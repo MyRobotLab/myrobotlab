@@ -1486,7 +1486,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			File cfg = new File(filename);
 			if (cfg.exists()) {
 				// serializer.read(o, cfg);
-				String json = FileIO.fileToString(filename);
+				String json = FileIO.toString(filename);
 				Object saved = CodecUtils.fromJson(json, o.getClass());
 				copyShallowFrom(o, saved);
 				return true;
@@ -1795,7 +1795,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		// saves user data in the .myrobotlab directory
 		// with the file naming convention of name.<cfgFileName>
 		try {
-			FileIO.stringToFile(String.format("%s%s%s.%s", cfgDir, File.separator, this.getName(), cfgFileName), data);
+			FileIO.toFile(String.format("%s%s%s.%s", cfgDir, File.separator, this.getName(), cfgFileName), data);
 		} catch (Exception e) {
 			Logging.logError(e);
 			return false;

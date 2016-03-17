@@ -118,7 +118,8 @@ public class Test extends Service {
 		try {
 
 			String serviceType = "InMoovHand";
-			Repo repo = new Repo();
+			Repo repo = Repo.getLocalInstance();
+
 			// repo.clearRepo();
 			// dirty clean :)
 			// repo.clearLibraries();
@@ -299,7 +300,7 @@ public class Test extends Service {
 		// we are started so .. we'll use the big hammer at the end
 		Status status = Status.info("========TESTING=============");
 		log.info("===========INFO TESTING========");
-		log.info(String.format("TEST PID = %s", Runtime.getPID()));
+		log.info(String.format("TEST PID = %s", Runtime.getPid()));
 		// big hammer
 		System.exit(0);
 		return status;
@@ -430,7 +431,7 @@ public class Test extends Service {
 	public List<Status> verifyServicePageScripts() {
 		List<Status> ret = new ArrayList<Status>();
 		Repo repo = Runtime.getInstance().getRepo();
-		ServiceData serviceData = repo.getServiceData();
+		ServiceData serviceData = ServiceData.getLocalInstance();
 		ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
 
 		Status status = Status.info("serviceTest will test %d services", serviceTypes.size());

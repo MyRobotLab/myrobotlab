@@ -67,6 +67,16 @@ public class CodecUtils {
 	private static boolean initialized = false;
 	
 	public final static String PREFIX_API = "api";
+	
+	public final static String makeFullTypeName(String type){
+		if (type == null){
+			return null;
+		}
+		if (!type.contains(".")){
+			return String.format("org.myrobotlab.service.%s", type);
+		}
+		return type;
+	}
 
 	
 	public static final Set<Class<?>> WRAPPER_TYPES = new HashSet<Class<?>>(Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class,

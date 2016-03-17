@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,6 +23,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.Http;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.python.core.Py;
 import org.python.core.PyException;
@@ -34,6 +34,7 @@ import org.python.modules.thread.thread;
 import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
 
+import com.google.common.io.Files;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -201,8 +202,8 @@ public class Python extends Service {
 
 		}
 	}
-	
-	public void finishedExecutingScript(){		
+
+	public void finishedExecutingScript() {
 	}
 
 	public static class Script implements Serializable {
@@ -257,9 +258,11 @@ public class Python extends Service {
 	// TODO this needs to be moved into an actual cache if it is to be used
 	// Cache of compile python code
 	private static final transient HashMap<String, PyObject> objectCache;
+
 	static {
 		objectCache = new HashMap<String, PyObject>();
 	}
+
 	String inputScript = null;
 	String setupScript = null;
 	String msgHandlerScript = null;
@@ -272,7 +275,6 @@ public class Python extends Service {
 	String rootPath = null;
 
 	String modulesDir = "pythonModules";
-
 
 	/**
 	 * Get a compiled version of the python call.
@@ -339,20 +341,22 @@ public class Python extends Service {
 		subscribe(Runtime.getInstance().getName(), "registered");
 		log.info(String.format("created python %s", getName()));
 
+		log.info("creating module directory pythonModules");
+		new File("pythonModules").mkdir();
+		
 		// get file references from Python resources
 		// FIXME - add root defintions - like below
 		/*
-		currentFileList.add(new File("examples"));
-		currentFileList.add(new File("local"));
-		currentFileList.add(new File("pyrobotlab"));
-		*/
+		 * currentFileList.add(new File("examples")); currentFileList.add(new
+		 * File("local")); currentFileList.add(new File("pyrobotlab"));
+		 */
 		/*
 		 * currentFileList[3] = new File("home"); currentFileList[4] = new
 		 * File("pyrobotlab");
 		 */
 		try {
 			setCwd("examples");
-		} catch(Exception e){
+		} catch (Exception e) {
 			error(e);
 		}
 	}
@@ -389,10 +393,12 @@ public class Python extends Service {
 	 */
 	public void createPythonInterpreter() {
 		// TODO: If the username on windows contains non-ascii characters
-		// the Jython interpreter will blow up.  
+		// the Jython interpreter will blow up.
 		// The APPDATA environment variable contains the username.
-		// as a result, jython sees the non ascii chars and it causes a utf-8 decoding error.
-		// overriding of the APPDATA environment variable is done in the agent as a work around.
+		// as a result, jython sees the non ascii chars and it causes a utf-8
+		// decoding error.
+		// overriding of the APPDATA environment variable is done in the agent
+		// as a work around.
 		PySystemState.initialize();
 		interp = new PythonInterpreter();
 
@@ -503,7 +509,7 @@ public class Python extends Service {
 	 * @throws IOException
 	 */
 	public void execFile(String filename) throws IOException {
-		String script = FileIO.fileToString(filename);
+		String script = FileIO.toString(filename);
 		exec(script);
 	}
 
@@ -540,8 +546,14 @@ public class Python extends Service {
 	 * 
 	 * @return list of python examples
 	 */
-	public ArrayList<File> getExampleListing() {
-		ArrayList<File> r = FileIO.listResourceContents("/Python/examples");
+	public List<File> getExampleListing() {
+		List<File> r = null;
+		try {
+			// expensive method - searches through entire jar
+			r = FileIO.listResourceContents("Python/examples");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 		return r;
 	}
 
@@ -595,7 +607,7 @@ public class Python extends Service {
 	 */
 	public boolean loadScriptFromFile(String filename) throws IOException {
 		log.info(String.format("loadScriptFromFile %s", filename));
-		String data = FileIO.fileToString(filename);
+		String data = FileIO.toString(filename);
 		return loadScript(filename, data);
 	}
 
@@ -630,7 +642,7 @@ public class Python extends Service {
 	 */
 	public boolean loadExample(String filename) {
 		log.info(String.format("loadExample %s", filename));
-		if (!filename.startsWith("Python/examples/")){
+		if (!filename.startsWith("Python/examples/")) {
 			filename = String.format("Python/examples/%s", filename);
 		}
 		String newCode = FileIO.resourceToString(filename);
@@ -646,7 +658,7 @@ public class Python extends Service {
 	 * @throws IOException
 	 */
 	public boolean loadUserScript(String filename) throws IOException {
-		String newCode = FileIO.fileToString(getCFGDir() + File.separator + filename);
+		String newCode = FileIO.toString(getCFGDir() + File.separator + filename);
 		if (newCode != null && !newCode.isEmpty()) {
 			log.info(String.format("replacing current script with %s", filename));
 
@@ -781,7 +793,7 @@ public class Python extends Service {
 
 	public void setCwd(String path) throws IOException, ClassNotFoundException {
 		if ("examples".equals(cwdRoot)) {
-			currentFileList = FileIO.getPackageContent("resource.Python.examples");
+			currentFileList = FileIO.listResourceContents("resource.Python.examples");
 		} else if ("local".equals(cwdRoot)) {
 
 			ArrayList<File> localFiles = new ArrayList<File>();
@@ -802,15 +814,16 @@ public class Python extends Service {
 		} else if ("pyrobotlab".equals(cwdRoot)) {
 			// FIXME implement
 			// 1. Encoder.fromJson - needs an option to return JsonElement
-			// 2. Makit nice so you can submit xpath like target and just get the data you want
-			byte[] data = FileIO.getURL(new URL("https://api.github.com/repos/MyRobotLab/pyrobotlab/contents/home"));
+			// 2. Makit nice so you can submit xpath like target and just get
+			// the data you want
+			byte[] data = Http.get("https://api.github.com/repos/MyRobotLab/pyrobotlab/contents/home");
 			if (data != null) {
 				String json = new String(data);
 
 				JsonElement jse = new JsonParser().parse(json);
 				// jse.getAsJsonObject();
 
-				JsonArray types = jse.getAsJsonArray();//.getAsJsonObject("waypoints").getAsJsonObject("ship").getAsJsonArray("first_type");
+				JsonArray types = jse.getAsJsonArray();// .getAsJsonObject("waypoints").getAsJsonObject("ship").getAsJsonArray("first_type");
 
 				for (final JsonElement type : types) {
 					final JsonArray coords = type.getAsJsonArray();
@@ -828,45 +841,41 @@ public class Python extends Service {
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-		
+
 		try {
 
-		// Runtime.start("gui", "GUIService");
-		// String f = "C:\\Program Files\\blah.1.py";
-		// log.info(getName(f));
-		Python python = (Python) Runtime.start("python", "Python");
+			// Runtime.start("gui", "GUIService");
+			// String f = "C:\\Program Files\\blah.1.py";
+			// log.info(getName(f));
+			Python python = (Python) Runtime.start("python", "Python");
 
-		// python.error("this is an error");
-		// python.loadScriptFromResource("VirtualDevice/Arduino.py");
-		// python.execAndWait();
-		// python.releaseService();
+			// python.error("this is an error");
+			// python.loadScriptFromResource("VirtualDevice/Arduino.py");
+			// python.execAndWait();
+			// python.releaseService();
 
+			python.load();
+			python.save();
 
+			FileOutputStream fos = new FileOutputStream("python.dat");
+			ObjectOutputStream out = new ObjectOutputStream(fos);
+			out.writeObject(python);
+			out.close();
 
-		python.load();
-		python.save();
-		
-		FileOutputStream fos = new FileOutputStream("python.dat");
-		ObjectOutputStream out = new ObjectOutputStream(fos);
-		out.writeObject(python);
-		out.close();
-		
-		FileInputStream fis = new FileInputStream("python.dat");
-		ObjectInputStream in = new ObjectInputStream(fis);
-		Object x = in.readObject();
-		in.close();
-		
-		
-		Runtime.createAndStart("gui", "GUIService");
-		// Runtime.createAndStart("webgui", "WebGui");
+			FileInputStream fis = new FileInputStream("python.dat");
+			ObjectInputStream in = new ObjectInputStream(fis);
+			Object x = in.readObject();
+			in.close();
+
+			Runtime.createAndStart("gui", "GUIService");
+			// Runtime.createAndStart("webgui", "WebGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 
-		
 	}
-	
+
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
@@ -879,10 +888,9 @@ public class Python extends Service {
 
 		ServiceType meta = new ServiceType(Python.class.getCanonicalName());
 		meta.addDescription("Python ID");
-		meta.addCategory("programming","control");
+		meta.addCategory("programming", "control");
 		meta.addDependency("org.python.core", "2.7.0");
 		return meta;
 	}
-
 
 }

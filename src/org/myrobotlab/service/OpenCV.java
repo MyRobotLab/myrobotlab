@@ -40,6 +40,7 @@ import java.awt.Rectangle;
 //import static org.bytedeco.javacpp.opencv_superres.*;
 //import static org.bytedeco.javacpp.opencv_ts.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -716,8 +717,8 @@ public class OpenCV extends VideoSource {
 	}
 
 
-	public void captureFromResourceFile(String filename) {
-		FileIO.copyResource(filename, filename);
+	public void captureFromResourceFile(String filename) throws IOException {
+		FileIO.extractResource(filename, filename);
 		captureFromImageFile(filename);
 	}
 

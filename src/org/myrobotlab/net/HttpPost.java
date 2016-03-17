@@ -18,8 +18,10 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * 
- Title: Client HTTP Request class
+ *  FIXME - Buffer the post with ByteArrayOutputStream so you dont need to write to 
+ *  the real output stream until you call the method post(new URL("http://blah/blah));
+ *  
+ *  and move to the Http class
  * 
  * 
  * 

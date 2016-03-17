@@ -106,7 +106,6 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 			Repo repo = myRuntime.getRepo();
 			setEnabled(table == null || table.isEnabled());
-			repo.getServiceDataFile();
 			Boolean availableToInstall = null;
 
 			boolean upgradeAvailable = false;
@@ -290,7 +289,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		// multiple instances
 		myRuntime = (Runtime) Runtime.getService(boundServiceName);
 		myRepo = myRuntime.getRepo();
-		serviceData = myRepo.getServiceData();
+		serviceData = myRuntime.getServiceData();
 	}
 
 	// zod
@@ -322,7 +321,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 					return;
 				}
 				// you say "install", i say "update", repo says "resolve"
-				myService.send(boundServiceName, "update", entry.name);
+				myService.send(boundServiceName, "install", entry.name);
 			} else {
 				// no unfulfilled dependencies - good to go
 				addNewService(entry.name);

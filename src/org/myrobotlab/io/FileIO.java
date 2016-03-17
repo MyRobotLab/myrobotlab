@@ -25,28 +25,27 @@
 package org.myrobotlab.io;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
+import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
+import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -70,33 +69,7 @@ public class FileIO {
 		}
 	}
 
-	public final static Logger log = LoggerFactory.getLogger(FileIO.class);
-
-	static public void byteArrayToFile(File dst, byte[] data) throws IOException {
-		FileOutputStream fos = null;
-		fos = new FileOutputStream(dst);
-		fos.write(data);
-		fos.close();
-
-	}
-
-	static public void deleteRecursive(File path) {
-		File[] c = path.listFiles();
-		log.info("clearing dir " + path.toString());
-		for (File file : c) {
-			if (file.isDirectory()) {
-				deleteRecursive(file);
-				log.info("deleting dir " + file.toString());
-				file.delete();
-			} else {
-				log.info("deleting file " + file.toString());
-				file.delete();
-			}
-		}
-
-		path.delete();
-	}
-
+	static public final Logger log = LoggerFactory.getLogger(FileIO.class);
 
 	/**
 	 * compares two files - throws if they are not identical, good to use in
@@ -107,78 +80,268 @@ public class FileIO {
 	 * @throws FileComparisonException
 	 * @throws IOException
 	 */
-	public static void compareFiles(String filename1, String filename2) throws FileComparisonException, IOException {
+	static public final boolean compareFiles(String filename1, String filename2) throws FileComparisonException, IOException {
 		File file1 = new File(filename1);
 		File file2 = new File(filename2);
 		if (file1.length() != file2.length()) {
 			throw new FileComparisonException(String.format("%s size is %d adn %s is size %d", filename1, file1.length(), filename2, file2.length()));
 		}
 
-		byte[] a1 = fileToByteArray(new File(filename1));
-		byte[] a2 = fileToByteArray(new File(filename2));
+		byte[] a1 = toByteArray(new File(filename1));
+		byte[] a2 = toByteArray(new File(filename2));
 
 		for (int i = 0; i < a1.length; ++i) {
 			if (a1[i] != a2[i]) {
 				throw new FileComparisonException(String.format("files differ at position %d", i));
 			}
 		}
+
+		return true;
 	}
 
+	/**
+	 * a simple copy method which works like a 'regular' operating system copy
+	 * 
+	 * @param src
+	 * @param dst
+	 * @throws IOException
+	 */
+	// TODO - test dst exists or not
+	// TODO - test slashes on end of dirs
+	static public final void copy(File src, File dst) throws IOException {
+		log.info("copying from {} to {}", src, dst);
+		if (!src.isDirectory()) {
+			byte[] b = toByteArray(src);
+			toFile(dst, b);
+		} else {
+			if (!dst.exists()) {
+				// if dst does not exist copy 'contents' of src into dst
+				dst.mkdirs();
+				log.info("directory copied from {} to {}", src, dst);
+				String files[] = src.list();
 
-	
-
-	// --- string interface end --------------------
-
-	// --- byte[] interface begin ------------------
-	// rename getBytes getResourceBytes / String File InputStream
-
-	//
-	static public boolean copyResource(String src, String dst) {
-		try {
-			File dstF = new File(dst);
-			byte[] b = resourceToByteArray(src);
-			String path = dstF.getParent();
-			File dir = new File(path);
-			if (!dir.exists()) {
-				dir.mkdirs();
+				for (String file : files) {
+					File srcFile = new File(src, file);
+					File destFile = new File(dst, file);
+					copy(srcFile, destFile);
+				}
+			} else {
+				// when dst exists - then whole directory src is copied into dst
+				copy(src, new File(gluePaths(dst.getPath(), src.getName())));
 			}
 
-			byteArrayToFile(dstF, b);
+		}
+	}
+
+	/**
+	 * copy file or folder from one place to another with string interface
+	 * 
+	 * @param src
+	 * @param dst
+	 * @throws IOException
+	 */
+	static public final void copy(String src, String dst) throws IOException {
+		copy(new File(src), new File(dst));
+	}
+
+	static public final boolean extract(String src, String dst) throws IOException {
+		return extract(getRoot(), src, dst);
+	}
+
+	/**
+	 * extract needs 3 parameters - a root file source, which could be a file
+	 * directory or jar file, a src location, and a destination. During runtime
+	 * this method will extract contents from a jar specified, during build time
+	 * it will copy from a folder location. It could probably be improved, and
+	 * simplified to take only 2 parameters, but that would mean calling methods
+	 * would need to be 'smart' enough to use full getURI notation .. e.g.
+	 * jar:file:/C:/proj/parser/jar/parser.jar!/test.xml
+	 * 
+	 * e.g
+	 * http://stackoverflow.com/questions/402683/how-do-i-get-just-the-jar-url-
+	 * from-a-jar-url-containing-a-and-a-specific-fi/402771#402771 final URL
+	 * jarUrl = new URL("jar:file:/C:/proj/parser/jar/parser.jar!/test.xml");
+	 * final JarURLConnection connection = (JarURLConnection)
+	 * jarUrl.openConnection(); final URL url = connection.getJarFileURL();
+	 * 
+	 * 
+	 * @param root
+	 *            - the jar file / or absolute file location .. e.g.
+	 *            file:/c:/somedir/myrobotlab.jar or file:/c:/somdir/bin
+	 * @param src
+	 *            - the folder or file to extract from the root
+	 * @param dst
+	 *            - target location
+	 * @return
+	 * @throws IOException
+	 */
+	static public final boolean extract(String root, String src, String dst) throws IOException {
+		log.info("extract([{}], [{}], [{}])", root, src, dst);
+
+		boolean contents = false;
+		boolean found = false;
+		boolean firstMatch = true;
+
+		// === pre-processing / normalizing of paths begin ===
+		if (dst == null || dst.equals("") || dst.equals("./")) {
+			dst = ".";
+		}
+
+		if (src == null || src.equals("") || src.equals("./")) {
+			src = ".";
+		}
+
+		// normalize slash
+		src = src.replace("\\", "\\\\");
+
+		dst = dst.replace("\\", "\\\\");
+
+		// normalize [from | from/ | from/*]
+		String fromRoot = null;
+		if (src != null && (src.endsWith("/") || src.endsWith("/*"))) {
+			fromRoot = src.substring(0, src.lastIndexOf("/"));
+			contents = true;
+		} else {
+			fromRoot = src;
+		}
+
+		// extract(/C:/mrl/myrobotlab/dist/myrobotlab.jar, resource, )
+		log.info("normalized extract([{}], [{}], [{}])", root, src, dst);
+
+		// === pre-processing / normalizing of paths end ===
+		// FIXME - isJar(root)
+		if (isJar(root)) {
+
+			// String jarFile = getJarName();
+
+			log.info("extracting from {}", root);
+
+			JarFile jar = new JarFile(root);
+			Enumeration<JarEntry> enumEntries = jar.entries();
+
+			// jar access is non-recursive
+			while (enumEntries.hasMoreElements()) {
+				JarEntry file = (JarEntry) enumEntries.nextElement();
+				// log.debug(file.getName());
+
+				// spin through resrouces until a match
+				if (fromRoot != null && !file.getName().startsWith(fromRoot)) {
+					// log.info(String.format("skipping %s", file.getName()));
+					continue;
+				}
+
+				found = true;
+
+				// our first match !
+				if (!file.isDirectory()) {
+					// not a directory
+					String name = null;
+					if (contents) {
+						name = String.format("%s/%s", dst, file.getName().substring((fromRoot.length() + 1)));
+					} else {
+						if (firstMatch) {
+							// file to file
+							name = dst;
+						} else {
+							// dirFile to file
+							name = String.format("%s/%s", dst, file.getName());
+						}
+					}
+
+					log.info("extracting {} to {}", file.getName(), name);
+					// FIXING toFile(filename, data);
+					// FIXING toByteArray(is)
+
+					FileIO.toFile(name, toByteArray(jar.getInputStream(file)));
+
+					// file to file copy ... done
+					if (firstMatch) {
+						break;
+					}
+				} else {
+					// df
+					// if (conti)
+					String name = null;
+					if (contents) {
+						name = String.format("%s/%s", dst, file.getName().substring((fromRoot.length() + 1)));
+					} else {
+						name = String.format("%s/%s", dst, file.getName());
+					}
+					File d = new File(name);
+					d.mkdirs();
+				}
+
+				firstMatch = false;
+			}
+
+			if (!found) {
+				log.error("could not find {}", src);
+			}
+
+			jar.close();
+
+			return found;
+		} else {
+			copy(new File(String.format("%s/%s", root, src)), new File(dst));
 			return true;
+		}
+
+	}
+
+	/**
+	 * copies a resource file or directory from the myrobotlab.jar and extracts
+	 * it onto the file system at a destination supplied. This method works
+	 * during dev, build, and runtime
+	 * 
+	 * @param src
+	 * @param dst
+	 * @return
+	 * @throws IOException
+	 */
+	static public final void extractResource(String src, String dst) throws IOException {
+		extract(getRoot(), gluePaths("/resource/", src), dst);
+	}
+
+	/**
+	 * extractResources will extract the entire /resource directory out unless
+	 * it already exist
+	 * 
+	 * this process is important to the webgui, as it accesses the AngularJS
+	 * files from the file system and not within the jar
+	 * 
+	 * @return
+	 */
+	static public final boolean extractResources() {
+		try {
+			return extractResources(false);
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 		return false;
 	}
 
-	public final static byte[] fileToByteArray(File file) throws IOException {
-
-		FileInputStream fis = null;
-		byte[] data = null;
-
-		fis = new FileInputStream(file);
-		data = toByteArray(fis);
-
-		fis.close();
-
-		return data;
-	}
-
-	// --- string interface begin ---
-	public final static String fileToString(File file) throws IOException {
-		byte[] bytes = fileToByteArray(file);
-		if (bytes == null) {
-			return null;
+	/**
+	 * same as extractResources except with an ability to force overwriting an
+	 * already existing directory
+	 * 
+	 * @param overwrite
+	 * @return
+	 * @throws IOException
+	 */
+	static public final boolean extractResources(boolean overwrite) throws IOException {
+		String resourceName = "resource";
+		File check = new File(resourceName);
+		if (check.exists() && !overwrite) {
+			log.warn("{} aleady exists - not extracting", resourceName);
+			return false;
 		}
-		return new String(bytes);
-	}
 
-	public final static String fileToString(String filename) throws IOException {
-		return fileToString(new File(filename));
-	}
+		if (!isJar() && !overwrite) {
+			log.warn("mrl is not operating in a jar - not extracting");
+			return false;
+		}
 
-	static public String getBinaryPath() {
-		return ClassLoader.getSystemClassLoader().getResource(".").getPath();
+		return extract(resourceName, null);
 	}
 
 	/**
@@ -186,7 +349,7 @@ public class FileIO {
 	 * 
 	 * @return
 	 */
-	static public String getCfgDir() {
+	static public final String getCfgDir() {
 		try {
 			String dirName = String.format("%s%s.myrobotlab", System.getProperty("user.dir"), File.separator);
 
@@ -211,154 +374,293 @@ public class FileIO {
 		return null;
 	}
 
-	/*
-	 * public static File[] getPackageContent(String packageName) throws
-	 * IOException { ArrayList<File> list = new ArrayList<File>();
-	 * Enumeration<URL> urls =
-	 * Thread.currentThread().getContextClassLoader().getResources(packageName);
-	 * while (urls.hasMoreElements()) { URL url = urls.nextElement(); File dir =
-	 * new File(url.getFile()); if (dir != null) { for (File f :
-	 * dir.listFiles()) { list.add(f); } } } return list.toArray(new File[] {});
-	 * }
+	/**
+	 * Method to universally get the root location of where mrl is currently
+	 * running form. It could be from Eclipse's bin directory, a build
+	 * directory, or inside a jar.
+	 * 
+	 * There are 100 rabbit holes, with the different ways you can 'attempt' to
+	 * get a path to where mrl is running. Some work during Develop-Time, and
+	 * return null during Runtime. Some encode or decode the path into something
+	 * which can not be used. Some appear simple superficially. This currently
+	 * is the best pratical solution I have found.
+	 * 
+	 * 2 Step process: 1. get URL of code executing 2. convert to a File
+	 * 
+	 * Test Results:
+	 * 
+	 * == Develop-Time Windows Eclipse == [/C:/mrlDevelop/myrobotlab/bin/]
+	 * 
+	 * == Run-Time Windows Jar == [/C:/mrl.test/current
+	 * 10/develop/myrobotlab.1.0.${env.TRAVIS_BUILD_NUMBER}.jar]
+	 * 
+	 * http://stackoverflow.com/questions/9729197/getting-current-class-name-
+	 * including-package
+	 * https://community.oracle.com/blogs/kohsuke/2007/04/25/how-convert-
+	 * javaneturl-javaiofile
+	 * 
+	 * @return
 	 */
+	static public final String getRoot() {
+		try {
 
-	// getBytes end ------------------
-
-	static public String getResourceJarPath() {
-
-		if (!inJar()) {
-			log.info("resource is not in jar");
+			String source = FileIO.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+			log.debug("getRoot {}", source);
+			return source;
+		} catch (Exception e) {
+			log.error("getRoot threw");
+			Logging.logError(e);
 			return null;
 		}
-
-		String full = getResouceLocation();
-		String jarPath = full.substring(full.indexOf("jar:file:/") + 10, full.lastIndexOf("!"));
-		return jarPath;
 	}
 
-	// --- object interface end --------
+	static public final List<String> getServiceList() throws IOException {
 
-	// jar pathing begin ---------------
-
-	static public String getRootLocation() {
-		URL url = File.class.getResource("/");
-		return url.toString();
-	}
-
-	static public byte[] getURL(URL url) {
-		try {
-			URLConnection conn = url.openConnection();
-			return toByteArray(conn.getInputStream());
-		} catch (Exception e) {
-			Logging.logError(e);
+		List<URL> urls = listContents(getRoot(), "org/myrobotlab/service", false, new String[] { ".*\\.class" }, new String[] { ".*Test\\.class", ".*\\$.*" });
+		ArrayList<String> classes = new ArrayList<String>();
+		// String path = packageName.replace('.', '/');
+		for (URL url : urls) {
+			String urlName = url.getPath();
+			String simpleName = urlName.substring(urlName.lastIndexOf("/") + 1, urlName.lastIndexOf("."));
+			String classname = String.format("org.myrobotlab.service.%s", simpleName);
+			classes.add(classname);
 		}
-		return null;
+		return classes;
 	}
 
-	static public String getResouceLocation() {
-		URL url = File.class.getResource("/resource");
-
-		// FIXME - DALVIK issue !
-		if (url == null) {
-			return null; // FIXME DALVIK issue
-		} else {
-			return url.toString();
+	static public final String gluePaths(String path1, String path2) {
+		// normalize to 'real' network slash direction ;)
+		// jar internals probably do not handle back-slash
+		// most file access even on 'windows' machine can interface correctly
+		// with forward slash
+		// network url order is always forward slash
+		path1 = path1.replace("\\", "/");
+		path2 = path2.replace("\\", "/");
+		// only 1 slash between path1 & path2
+		if (path1.endsWith("/")) {
+			path1 = path1.substring(0, path1.length() - 1);
 		}
-	}
-
-	static public boolean inJar() {
-		String location = getResouceLocation();
-		if (location != null) {
-			return getResouceLocation().startsWith("jar:");
-		} else {
-			return false;
+		if (path2.startsWith("/")) {
+			path2 = path2.substring(1);
 		}
+
+		return String.format("%s/%s", path1, path2);
 	}
 
-	public static final boolean isJar() {
-		String source = getSource();
-		if (source != null) {
-			return source.endsWith(".jar");
+	static public final boolean isJar() {
+		return isJar(null);
+	}
+
+	static public final boolean isJar(String path) {
+		if (path == null) {
+			path = getRoot();
+		}
+		if (path != null) {
+			return path.endsWith(".jar");
 		}
 		return false;
 	}
 
-	public static String getJarName() {
-		String nm = getSource();
-		if (!nm.endsWith(".jar")) {
-			log.error("mrl is not in a jar!");
-			return null;
-		}
-		return nm;
+	/*
+	 * FIXME FIXME - make this a more general implementation of getServiceList
+	 * static public final List<File> getPackageContent(String packageName)
+	 * throws IOException { return getPackageContent(packageName, false, null,
+	 * null); }
+	 */
+
+	/**
+	 * The "goal" of this method is to get the list of contents from a package
+	 * REGARDLESS of the packaging :P Regrettably, the implementation depends
+	 * greatly on if the classes are on the file system vs if they are in a jar
+	 * file
+	 * 
+	 * Step 1: find out if our application is running in a jar (runtime release)
+	 * or running on classes on the file system (debug)
+	 * 
+	 * Step 2: if we are running from the file system with .class files - it
+	 * becomes very simple file operations
+	 * 
+	 * @param packageName
+	 * @param recurse
+	 * @param include
+	 * @param exclude
+	 * @return
+	 * @throws IOException
+	 */
+	// FIXME reconcile with listPackage - No Files ! use URL returns ?!?!?
+	/*
+	 * static public final List<File> getPackageContent(String packageName,
+	 * boolean recurse, String[] include, String[] exclude) throws IOException {
+	 * 
+	 * ArrayList<File> files = new ArrayList<File>();
+	 * 
+	 * if (!isJar()) {
+	 * 
+	 * ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+	 * assert classLoader != null; String path = packageName.replace('.', '/');
+	 * Enumeration<URL> resources = classLoader.getResources(path); List<File>
+	 * dirs = new ArrayList<File>(); log.info("resources.hasMoreElements {}",
+	 * resources.hasMoreElements());
+	 * 
+	 * while (resources.hasMoreElements()) { URL resource =
+	 * resources.nextElement(); log.info("resources.nextElement {}", resource);
+	 * dirs.add(new File(resource.getFile())); }
+	 * 
+	 * // if (recurse) { for (File directory : dirs) { // FIXME
+	 * files.addAll(findPackageContents(directory, // packageName, recurse,
+	 * include, exclude)); } } else { // sdf }
+	 * 
+	 * // } return files;// .toArray(new Class[classes.size()]); }
+	 */
+
+	/*
+	 * public static String getJarName() { String nm = getRoot(); if
+	 * (!nm.endsWith(".jar")) { log.error("mrl is not in a jar!"); return null;
+	 * } return nm; }
+	 */
+
+	/**
+	 * list the contents of 'self' at directory 'src'
+	 * 
+	 * @param src
+	 * @return
+	 * @throws IOException
+	 */
+	static public final List<URL> listContents(String src) throws IOException {
+		return listContents(getRoot(), src, true, null, null);
 	}
 
-	public static final String getSource() {
-		try {
-			// return
-			// URLDecoder.decode(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),
-			// "UTF-8");
-			String source = FileIO.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-			log.info("getSource {}", source);
-			return source;
-		} catch (Exception e) {
-			log.error("getSource threw");
-			Logging.logError(e);
-			return null;
-		}
+	static public final List<URL> listContents(String root, String src) throws IOException {
+		return listContents(root, src, true, null, null);
 	}
 
 	/**
-	 * similar to ls - when running in jar form will return contents of path in
-	 * an array list of files when running in the ide will return the contents
-	 * of /bin + path
+	 * list the contents of a file system directory or list the contents of a
+	 * jar file directory
 	 * 
-	 * @param path
+	 * 
+	 * @param root
+	 * @param src
+	 * @param recurse
+	 * @param include
+	 * @param exclude
 	 * @return
+	 * @throws IOException
 	 */
-	static public ArrayList<File> listInternalContents(String path) {
-		ArrayList<File> ret = new ArrayList<File>();
-		if (!inJar()) {
-			// get listing if in debug mode or classes are unzipped
-			String rp = getRootLocation();
-			String targetDir = rp.substring(rp.indexOf("file:/") + 6);
-			String fullPath = targetDir + path;
-			File dir = new File(fullPath);
-			if (!dir.exists()) {
-				log.error(String.format("%s does not exist", fullPath));
-				return ret;
-			}
+	static public final List<URL> listContents(String root, String src, boolean recurse, String[] include, String[] exclude) throws IOException {
+		List<URL> classes = new ArrayList<URL>();
+		log.info("findPackageContents root [{}], src [{}], recurse [{}], include [{}], exclude [{}]", root, src, recurse, Arrays.toString(include), Arrays.toString(exclude));
 
-			if (!dir.isDirectory()) {
-				ret.add(dir);
-			}
-
-			String[] tmp = dir.list();
-			for (int i = 0; i < tmp.length; ++i) {
-				File file = new File(targetDir + path + "/" + tmp[i]);
-				ret.add(file);
-				/*
-				 * if (dirCheck.isDirectory()) { ret.add(tmp[i] + "/"); } else {
-				 * ret.add(tmp[i]); }
-				 */
-			}
-			dir.list();
-			return ret;
-		} else {
-			// gets compiled to the "bin" directory in eclipse
-			File bin = new File(String.format("./bin%s", path));
-			if (!bin.exists()) {
-				log.error("{} does not exist", bin);
-				return ret;
-			}
-
-			log.error("implement");
-			// if ()
-			return null;
+		if (root == null) {
+			root = "./";
 		}
+
+		if (!isJar(root)) {
+			String rootPath = gluePaths(root, src);
+			File srcFile = new File(rootPath);
+			if (!srcFile.exists()) {
+				log.error("{} does not exist");
+				return classes;
+			}
+			// MUST BE DIRECTORY !
+			if (!srcFile.isDirectory()) {
+				log.error("{} is not a directory");
+				return classes;
+			}
+
+			File[] files = srcFile.listFiles();
+			for (File file : files) {
+				if (file.isDirectory() && recurse) {
+					assert !file.getName().contains(".");
+					classes.addAll(listContents(rootPath, "/" + file.getName(), recurse, include, exclude));
+				} else { // if (file.getName().endsWith(".class")) {
+					String filename = file.getName();
+					boolean add = false;
+					if (include != null) {
+						for (int i = 0; i < include.length; ++i) {
+							if (filename.matches(include[i])) {
+								add = true;
+								break;
+							}
+						}
+					}
+
+					if (exclude != null) {
+						for (int i = 0; i < exclude.length; ++i) {
+							if (filename.matches(exclude[i])) {
+								add = false;
+								break;
+							}
+						}
+					}
+
+					if (include == null && exclude == null) {
+						add = true;
+					}
+
+					if (add) {
+						// IMPORTANT toURI().toURL() otherwise spaces can be
+						// problems
+						classes.add(file.toURI().toURL());
+					}
+				}
+			}
+		} else {
+
+			///////////////////////////////////////////////////////////////////////////////////////////////
+			// FIXME - location of file will be different from path inside
+
+			// local file
+			// url=new URL("jar:file:/C:/dist/current/develop/myrobotlab.jar!/"
+
+			// remote file
+			// url=new
+			// URL("jar:http://mrl-bucket-01.s3.amazonaws.com/current/develop/myrobotlab.jar!/");
+			// URLcon=(JarURLConnection)(url.openConnection());
+			// jar=URLcon.getJarFile();
+
+			JarFile jar = new JarFile(root);
+			Enumeration<JarEntry> enumEntries = jar.entries();
+
+			/**
+			 * jar access requires a linear spin through all the entries :( and
+			 * unfortunately the paths are not ordered as a depth first
+			 * ordering, instead they are breadth first, so a 'group of files'
+			 * in a 'directory' can not be optimized in access - you are
+			 * required to look through 'all' entries because there is no order
+			 * guarantee you will find them all in one spot
+			 */
+			while (enumEntries.hasMoreElements()) {
+				JarEntry jarEntry = (JarEntry) enumEntries.nextElement();
+
+				// search for matching entries
+				if (!jarEntry.getName().startsWith(src)) {
+					// log.info(String.format("skipping %s", file.getName()));
+					continue;
+				}
+
+				String urlStr = String.format("jar:file:%s!/%s", root, jarEntry.getName());
+
+				if (jarEntry.isDirectory()) {
+					log.info("match on directory url {}", urlStr);
+				} else {
+					log.info("adding url {}", urlStr);
+					URL url = new URL(urlStr);
+					classes.add(url);
+				}
+			}
+			jar.close();
+		}
+
+		return classes;
+
 	}
 
-	static public ArrayList<File> listResourceContents(String path) {
-		return listInternalContents("/resource" + path);
+	static public final List<File> listResourceContents(String path) throws IOException {
+		List<URL> urls = null;
+		String root = (path.startsWith("/")) ? "resource" : "resource/";
+		urls = listContents(root + path);
+		return UrlsToFiles(urls);
 	}
 
 	/**
@@ -370,18 +672,18 @@ public class FileIO {
 	 * @param filename
 	 * @throws IOException
 	 */
-	static public byte[] loadPartFile(String filename) throws IOException {
+	static public final byte[] loadPartFile(String filename) throws IOException {
 		return loadPartFile(filename, 1000);
 	}
 
-	static public byte[] loadPartFile(String filename, long timeoutMs) throws IOException {
+	static public final byte[] loadPartFile(String filename, long timeoutMs) throws IOException {
 		long startTs = System.currentTimeMillis();
 		try {
 			while (System.currentTimeMillis() - startTs < timeoutMs) {
 
 				File file = new File(filename);
 				if (file.exists()) {
-					return fileToByteArray(file);
+					return toByteArray(file);
 				}
 				Thread.sleep(30);
 			}
@@ -392,478 +694,199 @@ public class FileIO {
 		return null;
 	}
 
-	// jar pathing end ---------------
-	// -- os primitives begin -------
-
-	public final static Object readBinary(String filename) {
-		try {
-			InputStream file = new FileInputStream(filename);
-			InputStream buffer = new BufferedInputStream(file);
-			ObjectInput input = new ObjectInputStream(buffer);
-			try {
-				return input.readObject();
-			} finally {
-				input.close();
-			}
-		} catch (Exception e) {
-			Logging.logError(e);
-			return null;
-		}
-	}
-
-	public static final byte[] resourceToByteArray(String src) {
-		String filename = String.format("/resource/%s", src);
-
-		log.info(String.format("looking for %s", filename));
-		InputStream isr = null;
-		if (isJar()) {
-			isr = FileIO.class.getResourceAsStream(filename);
-		} else {
-			try {
-				isr = new FileInputStream(String.format("%sresource/%s", getSource(), src));
-			} catch (Exception e) {
-				Logging.logError(e);
-				return null;
-			}
-		}
-		byte[] data = null;
-		try {
-			if (isr == null) {
-				log.error(String.format("can not find resource [%s]", filename));
-				return null;
-			}
-			data = toByteArray(isr);
-		} finally {
-			try {
-				if (isr != null) {
-					isr.close();
-				}
-			} catch (Exception e) {
-
-			}
-		}
-		return data;
-	}
-
-	/*
-	public final static String resourceToString(String src) {
-		return resourceToString(new File(src));
-	}
-	*/
-	
-	public final static String resourceToString(String src) {
-		byte[] bytes = resourceToByteArray(src);
-		if (bytes == null) {
-			return null;
-		}
-		return new String(bytes);
-	}
-
-	public static boolean rmDir(File directory, Set<File> exclude) {
-		if (directory.exists()) {
-			File[] files = directory.listFiles();
-			if (null != files) {
-				for (int i = 0; i < files.length; i++) {
-					if (files[i].isDirectory()) {
-						rmDir(files[i], exclude);
-					} else {
-						if (exclude != null && exclude.contains(files[i])) {
-							log.info("skipping exluded file {}", files[i].getName());
-						} else {
-							log.info("removing file {}", files[i].getName());
-							files[i].delete();
-						}
-					}
-				}
-			}
-		}
-
-		boolean ret = (exclude != null) ? true : (directory.delete());
-		return ret;
-	}
-
-	/**
-	 * for inter process file writting & locking ..
-	 * 
-	 * @param filename
-	 * @param data
-	 * @throws IOException
-	 */
-	static public void savePartFile(File file, byte[] data) throws IOException {
-		// first delete any part or filename file currently there
-
-		String filename = file.getName();
-		
-		if (file.exists()) {
-			if (!file.delete()) {
-				throw new IOException(String.format("%s exists but could not delete", filename));
-			}
-		}
-		String partFilename = String.format("%s.part", filename);
-		File partFile = new File(partFilename);
-		if (partFile.exists()) {
-			if (!partFile.delete()) {
-				throw new IOException(String.format("%s exists but could not delete", partFilename));
-			}
-		}
-
-		byteArrayToFile(new File(partFilename), data);
-
-		if (!partFile.renameTo(new File(filename))) {
-			throw new IOException(String.format("could not rename %s to %s ..  don't know why.. :(", partFilename, filename));
-		}
-
-	}
-
-	public static void stringToFile(String filename, String data) throws IOException {
-		byteArrayToFile(new File(filename), data.getBytes());
-	}
-
-	public static byte[] toByteArray(InputStream is) {
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		// DataInputStream input = new DataInputStream(isr);
-		try {
-
-			int nRead;
-			byte[] data = new byte[16384];
-
-			while ((nRead = is.read(data, 0, data.length)) != -1) {
-				baos.write(data, 0, nRead);
-			}
-
-			baos.flush();
-			baos.close();
-			return baos.toByteArray();
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		return null;
-	}
-
-	// --- object interface begin ------
-	public final static boolean writeBinary(String filename, Object toSave) {
-		try {
-			// use buffering
-			OutputStream file = new FileOutputStream(filename);
-			OutputStream buffer = new BufferedOutputStream(file);
-			ObjectOutput output = new ObjectOutputStream(buffer);
-			try {
-				output.writeObject(toSave);
-				output.flush();
-			} finally {
-				output.close();
-			}
-		} catch (IOException e) {
-			Logging.logError(e);
-			return false;
-		}
-		return true;
-	}
-
-	static public void copy(File src, File dst) throws IOException {		
-		byte[] b = fileToByteArray(src);
-		byteArrayToFile(dst, b);
-	}
-
-	static public void copyFile(InputStream is, long size, String outFile) throws IOException {
-		String[] parts = outFile.split("/");
-		if (parts.length > 1) {
-			if (parts.length > 1) {
-				File d = new File(outFile.substring(0, outFile.lastIndexOf("/")));
-				if (!d.exists()) {
-					d.mkdirs();
-				}
-			}
-		}
-
-		FileOutputStream fos = new FileOutputStream(new File(outFile));
-		/*
-		 * apparently size is not correct or is compressed size ? dunno
-		 * something aint right ! byte[] buffer = new byte[(int) size];
-		 * is.read(buffer); FileOutputStream fos = new FileOutputStream(new
-		 * File(outFile)); fos.write(buffer); fos.close(); is.close();
-		 */
-
-		// some files are big - nice to have a big buffer
-		byte[] byteArray = new byte[262144];
-		int i;
-
-		while ((i = is.read(byteArray)) > 0) {
-			fos.write(byteArray, 0, i);
-		}
-		is.close();
-		fos.close();
-	}
-
-	static public final boolean extractResources() {
-		try {
-			return extractResources(false);
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		return false;
-	}
-
-	static public final boolean extractResources(boolean overwrite) throws IOException {
-		String resourceName = "resource";
-		File check = new File(resourceName);
-		if (check.exists() && !overwrite) {
-			log.warn("{} aleady exists - not extracting", resourceName);
-			return false;
-		}
-
-		if (!inJar() && !overwrite) {
-			log.warn("mrl is not operating in a jar - not extracting");
-			return false;
-		}
-
-		return extract(getJarName(), resourceName, "");
-	}
-
-	static public final boolean extract(String jarFile, String from, String to) throws IOException {
-		// extract(/C:/mrl/myrobotlab/dist/myrobotlab.jar, resource, )
-		log.info(String.format("extract(%s, %s, %s)", jarFile, from, to));
-
-		boolean contents = false;
-		boolean found = false;
-		boolean firstMatch = true;
-
-		JarFile jar = new JarFile(jarFile);
-		Enumeration<JarEntry> enumEntries = jar.entries();
-
-		// normalize slash
-		if (from != null) {
-			from = from.replace("\\", "\\\\");
-		}
-
-		if (to != null) {
-			to = to.replace("\\", "\\\\");
-		}
-
-		// normalize [from | from/ | from/*]
-		String fromRoot = null;
-		if (from != null && (from.endsWith("/") || from.endsWith("/*"))) {
-			fromRoot = from.substring(0, from.lastIndexOf("/"));
-			contents = true;
-		} else {
-			fromRoot = from;
-		}
-
-		// normalize [to , to/]
-		if (to == null || to.equals("") || to.equals("./")) {
-			to = ".";
-		}
-
-		while (enumEntries.hasMoreElements()) {
-			JarEntry file = (JarEntry) enumEntries.nextElement();
-			// log.debug(file.getName());
-
-			// spin through resrouces until a match
-			if (fromRoot != null && !file.getName().startsWith(fromRoot)) {
-				// log.info(String.format("skipping %s", file.getName()));
-				continue;
-			}
-
-			found = true;
-
-			// our first match !
-			if (!file.isDirectory()) {
-				// not a directory
-				String name = null;
-				if (contents) {
-					name = String.format("%s/%s", to, file.getName().substring((fromRoot.length() + 1)));
-				} else {
-					if (firstMatch) {
-						// file to file
-						name = to;
-					} else {
-						// dirFile to file
-						name = String.format("%s/%s", to, file.getName());
-					}
-				}
-
-				log.info("extracting {} to {}", file.getName(), name);
-				copyFile(jar.getInputStream(file), file.getSize(), name);
-				// file to file copy ... done
-				if (firstMatch) {
-					break;
-				}
-			} else {
-				// df
-				// if (conti)
-				String name = null;
-				if (contents) {
-					name = String.format("%s/%s", to, file.getName().substring((fromRoot.length() + 1)));
-				} else {
-					name = String.format("%s/%s", to, file.getName());
-				}
-				File d = new File(name);
-				d.mkdirs();
-			}
-
-			firstMatch = false;
-		}
-
-		if (!found) {
-			log.error("could not find {}", from);
-		}
-
-		jar.close();
-
-		return found;
-	}
-
-	/**
-	 * 
-	 * Yet Another Way
-	 * 
-	 * public void extractFromJar(String jarFile, String fileToExtract, String
-	 * dest) { try {
-	 * 
-	 * 
-	 * String home = getClass().getProtectionDomain().
-	 * getCodeSource().getLocation().toString(). substring(6);
-	 * 
-	 * JarFile jar = new JarFile(jarFile); ZipEntry entry =
-	 * jar.getEntry(fileToExtract); File efile = new File(dest,
-	 * entry.getName());
-	 * 
-	 * InputStream in = new BufferedInputStream(jar.getInputStream(entry));
-	 * OutputStream out = new BufferedOutputStream(new FileOutputStream(efile));
-	 * byte[] buffer = new byte[2048]; for (;;) { int nBytes = in.read(buffer);
-	 * if (nBytes <= 0) break; out.write(buffer, 0, nBytes); } out.flush();
-	 * out.close(); in.close(); } catch (Exception e) { e.printStackTrace(); } }
-	 * 
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 */
-
-	public static List<File> getPackageContent(String packageName) throws IOException {
-		return getPackageContent(packageName, false, null, null);
-	}
-
-	/** 
-	 * The "goal" of this method is to get the list of contents from a package REGARDLESS of the packaging :P
-	 * Regrettably, the implementation depends greatly on if the classes are on the file system vs if they are in a jar file
-	 * 
-	 * Step 1: find out if our application is running in a jar (runtime release) or running on classes on the file system (debug)
-	 * 
-	 * Step 2: if we are running from the file system with .class files - it becomes very simple file operations 
-	 * 
-	 * @param packageName
-	 * @param recurse
-	 * @param include
-	 * @param exclude
-	 * @return
-	 * @throws IOException
-	 */
-	public static List<File> getPackageContent(String packageName, boolean recurse, String[] include, String[] exclude) throws IOException {
-		
-		// FIXME - "if inJar()" must be done in a very different way !
-		
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		assert classLoader != null;
-		String path = packageName.replace('.', '/');
-		Enumeration<URL> resources = classLoader.getResources(path);
-		List<File> dirs = new ArrayList<File>();
-		log.info("resources.hassMoreElements {}", resources.hasMoreElements());
-		
-		while (resources.hasMoreElements()) {
-			URL resource = resources.nextElement();
-			log.info("resources.nextElement {}", resource);
-			dirs.add(new File(resource.getFile()));
-		}
-		
-		ArrayList<File> files = new ArrayList<File>();
-		// if (recurse) {
-		for (File directory : dirs) {
-			files.addAll(findPackageContents(directory, packageName, recurse, include, exclude));
-		}
-		// }
-		return files;// .toArray(new Class[classes.size()]);
-	}
-
-	/**
-	 * Recursive method used to find all classes in a given directory and
-	 * subdirs.
-	 *
-	 * @param directory
-	 *            The base directory
-	 * @param packageName
-	 *            The package name for classes found inside the base directory
-	 * @return The classes
-	 * @throws ClassNotFoundException
-	 */
-	public static List<File> findPackageContents(File directory, String packageName, boolean recurse, String[] include, String[] exclude) {
-		List<File> classes = new ArrayList<File>();
-		if (!directory.exists()) {
-			return classes;
-		}
-		File[] files = directory.listFiles();
-		for (File file : files) {
-			if (file.isDirectory() && recurse) {
-				assert !file.getName().contains(".");
-				classes.addAll(findPackageContents(file, packageName + "." + file.getName(), recurse, include, exclude));
-			} else { // if (file.getName().endsWith(".class")) {
-				String filename = file.getName();
-				boolean add = false;
-				if (include != null) {
-					for (int i = 0; i < include.length; ++i) {
-						if (filename.matches(include[i])) {
-							add = true;
-							break;
-						}
-					}
-				}
-
-				if (exclude != null) {
-					for (int i = 0; i < exclude.length; ++i) {
-						if (filename.matches(exclude[i])) {
-							add = false;
-							break;
-						}
-					}
-				}
-
-				if (include == null && exclude == null) {
-					add = true;
-				}
-
-				if (add) {
-					classes.add(file);
-				}
-			}
-		}
-		return classes;
-	}
-
 	// FIXME - UNIT TESTS !!!
 	public static void main(String[] args) throws ZipException, IOException {
+
+		// foo://example.com:8042/over/there?name=ferret#nose
+		// \_/ \______________/\_________/ \_________/ \__/
+		// | | | | |
+		// scheme authority path query fragment
+
+		// File f = new File(uri.getPath()); - handle depending on scheme?
 
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
+		copy("dir1", "dir2");
+
+		// JUNIT BEGIN
+		String result = gluePaths("/", "/a/");
+		// assert /a/
+		result = gluePaths("/a/", "\\b\\");
+		// assert /a/b/
+		log.info(result);
+		result = gluePaths("/a", "\\b\\");
+		// assert /a/b/
+		result = gluePaths("\\a\\", "\\b\\");
+		// assert /a/b/
+		result = gluePaths("\\a\\", "b\\");
+		// assert /a/b/
+
+		/*
+		 * URI ?? full circle URL url = new
+		 * URL("jar:file:/C:/Program%20Files/test.jar!/foo/bar");
+		 * JarURLConnection connection = (JarURLConnection)
+		 * url.openConnection(); File file = new
+		 * File(connection.getJarFileURL().toURI())
+		 * 
+		 * getResource ! takes string - returns url URL url =
+		 * FileIO.class.getResource("/com"); =>
+		 * jar:file:/C:/mrlDevelop/repo/org.alicebot.ab/0.0.6.26/Ab.jar!/com
+		 * 
+		 * 
+		 */
+
 		try {
 
+			// TODO - matrix of all file listing / url listings
+			// TODO - test getRoot with spaces and utf-8
+			// file:/C url string paths
+			// file:jar:/mrlDevelop/dist
+			// TODO - various other url path combos
+			// TODO - make a jar - test it
+
+			CmdLine cmdLine = new CmdLine(args);
+
+			log.info("=== jar info begin ===");
+			log.info("source url [{}]", FileIO.class.getProtectionDomain().getCodeSource().getLocation());
+			log.info("source uri [{}]", FileIO.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			log.info("source path [{}]", FileIO.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			log.info("=== jar info end ===");
+			log.info("getRoot [{}]", getRoot());
+
+			// interesting result ! - multiple definitions across many
+			// jars are handled with this classloader's 'first jar match'
+			URL url = FileIO.class.getResource("/com");
+			log.info("{}", url);
+
+			// File test = new File(url.toURI());
+			// log.info("{}", test.exists());
+			// File test = new File("/C:/")
+
+			// === jar info begin ===
+			// source url
+			// [file:/C:/mrlDevelop/myrobotlab/dist/current/develop/myrobotlab.jar]
+			// source uri
+			// [file:/C:/mrlDevelop/myrobotlab/dist/current/develop/myrobotlab.jar]
+			// source path
+			// [/C:/mrlDevelop/myrobotlab/dist/current/develop/myrobotlab.jar]
+			// === jar info end ===
+			// getRoot
+			// [/C:/mrlDevelop/myrobotlab/dist/current/develop/myrobotlab.jar]
+			// file:/c:/windows exists true
+			// file:///c:/windows exists true
+			//
+			//
+			// final URL jarUrl = new
+			// URL("jar:file:/C:/proj/parser/jar/parser.jar!/test.xml");
+			// final JarURLConnection connection = (JarURLConnection)
+			// jarUrl.openConnection();
+			// final URL url = connection.getJarFileURL();
+			//
+			// System.out.println(url.getFile());
+			//
+
+			List<String> services = getServiceList();
+			log.info("{}", services.size());
+
+			URI uri = new URI("file:/c:/windows");
+			File f = new File(uri);
+			log.info("{} exists {}", uri, f.exists());
+
+			// uri = new URI("file://c:/windows");
+			// f = new File(uri);
+			// log.info("{} exists {}", uri, f.exists());
+			// throws - java.lang.IllegalArgumentException: URI has an authority
+			// component
+
+			uri = new URI("file:///c:/windows");
+			f = new File(uri);
+			log.info("{} exists {}", uri, f.exists());
+
 			/*
-			final URL jarUrl = new URL("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource");
-			final JarURLConnection connection = (JarURLConnection) jarUrl.openConnection();
-			final URL url = connection.getJarFileURL();
+			 * URI uri = new URI("file://c:/windows"); File f = new File(uri);
+			 * log.info("{} exists {}", uri, f.exists());
+			 */
 
-			System.out.println(url.getFile());
-			*/
+			// info part
 
-			List<File> c = getPackageContent("org.myrobotlab.service");
+			// test examples root - . ./ / <-- absolute
+			String root = cmdLine.getSafeArgument("-root", 0, "dist/current/develop/myrobotlab.jar");
+			String src = cmdLine.getSafeArgument("-src", 0, "resource/Python/examples");
+			String dst = cmdLine.getSafeArgument("-dst", 0, "test2");
+
+			//
+			List<File> files = listResourceContents("Python/examples");
+			log.info("listInternalContents /Python/examples size {}", files.size());
+
+			List<URL> urls = null;
+
+			log.info("findPackageContents resource/Python/examples");
+			urls = listContents(root, "resource/Python/examples");
+
+			log.info("findPackageContents resource/Python/examples {}", urls.size());
+
+			/*
+			 * for (int i = 0; i < urls.size(); ++i) { File test = new
+			 * File(urls.get(i).getPath()); String x = FileIO.toString(test);
+			 * log.info("{}", test); }
+			 */
+
+			urls = listContents(getRoot(), "resource/Python/examples");
+			log.info("findPackageContents resource/Python/examples {}", urls.size());
+
+			urls = listContents(src);
+			log.info("findPackageContents {} {}", src, urls.size());
+
+			urls = listContents(root, "org/myrobotlab/service");
+
+			// urls = getPackageContent("org.myrobotlab.service");
+			// log.info("listResourceContents {} {}", src, urls.size());
+
+			// DOOD ! - listResourceContents findPackagContent getPackageContent
+
+			// copy requirements
+			// FIXME - don't use package names for consistency - these are all
+			// file manipulations - use file notation
+
+			// deravations for root="/c:/.../bin/ or /c:/.../myrobotlab.jar!"
+			// extract root="/c:/.../bin or /c:/.../myrobotlab.jar" src="/ or /*
+			// or blank or null or ./" dst="/ or /* or blank or null or ./"
+			// the contents of (bin or myrobotlab.jar) will be extracted in the
+			// current directory
+			// root bounds test .. root="/" src="/" dst="?"
+			// more testing spaces, special characters, UTF-8
+
+			// log.info("extract test");
+			// extractResources(true);
+			// extract(src, dst);
+
+			// inJar
+			// extract ("/resource", "test"); -> .\bin\resource\Python\examples
+			// does not exist what the hell?
+			// extract(/C:/mrlDevelop/myrobotlab/dist/current/develop/myrobotlab.jar,
+			// /, test)
+
+			/*
+			 * final URL jarUrl = new
+			 * URL("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource");
+			 * final JarURLConnection connection = (JarURLConnection)
+			 * jarUrl.openConnection(); final URL url =
+			 * connection.getJarFileURL();
+			 * 
+			 * System.out.println(url.getFile());
+			 */
+
+			log.info("isJar : {}", isJar());
 
 			// File[] files = getPackageContent("org.myrobotlab.service");
 
-//			extract("develop/myrobotlab.jar", "resource/version.txt", "./version.txt");
+			// extract("develop/myrobotlab.jar", "resource/version.txt",
+			// "./version.txt");
 
 			// extract("/C:/mrl/myrobotlab/dist/myrobotlab.jar", "resource",
 			// "");
-//			extract("dist/myrobotlab.jar", "resource", "");
+			// extract("dist/myrobotlab.jar", "resource", "");
 			// extractResources();
 			/*
 			 * // extract directory to a non existent directory // result should
@@ -925,16 +948,302 @@ public class FileIO {
 
 	}
 
-	public static List<String> getPackageClassNames(String packageName) throws ClassNotFoundException, IOException {
-		List<File> files = getPackageContent(packageName, false, new String[] { ".*\\.class" }, new String[] { ".*Test\\.class", ".*\\$.*" });
-		ArrayList<String> classes = new ArrayList<String>();
-		String path = packageName.replace('.', '/');
-		for (File file : files) {
-			String filename = file.getName();
-			String classname = String.format("%s.%s", packageName, filename.substring(0, filename.length() - 6));
-			classes.add(classname);
+	/**
+	 * resource directory resource contents read into a byte array
+	 * 
+	 * @param src
+	 *            - location - (root is /resource) - e.g. src =
+	 *            Python/examples/someFile.py
+	 * @return
+	 */
+	static public final byte[] resourceToByteArray(String src) {
+
+		String filename = String.format(gluePaths("/resource/", src));
+
+		log.info(String.format("looking for %s", filename));
+		InputStream isr = null;
+		if (isJar()) {
+			isr = FileIO.class.getResourceAsStream(filename);
+		} else {
+			try {
+				isr = new FileInputStream(String.format("%sresource/%s", getRoot(), src));
+			} catch (Exception e) {
+				Logging.logError(e);
+				return null;
+			}
 		}
-		return classes;
+		byte[] data = null;
+		try {
+			if (isr == null) {
+				log.error(String.format("can not find resource [%s]", filename));
+				return null;
+			}
+			data = toByteArray(isr);
+		} finally {
+			try {
+				if (isr != null) {
+					isr.close();
+				}
+			} catch (Exception e) {
+
+			}
+		}
+		return data;
+	}
+
+	/**
+	 * resource directory resource contents read into a string
+	 * 
+	 * @param src
+	 *            - location - (root is /resource) - e.g. src =
+	 *            Python/examples/someFile.py
+	 * @return
+	 */
+	static public final String resourceToString(String src) {
+		byte[] bytes = resourceToByteArray(src);
+		if (bytes == null) {
+			return null;
+		}
+		return new String(bytes);
+	}
+
+	/**
+	 * removes a file or recursively removes directory
+	 * 
+	 * @param file
+	 * @return
+	 */
+	static public final boolean rm(File file) {
+		if (file.isDirectory())
+			return rmDir(file, null);
+		else {
+			log.info("removing file {}", file.getAbsolutePath());
+			return file.delete();
+		}
+	}
+
+	/**
+	 * removes a file or recursively removes directory
+	 * 
+	 * @param filename
+	 * @return
+	 */
+	static public final boolean rm(String filename) {
+		return rm(new File(filename));
+	}
+
+	/**
+	 * recursively remove files and directories, leaving exlusions
+	 * 
+	 * @param directory
+	 *            - the directory to remove
+	 * @param exclude
+	 *            - the exceptions to save
+	 * @return
+	 */
+	static public final boolean rmDir(File directory, Set<File> exclude) {
+		if (directory.exists()) {
+			File[] files = directory.listFiles();
+			if (null != files) {
+				for (int i = 0; i < files.length; i++) {
+					if (files[i].isDirectory()) {
+						rmDir(files[i], exclude);
+					} else {
+						if (exclude != null && exclude.contains(files[i])) {
+							log.info("skipping exluded file {}", files[i].getName());
+						} else {
+							log.info("removing file - {}", files[i].getAbsolutePath());
+							files[i].delete();
+						}
+					}
+				}
+			}
+		}
+
+		boolean ret = (exclude != null) ? true : (directory.delete());
+		return ret;
+	}
+
+	/**
+	 * for intra-process file writing & locking ..
+	 * 
+	 * @param filename
+	 * @param data
+	 * @throws IOException
+	 */
+	static public final void savePartFile(File file, byte[] data) throws IOException {
+		// first delete any part or filename file currently there
+
+		String filename = file.getName();
+
+		if (file.exists()) {
+			if (!file.delete()) {
+				throw new IOException(String.format("%s exists but could not delete", filename));
+			}
+		}
+		String partFilename = String.format("%s.part", filename);
+		File partFile = new File(partFilename);
+		if (partFile.exists()) {
+			if (!partFile.delete()) {
+				throw new IOException(String.format("%s exists but could not delete", partFilename));
+			}
+		}
+
+		toFile(new File(partFilename), data);
+
+		if (!partFile.renameTo(new File(filename))) {
+			throw new IOException(String.format("could not rename %s to %s ..  don't know why.. :(", partFilename, filename));
+		}
+
+	}
+
+	/**
+	 * simple file to byte array
+	 * 
+	 * @param file
+	 *            - file to read
+	 * @return byte array of contents
+	 * @throws IOException
+	 */
+	static public final byte[] toByteArray(File file) throws IOException {
+
+		FileInputStream fis = null;
+		byte[] data = null;
+
+		fis = new FileInputStream(file);
+		data = toByteArray(fis);
+
+		fis.close();
+
+		return data;
+	}
+
+	/**
+	 * IntputStream to byte array
+	 * 
+	 * @param is
+	 * @return
+	 */
+	static public final byte[] toByteArray(InputStream is) {
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+
+			int nRead;
+			byte[] data = new byte[16384];
+
+			while ((nRead = is.read(data, 0, data.length)) != -1) {
+				baos.write(data, 0, nRead);
+			}
+
+			baos.flush();
+			baos.close();
+			return baos.toByteArray();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		return null;
+	}
+
+	static public void toFile(File dst, byte[] data) throws IOException {
+		FileOutputStream fos = null;
+		fos = new FileOutputStream(dst);
+		fos.write(data);
+		fos.close();
+	}
+
+	static public void toFile(String dst, byte[] data) throws IOException {
+		toFile(new File(dst), data);
+	}
+
+	/**
+	 * String to file
+	 * 
+	 * @param filename
+	 *            - new file name
+	 * @param data
+	 *            - string data to save
+	 * @throws IOException
+	 */
+	static public final void toFile(String filename, String data) throws IOException {
+		toFile(new File(filename), data.getBytes());
+	}
+
+	static public final String toString(File file) throws IOException {
+		byte[] bytes = toByteArray(file);
+		if (bytes == null) {
+			return null;
+		}
+		return new String(bytes);
+	}
+
+	static public final String toString(String filename) throws IOException {
+		return toString(new File(filename));
+	}
+
+	static public final List<File> UrlsToFiles(List<URL> urls) {
+		List<File> files = new ArrayList<File>();
+		for (int i = 0; i < urls.size(); ++i) {
+			files.add(new File(urls.get(i).getPath()));
+		}
+		return files;
+	}
+
+	public void zip(String filename, List<File> files) throws IOException {
+		zip(filename, files);
+	}
+
+	public void zip(String filename, List<File> files, String version) throws IOException {
+		if (version == null) {
+			version = "1.0";
+		}
+
+		Manifest manifest = new Manifest();
+		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, version);
+		JarOutputStream jar = new JarOutputStream(new FileOutputStream(filename), manifest);
+		for (int i = 0; i < files.size(); ++i) {
+			zipAdd(jar, new File("inputDirectory"));
+		}
+
+		jar.close();
+	}
+
+	public void zipAdd(JarOutputStream jar, File src) throws IOException {
+		BufferedInputStream in = null;
+		try {
+			if (src.isDirectory()) {
+				String name = src.getPath().replace("\\", "/");
+				if (!name.isEmpty()) {
+					if (!name.endsWith("/"))
+						name += "/";
+					JarEntry entry = new JarEntry(name);
+					entry.setTime(src.lastModified());
+					jar.putNextEntry(entry);
+					jar.closeEntry();
+				}
+				for (File nestedFile : src.listFiles())
+					zipAdd(jar, nestedFile);
+				return;
+			}
+
+			JarEntry entry = new JarEntry(src.getPath().replace("\\", "/"));
+			entry.setTime(src.lastModified());
+			jar.putNextEntry(entry);
+			in = new BufferedInputStream(new FileInputStream(src));
+
+			byte[] buffer = new byte[1024];
+			while (true) {
+				int count = in.read(buffer);
+				if (count == -1)
+					break;
+				jar.write(buffer, 0, count);
+			}
+			jar.closeEntry();
+		} finally {
+			if (in != null)
+				in.close();
+		}
 	}
 
 }

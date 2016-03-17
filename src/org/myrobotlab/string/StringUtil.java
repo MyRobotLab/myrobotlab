@@ -3,6 +3,67 @@ package org.myrobotlab.string;
 public class StringUtil {
 
 	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+	
+	static public String getLatestVersion(String[] versions) {
+
+		if (versions == null || versions.length == 0) {
+			return null;
+		}
+
+		int[][] ver = new int[versions.length][3];
+
+		int major = 0;
+		int minor = 0;
+		int build = 0;
+
+		int latestMajor = 0;
+		int latestMinor = 0;
+		int latestBuild = 0;
+
+		int latestIndex = 0;
+
+		for (int i = 0; i < versions.length; ++i) {
+			try {
+				major = 0;
+				minor = 0;
+				build = 0;
+
+				String[] parts = versions[i].split("\\.");
+				major = Integer.parseInt(parts[0]);
+				minor = Integer.parseInt(parts[1]);
+				build = Integer.parseInt(parts[2]);
+			} catch (Exception e) {
+				//log.error(e.getMessage());
+				System.out.println(e.getMessage());
+			}
+
+			if (major > latestMajor) {
+				latestMajor = major;
+				latestMinor = minor;
+				latestBuild = build;
+				latestIndex = i;
+			} else if (major == latestMajor) {
+				// go deeper (minor)
+				if (minor > latestMinor) {
+					latestMajor = major;
+					latestMinor = minor;
+					latestBuild = build;
+					latestIndex = i;
+				} else if (minor == latestMinor) {
+					// go deeper (build)
+					if (build > latestBuild) {
+						latestMajor = major;
+						latestMinor = minor;
+						latestBuild = build;
+						latestIndex = i;
+					}
+				}
+			}
+		}
+
+		return versions[latestIndex];
+	}
+	
 
 	public static String bytesToHex(byte[] bytes) {
 		char[] hexChars = new char[bytes.length * 2];

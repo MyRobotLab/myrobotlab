@@ -20,7 +20,7 @@ public class StreamGobbler extends Thread {
 	String tag;
 
 	public StreamGobbler(InputStream is, ArrayList<OutputStream> os, String type) {
-		super(String.format("%s_%s", type, Runtime.getPID()));
+		super(String.format("%s_%s", type, Runtime.getPid()));
 		// this.tag = String.format("%s_%s<<", type, Runtime.getPID());
 		this.tag = "";
 		this.is = is;

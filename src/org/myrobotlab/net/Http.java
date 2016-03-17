@@ -10,14 +10,14 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
-public class HttpGet {
+public class Http {
 	/**
-	 * FIXME - offer proxy
-	 * Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("my.proxy.example.com", 3128));
-	 * URLConnection yc = url.openConnection(proxy);
+	 * FIXME - OFFER PROXY !!!! See Below !!! NOT APACHE HTTPCLIENT
+	 * IN FACT HTTPCLIENT SHOULD ABEND TO THE ENV SET HERE !!!!
+	 * http://stackoverflow.com/questions/15927079/how-to-use-httpsurlconnection-through-proxy-by-setproperty
 	 */
 	
-	public final static Logger log = LoggerFactory.getLogger(HttpGet.class);
+	public final static Logger log = LoggerFactory.getLogger(Http.class);
 
 	public static byte[] get(String theUrl) {
 		log.info("get {}", theUrl);
@@ -62,7 +62,7 @@ public class HttpGet {
 	}
 
 	public static void main(String[] args) {
-		byte[] data = HttpGet.get("http://mrl-bucket-01.s3.amazonaws.com/current/develop/version.txt");
+		byte[] data = Http.get("http://mrl-bucket-01.s3.amazonaws.com/current/develop/version.txt");
 		String version = new String(data);
 		int v = Integer.parseInt(version);
 		log.info(version);

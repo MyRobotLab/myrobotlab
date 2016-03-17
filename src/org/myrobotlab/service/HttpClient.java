@@ -56,7 +56,13 @@ import org.slf4j.Logger;
 /**
  * HttpClient - wrapper for Apache HttpClient
  * 
- * @author greg (at) myrobotlab.org wrapper service for Apache HttpClient
+ * @author GroG
+ * 
+ * TODO - asynchronous call back similar to AngularJS promise - or at least
+ * a callback method is call .. onHttpResponse
+ * 
+ * Synchronous or Asynchrounous - Synchronous by default, Asynchronous if a callback method is supplied
+ * or Non-Blocking method is called
  */
 public class HttpClient extends Service {
 

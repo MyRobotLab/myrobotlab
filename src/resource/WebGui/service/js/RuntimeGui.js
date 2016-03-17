@@ -33,7 +33,7 @@ angular.module('mrlapp.service.RuntimeGui', [])
                     }
                 };
 
-                $scope.localServiceData = $scope.service.repo.localServiceData.serviceTypes;
+                $scope.serviceData = $scope.service.serviceData.serviceTypes;
                 //mrl.subscribe($scope.service.name, 'pulse');            
 
                 $scope.newType = undefined;

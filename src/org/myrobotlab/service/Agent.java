@@ -27,7 +27,7 @@ import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.net.HttpGet;
+import org.myrobotlab.net.Http;
 import org.slf4j.Logger;
 
 import com.google.gson.internal.LinkedTreeMap;
@@ -171,7 +171,7 @@ public class Agent extends Service {
 
 	public Agent(String n) {
 		super(n);
-		log.info("Agent {} PID {} is alive", n, Runtime.getPID());
+		log.info("Agent {} PID {} is alive", n, Runtime.getPid());
 		agentJVMArgs = Runtime.getJVMArgs();
 		if (currentBranch == null) {
 			currentBranch = platform.getBranch();
@@ -355,22 +355,23 @@ public class Agent extends Service {
 	// FIXME - should just be be saveRemoteJar() - but shouldn't be from
 	// multiple threads
 	public byte[] getLatestRemoteJar(String branch) {
-		return HttpGet.get(String.format(jarUrlTemplate, branch));
+		return Http.get(String.format(jarUrlTemplate, branch));
 	}
 
 	public String getLatestRemoteVersion(String branch) {
-		byte[] data = HttpGet.get(String.format(versionUrlTemplate, branch));
+		byte[] data = Http.get(String.format(versionUrlTemplate, branch));
 		if (data != null) {
 			return new String(data);
 		}
 		return null;
 	}
 
+	/*
 	public ArrayList<String> getLocalVersions(String branch) throws IOException {
 		File m = new File(String.format("%s/myrobotlab.jar", branch));
 		String checkVersion = String.format("./checkVersion.%d.txt", System.currentTimeMillis());
-		FileIO.extract(m.getAbsolutePath(), "resource/version.txt", checkVersion);
-		byte[] v = FileIO.fileToByteArray(new File(checkVersion));
+		//FileIO.extract(m.getAbsolutePath(), "resource/version.txt", checkVersion);
+		byte[] v = FileIO.toByteArray(new File(checkVersion));
 		File cv = new File(checkVersion);
 		if (!cv.delete()) {
 			log.warn("could not delete {}", m.getAbsolutePath());
@@ -381,14 +382,13 @@ public class Agent extends Service {
 			error("failed attempt of checking version for %s", m.getAbsolutePath());
 		} else {
 			version = new String(v);
-			/*
-			 * if (version.contains("TRAVIS")){ version = "local build"; }
-			 */
+			
 			info("found local version %s", version);
 		}
 
 		return null;
 	}
+	*/
 
 	/**
 	 * gets name from id
@@ -422,7 +422,7 @@ public class Agent extends Service {
 			// TODO - all http gets use HttpClient static methods and promise
 			// for asynchronous
 			// get gitHub's branches
-			byte[] r = HttpGet.get("https://api.github.com/repos/MyRobotLab/myrobotlab/branches");
+			byte[] r = Http.get("https://api.github.com/repos/MyRobotLab/myrobotlab/branches");
 			if (r != null) {
 				String branches = new String(r);
 				CodecJson decoder = new CodecJson();
@@ -515,12 +515,12 @@ public class Agent extends Service {
 		List<Status> ret = new ArrayList<Status>();
 		ret.add(Status.info("install %s", fullType));
 		try {
-			Repo repo = new Repo();
+			Repo repo = Repo.getLocalInstance();
 
 			if (!repo.isServiceTypeInstalled(fullType)) {
 				repo.install(fullType);
 				if (repo.hasErrors()) {
-					ret.add(Status.error(repo.getErrors()));
+					ret.addAll(repo.getErrors());
 				}
 
 			} else {
@@ -629,7 +629,7 @@ public class Agent extends Service {
 
 		long installTime = 0;
 		Repo repo = Runtime.getInstance().getRepo();
-		ServiceData serviceData = repo.getServiceData();
+		ServiceData serviceData = ServiceData.getLocalInstance();
 		ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
 
 		ret.add(info("serviceTest will test %d services", serviceTypes.size()));
@@ -670,10 +670,9 @@ public class Agent extends Service {
 				// comment all out for dirty
 
 				// install Test dependencies
-				boolean force = false;
 				long installStartTime = System.currentTimeMillis();
-				repo.install("org.myrobotlab.service.Test", force);
-				repo.install(serviceType.getName(), force);
+				repo.install("org.myrobotlab.service.Test");
+				repo.install(serviceType.getName());
 				installTime += System.currentTimeMillis() - installStartTime;
 				// clean test.json part file
 
@@ -938,7 +937,7 @@ public class Agent extends Service {
 		// directory ..
 		FileIO.extract(String.format("%s/myrobotlab.jar", branch), "resource/version.txt", String.format("%s/version.txt", branch));
 
-		String currentVersion = FileIO.fileToString(String.format("%s/version.txt", branch));
+		String currentVersion = FileIO.toString(String.format("%s/version.txt", branch));
 		if (currentVersion == null) {
 			error("{}/version.txt current version is null", branch);
 			return;

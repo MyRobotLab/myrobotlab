@@ -217,7 +217,7 @@ public class Security extends Service implements AuthorizationProvider {
 
 			// FIXME - store not threadsafe
 			Properties fileStore = new Properties();
-			String storeFileContents = FileIO.fileToString(getStoreFileName());
+			String storeFileContents = FileIO.toString(getStoreFileName());
 			if (storeFileContents != null) {
 				String properties = decrypt(storeFileContents, new File(getKeyFileName()));
 				ByteArrayInputStream bis = new ByteArrayInputStream(properties.getBytes());
@@ -314,7 +314,7 @@ public class Security extends Service implements AuthorizationProvider {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			store.store(out, null);
 			String encrypted = Security.encrypt(new String(out.toByteArray()), new File(getKeyFileName()));
-			FileIO.stringToFile(getStoreFileName(), encrypted);
+			FileIO.toFile(getStoreFileName(), encrypted);
 		} catch (Exception e) {
 			Logging.logError(e);
 		}

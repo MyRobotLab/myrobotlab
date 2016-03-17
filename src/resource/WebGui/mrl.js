@@ -712,9 +712,9 @@ angular
             },
             getPossibleServices: function() {
                 var possibleServices = [];
-                for (var property in _self.runtime.repo.localServiceData.serviceTypes) {
-                    if (_self.runtime.repo.localServiceData.serviceTypes.hasOwnProperty(property)) {
-                        var serviceType = _self.runtime.repo.localServiceData.serviceTypes[property];
+                for (var property in _self.runtime.serviceData.serviceTypes) {
+                    if (_self.runtime.serviceData.serviceTypes.hasOwnProperty(property)) {
+                        var serviceType = _self.runtime.serviceData.serviceTypes[property];
                         var model = {};
                         model.name = getSimpleName(property);
                         model.img = model.name + '.png';

@@ -123,7 +123,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 				// File("src/resource/WebGUI/video/ffmpeg.1443989700495.mp4"));
 				// byte[] data = FileIO.fileToByteArray(new
 				// File("mp4Test.mp4"));
-				byte[] data = FileIO.fileToByteArray(new File("test.avi.h264.mp4"));
+				byte[] data = FileIO.toByteArray(new File("test.avi.h264.mp4"));
 
 				log.info("bytes {}", data.length);
 				out.write(data);
@@ -554,11 +554,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 				respond(out, codec, "getLocalServices", env);
 				return;
 			} else if (parts.length == 4) {
-				// *** /api/messages/runtime ***
-				// FIXME ! - uh .. FORGOT SOMETHING !?!?!? :P
+				// *** /api/messages/runtime/ ***
+				// *** /api/services/servo/  ****
 				ServiceInterface si = Runtime.getService(parts[3]);
-				Method[] methods = si.getDeclaredMethods();
-				respond(out, codec, "getDeclaredMethods", si);
+				respond(out, codec, "getDeclaredMethods", si.getMethodMap());
 				return;
 			}
 

@@ -1176,7 +1176,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	public void writeFile(String filename) {
 		try {
 
-			byte[] fileData = FileIO.fileToByteArray(new File(filename));
+			byte[] fileData = FileIO.toByteArray(new File(filename));
 
 			/*
 			 * TODO - ENCODING !!! if (txCodec != null) { // FIXME parse the

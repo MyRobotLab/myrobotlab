@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -13,7 +14,6 @@ import java.util.Set;
 
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
@@ -61,17 +61,12 @@ public class Incubator extends Service {
 		try {
 
 			// install everything...
-			Repo repo = new Repo();
+			Repo repo = Repo.getLocalInstance();
 
 			if (!repo.isServiceTypeInstalled(fullType)) {
-				ArrayList<ResolveReport> reports = repo.install(fullType);
-
-				for (int j = 0; j < reports.size(); ++j) {
-					ResolveReport report = reports.get(j);
-					List<?> errors = report.getAllProblemMessages();
-					if (errors.size() > 0) {
-						return Status.error("retrieving %s returned errors %s", fullType, Arrays.toString(errors.toArray()));
-					}
+				repo.install(fullType);
+				if (repo.hasErrors()) {
+					log.error("repo had errors");
 				}
 			}
 		} catch (Exception e) {
@@ -86,7 +81,7 @@ public class Incubator extends Service {
 		LoggingFactory.getInstance().addAppender(Appender.FILE);
 
 		Incubator incubator = (Incubator) Runtime.start("incubator", "Incubator");
-		
+
 		// incubator.servoArduinoOpenCVGUIService();
 
 		/*
@@ -114,15 +109,13 @@ public class Incubator extends Service {
 	// step 2 in any onRegistered -
 	// step 3 - fix up - so that state is handled (not just "error")
 	public void addRoutes() {
-		
+
 		Runtime r = Runtime.getInstance();
 		subscribe(r.getName(), "registered");
-		
+
 		// handle my own error the same way too
 		subscribe(getName(), "publishError");
 	}
-
-
 
 	public void onError(Status status) {
 		try {
@@ -157,17 +150,19 @@ public class Incubator extends Service {
 
 	/**
 	 * install all service
+	 * 
+	 * @throws IOException
+	 * @throws ParseException
 	 */
-	public void installAll() {
-
-		Runtime runtime = Runtime.getInstance();
-		UpdateReport report = runtime.updateAll();
-		log.info(report.toString());
+	public void installAll() throws ParseException, IOException {
+		// Runtime.getInstance();
+		Repo repo = Repo.getLocalInstance();
+		repo.install();
 	}
 
 	public List<Status> pythonTest() throws IOException {
 		ArrayList<Status> ret = new ArrayList<Status>();
-		
+
 		Python python = (Python) Runtime.start("python", "Python");
 		Serial uart99 = (Serial) Runtime.start("uart99", "Serial");
 		// take inventory of currently running services
@@ -194,7 +189,7 @@ public class Incubator extends Service {
 			if (py == null || py.length() == 0) {
 				ret.add(Status.error("%s.py does not exist", shortName));
 			} else {
-				//uart99.connect("UART99");
+				// uart99.connect("UART99");
 				uart99.recordRX(String.format("%s.rx", shortName)); // FIXME
 																	// FILENAME
 																	// OVERLOAD
@@ -224,7 +219,7 @@ public class Incubator extends Service {
 	// TODO - encode decode test JSON & XML
 	// final ArrayList<Status>
 	public ArrayList<Status> serializeTest() {
-		
+
 		ArrayList<Status> ret = new ArrayList<Status>();
 
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
@@ -356,11 +351,9 @@ public class Incubator extends Service {
 				log.info("starting {}", fullType);
 				// FIXME - will need to do JUnit !!!!
 				/*
-				Status result = s.test();
-				if (result != null && result.hasError()) {
-					ret.add(result);
-				}
-				*/
+				 * Status result = s.test(); if (result != null &&
+				 * result.hasError()) { ret.add(result); }
+				 */
 
 				s.releaseService();
 
@@ -383,62 +376,49 @@ public class Incubator extends Service {
 	}
 
 	/*
-	public Status subTest() {
-
-		HashSet<String> keepMeRunning = new HashSet<String>();
-		List<ServiceInterface> list = Runtime.getServices();
-		for (int j = 0; j < list.size(); ++j) {
-			ServiceInterface si = list.get(j);
-			keepMeRunning.add(si.getName());
-		}
-
-		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
-		Status status = Status.info("subTest");
-
-		ret.add(Status.info("will test %d services", serviceTypeNames.length));
-
-		for (int i = 0; i < serviceTypeNames.length; ++i) {
-			String fullName = serviceTypeNames[i];
-			String shortName = fullName.substring(fullName.lastIndexOf(".") + 1);
-			try {
-				ServiceInterface si = Runtime.start(shortName, shortName);
-				ret.add(si.test());
-			} catch (Exception e) {
-				ret.addError(e);
-			}
-
-			// clean services
-			Runtime.releaseAllServicesExcept(keepMeRunning);
-		}
-
-		return status;
-
-	}
-	*/
+	 * public Status subTest() {
+	 * 
+	 * HashSet<String> keepMeRunning = new HashSet<String>();
+	 * List<ServiceInterface> list = Runtime.getServices(); for (int j = 0; j <
+	 * list.size(); ++j) { ServiceInterface si = list.get(j);
+	 * keepMeRunning.add(si.getName()); }
+	 * 
+	 * String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
+	 * Status status = Status.info("subTest");
+	 * 
+	 * ret.add(Status.info("will test %d services", serviceTypeNames.length));
+	 * 
+	 * for (int i = 0; i < serviceTypeNames.length; ++i) { String fullName =
+	 * serviceTypeNames[i]; String shortName =
+	 * fullName.substring(fullName.lastIndexOf(".") + 1); try { ServiceInterface
+	 * si = Runtime.start(shortName, shortName); ret.add(si.test()); } catch
+	 * (Exception e) { ret.addError(e); }
+	 * 
+	 * // clean services Runtime.releaseAllServicesExcept(keepMeRunning); }
+	 * 
+	 * return status;
+	 * 
+	 * }
+	 */
 
 	/*
-	@Override
-	public List<Status> test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-
-		// ret.add(subTest());
-		// ret.add(serializeTest());
-		return ret.add(serviceTest());
-
-		if (status.hasError()) {
-			onError(status);
-		}
-
-		return status;
-	}
-	*/
+	 * @Override public List<Status> test() { Status status = Status.info(
+	 * "starting %s %s test", getName(), getType());
+	 * 
+	 * // ret.add(subTest()); // ret.add(serializeTest()); return
+	 * ret.add(serviceTest());
+	 * 
+	 * if (status.hasError()) { onError(status); }
+	 * 
+	 * return status; }
+	 */
 
 	public void testInMoovPythonScripts() {
 		try {
 
 			Python python = (Python) Runtime.start("python", "Python");
 			// String script;
-			ArrayList<File> list = FileIO.listInternalContents("/resource/Python/examples");
+			List<File> list = FileIO.listResourceContents("Python/examples");
 
 			Runtime.createAndStart("gui", "GUIService");
 			python = (Python) startPeer("python");
@@ -468,7 +448,7 @@ public class Incubator extends Service {
 
 			Python python = (Python) Runtime.start("python", "Python");
 			// String script;
-			ArrayList<File> list = FileIO.listInternalContents("/resource/Python/examples");
+			List<File> list = FileIO.listResourceContents("Python/examples");
 
 			Runtime.createAndStart("gui", "GUIService");
 			python = (Python) startPeer("python");
@@ -500,7 +480,7 @@ public class Incubator extends Service {
 
 		// test - instrumentation for
 	}
-	
+
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
@@ -519,6 +499,5 @@ public class Incubator extends Service {
 
 		return meta;
 	}
-
 
 }
