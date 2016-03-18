@@ -73,7 +73,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	 */
 	// String botName;
 	// This is the username that is chatting with the bot.
-	//String currentSession = "default";
+	// String currentSession = "default";
 	// Session is a user and a bot. so the key to the session should be the username, and the bot name.
 	HashMap<String, ChatData> sessions = new HashMap<String, ChatData>();
 	// TODO: better parsing than a regex...
@@ -201,8 +201,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	 *            - the name of the bot you which to get the response from
 	 * @return
 	 */
+	public Response getResponse(String username, String botName, String text) {
+		this.currentBotName = botName;
+		return getResponse(username, text);
+	}
+	
 	public Response getResponse(String username, String text) {
-		log.info(String.format("Get Response for : session %s : %s", username, text));
+		log.info(String.format("Get Response for : user %s bot %s : %s", username, currentBotName, text));
 
 		if (bot == null) {
 			String error = "ERROR: Core not loaded, please load core before chatting.";
@@ -633,7 +638,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		}
 
 		cleanOutOfDateAimlIFFiles(botName);
+		// TODO: manage the bots in a collective pool/hash map.
 		if (bot == null) {
+			bot = new Bot(botName, path);
+		} else if (!botName.equalsIgnoreCase(bot.name)) {
 			bot = new Bot(botName, path);
 		}
 
@@ -708,8 +716,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel("INFO");
 
+		// Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("webgui", "WebGui");
+		
 		ProgramAB ai = (ProgramAB) Runtime.createAndStart("simple", "ProgramAB");
-		ai.startSession("C:\\mrl\\develop\\ProgramAB","default", "simple");
+		//ai.startSession("C:\\mrl\\develop\\ProgramAB","default", "simple");
 		
 		log.info(ai.getResponse("hi there").toString());
 	
