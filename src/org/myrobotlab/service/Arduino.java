@@ -629,7 +629,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public void motorMove(Motor motor) {
 
 		double powerOutput = motor.getPowerOutput();
-		String type = motor.getType();
+		String type = motor.getMotorType();
 
 		if (Motor.TYPE_SIMPLE.equals(type)) {
 			sendMsg(DIGITAL_WRITE, motor.getPin(Motor.PIN_TYPE_DIR), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
