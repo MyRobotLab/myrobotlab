@@ -1,4 +1,5 @@
-<div class="col-md-12">          
+<div class="col-md-12">         
+
 <!-- <form ui-keypress="{13:'askProgramAB(session,utterance)'}"> -->
 <div class="input-group">       
    <select class="form-control"
@@ -7,8 +8,8 @@
    </select>
  
    <span class="input-group-btn"><button class="btn btn-default" ng-click="startDialog()">start session</button></span>
-   <input class="form-control" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" press-enter="getResponse(currentSession,utterance)" placeholder="type here"/>
-   <span class="input-group-btn"><button class="btn btn-default" ng-show="service.currentSession != null" ng-click="getResponse(currentSession,utterance)">Ask</button></span>
+   <input class="form-control" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" press-enter="getSessionResponse(currentSession,utterance)" placeholder="type here"/>
+<!--    <span class="input-group-btn"><button class="btn btn-default" ng-show="currentSession.key != null" ng-click="getResponse(currentSession,utterance)">Ask</button></span>  -->
    <!-- <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.startSession(username,botName)">Start</button></span> -->
    <!-- <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.savePredicates()">Save Predicates</button></span> -->
    
@@ -39,7 +40,7 @@
     </div>
         <div class="modal-body">
         <div class="input-group">     
-            session <input class="form-control" type="text" placeholder="{{newSession}}" ng-model="newSession"/><br>
+            session <input class="form-control" type="text" placeholder="{{newUserName}}" ng-model="newUserName"/><br>
             bot name 
 
             <select class="form-control"
@@ -51,7 +52,7 @@
         </div>
         </div>
         <div class="modal-footer">            
-            <span class="input-group-btn"><button class="btn btn-default" ng-click="startSession(newSession,newBotName)">start</button></span>        
+            <span class="input-group-btn"><button class="btn btn-default" ng-click="startSession(newUserName,newBotName)">start</button></span>        
             <!-- <button ng-click="cancel()" class="btn btn-primary">Close</button> -->
         </div>
   </script>

@@ -13,9 +13,13 @@ angular.module('mrlapp.service.ProgramABGui', [])
     $scope.currentText = '';
 
     $scope.currentSession = '';
+    // TODO: which should we use?
+    $scope.currentUserName =  '';
+    $scope.currentBotName = '';
 
-    $scope.newSession = 'alice2';
-    $scope.newBotName = 'alice2';
+    // grab defaults.
+    $scope.newUserName = $scope.service.currentUserName;
+    $scope.newBotName = $scope.service.currentBotName;
 
     // start info status
     $scope.rows = [];
@@ -25,7 +29,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
         // use another scope var to transfer/merge selection
         // from user - service.currentSession is always read-only
         // all service data should never be written to, only read from
-        $scope.currentSession = service.currentSession;
+        $scope.currentSession = service.currentUserName + "-" + service.currentBotName;
         $scope.service = service;
     }
     ;
@@ -61,16 +65,21 @@ angular.module('mrlapp.service.ProgramABGui', [])
         msg.send("getCategories","hello");
     }
     
-    $scope.getResponse = function(session, utterance) {
-        msg.send("getResponse", session, utterance);
+    
+    $scope.getSessionResponse = function(session, utterance) {
+    	$log.info("SESSION GET RESPONSE" + session);
+    	$scope.getResponse(session.split("-")[0], session.split("-")[1], utterance);
+    }
+    
+    $scope.getResponse = function(username, botname, utterance) {
+    	$log.info("USER BOT RESPNSE" + username + " - " + botname);
+        msg.send("getResponse", username, botname, utterance);
         $scope.rows.unshift({
             name: "User",
             response: $sce.trustAsHtml(utterance)
-        });
-        
+        });        
         $scope.utterance = "";
-    }
-    ;
+    };
     
     $scope.startDialog = function() {
         startDialog = $uibModal.open({
@@ -86,22 +95,24 @@ angular.module('mrlapp.service.ProgramABGui', [])
         });
     }
     
-    $scope.startSession = function(session, botname) {
-        $scope.rows.unshift("Reload Session for Bot " + botname);
+    $scope.startSession = function(username, botname) {
+        $scope.currentUserName = username;
+        $scope.currentBotName = botname;
+    	$scope.rows.unshift("Reload Session for Bot " + botname);
         $scope.startSessionLabel = 'Reload Session';
-        msg.send("startSession", session, botname);
+        msg.send("startSession", username, botname);
         startDialog.dismiss();
-    }
-    ;
+    };
     
     $scope.savePredicates = function() {
         $scope.service = mrl.getService($scope.service.name);
         mrl.sendTo($scope.service.name, "savePredicates");
-    }
-    ;
+    };
     
     // subscribe to the response from programab.
     msg.subscribe('publishText');
     msg.subscribe(this);
 }
 ]);
+
+
