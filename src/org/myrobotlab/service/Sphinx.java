@@ -268,7 +268,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 			// so that speech asks for confirmation
 			// TODO - put this in gui so state will be updated with text
 			// question
-			ear.attach(speech);
+			ear.addMouth(speech);
 
 			Log log = (Log) Runtime.createAndStart("log", "Log");
 			Clock clock = (Clock) Runtime.createAndStart("clock", "Clock");
@@ -358,22 +358,18 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	}
 
 	// TODO - make "Speech" interface if desired
-	public boolean attach(SpeechSynthesis mouth) {
-		if (mouth == null) {
-			warn("can not attach mouth is null");
-			return false;
-		}
-		// if I'm speaking - I shouldn't be listening
-		mouth.addEar(this);
-		this.addListener("publishText", mouth.getName(), "onText");
-		this.addListener("publishRequestConfirmation", mouth.getName(), "onRequestConfirmation");
-//		
-//		mouth.subscribe(getName(), "requestConfirmation");
-//		mouth.subscribe(getName(), "publishText", mouth.getName(), "speak");
-//		
-		log.info(String.format("attached Speech service %s to Sphinx service %s with default message routes", mouth.getName(), getName()));
-		return true;
-	}
+//	public boolean attach(SpeechSynthesis mouth) {
+//		if (mouth == null) {
+//			warn("can not attach mouth is null");
+//			return false;
+//		}
+//		// if I'm speaking - I shouldn't be listening
+//		mouth.addEar(this);
+//		this.addListener("publishText", mouth.getName(), "onText");
+//		this.addListener("publishRequestConfirmation", mouth.getName(), "onRequestConfirmation");
+//		log.info(String.format("attached Speech service %s to Sphinx service %s with default message routes", mouth.getName(), getName()));
+//		return true;
+//	}
 
 	public void buildGrammar(StringBuffer sb, HashMap<String, Command> cmds) {
 		if (cmds != null) {
@@ -657,8 +653,18 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
 	@Override
 	public void addMouth(SpeechSynthesis mouth) {
-		attach(mouth);
+		if (mouth == null) {
+			warn("can not attach mouth is null");
+			return;
+		}
+		// if I'm speaking - I shouldn't be listening
+		mouth.addEar(this);
+		this.addListener("publishText", mouth.getName(), "onText");
+		this.addListener("publishRequestConfirmation", mouth.getName(), "onRequestConfirmation");
+
 		addListener("requestConfirmation", mouth.getName(), "onRequestConfirmation");
+		log.info("attached Speech service {} to Sphinx service {} with default message routes", mouth.getName(), getName());
+
 	}
 
 	@Override

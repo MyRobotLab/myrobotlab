@@ -1,10 +1,13 @@
 package org.myrobotlab.service;
 
+import java.util.HashMap;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Sphinx.Command;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -18,6 +21,24 @@ import org.myrobotlab.service.interfaces.TextPublisher;
  */
 public class WebkitSpeechRecognition extends Service implements SpeechRecognizer, TextPublisher {
 
+	
+	/**
+	 * TODO: make it's own class.
+	 * TODO: merge this data structure with the programab oob stuff?
+	 *
+	 */
+	public class Command {
+		public String name;
+		public String method;
+		public Object[] params;
+
+		Command(String name, String method, Object[] params) {
+			this.name = name;
+			this.method = method;
+			this.params = params;
+		}
+	}
+	
 	/**
 	 * 
 	 */
@@ -25,12 +46,22 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
 	private String language = "en-US";
 	
+	HashMap<String, Command> commands = null;
+	
 	public WebkitSpeechRecognition(String reservedKey) {
 		super(reservedKey);
 	}
 
 	@Override
 	public String publishText(String text) {
+		log.info("Publish Text : {}", text);
+		// TODO: is there a better place to do this?  maybe recognized?
+		if (commands.containsKey(text)) {
+			// If we have a command. send it when we recognize...
+			Command cmd = commands.get(text);
+			send(cmd.name, cmd.method, cmd.params);
+		}
+		
 		return text;
 	}
 
@@ -47,8 +78,14 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 	}
 
 	@Override
-	public String recognized(String word) {
-		return word;
+	public String recognized(String text) {
+		log.info("Recognized : {}", text);
+		if (commands.containsKey(text)) {
+			// If we have a command. send it when we recognize...
+			Command cmd = commands.get(text);
+			send(cmd.name, cmd.method, cmd.params);
+		}
+		return text;
 	}
 
 	@Override
@@ -135,6 +172,25 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 		meta.addCategory("speech recognition");
 		// meta.addPeer("tracker", "Tracking", "test tracking");
 		return meta;		
+	}
+
+	@Override
+	public void lockOutAllGrammarExcept(String lockPhrase) {
+		log.warn("Lock out grammar not supported on webkit, yet...");
+	}
+
+	@Override
+	public void clearLock() {
+		log.warn("clear lock out grammar not supported on webkit, yet...");
+	}
+	
+	
+	// TODO - should this be in Service ?????
+	public void addCommand(String actionPhrase, String name, String method, Object... params) {
+		if (commands == null) {
+			commands = new HashMap<String, Command>();
+		}
+		commands.put(actionPhrase, new Command(name, method, params));
 	}
 	
 }

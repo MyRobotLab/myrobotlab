@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.ServiceType;
@@ -16,6 +15,7 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
@@ -79,8 +79,8 @@ public class InMoov extends Service {
 	transient private HashMap<String, InMoovArm> arms = new HashMap<String, InMoovArm>();
 	transient private HashMap<String, InMoovHand> hands = new HashMap<String, InMoovHand>();
 
-	// meta
-	transient public Sphinx ear;
+	// metas
+	transient public SpeechRecognizer ear;
 	transient public SpeechSynthesis mouth;
 	transient public Tracking eyesTracking;
 	transient public Tracking headTracking;
@@ -132,8 +132,8 @@ public class InMoov extends Service {
 
 	//static String speechService = "MarySpeech";
 	static String speechService = "AcapelaSpeech";
+	static String speechRecognizer = "WebkitSpeechRecognition";
 	
-
 	public InMoov(String n) {
 		super(n);
 		// addRoutes();
@@ -705,7 +705,7 @@ public class InMoov extends Service {
 		// rightSerialPort.digitalWrite(53, Arduino.LOW);
 		// leftSerialPort.digitalWrite(53, Arduino.LOW);
 		if (ear != null) {
-			ear.lockOutAllGrammarExcept("power up");
+			ear.lockOutAllGrammarExcept("power up");			
 		}
 
 		startSleep = System.currentTimeMillis();
@@ -928,11 +928,11 @@ public class InMoov extends Service {
 	// TODO TODO TODO - context & status report -
 	// "current context is right hand"
 	// FIXME - voice control for all levels (ie just a hand or head !!!!)
-	public Sphinx startEar() throws Exception {
+	public SpeechRecognizer startEar() throws Exception {
 		speakBlocking("starting ear");
-		ear = (Sphinx) startPeer("ear");
+		ear = (SpeechRecognizer) startPeer("ear");
 		if (mouth != null) {
-			ear.attach(mouth);
+			ear.addMouth(mouth);
 		}
 		return ear;
 	}
@@ -1022,7 +1022,7 @@ public class InMoov extends Service {
 		speakBlocking("starting mouth");
 
 		if (ear != null) {
-			ear.attach(mouth);
+			ear.addMouth(mouth);
 		}
 		return mouth;
 	}
@@ -1418,8 +1418,9 @@ public class InMoov extends Service {
 		meta.addPeer("leftHand", "InMoovHand", "left hand");
 		meta.addPeer("rightArm", "InMoovArm", "right arm");
 		meta.addPeer("rightHand", "InMoovHand", "right hand");
-
-		meta.addPeer("ear", "Sphinx", "InMoov spech recognition service");
+		// webkit speech.
+		meta.addPeer("ear", speechRecognizer, "InMoov webkit speech recognition service");
+		// meta.addPeer("ear", "Sphinx", "InMoov Sphinx speech recognition service");
 		meta.addPeer("eyesTracking", "Tracking", "Tracking for the eyes");
 		meta.addPeer("head", "InMoovHead", "the head");
 		meta.addPeer("headTracking", "Tracking", "Head tracking system");
@@ -1429,9 +1430,7 @@ public class InMoov extends Service {
 		meta.addPeer("openni", "OpenNi", "Kinect service");
 		meta.addPeer("pid", "PID2", "PID2 service");
 
-
 		return meta;
 	}
-
 
 }
