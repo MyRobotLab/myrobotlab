@@ -31,4 +31,9 @@ public interface SpeechRecognizer extends NameProvider {
 	public void onStartSpeaking(String utterance);
 	public void onEndSpeaking(String utterance);
 	
+	// TODO: rationalize these 2 interfaces maybe re-name them?
+	public void lockOutAllGrammarExcept(String lockPhrase);
+	public void clearLock();
+	
+	
 }
