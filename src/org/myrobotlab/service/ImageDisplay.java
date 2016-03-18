@@ -22,7 +22,7 @@ public class ImageDisplay extends Service {
 	int wOffset = 0;
 	int hOffset = 20;
 	private static int h,w;
-	private static GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	private static GraphicsDevice gd;
 	
 	public final static Logger log = LoggerFactory.getLogger(ImageDisplay.class);
 
@@ -50,6 +50,14 @@ public class ImageDisplay extends Service {
 
 	public ImageDisplay(String n) {
 		super(n);
+	}
+
+	@Override
+	public void startService() {
+		// TODO Auto-generated method stub
+		super.startService();
+		gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		
 	}
 
 	//Displays an image.
