@@ -514,8 +514,9 @@
 		<!-- copy resource.root -->
 		<java classname="org.myrobotlab.framework.repo.ServiceData">
 	         <arg value="${build}/classes/resource/framework"/>
-	         <classpath refid="compile.classpath">
-	         	<pathelement location="${build}/classes"/>
+	         <classpath>
+	         	<path refid="compile.classpath"/>
+	         	<path path="${build}/classes"/>
 	           <!-- pathelement location="dist/test.jar"/ 	         	
 		           <pathelement refid="compile.classpath"/>
 		           <pathelement path="${build}/classes"/>
