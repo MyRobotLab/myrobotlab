@@ -213,10 +213,24 @@ public class FileIO {
 		if (isJar(root)) {
 
 			// String jarFile = getJarName();
-
+			
+			// if an exact file (not directory) is specified
+			// we can immediately extract it
+			// however for directories - there is no specific key given
+			// and all the contents has to be iterated through :P
+			
+			// trying direct key of resource first ....
+			URL url = FileIO.class.getResource(src);
+			if (url != null){
+				log.info("{} exists on the classpath - extracting to {}", url, dst);
+				FileIO.toFile(dst, toByteArray(FileIO.class.getResourceAsStream(src)));
+				return true;
+			}
+			
 			log.info("extracting from {}", root);
 
 			JarFile jar = new JarFile(root);
+			
 			Enumeration<JarEntry> enumEntries = jar.entries();
 
 			// jar access is non-recursive
@@ -706,6 +720,8 @@ public class FileIO {
 
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
+		
+		FileIO.extract("/C:/mrl.test/current/myrobotlab.jar", "/resource/framework/serviceData.json", "C:\\mrl.test\\current\\.myrobotlab\\serviceData.json");
 
 		copy("dir1", "dir2");
 

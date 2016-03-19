@@ -84,6 +84,8 @@ public class ServiceData implements Serializable {
 					String extractFrom = "/resource/framework/serviceData.json";
 					log.info("try #2 {} not found - extracting from {}", jsonFile.getName(), extractFrom);
 					FileIO.extract(extractFrom, jsonFile.getAbsolutePath());
+					String data = FileIO.toString(jsonFile);
+					localInstance = CodecUtils.fromJson(data, ServiceData.class);
 				} catch (Exception e) {
 					String newJson = FileIO.gluePaths(FileIO.getRoot(), "/resource/framework/serviceData.json");
 					log.info("try #3 serviceData.json not found in resource ! - generating and putting it in {}", newJson);
