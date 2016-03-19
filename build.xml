@@ -793,6 +793,7 @@
 				<fileset dir="${test}">
 					<include name="**/*Test.java" />
 					<exclude name="**/JFugueTest.java" />
+					<exclude name="**/MessageTest.java" />
 				</fileset>
 			</batchtest>
 
