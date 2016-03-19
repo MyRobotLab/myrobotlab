@@ -84,7 +84,7 @@
 -->
 
 <!-- The MyRobotLab ant build.xml  -->
-<project name="myrobotlab" default="jar" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
+<project name="myrobotlab" default="test" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
@@ -261,11 +261,8 @@
 		<pathelement location="${repo}/org.bytedeco.javacv/1.1/opencv-macosx-x86_64.jar"/>
 		
 		<pathelement location="${repo}/com.thalmic.myo/0.9.0/myo-java-0.9.1-SNAPSHOT.jar"/>
-		
 
-
-                <!-- oculus stuff for display.  TODO: clean and re-order these -->
-   
+		<!-- oculus stuff for display.  TODO: clean and re-order these -->
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jovr-0.7.0.0.jar"/>
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jna-4.2.0.jar"/>
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/lwjgl-2.9.3.jar"/>
@@ -277,7 +274,7 @@
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/math-1.0.4.jar"/>
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/guava-17.0.jar"/>
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jscience-4.3.1.jar"/>
-                <!-- end oculus stuff.. TODO: clean it up! -->
+		<!-- end oculus stuff.. TODO: clean it up! -->
 		
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.19/BoofCV-WebcamCapture-0.19.jar"/>
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.19/BoofCV-xuggler-0.19.jar"/>
@@ -295,13 +292,13 @@
 		<pathelement location="${repo}/feed4j/1.0/xercesImpl.jar"/>
 		<pathelement location="${repo}/feed4j/1.0/xml-apis.jar"/>
 
-                <!-- for the document processing pipeline.. it'd be nice to refactor this out. -->
+		<!-- for the document processing pipeline.. it'd be nice to refactor this out. -->
 		<pathelement location="${repo}/com.thoughtworks.xstream/1.4.7/xstream-1.4.7.jar"/>
 		<pathelement location="${repo}/org.apache.tika/1.11/tika-core-1.11.jar"/>
 		<pathelement location="${repo}/net.sf.opencsv/2.3/opencsv-2.3.jar"/>
 		<pathelement location="${repo}/org.jsoup/1.8.3/jsoup-1.8.3.jar"/> 
-                <!-- for OpenNLP stage in pipeline -->  
-                <pathelement location="${repo}/opennlp/1.6/opennlp-tools-1.6.0.jar"/>
+        <!-- for OpenNLP stage in pipeline -->  
+        <pathelement location="${repo}/opennlp/1.6/opennlp-tools-1.6.0.jar"/>
 
 		<pathelement location="${repo}/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>	
 
@@ -761,31 +758,19 @@
 		               printsummary="true"
 		               printsummary="withOutAndErr"
 		               outputtoformatters="true" -->
-                <jacoco:coverage destfile="${result.jacoco.file}">
+		<jacoco:coverage destfile="${result.jacoco.file}">
 		    <junit printsummary="on" fork="true" haltonfailure="on">
 			<!--
 			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
 			<env key="LD_LIBRARY_PATH" path="${dist}/libraries/native"/>			
 			-->
-
-			<!--			
-			FIXME - OS NEEDS TO BE TAKEN OUT OF PATH !!!!!
-			So we can do this
-			<jvmarg value="-Djava.library.path=libraries/native"/>
-			and not this !!!
-			<jvmarg value="-Djava.library.path=libraries/native/x86.64.windows"/>
-			so we don't have to exclude SerialTest !
-			-->
 			<sysproperty key="java.awt.headless" value="true" />
 			<!-- any junit tests would fail running on jenkins with gui components -->
 			<classpath>
-				<!-- <pathelement location="${dist}/myrobotlab.jar" /> FIXME - it needs to be this -->
 				<pathelement location="${build}/classes" />
 				<pathelement location="${build}/test" />
 				<path refid="test.classpath" />
 				<path refid="compile.classpath" />
-				<!-- remove <path refid="compile.classpath" /> -->
-				<!-- remove <pathelement location="${build}/classes" /> -->
 			</classpath>
 			<formatter type="xml" />
 
@@ -798,7 +783,7 @@
 			</batchtest>
 
 		    </junit>
-        	</jacoco:coverage>
+		</jacoco:coverage>
 	</target>
 
 	<target name="quickTest" > <!-- not correct depends="compiletests" -->
