@@ -310,10 +310,20 @@ public class ServiceData implements Serializable {
 			LoggingFactory.getInstance().configure();
 			// LoggingFactory.getInstance().setLevel("INFO");
 			// LoggingFactory.getInstance().addAppender(Appender.FILE);
+			String path = "";
+			if (args.length > 0){
+				path = args[0];
+			}
+			
+			String filename = FileIO.gluePaths(path, "serviceData.json");
+			log.info("generating {}", filename);
+			if (path.length() > 0){
+				new File(path).mkdirs();
+			}
 
 			// THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----
 			ServiceData sd = generate();
-			FileOutputStream fos = new FileOutputStream("serviceData.json");
+			FileOutputStream fos = new FileOutputStream(filename);
 			fos.write(CodecUtils.toJson(sd).getBytes());
 			fos.close();
 			// THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - END ----

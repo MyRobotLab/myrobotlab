@@ -107,13 +107,13 @@ public class Repo implements Serializable {
 	/**
 	 * call back notification of progress
 	 */
-	private transient StatusListener listeners = null;
+	private transient StatusListener listener = null;
 
 	public Repo() {
 	}
 
 	public void addStatusListener(StatusListener listener) {
-		this.listeners = listener;
+		this.listener = listener;
 	}
 
 	public void error(Exception e) {
@@ -124,8 +124,9 @@ public class Repo implements Serializable {
 	// pulled in dependencies .. not sure if that is good
 	public void error(String format, Object... args) {
 		Status status = Status.error(format, args);
-		if (listeners != null){
-			listeners.onStatus(status);
+		errors.add(status);
+		if (listener != null) {
+			listener.onStatus(status);
 		}
 	}
 
@@ -140,15 +141,16 @@ public class Repo implements Serializable {
 	// pulled in dependencies .. not sure if that is good
 	public void info(String format, Object... args) {
 		Status status = Status.info(format, args);
-		listeners.onStatus(status);
+		if (listener != null) {
+			listener.onStatus(status);
+		}
 	}
-	
-	public void install() throws ParseException, IOException{
+
+	public void install() throws ParseException, IOException {
 		clearErrors();
 		ServiceData sd = ServiceData.getLocalInstance();
-		ArrayList<ResolveReport> ret = new ArrayList<ResolveReport>();
 		String[] typeNames = sd.getServiceTypeNames();
-		for (int i = 0; i < typeNames.length; ++i){
+		for (int i = 0; i < typeNames.length; ++i) {
 			install(typeNames[i]);
 		}
 	}
@@ -157,20 +159,19 @@ public class Repo implements Serializable {
 		errors.clear();
 	}
 
-
 	/**
-	 * Install the all dependencies for a service if it has any.
-	 * This uses Ivy programmatically to resolve and retrieve all necessary dependencies for a
-	 * service.  
+	 * Install the all dependencies for a service if it has any. This uses Ivy
+	 * programmatically to resolve and retrieve all necessary dependencies for a
+	 * service.
 	 * 
 	 * Steps :
 	 * 
-	 *  1. check if .myrobotlab/repo.json file loaded - if not create it  repo.json represents current state of installed
-	 *  	libraries (local repo)
-	 *  2. get list of dependecies from service type (this comes from the serviceData.json / classMeta) 
-	 *  	these are what need to be resolved
-	 *  3. retrieve - and update state in memory and repo.json
-	 *  
+	 * 1. check if .myrobotlab/repo.json file loaded - if not create it
+	 * repo.json represents current state of installed libraries (local repo) 2.
+	 * get list of dependecies from service type (this comes from the
+	 * serviceData.json / classMeta) these are what need to be resolved 3.
+	 * retrieve - and update state in memory and repo.json
+	 * 
 	 * @param fullTypeName
 	 * @throws ParseException
 	 * @throws IOException
@@ -184,8 +185,8 @@ public class Repo implements Serializable {
 		Set<Library> unfulfilled = getUnfulfilledDependencies(fullTypeName); // serviceData.getDependencyKeys(fullTypeName);
 
 		for (Library dep : unfulfilled) {
-				libraries.put(dep.getKey(), dep);
-				resolveArtifacts(dep.getOrg(), dep.getRevision(), true);
+			libraries.put(dep.getKey(), dep);
+			resolveArtifacts(dep.getOrg(), dep.getRevision(), true);
 		}
 	}
 
@@ -230,7 +231,7 @@ public class Repo implements Serializable {
 		info("%s %s.%s", (retrieve) ? "retrieve" : "resolve", org, version);
 		// clear errors for this install
 		errors.clear();
-		
+
 		Library library = new Library(org, version);
 		libraries.put(library.getKey(), library);
 		// creates clear ivy settings
@@ -390,7 +391,7 @@ public class Repo implements Serializable {
 	 * @param org
 	 * @param version
 	 */
-	public void addDependency(String org, String version) {
+	public void addLibrary(String org, String version) {
 		Library dep = new Library(org, version);
 		libraries.put(String.format("%s/%s", org, version), dep);
 		save();
@@ -489,18 +490,18 @@ public class Repo implements Serializable {
 				}
 			}
 		}
-		
+
 		TreeMap<String, ServiceReservation> peers = st.getPeers();
-		if (peers != null){
-			for (String key : peers.keySet()){
+		if (peers != null) {
+			for (String key : peers.keySet()) {
 				ServiceReservation sr = peers.get(key);
 				ret.addAll(getUnfulfilledDependencies(sr.fullTypeName));
 			}
-		}		
+		}
 
 		return ret;
 	}
-	
+
 	public void clear() {
 		log.info("Repo.clear - clearing libraries");
 		FileIO.rm("libraries");
@@ -509,9 +510,12 @@ public class Repo implements Serializable {
 		log.info("Repo.clear - {}", REPO_STATE_FILE_NAME);
 		FileIO.rm(REPO_STATE_FILE_NAME);
 		log.info("Repo.clear - clearing memory");
-		localInstance = new Repo();
+		localInstance.libraries.clear();
+		// localInstance = new Repo();
+		log.info("clearing errors");
+		clearErrors();
 	}
-	
+
 	public boolean isInstalled(String typeName) {
 		String fullTypeName = CodecUtils.makeFullTypeName(typeName);
 		Set<Library> libraries = getUnfulfilledDependencies(fullTypeName);
@@ -596,7 +600,5 @@ public class Repo implements Serializable {
 			Logging.logError(e);
 		}
 	}
-
-
 
 }

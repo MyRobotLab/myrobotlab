@@ -84,7 +84,7 @@
 -->
 
 <!-- The MyRobotLab ant build.xml  -->
-<project name="myrobotlab" default="report" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
+<project name="myrobotlab" default="jar" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
@@ -512,6 +512,16 @@
 	<target name="jar" depends="compile" description="create the myrobotlab.jar file">
 		<!-- FIXME - use Ivy to get the files there ! filebase or url resolver -->
 		<!-- copy resource.root -->
+		<java classname="org.myrobotlab.framework.repo.ServiceData">
+	         <arg value="${build}/classes/resource/framework"/>
+	         <classpath refid="compile.classpath">
+	           <!-- pathelement location="dist/test.jar"/ 	         	
+		           <pathelement refid="compile.classpath"/>
+		           <pathelement path="${build}/classes"/>
+	         	-->
+	         </classpath>
+		</java>
+		
 		<copy todir="${build}/classes/resource">
 			<fileset dir="${src}/resource" />
 		</copy>
@@ -522,16 +532,7 @@
 		<!-- copy file="${repo}/serviceData.xml" todir="${build}/classes/resource/framework" / -->
 		<!-- copy file="${repo}/serviceData.json" todir="${build}/classes/resource/framework" / -->
 		
-		<java classname="org.myrobotlab.framework.repo.ServiceData">
-		         <!-- arg value="-h"/ -->
-		         <classpath refid="compile.classpath">
-		           <!-- pathelement location="dist/test.jar"/ -->
-		         	<!--
-			           <pathelement refid="compile.classpath"/>
-			           <pathelement path="${build}/classes"/>
-		         	-->
-		         </classpath>
-		</java>
+		
 
 		<jar jarfile="${build}/lib/myrobotlab.jar" basedir="${build}/classes">
 			<!-- excludes="org/myrobotlab/boot/" -->
