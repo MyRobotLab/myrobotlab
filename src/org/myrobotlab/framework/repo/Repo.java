@@ -79,11 +79,15 @@ public class Repo implements Serializable {
 	private static Repo localInstance = getLocalInstance();
 
 	TreeMap<String, Library> libraries = new TreeMap<String, Library>();
+	
+	static String REPO_STATE_FILE_NAME;
 
 	synchronized static public Repo getLocalInstance() {
 		if (localInstance == null) {
 
 			try {
+
+				REPO_STATE_FILE_NAME = String.format("%s%srepo.json", FileIO.getCfgDir(), File.separator);
 				String data = FileIO.toString(REPO_STATE_FILE_NAME);
 				localInstance = CodecUtils.fromJson(data, Repo.class);
 			} catch (Exception e) {
@@ -100,8 +104,6 @@ public class Repo implements Serializable {
 
 	ArrayList<Status> errors = new ArrayList<Status>();
 
-	final static public String REPO_STATE_FILE_NAME = String.format("%s%srepo.json", FileIO.getCfgDir(), File.separator);
-
 	private transient Ivy ivy = null;
 
 	/**
@@ -109,7 +111,7 @@ public class Repo implements Serializable {
 	 */
 	private transient StatusListener listener = null;
 
-	public Repo() {
+	public Repo() {		
 	}
 
 	public void addStatusListener(StatusListener listener) {
@@ -315,7 +317,7 @@ public class Repo implements Serializable {
 		confs = new String[] { "default" };
 
 		ResolveOptions resolveOptions = new ResolveOptions().setConfs(confs).setValidate(true).setResolveMode(null).setArtifactFilter(NO_FILTER);
-
+		// resolve & retrieve happen here ...
 		ResolveReport report = ivy.resolve(ivyfile.toURI().toURL(), resolveOptions);
 		List<?> err = report.getAllProblemMessages();
 
