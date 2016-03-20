@@ -214,6 +214,12 @@ public class Agent extends Service {
 
 	}
 
+	/**
+	 * checks the current branch
+	 * looks if the verstion.txt has been changed
+	 * 
+	 * @throws IOException
+	 */
 	synchronized public void processUpdates() throws IOException {
 
 		String remoteVersion = getLatestRemoteVersion(currentBranch);
@@ -253,21 +259,6 @@ public class Agent extends Service {
 	public synchronized void restart(Integer id) throws IOException {
 		kill(id);
 		spawn2(processes.get(id));
-	}
-
-	/**
-	 * DEPRECATED - NO NEED - if the remote version is not local - then we need
-	 * an update !!! simple ! FIXME - move to Runtime compares various version
-	 * formats of mrl
-	 * 
-	 * @param remoteVersion
-	 * @param version
-	 * @return
-	 */
-	public boolean compareGreater(String remoteVersion, String version) {
-		boolean result = false;
-		log.info(String.format(" remote [%s] > local [%s] = %b", remoteVersion, version, result));
-		return true;
 	}
 
 	/**
@@ -318,11 +309,6 @@ public class Agent extends Service {
 		fos.close();
 	}
 
-	/*
-	 * public void start(String name) throws IOException, URISyntaxException,
-	 * InterruptedException{ start(getId(name)); }
-	 */
-
 	public String formatList(ArrayList<String> args) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < args.size(); ++i) {
@@ -331,7 +317,6 @@ public class Agent extends Service {
 		}
 		return sb.toString();
 	}
-
 
 
 	/**

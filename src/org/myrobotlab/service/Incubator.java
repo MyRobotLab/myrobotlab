@@ -12,13 +12,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceType;
-import org.myrobotlab.framework.repo.UpdateReport;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.Level;
