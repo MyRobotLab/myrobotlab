@@ -23,7 +23,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.RepoInstallListener;
-import org.myrobotlab.service.interfaces.StatusListener;
 import org.slf4j.Logger;
 
 public class RepoTest implements RepoInstallListener {
@@ -223,7 +222,13 @@ public class RepoTest implements RepoInstallListener {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
+			
+	
 			/*
+			  
+			Repo repo = Repo.getLocalInstance();
+			repo.clear();
+			
 			RepoTest.setUpBeforeClass();
 			RepoTest test = new RepoTest();
 			test.testGetUnfulfilledDependencies();

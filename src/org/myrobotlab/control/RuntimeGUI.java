@@ -79,7 +79,6 @@ import org.myrobotlab.framework.repo.Category;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
-import org.myrobotlab.framework.repo.Updates;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.Level;
@@ -381,29 +380,8 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		}
 	}
 
-	/**
-	 * FIXME - on repo change (install) - need an event hook
-	 */
 	@Override
 	public void attachGUI() {
-
-		/*
-		// check to see if there are updates
-		subscribe("checkingForUpdates", "checkingForUpdates");
-
-		// results of checkForUpdates
-		subscribe("publishUpdates", "publishUpdates", Updates.class);
-
-		lklsdfjk
-		subscribe("updatesBegin", "updatesBegin", Updates.class);
-		subscribe("updateProgress", "updateProgress", Status.class);
-		subscribe("updatesFinished", "updatesFinished", ArrayList.class);
-		*/
-		
-		// Removed the above subscriptions .. Yay!
-		// down to a single one .. but its out of spec
-		// Swing implementation does not do the auto substitution for the new
-		// pub/sub framework so we will do it manually here
 		subscribe("publishInstallProgress", "onInstallProgress");
 	}
 
@@ -462,15 +440,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void detachGUI() {
-
-		unsubscribe("checkingForUpdates", "checkingForUpdates");
-
-		unsubscribe("publishUpdates", "publishUpdates", Updates.class);
-
-		unsubscribe("updatesBegin", "updatesBegin", Updates.class);
-		unsubscribe("updateProgress", "updateProgress", Status.class);
-		unsubscribe("updatesFinished", "updatesFinished", ArrayList.class);
-
+		unsubscribe("publishInstallProgress", "onInstallProgress");
 	}
 
 	public void failedDependency(String dep) {
@@ -778,20 +748,6 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		display.add(flowLayout, BorderLayout.SOUTH);
 
 		getPossibleServices();
-	}
-
-	/**
-	 * event method which is called when a "check for updates" request has new
-	 * ServiceInfo data from the repo
-	 * 
-	 * @param si
-	 * @return
-	 */
-	public void publishUpdates(Updates updates) {
-		// depending on update changes options - no updates available
-
-		progressDialog.publishUpdates(updates);
-		// getPossibleServices("all");
 	}
 
 	/**

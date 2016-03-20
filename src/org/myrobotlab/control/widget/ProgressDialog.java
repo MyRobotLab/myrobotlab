@@ -19,7 +19,6 @@ import javax.swing.text.DefaultCaret;
 
 import org.myrobotlab.control.RuntimeGUI;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.repo.Updates;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -51,8 +50,6 @@ public class ProgressDialog extends JDialog implements ActionListener {
 
 	ArrayList<Status> errors = new ArrayList<Status>();
 	RuntimeGUI parent;
-
-	private Updates lastUpdates;
 
 	public ProgressDialog(RuntimeGUI parent) {
 		super(parent.myService.getFrame(), "new components");
@@ -107,8 +104,6 @@ public class ProgressDialog extends JDialog implements ActionListener {
 			parent.restart();
 		} else if (source == cancel) {
 			setVisible(false);
-		} else if (source == okToUpdates) {
-			parent.myService.send(parent.myRuntime.getName(), "applyUpdates", lastUpdates);
 		} else {
 			log.error("unknown source");
 		}
@@ -177,39 +172,6 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		cancel.setVisible(false);
 		restart.setVisible(false);
 		noWorky.setVisible(false);
-	}
-
-	public void publishUpdates(final Updates updates) {
-		lastUpdates = updates;
-		hideButtons();
-
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-
-				if (!updates.isValid) {
-					spinner.setIcon(new ImageIcon(ProgressDialog.class.getResource("/resource/evilGnome.png")));
-					actionText.setText("");
-					buttonText.setText(String.format("<html>OMG ! I can't find the updates!<br/>I think it might be evil gnomes!<br/>%s</html>", updates.lastError));
-					return;
-				}
-
-				if (updates.hasJarUpdate()) {
-					buttonText.setText(String.format("<html>Version %s is available<br/>Would you like to update?</html>", updates.repoVersion));
-					okToUpdates.setVisible(true);
-					cancel.setVisible(true);
-				} else {
-					okToUpdates.setVisible(true);
-					buttonText.setText("No new updates are available.");
-				}
-				// FIXME - enable cancel & ok button -> okUpdate button ?
-				/*
-				 * if (reply == JOptionPane.OK_OPTION) { // do (ALL updates)
-				 * send("applyUpdates", updates); } else { // chose not to do
-				 * updates log.info("user chose not to update"); }
-				 */
-			}
-		});
 	}
 
 }

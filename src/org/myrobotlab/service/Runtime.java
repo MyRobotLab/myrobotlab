@@ -44,7 +44,6 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
-import org.myrobotlab.framework.repo.Updates;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
@@ -118,9 +117,11 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
 	private boolean autoRestartAfterUpdate = false;
 
+	static private boolean autoAcceptLicense = true; // at the moment
+
 	/**
-	 * the local repo of this machine - it should not be static as other foreign repos
-	 * will come in with other Runtimes from other machines.
+	 * the local repo of this machine - it should not be static as other foreign
+	 * repos will come in with other Runtimes from other machines.
 	 */
 	private Repo repo = Repo.getLocalInstance();
 	private ServiceData serviceData = ServiceData.getLocalInstance();
@@ -310,13 +311,13 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 			}
 			return;
 		} /*
-		 * LIST ???
-		 * 
-		 * else if (cmdline.hasSwitch("-list")) { Runtime runtime =
-		 * Runtime.getInstance(); if (runtime == null) {
-		 * 
-		 * } else { System.out.println(getServiceTypeNames()); } return; }
-		 */
+			 * LIST ???
+			 * 
+			 * else if (cmdline.hasSwitch("-list")) { Runtime runtime =
+			 * Runtime.getInstance(); if (runtime == null) {
+			 * 
+			 * } else { System.out.println(getServiceTypeNames()); } return; }
+			 */
 		mainHelp();
 	}
 
@@ -354,17 +355,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 				log.debug("thread context parent " + Thread.currentThread().getContextClassLoader().getParent().getClass().getCanonicalName());
 			}
 
-			// want to use only local instance runtime - but cant check to see
-			// if local runtime exists
-			if (!fullTypeName.equals("org.myrobotlab.service.Runtime")) {
-
-				Repo repo = Runtime.getInstance().getRepo();
-
-				if (!repo.isServiceTypeInstalled(fullTypeName)) {
-					log.error(String.format("%s is not installed - please install it", fullTypeName));
-					// return null;
+			Repo repo = Runtime.getInstance().getRepo();
+			if (!repo.isServiceTypeInstalled(fullTypeName)) {
+				log.error(String.format("%s is not installed", fullTypeName));
+				if (autoAcceptLicense) {
+					repo.install(fullTypeName);
 				}
-
 			}
 
 			// create an instance
@@ -496,17 +492,18 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	public static final void exit(int status) {
 		try {
 			releaseAll();
-		} catch(Exception e){
+		} catch (Exception e) {
 			Logging.logError(e);
 		}
-		
+
 		try {
 			java.lang.Runtime.getRuntime().exit(status);
-		} catch(Exception e){
+		} catch (Exception e) {
 			Logging.logError(e);
 		}
 		//
-		// In unusual situations, System.exit(int) might not actually stop the program.
+		// In unusual situations, System.exit(int) might not actually stop the
+		// program.
 		// Runtime.getRuntime().halt(int) on the other hand, always does.
 		java.lang.Runtime.getRuntime().halt(status);
 	}
@@ -994,70 +991,71 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	}
 
 	public static String getVersion() {
-		return Platform.getLocalInstance().getVersion();//FileIO.resourceToString("version.txt");
+		return Platform.getLocalInstance().getVersion();// FileIO.resourceToString("version.txt");
 	}
 
 	// FIXME - shouldn't this be in platform ???
 	public static String getBranch() {
-		return Platform.getLocalInstance().getBranch();//FileIO.resourceToString("branch.txt");
+		return Platform.getLocalInstance().getBranch();// FileIO.resourceToString("branch.txt");
 	}
-	
-	static public void install() throws ParseException, IOException{	
+
+	static public void install() throws ParseException, IOException {
 		// if a runtime exits we'll broadcast we are starting to install
 		ServiceData sd = ServiceData.getLocalInstance();
-		if (runtime != null){			
+		if (runtime != null) {
 			runtime.onInstallProgress(Repo.createStartStatus("starting installation of %s services", sd.getServiceTypeNames().length));
 		}
-		
+
 		Repo.getLocalInstance().install();
-		
+
 		// if a runtime exits we'll broadcast we are done installing
-		if (runtime != null){
+		if (runtime != null) {
 			runtime.onInstallProgress(Repo.createFinishedStatus("finished installing %s", sd.getServiceTypeNames().length));
 		}
 	}
 
 	/**
-	 * Installs a single Service type.
-	 * This "should" work even if there is no Runtime.
-	 * It can be invoked on the command line without starting a MRL instance.
-	 * If a runtime exits it will broadcast events of installation progress
+	 * Installs a single Service type. This "should" work even if there is no
+	 * Runtime. It can be invoked on the command line without starting a MRL
+	 * instance. If a runtime exits it will broadcast events of installation
+	 * progress
+	 * 
 	 * @param serviceType
 	 * @throws ParseException
 	 * @throws IOException
 	 */
 	static public void install(String serviceType) throws ParseException, IOException {
-		
+
 		// if a runtime exits we'll broadcast we are starting to install
-		if (runtime != null){			
+		if (runtime != null) {
 			runtime.onInstallProgress(Repo.createStartStatus("starting installation of %s", serviceType));
 		}
-		
+
 		Repo.getLocalInstance().install(serviceType);
-		
+
 		// if a runtime exits we'll broadcast we are done installing
-		if (runtime != null){
+		if (runtime != null) {
 			runtime.onInstallProgress(Repo.createFinishedStatus("finished installing %s", serviceType));
 		}
 	}
-	
+
 	/**
 	 * broadcast of Service install progress
+	 * 
 	 * @param status
 	 * @return
 	 */
-	public Status publishInstallProgress(Status status){
+	public Status publishInstallProgress(Status status) {
 		return status;
 	}
-	
+
 	/**
-	 * direct callback from the Repo on installation progress
-	 * we re-broadcast this on a topic
+	 * direct callback from the Repo on installation progress we re-broadcast
+	 * this on a topic
 	 */
-	public void onInstallProgress(final Status status){
+	public void onInstallProgress(final Status status) {
 		invoke("publishInstallProgress", status);
 	}
-	
 
 	static public void invokeCommands(CmdLine cmdline) {
 		int argCount = cmdline.getArgumentCount("-invoke");
@@ -1187,7 +1185,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 			} else if (cmdline.containsKey("-fromAgent")) {
 				logging.addAppender(Appender.FROM_AGENT);
 			} else if (cmdline.containsKey("-logToConsole")) {
-				logging.addAppender(Appender.CONSOLE);				
+				logging.addAppender(Appender.CONSOLE);
 			} else {
 				logging.addAppender(Appender.FILE, String.format("%s.log", runtimeName));
 			}
@@ -1227,7 +1225,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 				}
 				return;
 			}
-			
+
 			if (cmdline.containsKey("-service")) {
 				createAndStartServices(cmdline);
 			}
@@ -1319,9 +1317,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		if (se.serviceDirectory.containsKey(name)) {
 			log.info("attempting to register {} which is already registered in {}", name, url);
 			if (runtime != null) {
-				runtime.invoke("collision", name);// necessary ?  collisions are 'expected' in mrl's evolution
+				runtime.invoke("collision", name);// necessary ? collisions are
+													// 'expected' in mrl's
+													// evolution
 				log.info("collision registering %s", name);
-				// runtime.error(String.format(" name collision or already registered with %s", name));
+				// runtime.error(String.format(" name collision or already
+				// registered with %s", name));
 			}
 			return s;// <--- BUG ?!?!? WHAT ABOUT THE REMOTE GATEWAYS !!!
 		}
@@ -1390,10 +1391,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	 *            of the service to be released
 	 * @return whether or not it successfully released the service
 	 */
-	public synchronized static boolean release(String name) /*
-															 * release local
-															 * Service
-															 */
+	public synchronized static boolean release(
+			String name) /*
+							 * release local Service
+							 */
 	{
 		log.warn("releasing service {}", name);
 		Runtime rt = getInstance();
@@ -1713,8 +1714,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		log.info("getBitness [{}]", platform.getBitness());
 		log.info("java.vm.name [{}] getVMName [{}]", vmName, platform.getVMName());
 		log.info("version [{}]", Runtime.getVersion());
-		log.info("root [{}]", FileIO.getRoot());		
-		log.info("cfg dir [{}]", FileIO.getCfgDir());		
+		log.info("root [{}]", FileIO.getRoot());
+		log.info("cfg dir [{}]", FileIO.getCfgDir());
 		log.info("sun.arch.data.model [{}]", System.getProperty("sun.arch.data.model"));
 
 		log.info("============== non-normalized ==============");
@@ -1809,7 +1810,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		return dep;
 	}
 
-	
 	/**
 	 * returns version string of MyRobotLab
 	 * 
@@ -1956,19 +1956,20 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 			log.error("the noWorky didn't worky !");
 			status = Status.error(e);
 		}
-		
+
 		// this makes the 'static' of this method pointless
 		// perhaps the webgui should invoke rather than call directly .. :P
 		Runtime.getInstance().invoke("publishNoWorky", status);
 		return status;
 	}
-	
+
 	/**
 	 * published results of sending a noWorky
+	 * 
 	 * @param status
 	 * @return
 	 */
-	static public Status publishNoWorky(Status status){
+	static public Status publishNoWorky(Status status) {
 		return status;
 	}
 
@@ -1983,17 +1984,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
 	public String publishMessage(String msg) {
 		return msg;
-	}
-
-	/**
-	 * publish the results of a query of updates - to be presented to the user
-	 * for selections
-	 * 
-	 * @param updates
-	 * @return
-	 */
-	public Updates publishUpdates(Updates updates) {
-		return updates;
 	}
 
 	// -------- network end ------------------------
@@ -2170,7 +2160,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		return Runtime.getInstance().getName();
 	}
 
-	
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
@@ -2185,13 +2174,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		meta.addDescription("Runtime singleton service responsible for the creation and registry of all other services");
 		meta.addCategory("framework");
 		meta.addPeer("cli", "Cli", "command line interpreter for the runtime");
-		
+
 		return meta;
 	}
 
 	public ServiceData getServiceData() {
 		return serviceData;
 	}
-
 
 }
