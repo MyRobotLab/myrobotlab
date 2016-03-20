@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
-import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
@@ -45,7 +44,6 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
-import org.myrobotlab.framework.repo.UpdateReport;
 import org.myrobotlab.framework.repo.Updates;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Appender;
@@ -54,7 +52,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.interfaces.StatusListener;
+import org.myrobotlab.service.interfaces.RepoInstallListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
@@ -81,7 +79,7 @@ import org.slf4j.Logger;
  * TODO - add check for 64 bit OS & 32 bit JVM :(
  * 
  */
-public class Runtime extends Service implements MessageListener, StatusListener {
+public class Runtime extends Service implements MessageListener, RepoInstallListener {
 	final static private long serialVersionUID = 1L;
 
 	/**
@@ -604,6 +602,7 @@ public class Runtime extends Service implements MessageListener, StatusListener 
 						runtimeName = "runtime";
 					}
 					runtime = new Runtime(runtimeName);
+					Repo.getLocalInstance().addStatusListener(runtime);
 				}
 			}
 		}
@@ -1003,20 +1002,62 @@ public class Runtime extends Service implements MessageListener, StatusListener 
 		return Platform.getLocalInstance().getBranch();//FileIO.resourceToString("branch.txt");
 	}
 	
-	static public void install() throws ParseException, IOException{		
-		Repo.getLocalInstance().install();
-	}
-
-	static public void install(String serviceType) throws ParseException, IOException {
-		String fullTypeName = null;
-		if (serviceType.indexOf(".") == -1) {
-			fullTypeName = String.format("org.myrobotlab.service.%s", serviceType);
-		} else {
-			fullTypeName = serviceType;
+	static public void install() throws ParseException, IOException{	
+		// if a runtime exits we'll broadcast we are starting to install
+		ServiceData sd = ServiceData.getLocalInstance();
+		if (runtime != null){			
+			runtime.onInstallProgress(Repo.createStartStatus("starting installation of %s services", sd.getServiceTypeNames().length));
 		}
-
-		Repo.getLocalInstance().install(fullTypeName);
+		
+		Repo.getLocalInstance().install();
+		
+		// if a runtime exits we'll broadcast we are done installing
+		if (runtime != null){
+			runtime.onInstallProgress(Repo.createFinishedStatus("finished installing %s", sd.getServiceTypeNames().length));
+		}
 	}
+
+	/**
+	 * Installs a single Service type.
+	 * This "should" work even if there is no Runtime.
+	 * It can be invoked on the command line without starting a MRL instance.
+	 * If a runtime exits it will broadcast events of installation progress
+	 * @param serviceType
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	static public void install(String serviceType) throws ParseException, IOException {
+		
+		// if a runtime exits we'll broadcast we are starting to install
+		if (runtime != null){			
+			runtime.onInstallProgress(Repo.createStartStatus("starting installation of %s", serviceType));
+		}
+		
+		Repo.getLocalInstance().install(serviceType);
+		
+		// if a runtime exits we'll broadcast we are done installing
+		if (runtime != null){
+			runtime.onInstallProgress(Repo.createFinishedStatus("finished installing %s", serviceType));
+		}
+	}
+	
+	/**
+	 * broadcast of Service install progress
+	 * @param status
+	 * @return
+	 */
+	public Status publishInstallProgress(Status status){
+		return status;
+	}
+	
+	/**
+	 * direct callback from the Repo on installation progress
+	 * we re-broadcast this on a topic
+	 */
+	public void onInstallProgress(final Status status){
+		invoke("publishInstallProgress", status);
+	}
+	
 
 	static public void invokeCommands(CmdLine cmdline) {
 		int argCount = cmdline.getArgumentCount("-invoke");
@@ -2063,40 +2104,8 @@ public class Runtime extends Service implements MessageListener, StatusListener 
 	 */
 	@Override
 	public void stopService() {
-		/*
-		 * FIXME - re-implement but only start if you have a task if (timer !=
-		 * null) { timer.cancel(); // stop all scheduled jobs timer.purge(); }
-		 */
 		super.stopService();
 		runtime = null;
-	}
-
-	/**
-	 * publishing the updates progress with a series of status messages.
-	 * 
-	 * @return
-	 */
-	@Override
-	final public void onStatus(final Status status) {
-		if (status.isError()) {
-			log.error(status.toString());
-		} else {
-			log.info(status.toString());
-		}
-	}
-
-	/**
-	 * publishing event for the start of updates being applied
-	 */
-	public Updates updatesBegin(Updates updates) {
-		return updates;
-	}
-
-	/**
-	 * publishing event for the end of updates being applied
-	 */
-	public ArrayList<ResolveReport> updatesFinished(ArrayList<ResolveReport> report) {
-		return report;
 	}
 
 	public static void clearErrors() {

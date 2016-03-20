@@ -22,10 +22,11 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.RepoInstallListener;
 import org.myrobotlab.service.interfaces.StatusListener;
 import org.slf4j.Logger;
 
-public class RepoTest implements StatusListener {
+public class RepoTest implements RepoInstallListener {
 	
 	public final static Logger log = LoggerFactory.getLogger(RepoTest.class);
 	ArrayList<Status> status = new ArrayList<Status>();
@@ -71,6 +72,7 @@ public class RepoTest implements StatusListener {
 		repo.install("Arduino");
 	}
 
+	/*
 	@Test
 	public void testErrorException() {
 		Repo repo = Repo.getLocalInstance();
@@ -78,6 +80,7 @@ public class RepoTest implements StatusListener {
 		repo.error(new IOException("io exception test"));
 		assertTrue(repo.getErrors().size() > 0);
 	}
+	*/
 
 	@Test
 	public void testErrorStringObjectArray() {
@@ -206,9 +209,10 @@ public class RepoTest implements StatusListener {
 		repo.install("Arduino");
 		assertTrue(repo.isInstalled("Arduino"));
 	}
+	
 
 	@Override
-	public void onStatus(Status status) {
+	public void onInstallProgress(Status status) {
 		this.status.add(status);
 		log.info(status.toString());
 	}

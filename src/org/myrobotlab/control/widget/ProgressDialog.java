@@ -17,6 +17,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
 
 import org.myrobotlab.control.RuntimeGUI;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Updates;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
@@ -111,6 +112,8 @@ public class ProgressDialog extends JDialog implements ActionListener {
 			log.error("unknown source");
 		}
 	}
+	
+	/*
 
 	public void addErrorInfo(String error) {
 		hasError = true;
@@ -123,6 +126,15 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		reportArea.append(String.format("%s\n", msg));
 		// move caret???
 		// reportArea.setText(data);
+	}
+	*/
+	
+	public void addStatus(Status status){
+		reportArea.append(String.format("%s\n", status.detail));
+		if (status.isError()){
+			hasError = true;
+			spinner.setIcon(Util.getImageIcon("error.png"));
+		}
 	}
 
 	public void beginUpdates() {

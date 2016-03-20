@@ -502,10 +502,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	 * @param className
 	 */
 	public void mergePeerDNA(String myKey, String className) {
-		if (myKey.equals("c01")){
+		if (myKey.equals("c01")) {
 			log.info("blah");
 		}
-		
+
 		if (serviceType != null) {
 			TreeMap<String, ServiceReservation> peers = serviceType.getPeers();
 			for (Entry<String, ServiceReservation> entry : peers.entrySet()) {
@@ -513,8 +513,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 				ServiceReservation template = entry.getValue();
 				// build full key with our instance key + the peer template
 				// defined in getMetaData
-				
-				String fullKey = String.format("%s.%s", myKey, templateKey);				
+
+				String fullKey = String.format("%s.%s", myKey, templateKey);
 
 				// test dna - if something already exists then LEAVE IT !!!
 				// if it does not exist then inject it
@@ -530,14 +530,13 @@ public abstract class Service extends MessageService implements Runnable, Serial
 					// if actualName == key then there is no re-mapping and both
 					// get prefixed !
 					// if actualName != key then there is a re-map
-					
 
 					// create new service reservation with fullkey to put into
 					// dna
 					// do we prefix the actual name !?!?!?!?!?
 					ServiceReservation sr = null;
 
-					if (template.key.equals(template.actualName)  && !template.isRoot) {
+					if (template.key.equals(template.actualName) && !template.isRoot) {
 						sr = new ServiceReservation(fullKey, template.fullTypeName, template.comment);
 					} else {
 						// COLLISION WITH CUSTOM KEY - WE ARE MOVING DNA !!!
@@ -578,16 +577,16 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	 */
 	public void movePeerDNA(String myKey, String actualName, String fullTypeName, String comment) {
 		ServiceType meta = getMetaData(fullTypeName);
-		if (meta != null){
+		if (meta != null) {
 			TreeMap<String, ServiceReservation> peers = meta.getPeers();
-			
+
 			for (Entry<String, ServiceReservation> reservation : peers.entrySet()) {
 				String templateKey = reservation.getKey();
 				// build full key with our instance key + the peer template
 				// defined in getMetaData
 				String fullKey = String.format("%s.%s", myKey, templateKey);
 				String movedActual = String.format("%s.%s", actualName, templateKey);
-				ServiceReservation templateSr = reservation.getValue();				
+				ServiceReservation templateSr = reservation.getValue();
 				ServiceReservation sr = new ServiceReservation(movedActual, movedActual, templateSr.fullTypeName, templateSr.comment);
 				dna.put(movedActual, sr);
 				// recurse to process children
@@ -909,10 +908,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	public void display() {
 	}
 
-	/**`
-	 * called typically from a remote system When 2 MRL instances are connected
-	 * they contain serialized non running Service in a registry, which is
-	 * maintained by the Runtime. The data can be stale.
+	/**
+	 * ` called typically from a remote system When 2 MRL instances are
+	 * connected they contain serialized non running Service in a registry,
+	 * which is maintained by the Runtime. The data can be stale.
 	 * 
 	 * Messages are sometimes sent (often in the gui) which prompt the remote
 	 * service to "broadcastState" a new serialized snapshot is broadcast to all
@@ -1313,8 +1312,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 			// TODO: validate what "params.toString()" returns.
 			StringBuilder keyBuilder = new StringBuilder();
-			for (Object o : paramTypes) {
-				keyBuilder.append(o);
+			if (paramTypes != null) {
+				for (Object o : paramTypes) {
+					keyBuilder.append(o);
+				}
 			}
 			String methodCacheKey = c.toString() + "_" + keyBuilder.toString();
 			Method mC = LRUMethodCache.getInstance().getCacheEntry(methodCacheKey);

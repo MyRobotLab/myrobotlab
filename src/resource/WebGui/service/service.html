@@ -3,7 +3,7 @@
         <div class="panel-heading" drag-directive>
             <!--header-->
             <h3 class="panel-title">
-                <img ng-src="{{::panel.simpleName}}.png" alt="" width="16">
+                <img ng-src="{{::panel.simpleName}}.png" alt="" width="24">
                 <b>{{::panel.name}}</b><div style="display:inline;" ng-if="panel.showpanelname">&nbsp;&nbsp;{{panel.panelname}}</div>
                 <div class="pull-right" uib-dropdown dropdown-append-to-body auto-close="outsideClick" is-open="servicemenuDropdownOpen">
                     {{::panel.simpleName}}&nbsp;&nbsp;
@@ -75,7 +75,15 @@
                                 </table>
                             </script>
                         </li>
-                    </ul>
+                        <li>
+                            <a href="" uib-popover-template="'listMethodsPopoverTemplate2.html'" popover-title="Service Data" popover-placement="right-top">
+                                <i class="glyphicon glyphicon-list-alt"></i>
+                                &nbsp;&nbsp;show json
+                            </a>
+                            <script type="text/ng-template" id="listMethodsPopoverTemplate2.html">
+                                <!-- FIXME ! - how to get a service reference here ??? JSON.stringify({service, null, 2); -->
+                            </script>
+                        </li>                    </ul>
                 </div>
             </h3>
         </div>
