@@ -174,6 +174,7 @@ public class Repo implements Serializable {
 		Status status = Status.error(format, args);
 		status.name = Repo.class.getSimpleName();
 		log.error(status.toString());	
+		errors.add(status);
 		installProgress(status);
 	}
 	
@@ -300,7 +301,7 @@ public class Repo implements Serializable {
 	 */
 
 	synchronized public ResolveReport resolveArtifacts(String org, String version, boolean retrieve) throws ParseException, IOException {
-		info("%s %s.%s", (retrieve) ? "retrieve" : "resolve", org, version);
+		info("%s %s.%s", (retrieve) ? "retrieving" : "resolve", org, version);
 		// clear errors for this install
 		errors.clear();
 

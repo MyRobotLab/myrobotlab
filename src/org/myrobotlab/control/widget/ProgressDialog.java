@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -48,7 +49,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 	JButton restart = new JButton("restart");
 	JButton noWorky = new JButton("noWorky!");
 
-	boolean hasError = false;
+	ArrayList<Status> errors = new ArrayList<Status>();
 	RuntimeGUI parent;
 
 	private Updates lastUpdates;
@@ -113,26 +114,10 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		}
 	}
 	
-	/*
-
-	public void addErrorInfo(String error) {
-		hasError = true;
-		spinner.setIcon(Util.getImageIcon("error.png"));
-		addInfo(error);
-	}
-
-	public void addInfo(String msg) {
-		// data += "\n" + info;
-		reportArea.append(String.format("%s\n", msg));
-		// move caret???
-		// reportArea.setText(data);
-	}
-	*/
-	
 	public void addStatus(Status status){
 		reportArea.append(String.format("%s\n", status.detail));
 		if (status.isError()){
-			hasError = true;
+			errors.add(status);
 			spinner.setIcon(Util.getImageIcon("error.png"));
 		}
 	}
@@ -142,7 +127,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 			@Override
 			public void run() {
 				hideButtons();
-				hasError = false;
+				errors.clear();
 				buttonText.setText("");
 				reportArea.setText("");
 				setVisible(true);
@@ -157,7 +142,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 			@Override
 			public void run() {
 				hideButtons();
-				hasError = false;
+				errors.clear();
 				buttonText.setText("");
 				reportArea.setText("");
 				setVisible(true);
@@ -172,10 +157,14 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				if (!hasError) {
+				if (errors.size() == 0) {
 					spinner.setIcon(Util.getImageIcon("success.png"));
 					restart.setVisible(true);
 				} else {
+					reportArea.append("ERRORS -----------\n");
+					for (int i = 0; i < errors.size(); ++i){
+						reportArea.append(String.format("%s\n", errors.get(i).detail));
+					}
 					noWorky.setVisible(true);
 				}
 				actionText.setText("finished");
