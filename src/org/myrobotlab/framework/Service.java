@@ -598,52 +598,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	}
 
 	/**
-	 * this is called by the framework before a new Service is constructed and
-	 * places the "default" reservations of the Service's type into the global
-	 * reservation index.
-	 * 
-	 * it "merges" in the default index, because if any user defined values are
-	 * found it preserves them.
-	 * 
-	 * it mergest a SINGLE LEVEL - only its immediate peers (non-recursive)
-	 * recursive call is not necessary, because as each service is created they
-	 * will create their peers
-	 * 
-	 * TODO - a more detailed merge could be useful, so that a user has the
-	 * option of only specifying the minimum changes to a ServiceRegistration
-	 * 
-	 * @param myKey
-	 * @param serviceClass
-	 */
-	/*
-	 * static public void mergePeerDNAx(String myKey, String className) { String
-	 * serviceClass = className; if (!className.contains(".")) { serviceClass =
-	 * String.format("org.myrobotlab.service.%s", className); }
-	 * log.info(String.format("createReserves (%s, %s)", myKey, serviceClass));
-	 * try { Class<?> theClass = Class.forName(serviceClass); Method method =
-	 * theClass.getMethod("getPeers", String.class); Peers peers = (Peers)
-	 * method.invoke(null, new Object[] { myKey });
-	 * IndexNode<ServiceReservation> myNode = peers.getDNA().getNode(myKey); //
-	 * LOAD CLASS BY NAME - and do a getReservations on it ! HashMap<String,
-	 * IndexNode<ServiceReservation>> peerRequests = myNode.getBranches(); for
-	 * (Entry<String, IndexNode<ServiceReservation>> o :
-	 * peerRequests.entrySet()) { String peerKey = o.getKey();
-	 * IndexNode<ServiceReservation> p = o.getValue();
-	 * 
-	 * String fullKey = Peers.getPeerKey(myKey, peerKey); ServiceReservation
-	 * peersr = p.getValue(); ServiceReservation globalSr = dna.get(fullKey);
-	 * 
-	 * // TODO - if (globalSr == null) { // FIXME if this method accepted an
-	 * Index<?> then Peers // could use it reserveRoot(fullKey,
-	 * peersr.fullTypeName, peersr.comment); } else { log.info(String.format(
-	 * "*found** key %s -> %s %s %s", fullKey, globalSr.actualName,
-	 * globalSr.fullTypeName, globalSr.comment)); } }
-	 * 
-	 * } catch (Exception e) { log.debug(String.format(
-	 * "%s does not have a getPeers", serviceClass)); } }
-	 */
-
-	/**
 	 * Reserves a name for a root level Service. allows modifications to the
 	 * reservation map at the highest level
 	 * 
@@ -673,12 +627,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		ServiceReservation sr = new ServiceReservation(fullKey, peerName, peerType, null);
 		dna.put(fullKey, sr);
 	}
-
-	/*
-	 * static public Set<String> getDependencies(String serviceClass) {
-	 * 
-	 * }
-	 */
 
 	/**
 	 * This method re-binds the key to another name. An example of where this
