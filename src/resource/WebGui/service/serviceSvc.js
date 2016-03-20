@@ -189,7 +189,8 @@ angular.module('mrlapp.service')
                         panelnames: null,
                         showpanelnames: null,
                         panelsizes: null,
-                        panels: {}
+                        panels: {},
+                        logLevel: "debug"
                     };
                     $log.info('lazy-loading:', services[name].simpleName);
                     $ocLazyLoad.load('service/js/' + services[name].simpleName + 'Gui.js').then(function () {

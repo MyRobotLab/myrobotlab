@@ -36,6 +36,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.StatusLevel;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
 import org.myrobotlab.io.Zip;
@@ -43,6 +44,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.RepoInstallListener;
 import org.myrobotlab.service.interfaces.StatusListener;
 import org.slf4j.Logger;
 
@@ -80,6 +82,10 @@ public class Repo implements Serializable {
 
 	TreeMap<String, Library> libraries = new TreeMap<String, Library>();
 	
+	final public static String INSTALL_START 		= "install start";
+	final public static String INSTALL_PROGRESS 	= "install progress";
+	final public static String INSTALL_FINISHED 	= "install finished";
+	
 	static String REPO_STATE_FILE_NAME;
 
 	synchronized static public Repo getLocalInstance() {
@@ -109,28 +115,33 @@ public class Repo implements Serializable {
 	/**
 	 * call back notification of progress
 	 */
-	private transient StatusListener listener = null;
+	private transient RepoInstallListener listener = null;
 
 	public Repo() {		
 	}
 
-	public void addStatusListener(StatusListener listener) {
+	public void addStatusListener(RepoInstallListener listener) {
 		this.listener = listener;
 	}
 
+	/*
 	public void error(Exception e) {
 		Logging.logError(e);
 		error(e.getMessage());
 	}
+	*/
 
 	// pulled in dependencies .. not sure if that is good
+	/*
 	public void error(String format, Object... args) {
 		Status status = Status.error(format, args);
+		status.name = Repo.class.getSimpleName();
 		errors.add(status);
 		if (listener != null) {
 			listener.onStatus(status);
 		}
 	}
+	*/
 
 	public List<Status> getErrors() {
 		return errors;
@@ -140,13 +151,72 @@ public class Repo implements Serializable {
 		return (errors.size() > 0) ? true : false;
 	}
 
-	// pulled in dependencies .. not sure if that is good
+	/**
+	 * info call back
+	 * @param key
+	 * @param format
+	 * @param args
+	 */
 	public void info(String format, Object... args) {
 		Status status = Status.info(format, args);
+		status.name = Repo.class.getSimpleName();
+		log.info(status.toString());	
+		installProgress(status);
+	}
+	
+	/**
+	 * error call back
+	 * @param key
+	 * @param format
+	 * @param args
+	 */
+	public void error(String format, Object... args) {
+		Status status = Status.error(format, args);
+		status.name = Repo.class.getSimpleName();
+		log.error(status.toString());	
+		installProgress(status);
+	}
+	
+	/**
+	 * creates a installation start status
+	 * this is primarily for calling services
+	 * which want a status of repo starting an install
+	 * 
+	 * @param format
+	 * @param args
+	 * @return
+	 */
+	static public Status createStartStatus(String format, Object...args) {
+		Status status = Status.info(format, args);
+		status.key = Repo.INSTALL_START;
+		return status;
+	}
+	
+	/**
+	 * creates a installation finished status
+	 * this is primarily for calling services
+	 * which want a status of repo starting finishing an install
+	 * 
+	 * @param format
+	 * @param args
+	 * @return
+	 */
+	static public Status createFinishedStatus(String format, Object...args) {
+		Status status = Status.info(format, args);
+		status.key = Repo.INSTALL_FINISHED;
+		return status;
+	}
+	
+	/**
+	 * call back for listeners
+	 * @param status
+	 */
+	public void installProgress(Status status){
 		if (listener != null) {
-			listener.onStatus(status);
+			listener.onInstallProgress(status);//.onStatus(status);
 		}
 	}
+	
 
 	public void install() throws ParseException, IOException {
 		clearErrors();
@@ -204,7 +274,7 @@ public class Repo implements Serializable {
 		ServiceData sd = ServiceData.getLocalInstance();
 
 		if (!sd.containsServiceType(fullTypeName)) {
-			error("unknown service %s", fullTypeName);
+			log.error("unknown service %s", fullTypeName);
 			return false;
 		}
 
@@ -294,7 +364,7 @@ public class Repo implements Serializable {
 		if (!cache.exists()) {
 			cache.mkdirs();
 		} else if (!cache.isDirectory()) {
-			error(cache + " is not a directory");
+			log.error(cache + " is not a directory");
 		}
 
 		Platform platform = Platform.getLocalInstance();
@@ -324,7 +394,7 @@ public class Repo implements Serializable {
 		if (err.size() > 0) {
 			for (int i = 0; i < err.size(); ++i) {
 				String errStr = err.get(i).toString();
-				error(errStr);
+				error(errStr);			
 			}
 		} else {
 			// set as installed & save state

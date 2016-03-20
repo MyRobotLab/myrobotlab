@@ -46,7 +46,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -223,8 +222,6 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	static final long serialVersionUID = 1L;
 	HashMap<String, ServiceInterface> nameToServiceEntry = new HashMap<String, ServiceInterface>();
 
-	JDialog updateDialog = null;
-
 	ArrayList<String> resolveErrors = null;
 	boolean localRepoChange = false;
 	int popupRow = 0;
@@ -333,7 +330,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 			addNewService(entry.name);
 
 		} else if ("install all".equals(cmd)) {
-			myService.send(boundServiceName, "updateAll");
+			myService.send(boundServiceName, "install");
 			/*
 			 * } else if ("upgrade".equals(cmd)) { // INSTALL OF A SERVICE //
 			 * send to "my" runtime - may be remote
@@ -391,15 +388,24 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	@Override
 	public void attachGUI() {
 
+		/*
 		// check to see if there are updates
 		subscribe("checkingForUpdates", "checkingForUpdates");
 
 		// results of checkForUpdates
 		subscribe("publishUpdates", "publishUpdates", Updates.class);
 
+		lklsdfjk
 		subscribe("updatesBegin", "updatesBegin", Updates.class);
 		subscribe("updateProgress", "updateProgress", Status.class);
 		subscribe("updatesFinished", "updatesFinished", ArrayList.class);
+		*/
+		
+		// Removed the above subscriptions .. Yay!
+		// down to a single one .. but its out of spec
+		// Swing implementation does not do the auto substitution for the new
+		// pub/sub framework so we will do it manually here
+		subscribe("publishInstallProgress", "onInstallProgress");
 	}
 
 	/**
@@ -825,48 +831,24 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		send("restart");
 	}
 
-	/**
-	 * progress messages relating to an update
-	 * 
-	 * @param status
-	 * @return
-	 */
-	public Status updateProgress(Status status) {
-		// FIXME - start dialog - warn previously Internet connection necessary
-		// no proxy
-
-		if (status.isError()) {
-			progressDialog.addErrorInfo(status.toString());
-			if (resolveErrors == null) {
-				resolveErrors = new ArrayList<String>();
-			}
-			resolveErrors.add(status.toString());
-		} else {
-			progressDialog.addInfo(status.toString());
+	
+	public void onInstallProgress(Status status){
+		
+		if (Repo.INSTALL_START.equals(status.key)){
+			progressDialog.beginUpdates();
+		} else if (Repo.INSTALL_FINISHED.equals(status.key)){		
+			progressDialog.finished();
 		}
-		return status;
+		
+		progressDialog.addStatus(status);
 	}
 
 	/**
 	 * this is the beginning of the applyUpdates process
-	 * 
-	 * @param updates
 	 * @return
 	 */
-	public Updates updatesBegin(Updates updates) {
+	public void updatesBegin() {
 		progressDialog.beginUpdates();
-		return updates;
-	}
-
-	/**
-	 * updatesFinished - finished processing updates. Looking for confirmation
-	 * of a restart or a no worky in case of errors
-	 * 
-	 * @param report
-	 */
-	public void updatesFinished(ArrayList<ResolveReport> report) {
-		progressDialog.addInfo("finished processing updates ");
-		progressDialog.finished();
 	}
 
 }
