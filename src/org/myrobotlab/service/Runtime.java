@@ -1179,12 +1179,12 @@ public class Runtime extends Service implements MessageListener, StatusListener 
 				Repo repo = Repo.getLocalInstance();
 				if (services.size() == 0) {
 					repo.install();
-					return;
 				} else {
 					for (int i = 0; i < services.size(); ++i) {
 						repo.install(services.get(i));
 					}
 				}
+				return;
 			}
 			
 			if (cmdline.containsKey("-service")) {

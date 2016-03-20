@@ -216,9 +216,7 @@ public class Agent extends Service {
 
 	synchronized public void processUpdates() throws IOException {
 
-		if (autoUpdate) {
-
-			String remoteVersion = getLatestRemoteVersion(currentBranch);
+		String remoteVersion = getLatestRemoteVersion(currentBranch);
 			if (remoteVersion == null) {
 				error("checkForUpdates %s is null", currentBranch);
 			} else {
@@ -250,7 +248,6 @@ public class Agent extends Service {
 					}
 				}
 			}
-		}
 	}
 
 	public synchronized void restart(Integer id) throws IOException {
@@ -834,9 +831,17 @@ public class Agent extends Service {
 		// check to see if myrobotlab.jar is in the directory
 		String filename = String.format("%s/myrobotlab.%s.jar", pd.branch, pd.version);
 		File m = new File(filename);
+
+		// if I'm a jar and target jar does not exist
 		if (!m.exists()) {
-			log.info(String.format("cloning self to %s", filename));
-			FileIO.copy(new File("myrobotlab.jar"), new File(filename));
+			if (FileIO.isJar()){
+				log.info(String.format("cloning self to %s", filename));
+				FileIO.copy(new File("myrobotlab.jar"), new File(filename));
+			} else {
+				log.info("I am not a jar - must be develop time");
+				log.info(String.format("copying last build to %s", filename));
+				FileIO.copy(new File("build/lib/myrobotlab.jar"), new File(filename));
+			}
 		}
 
 		// move process to start in that directory
@@ -918,7 +923,9 @@ public class Agent extends Service {
 
 	public void startService() {
 		super.startService();
-		addTask(getName(), 1000 * 60, "processUpdates");
+		if (autoUpdate){
+			addTask(getName(), 1000 * 60, "processUpdates");
+		}
 	}
 
 	public void terminateSelfOnly() {
