@@ -812,6 +812,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		timer.schedule(task, 0);
 		tasks.put(name, timer);
 	}
+	
+	public HashMap<String, Timer> getTasks(){
+		return tasks;
+	}
 
 	public void purgeTask(String taskName) {
 		if (tasks.containsKey(taskName)) {
