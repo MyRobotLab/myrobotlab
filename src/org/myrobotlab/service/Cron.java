@@ -142,7 +142,7 @@ public class Cron extends Service {
 		return scheduler.schedule(cron, task);
 	}
 
-	public ArrayList<Task> getTasks() {
+	public ArrayList<Task> getCronTasks() {
 		return tasks;
 	}
 

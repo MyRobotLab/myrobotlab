@@ -109,30 +109,7 @@ public class Test extends Service {
 	 * }
 	 */
 
-	// TODO - subscribe to registered --> generates subscription to
-	// publishState() - filter on Errors
-	// FIXME - FILE COMMUNICATION !!!!
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-		try {
 
-			String serviceType = "InMoovHand";
-			Repo repo = Repo.getLocalInstance();
-
-			// repo.clearRepo();
-			// dirty clean :)
-			// repo.clearLibraries();
-			// repo.clearServiceData();
-			repo.install(serviceType);
-			Test test = (Test) Runtime.start("test", "Test");
-			test.getState();
-			test.test(serviceType);
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-	}
 
 	/*
 	 * 
@@ -456,6 +433,9 @@ public class Test extends Service {
 	 * 
 	 * @return ServiceType - returns all the data
 	 * 
+	 * FIXME - todo - make junit html report 
+	 * TODO - simple install start release - check for rogue threads
+	 * 
 	 */
 	static public ServiceType getMetaData() {
 
@@ -463,6 +443,35 @@ public class Test extends Service {
 		meta.addDescription("Testing service");
 		meta.addCategory("testing","framework");		
 		return meta;
+	}
+	
+	public void startAndReleaseTest(String serviceType){
+		
+	}
+	
+	// TODO - subscribe to registered --> generates subscription to
+	// publishState() - filter on Errors
+	// FIXME - FILE COMMUNICATION !!!!
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		try {
+
+			String serviceType = "InMoovHand";
+			Repo repo = Repo.getLocalInstance();
+
+			// repo.clearRepo();
+			// dirty clean :)
+			// repo.clearLibraries();
+			// repo.clearServiceData();
+			repo.install(serviceType);
+			Test test = (Test) Runtime.start("test", "Test");
+			test.getState();
+			test.test(serviceType);
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
 	}
 
 }

@@ -65,8 +65,8 @@ public class Sprinkler extends Service {
 		return history;
 	}
 
-	public ArrayList<org.myrobotlab.service.Cron.Task> getTasks() {
-		return cron.getTasks();
+	public ArrayList<org.myrobotlab.service.Cron.Task> getCronTasks() {
+		return cron.getCronTasks();
 	}
 
 	// TODO - fix add length of watering

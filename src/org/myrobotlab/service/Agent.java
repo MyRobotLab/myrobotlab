@@ -122,9 +122,7 @@ public class Agent extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Agent.class);
 
-	
 	HashSet<String> dependencies = new HashSet<String>();
-	
 
 	HashMap<Integer, ProcessData> processes = new HashMap<Integer, ProcessData>();
 
@@ -158,7 +156,6 @@ public class Agent extends Service {
 	// WebGui webAdmin = null; can't have a peer untile nettosphere is part of
 	// base build
 	// boolean updateRestartProcesses = false;
-	boolean autoUpdate = false;
 
 	String updateUrl = "http://mrl-bucket-01.s3.amazonaws.com/current/%s";
 	String jarUrlTemplate = "http://mrl-bucket-01.s3.amazonaws.com/current/%s/myrobotlab.jar";
@@ -193,21 +190,24 @@ public class Agent extends Service {
 
 	// revert ! only 1 global autoUpdate - all processes - not Agent (yet)
 	public void autoUpdate(boolean b) {
-		/*
-		 * for (Integer id : processes.keySet()) { autoUpdate(id, b); }
-		 */
-		autoUpdate = b;
+
+		String name = String.format("%s.timer.processUpdates", getName());
+
+		if (b) {
+			addTask(name, 1000 * 60, "processUpdates");
+		} else {
+			purgeTask(name);
+		}
 	}
 
 	public void startWebGui() {
 		try {
-			Runtime.install("WebGui");
 			// no reference at all to WebGui
 			// look ma no reference !
 			Runtime.create("webAdmin", "WebGui");
 			send("webAdmin", "setPort", 8887);
 			Runtime.start("webAdmin", "WebGui");
-			
+
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -215,45 +215,44 @@ public class Agent extends Service {
 	}
 
 	/**
-	 * checks the current branch
-	 * looks if the verstion.txt has been changed
+	 * checks the current branch looks if the verstion.txt has been changed
 	 * 
 	 * @throws IOException
 	 */
 	synchronized public void processUpdates() throws IOException {
 
 		String remoteVersion = getLatestRemoteVersion(currentBranch);
-			if (remoteVersion == null) {
-				error("checkForUpdates %s is null", currentBranch);
-			} else {
-				log.info("found remote version {}", remoteVersion);
-				File checkIfWeHaveJar = new File(String.format("%s/myrobotlab.%s.jar", currentBranch, remoteVersion));
-				if (!checkIfWeHaveJar.exists()) {
-					log.info("downloading remote version {}", remoteVersion);
-					downloadLatest(currentBranch);
+		if (remoteVersion == null) {
+			error("checkForUpdates %s is null", currentBranch);
+		} else {
+			log.info("found remote version {}", remoteVersion);
+			File checkIfWeHaveJar = new File(String.format("%s/myrobotlab.%s.jar", currentBranch, remoteVersion));
+			if (!checkIfWeHaveJar.exists()) {
+				log.info("downloading remote version {}", remoteVersion);
+				downloadLatest(currentBranch);
+			}
+
+			for (Integer key : processes.keySet()) {
+				ProcessData process = processes.get(key);
+				if (!currentBranch.equals(process.branch)) {
+					log.info("skipping update of {} because its on branch {}", process.id, process.branch);
+					continue;
 				}
 
-				for (Integer key : processes.keySet()) {
-					ProcessData process = processes.get(key);
-					if (!currentBranch.equals(process.branch)) {
-						log.info("skipping update of {} because its on branch {}", process.id, process.branch);
-						continue;
-					}
+				if (remoteVersion.equals(process.version)) {
+					log.info("skipping update of {} {} because its already version {}", process.id, process.name, process.version);
+					continue;
+				}
 
-					if (remoteVersion.equals(process.version)) {
-						log.info("skipping update of {} {} because its already version {}", process.id, process.name, process.version);
-						continue;
-					}
-
-					// FIXME - it would be nice to send a SIG_TERM to
-					// the process before we kill the jvm
-					// process.process.getOutputStream().write("/Runtime/releaseAll".getBytes());
-					process.version = remoteVersion;
-					if (process.isRunning()) {
-						restart(process.id);
-					}
+				// FIXME - it would be nice to send a SIG_TERM to
+				// the process before we kill the jvm
+				// process.process.getOutputStream().write("/Runtime/releaseAll".getBytes());
+				process.version = remoteVersion;
+				if (process.isRunning()) {
+					restart(process.id);
 				}
 			}
+		}
 	}
 
 	public synchronized void restart(Integer id) throws IOException {
@@ -318,7 +317,6 @@ public class Agent extends Service {
 		return sb.toString();
 	}
 
-
 	/**
 	 * gets id from name
 	 * 
@@ -349,28 +347,22 @@ public class Agent extends Service {
 	}
 
 	/*
-	public ArrayList<String> getLocalVersions(String branch) throws IOException {
-		File m = new File(String.format("%s/myrobotlab.jar", branch));
-		String checkVersion = String.format("./checkVersion.%d.txt", System.currentTimeMillis());
-		//FileIO.extract(m.getAbsolutePath(), "resource/version.txt", checkVersion);
-		byte[] v = FileIO.toByteArray(new File(checkVersion));
-		File cv = new File(checkVersion);
-		if (!cv.delete()) {
-			log.warn("could not delete {}", m.getAbsolutePath());
-		}
-
-		String version = null;
-		if (v == null) {
-			error("failed attempt of checking version for %s", m.getAbsolutePath());
-		} else {
-			version = new String(v);
-			
-			info("found local version %s", version);
-		}
-
-		return null;
-	}
-	*/
+	 * public ArrayList<String> getLocalVersions(String branch) throws
+	 * IOException { File m = new File(String.format("%s/myrobotlab.jar",
+	 * branch)); String checkVersion = String.format("./checkVersion.%d.txt",
+	 * System.currentTimeMillis()); //FileIO.extract(m.getAbsolutePath(),
+	 * "resource/version.txt", checkVersion); byte[] v = FileIO.toByteArray(new
+	 * File(checkVersion)); File cv = new File(checkVersion); if (!cv.delete())
+	 * { log.warn("could not delete {}", m.getAbsolutePath()); }
+	 * 
+	 * String version = null; if (v == null) { error(
+	 * "failed attempt of checking version for %s", m.getAbsolutePath()); } else
+	 * { version = new String(v);
+	 * 
+	 * info("found local version %s", version); }
+	 * 
+	 * return null; }
+	 */
 
 	/**
 	 * gets name from id
@@ -660,8 +652,8 @@ public class Agent extends Service {
 
 				// spawn a test - attach to cli - test 1 service end to end
 				// ,"-invoke", "test","test","org.myrobotlab.service.Clock"
-				Process process = spawn(new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-logLevel", "WARN", "-noEnv", "-invoke", "test", "test",
-						serviceType.getName() });
+				Process process = spawn(
+						new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-logLevel", "WARN", "-noEnv", "-invoke", "test", "test", serviceType.getName() });
 
 				process.waitFor();
 
@@ -723,7 +715,7 @@ public class Agent extends Service {
 			String path = String.format("PATH=%%CD%%\\libraries\\native;PATH=%%CD%%\\libraries\\native\\%s;%%PATH%%", platformId);
 			env.put("PATH", path);
 			// we need to sanitize against a non-ascii username
-			// work around for Jython bug in 2.7.0... 
+			// work around for Jython bug in 2.7.0...
 			env.put("APPDATA", "%%CD%%");
 		} else {
 			log.error("unkown operating system");
@@ -819,7 +811,7 @@ public class Agent extends Service {
 
 		// if I'm a jar and target jar does not exist
 		if (!m.exists()) {
-			if (FileIO.isJar()){
+			if (FileIO.isJar()) {
 				log.info(String.format("cloning self to %s", filename));
 				FileIO.copy(new File("myrobotlab.jar"), new File(filename));
 			} else {
@@ -908,9 +900,7 @@ public class Agent extends Service {
 
 	public void startService() {
 		super.startService();
-		if (autoUpdate){
-			addTask(getName(), 1000 * 60, "processUpdates");
-		}
+		addTask(getName(), 1000 * 60, "processUpdates");
 	}
 
 	public void terminateSelfOnly() {
@@ -962,6 +952,11 @@ public class Agent extends Service {
 	 * 
 	 * @param args
 	 */
+	// FIXME - add -help
+	// TODO - add jvm memory other runtime info
+	// FIXME - a way to route parameters from command line to Agent vs Runtime -
+	// the current concept is ok - but it does not work ..
+	// make it work if necessary prefix everything by -agent-<...>
 	public static void main(String[] args) {
 		try {
 			System.out.println("Agent.main starting");
@@ -1006,8 +1001,11 @@ public class Agent extends Service {
 			Agent agent = (Agent) Runtime.start("agent", "Agent");
 
 			// FIXME - if "-install" - then install a version ?? minecraft way ?
+			if (!runtimeArgs.containsKey("-headless")) {
+				agent.startWebGui();
+			}
 
-			if (agentCmd.containsKey("-test")) {
+			if (runtimeArgs.containsKey("-test")) {
 				agent.serviceTest();
 
 			} else {
@@ -1023,23 +1021,22 @@ public class Agent extends Service {
 			// System.exit(0);
 		}
 	}
-	
 
 	/**
-	 * This static method returns all the details of the class without
-	 * it having to be constructed.  It has description, categories,
-	 * dependencies, and peer definitions.
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
 	 * 
 	 * @return ServiceType - returns all the data
 	 * 
 	 */
-	static public ServiceType getMetaData(){
-		
+	static public ServiceType getMetaData() {
+
 		ServiceType meta = new ServiceType(Agent.class.getCanonicalName());
 		meta.addDescription("Agent - responsible for creating the environment and maintaining, tracking and terminating all processes");
-		meta.addCategory("framework");		
+		meta.addCategory("framework");
 		// meta.addPeer("webadmin", "WebGui", "webgui for the Agent");
-		return meta;		
+		return meta;
 	}
 
 }
