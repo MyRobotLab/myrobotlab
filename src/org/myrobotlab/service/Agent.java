@@ -1001,9 +1001,9 @@ public class Agent extends Service {
 			Agent agent = (Agent) Runtime.start("agent", "Agent");
 
 			// FIXME - if "-install" - then install a version ?? minecraft way ?
-			if (!runtimeArgs.containsKey("-headless")) {
-				agent.startWebGui();
-			}
+			// if (!runtimeArgs.containsKey("-headless")) {
+			//	agent.startWebGui();
+			// }
 
 			if (runtimeArgs.containsKey("-test")) {
 				agent.serviceTest();
