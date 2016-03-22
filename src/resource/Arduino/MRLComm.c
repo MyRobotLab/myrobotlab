@@ -35,8 +35,12 @@
 // TODO - getPinInfo() - returns pin info !
 
 #include <Servo.h>
+// Start of Adafruit16CServoDriver I2C import
+#define WIRE Wire
+#include <Wire.h>
+// Start of Adafruit16CServoDriver I2C import
 // version to match with MRL
-#define MRLCOMM_VERSION        27
+#define MRLCOMM_VERSION        28
 
 // serial protocol functions
 #define MAGIC_NUMBER            170 // 10101010
@@ -136,6 +140,18 @@
 ///// INO GENERATED DEFINITION END //////
 
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
+// Start of Adafruit16CServoDriver defines
+#define AF_BEGIN 50
+#define AF_SET_PWM_FREQ 51
+#define AF_SET_PWM 52
+#define AF_SET_SERVO 53
+
+#define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
+#define PCA9685_MODE1 0x0
+#define PCA9685_PRESCALE 0xFE
+#define LED0_ON_L 0x6
+// End of Adafruit16CServoDriver defines
 
 // TODO - UNIONS !!!! - all unions begin with type
 
@@ -321,7 +337,7 @@ int paramBuffIndex;
 int paramCnt;
 //===custom msg interface end===
 
-void sendServoEvent(servo_type& s, int eventType);
+//void sendServoEvent(servo_type& s, int eventType);
 unsigned long getUltrasonicRange(pin_type& pin);
 // void sendMsg ( int num, ... );
 
@@ -887,7 +903,49 @@ void loop() {
 				pin.isActive = false;
 				break;
 			} // SENSOR_POLLING_STOP
-
+			
+		// Start of Adafruit16CServoDriver commands
+    	case AF_BEGIN:
+      	{ 
+        	WIRE.begin();
+        	write8(ioCmd[1],PCA9685_MODE1, 0x0);
+        	break;
+       	} // AF_BEGIN
+       
+    	case AF_SET_PWM_FREQ:
+       	{ 
+        	//ioCmd[1] is the I2C address
+        	//ioCmd[2] is the freqency value
+        	int freq = 0.9 * ioCmd[2];  // Correct for overshoot in the frequency setting (see issue #11).        
+        	float prescaleval = 25000000;
+        	prescaleval /= 4096;
+        	prescaleval /= freq;
+        	prescaleval -= 1;
+        	uint8_t prescale = floor(prescaleval + 0.5);
+        	uint8_t oldmode = read8(ioCmd[1],PCA9685_MODE1);
+        	uint8_t newmode = (oldmode&0x7F) | 0x10; // sleep
+        	write8(ioCmd[1],PCA9685_MODE1, newmode); // go to sleep
+        	write8(ioCmd[1],PCA9685_PRESCALE, prescale); // set the prescaler
+        	write8(ioCmd[1],PCA9685_MODE1, oldmode);
+        	delay(5);
+        	write8(ioCmd[1],PCA9685_MODE1, oldmode | 0xa1);  //  This sets the MODE1 register to turn on auto increment.
+         	                                                // This is why the beginTransmission below was not working.
+        	break;
+       	} // AF_SET_PWM_FREQ
+       
+    	case AF_SET_PWM:
+      	{ 
+        	setPWM(ioCmd[1], ioCmd[2], ioCmd[3], ioCmd[4]);
+        	break;
+       	} // AF_SET_PWM
+		// End of Adafruit16CServoDriver commands
+		
+    	case AF_SET_SERVO:
+      	{ 
+        	setPWM(ioCmd[1], ioCmd[2], 0, (ioCmd[3] << 8) + ioCmd[4]);
+        	break;
+       	} // AF_SET_SERVO
+       
 		case NOP: 
 			{
 				// No Operation
@@ -1209,3 +1267,32 @@ void sendError(int type) {
 	Serial.write(type);
 }
 
+// Start of Adafruit16CServoDriver methods
+// I2C write 
+void write8(uint8_t i2caddr, uint8_t addr, uint8_t d) {
+  WIRE.beginTransmission(i2caddr);
+  WIRE.write(addr);
+  WIRE.write(d);
+  WIRE.endTransmission();
+}
+
+// I2C Read
+uint8_t  read8(uint8_t i2caddr, uint8_t addr) {
+  WIRE.beginTransmission(i2caddr);
+  WIRE.write(addr);
+  WIRE.endTransmission();
+
+  WIRE.requestFrom((uint8_t)i2caddr, (uint8_t)1);
+  return WIRE.read();
+}
+
+void setPWM(uint8_t i2caddr, uint8_t num, uint16_t on, uint16_t off) {
+  WIRE.beginTransmission(i2caddr);
+  WIRE.write(LED0_ON_L+4*num);
+  WIRE.write(on);
+  WIRE.write(on>>8);
+  WIRE.write(off);
+  WIRE.write(off>>8);
+  WIRE.endTransmission();
+}
+// End of Adafruit16CServoDriver methods

@@ -17,6 +17,7 @@ import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Arduino.ServoData;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ArduinoShield;
@@ -55,7 +56,11 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	public final int AF_SET_PWM = 52;
 	public final int AF_SET_SERVO = 53;
 
+	// Variable to ensure that a PWM freqency has been set before starting PWM
+	private int pwmFreq = 60;
 	private boolean pwmFreqSet = false;
+
+	private int i2cAddress = 0x40;
 
 	public transient final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriver.class.getCanonicalName());
 
@@ -185,7 +190,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	// VENDOR SPECIFIC LIBRARY METHODS BEGIN /////
 	// ----------- AF16C API Begin --------------
 	public void begin() {
-		arduino.sendMsg(AF_BEGIN, 0, 0);
+		  arduino.sendMsg(AF_BEGIN, i2cAddress, 0, 0);
+
 	}
 
 	public boolean connect(String comPort) {
@@ -216,27 +222,28 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	}
 
 	
-	// drive the servo
+	public void setI2CAddress(Integer I2CAddress) {
+		i2cAddress = I2CAddress;
+	}
+	
+	// drive the true PWM. I
 	public void setPWM(Integer servoNum, Integer pulseWidthOn, Integer pulseWidthOff) {
-		if (!pwmFreqSet) {
-			setPWMFreq(60);
-		}
-		arduino.sendMsg(AF_SET_PWM, servoNum, pulseWidthOn, pulseWidthOff);
+		arduino.sendMsg(AF_SET_PWM, i2cAddress, servoNum, pulseWidthOn, pulseWidthOff);
 	}
-
+	
 	public void setPWMFreq(Integer hz) { // Analog servos run at ~60 Hz updates
-		arduino.sendMsg(AF_SET_PWM_FREQ, hz, 0);
+		arduino.sendMsg(AF_SET_PWM_FREQ, i2cAddress, hz, 0);
+		pwmFreqSet = true;
 	}
-
-	public void setServo(Integer servoNum, Integer pulseWidthOff) {
-		if (!pwmFreqSet) {
-			setPWMFreq(60);
-		}
+	
+	public void setServo(Integer servo, Integer pulseWidthOff) {
 		// since pulseWidthOff can be larger than > 256 it needs to be
 		// sent as 2 bytes
-		arduino.sendMsg(AF_SET_SERVO, servoNum, pulseWidthOff >> 8, pulseWidthOff & 0xFF);
+		log.info(String.format("setServo %s i2cAddress x%02X pin %s pulse %s", servo, i2cAddress, servo, pulseWidthOff));
+		arduino.sendMsg(AF_SET_SERVO, i2cAddress, servo, pulseWidthOff >> 8, pulseWidthOff & 0xFF);
 	}
-
+	
+	
 	@Override
 	public void startService() {
 		super.startService();
@@ -256,17 +263,31 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	public synchronized boolean servoAttach(Servo servo, Integer pinNumber) {
+		if (servo == null) {
+			error("trying to attach null servo");
+			return false;
+		}
 
+		servo.setController(this);
+		servoNameToPinMap.put(servo.getName(), pinNumber);
+		
+		begin();
+		
+		return true;
+}
 	@Override
 	public boolean servoAttach(Servo servo) {
-		// TODO Auto-generated method stub
-		return false;
+	
+		return servoAttach(servo, servo.getPin());
 	}
 
 	@Override
 	public boolean servoDetach(Servo servo) {
-		// TODO Auto-generated method stub
-		return false;
+		
+		servoNameToPinMap.remove(servo.getName());
+		return true;
 	}
 
 	@Override
@@ -283,14 +304,25 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 
 	@Override
 	public void servoWrite(Servo servo) {
-		// TODO Auto-generated method stub
-		
+		if (!pwmFreqSet) {
+			setPWMFreq(pwmFreq);
+		}	
+		log.info(String.format("servoWrite %s i2cAddress x%02X pin %s targetOutput %d", servo.getName(), i2cAddress, servo.getPin(), servo.targetOutput));
+		int pulseWidthOff = SERVOMIN + (int)(servo.targetOutput * (int)((float)SERVOMAX - (float)SERVOMIN) / (float)(180));
+		setServo(servo.getPin(), pulseWidthOff);
 	}
 
 	@Override
 	public void servoWriteMicroseconds(Servo servo) {
-		// TODO Auto-generated method stub
-		
+		if (!pwmFreqSet) {
+			setPWMFreq(pwmFreq);
+		}
+		// 1000 ms => 150, 2000 ms => 600
+		int pulseWidthOff = (int)(servo.uS * 0.45) - 300;
+		// since pulseWidthOff can be larger than > 256 it needs to be
+		// sent as 2 bytes
+		log.info(String.format("servoWriteMicroseconds %s i2cAddress x%02X pin %s pulse %d", servo.getName(), i2cAddress, servo.getPin(), pulseWidthOff));
+		arduino.sendMsg(AF_SET_SERVO, i2cAddress, servo.getPin(), pulseWidthOff >> 8, pulseWidthOff & 0xFF);
 	}
 
 	@Override
