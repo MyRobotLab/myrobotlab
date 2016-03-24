@@ -337,7 +337,7 @@ int paramBuffIndex;
 int paramCnt;
 //===custom msg interface end===
 
-//void sendServoEvent(servo_type& s, int eventType);
+void sendServoEvent(servo_type& s, int eventType);
 unsigned long getUltrasonicRange(pin_type& pin);
 // void sendMsg ( int num, ... );
 
