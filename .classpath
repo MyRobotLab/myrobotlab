@@ -26,7 +26,7 @@
 	<classpathentry kind="lib" path="/repo/net.sourceforge.simbad/1.4/simbad-1.4.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.op.chess/1.0.0/ChessBoard.jar"/>
-	<classpathentry kind="lib" path="/repo/org.python.core/2.7.0/jython-2.7.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.python.core/2.5.2/jython.jar"/>
 	<classpathentry kind="lib" path="/repo/org.tritonus.share.sampled.floatsamplebuffer/0.3.6/tritonus_share-0.3.6.jar"/>
 	<classpathentry kind="lib" path="/repo/simbad.gui/1.4/simbad-1.4.jar"/>
 	<classpathentry kind="lib" path="/repo/wiiuse.wiimote/0.12b/wiiusej.jar"/>
