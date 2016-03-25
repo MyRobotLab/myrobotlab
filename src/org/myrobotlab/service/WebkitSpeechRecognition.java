@@ -45,7 +45,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
 	private String language = "en-US";
 	
-	HashMap<String, Command> commands = null;
+	HashMap<String, Command> commands = new HashMap<String, Command>();
 	
 	public WebkitSpeechRecognition(String reservedKey) {
 		super(reservedKey);
