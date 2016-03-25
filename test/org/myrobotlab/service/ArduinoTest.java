@@ -680,14 +680,14 @@ public class ArduinoTest {
 			ArduinoTest.setUpBeforeClass();
 			ArduinoTest test = new ArduinoTest();
 
-			WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
+			// WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
 			// ServiceInterface gui = Runtime.start("gui", "GUIService");
 
 			Runtime.dumpToFile();
 
 			log.info("here");
-			serial.removeByteListener(gui.getName());
-			uart.removeByteListener(gui.getName());
+			// serial.removeByteListener(gui.getName());
+			// uart.removeByteListener(gui.getName());
 
 			Runtime.dumpToFile();
 
