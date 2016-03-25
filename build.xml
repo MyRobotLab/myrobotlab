@@ -98,10 +98,10 @@
 	<echo message="TRAVIS_TAG=${env.TRAVIS_TAG}" />
 	<echo message="TRAVIS_BUILD_NUMBER=${env.TRAVIS_BUILD_NUMBER}" />
 	
-        <property name="developVersion" value="1.0.${env.TRAVIS_BUILD_NUMBER}" />
+    <property name="developVersion" value="1.0.${env.TRAVIS_BUILD_NUMBER}" />
 	<!-- property name="developVersion" value="1.0.9999" / -->
 	<property name="masterVersion" value="${env.TRAVIS_TAG}" />
-	<property name="version" value="${masterVersion}" />
+	<property name="version" value="${developVersion}" />
 	<echo message="version=${version}" />
 
 	<!-- set global properties for this build -->
@@ -795,7 +795,7 @@
 					<include name="**/*Test.java" />
 					<exclude name="**/JFugueTest.java" />
 					<exclude name="**/MessageTest.java" />
-					<exclude name="**/ArduinoTest.java" />
+					<!-- exclude name="**/ArduinoTest.java" / -->
 				</fileset>
 			</batchtest>
 
