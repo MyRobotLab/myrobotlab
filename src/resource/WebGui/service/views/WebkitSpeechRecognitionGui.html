@@ -1,11 +1,16 @@
 <div>
-  Service : {{service.name}} of type {{service.simpleName}}<br /> Start
-  Time: {{service.serviceStartTime}}<br /> <br />
+  Start Time: {{service.serviceStartTime}}<br /> <br />
   <!--  TODO: allow the user to upgrade ?
 	<p id="info_upgrade">Web Speech API is not supported by this browser.
      Upgrade to <a href="//www.google.com/chrome">Chrome</a>
      version 25 or later.</p>  -->
-  <br /> Status: {{status}} <br />
+  <br /> 
+  Language: {{service.language}} <br />
+  Current Language: {{current_language}} <br />
+  lang selected id: {{lang.selectedOption.id}} <br />
+  Recognition Language: {{recognition.lang}} <br />
+
+  Status: {{status}} <br />
   <form>
     <input class="form-control" ng-model="utterance" name="utterance"
       id="utterance" />
