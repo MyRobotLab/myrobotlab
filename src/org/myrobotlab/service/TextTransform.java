@@ -63,7 +63,7 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(TextTransform.class.getCanonicalName());
-		meta.addDescription("TestThrower is used with TestCatcher to test messaging");
+		meta.addDescription("TextTransform");
 		meta.addCategory("data","filter");		
 		return meta;
 	}
