@@ -98,9 +98,10 @@
 	<echo message="TRAVIS_TAG=${env.TRAVIS_TAG}" />
 	<echo message="TRAVIS_BUILD_NUMBER=${env.TRAVIS_BUILD_NUMBER}" />
 	
-	<property name="developVersion" value="1.0.${env.TRAVIS_BUILD_NUMBER}" />
+        <property name="developVersion" value="1.0.${env.TRAVIS_BUILD_NUMBER}" />
+	<!-- property name="developVersion" value="1.0.9999" / -->
 	<property name="masterVersion" value="${env.TRAVIS_TAG}" />
-	<property name="version" value="${developVersion}" />
+	<property name="version" value="${masterVersion}" />
 	<echo message="version=${version}" />
 
 	<!-- set global properties for this build -->
@@ -469,24 +470,38 @@
 		</exec>
 	</target>
 	<!-- =============== repo end  =============== -->
-	<!-- TODO - work on removing these 3rd party dependencies -->
+	<!-- 
+		The following are "initial" myrobotlab dependencies - they get incorporated into myrobotlab.jar
+		The 'getMetaData()' methods of these services have their dependencies removed, because
+		they are satisfied here.
+	 -->
 	<target name="unzip" description="unzip various jar files to be included into the myrobotlab.jar">
 		<echo>unzipping dependencies</echo>
 		<echo message="${license.present}" />
 
 		<!-- SYNCH WITH AGENT TO DEBUG!!!! -->
+		<!-- repo -->
 		<unzip src="${repo}/com.google.gson/2.2.4/gson-2.2.4.jar" dest="${build}/classes" />
 		<unzip src="${repo}/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar" dest="${build}/classes" />
+		
+		<!-- swing gui -->
 		<unzip src="${repo}/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar" dest="${build}/classes" />
 		<unzip src="${repo}/org.fife.autocomplete/2.0.4/autocomplete.jar" dest="${build}/classes" />
 		<unzip src="${repo}/com.mxgraph.jgraph/1.6.1.2/jgraphx.jar" dest="${build}/classes" />
 		<!-- <unzip src="${repo}/org.apache.log4j/1.2.14/log4j-1.2.14.jar" dest="${build}/classes" /> -->
+		
+		<!-- webgui -->
 		<unzip src="${repo}/org.atmosphere.nettosphere/2.3.0/nettosphere-assembly-2.3.0.jar" dest="${build}/classes" />		
 		<unzip src="${repo}/org.atmosphere.nettosphere/2.3.0/geronimo-servlet_3.0_spec-1.0.jar" dest="${build}/classes" />
+		<unzip src="${repo}/io.netty/3.10.0/netty-3.10.0.Final.jar" dest="${build}/classes" />
 		
+		<!-- logging -->
 		<unzip src="${repo}/org.slf4j.logback/1.1.3/logback-classic-1.1.3.jar" dest="${build}/classes" />
 		<unzip src="${repo}/org.slf4j.logback/1.1.3/logback-core-1.1.3.jar" dest="${build}/classes" />
 		<unzip src="${repo}/org.slf4j.logback/1.1.3/slf4j-api-1.7.12.jar" dest="${build}/classes" />
+		
+		<!-- python -->
+		<unzip src="${repo}/org.python.core/2.7.0/jython-2.7.0.jar" dest="${build}/classes" />
 		
 		<!-- for client -->
 

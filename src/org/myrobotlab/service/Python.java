@@ -889,10 +889,11 @@ public class Python extends Service {
 		ServiceType meta = new ServiceType(Python.class.getCanonicalName());
 		meta.addDescription("Python ID");
 		meta.addCategory("programming", "control");
-		meta.addDependency("org.python.core", "2.7.0");
-		// sadly - the swing console for PythonGUI depends
-		// on Console class and it depends on log4j :P
-		// meta.addDependency("org.apache.log4j", "1.2.14");
+
+		// Its now part of myrobotlab.jar - unzipped in
+		// build.xml (part of myrobotlab.jar now)
+		// meta.addDependency("org.python.core", "2.7.0");
+
 		return meta;
 	}
 
