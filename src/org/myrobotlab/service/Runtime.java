@@ -1223,6 +1223,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 						repo.install(services.get(i));
 					}
 				}
+				shutdown();
 				return;
 			}
 
@@ -1514,6 +1515,11 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		registry.clear();
 
 		// exit () ?
+	}
+	
+	public static void shutdown(){
+		releaseAll();
+		System.exit(-1);
 	}
 
 	// ---------------- callback events end -------------

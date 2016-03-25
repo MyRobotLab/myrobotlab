@@ -485,6 +485,7 @@ public class Agent extends Service {
 		return processes;
 	}
 
+	/* - REMOVE only Runtime should install
 	public List<Status> install(String fullType) {
 		List<Status> ret = new ArrayList<Status>();
 		ret.add(Status.info("install %s", fullType));
@@ -505,6 +506,7 @@ public class Agent extends Service {
 		}
 		return ret;
 	}
+	*/
 
 	public Integer kill(Integer id) {
 		if (processes.containsKey(id)) {
@@ -817,6 +819,13 @@ public class Agent extends Service {
 			} else {
 				log.info("I am not a jar - must be develop time");
 				log.info(String.format("copying last build to %s", filename));
+				File recentlyBuilt = new File("build/lib/myrobotlab.jar");
+				if (!recentlyBuilt.exists()){
+					log.error("umm .. I need to start a jar - would you mind building one with build.xml");
+					log.error("perhaps in the future I can change all the classpaths etc to start an instances with the bin classes - but no time to do that now");
+					log.error("adios... hope we meet again...");
+					System.exit(-1);
+				}
 				FileIO.copy(new File("build/lib/myrobotlab.jar"), new File(filename));
 			}
 		}
@@ -898,11 +907,6 @@ public class Agent extends Service {
 		// spawn(p.cmdLine.toArray(new String[p.cmdLine.size()]));
 	}
 
-	public void startService() {
-		super.startService();
-		addTask(getName(), 1000 * 60, "processUpdates");
-	}
-
 	public void terminateSelfOnly() {
 		log.info("goodbye .. cruel world");
 		System.exit(0);
@@ -960,6 +964,13 @@ public class Agent extends Service {
 	public static void main(String[] args) {
 		try {
 			System.out.println("Agent.main starting");
+			
+			// FIXME - I think the basic idea is to have
+			// parameters route to Agent or to the target instance
+			// initially I was thinking of having all agent parameters
+			// in a -agent \"-param1 value1 -param2 value2\" -services gui GUI .. instance params
+			// but that didn't work due to the parsing of CmdLine ...
+			// need a good solution
 
 			// split agent commands from runtime commands
 			// String[] agentArgs = new String[0];
@@ -1001,18 +1012,27 @@ public class Agent extends Service {
 			Agent agent = (Agent) Runtime.start("agent", "Agent");
 
 			// FIXME - if "-install" - then install a version ?? minecraft way ?
-			// if (!runtimeArgs.containsKey("-headless")) {
-			//	agent.startWebGui();
-			// }
+			if (!runtimeArgs.containsKey("-headless") && !runtimeArgs.containsKey("-install")) {
+				agent.startWebGui();
+			}
 
+			Process p = null;
+			
 			if (runtimeArgs.containsKey("-test")) {
 				agent.serviceTest();
 
 			} else {
-				agent.spawn(args); // <-- agent's is now in charge of first mrl
+				p = agent.spawn(args); // <-- agent's is now in charge of first mrl
 									// instance
 			}
-
+			
+			// handle things which are supposed to terminate
+			// after completion
+			if (runtimeArgs.containsKey("-install")) {
+				p.waitFor();
+				agent.shutdown();
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {

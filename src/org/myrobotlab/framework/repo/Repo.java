@@ -93,7 +93,8 @@ public class Repo implements Serializable {
 
 			try {
 
-				REPO_STATE_FILE_NAME = String.format("%s%srepo.json", FileIO.getCfgDir(), File.separator);
+				// REPO_STATE_FILE_NAME = String.format("%s%srepo.json", FileIO.getCfgDir(), File.separator);
+				REPO_STATE_FILE_NAME = String.format("repo.json");
 				String data = FileIO.toString(REPO_STATE_FILE_NAME);
 				localInstance = CodecUtils.fromJson(data, Repo.class);
 			} catch (Exception e) {

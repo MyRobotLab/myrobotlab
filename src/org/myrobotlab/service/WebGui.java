@@ -329,26 +329,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// Broadcaster b = broadcasterFactory.get();
 			// a session "might" be nice - but for now we are stateless
 			// SessionSupport ss = new SessionSupport();
-			boolean wasRunning = (nettosphere != null && nettosphere.isStarted());
 
-			if (wasRunning) {
-				sleep(1000);
-
-				log.info("stopping nettosphere");
-				// Must not be called from a I/O-Thread to prevent deadlocks!
-				(new Thread("stopping nettophere") {
-					public void run() {
-						/*
-						 * nettosphere.framework().removeAllAtmosphereHandler();
-						 * nettosphere.framework().resetStates();
-						 * nettosphere.framework().destroy();
-						 */
-						nettosphere.stop();
-					}
-				}).start();
-				sleep(1000);
+			if (nettosphere != null && nettosphere.isStarted()) {
+				// is running
+				info("{} currently running on port {} - stop first, then start");
+				return;
 			}
-
+			
 			nettosphere = new Nettosphere.Builder().config(getConfig().build()).build();
 			sleep(1000);
 
@@ -362,7 +349,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// get default boadcaster
 			broadcaster = broadcastFactory.get("/*");
 
-			log.info("WebGUI2 {} started on port {}", getName(), port);
+			log.info("WebGui {} started on port {}", getName(), port);
 
 			if (autoStartBrowser) {
 				log.info("auto starting default browser");
@@ -555,7 +542,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 				return;
 			} else if (parts.length == 4) {
 				// *** /api/messages/runtime/ ***
-				// *** /api/services/servo/  ****
+				// *** /api/services/servo/ ****
 				ServiceInterface si = Runtime.getService(parts[3]);
 				respond(out, codec, "getDeclaredMethods", si.getMethodMap());
 				return;
@@ -883,14 +870,31 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 	public void setPort(Integer port) {
 		this.port = port;
-		startNettosphere();
+		// startNettosphere();
 	}
 
 	public void stopService() {
 		super.stopService();
+		stopNettosphere();
+	}
+	
+	public void stopNettosphere(){
 		if (nettosphere != null) {
-			nettosphere.stop();
-		}
+
+			log.info("stopping nettosphere");
+			// Must not be called from a I/O-Thread to prevent deadlocks!
+			(new Thread("stopping nettophere") {
+				public void run() {
+					/*
+					 * nettosphere.framework().removeAllAtmosphereHandler();
+					 * nettosphere.framework().resetStates();
+					 * nettosphere.framework().destroy();
+					 */
+					nettosphere.stop();
+				}
+			}).start();
+			sleep(1000);
+		}		
 	}
 
 	public static void main(String[] args) {
