@@ -1,6 +1,6 @@
 angular.module('mrlapp.service.WebGuiGui', [])
 
-        .controller('WebGuiGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+        .controller('WebGuiGuiCtrl', ['$scope', '$log', 'mrl', 'serviceSvc', function ($scope, $log, mrl, serviceSvc) {
                 $log.info('WebGuiGuiCtrl');
                 var _self = this;
                 var msg = this.msg;
@@ -21,10 +21,18 @@ angular.module('mrlapp.service.WebGuiGui', [])
                         case 'onState':
                             _self.updateState(inMsg.data[0]);
                             $scope.$apply();
+                            break;service
+                        case 'onShowAll':
+                            serviceSvc.showAll(inMsg.data[0]);
+                            break;                     
+                        case 'onShow':
+                            serviceSvc.show(inMsg.data[0]);
                             break;
-                        case 'onPulse':
-                            $scope.pulseData = inMsg.data[0];
-                            $scope.$apply();
+                        case 'onHide':
+                            serviceSvc.hide(inMsg.data[0]);
+                            break;
+                        case 'onSet':
+                            serviceSvc.set(inMsg.data[0]);
                             break;
                         default:
                             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);
@@ -33,7 +41,11 @@ angular.module('mrlapp.service.WebGuiGui', [])
                 };
 
                 //mrl.subscribe($scope.service.name, 'pulse');
-                //msg.subscribe('pulse');
+                msg.subscribe('publishShowAll');
+                // msg.subscribe('publishHideAll'); FIXME ? not symmetric
+                msg.subscribe('publishHide');
+                msg.subscribe('publishShow');
+                msg.subscribe('publishSet');
                 msg.subscribe(this);
             }
         ]);

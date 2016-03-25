@@ -86,6 +86,20 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	// FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
 
 	transient LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
+	
+	public static class PanelPos {
+		String name;
+		int x;
+		int y;
+		int z;
+		
+		public PanelPos(String name, int x, int y, int z){
+			this.name = name;
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+	}
 
 	/**
 	 * Static list of third party dependencies for this service. The list will
@@ -939,7 +953,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// ai.startSession("alice2");
 			// ai.getResponse("hello ");
 
-			Runtime.start("servo", "Servo");
+			// Runtime.start("servo", "Servo");
+			Runtime.start("python", "Python");
 			WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
 			log.info(Service.getDNA().toString());
 			// webgui.startPeer("tracker");
@@ -985,6 +1000,46 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		}
 	}
 
+	// === begin positioning panels plumbing ===
+	public void set(String name, int x, int y){
+		set(name, x, y, 0); // or is z -1 ?
+	}
+
+	public void set(String name, int x, int y, int z){
+		invoke("publishSet", new PanelPos(name, x, y, z));
+	}
+
+	public void showAll(boolean b){
+		invoke("publishShowAll", b);
+	}
+	
+	public void show(String name){
+		invoke("publishShow", name);
+	}
+
+	public void hide(String name){
+		invoke("publishHide", name);
+	}
+
+	public String publishShow(String name) {
+		return name;
+	}
+	
+	public String publishHide(String name) {
+		return name;
+	}
+	
+	public boolean publishShowAll(boolean b){
+		return b;
+	}
+	
+	public PanelPos publishSet(PanelPos pos){
+		return pos;
+	}
+	// === end positioning panels plumbing ===
+	
+	
+	
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
