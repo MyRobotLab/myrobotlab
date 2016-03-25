@@ -117,7 +117,7 @@
 	<!-- directory for the build to go into -->
 	<property name="build" location="build" />
 	<!-- location for the unit test reports to go into -->
-        <property name="report" location="dist/current/${branch}/report" />
+    <property name="report" location="dist/current/${branch}/report" />
 
 	<!-- location for the jacoco reports -->
 	<property name="result.jacoco.file" location="${build}/jacoco.exec" />
