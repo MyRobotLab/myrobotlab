@@ -667,7 +667,7 @@
 		</http>
 	</target>
 	<!-- TODO: make this depend on test , gotta figure out why travis ci is failing on this now. -->
-	<target name="dist" depends="test" description="generate the distribution">
+	<target name="dist" depends="report" description="generate the distribution">
 		<!-- copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${version}.jar" / -->
 		<!-- backwards compat .. TODO: review this.. -->
 		<mkdir dir="${dist}" />
