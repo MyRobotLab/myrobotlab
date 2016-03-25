@@ -1013,7 +1013,12 @@ public class Agent extends Service {
 
 			// FIXME - if "-install" - then install a version ?? minecraft way ?
 			if (!runtimeArgs.containsKey("-headless") && !runtimeArgs.containsKey("-install")) {
-				agent.startWebGui();
+				// FIXME - NOT READY FOR PRIMETIME
+				// THIS IS THE AGENT - it does not require special parameters to start
+				// the expectation is there is a simple set of params for the "target" instance
+				// WHICH MEANS ALL DEPENDENCIES HAVE TO BE PACKAGED WITH MYROBOTLAB.JAR
+				// "AND" - the fact that dependencies are bundled means they should be removed from the service classMeta !!!!
+				// agent.startWebGui();
 			}
 
 			Process p = null;
