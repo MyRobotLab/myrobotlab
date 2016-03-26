@@ -3,7 +3,7 @@
         <div class="panel-heading" drag-directive>
             <!--header-->
             <h3 class="panel-title">
-                <img ng-src="{{::panel.simpleName}}.png" alt="" width="24">
+                <img ng-src="{{::panel.simpleName}}.png" alt="" width="16">
                 <b>{{::panel.name}}</b><div style="display:inline;" ng-if="panel.showpanelname">&nbsp;&nbsp;{{panel.panelname}}</div>
                 <div class="pull-right" uib-dropdown dropdown-append-to-body auto-close="outsideClick" is-open="servicemenuDropdownOpen">
                     {{::panel.simpleName}}&nbsp;&nbsp;
@@ -94,6 +94,9 @@
             </div>
             <div ng-if="panel.templatestatus == 'notfound'">
                 <i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;servicegui not found
+            </div>
+            <div ng-if="panel.templatestatus == 'loading'">
+                <i class="glyphicon glyphicon-refresh"></i>&nbsp;&nbsp;loading servicegui ...
             </div>
         </div>
         <div class="panel-footer" ng-show="panel.panelsize.sizes[panel.panelsize.aktsize].footer != 'collapse'" drag-directive>
