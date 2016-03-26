@@ -76,14 +76,17 @@
                             </script>
                         </li>
                         <li>
-                            <a href="" uib-popover-template="'listMethodsPopoverTemplate2.html'" popover-title="Service Data" popover-placement="right-top">
+                            <a href="" ng-click="updateServiceData()" uib-popover-template="'listMethodsPopoverTemplate2.html'" popover-title="Service Data" popover-placement="right-top">
                                 <i class="glyphicon glyphicon-list-alt"></i>
                                 &nbsp;&nbsp;show json
                             </a>
+                            <!--TODO - remove this comment: @grog: Is this what you were trying to achieve?-->
                             <script type="text/ng-template" id="listMethodsPopoverTemplate2.html">
-                                <!-- FIXME ! - how to get a service reference here ??? JSON.stringify({service, null, 2); -->
+                                <!--<div>{{servicedatajson | json}}</div>-->
+                                <div>{{servicedatajson}}</div>
                             </script>
-                        </li>                    </ul>
+                        </li>
+                    </ul>
                 </div>
             </h3>
         </div>

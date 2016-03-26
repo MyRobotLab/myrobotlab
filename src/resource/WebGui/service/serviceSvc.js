@@ -1,5 +1,5 @@
 angular.module('mrlapp.service')
-        .service('serviceSvc', ['mrl', '$log', '$http', '$templateCache', '$ocLazyLoad', function (mrl, $log, $http, $templateCache, $ocLazyLoad) {
+        .service('serviceSvc', ['mrl', '$log', '$http', '$templateCache', '$timeout', '$ocLazyLoad', function (mrl, $log, $http, $templateCache, $timeout, $ocLazyLoad) {
                 var _self = this;
 
 //                var lastPosY; //unused, atm
@@ -348,16 +348,18 @@ angular.module('mrlapp.service')
                     panels[panelName + '/panel0'].notifyZIndexChanged();
                     //FIXME All this will only work on default panel names & only with the first panel ...
                 };
-
+                
+                //TODO maybe consolidate this two functions into one with boolean switch - like showAll(boolean) ?
                 this.show = function (panelName) {
                     // FIXME - the names should be refactored
                     // - could be a root panel, but the 'real' issue
                     // is that is heirachial not flat
                     // you can express a heirarchy with a flat keys - but its more
                     // than just incrementing (GroG)
-                    panels[panelName + '/panel0'].hide = false;
+                    $timeout(function () {
+                        panels[panelName + '/panel0'].hide = false;
+                    });
                     //FIXME All this will only work on default panel names & only with the first panel ...
-                    notifyAllOfUpdate(); //wrong use-case, workaround FIXME !!!
                 };
 
                 this.hide = function (panelName) {
@@ -366,11 +368,11 @@ angular.module('mrlapp.service')
                     // is that is heirachial not flat
                     // you can express a heirarchy with a flat keys - but its more
                     // than just incrementing (GroG)
-                    panels[panelName + '/panel0'].hide = true;
+                    $timeout(function () {
+                        panels[panelName + '/panel0'].hide = true;
+                    });
                     //FIXME All this will only work on default panel names & only with the first panel ...
-                    notifyAllOfUpdate(); //wrong use-case, workaround FIXME !!!
-                }
-                ;
+                };
 
                 this.showAll = function (show) {
                     //hide or show all panels

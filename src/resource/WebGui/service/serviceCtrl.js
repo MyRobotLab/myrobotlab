@@ -14,6 +14,14 @@ angular.module('mrlapp.service')
                 $scope.noworky = function () {
                     noWorkySvc.openNoWorkyModal($scope.panel.name);
                 };
+                
+                $scope.updateServiceData = function () {
+                    //get an updated / fresh servicedata & convert it to json
+                    var servicedata = mrl.getService($scope.panel.name);
+                    $scope.servicedatajson = JSON.stringify(servicedata, null, 2);
+                    console.log($scope.servicedatajson);
+                };
+                $scope.updateServiceData();
 
                 //service-menu-size-change-buttons
                 $scope.changesize = function (size) {
