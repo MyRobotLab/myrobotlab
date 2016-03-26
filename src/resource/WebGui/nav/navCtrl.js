@@ -28,8 +28,9 @@ angular.module('mrlapp.nav')
                 // ==== status history begin ========= 
                 // global callback for "all" service status
                 $scope.statuslist = statusSvc.getStatuses();
-                //TODO would make sense to move this to serviceSvc - question is what happens with firststatus
+                //TODO would make sense to move this to statusSvc - question is what happens with firststatus
                 //don't think another notification-callback would be good
+                //DO IT - (but first find a test scenario)
                 var onStatus = function (statusMsg) {
 //                    $timeout(function () {
                     statusSvc.addStatus(statusMsg.data[0]);
@@ -57,15 +58,11 @@ angular.module('mrlapp.nav')
                 $scope.closeAlert = function (index) {
                     $scope.alerts.splice(index, 1);
                 };
-                
+
                 statusSvc.registerAddAlertCallback($scope.addAlert);
                 //END_Alerts
 
-                $scope.showAll = function (value) {
-                    //hide or show all panels
-                    $log.info('showAll', value);
-                    serviceSvc.showAll(value);
-                };
+                $scope.showAll = serviceSvc.showAll;
                 $scope.showminlist = false;
 
                 //service-panels & update-routine (also used for search)
@@ -75,22 +72,23 @@ angular.module('mrlapp.nav')
                         $scope.minlist = $filter('panellist')($scope.allpanels, 'min');
                     });
                 };
-                panelsUpdated();
+                panelsUpdated(serviceSvc.getPanelsList());
                 serviceSvc.subscribeToUpdates(panelsUpdated);
-                
+
                 $scope.shutdown = function (type) {
-                    switch (type) {
-                        case 'shutdown':
-                            //TODO - important - send message to runtime!
-                            break;
-                        case 'restart':
-                            //TODO - important - send message to runtime!
-                            break;
-                        default:
-                            break;
-                    }
+                    var modalInstance = $uibModal.open({
+                        animation: true,
+                        templateUrl: 'nav/shutdown.html',
+                        controller: 'shutdownCtrl',
+//                        size: 'sm',
+                        resolve: {
+                            type: function () {
+                                return type;
+                            }
+                        }
+                    });
                 };
-                
+
                 $scope.about = function () {
                     var modalInstance = $uibModal.open({
                         animation: true,
@@ -100,13 +98,13 @@ angular.module('mrlapp.nav')
 //                        scope: $scope
                     });
                 };
-                
+
                 $scope.help = function () {
                     // should be something with help - for now: no Worky
                     //-> maybe tipps & tricks, ...
                     noWorkySvc.openNoWorkyModal('');
                 };
-                
+
                 $scope.noWorky = function () {
                     // modal display of no worky 
                     noWorkySvc.openNoWorkyModal('');
@@ -132,7 +130,7 @@ angular.module('mrlapp.nav')
                     item.posx = 15;
                     item.posy = 0;
                     item.notifyPositionChanged();
-                    //scroll to selected service
+//                    //scroll to selected service
 //                    $location.hash(item.name + '_' + item.panelname);
 //                    $anchorScroll();
 
