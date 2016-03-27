@@ -8,7 +8,7 @@ angular.module('mrlapp.service')
 //                };
                 
                 $scope.release = function () {
-                    //TODO - important - send message to release service
+                    mrl.sendTo(mrl.getRuntime().name, 'release', $scope.panel.name);
                 };
                 
                 $scope.noworky = function () {
