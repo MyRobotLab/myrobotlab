@@ -101,7 +101,6 @@ public class PID2 extends Service {
 
 	private HashMap<String, PIDData> data = new HashMap<String, PIDData>();
 
-
 	public PID2(String n) {
 		super(n);
 	}
@@ -311,13 +310,17 @@ public class PID2 extends Service {
 	 * *********************************************
 	 */
 	public void setPID(String key, Double Kp, Double Ki, Double Kd) {
+		PIDData piddata = new PIDData();
+		
 		if (Kp < 0 || Ki < 0 || Kd < 0) {
 			error("kp < 0 || ki < 0 || kd < 0");
 			return;
 		}
-
-		PIDData piddata = new PIDData();
-
+		
+		if (data.containsKey(key)){
+			piddata = data.get(key);
+		}
+		
 		piddata.dispKp = Kp;
 		piddata.dispKi = Ki;
 		piddata.dispKd = Kd;
