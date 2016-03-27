@@ -161,11 +161,17 @@ public class WikiDataFetcher extends Service {
 		char[] array = value.toCharArray();
 		// Uppercase first letter.
 		array[0] = Character.toUpperCase(array[0]);
-
+		int count=0; // Count number of char since last space
+		int charToChange = 0;
 		// Uppercase all letters that follow a whitespace character.
 		for (int i = 1; i < array.length; i++) {
-		    if (Character.isWhitespace(array[i - 1])) {
-			array[i] = Character.toUpperCase(array[i]);
+			count++;
+		    if (Character.isWhitespace(array[i - 1]) || i==array.length-1) {
+		    	if (count>3){
+		    	array[charToChange] = Character.toUpperCase(array[charToChange]);
+		    	}
+		    	charToChange = i;
+		    	count=0;
 		    }
 		}
 
