@@ -7,11 +7,11 @@ angular.module('mrlapp.nav')
                     switch (type) {
                         case 'shutdown':
                             $log.info('attempt to SHUTDOWN');
-                            //TODO - important - send message to runtime!
+                            mrl.sendTo(mrl.getRuntime().name, 'shutdown');
                             break;
                         case 'restart':
                             $log.info('attempt to RESTART');
-                            //TODO - important - send message to runtime!
+                            mrl.sendTo(mrl.getRuntime().name, 'restart');
                             break;
                         default:
                             break;
