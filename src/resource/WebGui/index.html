@@ -17,9 +17,10 @@
             MyRobotLab
         </div>
 
-        <div class="view-container">
+        <!--<div class="view-container">
             <div ng-view class="view-frame"></div>
-        </div>
+        </div>-->
+        <div ui-view></div>
 
         <!--Scripts & Libaries(js)-->
         <!-- -> Atmosphere.js (not jQuery plugin !)-->
@@ -30,9 +31,10 @@
         <script src="lib/jquery-ui-1.11.4/jquery-ui.min.js"></script>
         <!-- -> Bootstrap(js)-->
         <script src="lib/bootstrap-3.3.6/js/bootstrap.min.js"></script>
-        <!-- -> Angular(js) & Libary route-->
+        <!-- -> Angular(js)-->
         <script src="lib/angular-1.5.3/angular.min.js"></script>
-        <script src="lib/angular-1.5.3/angular-route.min.js"></script>
+        <!-- -> Library for Angular - Angular UI Router-->
+        <script src="lib/angular-ui-router-0.2.18.min.js"></script>
         <!-- -> Library for Angular - Angular Bootstrap UI(js)-->
         <script src="lib/ui-bootstrap-tpls-1.2.5.min.js"></script>
         <!-- -> Library for Angular - Drag&Drop-->
