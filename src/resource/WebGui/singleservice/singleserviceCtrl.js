@@ -1,9 +1,9 @@
 angular.module('mrlapp.singleservice.singleserviceCtrl', ['mrlapp.mrl'])
-        .controller('singleserviceCtrl', ['$scope', '$log', '$routeParams', '$filter', '$timeout', 'mrl', 'serviceSvc',
-            function ($scope, $log, $routeParams, $filter, $timeout, mrl, serviceSvc) {
+        .controller('singleserviceCtrl', ['$scope', '$log', '$stateParams', '$filter', '$timeout', 'mrl', 'serviceSvc',
+            function ($scope, $log, $stateParams, $filter, $timeout, mrl, serviceSvc) {
                 $log.info('singleserviceCtrl');
                 
-                $scope.servicename = $routeParams.servicename;
+                $scope.servicename = $stateParams.servicename;
                 
                 var isUndefinedOrNull = function (val) {
                     return angular.isUndefined(val) || val === null;
