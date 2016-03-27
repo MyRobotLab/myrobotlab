@@ -10,8 +10,8 @@
 // http://odetocode.com/blogs/scott/archive/2014/05/20/using-resolve-in-angularjs-routes.aspx
 
 angular.module('mrlapp', [
-    'ngRoute',
     'ng',
+    'ui.router',
     'ui.bootstrap', //BootstrapUI (in Angular style)
     'oc.lazyLoad', //lazyload
     'sticky', //sticky elements
@@ -33,31 +33,54 @@ angular.module('mrlapp', [
     'mrlapp.nav', //Navbar & Co. (/nav)
     'mrlapp.service' //Service & Co. (/service)
 ])
-        .config(['$provide', '$routeProvider', 'mrlProvider', 'ngClipProvider',
-            function ($provide, $routeProvider, mrlProvider, ngClipProvider) {
+        .config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', 'ngClipProvider',
+            function ($provide, $stateProvider, $urlRouterProvider, mrlProvider, ngClipProvider) {
 
                 ngClipProvider.setPath("lib/zeroclipboard/ZeroClipboard.swf");
 
-                $routeProvider.when('/main', {
-                    templateUrl: 'main/main.html',
-                    controller: 'mainCtrl',
-                    resolve: {
-                        message: function (mrl) {
-                            return mrl.init();
-                        }
-                    }
-                }).when('/service/:servicename', {
-                    templateUrl: 'singleservice/singleservice.html',
-                    controller: 'singleserviceCtrl',
-                    resolve: {
-                        message: function (mrl) {
-                            return mrl.init();
-                        }
-                    }
-//        }).when('/workpace', {
-//            templateUrl: 'workpace/index.html',
-                }).otherwise({
-                    redirectTo: '/main'
-                });
+                $urlRouterProvider.otherwise("/main");
+
+                $stateProvider
+                        .state('main', {
+                            url: "/main",
+                            templateUrl: "main/main.html",
+                            controller: 'mainCtrl',
+                            resolve: {
+                                message: function (mrl) {
+                                    return mrl.init();
+                                }
+                            }
+                        })
+                        .state('singleservice', {
+                            url: "/service/:servicename",
+                            templateUrl: "singleservice/singleservice.html",
+                            controller: "singleserviceCtrl",
+                            resolve: {
+                                message: function (mrl) {
+                                    return mrl.init();
+                                }
+                            }
+                        });
+//                $routeProvider.when('/main', {
+//                    templateUrl: 'main/main.html',
+//                    controller: 'mainCtrl',
+//                    resolve: {
+//                        message: function (mrl) {
+//                            return mrl.init();
+//                        }
+//                    }
+//                }).when('/service/:servicename', {
+//                    templateUrl: 'singleservice/singleservice.html',
+//                    controller: 'singleserviceCtrl',
+//                    resolve: {
+//                        message: function (mrl) {
+//                            return mrl.init();
+//                        }
+//                    }
+////        }).when('/workpace', {
+////            templateUrl: 'workpace/index.html',
+//                }).otherwise({
+//                    redirectTo: '/main'
+//                });
             }]);
 
