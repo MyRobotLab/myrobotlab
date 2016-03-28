@@ -1,24 +1,2 @@
-<!--Navbar-->
-<div nav-directive></div>
-
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <div ng-repeat="panel in allpanels"
-                 service-ctrl-directive
-                 panel="panel">
-                <!--maybe move this in the navbar?-->
-            </div>
-            <div ng-repeat="panel in panels"
-                 service-directive
-                 panel="panel">
-            </div>
-        </div>
-        <!--TODO remove that at some point-->
-        <!--<div class="col-md-12">
-            <div>DEBUG-SECTION</div>
-            <pre>Model: {{searchSelectedService| json}}</pre>
-            <pre>{{log| json}}</pre>
-        </div>-->
-    </div>
-</div>
+<div ui-view="navbar"></div>
+<div ui-view="content"></div>

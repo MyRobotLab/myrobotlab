@@ -1,16 +1,15 @@
 angular.module('mrlapp.main.mainCtrl', ['mrlapp.mrl'])
-        .controller('mainCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', 'serviceSvc',
-            function ($scope, $log, $filter, $timeout, mrl, serviceSvc) {
+        .controller('mainCtrl', ['$scope', '$log', '$state', 'mrl', 'serviceSvc',
+            function ($scope, $log, $state, mrl, serviceSvc) {
                 $log.info('mainCtrl');
-
-                //service-panels & update-routine
-                var panelsUpdated = function (panels) {
-                    $scope.allpanels = panels;
-                    $timeout(function () {
-                        $scope.panels = $filter('panellist')($scope.allpanels, 'main');
-                        $log.info('panels-main', $scope.panels);
-                    });
-                };
-                panelsUpdated(serviceSvc.getPanelsList());
-                serviceSvc.subscribeToUpdates(panelsUpdated);
+                
+                $log.info(mrl.isConnected(), serviceSvc.isReady());
+                if (!mrl.isConnected() || !serviceSvc.isReady()) {
+                    //you shouldn't be here if something isn't ready yet
+                    $log.info('redirect to loading from main');
+                    $state.go('loading');
+                } else {
+                    $log.info('redirecting to sub-state .main');
+                    $state.go('.main');
+                }
             }]);
