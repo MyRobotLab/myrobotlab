@@ -11,7 +11,8 @@
 
 angular.module('mrlapp', [
     'ng',
-    'ui.router',
+    'ui.router', //Angular UI Router - Yeah!
+    'ct.ui.router.extras.previous', //Angular UI Router Extras _ PreviousState - Yeah!Yeah!
     'ui.bootstrap', //BootstrapUI (in Angular style)
     'oc.lazyLoad', //lazyload
     'sticky', //sticky elements
@@ -41,46 +42,47 @@ angular.module('mrlapp', [
                 $urlRouterProvider.otherwise("/main");
 
                 $stateProvider
+                        .state('loading', {
+                            url: "/loading",
+                            templateUrl: "main/loading.html",
+                            controller: 'loadingCtrl'
+                        })
                         .state('main', {
                             url: "/main",
-                            templateUrl: "main/main.html",
-                            controller: 'mainCtrl',
-                            resolve: {
-                                message: function (mrl) {
-                                    return mrl.init();
+                            template: "<div ui-view></div>",
+                            controller: 'mainCtrl'
+                        })
+                        .state('main.main', {
+                            views: {
+                                '': {
+                                    templateUrl: 'main/main.html'
+                                },
+                                'navbar@main.main': {
+                                    templateUrl: 'nav/nav.html',
+                                    controller: 'navCtrl'
+                                },
+                                'content@main.main': {
+                                    templateUrl: 'main/mainView.html',
+                                    controller: 'mainViewCtrl'
                                 }
                             }
                         })
                         .state('singleservice', {
-                            url: "/service/:servicename",
-                            templateUrl: "singleservice/singleservice.html",
-                            controller: "singleserviceCtrl",
-                            resolve: {
-                                message: function (mrl) {
-                                    return mrl.init();
+                            url: '/service/:servicename',
+                            template: "<div ui-view></div>",
+                            controller: 'mainCtrl'
+                        })
+                        .state('singleservice.main', {
+                            views: {
+                                '': {
+                                    templateUrl: 'main/main.html'
+                                },
+                                'navbar@singleservice.main': {},
+                                'content@singleservice.main': {
+                                    templateUrl: 'singleservice/singleservice.html',
+                                    controller: 'singleserviceCtrl'
                                 }
                             }
                         });
-//                $routeProvider.when('/main', {
-//                    templateUrl: 'main/main.html',
-//                    controller: 'mainCtrl',
-//                    resolve: {
-//                        message: function (mrl) {
-//                            return mrl.init();
-//                        }
-//                    }
-//                }).when('/service/:servicename', {
-//                    templateUrl: 'singleservice/singleservice.html',
-//                    controller: 'singleserviceCtrl',
-//                    resolve: {
-//                        message: function (mrl) {
-//                            return mrl.init();
-//                        }
-//                    }
-////        }).when('/workpace', {
-////            templateUrl: 'workpace/index.html',
-//                }).otherwise({
-//                    redirectTo: '/main'
-//                });
             }]);
 

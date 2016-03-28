@@ -48,6 +48,8 @@ angular
     var onCloseCallbacks = [];
     var onStatus = [];
     
+    var connectedCallbacks = [];
+    
     var deferred = null ;
     
     var msgInterfaces = {};
@@ -234,6 +236,10 @@ angular
         // ok now we are connected
         connected = true;
         
+        angular.forEach(connectedCallbacks, function (value, key) {
+            value(connected);
+        });
+        
         deferred.resolve('connected !');
         return deferred.promise;
     }
@@ -331,7 +337,7 @@ angular
     }
     
     this.onClose = function(response) {
-        this.connected = false;
+        connected = false;
         console.log('websocket, onclose');
         if (response.state == "unsubscribe") {
             console.log('Info: ' + transport + ' closed.');
@@ -340,6 +346,10 @@ angular
         for (var i = 0; i < onCloseCallbacks.length; i++) {
             onCloseCallbacks[i]();
         }
+        
+        angular.forEach(connectedCallbacks, function (value, key) {
+            value(connected);
+        });
     
     }
     ;
@@ -485,13 +495,36 @@ angular
     
     this.subscribeOnOpen = function(callback) {
         onOpenCallbacks.push(callback);
-    }
-    ;
+    };
+    
+    this.unsubscribeOnOpen = function (callback) {
+        var index = onOpenCallbacks.indexOf(callback);
+        if (index != -1) {
+            onOpenCallbacks.splice(index, 1);
+        }
+    };
     
     this.subscribeOnClose = function(callback) {
         onCloseCallbacks.push(callback);
-    }
-    ;
+    };
+    
+    this.unsubscribeOnClose = function (callback) {
+        var index = onCloseCallbacks.indexOf(callback);
+        if (index != -1) {
+            onCloseCallbacks.splice(index, 1);
+        }
+    };
+    
+    this.subscribeConnected = function(callback) {
+        connectedCallbacks.push(callback);
+    };
+    
+    this.unsubscribeConnected = function (callback) {
+        var index = connectedCallbacks.indexOf(callback);
+        if (index != -1) {
+            connectedCallbacks.splice(index, 1);
+        }
+    };
     
     // injectables go here
     // the special $get method called when
@@ -738,13 +771,13 @@ angular
                     return true;
                 }
                 _self.connect();
-                deferred.promise.then(function(result) {
-                    var result = result;
-                }
-                , function(error) {
-                    var error = error;
-                }
-                );
+//                deferred.promise.then(function(result) {
+//                    var result = result;
+//                }
+//                , function(error) {
+//                    var error = error;
+//                }
+//                );
                 return deferred.promise;
             },
             
@@ -775,7 +808,11 @@ angular
             unsubscribe: _self.unsubscribe,
             subscribeToService: _self.subscribeToService,
             subscribeOnClose: _self.subscribeOnClose,
+            unsubscribeOnClose: _self.unsubscribeOnClose,
             subscribeOnOpen: _self.subscribeOnOpen,
+            unsubscribeOnOpen: _self.unsubscribeOnOpen,
+            subscribeConnected: _self.subscribeConnected,
+            unsubscribeConnected: _self.unsubscribeConnected,
             subscribeToMethod: _self.subscribeToMethod,
             subscribeToServiceMethod: _self.subscribeToServiceMethod,
             promise: _self.promise
