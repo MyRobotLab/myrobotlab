@@ -19,7 +19,6 @@ angular.module('mrlapp.service')
                     //get an updated / fresh servicedata & convert it to json
                     var servicedata = mrl.getService($scope.panel.name);
                     $scope.servicedatajson = JSON.stringify(servicedata, null, 2);
-                    console.log($scope.servicedatajson);
                 };
                 $scope.updateServiceData();
 
