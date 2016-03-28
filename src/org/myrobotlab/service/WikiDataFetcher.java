@@ -21,6 +21,7 @@ import org.wikidata.wdtk.datamodel.interfaces.StatementGroup;
 import org.wikidata.wdtk.datamodel.interfaces.TimeValue;
 import org.wikidata.wdtk.datamodel.interfaces.Value;
 import org.wikidata.wdtk.datamodel.interfaces.ValueSnak;
+import org.wikidata.wdtk.datamodel.json.jackson.JacksonSnak;
 import org.wikidata.wdtk.datamodel.json.jackson.JacksonValueSnak;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException;
@@ -73,7 +74,9 @@ public class WikiDataFetcher extends Service {
 	
 	private EntityDocument getWiki(String query) throws MediaWikiApiErrorException{
 		WikibaseDataFetcher wbdf =  WikibaseDataFetcher.getWikidataDataFetcher();
-		EntityDocument wiki = wbdf.getEntityDocumentByTitle(website,upperCaseAllFirst(query));
+		query = upperCaseAllFirst(query);
+		EntityDocument wiki = wbdf.getEntityDocumentByTitle(website,query);
+		// System.out.println("uppercaseFirst : " + upperCaseAllFirst(query));
 		if (wiki == null) {
 			System.out.println("ERROR ! Can't get the document : " + query);
 		 	} 	
@@ -167,14 +170,18 @@ public class WikiDataFetcher extends Service {
 		for (int i = 1; i < array.length; i++) {
 			count++;
 		    if (Character.isWhitespace(array[i - 1]) || i==array.length-1) {
-		    	if (count>3){
+		    	if (i==array.length-1){
+		    		count+=2;
+		    	}
+		    	if (count>4){
 		    	array[charToChange] = Character.toUpperCase(array[charToChange]);
 		    	}
 		    	charToChange = i;
 		    	count=0;
 		    }
+		    
 		}
-
+		System.out.println(array);
 		// Result.
 		return new String(array);
 	    }
@@ -193,8 +200,7 @@ public class WikiDataFetcher extends Service {
 			if (ID.equals(sg.getProperty().getId())) { // Check if this ID exist for this document
 				
 				for (Statement s : sg.getStatements()) {
-				if (s.getClaim().getMainSnak() instanceof ValueSnak) {	
-					//System.out.println("DataType : " + ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString());
+				if (s.getClaim().getMainSnak() instanceof ValueSnak) {
 					dataType = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString();
 					al.add(dataType);
 					al.add((JacksonValueSnak) s.getClaim().getMainSnak());
