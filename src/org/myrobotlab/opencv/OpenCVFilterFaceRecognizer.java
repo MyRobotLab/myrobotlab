@@ -104,6 +104,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	// some padding around the detected face
 	private int borderSize = 25;
 	
+	private boolean face = false;
+	
 	
 	private String lastRecognizedName = null;
 	
@@ -383,9 +385,13 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 					// You bettah recognize!
 					if (!trained) {
 						// we are a young grasshopper.
-						log.info("Classifier not trained yet.");
+						if(face){
+						 invoke("publishNoRecognizedFace");
+						 face = false;
+						}
 						return image;
 					} else {
+			                        face = true;
 						// Resize the face to pass it to the predicter
 						Mat dFaceMatSized = resizeImage(dFaceMat);
 						Mat copytoMat = dFaceMatSized.clone();
@@ -652,5 +658,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	// can recognize objects and other data.
 	public String publishRecognizedFace(String name) {
 		return name;
+	}
+	public void publishNoRecognizedFace() {
+	        log.info("Classifier not trained yet.");
 	}
 }
