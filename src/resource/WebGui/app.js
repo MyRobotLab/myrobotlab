@@ -11,6 +11,7 @@
 
 angular.module('mrlapp', [
     'ng',
+    'ngAnimate', //Angular Animate
     'ui.router', //Angular UI Router - Yeah!
     'ct.ui.router.extras.previous', //Angular UI Router Extras _ PreviousState - Yeah!Yeah!
     'ui.bootstrap', //BootstrapUI (in Angular style)
