@@ -11,6 +11,7 @@
 
 angular.module('mrlapp', [
     'ng',
+    'ngAnimate', //Angular Animate
     'ui.router', //Angular UI Router - Yeah!
     'ct.ui.router.extras.previous', //Angular UI Router Extras _ PreviousState - Yeah!Yeah!
     'ui.bootstrap', //BootstrapUI (in Angular style)
@@ -64,6 +65,26 @@ angular.module('mrlapp', [
                                 'content@main.main': {
                                     templateUrl: 'main/mainView.html',
                                     controller: 'mainViewCtrl'
+                                }
+                            }
+                        })
+                        .state('tabs', {
+                            url: "/tabs",
+                            template: "<div ui-view></div>",
+                            controller: 'mainCtrl'
+                        })
+                        .state('tabs.main', {
+                            views: {
+                                '': {
+                                    templateUrl: 'main/main.html'
+                                },
+                                'navbar@tabs.main': {
+                                    templateUrl: 'nav/nav.html',
+                                    controller: 'navCtrl'
+                                },
+                                'content@tabs.main': {
+                                    templateUrl: 'main/tabsView.html',
+                                    controller: 'tabsViewCtrl'
                                 }
                             }
                         })
