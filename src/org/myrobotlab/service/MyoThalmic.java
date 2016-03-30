@@ -55,6 +55,7 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 	transient Myo myo = null;
 	transient Hub hub = null;
 	transient HubThread hubThread = null;
+	
 	MyoData myodata = new MyoData();
 	boolean delta = false;
 	boolean locked = true;
@@ -80,6 +81,8 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 	}
 
 	public void disconnect() {
+		
+		
 		if (hubThread != null) {
 			hubThread.running = false;
 			hubThread = null;
@@ -91,7 +94,17 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 		broadcastState();
 	}
 
-	public void connect() {
+	public void connect() {		
+		if (hub == null){
+			// FIXME - put in connect
+			try {
+				currentPose = new Pose();
+				hub = new Hub("com.example.hello-myo");
+			} catch(Exception e){
+				Logging.logError(e);
+			}			
+		}
+		
 		if (myo == null) {
 			info("Attempting to find a Myo...");
 			myo = hub.waitForMyo(10000);
@@ -118,14 +131,6 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 
 	public MyoThalmic(String n) {
 		super(n);
-		
-		// FIXME - put in connect
-		currentPose = new Pose();
-		try {
-			hub = new Hub("com.example.hello-myo");
-		} catch(Exception e){
-			Logging.logError(e);
-		}
 	}
 
 
@@ -379,11 +384,6 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 	@Override
 	public void onWarmupCompleted(Myo myo, long unkown, WarmupResult warmUpResult) {
 		log.info("onWarmupCompleted {} {}", unkown, warmUpResult);
-	}
-	
-	public void startService() {
-		super.startService();
-		return;
 	}
 	
 
