@@ -743,6 +743,9 @@ public class OpenCV extends VideoSource {
 	public String publishRecognizedFace(String value){
 		return value;
 	}
+        public void publishNoRecognizedFace(){
+	  
+	}
 
 	public static void main(String[] args) throws Exception {
 

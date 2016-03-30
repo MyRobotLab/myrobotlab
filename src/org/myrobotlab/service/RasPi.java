@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -7,6 +8,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.i2c.I2CFactory;
+import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -33,7 +35,7 @@ import com.pi4j.wiringpi.SoftPwm;
  * More Info : http://pi4j.com/
  * 
  */
-public class RasPi extends Service {
+public class RasPi extends Service implements I2CControl {
 
 	public static class Device {
 		public I2CBus bus;
@@ -92,6 +94,7 @@ public class RasPi extends Service {
 
 		Platform platform = Platform.getLocalInstance();
 		log.info(String.format("platform is %s", platform));
+		log.info(String.format("architecture is %s", platform.getArch()));
 		if ("arm".equals(platform.getArch())) {
 			// init I2C
 			gpio = GpioFactory.getInstance();
@@ -273,7 +276,44 @@ public class RasPi extends Service {
 			Logging.logError(e);
 		}
 	}
-	
+
+
+	@Override
+	public void i2cWrite(byte[] buffer, int offset, int size)
+			throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void i2cWrite(int address, byte[] buffer, int offset, int size)
+			throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int i2cRead(byte[] buffer, int offset, int size) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public int i2cRead(int address, byte[] buffer, int offset, int size)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public int i2CRead(byte[] writeBuffer, int writeOffset, int writeSize,
+			byte[] readBuffer, int readOffset, int readSize) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer

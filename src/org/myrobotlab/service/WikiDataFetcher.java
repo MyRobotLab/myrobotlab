@@ -76,7 +76,6 @@ public class WikiDataFetcher extends Service {
 		WikibaseDataFetcher wbdf =  WikibaseDataFetcher.getWikidataDataFetcher();
 		query = upperCaseAllFirst(query);
 		EntityDocument wiki = wbdf.getEntityDocumentByTitle(website,query);
-		// System.out.println("uppercaseFirst : " + upperCaseAllFirst(query));
 		if (wiki == null) {
 			System.out.println("ERROR ! Can't get the document : " + query);
 		 	} 	
@@ -181,24 +180,26 @@ public class WikiDataFetcher extends Service {
 		    }
 		    
 		}
-		System.out.println(array);
 		// Result.
 		return new String(array);
 	    }
 	
-	private List<StatementGroup> getStatementGroup(String query, String ID) throws MediaWikiApiErrorException{
+	private List<StatementGroup> getStatementGroup(String query) throws MediaWikiApiErrorException{
 		EntityDocument document = getWiki(query);
 		return  ((ItemDocument) document).getStatementGroups();
 	}
 	
 	private ArrayList getSnak(String query, String ID) throws MediaWikiApiErrorException{;
-		List<StatementGroup> document = getStatementGroup(query,ID);
+		List<StatementGroup> document = getStatementGroup(query);
 		String dataType = "error";
 		Value data = document.get(0).getProperty();
 		ArrayList al = new ArrayList();
+		
 		for (StatementGroup sg : document) {
-			if (ID.equals(sg.getProperty().getId())) { // Check if this ID exist for this document
-				
+			ID = ID.replaceAll("[\r\n]+", "");
+			String testedID = sg.getProperty().getId();	
+			if (ID.equals(testedID)) { // Check if this ID exist for this document
+				System.out.println("Found !" );
 				for (Statement s : sg.getStatements()) {
 				if (s.getClaim().getMainSnak() instanceof ValueSnak) {
 					dataType = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString();
