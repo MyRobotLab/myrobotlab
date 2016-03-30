@@ -68,6 +68,26 @@ angular.module('mrlapp', [
                                 }
                             }
                         })
+                        .state('tabs', {
+                            url: "/tabs",
+                            template: "<div ui-view></div>",
+                            controller: 'mainCtrl'
+                        })
+                        .state('tabs.main', {
+                            views: {
+                                '': {
+                                    templateUrl: 'main/main.html'
+                                },
+                                'navbar@tabs.main': {
+                                    templateUrl: 'nav/nav.html',
+                                    controller: 'navCtrl'
+                                },
+                                'content@tabs.main': {
+                                    templateUrl: 'main/tabsView.html',
+                                    controller: 'tabsViewCtrl'
+                                }
+                            }
+                        })
                         .state('singleservice', {
                             url: '/service/:servicename',
                             template: "<div ui-view></div>",

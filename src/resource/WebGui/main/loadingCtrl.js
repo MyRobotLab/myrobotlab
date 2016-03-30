@@ -2,7 +2,11 @@ angular.module('mrlapp.main.mainCtrl')
         .controller('loadingCtrl', ['$scope', '$log', 'mrl', 'serviceSvc', '$state', '$previousState',
             function ($scope, $log, mrl, serviceSvc, $state, $previousState) {
                 $log.info('loadingCtrl');
-                
+
+                var isUndefinedOrNull = function (val) {
+                    return angular.isUndefined(val) || val === null;
+                };
+
                 $scope.mrlReady = false;
                 $scope.serviceSvcReady = false;
                 mrl.init().then(function () {
@@ -23,10 +27,16 @@ angular.module('mrlapp.main.mainCtrl')
                 }, function (msg_) {
                     $log.info('mrl.init()-meh!');
                 });
-                
+
                 var go = function () {
                     var previousstate = $previousState.get();
-                    $log.info('transitioning to state ', previousstate.state.name, ' with params ', previousstate.params);
-                    $state.go(previousstate.state.name, previousstate.params);
+                    if (isUndefinedOrNull(previousstate)) {
+                        $log.warn('can"t go back - there is no back -> defaulting to /main');
+                        $log.info('transitioning to state main');
+                        $state.go('main');
+                    } else {
+                        $log.info('transitioning to state', previousstate.state.name, 'with params', previousstate.params);
+                        $state.go(previousstate.state.name, previousstate.params);
+                    }
                 };
             }]);
