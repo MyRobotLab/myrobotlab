@@ -328,12 +328,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		}
 	}
 
-
 	public void setPredicate(String username, String predicateName, String predicateValue) {
 		Predicates preds = getChat(username, currentBotName).predicates;
 		preds.put(predicateName, predicateValue);
 	}
-
+	
+	public void unsetPredicate(String username, String predicateName) {
+		Predicates preds = getChat(username, currentBotName).predicates;
+		preds.remove(predicateName);
+	}
+	
+	
 	public String getPredicate(String username, String predicateName) {
 		Predicates preds = getChat(username, currentBotName).predicates;
 		return preds.get(predicateName);
