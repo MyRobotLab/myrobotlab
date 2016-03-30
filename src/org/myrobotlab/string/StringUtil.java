@@ -131,4 +131,13 @@ public class StringUtil {
 		return methodName.toString();
 	}
 
+
+	public static boolean isEmpty(String v) {
+		// return true if the string is null or empty.
+		if (v == null || "".equals(v)) {
+			return true;
+		}
+		return false;
+	}
+
 }
