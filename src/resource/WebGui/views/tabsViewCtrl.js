@@ -1,4 +1,4 @@
-angular.module('mrlapp.main.mainCtrl')
+angular.module('mrlapp.views')
         .controller('tabsViewCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', 'serviceSvc', '$state',
             function ($scope, $log, $filter, $timeout, mrl, serviceSvc, $state) {
                 $log.info('tabsViewCtrl');
