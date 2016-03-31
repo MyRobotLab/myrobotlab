@@ -223,6 +223,7 @@ public class WikiDataFetcher extends Service {
 			Value data = ((JacksonValueSnak) al.get(1)).getDatavalue();
 			String dataType = (String) al.get(0);
 			String answer = "";
+			System.out.print("Datatype : " + dataType);
 			switch (dataType) {
          	case "wikibase-item"://
          		String info = (String) data.toString();
@@ -235,7 +236,7 @@ public class WikiDataFetcher extends Service {
          		data = (TimeValue) data;
          		answer =  String.valueOf(((TimeValue) data).getDay()) +"/" + String.valueOf(((TimeValue) data).getMonth()) +"/" + String.valueOf(((TimeValue) data).getYear()) +" - " + String.valueOf(((TimeValue) data).getHour()) +"H" + String.valueOf(((TimeValue) data).getMinute()) +"Mn";
          		break;
-         	case "globe-coordinates":
+         	case "globe-coordinate":
          		answer = ((GlobeCoordinatesValue)data).toString();
          		break;
          	case "monolingualtext"://
