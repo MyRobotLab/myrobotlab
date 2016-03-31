@@ -28,12 +28,11 @@ angular.module('mrlapp', [
     'mrlapp.main.mainCtrl',
     'mrlapp.main.statusSvc', //very basic service for storing "statuses"
     'mrlapp.main.noWorkySvc', //send a noWorky !
-    'mrlapp.main.filter',
-    'mrlapp.main.parseHtml',
-    'mrlapp.singleservice.singleserviceCtrl',
+    'mrlapp.views', //mainView, tabsView, serviceView, ...
     'mrlapp.widget.startCtrl',
     'mrlapp.nav', //Navbar & Co. (/nav)
-    'mrlapp.service' //Service & Co. (/service)
+    'mrlapp.service', //Service & Co. (/service)
+    'mrlapp.utils' //general, helful tools, directives, services, ...
 ])
         .config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', 'ngClipProvider',
             function ($provide, $stateProvider, $urlRouterProvider, mrlProvider, ngClipProvider) {
@@ -63,7 +62,7 @@ angular.module('mrlapp', [
                                     controller: 'navCtrl'
                                 },
                                 'content@main.main': {
-                                    templateUrl: 'main/mainView.html',
+                                    templateUrl: 'views/mainView.html',
                                     controller: 'mainViewCtrl'
                                 }
                             }
@@ -83,25 +82,25 @@ angular.module('mrlapp', [
                                     controller: 'navCtrl'
                                 },
                                 'content@tabs.main': {
-                                    templateUrl: 'main/tabsView.html',
+                                    templateUrl: 'views/tabsView.html',
                                     controller: 'tabsViewCtrl'
                                 }
                             }
                         })
-                        .state('singleservice', {
+                        .state('serviceView', {
                             url: '/service/:servicename',
                             template: "<div ui-view></div>",
                             controller: 'mainCtrl'
                         })
-                        .state('singleservice.main', {
+                        .state('serviceView.main', {
                             views: {
                                 '': {
                                     templateUrl: 'main/main.html'
                                 },
-                                'navbar@singleservice.main': {},
-                                'content@singleservice.main': {
-                                    templateUrl: 'singleservice/singleservice.html',
-                                    controller: 'singleserviceCtrl'
+                                'navbar@serviceView.main': {},
+                                'content@serviceView.main': {
+                                    templateUrl: 'views/serviceView.html',
+                                    controller: 'serviceViewCtrl'
                                 }
                             }
                         });

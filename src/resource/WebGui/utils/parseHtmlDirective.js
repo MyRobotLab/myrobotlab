@@ -1,4 +1,4 @@
-angular.module('mrlapp.main.parseHtml', [])
+angular.module('mrlapp.utils')
         //general HTML-compile/parse directive
         .directive('parseHtml', ['$compile', function ($compile) {
                 return {

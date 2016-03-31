@@ -21,13 +21,12 @@
                 <li>
                     <form class="navbar-form">
                         <input class="form-control" type="text" ng-model="newName" placeholder="name">
-                        <input class="form-control" typeahead-min-length="0" type="text" ng-model="newType" placeholder="Service Type" uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-template-url="serviceSearchTemplate.html">
-                        <script type="text/ng-template" id="serviceSearchTemplate.html">
-                            <a>
-                            <img ng-src="/{{match.model.img}}" width="16">
-                            <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
-                            </a>
-                        </script>
+                        <input class="form-control" type="text"
+                               ng-model="newType"
+                               placeholder="Service Type"
+                               uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}"
+                               typeahead-min-length="0"
+                               typeahead-template-url="nav/templates/serviceSearchTemplate.html">
                         <button class="btn btn-default" ng-click="start(newName, newType)">start</button>
                     </form>
                 </li>
@@ -80,11 +79,11 @@
                     <form class="navbar-form" role="search">
                         <div class="input-group">
                             <input type="text" class="form-control"
-                                   placeholder="Search"
-                                   typeahead-min-length="0"
                                    ng-model="searchSelectedPanel"
+                                   placeholder="Search"
                                    uib-typeahead="panel as panel.name for panel in allpanels | filter:{name:$viewValue}"
-                                   typeahead-template-url="nav/searchtemplate.html"
+                                   typeahead-min-length="0"
+                                   typeahead-template-url="nav/templates/searchtemplate.html"
                                    typeahead-on-select='searchOnSelect($item, $model, $label)'>
                             <div class="input-group-btn">
                                 <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Search">
