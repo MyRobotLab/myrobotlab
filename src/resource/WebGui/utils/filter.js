@@ -1,4 +1,4 @@
-angular.module('mrlapp.main.filter', [])
+angular.module('mrlapp.utils')
         //general reverse filter
         .filter('reverse', function () {
             return function (items) {

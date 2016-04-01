@@ -53,11 +53,13 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 	public void flush() {
 		// flush any partial batch
 		// TODO: make this thread safe!
+		
+		
 		invoke("publishDocuments", batch);
 		invoke("publishFlush");
 		// reset/clear the batch.
 		batch = new ArrayList<Document>();
-		while (getOutbox().size() > 0) {
+		while (getOutbox().size() > 0 || isRunning ) {
 			// TODO: wait until the outbox is empty.
 			log.info("Draining out box Size: {}", getOutbox().size());
 			try {

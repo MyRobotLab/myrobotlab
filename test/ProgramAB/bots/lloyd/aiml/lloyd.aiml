@@ -202,5 +202,24 @@
     </template>
   </category>
 
+  <!--  The below are for the topic test cases.  set current topic, validate response --> 
+  <category>
+    <pattern>SET TOPIC TEST</pattern>
+    <template><think><set name="topic">TESTTOPIC</set></think></template>  
+  </category>
+  
+  <!--  if we are not in a topic, this is the response. -->
+  <category>
+    <pattern>TESTTOPICTEST</pattern>
+    <template>TOPIC IS <get name="topic"/></template>  
+  </category>
+  
+  <topic name="TESTTOPIC">
+    <!-- if we are in this category, this will be the response to the pattern. -->
+    <category>
+      <pattern>TESTTOPICTEST</pattern>
+      <template>TEST TOPIC RESPONSE</template>
+    </category>
+  </topic> 
   
 </aiml>

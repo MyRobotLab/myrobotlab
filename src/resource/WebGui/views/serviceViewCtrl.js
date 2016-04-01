@@ -1,7 +1,7 @@
-angular.module('mrlapp.singleservice.singleserviceCtrl', ['mrlapp.mrl'])
-        .controller('singleserviceCtrl', ['$scope', '$log', '$stateParams', '$filter', '$timeout', 'mrl', 'serviceSvc',
+angular.module('mrlapp.views')
+        .controller('serviceViewCtrl', ['$scope', '$log', '$stateParams', '$filter', '$timeout', 'mrl', 'serviceSvc',
             function ($scope, $log, $stateParams, $filter, $timeout, mrl, serviceSvc) {
-                $log.info('singleserviceCtrl');
+                $log.info('serviceViewCtrl');
                 
                 $scope.servicename = $stateParams.servicename;
                 
@@ -25,7 +25,7 @@ angular.module('mrlapp.singleservice.singleserviceCtrl', ['mrlapp.mrl'])
                         } else {
                             $scope.panelfound = false;
                         }
-                        $log.info('panel-singleservice', $scope.panel);
+                        $log.info('panel-serviceView', $scope.panel);
                     });
                 };
                 panelsUpdated(serviceSvc.getPanelsList());
