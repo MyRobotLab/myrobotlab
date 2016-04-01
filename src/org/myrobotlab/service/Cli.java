@@ -46,7 +46,7 @@ public class Cli extends Service {
 	
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Cli.class);
-	public final static HashSet<String> cmdSet = new HashSet<String>();
+	// public final static HashSet<String> cmdSet = new HashSet<String>();
 
 	
 	// commands

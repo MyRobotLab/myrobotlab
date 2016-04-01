@@ -26,7 +26,7 @@
 	<classpathentry kind="lib" path="/repo/net.sourceforge.simbad/1.4/simbad-1.4.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.op.chess/1.0.0/ChessBoard.jar"/>
-	<classpathentry kind="lib" path="/repo/org.python.core/2.5.2/jython.jar"/>
+	<classpathentry kind="lib" path="/repo/org.python.core/2.7.0/jython-2.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.tritonus.share.sampled.floatsamplebuffer/0.3.6/tritonus_share-0.3.6.jar"/>
 	<classpathentry kind="lib" path="/repo/simbad.gui/1.4/simbad-1.4.jar"/>
 	<classpathentry kind="lib" path="/repo/wiiuse.wiimote/0.12b/wiiusej.jar"/>
@@ -56,7 +56,17 @@
 	<classpathentry kind="lib" path="/repo/com.wolfram.alpha/1.1/WolframAlpha-1.1.jar"/>
 	<classpathentry kind="lib" path="/repo/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
 	<classpathentry kind="lib" path="/repo/edu.northwestern.topcodes/1.0/topcodes.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/3.3.0/smack.jar"/>
+	
+	<!--  classpathentry kind="lib" path="/repo/org.jivesoftware.smack/3.3.0/smack.jar"/ -->
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-core-4.1.6.jar"/>	
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-tcp-4.1.6.jar"/>	
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-im-4.1.6.jar"/>	
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-debug-4.1.6.jar"/>	
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/xpp3-1.1.4c.jar"/>	
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/jxmpp-core-0.4.2.jar"/>	
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/jxmpp-util-cache-0.4.2.jar"/>	
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-java7-4.1.6.jar"/>	
+	 
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-async-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-core-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-examples-3.0.5.jar"/>

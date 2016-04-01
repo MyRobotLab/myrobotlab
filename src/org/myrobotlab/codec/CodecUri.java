@@ -69,11 +69,6 @@ public class CodecUri {
 			throw new IOException(String.format("/api expected received %s", pathInfo));
 		}
 
-		if (!CodecUtils.PREFIX_API.equals(parts[1])) {
-			log.error(String.format("apiTag %s specified but %s in ordinal", CodecUtils.PREFIX_API, parts[0]));
-			return null;
-		}
-
 		// FIXME INVOKING VS PUTTING A MESSAGE ON THE BUS
 		Message msg = new Message();
 		

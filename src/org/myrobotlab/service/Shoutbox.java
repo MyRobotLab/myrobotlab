@@ -10,7 +10,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.roster.Roster;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
@@ -22,15 +24,14 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.ProgramAB.Response;
-import org.myrobotlab.service.Xmpp.XMPPMsg;
+import org.myrobotlab.service.Xmpp.XmppMsg;
 import org.slf4j.Logger;
 
 // FIXME - use Peers !
 public class Shoutbox extends Service {
-	
+
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Shoutbox.class);
-
 
 	public static class DefaultNameProvider implements NameProvider {
 		@Override
@@ -60,7 +61,6 @@ public class Shoutbox extends Service {
 
 		public String time;
 
-
 	}
 
 	static final public String TYPE_SYSTEM = "TYPE_SYSTEM";
@@ -86,6 +86,7 @@ public class Shoutbox extends Service {
 	static public String makeKey(String ws) {
 		return String.format("%s:%s", ws, ws);
 	}
+
 	transient ProgramAB chatbot;
 
 	transient Xmpp xmpp;
@@ -128,8 +129,8 @@ public class Shoutbox extends Service {
 	// TODO - force logout command
 	// FIXME - color options
 
-	//transient Connections conns = new Connections();
-	
+	// transient Connections conns = new Connections();
+
 	int maxShoutsInMemory = 200;
 
 	ArrayList<Shout> shouts = new ArrayList<Shout>();
@@ -138,7 +139,6 @@ public class Shoutbox extends Service {
 	int msgCount;
 
 	transient FileWriter fw = null;
-
 
 	transient BufferedWriter bw = null;
 
@@ -153,7 +153,7 @@ public class Shoutbox extends Service {
 
 	public String addXMPPRelay(String user) {
 		xmppRelays.add(user);
-		xmpp.sendMessage("now shoutbox relay", user);
+		// xmpp.sendMessage("now shoutbox relay", user); FIXME
 		return user;
 	}
 
@@ -216,18 +216,13 @@ public class Shoutbox extends Service {
 		return null;
 	}
 
-
 	public void getXMPPRelays() {
 		Shout shout = createShout(TYPE_USER, Arrays.toString(xmppRelays.toArray()));
 		shout.from = "mr.turing";
 		invoke("publishShout", shout);
 	}
 
-	public Roster getXMPPRoster() {
-		return xmpp.getRoster();
-	}
-	
-	
+
 	/**
 	 * archiving restores last json file back into newly started shoutbox
 	 */
@@ -266,13 +261,13 @@ public class Shoutbox extends Service {
 			Logging.logError(e);
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param myName
 	 */
-	public void setNickName(String nickname){
-		//WebGui web
+	public void setNickName(String nickname) {
+		// WebGui web
 		log.info("setNickName {}", nickname);
 	}
 
@@ -292,7 +287,7 @@ public class Shoutbox extends Service {
 		// String r = resizeImage(response.msg);
 		String r = response.msg;
 
-		//conns.addConnection("mr.turing", "mr.turing");
+		// conns.addConnection("mr.turing", "mr.turing");
 
 		Shout shout = createShout(TYPE_USER, r);
 		shout.from = "mr.turing";
@@ -302,45 +297,50 @@ public class Shoutbox extends Service {
 
 	// FIXME FIXME FIXME - not normalized with publishShout(WebSocket) :PPPP
 	// FIXME - must fill in your name - "Greg Perry" somewhere..
-	public void onXMPPMsg(XMPPMsg xmppMsg) {
-		log.info(String.format("XMPP - %s %s", xmppMsg.msg.getFrom(), xmppMsg.msg.getBody()));
+	public void onXMPPMsg(XmppMsg xmppMsg) {
+		log.info(String.format("XMPP - %s %s", xmppMsg.from, xmppMsg.msg));
 
 		// not exactly the same model as onConnect - so we try to add each time
-		String user = xmpp.getEntry(xmppMsg.msg.getFrom()).getName();
-		//conns.addConnection(xmppMsg.msg.getFrom(), user);
+		String user = "me";// FIXME
+							// xmpp.getEntry(xmppMsg.msg.getFrom()).getName();
+		// conns.addConnection(xmppMsg.msg.getFrom(), user);
 
-		Shout shout = createShout(TYPE_USER, xmppMsg.msg.getBody());
+		Shout shout = createShout(TYPE_USER, xmppMsg.msg);
 		shout.from = user;
 
 		invoke("publishShout", shout);
 	}
-	
+
 	/**
 	 * shout of minimal complexity
+	 * 
 	 * @param msg
 	 */
-	public void shout(String msg){
-		// an optimized shout - there is client id & auth stuff which should be supplied at the service level
-		// a client should simply shout('my text') and all the other parts be filled in on overloaded methods
+	public void shout(String msg) {
+		// an optimized shout - there is client id & auth stuff which should be
+		// supplied at the service level
+		// a client should simply shout('my text') and all the other parts be
+		// filled in on overloaded methods
 		shout("test", msg);
 	}
-	
+
 	/**
 	 * max complexity shout
+	 * 
 	 * @param msg
 	 * @param clientId
 	 */
-	public void shout(String clientId, String msg){
+	public void shout(String clientId, String msg) {
 		Shout shout = createShout(TYPE_USER, msg);
 		shout.clientId = clientId;
-		shout.from = clientId; //????
+		shout.from = clientId; // ????
 		invoke("publishShout", shout);
 	}
 
 	// EXCHANGE need "session-key" to do a - connection/session-key for user
 	// FIXME NOT NORMALIZED with onXMPPMsg() !!!!
 	// public void publishShout(WSMsg wsmsg) { is Message necessary here?
-	public Shout publishShout(Shout shout) {
+	public Shout publishShout(Shout shout) throws NotConnectedException, XMPPException {
 		log.info(String.format("publishShout %s %s", shout.from, shout.msg));
 
 		String foundName = findChatBotName(shout.msg);
@@ -350,12 +350,12 @@ public class Shoutbox extends Service {
 
 		shouts.add(shout);
 		Message out = createMessage("shoutclient", "publishShout", CodecUtils.toJson(shout));
-		//webgui.sendToAll(out);
+		// webgui.sendToAll(out);
 
 		if (xmpp != null && !TYPE_SYSTEM.equals(shout.type)) {
 			for (int i = 0; i < xmppRelays.size(); ++i) {
 				String relayName = xmppRelays.get(i);
-				String jabberID = xmpp.getJabberID(relayName);
+				String jabberID = null;// FIXME xmpp.getJabberID(relayName);
 				// don't echo to self
 				// if (!key.startsWith(jabberID)) { filter took out mrt and
 				// other activity !
@@ -367,11 +367,11 @@ public class Shoutbox extends Service {
 		}
 
 		archive(shout);
-		
+
 		return shout;
 	}
 
-	public void quickStart(String xmpp, String password) {
+	public void quickStart(String xmpp, String password) throws Exception {
 		startXMPP(xmpp, password);
 		startChatBot();
 
@@ -389,7 +389,7 @@ public class Shoutbox extends Service {
 
 	public String removeXMPPRelay(String user) {
 		xmppRelays.remove(user);
-		//conns.remove(xmpp.getJabberID(user));
+		// conns.remove(xmpp.getJabberID(user));
 		return user;
 	}
 
@@ -454,7 +454,7 @@ public class Shoutbox extends Service {
 		super.startService();
 
 		try {
-			// TODO FIGURE THIS OUT :P  OATH ?
+			// TODO FIGURE THIS OUT :P OATH ?
 			String provider = "org.myrobotlab.client.DrupalNameProvider";
 			log.info(String.format("attempting to set name provider - %s", provider));
 			setNameProvider(provider);
@@ -467,58 +467,45 @@ public class Shoutbox extends Service {
 
 	// ---- outbound ---->
 
-	
 	/*
+	 * 
+	 * 
+	 * CONCEPTS systemBroadcast - system needs to send to all system message
+	 * list - system sends to a list of users system message channel -
+	 * 
+	 * channel - a group of recievers & senders
+	 * 
+	 * Authenticaiton & Authorization - OATH query to Drupal?
+	 * 
+	 * DATA timezone - set time zode - use UTC for all server data
+	 * 
+	 * // system related public int connectionCount; public int userCount;
+	 * public int guestCount; public int msgCount;
+	 * 
+	 * getVersion
+	 */
 
-
-	CONCEPTS
-		systemBroadcast - system needs to send to all
-		system message list - system sends to a list of users
-		system message channel -
-		
-	channel - a group of recievers & senders
-	
-	Authenticaiton &  Authorization - OATH query to Drupal?
-	
-	DATA
-		timezone - set time zode - use UTC for all server data
-	
-	// system related
-	public int connectionCount;
-	public int userCount;
-	public int guestCount;
-	public int msgCount;
-	
-	getVersion
-	*/
-	
-	
 	// --------- XMPP BEGIN ------------
-	public boolean startXMPP(String user, String password) {
+	public void startXMPP(String user, String password) throws Exception {
 		if (xmpp == null) {
 			xmpp = (Xmpp) Runtime.start("xmpp", "XMPP");
 		}
-		xmpp.connect(user, password);
-		if (xmpp.connect(user, password)) {
-			xmpp.addXMPPMsgListener(this);
-			return true;
-		} else {
-			return false;
-		}
+
+		xmpp.connect("myrobotlab.org", 5222, user, password);
+		xmpp.addXmppMsgListener(this);
 
 	}
-	
+
 	public static void main(String args[]) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
-			Shoutbox shoutbox = (Shoutbox)Runtime.start("shoutbox", "Shoutbox");
+			Shoutbox shoutbox = (Shoutbox) Runtime.start("shoutbox", "Shoutbox");
 			Shout shout = new Shout();
 			shout.from = "Fred";
 			shout.msg = "Hello I'm Fred";
-			
-			
+
 			shoutbox.shouts.add(shout);
 
 			shout = new Shout();
@@ -526,7 +513,6 @@ public class Shoutbox extends Service {
 			shout.msg = "Hi I'm George";
 			shoutbox.shouts.add(shout);
 
-			
 			shoutbox.createShout(TYPE_SYSTEM, "this is a test shout");
 			shoutbox.createShout(TYPE_SYSTEM, "this is another test shout");
 			shoutbox.createShout(TYPE_SYSTEM, "more test shouting");
@@ -554,9 +540,8 @@ public class Shoutbox extends Service {
 		ServiceType meta = new ServiceType(Shoutbox.class.getCanonicalName());
 		meta.addDescription("shoutbox server");
 		meta.addCategory("connectivity");
-		
+
 		return meta;
 	}
-
 
 }

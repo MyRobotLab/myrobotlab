@@ -128,9 +128,9 @@ public class Incubator extends Service {
 			xmpp.startService();
 			// webgui.startService();
 
-			xmpp.login("incubator@myrobotlab.org", "hatchMe!");
+			xmpp.connect("incubator@myrobotlab.org", "hatchMe!");
 
-			xmpp.addAuditor("Greg Perry");
+			// FIXME - xmpp.addAuditor("Greg Perry");
 			// python.startService();
 			xmpp.sendMessage(CodecUtils.toJson(status), "Greg Perry");
 			// xmpp.releaseService();

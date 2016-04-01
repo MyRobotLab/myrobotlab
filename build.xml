@@ -84,7 +84,7 @@
 -->
 
 <!-- The MyRobotLab ant build.xml  -->
-<project name="myrobotlab" default="jar" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
+<project name="myrobotlab" default="report" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
@@ -167,7 +167,7 @@
 		<pathelement location="${repo}/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar"/>
 		<pathelement location="${repo}/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
 		<pathelement location="${repo}/org.op.chess/1.0.0/ChessBoard.jar"/>
-		<pathelement location="${repo}/org.python.core/2.5.2/jython.jar"/>
+		<pathelement location="${repo}/org.python.core/2.7.0/jython-2.7.0.jar"/>
 		<pathelement location="${repo}/org.tritonus.share.sampled.floatsamplebuffer/0.3.6/tritonus_share-0.3.6.jar"/>
 		<pathelement location="${repo}/simbad.gui/1.4/simbad-1.4.jar"/>
 		<pathelement location="${repo}/wiiuse.wiimote/0.12b/wiiusej.jar"/>
@@ -502,7 +502,7 @@
 		<unzip src="${repo}/org.slf4j.logback/1.1.3/slf4j-api-1.7.12.jar" dest="${build}/classes" />
 		
 		<!-- python -->
-		<unzip src="${repo}/org.python.core/2.5.2/jython.jar" dest="${build}/classes" />
+		<unzip src="${repo}/org.python.core/2.7.0/jython-2.7.0.jar" dest="${build}/classes" />
 		
 		<!-- for client -->
 
@@ -701,12 +701,13 @@
 		</junitreport>
 		<!-- jacoco report stuff -->
                <echo message="JACOCO RESULTS FILE ${result.jacoco.file}" />
+		<!-- temporarily disabling jacoco
 		<jacoco:report>
-			<!-- This task needs the collected execution data and ... -->
+			// This task needs the collected execution data and ...
 			<executiondata>
 				<file file="${result.jacoco.file}" />
 			</executiondata>
-			<!-- the class files and optional source files ... -->
+			// the class files and optional source files ... 
 			<structure name="JaCoCo MyRobotLab Report">
 				<classfiles>
 					<fileset dir="${build}/classes/org/myrobotlab" />
@@ -715,12 +716,12 @@
 					<fileset dir="${src}" />
 				</sourcefiles>
 			</structure>
-			<!-- to produce reports in different formats. -->
+			// to produce reports in different formats. 
 			<html destdir="${result.report.dir}" />
 			<csv destfile="${result.report.dir}/report.csv" />
 			<xml destfile="${result.report.dir}/report.xml" />
 		</jacoco:report>
-  
+  -->
                	 <!-- helper task to facilitate moving the jacoco report to s3 because
                       hidden directories aren't copied with the local_dir task in travis s3 task --> 
 		<!-- replace and rename the .resources directory to resources -->
@@ -774,7 +775,8 @@
 		               printsummary="true"
 		               printsummary="withOutAndErr"
 		               outputtoformatters="true" -->
-		<jacoco:coverage destfile="${result.jacoco.file}">
+		<!-- temporarily disabling jacoco -->
+		<!-- jacoco:coverage destfile="${result.jacoco.file}" -->
 		    <junit printsummary="on" fork="true" haltonfailure="on">
 			<!--
 			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
@@ -796,12 +798,12 @@
 					<exclude name="**/JFugueTest.java" />
 					<exclude name="**/MessageTest.java" />
 					<!-- FIXME !!  there should be no excluded tests ! -->
-					<exclude name="**/ArduinoTest.java" />
+					<!-- exclude name="**/ArduinoTest.java" / -->
 				</fileset>
 			</batchtest>
 
 		    </junit>
-		</jacoco:coverage>
+		<!-- /jacoco:coverage -->
 	</target>
 
 	<target name="quickTest" > <!-- not correct depends="compiletests" -->

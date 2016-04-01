@@ -1,245 +1,250 @@
 package org.myrobotlab.service;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
-import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.ChatManager;
-import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
+import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.MessageListener;
-import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
-import org.jivesoftware.smack.SASLAuthentication;
+import org.jivesoftware.smack.SmackException.NoResponseException;
+import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.SmackException.NotLoggedInException;
 import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.XMPPException.XMPPErrorException;
+import org.jivesoftware.smack.chat.Chat;
+import org.jivesoftware.smack.chat.ChatManager;
+import org.jivesoftware.smack.chat.ChatManagerListener;
+import org.jivesoftware.smack.chat.ChatMessageListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Type;
+import org.jivesoftware.smack.roster.Roster;
+import org.jivesoftware.smack.roster.Roster.SubscriptionMode;
+import org.jivesoftware.smack.roster.RosterEntry;
+import org.jivesoftware.smack.roster.RosterListener;
+import org.jivesoftware.smack.roster.packet.RosterPacket.ItemStatus;
+import org.jivesoftware.smack.tcp.XMPPTCPConnection;
+import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
+import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration.Builder;
+import org.myrobotlab.codec.CodecCli;
+import org.myrobotlab.codec.CodecUri;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.InvokerUtils;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceEnvironment;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Connection;
-import org.myrobotlab.service.RemoteAdapter.CommOptions;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
- * An Xmpp service which utilizes Jive's smack client library
- * There is smack, whack, and tinder
- * http://stackoverflow.com/questions/1547599/differences-between-smack-tinder-and-whack
+ * An Xmpp service which utilizes Jive's smack client library There is smack,
+ * whack, and tinder
+ * http://stackoverflow.com/questions/1547599/differences-between-smack-tinder-
+ * and-whack
  * 
  * @author GROG
  *
  */
-public class Xmpp extends Service implements Gateway, MessageListener {
+public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatMessageListener, MessageListener, RosterListener, ConnectionListener {// ,
 
-	// GOOD ! - bundle message in single object for event return
-	public static class XMPPMsg {
-		public Chat chat;
-		public Message msg;
+	public static class Contact {
+		public String user;
+		public String presence;
+		public String type;
+		public String name;
+		public String status;
 
-		public XMPPMsg(Chat chat, Message msg) {
-			this.chat = chat;
-			this.msg = msg;
+		public String toString() {
+			return String.format("user: %s, name: %s, presence: %s, type: %s, status: %s", user, name, type, presence, status);
+		}
+	}
+	public static class XmppMsg {
+		public String from;
+		public String msg;
+		public String type;
+		public String stanzaId;
+
+		public XmppMsg(Chat chat, Message msg) {
+			this.from = chat.getParticipant();
+			this.msg = msg.getBody();
+			Message.Type t = msg.getType();
+			if (t != null){
+				this.type = msg.getType().toString();
+			}
+			stanzaId = msg.getStanzaId();
 		}
 	}
 
+	boolean isConnected = false;
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Xmpp.class.getCanonicalName());
-	static final int packetReplyTimeout = 500; // millis
+	public final static Logger log = LoggerFactory.getLogger(Xmpp.class);
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+		ServiceType meta = new ServiceType(Xmpp.class.getCanonicalName());
+		meta.addDescription("xmpp service to access the jabber network");
+		meta.addCategory("connectivity");
+		meta.addDependency("org.jivesoftware.smack", "3.3.0");
+		return meta;
+	}
 
-	// FIXME - sendMsg onMsg getMsg - GLOBAL INTERFACE FOR GATEWAYS
-	// FIXME - handle multiple user accounts
+	transient CodecCli cli = new CodecCli();
 
-	// not sure how to initialize requirements .. probably a register Security
-	// event
-	// thread safe ???
+	transient CodecUri uri = new CodecUri();
 
-	private String defaultPrefix;
-
-	HashMap<String, String> xmppSecurity = new HashMap<String, String>();
-
-	String user;
+	TreeMap<String, Contact> contacts = new TreeMap<String, Contact>();
+	String username;
 	String password;
-	String hostname = "talk.google.com";
-	int port = 5222;
-	String service = "gmail.com"; // defaulted :P
 
-	transient ConnectionConfiguration config;
-	transient XMPPConnection connection;
+	String hostname = "myrobotlab.org"; // talk.myrobotlab.org
+	String serviceName = "myrobotlab.org"; // xmpp.myrobotlab.org
+
+	int port = 5222;
+	transient XMPPTCPConnectionConfiguration config;
+	transient XMPPTCPConnection connection;
 	transient ChatManager chatManager;
 
 	transient Roster roster = null;
 
-	transient HashMap<String, RosterEntry> idToEntry = new HashMap<String, RosterEntry>();
-
-
-	/**
-	 * Static list of third party dependencies for this service. The list will
-	 * be consumed by Ivy to download and manage the appropriate resources
-	 * 
-	 * @return
-	 */
-	
 	/**
 	 * auditors chat buddies who can see what commands are being processed and
 	 * by who through the Xmpp service TODO - audit full system ??? regardless
 	 * of message origin?
 	 */
-	// FIXME ?? - change to HashMap<String, RosterEntry>
 	HashSet<String> auditors = new HashSet<String>();
+
 	// HashSet<String> responseRelays = new HashSet<String>();
 	HashSet<String> allowCommandsFrom = new HashSet<String>();
+
 	transient HashMap<String, Chat> chats = new HashMap<String, Chat>();
 
+	transient Chat chat = null;
 
 	public Xmpp(String n) {
 		super(n);
-		// defaultPrefix = n;
 	}
 
-	public boolean addAuditor(String id) {
-		RosterEntry entry = getEntry(id);
-		if (entry == null) {
-			error("can not add auditor %s", id);
-			return false;
-		}
-		String jabberID = entry.getUser();
-		auditors.add(jabberID);
-		broadcast(String.format("added buddy %s", entry.getName()));
-		return true;
+	public void addBuddy(String user) throws NotLoggedInException, NoResponseException, XMPPErrorException, NotConnectedException {
+		Roster roster = Roster.getInstanceFor(connection);
+		roster.setSubscriptionMode(SubscriptionMode.accept_all);
+		// jid: String, user: String, groups: String[]
+
+		// null groups
+		roster.createEntry("grog@myrobotlab.org", "grog", null);
 	}
 
-	// FIXME normalize with all gateways?
 	@Override
 	public void addConnectionListener(String name) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public void addXMPPMsgListener(Service service) {
-		addListener("publishXMPPMsg", service.getName(), "onXMPPMsg");
+	public void addXmppMsgListener(Service service) {
+		// FIXME - implement direct callback or pub sub support ??
 	}
 
-	/**
-	 * broadcast a chat message to all buddies in the relay
-	 * 
-	 * @param text
-	 *            - text to broadcast
-	 */
-	public void broadcast(String text) {
-		for (String buddy : auditors) {
-			sendMessage(text, buddy);
+	public void broadcast(String msg) {
+		// TODO - possibly implement
+		// but we should use more xmpp definitions e.g. broadcast to room
+		// define a room etc...
+	}
+
+	public void chatCreated(Chat chat, boolean locallyCreated) {
+		// test if locallyCreated
+		if (!locallyCreated) {
+			chat.addMessageListener(this);
 		}
 	}
 
-	public boolean connect() {
-
-		try {
-
-			if (config == null) {
-				SASLAuthentication.supportSASLMechanism("PLAIN", 0);
-				// SASLAuthentication.registerSASLMechanism("DIGEST-MD5",
-				// SASLDigestMD5Mechanism.class);
-				// SASLAuthentication.supportSASLMechanism("DIGEST-MD5", 0);
-				// WTF is a service name ?
-				// ConnectionConfiguration config = new
-				// ConnectionConfiguration(SERVER_HOST, SERVER_PORT);
-				// ConnectionConfiguration config = new
-				// ConnectionConfiguration("talk.google.com", 5222,
-				// "gmail.com");
-				// config.setTruststoreType("BKS");
-				// TODO - look for security keys "myName" user & myName password
-				
-				/*
-				SASLAuthentication.unBlacklistSASLMechanism("PLAIN");
-				SASLAuthentication.blacklistSASLMechanism("DIGEST-MD5");
-				*/
-				
-				config = new ConnectionConfiguration(hostname, 5222);
-			}
-
-			if (connection == null || !connection.isConnected()) {
-
-				log.info(String.format("%s new connection to %s:%d", getName(), hostname, port));
-				connection = new XMPPConnection(config);
-				connection.connect();
-				log.info(String.format("%s connected %s", getName(), connection.isConnected()));
-				chatManager = connection.getChatManager();
-
-				log.info(String.format("%s is connected - logging in", getName()));
-				if (!login(user, password)) {
-					disconnect();
-				}
-
-				getRoster();
-
-			}
-
-			return connection.isConnected();
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		return false;
-	}
-
+	// grog@xmpp://{host}:5222 ???
 	@Override
 	public void connect(String uri) throws URISyntaxException {
-		org.myrobotlab.framework.Message msg = createMessage("", "register", null);
-		sendRemote(uri, msg);
+		// TODO Auto-generated method stub
+
 	}
 
-	public boolean connect(String host, int port, String user, String password) {
-		return connect(host, port, user, password, service);
-	}
+	public void connect(String hostname, int port, String username, String password) throws Exception {
 
-	public boolean connect(String host, int port, String user, String password, String service) {
-		this.hostname = host;
+		purgeTask("reconnect");
+
+		this.hostname = hostname;
+		this.serviceName = hostname;
 		this.port = port;
-		this.user = user;
+		this.username = username;
 		this.password = password;
-		this.service = service;
-		return connect();
+
+		Builder builder = XMPPTCPConnectionConfiguration.builder();
+		builder.setUsernameAndPassword(username, password);
+		builder.setServiceName(serviceName);
+		builder.setServiceName(hostname);
+		builder.setPort(port);
+		builder.setSecurityMode(SecurityMode.disabled);
+		builder.setDebuggerEnabled(true);
+
+		XMPPTCPConnectionConfiguration config = builder.build();
+
+		connection = new XMPPTCPConnection(config);
+		connection.connect().login();
+
+		roster = Roster.getInstanceFor(connection);
+		chatManager = ChatManager.getInstanceFor(connection);
+
+		roster.addRosterListener(this);
+		
+		isConnected = true;
+		
+		// not worth it - always empty right after connect
+		// getContactList();
+		
+		broadcastState();
 	}
 
-	// FIXME - user name and password - default the host and port (duh)
-	public boolean connect(String user, String password) {
-		this.user = user;
-		this.password = password;
-		return connect(hostname, port, user, password);
-	}
-
-	public void createEntry(String user, String name) throws Exception {
-		log.info(String.format("Creating entry for buddy '%1$s' with name %2$s", user, name));
-		connect();
-		Roster roster = connection.getRoster();
-		roster.createEntry(user, name, null);
+	public void connect(String username, String password) throws Exception {
+		connect("myrobotlab.org", 5222, username, password);
 	}
 
 	public void disconnect() {
-		log.info(String.format("%s disconnecting from %s:%d", getName(), hostname, port));
-		if (connection != null && connection.isConnected()) {
-			connection.disconnect();
-			connection = null;
-		}
+		connection.disconnect();
+		isConnected = false;
+		broadcastState();
+	}
 
-		config = null;
-		chatManager = null;
-		chats.clear();
+	@Override
+	public void entriesAdded(Collection<String> entries) {
+		log.info("entriesAdded {}", entries);
+		getContactList();
+	}
+
+	@Override
+	public void entriesDeleted(Collection<String> entries) {
+		log.info("entriesAdded {}", entries);
+
+	}
+
+	@Override
+	public void entriesUpdated(Collection<String> entries) {
+		log.info("entriesAdded {}", entries);
+
 	}
 
 	@Override
@@ -254,443 +259,189 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 		return null;
 	}
 
+	public Contact getContact(RosterEntry r) {
+		Contact contact = new Contact();
+		contact.name = r.getName();
+		contact.user = r.getUser();
+		contact.type = r.getType().toString();
 
-	public RosterEntry getEntry(String userOrBuddyId) {
-		RosterEntry entry = null;
-		String id = null;
-		int pos = userOrBuddyId.indexOf("/");
-		if (pos > 0) {
-			id = userOrBuddyId.substring(0, pos);
-		} else {
-			id = userOrBuddyId;
+		Type presenceType = roster.getPresence(r.getUser()).getType();
+		if (presenceType != null) {
+			contact.presence = presenceType.toString();
 		}
 
-		entry = roster.getEntry(id);
-		if (entry != null) {
-			return entry;
+		ItemStatus status = r.getStatus();
+		if (status != null) {
+			contact.status = status.toString();
 		}
 
-		if (idToEntry.containsKey(id)) {
-			return idToEntry.get(id);
-		}
+		// ItemStatus status = r.getStatus(); // null
+		// log.info("roster entry {}", r.toString());
+		// contact.na= r.getUser();
+		log.info("getContact {}", contact.toString());
 
-		return null;
-
+		return contact;
 	}
 
-	public String getJabberID(String id) {
-		RosterEntry entry = getEntry(id);
-		String jabberID;
-		if (entry == null) {
-			// error("could not get entry for id - using %s", id);
-			jabberID = id;
-		} else {
-			jabberID = entry.getUser();
+	/**
+	 * Displays users (entries) in the roster
+	 */
+	public Map<String, Contact> getContactList() {
+		// Roster roster = Roster.getInstanceFor(connection);
+		Collection<RosterEntry> entries = roster.getEntries();
+		contacts.clear();
+
+		log.info("\n\n" + entries.size() + " buddy(ies):");
+		for (RosterEntry r : entries) {
+			Contact c = getContact(r);
+			contacts.put(c.user, c);
 		}
-		return jabberID;
-	}
-
-	public CommOptions getOptions() {
-		return null;
-	}
-
-	// @Override
-	public Platform getPlatform() {
-		return Runtime.getInstance().getPlatform();
+		broadcastState();
+		return contacts;
 	}
 
 	@Override
 	public String getPrefix(URI protocolKey) {
-		if (defaultPrefix != null) {
-			return defaultPrefix;
-		} else {
-			return "";// important - return "" not null
-		}
-	}
-
-	public Roster getRoster() {
-		roster = connection.getRoster();
-		for (RosterEntry entry : roster.getEntries()) {
-			log.info(String.format("User: %s %s ", entry.getName(), entry.getUser()));
-			idToEntry.put(entry.getName(), entry);
-		}
-		return roster;
-	}
-
-	// FIXME - should be in runtime
-	public String listServices() {
-		StringBuffer sb = new StringBuffer();
-		List<ServiceInterface> services = Runtime.getServices();
-		for (int i = 0; i < services.size(); ++i) {
-			ServiceInterface sw = services.get(i);
-			sb.append(String.format("/%s\n", sw.getName()));
-		}
-		return sb.toString();
-	}
-
-	public boolean login(String username, String password) {
-		log.info(String.format("login %s xxxxxxxx", username));
-		if (connection == null || !connection.isConnected()) {
-			return connect(hostname, port, username, password);
-		} else {
-			try {
-				connection.login(username, password);
-				// getRoster();
-			} catch (Exception e) {
-				Logging.logError(e);
-				return false;
-			}
-		}
-		return true;
-
-	}
-
-	/**
-	 * processMessage is the Xmpp / Smack API override which handles incoming
-	 * chat messages - Xmpp comes with well defined and extendable capabilities,
-	 * however, Google Talk does not support much more than text messages with
-	 * started open xmpp .. sad :(
-	 * 
-	 * So we'd like to send binary mrl messages - since google doesn't support
-	 * any binary extentions .. we will base64 encode our messages and send them
-	 * as regular chats ;)
-	 * 
-	 */
-
-	// FIXME - get clear about different levels of authorization -
-	// Security/Framework to handle at message/method level
-	@Override
-	public void processMessage(Chat chat, Message msg) {
-
-		Message.Type type = msg.getType();
-		String from = msg.getFrom();
-		String body = msg.getBody();
-		if (type.equals(Message.Type.error) || body == null || body.length() == 0) {
-			// log.error("{} processMessage returned error {}", from, body);
-			// TODO error count ?
-			return;
-		}
-
-		if (log.isDebugEnabled()) {
-			log.debug(String.format("Received %s message [%s] from [%s]", type, body, from));
-		}
-
-		// Security HERE !
-		// check each message here ??? versus CommunicationManager
-		// someone wants to do a instance.method call
-		// isAuthorized(id, name, method)
-		// "internally" Message can be broken up into id = security header,
-		// msg.name, msg.method
-		// "externally" there is an incoming id (which could map to an internal
-		// id?), msg.name, msg.method
-
-		if (body.startsWith(CodecUtils.SCHEME_BASE64)) {
-			// BASE 64 Messages
-			org.myrobotlab.framework.Message inboundMsg = CodecUtils.base64ToMsg(body);
-
-			log.info(String.format("********* remote inbound message from %s -to-> %s.%s *********", inboundMsg.sender, inboundMsg.name, inboundMsg.method));
-
-			// broadcast - then msg gets sent to restricted service issue !
-			// xmpp has its own security - how to integrate this with central
-			// security ??
-			xmppSecurity.put("user", getEntry(from).getName());
-			if (security != null && !security.isAuthorized(xmppSecurity, inboundMsg.name, inboundMsg.method)) {
-				log.error("Security does not allow processing of %s message", inboundMsg);
-				return;
-			}
-
-			// must add key for registration ??? - foreign system has no
-			// idea what my runtime's name is - I will wrap it in a my
-			// own message and send it
-			if (inboundMsg.method.equals("register")) {
-				try {
-
-					// BEGIN ENCAPSULATION --- ENCODER BEGIN -------------
-					// IMPORTANT - (should be in Encoder) - create the key for
-					// foreign service environment
-					URI protocolKey = new URI(String.format("xmpp://%s", from));
-					String mrlURI = String.format("mrl://%s/%s", getName(), protocolKey.toString());
-					URI uri = new URI(mrlURI);
-
-					// IMPORTANT - this is an optimization and probably should
-					// be in the Comm interface defintion
-					getOutbox().getCommunicationManager().addRemote(uri, protocolKey);
-
-					// check if the URI is already defined - if not - we will
-					// send back the services which we want to export - Security
-					// will filter appropriately
-					ServiceEnvironment foreignProcess = Runtime.getEnvironment(uri);
-					if (foreignProcess == null) {
-						// not defined we will send export
-						// TODO - Security filters - default export (include
-						// exclude) - mapset of name
-						ServiceEnvironment localProcess = Runtime.getLocalServicesForExport();
-
-						Iterator<String> it = localProcess.serviceDirectory.keySet().iterator();
-						String name;
-						ServiceInterface si;
-						while (it.hasNext()) {
-							name = it.next();
-							si = localProcess.serviceDirectory.get(name);
-
-							org.myrobotlab.framework.Message sendService = createMessage("", "register", si);
-							String base64 = CodecUtils.msgToBase64(sendService);
-							sendMessage(base64, from);
-						}
-
-					}
-
-					ServiceInterface si = (ServiceInterface) inboundMsg.data[0];
-					// HMMM a vote for String vs URI here - since we need to
-					// catch syntax !!!
-					si.setInstanceId(uri);
-
-					// if security ... msg within msg
-					// getOutbox().add(createMessage(Runtime.getInstance().getName(),
-					// "register", inboundMsg));
-					Runtime.register(si, uri);// <-- not an INVOKE !!! // -
-					// no security ! :P
-					// BEGIN ENCAPSULATION --- ENCODER END -------------
-
-				} catch (Exception e) {
-					Logging.logError(e);
-				}
-			} else {
-				// just route it
-				getOutbox().add(inboundMsg);
-			}
-
-			return;
-		}
-
-		// chat client interface
-		if (body.charAt(0) == '/') {
-			// chat command - from chat client
-			try {
-				processRESTChatMessage(msg);
-			} catch (Exception e) {
-				broadcast(String.format("sorry sir, I do not understand your command %s", e.getMessage()));
-				Logging.logError(e);
-			}
-		}
-
-		/*
-		 * CUSTOS SPECIFIC - REMOVE else if (body != null && body.length() > 0
-		 * && body.charAt(0) != '/') { broadcast(
-		 * "sorry sir, I do not understand! I await your orders but,\n they must start with / for more information go to http://myrobotlab.org/service/Xmpp"
-		 * ); broadcast("*HAIL BEPSL!*"); broadcast(String.format(
-		 * "for a list of possible commands please type /%s/help", getName()));
-		 * broadcast
-		 * (String.format("current roster of active units is as follows\n\n %s",
-		 * listServices()));
-		 * broadcast(String.format("you may query any unit for help *HAIL BEPSL!*"
-		 * )); // sendMessage(String.format("<b>hello</b>"), //
-		 * "supertick@gmail.com"); }
-		 */
-
-		invoke("publishXMPPMsg", chat, msg);
-		//
-
-		// FIXME - decide if its a publishing point
-		// or do we directly invoke and expect a response type
-		// invoke("publishMessage", chat, msg);
-	}
-
-	public org.myrobotlab.framework.Message processMyRobotLabRESTMessage(Message msg) {
-
+		// TODO Auto-generated method stub
 		return null;
 	}
 
-	// FIXME move to codec package
-	public Object processRESTChatMessage(Message msg) {
-		String body = msg.getBody();
-		log.info(String.format("processRESTChatMessage [%s]", body));
-
-		if (auditors.size() > 0) {
-			for (String auditor : auditors) {
-				RosterEntry re = getEntry(auditor);
-				sendMessage(String.format("%s %s", re.getName(), msg.getBody()), msg.getFrom());
-			}
-		}
-
-		if (body == null || body.length() < 1) {
-			log.info("invalid");
-			return null;
-		}
-
-		// TODO - allow to be in middle of message
-		// pre-processing begin --------
-		int pos0 = body.indexOf('/');
-		if (pos0 != 0) {
-			log.info("command must start with /");
-			return null;
-		}
-
-		int pos1 = body.indexOf("\n");
-		if (pos1 == -1) {
-			pos1 = body.length();
-		}
-
-		String uri = "";
-		if (pos1 > 0) {
-			uri = body.substring(pos0, pos1);
-		}
-
-		uri = uri.trim();
-
-		log.info(String.format("[%s]", uri));
-
-		// pre-processing end --------
-
-		// Message msg = Encoder.decodePathInfo(path);
-		Object o = null;
+	@Override
+	public void presenceChanged(Presence presence) {
+		log.info("presenceChanged {}", presence);
+		//String user = presence.getFrom();
 		
-		try {
-			o = InvokerUtils.invoke(uri);
-		} catch (Exception e) {
-			error(e);
+		getContactList();
+		/*
+		if (contacts.containsKey(user)) {
+			Contact c = contacts.get(user);
+			c.presence = presence.toString();
+			invoke("publishPresenceChanged", c);
 		}
-		// Object o = RESTProcessor.invoke(uri);
-
-		// FIXME - encoding is that input uri before call ?
-		// or config ?
-		// FIXME - echo
-		// FIXME - choose type of encoding based on input ? part of the URI init
-		// call ?
-		// e.g. /api/gson/runtime/getLocalIPAdddresses [/api/gson/ .. is assumed
-		// (non-explicit) and pre-pended
-
-		if (o != null) {
-			broadcast(CodecUtils.toJson(o, o.getClass()));
-			// broadcast(o.toString());
-		} else {
-			broadcast(null);
-		}
-
-		return o;
+		*/
 	}
 
 	/**
-	 * publishing point for Xmpp messages
-	 * 
-	 * @param message
-	 * @return
+	 * Process received messages
 	 */
-	public Message publishMessage(Chat chat, Message msg) {
-		log.info(String.format("%s sent msg %s", msg.getFrom(), msg.getBody()));
-		return msg;
+	public void processMessage(Chat chat, Message message) {
+		XmppMsg xmppMsg = new XmppMsg(chat, message);
+		invoke("publishXmppMsg", xmppMsg);
+		
+		Message.Type type = message.getType();
+		String participant = chat.getParticipant();
+		String body = message.getBody();
+		log.info("message of type {} from user {} - {}", type, participant, body);
+		if (type == Message.Type.chat) {
+			if (body.startsWith("/")) {
+				// String pathInfo = String.format("/%s/service%s", CodecUtils.PREFIX_API, body); FIXME - wow that was horrific
+				String pathInfo = String.format("/%s%s", CodecUtils.PREFIX_API, body);
+				try {
+					org.myrobotlab.framework.Message msg = CodecUri.decodePathInfo(pathInfo);
+					Object ret = null;
+					ServiceInterface si = Runtime.getService(msg.name);
+					if (si == null) {
+						ret = Status.error("could not find service %s", msg.name);
+					} else {
+						ret = si.invoke(msg.method, msg.data);
+					}
+
+					if (ret != null && ret instanceof Serializable) {
+						// configurable use log or system.out ?
+						// FIXME - make getInstance configurable
+						// Encoder
+						// reference !!!
+						sendMessage(CodecUtils.toJson(ret), participant);
+					}
+				} catch (Exception e) {
+					try {
+						Logging.logError(e);
+						sendMessage(e.toString(), participant);
+					} catch (Exception e2) {
+						// give up
+					}
+				}
+			}
+		} else {
+			log.error("don't know how to handle message of type {}", type);
+		}
+		
 	}
 
 	@Override
-	public Connection publishNewConnection(Connection conn) {
-		return conn;
+	public void processMessage(Message msg) {
+		log.info("here");
 	}
 
+	@Override
+	public Connection publishNewConnection(Connection keys) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Contact publishPresenceChanged(Contact contact) {
+		return contact;
+	}
+	
 	/**
 	 * MRL Interface to gateways .. onMsg(GatewayData d) addMsgListener(Service
 	 * s) publishMsg(Object..) returns gateway specific data
 	 */
-
-	public XMPPMsg publishXMPPMsg(Chat chat, Message msg) {
-		return new XMPPMsg(chat, msg);
+	// FIXME - should be MessageXmpp along with all other message types under
+	// org.myrobotlab.msg
+	public XmppMsg publishXmppMsg(XmppMsg msg) {
+		return msg;
+	}
+	
+	public XmppMsg publishSentXmppMsg(XmppMsg msg) {
+		return msg;
 	}
 
-	public boolean removeAuditor(String id) {
-		RosterEntry entry = getEntry(id);
-		if (entry == null) {
-			error("can not remove auditor %s", id);
-			return false;
-		}
-		String jabberID = entry.getUser();
-		auditors.remove(jabberID);
-		return true;
-	}
-
-	// FIXME synchronized not needed?
-	synchronized public void sendMessage(String text, String id) {
-		try {
-
-			connect();
-
-			String jabberID = getJabberID(id);
-
-			// FIXME FIXME FIXME !!! - if
-			// "just connected - ie just connected and this is the first chat of the connection then "create
-			// chat" otherwise use existing chat !"
-			Chat chat = null;
-			if (chats.containsKey(jabberID)) {
-				chat = chats.get(jabberID);
-			} else {
-				chat = chatManager.createChat(jabberID, this);
-				chats.put(jabberID, chat);
-			}
-
-			log.info("chat threadid {} hashcode {}", chat.getThreadID(), chat.hashCode());
-
-			if (text == null) {
-				text = "null"; // dangerous converson?
-			}
-
-			// log.info(String.format("sending %s (%s) %s", entry.getName(),
-			// jabberID, text));
-			if (log.isDebugEnabled()) {
-				log.info(String.format("sending %s %s", jabberID, (text.length() > 32) ? String.format("%s...", text.substring(0, 32)) : text));
-			}
-			chat.sendMessage(text);
-
-		} catch (Exception e) {
-			// currentChats.remove(jabberID);
-			Logging.logError(e);
-		}
-	}
-
-	// FIXME - create Resistrar interface sendMRLMessage(Message msg, URI/String
-	// key)
-	public void sendMRLMessage(org.myrobotlab.framework.Message msg, String id) {
-		// Base64.enc
-	}
-
-	// TODO implement lower level messaging
-	public void sendMyRobotLabJSONMessage(org.myrobotlab.framework.Message msg) {
-
-	}
-
-	public void sendMyRobotLabRESTMessage(org.myrobotlab.framework.Message msg) {
-
-	}
-
-	@Override
-	public void sendRemote(String uri, org.myrobotlab.framework.Message msg) throws URISyntaxException {
-		sendRemote(new URI(uri), msg);
-	}
 
 	/**
-	 * sending remotely - need uri key data to send to client adds to history
-	 * list as a hop - to "hopefully" prevent infinite routing problems
+	 * Sends the specified text as a message to the other chat participant.
+	 * 
+	 * @param message
+	 * @param to
+	 * @throws XMPPException
+	 * @throws NotConnectedException
 	 */
+	public void sendMessage(String text, String to) throws XMPPException, NotConnectedException {
+		if (chat == null) {
+			Chat chat = chatManager.createChat(to, this);
+			chat.addMessageListener(this);
+			this.chat = chat;
+		}
+		
+		Message message = new Message();
+	    message.setTo(chat.getParticipant());
+	    message.setType(Message.Type.chat); // Message.Type.groupchat
+	    message.setThread(chat.getThreadID());
+	    message.setBody(text);
+	    
+		chat.sendMessage(message);
+		
+		invoke("publishSentXmppMsg", new XmppMsg(chat, message));
+	}
+
 	@Override
-	public void sendRemote(URI uri, org.myrobotlab.framework.Message msg) {
-		// decompose uri or use as key (mmm specified encoding???)
-		// FIXME - Encoder should do this !!!
-		// String remoteURI = uri.getPath().substring(1 + "xmpp://".length());
-		// // remove
-		String remoteURI = uri.toString().substring("xmpp://".length()); // remove
-																			// the
-																			// root
-																			// "/"
-		// log.info(remoteURI);
-		msg.historyList.add(getName());
-		String base64 = CodecUtils.msgToBase64(msg);
-		sendMessage(base64, remoteURI);
+	public void sendRemote(String key, org.myrobotlab.framework.Message msg) throws URISyntaxException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void sendRemote(URI key, org.myrobotlab.framework.Message msg) {
+		// TODO Auto-generated method stub
+
 	}
 
 	public void setStatus(boolean available, String status) {
-		connect();
 		if (connection != null && connection.isConnected()) {
 			Presence.Type type = available ? Type.available : Type.unavailable;
 			Presence presence = new Presence(type);
 			presence.setStatus(status);
-			connection.sendPacket(presence);
+			// connection.sendPacket(presence);
 		} else {
 			log.error("setStatus not connected");
 		}
@@ -702,27 +453,76 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 		disconnect();
 	}
 	
+	// FIXME - sendMsg onMsg getMsg - GLOBAL INTERFACE FOR GATEWAYS
+	// FIXME - handle multiple user accounts
+
+	// best ->
+	// https://www.snip2code.com/Snippet/828300/Smack-API-example-(uses-Smack-v4-1-5)
 	public static void main(String[] args) {
+
+		// 1. get connection
+		// 2. login
+		// 3. set auto accept
+		// 4. get roster
+		// 5. list buddies
+
+		// 6. addChatListener (add self)
+		// 7. in chatCreated
+		// create a Message Listener (add self)
+
+		// more stuff
+
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
 
-			int i = 1;
-			// Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
+			// SmackConfiguration.DEBUG = true;
+
 			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart("xmpp", "Xmpp");
 			// Runtime.start(String.format("clock%d", i), "Clock");
-			Runtime.start("gui", "GUIService");
-			Runtime.start("python", "Python");
+			// Runtime.start("gui", "GUIService");
+			// Runtime.start("python", "Python");
+			// HMMM is fully qualified name important ???
+			// grog.robot01@myrobotlab.org vs grog.robot01 ???
+			//
+
+			xmpp1.connect("grog.robot01@myrobotlab.org", "zardoz7");
+			// xmpp1.connect("myrobotlab.org", 5222,
+			// "grog.robot01@myrobotlab.org", "zardoz7");
+			// xmpp1.test();
+			// xmpp1.test2();
+			// xmpp1.addBuddy("grog@myrobotlab.org");
+			// for (int i = 0; i < 100; ++i) {
+			// xmpp1.sendMessage(String.format("/runtime/getUptime/%d", i),
+			// "grog@myrobotlab.org");
+			// }
+
+			Runtime.createAndStart("webgui", "WebGui");
+
+			xmpp1.sendMessage("hello !", "grog@myrobotlab.org");
+			xmpp1.getContactList();
+
+			// xmpp1.getContactList();
 			// xmpp1.connect("myrobotlab.org", 5222, "grog.robot01", "xxxxxxx");
 			// xmpp1.addAuditor("Ma. Vo.");
 			// xmpp1.sendMessage("Ma. Vo. - xmpp test", "Ma. Vo.");
 			// xmpp1.send("Ma. Vo.", "xmpp test");
 			// xmpp1.sendMessage("hello from incubator by name " +
 			// System.currentTimeMillis(), "Greg Perry");
-			// xmpp1.sendMessage("/runtime/getUptime", "GroG@myrobotlab.org");
+			xmpp1.sendMessage("/runtime/getUptime", "GroG@myrobotlab.org");
+			xmpp1.sendMessage("msg 2", "GroG@myrobotlab.org");
 			// xmpp1.sendMessage("/runtime", "grogbot@myrobotlab.org");
-			
+
+			// TEST CASES :
+			// 1. different clients
+			// 2. group chats
+			// 3. URL processing must be handled in Codec !!!! and same as CLI
+			// !!!
+			// 4. Non-text chats ?
+			// 5. Mrl Messages
+
+			log.info("here");
 
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -730,21 +530,50 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 
 	}
 
-	/**
-	 * This static method returns all the details of the class without
-	 * it having to be constructed.  It has description, categories,
-	 * dependencies, and peer definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData(){
-		ServiceType meta = new ServiceType(Xmpp.class.getCanonicalName());
-		meta.addDescription("xmpp service to access the jabber network");
-		meta.addCategory("connectivity");
-		meta.addDependency("org.jivesoftware.smack", "3.3.0");
-		return meta;		
-	}	
+	@Override
+	public void authenticated(XMPPConnection arg0, boolean arg1) {
+		// TODO Auto-generated method stub
+		
+	}
 
-	
+	@Override
+	public void connected(XMPPConnection arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void connectionClosed() {
+		log.info("connectionClosed");
+		addTask("reconnect", 5000, "connect", hostname, port, username, password);
+		isConnected = false;
+		broadcastState();		
+	}
+
+	@Override
+	public void connectionClosedOnError(Exception arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void reconnectingIn(int arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void reconnectionFailed(Exception arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void reconnectionSuccessful() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
 }

@@ -157,7 +157,7 @@ public class Clock extends Service {
 		super.stopService();
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, CloneNotSupportedException {
+	public static void main(String[] args) throws Exception {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 

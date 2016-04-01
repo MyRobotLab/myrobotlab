@@ -470,13 +470,18 @@ public class Plantoid extends Service {
 	public void startService() {
 		super.startService();
 		xmpp.startService();
-		xmpp.connect("talk.google.com", 5222, "orbous@myrobotlab.org", "mrlRocks!");
+		try {
+			xmpp.connect("talk.google.com", 5222, "orbous@myrobotlab.org", "mrlRocks!");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		// gets all users it can send messages to
 		xmpp.setStatus(true, String.format("online all the time - %s", new Date()));
-		xmpp.addAuditor("incubator incubator");
-		xmpp.addAuditor("David Ultis");
-		xmpp.addAuditor("Greg Perry");
-		xmpp.broadcast("reporting for duty *SIR* !");
+		//xmpp.addAuditor("incubator incubator");
+		//xmpp.addAuditor("David Ultis");
+		//xmpp.addAuditor("Greg Perry");
+		//xmpp.broadcast("reporting for duty *SIR* !");
 
 		if (tracking != null) {
 			tracking.startService();
