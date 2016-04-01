@@ -1,4 +1,5 @@
-env:
+# use https://lint.travis-ci.org/ to check validity
+# env:
 language: java
 sudo: false
 script: ant dist
@@ -9,7 +10,7 @@ jdk:
 deploy:
   provider: s3
   deployment_group: s3 group
-  on:
+  after_all:
         all_branches: true
   access_key_id: AKIAJGL6AEN37LDO3N7A
   secret_access_key:
@@ -21,3 +22,5 @@ deploy:
   local_dir: dist
   # local_dir: build/report
   acl: 'public_read'
+
+  

@@ -44,7 +44,7 @@ angular.module('mrlapp.service.RuntimeGui', [])
                 }
 
                 $scope.install = function () {
-                    mrl.sendTo($scope.service.name, "updateAll");
+                    mrl.sendTo($scope.service.name, "install");
                 }
 
             }]);
