@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.document.Document;
+import org.myrobotlab.logging.LoggerFactory;
+import org.python.jline.internal.Log;
+import org.slf4j.Logger;
 
 /**
  * This stage will iterate the values of the inputField and attempt to cast them to a double.
@@ -14,6 +17,7 @@ import org.myrobotlab.document.Document;
  */
 public class CastValuesToDouble extends AbstractStage {
 
+	public final static Logger log = LoggerFactory.getLogger(CastValuesToDouble.class.getCanonicalName());
 	private String inputField = null;
 	private String outputField = null;
 	
@@ -38,7 +42,8 @@ public class CastValuesToDouble extends AbstractStage {
 				double i = Double.valueOf(val.toString());
 				doubles.add(i);
 			} catch (NumberFormatException e) {
-				e.printStackTrace();
+				log.warn("Failed to cast value to double: doc id: {} value {}", doc.getId(), val);
+				// e.printStackTrace();
 				// ??
 				// doc.setStatus(ProcessingStatus.ERROR);
 			}
