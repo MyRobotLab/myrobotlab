@@ -6,11 +6,10 @@ script: ant dist
 jdk:
 - openjdk7
 
-
 deploy:
   provider: s3
   deployment_group: s3 group
-  after_all:
+  on:
         all_branches: true
   access_key_id: AKIAJGL6AEN37LDO3N7A
   secret_access_key:
