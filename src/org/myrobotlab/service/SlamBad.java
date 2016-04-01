@@ -74,9 +74,9 @@ public class SlamBad extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.WARN);
 
-		SlamBad slambad = (SlamBad) Runtime.start("slambad", "SLAMBad");
+		SlamBad slambad = (SlamBad) Runtime.start("slambad", "SlamBad");
 		
-		// slambad.addWall(3.0, 0.0, 0.0, 1.0f, 1.0f, 1.0f);
+		slambad.addWall(3.0, 0.0, 0.0, 1.0f, 1.0f, 1.0f);
 
 		/*
 		 * MyEnv env = new MyEnv();
