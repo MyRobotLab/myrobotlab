@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
+import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.string.StringUtil;
 
@@ -56,7 +57,7 @@ public class CSVConnector extends AbstractConnector {
 	@Override
 	public void startCrawling() {
 		
-		isRunning = true;
+		state = ConnectorState.RUNNING;
 		// compile the map to for header to column number.
 		initialize();
 		// TODO: add a directory traversal ..
@@ -84,9 +85,11 @@ public class CSVConnector extends AbstractConnector {
 		try {
 			
 			while ((nextLine = csvReader.readNext()) != null) {
-				if (!isRunning) {
+				// TODO: replace this with connector state, and make private isRunning again.
+				if (!state.equals(ConnectorState.RUNNING)) {
 					// we've been interrupted.
 					log.info("Crawl interrupted, stopping crawl.");
+					state = ConnectorState.INTERRUPTED;					
 					break;
 				}
 				rowNum++;
@@ -113,8 +116,9 @@ public class CSVConnector extends AbstractConnector {
 			// shouldn't see this.. but who knows.
 			e.printStackTrace();
 		}
-		isRunning = false;
+		state = ConnectorState.STOPPED;
 	}
+	
 
 	@Override
 	public void stopCrawling() {

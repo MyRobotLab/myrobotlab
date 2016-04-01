@@ -27,6 +27,9 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 	
 	public AbstractConnector(String name) {
 		super(name);
+		// no overruns!
+		this.getOutbox().setBlocking(true);
+		
 	}
 
 	public void feed(Document doc) {
@@ -59,9 +62,10 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 		invoke("publishFlush");
 		// reset/clear the batch.
 		batch = new ArrayList<Document>();
-		while (getOutbox().size() > 0 || isRunning ) {
-			// TODO: wait until the outbox is empty.
-			log.info("Draining out box Size: {}", getOutbox().size());
+		// TODO: I worry there's a race condition here..  but maybe not... more testing will show.
+		while (getOutbox().size() > 0 && !state.equals(ConnectorState.RUNNING)) {
+			// TODO: wait until the outbox is empty...  perhaps we also need to validate if we've been interrupted?
+			log.info("Draining out box Size: {} Connector State: {}", getOutbox().size(), state);
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
