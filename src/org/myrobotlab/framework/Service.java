@@ -154,7 +154,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 	private String serviceClass;
 
-	protected boolean isRunning = false;
+	private boolean isRunning = false;
 
 	transient protected Thread thisThread = null;
 

@@ -1,9 +1,12 @@
 package org.myrobotlab.document.transformer;
 
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -15,12 +18,15 @@ import au.com.bytecode.opencsv.CSVReader;
  *
  */
 public class DictionaryLoader {
+	
+	public final static Logger log = LoggerFactory.getLogger(DictionaryLoader.class.getCanonicalName());
 	private static DictionaryLoader instance = null;
 
 	private HashMap<String, HashMap<String,String>> dictMap;
 
 	protected DictionaryLoader() {
 		// Exists only to defeat instantiation.
+		dictMap = new HashMap<String, HashMap<String,String>>();
 	}
 	public static DictionaryLoader getInstance() {
 		if(instance == null) {
@@ -37,6 +43,11 @@ public class DictionaryLoader {
 		// it's not loaded , load the file and put it in the dict map and return
 		// assume the file is a csv file with key/value pairs on each line
 		HashMap<String,String> dictionary = new HashMap<String,String>();
+		File dictFile = new File(fileName);
+		if (!dictFile.exists()) {
+			log.warn("Dictionary file not found {}", dictFile.getAbsolutePath());
+			return null;
+		}
 		CSVReader reader = new CSVReader(new FileReader(fileName));
 		String [] nextLine;
 		while ((nextLine = reader.readNext()) != null) {
@@ -44,6 +55,7 @@ public class DictionaryLoader {
 			dictionary.put(nextLine[0], nextLine[1]);
 		}
 		dictMap.put(fileName, dictionary);
+		reader.close();
 		return dictionary;
 	}
 }
