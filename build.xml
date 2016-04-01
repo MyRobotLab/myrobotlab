@@ -84,7 +84,7 @@
 -->
 
 <!-- The MyRobotLab ant build.xml  -->
-<project name="myrobotlab" default="report" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
+<project name="myrobotlab" default="dist" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
@@ -198,7 +198,15 @@
 		<pathelement location="${repo}/com.wolfram.alpha/1.1/WolframAlpha-1.1.jar"/>
 		<pathelement location="${repo}/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
 		<pathelement location="${repo}/edu.northwestern.topcodes/1.0/topcodes.jar"/>
-		<pathelement location="${repo}/org.jivesoftware.smack/3.3.0/smack.jar"/>
+
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-core-4.1.6.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-tcp-4.1.6.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-im-4.1.6.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/xpp3-1.1.4c.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/jxmpp-core-0.4.2.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/jxmpp-util-cache-0.4.2.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-java7-4.1.6.jar"/>
+		
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-async-3.0.5.jar"/>
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-core-3.0.5.jar"/>
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-examples-3.0.5.jar"/>
