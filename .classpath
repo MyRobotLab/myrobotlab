@@ -61,7 +61,7 @@
 	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-core-4.1.6.jar"/>	
 	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-tcp-4.1.6.jar"/>	
 	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-im-4.1.6.jar"/>	
-	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-debug-4.1.6.jar"/>	
+	<!-- classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-debug-4.1.6.jar"/ -->	
 	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/xpp3-1.1.4c.jar"/>	
 	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/jxmpp-core-0.4.2.jar"/>	
 	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/jxmpp-util-cache-0.4.2.jar"/>	
