@@ -230,7 +230,7 @@ public class InMoovHead extends Service {
 	// ----- movements begin -----------
 
 	public void setpins(int headXPin, int headYPin, int eyeXPin, int eyeYPin, int jawPin) {
-		log.info(String.format("setPins %d %d %d %d %d %d", headXPin, headYPin, eyeXPin, eyeYPin, jawPin));
+		log.info(String.format("setPins %d %d %d %d %d", headXPin, headYPin, eyeXPin, eyeYPin, jawPin));
 		rothead.setPin(headXPin);
 		neck.setPin(headYPin);
 		eyeX.setPin(eyeXPin);
