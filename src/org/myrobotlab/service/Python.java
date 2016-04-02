@@ -13,10 +13,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
@@ -24,7 +27,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.net.Http;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.python.core.Py;
 import org.python.core.PyException;
@@ -34,10 +36,6 @@ import org.python.core.PySystemState;
 import org.python.modules.thread.thread;
 import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 /**
  * 
@@ -54,6 +52,9 @@ public class Python extends Service {
 	int interpreterThreadCount = 0;
 
 	List<File> currentFileList = new ArrayList<File>();
+	
+	Map<String, String> exampleUrls = new TreeMap<String, String>();
+	
 	/**
 	 * current working directory root there are multiple filesystems we can load
 	 * scripts from github urls | jar:file /resources | /resource exploded |
@@ -62,7 +63,7 @@ public class Python extends Service {
 	 */
 	// String cwdRoot = "pyrobotlab";
 	// String cwdRoot = "local";
-	String cwdRoot = "examples";
+	// String cwdRoot = "examples";
 
 	/**
 	 * current working directory
@@ -354,11 +355,24 @@ public class Python extends Service {
 		 * currentFileList[3] = new File("home"); currentFileList[4] = new
 		 * File("pyrobotlab");
 		 */
+		/*
 		try {
 			setCwd("examples");
 		} catch (Exception e) {
 			error(e);
 		}
+		*/
+		
+		// I love ServiceData !
+		ServiceData sd = ServiceData.getLocalInstance();
+		// I love Platform !
+		Platform p = Platform.getLocalInstance();
+		List<ServiceType> sdt = sd.getAvailableServiceTypes();
+		for (int i = 0; i < sdt.size(); ++i){
+			ServiceType st = sdt.get(i);
+			String url = String.format("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/%s/service/%s.py", p.getBranch(), st.getSimpleName());
+			exampleUrls.put(st.getSimpleName(), url);
+		}		
 	}
 
 	// PyObject interp.eval(String s) - for verifying?
@@ -818,6 +832,8 @@ public class Python extends Service {
 		super.stopService();
 		stop();// release the interpeter
 	}
+	
+	/* crappy implementation
 
 	public void setCwd(String path) throws IOException, ClassNotFoundException {
 		if ("examples".equals(cwdRoot)) {
@@ -827,8 +843,6 @@ public class Python extends Service {
 			ArrayList<File> localFiles = new ArrayList<File>();
 
 			File dir = new File(".");
-			// String[] list = dir.list(filter); - FIXME - make a
-			// GenericFileFilter in FileIO
 
 			String[] list = dir.list();
 
@@ -865,7 +879,7 @@ public class Python extends Service {
 
 		// broadcastState();
 	}
-
+*/
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
