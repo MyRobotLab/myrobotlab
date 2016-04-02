@@ -402,6 +402,7 @@ public class Python extends Service {
 		PySystemState.initialize();
 		interp = new PythonInterpreter();
 
+		
 		PySystemState sys = Py.getSystemState();
 		if (rootPath != null) {
 			sys.path.append(new PyString(rootPath));
@@ -409,7 +410,8 @@ public class Python extends Service {
 		if (modulesDir != null) {
 			sys.path.append(new PyString(modulesDir));
 		}
-
+		log.info("Python System Path: {}", sys.path);
+		
 		String selfReferenceScript = "from org.myrobotlab.service import Runtime\n" + "from org.myrobotlab.service import Python\n"
 				+ String.format("%s = Runtime.getService(\"%s\")\n\n", getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
 				+ String.format("myService = Runtime.getService(\"%s\")\n", getName());

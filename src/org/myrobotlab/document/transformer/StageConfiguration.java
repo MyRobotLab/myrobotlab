@@ -1,6 +1,7 @@
 package org.myrobotlab.document.transformer;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class StageConfiguration extends Configuration {
 
@@ -18,6 +19,19 @@ public class StageConfiguration extends Configuration {
 	public StageConfiguration() {
 		// depricate this constructor?
 		config = new HashMap<String, Object>();
+	}
+	
+	public void setListParam(String name, List<String> values) {
+		config.put(name, values);
+	}
+
+	public List<String> getListParam(String name) {
+		Object val = config.get(name);
+		if (val instanceof List) {
+			return (List<String>)val;
+		}
+		// TODO: null or empty list?
+		return null;
 	}
 	
 	public void setStringParam(String name, String value) {

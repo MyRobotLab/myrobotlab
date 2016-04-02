@@ -14,13 +14,13 @@ public class Configuration {
 	// connector config
 	
 	protected HashMap<String, Object> config = null;
-	//private XStream xstream = null;
+	private XStream xstream = null;
 	
 	public Configuration() {
 		config = new HashMap<String, Object>();
 		// figure that we need to be able to serialize / deserialize
 		// TODO: consider a faster driver / serializer
-		// xstream = new XStream(new StaxDriver());	
+		xstream = new XStream(new StaxDriver());	
 	}
 	
 	public void setStringParam(String name, String value) {
@@ -52,6 +52,18 @@ public class Configuration {
 		} else {
 			return val;
 		}
+	}
+	
+	public Object fromXML(String xml) {
+		Object o = xstream.fromXML(xml);
+		return o;
+	}
+
+	public String toXML() {
+		// TODO: does this serialize the xstream object itself?
+		// maybe we should convert the xstream to a singleton in the platform.
+		String xml = xstream.toXML(this);
+		return xml;
 	}
 
 }

@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.List;
 
 import org.myrobotlab.document.Document;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.FileConnector;
+import org.slf4j.Logger;
 
 /**
  * This stage will take the values in the inputField and attempt to parse them
@@ -18,51 +21,66 @@ import org.myrobotlab.document.Document;
  */
 public class ParseDate extends AbstractStage {
 
+	public final static Logger log = LoggerFactory.getLogger(ParseDate.class.getCanonicalName());
+	
 	private String inputField = null;
 	private String outputField = "date";
-	private String formatString = "MM/dd/YYYY";
-	private SimpleDateFormat sdf = null;
-	
+	private List<String> formatStrings;
+	private List<SimpleDateFormat> sdfs = null;
+
 	@Override
 	public void startStage(StageConfiguration config) {
 		// TODO Auto-generated method stub
 		if (config != null) {
 			inputField = config.getProperty("inputField");
 			outputField = config.getProperty("outputField", "date");
-			formatString = config.getProperty("formatString", "MM/dd/YYYY");			
+			formatStrings = config.getListParam("formatStrings");	
 		}
-		
-		sdf = new SimpleDateFormat(formatString);
-		
+		// compile the date string parsers.
+		sdfs = new ArrayList<SimpleDateFormat>();
+		for (String formatString : formatStrings) {
+			SimpleDateFormat sdf = new SimpleDateFormat(formatString);
+			sdfs.add(sdf);
+		}
+
 	}
 
 	@Override
 	public List<Document> processDocument(Document doc) {
-		
+
 		if (!doc.hasField(inputField)) {
 			return null;
 		}
-		
 		ArrayList<Date> dates = new ArrayList<Date>();
-		
 		for (Object val : doc.getField(inputField)) {
 			if (val instanceof String) {
-				try {
-					Date d = sdf.parse(val.toString());
-					dates.add(d);
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					//System.out.println("Invalid Date Field: " + val);
-				}				
+				boolean parsed = false;
+				for (SimpleDateFormat sdf : sdfs) {
+					try {
+						Date d = sdf.parse(val.toString());
+						dates.add(d);
+						parsed = true;
+						// we found a match
+						break;
+					} catch (ParseException e) {
+						//log.warn("Unparsable date string doc id: {} value: {}", doc.getId(), val);
+						//e.printStackTrace();
+					}
+				}
+				if (!parsed) {
+					log.warn("Doc ID : {} Did not parse date string: {}", doc.getId(), val);
+				}
+				
 			}
-		}		
-		
-		doc.removeField(outputField);
+		}	
+		// TODO: configure input/output overwrite vs append mode.
+		if (inputField.equals(outputField)) {
+			doc.removeField(outputField);
+		}
 		for (Date d: dates) {
 			doc.addToField(outputField, d);
 		}
-		
+
 		return null;
 	}
 

@@ -12,10 +12,13 @@ import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
+import org.slf4j.Logger;
 
 public class FileConnector extends AbstractConnector implements DocumentPublisher,FileVisitor<Path> {
 
+	public final static Logger log = LoggerFactory.getLogger(FileConnector.class.getCanonicalName());
 	private static final long serialVersionUID = 1L;
 	private String directory;
 	// TODO: add wildcard includes/excludes
@@ -24,8 +27,6 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 
 	public FileConnector(String name) {
 		super(name);
-		// no overruns!
-		this.getOutbox().setBlocking(true);
 	}
 
 	@Override
@@ -38,6 +39,8 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		log.info("File Connector finished walking the tree.");
+		// TODO: should we flush here immediately?
 		state = ConnectorState.STOPPED;
 	}
 
@@ -55,8 +58,10 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 		System.out.println(file);
-		if (interrupted) 
+		if (interrupted) {
+			state = ConnectorState.INTERRUPTED;
 			return FileVisitResult.TERMINATE;
+		}
 		String docId = getDocIdPrefix() + file.toFile().getAbsolutePath();
 		Document doc = new Document(docId);		
 		doc.setField("last_modified", attrs.lastModifiedTime());
