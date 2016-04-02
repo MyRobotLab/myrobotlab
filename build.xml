@@ -708,7 +708,7 @@
 			</report>
 		</junitreport>
 		<!-- jacoco report stuff -->
-               <echo message="JACOCO RESULTS FILE ${result.jacoco.file}" />
+               <!-- echo message="JACOCO RESULTS FILE ${result.jacoco.file}" / -->
 		<!-- temporarily disabling jacoco
 		<jacoco:report>
 			// This task needs the collected execution data and ...
@@ -744,6 +744,7 @@
 -->  		
 		<!-- we only care about code coverage from org.myrobotlab ... not sure how to easily make sure
                      the report only contains that stuff.. so time to delete everything we don't care about.. -->
+
 		<delete>
 			<fileset dir="${result.report.dir}">
                                 <!-- delete everything from the resources , index.html and the stuff from org.myrobotlab -->
