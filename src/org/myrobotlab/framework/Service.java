@@ -1339,7 +1339,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			}
 
 			// TODO - build method cache map from errors
-			log.warn(String.format("%s.%s NoSuchMethodException - attempting upcasting", c.getSimpleName(), MethodEntry.getPrettySignature(method, paramTypes, null)));
+			log.warn(String.format("no such method %s.%s - attempting upcasting", c.getSimpleName(), MethodEntry.getPrettySignature(method, paramTypes, null)));
 
 			// TODO - optimize with a paramter TypeConverter & Map
 			// c.getMethod - returns on EXACT match - not "Working" match
