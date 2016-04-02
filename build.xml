@@ -744,10 +744,12 @@
 -->  		
 		<!-- we only care about code coverage from org.myrobotlab ... not sure how to easily make sure
                      the report only contains that stuff.. so time to delete everything we don't care about.. -->
-
+<!--
 		<delete>
 			<fileset dir="${result.report.dir}">
+-->			
                                 <!-- delete everything from the resources , index.html and the stuff from org.myrobotlab -->
+<!--		
 				<patternset id="mrlonly">
     					<exclude name="**/resources/**"/>
     					<exclude name="**/index.html"/>
@@ -755,7 +757,7 @@
 				</patternset>
 			</fileset>
 		</delete>
-
+-->
         </target>
 
 	<target name="mail" depends="report">
