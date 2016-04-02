@@ -406,10 +406,18 @@ public class Python extends Service {
 		// ??? - do we need to extract {jar}/Lib/site.py ???
 		
 		Properties props = new Properties();
-		props.put("python.home","."); // hmm should be /Lib ./Lib classpath relative  path or other ?
+		props.put("python.home","build/classes"); // hmm should be /Lib ./Lib classpath relative  path or other ?
 		props.put("python.console.encoding", "UTF-8"); // Used to prevent: console: Failed to install '': java.nio.charset.UnsupportedCharsetException: cp0.
 		props.put("python.security.respectJavaAccessibility", "false"); //don't respect java accessibility, so that we can access protected members on subclasses
 		props.put("python.import.site","false");
+		
+		 // Build up the python.path
+		/*
+	    StringBuilder sb = new StringBuilder();
+	    sb.append(System.getProperty("java.class.path"));
+	    for (String p : pythonPath) {
+	        sb.append(":").append(p);
+	    */
 
 		Properties preprops = System.getProperties();
 				
