@@ -733,6 +733,7 @@
                	 <!-- helper task to facilitate moving the jacoco report to s3 because
                       hidden directories aren't copied with the local_dir task in travis s3 task --> 
 		<!-- replace and rename the .resources directory to resources -->
+<!-- TEMPORARY DISABLE JACOCO		
 		<replace dir="${result.report.dir}" value="resources">
 			<include name="**/*.html"/>
   			<replacetoken>.resources</replacetoken>
@@ -740,6 +741,7 @@
                 <move todir="${result.report.dir}/resources">
     			<fileset dir="${result.report.dir}/.resources"/>
   		</move>
+-->  		
 		<!-- we only care about code coverage from org.myrobotlab ... not sure how to easily make sure
                      the report only contains that stuff.. so time to delete everything we don't care about.. -->
 		<delete>
