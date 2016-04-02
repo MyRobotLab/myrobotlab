@@ -116,6 +116,7 @@ public class Clock extends Service {
 
 	public void setInterval(Integer milliseconds) {
 		interval = milliseconds;
+                broadcastState();
 	}
 
 	public void startClock() {
