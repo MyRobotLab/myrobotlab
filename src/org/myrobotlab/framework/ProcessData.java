@@ -218,6 +218,9 @@ public class ProcessData implements Serializable {
 
 		// step 1 - get current env data
 		String ps = File.pathSeparator;
+		// bogus jython.jar added as a hack to support - jython's 'more' fragile 2.7.0 interface :(
+		// http://www.jython.org/archive/21/docs/registry.html
+		// http://bugs.jython.org/issue2355
 		String classpath = String.format("./myrobotlab.%s.jar%s./libraries/jar/jython.jar%s./libraries/jar/*%s./bin%s./build/classes", version, ps, ps, ps, ps);
 		cmd.add(classpath);
 
