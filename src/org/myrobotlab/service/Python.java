@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.myrobotlab.framework.Message;
@@ -34,7 +35,6 @@ import org.python.modules.thread.thread;
 import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
 
-import com.google.common.io.Files;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -399,7 +399,23 @@ public class Python extends Service {
 		// decoding error.
 		// overriding of the APPDATA environment variable is done in the agent
 		// as a work around.
-		PySystemState.initialize();
+		
+		// work around for 2.7.0
+		// http://bugs.jython.org/issue2355 
+		
+		// ??? - do we need to extract {jar}/Lib/site.py ???
+		
+		Properties props = new Properties();
+		props.put("python.home","."); // hmm should be /Lib ./Lib classpath relative  path or other ?
+		props.put("python.console.encoding", "UTF-8"); // Used to prevent: console: Failed to install '': java.nio.charset.UnsupportedCharsetException: cp0.
+		props.put("python.security.respectJavaAccessibility", "false"); //don't respect java accessibility, so that we can access protected members on subclasses
+		props.put("python.import.site","false");
+
+		Properties preprops = System.getProperties();
+				
+		PythonInterpreter.initialize(preprops, props, new String[0]);
+		
+		// PySystemState.initialize();
 		interp = new PythonInterpreter();
 
 		
