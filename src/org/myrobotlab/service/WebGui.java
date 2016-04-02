@@ -503,7 +503,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			}
 
 			if (parts == null || parts.length < 3) {
-				// http://host:port/api
+				// http://host:port/api  FIXME SWAGGER ???? FIXME ???
 				response.addHeader("Content-Type", codec.getMimeType());
 				handleError(httpMethod, out, codec, "API", "http(s)://{host}:{port}/api/{api-type}");
 				return;
