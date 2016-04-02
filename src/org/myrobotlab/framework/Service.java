@@ -1519,8 +1519,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		log.info(String.format("releasePeers (%s, %s)", myKey, serviceClass));
 		try {
 			Class<?> theClass = Class.forName(serviceClass);
-			Method method = theClass.getMethod("getPeers", String.class);
-			Peers peers = (Peers) method.invoke(null, new Object[] { myKey });
+			Method method = theClass.getMethod("getMetaData");
+			ServiceType serviceType = (ServiceType) method.invoke(null);
+			TreeMap<String, ServiceReservation> peers = serviceType.getPeers();
+			/* DEPRECATED ?   If a service shutdown - should it shut down its children ? 
+			 * maybe its children are shared with others - that might be bad ..
+			 * 
 			IndexNode<ServiceReservation> myNode = peers.getDNA().getNode(myKey);
 			// LOAD CLASS BY NAME - and do a getReservations on it !
 			HashMap<String, IndexNode<ServiceReservation>> peerRequests = myNode.getBranches();
@@ -1546,7 +1550,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 				}
 			}
-
+			*/
 		} catch (Exception e) {
 			log.debug(String.format("%s does not have a getPeers", serviceClass));
 		}
@@ -1939,6 +1943,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 	@Override
 	public void startService() {
+		ServiceInterface si = Runtime.getService(name);
+		if (si == null){
+			Runtime.create(name, getSimpleName());
+		}
 		if (!isRunning()) {
 			outbox.start();
 			if (thisThread == null) {

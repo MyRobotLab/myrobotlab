@@ -71,6 +71,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 			return String.format("user: %s, name: %s, presence: %s, type: %s, status: %s", user, name, type, presence, status);
 		}
 	}
+
 	public static class XmppMsg {
 		public String from;
 		public String msg;
@@ -81,7 +82,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 			this.from = chat.getParticipant();
 			this.msg = msg.getBody();
 			Message.Type t = msg.getType();
-			if (t != null){
+			if (t != null) {
 				this.type = msg.getType().toString();
 			}
 			stanzaId = msg.getStanzaId();
@@ -92,6 +93,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(Xmpp.class);
+
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
@@ -210,12 +212,12 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 		chatManager = ChatManager.getInstanceFor(connection);
 
 		roster.addRosterListener(this);
-		
+
 		isConnected = true;
-		
+
 		// not worth it - always empty right after connect
 		// getContactList();
-		
+
 		broadcastState();
 	}
 
@@ -224,9 +226,12 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 	}
 
 	public void disconnect() {
-		connection.disconnect();
+		if (connection != null) {
+			connection.disconnect();
+		}
 		isConnected = false;
 		broadcastState();
+
 	}
 
 	@Override
@@ -309,16 +314,14 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 	@Override
 	public void presenceChanged(Presence presence) {
 		log.info("presenceChanged {}", presence);
-		//String user = presence.getFrom();
-		
+		// String user = presence.getFrom();
+
 		getContactList();
 		/*
-		if (contacts.containsKey(user)) {
-			Contact c = contacts.get(user);
-			c.presence = presence.toString();
-			invoke("publishPresenceChanged", c);
-		}
-		*/
+		 * if (contacts.containsKey(user)) { Contact c = contacts.get(user);
+		 * c.presence = presence.toString(); invoke("publishPresenceChanged",
+		 * c); }
+		 */
 	}
 
 	/**
@@ -327,14 +330,15 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 	public void processMessage(Chat chat, Message message) {
 		XmppMsg xmppMsg = new XmppMsg(chat, message);
 		invoke("publishXmppMsg", xmppMsg);
-		
+
 		Message.Type type = message.getType();
 		String participant = chat.getParticipant();
 		String body = message.getBody();
 		log.info("message of type {} from user {} - {}", type, participant, body);
 		if (type == Message.Type.chat) {
 			if (body.startsWith("/")) {
-				// String pathInfo = String.format("/%s/service%s", CodecUtils.PREFIX_API, body); FIXME - wow that was horrific
+				// String pathInfo = String.format("/%s/service%s",
+				// CodecUtils.PREFIX_API, body); FIXME - wow that was horrific
 				String pathInfo = String.format("/%s%s", CodecUtils.PREFIX_API, body);
 				try {
 					org.myrobotlab.framework.Message msg = CodecUri.decodePathInfo(pathInfo);
@@ -365,7 +369,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 		} else {
 			log.error("don't know how to handle message of type {}", type);
 		}
-		
+
 	}
 
 	@Override
@@ -382,7 +386,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 	public Contact publishPresenceChanged(Contact contact) {
 		return contact;
 	}
-	
+
 	/**
 	 * MRL Interface to gateways .. onMsg(GatewayData d) addMsgListener(Service
 	 * s) publishMsg(Object..) returns gateway specific data
@@ -392,11 +396,10 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 	public XmppMsg publishXmppMsg(XmppMsg msg) {
 		return msg;
 	}
-	
+
 	public XmppMsg publishSentXmppMsg(XmppMsg msg) {
 		return msg;
 	}
-
 
 	/**
 	 * Sends the specified text as a message to the other chat participant.
@@ -412,15 +415,15 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 			chat.addMessageListener(this);
 			this.chat = chat;
 		}
-		
+
 		Message message = new Message();
-	    message.setTo(chat.getParticipant());
-	    message.setType(Message.Type.chat); // Message.Type.groupchat
-	    message.setThread(chat.getThreadID());
-	    message.setBody(text);
-	    
+		message.setTo(chat.getParticipant());
+		message.setType(Message.Type.chat); // Message.Type.groupchat
+		message.setThread(chat.getThreadID());
+		message.setBody(text);
+
 		chat.sendMessage(message);
-		
+
 		invoke("publishSentXmppMsg", new XmppMsg(chat, message));
 	}
 
@@ -452,7 +455,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 		super.stopService();
 		disconnect();
 	}
-	
+
 	// FIXME - sendMsg onMsg getMsg - GLOBAL INTERFACE FOR GATEWAYS
 	// FIXME - handle multiple user accounts
 
@@ -487,7 +490,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 			// grog.robot01@myrobotlab.org vs grog.robot01 ???
 			//
 
-			xmpp1.connect("grog.robot01@myrobotlab.org", "zardoz7");
+			xmpp1.connect("grog.robot01@myrobotlab.org", "xxxxxx");
 			// xmpp1.connect("myrobotlab.org", 5222,
 			// "grog.robot01@myrobotlab.org", "zardoz7");
 			// xmpp1.test();
@@ -533,13 +536,13 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 	@Override
 	public void authenticated(XMPPConnection arg0, boolean arg1) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void connected(XMPPConnection arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -547,33 +550,31 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 		log.info("connectionClosed");
 		addTask("reconnect", 5000, "connect", hostname, port, username, password);
 		isConnected = false;
-		broadcastState();		
+		broadcastState();
 	}
 
 	@Override
 	public void connectionClosedOnError(Exception arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void reconnectingIn(int arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void reconnectionFailed(Exception arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void reconnectionSuccessful() {
 		// TODO Auto-generated method stub
-		
+
 	}
-
-
 
 }
