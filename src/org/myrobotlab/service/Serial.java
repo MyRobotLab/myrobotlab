@@ -261,6 +261,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * @param name
 	 */
 	public void addByteListener(String name) {
+		Runtime.dump();
 		ServiceInterface si = Runtime.getService(name);
 
 		// if (si instanceof SerialDataListener && si.isLocal()){

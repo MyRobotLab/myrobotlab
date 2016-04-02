@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -875,7 +874,7 @@ public class Gps extends Service implements SerialDataListener {
 	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(Gps.class.getCanonicalName());
-		meta.addDescription("THe Global Positioning Sensor");
+		meta.addDescription("The Global Positioning Sensor");
 		meta.addCategory("location");
 		meta.addCategory("sensor");
 		meta.addPeer("serial", "Serial", "serial port for GPS");

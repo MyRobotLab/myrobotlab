@@ -537,6 +537,8 @@ public class Sweety extends Service {
 		arduino = (Arduino) startPeer("arduino");
 
 		// Share arduino service with others
+		
+		/* You shouldn't need these Beetle ! (GroG)
 		reserveRootAs("sweety.leftTracker.arduino", "sweety.arduino");
 		reserveRootAs("sweety.rightTracker.arduino", "sweety.arduino");
 		reserveRootAs("sweety.USfront.arduino", "sweety.arduino");
@@ -545,6 +547,7 @@ public class Sweety extends Service {
 		reserveRootAs("sweety.USback.arduino", "sweety.arduino");
 		reserveRootAs("sweety.USbackRight.arduino", "sweety.arduino");
 		reserveRootAs("sweety.USbackLeft.arduino", "sweety.arduino");
+		*/
 
 		chatBot = (ProgramAB) startPeer("chatBot");
 		htmlFilter = (HtmlFilter) startPeer("htmlFilter");

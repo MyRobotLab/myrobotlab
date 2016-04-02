@@ -33,13 +33,6 @@ public class Sprinkler extends Service {
 	// TODO - memory appender
 	ArrayList<String> history = new ArrayList<String>();
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("webgui", "WebGui", "WebGui service");
-		peers.put("arduino", "Arduino", "Arduino service");
-		peers.put("cron", "Cron", "Cron service");
-		return peers;
-	}
 
 	public static void main(String args[]) throws InterruptedException, IOException {
 		LoggingFactory.getInstance().configure();
@@ -52,6 +45,7 @@ public class Sprinkler extends Service {
 	}
 
 	public boolean connect() {
+		arduino = (Arduino)startPeer("arduino");
 		return arduino.connect(defaultPort);
 	}
 
@@ -197,6 +191,13 @@ public class Sprinkler extends Service {
 		
 	}
 	
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+		peers.put("webgui", "WebGui", "WebGui service");
+		peers.put("arduino", "Arduino", "Arduino service");
+		peers.put("cron", "Cron", "Cron service");
+		return peers;
+	}
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
@@ -210,7 +211,9 @@ public class Sprinkler extends Service {
 		ServiceType meta = new ServiceType(Sprinkler.class.getCanonicalName());
 		meta.addDescription("sprinkler system");
 		meta.addCategory("control", "home automation");
-		
+		meta.addPeer("arduino", "Arduino", "Arduino for relay control");
+		meta.addPeer("webgui", "WebGui", "web interface");
+		meta.addPeer("cron", "Cron", "scheduler for sprinklers");
 		return meta;
 	}
 }

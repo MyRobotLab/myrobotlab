@@ -16,10 +16,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
-
-import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -27,7 +24,6 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 
-@Ignore
 public class ServiceInterfaceTest {
 
 	public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
@@ -37,7 +33,7 @@ public class ServiceInterfaceTest {
 	public final void testInstallAllServices() throws ClassNotFoundException, ParseException, IOException {
 		// TODO: this probably is going to take longer but it's worth while!
 		
-		ServiceData sd = CodecUtils.fromJson(FileUtils.readFileToString(new File("../repo/serviceData.json")), ServiceData.class);
+		ServiceData sd =  ServiceData.getLocalInstance();//CodecUtils.fromJson(FileUtils.readFileToString(new File("../repo/serviceData.json")), ServiceData.class);
 		for (ServiceType st : sd.getServiceTypes()) {
 			if (!st.isAvailable()) {
 				log.info("Installing Service:" + st.getName());
@@ -107,14 +103,7 @@ public class ServiceInterfaceTest {
 		// Load the service data file
 		
 		// TODO: read this from the repo at build time?
-		ServiceData sd = null;
-		try {
-			sd = CodecUtils.fromJson(FileUtils.readFileToString(new File("../repo/serviceData.json")), ServiceData.class);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println(sd);
+		ServiceData sd = ServiceData.getLocalInstance();
 		
 		
 		int numServices = servicesToTest.size();
@@ -155,6 +144,10 @@ public class ServiceInterfaceTest {
 			} else {
 				log.warn("Service {} does not have a web page..", service);
 				servicesWithoutWebPages.add(service);
+			}
+			
+			if ("Gps".equals(service)){
+				log.info("here");
 			}
 			
 			if (serviceInterfaceTest(service)) {
