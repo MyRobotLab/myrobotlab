@@ -1,22 +1,22 @@
 <div class="row">
-<div class="col-lg-12">
-    <label for="platform">{{platform}} {{version}}</label>
-     <!--<pre>Model: {{customSelected | json}}</pre> -->
-</div>     
-<div class="col-lg-4">
-     <input class="form-control" type="text" ng-model="newName" placeholder="name">
-</div>
-<div class="col-lg-4">
-    <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" uib-typeahead="state as state.name for state in possibleServices | filter:{name:$viewValue}" typeahead-template-url="customTemplate.html">
-    <script type="text/ng-template" id="customTemplate.html">
-    <a>
-      <img ng-src="/{{match.model.img}}" width="16">
-      <span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
-    </a>
-    </script>
-</div>  
-<div class="col-lg-4">
-    <button class="btn btn-default" ng-click="start(newName, newType)">start service</button>
-    <button class="btn btn-default" ng-click="install()">install all</button>
-</div>   
+    <div class="col-lg-12">
+        <b>{{platform}} {{version}}</b>
+    </div>
+    <div class="col-lg-12">
+        <!--you're not supposed to use navbar classes here, but it easily applies a good layout-->
+        <!--FIXME - use right class-->
+        <form class="navbar-form">
+            <input class="form-control" type="text" ng-model="newName" placeholder="name">
+            <input class="form-control" type="text"
+                   ng-model="newType"
+                   placeholder="Service Type"
+                   uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}"
+                   typeahead-min-length="0"
+                   typeahead-template-url="nav/templates/serviceSearchTemplate.html">
+            <button class="btn btn-default" ng-click="msg.start(newName, newType.name); newName = ''; newType = '';">start service</button>
+        </form>
+    </div>
+    <div class="col-lg-12">
+        <button class="btn btn-default" ng-click="msg.install()">install all services</button>
+    </div>
 </div>
