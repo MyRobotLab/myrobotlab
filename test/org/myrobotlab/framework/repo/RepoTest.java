@@ -82,6 +82,12 @@ public class RepoTest implements RepoInstallListener {
 	*/
 
 	@Test
+	public void explode(){
+		boolean explode = true;
+		assertFalse(explode);
+	}
+	
+	@Test
 	public void testErrorStringObjectArray() {
 		Repo repo = Repo.getLocalInstance();
 		repo.error("%s is a test of errors", "myError");

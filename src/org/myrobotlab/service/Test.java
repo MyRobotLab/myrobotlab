@@ -456,6 +456,10 @@ public class Test extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		try {
+			
+			// requ
+			// test all junit tests
+			//
 
 			String serviceType = "InMoovHand";
 			Repo repo = Repo.getLocalInstance();
