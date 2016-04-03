@@ -54,10 +54,13 @@ public class ImageDisplay extends Service {
 
 	@Override
 	public void startService() {
-		// TODO Auto-generated method stub
 		super.startService();
-		gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		
+		if (GraphicsEnvironment.isHeadless()){
+			log.warn("in headless mode - can not start awt components");
+			return;
+		} else {
+			gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		}
 	}
 
 	//Displays an image.
