@@ -13,7 +13,7 @@ deploy:
   on:
     # experiment to 'always' deploy so the results of junit can always be seen
     # even if they fail
-    condition: true
+    # condition: true
     all_branches: true
   access_key_id: AKIAJGL6AEN37LDO3N7A
   secret_access_key:

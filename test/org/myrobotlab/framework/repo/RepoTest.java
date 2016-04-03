@@ -81,11 +81,13 @@ public class RepoTest implements RepoInstallListener {
 	}
 	*/
 
+	/*
 	@Test
 	public void explode(){
 		boolean explode = true;
 		assertFalse(explode);
 	}
+	*/
 	
 	@Test
 	public void testErrorStringObjectArray() {
