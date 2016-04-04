@@ -143,17 +143,24 @@ public class WikiDataFetcher extends Service {
 		catch (Exception e){return  "Label by ID not found";}
 	}
 	
-	public String cutStart(String sentence) throws MediaWikiApiErrorException{// keep only the first word (The cat -> The)
+	public String cutStart(String sentence) throws MediaWikiApiErrorException{// Remove the first word (The cat -> The)
 		try {
-			String answer =  sentence.substring(sentence.indexOf(" ")+1);
-			return answer;
+			if (sentence.indexOf(" ")!=-1){
+				String answer =  sentence.substring(sentence.indexOf(" ")+1);
+				return answer;
+			}
+			else{return sentence;}
+			
 		}
 		catch (Exception e){return  sentence;}
 	}
-	public String grabStart(String sentence) throws MediaWikiApiErrorException{// Remove the first word (The cat -> cat)
+	public String grabStart(String sentence) throws MediaWikiApiErrorException{// keep only the first word (The cat -> cat)
 		try {
-			String answer =  sentence.substring(0,sentence.indexOf(" "));
-			return answer;
+			if (sentence.indexOf(" ")!=-1){
+				String answer =  sentence.substring(0,sentence.indexOf(" "));
+				return answer;
+			}
+			else{return sentence;}
 		}
 		catch (Exception e){return  sentence;}
 	}
