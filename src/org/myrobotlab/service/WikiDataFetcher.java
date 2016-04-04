@@ -234,7 +234,7 @@ public class WikiDataFetcher extends Service {
          		break;
          	case "time"://
          		data = (TimeValue) data;
-         		answer =  String.valueOf(((TimeValue) data).getDay()) +"/" + String.valueOf(((TimeValue) data).getMonth()) +"/" + String.valueOf(((TimeValue) data).getYear()) +" - " + String.valueOf(((TimeValue) data).getHour()) +"H" + String.valueOf(((TimeValue) data).getMinute()) +"Mn";
+         		answer =  String.valueOf(((TimeValue) data).getDay()) +"/" + String.valueOf(((TimeValue) data).getMonth()) +"/" + String.valueOf(((TimeValue) data).getYear());
          		break;
          	case "globe-coordinate":
          		answer = ((GlobeCoordinatesValue)data).toString();
