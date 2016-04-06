@@ -174,7 +174,7 @@ public class ProgramABTest {
 		for (String s : testService.listPatterns(botname)) {
 			System.out.println("PATTERN:" + s);
 		}
-		Response resp = testService.getResponse(username, "Lars Ümlaüt");
+		Response resp = testService.getResponse(username, "Lars ÃœmlaÃ¼t");
 		assertEquals("He's a character from Guitar Hero!", resp.msg);
 	}
 	
