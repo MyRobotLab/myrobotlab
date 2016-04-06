@@ -168,10 +168,21 @@ public class ProgramABTest {
 		assertEquals("TOPIC IS unknown", resp.msg);		
 	}
 	
+	@Test
+	public void umlautTest() {
+		
+		for (String s : testService.listPatterns(botname)) {
+			System.out.println("PATTERN:" + s);
+		}
+		Response resp = testService.getResponse(username, "Lars Ümlaüt");
+		assertEquals("He's a character from Guitar Hero!", resp.msg);
+	}
+	
 	@After
 	public void tearDown() throws Exception {
 		testService.stopService();
 		testService.releaseService();
 	} 
+	
 	
 }

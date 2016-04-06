@@ -222,4 +222,10 @@
     </category>
   </topic> 
   
+  <!--  internationalization support -->
+  <category>
+    <pattern>LARS ÜMLAÜT</pattern>
+    <template>He's a character from Guitar Hero!</template>
+  </category>
+  
 </aiml>
