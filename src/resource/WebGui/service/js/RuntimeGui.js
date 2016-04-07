@@ -10,17 +10,14 @@ angular.module('mrlapp.service.RuntimeGui', [])
 
                 _self.updateState(mrl.getService($scope.service.name));
 
-                var platform = $scope.service.platform;
-                // make the platform string
-                $scope.platform = platform.arch + "." + platform.bitness + "." + platform.os;
-                $scope.version = platform.mrlVersion;
+                $scope.platform = $scope.service.platform;
 
                 this.onMsg = function (inMsg) {
-
                     switch (inMsg.method) {
                         case 'onState':
-                            _self.updateState(inMsg.data[0]);
-                            $scope.$apply();
+                            $timeout(function () {
+                                _self.updateState(inMsg.data[0]);
+                            });
                             break;
                         default:
                             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);

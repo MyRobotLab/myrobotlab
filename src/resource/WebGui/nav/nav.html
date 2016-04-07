@@ -12,7 +12,7 @@
         <div class="collapse navbar-collapse navbar-ex1-collapse">
 
             <ul class="nav navbar-nav">
-                <li><a href="http://myrobotlab.org">{{platform}}</a></li>
+                <li><a href="http://myrobotlab.org">{{platform.branch}} {{platform.arch}}.{{platform.bitness}}.{{platform.os}} {{platform.mrlVersion}}</a></li>
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
@@ -140,7 +140,7 @@
     MyRobotLab
 </div>
 <div style="position: absolute; left: 380px; top: 370px; z-index: -1; height: 10px; transform: rotate(-45deg); font-size: 25px;">
-    {{platform}}
+    {{platform.branch}} {{platform.arch}}.{{platform.bitness}}.{{platform.os}} {{platform.mrlVersion}}
 </div>
 <!--min-list-->
 <div style="height: 80vh; width: 200px; z-index: 100; position: fixed; right: 200px; background-color: lightgray;" ng-show="showminlist" sticky offset="50">

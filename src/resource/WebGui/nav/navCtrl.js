@@ -2,7 +2,7 @@ angular.module('mrlapp.nav')
         .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc', 'serviceSvc', 'noWorkySvc',
             function ($scope, $log, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, serviceSvc, noWorkySvc) {
 
-                //START_green-/red-LED
+                //connection state LED
                 $scope.connected = mrl.isConnected();
                 mrl.subscribeConnected(function (connected) {
                     $log.info('nav:connection update', connected);
@@ -10,43 +10,21 @@ angular.module('mrlapp.nav')
                         $scope.connected = connected;
                     });
                 });
-//                mrl.subscribeOnOpen(function () {
-//                    $scope.$apply(function () {
-//                        $scope.connected = true;
-//                    });
-//                });
-//                mrl.subscribeOnClose(function () {
-//                    $scope.$apply(function () {
-//                        $scope.connected = false;
-//                    });
-//                });
-                //END_green-/red-LED
 
                 // load type ahead service types
                 $scope.possibleServices = mrl.getPossibleServices();
                 // console.log('possibleServices', $scope.possibleServices);
 
                 // get platform information for display
-                var p = mrl.getPlatform();
-//                var branch = (p.branch == 'master') ? '' : p.branch;
-                $scope.platform = p.branch + " " + p.arch + "." + p.bitness + "." + p.os + " " + p.mrlVersion;
+                $scope.platform = mrl.getPlatform();
 
-                // ==== status history begin ========= 
-                // global callback for "all" service status
+                //service statuses
                 $scope.statuslist = statusSvc.getStatuses();
-                //TODO would make sense to move this to statusSvc - question is what happens with firststatus
-                //don't think another notification-callback would be good
-                //DO IT - (but first find a test scenario)
-                var onStatus = function (statusMsg) {
-//                    $timeout(function () {
-                    statusSvc.addStatus(statusMsg.data[0]);
-                    //TODO - think of a better solution (instead of firststatus) (and hopefully better styled)
-                    var status = $scope.statuslist[$scope.statuslist.length - 1];
-                    $scope.firststatus = status.name + " " + status.level + " " + status.detail;
-//                    });
-                };
-                mrl.subscribeToMethod(onStatus, "onStatus");
-                // ==== status history end ========= 
+                statusSvc.subscribeToUpdates(function (status) {
+                    $timeout(function () {
+                        $scope.firststatus = status.name + " " + status.level + " " + status.detail;
+                    });
+                });
 
                 //START_Alerts
                 $scope.alerts = [
@@ -150,6 +128,6 @@ angular.module('mrlapp.nav')
                     $scope.newName = '';
                     $scope.newType = '';
                 };
-                
+
                 $scope.stateGo = $state.go;
             }]);
