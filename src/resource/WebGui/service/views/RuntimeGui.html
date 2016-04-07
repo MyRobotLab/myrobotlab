@@ -1,11 +1,9 @@
 <div class="row">
     <div class="col-lg-12">
-        <b>{{platform}} {{version}}</b>
+        <b>{{platform.arch}}.{{platform.bitness}}.{{platform.os}} {{platform.mrlVersion}}</b>
     </div>
     <div class="col-lg-12">
-        <!--you're not supposed to use navbar classes here, but it easily applies a good layout-->
-        <!--FIXME - use right class-->
-        <form class="navbar-form">
+        <form class="form-inline">
             <input class="form-control" type="text" ng-model="newName" placeholder="name">
             <input class="form-control" type="text"
                    ng-model="newType"
