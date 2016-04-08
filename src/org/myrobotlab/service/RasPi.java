@@ -35,6 +35,7 @@ import com.pi4j.wiringpi.SoftPwm;
  * More Info : http://pi4j.com/
  * 
  */
+// TODO Ensure that only one instance of RasPi can execute on each RaspBerry PI
 public class RasPi extends Service implements I2CControl {
 
 	public static class Device {
@@ -51,8 +52,10 @@ public class RasPi extends Service implements I2CControl {
 	GpioController gpio;
 	// FIXME - do a
 	GpioPinDigitalOutput gpio01;
-
 	GpioPinDigitalOutput gpio03;
+	
+	// i2c bus
+	public static I2CBus i2c;
 
 	HashMap<String, Device> devices = new HashMap<String, Device>();
 
@@ -95,17 +98,27 @@ public class RasPi extends Service implements I2CControl {
 		Platform platform = Platform.getLocalInstance();
 		log.info(String.format("platform is %s", platform));
 		log.info(String.format("architecture is %s", platform.getArch()));
-		if ("arm".equals(platform.getArch())) {
-			// init I2C
-			gpio = GpioFactory.getInstance();
+		
+		if ("arm".equals(platform.getArch()) || "armv7.hfp".equals(platform.getArch())) {
+
+			// gpio = GpioFactory.getInstance();
+			// init I2C			
+			try {
+				i2c = I2CFactory.getInstance(I2CBus.BUS_1);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				Logging.logError(e);
+			}
+			
+			// TODO Check if the is correct. I don't think it is /Mats
+			/*
 			gpio01 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01);
 			gpio03 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03);
-
+            */
 		} else {
 			// we should be running on a Raspberry Pi
 			log.error("architecture is not arm");
 		}
-
 	}
 
 	// FIXME - create low level I2CDevice
@@ -113,6 +126,8 @@ public class RasPi extends Service implements I2CControl {
 
 		try {
 
+			I2CDevice device = i2c.getDevice(busAddress);
+			
 			String key = String.format("%d.%d", busAddress, deviceAddress);
 			I2CBus bus = I2CFactory.getInstance(busAddress);
 
@@ -277,31 +292,21 @@ public class RasPi extends Service implements I2CControl {
 		}
 	}
 
-
 	@Override
-	public void i2cWrite(byte[] buffer, int offset, int size)
-			throws IOException {
+	public void i2cWrite(int address, byte[] buffer, int offset, int size){
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void i2cWrite(int address, byte[] buffer, int offset, int size)
-			throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int i2cRead(byte[] buffer, int offset, int size) throws IOException {
+	public int i2cRead(byte[] buffer, int offset, int size) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 
 	@Override
-	public int i2cRead(int address, byte[] buffer, int offset, int size)
-			throws IOException {
+	public int i2cRead(int address, byte[] buffer, int offset, int size) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -309,7 +314,7 @@ public class RasPi extends Service implements I2CControl {
 
 	@Override
 	public int i2CRead(byte[] writeBuffer, int writeOffset, int writeSize,
-			byte[] readBuffer, int readOffset, int readSize) throws IOException {
+			byte[] readBuffer, int readOffset, int readSize) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -327,7 +332,7 @@ public class RasPi extends Service implements I2CControl {
 		ServiceType meta = new ServiceType(RasPi.class.getCanonicalName());
 		meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware such as I2C");
 		meta.addCategory("i2c","control");
-		meta.addDependency("com.pi4j.pi4j", "0.0.5");
+		meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
 		return meta;
 	}
 
