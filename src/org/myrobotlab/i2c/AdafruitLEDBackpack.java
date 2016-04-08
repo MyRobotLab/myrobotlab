@@ -316,12 +316,12 @@ public class AdafruitLEDBackpack implements I2CDevice {
 	public int read(byte[] buffer, int offset, int size) throws IOException {
 		return device.read(buffer, offset, size);
 	}
-	
+	/* New in pi4j 1.1
 	@Override
 	public int read(byte[] writeBuffer, int writeOffset, int writeSize, byte[] readBuffer, int readOffset, int readSize) throws IOException {
 		return device.read(writeBuffer, writeOffset, writeSize, readBuffer, readOffset, readSize);
 	}
-
+    */
 	@Override
 	public int read(int address) throws IOException {
 		return device.read(address);
@@ -337,10 +337,12 @@ public class AdafruitLEDBackpack implements I2CDevice {
 		device.write(b);
 	}
 	
+	/* New in pi4j 1.1
 	@Override
 	public void write(int address, byte[] b) throws IOException {
 		device.write(address, b);
 	}
+	*/
 	
 	@Override
 	public void write(byte[] buffer, int offset, int size) throws IOException {
@@ -351,11 +353,13 @@ public class AdafruitLEDBackpack implements I2CDevice {
 	public void write(int address, byte b) throws IOException {
 		device.write(address, b);
 	}
-
+	
+	/* New in pi4j 1.1
 	@Override
 	public void write(byte[] b) throws IOException {
 		device.write(b);
 	}
+	*/
 	
 	@Override
 	public void write(int address, byte[] buffer, int offset, int size) throws IOException {
