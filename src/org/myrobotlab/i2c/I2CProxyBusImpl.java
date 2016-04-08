@@ -20,7 +20,7 @@ public class I2CProxyBusImpl implements I2CBus {
 		return new I2CProxyDeviceImpl();
 	}
 	
-	/* New in pi4j 1.1
+	// New in pi4j 1.1
 	@Override
 	public int getFileDescriptor(){
 		// TODO Auto-generated method stub
@@ -32,5 +32,5 @@ public class I2CProxyBusImpl implements I2CBus {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	*/
+	//
 }

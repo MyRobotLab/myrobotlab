@@ -160,7 +160,7 @@
 	<classpathentry kind="lib" path="/repo/marytts/5.1.2/freetts-en_us-1.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.5.0/wdtk-client-0.5.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>
-	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-core.jar"/>
+	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

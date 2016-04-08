@@ -181,8 +181,8 @@
 		<pathelement location="${repo}/org.fife.autocomplete/2.0.4/autocomplete.jar"/>
 		<pathelement location="${repo}/com.googlecode.jssc/2.8.0/jssc-2.8.0.jar"/>
 		<pathelement location="${repo}/com.googlecode.chatterbot/1.2.1/chatter-bot-api.jar"/>
-		<pathelement location="${repo}/com.pi4j.pi4j/0.0.5/pi4j-core.jar"/>
-		<pathelement location="${repo}/com.pi4j.pi4j/0.0.5/pi4j-gpio-extension.jar"/>
+		<pathelement location="${repo}/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-core.jar"/>
+		<pathelement location="${repo}/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
 		<pathelement location="${repo}/it.sauronsoftware.cron4j/2.2.5/cron4j-2.2.5.jar"/>
 		<pathelement location="${repo}/org.drjava.java/20120818/asm-3.1.jar"/>
 		<pathelement location="${repo}/org.drjava.java/20120818/dynamicjava-base.jar"/>
