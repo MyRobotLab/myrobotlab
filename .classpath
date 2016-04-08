@@ -39,8 +39,6 @@
 	<classpathentry kind="lib" path="/repo/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar"/>
 	<classpathentry kind="lib" path="/repo/org.fife.autocomplete/2.0.4/autocomplete.jar"/>
 	<classpathentry kind="lib" path="/repo/com.googlecode.chatterbot/1.2.1/chatter-bot-api.jar"/>
-	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/0.0.5/pi4j-core.jar"/>
-	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/0.0.5/pi4j-gpio-extension.jar"/>
 	<classpathentry kind="lib" path="/repo/it.sauronsoftware.cron4j/2.2.5/cron4j-2.2.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.drjava.java/20120818/asm-3.1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.drjava.java/20120818/dynamicjava-base.jar"/>
@@ -56,17 +54,13 @@
 	<classpathentry kind="lib" path="/repo/com.wolfram.alpha/1.1/WolframAlpha-1.1.jar"/>
 	<classpathentry kind="lib" path="/repo/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
 	<classpathentry kind="lib" path="/repo/edu.northwestern.topcodes/1.0/topcodes.jar"/>
-	
-	<!--  classpathentry kind="lib" path="/repo/org.jivesoftware.smack/3.3.0/smack.jar"/ -->
-	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-core-4.1.6.jar"/>	
-	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-tcp-4.1.6.jar"/>	
-	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-im-4.1.6.jar"/>	
-	<!-- classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-debug-4.1.6.jar"/ -->	
-	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/xpp3-1.1.4c.jar"/>	
-	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/jxmpp-core-0.4.2.jar"/>	
-	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/jxmpp-util-cache-0.4.2.jar"/>	
-	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-java7-4.1.6.jar"/>	
-	 
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-core-4.1.6.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-tcp-4.1.6.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-im-4.1.6.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/xpp3-1.1.4c.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/jxmpp-core-0.4.2.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/jxmpp-util-cache-0.4.2.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/4.1.6/smack-java7-4.1.6.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-async-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-core-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-examples-3.0.5.jar"/>
@@ -165,6 +159,8 @@
 	<classpathentry kind="lib" path="/repo/marytts/5.1.2/freetts-de-1.0.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.1.2/freetts-en_us-1.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.5.0/wdtk-client-0.5.0.jar"/>
-	<classpathentry kind="lib" path="/repo/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>	
+	<classpathentry kind="lib" path="/repo/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
+	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-core.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
