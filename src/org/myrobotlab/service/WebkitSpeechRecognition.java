@@ -7,6 +7,7 @@ import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Sphinx.Command;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -55,9 +56,12 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 	public String publishText(String text) {
 		log.info("Publish Text : {}", text);
 		// TODO: is there a better place to do this?  maybe recognized?
-		if (commands.containsKey(text)) {
+		// TODO: remove this! it probably should be invoking the command on publish text.. only on recognized?!
+		// not sure.
+		String cleantext = text.toLowerCase().trim();
+		if (commands.containsKey(cleantext)) {
 			// If we have a command. send it when we recognize...
-			Command cmd = commands.get(text);
+			Command cmd = commands.get(cleantext);
 			send(cmd.name, cmd.method, cmd.params);
 		}
 		
@@ -78,7 +82,8 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
 	@Override
 	public String recognized(String text) {
-		log.info("Recognized : {}", text);
+		log.info("Recognized : >{}<", text);
+		text = text.toLowerCase().trim();
 		if (commands.containsKey(text)) {
 			// If we have a command. send it when we recognize...
 			Command cmd = commands.get(text);
@@ -186,10 +191,25 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 	
 	// TODO - should this be in Service ?????
 	public void addCommand(String actionPhrase, String name, String method, Object... params) {
+		actionPhrase = actionPhrase.toLowerCase().trim();
 		if (commands == null) {
 			commands = new HashMap<String, Command>();
 		}
 		commands.put(actionPhrase, new Command(name, method, params));
 	}
 	
+	// TODO: this might need to go into the interface if we want to support it.
+	public void addComfirmations(String... txt) {
+		log.warn("Confirmation support not enabled in webkit speech.");
+	}
+	
+	// TODO: this might need to go into the interface if we want to support it.
+	public void addNegations(String... txt) {
+		log.warn("Negations not enabled in webkit speech.");
+	}
+	
+	public void startListening(String grammar) {
+		log.warn("Webkit speech doesn't listen for a specific grammar.  use startListening() instead. ");
+		startListening();
+	}	
 }
