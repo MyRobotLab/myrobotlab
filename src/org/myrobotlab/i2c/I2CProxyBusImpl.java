@@ -19,5 +19,17 @@ public class I2CProxyBusImpl implements I2CBus {
 		this.bus = bus;
 		return new I2CProxyDeviceImpl();
 	}
+	
+	@Override
+	public int getFileDescriptor(){
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
+	@Override
+	public String getFileName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }
