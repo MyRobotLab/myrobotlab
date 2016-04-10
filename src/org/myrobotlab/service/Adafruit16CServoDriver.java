@@ -242,7 +242,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	// ----------- AF16C API Begin --------------
 	// TODO The Arduino specific parts should be move to the Arduino service
 	//      The I2CControler methods should be used for both Arduino and RasPi
-	//      The buffer valuse and the offset and size needs to be changed to correct values.
+	//      The buffer values and the offset and size needs to be changed to correct values.
 	public void begin() {
         if (controler == "Arduino"){
         	arduino.sendMsg(AF_BEGIN, deviceAddress, 0, 0);
