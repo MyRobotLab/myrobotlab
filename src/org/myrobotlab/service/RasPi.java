@@ -101,15 +101,19 @@ public class RasPi extends Service implements I2CControl {
 		log.info(String.format("architecture is %s", platform.getArch()));
 		
 		if ("arm".equals(platform.getArch()) || "armv7.hfp".equals(platform.getArch())) {
-
-			// init gpio		
+			log.info("Executing on Raspberry PI");
+			// init gpio	
+			log.info("Initiating GPIO");
 			gpio = GpioFactory.getInstance();
-			
+			log.info("GPIO Initiated");
 			// init i2c			
-			try {
+			try {		
+				log.info("Initiating i2c");
 				i2c = I2CFactory.getInstance(I2CBus.BUS_1);
+				log.info("i2c initiated");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
+				log.error("i2c initiation failed");
 				Logging.logError(e);
 			}
 			
