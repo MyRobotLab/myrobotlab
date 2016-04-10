@@ -80,6 +80,7 @@ public class ServiceData implements Serializable {
 				return localInstance;
 			} catch (FileNotFoundException fe) {
 				try {
+					log.info("could not find {}", serviceDataCacheFileName);
 					jsonFile.getParentFile().mkdirs();
 					String extractFrom = "/resource/framework/serviceData.json";
 					log.info("try #2 {} not found - extracting from {}", jsonFile.getName(), extractFrom);
@@ -87,6 +88,7 @@ public class ServiceData implements Serializable {
 					String data = FileIO.toString(jsonFile);
 					localInstance = CodecUtils.fromJson(data, ServiceData.class);
 				} catch (Exception e) {
+					log.info("could not extract from {}", "/resource/framework/serviceData.json");
 					String newJson = FileIO.gluePaths(FileIO.getRoot(), "/resource/framework/serviceData.json");
 					log.info("try #3 serviceData.json not found in resource ! - generating and putting it in {}", newJson);
 					if (FileIO.isJar()) {

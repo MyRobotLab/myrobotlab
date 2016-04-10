@@ -36,7 +36,6 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.StatusLevel;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
 import org.myrobotlab.io.Zip;
@@ -45,7 +44,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.RepoInstallListener;
-import org.myrobotlab.service.interfaces.StatusListener;
 import org.slf4j.Logger;
 
 // FIXME
@@ -107,7 +105,6 @@ public class Repo implements Serializable {
 	}
 
 	final public String REPO_DIR = "repo";
-	final public String REPO_BASE_URL = "https://raw.githubusercontent.com/MyRobotLab/repo/";
 
 	ArrayList<Status> errors = new ArrayList<Status>();
 
@@ -124,25 +121,6 @@ public class Repo implements Serializable {
 	public void addStatusListener(RepoInstallListener listener) {
 		this.listener = listener;
 	}
-
-	/*
-	public void error(Exception e) {
-		Logging.logError(e);
-		error(e.getMessage());
-	}
-	*/
-
-	// pulled in dependencies .. not sure if that is good
-	/*
-	public void error(String format, Object... args) {
-		Status status = Status.error(format, args);
-		status.name = Repo.class.getSimpleName();
-		errors.add(status);
-		if (listener != null) {
-			listener.onStatus(status);
-		}
-	}
-	*/
 
 	public List<Status> getErrors() {
 		return errors;
@@ -218,8 +196,13 @@ public class Repo implements Serializable {
 			listener.onInstallProgress(status);//.onStatus(status);
 		}
 	}
-	
 
+	/**
+	 * installs all currently defined service types and their dependencies
+	 * 
+	 * @throws ParseException
+	 * @throws IOException
+	 */
 	public void install() throws ParseException, IOException {
 		clearErrors();
 		ServiceData sd = ServiceData.getLocalInstance();
@@ -251,7 +234,8 @@ public class Repo implements Serializable {
 	 * @throws IOException
 	 */
 	public void install(String fullTypeName) throws ParseException, IOException {
-
+		log.info("installing {}", fullTypeName);
+		
 		if (!fullTypeName.contains(".")) {
 			fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
 		}
@@ -276,15 +260,17 @@ public class Repo implements Serializable {
 		ServiceData sd = ServiceData.getLocalInstance();
 
 		if (!sd.containsServiceType(fullTypeName)) {
-			log.error("unknown service %s", fullTypeName);
+			log.error("unknown service {}", fullTypeName);
 			return false;
 		}
 
 		Set<Library> libraries = getUnfulfilledDependencies(fullTypeName);
 		if (libraries.size() > 0) {
+			// log.info("{} is NOT installed", fullTypeName);
 			return false;
 		}
 
+		// log.info("{} is installed", fullTypeName);
 		return true;
 	}
 
