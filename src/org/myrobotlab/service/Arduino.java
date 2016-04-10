@@ -53,6 +53,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.ServiceType;
@@ -202,7 +203,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public static final int ERROR_UNKOWN_CMD = 2;
 	// sensor types
 	public static final int COMMUNICATION_RESET = 252;
-	public static final int SOFT_RESET = 253;
 	public static final int NOP = 255;
 
 	public static final int TRUE = 1;
@@ -1542,7 +1542,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * TODO - reset servos ? motors ? etc. ?
 	 */
 	public void softReset() {
-		sendMsg(SOFT_RESET, 0, 0);
+		sendMsg(ArduinoMsgCodec.SOFT_RESET, 0, 0);
 	}
 
 	@Override

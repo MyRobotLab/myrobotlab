@@ -171,6 +171,9 @@ public class ArduinoBindingsGenerator {
 		exclude.add("setBoardMega");	
 		exclude.add("setBoardUno");			
 		
+		exclude.add("createVirtual");
+		exclude.add("getMetaData");
+		
 		int index = 0;
 
 		++index;
