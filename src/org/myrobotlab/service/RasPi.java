@@ -135,7 +135,7 @@ public class RasPi extends Service implements I2CControl {
 	public I2CDevice createDevice(int busAddress, int deviceAddress, String type) {
         
 		try {
-			I2CDevice device = i2c.getDevice(busAddress);
+			I2CDevice device = i2c.getDevice(deviceAddress);
 			I2CBus bus = I2CFactory.getInstance(busAddress);
 			String key = String.format("%d.%d", busAddress, deviceAddress);
 			
