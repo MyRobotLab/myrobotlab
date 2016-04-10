@@ -20,12 +20,12 @@ public class StreamGobbler extends Thread {
 	String tag;
 
 	public StreamGobbler(InputStream is, ArrayList<OutputStream> os, String type) {
-		super(String.format("%s_%s", type, Runtime.getPid()));
+		super(String.format("streamgobbler_%s_%s", type, Runtime.getPid()));
 		// this.tag = String.format("%s_%s<<", type, Runtime.getPID());
-		this.tag = "";
+		// this.tag = "";
 		this.is = is;
 		this.os = os;
-		this.type = type;
+		// this.type = type;
 	}
 
 	@Override

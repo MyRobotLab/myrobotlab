@@ -408,6 +408,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return true;
 	}
 
+	// FIXME - DEPRECATE !!! only need createVirtual(port)
 	// TODO - should be override .. ??
 	public Serial connectVirtualUART() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException,
 			IllegalArgumentException, InvocationTargetException {
@@ -415,6 +416,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		uart.setCodec("arduino");
 		connect(serial.getName());
 		return uart;
+	}
+	
+	public VirtualDevice createVirtual(String port) throws IOException{
+		VirtualDevice virtual = (VirtualDevice) startPeer("virtual");
+		virtual.createVirtualArduino(port);
+		return virtual;
 	}
 
 	public ArrayList<Pin> createPinList() {
@@ -1570,6 +1577,47 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		disconnect();
 	}
 
+
+	@Override
+	public void update(Object data) {
+		invoke("publishPin", data);
+	}
+
+	@Override
+	public int getDataSinkType() {
+		return DATA_SINK_TYPE_PIN;
+	}
+
+	@Override
+	public int getSensorType() {
+		return SENSOR_TYPE_PIN;
+	}
+
+	@Override
+	public int[] getSensorConfig() {
+		// is a Pin sensor
+		return new int[] {};
+	}
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Arduino.class.getCanonicalName());
+		meta.addDescription("This service interfaces with an Arduino micro-controller");
+		meta.addCategory("microcontroller");
+		meta.addPeer("serial", "Serial", "serial device for this Arduino");
+		meta.addPeer("virtual", "VirtualDevice", "used to create virtual arduino");
+		return meta;
+	}
+
+
 	public static void main(String[] args) {
 		try {
 
@@ -1580,12 +1628,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			// Runtime.start("clock", "Clock");
 			// Runtime.start("serial", "Serial");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			arduino.setBoardUno();
-			arduino.connect("COM18");
+			//arduino.createVirtual("COM18");
+			// arduino.setBoardUno();
+			//arduino.connect("COM18");
 			// Runtime.start("webgui", "WebGui");
-			Runtime.start("gui", "GUIService");
+			//Runtime.start("gui", "GUIService");
+			Runtime.start("webgui", "WebGui");
 
-			arduino.analogReadPollingStart(14);
+			// arduino.analogReadPollingStart(14);
 			// Runtime.start("gui", "GUIService");
 			// Runtime.start("python", "Python");
 			// arduino.connect("COM18");
@@ -1669,43 +1719,4 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			Logging.logError(e);
 		}
 	}
-
-	@Override
-	public void update(Object data) {
-		invoke("publishPin", data);
-	}
-
-	@Override
-	public int getDataSinkType() {
-		return DATA_SINK_TYPE_PIN;
-	}
-
-	@Override
-	public int getSensorType() {
-		return SENSOR_TYPE_PIN;
-	}
-
-	@Override
-	public int[] getSensorConfig() {
-		// is a Pin sensor
-		return new int[] {};
-	}
-
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = new ServiceType(Arduino.class.getCanonicalName());
-		meta.addDescription("This service interfaces with an Arduino micro-controller");
-		meta.addCategory("microcontroller");
-		meta.addPeer("serial", "Serial", "serial device for this Arduino");
-		return meta;
-	}
-
 }

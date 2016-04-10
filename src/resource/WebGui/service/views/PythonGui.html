@@ -10,7 +10,7 @@
     </button>	
     <ul uib-dropdown-menu aria-labelledby="dropdownMenu1">
       <!-- li ng-repeat="file in service.currentFileList" ng-class="navClass('{{file.type}}')"> <a href='' ng-click="msg.loadExample(getName(file.path))">{{getName(file.path)}}</a --> 
-      <li ng-repeat="(key, value) in service.exampleUrls" ng-class="navClass('{{key}}')"> <a href='' ng-click="msg.loadExample(getName(value))">{{key}}</a>       
+      <li ng-repeat="(key, value) in service.exampleUrls" ng-class="navClass('{{key}}')"> <a href='' ng-click="msg.loadPyRobotLabServiceScript(key)">{{key}}</a>       
         </li>
     </ul>
 	</div>

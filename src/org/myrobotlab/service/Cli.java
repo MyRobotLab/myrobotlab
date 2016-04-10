@@ -1,20 +1,15 @@
 package org.myrobotlab.service;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import org.myrobotlab.codec.CodecUri;
 import org.myrobotlab.codec.CodecUtils;
@@ -94,7 +89,7 @@ public class Cli extends Service {
 		transient InputStream is;
 		// TODO ecoding defaults & methods to change
 		// FIXME - need reference to OutputStream to return
-		String inputEncoding = CodecUtils.TYPE_REST; // REST JSON
+		String inputEncoding = CodecUtils.TYPE_URI; // REST JSON
 		String outputEncoding = CodecUtils.TYPE_JSON; // REST JSON
 
 		public Decoder(Cli cli, String name, InputStream is) {
@@ -103,23 +98,41 @@ public class Cli extends Service {
 			this.name = name;
 			this.is = is;
 		}
+		
+		StringBuffer sb = new StringBuffer();
 
 		@Override
 		public void run() {
 			try {
 				InputStreamReader in = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(in); // < FIXME ? is
+				//BufferedReader br = new BufferedReader(in); // < FIXME ? is
 															// Buffered
 															// Necessary?
 				writePrompt();
 
 				String line = null;
+				
+				char c =  0;
 
 				// FIXME FIXME FIXME - line.split(" ") - invoke(line[0], line)
 				// "One Handler to Rule them All !"
-				while ((line = br.readLine()) != null) {
+				while ((c = (char)in.read()) != -1) {
+					
+					// handle up arrow - tab autoComplet - and regular \n
+					// if not one of these - then append the next character
+					if (c != '\n'){
+						sb.append(c);
+						continue;
+					} else {
+						line = sb.toString();
+						sb.setLength(0);
+					}
+					
+					
+					
 					// FIXME - must read char by char to process up-arrow history commands 
 					//in.read()
+					// FIXME - tab to autoComplete !
 					line = line.trim();
 
 					if (line.length() == 0) {
@@ -135,9 +148,15 @@ public class Cli extends Service {
 						}
 
 						// relaying command to another process
-						attachedIn.write(line);
-						attachedIn.newLine();
-						attachedIn.flush();
+						try {
+							attachedIn.write(line);
+							attachedIn.newLine();
+							attachedIn.flush();
+						} catch(Exception e){
+							log.error("std:in ---(agent)---X---> process ({})", name);
+							log.info("detaching... ");
+							detach();
+						}
 						// writePrompt();
 						continue;
 					}
@@ -615,36 +634,6 @@ public class Cli extends Service {
 		}
 	}
 	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel("ERROR");
-
-		try {
-
-			Cli cli = (Cli) Runtime.start("cli", "Cli");
-			cli.load();
-			cli.save();
-			
-			FileOutputStream fos = new FileOutputStream("cli.dat");
-			ObjectOutputStream out = new ObjectOutputStream(fos);
-			out.writeObject(cli);
-			out.close();
-			
-			FileInputStream fis = new FileInputStream("cli.dat");
-			ObjectInputStream in = new ObjectInputStream(fis);
-			Object x = in.readObject();
-			in.close();
-			
-			/*
-			 * cli.ls("/"); cli.ls("/cli"); cli.ls("/cli/");
-			 */
-			// cli.test();
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-	
 
 	/**
 	 * This static method returns all the details of the class without
@@ -661,6 +650,28 @@ public class Cli extends Service {
 		meta.addCategory("framework");	
 		return meta;		
 	}
+	
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel("ERROR");
+
+		try {
+
+			Cli cli = (Cli) Runtime.start("cli", "Cli");
+			
+			cli.process("help");
+			
+			/*
+			 * cli.ls("/"); cli.ls("/cli"); cli.ls("/cli/");
+			 */
+			// cli.test();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+	
 
 
 }
