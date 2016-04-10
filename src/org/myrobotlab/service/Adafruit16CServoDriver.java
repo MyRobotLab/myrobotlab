@@ -26,6 +26,8 @@ import org.myrobotlab.service.interfaces.ArduinoShield;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
+import com.pi4j.io.i2c.I2CBus;
+
 /**
  * AdaFruit Motor Shield Controller Service
  * 
@@ -70,7 +72,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	private boolean pwmFreqSet = false;
 	
     // Default i2cAddress
-	public int busAddress = 1;
+	public int busAddress = I2CBus.BUS_1;
 	public int deviceAddress = 0x40;
 	public String type = "PCA9685";
 

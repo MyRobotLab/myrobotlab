@@ -148,7 +148,7 @@ public class RasPi extends Service implements I2CControl {
 			    devicedata.device = device;
 			    devicedata.type = type;
 				devices.put(key, devicedata);
-
+                return devicedata.device;
 
 			// PCF8574GpioProvider pcf = new PCF8574GpioProvider(busAddress,
 			// deviceAddress);
