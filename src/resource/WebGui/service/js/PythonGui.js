@@ -57,7 +57,7 @@ angular.module('mrlapp.service.PythonGui', [])
             $scope.$apply();
             break;
         case 'onStdOut':
-            $scope.output = msg.data[0] + $scope.output;
+            $scope.output =  $scope.output + msg.data[0];
             $scope.$apply();
             break;
         default:
