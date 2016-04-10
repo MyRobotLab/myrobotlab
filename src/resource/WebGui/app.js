@@ -23,7 +23,7 @@ angular.module('mrlapp', [
     'nvd3ChartDirectives',
     'ui.ace', //funky editor
     'timer',
-    'luegg.directives',
+    'luegg.directives', // scrollglue
     'mrlapp.mrl', //mrl.js (/mrl.js) - the really really core
     'mrlapp.main.mainCtrl',
     'mrlapp.main.statusSvc', //very basic service for storing "statuses"
