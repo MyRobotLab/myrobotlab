@@ -10,17 +10,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
-import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
-import org.wikidata.wdtk.datamodel.interfaces.GlobeCoordinatesValue;
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
-import org.wikidata.wdtk.datamodel.interfaces.MonolingualTextValue;
-import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
-import org.wikidata.wdtk.datamodel.interfaces.QuantityValue;
-import org.wikidata.wdtk.datamodel.interfaces.Statement;
-import org.wikidata.wdtk.datamodel.interfaces.StatementGroup;
-import org.wikidata.wdtk.datamodel.interfaces.TimeValue;
-import org.wikidata.wdtk.datamodel.interfaces.Value;
-import org.wikidata.wdtk.datamodel.interfaces.ValueSnak;
+import org.wikidata.wdtk.datamodel.interfaces.*;
+
 import org.wikidata.wdtk.datamodel.json.jackson.JacksonSnak;
 import org.wikidata.wdtk.datamodel.json.jackson.JacksonValueSnak;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
@@ -92,7 +83,7 @@ public class WikiDataFetcher extends Service {
 		return wiki;
 	}
 	
-	
+	// TODO Add comments to build the javadoc
 	public String getDescription(String query) throws MediaWikiApiErrorException{
 		EntityDocument document = getWiki(query);
 		if (document instanceof ValueSnak) {
@@ -103,7 +94,7 @@ public class WikiDataFetcher extends Service {
 			String answer = ((ItemDocument) document).getDescriptions().get(language).getText();
 			return answer;
 		} 
-		catch (Exception e){return  " Description not found";}
+		catch (Exception e){return  "Not Found !";}
 		
 	}
 	
@@ -113,7 +104,7 @@ public class WikiDataFetcher extends Service {
 			String answer =  ((ItemDocument) document).getLabels().get(language).getText();
 			return answer;
 		} 
-		catch (Exception e){return  "Label not found";}
+		catch (Exception e){return  "Not Found !";}
 	}
 	
 	public String getId(String query) throws MediaWikiApiErrorException{
@@ -122,7 +113,7 @@ public class WikiDataFetcher extends Service {
 			String answer =  document.getEntityId().getId();
 			return answer;
 		}
-		catch (Exception e){return  "ID not found";}
+		catch (Exception e){return  "Not Found !";}
 	}
 	
 	public String getDescriptionById(String query) throws MediaWikiApiErrorException{
@@ -131,7 +122,7 @@ public class WikiDataFetcher extends Service {
 			String answer =  ((ItemDocument) document).getDescriptions().get(language).getText();
 			return answer;
 		}
-	 catch (Exception e){return  "Description by ID  not found";}
+	 catch (Exception e){return  "Not Found !";}
 	}
 	
 	public String getLabelById(String query) throws MediaWikiApiErrorException{
@@ -140,7 +131,7 @@ public class WikiDataFetcher extends Service {
 			String answer =  ((ItemDocument) document).getLabels().get(language).getText();
 			return answer;
 		}
-		catch (Exception e){return  "Label by ID not found";}
+		catch (Exception e){return  "Not Found !";}
 	}
 	
 	public String cutStart(String sentence) throws MediaWikiApiErrorException{// Remove the first word (The cat -> The)
@@ -210,6 +201,7 @@ public class WikiDataFetcher extends Service {
 				for (Statement s : sg.getStatements()) {
 				if (s.getClaim().getMainSnak() instanceof ValueSnak) {
 					dataType = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString();
+					// TODO Add all snaks instead of only the main snak
 					al.add(dataType);
 					al.add((JacksonValueSnak) s.getClaim().getMainSnak());
 					 
@@ -227,10 +219,12 @@ public class WikiDataFetcher extends Service {
 	public String getData(String query, String ID)throws MediaWikiApiErrorException{
 		try {
 			ArrayList al = getSnak(query,ID);
+			// TODO manage all snaks and qualifiers
 			Value data = ((JacksonValueSnak) al.get(1)).getDatavalue();
 			String dataType = (String) al.get(0);
 			String answer = "";
 			System.out.print("Datatype : " + dataType);
+			// TODO put switch in a function out of getData()
 			switch (dataType) {
          	case "wikibase-item"://
          		String info = (String) data.toString();
@@ -269,7 +263,7 @@ public class WikiDataFetcher extends Service {
          		answer = data.toString();
          		break;
          	case "commonsMedia":
-         		data = ((JacksonValueSnak) data).getDatavalue();
+         		answer = data.toString();
          		break;
          	default:
          		answer = "Not Found !";
@@ -362,6 +356,8 @@ public class WikiDataFetcher extends Service {
 		}
 		catch (Exception e){return  "Not Found !";}
 	}
+	
+	// TODO Add a function to compare (is there the word "fruit" in the banana's document ? )
 	
 	/**
 	 * This static method returns all the details of the class without
