@@ -69,5 +69,7 @@ int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size);
 * @throws IOException thrown in case byte cannot be read from the i2c device or i2c bus
 */
 int i2CRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize);
-	
+
+public String getName();	
+
 }
