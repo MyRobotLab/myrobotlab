@@ -80,12 +80,13 @@ public class AdafruitINA219 extends Service {
 	/**
 	 * This method creates the i2c device 
 	 */
-	boolean setDeviceAddress(int deviceAddress){
+	boolean setDeviceAddress(int DeviceAddress){
 		if (controller != null) {
 			error("setDeviceAddress must be used before calling createDevice");
 			return false;
 		}
 		log.info(String.format("Setting device address to x%02X", deviceAddress));
+		deviceAddress = DeviceAddress;
 		return true;
 	}
 	/**
