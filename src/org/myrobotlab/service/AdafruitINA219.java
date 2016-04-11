@@ -114,6 +114,7 @@ public class AdafruitINA219 extends Service {
 		byte[] readbuffer = {0x0,0x0}; 
 		controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
 		controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
+		log.info(String.format("getShuntVoltage x%02X x&02X", readbuffer[0], readbuffer[1]));
 		shuntVoltage = (int)(readbuffer[0])<<8 + (int)readbuffer[1];
 		return shuntVoltage;
 	}
@@ -126,7 +127,8 @@ public class AdafruitINA219 extends Service {
 		byte[] readbuffer = {0x0,0x0}; 
 		controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
 		controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
-		busVoltage = (int)(readbuffer[0])<<8 + (int)readbuffer[1];
+		log.info(String.format("getBusVoltage x%02X x&02X", readbuffer[0], readbuffer[1]));
+		busVoltage = ((int)(readbuffer[0])<<8 + (int)readbuffer[1]) / scaleRange;
 		return busVoltage;
 	}
 	
