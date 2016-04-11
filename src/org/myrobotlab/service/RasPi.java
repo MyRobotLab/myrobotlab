@@ -141,7 +141,8 @@ public class RasPi extends Service implements I2CControl {
 			
 			Device devicedata = new Device();
 			if (devices.containsKey(key)){
-				log.error("Device %s %s %s already exists.",busAddress, deviceAddress,type);
+				log.error(String.format("Device %s %s %s already exists.",busAddress, deviceAddress,type));
+				return devices.get(key).device;
 			}
 			else
 				devicedata.bus = bus;
@@ -193,7 +194,6 @@ public class RasPi extends Service implements I2CControl {
 				log.info(String.format("getDevice %d", deviceAddress));
 				Device devicedata = devices.get(key);
 				return devicedata.device;
-
 			} else {
 				return devices.get(key).device;
 			}
@@ -272,21 +272,6 @@ public class RasPi extends Service implements I2CControl {
 			}
 		} catch (Exception e) {
 
-		}
-	}
-
-	public void writeRaw(int busAddress, int deviceAddress, byte d0, byte d1, byte d2, byte d3, byte d4, byte d5, byte d6, byte d7, byte d8, byte d9, byte d10, byte d11, byte d12,
-			byte d13, byte d14, byte d15) {
-		try {
-			log.info("--------writeRaw begin -------------");
-
-			log.info(String.format("test %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15));
-			I2CDevice device = getDevice(busAddress, deviceAddress);
-			device.write(0x00, new byte[] { d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15 }, 0, 16);
-
-			log.info("--------writeRaw end-------------");
-		} catch (Exception e) {
-			Logging.logError(e);
 		}
 	}
 
