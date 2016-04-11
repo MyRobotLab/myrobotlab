@@ -203,7 +203,15 @@ public class RasPi extends Service implements I2CControl {
 
 		return null;
 	}
-
+	
+	@Override
+	public void releaseDevice(int busAddress, int deviceAddress) {
+		
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		devices.remove(key);
+		
+	}
+	
 	// FIXME - return array
 	public Integer[] scanI2CDevices(int busAddress) {
 		log.info("scanning through I2C devices");
