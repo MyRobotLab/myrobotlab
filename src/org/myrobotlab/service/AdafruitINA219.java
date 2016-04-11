@@ -36,17 +36,31 @@ public class AdafruitINA219 extends Service {
 	public double shuntVoltage;
 	public double current;
 	public double power;
+	
+	// TODO Add methods to calibrate 
+	//      Currently only supports setting the shunt resistance to a different
+	//      value than the default, in case it has been exchanged to measure
+	//      a different range of current
 	public double shuntResistance = 0.1;  // expressed in Ohms
-	public double scaleRange = 32;        // 32V = bus full-scale range 
+	public int    scaleRange = 32;        // 32V = bus full-scale range 
+	public int    pga = 8;		          // 320 mV = shunt full-scale range 
 	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
-			AdafruitINA219 adafruitINA219 = (AdafruitINA219) Runtime.start("AdafruitINA219", "AdafruitINA219");
-			Runtime.start("gui", "GUIService");
-
+			//AdafruitINA219 adafruitINA219 = (AdafruitINA219) Runtime.start("AdafruitINA219", "AdafruitINA219");
+			//Runtime.start("gui", "GUIService");
+			double shuntVoltage;
+			byte[] readbuffer = {(byte)0xE0,(byte)0xC0}; 
+			// pga = 8
+			// shuntVoltage = (double)(((short)(readbuffer[0])<<8) + ((short)readbuffer[1] & 0xff)) * 0.00001;
+			// pga = 4
+			shuntVoltage = (double)(((short)(readbuffer[0])<<8) + ((short)readbuffer[1] & 0xff)) * 0.00001;
+			// pga = 2
+			shuntVoltage = (double)(((short)(readbuffer[0])<<8) + ((short)readbuffer[1] & 0xff)) * 0.00001;
+			log.info(String.format("shuntVoltage %s", shuntVoltage));
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -91,14 +105,21 @@ public class AdafruitINA219 extends Service {
 		return true;
 	}
 	/**
-	 * This method reads and returns the power
+	 * This method sets the shunt resistance in ohms
+	 * Default value is .1 Ohms ( R100 ) 
+	 */
+	void setShuntResistance(double ShuntResistance){
+		shuntResistance = ShuntResistance;
+	}
+	/**
+	 * This method reads and returns the power in Watts
 	 */
 	double getPower(){
 		power = getBusVoltage() * getCurrent();
 		return power;
 	}
 	/**
-	 * This method reads and returns the shunt Voltage
+	 * This method reads and returns the shunt current in Amperes
 	 */
 	double getCurrent(){
 		current = getShuntVoltage() / shuntResistance;
@@ -106,7 +127,7 @@ public class AdafruitINA219 extends Service {
 	}
 	
 	/**
-	 * This method reads and returns the shunt Voltage
+	 * This method reads and returns the shunt Voltage in Volts
 	 */
 	double getShuntVoltage(){
 		byte[] writebuffer = {INA219_SHUNTVOLTAGE}; 
@@ -114,12 +135,12 @@ public class AdafruitINA219 extends Service {
 		controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
 		controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
 		log.info(String.format("getShuntVoltage x%02X x%02X", readbuffer[0], readbuffer[1]));
-		shuntVoltage = (int)(readbuffer[0])<<8 + (int)readbuffer[1];
+		shuntVoltage = (double)(((short)(readbuffer[0])<<8) + ((short)readbuffer[1] & 0xff)) * 0.00001;
 		return shuntVoltage;
 	}
 	
 	/**
-	 * This method reads and returns the bus Voltage
+	 * This method reads and returns the bus Voltage in Volts
 	 */
 	double getBusVoltage(){
 		int scale = 250;
