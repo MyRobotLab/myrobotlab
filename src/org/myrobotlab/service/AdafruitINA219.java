@@ -44,7 +44,6 @@ public class AdafruitINA219 extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
-
 			AdafruitINA219 adafruitINA219 = (AdafruitINA219) Runtime.start("AdafruitINA219", "AdafruitINA219");
 			Runtime.start("gui", "GUIService");
 
@@ -129,7 +128,7 @@ public class AdafruitINA219 extends Service {
 		controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
 		controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
 		log.info(String.format("getBusVoltage x%02X x%02X", readbuffer[0], readbuffer[1]));
-		busVoltage = ((int)(readbuffer[0])<<5 + (int)readbuffer[1]>>3) / scale;
+		busVoltage = (double)(((int)(readbuffer[0])<<5 & 0x7fff) + ((int)readbuffer[1]>>3 & 0x7f)) / scale;
 		return busVoltage;
 	}
 	
