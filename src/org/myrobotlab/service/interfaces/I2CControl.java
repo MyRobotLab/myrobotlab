@@ -26,6 +26,14 @@ I2CDevice createDevice(int busAddress, int deviceAddress, String type);
 * @param address local address in the i2c device
 * 
 */
+void releaseDevice(int busAddress, int deviceAddress);	
+/**
+* This method release and already existing I2CDevice
+* 
+* @param busaddress
+* @param address local address in the i2c device
+* 
+*/
 I2CDevice getDevice(int busAddress, int deviceAddress);	
 /**
 * This method writes several bytes to the i2c device from given buffer.

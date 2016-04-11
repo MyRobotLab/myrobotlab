@@ -82,8 +82,10 @@ public class AdafruitINA219 extends Service {
 	 */
 	boolean setDeviceAddress(int DeviceAddress){
 		if (controller != null) {
-			error("setDeviceAddress must be used before calling createDevice");
-			return false;
+			if (deviceAddress != DeviceAddress){
+				controller.releaseDevice(busAddress,deviceAddress);
+				controller.createDevice(busAddress, DeviceAddress, type);
+			}
 		}
 		log.info(String.format("Setting device address to x%02X", deviceAddress));
 		deviceAddress = DeviceAddress;
