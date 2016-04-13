@@ -18,7 +18,7 @@ public interface I2CControl {
 * @param type 
 * 
 */
-I2CDevice createDevice(int busAddress, int deviceAddress, String type);
+void createDevice(int busAddress, int deviceAddress, String type);
 /**
 * This method returns and already existing I2CDevice
 * 
@@ -27,14 +27,7 @@ I2CDevice createDevice(int busAddress, int deviceAddress, String type);
 * 
 */
 void releaseDevice(int busAddress, int deviceAddress);	
-/**
-* This method release and already existing I2CDevice
-* 
-* @param busaddress
-* @param address local address in the i2c device
-* 
-*/
-I2CDevice getDevice(int busAddress, int deviceAddress);	
+
 /**
 * This method writes several bytes to the i2c device from given buffer.
 * 
@@ -76,7 +69,7 @@ int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size);
 *
 * @throws IOException thrown in case byte cannot be read from the i2c device or i2c bus
 */
-int i2CRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize);
+int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize);
 
 public String getName();	
 
