@@ -300,6 +300,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	}
 	
 	public void setPWMFreq(Integer hz) { // Analog servos run at ~60 Hz updates
+		log.info(String.format("servoPWMFreq %s hz", hz));
         if (controler == "Arduino"){
 		  arduino.sendMsg(AF_SET_PWM_FREQ, deviceAddress, hz, 0);
         }
