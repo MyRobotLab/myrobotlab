@@ -24,6 +24,9 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE_READ;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_STOP;
@@ -62,8 +65,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.RasPi.Device;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.CustomMsgListener;
+import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
@@ -72,6 +77,9 @@ import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
+
+import com.pi4j.io.i2c.I2CBus;
+import com.pi4j.io.i2c.I2CDevice;
 
 /**
  * Implementation of a Arduino Service connected to MRL through a serial port.
@@ -141,7 +149,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class Arduino extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController, SensorDataSink {
+public class Arduino extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController, SensorDataSink,  I2CControl  {
 
 	/**
 	 * MotorData is the combination of a Motor and any controller data needed to
@@ -174,9 +182,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			this.name = name;
 			this.data = data;
 		}
-
 	}
 
+	public static class Device {
+		public int bus;
+		public int device;
+		public String type;
+	}
+	
 	public Sketch sketch;
 
 	private static final long serialVersionUID = 1L;
@@ -284,6 +297,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 */
 	HashMap<Integer, ServoData> servoIndex = new HashMap<Integer, ServoData>();
 
+	/**
+	 * i2c device 
+	 */
+	HashMap<String, Device> devices = new HashMap<String, Device>();
+	
 	/**
 	 * As simple pojo wrapper to contain the service and its index in
 	 * MRLComm.ino Used for callbacks
@@ -1718,5 +1736,53 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+
+	@Override
+	public void createDevice(int busAddress, int deviceAddress, String type) {
+
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		Device devicedata = new Device();
+		if (devices.containsKey(key)){
+			log.error(String.format("Device %s %s %s already exists.",busAddress, deviceAddress,type));
+		}
+		else {
+			devicedata.bus = busAddress;
+		    devicedata.device = deviceAddress;
+		    devicedata.type = type;
+			devices.put(key, devicedata);
+		}
+	}
+
+	@Override
+	public void releaseDevice(int busAddress, int deviceAddress) {
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		devices.remove(key);
+		
+	}
+
+	@Override
+	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
+		int wBuffer[] = new int[buffer.length +3];
+		wBuffer[0] = busAddress;
+		wBuffer[1] = deviceAddress;
+		wBuffer[2] = size;
+		for(int i = 0; i < buffer.length; i++){
+			wBuffer[i+3] = (int)buffer[i] & 0xFF;
+		}
+		sendMsg(I2C_WRITE, wBuffer);	
+	}
+
+	@Override
+	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
+		sendMsg(I2C_READ, busAddress, deviceAddress);
+		return 0;
+	}
+
+	@Override
+	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer,
+			int writeSize, byte[] readBuffer, int readSize) {
+		sendMsg(I2C_WRITE_READ, busAddress, deviceAddress);
+		return 0;
 	}
 }
