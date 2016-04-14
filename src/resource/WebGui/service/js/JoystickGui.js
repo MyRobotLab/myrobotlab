@@ -25,12 +25,6 @@ angular.module('mrlapp.service.JoystickGui', [])
         'bar': 'aaa'
     };
     
-    /*
-    $scope.hovered = function(d) {
-        $scope.barValue = d;
-        $scope.$apply();
-    }
-    ; */
     $scope.barValue = 'None';
     $scope.globalInt = 15;
     
