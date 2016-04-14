@@ -132,7 +132,7 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	// FIXME - create low level I2CDevice
-	public I2CDevice createDevice(int busAddress, int deviceAddress, String type) {
+	public void createDevice(int busAddress, int deviceAddress, String type) {
         
 		try {
 			I2CDevice device = i2c.getDevice(deviceAddress);
@@ -142,14 +142,12 @@ public class RasPi extends Service implements I2CControl {
 			Device devicedata = new Device();
 			if (devices.containsKey(key)){
 				log.error(String.format("Device %s %s %s already exists.",busAddress, deviceAddress,type));
-				return devices.get(key).device;
 			}
 			else
 				devicedata.bus = bus;
 			    devicedata.device = device;
 			    devicedata.type = type;
 				devices.put(key, devicedata);
-                return devicedata.device;
 
 			// PCF8574GpioProvider pcf = new PCF8574GpioProvider(busAddress,
 			// deviceAddress);
@@ -180,30 +178,9 @@ public class RasPi extends Service implements I2CControl {
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
-
-		return null;
      
 	}
 
-	public I2CDevice getDevice(int busAddress, int deviceAddress) {
-		try {
-			String key = String.format("%d.%d", busAddress, deviceAddress);
-			if (!devices.containsKey(key)) {
-				// FIXME -- remove put in createDevice
-				createDevice(busAddress, deviceAddress, "unknown");
-				log.info(String.format("getDevice %d", deviceAddress));
-				Device devicedata = devices.get(key);
-				return devicedata.device;
-			} else {
-				return devices.get(key).device;
-			}
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		return null;
-	}
-	
 	@Override
 	public void releaseDevice(int busAddress, int deviceAddress) {
 		
@@ -311,7 +288,7 @@ public class RasPi extends Service implements I2CControl {
 
 
 	@Override
-	public int i2CRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize,
+	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize,
 			byte[] readBuffer, int readSize) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		Device devicedata = devices.get(key);

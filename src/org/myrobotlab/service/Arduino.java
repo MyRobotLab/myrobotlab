@@ -1146,6 +1146,16 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			error("sendMsg " + e.getMessage());
 		}
 
+		// putting delay at the end so we give the message and allow the arduino to process
+		// this decreases the latency between when mrl sends the message 
+		// and the message is picked up by the arduino.
+		// This helps avoid the arduino dropping messages and getting lost/disconnected.
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			log.error("Send msg to arduino error", e);
+		}
+
 	}
 
 	// FIXME !! - implement sensorDetach !!!
