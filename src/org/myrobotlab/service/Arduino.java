@@ -328,7 +328,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	int msgSize;
 
-	int[] msg = new int[MAX_MSG_SIZE];
+	transient int[] msg = new int[MAX_MSG_SIZE];
 
 	private int retryConnectMax = 3;
 
@@ -1631,11 +1631,18 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			// Runtime.start("webgui", "WebGui");
+			Runtime.start("webgui", "WebGui");
 			// Runtime.start("servo", "Servo");
 			// Runtime.start("clock", "Clock");
 			// Runtime.start("serial", "Serial");
+			// Arduino.createVirtual("COM9");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			
+			boolean done = true;
+			if (done){
+				return;
+			}
+			
 			arduino.connect("COM9");
 			arduino.setLoadTimingEnabled(true);
 			long ts = System.currentTimeMillis();
