@@ -329,13 +329,13 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	static public synchronized ServiceInterface createService(String name, String fullTypeName) {
 		log.info(String.format("Runtime.createService %s", name));
 		if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
-			log.error(String.format("%s not a type or %s not defined ", fullTypeName, name));
+			log.error("{} not a type or {} not defined ", fullTypeName, name);
 			return null;
 		}
 
 		ServiceInterface sw = Runtime.getService(name);
 		if (sw != null) {
-			log.debug(String.format("service %s already exists", name));
+			log.debug("service {} already exists", name);
 			return sw;
 		}
 
@@ -519,7 +519,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		java.lang.Runtime.getRuntime().gc();
 	}
 
-	public static Cli getCLI() {
+	public static Cli getCli() {
+		if (cli == null) {
+			cli = startCli();
+		}
 		return cli;
 	}
 
@@ -986,7 +989,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		long diffDays = diff / (24 * 60 * 60 * 1000);
 
 		StringBuffer sb = new StringBuffer();
-		sb.append(diffDays).append(" days ").append(diffHours).append(" hours ").append(diffMinutes).append(" minutes ").append(diffSeconds).append(" seconds ");
+		sb.append(diffDays).append(" days ").append(diffHours).append(" hours ").append(diffMinutes).append(" minutes ").append(diffSeconds).append(" seconds");
 		return sb.toString();
 	}
 
@@ -1202,7 +1205,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
 			if (!cmdline.containsKey("-noCLI")) {
 				Runtime.getInstance();
-				startCLI();
+				startCli();
 			}
 
 			// LINUX LD_LIBRARY_PATH MUST BE EXPORTED - NO OTHER SOLUTION FOUND
@@ -1321,7 +1324,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 				runtime.invoke("collision", name);// necessary ? collisions are
 													// 'expected' in mrl's
 													// evolution
-				log.info("collision registering %s", name);
+				log.info("collision registering {}", name);
 				// runtime.error(String.format(" name collision or already
 				// registered with %s", name));
 			}
@@ -1516,8 +1519,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
 		// exit () ?
 	}
-	
-	public static void shutdown(){
+
+	public static void shutdown() {
 		releaseAll();
 		System.exit(-1);
 	}
@@ -1641,20 +1644,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		return createAndStart(name, type);
 	}
 
-	static public Cli startCLI() {
-		// FIXME !!! - query registry by type
-		// we want 1 and only 1 Cli
-		// peer start ?
-		if (cli == null) {
-			cli = (Cli) start("cli", "Cli");
-		} else {
-			log.error("one and only cli already created");
-		}
-
+	static public Cli startCli() {
+		cli = (Cli) start("cli", "Cli");
 		return cli;
 	}
 
-	static public void stopCLI() {
+	static public void stopCli() {
 		if (cli != null) {
 			release(cli.getName());
 		}

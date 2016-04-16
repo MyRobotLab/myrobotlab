@@ -29,6 +29,8 @@ public class RecordingInputStream extends FilterInputStream {
 	@Override
 	public synchronized int read(byte[] buf, int off, int len) throws IOException {
 		int l = in.read(buf, off, len);
+		if (l == -1)
+			return -1;
 		sink.write(buf, off, l);
 		return l;
 	}

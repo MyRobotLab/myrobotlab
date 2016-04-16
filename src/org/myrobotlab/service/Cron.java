@@ -17,6 +17,11 @@ import org.slf4j.Logger;
 /**
  * Cron - This is a cron based service that can execute a "task" at some point
  * in the future such as "invoke this method on that service"
+ * 
+ * FIXME - the common cron notation is kind of nice - but this thing doesn't do more
+ * than Service.addTask
+ * 
+ * FIXME - make a purge & delete DUH !
  *
  */
 public class Cron extends Service {
@@ -131,13 +136,13 @@ public class Cron extends Service {
 	 * addTask - Add a task to the cron service to invoke a method on a service on some schedule.
 	 * 
 	 * @param cron - The cron string to define the schedule
-	 * @param name - The name of the service to invoke
+	 * @param serviceName - The name of the service to invoke
 	 * @param method - the method on the service to invoke when the task starts.
 	 * @param data - additional objects/varags to pass to the method 
 	 * @return
 	 */
-	public String addTask(String cron, String name, String method, Object... data) {
-		Task task = new Task(this, cron, name, method, data);
+	public String addTask(String cron, String serviceName, String method, Object... data) {
+		Task task = new Task(this, cron, serviceName, method, data);
 		tasks.add(task);
 		return scheduler.schedule(cron, task);
 	}

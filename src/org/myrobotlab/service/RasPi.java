@@ -1,5 +1,5 @@
 package org.myrobotlab.service;
-
+ 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.i2c.I2CFactory;
+import org.myrobotlab.service.PID2.PIDData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -100,17 +101,26 @@ public class RasPi extends Service implements I2CControl {
 		log.info(String.format("architecture is %s", platform.getArch()));
 		
 		if ("arm".equals(platform.getArch()) || "armv7.hfp".equals(platform.getArch())) {
-
-			// gpio = GpioFactory.getInstance();
-			// init I2C			
-			try {
+			log.info("Executing on Raspberry PI");
+			// init gpio	
+			/*
+			log.info("Initiating GPIO");
+			gpio = GpioFactory.getInstance();
+			log.info("GPIO Initiated");
+			*/
+			// init i2c			
+			try {		
+				log.info("Initiating i2c");
 				i2c = I2CFactory.getInstance(I2CBus.BUS_1);
+				log.info("i2c initiated");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
+				log.error("i2c initiation failed");
 				Logging.logError(e);
 			}
 			
 			// TODO Check if the is correct. I don't think it is /Mats
+			// GPIO pins should be provisioned in the CreateDevice 
 			/*
 			gpio01 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01);
 			gpio03 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03);
@@ -122,14 +132,22 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	// FIXME - create low level I2CDevice
-	public I2CDevice createDevice(int busAddress, int deviceAddress, String type) {
-
+	public void createDevice(int busAddress, int deviceAddress, String type) {
+        
 		try {
-
-			I2CDevice device = i2c.getDevice(busAddress);
-			
-			String key = String.format("%d.%d", busAddress, deviceAddress);
+			I2CDevice device = i2c.getDevice(deviceAddress);
 			I2CBus bus = I2CFactory.getInstance(busAddress);
+			String key = String.format("%d.%d", busAddress, deviceAddress);
+			
+			Device devicedata = new Device();
+			if (devices.containsKey(key)){
+				log.error(String.format("Device %s %s %s already exists.",busAddress, deviceAddress,type));
+			}
+			else
+				devicedata.bus = bus;
+			    devicedata.device = device;
+			    devicedata.type = type;
+				devices.put(key, devicedata);
 
 			// PCF8574GpioProvider pcf = new PCF8574GpioProvider(busAddress,
 			// deviceAddress);
@@ -138,7 +156,8 @@ public class RasPi extends Service implements I2CControl {
 			// PCF8574GpioProvider p = new PCF8574GpioProvider(busAddress,
 			// deviceAddress);
 			// p.setValue(pin, value)
-
+			
+            /*
 			if ("com.pi4j.gpio.extension.pcf.PCF8574GpioProvider".equals(type)) {
 				Device d = new Device();
 				d.bus = bus;
@@ -148,64 +167,28 @@ public class RasPi extends Service implements I2CControl {
 																// name
 				devices.put(key, d);
 				return d.device;
+				
+			
 			} else {
 				log.error("could not create device %s", type);
 				return null;
 			}
-
+			*/
+			
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
-
-		return null;
+     
 	}
 
-	public I2CDevice getDevice(int busAddress, int deviceAddress) {
-		try {
-			String key = String.format("%d.%d", busAddress, deviceAddress);
-			if (!devices.containsKey(key)) {
-				// FIXME -- remove put in createDevice
-				I2CBus bus = I2CFactory.getInstance(busAddress);
-				log.info(String.format("getDevice %d", deviceAddress));
-				I2CDevice device = bus.getDevice(deviceAddress);
-
-				Device d = new Device();
-				d.bus = bus;
-				d.device = device;
-				d.type = "display";
-
-				devices.put(key, d);
-				return d.device;
-
-			} else {
-				return devices.get(key).device;
-			}
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		return null;
+	@Override
+	public void releaseDevice(int busAddress, int deviceAddress) {
+		
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		devices.remove(key);
+		
 	}
-
-	// FIXME LOW LEVEL ANY I2C READ OR WRITE !!!
-	public byte I2CWrite(int busAddress, int deviceAddress, byte value) {
-		I2CDevice device = getDevice(busAddress, deviceAddress);
-
-		if (device == null) {
-			error("bus %d device %d not valid", busAddress, deviceAddress);
-			return -1;
-		}
-
-		try {
-			device.write(value);
-			return value;
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		return -1;
-	}
-
-	// FIXME - test by reading? writing ?
+	
 	// FIXME - return array
 	public Integer[] scanI2CDevices(int busAddress) {
 		log.info("scanning through I2C devices");
@@ -277,46 +260,45 @@ public class RasPi extends Service implements I2CControl {
 		}
 	}
 
-	public void writeRaw(int busAddress, int deviceAddress, byte d0, byte d1, byte d2, byte d3, byte d4, byte d5, byte d6, byte d7, byte d8, byte d9, byte d10, byte d11, byte d12,
-			byte d13, byte d14, byte d15) {
+	@Override
+	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size){
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+    	log.info(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+		Device devicedata = devices.get(key);
 		try {
-			log.info("--------writeRaw begin -------------");
-
-			log.info(String.format("test %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15));
-			I2CDevice device = getDevice(busAddress, deviceAddress);
-			device.write(0x00, new byte[] { d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15 }, 0, 16);
-
-			log.info("--------writeRaw end-------------");
-		} catch (Exception e) {
+			devicedata.device.write(buffer, 0, buffer.length);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			Logging.logError(e);
-		}
+		};	
 	}
 
 	@Override
-	public void i2cWrite(int address, byte[] buffer, int offset, int size){
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int i2cRead(byte[] buffer, int offset, int size) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-
-	@Override
-	public int i2cRead(int address, byte[] buffer, int offset, int size) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		Device devicedata = devices.get(key);
+		try {
+			devicedata.device.read(buffer, 0, buffer.length);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Logging.logError(e);
+		};	
+		return buffer.length;
 	}
 
 
 	@Override
-	public int i2CRead(byte[] writeBuffer, int writeOffset, int writeSize,
-			byte[] readBuffer, int readOffset, int readSize) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize,
+			byte[] readBuffer, int readSize) {
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		Device devicedata = devices.get(key);
+		try {
+			devicedata.device.read(writeBuffer, 0, writeBuffer.length, readBuffer, 0, readBuffer.length);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Logging.logError(e);
+		};	
+		return readBuffer.length;
 	}
 
 	/**

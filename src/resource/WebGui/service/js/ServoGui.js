@@ -18,6 +18,7 @@ angular.module('mrlapp.service.ServoGui', [])
         $scope.pins.push(i);
     }
     
+    //control 
     //Slider config with callbacks
     $scope.pos = {
         value: 0,
@@ -33,18 +34,37 @@ angular.module('mrlapp.service.ServoGui', [])
             }
         }
     };
+
+    //status 
+    //Slider config with callbacks
+    $scope.posStatus = {
+        value: 0,
+        options: {
+            floor: 0,
+            ceil: 180,
+            getSelectionBarColor: "black",
+            readOnly: true,
+            onStart: function() {
+            },
+            onChange: function() {
+                // msg.send('moveTo', $scope.pos.value);
+            },
+            onEnd: function() {
+            }
+        }
+    };
     
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service;
         $scope.pos.value = service.targetPos;
+        $scope.posStatus.value = service.targetPos;
         $scope.controllerName = service.controllerName;
         $scope.speed = service.speed;
         $scope.isAttached = service.isAttached;
         $scope.pin = service.pin;
         $scope.rest = service.rest;
-        //$scope.pos.value = service.pos;
         $scope.min = service.mapper.minOutput;
         $scope.max = service.mapper.maxOutput;
     }
@@ -59,8 +79,13 @@ angular.module('mrlapp.service.ServoGui', [])
             _self.updateState(data);
             $scope.$apply();
             break;
+        // servo event in the past 
+        // meant feedback from MRLComm.c
+        // but perhaps its come to mean
+        // feedback from the service.moveTo
         case 'onServoEvent':
-            $scope.pin.value = data;
+            //$scope.pin.value = data;
+            $scope.posStatus.value = data;
             $scope.$apply();
             break;
         case 'onStatus':

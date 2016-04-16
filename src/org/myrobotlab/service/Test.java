@@ -6,14 +6,18 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
@@ -41,20 +45,34 @@ public class Test extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Test.class);
 
+	// state information
 	Date now = new Date();
 	transient Set<Thread> threads = null;
 	transient Set<File> files = new HashSet<File>();
 
+	// python
+	ArrayList<String> neededPythonScripts = new ArrayList<String>();
+	ArrayList<String> pythonScriptsWithNoServiceType = new ArrayList<String>();
+	ArrayList<String> failedPythonScripts = new ArrayList<String>();
+	ArrayList<String> passedPythonScripts = new ArrayList<String>();
+	HashSet<String> skippedPythonScript = new HashSet<String>();
+	
+
+	// thread blocking
+	Object lock = new Object();
+
 	List<Status> status = new ArrayList<Status>();
+
+	TreeMap<String, String> pythonScripts = null;
 
 	LinkedBlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
 	public static void logThreadNames() {
-		
+
 		Set<Thread> threads = Runtime.getThreads();
 		String[] tn = new String[threads.size()];
 		int x = 0;
-		for(Thread thread: threads){
+		for (Thread thread : threads) {
 			tn[x] = thread.getName();
 			++x;
 		}
@@ -94,11 +112,11 @@ public class Test extends Service {
 	 * FileIO.resourceToString(String.format("Python/examples/%s.py",
 	 * shortName));
 	 * 
-	 * if (py == null || py.length() == 0) {
-	 * status.addError("%s.py does not exist", shortName); } else {
-	 * uart99.connect("UART99"); uart99.recordRX(String.format("%s.rx",
-	 * shortName)); // FIXME // FILENAME // OVERLOAD python.exec(py);
-	 * uart99.stopRecording(); // check rx file against saved data }
+	 * if (py == null || py.length() == 0) { status.addError(
+	 * "%s.py does not exist", shortName); } else { uart99.connect("UART99");
+	 * uart99.recordRX(String.format("%s.rx", shortName)); // FIXME // FILENAME
+	 * // OVERLOAD python.exec(py); uart99.stopRecording(); // check rx file
+	 * against saved data }
 	 * 
 	 * // get python errors !
 	 * 
@@ -108,8 +126,6 @@ public class Test extends Service {
 	 * 
 	 * }
 	 */
-
-
 
 	/*
 	 * 
@@ -204,7 +220,6 @@ public class Test extends Service {
 		System.exit(0);
 	}
 
-
 	/**
 	 * used to get state of the current service and runtime - so that the
 	 * environment and final system can be cleaned to an original "base" state
@@ -259,7 +274,7 @@ public class Test extends Service {
 
 			// TODO JAXB xml - since it comes with java 7
 
-		} catch (Exception ex) {			
+		} catch (Exception ex) {
 			return Status.error(ex);
 		}
 
@@ -319,7 +334,7 @@ public class Test extends Service {
 			}
 
 			// add error route - for call backs
-			subscribe(s.getName(), "publishError",  getName(), "onError");
+			subscribe(s.getName(), "publishError", getName(), "onError");
 
 			try {
 				s.startService();
@@ -380,7 +395,8 @@ public class Test extends Service {
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 		Status status = Status.info("subTest");
 
-		//status.add(Status.info("will test %d services", serviceTypeNames.length));
+		// status.add(Status.info("will test %d services",
+		// serviceTypeNames.length));
 
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
 			String fullName = serviceTypeNames[i];
@@ -433,22 +449,162 @@ public class Test extends Service {
 	 * 
 	 * @return ServiceType - returns all the data
 	 * 
-	 * FIXME - todo - make junit html report 
-	 * TODO - simple install start release - check for rogue threads
+	 *         FIXME - todo - make junit html report TODO - simple install start
+	 *         release - check for rogue threads
 	 * 
 	 */
 	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(Test.class.getCanonicalName());
 		meta.addDescription("Testing service");
-		meta.addCategory("testing","framework");		
+		meta.addCategory("testing", "framework");
 		return meta;
 	}
-	
-	public void startAndReleaseTest(String serviceType){
-		
+
+	public void startAndReleaseTest(String serviceType) {
+
 	}
-	
+
+	public void onFinishedPythonScript(String result) {
+		log.info("DONE !");
+		log.info("onFinishedPythonScript - {}", result);
+		synchronized (lock){
+			lock.notifyAll();
+		}
+	}
+
+	public Map<String, String> getPyRobotLabServiceScripts() throws Exception {
+
+		if (pythonScripts == null) {
+			neededPythonScripts.clear();
+			pythonScriptsWithNoServiceType.clear();
+
+			HashSet<String> serviceTypes = new HashSet<String>();
+
+			pythonScripts = new TreeMap<String, String>();
+			ServiceData sd = ServiceData.getLocalInstance();
+			List<ServiceType> sts = sd.getServiceTypes();
+			for (int i = 0; i < sts.size(); ++i) {
+				ServiceType st = sts.get(i);
+				serviceTypes.add(st.getSimpleName());
+				String script = GitHub.getPyRobotLabScript(st.getSimpleName());
+				if (script != null) {
+					pythonScripts.put(st.getSimpleName(), script);
+
+				} else {
+					log.info("{}<br>", st.getSimpleName());
+					neededPythonScripts.add(String.format("%s<br>", st.getSimpleName()));
+					StringBuffer t = new StringBuffer("# start the service\n");
+					String lowercase = st.getSimpleName().toLowerCase();
+					t.append(String.format("%s = Runtime.start(\"%s\",\"%s\")", lowercase, lowercase, st.getSimpleName()));
+					FileIO.toFile(new File(String.format("%s.py", st.getSimpleName())), t.toString().getBytes());
+				}
+			}
+			Set<String> gitHubServiceScripts = GitHub.getServiceScriptNames();
+			for (String key : gitHubServiceScripts) {
+				String serviceName = key.substring(0, key.lastIndexOf("."));
+				if (!serviceTypes.contains(serviceName)) {
+					pythonScriptsWithNoServiceType.add(key);
+				}
+			}
+
+			log.info("needed scripts - service type found but no script {}", neededPythonScripts);
+			log.info("remove scripts - script found by no service type {}", pythonScriptsWithNoServiceType);
+
+		}
+		return pythonScripts;
+	}
+
+	public List<String> getServicesWithOutScripts() {
+		ArrayList<String> ret = new ArrayList<String>();
+
+		return ret;
+	}
+
+	/**
+	 * Gets all the pyrobotlab/service/scripts and does some basic testing. This
+	 * method also finds all script not associated with active services (to be
+	 * removed). And all services which do not have scripts (to be added) It
+	 * runs in the same process as Python and the expectation is the Agent (with
+	 * the help of the Test service) has created an environment where the
+	 * service to be tested has all its depedencies
+	 * 
+	 * @throws Exception
+	 * 
+	 * FIXME - need to change to testPythonScript(serviceName) .. because
+	 * only 1 will be run in a 'clean' environment ...
+	 * 
+	 * FIXME - structured logging back to self to generate report
+	 */
+	public void testPythonScripts() throws Exception {
+		// get scripts
+		getPyRobotLabServiceScripts();
+		failedPythonScripts.clear();
+
+		// check if python is installed
+		// start python
+		Python python = (Python) Runtime.start("python", "Python");
+		
+		
+		skippedPythonScript.add("AcapelaSpeech");  // currently tooooo long.....
+		skippedPythonScript.add("Adafruit16CServoDriver"); 
+		skippedPythonScript.add("AdafruitMotorShield"); 
+		
+		
+		for (String serviceName : pythonScripts.keySet()) {
+			String script = pythonScripts.get(serviceName);
+			log.info("TESTING SCRIPT {} - quiet on the set please...", serviceName);
+			
+			if (skippedPythonScript.contains(serviceName)){
+				log.info("SKIPPING {} ....", serviceName);
+				continue;
+			}
+
+			// challenge #1
+			// I would prefer to be in the same
+			// process as python when things are exectuted
+			// therefore "something else" or Test in a different
+			// process needs to execute Test with 'installed' components
+
+			// challenge #2 execute blocking ? or is there a callback 'from the
+			// script' ?
+			// append exit ?
+			// append test done callback !!!
+
+			// add callback at the end of script
+			StringBuffer callback = new StringBuffer();
+			callback.append("\n");
+			callback.append("sleep(1) # 1 second to cool down");
+			callback.append("\n\n");
+			// callback.append("import Test from org.myrobotlab.service");
+			callback.append(String.format("%s.onFinishedPythonScript('done!')\n", getName()));
+
+			// by default - python will create a new thread
+			// to execute the script
+			python.exec(script + callback);//, true, true);
+
+			// script has at maximum 1 minute to return
+			synchronized (lock) {
+				long ts = System.currentTimeMillis();
+				lock.wait(60000);
+				if (System.currentTimeMillis() - ts >= 60000) {
+					log.error("script {} FAILED !", serviceName);
+					failedPythonScripts.add(serviceName);
+				} else {
+					log.info("script {} PASSED !", serviceName);
+					passedPythonScripts.add(serviceName);
+				}
+			}
+
+			// max execution time ??? - then error
+
+			log.info("inspect python errors (syntax) + java errors");
+		}
+		
+		log.info("TESTING COMPLETED");
+
+	}
+
 	// TODO - subscribe to registered --> generates subscription to
 	// publishState() - filter on Errors
 	// FIXME - FILE COMMUNICATION !!!!
@@ -456,22 +612,40 @@ public class Test extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		try {
-			
-			// requ
-			// test all junit tests
-			//
 
-			String serviceType = "InMoovHand";
-			Repo repo = Repo.getLocalInstance();
+			Test test = (Test)Runtime.start("test", "Test");
+			// Runtime.start("cli", "Cli");
+			Agent agent = (Agent)Runtime.start("agent", "Agent");
+			String[] cmdline = new String[]{"-fromAgent", "-service", "guiservice", "GUIService"};
+			agent.spawn(cmdline);
+			
+			// requirements:
+			// run all junit tests
+			// clear repo
+			// install all dependencies
+			// run python
+			// load test
+			// queue speed test
+			// "use Agent's spawn"???
+			// Repo repo = Repo.getLocalInstance();
 
 			// repo.clearRepo();
 			// dirty clean :)
 			// repo.clearLibraries();
 			// repo.clearServiceData();
-			repo.install(serviceType);
+			// repo.install(serviceType);
+			/*
+			
 			Test test = (Test) Runtime.start("test", "Test");
+			test.getPyRobotLabServiceScripts();
 			test.getState();
-			test.test(serviceType);
+			test.testPythonScripts();
+			log.info("here");
+			
+			*/
+			
+			log.info("here");
+
 		} catch (Exception e) {
 			Logging.logError(e);
 		}

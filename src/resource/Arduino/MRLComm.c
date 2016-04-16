@@ -40,7 +40,7 @@
 #include <Wire.h>
 // Start of Adafruit16CServoDriver I2C import
 // version to match with MRL
-#define MRLCOMM_VERSION        28
+#define MRLCOMM_VERSION        29
 
 // serial protocol functions
 #define MAGIC_NUMBER            170 // 10101010
@@ -190,7 +190,6 @@
 // http://forum.arduino.cc/index.php?topic=100557.0
 
 #define COMMUNICATION_RESET    252
-#define SOFT_RESET         253
 #define NOP            255
 
 // ----------  MRLCOMM FUNCTION INTERFACE END -----------
