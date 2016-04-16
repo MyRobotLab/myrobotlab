@@ -14,35 +14,20 @@ angular.module('mrlapp.service')
                             return angular.isUndefined(val) || val === null;
                         };
 
-                        //only here for compability reasons
-                        scope.ctrlfunctions = {};
-                        scope.ctrlfunctions.getService = function () {
-                            return mrl.getService(scope.panel.name);
-                        };
-                        scope.ctrlfunctions.subscribe = function (method) {
-                            return mrl.subscribe(scope.panel.name, method);
-                        };
-                        scope.ctrlfunctions.send = function (method, data) {
-                            //TODO & FIXME !important! - what if it is has more than one data?
-                            if (isUndefinedOrNull(data)) {
-                                return mrl.sendTo(scope.panel.name, method);
-                            } else {
-                                return mrl.sendTo(scope.panel.name, method, data);
-                            }
-                        };
-                        scope.ctrlfunctions.setPanelCount = function (number) {
+                        scope.panelconfig = {};
+                        scope.panelconfig.setPanelCount = function (number) {
                             $log.info('setting panelcount', number);
                             serviceSvc.notifyPanelCountChanged(scope.panel.name, number);
                         };
-                        scope.ctrlfunctions.setPanelNames = function (names) {
+                        scope.panelconfig.setPanelNames = function (names) {
                             $log.info('setting panelnames', names);
                             serviceSvc.notifyPanelNamesChanged(scope.panel.name, names);
                         };
-                        scope.ctrlfunctions.setPanelShowNames = function (show) {
+                        scope.panelconfig.setPanelShowNames = function (show) {
                             $log.info('setting panelshownames', show);
                             serviceSvc.notifyPanelShowNamesChanged(scope.panel.name, show);
                         };
-                        scope.ctrlfunctions.setPanelSizes = function (sizes) {
+                        scope.panelconfig.setPanelSizes = function (sizes) {
                             $log.info('setting panelsizes', sizes);
                             serviceSvc.notifyPanelSizesChanged(scope.panel.name, sizes);
                         };
@@ -54,14 +39,8 @@ angular.module('mrlapp.service')
                                 + 'service="service" '
                                 + 'msginterface="msginterface" '
                                 + 'msgmethods="msgmethods" '
-                                + 'size="panel.size" panelname="panel.panelname" cb="cb" '
-                                + 'get-service="ctrlfunctions.getService" '
-                                + 'subscribe="ctrlfunctions.subscribe" '
-                                + 'send="ctrlfunctions.send" '
-                                + 'set-panel-count="ctrlfunctions.setPanelCount" '
-                                + 'set-panel-names="ctrlfunctions.setPanelNames" '
-                                + 'set-panel-show-names="ctrlfunctions.setPanelShowNames" '
-                                + 'set-panel-sizes="ctrlfunctions.setPanelSizes"'
+                                + 'panelconfig="panelconfig" '
+                                + 'size="panel.size" panelname="panel.panelname" cb="cb"'
                                 + '></div>';
 
 
@@ -94,16 +73,11 @@ angular.module('mrlapp.service')
                     scope: {
                         msg: '=msgmethods',
                         name: '=',
-                        service: '=' //Does it make sense to give him an instance of itself that may be outdated in just a bit? Or let it fetch it's instance himself`?
+                        service: '=', //Does it make sense to give him an instance of itself that may be outdated in just a bit? Or let it fetch it's instance himself`?
+                        size: '='
                     },
                     bindToController: {
-                        getService: '&',
-                        subscribe: '&',
-                        send: '&',
-                        setPanelCount: '&',
-                        setPanelNames: '&',
-                        setPanelShowNames: '&',
-                        setPanelSizes: '&',
+                        panelconfig: '=',
                         msg: '=msginterface'
                     },
                     controller: "@",
