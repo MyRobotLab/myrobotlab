@@ -1,5 +1,5 @@
 angular.module('mrlapp.service.RuntimeGui', [])
-        .controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+        .controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', '$timeout', function ($scope, $log, mrl, $timeout) {
                 $log.info('RuntimeGuiCtrl');
                 var _self = this;
                 var msg = this.msg;

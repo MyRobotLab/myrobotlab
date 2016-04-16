@@ -31,17 +31,17 @@ angular.module('mrlapp.service.ClockGui', [])
                             break;
                     }
                 };
-                
+
                 $scope.toNumber = function (val) {
                     if (angular.isUndefined(val)) {
-                            var val = '0';
-                        }
-                        val = val.toString();
-                        var clean = val.replace(/[^0-9\.]/g, '').replace('.', '').replace(' ', '');
-                        if (clean == '') {
-                            clean = '0';
-                        }
-                        return clean;
+                        var val = '0';
+                    }
+                    val = val.toString();
+                    var clean = val.replace(/[^0-9\.]/g, '').replace('.', '').replace(' ', '');
+                    if (clean == '') {
+                        clean = '0';
+                    }
+                    return clean;
                 };
 
                 msg.subscribe('pulse');
