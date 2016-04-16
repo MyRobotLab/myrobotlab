@@ -200,7 +200,8 @@
 // #define NUM_DIGITAL_PINS            20
 // #define NUM_ANALOG_INPUTS           6
 
-#define SENSORS_MAX  NUM_DIGITAL_PINS // this is max number of pins (analog included)
+//#define SENSORS_MAX  NUM_DIGITAL_PINS // this is max number of pins (analog included)
+#define SENSORS_MAX  32 // TODO: Setting to value larger than 32 causes TX/RX errors in MRL. (Make sensor loop faster to fix.)
 #define DIGITAL_PIN_COUNT
 
 // ECHO FINITE STATE MACHINE
@@ -358,6 +359,8 @@ void startMsg() {
 void setup() {
 	Serial.begin(57600);        // connect to the serial port
 
+	while (!Serial){
+	};
 	softReset();
 
 	// --VENDOR SETUP BEGIN--
