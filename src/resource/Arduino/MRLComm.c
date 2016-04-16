@@ -40,7 +40,7 @@
 #include <Wire.h>
 // Start of Adafruit16CServoDriver I2C import
 // version to match with MRL
-#define MRLCOMM_VERSION        29
+#define MRLCOMM_VERSION         30
 
 // serial protocol functions
 #define MAGIC_NUMBER            170 // 10101010
@@ -201,7 +201,7 @@
 // #define NUM_ANALOG_INPUTS           6
 
 //#define SENSORS_MAX  NUM_DIGITAL_PINS // this is max number of pins (analog included)
-#define SENSORS_MAX  32 // TODO: Setting to value larger than 32 causes TX/RX errors in MRL. (Make sensor loop faster to fix.)
+#define SENSORS_MAX  20 // TODO: Setting to value larger than 32 causes TX/RX errors in MRL. (Make sensor loop faster to fix.)
 #define DIGITAL_PIN_COUNT
 
 // ECHO FINITE STATE MACHINE
