@@ -21,6 +21,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
@@ -396,7 +397,7 @@ public class Agent extends Service {
 			// TODO - all http gets use HttpClient static methods and promise
 			// for asynchronous
 			// get gitHub's branches
-			byte[] r = Http.get("https://api.github.com/repos/MyRobotLab/myrobotlab/branches");
+			byte[] r = Http.get(GitHub.BRANCHES);
 			if (r != null) {
 				String branches = new String(r);
 				CodecJson decoder = new CodecJson();
@@ -485,28 +486,18 @@ public class Agent extends Service {
 		return processes;
 	}
 
-	/* - REMOVE only Runtime should install
-	public List<Status> install(String fullType) {
-		List<Status> ret = new ArrayList<Status>();
-		ret.add(Status.info("install %s", fullType));
-		try {
-			Repo repo = Repo.getLocalInstance();
-
-			if (!repo.isServiceTypeInstalled(fullType)) {
-				repo.install(fullType);
-				if (repo.hasErrors()) {
-					ret.addAll(repo.getErrors());
-				}
-
-			} else {
-				log.info("installed {}", fullType);
-			}
-		} catch (Exception e) {
-			ret.add(Status.error(e));
-		}
-		return ret;
-	}
-	*/
+	/*
+	 * - REMOVE only Runtime should install public List<Status> install(String
+	 * fullType) { List<Status> ret = new ArrayList<Status>();
+	 * ret.add(Status.info("install %s", fullType)); try { Repo repo =
+	 * Repo.getLocalInstance();
+	 * 
+	 * if (!repo.isServiceTypeInstalled(fullType)) { repo.install(fullType); if
+	 * (repo.hasErrors()) { ret.addAll(repo.getErrors()); }
+	 * 
+	 * } else { log.info("installed {}", fullType); } } catch (Exception e) {
+	 * ret.add(Status.error(e)); } return ret; }
+	 */
 
 	public Integer kill(Integer id) {
 		if (processes.containsKey(id)) {
@@ -801,11 +792,11 @@ public class Agent extends Service {
 			sb.append(" ");
 		}
 
-		log.info(String.format("spawning -> [%s]", sb.toString()));
-		ProcessBuilder builder = new ProcessBuilder(cmdLine);// .inheritIO();
-
 		File b = new File(pd.branch);
 		b.mkdirs();
+
+		log.info(String.format("in %s spawning -> [%s]", b.getAbsolutePath(), sb.toString()));
+		ProcessBuilder builder = new ProcessBuilder(cmdLine);// .inheritIO();
 
 		// check to see if myrobotlab.jar is in the directory
 		String filename = String.format("%s/myrobotlab.%s.jar", pd.branch, pd.version);
@@ -820,7 +811,7 @@ public class Agent extends Service {
 				log.info("I am not a jar - must be develop time");
 				log.info(String.format("copying last build to %s", filename));
 				File recentlyBuilt = new File("build/lib/myrobotlab.jar");
-				if (!recentlyBuilt.exists()){
+				if (!recentlyBuilt.exists()) {
 					log.error("umm .. I need to start a jar - would you mind building one with build.xml");
 					log.error("perhaps in the future I can change all the classpaths etc to start an instances with the bin classes - but no time to do that now");
 					log.error("adios... hope we meet again...");
@@ -864,13 +855,13 @@ public class Agent extends Service {
 		}
 
 		// attach our cli to the latest instance
-		Cli cli = Runtime.getCLI();
-		if (cli != null) {
-			cli.add(runtimeName, process.getInputStream(), process.getOutputStream());
-			cli.attach(runtimeName);
-		}
-
-		// FileUtils.
+		// *** interesting - not processing input/output will block the thread
+		// in the spawned process ***
+		// which I assume is the beginning main thread doing a write to std::out
+		// and it blocking before anything else can happen
+		Cli cli = Runtime.getCli();
+		cli.add(runtimeName, process.getInputStream(), process.getOutputStream());
+		cli.attach(runtimeName);
 
 		log.info("Agent finished spawn {}", formatter.format(new Date()));
 		broadcastState();
@@ -964,11 +955,12 @@ public class Agent extends Service {
 	public static void main(String[] args) {
 		try {
 			System.out.println("Agent.main starting");
-			
+
 			// FIXME - I think the basic idea is to have
 			// parameters route to Agent or to the target instance
 			// initially I was thinking of having all agent parameters
-			// in a -agent \"-param1 value1 -param2 value2\" -services gui GUI .. instance params
+			// in a -agent \"-param1 value1 -param2 value2\" -services gui GUI
+			// .. instance params
 			// but that didn't work due to the parsing of CmdLine ...
 			// need a good solution
 
@@ -1014,30 +1006,35 @@ public class Agent extends Service {
 			// FIXME - if "-install" - then install a version ?? minecraft way ?
 			if (!runtimeArgs.containsKey("-headless") && !runtimeArgs.containsKey("-install")) {
 				// FIXME - NOT READY FOR PRIMETIME
-				// THIS IS THE AGENT - it does not require special parameters to start
-				// the expectation is there is a simple set of params for the "target" instance
-				// WHICH MEANS ALL DEPENDENCIES HAVE TO BE PACKAGED WITH MYROBOTLAB.JAR
-				// "AND" - the fact that dependencies are bundled means they should be removed from the service classMeta !!!!
+				// THIS IS THE AGENT - it does not require special parameters to
+				// start
+				// the expectation is there is a simple set of params for the
+				// "target" instance
+				// WHICH MEANS ALL DEPENDENCIES HAVE TO BE PACKAGED WITH
+				// MYROBOTLAB.JAR
+				// "AND" - the fact that dependencies are bundled means they
+				// should be removed from the service classMeta !!!!
 				// agent.startWebGui();
 			}
 
 			Process p = null;
-			
+
 			if (runtimeArgs.containsKey("-test")) {
 				agent.serviceTest();
 
 			} else {
-				p = agent.spawn(args); // <-- agent's is now in charge of first mrl
-									// instance
+				p = agent.spawn(args); // <-- agent's is now in charge of first
+										// mrl
+										// instance
 			}
-			
+
 			// handle things which are supposed to terminate
 			// after completion
 			if (runtimeArgs.containsKey("-install")) {
 				p.waitFor();
 				agent.shutdown();
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {

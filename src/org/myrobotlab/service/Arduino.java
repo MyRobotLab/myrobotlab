@@ -53,6 +53,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.ServiceType;
@@ -202,7 +203,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public static final int ERROR_UNKOWN_CMD = 2;
 	// sensor types
 	public static final int COMMUNICATION_RESET = 252;
-	public static final int SOFT_RESET = 253;
 	public static final int NOP = 255;
 
 	public static final int TRUE = 1;
@@ -328,7 +328,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	int msgSize;
 
-	int[] msg = new int[MAX_MSG_SIZE];
+	transient int[] msg = new int[MAX_MSG_SIZE];
 
 	private int retryConnectMax = 3;
 
@@ -408,6 +408,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return true;
 	}
 
+	// FIXME - DEPRECATE !!! only need createVirtual(port)
 	// TODO - should be override .. ??
 	public Serial connectVirtualUART() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException,
 			IllegalArgumentException, InvocationTargetException {
@@ -415,6 +416,13 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		uart.setCodec("arduino");
 		connect(serial.getName());
 		return uart;
+	}
+	
+	static public VirtualDevice createVirtual(String port) throws IOException{
+		// VirtualDevice virtual = (VirtualDevice) startPeer("virtual");
+		VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
+		virtual.createVirtualArduino(port);
+		return virtual;
 	}
 
 	public ArrayList<Pin> createPinList() {
@@ -527,7 +535,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			Logging.logError(e);
 		}
 		if (mrlCommVersion == null) {
-			error("did not get response from arduino....");
+			error(String.format("%s did not get response from arduino....", serial.getPortName()));
 		} else if (!mrlCommVersion.equals(MRLCOMM_VERSION)) {
 			error(String.format("MRLComm.ino responded with version %s expected version is %s", mrlCommVersion, MRLCOMM_VERSION));
 		} else {
@@ -1126,11 +1134,17 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			for (int i = 0; i < params.length; ++i) {
 				serial.write(params[i]);
 			}
-
+			
+			// putting delay at the end so we give the message and allow the arduino to process
+			// this decreases the latency between when mrl sends the message 
+			// and the message is picked up by the arduino.
+			// This helps avoid the arduino dropping messages and getting lost/disconnected.
+		
+			Thread.sleep(1);
+			
 		} catch (Exception e) {
 			error("sendMsg " + e.getMessage());
 		}
-
 	}
 
 	// FIXME !! - implement sensorDetach !!!
@@ -1535,7 +1549,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * TODO - reset servos ? motors ? etc. ?
 	 */
 	public void softReset() {
-		sendMsg(SOFT_RESET, 0, 0);
+		sendMsg(ArduinoMsgCodec.SOFT_RESET, 0, 0);
 	}
 
 	@Override
@@ -1570,22 +1584,92 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		disconnect();
 	}
 
+
+	@Override
+	public void update(Object data) {
+		invoke("publishPin", data);
+	}
+
+	@Override
+	public int getDataSinkType() {
+		return DATA_SINK_TYPE_PIN;
+	}
+
+	@Override
+	public int getSensorType() {
+		return SENSOR_TYPE_PIN;
+	}
+
+	@Override
+	public int[] getSensorConfig() {
+		// is a Pin sensor
+		return new int[] {};
+	}
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Arduino.class.getCanonicalName());
+		meta.addDescription("This service interfaces with an Arduino micro-controller");
+		meta.addCategory("microcontroller");
+		meta.addPeer("serial", "Serial", "serial device for this Arduino");
+		meta.addPeer("virtual", "VirtualDevice", "used to create virtual arduino");
+		return meta;
+	}
+
+
 	public static void main(String[] args) {
 		try {
 
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
+			Runtime.start("webgui", "WebGui");
 			// Runtime.start("servo", "Servo");
 			// Runtime.start("clock", "Clock");
 			// Runtime.start("serial", "Serial");
+			// Arduino.createVirtual("COM9");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			arduino.setBoardUno();
-			arduino.connect("COM18");
+			
+			boolean done = true;
+			if (done){
+				return;
+			}
+			
+			arduino.connect("COM9");
+			arduino.setLoadTimingEnabled(true);
+			long ts = System.currentTimeMillis();
+			
+			for (int i = 0; i < 10000; ++i){
+				arduino.sendMsg(ArduinoMsgCodec.GET_VERSION);
+				// log.info("{}", i);
+			}
+			
+			log.error("time {} ms", System.currentTimeMillis() - ts );
+			
+			for (int i = 0; i < 10000; ++i){
+				arduino.sendMsg(ArduinoMsgCodec.GET_VERSION);
+				log.info("{}", i);
+			}
+			
+			arduino.broadcastState();
+			
+			// arduino.createVirtual("COM77");
+			//arduino.createVirtual("COM18");
+			// arduino.setBoardUno();
+			//arduino.connect("COM18");
 			// Runtime.start("webgui", "WebGui");
-			Runtime.start("gui", "GUIService");
+			//Runtime.start("gui", "GUIService");
+			// Runtime.start("webgui", "WebGui");
 
-			arduino.analogReadPollingStart(14);
+			// arduino.analogReadPollingStart(14);
 			// Runtime.start("gui", "GUIService");
 			// Runtime.start("python", "Python");
 			// arduino.connect("COM18");
@@ -1640,10 +1724,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			 */
 
 			// arduino.analogReadPollingStart(68);
-			boolean done = true;
-			if (done) {
-				return;
-			}
+			
 			/*
 			 * Serial serial = arduino.getSerial();
 			 * serial.connectTCP("localhost", 9191);
@@ -1669,43 +1750,4 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			Logging.logError(e);
 		}
 	}
-
-	@Override
-	public void update(Object data) {
-		invoke("publishPin", data);
-	}
-
-	@Override
-	public int getDataSinkType() {
-		return DATA_SINK_TYPE_PIN;
-	}
-
-	@Override
-	public int getSensorType() {
-		return SENSOR_TYPE_PIN;
-	}
-
-	@Override
-	public int[] getSensorConfig() {
-		// is a Pin sensor
-		return new int[] {};
-	}
-
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = new ServiceType(Arduino.class.getCanonicalName());
-		meta.addDescription("This service interfaces with an Arduino micro-controller");
-		meta.addCategory("microcontroller");
-		meta.addPeer("serial", "Serial", "serial device for this Arduino");
-		return meta;
-	}
-
 }

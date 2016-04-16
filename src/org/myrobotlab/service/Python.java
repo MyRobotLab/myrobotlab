@@ -19,6 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.io.FileIO;
@@ -682,13 +683,9 @@ public class Python extends Service {
 	 *            name of file to load
 	 * @return true if successfully loaded
 	 */
-	public boolean loadExample(String filename) {
-		log.info(String.format("loadExample %s", filename));
-		if (!filename.startsWith("Python/examples/")) {
-			filename = String.format("Python/examples/%s", filename);
-		}
-		String newCode = FileIO.resourceToString(filename);
-		return loadScript(filename, newCode);
+	public void loadPyRobotLabServiceScript(String serviceType) {
+		String serviceScript = GitHub.getPyRobotLabScript(serviceType);	
+		loadScript(String.format("%s.py", serviceType), serviceScript);
 	}
 
 	/**

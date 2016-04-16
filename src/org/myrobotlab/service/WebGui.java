@@ -351,7 +351,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			}
 			
 			nettosphere = new Nettosphere.Builder().config(getConfig().build()).build();
-			sleep(1000);
+			sleep(1000); // needed ?
 
 			try {
 				nettosphere.start();
@@ -458,6 +458,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		Codec codec = null;
 		OutputStream out = null;
 		String httpMethod = r.getRequest().getMethod();
+		// default api type
+		String apiTypeKey = CodecUtils.TYPE_MESSAGES;
 
 		try {
 
@@ -505,11 +507,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			if (parts == null || parts.length < 3) {
 				// http://host:port/api  FIXME SWAGGER ???? FIXME ???
 				response.addHeader("Content-Type", codec.getMimeType());
-				handleError(httpMethod, out, codec, "API", "http(s)://{host}:{port}/api/{api-type}");
+				handleError(httpMethod, out, codec, "API", "http(s)://{host}:{port}/api/{api-type}", apiTypeKey);
 				return;
 			}
 
-			String apiTypeKey = parts[2];
+			// set to requested api type
+			apiTypeKey = parts[2];
 
 			if ("messages".equals(apiTypeKey)) {
 				if (!r.isSuspended()) {
@@ -532,6 +535,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			 * WEBSOCKET: case STREAMING: res.getWriter().flush(); break; }
 			 */
 
+			// FIXME - should NOT be set until resolved !!!
 			response.addHeader("Content-Type", codec.getMimeType());
 
 			if (parts.length == 3) {
@@ -552,16 +556,21 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 				// FIXME - getEnvironments()
 				// FIXME - relfect with javdoc info log.info("inspecting");
-				respond(out, codec, "getLocalServices", env);
+				respond(out, codec, "getLocalServices", env, apiTypeKey);
 				return;
 			} else if (parts.length == 4) {
 				// *** /api/messages/runtime/ ***
 				// *** /api/services/servo/ ****
 				ServiceInterface si = Runtime.getService(parts[3]);
-				respond(out, codec, "getDeclaredMethods", si.getMethodMap());
+				if (pathInfo.endsWith("/")){
+					respond(out, codec, "onDeclaredMethods", si.getMethodMap(), apiTypeKey);
+				} else {
+					respond(out, codec, "onService", si, apiTypeKey);
+				}
 				return;
 			}
 
+			// parts.length > 4 =>   /api/services/{name}/method
 			String name = parts[3];
 
 			ServiceInterface si = Runtime.getService(name);
@@ -574,12 +583,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// String body = convertStreamToString(in);
 			int cl = request.getContentLength();
 			byte[] body = null;
+			
+			// FIXME - need to take care of this - client does not always send correct length
 
 			if (cl > 0) {
 				body = new byte[cl];
 				int bytesRead = in.read(body);
 				if (bytesRead != cl) {
-					handleError(httpMethod, out, codec, "BadInput", String.format("client said it would send %d bytes but only %d were read", cl, bytesRead));
+					handleError(httpMethod, out, codec, "BadInput", String.format("client said it would send %d bytes but only %d were read", cl, bytesRead), apiTypeKey);
 					return;
 				}
 			}
@@ -666,8 +677,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			if (si.isLocal()) {
 				log.debug("{} is local", name);
 				Object ret = method.invoke(si, params);
-				respond(out, codec, method.getName(), ret);
+				respond(out, codec, method.getName(), ret, apiTypeKey);
 			} else {
+				// FIXME - creat blocking send based on api requested ?
 				log.debug("{} is is remote", name);
 				Message msg = createMessage(name, method.getName(), params);
 				out(msg);
@@ -681,7 +693,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// - getMimeType !!
 
 		} catch (Exception e) {
-			handleError(httpMethod, out, codec, e);
+			handleError(httpMethod, out, codec, e, apiTypeKey);
 		}
 
 	}
@@ -785,25 +797,30 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	// FIXME !!! - ALL CODECS SHOULD HANDLE MSG INSTEAD OF OBJECT !!!
 	// THEN YOU COULD ALSO HAVE urlToMsg(URL url)
 	// "lower layer encoders can strip down to the data" !!!
-	public void respond(OutputStream out, Codec codec, String method, Object ret) throws Exception {
+	public void respond(OutputStream out, Codec codec, String method, Object ret, String apiTypeKey) throws Exception {
 		// getName() ? -> should it be AngularJS client name ?
 		Message msg = createMessage(getName(), CodecUtils.getCallBackName(method), ret);
-		codec.encode(out, msg);
+		if(CodecUtils.API_TYPE_SERVICES.equals(apiTypeKey)){
+			codec.encode(out, msg.data[0]);
+		} else {
+			// API_TYPE_MESSAGES
+			codec.encode(out, msg);
+		}
 	}
 
-	public void handleError(String httpMethod, OutputStream out, Codec codec, Throwable e) {
-		handleError(httpMethod, out, codec, e.getMessage(), Logging.logError(e));
+	public void handleError(String httpMethod, OutputStream out, Codec codec, Throwable e, String apiTypeKey) {
+		handleError(httpMethod, out, codec, e.getMessage(), Logging.logError(e), apiTypeKey);
 	}
 
 	// FIXME - APP_EVENT_LOG for normalizing (if available)
-	public void handleError(String httpMethod, OutputStream out, Codec codec, String key, String detail) {
+	public void handleError(String httpMethod, OutputStream out, Codec codec, String key, String detail, String apiTypeKey) {
 		try {
 			log.error(detail);
 			Status error = new Status(getName(), StatusLevel.ERROR, key, detail);
 			if ("POST".equals(httpMethod)) {
 				broadcast(createMessage(getName(), "onStatus", error));
 			} else {
-				respond(out, codec, "handleError", error);
+				respond(out, codec, "handleError", error, apiTypeKey);
 			}
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -911,95 +928,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		}		
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		/*
-		 * ServiceType meta = getMetaData(WebGui.class.getCanonicalName());
-		 * log.info(meta.toString());
-		 */
-
-		// log.info("hello");
-
-		// Call context.reset() to clear any previous configuration, e.g.
-		// default
-		// configuration. For multi-step configuration, omit calling
-		// context.reset().
-		// context.reset();
-		// configurator.doConfigure(args[0]);
-
-		// log.info(Logging.)
-		/*
-		 * log.trace("trace"); log.debug("debug"); log.info("info");
-		 * log.warn("warn"); log.error("error");
-		 */
-
-		try {
-
-			// Runtime.start("python", "Python");
-			// Runtime.start("gui", "GUIService");
-			// RemoteAdapter remote =
-			// (RemoteAdapter)Runtime.start("remote","RemoteAdapter");
-			// remote.startListening();
-			// remote.setDefaultPrefix("x-");
-			// remote.setDefaultPrefix("");
-			// Runtime.start("python", "Python");
-			// ProgramAB ai = (ProgramAB) Runtime.start("ai", "ProgramAB");
-			// Runtime.start("mouth", "AcapelaSpeech");
-			// Runtime.start("head", "InMoovHead");
-			// Runtime.start("head", "InMoovHead");
-			// Runtime.start("arduino", "Arduino");
-			// ai.startSession("alice2");
-			// ai.getResponse("hello ");
-
-			// Runtime.start("servo", "Servo");
-			Runtime.start("python", "Python");
-			WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
-			log.info(Service.getDNA().toString());
-			// webgui.startPeer("tracker");
-
-			// log.info(Service.getDNA().toString());
-			// webgui.autoStartBrowser(false);
-
-			// Runtime.start("python", "Python");
-			// Runtime.start("myo", "MyoThalmic");
-			// remote.connect("tcp://127.0.0.1:6767");
-
-			// Runtime.start("macgui", "GUIService");
-
-			// MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
-			// myo.connect();
-
-			// myo.addMyoDataListener(python);
-
-			// Runtime.start("python", "Python");
-			// Runtime.start("remote", "RemoteAdapter");
-			// Runtime.start("arduino", "Arduino");// Runtime.start("clock01",
-			// "Clock"); Runtime.start("clck3", "Clock");
-			// Runtime.start("gui", "GUIService");
-
-			// webgui.extract();
-			/*
-			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock");
-			 * Runtime.start("clck3", "Clock");
-			 * 
-			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock");
-			 * Runtime.start("clck3", "Clock");
-			 */
-
-			/*
-			 * Message msg = webgui.createMessage("runtime", "start", new
-			 * Object[]{"arduino", "Arduino"}); String json =
-			 * Encoder.toJson(msg); log.info(json); // Runtime.start("gui",
-			 * "GUIService"); log.info(json);
-			 */
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-
 	// === begin positioning panels plumbing ===
 	public void set(String name, int x, int y){
 		set(name, x, y, 0); // or is z -1 ?
@@ -1065,5 +993,21 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// meta.addDependency("org.atmosphere.nettosphere", "2.3.0"); // nettosphere-assembly-2.3.0.jar
 		// meta.addDependency("org.atmosphere.nettosphere", "2.3.0");// geronimo-servlet_3.0_spec-1.0.jar
 		return meta;
+	}
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+			
+			Runtime.start("python", "Python");
+			Runtime.start("arduino", "Arduino");
+			Runtime.start("srf05", "UltrasonicSensor");
+			Runtime.start("webgui", "WebGui");	
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 }

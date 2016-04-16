@@ -715,10 +715,7 @@ public class Tracking extends Service {
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 			int xPin = 7;
 			int yPin = 10;
-			int cameraIndex = 1;
-			// Speech speech = new Speech("speech");
-
-			// Y min max 79 - 127
+			int cameraIndex = 0;
 
 			Tracking tracker = new Tracking("tracker");
 			
@@ -728,17 +725,15 @@ public class Tracking extends Service {
 			tracker.getY().setPin(8);
 			tracker.getOpenCV().setCameraIndex(1);
 			*/
-			tracker.connect("COM18", xPin, yPin, cameraIndex);
+			tracker.connect("COM3", xPin, yPin, cameraIndex);
 			// tracker.connect("COM4");
 			tracker.startService();
 			tracker.faceDetect();
-			OpenCV opencv = tracker.getOpenCV();
+			
+			Runtime.start("gui", "GUIService");
+			// OpenCV opencv = tracker.getOpenCV();
 			//opencv.setFrameGrabberType(OpenCV.GR)
-			//		.capture();
-
-			GUIService gui = new GUIService("gui");
-			gui.startService();
-
+			//		.capture()
 			// tracker.getGoodFeatures();
 		} catch (Exception e) {
 			e.printStackTrace();
