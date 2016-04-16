@@ -1115,6 +1115,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public synchronized void sendMsg(int function, int... params) {
 		// log.debug("sendMsg magic | fn " + function + " p1 " + param1 + " p2 "
 		// + param2);
+		
+		System.out.println("Sending Message " + function );
 		try {
 
 			// not CRC16 - but cheesy error correction of bytestream
@@ -1145,6 +1147,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		} catch (Exception e) {
 			error("sendMsg " + e.getMessage());
 		}
+
 	}
 
 	// FIXME !! - implement sensorDetach !!!
