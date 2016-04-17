@@ -40,7 +40,7 @@
 #include <Wire.h>
 // Start of Adafruit16CServoDriver I2C import
 // version to match with MRL
-#define MRLCOMM_VERSION         30
+#define MRLCOMM_VERSION         31
 
 // serial protocol functions
 #define MAGIC_NUMBER            170 // 10101010
@@ -528,44 +528,43 @@ bool removeAndShift(int array[], int& len, int removeValue)
 	return true;
 }
 
-boolean getCommand()
-{
+boolean getCommand() {
 	// handle serial data begin
-	if (Serial.available() > 0)
-	{
-		// read the incoming byte:
-		newByte = Serial.read();
-		++byteCount;
+	int bytesAvailable = Serial.available();
+	if (bytesAvailable > 0) {
+		// now we should loop over the available bytes .. not just read one by one.
+		for (int i = 0 ; i < bytesAvailable; i++) {
+			// read the incoming byte:
+			newByte = Serial.read();
+			++byteCount;
 
-		// checking first byte - beginning of message?
-		if (byteCount == 1 && newByte != MAGIC_NUMBER)
-		{
-			sendError(ERROR_SERIAL);
+			// checking first byte - beginning of message?
+			if (byteCount == 1 && newByte != MAGIC_NUMBER) {
+				sendError(ERROR_SERIAL);
+				// reset - try again
+				byteCount = 0;
+				// return false;
+			}
 
-			// reset - try again
-			byteCount = 0;
-			return false;
-		}
+			if (byteCount == 2) {
+				// get the size of message
+				// todo check msg < 64 (MAX_MSG_SIZE)
+				msgSize = newByte;
+			}
 
-		if (byteCount == 2)
-		{
-			// get the size of message
-			// todo check msg < 64 (MAX_MSG_SIZE)
-			msgSize = newByte;
-		}
+			if (byteCount > 2) {
+				// fill in msg data - (2) headbytes -1 (offset)
+				ioCmd[byteCount - 3] = newByte;
+			}
 
-		if (byteCount > 2) {
-			// fill in msg data - (2) headbytes -1 (offset)
-			ioCmd[byteCount - 3] = newByte;
-		}
-
-		// if received header + msg
-		if (byteCount == 2 + msgSize)
-		{
-			return true;
+			// if received header + msg
+			if (byteCount == 2 + msgSize) {
+				// we've reach the end of the command, just return true .. we've got it
+				return true;
+			}
 		}
 	} // if Serial.available
-
+	// we only partially read a command.  (or nothing at all.)
 	return false;
 }
 
