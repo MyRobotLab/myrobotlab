@@ -210,6 +210,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	Integer mrlCommVersion = null;
 
+	// number of messages to pause after sending an arduino message.
+	public int delay = 0;
+
 	/**
 	 * FIXME ! - these processor types ! - something we are not interested in
 	 * and do not have to deal with - we are far more interested in
@@ -1133,16 +1136,27 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 			serial.write(function);
 
+			if (params.length > MAX_MSG_SIZE) {
+				log.error("Arduino Message size was large! Function {} Size {}" , function , params.length);
+			}
+			
+			// TODO: what should this value be?
+			//int x = 64;
 			for (int i = 0; i < params.length; ++i) {
 				serial.write(params[i]);
+				// TODO: if i is greater than X bytes we throw a small pause in when writing large messages?
+				//if (i % x == 0) {
+				//	Thread.sleep(delay);
+				//}
 			}
 			
 			// putting delay at the end so we give the message and allow the arduino to process
 			// this decreases the latency between when mrl sends the message 
 			// and the message is picked up by the arduino.
 			// This helps avoid the arduino dropping messages and getting lost/disconnected.
-		
-			Thread.sleep(1);
+			if (delay > 0) {
+				Thread.sleep(delay);
+			}
 			
 		} catch (Exception e) {
 			error("sendMsg " + e.getMessage());
