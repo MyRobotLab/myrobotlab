@@ -436,8 +436,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return uart;
 	}
 	
-	public VirtualDevice createVirtual(String port) throws IOException{
-		VirtualDevice virtual = (VirtualDevice) startPeer("virtual");
+	static public VirtualDevice createVirtual(String port) throws IOException{
+		// VirtualDevice virtual = (VirtualDevice) startPeer("virtual");
+		VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
 		virtual.createVirtualArduino(port);
 		return virtual;
 	}
@@ -552,7 +553,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			Logging.logError(e);
 		}
 		if (mrlCommVersion == null) {
-			error("did not get response from arduino....");
+			error(String.format("%s did not get response from arduino....", serial.getPortName()));
 		} else if (!mrlCommVersion.equals(MRLCOMM_VERSION)) {
 			error(String.format("MRLComm.ino responded with version %s expected version is %s", mrlCommVersion, MRLCOMM_VERSION));
 		} else {
@@ -1151,11 +1152,17 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			for (int i = 0; i < params.length; ++i) {
 				serial.write(params[i]);
 			}
-
+			
+			// putting delay at the end so we give the message and allow the arduino to process
+			// this decreases the latency between when mrl sends the message 
+			// and the message is picked up by the arduino.
+			// This helps avoid the arduino dropping messages and getting lost/disconnected.
+		
+			Thread.sleep(1);
+			
 		} catch (Exception e) {
 			error("sendMsg " + e.getMessage());
 		}
-
 	}
 
 	// FIXME !! - implement sensorDetach !!!
@@ -1642,16 +1649,36 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
+			// Runtime.start("webgui", "WebGui");
 			// Runtime.start("servo", "Servo");
 			// Runtime.start("clock", "Clock");
 			// Runtime.start("serial", "Serial");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			arduino.connect("COM9");
+			arduino.setLoadTimingEnabled(true);
+			long ts = System.currentTimeMillis();
+			
+			for (int i = 0; i < 10000; ++i){
+				arduino.sendMsg(ArduinoMsgCodec.GET_VERSION);
+				// log.info("{}", i);
+			}
+			
+			log.error("time {} ms", System.currentTimeMillis() - ts );
+			
+			for (int i = 0; i < 10000; ++i){
+				arduino.sendMsg(ArduinoMsgCodec.GET_VERSION);
+				log.info("{}", i);
+			}
+			
+			arduino.broadcastState();
+			
+			// arduino.createVirtual("COM77");
 			//arduino.createVirtual("COM18");
 			// arduino.setBoardUno();
 			//arduino.connect("COM18");
 			// Runtime.start("webgui", "WebGui");
 			//Runtime.start("gui", "GUIService");
-			Runtime.start("webgui", "WebGui");
+			// Runtime.start("webgui", "WebGui");
 
 			// arduino.analogReadPollingStart(14);
 			// Runtime.start("gui", "GUIService");
@@ -1708,10 +1735,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			 */
 
 			// arduino.analogReadPollingStart(68);
-			boolean done = true;
-			if (done) {
-				return;
-			}
+			
 			/*
 			 * Serial serial = arduino.getSerial();
 			 * serial.connectTCP("localhost", 9191);
