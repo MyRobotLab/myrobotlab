@@ -92,6 +92,7 @@ angular.module('mrlapp.service.PythonGui', [])
         $log.info("ace changed");
         //
     }
+
     ////// ace editor related callbacks end ///////
     /* STUFF LIKE THIS IS NO LONGER NEEDED
     $scope.exec = function() {
