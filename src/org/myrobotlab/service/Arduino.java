@@ -210,7 +210,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	Integer mrlCommVersion = null;
 
-	// number of messages to pause after sending an arduino message.
+	/**
+	 * number of ms to pause after sending a message to the Arduino
+	 */
 	public int delay = 0;
 
 	/**
@@ -1119,7 +1121,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		// log.debug("sendMsg magic | fn " + function + " p1 " + param1 + " p2 "
 		// + param2);
 		
-		System.out.println("Sending Message " + function );
+		// System.out.println("Sending Message " + function );
 		try {
 
 			// not CRC16 - but cheesy error correction of bytestream

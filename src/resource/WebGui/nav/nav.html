@@ -70,13 +70,9 @@
                                    typeahead-template-url="nav/templates/searchtemplate.html"
                                    typeahead-on-select='searchOnSelect($item, $model, $label)'>
                             <div class="input-group-btn">
-                            <!-- not needed as clicking in the typeahead appears to do the 'best' thing
-                                who needs another button clock -->
-                             <!--
-                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Search">
-                                    <i class="glyphicon glyphicon-search"></i>
-                                </button>
-                             -->
+                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Search">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
                             <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Hide All" ng-click="showAll(false)">
                                 <i class="glyphicon glyphicon-eye-close"></i>
                             </button>
