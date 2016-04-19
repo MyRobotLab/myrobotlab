@@ -365,7 +365,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
 			// create an instance
 			Object newService = Instantiator.getNewInstance(fullTypeName, name);
-			log.info("returning {}", fullTypeName);
+			log.debug("returning {}", fullTypeName);
 			return (Service) newService;
 		} catch (Exception e) {
 			Logging.logError(e);

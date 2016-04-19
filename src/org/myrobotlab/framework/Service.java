@@ -563,8 +563,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			}
 		}
 		// buildDNA(myKey, className, "merged dna");
-		log.info("merged dna \n{}", dna);
-		log.debug("here");
+		log.debug("merged dna \n{}", dna);
 	}
 
 	/**
