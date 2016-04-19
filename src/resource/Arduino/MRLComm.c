@@ -549,6 +549,11 @@ boolean getCommand() {
 			if (byteCount == 2) {
 				// get the size of message
 				// todo check msg < 64 (MAX_MSG_SIZE)
+				if (newByte > 64){
+					// TODO - send error back
+					byteCount = 0;
+					continue; // GroG - I guess  we continue now vs return false on error conditions? 
+				}
 				msgSize = newByte;
 			}
 
