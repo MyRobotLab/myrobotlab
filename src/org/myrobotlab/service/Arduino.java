@@ -274,7 +274,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	/**
 	 * blocking queues to support blocking methods
 	 */
-	transient BlockingQueue<Integer> versionQueue = new LinkedBlockingQueue<Integer>();
+	// transient BlockingQueue<Integer> versionQueue = new LinkedBlockingQueue<Integer>();
 
 	// HashMap<String, Motor> motors = new HashMap<String, Motor>();
 	// HashMap<Integer, Motor> motorIndex = new HashMap<Integer, Motor>();
@@ -526,14 +526,22 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @return
 	 */
 	public Integer getVersion() {
-		log.info("getVersion");
+		log.info("{} {} getVersion", getName(), serial.getPortName());
 		int retry = 0;
 
 		try {
+			/**
+			 * We will try up to retryConnectMax times to get a version out of MRLComm.c
+			 * and wait 333 ms between each try.  A blocking queue is not needed,
+			 * as this is only a single data element - and blocking is not necessary.
+			 * mrlCommVersion will be set by our port listener in PUBLISH_VERSION if the result
+			 * comes back.
+			 */
 			while (retry < retryConnectMax && mrlCommVersion == null) {
-				versionQueue.clear();
+				// versionQueue.clear();
 				sendMsg(GET_VERSION);
-				mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
+				// mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
+				sleep(333);
 				++retry;
 			}
 		} catch (Exception e) {
@@ -544,7 +552,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		} else if (!mrlCommVersion.equals(MRLCOMM_VERSION)) {
 			error(String.format("MRLComm.ino responded with version %s expected version is %s", mrlCommVersion, MRLCOMM_VERSION));
 		} else {
-			info(String.format("connected %s responded version %s ... goodtimes...", serial.getName(), mrlCommVersion));
+			info(String.format("%s connected on %s responded version %s ... goodtimes...", serial.getName(), serial.getPortName(), mrlCommVersion));
 		}
 
 		return mrlCommVersion;
@@ -798,10 +806,10 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				case PUBLISH_VERSION: {
 					// TODO - get vendor version
 					// String version = String.format("%d", msg[1]);
-					versionQueue.add(msg[1] & 0xff);
-					int v = msg[1] & 0xff;
-					log.info(String.format("PUBLISH_VERSION %d", msg[1] & 0xff));
-					invoke("publishVersion", v);
+					// versionQueue.add(msg[1] & 0xff);
+					mrlCommVersion = msg[1] & 0xff;					
+					log.info(String.format("PUBLISH_VERSION %d", mrlCommVersion));
+					invoke("publishVersion", mrlCommVersion);
 					break;
 				}
 
