@@ -24,9 +24,6 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE_READ;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_STOP;
@@ -65,10 +62,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.RasPi.Device;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.CustomMsgListener;
-import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
@@ -77,9 +72,6 @@ import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
-
-import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.i2c.I2CDevice;
 
 /**
  * Implementation of a Arduino Service connected to MRL through a serial port.
@@ -149,7 +141,7 @@ import com.pi4j.io.i2c.I2CDevice;
  *
  */
 
-public class Arduino extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController, SensorDataSink,  I2CControl  {
+public class Arduino extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController, SensorDataSink {
 
 	/**
 	 * MotorData is the combination of a Motor and any controller data needed to
@@ -182,14 +174,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			this.name = name;
 			this.data = data;
 		}
+
 	}
 
-	public static class Device {
-		public int bus;
-		public int device;
-		public String type;
-	}
-	
 	public Sketch sketch;
 
 	private static final long serialVersionUID = 1L;
@@ -222,6 +209,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public static final int FALSE = 0;
 
 	Integer mrlCommVersion = null;
+
+	/**
+	 * number of ms to pause after sending a message to the Arduino
+	 */
+	public int delay = 0;
 
 	/**
 	 * FIXME ! - these processor types ! - something we are not interested in
@@ -282,7 +274,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	/**
 	 * blocking queues to support blocking methods
 	 */
-	transient BlockingQueue<Integer> versionQueue = new LinkedBlockingQueue<Integer>();
+	// transient BlockingQueue<Integer> versionQueue = new LinkedBlockingQueue<Integer>();
 
 	// HashMap<String, Motor> motors = new HashMap<String, Motor>();
 	// HashMap<Integer, Motor> motorIndex = new HashMap<Integer, Motor>();
@@ -297,11 +289,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 */
 	HashMap<Integer, ServoData> servoIndex = new HashMap<Integer, ServoData>();
 
-	/**
-	 * i2c device 
-	 */
-	HashMap<String, Device> devices = new HashMap<String, Device>();
-	
 	/**
 	 * As simple pojo wrapper to contain the service and its index in
 	 * MRLComm.ino Used for callbacks
@@ -346,7 +333,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	int msgSize;
 
-	int[] msg = new int[MAX_MSG_SIZE];
+	transient int[] msg = new int[MAX_MSG_SIZE];
 
 	private int retryConnectMax = 3;
 
@@ -539,14 +526,22 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @return
 	 */
 	public Integer getVersion() {
-		log.info("getVersion");
+		log.info("{} {} getVersion", getName(), serial.getPortName());
 		int retry = 0;
 
 		try {
+			/**
+			 * We will try up to retryConnectMax times to get a version out of MRLComm.c
+			 * and wait 333 ms between each try.  A blocking queue is not needed,
+			 * as this is only a single data element - and blocking is not necessary.
+			 * mrlCommVersion will be set by our port listener in PUBLISH_VERSION if the result
+			 * comes back.
+			 */
 			while (retry < retryConnectMax && mrlCommVersion == null) {
-				versionQueue.clear();
+				// versionQueue.clear();
 				sendMsg(GET_VERSION);
-				mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
+				// mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
+				sleep(333);
 				++retry;
 			}
 		} catch (Exception e) {
@@ -557,7 +552,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		} else if (!mrlCommVersion.equals(MRLCOMM_VERSION)) {
 			error(String.format("MRLComm.ino responded with version %s expected version is %s", mrlCommVersion, MRLCOMM_VERSION));
 		} else {
-			info(String.format("connected %s responded version %s ... goodtimes...", serial.getName(), mrlCommVersion));
+			info(String.format("%s connected on %s responded version %s ... goodtimes...", serial.getName(), serial.getPortName(), mrlCommVersion));
 		}
 
 		return mrlCommVersion;
@@ -811,10 +806,10 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				case PUBLISH_VERSION: {
 					// TODO - get vendor version
 					// String version = String.format("%d", msg[1]);
-					versionQueue.add(msg[1] & 0xff);
-					int v = msg[1] & 0xff;
-					log.info(String.format("PUBLISH_VERSION %d", msg[1] & 0xff));
-					invoke("publishVersion", v);
+					// versionQueue.add(msg[1] & 0xff);
+					mrlCommVersion = msg[1] & 0xff;					
+					log.info(String.format("PUBLISH_VERSION %d", mrlCommVersion));
+					invoke("publishVersion", mrlCommVersion);
 					break;
 				}
 
@@ -1133,6 +1128,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public synchronized void sendMsg(int function, int... params) {
 		// log.debug("sendMsg magic | fn " + function + " p1 " + param1 + " p2 "
 		// + param2);
+		
+		// System.out.println("Sending Message " + function );
 		try {
 
 			// not CRC16 - but cheesy error correction of bytestream
@@ -1149,20 +1146,32 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 			serial.write(function);
 
+			if (params.length > MAX_MSG_SIZE) {
+				log.error("Arduino Message size was large! Function {} Size {}" , function , params.length);
+			}
+			
+			// TODO: what should this value be?
+			//int x = 64;
 			for (int i = 0; i < params.length; ++i) {
 				serial.write(params[i]);
+				// TODO: if i is greater than X bytes we throw a small pause in when writing large messages?
+				//if (i % x == 0) {
+				//	Thread.sleep(delay);
+				//}
 			}
 			
 			// putting delay at the end so we give the message and allow the arduino to process
 			// this decreases the latency between when mrl sends the message 
 			// and the message is picked up by the arduino.
 			// This helps avoid the arduino dropping messages and getting lost/disconnected.
-		
-			Thread.sleep(1);
+			if (delay > 0) {
+				Thread.sleep(delay);
+			}
 			
 		} catch (Exception e) {
 			error("sendMsg " + e.getMessage());
 		}
+
 	}
 
 	// FIXME !! - implement sensorDetach !!!
@@ -1649,11 +1658,18 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			// Runtime.start("webgui", "WebGui");
+			Runtime.start("webgui", "WebGui");
 			// Runtime.start("servo", "Servo");
 			// Runtime.start("clock", "Clock");
 			// Runtime.start("serial", "Serial");
+			// Arduino.createVirtual("COM9");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			
+			boolean done = true;
+			if (done){
+				return;
+			}
+			
 			arduino.connect("COM9");
 			arduino.setLoadTimingEnabled(true);
 			long ts = System.currentTimeMillis();
@@ -1760,53 +1776,5 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
-	}
-
-	@Override
-	public void createDevice(int busAddress, int deviceAddress, String type) {
-
-		String key = String.format("%d.%d", busAddress, deviceAddress);
-		Device devicedata = new Device();
-		if (devices.containsKey(key)){
-			log.error(String.format("Device %s %s %s already exists.",busAddress, deviceAddress,type));
-		}
-		else {
-			devicedata.bus = busAddress;
-		    devicedata.device = deviceAddress;
-		    devicedata.type = type;
-			devices.put(key, devicedata);
-		}
-	}
-
-	@Override
-	public void releaseDevice(int busAddress, int deviceAddress) {
-		String key = String.format("%d.%d", busAddress, deviceAddress);
-		devices.remove(key);
-		
-	}
-
-	@Override
-	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
-		int wBuffer[] = new int[buffer.length +3];
-		wBuffer[0] = busAddress;
-		wBuffer[1] = deviceAddress;
-		wBuffer[2] = size;
-		for(int i = 0; i < buffer.length; i++){
-			wBuffer[i+3] = (int)buffer[i] & 0xFF;
-		}
-		sendMsg(I2C_WRITE, wBuffer);	
-	}
-
-	@Override
-	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
-		sendMsg(I2C_READ, busAddress, deviceAddress);
-		return 0;
-	}
-
-	@Override
-	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer,
-			int writeSize, byte[] readBuffer, int readSize) {
-		sendMsg(I2C_WRITE_READ, busAddress, deviceAddress);
-		return 0;
 	}
 }

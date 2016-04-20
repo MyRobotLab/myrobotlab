@@ -25,9 +25,11 @@
 
 package org.myrobotlab.control;
 
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
@@ -41,6 +43,14 @@ public class AdafruitINA219GUI extends ServiceGUI implements ActionListener {
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(AdafruitINA219GUI.class.getCanonicalName());
 
+	JLabel voltageLabel = null;
+	JLabel currentLabel = null;
+	JLabel powerLabel = null;
+	
+	JLabel voltageValue = null;
+	JLabel currentValue= null;
+	JLabel powerValue = null;
+	
 	public AdafruitINA219GUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
@@ -78,6 +88,7 @@ public class AdafruitINA219GUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void init() {
+		display.setLayout(new BorderLayout());
 	}
 
 }

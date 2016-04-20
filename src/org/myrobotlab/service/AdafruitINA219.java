@@ -9,7 +9,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.slf4j.Logger;
 
-import com.pi4j.io.i2c.I2CBus;
+//import com.pi4j.io.i2c.I2CBus;
 /**
  * AdaFruit INA219 Shield Controller Service
  * 
@@ -28,7 +28,7 @@ public class AdafruitINA219 extends Service {
 	public static final byte INA219_BUSVOLTAGE   = 0x2;
 	
     // Default i2cAddress
-	public int busAddress = I2CBus.BUS_1;
+	public int busAddress = 1;
 	public int deviceAddress = 0x40;
 	public String type = "INA219";
 	
