@@ -626,9 +626,13 @@ public class Mpu6050 extends Service{
 
 			Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "Mpu6050");
 			Runtime.start("gui", "GUIService");
+			/*
 			Arduino arduino = (Arduino) Runtime.start("Arduino","Arduino");
 			arduino.connect("COM4");
 			mpu6050.setController(arduino);
+			*/
+			RasPi raspi = (RasPi) Runtime.start("RasPi","RasPi");
+			mpu6050.setController(raspi);
 			mpu6050.dmpInitialize();
 
 		} catch (Exception e) {
