@@ -895,7 +895,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			return null;
 		}
 
-		return Runtime.create(fullkey, sr.fullTypeName);
+		// WOW THIS WAS A NASTY BUG !!!
+		// return Runtime.create(fullkey, sr.fullTypeName);
+		return Runtime.create(sr.actualName, sr.fullTypeName);		
 	}
 
 	// -------------------------------- new createPeer begin
