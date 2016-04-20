@@ -4,6 +4,8 @@ angular.module('mrlapp.service.ArduinoGui', [])
     var _self = this;
     var msg = this.msg;
     
+    $scope.editor = null ;
+    
     $scope.statusLine = "";
     $scope.version = "unknown";
     $scope.board = "";
@@ -25,9 +27,9 @@ angular.module('mrlapp.service.ArduinoGui', [])
             $scope.portName = $scope.service.serial.lastPortName;
         }
         // === service.serial begin ===
-
+        
         $scope.statusLine = $scope.board;
-        if ($scope.isConnected){
+        if ($scope.isConnected) {
             $scope.statusLine += ' connected to ' + $scope.portName + ' version ' + $scope.version;
         } else {
             $scope.statusLine += ' disconnected'
@@ -76,7 +78,7 @@ angular.module('mrlapp.service.ArduinoGui', [])
             $scope.$apply();
             break;
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);            
+            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);
             break;
         }
     }
@@ -91,6 +93,8 @@ angular.module('mrlapp.service.ArduinoGui', [])
     ;
     
     $scope.aceLoaded = function(editor) {
+        // FIXME - can't we get a handle to it earlier ?
+        $scope.editor = editor;
         // Options
         editor.setReadOnly(true);
         editor.$blockScrolling = Infinity;
@@ -99,10 +103,10 @@ angular.module('mrlapp.service.ArduinoGui', [])
     ;
     
     $scope.aceChanged = function(e) {
-    //
     }
     ;
     
+ 
     // get version
     msg.subscribe('publishVersion');
     msg.send("getVersion");

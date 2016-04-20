@@ -43,7 +43,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
+import javax.swing.text.Document;
 
 import org.myrobotlab.codec.serial.Codec;
 import org.myrobotlab.codec.serial.DecimalCodec;
@@ -53,6 +55,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Serial;
+import org.python.netty.handler.codec.CodecException;
 import org.slf4j.Logger;
 
 public class SerialGUI extends ServiceGUI implements ActionListener, ItemListener {
@@ -71,7 +74,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 
 	JLabel connectLight = new JLabel();
 
-	JTextArea rx = new JTextArea(20, 40);
+	JTextArea rx = new JTextArea(20, 10);
 	JLabel rxTotal = new JLabel("0");
 	JLabel txTotal = new JLabel("0");
 	String delimiter = " ";
@@ -326,11 +329,18 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	 * 1 byte = 1 ascii char FORMAT_HEX is 2 digit asci hex
 	 * 
 	 * @param data
+	 * @throws BadLocationException 
 	 * @throws CodecException
 	 */
-	public final void publishRX(final Integer data) {
+	public final void publishRX(final Integer data) throws BadLocationException {
 		++rxCount;
-		rx.append(rxFormatter.decode(data));
+		String formatted = rxFormatter.decode(data);
+		rx.append(formatted);
+		if (formatted != null && rx.getLineCount() > 50){
+			Document doc = rx.getDocument();
+			doc.remove(0, formatted.length());			
+		}
+
 		// rx.append(String.format("%s ", data));
 		/*
 		 * if (!mySerial.getDisplayFormat().equals(Serial.DISPLAY_RAW) && width

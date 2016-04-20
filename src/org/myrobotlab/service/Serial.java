@@ -353,7 +353,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			if (this.portName != null) {
 				Port port = ports.get(portName);
 				if (port.isOpen() && port.isListening()) {
-					info("already connected to %s - disconnect", portName);
+					info("already connected to %s - disconnect first to reconnect", portName);
 					return true;
 				}
 			}

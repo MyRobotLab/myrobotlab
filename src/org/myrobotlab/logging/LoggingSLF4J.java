@@ -37,7 +37,8 @@ public class LoggingSLF4J extends Logging {
 		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 		PatternLayoutEncoder ple = new PatternLayoutEncoder();
 
-		ple.setPattern("%date %level [%thread] %logger{10} [%file:%line] %msg%n");
+		// %date
+		ple.setPattern("%date{HH:mm:ss.SSS} [%thread] %level %logger{10} [%file:%line] %msg%n");
 		ple.setContext(lc);
 		ple.start();
 

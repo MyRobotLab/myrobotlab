@@ -120,9 +120,10 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 			listening = false;
 			readingThread = null;// is dead anyway
 			port.closePort();
-			// port.notifyOnDataAvailable(false);
-
+			// FIXME - JSSC issue (IMHO)
+			// if a listener doesn't exist it throws ? meh :P
 			port.removeEventListener();
+			// port.notifyOnDataAvailable(false);
 		} catch (Exception e) {
 			Logging.logError(e);
 		}

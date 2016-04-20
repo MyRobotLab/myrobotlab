@@ -5,9 +5,12 @@
     <div class="media">
         <span class="media-body">
             <div>
-                <p>You're currently running MyRobotLab in version <b>{{platform.mrlVersion}}</b> on branch <b>{{platform.branch}}</b>.</p>
-                <p>Your operating system seems to be <b>{{platform.os}}</b>, your architecture <b>{{platform.arch}}</b> and your bitness <b>{{platform.bitness}}</b>.</p>
-                <p>Lastly your running java as <b>{{platform.vmName}}</b>.</p>
+                <p>
+                Version <b>{{platform.mrlVersion}}</b><br/>
+                Branch <b>{{platform.branch}}</b><br/>
+                Operating System <b>{{platform.arch}}.{{platform.bitness}}.{{platform.os}}</b><br/>
+                Java <b>{{platform.vmName}}</b><br/>
+                </p>
             </div>
         </span>
         <span class="media-right">

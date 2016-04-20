@@ -36,8 +36,6 @@ public class VirtualDevice extends Service implements SerialDataListener {
 	transient Python logic;	
 	
 	transient BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
-	//transient BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
-
 
 	public VirtualDevice(String n) {
 		super(n);
@@ -66,10 +64,10 @@ public class VirtualDevice extends Service implements SerialDataListener {
 		return uart.connectVirtualNullModem(portName);
 	}
 	
-
 	public String createVirtualArduino(String portName) throws IOException {
 		createVirtualPort(portName);
 		String newCode = FileIO.resourceToString("VirtualDevice/Arduino.py");
+		log.info(newCode);
 		logic.loadScript("Arduino.py", newCode);
 		logic.execAndWait();
 		return portName;
@@ -165,6 +163,28 @@ public class VirtualDevice extends Service implements SerialDataListener {
 		return ret;
 	}
 	
+
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(VirtualDevice.class.getCanonicalName());
+		meta.addDescription("A service which can create virtual devices, like the virtual Arduino");
+		meta.addCategory("testing");
+		// put peer definitions in
+		meta.addPeer("uart", "Serial", "uart");
+		meta.addPeer("logic", "Python", "logic to implement");
+
+		return meta;
+	}
+	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -209,25 +229,5 @@ public class VirtualDevice extends Service implements SerialDataListener {
 		}
 	}
 
-
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = new ServiceType(VirtualDevice.class.getCanonicalName());
-		meta.addDescription("A service which can create virtual devices, like the virtual Arduino");
-		meta.addCategory("testing");
-		// put peer definitions in
-		meta.addPeer("uart", "Serial", "uart");
-		meta.addPeer("logic", "Python", "logic to implement");
-
-		return meta;
-	}
 		
 }

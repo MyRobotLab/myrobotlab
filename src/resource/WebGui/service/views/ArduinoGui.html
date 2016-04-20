@@ -1,62 +1,52 @@
-<div class="row">
- <div class="col-lg-12">
- {{statusLine}}
- <tabset justified="true">
- 
-    <tab heading="MRLComm.c">
-    <button class="btn btn-default pull-right" clip-copy="service.sketch.data"><span class="glyphicon glyphicon-copy"></span> copy</button>
-    <div class="col-lg-12" style="height: 600px;" ui-ace="{
-                                           useWrapMode : true,
-                                           showGutter: true,
-                                           theme:'chrome',
-                                           mode: 'c_cpp',
-                                           firstLineNumber: 1,
-                                           onLoad: aceLoaded,
-                                           onChange: aceChanged}">
-    </div>
-    </tab>
-
-    <tab heading="Settings">
- 		
-		<!-- FIXME - this should be a portDirective begin -->
-		<!--
-		<div class="row">
-		  <div class="col-md-4">
-		   <label>port</label>
-			<div class="input-group">
-			   <input class="form-control" type="text" ng-model="portName" ng-disabled="isConnected" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8"/>
-			   <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="disconnect()">refresh</button></span>
+<uib-tabset active="active">
+	<!-- begin -->
+    <uib-tab index="0" heading="Status">
+		<div class="col-lg-4">
+		<div class="input-group">
+			   <input class="form-control" type="text" ng-model="portName" ng-disabled="isConnected" uib-typeahead="portName for portName in serial.possiblePorts | filter:$viewValue | limitTo:8"/>
+			   <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">refresh</button></span>
 			   <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</button></span>
 			   <span class="input-group-btn"><button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button></span>
-			   <span class="input-group-btn"><button class="btn btn-default"  ng-click="msg.digitalWrite(1,1)">test</button></span>
-			 </div>
-		  </div>
-		  <div class="col-md-4">
-			 <img ng-src="../{{isConnectedImage}}.png" /> 
-			 <label ng-show="isConnected">{{stats.lineSpeed}} Kbps</label>
-		  </div>
-		  <div class="col-md-4">
-		  </div>
+			   <!-- span class="input-group-btn"><button class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</button></span -->
 		</div>
-		<!-- FIXME - this should be a portDirective end -->
-
-		<div class="row">
-		 <div class="col-md-6">
+		</div>
+		<div class="col-lg-8">
+		{{statusLine}}
+		</div>
+    </uib-tab>
+	<!-- end -->
+	<!-- begin -->
+    <uib-tab heading="MRLComm.c">
+		 <button class="btn btn-default pull-right" clipboard text="service.sketch.data"><span class="glyphicon glyphicon-copy"></span>Copy</button> 
+		 <div class="col-lg-12" style="height: 600px;" ui-ace="{
+												   useWrapMode : true,
+												   showGutter: true,
+												   theme:'chrome',
+												   mode: 'c_cpp',
+												   firstLineNumber: 1,
+												   onLoad: aceLoaded,
+												   onChange: aceChanged}">
+		</div>
+    </uib-tab>
+	<!-- end -->
+	<!-- begin -->
+    <uib-tab heading="Settings">
 		   <label for="type">board</label>
 		   <select ng-model="board" ng-change="onBoardChange(board)" class="form-control">
 		   	  	<option>Uno</option>
 		   		<option>Mega</option>
-			</select>
-		 </div>
-		</div> 	
-    </tab><!-- end Settings -->
-
-    <tab heading="Oscope">
- 		<!-- oscope id="oscope" ng-model="service.name" ></oscope -->
-    </tab>
-    <tab heading="Pins">
+			</select>    
+    </uib-tab>
+	<!-- end -->
+	<!-- begin -->
+    <uib-tab heading="Oscope">
+ 		<oscope id="oscope" ng-model="service.name" ></oscope>
+    </uib-tab>
+	<!-- end -->
+	<!-- begin -->
+    <uib-tab heading="Pins">
 		<img src="{{image}}" width="600"/>
-    </tab>
-  </tabset>
-  </div>
-</div>
+    </uib-tab>
+	<!-- end -->
+
+</uib-tabset>
