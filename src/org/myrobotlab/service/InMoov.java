@@ -896,7 +896,7 @@ public class InMoov extends Service {
 	public void startAll(String leftPort, String rightPort) throws Exception {
 		// TODO add vision
 		startMouth();
-		startHead(leftPort);
+ 		startHead(leftPort);
 		startEar();
 
 		startMouthControl(leftPort);

@@ -121,7 +121,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 	static final long serialVersionUID = 1L;
 
 	static final int DATA_WIDTH = 600;
-	static final int DATA_HEIGHT = 1024;
+	static final int DATA_HEIGHT = 512;
 
 	Graphics g = null;
 
