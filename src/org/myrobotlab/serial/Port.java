@@ -11,8 +11,6 @@ import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
 /**
- * FIXME !!! - implement subclass abstract/interface - HardwarePort &
- * SoftwarePort
  * 
  * @author Grog
  *
@@ -107,6 +105,9 @@ public abstract class Port implements Runnable, PortSource {
 	public void listen(HashMap<String, SerialDataListener> listeners) {
 		// opened = new CountDownLatch(1);
 		// try {
+			if (this.listeners != null){
+				log.info("here");
+			}
 			this.listeners = listeners;
 			if (readingThread == null) {
 				++pIndex;

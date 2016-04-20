@@ -46,7 +46,7 @@ def work():
 
 codec = ArduinoMsgCodec()
 
-virtual = Runtime.getService("virtual")
+virtual = Runtime.start("virtual","VirtualDevice")
 uart = virtual.getUART()
 uart.setCodec("arduino")
 logic = virtual.getLogic()
@@ -104,12 +104,49 @@ def off():
   worker = None
       
 def onConnect(portName):
-  print("connected to ", portName)
+  print("onConnect to ", portName)
 
+# FIXME ??? is this bad algorithm to determine callback method name ?
+# seems somebody is expecting it this way 
+def onOnConnect(portName):
+  print("onOnConnect connected to ", portName)
 
 def onPortNames(portName):
-  print("TODO - list portNames")
+  print("onPortNames TODO - list portNames")
 
+def onOnPortNames(portName):
+  print("onOnPortNames TODO - list portNames")
 
 def onDisconnect(portName):
-  print("disconnected from ", portName)
+  print("onDisconnect from ", portName)
+
+def onOnDisconnect(portName):
+  print("onOnDisconnect from ", portName)
+  
+# WHAT THE HECK IS THIS ABOUT ?
+# TODO - find out
+def serial1RX(data):
+  print("serial1RX ", data)
+  
+def serial2RX(data):
+  print("serial2RX ", data)
+
+def serial3RX(data):
+  print("serial3RX ", data)
+
+def serial4RX(data):
+  print("serial4RX ", data)
+
+def serial5RX(data):
+  print("serial5RX ", data)
+
+def serial6RX(data):
+  print("serial6RX ", data)
+
+def serial7RX(data):
+  print("serial7RX ", data)
+
+def serial8RX(data):
+  print("serial8RX ", data)
+  
+  

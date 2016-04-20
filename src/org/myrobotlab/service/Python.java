@@ -1,11 +1,8 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +52,7 @@ public class Python extends Service {
 	List<File> currentFileList = new ArrayList<File>();
 	
 	Map<String, String> exampleUrls = new TreeMap<String, String>();
+	List<String> localPythonFiles = new ArrayList<String>();
 	
 	/**
 	 * current working directory root there are multiple filesystems we can load
@@ -80,7 +78,7 @@ public class Python extends Service {
 		private Python python;
 
 		public InputQueueThread(Python python) {
-			super(String.format("%s_input", python.getName()));
+			super(String.format("%s.input", python.getName()));
 			this.python = python;
 		}
 
@@ -374,6 +372,8 @@ public class Python extends Service {
 			String url = String.format("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/%s/service/%s.py", p.getBranch(), st.getSimpleName());
 			exampleUrls.put(st.getSimpleName(), url);
 		}		
+		
+		localPythonFiles = getFileListing();
 	}
 
 	// PyObject interp.eval(String s) - for verifying?
@@ -649,31 +649,23 @@ public class Python extends Service {
 	 * @throws IOException
 	 */
 	public boolean loadScriptFromFile(String filename) throws IOException {
-		log.info(String.format("loadScriptFromFile %s", filename));
+		log.info("loadScriptFromFile {}", filename);
 		String data = FileIO.toString(filename);
 		return loadScript(filename, data);
 	}
 
 	public boolean loadScript(String scriptName, String newCode) {
-		if (newCode != null && !newCode.isEmpty()) {
-			log.info(String.format("replacing current script with %1s", scriptName));
-
+		if (newCode != null) {
+			log.info(String.format("replacing current script with {}", scriptName));
 			currentScript = new Script(scriptName, newCode);
-
-			// tell other listeners we have changed
-			// our current script
-			// invoke("getScript");
-			// invoke("publishLoadedScript", currentScript);
 			broadcastState();
 			return true;
 		} else {
-			warn(String.format("%1s a not valid script", scriptName));
+			error(String.format("%s a not valid script", scriptName));
 			return false;
 		}
 	}
 
-	// FIXME - need to replace "script" with Hashmap<filename, script> to
-	// support and IDE muti-file view
 
 	/**
 	 * load a script from the myrobotlab.jar - location of example scripts are
@@ -696,20 +688,13 @@ public class Python extends Service {
 	 * @return true if successfully loaded
 	 * @throws IOException
 	 */
-	public boolean loadUserScript(String filename) throws IOException {
+	public void loadUserScript(String filename) throws IOException {
+		log.info("loadUserScript {}", filename);
 		String newCode = FileIO.toString(getCFGDir() + File.separator + filename);
-		if (newCode != null && !newCode.isEmpty()) {
-			log.info(String.format("replacing current script with %s", filename));
-
-			currentScript = new Script(filename, newCode);
-
-			// tell other listeners we have changed
-			// our current script
-			// broadcastState();
-			return true;
+		if (newCode != null) {
+			loadScript(filename, newCode);
 		} else {
-			log.warn(String.format("%1s a not valid script", filename));
-			return false;
+			error(String.format("%s a not valid script", filename));
 		}
 	}
 
@@ -829,91 +814,7 @@ public class Python extends Service {
 		super.stopService();
 		stop();// release the interpeter
 	}
-	
-	/* crappy implementation
 
-	public void setCwd(String path) throws IOException, ClassNotFoundException {
-		if ("examples".equals(cwdRoot)) {
-			currentFileList = FileIO.listResourceContents("resource.Python.examples");
-		} else if ("local".equals(cwdRoot)) {
-
-			ArrayList<File> localFiles = new ArrayList<File>();
-
-			File dir = new File(".");
-
-			String[] list = dir.list();
-
-			for (String file : list) {
-				if (file.endsWith(".py")) {
-					localFiles.add(new File(file));
-				}
-			}
-
-			currentFileList = localFiles;
-		} else if ("pyrobotlab".equals(cwdRoot)) {
-			// FIXME implement
-			// 1. Encoder.fromJson - needs an option to return JsonElement
-			// 2. Makit nice so you can submit xpath like target and just get
-			// the data you want
-			byte[] data = Http.get("https://api.github.com/repos/MyRobotLab/pyrobotlab/contents/home");
-			if (data != null) {
-				String json = new String(data);
-
-				JsonElement jse = new JsonParser().parse(json);
-				// jse.getAsJsonObject();
-
-				JsonArray types = jse.getAsJsonArray();// .getAsJsonObject("waypoints").getAsJsonObject("ship").getAsJsonArray("first_type");
-
-				for (final JsonElement type : types) {
-					final JsonArray coords = type.getAsJsonArray();
-				}
-
-				// Encoder.fromJson(json, clazz)
-				log.info(json);
-			}
-
-		}
-
-		// broadcastState();
-	}
-*/
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-
-			// Runtime.start("gui", "GUIService");
-			// String f = "C:\\Program Files\\blah.1.py";
-			// log.info(getName(f));
-			Python python = (Python) Runtime.start("python", "Python");
-
-			// python.error("this is an error");
-			// python.loadScriptFromResource("VirtualDevice/Arduino.py");
-			// python.execAndWait();
-			// python.releaseService();
-
-			python.load();
-			python.save();
-
-			FileOutputStream fos = new FileOutputStream("python.dat");
-			ObjectOutputStream out = new ObjectOutputStream(fos);
-			out.writeObject(python);
-			out.close();
-
-			FileInputStream fis = new FileInputStream("python.dat");
-			ObjectInputStream in = new ObjectInputStream(fis);
-			Object x = in.readObject();
-			in.close();
-
-			Runtime.createAndStart("gui", "GUIService");
-			// Runtime.createAndStart("webgui", "WebGui");
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-	}
 
 	/**
 	 * This static method returns all the details of the class without it having
@@ -934,6 +835,46 @@ public class Python extends Service {
 		// meta.addDependency("org.python.core", "2.7.0");
 
 		return meta;
+	}
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+
+			// Runtime.start("gui", "GUIService");
+			// String f = "C:\\Program Files\\blah.1.py";
+			// log.info(getName(f));
+			Python python = (Python) Runtime.start("python", "Python");
+
+			// python.error("this is an error");
+			// python.loadScriptFromResource("VirtualDevice/Arduino.py");
+			// python.execAndWait();
+			// python.releaseService();
+
+			/*
+			python.load();
+			python.save();
+
+			FileOutputStream fos = new FileOutputStream("python.dat");
+			ObjectOutputStream out = new ObjectOutputStream(fos);
+			out.writeObject(python);
+			out.close();
+
+			FileInputStream fis = new FileInputStream("python.dat");
+			ObjectInputStream in = new ObjectInputStream(fis);
+			Object x = in.readObject();
+			in.close();
+
+			Runtime.createAndStart("gui", "GUIService");
+			*/
+			Runtime.start("webgui", "WebGui");
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
 	}
 
 }

@@ -187,7 +187,7 @@ public class GUIServiceGUI extends ServiceGUI {
 	}
 
 	public void buildGraph() {
-		log.info("buildGraph");
+		log.debug("buildGraph");
 		// -------------------------BEGIN PURE JGRAPH
 		// ----------------------------
 
@@ -225,16 +225,16 @@ public class GUIServiceGUI extends ServiceGUI {
 
 			Object parent = graph.getDefaultParent();
 			Object services[] = graph.getChildVertices(parent);
-			// log.info("serviceCount " + services.length);
+			// log.debug("serviceCount " + services.length);
 
 			for (int i = 0; i < services.length; ++i) {
 				// serviceCells
 				Object s = services[i];
-				log.info("service {}", s);
+				log.debug("service {}", s);
 
 				mxCell m = (mxCell) services[i];
 				GUIServiceGraphVertex v = (GUIServiceGraphVertex) m.getValue();
-				log.info(v.name);
+				log.debug(v.name);
 				serviceCells.put(v.name, m);
 				// serviceCells.put(arg0, s.);
 			}
@@ -266,14 +266,14 @@ public class GUIServiceGUI extends ServiceGUI {
 				@Override
 				public void mouseDragged(MouseEvent e) {
 					Object cell = graphComponent.getCellAt(e.getX(), e.getY());
-					// too chatty log.info("dragged cell " + cell + " " +
+					// too chatty log.debug("dragged cell " + cell + " " +
 					// e.getX() + "," + e.getY());
 				}
 
 				@Override
 				public void mouseMoved(MouseEvent e) {
 					Object cell = graphComponent.getCellAt(e.getX(), e.getY());
-					// too chatty log.info("dragged - mouseMoved - cell " + cell
+					// too chatty log.debug("dragged - mouseMoved - cell " + cell
 					// + " " + e.getX() + "," + e.getY());
 				}
 			});
@@ -282,24 +282,24 @@ public class GUIServiceGUI extends ServiceGUI {
 
 				/*
 				 * protected void mouseLocationChanged(MouseEvent e) {
-				 * log.info(e.getX() + ", " + e.getY()); }
+				 * log.debug(e.getX() + ", " + e.getY()); }
 				 * 
 				 * public void mouseDragged(MouseEvent e) { //
 				 * http://forum.jgraph
 				 * .com/questions/1343/mouse-coordinates-at-drop-event Object
 				 * cell = graphComponent.getCellAt(e.getX(), e.getY());
-				 * log.info(e.getX() + "," + e.getY()); }
+				 * log.debug(e.getX() + "," + e.getY()); }
 				 */
 
 				@Override
 				public void mouseReleased(MouseEvent e) {
 					Object cell = graphComponent.getCellAt(e.getX(), e.getY());
-					// too chatty log.info("cell " + e.getX() + "," + e.getY());
+					// too chatty log.debug("cell " + e.getX() + "," + e.getY());
 					currentlySelectedCell = (mxCell) cell;
 
 					if (cell != null) {
 						mxCell m = (mxCell) cell;
-						// too chatty log.info("cell=" + graph.getLabel(cell) +
+						// too chatty log.debug("cell=" + graph.getLabel(cell) +
 						// ", " + m.getId() + ", "
 						// + graph.getLabel(m.getParent()));
 						if (m.isVertex()) {
@@ -330,9 +330,9 @@ public class GUIServiceGUI extends ServiceGUI {
 
 	public void buildLocalServiceGraph() {
 
-		log.info("buildLocalServiceGraph-begin");
+		log.debug("buildLocalServiceGraph-begin");
 		Map<String, ServiceInterface> services = Runtime.getRegistry();
-		log.info("GUIServiceGUI service count " + Runtime.getRegistry().size());
+		log.debug("GUIServiceGUI service count " + Runtime.getRegistry().size());
 
 		TreeMap<String, ServiceInterface> sortedMap = new TreeMap<String, ServiceInterface>(services);
 		Iterator<String> it = sortedMap.keySet().iterator();
@@ -411,7 +411,7 @@ public class GUIServiceGUI extends ServiceGUI {
 			}
 		}
 
-		log.info("buildLocalServiceGraph-end");
+		log.debug("buildLocalServiceGraph-end");
 	}
 
 	// FIXME - return a "copy" of registry ????

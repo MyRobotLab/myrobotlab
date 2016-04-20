@@ -333,7 +333,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		return super.save();
 	}
 
-	public void startNettosphere() {
+	public void start() {
 		try {
 
 			if (port == null) {
@@ -403,7 +403,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			Logging.logError(e);
 		}
 
-		startNettosphere();
+		start();
 	}
 
 	public void onRegistered(ServiceInterface si) {
@@ -906,10 +906,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 	public void stopService() {
 		super.stopService();
-		stopNettosphere();
+		stop();
 	}
 	
-	public void stopNettosphere(){
+	public void restart(){
+		stop();
+		start();
+	}
+	
+	public void stop(){
 		if (nettosphere != null) {
 
 			log.info("stopping nettosphere");
@@ -926,95 +931,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			}).start();
 			sleep(1000);
 		}		
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		/*
-		 * ServiceType meta = getMetaData(WebGui.class.getCanonicalName());
-		 * log.info(meta.toString());
-		 */
-
-		// log.info("hello");
-
-		// Call context.reset() to clear any previous configuration, e.g.
-		// default
-		// configuration. For multi-step configuration, omit calling
-		// context.reset().
-		// context.reset();
-		// configurator.doConfigure(args[0]);
-
-		// log.info(Logging.)
-		/*
-		 * log.trace("trace"); log.debug("debug"); log.info("info");
-		 * log.warn("warn"); log.error("error");
-		 */
-
-		try {
-
-			// Runtime.start("python", "Python");
-			// Runtime.start("gui", "GUIService");
-			// RemoteAdapter remote =
-			// (RemoteAdapter)Runtime.start("remote","RemoteAdapter");
-			// remote.startListening();
-			// remote.setDefaultPrefix("x-");
-			// remote.setDefaultPrefix("");
-			// Runtime.start("python", "Python");
-			// ProgramAB ai = (ProgramAB) Runtime.start("ai", "ProgramAB");
-			// Runtime.start("mouth", "AcapelaSpeech");
-			// Runtime.start("head", "InMoovHead");
-			// Runtime.start("head", "InMoovHead");
-			// Runtime.start("arduino", "Arduino");
-			// ai.startSession("alice2");
-			// ai.getResponse("hello ");
-
-			// Runtime.start("servo", "Servo");
-			Runtime.start("python", "Python");
-			WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
-			log.info(Service.getDNA().toString());
-			// webgui.startPeer("tracker");
-
-			// log.info(Service.getDNA().toString());
-			// webgui.autoStartBrowser(false);
-
-			// Runtime.start("python", "Python");
-			// Runtime.start("myo", "MyoThalmic");
-			// remote.connect("tcp://127.0.0.1:6767");
-
-			// Runtime.start("macgui", "GUIService");
-
-			// MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
-			// myo.connect();
-
-			// myo.addMyoDataListener(python);
-
-			// Runtime.start("python", "Python");
-			// Runtime.start("remote", "RemoteAdapter");
-			// Runtime.start("arduino", "Arduino");// Runtime.start("clock01",
-			// "Clock"); Runtime.start("clck3", "Clock");
-			// Runtime.start("gui", "GUIService");
-
-			// webgui.extract();
-			/*
-			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock");
-			 * Runtime.start("clck3", "Clock");
-			 * 
-			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock");
-			 * Runtime.start("clck3", "Clock");
-			 */
-
-			/*
-			 * Message msg = webgui.createMessage("runtime", "start", new
-			 * Object[]{"arduino", "Arduino"}); String json =
-			 * Encoder.toJson(msg); log.info(json); // Runtime.start("gui",
-			 * "GUIService"); log.info(json);
-			 */
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
 	}
 
 	// === begin positioning panels plumbing ===
@@ -1082,5 +998,21 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// meta.addDependency("org.atmosphere.nettosphere", "2.3.0"); // nettosphere-assembly-2.3.0.jar
 		// meta.addDependency("org.atmosphere.nettosphere", "2.3.0");// geronimo-servlet_3.0_spec-1.0.jar
 		return meta;
+	}
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+			
+			Runtime.start("python", "Python");
+			Runtime.start("arduino", "Arduino");
+			Runtime.start("srf05", "UltrasonicSensor");
+			Runtime.start("webgui", "WebGui");	
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 }

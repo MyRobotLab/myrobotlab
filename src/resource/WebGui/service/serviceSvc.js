@@ -115,7 +115,7 @@ angular.module('mrlapp.service')
                                     //(and can be applied)
                                     tiny: {
                                         glyphicon: 'glyphicon glyphicon-minus', //define a glyphicon to show (as a symbol)
-                                        width: 200, //width of _self size-setting
+                                        width: 200, //width of this size-setting
                                         body: 'collapse', //means that the body-section of the panel won't be shown
                                         footer: 'collapse'//don't show footer-section of panel
                                     },
@@ -141,12 +141,12 @@ angular.module('mrlapp.service')
                                     }
                                 },
                                 order: ["free", "full", "large", "small", "tiny"], //shows your size-options in _self order
-                                aktsize: 'large'//set _self as the start-value
+                                aktsize: 'large'//set this as the start-/default-size
                             };
                         } else {
                             panelsize = service.panelsizes[panelname];
                             if (isUndefinedOrNull(panelsize.aktsize)) {
-                                $log.error('ERROR_no current size defined');
+                                $log.error('ERROR_no current size (aktsize) defined');
                             }
                         }
                         panelsize.sizes['min'] = {
@@ -161,7 +161,7 @@ angular.module('mrlapp.service')
                         panelsize.oldsize = null;
                         //posy
                         //TODO - come back here
-                        //liked _self more, but ...
+                        //liked this more, but ...
                         var panelsarray = _self.getPanelsList();
                         var posy = 0;
                         for (var i = 0; i < panelsarray.length; i++) {
@@ -184,7 +184,7 @@ angular.module('mrlapp.service')
                                 i = 0;
                             }
                         }
-                        //... _self is working better atm <-WRONG!!! NoWorky in chrome !!!
+                        //... this is working better atm <-WRONG!!! NoWorky in chrome !!!
 //                        lastPosY += 30;
 //                        var posy = lastPosY;
                         //zindex
@@ -315,9 +315,16 @@ angular.module('mrlapp.service')
                         var counter = 0;
                         for (var panel in services[name].panels) {
                             panels[name + '/' + names[counter]] = panels[name + '/' + panel];
+                            delete panels[name + '/' + panel];
                             panels[name + '/' + names[counter]].panelname = names[counter];
                             counter++;
                         }
+                        services[name].panels = {};
+                        angular.forEach(panels, function (value, key) {
+                            if (value.name == name) {
+                                services[name].panels[value.panelname] = panels[name + '/' + value.panelname];
+                            }
+                        });
                         services[name].panelnames = names;
                     };
 
@@ -325,9 +332,9 @@ angular.module('mrlapp.service')
                         //service want's to change which panel-names should be shown
                         $log.info('notifyPanelShowNamesChanged', name, show);
                         services[name].showpanelnames = show;
-                        for (var panel in services[name].panels) {
-                            panels[name + '/' + panel].showpanelname = show[panel];
-                        }
+                        angular.forEach(services[name].panels, function (value, key) {
+                            panels[name + '/' + value.panelname].showpanelname = show[value.panelname];
+                        });
                     };
 
                     _self.notifyPanelSizesChanged = function (name, sizes) {
