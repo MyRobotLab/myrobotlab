@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -1273,6 +1274,32 @@ public class InMoov extends Service {
 		moveArm("right", 0, 73, 30, 17);
 		moveHand("left", 170, 0, 0, 168, 167, 0);
 		moveHand("right", 98, 37, 34, 67, 118, 166);
+	}
+	
+	
+	public void loadGestures(String directory) {
+		// TODO: iterate over each of the python files in the directory
+		// and load them into the python interpreter.
+		File dir = new File(directory);
+		if (!dir.isDirectory()) {
+			// TODO: maybe create the directory ?
+			log.warn("Gestures directory {} doest not exist.", directory);
+			return;
+		}
+		
+		for (File f : dir.listFiles()) {
+			if (f.getName().toLowerCase().endsWith(".py")) {
+				log.info("Loading Gesture Python file {}", f.getAbsolutePath());
+				Python p = (Python)Runtime.getService("python");
+				try {
+					p.execFile(f.getAbsolutePath());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					log.warn("Error loading gesture file {}", f.getAbsolutePath());
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	public static void main(String[] args) {
