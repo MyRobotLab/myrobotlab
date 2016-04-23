@@ -4010,10 +4010,14 @@ public class Mpu6050 extends Service{
 	        chunkSize = MPU6050_DMP_MEMORY_CHUNK_SIZE;
 
 	        // make sure we don't go past the data size
-	        if (i + chunkSize > dataSize) chunkSize = dataSize - i;
+	        if (i + chunkSize > dataSize)
+	        	{chunkSize = dataSize - i;
+	        	}
 
 	        // make sure this chunk doesn't go past the bank boundary (256 bytes)
-	        if (chunkSize > 256 - address) chunkSize = 256 - address;
+	        if (chunkSize > 256 - address){
+	        	chunkSize = 256 - address;
+	        }
 	        
 	        // write the chunk of data as specified
 	        // progBuffer = (int *)data + i;
@@ -4022,7 +4026,7 @@ public class Mpu6050 extends Service{
 	        	progBuffer[j] = data[i+j];
 	        }
 
-			log.info(String.format("writeMemoryBlock: Block start: %s, ChunkSize %s", chunkSize, i));
+			log.info(String.format("writeMemoryBlock: Block start: %s, ChunkSize %s", i, chunkSize));
 	        I2CdevWriteBytes(deviceAddress, MPU6050_RA_MEM_R_W, chunkSize, progBuffer);
 
 	        // verify data if needed
@@ -4058,7 +4062,7 @@ public class Mpu6050 extends Service{
 	        i += chunkSize;
 
 	        // int automatically wraps to 0 at 256
-	        address += chunkSize;
+	        address += chunkSize & 0xff;
 
 	        // if we aren't done, update bank (if necessary) and address
 	        if (i < dataSize) {
