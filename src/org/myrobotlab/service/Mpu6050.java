@@ -640,8 +640,8 @@ public class Mpu6050 extends Service{
 			mpu6050.setController(raspi);
 			mpu6050.dmpInitialize();
 			*/
-			byte [] buffer = new byte[] {(byte)0x8f, (byte) 0x80};
-		    int a = (((int)buffer[0]) << 8) | buffer[1] & 0xff;
+			byte [] buffer = new byte[] {(byte)0xff, (byte) 0xd3};
+		    int a = (((short)buffer[0]) << 8) | buffer[1] & 0xff;
 		    log.info(String.format("a value = %s", a));
 		    
 		} catch (Exception e) {
@@ -2885,9 +2885,9 @@ public class Mpu6050 extends Service{
 	 */
 	int getRotationX() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 2, buffer);
-	    int a = (((int)buffer[0]) << 8) | buffer[1] & 0xff;
+	    int a = (((short)buffer[0]) << 8) | buffer[1] & 0xff;
 	    log.info(String.format("getRotationX returns %s", a));
-	    return (((int)buffer[0]) << 8) | buffer[1] & 0xff;
+	    return (((short)buffer[0]) << 8) | buffer[1] & 0xff;
 	}
 	/** Get Y-axis gyroscope reading.
 	 * @return Y-axis rotation measurement in 16-bit 2's complement format
