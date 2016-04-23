@@ -640,7 +640,7 @@ public class Mpu6050 extends Service{
 			mpu6050.setController(raspi);
 			mpu6050.dmpInitialize();
 			*/
-			byte [] buffer = new byte[] {(byte)0xff, (byte) 0xd3};
+			byte [] buffer = new byte[] {(byte)0x70, (byte)0xfe};
 		    int a = (((short)buffer[0]) << 8) | buffer[1] & 0xff;
 		    log.info(String.format("a value = %s", a));
 		    
@@ -2885,6 +2885,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getRotationX() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 2, buffer);
+		log.info(String.format("buffer[0] x%02X, buffer[1] x%02X", buffer[0], buffer[1]));
 	    int a = (((short)buffer[0]) << 8) | buffer[1] & 0xff;
 	    log.info(String.format("getRotationX returns %s", a));
 	    return (((short)buffer[0]) << 8) | buffer[1] & 0xff;
