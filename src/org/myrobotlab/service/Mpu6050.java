@@ -4017,7 +4017,7 @@ public class Mpu6050 extends Service{
 	        }
 
 	        // make sure this chunk doesn't go past the bank boundary (256 bytes)
-	        if (chunkSize > 256 - address){
+	        if (chunkSize > (256 - address)){
 				log.info(String.format("chunkSize > 256 - address. chunkSize=%s, address =%s",chunkSize, address));
 	        	chunkSize = 256 - address;
 				log.info(String.format("New chunkSize=%s",chunkSize));
@@ -4066,7 +4066,7 @@ public class Mpu6050 extends Service{
 	        i += chunkSize;
 
 	        // int automatically wraps to 0 at 256
-	        address += chunkSize & 0xff;
+	        address = (address + chunkSize) & 0xff;
 
 	        // if we aren't done, update bank (if necessary) and address
 	        if (i < dataSize) {
