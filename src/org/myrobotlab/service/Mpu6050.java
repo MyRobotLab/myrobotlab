@@ -4338,7 +4338,7 @@ public class Mpu6050 extends Service{
 	 */
 	// TODO Return the correct length
 	int I2CdevReadBytes(int devAddr, int regAddr, int length, int[] data, int timeout) {
-		byte[] writebuffer = new byte[] {(byte)regAddr}; 
+		byte[] writebuffer = new byte[] {(byte)(regAddr & 0xff)}; 
 		byte[] readbuffer = new byte[length]; 
 		controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
 		controller.i2cRead(busAddress, deviceAddress, readbuffer, length);
