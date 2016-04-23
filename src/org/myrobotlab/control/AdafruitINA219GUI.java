@@ -26,11 +26,15 @@
 package org.myrobotlab.control;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -43,21 +47,23 @@ public class AdafruitINA219GUI extends ServiceGUI implements ActionListener {
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(AdafruitINA219GUI.class.getCanonicalName());
 
-	JLabel voltageLabel = null;
-	JLabel currentLabel = null;
-	JLabel powerLabel = null;
+	JButton refresh = new JButton("refresh");
 	
-	JLabel voltageValue = null;
-	JLabel currentValue= null;
-	JLabel powerValue = null;
+	JTextField busVoltage = new JTextField(10);
+	JTextField shuntVoltage = new JTextField(10);
+	JTextField current = new JTextField(10);
+	JTextField power = new JTextField(10);
 	
 	public AdafruitINA219GUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
-
+	public void actionPerformed(ActionEvent e) {
+		Object o = e.getSource();
+		if (o == refresh) {
+			send("refresh");
+		}
 	}
 
 	@Override
@@ -65,8 +71,8 @@ public class AdafruitINA219GUI extends ServiceGUI implements ActionListener {
 		// commented out subscription due to this class being used for
 		// un-defined gui's
 
-		// subscribe("publishState", "getState", AdafruitINA219.class);
-		// send("publishState");
+		subscribe("publishState", "getState", AdafruitINA219.class);
+		send("publishState");
 	}
 
 	@Override
@@ -88,7 +94,32 @@ public class AdafruitINA219GUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void init() {
+		
+		// Container BACKGROUND = getContentPane();
+		
 		display.setLayout(new BorderLayout());
+		JPanel north = new JPanel();
+		north.add(refresh);
+
+		JPanel center = new JPanel();
+		center.add(new JLabel("Bus Voltage   :"));
+		center.add(busVoltage);
+		center.add(new JLabel(" mV"));
+
+		center.add(new JLabel("Shunt Voltage :"));
+		center.add(shuntVoltage);
+		center.add(new JLabel(" mV"));
+		
+		center.add(new JLabel("Shunt Current :"));
+		center.add(current);
+		center.add(new JLabel(" mA"));
+		
+		center.add(new JLabel("Power         :"));
+		center.add(power);
+		center.add(new JLabel(" mW"));
+		
+		display.add(north, BorderLayout.NORTH);
+		display.add(center, BorderLayout.CENTER);
 	}
 
 }

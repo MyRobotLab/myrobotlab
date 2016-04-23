@@ -24,16 +24,16 @@ public class AdafruitINA219 extends Service {
 	public final static Logger log = LoggerFactory.getLogger(_TemplateService.class);
 	transient I2CControl controller;
 	
-	public static final byte INA219_SHUNTVOLTAGE = 0x1;
-	public static final byte INA219_BUSVOLTAGE   = 0x2;
+	public static final byte INA219_SHUNTVOLTAGE = 0x01;
+	public static final byte INA219_BUSVOLTAGE   = 0x02;
 	
     // Default i2cAddress
 	public int busAddress = 1;
 	public int deviceAddress = 0x40;
 	public String type = "INA219";
 	
-	public double busVoltage;
-	public double shuntVoltage;
+	public int busVoltage;
+	public int shuntVoltage;
 	public double current;
 	public double power;
 	
@@ -52,15 +52,22 @@ public class AdafruitINA219 extends Service {
 		try {
 			//AdafruitINA219 adafruitINA219 = (AdafruitINA219) Runtime.start("AdafruitINA219", "AdafruitINA219");
 			//Runtime.start("gui", "GUIService");
-			double shuntVoltage;
-			byte[] readbuffer = {(byte)0xE0,(byte)0xC0}; 
+			int shuntVoltage;
+			byte[] readbuffer = {(byte)0x83,(byte)0x00}; 
 			// pga = 8
 			// shuntVoltage = (double)(((short)(readbuffer[0])<<8) + ((short)readbuffer[1] & 0xff)) * 0.00001;
 			// pga = 4
-			shuntVoltage = (double)(((short)(readbuffer[0])<<8) + ((short)readbuffer[1] & 0xff)) * 0.00001;
-			// pga = 2
-			shuntVoltage = (double)(((short)(readbuffer[0])<<8) + ((short)readbuffer[1] & 0xff)) * 0.00001;
+			shuntVoltage = (((int)(readbuffer[0])<<8) + ((int)readbuffer[1] & 0xff));
 			log.info(String.format("shuntVoltage %s", shuntVoltage));
+			
+			// Test bus voltage logic
+			double busVoltage;
+			byte []readbuffer2 = {(byte)0x1f,(byte)0x40}; 
+			log.info(String.format("getBusVoltage x%02X x%02X", readbuffer2[0], readbuffer2[1]));
+			busVoltage = (double)((int)((readbuffer2[0])<<8 & 0xffff) + ((int)readbuffer2[1] & 0xf8)) * 4;
+			int mathOverflow = readbuffer2[1] & 0x1;
+			log.info(String.format("busVoltage %s", busVoltage));
+			
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -112,14 +119,14 @@ public class AdafruitINA219 extends Service {
 		shuntResistance = ShuntResistance;
 	}
 	/**
-	 * This method reads and returns the power in Watts
+	 * This method reads and returns the power in milliWatts
 	 */
 	double getPower(){
 		power = getBusVoltage() * getCurrent();
 		return power;
 	}
 	/**
-	 * This method reads and returns the shunt current in Amperes
+	 * This method reads and returns the shunt current in milliAmperes
 	 */
 	double getCurrent(){
 		current = getShuntVoltage() / shuntResistance;
@@ -127,7 +134,7 @@ public class AdafruitINA219 extends Service {
 	}
 	
 	/**
-	 * This method reads and returns the shunt Voltage in Volts
+	 * This method reads and returns the shunt Voltage in milliVolts
 	 */
 	double getShuntVoltage(){
 		byte[] writebuffer = {INA219_SHUNTVOLTAGE}; 
@@ -135,21 +142,20 @@ public class AdafruitINA219 extends Service {
 		controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
 		controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
 		log.info(String.format("getShuntVoltage x%02X x%02X", readbuffer[0], readbuffer[1]));
-		shuntVoltage = (double)(((short)(readbuffer[0])<<8) + ((short)readbuffer[1] & 0xff)) * 0.00001;
+		shuntVoltage = (((int)(readbuffer[0])<<8) + ((int)readbuffer[1] & 0xff));
 		return shuntVoltage;
 	}
 	
 	/**
-	 * This method reads and returns the bus Voltage in Volts
+	 * This method reads and returns the bus Voltage in milliVolts
 	 */
 	double getBusVoltage(){
-		int scale = 250;
 		byte[] writebuffer = {INA219_BUSVOLTAGE}; 
 		byte[] readbuffer = {0x0,0x0}; 
 		controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
 		controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
 		log.info(String.format("getBusVoltage x%02X x%02X", readbuffer[0], readbuffer[1]));
-		busVoltage = (double)(((int)(readbuffer[0])<<5 & 0x7fff) + ((int)readbuffer[1]>>3 & 0x7f)) / scale;
+		busVoltage = (((int)(readbuffer[0])<<8 & 0xffff) + ((int)readbuffer[1] & 0xf8)) * 4;
 		return busVoltage;
 	}
 	
