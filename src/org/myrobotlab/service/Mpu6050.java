@@ -4010,11 +4010,11 @@ public class Mpu6050 extends Service{
 	        chunkSize = MPU6050_DMP_MEMORY_CHUNK_SIZE;
 
 	        // make sure we don't go past the data size
-	        if (i + chunkSize > dataSize)
+	        if (i + chunkSize > dataSize){
 				log.info(String.format("i + chunkSize > dataSize: i=%s, chunkSize=%s, dataSize=%s", i, chunkSize, dataSize));
-	        	{chunkSize = dataSize - i;
+	        	chunkSize = dataSize - i;
 				log.info(String.format("New chunkSize=%s",chunkSize));
-	        	}
+	        }
 
 	        // make sure this chunk doesn't go past the bank boundary (256 bytes)
 	        if (chunkSize > 256 - address){
