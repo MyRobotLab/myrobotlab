@@ -624,17 +624,26 @@ public class Mpu6050 extends Service{
 
 		try {
 
+			/*
 			Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "Mpu6050");
 			Runtime.start("gui", "GUIService");
+			*/ 
+			
 			/*
 			Arduino arduino = (Arduino) Runtime.start("Arduino","Arduino");
 			arduino.connect("COM4");
 			mpu6050.setController(arduino);
 			*/
+			
+			/*
 			RasPi raspi = (RasPi) Runtime.start("RasPi","RasPi");
 			mpu6050.setController(raspi);
 			mpu6050.dmpInitialize();
-
+			*/
+			byte [] buffer = new byte[] {(byte)0x8f, (byte) 0x80};
+		    int a = (((int)buffer[0]) << 8) | buffer[1] & 0xff;
+		    log.info(String.format("a value = %s", a));
+		    
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -2865,9 +2874,9 @@ public class Mpu6050 extends Service{
 	 */
 	void getRotation(int x, int y, int z) {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 6, buffer);
-	    x = (((int)buffer[0]) << 8) | buffer[1];
-	    y = (((int)buffer[2]) << 8) | buffer[3];
-	    z = (((int)buffer[4]) << 8) | buffer[5];
+	    x = (((int)buffer[0]) << 8) | buffer[1] &0xff;
+	    y = (((int)buffer[2]) << 8) | buffer[3] &0xff;
+	    z = (((int)buffer[4]) << 8) | buffer[5] &0xff;
 	}
 	/** Get X-axis gyroscope reading.
 	 * @return X-axis rotation measurement in 16-bit 2's complement format
@@ -2876,7 +2885,9 @@ public class Mpu6050 extends Service{
 	 */
 	int getRotationX() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    int a = (((int)buffer[0]) << 8) | buffer[1] & 0xff;
+	    log.info(String.format("getRotationX returns %s", a));
+	    return (((int)buffer[0]) << 8) | buffer[1] & 0xff;
 	}
 	/** Get Y-axis gyroscope reading.
 	 * @return Y-axis rotation measurement in 16-bit 2's complement format
@@ -2885,7 +2896,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getRotationY() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_YOUT_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (((int)buffer[0]) << 8) | buffer[1] & 0xff;
 	}
 	/** Get Z-axis gyroscope reading.
 	 * @return Z-axis rotation measurement in 16-bit 2's complement format
@@ -2894,7 +2905,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getRotationZ() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_ZOUT_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (((int)buffer[0]) << 8) | buffer[1] & 0xff;
 	}
 
 	// EXT_SENS_DATA_* registers
