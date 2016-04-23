@@ -4022,6 +4022,7 @@ public class Mpu6050 extends Service{
 	        	progBuffer[j] = data[i+j];
 	        }
 
+			log.info(String.format("writeMemoryBlock: Block start: %s, ChunkSize %s", chunkSize, i));
 	        I2CdevWriteBytes(deviceAddress, MPU6050_RA_MEM_R_W, chunkSize, progBuffer);
 
 	        // verify data if needed
@@ -4471,7 +4472,7 @@ public class Mpu6050 extends Service{
 	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(Mpu6050.class.getCanonicalName());
-		meta.addDescription("General MPU 6050");
+		meta.addDescription("General MPU-6050 acclerometer and gyro");
 		meta.addCategory("microcontroller", "sensor");
 		return meta;
 	}
