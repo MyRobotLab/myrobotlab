@@ -303,6 +303,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		log.info(String.format("servoPWMFreq %s hz", hz));
         if (controler == "Arduino"){
 		  arduino.sendMsg(AF_SET_PWM_FREQ, deviceAddress, hz, 0);
+		  pwmFreqSet = true;
         }
         else
         {
