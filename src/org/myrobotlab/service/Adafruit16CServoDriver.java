@@ -57,7 +57,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	transient public RasPi raspi = null;
 	// Used during development to switch between Arduino and RasPi specific code
 	// Not needed when both use I2CControl interface
-	public String controler = "RasPI"; 
+	public String controler = "Arduino"; 
 	
 	HashMap<String, Integer> servoMap = new HashMap<String, Integer>();
 
