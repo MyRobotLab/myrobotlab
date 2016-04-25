@@ -2885,13 +2885,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getRotationX() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 2, buffer);
-		log.info(String.format("buffer[0] x%02X, buffer[1] x%02X", buffer[0], buffer[1]));
-	    int a = (byte)buffer[0] << 8 | buffer[1] & 0xff;
-	    log.info(String.format("getRotationX returns %s", a));
-		byte [] buffer = new byte[] {(byte)0xff, (byte)0xcf};
-	    a = (byte)buffer[0] << 8 | buffer[1] & 0xff;
-	    log.info(String.format("0xffcf should be -49 is = %s", a));
-	    return ((byte)buffer[0] << 8) | buffer[1] & 0xff;
+	    return (byte)buffer[0] << 8| buffer[1] & 0xff;
 	}
 	/** Get Y-axis gyroscope reading.
 	 * @return Y-axis rotation measurement in 16-bit 2's complement format
@@ -2900,7 +2894,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getRotationY() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_YOUT_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1] & 0xff;
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 	/** Get Z-axis gyroscope reading.
 	 * @return Z-axis rotation measurement in 16-bit 2's complement format
@@ -2909,7 +2903,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getRotationZ() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_ZOUT_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1] & 0xff;
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 
 	// EXT_SENS_DATA_* registers
@@ -2990,7 +2984,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getExternalSensorByte(int position) {
 	    I2CdevReadByte(deviceAddress, MPU6050_RA_EXT_SENS_DATA_00 + position, bytebuffer);
-	    return bytebuffer;
+	    return bytebuffer & 0xff;
 	}
 	/** Read word (2 bytes) from external sensor data registers.
 	 * @param position Starting position (0-21)
@@ -2999,7 +2993,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getExternalSensorWord(int position) {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_EXT_SENS_DATA_00 + position, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (byte)buffer[0] << 8 | buffer[1];
 	}
 	/** Read double word (4 bytes) from external sensor data registers.
 	 * @param position Starting position (0-20)
@@ -3822,7 +3816,7 @@ public class Mpu6050 extends Service{
 
 	int getXAccelOffset() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_XA_OFFS_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 	void setXAccelOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_XA_OFFS_H, offset);
@@ -3832,7 +3826,7 @@ public class Mpu6050 extends Service{
 
 	int getYAccelOffset() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_YA_OFFS_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 	void setYAccelOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_YA_OFFS_H, offset);
@@ -3842,7 +3836,7 @@ public class Mpu6050 extends Service{
 
 	int getZAccelOffset() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ZA_OFFS_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 	void setZAccelOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_ZA_OFFS_H, offset);
@@ -3852,7 +3846,7 @@ public class Mpu6050 extends Service{
 
 	int getXGyroOffset() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_XG_OFFS_USRH, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 	void setXGyroOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_XG_OFFS_USRH, offset);
@@ -3862,7 +3856,7 @@ public class Mpu6050 extends Service{
 
 	int getYGyroOffset() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_YG_OFFS_USRH, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 	void setYGyroOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_YG_OFFS_USRH, offset);
@@ -3872,7 +3866,7 @@ public class Mpu6050 extends Service{
 
 	int getZGyroOffset() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ZG_OFFS_USRH, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 	void setZGyroOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_ZG_OFFS_USRH, offset);
