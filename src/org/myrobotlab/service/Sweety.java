@@ -476,7 +476,7 @@ public class Sweety extends Service {
 	public synchronized void saying(String text) { // Adapt mouth leds to words
 		log.info("Saying :" + text);
 		try {
-			mouth.speak(text);
+			mouth.speakBlocking(text);
 		} catch(Exception e){
 			Logging.logError(e);
 		}
