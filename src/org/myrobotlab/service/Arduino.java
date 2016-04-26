@@ -335,7 +335,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	transient int[] msg = new int[MAX_MSG_SIZE];
 
-	private int retryConnectMax = 3;
+	// parameters for testing the getVersion retry stuff.
+	// TODO: some way to do this more synchronously
+	// perhaps when we connect to the serial port, MRLComm can just have the version waiting?
+	public int retryConnectMax = 3;
+	public int retryConnectDelay = 1500;
 
 	// ---------------------------- ServoController End -----------------------
 	// ---------------------- Protocol Methods Begin ------------------
@@ -403,6 +407,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		// startService
 		boolean ret = serial.connect(port);
 
+		log.info("RETRUNED VALUE FROM CONNECT: {}", ret);
+		
 		Integer version = getVersion();
 
 		if (version == null || version != MRLCOMM_VERSION) {
@@ -541,8 +547,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				// versionQueue.clear();
 				sendMsg(GET_VERSION);
 				// mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
-				sleep(333);
+				sleep(retryConnectDelay);
 				++retry;
+				log.info("Get Version Attempt # {}", retry);
 			}
 		} catch (Exception e) {
 			Logging.logError(e);
