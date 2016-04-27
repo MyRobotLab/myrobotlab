@@ -88,7 +88,7 @@ angular.module('mrlapp.service.SerialGui', [])
             break;
         case 'onTX':
             ++$scope.txCount;
-            $scope.tx += msg.data[0];
+            $scope.tx += msg.data[0] + ' ';
             $scope.$apply();
             break;
         default:
@@ -112,7 +112,7 @@ angular.module('mrlapp.service.SerialGui', [])
     $scope.monitor = function() {
         // mrl.sendTo($scope.service.name, 'refresh');
         $log.info('monitor', $scope.monitorModel);
-        if (!$scope.monitorModel) {
+        if ($scope.monitorModel) {
             mrl.subscribe($scope.service.name, 'publishTX');
             mrl.subscribe($scope.service.name, 'publishRX');
         } else {
