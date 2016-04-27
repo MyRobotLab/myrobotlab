@@ -46,15 +46,18 @@ def work():
 
 codec = ArduinoMsgCodec()
 
-virtual = Runtime.start("virtual","VirtualDevice")
-uart = virtual.getUART()
-uart.setCodec("arduino")
+virtual = Runtime.start("virtual", "VirtualDevice")
+
 logic = virtual.getLogic()
 
-logic.subscribe(uart.getName(), "publishRX")
-logic.subscribe(uart.getName(), "onConnect")
-logic.subscribe(uart.getName(), "onPortNames")
-logic.subscribe(uart.getName(), "onDisconnect")
+# get uarts and subscribe to them
+
+for uartName in virtual.getUarts().keySet():
+  uart = virtual.getUart(uartName)
+  logic.subscribe(uart.getName(), "publishRX")
+  logic.subscribe(uart.getName(), "onConnect")
+  logic.subscribe(uart.getName(), "onPortNames")
+  logic.subscribe(uart.getName(), "onDisconnect")
 
 
 def onRX(b):
@@ -63,7 +66,7 @@ def onRX(b):
   command = codec.decode(b)
   if command != None and len(command) > 0 :
     print("decoded", command)
-    # rstrip trips the \n from the record
+    # rstrip strips the \n from the record
     command = command.rstrip()
     clist = command.split('/')
     

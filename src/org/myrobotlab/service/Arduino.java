@@ -45,13 +45,9 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.framework.MRLException;
@@ -421,6 +417,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	// FIXME - DEPRECATE !!! only need createVirtual(port)
 	// TODO - should be override .. ??
+	/*
 	public Serial connectVirtualUART() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException,
 			IllegalArgumentException, InvocationTargetException {
 		Serial uart = serial.createVirtualUART();
@@ -429,12 +426,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return uart;
 	}
 	
-	static public VirtualDevice createVirtual(String port) throws IOException{
-		// VirtualDevice virtual = (VirtualDevice) startPeer("virtual");
+	static public VirtualDevice createVirtual(String port) throws IOException{		
+		// Once device to rule them all ? - I think that would work.. 
 		VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
+		// this call would generate the instance of virtual device needed
 		virtual.createVirtualArduino(port);
 		return virtual;
 	}
+	*/
 
 	public ArrayList<Pin> createPinList() {
 		pinList = new ArrayList<Pin>();
@@ -549,7 +548,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				// mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
 				sleep(retryConnectDelay);
 				++retry;
-				log.info("Get Version Attempt # {}", retry);
+				log.info("getVersion attempt # {}", retry);
 			}
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -1671,13 +1670,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			// Runtime.start("serial", "Serial");
 			// Arduino.createVirtual("COM9");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			//arduino.connect("COM18");
 			
-			boolean done = true;
-			if (done){
-				return;
-			}
-			
-			arduino.connect("COM9");
+			/*
 			arduino.setLoadTimingEnabled(true);
 			long ts = System.currentTimeMillis();
 			
@@ -1692,8 +1687,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				arduino.sendMsg(ArduinoMsgCodec.GET_VERSION);
 				log.info("{}", i);
 			}
+			*/
 			
-			arduino.broadcastState();
+			//arduino.broadcastState();
 			
 			// arduino.createVirtual("COM77");
 			//arduino.createVirtual("COM18");

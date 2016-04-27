@@ -18,7 +18,7 @@ public class Adafruit16CServoDriverTest {
 	static Adafruit16CServoDriver driver = null;
 	static Arduino arduino = null;
 	static Serial serial = null;
-	static Serial virtual = null;
+	static VirtualDevice virtual = null;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -160,12 +160,13 @@ public class Adafruit16CServoDriverTest {
 	}
 
 	public final void test() throws IOException, FileComparisonException {
-		virtual = serial.createVirtualUART();
-
+		//virtual.create
+		virtual.createVirtualSerial("v1");
 		// FIXME - make virtual UART
 
-		virtual.connect("v1");
-		virtual.record("test/Adafruit16CServoDriver/test");
+		Serial uart = virtual.getUart("v1");
+		uart.connect("v1");
+		uart.record("test/Adafruit16CServoDriver/test");
 		driver.arduino.connect("v0");
 
 		driver.setServo(0, SERVOMIN);
@@ -206,7 +207,7 @@ public class Adafruit16CServoDriverTest {
 		// stop recording
 		driver.arduino.disconnect();
 		// cable.close();
-		virtual.stopRecording();
+		uart.stopRecording();
 
 		FileIO.compareFiles("test/Adafruit16CServoDriver/test.rx", "test/Adafruit16CServoDriver/control/test.rx");
 
