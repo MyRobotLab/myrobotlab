@@ -484,6 +484,9 @@ public class Sweety extends Service {
 		} catch(Exception e){
 			Logging.logError(e);
 		}
+	}
+	
+	public synchronized void onStartSpeaking(String text) {
 		sleep(15);
 		boolean ison = false;
 		String testword;
@@ -499,21 +502,24 @@ public class Sweety extends Service {
 
 					myShiftOut("00011100");
 					ison = true;
-					//sleep(delaytime);
+					sleep(delaytime);
 					myShiftOut("00000100");
 				} else if (s == '.') {
 					ison = false;
 					myShiftOut("00000000");
-					//sleep(delaytimestop);
+					sleep(delaytimestop);
 				} else {
 					ison = false;
-					//sleep(delaytimeletter); // # sleep half a second
+					sleep(delaytimeletter); //
 				}
 
 			}
-			myShiftOut("00000000");
-			//sleep(2);
+			
 		}
+	}
+	
+	public synchronized void onEndSpeaking(String utterance) {
+		myShiftOut("00000000");
 	}
 
 	public void setdelays(Integer d1, Integer d2, Integer d3) {
@@ -528,19 +534,6 @@ public class Sweety extends Service {
 		super.startService();
 
 		arduino = (Arduino) startPeer("arduino");
-		
-		// Share arduino service with others
-		
-		/* You shouldn't need these Beetle ! (GroG)
-		reserveRootAs("sweety.leftTracker.arduino", "sweety.arduino");
-		reserveRootAs("sweety.rightTracker.arduino", "sweety.arduino");
-		reserveRootAs("sweety.USfront.arduino", "sweety.arduino");
-		reserveRootAs("sweety.USfrontRight.arduino", "sweety.arduino");
-		reserveRootAs("sweety.USfrontLeft.arduino", "sweety.arduino");
-		reserveRootAs("sweety.USback.arduino", "sweety.arduino");
-		reserveRootAs("sweety.USbackRight.arduino", "sweety.arduino");
-		reserveRootAs("sweety.USbackLeft.arduino", "sweety.arduino");
-		*/
 		chatBot = (ProgramAB) startPeer("chatBot");
 		htmlFilter = (HtmlFilter) startPeer("htmlFilter");
 		mouth = (SpeechSynthesis) startPeer("mouth");
@@ -548,6 +541,8 @@ public class Sweety extends Service {
 		mouth.setVoice("Antoine");
 		ear = (WebkitSpeechRecognition) startPeer("ear");
 		webGui = (WebGui) startPeer("webGui");
+		subscribe(mouth.getName(), "publishStartSpeaking");
+		subscribe(mouth.getName(), "publishEndSpeaking");
 		
 	}
 
