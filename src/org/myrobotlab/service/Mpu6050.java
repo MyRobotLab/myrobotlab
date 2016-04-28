@@ -739,6 +739,7 @@ public class Mpu6050 extends Service{
 		gyroZ  = (byte)readbuffer[12]<<8 + readbuffer[13] & 0xFF;
 		// Convert temp to degrees Celcius
 		temperature = (temp / 340.0)  + 36.53;		
+		broadcastState();
 	}
 	
 	public int dmpInitialize(){
