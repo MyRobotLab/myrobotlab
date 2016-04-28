@@ -126,9 +126,9 @@ public class Sweety extends Service {
 	int leftWristNeutral = 85;
 	
 	// variables for speak / mouth sync
-	public int delaytime = 50;
-	public int delaytimestop = 200;
-	public int delaytimeletter = 50;
+	public int delaytime = 3;
+	public int delaytimestop = 5;
+	public int delaytimeletter = 1;
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -169,8 +169,12 @@ public class Sweety extends Service {
 	/**
 	 * Connect the arduino to a COM port . Exemple : connect("COM8")
 	 */
-	public boolean connect(String port) {
-		return arduino.connect(port);
+	public void connect(String port) {
+		arduino.connect(port);
+		sleep(2000);
+		arduino.pinMode(SHIFT, Arduino.OUTPUT);
+		arduino.pinMode(LATCH, Arduino.OUTPUT);
+		arduino.pinMode(DATA, Arduino.OUTPUT);
 	}
 
 	/**
@@ -476,27 +480,16 @@ public class Sweety extends Service {
 	public synchronized void saying(String text) { // Adapt mouth leds to words
 		log.info("Saying :" + text);
 		try {
-			mouth.speakBlocking(text);
+			mouth.speak(text);
 		} catch(Exception e){
 			Logging.logError(e);
 		}
-		sleep(50);
+		sleep(15);
 		boolean ison = false;
 		String testword;
 		String[] a = text.split(" ");
 		for (int w = 0; w < a.length; w++) {
-			// String word = ;
-			// log.info(String.valueOf(a[w].length()));
-
-			if (a[w].endsWith("es")) {
-				testword = a[w].substring(0, a[w].length() - 2);
-			} else if (a[w].endsWith("e")) {
-				testword = a[w].substring(0, a[w].length() - 1);
-				// log.info("e gone");
-			} else {
-				testword = a[w];
-			}
-
+			testword = a[w];
 			char[] c = testword.toCharArray();
 
 			for (int x = 0; x < c.length; x++) {
@@ -506,20 +499,20 @@ public class Sweety extends Service {
 
 					myShiftOut("00011100");
 					ison = true;
-					sleep(delaytime);
+					//sleep(delaytime);
 					myShiftOut("00000100");
 				} else if (s == '.') {
 					ison = false;
 					myShiftOut("00000000");
-					sleep(delaytimestop);
+					//sleep(delaytimestop);
 				} else {
 					ison = false;
-					sleep(delaytimeletter); // # sleep half a second
+					//sleep(delaytimeletter); // # sleep half a second
 				}
 
 			}
 			myShiftOut("00000000");
-			sleep(2);
+			//sleep(2);
 		}
 	}
 
@@ -535,7 +528,7 @@ public class Sweety extends Service {
 		super.startService();
 
 		arduino = (Arduino) startPeer("arduino");
-
+		
 		// Share arduino service with others
 		
 		/* You shouldn't need these Beetle ! (GroG)
@@ -548,7 +541,6 @@ public class Sweety extends Service {
 		reserveRootAs("sweety.USbackRight.arduino", "sweety.arduino");
 		reserveRootAs("sweety.USbackLeft.arduino", "sweety.arduino");
 		*/
-
 		chatBot = (ProgramAB) startPeer("chatBot");
 		htmlFilter = (HtmlFilter) startPeer("htmlFilter");
 		mouth = (SpeechSynthesis) startPeer("mouth");
