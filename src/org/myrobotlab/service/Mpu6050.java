@@ -15,7 +15,31 @@ import org.slf4j.Logger;
  * Therefore it captures the x, y, and z channel at the same time.
  * http://playground.arduino.cc/Main/MPU-6050
  *
+ * This is a port of the https://github.com/jrowberg/i2cdevlib/blob/master/Arduino/MPU6050/MPU6050.cpp
+ * from Arduino C/C++ to Java. 
+ * 
  */
+/** ============================================
+I2Cdev device library code is placed under the MIT license
+Copyright (c) 2012 Jeff Rowberg
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+===============================================
+*/
+ 
 public class Mpu6050 extends Service{
 
 	private static final long serialVersionUID = 1L;
@@ -411,13 +435,13 @@ public class Mpu6050 extends Service{
 	
 	public static final byte ACCEL_XOUT_H = 0x3B;
 	
-	public static int accelX;
-	public static int accelY;
-	public static int accelZ;
-	public static double temperature;
-	public static int gyroX;
-	public static int gyroY;
-	public static int gyroZ;
+	public int accelX;
+	public int accelY;
+	public int accelZ;
+	public double temperature;
+	public int gyroX;
+	public int gyroY;
+	public int gyroZ;
 	
 	// this block of memory gets written to the MPU on start-up, and it seems
 	// to be volatile memory, so it has to be done each time (it only takes ~1
@@ -704,17 +728,17 @@ public class Mpu6050 extends Service{
 		// Not sure if this will do the trick
 		// Request 14 bytes from the MPU-6050
 		byte[] readbuffer = new byte[14]; 
-		controller.i2cWrite(busAddress, deviceAddress, readbuffer, readbuffer.length);
+		controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
 		// Fill the variables with the result from the read operation
-		accelX = readbuffer[0]<<8 + readbuffer[1] & 0xFF;
-		accelY = readbuffer[2]<<8 + readbuffer[3] & 0xFF;
-		accelZ = readbuffer[4]<<8 + readbuffer[5] & 0xFF;
-		int temp = readbuffer[6]<<8 + readbuffer[7] & 0xFF;
-		gyroX  = readbuffer[8]<<8 + readbuffer[9] & 0xFF;
-		gyroY  = readbuffer[10]<<8 + readbuffer[11] & 0xFF;
-		gyroZ  = readbuffer[12]<<8 + readbuffer[13] & 0xFF;
+		accelX = (byte)readbuffer[0]<<8 + readbuffer[1] & 0xFF;
+		accelY = (byte)readbuffer[2]<<8 + readbuffer[3] & 0xFF;
+		accelZ = (byte)readbuffer[4]<<8 + readbuffer[5] & 0xFF;
+		int temp = (byte)readbuffer[6]<<8 + readbuffer[7] & 0xFF;
+		gyroX  = (byte)readbuffer[8]<<8 + readbuffer[9] & 0xFF;
+		gyroY  = (byte)readbuffer[10]<<8 + readbuffer[11] & 0xFF;
+		gyroZ  = (byte)readbuffer[12]<<8 + readbuffer[13] & 0xFF;
 		// Convert temp to degrees Celcius
-		temperature = temp / 340.0  + 36.53;		
+		temperature = (temp / 340.0)  + 36.53;		
 	}
 	
 	public int dmpInitialize(){
