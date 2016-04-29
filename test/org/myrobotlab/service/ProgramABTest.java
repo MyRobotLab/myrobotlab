@@ -9,16 +9,11 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB.Response;
 import org.slf4j.Logger;
 
-import com.sun.xml.internal.ws.policy.spi.AssertionCreationException;
-
-// GAH! why is this test failing under TravisCI..  ignore for now.
-// @Ignore
 public class ProgramABTest {
 	
 	private ProgramAB testService;
