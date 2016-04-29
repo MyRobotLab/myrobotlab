@@ -1,7 +1,6 @@
 package org.myrobotlab.framework;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.io.Serializable;
 
 /**
  * ServiceRegistration is a data object containing information regarding a
@@ -13,12 +12,10 @@ import com.google.gson.GsonBuilder;
  * to a differently named peer service.
  * 
  */
-public class ServiceReservation {
-	final static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").create();
-
+public class ServiceReservation implements Serializable {
+	private static final long serialVersionUID = 1L;
 	// FIXME MAKE KEY FINAL !
 	public final String key; // FIXME - remove completely - exists only in Index
-								// ???
 	public String actualName;
 	public String fullTypeName;
 	public String comment;

@@ -44,6 +44,8 @@ public class _TemplateService extends Service {
 		
 		ServiceType meta = new ServiceType(_TemplateService.class.getCanonicalName());
 		meta.addDescription("used as a general template");
+		// add dependency if necessary
+		// meta.addDependency("org.coolproject", "1.0.0");
 		meta.addCategory("general");		
 		return meta;		
 	}
