@@ -61,7 +61,7 @@ public class UltrasonicSensorTest {
 
 		catcher.subscribe(arduino,"onError");
 
-		uart = virtual.getUART();
+		uart = virtual.getUart(vport);
 		uart.setCodec("arduino");
 		Codec codec = uart.getRXCodec();
 		codec.setTimeout(1000);

@@ -141,7 +141,7 @@ public class Python extends Service {
 
 					} catch (Exception e) {
 						Logging.logError(e);
-						python.error(e.getMessage());
+						python.error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
 					}
 
 				}
