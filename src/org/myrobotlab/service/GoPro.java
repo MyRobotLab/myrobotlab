@@ -60,6 +60,17 @@ public class GoPro extends Service {
 		}
 	}
 	
+	public void shutterOn(){
+		if (cameraModel == "HERO4"){
+		sendHttpGet("http://10.5.5.9/gp/gpControl/command/shutter?p=1");
+		}
+		else {
+			System.out.println("Select your Camera Before");
+		}
+	}
+	
+	
+	
 	public void sendHttpGet(String url){
 		try {
 			String getResult = http.get(url);
