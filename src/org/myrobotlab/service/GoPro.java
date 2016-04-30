@@ -29,6 +29,7 @@ public class GoPro extends Service {
 
 			GoPro gopro = (GoPro) Runtime.start("gopro", "GoPro");
 			Runtime.start("gui", "GUIService");
+			Runtime.start("python","Python");
 
 		} catch (Exception e) {
 			Logging.logError(e);
