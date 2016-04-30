@@ -1276,11 +1276,15 @@ public class InMoov extends Service {
 		moveHand("right", 98, 37, 34, 67, 118, 166);
 	}
 	
+	public void loadGestures(){
+		loadGestures("gestures");
+	}
 	
-	public void loadGestures(String directory) {
+	public void loadGestures(String directory) {		
 		// TODO: iterate over each of the python files in the directory
 		// and load them into the python interpreter.
 		File dir = new File(directory);
+		dir.mkdirs();
 		if (!dir.isDirectory()) {
 			// TODO: maybe create the directory ?
 			log.warn("Gestures directory {} doest not exist.", directory);

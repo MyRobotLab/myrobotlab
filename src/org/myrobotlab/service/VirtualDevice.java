@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -14,6 +15,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.serial.Port;
+import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
@@ -32,70 +35,155 @@ public class VirtualDevice extends Service implements SerialDataListener {
 
 	public final static Logger log = LoggerFactory.getLogger(VirtualDevice.class);
 	
-	transient Serial uart;
+	// transient Serial uart;
+	transient HashMap<String, Serial> uarts = new HashMap<String, Serial>();
 	transient Python logic;	
 	
 	transient BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
 
 	public VirtualDevice(String n) {
 		super(n);
-		uart = (Serial)createPeer("uart");
+		// uart = (Serial)createPeer("uart");
 		logic = (Python)createPeer("logic");
 	}
 	
 	public void startService(){
 		super.startService();
-		uart = (Serial)startPeer("uart");
+		// uart = (Serial)startPeer("uart");
 		logic = (Python)startPeer("logic");
 		
-		uart.addByteListener(this);
+		//uart.addByteListener(this);
 	}
 	
 	public Python getLogic(){
 		return logic;
 	}
 	
-	public Serial getUART(){
-		return uart;
+	public Serial getUart(String portName){
+		return uarts.get(portName);
 	}
 	
-	public String createVirtualPort(String portName) throws IOException{
+	public HashMap<String, Serial> getUarts(){
+		return uarts;
+	}
+	
+	public void createVirtualSerial(String portName) throws IOException{
+		
 		// first create and connect on the virtual UART side
-		return uart.connectVirtualNullModem(portName);
+		connectVirtualUart(portName, null);
+		// return uart.connectVirtualNullModem(portName);
 	}
 	
-	public String createVirtualArduino(String portName) throws IOException {
-		createVirtualPort(portName);
+	public void createVirtualArduino(String portName) throws IOException {
+		createVirtualSerial(portName);
 		String newCode = FileIO.resourceToString("VirtualDevice/Arduino.py");
 		log.info(newCode);
 		logic.loadScript("Arduino.py", newCode);
 		logic.execAndWait();
-		return portName;
 	}
 	
-	/* WRONG - the "service" which handles this should
-	 * delegate the event - relaying is a unecessary activity
-	public String publishLoadedScript(String script){
-		return script;
+	/**
+	 * for a virtual UART to create a unopened port available for connection. it
+	 * will connect itself to one end of the twisted buffer pair
+	 * 
+	 * @param portName
+	 * @param myPort
+	 * @throws IOException
+	 */
+	/*
+	public String connectVirtualNullModem(String newPortName) throws IOException {
+
+		BlockingQueue<Integer> left = new LinkedBlockingQueue<Integer>();
+		BlockingQueue<Integer> right = new LinkedBlockingQueue<Integer>();
+
+		// create other end of null modem cable
+		// which MRL Services can connect to
+		Port newPort = new PortQueue(newPortName, right, left);
+		ports.put(newPortName, newPort);
+
+		// add our virtual port
+		String uartPortName = String.format("%s_uart", newPortName);
+		PortQueue vPort = new PortQueue(uartPortName, left, right);
+		connectPort(vPort, this);
+
+		info(String.format("created virtual null modem cable %s <--> %s", newPortName, uartPortName));
+		return newPortName;
 	}
 	*/
 
+	/**
+	 * connecting to a virtual UART allows a Serial service to interface with a
+	 * mocked hardware. To do this a Serial service creates 2 stream ports and
+	 * twists the virtual cable between them.
+	 * 
+	 * A virtual port is half a virtual pipe, and if unconnected - typically is
+	 * not very interesting...
+	 * 
+	 * @param listener
+	 * @return
+	 * @throws IOException
+	 */
+
+	public Serial connectVirtualUart(String myPort, String uartPort) throws IOException {
+
+		// get port names
+		if (myPort == null) {
+			myPort = getName();
+		}
+
+		if (uartPort == null) {
+			uartPort = String.format("%s_uart", myPort);
+		}
+
+		BlockingQueue<Integer> left = new LinkedBlockingQueue<Integer>();
+		BlockingQueue<Integer> right = new LinkedBlockingQueue<Integer>();
+
+		/*
+		 * if (listener != null) { listeners.put(listener.getName(), listener);
+		 * }
+		 */
+
+		;
+		// connectPort(vPort, this);
+
+		// create & connect virtual uart
+		Serial uart = (Serial) Runtime.start(uartPort, "Serial");
+		
+		// add our virtual port
+		PortQueue vPort = new PortQueue(myPort, left, right);
+		Serial.ports.put(myPort, vPort);
+		
+		PortQueue uPort = new PortQueue(uartPort, right, left);
+		uart.connectPort(uPort, uart);
+		
+		// add the uart connected to my port
+		uarts.put(myPort, uart);
+
+		log.info(String.format("connectToVirtualUart - creating uart %s <--> %s", myPort, uartPort));
+		return uart;
+	}
+	
+	public Serial createVirtualUart() throws IOException {
+		return connectVirtualUart(null, null);
+	}
+	
+	
 	@Override
 	public Integer onByte(Integer b) throws IOException {
-		// TODO Auto-generated method stub
+		log.info("{}.onByte {}", getName(), b);
 		return null;
 	}
 
 	@Override
 	public String onConnect(String portName) {
-		// TODO Auto-generated method stub
-		return null;
+		log.info("{}.onConnect {}", getName(), portName);
+		return portName;
 	}
 
 	@Override
 	public String onDisconnect(String portName) {
-		// TODO Auto-generated method stub
-		return null;
+		log.info("{}.onDisconnect {}", getName(), portName);
+		return portName;
 	}
 	
 	/**
