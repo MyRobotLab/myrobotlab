@@ -2820,9 +2820,9 @@ public class Mpu6050 extends Service{
 	 */
 	void getAcceleration(int x, int y, int z) {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_XOUT_H, 6, buffer);
-	    x = (((int)buffer[0]) << 8) | buffer[1];
-	    y = (((int)buffer[2]) << 8) | buffer[3];
-	    z = (((int)buffer[4]) << 8) | buffer[5];
+	    x = ((byte)buffer[0] << 8) | buffer[1] & 0xff;
+	    y = ((byte)buffer[2] << 8) | buffer[3] & 0xff;
+	    z = ((byte)buffer[4] << 8) | buffer[5] & 0xff;
 	}
 	/** Get X-axis accelerometer reading.
 	 * @return X-axis acceleration measurement in 16-bit 2's complement format
@@ -2831,7 +2831,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getAccelerationX() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_XOUT_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (byte)buffer[0] << 8 | buffer[1]  & 0xff;
 	}
 	/** Get Y-axis accelerometer reading.
 	 * @return Y-axis acceleration measurement in 16-bit 2's complement format
@@ -2840,7 +2840,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getAccelerationY() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_YOUT_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 	/** Get Z-axis accelerometer reading.
 	 * @return Z-axis acceleration measurement in 16-bit 2's complement format
@@ -2849,7 +2849,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getAccelerationZ() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_ZOUT_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 
 	// TEMP_OUT_* registers
@@ -2858,9 +2858,19 @@ public class Mpu6050 extends Service{
 	 * @return Temperature reading in 16-bit 2's complement format
 	 * @see MPU6050_RA_TEMP_OUT_H
 	 */
+	double getTemperatureCelcius() {
+	    double rawTemp = getTemperature(); 
+	    double tempCelcius = ( rawTemp / 340.0 ) + 36.53;
+	    return tempCelcius;
+	}
+	
+	/** Get current internal temperature.
+	 * @return Temperature reading in 16-bit 2's complement format
+	 * @see MPU6050_RA_TEMP_OUT_H
+	 */
 	int getTemperature() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_TEMP_OUT_H, 2, buffer);
-	    return (((int)buffer[0]) << 8) | buffer[1];
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 
 	// GYRO_*OUT_* registers
@@ -2899,9 +2909,9 @@ public class Mpu6050 extends Service{
 	 */
 	void getRotation(int x, int y, int z) {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 6, buffer);
-	    x = (((int)buffer[0]) << 8) | buffer[1] &0xff;
-	    y = (((int)buffer[2]) << 8) | buffer[3] &0xff;
-	    z = (((int)buffer[4]) << 8) | buffer[5] &0xff;
+	    x = (byte)buffer[0] << 8 | buffer[1] &0xff;
+	    y = (byte)buffer[2] << 8 | buffer[3] &0xff;
+	    z = (byte)buffer[4] << 8 | buffer[5] &0xff;
 	}
 	/** Get X-axis gyroscope reading.
 	 * @return X-axis rotation measurement in 16-bit 2's complement format
@@ -2910,7 +2920,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getRotationX() {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 2, buffer);
-	    return (byte)buffer[0] << 8| buffer[1] & 0xff;
+	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
 	}
 	/** Get Y-axis gyroscope reading.
 	 * @return Y-axis rotation measurement in 16-bit 2's complement format
@@ -3027,7 +3037,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getExternalSensorDWord(int position) {
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_EXT_SENS_DATA_00 + position, 4, buffer);
-	    return (((int)buffer[0]) << 24) | (((int)buffer[1]) << 16) | (((int)buffer[2]) << 8) | buffer[3];
+	    return (((byte)buffer[0]) << 24) | (((byte)buffer[1]) << 16) | (((byte)buffer[2]) << 8) | buffer[3] & 0xff;
 	}
 
 	// MOT_DETECT_STATUS register
