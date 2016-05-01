@@ -290,7 +290,7 @@ public class RasPi extends Service implements I2CControl {
 
 	@Override
 	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize,
-			byte[] readBuffer, int readSize) {
+		byte[] readBuffer, int readSize) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		Device devicedata = devices.get(key);
 		try {
