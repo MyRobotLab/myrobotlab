@@ -45,11 +45,12 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.HttpData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.HttpResponseListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -67,24 +68,7 @@ import org.slf4j.Logger;
  *         if a callback method is supplied or Non-Blocking method is called
  */
 public class HttpClient extends Service implements HttpDataListener, HttpResponseListener {
-	public class HttpData {
-		public byte[] data;
-		public String uri;
-		public Integer responseCode;
-		public String contentType;
 
-		public HttpData(String uri) {
-			this.uri = uri;
-		}
-		
-		public String toString(){
-			int length = 0;
-			if (data != null){
-				length = data.length;
-			}
-			return String.format("%d - content type %s, content length  %d", responseCode, contentType, length);
-		}
-	}
 	private static final long serialVersionUID = 1L;
 
 	// this httpclient should be thread safe -

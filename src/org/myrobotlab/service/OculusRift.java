@@ -3,7 +3,7 @@ package org.myrobotlab.service;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.headtracking.OculusHeadTracking;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.kinematics.Point;

@@ -6,8 +6,8 @@ import java.util.Date;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -191,13 +191,6 @@ public class Sprinkler extends Service {
 		
 	}
 	
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("webgui", "WebGui", "WebGui service");
-		peers.put("arduino", "Arduino", "Arduino service");
-		peers.put("cron", "Cron", "Cron service");
-		return peers;
-	}
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer

@@ -1,6 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.service.LeapMotion.LeapData;
+import org.myrobotlab.service.data.LeapData;
 
 public interface LeapDataListener {
 

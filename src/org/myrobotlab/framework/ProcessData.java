@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Agent;
 import org.myrobotlab.service.interfaces.Invoker;
 import org.slf4j.Logger;
 
@@ -16,7 +15,7 @@ import org.slf4j.Logger;
  *
  */
 public class ProcessData implements Serializable {
-	public final static Logger log = LoggerFactory.getLogger(Agent.class);
+	public final static Logger log = LoggerFactory.getLogger(ProcessData.class);
 
 	private static final long serialVersionUID = 1L;
 

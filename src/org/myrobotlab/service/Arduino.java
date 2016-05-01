@@ -52,7 +52,7 @@ import java.util.HashMap;
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -60,6 +60,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.CustomMsgListener;
+import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
@@ -572,7 +573,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorAttach(Motor motor) throws MRLException {
+	public void motorAttach(MotorControl motor) throws MRLException {
 		if (!motor.isLocal()) {
 			throw new MRLException("motor is not in the same MRL instance as the motor controller");
 		}
@@ -644,7 +645,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	// ================= new interface end =========================
 
 	@Override
-	public boolean motorDetach(Motor motor) {
+	public boolean motorDetach(MotorControl motor) {
 		/*
 		 * boolean ret = motors.containsKey(motorName); if (ret) {
 		 * motors.remove(motorName); } return ret;
@@ -653,7 +654,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorMove(Motor motor) {
+	public void motorMove(MotorControl motor) {
 
 		double powerOutput = motor.getPowerOutput();
 		String type = motor.getMotorType();
@@ -683,11 +684,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorMoveTo(Motor motor) {
+	public void motorMoveTo(MotorControl motor) {
 		// speed parameter?
 		// modulo - if < 1
 		// speed = 1 else
-		log.info("motorMoveTo targetPos {} powerLevel {}", motor.targetPos, motor.getPowerLevel());
+		log.info("motorMoveTo targetPos {} powerLevel {}", motor.getTargetPos(), motor.getPowerLevel());
 
 		int feedbackRate = 1;
 		// if pulser (with or without fake encoder
@@ -700,7 +701,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 			// FIXME !!! - this will have to send a Long for targetPos at some
 			// point !!!!
-			double target = Math.abs(motor.targetPos);
+			double target = Math.abs(motor.getTargetPos());
 
 			int b0 = (int) target & 0xff;
 			int b1 = ((int) target >> 8) & 0xff;
@@ -713,7 +714,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorStop(Motor motor) {
+	public void motorStop(MotorControl motor) {
 
 		if (motor.getType().equals(Motor.TYPE_PULSE_STEP)) {
 			// check motor direction
@@ -1604,7 +1605,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorReset(Motor motor) {
+	public void motorReset(MotorControl motor) {
 		// perhaps this should be in the motor control
 		// motor.reset();
 		// opportunity to reset variables on the controller

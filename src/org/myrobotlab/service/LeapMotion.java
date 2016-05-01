@@ -4,13 +4,14 @@ import java.io.IOException;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.leap.LeapMotionListener;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.LeapData;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.LeapDataPublisher;
 import org.myrobotlab.service.interfaces.PointPublisher;
@@ -22,27 +23,6 @@ import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Vector;
 
 public class LeapMotion extends Service implements LeapDataListener, LeapDataPublisher, PointPublisher {
-
-	public static class Hand {
-		public String type;
-		public int thumb;
-		public int index;
-		public int middle;
-		public int ring;
-		public int pinky;
-		public double palmNormalX;
-		public double palmNormalY;
-		public double palmNormalZ;
-		public double posX;
-		public double posY;
-		public double posZ;
-	}
-
-	public static class LeapData {
-		transient public Frame frame;
-		public Hand leftHand;
-		public Hand rightHand;
-	}
 
 	private static final long serialVersionUID = 1L;
 

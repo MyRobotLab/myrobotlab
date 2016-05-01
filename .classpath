@@ -161,7 +161,9 @@
 	<classpathentry kind="lib" path="/repo/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-core.jar"/>
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
-	<classpathentry kind="lib" path="/repo/org.json/20090211/json-20090211.jar"/>
+	<classpathentry kind="lib" path="/repo/org.node/0.1.1/nodyn-0.1.1-20141121.193443-283.jar"/>
+		<classpathentry kind="lib" path="/repo/org.json/20090211/json-20090211.jar"/>
 	<classpathentry kind="lib" path="/repo/org.alicebot.ab/0.0.1-kw/program-ab-kw-0.0.1.jar"/>
+	
 	<classpathentry kind="output" path="bin"/>
 </classpath>

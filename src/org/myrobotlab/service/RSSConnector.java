@@ -6,7 +6,7 @@ import java.net.URL;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 
 import it.sauronsoftware.feed4j.FeedIOException;
 import it.sauronsoftware.feed4j.FeedParser;
