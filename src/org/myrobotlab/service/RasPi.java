@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.i2c.I2CFactory;
 import org.myrobotlab.service.PID2.PIDData;
 import org.myrobotlab.service.interfaces.I2CControl;

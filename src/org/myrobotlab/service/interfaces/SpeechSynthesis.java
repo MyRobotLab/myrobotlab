@@ -3,7 +3,7 @@ package org.myrobotlab.service.interfaces;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import org.myrobotlab.audio.AudioData;
+import org.myrobotlab.service.data.AudioData;
 
 /**
  * SpeechSynthesis - This is the interface that services that provide text to speech should implement. 

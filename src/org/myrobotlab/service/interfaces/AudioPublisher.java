@@ -1,6 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.audio.AudioData;
+import org.myrobotlab.service.data.AudioData;
 
 public interface AudioPublisher {
 	

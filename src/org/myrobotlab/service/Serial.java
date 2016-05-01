@@ -20,7 +20,7 @@ import org.myrobotlab.codec.serial.Codec;
 import org.myrobotlab.codec.serial.CodecOutputStream;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -220,6 +220,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return retVal;
 	}
 
+	/*
+	 * DEPRECATED BECAUSE SIGNED BYTE ARRAYS ARE SILLY
 	public static byte[] intArrayToByteArray(int[] src) {
 
 		if (src == null) {
@@ -232,6 +234,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		}
 		return ret;
 	}
+	*/
 
 	/**
 	 * Static list of third party dependencies for this service.

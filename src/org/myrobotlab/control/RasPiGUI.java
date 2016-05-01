@@ -36,10 +36,9 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.memory.Node;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.RasPi;
-import org.myrobotlab.service.interfaces.MemoryDisplay;
 import org.slf4j.Logger;
 
-public class RasPiGUI extends ServiceGUI implements ActionListener, MemoryDisplay {
+public class RasPiGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(RasPiGUI.class.getCanonicalName());
@@ -62,28 +61,12 @@ public class RasPiGUI extends ServiceGUI implements ActionListener, MemoryDispla
 		myService.send(boundServiceName, "publishState");
 	}
 
-	@Override
-	public void clear() {
-		// TODO Auto-generated method stub
-
-	}
-
+	
 	@Override
 	public void detachGUI() {
 		unsubscribe("publishState", "getState", RasPi.class);
 	}
 
-	@Override
-	public void display(Node node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void displayStatus(Status status) {
-		// TODO Auto-generated method stub
-
-	}
 
 	public void getState(RasPi raspi) {
 		SwingUtilities.invokeLater(new Runnable() {

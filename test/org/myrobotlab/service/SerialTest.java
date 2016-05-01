@@ -171,13 +171,6 @@ public class SerialTest {
 
 	}
 
-
-	@Test
-	public final void testIntArrayToByteArray() {
-		//fail("Not yet implemented"); // TODO
-	}
-
-
 	@Test
 	public final void testAvailable() throws Exception, InterruptedException {
 		log.info("testAvailable");
@@ -344,7 +337,32 @@ public class SerialTest {
 
 	@Test
 	public final void testBytesToLong() {
-		//fail("Not yet implemented"); // TODO
+		int[] test;
+		long x;
+		
+		test = new int[]{0x00, 0x00, 0x00, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+		x = Serial.bytesToLong(test, 0, 4);
+		assertEquals(3, x);
+		
+		test = new int[]{0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00};
+		x = Serial.bytesToLong(test, 3, 3);
+		assertEquals(65280, x);
+		
+		test = new int[]{0x00, 0x00, 0x00, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+		x = Serial.bytesToLong(test, 0, 8);
+		assertEquals(12952339975L, x);
+		
+		test = new int[]{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+		x = Serial.bytesToLong(test, 0, 8);
+		assertEquals(-1, x);
+
+		/* WTH?
+		test = new int[]{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE};
+		x = Serial.bytesToLong(test, 0, 8);
+		assertEquals(-1, x);
+		*/
+
+		log.info("here");
 	}
 
 
@@ -800,6 +818,7 @@ public class SerialTest {
 
 			SerialTest.setUpBeforeClass();
 			SerialTest test = new SerialTest();
+			test.testBytesToLong();
 			test.testConnectString();
 			
 			JUnitCore junit = new JUnitCore();

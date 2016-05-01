@@ -9,7 +9,7 @@ import java.net.URLConnection;
 
 import org.bytedeco.javacv.IPCameraFrameGrabber;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;

@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -21,6 +21,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ArduinoShield;
+import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.slf4j.Logger;
 
@@ -326,31 +327,31 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 	}
 
 	@Override
-	public void motorAttach(Motor motor) throws MRLException {
+	public void motorAttach(MotorControl motor) throws MRLException {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public boolean motorDetach(Motor motor) {
+	public boolean motorDetach(MotorControl motor) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public void motorMove(Motor motor) {
+	public void motorMove(MotorControl motor) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void motorMoveTo(Motor motor) {
+	public void motorMoveTo(MotorControl motor) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void motorStop(Motor motor) {
+	public void motorStop(MotorControl motor) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -362,7 +363,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 	}
 
 	@Override
-	public void motorReset(Motor motor) {
+	public void motorReset(MotorControl motor) {
 		// TODO Auto-generated method stub
 		
 	}

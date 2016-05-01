@@ -26,33 +26,32 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.MRLException;
-import org.myrobotlab.service.Motor;
 
 public interface MotorController extends NameProvider, MicrocontrollerPeripheral {
 
 	
 	/**
-	 * typed motorAttach, typed for a reason - the Motor's attach should always be used
-	 * any of the following methods expect the Motor to be valid and filled with the
+	 * typed motorAttach, typed for a reason - the MotorControl's attach should always be used
+	 * any of the following methods expect the MotorControl to be valid and filled with the
 	 * appropriate data by the time it's "attached" to the motor controller, so....
 	 * the only parameter needed is the motor
 	 * 
 	 * @param motor
 	 * @throws MRLException
 	 */
-	public void motorAttach(Motor motor) throws Exception;
+	public void motorAttach(MotorControl motor) throws Exception;
 	
 	// ========  new interface end ===================
 
 	
 	/**
-	 * MotorDetach - detach the Motor from a specific pin on the controller
+	 * MotorDetach - detach the MotorControl from a specific pin on the controller
 	 * 
 	 * @param name
-	 *            - name of the Motor
+	 *            - name of the MotorControl
 	 * @return void
 	 */
-	public boolean motorDetach(Motor motor);
+	public boolean motorDetach(MotorControl motor);
 
 	/**
 	 * 
@@ -62,25 +61,25 @@ public interface MotorController extends NameProvider, MicrocontrollerPeripheral
 	 * 
 	 * @param name
 	 */
-	public void motorMove(Motor motor);
+	public void motorMove(MotorControl motor);
 
 	/**
-	 * moveTo - move the Motor a relative amount the amount can be negative or
+	 * moveTo - move the MotorControl a relative amount the amount can be negative or
 	 * positive an integer value is expected
 	 * 
 	 * @param name
-	 *            - name of the Motor
+	 *            - name of the MotorControl
 	 * @param position
-	 *            - positive or negative absolute amount to move the Motor
+	 *            - positive or negative absolute amount to move the MotorControl
 	 * @return void
 	 */
-	public void motorMoveTo(Motor motor);
+	public void motorMoveTo(MotorControl motor);
 
 	/**
 	 * stops the motor
 	 * @param motor
 	 */
-	public void motorStop(Motor motor);
+	public void motorStop(MotorControl motor);
 	
 	/**
 	 * method for resetting all the variables of a motor
@@ -89,7 +88,7 @@ public interface MotorController extends NameProvider, MicrocontrollerPeripheral
 	 * 
 	 * @param motor
 	 */
-	public void motorReset(Motor motor);
+	public void motorReset(MotorControl motor);
 	
 	/**
 	 * tests if this controller is connected & ready

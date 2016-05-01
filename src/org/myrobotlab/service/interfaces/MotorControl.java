@@ -27,7 +27,7 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.sensor.Encoder;
 
-public interface MotorControl {
+public interface MotorControl extends SensorDataSink {
 
 	/**
 	 * detaches the motor from the motor controller
@@ -145,5 +145,15 @@ public interface MotorControl {
 	public void attach(String controllerName) throws Exception;
 	
 	public void attach(MotorController uC) throws Exception;
+
+	public boolean isLocal();
+
+	public void broadcastState();
+
+	public String getMotorType();
+
+	public Integer getPin(String pinTypeDir);
+
+	public int getTargetPos();
 
 }

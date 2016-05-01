@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -31,11 +31,6 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 
 	public final static Logger log = LoggerFactory.getLogger(UltrasonicSensor.class);
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("controller", "Arduino", "controller");
-		return peers;
-	}
 
 	public final Set<String> types = new HashSet<String>(Arrays.asList("SR04"));
 	private int pings;
