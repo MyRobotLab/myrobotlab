@@ -730,13 +730,13 @@ public class Mpu6050 extends Service{
 		byte[] readbuffer = new byte[14]; 
 		controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
 		// Fill the variables with the result from the read operation
-		accelX = (byte)readbuffer[0]<<8 + readbuffer[1] & 0xFF;
-		accelY = (byte)readbuffer[2]<<8 + readbuffer[3] & 0xFF;
-		accelZ = (byte)readbuffer[4]<<8 + readbuffer[5] & 0xFF;
-		int temp = (byte)readbuffer[6]<<8 + readbuffer[7] & 0xFF;
-		gyroX  = (byte)readbuffer[8]<<8 + readbuffer[9] & 0xFF;
-		gyroY  = (byte)readbuffer[10]<<8 + readbuffer[11] & 0xFF;
-		gyroZ  = (byte)readbuffer[12]<<8 + readbuffer[13] & 0xFF;
+		accelX = (byte)readbuffer[0]<<8 | readbuffer[1] & 0xFF;
+		accelY = (byte)readbuffer[2]<<8 | readbuffer[3] & 0xFF;
+		accelZ = (byte)readbuffer[4]<<8 | readbuffer[5] & 0xFF;
+		int temp = (byte)readbuffer[6]<<8 | readbuffer[7] & 0xFF;
+		gyroX  = (byte)readbuffer[8]<<8 | readbuffer[9] & 0xFF;
+		gyroY  = (byte)readbuffer[10]<<8 | readbuffer[11] & 0xFF;
+		gyroZ  = (byte)readbuffer[12]<<8 | readbuffer[13] & 0xFF;
 		// Convert temp to degrees Celcius
 		temperature = (temp / 340.0)  + 36.53;		
 		broadcastState();
