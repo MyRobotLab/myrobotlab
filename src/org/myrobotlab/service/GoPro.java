@@ -20,6 +20,7 @@ public class GoPro extends Service {
 	public final static Logger log = LoggerFactory.getLogger(GoPro.class);
 	
 	String cameraModel;
+	String password;
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -51,6 +52,10 @@ public class GoPro extends Service {
 		cameraModel = model;
 	}
 	
+	public void setWifiPassword(String passwordWifi){
+		password = passwordWifi;
+	}
+	
 	public void turnCameraOff(){
 		if (cameraModel == "HERO4"){
 		sendHttpGet("http://10.5.5.9/gp/gpControl/command/system/sleep");
@@ -64,8 +69,11 @@ public class GoPro extends Service {
 		if (cameraModel == "HERO4"){
 		sendHttpGet("http://10.5.5.9/gp/gpControl/command/shutter?p=1");
 		}
+		else if (cameraModel == "HERO3" && password != null){
+	    sendHttpGet("http://10.5.5.9/bacpac/SH?t="+ password + "&p=%01");	
+		}
 		else {
-			System.out.println("Select your Camera Before");
+			System.out.println("Select your Camera model and insert your wifi password before");
 		}
 	}
 	
