@@ -44,14 +44,14 @@ public class Sprinkler extends Service {
 		super(n);
 	}
 
-	public boolean connect() {
+	public void connect() {
 		arduino = (Arduino)startPeer("arduino");
-		return arduino.connect(defaultPort);
+		arduino.connect(defaultPort);
 	}
 
-	public boolean connect(String port) throws IOException {
+	public void connect(String port) throws IOException {
 		defaultPort = port;
-		return arduino.connect(defaultPort);
+		arduino.connect(defaultPort);
 	}
 
 

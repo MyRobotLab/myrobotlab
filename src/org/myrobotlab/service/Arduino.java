@@ -386,6 +386,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		// if (pin.mode == INPUT) {sendMsg(PIN_MODE, OUTPUT)}
 		sendMsg(ANALOG_WRITE, address, value);
 	}
+	
+	public void connect(String port) {
+		serial.connect(port, Serial.BAUD_57600, 8, 1, 0);
+	}
+
 
 	/**
 	 * default params to connect to Arduino & MRLComm.ino
@@ -395,14 +400,16 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @throws IOException
 	 * @throws SerialDeviceException
 	 */
-	public boolean connect(String port) {
+	@Override
+	public void connect(String port, Integer rate, int databits, int stopbits, int parity) {
+	
 		// FIXME ! <<<-- REMOVE ,this) - patterns should be to add listener on
 		// startService
 		// return connect(port, 57600, 8, 1, 0); <- put this back ?
 		// return serial.connect(port); // <<<-- REMOVE ,this) - patterns
 		// should be to add listener on
 		// startService
-		boolean ret = serial.connect(port);
+		boolean ret = serial.connect(port, rate, databits, stopbits, parity);
 
 		log.info("RETRUNED VALUE FROM CONNECT: {}", ret);
 		
@@ -410,10 +417,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 		if (version == null || version != MRLCOMM_VERSION) {
 			error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
-			return false;
+			return;
 		}
-
-		return true;
 	}
 
 	// FIXME - DEPRECATE !!! only need createVirtual(port)
@@ -631,15 +636,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		// else if instance of Servo ... yattah yattah yattah
 	}
 
-	public boolean detach(String name) {
+	public void detach(String name) {
 		NameProvider si = Runtime.getService(name);
 
 		if (si instanceof Motor) {
-			return motorDetach((Motor) si);
+			motorDetach((Motor) si);
 		}
-
-		// else if instance of Servo ... yattah yattah yattah
-		return false;
 	}
 
 	// ================= new interface end =========================
@@ -1781,4 +1783,18 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			Logging.logError(e);
 		}
 	}
+
+	@Override
+	public void motorAttach(MotorControl motor, int portNumber) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void motorAttach(String name, int portNumber) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
 }

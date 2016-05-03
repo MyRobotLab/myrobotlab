@@ -226,8 +226,8 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 		return true;
 	}
 
-	public boolean connect(String port) {
-		return arduino.connect(port);
+	public void connect(String port, Integer rate, int databits, int stopbit, int parity) {		
+		arduino.connect(port, rate, databits, stopbit, parity);
 	}
 
 	/**
@@ -321,9 +321,8 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 	}
 
 	@Override
-	public boolean detach(String name) {
+	public void detach(String name) {
 		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
@@ -385,6 +384,23 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 		meta.addCategory("motor");		
 		meta.addPeer("arduino", "Arduino", "our Arduino");
 		return meta;		
+	}
+
+	@Override
+	public void motorAttach(String name, int portNumber) {
+		error("not currently implemented");
+	}
+
+	@Override
+	public void motorAttach(MotorControl motor, int portNumber) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void connect(String port) {
+		// TODO Auto-generated method stub
+		connect(port, Serial.BAUD_57600, 8, 1, 0);
 	}
 
 }

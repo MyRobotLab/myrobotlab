@@ -160,8 +160,8 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 		return arduino;
 	}
 
-	public boolean connect(String port) {
-		return arduino.connect(port);
+	public void connect(String port) {
+		arduino.connect(port);
 	}
 
 	public static void main(String[] args) {

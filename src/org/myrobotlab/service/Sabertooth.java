@@ -16,7 +16,6 @@ import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.SerialDataListener;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -33,15 +32,20 @@ import org.slf4j.Logger;
  */
 public class Sabertooth extends Service implements SerialDataListener, MotorController {
 
+	
 	class MotorData implements Serializable {
 		private static final long serialVersionUID = 1L;
 		transient MotorControl motor = null;
+		/*
 		int PWMPin = -1;
 		int dirPin0 = -1;
 		int dirPin1 = -1;
 		int motorPort = -1;
 		String port = null;
+		*/
+		int portNumber;
 	}
+	
 
 	private static final long serialVersionUID = 1L;
 
@@ -95,9 +99,8 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 		super(n);
 	}
 
-	public boolean connect(String port) {
-		// The valid baud rates are 2400, 9600, 19200 and 38400 baud
-		return serial.connect(port, 9600, 8, 1, 0);
+	public void connect(String port) {
+		connect(port, 9600, 8, 1, 0);
 	}
 
 	public void disconnect() {
@@ -139,7 +142,7 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	}
 
 	public Object[] getMotorData(String motorName) {
-		return new Object[] { motors.get(motorName).port };
+		return new Object[] { motors.get(motorName).portNumber };
 	}
 
 	public ArrayList<Pin> getPinList() {
@@ -166,23 +169,8 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	}
 
 	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin, Integer encoderPin) {
-		ServiceInterface sw = Runtime.getService(motorName);
-		if (!sw.isLocal()) {
-			error("motor is not in the same MRL instance as the motor controller");
-			return false;
-		}
-		ServiceInterface service = sw;
-		MotorControl motor = (MotorControl) service;
-
-		MotorData md = new MotorData();
-		md.motor = motor;
-		md.PWMPin = pwrPin;
-		md.dirPin0 = dirPin;
-		motors.put(motor.getName(), md);
-		// FIXME motor.setController(this);
-		// sendMsg(PINMODE, md.PWMPin, OUTPUT);
-		// sendMsg(PINMODE, md.dirPin0, OUTPUT);
-		return true;
+		error("motorAttach with pins not supported");
+		return false;
 	}
 
 	// FIXME - this seems very Arduino specific?
@@ -197,33 +185,7 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	}
 
 	public void motorMove(String name) {
-		// a bit weird indirection - but this would support
-		// adafruit to be attached to motors defined outside of
-		// initialization
-		MotorData d = motors.get(name);
-		MotorControl mc = (MotorControl) Runtime.getService(name);
-
-		double pwr = mc.getPowerLevel();
-		int power = (int) (pwr * 127);
-
-		// FIXME - optimization would be to have a "moveSendPacket" command
-		// which took
-		// data from MotorData
-		if (d.port.equals("m1")) {
-			if (pwr >= 0) {
-				driveForwardMotor1(power);
-			} else {
-				driveBackwardsMotor1(Math.abs(power));
-			}
-		} else if (d.port.equals("m2")) {
-			if (pwr >= 0) {
-				driveForwardMotor1(power);
-			} else {
-				driveBackwardsMotor1(Math.abs(power));
-			}
-		} else {
-			error("invalid port %s", d.port);
-		}
+		motorMove((MotorControl)Runtime.getService(name));
 	}
 
 	public void motorMoveTo(String name, Integer position) {
@@ -322,7 +284,7 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 		case 38400:
 			value = 4;
 			break;
-		case 115200:
+		case 115200: // not valid ???
 			value = 5;
 			break;
 		}
@@ -347,9 +309,8 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	}
 
 	@Override
-	public boolean detach(String name) {
+	public void detach(String name) {
 		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
@@ -366,7 +327,34 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 
 	@Override
 	public void motorMove(MotorControl motor) {
-		// TODO Auto-generated method stub
+		// a bit weird indirection - but this would support
+		// adafruit to be attached to motors defined outside of
+		// initialization
+		String name = motor.getName();
+		MotorData d = motors.get(name);
+		//MotorControl mc = (MotorControl) Runtime.getService(name);
+
+		double pwr = motor.getPowerLevel();
+		int power = (int) (pwr * 127);
+
+		// FIXME - optimization would be to have a "moveSendPacket" command
+		// which took
+		// data from MotorData
+		if (d.portNumber == 1) {
+			if (pwr >= 0) {
+				driveForwardMotor1(power);
+			} else {
+				driveBackwardsMotor1(Math.abs(power));
+			}
+		} else if (d.portNumber == 2) {
+			if (pwr >= 0) {
+				driveForwardMotor2(power);
+			} else {
+				driveBackwardsMotor2(Math.abs(power));
+			}
+		} else {
+			error("invalid port number %d", d.portNumber);
+		}
 
 	}
 
@@ -378,8 +366,7 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 
 	@Override
 	public void motorStop(MotorControl motor) {
-		// TODO Auto-generated method stub
-
+		motor.move(0);
 	}
 
 	@Override
@@ -411,6 +398,19 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 
 		return meta;
 	}
+	
+	@Override
+	public void motorAttach(String name, int portNumber){
+		motorAttach((MotorControl)Runtime.getService(name), portNumber);
+	}
+
+	public void motorAttach(MotorControl motor, int portNumber) {
+		MotorData data = new MotorData();
+		data.motor = motor;
+		data.portNumber = portNumber;
+		motors.put(motor.getName(), data);
+		motor.setController(this);
+	}
 
 	///////////// start new methods /////////////////
 
@@ -423,16 +423,40 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 			String port = "COM19";
 
 			// ---- Virtual Begin -----
-			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-			virtual.createVirtualSerial(port);
+			// VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
+			// virtual.createVirtualSerial(port);
 			// virtual.getUART(); uart.setTimeout(300);
 			// ---- Virtual End -----
 
+			Runtime.start("webgui", "WebGui");
 			Runtime.start("python", "Python");
+			Joystick joystick = (Joystick)Runtime.start("joystick", "Joystick");
+			
 
 			Sabertooth saber = (Sabertooth) Runtime.start("saber", "Sabertooth");
-			boolean connected = saber.connect(port);
-			log.info(connected + "");
+			saber.connect(port);
+
+			MotorController mc = (MotorController)saber;
+			Motor motor01 = (Motor) Runtime.start("motor01", "Motor");
+			Motor motor02 = (Motor) Runtime.start("motor02", "Motor");
+			
+			
+			
+			mc.motorAttach(motor01, 1);
+			mc.motorAttach(motor02, 1);
+			
+			motor01.move(0);
+			motor01.move(0.15);
+			motor01.move(0.30);
+			motor01.move(0.40);
+
+			motor01.stop();
+			
+			motor01.move(0.15);
+			motor01.stopAndLock();
+			motor01.move(0.40);
+			motor01.unlock();
+			
 			saber.driveForwardMotor1(20);
 			saber.driveForwardMotor1(30);
 			saber.driveForwardMotor1(60);
@@ -462,5 +486,11 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 			Logging.logError(e);
 		}
 	}
+
+	@Override
+	public void connect(String port, Integer rate, int databits, int stopbits, int parity) {
+		serial.connect(port, rate, databits, stopbits, parity);
+	}
+
 
 }
