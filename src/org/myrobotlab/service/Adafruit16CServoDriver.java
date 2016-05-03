@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -57,7 +57,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	transient public RasPi raspi = null;
 	// Used during development to switch between Arduino and RasPi specific code
 	// Not needed when both use I2CControl interface
-	public String controler = "RasPI"; 
+	public String controler = "Arduino"; 
 	
 	HashMap<String, Integer> servoMap = new HashMap<String, Integer>();
 
@@ -134,7 +134,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		super(n);
 		// Only one should be created
 		arduino = (Arduino) createPeer("arduino");
-		raspi   = (RasPi) createPeer("raspi");
+		// raspi   = (RasPi) createPeer("raspi");
 	}
 
 	// ----------- AFMotor API End --------------
@@ -253,8 +253,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
         }
 	}
 
-	public boolean connect(String comPort) {
-		return arduino.connect(comPort);
+	public void connect(String comPort) {
+		arduino.connect(comPort);
 	}
 
 	public Arduino getArduino() {
@@ -303,6 +303,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		log.info(String.format("servoPWMFreq %s hz", hz));
         if (controler == "Arduino"){
 		  arduino.sendMsg(AF_SET_PWM_FREQ, deviceAddress, hz, 0);
+		  pwmFreqSet = true;
         }
         else
         {
@@ -359,8 +360,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		super.startService();
 		attach(arduino);
 		arduino.startService();
-		attach(raspi);
-		raspi.startService();
+		// attach(raspi);
+		// raspi.startService();
 		// TODO - request myArduino - re connect
 	}
 
@@ -371,9 +372,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	}
 
 	@Override
-	public boolean detach(String name) {
+	public void detach(String name) {
 		// TODO Auto-generated method stub
-		return false;
 	}
 	
 	public synchronized boolean servoAttach(Servo servo, Integer pinNumber) {
@@ -384,9 +384,12 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 
 		servo.setController(this);
 		servoNameToPinMap.put(servo.getName(), pinNumber);
-		
-		raspi.createDevice(busAddress, deviceAddress, type);
-		begin();
+        if (controler == "Arduino"){	
+    		begin();
+        }
+        else {
+        	raspi.createDevice(busAddress, deviceAddress, type);
+        }
 		
 		return true;
 }

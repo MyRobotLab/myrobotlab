@@ -14,9 +14,9 @@ import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
-import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.Level;

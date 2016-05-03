@@ -11,7 +11,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 import org.slf4j.Logger;

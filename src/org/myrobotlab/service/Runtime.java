@@ -40,10 +40,10 @@ import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
-import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
@@ -373,50 +373,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		return null;
 	}
 
-	public static String dump() {
-		StringBuffer sb = new StringBuffer().append("\ninstances:\n");
-		Map<URI, ServiceEnvironment> sorted = environments;
-		Iterator<URI> hkeys = sorted.keySet().iterator();
-		URI url;
-		ServiceEnvironment se;
-		Iterator<String> it2;
-		String serviceName;
-		ServiceInterface sw;
-		while (hkeys.hasNext()) {
-			url = hkeys.next();
-			se = environments.get(url);
-			sb.append("\t").append(url);
-
-			// good check :)
-			/*
-			 * if ((se.accessURL != url) && (!url.equals(se.accessURL))) {
-			 * sb.append(" key not equal to data ").append(se.accessURL); }
-			 * sb.append("\n");
-			 */
-
-			// Service Environment
-			Map<String, ServiceInterface> sorted2 = new TreeMap<String, ServiceInterface>(se.serviceDirectory);
-			it2 = sorted2.keySet().iterator();
-			while (it2.hasNext()) {
-				serviceName = it2.next();
-				sw = sorted2.get(serviceName);
-				sb.append("\t\t").append(serviceName);
-				sb.append("\n");
-			}
-		}
-
-		sb.append("\nregistry:");
-
-		Map<String, ServiceInterface> sorted3 = new TreeMap<String, ServiceInterface>(registry);
-		Iterator<String> rkeys = sorted3.keySet().iterator();
-		while (rkeys.hasNext()) {
-			serviceName = rkeys.next();
-			sw = sorted3.get(serviceName);
-			sb.append("\n").append(serviceName).append(" ").append(sw.getInstanceId());
-		}
-
-		return sb.toString();
-	}
 
 	/**
 	 * a method which returns a xml representation of all the listeners and
@@ -465,13 +421,54 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		return sb.toString();
 	}
 
-	public static void dumpToFile() {
+	public static String dump() {
 		try {
-			FileIO.toFile(String.format("serviceRegistry.%s.txt", runtime.getName()), Runtime.dump());
+			
+			StringBuffer sb = new StringBuffer().append("\ninstances:\n");
+			Map<URI, ServiceEnvironment> sorted = environments;
+			Iterator<URI> hkeys = sorted.keySet().iterator();
+			URI url;
+			ServiceEnvironment se;
+			Iterator<String> it2;
+			String serviceName;
+			ServiceInterface sw;
+			while (hkeys.hasNext()) {
+				url = hkeys.next();
+				se = environments.get(url);
+				sb.append("\t").append(url);
+
+				// Service Environment
+				Map<String, ServiceInterface> sorted2 = new TreeMap<String, ServiceInterface>(se.serviceDirectory);
+				it2 = sorted2.keySet().iterator();
+				while (it2.hasNext()) {
+					serviceName = it2.next();
+					sw = sorted2.get(serviceName);
+					sb.append("\t\t").append(serviceName);
+					sb.append("\n");
+				}
+			}
+
+			sb.append("\nregistry:");
+
+			Map<String, ServiceInterface> sorted3 = new TreeMap<String, ServiceInterface>(registry);
+			Iterator<String> rkeys = sorted3.keySet().iterator();
+			while (rkeys.hasNext()) {
+				serviceName = rkeys.next();
+				sw = sorted3.get(serviceName);
+				sb.append("\n").append(serviceName).append(" ").append(sw.getInstanceId());
+			}
+
+			sb.toString();
+						
+			FileIO.toFile(String.format("serviceRegistry.%s.txt", runtime.getName()), sb.toString());
 			FileIO.toFile(String.format("notifyEntries.%s.xml", runtime.getName()), Runtime.dumpNotifyEntries());
+			
+			return sb.toString();
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+		
+		return null;
 	}
 
 	/**

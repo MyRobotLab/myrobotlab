@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.logging.LoggerFactory;

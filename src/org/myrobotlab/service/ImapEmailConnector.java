@@ -24,7 +24,7 @@ import java.text.ParseException;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 
 /**
  * 

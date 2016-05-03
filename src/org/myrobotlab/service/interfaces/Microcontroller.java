@@ -20,7 +20,7 @@ public interface Microcontroller {
 	public void compile(String sketchName, String sketch);
 
 	// serial port
-	public boolean connect(String port);
+	public void connect(String port);
 
 	// filtering
 	public void digitalDebounceOn(int delay);

@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.LeapMotion;
-import org.myrobotlab.service.LeapMotion.LeapData;
+import org.myrobotlab.service.data.LeapData;
+import org.myrobotlab.service.data.LeapHand;
 import org.slf4j.Logger;
 
-import com.leapmotion.leap.Arm;
 import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Finger;
 import com.leapmotion.leap.Gesture;
@@ -37,8 +37,8 @@ public class LeapMotionListener extends Listener {
 		return angle;
 	}
 
-	private LeapMotion.Hand mapLeapHandData(Hand lh) {
-		LeapMotion.Hand mrlHand = new LeapMotion.Hand();
+	private LeapHand mapLeapHandData(Hand lh) {
+		LeapHand mrlHand = new LeapHand();
 		// process the normal
 		Vector palmNormal = lh.palmNormal();
 		mrlHand.palmNormalX = palmNormal.getX();
@@ -104,8 +104,8 @@ public class LeapMotionListener extends Listener {
 		Hand rh = controller.frame().hands().rightmost();
 		// map the data to the MRL Hand pojo
 		
-		LeapMotion.Hand mrlLHand = null;
-		LeapMotion.Hand mrlRHand = null;
+		LeapHand mrlLHand = null;
+		LeapHand mrlRHand = null;
 		if (lh.isLeft()) {
 			mrlLHand = mapLeapHandData(lh);
 		}

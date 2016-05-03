@@ -16,7 +16,7 @@ import org.jivesoftware.smack.roster.Roster;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
 import org.myrobotlab.logging.Level;

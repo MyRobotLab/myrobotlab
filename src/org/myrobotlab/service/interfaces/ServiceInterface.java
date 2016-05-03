@@ -11,7 +11,7 @@ import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
-public interface ServiceInterface extends Messaging, LoggingSink, NameProvider {
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameProvider, MessageSubscriber, MessageSender {
 
 
 	/**

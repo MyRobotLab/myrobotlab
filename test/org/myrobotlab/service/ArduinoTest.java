@@ -54,9 +54,6 @@ public class ArduinoTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
 		log.info("setUpBeforeClass");
 
 		// Runtime.start("gui", "GUIService");
@@ -71,7 +68,7 @@ public class ArduinoTest {
 
 		catcher.subscribe(arduino.getName(), "publishError");
 
-		uart = virtual.getUART();
+		uart = virtual.getUart(vport);
 		uart.setCodec("arduino");
 		Codec codec = uart.getRXCodec();
 		codec.setTimeout(1000);
@@ -672,24 +669,25 @@ public class ArduinoTest {
 		try {
 
 			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-			JUnitCore junit = new JUnitCore();
-			Result result = junit.run(ArduinoTest.class);
+			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			ArduinoTest.setUpBeforeClass();
 			ArduinoTest test = new ArduinoTest();
-
+			test.testConnect();
+			
+			JUnitCore junit = new JUnitCore();
+			Result result = junit.run(ArduinoTest.class);
+			
 			// WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
 			// ServiceInterface gui = Runtime.start("gui", "GUIService");
 
-			Runtime.dumpToFile();
+			Runtime.dump();
 
 			log.info("here");
 			// serial.removeByteListener(gui.getName());
 			// uart.removeByteListener(gui.getName());
 
-			Runtime.dumpToFile();
+			Runtime.dump();
 
 		} catch (Exception e) {
 			Logging.logError(e);

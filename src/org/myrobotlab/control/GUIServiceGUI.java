@@ -104,7 +104,7 @@ public class GUIServiceGUI extends ServiceGUI {
 				}
 				rebuildGraph();
 			} else if (b == dumpButton) {
-				Runtime.dumpToFile();
+				Runtime.dump();
 			}
 		}
 	}

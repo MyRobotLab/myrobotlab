@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -671,26 +671,27 @@ public class Tracking extends Service {
 	}
 
 
-	public boolean connect(String port) throws IOException {
+	public void connect(String port) throws IOException {
 
 		if (getX().getPin() == null){
 			error("x pin not set");
-			return false;
+			return;
 		}
 		if (getY().getPin() == null){
 			error("y pin not set");
-			return false;
+			return;
 		}
-		return connect(port, getX().getPin(), getY().getPin(), getOpenCV().getCameraIndex());
+		
+		connect(port, getX().getPin(), getY().getPin(), getOpenCV().getCameraIndex());
 	}
 	
-	public boolean connect(String port, int xPin, int yPin) throws IOException {
-		return connect(port, xPin, yPin, 0);
+	public void connect(String port, int xPin, int yPin) throws IOException {
+		connect(port, xPin, yPin, 0);
 	}
 
 
-	public boolean connect(String port, int xPin, int yPin, int cameraIndex) {
-		boolean ret = arduino.connect(port);
+	public void connect(String port, int xPin, int yPin, int cameraIndex) {
+		arduino.connect(port);
 		
 		x.setPin(xPin);
 		y.setPin(yPin);
@@ -703,9 +704,7 @@ public class Tracking extends Service {
 		sleep(300);
 		y.moveTo(y.getRest() + 2);
 		sleep(300);
-		rest();
-		
-		return ret;		
+		rest();	
 	}
 	
 	public static void main(String[] args) {
