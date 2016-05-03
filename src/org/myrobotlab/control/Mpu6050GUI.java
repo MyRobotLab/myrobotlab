@@ -89,13 +89,13 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 	}
 
 	public void getState(Mpu6050 mpu6050) {
-		accelX.setText(String.format("%s",mpu6050.accelX));
-		accelY.setText(String.format("%s",mpu6050.accelY));
-		accelZ.setText(String.format("%s",mpu6050.accelZ));
-		temperature.setText(String.format("%s",mpu6050.temperature));
-		gyroX.setText(String.format("%s",mpu6050.gyroX));
-		gyroY.setText(String.format("%s",mpu6050.gyroY));
-		gyroZ.setText(String.format("%s",mpu6050.gyroZ));
+		accelX.setText(String.format("%.3f",mpu6050.accelGX));
+		accelY.setText(String.format("%.3f",mpu6050.accelGY));
+		accelZ.setText(String.format("%.3f",mpu6050.accelGZ));
+		temperature.setText(String.format("%.3f",mpu6050.temperature));
+		gyroX.setText(String.format("%.3f",mpu6050.gyroDegreeX));
+		gyroY.setText(String.format("%.3f",mpu6050.gyroDegreeY));
+		gyroZ.setText(String.format("%.3f",mpu6050.gyroDegreeZ));
 		
 	}
 	
@@ -121,7 +121,7 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1;
 		c.gridy = 1;
-		display.add(new JLabel("AccelX :"),c);
+		display.add(new JLabel("AccelX  :"),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
@@ -131,12 +131,12 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 3;
 		c.gridy = 1;
-		display.add(new JLabel(" uom? "),c);
+		display.add(new JLabel(" G "),c);
 
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1;
 		c.gridy = 2;
-		display.add(new JLabel("AccelY :"),c);
+		display.add(new JLabel("AccelY  :"),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
@@ -146,12 +146,12 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 3;
 		c.gridy = 2;
-		display.add(new JLabel(" uom? "),c);
+		display.add(new JLabel(" G "),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1;
 		c.gridy = 3;
-		display.add(new JLabel("AccelZ :"),c);
+		display.add(new JLabel("AccelZ  :"),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
@@ -161,12 +161,12 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 3;
 		c.gridy = 3;
-		display.add(new JLabel(" uom ? "),c);	
+		display.add(new JLabel(" G "),c);	
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1;
 		c.gridy = 4;
-		display.add(new JLabel("Temperature :"),c);
+		display.add(new JLabel("Temperature : "),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
@@ -181,7 +181,7 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1;
 		c.gridy = 5;
-		display.add(new JLabel("GyroX :"),c);
+		display.add(new JLabel("GyroX  :"),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
@@ -191,13 +191,13 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 3;
 		c.gridy = 5;
-		display.add(new JLabel(" degrees"),c);
+		display.add(new JLabel(" degrees/s"),c);
 		
 
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1;
 		c.gridy = 6;
-		display.add(new JLabel("GyroY :"),c);
+		display.add(new JLabel("GyroY  :"),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
@@ -207,12 +207,12 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 3;
 		c.gridy = 6;
-		display.add(new JLabel(" degrees"),c);
+		display.add(new JLabel(" degrees/s"),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1;
 		c.gridy = 7;
-		display.add(new JLabel("GyroZ :"),c);
+		display.add(new JLabel("GyroZ  :"),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
@@ -222,7 +222,7 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 3;
 		c.gridy = 7;
-		display.add(new JLabel(" degrees"),c);
+		display.add(new JLabel(" degrees/s"),c);
 		
 		display.repaint();
 	}
