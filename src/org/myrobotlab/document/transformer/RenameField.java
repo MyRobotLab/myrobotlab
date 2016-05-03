@@ -29,7 +29,9 @@ public class RenameField extends AbstractStage {
 		if (!doc.hasField(oldName)) {
 			return null;
 		}
-		doc.addToField(newName, doc.getField(oldName));
+		for (Object o : doc.getField(oldName)) {
+			doc.addToField(newName, o);
+		}
 		doc.removeField(oldName);
 		return null;
 	}
