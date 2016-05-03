@@ -33,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
@@ -48,8 +49,8 @@ import org.myrobotlab.control.widget.JoystickButtonsPanel;
 import org.myrobotlab.control.widget.JoystickCompassPanel;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Joystick;
-import org.myrobotlab.service.Joystick.Input;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.data.JoystickData;
 
 public class JoystickGUI extends ServiceGUI implements ActionListener {
 
@@ -97,7 +98,7 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 	@Override
 	public void attachGUI() {
 		subscribe("publishState", "getState", Joystick.class);
-		subscribe("getControllers", "getControllers", HashMap.class);
+		subscribe("getControllers", "getControllers", Map.class);
 
 		subscribe("publishX", "publishX", Float.class);
 		subscribe("publishY", "publishY", Float.class);
@@ -133,7 +134,7 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		subscribe("publish12", "publish12", Float.class);
 		subscribe("publish13", "publish13", Float.class);
 
-		subscribe("getComponents", "getComponents", HashMap.class);
+		subscribe("getComponents", "getComponents", Map.class);
 		subscribe("publishButton", "onButton", Float.class);
 
 		send("publishState");
@@ -204,7 +205,7 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 
 	}
 
-	public void getControllers(final HashMap<String, Integer> contrls) {
+	public void getControllers(final Map<String, Integer> contrls) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -299,7 +300,7 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		myJoy = (Joystick) Runtime.getService(boundServiceName);
 	}
 
-	public void onInput(final Input input) {
+	public void onInput(final JoystickData input) {
 		log.info(String.format("onButton %s", input));
 		if (input.value == null) {
 			outputValues.get(input.id).setText("null");

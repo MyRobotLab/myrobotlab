@@ -221,6 +221,7 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 	@Override
 	// not relative ! - see moveStep
 	public void move(double power) {
+		log.info(String.format("%s.move(%f)", getName(), power));
 		powerLevel = power;
 		if (locked) {
 			log.warn("motor locked");
@@ -442,6 +443,41 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 	 * this.type = type; }
 	 */
 
+
+	@Override
+	public void pulse() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setEncoder(Encoder encoder) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Motor.class.getCanonicalName());
+		meta.addDescription("General Motor Service");
+		meta.addCategory("motor");
+
+		return meta;
+	}
+
+	@Override
+	public int getTargetPos() {
+		return targetPos;
+	}
+
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
@@ -543,40 +579,6 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 			Logging.logError(e);
 		}
 
-	}
-
-	@Override
-	public void pulse() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setEncoder(Encoder encoder) {
-		// TODO Auto-generated method stub
-
-	}
-
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = new ServiceType(Motor.class.getCanonicalName());
-		meta.addDescription("General Motor Service");
-		meta.addCategory("motor");
-
-		return meta;
-	}
-
-	@Override
-	public int getTargetPos() {
-		return targetPos;
 	}
 
 }

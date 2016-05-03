@@ -2,7 +2,6 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.Message;
 
-// TODO - maybe "publisher" is a better Interface name ?  publish vs invoke
 public interface Invoker {
 	public Object invoke(Message msg);
 

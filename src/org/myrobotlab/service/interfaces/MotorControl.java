@@ -27,7 +27,7 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.sensor.Encoder;
 
-public interface MotorControl extends SensorDataSink {
+public interface MotorControl extends SensorDataSink, NameProvider, MessageSubscriber {
 
 	/**
 	 * detaches the motor from the motor controller

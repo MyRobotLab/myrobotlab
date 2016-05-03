@@ -25,12 +25,8 @@ package org.myrobotlab.service;
 
 import java.io.Serializable;
 import java.util.HashMap;
-
-
-
-//import net.java.games.input.Controller;
-import net.java.games.input.ControllerEnvironment;
-import net.java.games.input.Rumbler;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -39,7 +35,12 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.data.JoystickData;
 import org.slf4j.Logger;
+
+//import net.java.games.input.Controller;
+import net.java.games.input.ControllerEnvironment;
+import net.java.games.input.Rumbler;
 
 
 /**
@@ -83,27 +84,6 @@ public class Joystick extends Service {
 		}
 	}
 		
-
-
-	/**
-	 * The value & id of a component. It is sent when the value changes.
-	 *
-	 */
-	static public class Input implements Serializable {
-		private static final long serialVersionUID = 1L;
-		public String id;
-		public Float value;
-
-		public Input(String id, Float value) {
-			this.id = id;
-			this.value = value;
-		}
-
-		@Override
-		public String toString() {
-			return String.format("[%s] %f", id, value);
-		}
-	}
 
 	public class InputPollingThread extends Thread {
 		public boolean isPolling = false;
@@ -151,7 +131,7 @@ public class Joystick extends Service {
 							input = (float) mappers.get(id).calc(input);
 						}
 						
-						invoke("publishInput", new Input(id, input));						
+						invoke("publishJoystickInput", new JoystickData(id, input));						
 
 					} // if (lastValue == null || Math.abs(input - lastValue) >
 						// 0.0001)
@@ -188,7 +168,7 @@ public class Joystick extends Service {
 	transient InputPollingThread pollingThread = null;
 
 	// these data structures are serializable
-	HashMap<String, Integer> controllerNames = new HashMap<String, Integer>();
+	TreeMap<String, Integer> controllerNames = new TreeMap<String, Integer>();
 
 	// FIXME - lame not just last index :P
 	int rumblerIdx; // index for the rumbler being used
@@ -228,7 +208,7 @@ public class Joystick extends Service {
 		return components;
 	}
 
-	public HashMap<String, Integer> getControllers() {
+	public Map<String, Integer> getControllers() {
 		log.info(String.format("%s getting controllers", getName()));
 		hardwareControllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 		info(String.format("found %d controllers", hardwareControllers.length));
@@ -263,15 +243,15 @@ public class Joystick extends Service {
 	
 	// or one publish to rule them all ? :)
 	public void addInputListener(Service service) {
-		addListener("publishInput", service.getName(), "onJoystickInput");
+		service.subscribe(this.getName(), "publishJoystickInput");
 	}
 
 	// ---add listeners end---
 
 
 	// ---publishing begin---
-	public Input publishInput(final Input input) {
-		log.info(String.format("publishInput %s", input));
+	public JoystickData publishJoystickInput(final JoystickData input) {
+		log.info(String.format("publishJoystickInput %s", input));
 		return input;
 	}
 
@@ -338,7 +318,6 @@ public class Joystick extends Service {
 
 	public void startService() {
 		super.startService();
-
 		invoke("getControllers");
 	}
 

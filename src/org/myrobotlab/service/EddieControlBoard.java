@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -11,8 +10,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
-import org.myrobotlab.service.Joystick.Input;
-import org.myrobotlab.service.interfaces.InputListener;
+import org.myrobotlab.service.data.JoystickData;
+import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.KeyListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -23,7 +22,7 @@ import org.slf4j.Logger;
  * EddieControlBoard It can publish sensor data , control motors and more!
  *
  */
-public class EddieControlBoard extends Service implements KeyListener, SerialDataListener, InputListener {
+public class EddieControlBoard extends Service implements KeyListener, SerialDataListener, JoystickListener {
 
 	class SensorPoller extends Thread {
 
@@ -204,7 +203,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 	}
 
 	@Override
-	public void onInput(Input input) throws Exception {
+	public void onJoystickInput(JoystickData input) throws Exception {
 		// TODO Auto-generated method stub
 
 	}

@@ -51,6 +51,15 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	private Integer timeoutMS = null;
 
 	private static final long serialVersionUID = 1L;
+	
+	// rates
+	public final static Integer BAUD_2400 = 2400;
+	public final static Integer BAUD_4800 = 4800;
+	public final static Integer BAUD_9600 = 9600;
+	public final static Integer BAUD_19200 = 19200;
+	public final static Integer BAUD_38400 = 38400;
+	public final static Integer BAUD_57600 = 57600;
+	public final static Integer BAUD_115200 = 115200;
 
 	/**
 	 * deprecated hardware library

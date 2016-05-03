@@ -75,15 +75,13 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 	}
 
 	@Override
-	public boolean detach(String name) {
+	public void detach(String name) {
 		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
-	public boolean connect(String port) {
+	public void connect(String port) {
 		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override

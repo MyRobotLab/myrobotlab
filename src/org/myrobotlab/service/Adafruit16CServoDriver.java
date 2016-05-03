@@ -253,8 +253,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
         }
 	}
 
-	public boolean connect(String comPort) {
-		return arduino.connect(comPort);
+	public void connect(String comPort) {
+		arduino.connect(comPort);
 	}
 
 	public Arduino getArduino() {
@@ -372,9 +372,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	}
 
 	@Override
-	public boolean detach(String name) {
+	public void detach(String name) {
 		// TODO Auto-generated method stub
-		return false;
 	}
 	
 	public synchronized boolean servoAttach(Servo servo, Integer pinNumber) {
