@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -21,6 +21,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ArduinoShield;
+import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.slf4j.Logger;
 
@@ -225,8 +226,8 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 		return true;
 	}
 
-	public boolean connect(String port) {
-		return arduino.connect(port);
+	public void connect(String port, Integer rate, int databits, int stopbit, int parity) {		
+		arduino.connect(port, rate, databits, stopbit, parity);
 	}
 
 	/**
@@ -320,37 +321,36 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 	}
 
 	@Override
-	public boolean detach(String name) {
+	public void detach(String name) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void motorAttach(MotorControl motor) throws MRLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean motorDetach(MotorControl motor) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public void motorAttach(Motor motor) throws MRLException {
+	public void motorMove(MotorControl motor) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public boolean motorDetach(Motor motor) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void motorMove(Motor motor) {
+	public void motorMoveTo(MotorControl motor) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void motorMoveTo(Motor motor) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void motorStop(Motor motor) {
+	public void motorStop(MotorControl motor) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -362,7 +362,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 	}
 
 	@Override
-	public void motorReset(Motor motor) {
+	public void motorReset(MotorControl motor) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -384,6 +384,23 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 		meta.addCategory("motor");		
 		meta.addPeer("arduino", "Arduino", "our Arduino");
 		return meta;		
+	}
+
+	@Override
+	public void motorAttach(String name, int portNumber) {
+		error("not currently implemented");
+	}
+
+	@Override
+	public void motorAttach(MotorControl motor, int portNumber) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void connect(String port) {
+		// TODO Auto-generated method stub
+		connect(port, Serial.BAUD_57600, 8, 1, 0);
 	}
 
 }

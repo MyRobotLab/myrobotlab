@@ -32,7 +32,7 @@ import java.util.TreeMap;
 
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -129,7 +129,7 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 	double powerLevel = 0;
 
 	Mapper powerMap = new Mapper(-1.0, 1.0, -255.0, 255.0);
-	
+
 	// position
 	int currentPos = 0;
 	int targetPos = 0;
@@ -180,7 +180,7 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 	public double getPowerLevel() {
 		return powerLevel;
 	}
-	
+
 	@Override
 	public double getPowerOutput() {
 		return powerMap.calc(powerLevel);
@@ -221,6 +221,7 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 	@Override
 	// not relative ! - see moveStep
 	public void move(double power) {
+		log.info(String.format("%s.move(%f)", getName(), power));
 		powerLevel = power;
 		if (locked) {
 			log.warn("motor locked");
@@ -228,9 +229,9 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 		}
 		controller.motorMove(this);
 	}
-	
+
 	public void attach(String controllerName) throws Exception {
-		attach((MotorController)Runtime.getService(controllerName));
+		attach((MotorController) Runtime.getService(controllerName));
 	}
 
 	/**
@@ -266,7 +267,7 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 
 	@Override
 	public void moveTo(int newPos, Double powerLevel) {
-		this.powerLevel = powerLevel; 
+		this.powerLevel = powerLevel;
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
 			return;
@@ -276,9 +277,9 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 		targetPos = newPos;
 		controller.motorMoveTo(this);
 	}
-	
+
 	@Override
-	public void moveTo(int newPos){
+	public void moveTo(int newPos) {
 		moveTo(newPos, null);
 	}
 
@@ -442,6 +443,41 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 	 * this.type = type; }
 	 */
 
+
+	@Override
+	public void pulse() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setEncoder(Encoder encoder) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Motor.class.getCanonicalName());
+		meta.addDescription("General Motor Service");
+		meta.addCategory("motor");
+
+		return meta;
+	}
+
+	@Override
+	public int getTargetPos() {
+		return targetPos;
+	}
+
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
@@ -491,18 +527,17 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 
 			Motor m1 = (Motor) Runtime.start("m1", "Motor");
 			m1.setTypeSimple(pwmPin, dirPin);
-			
+
 			/*
-			m1.setType2Pwm(leftPwm, rightPwm);
-			m1.setTypeStepper();
-			m1.setTypePulseStep(pwmPin, dirPin);
-			*/
+			 * m1.setType2Pwm(leftPwm, rightPwm); m1.setTypeStepper();
+			 * m1.setTypePulseStep(pwmPin, dirPin);
+			 */
 			// Runtime.start("webgui", "WebGui");
 			// m1.attach(arduino, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);
 			// m1.attach(arduino, Motor.TYPE_2_PWM, pwmPin, dirPin);
-			//m1.attach(arduino, Motor.TYPE_SIMPLE, pwmPin, dirPin);
+			// m1.attach(arduino, Motor.TYPE_SIMPLE, pwmPin, dirPin);
 			m1.attach(arduino);
-			
+
 			m1.move(1.0);
 			m1.move(-1.0);
 
@@ -546,34 +581,4 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 
 	}
 
-	@Override
-	public void pulse() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setEncoder(Encoder encoder) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = new ServiceType(Motor.class.getCanonicalName());
-		meta.addDescription("General Motor Service");
-		meta.addCategory("motor");
-		
-		return meta;
-	}
-
-	
 }

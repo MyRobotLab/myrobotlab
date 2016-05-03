@@ -8,7 +8,7 @@ import java.io.IOException;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.string.StringUtil;
 
 import com.ning.http.util.StringUtils;

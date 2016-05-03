@@ -20,7 +20,7 @@ import org.alicebot.ab.Chat;
 import org.alicebot.ab.Predicates;
 import org.apache.commons.io.IOUtils;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
@@ -712,7 +712,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		ServiceType meta = new ServiceType(ProgramAB.class.getCanonicalName());
 		meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
 		meta.addCategory("intelligence");
-		meta.addDependency("org.alicebot.ab", "0.0.6.26");
+		//meta.addDependency("org.alicebot.ab", "0.0.6.26");
+		meta.addDependency("org.alicebot.ab", "0.0.1-kw");
+		meta.addDependency("org.json", "20090211");
 		return meta;
 	}
 

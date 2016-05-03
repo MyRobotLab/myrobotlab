@@ -16,9 +16,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.ServiceData;
-import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
 import org.myrobotlab.logging.Level;
@@ -141,7 +141,7 @@ public class Python extends Service {
 
 					} catch (Exception e) {
 						Logging.logError(e);
-						python.error(e.getMessage());
+						python.error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
 					}
 
 				}

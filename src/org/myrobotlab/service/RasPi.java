@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.i2c.I2CFactory;
 import org.myrobotlab.service.PID2.PIDData;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -263,7 +263,7 @@ public class RasPi extends Service implements I2CControl {
 	@Override
 	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size){
 		String key = String.format("%d.%d", busAddress, deviceAddress);
-    	log.info(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+    	log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
 		Device devicedata = devices.get(key);
 		try {
 			devicedata.device.write(buffer, 0, buffer.length);
@@ -276,6 +276,7 @@ public class RasPi extends Service implements I2CControl {
 	@Override
 	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
+		log.debug(String.format("i2cRead busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
 		Device devicedata = devices.get(key);
 		try {
 			devicedata.device.read(buffer, 0, buffer.length);
@@ -289,7 +290,7 @@ public class RasPi extends Service implements I2CControl {
 
 	@Override
 	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize,
-			byte[] readBuffer, int readSize) {
+		byte[] readBuffer, int readSize) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		Device devicedata = devices.get(key);
 		try {

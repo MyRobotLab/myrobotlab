@@ -45,18 +45,14 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -64,6 +60,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.CustomMsgListener;
+import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
@@ -389,6 +386,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		// if (pin.mode == INPUT) {sendMsg(PIN_MODE, OUTPUT)}
 		sendMsg(ANALOG_WRITE, address, value);
 	}
+	
+	public void connect(String port) {
+		serial.connect(port, Serial.BAUD_57600, 8, 1, 0);
+	}
+
 
 	/**
 	 * default params to connect to Arduino & MRLComm.ino
@@ -398,14 +400,16 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @throws IOException
 	 * @throws SerialDeviceException
 	 */
-	public boolean connect(String port) {
+	@Override
+	public void connect(String port, Integer rate, int databits, int stopbits, int parity) {
+	
 		// FIXME ! <<<-- REMOVE ,this) - patterns should be to add listener on
 		// startService
 		// return connect(port, 57600, 8, 1, 0); <- put this back ?
 		// return serial.connect(port); // <<<-- REMOVE ,this) - patterns
 		// should be to add listener on
 		// startService
-		boolean ret = serial.connect(port);
+		boolean ret = serial.connect(port, rate, databits, stopbits, parity);
 
 		log.info("RETRUNED VALUE FROM CONNECT: {}", ret);
 		
@@ -413,14 +417,13 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 		if (version == null || version != MRLCOMM_VERSION) {
 			error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
-			return false;
+			return;
 		}
-
-		return true;
 	}
 
 	// FIXME - DEPRECATE !!! only need createVirtual(port)
 	// TODO - should be override .. ??
+	/*
 	public Serial connectVirtualUART() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException,
 			IllegalArgumentException, InvocationTargetException {
 		Serial uart = serial.createVirtualUART();
@@ -429,12 +432,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return uart;
 	}
 	
-	static public VirtualDevice createVirtual(String port) throws IOException{
-		// VirtualDevice virtual = (VirtualDevice) startPeer("virtual");
+	static public VirtualDevice createVirtual(String port) throws IOException{		
+		// Once device to rule them all ? - I think that would work.. 
 		VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
+		// this call would generate the instance of virtual device needed
 		virtual.createVirtualArduino(port);
 		return virtual;
 	}
+	*/
 
 	public ArrayList<Pin> createPinList() {
 		pinList = new ArrayList<Pin>();
@@ -549,7 +554,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				// mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
 				sleep(retryConnectDelay);
 				++retry;
-				log.info("Get Version Attempt # {}", retry);
+				log.info("getVersion attempt # {}", retry);
 			}
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -573,7 +578,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorAttach(Motor motor) throws MRLException {
+	public void motorAttach(MotorControl motor) throws MRLException {
 		if (!motor.isLocal()) {
 			throw new MRLException("motor is not in the same MRL instance as the motor controller");
 		}
@@ -631,21 +636,18 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		// else if instance of Servo ... yattah yattah yattah
 	}
 
-	public boolean detach(String name) {
+	public void detach(String name) {
 		NameProvider si = Runtime.getService(name);
 
 		if (si instanceof Motor) {
-			return motorDetach((Motor) si);
+			motorDetach((Motor) si);
 		}
-
-		// else if instance of Servo ... yattah yattah yattah
-		return false;
 	}
 
 	// ================= new interface end =========================
 
 	@Override
-	public boolean motorDetach(Motor motor) {
+	public boolean motorDetach(MotorControl motor) {
 		/*
 		 * boolean ret = motors.containsKey(motorName); if (ret) {
 		 * motors.remove(motorName); } return ret;
@@ -654,7 +656,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorMove(Motor motor) {
+	public void motorMove(MotorControl motor) {
 
 		double powerOutput = motor.getPowerOutput();
 		String type = motor.getMotorType();
@@ -684,11 +686,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorMoveTo(Motor motor) {
+	public void motorMoveTo(MotorControl motor) {
 		// speed parameter?
 		// modulo - if < 1
 		// speed = 1 else
-		log.info("motorMoveTo targetPos {} powerLevel {}", motor.targetPos, motor.getPowerLevel());
+		log.info("motorMoveTo targetPos {} powerLevel {}", motor.getTargetPos(), motor.getPowerLevel());
 
 		int feedbackRate = 1;
 		// if pulser (with or without fake encoder
@@ -701,7 +703,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 			// FIXME !!! - this will have to send a Long for targetPos at some
 			// point !!!!
-			double target = Math.abs(motor.targetPos);
+			double target = Math.abs(motor.getTargetPos());
 
 			int b0 = (int) target & 0xff;
 			int b1 = ((int) target >> 8) & 0xff;
@@ -714,7 +716,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorStop(Motor motor) {
+	public void motorStop(MotorControl motor) {
 
 		if (motor.getType().equals(Motor.TYPE_PULSE_STEP)) {
 			// check motor direction
@@ -1605,7 +1607,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorReset(Motor motor) {
+	public void motorReset(MotorControl motor) {
 		// perhaps this should be in the motor control
 		// motor.reset();
 		// opportunity to reset variables on the controller
@@ -1671,13 +1673,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			// Runtime.start("serial", "Serial");
 			// Arduino.createVirtual("COM9");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			//arduino.connect("COM18");
 			
-			boolean done = true;
-			if (done){
-				return;
-			}
-			
-			arduino.connect("COM9");
+			/*
 			arduino.setLoadTimingEnabled(true);
 			long ts = System.currentTimeMillis();
 			
@@ -1692,8 +1690,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				arduino.sendMsg(ArduinoMsgCodec.GET_VERSION);
 				log.info("{}", i);
 			}
+			*/
 			
-			arduino.broadcastState();
+			//arduino.broadcastState();
 			
 			// arduino.createVirtual("COM77");
 			//arduino.createVirtual("COM18");
@@ -1784,4 +1783,18 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			Logging.logError(e);
 		}
 	}
+
+	@Override
+	public void motorAttach(MotorControl motor, int portNumber) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void motorAttach(String name, int portNumber) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
 }

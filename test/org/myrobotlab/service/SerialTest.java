@@ -17,11 +17,14 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
 import org.myrobotlab.codec.serial.Codec;
 import org.myrobotlab.codec.serial.DecimalCodec;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.serial.Port;
 import org.slf4j.Logger;
@@ -53,9 +56,9 @@ public class SerialTest {
 		serial = (Serial) Runtime.start("serial", "Serial");
 		catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
 		virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-		virtual.createVirtualPort(vport);
+		virtual.createVirtualSerial(vport);
 		
-		uart = virtual.getUART();
+		uart = virtual.getUart(vport);
 		uart.setTimeout(300);
 		
 		logic = virtual.getLogic();
@@ -167,13 +170,6 @@ public class SerialTest {
 		*/
 
 	}
-
-
-	@Test
-	public final void testIntArrayToByteArray() {
-		//fail("Not yet implemented"); // TODO
-	}
-
 
 	@Test
 	public final void testAvailable() throws Exception, InterruptedException {
@@ -322,11 +318,83 @@ public class SerialTest {
 		}
 	}
 
+	
+	@Test
+	public final void testConnectVirtualNullModem() {
+		//fail("Not yet implemented"); // TODO
+	}
+
+	@Test
+	public final void testConnectVirtualUART() {
+		//fail("Not yet implemented"); // TODO
+	}
+
+	@Test
+	public final void testToString() {
+		//fail("Not yet implemented"); // TODO
+	}
+
+
+	@Test
+	public final void testBytesToLong() {
+		int[] test;
+		long x;
+		
+		test = new int[]{0x00, 0x00, 0x00, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+		x = Serial.bytesToLong(test, 0, 4);
+		assertEquals(3, x);
+		
+		test = new int[]{0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00};
+		x = Serial.bytesToLong(test, 3, 3);
+		assertEquals(65280, x);
+		
+		test = new int[]{0x00, 0x00, 0x00, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+		x = Serial.bytesToLong(test, 0, 8);
+		assertEquals(12952339975L, x);
+		
+		test = new int[]{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+		x = Serial.bytesToLong(test, 0, 8);
+		assertEquals(-1, x);
+
+		/* WTH?
+		test = new int[]{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE};
+		x = Serial.bytesToLong(test, 0, 8);
+		assertEquals(-1, x);
+		*/
+
+		log.info("here");
+	}
+
+
+	@Test
+	public final void testSerial() {
+		//fail("Not yet implemented"); // TODO
+	}
+
+	@Test
+	public final void testAddByteListenerSerialDataListener() {
+		//fail("Not yet implemented"); // TODO
+	}
+
+	@Test
+	public final void testAddByteListenerString() {
+		//fail("Not yet implemented"); // TODO
+	}
+
+	@Test
+	public final void testSetParams() {
+		//fail("Not yet implemented"); // TODO
+	}
+
 	@Test
 	public final void testConnectStringIntIntIntInt() {
 		//fail("Not yet implemented"); // TODO
 	}
 
+	@Test
+	public final void testConnectStringSerialDataListener() {
+		//fail("Not yet implemented"); // TODO
+	}
 
 	@Test
 	public final void testConnectFilePlayer() {
@@ -348,15 +416,6 @@ public class SerialTest {
 		//fail("Not yet implemented"); // TODO
 	}
 
-	@Test
-	public final void testConnectVirtualNullModem() {
-		//fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public final void testConnectVirtualUART() {
-		//fail("Not yet implemented"); // TODO
-	}
 
 	@Test
 	public final void testCreateHardwarePort() {
@@ -591,6 +650,21 @@ public class SerialTest {
 	}
 
 	@Test
+	public final void testRefresh() {
+		//fail("Not yet implemented"); // TODO
+	}
+
+	@Test
+	public final void testRemoveByteListenerSerialDataListener() {
+		//fail("Not yet implemented"); // TODO
+	}
+
+	@Test
+	public final void testRemoveByteListenerString() {
+		//fail("Not yet implemented"); // TODO
+	}
+
+	@Test
 	public final void testReset() {
 		serial.reset();
 		assertEquals(0, serial.available());
@@ -692,7 +766,7 @@ public class SerialTest {
 	}
 
 	@Test
-	public final void testSetRXFormatter() {
+	public final void testSetRXCodec() {
 		//fail("Not yet implemented"); // TODO
 	}
 
@@ -702,7 +776,7 @@ public class SerialTest {
 	}
 
 	@Test
-	public final void testSetTXFormatter() {
+	public final void testSetTXCodec() {
 		//fail("Not yet implemented"); // TODO
 	}
 
@@ -735,5 +809,36 @@ public class SerialTest {
 	public final void testWriteFile() {
 		//fail("Not yet implemented"); // TODO
 	}
+	
+	public static void main(String[] args) {
+		try {
+
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+			SerialTest.setUpBeforeClass();
+			SerialTest test = new SerialTest();
+			test.testBytesToLong();
+			test.testConnectString();
+			
+			JUnitCore junit = new JUnitCore();
+			Result result = junit.run(SerialTest.class);
+			
+			// WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
+			// ServiceInterface gui = Runtime.start("gui", "GUIService");
+
+			Runtime.dump();
+
+			log.info("here");
+			// serial.removeByteListener(gui.getName());
+			// uart.removeByteListener(gui.getName());
+
+			Runtime.dump();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 
 }

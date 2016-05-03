@@ -31,7 +31,7 @@ public interface MicrocontrollerPeripheral {
 	 * @param name
 	 * @return
 	 */
-	public boolean detach(String name);
+	public void detach(String name);
 	
-	public boolean connect(String port);
+	public void connect(String port);
 }

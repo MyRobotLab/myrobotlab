@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,14 +9,11 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB.Response;
 import org.slf4j.Logger;
 
-// GAH! why is this test failing under TravisCI..  ignore for now.
-// @Ignore
 public class ProgramABTest {
 	
 	private ProgramAB testService;
@@ -177,6 +175,15 @@ public class ProgramABTest {
 		Response resp = testService.getResponse(username, "Lars Ümlaüt");
 		assertEquals("He's a character from Guitar Hero!", resp.msg);
 	}
+	
+	@Test
+	public void pannousTest() {
+		Response resp = testService.getResponse(username, "Show me InMoov");
+		System.out.println(resp);
+		boolean contains = resp.msg.contains("http");
+		assertTrue(contains);
+	}
+	
 	
 	@After
 	public void tearDown() throws Exception {

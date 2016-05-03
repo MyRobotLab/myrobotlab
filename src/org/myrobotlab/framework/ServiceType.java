@@ -1,12 +1,10 @@
-package org.myrobotlab.framework.repo;
+package org.myrobotlab.framework;
 
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
-
-import org.myrobotlab.framework.ServiceReservation;
 
 /**
  * list of relations from a Service type to a Dependency key the key is used to

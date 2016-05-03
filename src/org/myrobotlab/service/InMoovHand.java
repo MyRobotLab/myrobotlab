@@ -3,13 +3,13 @@ package org.myrobotlab.service;
 import java.io.IOException;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.LeapMotion.Hand;
-import org.myrobotlab.service.LeapMotion.LeapData;
+import org.myrobotlab.service.data.LeapData;
+import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.slf4j.Logger;
 
@@ -303,7 +303,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 			log.info("Leap data frame not valid.");
 			return data;
 		}
-		Hand h;
+		LeapHand h;
 		if ("right".equalsIgnoreCase(side)) {
 			if (data.frame.hands().rightmost().isValid()) {
 				h = data.rightHand;
