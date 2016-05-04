@@ -65,7 +65,6 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-	    log.info("Mpu6050 actionPerformed");
 		Object o = e.getSource();
 		if (o == refresh) {
 			myService.send(boundServiceName, "readRaw");
@@ -113,8 +112,6 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
 		c.gridy = 0;
-		
-		c.fill = GridBagConstraints.HORIZONTAL;
 		display.add(refresh,c);
 		refresh.addActionListener(this);
 
@@ -165,63 +162,63 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1;
-		c.gridy = 4;
+		c.gridy = 5;
 		display.add(new JLabel("Temperature : "),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
-		c.gridy = 4;
+		c.gridy = 5;
 		display.add(temperature,c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 3;
-		c.gridy = 4;
+		c.gridy = 5;
 		display.add(new JLabel(" degrees Celcius"),c);
 
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1;
-		c.gridy = 5;
+		c.gridy = 7;
 		display.add(new JLabel("GyroX  :"),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
-		c.gridy = 5;
+		c.gridy = 7;
 		display.add(gyroX,c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 3;
-		c.gridy = 5;
+		c.gridy = 7;
 		display.add(new JLabel(" degrees/s"),c);
 		
 
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1;
-		c.gridy = 6;
+		c.gridy = 8;
 		display.add(new JLabel("GyroY  :"),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
-		c.gridy = 6;
+		c.gridy = 8;
 		display.add(gyroY,c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 3;
-		c.gridy = 6;
+		c.gridy = 8;
 		display.add(new JLabel(" degrees/s"),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1;
-		c.gridy = 7;
+		c.gridy = 9;
 		display.add(new JLabel("GyroZ  :"),c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 2;
-		c.gridy = 7;
+		c.gridy = 9;
 		display.add(gyroZ,c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 3;
-		c.gridy = 7;
+		c.gridy = 9;
 		display.add(new JLabel(" degrees/s"),c);
 		
 		display.repaint();
