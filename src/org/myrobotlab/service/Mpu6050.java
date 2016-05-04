@@ -745,16 +745,16 @@ public class Mpu6050 extends Service{
 		gyroX  = (byte)readbuffer[8]<<8 | readbuffer[9] & 0xFF;
 		gyroY  = (byte)readbuffer[10]<<8 | readbuffer[11] & 0xFF;
 		gyroZ  = (byte)readbuffer[12]<<8 | readbuffer[13] & 0xFF;
-		// Convert accel to degrees / s
+		// Convert acceleration to G assuming min-max 2G
 		accelGX = accelX / 16384.0;
 		accelGY = accelY / 16384.0;
 		accelGZ = accelZ / 16384.0;
 		// Convert temp to degrees Celcius 
 		temperature = (temp / 340.0)  + 36.53;
-		// Convert gyro to G
-		gyroDegreeX = gyroX / 16384.0;
-		gyroDegreeY = gyroY / 16384.0;
-		gyroDegreeZ = gyroZ / 16384.0;
+		// Convert gyro to G ( assuming max +-2000 degrees/s )
+		gyroDegreeX = gyroX / 16.0;
+		gyroDegreeY = gyroY / 16.0;
+		gyroDegreeZ = gyroZ / 16.0;
 		broadcastState();
 	}
 	
@@ -1231,7 +1231,7 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_GCONFIG_FS_SEL_LENGTH
 	 */
 	int getFullScaleGyroRange() {
-		return  I2CdevReadBits(deviceAddress, MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH);
+		return I2CdevReadBits(deviceAddress, MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH);
 	}
 	/** Set full-scale gyroscope range.
 	 * @param range New full-scale gyroscope range value
@@ -1620,7 +1620,7 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	boolean getTempFIFOEnabled() {
-		return  I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_TEMP_FIFO_EN_BIT);
+		return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_TEMP_FIFO_EN_BIT);
 	}
 	/** Set temperature FIFO enabled value.
 	 * @param enabled New temperature FIFO enabled value
@@ -1637,7 +1637,7 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	boolean getXGyroFIFOEnabled() {
-		return  I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_XG_FIFO_EN_BIT);
+		return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_XG_FIFO_EN_BIT);
 	}
 	/** Set gyroscope X-axis FIFO enabled value.
 	 * @param enabled New gyroscope X-axis FIFO enabled value
@@ -1706,7 +1706,7 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	boolean getSlave2FIFOEnabled() {
-		return  I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_SLV2_FIFO_EN_BIT);
+		return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_SLV2_FIFO_EN_BIT);
 	}
 	/** Set Slave 2 FIFO enabled value.
 	 * @param enabled New Slave 2 FIFO enabled value
@@ -1723,7 +1723,7 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	boolean getSlave1FIFOEnabled() {
-		return  I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_SLV1_FIFO_EN_BIT);
+		return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_SLV1_FIFO_EN_BIT);
 	}
 	/** Set Slave 1 FIFO enabled value.
 	 * @param enabled New Slave 1 FIFO enabled value
@@ -1970,7 +1970,7 @@ public class Mpu6050 extends Service{
 	 */
 	boolean getSlaveEnabled(int num) {
 	    if (num > 3) return false;
-	    return  I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num*3, MPU6050_I2C_SLV_EN_BIT);
+	    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num*3, MPU6050_I2C_SLV_EN_BIT);
 	}
 	/** Set the enabled value for the specified slave (0-3).
 	 * @param num Slave number (0-3)
@@ -2065,8 +2065,7 @@ public class Mpu6050 extends Service{
 	 */
 	int getSlaveDataLength(int num) {
 	    if (num > 3) return 0;
-	    int readBuffer = I2CdevReadBits(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num*3, MPU6050_I2C_SLV_LEN_BIT, MPU6050_I2C_SLV_LEN_LENGTH);
-	    return readBuffer;
+	    return I2CdevReadBits(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num*3, MPU6050_I2C_SLV_LEN_BIT, MPU6050_I2C_SLV_LEN_LENGTH);
 	}
 	/** Set number of bytes to read for the specified slave (0-3).
 	 * @param num Slave number (0-3)
@@ -2254,7 +2253,7 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_I2C_MST_STATUS
 	 */
 	boolean getLostArbitration() {
-		return  I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_LOST_ARB_BIT);
+		return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_LOST_ARB_BIT);
 	}
 	/** Get Slave 4 NACK status.
 	 * This bit automatically sets to 1 when the I2C Master receives a NACK in a
@@ -2274,7 +2273,7 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_I2C_MST_STATUS
 	 */
 	boolean getSlave3Nack() {
-		return  I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV3_NACK_BIT);
+		return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV3_NACK_BIT);
 	}
 	/** Get Slave 2 NACK status.
 	 * This bit automatically sets to 1 when the I2C Master receives a NACK in a
@@ -4135,22 +4134,6 @@ public class Mpu6050 extends Service{
 	    int bitValue = byteValue & (bitmask << bitNum);
 	    return (bitValue != 0);
 	}
-	/** Read a single bit from a 16-bit device register.
-	 * @param devAddr I2C slave device address
-	 * @param regAddr Register regAddr to read from
-	 * @param bitNum Bit position to read (0-15)
-	 * @param data Container for single bit value
-	 * @return Status of read operation (true = success)
-	 */
-	
-	int I2CdevReadBitW(int devAddr, int regAddr, int bitNum, int data) {
-	    int b = 0;
-	    int bitmask = 1;
-	    int count = I2CdevReadWord(devAddr, regAddr, b);
-	    data = b & (bitmask << bitNum);
-	    return count;
-	}
-
 	/** Read multiple bits from an 8-bit device register.
 	 * @param devAddr I2C slave device address
 	 * @param regAddr Register regAddr to read from
@@ -4173,31 +4156,6 @@ public class Mpu6050 extends Service{
 		return b;
 	}
 
-	/** Read multiple bits from a 16-bit device register.
-	 * @param devAddr I2C slave device address
-	 * @param regAddr Register regAddr to read from
-	 * @param bitStart First bit position to read (0-15)
-	 * @param length Number of bits to read (not more than 16)
-	 * @param data Container for right-aligned value (i.e. '101' read from any bitStart position will equal 0x05)
-	 * @return Status of read operation (1 = success, 0 = failure)
-	 */
-	int I2CdevReadBitsW(int devAddr, int regAddr, int bitStart, int length, int data) {
-	    // 1101011001101001 read byte
-	    // fedcba9876543210 bit numbers
-	    //    xxx           args: bitStart=12, length=3
-	    //    010           masked
-	    //           -> 010 shifted
-	    int count;
-	    int w = 0;
-	    if ((count = I2CdevReadWord(devAddr, regAddr, w)) != 0) {
-	        int mask = ((1 << length) - 1) << (bitStart - length + 1);
-	        w &= mask;
-	        w >>= (bitStart - length + 1);
-	        data = w;
-	    }
-	    return count;
-	}
-
 	/** Read single byte from an 8-bit device register.
 	 * @param devAddr I2C slave device address
 	 * @param regAddr Register regAddr to read from
@@ -4206,7 +4164,7 @@ public class Mpu6050 extends Service{
 	int I2CdevReadByte(int devAddr, int regAddr) {
 		int readBuffer[] = new int[1];
 		I2CdevReadBytes(devAddr, regAddr, 1, readBuffer);
-		return readBuffer[0];
+		return readBuffer[0] & 0xff;
 	}
 
 	/** Read single word from a 16-bit device register.
