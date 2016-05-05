@@ -33,14 +33,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.myrobotlab.audio.AudioData;
 import org.myrobotlab.audio.AudioProcessor;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
 /**

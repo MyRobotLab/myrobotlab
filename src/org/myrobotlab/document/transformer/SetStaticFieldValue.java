@@ -16,6 +16,7 @@ public class SetStaticFieldValue extends AbstractStage {
 
 	private String fieldName = null;
 	private String value = null;
+  private List<String> values = null;
 	
 	@Override
 	public void startStage(StageConfiguration config) {
@@ -23,12 +24,20 @@ public class SetStaticFieldValue extends AbstractStage {
 		if (config != null) {
 			fieldName = config.getStringParam("fieldName");
 			value = config.getStringParam("value");
+      values = config.getListParam("values");
 		}
 	}
 
 	@Override
 	public List<Document> processDocument(Document doc) {
-		doc.addToField(fieldName, value);
+    if (values != null) {
+      for (String value : values) {
+        doc.addToField(fieldName, value);
+      }
+    } else {
+      doc.addToField(fieldName, value);
+    }
+
 		return null;
 	}
 

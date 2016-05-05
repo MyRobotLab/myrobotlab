@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.kinematics.Matrix;
@@ -14,9 +14,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.opencv.OpenCVFilterAffine;
-import org.myrobotlab.service.Joystick.Input;
-import org.myrobotlab.service.Joystick.InputPollingThread;
+import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.PointsListener;
 import org.slf4j.Logger;
@@ -339,7 +337,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	}
 	
 	
-	public void onJoystickInput(Input input) {
+	public void onJoystickInput(JoystickData input) {
 		
 		// a few control button pushes
 		// Ok, lets say the the "a" button starts tracking

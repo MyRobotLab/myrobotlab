@@ -34,9 +34,9 @@ import org.myrobotlab.codec.MethodCache;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.StatusLevel;
-import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -333,7 +333,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		return super.save();
 	}
 
-	public void startNettosphere() {
+	public void start() {
 		try {
 
 			if (port == null) {
@@ -403,7 +403,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			Logging.logError(e);
 		}
 
-		startNettosphere();
+		start();
 	}
 
 	public void onRegistered(ServiceInterface si) {
@@ -906,10 +906,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 	public void stopService() {
 		super.stopService();
-		stopNettosphere();
+		stop();
 	}
 	
-	public void stopNettosphere(){
+	public void restart(){
+		stop();
+		start();
+	}
+	
+	public void stop(){
 		if (nettosphere != null) {
 
 			log.info("stopping nettosphere");

@@ -12,14 +12,20 @@ angular.module('mrlapp.service')
                         //width - change on size change
                         //-->preset sizes (width is undefined)
                         //-->free-form-resizing (width is defined)
+
                         scope.panel.notifySizeChanged = function (width) {
+                                        
                             if (!width) {
                                 scope.resetResizing();
                             }
                             width = scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].width + width || scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].width;
+                           
+                           /*
                             element.css({
                                 width: width + 'px'
                             });
+                            */
+
                         };
                         scope.panel.notifySizeChanged();
 

@@ -1,6 +1,6 @@
 /*
  * 
- *   AdafruitMotorShield
+ *   Adafruit16CServoDirver
  *   
  *   TODO - test with Steppers & Motors - switches on board - interface accepts motor control
  *
@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -29,11 +29,12 @@ import org.slf4j.Logger;
 import com.pi4j.io.i2c.I2CBus;
 
 /**
- * AdaFruit Motor Shield Controller Service
+ * AdaFruit 16-Channel PWM / Servo Driver
  * 
  * @author GroG
  * 
  *         References : http://www.ladyada.net/make/mshield/use.html
+ *                      https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
 
 public class Adafruit16CServoDriver extends Service implements ArduinoShield, ServoController {
@@ -57,7 +58,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	transient public RasPi raspi = null;
 	// Used during development to switch between Arduino and RasPi specific code
 	// Not needed when both use I2CControl interface
-	public String controler = "RasPI"; 
+	public String controler; 
 	
 	HashMap<String, Integer> servoMap = new HashMap<String, Integer>();
 
@@ -132,9 +133,10 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 
 	public Adafruit16CServoDriver(String n) {
 		super(n);
-		// Only one should be created
-		arduino = (Arduino) createPeer("arduino");
-		raspi   = (RasPi) createPeer("raspi");
+		// Don't create and Peers 
+		// They should be started / connected by the caller
+		// arduino = (Arduino) createPeer("arduino");
+		// raspi   = (RasPi) createPeer("raspi");
 	}
 
 	// ----------- AFMotor API End --------------
@@ -156,16 +158,17 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 			error("can't attach - arduino is invalid");
 			return false;
 		}
-
+		controler = "Arduino"; 
 		this.arduino = arduino;
 
 		// FIXME - better way to do this might be custom messaging within the
 		// MRLComm protocol - or re-implementation of the library with MRLComm
 		// :(
 		// arduinoName; FIXME - get clear on diction Program Script or Sketch
+		/*
 		StringBuffer newProgram = new StringBuffer();
 		newProgram.append(arduino.getSketch().data);
-
+        */
 		/*
 		// modify the program
 		int insertPoint = newProgram.indexOf(Arduino.VENDOR_DEFINES_BEGIN);
@@ -200,6 +203,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		*/
 		
 		// set the program
+		/*
 		Sketch sketch = new Sketch("Adafruit16CServoDriver", newProgram.toString());
 		arduino.setSketch(sketch);
 		// broadcast the arduino state - ArduinoGUI should subscribe to
@@ -210,6 +214,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		// servo10.attach(arduinoName, 10);
 
 		// error(String.format("couldn't find %s", arduinoName));
+		 */
 		return true;
 	}
 
@@ -234,7 +239,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 			error("can't attach - RasPi is invalid");
 			return false;
 		}
-
+		
+		controler = "RasPi"; 
 		this.raspi = raspi;
 		return true;
 	}
@@ -253,8 +259,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
         }
 	}
 
-	public boolean connect(String comPort) {
-		return arduino.connect(comPort);
+	public void connect(String comPort) {
+		arduino.connect(comPort);
 	}
 
 	public Arduino getArduino() {
@@ -303,6 +309,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		log.info(String.format("servoPWMFreq %s hz", hz));
         if (controler == "Arduino"){
 		  arduino.sendMsg(AF_SET_PWM_FREQ, deviceAddress, hz, 0);
+		  pwmFreqSet = true;
         }
         else
         {
@@ -357,10 +364,10 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	@Override
 	public void startService() {
 		super.startService();
-		attach(arduino);
-		arduino.startService();
-		attach(raspi);
-		raspi.startService();
+		// attach(arduino);
+		// arduino.startService();
+		// attach(raspi);
+		// raspi.startService();
 		// TODO - request myArduino - re connect
 	}
 
@@ -371,9 +378,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	}
 
 	@Override
-	public boolean detach(String name) {
+	public void detach(String name) {
 		// TODO Auto-generated method stub
-		return false;
 	}
 	
 	public synchronized boolean servoAttach(Servo servo, Integer pinNumber) {
@@ -384,9 +390,12 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 
 		servo.setController(this);
 		servoNameToPinMap.put(servo.getName(), pinNumber);
-		
-		raspi.createDevice(busAddress, deviceAddress, type);
-		begin();
+        if (controler == "Arduino"){	
+    		begin();
+        }
+        else {
+        	raspi.createDevice(busAddress, deviceAddress, type);
+        }
 		
 		return true;
 }
@@ -471,8 +480,10 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		ServiceType meta = new ServiceType(Adafruit16CServoDriver.class.getCanonicalName());
 		meta.addDescription("Adafruit Motor Shield Service");
 		meta.addCategory("shield", "motor");		
+		/*
 		meta.addPeer("arduino", "Arduino", "our Arduino");
 		meta.addPeer("raspi", "RasPi", "our RasPi");
+		*/
 		return meta;		
 	}
 }

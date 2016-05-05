@@ -45,18 +45,14 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -64,6 +60,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.CustomMsgListener;
+import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
@@ -211,6 +208,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	Integer mrlCommVersion = null;
 
 	/**
+	 * number of ms to pause after sending a message to the Arduino
+	 */
+	public int delay = 0;
+
+	/**
 	 * FIXME ! - these processor types ! - something we are not interested in
 	 * and do not have to deal with - we are far more interested in
 	 * NUM_DIGITAL_PINS and "board pin layouts" -
@@ -269,7 +271,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	/**
 	 * blocking queues to support blocking methods
 	 */
-	transient BlockingQueue<Integer> versionQueue = new LinkedBlockingQueue<Integer>();
+	// transient BlockingQueue<Integer> versionQueue = new LinkedBlockingQueue<Integer>();
 
 	// HashMap<String, Motor> motors = new HashMap<String, Motor>();
 	// HashMap<Integer, Motor> motorIndex = new HashMap<Integer, Motor>();
@@ -330,7 +332,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	transient int[] msg = new int[MAX_MSG_SIZE];
 
-	private int retryConnectMax = 3;
+	// parameters for testing the getVersion retry stuff.
+	// TODO: some way to do this more synchronously
+	// perhaps when we connect to the serial port, MRLComm can just have the version waiting?
+	public int retryConnectMax = 3;
+	public int retryConnectDelay = 1500;
 
 	// ---------------------------- ServoController End -----------------------
 	// ---------------------- Protocol Methods Begin ------------------
@@ -380,6 +386,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		// if (pin.mode == INPUT) {sendMsg(PIN_MODE, OUTPUT)}
 		sendMsg(ANALOG_WRITE, address, value);
 	}
+	
+	public void connect(String port) {
+		serial.connect(port, Serial.BAUD_57600, 8, 1, 0);
+	}
+
 
 	/**
 	 * default params to connect to Arduino & MRLComm.ino
@@ -389,27 +400,30 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @throws IOException
 	 * @throws SerialDeviceException
 	 */
-	public boolean connect(String port) {
+	@Override
+	public void connect(String port, Integer rate, int databits, int stopbits, int parity) {
+	
 		// FIXME ! <<<-- REMOVE ,this) - patterns should be to add listener on
 		// startService
 		// return connect(port, 57600, 8, 1, 0); <- put this back ?
 		// return serial.connect(port); // <<<-- REMOVE ,this) - patterns
 		// should be to add listener on
 		// startService
-		boolean ret = serial.connect(port);
+		boolean ret = serial.connect(port, rate, databits, stopbits, parity);
 
+		log.info("RETRUNED VALUE FROM CONNECT: {}", ret);
+		
 		Integer version = getVersion();
 
 		if (version == null || version != MRLCOMM_VERSION) {
 			error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
-			return false;
+			return;
 		}
-
-		return true;
 	}
 
 	// FIXME - DEPRECATE !!! only need createVirtual(port)
 	// TODO - should be override .. ??
+	/*
 	public Serial connectVirtualUART() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException,
 			IllegalArgumentException, InvocationTargetException {
 		Serial uart = serial.createVirtualUART();
@@ -418,12 +432,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return uart;
 	}
 	
-	static public VirtualDevice createVirtual(String port) throws IOException{
-		// VirtualDevice virtual = (VirtualDevice) startPeer("virtual");
+	static public VirtualDevice createVirtual(String port) throws IOException{		
+		// Once device to rule them all ? - I think that would work.. 
 		VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
+		// this call would generate the instance of virtual device needed
 		virtual.createVirtualArduino(port);
 		return virtual;
 	}
+	*/
 
 	public ArrayList<Pin> createPinList() {
 		pinList = new ArrayList<Pin>();
@@ -521,15 +537,24 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @return
 	 */
 	public Integer getVersion() {
-		log.info("getVersion");
+		log.info("{} {} getVersion", getName(), serial.getPortName());
 		int retry = 0;
 
 		try {
+			/**
+			 * We will try up to retryConnectMax times to get a version out of MRLComm.c
+			 * and wait 333 ms between each try.  A blocking queue is not needed,
+			 * as this is only a single data element - and blocking is not necessary.
+			 * mrlCommVersion will be set by our port listener in PUBLISH_VERSION if the result
+			 * comes back.
+			 */
 			while (retry < retryConnectMax && mrlCommVersion == null) {
-				versionQueue.clear();
+				// versionQueue.clear();
 				sendMsg(GET_VERSION);
-				mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
+				// mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
+				sleep(retryConnectDelay);
 				++retry;
+				log.info("getVersion attempt # {}", retry);
 			}
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -539,7 +564,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		} else if (!mrlCommVersion.equals(MRLCOMM_VERSION)) {
 			error(String.format("MRLComm.ino responded with version %s expected version is %s", mrlCommVersion, MRLCOMM_VERSION));
 		} else {
-			info(String.format("connected %s responded version %s ... goodtimes...", serial.getName(), mrlCommVersion));
+			info(String.format("%s connected on %s responded version %s ... goodtimes...", serial.getName(), serial.getPortName(), mrlCommVersion));
 		}
 
 		return mrlCommVersion;
@@ -553,7 +578,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorAttach(Motor motor) throws MRLException {
+	public void motorAttach(MotorControl motor) throws MRLException {
 		if (!motor.isLocal()) {
 			throw new MRLException("motor is not in the same MRL instance as the motor controller");
 		}
@@ -611,21 +636,18 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		// else if instance of Servo ... yattah yattah yattah
 	}
 
-	public boolean detach(String name) {
+	public void detach(String name) {
 		NameProvider si = Runtime.getService(name);
 
 		if (si instanceof Motor) {
-			return motorDetach((Motor) si);
+			motorDetach((Motor) si);
 		}
-
-		// else if instance of Servo ... yattah yattah yattah
-		return false;
 	}
 
 	// ================= new interface end =========================
 
 	@Override
-	public boolean motorDetach(Motor motor) {
+	public boolean motorDetach(MotorControl motor) {
 		/*
 		 * boolean ret = motors.containsKey(motorName); if (ret) {
 		 * motors.remove(motorName); } return ret;
@@ -634,7 +656,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorMove(Motor motor) {
+	public void motorMove(MotorControl motor) {
 
 		double powerOutput = motor.getPowerOutput();
 		String type = motor.getMotorType();
@@ -664,11 +686,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorMoveTo(Motor motor) {
+	public void motorMoveTo(MotorControl motor) {
 		// speed parameter?
 		// modulo - if < 1
 		// speed = 1 else
-		log.info("motorMoveTo targetPos {} powerLevel {}", motor.targetPos, motor.getPowerLevel());
+		log.info("motorMoveTo targetPos {} powerLevel {}", motor.getTargetPos(), motor.getPowerLevel());
 
 		int feedbackRate = 1;
 		// if pulser (with or without fake encoder
@@ -681,7 +703,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 			// FIXME !!! - this will have to send a Long for targetPos at some
 			// point !!!!
-			double target = Math.abs(motor.targetPos);
+			double target = Math.abs(motor.getTargetPos());
 
 			int b0 = (int) target & 0xff;
 			int b1 = ((int) target >> 8) & 0xff;
@@ -694,7 +716,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorStop(Motor motor) {
+	public void motorStop(MotorControl motor) {
 
 		if (motor.getType().equals(Motor.TYPE_PULSE_STEP)) {
 			// check motor direction
@@ -793,10 +815,10 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				case PUBLISH_VERSION: {
 					// TODO - get vendor version
 					// String version = String.format("%d", msg[1]);
-					versionQueue.add(msg[1] & 0xff);
-					int v = msg[1] & 0xff;
-					log.info(String.format("PUBLISH_VERSION %d", msg[1] & 0xff));
-					invoke("publishVersion", v);
+					// versionQueue.add(msg[1] & 0xff);
+					mrlCommVersion = msg[1] & 0xff;					
+					log.info(String.format("PUBLISH_VERSION %d", mrlCommVersion));
+					invoke("publishVersion", mrlCommVersion);
 					break;
 				}
 
@@ -1115,6 +1137,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public synchronized void sendMsg(int function, int... params) {
 		// log.debug("sendMsg magic | fn " + function + " p1 " + param1 + " p2 "
 		// + param2);
+		
+		// System.out.println("Sending Message " + function );
 		try {
 
 			// not CRC16 - but cheesy error correction of bytestream
@@ -1131,20 +1155,32 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 			serial.write(function);
 
+			if (params.length > MAX_MSG_SIZE) {
+				log.error("Arduino Message size was large! Function {} Size {}" , function , params.length);
+			}
+			
+			// TODO: what should this value be?
+			//int x = 64;
 			for (int i = 0; i < params.length; ++i) {
 				serial.write(params[i]);
+				// TODO: if i is greater than X bytes we throw a small pause in when writing large messages?
+				//if (i % x == 0) {
+				//	Thread.sleep(delay);
+				//}
 			}
 			
 			// putting delay at the end so we give the message and allow the arduino to process
 			// this decreases the latency between when mrl sends the message 
 			// and the message is picked up by the arduino.
 			// This helps avoid the arduino dropping messages and getting lost/disconnected.
-		
-			Thread.sleep(1);
+			if (delay > 0) {
+				Thread.sleep(delay);
+			}
 			
 		} catch (Exception e) {
 			error("sendMsg " + e.getMessage());
 		}
+
 	}
 
 	// FIXME !! - implement sensorDetach !!!
@@ -1571,7 +1607,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public void motorReset(Motor motor) {
+	public void motorReset(MotorControl motor) {
 		// perhaps this should be in the motor control
 		// motor.reset();
 		// opportunity to reset variables on the controller
@@ -1637,13 +1673,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			// Runtime.start("serial", "Serial");
 			// Arduino.createVirtual("COM9");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			//arduino.connect("COM18");
 			
-			boolean done = true;
-			if (done){
-				return;
-			}
-			
-			arduino.connect("COM9");
+			/*
 			arduino.setLoadTimingEnabled(true);
 			long ts = System.currentTimeMillis();
 			
@@ -1658,8 +1690,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				arduino.sendMsg(ArduinoMsgCodec.GET_VERSION);
 				log.info("{}", i);
 			}
+			*/
 			
-			arduino.broadcastState();
+			//arduino.broadcastState();
 			
 			// arduino.createVirtual("COM77");
 			//arduino.createVirtual("COM18");
@@ -1750,4 +1783,18 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			Logging.logError(e);
 		}
 	}
+
+	@Override
+	public void motorAttach(MotorControl motor, int portNumber) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void motorAttach(String name, int portNumber) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
 }

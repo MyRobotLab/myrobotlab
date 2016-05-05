@@ -1,7 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -160,8 +160,8 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 		return arduino;
 	}
 
-	public boolean connect(String port) {
-		return arduino.connect(port);
+	public void connect(String port) {
+		arduino.connect(port);
 	}
 
 	public static void main(String[] args) {

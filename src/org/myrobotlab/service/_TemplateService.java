@@ -1,7 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -44,6 +44,8 @@ public class _TemplateService extends Service {
 		
 		ServiceType meta = new ServiceType(_TemplateService.class.getCanonicalName());
 		meta.addDescription("used as a general template");
+		// add dependency if necessary
+		// meta.addDependency("org.coolproject", "1.0.0");
 		meta.addCategory("general");		
 		return meta;		
 	}

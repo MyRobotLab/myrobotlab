@@ -1,4 +1,4 @@
-package org.myrobotlab.audio;
+package org.myrobotlab.service.data;
 
 import org.myrobotlab.service.AudioFile;
 	

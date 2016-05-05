@@ -1,14 +1,11 @@
-
-
 <!-- file menu button bar begin -->
 <div class="btn-group">
-
     <!-- python example resource files begin -->
     <div class="btn-group" uib-dropdown is-open="status.isopen">
-    <button class="btn btn-default uib-dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
+    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">
       <span class="glyphicon glyphicon-open">examples</span><!-- span class="caret"></span-->
     </button>	
-    <ul uib-dropdown-menu aria-labelledby="dropdownMenu1">
+    <ul uib-dropdown-menu>
       <!-- li ng-repeat="file in service.currentFileList" ng-class="navClass('{{file.type}}')"> <a href='' ng-click="msg.loadExample(getName(file.path))">{{getName(file.path)}}</a --> 
       <li ng-repeat="(key, value) in service.exampleUrls" ng-class="navClass('{{key}}')"> <a href='' ng-click="msg.loadPyRobotLabServiceScript(key)">{{key}}</a>       
         </li>
@@ -16,11 +13,24 @@
 	</div>
     <!-- python example resource files end -->
 
+    <!-- python open resource files begin -->
+    <div class="btn-group" uib-dropdown is-open="status.isopen">
+    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">
+      <span class="glyphicon glyphicon-open">open</span><!-- span class="caret"></span-->
+    </button>	
+    <ul uib-dropdown-menu>
+      <!-- li ng-repeat="file in service.currentFileList" ng-class="navClass('{{file.type}}')"> <a href='' ng-click="msg.loadExample(getName(file.path))">{{getName(file.path)}}</a --> 
+      <li ng-repeat="file in service.localPythonFiles" ng-class="navClass('{{file}}')"> <a href='' ng-click="msg.loadUserScript(file)">{{file}}</a>       
+        </li>
+    </ul>
+	</div>
+    <!-- python open resource files end -->
+
     <!-- python example resource files end -->
 
   <button type="button" class="btn btn-default" ng-click="msg.exec(editor.getValue())"><span class="glyphicon glyphicon-play"></span>execute</button>
-  <button type="button" class="btn btn-default"                        ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
-  <button type="button" class="btn btn-default"                        ng-click="msg.saveCurrentScript()"><span class="glyphicon glyphicon-save"></span>save</button>
+  <button type="button" class="btn btn-default" ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
+  <button type="button" class="btn btn-default" ng-click="msg.saveCurrentScript()"><span class="glyphicon glyphicon-save"></span>save</button>
   
 </div>
 
@@ -54,3 +64,4 @@
 
 <textarea ng-model="output" id="output" class="col-lg-12" readonly scroll-glue>
 </textarea>	
+<textarea  id="x" class="col-lg-12"/>

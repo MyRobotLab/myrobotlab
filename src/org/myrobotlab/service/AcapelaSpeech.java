@@ -47,14 +47,14 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.myrobotlab.audio.AudioData;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -524,7 +524,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 			// speech.setVoice("Ryan");
 			// TODO: fix the volume control
 			//speech.setVolume(0);
-			speech.speakBlocking("Open the pod bay door hal.");
+			speech.speakBlocking("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
 			speech.speakBlocking("I'm afraid I can't do that.");
 			
 			// speech.speak("this is a test");

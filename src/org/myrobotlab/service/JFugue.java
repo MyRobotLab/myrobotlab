@@ -28,7 +28,7 @@ package org.myrobotlab.service;
 import org.jfugue.Player;
 import org.jfugue.Rhythm;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
