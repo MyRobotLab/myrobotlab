@@ -433,21 +433,23 @@ public class Mpu6050 extends Service{
 	public static final int MPU6050_DMP_MEMORY_BANK_SIZE  = 256;
 	public static final int MPU6050_DMP_MEMORY_CHUNK_SIZE = 16;
 	
-	public static final byte ACCEL_XOUT_H = 0x3B;
+	// public static final byte ACCEL_XOUT_H = 0x3B;
 	
 	// Raw data values read by readRaw
-	// Accel values converted to G
-	// Gyro  values converted degrees/s
 	public int accelX;
 	public int accelY;
 	public int accelZ;
-	public double temperature;
+	public int temperature;
 	public int gyroX;
 	public int gyroY;
 	public int gyroZ;
+	// Accel values converted to G
+	// Temperature converted to Celcius
+	// Gyro  values converted degrees/s
 	public double accelGX;
 	public double accelGY;
 	public double accelGZ;
+	public double temperatureC;
 	public double gyroDegreeX;
 	public double gyroDegreeY;
 	public double gyroDegreeZ;
@@ -648,8 +650,7 @@ public class Mpu6050 extends Service{
 		0x00,   0x60,   0x04,   0x00, 0x40, 0x00, 0x00
 	};
 
-	private int[] buffer = new int[20];
-	// private int bytebuffer;
+	// private int[] buffer = new int[20];
 	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -728,9 +729,9 @@ public class Mpu6050 extends Service{
 	 * gyroZ
 	 * 
 	 */
-	public void readRaw(){
+	public void getRaw(){
 		// Set the start address to read from
-		byte[] writebuffer = {ACCEL_XOUT_H}; 
+		byte[] writebuffer = {MPU6050_RA_ACCEL_XOUT_H}; 
 		controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
 	    // The Arduino example executes a request_from() 
 		// Not sure if this will do the trick
@@ -741,7 +742,7 @@ public class Mpu6050 extends Service{
 		accelX = (byte)readbuffer[0]<<8 | readbuffer[1] & 0xFF;
 		accelY = (byte)readbuffer[2]<<8 | readbuffer[3] & 0xFF;
 		accelZ = (byte)readbuffer[4]<<8 | readbuffer[5] & 0xFF;
-		int temp = (byte)readbuffer[6]<<8 | readbuffer[7] & 0xFF;
+		temperature = (byte)readbuffer[6]<<8 | readbuffer[7] & 0xFF;
 		gyroX  = (byte)readbuffer[8]<<8 | readbuffer[9] & 0xFF;
 		gyroY  = (byte)readbuffer[10]<<8 | readbuffer[11] & 0xFF;
 		gyroZ  = (byte)readbuffer[12]<<8 | readbuffer[13] & 0xFF;
@@ -750,7 +751,7 @@ public class Mpu6050 extends Service{
 		accelGY = accelY / 16384.0;
 		accelGZ = accelZ / 16384.0;
 		// Convert temp to degrees Celcius 
-		temperature = (temp / 340.0)  + 36.53;
+		temperatureC = (temperature / 340.0)  + 36.53;
 		// Convert gyro to G ( assuming max +-2000 degrees/s )
 		gyroDegreeX = gyroX / 16.0;
 		gyroDegreeY = gyroY / 16.0;
@@ -1274,7 +1275,7 @@ public class Mpu6050 extends Service{
 	int getAccelZSelfTestFactoryTrim() {
 		int[] readBuffer = new int[2];
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_SELF_TEST_Z, 2, readBuffer);	
-	    return (byte)buffer[0]>>3 | (buffer[1] & 0x03);
+	    return (byte)readBuffer[0]>>3 | (readBuffer[1] & 0x03);
 	}
 
 	/** Get self-test factory trim value for gyro X axis.
@@ -2677,49 +2678,6 @@ public class Mpu6050 extends Service{
 	    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_DATA_RDY_BIT);
 	}
 
-	// ACCEL_*OUT_* registers
-
-	/** Get raw 9-axis motion sensor readings (accel/gyro/compass).
-	 * FUNCTION NOT FULLY IMPLEMENTED YET.
-	 * @param ax 16-bit signed integer container for accelerometer X-axis value
-	 * @param ay 16-bit signed integer container for accelerometer Y-axis value
-	 * @param az 16-bit signed integer container for accelerometer Z-axis value
-	 * @param gx 16-bit signed integer container for gyroscope X-axis value
-	 * @param gy 16-bit signed integer container for gyroscope Y-axis value
-	 * @param gz 16-bit signed integer container for gyroscope Z-axis value
-	 * @param mx 16-bit signed integer container for magnetometer X-axis value
-	 * @param my 16-bit signed integer container for magnetometer Y-axis value
-	 * @param mz 16-bit signed integer container for magnetometer Z-axis value
-	 * @see getMotion6()
-	 * @see getAcceleration()
-	 * @see getRotation()
-	 * @see MPU6050_RA_ACCEL_XOUT_H
-	 */
-	void getMotion9(int ax, int ay, int az, int gx, int gy, int gz, int mx, int my, int mz) {
-	    getMotion6(ax, ay, az, gx, gy, gz);
-	    // TODO: magnetometer integration
-	}
-	/** Get raw 6-axis motion sensor readings (accel/gyro).
-	 * Retrieves all currently available motion sensor values.
-	 * @param ax 16-bit signed integer container for accelerometer X-axis value
-	 * @param ay 16-bit signed integer container for accelerometer Y-axis value
-	 * @param az 16-bit signed integer container for accelerometer Z-axis value
-	 * @param gx 16-bit signed integer container for gyroscope X-axis value
-	 * @param gy 16-bit signed integer container for gyroscope Y-axis value
-	 * @param gz 16-bit signed integer container for gyroscope Z-axis value
-	 * @see getAcceleration()
-	 * @see getRotation()
-	 * @see MPU6050_RA_ACCEL_XOUT_H
-	 */
-	void getMotion6(int ax, int ay, int az, int gx, int gy, int gz) {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_XOUT_H, 14, buffer);
-	    ax = (((int)buffer[0]) << 8) | buffer[1];
-	    ay = (((int)buffer[2]) << 8) | buffer[3];
-	    az = (((int)buffer[4]) << 8) | buffer[5];
-	    gx = (((int)buffer[8]) << 8) | buffer[9];
-	    gy = (((int)buffer[10]) << 8) | buffer[11];
-	    gz = (((int)buffer[12]) << 8) | buffer[13];
-	}
 	/** Get 3-axis accelerometer readings.
 	 * These registers store the most recent accelerometer measurements.
 	 * Accelerometer measurements are written to these registers at the Sample Rate
@@ -2756,11 +2714,12 @@ public class Mpu6050 extends Service{
 	 * @param z 16-bit signed integer container for Z-axis acceleration
 	 * @see MPU6050_RA_GYRO_XOUT_H
 	 */
-	void getAcceleration(int x, int y, int z) {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_XOUT_H, 6, buffer);
-	    x = ((byte)buffer[0] << 8) | buffer[1] & 0xff;
-	    y = ((byte)buffer[2] << 8) | buffer[3] & 0xff;
-	    z = ((byte)buffer[4] << 8) | buffer[5] & 0xff;
+	void getAcceleration(int[] x, int[] y, int[] z) {
+		int readBuffer[] = new int[6]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_XOUT_H, 6, readBuffer);
+	    x[0] = ((byte)readBuffer[0] << 8) | readBuffer[1] & 0xff;
+	    y[0] = ((byte)readBuffer[2] << 8) | readBuffer[3] & 0xff;
+	    z[0] = ((byte)readBuffer[4] << 8) | readBuffer[5] & 0xff;
 	}
 	/** Get X-axis accelerometer reading.
 	 * @return X-axis acceleration measurement in 16-bit 2's complement format
@@ -2768,8 +2727,9 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_ACCEL_XOUT_H
 	 */
 	int getAccelerationX() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_XOUT_H, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1]  & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_XOUT_H, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1]  & 0xff;
 	}
 	/** Get Y-axis accelerometer reading.
 	 * @return Y-axis acceleration measurement in 16-bit 2's complement format
@@ -2777,8 +2737,9 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_ACCEL_YOUT_H
 	 */
 	int getAccelerationY() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_YOUT_H, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_YOUT_H, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 	/** Get Z-axis accelerometer reading.
 	 * @return Z-axis acceleration measurement in 16-bit 2's complement format
@@ -2786,8 +2747,9 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_ACCEL_ZOUT_H
 	 */
 	int getAccelerationZ() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_ZOUT_H, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_ZOUT_H, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 
 	// TEMP_OUT_* registers
@@ -2807,8 +2769,9 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_TEMP_OUT_H
 	 */
 	int getTemperature() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_TEMP_OUT_H, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_TEMP_OUT_H, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 
 	// GYRO_*OUT_* registers
@@ -2845,11 +2808,12 @@ public class Mpu6050 extends Service{
 	 * @see getMotion6()
 	 * @see MPU6050_RA_GYRO_XOUT_H
 	 */
-	void getRotation(int x, int y, int z) {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 6, buffer);
-	    x = (byte)buffer[0] << 8 | buffer[1] &0xff;
-	    y = (byte)buffer[2] << 8 | buffer[3] &0xff;
-	    z = (byte)buffer[4] << 8 | buffer[5] &0xff;
+	void getRotation(int x[], int y[], int z[]) {
+		int readBuffer[] = new int[6]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 6, readBuffer);
+	    x[0] = (byte)readBuffer[0] << 8 | readBuffer[1] &0xff;
+	    y[0] = (byte)readBuffer[2] << 8 | readBuffer[3] &0xff;
+	    z[0] = (byte)readBuffer[4] << 8 | readBuffer[5] &0xff;
 	}
 	/** Get X-axis gyroscope reading.
 	 * @return X-axis rotation measurement in 16-bit 2's complement format
@@ -2857,8 +2821,9 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_GYRO_XOUT_H
 	 */
 	int getRotationX() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 	/** Get Y-axis gyroscope reading.
 	 * @return Y-axis rotation measurement in 16-bit 2's complement format
@@ -2866,8 +2831,9 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_GYRO_YOUT_H
 	 */
 	int getRotationY() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_YOUT_H, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_YOUT_H, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 	/** Get Z-axis gyroscope reading.
 	 * @return Z-axis rotation measurement in 16-bit 2's complement format
@@ -2875,8 +2841,9 @@ public class Mpu6050 extends Service{
 	 * @see MPU6050_RA_GYRO_ZOUT_H
 	 */
 	int getRotationZ() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_ZOUT_H, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_ZOUT_H, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 
 	// EXT_SENS_DATA_* registers
@@ -2964,8 +2931,9 @@ public class Mpu6050 extends Service{
 	 * @see getExternalSensorByte()
 	 */
 	int getExternalSensorWord(int position) {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_EXT_SENS_DATA_00 + position, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1];
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_EXT_SENS_DATA_00 + position, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1];
 	}
 	/** Read double word (4 bytes) from external sensor data registers.
 	 * @param position Starting position (0-20)
@@ -2973,8 +2941,9 @@ public class Mpu6050 extends Service{
 	 * @see getExternalSensorByte()
 	 */
 	int getExternalSensorDWord(int position) {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_EXT_SENS_DATA_00 + position, 4, buffer);
-	    return (((byte)buffer[0]) << 24) | (((byte)buffer[1]) << 16) | (((byte)buffer[2]) << 8) | buffer[3] & 0xff;
+		int readBuffer[] = new int[4]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_EXT_SENS_DATA_00 + position, 4, readBuffer);
+	    return (((byte)readBuffer[0]) << 24) | (((byte)readBuffer[1]) << 16) | (((byte)readBuffer[2]) << 8) | readBuffer[3] & 0xff;
 	}
 
 	// MOT_DETECT_STATUS register
@@ -3613,7 +3582,7 @@ public class Mpu6050 extends Service{
 	int getFIFOCount() {
 		int readBuffer[] = new int[2]; 
 	    I2CdevReadBytes(deviceAddress, MPU6050_RA_FIFO_COUNTH, 2, readBuffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 
 	// FIFO_R_W register
@@ -3754,8 +3723,9 @@ public class Mpu6050 extends Service{
 	// XA_OFFS_* registers
 
 	int getXAccelOffset() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_XA_OFFS_H, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_XA_OFFS_H, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 	void setXAccelOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_XA_OFFS_H, offset);
@@ -3764,8 +3734,9 @@ public class Mpu6050 extends Service{
 	// YA_OFFS_* register
 
 	int getYAccelOffset() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_YA_OFFS_H, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_YA_OFFS_H, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 	void setYAccelOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_YA_OFFS_H, offset);
@@ -3774,8 +3745,9 @@ public class Mpu6050 extends Service{
 	// ZA_OFFS_* register
 
 	int getZAccelOffset() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ZA_OFFS_H, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ZA_OFFS_H, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 	void setZAccelOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_ZA_OFFS_H, offset);
@@ -3784,8 +3756,9 @@ public class Mpu6050 extends Service{
 	// XG_OFFS_USR* registers
 
 	int getXGyroOffset() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_XG_OFFS_USRH, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_XG_OFFS_USRH, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 	void setXGyroOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_XG_OFFS_USRH, offset);
@@ -3794,8 +3767,9 @@ public class Mpu6050 extends Service{
 	// YG_OFFS_USR* register
 
 	int getYGyroOffset() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_YG_OFFS_USRH, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_YG_OFFS_USRH, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 	void setYGyroOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_YG_OFFS_USRH, offset);
@@ -3804,8 +3778,9 @@ public class Mpu6050 extends Service{
 	// ZG_OFFS_USR* register
 
 	int getZGyroOffset() {
-	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ZG_OFFS_USRH, 2, buffer);
-	    return (byte)buffer[0] << 8 | buffer[1] & 0xff;
+		int readBuffer[] = new int[2]; 
+	    I2CdevReadBytes(deviceAddress, MPU6050_RA_ZG_OFFS_USRH, 2, readBuffer);
+	    return (byte)readBuffer[0] << 8 | readBuffer[1] & 0xff;
 	}
 	void setZGyroOffset(int offset) {
 	    I2CdevWriteWord(deviceAddress, MPU6050_RA_ZG_OFFS_USRH, offset);
@@ -4210,7 +4185,7 @@ public class Mpu6050 extends Service{
 		controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
 		controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
 		for (int i=0; i < length ; i++){
-			data[i] = readbuffer[i];
+			data[i] = readbuffer[i] & 0xff;
 		}
 		return length;
 	}
