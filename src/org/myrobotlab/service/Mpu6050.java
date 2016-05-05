@@ -629,7 +629,7 @@ public class Mpu6050 extends Service{
 	    0x07,   0x46,   0x01,   0x9A,                     // CFG_GYRO_SOURCE inv_send_gyro
 	    0x07,   0x47,   0x04,   0xF1, 0x28, 0x30, 0x38,   // CFG_9 inv_send_gyro -> inv_construct3_fifo
 	    0x07,   0x6C,   0x04,   0xF1, 0x28, 0x30, 0x38,   // CFG_12 inv_send_accel -> inv_construct3_fifo
-	    0x02,   0x16,   0x02,   0x00, 0x01                // D_0_22 inv_set_fifo_rate
+	    0x02,   0x16,   0x02,   0x00, 0x09                // D_0_22 inv_set_fifo_rate
 
 	    // This very last 0x01 WAS a 0x09, which drops the FIFO rate down to 20 Hz. 0x07 is 25 Hz,
 	    // 0x01 is 100Hz. Going faster than 100Hz (0x00=200Hz) tends to result in very noisy data.
@@ -942,6 +942,10 @@ public class Mpu6050 extends Service{
 
 	            log.info("Reading final memory update 6/7 (function unknown)...");
 	            writeMemoryBlock(dmpUpdates6, dmpUpdates6.length, dmpBank6, dmpAddress6, true);
+	            
+	            // Added extra FIFO reset ( not sure why needed, but I get index out of range otherwise 
+	            log.info("Resetting FIFO...");
+	            resetFIFO();
 	            
 	            log.info("Waiting for FIFO count > 2...");
 	            while ((fifoCount = getFIFOCount()) < 3);
