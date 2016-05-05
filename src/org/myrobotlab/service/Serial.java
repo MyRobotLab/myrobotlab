@@ -20,7 +20,7 @@ import org.myrobotlab.codec.serial.Codec;
 import org.myrobotlab.codec.serial.CodecOutputStream;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -51,6 +51,15 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	private Integer timeoutMS = null;
 
 	private static final long serialVersionUID = 1L;
+	
+	// rates
+	public final static Integer BAUD_2400 = 2400;
+	public final static Integer BAUD_4800 = 4800;
+	public final static Integer BAUD_9600 = 9600;
+	public final static Integer BAUD_19200 = 19200;
+	public final static Integer BAUD_38400 = 38400;
+	public final static Integer BAUD_57600 = 57600;
+	public final static Integer BAUD_115200 = 115200;
 
 	/**
 	 * deprecated hardware library
@@ -220,6 +229,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return retVal;
 	}
 
+	/*
+	 * DEPRECATED BECAUSE SIGNED BYTE ARRAYS ARE SILLY
 	public static byte[] intArrayToByteArray(int[] src) {
 
 		if (src == null) {
@@ -232,6 +243,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		}
 		return ret;
 	}
+	*/
 
 	/**
 	 * Static list of third party dependencies for this service.
@@ -261,7 +273,6 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * @param name
 	 */
 	public void addByteListener(String name) {
-		Runtime.dump();
 		ServiceInterface si = Runtime.getService(name);
 
 		// if (si instanceof SerialDataListener && si.isLocal()){
@@ -353,7 +364,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			if (this.portName != null) {
 				Port port = ports.get(portName);
 				if (port.isOpen() && port.isListening()) {
-					info("already connected to %s - disconnect", portName);
+					info("already connected to %s - disconnect first to reconnect", portName);
 					return true;
 				}
 			}
@@ -458,78 +469,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return true;
 	}
 
-	/**
-	 * for a virtual UART to create a unopened port available for connection. it
-	 * will connect itself to one end of the twisted buffer pair
-	 * 
-	 * @param portName
-	 * @param myPort
-	 * @throws IOException
-	 */
-	public String connectVirtualNullModem(String newPortName) throws IOException {
 
-		BlockingQueue<Integer> left = new LinkedBlockingQueue<Integer>();
-		BlockingQueue<Integer> right = new LinkedBlockingQueue<Integer>();
-
-		// create other end of null modem cable
-		// which MRL Services can connect to
-		Port newPort = new PortQueue(newPortName, right, left);
-		ports.put(newPortName, newPort);
-
-		// add our virtual port
-		String uartPortName = String.format("%s_uart", newPortName);
-		PortQueue vPort = new PortQueue(uartPortName, left, right);
-		connectPort(vPort, this);
-
-		info(String.format("created virtual null modem cable %s <--> %s", newPortName, uartPortName));
-		return newPortName;
-	}
-
-	/**
-	 * connecting to a virtual UART allows a Serial service to interface with a
-	 * mocked hardware. To do this a Serial service creates 2 stream ports and
-	 * twists the virtual cable between them.
-	 * 
-	 * A virtual port is half a virtual pipe, and if unconnected - typically is
-	 * not very interesting...
-	 * 
-	 * @param listener
-	 * @return
-	 * @throws IOException
-	 */
-
-	public Serial connectVirtualUART(String myPort, String uartPort) throws IOException {
-
-		// get port names
-		if (myPort == null) {
-			myPort = getName();
-		}
-
-		if (uartPort == null) {
-			uartPort = String.format("%s_uart", myPort);
-		}
-
-		BlockingQueue<Integer> left = new LinkedBlockingQueue<Integer>();
-		BlockingQueue<Integer> right = new LinkedBlockingQueue<Integer>();
-
-		/*
-		 * if (listener != null) { listeners.put(listener.getName(), listener);
-		 * }
-		 */
-
-		// add our virtual port
-		PortQueue vPort = new PortQueue(myPort, left, right);
-		ports.put(myPort, vPort);
-		// connectPort(vPort, this);
-
-		// create & connect virtual uart
-		Serial uart = (Serial) Runtime.start(uartPort, "Serial");
-		PortQueue uPort = new PortQueue(uartPort, right, left);
-		uart.connectPort(uPort, uart);
-
-		log.info(String.format("connectToVirtualUART - creating uart %s <--> %s", myPort, uartPort));
-		return uart;
-	}
 
 	/**
 	 * Dynamically create a hardware port - this method is needed to abtract
@@ -583,9 +523,6 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return portQueue;
 	}
 
-	public Serial createVirtualUART() throws IOException {
-		return connectVirtualUART(null, null);
-	}
 
 	/**
 	 * decode relies on the rx codec decode method which will block a thread
@@ -1200,14 +1137,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
-		Runtime.start("webgui", "WebGui");
-		Serial serial = (Serial) Runtime.start("serial", "Serial");
-
-		boolean done = true;
-		if (done) {
-			return;
-		}
-
+	
+	
 		// TODO - test blocking / non blocking / time-out blocking / reading an
 		// array (or don't bother?) or do with length? num bytes to block or
 		// timeout
@@ -1226,6 +1157,9 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 
 		try {
 
+			Runtime.start("webgui", "WebGui");
+			Serial serial = (Serial) Runtime.start("serial", "Serial");
+
 			int timeout = 500;// 500 ms serial timeout
 
 			// Runtime.start("gui", "GUIService");
@@ -1241,8 +1175,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 
 			// ---- Virtual Begin -----
 			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-			virtual.createVirtualPort(port);
-			Serial uart = virtual.getUART();
+			virtual.createVirtualSerial(port);
+			Serial uart = virtual.getUart(port);
 			uart.setTimeout(300);
 			// ---- Virtual End -----
 
@@ -1401,8 +1335,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			// parsing of files based on extension check
 
 			// TODO flush & close tests ?
-			serial.disconnect();
-			uart.disconnect();
+//			serial.disconnect();
+//			uart.disconnect();
 
 			// log.info(status.flatten().toString());
 

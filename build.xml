@@ -214,7 +214,8 @@
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-stream-3.0.5.jar"/>
 		<pathelement location="${repo}/com.googlecode.simpleopenni/1.96/SimpleOpenNI.jar"/>
 		<pathelement location="${repo}/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar"/>
-		<pathelement location="${repo}/org.alicebot.ab/0.0.6.26/Ab.jar"/>
+		<pathelement location="${repo}/org.alicebot.ab/0.0.1-kw/program-ab-kw-0.0.1.jar"/>
+		<pathelement location="${repo}/org.json/20090211/json-20090211.jar"/>
 		<pathelement location="${repo}/com.leapmotion/2.1.3/LeapJava.jar"/>
 		<pathelement location="${repo}/se.comhem.chess/1.1.2/cuckoo112.jar"/>
 		<pathelement location="${repo}/javazoom.spi/1.9.5/mp3spi1.9.5.jar"/>
@@ -290,6 +291,8 @@
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.19/core-0.28.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/webcam-capture-0.3.10.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/bridj-0.6.2.jar"/>
+		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/sosia.jar"/>
+		
 		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-arch-x86_64-w64-mingw32.jar"/>
 		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-noarch-5.4.jar"/>
 		<pathelement location="${repo}/com.coobird.thumbnail/0.4.2/thumbnailator-0.4.2-all.jar"/>

@@ -26,7 +26,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Serial;
 import org.slf4j.Logger;
 
 public class MethodCache {
@@ -99,8 +98,8 @@ public class MethodCache {
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 			MethodCache mc = MethodCache.getInstance();
 			Class[] paramsTypes = new Class[] { String.class, Double.class, Double.class, Double.class, Double.class };
-			Method method = mc.getMethod(Serial.class, "connect", paramsTypes);
-			log.info(method.getName());
+			// Method method = mc.getMethod(Serial.class, "connect", paramsTypes);
+			// log.info(method.getName());
 
 		} catch (Exception e) {
 			Logging.logError(e);

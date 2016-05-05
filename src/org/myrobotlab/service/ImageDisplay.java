@@ -8,7 +8,7 @@ import java.awt.event.MouseListener;
 import javax.swing.JFrame;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.DisplayedImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -39,6 +39,7 @@ public class ImageDisplay extends Service {
 			Runtime.start("gui", "GUIService");
 			Runtime.start("python", "Python");
 			//Runtime.start("webgui", "WebGui");
+			imageDisplay.display("https://www.cloudflare.com/ssl/ssl.png");
 			imageDisplay.display(path3);
 			imageDisplay.displayFullScreen("http://cdn.collider.com/wp-content/uploads/2015/06/minions-image-bob-kevin-stuart.jpg");
 			//imageDisplay.displayFS(path3);

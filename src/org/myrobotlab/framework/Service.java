@@ -56,7 +56,6 @@ import java.util.TreeMap;
 import org.myrobotlab.cache.LRUMethodCache;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.Recorder;
-import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -563,8 +562,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			}
 		}
 		// buildDNA(myKey, className, "merged dna");
-		log.info("merged dna \n{}", dna);
-		log.debug("here");
+		log.debug("merged dna \n{}", dna);
 	}
 
 	/**
@@ -896,7 +894,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			return null;
 		}
 
-		return Runtime.create(fullkey, sr.fullTypeName);
+		// WOW THIS WAS A NASTY BUG !!!
+		// return Runtime.create(fullkey, sr.fullTypeName);
+		return Runtime.create(sr.actualName, sr.fullTypeName);		
 	}
 
 	// -------------------------------- new createPeer begin

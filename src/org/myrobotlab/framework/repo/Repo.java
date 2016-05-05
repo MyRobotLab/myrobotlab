@@ -35,6 +35,7 @@ import org.apache.ivy.util.url.URLHandlerRegistry;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceReservation;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
