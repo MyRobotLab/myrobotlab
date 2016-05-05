@@ -649,8 +649,6 @@ public class Mpu6050 extends Service{
 		0x01,   0x62,   0x02,   0x00, 0x00,
 		0x00,   0x60,   0x04,   0x00, 0x40, 0x00, 0x00
 	};
-
-	// private int[] buffer = new int[20];
 	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -676,7 +674,7 @@ public class Mpu6050 extends Service{
 			int[] buffer = new int[] {(int)0xff, (int)0xd0};
 		    int a = (byte)buffer[0] << 8 | buffer[1] & 0xff;
 		    log.info(String.format("0xffd0 should be -48 is = %s", a));
-		    
+		        
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -852,8 +850,9 @@ public class Mpu6050 extends Service{
 	            int[] dmpUpdate = new int[13];
 	            int j;
 	            int pos = 0;
-	            int bank = 0, address = 0, dataSize = 0;
-	            for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++){
+	            int bank = 0, address = 0;
+	            int dataSize = dmpUpdate[2];
+	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
 	            	if (j==0){
 	            		bank = dmpUpdates[j];
 	            		}
@@ -861,7 +860,7 @@ public class Mpu6050 extends Service{
 	            		address = dmpUpdates[j];
 	            		}
 	            	if (j==2){
-	            		dataSize = dmpUpdates[j];
+	            		// dataSize = dmpUpdates[j];
 	            		}
 	            	if (j>2){
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
@@ -870,7 +869,8 @@ public class Mpu6050 extends Service{
 	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
 
 	            log.info("Writing final memory update 2/7 (function unknown)...");
-	            for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++){
+	            dataSize = dmpUpdate[pos+2];
+	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
 	            	if (j==0){
 	            		bank = dmpUpdates[j];
 	            		}
@@ -878,7 +878,7 @@ public class Mpu6050 extends Service{
 	            		address = dmpUpdates[j];
 	            		}
 	            	if (j==2){
-	            		dataSize = dmpUpdates[j];
+	            		// dataSize = dmpUpdates[j];
 	            		}
 	            	if (j>2){
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
@@ -921,7 +921,8 @@ public class Mpu6050 extends Service{
 	            resetDMP();
 
 	            log.info("Writing final memory update 3/7 (function unknown)...");
-	            for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++){
+	            dataSize = dmpUpdate[pos+2];
+	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
 	            	if (j==0){
 	            		bank = dmpUpdates[j];
 	            		}
@@ -929,7 +930,7 @@ public class Mpu6050 extends Service{
 	            		address = dmpUpdates[j];
 	            		}
 	            	if (j==2){
-	            		dataSize = dmpUpdates[j];
+	            		// dataSize = dmpUpdates[j];
 	            		}
 	            	if (j>2){
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
@@ -938,7 +939,8 @@ public class Mpu6050 extends Service{
 	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
 
 	            log.info("Writing final memory update 4/7 (function unknown)...");
-	            for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++){
+	            dataSize = dmpUpdate[pos+2];
+	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
 	            	if (j==0){
 	            		bank = dmpUpdates[j];
 	            		}
@@ -946,7 +948,7 @@ public class Mpu6050 extends Service{
 	            		address = dmpUpdates[j];
 	            		}
 	            	if (j==2){
-	            		dataSize = dmpUpdates[j];
+	            		// dataSize = dmpUpdates[j];
 	            		}
 	            	if (j>2){
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
@@ -954,7 +956,8 @@ public class Mpu6050 extends Service{
 	            }
 	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
 	            log.info("Writing final memory update 5/7 (function unknown)...");
-	            for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++){
+	            dataSize = dmpUpdate[pos+2];
+	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
 	            	if (j==0){
 	            		bank = dmpUpdates[j];
 	            		}
@@ -962,7 +965,7 @@ public class Mpu6050 extends Service{
 	            		address = dmpUpdates[j];
 	            		}
 	            	if (j==2){
-	            		dataSize = dmpUpdates[j];
+	            		// dataSize = dmpUpdates[j];
 	            		}
 	            	if (j>2){
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
@@ -982,7 +985,8 @@ public class Mpu6050 extends Service{
 	            log.info(String.format("Current interrupt status=x%02X",getIntStatus()));
 
 	            log.info("Reading final memory update 6/7 (function unknown)...");
-	            for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++){
+	            dataSize = dmpUpdate[pos+2];
+	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
 	            	if (j==0){
 	            		bank = dmpUpdates[j];
 	            		}
@@ -990,7 +994,7 @@ public class Mpu6050 extends Service{
 	            		address = dmpUpdates[j];
 	            		}
 	            	if (j==2){
-	            		dataSize = dmpUpdates[j];
+	            		// dataSize = dmpUpdates[j];
 	            		}
 	            	if (j>2){
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
@@ -1010,7 +1014,8 @@ public class Mpu6050 extends Service{
 	            log.info(String.format("Current interrupt status=x%02X",getIntStatus()));
 
 	            log.info("Writing final memory update 7/7 (function unknown)...");
-	            for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++){
+	            dataSize = dmpUpdate[pos+2];
+	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
 	            	if (j==0){
 	            		bank = dmpUpdates[j];
 	            		}
@@ -1018,7 +1023,7 @@ public class Mpu6050 extends Service{
 	            		address = dmpUpdates[j];
 	            		}
 	            	if (j==2){
-	            		dataSize = dmpUpdates[j];
+	            		// dataSize = dmpUpdates[j];
 	            		}
 	            	if (j>2){
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
@@ -4264,7 +4269,7 @@ public class Mpu6050 extends Service{
 	    // Set the specified bit to 0
 	    else {
 	    	newbyte = (b & ~(bitmask << bitNum));
-	    	}
+	    }
 	    return I2CdevWriteByte(devAddr, regAddr, newbyte);
 	}
 	boolean I2CdevWriteByte(int devAddr, int regAddr, int data) {

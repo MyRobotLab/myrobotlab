@@ -478,8 +478,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	static public ServiceType getMetaData(){
 		
 		ServiceType meta = new ServiceType(Adafruit16CServoDriver.class.getCanonicalName());
-		meta.addDescription("Adafruit Motor Shield Service");
-		meta.addCategory("shield", "motor");		
+		meta.addDescription("Adafruit 16-Channel PWM/Servo Driver");
+		meta.addCategory("shield", "servo & pwm");		
 		/*
 		meta.addPeer("arduino", "Arduino", "our Arduino");
 		meta.addPeer("raspi", "RasPi", "our RasPi");
