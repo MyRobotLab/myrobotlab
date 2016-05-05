@@ -14,20 +14,22 @@ angular.module('mrlapp.service')
                         //-->free-form-resizing (width is defined)
 
                         scope.panel.notifySizeChanged = function (width) {
-                                        
-                            if (!width) {
-                                scope.resetResizing();
-                            }
-                            width = scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].width + width || scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].width;
-                           
-                           /*
+
+//                            if (!width) {
+//                                scope.resetResizing();
+//                            }
+                            width = width || scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].width;
+
                             element.css({
                                 width: width + 'px'
                             });
-                            */
 
                         };
                         scope.panel.notifySizeChanged();
+                        
+                        scope.panel.getCurrentWidth = function () {
+                            return element.width();
+                        };
 
                         scope.panel.notifyZIndexChanged = function () {
                             element.css({
@@ -36,14 +38,14 @@ angular.module('mrlapp.service')
                         };
                         scope.panel.notifyZIndexChanged();
 
-                        scope.$watch(function () {
-                            return element.height();
-                        }, function () {
-                            scope.panel.height = element.height();
-                        });
+//                        scope.$watch(function () {
+//                            return element.height();
+//                        }, function () {
+//                            scope.panel.height = element.height();
+//                        });
 
                         //position: 'absolute' is necessary (even tough it introduces some more work)
-                        //without it other panels jump / glitch around when a panel is moved from this list
+                        //without it other panels jump / glitch around when a panel is (re-)moved from this list
                         if (!scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].denyMoving) {
                             element.css({
                                 position: 'absolute'

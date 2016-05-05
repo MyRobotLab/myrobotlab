@@ -6,6 +6,25 @@ angular.module('mrlapp.service')
                     },
                     link: function (scope, elem, attr) {
 
+                        elem.css({
+                            'overflow-x': 'auto',
+                            'overflow-y': 'auto'
+                        });
+                        
+                        scope.panel.notifySizeYChanged = function (height) {
+                            elem.css({
+                                height: height + 'px'
+                            });
+                        };
+                        
+                        scope.panel.getCurrentHeight = function () {
+                            return elem.height();
+                        };
+                        
+//                        elem.css({
+//                            height: '500px'
+//                        });
+
                         var isUndefinedOrNull = function (val) {
                             return angular.isUndefined(val) || val === null;
                         };

@@ -35,7 +35,7 @@ angular.module('mrlapp.service')
                 var run = function () {
                     $log.info('initalizing serviceSvc');
 
-//                    var lastPosY; //unused, atm
+                    var lastPosY = -40; //store the y-position of the last added panel
 
                     var gateway = mrl.getGateway();
                     var runtime = mrl.getRuntime();
@@ -110,6 +110,38 @@ angular.module('mrlapp.service')
                                 isUndefinedOrNull(service.panelsizes[panelname])) {
                             //explanation in service/js/_templategui.js
                             panelsize = {
+//                                sizes: {
+//                                    //size-options, these will be shown as a option to select from
+//                                    //(and can be applied)
+//                                    tiny: {
+//                                        glyphicon: 'glyphicon glyphicon-minus', //define a glyphicon to show (as a symbol)
+//                                        width: 200, //width of this size-setting
+//                                        body: 'collapse', //means that the body-section of the panel won't be shown
+//                                        footer: 'collapse'//don't show footer-section of panel
+//                                    },
+//                                    small: {
+//                                        glyphicon: 'glyphicon glyphicon-resize-small',
+//                                        width: 400
+//                                    },
+//                                    large: {
+//                                        glyphicon: 'glyphicon glyphicon-resize-full',
+//                                        width: 800
+//                                    },
+//                                    full: {
+//                                        glyphicon: 'glyphicon glyphicon-fullscreen',
+//                                        width: 0,
+//                                        fullscreen: true, //show fullscreen (modal)
+//                                        body: 'collapse',
+//                                        footer: 'collapse'
+//                                    },
+//                                    free: {
+//                                        glyphicon: 'glyphicon glyphicon-resize-horizontal',
+//                                        width: 800,
+//                                        freeform: true //allow free-form resizing (width)
+//                                    }
+//                                },
+//                                order: ["free", "full", "large", "small", "tiny"], //shows your size-options in _self order
+//                                aktsize: 'large'//set this as the start-/default-size
                                 sizes: {
                                     //size-options, these will be shown as a option to select from
                                     //(and can be applied)
@@ -141,7 +173,7 @@ angular.module('mrlapp.service')
                                     }
                                 },
                                 order: ["free", "full", "large", "small", "tiny"], //shows your size-options in _self order
-                                aktsize: 'large'//set this as the start-/default-size
+                                aktsize: 'free'//set this as the start-/default-size
                             };
                         } else {
                             panelsize = service.panelsizes[panelname];
@@ -160,33 +192,32 @@ angular.module('mrlapp.service')
                         panelsize.order.push('min');
                         panelsize.oldsize = null;
                         //posy
-                        //TODO - come back here
-                        //liked this more, but ...
-                        var panelsarray = _self.getPanelsList();
-                        var posy = 0;
-                        for (var i = 0; i < panelsarray.length; i++) {
-                            var value = panelsarray[i];
-                            var height = 300;
-                            var spacing = 30;
-                            var comp1 = value.posy;
-                            var comp2 = value.posy + value.height;
-                            if (posy <= comp1 && posy + height >= comp1) {
-                                posy = comp2 + spacing;
-                                i = 0;
-                            } else if (posy <= comp2 && posy + height >= comp2) {
-                                posy = comp2 + spacing;
-                                i = 0;
-                            } else if (posy >= comp1 && posy <= comp2) {
-                                posy = comp2 + spacing;
-                                i = 0;
-                            } else if (posy + height >= comp1 && posy + height <= comp2) {
-                                posy = comp2 + spacing;
-                                i = 0;
-                            }
-                        }
-                        //... this is working better atm <-WRONG!!! NoWorky in chrome !!!
-//                        lastPosY += 30;
-//                        var posy = lastPosY;
+                        //deprecated, remove at some point ...
+//                        var panelsarray = _self.getPanelsList();
+//                        var posy = 0;
+//                        for (var i = 0; i < panelsarray.length; i++) {
+//                            var value = panelsarray[i];
+//                            var height = 300;
+//                            var spacing = 30;
+//                            var comp1 = value.posy;
+//                            var comp2 = value.posy + value.height;
+//                            if (posy <= comp1 && posy + height >= comp1) {
+//                                posy = comp2 + spacing;
+//                                i = 0;
+//                            } else if (posy <= comp2 && posy + height >= comp2) {
+//                                posy = comp2 + spacing;
+//                                i = 0;
+//                            } else if (posy >= comp1 && posy <= comp2) {
+//                                posy = comp2 + spacing;
+//                                i = 0;
+//                            } else if (posy + height >= comp1 && posy + height <= comp2) {
+//                                posy = comp2 + spacing;
+//                                i = 0;
+//                            }
+//                        }
+                        //... this is working a lot better
+                        lastPosY += 40;
+                        var posy = lastPosY;
                         //zindex
                         var zindex = 1;
                         angular.forEach(panels, function (value, key) {
@@ -481,7 +512,7 @@ angular.module('mrlapp.service')
                             _self.addService(name, registry[name]);
                         }
                     }
-                    
+
                     ready = true;
 //                    if (isUndefinedOrNull(deferred)) {
 //                        deferred.resolve();

@@ -62,6 +62,14 @@
                 <li>
                     <form class="navbar-form" role="search">
                         <div class="input-group">
+                            <div class="input-group-btn">
+                                <button class="btn btn-default" type="button" tooltip-placement="bottom" uib-tooltip="Hide All" ng-click="showAll(false)">
+                                    <i class="glyphicon glyphicon-eye-close"></i>
+                                </button>
+                                <button class="btn btn-default" type="button" tooltip-placement="bottom" uib-tooltip="Show All" ng-click="showAll(true)">
+                                    <i class="glyphicon glyphicon-eye-open"></i>
+                                </button>
+                            </div>
                             <input type="text" class="form-control"
                                    ng-model="searchSelectedPanel"
                                    placeholder="Search"
@@ -70,16 +78,9 @@
                                    typeahead-template-url="nav/templates/searchtemplate.html"
                                    typeahead-on-select='searchOnSelect($item, $model, $label)'>
                             <div class="input-group-btn">
-                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Search">
-                                <i class="glyphicon glyphicon-search"></i>
-                            </button>
-                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Hide All" ng-click="showAll(false)">
-                                <i class="glyphicon glyphicon-eye-close"></i>
-                            </button>
-                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Show All" ng-click="showAll(true)">
-                                <i class="glyphicon glyphicon-eye-open"></i>
-                            </button>
-
+                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Search">
+                                    <i class="glyphicon glyphicon-search"></i>
+                                </button>
                             </div>
                         </div>
                     </form>
