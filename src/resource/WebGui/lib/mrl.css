@@ -10,18 +10,18 @@
     	min-width: 50px;
     	min-height: 70px;
 */
-    width: 600px;
-    resize: both;
-   	overflow: auto;
+    /*width: 600px;*/
+    /*resize: both;*/
+   	/*overflow: auto;*/
 }    
 
 .panel-footer{
-	// position: absolute;
-	// height: 50px; 
-	//background: blue;
-	//position: absolute; //tells the browser to position #footer relative to #wrapper
-	// bottom: 3; #sticks the footer 3px above the bottom edges of the #wrapper div
-	// width: 100%;
-	//text-align: center;
+/*	 position: absolute;
+	 height: 50px; 
+	 background: blue;
+ 	 position: absolute; tells the browser to position #footer relative to #wrapper
+	 bottom: 3; sticks the footer 3px above the bottom edges of the #wrapper div
+	 width: 100%;
+	 text-align: center;*/
    
 }
