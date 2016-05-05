@@ -286,9 +286,6 @@
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jscience-4.3.1.jar"/>
 		<!-- end oculus stuff.. TODO: clean it up! -->
 		
-		<pathelement location="${repo}/net.sourceforge.boofcv/0.19/BoofCV-WebcamCapture-0.19.jar"/>
-		<pathelement location="${repo}/net.sourceforge.boofcv/0.19/BoofCV-xuggler-0.19.jar"/>
-		<pathelement location="${repo}/net.sourceforge.boofcv/0.19/core-0.28.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/webcam-capture-0.3.10.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/bridj-0.6.2.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/sosia.jar"/>
@@ -313,6 +310,32 @@
         <pathelement location="${repo}/opennlp/1.6/opennlp-tools-1.6.0.jar"/>
 
 		<pathelement location="${repo}/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>	
+
+		<pathelement location="${repo}/org.node/0.1.1/nodyn-0.1.1-20141121.193443-283.jar"/>
+		
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-android-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-calibration-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-feature-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-geo-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-io-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-ip-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-jcodec-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-learning-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-openkinect-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-recognition-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-sfm-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-visualize-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-WebcamCapture-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-xuggler-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/core-0.29.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/ddogleg-0.9.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/dense64-0.29.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/equation-0.29.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/georegression-0.10.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/simple-0.29.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/xmlpull-1.1.3.1.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/xpp3_min-1.1.4c.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/xstream-1.4.7.jar"/>
 
 
 		<pathelement location="build-lib/tools.jar"/>
