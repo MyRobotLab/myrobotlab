@@ -435,7 +435,7 @@ public class Mpu6050 extends Service{
 	
 	// public static final byte ACCEL_XOUT_H = 0x3B;
 	
-	// Raw data values read by readRaw
+	// Raw data values read by getRaw
 	public int accelX;
 	public int accelY;
 	public int accelZ;
@@ -923,6 +923,11 @@ public class Mpu6050 extends Service{
 	   
 	            log.info("Writing final memory update 5/7 (function unknown)...");
 	            writeMemoryBlock(dmpUpdates5, dmpUpdates5.length, dmpBank5, dmpAddress5, true);
+	            
+	            // Added extra FIFO reset ( not sure why needed, but I get index out of range otherwise 
+	            log.info("Resetting FIFO...");
+	            resetFIFO();
+	            
 	            log.info("Waiting for FIFO count > 2...");
 	            while ((fifoCount = getFIFOCount()) < 3);
 
