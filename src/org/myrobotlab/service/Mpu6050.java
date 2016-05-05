@@ -866,6 +866,7 @@ public class Mpu6050 extends Service{
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
 	            	}
 	            }
+	    	    log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
 	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
 
 	            log.info("Writing final memory update 2/7 (function unknown)...");
@@ -884,6 +885,7 @@ public class Mpu6050 extends Service{
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
 	            	}
 	            }
+	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
 	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
 
 	            log.info("Resetting FIFO...");
@@ -936,6 +938,7 @@ public class Mpu6050 extends Service{
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
 	            	}
 	            }
+	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
 	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
 
 	            log.info("Writing final memory update 4/7 (function unknown)...");
@@ -954,6 +957,7 @@ public class Mpu6050 extends Service{
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
 	            	}
 	            }
+	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
 	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
 	            log.info("Writing final memory update 5/7 (function unknown)...");
 	            dataSize = dmpUpdate[pos+2];
@@ -971,6 +975,7 @@ public class Mpu6050 extends Service{
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
 	            	}
 	            }
+	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
 	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
 	            log.info("Waiting for FIFO count > 2...");
 	            while ((fifoCount = getFIFOCount()) < 3);
@@ -1000,6 +1005,7 @@ public class Mpu6050 extends Service{
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
 	            	}
 	            }
+	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
 	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
 	            log.info("Waiting for FIFO count > 2...");
 	            while ((fifoCount = getFIFOCount()) < 3);
@@ -1029,6 +1035,7 @@ public class Mpu6050 extends Service{
 	            		dmpUpdate[j-3] = dmpUpdates[pos];
 	            	}
 	            }
+	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
 	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
 	            log.info("DMP is good to go! Finally.");
 
