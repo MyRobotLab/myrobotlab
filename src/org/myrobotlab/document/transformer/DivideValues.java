@@ -43,6 +43,9 @@ public class DivideValues extends AbstractStage {
         //log.info("Compute {} divided by {}", doc.getField(dividendField).get(i), doc.getField(divisorField).get(i));
         Double divisor = convertToDouble(doc.getField(divisorField).get(i));
         Double dividend = convertToDouble(doc.getField(dividendField).get(i));
+        if (dividend == 0.0) {
+          continue;
+        }
         Double result = divisor/dividend;
         results.add(result);
       } catch (ClassCastException e) {
