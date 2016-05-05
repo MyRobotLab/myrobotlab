@@ -23,7 +23,7 @@ public class RegexExtractor extends AbstractStage {
 	private String outputField = null;
 	private List<Integer> keepGroups = null;
 	private String regex = null;
-	
+
 	private Pattern pattern;
 	
 	@Override
@@ -33,6 +33,7 @@ public class RegexExtractor extends AbstractStage {
 			outputField = config.getProperty("outputField", "entity");
       List<String> keepGroupsStr = config.getListParam("keepGroups");
 			regex = config.getProperty("regex");
+      processOnlyNull = "true".equalsIgnoreCase(config.getStringParam("processOnlyNull"));
 
       keepGroups = new ArrayList<Integer>();
       if (keepGroupsStr == null) {
@@ -51,6 +52,10 @@ public class RegexExtractor extends AbstractStage {
 		if (!doc.hasField(inputField)){
 			return null;
 		}
+
+    if (processOnlyNull && doc.hasField(outputField)) {
+      return null;
+    }
 
     List<String> matches = new ArrayList<String>();
 		for (Object o : doc.getField(inputField)) {
