@@ -42,7 +42,7 @@ public class CastValuesToDouble extends AbstractStage {
 				double i = Double.valueOf(val.toString().replaceAll(",", ""));
 				doubles.add(i);
 			} catch (NumberFormatException e) {
-				log.warn("Failed to cast value to double: doc id: {} value {}", doc.getId(), val);
+				log.warn("Failed to cast value to double: doc id: {} field: {} value: {}", doc.getId(), inputField, val);
 				// e.printStackTrace();
 				// ??
 				// doc.setStatus(ProcessingStatus.ERROR);
