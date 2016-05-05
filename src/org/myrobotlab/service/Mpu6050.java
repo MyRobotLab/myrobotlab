@@ -639,7 +639,7 @@ public class Mpu6050 extends Service{
 	    // the FIFO output at the desired rate. Handling FIFO overflow cleanly is also a good idea.
 	};
 	
-
+	/* Replaced by the dmpDpdates1-7 below
 	public static final int[] dmpUpdates = {
 		0x01,   0xB2,   0x02,   0xFF, 0xFF,
 		0x01,   0x90,   0x04,   0x09, 0x23, 0xA1, 0x35,
@@ -649,6 +649,35 @@ public class Mpu6050 extends Service{
 		0x01,   0x62,   0x02,   0x00, 0x00,
 		0x00,   0x60,   0x04,   0x00, 0x40, 0x00, 0x00
 	};
+	*/
+	public static final int dmpBank1    = 0x01;
+	public static final int dmpAddress1 = 0xB2;
+	public static final int[] dmpUpdates1 = {0xFF, 0xFF};
+	
+	public static final int dmpBank2    = 0x01;
+	public static final int dmpAddress2 = 0x90;	
+	public static final int[] dmpUpdates2 = {0x09, 0x23, 0xA1, 0x35};
+	
+	public static final int dmpBank3    = 0x01;
+	public static final int dmpAddress3 = 0x6A;
+	public static final int[] dmpUpdates3 = {0x06, 0x00};
+	
+	public static final int dmpBank4    = 0x01;
+	public static final int dmpAddress4 = 0x60;
+	public static final int[] dmpUpdates4 = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	
+	public static final int dmpBank5    = 0x00;
+	public static final int dmpAddress5 = 0x60;
+	public static final int[] dmpUpdates5 = {0x40, 0x00, 0x00, 0x00};
+	
+	public static final int dmpBank6    = 0x01;
+	public static final int dmpAddress6 = 0x62;
+	public static final int[] dmpUpdates6 = {0x00, 0x00};
+	
+	public static final int dmpBank7    = 0x00;
+	public static final int dmpAddress7 = 0x60;
+	public static final int[] dmpUpdates7 = {0x00, 0x40, 0x00, 0x00};
+	
 	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -847,46 +876,10 @@ public class Mpu6050 extends Service{
 	            //setZGyroOffset(0);
 
 	            log.info("Writing final memory update 1/7 (function unknown)...");
-	            int[] dmpUpdate = new int[13];
-	            int j;
-	            int pos = 0;
-	            int bank = 0, address = 0;
-	            int dataSize = dmpUpdate[2];
-	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
-	            	if (j==0){
-	            		bank = dmpUpdates[j];
-	            		}
-	            	if (j==1){ 
-	            		address = dmpUpdates[j];
-	            		}
-	            	if (j==2){
-	            		// dataSize = dmpUpdates[j];
-	            		}
-	            	if (j>2){
-	            		dmpUpdate[j-3] = dmpUpdates[pos];
-	            	}
-	            }
-	    	    log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
-	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
+	            writeMemoryBlock(dmpUpdates1, dmpUpdates1.length, dmpBank1, dmpAddress1, true);
 
 	            log.info("Writing final memory update 2/7 (function unknown)...");
-	            dataSize = dmpUpdate[pos+2];
-	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
-	            	if (j==0){
-	            		bank = dmpUpdates[j];
-	            		}
-	            	if (j==1){ 
-	            		address = dmpUpdates[j];
-	            		}
-	            	if (j==2){
-	            		// dataSize = dmpUpdates[j];
-	            		}
-	            	if (j>2){
-	            		dmpUpdate[j-3] = dmpUpdates[pos];
-	            	}
-	            }
-	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
-	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
+	            writeMemoryBlock(dmpUpdates2, dmpUpdates2.length, dmpBank2, dmpAddress2, true);
 
 	            log.info("Resetting FIFO...");
 	            resetFIFO();
@@ -923,60 +916,13 @@ public class Mpu6050 extends Service{
 	            resetDMP();
 
 	            log.info("Writing final memory update 3/7 (function unknown)...");
-	            dataSize = dmpUpdate[pos+2];
-	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
-	            	if (j==0){
-	            		bank = dmpUpdates[j];
-	            		}
-	            	if (j==1){ 
-	            		address = dmpUpdates[j];
-	            		}
-	            	if (j==2){
-	            		// dataSize = dmpUpdates[j];
-	            		}
-	            	if (j>2){
-	            		dmpUpdate[j-3] = dmpUpdates[pos];
-	            	}
-	            }
-	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
-	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
-
+	            writeMemoryBlock(dmpUpdates3, dmpUpdates3.length, dmpBank3, dmpAddress3, true);
+	    
 	            log.info("Writing final memory update 4/7 (function unknown)...");
-	            dataSize = dmpUpdate[pos+2];
-	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
-	            	if (j==0){
-	            		bank = dmpUpdates[j];
-	            		}
-	            	if (j==1){ 
-	            		address = dmpUpdates[j];
-	            		}
-	            	if (j==2){
-	            		// dataSize = dmpUpdates[j];
-	            		}
-	            	if (j>2){
-	            		dmpUpdate[j-3] = dmpUpdates[pos];
-	            	}
-	            }
-	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
-	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
+	            writeMemoryBlock(dmpUpdates4, dmpUpdates4.length, dmpBank4, dmpAddress4, true);
+	   
 	            log.info("Writing final memory update 5/7 (function unknown)...");
-	            dataSize = dmpUpdate[pos+2];
-	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
-	            	if (j==0){
-	            		bank = dmpUpdates[j];
-	            		}
-	            	if (j==1){ 
-	            		address = dmpUpdates[j];
-	            		}
-	            	if (j==2){
-	            		// dataSize = dmpUpdates[j];
-	            		}
-	            	if (j>2){
-	            		dmpUpdate[j-3] = dmpUpdates[pos];
-	            	}
-	            }
-	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
-	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
+	            writeMemoryBlock(dmpUpdates5, dmpUpdates5.length, dmpBank5, dmpAddress5, true);
 	            log.info("Waiting for FIFO count > 2...");
 	            while ((fifoCount = getFIFOCount()) < 3);
 
@@ -990,23 +936,8 @@ public class Mpu6050 extends Service{
 	            log.info(String.format("Current interrupt status=x%02X",getIntStatus()));
 
 	            log.info("Reading final memory update 6/7 (function unknown)...");
-	            dataSize = dmpUpdate[pos+2];
-	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
-	            	if (j==0){
-	            		bank = dmpUpdates[j];
-	            		}
-	            	if (j==1){ 
-	            		address = dmpUpdates[j];
-	            		}
-	            	if (j==2){
-	            		// dataSize = dmpUpdates[j];
-	            		}
-	            	if (j>2){
-	            		dmpUpdate[j-3] = dmpUpdates[pos];
-	            	}
-	            }
-	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
-	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
+	            writeMemoryBlock(dmpUpdates6, dmpUpdates6.length, dmpBank6, dmpAddress6, true);
+	            
 	            log.info("Waiting for FIFO count > 2...");
 	            while ((fifoCount = getFIFOCount()) < 3);
 
@@ -1020,23 +951,8 @@ public class Mpu6050 extends Service{
 	            log.info(String.format("Current interrupt status=x%02X",getIntStatus()));
 
 	            log.info("Writing final memory update 7/7 (function unknown)...");
-	            dataSize = dmpUpdate[pos+2];
-	            for (j = 0; j < 4 || j < dataSize + 3; j++, pos++){
-	            	if (j==0){
-	            		bank = dmpUpdates[j];
-	            		}
-	            	if (j==1){ 
-	            		address = dmpUpdates[j];
-	            		}
-	            	if (j==2){
-	            		// dataSize = dmpUpdates[j];
-	            		}
-	            	if (j>2){
-	            		dmpUpdate[j-3] = dmpUpdates[pos];
-	            	}
-	            }
-	            log.info(String.format("writeMemoryB dmpUpdate[0] x%02x, datasize %s, bank x%02x, address x%02x", dmpUpdate[0], dataSize, bank, address));
-	            writeMemoryBlock(dmpUpdate, dataSize, bank, address,true);
+	            writeMemoryBlock(dmpUpdates7, dmpUpdates7.length, dmpBank7, dmpAddress7, true);
+	            
 	            log.info("DMP is good to go! Finally.");
 
 	            log.info("Disabling DMP (you turn it on later)...");
