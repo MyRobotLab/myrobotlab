@@ -91,7 +91,7 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 		accelX.setText(String.format("%.3f",mpu6050.accelGX));
 		accelY.setText(String.format("%.3f",mpu6050.accelGY));
 		accelZ.setText(String.format("%.3f",mpu6050.accelGZ));
-		temperature.setText(String.format("%.3f",mpu6050.temperature));
+		temperature.setText(String.format("%.3f",mpu6050.temperatureC));
 		gyroX.setText(String.format("%.3f",mpu6050.gyroDegreeX));
 		gyroY.setText(String.format("%.3f",mpu6050.gyroDegreeY));
 		gyroZ.setText(String.format("%.3f",mpu6050.gyroDegreeZ));
