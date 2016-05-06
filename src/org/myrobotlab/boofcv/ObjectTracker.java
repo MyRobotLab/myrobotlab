@@ -8,24 +8,40 @@ import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.ImageBase;
 import boofcv.struct.image.ImageType;
 import boofcv.struct.image.Planar;
+
 import com.github.sarxos.webcam.Webcam;
+
 import georegression.geometry.UtilPolygons2D_F64;
 import georegression.struct.point.Point2D_I32;
 import georegression.struct.shapes.Quadrilateral_F64;
 import georegression.struct.shapes.Rectangle2D_F64;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.util.List;
+
+import org.myrobotlab.service.BoofCV;
+import org.myrobotlab.service.LeapMotion;
+import org.myrobotlab.service.data.OculusData;
+import org.myrobotlab.service.data.Point2Df;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.interfaces.Point2DfListener;
+import org.myrobotlab.service.interfaces.Point2DfPublisher;
 
 
 public class ObjectTracker<T extends ImageBase> extends JPanel
 implements MouseListener, MouseMotionListener {
 
-TrackerObjectQuad<T> tracker;
+
+	BoofCV myService = null;
+	TrackerObjectQuad<T> tracker;
 
 // location of the target being tracked
 Quadrilateral_F64 target = new Quadrilateral_F64();
@@ -39,6 +55,7 @@ volatile int mode = 0;
 
 BufferedImage workImage;
 
+Point2Df rectangleCenter = new Point2Df(0.0f,0.0f);
 
 JFrame window;
 
@@ -64,11 +81,13 @@ window.setContentPane(this);
 window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 }
 
+
 /**
 * Invoke to start the main processing loop.
 */
 public void process() {
 Webcam webcam = UtilWebcamCapture.openDefault(desiredWidth,desiredHeight);
+Mapper mapperX = new Mapper(0,desiredWidth,0.0,1.0);
 
 // adjust the window size and let the GUI know it has changed
 Dimension actualSize = webcam.getViewSize();
@@ -112,6 +131,7 @@ while( true ) {
 		} else if (mode == 3) {
 			if( success ) {
 				drawTrack(g2);
+				
 			}
 		}
 	}
@@ -149,6 +169,9 @@ g2.setColor(Color.GREEN);
 g2.drawLine((int)target.c.getX(),(int)target.c.getY(),(int)target.d.getX(),(int)target.d.getY());
 g2.setColor(Color.DARK_GRAY);
 g2.drawLine((int)target.d.getX(),(int)target.d.getY(),(int)target.a.getX(),(int)target.a.getY());
+rectangleCenter.x = (float) (target.a.getX() + ((target.b.getX() - target.a.getX())/2));
+rectangleCenter.y = (float) (target.a.getY() + ((target.d.getY() - target.a.getY())/2));
+System.out.println(rectangleCenter.x + " , " + rectangleCenter.y);
 }
 
 private void drawTarget( Graphics2D g2 ) {
@@ -204,6 +227,4 @@ public static void main(String[] args) {
 	ObjectTracker app = new ObjectTracker(tracker,640,480);
 
 	app.process();
-}
-
-}
+}}

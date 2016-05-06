@@ -12,6 +12,9 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.Point2Df;
+import org.myrobotlab.service.interfaces.Point2DfListener;
+import org.myrobotlab.service.interfaces.Point2DfPublisher;
 import org.slf4j.Logger;
 
 import boofcv.abst.feature.detect.interest.ConfigGeneralDetector;
@@ -31,7 +34,7 @@ import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.ImageType;
 import boofcv.struct.image.Planar;
 
-public class BoofCV extends Service {
+public class BoofCV extends Service implements Point2DfPublisher, Point2DfListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -59,6 +62,19 @@ public class BoofCV extends Service {
 		meta.addCategory("general");
 		return meta;
 	}
+	
+	public Point2Df publishPoint2Df(Point2Df point) {
+		return point;
+
+	}
+	
+	public Point2Df onPoint2Df(Point2Df point) {
+		System.out.println("Receinvig");
+		return point;
+
+	}
+	
+	
 
 	public static void main(String[] args) {
 		try {
