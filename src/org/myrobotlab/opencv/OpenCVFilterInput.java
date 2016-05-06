@@ -26,10 +26,9 @@
 // http://stackoverflow.com/questions/11515072/how-to-identify-optimal-parameters-for-cvcanny-for-polygon-approximation
 package org.myrobotlab.opencv;
 
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterInput extends OpenCVFilter {
 

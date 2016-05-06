@@ -1,7 +1,6 @@
 package org.myrobotlab.net;
 
 import java.io.ByteArrayOutputStream;
-
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;

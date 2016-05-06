@@ -1,8 +1,7 @@
 package org.myrobotlab.document.transformer;
 
-import org.myrobotlab.document.Document;
-
 import org.junit.Assert;
+import org.myrobotlab.document.Document;
 
 public class XPathExtractorTest extends AbstractStageTest {
 

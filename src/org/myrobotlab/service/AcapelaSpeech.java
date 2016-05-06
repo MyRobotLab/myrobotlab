@@ -475,7 +475,9 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		ServiceType meta = new ServiceType(AcapelaSpeech.class.getCanonicalName());
 		meta.addDescription("Acapela group speech synthesis service.");
 		meta.addCategory("speech");
+		meta.setSponsor("GroG");
 		meta.addPeer("audioFile", "AudioFile", "audioFile");
+		meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
 		return meta;
 	}
 	

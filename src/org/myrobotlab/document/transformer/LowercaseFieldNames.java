@@ -1,9 +1,6 @@
 package org.myrobotlab.document.transformer;
 
-import org.myrobotlab.document.transformer.StageConfiguration;
-
 import java.util.List;
-import java.util.Set;
 
 import org.myrobotlab.document.Document;
 

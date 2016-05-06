@@ -4,8 +4,6 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.document.connector.AbstractConnector;
-import org.myrobotlab.document.connector.ConnectorState;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

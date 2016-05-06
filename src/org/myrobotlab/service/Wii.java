@@ -29,9 +29,6 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -40,6 +37,8 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+import jssc.SerialPortEvent;
+import jssc.SerialPortEventListener;
 import wiiusej.WiiUseApiManager;
 import wiiusej.Wiimote;
 import wiiusej.wiiusejevents.physicalevents.ExpansionEvent;

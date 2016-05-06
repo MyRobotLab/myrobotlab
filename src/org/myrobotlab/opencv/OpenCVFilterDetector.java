@@ -27,13 +27,12 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 
-import org.bytedeco.javacpp.opencv_video.BackgroundSubtractor;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacpp.opencv_video.BackgroundSubtractor;
+import org.bytedeco.javacpp.opencv_video.BackgroundSubtractorMOG2;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_video.BackgroundSubtractorMOG2;
 
 public class OpenCVFilterDetector extends OpenCVFilter {
 

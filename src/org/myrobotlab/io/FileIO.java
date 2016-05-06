@@ -432,6 +432,7 @@ public class FileIO {
 
 		List<URL> urls = listContents(getRoot(), "org/myrobotlab/service", false, new String[] { ".*\\.class" }, new String[] { ".*Test\\.class", ".*\\$.*" });
 		ArrayList<String> classes = new ArrayList<String>();
+		log.info("found {} service files in {}", urls.size(), getRoot());
 		// String path = packageName.replace('.', '/');
 		for (URL url : urls) {
 			String urlName = url.getPath();

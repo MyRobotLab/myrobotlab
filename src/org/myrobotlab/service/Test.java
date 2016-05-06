@@ -2,11 +2,11 @@ package org.myrobotlab.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.http.client.ClientProtocolException;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -51,12 +52,12 @@ public class Test extends Service {
 	transient Set<File> files = new HashSet<File>();
 
 	// python
+
 	ArrayList<String> neededPythonScripts = new ArrayList<String>();
 	ArrayList<String> pythonScriptsWithNoServiceType = new ArrayList<String>();
 	ArrayList<String> failedPythonScripts = new ArrayList<String>();
 	ArrayList<String> passedPythonScripts = new ArrayList<String>();
 	HashSet<String> skippedPythonScript = new HashSet<String>();
-	
 
 	// thread blocking
 	Object lock = new Object();
@@ -66,6 +67,32 @@ public class Test extends Service {
 	TreeMap<String, String> pythonScripts = null;
 
 	LinkedBlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
+
+	TestMatrix matrix = new TestMatrix();
+
+	public static class TestMatrix {
+		Date lastTestDt;
+		long lastTestDurationMs;
+		long totalDuration;
+
+		HashSet<String> testsToRun = new HashSet<String>();
+		HashSet<String> servicesToTest;
+		Map<String, TestResults> results = new TreeMap<String, TestResults>();
+	}
+
+	public static class TestResults {
+		String name;
+		String simpleName;
+		ServiceType type;
+		TreeMap<String, TestResult> results = new TreeMap<String, TestResult>();
+	}
+
+	public static class TestResult {
+		String test;
+		long startTime;
+		long endTime;
+		Status status;
+	}
 
 	public static void logThreadNames() {
 
@@ -82,6 +109,29 @@ public class Test extends Service {
 		/*
 		 * for (int i = 0; i < t.length; ++i){ log.warn(t[i]); }
 		 */
+	}
+
+	public void startService() {
+		super.startService();
+		createTestPlan();
+	}
+
+	TestMatrix createTestPlan() {
+
+		ServiceData serviceData = ServiceData.getLocalInstance();
+		ArrayList<ServiceType> types = serviceData.getServiceTypes();
+		for (int i = 0; i < types.size(); ++i) {
+			ServiceType type = types.get(i);
+			TestResults stp = new TestResults();
+			String n = type.getName();
+
+			stp.simpleName = n.substring(n.lastIndexOf(".") + 1);
+			stp.type = type;
+			matrix.results.put(type.getName(), stp);
+		}
+
+		broadcastState();
+		return matrix;
 	}
 
 	/*
@@ -250,6 +300,8 @@ public class Test extends Service {
 		subscribe(sw.getName(), "publishError");
 	}
 
+	ArrayList<String> serializationTestFailures = new ArrayList<String>();
+
 	// TODO - do all forms of serialization - binary json xml
 	public Status serializeTest(ServiceInterface s) {
 		log.info("serializeTest {}", s.getName(), s.getSimpleName());
@@ -275,6 +327,7 @@ public class Test extends Service {
 			// TODO JAXB xml - since it comes with java 7
 
 		} catch (Exception ex) {
+			// serializationTestFailures
 			return Status.error(ex);
 		}
 
@@ -288,14 +341,37 @@ public class Test extends Service {
 		return inData;
 	}
 
-	public Status test() {
+	// FIXME - initially i was trying to control this through an Agent
+	// as it would then be possible to have a 'clean' repo without the
+	// dependencies of the Test(er) mixing with the Tested target
+	// out-of-process testing can be a challenge - even more so through std:io
+	// but with UDP control this should be significantly easier
+
+	// in the interim we have lots of other testing we can do - junit, scripts,
+	// invoking scripts, service pages .. yatta yatta
+
+	// test is the main interface to test everything
+	// failures need to be collected & options (like junit) to halt on error
+	// or continue and report
+	public void test() {
 		// we are started so .. we'll use the big hammer at the end
-		Status status = Status.info("========TESTING=============");
-		log.info("===========INFO TESTING========");
-		log.info(String.format("TEST PID = %s", Runtime.getPid()));
-		// big hammer
-		System.exit(0);
-		return status;
+		/*
+		 * Status status = Status.info("========TESTING=============");
+		 * log.info("===========INFO TESTING========"); log.info(String.format(
+		 * "TEST PID = %s", Runtime.getPid())); // big hammer System.exit(0);
+		 * return status;
+		 */
+
+		// do the cross product of
+		// tests to run over services selected
+		// update the matrix accordingly broadcast after every service x test
+
+		// single method test(getMethod(String name))
+	}
+
+	public String[] getAllServiceNames() {
+		ServiceData sd = ServiceData.getLocalInstance();
+		return sd.getServiceTypeNames();
 	}
 
 	/**
@@ -458,6 +534,8 @@ public class Test extends Service {
 		ServiceType meta = new ServiceType(Test.class.getCanonicalName());
 		meta.addDescription("Testing service");
 		meta.addCategory("testing", "framework");
+		meta.addPeer("http", "HttpClient", "to interface with Service pages");
+		meta.addPeer("python", "Python", "python to excercise python scripts");
 		return meta;
 	}
 
@@ -468,8 +546,25 @@ public class Test extends Service {
 	public void onFinishedPythonScript(String result) {
 		log.info("DONE !");
 		log.info("onFinishedPythonScript - {}", result);
-		synchronized (lock){
+		synchronized (lock) {
 			lock.notifyAll();
+		}
+	}
+
+	public void testPythonScriptExists(TestResults test) {
+		
+		TestResult result = new TestResult();
+		result.test = "PythonScriptExists";
+		result.startTime = System.currentTimeMillis();
+		String script = GitHub.getPyRobotLabScript(test.simpleName);
+		result.endTime = System.currentTimeMillis();
+		
+		if (script == null) {
+			result.status = Status.error("script not found");
+			test.results.put("PythonScriptExists", result);
+		} else {
+			result.status = Status.success();
+			test.results.put("PythonScriptExists", result);
 		}
 	}
 
@@ -515,6 +610,29 @@ public class Test extends Service {
 		return pythonScripts;
 	}
 
+	public List<String> getServicesWithOutServicePages() throws ClientProtocolException, IOException {
+		ArrayList<String> ret = new ArrayList<String>();
+		ServiceData sd = ServiceData.getLocalInstance();
+		ArrayList<ServiceType> serviceTypes = sd.getServiceTypes();
+		HttpClient http = (HttpClient) startPeer("http");
+		for (int i = 0; i < serviceTypes.size(); ++i) {
+			ServiceType serviceType = serviceTypes.get(i);
+
+			// Status retStatus =
+			// verifyServicePageScript(serviceType.getName());
+			String n = serviceType.getSimpleName();
+			String url = String.format("http://myrobotlab.org/service/%s", n);
+			String servicePage = http.get(url);
+			if (servicePage.contains("Page not found")) {
+				log.warn("no service page for {}", n);
+				ret.add(n);
+			}
+
+		}
+
+		return ret;
+	}
+
 	public List<String> getServicesWithOutScripts() {
 		ArrayList<String> ret = new ArrayList<String>();
 
@@ -531,10 +649,10 @@ public class Test extends Service {
 	 * 
 	 * @throws Exception
 	 * 
-	 * FIXME - need to change to testPythonScript(serviceName) .. because
-	 * only 1 will be run in a 'clean' environment ...
+	 *             FIXME - need to change to testPythonScript(serviceName) ..
+	 *             because only 1 will be run in a 'clean' environment ...
 	 * 
-	 * FIXME - structured logging back to self to generate report
+	 *             FIXME - structured logging back to self to generate report
 	 */
 	public void testPythonScripts() throws Exception {
 		// get scripts
@@ -544,18 +662,16 @@ public class Test extends Service {
 		// check if python is installed
 		// start python
 		Python python = (Python) Runtime.start("python", "Python");
-		
-		
-		skippedPythonScript.add("AcapelaSpeech");  // currently tooooo long.....
-		skippedPythonScript.add("Adafruit16CServoDriver"); 
-		skippedPythonScript.add("AdafruitMotorShield"); 
-		
-		
+
+		skippedPythonScript.add("AcapelaSpeech"); // currently tooooo long.....
+		skippedPythonScript.add("Adafruit16CServoDriver");
+		skippedPythonScript.add("AdafruitMotorShield");
+
 		for (String serviceName : pythonScripts.keySet()) {
 			String script = pythonScripts.get(serviceName);
 			log.info("TESTING SCRIPT {} - quiet on the set please...", serviceName);
-			
-			if (skippedPythonScript.contains(serviceName)){
+
+			if (skippedPythonScript.contains(serviceName)) {
 				log.info("SKIPPING {} ....", serviceName);
 				continue;
 			}
@@ -581,7 +697,7 @@ public class Test extends Service {
 
 			// by default - python will create a new thread
 			// to execute the script
-			python.exec(script + callback);//, true, true);
+			python.exec(script + callback);// , true, true);
 
 			// script has at maximum 1 minute to return
 			synchronized (lock) {
@@ -600,7 +716,7 @@ public class Test extends Service {
 
 			log.info("inspect python errors (syntax) + java errors");
 		}
-		
+
 		log.info("TESTING COMPLETED");
 
 	}
@@ -613,12 +729,31 @@ public class Test extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		try {
 
-			Test test = (Test)Runtime.start("test", "Test");
+			Test test = (Test) Runtime.start("test", "Test");
+
+			Runtime.start("webgui", "WebGui");
+
+			boolean done = true;
+			if (done) {
+				return;
+			}
+
+			String[] all = test.getAllServiceNames();
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < all.length; ++i) {
+				sb.append(String.format("%s\n", all[i]));
+			}
+
+			log.info("\n{}\n", sb.toString());
+
+			List<String> ret = test.getServicesWithOutServicePages();
+			test.testAll();
+
 			// Runtime.start("cli", "Cli");
-			Agent agent = (Agent)Runtime.start("agent", "Agent");
-			String[] cmdline = new String[]{"-fromAgent", "-service", "guiservice", "GUIService"};
+			Agent agent = (Agent) Runtime.start("agent", "Agent");
+			String[] cmdline = new String[] { "-fromAgent", "-service", "guiservice", "GUIService" };
 			agent.spawn(cmdline);
-			
+
 			// requirements:
 			// run all junit tests
 			// clear repo
@@ -635,15 +770,13 @@ public class Test extends Service {
 			// repo.clearServiceData();
 			// repo.install(serviceType);
 			/*
-			
-			Test test = (Test) Runtime.start("test", "Test");
-			test.getPyRobotLabServiceScripts();
-			test.getState();
-			test.testPythonScripts();
-			log.info("here");
-			
-			*/
-			
+			 * 
+			 * Test test = (Test) Runtime.start("test", "Test");
+			 * test.getPyRobotLabServiceScripts(); test.getState();
+			 * test.testPythonScripts(); log.info("here");
+			 * 
+			 */
+
 			log.info("here");
 
 		} catch (Exception e) {

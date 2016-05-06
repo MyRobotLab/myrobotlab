@@ -33,7 +33,7 @@ public class ImageDisplay extends Service {
 		try {
 			//String path = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJwoVloTUs4cW2uWdsIbP_Fdph0IfEhODRrQoOgFOiYrYj_9J01A";
 			//String path2 = "/Users/Sebastien/Pictures/scan10.jpeg";
-			String path3 = "http://vignette3.wikia.nocookie.net/jadensadventures/images/5/54/Pokemon-Ash-s-Pikachu-Riley-Sir-Aaron-s-Lucarios-pokemon-guys-10262907-563-579.jpg/revision/latest?cb=20120902022940";
+			String path3 = "http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg";
 
 			ImageDisplay imageDisplay = (ImageDisplay) Runtime.start("ImageDisplay", "ImageDisplay");
 			Runtime.start("gui", "GUIService");
@@ -41,9 +41,11 @@ public class ImageDisplay extends Service {
 			//Runtime.start("webgui", "WebGui");
 			imageDisplay.display("https://www.cloudflare.com/ssl/ssl.png");
 			imageDisplay.display(path3);
-			imageDisplay.displayFullScreen("http://cdn.collider.com/wp-content/uploads/2015/06/minions-image-bob-kevin-stuart.jpg");
+			// imageDisplay.displayFullScreen("http://cdn.collider.com/wp-content/uploads/2015/06/minions-image-bob-kevin-stuart.jpg");
 			//imageDisplay.displayFS(path3);
 
+			imageDisplay.displayFullScreen("http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg");
+			
 		} catch (Exception e) {
 			Logging.logError(e);
 		}

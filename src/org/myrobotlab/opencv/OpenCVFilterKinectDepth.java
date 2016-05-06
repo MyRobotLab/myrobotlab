@@ -31,11 +31,10 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
 import java.awt.Graphics;
 
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterKinectDepth extends OpenCVFilter {
 

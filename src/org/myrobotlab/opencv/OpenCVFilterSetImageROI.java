@@ -27,10 +27,9 @@ package org.myrobotlab.opencv;
 
 import java.awt.Rectangle;
 
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterSetImageROI extends OpenCVFilter {
 

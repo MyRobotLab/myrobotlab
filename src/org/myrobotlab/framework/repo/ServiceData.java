@@ -77,6 +77,9 @@ public class ServiceData implements Serializable {
 			try {
 				log.info("try #1 loading local file {}", jsonFile);
 				String data = FileIO.toString(jsonFile);
+				if (data == null || data.length() == 0){
+					throw new IOException("service data file [{}] contains no data");
+				}
 				localInstance = CodecUtils.fromJson(data, ServiceData.class);
 				return localInstance;
 			} catch (FileNotFoundException fe) {
@@ -138,7 +141,7 @@ public class ServiceData implements Serializable {
 	 * @throws IOException
 	 */
 	static public ServiceData generate() throws IOException {
-
+		log.info("================ generating serviceData.json begin ================");
 		ServiceData sd = new ServiceData();
 
 		// get services - all this could be done during Runtime
@@ -170,7 +173,7 @@ public class ServiceData implements Serializable {
 						category = new Category();
 						category.name = category.name;
 					}
-					category.serviceTypes.add(serviceType.name);
+					category.serviceTypes.add(serviceType.getName());
 					sd.categoryTypes.put(cat, category);
 				}
 
@@ -178,6 +181,8 @@ public class ServiceData implements Serializable {
 				log.error(String.format("%s does not have a static getMetaData method", fullClassName));
 			}
 		}
+		log.info("================ generating serviceData.json end ================");
+
 		return sd;
 	}
 	
@@ -185,7 +190,7 @@ public class ServiceData implements Serializable {
 	}
 
 	public void add(ServiceType serviceType) {
-		serviceTypes.put(serviceType.name, serviceType);
+		serviceTypes.put(serviceType.getName(), serviceType);
 	}
 
 	public boolean containsServiceType(String fullServiceName) {
@@ -309,6 +314,19 @@ public class ServiceData implements Serializable {
 		return categories;
 	}
 
+
+	static public Set<String> getDependencyKeys(String fullTypeName) {
+		HashSet<String> keys = new HashSet<String>();
+		ServiceData sd = getLocalInstance();
+		if (!sd.serviceTypes.containsKey(fullTypeName)) {
+			log.error("{} not defined in service types");
+			return keys;
+		}
+
+		ServiceType st = localInstance.serviceTypes.get(fullTypeName);
+		return st.getDependencies();
+	}
+	
 	public static void main(String[] args) {
 		try {
 
@@ -338,16 +356,5 @@ public class ServiceData implements Serializable {
 		}
 	}
 
-	static public Set<String> getDependencyKeys(String fullTypeName) {
-		HashSet<String> keys = new HashSet<String>();
-		ServiceData sd = getLocalInstance();
-		if (!sd.serviceTypes.containsKey(fullTypeName)) {
-			log.error("{} not defined in service types");
-			return keys;
-		}
-
-		ServiceType st = localInstance.serviceTypes.get(fullTypeName);
-		return st.getDependencies();
-	}
 
 }

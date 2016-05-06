@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 
 import org.myrobotlab.framework.MRLException;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;

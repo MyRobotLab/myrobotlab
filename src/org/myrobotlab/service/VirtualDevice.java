@@ -15,7 +15,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.serial.Port;
 import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;

@@ -27,11 +27,11 @@ package org.myrobotlab.opencv;
 
 import java.awt.image.BufferedImage;
 
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterSampleArray extends OpenCVFilter {
 

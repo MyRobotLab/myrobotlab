@@ -6,6 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+import org.myrobotlab.document.Document;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.namefind.TokenNameFinderModel;
 import opennlp.tools.postag.POSModel;
@@ -16,11 +21,6 @@ import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
 import opennlp.tools.util.Span;
-
-import org.apache.commons.lang.StringUtils;
-import org.myrobotlab.document.Document;
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
 
 public class NounPhraseExtractor extends AbstractStage {
 

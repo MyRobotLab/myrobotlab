@@ -44,7 +44,6 @@ import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvSeq;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
-import org.bytedeco.javacpp.helper.opencv_core.CvArr;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

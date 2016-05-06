@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -18,9 +20,6 @@ import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeMultipart;
-
-import java.io.IOException;
-import java.text.ParseException;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;

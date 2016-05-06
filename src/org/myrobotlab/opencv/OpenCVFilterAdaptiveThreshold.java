@@ -33,10 +33,9 @@ import static org.bytedeco.javacpp.opencv_imgproc.CV_THRESH_BINARY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvAdaptiveThreshold;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterAdaptiveThreshold extends OpenCVFilter {
 

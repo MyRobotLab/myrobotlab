@@ -14,10 +14,10 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
-import com.memetix.mst.language.Language;
+
 import com.memetix.mst.detect.Detect;
+import com.memetix.mst.language.Language;
 import com.memetix.mst.translate.Translate;
-import com.sun.tools.javac.util.List;
 
 public class AzureTranslator extends Service {
 

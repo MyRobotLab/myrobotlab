@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import it.sauronsoftware.cron4j.Scheduler;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -13,6 +11,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
+
+import it.sauronsoftware.cron4j.Scheduler;
 
 /**
  * Cron - This is a cron based service that can execute a "task" at some point

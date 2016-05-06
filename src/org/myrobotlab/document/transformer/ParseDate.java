@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.FileConnector;
 import org.slf4j.Logger;
 
 /**

@@ -12,7 +12,6 @@ import org.myrobotlab.oculus.lwjgl.entities.Entity;
 import org.myrobotlab.oculus.lwjgl.models.RawModel;
 import org.myrobotlab.oculus.lwjgl.models.TexturedModel;
 import org.myrobotlab.oculus.lwjgl.shaders.StaticShader;
-import org.newdawn.slick.util.Log;
 
 /**
  * An OpenGL renderer class to render textured models in the viewport.

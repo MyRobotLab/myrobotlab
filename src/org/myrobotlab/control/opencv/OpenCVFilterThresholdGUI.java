@@ -39,7 +39,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.opencv.OpenCVFilterCanny;
 import org.myrobotlab.opencv.OpenCVFilterThreshold;
 import org.myrobotlab.service.GUIService;
 

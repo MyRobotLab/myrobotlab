@@ -28,10 +28,9 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_GAUSSIAN;
 import static org.bytedeco.javacpp.opencv_imgproc.cvSmooth;
 
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterSmooth extends OpenCVFilter {
 

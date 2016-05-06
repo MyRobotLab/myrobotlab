@@ -2,7 +2,6 @@ package org.myrobotlab.opencv;
 
 import java.util.LinkedList;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.myrobotlab.image.SerializableImage;

@@ -4,17 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.common.SolrInputDocument;
-
-import org.myrobotlab.document.transformer.StageConfiguration;
-import org.myrobotlab.logging.LoggerFactory;
-import org.newdawn.slick.util.Log;
-import org.slf4j.Logger;
-import org.myrobotlab.control.widget.AboutDialog;
 import org.myrobotlab.document.Document;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * This stage will convert an MRL document to a solr document.  

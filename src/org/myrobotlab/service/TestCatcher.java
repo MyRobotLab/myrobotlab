@@ -275,30 +275,6 @@ public class TestCatcher extends Service implements SerialDataListener {
 	 * @return ServiceType - returns all the data
 	 * 
 	 */
-	static public ServiceType getMetaData() {
-
-		/*
-		ServiceType meta = new ServiceType(TestCatcher.class.getCanonicalName());
-		meta.addDescription("TestCatcher is used with TestThrower to test messaging");
-		meta.addCategory("testing","framework");		
-		
-		meta.sharePeer("t01.arduino", "left", "Arduino", "shared left arduino");
-		meta.sharePeer("t02.arduino", "left", "Arduino", "shared left arduino");
-
-		meta.addRootPeer("opencv", "OpenCV", "shared global root OpenCV service");
-				
-		meta.sharePeer("t01.opencv", "lowEye", "OpenCV", "shared opencv");
-		meta.sharePeer("t02.opencv", "lowEye", "OpenCV", "shared opencv");
-		
-
-		meta.addPeer("t01", "Tracking", "tracking 01");
-		meta.addPeer("t02", "Tracking", "tracking 02");
-		
-		log.info(getDnaString());
-		*/
-		
-		return meta;
-	}
 	
 	public void startService(){
 		super.startService();
@@ -336,6 +312,16 @@ public class TestCatcher extends Service implements SerialDataListener {
 			Logging.logError(e);
 		}
 
+	}
+	
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(TestThrower.class.getCanonicalName());
+		meta.addDescription("This service is used to test messaging");
+		meta.setAvailable(false);
+		meta.addCategory("testing","framework");	
+		
+		return meta;
 	}
 
 	
