@@ -28,12 +28,12 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class OpenCVFilterResize extends OpenCVFilter {
 

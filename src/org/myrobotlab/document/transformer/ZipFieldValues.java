@@ -2,7 +2,6 @@ package org.myrobotlab.document.transformer;
 
 import java.util.List;
 
-import org.eclipse.jetty.util.log.Log;
 import org.myrobotlab.document.Document;
 
 /**

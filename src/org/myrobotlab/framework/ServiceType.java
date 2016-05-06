@@ -21,12 +21,33 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 
 	private static final long serialVersionUID = 1L;
 
-	public String name;
+	String name;
 
-	public String state = null;
-	public Integer workingLevel = null;
-	public String description = null;
-	public Boolean available = true; // why not ? :P
+	String state = null;
+	Integer workingLevel = null;
+	/**
+	 * description of what the service does
+	 */
+	String description = null;
+	/**
+	 * the single sponsor of this service
+	 */
+	String sponsor;
+	/**
+	 * ready for release
+	 */
+	Boolean ready = false;
+
+	/**
+	 * available in the UI(s)
+	 */
+	Boolean available = true; // why not ? :P
+
+	/**
+	 * what is left todo on this service for it to be ready for release
+	 */
+	String todo;
+	
 	/**
 	 * dependency keys of with key structure {org}-{version}
 	 */
@@ -50,12 +71,6 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	public int compare(ServiceType o1, ServiceType o2) {
 		return o1.name.compareTo(o2.name);
 	}
-
-	/*
-	public String get(int index) {
-		return dependencies.get(index);
-	}
-	*/
 
 	public String getName() {
 		return name;
@@ -117,7 +132,18 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	public TreeMap<String, ServiceReservation> getPeers() {
 		return peers;
 	}
+
+	public void setSponsor(String sponsor) {
+		this.sponsor = sponsor;
+	}
 	
+	public void setReady(boolean b) {
+		this.ready = b;
+	}
+
+	public void addTodo(String todo) {
+		this.todo = todo;
+	}
 	
 
 }

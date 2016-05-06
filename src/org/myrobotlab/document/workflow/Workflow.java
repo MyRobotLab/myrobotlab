@@ -1,8 +1,9 @@
 package org.myrobotlab.document.workflow;
 
 import java.util.concurrent.LinkedBlockingQueue;
-import org.myrobotlab.document.transformer.WorkflowConfiguration;
+
 import org.myrobotlab.document.Document;
+import org.myrobotlab.document.transformer.WorkflowConfiguration;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

@@ -3,7 +3,6 @@ package org.myrobotlab.kinematics;
 import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.InverseKinematics3D;
 import org.slf4j.Logger;
 

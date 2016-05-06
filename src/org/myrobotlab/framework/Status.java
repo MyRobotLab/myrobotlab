@@ -4,6 +4,7 @@ import static org.myrobotlab.framework.StatusLevel.DEBUG;
 import static org.myrobotlab.framework.StatusLevel.ERROR;
 import static org.myrobotlab.framework.StatusLevel.INFO;
 import static org.myrobotlab.framework.StatusLevel.WARN;
+import static org.myrobotlab.framework.StatusLevel.SUCCESS;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -191,5 +192,15 @@ public class Status implements Serializable {// extends Exception {
 		log.info(json);
 	}
 
+	public static Status success() {
+		Status s = new Status(SUCCESS);
+		s.level = SUCCESS;
+		return s;
+	}
+
+
+	public boolean isSuccess() {
+		return SUCCESS.equals(level);
+	}
 
 }

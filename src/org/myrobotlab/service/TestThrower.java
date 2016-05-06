@@ -125,7 +125,9 @@ public class TestThrower extends Service {
 
 		ServiceType meta = new ServiceType(TestThrower.class.getCanonicalName());
 		meta.addDescription("TestThrower is used with TestCatcher to test messaging");
-		meta.addCategory("testing","framework");		
+		meta.setAvailable(false);
+		meta.addCategory("testing","framework");	
+		
 		return meta;
 	}
 

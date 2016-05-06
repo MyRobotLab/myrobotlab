@@ -38,11 +38,11 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterInRange extends OpenCVFilter {
 	private static final long serialVersionUID = 1L;

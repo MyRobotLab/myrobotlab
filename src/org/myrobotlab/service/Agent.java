@@ -1057,6 +1057,7 @@ public class Agent extends Service {
 		ServiceType meta = new ServiceType(Agent.class.getCanonicalName());
 		meta.addDescription("Agent - responsible for creating the environment and maintaining, tracking and terminating all processes");
 		meta.addCategory("framework");
+		meta.setSponsor("GroG");
 		// meta.addPeer("webadmin", "WebGui", "webgui for the Agent");
 		return meta;
 	}

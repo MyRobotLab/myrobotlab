@@ -32,10 +32,9 @@ import static org.bytedeco.javacpp.opencv_core.cvSize;
 
 import java.util.ArrayList;
 
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterSplit extends OpenCVFilter {
 

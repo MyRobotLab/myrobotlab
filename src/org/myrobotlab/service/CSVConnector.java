@@ -11,8 +11,6 @@ import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.string.StringUtil;
 
-import com.ning.http.util.StringUtils;
-
 import au.com.bytecode.opencsv.CSVReader;
 
 public class CSVConnector extends AbstractConnector {

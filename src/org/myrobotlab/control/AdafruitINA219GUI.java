@@ -26,7 +26,6 @@
 package org.myrobotlab.control;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -34,12 +33,10 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.AdafruitINA219;
+import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 
 public class AdafruitINA219GUI extends ServiceGUI implements ActionListener {

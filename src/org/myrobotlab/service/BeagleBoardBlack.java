@@ -53,6 +53,7 @@ public class BeagleBoardBlack extends Service {
 		ServiceType meta = new ServiceType(BeagleBoardBlack.class.getCanonicalName());
 		meta.addDescription("service to access the beagle board black hardware");
 		meta.addCategory("microcontroller");	
+		meta.setAvailable(false);
 		return meta;		
 	}
 

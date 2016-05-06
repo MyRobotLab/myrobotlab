@@ -127,7 +127,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 			} else if (value.getClass().equals(String.class)) {
 				ServiceType entry = (ServiceType) table.getValueAt(row, 0);
-				availableToInstall = repo.isServiceTypeInstalled(entry.name);
+				availableToInstall = repo.isServiceTypeInstalled(entry.getName());
 
 				setIcon(null);
 				setHorizontalAlignment(SwingConstants.LEFT);
@@ -152,7 +152,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 			} else {
 
 				ServiceType entry = (ServiceType) table.getValueAt(row, 0);
-				availableToInstall = repo.isServiceTypeInstalled(entry.name);
+				availableToInstall = repo.isServiceTypeInstalled(entry.getName());
 
 				if (!availableToInstall) {
 					setForeground(Style.listForeground);
@@ -299,15 +299,19 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 			return;
 		}
 
+		
+		
 		if ("info".equals(cmd)) {
 			BareBonesBrowserLaunch.openURL("http://myrobotlab.org/service/" + c.getSimpleName());
 		} else if ("install".equals(cmd)) {
 			int selectedRow = possibleServices.getSelectedRow();
 
 			ServiceType entry = ((ServiceType) possibleServices.getValueAt(selectedRow, 0));
+			String n = entry.getName();
 			Repo repo = myRuntime.getRepo();
+			
 
-			if (!repo.isServiceTypeInstalled(entry.name)) {
+			if (!repo.isServiceTypeInstalled(n)) {
 				// dependencies needed !!!
 				String msg = "<html>This Service has dependencies which are not yet loaded,<br>" + "do you wish to download them now?";
 				JOptionPane.setRootFrame(myService.getFrame());
@@ -316,16 +320,16 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 					return;
 				}
 				// you say "install", i say "update", repo says "resolve"
-				myService.send(boundServiceName, "install", entry.name);
+				myService.send(boundServiceName, "install", n);
 			} else {
 				// no unfulfilled dependencies - good to go
-				addNewService(entry.name);
+				addNewService(n);
 			}
 
 		} else if ("start".equals(cmd)) {
 			int selectedRow = possibleServices.getSelectedRow();
 			ServiceType entry = ((ServiceType) possibleServices.getValueAt(selectedRow, 0));
-			addNewService(entry.name);
+			addNewService(entry.getName());
 
 		} else if ("install all".equals(cmd)) {
 			myService.send(boundServiceName, "install");
@@ -498,7 +502,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 				ArrayList<ServiceType> possibleService = serviceData.getServiceTypes();
 				for (int i = 0; i < possibleService.size(); ++i) {
 					ServiceType serviceType = possibleService.get(i);
-					if (filtered == null || filtered.contains(serviceType.name)) {
+					if (filtered == null || filtered.contains(serviceType.getName())) {
 						if (serviceType.isAvailable()) {
 							possibleServicesModel.addRow(new Object[] { serviceType, "" });
 						}
@@ -571,7 +575,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 				ServiceType c = (ServiceType) possibleServicesModel.getValueAt(popupRow, 0);
 				releaseMenuItem.setVisible(false);
 				infoMenuItem.setVisible(true);
-				if (!myRepo.isServiceTypeInstalled(c.name)) {
+				if (!myRepo.isServiceTypeInstalled(c.getName())) {
 					// need to install it
 					installMenuItem.setVisible(true);
 					startMenuItem.setVisible(false);

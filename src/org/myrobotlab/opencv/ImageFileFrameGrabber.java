@@ -1,7 +1,7 @@
 package org.myrobotlab.opencv;
 
 
-import static org.bytedeco.javacpp.opencv_imgcodecs.*;
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 
 import java.util.HashMap;
 

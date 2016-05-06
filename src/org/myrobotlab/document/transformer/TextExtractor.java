@@ -7,18 +7,15 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.myrobotlab.document.Document;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-
-import org.apache.tika.exception.TikaException;
-import org.apache.tika.metadata.Metadata;
-
-import org.myrobotlab.document.transformer.StageConfiguration;
-import org.myrobotlab.document.Document;
 
 /**
  * This stage will use Apache Tika to perform text and metadata extraction

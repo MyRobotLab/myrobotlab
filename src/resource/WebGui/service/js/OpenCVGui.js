@@ -84,6 +84,7 @@ angular.module('mrlapp.service.OpenCVGui', [])
                 // TODO: we're not going to publish the display.
                 // we will start a video stream and update the page to display that stream.
                 // mrl.subscribe($scope.service.name, 'publishState');
+                msg.subscribe('getPossibleFilters');
                 msg.subscribe('publishState');
                 msg.subscribe(this);
             }

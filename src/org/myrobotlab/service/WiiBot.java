@@ -31,9 +31,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Wii.IRData;
-import org.myrobotlab.service.WiiDar.Point;
-import org.myrobotlab.service.data.Pin;
 import org.slf4j.Logger;
 
 // TODO - BlockingQueue - + reference !

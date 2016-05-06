@@ -1,24 +1,23 @@
 package org.myrobotlab.opencv;
 
-import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
+import static org.bytedeco.javacpp.opencv_core.CV_32FC1;
+import static org.bytedeco.javacpp.opencv_core.CV_32FC2;
+import static org.bytedeco.javacpp.opencv_core.cvCreateMat;
+import static org.bytedeco.javacpp.opencv_core.cvPoint2D32f;
+import static org.bytedeco.javacpp.opencv_core.cvSize2D32f;
+import static org.bytedeco.javacpp.opencv_imgproc.cv2DRotationMatrix;
+import static org.bytedeco.javacpp.opencv_imgproc.cvBoundingRect;
+import static org.bytedeco.javacpp.opencv_imgproc.cvBoxPoints;
+import static org.bytedeco.javacpp.opencv_imgproc.cvWarpAffine;
 
 import org.bytedeco.javacpp.opencv_core.CvBox2D;
 import org.bytedeco.javacpp.opencv_core.CvMat;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.IplImage;
-
-import static org.bytedeco.javacpp.opencv_core.CV_32FC1;
-import static org.bytedeco.javacpp.opencv_core.CV_32FC2;
-import static org.bytedeco.javacpp.opencv_core.cvCreateMat;
-import static org.bytedeco.javacpp.opencv_core.cvSize2D32f;
-import static org.bytedeco.javacpp.opencv_core.cvPoint2D32f;
-import static org.bytedeco.javacpp.opencv_imgproc.cvBoxPoints;
-import static org.bytedeco.javacpp.opencv_imgproc.cvWarpAffine;
-import static org.bytedeco.javacpp.opencv_imgproc.cvBoundingRect;
-import static org.bytedeco.javacpp.opencv_imgproc.cv2DRotationMatrix;
+import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class OpenCVFilterAffine extends OpenCVFilter {
 

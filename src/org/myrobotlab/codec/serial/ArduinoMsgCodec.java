@@ -12,6 +12,7 @@ import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.interfaces.LoggingSink;
+import org.python.netty.handler.codec.CodecException;
 import org.slf4j.Logger;
 
 // FIXME - use InputStream OutputStream 

@@ -17,8 +17,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.myrobotlab.service.Joystick;
-
 public class JoystickButtonsPanel extends JPanel {
 	// background colours for the textfields (game pad buttons)
 	private static final Color OFF_COLOUR = Color.LIGHT_GRAY;

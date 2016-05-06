@@ -96,7 +96,7 @@ public class InverseKinematics extends Service {
 		ServiceType meta = new ServiceType(InverseKinematics.class.getCanonicalName());
 		meta.addDescription("Inverse Kinematics");
 		meta.addCategory("robot", "control");
-		
+		meta.setAvailable(false);
 		return meta;
 	}
 

@@ -31,7 +31,6 @@ import java.awt.event.ActionListener;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.memory.Node;
 import org.myrobotlab.service.GUIService;

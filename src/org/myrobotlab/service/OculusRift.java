@@ -11,7 +11,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.oculus.OculusDisplay;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
-import org.myrobotlab.opencv.OpenCVFilterResize;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.service.data.OculusData;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;

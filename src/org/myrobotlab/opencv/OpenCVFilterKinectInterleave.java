@@ -32,11 +32,10 @@ import static org.bytedeco.javacpp.opencv_core.cvSize;
 
 import java.awt.Graphics;
 
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
-
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class OpenCVFilterKinectInterleave extends OpenCVFilter {
 

@@ -1,0 +1,13 @@
+<span class="input-group-btn"><button class="btn btn-default" ng-click="msg.test()">test</button></span>
+
+<table class="table table-striped">
+  <tr><th>service</th><th>description</th><th>available</th><th>ready</th><th>sponsor</th><th>todo</th></tr>
+  <tr ng-repeat="result in matrix.results">
+    <td><img ng-src="/{{result.simpleName}}.png" width="16">{{result.simpleName}}</td>
+    <td>{{ result.type.description }}</td>
+    <td>{{ result.type.available }}</td>
+    <td>{{ result.type.ready }}</td>
+    <td>{{ result.type.sponsor }}</td>
+    <td>{{ result.type.todo }}</td>
+  </tr>
+</table>

@@ -158,13 +158,6 @@ public class OpenCV extends VideoSource {
 	// mask for each named filter
 	transient public HashMap<String, IplImage> masks = new HashMap<String, IplImage>();
 
-	// DEPRECATED - use getOpenCVData() instead of lastDisplay
-	// public OpenCVData lastDisplay;
-
-	// P - N Learning TODO - remove - implement on "images"
-	public ArrayList<SerializableImage> positive = new ArrayList<SerializableImage>();
-	public ArrayList<SerializableImage> negative = new ArrayList<SerializableImage>();
-
 	public boolean undockDisplay = false;
 
 	// track the state of opencv. capturing  true/false?
@@ -172,14 +165,12 @@ public class OpenCV extends VideoSource {
 	
 	// TODO: a peer, but in the future , we should use WebGui and it's http container for this
 	// if possible.
+	// GROG : .. perhaps just a filter in the pipeline could stream it via http
 	transient public VideoStreamer streamer;
 	
 	
 	public OpenCV(String n) {
 		super(n);
-		// load(); // FIXME - go into service frame work .. after construction
-		// ..
-		// somewhere ...
 		videoProcessor.setOpencv(this);
 	}
 	
@@ -369,9 +360,6 @@ public class OpenCV extends VideoSource {
 		return img;
 	}
 
-	public Boolean isTracking(Boolean b) {
-		return b;
-	}
 
 	// publish functions end ---------------------------
 
@@ -387,15 +375,10 @@ public class OpenCV extends VideoSource {
 		streamer.attach(this);
 		// stopCapture(); // restart?
 		videoProcessor.start();
-		try {
-			// there's a nasty race condition, 
-			// so we sleep here for 500 milliseconds to make sure
-			// the video stream is up and running before we publish our state.
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// there's a nasty race condition, 
+		// so we sleep here for 500 milliseconds to make sure
+		// the video stream is up and running before we publish our state.
+		sleep(500);
 		capturing = true;
 		broadcastState(); // let everyone know
 	}
@@ -876,5 +859,6 @@ public class OpenCV extends VideoSource {
 		meta.addDependency("org.bytedeco.javacv","1.1");
 		return meta;
 	}
+	
 
 }

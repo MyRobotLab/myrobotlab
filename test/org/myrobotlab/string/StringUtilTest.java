@@ -1,9 +1,8 @@
 package org.myrobotlab.string;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.myrobotlab.string.StringUtil;
 
 public class StringUtilTest {
 

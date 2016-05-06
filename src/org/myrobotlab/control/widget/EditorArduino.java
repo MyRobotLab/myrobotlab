@@ -25,7 +25,6 @@
 
 package org.myrobotlab.control.widget;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

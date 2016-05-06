@@ -236,7 +236,7 @@ angular
         // ok now we are connected
         connected = true;
         
-        angular.forEach(connectedCallbacks, function (value, key) {
+        angular.forEach(connectedCallbacks, function(value, key) {
             value(connected);
         });
         
@@ -347,7 +347,7 @@ angular
             onCloseCallbacks[i]();
         }
         
-        angular.forEach(connectedCallbacks, function (value, key) {
+        angular.forEach(connectedCallbacks, function(value, key) {
             value(connected);
         });
     
@@ -495,36 +495,42 @@ angular
     
     this.subscribeOnOpen = function(callback) {
         onOpenCallbacks.push(callback);
-    };
+    }
+    ;
     
-    this.unsubscribeOnOpen = function (callback) {
+    this.unsubscribeOnOpen = function(callback) {
         var index = onOpenCallbacks.indexOf(callback);
         if (index != -1) {
             onOpenCallbacks.splice(index, 1);
         }
-    };
+    }
+    ;
     
     this.subscribeOnClose = function(callback) {
         onCloseCallbacks.push(callback);
-    };
+    }
+    ;
     
-    this.unsubscribeOnClose = function (callback) {
+    this.unsubscribeOnClose = function(callback) {
         var index = onCloseCallbacks.indexOf(callback);
         if (index != -1) {
             onCloseCallbacks.splice(index, 1);
         }
-    };
+    }
+    ;
     
     this.subscribeConnected = function(callback) {
         connectedCallbacks.push(callback);
-    };
+    }
+    ;
     
-    this.unsubscribeConnected = function (callback) {
+    this.unsubscribeConnected = function(callback) {
         var index = connectedCallbacks.indexOf(callback);
         if (index != -1) {
             connectedCallbacks.splice(index, 1);
         }
-    };
+    }
+    ;
     
     // injectables go here
     // the special $get method called when
@@ -603,7 +609,7 @@ angular
                          *   sendArgs will be called by the dynamically generated code interface
                          */
                         sendArgs: function(method, obj) {
-                           // var args = Array.prototype.slice.call(arguments, 1);
+                            // var args = Array.prototype.slice.call(arguments, 1);
                             data = [];
                             for (var key in obj) {
                                 if (obj.hasOwnProperty(key)) {
@@ -748,11 +754,13 @@ angular
                 for (var property in _self.runtime.serviceData.serviceTypes) {
                     if (_self.runtime.serviceData.serviceTypes.hasOwnProperty(property)) {
                         var serviceType = _self.runtime.serviceData.serviceTypes[property];
-                        var model = {};
-                        model.name = getSimpleName(property);
-                        model.img = model.name + '.png';
-                        model.alt = serviceType.description;
-                        possibleServices.push(model);
+                        if (serviceType.available) {
+                            var model = {};
+                            model.name = getSimpleName(property);
+                            model.img = model.name + '.png';
+                            model.alt = serviceType.description;
+                            possibleServices.push(model);
+                        }
                     }
                 }
                 return possibleServices;
@@ -771,13 +779,13 @@ angular
                     return true;
                 }
                 _self.connect();
-//                deferred.promise.then(function(result) {
-//                    var result = result;
-//                }
-//                , function(error) {
-//                    var error = error;
-//                }
-//                );
+                //                deferred.promise.then(function(result) {
+                //                    var result = result;
+                //                }
+                //                , function(error) {
+                //                    var error = error;
+                //                }
+                //                );
                 return deferred.promise;
             },
             

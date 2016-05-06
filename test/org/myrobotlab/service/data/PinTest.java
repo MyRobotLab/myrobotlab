@@ -3,7 +3,6 @@ package org.myrobotlab.service.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.bytedeco.javacpp.opencv_highgui.Pt2Func_int_byte__;
 import org.junit.Test;
 
 public class PinTest {
