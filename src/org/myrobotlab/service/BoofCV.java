@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
+import org.myrobotlab.boofcv.ObjectTracker;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -16,14 +17,19 @@ import org.slf4j.Logger;
 import boofcv.abst.feature.detect.interest.ConfigGeneralDetector;
 import boofcv.abst.feature.tracker.PointTrack;
 import boofcv.abst.feature.tracker.PointTracker;
+import boofcv.abst.tracker.TrackerObjectQuad;
 import boofcv.alg.tracker.klt.PkltConfig;
 import boofcv.factory.feature.tracker.FactoryPointTracker;
+import boofcv.factory.tracker.FactoryTrackerObjectQuad;
 import boofcv.gui.feature.VisualizeFeatures;
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.webcamcapture.UtilWebcamCapture;
 import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.GrayU8;
+import boofcv.struct.image.ImageType;
+import boofcv.struct.image.Planar;
 
 public class BoofCV extends Service {
 
@@ -60,50 +66,23 @@ public class BoofCV extends Service {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			// tune the tracker for the image size and visual appearance
-			ConfigGeneralDetector configDetector = new ConfigGeneralDetector(-1,8,1);
-			PkltConfig configKlt = new PkltConfig(3,new int[]{1,2,4,8});
-	 
-			PointTracker<GrayF32> tracker = FactoryPointTracker.klt(configKlt,configDetector,GrayF32.class,null);
-	 
-			// Open a webcam at a resolution close to 640x480
-			com.github.sarxos.webcam.Webcam webcam = UtilWebcamCapture.openDefault(640,480);
-	 
-			// Create the panel used to display the image and feature tracks
-			ImagePanel gui = new ImagePanel();
-			gui.setPreferredSize(webcam.getViewSize());
-	 
-			ShowImages.showWindow(gui,"KLT Tracker",true);
-	 
-			int minimumTracks = 100;
-			while( true ) {
-				BufferedImage image = webcam.getImage();
-				GrayF32 gray = ConvertBufferedImage.convertFrom(image,(GrayF32)null);
-	 
-				tracker.process(gray);
-	 
-				List<PointTrack> tracks = tracker.getActiveTracks(null);
-	 
-				// Spawn tracks if there are too few
-				if( tracks.size() < minimumTracks ) {
-					tracker.spawnTracks();
-					tracks = tracker.getActiveTracks(null);
-					minimumTracks = tracks.size()/2;
-				}
-	 
-				// Draw the tracks
-				Graphics2D g2 = image.createGraphics();
-	 
-				for( PointTrack t : tracks ) {
-					VisualizeFeatures.drawPoint(g2,(int)t.x,(int)t.y,Color.RED);
-				}
-	 
-				gui.setBufferedImageSafe(image);
-			}
+			ImageType<Planar<GrayU8>> colorType = ImageType.pl(3,GrayU8.class);
+
+			TrackerObjectQuad tracker =
+//					FactoryTrackerObjectQuad.circulant(null, GrayU8.class);
+//					FactoryTrackerObjectQuad.sparseFlow(null,GrayU8.class,null);
+					FactoryTrackerObjectQuad.tld(null,GrayU8.class);
+//					FactoryTrackerObjectQuad.meanShiftComaniciu2003(new ConfigComaniciu2003(), colorType);
+//					FactoryTrackerObjectQuad.meanShiftComaniciu2003(new ConfigComaniciu2003(true),colorType);
+//					FactoryTrackerObjectQuad.meanShiftLikelihood(30,5,255, MeanShiftLikelihoodType.HISTOGRAM,colorType);
+
+
+			ObjectTracker app = new ObjectTracker(tracker,640,480);
+
+			app.process();
 			
 			// BoofCV template = (BoofCV) Runtime.start("template", "BoofCV");
 			// Runtime.start("gui", "GUIService");
-
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
