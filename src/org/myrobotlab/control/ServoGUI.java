@@ -109,7 +109,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 		myServo = (Servo) Runtime.getService(boundServiceName);
 
 		pinModel.addElement(null);
-		for (int i = 2; i < 54; i++) {
+		for (int i = 0; i < 54; i++) {
 			pinModel.addElement(i);
 		}
 		// determine not worth querying the controller to its pin list
@@ -204,6 +204,9 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 			public void run() {
 
 				removeListeners();
+				if (controllerModel.getIndexOf(servo.getControllerName()) < 0);{
+					controllerModel.addElement(servo.getControllerName());
+				}
 				controller.setSelectedItem(servo.getControllerName());
 				pin.setSelectedItem(servo.getPin());
 
