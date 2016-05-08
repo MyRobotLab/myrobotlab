@@ -23,6 +23,7 @@ import javax.mail.internet.MimeMultipart;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
+import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.framework.ServiceType;
 
 /**
@@ -34,6 +35,7 @@ import org.myrobotlab.framework.ServiceType;
  */
 public class ImapEmailConnector extends AbstractConnector {
 
+	private static final long serialVersionUID = 1L;
 	private static final String MESSAGE_ID_HEADER = "message_id";
 	private String emailServer;
 	private String username;
@@ -46,8 +48,12 @@ public class ImapEmailConnector extends AbstractConnector {
 		super(name);
 	}
 
-	private static final long serialVersionUID = 1L;
-
+	@Override
+	public void setConfig(ConnectorConfig config) {
+		// TODO Auto-generated method stub
+		log.info("Set Config not yet implemented");
+	}
+	
 	public void startCrawling() {
 		log.info("Sarting IMAP Email connector.");
 		// connect to the email store

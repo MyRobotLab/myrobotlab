@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.myrobotlab.document.Document;
+import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.interfaces.DocumentConnector;
 import org.myrobotlab.service.interfaces.DocumentListener;
@@ -29,9 +30,10 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 		super(name);
 		// no overruns!
 		this.getOutbox().setBlocking(true);
-		
 	}
 
+	public abstract void setConfig(ConnectorConfig config);
+	
 	public void feed(Document doc) {
 		// System.out.println("Feeding document " + doc.getId());
 		// TODO: add batching and change this to publishDocuments (as a list)
@@ -56,8 +58,6 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 	public void flush() {
 		// flush any partial batch
 		// TODO: make this thread safe!
-		
-		
 		invoke("publishDocuments", batch);
 		invoke("publishFlush");
 		// reset/clear the batch.

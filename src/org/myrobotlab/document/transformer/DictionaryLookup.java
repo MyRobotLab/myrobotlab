@@ -24,16 +24,16 @@ public class DictionaryLookup extends AbstractStage {
 	public void startStage(StageConfiguration config) {
 		if (config != null) {
 			inputField = config.getProperty("inputField", "text");
-      outputFields = config.getListParam("outputFields");
+			outputFields = config.getListParam("outputFields");
 			dictionaryFile = config.getProperty("dictionaryFile", "mydict.csv");
 
-      if (outputFields == null) {
-        String outputField = config.getProperty("outputField");
-        if (!StringUtil.isEmpty(outputField)) {
-          outputFields = new ArrayList<String>();
-          outputFields.add(outputField);
-        }
-      }
+			if (outputFields == null) {
+				String outputField = config.getProperty("outputField");
+				if (!StringUtil.isEmpty(outputField)) {
+					outputFields = new ArrayList<String>();
+					outputFields.add(outputField);
+				}
+			}
 		}
 
 		try {

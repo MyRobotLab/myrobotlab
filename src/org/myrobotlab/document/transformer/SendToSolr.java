@@ -26,12 +26,13 @@ public class SendToSolr extends AbstractStage {
 	public final static Logger log = LoggerFactory.getLogger(SendToSolr.class);
 	private String idField = "id";
 	private String fieldsField = "fields";
+	private boolean addFieldsField = false;
 	private SolrServer solrServer = null;
 	private String solrUrl = "http://localhost:8983/solr/collection1";
 	private boolean issueCommit = true;
 
 	private int batchSize = 100;
-	//private LinkedBlockingQueue<SolrInputDocument> batch = new LinkedBlockingQueue<SolrInputDocument>(); 
+	// private LinkedBlockingQueue<SolrInputDocument> batch = new LinkedBlockingQueue<SolrInputDocument>(); 
 	// Synchronized list. needed for thread safety.
 	private List<SolrInputDocument> batch = Collections.synchronizedList(new ArrayList<SolrInputDocument>()); 
 	
@@ -59,22 +60,19 @@ public class SendToSolr extends AbstractStage {
 
 		// set the id field on the solr doc
 		String docId = doc.getId();
-
-		// HashSet<String> fields = new HashSet<String>();
 		for (String fieldName : doc.getFields()) {
 			for (Object value: doc.getField(fieldName)) {
 				solrDoc.addField(fieldName, value);
 			}
-			solrDoc.addField(fieldsField, fieldName);
-			// fields.add(fieldName);
+			if (addFieldsField) {
+				solrDoc.addField(fieldsField, fieldName);
+			}
 		}
-
 		// prevent id field duplicate values.
 		// remove the id field if it was set,
-		solrDoc.removeField("id");
+		solrDoc.removeField(idField);
 		// make sure we add it back
-		solrDoc.setField("id", docId);
-
+		solrDoc.setField(idField, docId);
 		// I guess we have the full document, we should send it
 		//ArrayList<SolrInputDocument> solrDocs = new ArrayList<SolrInputDocument>();
 		//solrDocs.add(solrDoc);

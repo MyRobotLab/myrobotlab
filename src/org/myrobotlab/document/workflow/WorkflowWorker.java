@@ -31,7 +31,7 @@ public class WorkflowWorker extends Thread {
 		stages = new ArrayList<AbstractStage>();
 		for (StageConfiguration stageConf : workflowConfig.getStages()) {
 			String stageClass = stageConf.getStageClass();
-			System.out.println("Starting stage :"  + stageConf.getStageName() + " class=" + stageConf.getStageClass());
+			log.info("Starting stage: {} class: {}", stageConf.getStageName(), stageConf.getStageClass());
 			Class<?> sc = Workflow.class.getClassLoader().loadClass(stageClass);
 			try {
 				AbstractStage stageInst = (AbstractStage) sc.newInstance();

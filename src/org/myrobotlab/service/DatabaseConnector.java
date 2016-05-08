@@ -10,6 +10,7 @@ import java.sql.Statement;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
+import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.framework.ServiceType;
 
 public class DatabaseConnector extends AbstractConnector {
@@ -31,6 +32,13 @@ public class DatabaseConnector extends AbstractConnector {
 	public DatabaseConnector(String name) {
 		super(name);
 	}
+	
+	
+	@Override
+	public void setConfig(ConnectorConfig config) {
+		// TODO Auto-generated method stub
+		log.info("Set Config not yet implemented");
+	}	
 	
 //	@Override
 //	public void initialize(ConnectorConfiguration config) {

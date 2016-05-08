@@ -74,7 +74,22 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 	}
 	
 	public void flush() {
+		while(getInbox().size() > 0) {
+			// TODO: we've gotta wait until we've consumed our inbox if we're flushing?
+			// TODO: This seems dangerous if we want to flush while continously feeding
+			// we'll never get to flush unless data pauses while we catchup.
+			try {
+				log.info("Waiting for inbox to drain...Size: {}", getInbox().size());
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		workflowServer.flush(workflowName);
+		// TODO: what if our inbox isn't empty?
+		
 	}
 	
 	public static void main(String[] args) throws Exception {
