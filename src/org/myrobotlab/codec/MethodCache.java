@@ -39,10 +39,16 @@ public class MethodCache {
 							// because what will we decode too ?
 							// we just can't ! :)
 							Class<?> type = pTypes[i]; 
+							
+/* BAD ASSUMPTION - SOME CODECs have a default class they serialize
+ * from for List Map HashSet etc..							
+ */
+							/*
 							if (type.isInterface()) {
 								interfaceInParamList = true;
 								break;
 							}
+							*/
 							
 							if (type.isPrimitive() || type.equals(String.class)){
 								++score;

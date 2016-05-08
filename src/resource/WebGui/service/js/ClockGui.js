@@ -17,14 +17,10 @@ angular.module('mrlapp.service.ClockGui', [])
                 this.onMsg = function (inMsg) {
                     switch (inMsg.method) {
                         case 'onState':
-                            $timeout(function () {
                                 _self.updateState(inMsg.data[0]);
-                            });
                             break;
                         case 'onPulse':
-                            $timeout(function () {
                                 $scope.pulseData = inMsg.data[0];
-                            });
                             break;
                         default:
                             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);

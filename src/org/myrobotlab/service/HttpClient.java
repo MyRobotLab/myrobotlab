@@ -94,9 +94,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
 	}
 
 
-	DefaultHttpClient client;
+	transient DefaultHttpClient client;
 
-	HashMap<String, String> formFields = new HashMap<String, String>();
+	transient HashMap<String, String> formFields = new HashMap<String, String>();
 
 	public HttpClient(String n) {
 		super(n);
