@@ -16,6 +16,11 @@ import java.util.TreeMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.http.client.ClientProtocolException;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Request;
+import org.junit.runner.Result;
+import org.junit.runners.Suite;
+import org.junit.runners.model.RunnerBuilder;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -706,23 +711,33 @@ public class Test extends Service {
 		return test;
 	}
 
-	public TestResults BasicCreateStartStopRelease(String testName, TestResults test) {
+	// TODO - BasicCreateStartStopRelease - over network control
+	public TestResults JunitService(String testName, TestResults test) {
 		TestResult result = test.results.get(testName);
 		try {
+			
+			/*
+			Suite suite = new Suite(klass, new RunnerBuilder() {
+				... // Implement methods
+				});
+				JUnitCore c = new JUnitCore();
+				c.run(Request.runner(suite));
+				*/
+			
+			Class<?> junitTest = Class.forName(String.format("org.myrobotlab.service.%sTest", test.simpleName));
+			JUnitCore junit = new JUnitCore();
+			Result junitResult = junit.run(junitTest);
+				
 
-			// TODO - THREADS SHOULD BE THE SAME AFTER AS BEFORE !!
-			HttpClient http = (HttpClient) startPeer("http");
-
-			String n = test.simpleName;
-			String url = String.format("http://myrobotlab.org/service/%s", n);
-			String servicePage = http.get(url);
-
-			result.link = String.format("<a href=\"%s\">%s</a>", url, testName);
+			// result.link = String.format("<a href=\"%s\">%s</a>", url, testName);
+			/*
 			if (servicePage == null || servicePage.contains("Page not found")) {
 				result.status = Status.error("script not found");
 			} else {
 				result.status = Status.success();
-			}
+			}*/
+			
+			result.status = Status.success();
 
 		} catch (Exception e) {
 			result.status = Status.error(e);

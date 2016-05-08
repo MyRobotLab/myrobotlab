@@ -10,7 +10,11 @@ angular.module('mrlapp.service.TestGui', [])
     $scope.currentProgress.percentDone = 0;
     $scope.currentProgress.currentActivity = "ready";
     $scope.servicesToTest = [];
-    $scope.testsToRun = ['PythonScriptExists', 'ServicePageExists'];
+
+    // FIXME - do the same thing for Services - default state is selected
+    // FIXME - get this from the service
+    $scope.tests = ['JunitService','PythonScriptExists', 'ServicePageExists'];
+    $scope.testsToRun = [];
     $scope.trustAsHtml = $sce.trustAsHtml;
     
     // GOOD TEMPLATE TO FOLLOW
@@ -50,6 +54,20 @@ angular.module('mrlapp.service.TestGui', [])
         } else {
             // is newly selected
             $scope.servicesToTest.push(serviceName);
+        }
+    }
+    ;
+
+       // toggle service to test
+    $scope.toggleTest = function toggleTest(testName) {
+        var idx = $scope.testsToRun.indexOf(testName);
+        
+        // is currently selected
+        if (idx > -1) {
+            $scope.testsToRun.splice(idx, 1);
+        } else {
+            // is newly selected
+            $scope.testsToRun.push(testName);
         }
     }
     ;
