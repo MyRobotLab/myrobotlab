@@ -1,13 +1,28 @@
-<span class="input-group-btn"><button class="btn btn-default" ng-click="msg.test()">test</button></span>
+<button class="btn btn-default" ng-click="msg.test(servicesToTest, testsToRun)">test</button> {{currentProgress.currentActivity}} <b>tests: {{currentProgress.testsDone}} <span class="text-danger">errors: {{currentProgress.errors}}</span><span class="text-success"> worky: {{currentProgress.testsDone - currentProgress.errors}}</span></b>
+
+<uib-progressbar class="progress-striped active" value="currentProgress.percentDone" type="active">{{currentProgress.testsDone}}/{{currentProgress.totalTests}} - {{currentProgress.percentDone}}%</uib-progressbar>
+<uib-progressbar class="progress-striped active" value="currentProgress.errorPercentage" type="danger">{{currentProgress.errors}}/{{currentProgress.errorPercentage}}%</uib-progressbar>
+<uib-progressbar class="progress-striped active" value="currentProgress.successPercentage" type="success">{{currentProgress.successes}}/{{currentProgress.successPercentage}}%</uib-progressbar>
+    
+
+  
+<!--<input type="checkbox" ng-model="selectedAll" ng-click="checkAll()" />--> <!-- {{servicesToTest}} -->
 
 <table class="table table-striped">
-  <tr><th>service</th><th>description</th><th>available</th><th>ready</th><th>sponsor</th><th>todo</th></tr>
-  <tr ng-repeat="result in matrix.results">
-    <td><img ng-src="/{{result.simpleName}}.png" width="16">{{result.simpleName}}</td>
+  <tr><th>service</th><th>description</th><th>available</th><th>tests</th><th>ready</th><th>sponsor</th><th>todo</th></tr>
+  <tr ng-repeat="result in matrix.results"> 
+    <td><!-- <input type="checkbox" name="servicesToTest[]" value="{{result.simpleName}}" ng-checked="selection.indexOf(result.simpleName) > -1" ng-click="toggleSelection(result.simpleName)"> -->  <img ng-src="/{{result.simpleName}}.png" width="16">&nbsp;&nbsp;{{result.simpleName}}</td>
     <td>{{ result.type.description }}</td>
     <td>{{ result.type.available }}</td>
+    <td width="40%">
+          <table class="table table-striped">
+              <tr ng-repeat="test in result.results">
+                   <td ng-bind-html="trustAsHtml(test.link)"></td><td>&nbsp;<img ng-src="/Test/{{test.status.level}}.png" width="16"></td>
+               </tr>
+           </table>
+    </td>    
     <td>{{ result.type.ready }}</td>
     <td>{{ result.type.sponsor }}</td>
-    <td>{{ result.type.todo }}</td>
+    <td width="40%">{{ result.type.todo }}</td>
   </tr>
 </table>

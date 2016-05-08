@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -16,6 +17,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.http.client.ClientProtocolException;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
@@ -60,38 +62,80 @@ public class Test extends Service {
 	HashSet<String> skippedPythonScript = new HashSet<String>();
 
 	// thread blocking
-	Object lock = new Object();
+	transient Object lock = new Object();
 
 	List<Status> status = new ArrayList<Status>();
 
-	TreeMap<String, String> pythonScripts = null;
+	transient TreeMap<String, String> pythonScripts = null;
 
-	LinkedBlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
+	transient LinkedBlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
 	TestMatrix matrix = new TestMatrix();
 
-	public static class TestMatrix {
+	public static class Progress implements Serializable {
+		private static final long serialVersionUID = 1L;
+		String currentActivity;
+		int percentDone;
+		public int testsDone;
+		public int errors;
+		public int errorPercentage;
+		public int successes;
+		public int successPercentage;
+		public int totalTests;
+
+		public void process(Status status) {
+			testsDone++;
+			percentDone = testsDone * 100 / totalTests;
+
+			if (status.isError()) {
+				errors++;
+				errorPercentage = errors * 100 / testsDone;
+			} else {
+				successes++;
+				successPercentage = successes * 100 / testsDone;
+			}
+		}
+	}
+
+	public static class TestMatrix implements Serializable {
+		Progress currentProgress = new Progress();
 		Date lastTestDt;
 		long lastTestDurationMs;
 		long totalDuration;
+		/**
+		 * this will be important when we start posting test matrices from
+		 * different platforms
+		 */
+		Platform platform = Platform.getLocalInstance();
 
 		HashSet<String> testsToRun = new HashSet<String>();
-		HashSet<String> servicesToTest;
+		HashSet<String> servicesToTest = new HashSet<String>();
 		Map<String, TestResults> results = new TreeMap<String, TestResults>();
+
 	}
 
-	public static class TestResults {
-		String name;
+	public static class TestResults implements Serializable {
+		String fullTypeName;
 		String simpleName;
 		ServiceType type;
 		TreeMap<String, TestResult> results = new TreeMap<String, TestResult>();
 	}
 
-	public static class TestResult {
+	public static class TestResult implements Serializable {
+		private static final long serialVersionUID = 1L;
+
 		String test;
 		long startTime;
 		long endTime;
 		Status status;
+
+		public String link;
+
+		public TestResult(String testName) {
+			this.test = testName;
+			this.link = testName;
+			this.startTime = System.currentTimeMillis();
+		}
 	}
 
 	public static void logThreadNames() {
@@ -105,10 +149,14 @@ public class Test extends Service {
 		}
 
 		Arrays.sort(tn);
-		log.warn(CodecUtils.toJson(tn));
+		// log.warn(CodecUtils.toJson(tn));
 		/*
 		 * for (int i = 0; i < t.length; ++i){ log.warn(t[i]); }
 		 */
+	}
+
+	public Progress publishProgress(Progress progress) {
+		return progress;
 	}
 
 	public void startService() {
@@ -122,12 +170,14 @@ public class Test extends Service {
 		ArrayList<ServiceType> types = serviceData.getServiceTypes();
 		for (int i = 0; i < types.size(); ++i) {
 			ServiceType type = types.get(i);
-			TestResults stp = new TestResults();
+			TestResults results = new TestResults();
 			String n = type.getName();
+			results.fullTypeName = type.getName();
 
-			stp.simpleName = n.substring(n.lastIndexOf(".") + 1);
-			stp.type = type;
-			matrix.results.put(type.getName(), stp);
+			results.simpleName = n.substring(n.lastIndexOf(".") + 1);
+			results.type = type;
+			matrix.results.put(results.simpleName, results);
+			matrix.servicesToTest.add(results.simpleName);
 		}
 
 		broadcastState();
@@ -353,7 +403,43 @@ public class Test extends Service {
 	// test is the main interface to test everything
 	// failures need to be collected & options (like junit) to halt on error
 	// or continue and report
-	public void test() {
+
+	/**
+	 * need to do a type conversion here... in JS land there is no HashSet
+	 * <String> only List & HashMap types
+	 * 
+	 * @param servicesToTest
+	 */
+	public void test(List<String> servicesToTest, List<String> testsToRun) {
+		// clear results ???
+		matrix.servicesToTest.clear();
+		matrix.testsToRun.clear();
+		for (int i = 0; i < servicesToTest.size(); ++i) {
+			matrix.servicesToTest.add(servicesToTest.get(i));
+		}
+		for (int i = 0; i < testsToRun.size(); ++i) {
+			matrix.testsToRun.add(testsToRun.get(i));
+		}
+
+		// test();
+		Tester tester = new Tester(this);
+	}
+
+	public static class Tester extends Thread {
+		transient Test test;
+
+		public Tester(Test test) {
+			super("tester");
+			this.test = test;
+			start();
+		}
+
+		public void run() {
+			test.test();
+		}
+	}
+
+	synchronized public void test() {
 		// we are started so .. we'll use the big hammer at the end
 		/*
 		 * Status status = Status.info("========TESTING=============");
@@ -367,6 +453,50 @@ public class Test extends Service {
 		// update the matrix accordingly broadcast after every service x test
 
 		// single method test(getMethod(String name))
+
+		// small but powerfull test engine
+		Progress progress = new Progress();
+		matrix.currentProgress = progress;
+
+		invoke("publishProgress", progress);
+
+		int total = matrix.testsToRun.size() * matrix.servicesToTest.size();
+
+		progress.totalTests = total;
+		progress.percentDone = 0;
+		progress.currentActivity = String.format("starting %d tests", total);
+
+		for (String testName : matrix.testsToRun) {
+			for (String name : matrix.servicesToTest) {
+				TestResults results = matrix.results.get(name);
+
+				String activity = String.format("test %s %s", testName, results.simpleName);
+				log.info(activity);
+				progress.currentActivity = activity;
+				invoke("publishProgress", progress);
+
+				// Create a new test result to hold the results for this test
+				TestResult result = new TestResult(testName);
+				// load it into the results
+				results.results.put(testName, result);
+
+				// do the TEST !!
+				invoke(testName, testName, results);
+
+				result.endTime = System.currentTimeMillis();
+
+				progress.process(results.results.get(testName).status);
+
+				broadcastState(); // admittedly a bit heavy handed
+
+				activity = String.format("tested %s(%s)", testName, results.simpleName);
+				invoke("publishProgress", progress);
+
+			}
+
+		}
+
+		log.info("here");
 	}
 
 	public String[] getAllServiceNames() {
@@ -551,21 +681,78 @@ public class Test extends Service {
 		}
 	}
 
-	public void testPythonScriptExists(TestResults test) {
-		
-		TestResult result = new TestResult();
-		result.test = "PythonScriptExists";
-		result.startTime = System.currentTimeMillis();
-		String script = GitHub.getPyRobotLabScript(test.simpleName);
-		result.endTime = System.currentTimeMillis();
-		
-		if (script == null) {
-			result.status = Status.error("script not found");
-			test.results.put("PythonScriptExists", result);
-		} else {
-			result.status = Status.success();
-			test.results.put("PythonScriptExists", result);
+	// TODO - load python
+	public TestResults PythonScriptExists(String testName, TestResults test) {
+
+		TestResult result = test.results.get(testName);
+		try {
+			result.startTime = System.currentTimeMillis();
+			String script = GitHub.getPyRobotLabScript(test.simpleName);
+			result.endTime = System.currentTimeMillis();
+
+			String branch = Platform.getLocalInstance().getBranch();
+			String url = String.format("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/%s/service/%s.py", branch, test.fullTypeName);
+			result.link = String.format("<a href=\"%s\">%s</a>", url, testName);
+
+			if (script == null) {
+				result.status = Status.error("script not found");
+			} else {
+				result.status = Status.success();
+			}
+
+		} catch (Exception e) {
+			result.status = Status.error(e);
 		}
+		return test;
+	}
+
+	public TestResults BasicCreateStartStopRelease(String testName, TestResults test) {
+		TestResult result = test.results.get(testName);
+		try {
+
+			// TODO - THREADS SHOULD BE THE SAME AFTER AS BEFORE !!
+			HttpClient http = (HttpClient) startPeer("http");
+
+			String n = test.simpleName;
+			String url = String.format("http://myrobotlab.org/service/%s", n);
+			String servicePage = http.get(url);
+
+			result.link = String.format("<a href=\"%s\">%s</a>", url, testName);
+			if (servicePage == null || servicePage.contains("Page not found")) {
+				result.status = Status.error("script not found");
+			} else {
+				result.status = Status.success();
+			}
+
+		} catch (Exception e) {
+			result.status = Status.error(e);
+		}
+
+		return test;
+	}
+
+	public TestResults ServicePageExists(String testName, TestResults test) {
+		TestResult result = test.results.get(testName);
+		try {
+
+			HttpClient http = (HttpClient) startPeer("http");
+
+			String n = test.simpleName;
+			String url = String.format("http://myrobotlab.org/service/%s", n);
+			String servicePage = http.get(url);
+
+			result.link = String.format("<a href=\"%s\">%s</a>", url, testName);
+			if (servicePage == null || servicePage.contains("Page not found")) {
+				result.status = Status.error("script not found");
+			} else {
+				result.status = Status.success();
+			}
+
+		} catch (Exception e) {
+			result.status = Status.error(e);
+		}
+
+		return test;
 	}
 
 	public Map<String, String> getPyRobotLabServiceScripts() throws Exception {
