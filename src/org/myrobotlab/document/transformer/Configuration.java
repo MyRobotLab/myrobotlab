@@ -2,6 +2,7 @@ package org.myrobotlab.document.transformer;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
@@ -124,11 +125,18 @@ public class Configuration {
 	public List<String> getListParam(String name) {
 		Object val = config.get(name);
 		if (val instanceof List) {
-			// TODO: 
+			// TODO: type safety?!
 			return (List<String>)val;
 		}
 		// TODO: null or empty list?
 		return null;
+	}
+	
+	
+
+	public Map<String, String> getMapProperty(String name) {
+		// TODO type safety?!
+		return (Map<String, String>)config.get(name);
 	}
 	
 	public static WorkflowConfiguration fromXML(String xml) {
