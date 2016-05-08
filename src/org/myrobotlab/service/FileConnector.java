@@ -11,6 +11,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
+import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
@@ -29,6 +30,12 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 		super(name);
 	}
 
+	@Override
+	public void setConfig(ConnectorConfig config) {
+		// TODO Auto-generated method stub
+		log.info("Set Config not yet implemented");
+	}	
+	
 	@Override
 	public void startCrawling() {
 		state = ConnectorState.RUNNING;

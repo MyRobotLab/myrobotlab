@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
+import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.string.StringUtil;
 
@@ -19,20 +20,38 @@ public class CSVConnector extends AbstractConnector {
 	private String filename;
 	private String[] columns;
 	private String idField;
-	private String idPrefix; 
 	private String separator = ",";
 	private int numFields;
 	private int idColumn = -1;
 	private boolean useRowAsId = true;
 	private int skipRows = 1;
+	private boolean firstRowAsColumns = false;
 	
 	public CSVConnector(String name) {
 		super(name);
 	}
-	
 
+	@Override
+	public void setConfig(ConnectorConfig config) {
+		// TODO: remove side effects of a "setter" 
+		// the parsing of the config should be handled elsewhere? maybe initialize?
+		// TODO: validate the config options are valid.
+		
+		setDocIdPrefix(config.getStringParam("docIdPrefix", ""));
+		filename = config.getProperty("filename");
+		columns = config.getStringArray("columns");
+		idField = config.getProperty("idField");
+		
+		separator = config.getProperty("separator");
+		numFields = config.getIntegerParam("numFields", numFields);
+		// this is computed in initialize.
+		//idColumn = config.getProperty("idColumn");
+		useRowAsId = config.getBoolParam("useRowAsId", useRowAsId);
+		skipRows = config.getIntegerParam("skipRows", skipRows);
+		firstRowAsColumns = config.getBoolParam("firstRowAsColumns", firstRowAsColumns);		
+	}	
+	
 	public void initialize() {
-		// TODO Auto-generated method stub
 //		filename = config.getProperty("filename", "data/myfile.csv");	
 //		columns = config.getProperty("columnnames", "id,column1,column2").split(",");
 //		idField = config.getProperty("idcolumn", "id");
@@ -57,7 +76,6 @@ public class CSVConnector extends AbstractConnector {
 		
 		state = ConnectorState.RUNNING;
 		// compile the map to for header to column number.
-		initialize();
 		// TODO: add a directory traversal ..
 		// log.info("Starting CSV Connector");
 		File fileToCrawl = new File(filename);
@@ -75,7 +93,17 @@ public class CSVConnector extends AbstractConnector {
 			e.printStackTrace();
 		}
 		CSVReader csvReader = new CSVReader(reader, separator.charAt(0));
-		
+		if (firstRowAsColumns) {
+			// we should read the first row as the column header
+			try {
+				columns = csvReader.readNext();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		// pick out which column has the primary key / id field.
+		initialize();
 		
 		int rowNum = 0;
 		String[] nextLine;
@@ -96,9 +124,9 @@ public class CSVConnector extends AbstractConnector {
 				}
 				String id;
 				if (useRowAsId) {
-					id = idPrefix + rowNum;
+					id = getDocIdPrefix() + rowNum;
 				} else {
-					id = idPrefix + nextLine[idColumn];
+					id = getDocIdPrefix() + nextLine[idColumn];
 				}
 			    Document docToSend = new Document(id);
 			    for (int i = 0; i < numFields ; i++) {
@@ -113,15 +141,34 @@ public class CSVConnector extends AbstractConnector {
 			// TODO Auto-generated catch block
 			// shouldn't see this.. but who knows.
 			e.printStackTrace();
+			log.error("IO Exception during crawl. {}", e.getMessage());
+			// TODO: re-throw something else?
 		}
+		
+		
+		// Lets poll until our outbox has been completely picked up.
+		while (outbox.size() > 0) {
+			// wait until our outbox has drained before going to stopped?
+			try {
+				log.info("Waiting for outbox to drain. Size: {}", outbox.size());
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		// TODO: why the heck does this not block until we're done as we expect?!?!
 		state = ConnectorState.STOPPED;
+		flush();
+		// TODO: push this state management to the base class?
+		
 	}
 	
 
 	@Override
 	public void stopCrawling() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public String getFilename() {
@@ -146,14 +193,6 @@ public class CSVConnector extends AbstractConnector {
 
 	public void setIdField(String idField) {
 		this.idField = idField;
-	}
-
-	public String getIdPrefix() {
-		return idPrefix;
-	}
-
-	public void setIdPrefix(String idPrefix) {
-		this.idPrefix = idPrefix;
 	}
 
 	public String getSeparator() {

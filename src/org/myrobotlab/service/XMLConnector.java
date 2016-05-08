@@ -10,6 +10,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
+import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.document.xml.MRLChunkingXMLHandler;
 import org.myrobotlab.document.xml.RecordingInputStream;
 import org.myrobotlab.framework.ServiceType;
@@ -38,6 +39,12 @@ public class XMLConnector extends AbstractConnector {
 		super(name);
 	}
 
+	@Override
+	public void setConfig(ConnectorConfig config) {
+		// TODO Auto-generated method stub
+		log.info("Set Config not yet implemented");
+	}	
+	
 	// from oracle java sax example.
 	// https://docs.oracle.com/javase/tutorial/jaxp/sax/parsing.html
 	// TODO: remove this method!
@@ -146,6 +153,6 @@ public class XMLConnector extends AbstractConnector {
 		meta.addDescription("This is an XML Connector that will parse a large xml file into many small xml documents");
 		meta.addCategory("data");
 		return meta;		
-	}	
+	}
 	
 }
