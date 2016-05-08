@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class MQTTTest {
+public class MqttTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
