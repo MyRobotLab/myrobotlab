@@ -45,6 +45,10 @@ import org.slf4j.Logger;
  * 
  *         TODO - grab and report all missing Service Pages & all missing Python
  *         scripts !
+ *         
+ *         TODO - install create start stop release test
+ *         TODO - serialization json + native test
+ *         TODO - run Python & JavaScript tests - last method appended is a callback
  *
  */
 public class Test extends Service {
@@ -595,63 +599,7 @@ public class Test extends Service {
 		return status;
 	}
 
-	/**
-	 * this can not be used to test environment
-	 * 
-	 * @return
-	 */
-	public List<Status> testAll() {
 
-		List<Status> ret = new ArrayList<Status>();
-		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
-		Status status = Status.info("subTest");
-
-		// status.add(Status.info("will test %d services",
-		// serviceTypeNames.length));
-
-		for (int i = 0; i < serviceTypeNames.length; ++i) {
-			String fullName = serviceTypeNames[i];
-			ret.addAll((test(fullName)));
-		}
-
-		return ret;
-	}
-
-	public void testServiceScripts() {
-		// get download zip
-
-		// uncompress locally
-
-		// test - instrumentation for
-	}
-
-	public Status verifyServicePageScript(String serviceType) {
-		Status status = new Status("starting");
-		return status;
-	}
-
-	// save / load test !
-
-	public List<Status> verifyServicePageScripts() {
-		List<Status> ret = new ArrayList<Status>();
-		Repo repo = Runtime.getInstance().getRepo();
-		ServiceData serviceData = ServiceData.getLocalInstance();
-		ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
-
-		Status status = Status.info("serviceTest will test %d services", serviceTypes.size());
-		long startTime = System.currentTimeMillis();
-		ret.add(info("startTime", "%d", startTime));
-
-		for (int i = 0; i < serviceTypes.size(); ++i) {
-			ServiceType serviceType = serviceTypes.get(i);
-			Status retStatus = verifyServicePageScript(serviceType.getName());
-			if (retStatus.isError()) {
-				ret.add(retStatus);
-			}
-		}
-
-		return ret;
-	}
 
 	/**
 	 * This static method returns all the details of the class without it having
@@ -691,16 +639,30 @@ public class Test extends Service {
 
 		TestResult result = test.results.get(testName);
 		try {
-			result.startTime = System.currentTimeMillis();
-			String script = GitHub.getPyRobotLabScript(test.simpleName);
-			result.endTime = System.currentTimeMillis();
+			String name = test.simpleName;
+			String script = GitHub.getPyRobotLabScript(name);
 
 			String branch = Platform.getLocalInstance().getBranch();
-			String url = String.format("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/%s/service/%s.py", branch, test.fullTypeName);
-			result.link = String.format("<a href=\"%s\">%s</a>", url, testName);
+			// https://github.com/MyRobotLab/pyrobotlab/edit/develop/service/AcapelaSpeech.py
+			String url = String.format("https://github.com/MyRobotLab/pyrobotlab/edit/%s/service/%s.py", branch, name);
+			result.link = String.format("<a href=\"%s\">%s</a>", url, result.test);
 
 			if (script == null) {
 				result.status = Status.error("script not found");
+				
+				ServiceData sd = ServiceData.getLocalInstance();
+				ServiceType st = sd.getServiceType(test.fullTypeName);
+				StringBuffer t = new StringBuffer();
+				t.append("#########################################\n");
+				t.append(String.format("# %s.py\n", name));
+				t.append(String.format("# description: %s\n", st.getDescription()));
+				t.append(String.format("# categories: %s\n", Arrays.toString(st.categories.toArray(new String[st.categories.size()]))));
+				t.append(String.format("# possibly more info @: http://myrobotlab.org/service/%s\n", name));
+				t.append("#########################################\n");
+				t.append("# start the service\n");
+				String lowercase = name.toLowerCase();
+				t.append(String.format("%s = Runtime.start(\"%s\",\"%s\")", lowercase, lowercase, name));
+				FileIO.toFile(new File(String.format("%s.py", name)), t.toString().getBytes());
 			} else {
 				result.status = Status.success();
 			}
@@ -949,7 +911,7 @@ public class Test extends Service {
 			log.info("\n{}\n", sb.toString());
 
 			List<String> ret = test.getServicesWithOutServicePages();
-			test.testAll();
+	
 
 			// Runtime.start("cli", "Cli");
 			Agent agent = (Agent) Runtime.start("agent", "Agent");

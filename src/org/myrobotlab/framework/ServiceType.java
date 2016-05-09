@@ -144,6 +144,10 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	public void addTodo(String todo) {
 		this.todo = todo;
 	}
+
+	public String getDescription() {
+		return description;
+	}
 	
 
 }
