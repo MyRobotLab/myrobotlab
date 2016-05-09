@@ -40,9 +40,9 @@ public class WikipediaIndexer {
 		DocumentPipeline docproc = new DocumentPipeline("docproc");
 		// build the pipeline.. assemble the stages.
 		// create our document processing pipeline workflow.
-		WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
+		WorkflowConfiguration workflowConfig = new WorkflowConfiguration("default");
 		workflowConfig.setNumWorkerThreads(5);
-		workflowConfig.setName("default");
+		// workflowConfig.setName("default");
 		workflowConfig.addStage(staticFieldStageConfig);
 		workflowConfig.addStage(xpathStageConfig);
 		// remove the original xml.. it's icky

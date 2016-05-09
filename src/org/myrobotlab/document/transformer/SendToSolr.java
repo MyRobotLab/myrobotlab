@@ -5,8 +5,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.HttpClient;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.HttpClientUtil;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.common.SolrInputDocument;
 import org.myrobotlab.document.Document;
@@ -36,6 +41,9 @@ public class SendToSolr extends AbstractStage {
 	// Synchronized list. needed for thread safety.
 	private List<SolrInputDocument> batch = Collections.synchronizedList(new ArrayList<SolrInputDocument>()); 
 	
+	//private String basicAuthUser = null;
+	//private String basicAuthPass = null;
+	
 	// Batch size +/-
 	
 	@Override
@@ -44,11 +52,24 @@ public class SendToSolr extends AbstractStage {
 		issueCommit = config.getBoolParam("issueCommit", new Boolean(issueCommit));
 		batchSize = Integer.valueOf(config.getIntegerParam("batchSize", batchSize));
 		
+		//basicAuthUser = config.getStringParam("basicAuthUser", basicAuthUser);
+		//basicAuthPass = config.getStringParam("basicAuthPass", basicAuthPass);
+		
 		// Initialize a connection to the solr server on startup.
 		if (solrServer == null) {
 			// TODO: support an embeded solr instance
 			log.info("Connecting to Solr at {}", solrUrl);
-			solrServer = new HttpSolrServer( solrUrl );
+			// set credentials.
+			
+			
+			//if (basicAuthUser != null) {
+				//DefaultHttpClient httpClient = new DefaultHttpClient();
+				//httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(basicAuthUser, basicAuthPass));
+				// create solr server with client.
+				//solrServer = new HttpSolrServer( solrUrl , httpClient);
+			//} else {
+				solrServer = new HttpSolrServer( solrUrl );
+			//}
 		} else {
 			log.info("Solr instance already created.");
 		}

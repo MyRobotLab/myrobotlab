@@ -39,10 +39,10 @@ public class Configuration {
 		if (config.containsKey(name)) {
 			Object val = config.get(name);
 			if (val instanceof String) {
-				return (String)val;
+				return ((String)val).trim();
 			} else {
 				// TOOD: this value was not a string?
-				return val.toString();
+				return val.toString().trim();
 			}
 		} else {
 			return defaultValue;
@@ -138,12 +138,7 @@ public class Configuration {
 		// TODO type safety?!
 		return (Map<String, String>)config.get(name);
 	}
-	
-	public static WorkflowConfiguration fromXML(String xml) {
-		// TODO: move this to a utility to serialize/deserialize the config objects.
-		Object o = (new XStream(new StaxDriver())).fromXML(xml);
-		return (WorkflowConfiguration)o;
-	}
+
 
 	public String toXML() {
 		// TODO: does this serialize the xstream object itself?

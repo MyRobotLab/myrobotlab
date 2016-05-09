@@ -31,10 +31,10 @@ public class StageConfiguration extends Configuration {
 		if (config.containsKey(name)) {
 			Object val = config.get(name);
 			if (val instanceof String) {
-				return (String)val;
+				return ((String)val).trim();
 			} else {
 				// TOOD: this value was not a string?
-				return val.toString();
+				return val.toString().trim();
 			}
 		} else {
 			return null;
