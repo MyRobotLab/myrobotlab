@@ -25,24 +25,24 @@ public class RegexExtractor extends AbstractStage {
 	private String regex = null;
 
 	private Pattern pattern;
-	
+
 	@Override
 	public void startStage(StageConfiguration config) {
 		if (config != null) {
 			inputField = config.getProperty("inputField", "text");
 			outputField = config.getProperty("outputField", "entity");
-      List<String> keepGroupsStr = config.getListParam("keepGroups");
+			List<String> keepGroupsStr = config.getListParam("keepGroups");
 			regex = config.getProperty("regex");
-      processOnlyNull = "true".equalsIgnoreCase(config.getStringParam("processOnlyNull"));
+			processOnlyNull = config.getBoolParam("processOnlyNull", processOnlyNull);
 
-      keepGroups = new ArrayList<Integer>();
-      if (keepGroupsStr == null) {
-        keepGroups.add(1);
-      } else {
-        for (String groupNum : keepGroupsStr) {
-          keepGroups.add(Integer.parseInt(groupNum));
-        }
-      }
+			keepGroups = new ArrayList<Integer>();
+			if (keepGroupsStr == null) {
+				keepGroups.add(1);
+			} else {
+				for (String groupNum : keepGroupsStr) {
+					keepGroups.add(Integer.parseInt(groupNum));
+				}
+			}
 		}
 		pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 	}
@@ -53,27 +53,27 @@ public class RegexExtractor extends AbstractStage {
 			return null;
 		}
 
-    if (processOnlyNull && doc.hasField(outputField)) {
-      return null;
-    }
+		if (processOnlyNull && doc.hasField(outputField)) {
+			return null;
+		}
 
-    List<String> matches = new ArrayList<String>();
+		List<String> matches = new ArrayList<String>();
 		for (Object o : doc.getField(inputField)) {
 			String text = o.toString();
 			Matcher matcher = pattern.matcher(text);
 			if (matcher.matches() && matcher.groupCount() > 0) {
 				String match = "";
-        for (Integer num : keepGroups) {
-          match += matcher.group(num);
-        }
-        matches.add(match);
+				for (Integer num : keepGroups) {
+					match += matcher.group(num);
+				}
+				matches.add(match);
 			}
 		}
 
-    doc.removeField(outputField);
-    for (String match : matches) {
-      doc.addToField(outputField, match);
-    }
+		doc.removeField(outputField);
+		for (String match : matches) {
+			doc.addToField(outputField, match);
+		}
 
 		// this stage doesn't emit child docs.
 		return null;

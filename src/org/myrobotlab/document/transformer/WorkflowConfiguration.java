@@ -2,16 +2,18 @@ package org.myrobotlab.document.transformer;
 
 import java.util.ArrayList;
 
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
+
 public class WorkflowConfiguration extends Configuration {
 
 	ArrayList<StageConfiguration> stages;
-	
-	private String name = "defaultWorkflow";
-	
+	private String name = "default";
 	private int numWorkerThreads = 1;
 	private int queueLength = 50;
 	
-	public WorkflowConfiguration() {
+	public WorkflowConfiguration(String name) {
+		this.name = name;
 		stages = new ArrayList<StageConfiguration>();
 		// default workflow static config
 	}
@@ -28,7 +30,7 @@ public class WorkflowConfiguration extends Configuration {
 	public String getName() {
 		return name;
 	}
-
+	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -47,6 +49,14 @@ public class WorkflowConfiguration extends Configuration {
 
 	public void setQueueLength(int queueLength) {
 		this.queueLength = queueLength;
+	}
+	
+	public static WorkflowConfiguration fromXML(String xml) {
+		// TODO: move this to a utility to serialize/deserialize the config objects.
+		// TODO: should override on the impl classes so they return a properly
+		// cast config.
+		Object o = (new XStream(new StaxDriver())).fromXML(xml);
+		return (WorkflowConfiguration)o;
 	}
 
 }

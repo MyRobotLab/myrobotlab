@@ -99,7 +99,7 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 		
 		// pipeline.workflowName = "default";
 		// create a workflow to load into that pipeline service
-		WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
+		WorkflowConfiguration workflowConfig = new WorkflowConfiguration("default");
 		workflowConfig.setName("default");
 		StageConfiguration stage1Config = new StageConfiguration();
 		stage1Config.setStageClass("org.myrobotlab.document.transformer.SetStaticFieldValue");
