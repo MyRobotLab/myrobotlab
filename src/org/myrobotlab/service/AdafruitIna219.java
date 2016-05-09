@@ -17,11 +17,11 @@ import org.slf4j.Logger;
  * 
  *         References : https://www.adafruit.com/products/904
  */
-public class AdafruitINA219 extends Service {
+public class AdafruitIna219 extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(AdafruitINA219.class);
+	public final static Logger log = LoggerFactory.getLogger(AdafruitIna219.class);
 	transient I2CControl controller;
 	
 	public static final byte INA219_SHUNTVOLTAGE = 0x01;
@@ -50,7 +50,7 @@ public class AdafruitINA219 extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
-			AdafruitINA219 adafruitINA219 = (AdafruitINA219) Runtime.start("AdafruitINA219", "AdafruitINA219");
+			AdafruitIna219 adafruitINA219 = (AdafruitIna219) Runtime.start("AdafruitINA219", "AdafruitINA219");
 			Runtime.start("gui", "GUIService");
 			
 		} catch (Exception e) {
@@ -58,7 +58,7 @@ public class AdafruitINA219 extends Service {
 		}
 	}
 
-	public AdafruitINA219(String n) {
+	public AdafruitIna219(String n) {
 		super(n);
 		// TODO Auto-generated constructor stub
 	}
@@ -157,7 +157,7 @@ public class AdafruitINA219 extends Service {
 	 */
 	static public ServiceType getMetaData(){
 		
-		ServiceType meta = new ServiceType(AdafruitINA219.class.getCanonicalName());
+		ServiceType meta = new ServiceType(AdafruitIna219.class.getCanonicalName());
 		meta.addDescription("Adafruit INA219 Voltage and Current sensor Service");
 		meta.addCategory("sensor");	
 		return meta;		

@@ -35,14 +35,14 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.AdafruitINA219;
+import org.myrobotlab.service.AdafruitIna219;
 import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 
-public class AdafruitINA219GUI extends ServiceGUI implements ActionListener {
+public class AdafruitIna219GUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(AdafruitINA219GUI.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(AdafruitIna219GUI.class);
 
 	JButton refresh = new JButton("refresh");
 	
@@ -51,7 +51,7 @@ public class AdafruitINA219GUI extends ServiceGUI implements ActionListener {
 	JLabel current = new JLabel();
 	JLabel power = new JLabel();
 	
-	public AdafruitINA219GUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+	public AdafruitIna219GUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 
@@ -68,7 +68,7 @@ public class AdafruitINA219GUI extends ServiceGUI implements ActionListener {
 	public void attachGUI() {
 		// commented out subscription due to this class being used for
 		// un-defined gui's
-		subscribe("publishState", "getState", AdafruitINA219.class);
+		subscribe("publishState", "getState", AdafruitIna219.class);
 		send("publishState");
 	}
 
@@ -77,10 +77,10 @@ public class AdafruitINA219GUI extends ServiceGUI implements ActionListener {
 		// commented out subscription due to this class being used for
 		// un-defined gui's
 
-		unsubscribe("publishState", "getState", AdafruitINA219.class);
+		unsubscribe("publishState", "getState", AdafruitIna219.class);
 	}
 
-	public void getState(AdafruitINA219 ina219) {
+	public void getState(AdafruitIna219 ina219) {
 		busVoltage.setText(String.format("%s",ina219.busVoltage));
 		shuntVoltage.setText(String.format("%s",ina219.shuntVoltage));
 		current.setText(String.format("%s",ina219.current));
