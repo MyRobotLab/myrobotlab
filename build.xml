@@ -306,6 +306,7 @@
 		<pathelement location="${repo}/org.apache.tika/1.11/tika-core-1.11.jar"/>
 		<pathelement location="${repo}/net.sf.opencsv/2.3/opencsv-2.3.jar"/>
 		<pathelement location="${repo}/org.jsoup/1.8.3/jsoup-1.8.3.jar"/> 
+		<pathelement location="${repo}/net.objecthunter.exp4j/0.4.7/exp4j-0.4.7.jar"/>
         <!-- for OpenNLP stage in pipeline -->  
         <pathelement location="${repo}/opennlp/1.6/opennlp-tools-1.6.0.jar"/>
 
