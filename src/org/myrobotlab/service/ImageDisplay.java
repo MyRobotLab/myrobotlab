@@ -4,6 +4,8 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -25,6 +27,8 @@ public class ImageDisplay extends Service {
 	private static GraphicsDevice gd;
 	
 	public final static Logger log = LoggerFactory.getLogger(ImageDisplay.class);
+	
+	List<JFrame> frames = new ArrayList<JFrame>();
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -136,6 +140,7 @@ public class ImageDisplay extends Service {
     	getResolution();
         f.setLocation(w/2-image.getWidth()/2,h/2-(image.getHeight()+hOffset)/2);
         f.setVisible(true);
+        frames.add(f);
     }
     
     //builds a JFrame for the FullScreen sized image.
@@ -156,6 +161,15 @@ public class ImageDisplay extends Service {
     	getResolution();
     	f.setLocation(image.getwOffset(),image.gethOffset());
         f.setVisible(true);
+        frames.add(f);
+    }
+    
+    public void closeAll(){
+    	for (int i = 0; i < frames.size(); ++i){
+    		JFrame f = frames.get(i);
+    		f.dispose();
+    	}
+    	frames.clear();
     }
     
     //Exits the Fullscreen mode.
