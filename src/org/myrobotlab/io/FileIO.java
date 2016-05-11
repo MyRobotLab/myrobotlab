@@ -28,6 +28,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +37,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -1263,4 +1266,21 @@ public class FileIO {
 		}
 	}
 
+	public static Properties loadProperties(String propertiesFile) throws IOException {
+		Properties props = new Properties();
+		InputStream in = new FileInputStream(propertiesFile);
+		props.load(in);
+		in.close();
+		return props;
+	}
+	
+	public static HashMap<String,String> loadPropertiesAsMap(String propertiesFile) throws IOException {
+		Properties props = FileIO.loadProperties(propertiesFile);
+		HashMap<String,String> propMap = new HashMap<String,String>();
+		for (Object key : props.keySet()) {
+			propMap.put(key.toString(), props.getProperty(key.toString()));
+		}
+		return propMap;
+	}
+	
 }
