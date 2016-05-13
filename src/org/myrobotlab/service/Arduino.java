@@ -360,7 +360,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * 
 	 * @param pin
 	 */
-	public void analogReadPollingStart(Integer pin) {
+	public void analogReadPollingStart(Integer pin, Integer sampleRate) {
 		// check pin type - if not analog then change PIN_MODE
 		// sendMsg(PIN_MODE, pin, INPUT); DUH - not needed !
 		// sendMsg(ANALOG_READ_POLLING_START, pin);
@@ -368,7 +368,10 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		// sensorAttachPin = pin;
 		// sensorAttach(this);
 
-		sendMsg(ANALOG_READ_POLLING_START, pin);
+		sendMsg(ANALOG_READ_POLLING_START, pin, (sampleRate >> 8) & 0xff, sampleRate & 0xff);
+	}
+	public void analogReadPollingStart(Integer pin) {
+		analogReadPollingStart(pin,1);
 	}
 
 	/**
@@ -481,8 +484,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @param pin
 	 */
 	public void digitalReadPollingStart(Integer pin) {
+		digitalReadPollingStart(pin,1);
+	}
+
+	public void digitalReadPollingStart(Integer pin,Integer sampleRate) {
 		sendMsg(PIN_MODE, pin, INPUT);
-		sendMsg(DIGITAL_READ_POLLING_START, pin);
+		sendMsg(DIGITAL_READ_POLLING_START, pin, (sampleRate >> 8) & 0xff, sampleRate & 0xff);
 	}
 
 	/**
