@@ -40,7 +40,7 @@
 #include <Wire.h>
 // Start of Adafruit16CServoDriver I2C import
 // version to match with MRL
-#define MRLCOMM_VERSION         33
+#define MRLCOMM_VERSION         32
 
 // serial protocol functions
 #define MAGIC_NUMBER            170 // 10101010
@@ -744,7 +744,6 @@ void loop() {
     case DIGITAL_READ_POLLING_START: 
       {
         int pinIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
-        pinMode(pinIndex,INPUT);
         pin_type& pin = pins[pinIndex];
         pin.sensorIndex = 0; // FORCE ARDUINO TO BE OUR SERVICE - DUNNO IF THIS IS GOOD/BAD
         pin.sensorType = SENSOR_TYPE_DIGITAL_PIN_READER; // WIERD - mushing of roles/responsibilities
