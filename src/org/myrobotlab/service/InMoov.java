@@ -727,6 +727,7 @@ public class InMoov extends Service {
 	}
 
 	public void publishPin(Pin pin) {
+		log.info("{} - {}",pin.pin,pin.value);
 		if (pin.value == 1) {
 			lastPIRActivityTime = System.currentTimeMillis();
 		}
@@ -1092,9 +1093,9 @@ public class InMoov extends Service {
 		speakBlocking(String.format("starting pee. eye. are. sensor on port %s pin %d", port, pin));
 		if (arduinos.containsKey(port)) {
 			Arduino arduino = arduinos.get(port);
-			arduino.connect(port);
-			arduino.setSampleRate(8000);
-			arduino.digitalReadPollingStart(pin);
+			//arduino.connect(port);
+			//arduino.setSampleRate(8000);
+			arduino.digitalReadPollingStart(pin, 8000);
 			pirPin = pin;
 			arduino.addListener("publishPin", this.getName(), "publishPin");
 
