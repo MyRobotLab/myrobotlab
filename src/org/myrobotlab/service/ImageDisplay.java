@@ -20,15 +20,15 @@ import org.slf4j.Logger;
 
 public class ImageDisplay extends Service {
 
+	public final static Logger log = LoggerFactory.getLogger(ImageDisplay.class);
+
 	private static final long serialVersionUID = 1L;
 	int wOffset = 0;
 	int hOffset = 20;
 	private static int h,w;
-	private static GraphicsDevice gd;
+	transient private static GraphicsDevice gd;
 	
-	public final static Logger log = LoggerFactory.getLogger(ImageDisplay.class);
-	
-	List<JFrame> frames = new ArrayList<JFrame>();
+	transient List<JFrame> frames = new ArrayList<JFrame>();
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
