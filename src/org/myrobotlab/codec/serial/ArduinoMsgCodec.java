@@ -51,7 +51,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 	public static final int MAX_MSG_SIZE = 64;
 	
-	public static final int MRLCOMM_VERSION = 32;
+	public static final int MRLCOMM_VERSION = 33;
 
 	public static final int MAGIC_NUMBER = 170; // 10101010
 	
