@@ -54,6 +54,13 @@ public class ImageDisplay extends Service {
 			Logging.logError(e);
 		}
 	}
+	
+	
+	public void stopService(){
+		super.stopService();
+		closeAll();
+	}
+
 
 	public ImageDisplay(String n) {
 		super(n);

@@ -463,7 +463,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return port;
 	}
 
-	public boolean connectTCP(String host, int port) throws IOException {
+	public boolean connectTcp(String host, int port) throws IOException {
 		Port tcpPort = createTCPPort(host, port, this);
 		connectPort(tcpPort, this);
 		return true;
@@ -1132,6 +1132,25 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		}
 	}
 
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Serial.class.getCanonicalName());
+		meta.addDescription("reads and writes data to a serial port");
+		meta.addCategory("sensor", "microcontroller", "control");
+		meta.addDependency("com.googlecode.jssc", "2.8.0");
+		return meta;
+	}
+
+	
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
@@ -1157,8 +1176,14 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 
 		try {
 
-			Runtime.start("webgui", "WebGui");
 			Serial serial = (Serial) Runtime.start("serial", "Serial");
+			Python python = (Python) Runtime.start("python", "Python");
+			Runtime.start("webgui", "WebGui");
+			
+			boolean done = true;
+			if (done){
+				return;
+			}
 
 			int timeout = 500;// 500 ms serial timeout
 
@@ -1344,23 +1369,6 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			Logging.logError(e);
 		}
 
-	}
-	
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = new ServiceType(Serial.class.getCanonicalName());
-		meta.addDescription("reads and writes data to a serial port");
-		meta.addCategory("sensor", "microcontroller", "control");
-		meta.addDependency("com.googlecode.jssc", "2.8.0");
-		return meta;
 	}
 
 

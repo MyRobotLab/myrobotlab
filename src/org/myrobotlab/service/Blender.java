@@ -200,7 +200,7 @@ public class Blender extends Service {
 					Serial serial = arduino.getSerial();
 
 					// connecting over tcp ip
-					serial.connectTCP(host, serialPort);
+					serial.connectTcp(host, serialPort);
 
 					// int vpn = virtualPorts.size();
 

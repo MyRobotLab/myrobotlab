@@ -17,6 +17,7 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -53,16 +54,13 @@ public class Python extends Service {
 	
 	Map<String, String> exampleUrls = new TreeMap<String, String>();
 	List<String> localPythonFiles = new ArrayList<String>();
-	
+		
 	/**
 	 * current working directory root there are multiple filesystems we can load
 	 * scripts from github urls | jar:file /resources | /resource exploded |
 	 * .myrobotlab directory | workind directory | root of file system this
 	 * variable is to tell which root to begin with
 	 */
-	// String cwdRoot = "pyrobotlab";
-	// String cwdRoot = "local";
-	// String cwdRoot = "examples";
 
 	/**
 	 * current working directory
@@ -181,20 +179,24 @@ public class Python extends Service {
 				}
 			} catch (Exception e) {
 				String error = Logging.stackToString(e);
-				error = error.replace("'", "");
-				error = error.replace("\"", "");
-				error = error.replace("\n", "");
-				error = error.replace("\r", "");
-				error = error.replace("<", "");
-				error = error.replace(">", "");
+				
+				invoke("publishStatus", Status.error(e));
+				
+				String filtered = error;
+				filtered = filtered.replace("'", "");
+				filtered = filtered.replace("\"", "");
+				filtered = filtered.replace("\n", "");
+				filtered = filtered.replace("\r", "");
+				filtered = filtered.replace("<", "");
+				filtered = filtered.replace(">", "");
 				if (interp != null) {
-					interp.exec(String.format("print '%s'", error));
+					interp.exec(String.format("print '%s'", filtered));
 				}
 				Logging.logError(e);
-				if (error.length() > 40) {
-					error = error.substring(0, 40);
+				if (filtered.length() > 40) {
+					filtered = filtered.substring(0, 40);
 				}
-				error("Python error - %s", error);
+
 			} finally {
 				executing = false;
 				invoke("finishedExecutingScript");
@@ -656,7 +658,7 @@ public class Python extends Service {
 
 	public boolean loadScript(String scriptName, String newCode) {
 		if (newCode != null) {
-			log.info(String.format("replacing current script with {}", scriptName));
+			log.info("replacing current script with {}", scriptName);
 			currentScript = new Script(scriptName, newCode);
 			broadcastState();
 			return true;
@@ -836,6 +838,7 @@ public class Python extends Service {
 
 		return meta;
 	}
+	
 	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();

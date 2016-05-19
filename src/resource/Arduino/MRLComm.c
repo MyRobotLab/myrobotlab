@@ -310,6 +310,7 @@ typedef struct
 
 servo_type servos[MAX_SERVOS];
 
+// FIXME - these are const defines
 int PIN_TYPE_DIGITAL = 1;
 int PIN_TYPE_ANALOG = 2;
 int PIN_TYPE_PWM = 4;

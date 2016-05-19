@@ -37,17 +37,17 @@ import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service._TemplateService;
 import org.slf4j.Logger;
 
-public class MQTTGUI extends ServiceGUI implements ActionListener {
+public class MqttGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(MQTTGUI.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(MqttGUI.class.getCanonicalName());
 	private JTextField timeTextField = new JTextField(30);
 	private JTextField topicTextField = new JTextField(30);
 	// final JTextArea messageConsole;
 	// final JScrollPane messageScrollPane;
 	private JTextField messageTextField = new JTextField(100);
 
-	public MQTTGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+	public MqttGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		// messageConsole = new JTextArea();
 		// messageScrollPane = new JScrollPane(messageConsole);
@@ -60,12 +60,12 @@ public class MQTTGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void attachGUI() {
-		subscribe("publishMQTTMessage", "displayData", String[].class);
+		subscribe("publishMqttMessage", "displayData", String[].class);
 	}
 
 	@Override
 	public void detachGUI() {
-		unsubscribe("publishMQTTMessage", "displayData", String[].class);
+		unsubscribe("publishMqttMessage", "displayData", String[].class);
 	}
 
 	public void displayData(String[] tokens) {
