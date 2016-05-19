@@ -20,9 +20,9 @@ public class JavaScript extends Service {
 
 	// TODO - https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Embedding_tutorial
 	
-	ScriptEngine engine;
+	transient ScriptEngine engine;
 
-	ScriptEngineManager manager = new ScriptEngineManager();
+	transient ScriptEngineManager manager = new ScriptEngineManager();
 
 	public void startService() {
 		for (final ScriptEngineFactory scriptEngine : manager.getEngineFactories()) {

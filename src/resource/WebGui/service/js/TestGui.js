@@ -3,26 +3,35 @@ angular.module('mrlapp.service.TestGui', [])
     $log.info('TestGuiCtrl');
     var _self = this;
     var msg = this.msg;
+
+    $scope.selectedAll = true;
     
     // init scope variables
     $scope.matrix = {};
     $scope.currentProgress = {};
     $scope.currentProgress.percentDone = 0;
     $scope.currentProgress.currentActivity = "ready";
-    $scope.servicesToTest = [];
-
+    
+    // two service arrays - one is model of "all"
+    // the other is current model to test
+    $scope.services = [];
+    $scope.testPlan = {
+        servicesToTest : []
+    };
+    
     // FIXME - do the same thing for Services - default state is selected
     // FIXME - get this from the service
-    $scope.tests = ['JunitService','PythonScriptExists', 'ServicePageExists'];
-    $scope.testsToRun = [];
+    $scope.tests = ['PythonScriptTest', 'JunitService', 'PythonScriptExists', 'ServicePageExists'];
+    $scope.testsToRun =  angular.copy($scope.tests);
     $scope.trustAsHtml = $sce.trustAsHtml;
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service;
         $scope.matrix = service.matrix;
+        $scope.services = service.matrix.services;
         $scope.currentProgress = service.matrix.currentProgress;
-        $scope.servicesToTest = service.matrix.servicesToTest;
+        $scope.testPlan.servicesToTest = service.matrix.servicesToTest;
     }
     ;
     
@@ -44,47 +53,18 @@ angular.module('mrlapp.service.TestGui', [])
     }
     ;
     
-    // toggle service to test
-    $scope.toggleSelection = function toggleSelection(serviceName) {
-        var idx = $scope.servicesToTest.indexOf(serviceName);
-        
-        // is currently selected
-        if (idx > -1) {
-            $scope.servicesToTest.splice(idx, 1);
-        } else {
-            // is newly selected
-            $scope.servicesToTest.push(serviceName);
-        }
-    }
-    ;
-
-       // toggle service to test
-    $scope.toggleTest = function toggleTest(testName) {
-        var idx = $scope.testsToRun.indexOf(testName);
-        
-        // is currently selected
-        if (idx > -1) {
-            $scope.testsToRun.splice(idx, 1);
-        } else {
-            // is newly selected
-            $scope.testsToRun.push(testName);
-        }
-    }
-    ;
-    
     $scope.checkAll = function() {
         if ($scope.selectedAll) {
             $scope.selectedAll = true;
+            $scope.testPlan.servicesToTest = angular.copy($scope.services);
+            $scope.$apply();
         } else {
             $scope.selectedAll = false;
+            $scope.testPlan.servicesToTest = [];
+            $scope.$apply();
         }
-        angular.forEach($scope.servicesToTest, function(item) {
-            item.Selected = $scope.selectedAll;
-        });
-    
     }
-    ;
-    
+  
     msg.subscribe('publishProgress');
     msg.subscribe(this);
 }

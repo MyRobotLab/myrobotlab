@@ -17,6 +17,8 @@ angular.module('mrlapp', [
     'ui.bootstrap', //BootstrapUI (in Angular style)
     'oc.lazyLoad', //lazyload
     'sticky', //sticky elements
+    'checklist-model',
+    'angular-intro', // intro
     //'ngclipboard',
     'angular-clipboard',
     'rzModule',

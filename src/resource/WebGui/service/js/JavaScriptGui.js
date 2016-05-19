@@ -1,24 +1,19 @@
-angular.module('mrlapp.service.PythonGui', [])
-.controller('PythonGuiCtrl', ['$log', '$scope', 'mrl', '$timeout', function($log, $scope, mrl, $timeout) {
-    $log.info('PythonGuiCtrl');
+angular.module('mrlapp.service.JavaScriptGui', [])
+.controller('JavaScriptGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
+    $log.info('JavaScriptGuiCtrl');
     _self = this;
     var msg = this.msg;
     
     // The all powerful name !
     var name = $scope.name;
+    // create our msg interface to our service
+    // this also initalizes a data structure which
+    // will hold "ALL" of public stubbed out methods from the Service
+//    var msg = mrl.createMsgInterface(name, $scope);
     
     // init scope values
     $scope.output = '';
-    $scope.currentScript = {
-        name: 'untitled',
-        code: ''
-    };
-    
-    $scope.activeScriptIndex = 0;
-
-    $scope.scripts = [];
-    $scope.scripts.push($scope.currentScript);
-    
+    $scope.tabName = 'untitled';
     
     // the awesome ace editor 1
     $scope.editor = null ;
@@ -37,9 +32,15 @@ angular.module('mrlapp.service.PythonGui', [])
         // this is where we update all gui components through the scope
         // which will show on the html service body
         $scope.service = service;
-        // TODO make something like "script"
+        // TODO make something like "files"
         $scope.editor.setValue(service.currentScript.code);
-        $scope.currentScript = service.currentScript; 
+        $scope.tabName = service.currentScript.name;
+        
+        
+        // TODO show current local files
+        
+        // TODO show example files (perhaps just once)
+    
     }
     ;
     
@@ -56,7 +57,7 @@ angular.module('mrlapp.service.PythonGui', [])
             $scope.$apply();
             break;
         case 'onStdOut':
-            $scope.output = $scope.output + msg.data[0];
+            $scope.output =  $scope.output + msg.data[0];
             $scope.$apply();
             break;
         default:
@@ -67,13 +68,13 @@ angular.module('mrlapp.service.PythonGui', [])
     ;
     
     // utility methods //
-    // gets script name from full path name
+    // gets filename from full path name
     $scope.getName = function(path) {
-        if (path.indexOf("/") >= 0) {
-            return ( path.split("/").pop()) ;
+        if (path.indexOf("/") >= 0){
+            return(path.split("/").pop());
         }
-        if (path.indexOf("\\") >= 0) {
-            return ( path.split("\\").pop()) ;
+        if (path.indexOf("\\") >= 0){
+            return(path.split("\\").pop());
         }
         return path;
     }
@@ -91,26 +92,21 @@ angular.module('mrlapp.service.PythonGui', [])
         $log.info("ace changed");
         //
     }
-    
-    $scope.addScript = function() {
-        var newScript = {
-            name: 'Script ' + ($scope.scripts.length + 1),
-            code: ''
-        };
-        $scope.scripts.push(newScript);
-        $timeout(function() {
-            $scope.activeScriptIndex = ($scope.scripts.length - 1);
-        });
-        console.log($scope.activeScriptIndex);
+
+    ////// ace editor related callbacks end ///////
+    /* STUFF LIKE THIS IS NO LONGER NEEDED
+    $scope.exec = function() {
+        $log.info("exec");
+        msg.send("exec", editor.getValue());
     }
     ;
-    
+    */
     
     // now you can subscribe to the methods you want
     msg.subscribe('publishStdOut');
     
     // or send control commands
-    msg.send("attachPythonConsole");
+    msg.send("attachJavaScriptConsole");
     
     // The last thing needed is
     // subscriptions for the framework for this controller
@@ -124,7 +120,7 @@ angular.module('mrlapp.service.PythonGui', [])
     // and attach them to scope. 
     
     // Here is some example html.
-    // preface: the Java Python Service has a method Python.loadScriptFromFile(String filename), which loads
+    // preface: the Java JavaScript Service has a method JavaScript.loadScriptFromFile(String filename), which loads
     // a file from the directory mrl is running from.  
     // The "ONLY" code needed is ng-click="msg.loadScriptFromFile('test.py') ! 
     // <button type="button" class="btn btn-default" ng-click="msg.loadScriptFromFile('test.py')">

@@ -1667,12 +1667,18 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
+			// 
+			Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+			Serial serial = (Serial)arduino.getSerial();
+			
+			serial.connectTcp("192.168.0.99", 80);
+			// arduino.setLoadTimingEnabled(true);
+			Runtime.start("python", "Python");
 			Runtime.start("webgui", "WebGui");
 			// Runtime.start("servo", "Servo");
 			// Runtime.start("clock", "Clock");
 			// Runtime.start("serial", "Serial");
 			// Arduino.createVirtual("COM9");
-			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			//arduino.connect("COM18");
 			
 			/*

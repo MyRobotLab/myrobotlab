@@ -42,6 +42,7 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,6 +53,7 @@ import java.util.SimpleTimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.myrobotlab.cache.LRUMethodCache;
 import org.myrobotlab.codec.CodecUtils;
@@ -993,15 +995,23 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		return ret;
 	}
 
+	// FIXME - should be a "Set" not an array !
 	@Override
 	public String[] getMethodNames() {
 		Method[] methods = getMethods();
+		/*
+		Set<String> m = new TreeSet<String>();
+		m.addAll(methods);
+		*/
 		String[] ret = new String[methods.length];
 
 		log.info(String.format("getMethodNames loading %d non-sub-routable methods", methods.length));
 		for (int i = 0; i < methods.length; ++i) {
 			ret[i] = methods[i].getName();
 		}
+		
+		Arrays.sort(ret);
+		
 		return ret;
 	}
 
@@ -2209,4 +2219,5 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		return "FIXME - meta data needs to be re-infused into instance";
 	}
 
+	
 }

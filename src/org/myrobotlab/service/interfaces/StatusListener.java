@@ -2,7 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.Status;
 
-public interface StatusListener {
+public interface StatusListener extends NameProvider {
 
 	/**
 	 * Status events from Repo when dependency resolution is attempted

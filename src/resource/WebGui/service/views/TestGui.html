@@ -1,18 +1,23 @@
-<button class="btn btn-default" ng-click="msg.test(servicesToTest, testsToRun)">test</button> {{currentProgress.currentActivity}} <b>tests: {{currentProgress.testsDone}} <span class="text-danger">errors: {{currentProgress.errors}}</span><span class="text-success"> worky: {{currentProgress.testsDone - currentProgress.errors}}</span></b>
-
-<uib-progressbar class="progress-striped active" value="currentProgress.percentDone" type="active">{{currentProgress.testsDone}}/{{currentProgress.totalTests}} - {{currentProgress.percentDone}}%</uib-progressbar>
-<uib-progressbar class="progress-striped active" value="currentProgress.errorPercentage" type="danger">{{currentProgress.errors}}/{{currentProgress.errorPercentage}}%</uib-progressbar>
-<uib-progressbar class="progress-striped active" value="currentProgress.successPercentage" type="success">{{currentProgress.successes}}/{{currentProgress.successPercentage}}%</uib-progressbar>
-    {{testsToRun}}
-<!--<input type="checkbox" ng-model="selectedAll" ng-click="checkAll()" />--> <!-- {{servicesToTest}} -->
+<button class="btn btn-default" ng-click="msg.test(testPlan.servicesToTest, testsToRun)">test</button> {{currentProgress.currentActivity}} <b>tests: {{currentProgress.testsDone}} <span class="text-danger">errors: {{currentProgress.errors}}</span><span class="text-success"> worky: {{currentProgress.testsDone - currentProgress.errors}}</span></b>
+<uib-progress>
+<uib-bar class="progress-striped active" value="currentProgress.errorPercentage" type="danger">{{currentProgress.errors}}/{{currentProgress.totalTests}} {{currentProgress.errorPercentage}}%</uib-bar>
+<uib-bar class="progress-striped active" value="currentProgress.successPercentage" type="success">{{currentProgress.successes}}/{{currentProgress.totalTests}} {{currentProgress.successPercentage}}%</uib-bar>
+</uib-progress>
+ <!-- {{testPlan.servicesToTest}} -->
+ <!-- {{servicesToTest}} -->
+ <!-- {{testsToRun}}-->
 <span ng-repeat="test in tests"> 
-<input type="checkbox" name="tests[]" value="{{test}}" ng-checked="selection.indexOf(test) > -1" ng-click="toggleTest(test)">{{test}}
+<input type="checkbox" checklist-model="testsToRun" checklist-value="test"> {{test}}
 </span>
 
 <table class="table table-striped">
-  <tr><th>service</th><th>description</th><th>available</th><th>tests</th><th>ready</th><th>sponsor</th><th>todo</th></tr>
+  <tr><th><input type="checkbox" ng-model="selectedAll" ng-click="checkAll()" />service</th><th>description</th><th>available</th><th>tests</th><th>ready</th><th>sponsor</th><th>todo</th></tr>
   <tr ng-repeat="result in matrix.results"> 
-    <td><!-- <input type="checkbox" name="servicesToTest[]" value="{{result.simpleName}}" ng-checked="selection.indexOf(result.simpleName) > -1" ng-click="toggleSelection(result.simpleName)"> -->  <img ng-src="/{{result.simpleName}}.png" width="16">&nbsp;&nbsp;{{result.simpleName}}</td>
+    <td>
+      <input type="checkbox" checklist-model="testPlan.servicesToTest" checklist-value="result.simpleName">  
+      <!-- <input type="checkbox" value="{{result.simpleName}}" ng-checked="true" ng-click="toggleService(result.simpleName)">  -->
+      <img ng-src="/{{result.simpleName}}.png" width="16">&nbsp;&nbsp;{{result.simpleName}}
+    </td>
     <td>{{ result.type.description }}</td>
     <td>{{ result.type.available }}</td>
     <td width="40%">

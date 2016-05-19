@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 
 /**
  *
- * MQTT - MQTT is a machine-to-machine (M2M)/"Internet of Things" connectivity protocol. 
+ * Mqtt - Mqtt is a machine-to-machine (M2M)/"Internet of Things" connectivity protocol. 
  * It was designed as an extremely lightweight publish/subscribe messaging transport. 
  * It is useful for connections with remote locations where a small code footprint is required and/or network bandwidth is at a premium. 
  * http://mqtt.org/
@@ -94,7 +94,7 @@ public class Mqtt extends Service implements MqttCallback {
 			// Connect to the server
 			// Get a token and setup an asynchronous listener on the token which
 			// will be notified once the connect completes
-			log.info("Connecting to " + brokerURL + " with client ID " + client.getClientId());
+			info("Connecting to %s with client Id %s", brokerURL, client.getClientId());
 
 			IMqttActionListener conListener = new IMqttActionListener() {
 				public void carryOn() {
@@ -252,7 +252,7 @@ public class Mqtt extends Service implements MqttCallback {
 	int qos = 2;
 	String brokerURL = "m2m.eclipse.org";
 	int port = 1883;
-	String clientId = "MRL MQTT client";
+	String clientId = "MRL Mqtt client";
 	String subTopic = "mrl/#";
 	String pubTopic = "mrl";
 	boolean cleanSession = true; // Non durable subscriptions
@@ -277,7 +277,7 @@ public class Mqtt extends Service implements MqttCallback {
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 			Python python = new Python("python");
 			python.startService();
-			Mqtt mqtt = (Mqtt) Runtime.start("mqtt", "MQTT");
+			Mqtt mqtt = (Mqtt) Runtime.start("mqtt", "Mqtt");
 			Runtime.start("gui", "GUIService");
 
 
@@ -299,7 +299,7 @@ public class Mqtt extends Service implements MqttCallback {
 		// Called when the connection to the server has been lost.
 		// An application may choose to implement reconnection
 		// logic at this point. This sample simply exits.
-		log.info("Connection to " + brokerURL + " lost!" + cause);
+		error("Connection to " + brokerURL + " lost!" + cause);
 	}
 
 	/**
@@ -339,14 +339,14 @@ public class Mqtt extends Service implements MqttCallback {
 		log.info(messageStr);
 
 		tokens = messageStr.split("\t");
-		invoke("publishMQTTMessage");
+		invoke("publishMqttMessage");
 	}
 
 	public void publish(String content) throws Throwable { // MqttPersistenceException,
 															// MqttException {
 		// Use a state machine to decide which step to do next. State change
 		// occurs
-		// when a notification is received that an MQTT action has completed
+		// when a notification is received that an Mqtt action has completed
 		while (state != FINISH) {
 			switch (state) {
 			case BEGIN:
@@ -387,7 +387,7 @@ public class Mqtt extends Service implements MqttCallback {
 	/* End of MqttCallback methods */
 	/****************************************************************/
 
-	public String[] publishMQTTMessage() {
+	public String[] publishMqttMessage() {
 		// tokens = message.split(",");
 		return tokens;
 	}
@@ -434,7 +434,7 @@ public class Mqtt extends Service implements MqttCallback {
 	}
 
 	/**
-	 * Subscribe to a topic on an MQTT server Once subscribed this method waits
+	 * Subscribe to a topic on an Mqtt server Once subscribed this method waits
 	 * for the messages to arrive from the server that match the subscription.
 	 * It continues listening for messages until the enter key is pressed.
 	 * 
@@ -448,7 +448,7 @@ public class Mqtt extends Service implements MqttCallback {
 	public void subscribe(String topicName, int qos) throws Throwable {
 		// Use a state machine to decide which step to do next. State change
 		// occurs
-		// when a notification is received that an MQTT action has completed
+		// when a notification is received that an Mqtt action has completed
 		while (state != FINISH) {
 			switch (state) {
 			case BEGIN:
@@ -521,7 +521,7 @@ public class Mqtt extends Service implements MqttCallback {
 	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(Mqtt.class.getCanonicalName());
-		meta.addDescription("This is an MQTT client based on the Paho MQTT client library. MQTT is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");
+		meta.addDescription("This is an Mqtt client based on the Paho Mqtt client library. Mqtt is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");
 		meta.addCategory("data", "cloud");
 		meta.addDependency("org.eclipse.paho", "1.0");
 		return meta;

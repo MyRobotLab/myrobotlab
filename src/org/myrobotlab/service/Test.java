@@ -17,17 +17,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.http.client.ClientProtocolException;
 import org.junit.runner.JUnitCore;
-import org.junit.runner.Request;
 import org.junit.runner.Result;
-import org.junit.runners.Suite;
-import org.junit.runners.model.RunnerBuilder;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.GitHub;
-import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
@@ -36,6 +32,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.myrobotlab.service.interfaces.StatusListener;
 import org.slf4j.Logger;
 
 /**
@@ -51,7 +48,7 @@ import org.slf4j.Logger;
  *         TODO - run Python & JavaScript tests - last method appended is a callback
  *
  */
-public class Test extends Service {
+public class Test extends Service implements StatusListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -71,7 +68,8 @@ public class Test extends Service {
 	HashSet<String> skippedPythonScript = new HashSet<String>();
 
 	// thread blocking
-	transient Object lock = new Object();
+	// transient Object lock = new Object();
+	transient StatusLock lock = new StatusLock();
 
 	List<Status> status = new ArrayList<Status>();
 
@@ -90,7 +88,7 @@ public class Test extends Service {
 		public int errorPercentage;
 		public int successes;
 		public int successPercentage;
-		public int totalTests;
+		public int totalTests;		
 
 		public void process(Status status) {
 			testsDone++;
@@ -107,10 +105,13 @@ public class Test extends Service {
 	}
 
 	public static class TestMatrix implements Serializable {
+		private static final long serialVersionUID = 1L;
 		Progress currentProgress = new Progress();
 		Date lastTestDt;
 		long lastTestDurationMs;
 		long totalDuration;
+		public boolean isRunning = false;
+		
 		/**
 		 * this will be important when we start posting test matrices from
 		 * different platforms
@@ -119,11 +120,14 @@ public class Test extends Service {
 
 		HashSet<String> testsToRun = new HashSet<String>();
 		HashSet<String> servicesToTest = new HashSet<String>();
+		HashSet<String> services = new HashSet<String>();
 		Map<String, TestResults> results = new TreeMap<String, TestResults>();
+		
 
 	}
 
 	public static class TestResults implements Serializable {
+		private static final long serialVersionUID = 1L;
 		String fullTypeName;
 		String simpleName;
 		ServiceType type;
@@ -145,6 +149,10 @@ public class Test extends Service {
 			this.link = testName;
 			this.startTime = System.currentTimeMillis();
 		}
+	}
+	
+	public static class StatusLock {
+		public Status status;
 	}
 
 	public static void logThreadNames() {
@@ -187,6 +195,7 @@ public class Test extends Service {
 			results.type = type;
 			matrix.results.put(results.simpleName, results);
 			matrix.servicesToTest.add(results.simpleName);
+			matrix.services.add(results.simpleName);
 		}
 
 		broadcastState();
@@ -449,6 +458,7 @@ public class Test extends Service {
 	}
 
 	synchronized public void test() {
+		matrix.isRunning = true;
 		// we are started so .. we'll use the big hammer at the end
 		/*
 		 * Status status = Status.info("========TESTING=============");
@@ -810,6 +820,7 @@ public class Test extends Service {
 	 * runs in the same process as Python and the expectation is the Agent (with
 	 * the help of the Test service) has created an environment where the
 	 * service to be tested has all its depedencies
+	 * @throws InterruptedException 
 	 * 
 	 * @throws Exception
 	 * 
@@ -818,27 +829,39 @@ public class Test extends Service {
 	 * 
 	 *             FIXME - structured logging back to self to generate report
 	 */
-	public void testPythonScripts() throws Exception {
-		// get scripts
-		getPyRobotLabServiceScripts();
-		failedPythonScripts.clear();
+	
+	public TestResults PythonScriptTest(String testName, TestResults test) throws Exception {
+		
+		// a test will resolve in 3 possible states
+		// 1. complete & success - with onFinish callback called
+		// 2. with an error
+		// 3. with a time out
+		
+		// all three need to be handled
+		
+		Python python = (Python) startPeer("python", "Python");
+		subscribe(python.getName(), "publishStatus");
 
-		// check if python is installed
-		// start python
-		Python python = (Python) Runtime.start("python", "Python");
+		TestResult result = test.results.get(testName);
+		try {
+			
+	
+		String script = GitHub.getPyRobotLabScript(test.simpleName);
+		
+		if (script == null){
+			result.status = Status.error("script does not exist");
+			return test;
+		}
 
-		skippedPythonScript.add("AcapelaSpeech"); // currently tooooo long.....
-		skippedPythonScript.add("Adafruit16CServoDriver");
-		skippedPythonScript.add("AdafruitMotorShield");
-
-		for (String serviceName : pythonScripts.keySet()) {
-			String script = pythonScripts.get(serviceName);
+		String serviceName = test.simpleName;
 			log.info("TESTING SCRIPT {} - quiet on the set please...", serviceName);
 
+			/*
 			if (skippedPythonScript.contains(serviceName)) {
 				log.info("SKIPPING {} ....", serviceName);
 				continue;
 			}
+			*/
 
 			// challenge #1
 			// I would prefer to be in the same
@@ -868,20 +891,33 @@ public class Test extends Service {
 				long ts = System.currentTimeMillis();
 				lock.wait(60000);
 				if (System.currentTimeMillis() - ts >= 60000) {
-					log.error("script {} FAILED !", serviceName);
-					failedPythonScripts.add(serviceName);
+					result.status = Status.error("script %s FAILED - took longer than 1 minute!", serviceName);					
 				} else {
-					log.info("script {} PASSED !", serviceName);
-					passedPythonScripts.add(serviceName);
+					if(lock.status.isError()){
+						// the callback had error - set the result of the test
+						result.status = lock.status;
+						// reset the lock
+						lock.status = Status.success();
+					} else {
+						log.info("script {} PASSED !", serviceName);
+						result.status = Status.success();
+					}
 				}
 			}
 
 			// max execution time ??? - then error
 
 			log.info("inspect python errors (syntax) + java errors");
+			
+			
+		
+		} catch(Exception e){
+			result.status = Status.error(e);
 		}
 
 		log.info("TESTING COMPLETED");
+		
+		return test;
 
 	}
 
@@ -947,6 +983,14 @@ public class Test extends Service {
 			Logging.logError(e);
 		}
 
+	}
+
+	@Override
+	public void onStatus(Status status) {
+		synchronized (lock) {
+			lock.status = status;
+			lock.notifyAll();
+		}
 	}
 
 }
