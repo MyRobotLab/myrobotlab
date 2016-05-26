@@ -10,10 +10,9 @@ angular.module('mrlapp.service')
                         element.on('mousedown', function (event) {
                             startX = event.pageX - scope.panel.posx;
                             startY = event.pageY - scope.panel.posy;
-                            if (((!scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].freeform)
-                                    || (scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].freeform
-                                            && startX < element.width() - resizeX))
-                                    && !scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].denyMoving) {
+                            if (scope.panel.size != 'free' ||
+                                    (scope.panel.size == 'free'
+                                            && startX < element.width() - resizeX)) {
                                 // Prevent default dragging of selected content
                                 event.preventDefault();
 

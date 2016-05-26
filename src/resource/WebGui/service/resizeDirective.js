@@ -11,6 +11,8 @@ angular.module('mrlapp.service')
 
                         scope.resetResizing = function () {
                             //can this be removed now?
+                            //I think so
+                            //TODO - remove
                             x = 0;
                             startX = 0;
                             y = 0;

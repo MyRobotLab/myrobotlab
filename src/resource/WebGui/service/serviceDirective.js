@@ -14,14 +14,13 @@ angular.module('mrlapp.service')
                         //-->free-form-resizing (width is defined)
 
                         scope.panel.notifySizeChanged = function (width) {
-
-//                            if (!width) {
-//                                scope.resetResizing();
-//                            }
-                            width = width || scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].width;
-
+                            //check if a new width is to be set
+                            //or the width should be resetted
+                            if (width) {
+                                scope.panel.width = width;
+                            }
                             element.css({
-                                width: width + 'px'
+                                width: scope.panel.width + 'px'
                             });
 
                         };
@@ -38,19 +37,11 @@ angular.module('mrlapp.service')
                         };
                         scope.panel.notifyZIndexChanged();
 
-//                        scope.$watch(function () {
-//                            return element.height();
-//                        }, function () {
-//                            scope.panel.height = element.height();
-//                        });
-
                         //position: 'absolute' is necessary (even tough it introduces some more work)
                         //without it other panels jump / glitch around when a panel is (re-)moved from this list
-                        if (!scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].denyMoving) {
-                            element.css({
+                        element.css({
                                 position: 'absolute'
-                            });
-                        }
+                        });
 
                         scope.panel.notifyPositionChanged = function () {
                             element.css({
@@ -58,9 +49,7 @@ angular.module('mrlapp.service')
                                 left: scope.panel.posx + 'px'
                             });
                         };
-                        if (!scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].denyMoving) {
-                            scope.panel.notifyPositionChanged();
-                        }
+                        scope.panel.notifyPositionChanged();
                     }
                 };
             }]);

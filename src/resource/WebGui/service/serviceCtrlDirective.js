@@ -27,10 +27,6 @@ angular.module('mrlapp.service')
                             $log.info('setting panelshownames', show);
                             serviceSvc.notifyPanelShowNamesChanged(scope.panel.name, show);
                         };
-                        scope.panelconfig.setPanelSizes = function (sizes) {
-                            $log.info('setting panelsizes', sizes);
-                            serviceSvc.notifyPanelSizesChanged(scope.panel.name, sizes);
-                        };
 
                         //prepare dynamic controller injection
                         var html = '<div service-ctrl-next '

@@ -15,19 +15,31 @@
                                 &nbsp;&nbsp;help
                             </a>
                         </li>
-                        <li ng-show="!panel.panelsize.sizes[panel.panelsize.aktsize].forcesize" ng-repeat="sizename in panel.panelsize.order">
-                            <a href="" ng-show="panel.panelsize.aktsize != sizename" ng-click="changesize(sizename)">
-                                <i class="{{::panel.panelsize.sizes[sizename].glyphicon}}"></i>
-                                &nbsp;&nbsp;{{::sizename}}
+                        <li ng-show="panel.size != 'free'">
+                            <a href="" ng-click="changesize('free')">
+                                <i class="glyphicon glyphicon-resize-horizontal"></i>
+                                &nbsp;&nbsp;free
                             </a>
                         </li>
-                        <li ng-show="panel.panelsize.sizes[panel.panelsize.aktsize].forcesize">
+                        <li ng-show="!panel.size != 'full'">
+                            <a href="" ng-click="changesize('full')">
+                                <i class="glyphicon glyphicon-fullscreen"></i>
+                                &nbsp;&nbsp;full
+                            </a>
+                        </li>
+                        <li ng-show="panel.size != 'tiny'">
+                            <a href="" ng-click="changesize('tiny')">
+                                <i class="glyphicon glyphicon-minus"></i>
+                                &nbsp;&nbsp;tiny
+                            </a>
+                        </li>
+                        <!--<li ng-show="panel.panelsize.sizes[panel.panelsize.aktsize].forcesize">
                             <a href="" ng-click="changesize('unmin')">
                                 <i class="glyphicon glyphicon-eye-open"></i>
                                 &nbsp;&nbsp;expand
                             </a>
-                        </li>
-                        <li ng-show="!panel.panelsize.sizes[panel.panelsize.aktsize].forcesize">
+                        </li>-->
+                        <li>
                             <a href="" ng-click="servicemenuDropdownOpen = false;panel.hide = !panel.hide">
                                 <span ng-show="!panel.hide">
                                     <i class="glyphicon glyphicon-eye-close"></i>
@@ -91,7 +103,7 @@
                 </div>
             </h3>
         </div>
-        <div class="panel-body" ng-show="panel.panelsize.sizes[panel.panelsize.aktsize].body != 'collapse'">
+        <div class="panel-body" ng-show="panel.size != 'full' && panel.size != 'tiny'">
             <!--body-->
             <div ng-if="panel.templatestatus == 'loaded'">
                 <div service-body panel="panel"></div>
@@ -103,11 +115,11 @@
                 <i class="glyphicon glyphicon-refresh"></i>&nbsp;&nbsp;loading servicegui ...
             </div>
         </div>
-        <div class="panel-footer" ng-show="panel.panelsize.sizes[panel.panelsize.aktsize].footer != 'collapse'" drag-directive>
+        <div class="panel-footer" ng-show="panel.size != 'tiny'" drag-directive>
             <!--footer-->
             <div>
                 &nbsp;
-                <div class="pull-right" ng-show="panel.panelsize.sizes[panel.panelsize.aktsize].freeform">
+                <div class="pull-right" ng-show="panel.size == 'free'">
                     <span style="position: relative; cursor: nw-resize;" resize-directive><i class="glyphicon glyphicon-resize-horizontal"></i></span>
                 </div>
             </div>
