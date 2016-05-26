@@ -104,93 +104,6 @@ angular.module('mrlapp.service')
                         } else {
                             showpanelname = service.showpanelnames[panelname];
                         }
-                        //panelsize
-                        var panelsize;
-                        if (isUndefinedOrNull(service.panelsizes) ||
-                                isUndefinedOrNull(service.panelsizes[panelname])) {
-                            //explanation in service/js/_templategui.js
-                            panelsize = {
-//                                sizes: {
-//                                    //size-options, these will be shown as a option to select from
-//                                    //(and can be applied)
-//                                    tiny: {
-//                                        glyphicon: 'glyphicon glyphicon-minus', //define a glyphicon to show (as a symbol)
-//                                        width: 200, //width of this size-setting
-//                                        body: 'collapse', //means that the body-section of the panel won't be shown
-//                                        footer: 'collapse'//don't show footer-section of panel
-//                                    },
-//                                    small: {
-//                                        glyphicon: 'glyphicon glyphicon-resize-small',
-//                                        width: 400
-//                                    },
-//                                    large: {
-//                                        glyphicon: 'glyphicon glyphicon-resize-full',
-//                                        width: 800
-//                                    },
-//                                    full: {
-//                                        glyphicon: 'glyphicon glyphicon-fullscreen',
-//                                        width: 0,
-//                                        fullscreen: true, //show fullscreen (modal)
-//                                        body: 'collapse',
-//                                        footer: 'collapse'
-//                                    },
-//                                    free: {
-//                                        glyphicon: 'glyphicon glyphicon-resize-horizontal',
-//                                        width: 800,
-//                                        freeform: true //allow free-form resizing (width)
-//                                    }
-//                                },
-//                                order: ["free", "full", "large", "small", "tiny"], //shows your size-options in _self order
-//                                aktsize: 'large'//set this as the start-/default-size
-                                sizes: {
-                                    //size-options, these will be shown as a option to select from
-                                    //(and can be applied)
-                                    tiny: {
-                                        glyphicon: 'glyphicon glyphicon-minus', //define a glyphicon to show (as a symbol)
-                                        width: 200, //width of this size-setting
-                                        body: 'collapse', //means that the body-section of the panel won't be shown
-                                        footer: 'collapse'//don't show footer-section of panel
-                                    },
-                                    small: {
-                                        glyphicon: 'glyphicon glyphicon-resize-small',
-                                        width: 400
-                                    },
-                                    large: {
-                                        glyphicon: 'glyphicon glyphicon-resize-full',
-                                        width: 800
-                                    },
-                                    full: {
-                                        glyphicon: 'glyphicon glyphicon-fullscreen',
-                                        width: 0,
-                                        fullscreen: true, //show fullscreen (modal)
-                                        body: 'collapse',
-                                        footer: 'collapse'
-                                    },
-                                    free: {
-                                        glyphicon: 'glyphicon glyphicon-resize-horizontal',
-                                        width: 800,
-                                        freeform: true //allow free-form resizing (width)
-                                    }
-                                },
-                                order: ["free", "full", "large", "small", "tiny"], //shows your size-options in _self order
-                                aktsize: 'free'//set this as the start-/default-size
-                            };
-                        } else {
-                            panelsize = service.panelsizes[panelname];
-                            if (isUndefinedOrNull(panelsize.aktsize)) {
-                                $log.error('ERROR_no current size (aktsize) defined');
-                            }
-                        }
-                        panelsize.sizes['min'] = {
-                            glyphicon: 'glyphicon glyphicon-eye-close',
-                            width: 200,
-                            body: 'collapse',
-                            footer: 'collapse',
-                            forcesize: true,
-                            denyMoving: true
-                        };
-                        panelsize.order.push('min');
-                        panelsize.oldsize = null;
                         //posy
                         //deprecated, remove at some point ...
 //                        var panelsarray = _self.getPanelsList();
@@ -231,15 +144,16 @@ angular.module('mrlapp.service')
                             simpleName: service.simpleName, //serviceType (e.g. Runtime, Python, ...)
                             name: service.name, //name of the service instance (e.g. runtime, python, rt, pyt, ...)
                             templatestatus: service.templatestatus, //the state the loading of the template is in (loading, loaded, notfound)
-                            list: 'main', //the list _self panel belong to (e.g. main, min, ...)
-                            panelname: panelname, //the name of _self panel
+                            list: 'main', //the list this panel belongs to (e.g. main, min, ...)
+                            panelname: panelname, //the name of this panel
                             showpanelname: showpanelname, //if the panelname should be shown
-                            panelsize: panelsize, //the size of _self panel (incl. options for sizes and current size, ...)
-                            height: 0, //the height of _self panel
-                            posx: 15, //the x-position of _self panel
-                            posy: posy, //the y-position of _self panel
-                            zindex: zindex, //the zindex of _self panel
-                            hide: false         //if _self panel should be hidden
+                            size: 'free',
+                            height: 0, //the height of this panel
+                            width: 800,
+                            posx: 15, //the x-position of this panel
+                            posy: posy, //the y-position of this panel
+                            zindex: zindex, //the zindex of this panel
+                            hide: false         //if this panel should be hidden
                         };
                         service.panels[panelname] = panels[service.name + '/' + panelname];
                     };
@@ -252,12 +166,12 @@ angular.module('mrlapp.service')
                             simpleName: temp.simpleName, //serviceType (e.g. Runtime, Python, ...)
                             name: temp.name, //name of the service instance (e.g. runtime, python, rt, pyt, ...)
                             templatestatus: 'loading', //the state the loading of the template is in (loading, loaded, notfound)
-                            panelcount: 1, //number of panels _self service owns
+                            panelcount: 1, //number of panels this service owns
                             panelnames: null, //what the panels should be called
                             showpanelnames: null, //which panels should show their name?
-                            panelsizes: null, //what sizes do the panels have
+//                            panelsizes: null, //what sizes do the panels have
                             panels: {}, //all panels _self service owns
-                            logLevel: "debug"   //FIMXE where is _self used & what it is used for?
+                            logLevel: "debug"   //FIMXE where is this used & what it is used for?
                         };
                         //first load & parse the controller,    //js
                         //then load and save the template       //html
@@ -366,15 +280,6 @@ angular.module('mrlapp.service')
                         angular.forEach(services[name].panels, function (value, key) {
                             panels[name + '/' + value.panelname].showpanelname = show[value.panelname];
                         });
-                    };
-
-                    _self.notifyPanelSizesChanged = function (name, sizes) {
-                        //service want's to change the size-options of panels
-                        $log.info('notifyPanelSizesChanged', name, sizes);
-                        services[name].panelsizes = sizes;
-                        for (var panel in services[name].panels) {
-                            panels[name + '/' + panel].panelsize = sizes[panel];
-                        }
                     };
 
                     _self.putPanelZIndexOnTop = function (name, panelname) {
