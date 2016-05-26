@@ -24,9 +24,17 @@ public class RenameField extends AbstractStage {
 
 	@Override
 	public List<Document> processDocument(Document doc) {
+
+		if (oldName.contentEquals(newName)) {
+			// Log.info("bad stage config, old field equals new field names.");
+			return null;
+		}
+		
 		if (!doc.hasField(oldName)) {
 			return null;
 		}
+		// TODO: fix the concurrent modification error here. 
+		// (if old fieldname = new fieldname)
 		for (Object o : doc.getField(oldName)) {
 			doc.addToField(newName, o);
 		}

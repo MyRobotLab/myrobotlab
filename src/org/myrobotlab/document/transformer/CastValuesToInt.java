@@ -28,29 +28,32 @@ public class CastValuesToInt extends AbstractStage {
 
 	@Override
 	public List<Document> processDocument(Document doc) {
+		if (!doc.hasField(inputField)) {
+			// doc doesn't have this field... just return
+			return null;
+		}
 		// throw away malformed values.
 		ArrayList<Integer> ints = new ArrayList<Integer>();
 		for (Object val : doc.getField(inputField)) {
-			try {
-				int i = Integer.valueOf(val.toString().replaceAll(",", ""));
-				ints.add(i);
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
+			if (val != null) {
+				try {
+					int i = Integer.valueOf(val.toString().replaceAll(",", ""));
+					ints.add(i);
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				}
 			}
-		}		
-		
+		}
 		doc.removeField(outputField);
 		for (Integer i: ints) {
 			doc.addToField(outputField, i);
 		}
-		
 		return null;
 	}
 
 	@Override
 	public void stopStage() {
 		// NOOP
-
 	}
 
 	@Override
