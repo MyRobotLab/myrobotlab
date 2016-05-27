@@ -64,13 +64,21 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 	private int leftCameraIndex = 0;
 	private int rightCameraIndex = 1;
 
-
+	// TODO: encapsulate the configuration and calibration of the rift
+	public float leftCameraDx = 0;
+	public float leftCameraDy = 0;
+	public float leftCameraAngle = 0;
+	
+	public float rightCameraDx = 0;
+	public float rightCameraDy = 0;
+	public float rightCameraAngle = 0;
+	
 	private HmdDesc hmdDesc;
 
 	transient public OculusHeadTracking headTracker = null;
 
 	// TODO: remove this!  this is if you only have 1 video source.
-	private	boolean mirrorLeftCamera = true;
+	private	boolean mirrorLeftCamera = false;
 
 	public static class RiftFrame{
 		public SerializableImage left;	
@@ -100,23 +108,20 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 
 		// Initalize the JNA library/ head mounted device.
 		Hmd.initialize();
+		// TODO: is this delay needed?
 		try {
 			Thread.sleep(400);
 		} catch (InterruptedException e) {
 			throw new IllegalStateException(e);
 		}
-
 		hmd = Hmd.create();
-
-
 		if (null == hmd) {
 			throw new IllegalStateException("Unable to initialize HMD");
 		}
 		hmdDesc = hmd.getDesc();
-
 		hmd.configureTracking();
-
-
+		
+		log.info("Created HMD Oculus Rift Sensor and configured tracking.");
 	}
 
 	private void initContext() {
@@ -125,118 +130,120 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 			log.info("Init the rift.");
 			// Init the rift..
 			setupRift();
-			//OvrLibrary.INSTANCE.ovr_Initialize();
-			//hmd = Hmd.create(0); 
-			//int requiredSensorCaps = 0;
-			//int supportedSensorCaps = OvrLibrary.ovrSensorCaps.ovrSensorCap_Orientation;
-			// TODO: what errors/exceptions might be thrown here?  not sure how JNA exposes that info.
-			//hmd.startSensor(supportedSensorCaps, requiredSensorCaps);
-			log.info("Created HMD Oculus Rift Sensor");
+			
 			initialized = true;
 			// now that we have the hmd. lets start up the polling thread.
 			headTracker = new OculusHeadTracking(hmd, hmdDesc);
 			headTracker.oculus = this;
 			headTracker.start();
-			// create and start the two open cv services..
-			leftOpenCV = new OpenCV(getName() + "." + LEFT_OPEN_CV);
-			rightOpenCV = new OpenCV(getName() + "." + RIGHT_OPEN_CV);
-			leftOpenCV.startService();
-			rightOpenCV.startService();
-			leftOpenCV.setCameraIndex(leftCameraIndex);
-			rightOpenCV.setCameraIndex(rightCameraIndex);
-			// create msg routes from opencv services
-			// a bit kludgy because OpenCV is old :P
-			subscribe(leftOpenCV.getName(), "publishDisplay");
-			subscribe(rightOpenCV.getName(), "publishDisplay");
-			// Add some filters to rotate the images (cameras are mounted on their sides.)
-			// TODO: use 1 filter per eye for the rotations.  (might not be exactly 90degree rotation)
-			// TODO: replace with Affine filter.
-			//OpenCVFilterResize leftResizeFilter = new OpenCVFilterResize("lrf");
-			//OpenCVFilterResize rightResizeFilter = new OpenCVFilterResize("rrf");
-			
-			// TODO: pick these on the resoultion of the rift.
-			int w = 512;
-			int h = w; 
-			//leftResizeFilter.setDestHeight(h);
-			//leftResizeFilter.setDestWidth(w);
-			
-			//rightResizeFilter.setDestHeight(h);
-			//rightResizeFilter.setDestWidth(w);
+			log.info("Started head tracking thread.");
 
+			// create and start the two open cv services..
+			// start the left eye.
+			leftOpenCV = new OpenCV(getName() + "." + LEFT_OPEN_CV);
+			leftOpenCV.startService();
+			leftOpenCV.setCameraIndex(leftCameraIndex);
 			
-			//leftOpenCV.addFilter(leftResizeFilter);
-			//rightOpenCV.addFilter(rightResizeFilter);
-			
-			boolean addTransposeEyes = true;
-			if (addTransposeEyes) {
-				OpenCVFilterTranspose t1 = new OpenCVFilterTranspose("t1"); 
-				t1.flipCode = 1; 
-				OpenCVFilterTranspose t2 = new OpenCVFilterTranspose("t2"); 
-				t2.flipCode = 1; 
-				//float leftAngle = 180;
-				//float rightAngle = 0;
-				//leftAffine.setAngle(leftAngle);
-				//rightAffine.setAngle(rightAngle);
-				//rotate 270
-				leftOpenCV.addFilter(t1);
-				// rotate 90
-				rightOpenCV.addFilter(t2);
-				leftAffine.setAngle(90);
+			subscribe(leftOpenCV.getName(), "publishDisplay");
+
+			// start the right eye
+			if (!mirrorLeftCamera) {
+				rightOpenCV = new OpenCV(getName() + "." + RIGHT_OPEN_CV);
+				rightOpenCV.startService();
+				rightOpenCV.setCameraIndex(rightCameraIndex);
+				subscribe(rightOpenCV.getName(), "publishDisplay");
+
 			}
 			
-			// if we specify some per eye transforms
-			// if we specify some per eye transforms
+			// if the cameras are mounted at 90 degrees rotation, transpose the 
+			// image data to flip the resolution.
+			boolean addTransposeEyes = true;
+			if (addTransposeEyes) {
+				// left eye
+				OpenCVFilterTranspose t1 = new OpenCVFilterTranspose("t1"); 
+				t1.flipCode = 1; 
+				leftOpenCV.addFilter(t1);
+				// right eye
+				if (!mirrorLeftCamera) {
+					OpenCVFilterTranspose t2 = new OpenCVFilterTranspose("t2"); 
+					t2.flipCode = 1; 
+					rightOpenCV.addFilter(t2);
+				}
+			}
+
+			//OpenCVFilterResize leftResizeFilter = new OpenCVFilterResize("lrf");
+			// TODO: resize the image resolution so it works with the rift.
+			//int w = display.getWidth()/2;
+			//int h = display.getHeight(); 
+			//leftResizeFilter.setDestHeight(h);
+			//leftResizeFilter.setDestWidth(w);
+
+			//OpenCVFilterResize rightResizeFilter = new OpenCVFilterResize("rrf");
+			//rightResizeFilter.setDestHeight(h);
+			//rightResizeFilter.setDestWidth(w);
+			//leftOpenCV.addFilter(leftResizeFilter);
+			//rightOpenCV.addFilter(rightResizeFilter);
+
+			// configure the affine filters to calibrate image position and rotation.
 			//leftAffine.setDx(200);
-			leftAffine.setDy(0);
-			leftAffine.setAngle(90);
-			//rightAffine.setDx(200);
-			rightAffine.setDy(0);
-			rightAffine.setAngle(90);
-			
+			leftAffine.setDx(leftCameraDx);
+			leftAffine.setDy(leftCameraDy);
+			leftAffine.setAngle(leftCameraAngle);
 			// the affine is always on top i guess
 			leftOpenCV.addFilter(leftAffine);
-			rightOpenCV.addFilter(rightAffine);
-
 			leftOpenCV.setDisplayFilter("left");
-			rightOpenCV.setDisplayFilter("right");
-
-			// lets set the grabbers
-			// TODO: remove me!
-			//rightOpenCV.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
-			//rightOpenCV.setInputSource(OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY);
-			
-			//leftOpenCV.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
-			//leftOpenCV.setInputSource(OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY);
-			
-			//opencvRight.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
-			// opencvRight.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
-			
-			// start the cameras.
+			// start the left camera.
 			leftOpenCV.capture();
-			rightOpenCV.capture();
+			if (!mirrorLeftCamera) {
+				rightAffine.setDx(rightCameraDx);
+				rightAffine.setDy(rightCameraDy);
+				rightAffine.setAngle(rightCameraAngle);
+				rightOpenCV.addFilter(rightAffine);
+				rightOpenCV.setDisplayFilter("right");
+				// start the right camera
+				rightOpenCV.capture();
+			}
 			// Now turn on the camras.
 			// set camera index
-
 			// Now that the Rift and OpenCV has been setup.
+			// we should wait for the camera to start up.
+			
 			display = new OculusDisplay();
 			// on publish frame we'll update the current frame in the rift..
 			// synchronization issues maybe?
-			display.run();
-
+			// Ok, we never return here!  that's not good. this should be it's own thread.
+			//display.run();
+			display.oculus = this;
+			display.start();
+			log.info("Oculus display started and running.");
 		} else {
 			log.info("Rift interface already initialized.");
 		}
 	}
 
+	public void updateAffine() {
+		// this method will update the angle / dx / dy settings on the affine filters.		
+		leftAffine.setDx(leftCameraDx);
+		leftAffine.setDy(leftCameraDy);
+		leftAffine.setAngle(leftCameraAngle);
+		if (!mirrorLeftCamera) {
+			rightAffine.setDx(rightCameraDx);
+			rightAffine.setDy(rightCameraDy);
+			rightAffine.setAngle(rightCameraAngle);			
+		}
+		
+	}
+	
 	public void onDisplay(SerializableImage frame){
 
 		// if we're only one camera
 		// the left frame is both frames.
 		if (mirrorLeftCamera) {
 			// if we're mirroring the left camera
+			// log.info("Oculus Frame Source {}",frame.getSource());
 			if ("left".equals(frame.getSource())) {
 				lastRiftFrame.left = frame;
- 				lastRiftFrame.right = frame;
+				lastRiftFrame.right = frame;
 			}
 		} else if ("left".equals(frame.getSource())){
 			lastRiftFrame.left = frame;
@@ -252,8 +259,8 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 				double deltaY = (leftAffine.getLastClicked().getY() - rightAffine.getLastClicked().getY())/2.0;
 				leftAffine.setDy(-deltaY);
 				rightAffine.setDy(deltaY);
-				System.out.println("Delta Y calibrated " + deltaY);
 				calibrated=true;
+				log.info("Calibrated images! DeltaY = {}", deltaY);
 			}
 		}
 
@@ -261,22 +268,20 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		if (display != null) {
 			display.setCurrentFrame(lastRiftFrame);
 		} else {
-			log.warn("The Oculus Display was null.");
+			// TODO: wait on the display to be initialized ?
+			// maybe just log something?
+			//log.warn("The Oculus Display was null.");
 		}
 		invoke("publishRiftFrame", lastRiftFrame);
 	}
-
-
 
 	@Override
 	public void stopService() {
 		super.stopService();
 		// TODO: validate proper life cycle.
 		if (headTracker != null) {
-			// TODO: ?
 			headTracker.stop();
 		}
-
 		if (hmd != null){
 			hmd.destroy();
 			Hmd.shutdown();
@@ -347,30 +352,6 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		return frame;
 	}
 
-
-	public static void main(String s[]) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel("INFO");
-		Runtime.createAndStart("gui", "GUIService");
-		Runtime.createAndStart("python", "Python");
-		OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
-
-		while (true) {
-			float roll = rift.getRoll();
-			rift.leftAffine.setAngle(-roll+180);
-			rift.rightAffine.setAngle(-roll);
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				break;
-			}
-		}
-		rift.logOrientation();
-	}
-
-
 	public int getLeftCameraIndex() {
 		return leftCameraIndex;
 	}
@@ -406,7 +387,7 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
@@ -423,7 +404,7 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		// make sure the open cv instance share each others streamer..
 		//meta.sharePeer("leftOpenCV.streamer", "streamer", "VideoStreamer", "shared left streamer");
 		//meta.sharePeer("rightOpenCV.streamer", "streamer", "VideoStreamer", "shared right streamer");
-		
+
 		meta.addPeer("leftOpenCV", "OpenCV", "Left Eye Camera");
 		meta.sharePeer("rightOpenCV", "leftOpenCV", "OpenCV", "Right Eye sharing left eye camera");
 		meta.addPeer("rightOpenCV", "OpenCV", "Right Eye Camera");
@@ -431,6 +412,36 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		return meta;
 	}
 
+	
+	public static void main(String s[]) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel("INFO");
+		// Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("python", "Python");
+		OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
+		
+		rift.leftCameraAngle = 180;
+		rift.leftCameraDy = 5;
+		rift.rightCameraDy = -5;
+		// call this once you've updated the affine stuff?
+		rift.updateAffine();
+		
+		rift.logOrientation();
+		// TODO: configuration to enable left/right camera roll tracking.
+		//		while (true) {
+		//			float roll = rift.getRoll();
+		//			rift.leftAffine.setAngle(-roll+180);
+		//			rift.rightAffine.setAngle(-roll);
+		//			try {
+		//				Thread.sleep(1);
+		//			} catch (InterruptedException e) {
+		//				// TODO Auto-generated catch block
+		//				e.printStackTrace();
+		//				break;
+		//			}
+		//		}
+		
+	}
 
 }
 
