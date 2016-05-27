@@ -167,6 +167,7 @@ public class OpenCV extends VideoSource {
 	// if possible.
 	// GROG : .. perhaps just a filter in the pipeline could stream it via http
 	transient public VideoStreamer streamer;
+	public boolean streamerEnabled = true;
 	
 	
 	public OpenCV(String n) {
@@ -371,8 +372,11 @@ public class OpenCV extends VideoSource {
 
 	public void capture() {
 		save();
-		streamer = (VideoStreamer) startPeer("streamer");
-		streamer.attach(this);
+		
+		if (streamerEnabled) {
+			streamer = (VideoStreamer) startPeer("streamer");
+			streamer.attach(this);
+		}
 		// stopCapture(); // restart?
 		videoProcessor.start();
 		// there's a nasty race condition, 
@@ -745,7 +749,7 @@ public class OpenCV extends VideoSource {
 		org.apache.log4j.BasicConfigurator.configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		
-		OpenCV opencvLeft = (OpenCV) Runtime.start("left", "OpenCV");
+		//OpenCV opencvLeft = (OpenCV) Runtime.start("left", "OpenCV");
 		// Runtime.start("right", "OpenCV");
 		//opencvLeft.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
 		//opencvLeft.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
@@ -753,26 +757,27 @@ public class OpenCV extends VideoSource {
 		//	OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
 		//	opencv.addFilter(tr);
 
-		OpenCV opencvRight = (OpenCV) Runtime.start("right", "OpenCV");
+		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
 		// Runtime.start("right", "OpenCV");
-		opencvRight.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
-		opencvRight.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
+		opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
+		// opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
+		opencv.setInputSource(INPUT_SOURCE_CAMERA);
 
 		
 //		opencv.addFilter("facerec", "FaceRecognizer");
 		
-		OpenCVFilterFaceRecognizer facerec = new OpenCVFilterFaceRecognizer("facerec");
+		//OpenCVFilterFaceRecognizer facerec = new OpenCVFilterFaceRecognizer("facerec");
 		
-		String trainingDir = "C:\\training";
-		facerec.setTrainingDir(trainingDir);
-		facerec.train();
+		//String trainingDir = "C:\\training";
+		//facerec.setTrainingDir(trainingDir);
+		//facerec.train();
 		
-		opencvLeft.addFilter(facerec);
+		//opencvLeft.addFilter(facerec);
 		
 		//VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
 		//vs.attach(opencv);
 		//opencv.capture();
-		opencvLeft.capture();
+		//opencvLeft.capture();
 		// opencvRight.capture();
 		
 		/*
@@ -781,6 +786,16 @@ public class OpenCV extends VideoSource {
 		*/
 		
 		//opencv.capture();
+//		Thread.sleep(5000);
+//		opencv.stopCapture();
+//		Thread.sleep(5000);
+//		
+//
+//		opencv.capture();
+//		Thread.sleep(5000);
+//		opencv.stopCapture();
+//		Thread.sleep(5000);
+
 		
 		boolean leave = true;
 		if (leave){

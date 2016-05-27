@@ -162,7 +162,9 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 			
 			
 			
-			if ("IPCamera".equals(selected) || "Pipeline".equals(selected) || "ImageFile".equals(selected) || "SlideShow".equals(selected)) {
+			if ("IPCamera".equals(selected) || "Pipeline".equals(selected) || 
+					"ImageFile".equals(selected) || "SlideShow".equals(selected) || 
+					"Sarxos".equals(selected)) {
 				prefixPath = "org.myrobotlab.opencv.";
 			} else {
 				prefixPath = "org.bytedeco.javacv.";
@@ -606,6 +608,7 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 											// ImageStreamSource
 		frameGrabberList.add("ImageFile");
 		frameGrabberList.add("SlideShowFile");
+		frameGrabberList.add("Sarxos");
 		
 		// CanvasFrame cf = new CanvasFrame("hello");
 

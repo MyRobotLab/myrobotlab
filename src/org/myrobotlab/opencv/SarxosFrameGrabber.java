@@ -64,7 +64,9 @@ public class SarxosFrameGrabber extends FrameGrabber {
 			start();
 		}
  		BufferedImage img = webcam.getImage();
- 		Frame frame = converter.convert(img);
+ 		// Seems like we need to flip the color chanels ..  also gamma is set to 1.0 ? (what ever that is.)
+ 		Frame frame = converter.getFrame(img, 1.0, true);
+ 		// Frame frame = converter.convert(img);
 		return frame;
 	}
 
