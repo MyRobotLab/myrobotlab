@@ -306,9 +306,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 				// .resource("/video/ffmpeg.1443989700495.mp4", test)
 
 				// for debugging
-				.resource("./src/resource/WebGui").resource("./src/resource")
+				.resource("./src/resource/WebGui/app").resource("./src/resource")
 				// for runtime - after extractions
-				.resource("./resource/WebGui").resource("./resource")
+				.resource("./resource/WebGui/app").resource("./resource")
 
 				// Support 2 APIs
 				// REST - http://host/object/method/param0/param1/...

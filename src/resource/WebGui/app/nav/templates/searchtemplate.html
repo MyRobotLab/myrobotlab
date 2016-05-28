@@ -1,0 +1,5 @@
+<a>
+    <img ng-src="{{match.model.simpleName}}.png" alt="" width="16">
+    <span ng-bind-html="match.model.name | uibTypeaheadHighlight:query"></span>
+    <span ng-if="match.model.showpanelname"><i>&nbsp;&nbsp;{{match.model.panelname}}</i></span>
+</a>

@@ -1,0 +1,67 @@
+<div class="col-md-12">         
+
+<!-- <form ui-keypress="{13:'askProgramAB(session,utterance)'}"> -->
+<div class="input-group">       
+   <select class="form-control"
+            ng-model="currentSession" 
+            ng-options="key as key for (key , value) in service.sessions">
+   </select>
+ 
+   <span class="input-group-btn"><button class="btn btn-default" ng-click="startDialog()">start session</button></span>
+   <input class="form-control" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" press-enter="getSessionResponse(currentSession,utterance)" placeholder="type here"/>
+<!--    <span class="input-group-btn"><button class="btn btn-default" ng-show="currentSession.key != null" ng-click="getResponse(currentSession,utterance)">Ask</button></span>  -->
+   <!-- <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.startSession(username,botName)">Start</button></span> -->
+   <!-- <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.savePredicates()">Save Predicates</button></span> -->
+   
+ </div>
+<!-- </form> -->
+</div>
+
+<div class="col-md-12" class="row">
+    <!--  the conversation history/log table -->
+    <table>
+      <thead>
+        <tr>
+          <th width="200">Chat Session Log:</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="rowContent in rows track by $index">
+            <td>{{rowContent.name}}</td><td><div ng-bind-html="rowContent.response"></div></td>
+        </tr>
+      </tbody>
+    </table>    
+</div>    
+
+ <script type="text/ng-template" id="startDialog.html">
+  <div class="modal-header">
+        <button type="button" class="close" ng-click="cancel()" aria-hidden="true">&times;</button>
+        start session
+    </div>
+        <div class="modal-body">
+        <div class="input-group">     
+            session <input class="form-control" type="text" placeholder="{{newUserName}}" ng-model="newUserName"/><br>
+            bot name 
+
+            <select class="form-control"
+            ng-model="newBotName" 
+            ng-options="o as o for o in service.bots">
+            </select>
+ 
+ 
+        </div>
+        </div>
+        <div class="modal-footer">            
+            <span class="input-group-btn"><button class="btn btn-default" ng-click="startSession(newUserName,newBotName)">start</button></span>        
+            <!-- <button ng-click="cancel()" class="btn btn-primary">Close</button> -->
+        </div>
+  </script>
+
+<!--
+  <button type="button" ng-click="msg.getCategories('abc','def','ghi')" >test</button>
+  <button type="button" ng-click="test('abc')" >send</button>
+  -->
+<!-- TODO - MAKE THIS A GLOBAL SERVICE WITH FORMATED -->
+<!-- <pre>{{service}}</pre> -->
+ 
+

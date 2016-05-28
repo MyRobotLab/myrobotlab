@@ -1,0 +1,18 @@
+<div>
+    HEY!!! - SolrGUI here!<br>
+    <!-- for debugging  Data: {{service}} <br/>  -->
+    <form novalidate class="search-form">
+     QueryString: <input type="text" ng-model="querystring"  /><br/>
+     <input type="submit" ng-click="search(querystring)" value="Search" />
+    </form>
+    
+    Query String: {{querystring}} <br/>
+    Query Results: {{service.solrResults}} <br/>
+    
+    <div ng-switch on="size">
+        <div class="animate-switch" ng-switch-when="small">Small view</div>
+        <div class="animate-switch" ng-switch-when="medium">Medium view<br>mevi</div>
+        <div class="animate-switch" ng-switch-when="large">Large view<br>lavi<br>lavi</div>
+        <div class="animate-switch" ng-switch-when="full">Full view<br>fuvi<br>fuvi<br>fuvi</div>
+    </div>
+</div>

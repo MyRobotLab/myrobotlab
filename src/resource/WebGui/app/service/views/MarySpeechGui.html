@@ -1,0 +1,101 @@
+<input type="text" class="form-control" ng-model="text"/>
+<button class="btn btn-default" ng-disabled="service.isSpeaking" ng-click="msg.speakBlocking(text)">Speak</button>
+<input type="text" class="form-control" ng-model="voice"/>
+<button class="btn btn-default" ng-click="msg.setVoice(voice)">Set Voice</button>
+<button type="button" class="btn btn-default" ng-click="collapse = !collapse">Toggle Component Installer</button>
+<div uib-collapse="collapse">
+    <div class="form-group">
+        <input type="text" class="form-control" ng-model="componenturl"/>
+        <button class="btn btn-default" ng-click="msg.updateFromComponentUrl(componenturl)">Update Components</button>
+    </div>
+    <!--TODO - fix automatic disabling if there are components-->
+    <div ng-show="{{service.possibleVoices === undefined}}">Please try to (re-)load the components file if list is empty</div>
+    <div uib-accordion>
+        <div uib-accordion-group is-open="status.open" ng-repeat="voice in service.possibleVoices">
+            <div uib-accordion-heading>
+                <div>
+                    {{voice.name}}
+                    <span class="pull-right">
+                        <span ng-if="voice.isSelected">install!</span>&nbsp;&nbsp;
+                        {{voice.status}}&nbsp;&nbsp;{{voice.gender}}&nbsp;&nbsp;{{voice.locale}}&nbsp;&nbsp;
+                        <i class="glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                    </span>
+                </div>
+            </div>
+            Description: {{voice.description}}<br>
+            Type: {{voice.type}}<br>
+            Version: {{voice.version}}<br>
+            Size: {{voice.packageSize / 1024 / 1024 | number:2}}MB<br>
+            <button type="button" class="btn btn-primary" ng-click="voice.isSelected = !voice.isSelected" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
+                <span ng-if="!voice.isSelected">install!</span>
+                <span ng-if="voice.isSelected">don't install!</span>
+            </button>
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary" ng-click="install()">
+        Install!
+    </button>
+</div>
+
+<script type="text/ng-template" id="MarySpeechInstallationnothingselected.html">
+    <div class="modal-header">
+        <h3 class="modal-title">ERROR</h3>
+    </div>
+    <div class="modal-body">
+        You have not selected any installable components
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="close();">OK</button>
+    </div>
+</script>
+<script type="text/ng-template" id="MarySpeechInstallationinstallcomponents.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Continue?</h3>
+    </div>
+    <div class="modal-body">
+        Install {{service.installationstateparam1}} components?<br>
+        ({{service.installationstateparam2}} to download)<br>
+        Proceed with installation?
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="msg.installSelectedLanguagesAndVoices2();close();">YES</button>
+        <button class="btn btn-primary" ng-click="close();">NO</button>
+    </div>
+</script>
+<script type="text/ng-template" id="MarySpeechInstallationshowlicenses.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Licenses</h3>
+    </div>
+    <div class="modal-body">
+        Used by:
+        <div ng-repeat="voice in service.installationstateparam1[alllicenses[counter]]">
+            <li>{{voice.name}}</li>
+        </div>
+        <br>
+        Do you accept the following license?
+        <div ng-bind-html="license"></div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="showNextLicense();">ACCEPT</button>
+        <button class="btn btn-primary" ng-click="close();">CANCEL</button>
+    </div>
+</script>
+<script type="text/ng-template" id="MarySpeechInstallationinstallationprogress.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Installing ...</h3>
+    </div>
+    <div class="modal-body">
+    {{service}}
+        Used by:
+        <div ng-repeat="voice in service.installationstateparam1[alllicenses[counter]]">
+            <li>{{voice.name}}</li>
+        </div>
+        <br>
+        Do you accept the following license?
+        <div ng-bind-html="license"></div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="showNextLicense();">ACCEPT</button>
+        <button class="btn btn-primary" ng-click="close();">CANCEL</button>
+    </div>
+</script>
