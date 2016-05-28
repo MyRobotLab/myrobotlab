@@ -40,7 +40,7 @@
 #include <Wire.h>
 // Start of Adafruit16CServoDriver I2C import
 // version to match with MRL
-#define MRLCOMM_VERSION         32
+#define MRLCOMM_VERSION         33
 
 // serial protocol functions
 #define MAGIC_NUMBER            170 // 10101010
@@ -366,6 +366,8 @@ void setup() {
   softReset();
   // --VENDOR SETUP BEGIN--
   // --VENDOR SETUP END--
+  // publish version on startup so it's immediately available for mrl.
+  publishVersion();
 }
 
 
@@ -830,10 +832,7 @@ void loop() {
 
     case GET_VERSION: 
       {
-        Serial.write(MAGIC_NUMBER);
-        Serial.write(2); // size
-        Serial.write(PUBLISH_VERSION);
-        Serial.write((byte)MRLCOMM_VERSION);
+        publishVersion();
         break;
       } // GET_VERSION
 
@@ -1314,3 +1313,11 @@ void setPWM(uint8_t i2caddr, uint8_t num, uint16_t on, uint16_t off) {
   WIRE.endTransmission();
 }
 // End of Adafruit16CServoDriver methods
+
+void publishVersion() {
+    Serial.write(MAGIC_NUMBER);
+    Serial.write(2); // size
+    Serial.write(PUBLISH_VERSION);
+    Serial.write((byte)MRLCOMM_VERSION);
+    Serial.flush();
+}
