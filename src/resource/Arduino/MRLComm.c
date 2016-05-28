@@ -355,95 +355,70 @@ void append(const int& data) {
   ++paramBuffIndex;
 }
 
-void startMsg() {
-}
-
 void setup() {
+  // TODO: higher port speeds?
   Serial.begin(57600);        // connect to the serial port
-
-  while (!Serial){
-  };
+  while (!Serial){};
+  // TODO: do this before we start the serial port?
   softReset();
-  // --VENDOR SETUP BEGIN--
-  // --VENDOR SETUP END--
   // publish version on startup so it's immediately available for mrl.
-  publishVersion();
+  getVersion();
 }
 
+// This is the main loop that the arduino runs.
+void loop() {
+  // increment how many times we've run
+  ++loopCount;
+  // get a command and process it from the serial port (if available.)
+  if (getCommand()) {
+    processCommand();
+  }
+  // update servo positions
+  updateServos();
+  // update analog sensor data stuffs
+  updateSensors();
+  // update and report timing metrics
+  updateStats();
+} // end of big loop
 
 void sendMsg() {
-
   // unbox
   Serial.write(MAGIC_NUMBER);
   Serial.write(paramBuffIndex + 2); // = param buff size + FN + paramCnt
   //Serial.write(2); // = param buff size + FN + paramCnt
   Serial.write(PUBLISH_CUSTOM_MSG);
   Serial.write(paramCnt);
-
   for (int i = 0; i < paramBuffIndex; ++i) {
     Serial.write(customParams[i]);
   }
-
   paramCnt = 0;
   paramBuffIndex = 0;
 }
 // ----------- send custom msg end ---------------------
 
-
-void softReset()
-{
-  for (int i = 0; i < MAX_SERVOS - 1; ++i)
-  {
+void softReset() {
+  for (int i = 0; i < MAX_SERVOS - 1; ++i) {
     servo_type& s = servos[i];
     s.speed = 100;
     if (s.servo != 0) {
       s.servo->detach();
     }
   }
-
-  for (int i = 0; i < SENSORS_MAX - 1; ++i)
-  {
+  for (int i = 0; i < SENSORS_MAX - 1; ++i) {
     resetPin(i);
   }
-
   loopCount = 0;
 }
 
-void resetPin(int pinIndex)
-{
+void resetPin(int pinIndex) {
   pin_type& pin = pins[pinIndex];
   pin.isActive = false;
   pin.address = pinIndex; // pin #
   pin.sensorIndex = 0; // all pins initially belong to Arduino service
   pin.rateModulus = 1; // full feedback/sample rate
-
   pin.count = 0;
   pin.target = 0;
   pin.nextPin = -1;
-}
-
-// sets frequency of pwm of analog
-// FIXME - us ifdef appropriate uC which
-// support these clocks TCCR0B
-void setPWMFrequency(int address, int prescalar)
-{
-  int clearBits = 0x07;
-  if (address == 0x25)
-  {
-    TCCR0B &= ~clearBits;
-    TCCR0B |= prescalar;
-  }
-  else if (address == 0x2E)
-  {
-    TCCR1B &= ~clearBits;
-    TCCR1B |= prescalar;
-  }
-  else if (address == 0xA1)
-  {
-    TCCR2B &= ~clearBits;
-    TCCR2B |= prescalar;
-  }
-
 }
 
 unsigned long toUnsignedLong(unsigned char* buffer, int start) {
@@ -456,10 +431,8 @@ unsigned long toUnsignedLong(unsigned char* buffer, int start) {
 * already exists
 */
 bool exists(int array[], int len, int searchValue) {
-  for (int i = 0; i < len; ++i)
-  {
-    if (searchValue == array[i])
-    {
+  for (int i = 0; i < len; ++i) {
+    if (searchValue == array[i]) {
       return true;
     }
   }
@@ -471,63 +444,50 @@ bool exists(int array[], int len, int searchValue) {
 * if successful - if value already exists on list
 * sends back an error
 */
-bool addNewValue(int array[], int& len, int addValue)
-{
+bool addNewValue(int array[], int& len, int addValue) {
   if (!exists(array, len, addValue)) {
     array[len] = addValue;
     ++len;
     return true;
-  }
-  else {
+  } else {
     sendError(ERROR_ALREADY_EXISTS);
     return false;
   }
 }
 
 // Will Be Depricated
-bool removeAndShift(int array[], int& len, int removeValue)
-{
+bool removeAndShift(int array[], int& len, int removeValue) {
   if (!exists(array, len, removeValue)) {
     sendError(ERROR_DOES_NOT_EXIST);
     return false;
   }
-
   int pos = -1;
-
-  if (len == 0)
-  {
+  if (len == 0) {
     // "should" never happen
     // would be calling remove on an empty list
     // the error ERROR_DOES_NOT_EXIST - "should" be called
     return true;
   }
-
   // find position of value
-  for (int i = 0; i < len; ++i)
-  {
-    if (removeValue == array[i])
-    {
+  for (int i = 0; i < len; ++i) {
+    if (removeValue == array[i]) {
       pos = i;
       break;
     }
   }
   // if at the end just decrement size
-  if (pos == len - 1)
-  {
+  if (pos == len - 1) {
     --len;
     return true;
   }
 
   // if found somewhere else shift left
-  if (pos < len && pos > -1)
-  {
-    for (int j = pos; j < len - 1; ++j)
-    {
+  if (pos < len && pos > -1) {
+    for (int j = pos; j < len - 1; ++j) {
       array[j] = array[j + 1];
     }
     --len;
   }
-
   return true;
 }
 
@@ -540,7 +500,6 @@ boolean getCommand() {
       // read the incoming byte:
       newByte = Serial.read();
       ++byteCount;
-
       // checking first byte - beginning of message?
       if (byteCount == 1 && newByte != MAGIC_NUMBER) {
         sendError(ERROR_SERIAL);
@@ -548,7 +507,6 @@ boolean getCommand() {
         byteCount = 0;
         // return false;
       }
-
       if (byteCount == 2) {
         // get the size of message
         // todo check msg < 64 (MAX_MSG_SIZE)
@@ -559,12 +517,10 @@ boolean getCommand() {
         }
         msgSize = newByte;
       }
-
       if (byteCount > 2) {
         // fill in msg data - (2) headbytes -1 (offset)
         ioCmd[byteCount - 3] = newByte;
       }
-
       // if received header + msg
       if (byteCount == 2 + msgSize) {
         // we've reach the end of the command, just return true .. we've got it
@@ -576,611 +532,303 @@ boolean getCommand() {
   return false;
 }
 
-void loop() {
+// This function will switch the current command and call
+// the associated function with the command
+void processCommand() {
+  switch (ioCmd[0]) {
+  // === system pass through begin ===
+  case DIGITAL_WRITE:
+    digitalWrite(ioCmd[1], ioCmd[2]);
+    break;
+  case ANALOG_WRITE:
+    analogWrite(ioCmd[1], ioCmd[2]);
+    break;
+  case PIN_MODE:
+    pinMode(ioCmd[1], ioCmd[2]);
+    break;
+  case SERVO_ATTACH:
+    servoAttach();
+    break;
+  case SERVO_SWEEP_START:
+    servoStartSweep();
+    break;
+  case SERVO_SWEEP_STOP:
+    servoStopSweep();
+    break;
+  case SERVO_EVENTS_ENABLED:
+    servoEventsEnabled();
+    break;
+  case SERVO_WRITE:
+    servoWrite();
+    break;
+  case PUBLISH_SERVO_EVENT:
+    publishServoEvent();
+    break;
+  case SERVO_WRITE_MICROSECONDS:
+    servoWriteMicroseconds();
+    break;
+  case SET_SERVO_SPEED:
+    setServoSpeed();
+    break;
+  case SERVO_DETACH:
+    servoDetach();
+    break;
+  case SET_LOAD_TIMING_ENABLED:
+    setLoadTimingEnabled();
+    break;
+  case SET_PWMFREQUENCY:
+    setPWMFrequency(ioCmd[1], ioCmd[2]);
+    break;
+  case ANALOG_READ_POLLING_START:
+    analogReadPollingStart();
+    break;
+  case ANALOG_READ_POLLING_STOP:
+    analogReadPollingStop();
+    break;
+  case DIGITAL_READ_POLLING_START:
+    digitalReadPollingStart();
+    break;
+  case PULSE:
+    pulse();
+    break;
+  case PULSE_STOP:
+    pulseStop();
+    break;
+  case DIGITAL_READ_POLLING_STOP:
+    digitalReadPollingStop();
+  case SET_TRIGGER:
+    setTrigger();
+    break;
+  case SET_DEBOUNCE:
+    setDebounce();
+    break;
+  case SET_DIGITAL_TRIGGER_ONLY:
+    setDigitalTriggerOnly();
+    break;
+  case SET_SERIAL_RATE:
+    setSerialRate();
+    break;
+  case GET_VERSION:
+    getVersion();
+    break;
+  case SET_SAMPLE_RATE:
+    setSampleRate();
+    break;
+  case SOFT_RESET:
+    softReset();
+    break;
+  case SENSOR_ATTACH:
+    sensorAttach();
+    break;
+  case SENSOR_POLLING_START:
+    sensorPollingStart();
+    break;
+  case SENSOR_POLLING_STOP:
+    sensorPollingStop();
+    break;
+  // Start of Adafruit16CServoDriver commands
+  case AF_BEGIN:
+    afBegin();
+    break;
+  case AF_SET_PWM_FREQ:
+    afSetPWMFREQ();
+    break;
+  case AF_SET_PWM:
+    afSetPWM();
+    break;
+  case AF_SET_SERVO:
+    afSetServo();
+    break;
+  case NOP:
+    // No Operation
+    break;
+  default:
+    sendError(ERROR_UNKOWN_CMD);
+    break;
+  } // end switch
+  // reset command buffer to be ready to receive the next command.
+  memset(ioCmd, 0, sizeof(ioCmd));
+  byteCount = 0;
+} // process Command
 
-  ++loopCount;
-
-  if (getCommand())
-  {
-    switch (ioCmd[0])
-    {
-
-      // === system pass through begin ===
-    case DIGITAL_WRITE: 
-      {
-        digitalWrite(ioCmd[1], ioCmd[2]);
-        break; 
-      } // DIGITAL_WRITE
-
-    case ANALOG_WRITE: 
-      {
-        analogWrite(ioCmd[1], ioCmd[2]);
-        break; 
-      } // ANALOG_WRITE
-
-    case PIN_MODE: 
-      {
-        pinMode(ioCmd[1], ioCmd[2]);
-        break; 
-      } // PIN_MODE
-
-      // FIXME - add pulseIn and any other system methods
-
-      // === system pass through end ===
-      // FIXME - 
-
-
-      // === servo begin ===
-      // we can add a little functionality to servos
-      // in the layer of the driver
-      // for example speed
-
-    case SERVO_ATTACH: 
-      {
-        servo_type& s = servos[ioCmd[1]];
-        s.index = ioCmd[1];
-        if (s.servo == NULL) {
-          s.servo = new Servo();
-        }
-        s.servo->attach(ioCmd[2]);
-        s.step = 1;
-        s.eventsEnabled = false;
-        break; 
-      } // SERVO_ATTACH
-
-    case SERVO_SWEEP_START: 
-      {
-        servo_type& s = servos[ioCmd[1]];
-        s.min = ioCmd[2];
-        s.max = ioCmd[3];
-        s.step = ioCmd[4];
-        s.isMoving = true;
-        s.isSweeping = true;
-        break;
-      } // SERVO_SWEEP_START
-
-    case SERVO_SWEEP_STOP: 
-      {
-        servo_type& s = servos[ioCmd[1]];
-        s.isMoving = false;
-        s.isSweeping = false;
-        break;
-      } // SERVO_SWEEP_STOP
-
-    case SERVO_EVENTS_ENABLED:
-      {
-        break;
-      } // SERVO_EVENTS_ENABLED
-
-    case SERVO_WRITE: 
-      {
-        servo_type& s = servos[ioCmd[1]];
-        if (s.speed == 100 && s.servo != 0)// move at regular/full 100% speed
-        {
-          s.targetPos = ioCmd[2];
-          s.currentPos = ioCmd[2];
-          s.isMoving = false;
-          s.servo->write(ioCmd[2]);
-          if (s.eventsEnabled) sendServoEvent(s, SERVO_EVENT_STOPPED);
-        }
-        else if (s.speed < 100 && s.speed > 0) {
-          s.targetPos = ioCmd[2];
-          s.isMoving = true;
-        }
-        break;
-      } // SERVO_WRITE
-
-
-    case PUBLISH_SERVO_EVENT: 
-      {
-        servo_type& s = servos[ioCmd[1]];
-        s.eventsEnabled = ioCmd[2];
-        break;
-      } // PUBLISH_SERVO_EVENT
-
-    case SERVO_WRITE_MICROSECONDS: 
-      {
-        // TODO - incorporate into speed control etc
-        // normalize - currently by itself doesn't effect events
-        // nor is it involved in speed control
-        servo_type& s = servos[ioCmd[1]];
-        if (s.servo != 0) {
-          // 1500 midpoint
-          s.servo->writeMicroseconds(ioCmd[2]);
-        }
-
-        break;
-      } // SERVO_WRITE_MICROSECONDS
-
-    case SET_SERVO_SPEED: 
-      {
-        // setting the speed of a servo
-        servo_type& servo = servos[ioCmd[1]];
-        servo.speed = ioCmd[2];
-        break;
-      } // SET_SERVO_SPEED
-
-    case SERVO_DETACH: 
-      {
-        servo_type& s = servos[ioCmd[1]];
-        if (s.servo != 0) {
-          s.servo->detach();
-        }
-        break;
-      } // SERVO_DETACH
-
-      // -------- servo begin ------------------------
-
-    case SET_LOAD_TIMING_ENABLED: 
-      {
-        loadTimingEnabled = ioCmd[1];
-        //loadTimingModulus = ioCmd[2];
-        loadTimingModulus = 1000;
-        break;
-      } // SET_LOAD_TIMING_ENABLED
-
-    case SET_PWMFREQUENCY: // FIXME - different boards have different timers
-      {
-        setPWMFrequency(ioCmd[1], ioCmd[2]);
-        break;
-      } // SET_PWMFREQUENCY
-
-      // FIXME - convert all to type SENSOR_TYPE_PIN
-    case ANALOG_READ_POLLING_START: 
-      {
-        int pinIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
-        pin_type& pin = pins[pinIndex];
-        pin.sensorIndex = 0; // FORCE ARDUINO TO BE OUR SERVICE - DUNNO IF THIS IS GOOD/BAD
-        pin.sensorType = SENSOR_TYPE_ANALOG_PIN_READER; // WIERD - mushing of roles/responsibilities
-        pin.isActive = true;
-        pin.rateModulus= (ioCmd[2] << 8)+ioCmd[3];
-        break; 
-      } // ANALOG_READ_POLLING_START
-
-    case ANALOG_READ_POLLING_STOP: 
-      {
-        pin_type& pin = pins[ioCmd[1]];
-        pin.isActive = false;
-        break; 
-      } // ANALOG_READ_POLLING_STOP
-
-    case DIGITAL_READ_POLLING_START: 
-      {
-        int pinIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
-        pin_type& pin = pins[pinIndex];
-        pin.sensorIndex = 0; // FORCE ARDUINO TO BE OUR SERVICE - DUNNO IF THIS IS GOOD/BAD
-        pin.sensorType = SENSOR_TYPE_DIGITAL_PIN_READER; // WIERD - mushing of roles/responsibilities
-        pin.isActive = true;
-        pin.rateModulus=(ioCmd[2] << 8) + ioCmd[3];
-        break; 
-       //int pin = ioCmd[1];
-        //addNewValue(digitalReadPin, digitalReadPollingPinCount, pin);
-        // this is the same as digitalWrite except
-        // we can keep track of the number of pulses
-        //break;
-      } // DIGITAL_READ_POLLING_START
-
-    case PULSE: 
-      {
-        // get pin from index
-        pin_type& pin = pins[ioCmd[1]];
-
-        // FIXME - this has to unload a Long !!!
-        pin.count = 0;
-        //pin.target = toUnsignedLong(ioCmd, 2);// ioCmd[2];
-        pin.target = ((ioCmd[2] << 24) + (ioCmd[3] << 16) + (ioCmd[4] << 8) + ioCmd[5]);
-        pin.rate = ioCmd[6];
-        pin.rateModulus = ioCmd[7];
-        pin.isActive = true;
-        pin.state = PUBLISH_SENSOR_DATA;
-
-        //addNewValue(activePins, activePinCount, ioCmd[1]);
-        break;
-      } // PULSE
-
-    case PULSE_STOP: 
-      {
-
-        pin_type& pin = pins[ioCmd[1]];
-
-        // FIXME - this has to unload a Long !!!
-        pin.state = PUBLISH_PULSE_STOP;
-
-        //removeAndShift(activePins, activePinCount, ioCmd[1]);
-        break;
-      } // PULSE_STOP
-
-    case DIGITAL_READ_POLLING_STOP: 
-      {
-        pin_type& pin = pins[ioCmd[1]];
-        pin.isActive = false;
-       //int pin = ioCmd[1];
-        //removeAndShift(digitalReadPin, digitalReadPollingPinCount, pin);
-        //break;
-        // FIXME - these should just be attributes of the pin
-      } // DIGITAL_READ_POLLING_STOP
-    case SET_TRIGGER: 
-      {
-        // FIXME !!! - you need 1. a complete pin list !!!   analog & digital should be defined by attribute not
-        // data structure !!!  if (pin.type == ??? if needed
-        // TODO - if POLLING ALREADY DON'T RE-ADD - MAKE RE-ENTRANT
-        //analogReadPin[analogReadPollingPinCount] = ioCmd[1]; // put on polling read list
-        //++analogReadPollingPinCount;
-        break;
-      } // SET_TRIGGER
-
-    case SET_DEBOUNCE: 
-      {
-        // default debounceDelay = 50;
-        debounceDelay = ((ioCmd[1] << 8) + ioCmd[2]);
-        break;
-      } // SET_DEBOUNCE
-
-    case SET_DIGITAL_TRIGGER_ONLY: 
-      {
-        //digitalTriggerOnly = ioCmd[1];
-        break;
-      } // SET_DIGITAL_TRIGGER_ONLY
-
-    case SET_SERIAL_RATE:
-      {
-        Serial.end();
-        delay(500);
-        Serial.begin(ioCmd[1]);
-        break;
-      } // SET_SERIAL_RATE  
-
-    case GET_VERSION: 
-      {
-        publishVersion();
-        break;
-      } // GET_VERSION
-
-    case SET_SAMPLE_RATE: 
-      {
-        // 2 byte int - valid range 1-65,535
-        sampleRate = (ioCmd[1] << 8) + ioCmd[2];
-        if (sampleRate == 0)
-        {
-          sampleRate = 1;
-        } // avoid /0 error - FIXME - time estimate param
-        break;
-      } // SET_SAMPLE_RATE
-
-    case SOFT_RESET: 
-      {
-        softReset();
-        break; 
-      } // SOFT_RESET
-
-    case SENSOR_ATTACH: 
-      {
-
-        // THIS WILL BE THE NEW BIG-KAHUNA
-
-        // INITIAL REQUEST - SENSOR GRABS ALL PINs IT NEEDS
-        // IT THEN POPULATES each of the PINs with its sensorIndex
-        // the uC (Arduino) - does not grab any - because it will
-        // always take/recieve any non-reserved pin (softReset) Pin
-
-        int sensorIndex    = ioCmd[1];
-        int sensorType     = ioCmd[2];
-        int pinCount       = ioCmd[3];
-
-        // for loop grabbing all pins for this sensor
-        for (int ordinal = 0; ordinal < pinCount; ++ordinal){
-
-          // grab the pin - assign the sensorIndex & sensorType
-          pin_type& pin = pins[ioCmd[4 + ordinal]];
-          pin.sensorIndex = sensorIndex;
-          pin.sensorType = sensorType; 
-
-          if (pin.sensorType == SENSOR_TYPE_ULTRASONIC && ordinal == 0) {
-            // pin.trigPin = ioCmd[3];
-            // pin.echoPin = ioCmd[4];
-            pinMode(pin.trigPin, OUTPUT); // WTF about wiring which has single pin ! :P
-            pinMode(pin.echoPin, INPUT);
-            //pin.ping = new NewPing(pin.trigPin, pin.echoPin, 100);
-            // triggerPin's next pin is the echo pin
-            pin.nextPin = ioCmd[5 + ordinal];
-
-          }
-          else if (pin.sensorType == SENSOR_TYPE_PULSE) {
-
-            pin.address = ioCmd[3];
-          }
-
-        }
-        break; 
-      } // SENSOR_ATTACH
-
-
-    case SENSOR_POLLING_START: 
-      {
-        // FIXME - this is the same as DIGITAL PIN POLLING START
-        int sensorIndex = ioCmd[1];
-        pin_type& pin = pins[sensorIndex];
-        pin.isActive = true;
-
-        // I'm used to ms - and would need to change some
-        // interfaces if i was to support inbound longs
-        //pin.timeoutUS = ioCmd[2] * 1000;
-        pin.timeoutUS = 20000; // 20 ms
-        pin.state = ECHO_STATE_START;
-
-        break;
-      } // SENSOR_POLLING_START
-
-      // FIXME - this is the same as DIGITAL PIN POLLING STOP
-    case SENSOR_POLLING_STOP: 
-      {
-        int sensorIndex = ioCmd[1];
-        pin_type& pin = pins[sensorIndex];
-        pin.isActive = false;
-        break;
-      } // SENSOR_POLLING_STOP
-      
-    // Start of Adafruit16CServoDriver commands
-      case AF_BEGIN:
-        { 
-          WIRE.begin();
-          write8(ioCmd[1],PCA9685_MODE1, 0x0);
-          break;
-        } // AF_BEGIN
-       
-      case AF_SET_PWM_FREQ:
-        { 
-          //ioCmd[1] is the I2C address
-          //ioCmd[2] is the freqency value
-          int freq = 0.9 * ioCmd[2];  // Correct for overshoot in the frequency setting (see issue #11).        
-          float prescaleval = 25000000;
-          prescaleval /= 4096;
-          prescaleval /= freq;
-          prescaleval -= 1;
-          uint8_t prescale = floor(prescaleval + 0.5);
-          uint8_t oldmode = read8(ioCmd[1],PCA9685_MODE1);
-          uint8_t newmode = (oldmode&0x7F) | 0x10; // sleep
-          write8(ioCmd[1],PCA9685_MODE1, newmode); // go to sleep
-          write8(ioCmd[1],PCA9685_PRESCALE, prescale); // set the prescaler
-          write8(ioCmd[1],PCA9685_MODE1, oldmode);
-          delay(5);
-          write8(ioCmd[1],PCA9685_MODE1, oldmode | 0xa1);  //  This sets the MODE1 register to turn on auto increment.
-                                                          // This is why the beginTransmission below was not working.
-          break;
-        } // AF_SET_PWM_FREQ
-       
-      case AF_SET_PWM:
-        { 
-          setPWM(ioCmd[1], ioCmd[2], ioCmd[3], ioCmd[4]);
-          break;
-        } // AF_SET_PWM
-    // End of Adafruit16CServoDriver commands
-    
-      case AF_SET_SERVO:
-        { 
-          setPWM(ioCmd[1], ioCmd[2], 0, (ioCmd[3] << 8) + ioCmd[4]);
-          break;
-        } // AF_SET_SERVO
-       
-    case NOP: 
-      {
-        // No Operation
-        break;
-      } // NOP
-
-    default: 
-      {
-        sendError(ERROR_UNKOWN_CMD);
-        break;
-      }
-    } // end switch
-
-    // reset buffer
-    memset(ioCmd, 0, sizeof(ioCmd));
-    byteCount = 0;
-
-  } // if getCommand()
-
-
-
+// This function handles updating the servo angles (mostly for sweeping?)
+void updateServos() {
   // update moving servos - send events if required
-  for (int i = 0; i < MAX_SERVOS; ++i)
-  {
+  for (int i = 0; i < MAX_SERVOS; ++i) {
     servo_type& s = servos[i];
     if (s.isMoving && s.servo != 0) {
-      if (s.currentPos != s.targetPos)
-      {
+      if (s.currentPos != s.targetPos) {
         // caclulate the appropriate modulus to drive
         // the servo to the next position
         // TODO - check for speed > 0 && speed < 100 - send ERROR back?
         int speedModulus = (100 - s.speed) * 10;
-        if (loopCount % speedModulus == 0)
-        {
+        if (loopCount % speedModulus == 0) {
           int increment = s.step * ((s.currentPos < s.targetPos) ? 1 : -1);
           // move the servo an increment
           s.currentPos = s.currentPos + increment;
           s.servo->write(s.currentPos);
           if (s.eventsEnabled) sendServoEvent(s, SERVO_EVENT_POSITION_UPDATE);
         }
-      }
-      else {
+      } else {
         if (s.isSweeping) {
           if (s.targetPos == s.min) {
             s.targetPos = s.max;
-          }
-          else {
+          } else {
             s.targetPos = s.min;
           }
-        }
-        else {
+        } else {
           if (s.eventsEnabled) sendServoEvent(s, SERVO_EVENT_STOPPED);
           s.isMoving = false;
         }
       }
     }
   }
+}
 
+// This function updates the sensor data (both analog and digital reading here.)
+void updateSensors() {
   unsigned long ts;
-
-  // FIXME - optimize with only "active" pins !!!
   for (int i = 0; i < SENSORS_MAX; ++i) {
     pin_type& pin = pins[i];
-
     if (pin.isActive != true) {
+      // only process the pin if it's active.
       continue;
     }
-
-    switch (pin.sensorType)
-    {
-
-    case SENSOR_TYPE_ANALOG_PIN_READER: 
-    case SENSOR_TYPE_DIGITAL_PIN_READER: {
-      // read the pin
-      if(pin.sensorType==SENSOR_TYPE_ANALOG_PIN_READER) pin.value = analogRead(pin.address);
-      else pin.value=digitalRead(pin.address);
-
-      // if my value is different from last time - send it
-      // if (pin.lastValue != pin.value || !pin.s) //TODO - SEND_DELTA_MIN_DIFF
-      if (pin.lastValue != pin.value || (loopCount%pin.rateModulus) == 0) 
-      {
-        //sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xff);
-        Serial.write(MAGIC_NUMBER);
-        Serial.write(5); //size
-        //Serial.write(PUBLISH_PIN);
-        Serial.write(PUBLISH_SENSOR_DATA); 
-        Serial.write(pin.sensorIndex);
-        Serial.write(pin.address);
-        Serial.write(pin.value >> 8);   // MSB
-        Serial.write(pin.value & 0xff); // LSB
-
-      }
-      // set the last input value of this pin
-      pin.lastValue = pin.value;
-                      }
-                      break;
-
-    case SENSOR_TYPE_ULTRASONIC: {
-      // FIXME - handle in own function - the overhead is worth not having
-      // 200+ lines of code inlined here !
-      // we are running & have an ultrasonic (ping) pin
-      // check to see what state we  are in
-
-      if (pin.state == ECHO_STATE_START) {
-        // trigPin prepare - start low for an
-        // upcoming high pulse
-        pinMode(pin.trigPin, OUTPUT);
-        digitalWrite(pin.trigPin, LOW);
-
-        // put the echopin into a high state
-        // is this necessary ???
-        pinMode(pin.echoPin, OUTPUT);
-        digitalWrite(pin.echoPin, HIGH);
-
-        ts = micros();
-        if (ts - pin.ts > 2) {
-          pin.ts = ts;
-          pin.state = ECHO_STATE_TRIG_PULSE_BEGIN;
+    switch (pin.sensorType) {
+      case SENSOR_TYPE_ANALOG_PIN_READER:
+      case SENSOR_TYPE_DIGITAL_PIN_READER:
+        // read the pin
+        if(pin.sensorType==SENSOR_TYPE_ANALOG_PIN_READER)
+          pin.value = analogRead(pin.address);
+        else
+          pin.value=digitalRead(pin.address);
+        // if my value is different from last time - send it
+        // if (pin.lastValue != pin.value || !pin.s) //TODO - SEND_DELTA_MIN_DIFF
+        if (pin.lastValue != pin.value || (loopCount%pin.rateModulus) == 0) {
+          //sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xff);
+          Serial.write(MAGIC_NUMBER);
+          Serial.write(5); //size
+          //Serial.write(PUBLISH_PIN);
+          Serial.write(PUBLISH_SENSOR_DATA);
+          Serial.write(pin.sensorIndex);
+          Serial.write(pin.address);
+          Serial.write(pin.value >> 8);   // MSB
+          Serial.write(pin.value & 0xff); // LSB
         }
-      }
-      else if (pin.state == ECHO_STATE_TRIG_PULSE_BEGIN) {
-
-        // begin high pulse for at least 10 us
-        pinMode(pin.trigPin, OUTPUT);
-        digitalWrite(pin.trigPin, HIGH);
-
-        ts = micros();
-        if (ts - pin.ts > 10) {
-          pin.ts = ts;
-          pin.state = ECHO_STATE_TRIG_PULSE_END;
-        }
-      }
-      else if (pin.state == ECHO_STATE_TRIG_PULSE_END) {
-        // end of pulse
-        pinMode(pin.trigPin, OUTPUT);
-        digitalWrite(pin.trigPin, LOW);
-
-        pin.state = ECHO_STATE_MIN_PAUSE_PRE_LISTENING;
-        pin.ts = micros();
-      }
-      else if (pin.state == ECHO_STATE_MIN_PAUSE_PRE_LISTENING) {
-
-        ts = micros();
-        if (ts - pin.ts > 1500) {
-          pin.ts = ts;
-
-          // putting echo pin into listen mode
+        // set the last input value of this pin
+        pin.lastValue = pin.value;
+        break;
+      case SENSOR_TYPE_ULTRASONIC: {
+        // FIXME - handle in own function - the overhead is worth not having
+        // 200+ lines of code inlined here !
+        // we are running & have an ultrasonic (ping) pin
+        // check to see what state we  are in
+        if (pin.state == ECHO_STATE_START) {
+          // trigPin prepare - start low for an
+          // upcoming high pulse
+          pinMode(pin.trigPin, OUTPUT);
+          digitalWrite(pin.trigPin, LOW);
+          // put the echopin into a high state
+          // is this necessary ???
           pinMode(pin.echoPin, OUTPUT);
           digitalWrite(pin.echoPin, HIGH);
-          pinMode(pin.echoPin, INPUT);
-
-          pin.state = ECHO_STATE_LISTENING;
-        }
-
+          ts = micros();
+          if (ts - pin.ts > 2) {
+            pin.ts = ts;
+            pin.state = ECHO_STATE_TRIG_PULSE_BEGIN;
+          }
+        } else if (pin.state == ECHO_STATE_TRIG_PULSE_BEGIN) {
+          // begin high pulse for at least 10 us
+          pinMode(pin.trigPin, OUTPUT);
+          digitalWrite(pin.trigPin, HIGH);
+          ts = micros();
+          if (ts - pin.ts > 10) {
+            pin.ts = ts;
+            pin.state = ECHO_STATE_TRIG_PULSE_END;
+          }
+        } else if (pin.state == ECHO_STATE_TRIG_PULSE_END) {
+          // end of pulse
+          pinMode(pin.trigPin, OUTPUT);
+          digitalWrite(pin.trigPin, LOW);
+          pin.state = ECHO_STATE_MIN_PAUSE_PRE_LISTENING;
+          pin.ts = micros();
+        } else if (pin.state == ECHO_STATE_MIN_PAUSE_PRE_LISTENING) {
+          ts = micros();
+          if (ts - pin.ts > 1500) {
+            pin.ts = ts;
+            // putting echo pin into listen mode
+            pinMode(pin.echoPin, OUTPUT);
+            digitalWrite(pin.echoPin, HIGH);
+            pinMode(pin.echoPin, INPUT);
+            pin.state = ECHO_STATE_LISTENING;
+          }
+        } else if (pin.state == ECHO_STATE_LISTENING) {
+          // timeout or change states..
+          int value = digitalRead(pin.echoPin);
+          ts = micros();
+          if (value == LOW) {
+            pin.lastValue = ts - pin.ts;
+            pin.ts = ts;
+            pin.state = ECHO_STATE_GOOD_RANGE;
+          } else if (ts - pin.ts > pin.timeoutUS) {
+            pin.state = ECHO_STATE_TIMEOUT;
+            pin.ts = ts;
+            pin.lastValue = 0;
+          }
+        } else if (pin.state == ECHO_STATE_GOOD_RANGE || pin.state == ECHO_STATE_TIMEOUT) {
+          Serial.write(MAGIC_NUMBER);
+          Serial.write(6); // size 1 FN + 4 bytes of unsigned long
+          Serial.write(PUBLISH_SENSOR_DATA);
+          Serial.write(i);
+          // write the long value out
+          Serial.write((byte)(pin.lastValue >> 24));
+          Serial.write((byte)(pin.lastValue >> 16));
+          Serial.write((byte)(pin.lastValue >> 8));
+          Serial.write((byte)pin.lastValue & 0xff);
+          pin.state = ECHO_STATE_START;
+        } // end else if
+        break;
       }
-      else if (pin.state == ECHO_STATE_LISTENING) {
-        // timeout or change states..
-        int value = digitalRead(pin.echoPin);
-        ts = micros();
-
-        if (value == LOW) {
-          pin.lastValue = ts - pin.ts;
-          pin.ts = ts;
-          pin.state = ECHO_STATE_GOOD_RANGE;
+      // because pin pulse & pulsing are so closely linked
+      // the pulse will be handled here as well even if the
+      // read data sent back on serial is disabled
+      case SENSOR_TYPE_PULSE: {
+        // TODO - implement - rate = modulo speed
+        // if (loopCount%rate == 0) {
+        // toggle pin state
+        pin.lastValue = (pin.lastValue == 0) ? 1 : 0;
+        // leading edge ... 0 to 1
+        if (pin.lastValue == 1) {
+          pin.count++;
+          if (pin.count >= pin.target) {
+            pin.state = PUBLISH_PULSE_STOP;
+          }
         }
-        else if (ts - pin.ts > pin.timeoutUS) {
-          pin.state = ECHO_STATE_TIMEOUT;
-          pin.ts = ts;
-          pin.lastValue = 0;
+        // change state of pin
+        digitalWrite(pin.address, pin.lastValue);
+        // move counter/current position
+        // see if feedback rate is valid
+        // if time to send feedback do it
+        // if (loopCount%feedbackRate == 0)
+        // 0--to-->1 counting leading edge only
+        // pin.method == PUBLISH_PULSE_PIN &&
+        // stopped on the leading edge
+        if (pin.state != PUBLISH_PULSE_STOP && pin.lastValue == 1) {
+          Serial.write(MAGIC_NUMBER);
+          Serial.write(6); // size
+          Serial.write(pin.state); // Serial.write(PUBLISH_PULSE);
+          Serial.write(pin.sensorIndex);// pin service
+          Serial.write(pin.address);// Pin#
+          Serial.write(pin.count >> 24);   // MSB zoddly
+          Serial.write(pin.count >> 16);   // MSB
+          Serial.write(pin.count >> 8);  // MSB
+          Serial.write(pin.count & 0xff);  // LSB
+          // deactivate
+          // lastDebounceTime[digitalReadPin[i]] = millis();
         }
-
-      }
-      else if (pin.state == ECHO_STATE_GOOD_RANGE || pin.state == ECHO_STATE_TIMEOUT) {
-        Serial.write(MAGIC_NUMBER);
-        Serial.write(6); // size 1 FN + 4 bytes of unsigned long
-        Serial.write(PUBLISH_SENSOR_DATA);
-        Serial.write(i);
-        // write the long value out
-        Serial.write((byte)(pin.lastValue >> 24));
-        Serial.write((byte)(pin.lastValue >> 16));
-        Serial.write((byte)(pin.lastValue >> 8));
-        Serial.write((byte)pin.lastValue & 0xff);
-        pin.state = ECHO_STATE_START;
-      } // end else if
-      break;
-                   }
-
-                   // because pin pulse & pulsing are so closely linked
-                   // the pulse will be handled here as well even if the
-                   // read data sent back on serial is disabled
-    case SENSOR_TYPE_PULSE: {
-
-      // TODO - implement - rate = modulo speed
-      // if (loopCount%rate == 0) {
-
-      // toggle pin state
-      pin.lastValue = (pin.lastValue == 0) ? 1 : 0;
-
-      // leading edge ... 0 to 1
-      if (pin.lastValue == 1) {
-        pin.count++;
-        if (pin.count >= pin.target) {
-          pin.state = PUBLISH_PULSE_STOP;
+        if (pin.state == PUBLISH_PULSE_STOP) {
+          pin.isActive = false;
         }
-      }
-
-      // change state of pin
-      digitalWrite(pin.address, pin.lastValue);
-
-
-      // move counter/current position
-      // see if feedback rate is valid
-      // if time to send feedback do it
-      // if (loopCount%feedbackRate == 0)
-      // 0--to-->1 counting leading edge only
-      // pin.method == PUBLISH_PULSE_PIN &&
-      // stopped on the leading edge
-      if (pin.state != PUBLISH_PULSE_STOP && pin.lastValue == 1)
-      {
         Serial.write(MAGIC_NUMBER);
         Serial.write(6); // size
         Serial.write(pin.state); // Serial.write(PUBLISH_PULSE);
@@ -1190,46 +838,25 @@ void loop() {
         Serial.write(pin.count >> 16);   // MSB
         Serial.write(pin.count >> 8);  // MSB
         Serial.write(pin.count & 0xff);  // LSB
-
-        // deactivate
-        // lastDebounceTime[digitalReadPin[i]] = millis();
+        break;
       }
-
-      if (pin.state == PUBLISH_PULSE_STOP) {
-        pin.isActive = false;
+      default: {
+        sendError(ERROR_UNKOWN_SENSOR);
+        break;
       }
-
-      Serial.write(MAGIC_NUMBER);
-      Serial.write(6); // size
-      Serial.write(pin.state); // Serial.write(PUBLISH_PULSE);
-      Serial.write(pin.sensorIndex);// pin service
-      Serial.write(pin.address);// Pin#
-      Serial.write(pin.count >> 24);   // MSB zoddly
-      Serial.write(pin.count >> 16);   // MSB
-      Serial.write(pin.count >> 8);  // MSB
-      Serial.write(pin.count & 0xff);  // LSB
-
-
-      break;
-                }
-
-    default: {
-      sendError(ERROR_UNKOWN_SENSOR);
-      break;
-         }
     }
-
   } // end for each pin
+}
 
-
+// This function updates how long it took to run this loop
+// and reports it back to the serial port if desired.
+void updateStats() {
   // FIXME - fix overflow with getDiff() method !!!
   unsigned long now = micros();
   loadTime = now - lastMicros; // avg outside
   lastMicros = now;
-
   // report load time
   if (loadTimingEnabled && (loopCount%loadTimingModulus == 0)) {
-
     // send it
     Serial.write(MAGIC_NUMBER);
     Serial.write(5); // size 1 FN + 4 bytes of unsigned long
@@ -1240,22 +867,16 @@ void loop() {
     Serial.write((byte)(loadTime >> 8));
     Serial.write((byte)loadTime & 0xff);
   }
-
-
-} // end of big loop
+}
 
 unsigned long getUltrasonicRange(pin_type& pin) {
-
   // added for pins which have single pin !
   pinMode(pin.trigPin, OUTPUT);
   digitalWrite(pin.trigPin, LOW);
   delayMicroseconds(2);
-
   digitalWrite(pin.trigPin, HIGH);
   delayMicroseconds(10);
-
   digitalWrite(pin.trigPin, LOW);
-
   // added for pins which have single pin !
   pinMode(pin.echoPin, INPUT);
   // CHECKING return pulseIn(pin.echoPin, HIGH, pin.timeoutUS);
@@ -1265,7 +886,6 @@ unsigned long getUltrasonicRange(pin_type& pin) {
 
 void sendServoEvent(servo_type& s, int eventType) {
   // check type of event - STOP vs CURRENT POS
-
   Serial.write(MAGIC_NUMBER);
   Serial.write(5); // size = 1 FN + 1 INDEX + 1 eventType + 1 curPos
   Serial.write(PUBLISH_SERVO_EVENT);
@@ -1275,7 +895,6 @@ void sendServoEvent(servo_type& s, int eventType) {
   Serial.write(s.currentPos);
   Serial.write(s.targetPos);
 }
-
 
 void sendError(int type) {
   Serial.write(MAGIC_NUMBER);
@@ -1294,11 +913,10 @@ void write8(uint8_t i2caddr, uint8_t addr, uint8_t d) {
 }
 
 // I2C Read
-uint8_t  read8(uint8_t i2caddr, uint8_t addr) {
+uint8_t read8(uint8_t i2caddr, uint8_t addr) {
   WIRE.beginTransmission(i2caddr);
   WIRE.write(addr);
   WIRE.endTransmission();
-
   WIRE.requestFrom((uint8_t)i2caddr, (uint8_t)1);
   return WIRE.read();
 }
@@ -1314,10 +932,310 @@ void setPWM(uint8_t i2caddr, uint8_t num, uint16_t on, uint16_t off) {
 }
 // End of Adafruit16CServoDriver methods
 
-void publishVersion() {
+// MRL Command helper methods below:
+// GET_VERSION
+void getVersion() {
     Serial.write(MAGIC_NUMBER);
     Serial.write(2); // size
     Serial.write(PUBLISH_VERSION);
     Serial.write((byte)MRLCOMM_VERSION);
     Serial.flush();
+}
+
+// SERVO_ATTACH
+void servoAttach() {
+  servo_type& s = servos[ioCmd[1]];
+  s.index = ioCmd[1];
+  if (s.servo == NULL) {
+    s.servo = new Servo();
+  }
+  s.servo->attach(ioCmd[2]);
+  s.step = 1;
+  s.eventsEnabled = false;
+}
+
+// SERVO_START_SWEEP
+void servoStartSweep() {
+  servo_type& s = servos[ioCmd[1]];
+  s.min = ioCmd[2];
+  s.max = ioCmd[3];
+  s.step = ioCmd[4];
+  s.isMoving = true;
+  s.isSweeping = true;
+}
+
+// SERVO_STOP_SWEEP
+void servoStopSweep() {
+  servo_type& s = servos[ioCmd[1]];
+  s.isMoving = false;
+  s.isSweeping = false;
+}
+
+// SERVO_EVENTS_ENABLED
+void servoEventsEnabled() {
+  // Not implemented.
+}
+
+// SERVO_WRITE
+void servoWrite() {
+  servo_type& s = servos[ioCmd[1]];
+  if (s.speed == 100 && s.servo != 0) {
+    // move at regular/full 100% speed
+    s.targetPos = ioCmd[2];
+    s.currentPos = ioCmd[2];
+    s.isMoving = false;
+    s.servo->write(ioCmd[2]);
+    if (s.eventsEnabled) sendServoEvent(s, SERVO_EVENT_STOPPED);
+  } else if (s.speed < 100 && s.speed > 0) {
+    s.targetPos = ioCmd[2];
+    s.isMoving = true;
+  }
+}
+
+// PUBLISH_SERVO_EVENT
+void publishServoEvent() {
+  servo_type& s = servos[ioCmd[1]];
+  s.eventsEnabled = ioCmd[2];
+}
+
+// SERVO_WRITE_MICROSECONDS
+void servoWriteMicroseconds() {
+  // TODO - incorporate into speed control etc
+  // normalize - currently by itself doesn't effect events
+  // nor is it involved in speed control
+  servo_type& s = servos[ioCmd[1]];
+  if (s.servo != 0) {
+    // 1500 midpoint
+    s.servo->writeMicroseconds(ioCmd[2]);
+  }
+}
+
+// SET_SERVO_SPEED
+void setServoSpeed() {
+  // setting the speed of a servo
+  servo_type& servo = servos[ioCmd[1]];
+  servo.speed = ioCmd[2];
+}
+
+// SERVO_DETACH
+void servoDetach() {
+  servo_type& s = servos[ioCmd[1]];
+  if (s.servo != 0) {
+    s.servo->detach();
+  }
+}
+
+// SET_LOAD_TIMING_ENABLED
+void setLoadTimingEnabled() {
+  loadTimingEnabled = ioCmd[1];
+  //loadTimingModulus = ioCmd[2];
+  loadTimingModulus = 1000;
+}
+
+// SET_PWMFREQUENCY
+void setPWMFrequency(int address, int prescalar) {
+  // FIXME - different boards have different timers
+  // sets frequency of pwm of analog
+  // FIXME - us ifdef appropriate uC which
+  // support these clocks TCCR0B
+  int clearBits = 0x07;
+  if (address == 0x25) {
+    TCCR0B &= ~clearBits;
+    TCCR0B |= prescalar;
+  } else if (address == 0x2E) {
+    TCCR1B &= ~clearBits;
+    TCCR1B |= prescalar;
+  } else if (address == 0xA1) {
+    TCCR2B &= ~clearBits;
+    TCCR2B |= prescalar;
+  }
+}
+
+// ANALOG_READ_POLLING_START
+void analogReadPollingStart() {
+  int pinIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
+  pin_type& pin = pins[pinIndex];
+  pin.sensorIndex = 0; // FORCE ARDUINO TO BE OUR SERVICE - DUNNO IF THIS IS GOOD/BAD
+  pin.sensorType = SENSOR_TYPE_ANALOG_PIN_READER; // WIERD - mushing of roles/responsibilities
+  pin.isActive = true;
+  pin.rateModulus= (ioCmd[2] << 8)+ioCmd[3];
+}
+
+// ANALOG_READ_POLLING_STOP
+void analogReadPollingStop() {
+  pin_type& pin = pins[ioCmd[1]];
+  pin.isActive = false;
+}
+
+// DIGITAL_READ_POLLING_START
+void digitalReadPollingStart() {
+  int pinIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
+  pin_type& pin = pins[pinIndex];
+  pin.sensorIndex = 0; // FORCE ARDUINO TO BE OUR SERVICE - DUNNO IF THIS IS GOOD/BAD
+  pin.sensorType = SENSOR_TYPE_DIGITAL_PIN_READER; // WIERD - mushing of roles/responsibilities
+  pin.isActive = true;
+  pin.rateModulus=(ioCmd[2] << 8) + ioCmd[3];
+}
+
+// PULSE
+void pulse() {
+  // get pin from index
+  pin_type& pin = pins[ioCmd[1]];
+  // FIXME - this has to unload a Long !!!
+  pin.count = 0;
+  //pin.target = toUnsignedLong(ioCmd, 2);// ioCmd[2];
+  pin.target = ((ioCmd[2] << 24) + (ioCmd[3] << 16) + (ioCmd[4] << 8) + ioCmd[5]);
+  pin.rate = ioCmd[6];
+  pin.rateModulus = ioCmd[7];
+  pin.isActive = true;
+  pin.state = PUBLISH_SENSOR_DATA;
+  //addNewValue(activePins, activePinCount, ioCmd[1]);
+  //int pin = ioCmd[1];
+  //addNewValue(digitalReadPin, digitalReadPollingPinCount, pin);
+  // this is the same as digitalWrite except
+  // we can keep track of the number of pulses
+  //break;
+}
+
+// PULSE
+void pulseStop() {
+  pin_type& pin = pins[ioCmd[1]];
+  // FIXME - this has to unload a Long !!!
+  pin.state = PUBLISH_PULSE_STOP;
+  //removeAndShift(activePins, activePinCount, ioCmd[1]);
+}
+
+// digital_READ_POLLING_STOP
+void digitalReadPollingStop() {
+  pin_type& pin = pins[ioCmd[1]];
+  pin.isActive = false;
+  //int pin = ioCmd[1];
+  //removeAndShift(digitalReadPin, digitalReadPollingPinCount, pin);
+  //break;
+  // FIXME - these should just be attributes of the pin
+}
+
+// SET_TRIGGER
+void setTrigger() {
+  // NOT IMPLEMENTED
+  // FIXME !!! - you need 1. a complete pin list !!!   analog & digital should be defined by attribute not
+  // data structure !!!  if (pin.type == ??? if needed
+  // TODO - if POLLING ALREADY DON'T RE-ADD - MAKE RE-ENTRANT
+  //analogReadPin[analogReadPollingPinCount] = ioCmd[1]; // put on polling read list
+  //++analogReadPollingPinCount;
+}
+
+// SET_DEBOUNCE
+void setDebounce() {
+  // default debounceDelay = 50;
+  debounceDelay = ((ioCmd[1] << 8) + ioCmd[2]);
+}
+
+// SET_DIGITAL_TRIGGER_ONLY
+void setDigitalTriggerOnly() {
+  // NOT IMPLEMENTED
+  //digitalTriggerOnly = ioCmd[1];
+}
+
+// SET_SERIAL_RATE
+void setSerialRate() {
+  Serial.end();
+  delay(500);
+  Serial.begin(ioCmd[1]);
+}
+
+// SET_SAMPLE_RATE
+void setSampleRate() {
+  // 2 byte int - valid range 1-65,535
+  sampleRate = (ioCmd[1] << 8) + ioCmd[2];
+  if (sampleRate == 0) {
+    sampleRate = 1;
+  } // avoid /0 error - FIXME - time estimate param
+}
+
+// SENSOR_ATTACH
+void sensorAttach() {
+  // THIS WILL BE THE NEW BIG-KAHUNA
+  // INITIAL REQUEST - SENSOR GRABS ALL PINs IT NEEDS
+  // IT THEN POPULATES each of the PINs with its sensorIndex
+  // the uC (Arduino) - does not grab any - because it will
+  // always take/recieve any non-reserved pin (softReset) Pin
+  int sensorIndex    = ioCmd[1];
+  int sensorType     = ioCmd[2];
+  int pinCount       = ioCmd[3];
+  // for loop grabbing all pins for this sensor
+  for (int ordinal = 0; ordinal < pinCount; ++ordinal){
+    // grab the pin - assign the sensorIndex & sensorType
+    pin_type& pin = pins[ioCmd[4 + ordinal]];
+    pin.sensorIndex = sensorIndex;
+    pin.sensorType = sensorType;
+    if (pin.sensorType == SENSOR_TYPE_ULTRASONIC && ordinal == 0) {
+      // pin.trigPin = ioCmd[3];
+      // pin.echoPin = ioCmd[4];
+      pinMode(pin.trigPin, OUTPUT); // WTF about wiring which has single pin ! :P
+      pinMode(pin.echoPin, INPUT);
+      //pin.ping = new NewPing(pin.trigPin, pin.echoPin, 100);
+      // triggerPin's next pin is the echo pin
+      pin.nextPin = ioCmd[5 + ordinal];
+    } else if (pin.sensorType == SENSOR_TYPE_PULSE) {
+      pin.address = ioCmd[3];
+    }
+  }
+}
+
+// SENSOR_POLLING_START
+void sensorPollingStart() {
+  // FIXME - this is the same as DIGITAL PIN POLLING START
+  int sensorIndex = ioCmd[1];
+  pin_type& pin = pins[sensorIndex];
+  pin.isActive = true;
+  // I'm used to ms - and would need to change some
+  // interfaces if i was to support inbound longs
+  //pin.timeoutUS = ioCmd[2] * 1000;
+  pin.timeoutUS = 20000; // 20 ms
+  pin.state = ECHO_STATE_START;
+}
+
+// SENSOR_POLLING_STOP
+void sensorPollingStop() {
+  int sensorIndex = ioCmd[1];
+  pin_type& pin = pins[sensorIndex];
+  pin.isActive = false;
+}
+
+// Adafruit commands
+// AF_BEGIN
+void afBegin() {
+  WIRE.begin();
+  write8(ioCmd[1],PCA9685_MODE1, 0x0);
+}
+
+// AF_SET_PWM_FREQ
+void afSetPWMFREQ() {
+  //ioCmd[1] is the I2C address
+  //ioCmd[2] is the freqency value
+  int freq = 0.9 * ioCmd[2];  // Correct for overshoot in the frequency setting (see issue #11).
+  float prescaleval = 25000000;
+  prescaleval /= 4096;
+  prescaleval /= freq;
+  prescaleval -= 1;
+  uint8_t prescale = floor(prescaleval + 0.5);
+  uint8_t oldmode = read8(ioCmd[1],PCA9685_MODE1);
+  uint8_t newmode = (oldmode&0x7F) | 0x10; // sleep
+  write8(ioCmd[1],PCA9685_MODE1, newmode); // go to sleep
+  write8(ioCmd[1],PCA9685_PRESCALE, prescale); // set the prescaler
+  write8(ioCmd[1],PCA9685_MODE1, oldmode);
+  delay(5);
+  write8(ioCmd[1],PCA9685_MODE1, oldmode | 0xa1);  //  This sets the MODE1 register to turn on auto increment.
+  // This is why the beginTransmission below was not working.
+}
+
+// AF_SET_PWM
+void afSetPWM() {
+  setPWM(ioCmd[1], ioCmd[2], ioCmd[3], ioCmd[4]);
+}
+
+// AF_SET_SERVO
+void afSetServo() {
+  setPWM(ioCmd[1], ioCmd[2], 0, (ioCmd[3] << 8) + ioCmd[4]);
 }
