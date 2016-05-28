@@ -339,12 +339,13 @@ int paramBuffIndex;
 int paramCnt;
 //===custom msg interface end===
 
+// define any functions that pass structs into them.
 void sendServoEvent(servo_type& s, int eventType);
 unsigned long getUltrasonicRange(pin_type& pin);
+void handleUltrasonicPing(pin_type& pin, unsigned long ts);
 // void sendMsg ( int num, ... );
 
 //---- data record definitions end -----
-
 
 // ----------- send custom msg begin ---------------------
 void append(const int& data) {
@@ -380,21 +381,6 @@ void loop() {
   // update and report timing metrics
   updateStats();
 } // end of big loop
-
-void sendMsg() {
-  // unbox
-  Serial.write(MAGIC_NUMBER);
-  Serial.write(paramBuffIndex + 2); // = param buff size + FN + paramCnt
-  //Serial.write(2); // = param buff size + FN + paramCnt
-  Serial.write(PUBLISH_CUSTOM_MSG);
-  Serial.write(paramCnt);
-  for (int i = 0; i < paramBuffIndex; ++i) {
-    Serial.write(customParams[i]);
-  }
-  paramCnt = 0;
-  paramBuffIndex = 0;
-}
-// ----------- send custom msg end ---------------------
 
 void softReset() {
   for (int i = 0; i < MAX_SERVOS - 1; ++i) {
@@ -706,14 +692,7 @@ void updateSensors() {
         // if (pin.lastValue != pin.value || !pin.s) //TODO - SEND_DELTA_MIN_DIFF
         if (pin.lastValue != pin.value || (loopCount%pin.rateModulus) == 0) {
           //sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xff);
-          Serial.write(MAGIC_NUMBER);
-          Serial.write(5); //size
-          //Serial.write(PUBLISH_PIN);
-          Serial.write(PUBLISH_SENSOR_DATA);
-          Serial.write(pin.sensorIndex);
-          Serial.write(pin.address);
-          Serial.write(pin.value >> 8);   // MSB
-          Serial.write(pin.value & 0xff); // LSB
+          publishSensorData(pin.sensorIndex, pin.address, pin.value);
         }
         // set the last input value of this pin
         pin.lastValue = pin.value;
@@ -723,70 +702,7 @@ void updateSensors() {
         // 200+ lines of code inlined here !
         // we are running & have an ultrasonic (ping) pin
         // check to see what state we  are in
-        if (pin.state == ECHO_STATE_START) {
-          // trigPin prepare - start low for an
-          // upcoming high pulse
-          pinMode(pin.trigPin, OUTPUT);
-          digitalWrite(pin.trigPin, LOW);
-          // put the echopin into a high state
-          // is this necessary ???
-          pinMode(pin.echoPin, OUTPUT);
-          digitalWrite(pin.echoPin, HIGH);
-          ts = micros();
-          if (ts - pin.ts > 2) {
-            pin.ts = ts;
-            pin.state = ECHO_STATE_TRIG_PULSE_BEGIN;
-          }
-        } else if (pin.state == ECHO_STATE_TRIG_PULSE_BEGIN) {
-          // begin high pulse for at least 10 us
-          pinMode(pin.trigPin, OUTPUT);
-          digitalWrite(pin.trigPin, HIGH);
-          ts = micros();
-          if (ts - pin.ts > 10) {
-            pin.ts = ts;
-            pin.state = ECHO_STATE_TRIG_PULSE_END;
-          }
-        } else if (pin.state == ECHO_STATE_TRIG_PULSE_END) {
-          // end of pulse
-          pinMode(pin.trigPin, OUTPUT);
-          digitalWrite(pin.trigPin, LOW);
-          pin.state = ECHO_STATE_MIN_PAUSE_PRE_LISTENING;
-          pin.ts = micros();
-        } else if (pin.state == ECHO_STATE_MIN_PAUSE_PRE_LISTENING) {
-          ts = micros();
-          if (ts - pin.ts > 1500) {
-            pin.ts = ts;
-            // putting echo pin into listen mode
-            pinMode(pin.echoPin, OUTPUT);
-            digitalWrite(pin.echoPin, HIGH);
-            pinMode(pin.echoPin, INPUT);
-            pin.state = ECHO_STATE_LISTENING;
-          }
-        } else if (pin.state == ECHO_STATE_LISTENING) {
-          // timeout or change states..
-          int value = digitalRead(pin.echoPin);
-          ts = micros();
-          if (value == LOW) {
-            pin.lastValue = ts - pin.ts;
-            pin.ts = ts;
-            pin.state = ECHO_STATE_GOOD_RANGE;
-          } else if (ts - pin.ts > pin.timeoutUS) {
-            pin.state = ECHO_STATE_TIMEOUT;
-            pin.ts = ts;
-            pin.lastValue = 0;
-          }
-        } else if (pin.state == ECHO_STATE_GOOD_RANGE || pin.state == ECHO_STATE_TIMEOUT) {
-          Serial.write(MAGIC_NUMBER);
-          Serial.write(6); // size 1 FN + 4 bytes of unsigned long
-          Serial.write(PUBLISH_SENSOR_DATA);
-          Serial.write(i);
-          // write the long value out
-          Serial.write((byte)(pin.lastValue >> 24));
-          Serial.write((byte)(pin.lastValue >> 16));
-          Serial.write((byte)(pin.lastValue >> 8));
-          Serial.write((byte)pin.lastValue & 0xff);
-          pin.state = ECHO_STATE_START;
-        } // end else if
+        handleUltrasonicPing(pin, ts);
         break;
       }
       // because pin pulse & pulsing are so closely linked
@@ -814,30 +730,15 @@ void updateSensors() {
         // pin.method == PUBLISH_PULSE_PIN &&
         // stopped on the leading edge
         if (pin.state != PUBLISH_PULSE_STOP && pin.lastValue == 1) {
-          Serial.write(MAGIC_NUMBER);
-          Serial.write(6); // size
-          Serial.write(pin.state); // Serial.write(PUBLISH_PULSE);
-          Serial.write(pin.sensorIndex);// pin service
-          Serial.write(pin.address);// Pin#
-          Serial.write(pin.count >> 24);   // MSB zoddly
-          Serial.write(pin.count >> 16);   // MSB
-          Serial.write(pin.count >> 8);  // MSB
-          Serial.write(pin.count & 0xff);  // LSB
+          publishPulseStop(pin.state, pin.sensorIndex, pin.address, pin.count);
           // deactivate
           // lastDebounceTime[digitalReadPin[i]] = millis();
         }
         if (pin.state == PUBLISH_PULSE_STOP) {
           pin.isActive = false;
         }
-        Serial.write(MAGIC_NUMBER);
-        Serial.write(6); // size
-        Serial.write(pin.state); // Serial.write(PUBLISH_PULSE);
-        Serial.write(pin.sensorIndex);// pin service
-        Serial.write(pin.address);// Pin#
-        Serial.write(pin.count >> 24);   // MSB zoddly
-        Serial.write(pin.count >> 16);   // MSB
-        Serial.write(pin.count >> 8);  // MSB
-        Serial.write(pin.count & 0xff);  // LSB
+        // publish the pulse!
+        publishPulse(pin.state, pin.sensorIndex, pin.address, pin.count);
         break;
       }
       default: {
@@ -858,14 +759,7 @@ void updateStats() {
   // report load time
   if (loadTimingEnabled && (loopCount%loadTimingModulus == 0)) {
     // send it
-    Serial.write(MAGIC_NUMBER);
-    Serial.write(5); // size 1 FN + 4 bytes of unsigned long
-    Serial.write(PUBLISH_LOAD_TIMING_EVENT);
-    // write the long value out
-    Serial.write((byte)(loadTime >> 24));
-    Serial.write((byte)(loadTime >> 16));
-    Serial.write((byte)(loadTime >> 8));
-    Serial.write((byte)loadTime & 0xff);
+    publishLoadTimingEvent(loadTime);
   }
 }
 
@@ -882,25 +776,6 @@ unsigned long getUltrasonicRange(pin_type& pin) {
   // CHECKING return pulseIn(pin.echoPin, HIGH, pin.timeoutUS);
   // TODO - adaptive timeout ? - start big - pull in until valid value - push out if range is coming close
   return pulseIn(pin.echoPin, HIGH);
-}
-
-void sendServoEvent(servo_type& s, int eventType) {
-  // check type of event - STOP vs CURRENT POS
-  Serial.write(MAGIC_NUMBER);
-  Serial.write(5); // size = 1 FN + 1 INDEX + 1 eventType + 1 curPos
-  Serial.write(PUBLISH_SERVO_EVENT);
-  Serial.write(s.index); // send my index
-  // write the long value out
-  Serial.write(eventType);
-  Serial.write(s.currentPos);
-  Serial.write(s.targetPos);
-}
-
-void sendError(int type) {
-  Serial.write(MAGIC_NUMBER);
-  Serial.write(2); // size = 1 FN + 1 TYPE
-  Serial.write(PUBLISH_MRLCOMM_ERROR);
-  Serial.write(type);
 }
 
 // Start of Adafruit16CServoDriver methods
@@ -935,11 +810,8 @@ void setPWM(uint8_t i2caddr, uint8_t num, uint16_t on, uint16_t off) {
 // MRL Command helper methods below:
 // GET_VERSION
 void getVersion() {
-    Serial.write(MAGIC_NUMBER);
-    Serial.write(2); // size
-    Serial.write(PUBLISH_VERSION);
-    Serial.write((byte)MRLCOMM_VERSION);
-    Serial.flush();
+  // call publish version to talk to the serial port.
+  publishVersion();
 }
 
 // SERVO_ATTACH
@@ -1239,3 +1111,172 @@ void afSetPWM() {
 void afSetServo() {
   setPWM(ioCmd[1], ioCmd[2], 0, (ioCmd[3] << 8) + ioCmd[4]);
 }
+
+
+void handleUltrasonicPing(pin_type& pin, unsigned long ts) {
+  if (pin.state == ECHO_STATE_START) {
+    // trigPin prepare - start low for an
+    // upcoming high pulse
+    pinMode(pin.trigPin, OUTPUT);
+    digitalWrite(pin.trigPin, LOW);
+    // put the echopin into a high state
+    // is this necessary ???
+    pinMode(pin.echoPin, OUTPUT);
+    digitalWrite(pin.echoPin, HIGH);
+    ts = micros();
+    if (ts - pin.ts > 2) {
+      pin.ts = ts;
+      pin.state = ECHO_STATE_TRIG_PULSE_BEGIN;
+    }
+  } else if (pin.state == ECHO_STATE_TRIG_PULSE_BEGIN) {
+    // begin high pulse for at least 10 us
+    pinMode(pin.trigPin, OUTPUT);
+    digitalWrite(pin.trigPin, HIGH);
+    ts = micros();
+    if (ts - pin.ts > 10) {
+      pin.ts = ts;
+      pin.state = ECHO_STATE_TRIG_PULSE_END;
+    }
+  } else if (pin.state == ECHO_STATE_TRIG_PULSE_END) {
+    // end of pulse
+    pinMode(pin.trigPin, OUTPUT);
+    digitalWrite(pin.trigPin, LOW);
+    pin.state = ECHO_STATE_MIN_PAUSE_PRE_LISTENING;
+    pin.ts = micros();
+  } else if (pin.state == ECHO_STATE_MIN_PAUSE_PRE_LISTENING) {
+    ts = micros();
+    if (ts - pin.ts > 1500) {
+      pin.ts = ts;
+      // putting echo pin into listen mode
+      pinMode(pin.echoPin, OUTPUT);
+      digitalWrite(pin.echoPin, HIGH);
+      pinMode(pin.echoPin, INPUT);
+      pin.state = ECHO_STATE_LISTENING;
+    }
+  } else if (pin.state == ECHO_STATE_LISTENING) {
+    // timeout or change states..
+    int value = digitalRead(pin.echoPin);
+    ts = micros();
+    if (value == LOW) {
+      pin.lastValue = ts - pin.ts;
+      pin.ts = ts;
+      pin.state = ECHO_STATE_GOOD_RANGE;
+    } else if (ts - pin.ts > pin.timeoutUS) {
+      pin.state = ECHO_STATE_TIMEOUT;
+      pin.ts = ts;
+      pin.lastValue = 0;
+    }
+  } else if (pin.state == ECHO_STATE_GOOD_RANGE || pin.state == ECHO_STATE_TIMEOUT) {
+    publishSensorDataLong(pin.address, pin.lastValue);
+    pin.state = ECHO_STATE_START;
+  } // end else if
+}
+
+// Helper methods to create MRLComm messages and write them back over the serial port.
+// send a generic message
+void sendMsg() {
+  // TODO: make everything use this!
+  // unbox
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(paramBuffIndex + 2); // = param buff size + FN + paramCnt
+  //Serial.write(2); // = param buff size + FN + paramCnt
+  Serial.write(PUBLISH_CUSTOM_MSG);
+  Serial.write(paramCnt);
+  for (int i = 0; i < paramBuffIndex; ++i) {
+    Serial.write(customParams[i]);
+  }
+  paramCnt = 0;
+  paramBuffIndex = 0;
+}
+
+// send an error message/code back to MRL.
+void sendError(int type) {
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(2); // size = 1 FN + 1 TYPE
+  Serial.write(PUBLISH_MRLCOMM_ERROR);
+  Serial.write(type);
+}
+
+// publish a servo event.
+void sendServoEvent(servo_type& s, int eventType) {
+  // check type of event - STOP vs CURRENT POS
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(5); // size = 1 FN + 1 INDEX + 1 eventType + 1 curPos
+  Serial.write(PUBLISH_SERVO_EVENT);
+  Serial.write(s.index); // send my index
+  // write the long value out
+  Serial.write(eventType);
+  Serial.write(s.currentPos);
+  Serial.write(s.targetPos);
+}
+
+void publishVersion() {
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(2); // size
+  Serial.write(PUBLISH_VERSION);
+  Serial.write((byte)MRLCOMM_VERSION);
+  Serial.flush();
+
+}
+
+// PUBLISH_SENSOR_DATA
+void publishSensorData(byte sensorIndex, byte address, byte value) {
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(5); //size
+  //Serial.write(PUBLISH_PIN);
+  Serial.write(PUBLISH_SENSOR_DATA);
+  Serial.write(sensorIndex);
+  Serial.write(address);
+  Serial.write(value >> 8);   // MSB
+  Serial.write(value & 0xff); // LSB
+}
+
+// TODO: maybe this can be merged with above?
+void publishSensorDataLong(int address, unsigned long lastValue) {
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(6); // size 1 FN + 4 bytes of unsigned long
+  Serial.write(PUBLISH_SENSOR_DATA);
+  // TODO: validate this is correct?
+  Serial.write(address);
+  // write the long value out
+  Serial.write((byte)(lastValue >> 24));
+  Serial.write((byte)(lastValue >> 16));
+  Serial.write((byte)(lastValue >> 8));
+  Serial.write((byte)lastValue & 0xff);
+}
+
+void publishPulseStop(int state, int sensorIndex, int address, unsigned long count) {
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(6); // size
+  Serial.write(state); // Serial.write(PUBLISH_PULSE);
+  Serial.write(sensorIndex);// pin service
+  Serial.write(address);// Pin#
+  Serial.write(count >> 24);   // MSB zoddly
+  Serial.write(count >> 16);   // MSB
+  Serial.write(count >> 8);  // MSB
+  Serial.write(count & 0xff);  // LSB
+}
+
+void publishPulse(int state, int sensorIndex, int address, unsigned long count) {
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(6); // size
+  Serial.write(state); // Serial.write(PUBLISH_PULSE);
+  Serial.write(sensorIndex);// pin service
+  Serial.write(address);// Pin#
+  Serial.write(count >> 24);   // MSB zoddly
+  Serial.write(count >> 16);   // MSB
+  Serial.write(count >> 8);  // MSB
+  Serial.write(count & 0xff);  // LSB
+}
+
+void publishLoadTimingEvent(unsigned long loadTime) {
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(5); // size 1 FN + 4 bytes of unsigned long
+  Serial.write(PUBLISH_LOAD_TIMING_EVENT);
+  // write the long value out
+  Serial.write((byte)(loadTime >> 24));
+  Serial.write((byte)(loadTime >> 16));
+  Serial.write((byte)(loadTime >> 8));
+  Serial.write((byte)loadTime & 0xff);
+}
+
