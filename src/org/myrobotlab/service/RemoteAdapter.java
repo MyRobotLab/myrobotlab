@@ -153,7 +153,7 @@ public class RemoteAdapter extends Service implements Gateway {
 
 						for (InterfaceAddress interfaceAddress : ni.getInterfaceAddresses()) {
 							InetAddress broadcast = interfaceAddress.getBroadcast();
-							short x = interfaceAddress.getNetworkPrefixLength();
+							//short x = interfaceAddress.getNetworkPrefixLength();
 							log.info("" + interfaceAddress.getAddress());
 							if (ni.getName().equals("net4")) {
 								log.info("net4");
@@ -540,7 +540,7 @@ public class RemoteAdapter extends Service implements Gateway {
 	public HashMap<URI, Connection> broadcastHeartbeat() {
 		for (Map.Entry<URI, Connection> entry : connections.entrySet()) {
 			URI uri = entry.getKey();
-			Connection value = entry.getValue();
+			//Connection value = entry.getValue();
 
 			// roll through send a set of transactions off & start a
 			// IOCompletion like

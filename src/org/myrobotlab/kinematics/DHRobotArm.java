@@ -15,7 +15,7 @@ public class DHRobotArm {
 	private ArrayList<DHLink> links;
 
 	// for debugging ..
-	private transient InverseKinematics3D ik3D = null;
+	public transient InverseKinematics3D ik3D = null;
 	
 	public DHRobotArm() {
 		super();

@@ -39,13 +39,13 @@ public class Plan {
 
 	Agent agent;
 
-	ArrayList actions;
+	ArrayList<Transition> actions;
 
 	int state, count;
 
 	public Plan(Agent agent) {
 		this.agent = agent;
-		actions = new ArrayList();
+		actions = new ArrayList<Transition>();
 		state = 0;
 		count = 0;
 	}

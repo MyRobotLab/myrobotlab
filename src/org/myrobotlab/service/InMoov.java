@@ -2,7 +2,6 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Service;
@@ -735,7 +734,7 @@ public class InMoov extends Service {
 		if (pirPin == pin.pin && startSleep != null && pin.value == 1) {
 			// attach(); // good morning / evening / night... asleep for % hours
 			powerUp();
-			Calendar now = Calendar.getInstance();
+			// Calendar now = Calendar.getInstance();
 
 			/*
 			 * FIXME - make a getSalutation String salutation = "hello "; if
@@ -1321,7 +1320,7 @@ public class InMoov extends Service {
 			//Runtime.start("webgui", "WebGui");
 
 			InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-			InMoovHead h = i01.startHead("COM1");
+		  i01.startHead("COM1");
 			i01.speakErrors(true);
 		
 			// Blender blender =  (Blender) Runtime.start("blender", "Blender");

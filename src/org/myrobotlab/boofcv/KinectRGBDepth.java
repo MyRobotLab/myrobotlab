@@ -27,7 +27,6 @@ import boofcv.openkinect.UtilOpenKinect;
 import boofcv.struct.image.GrayU16;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.Planar;
-import com.sun.jna.NativeLibrary;
 import org.openkinect.freenect.Context;
 import org.openkinect.freenect.Device;
 import org.openkinect.freenect.Freenect;

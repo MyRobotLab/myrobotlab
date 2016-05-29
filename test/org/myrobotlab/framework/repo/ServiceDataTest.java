@@ -58,8 +58,10 @@ public class ServiceDataTest {
 	@Test
 	public void testAdd() {
 		ServiceData sd = ServiceData.getLocalInstance();
-		List<ServiceType> types = sd.getAvailableServiceTypes();
+		// TODO: add a valid assert for this test.
+		// List<ServiceType> types = sd.getAvailableServiceTypes();
 		sd.add(new ServiceType("test"));
+		
 	}
 
 	@Test

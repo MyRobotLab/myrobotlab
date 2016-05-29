@@ -32,8 +32,8 @@ public class OOBPayload {
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			jaxbMarshaller.marshal(payload, file);
 			jaxbMarshaller.marshal(payload, System.out);
-			String xml = "<mrl><method>exec</method><param>bar</param><service>foo</service></mrl>";
-			StringReader xmlR = new StringReader(xml);
+			// String xml = "<mrl><method>exec</method><param>bar</param><service>foo</service></mrl>";
+			// StringReader xmlR = new StringReader(xml);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 			OOBPayload oob = (OOBPayload) jaxbUnmarshaller.unmarshal(file);
 			System.out.println(oob.getServiceName());

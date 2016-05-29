@@ -93,7 +93,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 
 		try {
 
-			EddieControlBoard ecb = (EddieControlBoard) Runtime.start("ecb", "EddieControlBoard");
+			Runtime.start("ecb", "EddieControlBoard");
 
 			// 129 -> 81
 			// 128 -> 80 (full reverse)
@@ -375,15 +375,17 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 	}
 
 	public void setMotorSpeed(float left, float right) {
-		// The left and right speeds have units of positions per second and are
+	  // TODO: this function doesn't do anything?
+	  // The left and right speeds have units of positions per second and are
 		// entered as
 		// signed (two's complement) 16-bit hex values. The range of allowed
 		// values is
 		// from 8000 to 7FFF.
-		int myleft = (int) (left * 1000);
-		int myright = (int) (right * 1000);
-		String l = Integer.toHexString(myleft);
-		String r = Integer.toHexString(myright);
+		//int myleft = (int) (left * 1000);
+		//int myright = (int) (right * 1000);
+		//String l = Integer.toHexString(myleft);
+		//String r = Integer.toHexString(myright);
+
 		// Long.parseLong("ffff8000", 16);
 		// serial.write(String.format("%s\r",cmd));
 	}

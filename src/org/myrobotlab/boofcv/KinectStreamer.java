@@ -3,7 +3,6 @@ package org.myrobotlab.boofcv;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
-import org.openkinect.*;
 import org.openkinect.freenect.Context;
 import org.openkinect.freenect.DepthFormat;
 import org.openkinect.freenect.DepthHandler;

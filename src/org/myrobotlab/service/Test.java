@@ -317,7 +317,7 @@ public class Test extends Service implements StatusListener {
 	public Status arduinoTest() {
 		Status status = Status.info("testing arduino");
 
-		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+		Runtime.start("arduino", "Arduino");
 
 		return status;
 	}
@@ -376,7 +376,7 @@ public class Test extends Service implements StatusListener {
 		String name = s.getName();
 
 		// multiple formats binary json xml
-		Status status = Status.info("serializeTest for %s", name);
+		//Status status = Status.info("serializeTest for %s", name);
 
 		try {
 
@@ -441,6 +441,8 @@ public class Test extends Service implements StatusListener {
 
 		// test();
 		Tester tester = new Tester(this);
+		// TODO: remove or make this do something.
+		log.info("Tester: {}", tester);
 	}
 
 	public static class Tester extends Thread {
@@ -699,7 +701,7 @@ public class Test extends Service implements StatusListener {
 			Class<?> junitTest = Class.forName(String.format("org.myrobotlab.service.%sTest", test.simpleName));
 			JUnitCore junit = new JUnitCore();
 			Result junitResult = junit.run(junitTest);
-				
+			log.info("JUnit Result : {}", junitResult);
 
 			// result.link = String.format("<a href=\"%s\">%s</a>", url, testName);
 			/*
@@ -947,7 +949,9 @@ public class Test extends Service implements StatusListener {
 			log.info("\n{}\n", sb.toString());
 
 			List<String> ret = test.getServicesWithOutServicePages();
-	
+			for (String s: ret) {
+			  log.info(s);
+			}
 
 			// Runtime.start("cli", "Cli");
 			Agent agent = (Agent) Runtime.start("agent", "Agent");

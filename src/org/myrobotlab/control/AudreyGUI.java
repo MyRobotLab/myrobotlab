@@ -96,11 +96,11 @@ public class AudreyGUI extends ServiceGUI implements ListSelectionListener {
 	BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
 
 	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
-	JList currentPlayers;
+	JList<String> currentPlayers;
 
-	JList currentLog;
+	JList<String> currentLog;
 
-	DefaultListModel logModel = new DefaultListModel();
+	DefaultListModel<String> logModel = new DefaultListModel<String>();
 
 	int msgCount = 0;
 
@@ -187,7 +187,7 @@ public class AudreyGUI extends ServiceGUI implements ListSelectionListener {
 
 		gc.gridx = 1;
 
-		currentLog = new JList(logModel);
+		currentLog = new JList<String>(logModel);
 		currentLog.setFixedCellWidth(200);
 		currentLog.addListSelectionListener(this);
 		currentLog.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

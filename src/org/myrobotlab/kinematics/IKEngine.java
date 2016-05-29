@@ -7,7 +7,6 @@ package org.myrobotlab.kinematics;
  */
 public class IKEngine {
 
-	private static final long serialVersionUID = 1L;
 	/**
 	 * Used to synchronize the methods w/ the animating thread
 	 */

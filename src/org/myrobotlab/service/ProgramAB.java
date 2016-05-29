@@ -409,7 +409,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		// What else should we do here? seems reasonable to just do this.
 		// this should actually call getResponse
 		// on input, get the proper response
-		Response resp = getResponse(text);
+		// Response resp = getResponse(text);
+	  getResponse(text);
 		// push that to the next end point.
 		// invoke("publishText", resp.msg);
 	}

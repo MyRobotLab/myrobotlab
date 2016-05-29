@@ -22,7 +22,7 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 
 		try {
 
-			TextTransform transform = (TextTransform) Runtime.start("transform", "TextTransform");
+			Runtime.start("transform", "TextTransform");
 
 			Runtime.start("gui", "GUIService");
 

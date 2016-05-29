@@ -52,7 +52,7 @@ public class AdafruitIna219 extends Service {
 		try {
 			AdafruitIna219 adafruitINA219 = (AdafruitIna219) Runtime.start("AdafruitINA219", "AdafruitINA219");
 			Runtime.start("gui", "GUIService");
-			
+			log.info("Adafruit instance: {}" , adafruitINA219);
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -105,7 +105,7 @@ public class AdafruitIna219 extends Service {
 	 */
 	public void refresh(){
 		
-		double power = getPower();
+		getPower();
 		broadcastState();
 	}
 	

@@ -78,7 +78,7 @@ public class Incubator extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		LoggingFactory.getInstance().addAppender(Appender.FILE);
 
-		Incubator incubator = (Incubator) Runtime.start("incubator", "Incubator");
+		Runtime.start("incubator", "Incubator");
 
 		// incubator.servoArduinoOpenCVGUIService();
 
@@ -221,7 +221,7 @@ public class Incubator extends Service {
 		ArrayList<Status> ret = new ArrayList<Status>();
 
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
-		Status status = Status.info("serializeTest");
+		//Status status = Status.info("serializeTest");
 
 		ret.add(Status.info("will test %d services", serviceTypeNames.length));
 
@@ -314,9 +314,9 @@ public class Incubator extends Service {
 
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 
-		Status status = Status.info("serviceTest will test %d services", serviceTypeNames.length);
+		//Status status = Status.info("serviceTest will test %d services", serviceTypeNames.length);
 
-		Set<Thread> originalThreads = Thread.getAllStackTraces().keySet();
+		//Set<Thread> originalThreads = Thread.getAllStackTraces().keySet();
 
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
 

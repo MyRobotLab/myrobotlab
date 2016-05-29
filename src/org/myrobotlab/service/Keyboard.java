@@ -49,6 +49,7 @@ public class Keyboard extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		Keyboard keyboard = (Keyboard) Runtime.start("keyboard", "Keyboard");
+		keyboard.stopService();
 
 	}
 

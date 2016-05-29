@@ -149,7 +149,7 @@ public class Zip {
 			dir = dir + "/";
 		}
 		log.info(String.format("listing %s directory %s", zipFile, dir));
-		int BUFFER = 2048;
+		//int BUFFER = 2048;
 		File file = new File(zipFile);
 		ArrayList<String> children = new ArrayList<String>();
 
@@ -158,15 +158,19 @@ public class Zip {
 		ZipEntry zipDir = zip.getEntry(dir);
 		if (zipDir == null) {
 			log.error(String.format("%s not found", dir));
+			// don't leak file handles.
+			zip.close();
 			return children;
 		}
 
 		if (!zipDir.isDirectory()) {
 			log.error(String.format("%s not a directory", dir));
+			// don't leak file handles.
+			zip.close();
 			return children;
 		}
 
-		Enumeration zipFileEntries = zip.entries();
+		Enumeration<?> zipFileEntries = zip.entries();
 
 		// Process each entry
 		while (zipFileEntries.hasMoreElements()) {
@@ -187,7 +191,8 @@ public class Zip {
 				}
 			}
 			// !entry.isDirectory()
-
+			// make sure we don't leak file handles.
+			zip.close();
 		}
 
 		return children;
@@ -215,7 +220,7 @@ public class Zip {
 		// String newPath = zipFile.substring(0, zipFile.length() - 4);
 
 		new File(newPath).mkdir();
-		Enumeration zipFileEntries = zip.entries();
+		Enumeration<?> zipFileEntries = zip.entries();
 
 		// Process each entry
 		while (zipFileEntries.hasMoreElements()) {
@@ -254,6 +259,8 @@ public class Zip {
 				unzip(destFile.getAbsolutePath(), "./");
 			}
 		}
+		// don't leak file handles.
+		zip.close();
 	}
 
 	// public static void main(String[] args) throws ZipException, IOException {

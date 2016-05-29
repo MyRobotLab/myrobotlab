@@ -1,7 +1,5 @@
 package org.myrobotlab.framework;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -96,10 +94,10 @@ public class Index<T> {
 		// config.put("arrayList", array);
 		// config.put("hashMap", hash);
 
-		File outfile = new File("out.xml");
+		//File outfile = new File("out.xml");
 
-		FileInputStream in = new FileInputStream(outfile);
-		Index config2 = new Index();
+		//FileInputStream in = new FileInputStream(outfile);
+		//Index config2 = new Index();
 		// config2.loadFromXML(in);
 	}
 

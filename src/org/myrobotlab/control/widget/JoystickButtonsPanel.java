@@ -13,16 +13,20 @@ package org.myrobotlab.control.widget;
 
 import java.awt.Color;
 
-import javax.swing.BoxLayout;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 public class JoystickButtonsPanel extends JPanel {
-	// background colours for the textfields (game pad buttons)
-	private static final Color OFF_COLOUR = Color.LIGHT_GRAY;
-	private static final Color ON_COLOUR = Color.YELLOW;
+	/**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  // background colours for the textfields (game pad buttons)
+  // below is not used?
+	// private static final Color OFF_COLOUR = Color.LIGHT_GRAY;
+	// private static final Color ON_COLOUR = Color.YELLOW;
 
-	private JTextField buttonTFs[]; // represents the game pad buttons
+  // not used
+	// private JTextField buttonTFs[]; // represents the game pad buttons
 
 	/**
 	 * Add the textfields to the panel and store references to them in a
@@ -50,24 +54,25 @@ public class JoystickButtonsPanel extends JPanel {
 		*/
 	} // end of ButtonsPanel()
 
-	private void makeRow(int start, int end)
-	// a row of textfields from buttonTFs[start] to buttonTFs[end-1]
-	{
-		JPanel rowPanel = new JPanel();
-		rowPanel.setLayout(new BoxLayout(rowPanel, BoxLayout.X_AXIS)); // horiz
-																		// box
-																		// layout
-
-		JPanel p;
-		for (int i = start; i < end; i++) {
-			p = new JPanel();
-			p.setBackground(Color.white);
-			p.add(buttonTFs[i]); // add button to its own panel p to stop
-									// resizing
-			rowPanel.add(p); // add panel p to row
-		}
-		add(rowPanel);
-	} // end of makeRow()
+	// not used method below
+//	private void makeRow(int start, int end)
+//	// a row of textfields from buttonTFs[start] to buttonTFs[end-1]
+//	{
+//		JPanel rowPanel = new JPanel();
+//		rowPanel.setLayout(new BoxLayout(rowPanel, BoxLayout.X_AXIS)); // horiz
+//																		// box
+//																		// layout
+//
+//		JPanel p;
+//		for (int i = start; i < end; i++) {
+//			p = new JPanel();
+//			p.setBackground(Color.white);
+//			p.add(buttonTFs[i]); // add button to its own panel p to stop
+//									// resizing
+//			rowPanel.add(p); // add panel p to row
+//		}
+//		add(rowPanel);
+//	} // end of makeRow()
 
 	public void setButton(int buttonNum, Float value) {
 		/*

@@ -116,8 +116,8 @@ public class LIDARGUI extends ServiceGUI implements ListSelectionListener, Video
 											// overwritten below
 		int[] y = new int[points.length];
 
-		int zScale = 8; // 11
-		int xOffset = vwidth / 2; // set origin of polar in middle
+		//int zScale = 8; // 11
+		//int xOffset = vwidth / 2; // set origin of polar in middle
 
 		if (points != null) {
 			// blank screen
@@ -128,7 +128,7 @@ public class LIDARGUI extends ServiceGUI implements ListSelectionListener, Video
 
 			// Draw Crosshairs
 			graph.setColor(Color.gray);
-			int midh = (vheight) / 2;
+			//int midh = (vheight) / 2;
 			int midw = (vwidth) / 2;
 			graph.drawLine(midw - 20, vheight - 2, midw + 20, vheight - 2);
 			graph.drawLine(midw, vheight, midw, vheight - 30);
@@ -140,7 +140,7 @@ public class LIDARGUI extends ServiceGUI implements ListSelectionListener, Video
 			drawStaticInfo(); // draw arcs on the screen
 
 			// get the first and last point
-			int first = points[0];
+			//int first = points[0];
 
 			graph.setColor(Color.green);
 
@@ -150,7 +150,7 @@ public class LIDARGUI extends ServiceGUI implements ListSelectionListener, Video
 			if (length == 101 || length == 201 || length == 401) {
 				startingAngle = 40;
 			}
-			int p;
+			//int p;
 
 			graph.setColor(Color.green);
 			for (int i = 0; i < length; ++i) {
@@ -220,7 +220,7 @@ public class LIDARGUI extends ServiceGUI implements ListSelectionListener, Video
 				ArrayList<Integer> sweep = history.get(i);
 				graph.setColor(new Color(v, v, v));
 				for (int j = sweep.size(); j > 0; j--) {
-					p = sweep.get(j);
+					// p = sweep.get(j);
 					// // x = vwidth - ((int) (p *
 					// Math.cos((i*100/length)+startingAngle) * zScale));
 					// // y = vheight - ((int) (p *
@@ -246,23 +246,20 @@ public class LIDARGUI extends ServiceGUI implements ListSelectionListener, Video
 
 			screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
 
-		} else {
-			log.error("points null");
-		}
-
+		} 
 	}
 
 	public void drawStaticInfo() {
 		graph.setColor(Color.gray);
 
-		int inches = 0;
+		//int inches = 0;
 
 		// 10 inches per 140 inches
 
 		int r = 160;
 
 		for (r = 160; r < vheight * 2; r += 160) {
-			inches += 10;
+			//inches += 10;
 			graph.drawArc(vwidth / 2 - r / 2, vheight - r / 2, r, r, 0, 180);
 			// graph.drawLine(0, vheight - i, vwidth, vheight - i);
 			// graph.drawArc(vwidth - 40, vheight, vheight - i - 5, vheight - i

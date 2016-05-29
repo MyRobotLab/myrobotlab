@@ -10,7 +10,7 @@ public class StringUtil {
 			return null;
 		}
 
-		int[][] ver = new int[versions.length][3];
+		//int[][] ver = new int[versions.length][3];
 
 		int major = 0;
 		int minor = 0;

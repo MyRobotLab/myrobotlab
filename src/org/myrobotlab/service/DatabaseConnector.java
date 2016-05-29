@@ -154,7 +154,7 @@ public class DatabaseConnector extends AbstractConnector {
 	private void runPreSql() {
 		try {
 			Statement state = connection.createStatement();
-			int res = state.executeUpdate(preSql);
+			state.executeUpdate(preSql);
 			state.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -165,7 +165,7 @@ public class DatabaseConnector extends AbstractConnector {
 	private void runPostSql() {
 		try {
 			Statement state = connection.createStatement();
-			int res = state.executeUpdate(postSql);
+			state.executeUpdate(postSql);
 			state.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

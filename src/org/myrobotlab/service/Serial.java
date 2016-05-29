@@ -1177,7 +1177,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		try {
 
 			Serial serial = (Serial) Runtime.start("serial", "Serial");
-			Python python = (Python) Runtime.start("python", "Python");
+			Runtime.start("python", "Python");
 			Runtime.start("webgui", "WebGui");
 			
 			boolean done = true;
@@ -1248,7 +1248,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			uart.clear();
 			serial.write("this is the end of the line \n");
 			serial.clear();
-			byte[] blah = serial.readLine();
+			// TODO: why are we doing this? burn the first line.
+			serial.readLine();
 			byte[] readBackArray = uart.readLine();
 			log.info(Arrays.toString(readBackArray));
 
@@ -1317,7 +1318,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			// basic record
 			String inRecord = "this is a short ascii row\n";
 			uart.write(inRecord);
-			String record = serial.readString();
+			//String record = serial.readString();
 
 			serial.clear();
 			uart.clear();

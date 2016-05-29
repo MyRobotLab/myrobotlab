@@ -40,6 +40,7 @@ public class CmdLine extends HashMap<String, CcmdParam> {
 
 		if (cmdline.containsKey("-test")) {
 			String service = cmdline.getSafeArgument("-service", 0, "");
+			System.out.println("Service: " + service);
 		}
 	}
 

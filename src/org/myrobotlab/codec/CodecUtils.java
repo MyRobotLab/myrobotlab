@@ -164,6 +164,7 @@ public class CodecUtils {
 	// encoded data.. YA !
 	static public Method getMethod(String pkgName, String objectName, String methodName, Object[] params) {
 		String fullObjectName = String.format("%s.%s", pkgName, objectName);
+		log.debug("Full Object Name : {}", fullObjectName);
 		return null;
 	}
 

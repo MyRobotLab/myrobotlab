@@ -43,7 +43,7 @@ public class _TemplateService extends Service {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			_TemplateService template = (_TemplateService) Runtime.start("template", "_TemplateService");
+			Runtime.start("template", "_TemplateService");
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {

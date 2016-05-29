@@ -92,7 +92,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 	public int direction = FORWARD;
 
 	// the last amount (abs) step command
-	private int step = 0;
+	// private int step = 0;
 
 	public transient final static Logger log = LoggerFactory.getLogger(AdafruitMotorShield.class.getCanonicalName());
 
@@ -263,7 +263,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 		}
 
 		String stepperName = String.format("%s_stepper%d", getName(), stepperPort);
-
+		log.debug("Stepper name: {}", stepperName);
 		/*
 		if (steppers.containsKey(stepperName)) {
 			warn("%s alreaady exists", stepperName);

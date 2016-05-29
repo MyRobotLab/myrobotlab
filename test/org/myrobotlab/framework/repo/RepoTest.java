@@ -244,7 +244,7 @@ public class RepoTest implements RepoInstallListener {
 
 			JUnitCore junit = new JUnitCore();
 			Result result = junit.run(RepoTest.class);
-
+			log.info("Result: {}", result);
 
 		} catch (Exception e) {
 			Logging.logError(e);

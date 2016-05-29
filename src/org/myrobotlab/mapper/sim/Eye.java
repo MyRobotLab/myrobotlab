@@ -92,15 +92,14 @@ public class Eye extends SensorDevice {
 	private class OffScreenCanvas3D extends Canvas3D {
 
 		private static final long serialVersionUID = 1L;
-		boolean rendering;
+		//boolean rendering;
 
 		public OffScreenCanvas3D(GraphicsConfiguration gconfig) {
 			super(gconfig, true);
 			ImageComponent2D buffer = new ImageComponent2D(ImageComponent.FORMAT_RGB, visionImage);
 			buffer.setCapability(ImageComponent.ALLOW_IMAGE_READ);
 			setOffScreenBuffer(buffer);
-			rendering = false;
-
+			//rendering = false;
 		}
 
 		@Override
@@ -108,7 +107,7 @@ public class Eye extends SensorDevice {
 			// copy rendered image
 			BufferedImage bim = getOffScreenBuffer().getImage();
 			visionImage.setData(bim.getData());
-			rendering = false;
+			//rendering = false;
 		}
 
 		synchronized void render() {

@@ -995,7 +995,7 @@ public class Agent extends Service {
 			inArgs.add("-isAgent");
 
 			String[] agentArgs = inArgs.toArray(new String[inArgs.size()]);
-			CmdLine agentCmd = new CmdLine(agentArgs);
+			//CmdLine agentCmd = new CmdLine(agentArgs);
 
 			// FIXME -isAgent identifier sent -- default to setting log name to
 			// agent.log !!!

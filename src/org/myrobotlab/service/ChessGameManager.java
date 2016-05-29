@@ -26,7 +26,7 @@ public class ChessGameManager extends Service {
 
 		try {
 
-			ChessGameManager template = (ChessGameManager) Runtime.start("chessgame", "ChessGameManager");
+			Runtime.start("chessgame", "ChessGameManager");
 
 			Runtime.start("gui", "GUIService");
 

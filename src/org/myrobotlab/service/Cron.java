@@ -98,7 +98,7 @@ public class Cron extends Service {
 
 			String json = CodecUtils.toJson(cron.getTasks());
 
-			log.info("here");
+			log.info("here {}", json);
 
 			// Runtime.createAndStart("webgui", "WebGui");
 

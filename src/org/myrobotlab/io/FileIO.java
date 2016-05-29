@@ -28,7 +28,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -834,7 +833,7 @@ public class FileIO {
 			String root = cmdLine.getSafeArgument("-root", 0, "dist/current/develop/myrobotlab.jar");
 			String src = cmdLine.getSafeArgument("-src", 0, "resource/Python/examples");
 			String dst = cmdLine.getSafeArgument("-dst", 0, "test2");
-
+			log.info("dst arg: {}", dst);
 			//
 			List<File> files = listResourceContents("Python/examples");
 			log.info("listInternalContents /Python/examples size {}", files.size());

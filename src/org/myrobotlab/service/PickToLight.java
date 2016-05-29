@@ -291,6 +291,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 
 			PickToLight pick = new PickToLight("pick.1");
 			String response = pick.getServerTime();
+			log.info("Response: {}", response);
 			// pick.sendSoap(soapAction, soapEnv);
 
 			pick.sendEvent(new PickEvent(pick.getController(), new Module(1, 13)));
@@ -847,7 +848,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 			properties.load(input);
 
 			if ("true".equalsIgnoreCase(properties.getProperty("xmpp.enabled"))) {
-				Xmpp xmpp = (Xmpp) Runtime.createAndStart("xmpp", "XMPP");
+				// Xmpp xmpp = (Xmpp) Runtime.createAndStart("xmpp", "XMPP");
+				Runtime.createAndStart("xmpp", "XMPP");
 				// xmpp.connect(properties.getProperty("xmpp.user"), properties.getProperty("xmpp.password"));
 				// FIXME - xmpp.addAuditor("Greg Perry");
 			}

@@ -795,9 +795,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
       if (byteCount == 2 + msgSize) {
         // we've received a full message 
         // process valid message
-        int[] payload = Arrays.copyOfRange(msg, 2, msgSize);
         // TODO: deserialize this byte array as an mrl message object to 
         // help clean up the code.
+        //int[] payload = Arrays.copyOfRange(msg, 2, msgSize);
         // MrlCommMessage mrlMsg = new MrlCommMessage(msg[0], payload);
         processMessage(msg);
         // clean up memory/buffers
@@ -820,7 +820,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
   private void processMessage(int[] message) {
     // MSG CONTENTS = FN | D0 | D1 | ...
     int function = message[0];
-    // log.info(String.format("%d", msg[1]));
+    // log.info(String.format("%d", message[1]));
     switch (function) {
       case PUBLISH_MRLCOMM_ERROR: {
         ++error_mrl_to_arduino_rx_cnt;
@@ -1320,7 +1320,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
   @Override
   public boolean servoAttach(Servo servo) {
     if (servo == null) {
-      error("servoAttach can not attach %s no service exists", servo.getName());
+      error("servoAttach can not attach %s no service exists");
       return false;
     }
     return servoAttach(servo, servo.getPin());
@@ -1765,14 +1765,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
   @Override
   public void motorAttach(MotorControl motor, int portNumber) {
-    // TODO Auto-generated method stub
-
+    log.warn("Motor attach not implemented. use motorAttach(motorControl) instead");
   }
 
   @Override
   public void motorAttach(String name, int portNumber) {
-    // TODO Auto-generated method stub
-
+    log.warn("Motor attach not implemented. use motorAttach(motorControl) instead");
   }
 
 

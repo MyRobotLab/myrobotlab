@@ -334,10 +334,10 @@ public class Joystick extends Service {
 
 			// Runtime.setRuntimeName("joyrun");
 			Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
-			// joy.mapId("x", "rx");
-			// joy.map("y", -1, 1, 0, 180);
+			//joy.mapId("x", "rx");
+			joy.map("y", -1, 1, 0, 180);
 			// Runtime.start("gui", "GUIService");
-			// joy.test();
+			//joy.test();
 
 			/*
 			RemoteAdapter remote = (RemoteAdapter) Runtime.create("remote", "RemoteAdapter");

@@ -140,7 +140,7 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 				}
 				list.model.clear();
 				for (Map.Entry<URI, Connection> o : remote.getClients().entrySet()) {
-					URI uri = o.getKey();
+					//URI uri = o.getKey();
 					Connection data = o.getValue();
 					list.model.add(0, data);
 				}

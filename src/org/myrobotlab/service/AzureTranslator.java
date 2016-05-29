@@ -34,6 +34,7 @@ public class AzureTranslator extends Service {
 
 			AzureTranslator translator = (AzureTranslator) Runtime.start("translator", "AzureTranslator");
 			Runtime.start("gui", "GUIService");
+			log.info("Translator service instance: {}", translator);
 
 		} catch (Exception e) {
 			Logging.logError(e);

@@ -19,7 +19,7 @@ import javax.swing.JPanel;
 public class JoystickCompassPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private static final int PANEL_SIZE = 80;
-	private static final int CIRCLE_RADIUS = 5;
+	// private static final int CIRCLE_RADIUS = 5;
 
 	private int x, y;
 	private JLabel XLabel = new JLabel();

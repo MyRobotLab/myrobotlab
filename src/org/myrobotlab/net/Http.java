@@ -64,7 +64,7 @@ public class Http {
 		byte[] data = Http.get("http://mrl-bucket-01.s3.amazonaws.com/current/develop/version.txt");
 		String version = new String(data);
 		int v = Integer.parseInt(version);
-		log.info(version);
+		log.info(version + " " + v);
 
 	}
 

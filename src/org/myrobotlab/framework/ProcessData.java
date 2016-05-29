@@ -171,7 +171,7 @@ public class ProcessData implements Serializable {
 		version = (version == null) ? defaultVersion : version;
 
 		// step 1 - get current env data
-		String ps = File.pathSeparator;
+		// String ps = File.pathSeparator;
 		String fs = File.separator;
 
 		Platform platform = Platform.getLocalInstance();

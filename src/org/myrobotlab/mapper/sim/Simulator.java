@@ -115,10 +115,10 @@ public class Simulator {
 	private Timer timer;
 
 	/** The list of all objects in the world. (static objects and agents). */
-	private ArrayList objects;
+	private ArrayList<Object> objects;
 
 	/** The list of all agents. */
-	private ArrayList agents;
+	private ArrayList<SimpleAgent> agents;
 
 	/** number of frames per virtual seconds - 20 is a good value */
 	private int framesPerSecond;
@@ -223,7 +223,7 @@ public class Simulator {
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// SIMULATION LOOP
 
-	public ArrayList getAgentList() {
+	public ArrayList<SimpleAgent> getAgentList() {
 		return agents;
 	}
 
@@ -260,8 +260,8 @@ public class Simulator {
 		setFramesPerSecond(20);
 		setVirtualTimeFactor(1);
 		fps = new FrameMeter();
-		agents = new ArrayList();
-		objects = new ArrayList();
+		agents = new ArrayList<SimpleAgent>();
+		objects = new ArrayList<Object>();
 		usePhysics = ed.usePhysics;
 		physicalEngine = new PhysicalEngine();
 

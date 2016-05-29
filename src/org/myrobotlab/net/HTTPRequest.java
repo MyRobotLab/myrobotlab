@@ -75,9 +75,9 @@ public class HTTPRequest {
 		logging.configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
-		HTTPRequest http;
-		http = new HTTPRequest("http://www.google.com");
-		String s = http.getString();
+		//HTTPRequest http;
+		//http = new HTTPRequest("http://www.google.com");
+		// String s = http.getString();
 
 		HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File("myrobotlab.log"));
 
@@ -111,7 +111,7 @@ public class HTTPRequest {
 	 * -use-java-net-urlconnection-to-fire-and-handle-http-requests
 	 */
 	static public String postFile(String url, String userid, String fieldName, File textFile) throws Exception {
-		String param = "value";
+		// String param = "value";
 		// File textFile = new File("/path/to/file.txt");
 		// File binaryFile = new File("/path/to/file.bin");
 		String boundary = Long.toHexString(System.currentTimeMillis()); // Just

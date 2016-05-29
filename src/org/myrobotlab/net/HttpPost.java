@@ -33,7 +33,6 @@ import java.util.Random;
  * @author Morgan Schweers
  * @version 1.1
  */
-@SuppressWarnings({ "JavaDoc" })
 public class HttpPost {
 	private URLConnection mConnection;
 
