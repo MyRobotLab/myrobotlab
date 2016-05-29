@@ -46,7 +46,8 @@ public class InMoovHand extends Service implements LeapDataListener {
 		try {
 			
 			InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
-			InMoovHand hand =i01.startRightHand("COM15");
+			i01.startRightHand("COM15");
+			
 			Arduino arduino = (Arduino)Runtime.getService("i01.right");
 			arduino.pinMode(13, Arduino.OUTPUT);
 			arduino.digitalWrite(13, 1);

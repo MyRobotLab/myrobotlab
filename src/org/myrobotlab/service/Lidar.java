@@ -40,7 +40,7 @@ public class Lidar extends Service implements SerialDataListener {
 	private int LIDARbaudRate = 9600; // by default
 	private String serialPort;
 	private byte[] message;
-	private boolean dataAvailable = false;
+	//private boolean dataAvailable = false;
 	String info; // used for outputting log.info messages
 	
 
@@ -107,7 +107,7 @@ public class Lidar extends Service implements SerialDataListener {
 			// These modes always have 14 bytes replies
 			// log.info(buffer.toString());
 			message = buffer.toByteArray();
-			dataAvailable = true;
+			//dataAvailable = true;
 			if (message[5] == 1 || message[6] == 1) {
 				log.info("Mode change was a Success!!!");
 			}
@@ -126,7 +126,7 @@ public class Lidar extends Service implements SerialDataListener {
 			message = buffer.toByteArray();
 			info = String.format("size of message = %s", message.length);
 			log.info(info);
-			dataAvailable = true;
+			//dataAvailable = true;
 			invoke("publishLidarData");
 			state = STATE_NOMINAL;
 			index = 0;
@@ -283,24 +283,24 @@ public class Lidar extends Service implements SerialDataListener {
 	 * Set Lidar to use centimeters
 	 */
 	public boolean setToCM() {
-
-		if (true) {
-			return true;
-		} else {
-			return false;
-		}
+	  return true;
+    //  if (true) {
+    //    return true;
+    //  } else {
+    //    return false;
+    //  }
 	}
 
 	/*
 	 * Set Lidar to use millimeters
 	 */
 	public boolean setToMM() {
-
-		if (true) {
-			return true;
-		} else {
-			return false;
-		}
+	  return true;
+    //		if (true) {
+    //			return true;
+    //		} else {
+    //			return false;
+    //		}
 	}
 
 	public void singleScan() throws Exception {

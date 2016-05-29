@@ -49,7 +49,7 @@ public class RTTTLParser {
 		System.out.println("parsing: " + rtttl);
 		String rtttl_working = rtttl.toLowerCase();
 		String parts[] = rtttl_working.split(":");
-		String name = parts[0];
+		// String name = parts[0];
 		String defaults[] = parts[1].split("[,=]");
 		String notes[] = parts[2].split(",");
 

@@ -170,14 +170,14 @@ final public class Search {
 		boolean check = board.inCheck(board.side);
 		if (check)
 			++depth;
-		List validMoves = board.gen();
+		List<HMove> validMoves = board.gen();
 		if (followPV) /* are we following the PV? */
 			sortPV(validMoves);
 		Collections.sort(validMoves);
 
 		/* loop through the moves */
 		boolean foundMove = false;
-		Iterator i = validMoves.iterator();
+		Iterator<HMove> i = validMoves.iterator();
 		int a = alpha;
 		int b = beta;
 		boolean first = true;
@@ -250,11 +250,11 @@ final public class Search {
 			pv[0][i] = pv[0][i + 2];
 	}
 
-	void sortPV(Collection moves) {
+	void sortPV(Collection<HMove> moves) {
 		followPV = false;
 		if (pv[0][ply] == null)
 			return;
-		Iterator i = moves.iterator();
+		Iterator<HMove> i = moves.iterator();
 		while (i.hasNext()) {
 			HMove m = (HMove) i.next();
 			if (m.equals(pv[0][ply])) {

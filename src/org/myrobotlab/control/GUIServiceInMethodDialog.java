@@ -70,14 +70,13 @@ public class GUIServiceInMethodDialog extends JDialog implements ActionListener 
 
 		TreeMap<String, MethodEntry> m = new TreeMap<String, MethodEntry>(Runtime.getMethodMap(v.name));
 
-		JComboBox combo = new JComboBox();
+		JComboBox<String> combo = new JComboBox<String>();
 		combo.addActionListener(this);
 		Iterator<String> sgi = m.keySet().iterator();
 		combo.addItem(""); // add empty
 		while (sgi.hasNext()) {
 			String methodName = sgi.next();
 			MethodEntry me = m.get(methodName);
-
 			combo.addItem(formatOutMethod(me));
 		}
 
@@ -90,7 +89,7 @@ public class GUIServiceInMethodDialog extends JDialog implements ActionListener 
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		JComboBox cb = (JComboBox) e.getSource();
+		JComboBox<Object> cb = (JComboBox<Object>) e.getSource();
 		String method = (String) cb.getSelectedItem();
 		log.error("method is " + method);
 		myService.setDstServiceName(v.name);

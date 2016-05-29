@@ -44,7 +44,9 @@ public class OpenCVFilterMatchTemplateGUI extends OpenCVFilterGUI {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				OpenCVFilterMatchTemplate bf = (OpenCVFilterMatchTemplate) filterWrapper.filter;
+				// OpenCVFilterMatchTemplate bf = (OpenCVFilterMatchTemplate) filterWrapper.filter;
+				// TODO: what to do with the "bf" result?
+			  // TODO: nothing here now because it didn't do anything before.
 			}
 		});
 

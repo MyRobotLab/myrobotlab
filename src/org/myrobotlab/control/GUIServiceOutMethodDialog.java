@@ -142,7 +142,7 @@ public class GUIServiceOutMethodDialog extends JDialog implements ActionListener
 		// MethodEntry>(myService.getHostCFG().getMethodMap(v.getName()));
 		TreeMap<String, MethodEntry> m = new TreeMap<String, MethodEntry>(Runtime.getMethodMap(v.name));
 
-		JComboBox combo = new JComboBox();
+		JComboBox<String> combo = new JComboBox<String>();
 		combo.addActionListener(this);
 		Iterator<String> sgi = m.keySet().iterator();
 		// combo.addItem(""); // add empty
@@ -164,7 +164,7 @@ public class GUIServiceOutMethodDialog extends JDialog implements ActionListener
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		JComboBox cb = (JComboBox) e.getSource();
+		JComboBox<Object> cb = (JComboBox<Object>) e.getSource();
 		String method = (String) cb.getSelectedItem();
 		log.error(method);
 		myService.setSrcServiceName(v.name);

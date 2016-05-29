@@ -20,8 +20,8 @@ public class Stepper_ArduinoGUI extends StepperControllerPanel implements Action
 
 	JLabel powerPinLabel = new JLabel("<html>power pin<br><font color=white bgcolor=green>speed control</font></html>");
 	JLabel directionPinLabel = new JLabel("direction pin");
-	JComboBox powerPin = new JComboBox();
-	JComboBox directionPin = new JComboBox();
+	JComboBox<String> powerPin = new JComboBox<String>();
+	JComboBox<String> directionPin = new JComboBox<String>();
 	JButton attachButton = new JButton("attach");
 	String arduinoName;
 	String motorName;

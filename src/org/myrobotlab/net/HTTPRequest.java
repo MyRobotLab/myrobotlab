@@ -408,7 +408,7 @@ public class HTTPRequest {
 	 * @throws IOException
 	 * @see #setParameters
 	 */
-	public InputStream post(Map parameters) throws IOException {
+	public InputStream post(Map<String,String> parameters) throws IOException {
 		setParameters(parameters);
 		return post();
 	}
@@ -427,7 +427,7 @@ public class HTTPRequest {
 	 * @see #setParameters
 	 * @see setCookies
 	 */
-	public InputStream post(Map<String, String> cookies, Map parameters) throws IOException {
+	public InputStream post(Map<String, String> cookies, Map<String,String> parameters) throws IOException {
 		setCookies(cookies);
 		setParameters(parameters);
 		return post();
@@ -567,7 +567,7 @@ public class HTTPRequest {
 	 * @throws IOException
 	 * @see #setParameters
 	 */
-	public InputStream post(URL url, Map parameters) throws IOException {
+	public InputStream post(URL url, Map<String,String> parameters) throws IOException {
 		return new HTTPRequest(url).post(parameters);
 	}
 
@@ -584,7 +584,7 @@ public class HTTPRequest {
 	 * @see #setCookies
 	 * @see #setParameters
 	 */
-	public InputStream post(URL url, Map<String, String> cookies, Map parameters) throws IOException {
+	public InputStream post(URL url, Map<String, String> cookies, Map<String,String> parameters) throws IOException {
 		return new HTTPRequest(url).post(cookies, parameters);
 	}
 
@@ -853,7 +853,7 @@ public class HTTPRequest {
 	 *            request
 	 * @throws IOException
 	 */
-	public void setParameters(Map parameters) throws IOException {
+	public void setParameters(Map<String,String> parameters) throws IOException {
 		if (parameters == null)
 			return;
 		for (Iterator i = parameters.entrySet().iterator(); i.hasNext();) {

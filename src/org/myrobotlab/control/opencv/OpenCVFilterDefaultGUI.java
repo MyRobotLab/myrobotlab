@@ -45,9 +45,8 @@ public class OpenCVFilterDefaultGUI extends OpenCVFilterGUI implements ActionLis
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
+		// Object o = e.getSource();
 		OpenCVFilter bf = boundFilter.filter;
-
 		setFilterState(bf);
 	}
 
@@ -68,7 +67,8 @@ public class OpenCVFilterDefaultGUI extends OpenCVFilterGUI implements ActionLis
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				OpenCVFilter bf = filterWrapper.filter;
+				//OpenCVFilter bf = filterWrapper.filter;
+			  // TODO: what should this method do?  local assignment of "bf" does nothing.
 			}
 		});
 	}

@@ -259,15 +259,15 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
 	Thread sensorTraceThread = null;
 
 	// input
-	DefaultListModel traceListModel = new DefaultListModel();
-	DefaultListModel triggerListModel = new DefaultListModel();
+	DefaultListModel<String> traceListModel = new DefaultListModel<String>();
+	DefaultListModel<String> triggerListModel = new DefaultListModel<String>();
 	JButton addTrace = new JButton("add");
 	JButton removeTrace = new JButton("remove");
 
 	JButton addTrigger = new JButton("add");
 	JButton removeTrigger = new JButton("remove");
 
-	JComboBox traceController = null;
+	JComboBox<String> traceController = null;
 	JComboBox triggerController = null;
 
 	JComboBox tracePin = null;
@@ -405,7 +405,7 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
 		p.addElement(18);
 		p.addElement(19);
 
-		tracePin = new JComboBox(p);
+		tracePin = new JComboBox<Integer>(p);
 
 		++gc.gridx;
 		trace.add(tracePin, gc);

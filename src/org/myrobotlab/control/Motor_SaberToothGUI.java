@@ -19,7 +19,7 @@ public class Motor_SaberToothGUI extends MotorControllerPanel implements ActionL
 	private GUIService myService;
 
 	JLabel motorPortLabel = new JLabel("motor port");
-	JComboBox motorPort = new JComboBox();
+	JComboBox<String> motorPort = new JComboBox<String>();
 	JButton attachButton = new JButton("attach");
 	String arduinoName;
 	String motorName;

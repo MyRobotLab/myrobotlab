@@ -74,6 +74,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 		
 		// TODO: track an array of blobs , not just one.
 		SimpleBlobDetector o = new SimpleBlobDetector();
+		
 		//KeyPoint point = new KeyPoint();
 		KeyPointVector pv = new KeyPointVector();
 
@@ -82,6 +83,14 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 		// TODO: this is null?! we blow up! (after javacv upgrade)
 
 		o.detect(new Mat(image), pv);
+		
+		try {
+		  // close this o/w you could leak something i guess?
+      o.close();
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 		
 		//System.out.println(point.toString());
 		if (pv.size() == 0){

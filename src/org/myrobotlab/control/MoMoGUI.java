@@ -78,12 +78,13 @@ public class MoMoGUI extends ServiceGUI implements ListSelectionListener {
 			// log.error("Typed" + keyEvent);
 		}
 
-		private void printIt(String title, KeyEvent keyEvent) {
-			int keyCode = keyEvent.getKeyCode();
-			String keyText = KeyEvent.getKeyText(keyCode);
-			// log.error(title + " : " + keyText + " / " +
-			// keyEvent.getKeyChar());
-		}
+		// never used locally.
+//		private void printIt(String title, KeyEvent keyEvent) {
+//			int keyCode = keyEvent.getKeyCode();
+//			String keyText = KeyEvent.getKeyText(keyCode);
+//			// log.error(title + " : " + keyText + " / " +
+//			// keyEvent.getKeyChar());
+//		}
 	}
 
 	public final static Logger log = LoggerFactory.getLogger(MoMoGUI.class.getCanonicalName());
@@ -102,11 +103,11 @@ public class MoMoGUI extends ServiceGUI implements ListSelectionListener {
 	BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
 
 	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
-	JList currentPlayers;
+	JList<String> currentPlayers;
 
-	JList currentLog;
+	JList<String> currentLog;
 
-	DefaultListModel logModel = new DefaultListModel();
+	DefaultListModel<String> logModel = new DefaultListModel<String>();
 
 	int msgCount = 0;
 

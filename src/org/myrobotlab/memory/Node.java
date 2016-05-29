@@ -64,7 +64,7 @@ public class Node implements Serializable {
 			Node node4 = root.getNode("root/node2/node3");
 			log.info("{}", node4.get("subkey1"));
 
-			Node node5 = root.getNode("root/node2/node5");
+			//Node node5 = root.getNode("root/node2/node5");
 
 			// SerializableImage img = new SerializableImage(ImageIO.read(new
 			// File("opencv.4084.jpg")), "myImage");

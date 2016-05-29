@@ -38,7 +38,7 @@ import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterFaceDetectGUI extends OpenCVFilterGUI implements ActionListener {
 
-	JComboBox cascadeFile = new JComboBox(new String[] { "haarcascade_eye.xml", "haarcascade_eye_tree_eyeglasses.xml", "haarcascade_frontalface_alt.xml",
+	JComboBox<String> cascadeFile = new JComboBox<String>(new String[] { "haarcascade_eye.xml", "haarcascade_eye_tree_eyeglasses.xml", "haarcascade_frontalface_alt.xml",
 			"haarcascade_frontalface_alt2.xml", "haarcascade_frontalface_alt_tree.xml", "haarcascade_frontalface_default.xml", "haarcascade_fullbody.xml",
 			"haarcascade_lefteye_2splits.xml", "haarcascade_lowerbody.xml", "haarcascade_mcs_eyepair_big.xml", "haarcascade_mcs_eyepair_small.xml", "haarcascade_mcs_leftear.xml",
 			"haarcascade_mcs_lefteye.xml", "haarcascade_mcs_mouth.xml", "haarcascade_mcs_nose.xml", "haarcascade_mcs_rightear.xml", "haarcascade_mcs_righteye.xml",
