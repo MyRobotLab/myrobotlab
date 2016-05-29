@@ -204,15 +204,16 @@ public class OpenCVFilterFFmpeg extends OpenCVFilter {
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
 
-		boolean runAudioThread = true;
+	  // TODO: support audio?
+		//boolean runAudioThread = true;
 
 		// Set the thread priority
 		// android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 
 		// Audio
-		int bufferSize = 2048;
-		short[] audioData;
-		int bufferReadResult;
+		//int bufferSize = 2048;
+		//short[] audioData;
+		//int bufferReadResult;
 
 		// bufferSize = AudioRecord.getMinBufferSize(sampleAudioRateInHz,
 		// AudioFormat.CHANNEL_CONFIGURATION_MONO,
@@ -221,7 +222,7 @@ public class OpenCVFilterFFmpeg extends OpenCVFilter {
 		// sampleAudioRateInHz, AudioFormat.CHANNEL_CONFIGURATION_MONO,
 		// AudioFormat.ENCODING_PCM_16BIT, bufferSize);
 
-		audioData = new short[bufferSize];
+		//audioData = new short[bufferSize];
 
 		log.info("audioRecord.startRecording()");
 		// audioRecord.startRecording();

@@ -348,7 +348,9 @@ public class Shoutbox extends Service {
 		}
 
 		shouts.add(shout);
-		Message out = createMessage("shoutclient", "publishShout", CodecUtils.toJson(shout));
+		// Message out = createMessage("shoutclient", "publishShout", CodecUtils.toJson(shout));
+		// TODO: what do we do with the result of this method?
+		createMessage("shoutclient", "publishShout", CodecUtils.toJson(shout));
 		// webgui.sendToAll(out);
 
 		if (xmpp != null && !TYPE_SYSTEM.equals(shout.type)) {
@@ -392,18 +394,19 @@ public class Shoutbox extends Service {
 		return user;
 	}
 
-	private String resizeImage(String shout) {
-		int x = shout.indexOf("<img");
-		if (x > 0) {
-			int space = shout.indexOf(" ", x);
-			int endTag = shout.indexOf(">", x);
-			int insert = (space < endTag) ? space : endTag;
-			String r = String.format("%s width=%d height=%d %s", shout.substring(0, insert), imageDefaultWidth, imageDefaultHeight, shout.substring(insert));
-			log.info(String.format("=========== RESIZE ============ %s", r));
-		}
-
-		return shout;
-	}
+	// TODO: when this gets used we could add it back in
+//	private String resizeImage(String shout) {
+//		int x = shout.indexOf("<img");
+//		if (x > 0) {
+//			int space = shout.indexOf(" ", x);
+//			int endTag = shout.indexOf(">", x);
+//			int insert = (space < endTag) ? space : endTag;
+//			String r = String.format("%s width=%d height=%d %s", shout.substring(0, insert), imageDefaultWidth, imageDefaultHeight, shout.substring(insert));
+//			log.info(String.format("=========== RESIZE ============ %s", r));
+//		}
+//
+//		return shout;
+//	}
 
 	public void savePredicates() {
 		try {
@@ -423,7 +426,10 @@ public class Shoutbox extends Service {
 	public void sendTo(String type, String key, Object data) {
 		Shout shout = createShout(TYPE_SYSTEM, CodecUtils.toJson(data));
 		String msgString = CodecUtils.toJson(shout);
-		Message sendTo = createMessage("shoutclient", "publishShout", msgString);
+	// TODO: do something with the "sendTo" message?
+		// Message sendTo = createMessage("shoutclient", "publishShout", msgString);
+		createMessage("shoutclient", "publishShout", msgString);
+		
 
 	}
 

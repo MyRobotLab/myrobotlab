@@ -45,21 +45,6 @@ public class XMLConnector extends AbstractConnector {
 		log.info("Set Config not yet implemented");
 	}	
 	
-	// from oracle java sax example.
-	// https://docs.oracle.com/javase/tutorial/jaxp/sax/parsing.html
-	// TODO: remove this method!
-    private static String convertToFileURL(String filename) {
-        String path = new File(filename).getAbsolutePath();
-        if (File.separatorChar != '/') {
-            path = path.replace(File.separatorChar, '/');
-        }
-
-        if (!path.startsWith("/")) {
-            path = "/" + path;
-        }
-        return "file:" + path;
-    }
-	
 	@Override
 	public void startCrawling() {
 		// avoid buffer overruns on the outbox.. connectors shouldn't drop messages. (or run out of memory)

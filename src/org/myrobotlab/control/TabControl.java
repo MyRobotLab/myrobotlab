@@ -20,7 +20,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
-import org.myrobotlab.control.widget.UndockedPanel;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
@@ -259,12 +258,12 @@ public class TabControl extends JLabel implements ActionListener, MouseListener,
 				parent.remove(myPanel);
 				if (boundServiceName.equals(getText())) {
 
-					boolean hide = true;
+					//boolean hide = true;
 					// if (!hide) {
 					// service tabs
 					undocked = new JFrame(boundServiceName);
 					// check to see if this frame was positioned before
-					UndockedPanel panel = null;
+					//UndockedPanel panel = null;
 					/*
 					 * if
 					 * (myService.undockedPanels.containsKey(boundServiceName))

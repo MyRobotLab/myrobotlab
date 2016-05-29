@@ -34,8 +34,8 @@ public class Client extends MessageService implements NameProvider {
 	public class ReceiveThread extends Thread {
 		public void run() {
 			while (socket != null && isRunning) {
-				Message msg = null;
-				Object o = null;
+				//Message msg = null;
+				//Object o = null;
 
 				/*o = in.readObject();
 				msg = (Message) o;

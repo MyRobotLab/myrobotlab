@@ -183,13 +183,14 @@ public class Status implements Serializable {// extends Exception {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		Status test = new Status("i am pessimistic");
-		Status subTest = new Status("i am sub pessimistic");
+		//Status subTest = new Status("i am sub pessimistic");
 
 		// test.add(subTest);
 
 		String json = CodecUtils.toJson(test);
 		Status z = CodecUtils.fromJson(json, Status.class);
 		log.info(json);
+		log.info(z.toString());
 	}
 
 	public static Status success() {

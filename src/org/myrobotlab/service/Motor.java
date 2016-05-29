@@ -501,8 +501,8 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 			int pwmPin = 6;
 			int dirPin = 7;
 
-			int leftPwm = 6;
-			int rightPwm = 7;
+			//int leftPwm = 6;
+			//int rightPwm = 7;
 
 			// virtual hardware
 			/*

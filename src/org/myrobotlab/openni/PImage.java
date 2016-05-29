@@ -753,17 +753,18 @@ public class PImage implements PConstants, Cloneable {
 			blurMult = new int[blurKernelSize][256]; // new
 														// int[1+radius*2][256];
 
-			int sum = 0;
+			// TODO: this sum isn't used anywhere ?! why accumulate if you're not using?
+			//int sum = 0;
 			for (int i = 1; i < radius; i++) {
 				int radiusi = radius - i;
 				blurKernel[radius + i] = blurKernel[radiusi] = radiusi * radiusi;
-				sum += blurKernel[radiusi] + blurKernel[radiusi];
+				//sum += blurKernel[radiusi] + blurKernel[radiusi];
 				for (int j = 0; j < 256; j++) {
 					blurMult[radius + i][j] = blurMult[radiusi][j] = blurKernel[radiusi] * j;
 				}
 			}
 			blurKernel[radius] = radius * radius;
-			sum += blurKernel[radius];
+			//sum += blurKernel[radius];
 			for (int j = 0; j < 256; j++) {
 				blurMult[radius][j] = blurKernel[radius] * j;
 			}

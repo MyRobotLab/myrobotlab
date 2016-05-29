@@ -75,7 +75,7 @@ public class PhysicalEngine {
 	 * 
 	 * Complexity is O(n^2).
 	 */
-	protected void checkAgentAgentPairs(double dt, ArrayList agents, boolean computeImpact, boolean checkCollision) {
+	protected void checkAgentAgentPairs(double dt, ArrayList<SimpleAgent> agents, boolean computeImpact, boolean checkCollision) {
 
 		int nagents = agents.size();
 		// At least two agents
@@ -161,7 +161,7 @@ public class PhysicalEngine {
 	 * Check all agents/static objetc pairs and verify physical interactions
 	 * and/or collision.
 	 */
-	protected void checkAgentObjectPairs(ArrayList agents, ArrayList objects, boolean computeInteraction, boolean checkCollision) {
+	protected void checkAgentObjectPairs(ArrayList<SimpleAgent> agents, ArrayList<Object> objects, boolean computeInteraction, boolean checkCollision) {
 
 		int nobjs = objects.size();
 		int nagents = agents.size();

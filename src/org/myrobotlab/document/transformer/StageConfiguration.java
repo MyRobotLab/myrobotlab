@@ -1,7 +1,6 @@
 package org.myrobotlab.document.transformer;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class StageConfiguration extends Configuration {
 

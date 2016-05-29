@@ -62,7 +62,7 @@ public class Android extends Service {
 
 		try {
 
-			Android template = (Android) Runtime.start("template", "_TemplateService");
+			//Android template = (Android) Runtime.start("template", "_TemplateService");
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {

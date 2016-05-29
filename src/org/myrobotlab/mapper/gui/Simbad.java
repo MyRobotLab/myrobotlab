@@ -129,7 +129,7 @@ public class Simbad extends JFrame implements ActionListener {
 	 * creates agent inspector window
 	 */
 	private AgentInspector createAgentInspector(Simulator simulator, int x, int y) {
-		ArrayList agents = simulator.getAgentList();
+		ArrayList<SimpleAgent> agents = simulator.getAgentList();
 		SimpleAgent a = ((SimpleAgent) agents.get(0));
 		if (a instanceof Agent) {
 			AgentInspector ai = new AgentInspector((Agent) a, !backgroundMode, simulator);

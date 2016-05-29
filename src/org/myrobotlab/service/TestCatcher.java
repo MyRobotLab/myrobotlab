@@ -289,7 +289,7 @@ public class TestCatcher extends Service implements SerialDataListener {
 
 		try {
 			
-			TestCatcher catcher01 = (TestCatcher)Runtime.start("c01", "TestCatcher");
+			Runtime.start("c01", "TestCatcher");
 			Runtime.start("gui", "GUIService");
 
 			/*

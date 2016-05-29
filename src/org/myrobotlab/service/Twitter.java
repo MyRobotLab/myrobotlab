@@ -120,6 +120,8 @@ public class Twitter extends Service {
 	public void tweet(String msg) {
 		try {
 			Status status = twitter.updateStatus(msg);
+		// TODO: invoke or publish this maybe?
+			log.info("Tweet Status Response: {}", status);
 		} catch (TwitterException e) {
 			error(e.getMessage());
 			Logging.logError(e);

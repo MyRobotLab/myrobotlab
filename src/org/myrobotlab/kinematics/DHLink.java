@@ -123,7 +123,8 @@ public class DHLink {
 		
 	}
 
-	private double zeroQuantize(double value) {
+	public double zeroQuantize(double value) {
+	  // TODO: move this to a math utils class.
 		double resolution = 0.000001;
 		if (value < resolution && value > -resolution) {
 			value = 0; 

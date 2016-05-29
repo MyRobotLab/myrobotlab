@@ -475,8 +475,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 			// good debug material
 			// log.info("sessionId {}", r);
-			String sessionId = r.getAtmosphereResourceEvent().getResource().getRequest().getSession().getId();
-			// log.info("sessionId {}", sessionId);
+			if (log.isDebugEnabled()) {
+			  String sessionId = r.getAtmosphereResourceEvent().getResource().getRequest().getSession().getId();
+			  log.debug("sessionId {}", sessionId);
+			}
 
 			Map<String, String> headers = getHeadersInfo(request);
 

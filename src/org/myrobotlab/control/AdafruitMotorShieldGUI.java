@@ -45,7 +45,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.AdafruitMotorShield;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 public class AdafruitMotorShieldGUI extends ServiceGUI implements ListSelectionListener {
@@ -64,13 +63,15 @@ public class AdafruitMotorShieldGUI extends ServiceGUI implements ListSelectionL
 	public final static Logger log = LoggerFactory.getLogger(AdafruitMotorShieldGUI.class.getCanonicalName());
 
 	static final long serialVersionUID = 1L;
-	private AdafruitMotorShield myAdafruitMotorShield = null;
+	//private AdafruitMotorShield myAdafruitMotorShield = null;
 
 	JLayeredPane imageMap;
 
 	public AdafruitMotorShieldGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
-		myAdafruitMotorShield = (AdafruitMotorShield) Runtime.getService(boundServiceName);
+		//myAdafruitMotorShield = (AdafruitMotorShield) Runtime.getService(boundServiceName);
+		// TODO: this needs to be implemented, myAdafruitMotorShield is never used in this class?
+		// am I missing something?
 	}
 
 	@Override

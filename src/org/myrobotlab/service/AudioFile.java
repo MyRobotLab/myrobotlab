@@ -445,11 +445,11 @@ public class AudioFile extends Service {
 				audio.silence();
 
 				Joystick joystick = (Joystick) Runtime.createAndStart("joy", "Joystick");
-				Python python = (Python) Runtime.createAndStart("python", "Python");
+				Runtime.createAndStart("python", "Python");
 				AudioFile player = new AudioFile("player");
 				// player.playFile(filename, true);
 				player.startService();
-				GUIService gui = (GUIService) Runtime.createAndStart("gui", "GUIService");
+				Runtime.createAndStart("gui", "GUIService");
 
 				joystick.setController(2);
 				joystick.broadcastState();

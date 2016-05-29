@@ -26,7 +26,6 @@
 package org.myrobotlab.mapper.sim;
 
 import java.util.ArrayList;
-
 import javax.media.j3d.BoundingSphere;
 
 /**
@@ -34,10 +33,10 @@ import javax.media.j3d.BoundingSphere;
  */
 public class BlockWorldCompositeObject extends BlockWorldObject {
 	/** Keep list of all simple components . */
-	ArrayList components;
+	ArrayList<BlockWorldObject> components;
 
 	BlockWorldCompositeObject() {
-		components = new ArrayList();
+		components = new ArrayList<BlockWorldObject>();
 	}
 
 	protected void addComponent(BlockWorldObject o) {

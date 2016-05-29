@@ -10,10 +10,10 @@ import java.util.regex.Pattern;
  */
 public class RTTTLParser {
 
-	public static HashMap noteToNum;
+	public static HashMap<String,Integer> noteToNum;
 
 	static {
-		noteToNum = new HashMap();
+		noteToNum = new HashMap<String,Integer>();
 		noteToNum.put("c", new Integer(0));
 		noteToNum.put("c#", new Integer(1));
 		noteToNum.put("d", new Integer(2));
@@ -39,13 +39,13 @@ public class RTTTLParser {
 			System.exit(0);
 		}
 		String rtttl = args[0];
-		ArrayList notelist = parse(rtttl);
+		ArrayList<Note> notelist = parse(rtttl);
 		for (int i = 0; i < notelist.size(); i++) {
 			System.out.println("notelist[" + i + "]=" + notelist.get(i));
 		}
 	}
 
-	public static ArrayList parse(String rtttl) {
+	public static ArrayList<Note> parse(String rtttl) {
 		System.out.println("parsing: " + rtttl);
 		String rtttl_working = rtttl.toLowerCase();
 		String parts[] = rtttl_working.split(":");
@@ -58,7 +58,7 @@ public class RTTTLParser {
 		int octave = 6;
 		int duration = 4;
 
-		ArrayList notelist = new ArrayList();
+		ArrayList<Note> notelist = new ArrayList<Note>();
 
 		for (int i = 0; i < defaults.length; i++) {
 			// System.out.println("defaults["+i+"]="+defaults[i]);

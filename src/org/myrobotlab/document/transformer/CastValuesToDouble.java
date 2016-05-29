@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.logging.LoggerFactory;
-import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 
 /**

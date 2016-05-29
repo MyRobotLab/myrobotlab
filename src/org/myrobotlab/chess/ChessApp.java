@@ -77,7 +77,7 @@ public final class ChessApp extends JApplet implements Constants, VetoableChange
 	private int computerSide = DARK;
 	private final int[] playTime = { 3000, 5000, 10000, 20000, 30000, 60000 };
 	private JLabel principalVariation;
-	private int moves = 0;
+//	private int moves = 0;
 	private int maxTime = 10000;
 	private Thread thinkThread = null;
 
@@ -132,12 +132,12 @@ public final class ChessApp extends JApplet implements Constants, VetoableChange
 		p1.add(switchSidesButton);
 
 		String[] timeStrings = { "3 seconds", "5 seconds", "10 seconds", "20 seconds", "30 seconds", "1 minute" };
-		JComboBox timeBox = new JComboBox(timeStrings);
+		JComboBox<String> timeBox = new JComboBox<String>(timeStrings);
 		timeBox.setSelectedIndex(2);
 		timeBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JComboBox cb = (JComboBox) e.getSource();
+				JComboBox<Object> cb = (JComboBox<Object>) e.getSource();
 				int selection = cb.getSelectedIndex();
 				setMaxTime(playTime[selection]);
 			}
@@ -175,9 +175,9 @@ public final class ChessApp extends JApplet implements Constants, VetoableChange
 	}
 
 	private boolean isResult() {
-		Collection validMoves = board.gen();
+		Collection<HMove> validMoves = board.gen();
 
-		Iterator i = validMoves.iterator();
+		Iterator<HMove> i = validMoves.iterator();
 		boolean found = false;
 		while (i.hasNext()) {
 			if (board.makeMove((HMove) i.next())) {
@@ -294,8 +294,8 @@ public final class ChessApp extends JApplet implements Constants, VetoableChange
 			promote = chessView.promotionDialog(board.side == LIGHT);
 		}
 		boolean found = false;
-		Collection validMoves = board.gen();
-		Iterator i = validMoves.iterator();
+		Collection<HMove> validMoves = board.gen();
+		Iterator<HMove> i = validMoves.iterator();
 		HMove m = null;
 		while (i.hasNext()) {
 			m = (HMove) i.next();

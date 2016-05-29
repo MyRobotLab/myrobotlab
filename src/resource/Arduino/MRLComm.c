@@ -412,7 +412,7 @@ unsigned long toUnsignedLong(unsigned char* buffer, int start) {
 }
 
 /**
-* checks the existance of the searched value in the array
+* checks the existence of the searched value in the array
 * - good for not adding to a dynamic list of values if it
 * already exists
 */
@@ -663,7 +663,8 @@ void updateServos() {
             s.targetPos = s.min;
           }
         } else {
-          if (s.eventsEnabled) sendServoEvent(s, SERVO_EVENT_STOPPED);
+          if (s.eventsEnabled)
+            sendServoEvent(s, SERVO_EVENT_STOPPED);
           s.isMoving = false;
         }
       }

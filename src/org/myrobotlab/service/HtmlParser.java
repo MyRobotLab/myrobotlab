@@ -21,7 +21,7 @@ public class HtmlParser extends Service {
 
 		try {
 
-			HtmlParser html = (HtmlParser) Runtime.start("jsoup", "Jsoup");
+			Runtime.start("jsoup", "Jsoup");
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {

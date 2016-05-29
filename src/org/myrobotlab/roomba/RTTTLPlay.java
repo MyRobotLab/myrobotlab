@@ -97,7 +97,7 @@ public class RTTTLPlay {
 		else
 			System.out.println("No Roomba. :(  Is it turned on?");
 
-		ArrayList notelist = RTTTLParser.parse(rtttl);
+		ArrayList<Note> notelist = RTTTLParser.parse(rtttl);
 		int songsize = notelist.size();
 		// if within the size of a roomba song, make the nsong, then play
 		if (songsize <= 16) {

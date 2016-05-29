@@ -290,8 +290,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 
 				Component c = tabs.getTabComponentAt(index);
 				if (c instanceof TabControl2) {
-					TabControl2 tc = (TabControl2) c;
-
+					// TabControl2 tc = (TabControl2) c;
 					if (!sw.isLocal()) {
 						Color hsv = GUIService.getColorFromURI(sw.getInstanceId());
 						tabs.setBackgroundAt(index, hsv);
@@ -524,7 +523,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 	}
 
 	public void noWorky() {
-		String img = GUIService.class.getResource("/resource/expert.jpg").toString();
+		// String img = GUIService.class.getResource("/resource/expert.jpg").toString();
 		String logon = (String) JOptionPane.showInputDialog(getFrame(),
 				"<html>This will send your myrobotlab.log file<br><p align=center>to our crack team of experts,<br> please type your myrobotlab.org user</p></html>", "No Worky!",
 				JOptionPane.WARNING_MESSAGE, Util.getResourceIcon("expert.jpg"), null, null);

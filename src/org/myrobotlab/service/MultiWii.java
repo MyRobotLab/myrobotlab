@@ -32,7 +32,7 @@ public class MultiWii extends Service {
 
 		try {
 
-			MultiWii template = (MultiWii) Runtime.start("template", "_TemplateService");
+			Runtime.start("template", "_TemplateService");
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {

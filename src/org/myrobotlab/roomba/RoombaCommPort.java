@@ -45,7 +45,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
 	 * contains a list of all the ports keys are port names (e.g.
 	 * "/dev/usbserial1") values are Boolean in-use indicator
 	 */
-	static Map ports = null;
+	static Map<String,Boolean> ports = null;
 
 	/**
 	 * The time to wait in milliseconds after sending sensors command before
@@ -201,7 +201,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
 
 	void makePorts() {
 		if (ports == null)
-			ports = Collections.synchronizedMap(new TreeMap());
+			ports = Collections.synchronizedMap(new TreeMap<String,Boolean>());
 	}
 
 	/*

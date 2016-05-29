@@ -1,7 +1,5 @@
 package org.myrobotlab.codec.serial;
 
-import java.util.ArrayList;
-
 import org.myrobotlab.service.interfaces.LoggingSink;
 
 public class HexCodec extends Codec {
@@ -43,9 +41,9 @@ public class HexCodec extends Codec {
 	}
 
 	public byte[] parse(byte[] data, String format) {
-		ArrayList<Byte> bytes = new ArrayList<Byte>();
+		// ArrayList<Byte> bytes = new ArrayList<Byte>();
 		if ("hex".equals(format)) {
-			int charCount = 0;
+			// int charCount = 0;
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < data.length; ++i) {
 				byte b = data[i];

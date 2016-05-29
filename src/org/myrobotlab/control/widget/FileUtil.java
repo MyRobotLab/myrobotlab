@@ -51,6 +51,8 @@ public class FileUtil {
 				fin.read(data, 0, filesize);
 				log.info("Loaded: " + newfilename);
 				setLastFileOpened(newfilename);
+				// avoid leaky file handles.
+				fin.close();
 				return new String(data);
 
 			} catch (FileNotFoundException exc) {

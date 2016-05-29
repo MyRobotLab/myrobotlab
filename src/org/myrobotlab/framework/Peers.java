@@ -46,11 +46,11 @@ public class Peers {
 
 		Peers peers = Peers.getPeers("InMoov");
 		ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
-		Repo repo = Repo.getLocalInstance();
+		// Repo repo = Repo.getLocalInstance();
 
 		for (int i = 0; i < peerList.size(); ++i) {
 			ServiceReservation sr = peerList.get(i);
-
+			log.info("SR: {}", sr);
 		}
 
 		// log.info(tdna.toString());

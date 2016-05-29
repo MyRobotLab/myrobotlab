@@ -43,7 +43,7 @@ public class Tutorial extends Service {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			Tutorial tutorial = (Tutorial) Runtime.start("tutorial", "Tutorial");
+			Runtime.start("tutorial", "Tutorial");
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {

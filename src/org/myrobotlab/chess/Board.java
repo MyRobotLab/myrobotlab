@@ -474,8 +474,8 @@ final public class Board implements Constants {
 
 	/* takeBack() is very similar to makeMove(), only backwards :) */
 
-	public List gen() {
-		List ret = new ArrayList();
+	public List<HMove> gen() {
+		List<HMove> ret = new ArrayList<HMove>();
 
 		long emptySlots = ~(pieceBits[LIGHT] | pieceBits[DARK]);
 		if (side == LIGHT) {
@@ -582,8 +582,8 @@ final public class Board implements Constants {
 		return ret;
 	}
 
-	List genCaps() {
-		List ret = new ArrayList();
+	List<HMove> genCaps() {
+		List<HMove> ret = new ArrayList<HMove>();
 
 		if (side == LIGHT) {
 			long moves = ((pawnBits[LIGHT] & 0x00fefefefefefefeL) >> 9) & pieceBits[DARK];
@@ -651,7 +651,7 @@ final public class Board implements Constants {
 	 * repeated. Thanks to John Stanback for this clever algorithm.
 	 */
 
-	void genPromote(Collection ret, int from, int to, int bits) {
+	void genPromote(Collection<HMove> ret, int from, int to, int bits) {
 		for (char i = KNIGHT; i <= QUEEN; ++i) {
 			HMove g = new HMove(from, to, i, (bits | 32), 'P');
 			g.setScore(1000000 + (i * 10));
@@ -659,7 +659,7 @@ final public class Board implements Constants {
 		}
 	}
 
-	void genPush(Collection ret, int from, int to, int bits) {
+	void genPush(Collection<HMove> ret, int from, int to, int bits) {
 		if ((bits & 16) != 0) {
 			if (side == LIGHT) {
 				if (to <= H8) {

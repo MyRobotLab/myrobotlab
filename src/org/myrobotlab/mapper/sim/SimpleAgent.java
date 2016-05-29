@@ -60,9 +60,9 @@ public class SimpleAgent extends BaseObject {
 	/** Parent simulator. */
 	private Simulator simulator;
 	/** The agent's sensors */
-	private ArrayList sensors;
+	private ArrayList<SensorDevice> sensors;
 	/** The agent's actuators */
-	private ArrayList actuators;
+	private ArrayList<ActuatorDevice> actuators;
 
 	/** Bounds for collision detection */
 	private PickBounds collisionPickBounds;
@@ -309,7 +309,7 @@ public class SimpleAgent extends BaseObject {
 		return (ActuatorDevice) actuators.get(num);
 	}
 
-	public ArrayList getActuatorList() {
+	public ArrayList<ActuatorDevice> getActuatorList() {
 		return actuators;
 	}
 
@@ -398,7 +398,7 @@ public class SimpleAgent extends BaseObject {
 
 	// ////////////////////////////////////////////////////////////////////
 	// / Get methods.
-	public ArrayList getSensorList() {
+	public ArrayList<SensorDevice> getSensorList() {
 		return sensors;
 	}
 

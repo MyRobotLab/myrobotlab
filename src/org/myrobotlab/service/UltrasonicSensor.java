@@ -33,15 +33,15 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 
 	public final Set<String> types = new HashSet<String>(Arrays.asList("SR04"));
 	private int pings;
-	private int max;
+	//private int max;
 
-	private int min;
-	private int sampleRate;
+	//private int min;
+	//private int sampleRate;
 
 	// TODO - avg ?
 
-	private int sensorMinCM;
-	private int sensorMaxCM;
+	//private int sensorMinCM;
+	//private int sensorMaxCM;
 	private Integer trigPin = null;
 	private Integer echoPin = null;
 	private String type = "SR04";
@@ -223,7 +223,7 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 			payload = Arrays.copyOfRange(config, 0, 2);
 			*/
 			
-			UltrasonicSensor srf05 = (UltrasonicSensor) Runtime.start("srf05", "UltrasonicSensor");
+			Runtime.start("srf05", "UltrasonicSensor");
 			Runtime.start("python", "Python");
 			Runtime.start("gui", "GUIService");
 			/*
@@ -273,5 +273,13 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 		meta.addCategory("sensor");		
 		return meta;
 	}
+
+  public int getPings() {
+    return pings;
+  }
+
+  public String getType() {
+    return type;
+  }
 	
 }

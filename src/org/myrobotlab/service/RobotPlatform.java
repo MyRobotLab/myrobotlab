@@ -88,8 +88,9 @@ public class RobotPlatform extends Service {
 					// while turning - if not i have to pause to correct
 					// send corrections - am I moving.. am I not moving ?
 					beginMotion = System.currentTimeMillis();
-					float leftPower = 0.12f;
-					float rightPower = 0.12f;
+					// TODO: support the "power setting"? 
+					//float leftPower = 0.12f;
+					//float rightPower = 0.12f;
 					if (headingDelta > 0) {
 						// correct right - don't block
 						

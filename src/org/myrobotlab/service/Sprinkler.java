@@ -35,7 +35,7 @@ public class Sprinkler extends Service {
 	public static void main(String args[]) throws InterruptedException, IOException {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-		Sprinkler sprinkler = (Sprinkler) Runtime.start("sprinkler", "Sprinkler");
+		Runtime.start("sprinkler", "Sprinkler");
 	}
 
 	public Sprinkler(String n) {

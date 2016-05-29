@@ -41,7 +41,7 @@ public class WikiDataFetcher extends Service {
 
 		try {
 
-			WikiDataFetcher wdf = (WikiDataFetcher) Runtime.start("wikiDataFetcher", "WikiDataFetcher");
+			Runtime.start("wikiDataFetcher", "WikiDataFetcher");
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {
@@ -195,7 +195,8 @@ public class WikiDataFetcher extends Service {
 		return  ((ItemDocument) document).getStatementGroups();
 	}
 	
-	private ArrayList getSnak(String query, String ID) throws MediaWikiApiErrorException{;
+	private ArrayList getSnak(String query, String ID) throws MediaWikiApiErrorException{
+	  // TODO: parameterize these data / al objects and parameterize the return value of this function.
 		List<StatementGroup> document = getStatementGroup(query);
 		String dataType = "error";
 		Value data = document.get(0).getProperty();

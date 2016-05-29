@@ -239,8 +239,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		
-		Python python = (Python)Runtime.createAndStart("python", "Python");
-		GUIService gui = (GUIService)Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("python", "Python");
+		Runtime.createAndStart("gui", "GUIService");
 		
 		InverseKinematics3D inversekinematics = (InverseKinematics3D)Runtime.start("ik3d", "InverseKinematics3D");
 		// InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");

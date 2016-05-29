@@ -96,13 +96,13 @@ final public class Search {
 		if (x > alpha)
 			alpha = x;
 
-		List validCaptures = board.genCaps();
+		List<HMove> validCaptures = board.genCaps();
 		if (followPV) /* are we following the PV? */
 			sortPV(validCaptures);
 		Collections.sort(validCaptures);
 
 		/* loop through the moves */
-		Iterator i = validCaptures.iterator();
+		Iterator<HMove> i = validCaptures.iterator();
 		while (i.hasNext()) {
 			HMove m = (HMove) i.next();
 			if (!board.makeMove(m))

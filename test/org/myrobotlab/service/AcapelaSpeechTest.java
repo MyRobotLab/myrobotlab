@@ -219,7 +219,7 @@ public class AcapelaSpeechTest {
 			
 			JUnitCore junit = new JUnitCore();
 			Result result = junit.run(AcapelaSpeechTest.class);
-			
+			log.info("Result: {}" + result);
 		} catch(Exception e){
 			Logging.logError(e);
 		}

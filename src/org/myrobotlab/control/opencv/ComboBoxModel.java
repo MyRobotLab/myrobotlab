@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 public class ComboBoxModel implements MutableComboBoxModel, ActionListener {
 	public final static Logger log = LoggerFactory.getLogger(ComboBoxModel.class.toString());
 
-	private static final DefaultComboBoxModel model = new DefaultComboBoxModel();
+	private static final DefaultComboBoxModel<Object> model = new DefaultComboBoxModel<Object>();
 
 	private static final HashMap<String, String> modelMap = new HashMap<String, String>();
 
@@ -55,7 +55,7 @@ public class ComboBoxModel implements MutableComboBoxModel, ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		JComboBox input = (JComboBox) e.getSource();
+		JComboBox<String> input = (JComboBox<String>) e.getSource();
 		if ((String) input.getSelectedItem() != null) {
 			filterGUI.boundFilter.filter.sourceKey = (String) input.getSelectedItem();
 		}

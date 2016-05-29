@@ -14,8 +14,14 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 
 public class PinTest extends JPanel {
-	static public void main(String[] args) {
+	/**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  static public void main(String[] args) {
 		PinTest pt = new PinTest();
+		System.out.println(pt);
 	}
 
 	public PinTest() {

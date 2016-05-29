@@ -316,7 +316,8 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		position.z *= 100.0f;
 		System.out.println((int)position.x + ", " + (int)position.y + " " + (int)position.z);
 
-		float w = trackingState.HeadPose.Pose.Orientation.w;
+		// TODO: see if we care about this value ?
+		// float w = trackingState.HeadPose.Pose.Orientation.w;
 		float x = trackingState.HeadPose.Pose.Orientation.x;
 		float y = trackingState.HeadPose.Pose.Orientation.y;
 		float z = trackingState.HeadPose.Pose.Orientation.z;

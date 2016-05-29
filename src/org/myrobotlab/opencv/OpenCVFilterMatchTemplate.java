@@ -147,7 +147,7 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
 		}
 
 		if (template != null) {
-			String text = "" + minVal[0];
+			// String text = "" + minVal[0];
 
 			// textpt.y(20);
 			// cvPutText(image, text, textpt, font, CV_RGB(254, 254, 254));

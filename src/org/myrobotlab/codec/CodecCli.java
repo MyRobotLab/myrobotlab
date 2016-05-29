@@ -26,6 +26,7 @@ public class CodecCli  {
 	public void process(String line){
 		// trim
 		String cmd = line.trim();
+		System.out.println("CMD:" + cmd);
 		
 	}
 

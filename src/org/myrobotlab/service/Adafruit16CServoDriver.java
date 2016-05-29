@@ -8,7 +8,6 @@
 
 package org.myrobotlab.service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -17,10 +16,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Arduino.ServoData;
-import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ArduinoShield;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -128,6 +124,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
 		Adafruit16CServoDriver driver = (Adafruit16CServoDriver) Runtime.start("pwm", "Adafruit16CServoDriver");
+		log.info("Driver {}", driver);
 
 	}
 

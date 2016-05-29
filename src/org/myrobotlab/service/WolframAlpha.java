@@ -55,11 +55,11 @@ public class WolframAlpha extends Service {
 	}
 
 	public WAQueryResult getQueryResult(String query) {
-		String url;
-		try {
-			url = "http://www.wolframalpha.com/input/?i=" + URLEncoder.encode(query, "UTF-8");
-		} catch (UnsupportedEncodingException e1) {
-		}
+//		String url;
+//		try {
+//			url = "http://www.wolframalpha.com/input/?i=" + URLEncoder.encode(query, "UTF-8");
+//		} catch (UnsupportedEncodingException e1) {
+//		}
 		// openUrl(url);
 		// The WAEngine is a factory for creating WAQuery objects,
 		// and it also used to perform those queries. You can set properties of

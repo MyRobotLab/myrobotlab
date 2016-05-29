@@ -265,14 +265,16 @@ public class GUIServiceGUI extends ServiceGUI {
 
 				@Override
 				public void mouseDragged(MouseEvent e) {
-					Object cell = graphComponent.getCellAt(e.getX(), e.getY());
+				  // TODO: this doesn't do anything.
+					// Object cell = graphComponent.getCellAt(e.getX(), e.getY());
 					// too chatty log.debug("dragged cell " + cell + " " +
 					// e.getX() + "," + e.getY());
 				}
 
 				@Override
 				public void mouseMoved(MouseEvent e) {
-					Object cell = graphComponent.getCellAt(e.getX(), e.getY());
+				  // TODO: this doesn't do anything.
+					// Object cell = graphComponent.getCellAt(e.getX(), e.getY());
 					// too chatty log.debug("dragged - mouseMoved - cell " + cell
 					// + " " + e.getX() + "," + e.getY());
 				}

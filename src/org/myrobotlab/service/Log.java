@@ -281,7 +281,9 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 				Class<?> c = si.getClass();
 				try {
 					Method meth = c.getMethod(listener.callbackMethod, new Class<?>[]{Message.class});
-					Object retobj = meth.invoke(si, param);
+					// TODO: what to do with this returned object?
+          // Object retobj = meth.invoke(si, param);
+					meth.invoke(si, param);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

@@ -198,7 +198,8 @@ public class ImapEmailConnector extends AbstractConnector {
 			doc.setField("to", "unknown");
 		}
 
-		Date d = m.getSentDate();
+		// TODO: what to use with the sent date?
+		// Date d = m.getSentDate();
 		Date sentdate = null;
 		// TODO: make it so we don't call tostring here.
 		// TODO: array out of bounds checking...
@@ -274,7 +275,7 @@ public class ImapEmailConnector extends AbstractConnector {
 		// attachments can be large.
 		if (p.isMimeType("text/plain")) {
 			String body = (String) p.getContent();
-			doc.addToField("text", "body");
+			doc.addToField("text", body);
 			return;
 		} else if (p.isMimeType("multipart/alternative")) {
 			MimeMultipart mmp = (MimeMultipart) p.getContent();

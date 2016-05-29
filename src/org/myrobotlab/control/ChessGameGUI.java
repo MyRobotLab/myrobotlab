@@ -204,12 +204,12 @@ public class ChessGameGUI extends ServiceGUI implements Constants, VetoableChang
 		p1.add(switchSidesButton);
 
 		String[] timeStrings = { "3 seconds", "5 seconds", "10 seconds", "20 seconds", "30 seconds", "1 minute" };
-		JComboBox timeBox = new JComboBox(timeStrings);
+		JComboBox<String> timeBox = new JComboBox<String>(timeStrings);
 		timeBox.setSelectedIndex(2);
 		timeBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JComboBox cb = (JComboBox) e.getSource();
+				JComboBox<Object> cb = (JComboBox<Object>) e.getSource();
 				int selection = cb.getSelectedIndex();
 				setMaxTime(playTime[selection]);
 			}

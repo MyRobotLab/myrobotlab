@@ -231,7 +231,8 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 					list.add(box);
 
 					if (publishPolygon) {
-						CvSeq points = cvApproxPoly(contour, Loader.sizeof(CvContour.class), cvStorage, CV_POLY_APPROX_DP, cvContourPerimeter(contour) * 0.02, 1);
+						// CvSeq points = cvApproxPoly(contour, Loader.sizeof(CvContour.class), cvStorage, CV_POLY_APPROX_DP, cvContourPerimeter(contour) * 0.02, 1);
+					  cvApproxPoly(contour, Loader.sizeof(CvContour.class), cvStorage, CV_POLY_APPROX_DP, cvContourPerimeter(contour) * 0.02, 1);
 					}
 					// Polygon polygon = new Polygon();
 					// iterate through points - points.total() build awt Polygon

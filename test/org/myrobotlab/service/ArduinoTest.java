@@ -677,7 +677,7 @@ public class ArduinoTest {
 			
 			JUnitCore junit = new JUnitCore();
 			Result result = junit.run(ArduinoTest.class);
-			
+			log.info("Result was: {}", result);
 			// WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
 			// ServiceInterface gui = Runtime.start("gui", "GUIService");
 

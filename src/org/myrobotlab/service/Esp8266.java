@@ -25,7 +25,7 @@ public class Esp8266 extends Service {
 
 		try {
 
-			Esp8266 template = (Esp8266) Runtime.start("esp", "Esp8266");
+			Runtime.start("esp", "Esp8266");
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {

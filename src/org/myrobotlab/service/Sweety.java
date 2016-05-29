@@ -136,7 +136,7 @@ public class Sweety extends Service {
 
 		try {
 
-			Sweety sweety = (Sweety) Runtime.start("sweety", "Sweety");
+			Runtime.start("sweety", "Sweety");
 
 		} catch (Exception e) {
 			Logging.logError(e);

@@ -30,7 +30,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
@@ -95,7 +94,7 @@ public class UltrasonicSensorGUI extends ServiceGUI implements ActionListener {
 		range.setPreferredSize(new Dimension(380, 25));
 
 		display.add(range, BorderLayout.NORTH);
-		JPanel center = new JPanel();
+		//JPanel center = new JPanel();
 
 	}
 
