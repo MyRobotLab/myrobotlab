@@ -11,6 +11,8 @@ public class MapperTest {
 	@Test
 	public void testMapper() {
 		Mapper myMapper = new Mapper(10,18,100,180);
+		// TODO: validate something here.
+		myMapper.getMaxX();
 	}
 
 	@Test

@@ -63,13 +63,13 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 
 	private Integer address = 128;
 
-	private float minX = 0;
-
-	private float maxX = 180;
-
-	private float minY = 0;
-
-	private float maxY = 180;
+//	private float minX = 0;
+//
+//	private float maxX = 180;
+//
+//	private float minY = 0;
+//
+//	private float maxY = 180;
 
 	public static final int INPUT = 0x0;
 
@@ -430,8 +430,8 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 
 			Runtime.start("webgui", "WebGui");
 			Runtime.start("python", "Python");
-			Joystick joystick = (Joystick)Runtime.start("joystick", "Joystick");
-			
+			//Joystick joystick = (Joystick)Runtime.start("joystick", "Joystick");
+			Runtime.start("joystick", "Joystick");
 
 			Sabertooth saber = (Sabertooth) Runtime.start("saber", "Sabertooth");
 			saber.connect(port);

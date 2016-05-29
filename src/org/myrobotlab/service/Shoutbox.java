@@ -13,7 +13,7 @@ import java.util.List;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.XMPPException;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.Message;
+// import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;

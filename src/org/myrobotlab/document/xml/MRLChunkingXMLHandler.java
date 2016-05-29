@@ -25,7 +25,7 @@ public class MRLChunkingXMLHandler implements ContentHandler {
 	private String documentIDPath;
 	private String docIDPrefix = "";
 	private boolean inDocID = false;
-	private boolean inDoc = false;
+	//private boolean inDoc = false;
 	private StringBuilder docIDBuilder = new StringBuilder();
 	private RecordingInputStream ris;
 	
@@ -70,7 +70,7 @@ public class MRLChunkingXMLHandler implements ContentHandler {
 		String path = "/" + StringUtils.join(currentPath.toArray(),"/");
 		if (documentRootPath.equals(path)) {
 			// this is the start of our page.
-			inDoc = true;
+			//inDoc = true;
 			docIDBuilder = new StringBuilder();
 			// ok we should clear our input buffer up to the current offset for this start element.
 			try {

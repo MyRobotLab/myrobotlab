@@ -374,7 +374,9 @@ public class Test extends Service implements StatusListener {
 	public Status serializeTest(ServiceInterface s) {
 		log.info("serializeTest {}", s.getName(), s.getSimpleName());
 		String name = s.getName();
-
+		if (name == null) {
+		  log.warn("Name was null on serialize test?!?");
+		}
 		// multiple formats binary json xml
 		//Status status = Status.info("serializeTest for %s", name);
 

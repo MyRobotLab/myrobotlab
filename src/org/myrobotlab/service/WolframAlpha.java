@@ -1,8 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;

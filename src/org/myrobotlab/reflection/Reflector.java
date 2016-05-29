@@ -5,7 +5,6 @@ package org.myrobotlab.reflection;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -19,7 +18,7 @@ import org.slf4j.Logger;
  */
 public class Reflector {
 
-	private static HashMap<String, Method> cache = new HashMap<String, Method>();
+	// private static HashMap<String, Method> cache = new HashMap<String, Method>();
 
 	static final Logger log = LoggerFactory.getLogger(Reflector.class);
 

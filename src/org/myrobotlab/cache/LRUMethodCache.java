@@ -4,21 +4,16 @@ import java.lang.reflect.Method;
 
 public class LRUMethodCache {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 413766389131942814L;
-
 	private static LRUMethodCache instance = null;
 	
 	// an lru cache object
 	private LRUCache<String, Method> cacheMap = null;
 	
 	// size of cache
-	private int size = 1024;
+	// private int size = 1024;
 	
 	protected LRUMethodCache(int size) {
-		this.size = size;
+		// this.size = size;
 		// Exists only to defeat instantiation.
 		cacheMap = new LRUCache<String,Method>(size);
 	}

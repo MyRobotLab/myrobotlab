@@ -195,39 +195,36 @@ public class WikiDataFetcher extends Service {
 		return  ((ItemDocument) document).getStatementGroups();
 	}
 	
-	private ArrayList getSnak(String query, String ID) throws MediaWikiApiErrorException{
+	private ArrayList<Object> getSnak(String query, String ID) throws MediaWikiApiErrorException{
 	  // TODO: parameterize these data / al objects and parameterize the return value of this function.
-		List<StatementGroup> document = getStatementGroup(query);
-		String dataType = "error";
-		Value data = document.get(0).getProperty();
-		ArrayList al = new ArrayList();
-		
-		for (StatementGroup sg : document) {
-			ID = ID.replaceAll("[\r\n]+", "");
-			String testedID = sg.getProperty().getId();	
-			if (ID.equals(testedID)) { // Check if this ID exist for this document
-				System.out.println("Found !" );
-				for (Statement s : sg.getStatements()) {
-				if (s.getClaim().getMainSnak() instanceof ValueSnak) {
-					dataType = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString();
-					// TODO Add all snaks instead of only the main snak
-					al.add(dataType);
-					al.add((JacksonValueSnak) s.getClaim().getMainSnak());
-					 
-				} 
-				
-				}
-			}
-		
-		}
-		return al;
-	
-		
+	  List<StatementGroup> document = getStatementGroup(query);
+	  String dataType = "error";
+	  //Value data = document.get(0).getProperty();
+	  ArrayList<Object> al = new ArrayList<Object>();
+	  for (StatementGroup sg : document) {
+	    ID = ID.replaceAll("[\r\n]+", "");
+	    String testedID = sg.getProperty().getId();	
+	    if (ID.equals(testedID)) { // Check if this ID exist for this document
+	      System.out.println("Found !" );
+	      for (Statement s : sg.getStatements()) {
+	        if (s.getClaim().getMainSnak() instanceof ValueSnak) {
+	          dataType = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString();
+	          // TODO Add all snaks instead of only the main snak
+	          al.add(dataType);
+	          al.add((JacksonValueSnak) s.getClaim().getMainSnak());
+
+	        } 
+
+	      }
+	    }
+
+	  }
+	  return al;
 	}
 	
 	public String getData(String query, String ID)throws MediaWikiApiErrorException{
 		try {
-			ArrayList al = getSnak(query,ID);
+			ArrayList<Object> al = getSnak(query,ID);
 			// TODO manage all snaks and qualifiers
 			Value data = ((JacksonValueSnak) al.get(1)).getDatavalue();
 			String dataType = (String) al.get(0);
@@ -286,7 +283,7 @@ public class WikiDataFetcher extends Service {
 	
 	public String getProperty(String query, String ID)throws MediaWikiApiErrorException{
 		try {
-			ArrayList al = getSnak(query,ID);
+			ArrayList<Object> al = getSnak(query,ID);
 			String info = (((JacksonValueSnak) al.get(1)).getDatavalue()).toString();
 			int beginIndex = info.indexOf('Q');
 			int endIndex = info.indexOf("(") ;
@@ -298,7 +295,7 @@ public class WikiDataFetcher extends Service {
 	
 	public String getTime(String query, String ID, String what)throws MediaWikiApiErrorException{
 		try {
-			ArrayList al = getSnak(query,ID);
+			ArrayList<Object> al = getSnak(query,ID);
 			TimeValue date = (TimeValue) ((JacksonValueSnak) al.get(1)).getDatavalue();
 			String data ="";
 			switch (what) {
@@ -345,7 +342,7 @@ public class WikiDataFetcher extends Service {
 		
 	public String getQuantity(String query, String ID)throws MediaWikiApiErrorException{
 		try {
-			ArrayList al = getSnak(query,ID);
+			ArrayList<Object> al = getSnak(query,ID);
 			QuantityValue data = (QuantityValue) (((JacksonValueSnak) al.get(1)).getDatavalue());
 			String info = 	String.valueOf(data.getNumericValue());
 			String unit = data.toString();
