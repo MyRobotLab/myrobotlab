@@ -13,7 +13,6 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -260,25 +259,26 @@ public class ServiceInterfaceTest {
 			log.info("Default Script Exists for {}" , service);
 		}
 		
-		
-		if (true) {
-			// Diabled testing of scripts currently.
-			return false;
-		}
-		
-		try {
-			String test = FileUtils.readFileToString(script);
-			System.out.println(test);
-			
-			python.execAndWait(test);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			log.warn("Error Running script {}" , script);
-			e.printStackTrace();
-			
-			return false;
-		}
-		return true;
+		return false;
+
+		// dead code
+//    if (true) {
+//      // Diabled testing of scripts currently.
+//      return false;
+//    }
+//		try {
+//			String test = FileUtils.readFileToString(script);
+//			System.out.println(test);
+//			
+//			python.execAndWait(test);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			log.warn("Error Running script {}" , script);
+//			e.printStackTrace();
+//			
+//			return false;
+//		}
+//		return true;
 	}
 
 	private boolean serviceHasWebPage(String service) {

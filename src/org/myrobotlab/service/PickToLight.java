@@ -316,7 +316,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 			pick.register();
 			pick.createModules();
 
-			Controller controller = pick.getController();
+			//Controller controller = pick.getController();
 			pick.startService();
 
 			int selector = 0x83; // IR selected - LED OFF
@@ -732,7 +732,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 
 		System.out.println(" --> GPIO PIN STATE CHANGE: " + event.getPin() + " [" + event.getPin().getName() + "]" + " = " + event.getState());
 		GpioPin pin = event.getPin();
-
+		log.info("GPIOPin: {}", pin);
 		/*
 		 * if (pin.getName().equals("GPIO 0")) {
 		 * modules.get("01").blinkOff("ok"); } else if

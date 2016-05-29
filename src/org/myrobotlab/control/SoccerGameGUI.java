@@ -74,12 +74,12 @@ public class SoccerGameGUI extends ServiceGUI implements ListSelectionListener {
 		public void keyTyped(KeyEvent keyEvent) {
 			log.error("Typed" + keyEvent);
 		}
-
-		private void printIt(String title, KeyEvent keyEvent) {
-			int keyCode = keyEvent.getKeyCode();
-			String keyText = KeyEvent.getKeyText(keyCode);
-			log.error(title + " : " + keyText + " / " + keyEvent.getKeyChar());
-		}
+    // never used, commented out
+    // private void printIt(String title, KeyEvent keyEvent) {
+    //		int keyCode = keyEvent.getKeyCode();
+    //		String keyText = KeyEvent.getKeyText(keyCode);
+    //		log.error(title + " : " + keyText + " / " + keyEvent.getKeyChar());
+    // }
 	}
 
 	public final static Logger log = LoggerFactory.getLogger(SoccerGameGUI.class.getCanonicalName());

@@ -151,7 +151,8 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 
 		// TODO - clean up - remove input parameters? only use storage?
 		if (imageKey != null) {
-			IplImage kinectDepth = vp.sources.get(String.format("%s.%s", vp.boundServiceName, OpenCV.SOURCE_KINECT_DEPTH));
+		  // TODO: validate what this is doing?
+			kinectDepth = vp.sources.get(String.format("%s.%s", vp.boundServiceName, OpenCV.SOURCE_KINECT_DEPTH));
 		} else {
 			kinectDepth = image;
 		}
@@ -208,7 +209,7 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 		// TODO - publish KinectImageNode ArrayList
 		// find contours ---- begin ------------------------------------
 		CvSeq contour = contourPointer;
-		int cnt = 0;
+		//int cnt = 0;
 
 		// cvFindContours(mask, cvStorage, contourPointer,
 		// Loader.sizeof(CvContour.class), 0 ,CV_CHAIN_APPROX_SIMPLE); NOT
@@ -293,7 +294,7 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 					isMinArea = true;
 					isMaxArea = true;
 
-					++cnt;
+					//++cnt;
 				}
 				contour = contour.h_next();
 			} // while (contour != null && !contour.isNull())

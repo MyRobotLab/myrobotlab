@@ -77,7 +77,7 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
 	 * the gap between depth positions being sampled this is an optimization of
 	 * only sampling modulus SAMPLE_FREQ on the X axis data
 	 */
-	private static final int SAMPLE_FREQ = 1;
+	// private static final int SAMPLE_FREQ = 1;
 
 	private static final int MAX_POINTS = IM_WIDTH * IM_HEIGHT; // wuh? FIXME -
 																// what is this

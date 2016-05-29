@@ -159,7 +159,8 @@ public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeLis
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				OpenCVFilterInRange bf = (OpenCVFilterInRange) filterWrapper.filter;
+				//OpenCVFilterInRange bf = (OpenCVFilterInRange) filterWrapper.filter;
+			  // TODO: not implemented ?
 			}
 		});
 	}

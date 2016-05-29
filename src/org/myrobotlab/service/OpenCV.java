@@ -66,7 +66,6 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
-import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.data.Point2Df;
@@ -744,7 +743,7 @@ public class OpenCV extends VideoSource {
 		// https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
 		//
 		//WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
-		GUIService gui = (GUIService)Runtime.start("gui", "GUIService");
+		Runtime.start("gui", "GUIService");
 		
 		org.apache.log4j.BasicConfigurator.configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);

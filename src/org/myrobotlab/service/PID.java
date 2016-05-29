@@ -92,7 +92,7 @@ public class PID extends Service {
 	private double outMin, outMax, outCenter;
 	private boolean inAuto;
 
-	private long sampleCount = 0;
+	// private long sampleCount = 0;
 
 	public static void main(String[] args) throws Exception {
 		// Logger root =
@@ -155,7 +155,7 @@ public class PID extends Service {
 		long now = System.currentTimeMillis();
 		long timeChange = (now - lastTime);
 		if (timeChange >= sampleTime) {
-			++sampleCount;
+			// ++sampleCount;
 			/* compute all the working error variables */
 			double error = setpoint - input;
 			ITerm += (ki * error);

@@ -245,9 +245,10 @@ public class PImage implements PConstants, Cloneable {
 				| high(((a & GREEN_MASK) - ((b & GREEN_MASK) >> 8) * f), BLUE_MASK) & GREEN_MASK | high((a & BLUE_MASK) - (((b & BLUE_MASK) * f) >> 8), 0));
 	}
 
-	private static float frac(float x) {
-		return (x - (int) x);
-	}
+	// never used locally
+//	private static float frac(float x) {
+//		return (x - (int) x);
+//	}
 
 	// ////////////////////////////////////////////////////////////
 
@@ -771,8 +772,8 @@ public class PImage implements PConstants, Cloneable {
 		}
 
 		// void blur(BImage img,int x, int y,int w,int h){
-		int sum, cr, cg, cb, k;
-		int pixel, read, ri, xl, yl, ym, riw;
+		int sum, cr, cg, cb;
+		int read, ri, xl, yl, ym, riw;
 		// int[] pix=img.pixels;
 		// int iw=img.width;
 
@@ -1303,8 +1304,8 @@ public class PImage implements PConstants, Cloneable {
 
 		int ix1 = 0;
 		int iy1 = 0;
-		int ix2 = image.width;
-		int iy2 = image.height;
+		//int ix2 = image.width;
+		//int iy2 = image.height;
 
 		if (x1 < 0) { // off left edge
 			ix1 += -x1;
@@ -1315,11 +1316,11 @@ public class PImage implements PConstants, Cloneable {
 			y1 = 0;
 		}
 		if (x2 >= width) { // off right edge
-			ix2 -= x2 - width;
+			//ix2 -= x2 - width;
 			x2 = width;
 		}
 		if (y2 >= height) { // off bottom edge
-			iy2 -= y2 - height;
+			//iy2 -= y2 - height;
 			y2 = height;
 		}
 

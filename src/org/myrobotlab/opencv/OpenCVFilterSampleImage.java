@@ -30,7 +30,6 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 
@@ -82,7 +81,7 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
 	public void loadImage(String path) {
 		try {
 			URL url = new URL(path);
-			BufferedImage fileImage = ImageIO.read(url);
+			fileImage = ImageIO.read(url);
 		} catch (IOException e) {
 			// Log.error("could not load image " + path);
 			e.printStackTrace();

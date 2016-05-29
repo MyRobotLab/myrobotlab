@@ -357,7 +357,8 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 			// TODO - block on response
 			currentFilterListModel.removeElement(name);
 		} else if (o == kinectImageOrDepth) {
-			String mode = (String) kinectImageOrDepth.getSelectedItem();
+			//String mode = (String) kinectImageOrDepth.getSelectedItem();
+		  // TODO: not implemented.
 			/*
 			 * if ("depth".equals(mode)) { vp.format = "depth"; } else {
 			 * vp.format = "image"; } // FIXME - broadcastState ???

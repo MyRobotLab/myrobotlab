@@ -97,7 +97,7 @@ public class MethodCache {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 			MethodCache mc = MethodCache.getInstance();
-			Class[] paramsTypes = new Class[] { String.class, Double.class, Double.class, Double.class, Double.class };
+			//Class[] paramsTypes = new Class[] { String.class, Double.class, Double.class, Double.class, Double.class };
 			// Method method = mc.getMethod(Serial.class, "connect", paramsTypes);
 			// log.info(method.getName());
 

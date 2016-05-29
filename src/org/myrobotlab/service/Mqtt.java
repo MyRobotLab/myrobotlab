@@ -277,7 +277,7 @@ public class Mqtt extends Service implements MqttCallback {
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 			Python python = new Python("python");
 			python.startService();
-			Mqtt mqtt = (Mqtt) Runtime.start("mqtt", "Mqtt");
+			Runtime.start("mqtt", "Mqtt");
 			Runtime.start("gui", "GUIService");
 
 

@@ -113,7 +113,8 @@ public class OpenCVFilterCannyGUI extends OpenCVFilterGUI implements ChangeListe
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				OpenCVFilterCanny bf = (OpenCVFilterCanny) filterWrapper.filter;
+				//OpenCVFilterCanny bf = (OpenCVFilterCanny) filterWrapper.filter;
+			  // TODO: not implemented?
 			}
 		});
 

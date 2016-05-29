@@ -28,7 +28,6 @@ package org.myrobotlab.control.opencv;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.opencv.OpenCVFilterMatchTemplate;
 import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterMatchTemplateGUI extends OpenCVFilterGUI {

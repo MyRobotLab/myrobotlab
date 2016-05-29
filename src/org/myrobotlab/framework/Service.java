@@ -1527,6 +1527,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		String myKey = getName();
 		log.info(String.format("releasePeers (%s, %s)", myKey, serviceClass));
 		try {
+		  // TODO: what the heck does this thing do? 
 			Class<?> theClass = Class.forName(serviceClass);
 			Method method = theClass.getMethod("getMetaData");
 			ServiceType serviceType = (ServiceType) method.invoke(null);

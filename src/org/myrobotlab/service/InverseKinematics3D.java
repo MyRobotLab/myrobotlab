@@ -257,15 +257,15 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		//inversekinematics.setCurrentArm(testArm);
 		// set up our input translation/rotation 
 		// 
-		if (false) {
-			double dx = 400.0;
-			double dy = -600.0;
-			double dz = -350.0;
-			double roll = 0.0;
-			double pitch = 0.0;
-			double yaw = 0.0;
-			inversekinematics.createInputMatrix(dx, dy, dz, roll, pitch, yaw);
-		}
+//		if (false) {
+//			double dx = 400.0;
+//			double dy = -600.0;
+//			double dz = -350.0;
+//			double roll = 0.0;
+//			double pitch = 0.0;
+//			double yaw = 0.0;
+//			inversekinematics.createInputMatrix(dx, dy, dz, roll, pitch, yaw);
+//		}
 		
 		// Rest position... 
 		//Point rest = new Point(100,-300,0,0,0,0);

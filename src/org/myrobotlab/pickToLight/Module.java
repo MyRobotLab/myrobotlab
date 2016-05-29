@@ -110,7 +110,7 @@ public class Module {
 	static public final int MASK_LED = 0x02;
 
 	static public final int MASK_SENSOR = 0x80;
-	private String lastValue = "";
+	// private String lastValue = "";
 
 	static private boolean translationInitialized = false;
 
@@ -256,7 +256,7 @@ public class Module {
 	}
 
 	public String display(String str) {
-		lastValue = str;
+		// lastValue = str;
 
 		// d1 d2 : d3 d4
 		byte[] display = new byte[] { 0, 0x17, 0, 0, 0, 0 };

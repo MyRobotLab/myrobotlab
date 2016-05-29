@@ -394,7 +394,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 			                        face = true;
 						// Resize the face to pass it to the predicter
 						Mat dFaceMatSized = resizeImage(dFaceMat);
-						Mat copytoMat = dFaceMatSized.clone();
+						//Mat copytoMat = dFaceMatSized.clone();
 						
 						// If we're applying a mask, do it before the prediction
 						if (facemask != null) {
