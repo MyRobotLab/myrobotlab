@@ -38,41 +38,41 @@ import org.slf4j.Logger;
 
 public class XmppGUI extends ServiceGUI implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(XmppGUI.class.getCanonicalName());
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(XmppGUI.class.getCanonicalName());
 
-	public XmppGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public XmppGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", Xmpp.class);
-		myService.send(boundServiceName, "publishState");
-	}
+  @Override
+  public void attachGUI() {
+    subscribe("publishState", "getState", Xmpp.class);
+    myService.send(boundServiceName, "publishState");
+  }
 
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", Xmpp.class);
-	}
+  @Override
+  public void detachGUI() {
+    unsubscribe("publishState", "getState", Xmpp.class);
+  }
 
-	public void getState(Xmpp template) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  public void getState(Xmpp template) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-			}
-		});
-	}
+      }
+    });
+  }
 
-	@Override
-	public void init() {
-	}
+  @Override
+  public void init() {
+  }
 
 }

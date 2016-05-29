@@ -48,98 +48,98 @@ import wiiusej.wiiusejevents.physicalevents.IREvent;
 
 public class SLAMGUI extends ServiceGUI implements ListSelectionListener, VideoGUISource {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(SLAMGUI.class.toString());
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(SLAMGUI.class.toString());
 
-	VideoWidget video = null;
-	Graphics g = null;
-	BufferedImage img = null;
+  VideoWidget video = null;
+  Graphics g = null;
+  BufferedImage img = null;
 
-	int width = 1024;
-	int height = 768;
+  int width = 1024;
+  int height = 768;
 
-	public Random rand = new Random();
+  public Random rand = new Random();
 
-	int x;
+  int x;
 
-	int y;
+  int y;
 
-	public SLAMGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public SLAMGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void attachGUI() {
-		video.attachGUI();
-		subscribe("publishIR", "publishIR", IREvent.class);
-		video.displayFrame(new SerializableImage(img, boundServiceName));
-	}
+  @Override
+  public void attachGUI() {
+    video.attachGUI();
+    subscribe("publishIR", "publishIR", IREvent.class);
+    video.displayFrame(new SerializableImage(img, boundServiceName));
+  }
 
-	protected ImageIcon createImageIcon(String path, String description) {
-		java.net.URL imgURL = getClass().getResource(path);
-		if (imgURL != null) {
-			return new ImageIcon(imgURL, description);
-		} else {
-			System.err.println("Couldn't find file: " + path);
-			return null;
-		}
-	}
+  protected ImageIcon createImageIcon(String path, String description) {
+    java.net.URL imgURL = getClass().getResource(path);
+    if (imgURL != null) {
+      return new ImageIcon(imgURL, description);
+    } else {
+      System.err.println("Couldn't find file: " + path);
+      return null;
+    }
+  }
 
-	@Override
-	public void detachGUI() {
-		video.detachGUI();
-		unsubscribe("publishIR", "publishIR", IREvent.class);
-	}
+  @Override
+  public void detachGUI() {
+    video.detachGUI();
+    unsubscribe("publishIR", "publishIR", IREvent.class);
+  }
 
-	public void displayFrame(SerializableImage img) {
-		video.displayFrame(img);
-	}
+  public void displayFrame(SerializableImage img) {
+    video.displayFrame(img);
+  }
 
-	@Override
-	public VideoWidget getLocalDisplay() {
-		return video;
-	}
+  @Override
+  public VideoWidget getLocalDisplay() {
+    return video;
+  }
 
-	@Override
-	public void init() {
+  @Override
+  public void init() {
 
-		img = new BufferedImage(width / 2, height / 2, BufferedImage.TYPE_INT_RGB);
-		g = img.getGraphics();
-		video.displayFrame(new SerializableImage(img, boundServiceName));
+    img = new BufferedImage(width / 2, height / 2, BufferedImage.TYPE_INT_RGB);
+    g = img.getGraphics();
+    video.displayFrame(new SerializableImage(img, boundServiceName));
 
-		video = new VideoWidget(boundServiceName, myService, tabs);
-		video.init();
-		gc.gridx = 0;
-		gc.gridy = 0;
-		gc.gridheight = 4;
-		gc.gridwidth = 2;
-		display.add(video.display, gc);
+    video = new VideoWidget(boundServiceName, myService, tabs);
+    video.init();
+    gc.gridx = 0;
+    gc.gridy = 0;
+    gc.gridheight = 4;
+    gc.gridwidth = 2;
+    display.add(video.display, gc);
 
-		setCurrentFilterMouseListener();
+    setCurrentFilterMouseListener();
 
-	}
+  }
 
-	// TODO - encapsulate this
-	// MouseListener mouseListener = new MouseAdapter() {
-	public void setCurrentFilterMouseListener() {
-		MouseListener mouseListener = new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent mouseEvent) {
-				JList theList = (JList) mouseEvent.getSource();
-				if (mouseEvent.getClickCount() == 2) {
-					int index = theList.locationToIndex(mouseEvent.getPoint());
-					if (index >= 0) {
-						Object o = theList.getModel().getElementAt(index);
-						System.out.println("Double-clicked on: " + o.toString());
-					}
-				}
-			}
-		};
+  // TODO - encapsulate this
+  // MouseListener mouseListener = new MouseAdapter() {
+  public void setCurrentFilterMouseListener() {
+    MouseListener mouseListener = new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent mouseEvent) {
+        JList theList = (JList) mouseEvent.getSource();
+        if (mouseEvent.getClickCount() == 2) {
+          int index = theList.locationToIndex(mouseEvent.getPoint());
+          if (index >= 0) {
+            Object o = theList.getModel().getElementAt(index);
+            System.out.println("Double-clicked on: " + o.toString());
+          }
+        }
+      }
+    };
 
-	}
+  }
 
-	@Override
-	public void valueChanged(ListSelectionEvent arg0) {
-	}
+  @Override
+  public void valueChanged(ListSelectionEvent arg0) {
+  }
 
 }

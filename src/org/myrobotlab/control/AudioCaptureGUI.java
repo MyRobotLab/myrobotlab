@@ -36,75 +36,75 @@ import org.myrobotlab.service.GUIService;
 
 public class AudioCaptureGUI extends ServiceGUI {
 
-	static final long serialVersionUID = 1L;
+  static final long serialVersionUID = 1L;
 
-	final JButton captureBtn = new JButton("Capture");
-	final JButton stopBtn = new JButton("Stop");
-	final JButton playBtn = new JButton("Playback");
+  final JButton captureBtn = new JButton("Capture");
+  final JButton stopBtn = new JButton("Stop");
+  final JButton playBtn = new JButton("Playback");
 
-	public AudioCaptureGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public AudioCaptureGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void attachGUI() {
-		// TODO Auto-generated method stub
+  @Override
+  public void attachGUI() {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void detachGUI() {
-		// TODO Auto-generated method stub
+  @Override
+  public void detachGUI() {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void init() {
-		// Register anonymous listeners
-		captureBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				captureBtn.setEnabled(false);
-				stopBtn.setEnabled(true);
-				playBtn.setEnabled(false);
-				// Capture input data from the
-				// microphone until the Stop
-				// button is clicked.
-				myService.send(boundServiceName, "captureAudio");
-			}// end actionPerformed
-		}// end ActionListener
-				);// end addActionListener()
-		display.add(captureBtn);
+  @Override
+  public void init() {
+    // Register anonymous listeners
+    captureBtn.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        captureBtn.setEnabled(false);
+        stopBtn.setEnabled(true);
+        playBtn.setEnabled(false);
+        // Capture input data from the
+        // microphone until the Stop
+        // button is clicked.
+        myService.send(boundServiceName, "captureAudio");
+      }// end actionPerformed
+    }// end ActionListener
+    );// end addActionListener()
+    display.add(captureBtn);
 
-		stopBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				captureBtn.setEnabled(true);
-				stopBtn.setEnabled(false);
-				playBtn.setEnabled(true);
-				// Terminate the capturing of
-				// input data from the
-				// microphone.
-				myService.send(boundServiceName, "stopAudioCapture");
-			}// end actionPerformed
-		}// end ActionListener
-		);// end addActionListener()
-		display.add(stopBtn);
+    stopBtn.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        captureBtn.setEnabled(true);
+        stopBtn.setEnabled(false);
+        playBtn.setEnabled(true);
+        // Terminate the capturing of
+        // input data from the
+        // microphone.
+        myService.send(boundServiceName, "stopAudioCapture");
+      }// end actionPerformed
+    }// end ActionListener
+    );// end addActionListener()
+    display.add(stopBtn);
 
-		playBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// Play back all of the data
-				// that was saved during
-				// capture.
-				myService.send(boundServiceName, "playAudio");
-			}// end actionPerformed
-		}// end ActionListener
-		);// end addActionListener()
-		display.add(playBtn);
+    playBtn.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        // Play back all of the data
+        // that was saved during
+        // capture.
+        myService.send(boundServiceName, "playAudio");
+      }// end actionPerformed
+    }// end ActionListener
+    );// end addActionListener()
+    display.add(playBtn);
 
-		display.setLayout(new FlowLayout());
+    display.setLayout(new FlowLayout());
 
-	}
+  }
 
 }

@@ -51,278 +51,274 @@ import org.slf4j.Logger;
  */
 public class TestCatcher extends Service implements SerialDataListener {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(TestCatcher.class);
+  public final static Logger log = LoggerFactory.getLogger(TestCatcher.class);
 
-	/**
-	 * data to hold the incoming messages
-	 */
-	transient public BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
-	transient public BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
-	
-	ArrayList<Status> errorList = new ArrayList<Status>();
+  /**
+   * data to hold the incoming messages
+   */
+  transient public BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
+  transient public BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
-	boolean isLocal = true;
+  ArrayList<Status> errorList = new ArrayList<Status>();
 
-	/**
-	 * awesome override to simulate remote services - e.g. in
-	 * Serial.addByteListener
-	 */
-	public boolean isLocal() {
-		return isLocal;
-	}
+  boolean isLocal = true;
 
+  /**
+   * awesome override to simulate remote services - e.g. in
+   * Serial.addByteListener
+   */
+  public boolean isLocal() {
+    return isLocal;
+  }
 
-	public Status onError(Status error){
-		errorList.add(error);
-		return error;
-	}
-	
-	public TestCatcher(String n) {
-		super(n);
-	}
+  public Status onError(Status error) {
+    errorList.add(error);
+    return error;
+  }
 
-	/**
-	 * some pub/sub interfaces do not use the Message queue to post their data -
-	 * but use a callback thread from the other service as an optimization
-	 * onByte is one of those methods
-	 */
-	@Override
-	public Integer onByte(Integer b) {
-		addData("onByte", b);
-		return b;
-	}
+  public TestCatcher(String n) {
+    super(n);
+  }
 
-	/**
-	 * preProcessHook is used to intercept messages and process or route them
-	 * before being processed/invoked in the Service.
-	 * 
-	 * @throws
-	 * 
-	 * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.framework.Message)
-	 */
-	@Override
-	public boolean preProcessHook(Message msg) {
-		try {
-			msgs.put(msg);
-			if (log.isDebugEnabled()){
-				log.debug(String.format("%d msg %s ", msgs.size(), msg));
-			}
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		return false;
-	}
+  /**
+   * some pub/sub interfaces do not use the Message queue to post their data -
+   * but use a callback thread from the other service as an optimization onByte
+   * is one of those methods
+   */
+  @Override
+  public Integer onByte(Integer b) {
+    addData("onByte", b);
+    return b;
+  }
 
-	public void clear() {
-		data.clear();
-		msgs.clear();
-	}
+  /**
+   * preProcessHook is used to intercept messages and process or route them
+   * before being processed/invoked in the Service.
+   * 
+   * @throws
+   * 
+   *           @see
+   *           org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.
+   *           framework.Message)
+   */
+  @Override
+  public boolean preProcessHook(Message msg) {
+    try {
+      msgs.put(msg);
+      if (log.isDebugEnabled()) {
+        log.debug(String.format("%d msg %s ", msgs.size(), msg));
+      }
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+    return false;
+  }
 
-	public BlockingQueue<Message> getMsgs() {
-		return msgs;
-	}
+  public void clear() {
+    data.clear();
+    msgs.clear();
+  }
 
-	public Message getMsg(long timeout) throws InterruptedException {
-		Message msg = msgs.poll(timeout, TimeUnit.MILLISECONDS);
-		return msg;
-	}
+  public BlockingQueue<Message> getMsgs() {
+    return msgs;
+  }
 
-	public Object getData(long timeout) throws InterruptedException {
-		Object obj = data.poll(timeout, TimeUnit.MILLISECONDS);
-		return obj;
-	}
+  public Message getMsg(long timeout) throws InterruptedException {
+    Message msg = msgs.poll(timeout, TimeUnit.MILLISECONDS);
+    return msg;
+  }
 
-	public BlockingQueue<Message> waitForMsgs(int count) throws InterruptedException, IOException {
-		return waitForMsgs(count, 1000);
-	}
+  public Object getData(long timeout) throws InterruptedException {
+    Object obj = data.poll(timeout, TimeUnit.MILLISECONDS);
+    return obj;
+  }
 
-	public BlockingQueue<Message> waitForMsgs(int count, int timeout) throws InterruptedException, IOException {
-		long start = System.currentTimeMillis();
-		int interCount = 0;
+  public BlockingQueue<Message> waitForMsgs(int count) throws InterruptedException, IOException {
+    return waitForMsgs(count, 1000);
+  }
 
-		while ((interCount = msgs.size()) < count) {
-			if (timeout < System.currentTimeMillis() - start){
-				throw new IOException(String.format("timeout - %d msgs under %d ms expected - got %d in %d ms", interCount, timeout, msgs.size(), System.currentTimeMillis() - start));
-			}
-			sleep(10);
-		}
+  public BlockingQueue<Message> waitForMsgs(int count, int timeout) throws InterruptedException, IOException {
+    long start = System.currentTimeMillis();
+    int interCount = 0;
 
-		log.warn(String.format("returned %d msgs in %s ms", interCount, System.currentTimeMillis() - start));
-		return msgs;
-	}
+    while ((interCount = msgs.size()) < count) {
+      if (timeout < System.currentTimeMillis() - start) {
+        throw new IOException(String.format("timeout - %d msgs under %d ms expected - got %d in %d ms", interCount, timeout, msgs.size(), System.currentTimeMillis() - start));
+      }
+      sleep(10);
+    }
 
-	public ArrayList<?> waitForData(int count) throws InterruptedException, IOException {
-		return waitForData(count, 1000, 100);
-	}
+    log.warn(String.format("returned %d msgs in %s ms", interCount, System.currentTimeMillis() - start));
+    return msgs;
+  }
 
-	public ArrayList<?> waitForData(int count, int timeout) throws InterruptedException, IOException {
-		return waitForData(count, timeout, 100);
-	}
+  public ArrayList<?> waitForData(int count) throws InterruptedException, IOException {
+    return waitForData(count, 1000, 100);
+  }
 
-	public ArrayList<?> waitForData(int count, int timeout, int pollInterval) throws InterruptedException, IOException {
-		int msgCount = 0;
-		ArrayList<Object> ret = new ArrayList<Object>();
-		long start = System.currentTimeMillis();
-		long now = start;
+  public ArrayList<?> waitForData(int count, int timeout) throws InterruptedException, IOException {
+    return waitForData(count, timeout, 100);
+  }
 
-		while (msgCount < count) {
-			Object msg = data.poll(pollInterval, TimeUnit.MILLISECONDS);
-			if (msg != null) {
-				ret.add(msg);
-			}
-			now = System.currentTimeMillis();
-			if (now - start > timeout) {
-				throw new IOException(String.format("waited %d ms received %d messages expecting %d in less than %d ms", now - start, ret.size(), count, timeout));
-			}
-		}
+  public ArrayList<?> waitForData(int count, int timeout, int pollInterval) throws InterruptedException, IOException {
+    int msgCount = 0;
+    ArrayList<Object> ret = new ArrayList<Object>();
+    long start = System.currentTimeMillis();
+    long now = start;
 
-		log.info("returned %d data in %s ms", ret.size(), now - start);
-		return ret;
-	}
+    while (msgCount < count) {
+      Object msg = data.poll(pollInterval, TimeUnit.MILLISECONDS);
+      if (msg != null) {
+        ret.add(msg);
+      }
+      now = System.currentTimeMillis();
+      if (now - start > timeout) {
+        throw new IOException(String.format("waited %d ms received %d messages expecting %d in less than %d ms", now - start, ret.size(), count, timeout));
+      }
+    }
 
-	public int getMsgCount() {
-		return msgs.size();
-	}
+    log.info("returned %d data in %s ms", ret.size(), now - start);
+    return ret;
+  }
 
-	@Override
-	public String onConnect(String portName) {
-		info("connected to %s", portName);
-		addData("onConnect", portName);
-		return portName;
-	}
+  public int getMsgCount() {
+    return msgs.size();
+  }
 
-	@Override
-	public String onDisconnect(String portName) {
-		info("disconnect to %s", portName);
-		addData("onDisconnect", portName);
-		return portName;
-	}
+  @Override
+  public String onConnect(String portName) {
+    info("connected to %s", portName);
+    addData("onConnect", portName);
+    return portName;
+  }
 
-	public void checkMsg(String method) throws InterruptedException, IOException {
-		checkMsg(1000, method, (Object[]) null);
-	}
+  @Override
+  public String onDisconnect(String portName) {
+    info("disconnect to %s", portName);
+    addData("onDisconnect", portName);
+    return portName;
+  }
 
-	public void checkMsg(String method, Object... checkParms) throws InterruptedException, IOException {
-		checkMsg(1000, method, checkParms);
-	}
+  public void checkMsg(String method) throws InterruptedException, IOException {
+    checkMsg(1000, method, (Object[]) null);
+  }
 
-	public void checkMsg(long timeout, String method, Object... checkParms) throws InterruptedException, IOException {
-		Message msg = getMsg(timeout);
-		if (msg == null) {
-			log.error(String.format("%s", msg));
-			throw new IOException(String.format("reached timeout of %d waiting for message", timeout));
-		}
-		if (checkParms != null && checkParms.length != msg.data.length) {
-			log.error(String.format("%s", msg));
-			throw new IOException(String.format("incorrect number of expected parameters - expected %d got %d", checkParms.length, msg.data.length));
-		}
+  public void checkMsg(String method, Object... checkParms) throws InterruptedException, IOException {
+    checkMsg(1000, method, checkParms);
+  }
 
-		if (checkParms == null && msg.data != null) {
-			log.error(String.format("%s", msg));
-			throw new IOException(String.format("expected null parameters - got non-null"));
-		}
+  public void checkMsg(long timeout, String method, Object... checkParms) throws InterruptedException, IOException {
+    Message msg = getMsg(timeout);
+    if (msg == null) {
+      log.error(String.format("%s", msg));
+      throw new IOException(String.format("reached timeout of %d waiting for message", timeout));
+    }
+    if (checkParms != null && checkParms.length != msg.data.length) {
+      log.error(String.format("%s", msg));
+      throw new IOException(String.format("incorrect number of expected parameters - expected %d got %d", checkParms.length, msg.data.length));
+    }
 
-		if (checkParms != null && msg.data == null) {
-			log.error(String.format("%s", msg));
-			throw new IOException(String.format("expected non null parameters - got null"));
-		}
+    if (checkParms == null && msg.data != null) {
+      log.error(String.format("%s", msg));
+      throw new IOException(String.format("expected null parameters - got non-null"));
+    }
 
-		if (!method.equals(msg.method)) {
-			log.error(String.format("%s", msg));
-			throw new IOException(String.format("unlike methods - expected %s got %s", method, msg.method));
-		}
+    if (checkParms != null && msg.data == null) {
+      log.error(String.format("%s", msg));
+      throw new IOException(String.format("expected non null parameters - got null"));
+    }
 
-		for (int i = 0; i < checkParms.length; ++i) {
-			Object expected = checkParms[i];
-			Object got = msg.data[i];
-			if (!expected.equals(got)) {
-				throw new IOException(String.format("unlike methods - expected %s got %s", method, msg.method));
-			}
-		}
+    if (!method.equals(msg.method)) {
+      log.error(String.format("%s", msg));
+      throw new IOException(String.format("unlike methods - expected %s got %s", method, msg.method));
+    }
 
-	}
+    for (int i = 0; i < checkParms.length; ++i) {
+      Object expected = checkParms[i];
+      Object got = msg.data[i];
+      if (!expected.equals(got)) {
+        throw new IOException(String.format("unlike methods - expected %s got %s", method, msg.method));
+      }
+    }
 
-	/**
-	 * "unified"? way of testing direct callbacks. reconstruct the message that
-	 * "would have" been created to make this direct callback
-	 * 
-	 * @param method
-	 * @param parms
-	 * @throws InterruptedException
-	 */
-	public void addData(String method, Object... parms) {
-		try {
-			Message msg = new Message();
-			msg.method = method;
-			msg.data = parms;
-			msgs.put(msg);
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-	
-	
-	static public ServiceType meta = null; 
+  }
 
+  /**
+   * "unified"? way of testing direct callbacks. reconstruct the message that
+   * "would have" been created to make this direct callback
+   * 
+   * @param method
+   * @param parms
+   * @throws InterruptedException
+   */
+  public void addData(String method, Object... parms) {
+    try {
+      Message msg = new Message();
+      msg.method = method;
+      msg.data = parms;
+      msgs.put(msg);
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	
-	public void startService(){
-		super.startService();
-		startPeer("t01");
-		startPeer("t02");
-		startPeer("opencv");
-	}
-	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+  static public ServiceType meta = null;
 
-		try {
-			
-			Runtime.start("c01", "TestCatcher");
-			Runtime.start("gui", "GUIService");
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
 
-			/*
-			TestThrower thrower = new TestThrower("thrower");
-			thrower.startService();
+  public void startService() {
+    super.startService();
+    startPeer("t01");
+    startPeer("t02");
+    startPeer("opencv");
+  }
 
-			catcher01.subscribe(thrower.getName(), "throwInteger", catcher01.getName(), "catchInteger");
+  public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
-			for (int i = 0; i < 1000; ++i) {
-				thrower.invoke("throwInteger", i);
-				if (i % 100 == 0) {
-					thrower.sendBlocking(catcher01.getName(), "catchInteger");
-				}
-			}
-			*/
+    try {
 
-			// thrower.throwInteger(count);
+      Runtime.start("c01", "TestCatcher");
+      Runtime.start("gui", "GUIService");
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
+      /*
+       * TestThrower thrower = new TestThrower("thrower");
+       * thrower.startService();
+       * 
+       * catcher01.subscribe(thrower.getName(), "throwInteger",
+       * catcher01.getName(), "catchInteger");
+       * 
+       * for (int i = 0; i < 1000; ++i) { thrower.invoke("throwInteger", i); if
+       * (i % 100 == 0) { thrower.sendBlocking(catcher01.getName(),
+       * "catchInteger"); } }
+       */
 
-	}
-	
-	static public ServiceType getMetaData() {
+      // thrower.throwInteger(count);
 
-		ServiceType meta = new ServiceType(TestCatcher.class.getCanonicalName());
-		meta.addDescription("This service is used to test messaging");
-		meta.setAvailable(false);
-		meta.addCategory("testing","framework");	
-		
-		return meta;
-	}
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
 
-	
+  }
+
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(TestCatcher.class.getCanonicalName());
+    meta.addDescription("This service is used to test messaging");
+    meta.setAvailable(false);
+    meta.addCategory("testing", "framework");
+
+    return meta;
+  }
+
 }

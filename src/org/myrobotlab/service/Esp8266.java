@@ -10,50 +10,47 @@ import org.slf4j.Logger;
 
 public class Esp8266 extends Service {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Esp8266.class);
+  public final static Logger log = LoggerFactory.getLogger(Esp8266.class);
 
-	
-	public Esp8266(String n) {
-		super(n);
-	}
-	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+  public Esp8266(String n) {
+    super(n);
+  }
 
-		try {
+  public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			Runtime.start("esp", "Esp8266");
-			Runtime.start("gui", "GUIService");
+    try {
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-	
+      Runtime.start("esp", "Esp8266");
+      Runtime.start("gui", "GUIService");
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-		ServiceType meta = new ServiceType(Esp8266.class.getCanonicalName());
-		meta.addDescription("wifi Arduino");
-		meta.addCategory("microcontroller");
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
-		// put peer definitions in
-		meta.addPeer("serial", "Serial", "serial");
-		meta.addPeer("webgui", "WebGui", "webgui");
+    ServiceType meta = new ServiceType(Esp8266.class.getCanonicalName());
+    meta.addDescription("wifi Arduino");
+    meta.addCategory("microcontroller");
 
-		return meta;
-	}
+    // put peer definitions in
+    meta.addPeer("serial", "Serial", "serial");
+    meta.addPeer("webgui", "WebGui", "webgui");
 
+    return meta;
+  }
 
 }

@@ -27,82 +27,79 @@ package org.myrobotlab.service.interfaces;
 
 public interface ServoControl {
 
-	// FIXME - add sweep and other fun methods
-	// extend Motor ???
-	/**
-	 * re-attaches servo to controller it was last attached to
-	 * 
-	 * @return
-	 */
-	public boolean attach();
+  // FIXME - add sweep and other fun methods
+  // extend Motor ???
+  /**
+   * re-attaches servo to controller it was last attached to
+   * 
+   * @return
+   */
+  public boolean attach();
 
-	public boolean attach(String controller, Integer pin);
+  public boolean attach(String controller, Integer pin);
 
-	/**
-	 * detaches the servo from the controller
-	 * 
-	 * @return
-	 */
-	public boolean detach();
+  /**
+   * detaches the servo from the controller
+   * 
+   * @return
+   */
+  public boolean detach();
 
-	public String getControllerName();
+  public String getControllerName();
 
-	public String getName();
+  public String getName();
 
-	public Integer getPin();
+  public Integer getPin();
 
-	
+  /**
+   * moveTo moves the servo to a specific location. Typically, a servo has 0 to
+   * 180 positions
+   * 
+   * @param newPos
+   */
+  public void moveTo(int newPos);
 
-	/**
-	 * moveTo moves the servo to a specific location. Typically, a servo has 0
-	 * to 180 positions
-	 * 
-	 * @param newPos
-	 */
-	public void moveTo(int newPos);
+  /**
+   * Attach a servo controller to the servo. The servo and servo controller
+   * "should be in the same instance of MRL and this reference to another
+   * service should be ok.
+   * 
+   * The servo controller uses this method to pass a reference of itself to the
+   * servo, to be used directly.
+   */
 
-	/**
-	 * Attach a servo controller to the servo. The servo and servo controller
-	 * "should be in the same instance of MRL and this reference to another
-	 * service should be ok.
-	 * 
-	 * The servo controller uses this method to pass a reference of itself to
-	 * the servo, to be used directly.
-	 */
+  public boolean setController(ServoController controller);
 
-	public boolean setController(ServoController controller);
+  public boolean setController(String controller);
 
-	
-	public boolean setController(String controller);
+  /**
+   * limits input of servo - to prevent damage or problems if servos should not
+   * move thier full range
+   * 
+   * @param max
+   */
+  public void setMinMax(int min, int max);
 
-	/**
-	 * limits input of servo - to prevent damage or problems if servos should
-	 * not move thier full range
-	 * 
-	 * @param max
-	 */
-	public void setMinMax(int min, int max);
+  /**
+   * memory of the controllers pin - so that it can be re-attached after a
+   * detach
+   * 
+   * @return
+   */
+  public boolean setPin(int pin);
 
-	/**
-	 * memory of the controllers pin - so that it can be re-attached after a
-	 * detach
-	 * 
-	 * @return
-	 */
-	public boolean setPin(int pin);
-	
-	/**
-	 * fractional speed settings
-	 * @param speed
-	 */
-	// public void setSpeed(int speed);
-	public void setSpeed(double speed);
+  /**
+   * fractional speed settings
+   * 
+   * @param speed
+   */
+  // public void setSpeed(int speed);
+  public void setSpeed(double speed);
 
-	/**
-	 * stops the servo if currently in motion servo must be moving at
-	 * incremental speed for a stop to work (setSpeed < 1.0)
-	 */
-	public void stop();
-
+  /**
+   * stops the servo if currently in motion servo must be moving at incremental
+   * speed for a stop to work (setSpeed < 1.0)
+   */
+  public void stop();
 
 }

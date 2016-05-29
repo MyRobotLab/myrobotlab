@@ -42,319 +42,317 @@ import org.slf4j.Logger;
  */
 public class ServiceData implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	transient public final static Logger log = LoggerFactory.getLogger(ServiceData.class);
+  transient public final static Logger log = LoggerFactory.getLogger(ServiceData.class);
 
-	/**
-	 * all services meta data is contained here
-	 */
-	TreeMap<String, ServiceType> serviceTypes = new TreeMap<String, ServiceType>();
+  /**
+   * all services meta data is contained here
+   */
+  TreeMap<String, ServiceType> serviceTypes = new TreeMap<String, ServiceType>();
 
-	/**
-	 * the set of all categories
-	 */
-	TreeMap<String, Category> categoryTypes = new TreeMap<String, Category>();
+  /**
+   * the set of all categories
+   */
+  TreeMap<String, Category> categoryTypes = new TreeMap<String, Category>();
 
-	static private ServiceData localInstance = null;
+  static private ServiceData localInstance = null;
 
-	static private String serviceDataCacheFileName = String.format("%s%sserviceData.json", FileIO.getCfgDir(), File.separator);
+  static private String serviceDataCacheFileName = String.format("%s%sserviceData.json", FileIO.getCfgDir(), File.separator);
 
-	static public ServiceData getLocalInstance() {
-		if (localInstance == null) {
+  static public ServiceData getLocalInstance() {
+    if (localInstance == null) {
 
-			// step 1 - try local file in the .myrobotlab directory
-			// step 2 - extract the file from the jar
-			// WE CAN NOT GENERATE THIS FILE DURING RUNTIME !!!
+      // step 1 - try local file in the .myrobotlab directory
+      // step 2 - extract the file from the jar
+      // WE CAN NOT GENERATE THIS FILE DURING RUNTIME !!!
 
-			// step 3 - if 1 & 2 fail - then we can 'assume' were in develop
-			// time (we'll isJar check and error if not)
-			// - generate it and put it in
-			// getRoot()/resource/framework/serviceData.json
+      // step 3 - if 1 & 2 fail - then we can 'assume' were in develop
+      // time (we'll isJar check and error if not)
+      // - generate it and put it in
+      // getRoot()/resource/framework/serviceData.json
 
-			File jsonFile = new File(serviceDataCacheFileName);
+      File jsonFile = new File(serviceDataCacheFileName);
 
-			try {
-				log.info("try #1 loading local file {}", jsonFile);
-				String data = FileIO.toString(jsonFile);
-				if (data == null || data.length() == 0){
-					throw new IOException("service data file [{}] contains no data");
-				}
-				localInstance = CodecUtils.fromJson(data, ServiceData.class);
-				return localInstance;
-			} catch (FileNotFoundException fe) {
-				try {
-					log.info("could not find {}", serviceDataCacheFileName);
-					jsonFile.getParentFile().mkdirs();
-					String extractFrom = "/resource/framework/serviceData.json";
-					log.info("try #2 {} not found - extracting from {}", jsonFile.getName(), extractFrom);
-					FileIO.extract(extractFrom, jsonFile.getAbsolutePath());
-					String data = FileIO.toString(jsonFile);
-					localInstance = CodecUtils.fromJson(data, ServiceData.class);
-				} catch (Exception e) {
-					log.info("could not extract from {}", "/resource/framework/serviceData.json");
-					String newJson = FileIO.gluePaths(FileIO.getRoot(), "/resource/framework/serviceData.json");
-					log.info("try #3 serviceData.json not found in resource ! - generating and putting it in {}", newJson);
-					if (FileIO.isJar()) {
-						log.error("we are in a jar!  This is very bad!");
-					} else {
-						log.info("we are not in a jar ... ok I guess we are doing a \"refresh\" on serviceData.json");
-					}
-					try {
-						ServiceData sd = ServiceData.generate();
-						String json = CodecUtils.toJson(sd);
+      try {
+        log.info("try #1 loading local file {}", jsonFile);
+        String data = FileIO.toString(jsonFile);
+        if (data == null || data.length() == 0) {
+          throw new IOException("service data file [{}] contains no data");
+        }
+        localInstance = CodecUtils.fromJson(data, ServiceData.class);
+        return localInstance;
+      } catch (FileNotFoundException fe) {
+        try {
+          log.info("could not find {}", serviceDataCacheFileName);
+          jsonFile.getParentFile().mkdirs();
+          String extractFrom = "/resource/framework/serviceData.json";
+          log.info("try #2 {} not found - extracting from {}", jsonFile.getName(), extractFrom);
+          FileIO.extract(extractFrom, jsonFile.getAbsolutePath());
+          String data = FileIO.toString(jsonFile);
+          localInstance = CodecUtils.fromJson(data, ServiceData.class);
+        } catch (Exception e) {
+          log.info("could not extract from {}", "/resource/framework/serviceData.json");
+          String newJson = FileIO.gluePaths(FileIO.getRoot(), "/resource/framework/serviceData.json");
+          log.info("try #3 serviceData.json not found in resource ! - generating and putting it in {}", newJson);
+          if (FileIO.isJar()) {
+            log.error("we are in a jar!  This is very bad!");
+          } else {
+            log.info("we are not in a jar ... ok I guess we are doing a \"refresh\" on serviceData.json");
+          }
+          try {
+            ServiceData sd = ServiceData.generate();
+            String json = CodecUtils.toJson(sd);
 
-						log.info("saving generated serviceData.json to {}", newJson);
-						FileOutputStream fos = new FileOutputStream(newJson);
-						fos.write(json.getBytes());
-						fos.close();
-						log.info("saved -- goodtimes");
-						localInstance = sd;
-					} catch (Exception e2) {
-						log.error("I've tried everything! .. I give up");
-						Logging.logError(e2);
-					}
-				}
-				localInstance.save();
-			} catch (Exception e) {
-				Logging.logError(e);
-			}
+            log.info("saving generated serviceData.json to {}", newJson);
+            FileOutputStream fos = new FileOutputStream(newJson);
+            fos.write(json.getBytes());
+            fos.close();
+            log.info("saved -- goodtimes");
+            localInstance = sd;
+          } catch (Exception e2) {
+            log.error("I've tried everything! .. I give up");
+            Logging.logError(e2);
+          }
+        }
+        localInstance.save();
+      } catch (Exception e) {
+        Logging.logError(e);
+      }
 
-		}
-		return localInstance;
-	}
+    }
+    return localInstance;
+  }
 
-	/**
-	 * This method has to check the environment first in order to tell if its
-	 * Develop-Time or Run-Time because the method of generating a service list
-	 * is different depending on current environment
-	 * 
-	 * Develop-Time can simply filter and process the files on the file system
-	 * given by the code source location
-	 * 
-	 * Run-Time must extract itself and scan/filter zip entries which is
-	 * potentially a lengthy process, and should only have to be done once for
-	 * the lifetime of the version or mrl
-	 * 
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	static public ServiceData generate() throws IOException {
-		log.info("================ generating serviceData.json begin ================");
-		ServiceData sd = new ServiceData();
+  /**
+   * This method has to check the environment first in order to tell if its
+   * Develop-Time or Run-Time because the method of generating a service list is
+   * different depending on current environment
+   * 
+   * Develop-Time can simply filter and process the files on the file system
+   * given by the code source location
+   * 
+   * Run-Time must extract itself and scan/filter zip entries which is
+   * potentially a lengthy process, and should only have to be done once for the
+   * lifetime of the version or mrl
+   * 
+   * 
+   * @return
+   * @throws IOException
+   */
+  static public ServiceData generate() throws IOException {
+    log.info("================ generating serviceData.json begin ================");
+    ServiceData sd = new ServiceData();
 
-		// get services - all this could be done during Runtime
-		// although running through zip entries would be a bit of a pain
-		// epecially if you have to spin through 12 megs of data
-		List<String> services = FileIO.getServiceList();
+    // get services - all this could be done during Runtime
+    // although running through zip entries would be a bit of a pain
+    // epecially if you have to spin through 12 megs of data
+    List<String> services = FileIO.getServiceList();
 
-		log.info("found {} services", services.size());
-		for (int i = 0; i < services.size(); ++i) {
+    log.info("found {} services", services.size());
+    for (int i = 0; i < services.size(); ++i) {
 
-			String fullClassName = services.get(i);
-			// log.info("querying {}", fullClassName);
-			try {
-				Class<?> theClass = Class.forName(fullClassName);
-				Method method = theClass.getMethod("getMetaData");
-				ServiceType serviceType = (ServiceType) method.invoke(null);
+      String fullClassName = services.get(i);
+      // log.info("querying {}", fullClassName);
+      try {
+        Class<?> theClass = Class.forName(fullClassName);
+        Method method = theClass.getMethod("getMetaData");
+        ServiceType serviceType = (ServiceType) method.invoke(null);
 
-				if (!fullClassName.equals(serviceType.getName())) {
-					log.error(String.format("Class name %s not equal to the ServiceType's name %s", fullClassName, serviceType.getName()));
-				}
+        if (!fullClassName.equals(serviceType.getName())) {
+          log.error(String.format("Class name %s not equal to the ServiceType's name %s", fullClassName, serviceType.getName()));
+        }
 
-				sd.add(serviceType);
+        sd.add(serviceType);
 
-				for (String cat : serviceType.categories) {
-					Category category = null;
-					if (sd.categoryTypes.containsKey(cat)) {
-						category = sd.categoryTypes.get(cat);
-					} else {
-						category = new Category();
-						category.name = category.name;
-					}
-					category.serviceTypes.add(serviceType.getName());
-					sd.categoryTypes.put(cat, category);
-				}
+        for (String cat : serviceType.categories) {
+          Category category = null;
+          if (sd.categoryTypes.containsKey(cat)) {
+            category = sd.categoryTypes.get(cat);
+          } else {
+            category = new Category();
+            category.name = category.name;
+          }
+          category.serviceTypes.add(serviceType.getName());
+          sd.categoryTypes.put(cat, category);
+        }
 
-			} catch (Exception e) {
-				log.error(String.format("%s does not have a static getMetaData method", fullClassName));
-			}
-		}
-		log.info("================ generating serviceData.json end ================");
+      } catch (Exception e) {
+        log.error(String.format("%s does not have a static getMetaData method", fullClassName));
+      }
+    }
+    log.info("================ generating serviceData.json end ================");
 
-		return sd;
-	}
-	
-	public ServiceData() {
-	}
+    return sd;
+  }
 
-	public void add(ServiceType serviceType) {
-		serviceTypes.put(serviceType.getName(), serviceType);
-	}
+  public ServiceData() {
+  }
 
-	public boolean containsServiceType(String fullServiceName) {
-		return serviceTypes.containsKey(fullServiceName);
-	}
+  public void add(ServiceType serviceType) {
+    serviceTypes.put(serviceType.getName(), serviceType);
+  }
 
-	public List<ServiceType> getAvailableServiceTypes() {
-		ArrayList<ServiceType> ret = new ArrayList<ServiceType>();
-		for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
-			if (o.getValue().isAvailable()) {
-				ret.add(o.getValue());
-			}
-		}
-		return ret;
-	}
+  public boolean containsServiceType(String fullServiceName) {
+    return serviceTypes.containsKey(fullServiceName);
+  }
 
-	public Category getCategory(String filter) {
-		if (filter == null) {
-			return null;
-		}
-		if (categoryTypes.containsKey(filter)) {
-			return categoryTypes.get(filter);
-		}
-		return null;
-	}
+  public List<ServiceType> getAvailableServiceTypes() {
+    ArrayList<ServiceType> ret = new ArrayList<ServiceType>();
+    for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
+      if (o.getValue().isAvailable()) {
+        ret.add(o.getValue());
+      }
+    }
+    return ret;
+  }
 
-	public String[] getCategoryNames() {
-		String[] cat = new String[categoryTypes.size()];
+  public Category getCategory(String filter) {
+    if (filter == null) {
+      return null;
+    }
+    if (categoryTypes.containsKey(filter)) {
+      return categoryTypes.get(filter);
+    }
+    return null;
+  }
 
-		int i = 0;
-		for (Map.Entry<String, Category> o : categoryTypes.entrySet()) {
-			cat[i] = o.getKey();
-			++i;
-		}
-		return cat;
-	}
+  public String[] getCategoryNames() {
+    String[] cat = new String[categoryTypes.size()];
 
-	public HashSet<String> getServiceTypeDependencyKeys() {
-		HashSet<String> uniqueKeys = new HashSet<String>();
-		for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
-			ServiceType st = o.getValue();
-			if (st.dependencies != null) {
-				for (String org : st.dependencies) {
-					uniqueKeys.add(org);
-				}
-			}
-		}
+    int i = 0;
+    for (Map.Entry<String, Category> o : categoryTypes.entrySet()) {
+      cat[i] = o.getKey();
+      ++i;
+    }
+    return cat;
+  }
 
-		return uniqueKeys;
-	}
+  public HashSet<String> getServiceTypeDependencyKeys() {
+    HashSet<String> uniqueKeys = new HashSet<String>();
+    for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
+      ServiceType st = o.getValue();
+      if (st.dependencies != null) {
+        for (String org : st.dependencies) {
+          uniqueKeys.add(org);
+        }
+      }
+    }
 
-	public String[] getServiceTypeNames() {
-		return getServiceTypeNames(null);
-	}
+    return uniqueKeys;
+  }
 
-	public String[] getServiceTypeNames(String categoryFilterName) {
+  public String[] getServiceTypeNames() {
+    return getServiceTypeNames(null);
+  }
 
-		if (categoryFilterName == null || categoryFilterName.length() == 0 || categoryFilterName.equals("all")) {
-			String[] ret = serviceTypes.keySet().toArray(new String[0]);
-			Arrays.sort(ret);
-			return ret;
-		}
+  public String[] getServiceTypeNames(String categoryFilterName) {
 
-		if (!categoryTypes.containsKey(categoryFilterName)) {
-			return new String[] {};
-		}
+    if (categoryFilterName == null || categoryFilterName.length() == 0 || categoryFilterName.equals("all")) {
+      String[] ret = serviceTypes.keySet().toArray(new String[0]);
+      Arrays.sort(ret);
+      return ret;
+    }
 
-		Category cat = categoryTypes.get(categoryFilterName);
-		return cat.serviceTypes.toArray(new String[cat.serviceTypes.size()]);
+    if (!categoryTypes.containsKey(categoryFilterName)) {
+      return new String[] {};
+    }
 
-	}
+    Category cat = categoryTypes.get(categoryFilterName);
+    return cat.serviceTypes.toArray(new String[cat.serviceTypes.size()]);
 
-	public ServiceType getServiceType(String fullTypeName) {
-		return serviceTypes.get(fullTypeName);
-	}
+  }
 
-	public ArrayList<ServiceType> getServiceTypes() {
-		ArrayList<ServiceType> ret = new ArrayList<ServiceType>();
-		for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
-			ret.add(o.getValue());
-		}
-		return ret;
-	}
+  public ServiceType getServiceType(String fullTypeName) {
+    return serviceTypes.get(fullTypeName);
+  }
 
-	public boolean save() {
+  public ArrayList<ServiceType> getServiceTypes() {
+    ArrayList<ServiceType> ret = new ArrayList<ServiceType>();
+    for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
+      ret.add(o.getValue());
+    }
+    return ret;
+  }
 
-		log.info("saving {}", serviceDataCacheFileName);
-		return save(serviceDataCacheFileName);
-	}
+  public boolean save() {
 
-	public boolean save(String filename) {
-		try {
+    log.info("saving {}", serviceDataCacheFileName);
+    return save(serviceDataCacheFileName);
+  }
 
-			FileOutputStream fos = new FileOutputStream(filename);
-			String json = CodecUtils.toJson(this);
-			fos.write(json.getBytes());
-			fos.close();
+  public boolean save(String filename) {
+    try {
 
-			return true;
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
+      FileOutputStream fos = new FileOutputStream(filename);
+      String json = CodecUtils.toJson(this);
+      fos.write(json.getBytes());
+      fos.close();
 
-		return false;
-	}
+      return true;
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
 
-	// TWO LEVELS !!! 1. Run-time checking & Build-time checking
-	// Built-time checking
-	// build time has access to the repo - can cross check dependencies to make
-	// sure they are in the library
-	//
-	// Runtime checking
-	// for all Peers - do ALL THERE TYPES CURRENTLY EXIST ???
-	// FIXME - TODO - FIND
+    return false;
+  }
 
-	public ArrayList<Category> getCategories() {
-		ArrayList<Category> categories = new ArrayList<Category>();
-		for (Category category : categoryTypes.values()) {
-			categories.add(category);
-		}
-		return categories;
-	}
+  // TWO LEVELS !!! 1. Run-time checking & Build-time checking
+  // Built-time checking
+  // build time has access to the repo - can cross check dependencies to make
+  // sure they are in the library
+  //
+  // Runtime checking
+  // for all Peers - do ALL THERE TYPES CURRENTLY EXIST ???
+  // FIXME - TODO - FIND
 
+  public ArrayList<Category> getCategories() {
+    ArrayList<Category> categories = new ArrayList<Category>();
+    for (Category category : categoryTypes.values()) {
+      categories.add(category);
+    }
+    return categories;
+  }
 
-	static public Set<String> getDependencyKeys(String fullTypeName) {
-		HashSet<String> keys = new HashSet<String>();
-		ServiceData sd = getLocalInstance();
-		if (!sd.serviceTypes.containsKey(fullTypeName)) {
-			log.error("{} not defined in service types");
-			return keys;
-		}
+  static public Set<String> getDependencyKeys(String fullTypeName) {
+    HashSet<String> keys = new HashSet<String>();
+    ServiceData sd = getLocalInstance();
+    if (!sd.serviceTypes.containsKey(fullTypeName)) {
+      log.error("{} not defined in service types");
+      return keys;
+    }
 
-		ServiceType st = localInstance.serviceTypes.get(fullTypeName);
-		return st.getDependencies();
-	}
-	
-	public static void main(String[] args) {
-		try {
+    ServiceType st = localInstance.serviceTypes.get(fullTypeName);
+    return st.getDependencies();
+  }
 
-			LoggingFactory.getInstance().configure();
-			// LoggingFactory.getInstance().setLevel("INFO");
-			// LoggingFactory.getInstance().addAppender(Appender.FILE);
-			String path = "";
-			if (args.length > 0){
-				path = args[0];
-			}
-			
-			String filename = FileIO.gluePaths(path, "serviceData.json");
-			log.info("generating {}", filename);
-			if (path.length() > 0){
-				new File(path).mkdirs();
-			}
+  public static void main(String[] args) {
+    try {
 
-			// THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----
-			ServiceData sd = generate();
-			FileOutputStream fos = new FileOutputStream(filename);
-			fos.write(CodecUtils.toJson(sd).getBytes());
-			fos.close();
-			// THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - END ----
+      LoggingFactory.getInstance().configure();
+      // LoggingFactory.getInstance().setLevel("INFO");
+      // LoggingFactory.getInstance().addAppender(Appender.FILE);
+      String path = "";
+      if (args.length > 0) {
+        path = args[0];
+      }
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+      String filename = FileIO.gluePaths(path, "serviceData.json");
+      log.info("generating {}", filename);
+      if (path.length() > 0) {
+        new File(path).mkdirs();
+      }
 
+      // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----
+      ServiceData sd = generate();
+      FileOutputStream fos = new FileOutputStream(filename);
+      fos.write(CodecUtils.toJson(sd).getBytes());
+      fos.close();
+      // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - END ----
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
 }

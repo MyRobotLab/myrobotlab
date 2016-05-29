@@ -37,62 +37,63 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterResize extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	transient IplImage resized;
+  transient IplImage resized;
 
-	private int destWidth = 480;
-	private int destHeight= 640;
-	// TODO: why the heck do we need to convert back and forth, and is this effecient?!?!
-	private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-	private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
-	
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterResize.class.getCanonicalName());
+  private int destWidth = 480;
+  private int destHeight = 640;
+  // TODO: why the heck do we need to convert back and forth, and is this
+  // effecient?!?!
+  private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+  private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
-	public OpenCVFilterResize() {
-		super();
-	}
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterResize.class.getCanonicalName());
 
-	public OpenCVFilterResize(String name) {
-		super(name);
-	}
+  public OpenCVFilterResize() {
+    super();
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		resized = IplImage.createCompatible(image);
-	}
+  public OpenCVFilterResize(String name) {
+    super(name);
+  }
 
-	
-	private Mat resizeImage(Mat img, int w, int h) {
-		// TODO: move this to a base class.
-		Mat resizedMat = new Mat();
-		// IplImage resizedImage = IplImage.create(modelSizeX, modelSizeY, img.depth(), img.channels());
-		Size sz = new Size(w,h);
-		resize(img, resizedMat, sz);
-		return resizedMat;
-	}
-	
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
-		Mat resizedMat = converterToMat.convertToMat(converterToIpl.convert(image));
-		Mat res = resizeImage(resizedMat, destWidth, destHeight);
-		return converterToMat.convertToIplImage(converterToIpl.convert(res));
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+    resized = IplImage.createCompatible(image);
+  }
 
-	public int getDestWidth() {
-		return destWidth;
-	}
+  private Mat resizeImage(Mat img, int w, int h) {
+    // TODO: move this to a base class.
+    Mat resizedMat = new Mat();
+    // IplImage resizedImage = IplImage.create(modelSizeX, modelSizeY,
+    // img.depth(), img.channels());
+    Size sz = new Size(w, h);
+    resize(img, resizedMat, sz);
+    return resizedMat;
+  }
 
-	public void setDestWidth(int destWidth) {
-		this.destWidth = destWidth;
-	}
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
+    Mat resizedMat = converterToMat.convertToMat(converterToIpl.convert(image));
+    Mat res = resizeImage(resizedMat, destWidth, destHeight);
+    return converterToMat.convertToIplImage(converterToIpl.convert(res));
+  }
 
-	public int getDestHeight() {
-		return destHeight;
-	}
+  public int getDestWidth() {
+    return destWidth;
+  }
 
-	public void setDestHeight(int destHeight) {
-		this.destHeight = destHeight;
-	}
+  public void setDestWidth(int destWidth) {
+    this.destWidth = destWidth;
+  }
+
+  public int getDestHeight() {
+    return destHeight;
+  }
+
+  public void setDestHeight(int destHeight) {
+    this.destHeight = destHeight;
+  }
 
 }

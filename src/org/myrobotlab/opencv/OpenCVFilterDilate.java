@@ -33,29 +33,29 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterDilate extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDilate.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDilate.class.getCanonicalName());
 
-	public int numberOfIterations = 1;
+  public int numberOfIterations = 1;
 
-	public OpenCVFilterDilate() {
-		super();
-	}
+  public OpenCVFilterDilate() {
+    super();
+  }
 
-	public OpenCVFilterDilate(String name) {
-		super(name);
-	}
+  public OpenCVFilterDilate(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+  }
 
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
 
-		cvDilate(image, image, null, numberOfIterations);
-		return image;
-	}
+    cvDilate(image, image, null, numberOfIterations);
+    return image;
+  }
 
 }

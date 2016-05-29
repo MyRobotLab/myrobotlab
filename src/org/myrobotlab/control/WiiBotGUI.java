@@ -43,64 +43,64 @@ import org.slf4j.Logger;
 
 public class WiiBotGUI extends ServiceGUI implements ListSelectionListener {
 
-	public class Keyboard implements KeyListener {
+  public class Keyboard implements KeyListener {
 
-		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss:SSS");
+    SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss:SSS");
 
-		@Override
-		public void keyPressed(KeyEvent keyEvent) {
+    @Override
+    public void keyPressed(KeyEvent keyEvent) {
 
-			myService.send(boundServiceName, "keyPressed", keyEvent.getKeyCode());
-		}
+      myService.send(boundServiceName, "keyPressed", keyEvent.getKeyCode());
+    }
 
-		@Override
-		public void keyReleased(KeyEvent keyEvent) {
-		}
+    @Override
+    public void keyReleased(KeyEvent keyEvent) {
+    }
 
-		@Override
-		public void keyTyped(KeyEvent keyEvent) {
-		}
-	}
+    @Override
+    public void keyTyped(KeyEvent keyEvent) {
+    }
+  }
 
-	public final static Logger log = LoggerFactory.getLogger(WiiBotGUI.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(WiiBotGUI.class.getCanonicalName());
 
-	static final long serialVersionUID = 1L;
+  static final long serialVersionUID = 1L;
 
-	Keyboard keyboard = new Keyboard();
+  Keyboard keyboard = new Keyboard();
 
-	public WiiBotGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public WiiBotGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void attachGUI() {
-	};
+  @Override
+  public void attachGUI() {
+  };
 
-	@Override
-	public void detachGUI() {
-	}
+  @Override
+  public void detachGUI() {
+  }
 
-	@Override
-	public void init() {
+  @Override
+  public void init() {
 
-		JButton keyboardButton = new JButton(
-				"<html><table><tr><td align=\"center\">click here</td></tr><tr><td align=\"center\">for keyboard</td></tr><tr><td align=\"center\">control</td></tr></table></html>");
-		display.add(keyboardButton, gc);
-		keyboardButton.addKeyListener(keyboard);
+    JButton keyboardButton = new JButton(
+        "<html><table><tr><td align=\"center\">click here</td></tr><tr><td align=\"center\">for keyboard</td></tr><tr><td align=\"center\">control</td></tr></table></html>");
+    display.add(keyboardButton, gc);
+    keyboardButton.addKeyListener(keyboard);
 
-		TitledBorder title;
-		JPanel logPanel = new JPanel();
-		title = BorderFactory.createTitledBorder("wiibot");
-		logPanel.setBorder(title);
+    TitledBorder title;
+    JPanel logPanel = new JPanel();
+    title = BorderFactory.createTitledBorder("wiibot");
+    logPanel.setBorder(title);
 
-		display.add(logPanel, gc);
+    display.add(logPanel, gc);
 
-	}
+  }
 
-	@Override
-	public void valueChanged(ListSelectionEvent arg0) {
-		// TODO Auto-generated method stub
+  @Override
+  public void valueChanged(ListSelectionEvent arg0) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
 }

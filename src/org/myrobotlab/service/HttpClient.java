@@ -69,246 +69,242 @@ import org.slf4j.Logger;
  */
 public class HttpClient extends Service implements HttpDataListener, HttpResponseListener {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	// this httpclient should be thread safe -
-	// transient org.apache.commons.httpclient.De client = null;
-	// DefaultHttpClient client = new DefaultHttpClient();
+  // this httpclient should be thread safe -
+  // transient org.apache.commons.httpclient.De client = null;
+  // DefaultHttpClient client = new DefaultHttpClient();
 
-	public final static Logger log = LoggerFactory.getLogger(HttpClient.class);
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+  public final static Logger log = LoggerFactory.getLogger(HttpClient.class);
 
-		ServiceType meta = new ServiceType(HttpClient.class.getCanonicalName());
-		meta.addDescription("an HTTP client, used to fetch information on the web");
-		meta.addCategory("network");
-		meta.addDependency("org.apache.commons.httpclient", "4.2.5");
-		return meta;
-	}
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
+    ServiceType meta = new ServiceType(HttpClient.class.getCanonicalName());
+    meta.addDescription("an HTTP client, used to fetch information on the web");
+    meta.addCategory("network");
+    meta.addDependency("org.apache.commons.httpclient", "4.2.5");
+    return meta;
+  }
 
-	transient DefaultHttpClient client;
+  transient DefaultHttpClient client;
 
-	transient HashMap<String, String> formFields = new HashMap<String, String>();
+  transient HashMap<String, String> formFields = new HashMap<String, String>();
 
-	public HttpClient(String n) {
-		super(n);
-	}
+  public HttpClient(String n) {
+    super(n);
+  }
 
-	public void addFormField(String name, String value) {
-		formFields.put(name, value);
-	}
+  public void addFormField(String name, String value) {
+    formFields.put(name, value);
+  }
 
-	public void addHttpDataListener(ServiceInterface listener) {
-		/*
-		 * TODO - finish this thought out .. it would mean a Map of method
-		 * signatures to interface methods .. and direct callbacks Pro - is an
-		 * optimization Con - is potentially blocking the callback thread for
-		 * "too" long
-		 * 
-		 * if (SerialDataListener.class.isAssignableFrom(listener.getClass()) &&
-		 * listener.isLocal()) { // direct callback
-		 * listeners.put(si.getName(),(SerialDataListener) si); } else {
-		 */
+  public void addHttpDataListener(ServiceInterface listener) {
+    /*
+     * TODO - finish this thought out .. it would mean a Map of method
+     * signatures to interface methods .. and direct callbacks Pro - is an
+     * optimization Con - is potentially blocking the callback thread for "too"
+     * long
+     * 
+     * if (SerialDataListener.class.isAssignableFrom(listener.getClass()) &&
+     * listener.isLocal()) { // direct callback
+     * listeners.put(si.getName(),(SerialDataListener) si); } else {
+     */
 
-		// pub sub
-		// instead of getting the data twice and expecting 2 methods for more or
-		// less the same material
-		// we will leave it up to the subscribing service to do subscribe and
-		// implement onHttpData
-		listener.subscribe(getName(), "publishHttpData");
+    // pub sub
+    // instead of getting the data twice and expecting 2 methods for more or
+    // less the same material
+    // we will leave it up to the subscribing service to do subscribe and
+    // implement onHttpData
+    listener.subscribe(getName(), "publishHttpData");
 
-		// }
-	}
-	
-	public void addHttpResponseListener(ServiceInterface listener) {
-		listener.subscribe(getName(), "publishHttpResponse");
-	}
-	
-	public void clearForm() {
-		formFields.clear();
-	}
+    // }
+  }
 
-	public String get(String uri) throws ClientProtocolException, IOException {
-		HttpData response = processResponse((HttpUriRequest) new HttpGet(uri), null);
-		if (response.data != null) {
-			return new String(response.data);
-		}
-		return null;
-	}
+  public void addHttpResponseListener(ServiceInterface listener) {
+    listener.subscribe(getName(), "publishHttpResponse");
+  }
 
-	public byte[] getBytes(String uri) throws ClientProtocolException, IOException {
-		return processResponse((HttpUriRequest) new HttpGet(uri), null).data;
-	}
+  public void clearForm() {
+    formFields.clear();
+  }
 
-	/**
-	 * publishHttpData contains more information
-	 * content type, response code, etc...
-	 * need to subscribe to it manually
-	 * for testing purposes
-	 * 
-	 */
-	@Override
-	public void onHttpData(HttpData data) {
-		log.info(data.toString());
-	}
+  public String get(String uri) throws ClientProtocolException, IOException {
+    HttpData response = processResponse((HttpUriRequest) new HttpGet(uri), null);
+    if (response.data != null) {
+      return new String(response.data);
+    }
+    return null;
+  }
 
-	/**
-	 * for testing purposes
-	 * 
-	 * @param data
-	 * @return
-	 */
-	@Override
-	public void onHttpResponse(String data) {
-		log.info(data);
-	}
+  public byte[] getBytes(String uri) throws ClientProtocolException, IOException {
+    return processResponse((HttpUriRequest) new HttpGet(uri), null).data;
+  }
 
-	public String post(String uri) throws ClientProtocolException, IOException {
-		HttpData response = processResponse((HttpUriRequest) new HttpPost(uri), null);
-		if (response.data != null) {
-			return new String(response.data);
-		}
-		return null;
-	}
+  /**
+   * publishHttpData contains more information content type, response code,
+   * etc... need to subscribe to it manually for testing purposes
+   * 
+   */
+  @Override
+  public void onHttpData(HttpData data) {
+    log.info(data.toString());
+  }
 
-	public String post(String uri, HashMap<String, String> fields) throws ClientProtocolException, IOException {
-		byte[] data = postBytes(uri, fields);
-		if (data != null) {
-			return new String(data);
-		}
-		return null;
-	}
+  /**
+   * for testing purposes
+   * 
+   * @param data
+   * @return
+   */
+  @Override
+  public void onHttpResponse(String data) {
+    log.info(data);
+  }
 
-	public byte[] postBytes(String uri, HashMap<String, String> fields) throws ClientProtocolException, IOException {
-		return processResponse((HttpUriRequest) new HttpPost(uri), fields).data;
-	}
+  public String post(String uri) throws ClientProtocolException, IOException {
+    HttpData response = processResponse((HttpUriRequest) new HttpPost(uri), null);
+    if (response.data != null) {
+      return new String(response.data);
+    }
+    return null;
+  }
 
-	public HttpData processResponse(HttpUriRequest request, HashMap<String, String> fields) throws HttpException, IOException {
-		HttpData data = new HttpData(request.getURI().toString());
-		if (fields == null) {
+  public String post(String uri, HashMap<String, String> fields) throws ClientProtocolException, IOException {
+    byte[] data = postBytes(uri, fields);
+    if (data != null) {
+      return new String(data);
+    }
+    return null;
+  }
 
-			fields = formFields;
-		}
+  public byte[] postBytes(String uri, HashMap<String, String> fields) throws ClientProtocolException, IOException {
+    return processResponse((HttpUriRequest) new HttpPost(uri), fields).data;
+  }
 
-		if (request.getClass().equals(HttpPost.class) && formFields.size() > 0) {
-			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(fields.size());
-			for (String nvPairKey : fields.keySet()) {
-				nameValuePairs.add(new BasicNameValuePair(nvPairKey, fields.get(nvPairKey)));
-				((HttpPost) request).setEntity(new UrlEncodedFormEntity(nameValuePairs));
-			}
-		}
-		HttpResponse response = client.execute(request);
-		StatusLine statusLine = response.getStatusLine();
-		data.responseCode = statusLine.getStatusCode();
-		HttpEntity entity = response.getEntity();
-		Header header = entity.getContentType();
-		if (header != null) {
-			data.contentType = header.getValue().toString();
-		}
+  public HttpData processResponse(HttpUriRequest request, HashMap<String, String> fields) throws HttpException, IOException {
+    HttpData data = new HttpData(request.getURI().toString());
+    if (fields == null) {
 
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		response.getEntity().writeTo(baos);
-		data.data = baos.toByteArray();
+      fields = formFields;
+    }
 
-		// publishing
-		invoke("publishHttpData", data);
-		if (data.data != null) {
-			invoke("publishHttpResponse", new String(data.data));
-		}
+    if (request.getClass().equals(HttpPost.class) && formFields.size() > 0) {
+      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(fields.size());
+      for (String nvPairKey : fields.keySet()) {
+        nameValuePairs.add(new BasicNameValuePair(nvPairKey, fields.get(nvPairKey)));
+        ((HttpPost) request).setEntity(new UrlEncodedFormEntity(nameValuePairs));
+      }
+    }
+    HttpResponse response = client.execute(request);
+    StatusLine statusLine = response.getStatusLine();
+    data.responseCode = statusLine.getStatusCode();
+    HttpEntity entity = response.getEntity();
+    Header header = entity.getContentType();
+    if (header != null) {
+      data.contentType = header.getValue().toString();
+    }
 
-		return data;
-	}
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    response.getEntity().writeTo(baos);
+    data.data = baos.toByteArray();
 
-	/**
-	 * publishing point for any http request this is the asynchronous callback
-	 * which will arrive typically at publishHttpData(data)
-	 * 
-	 * contains more data than just the text, can be used for any content type
-	 * too, since the payload is in a byte[]
-	 * 
-	 * @param data
-	 * @return
-	 */
-	public HttpData publishHttpData(HttpData data) {
-		return data;
-	}
+    // publishing
+    invoke("publishHttpData", data);
+    if (data.data != null) {
+      invoke("publishHttpResponse", new String(data.data));
+    }
 
-	/**
-	 * publishing point for any http request this is the asynchronous callback
-	 * which will arrive typically at onHttpRespone(data)
-	 * 
-	 * @param data
-	 * @return
-	 */
-	public String publishHttpResponse(String data) {
-		return data;
-	}
+    return data;
+  }
 
-	public void startService() {
-		super.startService();
-		if (client == null) {
-			// new MultiThreadedHttpConnectionManager()
-			client = new DefaultHttpClient();
-		}
-	}
-	
-	
-	// Set the default host/protocol for the methods to connect to.
-	// This value will only be used if the methods are not given an absolute URI
-	// httpClient.getHostConfiguration().setHost("hc.apache.org", 80, "http");
+  /**
+   * publishing point for any http request this is the asynchronous callback
+   * which will arrive typically at publishHttpData(data)
+   * 
+   * contains more data than just the text, can be used for any content type
+   * too, since the payload is in a byte[]
+   * 
+   * @param data
+   * @return
+   */
+  public HttpData publishHttpData(HttpData data) {
+    return data;
+  }
 
-	// Map<String, HttpData> clients = new HashMap<String, HttpData>();
+  /**
+   * publishing point for any http request this is the asynchronous callback
+   * which will arrive typically at onHttpRespone(data)
+   * 
+   * @param data
+   * @return
+   */
+  public String publishHttpResponse(String data) {
+    return data;
+  }
 
-	// TODO - proxy !
-	// TODO - authentication !
-	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+  public void startService() {
+    super.startService();
+    if (client == null) {
+      // new MultiThreadedHttpConnectionManager()
+      client = new DefaultHttpClient();
+    }
+  }
 
-		try {
+  // Set the default host/protocol for the methods to connect to.
+  // This value will only be used if the methods are not given an absolute URI
+  // httpClient.getHostConfiguration().setHost("hc.apache.org", 80, "http");
 
-			HttpClient client = (HttpClient) Runtime.start("client", "HttpClient");
-			// this is how a listener might subscribe
-			// TODO - put dynamically subscribing into framework
-			// with interface inspection ??
-			client.addHttpResponseListener(client);
-			client.addHttpDataListener(client);
+  // Map<String, HttpData> clients = new HashMap<String, HttpData>();
 
-			// TODO - getByteArray(...)
-			String index = client.get("https://www.cs.tut.fi/~jkorpela/forms/testing.html");
-			log.info(index);
+  // TODO - proxy !
+  // TODO - authentication !
 
-			client.addFormField("Comments", "This is a different comment");
-			client.addFormField("Box", "yes");
-			client.addFormField("Unexpected", "this is an unexpected field");
-			client.addFormField("hidden field", "something else");
+  public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			String response = client.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
+    try {
 
-			log.info(response);
+      HttpClient client = (HttpClient) Runtime.start("client", "HttpClient");
+      // this is how a listener might subscribe
+      // TODO - put dynamically subscribing into framework
+      // with interface inspection ??
+      client.addHttpResponseListener(client);
+      client.addHttpDataListener(client);
 
-			client.clearForm();
-			client.addFormField("hidden field", "something else");
-			response = client.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
-			log.info(response);
+      // TODO - getByteArray(...)
+      String index = client.get("https://www.cs.tut.fi/~jkorpela/forms/testing.html");
+      log.info(index);
 
-			response = client.get("http://www.google.com/search?hl=en&q=myrobotlab&btnG=Google+Search&aq=f&oq=");
-			log.info(response);
+      client.addFormField("Comments", "This is a different comment");
+      client.addFormField("Box", "yes");
+      client.addFormField("Unexpected", "this is an unexpected field");
+      client.addFormField("hidden field", "something else");
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
+      String response = client.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
 
-	}
+      log.info(response);
 
+      client.clearForm();
+      client.addFormField("hidden field", "something else");
+      response = client.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
+      log.info(response);
+
+      response = client.get("http://www.google.com/search?hl=en&q=myrobotlab&btnG=Google+Search&aq=f&oq=");
+      log.info(response);
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+
+  }
 
 }

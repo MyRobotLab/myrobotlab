@@ -7,22 +7,22 @@ import org.myrobotlab.image.SerializableImage;
 
 public abstract class VideoSource extends Service {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public VideoSource(String n) {
-		super(n);
-	}
+  public VideoSource(String n) {
+    super(n);
+  }
 
-	public boolean attach(VideoSink vs) {
-		subscribe(vs.getName(), "publishDisplay");
-		return true;
-	}
+  public boolean attach(VideoSink vs) {
+    subscribe(vs.getName(), "publishDisplay");
+    return true;
+  }
 
-	public boolean detach(VideoSink vs) {
-		unsubscribe(vs.getName(), "publishDisplay");
-		return true;
-	}
+  public boolean detach(VideoSink vs) {
+    unsubscribe(vs.getName(), "publishDisplay");
+    return true;
+  }
 
-	public abstract SerializableImage publishDisplay(SerializableImage img);
+  public abstract SerializableImage publishDisplay(SerializableImage img);
 
 }

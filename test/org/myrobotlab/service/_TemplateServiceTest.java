@@ -9,30 +9,30 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class _TemplateServiceTest {
-	
-	public final static Logger log = LoggerFactory.getLogger(_TemplateServiceTest.class);
 
-	static _TemplateServiceTest service = null;
+  public final static Logger log = LoggerFactory.getLogger(_TemplateServiceTest.class);
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
+  static _TemplateServiceTest service = null;
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+  }
 
-	@Before
-	public void setUp() throws Exception {
-	}
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+  }
 
-	@After
-	public void tearDown() throws Exception {
-	}
+  @Before
+  public void setUp() throws Exception {
+  }
 
-	@Test
-	public final void test() {
-		//fail("Not yet implemented"); // TODO
-	}
+  @After
+  public void tearDown() throws Exception {
+  }
+
+  @Test
+  public final void test() {
+    // fail("Not yet implemented"); // TODO
+  }
 
 }

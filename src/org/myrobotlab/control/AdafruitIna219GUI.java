@@ -41,81 +41,81 @@ import org.slf4j.Logger;
 
 public class AdafruitIna219GUI extends ServiceGUI implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(AdafruitIna219GUI.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(AdafruitIna219GUI.class);
 
-	JButton refresh = new JButton("refresh");
-	
-	JLabel busVoltage = new JLabel();
-	JLabel shuntVoltage = new JLabel();
-	JLabel current = new JLabel();
-	JLabel power = new JLabel();
-	
-	public AdafruitIna219GUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  JButton refresh = new JButton("refresh");
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	    log.info("AdafruitINA219GUI actionPerformed");
-		Object o = e.getSource();
-		if (o == refresh) {
-			myService.send(boundServiceName, "refresh");
-		}
-	}
+  JLabel busVoltage = new JLabel();
+  JLabel shuntVoltage = new JLabel();
+  JLabel current = new JLabel();
+  JLabel power = new JLabel();
 
-	@Override
-	public void attachGUI() {
-		// commented out subscription due to this class being used for
-		// un-defined gui's
-		subscribe("publishState", "getState", AdafruitIna219.class);
-		send("publishState");
-	}
+  public AdafruitIna219GUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void detachGUI() {
-		// commented out subscription due to this class being used for
-		// un-defined gui's
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    log.info("AdafruitINA219GUI actionPerformed");
+    Object o = e.getSource();
+    if (o == refresh) {
+      myService.send(boundServiceName, "refresh");
+    }
+  }
 
-		unsubscribe("publishState", "getState", AdafruitIna219.class);
-	}
+  @Override
+  public void attachGUI() {
+    // commented out subscription due to this class being used for
+    // un-defined gui's
+    subscribe("publishState", "getState", AdafruitIna219.class);
+    send("publishState");
+  }
 
-	public void getState(AdafruitIna219 ina219) {
-		busVoltage.setText(String.format("%s",ina219.busVoltage));
-		shuntVoltage.setText(String.format("%s",ina219.shuntVoltage));
-		current.setText(String.format("%s",ina219.current));
-		power.setText(String.format("%s",ina219.power));
-	}
-	
-	@Override
-	public void init() {
-		
-		// Container BACKGROUND = getContentPane();
-		
-		display.setLayout(new BorderLayout());
-		JPanel north = new JPanel();
-		north.add(refresh);
-		refresh.addActionListener(this);
+  @Override
+  public void detachGUI() {
+    // commented out subscription due to this class being used for
+    // un-defined gui's
 
-		JPanel center = new JPanel();
-		center.add(new JLabel("Bus Voltage   :"));
-		center.add(busVoltage);
-		center.add(new JLabel(" mV"));
+    unsubscribe("publishState", "getState", AdafruitIna219.class);
+  }
 
-		center.add(new JLabel("Shunt Voltage :"));
-		center.add(shuntVoltage);
-		center.add(new JLabel(" mV"));
-		
-		center.add(new JLabel("Shunt Current :"));
-		center.add(current);
-		center.add(new JLabel(" mA"));
-		
-		center.add(new JLabel("Power         :"));
-		center.add(power);
-		center.add(new JLabel(" mW"));
-		
-		display.add(north, BorderLayout.NORTH);
-		display.add(center, BorderLayout.CENTER);
-	}
+  public void getState(AdafruitIna219 ina219) {
+    busVoltage.setText(String.format("%s", ina219.busVoltage));
+    shuntVoltage.setText(String.format("%s", ina219.shuntVoltage));
+    current.setText(String.format("%s", ina219.current));
+    power.setText(String.format("%s", ina219.power));
+  }
+
+  @Override
+  public void init() {
+
+    // Container BACKGROUND = getContentPane();
+
+    display.setLayout(new BorderLayout());
+    JPanel north = new JPanel();
+    north.add(refresh);
+    refresh.addActionListener(this);
+
+    JPanel center = new JPanel();
+    center.add(new JLabel("Bus Voltage   :"));
+    center.add(busVoltage);
+    center.add(new JLabel(" mV"));
+
+    center.add(new JLabel("Shunt Voltage :"));
+    center.add(shuntVoltage);
+    center.add(new JLabel(" mV"));
+
+    center.add(new JLabel("Shunt Current :"));
+    center.add(current);
+    center.add(new JLabel(" mA"));
+
+    center.add(new JLabel("Power         :"));
+    center.add(power);
+    center.add(new JLabel(" mW"));
+
+    display.add(north, BorderLayout.NORTH);
+    display.add(center, BorderLayout.CENTER);
+  }
 
 }

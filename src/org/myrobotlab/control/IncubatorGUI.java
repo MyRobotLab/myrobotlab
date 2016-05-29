@@ -38,41 +38,41 @@ import org.slf4j.Logger;
 
 public class IncubatorGUI extends ServiceGUI implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(IncubatorGUI.class.getCanonicalName());
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(IncubatorGUI.class.getCanonicalName());
 
-	public IncubatorGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public IncubatorGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", Test.class);
-		send("publishState");
-	}
+  @Override
+  public void attachGUI() {
+    subscribe("publishState", "getState", Test.class);
+    send("publishState");
+  }
 
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", Test.class);
-	}
+  @Override
+  public void detachGUI() {
+    unsubscribe("publishState", "getState", Test.class);
+  }
 
-	public void getState(Test template) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  public void getState(Test template) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-			}
-		});
-	}
+      }
+    });
+  }
 
-	@Override
-	public void init() {
-	}
+  @Override
+  public void init() {
+  }
 
 }

@@ -21,49 +21,49 @@ import org.bytedeco.javacpp.opencv_core.IplImage;
  */
 public class VideoSources {
 
-	private final static HashMap<String, Object> data = new HashMap<String, Object>();
+  private final static HashMap<String, Object> data = new HashMap<String, Object>();
 
-	public IplImage get(String key) {
-		if (data.containsKey(key)) {
-			return (IplImage) data.get(key);// .clone();
-		}
-		return null;
-	}
+  public IplImage get(String key) {
+    if (data.containsKey(key)) {
+      return (IplImage) data.get(key);// .clone();
+    }
+    return null;
+  }
 
-	public IplImage get(String serviceName, String filtername) {
-		String key = (String.format("%s.%s", serviceName, filtername));
-		return get(key);
-	}
+  public IplImage get(String serviceName, String filtername) {
+    String key = (String.format("%s.%s", serviceName, filtername));
+    return get(key);
+  }
 
-	public HashMap<String, Object> getData() {
-		return new HashMap<String, Object>(data);
-	}
+  public HashMap<String, Object> getData() {
+    return new HashMap<String, Object>(data);
+  }
 
-	/*
-	 * FIXME - handle OTHER DATA ? public void put(String serviceName, String
-	 * filtername, ArrayList<Rectangle> boundingBoxes){
-	 * nonImageData.put(String.format("%s.%s.%s", serviceName, filtername,
-	 * OpenCVData.KEY_BOUNDING_BOXES), boundingBoxes); }
-	 * 
-	 * public void get()
-	 */
+  /*
+   * FIXME - handle OTHER DATA ? public void put(String serviceName, String
+   * filtername, ArrayList<Rectangle> boundingBoxes){
+   * nonImageData.put(String.format("%s.%s.%s", serviceName, filtername,
+   * OpenCVData.KEY_BOUNDING_BOXES), boundingBoxes); }
+   * 
+   * public void get()
+   */
 
-	public Set<String> getKeySet() {
-		return data.keySet();
-	}
+  public Set<String> getKeySet() {
+    return data.keySet();
+  }
 
-	public void put(String inputKey, IplImage frame) {
-		data.put(inputKey, frame);
-	}
+  public void put(String inputKey, IplImage frame) {
+    data.put(inputKey, frame);
+  }
 
-	public void put(String serviceName, String filtername, IplImage img) {
-		String key = (String.format("%s.%s", serviceName, filtername));
-		data.put(key, img);
-	}
+  public void put(String serviceName, String filtername, IplImage img) {
+    String key = (String.format("%s.%s", serviceName, filtername));
+    data.put(key, img);
+  }
 
-	public void put(String serviceName, String filtername, String subkey, IplImage img) {
-		String key = (String.format("%s.%s.%s", serviceName, filtername, subkey));
-		data.put(key, img);
-	}
+  public void put(String serviceName, String filtername, String subkey, IplImage img) {
+    String key = (String.format("%s.%s.%s", serviceName, filtername, subkey));
+    data.put(key, img);
+  }
 
 }

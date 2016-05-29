@@ -6,8 +6,8 @@ import org.myrobotlab.kinematics.Point;
 
 public interface PointPublisher {
 
-	public String getName();
+  public String getName();
 
-	public List<Point> publishPoints(List<Point> points);
+  public List<Point> publishPoints(List<Point> points);
 
 }

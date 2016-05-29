@@ -33,15 +33,15 @@ import javax.vecmath.Vector3f;
  * A wall which can be put in the environnement.
  */
 public class Wall extends Box {
-	final static float thickness = 0.3f;
+  final static float thickness = 0.3f;
 
-	public Wall(Vector3d pos, float length, float height, EnvironmentDescription wd) {
-		super(pos, new Vector3f(length, height, thickness), wd);
-		setColor(wd.wallColor);
-	}
+  public Wall(Vector3d pos, float length, float height, EnvironmentDescription wd) {
+    super(pos, new Vector3f(length, height, thickness), wd);
+    setColor(wd.wallColor);
+  }
 
-	public Wall(Vector3d pos, float length, float width, float height, EnvironmentDescription wd) {
-		super(pos, new Vector3f(length, height, width), wd);
-		setColor(wd.wallColor);
-	}
+  public Wall(Vector3d pos, float length, float width, float height, EnvironmentDescription wd) {
+    super(pos, new Vector3f(length, height, width), wd);
+    setColor(wd.wallColor);
+  }
 }

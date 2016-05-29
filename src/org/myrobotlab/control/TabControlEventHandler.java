@@ -5,12 +5,12 @@ import java.awt.event.MouseEvent;
 
 public interface TabControlEventHandler {
 
-	public void actionPerformed(ActionEvent e, String tabName);
+  public void actionPerformed(ActionEvent e, String tabName);
 
-	public void dockPanel();
+  public void dockPanel();
 
-	public void mouseClicked(MouseEvent event, String tabName);
+  public void mouseClicked(MouseEvent event, String tabName);
 
-	public void undockPanel();
+  public void undockPanel();
 
 }

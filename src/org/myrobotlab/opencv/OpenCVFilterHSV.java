@@ -49,87 +49,87 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterHSV extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterHSV.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterHSV.class.getCanonicalName());
 
-	IplImage hsv = null;
-	IplImage hue = null;
-	IplImage value = null;
-	IplImage saturation = null;
-	IplImage mask = null;
+  IplImage hsv = null;
+  IplImage hue = null;
+  IplImage value = null;
+  IplImage saturation = null;
+  IplImage mask = null;
 
-	int x = 0;
-	int y = 0;
-	int clickCounter = 0;
-	int frameCounter = 0;
-	Graphics g = null;
-	String lastHexValueOfPoint = "";
+  int x = 0;
+  int y = 0;
+  int clickCounter = 0;
+  int frameCounter = 0;
+  Graphics g = null;
+  String lastHexValueOfPoint = "";
 
-	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
+  transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
 
-	public OpenCVFilterHSV() {
-		super();
-	}
+  public OpenCVFilterHSV() {
+    super();
+  }
 
-	public OpenCVFilterHSV(String name) {
-		super(name);
-	}
+  public OpenCVFilterHSV(String name) {
+    super(name);
+  }
 
-	@Override
-	public IplImage display(IplImage image, OpenCVData data) {
+  @Override
+  public IplImage display(IplImage image, OpenCVData data) {
 
-		++frameCounter;
-		if (x != 0 && clickCounter % 2 == 0) {
+    ++frameCounter;
+    if (x != 0 && clickCounter % 2 == 0) {
 
-			if (frameCounter % 10 == 0) {
-				// frameBuffer = hsv.getBufferedImage(); // TODO - ran out of
-				// memory here
-				ByteBuffer buffer = image.getByteBuffer();
-				int index = y * image.widthStep() + x * image.nChannels();
-				// Used to read the pixel value - the 0xFF is needed to cast
-				// from
-				// an unsigned byte to an int.
-				int value = buffer.get(index) & 0xFF;
-				lastHexValueOfPoint = Integer.toHexString(value & 0x00ffffff);
-			}
+      if (frameCounter % 10 == 0) {
+        // frameBuffer = hsv.getBufferedImage(); // TODO - ran out of
+        // memory here
+        ByteBuffer buffer = image.getByteBuffer();
+        int index = y * image.widthStep() + x * image.nChannels();
+        // Used to read the pixel value - the 0xFF is needed to cast
+        // from
+        // an unsigned byte to an int.
+        int value = buffer.get(index) & 0xFF;
+        lastHexValueOfPoint = Integer.toHexString(value & 0x00ffffff);
+      }
 
-			cvPutText(image, lastHexValueOfPoint, cvPoint(x, y), font, CvScalar.BLACK);
-		}
+      cvPutText(image, lastHexValueOfPoint, cvPoint(x, y), font, CvScalar.BLACK);
+    }
 
-		return image;
-	}
+    return image;
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		hsv = IplImage.createCompatible(image);
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+    hsv = IplImage.createCompatible(image);
+  }
 
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
 
-		// CV_BGR2HSV_FULL - uses full 0-255 vs 0-180
-		// CV_HSV2BGR_FULL
-		cvCvtColor(image, hsv, CV_RGB2HSV);
+    // CV_BGR2HSV_FULL - uses full 0-255 vs 0-180
+    // CV_HSV2BGR_FULL
+    cvCvtColor(image, hsv, CV_RGB2HSV);
 
-		// cvSetImageCOI( hsv, 1);
-		// cvCopy(hsv, hue );
+    // cvSetImageCOI( hsv, 1);
+    // cvCopy(hsv, hue );
 
-		/*
-		 * http://cgi.cse.unsw.edu.au/~cs4411/wiki/index.php?title=OpenCV_Guide#
-		 * Calculating_color_histograms //Split out hue component and store in
-		 * hue cxcore.cvSplit(hsv, hue, null, null, null);
-		 */
+    /*
+     * http://cgi.cse.unsw.edu.au/~cs4411/wiki/index.php?title=OpenCV_Guide#
+     * Calculating_color_histograms //Split out hue component and store in hue
+     * cxcore.cvSplit(hsv, hue, null, null, null);
+     */
 
-		return hsv;
+    return hsv;
 
-	}
+  }
 
-	public void samplePoint(Integer inX, Integer inY) {
-		++clickCounter;
-		x = inX;
-		y = inY;
+  public void samplePoint(Integer inX, Integer inY) {
+    ++clickCounter;
+    x = inX;
+    y = inY;
 
-	}
+  }
 
 }

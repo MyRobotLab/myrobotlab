@@ -1,4 +1,5 @@
 package org.myrobotlab.service;
+
 // FIXME ! loose the awt (can't work on Android !)
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -47,296 +48,296 @@ import com.google.common.collect.ImmutableList;
 
 public class GoogleCloud extends Service {
 
-	private static final long serialVersionUID = 1L;
-	final static Logger log = LoggerFactory.getLogger(GoogleCloud.class);
-	/**
-	 * Be sure to specify the name of your application. If the application name
-	 * is {@code null} or blank, the application will log a warning. Suggested
-	 * format is "MyCompany-ProductName/1.0".
-	 */
-	private static final String APPLICATION_NAME = "Google-VisionFaceDetectSample/1.0";
-	transient Vision vision;
-	int maxResults = 32;
+  private static final long serialVersionUID = 1L;
+  final static Logger log = LoggerFactory.getLogger(GoogleCloud.class);
+  /**
+   * Be sure to specify the name of your application. If the application name is
+   * {@code null} or blank, the application will log a warning. Suggested format
+   * is "MyCompany-ProductName/1.0".
+   */
+  private static final String APPLICATION_NAME = "Google-VisionFaceDetectSample/1.0";
+  transient Vision vision;
+  int maxResults = 32;
 
+  public GoogleCloud(String n) {
+    super(n);
+  }
 
-	public GoogleCloud(String n) {
-		super(n);
-	}
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+    ServiceType meta = new ServiceType(GoogleCloud.class.getCanonicalName());
+    meta.addDescription("google api client service");
+    meta.setAvailable(true);
+    // add dependency if necessary
+    meta.addDependency("com.google.client", "1.22.0");
+    meta.addDependency("com.google.vision", "1.22.0");
+    meta.addCategory("cloud", "vision", "google");
+    return meta;
+  }
 
-		ServiceType meta = new ServiceType(GoogleCloud.class.getCanonicalName());
-		meta.addDescription("google api client service");
-		meta.setAvailable(true);
-		// add dependency if necessary
-		meta.addDependency("com.google.client", "1.22.0");
-		meta.addDependency("com.google.vision", "1.22.0");
-		meta.addCategory("cloud", "vision", "google");
-		return meta;
-	}
+  // [START main]
+  /**
+   * Annotates an image using the Vision API.
+   */
 
+  // [END main]
 
-	// [START main]
-	/**
-	 * Annotates an image using the Vision API.
-	 */
+  // [START get_vision_service]
+  /**
+   * Connects to the Vision API using Application Default Credentials.
+   */
+  public Vision getVisionService(String credJsonFile) throws IOException, GeneralSecurityException {
 
-	// [END main]
+    /*
+     * GoogleCredential credential = new
+     * GoogleCredential().setAccessToken(accessToken); Plus plus = new
+     * Plus.builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(),
+     * credential) .setApplicationName("Google-PlusSample/1.0") .build();
+     */
 
-	// [START get_vision_service]
-	/**
-	 * Connects to the Vision API using Application Default Credentials.
-	 */
-	public Vision getVisionService(String credJsonFile) throws IOException, GeneralSecurityException {
+    GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(credJsonFile)).createScoped(VisionScopes.all());
 
-		/*
-		 * GoogleCredential credential = new
-		 * GoogleCredential().setAccessToken(accessToken); Plus plus = new
-		 * Plus.builder(new NetHttpTransport(),
-		 * JacksonFactory.getDefaultInstance(), credential)
-		 * .setApplicationName("Google-PlusSample/1.0") .build();
-		 */
-		
-		
-		GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(credJsonFile)).createScoped(VisionScopes.all());
+    /*
+     * JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+     * 
+     * HttpTransport httpTransport =
+     * GoogleNetHttpTransport.newTrustedTransport();
+     * 
+     * InputStream inputStream = IOUtils.toInputStream(serviceAccountJson);
+     * 
+     * GoogleCredential credential = GoogleCredential.fromStream(inputStream,
+     * httpTransport, jsonFactory);
+     * 
+     * credential =
+     * credential.createScoped(Collections.singleton(AndroidPublisherScopes.
+     * ANDROIDPUBLISHER));
+     * 
+     * AndroidPublisher androidPublisher = new AndroidPublisher(httpTransport,
+     * jsonFactory, credential);
+     */
 
-		/*
-		JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    // GoogleCredential credential =
+    // GoogleCredential.getApplicationDefault().createScoped(VisionScopes.all());
+    JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    return new Vision.Builder(GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential).setApplicationName(APPLICATION_NAME).build();
+  }
+  // [END get_vision_service]
 
-		HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+  public void connect(String credJsonFile) throws IOException, GeneralSecurityException {
+    connect(getVisionService(credJsonFile));
+  }
 
-		InputStream inputStream = IOUtils.toInputStream(serviceAccountJson);
+  public void connect(Vision vision) {
+    this.vision = vision;
+  }
 
-		GoogleCredential credential = GoogleCredential.fromStream(inputStream, httpTransport, jsonFactory);
+  // [START detect_face]
+  public List<FaceAnnotation> detectFaces(String path) throws IOException {
+    return detectFaces(Paths.get(path), maxResults);
+  }
 
-		credential = credential.createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
+  public List<FaceAnnotation> detectFaces(Path path) throws IOException {
+    return detectFaces(path, maxResults);
+  }
 
-		AndroidPublisher androidPublisher = new AndroidPublisher(httpTransport, jsonFactory, credential);
-		*/
-		
-		//GoogleCredential credential = GoogleCredential.getApplicationDefault().createScoped(VisionScopes.all());
-		JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-		return new Vision.Builder(GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential).setApplicationName(APPLICATION_NAME).build();
-	}
-	// [END get_vision_service]
+  /**
+   * Gets up to {@code maxResults} faces for an image stored at {@code path}.
+   */
+  public List<FaceAnnotation> detectFaces(Path path, int maxResults) throws IOException {
+    byte[] data = Files.readAllBytes(path);
 
+    AnnotateImageRequest request = new AnnotateImageRequest().setImage(new Image().encodeContent(data))
+        .setFeatures(ImmutableList.of(new Feature().setType("FACE_DETECTION").setMaxResults(maxResults)));
+    Vision.Images.Annotate annotate = vision.images().annotate(new BatchAnnotateImagesRequest().setRequests(ImmutableList.of(request)));
+    // Due to a bug: requests to Vision API containing large images fail
+    // when GZipped.
+    annotate.setDisableGZipContent(true);
 
-	public void connect(String credJsonFile) throws IOException, GeneralSecurityException{
-		connect(getVisionService(credJsonFile));
-	}
-	
-	public void connect(Vision vision) {
-		this.vision = vision;
-	}
+    BatchAnnotateImagesResponse batchResponse = annotate.execute();
+    assert batchResponse.getResponses().size() == 1;
+    AnnotateImageResponse response = batchResponse.getResponses().get(0);
+    if (response.getFaceAnnotations() == null) {
+      throw new IOException(response.getError() != null ? response.getError().getMessage() : "Unknown error getting image annotations");
+    }
+    return response.getFaceAnnotations();
+  }
+  // [END detect_face]
 
-	// [START detect_face]
-	public List<FaceAnnotation> detectFaces(String path) throws IOException {
-		return detectFaces(Paths.get(path), maxResults);
-	}
-	
-	public List<FaceAnnotation> detectFaces(Path path) throws IOException {
-		return detectFaces(path, maxResults);
-	}
-	/**
-	 * Gets up to {@code maxResults} faces for an image stored at {@code path}.
-	 */
-	public List<FaceAnnotation> detectFaces(Path path, int maxResults) throws IOException {
-		byte[] data = Files.readAllBytes(path);
+  // [START highlight_faces]
 
-		AnnotateImageRequest request = new AnnotateImageRequest().setImage(new Image().encodeContent(data))
-				.setFeatures(ImmutableList.of(new Feature().setType("FACE_DETECTION").setMaxResults(maxResults)));
-		Vision.Images.Annotate annotate = vision.images().annotate(new BatchAnnotateImagesRequest().setRequests(ImmutableList.of(request)));
-		// Due to a bug: requests to Vision API containing large images fail
-		// when GZipped.
-		annotate.setDisableGZipContent(true);
+  public void writeWithFaces(String inputPath, String outputPath, List<FaceAnnotation> faces) throws IOException {
+    writeWithFaces(Paths.get(inputPath), Paths.get(outputPath), faces);
+  }
 
-		BatchAnnotateImagesResponse batchResponse = annotate.execute();
-		assert batchResponse.getResponses().size() == 1;
-		AnnotateImageResponse response = batchResponse.getResponses().get(0);
-		if (response.getFaceAnnotations() == null) {
-			throw new IOException(response.getError() != null ? response.getError().getMessage() : "Unknown error getting image annotations");
-		}
-		return response.getFaceAnnotations();
-	}
-	// [END detect_face]
+  /**
+   * Reads image {@code inputPath} and writes {@code outputPath} with
+   * {@code faces} outlined.
+   */
+  public void writeWithFaces(Path inputPath, Path outputPath, List<FaceAnnotation> faces) throws IOException {
+    BufferedImage img = ImageIO.read(inputPath.toFile());
+    annotateWithFaces(img, faces);
+    ImageIO.write(img, "jpg", outputPath.toFile());
+  }
 
-	// [START highlight_faces]
-	
-	public void writeWithFaces(String inputPath, String outputPath, List<FaceAnnotation> faces) throws IOException {
-		writeWithFaces(Paths.get(inputPath), Paths.get(outputPath), faces);
-	}
+  /**
+   * Annotates an image {@code img} with a polygon around each face in
+   * {@code faces}.
+   */
+  public void annotateWithFaces(BufferedImage img, List<FaceAnnotation> faces) {
+    for (FaceAnnotation face : faces) {
+      annotateWithFace(img, face);
+    }
+  }
 
-	/**
-	 * Reads image {@code inputPath} and writes {@code outputPath} with
-	 * {@code faces} outlined.
-	 */
-	public void writeWithFaces(Path inputPath, Path outputPath, List<FaceAnnotation> faces) throws IOException {
-		BufferedImage img = ImageIO.read(inputPath.toFile());
-		annotateWithFaces(img, faces);
-		ImageIO.write(img, "jpg", outputPath.toFile());
-	}
+  /**
+   * Annotates an image {@code img} with a polygon defined by {@code face}.
+   */
+  private void annotateWithFace(BufferedImage img, FaceAnnotation face) {
+    Graphics2D gfx = img.createGraphics();
+    Polygon poly = new Polygon();
+    for (Vertex vertex : face.getFdBoundingPoly().getVertices()) {
+      poly.addPoint(vertex.getX(), vertex.getY());
+    }
+    gfx.setStroke(new BasicStroke(5));
+    gfx.setColor(new Color(0x00ff00));
+    gfx.draw(poly);
+  }
+  // [END highlight_faces]
 
-	/**
-	 * Annotates an image {@code img} with a polygon around each face in
-	 * {@code faces}.
-	 */
-	public void annotateWithFaces(BufferedImage img, List<FaceAnnotation> faces) {
-		for (FaceAnnotation face : faces) {
-			annotateWithFace(img, face);
-		}
-	}
+  /**
+   * Prints the labels received from the Vision API.
+   */
+  public void printLabels(PrintStream out, Path imagePath, List<EntityAnnotation> labels) {
+    out.printf("Labels for image %s:\n", imagePath);
+    for (EntityAnnotation label : labels) {
+      out.printf("\t%s (score: %.3f)\n", label.getDescription(), label.getScore());
+    }
+    if (labels.isEmpty()) {
+      out.println("\tNo labels found.");
+    }
+  }
 
-	/**
-	 * Annotates an image {@code img} with a polygon defined by {@code face}.
-	 */
-	private void annotateWithFace(BufferedImage img, FaceAnnotation face) {
-		Graphics2D gfx = img.createGraphics();
-		Polygon poly = new Polygon();
-		for (Vertex vertex : face.getFdBoundingPoly().getVertices()) {
-			poly.addPoint(vertex.getX(), vertex.getY());
-		}
-		gfx.setStroke(new BasicStroke(5));
-		gfx.setColor(new Color(0x00ff00));
-		gfx.draw(poly);
-	}
-	// [END highlight_faces]
+  public List<EntityAnnotation> labelImage(Path path) throws IOException {
+    return labelImage(path, maxResults);
+  }
 
-	/**
-	 * Prints the labels received from the Vision API.
-	 */
-	public void printLabels(PrintStream out, Path imagePath, List<EntityAnnotation> labels) {
-		out.printf("Labels for image %s:\n", imagePath);
-		for (EntityAnnotation label : labels) {
-			out.printf("\t%s (score: %.3f)\n", label.getDescription(), label.getScore());
-		}
-		if (labels.isEmpty()) {
-			out.println("\tNo labels found.");
-		}
-	}
-	
-	public List<EntityAnnotation> labelImage(Path path) throws IOException {
-		return labelImage(path, maxResults);
-	}
+  /**
+   * Gets up to {@code maxResults} labels for an image stored at {@code path}.
+   */
+  public List<EntityAnnotation> labelImage(Path path, int maxResults) throws IOException {
+    // [START construct_request]
+    byte[] data = Files.readAllBytes(path);
 
-	/**
-	 * Gets up to {@code maxResults} labels for an image stored at {@code path}.
-	 */
-	public List<EntityAnnotation> labelImage(Path path, int maxResults) throws IOException {
-		// [START construct_request]
-		byte[] data = Files.readAllBytes(path);
+    AnnotateImageRequest request = new AnnotateImageRequest().setImage(new Image().encodeContent(data))
+        .setFeatures(ImmutableList.of(new Feature().setType("LABEL_DETECTION").setMaxResults(maxResults)));
+    Vision.Images.Annotate annotate = vision.images().annotate(new BatchAnnotateImagesRequest().setRequests(ImmutableList.of(request)));
+    // Due to a bug: requests to Vision API containing large images fail
+    // when GZipped.
+    // annotate.setDisableGZipContent(true);
+    // [END construct_request]
 
-		AnnotateImageRequest request = new AnnotateImageRequest().setImage(new Image().encodeContent(data))
-				.setFeatures(ImmutableList.of(new Feature().setType("LABEL_DETECTION").setMaxResults(maxResults)));
-		Vision.Images.Annotate annotate = vision.images().annotate(new BatchAnnotateImagesRequest().setRequests(ImmutableList.of(request)));
-		// Due to a bug: requests to Vision API containing large images fail
-		// when GZipped.
-		// annotate.setDisableGZipContent(true);
-		// [END construct_request]
+    // [START parse_response]
+    BatchAnnotateImagesResponse batchResponse = annotate.execute();
+    assert batchResponse.getResponses().size() == 1;
+    AnnotateImageResponse response = batchResponse.getResponses().get(0);
+    if (response.getLabelAnnotations() == null) {
+      throw new IOException(response.getError() != null ? response.getError().getMessage() : "Unknown error getting image annotations");
+    }
+    return response.getLabelAnnotations();
+    // [END parse_response]
+  }
 
-		// [START parse_response]
-		BatchAnnotateImagesResponse batchResponse = annotate.execute();
-		assert batchResponse.getResponses().size() == 1;
-		AnnotateImageResponse response = batchResponse.getResponses().get(0);
-		if (response.getLabelAnnotations() == null) {
-			throw new IOException(response.getError() != null ? response.getError().getMessage() : "Unknown error getting image annotations");
-		}
-		return response.getLabelAnnotations();
-		// [END parse_response]
-	}
-	
-	public Map<String, Float> getLabels(String filename) throws IOException {
-		LinkedHashMap<String,Float> ret = new LinkedHashMap<String,Float>();
-		byte[] data = Files.readAllBytes(Paths.get(filename));
+  public Map<String, Float> getLabels(String filename) throws IOException {
+    LinkedHashMap<String, Float> ret = new LinkedHashMap<String, Float>();
+    byte[] data = Files.readAllBytes(Paths.get(filename));
 
-		AnnotateImageRequest request = new AnnotateImageRequest().setImage(new Image().encodeContent(data))
-				.setFeatures(ImmutableList.of(new Feature().setType("LABEL_DETECTION").setMaxResults(maxResults)));
-		Vision.Images.Annotate annotate = vision.images().annotate(new BatchAnnotateImagesRequest().setRequests(ImmutableList.of(request)));
-		// Due to a bug: requests to Vision API containing large images fail
-		// when GZipped.
-		// annotate.setDisableGZipContent(true);
-		// [END construct_request]
+    AnnotateImageRequest request = new AnnotateImageRequest().setImage(new Image().encodeContent(data))
+        .setFeatures(ImmutableList.of(new Feature().setType("LABEL_DETECTION").setMaxResults(maxResults)));
+    Vision.Images.Annotate annotate = vision.images().annotate(new BatchAnnotateImagesRequest().setRequests(ImmutableList.of(request)));
+    // Due to a bug: requests to Vision API containing large images fail
+    // when GZipped.
+    // annotate.setDisableGZipContent(true);
+    // [END construct_request]
 
-		// [START parse_response]
-		BatchAnnotateImagesResponse batchResponse = annotate.execute();
-		assert batchResponse.getResponses().size() == 1;
-		AnnotateImageResponse response = batchResponse.getResponses().get(0);
-		if (response.getLabelAnnotations() == null) {
-			throw new IOException(response.getError() != null ? response.getError().getMessage() : "Unknown error getting image annotations");
-		}
-		
-		List<EntityAnnotation> labels =  response.getLabelAnnotations();
-		
-		log.info("Labels for image {}:", filename);
-		for (EntityAnnotation label : labels) {
-			String desc = label.getDescription();
-			Float score = label.getScore();
-			log.info("\t{} (score: {})", desc, score);
-			ret.put(desc, score);
-		}
-		
-		if (labels.isEmpty()) {
-			log.info("\tNo labels found.");
-		}
-		
-		return ret;
-	}
+    // [START parse_response]
+    BatchAnnotateImagesResponse batchResponse = annotate.execute();
+    assert batchResponse.getResponses().size() == 1;
+    AnnotateImageResponse response = batchResponse.getResponses().get(0);
+    if (response.getLabelAnnotations() == null) {
+      throw new IOException(response.getError() != null ? response.getError().getMessage() : "Unknown error getting image annotations");
+    }
 
+    List<EntityAnnotation> labels = response.getLabelAnnotations();
 
-	public static void main(String[] args) {
-		try {
+    log.info("Labels for image {}:", filename);
+    for (EntityAnnotation label : labels) {
+      String desc = label.getDescription();
+      Float score = label.getScore();
+      log.info("\t{} (score: {})", desc, score);
+      ret.put(desc, score);
+    }
 
-			LoggingFactory.getInstance().configure();
-			// LoggingFactory.getInstance().setLevel(Level.INFO);
+    if (labels.isEmpty()) {
+      log.info("\tNo labels found.");
+    }
 
-			GoogleCloud google = (GoogleCloud) Runtime.start("google", "GoogleCloud");
-			// Runtime.start("gui", "GUIService");
+    return ret;
+  }
 
-			if (args.length != 2) {
-				System.err.println("Usage:");
-				System.err.printf("\tjava %s inputImagePath outputImagePath\n", GoogleCloud.class.getCanonicalName());
-				System.exit(1);
-			}
+  public static void main(String[] args) {
+    try {
 
-			Path inputPath = Paths.get(args[0]);
-			Path outputPath = Paths.get(args[1]);
+      LoggingFactory.getInstance().configure();
+      // LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			if (!outputPath.toString().toLowerCase().endsWith(".jpg")) {
-				System.err.println("outputImagePath must have the file extension 'jpg'.");
-				System.exit(1);
-			}
+      GoogleCloud google = (GoogleCloud) Runtime.start("google", "GoogleCloud");
+      // Runtime.start("gui", "GUIService");
 
-			// "API Project-c90c3d12e7d3.json"
+      if (args.length != 2) {
+        System.err.println("Usage:");
+        System.err.printf("\tjava %s inputImagePath outputImagePath\n", GoogleCloud.class.getCanonicalName());
+        System.exit(1);
+      }
 
-			// GoogleCloudService app = new
-			// GoogleCloudService(getVisionService());
-			google.connect("../API Project-c90c3d12e7d3.json");
+      Path inputPath = Paths.get(args[0]);
+      Path outputPath = Paths.get(args[1]);
 
-			long ts = System.currentTimeMillis();
+      if (!outputPath.toString().toLowerCase().endsWith(".jpg")) {
+        System.err.println("outputImagePath must have the file extension 'jpg'.");
+        System.exit(1);
+      }
 
-			List<FaceAnnotation> faces = google.detectFaces(inputPath);
-			System.out.printf("Found %d face%s\n", faces.size(), faces.size() == 1 ? "" : "s");
-			System.out.printf("Writing to file %s\n", outputPath);
-			google.writeWithFaces(inputPath, outputPath, faces);
-			
-			google.getLabels("kitchen.jpg");
-			google.getLabels("plumbing.jpg");
-			google.getLabels("ship.jpg");
-			google.getLabels("greenball.jpg");
+      // "API Project-c90c3d12e7d3.json"
 
-			log.info("{} total ms", System.currentTimeMillis() - ts);
+      // GoogleCloudService app = new
+      // GoogleCloudService(getVisionService());
+      google.connect("../API Project-c90c3d12e7d3.json");
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+      long ts = System.currentTimeMillis();
 
+      List<FaceAnnotation> faces = google.detectFaces(inputPath);
+      System.out.printf("Found %d face%s\n", faces.size(), faces.size() == 1 ? "" : "s");
+      System.out.printf("Writing to file %s\n", outputPath);
+      google.writeWithFaces(inputPath, outputPath, faces);
+
+      google.getLabels("kitchen.jpg");
+      google.getLabels("plumbing.jpg");
+      google.getLabels("ship.jpg");
+      google.getLabels("greenball.jpg");
+
+      log.info("{} total ms", System.currentTimeMillis() - ts);
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
 }

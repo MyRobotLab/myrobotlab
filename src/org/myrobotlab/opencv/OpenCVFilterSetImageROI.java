@@ -33,30 +33,30 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterSetImageROI extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
-	Rectangle r = new Rectangle(10, 10, 100, 100);
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSetImageROI.class.getCanonicalName());
+  private static final long serialVersionUID = 1L;
+  Rectangle r = new Rectangle(10, 10, 100, 100);
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSetImageROI.class.getCanonicalName());
 
-	public OpenCVFilterSetImageROI() {
-		super();
-	}
+  public OpenCVFilterSetImageROI() {
+    super();
+  }
 
-	public OpenCVFilterSetImageROI(String name) {
-		super(name);
-	}
+  public OpenCVFilterSetImageROI(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
+  @Override
+  public void imageChanged(IplImage image) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
 
-		// cvSetImageROI(image, cvRect(1.0,1.0,20));
+    // cvSetImageROI(image, cvRect(1.0,1.0,20));
 
-		return image; // TODO - src dst or image? consistency?
-	}
+    return image; // TODO - src dst or image? consistency?
+  }
 
 }

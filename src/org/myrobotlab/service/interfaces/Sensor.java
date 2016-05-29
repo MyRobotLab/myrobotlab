@@ -4,5 +4,5 @@ package org.myrobotlab.service.interfaces;
 // TODO - define SensorData interface ?? - getData() byteArray ???
 public interface Sensor {
 
-	String getType();
+  String getType();
 }

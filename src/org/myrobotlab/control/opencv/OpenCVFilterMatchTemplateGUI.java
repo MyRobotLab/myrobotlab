@@ -32,23 +32,24 @@ import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterMatchTemplateGUI extends OpenCVFilterGUI {
 
-	public OpenCVFilterMatchTemplateGUI(String boundFilterName, String boundServiceName, GUIService myService) {
-		super(boundFilterName, boundServiceName, myService);
+  public OpenCVFilterMatchTemplateGUI(String boundFilterName, String boundServiceName, GUIService myService) {
+    super(boundFilterName, boundServiceName, myService);
 
-	}
+  }
 
-	@Override
-	public void getFilterState(final FilterWrapper filterWrapper) {
-		boundFilter = filterWrapper;
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				// OpenCVFilterMatchTemplate bf = (OpenCVFilterMatchTemplate) filterWrapper.filter;
-				// TODO: what to do with the "bf" result?
-			  // TODO: nothing here now because it didn't do anything before.
-			}
-		});
+  @Override
+  public void getFilterState(final FilterWrapper filterWrapper) {
+    boundFilter = filterWrapper;
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        // OpenCVFilterMatchTemplate bf = (OpenCVFilterMatchTemplate)
+        // filterWrapper.filter;
+        // TODO: what to do with the "bf" result?
+        // TODO: nothing here now because it didn't do anything before.
+      }
+    });
 
-	}
+  }
 
 }
