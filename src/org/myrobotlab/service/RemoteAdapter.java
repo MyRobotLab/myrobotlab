@@ -926,6 +926,23 @@ public class RemoteAdapter extends Service implements Gateway {
 	            .fire("/api/")
 	            .fire("bong");
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(RemoteAdapter.class.getCanonicalName());
+		meta.addDescription("allows remote communication between applets, or remote instances of myrobotlab");
+		meta.addCategory("connectivity","network","framework");
+
+		return meta;
+	}
 
 
 	public static void main(String[] args) {
@@ -1003,22 +1020,5 @@ public class RemoteAdapter extends Service implements Gateway {
 		}
 	}
 	
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = new ServiceType(RemoteAdapter.class.getCanonicalName());
-		meta.addDescription("allows remote communication between applets, or remote instances of myrobotlab");
-		meta.addCategory("connectivity","network","framework");
-
-		return meta;
-	}
-
-
+	
 }
