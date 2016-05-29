@@ -316,7 +316,7 @@ public class TestCatcher extends Service implements SerialDataListener {
 	
 	static public ServiceType getMetaData() {
 
-		ServiceType meta = new ServiceType(TestThrower.class.getCanonicalName());
+		ServiceType meta = new ServiceType(TestCatcher.class.getCanonicalName());
 		meta.addDescription("This service is used to test messaging");
 		meta.setAvailable(false);
 		meta.addCategory("testing","framework");	
