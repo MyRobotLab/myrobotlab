@@ -10,52 +10,52 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class CodecMessage implements Codec {
-	
-	public final static Logger log = LoggerFactory.getLogger(CodecMessage.class);
-	
-	private transient static Gson mapper = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 
-	public static final byte[] FQ_D = "d".getBytes();
+  public final static Logger log = LoggerFactory.getLogger(CodecMessage.class);
 
-	@Override
-	public void encode(OutputStream out, Object obj) throws IOException {
-		
-		// TODO - test if Message .. if not wrap it ..
-		
-		out.write(mapper.toJson(obj).getBytes());
-		// jackson stream way !
-		// mapper.writeValue(out, obj);
-	}
+  private transient static Gson mapper = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 
-	// probably should be Object too instead of byte[] :)
-	@Override
-	public Object[] decodeArray(Object data) throws Exception {
-		// ITS GOT TO BE STRING - it just has to be !!! :)
-		String instr = (String) data;
-		// array of Strings ? - don't want to double encode !
-		Object[] ret = mapper.fromJson(instr, Object[].class);
-		// TODO Auto-generated method stub
-		return ret;
-	}
+  public static final byte[] FQ_D = "d".getBytes();
 
-	@Override
-	public Object decode(Object data, Class<?> type) throws Exception {
-		// data has to be a String !! .. just has to be
-		if (data == null){
-			log.error("trying to decode null data");
-			return null;
-		}
-		return mapper.fromJson(data.toString(), type);
-	}
+  @Override
+  public void encode(OutputStream out, Object obj) throws IOException {
 
-	@Override
-	public String getMimeType() {
-		return "application/json";
-	}
+    // TODO - test if Message .. if not wrap it ..
 
-	@Override
-	public String getKey() {
-		return "messages";
-	}
+    out.write(mapper.toJson(obj).getBytes());
+    // jackson stream way !
+    // mapper.writeValue(out, obj);
+  }
+
+  // probably should be Object too instead of byte[] :)
+  @Override
+  public Object[] decodeArray(Object data) throws Exception {
+    // ITS GOT TO BE STRING - it just has to be !!! :)
+    String instr = (String) data;
+    // array of Strings ? - don't want to double encode !
+    Object[] ret = mapper.fromJson(instr, Object[].class);
+    // TODO Auto-generated method stub
+    return ret;
+  }
+
+  @Override
+  public Object decode(Object data, Class<?> type) throws Exception {
+    // data has to be a String !! .. just has to be
+    if (data == null) {
+      log.error("trying to decode null data");
+      return null;
+    }
+    return mapper.fromJson(data.toString(), type);
+  }
+
+  @Override
+  public String getMimeType() {
+    return "application/json";
+  }
+
+  @Override
+  public String getKey() {
+    return "messages";
+  }
 
 }

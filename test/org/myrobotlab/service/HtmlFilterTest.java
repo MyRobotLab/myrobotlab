@@ -6,13 +6,13 @@ import org.junit.Test;
 
 public class HtmlFilterTest {
 
-	@Test
-	public void testHtmlFilter() {
-		String html = "<div>test...</div>";
-		String expected = "test...";
-		HtmlFilter myfilter = (HtmlFilter)Runtime.createAndStart("myfilter", "HtmlFilter");
-		String actual = myfilter.stripHtml(html);
-		assertEquals(expected, actual);
-	}
-	
+  @Test
+  public void testHtmlFilter() {
+    String html = "<div>test...</div>";
+    String expected = "test...";
+    HtmlFilter myfilter = (HtmlFilter) Runtime.createAndStart("myfilter", "HtmlFilter");
+    String actual = myfilter.stripHtml(html);
+    assertEquals(expected, actual);
+  }
+
 }

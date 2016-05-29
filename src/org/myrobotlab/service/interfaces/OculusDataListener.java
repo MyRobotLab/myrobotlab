@@ -4,7 +4,7 @@ import org.myrobotlab.service.data.OculusData;
 
 public interface OculusDataListener {
 
-	public String getName();
+  public String getName();
 
-	public OculusData onOculusData(OculusData data);
+  public OculusData onOculusData(OculusData data);
 }

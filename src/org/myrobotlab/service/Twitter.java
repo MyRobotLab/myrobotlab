@@ -23,161 +23,159 @@ import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * 
- * Twitter - a service that allows you to send a tweet from MRL assuming you have
- * a consumerKey and accessToken from a twitter account.
+ * Twitter - a service that allows you to send a tweet from MRL assuming you
+ * have a consumerKey and accessToken from a twitter account.
  *
  */
 public class Twitter extends Service {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Twitter.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(Twitter.class.getCanonicalName());
 
-	public String consumerKey;
-	public String consumerSecret;
-	public String accessToken;
-	public String accessTokenSecret;
+  public String consumerKey;
+  public String consumerSecret;
+  public String accessToken;
+  public String accessTokenSecret;
 
-	twitter4j.Twitter twitter = null;
+  twitter4j.Twitter twitter = null;
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
+  public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.WARN);
 
-		try {
-			Twitter twitter = new Twitter("twitter");
+    try {
+      Twitter twitter = new Twitter("twitter");
 
-			twitter.startService();
+      twitter.startService();
 
-			Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "GUIService");
 
-			twitter.setSecurity("xxx", "xxx", "xxx", "xxx");
-			twitter.configure();
-			twitter.tweet("Ciao from MyRobotLab");
+      twitter.setSecurity("xxx", "xxx", "xxx", "xxx");
+      twitter.configure();
+      twitter.tweet("Ciao from MyRobotLab");
 
-			// twitter.uploadPic("C:/Users/ALESSANDRO/Desktop/myrobotlab/opencv.jpg"
-			// , "here is the pic");
+      // twitter.uploadPic("C:/Users/ALESSANDRO/Desktop/myrobotlab/opencv.jpg"
+      // , "here is the pic");
 
-			/*
-			 * OpenCV opencv = new OpenCV("opencv"); opencv.startService();
-			 * opencv.capture(); Service.sleep(4000);// wait for an image
-			 * SerializableImage img = opencv.getDisplay();
-			 * twitter.uploadImage(img, "ME TOO!");
-			 */
-			// twitter.subscribe("publishDisplay", opencv.getName(),
-			// "uploadImage",
-			// SerializableImage.class);
+      /*
+       * OpenCV opencv = new OpenCV("opencv"); opencv.startService();
+       * opencv.capture(); Service.sleep(4000);// wait for an image
+       * SerializableImage img = opencv.getDisplay(); twitter.uploadImage(img,
+       * "ME TOO!");
+       */
+      // twitter.subscribe("publishDisplay", opencv.getName(),
+      // "uploadImage",
+      // SerializableImage.class);
 
-			/*
-			 * GUIService gui = new GUIService("gui"); gui.startService();
-			 */
+      /*
+       * GUIService gui = new GUIService("gui"); gui.startService();
+       */
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-	
-	/**
-	 * Static list of third party dependencies for this service.
-	 * The list will be consumed by Ivy to download and manage
-	 * the appropriate resources
-	 * @return
-	 */
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-	public Twitter(String n) {
-		super(n);
-	}
+  /**
+   * Static list of third party dependencies for this service. The list will be
+   * consumed by Ivy to download and manage the appropriate resources
+   * 
+   * @return
+   */
 
-	public void configure() {
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setDebugEnabled(true).setOAuthConsumerKey(consumerKey).setOAuthConsumerSecret(consumerSecret).setOAuthAccessToken(accessToken)
-				.setOAuthAccessTokenSecret(accessTokenSecret);
-		TwitterFactory tf = new TwitterFactory(cb.build());
-		twitter = tf.getInstance();
-	}
+  public Twitter(String n) {
+    super(n);
+  }
 
-	
-	@Override
-	public void releaseService() {
-		super.releaseService();
-	}
+  public void configure() {
+    ConfigurationBuilder cb = new ConfigurationBuilder();
+    cb.setDebugEnabled(true).setOAuthConsumerKey(consumerKey).setOAuthConsumerSecret(consumerSecret).setOAuthAccessToken(accessToken).setOAuthAccessTokenSecret(accessTokenSecret);
+    TwitterFactory tf = new TwitterFactory(cb.build());
+    twitter = tf.getInstance();
+  }
 
-	public void setSecurity(String consumerKey, String consumerSecret, String accessToken, String accessTokenSecret) {
+  @Override
+  public void releaseService() {
+    super.releaseService();
+  }
 
-		this.consumerKey = consumerKey;
-		this.consumerSecret = consumerSecret;
-		this.accessToken = accessToken;
-		this.accessTokenSecret = accessTokenSecret;
+  public void setSecurity(String consumerKey, String consumerSecret, String accessToken, String accessTokenSecret) {
 
-		configure();
-	}
+    this.consumerKey = consumerKey;
+    this.consumerSecret = consumerSecret;
+    this.accessToken = accessToken;
+    this.accessTokenSecret = accessTokenSecret;
 
-	@Override
-	public void stopService() {
-		super.stopService();
-	}
+    configure();
+  }
 
-	public void tweet(String msg) {
-		try {
-			Status status = twitter.updateStatus(msg);
-		// TODO: invoke or publish this maybe?
-			log.info("Tweet Status Response: {}", status);
-		} catch (TwitterException e) {
-			error(e.getMessage());
-			Logging.logError(e);
-		}
-	}
+  @Override
+  public void stopService() {
+    super.stopService();
+  }
 
-	public void uploadImage(final SerializableImage image, final String message) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					StatusUpdate status = new StatusUpdate(message);
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					ImageIO.write(image.getImage(), "png", baos);
-					baos.flush();
-					byte[] buffer = baos.toByteArray();
-					status.media("image", new ByteArrayInputStream(buffer));
-					twitter.updateStatus(status);
-				} catch (Exception e) {
-					Logging.logError(e);
-				}
-			}
-		}).start();
-	}
+  public void tweet(String msg) {
+    try {
+      Status status = twitter.updateStatus(msg);
+      // TODO: invoke or publish this maybe?
+      log.info("Tweet Status Response: {}", status);
+    } catch (TwitterException e) {
+      error(e.getMessage());
+      Logging.logError(e);
+    }
+  }
 
-	public void uploadImageFile(final String filePath, final String message) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					File file = new File(filePath);
-					StatusUpdate status = new StatusUpdate(message);
-					status.setMedia(file);
-					twitter.updateStatus(status);
-				} catch (TwitterException e) {
-					Logging.logError(e);
-				}
-			}
-		}).start();
-	}
+  public void uploadImage(final SerializableImage image, final String message) {
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          StatusUpdate status = new StatusUpdate(message);
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          ImageIO.write(image.getImage(), "png", baos);
+          baos.flush();
+          byte[] buffer = baos.toByteArray();
+          status.media("image", new ByteArrayInputStream(buffer));
+          twitter.updateStatus(status);
+        } catch (Exception e) {
+          Logging.logError(e);
+        }
+      }
+    }).start();
+  }
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+  public void uploadImageFile(final String filePath, final String message) {
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          File file = new File(filePath);
+          StatusUpdate status = new StatusUpdate(message);
+          status.setMedia(file);
+          twitter.updateStatus(status);
+        } catch (TwitterException e) {
+          Logging.logError(e);
+        }
+      }
+    }).start();
+  }
 
-		ServiceType meta = new ServiceType(Twitter.class.getCanonicalName());
-		meta.addDescription("Service which can relay tweets");
-		meta.addCategory("cloud", "connectivity");		
-		meta.addDependency("org.twitter4j.twitter", "3.0.5");
-		return meta;
-	}
-	
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(Twitter.class.getCanonicalName());
+    meta.addDescription("Service which can relay tweets");
+    meta.addCategory("cloud", "connectivity");
+    meta.addDependency("org.twitter4j.twitter", "3.0.5");
+    return meta;
+  }
+
 }

@@ -46,132 +46,132 @@ import org.myrobotlab.service.RemoteAdapter;
 
 public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	JLabel numClients = new JLabel("0");
+  static final long serialVersionUID = 1L;
+  JLabel numClients = new JLabel("0");
 
-	JButton scan = new JButton("scan");
-	JButton connect = new JButton("connect");
-	JButton listen = new JButton("listen");
-	JLabel udpPort = new JLabel("");
-	JLabel tcpPort = new JLabel("");
-	JLabel newConn = new JLabel("");
+  JButton scan = new JButton("scan");
+  JButton connect = new JButton("connect");
+  JButton listen = new JButton("listen");
+  JLabel udpPort = new JLabel("");
+  JLabel tcpPort = new JLabel("");
+  JLabel newConn = new JLabel("");
 
-	// display of the Connections
-	ConnectionNodeList list = new ConnectionNodeList();
-	String lastProtoKey;
+  // display of the Connections
+  ConnectionNodeList list = new ConnectionNodeList();
+  String lastProtoKey;
 
-	RemoteAdapter myRemote = null;
+  RemoteAdapter myRemote = null;
 
-	public RemoteAdapterGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public RemoteAdapterGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent action) {
-		Object o = action.getSource();
-		if (o == connect) {
-			String newProtoKey = (String) JOptionPane.showInputDialog(myService.getFrame(), "<html>connect to a remote MyRobotLab</html>", "connect", JOptionPane.WARNING_MESSAGE,
-					Util.getResourceIcon("RemoteAdapter/connect.png"), null, lastProtoKey);
+  @Override
+  public void actionPerformed(ActionEvent action) {
+    Object o = action.getSource();
+    if (o == connect) {
+      String newProtoKey = (String) JOptionPane.showInputDialog(myService.getFrame(), "<html>connect to a remote MyRobotLab</html>", "connect", JOptionPane.WARNING_MESSAGE,
+          Util.getResourceIcon("RemoteAdapter/connect.png"), null, lastProtoKey);
 
-			if (newProtoKey == null || newProtoKey == "") {
-				return;
-			}
+      if (newProtoKey == null || newProtoKey == "") {
+        return;
+      }
 
-			send("connect", newProtoKey);
-			lastProtoKey = newProtoKey;
-		} else if (o == listen) {
-			if (listen.getText().equals("stop listening")) {
-				send("stopListening");
-			} else {
-				send("startListening");
-			}
-		} else if (o == scan) {
-			if (scan.getText().equals("stop scanning")) {
-				send("stopScanning");
-				send("broadcastState");
-			} else {
-				send("scan");
-				send("broadcastState");
-			}
-		}
-	}
+      send("connect", newProtoKey);
+      lastProtoKey = newProtoKey;
+    } else if (o == listen) {
+      if (listen.getText().equals("stop listening")) {
+        send("stopListening");
+      } else {
+        send("startListening");
+      }
+    } else if (o == scan) {
+      if (scan.getText().equals("stop scanning")) {
+        send("stopScanning");
+        send("broadcastState");
+      } else {
+        send("scan");
+        send("broadcastState");
+      }
+    }
+  }
 
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", RemoteAdapter.class);
-		subscribe("publishNewConnection", "onNewConnection", Connection.class);
-		send("broadcastState");
-	}
+  @Override
+  public void attachGUI() {
+    subscribe("publishState", "getState", RemoteAdapter.class);
+    subscribe("publishNewConnection", "onNewConnection", Connection.class);
+    send("broadcastState");
+  }
 
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", RemoteAdapter.class);
-		unsubscribe("publishNewConnection", "onNewConnection", Connection.class);
-	}
+  @Override
+  public void detachGUI() {
+    unsubscribe("publishState", "getState", RemoteAdapter.class);
+    unsubscribe("publishNewConnection", "onNewConnection", Connection.class);
+  }
 
-	public void getState(final RemoteAdapter remote) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				myRemote = remote;
-				if (myRemote.isScanning()) {
-					scan.setText("stop scanning");
-				} else {
-					scan.setText("scan");
-				}
-				if (myRemote.isListening()) {
-					listen.setText("stop listening");
-					if (remote.getUdpPort() != null) {
-						udpPort.setText(remote.getUdpPort().toString());
-					} else {
-						udpPort.setText("");
-					}
-					if (remote.getTcpPort() != null) {
-						tcpPort.setText(remote.getTcpPort().toString());
-					} else {
-						tcpPort.setText("");
-					}
-				} else {
-					listen.setText("listen");
-				}
-				lastProtoKey = remote.lastProtocolKey;
-				if (remote.getClients() == null) {
-					return;
-				}
-				list.model.clear();
-				for (Map.Entry<URI, Connection> o : remote.getClients().entrySet()) {
-					//URI uri = o.getKey();
-					Connection data = o.getValue();
-					list.model.add(0, data);
-				}
-			}
-		});
-	}
+  public void getState(final RemoteAdapter remote) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        myRemote = remote;
+        if (myRemote.isScanning()) {
+          scan.setText("stop scanning");
+        } else {
+          scan.setText("scan");
+        }
+        if (myRemote.isListening()) {
+          listen.setText("stop listening");
+          if (remote.getUdpPort() != null) {
+            udpPort.setText(remote.getUdpPort().toString());
+          } else {
+            udpPort.setText("");
+          }
+          if (remote.getTcpPort() != null) {
+            tcpPort.setText(remote.getTcpPort().toString());
+          } else {
+            tcpPort.setText("");
+          }
+        } else {
+          listen.setText("listen");
+        }
+        lastProtoKey = remote.lastProtocolKey;
+        if (remote.getClients() == null) {
+          return;
+        }
+        list.model.clear();
+        for (Map.Entry<URI, Connection> o : remote.getClients().entrySet()) {
+          // URI uri = o.getKey();
+          Connection data = o.getValue();
+          list.model.add(0, data);
+        }
+      }
+    });
+  }
 
-	@Override
-	public void init() {
+  @Override
+  public void init() {
 
-		display.setLayout(new BorderLayout());
+    display.setLayout(new BorderLayout());
 
-		JPanel top = new JPanel();
-		top.add(scan);
-		top.add(connect);
-		top.add(listen);
-		top.add(new JLabel("udp "));
-		top.add(udpPort);
-		top.add(new JLabel("tcp "));
-		top.add(tcpPort);
+    JPanel top = new JPanel();
+    top.add(scan);
+    top.add(connect);
+    top.add(listen);
+    top.add(new JLabel("udp "));
+    top.add(udpPort);
+    top.add(new JLabel("tcp "));
+    top.add(tcpPort);
 
-		scan.addActionListener(this);
-		connect.addActionListener(this);
-		listen.addActionListener(this);
+    scan.addActionListener(this);
+    connect.addActionListener(this);
+    listen.addActionListener(this);
 
-		display.add(top, BorderLayout.NORTH);
-		display.add(list, BorderLayout.CENTER);
-	}
+    display.add(top, BorderLayout.NORTH);
+    display.add(list, BorderLayout.CENTER);
+  }
 
-	public void onNewConnection(Connection conn) {
-		myService.info("new connection found %d %s", System.currentTimeMillis(), conn.toString());
-	}
+  public void onNewConnection(Connection conn) {
+    myService.info("new connection found %d %s", System.currentTimeMillis(), conn.toString());
+  }
 
 }

@@ -9,78 +9,81 @@ import java.util.List;
 
 public class MultiplyValues extends AbstractStage {
 
-	public final static Logger log = LoggerFactory.getLogger(MultiplyValues.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(MultiplyValues.class.getCanonicalName());
 
-	private List<String> inputFields = null;
-	private String outputField = null;
+  private List<String> inputFields = null;
+  private String outputField = null;
 
-	@Override
-	public void startStage(StageConfiguration config) {
-		// TODO Auto-generated method stub
+  @Override
+  public void startStage(StageConfiguration config) {
+    // TODO Auto-generated method stub
 
-		if (config != null) {
-			inputFields = config.getListParam("inputFields");
-			outputField = config.getProperty("outputField");
-		}
-	}
+    if (config != null) {
+      inputFields = config.getListParam("inputFields");
+      outputField = config.getProperty("outputField");
+    }
+  }
 
-	@Override
-	public List<Document> processDocument(Document doc) {
-		// divide the double values in 2 fields, store the result in the quotent field.
-		for (String inField : inputFields) {
-			if (!doc.hasField(inField)) {
-				// doc missing one of the input fields?  
-				// TODO: maybe we want to control this behavior  (ignore unset fields?)
-				return null;
-			}
-		}
-		
-		ArrayList<Double> results = new ArrayList<Double>();
-		int size = doc.getField(inputFields.get(0)).size();
-		for (int i = 0; i < size; i++) {
-			try {
-				//log.info("Compute {} divided by {}", doc.getField(dividendField).get(i), doc.getField(divisorField).get(i));
-				Double sum = 1.0;
-				for (String inField : inputFields) {
-					sum *= convertToDouble(doc.getField(inField).get(i));
-				}
-				results.add(sum);
-			} catch (ClassCastException e) {
-				log.warn("Division Error DocID: ", doc.getId());
-				e.printStackTrace();
-			}
-		}
+  @Override
+  public List<Document> processDocument(Document doc) {
+    // divide the double values in 2 fields, store the result in the quotent
+    // field.
+    for (String inField : inputFields) {
+      if (!doc.hasField(inField)) {
+        // doc missing one of the input fields?
+        // TODO: maybe we want to control this behavior (ignore unset fields?)
+        return null;
+      }
+    }
 
-		for (Double v : results) {
-			doc.addToField(outputField, v);
-		}
+    ArrayList<Double> results = new ArrayList<Double>();
+    int size = doc.getField(inputFields.get(0)).size();
+    for (int i = 0; i < size; i++) {
+      try {
+        // log.info("Compute {} divided by {}",
+        // doc.getField(dividendField).get(i),
+        // doc.getField(divisorField).get(i));
+        Double sum = 1.0;
+        for (String inField : inputFields) {
+          sum *= convertToDouble(doc.getField(inField).get(i));
+        }
+        results.add(sum);
+      } catch (ClassCastException e) {
+        log.warn("Division Error DocID: ", doc.getId());
+        e.printStackTrace();
+      }
+    }
 
-		return null;
-	}
+    for (Double v : results) {
+      doc.addToField(outputField, v);
+    }
 
-	private Double convertToDouble(Object obj) throws ClassCastException {
-		Double doubleVal = null;
-		if (obj instanceof Integer) {
-			doubleVal = new Double(((Integer) obj).intValue());
-		} else if (obj instanceof Double) {
-			doubleVal = (Double) obj;
-		} else {
-			throw new ClassCastException("Cannot convert " + obj.getClass().getName() + " to Double.");
-		}
+    return null;
+  }
 
-		return doubleVal;
-	}
+  private Double convertToDouble(Object obj) throws ClassCastException {
+    Double doubleVal = null;
+    if (obj instanceof Integer) {
+      doubleVal = new Double(((Integer) obj).intValue());
+    } else if (obj instanceof Double) {
+      doubleVal = (Double) obj;
+    } else {
+      throw new ClassCastException("Cannot convert " + obj.getClass().getName() + " to Double.");
+    }
 
-	@Override
-	public void stopStage() {
-		// TODO Auto-generated method stub
+    return doubleVal;
+  }
 
-	}
+  @Override
+  public void stopStage() {
+    // TODO Auto-generated method stub
 
-	@Override
-	public void flush() {
-		// TODO Auto-generated method stub
+  }
 
-	}
+  @Override
+  public void flush() {
+    // TODO Auto-generated method stub
+
+  }
 
 }

@@ -4,6 +4,6 @@ import org.myrobotlab.framework.Status;
 
 public interface RepoInstallListener {
 
-	public void onInstallProgress(final Status status);
+  public void onInstallProgress(final Status status);
 
 }

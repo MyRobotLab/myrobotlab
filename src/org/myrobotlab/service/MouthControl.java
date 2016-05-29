@@ -17,228 +17,225 @@ import org.slf4j.Logger;
  */
 public class MouthControl extends Service {
 
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(MouthControl.class.getCanonicalName());
-	public int mouthClosedPos = 20;
-	public int mouthOpenedPos = 4;
-	public int delaytime = 100;
-	public int delaytimestop = 200;
-	public int delaytimeletter = 60;
-	transient Servo jaw;
-	transient Arduino arduino;
-	transient SpeechSynthesis mouth;
-	public boolean autoAttach = true;
+  private static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(MouthControl.class.getCanonicalName());
+  public int mouthClosedPos = 20;
+  public int mouthOpenedPos = 4;
+  public int delaytime = 100;
+  public int delaytimestop = 200;
+  public int delaytimeletter = 60;
+  transient Servo jaw;
+  transient Arduino arduino;
+  transient SpeechSynthesis mouth;
+  public boolean autoAttach = true;
 
-	public MouthControl(String n) {
-		super(n);
-		jaw = (Servo) createPeer("jaw");
-		arduino = (Arduino) createPeer("arduino");
-		mouth = (SpeechSynthesis) createPeer("mouth");
-		jaw.setPin(7);
-		jaw.setController(arduino);
-		// TODO: mouth should probably implement speech synthesis.
-		// in a way of speaking, one day, people may be able to read the lips
-		// of the inmoov.. so you're synthesising speech in a mechanical way. 
-		// similar to sign language maybe?
-		subscribe(mouth.getName(), "publishStartSpeaking");
-		subscribe(mouth.getName(), "publishEndSpeaking");
-	}
+  public MouthControl(String n) {
+    super(n);
+    jaw = (Servo) createPeer("jaw");
+    arduino = (Arduino) createPeer("arduino");
+    mouth = (SpeechSynthesis) createPeer("mouth");
+    jaw.setPin(7);
+    jaw.setController(arduino);
+    // TODO: mouth should probably implement speech synthesis.
+    // in a way of speaking, one day, people may be able to read the lips
+    // of the inmoov.. so you're synthesising speech in a mechanical way.
+    // similar to sign language maybe?
+    subscribe(mouth.getName(), "publishStartSpeaking");
+    subscribe(mouth.getName(), "publishEndSpeaking");
+  }
 
-	// FIXME make interface
-	public boolean connect(String port) throws Exception {
-		startService(); // NEEDED? I DONT THINK SO....
+  // FIXME make interface
+  public boolean connect(String port) throws Exception {
+    startService(); // NEEDED? I DONT THINK SO....
 
-		if (arduino == null) {
-			error("arduino is invalid");
-			return false;
-		}
+    if (arduino == null) {
+      error("arduino is invalid");
+      return false;
+    }
 
-		arduino.connect(port);
+    arduino.connect(port);
 
-		if (!arduino.isConnected()) {
-			error("arduino %s not connected", arduino.getName());
-			return false;
-		}
+    if (!arduino.isConnected()) {
+      error("arduino %s not connected", arduino.getName());
+      return false;
+    }
 
-		// arduino.servoAttach(jaw);
-		jaw.attach();
-		return true;
-	}
+    // arduino.servoAttach(jaw);
+    jaw.attach();
+    return true;
+  }
 
-	public Arduino getArduino() {
-		return arduino;
-	}
-	
-	public Servo getJaw() {
-		return jaw;
-	}
+  public Arduino getArduino() {
+    return arduino;
+  }
 
-	public void setJaw(Servo jaw) {
-		this.jaw = jaw;
-	}
+  public Servo getJaw() {
+    return jaw;
+  }
 
-	public SpeechSynthesis getMouth() {
-		return mouth;
-	}
+  public void setJaw(Servo jaw) {
+    this.jaw = jaw;
+  }
 
-	public void setMouth(SpeechSynthesis mouth) {
-		this.mouth = mouth;
-		subscribe(mouth.getName(), "publishStartSpeaking");
-	}
+  public SpeechSynthesis getMouth() {
+    return mouth;
+  }
 
-	public void setArduino(Arduino arduino) {
-		this.arduino = arduino;
-	}
+  public void setMouth(SpeechSynthesis mouth) {
+    this.mouth = mouth;
+    subscribe(mouth.getName(), "publishStartSpeaking");
+  }
 
-	public String[] getCategories() {
-		return new String[] { "control" };
-	}
+  public void setArduino(Arduino arduino) {
+    this.arduino = arduino;
+  }
 
-	@Override
-	public String getDescription() {
-		return "mouth movements based on spoken text";
-	}
-	
-	public synchronized void onStartSpeaking(String text) {
-		log.info("move moving to :" + text);
-		if (jaw != null) { // mouthServo.moveTo(Mouthopen);
-			if (autoAttach) {
-				if (!jaw.isAttached()) {
-					// attach the jaw if it's not attached.
-					jaw.attach();
-				}
-			}
+  public String[] getCategories() {
+    return new String[] { "control" };
+  }
 
-			boolean ison = false;
-			String testword;
-			String[] a = text.split(" ");
-			for (int w = 0; w < a.length; w++) {
-				// String word = ;
-				// log.info(String.valueOf(a[w].length()));
+  @Override
+  public String getDescription() {
+    return "mouth movements based on spoken text";
+  }
 
-				if (a[w].endsWith("es")) {
-					testword = a[w].substring(0, a[w].length() - 2);
+  public synchronized void onStartSpeaking(String text) {
+    log.info("move moving to :" + text);
+    if (jaw != null) { // mouthServo.moveTo(Mouthopen);
+      if (autoAttach) {
+        if (!jaw.isAttached()) {
+          // attach the jaw if it's not attached.
+          jaw.attach();
+        }
+      }
 
-				} else if (a[w].endsWith("e")) {
-					testword = a[w].substring(0, a[w].length() - 1);
-					// log.info("e gone");
-				} else {
-					testword = a[w];
+      boolean ison = false;
+      String testword;
+      String[] a = text.split(" ");
+      for (int w = 0; w < a.length; w++) {
+        // String word = ;
+        // log.info(String.valueOf(a[w].length()));
 
-				}
+        if (a[w].endsWith("es")) {
+          testword = a[w].substring(0, a[w].length() - 2);
 
-				char[] c = testword.toCharArray();
+        } else if (a[w].endsWith("e")) {
+          testword = a[w].substring(0, a[w].length() - 1);
+          // log.info("e gone");
+        } else {
+          testword = a[w];
 
-				for (int x = 0; x < c.length; x++) {
-					char s = c[x];
-					if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y') && !ison) {
-						jaw.moveTo(mouthOpenedPos); // # move the servo to the
-						// open spot
-						ison = true;
-						sleep(delaytime);
-						jaw.moveTo(mouthClosedPos);// #// close the servo
-					} else if (s == '.') {
-						ison = false;
-						sleep(delaytimestop);
-					} else {
-						ison = false;
-						sleep(delaytimeletter); // # sleep half a second
-					}
+        }
 
-				}
+        char[] c = testword.toCharArray();
 
-				sleep(80);
-			}
+        for (int x = 0; x < c.length; x++) {
+          char s = c[x];
+          if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y') && !ison) {
+            jaw.moveTo(mouthOpenedPos); // # move the servo to the
+            // open spot
+            ison = true;
+            sleep(delaytime);
+            jaw.moveTo(mouthClosedPos);// #// close the servo
+          } else if (s == '.') {
+            ison = false;
+            sleep(delaytimestop);
+          } else {
+            ison = false;
+            sleep(delaytimeletter); // # sleep half a second
+          }
 
-		} else {
-			log.info("need to attach first");
-		}
+        }
 
-		//  We're done annimating, lets detach the jaw while not in use.
-		if (autoAttach && jaw != null) {
-			if (jaw.isAttached()) {
-				// attach the jaw if it's not attached.
-				jaw.detach();
-			}
-		}
-	}
-	
-	public synchronized void onEndSpeaking(String utterance) {
-		log.info("Mouth control recognized end speaking.");
-		// TODO: consider a jaw move to closed position
-		if (jaw != null && jaw.isAttached())  {
-			jaw.moveTo(mouthClosedPos);
-		} 
-		//else {
-		//	log.info("Not closing my mouth?");
-		//}
-	}
-	
+        sleep(80);
+      }
 
-	public void setdelays(Integer d1, Integer d2, Integer d3) {
-		delaytime = d1;
-		delaytimestop = d2;
-		delaytimeletter = d3;
-	}
+    } else {
+      log.info("need to attach first");
+    }
 
-	public void setmouth(Integer closed, Integer opened) {
-		// jaw.setMinMax(closed, opened);
-		mouthClosedPos = closed;
-		mouthOpenedPos = opened;
+    // We're done annimating, lets detach the jaw while not in use.
+    if (autoAttach && jaw != null) {
+      if (jaw.isAttached()) {
+        // attach the jaw if it's not attached.
+        jaw.detach();
+      }
+    }
+  }
 
-		if (closed < opened) {
-			jaw.setMinMax(closed, opened);
-		} else {
-			jaw.setMinMax(opened, closed);
-		}
-	}
+  public synchronized void onEndSpeaking(String utterance) {
+    log.info("Mouth control recognized end speaking.");
+    // TODO: consider a jaw move to closed position
+    if (jaw != null && jaw.isAttached()) {
+      jaw.moveTo(mouthClosedPos);
+    }
+    // else {
+    // log.info("Not closing my mouth?");
+    // }
+  }
 
-	@Override
-	public void startService() {
-		super.startService();
-		jaw.startService();
-		arduino.startService();
-		// mouth.startService();
-	}
+  public void setdelays(Integer d1, Integer d2, Integer d3) {
+    delaytime = d1;
+    delaytimestop = d2;
+    delaytimeletter = d3;
+  }
 
+  public void setmouth(Integer closed, Integer opened) {
+    // jaw.setMinMax(closed, opened);
+    mouthClosedPos = closed;
+    mouthOpenedPos = opened;
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+    if (closed < opened) {
+      jaw.setMinMax(closed, opened);
+    } else {
+      jaw.setMinMax(opened, closed);
+    }
+  }
 
-		ServiceType meta = new ServiceType(MouthControl.class.getCanonicalName());
-		meta.addDescription("Mouth movements based on spoken text");
-		meta.addCategory("control");
+  @Override
+  public void startService() {
+    super.startService();
+    jaw.startService();
+    arduino.startService();
+    // mouth.startService();
+  }
 
-		meta.addPeer("jaw", "Servo", "shared Jaw servo instance");
-		meta.addPeer("arduino", "Arduino", "shared Arduino instance");
-		meta.addPeer("mouth", "AcapelaSpeech", "shared Speech instance");
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
-		return meta;
-	}
+    ServiceType meta = new ServiceType(MouthControl.class.getCanonicalName());
+    meta.addDescription("Mouth movements based on spoken text");
+    meta.addCategory("control");
 
+    meta.addPeer("jaw", "Servo", "shared Jaw servo instance");
+    meta.addPeer("arduino", "Arduino", "shared Arduino instance");
+    meta.addPeer("mouth", "AcapelaSpeech", "shared Speech instance");
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-		try {
-			// LoggingFactory.getInstance().setLevel(Level.INFO);
-			MouthControl MouthControl = new MouthControl("MouthControl");
-			MouthControl.startService();
+    return meta;
+  }
 
-			Runtime.createAndStart("gui", "GUIService");
+  public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    try {
+      // LoggingFactory.getInstance().setLevel(Level.INFO);
+      MouthControl MouthControl = new MouthControl("MouthControl");
+      MouthControl.startService();
 
-			MouthControl.autoAttach = true;
-			MouthControl.onStartSpeaking("test on");
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+      Runtime.createAndStart("gui", "GUIService");
+
+      MouthControl.autoAttach = true;
+      MouthControl.onStartSpeaking("test on");
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
 }

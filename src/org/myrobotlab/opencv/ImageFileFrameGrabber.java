@@ -1,6 +1,5 @@
 package org.myrobotlab.opencv;
 
-
 import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 
 import java.util.HashMap;
@@ -14,52 +13,52 @@ import org.slf4j.Logger;
 
 public class ImageFileFrameGrabber extends FrameGrabber {
 
-	public final static Logger log = LoggerFactory.getLogger(ImageFileFrameGrabber.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(ImageFileFrameGrabber.class.getCanonicalName());
 
-	private IplImage image;
-	private IplImage lastImage;
-	private HashMap<String,IplImage> cache = new HashMap<String,IplImage>();
-	private int frameCounter = 0;
-	public String path;
-	transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
+  private IplImage image;
+  private IplImage lastImage;
+  private HashMap<String, IplImage> cache = new HashMap<String, IplImage>();
+  private int frameCounter = 0;
+  public String path;
+  transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
 
-	public ImageFileFrameGrabber(String path) {
-		this.path = path;
-	}
+  public ImageFileFrameGrabber(String path) {
+    this.path = path;
+  }
 
-	@Override
-	public Frame grab() {
-		if (!cache.containsKey(path))  {
-			image = cvLoadImage(path); 
-			cache.put(path, image);
-		} else {
-			image = cache.get(path).clone();
-		}
+  @Override
+  public Frame grab() {
+    if (!cache.containsKey(path)) {
+      image = cvLoadImage(path);
+      cache.put(path, image);
+    } else {
+      image = cache.get(path).clone();
+    }
 
-		++frameCounter;
+    ++frameCounter;
 
-		if (frameCounter > 1) {
-			lastImage.release();
-		}
+    if (frameCounter > 1) {
+      lastImage.release();
+    }
 
-		lastImage = image;
-		return converter.convert(image);
-	}
+    lastImage = image;
+    return converter.convert(image);
+  }
 
-	@Override
-	public void release() throws Exception {
-	}
+  @Override
+  public void release() throws Exception {
+  }
 
-	@Override
-	public void start() {
-	}
+  @Override
+  public void start() {
+  }
 
-	@Override
-	public void stop() {
-	}
+  @Override
+  public void stop() {
+  }
 
-	@Override
-	public void trigger() throws Exception {
-	}
+  @Override
+  public void trigger() throws Exception {
+  }
 
 }

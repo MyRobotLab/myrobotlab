@@ -31,32 +31,32 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterCreateHistogram extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterCreateHistogram.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterCreateHistogram.class.getCanonicalName());
 
-	IplImage buffer = null;
+  IplImage buffer = null;
 
-	public OpenCVFilterCreateHistogram() {
-		super();
-	}
+  public OpenCVFilterCreateHistogram() {
+    super();
+  }
 
-	public OpenCVFilterCreateHistogram(String name) {
-		super(name);
-	}
+  public OpenCVFilterCreateHistogram(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
+  @Override
+  public void imageChanged(IplImage image) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
 
-		// what can you expect? nothing? - if data != null then error?
+    // what can you expect? nothing? - if data != null then error?
 
-		return image;
-	}
+    return image;
+  }
 
 }

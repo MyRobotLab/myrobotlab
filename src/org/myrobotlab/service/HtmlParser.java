@@ -9,46 +9,43 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class HtmlParser extends Service {
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(HtmlParser.class);
-	
-	
+  public final static Logger log = LoggerFactory.getLogger(HtmlParser.class);
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+  public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.INFO);
 
-		try {
+    try {
 
-			Runtime.start("jsoup", "Jsoup");
-			Runtime.start("gui", "GUIService");
+      Runtime.start("jsoup", "Jsoup");
+      Runtime.start("gui", "GUIService");
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-	public HtmlParser(String n) {
-		super(n);
-	}
-	
-	/**
-	 * This static method returns all the details of the class without
-	 * it having to be constructed.  It has description, categories,
-	 * dependencies, and peer definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData(){
-		
-		ServiceType meta = new ServiceType(HtmlParser.class.getCanonicalName());
-		meta.addDependency("org.jsoup", "1.8.3");
-		meta.addDescription("html parser");
-		meta.addCategory("document");		
-		return meta;		
-	}
+  public HtmlParser(String n) {
+    super(n);
+  }
 
-	
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(HtmlParser.class.getCanonicalName());
+    meta.addDependency("org.jsoup", "1.8.3");
+    meta.addDescription("html parser");
+    meta.addCategory("document");
+    return meta;
+  }
+
 }

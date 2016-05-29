@@ -6,17 +6,19 @@ import org.myrobotlab.document.Document;
 
 @Ignore
 public abstract class AbstractStageTest {
-	
-	public abstract Document createDocument();
-	public abstract AbstractStage createStage();
-	public abstract void validate(Document doc);
-	
-	@Test
-	public void test() {
-		AbstractStage stage = createStage();
-		Document doc = createDocument();
-		stage.processDocument(doc);
-		validate(doc);
-	}
-	
+
+  public abstract Document createDocument();
+
+  public abstract AbstractStage createStage();
+
+  public abstract void validate(Document doc);
+
+  @Test
+  public void test() {
+    AbstractStage stage = createStage();
+    Document doc = createDocument();
+    stage.processDocument(doc);
+    validate(doc);
+  }
+
 }

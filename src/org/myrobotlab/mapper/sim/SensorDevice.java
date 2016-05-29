@@ -29,7 +29,7 @@ package org.myrobotlab.mapper.sim;
  */
 public abstract class SensorDevice extends Device {
 
-	SensorDevice() {
-	}
+  SensorDevice() {
+  }
 
 }

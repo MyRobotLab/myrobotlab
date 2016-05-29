@@ -38,36 +38,36 @@ import org.slf4j.Logger;
 
 public class MouthControlGUI extends ServiceGUI implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(MouthControlGUI.class.getCanonicalName());
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(MouthControlGUI.class.getCanonicalName());
 
-	public MouthControlGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public MouthControlGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void attachGUI() {
+  @Override
+  public void attachGUI() {
 
-	}
+  }
 
-	@Override
-	public void detachGUI() {
+  @Override
+  public void detachGUI() {
 
-	}
+  }
 
-	public void getState(MouthControl mouth) {
+  public void getState(MouthControl mouth) {
 
-	}
+  }
 
-	@Override
-	public void init() {
-		display.add(new JLabel("no gui"));
-	}
+  @Override
+  public void init() {
+    display.add(new JLabel("no gui"));
+  }
 
 }

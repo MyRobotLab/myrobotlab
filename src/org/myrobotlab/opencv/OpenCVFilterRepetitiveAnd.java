@@ -33,38 +33,38 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterRepetitiveAnd extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterRepetitiveAnd.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterRepetitiveAnd.class.getCanonicalName());
 
-	IplImage buffer = null;
-	// IplImage out = null;
-	IplImage[] memory = new IplImage[5];
+  IplImage buffer = null;
+  // IplImage out = null;
+  IplImage[] memory = new IplImage[5];
 
-	public OpenCVFilterRepetitiveAnd() {
-		super();
-	}
+  public OpenCVFilterRepetitiveAnd() {
+    super();
+  }
 
-	public OpenCVFilterRepetitiveAnd(String name) {
-		super(name);
-	}
+  public OpenCVFilterRepetitiveAnd(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
+  @Override
+  public void imageChanged(IplImage image) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
 
-		if (buffer == null) {
-			buffer = image.clone();
-		}
+    if (buffer == null) {
+      buffer = image.clone();
+    }
 
-		cvAnd(image, buffer, buffer, null);
+    cvAnd(image, buffer, buffer, null);
 
-		return buffer;
-	}
+    return buffer;
+  }
 
 }

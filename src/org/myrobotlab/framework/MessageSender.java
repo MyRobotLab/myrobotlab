@@ -27,6 +27,6 @@ package org.myrobotlab.framework;
 
 public interface MessageSender {
 
-	public void send(Message msg);
+  public void send(Message msg);
 
 }

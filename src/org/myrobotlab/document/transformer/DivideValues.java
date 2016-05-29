@@ -28,7 +28,8 @@ public class DivideValues extends AbstractStage {
 
   @Override
   public List<Document> processDocument(Document doc) {
-    // divide the double values in 2 fields, store the result in the quotent field.
+    // divide the double values in 2 fields, store the result in the quotent
+    // field.
     if (!(doc.hasField(dividendField) && doc.hasField(divisorField))) {
       return null;
     }
@@ -40,13 +41,15 @@ public class DivideValues extends AbstractStage {
     int size = doc.getField(dividendField).size();
     for (int i = 0; i < size; i++) {
       try {
-        //log.info("Compute {} divided by {}", doc.getField(dividendField).get(i), doc.getField(divisorField).get(i));
+        // log.info("Compute {} divided by {}",
+        // doc.getField(dividendField).get(i),
+        // doc.getField(divisorField).get(i));
         Double divisor = convertToDouble(doc.getField(divisorField).get(i));
         Double dividend = convertToDouble(doc.getField(dividendField).get(i));
         if (divisor == 0.0) {
           continue;
         }
-        Double quotient = dividend/divisor;
+        Double quotient = dividend / divisor;
         results.add(quotient);
       } catch (ClassCastException e) {
         log.warn("Division Error DocID: ", doc.getId());
@@ -60,7 +63,6 @@ public class DivideValues extends AbstractStage {
     for (Double v : results) {
       doc.addToField(quotentField, v);
     }
-
 
     return null;
   }

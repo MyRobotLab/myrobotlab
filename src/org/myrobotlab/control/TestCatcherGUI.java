@@ -38,72 +38,71 @@ import org.myrobotlab.service.TestCatcher;
 
 public class TestCatcherGUI extends ServiceGUI {
 
-	static final long serialVersionUID = 1L;
-	JLabel catchInteger = new JLabel("0");
-	JButton bindCatchIntegerButton = null;
+  static final long serialVersionUID = 1L;
+  JLabel catchInteger = new JLabel("0");
+  JButton bindCatchIntegerButton = null;
 
-	public TestCatcherGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public TestCatcherGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", TestCatcher.class);
-	}
+  @Override
+  public void attachGUI() {
+    subscribe("publishState", "getState", TestCatcher.class);
+  }
 
-	// TODO - reflect and auto-bind (or pull info from the Service/Method
-	// directory
-	// autoBind(ServiceName) would send all NotificationEntries to a service
-	public void bindCatchInteger() {
-		MRLListener MRLListener = new MRLListener("catchInteger", myService.getName(), "catchInteger");
-		myService.send(boundServiceName, "addListener", MRLListener);
-	}
+  // TODO - reflect and auto-bind (or pull info from the Service/Method
+  // directory
+  // autoBind(ServiceName) would send all NotificationEntries to a service
+  public void bindCatchInteger() {
+    MRLListener MRLListener = new MRLListener("catchInteger", myService.getName(), "catchInteger");
+    myService.send(boundServiceName, "addListener", MRLListener);
+  }
 
-	public void catchInteger(Integer i) {
-		catchInteger.setText(i.toString());
-	}
+  public void catchInteger(Integer i) {
+    catchInteger.setText(i.toString());
+  }
 
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", TestCatcher.class);
-	}
+  @Override
+  public void detachGUI() {
+    unsubscribe("publishState", "getState", TestCatcher.class);
+  }
 
-	// TODO - generalize this and use it in reflection
-	public JButton getBindCatchIntegerButton() {
-		if (bindCatchIntegerButton == null) {
-			bindCatchIntegerButton = new JButton("connect");
-			bindCatchIntegerButton.addActionListener(new ActionListener() {
+  // TODO - generalize this and use it in reflection
+  public JButton getBindCatchIntegerButton() {
+    if (bindCatchIntegerButton == null) {
+      bindCatchIntegerButton = new JButton("connect");
+      bindCatchIntegerButton.addActionListener(new ActionListener() {
 
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					myService.send(boundServiceName, "catchNothing");
-					/*
-					 * if (bindCatchIntegerButton.getText().compareTo("connect")
-					 * == 0) { bindCatchIntegerButton.setText("disconnect");
-					 * subscribe("catchInteger", "catchInteger",
-					 * SerializableImage.class); } else {
-					 * bindCatchIntegerButton.setText("connect");
-					 * unsubscribe("catchInteger", "catchInteger",
-					 * SerializableImage.class); }
-					 */
-				}
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          myService.send(boundServiceName, "catchNothing");
+          /*
+           * if (bindCatchIntegerButton.getText().compareTo("connect") == 0) {
+           * bindCatchIntegerButton.setText("disconnect");
+           * subscribe("catchInteger", "catchInteger", SerializableImage.class);
+           * } else { bindCatchIntegerButton.setText("connect");
+           * unsubscribe("catchInteger", "catchInteger",
+           * SerializableImage.class); }
+           */
+        }
 
-			});
+      });
 
-		}
+    }
 
-		return bindCatchIntegerButton;
+    return bindCatchIntegerButton;
 
-	}
+  }
 
-	@Override
-	public void init() {
+  @Override
+  public void init() {
 
-		display.add(new JLabel("catchInteger : "), gc);
-		++gc.gridx;
-		display.add(catchInteger, gc);
-		++gc.gridx;
-		display.add(getBindCatchIntegerButton(), gc);
-	}
+    display.add(new JLabel("catchInteger : "), gc);
+    ++gc.gridx;
+    display.add(catchInteger, gc);
+    ++gc.gridx;
+    display.add(getBindCatchIntegerButton(), gc);
+  }
 
 }

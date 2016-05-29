@@ -37,40 +37,41 @@ import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterDefaultGUI extends OpenCVFilterGUI implements ActionListener {
 
-	public OpenCVFilterDefaultGUI(String boundFilterName, String boundServiceName, GUIService myService) {
-		super(boundFilterName, boundServiceName, myService);
+  public OpenCVFilterDefaultGUI(String boundFilterName, String boundServiceName, GUIService myService) {
+    super(boundFilterName, boundServiceName, myService);
 
-		display.add(new JLabel("no available parameters"));
-	}
+    display.add(new JLabel("no available parameters"));
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// Object o = e.getSource();
-		OpenCVFilter bf = boundFilter.filter;
-		setFilterState(bf);
-	}
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    // Object o = e.getSource();
+    OpenCVFilter bf = boundFilter.filter;
+    setFilterState(bf);
+  }
 
-	// @Override
-	public void attachGUI() {
-		log.debug("attachGUI");
+  // @Override
+  public void attachGUI() {
+    log.debug("attachGUI");
 
-	}
+  }
 
-	// @Override
-	public void detachGUI() {
-		log.debug("detachGUI");
+  // @Override
+  public void detachGUI() {
+    log.debug("detachGUI");
 
-	}
+  }
 
-	@Override
-	public void getFilterState(final FilterWrapper filterWrapper) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				//OpenCVFilter bf = filterWrapper.filter;
-			  // TODO: what should this method do?  local assignment of "bf" does nothing.
-			}
-		});
-	}
+  @Override
+  public void getFilterState(final FilterWrapper filterWrapper) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        // OpenCVFilter bf = filterWrapper.filter;
+        // TODO: what should this method do? local assignment of "bf" does
+        // nothing.
+      }
+    });
+  }
 
 }

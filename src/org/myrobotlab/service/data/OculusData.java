@@ -3,56 +3,53 @@ package org.myrobotlab.service.data;
 /**
  * @author GroG
  * 
- *         
+ * 
  * 
  */
 public class OculusData {
 
-	public Double roll = null;
-	public Double pitch = null;
-	public Double yaw = null;
+  public Double roll = null;
+  public Double pitch = null;
+  public Double yaw = null;
 
-	// default constructor (values will be null until set)
-	public OculusData() {
-	}
-	
-	// constructor with initial values for roll/pitch/yaw
-	public OculusData(Double roll, Double pitch, Double yaw) {
-		this.roll = roll;
-		this.pitch = pitch;
-		this.yaw = yaw;
-	}
-	
+  // default constructor (values will be null until set)
+  public OculusData() {
+  }
 
-	
-	public Double getRoll() {
-		return roll;
-	}
+  // constructor with initial values for roll/pitch/yaw
+  public OculusData(Double roll, Double pitch, Double yaw) {
+    this.roll = roll;
+    this.pitch = pitch;
+    this.yaw = yaw;
+  }
 
-	public Double getPitch() {
-		return pitch;
-	}
-	
-	public Double getYaw() {
-		return yaw;
-	}
+  public Double getRoll() {
+    return roll;
+  }
 
-	public void setRoll(Double roll) {
-		this.roll = roll;
-	}
+  public Double getPitch() {
+    return pitch;
+  }
 
-	public void setPitch(Double pitch) {
-		this.pitch = pitch;
-	}
+  public Double getYaw() {
+    return yaw;
+  }
 
-	public void setYaw(Double yaw) {
-		this.yaw = yaw;
-	}
+  public void setRoll(Double roll) {
+    this.roll = roll;
+  }
 
-	@Override
-	public String toString() {
-		return "OculusData [roll=" + roll + ", pitch=" + pitch + ", yaw=" + yaw
-				+ "]";
-	}
+  public void setPitch(Double pitch) {
+    this.pitch = pitch;
+  }
+
+  public void setYaw(Double yaw) {
+    this.yaw = yaw;
+  }
+
+  @Override
+  public String toString() {
+    return "OculusData [roll=" + roll + ", pitch=" + pitch + ", yaw=" + yaw + "]";
+  }
 
 }

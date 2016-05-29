@@ -34,35 +34,35 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterSmooth extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSmooth.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSmooth.class.getCanonicalName());
 
-	IplImage buffer = null;
+  IplImage buffer = null;
 
-	public OpenCVFilterSmooth() {
-		super();
-	}
+  public OpenCVFilterSmooth() {
+    super();
+  }
 
-	public OpenCVFilterSmooth(String name) {
-		super(name);
-	}
+  public OpenCVFilterSmooth(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
+  @Override
+  public void imageChanged(IplImage image) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
 
-		// cvDrawRect(image, startPoint, startPoint,
-		// fillColor, 2, 1, 0);
-		cvSmooth(image, image, CV_GAUSSIAN, 9, 7, 7, 1);
+    // cvDrawRect(image, startPoint, startPoint,
+    // fillColor, 2, 1, 0);
+    cvSmooth(image, image, CV_GAUSSIAN, 9, 7, 7, 1);
 
-		return image;
+    return image;
 
-	}
+  }
 
 }

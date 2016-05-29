@@ -58,13 +58,11 @@ public class Program {
   public int program = -1;
 
   public Program(Resource vs, Resource fs) {
-    this(ResourceManager.getProvider().getAsString(vs),
-        ResourceManager.getProvider().getAsString(fs));
+    this(ResourceManager.getProvider().getAsString(vs), ResourceManager.getProvider().getAsString(fs));
   }
 
   public Program(String vssf, String fssf) {
-    this(new Shader(GL_VERTEX_SHADER, vssf), null, new Shader(
-        GL_FRAGMENT_SHADER, fssf));
+    this(new Shader(GL_VERTEX_SHADER, vssf), null, new Shader(GL_FRAGMENT_SHADER, fssf));
   }
 
   public Program(Shader vs, Shader fs) {
@@ -98,7 +96,7 @@ public class Program {
     this.uniforms.clear();
     this.attributes.clear();
     program = newProgram;
-    if (program == -1) { 
+    if (program == -1) {
       throw new IllegalStateException("Link failure");
     }
     int count = glGetProgrami(program, GL_ACTIVE_UNIFORMS);
@@ -143,8 +141,7 @@ public class Program {
 
   private void checkCurrent() {
     if (this != CURRENT_PROGRAM) {
-      throw new IllegalStateException(
-          "Attempting to set uniform on unbound program");
+      throw new IllegalStateException("Attempting to set uniform on unbound program");
     }
   }
 
@@ -179,8 +176,7 @@ public class Program {
   }
 
   public void setUniformMatrix4(final String name, float[] v) {
-    FloatBuffer fb = ByteBuffer.allocateDirect(v.length * 4)
-        .order(ByteOrder.nativeOrder()).asFloatBuffer();
+    FloatBuffer fb = ByteBuffer.allocateDirect(v.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
     fb.put(v);
     fb.position(0);
     setUniformMatrix4(name, fb);
