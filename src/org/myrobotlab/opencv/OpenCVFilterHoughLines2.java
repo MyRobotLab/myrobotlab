@@ -120,14 +120,16 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
 		// CV_HOUGH_MULTI_SCALE || CV_HOUGH_STANDARD
 		CvSeq lines = cvHoughLines2(inlines, storage, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 10);//, 40, 10);
 		
-		Pointer p = null;
+		//Pointer p = null;
 		//cvHoughLines2(inlines, p, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 10, 40, 10);
 
 		for (int i = 0; i < lines.total(); i++) {
 
 			Pointer line = cvGetSeqElem(lines, i);
-			CvPoint pt1 = new CvPoint(line).position(0);
-			CvPoint pt2 = new CvPoint(line).position(1);
+			CvPoint pt1 = new CvPoint(line);
+			pt1.position(0);
+			CvPoint pt2 = new CvPoint(line);
+			pt2.position(1);
 
 			System.out.println("Line spotted: ");
 			System.out.println("\t pt1: " + pt1);
@@ -135,6 +137,16 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
 			// cvLine(image, pt1, pt2, CV_RGB(255, 0, 0), 3, CV_AA, 0); // draw
 			// the segment on the image
 			cvDrawLine(image, p0, p1, CV_RGB(255, 255, 255), 2, 8, 0);
+			
+			try {
+			  // close these resources?!
+        pt1.close();
+        pt2.close();
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+			
 		}
 
 		// cxcore.cvPutText(image, "x", cvPoint(10, 14), font, CvScalar.WHITE);

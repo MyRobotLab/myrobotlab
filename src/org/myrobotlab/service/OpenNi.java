@@ -330,7 +330,7 @@ public class OpenNi extends Service // implements
 			Iterator itr = handPathList.entrySet().iterator();
 			while (itr.hasNext()) {
 				Map.Entry mapEntry = (Map.Entry) itr.next();
-				int handId = (Integer) mapEntry.getKey();
+				//int handId = (Integer) mapEntry.getKey();
 				ArrayList<PVector> vecList = (ArrayList<PVector>) mapEntry.getValue();
 				PVector p;
 				PVector p2d = new PVector();

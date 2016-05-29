@@ -113,9 +113,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	static private Date startDate = new Date();
 
 	// DEPRECATED - use Service Timer
-	private boolean checkForUpdatesOnStart = true;
+	//private boolean checkForUpdatesOnStart = true;
 
-	private boolean autoRestartAfterUpdate = false;
+	//private boolean autoRestartAfterUpdate = false;
 
 	static private boolean autoAcceptLicense = true; // at the moment
 
@@ -169,7 +169,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	 * @return
 	 */
 
-	private boolean shutdownAfterUpdate = false;
+	// private boolean shutdownAfterUpdate = false;
 
 	static transient Cli cli;
 

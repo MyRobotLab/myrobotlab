@@ -145,7 +145,7 @@ public class OpenCVFilterLKOpticalTrackGUI extends OpenCVFilterGUI implements Ac
 		 * if (this.boundFilter == null) { this.boundFilter = boundFilter; }
 		 */
 
-		OpenCVFilterLKOpticalTrack bf = (OpenCVFilterLKOpticalTrack) boundFilter.filter;
+		//OpenCVFilterLKOpticalTrack bf = (OpenCVFilterLKOpticalTrack) boundFilter.filter;
 		maxPointCount.setValueIsAdjusting(true);
 		minDistance.setValueIsAdjusting(true);
 		qualityLevel.setValueIsAdjusting(true);
@@ -176,7 +176,7 @@ public class OpenCVFilterLKOpticalTrackGUI extends OpenCVFilterGUI implements Ac
 			params[2] = slider.getValue();
 
 			if (!slider.getValueIsAdjusting()) {
-				OpenCVFilterLKOpticalTrack filter = (OpenCVFilterLKOpticalTrack) boundFilter.filter;
+				//OpenCVFilterLKOpticalTrack filter = (OpenCVFilterLKOpticalTrack) boundFilter.filter;
 				if (slider.getName().equals("qualityLevel")) {
 					// params[2] = slider.getValue() * 2 + 1;
 					// qualityLevel.value.setText("" +

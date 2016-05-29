@@ -91,7 +91,7 @@ public class Security extends Service implements AuthorizationProvider {
 
 	private String defaultNewGroupId = "anonymous";
 
-	private HashMap<String, byte[]> keys = new HashMap<String, byte[]>();
+	// private HashMap<String, byte[]> keys = new HashMap<String, byte[]>();
 
 	public static final String AES = "AES";
 
@@ -268,7 +268,8 @@ public class Security extends Service implements AuthorizationProvider {
 	}
 
 	private static byte[] readKeyFile(File keyFile) throws FileNotFoundException {
-		Scanner scanner = new Scanner(keyFile).useDelimiter("\\Z");
+		Scanner scanner = new Scanner(keyFile);
+		scanner.useDelimiter("\\Z");
 		String keyValue = scanner.next();
 		scanner.close();
 		return hexStringToByteArray(keyValue);

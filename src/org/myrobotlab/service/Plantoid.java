@@ -13,7 +13,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 /**
@@ -85,18 +84,18 @@ public class Plantoid extends Service {
 	private static final long serialVersionUID = 1L;
 
 	transient private Arduino arduino;
-	transient private AudioFile audioFile;
-	transient private JFugue jFugue;
-	transient private Keyboard keyboard;
+//	transient private AudioFile audioFile;
+//	transient private JFugue jFugue;
+//	transient private Keyboard keyboard;
 	transient private OpenCV opencv;
 	transient private Servo leg1, leg2, leg3, leg4, pan, tilt;
-	transient private SpeechSynthesis speech;
+//	transient private SpeechSynthesis speech;
 	transient private Tracking tracking;
 	transient private VideoStreamer streamer;
 
 	// FIXME make part of ServoControl
 
-	transient private WebGui webgui;
+	//transient private WebGui webgui;
 
 	transient private Xmpp xmpp;
 
@@ -153,7 +152,7 @@ public class Plantoid extends Service {
 
 		arduino = (Arduino) createPeer("arduino");
 		xmpp = (Xmpp) createPeer("xmpp");
-		webgui = (WebGui) createPeer("webgui");
+		// webgui = (WebGui) createPeer("webgui");
 		leg1 = (Servo) createPeer("leg1");
 		leg2 = (Servo) createPeer("leg2");
 		leg3 = (Servo) createPeer("leg3");
@@ -569,8 +568,8 @@ public class Plantoid extends Service {
 		meta.addPeer("arduino", "Arduino", "arduino service");
 		meta.addPeer("audioFile", "AudioFile", "audio file service");
 		meta.addPeer("jFugue", "JFugue", "jfugue service");
-
-		meta.addPeer("webgui", "WebGui", "WebGui service");
+		// TODO: removed this, why is webgui a peer here?
+		// meta.addPeer("webgui", "WebGui", "WebGui service");
 		meta.addPeer("xmpp", "Xmpp", "Xmpp service");
 		meta.addPeer("leg1", "Servo", "leg1");
 		meta.addPeer("leg2", "Servo", "leg2");

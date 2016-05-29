@@ -78,11 +78,6 @@ public class TextExtractor extends AbstractStage {
 				continue;
 			}
 			//InputStream binaryData = null;
-
-			if (binaryData == null) {
-				// This should never happen either.
-				continue;
-			}
 			
 			Metadata metadata = new Metadata();
 			StringWriter textData = new StringWriter();

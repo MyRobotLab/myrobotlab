@@ -968,7 +968,7 @@ public class Mpu6050 extends Service{
 	            setDMPEnabled(false);
 
 	            log.info("Setting up internal 42-byte (default) DMP packet buffer...");
-	            int dmpPacketSize = 42;
+	            // int dmpPacketSize = 42;
 	            /*if ((dmpPacketBuffer = (int *)malloc(42)) == 0) {
 	                return 3; // TODO: proper error code for no memory
 	            }*/

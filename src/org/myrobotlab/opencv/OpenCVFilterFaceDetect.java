@@ -199,6 +199,14 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 						rect = new Rectangle(r.x(), r.y(), r.width(), r.height());
 					}
 					bb.add(rect);
+					
+					try {
+					// close resource
+            r.close();
+          } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
 				}
 
 				data.put(bb);

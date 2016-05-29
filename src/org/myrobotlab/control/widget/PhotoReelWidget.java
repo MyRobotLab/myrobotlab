@@ -88,7 +88,6 @@ public class PhotoReelWidget extends ServiceGUI {
 
 	}
 
-	private static final long serialVersionUID = 1L;
 	JLabel screen = new JLabel();
 	JLabel mouseInfo = new JLabel("mouse x y");
 	JLabel resolutionInfo = new JLabel("width x height");

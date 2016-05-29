@@ -47,7 +47,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -482,7 +481,7 @@ public class RemoteAdapter extends Service implements Gateway {
 	private String defaultPrefix = null;
 
 	private HashMap<String, String> prefixMap = new HashMap<String, String>();
-	private HashSet<URI> localProtocolKeys = new HashSet<URI>();
+	// private HashSet<URI> localProtocolKeys = new HashSet<URI>();
 
 	// types of listening threads - multiple could be managed
 	// when correct interfaces and base classes are done
@@ -772,6 +771,8 @@ public class RemoteAdapter extends Service implements Gateway {
 			s.send(dgram);
 			// dgram.se
 			// TODO - send the damn packet???
+			// close the datagram to avoid resource leaks
+			s.close();
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -951,7 +952,7 @@ public class RemoteAdapter extends Service implements Gateway {
 
 		try {
 
-			int i = 0;
+			//int i = 0;
 
 			// RemoteAdapter remote0 = (RemoteAdapter)
 			// Runtime.start(String.format("remote%d", 0), "RemoteAdapter");

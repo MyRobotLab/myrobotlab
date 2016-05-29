@@ -299,7 +299,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 //            mary.setVoice("dfki-spike en_GB male unitselection general");
 //            mary.speak("hello");
 //            mary.speak("world");
-//        mary.speakBlocking("Hello world");
+        mary.speakBlocking("Hello world");
 //        mary.speakBlocking("I am Mary TTS and I am open source");
 //        mary.speakBlocking("and I will evolve quicker than any closed source application if not in a short window of time");
 //        mary.speakBlocking("then in the long term evolution of software");
@@ -669,14 +669,14 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
         private class CurrentProgress {
 
-            String name;
-            String status;
-            int progress;
+//            String name;
+//            String status;
+//            int progress;
 
             public CurrentProgress(String name, String status, int progress) {
-                this.name = name;
-                this.status = status;
-                this.progress = progress;
+//                this.name = name;
+//                this.status = status;
+//                this.progress = progress;
             }
         }
     }

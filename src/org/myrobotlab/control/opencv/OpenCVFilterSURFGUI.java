@@ -76,7 +76,8 @@ public class OpenCVFilterSURFGUI extends OpenCVFilterGUI implements ActionListen
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				OpenCVFilterSURF af = (OpenCVFilterSURF) filterWrapper.filter;
+				// OpenCVFilterSURF af = (OpenCVFilterSURF) filterWrapper.filter;
+			  // TODO: doesn't do anything yet ? not implemented?
 			}
 		});
 

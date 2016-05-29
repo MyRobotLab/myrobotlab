@@ -263,7 +263,7 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		EditorPanel panel = new EditorPanel(script);
 		editorTabs.addTab(panel.getDisplayName(), panel.panel);
 		log.info(panel.getEditor().getFileFullPath());
-		GUIService gui = myService;// FIXME - bad bad bad ...
+		// GUIService gui = myService;// FIXME - bad bad bad ...
 
 		// -------- here ----------------
 
@@ -320,16 +320,17 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 	 * 
 	 * @return
 	 */
-	private CompletionProvider createCompletionProvider() {
-		// TODO -> LanguageSupportFactory.get().register(editor);
-
-		// A DefaultCompletionProvider is the simplest concrete implementation
-		// of CompletionProvider. This provider has no understanding of
-		// language semantics. It simply checks the text entered up to the
-		// caret position for a match against known completions. This is all
-		// that is needed in the majority of cases.
-		return new MRLCompletionProvider();
-	}
+	// Never called locally, commenting out.
+//	private CompletionProvider createCompletionProvider() {
+//		// TODO -> LanguageSupportFactory.get().register(editor);
+//
+//		// A DefaultCompletionProvider is the simplest concrete implementation
+//		// of CompletionProvider. This provider has no understanding of
+//		// language semantics. It simply checks the text entered up to the
+//		// caret position for a match against known completions. This is all
+//		// that is needed in the majority of cases.
+//		return new MRLCompletionProvider();
+//	}
 
 
 	/**
@@ -409,9 +410,10 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 	 * @param actionCommand
 	 * @return
 	 */
-	private JMenuItem createMenuItem(String label, String actionCommand) {
-		return createMenuItem(label, -1, null, actionCommand);
-	}
+	// never called locally, commenting out.
+//	private JMenuItem createMenuItem(String label, String actionCommand) {
+//		return createMenuItem(label, -1, null, actionCommand);
+//	}
 
 	/**
 	 * Build the top menu panel.

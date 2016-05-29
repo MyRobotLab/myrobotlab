@@ -226,7 +226,7 @@ public class RasPi extends Service implements I2CControl {
 
 	public void testGPIOOutput() {
 		GpioPinDigitalMultipurpose pin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_02, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_DOWN);
-
+		log.info("Pin: {}",pin);
 	}
 
 	public void testPWM() {

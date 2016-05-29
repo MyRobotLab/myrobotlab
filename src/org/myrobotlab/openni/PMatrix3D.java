@@ -477,7 +477,7 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */{
 		 * PApplet.nfs(m31, digits, 4) + " " + PApplet.nfs(m32, digits, 4) + " "
 		 * + PApplet.nfs(m33, digits, 4));
 		 */
-		System.out.println();
+		System.out.println(digits);
 	}
 
 	public void reset() {

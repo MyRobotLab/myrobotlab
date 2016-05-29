@@ -108,7 +108,8 @@ public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeList
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				OpenCVFilterAffine af = (OpenCVFilterAffine) filterWrapper.filter;
+				// OpenCVFilterAffine af = (OpenCVFilterAffine) filterWrapper.filter;
+			  // TODO: not implemented?
 			}
 		});
 
