@@ -3,15 +3,14 @@ package org.myrobotlab.codec;
 import java.io.IOException;
 
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.NameProvider;
 
 public class RecorderXmlFile implements Recorder {
 
 	@Override
 	public void write(Message msg) throws IOException {
-		Object[] data = msg.data;
-		String msgName = (msg.name.equals(Runtime.getInstance().getName())) ? "runtime" : msg.name;
+		//Object[] data = msg.data;
+		//String msgName = (msg.name.equals(Runtime.getInstance().getName())) ? "runtime" : msg.name;
 		// TODO implement
 		
 	}

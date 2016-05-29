@@ -493,6 +493,10 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
     private class InstallationThread extends javax.swing.JPanel implements Runnable, Observer {
 
+        /**
+       * 
+       */
+      private static final long serialVersionUID = 1L;
         private List<ComponentDescription> allComponents;
         private ComponentDescription currentComponent = null;
         private boolean install;
@@ -695,4 +699,8 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 		meta.addDependency("opennlp", "1.6");
 		return meta;
 	}
+
+  public List<LanguageComponentDescription> getPossibleLanguages() {
+    return possibleLanguages;
+  }
 }

@@ -25,19 +25,14 @@
 
 package org.myrobotlab.control;
 
-import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;

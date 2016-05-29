@@ -1,7 +1,6 @@
 package org.myrobotlab.programab;
 
 import java.io.File;
-import java.io.StringReader;
 import java.util.ArrayList;
 
 import javax.xml.bind.JAXBContext;

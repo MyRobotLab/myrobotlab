@@ -66,7 +66,7 @@ public class Pingdar extends Service {
 		 * serial.connect("uart");
 		 */
 
-		Pingdar pingdar = (Pingdar) Runtime.start("pingdar", "Pingdar");
+		Runtime.start("pingdar", "Pingdar");
 
 		// Runtime.createAndStart("gui", "GUIService");
 

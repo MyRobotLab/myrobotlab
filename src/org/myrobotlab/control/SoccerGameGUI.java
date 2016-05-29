@@ -102,11 +102,11 @@ public class SoccerGameGUI extends ServiceGUI implements ListSelectionListener {
 	BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
 
 	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
-	JList currentPlayers;
-	JList currentLog;
-	DefaultListModel rosterModel = new DefaultListModel();
+	JList<String> currentPlayers;
+	JList<String> currentLog;
+	DefaultListModel<String> rosterModel = new DefaultListModel<String>();
 
-	DefaultListModel logModel = new DefaultListModel();
+	DefaultListModel<String> logModel = new DefaultListModel<String>();
 
 	int msgCount = 0;
 
@@ -214,13 +214,13 @@ public class SoccerGameGUI extends ServiceGUI implements ListSelectionListener {
 		display.add(new JLabel(pic), gc);
 
 		gc.gridx = 1;
-		currentPlayers = new JList(rosterModel);
+		currentPlayers = new JList<String>(rosterModel);
 		currentPlayers.setFixedCellWidth(200);
 		currentPlayers.addListSelectionListener(this);
 		currentPlayers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		currentPlayers.setVisibleRowCount(10);
 
-		currentLog = new JList(logModel);
+		currentLog = new JList<String>(logModel);
 		currentLog.setFixedCellWidth(200);
 		currentLog.addListSelectionListener(this);
 		currentLog.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

@@ -6,7 +6,7 @@ package org.myrobotlab.chess;
 //  Created by Peter Hunter on Mon Dec 31 2001.
 //  Copyright (c) 2001 Peter Hunter. All rights reserved.
 //
-public final class HMove extends org.op.chess.Move implements Comparable, Constants {
+public final class HMove extends org.op.chess.Move implements Comparable<HMove>, Constants {
 	public final int promote;
 	public final int bits;
 	final char pieceLetter;
@@ -28,8 +28,7 @@ public final class HMove extends org.op.chess.Move implements Comparable, Consta
 	 */
 
 	@Override
-	public int compareTo(Object o) {
-		HMove m = (HMove) o;
+	public int compareTo(HMove m) {
 		int mScore = m.getScore();
 		return mScore - score; // Can't overflow so this should work.
 	}

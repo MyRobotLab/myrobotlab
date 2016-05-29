@@ -52,7 +52,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		String sysStr = System.getProperty("os.name").toLowerCase();
 		String libName = "SimpleOpenNI";
 		String archStr = System.getProperty("os.arch").toLowerCase();
-		String depLib;
+		//String depLib;
 		try {
 			// check which system + architecture
 			if (sysStr.indexOf("win") >= 0) { // windows

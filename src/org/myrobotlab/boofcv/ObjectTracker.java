@@ -23,24 +23,20 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 import org.myrobotlab.service.BoofCV;
-import org.myrobotlab.service.LeapMotion;
-import org.myrobotlab.service.data.OculusData;
 import org.myrobotlab.service.data.Point2Df;
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.math.Mapper;
-import org.myrobotlab.service.interfaces.Point2DfListener;
-import org.myrobotlab.service.interfaces.Point2DfPublisher;
-
 
 public class ObjectTracker<T extends ImageBase> extends JPanel
 implements MouseListener, MouseMotionListener {
 
 
-	BoofCV myService = null;
+	/**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  BoofCV myService = null;
 	TrackerObjectQuad<T> tracker;
 
 // location of the target being tracked
