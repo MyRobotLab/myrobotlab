@@ -18,7 +18,7 @@ public class Stepper_AdafruitMotorShieldGUI extends StepperControllerPanel imple
 	private GUIService myService;
 
 	JLabel stepperPortLabel = new JLabel("stepper port");
-	JComboBox stepperPort = new JComboBox();
+	JComboBox<String> stepperPort = new JComboBox<String>();
 	JButton attachButton = new JButton("attach");
 	String arduinoName;
 	String stepperName;

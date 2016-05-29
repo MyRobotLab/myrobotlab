@@ -71,8 +71,8 @@ public class RoombaGUI extends ServiceGUI implements ListSelectionListener, Acti
 	// private Roomba myRoomba = null;
 
 	JPanel ctrlPanel, selectPanel, buttonPanel, displayPanel;
-	JComboBox portChoices;
-	JComboBox protocolChoices;
+	JComboBox<String> portChoices;
+	JComboBox<String> protocolChoices;
 	JCheckBox handshakeButton;
 	JTextArea displayText;
 	JButton connectButton;
@@ -464,13 +464,13 @@ public class RoombaGUI extends ServiceGUI implements ListSelectionListener, Acti
 
 		// Create a combo box with protocols
 		String[] protocols = { "Roomba 1xx-4xx (SCI)", "Roomba 5xx (OI)" };
-		protocolChoices = new JComboBox(protocols);
+		protocolChoices = new JComboBox<String>(protocols);
 		String p = roombacomm.getProtocol();
 		protocolChoices.setSelectedIndex(p.equals("SCI") ? 0 : 1);
 
 		// Create a combo box with choices.
 		String[] ports = roombacomm.listPorts();
-		portChoices = new JComboBox(ports);
+		portChoices = new JComboBox<String>(ports);
 
 		if (ports.length > 0) {
 			portChoices.setSelectedIndex(0);

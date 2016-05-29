@@ -863,7 +863,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		return ret;
 	}
 
-	protected Method getMethodRef(String methodName, Class[] paraList) {
+	protected Method getMethodRef(String methodName, Class<Object>[] paraList) {
 		Method ret = null;
 		try {
 			ret = _parent.getClass().getMethod(methodName, paraList);

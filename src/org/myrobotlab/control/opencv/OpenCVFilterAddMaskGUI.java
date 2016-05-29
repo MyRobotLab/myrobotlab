@@ -38,14 +38,12 @@ public class OpenCVFilterAddMaskGUI extends OpenCVFilterGUI implements ActionLis
 
 	public OpenCVFilterAddMaskGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
-
-		ComboBoxModel list = new ComboBoxModel(this);
-
+		// ComboBoxModel list = new ComboBoxModel(this);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
+		// Object o = e.getSource();
 		OpenCVFilterAddMask bf = (OpenCVFilterAddMask) boundFilter.filter;
 		setFilterState(bf);
 	}

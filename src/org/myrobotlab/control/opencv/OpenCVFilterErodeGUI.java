@@ -37,7 +37,7 @@ import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterErodeGUI extends OpenCVFilterGUI implements ActionListener {
 
-	JComboBox iterations = new JComboBox(new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+	JComboBox<Integer> iterations = new JComboBox<Integer>(new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
 
 	public OpenCVFilterErodeGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);

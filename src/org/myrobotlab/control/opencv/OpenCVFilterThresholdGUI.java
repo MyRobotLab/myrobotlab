@@ -83,7 +83,7 @@ public class OpenCVFilterThresholdGUI extends OpenCVFilterGUI {
 
 	JSlider2 apertureSize = new JSlider2(JSlider.HORIZONTAL, 1, 3, 1);
 
-	JComboBox type = new JComboBox(new String[] { "CV_THRESH_BINARY", "CV_THRESH_BINARY_INV", "CV_THRESH_TRUNC", "CV_THRESH_TOZERO", "CV_THRESH_TOZERO_INV" });
+	JComboBox<String> type = new JComboBox<String>(new String[] { "CV_THRESH_BINARY", "CV_THRESH_BINARY_INV", "CV_THRESH_TRUNC", "CV_THRESH_TOZERO", "CV_THRESH_TOZERO_INV" });
 
 	AdjustSlider change = new AdjustSlider();
 

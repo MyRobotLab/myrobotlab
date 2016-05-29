@@ -1,19 +1,15 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_core.CV_32FC1;
-import static org.bytedeco.javacpp.opencv_core.CV_32FC2;
 import static org.bytedeco.javacpp.opencv_core.cvCreateMat;
 import static org.bytedeco.javacpp.opencv_core.cvPoint2D32f;
 import static org.bytedeco.javacpp.opencv_core.cvSize2D32f;
 import static org.bytedeco.javacpp.opencv_imgproc.cv2DRotationMatrix;
-import static org.bytedeco.javacpp.opencv_imgproc.cvBoundingRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvBoxPoints;
 import static org.bytedeco.javacpp.opencv_imgproc.cvWarpAffine;
-
 import org.bytedeco.javacpp.opencv_core.CvBox2D;
 import org.bytedeco.javacpp.opencv_core.CvMat;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
-import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
@@ -65,16 +61,16 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 	    
 	    CvPoint2D32f points = new CvPoint2D32f(4);
 	    cvBoxPoints(box, points);
-	    CvMat pointMat = cvCreateMat(1, 4, CV_32FC2);
-	    pointMat.put(0, 0, 0, points.position(0).x());
-	    pointMat.put(0, 0, 1, points.position(0).y());
-	    pointMat.put(0, 1, 0, points.position(1).x());
-	    pointMat.put(0, 1, 1, points.position(1).y());
-	    pointMat.put(0, 2, 0, points.position(2).x());
-	    pointMat.put(0, 2, 1, points.position(2).y());
-	    pointMat.put(0, 3, 0, points.position(3).x());
-	    pointMat.put(0, 3, 1, points.position(3).y());
-	    CvRect boundingRect = cvBoundingRect(pointMat, 0);
+//	    CvMat pointMat = cvCreateMat(1, 4, CV_32FC2);
+//	    pointMat.put(0, 0, 0, points.position(0).x());
+//	    pointMat.put(0, 0, 1, points.position(0).y());
+//	    pointMat.put(0, 1, 0, points.position(1).x());
+//	    pointMat.put(0, 1, 1, points.position(1).y());
+//	    pointMat.put(0, 2, 0, points.position(2).x());
+//	    pointMat.put(0, 2, 1, points.position(2).y());
+//	    pointMat.put(0, 3, 0, points.position(3).x());
+//	    pointMat.put(0, 3, 1, points.position(3).y());
+//	    CvRect boundingRect = cvBoundingRect(pointMat, 0);
 	    //CvMat dst = cvCreateMat(boundingRect.height(), boundingRect.width(), image.type());
 	    //CvMat dst = cvCreateMat(boundingRect.height(), boundingRect.width(),  CV_32FC1);
 	    CvMat rotMat = cvCreateMat(2, 3, CV_32FC1);

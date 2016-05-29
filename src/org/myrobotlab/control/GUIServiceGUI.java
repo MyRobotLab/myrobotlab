@@ -439,10 +439,10 @@ public class GUIServiceGUI extends ServiceGUI {
 
 						// ROUTING LABELS
 						if (showRouteLabels) {
-							mxCell c = (mxCell) graph.insertEdge(parent, null, formatMethodString(listener.topicMethod, listener.callbackMethod),
+							graph.insertEdge(parent, null, formatMethodString(listener.topicMethod, listener.callbackMethod),
 									serviceCells.get(s.getName()), serviceCells.get(listener.callbackName));
 						} else {
-							mxCell c = (mxCell) graph.insertEdge(parent, null, "", serviceCells.get(s.getName()), serviceCells.get(listener.callbackName));
+							graph.insertEdge(parent, null, "", serviceCells.get(s.getName()), serviceCells.get(listener.callbackName));
 						}
 					}
 				}

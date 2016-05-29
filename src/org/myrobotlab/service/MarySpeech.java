@@ -559,7 +559,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
                 broadcastState();
                 setCurrentComponent(comp);
                 if (install) {
-                    ComponentDescription orig = null;
+                    // ComponentDescription orig = null;
                     if (comp.getStatus() == Status.INSTALLED) { // Installing an installed component really means replacing it with
                         // its updated version
                         assert comp.isUpdateAvailable();
@@ -658,12 +658,12 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
         private class OverallProgress {
 
-            int current;
-            int max;
+            //int current;
+            //int max;
 
             public OverallProgress(int current, int max) {
-                this.current = current;
-                this.max = max;
+                //this.current = current;
+                //this.max = max;
             }
         }
 
