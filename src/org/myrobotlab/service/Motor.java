@@ -220,7 +220,7 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
   @Override
   // not relative ! - see moveStep
   public void move(double power) {
-    log.info(String.format("%s.move(%f)", getName(), power));
+    log.info("{}.move({})", getName(), power);
     powerLevel = power;
     if (locked) {
       log.warn("motor locked");
@@ -411,14 +411,14 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 
   }
 
-  public void setType2Pwm(Integer leftPwm, Integer rightPwm) throws MRLException {
+  public void setType2Pwm(Integer leftPwm, Integer rightPwm) {
     this.type = TYPE_2_PWM;
     pinMap.clear();
     pinMap.put(PIN_TYPE_PWM_LEFT, leftPwm);
     pinMap.put(PIN_TYPE_PWM_RIGHT, rightPwm);
   }
 
-  public void setTypeSimple(Integer pwmPin, Integer dirPin) throws MRLException {
+  public void setTypeSimple(Integer pwmPin, Integer dirPin) {
     this.type = TYPE_SIMPLE;
     pinMap.clear();
     pinMap.put(PIN_TYPE_PWM, pwmPin);

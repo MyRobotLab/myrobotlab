@@ -217,6 +217,8 @@ public abstract class Port implements Runnable, PortSource {
    */
 
   abstract public void write(int b) throws Exception;
+  
+  abstract public void write(int[] data) throws Exception;
 
   public boolean setParams(int rate, int dataBits, int stopBits, int parity) throws Exception {
     // TODO Auto-generated method stub

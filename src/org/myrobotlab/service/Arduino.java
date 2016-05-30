@@ -395,6 +395,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
   public void connect(String port) {
     serial.connect(port, Serial.BAUD_57600, 8, 1, 0);
+    // we should block until we've connected and got a mrlcomm version.
+    getVersion();
   }
 
   /**
@@ -570,7 +572,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
   }
 
   public boolean isConnected() {
-    if (serial != null && serial.isConnected()) {
+    // include that we must have gotten a valid MRLComm version number.
+    if (serial != null && serial.isConnected() && mrlCommVersion != null) {
       return true;
     }
     return false;
@@ -662,7 +665,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
     if (Motor.TYPE_SIMPLE.equals(type)) {
       sendMsg(DIGITAL_WRITE, motor.getPin(Motor.PIN_TYPE_DIR), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
       sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM), (int) Math.abs(powerOutput));
-
     } else if (Motor.TYPE_2_PWM.equals(type)) {
       if (powerOutput < 0) {
         sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_LEFT), 0);
@@ -1130,6 +1132,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
       }
       // send the message as an array. (serial port actually writes 1 byte at a time anyway.. oh well.)
       serial.write(msgToSend);
+      
       // putting delay at the end so we give the message and allow the arduino to process
       // this decreases the latency between when mrl sends the message
       // and the message is picked up by the arduino.
