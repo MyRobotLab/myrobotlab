@@ -180,9 +180,8 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
   // FIXME - check to make sure these are the same as InputStream &
   // OutputStream
   public void write(int[] data) throws Exception {
-    for (int i = 0; i < data.length; ++i) {
-      write(data[i]);
-    }
+    // use the writeIntArray method to batch this operation.
+    port.writeIntArray(data);
   }
 
   @Override
