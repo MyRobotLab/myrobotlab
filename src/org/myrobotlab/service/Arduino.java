@@ -1023,7 +1023,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
    */
   @Override
   public Pin publishPin(Pin p) {
-    log.info("Publish Pin: {}", p);
+    // log.info("Publish Pin: {}", p);
     pinList.get(p.pin).value = p.value;
     return p;
   }
@@ -1105,51 +1105,38 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
    *          sendMsg(byte[]...data)
    */
   public synchronized void sendMsg(int function, int... params) {
-    // log.debug("sendMsg magic | fn " + function + " p1 " + param1 + " p2 "
-    // + param2);
-
+    // some sanity checking.
+    if (!serial.isConnected()) {
+      log.warn("Serial port is not connected, unable to send message.");
+      return;
+    }
+    // don't even attempt to send it if we know it's a bogus message.
+    // TODO: we need to account for the magic byte & length bytes. max message size is 64-2 (potentially) 
+    if (params.length > MAX_MSG_SIZE) {
+      log.error("Arduino Message size was large! Function {} Size {}", function, params.length);
+      return;
+    }
     // System.out.println("Sending Message " + function );
     try {
-
-      // not CRC16 - but cheesy error correction of bytestream
-      // http://www.java2s.com/Open-Source/Java/6.0-JDK-Modules-sun/misc/sun/misc/CRC16.java.htm
-      // #include <util/crc16.h>
-      // _crc16_update (test, testdata);
-
-      serial.write(MAGIC_NUMBER);
-
-      // msg size = function byte + x param bytes
-      // msg size does not include MAGIC_NUMBER & size
-      // MAGIC_NUMBER|3|FUNCTION|PARAM0|PARAM1 would be valid
-      serial.write(1 + params.length);
-
-      serial.write(function);
-
-      if (params.length > MAX_MSG_SIZE) {
-        log.error("Arduino Message size was large! Function {} Size {}", function, params.length);
+      // Minimum MRLComm message is 3 bytes(int).
+      // MAGIC_NUMBER|LENGTH|FUNCTION|PARAM0|PARAM1 would be valid
+      int[] msgToSend = new int[3+params.length];
+      msgToSend[0] = MAGIC_NUMBER;
+      msgToSend[1] = 1 + params.length;
+      msgToSend[2] = function;
+      for (int i = 0 ; i < params.length; i++) {
+        // What if the int is > 127 ?
+        msgToSend[3+i] = params[i];
       }
-
-      // TODO: what should this value be?
-      // int x = 64;
-      for (int i = 0; i < params.length; ++i) {
-        serial.write(params[i]);
-        // TODO: if i is greater than X bytes we throw a small pause in when
-        // writing large messages?
-        // if (i % x == 0) {
-        // Thread.sleep(delay);
-        // }
-      }
-
-      // putting delay at the end so we give the message and allow the arduino
-      // to process
+      // send the message as an array. (serial port actually writes 1 byte at a time anyway.. oh well.)
+      serial.write(msgToSend);
+      // putting delay at the end so we give the message and allow the arduino to process
       // this decreases the latency between when mrl sends the message
       // and the message is picked up by the arduino.
-      // This helps avoid the arduino dropping messages and getting
-      // lost/disconnected.
+      // This helps avoid the arduino dropping messages and getting lost/disconnected.
       if (delay > 0) {
         Thread.sleep(delay);
       }
-
     } catch (Exception e) {
       error("sendMsg " + e.getMessage());
     }
@@ -1568,6 +1555,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
       serial = (Serial) startPeer("serial");
       // FIXME - dynamically additive - if codec key has never been used -
       // add key
+      // serial.getOutbox().setBlocking(true);
+      // inbox.setBlocking(true);
       serial.setCodec("arduino");
       serial.addByteListener(this);
     } catch (Exception e) {

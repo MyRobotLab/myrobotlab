@@ -71,7 +71,8 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
   JButton createVirtualUART = new JButton("create virtual uart");
   JButton record = new JButton();
   // JButton sendTx = new JButton("send tx from file");
-
+  JButton connectButton = new JButton();
+  
   JLabel connectLight = new JLabel();
 
   JTextArea rx = new JTextArea(20, 10);
@@ -85,7 +86,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
   int txCount = 0;
 
   // JTextField sendData = new JTextField(40);
-  JTextArea tx = new JTextArea(3, 40);
+  JTextArea tx = new JTextArea(10, 60);
   JButton send = new JButton("send");
   JButton sendFile = new JButton("send file");
 
@@ -120,15 +121,23 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
         send("broadcastState");
       }
     }
-
+    if (o == connectButton) {
+      // TODO: make this connect/disconnect
+      if (mySerial.isConnected()) {
+        mySerial.disconnect();
+        connectButton.setText("Connect");
+      } else {        
+        mySerial.connect((String) ports.getSelectedItem());
+        connectButton.setText("Disconnect");
+      }
+      
+    }
     if (o == createVirtualUART) {
       send("createVirtualUART");
     }
-
     if (o == refresh) {
       send("refresh");
     }
-
     if (o == sendFile) {
       JFileChooser fileChooser = new JFileChooser();
       // set current directory
@@ -166,6 +175,13 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
       caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
     } else {
       caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+    }
+    
+    DefaultCaret caretTX = (DefaultCaret) tx.getCaret();
+    if (b) {
+      caretTX.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+    } else {
+      caretTX.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
     }
   }
 
@@ -242,6 +258,12 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
         } else {
           record.setText("stop recording");
         }
+        
+        if (serial.isConnected()) {
+          connectButton.setText("Disconnect");
+        } else {
+          connectButton.setText("Connect");
+        }
 
         // if (mySerial.getRXFormatter())
       }
@@ -263,20 +285,22 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
     north.add(widthMenu);
     north.add(createVirtualUART);
     north.add(record);
+    north.add(connectButton);
     // north.add(sendTx);
 
     display.add(north, BorderLayout.NORTH);
 
     rx.setEditable(false);
-    JScrollPane scrollPane = new JScrollPane(rx);
+    JScrollPane scrollPanelRX = new JScrollPane(rx);
+    JScrollPane scrollPanelTX = new JScrollPane(tx);
 
     autoScroll(true);
 
-    display.add(scrollPane, BorderLayout.CENTER);
+    display.add(scrollPanelRX, BorderLayout.CENTER);
 
     JPanel south = new JPanel();
 
-    south.add(tx);
+    south.add(scrollPanelTX);
     south.add(send);
     south.add(sendFile);
     south.add(new JLabel("rx"));
@@ -289,6 +313,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
     send.addActionListener(this);
     sendFile.addActionListener(this);
     record.addActionListener(this);
+    connectButton.addActionListener(this);
     reqFormat.addItemListener(this);
     refresh.addActionListener(this);
 
