@@ -1055,7 +1055,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
     }
   }
 
-  // write(int b) IOException
+  // TODO: remove this method use write(int[] b) instead
   public void write(int b) throws Exception {
     // int newByte = data & 0xFF;
 
@@ -1075,10 +1075,20 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
     outTX.write(b);
   }
 
-  // write(int[] data) throws IOException - not in OutputStream
   public void write(int[] data) throws Exception {
-    for (int i = 0; i < data.length; ++i) {
-      write(data[i]); // recently removed - & 0xFF
+    // If the port is JSSC we can just write the array.
+    for (String portName : connectedPorts.keySet()) {
+      Port writePort = connectedPorts.get(portName);
+      // take advantage to write the array in one call.
+      writePort.write(data);
+      // still need to publishtx.. 
+      // TODO: make publishTX publish an int array. not one at a time.
+      for (int i = 0; i < data.length; ++i) {
+        // main line TX
+        invoke("publishTX", data[i]);
+        ++txCount;
+        outTX.write(data[i]);
+      }
     }
   }
 
