@@ -107,7 +107,7 @@
 	<!-- set global properties for this build -->
 
 	<!-- the all powerful branch property if copied to master - will need to be updated -->
-	<property name="branch" value="develop"/>
+	<property name="branch" value="${env.TRAVIS_BRANCH}"/>
 
 	<property name="fs" location="${file.separator}" />
 	<!-- the source code for release -->
