@@ -80,7 +80,12 @@ public class AdafruitIna219 extends Service {
 		broadcastState();
 		return true;
 	}
+	
+	public void unsetController() {
+		controller = null;
 
+		broadcastState();
+	}
 	/**
 	 * This method creates the i2c device
 	 */

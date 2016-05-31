@@ -52,8 +52,8 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriverGUI.class.getCanonicalName());
 
-	String attach = "attachI2C";
-	String detach = "detachI2C";
+	String attach = "setController";
+	String detach = "unsetController";
 	String controllerName;
 	JButton attachButton = new JButton(attach);
 

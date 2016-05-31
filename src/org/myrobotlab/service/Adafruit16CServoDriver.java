@@ -129,12 +129,12 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 * 
 	 */
 	// @Override
-	public boolean attachI2C(String controllerName) {
-		return attachI2C((I2CControl) Runtime.getService(controllerName));
+	public boolean setController(String controllerName) {
+		return setController((I2CControl) Runtime.getService(controllerName));
 
 	}
 
-	public boolean attachI2C(I2CControl controller) {
+	public boolean setController(I2CControl controller) {
 		if (controller == null) {
 			error("setting null as controller");
 			return false;
@@ -158,11 +158,10 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		return true;
 	}
 
-	public boolean detachI2C() {
+	public void unsetController() {
 		controller = null;
 
 		broadcastState();
-		return true;
 	}
 
 	// FIXME - put in ServoController interface !!!
