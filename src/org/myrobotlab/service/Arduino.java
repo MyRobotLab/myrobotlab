@@ -61,6 +61,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.CustomMsgListener;
+import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NameProvider;
@@ -139,7 +140,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class Arduino extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController, SensorDataSink {
+public class Arduino extends Service implements I2CControl, SensorDataPublisher, SerialDataListener, ServoController, MotorController, SensorDataSink {
 
   /**
    * MotorData is the combination of a Motor and any controller data needed to
@@ -1757,5 +1758,35 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
   public void motorAttach(String name, int portNumber) {
     log.warn("Motor attach not implemented. use motorAttach(motorControl) instead");
   }
+
+	@Override
+	public void createDevice(int busAddress, int deviceAddress, String type) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void releaseDevice(int busAddress, int deviceAddress) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 }
