@@ -36,275 +36,275 @@ import com.pi4j.wiringpi.SoftPwm;
 // TODO Ensure that only one instance of RasPi can execute on each RaspBerry PI
 public class RasPi extends Service implements I2CControl {
 
-  public static class Device {
-    public I2CBus bus;
-    public I2CDevice device;
-    public String type;
-  }
+	public static class Device {
+		public I2CBus bus;
+		public I2CDevice device;
+		public String type;
+	}
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(RasPi.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(RasPi.class.getCanonicalName());
 
-  // the 2 pins for I2C on the raspberry
-  GpioController gpio;
-  // FIXME - do a
-  GpioPinDigitalOutput gpio01;
-  GpioPinDigitalOutput gpio03;
+	// the 2 pins for I2C on the raspberry
+	GpioController gpio;
+	// FIXME - do a
+	GpioPinDigitalOutput gpio01;
+	GpioPinDigitalOutput gpio03;
 
-  // i2c bus
-  public static I2CBus i2c;
+	// i2c bus
+	public static I2CBus i2c;
 
-  HashMap<String, Device> devices = new HashMap<String, Device>();
+	HashMap<String, Device> devices = new HashMap<String, Device>();
 
-  public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
-    /*
-     * RasPi.displayString(1, 70, "1");
-     * 
-     * RasPi.displayString(1, 70, "abcd");
-     * 
-     * RasPi.displayString(1, 70, "1234");
-     * 
-     * 
-     * //RasPi raspi = new RasPi("raspi");
-     */
+		/*
+		 * RasPi.displayString(1, 70, "1");
+		 * 
+		 * RasPi.displayString(1, 70, "abcd");
+		 * 
+		 * RasPi.displayString(1, 70, "1234");
+		 * 
+		 * 
+		 * //RasPi raspi = new RasPi("raspi");
+		 */
 
-    // raspi.writeDisplay(busAddress, deviceAddress, data)
+		// raspi.writeDisplay(busAddress, deviceAddress, data)
 
-    int i = 0;
+		int i = 0;
 
-    Runtime.createAndStart(String.format("ras%d", i), "Runtime");
-    Runtime.createAndStart(String.format("rasPi%d", i), "RasPi");
-    Runtime.createAndStart(String.format("rasGUI%d", i), "GUIService");
-    Runtime.createAndStart(String.format("rasPython%d", i), "Python");
-    // Runtime.createAndStart(String.format("rasClock%d",i), "Clock");
-    Runtime.createAndStart(String.format("rasRemote%d", i), "RemoteAdapter");
-  }
+		Runtime.createAndStart(String.format("ras%d", i), "Runtime");
+		Runtime.createAndStart(String.format("rasPi%d", i), "RasPi");
+		Runtime.createAndStart(String.format("rasGUI%d", i), "GUIService");
+		Runtime.createAndStart(String.format("rasPython%d", i), "Python");
+		// Runtime.createAndStart(String.format("rasClock%d",i), "Clock");
+		Runtime.createAndStart(String.format("rasRemote%d", i), "RemoteAdapter");
+	}
 
-  /*
-   * FIXME - make these methods createDigitalAndPwmPin public
-   * GpioPinDigitalOutput provisionDigitalOutputPin
-   */
+	/*
+	 * FIXME - make these methods createDigitalAndPwmPin public
+	 * GpioPinDigitalOutput provisionDigitalOutputPin
+	 */
 
-  public RasPi(String n) {
-    super(n);
+	public RasPi(String n) {
+		super(n);
 
-    Platform platform = Platform.getLocalInstance();
-    log.info(String.format("platform is %s", platform));
-    log.info(String.format("architecture is %s", platform.getArch()));
+		Platform platform = Platform.getLocalInstance();
+		log.info(String.format("platform is %s", platform));
+		log.info(String.format("architecture is %s", platform.getArch()));
 
-    if ("arm".equals(platform.getArch()) || "armv7.hfp".equals(platform.getArch())) {
-      log.info("Executing on Raspberry PI");
-      // init gpio
-      /*
-       * log.info("Initiating GPIO"); gpio = GpioFactory.getInstance();
-       * log.info("GPIO Initiated");
-       */
-      // init i2c
-      try {
-        log.info("Initiating i2c");
-        i2c = I2CFactory.getInstance(I2CBus.BUS_1);
-        log.info("i2c initiated");
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        log.error("i2c initiation failed");
-        Logging.logError(e);
-      }
+		if ("arm".equals(platform.getArch()) || "armv7.hfp".equals(platform.getArch())) {
+			log.info("Executing on Raspberry PI");
+			// init gpio
+			/*
+			 * log.info("Initiating GPIO"); gpio = GpioFactory.getInstance();
+			 * log.info("GPIO Initiated");
+			 */
+			// init i2c
+			try {
+				log.info("Initiating i2c");
+				i2c = I2CFactory.getInstance(I2CBus.BUS_1);
+				log.info("i2c initiated");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				log.error("i2c initiation failed");
+				Logging.logError(e);
+			}
 
-      // TODO Check if the is correct. I don't think it is /Mats
-      // GPIO pins should be provisioned in the CreateDevice
-      /*
-       * gpio01 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01); gpio03 =
-       * gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03);
-       */
-    } else {
-      // we should be running on a Raspberry Pi
-      log.error("architecture is not arm");
-    }
-  }
+			// TODO Check if the is correct. I don't think it is /Mats
+			// GPIO pins should be provisioned in the CreateDevice
+			/*
+			 * gpio01 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01); gpio03 =
+			 * gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03);
+			 */
+		} else {
+			// we should be running on a Raspberry Pi
+			log.error("architecture is not arm");
+		}
+	}
 
-  // FIXME - create low level I2CDevice
-  public void createDevice(int busAddress, int deviceAddress, String type) {
+	// FIXME - create low level I2CDevice
+	public void createDevice(int busAddress, int deviceAddress, String type) {
 
-    try {
-      I2CDevice device = i2c.getDevice(deviceAddress);
-      I2CBus bus = I2CFactory.getInstance(busAddress);
-      String key = String.format("%d.%d", busAddress, deviceAddress);
+		try {
+			I2CDevice device = i2c.getDevice(deviceAddress);
+			I2CBus bus = I2CFactory.getInstance(busAddress);
+			String key = String.format("%d.%d", busAddress, deviceAddress);
 
-      Device devicedata = new Device();
-      if (devices.containsKey(key)) {
-        log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, type));
-      } else
-        devicedata.bus = bus;
-      devicedata.device = device;
-      devicedata.type = type;
-      devices.put(key, devicedata);
+			Device devicedata = new Device();
+			if (devices.containsKey(key)) {
+				log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, type));
+			} else
+				devicedata.bus = bus;
+			devicedata.device = device;
+			devicedata.type = type;
+			devices.put(key, devicedata);
 
-      // PCF8574GpioProvider pcf = new PCF8574GpioProvider(busAddress,
-      // deviceAddress);
-      // I2CDevice device = bus.getDevice(deviceAddress);
+			// PCF8574GpioProvider pcf = new PCF8574GpioProvider(busAddress,
+			// deviceAddress);
+			// I2CDevice device = bus.getDevice(deviceAddress);
 
-      // PCF8574GpioProvider p = new PCF8574GpioProvider(busAddress,
-      // deviceAddress);
-      // p.setValue(pin, value)
+			// PCF8574GpioProvider p = new PCF8574GpioProvider(busAddress,
+			// deviceAddress);
+			// p.setValue(pin, value)
 
-      /*
-       * if ("com.pi4j.gpio.extension.pcf.PCF8574GpioProvider".equals(type)) {
-       * Device d = new Device(); d.bus = bus; d.device = (I2CDevice) new
-       * PCF8574GpioProvider(busAddress, deviceAddress); d.type =
-       * d.device.getClass().getCanonicalName();// "PCF8574GpioProvider"; // //
-       * full type // name devices.put(key, d); return d.device;
-       * 
-       * 
-       * } else { log.error("could not create device %s", type); return null; }
-       */
+			/*
+			 * if ("com.pi4j.gpio.extension.pcf.PCF8574GpioProvider".equals(type)) {
+			 * Device d = new Device(); d.bus = bus; d.device = (I2CDevice) new
+			 * PCF8574GpioProvider(busAddress, deviceAddress); d.type =
+			 * d.device.getClass().getCanonicalName();// "PCF8574GpioProvider"; // //
+			 * full type // name devices.put(key, d); return d.device;
+			 * 
+			 * 
+			 * } else { log.error("could not create device %s", type); return null; }
+			 */
 
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 
-  }
+	}
 
-  @Override
-  public void releaseDevice(int busAddress, int deviceAddress) {
+	@Override
+	public void releaseDevice(int busAddress, int deviceAddress) {
 
-    String key = String.format("%d.%d", busAddress, deviceAddress);
-    devices.remove(key);
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		devices.remove(key);
 
-  }
+	}
 
-  // FIXME - return array
-  public Integer[] scanI2CDevices(int busAddress) {
-    log.info("scanning through I2C devices");
-    ArrayList<Integer> list = new ArrayList<Integer>();
-    try {
-      /*
-       * From its name we can easily deduce that it provides a communication
-       * link between ICs (integrated circuits). I2C is multimaster and can
-       * support a maximum of 112 devices on the bus. The specification declares
-       * that 128 devices can be connected to the I2C bus, but it also defines
-       * 16 reserved addresses.
-       */
-      I2CBus bus = I2CFactory.getInstance(busAddress);
+	// FIXME - return array
+	public Integer[] scanI2CDevices(int busAddress) {
+		log.info("scanning through I2C devices");
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		try {
+			/*
+			 * From its name we can easily deduce that it provides a communication
+			 * link between ICs (integrated circuits). I2C is multimaster and can
+			 * support a maximum of 112 devices on the bus. The specification declares
+			 * that 128 devices can be connected to the I2C bus, but it also defines
+			 * 16 reserved addresses.
+			 */
+			I2CBus bus = I2CFactory.getInstance(busAddress);
 
-      for (int i = 0; i < 128; ++i) {
-        I2CDevice device = bus.getDevice(i);
-        if (device != null) {
-          try {
-            device.read();
-            list.add(i);
-            /*
-             * sb.append(i); sb.append(" ");
-             */
-            log.info(String.format("found device on address %d", i));
-          } catch (Exception e) {
-            log.warn(String.format("bad read on address %d", i));
-          }
+			for (int i = 0; i < 128; ++i) {
+				I2CDevice device = bus.getDevice(i);
+				if (device != null) {
+					try {
+						device.read();
+						list.add(i);
+						/*
+						 * sb.append(i); sb.append(" ");
+						 */
+						log.info(String.format("found device on address %d", i));
+					} catch (Exception e) {
+						log.warn(String.format("bad read on address %d", i));
+					}
 
-        }
-      }
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
+				}
+			}
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 
-    Integer[] ret = list.toArray(new Integer[list.size()]);
-    return ret;
-  }
+		Integer[] ret = list.toArray(new Integer[list.size()]);
+		return ret;
+	}
 
-  public void testGPIOOutput() {
-    GpioPinDigitalMultipurpose pin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_02, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_DOWN);
-    log.info("Pin: {}", pin);
-  }
+	public void testGPIOOutput() {
+		GpioPinDigitalMultipurpose pin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_02, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_DOWN);
+		log.info("Pin: {}", pin);
+	}
 
-  public void testPWM() {
-    try {
+	public void testPWM() {
+		try {
 
-      // initialize wiringPi library
-      com.pi4j.wiringpi.Gpio.wiringPiSetup();
+			// initialize wiringPi library
+			com.pi4j.wiringpi.Gpio.wiringPiSetup();
 
-      // create soft-pwm pins (min=0 ; max=100)
-      SoftPwm.softPwmCreate(1, 0, 100);
+			// create soft-pwm pins (min=0 ; max=100)
+			SoftPwm.softPwmCreate(1, 0, 100);
 
-      // continuous loop
-      while (true) {
-        // fade LED to fully ON
-        for (int i = 0; i <= 100; i++) {
-          SoftPwm.softPwmWrite(1, i);
-          Thread.sleep(100);
-        }
+			// continuous loop
+			while (true) {
+				// fade LED to fully ON
+				for (int i = 0; i <= 100; i++) {
+					SoftPwm.softPwmWrite(1, i);
+					Thread.sleep(100);
+				}
 
-        // fade LED to fully OFF
-        for (int i = 100; i >= 0; i--) {
-          SoftPwm.softPwmWrite(1, i);
-          Thread.sleep(100);
-        }
-      }
-    } catch (Exception e) {
+				// fade LED to fully OFF
+				for (int i = 100; i >= 0; i--) {
+					SoftPwm.softPwmWrite(1, i);
+					Thread.sleep(100);
+				}
+			}
+		} catch (Exception e) {
 
-    }
-  }
+		}
+	}
 
-  @Override
-  public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
-    String key = String.format("%d.%d", busAddress, deviceAddress);
-    log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
-    Device devicedata = devices.get(key);
-    try {
-      devicedata.device.write(buffer, 0, buffer.length);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      Logging.logError(e);
-    }
-    ;
-  }
+	@Override
+	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+		Device devicedata = devices.get(key);
+		try {
+			devicedata.device.write(buffer, 0, buffer.length);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Logging.logError(e);
+		}
+		;
+	}
 
-  @Override
-  public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
-    String key = String.format("%d.%d", busAddress, deviceAddress);
-    log.debug(String.format("i2cRead busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
-    Device devicedata = devices.get(key);
-    try {
-      devicedata.device.read(buffer, 0, buffer.length);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      Logging.logError(e);
-    }
-    ;
-    return buffer.length;
-  }
+	@Override
+	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		log.debug(String.format("i2cRead busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+		Device devicedata = devices.get(key);
+		try {
+			devicedata.device.read(buffer, 0, buffer.length);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Logging.logError(e);
+		}
+		;
+		return buffer.length;
+	}
 
-  @Override
-  public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
-    String key = String.format("%d.%d", busAddress, deviceAddress);
-    Device devicedata = devices.get(key);
-    try {
-      devicedata.device.read(writeBuffer, 0, writeBuffer.length, readBuffer, 0, readBuffer.length);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      Logging.logError(e);
-    }
-    ;
-    return readBuffer.length;
-  }
+	@Override
+	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		Device devicedata = devices.get(key);
+		try {
+			devicedata.device.read(writeBuffer, 0, writeBuffer.length, readBuffer, 0, readBuffer.length);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Logging.logError(e);
+		}
+		;
+		return readBuffer.length;
+	}
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(RasPi.class.getCanonicalName());
-    meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware such as I2C");
-    meta.addCategory("i2c", "control");
-    meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
-    return meta;
-  }
+		ServiceType meta = new ServiceType(RasPi.class.getCanonicalName());
+		meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware such as I2C");
+		meta.addCategory("i2c", "control");
+		meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
+		return meta;
+	}
 
 }
