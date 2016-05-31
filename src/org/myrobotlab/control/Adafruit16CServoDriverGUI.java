@@ -25,55 +25,187 @@
 
 package org.myrobotlab.control;
 
+import java.awt.Component;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
 
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Adafruit16CServoDriver;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service._TemplateService;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
-public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListener {
+public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListener, MouseListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriverGUI.class.getCanonicalName());
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriverGUI.class.getCanonicalName());
 
-  public Adafruit16CServoDriverGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
-  }
+	String attach = "attachI2C";
+	String detach = "detachI2C";
+	String controllerName;
+	JButton attachButton = new JButton(attach);
 
-  @Override
-  public void actionPerformed(ActionEvent arg0) {
-    // TODO Auto-generated method stub
+	JComboBox<String> controller = new JComboBox<String>();
 
-  }
+	// DefaultComboBoxModel<String> controllerModel = new
+	// DefaultComboBoxModel<String>();
 
-  @Override
-  public void attachGUI() {
-    subscribe("publishState", "getState", _TemplateService.class);
-    myService.send(boundServiceName, "publishState");
-  }
+	public Adafruit16CServoDriverGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+		super(boundServiceName, myService, tabs);
+	}
 
-  @Override
-  public void detachGUI() {
-    unsubscribe("publishState", "getState", _TemplateService.class);
-  }
+	@Override
+	public void actionPerformed(final ActionEvent event) {
+		// TODO Auto-generated method stub
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				Object o = event.getSource();
+				if (o == attachButton) {
+					if (attachButton.getText().equals(attach)) {
+						int index = controller.getSelectedIndex();
+						if (index != -1) {
+							myService.send(boundServiceName, attach, controller.getSelectedItem());
+						}
+					} else {
+						myService.send(boundServiceName, detach);
+					}
+				}
+				return;
+			}
+		});
+	}
 
-  public void getState(final Adafruit16CServoDriver driver) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+	@Override
+	public void attachGUI() {
+		log.info("AttachGUI subscribing to Adafruit16CServoDriver.class");
+		subscribe("publishState", "getState", Adafruit16CServoDriver.class);
+		subscribe("onRegistered", "onRegistered", Adafruit16CServoDriver.class);
+		myService.send(boundServiceName, "publishState");
+	}
 
-      }
-    });
-  }
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishState", "getState", Adafruit16CServoDriver.class);
+		unsubscribe("onRegistered", "onRegistered", Adafruit16CServoDriver.class);
+	}
 
-  @Override
-  public void init() {
-  }
+	public void onRegistered(ServiceInterface s) {
+		log.info(String.format("onRegistered %s", s.getName()));
+	}
 
+	public void getState(final Adafruit16CServoDriver driver) {
+		log.info("getState invoked");
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				removeListeners();
+				refreshControllers();
+				log.info(String.format("driver.getControllerName() %s", driver.getControllerName()));
+				log.info(String.format("driver.isAttached() %s", driver.isAttached()));
+				controllerName = driver.getControllerName();
+				controller.setSelectedItem(controllerName);
+				if (driver.isAttached()) {
+					attachButton.setText(detach);
+					controller.setEnabled(false);
+				} else {
+					attachButton.setText(attach);
+					controller.setEnabled(true);
+				}
+				restoreListeners();
+			}
+		});
+	}
+
+	@Override
+	public void init() {
+
+		// build input begin ------------------
+		JPanel panel = new JPanel();
+		panel.setLayout(new GridBagLayout());
+
+		// row 1
+		gc.gridx = 0;
+		gc.gridy = 0;
+
+		panel.add(attachButton, gc);
+		++gc.gridx;
+
+		panel.add(controller, gc);
+		display.add(panel);
+
+		restoreListeners();
+
+		refreshControllers();
+	}
+
+	public void refreshControllers() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+				ArrayList<String> v = Runtime.getServiceNamesFromInterface(I2CControl.class);
+				controller.removeAllItems();
+				for (int i = 0; i < v.size(); ++i) {
+					controller.addItem(v.get(i));
+				}
+				controller.setSelectedItem(controllerName);
+			}
+		});
+	}
+
+	public void removeListeners() {
+		attachButton.removeActionListener(this);
+	}
+
+	public void restoreListeners() {
+		attachButton.addActionListener(this);
+		Component[] comps = controller.getComponents();
+		for (int i = 0; i < comps.length; i++) {
+			comps[i].addMouseListener(this); // JComboBox composite listener -
+			// have to get all the sub
+			// components
+		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent mouseEvent) {
+		refreshControllers();
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
 }
