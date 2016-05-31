@@ -146,10 +146,12 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 
 		if (controller instanceof Arduino) {
 			this.arduino = (Arduino) controller;
+			controler = "Arduino";
 		}
 		;
 		if (controller instanceof RasPi) {
 			this.raspi = (RasPi) controller;
+			controler = "RasPi";
 		}
 		;
 		broadcastState();
@@ -314,6 +316,11 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 			return false;
 		}
 
+		if (controller == null) {
+			error("trying to attach a pin before attaching to an i2c controller");
+			return false;
+		}
+		
 		servo.setController(this);
 		servoNameToPinMap.put(servo.getName(), pinNumber);
 		if (controler == "Arduino") {
