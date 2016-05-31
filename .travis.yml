@@ -8,9 +8,9 @@ jdk:
 - openjdk7
 
 # whitelist
-branches:
-  only:
-    - develop
+# branches:
+#   only:
+#     - develop
 
 deploy:
   provider: s3
