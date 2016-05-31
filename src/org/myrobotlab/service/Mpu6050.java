@@ -699,7 +699,12 @@ public class Mpu6050 extends Service {
     broadcastState();
     return true;
   }
+  
+	public void unsetController() {
+		controller = null;
 
+		broadcastState();
+	}
   /**
    * This method creates the i2c device
    */
