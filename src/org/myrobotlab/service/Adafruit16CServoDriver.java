@@ -18,8 +18,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
-import org.myrobotlab.service.interfaces.ArduinoShield;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -114,9 +114,17 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 
 	public Adafruit16CServoDriver(String n) {
 		super(n);
-
+		// subscribe("runtime", "registered", this.getName(),"onRegistered");
+		ServiceInterface runtime = Runtime.createAndStart("runtime", "Runtime");
+	  subscribe(runtime.getName(), "registered", this.getName(),"onRegistered");
 	}
-
+	
+	public void onRegistered(ServiceInterface s) {
+		log.info(String.format("onRegistered %s", s.getName()));
+		broadcastState();
+		
+	}
+	
 	// ----------- AFMotor API End --------------
 
 	// attachControllerBoard ??? FIXME FIXME FIXME - should "attach" call
@@ -131,7 +139,6 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	// @Override
 	public boolean setController(String controllerName) {
 		return setController((I2CControl) Runtime.getService(controllerName));
-
 	}
 
 	public boolean setController(I2CControl controller) {
@@ -148,12 +155,12 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 			this.arduino = (Arduino) controller;
 			controler = "Arduino";
 		}
-		;
+		
 		if (controller instanceof RasPi) {
 			this.raspi = (RasPi) controller;
 			controler = "RasPi";
 		}
-		;
+		
 		broadcastState();
 		return true;
 	}
@@ -307,6 +314,10 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		}
 
 		return controlerName;
+	}
+
+	public I2CControl getController() {
+		return controller;
 	}
 
 	public synchronized boolean servoAttach(Servo servo, Integer pinNumber) {

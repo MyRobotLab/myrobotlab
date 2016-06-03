@@ -25,12 +25,9 @@
 
 package org.myrobotlab.control;
 
-import java.awt.Component;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -44,26 +41,24 @@ import org.myrobotlab.service.Adafruit16CServoDriver;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.I2CControl;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
-public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListener, MouseListener {
+public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriverGUI.class.getCanonicalName());
 
 	String attach = "setController";
 	String detach = "unsetController";
-	String controllerName;
 	JButton attachButton = new JButton(attach);
 
 	JComboBox<String> controller = new JComboBox<String>();
 
-	// DefaultComboBoxModel<String> controllerModel = new
-	// DefaultComboBoxModel<String>();
+  Adafruit16CServoDriver myAdafruit16CServoDriver = null;
 
 	public Adafruit16CServoDriverGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
+		myAdafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.getService(boundServiceName);
 	}
 
 	@Override
@@ -92,18 +87,12 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 	public void attachGUI() {
 		log.info("AttachGUI subscribing to Adafruit16CServoDriver.class");
 		subscribe("publishState", "getState", Adafruit16CServoDriver.class);
-		subscribe("onRegistered", "onRegistered", Adafruit16CServoDriver.class);
 		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
 	public void detachGUI() {
 		unsubscribe("publishState", "getState", Adafruit16CServoDriver.class);
-		unsubscribe("onRegistered", "onRegistered", Adafruit16CServoDriver.class);
-	}
-
-	public void onRegistered(ServiceInterface s) {
-		log.info(String.format("onRegistered %s", s.getName()));
 	}
 
 	public void getState(final Adafruit16CServoDriver driver) {
@@ -115,8 +104,7 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 				refreshControllers();
 				log.info(String.format("driver.getControllerName() %s", driver.getControllerName()));
 				log.info(String.format("driver.isAttached() %s", driver.isAttached()));
-				controllerName = driver.getControllerName();
-				controller.setSelectedItem(controllerName);
+				controller.setSelectedItem(driver.getController());
 				if (driver.isAttached()) {
 					attachButton.setText(detach);
 					controller.setEnabled(false);
@@ -146,9 +134,8 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 		panel.add(controller, gc);
 		display.add(panel);
 
-		restoreListeners();
-
 		refreshControllers();
+		restoreListeners();
 	}
 
 	public void refreshControllers() {
@@ -161,7 +148,7 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 				for (int i = 0; i < v.size(); ++i) {
 					controller.addItem(v.get(i));
 				}
-				controller.setSelectedItem(controllerName);
+				controller.setSelectedItem(myAdafruit16CServoDriver.getController());
 			}
 		});
 	}
@@ -172,40 +159,5 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 
 	public void restoreListeners() {
 		attachButton.addActionListener(this);
-		Component[] comps = controller.getComponents();
-		for (int i = 0; i < comps.length; i++) {
-			comps[i].addMouseListener(this); // JComboBox composite listener -
-			// have to get all the sub
-			// components
-		}
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent mouseEvent) {
-		refreshControllers();
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
 	}
 }
