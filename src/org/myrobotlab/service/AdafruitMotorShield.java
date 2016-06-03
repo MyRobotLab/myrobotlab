@@ -389,7 +389,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 
   @Override
   public void connect(String port) {
-    // TODO Auto-generated method stub
+    // TODO: Arduino just changed to 115200, does this also need to update?
     connect(port, Serial.BAUD_57600, 8, 1, 0);
   }
 

@@ -42,6 +42,8 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SAMPLE_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERIAL_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERVO_SPEED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MESSAGE_ACK;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_DEBUG;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -341,6 +343,10 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
   public int retryConnectMax = 3;
   public int retryConnectDelay = 1500;
 
+  // make sure this is sync'd across threads, 
+  private volatile boolean ackRecieved = false;
+  private int numAck = 0;
+
   // ---------------------------- ServoController End -----------------------
   // ---------------------- Protocol Methods Begin ------------------
 
@@ -395,9 +401,8 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
   }
 
   public void connect(String port) {
-    serial.connect(port, Serial.BAUD_57600, 8, 1, 0);
-    // we should block until we've connected and got a mrlcomm version.
-    getVersion();
+    // call the other method here.
+    connect(port, Serial.BAUD_115200, 8, 1, 0);
   }
 
   /**
@@ -418,11 +423,8 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
     // should be to add listener on
     // startService
     boolean ret = serial.connect(port, rate, databits, stopbits, parity);
-
     log.info("RETRUNED VALUE FROM CONNECT: {}", ret);
-
     Integer version = getVersion();
-
     if (version == null || version != MRLCOMM_VERSION) {
       error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
       return;
@@ -753,7 +755,9 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
   @Override
   public Integer onByte(Integer newByte) {
     try {
-      // log.info(String.format("onByte %d", newByte));
+      if (log.isDebugEnabled()) {
+        log.debug("onByte {}", newByte);
+      }
       /**
        * Archtype InputStream read - rxtxLib does not have this straightforward
        * design, but the details of how it behaves is is handled in the Serial
@@ -817,9 +821,14 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
 
   // This is called when a valid message is received from the serial port.
   private void processMessage(int[] message) {
+
+
     // MSG CONTENTS = FN | D0 | D1 | ...
     int function = message[0];
-    // log.info(String.format("%d", message[1]));
+    log.info("Process Message Called: {}", ArduinoMsgCodec.functionToString(function));
+    //    if (log.isDebugEnabled()) {
+    //      log.debug("Process Message Called: {}", ArduinoMsgCodec.functionToString(function));
+    //    }
     switch (function) {
       case PUBLISH_MRLCOMM_ERROR: {
         ++error_mrl_to_arduino_rx_cnt;
@@ -831,11 +840,11 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
         // String version = String.format("%d", message[1]);
         // versionQueue.add(message[1] & 0xff);
         mrlCommVersion = message[1] & 0xff;
-        log.info(String.format("PUBLISH_VERSION %d", mrlCommVersion));
+        log.info("PUBLISH_VERSION {}", mrlCommVersion);
         invoke("publishVersion", mrlCommVersion);
         break;
       }
-        // DEPRECATED - handled by PUBLISH_SENSOR_DATA
+      // DEPRECATED - handled by PUBLISH_SENSOR_DATA
       case PUBLISH_PIN: {
         Pin pin = pinList.get(message[1]);
         pin.value = ((message[2] & 0xFF) << 8) + (message[3] & 0xFF);
@@ -866,23 +875,29 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
         // get the sensor callback index
         int sensorIndex = (int) message[1];
         // get the sensor
-        SensorDataSink sensor = indexToSensor.get(sensorIndex).sensor;
-        // find its needed datatype
-        Object data = resolveSensorData(sensor, message);
-        sensor.update(data);
+        SensorData sensorData = indexToSensor.get(sensorIndex);
+        if (sensorData == null) {
+          // uh oh?  bad data form somewhere?
+          log.warn("Unknown sensor data received...");
+        } else {
+          SensorDataSink sensor = sensorData.sensor;
+          // find its needed datatype
+          Object data = resolveSensorData(sensor, message);
+          sensor.update(data);
+        }
         break;
       } // PUBLISH_SENSOR_DATA
-        // could be deprecated
-        /*
-         * case PUBLISH_PULSE: { int index = (int) message[1]; // FIXME -
-         * assumption its a encoder pin on a Motor NO !!! Motor motor =
-         * encoderPins.get(index);
-         * 
-         * Long data = Serial.bytesToLong(message, 2, 4);
-         * 
-         * sensor.update(data); break; }
-         */
-        // OOB
+      // could be deprecated
+      /*
+       * case PUBLISH_PULSE: { int index = (int) message[1]; // FIXME -
+       * assumption its a encoder pin on a Motor NO !!! Motor motor =
+       * encoderPins.get(index);
+       * 
+       * Long data = Serial.bytesToLong(message, 2, 4);
+       * 
+       * sensor.update(data); break; }
+       */
+      // OOB
       case PUBLISH_PULSE_STOP: {
         int index = (int) message[1];
         // FIXME - assumption its a encoder pin on a Motor NO !!!
@@ -895,6 +910,26 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
         // msg or data is of size byteCount
         Object[] params = resolveCustomMessage(message);
         invoke("publishCustomMsg", new Object[] { params });
+        break;
+      }
+      case PUBLISH_MESSAGE_ACK: {
+        // log.info("Message Ack received.");
+        ackRecieved = true;
+
+        numAck++;
+        // TODO: do i need to call notify?
+        // notify(); 
+        // TODO: something more async for notification on this mutex.
+        break;
+      }
+      case PUBLISH_DEBUG: {
+        // convert the int array to a string.
+        // TODO is there an easier / better way to do this?
+        StringBuilder payload = new StringBuilder();
+        for (int i = 1; i < msgSize; i++) {
+          payload.append((char)message[i]);
+        }
+        log.info("MRLComm Debug Message {}",payload);
         break;
       }
       default: {
@@ -955,17 +990,17 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
         data = Serial.bytesToInt(message, 3, 2); // 16 bit - 2 byte
         // int
       }
-        break;
+      break;
       case DATA_SINK_TYPE_PIN: {
         Pin pin = pinList.get(message[2]);
         pin.value = ((message[3] & 0xFF) << 8) + (message[4] & 0xFF);
         data = pin;
       }
-        break;
+      break;
       default: {
         error("unknown return type %d", clazz);
       }
-        break;
+      break;
     }
     return data;
   }
@@ -973,7 +1008,8 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
   @Override
   public String onConnect(String portName) {
     info("%s connected to %s", getName(), portName);
-    getVersion();
+    // Get version should alread have been called.  don't call it again!
+    // getVersion();
     return portName;
   }
 
@@ -1000,7 +1036,7 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
   }
 
   public void pinMode(Integer address, Integer value) {
-    log.info(String.format("pinMode(%d,%d) to %s", address, value, serial.getName()));
+    log.info("pinMode({},{}) to {}", address, value, serial.getName());
     sendMsg(PIN_MODE, address, value);
   }
 
@@ -1104,10 +1140,14 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
    * @param param1
    * @param param2
    * 
-   *          TODO - take the cheese out of this method .. it shold be
-   *          sendMsg(byte[]...data)
+   * TODO - take the cheese out of this method .. it shold be
+   * sendMsg(byte[]...data)
    */
   public synchronized void sendMsg(int function, int... params) {
+    log.info("Sending Message  : {}", ArduinoMsgCodec.functionToString(function));
+    //    if (log.isDebugEnabled()) {
+    //      log.debug("Sending Arduino message funciton {}", ArduinoMsgCodec.functionToString(function));
+    //    }
     // some sanity checking.
     if (!serial.isConnected()) {
       log.warn("Serial port is not connected, unable to send message.");
@@ -1132,8 +1172,46 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
         msgToSend[3+i] = params[i];
       }
       // send the message as an array. (serial port actually writes 1 byte at a time anyway.. oh well.)
-      serial.write(msgToSend);
+
+      // set a flag that a message is in flight.
+      ackRecieved = false;
+      // notify();
       
+      // Technically this is the only thing that needs to be synchronized i think.
+      synchronized (msgToSend) {
+        serial.write(msgToSend);        
+      }
+      // TODO: wait for an ack of the message to arrive!
+      long start = System.currentTimeMillis();
+      // wait a max of 100 for the ack.
+      int limit = 1000;
+      // log.info("Waiting on ack. {}", function);
+      while (!ackRecieved) {
+        // TODO: Avoid excessive cpu usage, and limit the amount of time we wait on this "ackRecieved" 
+        // variable.  There's some java thread/notify stuff that might be better to use?
+        // sleep 1 nanosecond?!
+        // Thread.sleep(0,1);
+        // sleep 1 millisecond
+        Thread.sleep(1);
+        // log.info("Waiting on ack {}", numAck);
+        long delta = System.currentTimeMillis() - start;
+        if (delta > limit) {
+          // log.warn(, limit, function);
+          warn(String.format("No ack received.. timing out after %d ms and continuing for function %s", limit, ArduinoMsgCodec.functionToString(function)));
+          // eek?
+          // ackRecieved = false;
+          break;
+        }
+        // break;
+      }      
+
+      //if (log.isDebugEnabled()) {
+      if (ackRecieved) {
+        log.info("Arduino responded: {} {}", ArduinoMsgCodec.functionToString(function), numAck);
+      } else {
+        log.info("Ack not received : {} {}", ArduinoMsgCodec.functionToString(function), numAck);        
+      }
+      //}
       // putting delay at the end so we give the message and allow the arduino to process
       // this decreases the latency between when mrl sends the message
       // and the message is picked up by the arduino.
@@ -1632,13 +1710,58 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
       LoggingFactory.getInstance().setLevel(Level.INFO);
 
       //
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      Serial serial = (Serial) arduino.getSerial();
+      Arduino arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
+      //Serial serial = (Serial) arduino.getSerial();
 
-      serial.connectTcp("192.168.0.99", 80);
+      arduino.connect("COM30");
+
+      // digitial PWM pins for hbrdige/motor control.
+      int leftPwm = 6;
+      int rightPwm = 7;
+      // analog feedback pin A0 on the Uno
+      int potPin = 14;
+      boolean testMotor = true;
+      boolean startAnalogPolling = true;
+
+      if (startAnalogPolling) {
+        arduino.analogReadPollingStart(potPin);
+      }
+      
+      if (testMotor) {
+        Motor motor = (Motor)Runtime.createAndStart("motor", "Motor");
+        motor.setType2Pwm(leftPwm, rightPwm);
+        // motor.attach(arduino);
+        arduino.motorAttach(motor);
+        while (true) {
+          // try to overrun?
+          // rand between -1 and 1.
+          double rand = (Math.random() - 0.5)*2;
+          motor.move(rand);
+        }
+      } else {
+        Servo servo = (Servo)Runtime.createAndStart("servo", "Servo");
+        servo.setPin(13);
+        arduino.servoAttach(servo);
+        servo.attach();
+        int angle = 0;
+        int max = 5000;
+        while (true) {
+          // System.out.println(angle);
+          angle++;
+          servo.moveTo(angle %180);
+          if (angle > max) {
+            break;
+          }
+        }
+        System.out.println("done with loop..");;
+
+      }
+
+      System.in.read();
+      //serial.connectTcp("192.168.0.99", 80);
       // arduino.setLoadTimingEnabled(true);
-      Runtime.start("python", "Python");
-      Runtime.start("webgui", "WebGui");
+      //Runtime.start("python", "Python");
+      //Runtime.start("webgui", "WebGui");
       // Runtime.start("servo", "Servo");
       // Runtime.start("clock", "Clock");
       // Runtime.start("serial", "Serial");

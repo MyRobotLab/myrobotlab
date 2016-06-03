@@ -40,7 +40,7 @@
 #include <Wire.h>
 // Start of Adafruit16CServoDriver I2C import
 // version to match with MRL
-#define MRLCOMM_VERSION         33
+#define MRLCOMM_VERSION         34
 
 // serial protocol functions
 #define MAGIC_NUMBER            170 // 10101010
@@ -190,6 +190,8 @@
 // http://forum.arduino.cc/index.php?topic=100557.0
 
 #define COMMUNICATION_RESET    252
+#define PUBLISH_MESSAGE_ACK    127
+#define PUBLISH_DEBUG          126
 #define NOP            255
 
 // ----------  MRLCOMM FUNCTION INTERFACE END -----------
@@ -201,7 +203,7 @@
 // #define NUM_ANALOG_INPUTS           6
 
 #define SENSORS_MAX  NUM_DIGITAL_PINS // this is max number of pins (analog included)
-//#define SENSORS_MAX  20 // TODO: Setting to value larger than 32 causes TX/RX errors in MRL. (Make sensor loop faster to fix.)
+// #define SENSORS_MAX  20 // TODO: Setting to value larger than 32 causes TX/RX errors in MRL. (Make sensor loop faster to fix.)
 #define DIGITAL_PIN_COUNT
 
 // ECHO FINITE STATE MACHINE
@@ -284,7 +286,6 @@ typedef struct
 
 pin_type pins[SENSORS_MAX];
 
-
 // Servos
 typedef struct
 {
@@ -346,19 +347,26 @@ void handleUltrasonicPing(pin_type& pin, unsigned long ts);
 // void sendMsg ( int num, ... );
 
 //---- data record definitions end -----
+// Define the reset function at address 0
+// allow us to reset the board if the serial port disconnects. (Thanks Mats! TODO: test me!)
+// void(* resetFunc) (void) = 0;
+
 
 // ----------- send custom msg begin ---------------------
-void append(const int& data) {
-  ++paramCnt;
-  customParams[paramBuffIndex] = ARDUINO_TYPE_INT;
-  customParams[++paramBuffIndex] = (byte)(data >> 8);
-  customParams[++paramBuffIndex] = ((byte)data & 0xff);
-  ++paramBuffIndex;
-}
+//void append(const int& data) {
+//  ++paramCnt;
+//  customParams[paramBuffIndex] = ARDUINO_TYPE_INT;
+//  customParams[++paramBuffIndex] = (byte)(data >> 8);
+//  customParams[++paramBuffIndex] = ((byte)data & 0xff);
+//  ++paramBuffIndex;
+//}
+
+boolean debug = false;
 
 void setup() {
   // TODO: higher port speeds?
-  Serial.begin(57600);        // connect to the serial port
+  //Serial.begin(57600);        // connect to the serial port
+  Serial.begin(115200);        // connect to the serial port
   while (!Serial){};
   // TODO: do this before we start the serial port?
   softReset();
@@ -368,18 +376,42 @@ void setup() {
 
 // This is the main loop that the arduino runs.
 void loop() {
+
+  if (debug)
+    publishDebug("Main");
+  // make sure we're still connected to the serial port.
+  //if (!Serial) {
+    // if we're disconnected, shutdown / reset
+//    resetFunc();
+//  }
+
   // increment how many times we've run
   ++loopCount;
   // get a command and process it from the serial port (if available.)
   if (getCommand()) {
+    if (debug)
+      publishDebug("GotCMD");
     processCommand();
+    // ack that we got a command (should we ack it first? or after we process the command?)
+    sendCommandAck();
   }
+  if (debug)
+    publishDebug("ProcCMD");
   // update servo positions
   updateServos();
+  if (debug)
+    publishDebug("UpdateServos");
+
   // update analog sensor data stuffs
   updateSensors();
+  if (debug)
+    publishDebug("UpdateSensors");
+
   // update and report timing metrics
   updateStats();
+  if (debug)
+    publishDebug("UpdatedStat");
+  // Serial.flush();
 } // end of big loop
 
 void softReset() {
@@ -485,6 +517,8 @@ boolean getCommand() {
     for (int i = 0 ; i < bytesAvailable; i++) {
       // read the incoming byte:
       newByte = Serial.read();
+      if (debug)
+        publishDebug("BYTE");
       ++byteCount;
       // checking first byte - beginning of message?
       if (byteCount == 1 && newByte != MAGIC_NUMBER) {
@@ -527,9 +561,13 @@ void processCommand() {
     digitalWrite(ioCmd[1], ioCmd[2]);
     break;
   case ANALOG_WRITE:
-    analogWrite(ioCmd[1], ioCmd[2]);
+    if (debug)
+      publishDebug("AW");
+    //analogWrite(ioCmd[1], ioCmd[2]);
     break;
   case PIN_MODE:
+    if (debug)
+      publishDebug("PM");
     pinMode(ioCmd[1], ioCmd[2]);
     break;
   case SERVO_ATTACH:
@@ -675,41 +713,56 @@ void updateServos() {
 // This function updates the sensor data (both analog and digital reading here.)
 void updateSensors() {
   unsigned long ts;
+
   for (int i = 0; i < SENSORS_MAX; ++i) {
     pin_type& pin = pins[i];
     if (pin.isActive != true) {
       // only process the pin if it's active.
+      //publishDebug("PNA");
       continue;
     }
+    // publishDebug("USL");
+    // continue;
+
     switch (pin.sensorType) {
       case SENSOR_TYPE_ANALOG_PIN_READER:
+        if (debug)
+          publishDebug("AREAD");
+        pin.value = analogRead(pin.address);
+        publishSensorData(pin.sensorIndex, pin.address, pin.value);
+        break;
       case SENSOR_TYPE_DIGITAL_PIN_READER:
+        if (debug)
+          publishDebug("DREAD");
         // read the pin
-        if(pin.sensorType==SENSOR_TYPE_ANALOG_PIN_READER)
-          pin.value = analogRead(pin.address);
-        else
-          pin.value=digitalRead(pin.address);
+        pin.value = digitalRead(pin.address);
+        publishSensorData(pin.sensorIndex, pin.address, pin.value);
+        break;
         // if my value is different from last time - send it
         // if (pin.lastValue != pin.value || !pin.s) //TODO - SEND_DELTA_MIN_DIFF
-        if (pin.lastValue != pin.value || (loopCount%pin.rateModulus) == 0) {
+        //if (pin.lastValue != pin.value || (loopCount%pin.rateModulus) == 0) {
           //sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xff);
-          publishSensorData(pin.sensorIndex, pin.address, pin.value);
-        }
-        // set the last input value of this pin
-        pin.lastValue = pin.value;
-        break;
-      case SENSOR_TYPE_ULTRASONIC: {
+          //publishSensorData(pin.sensorIndex, pin.address, pin.value);
+        //}
+        // set the last input value of this pin  (This is a type cast error?! why cast to unsigned long here?)
+        //pin.lastValue = pin.value;
+        // publishDebug("PUBDONE");
+
+      case SENSOR_TYPE_ULTRASONIC:
+        if (debug)
+          publishDebug("USTYPE");
         // FIXME - handle in own function - the overhead is worth not having
         // 200+ lines of code inlined here !
         // we are running & have an ultrasonic (ping) pin
         // check to see what state we  are in
         handleUltrasonicPing(pin, ts);
         break;
-      }
       // because pin pulse & pulsing are so closely linked
       // the pulse will be handled here as well even if the
       // read data sent back on serial is disabled
-      case SENSOR_TYPE_PULSE: {
+      case SENSOR_TYPE_PULSE:
+        if (debug)
+          publishDebug("PULSETYPE");
         // TODO - implement - rate = modulo speed
         // if (loopCount%rate == 0) {
         // toggle pin state
@@ -741,11 +794,11 @@ void updateSensors() {
         // publish the pulse!
         publishPulse(pin.state, pin.sensorIndex, pin.address, pin.count);
         break;
-      }
-      default: {
+      default:
+        if (debug)
+          publishDebug("UNKNTYPE");
         sendError(ERROR_UNKOWN_SENSOR);
         break;
-      }
     }
   } // end for each pin
 }
@@ -902,7 +955,7 @@ void servoDetach() {
 void setLoadTimingEnabled() {
   loadTimingEnabled = ioCmd[1];
   //loadTimingModulus = ioCmd[2];
-  loadTimingModulus = 1000;
+  loadTimingModulus = 1;
 }
 
 // SET_PWMFREQUENCY
@@ -1033,6 +1086,7 @@ void sensorAttach() {
   // IT THEN POPULATES each of the PINs with its sensorIndex
   // the uC (Arduino) - does not grab any - because it will
   // always take/recieve any non-reserved pin (softReset) Pin
+  publishDebug("BSAM");
   int sensorIndex    = ioCmd[1];
   int sensorType     = ioCmd[2];
   int pinCount       = ioCmd[3];
@@ -1054,6 +1108,7 @@ void sensorAttach() {
       pin.address = ioCmd[3];
     }
   }
+  publishDebug("ESAM");
 }
 
 // SENSOR_POLLING_START
@@ -1175,20 +1230,19 @@ void handleUltrasonicPing(pin_type& pin, unsigned long ts) {
 
 // Helper methods to create MRLComm messages and write them back over the serial port.
 // send a generic message
-void sendMsg() {
-  // TODO: make everything use this!
+// TODO: this is never called
+//void sendMsg() {
   // unbox
-  Serial.write(MAGIC_NUMBER);
-  Serial.write(paramBuffIndex + 2); // = param buff size + FN + paramCnt
-  //Serial.write(2); // = param buff size + FN + paramCnt
-  Serial.write(PUBLISH_CUSTOM_MSG);
-  Serial.write(paramCnt);
-  for (int i = 0; i < paramBuffIndex; ++i) {
-    Serial.write(customParams[i]);
-  }
-  paramCnt = 0;
-  paramBuffIndex = 0;
-}
+  //Serial.write(MAGIC_NUMBER);
+  //Serial.write(paramBuffIndex + 2); // = param buff size + FN + paramCnt
+  //Serial.write(PUBLISH_CUSTOM_MSG);
+  //Serial.write(paramCnt);
+  //for (int i = 0; i < paramBuffIndex; ++i) {
+    //Serial.write(customParams[i]);
+    //  }
+  //  paramCnt = 0;
+//  paramBuffIndex = 0;
+//}
 
 // send an error message/code back to MRL.
 void sendError(int type) {
@@ -1221,15 +1275,17 @@ void publishVersion() {
 }
 
 // PUBLISH_SENSOR_DATA
-void publishSensorData(byte sensorIndex, byte address, byte value) {
+void publishSensorData(int sensorIndex, int address, int value) {
+
+
   Serial.write(MAGIC_NUMBER);
   Serial.write(5); //size
-  //Serial.write(PUBLISH_PIN);
   Serial.write(PUBLISH_SENSOR_DATA);
   Serial.write(sensorIndex);
   Serial.write(address);
   Serial.write(value >> 8);   // MSB
   Serial.write(value & 0xff); // LSB
+
 }
 
 // TODO: maybe this can be merged with above?
@@ -1237,7 +1293,6 @@ void publishSensorDataLong(int address, unsigned long lastValue) {
   Serial.write(MAGIC_NUMBER);
   Serial.write(6); // size 1 FN + 4 bytes of unsigned long
   Serial.write(PUBLISH_SENSOR_DATA);
-  // TODO: validate this is correct?
   Serial.write(address);
   // write the long value out
   Serial.write((byte)(lastValue >> 24));
@@ -1248,20 +1303,22 @@ void publishSensorDataLong(int address, unsigned long lastValue) {
 
 void publishPulseStop(int state, int sensorIndex, int address, unsigned long count) {
   Serial.write(MAGIC_NUMBER);
-  Serial.write(6); // size
-  Serial.write(state); // Serial.write(PUBLISH_PULSE);
-  Serial.write(sensorIndex);// pin service
-  Serial.write(address);// Pin#
+  Serial.write(7); // size
+  //Serial.write(PUBLISH_PULSE_STOP);  ?!?! commented out?
+  Serial.write(state);
+  Serial.write(sensorIndex);   // pin service
+  Serial.write(address);       // Pin#
   Serial.write(count >> 24);   // MSB zoddly
   Serial.write(count >> 16);   // MSB
-  Serial.write(count >> 8);  // MSB
+  Serial.write(count >> 8);    // MSB
   Serial.write(count & 0xff);  // LSB
 }
 
 void publishPulse(int state, int sensorIndex, int address, unsigned long count) {
   Serial.write(MAGIC_NUMBER);
-  Serial.write(6); // size
-  Serial.write(state); // Serial.write(PUBLISH_PULSE);
+  Serial.write(7); // size
+  //Serial.write(PUBLISH_PULSE);  commented out ?!?!
+  Serial.write(state);
   Serial.write(sensorIndex);// pin service
   Serial.write(address);// Pin#
   Serial.write(count >> 24);   // MSB zoddly
@@ -1281,3 +1338,25 @@ void publishLoadTimingEvent(unsigned long loadTime) {
   Serial.write((byte)loadTime & 0xff);
 }
 
+void sendCommandAck() {
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(1); // size 1 FN + 0 bytes
+  Serial.write(PUBLISH_MESSAGE_ACK);
+  // keep this synchronous
+  Serial.flush();
+}
+
+// This method will publish a string back to the Arduino service
+// for debugging purproses.
+// NOTE:  If this method gets called excessively
+// I have seen memory corruption in the arduino where
+// it seems to be getting a null string passed in as "message"
+// very very very very very odd..  I suspect a bug in the arduino hard/software
+void publishDebug(String message) {
+  //Serial.flush();
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(1+message.length());
+  Serial.write(PUBLISH_DEBUG);
+  Serial.print(message);
+  Serial.flush();
+}
