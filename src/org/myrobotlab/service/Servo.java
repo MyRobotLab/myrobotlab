@@ -202,6 +202,8 @@ public class Servo extends Service implements ServoControl {
   public Servo(String n) {
     super(n);
     lastActivityTime = System.currentTimeMillis();
+    // don't allow buffer overruns?
+    // outbox.setBlocking(true);
   }
 
   // uber good

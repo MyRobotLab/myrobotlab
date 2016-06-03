@@ -52,7 +52,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
   public static final int MAX_MSG_SIZE = 64;
 
-  public static final int MRLCOMM_VERSION = 33;
+  public static final int MRLCOMM_VERSION = 34;
 
   public static final int MAGIC_NUMBER = 170; // 10101010
 
@@ -196,6 +196,12 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
   // {softReset}
   public final static int SOFT_RESET = 45;
 
+  // {messageAck} coming back from arduino
+  public final static int PUBLISH_MESSAGE_ACK = 127;
+  
+  // {publishDebug} a debug string returned from the arduino.
+  public final static int PUBLISH_DEBUG = 126;
+
   static {
     byteToMethod.put(PUBLISH_MRLCOMM_ERROR, "publishMRLCommError");
     methodToByte.put("publishMRLCommError", PUBLISH_MRLCOMM_ERROR);
@@ -332,6 +338,9 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
     byteToMethod.put(SOFT_RESET, "softReset");
     methodToByte.put("softReset", SOFT_RESET);
 
+    // TODO: should I add this here?
+    // byteToMethod.put(MESSAGE_ACK, "messageAck");
+    // methodToByte.put("messageAck", MESSAGE_ACK);
   }
   ///// JAVA GENERATED DEFINITION END - DO NOT MODIFY //////
 
@@ -591,6 +600,83 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
   @Override
   public String getKey() {
     return "arduino";
+  }
+  
+  public static String functionToString(int function) {
+    if (function == ArduinoMsgCodec.ANALOG_READ_POLLING_START)
+      return "ANALOG_READ_POLLING_START";
+    if (function == ArduinoMsgCodec.ANALOG_READ_POLLING_STOP)
+      return "ANALOG_READ_POLLING_STOP";
+    if (function == ArduinoMsgCodec.ANALOG_WRITE)
+      return "ANALOG_WRITE";
+    if (function == ArduinoMsgCodec.DIGITAL_READ_POLLING_START)
+      return "DIGITAL_READ_POLLING_START";
+    if (function == ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP)
+      return "DIGITAL_READ_POLLING_STOP";
+    if (function == ArduinoMsgCodec.DIGITAL_WRITE)
+      return "DIGITAL_WRITE";
+    if (function == ArduinoMsgCodec.GET_VERSION)
+      return "GET_VERSION";
+    if (function == ArduinoMsgCodec.MOTOR_ATTACH)
+      return "MOTOR_ATTACH";
+    if (function == ArduinoMsgCodec.MOTOR_DETACH)
+      return "MOTOR_DETACH";
+    if (function == ArduinoMsgCodec.MOTOR_MOVE)
+      return "MOTOR_MOVE";
+    if (function == ArduinoMsgCodec.MOTOR_MOVE_TO)
+      return "MOTOR_MOVE_TO";
+    if (function == ArduinoMsgCodec.MOTOR_RESET)
+      return "MOTOR_RESET";
+    if (function == ArduinoMsgCodec.MOTOR_STOP)
+      return "MOTOR_STOP";
+    if (function == ArduinoMsgCodec.PIN_MODE)
+      return "PIN_MODE";
+    if (function == ArduinoMsgCodec.PULSE)
+      return "PULSE";
+    if (function == ArduinoMsgCodec.PULSE_STOP)
+      return "PULSE_STOP";
+    if (function == ArduinoMsgCodec.SENSOR_ATTACH)
+      return "SENSOR_ATTACH";
+    if (function == ArduinoMsgCodec.SENSOR_POLLING_START)
+      return "SENSOR_POLLING_START";
+    if (function == ArduinoMsgCodec.SENSOR_POLLING_STOP)
+      return "SENSOR_POLLING_STOP";
+    if (function == ArduinoMsgCodec.SERVO_ATTACH)
+      return "SERVO_ATTACH";
+    if (function == ArduinoMsgCodec.SERVO_DETACH)
+      return "SERVO_DETACH";
+    if (function == ArduinoMsgCodec.SERVO_EVENTS_ENABLED)
+      return "SERVO_EVENTS_ENABLED";
+    if (function == ArduinoMsgCodec.SERVO_SWEEP_START)
+      return "SERVO_SWEEP_START";
+    if (function == ArduinoMsgCodec.SERVO_SWEEP_STOP)
+      return "SERVO_SWEEP_STOP";
+    if (function == ArduinoMsgCodec.SERVO_WRITE)
+      return "SERVO_WRITE";
+    if (function == ArduinoMsgCodec.SERVO_WRITE_MICROSECONDS)
+      return "SERVO_WRITE_MICROSECONDS";
+    if (function == ArduinoMsgCodec.PUBLISH_MESSAGE_ACK)
+      return "PUBLISH_MESSAGE_ACK";
+    if (function == ArduinoMsgCodec.PUBLISH_SENSOR_DATA)
+      return "PUBLISH_SENSOR_DATA";
+    if (function == ArduinoMsgCodec.PUBLISH_PIN)
+      return "PUBLISH_PIN";
+    if (function == ArduinoMsgCodec.PUBLISH_PULSE)
+      return "PUBLISH_PULSE";
+    if (function == ArduinoMsgCodec.PUBLISH_PULSE_STOP)
+      return "PUBLISH_PULSE_STOP";
+    if (function == ArduinoMsgCodec.PUBLISH_TRIGGER)
+      return "PUBLISH_TRIGGER";
+    if (function == ArduinoMsgCodec.PUBLISH_VERSION)
+      return "PUBLISH_VERSION";
+    if (function == ArduinoMsgCodec.PUBLISH_LOAD_TIMING_EVENT)
+      return "PUBLISH_LOAD_TIMING_EVENT";
+    if (function == ArduinoMsgCodec.SET_LOAD_TIMING_ENABLED) 
+      return "SET_LOAD_TIMING_ENABLED";
+    if (function == ArduinoMsgCodec.PUBLISH_DEBUG) 
+      return "PUBLISH_DEBUG";
+    return "OTHER(" + Integer.toString(function) + ")";
+    
   }
 
 }

@@ -169,7 +169,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
   /**
    * default bps
    */
-  int baudrate = 57600;
+  int baudrate = 115200;
 
   /**
    * default databits
@@ -248,6 +248,10 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
   public Serial(String n) {
     super(n);
     listeners.put(n, this);
+    
+    //outbox.setBlocking(true);
+    //outbox.maxQueue = 1;
+    
   }
 
   public void addByteListener(SerialDataListener listener) {

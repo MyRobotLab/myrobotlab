@@ -36,6 +36,10 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 
   transient SerialPort port = null;
 
+  public boolean debug = true;
+  public boolean debugTX = true;
+  public boolean debugRX = false;
+  
   public PortJSSC() {
     super();
   }
@@ -133,7 +137,11 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 
   @Override
   public int read() throws Exception {
-    return port.readIntArray(1)[0];
+    int data = port.readIntArray(1)[0];
+    if (debug && debugRX) {
+      log.info("Read : {}", data );
+    }
+    return data;
     /*
      * if (port == null) { return -1; } int[] ret = port.readIntArray(1); if
      * (ret != null) { return ret[0]; } else { return -1; }
@@ -181,6 +189,16 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
   // OutputStream
   public void write(int[] data) throws Exception {
     // use the writeIntArray method to batch this operation.
+    if (debug && debugTX) {
+      StringBuilder b = new StringBuilder();
+      for (int i = 0; i < data.length; i++) {
+        b.append("" + Integer.toString(data[i]) + "");
+        if (i != data.length-1)
+          b.append(",");
+      }
+      log.info("Sending Int Array: {}", b);
+    }
+    
     port.writeIntArray(data);
   }
 

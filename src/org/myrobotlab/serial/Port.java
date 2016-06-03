@@ -41,7 +41,8 @@ public abstract class Port implements Runnable, PortSource {
 
   // hardware serial port details
   // default convention over configuration
-  int rate = 57600;
+  // int rate = 57600;
+  int rate = 115200;
   int dataBits = 8;
   int stopBits = 1;
   int parity = 0;
