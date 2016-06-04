@@ -46,6 +46,9 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
   HashMap<String, Command> commands = new HashMap<String, Command>();
 
+  // track the state of the webgui, is it listening? maybe?
+  public boolean listening = false;
+  
   public WebkitSpeechRecognition(String reservedKey) {
     super(reservedKey);
   }
@@ -99,18 +102,23 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
   @Override
   public void resumeListening() {
-    // TODO Auto-generated method stub
-
+    log.info("Resume listening event seen.");
+    this.listening = true;
+    broadcastState();
   }
 
   @Override
   public void startListening() {
-    // TODO Auto-generated method stub
+    log.info("Start listening event seen.");
+    this.listening = true;
+    broadcastState();
   }
 
   @Override
   public void stopListening() {
-    // TODO Auto-generated method stub
+    log.info("Stop listening event seen.");
+    this.listening = false;
+    broadcastState();
   }
 
   public void setLanguage(String language) {
@@ -143,14 +151,12 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public void onStartSpeaking(String utterance) {
     // at this point we should subscribe to this in the webgui
     // so we can pause listening.
-
   }
 
   @Override
   public void onEndSpeaking(String utterance) {
     // need to subscribe to this in the webgui
     // so we can resume listening.
-
   }
 
   public static void main(String[] args) {
