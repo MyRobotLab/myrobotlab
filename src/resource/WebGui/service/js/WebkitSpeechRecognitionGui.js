@@ -310,7 +310,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         }
     };
     
-    
     this.updateState = function(service) {
         $scope.service = service;
         // we should check for the language here.. and update that on the webkit instance.
@@ -319,8 +318,21 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         // TODO: update the selected value in the gui.
         $scope.lang.selectedOption.id = service.language;
         $scope.current_language = service.language;
-    }
-    ;
+        if ($scope.service.listening != $scope.recognizing) {
+        	$log.info("Change listening state!");
+        	// huh!? not initialized  yet?!
+        	if (!angular.isUndefined($scope.recognizing)) {
+        		// update the recognizing state of the gui.
+        		// TODO: fix me. it doesn't handle the stop listening case (likely)
+        		if (!$scope.recognizing && $scope.service.listening) {
+        			// TODO: start Recognition is actually a toggle.. not start.
+        			$scope.startRecognition();
+        		}
+        	};
+        } else {
+        	$log.info("State did not change.");
+        }
+    };
     _self.updateState($scope.service);
     
     // when to use $scope or anything?!
@@ -436,7 +448,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     }
     ;
     
-    
     $scope.updateLanguage = function() {
         $log.info('WEBKIT Update Language');
         // Here we need to update the language that we're recognizing.. and probably 
@@ -486,6 +497,9 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
                 $scope.startRecognition();
             }
             break;
+        default:
+        	$log.info("Unknown Message recieved." + msg.method);
+            break;
         }
         ;
     }
@@ -493,6 +507,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     
     msg.subscribe('onStartSpeaking');
     msg.subscribe('onEndSpeaking');
+    msg.subscribe('onStartListening');
+    msg.subscribe('onStopListening');
     msg.subscribe(this);
 
 }
