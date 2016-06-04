@@ -1,5 +1,8 @@
 package org.myrobotlab.string;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class StringUtil {
 
   final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
@@ -137,5 +140,43 @@ public class StringUtil {
     }
     return false;
   }
+  
+  // split a string into sub strings that are a maxlength
+  // also try to be smart about text so you don't break a word in 1/2
+  public static List<String> chunkText(String text, int maxLength) {
+    ArrayList<String> chunks = new ArrayList<String>();
+    StringBuilder line = new StringBuilder();
+    // TODO: smarter tokenization!
+    // perhaps use a sentence splitter first, then 
+    // split the sentence into multiple parts if necessary
+    // to preserve a more natural boundary on the text.
+    String[] parts = text.split(" ");
+    for (String p : parts) {
+      if (line.length() + p.length() >= maxLength) {
+        // our substring is long enough.
+        chunks.add(line.toString().trim());
+        // reset out substring
+        line = new StringBuilder();
+        line.append(p);
+      } else {
+        // accumulate the words on the string.
+        line.append(p);
+        // TODO: this is currently hardcoded to be a space. not great, 
+        // in theory it should be the
+        // actual from the original string...
+      }
+      line.append(" ");
+    }
+    // add the last segment.
+    chunks.add(line.toString().trim());
+    return chunks; 
+    
+    
+    
+    
+    
+  }
+  
+  
 
 }
