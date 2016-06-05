@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 
 //import com.pi4j.io.i2c.I2CBus;
 /**
- * AdaFruit INA219 Shield Controller Service
+ * AdaFruit Ina219 Shield Controller Service
  * 
  * @author Mats
  * 
@@ -172,6 +172,7 @@ public class AdafruitIna219 extends Service {
 		ServiceType meta = new ServiceType(AdafruitIna219.class.getCanonicalName());
 		meta.addDescription("Adafruit INA219 Voltage and Current sensor Service");
 		meta.addCategory("sensor");
+    meta.setSponsor("Mats");
 		return meta;
 	}
 
