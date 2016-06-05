@@ -421,6 +421,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		ServiceType meta = new ServiceType(Adafruit16CServoDriver.class.getCanonicalName());
 		meta.addDescription("Adafruit 16-Channel PWM/Servo Driver");
 		meta.addCategory("shield", "servo & pwm");
+    meta.setSponsor("Mats");
 		/*
 		 * meta.addPeer("arduino", "Arduino", "our Arduino"); meta.addPeer("raspi",
 		 * "RasPi", "our RasPi");

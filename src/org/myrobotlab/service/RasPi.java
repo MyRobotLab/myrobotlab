@@ -303,6 +303,7 @@ public class RasPi extends Service implements I2CControl {
 		ServiceType meta = new ServiceType(RasPi.class.getCanonicalName());
 		meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware such as I2C");
 		meta.addCategory("i2c", "control");
+    meta.setSponsor("Mats");
 		meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
 		return meta;
 	}

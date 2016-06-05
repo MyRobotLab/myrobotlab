@@ -4979,6 +4979,7 @@ public class Mpu6050 extends Service {
     ServiceType meta = new ServiceType(Mpu6050.class.getCanonicalName());
     meta.addDescription("General MPU-6050 acclerometer and gyro");
     meta.addCategory("microcontroller", "sensor");
+    meta.setSponsor("Mats");
     return meta;
   }
 
