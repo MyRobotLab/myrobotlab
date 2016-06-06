@@ -1,0 +1,19 @@
+<div class="row">
+  <div class="col-lg-12">
+
+   <!-- simple dropdown -->
+  <div class="input-group">
+  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
+      <a href id="simple-dropdown" uib-dropdown-toggle>controller<span class="caret"></span></a>
+      <ul uib-dropdown-menu>
+        <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)"><a href>{{possibleController}}</a></li>
+      </ul>
+  </span>
+   
+   <input type="text" class="form-control" ng-model="controllerName" ng-disabled="isAttached"><!-- FIXME - type-ahead -->   
+     
+   <span class="input-group-btn">
+         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.unsetController()">unsetController</button>
+         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.setController(controllerName)">setController</button>
+   </span>
+  </div>

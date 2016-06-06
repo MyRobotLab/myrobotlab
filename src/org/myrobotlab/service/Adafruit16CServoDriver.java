@@ -138,6 +138,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 */
 	// @Override
 	public boolean setController(String controllerName) {
+		String test = controllerName;
 		return setController((I2CControl) Runtime.getService(controllerName));
 	}
 
