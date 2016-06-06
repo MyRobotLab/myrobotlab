@@ -100,7 +100,6 @@ public class AdafruitIna219 extends Service {
 
 	public void unsetController() {
 		controller = null;
-
 		broadcastState();
 	}
 
