@@ -310,13 +310,13 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       }
       return;
     } /*
-       * LIST ???
-       * 
-       * else if (cmdline.hasSwitch("-list")) { Runtime runtime =
-       * Runtime.getInstance(); if (runtime == null) {
-       * 
-       * } else { System.out.println(getServiceTypeNames()); } return; }
-       */
+     * LIST ???
+     * 
+     * else if (cmdline.hasSwitch("-list")) { Runtime runtime =
+     * Runtime.getInstance(); if (runtime == null) {
+     * 
+     * } else { System.out.println(getServiceTypeNames()); } return; }
+     */
     mainHelp();
   }
 
@@ -406,7 +406,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
           for (int i = 0; i < nes.size(); ++i) {
             listener = nes.get(i);
             sb.append("<MRLListener outMethod=\"").append(listener.topicMethod).append("\" name=\"").append(listener.callbackName).append("\" inMethod=\"")
-                .append(listener.callbackMethod).append("\" />");
+            .append(listener.callbackMethod).append("\" />");
           }
           sb.append("</addListener>");
         }
@@ -1390,12 +1390,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    *          of the service to be released
    * @return whether or not it successfully released the service
    */
-  public synchronized static boolean release(
-      String name) /*
-                    * release local Service
-                    */
-  {
-    log.warn("releasing service {}", name);
+  public synchronized static boolean release(String name) {
+    log.info("releasing service {}", name);
     Runtime rt = getInstance();
     if (!registry.containsKey(name)) {
       rt.error("release could not find %s", name);
@@ -1408,7 +1404,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     ServiceEnvironment se = environments.get(sw.getInstanceId());
     se.serviceDirectory.remove(name);
     rt.invoke("released", sw);
-    log.warn("released {}", name);
+    log.info("released {}", name);
     return true;
   }
 

@@ -40,10 +40,12 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
+import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
-import org.myrobotlab.service.interfaces.SensorDataSink;
+import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -56,7 +58,7 @@ import org.slf4j.Logger;
  *         H-bridges output
  * 
  */
-public class Motor extends Service implements MotorControl, SensorDataSink, EncoderListener {
+public class Motor extends Service implements MotorControl, SensorDataListener, EncoderListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -158,13 +160,14 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
   }
 
   @Override
-  public boolean detach() {
+  public void detach() {
     boolean ret = controller.motorDetach(this);
     controllerName = null; // FIXME - should only have controllerName and
     // not isAttached - test for null
     controller = null;
     broadcastState();
-    return ret;
+    // return ret;
+    return;
 
   }
 
@@ -347,18 +350,18 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
     invoke("updatePosition", data);
   }
 
-  @Override
-  public int getDataSinkType() {
-    // other data types available if needed
-    return DATA_SINK_TYPE_INTEGER;
-  }
+//  @Override
+//  public String getDataSinkType() {
+//    // other data types available if needed
+//    return "INTEGER_SENSOR";
+//  }
 
   @Override
-  public int getSensorType() {
+  public String getSensorType() {
     if (type != null && type.equals(TYPE_PULSE_STEP)) {
-      return SENSOR_TYPE_PULSE;
+      return "PULSE_PIN";
     } else {
-      return SENSOR_TYPE_PIN;
+      return "DIGITAL_PIN";
     }
   }
 
@@ -533,7 +536,7 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
       // m1.attach(arduino, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);
       // m1.attach(arduino, Motor.TYPE_2_PWM, pwmPin, dirPin);
       // m1.attach(arduino, Motor.TYPE_SIMPLE, pwmPin, dirPin);
-      m1.attach(arduino);
+      m1.attach((MotorController)arduino);
 
       m1.move(1.0);
       m1.move(-1.0);
@@ -576,6 +579,36 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
       Logging.logError(e);
     }
 
+  }
+
+  @Override
+  public SensorData publishSensorData(SensorData data) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void addSensorDataListener(SensorDataListener listener) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void attach(Microcontroller controller) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void start() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onSensorData(SensorData data) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

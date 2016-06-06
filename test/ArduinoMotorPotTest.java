@@ -7,23 +7,33 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.sensor.AnalogPinSensor;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.PID2;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.SensorDataSink;
+import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.interfaces.MotorController;
+import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.myrobotlab.test.TestUtils;
 import org.slf4j.Logger;
 
 @Ignore
-public class ArduinoMotorPotTest implements SensorDataSink {
+public class ArduinoMotorPotTest implements SensorDataListener {
 
+  //public boolean uploadSketch = false;
+  public boolean uploadSketch = false;
+  
   public final static Logger log = LoggerFactory.getLogger(ArduinoMotorPotTest.class);
   private String port ="COM30";
+  private String boardType ="uno";
   private int leftPwm = 6;
   private int rightPwm = 7;
-  private int potPin = 14;
+  
+  // A0 
+  private int potPin = 0;
 
   private double kp = 0.050; 
   private double ki = 0.020;
@@ -33,8 +43,8 @@ public class ArduinoMotorPotTest implements SensorDataSink {
   private String key = "test";
   private Motor motor;
 
-  // private int count = 0;
-  // private int rate = 5;
+  private int count = 0;
+  private int rate = 5;
 
   private double tolerance = 1.5;
   private Arduino arduino;
@@ -74,17 +84,20 @@ public class ArduinoMotorPotTest implements SensorDataSink {
     String result = runCommand(arduinoExe, args);
     // print stdout/err from running the command
     System.out.println("Result..." + result);
-    // take a breath...  We think it probably worked?  but not sure..
-    Thread.sleep(1000);
+
     System.out.println("Uploaded Sketch.");
+    System.out.flush();
+    // take a breath...  We think it probably worked?  but not sure..
+    Thread.sleep(2000);
   }
   
   @Test
   public void testArduinoMotPot() throws Exception {
-    String boardType ="uno";
-    boolean uploadSketch = true;
+    
+    
     if (uploadSketch)
       uploadMRLComm(port, boardType);
+    
     boolean enableLoadTiming = false;
     // Runtime.create("gui", "GUIService");
     // initialize the logger 
@@ -99,7 +112,7 @@ public class ArduinoMotorPotTest implements SensorDataSink {
     // clip the output values from the pid control to a range between -1 and 1. 
     pid.setOutputRange(key, -1.0, 1.0);
     // This is the desired sample value from the potentiometer 512 = ~ 90 degrees
-    int desiredValue = 223;
+    int desiredValue = 512;
     pid.setSetpoint(key, desiredValue);
     pid.setSampleTime(key, 40);
     // Start the arduino and the feedback potentiometer polling
@@ -110,10 +123,17 @@ public class ArduinoMotorPotTest implements SensorDataSink {
     // Start the motor and attach it to the arduino.
     motor = (Motor)Runtime.createAndStart("motor", "Motor");
     motor.setType2Pwm(leftPwm, rightPwm);
-    motor.attach(arduino);
+    motor.attach((MotorController)arduino);
     // Sensor callback
-    arduino.analogReadPollingStart(potPin);
-    arduino.sensorAttach(this);
+    // arduino.analogReadPollingStart(potPin);
+    // arduino.sensorAttach(this);
+    
+    // pin zero sample rate 1.  (TODO: fix the concept of a sample rate!)
+    // we actually want it to be specified in Hz..  not cycles ...
+    AnalogPinSensor feedbackPot = new AnalogPinSensor(0,1);
+    feedbackPot.addSensorDataListener(this);
+    arduino.sensorAttach(feedbackPot);
+    
     if (enableLoadTiming) {
       arduino.setLoadTimingEnabled(true);
     }
@@ -125,22 +145,25 @@ public class ArduinoMotorPotTest implements SensorDataSink {
   }
 
   @Override
-  public void update(Object data) {
+  public void onSensorData(SensorData data) {
     // about we downsample this call?
-    // count++;
-    //if (count % rate == 0) {
+    count++;
+    
     log.info("Data: {}", data);
-    pid.setInput(key,(Integer)data);
+    pid.setInput(key,data.value);
     pid.compute(key);
     double output = pid.getOutput(key);
     log.info("Data {} , Output : {}", data, output);
-    if (Math.abs(pid.getSetpoint(key) - (Integer)data) > tolerance) {
+    if (Math.abs(pid.getSetpoint(key) - data.value) > tolerance) {
       // log.info("Setting pin mode as a test.");
      //  arduino.pinMode(6,0);
      // arduino.analogWrite(6, 0);
       //arduino.pinMode(address, mode);
       //arduino.digitalWrite(4, 0);
-      motor.move(output);
+      if (count % rate == 0) {
+        motor.invoke("move", output);
+      }
+      // motor.move(output);
       //motor.move(-1.0);
     } else {
       // we made it!
@@ -153,28 +176,22 @@ public class ArduinoMotorPotTest implements SensorDataSink {
   }
 
   @Override
-  public int getDataSinkType() {
-    // TODO Auto-generated method stub  TODO what is this ?
-    return 0;
-  }
-
-  @Override
   public String getName() {
-    // TODO Auto-generated method stub
+    // a symbolic name for this sensor.
     return "feedback";
   }
 
-  @Override
-  public int getSensorType() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
+//  @Override
+//  public int getSensorType() {
+//    // potentiometer feedback is an analog pin.
+//    return ArduinoMsgCodec.SENSOR_TYPE_ANALOG_PIN;
+//  }
 
-  @Override
-  public int[] getSensorConfig() {
-    // TODO Auto-generated method stub
-    return new int[]{potPin};
-  }
+//  @Override
+//  public int[] getSensorConfig() {
+//    // return the list of pins that are associated with this sensor.
+//    return new int[]{potPin};
+//  }
   
   
   /**

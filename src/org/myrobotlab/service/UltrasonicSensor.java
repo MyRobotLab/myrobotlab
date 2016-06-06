@@ -14,8 +14,11 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.RangeListener;
-import org.myrobotlab.service.interfaces.SensorDataSink;
+import org.myrobotlab.service.interfaces.SensorDataListener;
+import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.slf4j.Logger;
 
 /**
@@ -24,7 +27,7 @@ import org.slf4j.Logger;
  * connected to an android.
  *
  */
-public class UltrasonicSensor extends Service implements RangeListener, SensorDataSink {
+public class UltrasonicSensor extends Service implements RangeListener, SensorDataPublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -94,12 +97,12 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
   /**
    * method for the controller to get the data type we want
    */
-  @Override
-  public int getDataSinkType() {
-    // we want an Integer
-    // return Integer.class.getCanonicalName();
-    return DATA_SINK_TYPE_INTEGER;
-  }
+//  @Override
+//  public String getDataSinkType() {
+//    // we want an Integer
+//    // return Integer.class.getCanonicalName();
+//    return "INTEGER_SENSOR";
+//  }
 
   public int getEchoPin() {
     return echoPin;
@@ -183,8 +186,8 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
   }
 
   @Override
-  public int getSensorType() {
-    return SENSOR_TYPE_ULTRASONIC;
+  public String getSensorType() {
+    return "ULTRASONIC";
   }
 
   @Override
@@ -269,6 +272,42 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 
   public String getType() {
     return type;
+  }
+
+  @Override
+  public SensorData publishSensorData(SensorData data) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void addSensorDataListener(SensorDataListener listener) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void attach(Microcontroller controller) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void detach() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void start() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void stop() {
+    // TODO Auto-generated method stub
+    
   }
 
 }
