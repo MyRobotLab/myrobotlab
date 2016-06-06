@@ -29,14 +29,20 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.AdafruitIna219;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Mpu6050;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.interfaces.I2CControl;
 import org.slf4j.Logger;
 
 public class Mpu6050GUI extends ServiceGUI implements ActionListener {
@@ -44,6 +50,11 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(Mpu6050GUI.class.getCanonicalName());
 
+  String attach = "setController";
+	String detach = "unsetController";
+	JButton attachButton = new JButton(attach);
+
+	JComboBox<String> controller = new JComboBox<String>();
   JButton refresh = new JButton("refresh");
 
   JLabel accelX = new JLabel();
@@ -54,8 +65,11 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
   JLabel gyroY = new JLabel();
   JLabel gyroZ = new JLabel();
 
+  Mpu6050 myMpu6050 = null;
+  
   public Mpu6050GUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
+		myMpu6050 = (Mpu6050) Runtime.getService(boundServiceName);
   }
 
   @Override
@@ -64,25 +78,43 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
     if (o == refresh) {
       myService.send(boundServiceName, "getRaw");
     }
+		if (o == attachButton) {
+			if (attachButton.getText().equals(attach)) {
+				int index = controller.getSelectedIndex();
+				if (index != -1) {
+					myService.send(boundServiceName, attach, controller.getSelectedItem());
+				}
+			} else {
+				myService.send(boundServiceName, detach);
+			}
+		}
   }
 
   @Override
   public void attachGUI() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
+
     subscribe("publishState", "getState", Mpu6050.class);
     send("publishState");
   }
 
   @Override
   public void detachGUI() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
 
     unsubscribe("publishState", "getState", Mpu6050.class);
   }
 
   public void getState(Mpu6050 mpu6050) {
+  	
+		refreshControllers();
+		controller.setSelectedItem(mpu6050.getController());
+		if (mpu6050.isAttached()) {
+			attachButton.setText(detach);
+			controller.setEnabled(false);
+		} else {
+			attachButton.setText(attach);
+			controller.setEnabled(true);
+		}
+		
     accelX.setText(String.format("%.3f", mpu6050.accelGX));
     accelY.setText(String.format("%.3f", mpu6050.accelGY));
     accelZ.setText(String.format("%.3f", mpu6050.accelGZ));
@@ -103,9 +135,20 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
     display.setLayout(new GridBagLayout());
     GridBagConstraints c = new GridBagConstraints();
     c.ipadx = 0;
-
+    
     c.fill = GridBagConstraints.HORIZONTAL;
+    c.gridx = 1;
+    c.gridy = 0;
+		display.add(attachButton);
+		attachButton.addActionListener(this);	
+
+		c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 2;
+    c.gridy = 0;
+		display.add(controller);
+		
+    c.fill = GridBagConstraints.HORIZONTAL;
+    c.gridx = 3;
     c.gridy = 0;
     display.add(refresh, c);
     refresh.addActionListener(this);
@@ -215,7 +258,19 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
     c.gridy = 9;
     display.add(new JLabel(" degrees/s"), c);
 
-    display.repaint();
   }
+	public void refreshControllers() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
+				ArrayList<String> v = Runtime.getServiceNamesFromInterface(I2CControl.class);
+				controller.removeAllItems();
+				for (int i = 0; i < v.size(); ++i) {
+					controller.addItem(v.get(i));
+				}
+				controller.setSelectedItem(myMpu6050.getController());
+			}
+		});
+	}
 }

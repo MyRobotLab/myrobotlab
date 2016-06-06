@@ -91,7 +91,6 @@ public class AdafruitIna219GUI extends ServiceGUI implements ActionListener {
 	@Override
 	public void attachGUI() {
 		subscribe("publishState", "getState", AdafruitIna219.class);
-		myService.send(boundServiceName, "publishState");
 		send("publishState");
 	}
 

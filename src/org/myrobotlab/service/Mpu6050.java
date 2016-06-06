@@ -6,6 +6,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -679,13 +680,34 @@ public class Mpu6050 extends Service {
 
   public Mpu6050(String n) {
     super(n);
+    
+		ServiceInterface runtime = Runtime.createAndStart("runtime", "Runtime");
+		subscribe(runtime.getName(), "registered", this.getName(), "onRegistered");
   }
+	
+  public void onRegistered(ServiceInterface s) {
+		broadcastState();
 
+	}
+	
   @Override
   public void startService() {
     super.startService();
   }
+	/**
+	 * This methods sets the i2c Controller that will be used to communicate with
+	 * the i2c device
+	 */
+	// @Override
+	public boolean setController(String controllerName) {
+		return setController((I2CControl) Runtime.getService(controllerName));
+	}
 
+	/**
+	 * This methods sets the i2c Controller that will be used to communicate with
+	 * the i2c device
+	 */
+	
   public boolean setController(I2CControl controller) {
     if (controller == null) {
       error("setting null as controller");
@@ -719,7 +741,15 @@ public class Mpu6050 extends Service {
     deviceAddress = DeviceAddress;
     return true;
   }
+  
+	public I2CControl getController() {
+		return controller;
+	}
 
+	public boolean isAttached() {
+		return controller != null;
+	}
+	
   /**
    * This method reads all the 7 raw values in one go accelX accelY accelZ
    * temperature ( In degrees Celcius ) gyroX gyroY gyroZ
