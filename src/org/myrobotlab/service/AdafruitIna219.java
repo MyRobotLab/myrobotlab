@@ -7,6 +7,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 //import com.pi4j.io.i2c.I2CBus;
@@ -60,7 +61,24 @@ public class AdafruitIna219 extends Service {
 
 	public AdafruitIna219(String n) {
 		super(n);
-		// TODO Auto-generated constructor stub
+
+		ServiceInterface runtime = Runtime.createAndStart("runtime", "Runtime");
+		subscribe(runtime.getName(), "registered", this.getName(), "onRegistered");
+	}
+
+	public void onRegistered(ServiceInterface s) {
+		log.info(String.format("onRegistered %s", s.getName()));
+		broadcastState();
+
+	}
+
+	/**
+	 * This methods sets the i2c Controller that will be used to communicate with
+	 * the i2c device
+	 */
+	// @Override
+	public boolean setController(String controllerName) {
+		return setController((I2CControl) Runtime.getService(controllerName));
 	}
 
 	/**
@@ -76,16 +94,24 @@ public class AdafruitIna219 extends Service {
 		log.info(String.format("%s setController %s", getName(), controller.getName()));
 
 		this.controller = controller;
-		controller.createDevice(busAddress, deviceAddress, type);
 		broadcastState();
 		return true;
 	}
-	
+
 	public void unsetController() {
 		controller = null;
 
 		broadcastState();
 	}
+
+	public I2CControl getController() {
+		return controller;
+	}
+
+	public boolean isAttached() {
+		return controller != null;
+	}
+
 	/**
 	 * This method creates the i2c device
 	 */
@@ -172,7 +198,7 @@ public class AdafruitIna219 extends Service {
 		ServiceType meta = new ServiceType(AdafruitIna219.class.getCanonicalName());
 		meta.addDescription("Adafruit INA219 Voltage and Current sensor Service");
 		meta.addCategory("sensor");
-    meta.setSponsor("Mats");
+		meta.setSponsor("Mats");
 		return meta;
 	}
 
