@@ -14,7 +14,7 @@ angular.module('mrlapp.service.ServoGui', [])
     $scope.max = 180;
     $scope.angle = 0;
     
-    for (i = 2; i < 54; ++i) {
+    for (i = 0; i < 54; ++i) {
         $scope.pins.push(i);
     }
     
