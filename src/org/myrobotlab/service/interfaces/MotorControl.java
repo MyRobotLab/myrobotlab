@@ -27,14 +27,14 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.sensor.Encoder;
 
-public interface MotorControl extends SensorDataSink, NameProvider, MessageSubscriber {
+public interface MotorControl extends SensorDataPublisher, SensorDataListener, NameProvider, MessageSubscriber {
 
   /**
    * detaches the motor from the motor controller
    * 
    * @return
    */
-  public boolean detach();
+  public void detach();
 
   public String getName();
 

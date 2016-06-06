@@ -25,14 +25,35 @@
 
 package org.myrobotlab.service.interfaces;
 
-import java.util.ArrayList;
+import org.myrobotlab.service.data.SensorData;
 
-import org.myrobotlab.service.data.Pin;
-
+/** 
+* Sensor Data Publisher Interface:
+* not a service
+* e.g. UltrasonicSensor /AnalogPinSensor / DigitialPinSensor
+*/
 public interface SensorDataPublisher {
-
-  public ArrayList<Pin> getPinList();
-
-  public Pin publishPin(Pin p);
-
+  // when sensor is ready to publish data, this method is called to update sensor state with new raw data.
+  public void update(Object data);
+  // this is what gets invoked in mrl
+  public SensorData publishSensorData(SensorData data);
+  // this is to attach something that listens to the output of this sensor data.
+  public void addSensorDataListener(SensorDataListener listener);
+  // get a list of “Pin” objects associated with this sensor?
+  // public Pin publishPin(Pin p);
+  // replace this with the getPin ??  currently, sensorConfig is a list of pin numbers for MRLComm
+  public int[] getSensorConfig();
+  // TODO: Make this return an enum!!!
+  public String getSensorType();
+  // lifecycle interfaces for the sensor
+  // the name of the sensor
+  public String getName();
+  // hmm. Should take a microcontroller?
+  
+  // TODO: Perhaps the start/stop attach/detach should move to the micro controller interface?
+  public void attach(Microcontroller controller);
+  public void detach();
+  public void start();
+  public void stop();
 }
+

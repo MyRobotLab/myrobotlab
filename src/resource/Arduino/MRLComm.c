@@ -40,7 +40,9 @@
 #include <Wire.h>
 // Start of Adafruit16CServoDriver I2C import
 // version to match with MRL
-#define MRLCOMM_VERSION         34
+// TODO: this isn't ready for an official bump to mrl comm 35
+// when it's ready we can update ArduinoMsgCodec  (also need to see why it's not publishing "goodtimes" anymore.)
+#define MRLCOMM_VERSION         35
 
 // serial protocol functions
 #define MAGIC_NUMBER            170 // 10101010
@@ -180,8 +182,11 @@
 
 // ------ sensor types ------
 // refer to - org.myrobotlab.service.interfaces.SensorDataSink
+// TODO: fully flush these out. digita/analog pin etc..
+// there are multiple references to this.
+// if it's in here, it should be in the arduino msg codec...
 #define SENSOR_TYPE_PIN            0
-#define SENSOR_TYPE_ULTRASONIC       1
+#define SENSOR_TYPE_ULTRASONIC       4
 #define SENSOR_TYPE_PULSE          2
 
 #define CUSTOM_MSG            50
@@ -202,8 +207,10 @@
 // #define NUM_DIGITAL_PINS            20
 // #define NUM_ANALOG_INPUTS           6
 
-#define SENSORS_MAX  NUM_DIGITAL_PINS // this is max number of pins (analog included)
-// #define SENSORS_MAX  20 // TODO: Setting to value larger than 32 causes TX/RX errors in MRL. (Make sensor loop faster to fix.)
+// #define SENSORS_MAX  NUM_DIGITAL_PINS // this is max number of pins (analog included)
+// TODO: Setting to value larger than 32 causes TX/RX errors in MRL. (Make sensor loop faster to fix.)
+#define SENSORS_MAX  10
+
 #define DIGITAL_PIN_COUNT
 
 // ECHO FINITE STATE MACHINE
@@ -215,8 +222,8 @@
 #define ECHO_STATE_GOOD_RANGE 6
 #define ECHO_STATE_TIMEOUT  7
 
-#define SENSOR_TYPE_ANALOG_PIN_READER 0
-#define SENSOR_TYPE_DIGITAL_PIN_READER 3
+#define SENSOR_TYPE_ANALOG_PIN_READER 3
+#define SENSOR_TYPE_DIGITAL_PIN_READER 1
 
 // FIXME FIXME FIXME
 // -- FIXME - modified by board type BEGIN --
@@ -344,6 +351,7 @@ int paramCnt;
 void sendServoEvent(servo_type& s, int eventType);
 unsigned long getUltrasonicRange(pin_type& pin);
 void handleUltrasonicPing(pin_type& pin, unsigned long ts);
+void handlePulseType(pin_type& pin);
 // void sendMsg ( int num, ... );
 
 //---- data record definitions end -----
@@ -361,56 +369,54 @@ void handleUltrasonicPing(pin_type& pin, unsigned long ts);
 //  ++paramBuffIndex;
 //}
 
+// TODO: make me configurable at runtime...
 boolean debug = false;
 
 void setup() {
   // TODO: higher port speeds?
-  //Serial.begin(57600);        // connect to the serial port
+  // Serial.begin(57600);        // connect to the serial port
   Serial.begin(115200);        // connect to the serial port
   while (!Serial){};
   // TODO: do this before we start the serial port?
   softReset();
+  // wait for the serial port a bit extra..
+  Serial.flush();
+  delay(100);
   // publish version on startup so it's immediately available for mrl.
-  getVersion();
+  publishVersion();
+  // TODO: see if we can publish the board type (uno/mega?)
 }
 
 // This is the main loop that the arduino runs.
 void loop() {
 
-  if (debug)
-    publishDebug("Main");
-  // make sure we're still connected to the serial port.
-  //if (!Serial) {
-    // if we're disconnected, shutdown / reset
-//    resetFunc();
-//  }
-
   // increment how many times we've run
   ++loopCount;
+
+  publishDebug("Main" + String(loopCount));
+  // make sure we're still connected to the serial port.
+  //if (!Serial) {
+  // if we're disconnected, shutdown / reset
+  //    resetFunc();
+  //  }
   // get a command and process it from the serial port (if available.)
   if (getCommand()) {
-    if (debug)
-      publishDebug("GotCMD");
+    publishDebug("GotCMD");
     processCommand();
-    // ack that we got a command (should we ack it first? or after we process the command?)
-    sendCommandAck();
   }
-  if (debug)
-    publishDebug("ProcCMD");
+  publishDebug("ProcCMD");
   // update servo positions
   updateServos();
-  if (debug)
-    publishDebug("UpdateServos");
+  publishDebug("UpdateServos");
 
   // update analog sensor data stuffs
-  updateSensors();
-  if (debug)
-    publishDebug("UpdateSensors");
+  // updateSensors();
+  updateSensorsNew();
+  publishDebug("UpdateSensors");
 
   // update and report timing metrics
   updateStats();
-  if (debug)
-    publishDebug("UpdatedStat");
+  publishDebug("UpdatedStat");
   // Serial.flush();
 } // end of big loop
 
@@ -513,12 +519,12 @@ boolean getCommand() {
   // handle serial data begin
   int bytesAvailable = Serial.available();
   if (bytesAvailable > 0) {
+    publishDebug("RXBUFF:" + String(bytesAvailable));
     // now we should loop over the available bytes .. not just read one by one.
     for (int i = 0 ; i < bytesAvailable; i++) {
       // read the incoming byte:
       newByte = Serial.read();
-      if (debug)
-        publishDebug("BYTE");
+      publishDebug("RX:" + String(newByte));
       ++byteCount;
       // checking first byte - beginning of message?
       if (byteCount == 1 && newByte != MAGIC_NUMBER) {
@@ -561,13 +567,11 @@ void processCommand() {
     digitalWrite(ioCmd[1], ioCmd[2]);
     break;
   case ANALOG_WRITE:
-    if (debug)
-      publishDebug("AW");
-    //analogWrite(ioCmd[1], ioCmd[2]);
+    publishDebug("AW");
+    analogWrite(ioCmd[1], ioCmd[2]);
     break;
   case PIN_MODE:
-    if (debug)
-      publishDebug("PM");
+    publishDebug("PM");
     pinMode(ioCmd[1], ioCmd[2]);
     break;
   case SERVO_ATTACH:
@@ -670,6 +674,11 @@ void processCommand() {
     sendError(ERROR_UNKOWN_CMD);
     break;
   } // end switch
+
+  // ack that we got a command (should we ack it first? or after we process the command?)
+  sendCommandAck();
+
+
   // reset command buffer to be ready to receive the next command.
   memset(ioCmd, 0, sizeof(ioCmd));
   byteCount = 0;
@@ -710,33 +719,72 @@ void updateServos() {
   }
 }
 
+void updateSensorsNew() {
+  // TODO: publish data from pins that are publishing data.
+  publishDebug("NEW SENSORS");
+  for (int i = 0; i < SENSORS_MAX; i++) {
+    pin_type& pin = pins[i];
+    if (!pin.isActive) {
+      continue;
+    }
+    // TODO: test if it's digital or analog and do the right thing.
+    switch (pin.sensorType) {
+      case SENSOR_TYPE_ANALOG_PIN_READER:
+        pin.value = analogRead(pin.address);
+        // we need to publish the sensor type!
+        publishSensor(pin.sensorIndex, pin.sensorType, pin.address, pin.value);
+        break;
+      case SENSOR_TYPE_DIGITAL_PIN_READER:
+        pin.value = digitalRead(pin.address);
+        publishSensor(pin.sensorIndex, pin.sensorType, pin.address, pin.value);
+        break;
+      default:
+        // TODO: maybe publish debug?
+        publishDebug("UNKNOWN_SENSOR_TYPE");
+    }
+  }
+}
+
 // This function updates the sensor data (both analog and digital reading here.)
 void updateSensors() {
   unsigned long ts;
-
-  for (int i = 0; i < SENSORS_MAX; ++i) {
+  for (int i = 0; i < SENSORS_MAX; i++) {
     pin_type& pin = pins[i];
-    if (pin.isActive != true) {
-      // only process the pin if it's active.
-      //publishDebug("PNA");
+    if (!pin.isActive) {
       continue;
     }
-    // publishDebug("USL");
-    // continue;
-
+    publishDebug("INDX:" + String(i) + " ADDR:" + String(pin.address));
     switch (pin.sensorType) {
       case SENSOR_TYPE_ANALOG_PIN_READER:
-        if (debug)
-          publishDebug("AREAD");
+        publishDebug("AR1" + String(pin.address));
         pin.value = analogRead(pin.address);
-        publishSensorData(pin.sensorIndex, pin.address, pin.value);
+        // pin.value = analogRead(pin.address);
+        publishDebug("AR2:" + String(pin.sensorIndex));
+        publishDebug("AR3:" + String(pin.address));
+        publishDebug("AR4:" + String(pin.value));
+        publishSensor(pin.sensorIndex, pin.sensorType, pin.address, pin.value);
+        //Serial.flush();
+        //Serial.write(MAGIC_NUMBER);
+        //Serial.write(5); // size
+        //Serial.write(PUBLISH_SENSOR_DATA);
+        //Serial.write((byte)pin.sensorIndex);
+        //Serial.write((byte)14);
+        //Serial.write((byte)0);
+        //Serial.write((byte)123);
+        //Serial.write(sensorIndex);
+        //Serial.write(address);
+       // Serial.write(value >> 8);   // MSB
+        //Serial.write(value & 0xff); // LSB
+        Serial.flush();
+        publishDebug("AR5:" + String(pin.address));
         break;
       case SENSOR_TYPE_DIGITAL_PIN_READER:
-        if (debug)
-          publishDebug("DREAD");
+        publishDebug("DR1");
         // read the pin
         pin.value = digitalRead(pin.address);
-        publishSensorData(pin.sensorIndex, pin.address, pin.value);
+        publishDebug("DR2");
+        publishSensor(pin.sensorIndex, pin.sensorType, pin.address, pin.value);
+        publishDebug("DR3");
         break;
         // if my value is different from last time - send it
         // if (pin.lastValue != pin.value || !pin.s) //TODO - SEND_DELTA_MIN_DIFF
@@ -749,59 +797,36 @@ void updateSensors() {
         // publishDebug("PUBDONE");
 
       case SENSOR_TYPE_ULTRASONIC:
-        if (debug)
-          publishDebug("USTYPE");
+        publishDebug("US1");
         // FIXME - handle in own function - the overhead is worth not having
         // 200+ lines of code inlined here !
         // we are running & have an ultrasonic (ping) pin
         // check to see what state we  are in
         handleUltrasonicPing(pin, ts);
+        publishDebug("US2");
         break;
       // because pin pulse & pulsing are so closely linked
       // the pulse will be handled here as well even if the
       // read data sent back on serial is disabled
       case SENSOR_TYPE_PULSE:
-        if (debug)
-          publishDebug("PULSETYPE");
+        publishDebug("PT1");
         // TODO - implement - rate = modulo speed
         // if (loopCount%rate == 0) {
         // toggle pin state
-        pin.lastValue = (pin.lastValue == 0) ? 1 : 0;
-        // leading edge ... 0 to 1
-        if (pin.lastValue == 1) {
-          pin.count++;
-          if (pin.count >= pin.target) {
-            pin.state = PUBLISH_PULSE_STOP;
-          }
-        }
-        // change state of pin
-        digitalWrite(pin.address, pin.lastValue);
-        // move counter/current position
-        // see if feedback rate is valid
-        // if time to send feedback do it
-        // if (loopCount%feedbackRate == 0)
-        // 0--to-->1 counting leading edge only
-        // pin.method == PUBLISH_PULSE_PIN &&
-        // stopped on the leading edge
-        if (pin.state != PUBLISH_PULSE_STOP && pin.lastValue == 1) {
-          publishPulseStop(pin.state, pin.sensorIndex, pin.address, pin.count);
-          // deactivate
-          // lastDebounceTime[digitalReadPin[i]] = millis();
-        }
-        if (pin.state == PUBLISH_PULSE_STOP) {
-          pin.isActive = false;
-        }
-        // publish the pulse!
-        publishPulse(pin.state, pin.sensorIndex, pin.address, pin.count);
+        handlePulseType(pin);
+        publishDebug("PT2");
         break;
       default:
-        if (debug)
-          publishDebug("UNKNTYPE");
+        publishDebug("UNK1");
         sendError(ERROR_UNKOWN_SENSOR);
+        publishDebug("UNK2");
         break;
     }
+    //publishDebug("SPD " + String(i));
   } // end for each pin
+  publishDebug("USDONE");
 }
+
 
 // This function updates how long it took to run this loop
 // and reports it back to the serial port if desired.
@@ -981,6 +1006,7 @@ void setPWMFrequency(int address, int prescalar) {
 void analogReadPollingStart() {
   int pinIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
   pin_type& pin = pins[pinIndex];
+  // TODO: remove this method and only use sensorAttach ..
   pin.sensorIndex = 0; // FORCE ARDUINO TO BE OUR SERVICE - DUNNO IF THIS IS GOOD/BAD
   pin.sensorType = SENSOR_TYPE_ANALOG_PIN_READER; // WIERD - mushing of roles/responsibilities
   pin.isActive = true;
@@ -1091,12 +1117,14 @@ void sensorAttach() {
   int sensorType     = ioCmd[2];
   int pinCount       = ioCmd[3];
   // for loop grabbing all pins for this sensor
-  for (int ordinal = 0; ordinal < pinCount; ++ordinal){
+  for (int ordinal = 0; ordinal < pinCount; ordinal++){
     // grab the pin - assign the sensorIndex & sensorType
-    pin_type& pin = pins[ioCmd[4 + ordinal]];
+    publishDebug("WHICH:" + String(ioCmd[4 + ordinal]));
+    pin_type& pin = pins[sensorIndex];
     pin.sensorIndex = sensorIndex;
     pin.sensorType = sensorType;
     if (pin.sensorType == SENSOR_TYPE_ULTRASONIC && ordinal == 0) {
+      publishDebug("ULTRAS");
       // pin.trigPin = ioCmd[3];
       // pin.echoPin = ioCmd[4];
       pinMode(pin.trigPin, OUTPUT); // WTF about wiring which has single pin ! :P
@@ -1105,7 +1133,17 @@ void sensorAttach() {
       // triggerPin's next pin is the echo pin
       pin.nextPin = ioCmd[5 + ordinal];
     } else if (pin.sensorType == SENSOR_TYPE_PULSE) {
+      publishDebug("PULSETYP");
       pin.address = ioCmd[3];
+    } else if (pin.sensorType == SENSOR_TYPE_PIN) {
+      // TODO: ?!
+      publishDebug("PINTYPE:" + String(ioCmd[1]) + " " + String(ioCmd[2]) + " " + String(ioCmd[3]) + " " + String(ioCmd[4]));
+      pin.address = ioCmd[4];
+      pin.isActive = true;
+      // we're reading form this pin now.
+      pinMode(pin.address, INPUT);
+    } else {
+      publishDebug("UNKNTYPE" + String(pin.sensorType));
     }
   }
   publishDebug("ESAM");
@@ -1166,6 +1204,37 @@ void afSetPWM() {
 // AF_SET_SERVO
 void afSetServo() {
   setPWM(ioCmd[1], ioCmd[2], 0, (ioCmd[3] << 8) + ioCmd[4]);
+}
+
+void handlePulseType(pin_type& pin) {
+  pin.lastValue = (pin.lastValue == 0) ? 1 : 0;
+  // leading edge ... 0 to 1
+  if (pin.lastValue == 1) {
+    pin.count++;
+    if (pin.count >= pin.target) {
+      pin.state = PUBLISH_PULSE_STOP;
+    }
+  }
+  // change state of pin
+  digitalWrite(pin.address, pin.lastValue);
+  // move counter/current position
+  // see if feedback rate is valid
+  // if time to send feedback do it
+  // if (loopCount%feedbackRate == 0)
+  // 0--to-->1 counting leading edge only
+  // pin.method == PUBLISH_PULSE_PIN &&
+  // stopped on the leading edge
+  if (pin.state != PUBLISH_PULSE_STOP && pin.lastValue == 1) {
+    publishPulseStop(pin.state, pin.sensorIndex, pin.address, pin.count);
+    // deactivate
+    // lastDebounceTime[digitalReadPin[i]] = millis();
+  }
+  if (pin.state == PUBLISH_PULSE_STOP) {
+    pin.isActive = false;
+  }
+  // publish the pulse!
+  publishPulse(pin.state, pin.sensorIndex, pin.address, pin.count);
+
 }
 
 
@@ -1275,17 +1344,17 @@ void publishVersion() {
 }
 
 // PUBLISH_SENSOR_DATA
-void publishSensorData(int sensorIndex, int address, int value) {
-
-
+void publishSensor(int sensorIndex, int sensorType, int address, int value) {
+  Serial.flush();
   Serial.write(MAGIC_NUMBER);
-  Serial.write(5); //size
+  Serial.write(6); //size
   Serial.write(PUBLISH_SENSOR_DATA);
   Serial.write(sensorIndex);
+  Serial.write(sensorType);
   Serial.write(address);
   Serial.write(value >> 8);   // MSB
   Serial.write(value & 0xff); // LSB
-
+  Serial.flush();
 }
 
 // TODO: maybe this can be merged with above?
@@ -1340,9 +1409,10 @@ void publishLoadTimingEvent(unsigned long loadTime) {
 
 void sendCommandAck() {
   Serial.write(MAGIC_NUMBER);
-  Serial.write(1); // size 1 FN + 0 bytes
+  Serial.write(2); // size 1 FN + 1 bytes (the function that we're acking.)
   Serial.write(PUBLISH_MESSAGE_ACK);
-  // keep this synchronous
+  // the function that we're ack-ing
+  Serial.write(ioCmd[0]);
   Serial.flush();
 }
 
@@ -1353,10 +1423,12 @@ void sendCommandAck() {
 // it seems to be getting a null string passed in as "message"
 // very very very very very odd..  I suspect a bug in the arduino hard/software
 void publishDebug(String message) {
-  //Serial.flush();
-  Serial.write(MAGIC_NUMBER);
-  Serial.write(1+message.length());
-  Serial.write(PUBLISH_DEBUG);
-  Serial.print(message);
-  Serial.flush();
+  if (debug) {
+    Serial.flush();
+    Serial.write(MAGIC_NUMBER);
+    Serial.write(1+message.length());
+    Serial.write(PUBLISH_DEBUG);
+    Serial.print(message);
+    Serial.flush();
+  }
 }

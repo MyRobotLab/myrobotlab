@@ -61,14 +61,16 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.sensor.AnalogPinSensor;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.CustomMsgListener;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
-import org.myrobotlab.service.interfaces.SensorDataSink;
+import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -142,7 +144,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class Arduino extends Service implements I2CControl, SensorDataPublisher, SerialDataListener, ServoController, MotorController, SensorDataSink {
+public class Arduino extends Service implements Microcontroller, I2CControl, SerialDataListener, ServoController, MotorController {
 
   /**
    * MotorData is the combination of a Motor and any controller data needed to
@@ -295,8 +297,8 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
    * Used for callbacks
    *
    */
-  public static class SensorData {
-    public SensorData(Integer index, SensorDataSink sensor) {
+  public static class SensorMRLCommMap {
+    public SensorMRLCommMap(Integer index, SensorDataPublisher sensor) {
       this.index = index;
       this.sensor = sensor;
     }
@@ -304,7 +306,7 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
     /**
      * the sensor
      */
-    transient public SensorDataSink sensor;
+    transient public SensorDataPublisher sensor;
 
     /**
      * index of the sensor on the MRLComm.ino side
@@ -316,11 +318,11 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
    * sensors - name index of sensor we need 2 indexes for sensors because they
    * will be referenced by name OR by index
    */
-  HashMap<String, SensorData> sensors = new HashMap<String, SensorData>();
+  HashMap<String, SensorMRLCommMap> sensors = new HashMap<String, SensorMRLCommMap>();
   /**
    * index reference of sensor
    */
-  HashMap<Integer, SensorData> indexToSensor = new HashMap<Integer, SensorData>();
+  HashMap<Integer, SensorMRLCommMap> indexToSensor = new HashMap<Integer, SensorMRLCommMap>();
 
   /**
    * Serial service - the Arduino's serial connection
@@ -357,7 +359,8 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
     String mrlcomm = FileIO.resourceToString("Arduino/MRLComm.c");
     setSketch(new Sketch("MRLComm", mrlcomm));
     // add self as Pin Array Sensor Listener
-    sensorAttach(this);
+    // I don't like this..
+    // sensorAttach(this);
   }
 
   public void addCustomMsgListener(CustomMsgListener service) {
@@ -376,11 +379,29 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
     // sendMsg(SENSOR_ATTACH, pin, );
     // sensorAttachPin = pin;
     // sensorAttach(this);
-
-    sendMsg(ANALOG_READ_POLLING_START, pin, (sampleRate >> 8) & 0xff, sampleRate & 0xff);
+    
+    // TODO: the pin should be the pin number on the arduino.
+    // instead if it's an analog pin, we need to subtract some number depending if it's
+    // an uno or a mega.. etc.. very very bad.
+    int actualPin = fixPinOffset(pin);
+    // create an analog pin sensor and attach it to the arduino controller.
+    AnalogPinSensor s = new AnalogPinSensor(actualPin, sampleRate);
+    sensorAttach(s);
+    // send read polling start!  (but actually. attaching the sensor should probably already do this.
+    sendMsg(ANALOG_READ_POLLING_START, actualPin, (sampleRate >> 8) & 0xff, sampleRate & 0xff);
   }
 
-  public void analogReadPollingStart(Integer pin) {
+  private int fixPinOffset(Integer pin) {
+    int actualPin = 0;
+    if (board.toLowerCase().contains("mega")) {
+      actualPin = pin - 53;
+    } else {
+      actualPin = pin - 14;
+    }
+    return actualPin;
+  }
+
+  public void analogReadPollingStart(int pin) {
     analogReadPollingStart(pin, 1);
   }
 
@@ -389,11 +410,14 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
    * 
    * @param pin
    */
-  public void analogReadPollingStop(Integer pin) {
-    sendMsg(ANALOG_READ_POLLING_STOP, pin);
+  public void analogReadPollingStop(int pin) {
+    int actualPin = fixPinOffset(pin);
+    // TODO: look up which sensor it is. and tell tell the sensor to stop  instead.
+    // that should call a sensor.stop on the controller maybe?! 
+    sendMsg(ANALOG_READ_POLLING_STOP, actualPin);
   }
 
-  public void analogWrite(Integer address, Integer value) {
+  public void analogWrite(int address, int value) {
     log.info(String.format("analogWrite(%d,%d) to %s", address, value, serial.getName()));
     // FIXME
     // if (pin.mode == INPUT) {sendMsg(PIN_MODE, OUTPUT)}
@@ -482,7 +506,7 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
    * 
    * @param pin
    */
-  public void digitalReadPollingStart(Integer pin) {
+  public void digitalReadPollingStart(int pin) throws IOException {
     digitalReadPollingStart(pin, 1);
   }
 
@@ -496,11 +520,11 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
    * 
    * @param pin
    */
-  public void digitalReadPollingStop(Integer pin) {
+  public void digitalReadPollingStop(int pin) {
     sendMsg(DIGITAL_READ_POLLING_STOP, pin);
   }
 
-  public void digitalWrite(Integer address, Integer value) {
+  public void digitalWrite(int address, int value) {
     info("digitalWrite (%d,%d) to %s", address, value, serial.getName());
     sendMsg(DIGITAL_WRITE, address, value);
     pinList.get(address).value = value;
@@ -755,9 +779,6 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
   @Override
   public Integer onByte(Integer newByte) {
     try {
-      if (log.isDebugEnabled()) {
-        log.debug("onByte {}", newByte);
-      }
       /**
        * Archtype InputStream read - rxtxLib does not have this straightforward
        * design, but the details of how it behaves is is handled in the Serial
@@ -769,11 +790,16 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
        */
       // TODO: consider reading more than 1 byte at a time ,and make this
       // callback onBytes or something like that.
+
       ++byteCount;
+      if (log.isDebugEnabled()) {
+        log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
+      }
       if (byteCount == 1) {
         if (newByte != MAGIC_NUMBER) {
           byteCount = 0;
           msgSize = 0;
+          Arrays.fill(msg, MAGIC_NUMBER);
           warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++error_arduino_to_mrl_rx_cnt));
           // dump.setLength(0);
         }
@@ -794,6 +820,10 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
         // dump.append(String.format("|P%d %d", byteCount,
         // newByte));
         msg[byteCount - 3] = (byte) newByte.intValue();
+      } else {
+        // the case where byteCount is negative?! not got.
+        error(String.format("Arduino->MRL error %d rx negsz errors", ++error_arduino_to_mrl_rx_cnt));
+        return newByte;
       }
       if (byteCount == 2 + msgSize) {
         // we've received a full message
@@ -811,6 +841,7 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
     } catch (Exception e) {
       ++error_mrl_to_arduino_rx_cnt;
       error("msg structure violation %d", error_mrl_to_arduino_rx_cnt);
+      log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(msg, byteCount));
       // try again (clean up memory buffer)
       msgSize = 0;
       byteCount = 0;
@@ -825,7 +856,7 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
 
     // MSG CONTENTS = FN | D0 | D1 | ...
     int function = message[0];
-    log.info("Process Message Called: {}", ArduinoMsgCodec.functionToString(function));
+    //log.info("Process Message Called: {}", ArduinoMsgCodec.functionToString(function));
     //    if (log.isDebugEnabled()) {
     //      log.debug("Process Message Called: {}", ArduinoMsgCodec.functionToString(function));
     //    }
@@ -874,16 +905,33 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
       case PUBLISH_SENSOR_DATA: {
         // get the sensor callback index
         int sensorIndex = (int) message[1];
+        int sensorType = (int) message[2];
         // get the sensor
-        SensorData sensorData = indexToSensor.get(sensorIndex);
+        SensorMRLCommMap sensorData = indexToSensor.get(sensorIndex);
         if (sensorData == null) {
           // uh oh?  bad data form somewhere?
           log.warn("Unknown sensor data received...");
         } else {
-          SensorDataSink sensor = sensorData.sensor;
+          SensorDataPublisher sensor = sensorData.sensor;
           // find its needed datatype
           Object data = resolveSensorData(sensor, message);
-          sensor.update(data);
+          // we're loopback i guess
+//          if (sensor.getSensorType() == SensorDataSink.SENSOR_TYPE_PIN) {
+//            // TODO: what's the proper type for analog/digitla.
+            
+//            if (sensor.getSensorType() == ArduinoMsgCodec.SENSOR_TYPE_ANALOG_PIN) {
+//              type = 0; 
+//            }
+          
+          if (data instanceof Pin) {
+            // Pin p = new Pin((Pin, 0, ((Pin)data).value, sensor.getName());
+            ((Pin)data).type = sensorType;
+            invoke("publishPin", (Pin)data);
+          }
+        //  }
+         // if (sensor.getSensorConfig() != null && sensor.getSensorConfig().length > 0) {
+            sensor.update(data);
+         // }
         }
         break;
       } // PUBLISH_SENSOR_DATA
@@ -901,7 +949,7 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
       case PUBLISH_PULSE_STOP: {
         int index = (int) message[1];
         // FIXME - assumption its a encoder pin on a Motor NO !!!
-        SensorDataSink sensor = indexToSensor.get(index).sensor;
+        SensorDataPublisher sensor = indexToSensor.get(index).sensor;
         Integer data = Serial.bytesToInt(message, 2, 4);
         sensor.update(data);
         break;
@@ -913,7 +961,7 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
         break;
       }
       case PUBLISH_MESSAGE_ACK: {
-        // log.info("Message Ack received.");
+        log.info("Message Ack received: {}", ArduinoMsgCodec.functionToString(message[1]));
         ackRecieved = true;
 
         numAck++;
@@ -980,25 +1028,27 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
     return params;
   }
 
-  private Object resolveSensorData(SensorDataSink sensor, int[] message) {
-    int clazz = sensor.getDataSinkType();
+  private Object resolveSensorData(SensorDataPublisher sensor, int[] message) {
+    String sensorType = sensor.getSensorType();
     Object data = null;
     // convert all return types from
     // asynchronous callbacks of sensors
-    switch (clazz) {
-      case DATA_SINK_TYPE_INTEGER: {
+    switch (sensorType) {
+      case "INTEGER_SENSOR": {
         data = Serial.bytesToInt(message, 3, 2); // 16 bit - 2 byte
         // int
       }
       break;
-      case DATA_SINK_TYPE_PIN: {
+      case "ANALOG_PIN":
+      case "DIGITAL_PIN": {
         Pin pin = pinList.get(message[2]);
-        pin.value = ((message[3] & 0xFF) << 8) + (message[4] & 0xFF);
+        pin.type = message[3];
+        pin.value = ((message[4] & 0xFF) << 8) + (message[5] & 0xFF);
         data = pin;
       }
       break;
       default: {
-        error("unknown return type %d", clazz);
+        error("unknown return type %s", sensorType);
       }
       break;
     }
@@ -1060,8 +1110,9 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
    * Arduino board the Arduino must be told to poll the desired pin(s). This is
    * done with a analogReadPollingStart(pin) or digitalReadPollingStart()
    */
-  @Override
+
   public Pin publishPin(Pin p) {
+    // TODO: this is being replaced with PublishSensorData !
     // log.info("Publish Pin: {}", p);
     pinList.get(p.pin).value = p.value;
     return p;
@@ -1144,7 +1195,7 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
    * sendMsg(byte[]...data)
    */
   public synchronized void sendMsg(int function, int... params) {
-    log.info("Sending Message  : {}", ArduinoMsgCodec.functionToString(function));
+    // log.info("Sending Message  : {}", ArduinoMsgCodec.functionToString(function));
     //    if (log.isDebugEnabled()) {
     //      log.debug("Sending Arduino message funciton {}", ArduinoMsgCodec.functionToString(function));
     //    }
@@ -1184,7 +1235,7 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
       // TODO: wait for an ack of the message to arrive!
       long start = System.currentTimeMillis();
       // wait a max of 100 for the ack.
-      int limit = 1000;
+      int limit = 2000;
       // log.info("Waiting on ack. {}", function);
       while (!ackRecieved) {
         // TODO: Avoid excessive cpu usage, and limit the amount of time we wait on this "ackRecieved" 
@@ -1195,9 +1246,13 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
         Thread.sleep(1);
         // log.info("Waiting on ack {}", numAck);
         long delta = System.currentTimeMillis() - start;
+        // timeout waiting for the ack.
         if (delta > limit) {
           // log.warn(, limit, function);
-          warn(String.format("No ack received.. timing out after %d ms and continuing for function %s", limit, ArduinoMsgCodec.functionToString(function)));
+          // warn(String.format("No ack received.. timing out after %d ms and continuing for function %s", limit, ArduinoMsgCodec.functionToString(function)));
+          // ackRecieved = true;
+          // Try again!
+          // sendMsg(function, params);
           // eek?
           // ackRecieved = false;
           break;
@@ -1206,9 +1261,7 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
       }      
 
       //if (log.isDebugEnabled()) {
-      if (ackRecieved) {
-        log.info("Arduino responded: {} {}", ArduinoMsgCodec.functionToString(function), numAck);
-      } else {
+      if (!ackRecieved) {
         log.info("Ack not received : {} {}", ArduinoMsgCodec.functionToString(function), numAck);        
       }
       //}
@@ -1226,7 +1279,7 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
   }
 
   // FIXME !! - implement sensorDetach !!!
-  public synchronized boolean sensorAttach(SensorDataSink sensor) {
+  public synchronized boolean sensorAttach(SensorDataPublisher sensor) {
     String sensorName = sensor.getName();
     log.info(String.format("%s/sensorAttach/%s", getName(), sensorName));
 
@@ -1249,15 +1302,19 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
     int[] payload = new int[config.length + 3];
 
     payload[0] = sensorIndex;
-    payload[1] = sensor.getSensorType();
+    String sensorType = sensor.getSensorType();
+    if ("ANALOG_PIN".equals(sensorType)) {
+      payload[1] = 3; 
+    } else {
+      // digital?
+      payload[1] = 1;
+    }
     payload[2] = config.length;
     for (int i = 0; i < config.length; ++i) {
       payload[i + 3] = config[i];
     }
-
     // SENSOR_ATTACH Format
     // SENSOR_ATTACH | sensorIndex | sensorType | pinCount | pins ...
-
     log.info(String.format("sensor index %d type %d config %s", payload[0], payload[1], Arrays.toString(config)));
 
     // FIXME - interface should have - requiresConnection to attach vs if
@@ -1272,12 +1329,13 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
     // sendMsg(SENSOR_ATTACH, index, sensor.getSensorType(),
     // sensor.getTriggerPin(), sensor.getEchoPin());
 
-    SensorData sd = new SensorData(sensorIndex, sensor);
+    SensorMRLCommMap sd = new SensorMRLCommMap(sensorIndex, sensor);
 
     sensors.put(sensorName, sd);
     indexToSensor.put(sensorIndex, sd);
 
-    info(String.format("sensor index %d type %d config payload %s ", sensorIndex, sensor.getSensorType(), Arrays.toString(payload)));
+    info(String.format("sensor index %d type %s config payload %s ", sensorIndex, sensor.getSensorType(), Arrays.toString(payload)));
+    //log.info("sensor index {} type {} config payload {}", sensorIndex, sensor.getSensorType(), Arrays.toString(payload));
 
     return true;
   }
@@ -1664,26 +1722,10 @@ public class Arduino extends Service implements I2CControl, SensorDataPublisher,
     disconnect();
   }
 
-  @Override
-  public void update(Object data) {
-    invoke("publishPin", data);
-  }
-
-  @Override
-  public int getDataSinkType() {
-    return DATA_SINK_TYPE_PIN;
-  }
-
-  @Override
-  public int getSensorType() {
-    return SENSOR_TYPE_PIN;
-  }
-
-  @Override
-  public int[] getSensorConfig() {
-    // is a Pin sensor
-    return new int[] {};
-  }
+//  @Override
+//  public void update(Object data) {
+//    invoke("publishPin", data);
+//  }
 
   /**
    * This static method returns all the details of the class without it having

@@ -197,6 +197,11 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
           b.append(",");
       }
       log.info("Sending Int Array: {}", b);
+      // a log file of all the mrl comm messages sent. (one per line.)
+      //      FileOutputStream fos = new FileOutputStream(new File("c:\\Python27\\playback.run.log"),true);
+      //      b.append("\n");
+      //      fos.write(b.toString().getBytes());
+      //      fos.close();
     }
     
     port.writeIntArray(data);

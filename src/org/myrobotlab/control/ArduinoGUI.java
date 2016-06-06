@@ -726,7 +726,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
       @Override
       public void run() {
 
-        // log.info(String.format("%s",pin.toString()));
+        log.info("PinData:{}",pin);
 
         if (!traceData.containsKey(pin.pin)) {
           TraceData td = new TraceData();

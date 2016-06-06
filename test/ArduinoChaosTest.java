@@ -33,12 +33,10 @@ public class ArduinoChaosTest {
     boolean testMotor = true;
     boolean testServo = true;
     boolean startAnalogPolling = true;
-
     if (startAnalogPolling) {
       arduino.analogReadPollingStart(potPin);
     }
-    arduino.setLoadTimingEnabled(true);
-
+    arduino.setLoadTimingEnabled(false);
     Motor motor = (Motor)Runtime.createAndStart("motor", "Motor");
     motor.setType2Pwm(leftPwm, rightPwm);
     // motor.attach(arduino);

@@ -202,6 +202,12 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
   // {publishDebug} a debug string returned from the arduino.
   public final static int PUBLISH_DEBUG = 126;
 
+  // Sensor Types:
+  public final static int SENSOR_TYPE_DIGITAL_PIN = 1;
+  public final static int SENSOR_TYPE_ANALOG_PIN  = 3;
+  
+  
+  
   static {
     byteToMethod.put(PUBLISH_MRLCOMM_ERROR, "publishMRLCommError");
     methodToByte.put("publishMRLCommError", PUBLISH_MRLCOMM_ERROR);
