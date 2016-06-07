@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.util.ArrayList;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -46,6 +48,10 @@ public class AdafruitIna219 extends Service {
 	public int scaleRange = 32; // 32V = bus full-scale range
 	public int pga = 8; // 320 mV = shunt full-scale range
 
+	public ArrayList<String> controllers;
+	public String controllerName;
+	private boolean isAttached = false;
+
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -67,9 +73,14 @@ public class AdafruitIna219 extends Service {
 	}
 
 	public void onRegistered(ServiceInterface s) {
-		log.info(String.format("onRegistered %s", s.getName()));
+		refreshControllers();
 		broadcastState();
 
+	}
+
+	public ArrayList<String> refreshControllers() {
+		controllers = Runtime.getServiceNamesFromInterface(I2CControl.class);
+		return controllers;
 	}
 
 	/**
@@ -90,21 +101,36 @@ public class AdafruitIna219 extends Service {
 			error("setting null as controller");
 			return false;
 		}
-
-		log.info(String.format("%s setController %s", getName(), controller.getName()));
-
+		controllerName = controller.getName();
 		this.controller = controller;
+		isAttached = true;
+
+		log.info(String.format("%s setController %s", getName(), controllerName));
+		
 		broadcastState();
 		return true;
 	}
 
 	public void unsetController() {
 		controller = null;
+		controllerName = null;
+		isAttached = false;
 		broadcastState();
 	}
 
 	public I2CControl getController() {
 		return controller;
+	}
+
+	public String getControllerName() {
+
+		String controlerName = null;
+
+		if (controller != null) {
+			controlerName = controller.getName();
+		}
+
+		return controlerName;
 	}
 
 	public boolean isAttached() {

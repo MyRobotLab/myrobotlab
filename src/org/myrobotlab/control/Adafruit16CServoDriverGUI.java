@@ -40,7 +40,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Adafruit16CServoDriver;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.I2CControl;
 import org.slf4j.Logger;
 
 public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListener {
@@ -102,8 +101,6 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 			public void run() {
 				removeListeners();
 				refreshControllers();
-				log.info(String.format("driver.getControllerName() %s", driver.getControllerName()));
-				log.info(String.format("driver.isAttached() %s", driver.isAttached()));
 				controller.setSelectedItem(driver.getControllerName());
 				if (driver.isAttached()) {
 					attachButton.setText(detach);
@@ -142,15 +139,7 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				/* Old method, 
-				ArrayList<String> v = Runtime.getServiceNamesFromInterface(I2CControl.class);
-				controller.removeAllItems();
-				for (int i = 0; i < v.size(); ++i) {
-					controller.addItem(v.get(i));
-				}
-				controller.setSelectedItem(myAdafruit16CServoDriver.getController());
-				*/
-				// New method 
+
 				ArrayList<String> v = myAdafruit16CServoDriver.refreshControllers();
 				controller.removeAllItems();
 				for (int i = 0; i < v.size(); ++i) {

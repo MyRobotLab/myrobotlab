@@ -122,7 +122,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	}
 
 	public void onRegistered(ServiceInterface s) {
-		log.info(String.format("onRegistered %s", s.getName()));
+		refreshControllers();
 		broadcastState();
 
 	}
