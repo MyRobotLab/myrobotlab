@@ -41,7 +41,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.AdafruitIna219;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.I2CControl;
 import org.slf4j.Logger;
 
 public class AdafruitIna219GUI extends ServiceGUI implements ActionListener {
@@ -106,9 +105,11 @@ public class AdafruitIna219GUI extends ServiceGUI implements ActionListener {
 		if (ina219.isAttached()) {
 			attachButton.setText(detach);
 			controller.setEnabled(false);
+			refresh.setEnabled(true);
 		} else {
 			attachButton.setText(attach);
 			controller.setEnabled(true);
+			refresh.setEnabled(false);
 		}
 		busVoltage.setText(String.format("%s", ina219.busVoltage));
 		shuntVoltage.setText(String.format("%s", ina219.shuntVoltage));
@@ -123,8 +124,8 @@ public class AdafruitIna219GUI extends ServiceGUI implements ActionListener {
 
 		display.setLayout(new BorderLayout());
 		JPanel north = new JPanel();
-		north.add(attachButton);
 		north.add(controller);
+		north.add(attachButton);
 		north.add(refresh);
 		attachButton.addActionListener(this);	
 		refresh.addActionListener(this);
@@ -155,12 +156,12 @@ public class AdafruitIna219GUI extends ServiceGUI implements ActionListener {
 			@Override
 			public void run() {
 
-				ArrayList<String> v = Runtime.getServiceNamesFromInterface(I2CControl.class);
+				ArrayList<String> v = myAdafruitIna219.refreshControllers();
 				controller.removeAllItems();
 				for (int i = 0; i < v.size(); ++i) {
 					controller.addItem(v.get(i));
 				}
-				controller.setSelectedItem(myAdafruitIna219.getController());
+				controller.setSelectedItem(myAdafruitIna219.getControllerName());
 			}
 		});
 	}
