@@ -104,7 +104,7 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 				refreshControllers();
 				log.info(String.format("driver.getControllerName() %s", driver.getControllerName()));
 				log.info(String.format("driver.isAttached() %s", driver.isAttached()));
-				controller.setSelectedItem(driver.getController());
+				controller.setSelectedItem(driver.getControllerName());
 				if (driver.isAttached()) {
 					attachButton.setText(detach);
 					controller.setEnabled(false);
@@ -142,13 +142,21 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-
+				/* Old method, 
 				ArrayList<String> v = Runtime.getServiceNamesFromInterface(I2CControl.class);
 				controller.removeAllItems();
 				for (int i = 0; i < v.size(); ++i) {
 					controller.addItem(v.get(i));
 				}
 				controller.setSelectedItem(myAdafruit16CServoDriver.getController());
+				*/
+				// New method 
+				ArrayList<String> v = myAdafruit16CServoDriver.refreshControllers();
+				controller.removeAllItems();
+				for (int i = 0; i < v.size(); ++i) {
+					controller.addItem(v.get(i));
+				}
+				controller.setSelectedItem(myAdafruit16CServoDriver.getControllerName());
 			}
 		});
 	}

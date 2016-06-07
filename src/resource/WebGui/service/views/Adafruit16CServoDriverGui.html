@@ -10,7 +10,7 @@
       </ul>
   </span>
    
-   <input type="text" class="form-control" ng-model="controllerName" ng-disabled="isAttached"><!-- FIXME - type-ahead -->   
+   <input type="text" ng-readonly=true class="form-control" ng-model="controllerName" ng-disabled="isAttached"><!-- FIXME - type-ahead -->  
      
    <span class="input-group-btn">
          <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.unsetController()">unsetController</button>

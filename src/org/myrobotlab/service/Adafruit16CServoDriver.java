@@ -102,6 +102,10 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 																								// internal clock
 	public static final int precision = 4096; // pwm_precision
 
+	public ArrayList<String> controllers;
+	public String controllerName;
+  private boolean isAttached = false;
+
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
@@ -114,17 +118,20 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 
 	public Adafruit16CServoDriver(String n) {
 		super(n);
-		// subscribe("runtime", "registered", this.getName(),"onRegistered");
-		ServiceInterface runtime = Runtime.createAndStart("runtime", "Runtime");
-	  subscribe(runtime.getName(), "registered", this.getName(),"onRegistered");
+		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 	}
-	
+
 	public void onRegistered(ServiceInterface s) {
 		log.info(String.format("onRegistered %s", s.getName()));
 		broadcastState();
-		
+
 	}
-	
+
+	public ArrayList<String> refreshControllers() {
+		controllers = Runtime.getServiceNamesFromInterface(I2CControl.class);
+		return controllers;
+	}
+
 	// ----------- AFMotor API End --------------
 
 	// attachControllerBoard ??? FIXME FIXME FIXME - should "attach" call
@@ -138,7 +145,6 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 */
 	// @Override
 	public boolean setController(String controllerName) {
-		String test = controllerName;
 		return setController((I2CControl) Runtime.getService(controllerName));
 	}
 
@@ -148,7 +154,8 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 			return false;
 		}
 
-		log.info(String.format("%s setController %s", getName(), controller.getName()));
+		controllerName = controller.getName();
+		log.info(String.format("%s setController %s", getName(), controllerName));
 
 		this.controller = controller;
 
@@ -156,19 +163,19 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 			this.arduino = (Arduino) controller;
 			controler = "Arduino";
 		}
-		
+
 		if (controller instanceof RasPi) {
 			this.raspi = (RasPi) controller;
 			controler = "RasPi";
 		}
-		
+		isAttached = true;
 		broadcastState();
 		return true;
 	}
 
 	public void unsetController() {
 		controller = null;
-
+		isAttached = false;
 		broadcastState();
 	}
 
@@ -219,7 +226,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 
 	// @Override
 	public boolean isAttached() {
-		return controller != null;
+		return isAttached;
 	}
 
 	public void setDeviceAddress(Integer DeviceAddress) {
@@ -331,7 +338,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 			error("trying to attach a pin before attaching to an i2c controller");
 			return false;
 		}
-		
+
 		servo.setController(this);
 		servoNameToPinMap.put(servo.getName(), pinNumber);
 		if (controler == "Arduino") {
@@ -422,7 +429,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		ServiceType meta = new ServiceType(Adafruit16CServoDriver.class.getCanonicalName());
 		meta.addDescription("Adafruit 16-Channel PWM/Servo Driver");
 		meta.addCategory("shield", "servo & pwm");
-    meta.setSponsor("Mats");
+		meta.setSponsor("Mats");
 		/*
 		 * meta.addPeer("arduino", "Arduino", "our Arduino"); meta.addPeer("raspi",
 		 * "RasPi", "our RasPi");

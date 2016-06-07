@@ -14,6 +14,7 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', [])
         $scope.service = service;
         $scope.controllerName = service.controllerName;
         $scope.isAttached = service.isAttached;
+        $scope.controllers = service.controllers;
     }
     ;
     
@@ -40,10 +41,11 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', [])
             $scope.status = data;
             $scope.$apply();
             break;
-        case 'onServiceNamesFromInterface':
-            $scope.controllers = data;
-            $scope.$apply();
-            break;
+      // case 'onServiceNamesFromInterface':
+      //    $scope.controllers = data;
+      //    $scope.$apply();
+      //    break;
+            
         default:
             $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method);
             break;
@@ -65,9 +67,9 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', [])
 
     msg.subscribe(this);
     
-    var runtimeName = mrl.getRuntime().name;
-    mrl.subscribe(runtimeName, 'getServiceNamesFromInterface');
-    mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface');
-    mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.I2CControl');
+    // var runtimeName = mrl.getRuntime().name;
+    // mrl.subscribe(runtimeName, 'getServiceNamesFromInterface');
+    // mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface');
+    // mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.I2CControl');
 }
 ]);
