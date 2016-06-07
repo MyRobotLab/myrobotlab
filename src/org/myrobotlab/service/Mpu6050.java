@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.util.ArrayList;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -650,6 +652,10 @@ public class Mpu6050 extends Service {
   public static final int dmpAddress7 = 0x60;
   public static final int[] dmpUpdates7 = { 0x00, 0x40, 0x00, 0x00 };
 
+	public ArrayList<String> controllers;
+	public String controllerName;
+	public boolean isAttached = false;
+	
   public static void main(String[] args) {
     LoggingFactory.getInstance().configure();
 
@@ -680,14 +686,18 @@ public class Mpu6050 extends Service {
 
   public Mpu6050(String n) {
     super(n);
-    
-		ServiceInterface runtime = Runtime.createAndStart("runtime", "Runtime");
-		subscribe(runtime.getName(), "registered", this.getName(), "onRegistered");
+		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
   }
 	
-  public void onRegistered(ServiceInterface s) {
+	public void onRegistered(ServiceInterface s) {
+		refreshControllers();
 		broadcastState();
 
+	}
+
+	public ArrayList<String> refreshControllers() {
+		controllers = Runtime.getServiceNamesFromInterface(I2CControl.class);
+		return controllers;
 	}
 	
   @Override
@@ -717,14 +727,21 @@ public class Mpu6050 extends Service {
     log.info(String.format("%s setController %s", getName(), controller.getName()));
 
     this.controller = controller;
-    controller.createDevice(busAddress, deviceAddress, type);
+		controllerName = controller.getName();
+		isAttached = true;
+
+		log.info(String.format("%s setController %s", getName(), controllerName));
+		
     broadcastState();
     return true;
   }
   
 	public void unsetController() {
+		
 		controller = null;
-
+		controllerName = null;
+		isAttached = false;
+		
 		broadcastState();
 	}
   /**
@@ -745,9 +762,20 @@ public class Mpu6050 extends Service {
 	public I2CControl getController() {
 		return controller;
 	}
+	
+	public String getControllerName() {
 
+		String controlerName = null;
+
+		if (controller != null) {
+			controlerName = controller.getName();
+		}
+
+		return controlerName;
+	}
+	
 	public boolean isAttached() {
-		return controller != null;
+		return isAttached;
 	}
 	
   /**

@@ -68,8 +68,7 @@ public class AdafruitIna219 extends Service {
 	public AdafruitIna219(String n) {
 		super(n);
 
-		ServiceInterface runtime = Runtime.createAndStart("runtime", "Runtime");
-		subscribe(runtime.getName(), "registered", this.getName(), "onRegistered");
+		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 	}
 
 	public void onRegistered(ServiceInterface s) {
@@ -134,7 +133,7 @@ public class AdafruitIna219 extends Service {
 	}
 
 	public boolean isAttached() {
-		return controller != null;
+		return isAttached;
 	}
 
 	/**

@@ -101,7 +101,7 @@ public class AdafruitIna219GUI extends ServiceGUI implements ActionListener {
 	public void getState(AdafruitIna219 ina219) {
 
 		refreshControllers();
-		controller.setSelectedItem(ina219.getController());
+		controller.setSelectedItem(ina219.getControllerName());
 		if (ina219.isAttached()) {
 			attachButton.setText(detach);
 			controller.setEnabled(false);
