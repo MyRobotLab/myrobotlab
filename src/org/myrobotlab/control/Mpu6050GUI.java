@@ -38,7 +38,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.AdafruitIna219;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Mpu6050;
 import org.myrobotlab.service.Runtime;
@@ -106,7 +105,7 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
   public void getState(Mpu6050 mpu6050) {
   	
 		refreshControllers();
-		controller.setSelectedItem(mpu6050.getController());
+		controller.setSelectedItem(mpu6050.getControllerName());
 		if (mpu6050.isAttached()) {
 			attachButton.setText(detach);
 			controller.setEnabled(false);
@@ -139,13 +138,13 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
     c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 1;
     c.gridy = 0;
-		display.add(attachButton);
+		display.add(controller);
 		attachButton.addActionListener(this);	
 
 		c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 2;
     c.gridy = 0;
-		display.add(controller);
+		display.add(attachButton);
 		
     c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 3;
@@ -264,12 +263,12 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 			@Override
 			public void run() {
 
-				ArrayList<String> v = Runtime.getServiceNamesFromInterface(I2CControl.class);
+				ArrayList<String> v = myMpu6050.refreshControllers();
 				controller.removeAllItems();
 				for (int i = 0; i < v.size(); ++i) {
 					controller.addItem(v.get(i));
 				}
-				controller.setSelectedItem(myMpu6050.getController());
+				controller.setSelectedItem(myMpu6050.getControllerName());
 			}
 		});
 	}
