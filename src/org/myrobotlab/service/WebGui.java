@@ -862,6 +862,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     this.useLocalResources = useLocalResources;
   }
 
+  public void startBrowser(String URL) {
+    BareBonesBrowserLaunch.openURL(String.format(URL, port));
+  }
+  
   public void autoStartBrowser(boolean autoStartBrowser) {
     this.autoStartBrowser = autoStartBrowser;
   }
