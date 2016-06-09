@@ -50,6 +50,7 @@ public class AdafruitIna219 extends Service {
 
 	public ArrayList<String> controllers;
 	public String controllerName;
+	
 	private boolean isAttached = false;
 
 	public static void main(String[] args) {
@@ -77,11 +78,17 @@ public class AdafruitIna219 extends Service {
 
 	}
 
+	public void refreshControllers() {
+		controllers = Runtime.getServiceNamesFromInterface(I2CControl.class);
+	}
+	
+	/*
 	public ArrayList<String> refreshControllers() {
 		controllers = Runtime.getServiceNamesFromInterface(I2CControl.class);
 		return controllers;
 	}
-
+  */
+	
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
