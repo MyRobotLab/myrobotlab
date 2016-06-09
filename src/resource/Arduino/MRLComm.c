@@ -50,6 +50,335 @@
 // TODO - getBoardInfo() - returns board info !
 // TODO - getPinInfo() - returns pin info !
 
+// Included as a 3rd party arduino library from here: https://github.com/ivanseidel/LinkedList/
+// #include <LinkedList.h>
+/*
+  LinkedList.h - V1.1 - Generic LinkedList implementation
+  Works better with FIFO, because LIFO will need to
+  search the entire List to find the last one;
+
+  For instructions, go to https://github.com/ivanseidel/LinkedList
+
+  Created by Ivan Seidel Gomes, March, 2013.
+  Released into the public domain.
+*/
+
+
+#ifndef LinkedList_h
+#define LinkedList_h
+
+template<class T>
+struct ListNode
+{
+  T data;
+  ListNode<T> *next;
+};
+
+template <typename T>
+class LinkedList{
+
+protected:
+  int _size;
+  ListNode<T> *root;
+  ListNode<T> *last;
+
+  // Helps "get" method, by saving last position
+  ListNode<T> *lastNodeGot;
+  int lastIndexGot;
+  // isCached should be set to FALSE
+  // everytime the list suffer changes
+  bool isCached;
+
+  ListNode<T>* getNode(int index);
+
+public:
+  LinkedList();
+  ~LinkedList();
+
+  /*
+    Returns current size of LinkedList
+  */
+  virtual int size();
+  /*
+    Adds a T object in the specified index;
+    Unlink and link the LinkedList correcly;
+    Increment _size
+  */
+  virtual bool add(int index, T);
+  /*
+    Adds a T object in the end of the LinkedList;
+    Increment _size;
+  */
+  virtual bool add(T);
+  /*
+    Adds a T object in the start of the LinkedList;
+    Increment _size;
+  */
+  virtual bool unshift(T);
+  /*
+    Set the object at index, with T;
+    Increment _size;
+  */
+  virtual bool set(int index, T);
+  /*
+    Remove object at index;
+    If index is not reachable, returns false;
+    else, decrement _size
+  */
+  virtual T remove(int index);
+  /*
+    Remove last object;
+  */
+  virtual T pop();
+  /*
+    Remove first object;
+  */
+  virtual T shift();
+  /*
+    Get the index'th element on the list;
+    Return Element if accessible,
+    else, return false;
+  */
+  virtual T get(int index);
+
+  /*
+    Clear the entire array
+  */
+  virtual void clear();
+
+};
+
+// Initialize LinkedList with false values
+template<typename T>
+LinkedList<T>::LinkedList()
+{
+  root=false;
+  last=false;
+  _size=0;
+
+  lastNodeGot = root;
+  lastIndexGot = 0;
+  isCached = false;
+}
+
+// Clear Nodes and free Memory
+template<typename T>
+LinkedList<T>::~LinkedList()
+{
+  ListNode<T>* tmp;
+  while(root!=false)
+  {
+    tmp=root;
+    root=root->next;
+    delete tmp;
+  }
+  last = false;
+  _size=0;
+  isCached = false;
+}
+
+/*
+  Actualy "logic" coding
+*/
+
+template<typename T>
+ListNode<T>* LinkedList<T>::getNode(int index){
+
+  int _pos = 0;
+  ListNode<T>* current = root;
+
+  // Check if the node trying to get is
+  // immediatly AFTER the previous got one
+  if(isCached && lastIndexGot <= index){
+    _pos = lastIndexGot;
+    current = lastNodeGot;
+  }
+
+  while(_pos < index && current){
+    current = current->next;
+
+    _pos++;
+  }
+
+  // Check if the object index got is the same as the required
+  if(_pos == index){
+    isCached = true;
+    lastIndexGot = index;
+    lastNodeGot = current;
+
+    return current;
+  }
+
+  return false;
+}
+
+template<typename T>
+int LinkedList<T>::size(){
+  return _size;
+}
+
+template<typename T>
+bool LinkedList<T>::add(int index, T _t){
+
+  if(index >= _size)
+    return add(_t);
+
+  if(index == 0)
+    return unshift(_t);
+
+  ListNode<T> *tmp = new ListNode<T>(),
+         *_prev = getNode(index-1);
+  tmp->data = _t;
+  tmp->next = _prev->next;
+  _prev->next = tmp;
+
+  _size++;
+  isCached = false;
+
+  return true;
+}
+
+template<typename T>
+bool LinkedList<T>::add(T _t){
+
+  ListNode<T> *tmp = new ListNode<T>();
+  tmp->data = _t;
+  tmp->next = false;
+
+  if(root){
+    // Already have elements inserted
+    last->next = tmp;
+    last = tmp;
+  }else{
+    // First element being inserted
+    root = tmp;
+    last = tmp;
+  }
+
+  _size++;
+  isCached = false;
+
+  return true;
+}
+
+template<typename T>
+bool LinkedList<T>::unshift(T _t){
+
+  if(_size == 0)
+    return add(_t);
+
+  ListNode<T> *tmp = new ListNode<T>();
+  tmp->next = root;
+  tmp->data = _t;
+  root = tmp;
+
+  _size++;
+  isCached = false;
+
+  return true;
+}
+
+template<typename T>
+bool LinkedList<T>::set(int index, T _t){
+  // Check if index position is in bounds
+  if(index < 0 || index >= _size)
+    return false;
+
+  getNode(index)->data = _t;
+  return true;
+}
+
+template<typename T>
+T LinkedList<T>::pop(){
+  if(_size <= 0)
+    return T();
+
+  isCached = false;
+
+  if(_size >= 2){
+    ListNode<T> *tmp = getNode(_size - 2);
+    T ret = tmp->next->data;
+    delete(tmp->next);
+    tmp->next = false;
+    last = tmp;
+    _size--;
+    return ret;
+  }else{
+    // Only one element left on the list
+    T ret = root->data;
+    delete(root);
+    root = false;
+    last = false;
+    _size = 0;
+    return ret;
+  }
+}
+
+template<typename T>
+T LinkedList<T>::shift(){
+  if(_size <= 0)
+    return T();
+
+  if(_size > 1){
+    ListNode<T> *_next = root->next;
+    T ret = root->data;
+    delete(root);
+    root = _next;
+    _size --;
+    isCached = false;
+
+    return ret;
+  }else{
+    // Only one left, then pop()
+    return pop();
+  }
+
+}
+
+template<typename T>
+T LinkedList<T>::remove(int index){
+  if (index < 0 || index >= _size)
+  {
+    return T();
+  }
+
+  if(index == 0)
+    return shift();
+
+  if (index == _size-1)
+  {
+    return pop();
+  }
+
+  ListNode<T> *tmp = getNode(index - 1);
+  ListNode<T> *toDelete = tmp->next;
+  T ret = toDelete->data;
+  tmp->next = tmp->next->next;
+  delete(toDelete);
+  _size--;
+  isCached = false;
+  return ret;
+}
+
+
+template<typename T>
+T LinkedList<T>::get(int index){
+  ListNode<T> *tmp = getNode(index);
+
+  return (tmp ? tmp->data : T());
+}
+
+template<typename T>
+void LinkedList<T>::clear(){
+  while(size() > 0)
+    shift();
+}
+
+#endif
+
+
+
+
 #include <Servo.h>
 #define WIRE Wire
 #include <Wire.h>
@@ -154,6 +483,10 @@
 #define SET_TRIGGER   44
 // {softReset} 
 #define SOFT_RESET    45
+//{debugEnable}
+#define DEBUG_ENABLE  46
+//{debugDisable}
+#define DEBUG_DISABLE 47
 ///// INO GENERATED DEFINITION END //////
 
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
@@ -209,7 +542,7 @@
 
 // #define SENSORS_MAX  NUM_DIGITAL_PINS // this is max number of pins (analog included)
 // TODO: Setting to value larger than 32 causes TX/RX errors in MRL. (Make sensor loop faster to fix.)
-#define SENSORS_MAX  10
+#define SENSORS_MAX  3
 
 #define DIGITAL_PIN_COUNT
 
@@ -270,6 +603,15 @@ typedef struct
 
 pin_type pins[SENSORS_MAX];
 
+typedef struct
+{
+  int index;
+  LinkedList<pin_type> pins;
+} sensor;
+
+LinkedList<sensor> sensorList = LinkedList<sensor>();
+
+
 // Servos
 typedef struct
 {
@@ -319,7 +661,6 @@ unsigned long getUltrasonicRange(pin_type& pin);
 void handleUltrasonicPing(pin_type& pin, unsigned long ts);
 void handlePulseType(pin_type& pin);
 
-// TODO: make me configurable at runtime...
 bool debug = false;
 
 void setup() {
@@ -328,10 +669,11 @@ void setup() {
   // TODO: do this before we start the serial port?
   softReset();
   // wait for the serial port a bit extra..
-  Serial.flush();
-  delay(100);
+  // delay(100);
   // publish version on startup so it's immediately available for mrl.
+  Serial.flush();
   publishVersion();
+  Serial.flush();
   // TODO: see if we can publish the board type (uno/mega?)
 }
 
@@ -340,27 +682,27 @@ void loop() {
 
   // increment how many times we've run
   ++loopCount;
-
   publishDebug("Main" + String(loopCount));
-
   // get a command and process it from the serial port (if available.)
   if (getCommand()) {
     publishDebug("GotCMD");
     processCommand();
+    publishDebug("ProcCMD");
   }
-  publishDebug("ProcCMD");
   // update servo positions
-  updateServos();
   publishDebug("UpdateServos");
-
+  updateServos();
+  // publishDebug("UpdateServos");
   // update analog sensor data stuffs
   // updateSensors();
+  publishDebug("UpdateSensors Start");
   updateSensorsNew();
-  publishDebug("UpdateSensors");
+  publishDebug("UpdateSensors End");
+  // publishDebug("UpdateSensors");
 
   // update and report timing metrics
   updateStats();
-  publishDebug("UpdatedStat");
+  // publishDebug("UpdatedStat");
   // Serial.flush();
 } // end of big loop
 
@@ -552,7 +894,7 @@ void processCommand() {
     setPWMFrequency(ioCmd[1], ioCmd[2]);
     break;
   case ANALOG_READ_POLLING_START:
-    analogReadPollingStart();
+    analogReadPollingStartNew();
     break;
   case ANALOG_READ_POLLING_STOP:
     analogReadPollingStop();
@@ -560,14 +902,14 @@ void processCommand() {
   case DIGITAL_READ_POLLING_START:
     digitalReadPollingStart();
     break;
+  case DIGITAL_READ_POLLING_STOP:
+    digitalReadPollingStop();
   case PULSE:
     pulse();
     break;
   case PULSE_STOP:
     pulseStop();
     break;
-  case DIGITAL_READ_POLLING_STOP:
-    digitalReadPollingStop();
   case SET_TRIGGER:
     setTrigger();
     break;
@@ -590,7 +932,9 @@ void processCommand() {
     softReset();
     break;
   case SENSOR_ATTACH:
-    sensorAttach();
+    publishDebug("SA_NEW_BEGIN");
+    sensorAttachNew();
+    publishDebug("SA_NEW_END");
     break;
   case SENSOR_POLLING_START:
     sensorPollingStart();
@@ -614,6 +958,13 @@ void processCommand() {
   case NOP:
     // No Operation
     break;
+  case DEBUG_ENABLE:
+    debug = true;
+    publishDebug("Debug logging enabled.");
+    break;
+  case DEBUG_DISABLE:
+    debug = false;
+    break;
   default:
     sendError(ERROR_UNKOWN_CMD);
     break;
@@ -622,10 +973,13 @@ void processCommand() {
   // ack that we got a command (should we ack it first? or after we process the command?)
   sendCommandAck();
 
+  publishDebug("Ack Sent.");
 
   // reset command buffer to be ready to receive the next command.
   memset(ioCmd, 0, sizeof(ioCmd));
   byteCount = 0;
+
+  publishDebug("buffer cleared.");
 } // process Command
 
 // This function handles updating the servo angles (mostly for sweeping?)
@@ -665,27 +1019,35 @@ void updateServos() {
 
 void updateSensorsNew() {
   // TODO: publish data from pins that are publishing data.
-  publishDebug("NEW SENSORS");
-  for (int i = 0; i < SENSORS_MAX; i++) {
-    pin_type& pin = pins[i];
-    if (!pin.isActive) {
-      continue;
+  // TODO: I'd much prefer use an iterator over the linked list of sensors!
+
+  int numSensors = sensorList.size();
+  if (numSensors > 0) {
+    publishDebug("Update Sensors : " + String(numSensors));
+  }
+  for (int sIdx = 0; sIdx < numSensors; sIdx++) {
+    publishDebug("Update Sensor " + String(sIdx));
+    sensor s = sensorList.get(sIdx);
+    // update the values of the pins for each sensor we have.
+    int numPins = s.pins.size();
+    for (int pIdx = 0; pIdx < numPins; pIdx++) {
+      pin_type pin = s.pins.get(pIdx);
+      switch (pin.sensorType) {
+        case SENSOR_TYPE_ANALOG_PIN_READER:
+          publishDebug("ANALOG_PIN UPDATE");
+          pin.value = analogRead(pin.address);
+          break;
+        case SENSOR_TYPE_DIGITAL_PIN_READER:
+          publishDebug("DIGITAL PIN UPDATE");
+          pin.value = digitalRead(pin.address);
+          break;
+        default:
+          // TODO: maybe publish debug?
+          publishDebug("UNKNOWN_SENSOR_TYPE");
+      }
     }
-    // TODO: test if it's digital or analog and do the right thing.
-    switch (pin.sensorType) {
-      case SENSOR_TYPE_ANALOG_PIN_READER:
-        pin.value = analogRead(pin.address);
-        // we need to publish the sensor type!
-        publishSensor(pin.sensorIndex, pin.sensorType, pin.address, pin.value);
-        break;
-      case SENSOR_TYPE_DIGITAL_PIN_READER:
-        pin.value = digitalRead(pin.address);
-        publishSensor(pin.sensorIndex, pin.sensorType, pin.address, pin.value);
-        break;
-      default:
-        // TODO: maybe publish debug?
-        publishDebug("UNKNOWN_SENSOR_TYPE");
-    }
+    // TODO: what if the pins are not active?
+    publishSensor(s);
   }
 }
 
@@ -946,8 +1308,26 @@ void setPWMFrequency(int address, int prescalar) {
   }
 }
 
+
+void analogReadPollingStartNew() {
+
+  // TODO: do we care about this pinIndex at all?
+  int sensorIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
+  // create a new sensor with 1 pin.
+  sensor s = sensor();
+  s.index = sensorIndex;
+  // create the pin for this sensor
+  pin_type p = pin_type();
+  p.isActive = true;
+  p.address = ioCmd[2];
+  // add the pin to the sensor
+  s.pins.add(p);
+  // add the sensor to the global list of sensors.
+  sensorList.add(s);
+}
 // ANALOG_READ_POLLING_START
 void analogReadPollingStart() {
+
   int pinIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
   pin_type& pin = pins[pinIndex];
   // TODO: remove this method and only use sensorAttach ..
@@ -1046,6 +1426,40 @@ void setSampleRate() {
   if (sampleRate == 0) {
     sampleRate = 1;
   } // avoid /0 error - FIXME - time estimate param
+}
+
+// SENSOR_ATTACH
+void sensorAttachNew() {
+
+  int sensorIndex    = ioCmd[1];
+  int sensorType     = ioCmd[2];
+  int pinCount       = ioCmd[3];
+
+  // for loop grabbing all pins for this sensor
+  publishDebug("S_ATTACH: " + String(sensorIndex) + " type:" + String(sensorType) + " count:" + String(pinCount));
+
+  sensor s = sensor();
+  s.index = sensorIndex;
+  LinkedList<pin_type> sensorPins = LinkedList<pin_type>();
+  // TODO: support an arbitrary list of pins being passed in
+  // right now, the pins are contigious
+  for (int ordinal = 0; ordinal < pinCount; ordinal++){
+    publishDebug("PINADD" + String(ordinal) + " TO " + String(pinCount));
+    pin_type sensorPin = pin_type();
+    sensorPin.address = ordinal;
+    // TODO: rename this analog/digital ?
+    sensorPin.sensorType = sensorType;
+    sensorPin.isActive = true;
+    sensorPins.add(sensorPin);
+    // TODO: special considerations based on the type of sensor to
+    // setup the pins correctly for multi-pin sensors
+  }
+  publishDebug("adding pins.");
+  s.pins = sensorPins;
+  publishDebug("Adding sensors");
+  sensorList.add(s);
+  publishDebug("NUM SENS:"+String(sensorList.size()));
+  publishDebug("Done with sensor attach.");
 }
 
 // SENSOR_ATTACH
@@ -1267,6 +1681,31 @@ void publishVersion() {
   Serial.write(2); // size
   Serial.write(PUBLISH_VERSION);
   Serial.write((byte)MRLCOMM_VERSION);
+  Serial.flush();
+
+}
+
+
+void publishSensor(sensor s) {
+  int numPins = s.pins.size();
+  // sensor data will be
+  // magic + size
+  // publish_sensor_data
+  // index
+  // int array (10 bit values = 2 bytes per pin are returned.)
+
+  int msgSize = 2 + numPins*2;
+
+  Serial.flush();
+  Serial.write(MAGIC_NUMBER);
+  Serial.write(msgSize); //size
+  Serial.write(PUBLISH_SENSOR_DATA);
+  Serial.write(s.index);
+  for (int i = 0; i < numPins; i++) {
+    pin_type pin = s.pins.get(i);
+    Serial.write(pin.value >> 8);   // MSB
+    Serial.write(pin.value & 0xff); // LSB
+  }
   Serial.flush();
 
 }
