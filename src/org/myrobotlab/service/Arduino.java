@@ -44,6 +44,8 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERVO_SPEED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MESSAGE_ACK;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_DEBUG;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEBUG_ENABLE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEBUG_DISABLE;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -388,7 +390,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
     AnalogPinSensor s = new AnalogPinSensor(actualPin, sampleRate);
     sensorAttach(s);
     // send read polling start!  (but actually. attaching the sensor should probably already do this.
-    sendMsg(ANALOG_READ_POLLING_START, actualPin, (sampleRate >> 8) & 0xff, sampleRate & 0xff);
+    // sendMsg(ANALOG_READ_POLLING_START, actualPin, (sampleRate >> 8) & 0xff, sampleRate & 0xff);
   }
 
   private int fixPinOffset(Integer pin) {
@@ -1490,7 +1492,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
   @Override
   public void servoWrite(Servo servo) {
     int index = getServoIndex(servo.getPin());
-    log.info(String.format("servoWrite %s %d index %d", servo.getName(), servo.targetOutput, index));
+    log.info("servoWrite {} {} index {}", servo.getName(), servo.targetOutput, index);
     sendMsg(SERVO_WRITE, index, servo.targetOutput.intValue());
   }
 
@@ -1952,6 +1954,14 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public void enableMRLCommDebug() {
+	  sendMsg(DEBUG_ENABLE);
+	}
+	
+	public void disableMRLCommDebug() {
+	   sendMsg(DEBUG_DISABLE);
 	}
 
 }

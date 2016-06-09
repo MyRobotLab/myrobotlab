@@ -195,7 +195,13 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
   // {softReset}
   public final static int SOFT_RESET = 45;
+  
+  //{debugEnable}
+  public final static int DEBUG_ENABLE = 46;
 
+  //{debugDisable}
+  public final static int DEBUG_DISABLE = 47;
+  
   // {messageAck} coming back from arduino
   public final static int PUBLISH_MESSAGE_ACK = 127;
   
@@ -681,6 +687,12 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
       return "SET_LOAD_TIMING_ENABLED";
     if (function == ArduinoMsgCodec.PUBLISH_DEBUG) 
       return "PUBLISH_DEBUG";
+    if (function == ArduinoMsgCodec.DEBUG_ENABLE) 
+      return "DEBUG_ENABLE";
+    if (function == ArduinoMsgCodec.DEBUG_DISABLE) 
+      return "DEBUG_DISABLE";
+    if (function == ArduinoMsgCodec.SET_PWMFREQUENCY)
+      return "SET_PWMFREQUENCY";
     return "OTHER(" + Integer.toString(function) + ")";
     
   }
