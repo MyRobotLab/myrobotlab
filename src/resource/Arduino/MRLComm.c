@@ -1,14 +1,31 @@
 /**
 *
-* @author GroG (at) myrobotlab.org
+* MRLComm.c
+* -----------------
 *
 * This file is part of MyRobotLab.
+* (myrobotlab.org)
 *
 * Enjoy !
+* @authors
+* GroG
+* Kwatters
+* Mats
+* and many others...
 *
-* MRLComm.ino
+* MRL Protocol definition
 * -----------------
-* Refactoring has made MRLComm.ino far more general
+* MAGIC_NUMBER|NUM_BYTES|FUNCTION|DATA0|DATA1|....|DATA(N)
+*              NUM_BYTES - is the number of bytes after NUM_BYTES to the end
+*
+* more info - http://myrobotlab.org/content/myrobotlab-api
+*
+*
+* General Concept
+* -----------------
+* Arduino is a slave process to MyRobotLab Arduino Service - this file receives
+* commands and sends back data.
+* Refactoring has made MRLComm.c far more general
 * there are only 2 "types" of things - controllers and pins - or writers and readers
 * each now will have sub-types
 *
@@ -24,7 +41,6 @@
 * -----------------
 * pingdar, non-blocking pulsin
 *
-*
 * Requirements: MyRobotLab running on a computer & a serial connection
 *
 */
@@ -35,11 +51,9 @@
 // TODO - getPinInfo() - returns pin info !
 
 #include <Servo.h>
-// Start of Adafruit16CServoDriver I2C import
 #define WIRE Wire
 #include <Wire.h>
-// Start of Adafruit16CServoDriver I2C import
-// version to match with MRL
+
 // TODO: this isn't ready for an official bump to mrl comm 35
 // when it's ready we can update ArduinoMsgCodec  (also need to see why it's not publishing "goodtimes" anymore.)
 #define MRLCOMM_VERSION         35
@@ -47,6 +61,9 @@
 // serial protocol functions
 #define MAGIC_NUMBER            170 // 10101010
 
+// FIXME - first rule of generate club is: whole file should be generated
+// so this needs to be turned itno a .h if necessary - but the manual munge
+// should be replaced
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE BEGIN -----------
 ///// INO GENERATED DEFINITION BEGIN //////
 // {publishMRLCommError Integer} 
@@ -81,8 +98,6 @@
 #define MOTOR_STOP    15
 // {pinMode Integer Integer} 
 #define PIN_MODE    16
-// {publishCustomMsg Object[]} 
-#define PUBLISH_CUSTOM_MSG    17
 // {publishLoadTimingEvent Long} 
 #define PUBLISH_LOAD_TIMING_EVENT   18
 // {publishPin Pin} 
@@ -125,7 +140,7 @@
 #define SET_DEBOUNCE    37
 // {setDigitalTriggerOnly Boolean} 
 #define SET_DIGITAL_TRIGGER_ONLY    38
-// {setLoadTimingEnabled boolean} 
+// {setLoadTimingEnabled bool}
 #define SET_LOAD_TIMING_ENABLED   39
 // {setPWMFrequency Integer Integer} 
 #define SET_PWMFREQUENCY    40
@@ -142,6 +157,7 @@
 ///// INO GENERATED DEFINITION END //////
 
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
+
 // Start of Adafruit16CServoDriver defines
 #define AF_BEGIN 50
 #define AF_SET_PWM_FREQ 51
@@ -155,28 +171,14 @@
 #define LED0_ON_L 0x6
 // End of Adafruit16CServoDriver defines
 
-// TODO - UNIONS !!!! - all unions begin with type
-
-// ------ non generated types begin ------
-// FIXME - all freeform types need to be in Java ! - all should be part
-// of the generator !!!
-
-// ------ stepper types ------
-#define STEPPER_TYPE_SIMPLE       1
-
-// ------ stepper event types ------
-#define STEPPER_EVENT_STOP        1
-#define STEPPER_EVENT_STEP        2
-
-// ------ stepper event types ------
-#define  SERVO_EVENT_STOPPED      1
+#define  SERVO_EVENT_STOPPED          1
 #define  SERVO_EVENT_POSITION_UPDATE  2
 
 // ------ error types ------
-#define ERROR_SERIAL          1
+#define ERROR_SERIAL          	1
 #define ERROR_UNKOWN_CMD        2
-#define ERROR_ALREADY_EXISTS      3
-#define ERROR_DOES_NOT_EXIST      4
+#define ERROR_ALREADY_EXISTS    3
+#define ERROR_DOES_NOT_EXIST    4
 #define ERROR_UNKOWN_SENSOR     5
 
 
@@ -185,11 +187,9 @@
 // TODO: fully flush these out. digita/analog pin etc..
 // there are multiple references to this.
 // if it's in here, it should be in the arduino msg codec...
-#define SENSOR_TYPE_PIN            0
-#define SENSOR_TYPE_ULTRASONIC       4
-#define SENSOR_TYPE_PULSE          2
-
-#define CUSTOM_MSG            50
+#define SENSOR_TYPE_PIN            	0
+#define SENSOR_TYPE_ULTRASONIC      4
+#define SENSOR_TYPE_PULSE          	2
 
 // need a method to identify type of board
 // http://forum.arduino.cc/index.php?topic=100557.0
@@ -213,7 +213,7 @@
 
 #define DIGITAL_PIN_COUNT
 
-// ECHO FINITE STATE MACHINE
+// ECHO FINITE STATE MACHINE - NON BLOCKING PULSIN
 #define ECHO_STATE_START 1
 #define ECHO_STATE_TRIG_PULSE_BEGIN 2
 #define ECHO_STATE_TRIG_PULSE_END 3
@@ -225,30 +225,7 @@
 #define SENSOR_TYPE_ANALOG_PIN_READER 3
 #define SENSOR_TYPE_DIGITAL_PIN_READER 1
 
-// FIXME FIXME FIXME
-// -- FIXME - modified by board type BEGIN --
-// Need Arduino to do a hardware abstraction layer
-// https://code.google.com/p/arduino/issues/detail?id=59
-// AHAAA !! - many defintions in - pins_arduino.h !!!
-// Need a "board" identifier at least !!!
-
-// #define MAX_SERVOS 48 - is defined @ compile time !!
-
-#define ARDUINO_TYPE_INT 16; // :) type identifier - not size - but what the hell ;)
-
-/*
-* TODO - CRC for last byte
-* getCommand - retrieves a command message
-* inbound and outbound messages are the same format, the following represents a basic message
-* format
-*
-* MAGIC_NUMBER|NUM_BYTES|FUNCTION|DATA0|DATA1|....|DATA(N)
-*              NUM_BYTES - is the number of bytes after NUM_BYTES to the end
-*
-*/
-
 int msgSize = 0; // the NUM_BYTES of current message
-
 unsigned int debounceDelay = 50; // in ms
 byte msgBuf[64];
 
@@ -319,12 +296,6 @@ typedef struct
 
 servo_type servos[MAX_SERVOS];
 
-// FIXME - these are const defines
-int PIN_TYPE_DIGITAL = 1;
-int PIN_TYPE_ANALOG = 2;
-int PIN_TYPE_PWM = 4;
-
-
 unsigned long loopCount = 0;
 unsigned long lastMicros = 0;
 int byteCount = 0;
@@ -335,46 +306,23 @@ int readValue;
 // FIXME - normalize with sampleRate ..
 int loadTimingModulus = 1000;
 
-boolean loadTimingEnabled = false;
+// load timing related
+bool loadTimingEnabled = false;
 unsigned long loadTime = 0;
-// TODO - avg load time
 
+// sensor sample rate
 unsigned int sampleRate = 1; // 1 - 65,535 modulus of the loopcount - allowing you to sample less
-
-//===custom msg interface begin===
-byte customParams[256];
-int paramBuffIndex;
-int paramCnt;
-//===custom msg interface end===
 
 // define any functions that pass structs into them.
 void sendServoEvent(servo_type& s, int eventType);
 unsigned long getUltrasonicRange(pin_type& pin);
 void handleUltrasonicPing(pin_type& pin, unsigned long ts);
 void handlePulseType(pin_type& pin);
-// void sendMsg ( int num, ... );
-
-//---- data record definitions end -----
-// Define the reset function at address 0
-// allow us to reset the board if the serial port disconnects. (Thanks Mats! TODO: test me!)
-// void(* resetFunc) (void) = 0;
-
-
-// ----------- send custom msg begin ---------------------
-//void append(const int& data) {
-//  ++paramCnt;
-//  customParams[paramBuffIndex] = ARDUINO_TYPE_INT;
-//  customParams[++paramBuffIndex] = (byte)(data >> 8);
-//  customParams[++paramBuffIndex] = ((byte)data & 0xff);
-//  ++paramBuffIndex;
-//}
 
 // TODO: make me configurable at runtime...
-boolean debug = false;
+bool debug = false;
 
 void setup() {
-  // TODO: higher port speeds?
-  // Serial.begin(57600);        // connect to the serial port
   Serial.begin(115200);        // connect to the serial port
   while (!Serial){};
   // TODO: do this before we start the serial port?
@@ -394,11 +342,7 @@ void loop() {
   ++loopCount;
 
   publishDebug("Main" + String(loopCount));
-  // make sure we're still connected to the serial port.
-  //if (!Serial) {
-  // if we're disconnected, shutdown / reset
-  //    resetFunc();
-  //  }
+
   // get a command and process it from the serial port (if available.)
   if (getCommand()) {
     publishDebug("GotCMD");
@@ -445,8 +389,8 @@ void resetPin(int pinIndex) {
   pin.nextPin = -1;
 }
 
-unsigned long toUnsignedLong(unsigned char* buffer, int start) {
-  return ((buffer[start + 3] << 24) + (buffer[start + 2] << 16) + (buffer[start + 1] << 8) + buffer[start]);
+unsigned long toUnsignedLongfromBigEndian(unsigned char* buffer, int start) {
+  return (((unsigned long)buffer[start] << 24) + ((unsigned long)buffer[start + 1] << 16) + (buffer[start + 2] << 8) + buffer[start + 3]);
 }
 
 /**
@@ -515,7 +459,7 @@ bool removeAndShift(int array[], int& len, int removeValue) {
   return true;
 }
 
-boolean getCommand() {
+bool getCommand() {
   // handle serial data begin
   int bytesAvailable = Serial.available();
   if (bytesAvailable > 0) {
@@ -1035,8 +979,7 @@ void pulse() {
   pin_type& pin = pins[ioCmd[1]];
   // FIXME - this has to unload a Long !!!
   pin.count = 0;
-  //pin.target = toUnsignedLong(ioCmd, 2);// ioCmd[2];
-  pin.target = ((ioCmd[2] << 24) + (ioCmd[3] << 16) + (ioCmd[4] << 8) + ioCmd[5]);
+  pin.target = toUnsignedLongfromBigEndian(ioCmd, 2);
   pin.rate = ioCmd[6];
   pin.rateModulus = ioCmd[7];
   pin.isActive = true;
@@ -1297,21 +1240,6 @@ void handleUltrasonicPing(pin_type& pin, unsigned long ts) {
   } // end else if
 }
 
-// Helper methods to create MRLComm messages and write them back over the serial port.
-// send a generic message
-// TODO: this is never called
-//void sendMsg() {
-  // unbox
-  //Serial.write(MAGIC_NUMBER);
-  //Serial.write(paramBuffIndex + 2); // = param buff size + FN + paramCnt
-  //Serial.write(PUBLISH_CUSTOM_MSG);
-  //Serial.write(paramCnt);
-  //for (int i = 0; i < paramBuffIndex; ++i) {
-    //Serial.write(customParams[i]);
-    //  }
-  //  paramCnt = 0;
-//  paramBuffIndex = 0;
-//}
 
 // send an error message/code back to MRL.
 void sendError(int type) {
