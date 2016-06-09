@@ -38,48 +38,45 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.AdafruitIna219;
+import org.myrobotlab.service.I2CMux;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
-public class AdafruitIna219GUI extends ServiceGUI implements ActionListener {
+public class I2CMuxGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(AdafruitIna219GUI.class);
+	public final static Logger log = LoggerFactory.getLogger(I2CMuxGUI.class);
 
 	String attach = "setController";
 	String detach = "unsetController";
 	JButton attachButton = new JButton(attach);
 
 	JComboBox<String> controller = new JComboBox<String>();
+	JComboBox<String> muxAddressList = new JComboBox<String>();
+	JComboBox<String> muxBusList = new JComboBox<String>();
 
-	JButton refresh = new JButton("refresh");
+	JLabel muxAddressLabel = new JLabel("Address");
+	JLabel muxBusLabel     = new JLabel("Bus");
+	
+	I2CMux myI2CMux = null;
 
-	JLabel busVoltage = new JLabel();
-	JLabel shuntVoltage = new JLabel();
-	JLabel current = new JLabel();
-	JLabel power = new JLabel();
-
-	AdafruitIna219 myAdafruitIna219 = null;
-
-	public AdafruitIna219GUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+	public I2CMuxGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
-		myAdafruitIna219 = (AdafruitIna219) Runtime.getService(boundServiceName);
+		myI2CMux = (I2CMux) Runtime.getService(boundServiceName);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		log.info("AdafruitINA219GUI actionPerformed");
 		Object o = e.getSource();
-		if (o == refresh) {
-			myService.send(boundServiceName, "refresh");
-		}
 		if (o == attachButton) {
 			if (attachButton.getText().equals(attach)) {
 				int index = controller.getSelectedIndex();
 				if (index != -1) {
-					myService.send(boundServiceName, attach, controller.getSelectedItem());
+					myService.send(boundServiceName, attach, 
+							controller.getSelectedItem(),
+							muxAddressList.getSelectedItem(),
+							muxBusList.getSelectedItem());
 				}
 			} else {
 				myService.send(boundServiceName, detach);
@@ -89,80 +86,82 @@ public class AdafruitIna219GUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void attachGUI() {
-		subscribe("publishState", "getState", AdafruitIna219.class);
+		subscribe("publishState", "getState", I2CMux.class);
 		send("publishState");
 	}
 
 	@Override
 	public void detachGUI() {
-		unsubscribe("publishState", "getState", AdafruitIna219.class);
+		unsubscribe("publishState", "getState", I2CMux.class);
 	}
 
-	public void getState(AdafruitIna219 ina219) {
+	public void getState(I2CMux i2cMux) {
 
 		refreshControllers();
-		controller.setSelectedItem(ina219.getControllerName());
-		if (ina219.isAttached()) {
+		controller.setSelectedItem(myI2CMux.controllerName);
+		muxAddressList.setSelectedItem(myI2CMux.muxAddress);
+		muxBusList.setSelectedItem(myI2CMux.muxBus);
+		if (i2cMux.isAttached()) {
 			attachButton.setText(detach);
 			controller.setEnabled(false);
-			refresh.setEnabled(true);
+			muxAddressList.setEnabled(false);
+			muxBusList.setEnabled(false);
 		} else {
 			attachButton.setText(attach);
 			controller.setEnabled(true);
-			refresh.setEnabled(false);
+			muxAddressList.setEnabled(true);
+			muxBusList.setEnabled(true);
 		}
-		busVoltage.setText(String.format("%s", ina219.busVoltage));
-		shuntVoltage.setText(String.format("%s", ina219.shuntVoltage));
-		current.setText(String.format("%s", ina219.current));
-		power.setText(String.format("%s", ina219.power));
 	}
 
 	@Override
 	public void init() {
 
 		// Container BACKGROUND = getContentPane();
-
 		display.setLayout(new BorderLayout());
 		JPanel north = new JPanel();
-		north.add(controller);
 		north.add(attachButton);
-		north.add(refresh);
-		attachButton.addActionListener(this);	
-		refresh.addActionListener(this);
+		north.add(controller);
+		north.add(muxAddressLabel);
+		north.add(muxAddressList);
+		north.add(muxBusLabel);
+		north.add(muxBusList);
+		attachButton.addActionListener(this);
 
-		JPanel center = new JPanel();
-		center.add(new JLabel("Bus Voltage   :"));
-		center.add(busVoltage);
-		center.add(new JLabel(" mV"));
-
-		center.add(new JLabel("Shunt Voltage :"));
-		center.add(shuntVoltage);
-		center.add(new JLabel(" mV"));
-
-		center.add(new JLabel("Shunt Current :"));
-		center.add(current);
-		center.add(new JLabel(" mA"));
-
-		center.add(new JLabel("Power         :"));
-		center.add(power);
-		center.add(new JLabel(" mW"));
+		getMuxAddressList();
+		getMuxBusList();
 
 		display.add(north, BorderLayout.NORTH);
-		display.add(center, BorderLayout.CENTER);
 	}
-	
+
+	public void getMuxAddressList() {
+
+		ArrayList<String> mal = myI2CMux.muxAddressList;
+		for (int i = 0; i < mal.size(); i++) {
+			muxAddressList.addItem(mal.get(i));
+		}
+	}
+
+	public void getMuxBusList() {
+		ArrayList<String> mbl = myI2CMux.muxBusList;
+		for (int i = 0; i < mbl.size(); i++) {
+			muxBusList.addItem(mbl.get(i));
+		}
+	}
+
 	public void refreshControllers() {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 
-				myAdafruitIna219.refreshControllers();
+				ArrayList<String> v = myI2CMux.controllers;
 				controller.removeAllItems();
-				ArrayList<String> c = myAdafruitIna219.controllers;	
-				for (int i = 0; i < c.size(); ++i) {
-					controller.addItem(c.get(i));
+				if (v != null) {
+					for (int i = 0; i < v.size(); ++i) {
+						controller.addItem(v.get(i));
+					}
+					controller.setSelectedItem(myI2CMux.getControllerName());
 				}
-				controller.setSelectedItem(myAdafruitIna219.getControllerName());
 			}
 		});
 	}

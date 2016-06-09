@@ -84,7 +84,6 @@ public interface I2CControl {
 	 *           thrown in case byte cannot be read from the i2c device or i2c bus
 	 */
 	int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize);
-
-	public String getName();
-
+  
+	String getName();
 }
