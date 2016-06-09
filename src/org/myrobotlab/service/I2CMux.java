@@ -19,7 +19,7 @@ import org.slf4j.Logger;
  * It can be used with tca9548a and possibly other devices.
  * 
  * 
- * @author Mats Önnerby
+ * @author Mats Onnerby
  *  
  * More Info : https://www.adafruit.com/product/2717
  * 
