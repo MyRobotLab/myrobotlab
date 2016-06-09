@@ -228,7 +228,7 @@ public class AdafruitIna219 extends Service {
 
 		ServiceType meta = new ServiceType(AdafruitIna219.class.getCanonicalName());
 		meta.addDescription("Adafruit INA219 Voltage and Current sensor Service");
-		meta.addCategory("sensor");
+		meta.addCategory("shield", "sensor");
 		meta.setSponsor("Mats");
 		return meta;
 	}

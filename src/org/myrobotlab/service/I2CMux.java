@@ -215,6 +215,7 @@ public class I2CMux extends Service implements I2CControl {
 		ServiceType meta = new ServiceType(I2CMux.class.getCanonicalName());
 		meta.addDescription("Multiplexer for i2c to be able to use multiple i2c devices");
 		meta.addCategory("i2c", "control");
+    meta.setAvailable(true);
     meta.setSponsor("Mats");
 		return meta;
 	}
