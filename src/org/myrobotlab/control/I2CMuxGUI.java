@@ -53,11 +53,11 @@ public class I2CMuxGUI extends ServiceGUI implements ActionListener {
 	JButton attachButton = new JButton(attach);
 
 	JComboBox<String> controller = new JComboBox<String>();
-	JComboBox<String> muxAddressList = new JComboBox<String>();
 	JComboBox<String> muxBusList = new JComboBox<String>();
+	JComboBox<String> muxAddressList = new JComboBox<String>();
 
-	JLabel muxAddressLabel = new JLabel("Address");
 	JLabel muxBusLabel     = new JLabel("Bus");
+	JLabel muxAddressLabel = new JLabel("Address");
 	
 	I2CMux myI2CMux = null;
 

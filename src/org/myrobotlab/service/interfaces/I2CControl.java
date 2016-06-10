@@ -44,7 +44,7 @@ public interface I2CControl {
 	 */
 
 	void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size);
-
+  	
 	/**
 	 * This method reads bytes from the i2c device to given buffer.
 	 * 

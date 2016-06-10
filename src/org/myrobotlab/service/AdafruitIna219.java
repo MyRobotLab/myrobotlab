@@ -1,6 +1,8 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -30,9 +32,16 @@ public class AdafruitIna219 extends Service {
 	public static final byte INA219_SHUNTVOLTAGE = 0x01;
 	public static final byte INA219_BUSVOLTAGE = 0x02;
 
-	// Default i2cAddress
-	public int busAddress = 1;
-	public int deviceAddress = 0x40;
+	public List<String> deviceAddressList = Arrays.asList(
+			 "0x40","0x41","0x42","0x43","0x44","0x45","0x46","0x47",
+		   "0x48","0x49","0x4A","0x4B","0x4C","0x4D","0x4E","0x4F");
+			
+	public String deviceAddress = "0x40";
+	
+	public List<String> deviceBusList = Arrays.asList(
+			"0","1","2","3","4","5","6","7","8");	
+	public String deviceBus = "1";
+
 	public String type = "AdafruitIna219";
 
 	public int busVoltage = 0;
@@ -94,21 +103,26 @@ public class AdafruitIna219 extends Service {
 	 * the i2c device
 	 */
 	// @Override
-	public boolean setController(String controllerName) {
-		return setController((I2CControl) Runtime.getService(controllerName));
+	public boolean setController(String controllerName, String deviceBus, String deviceAddress) {
+		return setController((I2CControl) Runtime.getService(controllerName), deviceBus, deviceAddress);
 	}
 
+	public boolean setController(String controllerName) {
+		return setController((I2CControl) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
+	}
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
 	 */
-	public boolean setController(I2CControl controller) {
+	public boolean setController(I2CControl controller, String deviceBus, String deviceAddress) {
 		if (controller == null) {
 			error("setting null as controller");
 			return false;
 		}
 		controllerName = controller.getName();
 		this.controller = controller;
+		this.deviceBus = deviceBus;
+		this.deviceAddress = deviceAddress;
 		isAttached = true;
 
 		log.info(String.format("%s setController %s", getName(), controllerName));
@@ -120,6 +134,8 @@ public class AdafruitIna219 extends Service {
 	public void unsetController() {
 		controller = null;
 		controllerName = null;
+		this.deviceBus = null;
+		this.deviceAddress = null;
 		isAttached = false;
 		broadcastState();
 	}
@@ -138,6 +154,16 @@ public class AdafruitIna219 extends Service {
 
 		return controlerName;
 	}
+	
+	public void SetDeviceBus(String deviceBus){
+		this.deviceBus = deviceBus;
+		broadcastState();
+  }
+	
+	public void SetDeviceAddress(String deviceAddress){
+		this.deviceAddress = deviceAddress;
+		broadcastState();
+  }
 
 	public boolean isAttached() {
 		return isAttached;
@@ -146,15 +172,16 @@ public class AdafruitIna219 extends Service {
 	/**
 	 * This method creates the i2c device
 	 */
-	boolean setDeviceAddress(int DeviceAddress) {
+	boolean setDeviceAddress(String DeviceAddress) {
 		if (controller != null) {
 			if (deviceAddress != DeviceAddress) {
-				controller.releaseDevice(busAddress, deviceAddress);
-				controller.createDevice(busAddress, DeviceAddress, type);
+				controller.releaseDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.createDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
 			}
 		}
-		log.info(String.format("Setting device address to x%02X", deviceAddress));
-		deviceAddress = DeviceAddress;
+		
+		log.info(String.format("Setting device address to %s", deviceAddress));
+		this.deviceAddress = DeviceAddress;
 		return true;
 	}
 
@@ -194,8 +221,8 @@ public class AdafruitIna219 extends Service {
 	double getShuntVoltage() {
 		byte[] writebuffer = { INA219_SHUNTVOLTAGE };
 		byte[] readbuffer = { 0x0, 0x0 };
-		controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
-		controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
+		controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+		controller.i2cRead(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
 		// log.info(String.format("getShuntVoltage x%02X x%02X", readbuffer[0],
 		// readbuffer[1]));
 		shuntVoltage = (((int) (readbuffer[0]) << 8) + ((int) readbuffer[1] & 0xff));
@@ -208,10 +235,8 @@ public class AdafruitIna219 extends Service {
 	double getBusVoltage() {
 		byte[] writebuffer = { INA219_BUSVOLTAGE };
 		byte[] readbuffer = { 0x0, 0x0 };
-		controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
-		controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
-		// log.info(String.format("getBusVoltage x%02X x%02X", readbuffer[0],
-		// readbuffer[1]));
+		controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+		controller.i2cRead(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
 		busVoltage = (((int) (readbuffer[0]) << 8 & 0xffff) + ((int) readbuffer[1] & 0xf8)) * 4;
 		return busVoltage;
 	}
