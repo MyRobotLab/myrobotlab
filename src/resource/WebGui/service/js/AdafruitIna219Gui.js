@@ -12,9 +12,13 @@ angular.module('mrlapp.service.AdafruitIna219Gui', [])
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service;
-        $scope.controllerName = service.controllerName;
-        $scope.isAttached = service.isAttached;
         $scope.controllers = service.controllers;
+        $scope.controllerName = service.controllerName;
+        $scope.deviceBusList = service.deviceBusList;
+        $scope.deviceBus = service.deviceBus;
+        $scope.deviceAddressList = service.deviceAddressList;
+        $scope.deviceAddress = service.deviceAddress;
+        $scope.isAttached = service.isAttached;
         $scope.busVoltage = service.busVoltage;
         $scope.shuntVoltage = service.shuntVoltage;
         $scope.current = service.current;
@@ -31,21 +35,6 @@ angular.module('mrlapp.service.AdafruitIna219Gui', [])
             _self.updateState(data);
             $scope.$apply();
             break;
-        // servo event in the past 
-        // meant feedback from MRLComm.c
-        // but perhaps its come to mean
-        // feedback from the service.moveTo
-        case 'onStatus':
-            $scope.status = data;
-            $scope.$apply();
-            break;
-        case 'addListener':
-            // wtf?
-            $log.info("Add listener called");
-            $scope.status = data;
-            $scope.$apply();
-            break;
-            
         default:
             $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method);
             break;
@@ -57,6 +46,14 @@ angular.module('mrlapp.service.AdafruitIna219Gui', [])
     
     $scope.setControllerName = function(name) {
         $scope.controllerName = name;
+    }
+    
+        $scope.setDeviceBus = function(bus) {
+        $scope.deviceBus = bus;
+    }
+    
+        $scope.setDeviceAddress = function(address) {
+        $scope.deviceAddress = address;
     }
     
     // regrettably the onMethodMap dynamic
