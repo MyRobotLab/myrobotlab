@@ -413,6 +413,7 @@ public class WikiDataFetcher extends Service {
     meta.addDescription("service interface for Wikipedia");
     meta.addCategory("intelligence");
     meta.addDependency("org.wikidata.wdtk", "0.5.0");
+    meta.addDependency("org.apache.commons.httpclient", "4.2.5");
     return meta;
   }
 
