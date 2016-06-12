@@ -85,7 +85,7 @@ module.exports = function (config) {
             // source files, that you wanna generate coverage for
             // do not include tests or libraries
             // (these files will be instrumented by Istanbul)
-			'{*.js,!(lib|bower_components)/**/*.js}': ['coverage']
+			'{!(*_test).js,!(lib|bower_components)/**/!(*_test).js}': ['coverage']
         },
         // optionally, configure the reporter
         coverageReporter: {
