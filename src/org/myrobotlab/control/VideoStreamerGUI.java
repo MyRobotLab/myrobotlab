@@ -38,41 +38,41 @@ import org.slf4j.Logger;
 
 public class VideoStreamerGUI extends ServiceGUI implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(VideoStreamerGUI.class.getCanonicalName());
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(VideoStreamerGUI.class.getCanonicalName());
 
-	public VideoStreamerGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public VideoStreamerGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void attachGUI() {
-		// subscribe("publishState", "getState", VideoStreamer.class);
-		myService.send(boundServiceName, "publishState");
-	}
+  @Override
+  public void attachGUI() {
+    // subscribe("publishState", "getState", VideoStreamer.class);
+    myService.send(boundServiceName, "publishState");
+  }
 
-	@Override
-	public void detachGUI() {
-		// unsubscribe("publishState", "getState", VideoStreamer.class);
-	}
+  @Override
+  public void detachGUI() {
+    // unsubscribe("publishState", "getState", VideoStreamer.class);
+  }
 
-	public void getState(VideoStreamer streamer) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  public void getState(VideoStreamer streamer) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-			}
-		});
-	}
+      }
+    });
+  }
 
-	@Override
-	public void init() {
-	}
+  @Override
+  public void init() {
+  }
 
 }

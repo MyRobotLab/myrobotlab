@@ -4,176 +4,186 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 /**
- * Represents a 3d point in space.
- * TODO: add rotation (roll/pitch/yaw - rz,rx,ry)
+ * Represents a 3d point in space. TODO: add rotation (roll/pitch/yaw -
+ * rz,rx,ry)
+ * 
  * @author kwatters
  *
  */
 public class Point {
-	private double x;
-	private double y;
-	private double z;
+  private double x;
+  private double y;
+  private double z;
 
-	private double roll;
-	private double pitch;
-	private double yaw;
-	
-	/**
-	 * A 6 dimensional vector representing the 6 degrees of freedom in space.
-	 * 
-	 * @param x - left / right axis
-	 * @param y - up / down axis
-	 * @param z - forward / backward axis
-	 * @param roll - rotation about the z axis
-	 * @param pitch - rotation about the x axis
-	 * @param yaw - rotation about the y axis
-	 * 
-	 */
-	public Point(double x, double y, double z, double roll, double pitch, double yaw) {
-		super();
-		// linear information
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		// angular information
-		this.roll = roll;
-		this.pitch = pitch;
-		this.yaw = yaw;
-	}
+  private double roll;
+  private double pitch;
+  private double yaw;
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Point other = (Point) obj;
-		if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
-			return false;
-		if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
-			return false;
-		if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
-			return false;
-		if (Double.doubleToLongBits(roll) != Double.doubleToLongBits(other.roll))
-			return false;
-		if (Double.doubleToLongBits(pitch) != Double.doubleToLongBits(other.pitch))
-			return false;
-		if (Double.doubleToLongBits(yaw) != Double.doubleToLongBits(other.yaw))
-			return false;
-		return true;
-	}
+  /**
+   * A 6 dimensional vector representing the 6 degrees of freedom in space.
+   * 
+   * @param x
+   *          - left / right axis
+   * @param y
+   *          - up / down axis
+   * @param z
+   *          - forward / backward axis
+   * @param roll
+   *          - rotation about the z axis
+   * @param pitch
+   *          - rotation about the x axis
+   * @param yaw
+   *          - rotation about the y axis
+   * 
+   */
+  public Point(double x, double y, double z, double roll, double pitch, double yaw) {
+    super();
+    // linear information
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    // angular information
+    this.roll = roll;
+    this.pitch = pitch;
+    this.yaw = yaw;
+  }
 
-	public double getX() {
-		return x;
-	}
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Point other = (Point) obj;
+    if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
+      return false;
+    if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
+      return false;
+    if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
+      return false;
+    if (Double.doubleToLongBits(roll) != Double.doubleToLongBits(other.roll))
+      return false;
+    if (Double.doubleToLongBits(pitch) != Double.doubleToLongBits(other.pitch))
+      return false;
+    if (Double.doubleToLongBits(yaw) != Double.doubleToLongBits(other.yaw))
+      return false;
+    return true;
+  }
 
-	public double getY() {
-		return y;
-	}
+  public double getX() {
+    return x;
+  }
 
-	public double getZ() {
-		return z;
-	}
+  public double getY() {
+    return y;
+  }
 
-	public double getRoll() {
-		return roll;
-	}
+  public double getZ() {
+    return z;
+  }
 
-	public double getPitch() {
-		return pitch;
-	}
+  public double getRoll() {
+    return roll;
+  }
 
-	public double getYaw() {
-		return yaw;
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(x);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(y);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(z);
-		result = prime * result + (int) (temp ^ (temp >>> 32));		
-		temp = Double.doubleToLongBits(roll);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(pitch);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(yaw);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		return result;
-	}
+  public double getPitch() {
+    return pitch;
+  }
 
-	public double magnitude() {
-		// TODO Auto-generated method stub
-		return Math.sqrt(x * x + y * y + z * z);
-	}
+  public double getYaw() {
+    return yaw;
+  }
 
-	public Point subtract(Point p) {
-		// TODO Auto-generated method stub
-		Point newPoint = new Point(x - p.getX(), y - p.getY(), z - p.getZ(), roll - p.getRoll() , pitch - p.getPitch(), yaw - p.getYaw() );
-		return newPoint;
-	}
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    long temp;
+    temp = Double.doubleToLongBits(x);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(y);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(z);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(roll);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(pitch);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(yaw);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    return result;
+  }
 
-	@Override
-	public String toString() {
-		// TODO: round this out
-		NumberFormat formatter = new DecimalFormat("#0.000");
-		return "(x=" + formatter.format(x) + ", y=" + formatter.format(y) + ", z=" + formatter.format(z) + ", roll=" + formatter.format(roll) + ", pitch=" + formatter.format(pitch) + ", yaw=" + formatter.format(yaw) + ")";
-	}
+  public double magnitude() {
+    // TODO Auto-generated method stub
+    return Math.sqrt(x * x + y * y + z * z);
+  }
 
-	public void setX(double x) {
-		this.x = x;
-	}
+  public Point subtract(Point p) {
+    // TODO Auto-generated method stub
+    Point newPoint = new Point(x - p.getX(), y - p.getY(), z - p.getZ(), roll - p.getRoll(), pitch - p.getPitch(), yaw - p.getYaw());
+    return newPoint;
+  }
 
-	public void setY(double y) {
-		this.y = y;
-	}
+  @Override
+  public String toString() {
+    // TODO: round this out
+    NumberFormat formatter = new DecimalFormat("#0.000");
+    return "(x=" + formatter.format(x) + ", y=" + formatter.format(y) + ", z=" + formatter.format(z) + ", roll=" + formatter.format(roll) + ", pitch=" + formatter.format(pitch)
+        + ", yaw=" + formatter.format(yaw) + ")";
+  }
 
-	public void setZ(double z) {
-		this.z = z;
-	}
+  public void setX(double x) {
+    this.x = x;
+  }
 
-	public void setRoll(double roll) {
-		this.roll = roll;
-	}
+  public void setY(double y) {
+    this.y = y;
+  }
 
-	public void setPitch(double pitch) {
-		this.pitch = pitch;
-	}
+  public void setZ(double z) {
+    this.z = z;
+  }
 
-	public void setYaw(double yaw) {
-		this.yaw = yaw;
-	}
+  public void setRoll(double roll) {
+    this.roll = roll;
+  }
 
-	/**
-	 * add the x,y,z,roll,pitch,yaw of the point passed in, to the current point.
-	 * return a new point with the individual components summed. 
-	 * @param p
-	 * @return
-	 */
-	public Point add(Point p) {
-		// add the linear and angular parts and return the resulting sum.
-		// TODO: move this to a utils class and keep this a POJO.
-		Point p2 = new Point(p.x+x, p.y+y, p.z+z, p.roll+roll,p.pitch+pitch,p.yaw+yaw);
-		return p2;
-	}
-	
-	/**
-	 *  return a new point with the x,y,z values multipled by the xyzScale
-	 * @param xyzScale
-	 * @return
-	 */
-	public Point multiplyXYZ(double xyzScale) {
-		// add the linear and angular parts and return the resulting sum.
-		// TODO: move this to a utils class and keep this a POJO.
-		Point p2 = new Point(xyzScale*x, xyzScale*y, xyzScale*z, roll,pitch,yaw);
-		return p2;
-	}
-	
+  public void setPitch(double pitch) {
+    this.pitch = pitch;
+  }
+
+  public void setYaw(double yaw) {
+    this.yaw = yaw;
+  }
+
+  /**
+   * add the x,y,z,roll,pitch,yaw of the point passed in, to the current point.
+   * return a new point with the individual components summed.
+   * 
+   * @param p
+   * @return
+   */
+  public Point add(Point p) {
+    // add the linear and angular parts and return the resulting sum.
+    // TODO: move this to a utils class and keep this a POJO.
+    Point p2 = new Point(p.x + x, p.y + y, p.z + z, p.roll + roll, p.pitch + pitch, p.yaw + yaw);
+    return p2;
+  }
+
+  /**
+   * return a new point with the x,y,z values multipled by the xyzScale
+   * 
+   * @param xyzScale
+   * @return
+   */
+  public Point multiplyXYZ(double xyzScale) {
+    // add the linear and angular parts and return the resulting sum.
+    // TODO: move this to a utils class and keep this a POJO.
+    Point p2 = new Point(xyzScale * x, xyzScale * y, xyzScale * z, roll, pitch, yaw);
+    return p2;
+  }
+
 }

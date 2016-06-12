@@ -12,41 +12,40 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 
 public class EncoderTest {
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-	}
 
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.INFO);
+  }
 
-	@Test
-	public void testEncoderDecodeURI() throws Exception {
-		//Encoder e = new Encoder();
+  @Test
+  public void testEncoderDecodeURI() throws Exception {
+    // Encoder e = new Encoder();
 
-		Message msg = CodecUri.decodeURI(new URI("http://www.myrobotlab.org:7777/api/foo/getCategories"));
-		assertNotNull(msg);
-		assertEquals("foo", msg.getName());
-		assertEquals("getCategories", msg.method);
-		
-		msg = CodecUri.decodeURI(new URI("http://www.myrobotlab.org:7777/api"));
-		assertNotNull(msg);
-		assertEquals("help", msg.method);
-		assertEquals("", msg.getName()); // FIXME SHOULD BE NULL
-		
-		// Runtime.getService(foo) (TYPE)
-		msg = CodecUri.decodeURI(new URI("http://www.myrobotlab.org:7777/api/foo"));
-		assertNotNull(msg);
-		assertEquals("", msg.getName());
-		assertEquals("foo", msg.method);
+    Message msg = CodecUri.decodeURI(new URI("http://www.myrobotlab.org:7777/api/foo/getCategories"));
+    assertNotNull(msg);
+    assertEquals("foo", msg.getName());
+    assertEquals("getCategories", msg.method);
 
-		// Runtime.showMethods(foo) (TYPE)
-		/*
-		msg = Encoder.decodeURI(new URI("http://www.myrobotlab.org:7777/api/foo/"));
-		assertNotNull(msg);
-		assertEquals("foo", msg.getName());
-		*/
-		
-	}
+    msg = CodecUri.decodeURI(new URI("http://www.myrobotlab.org:7777/api"));
+    assertNotNull(msg);
+    assertEquals("help", msg.method);
+    assertEquals("", msg.getName()); // FIXME SHOULD BE NULL
+
+    // Runtime.getService(foo) (TYPE)
+    msg = CodecUri.decodeURI(new URI("http://www.myrobotlab.org:7777/api/foo"));
+    assertNotNull(msg);
+    assertEquals("", msg.getName());
+    assertEquals("foo", msg.method);
+
+    // Runtime.showMethods(foo) (TYPE)
+    /*
+     * msg = Encoder.decodeURI(new
+     * URI("http://www.myrobotlab.org:7777/api/foo/")); assertNotNull(msg);
+     * assertEquals("foo", msg.getName());
+     */
+
+  }
 
 }

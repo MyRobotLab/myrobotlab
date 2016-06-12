@@ -1,5 +1,5 @@
 package org.myrobotlab.service;
- 
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +27,8 @@ import com.pi4j.wiringpi.SoftPwm;
 
 /**
  * 
- * RasPi - This is the MyRobotLab Service for the Raspberry Pi.  
- * It should allow all control offered by the great Pi4J project.
+ * RasPi - This is the MyRobotLab Service for the Raspberry Pi. It should allow
+ * all control offered by the great Pi4J project.
  * 
  * More Info : http://pi4j.com/
  * 
@@ -51,7 +51,7 @@ public class RasPi extends Service implements I2CControl {
 	// FIXME - do a
 	GpioPinDigitalOutput gpio01;
 	GpioPinDigitalOutput gpio03;
-	
+
 	// i2c bus
 	public static I2CBus i2c;
 
@@ -84,7 +84,6 @@ public class RasPi extends Service implements I2CControl {
 		Runtime.createAndStart(String.format("rasRemote%d", i), "RemoteAdapter");
 	}
 
-	
 	/*
 	 * FIXME - make these methods createDigitalAndPwmPin public
 	 * GpioPinDigitalOutput provisionDigitalOutputPin
@@ -96,17 +95,16 @@ public class RasPi extends Service implements I2CControl {
 		Platform platform = Platform.getLocalInstance();
 		log.info(String.format("platform is %s", platform));
 		log.info(String.format("architecture is %s", platform.getArch()));
-		
+
 		if ("arm".equals(platform.getArch()) || "armv7.hfp".equals(platform.getArch())) {
 			log.info("Executing on Raspberry PI");
-			// init gpio	
+			// init gpio
 			/*
-			log.info("Initiating GPIO");
-			gpio = GpioFactory.getInstance();
-			log.info("GPIO Initiated");
-			*/
-			// init i2c			
-			try {		
+			 * log.info("Initiating GPIO"); gpio = GpioFactory.getInstance();
+			 * log.info("GPIO Initiated");
+			 */
+			// init i2c
+			try {
 				log.info("Initiating i2c");
 				i2c = I2CFactory.getInstance(I2CBus.BUS_1);
 				log.info("i2c initiated");
@@ -115,13 +113,13 @@ public class RasPi extends Service implements I2CControl {
 				log.error("i2c initiation failed");
 				Logging.logError(e);
 			}
-			
+
 			// TODO Check if the is correct. I don't think it is /Mats
-			// GPIO pins should be provisioned in the CreateDevice 
+			// GPIO pins should be provisioned in the CreateDevice
 			/*
-			gpio01 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01);
-			gpio03 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03);
-            */
+			 * gpio01 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01); gpio03 =
+			 * gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03);
+			 */
 		} else {
 			// we should be running on a Raspberry Pi
 			log.error("architecture is not arm");
@@ -130,21 +128,20 @@ public class RasPi extends Service implements I2CControl {
 
 	// FIXME - create low level I2CDevice
 	public void createDevice(int busAddress, int deviceAddress, String type) {
-        
+
 		try {
 			I2CDevice device = i2c.getDevice(deviceAddress);
 			I2CBus bus = I2CFactory.getInstance(busAddress);
 			String key = String.format("%d.%d", busAddress, deviceAddress);
-			
+
 			Device devicedata = new Device();
-			if (devices.containsKey(key)){
-				log.error(String.format("Device %s %s %s already exists.",busAddress, deviceAddress,type));
-			}
-			else
+			if (devices.containsKey(key)) {
+				log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, type));
+			} else
 				devicedata.bus = bus;
-			    devicedata.device = device;
-			    devicedata.type = type;
-				devices.put(key, devicedata);
+			devicedata.device = device;
+			devicedata.type = type;
+			devices.put(key, devicedata);
 
 			// PCF8574GpioProvider pcf = new PCF8574GpioProvider(busAddress,
 			// deviceAddress);
@@ -153,50 +150,43 @@ public class RasPi extends Service implements I2CControl {
 			// PCF8574GpioProvider p = new PCF8574GpioProvider(busAddress,
 			// deviceAddress);
 			// p.setValue(pin, value)
-			
-            /*
-			if ("com.pi4j.gpio.extension.pcf.PCF8574GpioProvider".equals(type)) {
-				Device d = new Device();
-				d.bus = bus;
-				d.device = (I2CDevice) new PCF8574GpioProvider(busAddress, deviceAddress);
-				d.type = d.device.getClass().getCanonicalName();// "PCF8574GpioProvider";
-																// // full type
-																// name
-				devices.put(key, d);
-				return d.device;
-				
-			
-			} else {
-				log.error("could not create device %s", type);
-				return null;
-			}
-			*/
-			
+
+			/*
+			 * if ("com.pi4j.gpio.extension.pcf.PCF8574GpioProvider".equals(type)) {
+			 * Device d = new Device(); d.bus = bus; d.device = (I2CDevice) new
+			 * PCF8574GpioProvider(busAddress, deviceAddress); d.type =
+			 * d.device.getClass().getCanonicalName();// "PCF8574GpioProvider"; // //
+			 * full type // name devices.put(key, d); return d.device;
+			 * 
+			 * 
+			 * } else { log.error("could not create device %s", type); return null; }
+			 */
+
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
-     
+
 	}
 
 	@Override
 	public void releaseDevice(int busAddress, int deviceAddress) {
-		
+
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		devices.remove(key);
-		
+
 	}
-	
+
 	// FIXME - return array
 	public Integer[] scanI2CDevices(int busAddress) {
 		log.info("scanning through I2C devices");
 		ArrayList<Integer> list = new ArrayList<Integer>();
 		try {
 			/*
-			 * From its name we can easily deduce that it provides a
-			 * communication link between ICs (integrated circuits). I2C is
-			 * multimaster and can support a maximum of 112 devices on the bus.
-			 * The specification declares that 128 devices can be connected to
-			 * the I2C bus, but it also defines 16 reserved addresses.
+			 * From its name we can easily deduce that it provides a communication
+			 * link between ICs (integrated circuits). I2C is multimaster and can
+			 * support a maximum of 112 devices on the bus. The specification declares
+			 * that 128 devices can be connected to the I2C bus, but it also defines
+			 * 16 reserved addresses.
 			 */
 			I2CBus bus = I2CFactory.getInstance(busAddress);
 
@@ -226,7 +216,7 @@ public class RasPi extends Service implements I2CControl {
 
 	public void testGPIOOutput() {
 		GpioPinDigitalMultipurpose pin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_02, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_DOWN);
-
+		log.info("Pin: {}", pin);
 	}
 
 	public void testPWM() {
@@ -258,16 +248,17 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	@Override
-	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size){
+	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
-    	log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+		log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
 		Device devicedata = devices.get(key);
 		try {
 			devicedata.device.write(buffer, 0, buffer.length);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Logging.logError(e);
-		};	
+		}
+		;
 	}
 
 	@Override
@@ -280,14 +271,13 @@ public class RasPi extends Service implements I2CControl {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Logging.logError(e);
-		};	
+		}
+		;
 		return buffer.length;
 	}
 
-
 	@Override
-	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize,
-		byte[] readBuffer, int readSize) {
+	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		Device devicedata = devices.get(key);
 		try {
@@ -295,7 +285,8 @@ public class RasPi extends Service implements I2CControl {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Logging.logError(e);
-		};	
+		}
+		;
 		return readBuffer.length;
 	}
 
@@ -311,10 +302,10 @@ public class RasPi extends Service implements I2CControl {
 
 		ServiceType meta = new ServiceType(RasPi.class.getCanonicalName());
 		meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware such as I2C");
-		meta.addCategory("i2c","control");
+		meta.addCategory("i2c", "control");
+    meta.setSponsor("Mats");
 		meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
 		return meta;
 	}
-
 
 }

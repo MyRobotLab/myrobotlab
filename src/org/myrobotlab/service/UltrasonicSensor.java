@@ -14,8 +14,11 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.RangeListener;
-import org.myrobotlab.service.interfaces.SensorDataSink;
+import org.myrobotlab.service.interfaces.SensorDataListener;
+import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.slf4j.Logger;
 
 /**
@@ -24,254 +27,287 @@ import org.slf4j.Logger;
  * connected to an android.
  *
  */
-public class UltrasonicSensor extends Service implements RangeListener, SensorDataSink {
+public class UltrasonicSensor extends Service implements RangeListener, SensorDataPublisher {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(UltrasonicSensor.class);
+  public final static Logger log = LoggerFactory.getLogger(UltrasonicSensor.class);
 
+  public final Set<String> types = new HashSet<String>(Arrays.asList("SR04"));
+  private int pings;
+  // private int max;
 
-	public final Set<String> types = new HashSet<String>(Arrays.asList("SR04"));
-	private int pings;
-	private int max;
+  // private int min;
+  // private int sampleRate;
 
-	private int min;
-	private int sampleRate;
+  // TODO - avg ?
 
-	// TODO - avg ?
+  // private int sensorMinCM;
+  // private int sensorMaxCM;
+  private Integer trigPin = null;
+  private Integer echoPin = null;
+  private String type = "SR04";
 
-	private int sensorMinCM;
-	private int sensorMaxCM;
-	private Integer trigPin = null;
-	private Integer echoPin = null;
-	private String type = "SR04";
+  private Integer lastRaw;
+  private Integer lastRange;
 
-	private Integer lastRaw;
-	private Integer lastRange;
+  // for blocking asynchronous data
+  private boolean isBlocking = false;
 
-	// for blocking asynchronous data
-	private boolean isBlocking = false;
+  transient private BlockingQueue<Integer> data = new LinkedBlockingQueue<Integer>();
 
-	transient private BlockingQueue<Integer> data = new LinkedBlockingQueue<Integer>();
+  private transient Arduino controller;
 
-	private transient Arduino controller;
+  String controllerName;
 
-	String controllerName;
+  public UltrasonicSensor(String n) {
+    super(n);
+  }
 
-	public UltrasonicSensor(String n) {
-		super(n);
-	}
+  // ---- part of interfaces begin -----
 
-	// ---- part of interfaces begin -----
+  // Uber good - .. although this is "chained" versus star routing
+  // Star routing would be routing from the Arduino directly to the Listener
+  // The "chained" version takes 2 thread contexts :( .. but it has the
+  // benefit
+  // of the "publishRange" method being affected by the Sensor service e.g.
+  // change units, sample rate, etc
+  public void addRangeListener(Service service) {
+    addListener("publishRange", service.getName(), "onRange");
+  }
 
-	// Uber good - .. although this is "chained" versus star routing
-	// Star routing would be routing from the Arduino directly to the Listener
-	// The "chained" version takes 2 thread contexts :( .. but it has the
-	// benefit
-	// of the "publishRange" method being affected by the Sensor service e.g.
-	// change units, sample rate, etc
-	public void addRangeListener(Service service) {
-		addListener("publishRange", service.getName(), "onRange");
-	}
+  public void attach(String port, int pin) throws IOException {
+    attach(port, pin, pin);
+  }
 
-	public void attach(String port, int pin) throws IOException {
-		attach(port, pin, pin);
-	}
+  public boolean attach(String port, int trigPin, int echoPin) throws IOException {
+    controller = (Arduino) startPeer("controller");
+    controllerName = controller.getName();
+    this.trigPin = trigPin;
+    this.echoPin = echoPin;
+    this.controller.connect(port); // THIS BETTER BLOCK UNTIL READY !
+    return controller.sensorAttach(this);
+  }
 
-	public boolean attach(String port, int trigPin, int echoPin) throws IOException {
-		controller = (Arduino) startPeer("controller");
-		controllerName = controller.getName();
-		this.trigPin = trigPin;
-		this.echoPin = echoPin;
-		this.controller.connect(port); // THIS BETTER BLOCK UNTIL READY !
-		return controller.sensorAttach(this);
-	}
+  // FIXME - should be MicroController Interface ..
+  public Arduino getController() {
+    return controller;
+  }
 
+  /**
+   * method for the controller to get the data type we want
+   */
+//  @Override
+//  public String getDataSinkType() {
+//    // we want an Integer
+//    // return Integer.class.getCanonicalName();
+//    return "INTEGER_SENSOR";
+//  }
 
-	// FIXME - should be MicroController Interface ..
-	public Arduino getController() {
-		return controller;
-	}
+  public int getEchoPin() {
+    return echoPin;
+  }
 
-	/**
-	 * method for the controller to get the data type we want
-	 */
-	@Override
-	public int getDataSinkType() {
-		// we want an Integer
-		//return Integer.class.getCanonicalName();
-		return DATA_SINK_TYPE_INTEGER;
-	}
+  public int getTriggerPin() {
+    return trigPin;
+  }
 
+  @Override
+  public void onRange(Long range) {
+    log.info(String.format("RANGE: %d", range));
+  }
 
-	public int getEchoPin() {
-		return echoPin;
-	}
+  /* FIXME !!! IMPORTANT PUT IN INTERFACE & REMOVE SELF FROM ARDUINO !!! */
+  public Integer publishRange(Integer duration) {
 
-	public int getTriggerPin() {
-		return trigPin;
-	}
+    ++pings;
 
-	@Override
-	public void onRange(Long range) {
-		log.info(String.format("RANGE: %d", range));
-	}
+    lastRange = duration / 58;
 
-	/* FIXME !!! IMPORTANT PUT IN INTERFACE & REMOVE SELF FROM ARDUINO !!! */
-	public Integer publishRange(Integer duration) {
-		
-		++pings;
+    log.info("publishRange {}", lastRange);
+    return lastRange;
+  }
 
-		lastRange = duration / 58;
+  public int range() {
+    return range(10);
+  }
 
-		log.info("publishRange {}", lastRange);
-		return lastRange;
-	}
+  public Integer range(int timeout) {
 
-	public int range() {
-		return range(10);
-	}
+    Integer ret = null;
 
-	public Integer range(int timeout) {
+    try {
+      data.clear();
+      startRanging(timeout);
+      // sendMsg(GET_VERSION);
+      ret = data.poll(timeout, TimeUnit.MILLISECONDS);
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+    data.clear(); // double tap
+    return ret;// controller.pulseIn(trigPin, echoPin, timeout);
+  }
 
-		Integer ret = null;
+  public boolean setType(String type) {
+    if (types.contains(type)) {
+      this.type = type;
+      return true;
+    }
+    return false;
+  }
 
-		try {
-			data.clear();
-			startRanging(timeout);
-			// sendMsg(GET_VERSION);
-			ret = data.poll(timeout, TimeUnit.MILLISECONDS);
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		data.clear(); // double tap
-		return ret;// controller.pulseIn(trigPin, echoPin, timeout);
-	}
+  // ---- part of interfaces end -----
 
-	public boolean setType(String type) {
-		if (types.contains(type)) {
-			this.type = type;
-			return true;
-		}
-		return false;
-	}
+  public void startRanging() {
+    startRanging(10); // 10000 uS = 10 ms
+  }
 
-	// ---- part of interfaces end -----
+  public void startRanging(int timeoutMS) {
+    controller.sensorPollingStart(getName(), timeoutMS);
+  }
 
-	public void startRanging() {
-		startRanging(10); // 10000 uS = 10 ms
-	}
+  public void stopRanging() {
+    controller.sensorPollingStop(getName());
+  }
 
-	public void startRanging(int timeoutMS) {
-		controller.sensorPollingStart(getName(), timeoutMS);
-	}
+  @Override
+  public void update(Object raw) {
+    ++pings;
+    lastRaw = (Integer) raw;
+    if (isBlocking) {
+      try {
+        data.put(lastRaw);
+      } catch (InterruptedException e) {
+        Logging.logError(e);
+      }
+    }
 
-	public void stopRanging() {
-		controller.sensorPollingStop(getName());
-	}
+    invoke("publishRange", lastRaw);
+  }
 
-	@Override
-	public void update(Object raw) {
-		++pings;
-		lastRaw = (Integer) raw;
-		if (isBlocking) {
-			try {
-				data.put(lastRaw);
-			} catch (InterruptedException e) {
-				Logging.logError(e);
-			}
-		}
+  @Override
+  public String getSensorType() {
+    return "ULTRASONIC";
+  }
 
-		invoke("publishRange", lastRaw);
-	}
+  @Override
+  public int[] getSensorConfig() {
+    int[] config = new int[] { trigPin, echoPin };
+    return config;
+  }
 
-	@Override
-	public int getSensorType() {
-		return SENSOR_TYPE_ULTRASONIC;
-	}
+  public void test(int x, int y) {
+    log.info("int %d %d", x, y);
+  }
 
-	@Override
-	public int[] getSensorConfig() {
-		int[] config = new int[]{trigPin, echoPin};
-		return config;
-	}
-	
-	public void test(int x, int y){
-		log.info("int %d %d", x, y);
-	}
-	
-	public void test(double x, double y){
-		log.info(String.format("double %f %f", x, y));
-	}
-	
-	public void test(Double x, Double y){
-		log.info("double object %d %d", x, y);
-	}
-	
-	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+  public void test(double x, double y) {
+    log.info(String.format("double %f %f", x, y));
+  }
 
-		try {
+  public void test(Double x, Double y) {
+    log.info("double object %d %d", x, y);
+  }
 
-			//Runtime.start("gui", "GUIService");
-			
-			/*
-			int [] config = new int[]{1,2};
-			int [] payload = new int[config.length + 2];
-			payload = Arrays.copyOfRange(config, 0, 2);
-			*/
-			
-			UltrasonicSensor srf05 = (UltrasonicSensor) Runtime.start("srf05", "UltrasonicSensor");
-			Runtime.start("python", "Python");
-			Runtime.start("gui", "GUIService");
-			/*
-			srf05.attach("COM9", 7);
-			
-			Runtime.start("webgui", "WebGui");
+  public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			Arduino arduino = srf05.getController();
-			arduino.digitalWrite(13, 1);
-			arduino.digitalWrite(13, 0);
-			arduino.digitalWrite(13, 1);
-			arduino.digitalWrite(13, 0);
-			arduino.digitalWrite(13, 1);
-			Integer version = arduino.getVersion();			
-			log.info("version {}", version);
-			version = arduino.getVersion();			
-			log.info("version {}", version);
-			version = arduino.getVersion();			
-			log.info("version {}", version);
-			
-			srf05.startRanging();
-			
-			srf05.stopRanging();
-			
-			int x = srf05.range();
-			*/
-			
-			log.info("here");
+    try {
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+      // Runtime.start("gui", "GUIService");
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+      /*
+       * int [] config = new int[]{1,2}; int [] payload = new int[config.length
+       * + 2]; payload = Arrays.copyOfRange(config, 0, 2);
+       */
 
-		ServiceType meta = new ServiceType(UltrasonicSensor.class.getCanonicalName());
-		meta.addDescription("Ranging sensor");
-		meta.addCategory("sensor");		
-		return meta;
-	}
-	
+      Runtime.start("srf05", "UltrasonicSensor");
+      Runtime.start("python", "Python");
+      Runtime.start("gui", "GUIService");
+      /*
+       * srf05.attach("COM9", 7);
+       * 
+       * Runtime.start("webgui", "WebGui");
+       * 
+       * Arduino arduino = srf05.getController(); arduino.digitalWrite(13, 1);
+       * arduino.digitalWrite(13, 0); arduino.digitalWrite(13, 1);
+       * arduino.digitalWrite(13, 0); arduino.digitalWrite(13, 1); Integer
+       * version = arduino.getVersion(); log.info("version {}", version);
+       * version = arduino.getVersion(); log.info("version {}", version);
+       * version = arduino.getVersion(); log.info("version {}", version);
+       * 
+       * srf05.startRanging();
+       * 
+       * srf05.stopRanging();
+       * 
+       * int x = srf05.range();
+       */
+
+      log.info("here");
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(UltrasonicSensor.class.getCanonicalName());
+    meta.addDescription("Ranging sensor");
+    meta.addCategory("sensor");
+    return meta;
+  }
+
+  public int getPings() {
+    return pings;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  @Override
+  public SensorData publishSensorData(SensorData data) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void addSensorDataListener(SensorDataListener listener) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void attach(Microcontroller controller) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void detach() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void start() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void stop() {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

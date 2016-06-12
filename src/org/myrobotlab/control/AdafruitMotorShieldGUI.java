@@ -45,79 +45,82 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.AdafruitMotorShield;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 public class AdafruitMotorShieldGUI extends ServiceGUI implements ListSelectionListener {
 
-	class ButtonListener implements ActionListener {
-		ButtonListener() {
-		}
+  class ButtonListener implements ActionListener {
+    ButtonListener() {
+    }
 
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			log.info(e.getActionCommand());
-			myService.send(boundServiceName, e.getActionCommand());
-		}
-	}
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      log.info(e.getActionCommand());
+      myService.send(boundServiceName, e.getActionCommand());
+    }
+  }
 
-	public final static Logger log = LoggerFactory.getLogger(AdafruitMotorShieldGUI.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(AdafruitMotorShieldGUI.class.getCanonicalName());
 
-	static final long serialVersionUID = 1L;
-	private AdafruitMotorShield myAdafruitMotorShield = null;
+  static final long serialVersionUID = 1L;
+  // private AdafruitMotorShield myAdafruitMotorShield = null;
 
-	JLayeredPane imageMap;
+  JLayeredPane imageMap;
 
-	public AdafruitMotorShieldGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-		myAdafruitMotorShield = (AdafruitMotorShield) Runtime.getService(boundServiceName);
-	}
+  public AdafruitMotorShieldGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+    // myAdafruitMotorShield = (AdafruitMotorShield)
+    // Runtime.getService(boundServiceName);
+    // TODO: this needs to be implemented, myAdafruitMotorShield is never used
+    // in this class?
+    // am I missing something?
+  }
 
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", Arduino.class);
-		myService.send(boundServiceName, "publishState");
-	}
+  @Override
+  public void attachGUI() {
+    subscribe("publishState", "getState", Arduino.class);
+    myService.send(boundServiceName, "publishState");
+  }
 
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", Arduino.class);
-	}
+  @Override
+  public void detachGUI() {
+    unsubscribe("publishState", "getState", Arduino.class);
+  }
 
-	public void getAFPanel() {
-		imageMap = new JLayeredPane();
-		imageMap.setPreferredSize(new Dimension(400, 266));
-		imageMap.setVisible(true);
-		// pinComponentList = new ArrayList<PinComponent>();
+  public void getAFPanel() {
+    imageMap = new JLayeredPane();
+    imageMap.setPreferredSize(new Dimension(400, 266));
+    imageMap.setVisible(true);
+    // pinComponentList = new ArrayList<PinComponent>();
 
-		// set correct arduino image
-		JLabel image = new JLabel();
+    // set correct arduino image
+    JLabel image = new JLabel();
 
-		ImageIcon dPic = Util.getImageIcon("AdafruitMotorShield/DC_Motor_Ports.png");
-		image.setIcon(dPic);
-		Dimension s = image.getPreferredSize();
-		image.setBounds(0, 0, s.width, s.height);
-		imageMap.add(image, new Integer(1));
-	}
+    ImageIcon dPic = Util.getImageIcon("AdafruitMotorShield/DC_Motor_Ports.png");
+    image.setIcon(dPic);
+    Dimension s = image.getPreferredSize();
+    image.setBounds(0, 0, s.width, s.height);
+    imageMap.add(image, new Integer(1));
+  }
 
-	public void getState(AdafruitMotorShield shield) {
-		if (shield != null) {
-			// setPorts(roomba.getDeviceNames());
-		}
+  public void getState(AdafruitMotorShield shield) {
+    if (shield != null) {
+      // setPorts(roomba.getDeviceNames());
+    }
 
-	}
+  }
 
-	@Override
-	public void init() {
+  @Override
+  public void init() {
 
-		getAFPanel();
-		display.add(imageMap);
-	}
+    getAFPanel();
+    display.add(imageMap);
+  }
 
-	@Override
-	public void valueChanged(ListSelectionEvent arg0) {
-		// TODO Auto-generated method stub
+  @Override
+  public void valueChanged(ListSelectionEvent arg0) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
 }

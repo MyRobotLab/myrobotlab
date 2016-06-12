@@ -41,366 +41,357 @@ import com.thalmic.myo.enums.XDirection;
  */
 public class MyoThalmic extends Service implements DeviceListener, MyoDataListener, MyoDataPublisher {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(MyoThalmic.class);
+  public final static Logger log = LoggerFactory.getLogger(MyoThalmic.class);
 
-	static int scale = 180;
-	double rollW = 0;
-	double pitchW = 0;
-	double yawW = 0;
-	transient Pose currentPose;
-	transient Arm whichArm;
+  static int scale = 180;
+  double rollW = 0;
+  double pitchW = 0;
+  double yawW = 0;
+  transient Pose currentPose;
+  transient Arm whichArm;
 
-	transient Myo myo = null;
-	transient Hub hub = null;
-	transient HubThread hubThread = null;
-	
-	MyoData myodata = new MyoData();
-	boolean delta = false;
-	boolean locked = true;
-	int batterLevel = 0;
+  transient Myo myo = null;
+  transient Hub hub = null;
+  transient HubThread hubThread = null;
 
-	boolean isConnected = false;
+  MyoData myodata = new MyoData();
+  boolean delta = false;
+  boolean locked = true;
+  int batterLevel = 0;
 
-	class HubThread extends Thread {
-		public boolean running = false;
-		MyoThalmic myService = null;
+  boolean isConnected = false;
 
-		public HubThread(MyoThalmic myService) {
-			this.myService = myService;
-		}
+  class HubThread extends Thread {
+    public boolean running = false;
+    MyoThalmic myService = null;
 
-		public void run() {
-			running = true;
-			while (running) {
-				hub.run(1000 / 20);
-				// log.info(myService.toString());
-			}
-		}
-	}
+    public HubThread(MyoThalmic myService) {
+      this.myService = myService;
+    }
 
-	public void disconnect() {
-		
-		
-		if (hubThread != null) {
-			hubThread.running = false;
-			hubThread = null;
-		}
+    public void run() {
+      running = true;
+      while (running) {
+        hub.run(1000 / 20);
+        // log.info(myService.toString());
+      }
+    }
+  }
 
-		hub.removeListener(this);
+  public void disconnect() {
 
-		isConnected = false;
-		broadcastState();
-	}
+    if (hubThread != null) {
+      hubThread.running = false;
+      hubThread = null;
+    }
 
-	public void connect() {		
-		if (hub == null){
-			// FIXME - put in connect
-			try {
-				currentPose = new Pose();
-				hub = new Hub("com.example.hello-myo");
-			} catch(Exception e){
-				Logging.logError(e);
-			}			
-		}
-		
-		if (myo == null) {
-			info("Attempting to find a Myo...");
-			myo = hub.waitForMyo(10000);
-		}
+    hub.removeListener(this);
 
-		if (myo == null) {
-			error("Unable to find a Myo");
-			isConnected = false;
-			return;
-		}
+    isConnected = false;
+    broadcastState();
+  }
 
-		info("Connected to a Myo armband!");
-		hub.addListener(this);
+  public void connect() {
+    if (hub == null) {
+      // FIXME - put in connect
+      try {
+        currentPose = new Pose();
+        hub = new Hub("com.example.hello-myo");
+      } catch (Exception e) {
+        Logging.logError(e);
+      }
+    }
 
-		if (hubThread == null) {
-			hubThread = new HubThread(this);
-			hubThread.start();
-		}
+    if (myo == null) {
+      info("Attempting to find a Myo...");
+      myo = hub.waitForMyo(10000);
+    }
 
-		isConnected = true;
-		myo.requestBatteryLevel();
-		broadcastState();
-	}
+    if (myo == null) {
+      error("Unable to find a Myo");
+      isConnected = false;
+      return;
+    }
 
-	public MyoThalmic(String n) {
-		super(n);
-	}
+    info("Connected to a Myo armband!");
+    hub.addListener(this);
 
+    if (hubThread == null) {
+      hubThread = new HubThread(this);
+      hubThread.start();
+    }
 
-	@Override
-	public void onOrientationData(Myo myo, long timestamp, Quaternion rotation) {
+    isConnected = true;
+    myo.requestBatteryLevel();
+    broadcastState();
+  }
 
-		Quaternion normalized = rotation.normalized();
+  public MyoThalmic(String n) {
+    super(n);
+  }
 
-		double roll = Math.atan2(2.0f * (normalized.getW() * normalized.getX() + normalized.getY() * normalized.getZ()),
-				1.0f - 2.0f * (normalized.getX() * normalized.getX() + normalized.getY() * normalized.getY()));
-		double pitch = Math.asin(2.0f * (normalized.getW() * normalized.getY() - normalized.getZ() * normalized.getX()));
-		double yaw = Math.atan2(2.0f * (normalized.getW() * normalized.getZ() + normalized.getX() * normalized.getY()),
-				1.0f - 2.0f * (normalized.getY() * normalized.getY() + normalized.getZ() * normalized.getZ()));
+  @Override
+  public void onOrientationData(Myo myo, long timestamp, Quaternion rotation) {
 
-		rollW = Math.round((roll + Math.PI) / (Math.PI * 2.0) * scale);
-		pitchW = Math.round((pitch + Math.PI / 2.0) / Math.PI * scale);
-		yawW = Math.round((yaw + Math.PI) / (Math.PI * 2.0) * scale);
+    Quaternion normalized = rotation.normalized();
 
-		delta = (myodata.roll - rollW != 0) || (myodata.pitch - pitchW != 0) || (myodata.yaw - yawW != 0);
+    double roll = Math.atan2(2.0f * (normalized.getW() * normalized.getX() + normalized.getY() * normalized.getZ()),
+        1.0f - 2.0f * (normalized.getX() * normalized.getX() + normalized.getY() * normalized.getY()));
+    double pitch = Math.asin(2.0f * (normalized.getW() * normalized.getY() - normalized.getZ() * normalized.getX()));
+    double yaw = Math.atan2(2.0f * (normalized.getW() * normalized.getZ() + normalized.getX() * normalized.getY()),
+        1.0f - 2.0f * (normalized.getY() * normalized.getY() + normalized.getZ() * normalized.getZ()));
 
-		if (delta) {
-			myodata.roll = rollW;
-			myodata.pitch = pitchW;
-			myodata.yaw = yawW;
+    rollW = Math.round((roll + Math.PI) / (Math.PI * 2.0) * scale);
+    pitchW = Math.round((pitch + Math.PI / 2.0) / Math.PI * scale);
+    yawW = Math.round((yaw + Math.PI) / (Math.PI * 2.0) * scale);
 
-			myodata.timestamp = timestamp;
-			invoke("publishMyoData", myodata);
-		}
-	}
-	
-	
-	@Override
-	public void onPose(Myo myo, long timestamp, Pose pose) {
-		currentPose = pose;
-		myodata.currentPose = pose.getType().toString();
-		if (currentPose.getType() == PoseType.FIST) {
-			myo.vibrate(VibrationType.VIBRATION_MEDIUM);
-		}
-		invoke("publishPose", pose);
-		invoke("publishMyoData", myodata);
-	}
+    delta = (myodata.roll - rollW != 0) || (myodata.pitch - pitchW != 0) || (myodata.yaw - yawW != 0);
 
-	public void addPoseListener(Service service) {
-		addListener("publishPose", service.getName(), "onPose");
-	}
+    if (delta) {
+      myodata.roll = rollW;
+      myodata.pitch = pitchW;
+      myodata.yaw = yawW;
 
-	public Pose publishPose(Pose pose) {
-		return pose;
-	}
+      myodata.timestamp = timestamp;
+      invoke("publishMyoData", myodata);
+    }
+  }
 
-	/*
-	@Override
-	public void onArmSync(Myo myo, long timestamp, Arm arm, XDirection xDirection) {
-		whichArm = arm;
-	}
-	*/
-	
+  @Override
+  public void onPose(Myo myo, long timestamp, Pose pose) {
+    currentPose = pose;
+    myodata.currentPose = pose.getType().toString();
+    if (currentPose.getType() == PoseType.FIST) {
+      myo.vibrate(VibrationType.VIBRATION_MEDIUM);
+    }
+    invoke("publishPose", pose);
+    invoke("publishMyoData", myodata);
+  }
 
-	@Override
-	public void onArmUnsync(Myo myo, long timestamp) {
-		whichArm = null;
-	}
+  public void addPoseListener(Service service) {
+    addListener("publishPose", service.getName(), "onPose");
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder("\r");
+  public Pose publishPose(Pose pose) {
+    return pose;
+  }
 
-		String xDisplay = String.format("[%s%s]", repeatCharacter('*', (int) rollW), repeatCharacter(' ', (int) (scale - rollW)));
-		String yDisplay = String.format("[%s%s]", repeatCharacter('*', (int) pitchW), repeatCharacter(' ', (int) (scale - pitchW)));
-		String zDisplay = String.format("[%s%s]", repeatCharacter('*', (int) yawW), repeatCharacter(' ', (int) (scale - yawW)));
+  /*
+   * @Override public void onArmSync(Myo myo, long timestamp, Arm arm,
+   * XDirection xDirection) { whichArm = arm; }
+   */
 
-		String armString = null;
-		if (whichArm != null) {
-			armString = String.format("[%s]", whichArm == Arm.ARM_LEFT ? "L" : "R");
-		} else {
-			armString = String.format("[?]");
-		}
-		String poseString = null;
-		if (currentPose != null) {
-			String poseTypeString = currentPose.getType().toString();
-			poseString = String.format("[%s%" + (scale - poseTypeString.length()) + "s]", poseTypeString, " ");
-		} else {
-			poseString = String.format("[%14s]", " ");
-		}
-		builder.append(xDisplay);
-		builder.append(yDisplay);
-		builder.append(zDisplay);
-		builder.append(armString);
-		builder.append(poseString);
-		return builder.toString();
-	}
+  @Override
+  public void onArmUnsync(Myo myo, long timestamp) {
+    whichArm = null;
+  }
 
-	public String repeatCharacter(char character, int numOfTimes) {
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < numOfTimes; i++) {
-			builder.append(character);
-		}
-		return builder.toString();
-	}
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder("\r");
 
-	@Override
-	public void onPair(Myo myo, long timestamp, FirmwareVersion firmwareVersion) {
-		info("onPair");
-	}
+    String xDisplay = String.format("[%s%s]", repeatCharacter('*', (int) rollW), repeatCharacter(' ', (int) (scale - rollW)));
+    String yDisplay = String.format("[%s%s]", repeatCharacter('*', (int) pitchW), repeatCharacter(' ', (int) (scale - pitchW)));
+    String zDisplay = String.format("[%s%s]", repeatCharacter('*', (int) yawW), repeatCharacter(' ', (int) (scale - yawW)));
 
-	@Override
-	public void onUnpair(Myo myo, long timestamp) {
-		info("onUnpair");
-	}
+    String armString = null;
+    if (whichArm != null) {
+      armString = String.format("[%s]", whichArm == Arm.ARM_LEFT ? "L" : "R");
+    } else {
+      armString = String.format("[?]");
+    }
+    String poseString = null;
+    if (currentPose != null) {
+      String poseTypeString = currentPose.getType().toString();
+      poseString = String.format("[%s%" + (scale - poseTypeString.length()) + "s]", poseTypeString, " ");
+    } else {
+      poseString = String.format("[%14s]", " ");
+    }
+    builder.append(xDisplay);
+    builder.append(yDisplay);
+    builder.append(zDisplay);
+    builder.append(armString);
+    builder.append(poseString);
+    return builder.toString();
+  }
 
-	@Override
-	public void onConnect(Myo myo, long timestamp, FirmwareVersion firmwareVersion) {
-		info("onConnect");
-	}
+  public String repeatCharacter(char character, int numOfTimes) {
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < numOfTimes; i++) {
+      builder.append(character);
+    }
+    return builder.toString();
+  }
 
-	@Override
-	public void onDisconnect(Myo myo, long timestamp) {
-		info("onDisconnect");
-	}
+  @Override
+  public void onPair(Myo myo, long timestamp, FirmwareVersion firmwareVersion) {
+    info("onPair");
+  }
 
-	@Override
-	public void onUnlock(Myo myo, long timestamp) {
-		//info("onUnlock");
-		locked = false;
-		invoke("publishLocked", locked);
-	}
+  @Override
+  public void onUnpair(Myo myo, long timestamp) {
+    info("onUnpair");
+  }
 
-	@Override
-	public void onLock(Myo myo, long timestamp) {
-		//info("onLock");
-		locked = true;
-		invoke("publishLocked", locked);
-	}
-	
-	public Boolean publishLocked(Boolean b){
-		return b;
-	}
+  @Override
+  public void onConnect(Myo myo, long timestamp, FirmwareVersion firmwareVersion) {
+    info("onConnect");
+  }
 
-	@Override
-	public void onAccelerometerData(Myo myo, long timestamp, Vector3 accel) {
-		//info("onAccelerometerData");
-	}
+  @Override
+  public void onDisconnect(Myo myo, long timestamp) {
+    info("onDisconnect");
+  }
 
-	@Override
-	public void onGyroscopeData(Myo myo, long timestamp, Vector3 gyro) {
-		//info("onGyroscopeData");
-	}
+  @Override
+  public void onUnlock(Myo myo, long timestamp) {
+    // info("onUnlock");
+    locked = false;
+    invoke("publishLocked", locked);
+  }
 
-	@Override
-	public void onRssi(Myo myo, long timestamp, int rssi) {
-		info("onRssi");
-	}
+  @Override
+  public void onLock(Myo myo, long timestamp) {
+    // info("onLock");
+    locked = true;
+    invoke("publishLocked", locked);
+  }
 
-	@Override
-	public void onEmgData(Myo myo, long timestamp, byte[] emg) {
-		info("onEmgData");
-	}
+  public Boolean publishLocked(Boolean b) {
+    return b;
+  }
 
-	public void lock() {
-		myo.lock();
-	}
+  @Override
+  public void onAccelerometerData(Myo myo, long timestamp, Vector3 accel) {
+    // info("onAccelerometerData");
+  }
 
-	public void unlock() {
-		myo.unlock(UnlockType.UNLOCK_TIMED);
-	}
+  @Override
+  public void onGyroscopeData(Myo myo, long timestamp, Vector3 gyro) {
+    // info("onGyroscopeData");
+  }
 
-	/*
-	 * public void setLockingPolicy(String policy){ myo.setL
-	 * myo.setLockingPolicy("none") ; }
-	 */
+  @Override
+  public void onRssi(Myo myo, long timestamp, int rssi) {
+    info("onRssi");
+  }
 
-	// //
+  @Override
+  public void onEmgData(Myo myo, long timestamp, byte[] emg) {
+    info("onEmgData");
+  }
 
-	@Override
-	public MyoData onMyoData(MyoData myodata) {
-		return myodata;
-	}
+  public void lock() {
+    myo.lock();
+  }
 
-	@Override
-	public MyoData publishMyoData(MyoData myodata) {
+  public void unlock() {
+    myo.unlock(UnlockType.UNLOCK_TIMED);
+  }
 
-		return myodata;
-	}
+  /*
+   * public void setLockingPolicy(String policy){ myo.setL
+   * myo.setLockingPolicy("none") ; }
+   */
 
-	public void addMyoDataListener(Service service) {
-		addListener("publishMyoData", service.getName(), "onMyoData");
-	}
+  // //
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+  @Override
+  public MyoData onMyoData(MyoData myodata) {
+    return myodata;
+  }
 
-		try {
+  @Override
+  public MyoData publishMyoData(MyoData myodata) {
 
-			MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
-			myo.connect();
-			Runtime.start("webgui", "WebGui");
+    return myodata;
+  }
 
-			/*
-			 * Hub hub = new Hub("com.example.hello-myo");
-			 * 
-			 * log.info("Attempting to find a Myo...");
-			 * log.info("Attempting to find a Myo");
-			 * 
-			 * Myo myodevice = hub.waitForMyo(10000);
-			 * 
-			 * if (myodevice == null) { throw new
-			 * RuntimeException("Unable to find a Myo!"); }
-			 * 
-			 * log.info("Connected to a Myo armband!");
-			 * log.info("Connected to a Myo armband");
-			 * 
-			 * //DeviceListener dataCollector = new DataCollector();
-			 * //hub.addListener(myo);
-			 * 
-			 * while (true) { hub.run(1000 / 20);
-			 * //System.out.print(dataCollector);
-			 * 
-			 * 
-			 * 
-			 * }
-			 */
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+  public void addMyoDataListener(Service service) {
+    addListener("publishMyoData", service.getName(), "onMyoData");
+  }
 
-	
-	@Override
-	public void onArmSync(Myo myo, long arg1, Arm arm, XDirection direction, WarmupState warmUpState) {
-		log.info("onArmSync {}", arm);
-		whichArm = arm;		
-		invoke("publishArmSync", arm);
-	}
-	
-	public Arm publishArmSync(Arm arm){
-		return arm;
-	}
+  public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.INFO);
 
-	@Override
-	public void onBatteryLevelReceived(Myo myo, long timestamp, int level) {
-		batterLevel = level;
-		log.info("onBatteryLevelReceived {} {}", timestamp, batterLevel);
-		invoke("publishBatteryLevel", batterLevel);
-	}
+    try {
 
-	public Integer publishBatteryLevel(Integer level){
-		return level;
-	}
-	
-	@Override
-	public void onWarmupCompleted(Myo myo, long unkown, WarmupResult warmUpResult) {
-		log.info("onWarmupCompleted {} {}", unkown, warmUpResult);
-	}
-	
+      MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
+      myo.connect();
+      Runtime.start("webgui", "WebGui");
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+      /*
+       * Hub hub = new Hub("com.example.hello-myo");
+       * 
+       * log.info("Attempting to find a Myo..."); log.info(
+       * "Attempting to find a Myo");
+       * 
+       * Myo myodevice = hub.waitForMyo(10000);
+       * 
+       * if (myodevice == null) { throw new RuntimeException(
+       * "Unable to find a Myo!"); }
+       * 
+       * log.info("Connected to a Myo armband!"); log.info(
+       * "Connected to a Myo armband");
+       * 
+       * //DeviceListener dataCollector = new DataCollector();
+       * //hub.addListener(myo);
+       * 
+       * while (true) { hub.run(1000 / 20); //System.out.print(dataCollector);
+       * 
+       * 
+       * 
+       * }
+       */
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-		ServiceType meta = new ServiceType(MyoThalmic.class.getCanonicalName());
-		meta.addDescription("Myo service to control with the Myo armband");
-		meta.addCategory("control","sensor");
-		return meta;
-	}
+  @Override
+  public void onArmSync(Myo myo, long arg1, Arm arm, XDirection direction, WarmupState warmUpState) {
+    log.info("onArmSync {}", arm);
+    whichArm = arm;
+    invoke("publishArmSync", arm);
+  }
+
+  public Arm publishArmSync(Arm arm) {
+    return arm;
+  }
+
+  @Override
+  public void onBatteryLevelReceived(Myo myo, long timestamp, int level) {
+    batterLevel = level;
+    log.info("onBatteryLevelReceived {} {}", timestamp, batterLevel);
+    invoke("publishBatteryLevel", batterLevel);
+  }
+
+  public Integer publishBatteryLevel(Integer level) {
+    return level;
+  }
+
+  @Override
+  public void onWarmupCompleted(Myo myo, long unkown, WarmupResult warmUpResult) {
+    log.info("onWarmupCompleted {} {}", unkown, warmUpResult);
+  }
+
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(MyoThalmic.class.getCanonicalName());
+    meta.addDescription("Myo service to control with the Myo armband");
+    meta.addCategory("control", "sensor");
+    return meta;
+  }
 
 }

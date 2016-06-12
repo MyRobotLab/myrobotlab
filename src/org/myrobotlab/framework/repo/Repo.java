@@ -71,595 +71,595 @@ import org.slf4j.Logger;
 
 public class Repo implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-
-	public transient final static Logger log = LoggerFactory.getLogger(Repo.class);
-
-	public static final Filter NO_FILTER = NoFilter.INSTANCE;
-
-	private static Repo localInstance = getLocalInstance();
-
-	TreeMap<String, Library> libraries = new TreeMap<String, Library>();
-	
-	final public static String INSTALL_START 		= "install start";
-	final public static String INSTALL_PROGRESS 	= "install progress";
-	final public static String INSTALL_FINISHED 	= "install finished";
-	
-	static String REPO_STATE_FILE_NAME;
-
-	synchronized static public Repo getLocalInstance() {
-		if (localInstance == null) {
-
-			try {
-
-				// REPO_STATE_FILE_NAME = String.format("%s%srepo.json", FileIO.getCfgDir(), File.separator);
-				REPO_STATE_FILE_NAME = String.format("repo.json");
-				String data = FileIO.toString(REPO_STATE_FILE_NAME);
-				localInstance = CodecUtils.fromJson(data, Repo.class);
-			} catch (Exception e) {
-				log.info("{} file not found", REPO_STATE_FILE_NAME);
-				localInstance = new Repo();
-			}
-		}
-
-		return localInstance;
-	}
-
-	final public String REPO_DIR = "repo";
-
-	ArrayList<Status> errors = new ArrayList<Status>();
-
-	private transient Ivy ivy = null;
-
-	/**
-	 * call back notification of progress
-	 */
-	private transient RepoInstallListener listener = null;
-
-	public Repo() {		
-	}
-
-	public void addStatusListener(RepoInstallListener listener) {
-		this.listener = listener;
-	}
-
-	public List<Status> getErrors() {
-		return errors;
-	}
-
-	public boolean hasErrors() {
-		return (errors.size() > 0) ? true : false;
-	}
-
-	/**
-	 * info call back
-	 * @param key
-	 * @param format
-	 * @param args
-	 */
-	public void info(String format, Object... args) {
-		Status status = Status.info(format, args);
-		status.name = Repo.class.getSimpleName();
-		log.info(status.toString());	
-		installProgress(status);
-	}
-	
-	/**
-	 * error call back
-	 * @param key
-	 * @param format
-	 * @param args
-	 */
-	public void error(String format, Object... args) {
-		Status status = Status.error(format, args);
-		status.name = Repo.class.getSimpleName();
-		log.error(status.toString());	
-		errors.add(status);
-		installProgress(status);
-	}
-	
-	/**
-	 * creates a installation start status
-	 * this is primarily for calling services
-	 * which want a status of repo starting an install
-	 * 
-	 * @param format
-	 * @param args
-	 * @return
-	 */
-	static public Status createStartStatus(String format, Object...args) {
-		Status status = Status.info(format, args);
-		status.key = Repo.INSTALL_START;
-		return status;
-	}
-	
-	/**
-	 * creates a installation finished status
-	 * this is primarily for calling services
-	 * which want a status of repo starting finishing an install
-	 * 
-	 * @param format
-	 * @param args
-	 * @return
-	 */
-	static public Status createFinishedStatus(String format, Object...args) {
-		Status status = Status.info(format, args);
-		status.key = Repo.INSTALL_FINISHED;
-		return status;
-	}
-	
-	/**
-	 * call back for listeners
-	 * @param status
-	 */
-	public void installProgress(Status status){
-		if (listener != null) {
-			listener.onInstallProgress(status);//.onStatus(status);
-		}
-	}
-
-	/**
-	 * installs all currently defined service types and their dependencies
-	 * 
-	 * @throws ParseException
-	 * @throws IOException
-	 */
-	public void install() throws ParseException, IOException {
-		clearErrors();
-		ServiceData sd = ServiceData.getLocalInstance();
-		String[] typeNames = sd.getServiceTypeNames();
-		for (int i = 0; i < typeNames.length; ++i) {
-			install(typeNames[i]);
-		}
-	}
-
-	public void clearErrors() {
-		errors.clear();
-	}
-
-	/**
-	 * Install the all dependencies for a service if it has any. This uses Ivy
-	 * programmatically to resolve and retrieve all necessary dependencies for a
-	 * service.
-	 * 
-	 * Steps :
-	 * 
-	 * 1. check if .myrobotlab/repo.json file loaded - if not create it
-	 * repo.json represents current state of installed libraries (local repo) 2.
-	 * get list of dependecies from service type (this comes from the
-	 * serviceData.json / classMeta) these are what need to be resolved 3.
-	 * retrieve - and update state in memory and repo.json
-	 * 
-	 * @param fullTypeName
-	 * @throws ParseException
-	 * @throws IOException
-	 */
-	public void install(String fullTypeName) throws ParseException, IOException {
-		log.info("installing {}", fullTypeName);
-		
-		if (!fullTypeName.contains(".")) {
-			fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
-		}
-
-		Set<Library> unfulfilled = getUnfulfilledDependencies(fullTypeName); // serviceData.getDependencyKeys(fullTypeName);
-
-		for (Library dep : unfulfilled) {
-			libraries.put(dep.getKey(), dep);
-			resolveArtifacts(dep.getOrg(), dep.getRevision(), true);
-		}
-	}
-
-	/**
-	 * searches through dependencies directly defined by the service and all
-	 * Peers - recursively searches for their dependencies if any are not found
-	 * - returns false
-	 * 
-	 * @param fullTypeName
-	 * @return
-	 */
-	public boolean isServiceTypeInstalled(String fullTypeName) {
-		ServiceData sd = ServiceData.getLocalInstance();
-
-		if (!sd.containsServiceType(fullTypeName)) {
-			log.error("unknown service {}", fullTypeName);
-			return false;
-		}
-
-		Set<Library> libraries = getUnfulfilledDependencies(fullTypeName);
-		if (libraries.size() > 0) {
-			// log.info("{} is NOT installed", fullTypeName);
-			return false;
-		}
-
-		// log.info("{} is installed", fullTypeName);
-		return true;
-	}
-
-	/**
-	 * resolveArtifact does an Ivy resolve with a URLResolver to MRL's repo at
-	 * github. The equivalent command line is -settings ivychain.xml -dependency
-	 * "gnu.io.rxtx" "rxtx" "2.1-7r2" -confs "runtime,x86.64.windows"
-	 * 
-	 * @param org
-	 * @param version
-	 * @return
-	 * @throws IOException
-	 * @throws ParseException
-	 * @throws Exception
-	 */
-
-	synchronized public ResolveReport resolveArtifacts(String org, String version, boolean retrieve) throws ParseException, IOException {
-		info("%s %s.%s", (retrieve) ? "retrieving" : "resolve", org, version);
-		// clear errors for this install
-		errors.clear();
-
-		Library library = new Library(org, version);
-		libraries.put(library.getKey(), library);
-		// creates clear ivy settings
-		// IvySettings ivySettings = new IvySettings();
-		String module;
-		int p = org.lastIndexOf(".");
-		if (p != -1) {
-			module = org.substring(p + 1, org.length());
-		} else {
-			module = org;
-		}
-
-		// creates an Ivy instance with settings
-		// Ivy ivy = Ivy.newInstance(ivySettings);
-		if (ivy == null) {
-			ivy = Ivy.newInstance();
-			ivy.getLoggerEngine().pushLogger(new DefaultMessageLogger(Message.MSG_DEBUG));
-
-			// PROXY NEEDED ?
-			// CredentialsStore.INSTANCE.addCredentials(realm, host, username,
-			// passwd);
-
-			URLHandlerDispatcher dispatcher = new URLHandlerDispatcher();
-			URLHandler httpHandler = URLHandlerRegistry.getHttp();
-			dispatcher.setDownloader("http", httpHandler);
-			dispatcher.setDownloader("https", httpHandler);
-			URLHandlerRegistry.setDefault(dispatcher);
-
-			// File communication is used
-			// for ivy - the url branch info is in ivychain.xml
-			// theoretically this would never change
-			File ivychain = new File("ivychain.xml");
-			if (!ivychain.exists()) {
-				try {
-					String xml = FileIO.resourceToString("framework/ivychain.xml");
-					Platform platform = Platform.getLocalInstance();
-					xml = xml.replace("{release}", platform.getBranch());
-					FileOutputStream fos = new FileOutputStream(ivychain);
-					fos.write(xml.getBytes());
-					fos.close();
-				} catch (Exception e) {
-					Logging.logError(e);
-				}
-			}
-			ivy.configure(ivychain);
-			ivy.pushContext();
-
-		}
-
-		IvySettings settings = ivy.getSettings();
-		// GAP20151208 settings.setDefaultCache(new
-		// File(System.getProperty("user.home"), ".repo"));
-		settings.setDefaultCache(new File(REPO_DIR));
-		settings.addAllVariables(System.getProperties());
-
-		File cache = new File(settings.substitute(settings.getDefaultCache().getAbsolutePath()));
-
-		if (!cache.exists()) {
-			cache.mkdirs();
-		} else if (!cache.isDirectory()) {
-			log.error(cache + " is not a directory");
-		}
-
-		Platform platform = Platform.getLocalInstance();
-		String platformConf = String.format("runtime,%s.%s.%s", platform.getArch(), platform.getBitness(), platform.getOS());
-		log.info(String.format("requesting %s", platformConf));
-
-		String[] confs = new String[] { platformConf };
-		String[] dep = new String[] { org, module, version };
-
-		File ivyfile = File.createTempFile("ivy", ".xml");
-		ivyfile.deleteOnExit();
-
-		DefaultModuleDescriptor md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(dep[0], dep[1] + "-caller", "working"));
-		DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md, ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]), false, false, true);
-		for (int i = 0; i < confs.length; i++) {
-			dd.addDependencyConfiguration("default", confs[i]);
-		}
-		md.addDependency(dd);
-		XmlModuleDescriptorWriter.write(md, ivyfile);
-		confs = new String[] { "default" };
-
-		ResolveOptions resolveOptions = new ResolveOptions().setConfs(confs).setValidate(true).setResolveMode(null).setArtifactFilter(NO_FILTER);
-		// resolve & retrieve happen here ...
-		ResolveReport report = ivy.resolve(ivyfile.toURI().toURL(), resolveOptions);
-		List<?> err = report.getAllProblemMessages();
-
-		if (err.size() > 0) {
-			for (int i = 0; i < err.size(); ++i) {
-				String errStr = err.get(i).toString();
-				error(errStr);			
-			}
-		} else {
-			// set as installed & save state
-			info("%s %s.%s for %s", (retrieve) ? "retrieved" : "installed", org, version, platform.getPlatformId());
-			library.setInstalled(true);
-			save();
-		}
-		// TODO - no error
-		if (retrieve && err.size() == 0) {
-
-			// TODO check on extension here - additional processing
-
-			String retrievePattern = "libraries/[type]/[artifact].[ext]";// settings.substitute(line.getOptionValue("retrieve"));
-
-			String ivyPattern = null;
-			int ret = ivy.retrieve(md.getModuleRevisionId(), retrievePattern, new RetrieveOptions().setConfs(confs).setSync(false)// check
-					.setUseOrigin(false).setDestIvyPattern(ivyPattern).setArtifactFilter(NO_FILTER).setMakeSymlinks(false).setMakeSymlinksInMass(false));
-
-			log.info("retrieve returned {}", ret);
-
-			setInstalled(getKey(org, version));
-			save();
-
-			// TODO - retrieve should mean unzip from local cache -> to root of
-			// execution
-			ArtifactDownloadReport[] artifacts = report.getAllArtifactsReports();
-			for (int i = 0; i < artifacts.length; ++i) {
-				ArtifactDownloadReport ar = artifacts[i];
-				Artifact artifact = ar.getArtifact();
-				File file = ar.getLocalFile();
-				log.info("{}", file.getAbsoluteFile());
-				// FIXME - native move up one directory !!! - from denormalized
-				// back to normalized Yay!
-				// maybe look for PlatformId in path ?
-				// ret > 0 && <-- retrieved -
-				if ("zip".equalsIgnoreCase(artifact.getType())) {
-					String filename = String.format("libraries/zip/%s.zip", artifact.getName());
-					info("unzipping %s", filename);
-					Zip.unzip(filename, "./");
-					info("unzipped %s", filename);
-				}
-			}
-		}
-
-		return report;
-	}
-
-	/**
-	 * saves repo to file
-	 */
-	public void save() {
-		try {
-			FileOutputStream fos = new FileOutputStream(REPO_STATE_FILE_NAME);
-			fos.write(CodecUtils.toJson(this).getBytes());
-			fos.close();
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-
-	/**
-	 * adds a library initially as unresolved to the local repo information if
-	 * the library becomes resolved - the state changes, and will be used to
-	 * prevent fetch or resolving the library again
-	 * 
-	 * @param org
-	 * @param version
-	 */
-	public void addLibrary(String org, String version) {
-		Library dep = new Library(org, version);
-		libraries.put(String.format("%s/%s", org, version), dep);
-		save();
-	}
-
-	/**
-	 * generates instance of all dependencies from a repo directory would be
-	 * useful for checking validity - not used during runtime libraries
-	 * 
-	 * @param repoDir
-	 * @return
-	 */
-	static public Map<String, Library> generateLibrariesFromRepo(String repoDir) {
-		try {
-
-			HashMap<String, Library> libraries = new HashMap<String, Library>();
-
-			// get all third party libraries
-			// give me all the first level directories of the repo
-			// this CAN BE DONE REMOTELY TOO !!! - using v3 githup json api !!!
-			List<File> dirs = FindFile.find(repoDir, "^[^.].*[^-_.]$", false, true);
-			log.info("found {} files", dirs.size());
-			for (int i = 0; i < dirs.size(); ++i) {
-				File f = dirs.get(i);
-				if (f.isDirectory()) {
-					try {
-						// log.info("looking in {}", f.getAbsolutePath());
-						List<File> subDirsList = FindFile.find(f.getAbsolutePath(), ".*", false, true);
-						ArrayList<File> filtered = new ArrayList<File>();
-						for (int z = 0; z < subDirsList.size(); ++z) {
-							File dir = subDirsList.get(z);
-							if (dir.isDirectory()) {
-								filtered.add(dir);
-							}
-						}
-
-						File[] subDirs = filtered.toArray(new File[filtered.size()]);
-						Arrays.sort(subDirs);
-						// get latest version
-						File ver = subDirs[subDirs.length - 1];
-						log.info("adding third party library {} {}", f.getName(), ver.getName());
-						libraries.put(getKey(f.getName(), ver.getName()), new Library(getKey(f.getName(), ver.getName())));
-					} catch (Exception e) {
-						log.error("folder {} is hosed !", f.getName());
-						Logging.logError(e);
-					}
-
-				} else {
-					log.info("skipping file {}", f.getName());
-				}
-			}
-			return libraries;
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		return null;
-	}
-
-	public void setInstalled(String key) {
-		Library library = null;
-		if (!libraries.containsKey(key)) {
-			libraries.put(key, new Library(key));
-		}
-
-		library = libraries.get(key);
-		library.setInstalled(true);
-	}
-
-	public static String getKey(String org, String version) {
-		return String.format("%s/%s", org, version);
-	}
-
-	public Set<Library> getUnfulfilledDependencies(String type) {
-		if (!type.contains(".")) {
-			type = String.format("org.myrobotlab.service.%s", type);
-		}
-		HashSet<Library> ret = new HashSet<Library>();
-
-		// get the dependencies required by the type
-		ServiceData sd = ServiceData.getLocalInstance();
-		if (!sd.containsServiceType(type)) {
-			log.error(String.format("%s not found", type));
-			return ret;
-		}
-
-		ServiceType st = sd.getServiceType(type);
-
-		// look through our repo and resolve
-		// if we dont have it - we need it
-		Set<String> d = st.getDependencies();
-
-		if (d != null && d.size() > 0) {
-			for (String key : d) {
-				if (!libraries.containsKey(key) || !libraries.get(key).isInstalled()) {
-					ret.add(new Library(key));
-				}
-			}
-		}
-
-		TreeMap<String, ServiceReservation> peers = st.getPeers();
-		if (peers != null) {
-			for (String key : peers.keySet()) {
-				ServiceReservation sr = peers.get(key);
-				ret.addAll(getUnfulfilledDependencies(sr.fullTypeName));
-			}
-		}
-
-		return ret;
-	}
-
-	public void clear() {
-		log.info("Repo.clear - clearing libraries");
-		FileIO.rm("libraries");
-		log.info("Repo.clear - clearing repo");
-		FileIO.rm("repo");
-		log.info("Repo.clear - {}", REPO_STATE_FILE_NAME);
-		FileIO.rm(REPO_STATE_FILE_NAME);
-		log.info("Repo.clear - clearing memory");
-		localInstance.libraries.clear();
-		// localInstance = new Repo();
-		log.info("clearing errors");
-		clearErrors();
-	}
-
-	public boolean isInstalled(String typeName) {
-		String fullTypeName = CodecUtils.makeFullTypeName(typeName);
-		Set<Library> libraries = getUnfulfilledDependencies(fullTypeName);
-		return libraries.size() == 0;
-	}
-
-	public static void main(String[] args) {
-		try {
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
-
-			/**
-			 * TODO - test with all directories missing test as "one jar"
-			 * 
-			 * Use Cases : jar / no jar serviceData.json - none, local, remote
-			 * (no communication) / proxy / no proxy updateJar - no connection /
-			 * connection / preserve main args - jvm parameters update repo - no
-			 * connection / dependency affects others / single Service type /
-			 * single Dependency update repo - new Service Type purge respawner
-			 * - use always
-			 * 
-			 */
-
-			// FIXME - sync serviceData with ivy cache & library
-
-			// get local instance
-
-			Repo repo = Repo.getLocalInstance();
-			repo.install("OpenCV");
-
-			/*
-			 * String[] versions = { "1.0.100", "1.0.101", "1.0.102", "1.0.104",
-			 * "1.0.105", "1.0.106", "1.0.107", "1.0.92", "1.0.93", "1.0.94",
-			 * "1.0.95", "1.0.96", "1.0.97", "1.0.98", "1.0.99" };
-			 * 
-			 * String latest = repo.getLatestVersion(versions);
-			 * log.info(latest);
-			 */
-
-			// assert "1.0.107" == latest ->
-
-			if (!repo.isServiceTypeInstalled("org.myrobotlab.service.InMoov")) {
-				log.info("not installed");
-			} else {
-				log.info("is installed");
-			}
-
-			repo.install("org.myrobotlab.service.Arduino");
-
-			/*
-			 * Updates updates = repo.checkForUpdates(); log.info(String.format(
-			 * "updates %s", updates)); if (updates.hasJarUpdate()) {
-			 * repo.getLatestJar(); }
-			 */
-
-			// resolve All
-			repo.install();
-
-			// repo.clear(org, revision) // whipes out cache for 1 dep
-			// repo.clear() // whipes out cache
-
-			// FIXME - no serviceData.json = get from remote - will lose local
-			// cache
-			// info
-
-			// iterate through them see
-
-			// resolve dependency for 1
-
-			// resolve all dependencies
-
-			// update jar
-
-			// resolving
-			repo.install("org.myrobotlab.service.Arduino");
-
-			// repo.getAllDepenencies();
-
-			// remote tests
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+  private static final long serialVersionUID = 1L;
+
+  public transient final static Logger log = LoggerFactory.getLogger(Repo.class);
+
+  public static final Filter NO_FILTER = NoFilter.INSTANCE;
+
+  private static Repo localInstance = getLocalInstance();
+
+  TreeMap<String, Library> libraries = new TreeMap<String, Library>();
+
+  final public static String INSTALL_START = "install start";
+  final public static String INSTALL_PROGRESS = "install progress";
+  final public static String INSTALL_FINISHED = "install finished";
+
+  static String REPO_STATE_FILE_NAME;
+
+  synchronized static public Repo getLocalInstance() {
+    if (localInstance == null) {
+
+      try {
+
+        // REPO_STATE_FILE_NAME = String.format("%s%srepo.json",
+        // FileIO.getCfgDir(), File.separator);
+        REPO_STATE_FILE_NAME = String.format("repo.json");
+        String data = FileIO.toString(REPO_STATE_FILE_NAME);
+        localInstance = CodecUtils.fromJson(data, Repo.class);
+      } catch (Exception e) {
+        log.info("{} file not found", REPO_STATE_FILE_NAME);
+        localInstance = new Repo();
+      }
+    }
+
+    return localInstance;
+  }
+
+  final public String REPO_DIR = "repo";
+
+  ArrayList<Status> errors = new ArrayList<Status>();
+
+  private transient Ivy ivy = null;
+
+  /**
+   * call back notification of progress
+   */
+  private transient RepoInstallListener listener = null;
+
+  public Repo() {
+  }
+
+  public void addStatusListener(RepoInstallListener listener) {
+    this.listener = listener;
+  }
+
+  public List<Status> getErrors() {
+    return errors;
+  }
+
+  public boolean hasErrors() {
+    return (errors.size() > 0) ? true : false;
+  }
+
+  /**
+   * info call back
+   * 
+   * @param key
+   * @param format
+   * @param args
+   */
+  public void info(String format, Object... args) {
+    Status status = Status.info(format, args);
+    status.name = Repo.class.getSimpleName();
+    log.info(status.toString());
+    installProgress(status);
+  }
+
+  /**
+   * error call back
+   * 
+   * @param key
+   * @param format
+   * @param args
+   */
+  public void error(String format, Object... args) {
+    Status status = Status.error(format, args);
+    status.name = Repo.class.getSimpleName();
+    log.error(status.toString());
+    errors.add(status);
+    installProgress(status);
+  }
+
+  /**
+   * creates a installation start status this is primarily for calling services
+   * which want a status of repo starting an install
+   * 
+   * @param format
+   * @param args
+   * @return
+   */
+  static public Status createStartStatus(String format, Object... args) {
+    Status status = Status.info(format, args);
+    status.key = Repo.INSTALL_START;
+    return status;
+  }
+
+  /**
+   * creates a installation finished status this is primarily for calling
+   * services which want a status of repo starting finishing an install
+   * 
+   * @param format
+   * @param args
+   * @return
+   */
+  static public Status createFinishedStatus(String format, Object... args) {
+    Status status = Status.info(format, args);
+    status.key = Repo.INSTALL_FINISHED;
+    return status;
+  }
+
+  /**
+   * call back for listeners
+   * 
+   * @param status
+   */
+  public void installProgress(Status status) {
+    if (listener != null) {
+      listener.onInstallProgress(status);// .onStatus(status);
+    }
+  }
+
+  /**
+   * installs all currently defined service types and their dependencies
+   * 
+   * @throws ParseException
+   * @throws IOException
+   */
+  public void install() throws ParseException, IOException {
+    clearErrors();
+    ServiceData sd = ServiceData.getLocalInstance();
+    String[] typeNames = sd.getServiceTypeNames();
+    for (int i = 0; i < typeNames.length; ++i) {
+      install(typeNames[i]);
+    }
+  }
+
+  public void clearErrors() {
+    errors.clear();
+  }
+
+  /**
+   * Install the all dependencies for a service if it has any. This uses Ivy
+   * programmatically to resolve and retrieve all necessary dependencies for a
+   * service.
+   * 
+   * Steps :
+   * 
+   * 1. check if .myrobotlab/repo.json file loaded - if not create it repo.json
+   * represents current state of installed libraries (local repo) 2. get list of
+   * dependecies from service type (this comes from the serviceData.json /
+   * classMeta) these are what need to be resolved 3. retrieve - and update
+   * state in memory and repo.json
+   * 
+   * @param fullTypeName
+   * @throws ParseException
+   * @throws IOException
+   */
+  public void install(String fullTypeName) throws ParseException, IOException {
+    log.info("installing {}", fullTypeName);
+
+    if (!fullTypeName.contains(".")) {
+      fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
+    }
+
+    Set<Library> unfulfilled = getUnfulfilledDependencies(fullTypeName); // serviceData.getDependencyKeys(fullTypeName);
+
+    for (Library dep : unfulfilled) {
+      libraries.put(dep.getKey(), dep);
+      resolveArtifacts(dep.getOrg(), dep.getRevision(), true);
+    }
+  }
+
+  /**
+   * searches through dependencies directly defined by the service and all Peers
+   * - recursively searches for their dependencies if any are not found -
+   * returns false
+   * 
+   * @param fullTypeName
+   * @return
+   */
+  public boolean isServiceTypeInstalled(String fullTypeName) {
+    ServiceData sd = ServiceData.getLocalInstance();
+
+    if (!sd.containsServiceType(fullTypeName)) {
+      log.error("unknown service {}", fullTypeName);
+      return false;
+    }
+
+    Set<Library> libraries = getUnfulfilledDependencies(fullTypeName);
+    if (libraries.size() > 0) {
+      // log.info("{} is NOT installed", fullTypeName);
+      return false;
+    }
+
+    // log.info("{} is installed", fullTypeName);
+    return true;
+  }
+
+  /**
+   * resolveArtifact does an Ivy resolve with a URLResolver to MRL's repo at
+   * github. The equivalent command line is -settings ivychain.xml -dependency
+   * "gnu.io.rxtx" "rxtx" "2.1-7r2" -confs "runtime,x86.64.windows"
+   * 
+   * @param org
+   * @param version
+   * @return
+   * @throws IOException
+   * @throws ParseException
+   * @throws Exception
+   */
+
+  synchronized public ResolveReport resolveArtifacts(String org, String version, boolean retrieve) throws ParseException, IOException {
+    info("%s %s.%s", (retrieve) ? "retrieving" : "resolve", org, version);
+    // clear errors for this install
+    errors.clear();
+
+    Library library = new Library(org, version);
+    libraries.put(library.getKey(), library);
+    // creates clear ivy settings
+    // IvySettings ivySettings = new IvySettings();
+    String module;
+    int p = org.lastIndexOf(".");
+    if (p != -1) {
+      module = org.substring(p + 1, org.length());
+    } else {
+      module = org;
+    }
+
+    // creates an Ivy instance with settings
+    // Ivy ivy = Ivy.newInstance(ivySettings);
+    if (ivy == null) {
+      ivy = Ivy.newInstance();
+      ivy.getLoggerEngine().pushLogger(new DefaultMessageLogger(Message.MSG_DEBUG));
+
+      // PROXY NEEDED ?
+      // CredentialsStore.INSTANCE.addCredentials(realm, host, username,
+      // passwd);
+
+      URLHandlerDispatcher dispatcher = new URLHandlerDispatcher();
+      URLHandler httpHandler = URLHandlerRegistry.getHttp();
+      dispatcher.setDownloader("http", httpHandler);
+      dispatcher.setDownloader("https", httpHandler);
+      URLHandlerRegistry.setDefault(dispatcher);
+
+      // File communication is used
+      // for ivy - the url branch info is in ivychain.xml
+      // theoretically this would never change
+      File ivychain = new File("ivychain.xml");
+      if (!ivychain.exists()) {
+        try {
+          String xml = FileIO.resourceToString("framework/ivychain.xml");
+          Platform platform = Platform.getLocalInstance();
+          xml = xml.replace("{release}", platform.getBranch());
+          FileOutputStream fos = new FileOutputStream(ivychain);
+          fos.write(xml.getBytes());
+          fos.close();
+        } catch (Exception e) {
+          Logging.logError(e);
+        }
+      }
+      ivy.configure(ivychain);
+      ivy.pushContext();
+
+    }
+
+    IvySettings settings = ivy.getSettings();
+    // GAP20151208 settings.setDefaultCache(new
+    // File(System.getProperty("user.home"), ".repo"));
+    settings.setDefaultCache(new File(REPO_DIR));
+    settings.addAllVariables(System.getProperties());
+
+    File cache = new File(settings.substitute(settings.getDefaultCache().getAbsolutePath()));
+
+    if (!cache.exists()) {
+      cache.mkdirs();
+    } else if (!cache.isDirectory()) {
+      log.error(cache + " is not a directory");
+    }
+
+    Platform platform = Platform.getLocalInstance();
+    String platformConf = String.format("runtime,%s.%s.%s", platform.getArch(), platform.getBitness(), platform.getOS());
+    log.info(String.format("requesting %s", platformConf));
+
+    String[] confs = new String[] { platformConf };
+    String[] dep = new String[] { org, module, version };
+
+    File ivyfile = File.createTempFile("ivy", ".xml");
+    ivyfile.deleteOnExit();
+
+    DefaultModuleDescriptor md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(dep[0], dep[1] + "-caller", "working"));
+    DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md, ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]), false, false, true);
+    for (int i = 0; i < confs.length; i++) {
+      dd.addDependencyConfiguration("default", confs[i]);
+    }
+    md.addDependency(dd);
+    XmlModuleDescriptorWriter.write(md, ivyfile);
+    confs = new String[] { "default" };
+
+    ResolveOptions resolveOptions = new ResolveOptions().setConfs(confs).setValidate(true).setResolveMode(null).setArtifactFilter(NO_FILTER);
+    // resolve & retrieve happen here ...
+    ResolveReport report = ivy.resolve(ivyfile.toURI().toURL(), resolveOptions);
+    List<?> err = report.getAllProblemMessages();
+
+    if (err.size() > 0) {
+      for (int i = 0; i < err.size(); ++i) {
+        String errStr = err.get(i).toString();
+        error(errStr);
+      }
+    } else {
+      // set as installed & save state
+      info("%s %s.%s for %s", (retrieve) ? "retrieved" : "installed", org, version, platform.getPlatformId());
+      library.setInstalled(true);
+      save();
+    }
+    // TODO - no error
+    if (retrieve && err.size() == 0) {
+
+      // TODO check on extension here - additional processing
+
+      String retrievePattern = "libraries/[type]/[artifact].[ext]";// settings.substitute(line.getOptionValue("retrieve"));
+
+      String ivyPattern = null;
+      int ret = ivy.retrieve(md.getModuleRevisionId(), retrievePattern, new RetrieveOptions().setConfs(confs).setSync(false)// check
+          .setUseOrigin(false).setDestIvyPattern(ivyPattern).setArtifactFilter(NO_FILTER).setMakeSymlinks(false).setMakeSymlinksInMass(false));
+
+      log.info("retrieve returned {}", ret);
+
+      setInstalled(getKey(org, version));
+      save();
+
+      // TODO - retrieve should mean unzip from local cache -> to root of
+      // execution
+      ArtifactDownloadReport[] artifacts = report.getAllArtifactsReports();
+      for (int i = 0; i < artifacts.length; ++i) {
+        ArtifactDownloadReport ar = artifacts[i];
+        Artifact artifact = ar.getArtifact();
+        File file = ar.getLocalFile();
+        log.info("{}", file.getAbsoluteFile());
+        // FIXME - native move up one directory !!! - from denormalized
+        // back to normalized Yay!
+        // maybe look for PlatformId in path ?
+        // ret > 0 && <-- retrieved -
+        if ("zip".equalsIgnoreCase(artifact.getType())) {
+          String filename = String.format("libraries/zip/%s.zip", artifact.getName());
+          info("unzipping %s", filename);
+          Zip.unzip(filename, "./");
+          info("unzipped %s", filename);
+        }
+      }
+    }
+
+    return report;
+  }
+
+  /**
+   * saves repo to file
+   */
+  public void save() {
+    try {
+      FileOutputStream fos = new FileOutputStream(REPO_STATE_FILE_NAME);
+      fos.write(CodecUtils.toJson(this).getBytes());
+      fos.close();
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
+  /**
+   * adds a library initially as unresolved to the local repo information if the
+   * library becomes resolved - the state changes, and will be used to prevent
+   * fetch or resolving the library again
+   * 
+   * @param org
+   * @param version
+   */
+  public void addLibrary(String org, String version) {
+    Library dep = new Library(org, version);
+    libraries.put(String.format("%s/%s", org, version), dep);
+    save();
+  }
+
+  /**
+   * generates instance of all dependencies from a repo directory would be
+   * useful for checking validity - not used during runtime libraries
+   * 
+   * @param repoDir
+   * @return
+   */
+  static public Map<String, Library> generateLibrariesFromRepo(String repoDir) {
+    try {
+
+      HashMap<String, Library> libraries = new HashMap<String, Library>();
+
+      // get all third party libraries
+      // give me all the first level directories of the repo
+      // this CAN BE DONE REMOTELY TOO !!! - using v3 githup json api !!!
+      List<File> dirs = FindFile.find(repoDir, "^[^.].*[^-_.]$", false, true);
+      log.info("found {} files", dirs.size());
+      for (int i = 0; i < dirs.size(); ++i) {
+        File f = dirs.get(i);
+        if (f.isDirectory()) {
+          try {
+            // log.info("looking in {}", f.getAbsolutePath());
+            List<File> subDirsList = FindFile.find(f.getAbsolutePath(), ".*", false, true);
+            ArrayList<File> filtered = new ArrayList<File>();
+            for (int z = 0; z < subDirsList.size(); ++z) {
+              File dir = subDirsList.get(z);
+              if (dir.isDirectory()) {
+                filtered.add(dir);
+              }
+            }
+
+            File[] subDirs = filtered.toArray(new File[filtered.size()]);
+            Arrays.sort(subDirs);
+            // get latest version
+            File ver = subDirs[subDirs.length - 1];
+            log.info("adding third party library {} {}", f.getName(), ver.getName());
+            libraries.put(getKey(f.getName(), ver.getName()), new Library(getKey(f.getName(), ver.getName())));
+          } catch (Exception e) {
+            log.error("folder {} is hosed !", f.getName());
+            Logging.logError(e);
+          }
+
+        } else {
+          log.info("skipping file {}", f.getName());
+        }
+      }
+      return libraries;
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+    return null;
+  }
+
+  public void setInstalled(String key) {
+    Library library = null;
+    if (!libraries.containsKey(key)) {
+      libraries.put(key, new Library(key));
+    }
+
+    library = libraries.get(key);
+    library.setInstalled(true);
+  }
+
+  public static String getKey(String org, String version) {
+    return String.format("%s/%s", org, version);
+  }
+
+  public Set<Library> getUnfulfilledDependencies(String type) {
+    if (!type.contains(".")) {
+      type = String.format("org.myrobotlab.service.%s", type);
+    }
+    HashSet<Library> ret = new HashSet<Library>();
+
+    // get the dependencies required by the type
+    ServiceData sd = ServiceData.getLocalInstance();
+    if (!sd.containsServiceType(type)) {
+      log.error(String.format("%s not found", type));
+      return ret;
+    }
+
+    ServiceType st = sd.getServiceType(type);
+
+    // look through our repo and resolve
+    // if we dont have it - we need it
+    Set<String> d = st.getDependencies();
+
+    if (d != null && d.size() > 0) {
+      for (String key : d) {
+        if (!libraries.containsKey(key) || !libraries.get(key).isInstalled()) {
+          ret.add(new Library(key));
+        }
+      }
+    }
+
+    TreeMap<String, ServiceReservation> peers = st.getPeers();
+    if (peers != null) {
+      for (String key : peers.keySet()) {
+        ServiceReservation sr = peers.get(key);
+        ret.addAll(getUnfulfilledDependencies(sr.fullTypeName));
+      }
+    }
+
+    return ret;
+  }
+
+  public void clear() {
+    log.info("Repo.clear - clearing libraries");
+    FileIO.rm("libraries");
+    log.info("Repo.clear - clearing repo");
+    FileIO.rm("repo");
+    log.info("Repo.clear - {}", REPO_STATE_FILE_NAME);
+    FileIO.rm(REPO_STATE_FILE_NAME);
+    log.info("Repo.clear - clearing memory");
+    localInstance.libraries.clear();
+    // localInstance = new Repo();
+    log.info("clearing errors");
+    clearErrors();
+  }
+
+  public boolean isInstalled(String typeName) {
+    String fullTypeName = CodecUtils.makeFullTypeName(typeName);
+    Set<Library> libraries = getUnfulfilledDependencies(fullTypeName);
+    return libraries.size() == 0;
+  }
+
+  public static void main(String[] args) {
+    try {
+      LoggingFactory.getInstance().configure();
+      LoggingFactory.getInstance().setLevel(Level.INFO);
+
+      /**
+       * TODO - test with all directories missing test as "one jar"
+       * 
+       * Use Cases : jar / no jar serviceData.json - none, local, remote (no
+       * communication) / proxy / no proxy updateJar - no connection /
+       * connection / preserve main args - jvm parameters update repo - no
+       * connection / dependency affects others / single Service type / single
+       * Dependency update repo - new Service Type purge respawner - use always
+       * 
+       */
+
+      // FIXME - sync serviceData with ivy cache & library
+
+      // get local instance
+
+      Repo repo = Repo.getLocalInstance();
+      repo.install("OpenCV");
+
+      /*
+       * String[] versions = { "1.0.100", "1.0.101", "1.0.102", "1.0.104",
+       * "1.0.105", "1.0.106", "1.0.107", "1.0.92", "1.0.93", "1.0.94",
+       * "1.0.95", "1.0.96", "1.0.97", "1.0.98", "1.0.99" };
+       * 
+       * String latest = repo.getLatestVersion(versions); log.info(latest);
+       */
+
+      // assert "1.0.107" == latest ->
+
+      if (!repo.isServiceTypeInstalled("org.myrobotlab.service.InMoov")) {
+        log.info("not installed");
+      } else {
+        log.info("is installed");
+      }
+
+      repo.install("org.myrobotlab.service.Arduino");
+
+      /*
+       * Updates updates = repo.checkForUpdates(); log.info(String.format(
+       * "updates %s", updates)); if (updates.hasJarUpdate()) {
+       * repo.getLatestJar(); }
+       */
+
+      // resolve All
+      repo.install();
+
+      // repo.clear(org, revision) // whipes out cache for 1 dep
+      // repo.clear() // whipes out cache
+
+      // FIXME - no serviceData.json = get from remote - will lose local
+      // cache
+      // info
+
+      // iterate through them see
+
+      // resolve dependency for 1
+
+      // resolve all dependencies
+
+      // update jar
+
+      // resolving
+      repo.install("org.myrobotlab.service.Arduino");
+
+      // repo.getAllDepenencies();
+
+      // remote tests
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
 }

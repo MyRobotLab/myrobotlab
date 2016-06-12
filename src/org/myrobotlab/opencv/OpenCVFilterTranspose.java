@@ -35,35 +35,35 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterTranspose extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	transient IplImage dst;
-	public int flipCode = 1;
+  transient IplImage dst;
+  public int flipCode = 1;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTranspose.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTranspose.class.getCanonicalName());
 
-	public OpenCVFilterTranspose() {
-		super();
-	}
+  public OpenCVFilterTranspose() {
+    super();
+  }
 
-	public OpenCVFilterTranspose(String name) {
-		super(name);
-	}
+  public OpenCVFilterTranspose(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		dst = IplImage.create(image.height(), image.width(), image.depth(), image.nChannels());
-		// dst = IplImage.createCompatible(image);
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+    dst = IplImage.create(image.height(), image.width(), image.depth(), image.nChannels());
+    // dst = IplImage.createCompatible(image);
+  }
 
-	// http://stackoverflow.com/questions/7813376/rotate-cvmat-using-cvwarpaffine-offsets-destination-image
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
+  // http://stackoverflow.com/questions/7813376/rotate-cvmat-using-cvwarpaffine-offsets-destination-image
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
 
-		cvTranspose(image, dst);
-		cvFlip(dst, dst, flipCode);
+    cvTranspose(image, dst);
+    cvFlip(dst, dst, flipCode);
 
-		return dst;
-	}
+    return dst;
+  }
 
 }

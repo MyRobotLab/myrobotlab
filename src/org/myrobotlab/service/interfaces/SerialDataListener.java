@@ -29,15 +29,15 @@ import java.io.IOException;
 
 public interface SerialDataListener extends NameProvider, QueueReporter {
 
-	// FIXME - Integer object because no method cache
-	public Integer onByte(Integer b) throws IOException;
+  // FIXME - Integer object because no method cache
+  public Integer onByte(Integer b) throws IOException;
 
-	// FIXME - add isRemote() <-- to determine how to send (abstract code sends
-	// remotely?
-	// FIXME - add invoke("onByte") <-- need invoke to force remote publish
+  // FIXME - add isRemote() <-- to determine how to send (abstract code sends
+  // remotely?
+  // FIXME - add invoke("onByte") <-- need invoke to force remote publish
 
-	public String onConnect(String portName);
-	public String onDisconnect(String portName);
+  public String onConnect(String portName);
 
-	
+  public String onDisconnect(String portName);
+
 }

@@ -18,120 +18,115 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 /**
- * This stage will use Apache Tika to perform text and metadata extraction
- * on many different types of documents including, but not limited to,
- * pdf, office documents, html, etc..
+ * This stage will use Apache Tika to perform text and metadata extraction on
+ * many different types of documents including, but not limited to, pdf, office
+ * documents, html, etc..
  * 
  * @author kwatters
  *
  */
 public class TextExtractor extends AbstractStage {
 
-	private String textField = "text";
-	private String filePathField = "filepath";
+  private String textField = "text";
+  private String filePathField = "filepath";
 
-	@Override
-	public void startStage(StageConfiguration config) {
-		// TODO: support processing a byte array on a document.
-		// rather than just a reference for on disk
-		if (config != null) {
-			textField = config.getProperty("textField", "text");
-			filePathField = config.getProperty("filePathField", "filepath");
-		}
+  @Override
+  public void startStage(StageConfiguration config) {
+    // TODO: support processing a byte array on a document.
+    // rather than just a reference for on disk
+    if (config != null) {
+      textField = config.getProperty("textField", "text");
+      filePathField = config.getProperty("filePathField", "filepath");
+    }
 
-	}
+  }
 
-	@Override
-	public List<Document> processDocument(Document doc) {
-		// Create the parser..
-		// not sure if the parser is thread safe, so we create a new one here
-		// each time.  probably not effecient to do this.
-		Parser  parser = new AutoDetectParser();
-		ParseContext  parseCtx = new ParseContext();
-		parseCtx.set(Parser.class, parser);
+  @Override
+  public List<Document> processDocument(Document doc) {
+    // Create the parser..
+    // not sure if the parser is thread safe, so we create a new one here
+    // each time. probably not effecient to do this.
+    Parser parser = new AutoDetectParser();
+    ParseContext parseCtx = new ParseContext();
+    parseCtx.set(Parser.class, parser);
 
-		// TODO how does the doc model support this?
-		if (!doc.hasField(filePathField)) {
-			return null;
-		}
+    // TODO how does the doc model support this?
+    if (!doc.hasField(filePathField)) {
+      return null;
+    }
 
-		// we have the field populated
-		for (Object pathObj : doc.getField(filePathField)) {
+    // we have the field populated
+    for (Object pathObj : doc.getField(filePathField)) {
 
-			// TODO: test the object type here.
-			String path = (String)pathObj;
-			
-			File f = new File(path);
-			if (!f.exists()) {
-				// TODO: log that the file path was not found
-				System.out.println("File path not found " + path);
-				continue;
-			}
-			
-			FileInputStream binaryData = null;
-			try {
-				binaryData = new FileInputStream(f);
-			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				// This should never happen.
-				continue;
-			}
-			//InputStream binaryData = null;
+      // TODO: test the object type here.
+      String path = (String) pathObj;
 
-			if (binaryData == null) {
-				// This should never happen either.
-				continue;
-			}
-			
-			Metadata metadata = new Metadata();
-			StringWriter textData = new StringWriter();
-			ContentHandler bch = new BodyContentHandler(textData);
-			try {
-				parser.parse(binaryData, bch, metadata, parseCtx);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (TikaException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+      File f = new File(path);
+      if (!f.exists()) {
+        // TODO: log that the file path was not found
+        System.out.println("File path not found " + path);
+        continue;
+      }
 
-			doc.addToField(textField, textData.toString());
-			for (String name : metadata.names()) {
-				// clean the field name first.
-				String cleanName = cleanFieldName(name);
-				for (String value : metadata.getValues(name)) {
-					doc.addToField(cleanName , value);
-				}
-			}
-		}
+      FileInputStream binaryData = null;
+      try {
+        binaryData = new FileInputStream(f);
+      } catch (FileNotFoundException e1) {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+        // This should never happen.
+        continue;
+      }
+      // InputStream binaryData = null;
 
-		return null;
-	}
-	
-	// TODO: this should go on a common utility interface or something.
-	private static String cleanFieldName(String name) {
-		String cleanName = name.trim().toLowerCase();
-		cleanName = cleanName.replaceAll(" ", "_");
-		cleanName = cleanName.replaceAll("-" , "_");
-		cleanName = cleanName.replaceAll(":" , "_");
-		return cleanName;
-	}
+      Metadata metadata = new Metadata();
+      StringWriter textData = new StringWriter();
+      ContentHandler bch = new BodyContentHandler(textData);
+      try {
+        parser.parse(binaryData, bch, metadata, parseCtx);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (SAXException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (TikaException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
 
-	@Override
-	public void stopStage() {
-		// TODO Auto-generated method stub
+      doc.addToField(textField, textData.toString());
+      for (String name : metadata.names()) {
+        // clean the field name first.
+        String cleanName = cleanFieldName(name);
+        for (String value : metadata.getValues(name)) {
+          doc.addToField(cleanName, value);
+        }
+      }
+    }
 
-	}
+    return null;
+  }
 
-	@Override
-	public void flush() {
-		// TODO Auto-generated method stub
+  // TODO: this should go on a common utility interface or something.
+  private static String cleanFieldName(String name) {
+    String cleanName = name.trim().toLowerCase();
+    cleanName = cleanName.replaceAll(" ", "_");
+    cleanName = cleanName.replaceAll("-", "_");
+    cleanName = cleanName.replaceAll(":", "_");
+    return cleanName;
+  }
 
-	}
+  @Override
+  public void stopStage() {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void flush() {
+    // TODO Auto-generated method stub
+
+  }
 
 }

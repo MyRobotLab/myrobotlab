@@ -47,140 +47,135 @@ import org.slf4j.Logger;
 
 public class EditorArduino extends Editor implements ActionListener {
 
-	public final static Logger log = LoggerFactory.getLogger(EditorArduino.class);
-	static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(EditorArduino.class);
+  static final long serialVersionUID = 1L;
 
-	// button bar buttons
-	ImageButton compileButton;
-	ImageButton uploadButton;
-	public ImageButton connectButton;
-	ImageButton newButton;
-	ImageButton openButton;
-	ImageButton saveButton;
-	ImageButton fullscreenButton;
-	ImageButton monitorButton;
-	JLabel sketchName = new JLabel("MRLComm copy, paste and upload this sketch into the Arduinio IDE");
+  // button bar buttons
+  ImageButton compileButton;
+  ImageButton uploadButton;
+  public ImageButton connectButton;
+  ImageButton newButton;
+  ImageButton openButton;
+  ImageButton saveButton;
+  ImageButton fullscreenButton;
+  ImageButton monitorButton;
+  JLabel sketchName = new JLabel("MRLComm copy, paste and upload this sketch into the Arduinio IDE");
 
-	Arduino myArduino = null;
-	JMenu boardsMenu = new JMenu("Board");
-	public JMenu serialDeviceMenu = new JMenu("Serial Device");
-	public JMenu digitalPinMenu = new JMenu("Digital Pins");
-	JCheckBoxMenuItem digitalDebounce = new JCheckBoxMenuItem("Debounce");
-	JCheckBoxMenuItem digitalTriggerOnly = new JCheckBoxMenuItem("Digital Trigger Only");
+  Arduino myArduino = null;
+  JMenu boardsMenu = new JMenu("Board");
+  public JMenu serialDeviceMenu = new JMenu("Serial Device");
+  public JMenu digitalPinMenu = new JMenu("Digital Pins");
+  JCheckBoxMenuItem digitalDebounce = new JCheckBoxMenuItem("Debounce");
+  JCheckBoxMenuItem digitalTriggerOnly = new JCheckBoxMenuItem("Digital Trigger Only");
 
-	public EditorArduino(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs, SyntaxConstants.SYNTAX_STYLE_C);
-		ServiceInterface sw = Runtime.getService(boundServiceName);
-		myArduino = (Arduino) sw;
-		examplesMenu.add(createExamplesMenu());
-	}
+  public EditorArduino(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs, SyntaxConstants.SYNTAX_STYLE_C);
+    ServiceInterface sw = Runtime.getService(boundServiceName);
+    myArduino = (Arduino) sw;
+    examplesMenu.add(createExamplesMenu());
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		super.actionPerformed(event);
-		Object o = event.getSource();
+  @Override
+  public void actionPerformed(ActionEvent event) {
+    super.actionPerformed(event);
+    Object o = event.getSource();
 
-		if (o == compileButton) {
-			myService.send(boundServiceName, "compile", sketchName.getText(), textArea.getText());
-		} else if (o == uploadButton) {
-			myService.send(boundServiceName, "upload", textArea.getText());
-			return;
-		} else if (o == digitalDebounce) {
-			if (digitalDebounce.isSelected()) {
-				myService.send(boundServiceName, "digitalDebounceOn");
-			} else {
-				myService.send(boundServiceName, "digitalDebounceOff");
-			}
-		} else if (o == digitalTriggerOnly) {
-			if (digitalTriggerOnly.isSelected()) {
-				myService.send(boundServiceName, "setDigitalTriggerOnly", true);
-			} else {
-				myService.send(boundServiceName, "setDigitalTriggerOnly", false);
-			}
-		} else if (o == connectButton) {
-		} else if ("examples".equals(event.getActionCommand())) {
-			JMenuItem menu = (JMenuItem) o;
-			loadResourceFile(menu.getText());
-		}
-	}
+    if (o == compileButton) {
+      myService.send(boundServiceName, "compile", sketchName.getText(), textArea.getText());
+    } else if (o == uploadButton) {
+      myService.send(boundServiceName, "upload", textArea.getText());
+      return;
+    } else if (o == digitalDebounce) {
+      if (digitalDebounce.isSelected()) {
+        myService.send(boundServiceName, "digitalDebounceOn");
+      } else {
+        myService.send(boundServiceName, "digitalDebounceOff");
+      }
+    } else if (o == digitalTriggerOnly) {
+      if (digitalTriggerOnly.isSelected()) {
+        myService.send(boundServiceName, "setDigitalTriggerOnly", true);
+      } else {
+        myService.send(boundServiceName, "setDigitalTriggerOnly", false);
+      }
+    } else if (o == connectButton) {
+    } else if ("examples".equals(event.getActionCommand())) {
+      JMenuItem menu = (JMenuItem) o;
+      loadResourceFile(menu.getText());
+    }
+  }
 
-	private JMenu createExamplesMenu() {
-		JMenu menu;
-		menu = new JMenu("Communication");
-		menu.add(createMenuItem("MRLComm.ino", "examples"));
+  private JMenu createExamplesMenu() {
+    JMenu menu;
+    menu = new JMenu("Communication");
+    menu.add(createMenuItem("MRLComm.ino", "examples"));
 
-		return menu;
-	}
+    return menu;
+  }
 
-	@Override
-	public void init() {
-		super.init();
-		// NOTE !!! - must be lowercase to match image names
-		/*
-		compileButton = addImageButtonToButtonBar("Arduino", "compile", this);
-		compileButton.setVisible(false);
-		uploadButton = addImageButtonToButtonBar("Arduino", "upload", this);
-		uploadButton.setVisible(false);
-		connectButton = addImageButtonToButtonBar("Arduino", "connect", this);
-		connectButton.setVisible(false);
-		newButton = addImageButtonToButtonBar("Arduino", "new", this);
-		newButton.setVisible(false);
-		openButton = addImageButtonToButtonBar("Arduino", "open", this);
-		openButton.setVisible(false);
-		saveButton = addImageButtonToButtonBar("Arduino", "save", this);
-		saveButton.setVisible(false);
-		fullscreenButton = addImageButtonToButtonBar("Arduino", "fullscreen", this);
-		fullscreenButton.setVisible(false);
-		monitorButton = addImageButtonToButtonBar("Arduino", "monitor", this);
-		monitorButton.setVisible(false);
+  @Override
+  public void init() {
+    super.init();
+    // NOTE !!! - must be lowercase to match image names
+    /*
+     * compileButton = addImageButtonToButtonBar("Arduino", "compile", this);
+     * compileButton.setVisible(false); uploadButton =
+     * addImageButtonToButtonBar("Arduino", "upload", this);
+     * uploadButton.setVisible(false); connectButton =
+     * addImageButtonToButtonBar("Arduino", "connect", this);
+     * connectButton.setVisible(false); newButton =
+     * addImageButtonToButtonBar("Arduino", "new", this);
+     * newButton.setVisible(false); openButton =
+     * addImageButtonToButtonBar("Arduino", "open", this);
+     * openButton.setVisible(false); saveButton =
+     * addImageButtonToButtonBar("Arduino", "save", this);
+     * saveButton.setVisible(false); fullscreenButton =
+     * addImageButtonToButtonBar("Arduino", "fullscreen", this);
+     * fullscreenButton.setVisible(false); monitorButton =
+     * addImageButtonToButtonBar("Arduino", "monitor", this);
+     * monitorButton.setVisible(false);
+     * 
+     * buttonBar.setBackground(new Color(0, 100, 104));
+     * sketchName.setForeground(new Color(255, 255, 255));
+     * buttonBar.add(sketchName);
+     * 
+     * toolsMenu.add(boardsMenu); toolsMenu.add(serialDeviceMenu);
+     * toolsMenu.add(digitalPinMenu);
+     * 
+     * digitalDebounce.setSelected(true);
+     * digitalDebounce.addActionListener(this);
+     * digitalPinMenu.add(digitalDebounce);
+     * 
+     * digitalTriggerOnly.setSelected(true);
+     * digitalTriggerOnly.addActionListener(this);
+     * digitalPinMenu.add(digitalTriggerOnly);
+     * 
+     * // add to help menu helpMenu.add(createMenuItem("Getting Started"));
+     * helpMenu.add(createMenuItem("Environment"));
+     * helpMenu.add(createMenuItem("Troubleshooting"));
+     * helpMenu.add(createMenuItem("Reference")); helpMenu.add(createMenuItem(
+     * "Find in Reference", saveMenuMnemonic, "control+shift-F", null));
+     * helpMenu.add(createMenuItem("Frequently Asked Questions"));
+     * helpMenu.add(createMenuItem("Visit Arduino.cc"));
+     */
 
-		buttonBar.setBackground(new Color(0, 100, 104));
-		sketchName.setForeground(new Color(255, 255, 255));
-		buttonBar.add(sketchName);
+  }
 
-		toolsMenu.add(boardsMenu);
-		toolsMenu.add(serialDeviceMenu);
-		toolsMenu.add(digitalPinMenu);
+  public void loadCommunicationFile() {
+    loadResourceFile("MRLComm.ino");
+  }
 
-		digitalDebounce.setSelected(true);
-		digitalDebounce.addActionListener(this);
-		digitalPinMenu.add(digitalDebounce);
+  public void loadResourceFile(String filename) {
+    String resourcePath = String.format("Arduino/%s/%s", filename.substring(0, filename.indexOf(".")), filename);
+    log.info(String.format("loadResourceFile %s", resourcePath));
+    String sketch = FileIO.resourceToString(resourcePath);
+    textArea.setText(sketch);
+  }
 
-		digitalTriggerOnly.setSelected(true);
-		digitalTriggerOnly.addActionListener(this);
-		digitalPinMenu.add(digitalTriggerOnly);
+  public static void main(String[] args) {
 
-		// add to help menu
-		helpMenu.add(createMenuItem("Getting Started"));
-		helpMenu.add(createMenuItem("Environment"));
-		helpMenu.add(createMenuItem("Troubleshooting"));
-		helpMenu.add(createMenuItem("Reference"));
-		helpMenu.add(createMenuItem("Find in Reference", saveMenuMnemonic, "control+shift-F", null));
-		helpMenu.add(createMenuItem("Frequently Asked Questions"));
-		helpMenu.add(createMenuItem("Visit Arduino.cc"));
-		*/
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.INFO);
 
-	}
-
-	public void loadCommunicationFile() {
-		loadResourceFile("MRLComm.ino");
-	}
-
-	public void loadResourceFile(String filename) {
-		String resourcePath = String.format("Arduino/%s/%s", filename.substring(0, filename.indexOf(".")), filename);
-		log.info(String.format("loadResourceFile %s", resourcePath));
-		String sketch = FileIO.resourceToString(resourcePath);
-		textArea.setText(sketch);
-	}
-	
-	
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-		
-	}
-
-	
+  }
 
 }

@@ -16,124 +16,121 @@ import org.myrobotlab.service.interfaces.TextPublisher;
  */
 public class HtmlFilter extends Service implements TextListener, TextPublisher {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	// true will strip html, false will add html
-	private boolean stripHtml = true;
-	// if stripHtml is false these tags are used to wrap the input text
-	private String preHtmlTag = "<pre>";
-	private String postHtmlTag = "</pre>";
+  // true will strip html, false will add html
+  private boolean stripHtml = true;
+  // if stripHtml is false these tags are used to wrap the input text
+  private String preHtmlTag = "<pre>";
+  private String postHtmlTag = "</pre>";
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel("INFO");
+  public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel("INFO");
 
-		try {
-			Runtime.createAndStart("gui", "GUIService");
-			Runtime.createAndStart("python", "Python");
-			HtmlFilter htmlFilter = (HtmlFilter) Runtime.createAndStart("htmlFilter", "HtmlFilter");
-			log.info(">>>>>>>>>>" + htmlFilter.stripHtml("This is <a>foo</a> bar."));
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+    try {
+      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("python", "Python");
+      HtmlFilter htmlFilter = (HtmlFilter) Runtime.createAndStart("htmlFilter", "HtmlFilter");
+      log.info(">>>>>>>>>>" + htmlFilter.stripHtml("This is <a>foo</a> bar."));
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-	public HtmlFilter(String reservedKey) {
-		super(reservedKey);
-	}
+  public HtmlFilter(String reservedKey) {
+    super(reservedKey);
+  }
 
-	// helper function to add html tags
-	public String addHtml(String text) {
-		return preHtmlTag + text + postHtmlTag;
-	}
+  // helper function to add html tags
+  public String addHtml(String text) {
+    return preHtmlTag + text + postHtmlTag;
+  }
 
-	public void addTextListener(TextListener service) {
-		addListener("publishText", service.getName(), "onText");
-	}
+  public void addTextListener(TextListener service) {
+    addListener("publishText", service.getName(), "onText");
+  }
 
+  public String getPostHtmlTag() {
+    return postHtmlTag;
+  }
 
-	public String getPostHtmlTag() {
-		return postHtmlTag;
-	}
+  public String getPreHtmlTag() {
+    return preHtmlTag;
+  }
 
-	public String getPreHtmlTag() {
-		return preHtmlTag;
-	}
+  public boolean isStripHtml() {
+    return stripHtml;
+  }
 
-	public boolean isStripHtml() {
-		return stripHtml;
-	}
+  @Override
+  public void onText(String text) {
+    // process the text and then publish the new text.
+    if (stripHtml) {
+      String cleanText = stripHtml(text);
+      invoke("publishText", cleanText);
+    } else {
+      String htmlText = addHtml(text);
+      invoke("publishText", htmlText);
+    }
+  }
 
-	@Override
-	public void onText(String text) {
-		// process the text and then publish the new text.
-		if (stripHtml) {
-			String cleanText = stripHtml(text);
-			invoke("publishText", cleanText);
-		} else {
-			String htmlText = addHtml(text);
-			invoke("publishText", htmlText);
-		}
-	}
+  @Override
+  public String publishText(String text) {
+    return text;
+  }
 
-	@Override
-	public String publishText(String text) {
-		return text;
-	}
+  /**
+   * The string to be appended to the input text Defaults to &lt;/pre&gt;
+   * 
+   * @param postHtmlTag
+   */
+  public void setPostHtmlTag(String postHtmlTag) {
+    this.postHtmlTag = postHtmlTag;
+  }
 
-	/**
-	 * The string to be appended to the input text Defaults to &lt;/pre&gt;
-	 * 
-	 * @param postHtmlTag
-	 */
-	public void setPostHtmlTag(String postHtmlTag) {
-		this.postHtmlTag = postHtmlTag;
-	}
+  /**
+   * The string to be prepended to the input text Defaults to &lt;pre&gt;
+   * 
+   * @param preHtmlTag
+   */
+  public void setPreHtmlTag(String preHtmlTag) {
+    this.preHtmlTag = preHtmlTag;
+  }
 
-	/**
-	 * The string to be prepended to the input text Defaults to &lt;pre&gt;
-	 * 
-	 * @param preHtmlTag
-	 */
-	public void setPreHtmlTag(String preHtmlTag) {
-		this.preHtmlTag = preHtmlTag;
-	}
+  /**
+   * If this is true, the input text will be striped of html. If this is false,
+   * the input text will get the pre and post html tags added to it.
+   * 
+   * @param stripHtml
+   */
+  public void setStripHtml(boolean stripHtml) {
+    this.stripHtml = stripHtml;
+  }
 
-	/**
-	 * If this is true, the input text will be striped of html. If this is
-	 * false, the input text will get the pre and post html tags added to it.
-	 * 
-	 * @param stripHtml
-	 */
-	public void setStripHtml(boolean stripHtml) {
-		this.stripHtml = stripHtml;
-	}
+  // helper function to strip html tags.
+  public String stripHtml(String text) {
+    // TODO: something fancier but this works for now.
+    String cleanText = text.replaceAll("\\<.*?\\>", " ");
+    cleanText = cleanText.replaceAll("  ", " ");
+    return cleanText.trim();
+  }
 
-	// helper function to strip html tags.
-	public String stripHtml(String text) {
-		// TODO: something fancier but this works for now.
-		String cleanText = text.replaceAll("\\<.*?\\>", " ");
-		cleanText = cleanText.replaceAll("  ", " ");
-		return cleanText.trim();
-	}
-	
-	
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
-		ServiceType meta = new ServiceType(HtmlFilter.class.getCanonicalName());
-		meta.addDescription("This service will strip html markup from the input text");
-		meta.addCategory("data", "filter");
+    ServiceType meta = new ServiceType(HtmlFilter.class.getCanonicalName());
+    meta.addDescription("This service will strip html markup from the input text");
+    meta.addCategory("data", "filter");
 
-		return meta;
-	}
-
+    return meta;
+  }
 
 }

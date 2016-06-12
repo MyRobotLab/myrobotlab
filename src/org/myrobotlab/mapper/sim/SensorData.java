@@ -29,7 +29,7 @@ package org.myrobotlab.mapper.sim;
  */
 public abstract class SensorData implements Cloneable {
 
-	@Override
-	abstract public Object clone();
+  @Override
+  abstract public Object clone();
 
 }

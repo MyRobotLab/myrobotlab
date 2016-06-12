@@ -4,7 +4,7 @@ import org.myrobotlab.service.data.OculusData;
 
 public interface OculusDataPublisher {
 
-	public String getName();
+  public String getName();
 
-	public OculusData publishOculusData(OculusData data);
+  public OculusData publishOculusData(OculusData data);
 }

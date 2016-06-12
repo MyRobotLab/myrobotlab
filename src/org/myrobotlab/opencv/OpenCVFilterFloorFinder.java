@@ -39,50 +39,50 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterFloorFinder extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFloorFinder.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFloorFinder.class.getCanonicalName());
 
-	IplImage buffer = null;
+  IplImage buffer = null;
 
-	CvPoint startPoint = cvPoint(180, 120);
-	CvScalar fillColor = cvScalar(255.0, 0.0, 0.0, 1.0);
-	CvScalar lo_diff = CV_RGB(20.0, 20.0, 20.0);// cvScalar(20, 0.0, 0.5, 1.0);
-	CvScalar up_diff = CV_RGB(20.0, 20.0, 20.0);
+  CvPoint startPoint = cvPoint(180, 120);
+  CvScalar fillColor = cvScalar(255.0, 0.0, 0.0, 1.0);
+  CvScalar lo_diff = CV_RGB(20.0, 20.0, 20.0);// cvScalar(20, 0.0, 0.5, 1.0);
+  CvScalar up_diff = CV_RGB(20.0, 20.0, 20.0);
 
-	public OpenCVFilterFloorFinder() {
-		super();
-	}
+  public OpenCVFilterFloorFinder() {
+    super();
+  }
 
-	public OpenCVFilterFloorFinder(String name) {
-		super(name);
-	}
+  public OpenCVFilterFloorFinder(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
+  @Override
+  public void imageChanged(IplImage image) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
-		// if (startPoint == null)
-		{
-			startPoint = cvPoint(image.width() / 2, image.height() - 4);
-		}
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
+    // if (startPoint == null)
+    {
+      startPoint = cvPoint(image.width() / 2, image.height() - 4);
+    }
 
-		fillColor = cvScalar(255.0, 255.0, 255.0, 1.0);
+    fillColor = cvScalar(255.0, 255.0, 255.0, 1.0);
 
-		lo_diff = CV_RGB(1, 12, 13);// cvScalar(20, 0.0, 0.5, 1.0);
-		up_diff = CV_RGB(1, 12, 13);
+    lo_diff = CV_RGB(1, 12, 13);// cvScalar(20, 0.0, 0.5, 1.0);
+    up_diff = CV_RGB(1, 12, 13);
 
-		cvFloodFill(image, startPoint, fillColor, lo_diff, up_diff, null, 4, null);
+    cvFloodFill(image, startPoint, fillColor, lo_diff, up_diff, null, 4, null);
 
-		fillColor = cvScalar(0.0, 255.0, 0.0, 1.0);
-		cvDrawRect(image, startPoint, startPoint, fillColor, 2, 1, 0);
+    fillColor = cvScalar(0.0, 255.0, 0.0, 1.0);
+    cvDrawRect(image, startPoint, startPoint, fillColor, 2, 1, 0);
 
-		return image;
+    return image;
 
-	}
+  }
 
 }

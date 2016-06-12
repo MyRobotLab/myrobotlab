@@ -7,10 +7,12 @@ import org.myrobotlab.document.ProcessingStatus;
 
 public interface DocumentListener {
 
-	public String getName();
+  public String getName();
 
-	public ProcessingStatus onDocument(Document doc);
-	public ProcessingStatus onDocuments(List<Document> docs);
-	public boolean onFlush();
-	
+  public ProcessingStatus onDocument(Document doc);
+
+  public ProcessingStatus onDocuments(List<Document> docs);
+
+  public boolean onFlush();
+
 }

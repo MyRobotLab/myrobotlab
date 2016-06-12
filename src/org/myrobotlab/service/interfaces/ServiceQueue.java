@@ -6,23 +6,22 @@ import org.myrobotlab.framework.Message;
 // this one would be 'remote' - local would have addListener
 // decompose Message Sender & Message Subscriber
 public interface ServiceQueue {
-	
-	/**
-	 * put message in inbox, so it will be processed by this service
-	 * 
-	 * @param msg
-	 */
 
-	public void in(Message msg);
+  /**
+   * put message in inbox, so it will be processed by this service
+   * 
+   * @param msg
+   */
 
-	public void out(Message msg);
-	
-	// TODO - put in seperate Invoking interface
-	public Object invoke(String method);
+  public void in(Message msg);
 
-	public Object invoke(String method, Object... params);
+  public void out(Message msg);
 
-	public boolean isLocal();
+  // TODO - put in seperate Invoking interface
+  public Object invoke(String method);
 
+  public Object invoke(String method, Object... params);
+
+  public boolean isLocal();
 
 }

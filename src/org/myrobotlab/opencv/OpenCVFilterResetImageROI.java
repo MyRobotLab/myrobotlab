@@ -31,50 +31,50 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterResetImageROI extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterResetImageROI.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterResetImageROI.class.getCanonicalName());
 
-	IplImage src = null;
+  IplImage src = null;
 
-	IplImage dst = null;
+  IplImage dst = null;
 
-	public OpenCVFilterResetImageROI() {
-		super();
-	}
+  public OpenCVFilterResetImageROI() {
+    super();
+  }
 
-	public OpenCVFilterResetImageROI(String name) {
-		super(name);
-	}
+  public OpenCVFilterResetImageROI(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
+  @Override
+  public void imageChanged(IplImage image) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
 
-		/*
-		 * cfg.set(USE_INPUT_IMAGE_NAME, false); cfg.set(USE_OUTPUT_IMAGE_NAME,
-		 * false);
-		 * 
-		 * if (cfg.getBoolean(USE_INPUT_IMAGE_NAME)) { String srcName =
-		 * cfg.get(INPUT_IMAGE_NAME); if (globalData.containsKey(srcName)) { src
-		 * = (IplImage) globalData.get(srcName); } else { src = image.clone();
-		 * globalData.put(srcName, src); } } else { src = image; }
-		 * 
-		 * if (cfg.getBoolean(USE_OUTPUT_IMAGE_NAME)) { String dstName =
-		 * cfg.get(OUTPUT_IMAGE_NAME); if (globalData.containsKey(dstName)) {
-		 * dst = (IplImage) globalData.get(dstName); } else { dst =
-		 * image.clone(); globalData.put(dstName, dst); }
-		 * 
-		 * } else { dst = src; }
-		 * 
-		 * // if (cfg.getBoolean(USE_ROI)) // { cvResetImageROI(dst); // }
-		 */
-		return image; // TODO - src dst or image? consistency?
-	}
+    /*
+     * cfg.set(USE_INPUT_IMAGE_NAME, false); cfg.set(USE_OUTPUT_IMAGE_NAME,
+     * false);
+     * 
+     * if (cfg.getBoolean(USE_INPUT_IMAGE_NAME)) { String srcName =
+     * cfg.get(INPUT_IMAGE_NAME); if (globalData.containsKey(srcName)) { src =
+     * (IplImage) globalData.get(srcName); } else { src = image.clone();
+     * globalData.put(srcName, src); } } else { src = image; }
+     * 
+     * if (cfg.getBoolean(USE_OUTPUT_IMAGE_NAME)) { String dstName =
+     * cfg.get(OUTPUT_IMAGE_NAME); if (globalData.containsKey(dstName)) { dst =
+     * (IplImage) globalData.get(dstName); } else { dst = image.clone();
+     * globalData.put(dstName, dst); }
+     * 
+     * } else { dst = src; }
+     * 
+     * // if (cfg.getBoolean(USE_ROI)) // { cvResetImageROI(dst); // }
+     */
+    return image; // TODO - src dst or image? consistency?
+  }
 
 }

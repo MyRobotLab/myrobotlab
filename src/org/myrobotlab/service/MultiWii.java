@@ -10,56 +10,54 @@ import org.slf4j.Logger;
 
 /**
  * 
- * MultiWii - this is a skeleton service intended as a place holder to 
- * support controling the MultiWii
+ * MultiWii - this is a skeleton service intended as a place holder to support
+ * controling the MultiWii
  *
  * MultiWii is a general purpose software to control a multirotor RC model.
  * http://www.multiwii.com/
  */
 public class MultiWii extends Service {
 
-	transient public Serial serial;
+  transient public Serial serial;
 
-	transient public Serial uart;
+  transient public Serial uart;
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(MultiWii.class);
+  public final static Logger log = LoggerFactory.getLogger(MultiWii.class);
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+  public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.INFO);
 
-		try {
+    try {
 
-			MultiWii template = (MultiWii) Runtime.start("template", "_TemplateService");
-			Runtime.start("gui", "GUIService");
+      Runtime.start("template", "_TemplateService");
+      Runtime.start("gui", "GUIService");
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-	public MultiWii(String n) {
-		super(n);
-	}
+  public MultiWii(String n) {
+    super(n);
+  }
 
-	
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = new ServiceType(MultiWii.class.getCanonicalName());
-		meta.addDescription("MultiWii interface");
-		meta.addCategory("control");
-		return meta;
-	}
+    ServiceType meta = new ServiceType(MultiWii.class.getCanonicalName());
+    meta.addDescription("MultiWii interface");
+    meta.addCategory("control");
+    return meta;
+  }
 
 }

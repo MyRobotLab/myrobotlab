@@ -28,139 +28,138 @@ import org.slf4j.Logger;
 
 public class AboutDialog extends JDialog implements ActionListener, MouseListener {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(AboutDialog.class);
+  public final static Logger log = LoggerFactory.getLogger(AboutDialog.class);
 
-	JButton noWorky = null;
-	JButton ok = null;
-	JFrame parent = null;
-	JLabel versionLabel = new JLabel(org.myrobotlab.service.Runtime.getVersion());
-	GUIService gui;
+  JButton noWorky = null;
+  JButton ok = null;
+  JFrame parent = null;
+  JLabel versionLabel = new JLabel(org.myrobotlab.service.Runtime.getVersion());
+  GUIService gui;
 
-	public static void main(String[] args) throws Exception {
-		LoggingFactory.getInstance().configure();
+  public static void main(String[] args) throws Exception {
+    LoggingFactory.getInstance().configure();
 
-		log.info("[{}]", "1060M.20130227.0733".compareTo("1059M.20130227.0722"));
-		log.info("[{}]", "1059M.20130227.0722".compareTo("1060M.20130227.0733"));
+    log.info("[{}]", "1060M.20130227.0733".compareTo("1059M.20130227.0722"));
+    log.info("[{}]", "1059M.20130227.0722".compareTo("1060M.20130227.0733"));
 
-		// HTTPRequest logPoster = new HTTPRequest(new
-		// URL("http://myrobotlab.org/myrobotlab_log/postLogFile.php"));
-		HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File("myrobotlab.log"));
-		// logPoster.setParameter("file", "myrobotlab.log", new
-		// FileInputStream(new File("myrobotlab.log")));
-		// logPoster.setParameter("file", new File("myrobotlab.log"));
-		// logPoster.setc
-		/*
-		 * InputStream in = logPoster.post().getInputStream(); //read it with
-		 * BufferedReader BufferedReader br = new BufferedReader( new
-		 * InputStreamReader(in));
-		 * 
-		 * StringBuilder sb = new StringBuilder();
-		 * 
-		 * String line; while ((line = br.readLine()) != null) {
-		 * sb.append(line); }
-		 * 
-		 * System.out.println(sb.toString());
-		 * 
-		 * br.close();
-		 */
-	}
+    // HTTPRequest logPoster = new HTTPRequest(new
+    // URL("http://myrobotlab.org/myrobotlab_log/postLogFile.php"));
+    HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File("myrobotlab.log"));
+    // logPoster.setParameter("file", "myrobotlab.log", new
+    // FileInputStream(new File("myrobotlab.log")));
+    // logPoster.setParameter("file", new File("myrobotlab.log"));
+    // logPoster.setc
+    /*
+     * InputStream in = logPoster.post().getInputStream(); //read it with
+     * BufferedReader BufferedReader br = new BufferedReader( new
+     * InputStreamReader(in));
+     * 
+     * StringBuilder sb = new StringBuilder();
+     * 
+     * String line; while ((line = br.readLine()) != null) { sb.append(line); }
+     * 
+     * System.out.println(sb.toString());
+     * 
+     * br.close();
+     */
+  }
 
-	public AboutDialog(GUIService gui) {
-		super(gui.getFrame(), "about", true);
-		this.gui = gui;
-		this.parent = gui.getFrame();
-		if (parent != null) {
-			Dimension parentSize = parent.getSize();
-			Point p = parent.getLocation();
-			setLocation(p.x + parentSize.width / 4, p.y + parentSize.height / 4);
-		}
+  public AboutDialog(GUIService gui) {
+    super(gui.getFrame(), "about", true);
+    this.gui = gui;
+    this.parent = gui.getFrame();
+    if (parent != null) {
+      Dimension parentSize = parent.getSize();
+      Point p = parent.getLocation();
+      setLocation(p.x + parentSize.width / 4, p.y + parentSize.height / 4);
+    }
 
-		JPanel content = new JPanel(new BorderLayout());
-		content.setPreferredSize(new Dimension(350, 150));
-		getContentPane().add(content);
+    JPanel content = new JPanel(new BorderLayout());
+    content.setPreferredSize(new Dimension(350, 150));
+    getContentPane().add(content);
 
-		// picture
-		JLabel pic = new JLabel();
-		ImageIcon icon = Util.getResourceIcon("mrl_logo_about_128.png");
-		if (icon != null) {
-			pic.setIcon(icon);
-		}
-		content.add(pic, BorderLayout.WEST);
+    // picture
+    JLabel pic = new JLabel();
+    ImageIcon icon = Util.getResourceIcon("mrl_logo_about_128.png");
+    if (icon != null) {
+      pic.setIcon(icon);
+    }
+    content.add(pic, BorderLayout.WEST);
 
-		JPanel center = new JPanel(new GridBagLayout());
-		GridBagConstraints gc = new GridBagConstraints();
+    JPanel center = new JPanel(new GridBagLayout());
+    GridBagConstraints gc = new GridBagConstraints();
 
-		JLabel link = new JLabel("<html><p align=center><a href=\"http://myrobotlab.org\">http://myrobotlab.org</a><html>");
-		link.addMouseListener(this);
-		content.add(center, BorderLayout.CENTER);
-		content.add(versionLabel, BorderLayout.SOUTH);
-		gc.gridx = 0;
-		gc.gridy = 0;
-		gc.gridwidth = 2;
-		center.add(link, gc);
-		gc.gridwidth = 1;
-		++gc.gridy;
-		center.add(new JLabel("version "), gc);
-		++gc.gridx;
-		center.add(versionLabel, gc);
+    JLabel link = new JLabel("<html><p align=center><a href=\"http://myrobotlab.org\">http://myrobotlab.org</a><html>");
+    link.addMouseListener(this);
+    content.add(center, BorderLayout.CENTER);
+    content.add(versionLabel, BorderLayout.SOUTH);
+    gc.gridx = 0;
+    gc.gridy = 0;
+    gc.gridwidth = 2;
+    center.add(link, gc);
+    gc.gridwidth = 1;
+    ++gc.gridy;
+    center.add(new JLabel("version "), gc);
+    ++gc.gridx;
+    center.add(versionLabel, gc);
 
-		JPanel buttonPane = new JPanel();
+    JPanel buttonPane = new JPanel();
 
-		ok = new JButton("OK");
-		buttonPane.add(ok);
-		ok.addActionListener(this);
+    ok = new JButton("OK");
+    buttonPane.add(ok);
+    ok.addActionListener(this);
 
-		noWorky = new JButton("Help, it \"no-worky\"!");
-		buttonPane.add(noWorky);
-		noWorky.addActionListener(this);
+    noWorky = new JButton("Help, it \"no-worky\"!");
+    buttonPane.add(noWorky);
+    noWorky.addActionListener(this);
 
-		getContentPane().add(buttonPane, BorderLayout.SOUTH);
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		pack();
-		setVisible(true);
-	}
+    getContentPane().add(buttonPane, BorderLayout.SOUTH);
+    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+    pack();
+    setVisible(true);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object source = e.getSource();
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Object source = e.getSource();
 
-		if (source == ok) {
-			setVisible(false);
-			dispose();
-		} else if (source == noWorky) {
-			gui.noWorky();
-		}
-	}
+    if (source == ok) {
+      setVisible(false);
+      dispose();
+    } else if (source == noWorky) {
+      gui.noWorky();
+    }
+  }
 
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
+  @Override
+  public void mouseClicked(MouseEvent e) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
+  @Override
+  public void mouseEntered(MouseEvent e) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
+  @Override
+  public void mouseExited(MouseEvent e) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
+  @Override
+  public void mousePressed(MouseEvent e) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		BareBonesBrowserLaunch.openURL("http://myrobotlab.org");
-	}
+  @Override
+  public void mouseReleased(MouseEvent e) {
+    BareBonesBrowserLaunch.openURL("http://myrobotlab.org");
+  }
 
 }

@@ -23,7 +23,7 @@ public class Adafruit16CServoDriverTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		driver = (Adafruit16CServoDriver) Runtime.start("driver", "Adafruit16CServoDriver");
-		arduino = driver.getArduino();
+		// arduino = driver.getArduino();
 		serial = arduino.getSerial();
 	}
 
@@ -41,126 +41,126 @@ public class Adafruit16CServoDriverTest {
 
 	@Test
 	public final void testGetCategories() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testGetDescription() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testStartService() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testGetPeers() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testMain() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testAdafruit16CServoDriver() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testAttachArduino() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testAttachServoInteger() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testBegin() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testConnect() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testGetArduino() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testGetPinList() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testIsAttached() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testServoAttach() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testServoDetach() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testServoSweepStart() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testServoSweepStop() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testServoWrite() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testServoWriteMicroseconds() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testSetPWM() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testSetPWMFreq() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testSetServo() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testSetServoEventsEnabled() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	@Test
 	public final void testSetServoSpeed() {
-		//fail("Not yet implemented"); // TODO
+		// fail("Not yet implemented"); // TODO
 	}
 
 	public final void test() throws IOException, FileComparisonException {
-		//virtual.create
+		// virtual.create
 		virtual.createVirtualSerial("v1");
 		// FIXME - make virtual UART
 

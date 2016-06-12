@@ -41,79 +41,80 @@ import org.slf4j.Logger;
  * 
  * http://myrobotlab.org/content/myrobotlab-api
  * 
- * Typically this data class is used to send to a service on behalf of a subscriptions.
- * Its a subscription request data to add a message route from a topic.
+ * Typically this data class is used to send to a service on behalf of a
+ * subscriptions. Its a subscription request data to add a message route from a
+ * topic.
  * 
  * @author GroG
  *
  */
 public final class MRLListener implements Serializable {
-	private static final long serialVersionUID = 1L;
-	
-	public final static Logger log = LoggerFactory.getLogger(MRLListener.class);
-	
-	/**
-	 * the keyed topic Method - when this method is invoked listeners are sent
-	 * messages with return data
-	 */
-	public String topicMethod;
+  private static final long serialVersionUID = 1L;
 
-	/**
-	 * globally unique name of Service the a topic message will be sent to
-	 */
-	public String callbackName;
+  public final static Logger log = LoggerFactory.getLogger(MRLListener.class);
 
-	/**
-	 * the method which will be invoked
-	 */
-	public String callbackMethod;
+  /**
+   * the keyed topic Method - when this method is invoked listeners are sent
+   * messages with return data
+   */
+  public String topicMethod;
 
-	private int _hashCode = 0;
-	
-	public MRLListener(String topicMethod, String callbackName, String callbackMethod) {
-		this.topicMethod = topicMethod;
-		this.callbackMethod = callbackMethod;
-		this.callbackName = callbackName;
-	}
+  /**
+   * globally unique name of Service the a topic message will be sent to
+   */
+  public String callbackName;
 
-	final public boolean equals(final MRLListener other) {
-		if (callbackName.equals(other.callbackName) && callbackMethod.equals(other.callbackMethod) && topicMethod.equals(other.topicMethod)) {
-			return true;
-		}
-		return false;
-	}
+  /**
+   * the method which will be invoked
+   */
+  public String callbackMethod;
 
-	@Override
-	final public int hashCode() {
-		if (_hashCode == 0) {
-			_hashCode = 37 + topicMethod.hashCode() + callbackName.hashCode() + callbackMethod.hashCode();
-		}
+  private int _hashCode = 0;
 
-		return _hashCode;
-	}
+  public MRLListener(String topicMethod, String callbackName, String callbackMethod) {
+    this.topicMethod = topicMethod;
+    this.callbackMethod = callbackMethod;
+    this.callbackName = callbackName;
+  }
 
-	/*
-	 * Default format was xml is now JSON TODO - make toStringStyler like spring
-	 */
-	@Override
-	public String toString() {
-		return String.format("%s -will activate-> %s.%s", topicMethod, callbackName, callbackMethod);
-	}
+  final public boolean equals(final MRLListener other) {
+    if (callbackName.equals(other.callbackName) && callbackMethod.equals(other.callbackMethod) && topicMethod.equals(other.topicMethod)) {
+      return true;
+    }
+    return false;
+  }
 
-	public static void main(String args[]) throws InterruptedException, IOException {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+  @Override
+  final public int hashCode() {
+    if (_hashCode == 0) {
+      _hashCode = 37 + topicMethod.hashCode() + callbackName.hashCode() + callbackMethod.hashCode();
+    }
 
-		try {
-			//MRLListener listener = new MRLListener("thrower/pitch");
-			
-			// assert listener.name = thrower
-			// assert listener.outMethdod = onPitch
-			//log.info(listener.toString());
+    return _hashCode;
+  }
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+  /*
+   * Default format was xml is now JSON TODO - make toStringStyler like spring
+   */
+  @Override
+  public String toString() {
+    return String.format("%s -will activate-> %s.%s", topicMethod, callbackName, callbackMethod);
+  }
+
+  public static void main(String args[]) throws InterruptedException, IOException {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+    try {
+      // MRLListener listener = new MRLListener("thrower/pitch");
+
+      // assert listener.name = thrower
+      // assert listener.outMethdod = onPitch
+      // log.info(listener.toString());
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
 }

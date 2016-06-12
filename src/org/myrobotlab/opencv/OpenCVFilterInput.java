@@ -32,25 +32,25 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterInput extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterInput.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterInput.class.getCanonicalName());
 
-	public OpenCVFilterInput() {
-		super();
-	}
+  public OpenCVFilterInput() {
+    super();
+  }
 
-	public OpenCVFilterInput(String name) {
-		super(name);
-	}
+  public OpenCVFilterInput(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+  }
 
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
-		return image;
-	}
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
+    return image;
+  }
 
 }

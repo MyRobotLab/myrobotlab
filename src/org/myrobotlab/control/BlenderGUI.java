@@ -41,61 +41,61 @@ import org.slf4j.Logger;
 
 public class BlenderGUI extends ServiceGUI implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(BlenderGUI.class.getCanonicalName());
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(BlenderGUI.class.getCanonicalName());
 
-	JButton connect = new JButton("connect");
+  JButton connect = new JButton("connect");
 
-	public BlenderGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public BlenderGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		Object o = event.getSource();
-		if (o == connect) {
-			send("connect");
-		}
+  @Override
+  public void actionPerformed(ActionEvent event) {
+    Object o = event.getSource();
+    if (o == connect) {
+      send("connect");
+    }
 
-	}
+  }
 
-	@Override
-	public void attachGUI() {
-		// commented out subscription due to this class being used for
-		// un-defined gui's
+  @Override
+  public void attachGUI() {
+    // commented out subscription due to this class being used for
+    // un-defined gui's
 
-		subscribe("publishState", "getState", Blender.class);
-		subscribe("isConnected", "onConnected", Boolean.class);
-		send("publishState");
-	}
+    subscribe("publishState", "getState", Blender.class);
+    subscribe("isConnected", "onConnected", Boolean.class);
+    send("publishState");
+  }
 
-	@Override
-	public void detachGUI() {
-		// commented out subscription due to this class being used for
-		// un-defined gui's
+  @Override
+  public void detachGUI() {
+    // commented out subscription due to this class being used for
+    // un-defined gui's
 
-		unsubscribe("publishState", "getState", Blender.class);
-	}
+    unsubscribe("publishState", "getState", Blender.class);
+  }
 
-	public void getState(Blender template) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  public void getState(Blender template) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-			}
-		});
-	}
+      }
+    });
+  }
 
-	@Override
-	public void init() {
-		display.setLayout(new BorderLayout());
-		JPanel north = new JPanel();
-		north.add(connect);
-		connect.addActionListener(this);
-	}
+  @Override
+  public void init() {
+    display.setLayout(new BorderLayout());
+    JPanel north = new JPanel();
+    north.add(connect);
+    connect.addActionListener(this);
+  }
 
-	public void onConnected() {
-		connect.setText("disconnect");
-	}
+  public void onConnected() {
+    connect.setText("disconnect");
+  }
 
 }

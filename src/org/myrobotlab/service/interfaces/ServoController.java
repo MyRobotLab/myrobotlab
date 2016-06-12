@@ -27,61 +27,59 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.service.Servo;
 
-
 public interface ServoController extends NameProvider, MicrocontrollerPeripheral {
 
-	public final static String servoWrite = "servoWrite";
-	public final static String servoAttach = "servoAttach";
-	public final static String servoDetach = "servoDetach";
+  public final static String servoWrite = "servoWrite";
+  public final static String servoAttach = "servoAttach";
+  public final static String servoDetach = "servoDetach";
 
+  /**
+   * servoAttach - attach the servo to a specific pin on the controller
+   * 
+   * @param name
+   *          - name of the servo
+   * @param pin
+   *          - pin number
+   * @return boolean boolean
+   */
+  public boolean servoAttach(Servo servo);
 
-	/**
-	 * servoAttach - attach the servo to a specific pin on the controller
-	 * 
-	 * @param name
-	 *            - name of the servo
-	 * @param pin
-	 *            - pin number
-	 * @return boolean boolean
-	 */
-	public boolean servoAttach(Servo servo);
+  /**
+   * servoDetach - detach the servo from a specific pin on the controller
+   * 
+   * @param name
+   *          - name of the servo
+   * @return boolean
+   */
+  boolean servoDetach(Servo servo);
 
-	/**
-	 * servoDetach - detach the servo from a specific pin on the controller
-	 * 
-	 * @param name
-	 *            - name of the servo
-	 * @return boolean
-	 */
-	boolean servoDetach(Servo servo);
+  void servoSweepStart(Servo servo);
 
-	void servoSweepStart(Servo servo);
+  public void servoSweepStop(Servo servo);
 
-	public void servoSweepStop(Servo servo);
+  /**
+   * servoWrite - move the servo at an angle between 0 - 180
+   * 
+   * @param name
+   *          - name of the servo
+   * @param newPos
+   *          - positive or negative relative amount to move the servo
+   * @return void
+   */
+  void servoWrite(Servo servo);
 
-	/**
-	 * servoWrite - move the servo at an angle between 0 - 180
-	 * 
-	 * @param name
-	 *            - name of the servo
-	 * @param newPos
-	 *            - positive or negative relative amount to move the servo
-	 * @return void
-	 */
-	void servoWrite(Servo servo);
+  public void servoWriteMicroseconds(Servo servo);
 
-	public void servoWriteMicroseconds(Servo servo);
+  public boolean servoEventsEnabled(Servo servo);
 
-	public boolean servoEventsEnabled(Servo servo);
+  /**
+   * return the current pin this servo is attached to
+   * 
+   * @param servoName
+   * @return
+   */
+  // public Integer getServoPin(String servoName);
 
-	/**
-	 * return the current pin this servo is attached to
-	 * 
-	 * @param servoName
-	 * @return
-	 */
-	// public Integer getServoPin(String servoName);
-
-	public void setServoSpeed(Servo servo);
+  public void setServoSpeed(Servo servo);
 
 }

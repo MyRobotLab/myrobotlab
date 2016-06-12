@@ -6,11 +6,11 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.service.interfaces.NameProvider;
 
 public interface Recorder {
-	
-	public abstract void start(NameProvider service) throws IOException;
-	
-	public abstract void stop() throws IOException;
 
-	public abstract void write(Message msg) throws IOException;
+  public abstract void start(NameProvider service) throws IOException;
+
+  public abstract void stop() throws IOException;
+
+  public abstract void write(Message msg) throws IOException;
 
 }

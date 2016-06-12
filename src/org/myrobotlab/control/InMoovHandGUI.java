@@ -38,41 +38,41 @@ import org.slf4j.Logger;
 
 public class InMoovHandGUI extends ServiceGUI implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(InMoovHandGUI.class.getCanonicalName());
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(InMoovHandGUI.class.getCanonicalName());
 
-	public InMoovHandGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public InMoovHandGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", InMoovHand.class);
-		myService.send(boundServiceName, "publishState");
-	}
+  @Override
+  public void attachGUI() {
+    subscribe("publishState", "getState", InMoovHand.class);
+    myService.send(boundServiceName, "publishState");
+  }
 
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", InMoovHand.class);
-	}
+  @Override
+  public void detachGUI() {
+    unsubscribe("publishState", "getState", InMoovHand.class);
+  }
 
-	public void getState(InMoovHand template) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  public void getState(InMoovHand template) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-			}
-		});
-	}
+      }
+    });
+  }
 
-	@Override
-	public void init() {
-	}
+  @Override
+  public void init() {
+  }
 
 }

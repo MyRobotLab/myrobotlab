@@ -35,385 +35,386 @@ import org.myrobotlab.framework.ServiceType;
  */
 public class ImapEmailConnector extends AbstractConnector {
 
-	private static final long serialVersionUID = 1L;
-	private static final String MESSAGE_ID_HEADER = "message_id";
-	private String emailServer;
-	private String username;
-	private String password;
-	private String folderName = "INBOX";
-	private String docIdPrefix = "email_";
-	private transient Store store;
+  private static final long serialVersionUID = 1L;
+  private static final String MESSAGE_ID_HEADER = "message_id";
+  private String emailServer;
+  private String username;
+  private String password;
+  private String folderName = "INBOX";
+  private String docIdPrefix = "email_";
+  private transient Store store;
 
-	public ImapEmailConnector(String name) {
-		super(name);
-	}
+  public ImapEmailConnector(String name) {
+    super(name);
+  }
 
-	@Override
-	public void setConfig(ConnectorConfig config) {
-		// TODO Auto-generated method stub
-		log.info("Set Config not yet implemented");
-	}
-	
-	public void startCrawling() {
-		log.info("Sarting IMAP Email connector.");
-		// connect to the email store
-		Store store = connect();
-		if (store == null) {
-			log.warn("Email Store was null.  Check credentials and server name");
-			return;
-		} else {
-			log.info("connected to store");
-		}
-		// Get INBOX folder typically.
-		Folder folder = null;
-		try {
-			folder = store.getFolder(getFolderName());
-			folder = openFolder(folder);
-		} catch (MessagingException e) {
-			log.warn("Folder {} not found.", folder);
-			e.printStackTrace();
-			return;
-		}
+  @Override
+  public void setConfig(ConnectorConfig config) {
+    // TODO Auto-generated method stub
+    log.info("Set Config not yet implemented");
+  }
 
-		int count = 0;
-		try {
-			count = processFolder(folder);
-			Folder[] folders = folder.list();
-			// process all sub folders.
-			// TODO: check the recursion here and do it properly.
-			for (Folder f : folders) {
-				f = openFolder(f);
-				count = count + processFolder(f);
-			}
-		} catch (MessagingException e) {
-			log.warn("Message Exception processing subfolders : {}", e.getLocalizedMessage());
-			e.printStackTrace();
-		}
-		disconnect();
-		log.info("Fetched " + count + " messages");
-	}
+  public void startCrawling() {
+    log.info("Sarting IMAP Email connector.");
+    // connect to the email store
+    Store store = connect();
+    if (store == null) {
+      log.warn("Email Store was null.  Check credentials and server name");
+      return;
+    } else {
+      log.info("connected to store");
+    }
+    // Get INBOX folder typically.
+    Folder folder = null;
+    try {
+      folder = store.getFolder(getFolderName());
+      folder = openFolder(folder);
+    } catch (MessagingException e) {
+      log.warn("Folder {} not found.", folder);
+      e.printStackTrace();
+      return;
+    }
 
-	private Folder openFolder(Folder folder) {
-		try {
-			// Read only! lets not accidentally blow away someones email.
-			folder.open(Folder.READ_ONLY);
-		} catch (MessagingException e) {
-			log.info("Message Exception {}", e.getLocalizedMessage());
-			e.printStackTrace();
-			return null;
-		}
-		return folder;
-	}
+    int count = 0;
+    try {
+      count = processFolder(folder);
+      Folder[] folders = folder.list();
+      // process all sub folders.
+      // TODO: check the recursion here and do it properly.
+      for (Folder f : folders) {
+        f = openFolder(f);
+        count = count + processFolder(f);
+      }
+    } catch (MessagingException e) {
+      log.warn("Message Exception processing subfolders : {}", e.getLocalizedMessage());
+      e.printStackTrace();
+    }
+    disconnect();
+    log.info("Fetched " + count + " messages");
+  }
 
-	private int processFolder(Folder folder) {
-		log.info("Processing folder {}", folder.getName());
-		int numDocs = 0;
-		try {
-			numDocs = folder.getMessageCount();
-			log.info("Folder has {} docs.", numDocs);
-		} catch (MessagingException e) {
-			log.warn("Messaging Exception {}", e.getLocalizedMessage());
-			e.printStackTrace();
-			// TODO: bomb out here?
-			return 0;
-		}
-		try {
-			for (Message m : folder.getMessages()) {
-				try {
-					Document doc = processMessage(m);
-					doc.setField("folder", folder.getName());
-					feed(doc);
-					numDocs++;
-				} catch (MessagingException | IOException e) {
-					log.warn("process message failed.  continuing to next message. {} ", e.getLocalizedMessage());
-					e.printStackTrace();
-					continue;
-				}
+  private Folder openFolder(Folder folder) {
+    try {
+      // Read only! lets not accidentally blow away someones email.
+      folder.open(Folder.READ_ONLY);
+    } catch (MessagingException e) {
+      log.info("Message Exception {}", e.getLocalizedMessage());
+      e.printStackTrace();
+      return null;
+    }
+    return folder;
+  }
 
-			}
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			log.info("Messaging Exception getMessages {}", e.getLocalizedMessage());
-			e.printStackTrace();
-			return 0;
-		}
+  private int processFolder(Folder folder) {
+    log.info("Processing folder {}", folder.getName());
+    int numDocs = 0;
+    try {
+      numDocs = folder.getMessageCount();
+      log.info("Folder has {} docs.", numDocs);
+    } catch (MessagingException e) {
+      log.warn("Messaging Exception {}", e.getLocalizedMessage());
+      e.printStackTrace();
+      // TODO: bomb out here?
+      return 0;
+    }
+    try {
+      for (Message m : folder.getMessages()) {
+        try {
+          Document doc = processMessage(m);
+          doc.setField("folder", folder.getName());
+          feed(doc);
+          numDocs++;
+        } catch (MessagingException | IOException e) {
+          log.warn("process message failed.  continuing to next message. {} ", e.getLocalizedMessage());
+          e.printStackTrace();
+          continue;
+        }
 
-		return numDocs;
-	};
+      }
+    } catch (MessagingException e) {
+      // TODO Auto-generated catch block
+      log.info("Messaging Exception getMessages {}", e.getLocalizedMessage());
+      e.printStackTrace();
+      return 0;
+    }
 
-	private Document processMessage(Message m) throws MessagingException, IOException {
-		// create a unique(ish) doc id until we discover the true message id.
-		String docId = docIdPrefix + UUID.randomUUID().toString();
-		Document doc = new Document(docId);
-		Enumeration<Header> headers = m.getAllHeaders();
-		// walk every header and copy them to fields...
-		String messageId = null;
-		while (headers.hasMoreElements()) {
-			Header header = headers.nextElement();
-			String fieldName = cleanFieldName(header.getName());
-			if (fieldName.equals(MESSAGE_ID_HEADER)) {
-				// if we get a message id. use it.
-				messageId = header.getValue();
-				docId = docIdPrefix + messageId;
-				doc.setId(docId);
-			}
-			doc.addToField(fieldName, header.getValue());
-		}
+    return numDocs;
+  };
 
-		// TODO: grab the body of the email
-		// TODO: grab the attachments.
+  private Document processMessage(Message m) throws MessagingException, IOException {
+    // create a unique(ish) doc id until we discover the true message id.
+    String docId = docIdPrefix + UUID.randomUUID().toString();
+    Document doc = new Document(docId);
+    Enumeration<Header> headers = m.getAllHeaders();
+    // walk every header and copy them to fields...
+    String messageId = null;
+    while (headers.hasMoreElements()) {
+      Header header = headers.nextElement();
+      String fieldName = cleanFieldName(header.getName());
+      if (fieldName.equals(MESSAGE_ID_HEADER)) {
+        // if we get a message id. use it.
+        messageId = header.getValue();
+        docId = docIdPrefix + messageId;
+        doc.setId(docId);
+      }
+      doc.addToField(fieldName, header.getValue());
+    }
 
-		// specific stuff we really care about..
-		// We want to map all the From / To / CC / BCCs
-		//
-		// the "from" field should be handled in the "addHeadersToItem" method.
-		//
+    // TODO: grab the body of the email
+    // TODO: grab the attachments.
 
-		// Specially handle the TO field as this is multivalued.
-		// not sure which other fields we care about this for.
+    // specific stuff we really care about..
+    // We want to map all the From / To / CC / BCCs
+    //
+    // the "from" field should be handled in the "addHeadersToItem" method.
+    //
 
-		// TODO: this might be much faster to call this directly.. just need to
-		// pass it
-		// the header that we already copied to the to / bcc /cc fields of the
-		// mime message.
-		// InternetAddress.parseHeader(toHeader, this.strict)
-		//
-		// Address[] recipients = m.getAllRecipients();
+    // Specially handle the TO field as this is multivalued.
+    // not sure which other fields we care about this for.
 
-		// TODO: i don't like calling toString here.
-		if (doc.hasField("to")) {
-			// if the to field was found, we are going to override it here.
-			Address[] recipients = InternetAddress.parse(doc.getField("to").toString());
-			if (recipients != null) {
-				doc.removeField("to");
-				for (Address a : recipients) {
-					doc.addToField("to", a.toString());
-				}
-			} else {
-				// this shouldn't happen, right?
-				doc.setField("to", "unknown");
-			}
-		} else {
-			// this shouldn't happen?
-			doc.setField("to", "unknown");
-		}
+    // TODO: this might be much faster to call this directly.. just need to
+    // pass it
+    // the header that we already copied to the to / bcc /cc fields of the
+    // mime message.
+    // InternetAddress.parseHeader(toHeader, this.strict)
+    //
+    // Address[] recipients = m.getAllRecipients();
 
-		Date d = m.getSentDate();
-		Date sentdate = null;
-		// TODO: make it so we don't call tostring here.
-		// TODO: array out of bounds checking...
-		if (!doc.hasField("date")) {
-			sentdate = m.getSentDate();
-			doc.setField("sent_date", sentdate);
-		} else {
-			MailDateFormat mailDateFormat = new MailDateFormat();
-			try {
-				// parse the string version of the field and make it a proper
-				// java date object
-				sentdate = mailDateFormat.parse(doc.getField("date").get(0).toString());
-				doc.setField("sent_date", sentdate);
-			} catch (ParseException e) {
-				log.warn("Date Parse Exception {}", e.getLocalizedMessage());
-				e.printStackTrace();
-			}
-		}
+    // TODO: i don't like calling toString here.
+    if (doc.hasField("to")) {
+      // if the to field was found, we are going to override it here.
+      Address[] recipients = InternetAddress.parse(doc.getField("to").toString());
+      if (recipients != null) {
+        doc.removeField("to");
+        for (Address a : recipients) {
+          doc.addToField("to", a.toString());
+        }
+      } else {
+        // this shouldn't happen, right?
+        doc.setField("to", "unknown");
+      }
+    } else {
+      // this shouldn't happen?
+      doc.setField("to", "unknown");
+    }
 
-		Date receivedDate = m.getReceivedDate();
-		if (receivedDate != null) {
-			doc.setField("received_date", receivedDate);
-		}
+    // TODO: what to use with the sent date?
+    // Date d = m.getSentDate();
+    Date sentdate = null;
+    // TODO: make it so we don't call tostring here.
+    // TODO: array out of bounds checking...
+    if (!doc.hasField("date")) {
+      sentdate = m.getSentDate();
+      doc.setField("sent_date", sentdate);
+    } else {
+      MailDateFormat mailDateFormat = new MailDateFormat();
+      try {
+        // parse the string version of the field and make it a proper
+        // java date object
+        sentdate = mailDateFormat.parse(doc.getField("date").get(0).toString());
+        doc.setField("sent_date", sentdate);
+      } catch (ParseException e) {
+        log.warn("Date Parse Exception {}", e.getLocalizedMessage());
+        e.printStackTrace();
+      }
+    }
 
-		Address[] replyTo = m.getReplyTo();
-		if (replyTo != null) {
-			for (Address replyAddr : replyTo) {
-				doc.addToField("reply_to", replyAddr.toString());
-			}
-		}
+    Date receivedDate = m.getReceivedDate();
+    if (receivedDate != null) {
+      doc.setField("received_date", receivedDate);
+    }
 
-		String subject = m.getSubject();
-		if (subject != null) {
-			doc.setField("subject", subject);
-		} else {
-			log.debug("No subject");
-		}
+    Address[] replyTo = m.getReplyTo();
+    if (replyTo != null) {
+      for (Address replyAddr : replyTo) {
+        doc.addToField("reply_to", replyAddr.toString());
+      }
+    }
 
-		// the body of the email here
-		Object content = m.getContent();
-		if (content instanceof String) {
-			// This is already a string! ok...
-			doc.addToField("text", (String) (content));
-		} else if (content instanceof MimeMultipart) {
-			// multi-part mime docs are a pain. we'll just accumulate the
-			// text from each part.
-			int numParts = ((MimeMultipart) content).getCount();
-			// Walk all parts of the mime message.
-			for (int i = 0; i < numParts; i++) {
-				BodyPart bp = ((MimeMultipart) content).getBodyPart(i);
-				// add the various metadata fields to the document for this body
-				// part.
-				try {
-					parseBodyPart(bp, doc);
-				} catch (Exception e) {
-					log.warn("Exception in parse body part for message {}", e.getLocalizedMessage());
-					e.printStackTrace();
-					continue;
-				}
-			}
-		} else {
-			log.info("Unknown Type of content returned : " + content.getClass());
-			doc.addToField("text", content.toString());
-		}
-		doc.setField("size", m.getSize());
-		return doc;
-	}
+    String subject = m.getSubject();
+    if (subject != null) {
+      doc.setField("subject", subject);
+    } else {
+      log.debug("No subject");
+    }
 
-	public void parseBodyPart(Part p, Document doc) throws Exception {
-		//
-		// switch on ismimetype for processing. (avoid fetching if we don't need
-		// to!)
-		// attachments can be large.
-		if (p.isMimeType("text/plain")) {
-			String body = (String) p.getContent();
-			doc.addToField("text", "body");
-			return;
-		} else if (p.isMimeType("multipart/alternative")) {
-			MimeMultipart mmp = (MimeMultipart) p.getContent();
-			for (int i = 0; i < mmp.getCount(); i++) {
-				// TODO: check this recursion! nested body parts!
-				parseBodyPart(mmp.getBodyPart(i), doc);
-			}
-			return;
-		} else if (p.isMimeType("text/html")) {
-			String body = (String) p.getContent();
-			// TODO: have the pipeline parse the html
-			doc.addToField("html", body);
-			return;
-		} else if (p.isMimeType("application/ics")) {
-			log.info("Skipping Calender entry: not supported yet.");
-			Object icsEntry = p.getContent();
-			// TODO: add this to the doc
-			doc.addToField("ics", icsEntry.toString());
-			return;
-		} else {
-			log.info("Unhandled Content Type {}", p.getContentType());
-			return;
-		}
-	}
+    // the body of the email here
+    Object content = m.getContent();
+    if (content instanceof String) {
+      // This is already a string! ok...
+      doc.addToField("text", (String) (content));
+    } else if (content instanceof MimeMultipart) {
+      // multi-part mime docs are a pain. we'll just accumulate the
+      // text from each part.
+      int numParts = ((MimeMultipart) content).getCount();
+      // Walk all parts of the mime message.
+      for (int i = 0; i < numParts; i++) {
+        BodyPart bp = ((MimeMultipart) content).getBodyPart(i);
+        // add the various metadata fields to the document for this body
+        // part.
+        try {
+          parseBodyPart(bp, doc);
+        } catch (Exception e) {
+          log.warn("Exception in parse body part for message {}", e.getLocalizedMessage());
+          e.printStackTrace();
+          continue;
+        }
+      }
+    } else {
+      log.info("Unknown Type of content returned : " + content.getClass());
+      doc.addToField("text", content.toString());
+    }
+    doc.setField("size", m.getSize());
+    return doc;
+  }
 
-	private String cleanFieldName(String name) {
-		// TODO : centralize this as a util or something. (maybe move it to the
-		// pipeline)
-		String clean = name.trim().toLowerCase().replaceAll(" ", "_");
-		return clean;
-	}
+  public void parseBodyPart(Part p, Document doc) throws Exception {
+    //
+    // switch on ismimetype for processing. (avoid fetching if we don't need
+    // to!)
+    // attachments can be large.
+    if (p.isMimeType("text/plain")) {
+      String body = (String) p.getContent();
+      doc.addToField("text", body);
+      return;
+    } else if (p.isMimeType("multipart/alternative")) {
+      MimeMultipart mmp = (MimeMultipart) p.getContent();
+      for (int i = 0; i < mmp.getCount(); i++) {
+        // TODO: check this recursion! nested body parts!
+        parseBodyPart(mmp.getBodyPart(i), doc);
+      }
+      return;
+    } else if (p.isMimeType("text/html")) {
+      String body = (String) p.getContent();
+      // TODO: have the pipeline parse the html
+      doc.addToField("html", body);
+      return;
+    } else if (p.isMimeType("application/ics")) {
+      log.info("Skipping Calender entry: not supported yet.");
+      Object icsEntry = p.getContent();
+      // TODO: add this to the doc
+      doc.addToField("ics", icsEntry.toString());
+      return;
+    } else {
+      log.info("Unhandled Content Type {}", p.getContentType());
+      return;
+    }
+  }
 
-	@Override
-	public void stopCrawling() {
-		// TODO Auto-generated method stub
-		// TODO: this isn't implemented yet.. I'd like to move this sort of
-		// stuff to the base class.
-	}
+  private String cleanFieldName(String name) {
+    // TODO : centralize this as a util or something. (maybe move it to the
+    // pipeline)
+    String clean = name.trim().toLowerCase().replaceAll(" ", "_");
+    return clean;
+  }
 
-	public void disconnect() {
-		try {
-			store.close();
-		} catch (MessagingException e) {
-			log.warn("error closing store ... " + e.getMessage());
-			e.printStackTrace();
-		}
-	}
+  @Override
+  public void stopCrawling() {
+    // TODO Auto-generated method stub
+    // TODO: this isn't implemented yet.. I'd like to move this sort of
+    // stuff to the base class.
+  }
 
-	public Store connect() {
-		Properties props = System.getProperties();
-		props.setProperty("mail.store.protocol", "imaps");
-		Session session = Session.getDefaultInstance(props, null);
-		Store store = null;
-		try {
-			store = session.getStore("imaps");
-		} catch (NoSuchProviderException e) {
-			log.warn("No IMAPS support. {}", e.getLocalizedMessage());
-			e.printStackTrace();
-		}
-		try {
-			store.connect(getEmailServer(), getUsername(), getPassword());
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			log.warn(e.getMessage());
-			e.printStackTrace();
-			return null;
-		}
-		return store;
-	}
+  public void disconnect() {
+    try {
+      store.close();
+    } catch (MessagingException e) {
+      log.warn("error closing store ... " + e.getMessage());
+      e.printStackTrace();
+    }
+  }
 
-	public String getEmailServer() {
-		return emailServer;
-	}
+  public Store connect() {
+    Properties props = System.getProperties();
+    props.setProperty("mail.store.protocol", "imaps");
+    Session session = Session.getDefaultInstance(props, null);
+    Store store = null;
+    try {
+      store = session.getStore("imaps");
+    } catch (NoSuchProviderException e) {
+      log.warn("No IMAPS support. {}", e.getLocalizedMessage());
+      e.printStackTrace();
+    }
+    try {
+      store.connect(getEmailServer(), getUsername(), getPassword());
+    } catch (MessagingException e) {
+      // TODO Auto-generated catch block
+      log.warn(e.getMessage());
+      e.printStackTrace();
+      return null;
+    }
+    return store;
+  }
 
-	public void setEmailServer(String emailServer) {
-		this.emailServer = emailServer;
-	}
+  public String getEmailServer() {
+    return emailServer;
+  }
 
-	public String getUsername() {
-		return username;
-	}
+  public void setEmailServer(String emailServer) {
+    this.emailServer = emailServer;
+  }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+  public String getUsername() {
+    return username;
+  }
 
-	public String getPassword() {
-		return password;
-	}
+  public void setUsername(String username) {
+    this.username = username;
+  }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+  public String getPassword() {
+    return password;
+  }
 
-	public String getFolderName() {
-		return folderName;
-	}
+  public void setPassword(String password) {
+    this.password = password;
+  }
 
-	public void setFolderName(String folderName) {
-		this.folderName = folderName;
-	}
+  public String getFolderName() {
+    return folderName;
+  }
 
-	public String getDocIdPrefix() {
-		return docIdPrefix;
-	}
+  public void setFolderName(String folderName) {
+    this.folderName = folderName;
+  }
 
-	public void setDocIdPrefix(String docIdPrefix) {
-		this.docIdPrefix = docIdPrefix;
-	}
+  public String getDocIdPrefix() {
+    return docIdPrefix;
+  }
 
-	public static void main(String[] args) throws Exception {
-		ImapEmailConnector connector = (ImapEmailConnector) Runtime.start("email", "ImapEmailConnector");
-		connector.setEmailServer("imap.gmail.com");
-		connector.setUsername("YYY");
-		connector.setPassword("XXX");
-		connector.setBatchSize(1);
-		Solr solr = (Solr) Runtime.start("solr", "Solr");
-		// for example...
-		String solrUrl = "http://phobos:8983/solr/collection1";
-		solr.setSolrUrl(solrUrl);
-		connector.addDocumentListener(solr);
-		connector.startCrawling();
-	}
+  public void setDocIdPrefix(String docIdPrefix) {
+    this.docIdPrefix = docIdPrefix;
+  }
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+  public static void main(String[] args) throws Exception {
+    ImapEmailConnector connector = (ImapEmailConnector) Runtime.start("email", "ImapEmailConnector");
+    connector.setEmailServer("imap.gmail.com");
+    connector.setUsername("YYY");
+    connector.setPassword("XXX");
+    connector.setBatchSize(1);
+    Solr solr = (Solr) Runtime.start("solr", "Solr");
+    // for example...
+    String solrUrl = "http://phobos:8983/solr/collection1";
+    solr.setSolrUrl(solrUrl);
+    connector.addDocumentListener(solr);
+    connector.startCrawling();
+  }
 
-		ServiceType meta = new ServiceType(ImapEmailConnector.class.getCanonicalName());
-		meta.addDescription("This connector will connect to an IMAP based email server and crawl the emails");
-		meta.addCategory("data", "ingest");
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
-		return meta;
-	}
+    ServiceType meta = new ServiceType(ImapEmailConnector.class.getCanonicalName());
+    meta.addDescription("This connector will connect to an IMAP based email server and crawl the emails");
+    meta.addCategory("data", "ingest");
+
+    return meta;
+  }
 
 }

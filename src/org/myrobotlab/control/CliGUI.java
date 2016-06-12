@@ -38,46 +38,46 @@ import org.slf4j.Logger;
 
 public class CliGUI extends ServiceGUI implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(CliGUI.class.getCanonicalName());
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(CliGUI.class.getCanonicalName());
 
-	public CliGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public CliGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
 
-	}
+  }
 
-	@Override
-	public void attachGUI() {
-		// commented out subscription due to this class being used for
-		// un-defined gui's
+  @Override
+  public void attachGUI() {
+    // commented out subscription due to this class being used for
+    // un-defined gui's
 
-		// subscribe("publishState", "getState", _TemplateService.class);
-		// send("publishState");
-	}
+    // subscribe("publishState", "getState", _TemplateService.class);
+    // send("publishState");
+  }
 
-	@Override
-	public void detachGUI() {
-		// commented out subscription due to this class being used for
-		// un-defined gui's
+  @Override
+  public void detachGUI() {
+    // commented out subscription due to this class being used for
+    // un-defined gui's
 
-		// unsubscribe("publishState", "getState", _TemplateService.class);
-	}
+    // unsubscribe("publishState", "getState", _TemplateService.class);
+  }
 
-	public void getState(Cli cli) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  public void getState(Cli cli) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-			}
-		});
-	}
+      }
+    });
+  }
 
-	@Override
-	public void init() {
-	}
+  @Override
+  public void init() {
+  }
 
 }

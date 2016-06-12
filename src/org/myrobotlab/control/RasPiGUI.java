@@ -39,45 +39,43 @@ import org.slf4j.Logger;
 
 public class RasPiGUI extends ServiceGUI implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(RasPiGUI.class.getCanonicalName());
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(RasPiGUI.class.getCanonicalName());
 
-	public RasPiGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public RasPiGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", RasPi.class);
-		subscribe("publishNode", "publishNode", String.class, Node.class);
-		subscribe("putNode", "putNode", Node.NodeContext.class);
-		myService.send(boundServiceName, "publishState");
-	}
+  @Override
+  public void attachGUI() {
+    subscribe("publishState", "getState", RasPi.class);
+    subscribe("publishNode", "publishNode", String.class, Node.class);
+    subscribe("putNode", "putNode", Node.NodeContext.class);
+    myService.send(boundServiceName, "publishState");
+  }
 
-	
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", RasPi.class);
-	}
+  @Override
+  public void detachGUI() {
+    unsubscribe("publishState", "getState", RasPi.class);
+  }
 
+  public void getState(RasPi raspi) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-	public void getState(RasPi raspi) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+      }
+    });
+  }
 
-			}
-		});
-	}
-
-	@Override
-	public void init() {
-	}
+  @Override
+  public void init() {
+  }
 
 }

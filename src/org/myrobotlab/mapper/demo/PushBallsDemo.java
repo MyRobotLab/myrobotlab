@@ -38,60 +38,60 @@ import org.myrobotlab.mapper.sim.SimpleAgent;
  */
 public class PushBallsDemo extends Demo {
 
-	public class Robot extends Agent {
+  public class Robot extends Agent {
 
-		public Robot(Vector3d position, String name) {
-			super(position, name);
-			// RobotFactory.addCameraSensor(this);
-		}
+    public Robot(Vector3d position, String name) {
+      super(position, name);
+      // RobotFactory.addCameraSensor(this);
+    }
 
-		public void contactWith(SimpleAgent a) {
-			// System.out.println(getName()+" interacts with "+a.getName());
-		}
+    public void contactWith(SimpleAgent a) {
+      // System.out.println(getName()+" interacts with "+a.getName());
+    }
 
-		/** Initialize Agent's Behavior */
-		@Override
-		public void initBehavior() {
-			setTranslationalVelocity(0.5);
-		}
+    /** Initialize Agent's Behavior */
+    @Override
+    public void initBehavior() {
+      setTranslationalVelocity(0.5);
+    }
 
-		/** Perform one step of Agent's Behavior */
-		@Override
-		public void performBehavior() {
-			// if (collisionDetected()&& (! interactionDetected()))
-			// moveToStartPosition();
-			if ((getCounter() % 80) == 0) {
-				setRotationalVelocity(Math.PI / 2 * (0.5 - Math.random()));
-				setTranslationalVelocity(0.5);
-			}
+    /** Perform one step of Agent's Behavior */
+    @Override
+    public void performBehavior() {
+      // if (collisionDetected()&& (! interactionDetected()))
+      // moveToStartPosition();
+      if ((getCounter() % 80) == 0) {
+        setRotationalVelocity(Math.PI / 2 * (0.5 - Math.random()));
+        setTranslationalVelocity(0.5);
+      }
 
-		}
-	}
+    }
+  }
 
-	public PushBallsDemo() {
-		showAxis(false);
-		setUsePhysics(true);
-		setWorldSize(12);
-		boxColor = new Color3f(0.6f, 0.5f, .3f);
+  public PushBallsDemo() {
+    showAxis(false);
+    setUsePhysics(true);
+    setWorldSize(12);
+    boxColor = new Color3f(0.6f, 0.5f, .3f);
 
-		add(new Box(new Vector3d(-5, 0, 0), new Vector3f(0.1f, 1, 10), this));
-		add(new Box(new Vector3d(0, 0, -5), new Vector3f(10, 1, 0.1f), this));
-		add(new Box(new Vector3d(5, 0, 0), new Vector3f(0.1f, 1, 10), this));
-		add(new Box(new Vector3d(0, 0, 5), new Vector3f(10, 1, 0.1f), this));
+    add(new Box(new Vector3d(-5, 0, 0), new Vector3f(0.1f, 1, 10), this));
+    add(new Box(new Vector3d(0, 0, -5), new Vector3f(10, 1, 0.1f), this));
+    add(new Box(new Vector3d(5, 0, 0), new Vector3f(0.1f, 1, 10), this));
+    add(new Box(new Vector3d(0, 0, 5), new Vector3f(10, 1, 0.1f), this));
 
-		add(new Robot(new Vector3d(0, 0, 0), "Maradonna"));
-		// Set up the ball agents
-		int n = 1;
+    add(new Robot(new Vector3d(0, 0, 0), "Maradonna"));
+    // Set up the ball agents
+    int n = 1;
 
-		Color3f c;
-		for (int x = -n; x <= n; x++) {
-			for (int z = -n; z <= n; z++) {
-				if (!((x == 0) && (z == 0))) {
-					c = new Color3f(x / (float) n, 0.3f, z / (float) n);
-					add(new BallAgent(new Vector3d(x, 0, z), "ball", c, 0.25f, 0.25f));
-				}
-			}
-		}
+    Color3f c;
+    for (int x = -n; x <= n; x++) {
+      for (int z = -n; z <= n; z++) {
+        if (!((x == 0) && (z == 0))) {
+          c = new Color3f(x / (float) n, 0.3f, z / (float) n);
+          add(new BallAgent(new Vector3d(x, 0, z), "ball", c, 0.25f, 0.25f));
+        }
+      }
+    }
 
-	}
+  }
 }

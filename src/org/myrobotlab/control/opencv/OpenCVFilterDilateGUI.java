@@ -38,50 +38,50 @@ import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterDilateGUI extends OpenCVFilterGUI implements ActionListener {
 
-	JComboBox iterations = new JComboBox(new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+  JComboBox<Integer> iterations = new JComboBox<Integer>(new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
 
-	public OpenCVFilterDilateGUI(String boundFilterName, String boundServiceName, GUIService myService) {
-		super(boundFilterName, boundServiceName, myService);
+  public OpenCVFilterDilateGUI(String boundFilterName, String boundServiceName, GUIService myService) {
+    super(boundFilterName, boundServiceName, myService);
 
-		iterations.addActionListener(this);
-		display.add(new JLabel("iterations  "));
-		display.add(iterations);
+    iterations.addActionListener(this);
+    display.add(new JLabel("iterations  "));
+    display.add(iterations);
 
-	}
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		OpenCVFilterDilate bf = (OpenCVFilterDilate) boundFilter.filter;
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Object o = e.getSource();
+    OpenCVFilterDilate bf = (OpenCVFilterDilate) boundFilter.filter;
 
-		if (o == iterations) {
-			bf.numberOfIterations = (Integer) iterations.getSelectedItem();
-		}
+    if (o == iterations) {
+      bf.numberOfIterations = (Integer) iterations.getSelectedItem();
+    }
 
-		setFilterState(bf);
-	}
+    setFilterState(bf);
+  }
 
-	// @Override
-	public void attachGUI() {
-		log.debug("attachGUI");
+  // @Override
+  public void attachGUI() {
+    log.debug("attachGUI");
 
-	}
+  }
 
-	// @Override
-	public void detachGUI() {
-		log.debug("detachGUI");
+  // @Override
+  public void detachGUI() {
+    log.debug("detachGUI");
 
-	}
+  }
 
-	@Override
-	public void getFilterState(final FilterWrapper filterWrapper) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				OpenCVFilterDilate bf = (OpenCVFilterDilate) filterWrapper.filter;
-				iterations.setSelectedItem(bf.numberOfIterations);
-			}
-		});
-	}
+  @Override
+  public void getFilterState(final FilterWrapper filterWrapper) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        OpenCVFilterDilate bf = (OpenCVFilterDilate) filterWrapper.filter;
+        iterations.setSelectedItem(bf.numberOfIterations);
+      }
+    });
+  }
 
 }

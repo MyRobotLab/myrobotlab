@@ -11,34 +11,34 @@ import org.myrobotlab.logging.Logging;
  */
 
 public class EncoderTimer extends Thread implements Encoder {
-	boolean isRunning = false;
-	EncoderListener listener;
+  boolean isRunning = false;
+  EncoderListener listener;
 
-	public EncoderTimer(String name, long duration) {
-		super(name + "_duration");
-	}
+  public EncoderTimer(String name, long duration) {
+    super(name + "_duration");
+  }
 
-	// Thread in .wait
-	@Override
-	public void run() {
-		try {
-		isRunning = true;
-		while (isRunning) {
+  // Thread in .wait
+  @Override
+  public void run() {
+    try {
+      isRunning = true;
+      while (isRunning) {
 
-			listener.pulse();
-			Thread.sleep(100);
+        listener.pulse();
+        Thread.sleep(100);
 
-		}
-		} catch(Exception e){
-			Logging.logError(e);
-		}
-	}
-	
-	// TODO - RESET ... ABSOLUTE VS RELATIVE !!!
+      }
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+  // TODO - RESET ... ABSOLUTE VS RELATIVE !!!
 
-	}
+  public static void main(String[] args) {
+    // TODO Auto-generated method stub
+
+  }
 
 }

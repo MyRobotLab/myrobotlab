@@ -30,111 +30,110 @@ import org.slf4j.Logger;
  */
 public class Mail extends Service {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Mail.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(Mail.class.getCanonicalName());
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
+  public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.WARN);
 
-		try {
-			Mail mail = new Mail("mail");
-			mail.startService();
-			/*
-			 * GUIService gui = new GUIService("gui"); gui.startService();
-			 */
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+    try {
+      Mail mail = new Mail("mail");
+      mail.startService();
+      /*
+       * GUIService gui = new GUIService("gui"); gui.startService();
+       */
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-	public static void sendMailSSL() {
-		Properties props = new Properties();
-		props.put("mail.smtp.host", "smtp.gmail.com");
-		props.put("mail.smtp.socketFactory.port", "465");
-		props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.port", "465");
+  public static void sendMailSSL() {
+    Properties props = new Properties();
+    props.put("mail.smtp.host", "smtp.gmail.com");
+    props.put("mail.smtp.socketFactory.port", "465");
+    props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+    props.put("mail.smtp.auth", "true");
+    props.put("mail.smtp.port", "465");
 
-		Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
-			@Override
-			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication("username", "password");
-			}
-		});
+    Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
+      @Override
+      protected PasswordAuthentication getPasswordAuthentication() {
+        return new PasswordAuthentication("username", "password");
+      }
+    });
 
-		try {
+    try {
 
-			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress("from@no-spam.com"));
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("to@no-spam.com"));
-			message.setSubject("Testing Subject");
-			message.setText("Dear Mail Crawler," + "\n\n No spam to my email, please!");
+      Message message = new MimeMessage(session);
+      message.setFrom(new InternetAddress("from@no-spam.com"));
+      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("to@no-spam.com"));
+      message.setSubject("Testing Subject");
+      message.setText("Dear Mail Crawler," + "\n\n No spam to my email, please!");
 
-			Transport.send(message);
+      Transport.send(message);
 
-			System.out.println("Done");
+      System.out.println("Done");
 
-		} catch (MessagingException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    } catch (MessagingException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-	public static void sendMailTLS() {
-		final String username = "username@gmail.com";
-		final String password = "password";
+  public static void sendMailTLS() {
+    final String username = "username@gmail.com";
+    final String password = "password";
 
-		Properties props = new Properties();
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.starttls.enable", "true");
-		props.put("mail.smtp.host", "smtp.gmail.com");
-		props.put("mail.smtp.port", "587");
+    Properties props = new Properties();
+    props.put("mail.smtp.auth", "true");
+    props.put("mail.smtp.starttls.enable", "true");
+    props.put("mail.smtp.host", "smtp.gmail.com");
+    props.put("mail.smtp.port", "587");
 
-		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
-			@Override
-			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(username, password);
-			}
-		});
+    Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+      @Override
+      protected PasswordAuthentication getPasswordAuthentication() {
+        return new PasswordAuthentication(username, password);
+      }
+    });
 
-		try {
+    try {
 
-			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress("from-email@gmail.com"));
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("to-email@gmail.com"));
-			message.setSubject("Testing Subject");
-			message.setText("Dear Mail Crawler," + "\n\n No spam to my email, please!");
+      Message message = new MimeMessage(session);
+      message.setFrom(new InternetAddress("from-email@gmail.com"));
+      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("to-email@gmail.com"));
+      message.setSubject("Testing Subject");
+      message.setText("Dear Mail Crawler," + "\n\n No spam to my email, please!");
 
-			Transport.send(message);
+      Transport.send(message);
 
-			System.out.println("Done");
+      System.out.println("Done");
 
-		} catch (MessagingException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    } catch (MessagingException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-	public Mail(String n) {
-		super(n);
-	}
-	
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+  public Mail(String n) {
+    super(n);
+  }
 
-		ServiceType meta = new ServiceType(Mail.class.getCanonicalName());
-		meta.addDescription("General service for all your mail needs");
-		meta.addCategory("connectivity");
-		
-		return meta;
-	}
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
+    ServiceType meta = new ServiceType(Mail.class.getCanonicalName());
+    meta.addDescription("General service for all your mail needs");
+    meta.addCategory("connectivity");
+
+    return meta;
+  }
 
 }

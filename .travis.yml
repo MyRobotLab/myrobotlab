@@ -7,6 +7,11 @@ script: ant dist
 jdk:
 - openjdk7
 
+# whitelist
+# branches:
+#   only:
+#     - develop
+
 deploy:
   provider: s3
   deployment_group: s3 group

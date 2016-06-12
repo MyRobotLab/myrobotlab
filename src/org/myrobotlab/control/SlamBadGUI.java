@@ -36,41 +36,41 @@ import org.myrobotlab.service.SlamBad;
 
 public class SlamBadGUI extends ServiceGUI implements ActionListener {
 
-	static final long serialVersionUID = 1L;
+  static final long serialVersionUID = 1L;
 
-	SlamBad mySimbad = null;
+  SlamBad mySimbad = null;
 
-	public SlamBadGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
+  public SlamBadGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+    super(boundServiceName, myService, tabs);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	// FIXME sendNotifyStateRequest("publishState", "getState", String type); <-
-	// Class.forName(type)
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", SlamBad.class);
-		myService.send(boundServiceName, "publishState");
-	}
+  // FIXME sendNotifyStateRequest("publishState", "getState", String type); <-
+  // Class.forName(type)
+  @Override
+  public void attachGUI() {
+    subscribe("publishState", "getState", SlamBad.class);
+    myService.send(boundServiceName, "publishState");
+  }
 
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", SlamBad.class);
-	}
+  @Override
+  public void detachGUI() {
+    unsubscribe("publishState", "getState", SlamBad.class);
+  }
 
-	// FIXME - is get/set state interact with Runtime registry ???
-	// it probably should
-	public void getState(SlamBad c) {
-	}
+  // FIXME - is get/set state interact with Runtime registry ???
+  // it probably should
+  public void getState(SlamBad c) {
+  }
 
-	@Override
-	public void init() {
-		mySimbad = (SlamBad) Runtime.getService(boundServiceName);
-	}
+  @Override
+  public void init() {
+    mySimbad = (SlamBad) Runtime.getService(boundServiceName);
+  }
 
 }
