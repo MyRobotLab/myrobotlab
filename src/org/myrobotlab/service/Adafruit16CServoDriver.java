@@ -9,7 +9,9 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
@@ -71,9 +73,18 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	private int pwmFreq = 60;
 	private boolean pwmFreqSet = false;
 
-	// Default i2cAddress
-	public int busAddress = I2CBus.BUS_1;
-	public int deviceAddress = 0x40;
+	public List<String> deviceAddressList = Arrays.asList(
+			 "0x60","0x61","0x62","0x63","0x64","0x65","0x66","0x67",
+		   "0x68","0x69","0x6A","0x6B","0x6C","0x6D","0x6E","0x6F",
+	     "0x70","0x71","0x72","0x73","0x74","0x75","0x76","0x77",
+       "0x78","0x79","0x7A","0x7B","0x7C","0x7D","0x7E","0x7F");
+			
+	public String deviceAddress = "0x60";
+	
+	public List<String> deviceBusList = Arrays.asList(
+			"0","1","2","3","4","5","6","7","8");	
+	public String deviceBus = "1";
+	
 	public String type = "PCA9685";
 
 	public transient final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriver.class.getCanonicalName());
@@ -144,20 +155,28 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 * 
 	 */
 	// @Override
-	public boolean setController(String controllerName) {
-		return setController((I2CControl) Runtime.getService(controllerName));
+	public boolean setController(String controllerName, String deviceBus, String deviceAddress) {
+		return setController((I2CControl) Runtime.getService(controllerName), deviceBus, deviceAddress);
 	}
 
-	public boolean setController(I2CControl controller) {
+	public boolean setController(String controllerName) {
+		return setController((I2CControl) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
+	}
+	
+	public boolean setController(I2CControl controller, String deviceBus, String deviceAddress) {
 		if (controller == null) {
 			error("setting null as controller");
 			return false;
 		}
-
+		
 		controllerName = controller.getName();
 		log.info(String.format("%s setController %s", getName(), controllerName));
 
+		controllerName = controller.getName();
 		this.controller = controller;
+		this.deviceBus = deviceBus;
+		this.deviceAddress = deviceAddress;
+		isAttached = true;
 
 		if (controller instanceof Arduino) {
 			this.arduino = (Arduino) controller;
@@ -168,13 +187,15 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 			this.raspi = (RasPi) controller;
 			controler = "RasPi";
 		}
-		isAttached = true;
+		
 		broadcastState();
 		return true;
 	}
 
 	public void unsetController() {
 		controller = null;
+		this.deviceBus = null;
+		this.deviceAddress = null;
 		isAttached = false;
 		broadcastState();
 	}
@@ -190,7 +211,24 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		servoNameToPinMap.put(servo.getName(), pinNumber);
 		return true;
 	}
-
+	
+	public void SetDeviceBus(String deviceBus){
+		this.deviceBus = deviceBus;
+		broadcastState();
+  }
+	
+	boolean SetDeviceAddress(String deviceAddress){
+		if (controller != null) {
+			if (this.deviceAddress != deviceAddress) {
+				controller.releaseDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.createDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
+			}
+		}
+		log.info(String.format("Setting device address to %s", deviceAddress));
+		this.deviceAddress = deviceAddress;
+		return true;
+	}
+	
 	// VENDOR SPECIFIC LIBRARY METHODS BEGIN /////
 	// ----------- AF16C API Begin --------------
 	// TODO The Arduino specific parts should be move to the Arduino service
@@ -199,10 +237,10 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	// values.
 	public void begin() {
 		if (controler == "Arduino") {
-			arduino.sendMsg(AF_BEGIN, deviceAddress, 0, 0);
+			arduino.sendMsg(AF_BEGIN, Integer.decode(deviceAddress), 0, 0);
 		} else {
 			byte[] buffer = { PCA9685_MODE1, 0x0 };
-			raspi.i2cWrite(busAddress, deviceAddress, buffer, buffer.length);
+			raspi.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 		}
 	}
 
@@ -229,18 +267,18 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		return isAttached;
 	}
 
-	public void setDeviceAddress(Integer DeviceAddress) {
-		deviceAddress = DeviceAddress;
+	public void setDeviceAddress(String DeviceAddress) {
+		this.deviceAddress = DeviceAddress;
 	}
 
 	// drive the true PWM. I
 	public void setPWM(Integer servoNum, Integer pulseWidthOn, Integer pulseWidthOff) {
 		if (controler == "Arduino") {
-			arduino.sendMsg(AF_SET_PWM, deviceAddress, servoNum, pulseWidthOn, pulseWidthOff);
+			arduino.sendMsg(AF_SET_PWM, Integer.decode(deviceAddress), servoNum, pulseWidthOn, pulseWidthOff);
 		} else {
 			byte[] buffer = { (byte) (PCA9685_LED0_ON_L + (servoNum * 4)), (byte) (pulseWidthOn & 0xff), (byte) (pulseWidthOn >> 8), (byte) (pulseWidthOff & 0xff),
 					(byte) (pulseWidthOff >> 8) };
-			raspi.i2cWrite(busAddress, deviceAddress, buffer, buffer.length);
+			raspi.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 		}
 
 	}
@@ -248,13 +286,13 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	public void setPWMFreq(Integer hz) { // Analog servos run at ~60 Hz updates
 		log.info(String.format("servoPWMFreq %s hz", hz));
 		if (controler == "Arduino") {
-			arduino.sendMsg(AF_SET_PWM_FREQ, deviceAddress, hz, 0);
+			arduino.sendMsg(AF_SET_PWM_FREQ, Integer.decode(deviceAddress), hz, 0);
 			pwmFreqSet = true;
 		} else {
 			int prescale_value = Math.round(osc_clock / precision / PWM_FREQ) - 1;
 			// Set sleep mode before changing PWM freqency
 			byte[] buffer1 = { PCA9685_MODE1, PCA9685_SLEEP };
-			raspi.i2cWrite(busAddress, deviceAddress, buffer1, buffer1.length);
+			raspi.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer1, buffer1.length);
 
 			// Wait 1 millisecond until the oscillator has stabilized
 			try {
@@ -267,12 +305,12 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 
 			// Write the PWM frequency value
 			byte[] buffer2 = { PCA9685_PRESCALE, (byte) prescale_value };
-			raspi.i2cWrite(busAddress, deviceAddress, buffer2, buffer2.length);
+			raspi.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer2, buffer2.length);
 
 			// Leave sleep mode, set autoincrement to be able to write several bytes
 			// in sequence
 			byte[] buffer3 = { PCA9685_MODE1, PCA9685_AUTOINCREMENT };
-			raspi.i2cWrite(busAddress, deviceAddress, buffer3, buffer3.length);
+			raspi.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer3, buffer3.length);
 
 			// Wait 1 millisecond until the oscillator has stabilized
 			try {
@@ -288,12 +326,12 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	public void setServo(Integer servoNum, Integer pulseWidthOff) {
 		// since pulseWidthOff can be larger than > 256 it needs to be
 		// sent as 2 bytes
-		log.info(String.format("setServo %s deviceAddress x%02X pin %s pulse %s", servoNum, deviceAddress, servoNum, pulseWidthOff));
+		log.info(String.format("setServo %s deviceAddress %S pin %s pulse %s", servoNum, deviceAddress, servoNum, pulseWidthOff));
 		if (controler == "Arduino") {
-			arduino.sendMsg(AF_SET_SERVO, deviceAddress, servoNum, pulseWidthOff >> 8, pulseWidthOff & 0xFF);
+			arduino.sendMsg(AF_SET_SERVO, Integer.decode(deviceAddress), servoNum, pulseWidthOff >> 8, pulseWidthOff & 0xFF);
 		} else {
 			byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (servoNum * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
-			raspi.i2cWrite(busAddress, deviceAddress, buffer, buffer.length);
+			raspi.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 		}
 	}
 
@@ -344,7 +382,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		if (controler == "Arduino") {
 			begin();
 		} else {
-			raspi.createDevice(busAddress, deviceAddress, type);
+			raspi.createDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
 		}
 
 		return true;
@@ -380,7 +418,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		if (!pwmFreqSet) {
 			setPWMFreq(pwmFreq);
 		}
-		log.info(String.format("servoWrite %s deviceAddress x%02X pin %s targetOutput %d", servo.getName(), deviceAddress, servo.getPin(), servo.targetOutput));
+		log.info(String.format("servoWrite %s deviceAddress %s pin %s targetOutput %d", servo.getName(), deviceAddress, servo.getPin(), servo.targetOutput));
 		int pulseWidthOff = SERVOMIN + (int) (servo.targetOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
 		setServo(servo.getPin(), pulseWidthOff);
 	}
@@ -397,10 +435,10 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		log.info(String.format("servoWriteMicroseconds %s deviceAddress x%02X pin %s pulse %d", servo.getName(), deviceAddress, servo.getPin(), pulseWidthOff));
 
 		if (controler == "Arduino") {
-			arduino.sendMsg(AF_SET_SERVO, deviceAddress, servo.getPin(), pulseWidthOff >> 8, pulseWidthOff & 0xFF);
+			arduino.sendMsg(AF_SET_SERVO, Integer.decode(deviceAddress), servo.getPin(), pulseWidthOff >> 8, pulseWidthOff & 0xFF);
 		} else {
 			byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (servo.getPin() * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
-			raspi.i2cWrite(busAddress, deviceAddress, buffer, buffer.length);
+			raspi.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 		}
 	}
 

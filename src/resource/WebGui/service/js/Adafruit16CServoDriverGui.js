@@ -12,9 +12,14 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', [])
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service;
-        $scope.controllerName = service.controllerName;
-        $scope.isAttached = service.isAttached;
         $scope.controllers = service.controllers;
+        $scope.controllerName = service.controllerName;
+        $scope.deviceBusList = service.deviceBusList;
+        $scope.deviceBus = service.deviceBus;
+        $scope.deviceAddressList = service.deviceAddressList;
+        $scope.deviceAddress = service.deviceAddress;
+        $scope.isAttached = service.isAttached;
+
     }
     ;
     
@@ -26,26 +31,7 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', [])
         case 'onState':
             _self.updateState(data);
             $scope.$apply();
-            break;
-        // servo event in the past 
-        // meant feedback from MRLComm.c
-        // but perhaps its come to mean
-        // feedback from the service.moveTo
-        case 'onStatus':
-            $scope.status = data;
-            $scope.$apply();
-            break;
-        case 'addListener':
-            // wtf?
-            $log.info("Add listener called");
-            $scope.status = data;
-            $scope.$apply();
-            break;
-      // case 'onServiceNamesFromInterface':
-      //    $scope.controllers = data;
-      //    $scope.$apply();
-      //    break;
-            
+            break;          
         default:
             $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method);
             break;
@@ -59,6 +45,14 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', [])
         $scope.controllerName = name;
     }
     
+        $scope.setDeviceBus = function(bus) {
+        $scope.deviceBus = bus;
+    }
+    
+        $scope.setDeviceAddress = function(address) {
+        $scope.deviceAddress = address;
+    }
+    
     // regrettably the onMethodMap dynamic
     // generation of methods failed on this overloaded
     // sweep method - there are several overloads in the
@@ -67,9 +61,5 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', [])
 
     msg.subscribe(this);
     
-    // var runtimeName = mrl.getRuntime().name;
-    // mrl.subscribe(runtimeName, 'getServiceNamesFromInterface');
-    // mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface');
-    // mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.I2CControl');
 }
 ]);
