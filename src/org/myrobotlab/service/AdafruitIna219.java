@@ -86,17 +86,11 @@ public class AdafruitIna219 extends Service {
 		broadcastState();
 
 	}
-
-	public void refreshControllers() {
-		controllers = Runtime.getServiceNamesFromInterface(I2CControl.class);
-	}
 	
-	/*
 	public ArrayList<String> refreshControllers() {
 		controllers = Runtime.getServiceNamesFromInterface(I2CControl.class);
 		return controllers;
 	}
-  */
 	
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
