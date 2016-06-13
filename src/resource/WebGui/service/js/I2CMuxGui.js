@@ -11,13 +11,15 @@ angular.module('mrlapp.service.I2CMuxGui', [])
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service;
-        $scope.controllerName = service.controllerName;
-        $scope.isAttached = service.isAttached;
+
+
         $scope.controllers = service.controllers;
-        $scope.muxAddressList = service.muxAddressList;
-        $scope.muxAddress = service.muxAddress;
-        $scope.muxBusList = service.muxBusList;
-        $scope.muxBus = service.muxBus;
+        $scope.controllerName = service.controllerName;
+        $scope.deviceBusList = service.deviceBusList;
+        $scope.deviceBus = service.deviceBus;
+        $scope.deviceAddressList = service.deviceAddressList;
+        $scope.deviceAddress = service.deviceAddress;
+        $scope.isAttached = service.isAttached;
     }
     ;
     
@@ -43,12 +45,12 @@ angular.module('mrlapp.service.I2CMuxGui', [])
         $scope.controllerName = name;
     }
     
-    $scope.SetMuxAddress = function(address) {
-        $scope.muxAddress = address;
+        $scope.setDeviceBus = function(bus) {
+        $scope.deviceBus = bus;
     }
     
-    $scope.SetMuxBus = function(bus) {
-        $scope.muxBus = bus;
+        $scope.setDeviceAddress = function(address) {
+        $scope.deviceAddress = address;
     }
     
     // regrettably the onMethodMap dynamic
