@@ -32,14 +32,12 @@ public class AdafruitIna219 extends Service {
 	public static final byte INA219_SHUNTVOLTAGE = 0x01;
 	public static final byte INA219_BUSVOLTAGE = 0x02;
 
-	public List<String> deviceAddressList = Arrays.asList(
-			 "0x40","0x41","0x42","0x43","0x44","0x45","0x46","0x47",
-		   "0x48","0x49","0x4A","0x4B","0x4C","0x4D","0x4E","0x4F");
-			
+	public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E",
+			"0x4F");
+
 	public String deviceAddress = "0x40";
-	
-	public List<String> deviceBusList = Arrays.asList(
-			"0","1","2","3","4","5","6","7","8");	
+
+	public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
 	public String deviceBus = "1";
 
 	public String type = "AdafruitIna219";
@@ -59,7 +57,7 @@ public class AdafruitIna219 extends Service {
 
 	public ArrayList<String> controllers;
 	public String controllerName;
-	
+
 	private boolean isAttached = false;
 
 	public static void main(String[] args) {
@@ -86,12 +84,12 @@ public class AdafruitIna219 extends Service {
 		broadcastState();
 
 	}
-	
+
 	public ArrayList<String> refreshControllers() {
 		controllers = Runtime.getServiceNamesFromInterface(I2CControl.class);
 		return controllers;
 	}
-	
+
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
@@ -104,6 +102,7 @@ public class AdafruitIna219 extends Service {
 	public boolean setController(String controllerName) {
 		return setController((I2CControl) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
 	}
+
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
@@ -120,7 +119,7 @@ public class AdafruitIna219 extends Service {
 		isAttached = true;
 
 		log.info(String.format("%s setController %s", getName(), controllerName));
-		
+
 		broadcastState();
 		return true;
 	}
@@ -148,16 +147,16 @@ public class AdafruitIna219 extends Service {
 
 		return controlerName;
 	}
-	
-	public void SetDeviceBus(String deviceBus){
+
+	public void SetDeviceBus(String deviceBus) {
 		this.deviceBus = deviceBus;
 		broadcastState();
-  }
-	
-	public void SetDeviceAddress(String deviceAddress){
+	}
+
+	public void SetDeviceAddress(String deviceAddress) {
 		this.deviceAddress = deviceAddress;
 		broadcastState();
-  }
+	}
 
 	public boolean isAttached() {
 		return isAttached;
@@ -173,7 +172,7 @@ public class AdafruitIna219 extends Service {
 				controller.createDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
 			}
 		}
-		
+
 		log.info(String.format("Setting device address to %s", deviceAddress));
 		this.deviceAddress = DeviceAddress;
 		return true;
