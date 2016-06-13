@@ -1494,7 +1494,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         // maps :P
         runtime.invoke("released", sw);
       } catch (Exception e) {
-        runtime.error("%s threw while stopping");
+        runtime.error(String.format("%s threw while stopping",e));
         Logging.logError(e);
       }
     }
