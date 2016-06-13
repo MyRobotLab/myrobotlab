@@ -29,6 +29,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -38,6 +39,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.AdafruitIna219;
 import org.myrobotlab.service.I2CMux;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
@@ -53,17 +55,18 @@ public class I2CMuxGUI extends ServiceGUI implements ActionListener {
 	JButton attachButton = new JButton(attach);
 
 	JComboBox<String> controller = new JComboBox<String>();
-	JComboBox<String> muxBusList = new JComboBox<String>();
-	JComboBox<String> muxAddressList = new JComboBox<String>();
+	JComboBox<String> deviceAddressList = new JComboBox<String>();
+	JComboBox<String> deviceBusList = new JComboBox<String>();
 
-	JLabel muxBusLabel     = new JLabel("Bus");
-	JLabel muxAddressLabel = new JLabel("Address");
+	JLabel controllerLabel     = new JLabel("Controller");
+	JLabel deviceBusLabel     = new JLabel("Bus");
+	JLabel deviceAddressLabel = new JLabel("Address");
 	
-	I2CMux myI2CMux = null;
+	I2CMux boundService = null;
 
 	public I2CMuxGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
-		myI2CMux = (I2CMux) Runtime.getService(boundServiceName);
+		boundService = (I2CMux) Runtime.getService(boundServiceName);
 	}
 
 	@Override
@@ -75,8 +78,8 @@ public class I2CMuxGUI extends ServiceGUI implements ActionListener {
 				if (index != -1) {
 					myService.send(boundServiceName, attach, 
 							controller.getSelectedItem(),
-							muxAddressList.getSelectedItem(),
-							muxBusList.getSelectedItem());
+							deviceBusList.getSelectedItem(),
+							deviceAddressList.getSelectedItem());
 				}
 			} else {
 				myService.send(boundServiceName, detach);
@@ -98,19 +101,19 @@ public class I2CMuxGUI extends ServiceGUI implements ActionListener {
 	public void getState(I2CMux i2cMux) {
 
 		refreshControllers();
-		controller.setSelectedItem(myI2CMux.controllerName);
-		muxAddressList.setSelectedItem(myI2CMux.muxAddress);
-		muxBusList.setSelectedItem(myI2CMux.muxBus);
+		controller.setSelectedItem(i2cMux.getControllerName());
+		deviceBusList.setSelectedItem(i2cMux.deviceBus);
+		deviceAddressList.setSelectedItem(i2cMux.deviceAddress);
 		if (i2cMux.isAttached()) {
 			attachButton.setText(detach);
 			controller.setEnabled(false);
-			muxAddressList.setEnabled(false);
-			muxBusList.setEnabled(false);
+			deviceBusList.setEnabled(false);
+			deviceAddressList.setEnabled(false);
 		} else {
 			attachButton.setText(attach);
 			controller.setEnabled(true);
-			muxAddressList.setEnabled(true);
-			muxBusList.setEnabled(true);
+			deviceBusList.setEnabled(true);
+			deviceAddressList.setEnabled(true);
 		}
 	}
 
@@ -122,30 +125,30 @@ public class I2CMuxGUI extends ServiceGUI implements ActionListener {
 		JPanel north = new JPanel();
 		north.add(attachButton);
 		north.add(controller);
-		north.add(muxAddressLabel);
-		north.add(muxAddressList);
-		north.add(muxBusLabel);
-		north.add(muxBusList);
+		north.add(deviceBusLabel);		
+		north.add(deviceBusList);
+		north.add(deviceAddressLabel);
+		north.add(deviceAddressList);
 		attachButton.addActionListener(this);
 
-		getMuxAddressList();
-		getMuxBusList();
+		getDeviceBusList();
+		getDeviceAddressList();
 
 		display.add(north, BorderLayout.NORTH);
 	}
 
-	public void getMuxAddressList() {
-
-		ArrayList<String> mal = myI2CMux.muxAddressList;
-		for (int i = 0; i < mal.size(); i++) {
-			muxAddressList.addItem(mal.get(i));
+	public void getDeviceBusList() {
+		List<String> mbl = boundService.deviceBusList;
+		for (int i = 0; i < mbl.size(); i++) {
+			deviceBusList.addItem(mbl.get(i));
 		}
 	}
+	
+	public void getDeviceAddressList() {
 
-	public void getMuxBusList() {
-		ArrayList<String> mbl = myI2CMux.muxBusList;
-		for (int i = 0; i < mbl.size(); i++) {
-			muxBusList.addItem(mbl.get(i));
+		List<String> mal = boundService.deviceAddressList;
+		for (int i = 0; i < mal.size(); i++) {
+			deviceAddressList.addItem(mal.get(i));
 		}
 	}
 
@@ -154,13 +157,13 @@ public class I2CMuxGUI extends ServiceGUI implements ActionListener {
 			@Override
 			public void run() {
 
-				ArrayList<String> v = myI2CMux.controllers;
+				ArrayList<String> v = boundService.controllers;
 				controller.removeAllItems();
 				if (v != null) {
 					for (int i = 0; i < v.size(); ++i) {
 						controller.addItem(v.get(i));
 					}
-					controller.setSelectedItem(myI2CMux.getControllerName());
+					controller.setSelectedItem(boundService.getControllerName());
 				}
 			}
 		});
