@@ -12,9 +12,13 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service;
-        $scope.controllerName = service.controllerName;
-        $scope.isAttached = service.isAttached;
         $scope.controllers = service.controllers;
+        $scope.controllerName = service.controllerName;
+        $scope.deviceBusList = service.deviceBusList;
+        $scope.deviceBus = service.deviceBus;
+        $scope.deviceAddressList = service.deviceAddressList;
+        $scope.deviceAddress = service.deviceAddress;
+        $scope.isAttached = service.isAttached;
         $scope.accelGX = service.accelGX;
         $scope.accelGY = service.accelGY;
         $scope.accelGZ = service.accelGZ;
@@ -45,6 +49,14 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     
     $scope.setControllerName = function(name) {
         $scope.controllerName = name;
+    }
+    
+    $scope.setDeviceBus = function(bus) {
+        $scope.deviceBus = bus;
+    }
+    
+    $scope.setDeviceAddress = function(address) {
+        $scope.deviceAddress = address;
     }
     
     // regrettably the onMethodMap dynamic

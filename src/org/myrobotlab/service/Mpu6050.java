@@ -1,6 +1,8 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -51,9 +53,11 @@ public class Mpu6050 extends Service {
 
   transient I2CControl controller;
 
-  // Default i2cAddress
-  public int busAddress = 1;
-  public int deviceAddress = 0x68;
+	public List<String> deviceAddressList = Arrays.asList("0x68", "0x69");
+	public String deviceAddress = "0x68";
+
+	public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
+	public String deviceBus = "1";
   public String type = "MPU-6050";
 
   public static final int MPU6050_ADDRESS_AD0_LOW = 0x68; // address pin low
@@ -704,65 +708,54 @@ public class Mpu6050 extends Service {
   public void startService() {
     super.startService();
   }
-	/**
+  
+  /**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
 	 */
 	// @Override
+	public boolean setController(String controllerName, String deviceBus, String deviceAddress) {
+		return setController((I2CControl) Runtime.getService(controllerName), deviceBus, deviceAddress);
+	}
+
 	public boolean setController(String controllerName) {
-		return setController((I2CControl) Runtime.getService(controllerName));
+		return setController((I2CControl) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
 	}
 
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
 	 */
-	
-  public boolean setController(I2CControl controller) {
-    if (controller == null) {
-      error("setting null as controller");
-      return false;
-    }
-
-    log.info(String.format("%s setController %s", getName(), controller.getName()));
-
-    this.controller = controller;
+	public boolean setController(I2CControl controller, String deviceBus, String deviceAddress) {
+		if (controller == null) {
+			error("setting null as controller");
+			return false;
+		}
 		controllerName = controller.getName();
+		this.controller = controller;
+		this.deviceBus = deviceBus;
+		this.deviceAddress = deviceAddress;
 		isAttached = true;
 
 		log.info(String.format("%s setController %s", getName(), controllerName));
-		
-    broadcastState();
-    return true;
-  }
-  
+
+		broadcastState();
+		return true;
+	}
+
 	public void unsetController() {
-		
 		controller = null;
 		controllerName = null;
+		this.deviceBus = null;
+		this.deviceAddress = null;
 		isAttached = false;
-		
 		broadcastState();
 	}
-  /**
-   * This method creates the i2c device
-   */
-  public boolean setDeviceAddress(int DeviceAddress) {
-    if (controller != null) {
-      if (deviceAddress != DeviceAddress) {
-        controller.releaseDevice(busAddress, deviceAddress);
-        controller.createDevice(busAddress, DeviceAddress, type);
-      }
-    }
-    log.info(String.format("Setting device address to x%02X", deviceAddress));
-    deviceAddress = DeviceAddress;
-    return true;
-  }
-  
+
 	public I2CControl getController() {
 		return controller;
 	}
-	
+
 	public String getControllerName() {
 
 		String controlerName = null;
@@ -773,11 +766,37 @@ public class Mpu6050 extends Service {
 
 		return controlerName;
 	}
-	
+
+	public void SetDeviceBus(String deviceBus) {
+		this.deviceBus = deviceBus;
+		broadcastState();
+	}
+
+	public void SetDeviceAddress(String deviceAddress) {
+		this.deviceAddress = deviceAddress;
+		broadcastState();
+	}
+
 	public boolean isAttached() {
 		return isAttached;
 	}
-	
+
+	/**
+	 * This method creates the i2c device
+	 */
+	boolean setDeviceAddress(String DeviceAddress) {
+		if (controller != null) {
+			if (deviceAddress != DeviceAddress) {
+				controller.releaseDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.createDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
+			}
+		}
+
+		log.info(String.format("Setting device address to %s", deviceAddress));
+		this.deviceAddress = DeviceAddress;
+		return true;
+	}
+
   /**
    * This method reads all the 7 raw values in one go accelX accelY accelZ
    * temperature ( In degrees Celcius ) gyroX gyroY gyroZ
@@ -786,12 +805,12 @@ public class Mpu6050 extends Service {
   public void getRaw() {
     // Set the start address to read from
     byte[] writebuffer = { MPU6050_RA_ACCEL_XOUT_H };
-    controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
+    controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
     // The Arduino example executes a request_from()
     // Not sure if this will do the trick
     // Request 14 bytes from the MPU-6050
     byte[] readbuffer = new byte[14];
-    controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
+    controller.i2cRead(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
     // Fill the variables with the result from the read operation
     accelX = (byte) readbuffer[0] << 8 | readbuffer[1] & 0xFF;
     accelY = (byte) readbuffer[2] << 8 | readbuffer[3] & 0xFF;
@@ -1056,7 +1075,7 @@ public class Mpu6050 extends Service {
    * @return I2C supply voltage level (0=VLOGIC, 1=VDD)
    */
   public int getAuxVDDIOLevel() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_YG_OFFS_TC, MPU6050_TC_PWR_MODE_BIT) ? 1 : 0;
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_TC, MPU6050_TC_PWR_MODE_BIT) ? 1 : 0;
   }
 
   /**
@@ -1070,7 +1089,7 @@ public class Mpu6050 extends Service {
    */
   void setAuxVDDIOLevel(int level) {
     boolean bitbuffer = (level != 0);
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_YG_OFFS_TC, MPU6050_TC_PWR_MODE_BIT, bitbuffer);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_TC, MPU6050_TC_PWR_MODE_BIT, bitbuffer);
   }
 
   // SMPLRT_DIV register
@@ -1097,7 +1116,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_SMPLRT_DIV
    */
   int getRate() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_SMPLRT_DIV);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SMPLRT_DIV);
   }
 
   /**
@@ -1109,7 +1128,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_SMPLRT_DIV
    */
   void setRate(int rate) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_SMPLRT_DIV, rate);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_SMPLRT_DIV, rate);
   }
 
   // CONFIG register
@@ -1142,7 +1161,7 @@ public class Mpu6050 extends Service {
    * @return FSYNC configuration value
    */
   int getExternalFrameSync() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_CONFIG, MPU6050_CFG_EXT_SYNC_SET_BIT, MPU6050_CFG_EXT_SYNC_SET_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_CONFIG, MPU6050_CFG_EXT_SYNC_SET_BIT, MPU6050_CFG_EXT_SYNC_SET_LENGTH);
   }
 
   /**
@@ -1154,7 +1173,7 @@ public class Mpu6050 extends Service {
    *          New FSYNC configuration value
    */
   void setExternalFrameSync(int sync) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_CONFIG, MPU6050_CFG_EXT_SYNC_SET_BIT, MPU6050_CFG_EXT_SYNC_SET_LENGTH, sync);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_CONFIG, MPU6050_CFG_EXT_SYNC_SET_BIT, MPU6050_CFG_EXT_SYNC_SET_LENGTH, sync);
   }
 
   /**
@@ -1186,7 +1205,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_CFG_DLPF_CFG_LENGTH
    */
   int getDLPFMode() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_CONFIG, MPU6050_CFG_DLPF_CFG_BIT, MPU6050_CFG_DLPF_CFG_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_CONFIG, MPU6050_CFG_DLPF_CFG_BIT, MPU6050_CFG_DLPF_CFG_LENGTH);
   }
 
   /**
@@ -1201,7 +1220,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_CFG_DLPF_CFG_LENGTH
    */
   void setDLPFMode(int mode) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_CONFIG, MPU6050_CFG_DLPF_CFG_BIT, MPU6050_CFG_DLPF_CFG_LENGTH, mode);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_CONFIG, MPU6050_CFG_DLPF_CFG_BIT, MPU6050_CFG_DLPF_CFG_LENGTH, mode);
   }
 
   // GYRO_CONFIG register
@@ -1224,7 +1243,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_GCONFIG_FS_SEL_LENGTH
    */
   int getFullScaleGyroRange() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH);
   }
 
   /**
@@ -1239,7 +1258,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_GCONFIG_FS_SEL_LENGTH
    */
   void setFullScaleGyroRange(int range) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, range);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, range);
   }
 
   // SELF TEST FACTORY TRIM VALUES
@@ -1251,8 +1270,8 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_SELF_TEST_X
    */
   int getAccelXSelfTestFactoryTrim() {
-    int selftestX = I2CdevReadByte(deviceAddress, MPU6050_RA_SELF_TEST_X);
-    int selftestA = I2CdevReadByte(deviceAddress, MPU6050_RA_SELF_TEST_A);
+    int selftestX = I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_X);
+    int selftestA = I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_A);
     return (byte) selftestA >> 3 | ((selftestX >> 4) & 0x03);
   }
 
@@ -1263,8 +1282,8 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_SELF_TEST_Y
    */
   int getAccelYSelfTestFactoryTrim() {
-    int selftestY = I2CdevReadByte(deviceAddress, MPU6050_RA_SELF_TEST_Y);
-    int selftestA = I2CdevReadByte(deviceAddress, MPU6050_RA_SELF_TEST_A);
+    int selftestY = I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_Y);
+    int selftestA = I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_A);
     return (byte) selftestY >> 3 | ((selftestA >> 2) & 0x03);
   }
 
@@ -1276,7 +1295,7 @@ public class Mpu6050 extends Service {
    */
   int getAccelZSelfTestFactoryTrim() {
     int[] readBuffer = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_SELF_TEST_Z, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_Z, 2, readBuffer);
     return (byte) readBuffer[0] >> 3 | (readBuffer[1] & 0x03);
   }
 
@@ -1287,7 +1306,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_SELF_TEST_X
    */
   int getGyroXSelfTestFactoryTrim() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_SELF_TEST_X) & 0xff;
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_X) & 0xff;
   }
 
   /**
@@ -1297,7 +1316,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_SELF_TEST_Y
    */
   int getGyroYSelfTestFactoryTrim() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_SELF_TEST_Y) & 0xff;
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_Y) & 0xff;
   }
 
   /**
@@ -1307,7 +1326,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_SELF_TEST_Z
    */
   int getGyroZSelfTestFactoryTrim() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_SELF_TEST_Z) & 0x1F;
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_Z) & 0x1F;
   }
 
   // ACCEL_CONFIG register
@@ -1319,7 +1338,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ACCEL_CONFIG
    */
   boolean getAccelXSelfTest() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_XA_ST_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_XA_ST_BIT);
   }
 
   /**
@@ -1330,7 +1349,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ACCEL_CONFIG
    */
   void setAccelXSelfTest(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_XA_ST_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_XA_ST_BIT, enabled);
   }
 
   /**
@@ -1340,7 +1359,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ACCEL_CONFIG
    */
   boolean getAccelYSelfTest() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_YA_ST_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_YA_ST_BIT);
   }
 
   /**
@@ -1351,7 +1370,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ACCEL_CONFIG
    */
   void setAccelYSelfTest(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_YA_ST_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_YA_ST_BIT, enabled);
   }
 
   /**
@@ -1361,7 +1380,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ACCEL_CONFIG
    */
   boolean getAccelZSelfTest() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ZA_ST_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ZA_ST_BIT);
   }
 
   /**
@@ -1372,7 +1391,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ACCEL_CONFIG
    */
   void setAccelZSelfTest(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ZA_ST_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ZA_ST_BIT, enabled);
   }
 
   /**
@@ -1394,7 +1413,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_ACONFIG_AFS_SEL_LENGTH
    */
   int getFullScaleAccelRange() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH);
   }
 
   /**
@@ -1405,7 +1424,7 @@ public class Mpu6050 extends Service {
    * @see getFullScaleAccelRange()
    */
   void setFullScaleAccelRange(int range) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
   }
 
   /**
@@ -1445,7 +1464,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ACCEL_CONFIG
    */
   int getDHPFMode() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ACCEL_HPF_BIT, MPU6050_ACONFIG_ACCEL_HPF_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ACCEL_HPF_BIT, MPU6050_ACONFIG_ACCEL_HPF_LENGTH);
   }
 
   /**
@@ -1458,7 +1477,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ACCEL_CONFIG
    */
   void setDHPFMode(int bandwidth) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ACCEL_HPF_BIT, MPU6050_ACONFIG_ACCEL_HPF_LENGTH, bandwidth);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ACCEL_HPF_BIT, MPU6050_ACONFIG_ACCEL_HPF_LENGTH, bandwidth);
   }
 
   // FF_THR register
@@ -1480,7 +1499,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FF_THR
    */
   int getFreefallDetectionThreshold() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_FF_THR);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_FF_THR);
   }
 
   /**
@@ -1492,7 +1511,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FF_THR
    */
   void setFreefallDetectionThreshold(int threshold) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_FF_THR, threshold);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_FF_THR, threshold);
   }
 
   // FF_DUR register
@@ -1515,7 +1534,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FF_DUR
    */
   int getFreefallDetectionDuration() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_FF_DUR);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_FF_DUR);
   }
 
   /**
@@ -1527,7 +1546,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FF_DUR
    */
   void setFreefallDetectionDuration(int duration) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_FF_DUR, duration);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_FF_DUR, duration);
   }
 
   // MOT_THR register
@@ -1552,7 +1571,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_MOT_THR
    */
   int getMotionDetectionThreshold() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_MOT_THR);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_THR);
   }
 
   /**
@@ -1564,7 +1583,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_MOT_THR
    */
   void setMotionDetectionThreshold(int threshold) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_MOT_THR, threshold);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_THR, threshold);
   }
 
   // MOT_DUR register
@@ -1585,7 +1604,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_MOT_DUR
    */
   int getMotionDetectionDuration() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_MOT_DUR);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_DUR);
   }
 
   /**
@@ -1597,7 +1616,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_MOT_DUR
    */
   void setMotionDetectionDuration(int duration) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_MOT_DUR, duration);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_DUR, duration);
   }
 
   // ZRMOT_THR register
@@ -1631,7 +1650,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ZRMOT_THR
    */
   int getZeroMotionDetectionThreshold() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_ZRMOT_THR);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_THR);
   }
 
   /**
@@ -1643,7 +1662,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ZRMOT_THR
    */
   void setZeroMotionDetectionThreshold(int threshold) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_ZRMOT_THR, threshold);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_THR, threshold);
   }
 
   // ZRMOT_DUR register
@@ -1666,7 +1685,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ZRMOT_DUR
    */
   int getZeroMotionDetectionDuration() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_ZRMOT_DUR);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_DUR);
   }
 
   /**
@@ -1678,7 +1697,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_ZRMOT_DUR
    */
   void setZeroMotionDetectionDuration(int duration) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_ZRMOT_DUR, duration);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_DUR, duration);
   }
 
   // FIFO_EN register
@@ -1692,7 +1711,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   boolean getTempFIFOEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_TEMP_FIFO_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_TEMP_FIFO_EN_BIT);
   }
 
   /**
@@ -1704,7 +1723,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   void setTempFIFOEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_TEMP_FIFO_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_TEMP_FIFO_EN_BIT, enabled);
   }
 
   /**
@@ -1716,7 +1735,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   boolean getXGyroFIFOEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_XG_FIFO_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_XG_FIFO_EN_BIT);
   }
 
   /**
@@ -1728,7 +1747,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   void setXGyroFIFOEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_XG_FIFO_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_XG_FIFO_EN_BIT, enabled);
   }
 
   /**
@@ -1740,7 +1759,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   boolean getYGyroFIFOEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_YG_FIFO_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_YG_FIFO_EN_BIT);
   }
 
   /**
@@ -1752,7 +1771,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   void setYGyroFIFOEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_YG_FIFO_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_YG_FIFO_EN_BIT, enabled);
   }
 
   /**
@@ -1764,7 +1783,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   boolean getZGyroFIFOEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_ZG_FIFO_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ZG_FIFO_EN_BIT);
   }
 
   /**
@@ -1776,7 +1795,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   void setZGyroFIFOEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_ZG_FIFO_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ZG_FIFO_EN_BIT, enabled);
   }
 
   /**
@@ -1788,7 +1807,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   boolean getAccelFIFOEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_ACCEL_FIFO_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ACCEL_FIFO_EN_BIT);
   }
 
   /**
@@ -1800,7 +1819,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   void setAccelFIFOEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_ACCEL_FIFO_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ACCEL_FIFO_EN_BIT, enabled);
   }
 
   /**
@@ -1812,7 +1831,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   boolean getSlave2FIFOEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_SLV2_FIFO_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV2_FIFO_EN_BIT);
   }
 
   /**
@@ -1824,7 +1843,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   void setSlave2FIFOEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_SLV2_FIFO_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV2_FIFO_EN_BIT, enabled);
   }
 
   /**
@@ -1836,7 +1855,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   boolean getSlave1FIFOEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_SLV1_FIFO_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV1_FIFO_EN_BIT);
   }
 
   /**
@@ -1848,7 +1867,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   void setSlave1FIFOEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_SLV1_FIFO_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV1_FIFO_EN_BIT, enabled);
   }
 
   /**
@@ -1860,7 +1879,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   boolean getSlave0FIFOEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_SLV0_FIFO_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV0_FIFO_EN_BIT);
   }
 
   /**
@@ -1872,7 +1891,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_EN
    */
   void setSlave0FIFOEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_FIFO_EN, MPU6050_SLV0_FIFO_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV0_FIFO_EN_BIT, enabled);
   }
 
   // I2C_MST_CTRL register
@@ -1894,7 +1913,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_CTRL
    */
   boolean getMultiMasterEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_CTRL, MPU6050_MULT_MST_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_MULT_MST_EN_BIT);
   }
 
   /**
@@ -1906,7 +1925,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_CTRL
    */
   void setMultiMasterEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_MST_CTRL, MPU6050_MULT_MST_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_MULT_MST_EN_BIT, enabled);
   }
 
   /**
@@ -1922,7 +1941,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_CTRL
    */
   boolean getWaitForExternalSensorEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_CTRL, MPU6050_WAIT_FOR_ES_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_WAIT_FOR_ES_BIT);
   }
 
   /**
@@ -1934,7 +1953,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_CTRL
    */
   void setWaitForExternalSensorEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_MST_CTRL, MPU6050_WAIT_FOR_ES_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_WAIT_FOR_ES_BIT, enabled);
   }
 
   /**
@@ -1946,7 +1965,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_MST_CTRL
    */
   boolean getSlave3FIFOEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_CTRL, MPU6050_SLV_3_FIFO_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_SLV_3_FIFO_EN_BIT);
   }
 
   /**
@@ -1958,7 +1977,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_MST_CTRL
    */
   void setSlave3FIFOEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_MST_CTRL, MPU6050_SLV_3_FIFO_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_SLV_3_FIFO_EN_BIT, enabled);
   }
 
   /**
@@ -1973,7 +1992,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_CTRL
    */
   boolean getSlaveReadWriteTransitionEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_P_NSR_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_P_NSR_BIT);
   }
 
   /**
@@ -1985,7 +2004,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_CTRL
    */
   void setSlaveReadWriteTransitionEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_P_NSR_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_P_NSR_BIT, enabled);
   }
 
   /**
@@ -2018,7 +2037,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_CTRL
    */
   int getMasterClockSpeed() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_CLK_BIT, MPU6050_I2C_MST_CLK_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_CLK_BIT, MPU6050_I2C_MST_CLK_LENGTH);
   }
 
   /**
@@ -2028,7 +2047,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_CTRL
    */
   void setMasterClockSpeed(int speed) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_CLK_BIT, MPU6050_I2C_MST_CLK_LENGTH, speed);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_CLK_BIT, MPU6050_I2C_MST_CLK_LENGTH, speed);
   }
 
   // I2C_SLV* registers (Slave 0-3)
@@ -2080,7 +2099,7 @@ public class Mpu6050 extends Service {
   int getSlaveAddress(int num) {
     if (num > 3)
       return 0;
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_I2C_SLV0_ADDR + num * 3);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_ADDR + num * 3);
   }
 
   /**
@@ -2096,7 +2115,7 @@ public class Mpu6050 extends Service {
   void setSlaveAddress(int num, int address) {
     if (num > 3)
       return;
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_I2C_SLV0_ADDR + num * 3, address);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_ADDR + num * 3, address);
   }
 
   /**
@@ -2115,7 +2134,7 @@ public class Mpu6050 extends Service {
   int getSlaveRegister(int num) {
     if (num > 3)
       return 0;
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_I2C_SLV0_REG + num * 3);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_REG + num * 3);
   }
 
   /**
@@ -2131,7 +2150,7 @@ public class Mpu6050 extends Service {
   void setSlaveRegister(int num, int reg) {
     if (num > 3)
       return;
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_I2C_SLV0_REG + num * 3, reg);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_REG + num * 3, reg);
   }
 
   /**
@@ -2147,7 +2166,7 @@ public class Mpu6050 extends Service {
   boolean getSlaveEnabled(int num) {
     if (num > 3)
       return false;
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_EN_BIT);
   }
 
   /**
@@ -2163,7 +2182,7 @@ public class Mpu6050 extends Service {
   void setSlaveEnabled(int num, boolean enabled) {
     if (num > 3)
       return;
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_EN_BIT, enabled);
   }
 
   /**
@@ -2182,7 +2201,7 @@ public class Mpu6050 extends Service {
   boolean getSlaveWordByteSwap(int num) {
     if (num > 3)
       return false;
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_BYTE_SW_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_BYTE_SW_BIT);
   }
 
   /**
@@ -2198,7 +2217,7 @@ public class Mpu6050 extends Service {
   void setSlaveWordByteSwap(int num, boolean enabled) {
     if (num > 3)
       return;
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_BYTE_SW_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_BYTE_SW_BIT, enabled);
   }
 
   /**
@@ -2217,7 +2236,7 @@ public class Mpu6050 extends Service {
   boolean getSlaveWriteMode(int num) {
     if (num > 3)
       return false;
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_REG_DIS_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_REG_DIS_BIT);
   }
 
   /**
@@ -2234,7 +2253,7 @@ public class Mpu6050 extends Service {
   void setSlaveWriteMode(int num, boolean mode) {
     if (num > 3)
       return;
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_REG_DIS_BIT, mode);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_REG_DIS_BIT, mode);
   }
 
   /**
@@ -2253,7 +2272,7 @@ public class Mpu6050 extends Service {
   boolean getSlaveWordGroupOffset(int num) {
     if (num > 3)
       return false;
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_GRP_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_GRP_BIT);
   }
 
   /**
@@ -2269,7 +2288,7 @@ public class Mpu6050 extends Service {
   void setSlaveWordGroupOffset(int num, boolean enabled) {
     if (num > 3)
       return;
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_GRP_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_GRP_BIT, enabled);
   }
 
   /**
@@ -2285,7 +2304,7 @@ public class Mpu6050 extends Service {
   int getSlaveDataLength(int num) {
     if (num > 3)
       return 0;
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_LEN_BIT, MPU6050_I2C_SLV_LEN_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_LEN_BIT, MPU6050_I2C_SLV_LEN_LENGTH);
   }
 
   /**
@@ -2301,7 +2320,7 @@ public class Mpu6050 extends Service {
   void setSlaveDataLength(int num, int length) {
     if (num > 3)
       return;
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_LEN_BIT, MPU6050_I2C_SLV_LEN_LENGTH, length);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_LEN_BIT, MPU6050_I2C_SLV_LEN_LENGTH, length);
   }
 
   // I2C_SLV* registers (Slave 4)
@@ -2317,7 +2336,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_ADDR
    */
   int getSlave4Address() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_I2C_SLV4_ADDR);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_ADDR);
   }
 
   /**
@@ -2329,7 +2348,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_ADDR
    */
   void setSlave4Address(int address) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_I2C_SLV4_ADDR, address);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_ADDR, address);
   }
 
   /**
@@ -2341,7 +2360,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_REG
    */
   int getSlave4Register() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_I2C_SLV4_REG);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_REG);
   }
 
   /**
@@ -2353,7 +2372,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_REG
    */
   void setSlave4Register(int reg) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_I2C_SLV4_REG, reg);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_REG, reg);
   }
 
   /**
@@ -2366,7 +2385,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_DO
    */
   void setSlave4OutputByte(int data) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_I2C_SLV4_DO, data);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_DO, data);
   }
 
   /**
@@ -2378,7 +2397,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_CTRL
    */
   boolean getSlave4Enabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_EN_BIT);
   }
 
   /**
@@ -2390,7 +2409,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_CTRL
    */
   void setSlave4Enabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_EN_BIT, enabled);
   }
 
   /**
@@ -2404,7 +2423,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_CTRL
    */
   boolean getSlave4InterruptEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_INT_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_INT_EN_BIT);
   }
 
   /**
@@ -2416,7 +2435,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_CTRL
    */
   void setSlave4InterruptEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_INT_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_INT_EN_BIT, enabled);
   }
 
   /**
@@ -2431,7 +2450,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_CTRL
    */
   boolean getSlave4WriteMode() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_REG_DIS_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_REG_DIS_BIT);
   }
 
   /**
@@ -2444,7 +2463,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_CTRL
    */
   void setSlave4WriteMode(boolean mode) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_REG_DIS_BIT, mode);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_REG_DIS_BIT, mode);
   }
 
   /**
@@ -2463,7 +2482,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_CTRL
    */
   int getSlave4MasterDelay() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_MST_DLY_BIT, MPU6050_I2C_SLV4_MST_DLY_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_MST_DLY_BIT, MPU6050_I2C_SLV4_MST_DLY_LENGTH);
   }
 
   /**
@@ -2475,7 +2494,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_CTRL
    */
   void setSlave4MasterDelay(int delay) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_MST_DLY_BIT, MPU6050_I2C_SLV4_MST_DLY_LENGTH, delay);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_MST_DLY_BIT, MPU6050_I2C_SLV4_MST_DLY_LENGTH, delay);
   }
 
   /**
@@ -2486,7 +2505,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_SLV4_DI
    */
   int getSlate4InputByte() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_I2C_SLV4_DI);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_DI);
   }
 
   // I2C_MST_STATUS register
@@ -2502,7 +2521,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_STATUS
    */
   boolean getPassthroughStatus() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_PASS_THROUGH_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_PASS_THROUGH_BIT);
   }
 
   /**
@@ -2515,7 +2534,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_STATUS
    */
   boolean getSlave4IsDone() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV4_DONE_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV4_DONE_BIT);
   }
 
   /**
@@ -2528,7 +2547,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_STATUS
    */
   boolean getLostArbitration() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_LOST_ARB_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_LOST_ARB_BIT);
   }
 
   /**
@@ -2541,7 +2560,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_STATUS
    */
   boolean getSlave4Nack() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV4_NACK_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV4_NACK_BIT);
   }
 
   /**
@@ -2554,7 +2573,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_STATUS
    */
   boolean getSlave3Nack() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV3_NACK_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV3_NACK_BIT);
   }
 
   /**
@@ -2567,7 +2586,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_STATUS
    */
   boolean getSlave2Nack() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV2_NACK_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV2_NACK_BIT);
   }
 
   /**
@@ -2580,7 +2599,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_STATUS
    */
   boolean getSlave1Nack() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV1_NACK_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV1_NACK_BIT);
   }
 
   /**
@@ -2593,7 +2612,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_I2C_MST_STATUS
    */
   boolean getSlave0Nack() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV0_NACK_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV0_NACK_BIT);
   }
 
   // INT_PIN_CFG register
@@ -2607,7 +2626,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_INT_LEVEL_BIT
    */
   boolean getInterruptMode() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_LEVEL_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_LEVEL_BIT);
   }
 
   /**
@@ -2620,7 +2639,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_INT_LEVEL_BIT
    */
   void setInterruptMode(boolean mode) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_LEVEL_BIT, mode);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_LEVEL_BIT, mode);
   }
 
   /**
@@ -2631,7 +2650,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_INT_OPEN_BIT
    */
   boolean getInterruptDrive() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_OPEN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_OPEN_BIT);
   }
 
   /**
@@ -2644,7 +2663,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_INT_OPEN_BIT
    */
   void setInterruptDrive(boolean drive) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_OPEN_BIT, drive);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_OPEN_BIT, drive);
   }
 
   /**
@@ -2656,7 +2675,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_LATCH_INT_EN_BIT
    */
   boolean getInterruptLatch() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_LATCH_INT_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_LATCH_INT_EN_BIT);
   }
 
   /**
@@ -2669,7 +2688,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_LATCH_INT_EN_BIT
    */
   void setInterruptLatch(boolean latch) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_LATCH_INT_EN_BIT, latch);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_LATCH_INT_EN_BIT, latch);
   }
 
   /**
@@ -2681,7 +2700,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_INT_RD_CLEAR_BIT
    */
   boolean getInterruptLatchClear() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_RD_CLEAR_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_RD_CLEAR_BIT);
   }
 
   /**
@@ -2694,7 +2713,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_INT_RD_CLEAR_BIT
    */
   void setInterruptLatchClear(boolean clear) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_RD_CLEAR_BIT, clear);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_RD_CLEAR_BIT, clear);
   }
 
   /**
@@ -2706,7 +2725,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
    */
   boolean getFSyncInterruptLevel() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT);
   }
 
   /**
@@ -2719,7 +2738,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
    */
   void setFSyncInterruptLevel(boolean level) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT, level);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT, level);
   }
 
   /**
@@ -2731,7 +2750,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_FSYNC_INT_EN_BIT
    */
   boolean getFSyncInterruptEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_EN_BIT);
   }
 
   /**
@@ -2744,7 +2763,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_FSYNC_INT_EN_BIT
    */
   void setFSyncInterruptEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_EN_BIT, enabled);
   }
 
   /**
@@ -2760,7 +2779,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_I2C_BYPASS_EN_BIT
    */
   boolean getI2CBypassEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT);
   }
 
   /**
@@ -2777,7 +2796,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_I2C_BYPASS_EN_BIT
    */
   void setI2CBypassEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT, enabled);
   }
 
   /**
@@ -2791,7 +2810,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_CLKOUT_EN_BIT
    */
   boolean getClockOutputEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_CLKOUT_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_CLKOUT_EN_BIT);
   }
 
   /**
@@ -2806,7 +2825,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTCFG_CLKOUT_EN_BIT
    */
   void setClockOutputEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_CLKOUT_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_CLKOUT_EN_BIT, enabled);
   }
 
   // INT_ENABLE register
@@ -2820,7 +2839,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_FF_BIT
    **/
   int getIntEnabled() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_INT_ENABLE);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE);
   }
 
   /**
@@ -2834,7 +2853,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_FF_BIT
    **/
   void setIntEnabled(int enabled) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_INT_ENABLE, enabled);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, enabled);
   }
 
   /**
@@ -2846,7 +2865,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_FF_BIT
    **/
   boolean getIntFreefallEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FF_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FF_BIT);
   }
 
   /**
@@ -2859,7 +2878,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_FF_BIT
    **/
   void setIntFreefallEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FF_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FF_BIT, enabled);
   }
 
   /**
@@ -2871,7 +2890,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_MOT_BIT
    **/
   boolean getIntMotionEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_MOT_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_MOT_BIT);
   }
 
   /**
@@ -2884,7 +2903,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_MOT_BIT
    **/
   void setIntMotionEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_MOT_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_MOT_BIT, enabled);
   }
 
   /**
@@ -2896,7 +2915,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_ZMOT_BIT
    **/
   boolean getIntZeroMotionEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_ZMOT_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_ZMOT_BIT);
   }
 
   /**
@@ -2909,7 +2928,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_ZMOT_BIT
    **/
   void setIntZeroMotionEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_ZMOT_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_ZMOT_BIT, enabled);
   }
 
   /**
@@ -2921,7 +2940,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_FIFO_OFLOW_BIT
    **/
   boolean getIntFIFOBufferOverflowEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FIFO_OFLOW_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FIFO_OFLOW_BIT);
   }
 
   /**
@@ -2934,7 +2953,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_FIFO_OFLOW_BIT
    **/
   void setIntFIFOBufferOverflowEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FIFO_OFLOW_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FIFO_OFLOW_BIT, enabled);
   }
 
   /**
@@ -2947,7 +2966,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_I2C_MST_INT_BIT
    **/
   boolean getIntI2CMasterEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_I2C_MST_INT_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_I2C_MST_INT_BIT);
   }
 
   /**
@@ -2960,7 +2979,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_I2C_MST_INT_BIT
    **/
   void setIntI2CMasterEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_I2C_MST_INT_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_I2C_MST_INT_BIT, enabled);
   }
 
   /**
@@ -2973,7 +2992,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_DATA_RDY_BIT
    */
   boolean getIntDataReadyEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DATA_RDY_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DATA_RDY_BIT);
   }
 
   /**
@@ -2986,7 +3005,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_DATA_RDY_BIT
    */
   void setIntDataReadyEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DATA_RDY_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DATA_RDY_BIT, enabled);
   }
 
   // INT_STATUS register
@@ -3001,7 +3020,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_INT_STATUS
    */
   int getIntStatus() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_INT_STATUS);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS);
   }
 
   /**
@@ -3014,7 +3033,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_FF_BIT
    */
   boolean getIntFreefallStatus() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_FF_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_FF_BIT);
   }
 
   /**
@@ -3027,7 +3046,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_MOT_BIT
    */
   boolean getIntMotionStatus() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_MOT_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_MOT_BIT);
   }
 
   /**
@@ -3040,7 +3059,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_ZMOT_BIT
    */
   boolean getIntZeroMotionStatus() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_ZMOT_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_ZMOT_BIT);
   }
 
   /**
@@ -3053,7 +3072,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_FIFO_OFLOW_BIT
    */
   boolean getIntFIFOBufferOverflowStatus() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_FIFO_OFLOW_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_FIFO_OFLOW_BIT);
   }
 
   /**
@@ -3067,7 +3086,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_I2C_MST_INT_BIT
    */
   boolean getIntI2CMasterStatus() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_I2C_MST_INT_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_I2C_MST_INT_BIT);
   }
 
   /**
@@ -3080,7 +3099,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_INTERRUPT_DATA_RDY_BIT
    */
   boolean getIntDataReadyStatus() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_DATA_RDY_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_DATA_RDY_BIT);
   }
 
   /**
@@ -3125,7 +3144,7 @@ public class Mpu6050 extends Service {
    */
   void getAcceleration(int[] x, int[] y, int[] z) {
     int readBuffer[] = new int[6];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_XOUT_H, 6, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_XOUT_H, 6, readBuffer);
     x[0] = ((byte) readBuffer[0] << 8) | readBuffer[1] & 0xff;
     y[0] = ((byte) readBuffer[2] << 8) | readBuffer[3] & 0xff;
     z[0] = ((byte) readBuffer[4] << 8) | readBuffer[5] & 0xff;
@@ -3140,7 +3159,7 @@ public class Mpu6050 extends Service {
    */
   int getAccelerationX() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_XOUT_H, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_XOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
@@ -3153,7 +3172,7 @@ public class Mpu6050 extends Service {
    */
   int getAccelerationY() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_YOUT_H, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_YOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
@@ -3166,7 +3185,7 @@ public class Mpu6050 extends Service {
    */
   int getAccelerationZ() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_ACCEL_ZOUT_H, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_ZOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
@@ -3192,7 +3211,7 @@ public class Mpu6050 extends Service {
    */
   int getTemperature() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_TEMP_OUT_H, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_TEMP_OUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
@@ -3236,7 +3255,7 @@ public class Mpu6050 extends Service {
    */
   void getRotation(int x[], int y[], int z[]) {
     int readBuffer[] = new int[6];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 6, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_GYRO_XOUT_H, 6, readBuffer);
     x[0] = (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
     y[0] = (byte) readBuffer[2] << 8 | readBuffer[3] & 0xff;
     z[0] = (byte) readBuffer[4] << 8 | readBuffer[5] & 0xff;
@@ -3251,7 +3270,7 @@ public class Mpu6050 extends Service {
    */
   int getRotationX() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_XOUT_H, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_GYRO_XOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
@@ -3264,7 +3283,7 @@ public class Mpu6050 extends Service {
    */
   int getRotationY() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_YOUT_H, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_GYRO_YOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
@@ -3277,7 +3296,7 @@ public class Mpu6050 extends Service {
    */
   int getRotationZ() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_GYRO_ZOUT_H, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_GYRO_ZOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
@@ -3362,7 +3381,7 @@ public class Mpu6050 extends Service {
    * @return Byte read from register
    */
   int getExternalSensorByte(int position) {
-    return (byte) I2CdevReadByte(deviceAddress, MPU6050_RA_EXT_SENS_DATA_00 + position) & 0xff;
+    return (byte) I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_EXT_SENS_DATA_00 + position) & 0xff;
   }
 
   /**
@@ -3375,7 +3394,7 @@ public class Mpu6050 extends Service {
    */
   int getExternalSensorWord(int position) {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_EXT_SENS_DATA_00 + position, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_EXT_SENS_DATA_00 + position, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1];
   }
 
@@ -3389,7 +3408,7 @@ public class Mpu6050 extends Service {
    */
   int getExternalSensorDWord(int position) {
     int readBuffer[] = new int[4];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_EXT_SENS_DATA_00 + position, 4, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_EXT_SENS_DATA_00 + position, 4, readBuffer);
     return (((byte) readBuffer[0]) << 24) | (((byte) readBuffer[1]) << 16) | (((byte) readBuffer[2]) << 8) | readBuffer[3] & 0xff;
   }
 
@@ -3402,7 +3421,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_MOT_DETECT_STATUS
    */
   int getMotionStatus() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_MOT_DETECT_STATUS);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS);
   }
 
   /**
@@ -3413,7 +3432,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_MOTION_MOT_XNEG_BIT
    */
   boolean getXNegMotionDetected() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_XNEG_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_XNEG_BIT);
   }
 
   /**
@@ -3424,7 +3443,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_MOTION_MOT_XPOS_BIT
    */
   boolean getXPosMotionDetected() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_XPOS_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_XPOS_BIT);
   }
 
   /**
@@ -3435,7 +3454,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_MOTION_MOT_YNEG_BIT
    */
   boolean getYNegMotionDetected() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_YNEG_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_YNEG_BIT);
   }
 
   /**
@@ -3446,7 +3465,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_MOTION_MOT_YPOS_BIT
    */
   boolean getYPosMotionDetected() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_YPOS_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_YPOS_BIT);
   }
 
   /**
@@ -3457,7 +3476,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_MOTION_MOT_ZNEG_BIT
    */
   boolean getZNegMotionDetected() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZNEG_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZNEG_BIT);
   }
 
   /**
@@ -3468,7 +3487,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_MOTION_MOT_ZPOS_BIT
    */
   boolean getZPosMotionDetected() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZPOS_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZPOS_BIT);
   }
 
   /**
@@ -3479,7 +3498,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_MOTION_MOT_ZRMOT_BIT
    */
   boolean getZeroMotionDetected() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZRMOT_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZRMOT_BIT);
   }
 
   // I2C_SLV*_DO register
@@ -3499,7 +3518,7 @@ public class Mpu6050 extends Service {
   void setSlaveOutputByte(int num, int data) {
     if (num > 3)
       return;
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_I2C_SLV0_DO + num, data);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_DO + num, data);
   }
 
   // I2C_MST_DELAY_CTRL register
@@ -3515,7 +3534,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
    */
   boolean getExternalShadowDelayEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_DELAY_CTRL, MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_DELAY_CTRL, MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT);
   }
 
   /**
@@ -3528,7 +3547,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
    */
   void setExternalShadowDelayEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_MST_DELAY_CTRL, MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_DELAY_CTRL, MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT, enabled);
   }
 
   /**
@@ -3556,7 +3575,7 @@ public class Mpu6050 extends Service {
     // MPU6050_DELAYCTRL_I2C_SLV4_DLY_EN_BIT is 4, SLV3 is 3, etc.
     if (num > 4)
       return false;
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_I2C_MST_DELAY_CTRL, num);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_DELAY_CTRL, num);
   }
 
   /**
@@ -3570,7 +3589,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_DELAYCTRL_I2C_SLV0_DLY_EN_BIT
    */
   void setSlaveDelayEnabled(int num, boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_I2C_MST_DELAY_CTRL, num, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_DELAY_CTRL, num, enabled);
   }
 
   // SIGNAL_PATH_RESET register
@@ -3583,7 +3602,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PATHRESET_GYRO_RESET_BIT
    */
   void resetGyroscopePath() {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_GYRO_RESET_BIT, true);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_GYRO_RESET_BIT, true);
   }
 
   /**
@@ -3594,7 +3613,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PATHRESET_ACCEL_RESET_BIT
    */
   void resetAccelerometerPath() {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_ACCEL_RESET_BIT, true);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_ACCEL_RESET_BIT, true);
   }
 
   /**
@@ -3605,7 +3624,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PATHRESET_TEMP_RESET_BIT
    */
   void resetTemperaturePath() {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_TEMP_RESET_BIT, true);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_TEMP_RESET_BIT, true);
   }
 
   // MOT_DETECT_CTRL register
@@ -3627,7 +3646,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_DETECT_ACCEL_ON_DELAY_BIT
    */
   int getAccelerometerPowerOnDelay() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_ACCEL_ON_DELAY_BIT, MPU6050_DETECT_ACCEL_ON_DELAY_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_ACCEL_ON_DELAY_BIT, MPU6050_DETECT_ACCEL_ON_DELAY_LENGTH);
   }
 
   /**
@@ -3640,7 +3659,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_DETECT_ACCEL_ON_DELAY_BIT
    */
   void setAccelerometerPowerOnDelay(int delay) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_ACCEL_ON_DELAY_BIT, MPU6050_DETECT_ACCEL_ON_DELAY_LENGTH, delay);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_ACCEL_ON_DELAY_BIT, MPU6050_DETECT_ACCEL_ON_DELAY_LENGTH, delay);
   }
 
   /**
@@ -3671,7 +3690,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_DETECT_FF_COUNT_BIT
    */
   int getFreefallDetectionCounterDecrement() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_FF_COUNT_BIT, MPU6050_DETECT_FF_COUNT_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_FF_COUNT_BIT, MPU6050_DETECT_FF_COUNT_LENGTH);
   }
 
   /**
@@ -3684,7 +3703,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_DETECT_FF_COUNT_BIT
    */
   void setFreefallDetectionCounterDecrement(int decrement) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_FF_COUNT_BIT, MPU6050_DETECT_FF_COUNT_LENGTH, decrement);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_FF_COUNT_BIT, MPU6050_DETECT_FF_COUNT_LENGTH, decrement);
   }
 
   /**
@@ -3712,7 +3731,7 @@ public class Mpu6050 extends Service {
    *
    */
   int getMotionDetectionCounterDecrement() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_MOT_COUNT_BIT, MPU6050_DETECT_MOT_COUNT_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_MOT_COUNT_BIT, MPU6050_DETECT_MOT_COUNT_LENGTH);
   }
 
   /**
@@ -3725,7 +3744,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_DETECT_MOT_COUNT_BIT
    */
   void setMotionDetectionCounterDecrement(int decrement) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_MOT_COUNT_BIT, MPU6050_DETECT_MOT_COUNT_LENGTH, decrement);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_MOT_COUNT_BIT, MPU6050_DETECT_MOT_COUNT_LENGTH, decrement);
   }
 
   // USER_CTRL register
@@ -3741,7 +3760,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_USERCTRL_FIFO_EN_BIT
    */
   boolean getFIFOEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_EN_BIT);
   }
 
   /**
@@ -3754,7 +3773,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_USERCTRL_FIFO_EN_BIT
    */
   void setFIFOEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_EN_BIT, enabled);
   }
 
   /**
@@ -3770,7 +3789,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_USERCTRL_I2C_MST_EN_BIT
    */
   boolean getI2CMasterModeEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT);
   }
 
   /**
@@ -3783,7 +3802,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_USERCTRL_I2C_MST_EN_BIT
    */
   void setI2CMasterModeEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT, enabled);
   }
 
   /**
@@ -3791,7 +3810,7 @@ public class Mpu6050 extends Service {
    * interface will be enabled in place of the disabled primary I2C interface.
    */
   void switchSPIEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_IF_DIS_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_IF_DIS_BIT, enabled);
   }
 
   /**
@@ -3803,7 +3822,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_USERCTRL_FIFO_RESET_BIT
    */
   void resetFIFO() {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_RESET_BIT, true);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_RESET_BIT, true);
   }
 
   /**
@@ -3815,7 +3834,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_USERCTRL_I2C_MST_RESET_BIT
    */
   void resetI2CMaster() {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_RESET_BIT, true);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_RESET_BIT, true);
   }
 
   /**
@@ -3831,7 +3850,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_USERCTRL_SIG_COND_RESET_BIT
    */
   void resetSensors() {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_SIG_COND_RESET_BIT, true);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_SIG_COND_RESET_BIT, true);
   }
 
   // PWR_MGMT_1 register
@@ -3844,7 +3863,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR1_DEVICE_RESET_BIT
    */
   void reset() {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_DEVICE_RESET_BIT, true);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_DEVICE_RESET_BIT, true);
   }
 
   /**
@@ -3860,7 +3879,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR1_SLEEP_BIT
    */
   boolean getSleepEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT);
   }
 
   /**
@@ -3873,7 +3892,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR1_SLEEP_BIT
    */
   void setSleepEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, enabled);
   }
 
   /**
@@ -3887,7 +3906,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR1_CYCLE_BIT
    */
   boolean getWakeCycleEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CYCLE_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CYCLE_BIT);
   }
 
   /**
@@ -3900,7 +3919,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR1_CYCLE_BIT
    */
   void setWakeCycleEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CYCLE_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CYCLE_BIT, enabled);
   }
 
   /**
@@ -3917,7 +3936,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR1_TEMP_DIS_BIT
    */
   boolean getTempSensorEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_TEMP_DIS_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_TEMP_DIS_BIT);
     // 1 is actually disabled here
   }
 
@@ -3935,7 +3954,7 @@ public class Mpu6050 extends Service {
    */
   void setTempSensorEnabled(boolean enabled) {
     // 1 is actually disabled here
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_TEMP_DIS_BIT, !enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_TEMP_DIS_BIT, !enabled);
   }
 
   /**
@@ -3947,7 +3966,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR1_CLKSEL_LENGTH
    */
   int getClockSource() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH);
   }
 
   /**
@@ -3984,7 +4003,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR1_CLKSEL_LENGTH
    */
   void setClockSource(int source) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH, source);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH, source);
   }
 
   // PWR_MGMT_2 register
@@ -4013,7 +4032,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_PWR_MGMT_2
    */
   int getWakeFrequency() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_LP_WAKE_CTRL_BIT, MPU6050_PWR2_LP_WAKE_CTRL_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_LP_WAKE_CTRL_BIT, MPU6050_PWR2_LP_WAKE_CTRL_LENGTH);
   }
 
   /**
@@ -4024,7 +4043,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_PWR_MGMT_2
    */
   void setWakeFrequency(int frequency) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_LP_WAKE_CTRL_BIT, MPU6050_PWR2_LP_WAKE_CTRL_LENGTH, frequency);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_LP_WAKE_CTRL_BIT, MPU6050_PWR2_LP_WAKE_CTRL_LENGTH, frequency);
   }
 
   /**
@@ -4036,7 +4055,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_XA_BIT
    */
   boolean getStandbyXAccelEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XA_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XA_BIT);
   }
 
   /**
@@ -4049,7 +4068,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_XA_BIT
    */
   void setStandbyXAccelEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XA_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XA_BIT, enabled);
   }
 
   /**
@@ -4061,7 +4080,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_YA_BIT
    */
   boolean getStandbyYAccelEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YA_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YA_BIT);
   }
 
   /**
@@ -4074,7 +4093,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_YA_BIT
    */
   void setStandbyYAccelEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YA_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YA_BIT, enabled);
   }
 
   /**
@@ -4086,7 +4105,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_ZA_BIT
    */
   boolean getStandbyZAccelEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZA_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZA_BIT);
   }
 
   /**
@@ -4099,7 +4118,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_ZA_BIT
    */
   void setStandbyZAccelEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZA_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZA_BIT, enabled);
   }
 
   /**
@@ -4111,7 +4130,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_XG_BIT
    */
   boolean getStandbyXGyroEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XG_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XG_BIT);
   }
 
   /**
@@ -4124,7 +4143,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_XG_BIT
    */
   void setStandbyXGyroEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XG_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XG_BIT, enabled);
   }
 
   /**
@@ -4136,7 +4155,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_YG_BIT
    */
   boolean getStandbyYGyroEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YG_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YG_BIT);
   }
 
   /**
@@ -4149,7 +4168,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_YG_BIT
    */
   void setStandbyYGyroEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YG_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YG_BIT, enabled);
   }
 
   /**
@@ -4161,7 +4180,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_ZG_BIT
    */
   boolean getStandbyZGyroEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZG_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZG_BIT);
   }
 
   /**
@@ -4174,7 +4193,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_PWR2_STBY_ZG_BIT
    */
   void setStandbyZGyroEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZG_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZG_BIT, enabled);
   }
 
   // FIFO_COUNT* registers
@@ -4190,7 +4209,7 @@ public class Mpu6050 extends Service {
    */
   int getFIFOCount() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_FIFO_COUNTH, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_FIFO_COUNTH, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
@@ -4223,12 +4242,12 @@ public class Mpu6050 extends Service {
    * @return Byte from FIFO buffer
    */
   int getFIFOByte() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_FIFO_R_W);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_FIFO_R_W);
   }
 
   void getFIFOBytes(int[] data, int length) {
     if (length > 0) {
-      I2CdevReadBytes(deviceAddress, MPU6050_RA_FIFO_R_W, length, data);
+      I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_FIFO_R_W, length, data);
     } else {
       data = new int[0];
     }
@@ -4241,7 +4260,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_RA_FIFO_R_W
    */
   void setFIFOByte(int data) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_FIFO_R_W, data);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_FIFO_R_W, data);
   }
 
   // WHO_AM_I register
@@ -4256,7 +4275,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_WHO_AM_I_LENGTH
    */
   int getDeviceID() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_WHO_AM_I, MPU6050_WHO_AM_I_BIT, MPU6050_WHO_AM_I_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_WHO_AM_I, MPU6050_WHO_AM_I_BIT, MPU6050_WHO_AM_I_LENGTH);
   }
 
   /**
@@ -4271,7 +4290,7 @@ public class Mpu6050 extends Service {
    * @see MPU6050_WHO_AM_I_LENGTH
    */
   void setDeviceID(int id) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_WHO_AM_I, MPU6050_WHO_AM_I_BIT, MPU6050_WHO_AM_I_LENGTH, id);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_WHO_AM_I, MPU6050_WHO_AM_I_BIT, MPU6050_WHO_AM_I_LENGTH, id);
   }
 
   // ======== UNDOCUMENTED/DMP REGISTERS/METHODS ========
@@ -4279,209 +4298,209 @@ public class Mpu6050 extends Service {
   // XG_OFFS_TC register
 
   boolean getOTPBankValid() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OTP_BNK_VLD_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OTP_BNK_VLD_BIT);
   }
 
   void setOTPBankValid(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OTP_BNK_VLD_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OTP_BNK_VLD_BIT, enabled);
   }
 
   int getXGyroOffsetTC() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH);
   }
 
   void setXGyroOffsetTC(int offset) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
   }
 
   // YG_OFFS_TC register
 
   int getYGyroOffsetTC() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_YG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH);
   }
 
   void setYGyroOffsetTC(int offset) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_YG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
   }
 
   // ZG_OFFS_TC register
 
   int getZGyroOffsetTC() {
-    return I2CdevReadBits(deviceAddress, MPU6050_RA_ZG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH);
+    return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH);
   }
 
   void setZGyroOffsetTC(int offset) {
-    I2CdevWriteBits(deviceAddress, MPU6050_RA_ZG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
+    I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
   }
 
   // X_FINE_GAIN register
 
   int getXFineGain() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_X_FINE_GAIN);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_X_FINE_GAIN);
   }
 
   void setXFineGain(int gain) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_X_FINE_GAIN, gain);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_X_FINE_GAIN, gain);
   }
 
   // Y_FINE_GAIN register
 
   int getYFineGain() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_Y_FINE_GAIN);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_Y_FINE_GAIN);
   }
 
   void setYFineGain(int gain) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_Y_FINE_GAIN, gain);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_Y_FINE_GAIN, gain);
   }
 
   // Z_FINE_GAIN register
 
   int getZFineGain() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_Z_FINE_GAIN);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_Z_FINE_GAIN);
   }
 
   void setZFineGain(int gain) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_Z_FINE_GAIN, gain);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_Z_FINE_GAIN, gain);
   }
 
   // XA_OFFS_* registers
 
   int getXAccelOffset() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_XA_OFFS_H, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_XA_OFFS_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
   void setXAccelOffset(int offset) {
-    I2CdevWriteWord(deviceAddress, MPU6050_RA_XA_OFFS_H, offset);
+    I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_XA_OFFS_H, offset);
   }
 
   // YA_OFFS_* register
 
   int getYAccelOffset() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_YA_OFFS_H, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_YA_OFFS_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
   void setYAccelOffset(int offset) {
-    I2CdevWriteWord(deviceAddress, MPU6050_RA_YA_OFFS_H, offset);
+    I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_YA_OFFS_H, offset);
   }
 
   // ZA_OFFS_* register
 
   int getZAccelOffset() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_ZA_OFFS_H, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ZA_OFFS_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
   void setZAccelOffset(int offset) {
-    I2CdevWriteWord(deviceAddress, MPU6050_RA_ZA_OFFS_H, offset);
+    I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_ZA_OFFS_H, offset);
   }
 
   // XG_OFFS_USR* registers
 
   int getXGyroOffset() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_XG_OFFS_USRH, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_USRH, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
   void setXGyroOffset(int offset) {
-    I2CdevWriteWord(deviceAddress, MPU6050_RA_XG_OFFS_USRH, offset);
+    I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_USRH, offset);
   }
 
   // YG_OFFS_USR* register
 
   int getYGyroOffset() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_YG_OFFS_USRH, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_USRH, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
   void setYGyroOffset(int offset) {
-    I2CdevWriteWord(deviceAddress, MPU6050_RA_YG_OFFS_USRH, offset);
+    I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_USRH, offset);
   }
 
   // ZG_OFFS_USR* register
 
   int getZGyroOffset() {
     int readBuffer[] = new int[2];
-    I2CdevReadBytes(deviceAddress, MPU6050_RA_ZG_OFFS_USRH, 2, readBuffer);
+    I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_USRH, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
   void setZGyroOffset(int offset) {
-    I2CdevWriteWord(deviceAddress, MPU6050_RA_ZG_OFFS_USRH, offset);
+    I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_USRH, offset);
   }
 
   // INT_ENABLE register (DMP functions)
 
   boolean getIntPLLReadyEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_PLL_RDY_INT_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_PLL_RDY_INT_BIT);
   }
 
   void setIntPLLReadyEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_PLL_RDY_INT_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_PLL_RDY_INT_BIT, enabled);
   }
 
   boolean getIntDMPEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DMP_INT_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DMP_INT_BIT);
   }
 
   void setIntDMPEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DMP_INT_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DMP_INT_BIT, enabled);
   }
 
   // DMP_INT_STATUS
 
   boolean getDMPInt5Status() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_5_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_5_BIT);
   }
 
   boolean getDMPInt4Status() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_4_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_4_BIT);
   }
 
   boolean getDMPInt3Status() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_3_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_3_BIT);
   }
 
   boolean getDMPInt2Status() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_2_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_2_BIT);
   }
 
   boolean getDMPInt1Status() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_1_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_1_BIT);
   }
 
   boolean getDMPInt0Status() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_0_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_0_BIT);
   }
 
   // INT_STATUS register (DMP functions)
 
   boolean getIntPLLReadyStatus() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_PLL_RDY_INT_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_PLL_RDY_INT_BIT);
   }
 
   boolean getIntDMPStatus() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_DMP_INT_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_DMP_INT_BIT);
   }
 
   // USER_CTRL register (DMP functions)
 
   boolean getDMPEnabled() {
-    return I2CdevReadBit(deviceAddress, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_EN_BIT);
+    return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_EN_BIT);
   }
 
   void setDMPEnabled(boolean enabled) {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_EN_BIT, enabled);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_EN_BIT, enabled);
   }
 
   void resetDMP() {
-    I2CdevWriteBit(deviceAddress, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_RESET_BIT, true);
+    I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_RESET_BIT, true);
   }
 
   // BANK_SEL register
@@ -4492,7 +4511,7 @@ public class Mpu6050 extends Service {
       bank |= 0x20;
     if (prefetchEnabled)
       bank |= 0x40;
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_BANK_SEL, bank);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_BANK_SEL, bank);
   }
 
   void setMemoryBank(int bank) {
@@ -4502,17 +4521,17 @@ public class Mpu6050 extends Service {
   // MEM_START_ADDR register
 
   void setMemoryStartAddress(int address) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_MEM_START_ADDR, address);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_MEM_START_ADDR, address);
   }
 
   // MEM_R_W register
 
   int readMemoryByte() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_MEM_R_W);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MEM_R_W);
   }
 
   void writeMemoryByte(int data) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_MEM_R_W, data);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_MEM_R_W, data);
   }
 
   void readMemoryBlock(int[] data, int dataSize, int bank, int address) {
@@ -4532,7 +4551,7 @@ public class Mpu6050 extends Service {
         chunkSize = 256 - address;
 
       // read the chunk of data as specified
-      I2CdevReadBytes(deviceAddress, MPU6050_RA_MEM_R_W, chunkSize, data);
+      I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_MEM_R_W, chunkSize, data);
 
       // increase byte index by [chunkSize]
       i += chunkSize;
@@ -4590,14 +4609,14 @@ public class Mpu6050 extends Service {
       }
 
       log.info(String.format("writeMemoryBlock: Block start: %s, ChunkSize %s", i, chunkSize));
-      I2CdevWriteBytes(deviceAddress, MPU6050_RA_MEM_R_W, chunkSize, progBuffer);
+      I2CdevWriteBytes(Integer.decode(deviceAddress), MPU6050_RA_MEM_R_W, chunkSize, progBuffer);
 
       // verify data if needed
 
       if (verify && (verifyBuffer.length > 0)) {
         setMemoryBank(bank);
         setMemoryStartAddress(address);
-        I2CdevReadBytes(deviceAddress, MPU6050_RA_MEM_R_W, chunkSize, verifyBuffer);
+        I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_MEM_R_W, chunkSize, verifyBuffer);
         if (memcmp(progBuffer, verifyBuffer, chunkSize) != 0) {
           /*
            * Serial.print("Block write verification error, bank ");
@@ -4687,7 +4706,7 @@ public class Mpu6050 extends Service {
           // setIntZeroMotionEnabled(true);
           // setIntFIFOBufferOverflowEnabled(true);
           // setIntDMPEnabled(true);
-          I2CdevWriteByte(deviceAddress, MPU6050_RA_INT_ENABLE, 0x32); // single
+          I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, 0x32); // single
                                                                        // operation
 
           success = true;
@@ -4710,21 +4729,21 @@ public class Mpu6050 extends Service {
   // DMP_CFG_1 register
 
   int getDMPConfig1() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_DMP_CFG_1);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_DMP_CFG_1);
   }
 
   void setDMPConfig1(int config) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_DMP_CFG_1, config);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_DMP_CFG_1, config);
   }
 
   // DMP_CFG_2 register
 
   int getDMPConfig2() {
-    return I2CdevReadByte(deviceAddress, MPU6050_RA_DMP_CFG_2);
+    return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_DMP_CFG_2);
   }
 
   void setDMPConfig2(int config) {
-    I2CdevWriteByte(deviceAddress, MPU6050_RA_DMP_CFG_2, config);
+    I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_DMP_CFG_2, config);
   }
 
   // * Compare the content of two buffers
@@ -4842,7 +4861,7 @@ public class Mpu6050 extends Service {
    */
   int I2CdevReadWords(int devAddr, int regAddr, int length, int[] data) {
     byte bytebuffer[] = new byte[length * 2];
-    controller.i2cRead(busAddress, devAddr, bytebuffer, bytebuffer.length);
+    controller.i2cRead(Integer.parseInt(deviceBus), devAddr, bytebuffer, bytebuffer.length);
     for (int i = 0; i < bytebuffer.length; i++) {
       data[i] = bytebuffer[i * 2] << 8 + bytebuffer[i * 2 + 1] & 0xff;
     }
@@ -4866,8 +4885,8 @@ public class Mpu6050 extends Service {
   int I2CdevReadBytes(int devAddr, int regAddr, int length, int[] data) {
     byte[] writebuffer = new byte[] { (byte) (regAddr & 0xff) };
     byte[] readbuffer = new byte[length];
-    controller.i2cWrite(busAddress, deviceAddress, writebuffer, writebuffer.length);
-    controller.i2cRead(busAddress, deviceAddress, readbuffer, readbuffer.length);
+    controller.i2cWrite(Integer.parseInt(deviceBus), devAddr, writebuffer, writebuffer.length);
+    controller.i2cRead(Integer.parseInt(deviceBus), devAddr, readbuffer, readbuffer.length);
     for (int i = 0; i < length; i++) {
       data[i] = readbuffer[i] & 0xff;
     }
@@ -5004,7 +5023,7 @@ public class Mpu6050 extends Service {
     for (int i = 0; i < length; i++) {
       writebuffer[i + 1] = (byte) (data[i] & 0xff);
     }
-    controller.i2cWrite(busAddress, devAddr, writebuffer, writebuffer.length);
+    controller.i2cWrite(Integer.parseInt(deviceBus), devAddr, writebuffer, writebuffer.length);
     return true;
   }
 
@@ -5016,7 +5035,7 @@ public class Mpu6050 extends Service {
       writebuffer[i * 2 + 1] = (byte) (data[i] << 8); // MSByte
       writebuffer[i * 2 + 2] = (byte) (data[i] & 0xff); // LSByte
     }
-    controller.i2cWrite(busAddress, devAddr, writebuffer, writebuffer.length);
+    controller.i2cWrite(Integer.parseInt(deviceBus), devAddr, writebuffer, writebuffer.length);
     return true;
   }
 
