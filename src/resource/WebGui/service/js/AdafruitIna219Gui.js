@@ -48,11 +48,11 @@ angular.module('mrlapp.service.AdafruitIna219Gui', [])
         $scope.controllerName = name;
     }
     
-        $scope.setDeviceBus = function(bus) {
+    $scope.setDeviceBus = function(bus) {
         $scope.deviceBus = bus;
     }
     
-        $scope.setDeviceAddress = function(address) {
+    $scope.setDeviceAddress = function(address) {
         $scope.deviceAddress = address;
     }
     
