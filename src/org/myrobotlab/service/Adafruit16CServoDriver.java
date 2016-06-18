@@ -162,7 +162,9 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	public boolean setController(String controllerName) {
 		return setController((I2CControl) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
 	}
-	
+	public boolean setController(I2CControl controller) {
+		return setController(controller, this.deviceBus, this.deviceAddress);
+	}
 	public boolean setController(I2CControl controller, String deviceBus, String deviceAddress) {
 		if (controller == null) {
 			error("setting null as controller");

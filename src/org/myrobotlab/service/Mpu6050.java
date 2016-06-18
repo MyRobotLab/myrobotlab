@@ -721,7 +721,10 @@ public class Mpu6050 extends Service {
 	public boolean setController(String controllerName) {
 		return setController((I2CControl) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
 	}
-
+	
+	public boolean setController(I2CControl controller) {
+		return setController(controller, this.deviceBus, this.deviceAddress);
+	}
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
