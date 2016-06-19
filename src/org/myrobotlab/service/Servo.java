@@ -34,6 +34,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.interfaces.Device;
 import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -59,7 +60,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Servo extends Service implements ServoControl {
+public class Servo extends Service implements ServoControl, Device {
 
   /**
    * Sweeper - TODO - should be implemented in the arduino code for smoother
@@ -638,5 +639,15 @@ public class Servo extends Service implements ServoControl {
 
     return meta;
   }
+
+@Override
+public Integer getDeviceType() {
+	return Device.DEVICE_TYPE_SERVO;
+}
+
+@Override
+public int[] getDeviceConfig() {
+	return new int[]{pin};
+}
 
 }

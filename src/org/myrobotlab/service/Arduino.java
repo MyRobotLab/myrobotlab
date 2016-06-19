@@ -305,11 +305,6 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public String board;
 
 	/**
-	 * index reference of servo
-	 */
-	HashMap<Integer, ServoData> servoIndex = new HashMap<Integer, ServoData>();
-
-	/**
 	 * Devices - string name index of device we need 2 indexes for sensors because they
 	 * will be referenced by name OR by index
 	 */
@@ -925,7 +920,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 			// uber good -
 			// TODO - deprecate ServoControl interface - not
 			// needed Servo is abstraction enough
-			Servo servo = (Servo) servoIndex.get(index).servo;
+			Servo servo = (Servo) deviceList.get(index).getDevice();
 			servo.invoke("publishServoEvent", currentPos & 0xff);
 			break;
 		}
@@ -1450,7 +1445,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// because servo does not contain this data !
 		int index = getServoIndex(servo.getPin());
 
-		if (servoIndex.containsKey(index)) {
+		if (deviceList.containsKey(index)) {
 			log.info("servo already attach - detach first");
 			// important to return true - because we are "attached" !
 			return true;
@@ -1489,7 +1484,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		sd.servoIndex = index;
 		sd.servo = servo;
 		// servos.put(servo.getName(), sd);
-		servoIndex.put(index, sd);
+		deviceList.put(servo.getName(), new DeviceMapping(servo));
 		servo.setController(this);
 		servo.setPin(pin);
 		log.info("servo index {} pin {} attached ", index, pin);
@@ -1511,9 +1506,9 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		int index = getServoIndex(servo.getPin());
 		log.info(String.format("servoDetach(%s) index %d", servoName, index));
 
-		if (servoIndex.containsKey(index)) {
+		if (deviceList.containsKey(index)) {
 			sendMsg(SERVO_DETACH, index, 0);
-			servoIndex.remove(index);
+			deviceList.remove(index);
 			return true;
 		}
 
@@ -1525,7 +1520,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	@Override
 	public void servoSweepStart(Servo servo) {
 		String servoName = servo.getName();
-		if (!servoIndex.containsKey(servoName)) {
+		if (!deviceList.containsKey(servoName)) {
 			warn("Servo %s not attached to %s", servoName, getName());
 			return;
 		}
