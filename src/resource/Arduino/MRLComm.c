@@ -548,8 +548,9 @@ class Pin {
 
 class Device {
   public:
-    Device(int t) {
-      type = t;
+    Device(int deviceType, int deviceId) {
+      type = deviceType;
+      index=deviceId;
     }
     ~Device(){
       while(pins.size()>0){
@@ -566,7 +567,6 @@ class Device {
    //  LinkedList<int> config; // additional memory for the sensor if needed
 
     int step;
-    bool eventsEnabled;
     int min;
     int max;
 
@@ -576,9 +576,12 @@ class Device {
     unsigned long lastValue;
     int timeoutUS;
     int count;
+    int id;
 };
 
-
+/**
+ * Servo Device
+ */
 class MrlServo : public Device {
   public:
     Servo* servo; // servo pointer - in case our device is a servo
@@ -588,8 +591,9 @@ class MrlServo : public Device {
     int targetPos;
     int currentPos;
     int speed; // servos have a "speed" associated with them that's not part of the base servo driver
+    bool eventsEnabled;
 
-    MrlServo(int p) : Device(DEVICE_TYPE_SERVO) {
+    MrlServo(int p, int deviceId) : Device(DEVICE_TYPE_SERVO, deviceId) {
        pin = p;
        isMoving = false;
        isSweeping = false;
@@ -597,26 +601,94 @@ class MrlServo : public Device {
        // create the servo
        servo = new Servo();
        servo->attach(pin);
+       eventsEnabled = false;
     }
-
-    ~MrlServo(){
+    ~MrlServo() {
       servo->detach();
       delete servo;
     }
 
 };
 
+/**
+ * Motor Device
+ */
 class MrlMotor : public Device {
   // details of the different motor controls/types
+  public:
+    MrlMotor(int deviceId) : Device(DEVICE_TYPE_MOTOR, deviceId) {
+
+    }
 };
 
+/**
+ * Stepper Device
+ */
+class MrlStepper : public Device {
+  // details of the different motor controls/types
+  public:
+    MrlStepper(int deviceId) : Device(DEVICE_TYPE_STEPPER, deviceId) {
+
+    }
+};
+
+/**
+ * Analog Pin Array Sensor
+ */
 class MrlAnalogPinArray : public Device {
+  // int pins[];
+  public:
+    MrlAnalogPinArray(int deviceId) : Device(SENSOR_TYPE_ANALOG_PIN_ARRAY, deviceId) {
+    //pins = sensorPins;
+    //for (int i = 0; i < pins.size(); i++) {
+      // TODO: is this Analog or Digital?
+    //  pinMode(i, INPUT);
+    //}
+    }
   // specific stuffs for analog pins (sample rates?)
 };
 
+/**
+ * Digital Pin Array Sensor
+ */
 class MrlDigitalPinArray : public Device {
-  // config such as if they should publish the value in every loop
-  // or only on a state change.
+  public:
+    // config such as if they should publish the value in every loop
+    // or only on a state change.
+    MrlDigitalPinArray(int deviceId) : Device(SENSOR_TYPE_DIGITAL_PIN_ARRAY, deviceId) {
+    //pins = sensorPins;
+    //for (int i = 0; i < pins.size(); i++) {
+      // TODO: is this Analog or Digital?
+    //  pinMode(i, INPUT);
+    //}
+    }
+};
+
+/**
+ * Pulse Sensor Device
+ */
+class MrlPulse : public Device {
+  public:
+    MrlPulse(int deviceId) : Device(SENSOR_TYPE_PULSE, deviceId) {
+    }
+};
+
+/**
+ * Ultrasonic Sensor
+ */
+class MrlUltrasonic : public Device {
+  public:
+    MrlUltrasonic(int deviceId) : Device(SENSOR_TYPE_ULTRASONIC, deviceId) {
+    }
+};
+
+/**
+ * I2C device
+ */
+class MrlI2CDevice : public Device {
+  public:
+    MrlI2CDevice(int deviceId) : Device(DEVICE_TYPE_I2C, deviceId) {
+    }
 };
 
 
@@ -627,6 +699,7 @@ class MrlDigitalPinArray : public Device {
 
 // The mighty device List.  This contains all active devices that are attached to the arduino.
 LinkedList<Device*> deviceList;
+int nextDeviceId = 0;
 
 // MRLComm message buffer and current count from serial port ( MAGIC | MSGSIZE | FUNCTION | PAYLOAD ...
 int msgSize = 0; // the NUM_BYTES of current message (second byte of mrlcomm protocol)
@@ -646,6 +719,8 @@ unsigned int sampleRate = 1; // 1 - 65,535 modulus of the loopcount - allowing y
 void sendServoEvent(Device* s, int eventType);
 
 // Switch to know it the i2c bus has been initiated or not
+/** TODO Move to the device, in case several buses can be allocated
+    some versions of wire allows for that */
 bool i2cInitiated = false;
 
 // global debug setting, if set to true publishDebug will write to the serial port.
@@ -656,9 +731,9 @@ bool debug = false;
  * basic crud operations for devices to seperate the implementation
  * details of the data structure containing all the devices
  */
-Device* getDevice(unsigned long id);
-void removeDevice(unsigned long id);
-void addDevice(Device*);
+Device* getDeviceByIndex(int id);
+void removeDevice(int id);
+int addDevice(Device*);
 /**
  * DEVICE LIST ACCESS METHODS END
  **********************************************************************/
@@ -723,10 +798,33 @@ void softReset() {
   loadTimingEnabled = false;
   sampleRate = 1;
   debounceDelay = 50;
+  nextDeviceId = 0;
 }
 
-void addDevice(Device* device){
-  //sensorList.add(device);
+/**
+ * FIXME - G: I think dynamic array would work better
+ * at least for the deviceList
+ */
+int addDevice(Device* device) {
+  deviceList.add(device);
+  return device->index;
+}
+
+/**
+ * getDeviceByIndex - this method will look up a device by it's index in the device list.
+ * it returns null if the device isn't found.
+ */
+Device* getDeviceByIndex(int index) {
+  // TODO: more effecient lookup..
+  int numDevices = deviceList.size();
+  for (int i = 0; i < numDevices; i++) {
+    Device* dev=deviceList.get(i);
+    if (dev->index == index) {
+      // it was found.
+      return dev;
+    }
+  }
+  return NULL;
 }
 
 /**
@@ -795,7 +893,9 @@ void processCommand() {
     pinMode(ioCmd[1], ioCmd[2]);
     break;
   case SERVO_ATTACH:
-    // TODO: replace this with attachDevice
+    // this a user command to Servo.attach
+    // not to be confused with attachServo which is
+    // MRLComm framework request to attach a device
     servoAttach();
     break;
   case SERVO_SWEEP_START:
@@ -921,29 +1021,43 @@ void sensorPollingStop() {
 }
 
 // Start of I2CControl interface methods
+//
+// Return data in this format
+// PUBLISH_SENSOR_DATA | DEVICE_INDEX | DATA_SIZE | DATA ....
+/** TODO Add device index to the returned data
+//  I hope only one device is needed for the i2c bus in MRLComm,
+//  not one for each i2c device on the bus.
+//  That information is better handled in Arduino.java
+*/
 void i2cRead(){
   wireBegin();
   WIRE.beginTransmission(ioCmd[1]); // address to the i2c device
   WIRE.write(ioCmd[2]);             // device memory address to read from
   WIRE.endTransmission();
-  WIRE.requestFrom((uint8_t)ioCmd[1], (uint8_t)ioCmd[3]); // reqest a number of bytes to read
-  // Start an mrlcomm message
-  Serial.write(MAGIC_NUMBER);
-  // size of the mrlcomm message
-	Serial.write(1 + ioCmd[3]);
-	// mrlcomm function
-	Serial.write(PUBLISH_SENSOR_DATA);
-	// write the payload bytes
-	// write the device index..
-  // Device i2cDevice = deviceList.get(??)
-  // write the ioCmd[3]  number of bytes we are going to publish
-  for (int i = 1; i < ioCmd[3]; i++) {  // read the requested bytes
-    int numBytesToRead = WIRE.available();
-    if (numBytesToRead > 0) {              // slave may send less than requested
-      // WIRE.read() has a timeout..
-      Serial.write(WIRE.read());        // and pass back to the host
-    } else {
-	    Serial.write(0);                 // to aviod incomplete messages
+  int answer = WIRE.requestFrom((uint8_t)ioCmd[1], (uint8_t)ioCmd[3]); // reqest a number of bytes to read
+  if(answer==0){
+    //Report an error with I2C communication by returning a 0 length data size
+    //i.e a message size if 1 byte containing only PUBLISH_SENSOR_DATA
+     // Start an mrlcomm message
+    Serial.write(MAGIC_NUMBER);
+    // size of the mrlcomm message
+  	Serial.write(1);
+  	// mrlcomm function
+  	Serial.write(PUBLISH_SENSOR_DATA);
+  }
+  else{
+     // Start an mrlcomm message
+    Serial.write(MAGIC_NUMBER);
+    // size of the mrlcomm message
+  	Serial.write(1 + ioCmd[3]);
+  	// mrlcomm function
+  	Serial.write(PUBLISH_SENSOR_DATA);
+  	Serial.write(0);//get the DEVICE_INDEX
+  	// I2C device are only sending back data, some more identifier should be added
+  	//return the request bytes, incomplete message will be padded with 0xFF bytes
+  	Serial.write(answer);
+    for (int i = 1; i<answer; i++){
+      Serial.write(Wire.read());
     }
   }
 }
@@ -961,9 +1075,11 @@ void i2cWrite(){
 void i2cWriteRead(){
   /** TODO implement me */
 }
+// Method to make sure that WIRE.begin() is executed exactly one time
+// before any other i2c communication
 void wireBegin() {
   if (!i2cInitiated){
-    WIRE.begin(); //not sure if it's good to be able to initialize the WIRE library multiple time
+    WIRE.begin();
     i2cInitiated = true;
   }
 }
@@ -981,7 +1097,8 @@ void servoWriteMicroseconds() {
   // TODO - incorporate into speed control etc
   // normalize - currently by itself doesn't effect events
   // nor is it involved in speed control
-  MrlServo* s = (MrlServo*)deviceList.get(ioCmd[1]);
+  // TODO: this is wrong need to lookup device by id which means iterating the device list.
+  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
   if (s->servo != 0) {
     // 1500 midpoint
     s->servo->writeMicroseconds(ioCmd[2]);
@@ -991,16 +1108,18 @@ void servoWriteMicroseconds() {
 // SET_SERVO_SPEED
 void setServoSpeed() {
   // setting the speed of a servo
-  MrlServo* servo = (MrlServo*)deviceList.get(ioCmd[1]);
+  // TODO: this is wrong need to lookup device by id which means iterating the device list.
+  MrlServo* servo = (MrlServo*)getDeviceByIndex(ioCmd[1]);
   servo->speed = ioCmd[2];
 }
 
 // SERVO_DETACH
 void servoDetach() {
-  MrlServo* s = (MrlServo*)deviceList.get(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
   if (s->servo != 0) {
     s->servo->detach();
   }
+  detachDevice(ioCmd[1]);
 }
 
 // SET_LOAD_TIMING_ENABLED
@@ -1080,7 +1199,7 @@ void digitalReadPollingStart() {
 // PULSE
 void pulse() {
   // get pin from index
-  Device* d = deviceList.get(ioCmd[1]);
+  Device* d = (MrlPulse*)deviceList.get(ioCmd[1]);
   Pin* pin = d->pins.get(0);
   // FIXME - this has to unload a Long !!!
   pin->count = 0;
@@ -1099,7 +1218,7 @@ void pulse() {
 
 // PULSE
 void pulseStop() {
-  Device* d = deviceList.get(ioCmd[1]);
+  Device* d = (MrlPulse*)deviceList.get(ioCmd[1]);
   Pin* pin = d->pins.get(0);
   // FIXME - this has to unload a Long !!!
   pin->state = PUBLISH_PULSE_STOP;
@@ -1157,7 +1276,7 @@ void setSampleRate() {
 
 // SERVO_START_SWEEP
 void servoStartSweep() {
-  MrlServo* s = (MrlServo*)deviceList.get(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
   s->min = ioCmd[2];
   s->max = ioCmd[3];
   s->step = ioCmd[4];
@@ -1167,7 +1286,7 @@ void servoStartSweep() {
 
 // SERVO_STOP_SWEEP
 void servoStopSweep() {
-  MrlServo* s = (MrlServo*)deviceList.get(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
   s->isMoving = false;
   s->isSweeping = false;
 }
@@ -1179,7 +1298,7 @@ void servoEventsEnabled() {
 
 // SERVO_WRITE
 void servoWrite() {
-  MrlServo* s = (MrlServo*)deviceList.get(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
   if (s->speed == 100 && s->servo != 0) {
     // move at regular/full 100% speed
     s->targetPos = ioCmd[2];
@@ -1214,27 +1333,27 @@ void updateDevices() {
     Device* device = deviceList.get(i);
     switch (device->type) {
       case SENSOR_TYPE_ANALOG_PIN_ARRAY: {
-    	  updateAnalogPinArray(device);
+    	  updateAnalogPinArray((MrlAnalogPinArray*)device);
         break;
       }
       case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
-    	  updateDigitalPinArray(device);
+    	  updateDigitalPinArray((MrlDigitalPinArray*)device);
         break;
       }
       case SENSOR_TYPE_PULSE: {
-        updatePulse(device);
+        updatePulse((MrlPulse*)device);
         break;
       }
       case SENSOR_TYPE_ULTRASONIC: {
-    	  updateUltrasonic(device);
+    	  updateUltrasonic((MrlUltrasonic*)device);
         break;
       }
       case DEVICE_TYPE_STEPPER: {
-    	  updateStepper(device);
+    	  updateStepper((MrlStepper*)device);
         break;
       }
       case DEVICE_TYPE_MOTOR: {
-    	  updateMotor(device);
+    	  updateMotor((MrlMotor*)device);
         break;
       }
       case DEVICE_TYPE_SERVO: {
@@ -1242,7 +1361,7 @@ void updateDevices() {
         break;
       }
       case DEVICE_TYPE_I2C: {
-    	  updateI2C(device);
+    	  updateI2C((MrlI2CDevice*)device);
         break;
       }
       default:
@@ -1275,7 +1394,7 @@ void updateStatus() {
 void servoAttach() {
   // TODO: this is completely wrong, we need to create
   // a new device and return it's index.
-  MrlServo* s = (MrlServo*)deviceList.get(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
   s->index = ioCmd[1];
   if (s->servo == NULL) {
     s->servo = new Servo();
@@ -1291,15 +1410,19 @@ void servoAttach() {
 // PUBLISH_SERVO_EVENT
 // FIXME - should be using PUBLISH_SENSOR_DATA
 void publishServoEvent() {
-  Device* s = deviceList.get(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
   s->eventsEnabled = ioCmd[2];
 }
 
 
 /***********************************************************************
  * ATTACH DEVICES BEGIN
+ *
  * MSG STRUCTURE
- * ATTACH_DEVICE|DEVICE_TYPE|CONFIG_MSG_SIZE|DATA0|DATA1|....
+ *        0           1            2          3     4    ....  N
+ * ATTACH_DEVICE|DEVICE_TYPE|CONFIG_MSG_SIZE|DATA0|DATA1|....|DATA(N)
+ *
+ *
  * Device types are defined in org.myrobotlab.service.interface.Device
  * TODO crud Device operations create remove (update not needed?) delete
  * TODO probably need getDeviceId to decode id from Arduino.java - because if its
@@ -1308,40 +1431,42 @@ void publishServoEvent() {
  */
 
 void attachDevice(){
-	// TODO GET SERVICE NAME
+  // we're creating a new device. auto increment it
+  // TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
+  nextDeviceId++;
 	int deviceType   = ioCmd[1];
-	Device* deviceIndex = 0;
+	Device* devicePtr = 0;
 	switch(deviceType){
 	  case SENSOR_TYPE_ANALOG_PIN_ARRAY:{
-		  deviceIndex = attachAnalogPinArray();
+		  devicePtr = attachAnalogPinArray();
 		  break;
 	  }
 	  case SENSOR_TYPE_DIGITAL_PIN_ARRAY:{
-		  deviceIndex = attachDigitalPinArray();
+		  devicePtr = attachDigitalPinArray();
 		  break;
 	  }
     case SENSOR_TYPE_PULSE: {
-      // TODO
+      devicePtr = attachPulse();
       break;
     }
     case SENSOR_TYPE_ULTRASONIC: {
-      // TODO
+      devicePtr = attachUltrasonic();
       break;
     }
     case DEVICE_TYPE_STEPPER: {
-      // TODO
+      devicePtr = attachStepper();
       break;
     }
     case DEVICE_TYPE_MOTOR: {
-      // TODO:
+      devicePtr = attachMotor();
       break;
     }
     case DEVICE_TYPE_SERVO: {
-      attachServo();
+      devicePtr = attachServo();
       break;
     }
     case DEVICE_TYPE_I2C: {
-      // TODO
+      devicePtr = attachI2C();
       break;
     }
 	  default: {
@@ -1349,34 +1474,35 @@ void attachDevice(){
 	    break;
 	  }
 	}
-	publishDeviceAttached(*deviceIndex);
+	publishAttachedDevice(addDevice(devicePtr));
 }
 
 void detachDevice(int index) {
-  // TODO: Implement me to remove / detach a device
-
+  // TODO: more effecient device detach/removal by walking the list
+  // with a pointer
+  int numDevices = deviceList.size();
+  for (int i = 0; i < numDevices; i++) {
+    if (deviceList.get(i)->index == index) {
+      deviceList.remove(i);
+      break;
+    }
+  }
 }
 
-
 Device* attachAnalogPinArray() {
-  Device* pinArray = new Device(SENSOR_TYPE_ANALOG_PIN_ARRAY);
-  // set the device type to analog pin array
-  pinArray->type = SENSOR_TYPE_ANALOG_PIN_ARRAY;
-  // TODO: add the list of pins to the array <-- not necessary until a request to read/poll a pin is received
-  // pinArray.pins
-  // finally, add this to the current deviceList
-  deviceList.add(pinArray);
+  Device* pinArray = new MrlAnalogPinArray(nextDeviceId);
+  // TODO: add the actual pins to this analog pin array.
+  //deviceList.add(pinArray);
   return pinArray;
 }
 
 Device* attachDigitalPinArray() {
-  Device* pinArray = new Device(SENSOR_TYPE_DIGITAL_PIN_ARRAY);
+  Device* pinArray = new MrlDigitalPinArray(nextDeviceId);
   // set the device type to analog pin array
-  pinArray->type = SENSOR_TYPE_DIGITAL_PIN_ARRAY;
   // TODO: add the list of pins to the array <-- not necessary until a request to read/poll a pin is received
   // pinArray.pins
   // finally, add this to the current deviceList
-  deviceList.add(pinArray);
+  //deviceList.add(pinArray);
   return pinArray;
 }
 
@@ -1384,54 +1510,76 @@ Device* attachServo() {
   // TODO: add a new servo device  (pontentally attach it here also?)
   //  int type    = ioCmd[1]; already here
   // TODO : check that we don't already have a servo attached to this pin
- int configSize     = ioCmd[2];
+  int configSize     = ioCmd[2];
   // configSize "should" = 1
   int pinAddress       = ioCmd[3];
   // is this a copy constructor ?
-  MrlServo* device = new MrlServo(DEVICE_TYPE_SERVO);
-  Servo* s = new Servo();
-
-  s->attach(pinAddress);
-  device->servo = s;
-
+  MrlServo* device = new MrlServo(pinAddress, nextDeviceId);
   return device;
 }
 
+Device* attachPulse(){
+  MrlPulse* device = new MrlPulse(nextDeviceId);
+  return device;
+}
+
+Device* attachUltrasonic(){
+  MrlUltrasonic* device = new MrlUltrasonic(nextDeviceId);
+  return device;
+}
+
+Device* attachStepper(){
+  MrlStepper* device = new MrlStepper(nextDeviceId);
+  return device;
+}
+
+Device* attachMotor(){
+  MrlMotor* device = new MrlMotor(nextDeviceId);
+  return device;
+}
+
+Device* attachI2C(){
+  MrlI2CDevice* device = new MrlI2CDevice(nextDeviceId);
+  return device;
+}
+
+
 // TODO: look if we should remove this method.
 void addSensorDataListener() {
-  int sensorIndex    = ioCmd[1];
-  int sensorType     = ioCmd[2];
-  int pinCount       = ioCmd[3];
-  // TODO: the message should pass the list of pins that this sensor uses,
-  // and not assume sequential numbering!
-  // for loop grabbing all pins for this sensor
-  publishDebug("S_ATTACH: " + String(sensorIndex) + " type:" + String(sensorType) + " count:" + String(pinCount));
-  Device* s = new Device(DEVICE_TYPE_SERVO);
-  s->type = DEVICE_TYPE_SERVO;
-  s->index = sensorIndex;
-  LinkedList<Pin*> sensorPins = LinkedList<Pin*>();
-  // TODO: support an arbitrary list of pins being passed in
-  // right now, the pins are contigious
-  for (int ordinal = 0; ordinal < pinCount; ordinal++){
-    publishDebug("PINADD" + String(ordinal) + " TO " + String(pinCount));
-    // TODO: make sure it's the right pin type!
-    int type = SENSOR_TYPE_ANALOG_PIN_ARRAY;
-    Pin* sensorPin = new Pin(type, ordinal);
-    sensorPin->address = ordinal;
-    // TODO: rename this analog/digital ?
-    // sensorPin.deviceType = sensorType;
-    //sensorPin.isActive = true;
-    sensorPins.add(sensorPin);
-    // TODO: special considerations based on the type of sensor to
-    // setup the pins correctly for multi-pin sensors
-  }
-  publishDebug(F("adding pins."));
-  s->pins = sensorPins;
-  publishDebug(F("Adding sensors"));
-  deviceList.add(s);
-  publishDebug("NUM SENS:"+String(deviceList.size()));
-  publishDebug(F("Done with sensor attach."));
 }
+//  int sensorIndex    = ioCmd[1];
+//  int sensorType     = ioCmd[2];
+//  int pinCount       = ioCmd[3];
+//  // TODO: the message should pass the list of pins that this sensor uses,
+//  // and not assume sequential numbering!
+//  // for loop grabbing all pins for this sensor
+//  publishDebug("S_ATTACH: " + String(sensorIndex) + " type:" + String(sensorType) + " count:" + String(pinCount));
+//  Device* s = new Device(DEVICE_TYPE_SERVO);
+//  s->type = DEVICE_TYPE_SERVO;
+//  s->index = sensorIndex;
+//  LinkedList<Pin*> sensorPins = LinkedList<Pin*>();
+//  // TODO: support an arbitrary list of pins being passed in
+//  // right now, the pins are contigious
+//  for (int ordinal = 0; ordinal < pinCount; ordinal++){
+//    publishDebug("PINADD" + String(ordinal) + " TO " + String(pinCount));
+//    // TODO: make sure it's the right pin type!
+//    int type = SENSOR_TYPE_ANALOG_PIN_ARRAY;
+//    Pin* sensorPin = new Pin(type, ordinal);
+//    sensorPin->address = ordinal;
+//    // TODO: rename this analog/digital ?
+//    // sensorPin.deviceType = sensorType;
+//    //sensorPin.isActive = true;
+//    sensorPins.add(sensorPin);
+//    // TODO: special considerations based on the type of sensor to
+//    // setup the pins correctly for multi-pin sensors
+//  }
+//  publishDebug(F("adding pins."));
+//  s->pins = sensorPins;
+//  publishDebug(F("Adding sensors"));
+//  deviceList.add(s);
+//  publishDebug("NUM SENS:"+String(deviceList.size()));
+//  publishDebug(F("Done with sensor attach."));
+//}
 
 // SENSOR_ATTACH
 //void sensorAttach() {
@@ -1502,18 +1650,27 @@ void sendError(int type) {
   Serial.flush();
 }
 
-void publishDeviceAttached(Device& ptr){
-	// PUBLISH_ATTACHED_DEVICE | NAME_STR_SIZE | NAME | NEW_DEVICE_INDEX
-	Serial.write(PUBLISH_ATTACHED_DEVICE);
+/**
+ * PUBLISH_ATTACHED_DEVICE
+ * MSG STRUCTURE
+ * PUBLISH_ATTACHED_DEVICE | NAME_STR_SIZE | NAME | NEW_DEVICE_INDEX
+ *
+ * FIXME - this needs work - got to be consistent on index
+ * we had talked about using ptr - but now we are using index
+ * of the linked list - which works(ish) until a remove is done
+ *
+ */
+void publishAttachedDevice(int deviceIndex){
+	Serial.write(MAGIC_NUMBER);
 	Serial.write(2); // size
   // TODO:  figure how how to format this publish attached.
-	Serial.write(PUBLISH_VERSION);
+	Serial.write(PUBLISH_ATTACHED_DEVICE);
 	int size = ioCmd[2];
 	Serial.write(size);
   for (int i = 0; i  < size; i++) {
     Serial.write(ioCmd[i+2]);
   }
-  Serial.write(ptr.index);
+  Serial.write(deviceIndex);
 	Serial.flush();
 }
 
@@ -1589,7 +1746,7 @@ void publishDebug(String message) {
 
 //========== device update methods begin ==================
 //add pin.rateModulus, some sensor don't need to send back data every each ms
-void updateAnalogPinArray(Device* device) {
+void updateAnalogPinArray(MrlAnalogPinArray* device) {
 	if (device->pins.size() > 0) {
 		Serial.write(MAGIC_NUMBER);
 		Serial.write(2 + device->pins.size() * 2);
@@ -1608,7 +1765,7 @@ void updateAnalogPinArray(Device* device) {
 }
 
 //add pin.rateModulus, some sensor don't need to send back data every each ms
-void updateDigitalPinArray(Device* sensor) {
+void updateDigitalPinArray(MrlDigitalPinArray* sensor) {
 	if (sensor->pins.size() > 0) {
 		Serial.write(MAGIC_NUMBER);
 		Serial.write(2 + sensor->pins.size() * 1);
@@ -1625,7 +1782,7 @@ void updateDigitalPinArray(Device* sensor) {
 	}
 }
 
-void updateUltrasonic(Device* sensor) {
+void updateUltrasonic(MrlUltrasonic* sensor) {
   Pin* pin = sensor->pins.get(0);
   if (pin->state == ECHO_STATE_START) {
     // trigPin prepare - start low for an
@@ -1685,7 +1842,7 @@ void updateUltrasonic(Device* sensor) {
   } // end else if
 }
 
-void updatePulse(Device* sensor) {
+void updatePulse(MrlPulse* sensor) {
   sensor->lastValue = (sensor->lastValue == 0) ? 1 : 0;
   // leading edge ... 0 to 1
   Pin* pin = sensor->pins.get(0);
@@ -1722,13 +1879,15 @@ void updatePulse(Device* sensor) {
 }
 
 void updateServo(MrlServo* servo) {
-  // TODO: implement me. / test This seems to be just for sweeping stuffs?
+  // TODO: implement me. / test This seems to be just for sweeping stuffs? The first part is also use when Servo.speed!=100
+  //It's possible that the servo never reach the targetPos if servo->step!=1
   if (servo->isMoving && servo->servo != 0) {
     if (servo->currentPos != servo->targetPos) {
       // caclulate the appropriate modulus to drive
       // the servo to the next position
       // TODO - check for speed > 0 && speed < 100 - send ERROR back?
       int speedModulus = (100 - servo->speed) * 10;
+      // speed=99 will not be 99% of speed=100
       if (loopCount % speedModulus == 0) {
         int increment = servo->step * ((servo->currentPos < servo->targetPos) ? 1 : -1);
         // move the servo an increment
@@ -1751,19 +1910,19 @@ void updateServo(MrlServo* servo) {
       }
     }
   }
-
-
 }
 
-void updateStepper(Device* stepper) {
+void updateStepper(MrlStepper* stepper) {
   // TODO: implement me
 }
 
-void updateMotor(Device* stepper) {
+void updateMotor(MrlMotor* motor) {
   // TODO: implement me
 }
 
-void updateI2C(Device* device) {
-
+void updateI2C(MrlI2CDevice* device) {
+  // Nothing to implement for now
+  // MRLComm acts as a master and a slave can never initiate
+  // communication. It only responds to the master.
 }
 //========== device update methods end ==================
