@@ -781,8 +781,7 @@ unsigned long toUnsignedLongfromBigEndian(unsigned char* buffer, int start) {
           (buffer[start + 2] << 8) + buffer[start + 3]);
 }
 
-int getFreeRam()
-{
+int getFreeRam() {
   extern int __heap_start, *__brkval;
   int v;
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
