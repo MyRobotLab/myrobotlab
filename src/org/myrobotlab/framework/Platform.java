@@ -135,7 +135,7 @@ public class Platform implements Serializable {
 
       // TODO - ProcParser
 
-      System.out.println(sb.toString());
+      // System.out.println(sb.toString());
 
       localInstance = platform;
     }

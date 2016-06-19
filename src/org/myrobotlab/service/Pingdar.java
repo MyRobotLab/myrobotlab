@@ -93,10 +93,13 @@ public class Pingdar extends Service {
 
     arduino.connect(port);
 
+    // TODO - FIX ME
+    /*
     if (!sensor.attach(port, trigPin, echoPin)) {
       error("could not attach sensor");
       return false;
     }
+    */
 
     // FIXME sensor.addRangeListener
     // publishRange --> onRange

@@ -172,8 +172,8 @@ public class AdafruitIna219 extends Service {
 	boolean setDeviceAddress(String DeviceAddress) {
 		if (controller != null) {
 			if (deviceAddress != DeviceAddress) {
-				controller.releaseDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
+				controller.releaseI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
 			}
 		}
 

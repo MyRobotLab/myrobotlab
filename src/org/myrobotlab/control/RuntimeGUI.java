@@ -184,7 +184,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
     }
 
     @Override
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+    public Component getListCellRendererComponent(@SuppressWarnings("rawtypes") JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
       ServiceInterface entry = (ServiceInterface) value;
       setText("<html><font color=#" + Style.listBackground + ">" + entry.getName() + "</font></html>");
 

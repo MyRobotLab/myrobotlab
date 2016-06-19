@@ -23,36 +23,12 @@ public class AnalogPinSensor implements SensorDataPublisher {
     return "A" + pin;
   }
 
-  @Override
-  public int[] getSensorConfig() {
-    // one pin.
-    return new int[]{pin};
-    
-  }
 
   @Override
   public SensorData publishSensorData(SensorData data) {
     return data;
   }
 
-  @Override
-  public void start() {
-    // TODO Auto-generated method stub
-    // here we should start/stop analog polling for our pin..
-    // the arduino ...  Maybe these life cycle methods shouldn't be here?
-  }
-
-  @Override
-  public void stop() {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void update(Object data) {
-    // TODO Auto-generated method stub
-    
-  }
 
   @Override
   public void addSensorDataListener(SensorDataListener listener) {
@@ -60,24 +36,6 @@ public class AnalogPinSensor implements SensorDataPublisher {
     
   }
 
-  @Override
-  public String getSensorType() {
-    // TODO replace this with an ENUM ...
-    return "ANALOG_PIN";
-  }
-
-  @Override
-  public void attach(Microcontroller controller) {
-    // TODO: here we want to register our pin with the controller
-    // hmm.. what to do here?  this feels a little inverted for the interfaces.
-    controller.sensorAttach(this);
-  }
-
-  @Override
-  public void detach() {
-    // TODO Auto-generated method stub
-    
-  }
 
   public int getPin() {
     return pin;

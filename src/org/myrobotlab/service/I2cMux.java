@@ -26,11 +26,11 @@ import org.slf4j.Logger;
  * More Info : https://www.adafruit.com/product/2717
  * 
  */
-public class I2CMux extends Service implements I2CControl {
+public class I2cMux extends Service implements I2CControl {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(I2CMux.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(I2cMux.class.getCanonicalName());
 
 	transient I2CControl controller;
 
@@ -54,7 +54,7 @@ public class I2CMux extends Service implements I2CControl {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		try {
-			I2CMux i2cMux = (I2CMux) Runtime.start("i2cMux", "I2CMux");
+			I2cMux i2cMux = (I2cMux) Runtime.start("i2cMux", "I2CMux");
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {
@@ -62,7 +62,7 @@ public class I2CMux extends Service implements I2CControl {
 		}
 	}
 
-	public I2CMux(String n) {
+	public I2cMux(String n) {
 		super(n);
 		
 		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
@@ -91,8 +91,8 @@ public class I2CMux extends Service implements I2CControl {
 		broadcastState();
   }
 	
-	public void createDevice(int busAddress, int deviceAddress, String type) {
-				controller.createDevice(busAddress, deviceAddress, type);
+	public void createI2cDevice(int busAddress, int deviceAddress, String type) {
+				controller.createI2cDevice(busAddress, deviceAddress, type);
 	}
 	
 	/**
@@ -161,8 +161,8 @@ public class I2CMux extends Service implements I2CControl {
 	}
 
 	@Override
-	public void releaseDevice(int busAddress, int deviceAddress) {
-			controller.releaseDevice(busAddress, deviceAddress);
+	public void releaseI2cDevice(int busAddress, int deviceAddress) {
+			controller.releaseI2cDevice(busAddress, deviceAddress);
 	}
 
 	public void setMuxBus(int deviceBus) {
@@ -205,7 +205,7 @@ public class I2CMux extends Service implements I2CControl {
 	 */
 	static public ServiceType getMetaData() {
 
-		ServiceType meta = new ServiceType(I2CMux.class.getCanonicalName());
+		ServiceType meta = new ServiceType(I2cMux.class.getCanonicalName());
 		meta.addDescription("Multiplexer for i2c to be able to use multiple i2c devices");
 		meta.addCategory("i2c", "control");
     meta.setAvailable(true);

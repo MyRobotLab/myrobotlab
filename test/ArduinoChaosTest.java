@@ -41,6 +41,7 @@ public class ArduinoChaosTest {
 
     arduino.board= board;
     arduino.connect("COM30");
+   
 
     // let the board connect
     Thread.sleep(2000);
@@ -57,9 +58,9 @@ public class ArduinoChaosTest {
     // Start testing the functions one by one to make sure we're worky!
     
     // debug enable/disable first.
-    arduino.enableMRLCommDebug();
+    arduino.setDebug(true);
     Thread.sleep(1000);
-    arduino.disableMRLCommDebug();
+    arduino.setDebug(false);
     Thread.sleep(1000);
     // Now iterate all of the possible commands
     
@@ -154,10 +155,10 @@ public class ArduinoChaosTest {
     
     Thread.sleep(1000);
     AnalogPinSensor s = new AnalogPinSensor(3, 2);
-    arduino.sensorAttach(s);
+    // arduino.sensorAttach(s);
     Thread.sleep(1000);
     // ?!
-    arduino.sensorPollingStart("A0", 123);
+    // arduino.sensorPollingStart("A0", 123);
     Thread.sleep(1000);
     arduino.sensorPollingStop("A0");
     

@@ -2,6 +2,10 @@ package org.myrobotlab.service.data;
 
 public class SensorData {
 
-  public int value;
-  
+	public int[] data;
+	
+	public SensorData(int[] data) {
+		this.data = data;
+	}
+
 }

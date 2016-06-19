@@ -40,7 +40,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.AdafruitIna219;
-import org.myrobotlab.service.I2CMux;
+import org.myrobotlab.service.I2cMux;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
@@ -62,11 +62,11 @@ public class I2CMuxGUI extends ServiceGUI implements ActionListener {
 	JLabel deviceBusLabel     = new JLabel("Bus");
 	JLabel deviceAddressLabel = new JLabel("Address");
 	
-	I2CMux boundService = null;
+	I2cMux boundService = null;
 
 	public I2CMuxGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
-		boundService = (I2CMux) Runtime.getService(boundServiceName);
+		boundService = (I2cMux) Runtime.getService(boundServiceName);
 	}
 
 	@Override
@@ -89,16 +89,16 @@ public class I2CMuxGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void attachGUI() {
-		subscribe("publishState", "getState", I2CMux.class);
+		subscribe("publishState", "getState", I2cMux.class);
 		send("publishState");
 	}
 
 	@Override
 	public void detachGUI() {
-		unsubscribe("publishState", "getState", I2CMux.class);
+		unsubscribe("publishState", "getState", I2cMux.class);
 	}
 
-	public void getState(I2CMux i2cMux) {
+	public void getState(I2cMux i2cMux) {
 
 		refreshControllers();
 		controller.setSelectedItem(i2cMux.getControllerName());
