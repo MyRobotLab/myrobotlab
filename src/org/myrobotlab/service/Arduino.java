@@ -310,13 +310,13 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	HashMap<Integer, ServoData> servoIndex = new HashMap<Integer, ServoData>();
 
 	/**
-	 * sensors - name index of sensor we need 2 indexes for sensors because they
+	 * Devices - string name index of device we need 2 indexes for sensors because they
 	 * will be referenced by name OR by index
 	 */
 	HashMap<String, DeviceMapping> deviceList = new HashMap<String, DeviceMapping>();
 
 	/**
-	 * index reference of sensor
+	 * index reference of sensor,  key is the MRLComm device index
 	 */
 	HashMap<Integer, DeviceMapping> deviceIndex = new HashMap<Integer, DeviceMapping>();
 
