@@ -536,7 +536,6 @@ class Pin {
     int rate;
     // remove me,
     int rateModulus;
-
 };
 
 /***********************************************************************
@@ -750,6 +749,7 @@ void setup() {
   // TODO: see if we can purge the current serial port buffers
   publishVersion();
   // TODO: see if we can publish the board type (uno/mega?)
+  // publishBoardType();
 }
 
 // This is the main loop that the arduino runs.
