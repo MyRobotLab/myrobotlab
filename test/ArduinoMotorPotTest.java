@@ -132,7 +132,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     // we actually want it to be specified in Hz..  not cycles ...
     AnalogPinSensor feedbackPot = new AnalogPinSensor(0,1);
     feedbackPot.addSensorDataListener(this);
-    arduino.sensorAttach(feedbackPot);
+    // arduino.sensorAttach(feedbackPot);
     
     if (enableLoadTiming) {
       arduino.setLoadTimingEnabled(true);
@@ -148,13 +148,13 @@ public class ArduinoMotorPotTest implements SensorDataListener {
   public void onSensorData(SensorData data) {
     // about we downsample this call?
     count++;
-    
+    int value = data.data[0];
     log.info("Data: {}", data);
-    pid.setInput(key,data.value);
+    pid.setInput(key, value);
     pid.compute(key);
     double output = pid.getOutput(key);
     log.info("Data {} , Output : {}", data, output);
-    if (Math.abs(pid.getSetpoint(key) - data.value) > tolerance) {
+    if (Math.abs(pid.getSetpoint(key) - value) > tolerance) {
       // log.info("Setting pin mode as a test.");
      //  arduino.pinMode(6,0);
      // arduino.analogWrite(6, 0);
@@ -304,6 +304,24 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     }
     return sb.toString();
   }
+
+@Override
+public Integer getDeviceType() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public int[] getDeviceConfig() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public void update(SensorData data) {
+	// TODO Auto-generated method stub
+	
+}
 
 }
 

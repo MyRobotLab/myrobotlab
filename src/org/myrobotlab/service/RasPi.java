@@ -127,7 +127,7 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	// FIXME - create low level I2CDevice
-	public void createDevice(int busAddress, int deviceAddress, String type) {
+	public void createI2cDevice(int busAddress, int deviceAddress, String type) {
 
 		try {
 			I2CDevice device = i2c.getDevice(deviceAddress);
@@ -169,7 +169,7 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	@Override
-	public void releaseDevice(int busAddress, int deviceAddress) {
+	public void releaseI2cDevice(int busAddress, int deviceAddress) {
 
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		devices.remove(key);

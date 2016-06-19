@@ -41,6 +41,7 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.interfaces.Device;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
@@ -62,7 +63,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Motor.class.toString());
+  public final static Logger log = LoggerFactory.getLogger(Motor.class);
 
   // //////////////// Motor Types Begin
   // ////////////////////////////////////////
@@ -344,33 +345,14 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
     return position;
   }
 
-  // Perhaps shoulb be updateSensor
-  @Override
-  public void update(Object data) {
-    invoke("updatePosition", data);
-  }
 
-//  @Override
-//  public String getDataSinkType() {
-//    // other data types available if needed
-//    return "INTEGER_SENSOR";
-//  }
-
-  @Override
-  public String getSensorType() {
-    if (type != null && type.equals(TYPE_PULSE_STEP)) {
-      return "PULSE_PIN";
-    } else {
-      return "DIGITAL_PIN";
-    }
-  }
-
+ 
   public MotorController getController() {
     return controller;
   }
 
   @Override
-  public int[] getSensorConfig() {
+  public int[] getDeviceConfig() {
     if (type.equals(TYPE_PULSE_STEP)) {
       // pulse step only needs the pwm pin
       return new int[] { pinMap.get(PIN_TYPE_PWM) };
@@ -581,34 +563,34 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
   }
 
-  @Override
-  public SensorData publishSensorData(SensorData data) {
-    // TODO Auto-generated method stub
-    return null;
-  }
+@Override
+public SensorData publishSensorData(SensorData data) {
+	// TODO Auto-generated method stub
+	return null;
+}
 
-  @Override
-  public void addSensorDataListener(SensorDataListener listener) {
-    // TODO Auto-generated method stub
-    
-  }
+@Override
+public void addSensorDataListener(SensorDataListener listener) {
+	// TODO Auto-generated method stub
+	
+}
 
-  @Override
-  public void attach(Microcontroller controller) {
-    // TODO Auto-generated method stub
-    
-  }
+@Override
+public Integer getDeviceType() {
+	return Device.DEVICE_TYPE_MOTOR;
+}
 
-  @Override
-  public void start() {
-    // TODO Auto-generated method stub
-    
-  }
+@Override
+public void update(SensorData data) {
+	// TODO Auto-generated method stub
+	
+}
 
-  @Override
-  public void onSensorData(SensorData data) {
-    // TODO Auto-generated method stub
-    
-  }
+@Override
+public void onSensorData(SensorData data) {
+	// TODO Auto-generated method stub
+	
+}
+
 
 }

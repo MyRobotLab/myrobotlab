@@ -18,7 +18,7 @@ public interface I2CControl {
 	 * @param type
 	 * 
 	 */
-	void createDevice(int busAddress, int deviceAddress, String type);
+	void createI2cDevice(int busAddress, int deviceAddress, String type);
 
 	/**
 	 * This method returns and already existing I2CDevice
@@ -28,7 +28,7 @@ public interface I2CControl {
 	 *          local address in the i2c device
 	 * 
 	 */
-	void releaseDevice(int busAddress, int deviceAddress);
+	void releaseI2cDevice(int busAddress, int deviceAddress);
 
 	/**
 	 * This method writes several bytes to the i2c device from given buffer.

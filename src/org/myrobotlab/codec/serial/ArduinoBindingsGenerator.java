@@ -31,6 +31,7 @@ public class ArduinoBindingsGenerator {
 
   static StringBuilder javaDefines = new StringBuilder("\t///// java ByteToMethod generated definition - DO NOT MODIFY - Begin //////\n");
   static StringBuilder javaBindingsInit = new StringBuilder();
+  static StringBuilder javaFunctionToString = new StringBuilder();
 
   /**
    * called for each method - java method is the "source" of reflected data so
@@ -62,10 +63,12 @@ public class ArduinoBindingsGenerator {
     javaDefines.append(String.format("\tpublic final static int %s =\t\t%d;\n\n", underscore, index));
     javaBindingsInit.append(String.format("\t\tbyteToMethod.put(%s,\"%s\");\n", underscore, method.getName()));
     javaBindingsInit.append(String.format("\t\tmethodToByte.put(\"%s\",%s);\n\n", method.getName(), underscore));
-
+    
+    javaFunctionToString.append(String.format("\tcase ArduinoMsgCodec.%s:{\n\t\treturn \"%s\";\n\n\t}\n", underscore ,underscore));
+  
   }
 
-  /**
+  /**)
    * master method which gets source material for generating msg bindings - the
    * source is the Arduino class itself - its method should have a near 1 to 1
    * relation to the msgs sent to and from MRLComm.ino These msgs are examined
@@ -77,11 +80,12 @@ public class ArduinoBindingsGenerator {
 
     HashMap<String, String> snr = new HashMap<String, String>();
 
-    Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+    Arduino arduino = (Arduino) Runtime.create("arduino", "Arduino");
     Method[] m = arduino.getDeclaredMethods();
     for (int i = 0; i < m.length; ++i) {
       // String signature = Encoder.getMethodSignature(m[i]);
       Method method = m[i];
+    
       StringBuilder msb = new StringBuilder(m[i].getName());
       Class<?>[] params = method.getParameterTypes();
       for (int j = 0; j < params.length; ++j) {
@@ -107,12 +111,14 @@ public class ArduinoBindingsGenerator {
     HashSet<String> exclude = new HashSet<String>();
 
     // filter out methods which do not get relayed
-    // to the Arduino
-    exclude.add("addCustomMsgListener");
+    // from Arduino to MRLComm or Back
+    // these are all methods 'only' used in Java-Land
+    // exclude.add("addCustomMsgListener");
     exclude.add("connect");
     exclude.add("disconnect");
     exclude.add("getDescription");
     exclude.add("createPinList");
+    
     exclude.add("getServoIndex");
     exclude.add("getBoardType");
     exclude.add("getCategories");
@@ -138,9 +144,11 @@ public class ArduinoBindingsGenerator {
 
     // additionally force getversion and publishMRLCommError
     // so that mis-matches of version are quickly reported...
+    
     exclude.add("getVersion");
     exclude.add("publishVersion");
     exclude.add("publishMRLCommError");
+    
     // except.add("E");
 
     // getter & setters
@@ -171,9 +179,12 @@ public class ArduinoBindingsGenerator {
 
     exclude.add("createVirtual");
     exclude.add("getMetaData");
+    exclude.add("processMessage");
 
     int index = 0;
 
+    // forcing 3 methods to be always the same index publishMRLCommError 0, getVersion 2 publishVersion 3
+    // that way you can get a meaningful error if you have the wrong version or mrlcomm
     ++index;
     createBindingsFor("publishMRLCommError", index);
     ++index;
@@ -187,6 +198,7 @@ public class ArduinoBindingsGenerator {
         continue;
       }
 
+   
       createBindingsFor(key, index);
 
       ++index;
@@ -199,6 +211,9 @@ public class ArduinoBindingsGenerator {
     snr.put("<%=javaStaticImports%>", javaStaticImports.toString());
     snr.put("<%=java.defines%>", javaDefines.toString());
     snr.put("<%=java.bindings.init%>", javaBindingsInit.toString());
+    snr.put("<%=javaFunctionToString%>", javaFunctionToString.toString());
+    
+    
     snr.put("<%=mrlcomm.defines%>", inoTemplate.toString());
     snr.put("<%=python.defines%>", pythonTemplate.toString());
 
@@ -206,9 +221,9 @@ public class ArduinoBindingsGenerator {
     log.info(javaBindingsInit.toString());
 
     // file template filtering
-    String java = FileIO.resourceToString("Arduino/ArduinoMsgCodec.txt");
-    String python = FileIO.resourceToString("Arduino/pythonTemplate.txt");
-    String MRLComm = FileIO.resourceToString("Arduino/MRLComm.txt");
+    String java = FileIO.toString("src/resource/generate/ArduinoMsgCodec.txt");
+    String python = FileIO.toString("src/resource/generate/pythonTemplate.txt");
+    String MRLComm = FileIO.toString("src/resource/generate/MRLComm.txt");
 
     // merge data with template
     for (String key : snr.keySet()) {
@@ -220,7 +235,7 @@ public class ArduinoBindingsGenerator {
 
     long ts = System.currentTimeMillis();
     FileIO.toFile(String.format("ArduinoMsgCodec.%d.py", ts), python);
-    FileIO.toFile(String.format("ArduinoMsgCodec.%d.java", ts), java);
+    FileIO.toFile(String.format("ArduinoMsgCodec.java", ts), java);
     FileIO.toFile(String.format("ArduinoMsgCodec.%d.ino", ts), MRLComm);
 
     // String ret = String.format("%s\n\n%s", ino.toString(),

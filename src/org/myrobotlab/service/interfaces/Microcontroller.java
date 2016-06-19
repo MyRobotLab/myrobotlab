@@ -1,13 +1,10 @@
 package org.myrobotlab.service.interfaces;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.data.Pin;
 
-public interface Microcontroller {
+public interface Microcontroller extends NameProvider {
 
   // connectivity
   public void connect(String port);
@@ -19,6 +16,8 @@ public interface Microcontroller {
   public Integer getVersion();
   public List<Pin> getPinList();
   
-  public boolean sensorAttach(SensorDataPublisher sensor);
+  public void attachDevice(Device device) throws Exception;
+  public void sensorPollingStart(String nameToIndex);
+  public void sensorPollingStop(String nameToIndex);
   
 }

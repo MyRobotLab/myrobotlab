@@ -222,8 +222,8 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	boolean SetDeviceAddress(String deviceAddress){
 		if (controller != null) {
 			if (this.deviceAddress != deviceAddress) {
-				controller.releaseDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
+				controller.releaseI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
 			}
 		}
 		log.info(String.format("Setting device address to %s", deviceAddress));
@@ -384,7 +384,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		if (controler == "Arduino") {
 			begin();
 		} else {
-			raspi.createDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
+			raspi.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
 		}
 
 		return true;

@@ -8,9 +8,10 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.data.OculusData;
-import org.myrobotlab.service.interfaces.CustomMsgListener;
+import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.OculusDataListener;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
+import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -19,181 +20,199 @@ import org.slf4j.Logger;
  * build of MRLComm to work. Check with \@Alessandruino for questions.
  *
  */
-public class OculusDIY extends Service implements CustomMsgListener, OculusDataPublisher, OculusDataListener {
+public class OculusDIY extends Service implements SensorDataListener, OculusDataPublisher, OculusDataListener {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OculusDIY.class);
+	public final static Logger log = LoggerFactory.getLogger(OculusDIY.class);
 
-  transient public Arduino arduino;
+	transient public Arduino arduino;
 
-  OculusData oculus = new OculusData();
-  Mapper mapperPitch = new Mapper(-180, 0, 0, 180);
-  Mapper mapperYaw = new Mapper(-180, 180, 0, 360);
+	OculusData oculus = new OculusData();
+	Mapper mapperPitch = new Mapper(-180, 0, 0, 180);
+	Mapper mapperYaw = new Mapper(-180, 180, 0, 360);
 
-  Integer lastrotheadvalue = 90;
-  Integer lastValue = 30;
-  Integer resetValue = 30;
-  Integer head = 90;
-  Integer rothead = 90;
-  Integer offSet = 0;
-  Integer centerValue = 200;
-  Integer minHead = -50;
-  Integer maxHead = 500;
-  Integer lastValue2 = 200;
-  Integer bicep = 5;
-  Integer headingint = 90;
+	Integer lastrotheadvalue = 90;
+	Integer lastValue = 30;
+	Integer resetValue = 30;
+	Integer head = 90;
+	Integer rothead = 90;
+	Integer offSet = 0;
+	Integer centerValue = 200;
+	Integer minHead = -50;
+	Integer maxHead = 500;
+	Integer lastValue2 = 200;
+	Integer bicep = 5;
+	Integer headingint = 90;
 
-  public OculusDIY(String n) {
-    super(n);
-    arduino = (Arduino) createPeer("arduino");
-  }
+	public OculusDIY(String n) {
+		super(n);
+		arduino = (Arduino) createPeer("arduino");
+	}
 
-  // public void onCustomMsg(Integer ay, Integer mx, Integer headingint) {
-  @Override
-  public void onCustomMsg(Object[] data) {
-    Integer ay = (Integer) data[0];
-    Integer mx = (Integer) data[1];
-    Integer headingint = (Integer) data[2];
-    this.computeAngles(mx, headingint, ay);
+	public void calibrate() {
+		resetValue = lastValue;
+		offSet = (90 - lastValue);
 
-    oculus.yaw = Double.valueOf(rothead);
-    oculus.pitch = Double.valueOf(head);
-    oculus.roll = Double.valueOf(bicep);
-    invoke("publishOculusData", oculus);
+		centerValue = lastValue2;
+		minHead = centerValue - 300;
+		maxHead = centerValue + 300;
+	}
 
-    System.out.println(head + "," + rothead);
+	public void computeAngles(Integer mx, Integer headingint, Integer ay) {
 
-  }
+		lastValue2 = mx;
+		double y = mx;
+		double x = (20 + (((y - minHead) / (maxHead - minHead)) * (160 - 20)));
+		head = (int) x;
 
-  public void calibrate() {
-    resetValue = lastValue;
-    offSet = (90 - lastValue);
+		lastValue = headingint;
+		if (resetValue > 90 && lastValue < 0) {
+			rothead = (offSet + headingint + 360);
+		} else if (resetValue < -90 && lastValue > 0) {
+			rothead = (offSet + headingint - 360);
+		} else {
+			rothead = (offSet + headingint);
+		}
+		System.out.println("difference is" + Math.abs(rothead - lastrotheadvalue));
+		if (Math.abs(rothead - lastrotheadvalue) > 2) {
+			lastrotheadvalue = rothead;
+		} else {
+			rothead = lastrotheadvalue;
+		}
 
-    centerValue = lastValue2;
-    minHead = centerValue - 300;
-    maxHead = centerValue + 300;
-  }
+		y = ay;
+		x = (85 + (((y - 20) / (-16000 - 20)) * (5 - 85)));
+		bicep = (int) x;
 
-  public void computeAngles(Integer mx, Integer headingint, Integer ay) {
+	}
 
-    lastValue2 = mx;
-    double y = mx;
-    double x = (20 + (((y - minHead) / (maxHead - minHead)) * (160 - 20)));
-    head = (int) x;
+	public void computeAnglesAndroid(float yaw, float roll, float pitch) {
 
-    lastValue = headingint;
-    if (resetValue > 90 && lastValue < 0) {
-      rothead = (offSet + headingint + 360);
-    } else if (resetValue < -90 && lastValue > 0) {
-      rothead = (offSet + headingint - 360);
-    } else {
-      rothead = (offSet + headingint);
-    }
-    System.out.println("difference is" + Math.abs(rothead - lastrotheadvalue));
-    if (Math.abs(rothead - lastrotheadvalue) > 2) {
-      lastrotheadvalue = rothead;
-    } else {
-      rothead = lastrotheadvalue;
-    }
+		// head = (int) (180.0 +(((az - 9.82)/(-9.82 - 9.82))*(0.0 - 180.0)));
+		head = (int) mapperPitch.calc(pitch);
+		// headingint = (int) mapperYaw.calc(yaw);
+		headingint = (int) yaw;
 
-    y = ay;
-    x = (85 + (((y - 20) / (-16000 - 20)) * (5 - 85)));
-    bicep = (int) x;
+		lastValue = headingint;
+		if (resetValue > 90 && lastValue < 0) {
+			rothead = (offSet + headingint + 360);
+		} else if (resetValue < -90 && lastValue > 0) {
+			rothead = (offSet + headingint - 360);
+		} else {
+			rothead = (offSet + headingint);
+		}
+		System.out.println("difference is" + Math.abs(rothead - lastrotheadvalue));
+		if (Math.abs(rothead - lastrotheadvalue) > 2) {
+			lastrotheadvalue = rothead;
+		} else {
+			rothead = lastrotheadvalue;
+		}
 
-  }
+		oculus.pitch = Double.valueOf(head);
+		oculus.yaw = Double.valueOf(rothead);
+		oculus.roll = Double.valueOf(roll);
+		invoke("publishOculusData", oculus);
 
-  public void computeAnglesAndroid(float yaw, float roll, float pitch) {
+		System.out.println("pitch is " + head + "yaw is " + rothead);
 
-    // head = (int) (180.0 +(((az - 9.82)/(-9.82 - 9.82))*(0.0 - 180.0)));
-    head = (int) mapperPitch.calc(pitch);
-    // headingint = (int) mapperYaw.calc(yaw);
-    headingint = (int) yaw;
+	}
 
-    lastValue = headingint;
-    if (resetValue > 90 && lastValue < 0) {
-      rothead = (offSet + headingint + 360);
-    } else if (resetValue < -90 && lastValue > 0) {
-      rothead = (offSet + headingint - 360);
-    } else {
-      rothead = (offSet + headingint);
-    }
-    System.out.println("difference is" + Math.abs(rothead - lastrotheadvalue));
-    if (Math.abs(rothead - lastrotheadvalue) > 2) {
-      lastrotheadvalue = rothead;
-    } else {
-      rothead = lastrotheadvalue;
-    }
+	public OculusData publishOculusData(OculusData oculus) {
+		return oculus;
 
-    oculus.pitch = Double.valueOf(head);
-    oculus.yaw = Double.valueOf(rothead);
-    oculus.roll = Double.valueOf(roll);
-    invoke("publishOculusData", oculus);
+	}
 
-    System.out.println("pitch is " + head + "yaw is " + rothead);
+	public void addOculusDataListener(Service service) {
+		addListener("publishOculusData", service.getName(), "onOculusData");
+	}
 
-  }
+	public OculusData onOculusData(OculusData oculus) {
+		return oculus;
+	}
 
-  public OculusData publishOculusData(OculusData oculus) {
-    return oculus;
+	@Override
+	public void startService() {
+		super.startService();
+		arduino = (Arduino) startPeer("arduino");
+		arduino.addSensorDataListener(this);
+		return;
+	}
 
-  }
+	public Arduino getArduino() {
+		return arduino;
+	}
 
-  public void addOculusDataListener(Service service) {
-    addListener("publishOculusData", service.getName(), "onOculusData");
-  }
+	public void connect(String port) {
+		arduino.connect(port);
+	}
 
-  public OculusData onOculusData(OculusData oculus) {
-    return oculus;
-  }
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
 
-  @Override
-  public void startService() {
-    super.startService();
-    arduino = (Arduino) startPeer("arduino");
-    arduino.addCustomMsgListener(this);
-    return;
-  }
+		try {
 
-  public Arduino getArduino() {
-    return arduino;
-  }
+			// OculusDIY oculus = (OculusDIY) Runtime.start("oculus",
+			// "OculusDIY");
+			Runtime.start("python", "Python");
+			Runtime.start("gui", "GUIService");
+			// oculus.connect("COM15");
 
-  public void connect(String port) {
-    arduino.connect(port);
-  }
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
 
-  public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
 
-    try {
+		ServiceType meta = new ServiceType(OculusDIY.class.getCanonicalName());
+		meta.addDescription("Service to receive and compute data from a DIY Oculus");
+		meta.addCategory("video", "control", "sensor");
+		meta.addPeer("arduino", "Arduino", "Arduino for DIYOculus and Myo");
+		return meta;
+	}
 
-      // OculusDIY oculus = (OculusDIY) Runtime.start("oculus", "OculusDIY");
-      Runtime.start("python", "Python");
-      Runtime.start("gui", "GUIService");
-      // oculus.connect("COM15");
+	@Override
+	public Integer getDeviceType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
+	@Override
+	public int[] getDeviceConfig() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
+	@Override
+	public void update(SensorData sd) {
+		int[] data = sd.data;
+		Integer ay = (Integer) data[0];
+		Integer mx = (Integer) data[1];
+		Integer headingint = (Integer) data[2];
+		this.computeAngles(mx, headingint, ay);
 
-    ServiceType meta = new ServiceType(OculusDIY.class.getCanonicalName());
-    meta.addDescription("Service to receive and compute data from a DIY Oculus");
-    meta.addCategory("video", "control", "sensor");
-    meta.addPeer("arduino", "Arduino", "Arduino for DIYOculus and Myo");
-    return meta;
-  }
+		oculus.yaw = Double.valueOf(rothead);
+		oculus.pitch = Double.valueOf(head);
+		oculus.roll = Double.valueOf(bicep);
+		invoke("publishOculusData", oculus);
+
+		System.out.println(head + "," + rothead);
+	}
+
+	@Override
+	public void onSensorData(SensorData data) {
+		// TODO Auto-generated method stub
+
+	}
 
 }
