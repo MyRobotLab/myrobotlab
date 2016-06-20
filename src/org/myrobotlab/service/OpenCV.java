@@ -874,4 +874,12 @@ public class OpenCV extends VideoSource {
     return meta;
   }
 
+  public boolean isStreamerEnabled() {
+    return streamerEnabled;
+  }
+
+  public void setStreamerEnabled(boolean streamerEnabled) {
+    this.streamerEnabled = streamerEnabled;
+  }
+
 }
