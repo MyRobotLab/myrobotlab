@@ -289,7 +289,10 @@
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/webcam-capture-0.3.10.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/bridj-0.6.2.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/sosia.jar"/>
-		
+	
+                <!-- MJpeg frame grabber -->
+		<pathelement location="${repo}/net.sf.jipcam/0.9.1/jipcam-0.9.1.jar"/>
+	
 		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-arch-x86_64-w64-mingw32.jar"/>
 		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-noarch-5.4.jar"/>
 		<pathelement location="${repo}/com.coobird.thumbnail/0.4.2/thumbnailator-0.4.2-all.jar"/>
