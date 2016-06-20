@@ -755,9 +755,14 @@ public class OpenCV extends VideoSource {
 
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     // Runtime.start("right", "OpenCV");
-    opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
+   // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
+    opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
+
     // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
-    opencv.setInputSource(INPUT_SOURCE_CAMERA);
+    // opencv.setInputSource(INPUT_SOURCE_CAMERA);
+    opencv.setInputSource(INPUT_SOURCE_NETWORK);
+//    opencv.setInputFileName("http://192.168.4.112:8080/?action=stream");
+    opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
     // opencv.addFilter("facerec", "FaceRecognizer");
 
@@ -772,7 +777,7 @@ public class OpenCV extends VideoSource {
 
     // VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
     // vs.attach(opencv);
-    // opencv.capture();
+    opencv.capture();
     // opencvLeft.capture();
     // opencvRight.capture();
 
