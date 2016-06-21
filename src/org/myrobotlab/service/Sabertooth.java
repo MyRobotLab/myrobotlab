@@ -150,24 +150,7 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 
 	// ----------MotorController Interface Begin --------------
 
-	/**
-	 * Motor Controller specific method for attaching a motor In the case of a
-	 * SaberTooth - we will need the motor name (of course) and the motor port
-	 * number - SaberTooth supports 2 (M1 & M2)
-	 * 
-	 * @param motorName
-	 * @param motorPort
-	 * @return
-	 */
 
-	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin) {
-		return motorAttach(motorName, pwrPin, dirPin, null);
-	}
-
-	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin, Integer encoderPin) {
-		error("motorAttach with pins not supported");
-		return false;
-	}
 
 	// FIXME - this seems very Arduino specific?
 
@@ -298,16 +281,7 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 
 	// --- MotorController interface end ----
 
-	@Override
-	public void attach(String name) throws MRLException {
-		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public void detach(String name) {
-		// TODO Auto-generated method stub
-	}
 
 	@Override
 	public void motorMove(MotorControl motor) {
@@ -383,11 +357,6 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 		return meta;
 	}
 
-	@Override
-	public void motorAttach(String name, int portNumber) {
-		motorAttach((MotorControl) Runtime.getService(name), portNumber);
-	}
-
 	public void motorAttach(MotorControl motor, int portNumber) {
 		MotorData data = new MotorData();
 		data.motor = motor;
@@ -426,8 +395,8 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 			Motor motor01 = (Motor) Runtime.start("motor01", "Motor");
 			Motor motor02 = (Motor) Runtime.start("motor02", "Motor");
 
-			mc.motorAttach(motor01, 1);
-			mc.motorAttach(motor02, 1);
+			mc.attach(motor01);
+			mc.attach(motor02);
 
 			motor01.move(0);
 			motor01.move(0.15);
@@ -477,15 +446,45 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	}
 
 	@Override
-	public void attachDevice(Device device) throws Exception {
+	public void attach(String name) throws MRLException {
 		// TODO Auto-generated method stub
-		// TODO - attach MotorControl - you got 2 ports on this thing
+
 	}
 
 	@Override
-	public void detachDevice(Device device) {
+	public void detach(String name) {
 		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public void attach(Device device) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
 
+	@Override
+	public void detach(Device device) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * Motor Controller specific method for attaching a motor In the case of a
+	 * SaberTooth - we will need the motor name (of course) and the motor port
+	 * number - SaberTooth supports 2 (M1 & M2)
+	 * 
+	 * @param motorName
+	 * @param motorPort
+	 * @return
+	 */
+
+	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin) {
+		return motorAttach(motorName, pwrPin, dirPin, null);
+	}
+
+	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin, Integer encoderPin) {
+		error("motorAttach with pins not supported");
+		return false;
 	}
 
 }

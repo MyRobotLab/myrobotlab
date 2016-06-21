@@ -358,16 +358,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     return meta;
   }
 
-  @Override
-  public void motorAttach(String name, int portNumber) {
-    error("not currently implemented");
-  }
-
-  @Override
-  public void motorAttach(MotorControl motor, int portNumber) {
-    // TODO Auto-generated method stub
-
-  }
 
   @Override
   public void connect(String port) {
@@ -376,15 +366,16 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   }
 
 @Override
-public void attachDevice(Device device) throws Exception {
+public void attach(Device device) throws Exception {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public void detachDevice(Device device) {
+public void detach(Device device) {
 	// TODO Auto-generated method stub
 	
 }
+
 
 }

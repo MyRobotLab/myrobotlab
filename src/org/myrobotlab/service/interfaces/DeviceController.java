@@ -19,8 +19,8 @@ public interface DeviceController extends NameProvider {
 	public void detach(String name);
 
 
-	public void attachDevice(Device device) throws Exception;
+	public void attach(Device device) throws Exception;
 
-	public void detachDevice(Device device);
+	public void detach(Device device);
 
 }

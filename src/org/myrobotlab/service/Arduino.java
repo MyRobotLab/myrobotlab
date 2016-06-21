@@ -627,7 +627,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 	public void detach(String name) {
 		Device device = (Device)Runtime.getService(name);
-		detachDevice(device);
+		detach(device);
 	}
 
 	// ================= new interface end =========================
@@ -1821,16 +1821,6 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	@Override
-	public void motorAttach(MotorControl motor, int portNumber) {
-		log.warn("Motor attach not implemented. use motorAttach(motorControl) instead");
-	}
-
-	@Override
-	public void motorAttach(String name, int portNumber) {
-		log.warn("Motor attach not implemented. use motorAttach(motorControl) instead");
-	}
-
-	@Override
 	public void createI2cDevice(int busAddress, int deviceAddress, String type) {
 		// TODO Auto-generated method stub - I2C
 
@@ -1910,8 +1900,14 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 
 	@Override
-	public void detachDevice(Device device) {
+	public void detach(Device device) {
 		// TODO validity checks
+	}
+
+	@Override
+	public void attach(Device device) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 
 
