@@ -932,7 +932,7 @@ bool debug = false;
  * basic crud operations for devices to seperate the implementation
  * details of the data structure containing all the devices
  */
-Device* getDeviceByIndex(int id);
+Device* getDevice(int id);
 void removeDevice(int id);
 int addDevice(Device*);
 /**
@@ -1013,10 +1013,10 @@ int addDevice(Device* device) {
 }
 
 /**
- * getDeviceByIndex - this method will look up a device by it's index in the device list.
+ * getDevice - this method will look up a device by it's index in the device list.
  * it returns null if the device isn't found.
  */
-Device* getDeviceByIndex(int index) {
+Device* getDevice(int index) {
   // TODO: more effecient lookup..
   int numDevices = deviceList.size();
   for (int i = 0; i < numDevices; i++) {
@@ -1308,7 +1308,7 @@ void servoWriteMicroseconds() {
   // normalize - currently by itself doesn't effect events
   // nor is it involved in speed control
   // TODO: this is wrong need to lookup device by id which means iterating the device list.
-  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
   if (s->servo != 0) {
     // 1500 midpoint
     s->servo->writeMicroseconds(ioCmd[2]);
@@ -1319,13 +1319,13 @@ void servoWriteMicroseconds() {
 void setServoSpeed() {
   // setting the speed of a servo
   // TODO: this is wrong need to lookup device by id which means iterating the device list.
-  MrlServo* servo = (MrlServo*)getDeviceByIndex(ioCmd[1]);
+  MrlServo* servo = (MrlServo*)getDevice(ioCmd[1]);
   servo->speed = ioCmd[2];
 }
 
 // SERVO_DETACH
 void servoDetach() {
-  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
   if (s->servo != 0) {
     s->servo->detach();
   }
@@ -1486,7 +1486,7 @@ void setSampleRate() {
 
 // SERVO_START_SWEEP
 void servoStartSweep() {
-  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
   s->min = ioCmd[2];
   s->max = ioCmd[3];
   s->step = ioCmd[4];
@@ -1496,7 +1496,7 @@ void servoStartSweep() {
 
 // SERVO_STOP_SWEEP
 void servoStopSweep() {
-  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
   s->isMoving = false;
   s->isSweeping = false;
 }
@@ -1508,7 +1508,7 @@ void servoEventsEnabled() {
 
 // SERVO_WRITE
 void servoWrite() {
-  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
   if (s->speed == 100 && s->servo != 0) {
     // move at regular/full 100% speed
     s->targetPos = ioCmd[2];
@@ -1567,7 +1567,7 @@ void updateStatus() {
 void servoAttach() {
   // TODO: this is completely wrong, we need to create
   // a new device and return it's index.
-  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
   s->index = ioCmd[1];
   if (s->servo == NULL) {
     s->servo = new Servo();
@@ -1583,7 +1583,7 @@ void servoAttach() {
 //         this enable the PUBLISH_SERVO_EVENT, publishServoEvent(Device*, SERVO_EVENT_XXX) 
 //         publish the event
 void publishServoEvent() {
-  MrlServo* s = (MrlServo*)getDeviceByIndex(ioCmd[1]);
+  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
   s->eventsEnabled = ioCmd[2];
 }
 
