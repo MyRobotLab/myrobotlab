@@ -1028,7 +1028,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		}
     case PUBLISH_BOARD_INFO:{
       int boardId=message[1];
-      string boardName="";
+      String boardName="";
       switch(boardId){
         case BOARD_TYPE_ID_MEGA:
           boardName=BOARD_TYPE_MEGA;
