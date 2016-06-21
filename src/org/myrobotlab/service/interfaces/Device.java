@@ -35,8 +35,8 @@ public interface Device extends NameProvider {
 	// controllers (write)
 	public final static int DEVICE_TYPE_STEPPER = 5;
 	public final static int DEVICE_TYPE_MOTOR = 6;
-        public final static int DEVICE_TYPE_SERVO = 7;
-        public final static int DEVICE_TYPE_I2C = 8;
+    public final static int DEVICE_TYPE_SERVO = 7;
+    public final static int DEVICE_TYPE_I2C = 8;
 
 	/**
 	 * type of device identified by integer so that it can be identified and
