@@ -116,19 +116,19 @@ public class Chassis extends Service implements JoystickListener {
     controller = (MotorController) startPeer("controller");
   }
 
-  public void attachMotors(int leftPortNumber, int rightPortNumber) {
+  public void attachMotors(int leftPortNumber, int rightPortNumber) throws Exception {
     attachLeftMotor(leftPortNumber);
     attachRightMotor(rightPortNumber);
   }
 
-  public void attachLeftMotor(int portNumber) {
+  public void attachLeftMotor(int portNumber) throws Exception {
     MotorController mc = getController();
-    mc.motorAttach(left, portNumber);
+    mc.attach(left);
   }
 
-  public void attachRightMotor(int portNumber) {
+  public void attachRightMotor(int portNumber) throws Exception {
     MotorController mc = getController();
-    mc.motorAttach(right, portNumber);
+    mc.attach(right);
   }
 
   public static void main(String[] args) {

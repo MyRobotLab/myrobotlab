@@ -177,7 +177,13 @@ public void detach(String name) {
 }
 
 @Override
-public void detachDevice(Device device) {
+public void detach(Device device) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void attach(Device device) throws Exception {
 	// TODO Auto-generated method stub
 	
 }

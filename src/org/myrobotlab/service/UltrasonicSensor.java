@@ -87,7 +87,7 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 		this.trigPin = trigPin;
 		this.echoPin = echoPin;
 		this.controller.connect(port); // THIS BETTER BLOCK UNTIL READY !
-		controller.attachDevice(this);
+		controller.attach(this);
 	}
 
 	// FIXME - should be MicroController Interface ..

@@ -386,8 +386,8 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	}
 
 	@Override
-	public void detachDevice(Device servo) {
-		arduino.detachDevice(servo);
+	public void detach(Device servo) {
+		arduino.detach(servo);
 	}
 
 	@Override
@@ -465,6 +465,12 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 
 	@Override
 	public void servoDetach(Servo servo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void attach(Device device) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}
