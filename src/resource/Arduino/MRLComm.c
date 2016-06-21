@@ -569,6 +569,25 @@ class Device {
     //  LinkedList<int> config; // additional memory for the sensor if needed
     //virtual Device* attach() = 0;
     virtual void update(unsigned long loopCount) = 0;
+    /**
+     * PUBLISH_ATTACHED_DEVICE
+     * MSG STRUCTURE
+     * PUBLISH_ATTACHED_DEVICE | NAME_STR_SIZE | NAME | NEW_DEVICE_INDEX
+     *
+     */
+    void publishAttachedDevice(unsigned char* ioCmd){
+    	Serial.write(MAGIC_NUMBER);
+    	Serial.write(2); // size
+      // TODO:  figure how how to format this publish attached.
+    	Serial.write(PUBLISH_ATTACHED_DEVICE);
+    	int size = ioCmd[2];
+    	Serial.write(size);
+      for (int i = 0; i  < size; i++) {
+        Serial.write(ioCmd[i+2]);
+      }
+      Serial.write(index);
+    	Serial.flush();
+    }
 };
 
 /**
@@ -989,6 +1008,7 @@ void softReset() {
  */
 int addDevice(Device* device) {
   deviceList.add(device);
+  device->publishAttachedDevice(ioCmd);
   return device->index;
 }
 
@@ -1520,8 +1540,7 @@ void updateDevices() {
   // this is the update devices method..
   // iterate through our list of sensors
   for (int i = 0; i < deviceList.size(); i++) {
-    Device* device = deviceList.get(i);
-    device->update(loopCount);
+    deviceList.get(i)->update(loopCount);
   } // end for each device
 }
 
@@ -1626,7 +1645,7 @@ void attachDevice() {
 	    break;
 	  }
 	}
-	publishAttachedDevice(addDevice(devicePtr));
+	addDevice(devicePtr);
 }
 
 /**
@@ -1658,8 +1677,6 @@ Device* attachDigitalPinArray() {
   // set the device type to analog pin array
   // TODO: add the list of pins to the array <-- not necessary until a request to read/poll a pin is received
   // pinArray.pins
-  // finally, add this to the current deviceList
-  //deviceList.add(pinArray);
   return pinArray;
 }
 
@@ -1803,30 +1820,6 @@ void publishError(int type) {
   Serial.write(PUBLISH_MRLCOMM_ERROR);
   Serial.write(type);
   Serial.flush();
-}
-
-/**
- * PUBLISH_ATTACHED_DEVICE
- * MSG STRUCTURE
- * PUBLISH_ATTACHED_DEVICE | NAME_STR_SIZE | NAME | NEW_DEVICE_INDEX
- *
- * FIXME - this needs work - got to be consistent on index
- * we had talked about using ptr - but now we are using index
- * of the linked list - which works(ish) until a remove is done
- *
- */
-void publishAttachedDevice(int deviceIndex) {
-	Serial.write(MAGIC_NUMBER);
-	Serial.write(2); // size
-  // TODO:  figure how how to format this publish attached.
-	Serial.write(PUBLISH_ATTACHED_DEVICE);
-	int size = ioCmd[2];
-	Serial.write(size);
-  for (int i = 0; i  < size; i++) {
-    Serial.write(ioCmd[i+2]);
-  }
-  Serial.write(deviceIndex);
-	Serial.flush();
 }
 
 
