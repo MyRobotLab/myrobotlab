@@ -533,7 +533,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		serial.disconnect();
 	}
 	
-	public getBoardInfo(){
+	public void getBoardInfo(){
 	  sendMsg(GET_BOARD_INFO);
 	}
 
