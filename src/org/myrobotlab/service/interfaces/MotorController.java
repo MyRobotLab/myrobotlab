@@ -25,9 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.framework.MRLException;
-
-public interface MotorController extends NameProvider, MicrocontrollerPeripheral {
+public interface MotorController extends DeviceController {
 
   /**
    * typed motorAttach, typed for a reason - the MotorControl's attach should
@@ -38,18 +36,9 @@ public interface MotorController extends NameProvider, MicrocontrollerPeripheral
    * @param motor
    * @throws MRLException
    */
-  public void motorAttach(MotorControl motor) throws Exception;
+  // public void motorAttach(MotorControl motor) throws Exception;
 
   // ======== new interface end ===================
-
-  /**
-   * MotorDetach - detach the MotorControl from a specific pin on the controller
-   * 
-   * @param name
-   *          - name of the MotorControl
-   * @return void
-   */
-  public boolean motorDetach(MotorControl motor);
 
   /**
    * 

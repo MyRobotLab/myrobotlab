@@ -20,6 +20,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.interfaces.Device;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -252,18 +253,6 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 
 	// motor controller api
 
-	@Override
-	public ArrayList<Pin> getPinList() {
-		ArrayList<Pin> ret = new ArrayList<Pin>();
-		for (int i = 0; i < 16; ++i) {
-			Pin p = new Pin();
-			p.pin = i;
-			p.type = Pin.PWM_VALUE;
-			ret.add(p);
-		}
-		return ret;
-	}
-
 	// @Override
 	public boolean isAttached() {
 		return isAttached;
@@ -391,16 +380,14 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	}
 
 	@Override
-	public boolean servoAttach(Servo servo) {
-
-		return servoAttach(servo, servo.getPin());
+	public void attachDevice(Device device) {
+		// TODO - any more setup required
+		arduino.attachDevice(device);
 	}
 
 	@Override
-	public boolean servoDetach(Servo servo) {
-
-		servoNameToPinMap.remove(servo.getName());
-		return true;
+	public void detachDevice(Device servo) {
+		arduino.detachDevice(servo);
 	}
 
 	@Override
@@ -445,9 +432,8 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	}
 
 	@Override
-	public boolean servoEventsEnabled(Servo servo) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean servoEventsEnabled(Servo servo, boolean enabled) {
+		return arduino.servoEventsEnabled(servo, enabled);
 	}
 
 	@Override
@@ -475,5 +461,11 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		 * "RasPi", "our RasPi");
 		 */
 		return meta;
+	}
+
+	@Override
+	public void servoDetach(Servo servo) {
+		// TODO Auto-generated method stub
+		
 	}
 }

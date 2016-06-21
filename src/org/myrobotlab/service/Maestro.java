@@ -1,8 +1,7 @@
 package org.myrobotlab.service;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -10,7 +9,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
-import org.myrobotlab.service.interfaces.ArduinoShield;
+import org.myrobotlab.service.interfaces.Device;
+import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -19,7 +19,7 @@ import org.slf4j.Logger;
  *         http://www.pololu.com/product/1350
  *
  */
-public class Maestro extends Service implements ArduinoShield, ServoController {
+public class Maestro extends Service implements Microcontroller, ServoController {
 
   private static final long serialVersionUID = 1L;
 
@@ -48,87 +48,7 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
     super(n);
   }
 
-  @Override
-  public boolean attach(Arduino arduino) {
-    // TODO Auto-generated method stub
-    return false;
-  }
 
-  @Override
-  public ArrayList<Pin> getPinList() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public boolean isAttached() {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public void attach(String name) throws MRLException {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void detach(String name) {
-    // TODO Auto-generated method stub
-  }
-
-  @Override
-  public void connect(String port) {
-    // TODO Auto-generated method stub
-  }
-
-  @Override
-  public boolean servoAttach(Servo servo) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public boolean servoDetach(Servo servo) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public void servoSweepStart(Servo servo) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void servoSweepStop(Servo servo) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void servoWrite(Servo servo) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void servoWriteMicroseconds(Servo servo) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public boolean servoEventsEnabled(Servo servo) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public void setServoSpeed(Servo servo) {
-    // TODO Auto-generated method stub
-
-  }
 
   /**
    * This static method returns all the details of the class without it having
@@ -147,5 +67,119 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 
     return meta;
   }
+
+@Override
+public void connect(String port) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void disconnect() {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public boolean isConnected() {
+	// TODO Auto-generated method stub
+	return false;
+}
+
+@Override
+public String getBoardType() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public Integer getVersion() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public List<Pin> getPinList() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public void sensorPollingStart(String name) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void sensorPollingStop(String name) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void attachDevice(Device servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void servoDetach(Servo servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void servoSweepStart(Servo servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void servoSweepStop(Servo servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void servoWrite(Servo servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void servoWriteMicroseconds(Servo servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public boolean servoEventsEnabled(Servo servo, boolean enabled) {
+	// TODO Auto-generated method stub
+	return false;
+}
+
+@Override
+public void setServoSpeed(Servo servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void attach(String name) throws Exception {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void detach(String name) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void detachDevice(Device device) {
+	// TODO Auto-generated method stub
+	
+}
 
 }

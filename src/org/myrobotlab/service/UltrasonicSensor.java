@@ -16,6 +16,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.Device;
+import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.SensorDataListener;
