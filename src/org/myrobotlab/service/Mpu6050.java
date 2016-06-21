@@ -931,7 +931,7 @@ public class Mpu6050 extends Service {
 		isAttached = true;
 
 		log.info(String.format("%s setController %s", getName(), controllerName));
-
+		createDevice();
 		broadcastState();
 		return true;
 	}
@@ -977,16 +977,13 @@ public class Mpu6050 extends Service {
 	/**
 	 * This method creates the i2c device
 	 */
-	boolean setDeviceAddress(String DeviceAddress) {
+	boolean createDevice() {
 		if (controller != null) {
-			if (deviceAddress != DeviceAddress) {
 				controller.releaseI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 				controller.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
-			}
 		}
 
-		log.info(String.format("Setting device address to %s", deviceAddress));
-		this.deviceAddress = DeviceAddress;
+		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
 		return true;
 	}
 
