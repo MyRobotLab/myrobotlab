@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.myrobotlab.service.data.Pin;
 
-public interface Microcontroller extends NameProvider {
+public interface Microcontroller extends NameProvider, DeviceController {
 
   // connectivity
   public void connect(String port);
@@ -16,8 +16,7 @@ public interface Microcontroller extends NameProvider {
   public Integer getVersion();
   public List<Pin> getPinList();
   
-  public void attachDevice(Device device) throws Exception;
-  public void sensorPollingStart(String nameToIndex);
-  public void sensorPollingStop(String nameToIndex);
+  public void sensorPollingStart(String name);
+  public void sensorPollingStop(String name);
   
 }

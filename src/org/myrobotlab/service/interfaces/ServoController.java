@@ -27,22 +27,17 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.service.Servo;
 
-public interface ServoController extends NameProvider, MicrocontrollerPeripheral {
+public interface ServoController extends NameProvider, DeviceController {
 
   public final static String servoWrite = "servoWrite";
   public final static String servoAttach = "servoAttach";
   public final static String servoDetach = "servoDetach";
 
   /**
-   * servoAttach - attach the servo to a specific pin on the controller
-   * 
-   * @param name
-   *          - name of the servo
-   * @param pin
-   *          - pin number
+   * attachDevice - attach the servo to a specific pin on the controller
    * @return boolean boolean
    */
-  public boolean servoAttach(Servo servo);
+  public void attachDevice(Device servo);
 
   /**
    * servoDetach - detach the servo from a specific pin on the controller
@@ -51,7 +46,7 @@ public interface ServoController extends NameProvider, MicrocontrollerPeripheral
    *          - name of the servo
    * @return boolean
    */
-  boolean servoDetach(Servo servo);
+  void servoDetach(Servo servo);
 
   void servoSweepStart(Servo servo);
 
@@ -70,7 +65,7 @@ public interface ServoController extends NameProvider, MicrocontrollerPeripheral
 
   public void servoWriteMicroseconds(Servo servo);
 
-  public boolean servoEventsEnabled(Servo servo);
+  public boolean servoEventsEnabled(Servo servo, boolean enabled);
 
   /**
    * return the current pin this servo is attached to

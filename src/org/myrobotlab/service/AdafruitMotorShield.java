@@ -8,7 +8,6 @@
 
 package org.myrobotlab.service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.MRLException;
@@ -19,8 +18,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
-import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ArduinoShield;
+import org.myrobotlab.service.interfaces.Device;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.slf4j.Logger;
@@ -266,11 +265,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     return null;
   }
 
-  @Override
-  public ArrayList<Pin> getPinList() {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
   @Override
   public boolean isAttached() {
@@ -314,18 +308,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   @Override
   public void detach(String name) {
     // TODO Auto-generated method stub
-  }
-
-  @Override
-  public void motorAttach(MotorControl motor) throws MRLException {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public boolean motorDetach(MotorControl motor) {
-    // TODO Auto-generated method stub
-    return false;
   }
 
   @Override
@@ -392,5 +374,17 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     // TODO: Arduino just changed to 115200, does this also need to update?
     connect(port, Serial.BAUD_57600, 8, 1, 0);
   }
+
+@Override
+public void attachDevice(Device device) throws Exception {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void detachDevice(Device device) {
+	// TODO Auto-generated method stub
+	
+}
 
 }
