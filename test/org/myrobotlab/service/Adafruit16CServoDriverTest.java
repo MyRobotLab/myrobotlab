@@ -24,6 +24,7 @@ public class Adafruit16CServoDriverTest {
 	public static void setUpBeforeClass() throws Exception {
 		driver = (Adafruit16CServoDriver) Runtime.start("driver", "Adafruit16CServoDriver");
 		// arduino = driver.getArduino();
+		arduino = (Arduino) Runtime.start("arduino", "Arduino");
 		serial = arduino.getSerial();
 	}
 
