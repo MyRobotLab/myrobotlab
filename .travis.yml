@@ -5,6 +5,8 @@ language: java
 sudo: false
 script: ant dist
 jdk:
+- oraclejdk8
+- oraclejdk7
 - openjdk7
 
 # whitelist
