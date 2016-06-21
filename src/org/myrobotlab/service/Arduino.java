@@ -224,10 +224,10 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public static final int SENSOR_DATA = 37;
 
 	// SUBTYPES ...
-	public static final int ARDUINO_TYPE_INT = 16;
+	public static final int ARDUINO_TYPE_INT            = 16;
 
 	// servo event types
-	public static final int SERVO_EVENT_STOPPED = 1;
+	public static final int SERVO_EVENT_STOPPED         = 1;
 
 	public static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
@@ -270,6 +270,16 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 */
 	public transient static final String BOARD_TYPE_UNO = "Uno";
 	public transient static final String BOARD_TYPE_MEGA = "Mega";
+	public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
+	public transient static final int BOARD_TYPE_ID_MEGA = 1;
+	public transient static final int BOARD_TYPE_ID_UNO = 2;
+	//temporary
+	public final static int GET_BOARD_INFO = 70;
+	public final static int PUBLISH_BOARD_INFO = 71;
+	/**
+	 * board type - UNO Mega etc..
+	 */
+	public String board;
 
 	/**
 	 * pin description of board
@@ -298,11 +308,6 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public static final int MOTOR_FORWARD = 1;
 
 	public static final int MOTOR_BACKWARD = 0;
-
-	/**
-	 * board type - UNO Mega etc..
-	 */
-	public String board;
 
 	/**
 	 * Devices - string name index of device we need 2 indexes for sensors because they
@@ -527,6 +532,10 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public void disconnect() {
 		serial.disconnect();
 	}
+	
+	public getBoardInfo(){
+	  sendMsg(GET_BOARD_INFO);
+	}
 
 	public String getBoardType() {
 		return board;
@@ -649,7 +658,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 		if (si instanceof Motor) {
 			motorAttach((Motor) si);
-		} else if (si instanceof UltrasonicSensor) {
+		} else if (si instanceof Servo) {
 			servoAttach((Servo) si); // MAKE NOTE !! : - servoAttach is different concept than attachDevice
 			// servoAttach is calling Arduino servo.attach()  .. attachDevice is attaching the periphery device to 
 			// the framework so it can "be" a servo
@@ -936,7 +945,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 			int newDeviceIndex = message[nameStrSize + 2];
 			
 			if (!deviceList.containsKey(deviceName)){
-				error("PUBLISH_ATTACHED_SENSOR deviceName %s not found !", deviceName);
+				error("PUBLISH_ATTACHED_DEVICE deviceName %s not found !", deviceName);
 				break;
 			}
 			
@@ -1017,7 +1026,31 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 			log.info("MRLComm Debug Message {}", payload);
 			break;
 		}
-
+    case PUBLISH_BOARD_INFO:{
+      int boardId=message[1];
+      string boardName="";
+      switch(boardId){
+        case BOARD_TYPE_ID_MEGA:
+          boardName=BOARD_TYPE_MEGA;
+          break;
+        case BOARD_TYPE_ID_UNO:
+          boardName=BOARD_TYPE_UNO;
+          break;
+        default:
+          boardName="Unknown";
+          break;
+      }
+      log.info("Board type returned by Arduino: {}",boardName);
+      log.info("Board type currently set: {}",board);
+      if(board=="" && boardId != BOARD_TYPE_ID_UNKNOWN){
+        setBoard(boardName);
+        log.info("Board type set to: {}",board);
+      }
+      else{
+        log.info("No change in board type");
+      }
+      break;
+    }
 		default: {
 			// FIXME - use formatter for message
 			error("unknown serial event %d", function);
