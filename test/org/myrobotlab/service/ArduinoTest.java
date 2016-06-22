@@ -441,7 +441,7 @@ public class ArduinoTest {
   }
 
   @Test
-  public final void testServoAttachServoInteger() {
+  public final void testServoAttachServoInteger() throws Exception {
     log.info("testServoAttachServoInteger");
     Servo servo = (Servo) Runtime.start("servo", "Servo");
 

@@ -234,10 +234,13 @@ public class Servo extends Service implements ServoControl, Device {
 		return isAttached;
 	}
 
-	public boolean attach(ServoController controller, Integer pin) {
+	public boolean attach(ServoController controller, Integer pin) throws Exception {
 		setPin(pin);
 
 		if (setController(controller)) {
+			// THIS IS ATTACHING THE DEVICE !!!
+			controller.attach(this);
+			// THIS IS calling Arduino's Servo.attach(pin) !!
 			return attach();
 		}
 
@@ -245,7 +248,7 @@ public class Servo extends Service implements ServoControl, Device {
 	}
 
 	@Override
-	public boolean attach(String controllerName, Integer pin) {
+	public boolean attach(String controllerName, Integer pin) throws Exception {
 		return attach((ServoController) Runtime.getService(controllerName), pin);
 	}
 
