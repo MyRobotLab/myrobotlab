@@ -118,6 +118,9 @@ public class ArduinoBindingsGenerator {
     exclude.add("disconnect");
     exclude.add("getDescription");
     exclude.add("createPinList");
+
+    exclude.add("getDeviceId");
+
     
     exclude.add("getServoIndex");
     exclude.add("getBoardType");

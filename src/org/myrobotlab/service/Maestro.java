@@ -116,11 +116,6 @@ public void sensorPollingStop(String name) {
 	
 }
 
-@Override
-public void attachDevice(Device servo) {
-	// TODO Auto-generated method stub
-	
-}
 
 @Override
 public void servoDetach(Servo servo) {
@@ -184,6 +179,12 @@ public void detach(Device device) {
 
 @Override
 public void attach(Device device) throws Exception {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void servoAttach(Servo servo) {
 	// TODO Auto-generated method stub
 	
 }

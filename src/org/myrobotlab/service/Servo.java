@@ -212,6 +212,9 @@ public class Servo extends Service implements ServoControl, Device {
 		addListener("publishServoEvent", service.getName(), "onServoEvent");
 	}
 
+	/**
+	 * FIXME - this is Servo.attach NOT Device.attach (GroG)
+	 */
 	@Override
 	public boolean attach() {
 		lastActivityTime = System.currentTimeMillis();
@@ -225,7 +228,7 @@ public class Servo extends Service implements ServoControl, Device {
 			return false;
 		}
 
-		controller.attachDevice(this);
+		// controller.attach(this);
 		isAttached = true;
 		broadcastState();
 		return isAttached;
@@ -254,7 +257,7 @@ public class Servo extends Service implements ServoControl, Device {
 		}
 
 		if (controller != null) {
-			controller.servoDetach(this);
+			controller.detach(this);
 			isAttached = false;
 			// changed state
 			broadcastState();
@@ -586,8 +589,9 @@ public class Servo extends Service implements ServoControl, Device {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		try {
 			Runtime.start("webgui", "WebGui");
+			Runtime.start("gui", "GUIService");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			arduino.connect("COM18");
+			arduino.connect("COM5");
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
 			servo.attach(arduino, 8);
 			servo.moveTo(90);

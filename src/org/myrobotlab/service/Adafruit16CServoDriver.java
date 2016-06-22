@@ -19,14 +19,11 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.Device;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
-
-import com.pi4j.io.i2c.I2CBus;
 
 /**
  * AdaFruit 16-Channel PWM / Servo Driver
@@ -380,9 +377,9 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	}
 
 	@Override
-	public void attachDevice(Device device) {
+	public void attach(Device device) {
 		// TODO - any more setup required
-		arduino.attachDevice(device);
+		arduino.attach(device);
 	}
 
 	@Override
@@ -470,8 +467,10 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	}
 
 	@Override
-	public void attach(Device device) throws Exception {
+	public void servoAttach(Servo servo) {
 		// TODO Auto-generated method stub
 		
 	}
+
+
 }
