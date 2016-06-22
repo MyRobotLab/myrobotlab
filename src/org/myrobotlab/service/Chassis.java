@@ -123,12 +123,12 @@ public class Chassis extends Service implements JoystickListener {
 
   public void attachLeftMotor(int portNumber) throws Exception {
     MotorController mc = getController();
-    mc.attach(left);
+    mc.attachDevice(left);
   }
 
   public void attachRightMotor(int portNumber) throws Exception {
     MotorController mc = getController();
-    mc.attach(right);
+    mc.attachDevice(right);
   }
 
   public static void main(String[] args) {

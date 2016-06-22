@@ -14,13 +14,13 @@ public interface DeviceController extends NameProvider {
 	// however - the idea of creating a url with a device on it is "challenging" but this
 	// http://localhost:8888/api/service/arduino/attach/nameOfMyThing   - is quite satisfying..
 	
-	public void attach(String name) throws Exception;
+	public void attachDevice(String name) throws Exception;
 
-	public void detach(String name);
+	public void detachDevice(String name);
 
 
-	public void attach(Device device) throws Exception;
+	public void attachDevice(Device device) throws Exception;
 
-	public void detach(Device device);
+	public void detachDevice(Device device);
 
 }
