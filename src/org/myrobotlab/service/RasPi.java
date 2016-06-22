@@ -139,9 +139,9 @@ public class RasPi extends Service implements I2CControl {
 				log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, type));
 			} else
 				devicedata.bus = bus;
-			devicedata.device = device;
-			devicedata.type = type;
-			devices.put(key, devicedata);
+			  devicedata.device = device;
+			  devicedata.type = type;
+			  devices.put(key, devicedata);
 
 			// PCF8574GpioProvider pcf = new PCF8574GpioProvider(busAddress,
 			// deviceAddress);

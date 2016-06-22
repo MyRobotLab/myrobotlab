@@ -15,46 +15,48 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     var camera = new THREE.PerspectiveCamera( 75, 1, 0.1, 1000 );
 	var renderer = new THREE.WebGLRenderer();
 	renderer.setSize(400,400);
-    // TODO: Bind with html in the right place, not the body
-    // document.body.appendChild( renderer.domElement );
-    // var container = document.getElementById("canvas");
-    /*
-    if (container.hasChildNodes()) {
-		container.removeChild( container.childNodes[0]);
-		container.appendChild( renderer.domElement );	
-	} else {
-		container.appendChild( renderer.domElement );
-	}
-    // Create the objects in the scene
-    */
-    var geometry = new THREE.BoxGeometry(10, 0.5, 0.5);
+	
+	var geometry = new THREE.BoxGeometry(10, 0.5, 0.5);
     var material = new THREE.MeshBasicMaterial({color: 0xff0000});
     var cube = new THREE.Mesh(geometry,material);
+    cube.position.y = 5;
     
     var geometry2 = new THREE.BoxGeometry(0.5, 0.5, 10);
     var material2 = new THREE.MeshBasicMaterial({color: 0x00ff00});
     var cube2 = new THREE.Mesh(geometry2,material2);
+    cube2.position.y = 5;
     
     var gridHelper = new THREE.GridHelper( 50, 5 );
     var gray  = new THREE.Color(0xdd00dd);
     var black = new THREE.Color(0x00ff00);
     gridHelper.setColors(gray,black);
     
-    scene.add(cube);
-    scene.add(cube2);
+    var teapotSize = 10;
+    var tess = 15;
+    var bottom = true;
+    var lid = true;
+    var body = true;
+    var fitLid = true;
+    var blinn = true;
+    var teapotGeometry = new THREE.TeapotBufferGeometry( teapotSize,
+			tess,
+			bottom,
+		    lid,
+			body,
+			fitLid,
+			blinn);
+    
+    var teapot = new THREE.Mesh(teapotGeometry, material2);
+    
+    // scene.add(cube);
+    // scene.add(cube2);
+    scene.add(teapot);
     scene.add(gridHelper);
 
     camera.position.x = 0;
-    camera.position.y = 3;
-    camera.position.z = 10;
-    /*
-    function animate() {
-        requestAnimationFrame( animate );
-        controls.update();
-        renderer.render( scene, camera );
-    	}
-    animate();
-    */
+    camera.position.y = 8;
+    camera.position.z = 50;
+
     renderer.render( scene, camera );
     // End of three.js scene creation and object creation  
     
@@ -102,6 +104,10 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
         	cube2.rotation.y = $scope.gyroDegreeY / (2 * Math.PI);
         	cube2.rotation.z = $scope.gyroDegreeZ / (2 * Math.PI);
         	
+        	teapot.rotation.x = $scope.gyroDegreeX / (2 * Math.PI);
+        	teapot.rotation.y = $scope.gyroDegreeY / (2 * Math.PI);
+        	teapot.rotation.z = $scope.gyroDegreeZ / (2 * Math.PI);
+        	
             renderer.render( scene, camera );
             break;
         default:
@@ -134,3 +140,4 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     msg.subscribe(this);
 }
 ]);
+
