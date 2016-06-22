@@ -312,7 +312,7 @@ void LinkedList<T>::clear() {
 
 // TODO: this isn't ready for an official bump to mrl comm 35
 // when it's ready we can update ArduinoMsgCodec  (also need to see why it's not publishing "goodtimes" anymore.)
-#define MRLCOMM_VERSION         35
+#define MRLCOMM_VERSION         37
 
 // serial protocol functions
 #define MAGIC_NUMBER            170 // 10101010
@@ -339,18 +339,18 @@ void LinkedList<T>::clear() {
 #define ANALOG_READ_POLLING_STOP		6
 // {analogWrite int int}
 #define ANALOG_WRITE		7
-// {attachDevice Device}
-#define ATTACH_DEVICE		8
-// {createDevice int int String}
-#define CREATE_DEVICE		9
+// {createI2cDevice int int String}
+#define CREATE_I2C_DEVICE		8
 // {digitalReadPollingStart Integer Integer}
-#define DIGITAL_READ_POLLING_START		10
+#define DIGITAL_READ_POLLING_START		9
 // {digitalReadPollingStop int}
-#define DIGITAL_READ_POLLING_STOP		11
+#define DIGITAL_READ_POLLING_STOP		10
 // {digitalWrite int int}
-#define DIGITAL_WRITE		12
+#define DIGITAL_WRITE		11
 // {fixPinOffset Integer}
-#define FIX_PIN_OFFSET		13
+#define FIX_PIN_OFFSET		12
+// {getBoardInfo}
+#define GET_BOARD_INFO		13
 // {i2cRead int int byte[] int}
 #define I2C_READ		14
 // {i2cWrite int int byte[] int}
@@ -359,84 +359,80 @@ void LinkedList<T>::clear() {
 #define I2C_WRITE_READ		16
 // {intsToString int[] int int}
 #define INTS_TO_STRING		17
-// {motorAttach String int}
-#define MOTOR_ATTACH		18
-// {motorDetach MotorControl}
-#define MOTOR_DETACH		19
 // {motorMove MotorControl}
-#define MOTOR_MOVE		20
+#define MOTOR_MOVE		18
 // {motorMoveTo MotorControl}
-#define MOTOR_MOVE_TO		21
+#define MOTOR_MOVE_TO		19
 // {motorReset MotorControl}
-#define MOTOR_RESET		22
+#define MOTOR_RESET		20
 // {motorStop MotorControl}
-#define MOTOR_STOP		23
-// {pinMode int String}
-#define PIN_MODE		24
+#define MOTOR_STOP		21
+// {pinMode Integer Integer}
+#define PIN_MODE		22
 // {publishAttachedDevice Device}
-#define PUBLISH_ATTACHED_DEVICE		25
+#define PUBLISH_ATTACHED_DEVICE		23
 // {publishDebug String}
-#define PUBLISH_DEBUG		26
+#define PUBLISH_DEBUG		24
 // {publishMessageAck}
-#define PUBLISH_MESSAGE_ACK		27
+#define PUBLISH_MESSAGE_ACK		25
 // {publishPin Pin}
-#define PUBLISH_PIN		28
+#define PUBLISH_PIN		26
 // {publishPulse Long}
-#define PUBLISH_PULSE		29
+#define PUBLISH_PULSE		27
 // {publishPulseStop Integer}
-#define PUBLISH_PULSE_STOP		30
+#define PUBLISH_PULSE_STOP		28
 // {publishSensorData SensorData}
-#define PUBLISH_SENSOR_DATA		31
+#define PUBLISH_SENSOR_DATA		29
 // {publishServoEvent Integer}
-#define PUBLISH_SERVO_EVENT		32
+#define PUBLISH_SERVO_EVENT		30
 // {publishStatus Long Integer}
-#define PUBLISH_STATUS		33
+#define PUBLISH_STATUS		31
 // {publishTrigger Pin}
-#define PUBLISH_TRIGGER		34
+#define PUBLISH_TRIGGER		32
 // {pulse int int int int}
-#define PULSE		35
+#define PULSE		33
 // {pulseStop}
-#define PULSE_STOP		36
-// {releaseDevice int int}
-#define RELEASE_DEVICE		37
-// {sensorPollingStart Integer}
-#define SENSOR_POLLING_START		38
-// {sensorPollingStop Integer}
-#define SENSOR_POLLING_STOP		39
-// {servoAttach Servo Integer}
-#define SERVO_ATTACH		40
+#define PULSE_STOP		34
+// {releaseI2cDevice int int}
+#define RELEASE_I2C_DEVICE		35
+// {sensorPollingStart String}
+#define SENSOR_POLLING_START		36
+// {sensorPollingStop String}
+#define SENSOR_POLLING_STOP		37
+// {servoAttach Servo}
+#define SERVO_ATTACH		38
 // {servoDetach Servo}
-#define SERVO_DETACH		41
-// {servoEventsEnabled Servo}
-#define SERVO_EVENTS_ENABLED		42
+#define SERVO_DETACH		39
+// {servoEventsEnabled Servo boolean}
+#define SERVO_EVENTS_ENABLED		40
 // {servoSweepStart Servo}
-#define SERVO_SWEEP_START		43
+#define SERVO_SWEEP_START		41
 // {servoSweepStop Servo}
-#define SERVO_SWEEP_STOP		44
+#define SERVO_SWEEP_STOP		42
 // {servoWrite Servo}
-#define SERVO_WRITE		45
+#define SERVO_WRITE		43
 // {servoWriteMicroseconds Servo}
-#define SERVO_WRITE_MICROSECONDS		46
+#define SERVO_WRITE_MICROSECONDS		44
 // {setDebounce int}
-#define SET_DEBOUNCE		47
+#define SET_DEBOUNCE		45
 // {setDebug boolean}
-#define SET_DEBUG		48
+#define SET_DEBUG		46
 // {setDigitalTriggerOnly Boolean}
-#define SET_DIGITAL_TRIGGER_ONLY		49
+#define SET_DIGITAL_TRIGGER_ONLY		47
 // {setLoadTimingEnabled boolean}
-#define SET_LOAD_TIMING_ENABLED		50
+#define SET_LOAD_TIMING_ENABLED		48
 // {setPWMFrequency Integer Integer}
-#define SET_PWMFREQUENCY		51
+#define SET_PWMFREQUENCY		49
 // {setSampleRate int}
-#define SET_SAMPLE_RATE		52
+#define SET_SAMPLE_RATE		50
 // {setSerialRate int}
-#define SET_SERIAL_RATE		53
+#define SET_SERIAL_RATE		51
 // {setServoSpeed Servo}
-#define SET_SERVO_SPEED		54
+#define SET_SERVO_SPEED		52
 // {setTrigger int int int}
-#define SET_TRIGGER		55
+#define SET_TRIGGER		53
 // {softReset}
-#define SOFT_RESET		56
+#define SOFT_RESET		54
 ///// INO GENERATED DEFINITION END //////
 
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
