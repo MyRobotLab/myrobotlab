@@ -162,7 +162,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
   @Override
   public void detach() {
-    controller.detach(this);
+    controller.detachDevice(this);
     controllerName = null; // FIXME - should only have controllerName and
     // not isAttached - test for null
     controller = null;
@@ -259,7 +259,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
     controllerName = controller.getName();
     // GOOD DESIGN !! - this is the extent of what our attach should be !!!
     // just call the controller's motorAttach & broadcast our state
-    controller.attach(this);
+    controller.attachDevice(this);
     broadcastState();
   }
 

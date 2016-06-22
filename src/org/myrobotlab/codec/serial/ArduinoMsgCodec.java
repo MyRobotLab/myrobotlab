@@ -76,9 +76,9 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_START;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_STOP;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
-	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ATTACH;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ATTACH_DEVICE;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CREATE_I2C_DEVICE;
-	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DETACH;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DETACH_DEVICE;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_START;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
@@ -150,14 +150,14 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {analogWrite int int} 
 	public final static int ANALOG_WRITE =		7;
 
-	// {attach String} 
-	public final static int ATTACH =		8;
+	// {attachDevice String} 
+	public final static int ATTACH_DEVICE =		8;
 
 	// {createI2cDevice int int String} 
 	public final static int CREATE_I2C_DEVICE =		9;
 
-	// {detach Device} 
-	public final static int DETACH =		10;
+	// {detachDevice Device} 
+	public final static int DETACH_DEVICE =		10;
 
 	// {digitalReadPollingStart Integer Integer} 
 	public final static int DIGITAL_READ_POLLING_START =		11;
@@ -198,7 +198,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {motorStop MotorControl} 
 	public final static int MOTOR_STOP =		23;
 
-	// {pinMode int String} 
+	// {pinMode Integer Integer} 
 	public final static int PIN_MODE =		24;
 
 	// {publishAttachedDevice Device} 
@@ -219,7 +219,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {publishPulseStop Integer} 
 	public final static int PUBLISH_PULSE_STOP =		30;
 
-	// {publishSensorData SensorData} 
+	// {publishSensorData Object} 
 	public final static int PUBLISH_SENSOR_DATA =		31;
 
 	// {publishServoEvent Integer} 
@@ -320,14 +320,14 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		byteToMethod.put(ANALOG_WRITE,"analogWrite");
 		methodToByte.put("analogWrite",ANALOG_WRITE);
 
-		byteToMethod.put(ATTACH,"attach");
-		methodToByte.put("attach",ATTACH);
+		byteToMethod.put(ATTACH_DEVICE,"attachDevice");
+		methodToByte.put("attachDevice",ATTACH_DEVICE);
 
 		byteToMethod.put(CREATE_I2C_DEVICE,"createI2cDevice");
 		methodToByte.put("createI2cDevice",CREATE_I2C_DEVICE);
 
-		byteToMethod.put(DETACH,"detach");
-		methodToByte.put("detach",DETACH);
+		byteToMethod.put(DETACH_DEVICE,"detachDevice");
+		methodToByte.put("detachDevice",DETACH_DEVICE);
 
 		byteToMethod.put(DIGITAL_READ_POLLING_START,"digitalReadPollingStart");
 		methodToByte.put("digitalReadPollingStart",DIGITAL_READ_POLLING_START);
@@ -680,16 +680,16 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		return "ANALOG_WRITE";
 
 	}
-	case ArduinoMsgCodec.ATTACH:{
-		return "ATTACH";
+	case ArduinoMsgCodec.ATTACH_DEVICE:{
+		return "ATTACH_DEVICE";
 
 	}
 	case ArduinoMsgCodec.CREATE_I2C_DEVICE:{
 		return "CREATE_I2C_DEVICE";
 
 	}
-	case ArduinoMsgCodec.DETACH:{
-		return "DETACH";
+	case ArduinoMsgCodec.DETACH_DEVICE:{
+		return "DETACH_DEVICE";
 
 	}
 	case ArduinoMsgCodec.DIGITAL_READ_POLLING_START:{

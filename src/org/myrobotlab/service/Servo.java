@@ -239,7 +239,7 @@ public class Servo extends Service implements ServoControl, Device {
 
 		if (setController(controller)) {
 			// THIS IS ATTACHING THE DEVICE !!!
-			controller.attach(this);
+			controller.attachDevice(this);
 			// THIS IS calling Arduino's Servo.attach(pin) !!
 			return attach();
 		}
@@ -260,7 +260,7 @@ public class Servo extends Service implements ServoControl, Device {
 		}
 
 		if (controller != null) {
-			controller.detach(this);
+			controller.detachDevice(this);
 			isAttached = false;
 			// changed state
 			broadcastState();

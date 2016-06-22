@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-	///// java static import definition - DO NOT MODIFY - Begin //////
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
@@ -13,9 +12,9 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ADD_SENSOR_DATA_LISTEN
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ATTACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ATTACH_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CREATE_I2C_DEVICE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DETACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DETACH_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
@@ -647,9 +646,10 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 	*/
 
-	public void detach(String name) {
+	@Override
+	public void detachDevice(String name) {
 		Device device = (Device)Runtime.getService(name);
-		detach(device);
+		detachDevice(device);
 	}
 
 	// ================= new interface end =========================
@@ -1277,9 +1277,9 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	@Override
-	public void attach(String name) throws Exception {
+	public void attachDevice(String name) throws Exception {
 		Device device = (Device)Runtime.getService(name);
-		attach(device);
+		attachDevice(device);
 	}
 
 	/**
@@ -1301,7 +1301,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * @param device
 	 */
 	@Override
-	public synchronized void attach(Device device) {
+	public synchronized void attachDevice(Device device) {
 
 		int deviceType = device.getDeviceType();
 
@@ -1349,7 +1349,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// Arduino owns
 		// the mapping of the two.
 
- 		sendMsg(ATTACH, msgParms);
+ 		sendMsg(ATTACH_DEVICE, msgParms);
 
 	}
 	
@@ -1690,7 +1690,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 				Motor motor = (Motor) Runtime.createAndStart("motor", "Motor");
 				motor.setType2Pwm(leftPwm, rightPwm);
 				// motor.attach(arduino);
-				arduino.attach(motor);
+				arduino.attachDevice(motor);
 				while (true) {
 					// try to overrun?
 					// rand between -1 and 1.
@@ -1700,7 +1700,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 			} else {
 				Servo servo = (Servo) Runtime.createAndStart("servo", "Servo");
 				servo.setPin(13);
-				arduino.attach(servo);
+				arduino.attachDevice(servo);
 				servo.attach();
 				int angle = 0;
 				int max = 5000;
@@ -1910,12 +1910,12 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	
 	@Override
 	public void addSensorDataListener(SensorDataListener listener) {
-		attach(listener);
+		attachDevice(listener);
 	}
 
 
 	@Override
-	public void detach(Device device) {
+	public void detachDevice(Device device) {
 		// TODO validity checks
 	}
 

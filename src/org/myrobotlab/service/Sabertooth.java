@@ -395,8 +395,8 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 			Motor motor01 = (Motor) Runtime.start("motor01", "Motor");
 			Motor motor02 = (Motor) Runtime.start("motor02", "Motor");
 
-			mc.attach(motor01);
-			mc.attach(motor02);
+			mc.attachDevice(motor01);
+			mc.attachDevice(motor02);
 
 			motor01.move(0);
 			motor01.move(0.15);
@@ -446,24 +446,24 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	}
 
 	@Override
-	public void attach(String name) throws MRLException {
+	public void attachDevice(String name) throws MRLException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void detach(String name) {
+	public void detachDevice(String name) {
 		// TODO Auto-generated method stub
 	}
 	
 	@Override
-	public void attach(Device device) throws Exception {
+	public void attachDevice(Device device) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void detach(Device device) {
+	public void detachDevice(Device device) {
 		// TODO Auto-generated method stub
 		
 	}

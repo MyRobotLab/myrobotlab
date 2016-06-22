@@ -300,13 +300,13 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   // StepperController end ----
 
   @Override
-  public void attach(String name) throws MRLException {
+  public void attachDevice(String name) throws MRLException {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void detach(String name) {
+  public void detachDevice(String name) {
     // TODO Auto-generated method stub
   }
 
@@ -366,13 +366,13 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   }
 
 @Override
-public void attach(Device device) throws Exception {
+public void attachDevice(Device device) throws Exception {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public void detach(Device device) {
+public void detachDevice(Device device) {
 	// TODO Auto-generated method stub
 	
 }

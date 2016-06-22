@@ -204,7 +204,7 @@ public class ArduinoChaosTest {
     Motor motor = (Motor)Runtime.createAndStart("motor", "Motor");
     motor.setType2Pwm(leftPwm, rightPwm);
     // motor.attach(arduino);
-    arduino.attach(motor);
+    arduino.attachDevice(motor);
 
 
 //    servo.attach();

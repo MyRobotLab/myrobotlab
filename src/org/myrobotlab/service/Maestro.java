@@ -160,25 +160,25 @@ public void setServoSpeed(Servo servo) {
 }
 
 @Override
-public void attach(String name) throws Exception {
+public void attachDevice(String name) throws Exception {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public void detach(String name) {
+public void detachDevice(String name) {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public void detach(Device device) {
+public void detachDevice(Device device) {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public void attach(Device device) throws Exception {
+public void attachDevice(Device device) throws Exception {
 	// TODO Auto-generated method stub
 	
 }
