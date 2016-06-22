@@ -239,7 +239,7 @@ public class ServoOrchestrator extends Service {
     }
   }
 
-  public void middleright_attach_button() {
+  public void middleright_attach_button() throws Exception {
     if (!settingsitemholder[middleright_shownitem].attached) {
       settingsitemholder[middleright_shownitem].arduinopos = sogui_ref.middleright_arduino_list.getSelectedIndex();
       settingsitemholder[middleright_shownitem].pinpos = sogui_ref.middleright_pin_list.getSelectedIndex();

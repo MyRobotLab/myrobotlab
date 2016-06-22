@@ -148,8 +148,9 @@ public class Sweety extends Service {
 
   /**
    * Attach the servos to arduino pins
+ * @throws Exception 
    */
-  public void attach() {
+  public void attach() throws Exception {
     rightForearm.attach(arduino.getName(), 34);
     leftForearm.attach(arduino.getName(), 35);
     rightShoulder.attach(arduino.getName(), 36);
@@ -622,8 +623,9 @@ public class Sweety extends Service {
 
   /**
    * Stop the tracking services
+ * @throws Exception 
    */
-  public void stopTrack() {
+  public void stopTrack() throws Exception {
     leftTracker.opencv.stopCapture();
     rightTracker.opencv.stopCapture();
     leftTracker.releaseService();

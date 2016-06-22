@@ -36,7 +36,7 @@ public interface ServoControl {
    */
   public boolean attach();
 
-  public boolean attach(String controller, Integer pin);
+  public boolean attach(String controller, Integer pin) throws Exception;
 
   /**
    * detaches the servo from the controller

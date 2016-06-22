@@ -82,7 +82,7 @@ public class Pingdar extends Service {
 
   // ----------- interface begin ----------------
 
-  public boolean attach(Arduino arduino, String port, UltrasonicSensor sensor, int trigPin, int echoPin, Servo servo, int servoPin) throws IOException {
+  public boolean attach(Arduino arduino, String port, UltrasonicSensor sensor, int trigPin, int echoPin, Servo servo, int servoPin) throws Exception {
     this.arduino = arduino;
     this.sensor = sensor;
     this.servo = servo;
@@ -122,7 +122,7 @@ public class Pingdar extends Service {
   // complexity - no service creation
   // attach (port trigPin echoPin servoPin) <- min complexity - service
   // creation on peers
-  public boolean attach(String port, int trigPin, int echoPin, int servoPin) throws IOException {
+  public boolean attach(String port, int trigPin, int echoPin, int servoPin) throws Exception {
     return attach(arduino, port, sensor, trigPin, echoPin, servo, servoPin);
   }
 
