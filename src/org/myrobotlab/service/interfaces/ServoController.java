@@ -33,20 +33,6 @@ public interface ServoController extends NameProvider, DeviceController {
   public final static String servoAttach = "servoAttach";
   public final static String servoDetach = "servoDetach";
 
-  /**
-   * attachDevice - attach the servo to a specific pin on the controller
-   * @return boolean boolean
-   */
-  public void attachDevice(Device servo);
-
-  /**
-   * servoDetach - detach the servo from a specific pin on the controller
-   * 
-   * @param name
-   *          - name of the servo
-   * @return boolean
-   */
-  void servoDetach(Servo servo);
 
   void servoSweepStart(Servo servo);
 
@@ -73,8 +59,21 @@ public interface ServoController extends NameProvider, DeviceController {
    * @param servoName
    * @return
    */
-  // public Integer getServoPin(String servoName);
 
   public void setServoSpeed(Servo servo);
-
+  
+  /**
+   * These are "System" calls for the Arduino  e.g. .. ---> Servo.attach(10)
+   * NOT DEVICE ATTACH & DETACH !!!! 
+   * @param servo
+   */
+  public void servoAttach(Servo servo);
+  
+  /**
+   * These are "System" calls for the Arduino  e.g. .. ---> Servo.detach()
+   * NOT DEVICE ATTACH & DETACH !!!! 
+   * @param servo
+   */
+  public void servoDetach(Servo servo);
+  
 }

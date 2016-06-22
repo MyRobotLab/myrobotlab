@@ -594,8 +594,9 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	/**
-	 * FIXME DEPRECATED - / - REMOVE - handle in attachDevice
+	 * FIXME DEPRECATED - / - REMOVE - handle in attach(Device)
 	 */
+	/*
 	public void motorAttach(MotorControl motor) throws MRLException {
 		if (!motor.isLocal()) {
 			throw new MRLException("motor is not in the same MRL instance as the motor controller");
@@ -624,6 +625,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		motor.setController(this);
 		motor.broadcastState();
 	}
+	*/
 
 	public void detach(String name) {
 		Device device = (Device)Runtime.getService(name);
@@ -1257,7 +1259,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	@Override
 	public void attach(String name) throws Exception {
 		Device device = (Device)Runtime.getService(name);
-		attachDevice(device);
+		attach(device);
 	}
 
 	/**
@@ -1279,7 +1281,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * @param device
 	 */
 	@Override
-	public synchronized void attachDevice(Device device) {
+	public synchronized void attach(Device device) {
 
 		int deviceType = device.getDeviceType();
 
@@ -1366,13 +1368,6 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 	public void sensorPollingStop(String name) {
 		sendMsg(SENSOR_POLLING_STOP, getDeviceId(name));
-	}
-
-	@Override
-	public synchronized void servoDetach(Servo servo) {
-		int id = getDeviceId(servo);
-		log.info(String.format("servoDetach(%s) id %d", servo.getName(), id));
-		sendMsg(SERVO_DETACH, id);
 	}
 
 	// FIXME - do sweep single method call from ServoControl
@@ -1675,7 +1670,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 				Motor motor = (Motor) Runtime.createAndStart("motor", "Motor");
 				motor.setType2Pwm(leftPwm, rightPwm);
 				// motor.attach(arduino);
-				arduino.motorAttach(motor);
+				arduino.attach(motor);
 				while (true) {
 					// try to overrun?
 					// rand between -1 and 1.
@@ -1685,7 +1680,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 			} else {
 				Servo servo = (Servo) Runtime.createAndStart("servo", "Servo");
 				servo.setPin(13);
-				arduino.attachDevice(servo);
+				arduino.attach(servo);
 				servo.attach();
 				int angle = 0;
 				int max = 5000;
@@ -1895,7 +1890,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	
 	@Override
 	public void addSensorDataListener(SensorDataListener listener) {
-		attachDevice(listener);
+		attach(listener);
 	}
 
 
@@ -1904,10 +1899,21 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// TODO validity checks
 	}
 
+	/**
+	 * THESE ARE SERVO COMMANDS !  NOT REQUEST
+	 * TO ATTACH OR DETACH THE SERVO AS A DEVICE !!!
+	 * This is Servo.attach(10) .. not Arduino.attach(Device) !!
+	 */
 	@Override
-	public void attach(Device device) throws Exception {
-		// TODO Auto-generated method stub
-		
+	public void servoAttach(Servo servo) {
+		int id = getDeviceId(servo);
+		// sendMsg(SERVO_, getDeviceId(servo), id);		
+	}
+
+	@Override
+	public void servoDetach(Servo servo) {
+		int id = getDeviceId(servo);
+		// sendMsg(SERVO_, getDeviceId(servo), id);		
 	}
 
 
