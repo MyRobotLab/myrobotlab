@@ -138,8 +138,8 @@ public class ArduinoBindingsGenerator {
     exclude.add("setBoardType");
     exclude.add("startService");
     exclude.add("test");
-    exclude.add("attach");
-    exclude.add("detach");
+    // exclude.add("attach");  THESE ARE NOW CRITICAL attach & detach Device !
+    // exclude.add("detach");
 
     exclude.add("publishStepperEvent");
     exclude.add("setStepperSpeed");
