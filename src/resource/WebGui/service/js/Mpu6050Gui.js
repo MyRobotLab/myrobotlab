@@ -15,21 +15,18 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     var camera = new THREE.PerspectiveCamera( 75, 1, 0.1, 1000 );
 	var renderer = new THREE.WebGLRenderer();
 	renderer.setSize(400,400);
-	
-	var geometry = new THREE.BoxGeometry(10, 0.5, 0.5);
-    var material = new THREE.MeshBasicMaterial({color: 0xff0000});
-    var cube = new THREE.Mesh(geometry,material);
-    cube.position.y = 5;
-    
-    var geometry2 = new THREE.BoxGeometry(0.5, 0.5, 10);
-    var material2 = new THREE.MeshBasicMaterial({color: 0x00ff00});
-    var cube2 = new THREE.Mesh(geometry2,material2);
-    cube2.position.y = 5;
-    
+	// Lightning
+	var ambientLight, light;
+	ambientLight = new THREE.AmbientLight( 0x333333 );	// 0.2
+	light = new THREE.DirectionalLight( 0xFFFFFF, 1.0 );
+	// Materials
+	var teapotColor = new THREE.Color(0xdd00dd);
+	phongMaterial = new THREE.MeshPhongMaterial( { color: teapotColor, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
     var gridHelper = new THREE.GridHelper( 50, 5 );
-    var gray  = new THREE.Color(0xdd00dd);
-    var black = new THREE.Color(0x00ff00);
-    gridHelper.setColors(gray,black);
+    //
+    var color1 = new THREE.Color(0xdd00dd);
+    var color2 = new THREE.Color(0x00ff00);
+    gridHelper.setColors(color1,color2);
     
     var teapotSize = 10;
     var tess = 15;
@@ -46,12 +43,12 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
 			fitLid,
 			blinn);
     
-    var teapot = new THREE.Mesh(teapotGeometry, material2);
+    var teapot = new THREE.Mesh(teapotGeometry, phongMaterial);
     
-    // scene.add(cube);
-    // scene.add(cube2);
+    scene.add(ambientLight);
+	scene.add(light);
     scene.add(teapot);
-    scene.add(gridHelper);
+    // scene.add(gridHelper);
 
     camera.position.x = 0;
     camera.position.y = 8;
@@ -96,13 +93,6 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     		} else {
     			container.appendChild( renderer.domElement );
     		}
-        	cube.rotation.x = $scope.gyroDegreeX / (2 * Math.PI);
-        	cube.rotation.y = $scope.gyroDegreeY / (2 * Math.PI);
-        	cube.rotation.z = $scope.gyroDegreeZ / (2 * Math.PI);
-
-        	cube2.rotation.x = $scope.gyroDegreeX / (2 * Math.PI);
-        	cube2.rotation.y = $scope.gyroDegreeY / (2 * Math.PI);
-        	cube2.rotation.z = $scope.gyroDegreeZ / (2 * Math.PI);
         	
         	teapot.rotation.x = $scope.gyroDegreeX / (2 * Math.PI);
         	teapot.rotation.y = $scope.gyroDegreeY / (2 * Math.PI);
