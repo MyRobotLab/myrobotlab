@@ -964,13 +964,13 @@ class MrlI2CDevice : public Device {
         WIRE.begin();
       }
     }
-    void read(unsigned char* ioCmd) {
+    void i2cRead(unsigned char* ioCmd) {
       
     }
-    void write(unsigned char* ioCmd) {
+    void i2cWrite(unsigned char* ioCmd) {
       
     }
-    void readWrite(unsigned char* ioCmd) {
+    void i2cWriteRead(unsigned char* ioCmd) {
       
     }
     void update(unsigned long loopCount) {
