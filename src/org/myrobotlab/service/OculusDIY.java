@@ -27,6 +27,7 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	public final static Logger log = LoggerFactory.getLogger(OculusDIY.class);
 
 	transient public Arduino arduino;
+	transient public Mpu6050 mpu6050;
 
 	OculusData oculus = new OculusData();
 	Mapper mapperPitch = new Mapper(-180, 0, 0, 180);
@@ -48,6 +49,7 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	public OculusDIY(String n) {
 		super(n);
 		arduino = (Arduino) createPeer("arduino");
+		mpu6050 = (Mpu6050) createPeer("mpu6050");
 	}
 
 	public void calibrate() {
@@ -135,7 +137,7 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	public void startService() {
 		super.startService();
 		arduino = (Arduino) startPeer("arduino");
-		arduino.addSensorDataListener(this);
+		mpu6050 = (Mpu6050) startPeer("mpu6050");
 		return;
 	}
 
@@ -145,6 +147,8 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 
 	public void connect(String port) {
 		arduino.connect(port);
+		// FIXME - setup of the mpu6050 MRLComm device & initializaiton
+		// 
 	}
 
 	public static void main(String[] args) {
@@ -183,12 +187,6 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 
 	@Override
 	public Integer getDeviceType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int[] getDeviceConfig() {
 		// TODO Auto-generated method stub
 		return null;
 	}

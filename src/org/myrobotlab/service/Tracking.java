@@ -665,20 +665,6 @@ public class Tracking extends Service {
 
   }
 
-  public void connect(String port) throws IOException {
-
-    if (getX().getPin() == null) {
-      error("x pin not set");
-      return;
-    }
-    if (getY().getPin() == null) {
-      error("y pin not set");
-      return;
-    }
-
-    connect(port, getX().getPin(), getY().getPin(), getOpenCV().getCameraIndex());
-  }
-
   public void connect(String port, int xPin, int yPin) throws IOException {
     connect(port, xPin, yPin, 0);
   }
@@ -686,8 +672,8 @@ public class Tracking extends Service {
   public void connect(String port, int xPin, int yPin, int cameraIndex) {
     arduino.connect(port);
 
-    x.setPin(xPin);
-    y.setPin(yPin);
+    arduino.attach(x, xPin);
+    arduino.attach(y, yPin);
     opencv.setCameraIndex(cameraIndex);
 
     x.attach();

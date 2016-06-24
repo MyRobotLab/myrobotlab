@@ -161,6 +161,8 @@ public class Plantoid extends Service {
     opencv = (OpenCV) createPeer("opencv");
     tracking = (Tracking) createPeer("tracking");
 
+    // OLD WAY
+    /*
     leg1.setPin(2);
     leg2.setPin(3);
     leg3.setPin(4);
@@ -176,6 +178,14 @@ public class Plantoid extends Service {
 
     pan.setController(arduino);
     tilt.setController(arduino);
+    
+    */
+    arduino.attach(leg1, 2);
+    arduino.attach(leg2, 3);
+    arduino.attach(leg3, 4);
+    arduino.attach(leg4, 5);
+    arduino.attach(pan, 6);
+    arduino.attach(tilt, 7);
 
     pan.setRest(90);
     tilt.setRest(90);

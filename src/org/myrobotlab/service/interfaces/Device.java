@@ -48,6 +48,9 @@ public interface Device extends NameProvider {
 	public Integer getDeviceType();
 
 	/**
+	 * FIXED (GroG) - this is not config of the "Device"  .. ie - the device does not own the config..
+	 * the "config" is a binding data between the DeviceController & the Device
+	 * 
 	 * When attaching a Device with a microcontroller the microcontroller code
 	 * will need to initialize the new device.
 	 * 
@@ -55,5 +58,5 @@ public interface Device extends NameProvider {
 	 * 
 	 * @return
 	 */
-	public int[] getDeviceConfig();
+	// public int[] getDeviceConfig();
 }

@@ -39,7 +39,17 @@ public interface MotorController extends DeviceController {
 	// public void motorAttach(MotorControl motor) throws Exception;
 
 	// ======== new interface end ===================
-
+	
+	/*********************************************************
+	 * HIGH LEVEL ATTACHES BEGIN
+	 */
+	public void attach(MotorControl motor, int port);
+	public void attach(MotorControl motor, int powerPin, int dirPin);
+	
+	/**
+	 * HIGH LEVEL ATTACHES END
+	 *******************************************************/
+	
 	/**
 	 * 
 	 * request for motor to move the motor can be queried for the new powerlevel

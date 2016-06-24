@@ -76,7 +76,7 @@ public class ArduinoChaosTest {
     arduino.pinMode(2, Arduino.OUTPUT);
     Thread.sleep(1000);
     Servo servo = (Servo)Runtime.createAndStart("servo", "Servo");
-    servo.setPin(13);
+    // servo.setPin(13);
     // arduino.servoAttach(servo);
     Thread.sleep(1000);
     arduino.servoSweepStart(servo);
@@ -204,7 +204,7 @@ public class ArduinoChaosTest {
     Motor motor = (Motor)Runtime.createAndStart("motor", "Motor");
     motor.setType2Pwm(leftPwm, rightPwm);
     // motor.attach(arduino);
-    arduino.attachDevice(motor);
+    arduino.attachDevice(motor, null); // null  config is this right ?
 
 
 //    servo.attach();
