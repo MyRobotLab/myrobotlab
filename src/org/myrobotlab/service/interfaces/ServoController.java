@@ -28,11 +28,35 @@ package org.myrobotlab.service.interfaces;
 import org.myrobotlab.service.Servo;
 
 public interface ServoController extends NameProvider, DeviceController {
-
-  public final static String servoWrite = "servoWrite";
-  public final static String servoAttach = "servoAttach";
-  public final static String servoDetach = "servoDetach";
-
+  
+  /**
+   * high level "attach" which internally will call attachDevice(Device device, int[] config)
+   * and "might" call Servo.attach(pin) on MRLComm
+   * 
+   * "might" call - because Servo.attach & Device.attach are NOT related
+   * 
+   * @param servo
+   * @param pin
+   */
+  public void attach(Servo servo, int pin);
+  
+  /**
+   * retrieve the pin the servo is attached to
+   * @param servo
+   * @return null if pin is not set - otherwise the pin
+   * @throws Exception
+   */
+  public Integer getPin(Servo servo);
+  
+ 
+  /**
+   * high level "detach" with internally will call detachDevice(Device device) - this
+   * most likely will call Servo.detach - because it represents the "removal" of the 
+   * peripheral device from the Arduino ... similar to pulling the wires off ;)
+   * 
+   * @param servo
+   */
+  public void detach(Servo servo);
 
   void servoSweepStart(Servo servo);
 
@@ -63,7 +87,7 @@ public interface ServoController extends NameProvider, DeviceController {
   public void setServoSpeed(Servo servo);
   
   /**
-   * These are "System" calls for the Arduino  e.g. .. ---> Servo.attach(10)
+   * These are "System" calls for the Arduino and possibly other uCs e.g. .. ---> Servo.attach(10)
    * NOT DEVICE ATTACH & DETACH !!!! 
    * @param servo
    */
@@ -75,5 +99,6 @@ public interface ServoController extends NameProvider, DeviceController {
    * @param servo
    */
   public void servoDetach(Servo servo);
+    
   
 }

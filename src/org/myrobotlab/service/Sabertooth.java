@@ -395,8 +395,8 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 			Motor motor01 = (Motor) Runtime.start("motor01", "Motor");
 			Motor motor02 = (Motor) Runtime.start("motor02", "Motor");
 
-			mc.attachDevice(motor01);
-			mc.attachDevice(motor02);
+			mc.attach(motor01, 1);
+			mc.attach(motor02, 2);
 
 			motor01.move(0);
 			motor01.move(0.15);
@@ -445,27 +445,16 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 		serial.connect(port, rate, databits, stopbits, parity);
 	}
 
-	@Override
-	public void attachDevice(String name) throws MRLException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void detachDevice(String name) {
-		// TODO Auto-generated method stub
-	}
 	
 	@Override
-	public void attachDevice(Device device) throws Exception {
-		// TODO Auto-generated method stub
+	public void attachDevice(Device device, int[] config) throws Exception {
+		// TODO implement !
 		
 	}
 
 	@Override
 	public void detachDevice(Device device) {
-		// TODO Auto-generated method stub
-		
+		// NOOP for Sabertooth ?
 	}
 
 	/**
@@ -485,6 +474,16 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin, Integer encoderPin) {
 		error("motorAttach with pins not supported");
 		return false;
+	}
+
+	@Override
+	public void attach(MotorControl motor, int port) {
+		
+	}
+
+	@Override
+	public void attach(MotorControl motor, int powerPin, int dirPin) {
+		error("2 pin attach not supported for motors - did you want 2 pin control - attach(motor, port) ?");
 	}
 
 }

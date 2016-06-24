@@ -25,31 +25,27 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface ServoControl {
+public interface ServoControl extends NameProvider {
 
-  // FIXME - add sweep and other fun methods
-  // extend Motor ???
+ 
   /**
-   * re-attaches servo to controller it was last attached to
+   * calls Servo.attach(pin) on MRLComm
    * 
    * @return
    */
   public boolean attach();
 
-  public boolean attach(String controller, Integer pin) throws Exception;
-
+  
   /**
-   * detaches the servo from the controller
+   * calls Servo.detach() on MRLComm
    * 
    * @return
    */
   public boolean detach();
 
-  public String getControllerName();
+  
+  public ServoController getController();
 
-  public String getName();
-
-  public Integer getPin();
 
   /**
    * moveTo moves the servo to a specific location. Typically, a servo has 0 to
@@ -68,9 +64,8 @@ public interface ServoControl {
    * servo, to be used directly.
    */
 
-  public boolean setController(ServoController controller);
+  public void setController(ServoController controller);
 
-  public boolean setController(String controller);
 
   /**
    * limits input of servo - to prevent damage or problems if servos should not
@@ -80,20 +75,13 @@ public interface ServoControl {
    */
   public void setMinMax(int min, int max);
 
-  /**
-   * memory of the controllers pin - so that it can be re-attached after a
-   * detach
-   * 
-   * @return
-   */
-  public boolean setPin(int pin);
+ 
 
   /**
    * fractional speed settings
    * 
    * @param speed
    */
-  // public void setSpeed(int speed);
   public void setSpeed(double speed);
 
   /**

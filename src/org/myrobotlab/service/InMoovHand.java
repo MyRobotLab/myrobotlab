@@ -93,12 +93,14 @@ public class InMoovHand extends Service implements LeapDataListener {
     wrist.setRest(90);
 
     // connection details
+    /* OLD WAY
     thumb.setPin(2);
     index.setPin(3);
     majeure.setPin(4);
     ringFinger.setPin(5);
     pinky.setPin(6);
     wrist.setPin(7);
+    
 
     thumb.setController(arduino);
     index.setController(arduino);
@@ -106,6 +108,15 @@ public class InMoovHand extends Service implements LeapDataListener {
     ringFinger.setController(arduino);
     pinky.setController(arduino);
     wrist.setController(arduino);
+    */
+    
+    // NEW WAY
+    arduino.attach(thumb, 2);
+    arduino.attach(index, 3);
+    arduino.attach(majeure, 4);
+    arduino.attach(ringFinger, 5);
+    arduino.attach(pinky, 6);
+    arduino.attach(wrist, 7);
   }
 
   /**
@@ -411,14 +422,24 @@ public class InMoovHand extends Service implements LeapDataListener {
     return true;
   }
 
-  public void setPins(int thumb, int index, int majeure, int ringFinger, int pinky, int wrist) {
-    log.info(String.format("setPins %d %d %d %d %d %d", thumb, index, majeure, ringFinger, pinky, wrist));
+  public void setPins(int thumbPin, int indexPin, int majeurePin, int ringFingerPin, int pinkyPin, int wristPin) {
+    log.info(String.format("setPins %d %d %d %d %d %d", thumbPin, indexPin, majeurePin, ringFingerPin, pinkyPin, wristPin));
+    /* OLD WAY
     this.thumb.setPin(thumb);
     this.index.setPin(index);
     this.majeure.setPin(majeure);
     this.ringFinger.setPin(ringFinger);
     this.pinky.setPin(pinky);
     this.wrist.setPin(wrist);
+    */
+    
+    // NEW WAY
+    arduino.attach(thumb, thumbPin);
+    arduino.attach(index, indexPin);
+    arduino.attach(majeure, majeurePin);
+    arduino.attach(ringFinger, ringFingerPin);
+    arduino.attach(pinky, pinkyPin);
+    arduino.attach(wrist, wristPin);
   }
 
   public void setRest(int thumb, int index, int majeure, int ringFinger, int pinky) {

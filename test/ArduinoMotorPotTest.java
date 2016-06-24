@@ -123,7 +123,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     // Start the motor and attach it to the arduino.
     motor = (Motor)Runtime.createAndStart("motor", "Motor");
     motor.setType2Pwm(leftPwm, rightPwm);
-    motor.attach((MotorController)arduino);
+    motor.setController((MotorController)arduino);
     // Sensor callback
     // arduino.analogReadPollingStart(potPin);
     // arduino.sensorAttach(this);
@@ -131,7 +131,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     // pin zero sample rate 1.  (TODO: fix the concept of a sample rate!)
     // we actually want it to be specified in Hz..  not cycles ...
     AnalogPinSensor feedbackPot = new AnalogPinSensor(0,1);
-    feedbackPot.addSensorDataListener(this);
+    feedbackPot.addSensorDataListener(this, null); // null config is this right ?
     // arduino.sensorAttach(feedbackPot);
     
     if (enableLoadTiming) {
@@ -311,11 +311,6 @@ public Integer getDeviceType() {
 	return null;
 }
 
-@Override
-public int[] getDeviceConfig() {
-	// TODO Auto-generated method stub
-	return null;
-}
 
 @Override
 public void update(SensorData data) {

@@ -300,17 +300,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   // StepperController end ----
 
   @Override
-  public void attachDevice(String name) throws MRLException {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void detachDevice(String name) {
-    // TODO Auto-generated method stub
-  }
-
-  @Override
   public void motorMove(MotorControl motor) {
     // TODO Auto-generated method stub
 
@@ -362,11 +351,11 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   @Override
   public void connect(String port) {
     // TODO: Arduino just changed to 115200, does this also need to update?
-    connect(port, Serial.BAUD_57600, 8, 1, 0);
+    connect(port, Serial.BAUD_115200, 8, 1, 0);
   }
 
 @Override
-public void attachDevice(Device device) throws Exception {
+public void attachDevice(Device device, int[] config) throws Exception {
 	// TODO Auto-generated method stub
 	
 }
@@ -376,6 +365,19 @@ public void detachDevice(Device device) {
 	// TODO Auto-generated method stub
 	
 }
+
+@Override
+public void attach(MotorControl motor, int port) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void attach(MotorControl motor, int powerPin, int dirPin) {
+	// TODO Auto-generated method stub
+	
+}
+
 
 
 }

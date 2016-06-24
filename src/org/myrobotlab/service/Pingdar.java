@@ -43,7 +43,7 @@ public class Pingdar extends Service {
   transient private UltrasonicSensor sensor;
   // TODO - changed to XDar - make RangeSensor interface -> publishRange
   // TODO - set default sample rate
-  private boolean isAttached = false;
+  // private boolean isAttached = false;
   private Long lastRange;
 
   private Integer lastPos;
@@ -87,10 +87,7 @@ public class Pingdar extends Service {
     this.sensor = sensor;
     this.servo = servo;
 
-    if (isAttached) {
-      warn("already attached - detach first");
-    }
-
+   
     arduino.connect(port);
 
     // TODO - FIX ME
@@ -105,13 +102,8 @@ public class Pingdar extends Service {
     // publishRange --> onRange
     sensor.addRangeListener(this);
     servo.addServoEventListener(this);
-
-    if (!servo.attach(arduino, servoPin)) {
-      error("could not attach servo");
-      return false;
-    }
-
-    isAttached = true;
+    arduino.attach(servo, servoPin);
+    
     return true;
   }
 
@@ -202,10 +194,6 @@ public class Pingdar extends Service {
     this.sweepMax = sweepMax;
     this.step = 1; // FIXME STEP
 
-    if (!isAttached) {
-      error("not attached");
-      return false;
-    }
     // TODO - configurable speed
     sensor = getSensor();
     servo = getServo();

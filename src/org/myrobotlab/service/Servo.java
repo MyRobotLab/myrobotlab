@@ -149,6 +149,10 @@ public class Servo extends Service implements ServoControl, Device {
 	Integer uS;
 
 	/**
+	 * Pin is "gone" - it only is needed at the time of attaching the device
+	 * - Arduino and/or MRLComm will remember the pin for future reference..
+	 * its not a property of the "Servo"
+	 * 
 	 * the pin is a necessary part of servo - even though this is really
 	 * controller's information a pin is a integral part of a "servo" - so it is
 	 * beneficial to store it allowing a re-attach during runtime
@@ -157,7 +161,7 @@ public class Servo extends Service implements ServoControl, Device {
 	 * leave it even on a detach - a attach with pin should only replace it -
 	 * that way pin does not need to be stored on the Servo
 	 */
-	private Integer pin;
+	// private Integer pin;
 
 	/**
 	 * list of names of possible controllers
@@ -234,6 +238,13 @@ public class Servo extends Service implements ServoControl, Device {
 		return isAttached;
 	}
 
+	/**
+	 *  STOP THE CONFUSION .. arduino.attach(servo, 9) not servo.attach(arduino, 9) !!!
+	 * @param controller
+	 * @param pin
+	 * @return
+	 * @throws Exception
+	 *
 	public boolean attach(ServoController controller, Integer pin) throws Exception {
 		setPin(pin);
 
@@ -247,11 +258,14 @@ public class Servo extends Service implements ServoControl, Device {
 		return false;
 	}
 
+
 	@Override
 	public boolean attach(String controllerName, Integer pin) throws Exception {
 		return attach((ServoController) Runtime.getService(controllerName), pin);
 	}
-
+ 
+ 	*/
+	
 	@Override
 	public boolean detach() {
 		if (!isAttached) {
@@ -271,12 +285,8 @@ public class Servo extends Service implements ServoControl, Device {
 	}
 
 	@Override
-	public String getControllerName() {
-		if (controller == null) {
-			return null;
-		}
-
-		return controller.getName();
+	public ServoController getController() {
+		return controller;
 	}
 
 	public long getLastActivityTime() {
@@ -307,19 +317,15 @@ public class Servo extends Service implements ServoControl, Device {
 		return mapper.getMinOutput();
 	}
 
+	/*
 	@Override
 	public Integer getPin() {
-		/*
-		 * valiant attempt of normalizing - but Servo needs to know its own pin
-		 * to support attach()
-		 * 
-		 * if (controller == null) { return null; }
-		 * 
-		 * return controller.getServoPin(getName());
-		 */
+		
 		return pin;
 	}
 
+	*/
+	
 	public Integer getPos() {
 		return targetPos;
 	}
@@ -403,24 +409,28 @@ public class Servo extends Service implements ServoControl, Device {
 	}
 
 	@Override
-	public boolean setController(ServoController controller) {
+	public void setController(ServoController controller) {
 		if (controller == null) {
 			error("setting null as controller");
-			return false;
+			return;
 		}
 
 		log.info(String.format("%s setController %s", getName(), controller.getName()));
 
+		// FIXME - remove - the controller or MRLComm will take care of this
+		// check
+		/*
 		if (isAttached()) {
 			warn("can not set controller %s when servo %s is attached", controller, getName());
 			return false;
 		}
-
+		*/
+		
 		this.controller = controller;
 		broadcastState();
-		return true;
 	}
 
+	/*
 	@Override
 	public boolean setController(String controller) {
 
@@ -431,7 +441,8 @@ public class Servo extends Service implements ServoControl, Device {
 
 		return setController(sc);
 	}
-
+	*/
+	
 	public boolean eventsEnabled(boolean b) {
 		isEventsEnabled = b;
 		controller.servoEventsEnabled(this, b);
@@ -454,6 +465,7 @@ public class Servo extends Service implements ServoControl, Device {
 	 * 
 	 * @see org.myrobotlab.service.interfaces.ServoControl#setPin(int)
 	 */
+	/*
 	@Override
 	public boolean setPin(int pin) {
 		log.info(String.format("setting %s pin to %d", getName(), pin));
@@ -465,6 +477,7 @@ public class Servo extends Service implements ServoControl, Device {
 		broadcastState();
 		return true;
 	}
+	*/
 
 	public int setRest(int i) {
 		rest = i;
@@ -596,7 +609,10 @@ public class Servo extends Service implements ServoControl, Device {
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.connect("COM5");
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
-			servo.attach(arduino, 8);
+			arduino.attachDevice(servo, new int[]{8});
+			// servo.attach(arduino, 8);
+			// servo.attach(
+					
 			servo.moveTo(90);
 			servo.setRest(30);
 			servo.moveTo(10);
@@ -646,9 +662,12 @@ public class Servo extends Service implements ServoControl, Device {
 		return Device.DEVICE_TYPE_SERVO;
 	}
 
+	/*
+	 NO LONGER NEEDED - CONFIG is supplied at the time
+	 attachDevice(Device device, int[] config) is called
 	@Override
 	public int[] getDeviceConfig() {
 		return new int[] { pin };
 	}
-
+	*/
 }

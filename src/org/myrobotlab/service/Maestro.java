@@ -159,17 +159,6 @@ public void setServoSpeed(Servo servo) {
 	
 }
 
-@Override
-public void attachDevice(String name) throws Exception {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void detachDevice(String name) {
-	// TODO Auto-generated method stub
-	
-}
 
 @Override
 public void detachDevice(Device device) {
@@ -178,7 +167,7 @@ public void detachDevice(Device device) {
 }
 
 @Override
-public void attachDevice(Device device) throws Exception {
+public void attachDevice(Device device, int[] config) {
 	// TODO Auto-generated method stub
 	
 }
@@ -187,6 +176,23 @@ public void attachDevice(Device device) throws Exception {
 public void servoAttach(Servo servo) {
 	// TODO Auto-generated method stub
 	
+}
+
+@Override
+public void attach(Servo servo, int pin) {
+	attachDevice(servo, new int[]{pin});
+}
+
+@Override
+public void detach(Servo servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public Integer getPin(Servo servo) {
+	// TODO Auto-generated method stub
+	return null;
 }
 
 }

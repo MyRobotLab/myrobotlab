@@ -100,6 +100,8 @@ public interface MotorControl extends SensorDataPublisher, SensorDataListener, N
    * motor, to be used directly
    */
   public void setController(MotorController controller);
+  
+  public String getControllerName();
 
   public void setEncoder(Encoder encoder);
 
@@ -125,13 +127,6 @@ public interface MotorControl extends SensorDataPublisher, SensorDataListener, N
    */
   public void unlock();
 
-  /**
-   * a safety limit
-   * 
-   * @param max
-   */
-  // public void setMaxPower(float max);
-
   boolean hasSensor();
 
   int[] getControlPins();
@@ -141,10 +136,6 @@ public interface MotorControl extends SensorDataPublisher, SensorDataListener, N
   String[] getMotorTypes();
 
   double getPowerOutput();
-
-  public void attach(String controllerName) throws Exception;
-
-  public void attach(MotorController uC) throws Exception;
 
   public boolean isLocal();
 

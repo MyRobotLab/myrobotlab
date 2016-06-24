@@ -13,12 +13,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.interfaces.Device;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -71,18 +71,14 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	private int pwmFreq = 60;
 	private boolean pwmFreqSet = false;
 
-	public List<String> deviceAddressList = Arrays.asList(
-			 "0x60","0x61","0x62","0x63","0x64","0x65","0x66","0x67",
-		   "0x68","0x69","0x6A","0x6B","0x6C","0x6D","0x6E","0x6F",
-	     "0x70","0x71","0x72","0x73","0x74","0x75","0x76","0x77",
-       "0x78","0x79","0x7A","0x7B","0x7C","0x7D","0x7E","0x7F");
-			
+	public List<String> deviceAddressList = Arrays.asList("0x60", "0x61", "0x62", "0x63", "0x64", "0x65", "0x66", "0x67", "0x68", "0x69", "0x6A", "0x6B", "0x6C", "0x6D", "0x6E",
+			"0x6F", "0x70", "0x71", "0x72", "0x73", "0x74", "0x75", "0x76", "0x77", "0x78", "0x79", "0x7A", "0x7B", "0x7C", "0x7D", "0x7E", "0x7F");
+
 	public String deviceAddress = "0x60";
-	
-	public List<String> deviceBusList = Arrays.asList(
-			"0","1","2","3","4","5","6","7","8");	
+
+	public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
 	public String deviceBus = "1";
-	
+
 	public String type = "PCA9685";
 
 	public transient final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriver.class.getCanonicalName());
@@ -91,13 +87,16 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 
 	public static final int PCA9685_MODE1 = 0x00; // Mode 1 register
 	public static final byte PCA9685_SLEEP = 0x10; // Set sleep mode, before
-																									// changing prescale value
-	public static final byte PCA9685_AUTOINCREMENT = 0x20; // Set autoincrement to
-																													// be able to write
-																													// more than one byte
-																													// in sequence
+													// changing prescale value
+	public static final byte PCA9685_AUTOINCREMENT = 0x20; // Set autoincrement
+															// to
+															// be able to write
+															// more than one
+															// byte
+															// in sequence
 
-	public static final byte PCA9685_PRESCALE = (byte) 0xFE; // PreScale register
+	public static final byte PCA9685_PRESCALE = (byte) 0xFE; // PreScale
+																// register
 
 	// Pin PWM addresses 4 bytes repeats for each pin so I only define pin 0
 	// The rest of the addresses are calculated based on pin numbers
@@ -108,12 +107,19 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 
 	public static final int PWM_FREQ = 60; // default frequency for servos
 	public static final int osc_clock = 25000000; // clock frequency of the
-																								// internal clock
+													// internal clock
 	public static final int precision = 4096; // pwm_precision
 
 	public ArrayList<String> controllers;
 	public String controllerName;
-  private boolean isAttached = false;
+	private boolean isAttached = false;
+	
+	/**
+	 * @Mats - added by GroG - was wondering if this would help,
+	 * probably you need a reverse index too ?
+	 */
+	HashMap<String, DeviceMapping> servoToPin = new HashMap<String, DeviceMapping>();
+	HashMap<Integer, DeviceMapping> pinToServo = new HashMap<Integer, DeviceMapping>();
 
 	public static void main(String[] args) {
 
@@ -148,8 +154,8 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	/**
 	 * an Arduino does not need to know about a shield but a shield must know
 	 * about a Arduino Arduino owns the script, but a Shield needs additional
-	 * support Shields are specific - but plug into a generalized Arduino Arduino
-	 * shields can not be plugged into other uCs
+	 * support Shields are specific - but plug into a generalized Arduino
+	 * Arduino shields can not be plugged into other uCs
 	 * 
 	 */
 	// @Override
@@ -160,15 +166,17 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	public boolean setController(String controllerName) {
 		return setController((I2CControl) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
 	}
+
 	public boolean setController(I2CControl controller) {
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
+
 	public boolean setController(I2CControl controller, String deviceBus, String deviceAddress) {
 		if (controller == null) {
 			error("setting null as controller");
 			return false;
 		}
-		
+
 		controllerName = controller.getName();
 		log.info(String.format("%s setController %s", getName(), controllerName));
 
@@ -187,7 +195,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 			this.raspi = (RasPi) controller;
 			controler = "RasPi";
 		}
-		
+
 		broadcastState();
 		return true;
 	}
@@ -211,13 +219,13 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		servoNameToPinMap.put(servo.getName(), pinNumber);
 		return true;
 	}
-	
-	public void SetDeviceBus(String deviceBus){
+
+	public void SetDeviceBus(String deviceBus) {
 		this.deviceBus = deviceBus;
 		broadcastState();
-  }
-	
-	boolean SetDeviceAddress(String deviceAddress){
+	}
+
+	boolean SetDeviceAddress(String deviceAddress) {
 		if (controller != null) {
 			if (this.deviceAddress != deviceAddress) {
 				controller.releaseI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
@@ -228,7 +236,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		this.deviceAddress = deviceAddress;
 		return true;
 	}
-	
+
 	// VENDOR SPECIFIC LIBRARY METHODS BEGIN /////
 	// ----------- AF16C API Begin --------------
 	// TODO The Arduino specific parts should be move to the Arduino service
@@ -295,7 +303,8 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 			byte[] buffer2 = { PCA9685_PRESCALE, (byte) prescale_value };
 			raspi.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer2, buffer2.length);
 
-			// Leave sleep mode, set autoincrement to be able to write several bytes
+			// Leave sleep mode, set autoincrement to be able to write several
+			// bytes
 			// in sequence
 			byte[] buffer3 = { PCA9685_MODE1, PCA9685_AUTOINCREMENT };
 			raspi.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer3, buffer3.length);
@@ -321,22 +330,6 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 			byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (servoNum * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
 			raspi.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 		}
-	}
-
-	@Override
-	public void startService() {
-		super.startService();
-	}
-
-	@Override
-	public void attachDevice(String name) throws MRLException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void detachDevice(String name) {
-		// TODO Auto-generated method stub
 	}
 
 	public String getControllerName() {
@@ -377,9 +370,9 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	}
 
 	@Override
-	public void attachDevice(Device device) {
+	public void attachDevice(Device device, int[] config) {
 		// TODO - any more setup required
-		arduino.attachDevice(device);
+		arduino.attachDevice(device, config);
 	}
 
 	@Override
@@ -404,9 +397,9 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		if (!pwmFreqSet) {
 			setPWMFreq(pwmFreq);
 		}
-		log.info(String.format("servoWrite %s deviceAddress %s pin %s targetOutput %d", servo.getName(), deviceAddress, servo.getPin(), servo.targetOutput));
+		log.info(String.format("servoWrite %s deviceAddress %s targetOutput %d", servo.getName(), deviceAddress, servo.targetOutput));
 		int pulseWidthOff = SERVOMIN + (int) (servo.targetOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
-		setServo(servo.getPin(), pulseWidthOff);
+		setServo(servoToPin.get(servo.getName()).getIndex(), pulseWidthOff);
 	}
 
 	@Override
@@ -418,12 +411,12 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		int pulseWidthOff = (int) (servo.uS * 0.45) - 300;
 		// since pulseWidthOff can be larger than > 256 it needs to be
 		// sent as 2 bytes
-		log.info(String.format("servoWriteMicroseconds %s deviceAddress x%02X pin %s pulse %d", servo.getName(), deviceAddress, servo.getPin(), pulseWidthOff));
+		log.info(String.format("servoWriteMicroseconds %s deviceAddress x%02X pin %s pulse %d", servo.getName(), deviceAddress, servoToPin.get(servo.getName()), pulseWidthOff));
 
 		if (controler == "Arduino") {
-			arduino.sendMsg(AF_SET_SERVO, Integer.decode(deviceAddress), servo.getPin(), pulseWidthOff >> 8, pulseWidthOff & 0xFF);
+			arduino.sendMsg(AF_SET_SERVO, Integer.decode(deviceAddress), servoToPin.get(servo.getName()).getIndex(), pulseWidthOff >> 8, pulseWidthOff & 0xFF);
 		} else {
-			byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (servo.getPin() * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
+			byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (servoToPin.get(servo.getName()).getIndex() * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
 			raspi.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 		}
 	}
@@ -454,23 +447,86 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		meta.addCategory("shield", "servo & pwm");
 		meta.setSponsor("Mats");
 		/*
-		 * meta.addPeer("arduino", "Arduino", "our Arduino"); meta.addPeer("raspi",
-		 * "RasPi", "our RasPi");
+		 * meta.addPeer("arduino", "Arduino", "our Arduino");
+		 * meta.addPeer("raspi", "RasPi", "our RasPi");
 		 */
 		return meta;
 	}
 
+	/**
+	 * this should exist for the I2C but do not know the correct I2C write
+	 * command
+	 */
 	@Override
 	public void servoDetach(Servo servo) {
-		// TODO Auto-generated method stub
-		
+		int pin = servoToPin.get(servo.getName()).getIndex();
+		// FIXME send i2c command to detach
 	}
 
+	/**
+	 * I do not remember if the I2C Servo driver has a concept of
+	 * Servo.attach/detach like Arduino <Servo.h> does. I would think it does,
+	 * this really means go and stay at a position, vs power off to the servo
+	 */
 	@Override
 	public void servoAttach(Servo servo) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
+	/**
+	 * Device attach - this should be creating the I2C device on MRLComm for the
+	 * "first" servo if not already created - Since this does not use the
+	 * Arduino <Servo.h> servos - it DOES NOT need to create "Servo" devices in
+	 * MRLComm. It will need to keep track of the "pin" to I2C address, and
+	 * whenever a ServoControl.moveTo(79) - the Servo will tell this controller
+	 * its name & location to move.
+	 * 
+	 * This service will translate the name & location to an I2C address & value
+	 * write request to the MRLComm device.
+	 */
+	@Override
+	public void attach(Servo servo, int pin) {
+		// just guessing here what needs to be done
+		// if its our first servo - we need to create an I2C device on MRLComm
+		if (servoToPin.size() == 0){
+			// @Mats - is this re-entrant ?
+			// does it add the MRL I2C device ?
+			SetDeviceAddress(deviceBus);
+		}
+		
+		// potentially you could do your own speed control
+		// on MRLComm similar to how speed control is currently done
+		// with <Servo.h> servos - where MRLComm incrmentally moves them
+		// on updateDevice 
+		DeviceMapping mapping = new DeviceMapping(servo, new int[]{pin});
+		servoToPin.put(servo.getName(), mapping);
+		pinToServo.put(pin, mapping);
+		
+		// TODO - do the I2C equivalent of <Servo.h> Servo.attach		
+
+	}
+
+	/**
+	 * probably just call servoDetach, if desired on the last servo removed it
+	 * "could" free the actual I2C device in the MRLComm deviceList
+	 */
+	@Override
+	public void detach(Servo servo) {
+		int temp = servoToPin.get(servo.getName()).getIndex();
+		servoToPin.remove(servo.getName());
+		pinToServo.remove(temp);
+		
+		if (servoToPin.size() == 0){
+			// TODO - free I2C device
+		}
+
+	}
+
+	@Override
+	public Integer getPin(Servo servo) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
