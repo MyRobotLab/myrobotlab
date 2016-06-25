@@ -11,8 +11,8 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -52,10 +52,14 @@ public class ServoTest {
 	}
 
 	@Test
-	public void testAttach() {
+	public void testAttach() throws Exception {
+		
+		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 		Servo servo = (Servo)Runtime.start("servo01", "Servo");
-		ServoController arduino = (ServoController)Runtime.start("arduino", "Arduino");
+		
+		arduino.connect("COM5");
 		arduino.attach(servo, 7);
+		
 	}
 
 	@Test

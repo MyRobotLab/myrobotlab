@@ -405,7 +405,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		sendMsg(ANALOG_WRITE, address, value);
 	}
 
-	public void connect(String port) {
+	public void connect(String port) throws IOException {
 		// call the other method here.
 		connect(port, Serial.BAUD_115200, 8, 1, 0);
 	}
@@ -419,7 +419,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * @throws SerialDeviceException
 	 */
 	@Override
-	public void connect(String port, Integer rate, int databits, int stopbits, int parity) {
+	public void connect(String port, int rate, int databits, int stopbits, int parity) throws IOException {
 
 		// FIXME ! <<<-- REMOVE ,this) - patterns should be to add listener on
 		// startService
@@ -427,8 +427,8 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// return serial.connect(port); // <<<-- REMOVE ,this) - patterns
 		// should be to add listener on
 		// startService
-		boolean ret = serial.connect(port, rate, databits, stopbits, parity);
-		log.info("RETRUNED VALUE FROM CONNECT: {}", ret);
+		serial.open(port, rate, databits, stopbits, parity);
+		
 		Integer version = getVersion();
 		if (version == null || version != MRLCOMM_VERSION) {
 			error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
@@ -1301,7 +1301,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// references to work from
 		// Java-land Service -----name---> deviceList
 		// Java-land Service <----name---- deviceList
-		deviceList.put(device.getName(), new DeviceMapping(device));
+		deviceList.put(device.getName(), new DeviceMapping(device, config));
 
 		// to allow full duplex communication we need the device id
 		// from MRLComm to the appropriate service (identified by name)
@@ -1330,7 +1330,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	
 	Integer getDeviceId(String name){	
 		if (deviceList.containsKey(name)){
-			return deviceList.get(name).getIndex();
+			return deviceList.get(name).getId();
 		}
 		log.error("getDeviceId could not find device {}", name);
 		return null;
@@ -1371,8 +1371,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 	@Override
 	public void servoSweepStop(Servo servo) {
-		int id = deviceList.get(servo.getName()).getIndex();
-		sendMsg(SERVO_SWEEP_STOP, id);
+		sendMsg(SERVO_SWEEP_STOP, getDeviceId(servo));
 	}
 
 	@Override

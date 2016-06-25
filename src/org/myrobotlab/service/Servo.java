@@ -223,7 +223,7 @@ public class Servo extends Service implements ServoControl, Device {
 	public boolean attach() {
 		lastActivityTime = System.currentTimeMillis();
 		if (isAttached) {
-			log.info(String.format("%s.attach() - already attached - detach first", getName()));
+			log.info(String.format("%s.attach() - already attached - nothing to do", getName()));
 			return false;
 		}
 

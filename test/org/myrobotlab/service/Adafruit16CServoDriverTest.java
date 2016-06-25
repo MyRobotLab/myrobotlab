@@ -166,7 +166,7 @@ public class Adafruit16CServoDriverTest {
 		// FIXME - make virtual UART
 
 		Serial uart = virtual.getUart("v1");
-		uart.connect("v1");
+		uart.open("v1");
 		uart.record("test/Adafruit16CServoDriver/test");
 		arduino.connect("v0");
 

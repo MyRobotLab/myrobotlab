@@ -28,7 +28,7 @@ import gnu.io.UnsupportedCommOperationException;
  *         Serial service or ports.
  * 
  */
-public class PortRXTX extends Port implements PortSource, SerialPortEventListener {
+public class PortRXTX extends Port implements SerialControl, SerialPortEventListener {
 
   public final static Logger log = LoggerFactory.getLogger(PortRXTX.class);
 

@@ -353,13 +353,13 @@ public class Gps extends Service implements SerialDataListener {
     return checkInside(polygon, point.getLat(), point.getLon());
   }
 
-  public boolean connect(String port) {
-    return serial.connect(port, 38400, 8, 1, 0);
+  public void connect(String port) throws IOException {
+	  serial.open(port, 38400, 8, 1, 0);
     // serial.publishType(PUBLISH_STRING); // GPS units publish strings
   }
 
-  public boolean connect(String port, int baud) {
-    return serial.connect(port, baud, 8, 1, 0);
+  public void connect(String port, int baud) throws IOException {
+	  serial.open(port, baud, 8, 1, 0);
   }
 
   /***********************************************************************************

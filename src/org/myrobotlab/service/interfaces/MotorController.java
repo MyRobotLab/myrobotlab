@@ -89,15 +89,6 @@ public interface MotorController extends DeviceController {
 	 */
 	public void motorReset(MotorControl motor);
 
-	/**
-	 * tests if this controller is connected & ready
-	 * 
-	 * @return
-	 */
-	public boolean isConnected();
 
-	public void connect(String port);
-
-	public void connect(String port, Integer rate, int i, int j, int k);
 
 }

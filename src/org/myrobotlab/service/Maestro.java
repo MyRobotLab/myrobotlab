@@ -66,13 +66,8 @@ public class Maestro extends Service implements Microcontroller, ServoController
     meta.addPeer("serial", "Serial", "Serial service is needed for Pololu");
 
     return meta;
-  }
+ }
 
-@Override
-public void connect(String port) {
-	// TODO Auto-generated method stub
-	
-}
 
 @Override
 public void disconnect() {
@@ -194,5 +189,20 @@ public Integer getPin(Servo servo) {
 	// TODO Auto-generated method stub
 	return null;
 }
+
+
+@Override
+public void connect(String port, int rate, int databits, int stopbits, int parity) throws Exception {
+	// TODO Auto-generated method stub
+	
+}
+
+
+@Override
+public void connect(String port) {
+	// TODO Auto-generated method stub
+	
+}
+
 
 }
