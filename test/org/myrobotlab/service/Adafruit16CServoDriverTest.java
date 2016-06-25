@@ -168,7 +168,7 @@ public class Adafruit16CServoDriverTest {
 		Serial uart = virtual.getUart("v1");
 		uart.connect("v1");
 		uart.record("test/Adafruit16CServoDriver/test");
-		driver.arduino.connect("v0");
+		arduino.connect("v0");
 
 		driver.setServo(0, SERVOMIN);
 		driver.setServo(0, SERVOMAX);
@@ -206,7 +206,7 @@ public class Adafruit16CServoDriverTest {
 		// disconnect / close arduino port
 		// flush cable
 		// stop recording
-		driver.arduino.disconnect();
+		arduino.disconnect();
 		// cable.close();
 		uart.stopRecording();
 
