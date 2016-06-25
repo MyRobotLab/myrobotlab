@@ -318,7 +318,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	}
 
 	@Override
-	public void attachDevice(Device device, int[] config) {
+	public void attachDevice(Device device, Object... config) {
 		// TODO - any more setup required
 		// Commented out. Can't have any Ardino specific methods here. /Mats
 		// arduino.attachDevice(device, config);

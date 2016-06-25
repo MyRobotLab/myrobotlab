@@ -1269,7 +1269,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * @param device
 	 */
 	@Override
-	public synchronized void attachDevice(Device device, int[] config) {
+	public synchronized void attachDevice(Device device, Object... config) {
 
 		int deviceType = device.getDeviceType();
 		String name = device.getName();
@@ -1292,7 +1292,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// move the device config into the msg
 		if (config != null) {
 			for (int i = 0; i < config.length; ++i) {
-				msgParms[2 + i] = config[i];
+				msgParms[2 + i] = (int)config[i];
 			}
 		}
 		
