@@ -34,4 +34,8 @@ public class DeviceMapping {
 	public Device getDevice(){
 		return device;
 	}
+	
+	public Object[] getConfig(){
+		return config;
+	}
 }

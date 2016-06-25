@@ -317,18 +317,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		return true;
 	}
 
-	@Override
-	public void attachDevice(Device device, Object... config) {
-		// TODO - any more setup required
-		// Commented out. Can't have any Ardino specific methods here. /Mats
-		// arduino.attachDevice(device, config);
-	}
-
-	@Override
-	public void detachDevice(Device servo) {
-		// Commented out. Can't have any Ardino specific methods here. /Mats
-		// arduino.detachDevice(servo);
-	}
+	
 
 	@Override
 	public void servoSweepStart(Servo servo) {
@@ -406,8 +395,22 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 */
 	@Override
 	public void servoDetach(Servo servo) {
-		int pin = servoToPin.get(servo.getName()).getId();
+		int pin = getPin(servo);
 		// FIXME send i2c command to detach
+	}
+	
+	
+	@Override
+	public void attachDevice(Device device, Object... config) {
+		// TODO - any more setup required
+		// Commented out. Can't have any Ardino specific methods here. /Mats
+		// arduino.attachDevice(device, config);
+	}
+
+	@Override
+	public void detachDevice(Device servo) {
+		// Commented out. Can't have any Ardino specific methods here. /Mats
+		// arduino.detachDevice(servo);
 	}
 
 	/**
@@ -472,7 +475,6 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 
 	@Override
 	public Integer getPin(Servo servo) {
-		// TODO Auto-generated method stub
-		return null;
+		return (int) servoToPin.get(servo.getName()).getConfig()[0];
 	}
 }
