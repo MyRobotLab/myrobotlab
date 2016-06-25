@@ -50,6 +50,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.framework.Service;
@@ -1144,6 +1145,15 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		sleep(300);
 		disconnect();
 	}
+	
+	public synchronized void sendMsg(int function, List<Integer> params) {
+		int[] p = new int[params.size()];
+		for (int i = 0; i < params.size(); ++i){
+			p[i] = params.get(i);
+		}
+		
+		sendMsg(function, p);
+	}
 
 	/**
 	 * MRL protocol method
@@ -1274,6 +1284,8 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		int deviceType = device.getDeviceType();
 		String name = device.getName();
 		int nameSize = name.length();
+		
+		// FIXME - total length test - if name overruns - throw
 
 		info("attaching device %s of type %d", name, deviceType);
 
@@ -1282,22 +1294,27 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 			deviceConfigSize = config.length;
 		}
 
-		int[] msgParms = new int[deviceConfigSize + 2];
-		// + 2 is ATTACH_DEVICE|DEVICE_TYPE|CONFIG_MSG_SIZE|DATA0|DATA1 ...|DATA(N)|NAME_SIZE|NAME .... (N)
+		// ArrayList<Integer> msgParms = new int[deviceConfigSize + 2];
+		List<Integer> msgBody = new ArrayList<Integer>();
+		// ATTACH_DEVICE|DEVICE_TYPE|CONFIG_MSG_SIZE|DATA0|DATA1 ...|DATA(N)|NAME_SIZE|NAME .... (N)
 
 		// create msg payload for the specific device in MRLComm
-		msgParms[0] = deviceType;
-		msgParms[1] = deviceConfigSize;
+		msgBody.add(deviceType); 		// DEVICE_TYPE
+		msgBody.add(deviceConfigSize); 	// CONFIG_MSG_SIZE
 
 		// move the device config into the msg
+		// DATA0|DATA1 ...|DATA(N)
 		if (config != null) {
 			for (int i = 0; i < config.length; ++i) {
-				msgParms[2 + i] = (int)config[i];
+				msgBody.add((int)config[i]);
 			}
 		}
 		
-
-		// we put the device on the name list - this allows
+		msgBody.add(nameSize); // NAME_SIZE
+		for (int i = 0; i < nameSize; ++i) {
+			msgBody.add((int)name.charAt(i));
+		}
+		// we put the device on the name lst - this allows
 		// references to work from
 		// Java-land Service -----name---> deviceList
 		// Java-land Service <----name---- deviceList
@@ -1320,7 +1337,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// Arduino owns
 		// the mapping of the two.
 
- 		sendMsg(ATTACH_DEVICE, msgParms);
+ 		sendMsg(ATTACH_DEVICE, msgBody);
 
 	}
 	
