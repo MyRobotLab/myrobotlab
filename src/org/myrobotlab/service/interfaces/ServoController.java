@@ -27,7 +27,7 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.service.Servo;
 
-public interface ServoController extends NameProvider, DeviceController {
+public interface ServoController extends DeviceController {
   
   /**
    * high level "attach" which internally will call attachDevice(Device device, int[] config)
