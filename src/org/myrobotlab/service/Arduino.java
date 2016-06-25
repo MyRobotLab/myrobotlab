@@ -1822,7 +1822,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	@Override
 	public void attach(Servo servo, int pin) {
 		servo.setController(this);
-		attachDevice(servo, new int[]{pin});
+		attachDevice(servo, pin);
 	}
 	
 	/**

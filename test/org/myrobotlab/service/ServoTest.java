@@ -1,267 +1,266 @@
 package org.myrobotlab.service;
 
+import static org.junit.Assert.fail;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.ServoController;
+import org.slf4j.Logger;
 
 public class ServoTest {
 
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
+	public final static Logger log = LoggerFactory.getLogger(ServoTest.class);
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+	}
 
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+	}
 
-  @Before
-  public void setUp() throws Exception {
-  }
+	@Before
+	public void setUp() throws Exception {
+	}
 
-  @After
-  public void tearDown() throws Exception {
-  }
+	@After
+	public void tearDown() throws Exception {
+	}
 
-  @Test
-  public final void testGetCategories() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testReleaseService() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetDescription() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testServo() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testReleaseService() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testAddServoEventListener() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testMain() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testAttach() {
+		Servo servo = (Servo)Runtime.start("servo01", "Servo");
+		ServoController arduino = (ServoController)Runtime.start("arduino", "Arduino");
+		arduino.attach(servo, 7);
+	}
 
-  @Test
-  public final void testServo() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testDetach() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testAddServoEventListener() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetController() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testAttach() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetLastActivityTime() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testAttachServoControllerInteger() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetMax() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testAttachStringInteger() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetMaxInput() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testCalc() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetMaxOutput() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testDetach() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetMin() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetControllerName() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetMinInput() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetLastActivityTime() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetMinOutput() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetMax() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetPos() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetMaxInput() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetRest() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetMin() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testIsAttached() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetMinInput() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testIsInverted() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetPin() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testIsSweeping() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetPos() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testMap() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetPosFloat() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testMoveTo() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetRest() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testPublishServoEvent() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testIsAttached() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testRefreshControllers() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testIsInverted() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testRest() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testIsSweeping() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSetController() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testMapFloatFloatFloatFloat() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testEventsEnabled() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testMapIntIntIntInt() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSetInverted() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testMoveToDouble() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSetMinMax() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testMoveToFloat() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSetRest() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testMoveToInteger() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSetSpeed() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testPublishServoEvent() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSetSpeedControlOnUC() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testRefreshControllers() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSetSweepDelay() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testRest() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testStop() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetControllerServoController() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSweep() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetControllerString() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSweepIntInt() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetEventsEnabled() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSweepIntIntIntInt() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetInverted() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSweepIntIntIntIntBoolean() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetMinMax() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testWriteMicroseconds() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetPin() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testMain() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetRest() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetMetaData() {
+		fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetSpeed() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetDeviceType() {
+		fail("Not yet implemented");
+	}
+	
+	public static void main(String[] args) {
+	    try {
 
-  @Test
-  public final void testSetSpeedControlOnUC() {
-    // fail("Not yet implemented");
-  }
+	      LoggingFactory.getInstance().configure();
+	      LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
-  @Test
-  public final void testSetSweeperDelay() {
-    // fail("Not yet implemented");
-  }
+	      ServoTest.setUpBeforeClass();
+	      ServoTest test = new ServoTest();
+	      test.setUp();
+	      
+	      // structured testing begins
+	      test.testAttach();
 
-  @Test
-  public final void testStop() {
-    // fail("Not yet implemented");
-  }
+	      JUnitCore junit = new JUnitCore();
+	      Result result = junit.run(ServoTest.class);
+	      log.info("Result: {}", result);
+	     
+	      // Runtime.dump();
 
-  @Test
-  public final void testSweep() {
-    // fail("Not yet implemented");
-  }
+	    } catch (Exception e) {
+	      log.error("test threw",e);
+	    }
+	  }
 
-  @Test
-  public final void testSweepIntInt() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public final void testSweepIntIntIntInt() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public final void testSweepIntIntIntIntBoolean() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public final void testWriteMicroseconds() {
-    // fail("Not yet implemented");
-  }
 
 }
