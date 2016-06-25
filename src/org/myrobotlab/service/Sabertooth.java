@@ -447,7 +447,7 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 
 	
 	@Override
-	public void attachDevice(Device device, int[] config) throws Exception {
+	public void attachDevice(Device device, Object... config) throws Exception {
 		// TODO implement !
 		
 	}

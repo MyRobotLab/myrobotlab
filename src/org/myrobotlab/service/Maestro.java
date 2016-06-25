@@ -167,7 +167,7 @@ public void detachDevice(Device device) {
 }
 
 @Override
-public void attachDevice(Device device, int[] config) {
+public void attachDevice(Device device, Object... config) {
 	// TODO Auto-generated method stub
 	
 }
