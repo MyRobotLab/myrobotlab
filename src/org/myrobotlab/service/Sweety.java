@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -185,8 +187,9 @@ public class Sweety extends Service {
 
   /**
    * Connect the arduino to a COM port . Exemple : connect("COM8")
+ * @throws IOException 
    */
-  public void connect(String port) {
+  public void connect(String port) throws IOException {
     arduino.connect(port);
     sleep(2000);
     arduino.pinMode(SHIFT, Arduino.OUTPUT);

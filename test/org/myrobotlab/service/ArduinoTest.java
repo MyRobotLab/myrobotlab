@@ -184,7 +184,7 @@ public class ArduinoTest {
   }
 
   @Test
-  public final void testConnect() {
+  public final void testConnect() throws IOException {
     log.info("testConnect - begin");
     arduino.disconnect();
     arduino.connect(vport);
@@ -225,7 +225,7 @@ public class ArduinoTest {
   }
 
   @Test
-  public final void testDisconnect() {
+  public final void testDisconnect() throws IOException {
     log.info("testDisconnect");
     arduino.disconnect();
     assertTrue(!arduino.isConnected());

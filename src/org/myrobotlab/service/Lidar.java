@@ -134,17 +134,17 @@ public class Lidar extends Service implements SerialDataListener {
     return b;
   }
 
-  public boolean connect(String port) {
+  public void connect(String port) throws IOException {
     serial = getSerial();
     serialPort = port;
-    return serial.connect(port, LIDARbaudRate, 8, 1, 0);
+    serial.open(port, LIDARbaudRate, 8, 1, 0);
   }
 
   public boolean connect(String port, int baud) throws IOException {
     serial = getSerial();
     serialPort = port;
     LIDARbaudRate = baud;
-    serial.connect(port, baud, 8, 1, 0);
+    serial.open(port, baud, 8, 1, 0);
 
     return serial.isConnected();
   }
@@ -197,7 +197,7 @@ public class Lidar extends Service implements SerialDataListener {
   public boolean reconnectSerial() throws IOException {
     serial = getSerial();
     serial.disconnect();
-    serial.connect(serialPort, LIDARbaudRate, 8, 1, 0);
+    serial.open(serialPort, LIDARbaudRate, 8, 1, 0);
     return serial.isConnected();
   }
 

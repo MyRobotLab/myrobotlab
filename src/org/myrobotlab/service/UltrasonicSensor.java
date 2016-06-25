@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +15,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.Device;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.SensorDataListener;

@@ -190,13 +190,8 @@ public class Roomba extends Service {
    *          name of port, e.g. "/dev/cu.KeySerial1" or "COM3"
    * @return true if connect was successful, false otherwise
    */
-  public boolean connect(String portName) {
-    if (roombacomm.connect(portName)) {
-      this.portName = portName;
-      save();
-      return true;
-    }
-    return false;
+  public void connect(String portName) {
+    roombacomm.connect(portName);
   }
 
   public boolean connect(String name, int rate, int databits, int stopbits, int parity) {

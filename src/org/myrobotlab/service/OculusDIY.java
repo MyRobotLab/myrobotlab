@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -145,10 +147,8 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 		return arduino;
 	}
 
-	public void connect(String port) {
+	public void connect(String port) throws IOException {
 		arduino.connect(port);
-		// FIXME - setup of the mpu6050 MRLComm device & initializaiton
-		// 
 	}
 
 	public static void main(String[] args) {

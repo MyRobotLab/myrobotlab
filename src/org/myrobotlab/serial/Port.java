@@ -16,7 +16,7 @@ import org.slf4j.Logger;
  *
  */
 
-public abstract class Port implements Runnable, PortSource {
+public abstract class Port implements Runnable, SerialControl {
 
   public final static Logger log = LoggerFactory.getLogger(Port.class);
 

@@ -669,7 +669,7 @@ public class Tracking extends Service {
     connect(port, xPin, yPin, 0);
   }
 
-  public void connect(String port, int xPin, int yPin, int cameraIndex) {
+  public void connect(String port, int xPin, int yPin, int cameraIndex) throws IOException {
     arduino.connect(port);
 
     arduino.attach(x, xPin);

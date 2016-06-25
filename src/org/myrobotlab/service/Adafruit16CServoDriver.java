@@ -349,7 +349,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		}
 		log.info(String.format("servoWrite %s deviceAddress %s targetOutput %d", servo.getName(), deviceAddress, servo.targetOutput));
 		int pulseWidthOff = SERVOMIN + (int) (servo.targetOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
-		setServo(servoToPin.get(servo.getName()).getIndex(), pulseWidthOff);
+		setServo(servoToPin.get(servo.getName()).getId(), pulseWidthOff);
 	}
 
 	@Override
@@ -363,7 +363,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		// sent as 2 bytes
 		log.info(String.format("servoWriteMicroseconds %s deviceAddress x%02X pin %s pulse %d", servo.getName(), deviceAddress, servoToPin.get(servo.getName()), pulseWidthOff));
 
-		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (servoToPin.get(servo.getName()).getIndex() * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
+		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (servoToPin.get(servo.getName()).getId() * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
 		controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
 
@@ -406,7 +406,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 */
 	@Override
 	public void servoDetach(Servo servo) {
-		int pin = servoToPin.get(servo.getName()).getIndex();
+		int pin = servoToPin.get(servo.getName()).getId();
 		// FIXME send i2c command to detach
 	}
 
@@ -446,7 +446,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		// on MRLComm similar to how speed control is currently done
 		// with <Servo.h> servos - where MRLComm incrmentally moves them
 		// on updateDevice
-		DeviceMapping mapping = new DeviceMapping(servo, new int[] { pin });
+		DeviceMapping mapping = new DeviceMapping(servo, pin);
 		servoToPin.put(servo.getName(), mapping);
 		pinToServo.put(pin, mapping);
 
@@ -460,7 +460,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 */
 	@Override
 	public void detach(Servo servo) {
-		int temp = servoToPin.get(servo.getName()).getIndex();
+		int temp = servoToPin.get(servo.getName()).getId();
 		servoToPin.remove(servo.getName());
 		pinToServo.remove(temp);
 
@@ -475,5 +475,4 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

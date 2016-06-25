@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -14,6 +13,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.Device;
+import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.SerialDataListener;
@@ -31,7 +31,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Sabertooth extends Service implements SerialDataListener, MotorController {
+public class Sabertooth extends Service implements Microcontroller, MotorController {
 
 	class MotorData implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -58,14 +58,6 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	// range mapping
 
 	private Integer address = 128;
-
-	// private float minX = 0;
-	//
-	// private float maxX = 180;
-	//
-	// private float minY = 0;
-	//
-	// private float maxY = 180;
 
 	public static final int INPUT = 0x0;
 
@@ -95,7 +87,7 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 		super(n);
 	}
 
-	public void connect(String port) {
+	public void connect(String port) throws IOException {
 		connect(port, 9600, 8, 1, 0);
 	}
 
@@ -221,25 +213,7 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	public void startService() {
 		super.startService();
 		serial = (Serial) startPeer("serial");
-		serial.addByteListener(this);
-	}
-
-	@Override
-	public final Integer onByte(Integer newByte) throws IOException {
-		info("%s onByte %s", getName(), newByte);
-		return newByte;
-	}
-
-	@Override
-	public String onConnect(String portName) {
-		info("%s connected to %s", getName(), portName);
-		return portName;
-	}
-
-	@Override
-	public String onDisconnect(String portName) {
-		info("%s disconnected from %s", getName(), portName);
-		return portName;
+		// serial.addByteListener(this);
 	}
 
 	public Serial getSerial() {
@@ -441,8 +415,8 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	}
 
 	@Override
-	public void connect(String port, Integer rate, int databits, int stopbits, int parity) {
-		serial.connect(port, rate, databits, stopbits, parity);
+	public void connect(String port, int rate, int databits, int stopbits, int parity) throws IOException {
+		serial.open(port, rate, databits, stopbits, parity);
 	}
 
 	
@@ -484,6 +458,30 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	@Override
 	public void attach(MotorControl motor, int powerPin, int dirPin) {
 		error("2 pin attach not supported for motors - did you want 2 pin control - attach(motor, port) ?");
+	}
+
+	@Override
+	public String getBoardType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Integer getVersion() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void sensorPollingStart(String name) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sensorPollingStop(String name) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

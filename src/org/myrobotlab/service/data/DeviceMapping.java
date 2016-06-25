@@ -8,17 +8,13 @@ public class DeviceMapping {
 	/**
 	 * the unique integer id for this device
 	 */
-	Integer index;
+	Integer id;
 	/**
 	 * the original config used to attach the device
 	 */
-	int[] config;
+	Object[] config;
 	
-	public DeviceMapping(Device device){
-		this.device = device;
-	}
-	
-	public DeviceMapping(Device device, int[] config){
+	public DeviceMapping(Device device, Object... config){
 		this.device = device;
 		this.config = config;
 	}
@@ -27,12 +23,12 @@ public class DeviceMapping {
 		return device.getName();
 	}
 	
-	public void setIndex(int index){
-		this.index = index; 
+	public void setId(int id){
+		this.id = id; 
 	}
 	
-	public Integer getIndex(){
-		return index;
+	public Integer getId(){
+		return id;
 	}
 	
 	public Device getDevice(){
