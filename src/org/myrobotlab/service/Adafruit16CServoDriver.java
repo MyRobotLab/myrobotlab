@@ -71,8 +71,6 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
 	public String deviceBus = "1";
 
-	public String type = "PCA9685";
-
 	public transient final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriver.class.getCanonicalName());
 
 	public static final int PCA9685_MODE1 = 0x00; // Mode 1 register
@@ -209,7 +207,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		if (controller != null) {
 			if (this.deviceAddress != deviceAddress) {
 				controller.releaseI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
+				controller.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), this.getName());
 			}
 		}
 		log.info(String.format("Setting device address to %s", deviceAddress));

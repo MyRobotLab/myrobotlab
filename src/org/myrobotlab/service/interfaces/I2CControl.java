@@ -15,10 +15,10 @@ public interface I2CControl extends NameProvider {
 	 * @param busaddress
 	 * @param address
 	 *          local address in the i2c device
-	 * @param type
-	 * 
+	 * @param serviceName
+	 *          name of the service that invokes the createI2cDevice 
 	 */
-	void createI2cDevice(int busAddress, int deviceAddress, String type);
+	void createI2cDevice(int busAddress, int deviceAddress, String serviceName);
 
 	/**
 	 * This method returns and already existing I2CDevice

@@ -39,7 +39,7 @@ public class RasPi extends Service implements I2CControl {
 	public static class I2CDeviceMap {
 		public I2CBus bus;
 		public I2CDevice device;
-		public String type;
+		public String serviceName;
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -127,7 +127,7 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	// FIXME - create low level I2CDevice
-	public void createI2cDevice(int busAddress, int deviceAddress, String type) {
+	public void createI2cDevice(int busAddress, int deviceAddress, String serviceName) {
 
 		try {
 			I2CDevice device = i2c.getDevice(deviceAddress);
@@ -136,11 +136,11 @@ public class RasPi extends Service implements I2CControl {
 
 			I2CDeviceMap devicedata = new I2CDeviceMap();
 			if (i2cDevices.containsKey(key)) {
-				log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, type));
+				log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, serviceName));
 			} else
 				devicedata.bus = bus;
 			  devicedata.device = device;
-			  devicedata.type = type;
+			  devicedata.serviceName = serviceName;
 			  i2cDevices.put(key, devicedata);
 
 			// PCF8574GpioProvider pcf = new PCF8574GpioProvider(busAddress,

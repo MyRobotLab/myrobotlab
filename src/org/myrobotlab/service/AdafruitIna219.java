@@ -40,8 +40,6 @@ public class AdafruitIna219 extends Service {
 	public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
 	public String deviceBus = "1";
 
-	public String type = "AdafruitIna219";
-
 	public int busVoltage = 0;
 	public int shuntVoltage = 0;
 	public double current = 0.0;
@@ -173,7 +171,7 @@ public class AdafruitIna219 extends Service {
 		if (controller != null) {
 			if (deviceAddress != DeviceAddress) {
 				controller.releaseI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
+				controller.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), this.getName());
 			}
 		}
 
