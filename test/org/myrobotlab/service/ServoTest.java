@@ -246,7 +246,7 @@ public class ServoTest {
 	    try {
 
 	      LoggingFactory.getInstance().configure();
-	      LoggingFactory.getInstance().setLevel(Level.DEBUG);
+	      LoggingFactory.getInstance().setLevel(Level.INFO);
 
 	      ServoTest.setUpBeforeClass();
 	      ServoTest test = new ServoTest();
