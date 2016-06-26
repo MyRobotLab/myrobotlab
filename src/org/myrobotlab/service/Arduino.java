@@ -916,7 +916,9 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 			DeviceMapping deviceMapping = deviceList.get(deviceName);			
 			deviceIndex.put(newDeviceIndex, deviceList.get(deviceName));
 			
-			invoke("publishAttachedDevice", deviceMapping.getDevice());
+			// do we what this ? perhaps do it by name ? not by device object
+			// otherwise you force the framework to upcast :(
+			// invoke("publishAttachedDevice", deviceMapping.getDevice());
 
 			info("connected service %s with mrlcomm device %d", deviceName, newDeviceIndex);
 			
