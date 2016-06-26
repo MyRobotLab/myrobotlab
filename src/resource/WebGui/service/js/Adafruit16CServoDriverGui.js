@@ -18,7 +18,7 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', [])
         $scope.deviceBus = service.deviceBus;
         $scope.deviceAddressList = service.deviceAddressList;
         $scope.deviceAddress = service.deviceAddress;
-        $scope.isAttached = service.isAttached;
+        $scope.isControllerSet = service.isControllerSet;
 
     }
     ;
