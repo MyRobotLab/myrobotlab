@@ -200,18 +200,6 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		broadcastState();
 	}
 
-	// FIXME - put in ServoController interface !!!
-	public boolean attach(Servo servo, Integer pinNumber) {
-		if (servo == null) {
-			error("trying to attach null servo");
-			return false;
-		}
-
-		servo.setController(this);
-		servoNameToPin.put(servo.getName(), pinNumber);
-		return true;
-	}
-
 	public void SetDeviceBus(String deviceBus) {
 		this.deviceBus = deviceBus;
 		broadcastState();
@@ -322,23 +310,6 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		return controller;
 	}
 
-	public synchronized boolean servoAttach(Servo servo, Integer pinNumber) {
-		if (servo == null) {
-			error("trying to attach null servo");
-			return false;
-		}
-
-		if (controller == null) {
-			error("trying to attach a pin before attaching to an i2c controller");
-			return false;
-		}
-
-		servo.setController(this);
-		servoNameToPin.put(servo.getName(), pinNumber);
-
-		return true;
-	}
-
 	@Override
 	public void servoSweepStart(Servo servo) {
 		// TODO Auto-generated method stub
@@ -411,8 +382,16 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	}
 
 	/**
-	 * Is this method intended to do a complete detach so that the pin can be
-	 * reassigned to a different servo ?
+	 * THESE ARE SERVO COMMANDS !  NOT REQUEST
+	 * TO ATTACH OR DETACH THE SERVO AS A DEVICE !!!
+	 */
+	@Override
+	public void servoAttach(Servo servo) {
+		// TODO Implement something ? Or not ?
+	}
+	
+	/**
+	 * Stop sending pulses to the servo, relax
 	 */
 	@Override
 	public void servoDetach(Servo servo) {
@@ -425,14 +404,14 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		// TODO - any more setup required
 		// Commented out. Can't have any Ardino specific methods here. /Mats
 		// arduino.attachDevice(device, config);
-		// @Grog. What is this methods expected to do ?
+		// @Grog. What is this methods expected to do here.
 	}
 
 	@Override
 	public void detachDevice(Device servo) {
 		// Commented out. Can't have any Ardino specific methods here. /Mats
 		// arduino.detachDevice(servo);
-		// @Grog. What is this methods expected to do ?
+		// @Grog. What is this methods expected to do here.
 	}
 
 	/**
@@ -440,11 +419,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 * Servo.attach/detach like Arduino <Servo.h> does. I would think it does,
 	 * this really means go and stay at a position, vs power off to the servo
 	 */
-	@Override
-	public void servoAttach(Servo servo) {
-		// TODO Auto-generated method stub
 
-	}
 
 	/**
 	 * Device attach - this should be creating the I2C device on MRLComm for the
@@ -471,20 +446,26 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 */
 	@Override
 	public void attach(Servo servo, int pin) {
-		// potentially you could do your own speed control
-		// on MRLComm similar to how speed control is currently done
-		// with <Servo.h> servos - where MRLComm incrmentally moves them
-		// on updateDevice
-		servoNameToPin.put(servo.getName(), pin);
+
+			if (servo == null) {
+				error("trying to attach null servo");
+			}
+
+			servo.setController(this);
+			servoNameToPin.put(servo.getName(), pin);
+			isAttached = true;
 	}
 
-	/**
-	 * probably just call servoDetach, if desired on the last servo removed it
-	 * "could" free the actual I2C device in the MRLComm deviceList
-	 */
+
+  /**
+   * Complete detach. Stop sending pulses to the servo
+   * and remove it from the list of servos
+   */
 	@Override
 	public void detach(Servo servo) {
+		servoDetach(servo);
 		servoNameToPin.remove(servo.getName());
+		isAttached = false;
 	}
 
 	@Override
