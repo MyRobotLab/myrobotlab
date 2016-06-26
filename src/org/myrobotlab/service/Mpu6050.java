@@ -58,7 +58,6 @@ public class Mpu6050 extends Service {
 
 	public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
 	public String deviceBus = "1";
-	public String type = "MPU-6050";
 
 	public static final int MPU6050_ADDRESS_AD0_LOW = 0x68; // address pin low
 																													// (GND), default for
@@ -980,7 +979,7 @@ public class Mpu6050 extends Service {
 	boolean createDevice() {
 		if (controller != null) {
 				controller.releaseI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), type);
+				controller.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), this.getName());
 		}
 
 		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
