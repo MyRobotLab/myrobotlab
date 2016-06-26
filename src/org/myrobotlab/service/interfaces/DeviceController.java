@@ -11,9 +11,9 @@ public interface DeviceController extends NameProvider {
 	 * @param config
 	 * @throws Exception
 	 */
-	public void attachDevice(Device device, Object... config) throws Exception;
+	public void attachDevice(DeviceControl device, Object... config) throws Exception;
 
-	public void detachDevice(Device device);
+	public void detachDevice(DeviceControl device);
 
 	
 }

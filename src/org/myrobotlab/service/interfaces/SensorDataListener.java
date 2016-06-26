@@ -6,7 +6,7 @@ import org.myrobotlab.service.data.SensorData;
  * A SensorDataListener is a (microcontroller) Device which can read data
  *
  */
-public interface SensorDataListener extends Device {  
+public interface SensorDataListener extends DeviceControl {  
     // PIR ??  OScope gui ? other listeners?
     
     /**

@@ -41,8 +41,8 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.data.SensorData;
-import org.myrobotlab.service.interfaces.Device;
-import org.myrobotlab.service.interfaces.Microcontroller;
+import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
@@ -172,11 +172,17 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
   }
 
+  /* NON STANDARD - USE getController
   public String getControllerName() {
     if (controller != null) {
       return controller.getName();
     }
     return null;
+  }
+  */
+  
+  public DeviceController getController(){
+	  return controller;
   }
 
   @Override
@@ -256,8 +262,8 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
   }
 
   @Override
-  public void setController(MotorController controller) {
-    this.controller = controller;
+  public void setController(DeviceController controller) {
+    this.controller = (MotorController)controller;
     this.controllerName = controller.getName();
   }
 
@@ -380,17 +386,6 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
    * this.type = type; }
    */
 
-  @Override
-  public void pulse() {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void setEncoder(Encoder encoder) {
-    // TODO Auto-generated method stub
-
-  }
 
   /**
    * This static method returns all the details of the class without it having
@@ -516,7 +511,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
     }
 
   }
-
+/*  I DONT THINK MOTOR NEEDS THESE
 @Override
 public SensorData publishSensorData(SensorData data) {
 	// TODO Auto-generated method stub
@@ -528,10 +523,11 @@ public void addSensorDataListener(SensorDataListener listener, int[] config) {
 	// TODO Auto-generated method stub
 	
 }
+*/
 
 @Override
 public Integer getDeviceType() {
-	return Device.DEVICE_TYPE_MOTOR;
+	return DeviceControl.DEVICE_TYPE_MOTOR;
 }
 
 @Override
@@ -542,6 +538,18 @@ public void update(SensorData data) {
 
 @Override
 public void onSensorData(SensorData data) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void pulse() {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void setEncoder(Encoder encoder) {
 	// TODO Auto-generated method stub
 	
 }

@@ -14,7 +14,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.SensorData;
-import org.myrobotlab.service.interfaces.Device;
+import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.SensorDataListener;
@@ -253,13 +254,19 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 
 	@Override
 	public Integer getDeviceType() {
-		return Device.SENSOR_TYPE_ULTRASONIC;
+		return DeviceControl.SENSOR_TYPE_ULTRASONIC;
 	}
 
 	@Override
 	public void onSensorData(SensorData data) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void setController(DeviceController controller) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

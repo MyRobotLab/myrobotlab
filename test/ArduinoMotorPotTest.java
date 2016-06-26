@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.sensor.AnalogPinSensor;
 import org.myrobotlab.service.Arduino;
@@ -15,6 +14,7 @@ import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.PID2;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.myrobotlab.test.TestUtils;
@@ -316,6 +316,18 @@ public Integer getDeviceType() {
 public void update(SensorData data) {
 	// TODO Auto-generated method stub
 	
+}
+
+@Override
+public void setController(DeviceController controller) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public DeviceController getController() {
+	// TODO Auto-generated method stub
+	return null;
 }
 
 }

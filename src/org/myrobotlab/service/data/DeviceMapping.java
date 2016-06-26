@@ -1,10 +1,10 @@
 package org.myrobotlab.service.data;
 
-import org.myrobotlab.service.interfaces.Device;
+import org.myrobotlab.service.interfaces.DeviceControl;
 
 public class DeviceMapping {
 	
-	Device device;
+	DeviceControl device;
 	/**
 	 * the unique integer id for this device
 	 */
@@ -14,7 +14,7 @@ public class DeviceMapping {
 	 */
 	Object[] config;
 	
-	public DeviceMapping(Device device, Object... config){
+	public DeviceMapping(DeviceControl device, Object... config){
 		this.device = device;
 		this.config = config;
 	}
@@ -31,7 +31,7 @@ public class DeviceMapping {
 		return id;
 	}
 	
-	public Device getDevice(){
+	public DeviceControl getDevice(){
 		return device;
 	}
 	

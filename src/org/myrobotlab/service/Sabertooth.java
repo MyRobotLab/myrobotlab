@@ -12,7 +12,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
-import org.myrobotlab.service.interfaces.Device;
+import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
@@ -421,13 +421,13 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 
 	
 	@Override
-	public void attachDevice(Device device, Object... config) throws Exception {
+	public void attachDevice(DeviceControl device, Object... config) throws Exception {
 		// TODO implement !
 		
 	}
 
 	@Override
-	public void detachDevice(Device device) {
+	public void detachDevice(DeviceControl device) {
 		// NOOP for Sabertooth ?
 	}
 

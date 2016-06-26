@@ -12,7 +12,7 @@ package org.myrobotlab.service.interfaces;
  * with the service (getName())
  *
  */
-public interface Device extends NameProvider {
+public interface DeviceControl extends NameProvider {
 
 	/**
 	 * The set of defined devices supported. This set is microcontroller
@@ -59,4 +59,10 @@ public interface Device extends NameProvider {
 	 * @return
 	 */
 	// public int[] getDeviceConfig();
+	
+	public void setController(DeviceController controller);
+	
+	public DeviceController getController();
+	
+	
 }
