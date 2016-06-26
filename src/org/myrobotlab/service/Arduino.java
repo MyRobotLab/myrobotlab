@@ -316,8 +316,9 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	int msgSize;
 
 	transient int[] msg = new int[MAX_MSG_SIZE];
-  // i2c  
-	boolean i2cDataReturned = false;
+	
+  // i2c This needs to be volatile because it can be updated in a different thread  
+	volatile boolean i2cDataReturned = false;
 
 	// parameters for testing the getVersion retry stuff.
 	// TODO: some way to do this more synchronously
@@ -1861,18 +1862,20 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	@Override
 	public void createI2cDevice(int busAddress, int deviceAddress, String type) {
 		// TODO Auto-generated method stub - I2C
+		// This method should add an entry to the list of I2CDevices that it can do a callback to
+		// It should create and initiate one I2C bus in MRLComm and add this arduino as its callback
 
 	}
 
 	@Override
 	public void releaseI2cDevice(int busAddress, int deviceAddress) {
 		// TODO Auto-generated method stub
-
+		// This method should delete the i2c device entry from the list of I2CDevices
 	}
 
 	@Override
 	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
-    int msgBuffer[] = new int[size+1];
+		int msgBuffer[] = new int[size+1];
     msgBuffer[0] = deviceAddress;
     for (int i=0 ; i < size ; i++){
     	msgBuffer[i+1] = (int)buffer[i] & 0xFF;
@@ -1882,7 +1885,9 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 	@Override
 	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
-		sendMsg(I2C_READ, deviceAddress, size);
+		// Get the device index to the MRL i2c bus so that it can be added to the datastream
+		int deviceIndex = 42; // Change this to get the the deviceinex using busAddress
+		sendMsg(I2C_READ, deviceIndex, deviceAddress, size);
 		int retry = 0;
 		int retryMax = 1000;
 		try {
