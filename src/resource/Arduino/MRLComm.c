@@ -1283,6 +1283,9 @@ void processCommand() {
   case SENSOR_POLLING_START:
     sensorPollingStart();
     break;
+  case ATTACH_DEVICE:
+	  attachDevice();
+	break;
   case SENSOR_POLLING_STOP:
     sensorPollingStop();
     break;
