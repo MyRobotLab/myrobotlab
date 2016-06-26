@@ -1269,7 +1269,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * applicable for the service requesting.
 	 * 
 	 * Arduino will attach itself this way too as a Analog & Digital Pin array
-	 *
+	 * 
 	 * Comment from Mats: Arduino should probably attach itself as an DEVICE_TYPE_I2C 
 	 * the first to createI2cDevice is invoked. This service probably needs to keep track of
 	 * the differnt devices connected on the i2c bus, but not MRLComm.
@@ -1301,10 +1301,16 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 		// ArrayList<Integer> msgParms = new int[deviceConfigSize + 2];
 		List<Integer> msgBody = new ArrayList<Integer>();
-		// ATTACH_DEVICE|DEVICE_TYPE|CONFIG_MSG_SIZE|DATA0|DATA1 ...|DATA(N)|NAME_SIZE|NAME .... (N)
+		// ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME .... (N)|CONFIG_MSG_SIZE|DATA0|DATA1 ...|DATA(N)
 
 		// create msg payload for the specific device in MRLComm
 		msgBody.add(deviceType); 		// DEVICE_TYPE
+		
+		msgBody.add(nameSize); // NAME_SIZE
+		for (int i = 0; i < nameSize; ++i) {
+			msgBody.add((int)name.charAt(i));
+		}
+		
 		msgBody.add(deviceConfigSize); 	// CONFIG_MSG_SIZE
 
 		// move the device config into the msg
@@ -1315,10 +1321,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 			}
 		}
 		
-		msgBody.add(nameSize); // NAME_SIZE
-		for (int i = 0; i < nameSize; ++i) {
-			msgBody.add((int)name.charAt(i));
-		}
+		
 		// we put the device on the name lst - this allows
 		// references to work from
 		// Java-land Service -----name---> deviceList
@@ -1875,7 +1878,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 	@Override
 	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
-		int msgBuffer[] = new int[size+1];
+    int msgBuffer[] = new int[size+1];
     msgBuffer[0] = deviceAddress;
     for (int i=0 ; i < size ; i++){
     	msgBuffer[i+1] = (int)buffer[i] & 0xFF;
