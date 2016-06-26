@@ -983,7 +983,7 @@ class MrlI2CDevice : public Device {
     }
 
     void i2cWrite(unsigned char* ioCmd) {
-        wireBegin();
+    	int msgSize = ioCmd[3];
         WIRE.beginTransmission(ioCmd[1]);   // address to the i2c device
         WIRE.write(ioCmd[2]);               // device memory address to write to
         for (int i = 3; i < msgSize; i++) { // data to write
@@ -1277,6 +1277,7 @@ void processCommand() {
     sensorPollingStop();
     break;
   // Start of i2c read and writes
+    /*
   case I2C_READ:
     i2cRead();
     break;
@@ -1286,6 +1287,7 @@ void processCommand() {
   case I2C_WRITE_READ:
     i2cWriteRead();
     break;
+    */
   case SET_DEBUG:
     debug = ioCmd[1];
     if (debug) {
@@ -1322,63 +1324,6 @@ void sensorPollingStart() {
 void sensorPollingStop() {
   // TODO: implement me.
 }
-
-// Start of I2CControl interface methods
-//
-// Return data in this format
-// PUBLISH_SENSOR_DATA | DEVICE_INDEX | DATA_SIZE | DATA ....
-/** TODO Add device id to the returned data
-//  I hope only one device is needed for the i2c bus in MRLComm,
-//  not one for each i2c device on the bus.
-//  That information is better handled in Arduino.java
-*/
-void i2cRead() {
-  wireBegin();
-  WIRE.beginTransmission(ioCmd[1]); // address to the i2c device
-  WIRE.write(ioCmd[2]);             // device memory address to read from
-  WIRE.endTransmission();
-  int answer = WIRE.requestFrom((uint8_t)ioCmd[1], (uint8_t)ioCmd[3]); // reqest a number of bytes to read
-  if (answer==0) {
-    //Report an error with I2C communication by returning a 0 length data size
-    //i.e a message size if 1 byte containing only PUBLISH_SENSOR_DATA
-     // Start an mrlcomm message
-    Serial.write(MAGIC_NUMBER);
-    // size of the mrlcomm message
-    Serial.write(1);
-    // mrlcomm function
-    Serial.write(PUBLISH_SENSOR_DATA);
-  } else {
-     // Start an mrlcomm message
-    Serial.write(MAGIC_NUMBER);
-    // size of the mrlcomm message
-    Serial.write(1 + ioCmd[3]);
-    // mrlcomm function
-    Serial.write(PUBLISH_SENSOR_DATA);
-    Serial.write(0);//get the DEVICE_INDEX
-    // I2C device are only sending back data, some more identifier should be added
-    //return the request bytes, incomplete message will be padded with 0xFF bytes
-    Serial.write(answer);
-    for (int i = 1; i<answer; i++) {
-      Serial.write(Wire.read());
-    }
-  }
-}
-
-void i2cWrite() {
-  wireBegin();
-  WIRE.beginTransmission(ioCmd[1]);   // address to the i2c device
-  WIRE.write(ioCmd[2]);               // device memory address to write to
-  for (int i = 3; i < msgSize; i++) { // data to write
-    WIRE.write(ioCmd[i]);
-  }
-  WIRE.endTransmission();
-}
-
-void i2cWriteRead() {
-  /** TODO implement me */
-}
-
-// End of I2CControl interface methods
 
 // MRL Command helper methods below:
 // GET_VERSION
