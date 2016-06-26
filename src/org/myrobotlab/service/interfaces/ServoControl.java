@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface ServoControl extends NameProvider {
+public interface ServoControl extends DeviceControl {
 
  
   /**
@@ -43,8 +43,9 @@ public interface ServoControl extends NameProvider {
    */
   public boolean detach();
 
-  
+  /* PUSHED UP INTO DeviceControl.getController 
   public ServoController getController();
+  */
 
 
   /**
@@ -64,7 +65,9 @@ public interface ServoControl extends NameProvider {
    * servo, to be used directly.
    */
 
+  /*  PUSHED UP INTO DeviceControl.setController(DeviceController controller)
   public void setController(ServoController controller);
+  */
 
 
   /**

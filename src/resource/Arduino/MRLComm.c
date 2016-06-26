@@ -1012,7 +1012,14 @@ unsigned int nextDeviceId = 0;
 
 // MRLComm message buffer and current count from serial port ( MAGIC | MSGSIZE | FUNCTION | PAYLOAD ...
 int msgSize = 0; // the NUM_BYTES of current message (second byte of mrlcomm protocol)
+
 unsigned char ioCmd[MAX_MSG_SIZE];  // message buffer for all inbound messages
+
+// N.B. - not sure if its should be signed or unsigned - the data
+// for this originates from ioCmd
+unsigned char config[MAX_MSG_SIZE];  // config buffer
+int configPos = 0; // position of the beginning of config in the ioCmd message
+
 int byteCount = 0;
 unsigned long loopCount = 0; // main loop count
 unsigned int debounceDelay = 50; // in ms
@@ -1527,16 +1534,20 @@ void servoAttach() {
   s->eventsEnabled = false;
 }
 
-// PUBLISH_SERVO_EVENT
-// FIXME - should be using PUBLISH_SENSOR_DATA
-//         this enable the PUBLISH_SERVO_EVENT, publishServoEvent(Device*, SERVO_EVENT_XXX) 
-//         publish the event
 /***********************************************************************
  * ATTACH DEVICES BEGIN
  *
  * MSG STRUCTURE
- *        0           1            2          3     4    ....  N
- * ATTACH_DEVICE|DEVICE_TYPE|CONFIG_MSG_SIZE|DATA0|DATA1|....|DATA(N)
+ *                    |<-- ioCmd starts here                                        |<-- config starts here
+ * MAGIC_NUMBER|LENGTH|ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME .... (N)|CONFIG_SIZE|DATA0|DATA1 ...|DATA(N)
+ *
+ * ATTACH_DEVICE - this method id
+ * DEVICE_TYPE - the mrlcomm device type we are attaching
+ * NAME_SIZE - the size of the name of the service of the device we are attaching
+ * NAME .... (N) - the name data
+ * CONFIG_SIZE - the size of the folloing config
+ * DATA0|DATA1 ...|DATA(N) - config data
+ *
  *
  * Device types are defined in org.myrobotlab.service.interface.Device
  * TODO crud Device operations create remove (update not needed?) delete
@@ -1545,58 +1556,83 @@ void servoAttach() {
  * it could be implemented with 1 byte
  */
 void attachDevice() {
-  // we're creating a new device. auto increment it
-  // TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
-  //       Arduino will run out of memory before that happen.
-  //       A mecanism that will call a softReset() when MRL disconnect will prevent that
+	// we're creating a new device. auto increment it
+	// TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
+	//       Arduino will run out of memory before that happen.
+	//       A mecanism that will call a softReset() when MRL disconnect will prevent that
 
-  int deviceType   = ioCmd[1];
-  Device* devicePtr = 0;
-  switch(deviceType){
-    case SENSOR_TYPE_ANALOG_PIN_ARRAY:{
-      devicePtr = attachAnalogPinArray();
-      break;
-    }
-    case SENSOR_TYPE_DIGITAL_PIN_ARRAY:{
-      devicePtr = attachDigitalPinArray();
-      break;
-    }
-      case SENSOR_TYPE_PULSE: {
-      devicePtr = attachPulse();
-      break;
-      }
-      case SENSOR_TYPE_ULTRASONIC: {
-        devicePtr = attachUltrasonic();
-        break;
-      }
-      case DEVICE_TYPE_STEPPER: {
-        devicePtr = attachStepper();
-        break;
-      }
-      case DEVICE_TYPE_MOTOR: {
-        devicePtr = attachMotor();
-        break;
-      }
-      case DEVICE_TYPE_SERVO: {
-        devicePtr = attachServo();
-        break;
-      }
-      case DEVICE_TYPE_I2C: {
-        devicePtr = attachI2C();
-        break;
-      }
-    default: {
-      // TODO: publish error message
-      break;
-    }
-  }
+	// we want to echo back the name
+	// and send the config in a nice neat package to
+	// the attach method which creates the device
 
-  if (devicePtr) {
-    devicePtr->id = nextDeviceId;
-    addDevice(devicePtr);
-    publishAttachedDevice(devicePtr->id);
-    nextDeviceId++;
-  }
+	int nameSize = ioCmd[2];
+
+	// get config size
+	int configSizePos = 3 + nameSize;
+	int configSize = ioCmd[configSizePos];
+	configPos = configSizePos + 1;
+
+	// MAKE NOTE: I've chosen to have config & configPos globals
+	// this is primarily to avoid the re-allocation/de-allocation of the config buffer
+	// but part of me thinks it should be a local var passed into the function to avoid
+	// the dangers of global var ... fortunately Arduino is single threaded
+	// It also makes sense to pass in config on the constructor of a new device
+	// based on device type - "you inflate the correct device with the correct config"
+	// but I went on the side of globals & hopefully avoiding more memory management and fragmentation
+
+	// move config off ioCmd into config buffer
+	for (int i = 0; i < configSize; ++i){
+		config[i] = ioCmd[configPos + 1];
+	}
+
+
+	int deviceType = ioCmd[1];
+	Device* devicePtr = 0;
+	switch (deviceType) {
+	case SENSOR_TYPE_ANALOG_PIN_ARRAY: {
+		devicePtr = attachAnalogPinArray();
+		break;
+	}
+	case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
+		devicePtr = attachDigitalPinArray();
+		break;
+	}
+	case SENSOR_TYPE_PULSE: {
+		devicePtr = attachPulse();
+		break;
+	}
+	case SENSOR_TYPE_ULTRASONIC: {
+		devicePtr = attachUltrasonic();
+		break;
+	}
+	case DEVICE_TYPE_STEPPER: {
+		devicePtr = attachStepper();
+		break;
+	}
+	case DEVICE_TYPE_MOTOR: {
+		devicePtr = attachMotor();
+		break;
+	}
+	case DEVICE_TYPE_SERVO: {
+		devicePtr = attachServo();
+		break;
+	}
+	case DEVICE_TYPE_I2C: {
+		devicePtr = attachI2C();
+		break;
+	}
+	default: {
+		// TODO: publish error message
+		break;
+	}
+}
+
+if (devicePtr) {
+	devicePtr->id = nextDeviceId;
+	addDevice(devicePtr);
+	publishAttachedDevice(devicePtr->id);
+	nextDeviceId++;
+}
 }
 
 /**
@@ -1654,12 +1690,13 @@ Device* attachDigitalPinArray() {
 }
 
 Device* attachServo() {
+  // GETTING CONFIG BECMOMES MUCH EASIER !!!!
   // TODO: add a new servo device  (pontentally attach it here also?)
   //  int type    = ioCmd[1]; already here
   // TODO : check that we don't already have a servo attached to this pin
-  int configSize     = ioCmd[2];
+  // int configSize     = ioCmd[2];
   // configSize "should" = 1
-  int pinAddress       = ioCmd[3];
+  int pinAddress       = config[0];
   // is this a copy constructor ?
   MrlServo* device = new MrlServo(pinAddress);
   return device;

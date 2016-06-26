@@ -9,7 +9,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
-import org.myrobotlab.service.interfaces.Device;
+import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
@@ -156,13 +156,13 @@ public void setServoSpeed(Servo servo) {
 
 
 @Override
-public void detachDevice(Device device) {
+public void detachDevice(DeviceControl device) {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public void attachDevice(Device device, Object... config) {
+public void attachDevice(DeviceControl device, Object... config) {
 	// TODO Auto-generated method stub
 	
 }

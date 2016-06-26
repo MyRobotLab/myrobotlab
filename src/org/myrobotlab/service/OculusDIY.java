@@ -11,6 +11,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.data.OculusData;
 import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.OculusDataListener;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
 import org.myrobotlab.service.interfaces.SensorDataListener;
@@ -211,6 +212,18 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	public void onSensorData(SensorData data) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void setController(DeviceController controller) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public DeviceController getController() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

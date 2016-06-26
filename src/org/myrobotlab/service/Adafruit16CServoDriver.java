@@ -19,7 +19,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.DeviceMapping;
-import org.myrobotlab.service.interfaces.Device;
+import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -388,7 +388,6 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	@Override
 	public void servoAttach(Servo servo) {
 		// TODO Implement something ? Or not ?
-		servoWrite(servo);
 	}
 	
 	/**
@@ -401,7 +400,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	}
 
 	@Override
-	public void attachDevice(Device device, Object... config) {
+	public void attachDevice(DeviceControl device, Object... config) {
 		// TODO - any more setup required
 		// Commented out. Can't have any Ardino specific methods here. /Mats
 		// arduino.attachDevice(device, config);
@@ -409,7 +408,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	}
 
 	@Override
-	public void detachDevice(Device servo) {
+	public void detachDevice(DeviceControl servo) {
 		// Commented out. Can't have any Ardino specific methods here. /Mats
 		// arduino.detachDevice(servo);
 		// @Grog. What is this methods expected to do here.

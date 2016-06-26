@@ -63,7 +63,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.SensorData;
-import org.myrobotlab.service.interfaces.Device;
+import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.Microcontroller;
@@ -1008,7 +1008,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * @param device
 	 * @return
 	 */
-	public Device publishAttachedDevice(Device device){
+	public DeviceControl publishAttachedDevice(DeviceControl device){
 		return device;
 	}
 
@@ -1277,14 +1277,20 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * the micro controller message format for ATTACH_DEVICE will be:
 	 * 
 	 * MAGIC_NUMBER|LENGTH|FUNCTION|PARAM0|PARAM1
-	 * MAGIC_NUMBER|LENGTH|ATTACH_DEVICE|DEVICE_TYPE|CONFIG_MSG_SIZE|B1|B2|B3
-	 * ...|B(N)
 	 * 
+	 * MAGIC_NUMBER|LENGTH|ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME .... (N)|CONFIG_SIZE|DATA0|DATA1 ...|DATA(N)
+	 * 
+	 * ATTACH_DEVICE - this method id
+	 * DEVICE_TYPE - the mrlcomm device type we are attaching
+	 * NAME_SIZE - the size of the name of the service of the device we are attaching 
+	 * NAME .... (N) - the name data
+	 * CONFIG_SIZE - the size of the folloing config
+	 * DATA0|DATA1 ...|DATA(N) - config data
 	 * 
 	 * @param device
 	 */
 	@Override
-	public synchronized void attachDevice(Device device, Object... config) {
+	public synchronized void attachDevice(DeviceControl device, Object... config) {
 
 		int deviceType = device.getDeviceType();
 		String name = device.getName();
@@ -1349,7 +1355,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 	}
 	
-	Integer getDeviceId(Device device){
+	Integer getDeviceId(DeviceControl device){
 		return getDeviceId(device.getName());
 	}
 	
@@ -1946,7 +1952,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 
 	@Override
-	public void detachDevice(Device device) {
+	public void detachDevice(DeviceControl device) {
 		// TODO validity checks
 	}
 
