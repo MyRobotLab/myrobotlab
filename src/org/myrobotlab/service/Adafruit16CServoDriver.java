@@ -388,6 +388,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	@Override
 	public void servoAttach(Servo servo) {
 		// TODO Implement something ? Or not ?
+		servoWrite(servo);
 	}
 	
 	/**

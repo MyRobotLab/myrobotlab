@@ -957,18 +957,60 @@ class MrlUltrasonic : public Device {
 /**
  * I2C device
  */
-class MrlI2CDevice : public Device {
+class MrlI2CBus : public Device {
   public:
-    MrlI2CDevice(int deviceId) : Device(DEVICE_TYPE_I2C, deviceId) {
+    MrlI2CBus(int deviceId) : Device(DEVICE_TYPE_I2C, deviceId) {
       if (TWCR == 0) { //// do this check so that Wire only gets initialized once
         WIRE.begin();
       }
     }
+
+    // I2CREAD | DEVICE_INDEX | I2CADDRESS | MEMADDRESS | DATA_SIZE
+    // PUBLISH_SENSOR_DATA | DEVICE_INDEX | DATA_SIZE | I2CADDRESS | DATA ....
+    // DEVICE_INDEX = Index to the I2C bus
+    // I2CDEVICEINDEX = Index used by Arduino to return the read data to the device
+    // that requested a read
     void i2cRead(unsigned char* ioCmd) {
-      
+
+      WIRE.beginTransmission(ioCmd[2]); // address to the i2c device
+      WIRE.write(ioCmd[3]);             // device memory address to read from
+   	  WIRE.endTransmission();
+   	  int answer = WIRE.requestFrom((uint8_t)ioCmd[2], (uint8_t)ioCmd[4]); // reqest a number of bytes to read
+   	  if (answer==0) {
+   		  //Report an error with I2C communication by returning a 0 length data size    	    //i.e a message size if 1 byte containing only PUBLISH_SENSOR_DATA
+   		  // Start an mrlcomm message
+   		  Serial.write(MAGIC_NUMBER);
+    		// size of the mrlcomm message
+    		Serial.write(2);
+    		// mrlcomm function
+    		Serial.write(PUBLISH_SENSOR_DATA);
+    		Serial.write(ioCmd[1]);//get the DEVICE_INDEX
+    		} else {
+    		// Start an mrlcomm message
+    		Serial.write(MAGIC_NUMBER);
+    		// size of the mrlcomm message
+    		Serial.write(1 + ioCmd[3]);
+    		// mrlcomm function
+    		Serial.write(PUBLISH_SENSOR_DATA);
+    		Serial.write(0);//get the DEVICE_INDEX
+    		// I2C device are only sending back data, some more identifier should be added
+    		//return the request bytes, incomplete message will be padded with 0xFF bytes
+    		Serial.write(answer);
+    		for (int i = 1; i<answer; i++) {
+    			Serial.write(Wire.read());
+    		}
+    	}
     }
+
     void i2cWrite(unsigned char* ioCmd) {
-      
+    	  wireBegin();
+    	  WIRE.beginTransmission(ioCmd[1]);   // address to the i2c device
+    	  WIRE.write(ioCmd[2]);               // device memory address to write to
+    	  for (int i = 3; i < msgSize; i++) { // data to write
+    	    WIRE.write(ioCmd[i]);
+    	  }
+    	  WIRE.endTransmission();
+    	}
     }
     void i2cWriteRead(unsigned char* ioCmd) {
       
@@ -1002,11 +1044,6 @@ unsigned long lastMicros = 0; // timestamp of last loop (if stats enabled.)
 
 // sensor sample rate
 unsigned int sampleRate = 1; // 1 - 65,535 modulus of the loopcount - allowing you to sample less
-
-// Switch to know it the i2c bus has been initiated or not
-/** TODO Move to the device, in case several buses can be allocated
-    some versions of wire allows for that */
-bool i2cInitiated = false;
 
 // global debug setting, if set to true publishDebug will write to the serial port.
 bool debug = false;
@@ -1362,14 +1399,6 @@ void i2cWriteRead() {
   /** TODO implement me */
 }
 
-// Method to make sure that WIRE.begin() is executed exactly one time
-// before any other i2c communication
-void wireBegin() {
-  if (!i2cInitiated){
-    WIRE.begin();
-    i2cInitiated = true;
-  }
-}
 // End of I2CControl interface methods
 
 // MRL Command helper methods below:
@@ -1707,7 +1736,7 @@ Device* attachMotor() {
 }
 
 Device* attachI2C(){
-  MrlI2CDevice* device = new MrlI2CDevice(nextDeviceId);
+  MrlI2CBus* device = new MrlI2CBus(nextDeviceId);
   return device;
 }
 
