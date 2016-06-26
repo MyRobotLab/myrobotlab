@@ -1268,6 +1268,10 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * applicable for the service requesting.
 	 * 
 	 * Arduino will attach itself this way too as a Analog & Digital Pin array
+	 *
+	 * Comment from Mats: Arduino should probably attach itself as an DEVICE_TYPE_I2C 
+	 * the first to createI2cDevice is invoked. This service probably needs to keep track of
+	 * the differnt devices connected on the i2c bus, but not MRLComm.
 	 * 
 	 * the micro controller message format for ATTACH_DEVICE will be:
 	 * 
