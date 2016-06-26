@@ -138,7 +138,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {publishVersion Integer} 
 	public final static int PUBLISH_VERSION =		3;
 
-	// {addSensorDataListener SensorDataListener} 
+	// {addSensorDataListener SensorDataListener int[]} 
 	public final static int ADD_SENSOR_DATA_LISTENER =		4;
 
 	// {analogReadPollingStart Integer Integer} 
@@ -150,13 +150,13 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {analogWrite int int} 
 	public final static int ANALOG_WRITE =		7;
 
-	// {attachDevice String} 
+	// {attachDevice DeviceControl Object[]} 
 	public final static int ATTACH_DEVICE =		8;
 
 	// {createI2cDevice int int String} 
 	public final static int CREATE_I2C_DEVICE =		9;
 
-	// {detachDevice Device} 
+	// {detachDevice DeviceControl} 
 	public final static int DETACH_DEVICE =		10;
 
 	// {digitalReadPollingStart Integer Integer} 
@@ -201,7 +201,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {pinMode Integer Integer} 
 	public final static int PIN_MODE =		24;
 
-	// {publishAttachedDevice Device} 
+	// {publishAttachedDevice DeviceControl} 
 	public final static int PUBLISH_ATTACHED_DEVICE =		25;
 
 	// {publishDebug String} 
@@ -219,7 +219,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {publishPulseStop Integer} 
 	public final static int PUBLISH_PULSE_STOP =		30;
 
-	// {publishSensorData Object} 
+	// {publishSensorData SensorData} 
 	public final static int PUBLISH_SENSOR_DATA =		31;
 
 	// {publishServoEvent Integer} 

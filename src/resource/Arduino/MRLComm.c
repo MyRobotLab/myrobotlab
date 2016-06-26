@@ -322,117 +322,120 @@ void LinkedList<T>::clear() {
 * so this needs to be turned itno a .h if necessary - but the manual munge
 * should be replaced
 */
-
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE BEGIN -----------
 ///// INO GENERATED DEFINITION BEGIN //////
 // {publishMRLCommError Integer}
-#define PUBLISH_MRLCOMM_ERROR    1
+#define PUBLISH_MRLCOMM_ERROR		1
 // {getVersion}
-#define GET_VERSION   2
+#define GET_VERSION		2
 // {publishVersion Integer}
-#define PUBLISH_VERSION   3
-// {addSensorDataListener SensorDataListener}
-#define ADD_SENSOR_DATA_LISTENER    4
+#define PUBLISH_VERSION		3
+// {addSensorDataListener SensorDataListener int[]}
+#define ADD_SENSOR_DATA_LISTENER		4
 // {analogReadPollingStart Integer Integer}
-#define ANALOG_READ_POLLING_START   5
+#define ANALOG_READ_POLLING_START		5
 // {analogReadPollingStop int}
-#define ANALOG_READ_POLLING_STOP    6
+#define ANALOG_READ_POLLING_STOP		6
 // {analogWrite int int}
-#define ANALOG_WRITE    7
+#define ANALOG_WRITE		7
+// {attachDevice DeviceControl Object[]}
+#define ATTACH_DEVICE		8
 // {createI2cDevice int int String}
-#define CREATE_I2C_DEVICE   8
+#define CREATE_I2C_DEVICE		9
+// {detachDevice DeviceControl}
+#define DETACH_DEVICE		10
 // {digitalReadPollingStart Integer Integer}
-#define DIGITAL_READ_POLLING_START    9
+#define DIGITAL_READ_POLLING_START		11
 // {digitalReadPollingStop int}
-#define DIGITAL_READ_POLLING_STOP   10
+#define DIGITAL_READ_POLLING_STOP		12
 // {digitalWrite int int}
-#define DIGITAL_WRITE   11
+#define DIGITAL_WRITE		13
 // {fixPinOffset Integer}
-#define FIX_PIN_OFFSET    12
+#define FIX_PIN_OFFSET		14
 // {getBoardInfo}
-#define GET_BOARD_INFO    13
+#define GET_BOARD_INFO		15
 // {i2cRead int int byte[] int}
-#define I2C_READ    14
+#define I2C_READ		16
 // {i2cWrite int int byte[] int}
-#define I2C_WRITE   15
+#define I2C_WRITE		17
 // {i2cWriteRead int int byte[] int byte[] int}
-#define I2C_WRITE_READ    16
+#define I2C_WRITE_READ		18
 // {intsToString int[] int int}
-#define INTS_TO_STRING    17
+#define INTS_TO_STRING		19
 // {motorMove MotorControl}
-#define MOTOR_MOVE    18
+#define MOTOR_MOVE		20
 // {motorMoveTo MotorControl}
-#define MOTOR_MOVE_TO   19
+#define MOTOR_MOVE_TO		21
 // {motorReset MotorControl}
-#define MOTOR_RESET   20
+#define MOTOR_RESET		22
 // {motorStop MotorControl}
-#define MOTOR_STOP    21
+#define MOTOR_STOP		23
 // {pinMode Integer Integer}
-#define PIN_MODE    22
-// {publishAttachedDevice Device}
-#define PUBLISH_ATTACHED_DEVICE   23
+#define PIN_MODE		24
+// {publishAttachedDevice DeviceControl}
+#define PUBLISH_ATTACHED_DEVICE		25
 // {publishDebug String}
-#define PUBLISH_DEBUG   24
+#define PUBLISH_DEBUG		26
 // {publishMessageAck}
-#define PUBLISH_MESSAGE_ACK   25
+#define PUBLISH_MESSAGE_ACK		27
 // {publishPin Pin}
-#define PUBLISH_PIN   26
+#define PUBLISH_PIN		28
 // {publishPulse Long}
-#define PUBLISH_PULSE   27
+#define PUBLISH_PULSE		29
 // {publishPulseStop Integer}
-#define PUBLISH_PULSE_STOP    28
+#define PUBLISH_PULSE_STOP		30
 // {publishSensorData SensorData}
-#define PUBLISH_SENSOR_DATA   29
+#define PUBLISH_SENSOR_DATA		31
 // {publishServoEvent Integer}
-#define PUBLISH_SERVO_EVENT   30
+#define PUBLISH_SERVO_EVENT		32
 // {publishStatus Long Integer}
-#define PUBLISH_STATUS    31
+#define PUBLISH_STATUS		33
 // {publishTrigger Pin}
-#define PUBLISH_TRIGGER   32
+#define PUBLISH_TRIGGER		34
 // {pulse int int int int}
-#define PULSE   33
+#define PULSE		35
 // {pulseStop}
-#define PULSE_STOP    34
+#define PULSE_STOP		36
 // {releaseI2cDevice int int}
-#define RELEASE_I2C_DEVICE    35
+#define RELEASE_I2C_DEVICE		37
 // {sensorPollingStart String}
-#define SENSOR_POLLING_START    36
+#define SENSOR_POLLING_START		38
 // {sensorPollingStop String}
-#define SENSOR_POLLING_STOP   37
+#define SENSOR_POLLING_STOP		39
 // {servoAttach Servo}
-#define SERVO_ATTACH    38
+#define SERVO_ATTACH		40
 // {servoDetach Servo}
-#define SERVO_DETACH    39
+#define SERVO_DETACH		41
 // {servoEventsEnabled Servo boolean}
-#define SERVO_EVENTS_ENABLED    40
+#define SERVO_EVENTS_ENABLED		42
 // {servoSweepStart Servo}
-#define SERVO_SWEEP_START   41
+#define SERVO_SWEEP_START		43
 // {servoSweepStop Servo}
-#define SERVO_SWEEP_STOP    42
+#define SERVO_SWEEP_STOP		44
 // {servoWrite Servo}
-#define SERVO_WRITE   43
+#define SERVO_WRITE		45
 // {servoWriteMicroseconds Servo}
-#define SERVO_WRITE_MICROSECONDS    44
+#define SERVO_WRITE_MICROSECONDS		46
 // {setDebounce int}
-#define SET_DEBOUNCE    45
+#define SET_DEBOUNCE		47
 // {setDebug boolean}
-#define SET_DEBUG   46
+#define SET_DEBUG		48
 // {setDigitalTriggerOnly Boolean}
-#define SET_DIGITAL_TRIGGER_ONLY    47
+#define SET_DIGITAL_TRIGGER_ONLY		49
 // {setLoadTimingEnabled boolean}
-#define SET_LOAD_TIMING_ENABLED   48
+#define SET_LOAD_TIMING_ENABLED		50
 // {setPWMFrequency Integer Integer}
-#define SET_PWMFREQUENCY    49
+#define SET_PWMFREQUENCY		51
 // {setSampleRate int}
-#define SET_SAMPLE_RATE   50
+#define SET_SAMPLE_RATE		52
 // {setSerialRate int}
-#define SET_SERIAL_RATE   51
+#define SET_SERIAL_RATE		53
 // {setServoSpeed Servo}
-#define SET_SERVO_SPEED   52
+#define SET_SERVO_SPEED		54
 // {setTrigger int int int}
-#define SET_TRIGGER   53
+#define SET_TRIGGER		55
 // {softReset}
-#define SOFT_RESET    54
+#define SOFT_RESET		56
 ///// INO GENERATED DEFINITION END //////
 
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
@@ -1630,7 +1633,7 @@ void attachDevice() {
 if (devicePtr) {
 	devicePtr->id = nextDeviceId;
 	addDevice(devicePtr);
-	publishAttachedDevice(devicePtr->id);
+	publishAttachedDevice(devicePtr->id, nameSize, 3);
 	nextDeviceId++;
 }
 }
@@ -1638,20 +1641,22 @@ if (devicePtr) {
 /**
  * PUBLISH_ATTACHED_DEVICE
  * MSG STRUCTURE
- * PUBLISH_ATTACHED_DEVICE | NAME_STR_SIZE | NAME | NEW_DEVICE_INDEX
+ * PUBLISH_ATTACHED_DEVICE | NEW_DEVICE_INDEX | NAME_STR_SIZE | NAME
  *
  */
-void publishAttachedDevice(int id){
+void publishAttachedDevice(int id, int nameSize, int namePos){
   Serial.write(MAGIC_NUMBER);
-  Serial.write(2); // size
-  // TODO:  figure how how to format this publish attached.
-  Serial.write(PUBLISH_ATTACHED_DEVICE);
-  int size = ioCmd[2];
-  Serial.write(size);
-  for (int i = 0; i  < size; i++) {
-    Serial.write(ioCmd[i+2]);
+  int size = 1 + /* PUBLISH_ATTACHED_DEVICE */ + 1 /* NEW_DEVICE_INDEX */ + 1 /* NAME_STR_SIZE */+ nameSize /* NAME */;
+  Serial.write(size); // # of bytes to follow
+
+  Serial.write(PUBLISH_ATTACHED_DEVICE); /* PUBLISH_ATTACHED_DEVICE */
+  Serial.write(id); /* NEW_DEVICE_INDEX */
+  Serial.write(nameSize); /* NAME_STR_SIZE */
+
+  for (int i = 0; i  < nameSize; i++) { /* NAME */
+    Serial.write(ioCmd[namePos+i]);
   }
-  Serial.write(id);
+
   Serial.flush();
 }
 
@@ -1826,7 +1831,7 @@ void addSensorDataListener() {
  */
 void publishError(int type) {
   Serial.write(MAGIC_NUMBER);
-  Serial.write(2); // size = 1 FN + 1 TYPE
+  Serial.write(2); // bytes to follow, size = 1 FN + 1 TYPE
   Serial.write(PUBLISH_MRLCOMM_ERROR);
   Serial.write(type);
   Serial.flush();
@@ -1873,7 +1878,7 @@ void publishStatus(unsigned long loadTime, int freeMemory) {
 
 void publishCommandAck() {
   Serial.write(MAGIC_NUMBER);
-  Serial.write(2); // size 1 FN + 1 bytes (the function that we're acking.)
+  Serial.write(2); // bytes to follow, size 1 FN + 1 bytes (the function that we're acking.)
   Serial.write(PUBLISH_MESSAGE_ACK);
   // the function that we're ack-ing
   Serial.write(ioCmd[0]);
@@ -1903,7 +1908,7 @@ void publishDebug(String message) {
  */
 void publishBoardInfo() {
   Serial.write(MAGIC_NUMBER);
-  Serial.write(2);
+  Serial.write(2); // bytes which follow
   Serial.write(PUBLISH_BOARD_INFO);
   Serial.write(BOARD);
   Serial.flush();

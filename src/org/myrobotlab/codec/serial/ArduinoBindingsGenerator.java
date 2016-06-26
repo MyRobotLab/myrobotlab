@@ -141,6 +141,8 @@ public class ArduinoBindingsGenerator {
     exclude.add("attach");
     exclude.add("detach");
 
+    exclude.add("getPin");
+
     exclude.add("publishStepperEvent");
     exclude.add("setStepperSpeed");
     exclude.add("stepperAttach");
