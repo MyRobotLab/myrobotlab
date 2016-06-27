@@ -591,6 +591,7 @@ class MrlServo : public Device {
        pin = p;
        isMoving = false;
        isSweeping = false;
+       speed = 100;// 100% speed
        // TODO: target/curent position?
        // create the servo
        servo = new Servo();
@@ -1525,15 +1526,14 @@ void updateStatus() {
 }
 
 
-// SERVO_ATTACH
+/***********************************************************************
+ * SERVO_ATTACH
+ *
+ */
 void servoAttach() {
-  // TODO: this is completely wrong, we need to create
-  // a new device and return it's id.
+
   MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
-  s->id = ioCmd[1];
-  if (s->servo == NULL) {
-    s->servo = new Servo();
-  }
+
   // Servo takes 1 pin
   s->servo->attach(ioCmd[2]);
   s->step = 1;

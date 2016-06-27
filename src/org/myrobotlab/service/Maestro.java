@@ -168,7 +168,7 @@ public void attachDevice(DeviceControl device, Object... config) {
 }
 
 @Override
-public void servoAttach(Servo servo) {
+public void servoAttach(Servo servo, int pin) {
 	// TODO Auto-generated method stub
 	
 }

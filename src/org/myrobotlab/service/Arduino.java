@@ -1,47 +1,31 @@
 package org.myrobotlab.service;
 
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
-
-	///// java static import definition - DO NOT MODIFY - Begin //////
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ADD_SENSOR_DATA_LISTENER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ATTACH_DEVICE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CREATE_I2C_DEVICE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DETACH_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.FIX_PIN_OFFSET;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_BOARD_INFO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE_READ;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.INTS_TO_STRING;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE_TO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_RESET;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_STOP;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_ATTACHED_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_DEBUG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MESSAGE_ACK;
+///// java static import definition - DO NOT MODIFY - Begin //////
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PIN;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SENSOR_DATA;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_STATUS;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_TRIGGER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.RELEASE_I2C_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_ATTACH;
@@ -60,7 +44,6 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SAMPLE_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERIAL_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERVO_SPEED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SOFT_RESET;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -195,7 +178,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 			this.data = data;
 		}
 	}
-	
+
 	/**
 	 * 
 	 *
@@ -203,8 +186,8 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public static class MrlCommStatus {
 		public Long us;
 		public Integer freeMemory;
-		
-		public MrlCommStatus(Long us, Integer freeMemory){
+
+		public MrlCommStatus(Long us, Integer freeMemory) {
 			this.us = us;
 			this.freeMemory = freeMemory;
 		}
@@ -224,10 +207,10 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public static final int SENSOR_DATA = 37;
 
 	// SUBTYPES ...
-	public static final int ARDUINO_TYPE_INT            = 16;
+	public static final int ARDUINO_TYPE_INT = 16;
 
 	// servo event types
-	public static final int SERVO_EVENT_STOPPED         = 1;
+	public static final int SERVO_EVENT_STOPPED = 1;
 
 	public static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
@@ -273,7 +256,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
 	public transient static final int BOARD_TYPE_ID_MEGA = 1;
 	public transient static final int BOARD_TYPE_ID_UNO = 2;
-	//temporary
+	// temporary
 	public final static int GET_BOARD_INFO = 70;
 	public final static int PUBLISH_BOARD_INFO = 71;
 	/**
@@ -310,8 +293,8 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public static final int MOTOR_BACKWARD = 0;
 
 	/**
-	 * Devices - string name index of device we need 2 indexes for sensors because they
-	 * will be referenced by name OR by index
+	 * Devices - string name index of device we need 2 indexes for sensors
+	 * because they will be referenced by name OR by index
 	 */
 	HashMap<String, DeviceMapping> deviceList = new HashMap<String, DeviceMapping>();
 
@@ -333,8 +316,9 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	int msgSize;
 
 	transient int[] msg = new int[MAX_MSG_SIZE];
-	
-  // i2c This needs to be volatile because it can be updated in a different thread  
+
+	// i2c This needs to be volatile because it can be updated in a different
+	// thread
 	volatile boolean i2cDataReturned = false;
 
 	// parameters for testing the getVersion retry stuff.
@@ -447,7 +431,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// should be to add listener on
 		// startService
 		serial.open(port, rate, databits, stopbits, parity);
-		
+
 		Integer version = getVersion();
 		if (version == null || version != MRLCOMM_VERSION) {
 			error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
@@ -533,9 +517,9 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public void disconnect() {
 		serial.disconnect();
 	}
-	
-	public void getBoardInfo(){
-	  sendMsg(GET_BOARD_INFO);
+
+	public void getBoardInfo() {
+		sendMsg(GET_BOARD_INFO);
 	}
 
 	public String getBoardType() {
@@ -615,38 +599,26 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * FIXME DEPRECATED - / - REMOVE - handle in attach(Device)
 	 */
 	/*
-	public void motorAttach(MotorControl motor) throws MRLException {
-		if (!motor.isLocal()) {
-			throw new MRLException("motor is not in the same MRL instance as the motor controller");
-		}
-
-		int[] controlPins = motor.getControlPins();
-		for (int i = 0; i < controlPins.length; ++i) {
-			pinMode(controlPins[i], OUTPUT);
-		}
-
-		String type = motor.getType();
-
-		if (type == null) {
-			throw new IllegalArgumentException("");
-		}
-
-		// if we have a pulse step - we can do a form
-		// of false encoding :P
-		if (motor.getType().equals(Motor.TYPE_PULSE_STEP)) { // TODO - add other
-			// "real"
-			// encoders
-			// the pwm pin in a pulse step motor "is" the encoder
-			// sensorAttach(motor); TODO attachDevice
-		}
-
-		motor.setController(this);
-		motor.broadcastState();
-	}
-	*/
+	 * public void motorAttach(MotorControl motor) throws MRLException { if
+	 * (!motor.isLocal()) { throw new MRLException(
+	 * "motor is not in the same MRL instance as the motor controller"); }
+	 * 
+	 * int[] controlPins = motor.getControlPins(); for (int i = 0; i <
+	 * controlPins.length; ++i) { pinMode(controlPins[i], OUTPUT); }
+	 * 
+	 * String type = motor.getType();
+	 * 
+	 * if (type == null) { throw new IllegalArgumentException(""); }
+	 * 
+	 * // if we have a pulse step - we can do a form // of false encoding :P if
+	 * (motor.getType().equals(Motor.TYPE_PULSE_STEP)) { // TODO - add other //
+	 * "real" // encoders // the pwm pin in a pulse step motor "is" the encoder
+	 * // sensorAttach(motor); TODO attachDevice }
+	 * 
+	 * motor.setController(this); motor.broadcastState(); }
+	 */
 
 	// ================= new interface end =========================
-
 
 	@Override
 	public void motorMove(MotorControl motor) {
@@ -871,12 +843,12 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		}
 		case PUBLISH_STATUS: {
 			long microsPerLoop = Serial.bytesToInt(message, 1, 4);
-			int freeMemory = (int)Serial.bytesToInt(message, 5, 2);
+			int freeMemory = (int) Serial.bytesToInt(message, 5, 2);
 			info("load %d us - memory %d bytes", microsPerLoop, freeMemory);
 			invoke("publishStatus", new MrlCommStatus(microsPerLoop, freeMemory));
 			break;
 		}
-		
+
 		// TODO - REMOVE - this needs to be routed through
 		// PUBLISH_SENSOR_DATA and processed in Servo service !
 		case PUBLISH_SERVO_EVENT: {
@@ -897,31 +869,31 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		 * PUBLISH_DEVICE_ATTACHED - is the callback from MRLComm to bind a
 		 * service with its id
 		 * 
-		 * MSG STRUCTURE
-		 *    0							1					2			3+
-		 * PUBLISH_ATTACHED_DEVICE | NEW_DEVICE_INDEX | NAME_STR_SIZE | NAME
+		 * <pre>
+		 * MSG STRUCTURE 0 					1 					2 			  3+ 
+		 * 		PUBLISH_ATTACHED_DEVICE | NEW_DEVICE_ID | NAME_STR_SIZE | NAME
+		 * </pre>
 		 * 
 		 */
 		case PUBLISH_ATTACHED_DEVICE: {
-			
-			int newDeviceIndex = message[1];
+
+			int newDeviceId = message[1];
 			int nameStrSize = message[2];
 			String deviceName = intsToString(message, 3, nameStrSize);
-			
-			if (!deviceList.containsKey(deviceName)){
+
+			if (!deviceList.containsKey(deviceName)) {
 				error("PUBLISH_ATTACHED_DEVICE deviceName %s not found !", deviceName);
 				break;
 			}
-			
-			DeviceMapping deviceMapping = deviceList.get(deviceName);			
-			deviceIndex.put(newDeviceIndex, deviceList.get(deviceName));
-			
-			// do we what this ? perhaps do it by name ? not by device object
-			// otherwise you force the framework to upcast :(
-			// invoke("publishAttachedDevice", deviceMapping.getDevice());
 
-			info("connected service %s with mrlcomm device %d", deviceName, newDeviceIndex);
-			
+			DeviceMapping deviceMapping = deviceList.get(deviceName);
+			deviceMapping.setId(newDeviceId);
+			deviceIndex.put(newDeviceId, deviceList.get(deviceName));
+
+			invoke("publishAttachedDevice", deviceName);
+
+			info("connected service %s with mrlcomm device %d", deviceName, newDeviceId);
+
 			break;
 		}
 
@@ -992,31 +964,30 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 			log.info("MRLComm Debug Message {}", payload);
 			break;
 		}
-    case PUBLISH_BOARD_INFO:{
-      int boardId=message[1];
-      String boardName="";
-      switch(boardId){
-        case BOARD_TYPE_ID_MEGA:
-          boardName=BOARD_TYPE_MEGA;
-          break;
-        case BOARD_TYPE_ID_UNO:
-          boardName=BOARD_TYPE_UNO;
-          break;
-        default:
-          boardName="Unknown";
-          break;
-      }
-      log.info("Board type returned by Arduino: {}",boardName);
-      log.info("Board type currently set: {}",board);
-      if(board=="" && boardId != BOARD_TYPE_ID_UNKNOWN){
-        setBoard(boardName);
-        log.info("Board type set to: {}",board);
-      }
-      else{
-        log.info("No change in board type");
-      }
-      break;
-    }
+		case PUBLISH_BOARD_INFO: {
+			int boardId = message[1];
+			String boardName = "";
+			switch (boardId) {
+			case BOARD_TYPE_ID_MEGA:
+				boardName = BOARD_TYPE_MEGA;
+				break;
+			case BOARD_TYPE_ID_UNO:
+				boardName = BOARD_TYPE_UNO;
+				break;
+			default:
+				boardName = "Unknown";
+				break;
+			}
+			log.info("Board type returned by Arduino: {}", boardName);
+			log.info("Board type currently set: {}", board);
+			if (board == "" && boardId != BOARD_TYPE_ID_UNKNOWN) {
+				setBoard(boardName);
+				log.info("Board type set to: {}", board);
+			} else {
+				log.info("No change in board type");
+			}
+			break;
+		}
 		default: {
 			// FIXME - use formatter for message
 			error("unknown serial event %d", function);
@@ -1024,15 +995,15 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		}
 		} // end switch
 	}
-	
+
 	/**
 	 * when a device becomes attached to MRLComm
 	 * 
 	 * @param device
 	 * @return
 	 */
-	public DeviceControl publishAttachedDevice(DeviceControl device){
-		return device;
+	public String publishAttachedDevice(String deviceName) {
+		return deviceName;
 	}
 
 	public void publishMessageAck() {
@@ -1169,13 +1140,13 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		sleep(300);
 		disconnect();
 	}
-	
+
 	public synchronized void sendMsg(int function, List<Integer> params) {
 		int[] p = new int[params.size()];
-		for (int i = 0; i < params.size(); ++i){
+		for (int i = 0; i < params.size(); ++i) {
 			p[i] = params.get(i);
 		}
-		
+
 		sendMsg(function, p);
 	}
 
@@ -1293,32 +1264,34 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * 
 	 * Arduino will attach itself this way too as a Analog & Digital Pin array
 	 * 
-	 * Comment from Mats: Arduino should probably attach itself as an DEVICE_TYPE_I2C 
-	 * the first to createI2cDevice is invoked. This service probably needs to keep track of
-	 * the differnt devices connected on the i2c bus, but not MRLComm.
+	 * Comment from Mats: Arduino should probably attach itself as an
+	 * DEVICE_TYPE_I2C the first to createI2cDevice is invoked. This service
+	 * probably needs to keep track of the differnt devices connected on the i2c
+	 * bus, but not MRLComm.
 	 * 
 	 * the micro controller message format for ATTACH_DEVICE will be:
 	 * 
 	 * MAGIC_NUMBER|LENGTH|FUNCTION|PARAM0|PARAM1
 	 * 
-	 * MAGIC_NUMBER|LENGTH|ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME .... (N)|CONFIG_SIZE|DATA0|DATA1 ...|DATA(N)
+	 * MAGIC_NUMBER|LENGTH|ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME ....
+	 * (N)|CONFIG_SIZE|DATA0|DATA1 ...|DATA(N)
 	 * 
-	 * ATTACH_DEVICE - this method id
-	 * DEVICE_TYPE - the mrlcomm device type we are attaching
-	 * NAME_SIZE - the size of the name of the service of the device we are attaching 
-	 * NAME .... (N) - the name data
-	 * CONFIG_SIZE - the size of the folloing config
-	 * DATA0|DATA1 ...|DATA(N) - config data
+	 * ATTACH_DEVICE - this method id DEVICE_TYPE - the mrlcomm device type we
+	 * are attaching NAME_SIZE - the size of the name of the service of the
+	 * device we are attaching NAME .... (N) - the name data CONFIG_SIZE - the
+	 * size of the folloing config DATA0|DATA1 ...|DATA(N) - config data
 	 * 
 	 * @param device
 	 */
 	@Override
 	public synchronized void attachDevice(DeviceControl device, Object... config) {
 
+		// YAY ! - one place to set the device controller !
+		device.setController(this);
 		int deviceType = device.getDeviceType();
 		String name = device.getName();
 		int nameSize = name.length();
-		
+
 		// FIXME - total length test - if name overruns - throw
 
 		info("attaching device %s of type %d", name, deviceType);
@@ -1330,27 +1303,27 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 		// ArrayList<Integer> msgParms = new int[deviceConfigSize + 2];
 		List<Integer> msgBody = new ArrayList<Integer>();
-		// ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME .... (N)|CONFIG_MSG_SIZE|DATA0|DATA1 ...|DATA(N)
+		// ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME ....
+		// (N)|CONFIG_MSG_SIZE|DATA0|DATA1 ...|DATA(N)
 
 		// create msg payload for the specific device in MRLComm
-		msgBody.add(deviceType); 		// DEVICE_TYPE
-		
+		msgBody.add(deviceType); // DEVICE_TYPE
+
 		msgBody.add(nameSize); // NAME_SIZE
 		for (int i = 0; i < nameSize; ++i) {
-			msgBody.add((int)name.charAt(i));
+			msgBody.add((int) name.charAt(i));
 		}
-		
-		msgBody.add(deviceConfigSize); 	// CONFIG_MSG_SIZE
+
+		msgBody.add(deviceConfigSize); // CONFIG_MSG_SIZE
 
 		// move the device config into the msg
 		// DATA0|DATA1 ...|DATA(N)
 		if (config != null) {
 			for (int i = 0; i < config.length; ++i) {
-				msgBody.add((int)config[i]);
+				msgBody.add((int) config[i]);
 			}
 		}
-		
-		
+
 		// we put the device on the name lst - this allows
 		// references to work from
 		// Java-land Service -----name---> deviceList
@@ -1374,16 +1347,16 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// Arduino owns
 		// the mapping of the two.
 
- 		sendMsg(ATTACH_DEVICE, msgBody);
+		sendMsg(ATTACH_DEVICE, msgBody);
 
 	}
-	
-	Integer getDeviceId(DeviceControl device){
+
+	Integer getDeviceId(DeviceControl device) {
 		return getDeviceId(device.getName());
 	}
-	
-	Integer getDeviceId(String name){	
-		if (deviceList.containsKey(name)){
+
+	Integer getDeviceId(String name) {
+		if (deviceList.containsKey(name)) {
 			return deviceList.get(name).getId();
 		}
 		log.error("getDeviceId could not find device {}", name);
@@ -1402,7 +1375,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 */
 	public void sensorPollingStart(String name) {
 		sendMsg(SENSOR_POLLING_START, getDeviceId(name));
-		}
+	}
 
 	/**
 	 * Stops the "Device" from polling - puts the device into a non-reading
@@ -1860,65 +1833,74 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	/**
-	 * high level method for attaching the device of a 
-	 * Servo - not to be confused with Servo.attach - this method
-	 * attaches the "device" and sends the necessary config to the
-	 * method which handles all devices attachDevice(Device, int[] config).
+	 * high level method for attaching the device of a Servo - not to be
+	 * confused with Servo.attach - this method attaches the "device" and sends
+	 * the necessary config to the method which handles all devices
+	 * attachDevice(Device, int[] config).
 	 * 
-	 * Its purpose is to provide a standardized way of attaching a Servo to 
-	 * this microcontrollers - the details of how this microcontroller prepares
-	 * its message and sends it to the MRLComm is hidden
+	 * Its purpose is to provide a standardized way of attaching a Servo to this
+	 * microcontrollers - the details of how this microcontroller prepares its
+	 * message and sends it to the MRLComm is hidden
 	 * 
 	 * @param servo
 	 * @param pin
 	 */
 	@Override
 	public void attach(Servo servo, int pin) {
-		servo.setController(this);
-		attachDevice(servo, pin);
+		// Attaching the Device to the DeviceController !!
+		attachDevice(servo, pin); // FIXME - technically - you do not need the pin at this point !!
+		
+		// The probably expectation is when you attach
+		// servo (as a device) to the controller - you want the servo energized
+		// so we call the Servo.h Servo.attach(pin)
+		servo.attach(pin);
 	}
-	
+
 	/**
-	 * high level method for detaching the device of a 
-	 * Servo - not to be confused with Servo.detach.
+	 * high level method for detaching the device of a Servo - not to be
+	 * confused with Servo.detach.
 	 * 
-	 * This method tells MRLComm to release resources 
-	 * for this device which will probably include calling the 
-	 * method Servo.detach on MRLComm
+	 * This method tells MRLComm to release resources for this device which will
+	 * probably include calling the method Servo.detach on MRLComm
 	 * 
 	 */
-	public void detach(Servo servo){
+	public void detach(Servo servo) {
 		detachDevice(servo);
 	}
 
 	@Override
 	public void createI2cDevice(int busAddress, int deviceAddress, String type) {
 		// TODO Auto-generated method stub - I2C
-		// This method should add an entry to the list of I2CDevices that it can do a callback to
-		// It should create and initiate one I2C bus in MRLComm and add this arduino as its callback
+		// This method should add an entry to the list of I2CDevices that it can
+		// do a callback to
+		// It should create and initiate one I2C bus in MRLComm and add this
+		// arduino as its callback
 
 	}
 
 	@Override
 	public void releaseI2cDevice(int busAddress, int deviceAddress) {
 		// TODO Auto-generated method stub
-		// This method should delete the i2c device entry from the list of I2CDevices
+		// This method should delete the i2c device entry from the list of
+		// I2CDevices
 	}
 
 	@Override
 	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
-    int msgBuffer[] = new int[size+1];
-    msgBuffer[0] = deviceAddress;
-    for (int i=0 ; i < size ; i++){
-    	msgBuffer[i+1] = (int)buffer[i] & 0xFF;
-    }
-		sendMsg(I2C_WRITE,msgBuffer);
+		int msgBuffer[] = new int[size + 1];
+		msgBuffer[0] = deviceAddress;
+		for (int i = 0; i < size; i++) {
+			msgBuffer[i + 1] = (int) buffer[i] & 0xFF;
+		}
+		sendMsg(I2C_WRITE, msgBuffer);
 	}
 
 	@Override
 	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
-		// Get the device index to the MRL i2c bus so that it can be added to the datastream
-		int deviceIndex = 42; // Change this to get the the deviceinex using busAddress
+		// Get the device index to the MRL i2c bus so that it can be added to
+		// the datastream
+		int deviceIndex = 42; // Change this to get the the deviceinex using
+								// busAddress
 		sendMsg(I2C_READ, deviceIndex, deviceAddress, size);
 		int retry = 0;
 		int retryMax = 1000;
@@ -1938,7 +1920,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		}
 		if (i2cDataReturned) {
 			// TODO Implement me
-		  // Return the data in buffer[]
+			// Return the data in buffer[]
 			// Return the size of the data or -1 in case of an error
 			return size;
 		}
@@ -1967,12 +1949,11 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public SensorData publishSensorData(SensorData data) {
 		return data;
 	}
-	
+
 	@Override
 	public void addSensorDataListener(SensorDataListener listener, int[] config) {
 		attachDevice(listener, config);
 	}
-
 
 	@Override
 	public void detachDevice(DeviceControl device) {
@@ -1980,25 +1961,22 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	/**
-	 * THESE ARE SERVO COMMANDS !  NOT REQUEST
-	 * TO ATTACH OR DETACH THE SERVO AS A DEVICE !!!
-	 * This is Servo.attach(10) .. not Arduino.attach(Device) !!
+	 * THESE ARE SERVO COMMANDS ! NOT REQUEST TO ATTACH OR DETACH THE SERVO AS A
+	 * DEVICE !!! This is Servo.attach(10) .. not Arduino.attach(Device) !!
 	 */
 	@Override
-	public void servoAttach(Servo servo) {
-		int id = getDeviceId(servo);
-		sendMsg(SERVO_ATTACH, getDeviceId(servo), id);		
+	public void servoAttach(Servo servo, int pin) {
+		sendMsg(SERVO_ATTACH, getDeviceId(servo));
 	}
 
 	/**
-	 * THESE ARE SERVO COMMANDS !  NOT REQUEST
-	 * TO ATTACH OR DETACH THE SERVO AS A DEVICE !!!
-	 * This is Servo.attach(10) .. not Arduino.attach(Device) !!
+	 * THESE ARE SERVO COMMANDS ! NOT REQUEST TO ATTACH OR DETACH THE SERVO AS A
+	 * DEVICE !!! This is Servo.attach(10) .. not Arduino.attach(Device) !!
 	 */
 	@Override
 	public void servoDetach(Servo servo) {
 		int id = getDeviceId(servo);
-		sendMsg(SERVO_DETACH, getDeviceId(servo), id);		
+		sendMsg(SERVO_DETACH, getDeviceId(servo), id);
 	}
 
 	@Override
@@ -2008,14 +1986,13 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 	@Override
 	public void attach(MotorControl motor, int powerPin, int dirPin) {
-		attachDevice(motor, new int[]{powerPin, dirPin});
+		attachDevice(motor, new int[] { powerPin, dirPin });
 	}
 
 	@Override
 	public Integer getPin(Servo servo) {
-		// TODO Auto-generated method stub
-		return null;
+		Object[] config = deviceList.get(servo.getName()).getConfig();
+		return (Integer)config[0];
 	}
-
 
 }

@@ -150,9 +150,9 @@ public class Servo extends Service implements ServoControl {
 	Integer uS;
 
 	/**
-	 * Pin is "gone" - it only is needed at the time of attaching the device
-	 * - Arduino and/or MRLComm will remember the pin for future reference..
-	 * its not a property of the "Servo"
+	 * Pin is "gone" - it only is needed at the time of attaching the device -
+	 * Arduino and/or MRLComm will remember the pin for future reference.. its
+	 * not a property of the "Servo"
 	 * 
 	 * the pin is a necessary part of servo - even though this is really
 	 * controller's information a pin is a integral part of a "servo" - so it is
@@ -208,69 +208,58 @@ public class Servo extends Service implements ServoControl {
 	public Servo(String n) {
 		super(n);
 		lastActivityTime = System.currentTimeMillis();
-		// don't allow buffer overruns?
-		// outbox.setBlocking(true);
 	}
 
-	// uber good
 	public void addServoEventListener(NameProvider service) {
 		addListener("publishServoEvent", service.getName(), "onServoEvent");
 	}
 
 	/**
-	 * FIXME - this is Servo.attach NOT Device.attach (GroG)
+	 * Equivalent to Arduino's Servo.attach(pin).
+	 * It energizes the servo sending pulses to maintain its current position.
 	 */
 	@Override
-	public boolean attach() {
+	public boolean attach(int pin) {
 		lastActivityTime = System.currentTimeMillis();
 		if (isAttached) {
-			log.info(String.format("%s.attach() - already attached - nothing to do", getName()));
+			log.info("{}.attach() - already attached - nothing to do", getName());
 			return false;
 		}
 
 		if (controller == null) {
-			error("no valid controller can not attach %s", getName());
+			error("%s's controller is not set", getName());
 			return false;
 		}
 
-		// controller.attach(this);
+		controller.servoAttach(this, controller.getPin(this));
 		isAttached = true;
 		broadcastState();
 		return isAttached;
 	}
 
 	/**
-	 *  STOP THE CONFUSION .. arduino.attach(servo, 9) not servo.attach(arduino, 9) !!!
-	 * @param controller
-	 * @param pin
-	 * @return
-	 * @throws Exception
-	 *
-	public boolean attach(ServoController controller, Integer pin) throws Exception {
-		setPin(pin);
+	 * Re-attach to servo's current pin. The pin must have be set previously.
+	 * Equivalent to Arduino's Servo.attach(currentPin)
+	 */
+	@Override
+	public boolean attach() {
 
-		if (setController(controller)) {
-			// THIS IS ATTACHING THE DEVICE !!!
-			controller.attachDevice(this);
-			// THIS IS calling Arduino's Servo.attach(pin) !!
-			return attach();
+		Integer pin = controller.getPin(this);
+		if (pin == null) {
+			error("pin is not set");
+			return false;
 		}
 
-		return false;
+		return attach(pin);
 	}
 
-
-	@Override
-	public boolean attach(String controllerName, Integer pin) throws Exception {
-		return attach((ServoController) Runtime.getService(controllerName), pin);
-	}
- 
- 	*/
-	
+	/**
+	 * Equivalent to Arduino's Servo.detach() it de-energizes the servo
+	 */
 	@Override
 	public boolean detach() {
 		if (!isAttached) {
-			log.info(String.format("%s.detach() - already detach - attach first", getName()));
+			log.info("{}.detach() - already detach - attach first", getName());
 			return false;
 		}
 
@@ -319,14 +308,12 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/*
-	@Override
-	public Integer getPin() {
-		
-		return pin;
-	}
+	 * @Override public Integer getPin() {
+	 * 
+	 * return pin; }
+	 * 
+	 */
 
-	*/
-	
 	public Integer getPos() {
 		return targetPos;
 	}
@@ -421,29 +408,24 @@ public class Servo extends Service implements ServoControl {
 		// FIXME - remove - the controller or MRLComm will take care of this
 		// check
 		/*
-		if (isAttached()) {
-			warn("can not set controller %s when servo %s is attached", controller, getName());
-			return false;
-		}
-		*/
-		
-		this.controller = (ServoController)controller;
+		 * if (isAttached()) { warn(
+		 * "can not set controller %s when servo %s is attached", controller,
+		 * getName()); return false; }
+		 */
+
+		this.controller = (ServoController) controller;
 		broadcastState();
 	}
 
 	/*
-	@Override
-	public boolean setController(String controller) {
+	 * @Override public boolean setController(String controller) {
+	 * 
+	 * ServoController sc = (ServoController) Runtime.getService(controller); if
+	 * (sc == null) { return false; }
+	 * 
+	 * return setController(sc); }
+	 */
 
-		ServoController sc = (ServoController) Runtime.getService(controller);
-		if (sc == null) {
-			return false;
-		}
-
-		return setController(sc);
-	}
-	*/
-	
 	public boolean eventsEnabled(boolean b) {
 		isEventsEnabled = b;
 		controller.servoEventsEnabled(this, b);
@@ -467,18 +449,11 @@ public class Servo extends Service implements ServoControl {
 	 * @see org.myrobotlab.service.interfaces.ServoControl#setPin(int)
 	 */
 	/*
-	@Override
-	public boolean setPin(int pin) {
-		log.info(String.format("setting %s pin to %d", getName(), pin));
-		if (isAttached()) {
-			warn("%s can not set pin %d when servo is attached", getName(), pin);
-			return false;
-		}
-		this.pin = pin;
-		broadcastState();
-		return true;
-	}
-	*/
+	 * @Override public boolean setPin(int pin) { log.info(String.format(
+	 * "setting %s pin to %d", getName(), pin)); if (isAttached()) { warn(
+	 * "%s can not set pin %d when servo is attached", getName(), pin); return
+	 * false; } this.pin = pin; broadcastState(); return true; }
+	 */
 
 	public int setRest(int i) {
 		rest = i;
@@ -610,10 +585,10 @@ public class Servo extends Service implements ServoControl {
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.connect("COM5");
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
-			arduino.attachDevice(servo, new int[]{8});
+			arduino.attachDevice(servo, new int[] { 8 });
 			// servo.attach(arduino, 8);
 			// servo.attach(
-					
+
 			servo.moveTo(90);
 			servo.setRest(30);
 			servo.moveTo(10);
@@ -663,12 +638,4 @@ public class Servo extends Service implements ServoControl {
 		return DeviceControl.DEVICE_TYPE_SERVO;
 	}
 
-	/*
-	 NO LONGER NEEDED - CONFIG is supplied at the time
-	 attachDevice(Device device, int[] config) is called
-	@Override
-	public int[] getDeviceConfig() {
-		return new int[] { pin };
-	}
-	*/
 }
