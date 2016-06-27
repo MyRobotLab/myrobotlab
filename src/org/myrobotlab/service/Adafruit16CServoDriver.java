@@ -384,8 +384,12 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 * TO ATTACH OR DETACH THE SERVO AS A DEVICE !!!
 	 */
 	@Override
-	public void servoAttach(Servo servo) {
+	public void servoAttach(Servo servo, int pin) {
 		// TODO Implement something ? Or not ?
+		// Grog says,
+		// this is a (possibly an Arduino specific method call) which energizes a servo
+		// with a new pin equivalent to the Arduino's Servo.attach(int) - different
+		// from the low level concept of connecting a generalized device to this controller
 	}
 	
 	/**
@@ -403,6 +407,18 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		// Commented out. Can't have any Ardino specific methods here. /Mats
 		// arduino.attachDevice(device, config);
 		// @Grog. What is this methods expected to do here.
+		
+		// Grog says,
+		// The method is a low level call for a DeviceController to attach a Device
+		// you may pass any necessary config in order to properly initialize a device.
+		// If your Controller supports controlling multiple types of devices - for example,
+		// DynamixelServos & Servos - this method would be all where all the "common" logic
+		// to attach a device to its controller would be shared ..
+		//
+		// you can look at Arduino.attachDevice as an example...
+		// Arduino will need to support multiple DeviceControllers in addition to multiple Devices to control
+		// the common logic for all of them run through attachDevice
+		
 	}
 
 	@Override

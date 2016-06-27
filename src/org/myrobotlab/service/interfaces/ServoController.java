@@ -36,7 +36,7 @@ public interface ServoController extends DeviceController {
    * "might" call - because Servo.attach & Device.attach are NOT related
    * 
    * @param servo
-   * @param pin
+   * @param pin -  All of the config needed for the device 
    */
   public void attach(Servo servo, int pin);
   
@@ -91,7 +91,7 @@ public interface ServoController extends DeviceController {
    * NOT DEVICE ATTACH & DETACH !!!! 
    * @param servo
    */
-  public void servoAttach(Servo servo);
+  public void servoAttach(Servo servo, int pin);
   
   /**
    * These are "System" calls for the Arduino  e.g. .. ---> Servo.detach()

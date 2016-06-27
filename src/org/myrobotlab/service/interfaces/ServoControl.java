@@ -29,11 +29,18 @@ public interface ServoControl extends DeviceControl {
 
  
   /**
-   * calls Servo.attach(pin) on MRLComm
+   * Re-attaches (re-energizes) the servo on its current pin
    * 
    * @return
    */
   public boolean attach();
+  
+  /**
+   * Re-attaches (re-energizes) the servo on its current pin
+   * 
+   * @return
+   */
+  public boolean attach(int pin);
 
   
   /**
@@ -43,14 +50,10 @@ public interface ServoControl extends DeviceControl {
    */
   public boolean detach();
 
-  /* PUSHED UP INTO DeviceControl.getController 
-  public ServoController getController();
-  */
-
 
   /**
-   * moveTo moves the servo to a specific location. Typically, a servo has 0 to
-   * 180 positions
+   * Moves the servo to a specific location. Typically, a servo has 0 to
+   * 180 positions - each increment corresponding to a degree
    * 
    * @param newPos
    */
