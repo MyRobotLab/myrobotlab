@@ -60,6 +60,12 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+// Comment from Mats
+// The imports below is for the pi4j implemetation on RasPi
+// I don't think they add any value to the Arduino service and makes the 
+// Arduino service dependant of pi4j for very little or no reason
+// Please let me know if you have a different opinion
+import org.myrobotlab.service.RasPi.I2CDeviceMap;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.SensorData;
@@ -75,6 +81,14 @@ import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
+
+// Comment from Mats
+// The imports below are for the pi4j implemetation on RasPi
+// I don't think they add any value to the Ardino service and makes the 
+// Arduino service dependant of pi4j for very little or no reason
+// Please let me know if you have a different opinion
+import com.pi4j.io.i2c.I2CBus;
+import com.pi4j.io.i2c.I2CDevice;
 
 /**
  * Implementation of a Arduino Service connected to MRL through a serial port.
@@ -320,6 +334,14 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	// i2c This needs to be volatile because it can be updated in a different
 	// thread
 	volatile boolean i2cDataReturned = false;
+	
+	public static class I2CDeviceMap {
+		public int busAddress;
+		public int deviceAddress;
+		public String serviceName;
+	}
+	
+	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
 	// parameters for testing the getVersion retry stuff.
 	// TODO: some way to do this more synchronously
@@ -1264,10 +1286,11 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * 
 	 * Arduino will attach itself this way too as a Analog & Digital Pin array
 	 * 
-	 * Comment from Mats: Arduino should probably attach itself as an
-	 * DEVICE_TYPE_I2C the first to createI2cDevice is invoked. This service
-	 * probably needs to keep track of the differnt devices connected on the i2c
-	 * bus, but not MRLComm.
+	 * Comment from Mats: This service should create a DEVICE_TYPE_I2C by using
+	 * ATTACH_DEVICE the first time the createI2cDevice method is invoked. 
+	 * The DEVICE_TYPE_I2C represents one i2c bus on the Arduino hardware. 
+	 * This service needs to keep track of other services that are using the 
+	 * i2cbus, but not MRLComm.
 	 * 
 	 * the micro controller message format for ATTACH_DEVICE will be:
 	 * 
@@ -1853,6 +1876,11 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// The probably expectation is when you attach
 		// servo (as a device) to the controller - you want the servo energized
 		// so we call the Servo.h Servo.attach(pin)
+		// Comment from Mats: The servo no longer "owns" the pin. 
+		// Pin is "gone" - it only is needed at the time of attaching the device -
+		// Arduino and/or MRLComm will remember the pin for future reference.. its
+		// not a property of the "Servo"
+		// So this "attach" should be sent to MRLComm, not to the servo service.
 		servo.attach(pin);
 	}
 
@@ -1869,13 +1897,20 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	@Override
-	public void createI2cDevice(int busAddress, int deviceAddress, String type) {
+	public void createI2cDevice(int busAddress, int deviceAddress, String serviceName) {
 		// TODO Auto-generated method stub - I2C
-		// This method should add an entry to the list of I2CDevices that it can
-		// do a callback to
-		// It should create and initiate one I2C bus in MRLComm and add this
-		// arduino as its callback
-
+		// Create the i2c bus device in MRLComm the first time this method is invoked.
+		// Add the i2c device to the list of i2cDevices
+		// Pattern: attachDevice(DEVICE_TYPE_I2C, Object... config)
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		I2CDeviceMap devicedata = new I2CDeviceMap();
+		if (i2cDevices.containsKey(key)) {
+			log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, serviceName));
+		} else
+			devicedata.busAddress = busAddress;
+		  devicedata.deviceAddress = deviceAddress;
+		  devicedata.serviceName = serviceName;
+		  i2cDevices.put(key, devicedata);
 	}
 
 	@Override
@@ -1883,6 +1918,13 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// TODO Auto-generated method stub
 		// This method should delete the i2c device entry from the list of
 		// I2CDevices
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		if (i2cDevices.containsKey(key)) {
+			i2cDevices.remove(key);
+		}
+		if (i2cDevices.isEmpty()){
+			// Detach the i2c bus from MRLComm
+		}
 	}
 
 	@Override
