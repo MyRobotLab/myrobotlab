@@ -1610,10 +1610,6 @@ void attachDevice() {
 	int configSize = ioCmd[configSizePos];
 	configPos = configSizePos + 1;
 
-	publishDebug("nameSize " + String(nameSize));
-	publishDebug("configSizePos " + String(configSizePos));
-	publishDebug("configSize " + String(configSize));
-	publishDebug("configPos " + String(configPos));
 	// MAKE NOTE: I've chosen to have config & configPos globals
 	// this is primarily to avoid the re-allocation/de-allocation of the config buffer
 	// but part of me thinks it should be a local var passed into the function to avoid
@@ -1625,9 +1621,7 @@ void attachDevice() {
 	// move config off ioCmd into config buffer
 	for (int i = 0; i < configSize; ++i){
 		config[i] = ioCmd[configPos + i];
-		publishDebug("attachDevice config[i] " + String(config[i]) + " configSize " + String(configSize));
 	}
-
 
 	int deviceType = ioCmd[1];
 	Device* devicePtr = 0;
