@@ -55,8 +55,9 @@ public class ServoTest {
 		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 		arduino.connect("COM5");
 		Servo servo = (Servo)Runtime.start("servo01", "Servo");
-		arduino.setDebug(true);
+		// arduino.setDebug(true);
 		
+		// device controller attaching device
 		arduino.attach(servo, 8);
 		servo.moveTo(30);
 		servo.moveTo(130);
