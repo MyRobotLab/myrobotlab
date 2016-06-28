@@ -1294,11 +1294,22 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * 
 	 * the micro controller message format for ATTACH_DEVICE will be:
 	 * 
-	 * MAGIC_NUMBER|LENGTH|FUNCTION|PARAM0|PARAM1
-	 * 
-	 * MAGIC_NUMBER|LENGTH|ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME ....
-	 * (N)|CONFIG_SIZE|DATA0|DATA1 ...|DATA(N)
-	 * 
+	 *<pre>
+	 *
+	 * MSG STRUCTURE
+	 *                    |<-- ioCmd starts here                                        |<-- config starts here
+	 * MAGIC_NUMBER|LENGTH|ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME .... (N)|CONFIG_SIZE|DATA0|DATA1 ...|DATA(N)
+	 *
+	 *
+	 * ATTACH_DEVICE - this method id
+	 * DEVICE_TYPE - the mrlcomm device type we are attaching
+	 * NAME_SIZE - the size of the name of the service of the device we are attaching
+	 * NAME .... (N) - the name data
+	 * CONFIG_SIZE - the size of the folloing config
+	 * DATA0|DATA1 ...|DATA(N) - config data
+	 *
+	 *</pre>
+	 *
 	 * ATTACH_DEVICE - this method id DEVICE_TYPE - the mrlcomm device type we
 	 * are attaching NAME_SIZE - the size of the name of the service of the
 	 * device we are attaching NAME .... (N) - the name data CONFIG_SIZE - the
@@ -2008,7 +2019,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 */
 	@Override
 	public void servoAttach(Servo servo, int pin) {
-		sendMsg(SERVO_ATTACH, getDeviceId(servo));
+		sendMsg(SERVO_ATTACH, getDeviceId(servo), pin);
 	}
 
 	/**
