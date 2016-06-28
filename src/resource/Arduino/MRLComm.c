@@ -595,13 +595,19 @@ class MrlServo : public Device {
        // TODO: target/curent position?
        // create the servo
        servo = new Servo();
-       servo->attach(pin);
        eventsEnabled = false;
     }
+
     ~MrlServo() {
       servo->detach();
       delete servo;
     }
+
+    void attach(int pin){
+    	publishDebug("MRLServo.attach " + String(pin));
+    	servo->attach(pin);
+    }
+
     void update(unsigned long loopCount) {
       // TODO: implement me. / test This seems to be just for sweeping stuffs? The first part is also use when Servo.speed!=100
       //It's possible that the servo never reach the targetPos if servo->step!=1
@@ -655,6 +661,7 @@ class MrlServo : public Device {
         targetPos = position;
         currentPos = position;
         isMoving = false;
+        // servo->attach(8);
         servo->write(position);
         if (eventsEnabled)
           publishServoEvent(SERVO_EVENT_STOPPED);
@@ -663,6 +670,17 @@ class MrlServo : public Device {
         isMoving = true;
       }
     }
+    void publishDebug(String message) {
+
+        Serial.flush();
+        Serial.write(MAGIC_NUMBER);
+        Serial.write(1+message.length());
+        Serial.write(PUBLISH_DEBUG);
+        Serial.print(message);
+        Serial.flush();
+
+    }
+
     void servoWriteMicroseconds(int position) {
       if (servo) {
         servo->writeMicroseconds(position);
@@ -1049,6 +1067,7 @@ int addDevice(Device*);
 /**
  * DEVICE LIST ACCESS METHODS END
  **********************************************************************/
+void publishDebug(String message);
 
 /***********************************************************************
  * STANDARD ARDUINO BEGIN
@@ -1195,19 +1214,23 @@ void processCommand() {
   case DIGITAL_WRITE:
     digitalWrite(ioCmd[1], ioCmd[2]);
     break;
-  case ANALOG_WRITE:
+  case ANALOG_WRITE:{
     analogWrite(ioCmd[1], ioCmd[2]);
     break;
-  case PIN_MODE:
+  }
+  case PIN_MODE:{
     pinMode(ioCmd[1], ioCmd[2]);
     break;
-  case SERVO_ATTACH:
-    // this a user command to Servo.attach
-    // not to be confused with attachServo which is
-    // MRLComm framework request to attach a device
-    // this is still need?
-    servoAttach();
+  }
+  case SERVO_ATTACH:{
+    // Servo.attach(pin)
+	int pin = ioCmd[2];
+	publishDebug("SERVO_ATTACH " + String(pin));
+	MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
+	s->attach(pin);
+	publishDebug("SERVO_ATTACHED ");
     break;
+  }
   case SERVO_SWEEP_START:
     //startSweep(min,max,step)
     ((MrlServo*)getDevice(ioCmd[1]))->startSweep(ioCmd[2],ioCmd[3],ioCmd[4]);
@@ -1302,12 +1325,13 @@ void processCommand() {
     i2cWriteRead();
     break;
     */
-  case SET_DEBUG:
+  case SET_DEBUG:{
     debug = ioCmd[1];
     if (debug) {
       publishDebug(F("Debug logging enabled."));
     }
     break;
+  }
   case GET_BOARD_INFO:
     getBoardInfo();
     break;
@@ -1527,7 +1551,11 @@ void updateStatus() {
 
 
 /***********************************************************************
- * SERVO_ATTACH
+ * SERVO_ATTACH -
+ *
+ * GroG says - this should be removed - the resetting the setp & events is
+ * an assumption - the call is very simple - no longer calling a method here
+ * - its being called in the MrlServo class
  *
  */
 void servoAttach() {
@@ -1540,12 +1568,15 @@ void servoAttach() {
   s->eventsEnabled = false;
 }
 
-/***********************************************************************
+/**********************************************************************
  * ATTACH DEVICES BEGIN
+ *
+ *<pre>
  *
  * MSG STRUCTURE
  *                    |<-- ioCmd starts here                                        |<-- config starts here
  * MAGIC_NUMBER|LENGTH|ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME .... (N)|CONFIG_SIZE|DATA0|DATA1 ...|DATA(N)
+ *
  *
  * ATTACH_DEVICE - this method id
  * DEVICE_TYPE - the mrlcomm device type we are attaching
@@ -1554,6 +1585,7 @@ void servoAttach() {
  * CONFIG_SIZE - the size of the folloing config
  * DATA0|DATA1 ...|DATA(N) - config data
  *
+ *</pre>
  *
  * Device types are defined in org.myrobotlab.service.interface.Device
  * TODO crud Device operations create remove (update not needed?) delete
@@ -1578,6 +1610,10 @@ void attachDevice() {
 	int configSize = ioCmd[configSizePos];
 	configPos = configSizePos + 1;
 
+	publishDebug("nameSize " + String(nameSize));
+	publishDebug("configSizePos " + String(configSizePos));
+	publishDebug("configSize " + String(configSize));
+	publishDebug("configPos " + String(configPos));
 	// MAKE NOTE: I've chosen to have config & configPos globals
 	// this is primarily to avoid the re-allocation/de-allocation of the config buffer
 	// but part of me thinks it should be a local var passed into the function to avoid
@@ -1588,7 +1624,8 @@ void attachDevice() {
 
 	// move config off ioCmd into config buffer
 	for (int i = 0; i < configSize; ++i){
-		config[i] = ioCmd[configPos + 1];
+		config[i] = ioCmd[configPos + i];
+		publishDebug("attachDevice config[i] " + String(config[i]) + " configSize " + String(configSize));
 	}
 
 
@@ -1704,10 +1741,11 @@ Device* attachServo() {
   // TODO : check that we don't already have a servo attached to this pin
   // int configSize     = ioCmd[2];
   // configSize "should" = 1
-  int pinAddress       = config[0];
+  int pin = config[0];
   // is this a copy constructor ?
-  MrlServo* device = new MrlServo(pinAddress);
-  return device;
+  MrlServo* mrlServo = new MrlServo(pin);
+  mrlServo->attach(pin);
+  return mrlServo;
 }
 
 Device* attachPulse() {
