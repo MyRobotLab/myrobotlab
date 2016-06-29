@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -64,7 +65,7 @@ public class SerialTest {
 
     logic = virtual.getLogic();
 
-    serial.connect(vport);
+    serial.open(vport);
     Thread.sleep(300);
 
     startThreads = Runtime.getThreads();
@@ -99,7 +100,7 @@ public class SerialTest {
     serial.setTimeout(300);
 
     if (!serial.isConnected()) {
-      serial.connect(vport);
+      serial.open(vport);
     }
 
     serial.setCodec("decimal");
@@ -226,7 +227,7 @@ public class SerialTest {
 
     catcher.isLocal = false;
 
-    serial.connect(vport);
+    serial.open(vport);
     catcher.checkMsg("onConnect", vport);
 
     testReadAndWrite();
@@ -256,7 +257,7 @@ public class SerialTest {
     catcher.isLocal = true;
 
     serial.addByteListener(catcher);
-    serial.connect(vport);
+    serial.open(vport);
     catcher.checkMsg("onConnect", vport);
 
     testReadAndWrite();
@@ -264,7 +265,7 @@ public class SerialTest {
     serial.disconnect();
     catcher.checkMsg("onDisconnect", vport);
     serial.removeByteListener(catcher);
-    serial.connect(vport);
+    serial.open(vport);
   }
 
   @Test
@@ -454,7 +455,7 @@ public class SerialTest {
   }
 
   @Test
-  public final void testGetPortName() {
+  public final void testGetPortName() throws IOException {
     log.info("testGetPortName");
     String portName = serial.getPortName();
     log.info(String.format("port name is %s", portName));
@@ -462,7 +463,7 @@ public class SerialTest {
     serial.disconnect();
     portName = serial.getPortName();
     assertEquals(null, portName);
-    serial.connect(vport);
+    serial.open(vport);
     portName = serial.getPortName();
     assertEquals(vport, portName);
   }

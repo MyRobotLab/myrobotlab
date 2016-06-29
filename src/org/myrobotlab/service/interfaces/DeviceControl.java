@@ -12,7 +12,7 @@ package org.myrobotlab.service.interfaces;
  * with the service (getName())
  *
  */
-public interface Device extends NameProvider {
+public interface DeviceControl extends NameProvider {
 
 	/**
 	 * The set of defined devices supported. This set is microcontroller
@@ -35,8 +35,8 @@ public interface Device extends NameProvider {
 	// controllers (write)
 	public final static int DEVICE_TYPE_STEPPER = 5;
 	public final static int DEVICE_TYPE_MOTOR = 6;
-        public final static int DEVICE_TYPE_SERVO = 7;
-        public final static int DEVICE_TYPE_I2C = 8;
+    public final static int DEVICE_TYPE_SERVO = 7;
+    public final static int DEVICE_TYPE_I2C = 8;
 
 	/**
 	 * type of device identified by integer so that it can be identified and
@@ -48,6 +48,9 @@ public interface Device extends NameProvider {
 	public Integer getDeviceType();
 
 	/**
+	 * FIXED (GroG) - this is not config of the "Device"  .. ie - the device does not own the config..
+	 * the "config" is a binding data between the DeviceController & the Device
+	 * 
 	 * When attaching a Device with a microcontroller the microcontroller code
 	 * will need to initialize the new device.
 	 * 
@@ -55,5 +58,11 @@ public interface Device extends NameProvider {
 	 * 
 	 * @return
 	 */
-	public int[] getDeviceConfig();
+	// public int[] getDeviceConfig();
+	
+	public void setController(DeviceController controller);
+	
+	public DeviceController getController();
+	
+	
 }

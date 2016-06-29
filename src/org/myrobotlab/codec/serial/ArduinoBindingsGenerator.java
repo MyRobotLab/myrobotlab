@@ -118,6 +118,9 @@ public class ArduinoBindingsGenerator {
     exclude.add("disconnect");
     exclude.add("getDescription");
     exclude.add("createPinList");
+
+    exclude.add("getDeviceId");
+
     
     exclude.add("getServoIndex");
     exclude.add("getBoardType");
@@ -137,6 +140,8 @@ public class ArduinoBindingsGenerator {
     exclude.add("test");
     exclude.add("attach");
     exclude.add("detach");
+
+    exclude.add("getPin");
 
     exclude.add("publishStepperEvent");
     exclude.add("setStepperSpeed");

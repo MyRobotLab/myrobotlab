@@ -178,7 +178,8 @@ public class MotorGUI extends ServiceGUI implements ActionListener, ChangeListen
     if (motor.isAttached()) {
       // !!!!! - This actually fires the (makes a new
       // MotorControllerPanel) !!!!!
-      controllerSelect.setSelectedItem(motor.getControllerName());
+      MotorController mc = (MotorController)motor.getController();
+      controllerSelect.setSelectedItem(mc.getName());
       controllerTypePanel.set(motor);
     }
     controllerTypePanel.setAttached(motor.isAttached());

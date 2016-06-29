@@ -98,14 +98,14 @@ public class Chassis extends Service implements JoystickListener {
     right.stop();
   }
 
-  public void connect(String port) {
+  public void connect(String port) throws Exception {
     // if controller type - Aruduino 57600 if Sabertooh 9600
     connect(port, Serial.BAUD_9600);
   }
 
-  public void connect(String port, Integer rate) {
+  public void connect(String port, int rate) throws Exception {
     controller = getController();
-    controller.connect(port, rate, 8, 1, 0);
+    // controller.connect(port, rate, 8, 1, 0);
   }
 
   public void startService() {
@@ -116,19 +116,19 @@ public class Chassis extends Service implements JoystickListener {
     controller = (MotorController) startPeer("controller");
   }
 
-  public void attachMotors(int leftPortNumber, int rightPortNumber) {
+  public void attachMotors(int leftPortNumber, int rightPortNumber) throws Exception {
     attachLeftMotor(leftPortNumber);
     attachRightMotor(rightPortNumber);
   }
 
-  public void attachLeftMotor(int portNumber) {
+  public void attachLeftMotor(int portNumber) throws Exception {
     MotorController mc = getController();
-    mc.motorAttach(left, portNumber);
+    mc.attachDevice(left, new int[]{portNumber});
   }
 
-  public void attachRightMotor(int portNumber) {
+  public void attachRightMotor(int portNumber) throws Exception {
     MotorController mc = getController();
-    mc.motorAttach(right, portNumber);
+    mc.attachDevice(right, new int[]{portNumber});
   }
 
   public static void main(String[] args) {

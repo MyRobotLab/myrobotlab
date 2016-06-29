@@ -28,7 +28,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.serial.Port;
 import org.myrobotlab.serial.PortQueue;
-import org.myrobotlab.serial.PortSource;
+import org.myrobotlab.serial.SerialControl;
 import org.myrobotlab.serial.PortStream;
 import org.myrobotlab.service.interfaces.QueueSource;
 import org.myrobotlab.service.interfaces.SerialDataListener;
@@ -40,7 +40,7 @@ import org.slf4j.Logger;
  * Serial - a service that allows reading and writing to a serial port device.
  *
  */
-public class Serial extends Service implements PortSource, QueueSource, SerialDataListener {
+public class Serial extends Service implements SerialControl, QueueSource, SerialDataListener {
 
   /**
    * general read timeout - 0 is infinite > 0 is number of milliseconds to wait
@@ -301,8 +301,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
     outTX.clear();
   }
 
-  public boolean connect(String name) {
-    return connect(name, baudrate, databits, stopbits, parity);
+  public void open(String name) throws IOException {
+	  open(name, baudrate, databits, stopbits, parity);
   }
 
   public boolean setParams(int baudRate, int dataBits, int stopBits, int parity) throws IOException {
@@ -339,10 +339,11 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
    * @param inPortName
    * @param listener
    * @return
+ * @throws IOException 
    * @throws Exception
    */
-  public boolean connect(String inPortName, int baudrate, int databits, int stopbits, int parity) {
-    try {
+  public void open(String inPortName, int baudrate, int databits, int stopbits, int parity) throws IOException {
+
       info("connect to port %s %d|%d|%d|%d", inPortName, baudrate, databits, stopbits, parity);
       this.baudrate = baudrate;
       this.databits = databits;
@@ -361,7 +362,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
         Port port = ports.get(portName);
         if (port.isOpen() && port.isListening()) {
           info("already connected to %s - disconnect first to reconnect", portName);
-          return true;
+          return;
         }
       }
 
@@ -369,7 +370,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
       if (ports.containsKey(inPortName)) {
         connectPort(ports.get(inPortName), null);
         lastPortName = portName;
-        return true;
+        return;
       }
 
       // #3 we dont have an existing port - so we'll try a hardware port
@@ -377,7 +378,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
       // create the hardware port first
       Port port = createHardwarePort(inPortName, baudrate, databits, stopbits, parity);
       if (port == null) {
-        return false;
+        return;
       }
 
       connectPort(port, null);
@@ -388,16 +389,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
       // give us half a second for all the buffers
       // & hardware to be ready
       // sleep(1500);
-      return true;
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-    return false;
   }
 
-  public boolean connect(String name, SerialDataListener listener) {
-    return connect(name, baudrate, databits, stopbits, parity);
-  }
 
   /**
    * FIXME - implement connects to a FilePlayer details of tx/rx and timing can
@@ -614,12 +607,12 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
     return new ArrayList<String>(portNames);
   }
 
-  PortSource getPortSource() {
+  SerialControl getPortSource() {
     try {
       hardwareLibrary = getHardwareLibrary();
       log.info(String.format("loading class: %s", hardwareLibrary));
       Class<?> c = Class.forName(getHardwareLibrary());
-      return (PortSource) c.newInstance();
+      return (SerialControl) c.newInstance();
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -940,7 +933,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
     portNames.addAll(ports.keySet());
 
     // plus hardware ports
-    PortSource portSource = getPortSource();
+    SerialControl portSource = getPortSource();
     if (portSource != null) {
       List<String> osPortNames = portSource.getPortNames();
       for (int i = 0; i < osPortNames.size(); ++i) {
@@ -1198,7 +1191,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
       uart.setTimeout(300);
       // ---- Virtual End -----
 
-      serial.connect(port);
+      serial.open(port);
 
       // verify the null modem cable is connected
       if (!serial.isConnected()) {

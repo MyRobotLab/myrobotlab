@@ -125,8 +125,8 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     super(n);
   }
 
-  public boolean connect(String port) {
-    return serial.connect(port, 115200, 8, 1, 0);
+  public void connect(String port) throws IOException {
+	  serial.open(port, 115200, 8, 1, 0);
   }
 
   public String getAnalogValues() throws Exception {

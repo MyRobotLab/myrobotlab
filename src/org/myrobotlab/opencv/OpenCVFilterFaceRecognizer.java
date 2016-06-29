@@ -39,7 +39,7 @@ import org.bytedeco.javacpp.opencv_core.MatVector;
 import org.bytedeco.javacpp.opencv_core.Point2f;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import org.bytedeco.javacpp.opencv_core.RectVector;
-import org.bytedeco.javacpp.opencv_core.Size;
+import org.bytedeco.javacpp.opencv_core.Size;                                                                                   
 import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;

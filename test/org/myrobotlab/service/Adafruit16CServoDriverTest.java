@@ -24,6 +24,7 @@ public class Adafruit16CServoDriverTest {
 	public static void setUpBeforeClass() throws Exception {
 		driver = (Adafruit16CServoDriver) Runtime.start("driver", "Adafruit16CServoDriver");
 		// arduino = driver.getArduino();
+		arduino = (Arduino) Runtime.start("arduino", "Arduino");
 		serial = arduino.getSerial();
 	}
 
@@ -165,9 +166,9 @@ public class Adafruit16CServoDriverTest {
 		// FIXME - make virtual UART
 
 		Serial uart = virtual.getUart("v1");
-		uart.connect("v1");
+		uart.open("v1");
 		uart.record("test/Adafruit16CServoDriver/test");
-		driver.arduino.connect("v0");
+		arduino.connect("v0");
 
 		driver.setServo(0, SERVOMIN);
 		driver.setServo(0, SERVOMAX);
@@ -205,7 +206,7 @@ public class Adafruit16CServoDriverTest {
 		// disconnect / close arduino port
 		// flush cable
 		// stop recording
-		driver.arduino.disconnect();
+		arduino.disconnect();
 		// cable.close();
 		uart.stopRecording();
 

@@ -757,9 +757,14 @@ public class OpenCV extends VideoSource {
 
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     // Runtime.start("right", "OpenCV");
-    opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
+   // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
+    opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
+
     // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
-    opencv.setInputSource(INPUT_SOURCE_CAMERA);
+    // opencv.setInputSource(INPUT_SOURCE_CAMERA);
+    opencv.setInputSource(INPUT_SOURCE_NETWORK);
+//    opencv.setInputFileName("http://192.168.4.112:8080/?action=stream");
+    opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
     //opencv.addFilter("facerec", "FaceRecognizer");
     
@@ -871,6 +876,14 @@ public class OpenCV extends VideoSource {
     meta.addDependency("org.bytedeco.javacv", "1.1");
     meta.addDependency("pl.sarxos.webcam", "0.3.10");
     return meta;
+  }
+
+  public boolean isStreamerEnabled() {
+    return streamerEnabled;
+  }
+
+  public void setStreamerEnabled(boolean streamerEnabled) {
+    this.streamerEnabled = streamerEnabled;
   }
 
 }

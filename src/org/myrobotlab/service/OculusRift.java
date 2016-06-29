@@ -71,12 +71,17 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
   public float rightCameraDx = 0;
   public float rightCameraDy = 0;
   public float rightCameraAngle = 0;
-
+  
+  public String leftEyeURL = null;
+  public String rightEyeURL = null;
+  public String frameGrabberType = null;
+  public String cvInputSource = null;
+  
   private HmdDesc hmdDesc;
 
   transient public OculusHeadTracking headTracker = null;
 
-  // TODO: remove this! this is if you only have 1 video source.
+  // for single camera support, mirror the images
   private boolean mirrorLeftCamera = false;
 
   public static class RiftFrame {
@@ -91,7 +96,6 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
   @Override
   public void startService() {
     super.startService();
-    initContext();
   }
 
   // Boradcast the state of the peers to notify the gui.
@@ -121,7 +125,7 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
     log.info("Created HMD Oculus Rift Sensor and configured tracking.");
   }
 
-  private void initContext() {
+  public void initContext() {
 
     if (!initialized) {
       log.info("Init the rift.");
@@ -135,21 +139,41 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
       headTracker.start();
       log.info("Started head tracking thread.");
 
-      // create and start the two open cv services..
-      // start the left eye.
+      // create and start the open cv services
+      // TODO: start via runtime?
       leftOpenCV = new OpenCV(getName() + "." + LEFT_OPEN_CV);
       leftOpenCV.startService();
+      // TODO: remove me this is a work around for opencv
+      leftOpenCV.setStreamerEnabled(false);
       leftOpenCV.setCameraIndex(leftCameraIndex);
-
+      if (frameGrabberType != null) {
+        leftOpenCV.setFrameGrabberType(frameGrabberType);
+      }
+      if (cvInputSource != null) {
+        leftOpenCV.setInputSource(cvInputSource);
+      }
+      if (leftEyeURL != null) {
+        leftOpenCV.setInputFileName(leftEyeURL);
+      }
       subscribe(leftOpenCV.getName(), "publishDisplay");
 
       // start the right eye
       if (!mirrorLeftCamera) {
         rightOpenCV = new OpenCV(getName() + "." + RIGHT_OPEN_CV);
         rightOpenCV.startService();
+        // TODO: remove me this is a work around for opencv
+        leftOpenCV.setStreamerEnabled(false);
         rightOpenCV.setCameraIndex(rightCameraIndex);
+        if (frameGrabberType != null) {
+          rightOpenCV.setFrameGrabberType(frameGrabberType);
+        }
+        if (rightEyeURL != null) {
+          rightOpenCV.setInputFileName(rightEyeURL);
+        }
+        if (cvInputSource != null) {
+          rightOpenCV.setInputSource(cvInputSource);
+        }
         subscribe(rightOpenCV.getName(), "publishDisplay");
-
       }
 
       // if the cameras are mounted at 90 degrees rotation, transpose the
@@ -441,6 +465,94 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
     // }
     // }
 
+  }
+
+  public String getLeftEyeURL() {
+    return leftEyeURL;
+  }
+
+  public void setLeftEyeURL(String leftEyeURL) {
+    this.leftEyeURL = leftEyeURL;
+  }
+
+  public String getRightEyeURL() {
+    return rightEyeURL;
+  }
+
+  public void setRightEyeURL(String rightEyeURL) {
+    this.rightEyeURL = rightEyeURL;
+  }
+
+  public String getFrameGrabberType() {
+    return frameGrabberType;
+  }
+
+  public void setFrameGrabberType(String frameGrabberType) {
+    this.frameGrabberType = frameGrabberType;
+  }
+
+  public float getLeftCameraDx() {
+    return leftCameraDx;
+  }
+
+  public void setLeftCameraDx(float leftCameraDx) {
+    this.leftCameraDx = leftCameraDx;
+  }
+
+  public float getLeftCameraDy() {
+    return leftCameraDy;
+  }
+
+  public void setLeftCameraDy(float leftCameraDy) {
+    this.leftCameraDy = leftCameraDy;
+  }
+
+  public float getLeftCameraAngle() {
+    return leftCameraAngle;
+  }
+
+  public void setLeftCameraAngle(float leftCameraAngle) {
+    this.leftCameraAngle = leftCameraAngle;
+  }
+
+  public float getRightCameraDx() {
+    return rightCameraDx;
+  }
+
+  public void setRightCameraDx(float rightCameraDx) {
+    this.rightCameraDx = rightCameraDx;
+  }
+
+  public float getRightCameraDy() {
+    return rightCameraDy;
+  }
+
+  public void setRightCameraDy(float rightCameraDy) {
+    this.rightCameraDy = rightCameraDy;
+  }
+
+  public float getRightCameraAngle() {
+    return rightCameraAngle;
+  }
+
+  public void setRightCameraAngle(float rightCameraAngle) {
+    this.rightCameraAngle = rightCameraAngle;
+  }
+
+  public boolean isMirrorLeftCamera() {
+    return mirrorLeftCamera;
+  }
+
+  public void setMirrorLeftCamera(boolean mirrorLeftCamera) {
+    this.mirrorLeftCamera = mirrorLeftCamera;
+  }
+
+  public String getCvInputSource() {
+    return cvInputSource;
+  }
+
+  public void setCvInputSource(String cvInputSource) {
+    this.cvInputSource = cvInputSource;
   }
 
 }

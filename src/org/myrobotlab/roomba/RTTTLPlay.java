@@ -81,10 +81,7 @@ public class RTTTLPlay {
     roombacomm.debug = debug;
     roombacomm.flushOutput = flush;
 
-    if (!roombacomm.connect(portname)) {
-      System.out.println("Couldn't connect to " + portname);
-      System.exit(1);
-    }
+    roombacomm.connect(portname);
 
     System.out.println("Roomba startup on port" + portname);
     roombacomm.startup();

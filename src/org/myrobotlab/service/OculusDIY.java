@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -9,6 +11,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.data.OculusData;
 import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.OculusDataListener;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
 import org.myrobotlab.service.interfaces.SensorDataListener;
@@ -27,6 +30,7 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	public final static Logger log = LoggerFactory.getLogger(OculusDIY.class);
 
 	transient public Arduino arduino;
+	transient public Mpu6050 mpu6050;
 
 	OculusData oculus = new OculusData();
 	Mapper mapperPitch = new Mapper(-180, 0, 0, 180);
@@ -48,6 +52,7 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	public OculusDIY(String n) {
 		super(n);
 		arduino = (Arduino) createPeer("arduino");
+		mpu6050 = (Mpu6050) createPeer("mpu6050");
 	}
 
 	public void calibrate() {
@@ -135,7 +140,7 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	public void startService() {
 		super.startService();
 		arduino = (Arduino) startPeer("arduino");
-		arduino.addSensorDataListener(this);
+		mpu6050 = (Mpu6050) startPeer("mpu6050");
 		return;
 	}
 
@@ -143,7 +148,7 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 		return arduino;
 	}
 
-	public void connect(String port) {
+	public void connect(String port) throws IOException {
 		arduino.connect(port);
 	}
 
@@ -188,12 +193,6 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	}
 
 	@Override
-	public int[] getDeviceConfig() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void update(SensorData sd) {
 		int[] data = sd.data;
 		Integer ay = (Integer) data[0];
@@ -213,6 +212,18 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	public void onSensorData(SensorData data) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void setController(DeviceController controller) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public DeviceController getController() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

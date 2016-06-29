@@ -8,7 +8,7 @@
 
 package org.myrobotlab.service;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.MRLException;
@@ -19,8 +19,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
-import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ArduinoShield;
+import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.slf4j.Logger;
@@ -31,6 +31,9 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  *         References : http://www.ladyada.net/make/mshield/use.html
+ *         
+ *         FIXME - re-write with new MRLComm device - DO NOT USE ANCILLARY 
+ *         LIBRARIES LIKE AF_MOTOR !!!
  */
 
 public class AdafruitMotorShield extends Service implements MotorController, ArduinoShield {
@@ -220,7 +223,11 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     return true;
   }
 
-  public void connect(String port, Integer rate, int databits, int stopbit, int parity) {
+  public void connect(String port) throws IOException {
+	  arduino.connect(port);
+  }
+  
+  public void connect(String port, Integer rate, int databits, int stopbit, int parity) throws IOException {
     arduino.connect(port, rate, databits, stopbit, parity);
   }
 
@@ -266,11 +273,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     return null;
   }
 
-  @Override
-  public ArrayList<Pin> getPinList() {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
   @Override
   public boolean isAttached() {
@@ -306,29 +308,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   // StepperController end ----
 
   @Override
-  public void attach(String name) throws MRLException {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void detach(String name) {
-    // TODO Auto-generated method stub
-  }
-
-  @Override
-  public void motorAttach(MotorControl motor) throws MRLException {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public boolean motorDetach(MotorControl motor) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
   public void motorMove(MotorControl motor) {
     // TODO Auto-generated method stub
 
@@ -344,12 +323,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   public void motorStop(MotorControl motor) {
     // TODO Auto-generated method stub
 
-  }
-
-  @Override
-  public boolean isConnected() {
-    // TODO Auto-generated method stub
-    return false;
   }
 
   @Override
@@ -376,21 +349,31 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     return meta;
   }
 
-  @Override
-  public void motorAttach(String name, int portNumber) {
-    error("not currently implemented");
-  }
 
-  @Override
-  public void motorAttach(MotorControl motor, int portNumber) {
-    // TODO Auto-generated method stub
+@Override
+public void attachDevice(DeviceControl device, Object... config) throws Exception {
+	// TODO Auto-generated method stub
+	
+}
 
-  }
+@Override
+public void detachDevice(DeviceControl device) {
+	// TODO Auto-generated method stub
+	
+}
 
-  @Override
-  public void connect(String port) {
-    // TODO: Arduino just changed to 115200, does this also need to update?
-    connect(port, Serial.BAUD_57600, 8, 1, 0);
-  }
+@Override
+public void attach(MotorControl motor, int port) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void attach(MotorControl motor, int powerPin, int dirPin) {
+	// TODO Auto-generated method stub
+	
+}
+
+
 
 }

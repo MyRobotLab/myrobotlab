@@ -1,5 +1,6 @@
 package org.myrobotlab.roomba;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -121,12 +122,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
     computeSafetyFault();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.myrobotlab.roomba.Z#connect(java.lang.String)
-   */
-  @Override
+  
   public boolean connect(String portid) {
     logmsg("connecting to port '" + portid + "'");
     portname = portid;
@@ -136,7 +132,12 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
       return false;
     }
 
-    connected = openPort();
+    try {
+    openPort();
+    } catch(Exception e){
+    	log.error("cannot connect", e);
+    	return false;
+    }
 
     if (connected) {
       // log in the global ports hash if the port is in use now or not
@@ -146,7 +147,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
       disconnect();
     }
 
-    return connected;
+    return true;
   }
 
   /*
@@ -240,9 +241,10 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   /**
    * internal method, used by connect() FIXME: make it faile more gracefully,
    * recognize bad port
+ * @throws IOException 
    */
-  private boolean openPort() {
-    return serial.connect(portname, rate, databits, stopbits, parity);
+  private void openPort() throws IOException {
+	  serial.open(portname, rate, databits, stopbits, parity);
   }
 
   /*

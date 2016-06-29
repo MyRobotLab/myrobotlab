@@ -24,7 +24,7 @@ import jssc.SerialPortList;
  *         Serial service or ports.
  * 
  */
-public class PortJSSC extends Port implements PortSource, SerialPortEventListener, Serializable {
+public class PortJSSC extends Port implements SerialControl, SerialPortEventListener, Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -113,7 +113,7 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
       port.openPort();
       port.setParams(rate, dataBits, stopBits, parity);
     } catch (Exception e) {
-      throw new IOException(e);
+      throw new IOException(String.format("could not open port %s  rate %d dataBits %d stopBits %d parity %d", portName, rate, dataBits, stopBits, parity), e);
     }
   }
 
