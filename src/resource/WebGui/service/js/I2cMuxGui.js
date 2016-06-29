@@ -1,6 +1,6 @@
-angular.module('mrlapp.service.I2CMuxGui', [])
-.controller('I2CMuxGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
-    $log.info('I2CMuxGuiCtrl');
+angular.module('mrlapp.service.I2cMuxGui', [])
+.controller('I2cMuxGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
+    $log.info('I2cMuxGuiCtrl');
     var _self = this;
     var msg = this.msg;
     

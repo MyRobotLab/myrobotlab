@@ -45,10 +45,10 @@ import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
-public class I2CMuxGUI extends ServiceGUI implements ActionListener {
+public class I2cMuxGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(I2CMuxGUI.class);
+	public final static Logger log = LoggerFactory.getLogger(I2cMuxGUI.class);
 
 	String attach = "setController";
 	String detach = "unsetController";
@@ -64,7 +64,7 @@ public class I2CMuxGUI extends ServiceGUI implements ActionListener {
 	
 	I2cMux boundService = null;
 
-	public I2CMuxGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+	public I2cMuxGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		boundService = (I2cMux) Runtime.getService(boundServiceName);
 	}
