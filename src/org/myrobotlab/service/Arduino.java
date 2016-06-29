@@ -60,12 +60,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-// Comment from Mats
-// The imports below is for the pi4j implemetation on RasPi
-// I don't think they add any value to the Arduino service and makes the 
-// Arduino service dependant of pi4j for very little or no reason
-// Please let me know if you have a different opinion
-import org.myrobotlab.service.RasPi.I2CDeviceMap;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.SensorData;
@@ -81,14 +75,6 @@ import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
-
-// Comment from Mats
-// The imports below are for the pi4j implemetation on RasPi
-// I don't think they add any value to the Ardino service and makes the 
-// Arduino service dependant of pi4j for very little or no reason
-// Please let me know if you have a different opinion
-import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.i2c.I2CDevice;
 
 /**
  * Implementation of a Arduino Service connected to MRL through a serial port.
@@ -1912,7 +1898,12 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// TODO Auto-generated method stub - I2C
 		// Create the i2c bus device in MRLComm the first time this method is invoked.
 		// Add the i2c device to the list of i2cDevices
-		// Pattern: attachDevice(DEVICE_TYPE_I2C, Object... config)
+		// Pattern: attachDevice(device, Object... config)
+		// To add the i2c bus to the deviceList I need an device that represents
+		// the i2c bus here and in MRLComm
+		
+		// This part adds the service to the mapping between busAddress||DeviceAddress
+		// and the service name to be able to send data back to the invoker
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		I2CDeviceMap devicedata = new I2CDeviceMap();
 		if (i2cDevices.containsKey(key)) {
@@ -1951,10 +1942,10 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	@Override
 	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
 		// Get the device index to the MRL i2c bus so that it can be added to
-		// the datastream
-		int deviceIndex = 42; // Change this to get the the deviceinex using
-								// busAddress
-		sendMsg(I2C_READ, deviceIndex, deviceAddress, size);
+		// the I2C_READ
+		// int deviceIndex = 1; // Change this to get the the deviceinex using
+		// SensorDataListener sensor = (SensorDataListener) deviceIndex.get(id);
+		// sendMsg(I2C_READ, deviceIndex, deviceAddress, size);
 		int retry = 0;
 		int retryMax = 1000;
 		try {
