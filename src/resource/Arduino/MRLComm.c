@@ -1336,13 +1336,13 @@ void processCommand() {
     break;
   // Start of i2c read and writes
   case I2C_READ:
-    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cRead(&ioCmd[1]);
+    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cRead(&ioCmd[0]);
     break;
   case I2C_WRITE:
-    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWrite(&ioCmd[1]);
+    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWrite(&ioCmd[0]);
     break;
   case I2C_WRITE_READ:
-    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[1]);
+    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[0]);
     break;
   case SET_DEBUG:{
     debug = ioCmd[1];
