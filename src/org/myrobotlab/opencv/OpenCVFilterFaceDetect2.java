@@ -353,7 +353,7 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
       Rect offset = new Rect(dFace.getFace().x() + dFace.getLeftEye().x(), dFace.getFace().y() + dFace.getLeftEye().y(), dFace.getLeftEye().width(), dFace.getLeftEye().height());
       drawRect(image, offset, CvScalar.BLUE);
       String positionY = "Y of Left Eye is: " + dFace.getLeftEye().y();
-      cvPutText(image, positionY, cvPoint(20, 40), font, CvScalar.YELLOW);
+      cvPutText(image, positionY, cvPoint(20, 40), font, CvScalar.BLACK);
     }
     if (dFace.getRightEye() != null) {
       Rect offset = new Rect(dFace.getFace().x() + dFace.getRightEye().x(), dFace.getFace().y() + dFace.getRightEye().y(), dFace.getRightEye().width(),
@@ -361,8 +361,8 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
       drawRect(image, offset, CvScalar.BLUE);
       String positionY = "Y of Right Eye is: " + dFace.getRightEye().y();
       String difference = "Difference between eyes is " + (dFace.getRightEye().y() - dFace.getLeftEye().y()) ; 
-      cvPutText(image, positionY, cvPoint(20, 80), font, CvScalar.YELLOW);
-      cvPutText(image, difference , cvPoint(20, 100), font, CvScalar.YELLOW);
+      cvPutText(image, positionY, cvPoint(20, 80), font, CvScalar.BLACK);
+      cvPutText(image, difference , cvPoint(20, 100), font, CvScalar.BLACK);
     }
     if (dFace.getMouth() != null) {
       Rect offset = new Rect(dFace.getFace().x() + dFace.getMouth().x(), dFace.getFace().y() + dFace.getMouth().y(), dFace.getMouth().width(), dFace.getMouth().height());
