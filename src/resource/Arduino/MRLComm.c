@@ -604,7 +604,6 @@ class MrlServo : public Device {
     }
 
     void attach(int pin){
-    	publishDebug("MRLServo.attach " + String(pin));
     	servo->attach(pin);
     }
 
@@ -670,22 +669,13 @@ class MrlServo : public Device {
         isMoving = true;
       }
     }
-    void publishDebug(String message) {
-
-        Serial.flush();
-        Serial.write(MAGIC_NUMBER);
-        Serial.write(1+message.length());
-        Serial.write(PUBLISH_DEBUG);
-        Serial.print(message);
-        Serial.flush();
-
-    }
 
     void servoWriteMicroseconds(int position) {
       if (servo) {
         servo->writeMicroseconds(position);
       }
     }
+
     void setSpeed(int speed) {
       this->speed = speed;
     }
@@ -1745,16 +1735,8 @@ Device* attachDigitalPinArray() {
 }
 
 Device* attachServo() {
-  // GETTING CONFIG BECMOMES MUCH EASIER !!!!
-  // TODO: add a new servo device  (pontentally attach it here also?)
-  //  int type    = ioCmd[1]; already here
-  // TODO : check that we don't already have a servo attached to this pin
-  // int configSize     = ioCmd[2];
-  // configSize "should" = 1
   int pin = config[0];
-  // is this a copy constructor ?
   MrlServo* mrlServo = new MrlServo(pin);
-  mrlServo->attach(pin);
   return mrlServo;
 }
 
