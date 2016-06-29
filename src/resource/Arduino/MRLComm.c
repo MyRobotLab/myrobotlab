@@ -1324,7 +1324,7 @@ void processCommand() {
     setSerialRate();
     break;
   case GET_VERSION:
-    getVersion();
+    publishVersion();
     break;
   case SET_SAMPLE_RATE:
     setSampleRate();
@@ -1346,13 +1346,13 @@ void processCommand() {
     break;
   // Start of i2c read and writes
   case I2C_READ:
-    i2cRead();
+    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cRead(&ioCmd[1]);
     break;
   case I2C_WRITE:
-    i2cWrite();
+    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWrite(&ioCmd[1]);
     break;
   case I2C_WRITE_READ:
-    i2cWriteRead();
+    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[1]);
     break;
   case SET_DEBUG:{
     debug = ioCmd[1];
@@ -1362,7 +1362,7 @@ void processCommand() {
     break;
   }
   case GET_BOARD_INFO:
-    getBoardInfo();
+    publishBoardInfo();
     break;
   default:
     publishError(ERROR_UNKOWN_CMD);
@@ -1391,31 +1391,6 @@ void sensorPollingStart() {
 void sensorPollingStop() {
   // TODO: implement me.
 }
-
-void i2cRead(){
-  ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cRead(&ioCmd[1]);
-}
-
-void i2cWrite(){
-  ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWrite(&ioCmd[1]);
-}
-
-void i2cWriteRead(){
-  ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[1]);
-}
-
-// MRL Command helper methods below:
-// GET_VERSION
-void getVersion() {
-  // call publish version to talk to the serial port.
-  publishVersion();
-}
-
-// GET_BOARD_INFO
-void getBoardInfo() {
-  publishBoardInfo();
-}
-
 
 // SERVO_DETACH
 void servoDetach() {
