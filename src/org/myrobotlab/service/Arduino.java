@@ -341,6 +341,43 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * The business logic of driving the NeoPixel with serial commands would be in the NeoPixel service.
 	 * 
 	 *  GroG
+	 *  
+	 *  Comments on the above from Mats
+	 *  Hi GroG. 
+	 *  
+	 *  Thanks for writing and explaining about the responsibilities for the different interfaces. 
+	 *  I understand now that I have made a mistake when implementing I2CControl in RasPi, Ardino and I2cMux.
+	 *  They all should implement I2CController
+	 *  The services for i2c devices like Adafruit16CServoDriver, AdafruitIna219, I2cMux and Mpu6050 should implement I2CControl.
+	 *  I will rework that so that everything follows the same pattern. 
+	 *  
+	 *  About using the deviceList. 
+	 *  My understanding was/is that adding a device to the devicelist also would create a corresponding device in MRLComm.
+	 *  Since a single i2c bus may contain as many as 127 addressable devices that would potentially use a lot of memory in MRLComm.
+	 *  So I want to create a new device that represents a single I2CBus and that device should be added to the devicelist and also be created in
+	 *  MRLComm. 
+	 *  That is the reason that I also created a new i2cDevices list to keep track of the different i2c devices.
+	 *  
+	 *  If we can add the i2c devices to the devicelist without creating a device in MRLComm, then that's perhaps a better way.
+	 *  In that case we still need a i2cbus device that will be a MrlI2CDevice object.
+	 *  To make it clear what it actually represents, I would like to rename it to MrlI2cBus. 
+	 *  
+	 *  About I2CDeviceMap.
+	 *  If we can add the i2c devices to the devicelist without creating a device in MRLComm then I2CDeviceMap isn't needed at all
+	 *  in this Arduino service. So that's one option that needs to be explored / discussed.
+	 *  
+	 *  If that's not possible, then an other option is to keep the i2cDevices list using I2CDeviceMap.
+	 *  I tried to use the same definition of it in both RasPi and Arduino.
+	 *  However the I2CDeviceMap in RasPi is based on definitions in pi4j. 
+	 *  In the RasPi service both I2CBus and I2CDevice are objects defined in pi4j.
+	 *  So I redefined I2CDeviceMap in this Arduino service to only use Strings, not objects.
+	 *  They are not the same in this service and RasPi even if they share the same names.
+	 *  
+	 *  The third option is to keep the i2cDevices list but use DeviceMapping.
+	 *  
+	 *  I hope that I have been able to explain what I have done and the reasons for it. 
+	 *  So what way do you think is the best? Other people are also welcome to express their opinions.   
+	 *   
 	 * </pre>
 	 */
 	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
