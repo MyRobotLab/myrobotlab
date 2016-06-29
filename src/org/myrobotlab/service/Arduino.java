@@ -317,7 +317,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 
 	transient int[] msg = new int[MAX_MSG_SIZE];
 
-	// i2c This needs to be volatile because it can be updated in a different
+	// i2c This needs to be volatile because it will be updated in a different
 	// thread
 	volatile boolean i2cDataReturned = false;
 	
@@ -923,6 +923,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 			// unload the data
 			SensorData sensorData = new SensorData(new int[size]);
 			for (int i = 0; i < size; ++i) {
+				// Comment from Mats: Is this correct 2 + 1 = 3 always 
 				sensorData.data[i] = message[2 + 1];
 			}
 
@@ -1901,6 +1902,9 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		// Pattern: attachDevice(device, Object... config)
 		// To add the i2c bus to the deviceList I need an device that represents
 		// the i2c bus here and in MRLComm
+		// DeviceControl I2cBus = new DeviceControl("I2cBus"); 
+		// attachDevice(I2cBus, busAddress);
+		
 		
 		// This part adds the service to the mapping between busAddress||DeviceAddress
 		// and the service name to be able to send data back to the invoker
