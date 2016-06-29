@@ -65,7 +65,9 @@ import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
+import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterFaceDetect2;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.data.Point2Df;
@@ -759,9 +761,11 @@ public class OpenCV extends VideoSource {
     // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
     opencv.setInputSource(INPUT_SOURCE_CAMERA);
 
-    // opencv.addFilter("facerec", "FaceRecognizer");
+    //opencv.addFilter("facerec", "FaceRecognizer");
+    
 
-    // OpenCVFilterFaceRecognizer facerec = new
+    OpenCVFilterFaceDetect2 facedetect2 = new OpenCVFilterFaceDetect2("facedetect2");
+    opencv.addFilter(facedetect2);
     // OpenCVFilterFaceRecognizer("facerec");
 
     // String trainingDir = "C:\\training";
@@ -772,7 +776,7 @@ public class OpenCV extends VideoSource {
 
     // VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
     // vs.attach(opencv);
-    // opencv.capture();
+    opencv.capture();
     // opencvLeft.capture();
     // opencvRight.capture();
 
