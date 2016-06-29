@@ -1,31 +1,47 @@
 package org.myrobotlab.service;
 
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
+
+	///// java static import definition - DO NOT MODIFY - Begin //////
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ADD_SENSOR_DATA_LISTENER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ATTACH_DEVICE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CREATE_I2C_DEVICE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DETACH_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.FIX_PIN_OFFSET;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_BOARD_INFO;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE_READ;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.INTS_TO_STRING;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE_TO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_RESET;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_ATTACHED_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_DEBUG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MESSAGE_ACK;
-///// java static import definition - DO NOT MODIFY - Begin //////
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PIN;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SENSOR_DATA;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_STATUS;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_TRIGGER;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.RELEASE_I2C_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_ATTACH;
@@ -44,6 +60,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SAMPLE_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERIAL_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERVO_SPEED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SOFT_RESET;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -146,28 +163,6 @@ import org.slf4j.Logger;
 
 public class Arduino extends Service implements Microcontroller, I2CControl, SerialDataListener, ServoController, MotorController, SensorDataPublisher, DeviceController {
 
-	/**
-	 * MotorData is the combination of a Motor and any controller data needed to
-	 * implement all of MotorController API
-	 * 
-	 */
-	class MotorData implements Serializable {
-		private static final long serialVersionUID = 1L;
-		Motor motor = null;
-	}
-
-	// ---------- MRLCOMM FUNCTION INTERFACE BEGIN -----------
-	/**
-	 * ServoController data needed to run a servo
-	 * 
-	 */
-	class ServoData implements Serializable {
-		private static final long serialVersionUID = 1L;
-		transient ServoControl servo = null;
-		Integer pin = null;
-		int servoIndex = -1;
-	}
-
 	public static class Sketch implements Serializable {
 		private static final long serialVersionUID = 1L;
 		public String data;
@@ -180,8 +175,10 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	/**
-	 * 
-	 *
+	 * Status data for the running MRLComm sketch.
+	 * This data will be returned from the sketch
+	 * to Java-land to report on the speed and current
+	 * free memory of the Microcontroller
 	 */
 	public static class MrlCommStatus {
 		public Long us;
@@ -198,28 +195,6 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	private static final long serialVersionUID = 1L;
 
 	public transient final static Logger log = LoggerFactory.getLogger(Arduino.class);
-
-	public static final int DIGITAL_VALUE = 1; // normalized with PinData <---
-
-	// direction
-	public static final int ANALOG_VALUE = 3; // normalized with PinData
-
-	public static final int SENSOR_DATA = 37;
-
-	// SUBTYPES ...
-	public static final int ARDUINO_TYPE_INT = 16;
-
-	// servo event types
-	public static final int SERVO_EVENT_STOPPED = 1;
-
-	public static final int SERVO_EVENT_POSITION_UPDATE = 2;
-
-	// error types
-	public static final int ERROR_SERIAL = 1;
-	public static final int ERROR_UNKOWN_CMD = 2;
-	// sensor types
-	public static final int COMMUNICATION_RESET = 252;
-	public static final int NOP = 255;
 
 	public static final int TRUE = 1;
 	public static final int FALSE = 0;
@@ -257,7 +232,6 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public transient static final int BOARD_TYPE_ID_MEGA = 1;
 	public transient static final int BOARD_TYPE_ID_UNO = 2;
 	// temporary
-	public final static int GET_BOARD_INFO = 70;
 	public final static int PUBLISH_BOARD_INFO = 71;
 	/**
 	 * board type - UNO Mega etc..
@@ -269,27 +243,12 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 */
 	ArrayList<Pin> pinList = null;
 
-	// needed to dynamically adjust PWM rate (D. only?)
-	public static final int TCCR0B = 0x25; // register for pins 6,7
-	public static final int TCCR1B = 0x2E; // register for pins 9,10
-	public static final int TCCR2B = 0xA1; // register for pins 3,11
-
-	// FIXME - more depending on board (mega)
-	// http://playground.arduino.cc/Code/MegaServo
-	// Servos[NBR_SERVOS] ; // max servos is 48 for mega, 12 for other boards
-	// int pos
-	// public static final int MAX_SERVOS = 12;
-	public static final int MAX_SERVOS = 48;
-	// imported Arduino constants
 	public static final int HIGH = 0x1;
-
 	public static final int LOW = 0x0;
 	public static final int INPUT = 0x0;
-
 	public static final int OUTPUT = 0x1;
 
 	public static final int MOTOR_FORWARD = 1;
-
 	public static final int MOTOR_BACKWARD = 0;
 
 	/**
@@ -327,6 +286,63 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		public String serviceName;
 	}
 	
+	/**
+	 * <pre>
+	 * Hi Mats : I would recommend using the deviceList instead of creating another
+	 * map here .. the deviceList contains DeviceMapping & DeviceMappings have Object[] config
+	 * you can add your I2CDeviceMap to config - because it would be "config" for your
+	 * DeviceControl.DEVICE_TYPE_I2C
+	 * 
+	 * I think it might be could to pull as much I2C definitions as possible - what I mean to say
+	 * is I2C is its "own" thing - for example I2CDeviceMap exists currently in both Arduino & Raspi and
+	 * its the same definition - it deserves to exist on its own (perhaps in its own package name?) and
+	 * Arduino & RasPi services should share that definition..
+	 * 
+	 * A I2CDeviceController interface should be defined too .. 
+	 * the signatures would follow the same pattern as all DeviceController & DeviceControl interfaces..
+	 * 
+	 * You already have a I2CControl which should be derived from DeviceControl..
+	 * 
+	 * You needs an I2CController (derived from DeviceController) - 
+	 * 		the controllers purpose is to implement the low level details so I2Control methods can be done
+	 * 
+	 * I2Control methods are :
+	 *  	void createI2cDevice(int busAddress, int deviceAddress); // pure i2c no serviceName
+	 *  	void releaseI2cDevice(int busAddress, int deviceAddress);
+	 *  	void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size);
+	 *  	int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size);
+	 *  
+	 * I2CController methods could be 
+	 *  	void createI2cDevice(I2Control control, int busAddress, int deviceAddress); // don't need serviceName - you have the whole service in "control" parameter
+	 *  	void releaseI2cDevice(I2Control control, int busAddress, int deviceAddress);
+	 *  	void i2cWrite(I2Control control, int busAddress, int deviceAddress, byte[] buffer, int size);
+	 *  	int i2cRead(I2Control control, int busAddress, int deviceAddress, byte[] buffer, int size);
+	 *  
+	 * The I2CControl method implementation would be potentially very simple - they would just call the controller's method with
+	 * "this" as a first parameter... e.g.
+	 * 
+	 * 		void createI2cDevice(int busAddress, int deviceAddress, String serviceName){
+	 * 					controller.createI2cDevice(this, busAddress, deviceAddress)
+	 * 		}
+	 * 
+	 * This pattern follows MotorController / MotorControl & ServoController / ServoControl .. & Soon to be
+	 * PinArrayController / PinArrayControl, SerialController / SerialControl
+	 * 
+	 * This abstraction is structured enough to follow, yet necessary to provide the implementation differences between say
+	 * RasPi & Arduino for I2C ... or Serial control .. e.g. using a Serial service to read & write over USB vs Using Arduino
+	 * to create and relay serial reads & writes over a different set of pins (Mega pins 14-19)
+	 * 
+	 * The plans I have for SerialControl & SerialController (not yet defined - but similar to I2cControll & I2cController) is
+	 * SerialControl provides basic reads & writes - the SerialController provides the same methods, but with the SerialControl
+	 * as the first parameter - Arduino would be a service which implemented both SerialControl & SerialController
+	 * 
+	 * A service which "needed" Serial control .. say a NeoPixel Ring would allow attachment to a Serial service directly through
+	 * FTDI (https://github.com/tdicola/Adafruit_NeoPixel_FTDI)  or attachment to an Arduino Mega on pin 14 & 15. 
+	 * The business logic of driving the NeoPixel with serial commands would be in the NeoPixel service.
+	 * 
+	 *  GroG
+	 * </pre>
+	 */
 	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
 	// parameters for testing the getVersion retry stuff.
@@ -1013,6 +1029,10 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 */
 	public String publishAttachedDevice(String deviceName) {
 		return deviceName;
+	}
+	
+	public MrlCommStatus publishBoardInfo(MrlCommStatus status) {
+		return status;
 	}
 
 	public void publishMessageAck() {
