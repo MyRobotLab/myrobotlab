@@ -27,7 +27,7 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.sensor.Encoder;
 
-public interface MotorControl extends SensorDataPublisher, SensorDataListener, NameProvider, MessageSubscriber {
+public interface MotorControl extends  DeviceControl { // SensorDataPublisher, SensorDataListener, NameProvider, MessageSubscriber {
 
   /**
    * detaches the motor from the motor controller
@@ -99,7 +99,12 @@ public interface MotorControl extends SensorDataPublisher, SensorDataListener, N
    * The motor controller uses this method to pass a reference of itself to the
    * motor, to be used directly
    */
+  /* PUSHED UP INTO DeviceControl.setController(DeviceController controller)
   public void setController(MotorController controller);
+  */
+  
+  // NON-STANDARD - use getController
+  // public String getControllerName();
 
   public void setEncoder(Encoder encoder);
 
@@ -125,13 +130,6 @@ public interface MotorControl extends SensorDataPublisher, SensorDataListener, N
    */
   public void unlock();
 
-  /**
-   * a safety limit
-   * 
-   * @param max
-   */
-  // public void setMaxPower(float max);
-
   boolean hasSensor();
 
   int[] getControlPins();
@@ -141,10 +139,6 @@ public interface MotorControl extends SensorDataPublisher, SensorDataListener, N
   String[] getMotorTypes();
 
   double getPowerOutput();
-
-  public void attach(String controllerName) throws Exception;
-
-  public void attach(MotorController uC) throws Exception;
 
   public boolean isLocal();
 

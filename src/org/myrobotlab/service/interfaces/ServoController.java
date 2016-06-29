@@ -27,31 +27,36 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.service.Servo;
 
-public interface ServoController extends NameProvider, MicrocontrollerPeripheral {
-
-  public final static String servoWrite = "servoWrite";
-  public final static String servoAttach = "servoAttach";
-  public final static String servoDetach = "servoDetach";
-
+public interface ServoController extends DeviceController {
+  
   /**
-   * servoAttach - attach the servo to a specific pin on the controller
+   * high level "attach" which internally will call attachDevice(Device device, int[] config)
+   * and "might" call Servo.attach(pin) on MRLComm
    * 
-   * @param name
-   *          - name of the servo
-   * @param pin
-   *          - pin number
-   * @return boolean boolean
+   * "might" call - because Servo.attach & Device.attach are NOT related
+   * 
+   * @param servo
+   * @param pin -  All of the config needed for the device 
    */
-  public boolean servoAttach(Servo servo);
-
+  public void attach(Servo servo, int pin);
+  
   /**
-   * servoDetach - detach the servo from a specific pin on the controller
-   * 
-   * @param name
-   *          - name of the servo
-   * @return boolean
+   * retrieve the pin the servo is attached to
+   * @param servo
+   * @return null if pin is not set - otherwise the pin
+   * @throws Exception
    */
-  boolean servoDetach(Servo servo);
+  public Integer getPin(Servo servo);
+  
+ 
+  /**
+   * high level "detach" with internally will call detachDevice(Device device) - this
+   * most likely will call Servo.detach - because it represents the "removal" of the 
+   * peripheral device from the Arduino ... similar to pulling the wires off ;)
+   * 
+   * @param servo
+   */
+  public void detach(Servo servo);
 
   void servoSweepStart(Servo servo);
 
@@ -70,7 +75,7 @@ public interface ServoController extends NameProvider, MicrocontrollerPeripheral
 
   public void servoWriteMicroseconds(Servo servo);
 
-  public boolean servoEventsEnabled(Servo servo);
+  public boolean servoEventsEnabled(Servo servo, boolean enabled);
 
   /**
    * return the current pin this servo is attached to
@@ -78,8 +83,22 @@ public interface ServoController extends NameProvider, MicrocontrollerPeripheral
    * @param servoName
    * @return
    */
-  // public Integer getServoPin(String servoName);
 
   public void setServoSpeed(Servo servo);
-
+  
+  /**
+   * These are "System" calls for the Arduino and possibly other uCs e.g. .. ---> Servo.attach(10)
+   * NOT DEVICE ATTACH & DETACH !!!! 
+   * @param servo
+   */
+  public void servoAttach(Servo servo, int pin);
+  
+  /**
+   * These are "System" calls for the Arduino  e.g. .. ---> Servo.detach()
+   * NOT DEVICE ATTACH & DETACH !!!! 
+   * @param servo
+   */
+  public void servoDetach(Servo servo);
+    
+  
 }

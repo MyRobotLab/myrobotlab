@@ -25,35 +25,35 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface ServoControl {
+public interface ServoControl extends DeviceControl {
 
-  // FIXME - add sweep and other fun methods
-  // extend Motor ???
+ 
   /**
-   * re-attaches servo to controller it was last attached to
+   * Re-attaches (re-energizes) the servo on its current pin
    * 
    * @return
    */
   public boolean attach();
-
-  public boolean attach(String controller, Integer pin);
-
+  
   /**
-   * detaches the servo from the controller
+   * Re-attaches (re-energizes) the servo on its current pin
+   * 
+   * @return
+   */
+  public boolean attach(int pin);
+
+  
+  /**
+   * calls Servo.detach() on MRLComm
    * 
    * @return
    */
   public boolean detach();
 
-  public String getControllerName();
-
-  public String getName();
-
-  public Integer getPin();
 
   /**
-   * moveTo moves the servo to a specific location. Typically, a servo has 0 to
-   * 180 positions
+   * Moves the servo to a specific location. Typically, a servo has 0 to
+   * 180 positions - each increment corresponding to a degree
    * 
    * @param newPos
    */
@@ -68,9 +68,10 @@ public interface ServoControl {
    * servo, to be used directly.
    */
 
-  public boolean setController(ServoController controller);
+  /*  PUSHED UP INTO DeviceControl.setController(DeviceController controller)
+  public void setController(ServoController controller);
+  */
 
-  public boolean setController(String controller);
 
   /**
    * limits input of servo - to prevent damage or problems if servos should not
@@ -80,20 +81,13 @@ public interface ServoControl {
    */
   public void setMinMax(int min, int max);
 
-  /**
-   * memory of the controllers pin - so that it can be re-attached after a
-   * detach
-   * 
-   * @return
-   */
-  public boolean setPin(int pin);
+ 
 
   /**
    * fractional speed settings
    * 
    * @param speed
    */
-  // public void setSpeed(int speed);
   public void setSpeed(double speed);
 
   /**

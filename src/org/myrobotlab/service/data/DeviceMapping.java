@@ -1,29 +1,41 @@
 package org.myrobotlab.service.data;
 
-import org.myrobotlab.service.interfaces.Device;
+import org.myrobotlab.service.interfaces.DeviceControl;
 
 public class DeviceMapping {
 	
-	Device device;
-	Integer index;
+	DeviceControl device;
+	/**
+	 * the unique integer id for this device
+	 */
+	Integer id;
+	/**
+	 * the original config used to attach the device
+	 */
+	Object[] config;
 	
-	public DeviceMapping(Device device){
+	public DeviceMapping(DeviceControl device, Object... config){
 		this.device = device;
+		this.config = config;
 	}
 
 	public String getName(){
 		return device.getName();
 	}
 	
-	public void setIndex(int index){
-		this.index = index; 
+	public void setId(int id){
+		this.id = id; 
 	}
 	
-	public Integer getIndex(){
-		return index;
+	public Integer getId(){
+		return id;
 	}
 	
-	public Device getDevice(){
+	public DeviceControl getDevice(){
 		return device;
+	}
+	
+	public Object[] getConfig(){
+		return config;
 	}
 }

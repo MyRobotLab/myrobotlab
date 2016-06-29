@@ -31,9 +31,9 @@ public class AnalogPinSensor implements SensorDataPublisher {
 
 
   @Override
-  public void addSensorDataListener(SensorDataListener listener) {
-    // TODO Auto-generated method stub
-    
+  public void addSensorDataListener(SensorDataListener listener, int[] config) {
+  	// TODO Auto-generated method stub
+  	
   }
 
 
@@ -44,5 +44,7 @@ public class AnalogPinSensor implements SensorDataPublisher {
   public int getSampleRate() {
     return sampleRate;
   }
+
+
 
 }

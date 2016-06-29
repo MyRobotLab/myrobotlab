@@ -8,17 +8,17 @@ import java.io.IOException;
  * device drivers either connected directly to the GPIO pins of a Raspberry PI or
  * to the ic2 bus on an Arduino. 
  */
-public interface I2CControl {
+public interface I2CControl extends NameProvider {
 	/**
 	 * This method creates a I2CDevice
 	 * 
 	 * @param busaddress
 	 * @param address
 	 *          local address in the i2c device
-	 * @param type
-	 * 
+	 * @param serviceName
+	 *          name of the service that invokes the createI2cDevice 
 	 */
-	void createI2cDevice(int busAddress, int deviceAddress, String type);
+	void createI2cDevice(int busAddress, int deviceAddress, String serviceName);
 
 	/**
 	 * This method returns and already existing I2CDevice
@@ -85,5 +85,4 @@ public interface I2CControl {
 	 */
 	int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize);
   
-	String getName();
 }

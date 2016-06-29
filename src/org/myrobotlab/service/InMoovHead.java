@@ -33,6 +33,7 @@ public class InMoovHead extends Service {
     arduino = (Arduino) createPeer("arduino");
 
     // connection details
+    /* OLD WAYs
     neck.setPin(12);
     rothead.setPin(13);
     jaw.setPin(26);
@@ -44,6 +45,15 @@ public class InMoovHead extends Service {
     jaw.setController(arduino);
     eyeX.setController(arduino);
     eyeY.setController(arduino);
+    */
+    
+    // NEW WAY
+    arduino.attach(neck, 12);
+    arduino.attach(rothead, 13);
+    arduino.attach(jaw, 26);
+    arduino.attach(eyeX, 22);
+    arduino.attach(eyeY, 24);
+
 
     neck.setMinMax(20, 160);
     rothead.setMinMax(30, 150);
@@ -227,11 +237,21 @@ public class InMoovHead extends Service {
 
   public void setpins(int headXPin, int headYPin, int eyeXPin, int eyeYPin, int jawPin) {
     log.info(String.format("setPins %d %d %d %d %d", headXPin, headYPin, eyeXPin, eyeYPin, jawPin));
+
+    /*
     rothead.setPin(headXPin);
     neck.setPin(headYPin);
     eyeX.setPin(eyeXPin);
     eyeY.setPin(eyeYPin);
     jaw.setPin(jawPin);
+    */
+
+    arduino.attach(rothead, headXPin);
+    arduino.attach(neck, headYPin);
+    arduino.attach(eyeX, eyeXPin);
+    arduino.attach(eyeY, eyeYPin);
+    arduino.attach(jaw, jawPin);
+
   }
 
   public void setSpeed(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {

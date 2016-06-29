@@ -48,8 +48,6 @@ public class I2cMux extends Service implements I2CControl {
 	
 	private boolean isAttached = false;
 
-	public String muxType = "I2CMux";
-
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
@@ -90,9 +88,9 @@ public class I2cMux extends Service implements I2CControl {
 		this.deviceAddress = deviceAddress;
 		broadcastState();
   }
-	
-	public void createI2cDevice(int busAddress, int deviceAddress, String type) {
-				controller.createI2cDevice(busAddress, deviceAddress, type);
+
+	public void createI2cDevice(int busAddress, int deviceAddress, String serviceName) {
+				controller.createI2cDevice(busAddress, deviceAddress, this.getName());
 	}
 	
 	/**
@@ -180,14 +178,22 @@ public class I2cMux extends Service implements I2CControl {
 		controller.i2cWrite(Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
 		;
 	}
-
+	/**
+	 * TODO Add demuxing. i.e the route back to the caller
+	 *      The i2c will receive data that neeeds to be returned syncronous
+	 *      or asycncronus
+	 */
 	@Override
 	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
 		setMuxBus(busAddress);
 		controller.i2cRead(Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
 		return buffer.length;
 	}
-
+	/**
+	 * TODO Add demuxing. i.e the route back to the caller
+	 *      The i2c will receive data that neeeds to be returned syncronous
+	 *      or asycncronus
+	 */
 	@Override
 	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
 		setMuxBus(busAddress);

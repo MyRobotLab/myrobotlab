@@ -184,7 +184,7 @@ public class ArduinoTest {
   }
 
   @Test
-  public final void testConnect() {
+  public final void testConnect() throws IOException {
     log.info("testConnect - begin");
     arduino.disconnect();
     arduino.connect(vport);
@@ -225,7 +225,7 @@ public class ArduinoTest {
   }
 
   @Test
-  public final void testDisconnect() {
+  public final void testDisconnect() throws IOException {
     log.info("testDisconnect");
     arduino.disconnect();
     assertTrue(!arduino.isConnected());
@@ -441,7 +441,7 @@ public class ArduinoTest {
   }
 
   @Test
-  public final void testServoAttachServoInteger() {
+  public final void testServoAttachServoInteger() throws Exception {
     log.info("testServoAttachServoInteger");
     Servo servo = (Servo) Runtime.start("servo", "Servo");
 
@@ -453,7 +453,7 @@ public class ArduinoTest {
     // arduino.servoAttach(servo, servoPin);
 
     // common way
-    servo.attach(arduino, servoPin);
+    arduino.attach(servo, servoPin);
 
     // another way
     // servo.setPin(servoPin);
@@ -462,11 +462,11 @@ public class ArduinoTest {
     assertTrue(servo.isAttached());
 
     // re-entrant test
-    servo.attach(arduino, servoPin);
+    arduino.attach(servo, servoPin);
 
     assertTrue(servo.isAttached());
-    assertEquals(servoPin, servo.getPin().intValue());
-    assertEquals(arduino.getName(), servo.getControllerName());
+    // assertEquals(servoPin, servo.getPin().intValue());
+    assertEquals(arduino.getName(), servo.getController());
 
     assertEquals("servoAttach/7/9/5/115/101/114/118/111\n", uart.decode());
     servo.moveTo(0);
@@ -490,8 +490,8 @@ public class ArduinoTest {
     servo.attach();
     assertEquals("servoAttach/7/9/5/115/101/114/118/111\n", uart.decode());
     assertTrue(servo.isAttached());
-    assertEquals(servoPin, servo.getPin().intValue());
-    assertEquals(arduino.getName(), servo.getControllerName());
+    //assertEquals(servoPin, servo.getPin().intValue());
+    assertEquals(arduino.getName(), servo.getController());
 
     servo.moveTo(90);
     assertEquals("servoWrite/7/90\n", uart.decode());

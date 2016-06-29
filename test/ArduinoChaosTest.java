@@ -76,14 +76,14 @@ public class ArduinoChaosTest {
     arduino.pinMode(2, Arduino.OUTPUT);
     Thread.sleep(1000);
     Servo servo = (Servo)Runtime.createAndStart("servo", "Servo");
-    servo.setPin(13);
-    arduino.servoAttach(servo);
+    // servo.setPin(13);
+    // arduino.servoAttach(servo);
     Thread.sleep(1000);
     arduino.servoSweepStart(servo);
     Thread.sleep(1000);
     arduino.servoSweepStop(servo);
     Thread.sleep(1000);
-    arduino.servoEventsEnabled(servo);
+    arduino.servoEventsEnabled(servo, true);
     Thread.sleep(1000);
     // TODO : this blows up
     // arduino.servoWrite(servo);
@@ -204,7 +204,7 @@ public class ArduinoChaosTest {
     Motor motor = (Motor)Runtime.createAndStart("motor", "Motor");
     motor.setType2Pwm(leftPwm, rightPwm);
     // motor.attach(arduino);
-    arduino.motorAttach(motor);
+    arduino.attachDevice(motor, null); // null  config is this right ?
 
 
 //    servo.attach();

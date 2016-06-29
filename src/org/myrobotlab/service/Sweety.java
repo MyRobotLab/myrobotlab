@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -148,27 +150,46 @@ public class Sweety extends Service {
 
   /**
    * Attach the servos to arduino pins
+ * @throws Exception 
    */
-  public void attach() {
+  public void attach() throws Exception {
+	  /* OLD  WAY
     rightForearm.attach(arduino.getName(), 34);
     leftForearm.attach(arduino.getName(), 35);
     rightShoulder.attach(arduino.getName(), 36);
     leftShoulder.attach(arduino.getName(), 37);
     rightArm.attach(arduino.getName(), 38);
-    leftArm.attach(arduino.getName(), 41);
     neck.attach(arduino.getName(), 39);
     leftEye.attach(arduino.getName(), 40);
+    leftArm.attach(arduino.getName(), 41);
     rightEye.attach(arduino.getName(), 42);
-    rightHand.attach(arduino.getName(), 46);
-    rightWrist.attach(arduino.getName(), 44);
     leftHand.attach(arduino.getName(), 43);
+    rightWrist.attach(arduino.getName(), 44);
     leftWrist.attach(arduino.getName(), 45);
+    rightHand.attach(arduino.getName(), 46);
+    */
+    
+	  // NEW WAY
+    arduino.attach(rightForearm, 34);
+    arduino.attach(leftForearm, 35);
+    arduino.attach(rightShoulder, 36);
+    arduino.attach(leftShoulder, 37);
+    arduino.attach(rightArm, 38);
+    arduino.attach(neck, 39);
+    arduino.attach(leftEye, 40);
+    arduino.attach(leftArm, 41);
+    arduino.attach(rightEye, 42);
+    arduino.attach(leftHand, 43);
+    arduino.attach(rightWrist, 44);
+    arduino.attach(leftWrist, 45);
+    arduino.attach(rightHand, 46);
   }
 
   /**
    * Connect the arduino to a COM port . Exemple : connect("COM8")
+ * @throws IOException 
    */
-  public void connect(String port) {
+  public void connect(String port) throws IOException {
     arduino.connect(port);
     sleep(2000);
     arduino.pinMode(SHIFT, Arduino.OUTPUT);
@@ -584,18 +605,27 @@ public class Sweety extends Service {
     leftEye.detach();
 
     leftTracker = (Tracking) startPeer("leftTracker");
+    /* OLD WAY
     leftTracker.y.setPin(39); // neck
-    leftTracker.pid.invert("y");
     leftTracker.x.setPin(40); // right eye
     leftTracker.connect(port);
+    */
+    leftTracker.connect(port, 40, 39);
+
+    leftTracker.pid.invert("y");
     leftTracker.opencv.setCameraIndex(leftCameraIndex);
     leftTracker.opencv.capture();
 
     rightTracker = (Tracking) startPeer("rightTracker");
-    rightTracker.y.setPin(50); // nothing
-    rightTracker.pid.invert("y");
+    /* OLD WAY
     rightTracker.x.setPin(42); // right eye
     rightTracker.connect(port);
+    rightTracker.y.setPin(50); // nothing
+    */
+    
+    rightTracker.connect(port, 42, 50);
+    
+    rightTracker.pid.invert("y");
     rightTracker.opencv.setCameraIndex(rightCameraIndex);
     rightTracker.opencv.capture();
     saying("tracking activated.");
@@ -622,15 +652,16 @@ public class Sweety extends Service {
 
   /**
    * Stop the tracking services
+ * @throws Exception 
    */
-  public void stopTrack() {
+  public void stopTrack() throws Exception {
     leftTracker.opencv.stopCapture();
     rightTracker.opencv.stopCapture();
     leftTracker.releaseService();
     rightTracker.releaseService();
-    neck.attach(arduino, 39);
-    leftEye.attach(arduino, 40);
-    rightEye.attach(arduino, 42);
+    arduino.attach(neck, 39);
+    arduino.attach(leftEye, 40);
+    arduino.attach(rightEye, 42);
 
     saying("the tracking if stopped.");
   }

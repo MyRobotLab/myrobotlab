@@ -4,10 +4,58 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     var _self = this;
     var msg = this.msg;
     
-    // init
-    //$scope.controller = '';
+    // Init
+    // Don't think init is necessary for data that is bound
     $scope.controllerName = '';
-    $scope.controllers = [];    
+    $scope.controllers = [];  
+    // Start of three.js scene and object creation
+    // Create the scene
+	$log.info("Creating scene..");
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera( 75, 1, 0.1, 1000 );
+	var renderer = new THREE.WebGLRenderer();
+	renderer.setSize(400,400);
+	// Lightning
+	var ambientLight, light;
+	ambientLight = new THREE.AmbientLight( 0x333333 );	// 0.2
+	light = new THREE.DirectionalLight( 0xFFFFFF, 1.0 );
+	// Materials
+	var teapotColor = new THREE.Color(0xdd00dd);
+	phongMaterial = new THREE.MeshPhongMaterial( { color: teapotColor, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
+    var gridHelper = new THREE.GridHelper( 50, 5 );
+    //
+    var color1 = new THREE.Color(0xdd00dd);
+    var color2 = new THREE.Color(0x00ff00);
+    gridHelper.setColors(color1,color2);
+    
+    var teapotSize = 10;
+    var tess = 15;
+    var bottom = true;
+    var lid = true;
+    var body = true;
+    var fitLid = true;
+    var blinn = true;
+    var teapotGeometry = new THREE.TeapotBufferGeometry( teapotSize,
+			tess,
+			bottom,
+		    lid,
+			body,
+			fitLid,
+			blinn);
+    
+    var teapot = new THREE.Mesh(teapotGeometry, phongMaterial);
+    
+    scene.add(ambientLight);
+	scene.add(light);
+    scene.add(teapot);
+    // scene.add(gridHelper);
+
+    camera.position.x = 0;
+    camera.position.y = 8;
+    camera.position.z = 50;
+
+    renderer.render( scene, camera );
+    // End of three.js scene creation and object creation  
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
@@ -37,6 +85,20 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
         case 'onState':
             _self.updateState(data);
             $scope.$apply();
+            var container = document.getElementById( 'canvas' );
+    		// $log.info("CANVAS CONTAINER: " + container);
+    		if (container.hasChildNodes()) {
+    			container.removeChild( container.childNodes[0]);
+    			container.appendChild( renderer.domElement );	
+    		} else {
+    			container.appendChild( renderer.domElement );
+    		}
+        	
+        	teapot.rotation.x = $scope.gyroDegreeX / (2 * Math.PI);
+        	teapot.rotation.y = $scope.gyroDegreeY / (2 * Math.PI);
+        	teapot.rotation.z = $scope.gyroDegreeZ / (2 * Math.PI);
+        	
+            renderer.render( scene, camera );
             break;
         default:
             $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method);
@@ -68,3 +130,4 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     msg.subscribe(this);
 }
 ]);
+

@@ -187,7 +187,6 @@
 	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.23/xstream-1.4.7.jar"/>
 	<classpathentry kind="lib" path="/repo/net.objecthunter.exp4j/0.4.7/exp4j-0.4.7.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.vision/1.22.0/google-api-services-vision-v1-rev16-1.22.0.jar"/>
-
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-api-client-1.22.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-oauth-client-1.22.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-http-client-1.22.0.jar"/>
@@ -196,7 +195,6 @@
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-http-client-jackson2-1.22.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-http-client-jdo-1.22.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/jdo2-api-2.3-eb.jar"/>
-
-
+	<classpathentry kind="lib" path="/repo/net.sf.jipcam/0.9.1/jipcam-0.9.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

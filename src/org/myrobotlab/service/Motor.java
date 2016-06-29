@@ -41,8 +41,8 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.data.SensorData;
-import org.myrobotlab.service.interfaces.Device;
-import org.myrobotlab.service.interfaces.Microcontroller;
+import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
@@ -162,7 +162,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
   @Override
   public void detach() {
-    boolean ret = controller.motorDetach(this);
+    controller.detachDevice(this);
     controllerName = null; // FIXME - should only have controllerName and
     // not isAttached - test for null
     controller = null;
@@ -172,11 +172,17 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
   }
 
+  /* NON STANDARD - USE getController
   public String getControllerName() {
     if (controller != null) {
       return controller.getName();
     }
     return null;
+  }
+  */
+  
+  public DeviceController getController(){
+	  return controller;
   }
 
   @Override
@@ -233,36 +239,6 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
     controller.motorMove(this);
   }
 
-  public void attach(String controllerName) throws Exception {
-    attach((MotorController) Runtime.getService(controllerName));
-  }
-
-  /**
-   * GOOD - future of complicated attaching - supply all data in one horrific
-   * function signature - overload and default appropriately this sets all
-   * necessary data in the Motor - at the end of this method the controller is
-   * called, and it uses this service to pull out any necessary data to complete
-   * the attachment
-   * 
-   * @param controllerName
-   * @param motorType
-   * @param pwmPin
-   * @param dirPin
-   * @param encoderType
-   * @param encoderPin
-   * @throws MRLException
-   * 
-   *           TODO - encoder perhaps should be handled different where an array
-   *           of data is passed in Motor.setEncoder(int[] sensorConfig)
-   */
-  public void attach(MotorController controller) throws Exception {
-    controllerName = controller.getName();
-    // GOOD DESIGN !! - this is the extent of what our attach should be !!!
-    // just call the controller's motorAttach & broadcast our state
-    controller.motorAttach(this);
-    broadcastState();
-  }
-
   public Integer getPin(String name) {
     return pinMap.get(name);
   }
@@ -285,10 +261,9 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
     moveTo(newPos, null);
   }
 
-  // FIXME - DEPRECATE !!!
   @Override
-  public void setController(MotorController controller) {
-    this.controller = controller;
+  public void setController(DeviceController controller) {
+    this.controller = (MotorController)controller;
     this.controllerName = controller.getName();
   }
 
@@ -344,22 +319,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
     currentPos = position;
     return position;
   }
-
-
  
-  public MotorController getController() {
-    return controller;
-  }
-
-  @Override
-  public int[] getDeviceConfig() {
-    if (type.equals(TYPE_PULSE_STEP)) {
-      // pulse step only needs the pwm pin
-      return new int[] { pinMap.get(PIN_TYPE_PWM) };
-    }
-    return new int[] {};
-  }
-
   @Override
   public boolean hasSensor() {
     // TODO Auto-generated method stub
@@ -426,17 +386,6 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
    * this.type = type; }
    */
 
-  @Override
-  public void pulse() {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void setEncoder(Encoder encoder) {
-    // TODO Auto-generated method stub
-
-  }
 
   /**
    * This static method returns all the details of the class without it having
@@ -518,7 +467,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
       // m1.attach(arduino, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);
       // m1.attach(arduino, Motor.TYPE_2_PWM, pwmPin, dirPin);
       // m1.attach(arduino, Motor.TYPE_SIMPLE, pwmPin, dirPin);
-      m1.attach((MotorController)arduino);
+      m1.setController((MotorController)arduino);
 
       m1.move(1.0);
       m1.move(-1.0);
@@ -562,7 +511,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
     }
 
   }
-
+/*  I DONT THINK MOTOR NEEDS THESE
 @Override
 public SensorData publishSensorData(SensorData data) {
 	// TODO Auto-generated method stub
@@ -570,14 +519,15 @@ public SensorData publishSensorData(SensorData data) {
 }
 
 @Override
-public void addSensorDataListener(SensorDataListener listener) {
+public void addSensorDataListener(SensorDataListener listener, int[] config) {
 	// TODO Auto-generated method stub
 	
 }
+*/
 
 @Override
 public Integer getDeviceType() {
-	return Device.DEVICE_TYPE_MOTOR;
+	return DeviceControl.DEVICE_TYPE_MOTOR;
 }
 
 @Override
@@ -588,6 +538,18 @@ public void update(SensorData data) {
 
 @Override
 public void onSensorData(SensorData data) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void pulse() {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void setEncoder(Encoder encoder) {
 	// TODO Auto-generated method stub
 	
 }

@@ -56,7 +56,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
-  public static final int MRLCOMM_VERSION = 34;
+  public static final int MRLCOMM_VERSION = 37;
   
   // ----------- event types -------------------
   public static final int STEPPER_EVENT_STOP = 1;
@@ -78,16 +78,16 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ATTACH_DEVICE;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CREATE_I2C_DEVICE;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DETACH_DEVICE;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_START;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.FIX_PIN_OFFSET;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_BOARD_INFO;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE_READ;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.INTS_TO_STRING;
-	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_ATTACH;
-	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_DETACH;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE_TO;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_RESET;
@@ -138,7 +138,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {publishVersion Integer} 
 	public final static int PUBLISH_VERSION =		3;
 
-	// {addSensorDataListener SensorDataListener} 
+	// {addSensorDataListener SensorDataListener int[]} 
 	public final static int ADD_SENSOR_DATA_LISTENER =		4;
 
 	// {analogReadPollingStart Integer Integer} 
@@ -150,41 +150,41 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {analogWrite int int} 
 	public final static int ANALOG_WRITE =		7;
 
-	// {attachDevice Device} 
+	// {attachDevice DeviceControl Object[]} 
 	public final static int ATTACH_DEVICE =		8;
 
 	// {createI2cDevice int int String} 
 	public final static int CREATE_I2C_DEVICE =		9;
 
+	// {detachDevice DeviceControl} 
+	public final static int DETACH_DEVICE =		10;
+
 	// {digitalReadPollingStart Integer Integer} 
-	public final static int DIGITAL_READ_POLLING_START =		10;
+	public final static int DIGITAL_READ_POLLING_START =		11;
 
 	// {digitalReadPollingStop int} 
-	public final static int DIGITAL_READ_POLLING_STOP =		11;
+	public final static int DIGITAL_READ_POLLING_STOP =		12;
 
 	// {digitalWrite int int} 
-	public final static int DIGITAL_WRITE =		12;
+	public final static int DIGITAL_WRITE =		13;
 
 	// {fixPinOffset Integer} 
-	public final static int FIX_PIN_OFFSET =		13;
+	public final static int FIX_PIN_OFFSET =		14;
+
+	// {getBoardInfo} 
+	public final static int GET_BOARD_INFO =		15;
 
 	// {i2cRead int int byte[] int} 
-	public final static int I2C_READ =		14;
+	public final static int I2C_READ =		16;
 
 	// {i2cWrite int int byte[] int} 
-	public final static int I2C_WRITE =		15;
+	public final static int I2C_WRITE =		17;
 
 	// {i2cWriteRead int int byte[] int byte[] int} 
-	public final static int I2C_WRITE_READ =		16;
+	public final static int I2C_WRITE_READ =		18;
 
 	// {intsToString int[] int int} 
-	public final static int INTS_TO_STRING =		17;
-
-	// {motorAttach String int} 
-	public final static int MOTOR_ATTACH =		18;
-
-	// {motorDetach MotorControl} 
-	public final static int MOTOR_DETACH =		19;
+	public final static int INTS_TO_STRING =		19;
 
 	// {motorMove MotorControl} 
 	public final static int MOTOR_MOVE =		20;
@@ -201,7 +201,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {pinMode Integer Integer} 
 	public final static int PIN_MODE =		24;
 
-	// {publishAttachedDevice Device} 
+	// {publishAttachedDevice DeviceControl} 
 	public final static int PUBLISH_ATTACHED_DEVICE =		25;
 
 	// {publishDebug String} 
@@ -246,13 +246,13 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {sensorPollingStop String} 
 	public final static int SENSOR_POLLING_STOP =		39;
 
-	// {servoAttach Servo Integer} 
+	// {servoAttach Servo} 
 	public final static int SERVO_ATTACH =		40;
 
 	// {servoDetach Servo} 
 	public final static int SERVO_DETACH =		41;
 
-	// {servoEventsEnabled Servo} 
+	// {servoEventsEnabled Servo boolean} 
 	public final static int SERVO_EVENTS_ENABLED =		42;
 
 	// {servoSweepStart Servo} 
@@ -326,6 +326,9 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		byteToMethod.put(CREATE_I2C_DEVICE,"createI2cDevice");
 		methodToByte.put("createI2cDevice",CREATE_I2C_DEVICE);
 
+		byteToMethod.put(DETACH_DEVICE,"detachDevice");
+		methodToByte.put("detachDevice",DETACH_DEVICE);
+
 		byteToMethod.put(DIGITAL_READ_POLLING_START,"digitalReadPollingStart");
 		methodToByte.put("digitalReadPollingStart",DIGITAL_READ_POLLING_START);
 
@@ -338,6 +341,9 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		byteToMethod.put(FIX_PIN_OFFSET,"fixPinOffset");
 		methodToByte.put("fixPinOffset",FIX_PIN_OFFSET);
 
+		byteToMethod.put(GET_BOARD_INFO,"getBoardInfo");
+		methodToByte.put("getBoardInfo",GET_BOARD_INFO);
+
 		byteToMethod.put(I2C_READ,"i2cRead");
 		methodToByte.put("i2cRead",I2C_READ);
 
@@ -349,12 +355,6 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 		byteToMethod.put(INTS_TO_STRING,"intsToString");
 		methodToByte.put("intsToString",INTS_TO_STRING);
-
-		byteToMethod.put(MOTOR_ATTACH,"motorAttach");
-		methodToByte.put("motorAttach",MOTOR_ATTACH);
-
-		byteToMethod.put(MOTOR_DETACH,"motorDetach");
-		methodToByte.put("motorDetach",MOTOR_DETACH);
 
 		byteToMethod.put(MOTOR_MOVE,"motorMove");
 		methodToByte.put("motorMove",MOTOR_MOVE);
@@ -688,6 +688,10 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		return "CREATE_I2C_DEVICE";
 
 	}
+	case ArduinoMsgCodec.DETACH_DEVICE:{
+		return "DETACH_DEVICE";
+
+	}
 	case ArduinoMsgCodec.DIGITAL_READ_POLLING_START:{
 		return "DIGITAL_READ_POLLING_START";
 
@@ -704,6 +708,10 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		return "FIX_PIN_OFFSET";
 
 	}
+	case ArduinoMsgCodec.GET_BOARD_INFO:{
+		return "GET_BOARD_INFO";
+
+	}
 	case ArduinoMsgCodec.I2C_READ:{
 		return "I2C_READ";
 
@@ -718,14 +726,6 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	}
 	case ArduinoMsgCodec.INTS_TO_STRING:{
 		return "INTS_TO_STRING";
-
-	}
-	case ArduinoMsgCodec.MOTOR_ATTACH:{
-		return "MOTOR_ATTACH";
-
-	}
-	case ArduinoMsgCodec.MOTOR_DETACH:{
-		return "MOTOR_DETACH";
 
 	}
 	case ArduinoMsgCodec.MOTOR_MOVE:{

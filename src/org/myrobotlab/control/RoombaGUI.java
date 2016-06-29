@@ -206,12 +206,15 @@ public class RoombaGUI extends ServiceGUI implements ListSelectionListener, Acti
     roombacomm.setProtocol((i == 0) ? "SCI" : "OI");
 
     connectButton.setText("connecting");
-    if (!roombacomm.connect(portname)) {
-      updateDisplay("Couldn't connect to " + portname + "\n");
-      connectButton.setText("  connect  ");
-      // roombacomm.debug=false;
-      return false;
+    try {
+    	roombacomm.connect(portname);
+    } catch(Exception e){
+    	log.error("could not connect", e);
+    	updateDisplay("Couldn't connect to " + portname + "\n");
+        connectButton.setText("  connect  ");
+        return false;
     }
+    
     updateDisplay("Roomba startup\n");
 
     roombacomm.startup();
