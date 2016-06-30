@@ -325,117 +325,117 @@ void LinkedList<T>::clear() {
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE BEGIN -----------
 ///// INO GENERATED DEFINITION BEGIN //////
 // {publishMRLCommError Integer}
-#define PUBLISH_MRLCOMM_ERROR		1
+#define PUBLISH_MRLCOMM_ERROR    1
 // {getVersion}
-#define GET_VERSION		2
+#define GET_VERSION   2
 // {publishVersion Integer}
-#define PUBLISH_VERSION		3
+#define PUBLISH_VERSION   3
 // {addSensorDataListener SensorDataListener int[]}
-#define ADD_SENSOR_DATA_LISTENER		4
+#define ADD_SENSOR_DATA_LISTENER    4
 // {analogReadPollingStart Integer Integer}
-#define ANALOG_READ_POLLING_START		5
+#define ANALOG_READ_POLLING_START   5
 // {analogReadPollingStop int}
-#define ANALOG_READ_POLLING_STOP		6
+#define ANALOG_READ_POLLING_STOP    6
 // {analogWrite int int}
-#define ANALOG_WRITE		7
+#define ANALOG_WRITE    7
 // {attachDevice DeviceControl Object[]}
-#define ATTACH_DEVICE		8
+#define ATTACH_DEVICE   8
 // {createI2cDevice int int String}
-#define CREATE_I2C_DEVICE		9
+#define CREATE_I2C_DEVICE   9
 // {detachDevice DeviceControl}
-#define DETACH_DEVICE		10
+#define DETACH_DEVICE   10
 // {digitalReadPollingStart Integer Integer}
-#define DIGITAL_READ_POLLING_START		11
+#define DIGITAL_READ_POLLING_START    11
 // {digitalReadPollingStop int}
-#define DIGITAL_READ_POLLING_STOP		12
+#define DIGITAL_READ_POLLING_STOP   12
 // {digitalWrite int int}
-#define DIGITAL_WRITE		13
+#define DIGITAL_WRITE   13
 // {fixPinOffset Integer}
-#define FIX_PIN_OFFSET		14
+#define FIX_PIN_OFFSET    14
 // {getBoardInfo}
-#define GET_BOARD_INFO		15
+#define GET_BOARD_INFO    15
 // {i2cRead int int byte[] int}
-#define I2C_READ		16
+#define I2C_READ    16
 // {i2cWrite int int byte[] int}
-#define I2C_WRITE		17
+#define I2C_WRITE   17
 // {i2cWriteRead int int byte[] int byte[] int}
-#define I2C_WRITE_READ		18
+#define I2C_WRITE_READ    18
 // {intsToString int[] int int}
-#define INTS_TO_STRING		19
+#define INTS_TO_STRING    19
 // {motorMove MotorControl}
-#define MOTOR_MOVE		20
+#define MOTOR_MOVE    20
 // {motorMoveTo MotorControl}
-#define MOTOR_MOVE_TO		21
+#define MOTOR_MOVE_TO   21
 // {motorReset MotorControl}
-#define MOTOR_RESET		22
+#define MOTOR_RESET   22
 // {motorStop MotorControl}
-#define MOTOR_STOP		23
+#define MOTOR_STOP    23
 // {pinMode Integer Integer}
-#define PIN_MODE		24
+#define PIN_MODE    24
 // {publishAttachedDevice DeviceControl}
-#define PUBLISH_ATTACHED_DEVICE		25
+#define PUBLISH_ATTACHED_DEVICE   25
 // {publishDebug String}
-#define PUBLISH_DEBUG		26
+#define PUBLISH_DEBUG   26
 // {publishMessageAck}
-#define PUBLISH_MESSAGE_ACK		27
+#define PUBLISH_MESSAGE_ACK   27
 // {publishPin Pin}
-#define PUBLISH_PIN		28
+#define PUBLISH_PIN   28
 // {publishPulse Long}
-#define PUBLISH_PULSE		29
+#define PUBLISH_PULSE   29
 // {publishPulseStop Integer}
-#define PUBLISH_PULSE_STOP		30
+#define PUBLISH_PULSE_STOP    30
 // {publishSensorData SensorData}
-#define PUBLISH_SENSOR_DATA		31
+#define PUBLISH_SENSOR_DATA   31
 // {publishServoEvent Integer}
-#define PUBLISH_SERVO_EVENT		32
+#define PUBLISH_SERVO_EVENT   32
 // {publishStatus Long Integer}
-#define PUBLISH_STATUS		33
+#define PUBLISH_STATUS    33
 // {publishTrigger Pin}
-#define PUBLISH_TRIGGER		34
+#define PUBLISH_TRIGGER   34
 // {pulse int int int int}
-#define PULSE		35
+#define PULSE   35
 // {pulseStop}
-#define PULSE_STOP		36
+#define PULSE_STOP    36
 // {releaseI2cDevice int int}
-#define RELEASE_I2C_DEVICE		37
+#define RELEASE_I2C_DEVICE    37
 // {sensorPollingStart String}
-#define SENSOR_POLLING_START		38
+#define SENSOR_POLLING_START    38
 // {sensorPollingStop String}
-#define SENSOR_POLLING_STOP		39
+#define SENSOR_POLLING_STOP   39
 // {servoAttach Servo}
-#define SERVO_ATTACH		40
+#define SERVO_ATTACH    40
 // {servoDetach Servo}
-#define SERVO_DETACH		41
+#define SERVO_DETACH    41
 // {servoEventsEnabled Servo boolean}
-#define SERVO_EVENTS_ENABLED		42
+#define SERVO_EVENTS_ENABLED    42
 // {servoSweepStart Servo}
-#define SERVO_SWEEP_START		43
+#define SERVO_SWEEP_START   43
 // {servoSweepStop Servo}
-#define SERVO_SWEEP_STOP		44
+#define SERVO_SWEEP_STOP    44
 // {servoWrite Servo}
-#define SERVO_WRITE		45
+#define SERVO_WRITE   45
 // {servoWriteMicroseconds Servo}
-#define SERVO_WRITE_MICROSECONDS		46
+#define SERVO_WRITE_MICROSECONDS    46
 // {setDebounce int}
-#define SET_DEBOUNCE		47
+#define SET_DEBOUNCE    47
 // {setDebug boolean}
-#define SET_DEBUG		48
+#define SET_DEBUG   48
 // {setDigitalTriggerOnly Boolean}
-#define SET_DIGITAL_TRIGGER_ONLY		49
+#define SET_DIGITAL_TRIGGER_ONLY    49
 // {setLoadTimingEnabled boolean}
-#define SET_LOAD_TIMING_ENABLED		50
+#define SET_LOAD_TIMING_ENABLED   50
 // {setPWMFrequency Integer Integer}
-#define SET_PWMFREQUENCY		51
+#define SET_PWMFREQUENCY    51
 // {setSampleRate int}
-#define SET_SAMPLE_RATE		52
+#define SET_SAMPLE_RATE   52
 // {setSerialRate int}
-#define SET_SERIAL_RATE		53
+#define SET_SERIAL_RATE   53
 // {setServoSpeed Servo}
-#define SET_SERVO_SPEED		54
+#define SET_SERVO_SPEED   54
 // {setTrigger int int int}
-#define SET_TRIGGER		55
+#define SET_TRIGGER   55
 // {softReset}
-#define SOFT_RESET		56
+#define SOFT_RESET    56
 ///// INO GENERATED DEFINITION END //////
 
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
@@ -488,6 +488,7 @@ void LinkedList<T>::clear() {
 #define DEVICE_TYPE_MOTOR               6
 #define DEVICE_TYPE_SERVO               7
 #define DEVICE_TYPE_I2C                 8
+#define DEVICE_TYPE_NEOPIXEL            9
 /**
 * GLOBAL DEVICE TYPES END
 **********************************************************************/
@@ -515,6 +516,23 @@ void LinkedList<T>::clear() {
 #else
   #define BOARD BOARD_TYPE_ID_UNKNOWN
 #endif
+
+/***********************************************************************
+ * NEOPIXEL DEFINE
+ */
+// PORTC BIT7 = pin 30
+#define PIXEL_PORT PORTC
+#define PIXEL_DDR DDRC
+#define PIXEL_BIT 7
+#define T1H 900
+#define T1L 600
+#define T0H 400
+#define T0L 900
+#define RES 6000
+#define NS_PER_SEC (1000000000L)
+#define CYCLES_PER_SEC (F_CPU)
+#define NS_PER_CYCLE ( NS_PER_SEC / CYCLES_PER_SEC )
+#define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
 
 /***********************************************************************
  * PIN - This class represents one of the pins on the arduino and it's
@@ -586,6 +604,7 @@ class MrlServo : public Device {
     int step;
     int min;
     int max;
+    int x;
 
     MrlServo(int p) : Device(DEVICE_TYPE_SERVO) {
        pin = p;
@@ -596,6 +615,7 @@ class MrlServo : public Device {
        // create the servo
        servo = new Servo();
        eventsEnabled = false;
+       x=0;
     }
 
     ~MrlServo() {
@@ -604,18 +624,26 @@ class MrlServo : public Device {
     }
 
     void attach(int pin){
-    	servo->attach(pin);
+      servo->attach(pin);
     }
 
     void update(unsigned long loopCount) {
       // TODO: implement me. / test This seems to be just for sweeping stuffs? The first part is also use when Servo.speed!=100
       //It's possible that the servo never reach the targetPos if servo->step!=1
+     // if(!loopCount%10000){
+       // if(x) servo->write(120);
+        //else servo->write(60);
+        //x=!x;
+     // }
+      //else if(!loopCount%500) servo->write(60);
+      //servo->write(0);
+      //return;
       if (isMoving && servo != 0) {
         if (currentPos != targetPos) {
           // caclulate the appropriate modulus to drive
           // the servo to the next position
           // TODO - check for speed > 0 && speed < 100 - send ERROR back?
-          int speedModulus = (100 - speed) * 10;
+          int speedModulus = ((100 - speed) * 10)+1;
           // speed=99 will not be 99% of speed=100
           if (loopCount % speedModulus == 0) {
             int increment = step * ((currentPos < targetPos) ? 1 : -1);
@@ -685,6 +713,9 @@ class MrlServo : public Device {
       this->step = step;
       isMoving = true;
       isSweeping = true;
+      currentPos=min;
+      targetPos=max;
+      servo->write(min);
     }
     void stopSweep() {
       isMoving = false;
@@ -993,7 +1024,7 @@ class MrlI2CDevice : public Device {
     }
 
     void i2cWrite(unsigned char* ioCmd) {
-    	int msgSize = ioCmd[3];
+      int msgSize = ioCmd[3];
         WIRE.beginTransmission(ioCmd[1]);   // address to the i2c device
         WIRE.write(ioCmd[2]);               // device memory address to write to
         for (int i = 3; i < msgSize; i++) { // data to write
@@ -1041,6 +1072,98 @@ class MrlI2CDevice : public Device {
     void update(unsigned long loopCount) {
       //Nothing to do
     }
+};
+/**
+ * Neopixel device
+ * 
+ * it contains board specific code
+ * so far only working on pin 30 on Mega
+ * TODO: support on more pins and on UNO
+ */
+struct pixel{
+  unsigned char red;
+  unsigned char blue;
+  unsigned char green;
+};
+
+class MrlNeopixel:public Device{
+  public:
+  unsigned int numPixel;
+  pixel* pixels;
+  MrlNeopixel(unsigned int num_pixel):Device(DEVICE_TYPE_NEOPIXEL){
+    numPixel = num_pixel;
+    pixels = new pixel[numPixel];
+    bitSet(PIXEL_DDR,PIXEL_BIT);
+  }
+  ~MrlNeopixel(){
+    delete pixels;
+  }
+  inline void sendBit(bool bitVal){
+    if (bitVal) {        // 0 bit
+      asm volatile (
+        "sbi %[port], %[bit] \n\t"        // Set the output bit
+        ".rept %[onCycles] \n\t"                                // Execute NOPs to delay exactly the specified number of cycles
+        "nop \n\t"
+        ".endr \n\t"
+        "cbi %[port], %[bit] \n\t"                              // Clear the output bit
+        ".rept %[offCycles] \n\t"                               // Execute NOPs to delay exactly the specified number of cycles
+        "nop \n\t"
+        ".endr \n\t"
+        ::
+        [port]    "I" (_SFR_IO_ADDR(PIXEL_PORT)),
+        [bit]   "I" (PIXEL_BIT),
+        [onCycles]  "I" (NS_TO_CYCLES(T1H) - 2),    // 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
+        [offCycles]   "I" (NS_TO_CYCLES(T1L) - 2)     // Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
+      );
+    } else {          // 1 bit
+      // **************************************************************************
+      // This line is really the only tight goldilocks timing in the whole program!
+      // **************************************************************************
+      cli();
+      asm volatile (
+        "sbi %[port], %[bit] \n\t"        // Set the output bit
+        ".rept %[onCycles] \n\t"        // Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
+        "nop \n\t"                                              // Execute NOPs to delay exactly the specified number of cycles
+        ".endr \n\t"
+        "cbi %[port], %[bit] \n\t"                              // Clear the output bit
+        ".rept %[offCycles] \n\t"                               // Execute NOPs to delay exactly the specified number of cycles
+        "nop \n\t"
+        ".endr \n\t"
+        ::
+        [port]    "I" (_SFR_IO_ADDR(PIXEL_PORT)),
+        [bit]   "I" (PIXEL_BIT),
+        [onCycles]  "I" (NS_TO_CYCLES(T0H) - 2),
+        [offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
+      );
+      sei();
+    }
+      // Note that the inter-bit gap can be as long as you want as long as it doesn't exceed the 5us reset timeout (which is A long time)
+      // Here I have been generous and not tried to squeeze the gap tight but instead erred on the side of lots of extra time.
+      // This has thenice side effect of avoid glitches on very long strings becuase 
+  }
+  
+  inline void sendByte(unsigned char byte) {
+    for(unsigned char bit = 0 ; bit < 8 ; bit++ ) {
+      sendBit( bitRead( byte , 7 ) );                // Neopixel wants bit in highest-to-lowest order
+                                                     // so send highest bit (bit #7 in an 8-bit byte since they start at 0)
+      byte <<= 1;                                    // and then shift left so bit 6 moves into 7, 5 moves into 6, etc
+    }           
+  }
+  inline void sendPixel(pixel p) {  
+    sendByte(p.green);          // Neopixel wants colors in green then red then blue order
+    sendByte(p.red);
+    sendByte(p.blue);
+  }
+  void show() {
+    _delay_us( (RES / 1000UL) + 1);       // Round up since the delay must be _at_least_ this long (too short might not work, too long not a problem)
+  }
+  void update(unsigned long loopCount){
+    if(loopCount%400) return; //TODO: set a FPS?
+    for(int p=0; p<numPixel;p++){
+      sendPixel(pixels[p]);
+    }
+    show();
+  }
 };
 
 
@@ -1245,11 +1368,11 @@ void processCommand() {
   }
   case SERVO_ATTACH:{
     // Servo.attach(pin)
-	int pin = ioCmd[2];
-	publishDebug("SERVO_ATTACH " + String(pin));
-	MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
-	s->attach(pin);
-	publishDebug("SERVO_ATTACHED ");
+  int pin = ioCmd[2];
+  publishDebug("SERVO_ATTACH " + String(pin));
+  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
+  s->attach(pin);
+  publishDebug("SERVO_ATTACHED ");
     break;
   }
   case SERVO_SWEEP_START:
@@ -1329,8 +1452,8 @@ void processCommand() {
     sensorPollingStart();
     break;
   case ATTACH_DEVICE:
-	  attachDevice();
-	break;
+    attachDevice();
+  break;
   case SENSOR_POLLING_STOP:
     sensorPollingStop();
     break;
@@ -1600,81 +1723,81 @@ void servoAttach() {
  * it could be implemented with 1 byte
  */
 void attachDevice() {
-	// we're creating a new device. auto increment it
-	// TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
-	//       Arduino will run out of memory before that happen.
-	//       A mecanism that will call a softReset() when MRL disconnect will prevent that
+  // we're creating a new device. auto increment it
+  // TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
+  //       Arduino will run out of memory before that happen.
+  //       A mecanism that will call a softReset() when MRL disconnect will prevent that
 
-	// we want to echo back the name
-	// and send the config in a nice neat package to
-	// the attach method which creates the device
+  // we want to echo back the name
+  // and send the config in a nice neat package to
+  // the attach method which creates the device
 
-	int nameSize = ioCmd[2];
+  int nameSize = ioCmd[2];
 
-	// get config size
-	int configSizePos = 3 + nameSize;
-	int configSize = ioCmd[configSizePos];
-	configPos = configSizePos + 1;
+  // get config size
+  int configSizePos = 3 + nameSize;
+  int configSize = ioCmd[configSizePos];
+  configPos = configSizePos + 1;
 
-	// MAKE NOTE: I've chosen to have config & configPos globals
-	// this is primarily to avoid the re-allocation/de-allocation of the config buffer
-	// but part of me thinks it should be a local var passed into the function to avoid
-	// the dangers of global var ... fortunately Arduino is single threaded
-	// It also makes sense to pass in config on the constructor of a new device
-	// based on device type - "you inflate the correct device with the correct config"
-	// but I went on the side of globals & hopefully avoiding more memory management and fragmentation
+  // MAKE NOTE: I've chosen to have config & configPos globals
+  // this is primarily to avoid the re-allocation/de-allocation of the config buffer
+  // but part of me thinks it should be a local var passed into the function to avoid
+  // the dangers of global var ... fortunately Arduino is single threaded
+  // It also makes sense to pass in config on the constructor of a new device
+  // based on device type - "you inflate the correct device with the correct config"
+  // but I went on the side of globals & hopefully avoiding more memory management and fragmentation
 
-	// move config off ioCmd into config buffer
-	for (int i = 0; i < configSize; ++i){
-		config[i] = ioCmd[configPos + i];
-	}
+  // move config off ioCmd into config buffer
+  for (int i = 0; i < configSize; ++i){
+    config[i] = ioCmd[configPos + i];
+  }
 
-	int deviceType = ioCmd[1];
-	Device* devicePtr = 0;
-	switch (deviceType) {
-	case SENSOR_TYPE_ANALOG_PIN_ARRAY: {
-		devicePtr = attachAnalogPinArray();
-		break;
-	}
-	case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
-		devicePtr = attachDigitalPinArray();
-		break;
-	}
-	case SENSOR_TYPE_PULSE: {
-		devicePtr = attachPulse();
-		break;
-	}
-	case SENSOR_TYPE_ULTRASONIC: {
-		devicePtr = attachUltrasonic();
-		break;
-	}
-	case DEVICE_TYPE_STEPPER: {
-		devicePtr = attachStepper();
-		break;
-	}
-	case DEVICE_TYPE_MOTOR: {
-		devicePtr = attachMotor();
-		break;
-	}
-	case DEVICE_TYPE_SERVO: {
-		devicePtr = attachServo();
-		break;
-	}
-	case DEVICE_TYPE_I2C: {
-		devicePtr = attachI2C();
-		break;
-	}
-	default: {
-		// TODO: publish error message
-		break;
-	}
+  int deviceType = ioCmd[1];
+  Device* devicePtr = 0;
+  switch (deviceType) {
+  case SENSOR_TYPE_ANALOG_PIN_ARRAY: {
+    devicePtr = attachAnalogPinArray();
+    break;
+  }
+  case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
+    devicePtr = attachDigitalPinArray();
+    break;
+  }
+  case SENSOR_TYPE_PULSE: {
+    devicePtr = attachPulse();
+    break;
+  }
+  case SENSOR_TYPE_ULTRASONIC: {
+    devicePtr = attachUltrasonic();
+    break;
+  }
+  case DEVICE_TYPE_STEPPER: {
+    devicePtr = attachStepper();
+    break;
+  }
+  case DEVICE_TYPE_MOTOR: {
+    devicePtr = attachMotor();
+    break;
+  }
+  case DEVICE_TYPE_SERVO: {
+    devicePtr = attachServo();
+    break;
+  }
+  case DEVICE_TYPE_I2C: {
+    devicePtr = attachI2C();
+    break;
+  }
+  default: {
+    // TODO: publish error message
+    break;
+  }
 }
 
 if (devicePtr) {
-	devicePtr->id = nextDeviceId;
-	addDevice(devicePtr);
-	publishAttachedDevice(devicePtr->id, nameSize, 3);
-	nextDeviceId++;
+  devicePtr->id = nextDeviceId;
+  addDevice(devicePtr);
+  publishAttachedDevice(devicePtr->id, nameSize, 3);
+  nextDeviceId++;
 }
 }
 
