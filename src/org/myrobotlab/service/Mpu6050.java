@@ -9,6 +9,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -5264,14 +5265,12 @@ public class Mpu6050 extends Service implements I2CControl {
 
 	@Override
 	public Integer getDeviceType() {
-		// TODO Auto-generated method stub
-		return null;
+		return DeviceControl.DEVICE_TYPE_I2C;
 	}
 
 	@Override
 	public void setController(DeviceController controller) {
-		// TODO Auto-generated method stub
-		
+		setController(controller);
 	}
 
 }

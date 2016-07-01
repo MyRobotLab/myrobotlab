@@ -53,7 +53,7 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 	String detach = "unsetController";
 	JButton attachButton = new JButton(attach);
 
-	JComboBox<String> controller = new JComboBox<String>();
+	JComboBox<String> controllerList = new JComboBox<String>();
 	JComboBox<String> deviceAddressList = new JComboBox<String>();
 	JComboBox<String> deviceBusList = new JComboBox<String>();
 
@@ -77,9 +77,9 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 				Object o = event.getSource();
 				if (o == attachButton) {
 					if (attachButton.getText().equals(attach)) {
-						int index = controller.getSelectedIndex();
+						int index = controllerList.getSelectedIndex();
 						if (index != -1) {
-							myService.send(boundServiceName, attach, controller.getSelectedItem(), deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
+							myService.send(boundServiceName, attach, controllerList.getSelectedItem(), deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
 						}
 					} else {
 						myService.send(boundServiceName, detach);
@@ -109,17 +109,19 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 			public void run() {
 				removeListeners();
 				refreshControllers();
-				controller.setSelectedItem(driver.controller.getName());
-				deviceBusList.setSelectedItem(boundService.deviceBus);
-				deviceAddressList.setSelectedItem(boundService.deviceAddress);
+				if (driver.controller != null) {
+					controllerList.setSelectedItem(driver.controller.getName());
+					deviceBusList.setSelectedItem(boundService.deviceBus);
+					deviceAddressList.setSelectedItem(boundService.deviceAddress);
+				}
 				if (driver.isControllerSet) {
 					attachButton.setText(detach);
-					controller.setEnabled(false);
+					controllerList.setEnabled(false);
 					deviceBusList.setEnabled(false);
 					deviceAddressList.setEnabled(false);
 				} else {
 					attachButton.setText(attach);
-					controller.setEnabled(true);
+					controllerList.setEnabled(true);
 					deviceBusList.setEnabled(true);
 					deviceAddressList.setEnabled(true);
 				}
@@ -142,7 +144,7 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 		panel.add(attachButton, gc);
 		++gc.gridx;
 
-		panel.add(controller, gc);
+		panel.add(controllerList, gc);
 		panel.add(deviceBusLabel);
 		panel.add(deviceBusList);
 		panel.add(deviceAddressLabel);
@@ -178,11 +180,13 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 			public void run() {
 
 				ArrayList<String> v = boundService.refreshControllers();
-				controller.removeAllItems();
+				controllerList.removeAllItems();
 				for (int i = 0; i < v.size(); ++i) {
-					controller.addItem(v.get(i));
+					controllerList.addItem(v.get(i));
 				}
-				controller.setSelectedItem(boundService.controller.getName());
+				if (boundService.controller != null) {
+					controllerList.setSelectedItem(boundService.controller.getName());
+				}
 			}
 		});
 	}

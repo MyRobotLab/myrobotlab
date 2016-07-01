@@ -10,6 +10,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -107,6 +108,10 @@ public class AdafruitIna219 extends Service implements I2CControl{
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
 	
+	@Override
+	public void setController(DeviceController controller) {
+		setController(controller);
+	}
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
@@ -257,14 +262,7 @@ public class AdafruitIna219 extends Service implements I2CControl{
 
 	@Override
 	public Integer getDeviceType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setController(DeviceController controller) {
-		// TODO Auto-generated method stub
-		
+		return DeviceControl.DEVICE_TYPE_I2C;
 	}
 
 }
