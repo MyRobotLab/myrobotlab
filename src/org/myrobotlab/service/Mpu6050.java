@@ -9,7 +9,9 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -43,7 +45,7 @@ import org.slf4j.Logger;
  * DEALINGS IN THE SOFTWARE. ===============================================
  */
 
-public class Mpu6050 extends Service {
+public class Mpu6050 extends Service implements I2CControl {
 
 	private static final long serialVersionUID = 1L;
 
@@ -51,7 +53,7 @@ public class Mpu6050 extends Service {
 
 	StringBuilder debugRX = new StringBuilder();
 
-	transient I2CControl controller;
+	transient I2CController controller;
 
 	public List<String> deviceAddressList = Arrays.asList("0x68", "0x69");
 	public String deviceAddress = "0x68";
@@ -888,7 +890,7 @@ public class Mpu6050 extends Service {
 	}
 
 	public ArrayList<String> refreshControllers() {
-		controllers = Runtime.getServiceNamesFromInterface(I2CControl.class);
+		controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
 		return controllers;
 	}
 
@@ -903,14 +905,14 @@ public class Mpu6050 extends Service {
 	 */
 	// @Override
 	public boolean setController(String controllerName, String deviceBus, String deviceAddress) {
-		return setController((I2CControl) Runtime.getService(controllerName), deviceBus, deviceAddress);
+		return setController((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
 	}
 
 	public boolean setController(String controllerName) {
-		return setController((I2CControl) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
+		return setController((I2CController) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
 	}
 
-	public boolean setController(I2CControl controller) {
+	public boolean setController(I2CController controller) {
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
 
@@ -918,7 +920,7 @@ public class Mpu6050 extends Service {
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
 	 */
-	public boolean setController(I2CControl controller, String deviceBus, String deviceAddress) {
+	public boolean setController(I2CController controller, String deviceBus, String deviceAddress) {
 		if (controller == null) {
 			error("setting null as controller");
 			return false;
@@ -944,7 +946,7 @@ public class Mpu6050 extends Service {
 		broadcastState();
 	}
 
-	public I2CControl getController() {
+	public I2CController getController() {
 		return controller;
 	}
 
@@ -978,8 +980,8 @@ public class Mpu6050 extends Service {
 	 */
 	boolean createDevice() {
 		if (controller != null) {
-				controller.releaseI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), this.getName());
+				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 		}
 
 		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
@@ -1003,12 +1005,12 @@ public class Mpu6050 extends Service {
 	public void getRaw() {
 		// Set the start address to read from
 		byte[] writebuffer = { MPU6050_RA_ACCEL_XOUT_H };
-		controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
 		// The Arduino example executes a request_from()
 		// Not sure if this will do the trick
 		// Request 14 bytes from the MPU-6050
 		byte[] readbuffer = new byte[14];
-		controller.i2cRead(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
+		controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
 		// Fill the variables with the result from the read operation
 		accelX = (byte) readbuffer[0] << 8 | readbuffer[1] & 0xFF;
 		accelY = (byte) readbuffer[2] << 8 | readbuffer[3] & 0xFF;
@@ -5061,7 +5063,7 @@ public class Mpu6050 extends Service {
 	 */
 	int I2CdevReadWords(int devAddr, int regAddr, int length, int[] data) {
 		byte bytebuffer[] = new byte[length * 2];
-		controller.i2cRead(Integer.parseInt(deviceBus), devAddr, bytebuffer, bytebuffer.length);
+		controller.i2cRead(this, Integer.parseInt(deviceBus), devAddr, bytebuffer, bytebuffer.length);
 		for (int i = 0; i < bytebuffer.length; i++) {
 			data[i] = bytebuffer[i * 2] << 8 + bytebuffer[i * 2 + 1] & 0xff;
 		}
@@ -5085,8 +5087,8 @@ public class Mpu6050 extends Service {
 	int I2CdevReadBytes(int devAddr, int regAddr, int length, int[] data) {
 		byte[] writebuffer = new byte[] { (byte) (regAddr & 0xff) };
 		byte[] readbuffer = new byte[length];
-		controller.i2cWrite(Integer.parseInt(deviceBus), devAddr, writebuffer, writebuffer.length);
-		controller.i2cRead(Integer.parseInt(deviceBus), devAddr, readbuffer, readbuffer.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), devAddr, writebuffer, writebuffer.length);
+		controller.i2cRead(this, Integer.parseInt(deviceBus), devAddr, readbuffer, readbuffer.length);
 		for (int i = 0; i < length; i++) {
 			data[i] = readbuffer[i] & 0xff;
 		}
@@ -5223,7 +5225,7 @@ public class Mpu6050 extends Service {
 		for (int i = 0; i < length; i++) {
 			writebuffer[i + 1] = (byte) (data[i] & 0xff);
 		}
-		controller.i2cWrite(Integer.parseInt(deviceBus), devAddr, writebuffer, writebuffer.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), devAddr, writebuffer, writebuffer.length);
 		return true;
 	}
 
@@ -5235,7 +5237,7 @@ public class Mpu6050 extends Service {
 			writebuffer[i * 2 + 1] = (byte) (data[i] << 8); // MSByte
 			writebuffer[i * 2 + 2] = (byte) (data[i] & 0xff); // LSByte
 		}
-		controller.i2cWrite(Integer.parseInt(deviceBus), devAddr, writebuffer, writebuffer.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), devAddr, writebuffer, writebuffer.length);
 		return true;
 	}
 
@@ -5258,6 +5260,18 @@ public class Mpu6050 extends Service {
 		meta.addCategory("microcontroller", "sensor");
 		meta.setSponsor("Mats");
 		return meta;
+	}
+
+	@Override
+	public Integer getDeviceType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setController(DeviceController controller) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -83,6 +83,7 @@ import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
@@ -161,7 +162,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class Arduino extends Service implements Microcontroller, I2CControl, SerialDataListener, ServoController, MotorController, SensorDataPublisher, DeviceController {
+public class Arduino extends Service implements Microcontroller, I2CController, SerialDataListener, ServoController, MotorController, SensorDataPublisher, DeviceController {
 
 	public static class Sketch implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -283,7 +284,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public static class I2CDeviceMap {
 		public int busAddress;
 		public int deviceAddress;
-		public String serviceName;
+		public I2CControl control;
 	}
 	
 	/**
@@ -341,6 +342,43 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	 * The business logic of driving the NeoPixel with serial commands would be in the NeoPixel service.
 	 * 
 	 *  GroG
+	 *  
+	 *  Comments on the above from Mats
+	 *  Hi GroG. 
+	 *  
+	 *  Thanks for writing and explaining about the responsibilities for the different interfaces. 
+	 *  I understand now that I have made a mistake when implementing I2CControl in RasPi, Ardino and I2cMux.
+	 *  They all should implement I2CController
+	 *  The services for i2c devices like Adafruit16CServoDriver, AdafruitIna219, I2cMux and Mpu6050 should implement I2CControl.
+	 *  I will rework that so that everything follows the same pattern. 
+	 *  
+	 *  About using the deviceList. 
+	 *  My understanding was/is that adding a device to the devicelist also would create a corresponding device in MRLComm.
+	 *  Since a single i2c bus may contain as many as 127 addressable devices that would potentially use a lot of memory in MRLComm.
+	 *  So I want to create a new device that represents a single I2CBus and that device should be added to the devicelist and also be created in
+	 *  MRLComm. 
+	 *  That is the reason that I also created a new i2cDevices list to keep track of the different i2c devices.
+	 *  
+	 *  If we can add the i2c devices to the devicelist without creating a device in MRLComm, then that's perhaps a better way.
+	 *  In that case we still need a i2cbus device that will be a MrlI2CDevice object.
+	 *  To make it clear what it actually represents, I would like to rename it to MrlI2cBus. 
+	 *  
+	 *  About I2CDeviceMap.
+	 *  If we can add the i2c devices to the devicelist without creating a device in MRLComm then I2CDeviceMap isn't needed at all
+	 *  in this Arduino service. So that's one option that needs to be explored / discussed.
+	 *  
+	 *  If that's not possible, then an other option is to keep the i2cDevices list using I2CDeviceMap.
+	 *  I tried to use the same definition of it in both RasPi and Arduino.
+	 *  However the I2CDeviceMap in RasPi is based on definitions in pi4j. 
+	 *  In the RasPi service both I2CBus and I2CDevice are objects defined in pi4j.
+	 *  So I redefined I2CDeviceMap in this Arduino service to only use Strings, not objects.
+	 *  They are not the same in this service and RasPi even if they share the same names.
+	 *  
+	 *  The third option is to keep the i2cDevices list but use DeviceMapping.
+	 *  
+	 *  I hope that I have been able to explain what I have done and the reasons for it. 
+	 *  So what way do you think is the best? Other people are also welcome to express their opinions.   
+	 *   
 	 * </pre>
 	 */
 	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
@@ -1915,7 +1953,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	@Override
-	public void createI2cDevice(int busAddress, int deviceAddress, String serviceName) {
+	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
 		// TODO Auto-generated method stub - I2C
 		// Create the i2c bus device in MRLComm the first time this method is invoked.
 		// Add the i2c device to the list of i2cDevices
@@ -1931,16 +1969,16 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		I2CDeviceMap devicedata = new I2CDeviceMap();
 		if (i2cDevices.containsKey(key)) {
-			log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, serviceName));
+			log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, control.getName()));
 		} else
 			devicedata.busAddress = busAddress;
 		  devicedata.deviceAddress = deviceAddress;
-		  devicedata.serviceName = serviceName;
+		  devicedata.control = control;
 		  i2cDevices.put(key, devicedata);
 	}
 
 	@Override
-	public void releaseI2cDevice(int busAddress, int deviceAddress) {
+	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
 		// TODO Auto-generated method stub
 		// This method should delete the i2c device entry from the list of
 		// I2CDevices
@@ -1954,7 +1992,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	@Override
-	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
+	public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		int msgBuffer[] = new int[size + 1];
 		msgBuffer[0] = deviceAddress;
 		for (int i = 0; i < size; i++) {
@@ -1964,7 +2002,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	@Override
-	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
+	public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		// Get the device index to the MRL i2c bus so that it can be added to
 		// the I2C_READ
 		// int deviceIndex = 1; // Change this to get the the deviceinex using
@@ -1994,12 +2032,6 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		}
 		// Time out, no data returned
 		return -1;
-	}
-
-	@Override
-	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	public void setDebug(boolean b) {
@@ -2061,6 +2093,12 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public Integer getPin(Servo servo) {
 		Object[] config = deviceList.get(servo.getName()).getConfig();
 		return (Integer)config[0];
+	}
+
+	@Override
+	public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }
