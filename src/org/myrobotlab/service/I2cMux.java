@@ -10,7 +10,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -26,13 +29,13 @@ import org.slf4j.Logger;
  * More Info : https://www.adafruit.com/product/2717
  * 
  */
-public class I2cMux extends Service implements I2CControl {
+public class I2cMux extends Service implements I2CControl, I2CController {
 
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(I2cMux.class.getCanonicalName());
 
-	transient I2CControl controller;
+	transient I2CController controller;
 
 	public ArrayList<String> controllers = new ArrayList<String>();
 	public String controllerName;
@@ -73,7 +76,7 @@ public class I2cMux extends Service implements I2CControl {
 
    public void refreshControllers() {
   	 
-  	controllers = Runtime.getServiceNamesFromInterface(I2CControl.class);
+  	controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
 		controllers.remove(this.getName());
 		
 		broadcastState();
@@ -89,8 +92,9 @@ public class I2cMux extends Service implements I2CControl {
 		broadcastState();
   }
 
-	public void createI2cDevice(int busAddress, int deviceAddress, String serviceName) {
-				controller.createI2cDevice(busAddress, deviceAddress, this.getName());
+	public void createI2cDevice(I2CController controller, int busAddress, int deviceAddress) {
+		// TODO Create a devicelist to be able to pass reads back
+		controller.createI2cDevice(this, busAddress, deviceAddress);
 	}
 	
 	/**
@@ -99,21 +103,21 @@ public class I2cMux extends Service implements I2CControl {
 	 */
 	// @Override
 	public boolean setController(String controllerName, String deviceBus, String deviceAddress) {
-		return setController((I2CControl) Runtime.getService(controllerName), deviceBus, deviceAddress);
+		return setController((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
 	}
 
 	public boolean setController(String controllerName) {
-		return setController((I2CControl) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
+		return setController((I2CController) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
 	}
 	
-	public boolean setController(I2CControl controller) {
+	public boolean setController(I2CController controller) {
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
 	 */
-	public boolean setController(I2CControl controller, String deviceBus, String deviceAddress) {
+	public boolean setController(I2CController controller, String deviceBus, String deviceAddress) {
 		if (controller == null) {
 			error("setting null as controller");
 			return false;
@@ -139,7 +143,7 @@ public class I2cMux extends Service implements I2CControl {
 		broadcastState();
 	}
 
-	public I2CControl getController() {
+	public I2CController getController() {
 		return controller;
 	}
 
@@ -159,23 +163,23 @@ public class I2cMux extends Service implements I2CControl {
 	}
 
 	@Override
-	public void releaseI2cDevice(int busAddress, int deviceAddress) {
-			controller.releaseI2cDevice(busAddress, deviceAddress);
+	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
+			controller.releaseI2cDevice(this, busAddress, deviceAddress);
 	}
 
 	public void setMuxBus(int deviceBus) {
 		byte bus[] = new byte[1];
 		bus[0] = (byte) (1 << deviceBus);
-		controller.i2cWrite(Integer.parseInt(this.deviceBus), Integer.decode(this.deviceAddress), bus, bus.length);
+		controller.i2cWrite(this, Integer.parseInt(this.deviceBus), Integer.decode(this.deviceAddress), bus, bus.length);
 		;
 	}
 	
 	@Override
-	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
+	public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		setMuxBus(busAddress);
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
-		controller.i2cWrite(Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
+		controller.i2cWrite(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
 		;
 	}
 	/**
@@ -184,9 +188,9 @@ public class I2cMux extends Service implements I2CControl {
 	 *      or asycncronus
 	 */
 	@Override
-	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
+	public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		setMuxBus(busAddress);
-		controller.i2cRead(Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
+		controller.i2cRead(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
 		return buffer.length;
 	}
 	/**
@@ -195,9 +199,9 @@ public class I2cMux extends Service implements I2CControl {
 	 *      or asycncronus
 	 */
 	@Override
-	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+	public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
 		setMuxBus(busAddress);
-		controller.i2cWriteRead(Integer.parseInt(this.deviceBus), deviceAddress, writeBuffer, writeSize, readBuffer, readSize);
+		controller.i2cWriteRead(this, Integer.parseInt(this.deviceBus), deviceAddress, writeBuffer, writeSize, readBuffer, readSize);
 		return readBuffer.length;
 	}
 
@@ -219,4 +223,32 @@ public class I2cMux extends Service implements I2CControl {
 		return meta;
 	}
 
+	@Override
+	public void attachDevice(DeviceControl device, Object... config) throws Exception {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void detachDevice(DeviceControl device) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Integer getDeviceType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setController(DeviceController controller) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
+		// TODO Auto-generated method stub
+		
+	}
 }

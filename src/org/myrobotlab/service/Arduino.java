@@ -83,6 +83,7 @@ import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
@@ -161,7 +162,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class Arduino extends Service implements Microcontroller, I2CControl, SerialDataListener, ServoController, MotorController, SensorDataPublisher, DeviceController {
+public class Arduino extends Service implements Microcontroller, I2CController, SerialDataListener, ServoController, MotorController, SensorDataPublisher, DeviceController {
 
 	public static class Sketch implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -283,7 +284,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public static class I2CDeviceMap {
 		public int busAddress;
 		public int deviceAddress;
-		public String serviceName;
+		public I2CControl control;
 	}
 	
 	/**
@@ -1952,7 +1953,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	@Override
-	public void createI2cDevice(int busAddress, int deviceAddress, String serviceName) {
+	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
 		// TODO Auto-generated method stub - I2C
 		// Create the i2c bus device in MRLComm the first time this method is invoked.
 		// Add the i2c device to the list of i2cDevices
@@ -1968,16 +1969,16 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		I2CDeviceMap devicedata = new I2CDeviceMap();
 		if (i2cDevices.containsKey(key)) {
-			log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, serviceName));
+			log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, control.getName()));
 		} else
 			devicedata.busAddress = busAddress;
 		  devicedata.deviceAddress = deviceAddress;
-		  devicedata.serviceName = serviceName;
+		  devicedata.control = control;
 		  i2cDevices.put(key, devicedata);
 	}
 
 	@Override
-	public void releaseI2cDevice(int busAddress, int deviceAddress) {
+	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
 		// TODO Auto-generated method stub
 		// This method should delete the i2c device entry from the list of
 		// I2CDevices
@@ -1991,7 +1992,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	@Override
-	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
+	public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		int msgBuffer[] = new int[size + 1];
 		msgBuffer[0] = deviceAddress;
 		for (int i = 0; i < size; i++) {
@@ -2001,7 +2002,7 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	}
 
 	@Override
-	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
+	public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		// Get the device index to the MRL i2c bus so that it can be added to
 		// the I2C_READ
 		// int deviceIndex = 1; // Change this to get the the deviceinex using
@@ -2031,12 +2032,6 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 		}
 		// Time out, no data returned
 		return -1;
-	}
-
-	@Override
-	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	public void setDebug(boolean b) {
@@ -2098,6 +2093,12 @@ public class Arduino extends Service implements Microcontroller, I2CControl, Ser
 	public Integer getPin(Servo servo) {
 		Object[] config = deviceList.get(servo.getName()).getConfig();
 		return (Integer)config[0];
+	}
+
+	@Override
+	public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }
