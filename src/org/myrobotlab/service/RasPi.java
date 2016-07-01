@@ -12,7 +12,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
 
 import com.pi4j.io.gpio.GpioController;
@@ -34,7 +37,7 @@ import com.pi4j.wiringpi.SoftPwm;
  * 
  */
 // TODO Ensure that only one instance of RasPi can execute on each RaspBerry PI
-public class RasPi extends Service implements I2CControl {
+public class RasPi extends Service implements I2CController {
 
 	public static class I2CDeviceMap {
 		public I2CBus bus;
@@ -127,7 +130,8 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	// FIXME - create low level I2CDevice
-	public void createI2cDevice(int busAddress, int deviceAddress, String serviceName) {
+	@Override
+	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
 
 		try {
 			I2CDevice device = i2c.getDevice(deviceAddress);
@@ -136,11 +140,11 @@ public class RasPi extends Service implements I2CControl {
 
 			I2CDeviceMap devicedata = new I2CDeviceMap();
 			if (i2cDevices.containsKey(key)) {
-				log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, serviceName));
+				log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, control.getName()));
 			} else
 				devicedata.bus = bus;
 			  devicedata.device = device;
-			  devicedata.serviceName = serviceName;
+			  devicedata.serviceName = control.getName();
 			  i2cDevices.put(key, devicedata);
 
 			// PCF8574GpioProvider pcf = new PCF8574GpioProvider(busAddress,
@@ -169,7 +173,7 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	@Override
-	public void releaseI2cDevice(int busAddress, int deviceAddress) {
+	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
 
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		i2cDevices.remove(key);
@@ -248,7 +252,7 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	@Override
-	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
+	public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
 		I2CDeviceMap devicedata = i2cDevices.get(key);
@@ -262,7 +266,7 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	@Override
-	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
+	public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		log.debug(String.format("i2cRead busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
 		I2CDeviceMap devicedata = i2cDevices.get(key);
@@ -277,7 +281,7 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	@Override
-	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+	public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		I2CDeviceMap devicedata = i2cDevices.get(key);
 		try {
@@ -306,6 +310,18 @@ public class RasPi extends Service implements I2CControl {
     meta.setSponsor("Mats");
 		meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
 		return meta;
+	}
+
+	@Override
+	public void attachDevice(DeviceControl device, Object... config) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void detachDevice(DeviceControl device) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

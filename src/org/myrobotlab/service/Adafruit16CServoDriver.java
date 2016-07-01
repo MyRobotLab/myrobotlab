@@ -20,7 +20,9 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
@@ -34,7 +36,7 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
 
-public class Adafruit16CServoDriver extends Service implements ServoController {
+public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController {
 	/** version of the library */
 	static public final String VERSION = "0.9";
 
@@ -50,7 +52,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	public final static int SERVOMAX = 600; // this is the 'maximum' pulse
 	// length count (out of 4096)
 
-	transient public I2CControl controller;
+	transient public I2CController controller;
 
 	// Variable to ensure that a PWM freqency has been set before starting PWM
 	private int pwmFreq = 60;
@@ -138,7 +140,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 * Refresh the list of running services that can be selected in the GUI
 	 */
 	public ArrayList<String> refreshControllers() {
-		controllers = Runtime.getServiceNamesFromInterface(I2CControl.class);
+		controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
 		return controllers;
 	}
 
@@ -160,18 +162,18 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	 */
 	// @Override
 	public boolean setController(String controllerName, String deviceBus, String deviceAddress) {
-		return setController((I2CControl) Runtime.getService(controllerName), deviceBus, deviceAddress);
+		return setController((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
 	}
 
 	public boolean setController(String controllerName) {
-		return setController((I2CControl) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
+		return setController((I2CController) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
 	}
 
-	public boolean setController(I2CControl controller) {
+	public boolean setController(I2CController controller) {
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
 
-	public boolean setController(I2CControl controller, String deviceBus, String deviceAddress) {
+	public boolean setController(I2CController controller, String deviceBus, String deviceAddress) {
 		if (controller == null) {
 			error("setting null as controller");
 			return false;
@@ -206,8 +208,8 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	boolean SetDeviceAddress(String deviceAddress) {
 		if (controller != null) {
 			if (this.deviceAddress != deviceAddress) {
-				controller.releaseI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createI2cDevice(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), this.getName());
+				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 			}
 		}
 		log.info(String.format("Setting device address to %s", deviceAddress));
@@ -218,7 +220,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	public void begin() {
 
 		byte[] buffer = { PCA9685_MODE1, 0x0 };
-		controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
 
 	// @Override
@@ -240,7 +242,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	public void setPWM(Integer pin, Integer pulseWidthOn, Integer pulseWidthOff) {
 
 		byte[] buffer = { (byte) (PCA9685_LED0_ON_L + (pin * 4)), (byte) (pulseWidthOn & 0xff), (byte) (pulseWidthOn >> 8), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
-		controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
 
 	/**
@@ -254,7 +256,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		int prescale_value = Math.round(osc_clock / precision / hz) - 1;
 		// Set sleep mode before changing PWM freqency
 		byte[] buffer1 = { PCA9685_MODE1, PCA9685_SLEEP };
-		controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer1, buffer1.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer1, buffer1.length);
 
 		// Wait 1 millisecond until the oscillator has stabilized
 		try {
@@ -267,13 +269,13 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 
 		// Write the PWM frequency value
 		byte[] buffer2 = { PCA9685_PRESCALE, (byte) prescale_value };
-		controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer2, buffer2.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer2, buffer2.length);
 
 		// Leave sleep mode, set autoincrement to be able to write several
 		// bytes
 		// in sequence
 		byte[] buffer3 = { PCA9685_MODE1, PCA9685_AUTOINCREMENT };
-		controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer3, buffer3.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer3, buffer3.length);
 
 		// Wait 1 millisecond until the oscillator has stabilized
 		try {
@@ -290,7 +292,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		// sent as 2 bytes
 		log.info(String.format("setServo %s deviceAddress %S pin %s pulse %s", pin, deviceAddress, pin, pulseWidthOff));
 		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
-		controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
 
 	public String getControllerName() {
@@ -302,10 +304,6 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		}
 
 		return controlerName;
-	}
-
-	public I2CControl getController() {
-		return controller;
 	}
 
 	@Override
@@ -342,7 +340,7 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 		log.info(String.format("servoWriteMicroseconds %s deviceAddress x%02X pin %s pulse %d", servo.getName(), deviceAddress, getPin(servo), pulseWidthOff));
 
 		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (getPin(servo) * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
-		controller.i2cWrite(Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
 
 	@Override
@@ -485,5 +483,22 @@ public class Adafruit16CServoDriver extends Service implements ServoController {
 	@Override
 	public Integer getPin(Servo servo) {
 		return servoNameToPin.get(servo.getName());
+	}
+
+	@Override
+	public Integer getDeviceType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setController(DeviceController controller) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public DeviceController getController() {
+		return controller;
 	}
 }
