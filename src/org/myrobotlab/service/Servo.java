@@ -583,7 +583,7 @@ public class Servo extends Service implements ServoControl {
 			Runtime.start("webgui", "WebGui");
 			Runtime.start("gui", "GUIService");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			arduino.connect("COM5");
+			arduino.connect("COM15");
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
 			arduino.attachDevice(servo, new int[] { 8 });
 			// servo.attach(arduino, 8);

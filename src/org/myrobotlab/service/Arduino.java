@@ -92,6 +92,7 @@ import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.NeopixelController;
 import org.slf4j.Logger;
 
 /**
@@ -162,7 +163,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class Arduino extends Service implements Microcontroller, I2CController, SerialDataListener, ServoController, MotorController, SensorDataPublisher, DeviceController {
+public class Arduino extends Service implements Microcontroller, I2CController, SerialDataListener, ServoController, MotorController, SensorDataPublisher, DeviceController, NeopixelController {
 
 	public static class Sketch implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -2101,4 +2102,14 @@ public class Arduino extends Service implements Microcontroller, I2CController, 
 		return 0;
 	}
 
+	@Override
+	public void attach(Neopixel neopixel, int numPixel, int pin){
+	  // TODO implement me
+	  attachDevice(neopixel, numPixel, pin);
+	}
+	
+	@Override
+	public void detach(Neopixel neopixel){
+	  // TODO implement me
+	  detachDevice(neopixel);	}
 }
