@@ -961,12 +961,12 @@ public class Mpu6050 extends Service implements I2CControl {
 		return controlerName;
 	}
 
-	public void SetDeviceBus(String deviceBus) {
+	public void setDeviceBus(String deviceBus) {
 		this.deviceBus = deviceBus;
 		broadcastState();
 	}
 
-	public void SetDeviceAddress(String deviceAddress) {
+	public void setDeviceAddress(String deviceAddress) {
 		this.deviceAddress = deviceAddress;
 		broadcastState();
 	}

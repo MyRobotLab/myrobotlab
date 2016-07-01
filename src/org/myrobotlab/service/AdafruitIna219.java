@@ -152,14 +152,15 @@ public class AdafruitIna219 extends Service implements I2CControl{
 		return controlerName;
 	}
 
-	public void SetDeviceBus(String deviceBus) {
+	public void setDeviceBus(String deviceBus) {
 		this.deviceBus = deviceBus;
 		broadcastState();
 	}
 
-	public void SetDeviceAddress(String deviceAddress) {
+	public boolean SetDeviceAddress(String deviceAddress) {
 		this.deviceAddress = deviceAddress;
 		broadcastState();
+		return true;
 	}
 
 	public boolean isAttached() {
@@ -169,7 +170,7 @@ public class AdafruitIna219 extends Service implements I2CControl{
 	/**
 	 * This method creates the i2c device
 	 */
-	boolean setDeviceAddress(String DeviceAddress) {
+	public void setDeviceAddress(String DeviceAddress) {
 		if (controller != null) {
 			if (deviceAddress != DeviceAddress) {
 				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
@@ -179,7 +180,6 @@ public class AdafruitIna219 extends Service implements I2CControl{
 
 		log.info(String.format("Setting device address to %s", deviceAddress));
 		this.deviceAddress = DeviceAddress;
-		return true;
 	}
 
 	/**

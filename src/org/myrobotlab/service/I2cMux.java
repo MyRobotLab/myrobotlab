@@ -82,19 +82,20 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 		broadcastState();
 	}
 	
- 	public void SetDeviceBus(String deviceBus){
+ 	public void setDeviceBus(String deviceBus){
 		this.deviceBus = deviceBus;
 		broadcastState();
   }
 	
-	public void SetDeviceAddress(String deviceAddress){
+	public void setDeviceAddress(String deviceAddress){
 		this.deviceAddress = deviceAddress;
 		broadcastState();
   }
 
-	public void createI2cDevice(I2CController controller, int busAddress, int deviceAddress) {
+	@Override
+	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
 		// TODO Create a devicelist to be able to pass reads back
-		controller.createI2cDevice(this, busAddress, deviceAddress);
+		controller.createI2cDevice((I2CControl) this, busAddress, deviceAddress);
 	}
 	
 	/**
@@ -242,13 +243,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 	@Override
 	public void setController(DeviceController controller) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub		
 	}
 
-	@Override
-	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
-		// TODO Auto-generated method stub
-		
-	}
 }

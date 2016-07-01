@@ -380,6 +380,16 @@ public class Arduino extends Service implements Microcontroller, I2CController, 
 	 *  I hope that I have been able to explain what I have done and the reasons for it. 
 	 *  So what way do you think is the best? Other people are also welcome to express their opinions.   
 	 *   
+	 *  About I2CControl. 
+	 *  Since I2CControl should be the methods on the high level, I don't think that 
+	 *  the low level I2CController methods should be replicated.
+	 *  It's one thing to use the I2CController method calls, something completley 
+	 *  different to implement them. 
+	 *  For example Adafruit16CServoController and Mpu6050 use the methods in the 
+	 *  I2CController interfave.
+	 *  Ardino and RasPi implements it.
+	 *  So I agree on the methods in I2CController to 100%, but not at all on the 
+	 *  I2CControl methods that you suggested.
 	 * </pre>
 	 */
 	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
