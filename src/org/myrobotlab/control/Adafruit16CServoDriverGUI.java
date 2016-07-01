@@ -109,7 +109,7 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 			public void run() {
 				removeListeners();
 				refreshControllers();
-				controller.setSelectedItem(driver.getControllerName());
+				controller.setSelectedItem(driver.controller.getName());
 				deviceBusList.setSelectedItem(boundService.deviceBus);
 				deviceAddressList.setSelectedItem(boundService.deviceAddress);
 				if (driver.isControllerSet) {
@@ -182,7 +182,7 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 				for (int i = 0; i < v.size(); ++i) {
 					controller.addItem(v.get(i));
 				}
-				controller.setSelectedItem(boundService.getControllerName());
+				controller.setSelectedItem(boundService.controller.getName());
 			}
 		});
 	}

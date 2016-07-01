@@ -200,12 +200,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		broadcastState();
 	}
 
-	public void SetDeviceBus(String deviceBus) {
+	@Override
+	public void setDeviceBus(String deviceBus) {
 		this.deviceBus = deviceBus;
 		broadcastState();
 	}
 
-	boolean SetDeviceAddress(String deviceAddress) {
+	public boolean SetDeviceAddress(String deviceAddress) {
 		if (controller != null) {
 			if (this.deviceAddress != deviceAddress) {
 				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
@@ -226,10 +227,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	// @Override
 	public boolean isAttached() {
 		return isAttached;
-	}
-
-	public void setDeviceAddress(String DeviceAddress) {
-		this.deviceAddress = DeviceAddress;
 	}
 
 	/**
@@ -293,17 +290,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		log.info(String.format("setServo %s deviceAddress %S pin %s pulse %s", pin, deviceAddress, pin, pulseWidthOff));
 		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
-	}
-
-	public String getControllerName() {
-
-		String controlerName = null;
-
-		if (controller != null) {
-			controlerName = controller.getName();
-		}
-
-		return controlerName;
 	}
 
 	@Override
@@ -500,5 +486,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	@Override
 	public DeviceController getController() {
 		return controller;
+	}
+
+	@Override
+	public void setDeviceAddress(String deviceAddress) {
+		// TODO Auto-generated method stub
+		
 	}
 }
