@@ -1,6 +1,6 @@
-LEAH:Princess Leia Organa
-JABBA:Jabba the Hut
 LUKE:Luke Skywalker
 3PO:C-3PO
-PRINCESS LEAH:Princess Leia Organa
+LEAH:Princess Leia Organa
 HAN:Han Solo
+JABBA:Jabba the Hut
+PRINCESS LEAH:Princess Leia Organa
