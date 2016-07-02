@@ -1972,7 +1972,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		// the i2c bus here and in MRLComm
 		// This will only handle the creation of i2cBus.
 		I2CBusControl i2cBus = (I2CBusControl)this; 
-		attachDevice(i2cBus, busAddress);
+		attachDevice(i2cBus, DEVICE_TYPE_I2C, busAddress);
 
 		// This part adds the service to the mapping between
 		// busAddress||DeviceAddress
@@ -2005,6 +2005,14 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	}
 
 	@Override
+	public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+		// TODO Auto-generated method stub
+		i2cWrite(control, busAddress, deviceAddress, writeBuffer, writeSize);
+		i2cRead(control, busAddress, deviceAddress, readBuffer, readSize);
+		return readSize;
+	}
+	
+	@Override
 	public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		int msgBuffer[] = new int[size + 1];
 		msgBuffer[0] = deviceAddress;
@@ -2013,7 +2021,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		}
 		sendMsg(I2C_WRITE, msgBuffer);
 	}
-
+	
 	@Override
 	public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		// Get the device index to the MRL i2c bus so that it can be added to
@@ -2021,6 +2029,9 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		// int deviceIndex = 1; // Change this to get the the deviceinex using
 		// SensorDataListener sensor = (SensorDataListener) deviceIndex.get(id);
 		// sendMsg(I2C_READ, deviceIndex, deviceAddress, size);
+		int deviceIndex = 0; // Get the deviceIndex to the I2CBus 
+		int msgBuffer[] = new int[]{deviceIndex, deviceAddress, size, buffer[size]}; 
+		sendMsg(I2C_READ, msgBuffer);
 		int retry = 0;
 		int retryMax = 1000;
 		try {
@@ -2107,17 +2118,12 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		Object[] config = deviceList.get(servo.getName()).getConfig();
 		return (Integer) config[0];
 	}
-
-	@Override
-	public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 	
 	/** 
 	 * DeviceControl methods. In this case they represents the I2CBusControl
-	 * Not sure if this is a good way to use the Arduino as a DeviceControl
-	 * Exploring different alternatives. 
+	 * Not sure if this is good to use the Arduino as an I2CBusControl
+	 * Exploring different alternatives. I may have to rethink.
+	 * Alternate solutions are welcome. /Mats.
 	 */
 	@Override
 	public Integer getDeviceType() {
@@ -2127,12 +2133,12 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	@Override
 	public void setController(DeviceController controller) {
 		// TODO Auto-generated method stub
+		// Not sure what to do here. I don't want to create an infinite loop
 	}
 
 	@Override
 	public DeviceController getController() {
-		// TODO Auto-generated method stub
-		return null;
+		return this;
 	}
 
 }
