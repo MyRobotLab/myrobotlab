@@ -237,13 +237,12 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 	@Override
 	public Integer getDeviceType() {
-		// TODO Auto-generated method stub
-		return null;
+		return DeviceControl.DEVICE_TYPE_I2C;
 	}
 
 	@Override
 	public void setController(DeviceController controller) {
-		// TODO Auto-generated method stub		
+		setController(controller);	
 	}
 
 }

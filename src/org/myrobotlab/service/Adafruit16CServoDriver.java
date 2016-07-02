@@ -111,7 +111,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	/**
 	 * @Mats - added by GroG - was wondering if this would help, probably you need
 	 *       a reverse index too ?
-	 * @GroG - I only need servoNameToPin 
+	 * @GroG - I only need servoNameToPin
 	 */
 	HashMap<String, Integer> servoNameToPin = new HashMap<String, Integer>();
 
@@ -169,8 +169,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		return setController((I2CController) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
 	}
 
+	@Override
 	public boolean setController(I2CController controller) {
 		return setController(controller, this.deviceBus, this.deviceAddress);
+	}
+
+	@Override
+	public void setController(DeviceController controller) {
+		setController(controller);
 	}
 
 	public boolean setController(I2CController controller, String deviceBus, String deviceAddress) {
@@ -206,7 +212,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		broadcastState();
 	}
 
-	public boolean SetDeviceAddress(String deviceAddress) {
+	@Override
+	public void setDeviceAddress(String deviceAddress) {
 		if (controller != null) {
 			if (this.deviceAddress != deviceAddress) {
 				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
@@ -215,7 +222,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		}
 		log.info(String.format("Setting device address to %s", deviceAddress));
 		this.deviceAddress = deviceAddress;
-		return true;
 	}
 
 	public void begin() {
@@ -364,18 +370,20 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	/**
-	 * THESE ARE SERVO COMMANDS !  NOT REQUEST
-	 * TO ATTACH OR DETACH THE SERVO AS A DEVICE !!!
+	 * THESE ARE SERVO COMMANDS ! NOT REQUEST TO ATTACH OR DETACH THE SERVO AS A
+	 * DEVICE !!!
 	 */
 	@Override
 	public void servoAttach(Servo servo, int pin) {
 		// TODO Implement something ? Or not ?
 		// Grog says,
-		// this is a (possibly an Arduino specific method call) which energizes a servo
+		// this is a (possibly an Arduino specific method call) which energizes a
+		// servo
 		// with a new pin equivalent to the Arduino's Servo.attach(int) - different
-		// from the low level concept of connecting a generalized device to this controller
+		// from the low level concept of connecting a generalized device to this
+		// controller
 	}
-	
+
 	/**
 	 * Stop sending pulses to the servo, relax
 	 */
@@ -391,18 +399,22 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		// Commented out. Can't have any Ardino specific methods here. /Mats
 		// arduino.attachDevice(device, config);
 		// @Grog. What is this methods expected to do here.
-		
+
 		// Grog says,
 		// The method is a low level call for a DeviceController to attach a Device
-		// you may pass any necessary config in order to properly initialize a device.
-		// If your Controller supports controlling multiple types of devices - for example,
-		// DynamixelServos & Servos - this method would be all where all the "common" logic
+		// you may pass any necessary config in order to properly initialize a
+		// device.
+		// If your Controller supports controlling multiple types of devices - for
+		// example,
+		// DynamixelServos & Servos - this method would be all where all the
+		// "common" logic
 		// to attach a device to its controller would be shared ..
 		//
 		// you can look at Arduino.attachDevice as an example...
-		// Arduino will need to support multiple DeviceControllers in addition to multiple Devices to control
+		// Arduino will need to support multiple DeviceControllers in addition to
+		// multiple Devices to control
 		// the common logic for all of them run through attachDevice
-		
+
 	}
 
 	@Override
@@ -417,7 +429,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * Servo.attach/detach like Arduino <Servo.h> does. I would think it does,
 	 * this really means go and stay at a position, vs power off to the servo
 	 */
-
 
 	/**
 	 * Device attach - this should be creating the I2C device on MRLComm for the
@@ -445,20 +456,19 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	@Override
 	public void attach(Servo servo, int pin) {
 
-			if (servo == null) {
-				error("trying to attach null servo");
-			}
+		if (servo == null) {
+			error("trying to attach null servo");
+		}
 
-			servo.setController(this);
-			servoNameToPin.put(servo.getName(), pin);
-			isAttached = true;
+		servo.setController(this);
+		servoNameToPin.put(servo.getName(), pin);
+		isAttached = true;
 	}
 
-
-  /**
-   * Complete detach. Stop sending pulses to the servo
-   * and remove it from the list of servos
-   */
+	/**
+	 * Complete detach. Stop sending pulses to the servo and remove it from the
+	 * list of servos
+	 */
 	@Override
 	public void detach(Servo servo) {
 		servoDetach(servo);
@@ -472,25 +482,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	@Override
-	public Integer getDeviceType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setController(DeviceController controller) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public DeviceController getController() {
 		return controller;
 	}
 
 	@Override
-	public void setDeviceAddress(String deviceAddress) {
-		// TODO Auto-generated method stub
-		
+	public Integer getDeviceType() {
+		return DeviceControl.DEVICE_TYPE_I2C;
 	}
+
 }

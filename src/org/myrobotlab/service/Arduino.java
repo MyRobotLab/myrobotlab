@@ -386,11 +386,15 @@ public class Arduino extends Service implements Microcontroller, I2CController, 
 	 *  the low level I2CController methods should be replicated.
 	 *  It's one thing to use the I2CController method calls, something completley 
 	 *  different to implement them. 
-	 *  For example Adafruit16CServoController and Mpu6050 use the methods in the 
-	 *  I2CController interfave.
-	 *  Ardino and RasPi implements it.
-	 *  So I agree on the methods in I2CController to 100%, but not at all on the 
-	 *  I2CControl methods that you suggested.
+	 *  For example Arduino and RasPi implements the methods defined in the I2CController interface.
+	 *  Adafruit16CServoController and Mpu6050 use the methods in the I2CController interface.
+	 *  So I agree on the methods in I2CController, but not on the I2CControl methods that you suggested. 
+	 *  For example, I don't want a Python script create an Adafruit16CServoDriver and then
+	 *  use Adafruit16CServoDriver.i2cWrite(...) to directly make i2c reads and writes. 
+	 *  That would be really strange. 
+	 *  I'm fine with a Python script using Arduino or RasPi to do i2c reads and writes since it
+	 *  is defined in the I2CController interface.
+	 *  
 	 * </pre>
 	 */
 	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
