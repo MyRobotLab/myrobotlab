@@ -235,6 +235,7 @@ public class Arduino extends Service implements Microcontroller, I2CController, 
 	public transient static final int BOARD_TYPE_ID_UNO = 2;
 	// temporary
 	public final static int PUBLISH_BOARD_INFO = 71;
+	public final static int NEOPIXEL_WRITE_MATRIX = 72;
 	/**
 	 * board type - UNO Mega etc..
 	 */
@@ -2114,12 +2115,25 @@ public class Arduino extends Service implements Microcontroller, I2CController, 
 
 	@Override
 	public void attach(Neopixel neopixel, int numPixel, int pin){
-	  // TODO implement me
 	  attachDevice(neopixel, numPixel, pin);
 	}
 	
 	@Override
 	public void detach(Neopixel neopixel){
 	  // TODO implement me
-	  detachDevice(neopixel);	}
+	  detachDevice(neopixel);	
+	}
+	
+	@Override
+	public void neopixelWriteMatrix(Neopixel neopixel, List<Integer> msg){
+	  int id=getDeviceId(neopixel);
+	  int[] buffer = new int[msg.size()+2];
+	  buffer[0]=id;
+	  buffer[1]=msg.size();
+	  for (int i=0; i<msg.size(); i++){
+	    buffer[i+2]=msg.get(i);
+	  }
+	  sendMsg(NEOPIXEL_WRITE_MATRIX,buffer);
+	}
+	
 }

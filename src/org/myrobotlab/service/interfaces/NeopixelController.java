@@ -25,6 +25,8 @@
 
 package org.myrobotlab.service.interfaces;
 
+import java.util.List;
+
 import org.myrobotlab.service.Neopixel;
 
 public interface NeopixelController extends DeviceController {
@@ -43,6 +45,7 @@ public interface NeopixelController extends DeviceController {
    * @param neopixel
    */
   public void detach(Neopixel neopixel);
-
+  
+  public void neopixelWriteMatrix(Neopixel neopixel, List<Integer> msg);
   
 }
