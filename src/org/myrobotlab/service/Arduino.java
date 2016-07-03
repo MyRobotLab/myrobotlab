@@ -93,6 +93,7 @@ import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.NeopixelController;
 import org.slf4j.Logger;
 
 /**
@@ -163,7 +164,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class Arduino extends Service implements Microcontroller, I2CBusControl, I2CController, SerialDataListener, ServoController, MotorController, SensorDataPublisher, DeviceController {
+public class Arduino extends Service implements Microcontroller, I2CBusControl, I2CController, SerialDataListener, ServoController, MotorController, SensorDataPublisher, DeviceController, NeopixelController {
 
 	public static class Sketch implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -233,6 +234,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	public transient static final int BOARD_TYPE_ID_UNO = 2;
 	// temporary
 	public final static int PUBLISH_BOARD_INFO = 71;
+	public final static int NEOPIXEL_WRITE_MATRIX = 72;
 	/**
 	 * board type - UNO Mega etc..
 	 */
@@ -1055,7 +1057,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 			}
 			log.info("Board type returned by Arduino: {}", boardName);
 			log.info("Board type currently set: {}", board);
-			if (board == "" && boardId != BOARD_TYPE_ID_UNKNOWN) {
+			if (boardId != BOARD_TYPE_ID_UNKNOWN) {
 				setBoard(boardName);
 				log.info("Board type set to: {}", board);
 			} else {
@@ -2141,4 +2143,32 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		return this;
 	}
 
+	@Override
+	public void attach(Neopixel neopixel, int numPixel, int pin){
+	  attachDevice(neopixel, numPixel, pin);
+	}
+	
+	@Override
+	public void detach(Neopixel neopixel){
+	  // TODO implement me
+	  detachDevice(neopixel);	
+	}
+	
+	@Override
+	public void neopixelWriteMatrix(Neopixel neopixel, List<Integer> msg){
+	  int id=getDeviceId(neopixel);
+	  int[] buffer = new int[msg.size()+2];
+	  buffer[0]=id;
+	  buffer[1]=msg.size();
+	  for (int i=0; i<msg.size(); i++){
+	    buffer[i+2]=msg.get(i);
+	  }
+	  sendMsg(NEOPIXEL_WRITE_MATRIX,buffer);
+	}
+	
+  @Override
+  public Object[] getConfig(DeviceControl device) {
+    Object[] config = deviceList.get(device.getName()).getConfig();
+    return config;
+  }	
 }
