@@ -91,7 +91,7 @@ public class Neopixel extends Service implements NeopixelControl{
   
   public Neopixel(String n) {
     super(n);
-    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered" );
   }
 
   public void onRegistered(ServiceInterface s) {
