@@ -115,6 +115,7 @@ public class OpenCVData implements Serializable {
   private String displayFilterName = INPUT_KEY;
   private long timestamp;
   private int frameIndex;
+  private int eyesDifference;
 
   static BufferedImage deepCopy(BufferedImage bi) {
     ColorModel cm = bi.getColorModel();
@@ -390,6 +391,10 @@ public class OpenCVData implements Serializable {
   public long getTimestamp() {
     return timestamp;
   }
+  
+  public int getEyesDifference() {
+	    return eyesDifference;
+	  }
 
   public int getWidth() {
     return getImage().width();
@@ -548,6 +553,10 @@ public class OpenCVData implements Serializable {
   public void setSelectedFilterName(String name) {
     this.selectedFilter = name;
   }
+  
+  public void setEyesDifference(int difference) {
+	    this.eyesDifference = difference;
+	  }
 
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
