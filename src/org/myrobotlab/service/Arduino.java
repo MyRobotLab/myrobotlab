@@ -2165,6 +2165,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	  }
 	  sendMsg(NEOPIXEL_WRITE_MATRIX,buffer);
 	}
+	
   @Override
   public Object[] getConfig(DeviceControl device) {
     Object[] config = deviceList.get(device.getName()).getConfig();

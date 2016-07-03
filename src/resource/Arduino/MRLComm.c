@@ -121,6 +121,7 @@ public:
 // Initialize LinkedList with false values
 template<typename T>
 LinkedList<T>::LinkedList() {
+  // TODO: this causes a warning in the arduino compiler
   root=false;
   last=false;
   _size=0;
@@ -138,6 +139,7 @@ LinkedList<T>::~LinkedList() {
     root=root->next;
     delete tmp;
   }
+  // TODO: avoid the warning in the arduino compiler here.
   last = false;
   _size=0;
   isCached = false;
@@ -326,7 +328,7 @@ void LinkedList<T>::clear() {
 *   Second rule of generate club is , to complete the mission, this file must/should go away...  
 *   It should be generated, completely.  device subclasses, #defines and all..  muahahahhah! project mayhem...
 * 
-*   Third rule of generate club is, if something has not code and isn't used, remove it. If it has code, move the code.
+*   Third rule of generate club is, if something has no code and isn't used, remove it. If it has code, move the code.
 * 
 */
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE BEGIN -----------
@@ -348,7 +350,7 @@ void LinkedList<T>::clear() {
 // {attachDevice DeviceControl Object[]}
 #define ATTACH_DEVICE		8
 // {createI2cDevice int int String}
-#define CREATE_I2C_DEVICE		9
+#define CREATE_I2C_BUS		9
 // {detachDevice DeviceControl}
 #define DETACH_DEVICE		10
 // {digitalReadPollingStart Integer Integer}
@@ -449,8 +451,6 @@ void LinkedList<T>::clear() {
 
 
 // TODO: Move these into ArduinoMsgCodec  and re-generate ...
-//temporary #define This is duplicate defined as 70 and 15..
-#define GET_BOARD_INFO 70
 #define PUBLISH_BOARD_INFO 71
 #define NEOPIXEL_WRITE_MATRIX 72
 ///// INO GENERATED DEFINITION END //////
@@ -586,6 +586,7 @@ class Pin {
 class Device {
   public:
     // TODO: consider making this Device(int deviceType, int[] config) so the device always has a handle to it's original config.
+    // GroG - agreed
     Device(int deviceType) {
       type = deviceType;
     }
@@ -595,6 +596,8 @@ class Device {
     int id; // the all important id of the sensor - equivalent to the "name" - used in callbacks
     int type; // what type of device is this?
     int state; // state - single at the moment to handle all the finite states of the sensors (todo maybe this moves into the subclasses?)
+    // GroG - I think its good here - a uniform state description across all devices is if they are DEVICE_STATE_ACTIVE or DEVICE_STATE_DEACTIVE
+    // subclasses can/should define their os substate - eg ULTRASONIC_STATE_WAITING_PULSE etc..
     virtual void update(unsigned long loopCount) {}; // all devices must implement this to update their state.
 };
 
@@ -740,11 +743,16 @@ class MrlMotor : public Device {
       // TODO: implement classes or custom control for different motor controller types
       // usually they require 2 PWM pins, direction & speed...  sometimes the logic is a
       // little different to drive it.
+      // GroG: 3 Motor Types so far - probably a single MrlMotor could handle it
+      // they are MotorDualPwm MotorSimpleH and MotorPulse
+      // Stepper should be its own MrlStepper
     }
     void update(unsigned long loopCount) {
       // we should update the pwm values for the control of the motor device  here
       // this is potentially where the hardware specific logic could go for various motor controllers
       // L298N vs IBT2 vs other...  maybe consider a subclass for the type of motor-controller.
+      // GroG : All motor controller I know of which can be driven by the Arduino fall in the
+      // MotorDualPwm MotorSimpleH and MotorPulse - categories
     }
 };
 
@@ -841,6 +849,7 @@ class MrlDigitalPinArray : public Device {
 
 /**
  * Pulse Sensor Device
+ * TODO: add a description about this device! How does it work? What is it?
  */
 class MrlPulse : public Device {
   public:
@@ -909,6 +918,8 @@ class MrlPulse : public Device {
 
 /**
  * Ultrasonic Sensor
+ * TODO: add a description about this device, what is it? what does it do?
+ * How does it work?
  */
 class MrlUltrasonic : public Device {
   public:
@@ -993,21 +1004,35 @@ class MrlUltrasonic : public Device {
 };
 
 /**
- * I2C device
+ * I2C bus
+ * TODO:KW? don't allow this class to write directly to the global serial port
+ * device classes shouldn't have a direct handle to the serial port, rather have
+ * a mrlmessage class that it returns.
+ * TODO: Mats
+ * The I2CBus device represents one I2C bus. 
+ * It's the SDA (data line) and SCL pins (clock line) that is used to 
+ * communicate with any device that uses the i2c protocol on that bus.
+ * It is NOT a representation of the addressable i2c devices, just the bus
+ * On Arduino Uno that's pins A4 and A5, Mega 20 and 21, Leonardo 2 and 3, 
+ * The pin assignment is defined in Wire.h so it will change to the correct 
+ * pins at compile time. We don't have to worry here.
+ * However some other i2c implementations exist's so that more pins can be used
+ * for i2c communication. That is not supported here yet.
+ * 
  */
-class MrlI2CDevice : public Device {
+class MrlI2CBus : public Device {
   public:
-    MrlI2CDevice() : Device(DEVICE_TYPE_I2C) {
+    MrlI2CBus() : Device(DEVICE_TYPE_I2C) {
       if (TWCR == 0) { //// do this check so that Wire only gets initialized once
         WIRE.begin();
       }
     }
 
     // I2CREAD | DEVICE_INDEX | I2CADDRESS | DATA_SIZE
-    // PUBLISH_SENSOR_DATA | DEVICE_INDEX | DATA_SIZE | I2CADDRESS | DATA ....
+    // PUBLISH_SENSOR_DATA | DEVICE_INDEX | I2CADDRESS | DATA ....
     // DEVICE_INDEX = Index to the I2C bus
-    // I2CDEVICEINDEX = Index used by Arduino to return the read data to the device
-    // that requested a read
+    // I2CADDRESS = The address of the i2c device
+    // DATA_SIZE = The number of bytes to read from the i2c device
     void i2cRead(unsigned char* ioCmd) {
 
       int answer = WIRE.requestFrom((uint8_t)ioCmd[3], (uint8_t)ioCmd[4]); // reqest a number of bytes to read
@@ -1016,11 +1041,10 @@ class MrlI2CDevice : public Device {
         // Start an mrlcomm message
         Serial.write(MAGIC_NUMBER);
         // size of the mrlcomm message
-        Serial.write(4);
+        Serial.write(3);
         // mrlcomm function
         Serial.write(PUBLISH_SENSOR_DATA);
         Serial.write(ioCmd[1]); // DEVICE_INDEX
-        Serial.write(1);        // DATA_SIZE ( 1 byte for the i2caddress )
         Serial.write(ioCmd[3]); // I2CADDRESS
         } else {
         // Start an mrlcomm message
@@ -1038,46 +1062,44 @@ class MrlI2CDevice : public Device {
       }
     }
 
+    // I2WRITE | DEVICE_INDEX | I2CADDRESS | DATA_SIZE | DATA.....
     void i2cWrite(unsigned char* ioCmd) {
-    	int msgSize = ioCmd[3];
-        WIRE.beginTransmission(ioCmd[1]);   // address to the i2c device
-        WIRE.write(ioCmd[2]);               // device memory address to write to
-        for (int i = 3; i < msgSize; i++) { // data to write
+        int msgSize = ioCmd[4];
+        WIRE.beginTransmission(ioCmd[3]);   // address to the i2c device
+        for (int i = 5; i < msgSize; i++) { // i2caddress + data to write, 
           WIRE.write(ioCmd[i]);
         }
         WIRE.endTransmission();
     }
     
-    // I2WRITEREAD | DEVICE_INDEX | DATA_SIZE | I2CADDRESS | DEVICE_MEMORY_ADDRESS | DATA.....
-    // PUBLISH_SENSOR_DATA | DEVICE_INDEX | DATA_SIZE | I2CADDRESS | DATA ....
+    // I2WRITEREAD | DEVICE_INDEX | I2CADDRESS | DATA_SIZE | DEVICE_MEMORY_ADDRESS | DATA.....
+    // PUBLISH_SENSOR_DATA | DEVICE_INDEX | I2CADDRESS | DATA ....
     // DEVICE_INDEX = Index to the I2C bus
-    // I2CDEVICEINDEX = Index used by Arduino to return the read data to the device
-    // that requested a read
+    // I2CADDRESS = The address of the i2c device
+    // DATA_SIZE = The number of bytes to read from the i2c device
     void i2cWriteRead(unsigned char* ioCmd) {
-      WIRE.beginTransmission(ioCmd[4]); // address to the i2c device
+      WIRE.beginTransmission(ioCmd[3]); // address to the i2c device
       WIRE.write(ioCmd[5]);             // device memory address to read from
       WIRE.endTransmission();
-      int answer = WIRE.requestFrom((uint8_t)ioCmd[2], (uint8_t)ioCmd[4]); // reqest a number of bytes to read
+      int answer = WIRE.requestFrom((uint8_t)ioCmd[3], (uint8_t)ioCmd[4]); // reqest a number of bytes to read
       if (answer==0) {
         //Report an error with I2C communication by returning a 1 length data size //i.e a message size if 1 byte containing only PUBLISH_SENSOR_DATA
         // Start an mrlcomm message
         Serial.write(MAGIC_NUMBER);
         // size of the mrlcomm message
-        Serial.write(4);
+        Serial.write(3);
         // mrlcomm function
         Serial.write(PUBLISH_SENSOR_DATA);
-        Serial.write(ioCmd[1]); // DEVICE_INDEX
-        Serial.write(1);        // DATA_SIZE ( 1 byte for the i2caddress )
+        Serial.write(ioCmd[2]); // DEVICE_INDEX
         Serial.write(ioCmd[3]); // I2CADDRESS
         } else {
         // Start an mrlcomm message
         Serial.write(MAGIC_NUMBER);
         // size of the mrlcomm message
-        Serial.write(1 + ioCmd[4]);
+        Serial.write(3 + ioCmd[4]);
         // mrlcomm function
         Serial.write(PUBLISH_SENSOR_DATA);
-        Serial.write(ioCmd[1]); // DEVICE_INDEX
-        Serial.write(1+answer); // DATA_SIZE ( add 1 byte for the i2caddress )
+        Serial.write(ioCmd[2]); // DEVICE_INDEX
         Serial.write(ioCmd[3]); // I2CADDRESS
         for (int i = 1; i<answer; i++) {
           Serial.write(Wire.read());
@@ -1229,7 +1251,7 @@ class MrlNeopixel:public Device{
 /***********************************************************************
  * GLOBAL VARIABLES
  * TODO - work on reducing globals and pass as parameters
-*/
+ */
 
 // The mighty device List.  This contains all active devices that are attached to the arduino.
 LinkedList<Device*> deviceList;
@@ -1256,11 +1278,14 @@ bool loadTimingEnabled = false;
 int loadTimingModulus = 1000; // the frequency in which to report the load timing metrics (in number of main loops)
 unsigned long lastMicros = 0; // timestamp of last loop (if stats enabled.)
 
+// TODO: move this onto the particular device, not global
 // sensor sample rate
 unsigned int sampleRate = 1; // 1 - 65,535 modulus of the loopcount - allowing you to sample less
 
 // global debug setting, if set to true publishDebug will write to the serial port.
 bool debug = false;
+
+void publishDebug(String message);
 
 /***********************************************************************
  * DEVICE LIST ACCESS METHODS BEGIN
@@ -1273,7 +1298,6 @@ int addDevice(Device*);
 /**
  * DEVICE LIST ACCESS METHODS END
  **********************************************************************/
-void publishDebug(String message);
 
 /***********************************************************************
  * STANDARD ARDUINO BEGIN 
@@ -1296,12 +1320,13 @@ void setup() {
 }
 
 /**
- * Arduino loop() method. 
- * This method will be called over and over again by the arduino
+ * STANDARD ARDUINO LOOP BEGIN 
+ * This method will be called over and over again by the arduino, it is the 
+ * main loop any arduino sketch runs
  */
-// This is the main loop that the arduino runs.
 void loop() {
-  // increment how many times we've run
+  // increment how many times we've run 
+  // TODO: handle overflow here after 32k runs, i suspect this might blow up? 
   ++loopCount;
   // get a command and process it from the serial port (if available.)
   if (getCommand()) {
@@ -1311,13 +1336,11 @@ void loop() {
   updateDevices();
   // update memory & timing
   updateStatus();
-  // update the timestamp for this loop.
-  lastMicros = micros();
 } // end of big loop
 
 /**
- * STANDARD ARDUINO END
-**********************************************************************/
+ * STANDARD ARDUINO LOOP END
+ */
 
 /***********************************************************************
  * UTILITY METHODS BEGIN
@@ -1554,13 +1577,13 @@ void processCommand() {
       break;
     // Start of i2c read and writes
     case I2C_READ:
-      ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cRead(&ioCmd[0]);
+      ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cRead(&ioCmd[0]);
       break;
     case I2C_WRITE:
-      ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWrite(&ioCmd[0]);
+      ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cWrite(&ioCmd[0]);
       break;
     case I2C_WRITE_READ:
-      ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[0]);
+      ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[0]);
       break;
     case SET_DEBUG:
       debug = ioCmd[1];
@@ -1723,6 +1746,7 @@ void servoEventsEnabled() {
   // Not implemented.
   // TODO: move this to the servo device class.
   // or just remove it all together.
+  // publish_servo_event seem to do the same as this stub imply
 }
 
 /**
@@ -1739,30 +1763,33 @@ void servoEventsEnabled() {
  * pins
  */
 void updateDevices() {
-  // this is the update devices method..
-  // iterate through our list of sensors
+  // iterate through our device list and call update on them.
   for (int i = 0; i < deviceList.size(); i++) {
+    // TODO: implement more effecient list iterator
     deviceList.get(i)->update(loopCount);
   } // end for each device
 }
 
 /***********************************************************************
- * UPDATE DEVICES END
- */
-
-/**
  * UPDATE STATUS 
  * This function updates the average time it took to run the main loop
  * and reports it back with a publishStatus MRLComm message
+ *
+ * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
  */
 void updateStatus() {
-  // TODO: protect against a divide by zero
-  unsigned long avgTiming = (micros() - lastMicros) / loadTimingModulus;
+  // protect against a divide by zero in the division.
+  unsigned long avgTiming = 0;
+  if (loadTimingModulus != 0) {
+    avgTiming = (micros() - lastMicros) / loadTimingModulus;
+  } 
   // report load time
   if (loadTimingEnabled && (loopCount%loadTimingModulus == 0)) {
     // send the average loop timing.
     publishStatus(avgTiming, getFreeRam());
   }
+  // update the timestamp of this update.
+  lastMicros = micros();
 }
 
 /**********************************************************************
@@ -1798,7 +1825,6 @@ void attachDevice() {
 	// we want to echo back the name
 	// and send the config in a nice neat package to
 	// the attach method which creates the device
-
 	int nameSize = ioCmd[2];
 
 	// get config size
@@ -1964,7 +1990,7 @@ Device* attachMotor() {
 }
 
 Device* attachI2C(){
-  MrlI2CDevice* device = new MrlI2CDevice();
+  MrlI2CBus* device = new MrlI2CBus();
   return device;
 }
 
@@ -1979,9 +2005,13 @@ Device* attachNeopixel() {
  * ATTACH DEVICES END
 **********************************************************************/
 
-
 /***********************************************************************
  * PUBLISH DEVICES BEGIN
+ * 
+ * All serial IO should happen here to publish a MRLComm message.
+ * TODO: move all serial IO into a controlled place this this below...
+ * TODO: create MRLCommMessage class that can just send itself!
+ * 
  */
 
 /**
