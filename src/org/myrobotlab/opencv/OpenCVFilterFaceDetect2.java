@@ -238,6 +238,7 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
           
       // highlight each of the faces we find.
       drawFaceRects(image, dF);
+      data.setEyesDifference(dF.getRightEye().y() - dF.getLeftEye().y());
     }}
     // pass through/return the original image marked up.
     return image;
