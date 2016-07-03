@@ -47,5 +47,7 @@ public interface NeopixelController extends DeviceController {
   public void detach(Neopixel neopixel);
   
   public void neopixelWriteMatrix(Neopixel neopixel, List<Integer> msg);
+
+  public Object[] getConfig(DeviceControl device);
   
 }
