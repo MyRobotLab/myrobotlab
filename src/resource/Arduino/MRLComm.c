@@ -121,6 +121,7 @@ public:
 // Initialize LinkedList with false values
 template<typename T>
 LinkedList<T>::LinkedList() {
+  // TODO: this causes a warning in the arduino compiler
   root=false;
   last=false;
   _size=0;
@@ -138,6 +139,7 @@ LinkedList<T>::~LinkedList() {
     root=root->next;
     delete tmp;
   }
+  // TODO: avoid the warning in the arduino compiler here.
   last = false;
   _size=0;
   isCached = false;
@@ -321,6 +323,13 @@ void LinkedList<T>::clear() {
 * FIXME - first rule of generate club is: whole file should be generated
 * so this needs to be turned itno a .h if necessary - but the manual munge
 * should be replaced
+* 
+* Addendum up for vote:
+*   Second rule of generate club is , to complete the mission, this file must/should go away...  
+*   It should be generated, completely.  device subclasses, #defines and all..  muahahahhah! project mayhem...
+* 
+*   Third rule of generate club is, if something has no code and isn't used, remove it. If it has code, move the code.
+* 
 */
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE BEGIN -----------
 ///// INO GENERATED DEFINITION BEGIN //////
@@ -341,7 +350,7 @@ void LinkedList<T>::clear() {
 // {attachDevice DeviceControl Object[]}
 #define ATTACH_DEVICE		8
 // {createI2cDevice int int String}
-#define CREATE_I2C_DEVICE		9
+#define CREATE_I2C_BUS		9
 // {detachDevice DeviceControl}
 #define DETACH_DEVICE		10
 // {digitalReadPollingStart Integer Integer}
@@ -402,7 +411,7 @@ void LinkedList<T>::clear() {
 #define SENSOR_POLLING_START		38
 // {sensorPollingStop String}
 #define SENSOR_POLLING_STOP		39
-// {servoAttach Servo}
+// {servoAttach Servo} - deleted method servoAttach, not device.attach
 #define SERVO_ATTACH		40
 // {servoDetach Servo}
 #define SERVO_DETACH		41
@@ -441,10 +450,9 @@ void LinkedList<T>::clear() {
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
 
 
-//temporary #define
-#define GET_BOARD_INFO 70
+// TODO: Move these into ArduinoMsgCodec  and re-generate ...
 #define PUBLISH_BOARD_INFO 71
-
+#define NEOPIXEL_WRITE_MATRIX 72
 ///// INO GENERATED DEFINITION END //////
 
 // TODO: the max message size isn't auto generated but
@@ -474,9 +482,10 @@ void LinkedList<T>::clear() {
 * Device types start as 1 - so if anyone forgot to
 * define their device it will error - rather default
 * to a device they may not want
-*        the DEVICE_TYPE_NOT_FOUND will manage the error instead of have it do random stuff
+*   the DEVICE_TYPE_NOT_FOUND will manage the error instead of have it do random stuff
 */
 
+// TODO: consider rename to DEVICE_TYPE_UNKNOWN ?  currently this isn't called anywhere
 #define DEVICE_TYPE_NOT_FOUND           0
 
 #define SENSOR_TYPE_ANALOG_PIN_ARRAY    1
@@ -488,6 +497,8 @@ void LinkedList<T>::clear() {
 #define DEVICE_TYPE_MOTOR               6
 #define DEVICE_TYPE_SERVO               7
 #define DEVICE_TYPE_I2C                 8
+#define DEVICE_TYPE_NEOPIXEL            9
+
 /**
 * GLOBAL DEVICE TYPES END
 **********************************************************************/
@@ -515,6 +526,26 @@ void LinkedList<T>::clear() {
 #else
   #define BOARD BOARD_TYPE_ID_UNKNOWN
 #endif
+
+/***********************************************************************
+ * NEOPIXEL DEFINE
+ */
+// PORTC BIT7 = pin 30
+#define PIXEL_PORT PORTC
+#define PIXEL_DDR DDRC
+//timing for the neopixel communication
+#define T1H 900    
+#define T1L 600
+#define T0H 400
+#define T0L 900
+#define RES 6000
+
+#define NS_PER_SEC (1000000000L)
+#define CYCLES_PER_SEC (F_CPU)
+#define NS_PER_CYCLE ( NS_PER_SEC / CYCLES_PER_SEC )
+#define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
+
+void publishError(int type, String message);
 
 /***********************************************************************
  * PIN - This class represents one of the pins on the arduino and it's
@@ -554,20 +585,20 @@ class Pin {
 
 class Device {
   public:
+    // TODO: consider making this Device(int deviceType, int[] config) so the device always has a handle to it's original config.
+    // GroG - agreed
     Device(int deviceType) {
       type = deviceType;
     }
     ~Device(){
+      // default destructor for the device class. 
     }
     int id; // the all important id of the sensor - equivalent to the "name" - used in callbacks
-    int type; //
-    //LinkedList<Pin*> pins; // the pins currently assigned to this sensor 0 to many
-    // TODO: review all members below here for potential removal as a result of refactoring.
-    // int readModulus; // rate of reading or publish sensor data
-    int state; // state - single at the moment to handle all the finite states of the sensor
-    //  LinkedList<int> config; // additional memory for the sensor if needed
-    //virtual Device* attach() = 0;
-    virtual void update(unsigned long loopCount) {};
+    int type; // what type of device is this?
+    int state; // state - single at the moment to handle all the finite states of the sensors (todo maybe this moves into the subclasses?)
+    // GroG - I think its good here - a uniform state description across all devices is if they are DEVICE_STATE_ACTIVE or DEVICE_STATE_DEACTIVE
+    // subclasses can/should define their os substate - eg ULTRASONIC_STATE_WAITING_PULSE etc..
+    virtual void update(unsigned long loopCount) {}; // all devices must implement this to update their state.
 };
 
 /**
@@ -605,6 +636,7 @@ class MrlServo : public Device {
 
     void attach(int pin){
     	servo->attach(pin);
+    	// TODO-KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
     }
 
     void update(unsigned long loopCount) {
@@ -640,6 +672,10 @@ class MrlServo : public Device {
         }
       }
     }
+    
+    // TODO: consider moving all Serial.write stuff out of device classes! -KW
+    // I don't want devices knowing about the serial port directly.
+    // consider a lifecycle where a device yeilds a message  to publish perhaps.
     void publishServoEvent(int eventType) {
       Serial.write(MAGIC_NUMBER);
       Serial.write(5); // size = 1 FN + 1 INDEX + 1 eventType + 1 curPos
@@ -651,9 +687,11 @@ class MrlServo : public Device {
       Serial.write(targetPos);
       Serial.flush();
     }
+    
     void servoEventEnabled(int value) {
       eventsEnabled=value;
     }
+    
     void servoWrite(int position) {
       if (speed == 100 && servo != 0) {
         // move at regular/full 100% speed
@@ -679,6 +717,7 @@ class MrlServo : public Device {
     void setSpeed(int speed) {
       this->speed = speed;
     }
+    
     void startSweep(int min, int max, int step) {
       this->min = min;
       this->max = max;
@@ -686,6 +725,7 @@ class MrlServo : public Device {
       isMoving = true;
       isSweeping = true;
     }
+    
     void stopSweep() {
       isMoving = false;
       isSweeping = false;
@@ -700,9 +740,19 @@ class MrlMotor : public Device {
   // details of the different motor controls/types
   public:
     MrlMotor() : Device(DEVICE_TYPE_MOTOR) {
-
+      // TODO: implement classes or custom control for different motor controller types
+      // usually they require 2 PWM pins, direction & speed...  sometimes the logic is a
+      // little different to drive it.
+      // GroG: 3 Motor Types so far - probably a single MrlMotor could handle it
+      // they are MotorDualPwm MotorSimpleH and MotorPulse
+      // Stepper should be its own MrlStepper
     }
     void update(unsigned long loopCount) {
+      // we should update the pwm values for the control of the motor device  here
+      // this is potentially where the hardware specific logic could go for various motor controllers
+      // L298N vs IBT2 vs other...  maybe consider a subclass for the type of motor-controller.
+      // GroG : All motor controller I know of which can be driven by the Arduino fall in the
+      // MotorDualPwm MotorSimpleH and MotorPulse - categories
     }
 };
 
@@ -720,7 +770,8 @@ class MrlStepper : public Device {
 };
 
 /**
- * Analog Pin Array Sensor
+ * Analog Pin Array Sensor 
+ * This represents a set of pins that can be sampled
  */
 class MrlAnalogPinArray : public Device {
   // int pins[];
@@ -735,6 +786,8 @@ class MrlAnalogPinArray : public Device {
       }
 
     }
+    // TODO: remove the direct write to the serial here..  devices shouldn't 
+    // have a direct handle to the serial port.
     void update(unsigned long loopCount) {
       if (pins.size() > 0) {
         Serial.write(MAGIC_NUMBER);
@@ -775,6 +828,7 @@ class MrlDigitalPinArray : public Device {
       }
 
     }
+    // devices shouldn't have a direct handle to the serial port..
     void update(unsigned long loopCount) {
       if (pins.size() > 0) {
         Serial.write(MAGIC_NUMBER);
@@ -795,6 +849,7 @@ class MrlDigitalPinArray : public Device {
 
 /**
  * Pulse Sensor Device
+ * TODO: add a description about this device! How does it work? What is it?
  */
 class MrlPulse : public Device {
   public:
@@ -863,6 +918,8 @@ class MrlPulse : public Device {
 
 /**
  * Ultrasonic Sensor
+ * TODO: add a description about this device, what is it? what does it do?
+ * How does it work?
  */
 class MrlUltrasonic : public Device {
   public:
@@ -947,21 +1004,35 @@ class MrlUltrasonic : public Device {
 };
 
 /**
- * I2C device
+ * I2C bus
+ * TODO:KW? don't allow this class to write directly to the global serial port
+ * device classes shouldn't have a direct handle to the serial port, rather have
+ * a mrlmessage class that it returns.
+ * TODO: Mats
+ * The I2CBus device represents one I2C bus. 
+ * It's the SDA (data line) and SCL pins (clock line) that is used to 
+ * communicate with any device that uses the i2c protocol on that bus.
+ * It is NOT a representation of the addressable i2c devices, just the bus
+ * On Arduino Uno that's pins A4 and A5, Mega 20 and 21, Leonardo 2 and 3, 
+ * The pin assignment is defined in Wire.h so it will change to the correct 
+ * pins at compile time. We don't have to worry here.
+ * However some other i2c implementations exist's so that more pins can be used
+ * for i2c communication. That is not supported here yet.
+ * 
  */
-class MrlI2CDevice : public Device {
+class MrlI2CBus : public Device {
   public:
-    MrlI2CDevice() : Device(DEVICE_TYPE_I2C) {
+    MrlI2CBus() : Device(DEVICE_TYPE_I2C) {
       if (TWCR == 0) { //// do this check so that Wire only gets initialized once
         WIRE.begin();
       }
     }
 
     // I2CREAD | DEVICE_INDEX | I2CADDRESS | DATA_SIZE
-    // PUBLISH_SENSOR_DATA | DEVICE_INDEX | DATA_SIZE | I2CADDRESS | DATA ....
+    // PUBLISH_SENSOR_DATA | DEVICE_INDEX | I2CADDRESS | DATA ....
     // DEVICE_INDEX = Index to the I2C bus
-    // I2CDEVICEINDEX = Index used by Arduino to return the read data to the device
-    // that requested a read
+    // I2CADDRESS = The address of the i2c device
+    // DATA_SIZE = The number of bytes to read from the i2c device
     void i2cRead(unsigned char* ioCmd) {
 
       int answer = WIRE.requestFrom((uint8_t)ioCmd[3], (uint8_t)ioCmd[4]); // reqest a number of bytes to read
@@ -970,11 +1041,10 @@ class MrlI2CDevice : public Device {
         // Start an mrlcomm message
         Serial.write(MAGIC_NUMBER);
         // size of the mrlcomm message
-        Serial.write(4);
+        Serial.write(3);
         // mrlcomm function
         Serial.write(PUBLISH_SENSOR_DATA);
         Serial.write(ioCmd[1]); // DEVICE_INDEX
-        Serial.write(1);        // DATA_SIZE ( 1 byte for the i2caddress )
         Serial.write(ioCmd[3]); // I2CADDRESS
         } else {
         // Start an mrlcomm message
@@ -992,46 +1062,44 @@ class MrlI2CDevice : public Device {
       }
     }
 
+    // I2WRITE | DEVICE_INDEX | I2CADDRESS | DATA_SIZE | DATA.....
     void i2cWrite(unsigned char* ioCmd) {
-    	int msgSize = ioCmd[3];
-        WIRE.beginTransmission(ioCmd[1]);   // address to the i2c device
-        WIRE.write(ioCmd[2]);               // device memory address to write to
-        for (int i = 3; i < msgSize; i++) { // data to write
+        int msgSize = ioCmd[4];
+        WIRE.beginTransmission(ioCmd[3]);   // address to the i2c device
+        for (int i = 5; i < msgSize; i++) { // i2caddress + data to write, 
           WIRE.write(ioCmd[i]);
         }
         WIRE.endTransmission();
     }
     
-    // I2WRITEREAD | DEVICE_INDEX | DATA_SIZE | I2CADDRESS | DEVICE_MEMORY_ADDRESS | DATA.....
-    // PUBLISH_SENSOR_DATA | DEVICE_INDEX | DATA_SIZE | I2CADDRESS | DATA ....
+    // I2WRITEREAD | DEVICE_INDEX | I2CADDRESS | DATA_SIZE | DEVICE_MEMORY_ADDRESS | DATA.....
+    // PUBLISH_SENSOR_DATA | DEVICE_INDEX | I2CADDRESS | DATA ....
     // DEVICE_INDEX = Index to the I2C bus
-    // I2CDEVICEINDEX = Index used by Arduino to return the read data to the device
-    // that requested a read
+    // I2CADDRESS = The address of the i2c device
+    // DATA_SIZE = The number of bytes to read from the i2c device
     void i2cWriteRead(unsigned char* ioCmd) {
-      WIRE.beginTransmission(ioCmd[4]); // address to the i2c device
+      WIRE.beginTransmission(ioCmd[3]); // address to the i2c device
       WIRE.write(ioCmd[5]);             // device memory address to read from
       WIRE.endTransmission();
-      int answer = WIRE.requestFrom((uint8_t)ioCmd[2], (uint8_t)ioCmd[4]); // reqest a number of bytes to read
+      int answer = WIRE.requestFrom((uint8_t)ioCmd[3], (uint8_t)ioCmd[4]); // reqest a number of bytes to read
       if (answer==0) {
         //Report an error with I2C communication by returning a 1 length data size //i.e a message size if 1 byte containing only PUBLISH_SENSOR_DATA
         // Start an mrlcomm message
         Serial.write(MAGIC_NUMBER);
         // size of the mrlcomm message
-        Serial.write(4);
+        Serial.write(3);
         // mrlcomm function
         Serial.write(PUBLISH_SENSOR_DATA);
-        Serial.write(ioCmd[1]); // DEVICE_INDEX
-        Serial.write(1);        // DATA_SIZE ( 1 byte for the i2caddress )
+        Serial.write(ioCmd[2]); // DEVICE_INDEX
         Serial.write(ioCmd[3]); // I2CADDRESS
         } else {
         // Start an mrlcomm message
         Serial.write(MAGIC_NUMBER);
         // size of the mrlcomm message
-        Serial.write(1 + ioCmd[4]);
+        Serial.write(3 + ioCmd[4]);
         // mrlcomm function
         Serial.write(PUBLISH_SENSOR_DATA);
-        Serial.write(ioCmd[1]); // DEVICE_INDEX
-        Serial.write(1+answer); // DATA_SIZE ( add 1 byte for the i2caddress )
+        Serial.write(ioCmd[2]); // DEVICE_INDEX
         Serial.write(ioCmd[3]); // I2CADDRESS
         for (int i = 1; i<answer; i++) {
           Serial.write(Wire.read());
@@ -1043,11 +1111,147 @@ class MrlI2CDevice : public Device {
     }
 };
 
+/*****************************
+ * Neopixel device
+ * 
+ * adapted from https://github.com/bigjosh/SimpleNeoPixelDemo/blob/master/SimpleNeopixelDemo/SimpleNeopixelDemo.ino
+ * it contains board specific code
+ * so far only working on pins 30-37 on Mega
+ * TODO: support on more pins and on UNO
+ */
+struct Pixel{
+  unsigned char red;
+  unsigned char blue;
+  unsigned char green;
+  Pixel(){
+    red=0;
+    blue=0;
+    green=0;
+  }
+};
+
+class MrlNeopixel:public Device{
+  public:
+  unsigned int numPixel;
+  Pixel* pixels;
+  uint8_t bitmask;
+  unsigned long lastShow;
+  bool newData;
+  MrlNeopixel(int pin, unsigned int num_pixel):Device(DEVICE_TYPE_NEOPIXEL){
+    numPixel = num_pixel;
+    pixels = new Pixel[numPixel+1];
+    if(BOARD==BOARD_TYPE_ID_UNKNOWN) {
+      publishError(ERROR_DOES_NOT_EXIST,F("Board not supported"));
+      state=0;
+    }
+    if(pin<30 || pin>37) {
+      publishError(ERROR_DOES_NOT_EXIST,F("Pin not supported"));
+      state=0;
+    }
+    else{
+      state=1;
+      bitmask=digitalPinToBitMask(pin);
+    }
+    PIXEL_DDR |= bitmask;
+    lastShow=0;
+    Pixel pixel=Pixel();
+    for (int i=1; i<=numPixel; i++) {
+      pixels[i] = pixel;
+    }
+    newData=true;
+  }
+  ~MrlNeopixel(){
+    delete pixels;
+  }
+ inline void sendBit(bool bitVal){
+    uint8_t bit=bitmask;
+    if (bitVal) {        // 0 bit
+      PIXEL_PORT |= bit;
+      asm volatile (
+        ".rept %[onCycles] \n\t"                                // Execute NOPs to delay exactly the specified number of cycles
+        "nop \n\t"
+        ".endr \n\t"
+        ::
+        [onCycles]  "I" (NS_TO_CYCLES(T1H) - 2)    // 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
+        );
+      PIXEL_PORT &= ~bit;
+      asm volatile (
+        ".rept %[offCycles] \n\t"                               // Execute NOPs to delay exactly the specified number of cycles
+        "nop \n\t"
+        ".endr \n\t"
+        ::
+        [offCycles]   "I" (NS_TO_CYCLES(T1L) - 2)     // Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
+      );
+    } else {          // 1 bit
+      // **************************************************************************
+      // This line is really the only tight goldilocks timing in the whole program!
+      // **************************************************************************
+      cli(); //desactivate interrupts
+      PIXEL_PORT |= bit ;
+      asm volatile (
+        ".rept %[onCycles] \n\t"        // Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
+        "nop \n\t"                                              // Execute NOPs to delay exactly the specified number of cycles
+        ".endr \n\t"
+        ::
+        [onCycles]  "I" (NS_TO_CYCLES(T0H) - 2)
+        );
+      PIXEL_PORT &= ~bit;
+      asm volatile (
+        ".rept %[offCycles] \n\t"                               // Execute NOPs to delay exactly the specified number of cycles
+        "nop \n\t"
+        ".endr \n\t"
+        ::
+        [offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
+      );
+      sei(); //activate interrupts
+    }
+      // Note that the inter-bit gap can be as long as you want as long as it doesn't exceed the 5us reset timeout (which is A long time)
+      // Here I have been generous and not tried to squeeze the gap tight but instead erred on the side of lots of extra time.
+      // This has thenice side effect of avoid glitches on very long strings becuase 
+  }
+    
+  inline void sendByte(unsigned char byte) {
+    for(unsigned char bit = 0 ; bit < 8 ; bit++ ) {
+      sendBit( bitRead( byte , 7 ) );                // Neopixel wants bit in highest-to-lowest order
+                                                     // so send highest bit (bit #7 in an 8-bit byte since they start at 0)
+      byte <<= 1;                                    // and then shift left so bit 6 moves into 7, 5 moves into 6, etc
+    }           
+  }
+  inline void sendPixel(Pixel p) {  
+    sendByte(p.green);          // Neopixel wants colors in green then red then blue order
+    sendByte(p.red);
+    sendByte(p.blue);
+  }
+  void show(){
+    if (!state) return;
+    //be sure we wait at least 6us before sending new data
+    if ((lastShow+(RES/1000UL))>micros()) return;
+    for(int p=1; p<=numPixel;p++){
+      sendPixel(pixels[p]);
+    }
+    lastShow=micros();
+    newData=false;
+
+  }
+  void neopixelWriteMatrix(unsigned char* ioCmd) {
+    for (int i=3; i<ioCmd[2]+3;i+=4){
+      pixels[ioCmd[i]].red=ioCmd[i+1];
+      pixels[ioCmd[i]].green=ioCmd[i+2];
+      pixels[ioCmd[i]].blue=ioCmd[i+3];
+    }
+    newData=true;
+  }
+  void update(unsigned long loopCount){
+    if((lastShow+33000)>micros() || !newData) return; //update 30 times/sec if there is new data to show
+    show();
+  }
+};
+
 
 /***********************************************************************
  * GLOBAL VARIABLES
  * TODO - work on reducing globals and pass as parameters
-*/
+ */
 
 // The mighty device List.  This contains all active devices that are attached to the arduino.
 LinkedList<Device*> deviceList;
@@ -1060,22 +1264,28 @@ unsigned char ioCmd[MAX_MSG_SIZE];  // message buffer for all inbound messages
 
 // N.B. - not sure if its should be signed or unsigned - the data
 // for this originates from ioCmd
+// KW, i think this should move to the constuctor of the device classes.  devices should have a handle to their configs.
+// KW : i just don't like this being global..it's a lot of state to keep global.. not to mention it's a copy of what's in ioCmd 
 unsigned char config[MAX_MSG_SIZE];  // config buffer
 int configPos = 0; // position of the beginning of config in the ioCmd message
 
 int byteCount = 0;
 unsigned long loopCount = 0; // main loop count
+// TODO: this is referenced nowhere. remove? 
 unsigned int debounceDelay = 50; // in ms
 // performance metrics  and load timing
 bool loadTimingEnabled = false;
 int loadTimingModulus = 1000; // the frequency in which to report the load timing metrics (in number of main loops)
 unsigned long lastMicros = 0; // timestamp of last loop (if stats enabled.)
 
+// TODO: move this onto the particular device, not global
 // sensor sample rate
 unsigned int sampleRate = 1; // 1 - 65,535 modulus of the loopcount - allowing you to sample less
 
 // global debug setting, if set to true publishDebug will write to the serial port.
 bool debug = false;
+
+void publishDebug(String message);
 
 /***********************************************************************
  * DEVICE LIST ACCESS METHODS BEGIN
@@ -1088,15 +1298,19 @@ int addDevice(Device*);
 /**
  * DEVICE LIST ACCESS METHODS END
  **********************************************************************/
-void publishDebug(String message);
 
 /***********************************************************************
- * STANDARD ARDUINO BEGIN
+ * STANDARD ARDUINO BEGIN 
+ * setup() is called when the serial port is opened unless you hack the 
+ * serial port on your arduino
+ * 
+ * Here we default out serial port to 115.2kbps.
 */
 void setup() {
   Serial.begin(115200);        // connect to the serial port
   while (!Serial){};
-  // TODO: do this before we start the serial port?
+  // TODO: the arduino service might get a few garbage bytes before we're able
+  // to run, we should consider some additional logic here like a "publishReset"
   softReset();
   // publish version on startup so it's immediately available for mrl.
   // TODO: see if we can purge the current serial port buffers
@@ -1105,9 +1319,14 @@ void setup() {
   publishBoardInfo();
 }
 
-// This is the main loop that the arduino runs.
+/**
+ * STANDARD ARDUINO LOOP BEGIN 
+ * This method will be called over and over again by the arduino, it is the 
+ * main loop any arduino sketch runs
+ */
 void loop() {
-  // increment how many times we've run
+  // increment how many times we've run 
+  // TODO: handle overflow here after 32k runs, i suspect this might blow up? 
   ++loopCount;
   // get a command and process it from the serial port (if available.)
   if (getCommand()) {
@@ -1117,25 +1336,27 @@ void loop() {
   updateDevices();
   // update memory & timing
   updateStatus();
-  // update the timestamp for this loop.
-  lastMicros = micros();
 } // end of big loop
 
 /**
- * STANDARD ARDUINO END
-**********************************************************************/
+ * STANDARD ARDUINO LOOP END
+ */
 
 /***********************************************************************
  * UTILITY METHODS BEGIN
  */
 
 int getFreeRam() {
+  // KW: In the future the arduino might have more than an 32/64k of ram. an int might not be enough here to return.
   extern int __heap_start, *__brkval;
   int v;
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 
 void softReset() {
+  // TODO: do this before we start the serial port? At this point the memory 
+  // space should be clean, but we don't know.. always safe to sweep the memory 
+  // that we intend to use.
   while(deviceList.size()>0){
     delete deviceList.pop();
   }
@@ -1149,8 +1370,11 @@ void softReset() {
 }
 
 /**
+ * This adds a device to the current set of active devices in the deviceList.
+ * 
  * FIXME - G: I think dynamic array would work better
- * at least for the deviceList
+ * at least for the deviceList 
+ * TODO: KW: i think it's pretty dynamic now.
  */
 int addDevice(Device* device) {
   deviceList.add(device);
@@ -1161,7 +1385,7 @@ int addDevice(Device* device) {
  * it returns null if the device isn't found.
  */
 Device* getDevice(int id) {
-  // TODO: more effecient lookup..
+  // TODO: more effecient lookup..use a linked list iterator here..  while (nextNode != null) sort of iteration..
   int numDevices = deviceList.size();
   for (int i = 0; i < numDevices; i++) {
     Device* dev=deviceList.get(i);
@@ -1170,6 +1394,7 @@ Device* getDevice(int id) {
       return dev;
     }
   }
+  // TODO: force this to return an error message
   publishError(ERROR_DOES_NOT_EXIST);
   return 0; //returning a NULL ptr can cause runtime error
   // you'll still get a runtime error if any field, member or method not
@@ -1182,7 +1407,13 @@ Device* getDevice(int id) {
 
 /***********************************************************************
  * SERIAL METHODS BEGIN
- * TODO - add text api
+ */
+ 
+/**
+ * getCommand() - This is the main method to read new data from the serial port, 
+ * when a full mrlcomm message is read from the serial port.
+ * return values: true if the serial port read a full mrlcomm command
+ *                false if the serial port is still waiting on a command.
  */
 bool getCommand() {
   // handle serial data begin
@@ -1229,138 +1460,151 @@ bool getCommand() {
 
 // This function will switch the current command and call
 // the associated function with the command
+/**
+ * processCommand() - once the main loop has read an mrlcomm message from the 
+ * serial port, this method will be called.
+ */
+ // TODO: change this to something liek processCommand(MrlCommand cmd) ...
+ // passing around ioCmd as global is messy!
 void processCommand() {
+  // TODO-KW: make this switch statement go away.. or move somewhere else..
+  // it'd be nice to have command.process(ioCmd[])  ..
   switch (ioCmd[0]) {
-  // === system pass through begin ===
-  case DIGITAL_WRITE:
-    digitalWrite(ioCmd[1], ioCmd[2]);
-    break;
-  case ANALOG_WRITE:{
-    analogWrite(ioCmd[1], ioCmd[2]);
-    break;
-  }
-  case PIN_MODE:{
-    pinMode(ioCmd[1], ioCmd[2]);
-    break;
-  }
-  case SERVO_ATTACH:{
-    // Servo.attach(pin)
-	int pin = ioCmd[2];
-	publishDebug("SERVO_ATTACH " + String(pin));
-	MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
-	s->attach(pin);
-	publishDebug("SERVO_ATTACHED ");
-    break;
-  }
-  case SERVO_SWEEP_START:
-    //startSweep(min,max,step)
-    ((MrlServo*)getDevice(ioCmd[1]))->startSweep(ioCmd[2],ioCmd[3],ioCmd[4]);
-    break;
-  case SERVO_SWEEP_STOP:
-    ((MrlServo*)getDevice(ioCmd[1]))->stopSweep();
-    break;
-  case SERVO_EVENTS_ENABLED:
-    // PUBLISH_SERVO_EVENT seem to do the same thing
-    servoEventsEnabled();
-    break;
-  case SERVO_WRITE:
-    ((MrlServo*)getDevice(ioCmd[1]))->servoWrite(ioCmd[2]);
-    break;
-  case PUBLISH_SERVO_EVENT:
-    ((MrlServo*)getDevice(ioCmd[1]))->servoEventEnabled(ioCmd[2]);
-    break;
-  case SERVO_WRITE_MICROSECONDS:
-    ((MrlServo*)getDevice(ioCmd[1]))->servoWriteMicroseconds(ioCmd[2]);
-    break;
-  case SET_SERVO_SPEED:
-    ((MrlServo*)getDevice(ioCmd[1]))->setSpeed(ioCmd[2]);
-    break;
-  case SERVO_DETACH:
-    servoDetach();
-    break;
-  case SET_LOAD_TIMING_ENABLED:
-    setLoadTimingEnabled();
-    break;
-  case SET_PWMFREQUENCY:
-    setPWMFrequency(ioCmd[1], ioCmd[2]);
-    break;
-  case ANALOG_READ_POLLING_START:
-    analogReadPollingStart();
-    break;
-  case ANALOG_READ_POLLING_STOP:
-    analogReadPollingStop();
-    break;
-  case DIGITAL_READ_POLLING_START:
-    digitalReadPollingStart();
-    break;
-  case DIGITAL_READ_POLLING_STOP:
-    digitalReadPollingStop();
-  case PULSE:
-    ((MrlPulse*)getDevice(ioCmd[1]))->pulse(ioCmd);
-    break;
-  case PULSE_STOP:
-    ((MrlPulse*)getDevice(ioCmd[1]))->pulseStop();
-    break;
-  case SET_TRIGGER:
-    setTrigger();
-    break;
-  case SET_DEBOUNCE:
-    setDebounce();
-    break;
-  case SET_DIGITAL_TRIGGER_ONLY:
-    setDigitalTriggerOnly();
-    break;
-  case SET_SERIAL_RATE:
-    setSerialRate();
-    break;
-  case GET_VERSION:
-    publishVersion();
-    break;
-  case SET_SAMPLE_RATE:
-    setSampleRate();
-    break;
-  case SOFT_RESET:
-    softReset();
-    break;
-  case ADD_SENSOR_DATA_LISTENER:
-    addSensorDataListener();
-    break;
-  case SENSOR_POLLING_START:
-    sensorPollingStart();
-    break;
-  case ATTACH_DEVICE:
-	  attachDevice();
-	break;
-  case SENSOR_POLLING_STOP:
-    sensorPollingStop();
-    break;
-  // Start of i2c read and writes
-  case I2C_READ:
-    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cRead(&ioCmd[0]);
-    break;
-  case I2C_WRITE:
-    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWrite(&ioCmd[0]);
-    break;
-  case I2C_WRITE_READ:
-    ((MrlI2CDevice*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[0]);
-    break;
-  case SET_DEBUG:{
-    debug = ioCmd[1];
-    if (debug) {
-      publishDebug(F("Debug logging enabled."));
+    // === system pass through begin ===
+    case DIGITAL_WRITE:
+      digitalWrite(ioCmd[1], ioCmd[2]);
+      break;
+    case ANALOG_WRITE:{
+      analogWrite(ioCmd[1], ioCmd[2]);
+      break;
     }
-    break;
-  }
-  case GET_BOARD_INFO:
-    publishBoardInfo();
-    break;
-  default:
-    publishError(ERROR_UNKOWN_CMD);
-    break;
+    case PIN_MODE:{
+      pinMode(ioCmd[1], ioCmd[2]);
+      break;
+    }
+    case SERVO_ATTACH:{
+      // Servo.attach(pin)
+	    int pin = ioCmd[2];
+	    publishDebug("SERVO_ATTACH " + String(pin));
+  	  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
+	    s->attach(pin);
+  	  publishDebug("SERVO_ATTACHED ");
+      break;
+    }
+    case SERVO_SWEEP_START:
+      //startSweep(min,max,step)
+      ((MrlServo*)getDevice(ioCmd[1]))->startSweep(ioCmd[2],ioCmd[3],ioCmd[4]);
+      break;
+    case SERVO_SWEEP_STOP:
+      ((MrlServo*)getDevice(ioCmd[1]))->stopSweep();
+      break;
+    case SERVO_EVENTS_ENABLED:
+      // PUBLISH_SERVO_EVENT seem to do the same thing
+      servoEventsEnabled();
+      break;
+    case SERVO_WRITE:
+      ((MrlServo*)getDevice(ioCmd[1]))->servoWrite(ioCmd[2]);
+      break;
+    case PUBLISH_SERVO_EVENT:
+      ((MrlServo*)getDevice(ioCmd[1]))->servoEventEnabled(ioCmd[2]);
+      break;
+    case SERVO_WRITE_MICROSECONDS:
+      ((MrlServo*)getDevice(ioCmd[1]))->servoWriteMicroseconds(ioCmd[2]);
+      break;
+    case SET_SERVO_SPEED:
+      ((MrlServo*)getDevice(ioCmd[1]))->setSpeed(ioCmd[2]);
+      break;
+    case SERVO_DETACH:
+      servoDetach();
+      break;
+    case SET_LOAD_TIMING_ENABLED:
+      setLoadTimingEnabled();
+      break;
+    case SET_PWMFREQUENCY:
+      setPWMFrequency(ioCmd[1], ioCmd[2]);
+      break;
+    case ANALOG_READ_POLLING_START:
+      analogReadPollingStart();
+      break;
+    case ANALOG_READ_POLLING_STOP:
+      analogReadPollingStop();
+      break;
+    case DIGITAL_READ_POLLING_START:
+      digitalReadPollingStart();
+      break;
+    case DIGITAL_READ_POLLING_STOP:
+      digitalReadPollingStop();
+      break;
+    case PULSE:
+      ((MrlPulse*)getDevice(ioCmd[1]))->pulse(ioCmd);
+      break;
+    case PULSE_STOP:
+      ((MrlPulse*)getDevice(ioCmd[1]))->pulseStop();
+      break;
+    case SET_TRIGGER:
+      setTrigger();
+      break;
+    case SET_DEBOUNCE:
+      setDebounce();
+      break;
+    case SET_DIGITAL_TRIGGER_ONLY:
+      setDigitalTriggerOnly();
+      break;
+    case SET_SERIAL_RATE:
+      setSerialRate();
+      break;
+    case GET_VERSION:
+      publishVersion();
+      break;
+    case SET_SAMPLE_RATE:
+      setSampleRate();
+      break;
+    case SOFT_RESET:
+      softReset();
+      break;
+    case ADD_SENSOR_DATA_LISTENER:
+      // TODO: replace this with simple attachDevice call.
+      // addSensorDataListener();
+      break;
+    case SENSOR_POLLING_START:
+      sensorPollingStart();
+      break;
+    case ATTACH_DEVICE:
+	    attachDevice();
+	    break;
+    case SENSOR_POLLING_STOP:
+      sensorPollingStop();
+      break;
+    // Start of i2c read and writes
+    case I2C_READ:
+      ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cRead(&ioCmd[0]);
+      break;
+    case I2C_WRITE:
+      ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cWrite(&ioCmd[0]);
+      break;
+    case I2C_WRITE_READ:
+      ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[0]);
+      break;
+    case SET_DEBUG:
+      debug = ioCmd[1];
+      if (debug) {
+        publishDebug(F("Debug logging enabled."));
+      }
+      break;
+    case GET_BOARD_INFO:
+      publishBoardInfo();
+      break;
+    case NEOPIXEL_WRITE_MATRIX:
+      ((MrlNeopixel*)getDevice(ioCmd[1]))->neopixelWriteMatrix(ioCmd);
+      break;
+    default:
+      publishError(ERROR_UNKOWN_CMD);
+      break;
   } // end switch
   // ack that we got a command (should we ack it first? or after we process the command?)
   publishCommandAck();
   // reset command buffer to be ready to receive the next command.
+  // KW: we should only need to set the byteCount back to zero. clearing this array is just for safety sake i guess?
   memset(ioCmd, 0, sizeof(ioCmd));
   byteCount = 0;
 } // process Command
@@ -1371,6 +1615,8 @@ void processCommand() {
 
 /***********************************************************************
  * CONTROL METHODS BEGIN
+ * These methods map one to one for each MRLComm command that comes in.
+ * 
  * TODO - add text api
  */
 
@@ -1413,26 +1659,9 @@ void setPWMFrequency(int address, int prescalar) {
   }
 }
 
-// TODO :remove this method. we don't need it anymore.
-//void analogReadPollingStartNew() {
-  // TODO: do we care about this pinIndex at all?
-//  int sensorIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
-  // create a new sensor with 1 pin.
-//  sensor s = sensor();
-//  s.id = sensorIndex;
-  // create the pin for this sensor
-//  Pin p = Pin();
-//  p.isActive = true;
-//  p.address = ioCmd[2];
-  // add the pin to the sensor
-//  s.pins.add(p);
-  // add the sensor to the global list of sensors.
-//  deviceList.add(s);
-//}
-
 // ANALOG_READ_POLLING_START
 void analogReadPollingStart() {
-  // TODO: remove this method..
+  // TODO: remove this method.. potentially replace with device attach.
   // if you have a device attached,and it's a pin, implicitly, we're polling.
   //int pinIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
   //Pin& pin = pins[pinIndex];
@@ -1461,7 +1690,6 @@ void digitalReadPollingStart() {
   //pin.rateModulus=(ioCmd[2] << 8) + ioCmd[3];
 }
 
-
 // digital_READ_POLLING_STOP
 void digitalReadPollingStop() {
   //Device* d = getDevice(ioCmd[1]);
@@ -1486,6 +1714,7 @@ void setTrigger() {
 // SET_DEBOUNCE
 void setDebounce() {
   // default debounceDelay = 50;
+  // consider removing me?  or move it to a digital pin device or something?
   debounceDelay = ((ioCmd[1] << 8) + ioCmd[2]);
 }
 
@@ -1504,6 +1733,7 @@ void setSerialRate() {
 
 // SET_SAMPLE_RATE
 void setSampleRate() {
+  // TODO: move this method to the device classes that have a sample rate.
   // 2 byte int - valid range 1-65,535
   sampleRate = (ioCmd[1] << 8) + ioCmd[2];
   if (sampleRate == 0) {
@@ -1514,6 +1744,9 @@ void setSampleRate() {
 // SERVO_EVENTS_ENABLED
 void servoEventsEnabled() {
   // Not implemented.
+  // TODO: move this to the servo device class.
+  // or just remove it all together.
+  // publish_servo_event seem to do the same as this stub imply
 }
 
 /**
@@ -1530,48 +1763,33 @@ void servoEventsEnabled() {
  * pins
  */
 void updateDevices() {
-  // this is the update devices method..
-  // iterate through our list of sensors
+  // iterate through our device list and call update on them.
   for (int i = 0; i < deviceList.size(); i++) {
+    // TODO: implement more effecient list iterator
     deviceList.get(i)->update(loopCount);
   } // end for each device
 }
 
 /***********************************************************************
- * UPDATE DEVICES END
- */
-
-/**
+ * UPDATE STATUS 
  * This function updates the average time it took to run the main loop
  * and reports it back with a publishStatus MRLComm message
+ *
+ * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
  */
 void updateStatus() {
-  // TODO: protect against a divide by zero
-  unsigned long avgTiming = (micros() - lastMicros) / loadTimingModulus;
+  // protect against a divide by zero in the division.
+  unsigned long avgTiming = 0;
+  if (loadTimingModulus != 0) {
+    avgTiming = (micros() - lastMicros) / loadTimingModulus;
+  } 
   // report load time
   if (loadTimingEnabled && (loopCount%loadTimingModulus == 0)) {
     // send the average loop timing.
     publishStatus(avgTiming, getFreeRam());
   }
-}
-
-
-/***********************************************************************
- * SERVO_ATTACH -
- *
- * GroG says - this should be removed - the resetting the setp & events is
- * an assumption - the call is very simple - no longer calling a method here
- * - its being called in the MrlServo class
- *
- */
-void servoAttach() {
-
-  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
-
-  // Servo takes 1 pin
-  s->servo->attach(ioCmd[2]);
-  s->step = 1;
-  s->eventsEnabled = false;
+  // update the timestamp of this update.
+  lastMicros = micros();
 }
 
 /**********************************************************************
@@ -1582,7 +1800,6 @@ void servoAttach() {
  * MSG STRUCTURE
  *                    |<-- ioCmd starts here                                        |<-- config starts here
  * MAGIC_NUMBER|LENGTH|ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME .... (N)|CONFIG_SIZE|DATA0|DATA1 ...|DATA(N)
- *
  *
  * ATTACH_DEVICE - this method id
  * DEVICE_TYPE - the mrlcomm device type we are attaching
@@ -1600,15 +1817,14 @@ void servoAttach() {
  * it could be implemented with 1 byte
  */
 void attachDevice() {
+  // TOOD:KW check free memory to see if we can attach a new device. o/w return an error!
 	// we're creating a new device. auto increment it
 	// TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
 	//       Arduino will run out of memory before that happen.
 	//       A mecanism that will call a softReset() when MRL disconnect will prevent that
-
 	// we want to echo back the name
 	// and send the config in a nice neat package to
 	// the attach method which creates the device
-
 	int nameSize = ioCmd[2];
 
 	// get config size
@@ -1631,51 +1847,62 @@ void attachDevice() {
 
 	int deviceType = ioCmd[1];
 	Device* devicePtr = 0;
+	// KW: remove this switch statement by making "attach(int[]) a virtual method on the device base class.
+	// perhaps a factory to produce the devicePtr based on the deviceType.. 
+	// currently the attach logic is embeded in the constructors ..  maybe we can make that a more official
+	// lifecycle for the devices..  
+	// check out the make_stooge method on https://sourcemaking.com/design_patterns/factory_method/cpp/1
+	// This is really how we should do this.  (methinks)
 	switch (deviceType) {
-	case SENSOR_TYPE_ANALOG_PIN_ARRAY: {
-		devicePtr = attachAnalogPinArray();
-		break;
-	}
-	case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
-		devicePtr = attachDigitalPinArray();
-		break;
-	}
-	case SENSOR_TYPE_PULSE: {
-		devicePtr = attachPulse();
-		break;
-	}
-	case SENSOR_TYPE_ULTRASONIC: {
-		devicePtr = attachUltrasonic();
-		break;
-	}
-	case DEVICE_TYPE_STEPPER: {
-		devicePtr = attachStepper();
-		break;
-	}
-	case DEVICE_TYPE_MOTOR: {
-		devicePtr = attachMotor();
-		break;
-	}
-	case DEVICE_TYPE_SERVO: {
-		devicePtr = attachServo();
-		break;
-	}
-	case DEVICE_TYPE_I2C: {
-		devicePtr = attachI2C();
-		break;
-	}
-	default: {
-		// TODO: publish error message
-		break;
-	}
-}
+  	case SENSOR_TYPE_ANALOG_PIN_ARRAY: {
+	  	devicePtr = attachAnalogPinArray();
+		  break;
+  	}
+	  case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
+		  devicePtr = attachDigitalPinArray();
+  		break;
+	  }
+  	case SENSOR_TYPE_PULSE: {
+	  	devicePtr = attachPulse();
+		  break;
+  	}
+	  case SENSOR_TYPE_ULTRASONIC: {
+		  devicePtr = attachUltrasonic();
+  		break;
+	  }
+  	case DEVICE_TYPE_STEPPER: {
+	  	devicePtr = attachStepper();
+		  break;
+	  }
+  	case DEVICE_TYPE_MOTOR: {
+	  	devicePtr = attachMotor();
+		  break;
+	  }
+	  case DEVICE_TYPE_SERVO: {
+		  devicePtr = attachServo();
+	  	break;
+	  }
+	  case DEVICE_TYPE_I2C: {
+		  devicePtr = attachI2C();
+  		break;
+	  }
+	  case DEVICE_TYPE_NEOPIXEL: {
+	    devicePtr = attachNeopixel();
+	  }
+  	default: {
+		  // TODO: publish error message
+	  	publishDebug("Unknown Message Type.");
+		  break;
+	  }
+  }
 
-if (devicePtr) {
-	devicePtr->id = nextDeviceId;
-	addDevice(devicePtr);
-	publishAttachedDevice(devicePtr->id, nameSize, 3);
-	nextDeviceId++;
-}
+  // KW: a sort of null pointer case? TODO: maybe move this into default branch of switch above?
+  if (devicePtr) {
+	  devicePtr->id = nextDeviceId;
+  	addDevice(devicePtr);
+	  publishAttachedDevice(devicePtr->id, nameSize, 3);
+  	nextDeviceId++;
+  }
 }
 
 /**
@@ -1722,7 +1949,7 @@ void detachDevice(int id) {
 Device* attachAnalogPinArray() {
   Device* pinArray = new MrlAnalogPinArray();
   // TODO: add the actual pins to this analog pin array.
-  //deviceList.add(pinArray);
+  //deviceList.add(pinArray); config[] something ?
   return pinArray;
 }
 
@@ -1730,10 +1957,12 @@ Device* attachDigitalPinArray() {
   Device* pinArray = new MrlDigitalPinArray();
   // set the device type to analog pin array
   // TODO: add the list of pins to the array <-- not necessary until a request to read/poll a pin is received
-  // pinArray.pins
+  // KW: Ok, so a digital pin array is something you should dynamically specify which pins are in it ?
   return pinArray;
 }
 
+// KW: this should move into a device.attach() method on the MrlServo class/
+// get rid of the attach* methods here and move them to the device classes.
 Device* attachServo() {
   int pin = config[0];
   MrlServo* mrlServo = new MrlServo(pin);
@@ -1761,107 +1990,35 @@ Device* attachMotor() {
 }
 
 Device* attachI2C(){
-  MrlI2CDevice* device = new MrlI2CDevice();
+  MrlI2CBus* device = new MrlI2CBus();
   return device;
 }
 
-
-// TODO: look if we should remove this method.
-void addSensorDataListener() {
+Device* attachNeopixel() {
+  int pin=config[0];
+  int numPixel=config[1];
+  MrlNeopixel* device = new MrlNeopixel(pin,numPixel);
+  return device;
 }
-//  int sensorIndex    = ioCmd[1];
-//  int sensorType     = ioCmd[2];
-//  int pinCount       = ioCmd[3];
-//  // TODO: the message should pass the list of pins that this sensor uses,
-//  // and not assume sequential numbering!
-//  // for loop grabbing all pins for this sensor
-//  publishDebug("S_ATTACH: " + String(sensorIndex) + " type:" + String(sensorType) + " count:" + String(pinCount));
-//  Device* s = new Device(DEVICE_TYPE_SERVO);
-//  s->type = DEVICE_TYPE_SERVO;
-//  s->id = sensorIndex;
-//  LinkedList<Pin*> sensorPins = LinkedList<Pin*>();
-//  // TODO: support an arbitrary list of pins being passed in
-//  // right now, the pins are contigious
-//  for (int ordinal = 0; ordinal < pinCount; ordinal++){
-//    publishDebug("PINADD" + String(ordinal) + " TO " + String(pinCount));
-//    // TODO: make sure it's the right pin type!
-//    int type = SENSOR_TYPE_ANALOG_PIN_ARRAY;
-//    Pin* sensorPin = new Pin(type, ordinal);
-//    sensorPin->address = ordinal;
-//    // TODO: rename this analog/digital ?
-//    // sensorPin.deviceType = sensorType;
-//    //sensorPin.isActive = true;
-//    sensorPins.add(sensorPin);
-//    // TODO: special considerations based on the type of sensor to
-//    // setup the pins correctly for multi-pin sensors
-//  }
-//  publishDebug(F("adding pins."));
-//  s->pins = sensorPins;
-//  publishDebug(F("Adding sensors"));
-//  deviceList.add(s);
-//  publishDebug("NUM SENS:"+String(deviceList.size()));
-//  publishDebug(F("Done with sensor attach."));
-//}
-
-// SENSOR_ATTACH
-//void sensorAttach() {
-
-  // TODO: replace this kahuna with the deviceAttach big kahuna!
-
-  // THIS WILL BE THE NEW BIG-KAHUNA
-  // INITIAL REQUEST - SENSOR GRABS ALL PINs IT NEEDS
-  // IT THEN POPULATES each of the PINs with its sensorIndex
-  // the uC (Arduino) - does not grab any - because it will
-  // always take/recieve any non-reserved pin (softReset) Pin
-  //publishDebug("BSAM");
-  //int sensorIndex    = ioCmd[1];
-  //int sensorType     = ioCmd[2];
-  //int pinCount       = ioCmd[3];
-  // for loop grabbing all pins for this sensor
-  //for (int ordinal = 0; ordinal < pinCount; ordinal++){
-    // grab the pin - assign the sensorIndex & sensorType
-    //publishDebug("WHICH:" + String(ioCmd[4 + ordinal]));
-    //Pin pin = Pin();
-    //pin.sensorIndex = sensorIndex;
-    //pin.sensorType = sensorType;
-    //if (pin.sensorType == SENSOR_TYPE_ULTRASONIC && ordinal == 0) {
-    //  publishDebug("ULTRAS");
-      // pin.trigPin = ioCmd[3];
-      // pin.echoPin = ioCmd[4];
-    //  pinMode(pin.trigPin, OUTPUT); // WTF about wiring which has single pin ! :P
-    //  pinMode(pin.echoPin, INPUT);
-      //pin.ping = new NewPing(pin.trigPin, pin.echoPin, 100);
-      // triggerPin's next pin is the echo pin
-    //  pin.nextPin = ioCmd[5 + ordinal];
-    //} else if (pin.sensorType == SENSOR_TYPE_PULSE) {
-    //  publishDebug("PULSETYP");
-    //  pin.address = ioCmd[3];
-    //} else if (pin.sensorType == SENSOR_TYPE_PIN) {
-      // TODO: ?!
-    //  publishDebug("PINTYPE:" + String(ioCmd[1]) + " " + String(ioCmd[2]) + " " + String(ioCmd[3]) + " " + String(ioCmd[4]));
-    //  pin.address = ioCmd[4];
-      //pin.isActive = true;
-      // we're reading form this pin now.
-    //  pinMode(pin.address, INPUT);
-    //} else {
-    //  publishDebug("UNKNTYPE" + String(pin.sensorType));
-    //}
- // }
- // publishDebug("ESAM");
-//}
 
 /**
  * ATTACH DEVICES END
 **********************************************************************/
 
-
 /***********************************************************************
  * PUBLISH DEVICES BEGIN
+ * 
+ * All serial IO should happen here to publish a MRLComm message.
+ * TODO: move all serial IO into a controlled place this this below...
+ * TODO: create MRLCommMessage class that can just send itself!
+ * 
  */
 
 /**
  * send an error message/code back to MRL.
+ * MAGIC_NUMBER|2|PUBLISH_MRLCOMM_ERROR|ERROR_CODE
  */
+// KW: remove this, force an error message.
 void publishError(int type) {
   Serial.write(MAGIC_NUMBER);
   Serial.write(2); // bytes to follow, size = 1 FN + 1 TYPE
@@ -1872,16 +2029,22 @@ void publishError(int type) {
 
 /**
  * Send an error message along with the error code
+ * 
  */
 void publishError(int type, String message) {
   Serial.write(MAGIC_NUMBER);
   Serial.write(3+message.length()); // size = 1 FN + 1 TYPE
   Serial.write(PUBLISH_MRLCOMM_ERROR);
   Serial.write(type);
+  // TODO: ensure that this is decoded on the java side properly.
   Serial.print(message);
   Serial.flush();
 }
 
+/**
+ * Publish the MRLComm message
+ * MAGIC_NUMBER|2|MRLCOMM_VERSION
+ */
 void publishVersion() {
   Serial.write(MAGIC_NUMBER);
   Serial.write(2); // size
@@ -1890,7 +2053,14 @@ void publishVersion() {
   Serial.flush();
 }
 
-
+/**
+ * publishStatus
+ * This method is for performance profiling, it returns back the amount of time
+ * it took to run the loop() method and how much memory was free after that 
+ * loop method ran.
+ * 
+ * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
+ */
 void publishStatus(unsigned long loadTime, int freeMemory) {
   Serial.write(MAGIC_NUMBER);
   Serial.write(7); // size 1 FN + 4 bytes of unsigned long
@@ -1909,6 +2079,10 @@ void publishStatus(unsigned long loadTime, int freeMemory) {
   Serial.flush();
 }
 
+/**
+ * Publish the acknowledgement of the command received and processed.
+ * MAGIC_NUMBER|2|PUBLISH_MESSAGE_ACK|FUNCTION
+ */
 void publishCommandAck() {
   Serial.write(MAGIC_NUMBER);
   Serial.write(2); // bytes to follow, size 1 FN + 1 bytes (the function that we're acking.)
@@ -1918,14 +2092,18 @@ void publishCommandAck() {
   Serial.flush();
 }
 
-// This method will publish a string back to the Arduino service
-// for debugging purproses.
-// NOTE:  If this method gets called excessively
-// I have seen memory corruption in the arduino where
-// it seems to be getting a null string passed in as "message"
-// very very very very very odd..  I suspect a bug in the arduino hard/software
+/**
+ * Publish Debug - return a text debug message back to the java based arduino service in MRL
+ * MAGIC_NUMBER|1+MSG_LENGTH|MESSAGE_BYTES
+ * 
+ * This method will publish a string back to the Arduino service for debugging purproses.
+ * 
+ */
 void publishDebug(String message) {
   if (debug) {
+    // NOTE-KW:  If this method gets called excessively I have seen memory corruption in the 
+    // arduino where it seems to be getting a null string passed in as "message"
+    // very very very very very odd..  I suspect a bug in the arduino hardware/software
     Serial.flush();
     Serial.write(MAGIC_NUMBER);
     Serial.write(1+message.length());
@@ -1937,6 +2115,7 @@ void publishDebug(String message) {
 
 /**
  * publishBoardInfo()
+ * MAGIC_NUMBER|2|PUBLISH_BOARD_INFO|BOARD
  * return the board type (mega/uno) that can use in javaland for the pin layout
  */
 void publishBoardInfo() {
@@ -1947,4 +2126,4 @@ void publishBoardInfo() {
   Serial.flush();
 }
 
-// ================= publish methods end ==================
+/** ================= publish methods end ================== */
