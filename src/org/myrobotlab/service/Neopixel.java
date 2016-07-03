@@ -31,10 +31,12 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.NeopixelControl;
 import org.myrobotlab.service.interfaces.NeopixelController;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -62,19 +64,65 @@ public class Neopixel extends Service implements NeopixelControl{
       this.blue=blue;
       this.green=green;
     }
+    PixelColor(){
+      address=0;
+      red=0;
+      blue=0;
+      green=0;
+    }
   }
   
   HashMap<Integer, PixelColor> pixelMatrix = new HashMap<Integer, PixelColor>();
+  ArrayList<PixelColor> savedPixelMatrix = new ArrayList<PixelColor>();
+  
+ // PixelColor[] pixelMatrix;
   
   int numPixel=0;
-
+  
+  public boolean isAttached = false;
+  /**
+   * list of names of possible controllers
+   */
+  ArrayList<String> controllers;
+  public String controllerName;
+  
+  public int pin=0; 
+  public boolean off=false;
+  
   public Neopixel(String n) {
     super(n);
+    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
   }
-  
+
+  public void onRegistered(ServiceInterface s) {
+    refreshControllers();
+    broadcastState();
+  }
+
+  public ArrayList<String> refreshControllers() {
+    controllers = Runtime.getServiceNamesFromInterface(NeopixelController.class);
+    return controllers;
+  }
+
   @Override
   public NeopixelController getController() {
     return controller;
+  }
+  
+  public String getControllerName() {
+    String controlerName = null;
+    if (controller != null) {
+      controlerName = controller.getName();
+    }
+    return controlerName;
+  }
+
+  public void unsetController() {
+    controller.detach(this);
+    controller = null;
+    //controllerName = null;
+    isAttached = false;
+    broadcastState();
   }
 
   @Override
@@ -82,6 +130,12 @@ public class Neopixel extends Service implements NeopixelControl{
     return DeviceControl.DEVICE_TYPE_NEOPIXEL;
   }
 
+  public void setController(String controllerName, int pin, int numPixel){
+    if(controllerName!=""){
+      ((NeopixelController) Runtime.getService(controllerName)).attach(this, pin, numPixel);
+    }
+  }
+  
   @Override
   public void setController(DeviceController controller) {
     if (controller == null) {
@@ -90,22 +144,25 @@ public class Neopixel extends Service implements NeopixelControl{
     }
     log.info(String.format("%s setController %s", getName(), controller.getName()));
     this.controller = (NeopixelController) controller;
+    controllerName = this.controller.getName();
+    isAttached = true;
+    numPixel=0;
     pixelMatrix.clear();
-    for (int i=1; i<=numPixel; i++){
-      PixelColor pixel=new PixelColor(i,0,0,0);
-      pixel.address = i;
-      setPixel(pixel);
-    }
     broadcastState();
   }
   
+  public boolean isAttached() {
+    return isAttached;
+  }
+
   public void setPixel(int address, int red, int green, int blue){
     PixelColor pixel = new PixelColor(address, red, green, blue);
     setPixel(pixel);
   }
   
   public void setPixel(PixelColor pixel){
-    if (pixel.address<=numPixel){
+    if(off) return;
+    if (pixel.address<=getNumPixel()){
       pixelMatrix.put(pixel.address, pixel);
     }
     else {
@@ -113,7 +170,25 @@ public class Neopixel extends Service implements NeopixelControl{
     }
   }
   
+  public void sendPixel(PixelColor pixel){
+    if (off) return;
+    List<Integer> msg = new ArrayList<Integer>();
+    msg.add(pixel.address);
+    msg.add(pixel.red);
+    msg.add(pixel.green);
+    msg.add(pixel.blue);
+    controller.neopixelWriteMatrix(this, msg);
+    savedPixelMatrix.clear();
+    savedPixelMatrix.add(pixel);
+  }
+  
+  public void sendPixel(int address, int red, int green, int blue){
+    PixelColor pixel=new PixelColor(address,red,green,blue);
+    sendPixel(pixel);
+  }
+  
   public void sendPixelMatrix(){
+    savedPixelMatrix.clear();
     Set<Entry<Integer, PixelColor>> set = pixelMatrix.entrySet();
     Iterator<Entry<Integer, PixelColor>> i= set.iterator();
     List<Integer> msg = new ArrayList<Integer>();
@@ -123,14 +198,45 @@ public class Neopixel extends Service implements NeopixelControl{
       msg.add(me.getValue().red);
       msg.add(me.getValue().green);
       msg.add(me.getValue().blue);
+      savedPixelMatrix.add(me.getValue());
       if(msg.size()>32){
-        controller.neopixelWriteMatrix(this, msg);
+        if (!off) controller.neopixelWriteMatrix(this, msg);
         msg.clear();
       }
     }
-    controller.neopixelWriteMatrix(this, msg);
+    if (!off) controller.neopixelWriteMatrix(this, msg);
+    broadcastState();
   }
   
+  public int getPin(){
+    if(!isAttached) return 0;
+    pin = (int) controller.getConfig(this)[0];
+    return pin;
+  }
+
+  public int getNumPixel(){
+    if (!isAttached) return 0;
+    if(numPixel!=0) return numPixel;
+    numPixel = (int) controller.getConfig(this)[1];
+    for (int i=1; i < numPixel+1; i++){
+      setPixel(new PixelColor(i,0,0,0));
+    }
+    return numPixel;
+  }
+  
+  public void turnOff(){
+    for (int i=1; i<=numPixel; i++) {
+      PixelColor pixel=new PixelColor(i,0,0,0);
+      setPixel(pixel);
+    }
+    sendPixelMatrix();
+    off=true;
+  }
+  
+  public void turnOn(){
+    off=false;
+    broadcastState();
+  }
   
   /**
    * This static method returns all the details of the class without it having
@@ -156,14 +262,16 @@ public class Neopixel extends Service implements NeopixelControl{
     LoggingFactory.getInstance().setLevel(Level.INFO);
   
     try {
-     // Runtime.start("webgui", "WebGui");
+      WebGui webgui=(WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
       Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect("COM15");
      // arduino.setDebug(true);
       Neopixel neopixel = (Neopixel) Runtime.start("neopixel", "Neopixel");
-      neopixel.numPixel=16;
+      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
       //arduino.setLoadTimingEnabled(true);
       arduino.attachDevice(neopixel, 31,16 );
       PixelColor pix=new Neopixel.PixelColor(1,255,0,0);

@@ -1057,7 +1057,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 			}
 			log.info("Board type returned by Arduino: {}", boardName);
 			log.info("Board type currently set: {}", board);
-			if (board == "" && boardId != BOARD_TYPE_ID_UNKNOWN) {
+			if (boardId != BOARD_TYPE_ID_UNKNOWN) {
 				setBoard(boardName);
 				log.info("Board type set to: {}", board);
 			} else {
@@ -2165,5 +2165,9 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	  }
 	  sendMsg(NEOPIXEL_WRITE_MATRIX,buffer);
 	}
-	
+  @Override
+  public Object[] getConfig(DeviceControl device) {
+    Object[] config = deviceList.get(device.getName()).getConfig();
+    return config;
+  }	
 }
