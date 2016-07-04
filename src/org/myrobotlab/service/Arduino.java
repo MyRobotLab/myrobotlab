@@ -2151,8 +2151,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	@Override
 	public void servoAttach(ServoControl servo, int pin) {
-		// TODO Auto-generated method stub
-		
+		sendMsg(SERVO_ATTACH, getDeviceId(servo), pin);
 	}
 
 	@Override

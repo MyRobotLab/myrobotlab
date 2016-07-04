@@ -673,6 +673,10 @@ class MrlServo : public Device {
       // TODO-KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
     }
 
+    void detach(){
+      servo->detach();
+    }
+
     void update(unsigned long loopCount) {
       // TODO: implement me. / test This seems to be just for sweeping stuffs? The first part is also use when Servo.speed!=100
       //It's possible that the servo never reach the targetPos if servo->step!=1
@@ -1526,13 +1530,12 @@ void processCommand() {
     break;
   }
   case SERVO_ATTACH:{
-    // Servo.attach(pin)
-  int pin = ioCmd[2];
-  publishDebug("SERVO_ATTACH " + String(pin));
-  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
-  s->attach(pin);
-  publishDebug("SERVO_ATTACHED ");
-    break;
+	  int pin = ioCmd[2];
+	  publishDebug("SERVO_ATTACH " + String(pin));
+	  MrlServo* servo = (MrlServo*)getDevice(ioCmd[1]);
+	  servo->attach(pin);
+	  publishDebug("SERVO_ATTACHED");
+      break;
   }
   case SERVO_SWEEP_START:
     //startSweep(min,max,step)
@@ -1557,9 +1560,13 @@ void processCommand() {
   case SERVO_SET_SPEED:
     ((MrlServo*)getDevice(ioCmd[1]))->setSpeed(ioCmd[2]);
     break;
-  case SERVO_DETACH:
-    servoDetach();
+  case SERVO_DETACH:{
+	  publishDebug("SERVO_DETACH " + String(ioCmd[1]));
+	  MrlServo* servo = (MrlServo*)getDevice(ioCmd[1]);
+	  servo->detach();
+	  publishDebug("SERVO_DETACHED");
     break;
+  }
   case SET_LOAD_TIMING_ENABLED:
     setLoadTimingEnabled();
     break;
@@ -1666,11 +1673,6 @@ void sensorPollingStart() {
 
 void sensorPollingStop() {
   // TODO: implement me.
-}
-
-// SERVO_DETACH
-void servoDetach() {
-  detachDevice(ioCmd[1]);
 }
 
 // SET_LOAD_TIMING_ENABLED
@@ -1832,24 +1834,6 @@ void updateStatus() {
   lastMicros = micros();
 }
 
-
-/***********************************************************************
- * SERVO_ATTACH -
- *
- * GroG says - this should be removed - the resetting the setp & events is
- * an assumption - the call is very simple - no longer calling a method here
- * - its being called in the MrlServo class
- *
- */
-void servoAttach() {
-
-  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
-
-  // Servo takes 1 pin
-  s->servo->attach(ioCmd[2]);
-  s->step = 1;
-  s->eventsEnabled = false;
-}
 
 /**********************************************************************
  * ATTACH DEVICES BEGIN

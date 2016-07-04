@@ -42,6 +42,7 @@ public interface ServoControl extends DeviceControl {
 
 	/**
 	 * Re-attaches (re-energizes) the servo on its current pin
+	 * FIXME - should be renamed to energize
 	 * 
 	 * @return
 	 */
@@ -49,14 +50,14 @@ public interface ServoControl extends DeviceControl {
 
 	/**
 	 * Re-attaches (re-energizes) the servo on its current pin
-	 * 
+	 * FIXME - should be renamed to energize(pin)
 	 * @return
 	 */
 	public void attach(int pin);
 
 	/**
 	 * calls Servo.detach() on MRLComm
-	 * 
+	 * FIXME - should be renamed to de-energize (heh .. hyphons :P)
 	 * @return
 	 */
 	public void detach();
