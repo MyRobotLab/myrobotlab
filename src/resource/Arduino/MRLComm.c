@@ -339,115 +339,130 @@ void LinkedList<T>::clear() {
 #define GET_VERSION   2
 // {publishVersion Integer}
 #define PUBLISH_VERSION   3
-// {addSensorDataListener SensorDataListener int[]}
-#define ADD_SENSOR_DATA_LISTENER    4
 // {analogReadPollingStart Integer Integer}
-#define ANALOG_READ_POLLING_START   5
+#define ANALOG_READ_POLLING_START   4
 // {analogReadPollingStop int}
-#define ANALOG_READ_POLLING_STOP    6
+#define ANALOG_READ_POLLING_STOP    5
 // {analogWrite int int}
-#define ANALOG_WRITE    7
-// {attachDevice DeviceControl Object[]}
-#define ATTACH_DEVICE   8
-// {createI2cDevice int int String}
-#define CREATE_I2C_BUS    9
-// {detachDevice DeviceControl}
-#define DETACH_DEVICE   10
+#define ANALOG_WRITE    6
+// {createI2cDevice I2CControl int int}
+#define CREATE_I2C_DEVICE   7
+// {deviceAttach DeviceControl Object[]}
+#define DEVICE_ATTACH   8
+// {deviceDetach DeviceControl}
+#define DEVICE_DETACH   9
 // {digitalReadPollingStart Integer Integer}
-#define DIGITAL_READ_POLLING_START    11
+#define DIGITAL_READ_POLLING_START    10
 // {digitalReadPollingStop int}
-#define DIGITAL_READ_POLLING_STOP   12
+#define DIGITAL_READ_POLLING_STOP   11
 // {digitalWrite int int}
-#define DIGITAL_WRITE   13
+#define DIGITAL_WRITE   12
 // {fixPinOffset Integer}
-#define FIX_PIN_OFFSET    14
+#define FIX_PIN_OFFSET    13
 // {getBoardInfo}
-#define GET_BOARD_INFO    15
-// {i2cRead int int byte[] int}
-#define I2C_READ    16
-// {i2cWrite int int byte[] int}
-#define I2C_WRITE   17
-// {i2cWriteRead int int byte[] int byte[] int}
-#define I2C_WRITE_READ    18
+#define GET_BOARD_INFO    14
+// {getController}
+#define GET_CONTROLLER    15
+// {getMrlDeviceType DeviceControl}
+#define GET_MRL_DEVICE_TYPE   16
+// {i2cRead I2CControl int int byte[] int}
+#define I2C_READ    17
+// {i2cWrite I2CControl int int byte[] int}
+#define I2C_WRITE   18
+// {i2cWriteRead I2CControl int int byte[] int byte[] int}
+#define I2C_WRITE_READ    19
 // {intsToString int[] int int}
-#define INTS_TO_STRING    19
+#define INTS_TO_STRING    20
+// {isAttached}
+#define IS_ATTACHED   21
 // {motorMove MotorControl}
-#define MOTOR_MOVE    20
+#define MOTOR_MOVE    22
 // {motorMoveTo MotorControl}
-#define MOTOR_MOVE_TO   21
+#define MOTOR_MOVE_TO   23
 // {motorReset MotorControl}
-#define MOTOR_RESET   22
+#define MOTOR_RESET   24
 // {motorStop MotorControl}
-#define MOTOR_STOP    23
+#define MOTOR_STOP    25
+// {neoPixelWriteMatrix NeoPixel List}
+#define NEO_PIXEL_WRITE_MATRIX    26
 // {pinMode Integer Integer}
-#define PIN_MODE    24
-// {publishAttachedDevice DeviceControl}
-#define PUBLISH_ATTACHED_DEVICE   25
+#define PIN_MODE    27
+// {publishAttachedDevice String}
+#define PUBLISH_ATTACHED_DEVICE   28
+// {publishBoardInfo MrlCommStatus}
+#define PUBLISH_BOARD_INFO    29
 // {publishDebug String}
-#define PUBLISH_DEBUG   26
+#define PUBLISH_DEBUG   30
 // {publishMessageAck}
-#define PUBLISH_MESSAGE_ACK   27
+#define PUBLISH_MESSAGE_ACK   31
 // {publishPin Pin}
-#define PUBLISH_PIN   28
+#define PUBLISH_PIN   32
 // {publishPulse Long}
-#define PUBLISH_PULSE   29
+#define PUBLISH_PULSE   33
 // {publishPulseStop Integer}
-#define PUBLISH_PULSE_STOP    30
-// {publishSensorData SensorData}
-#define PUBLISH_SENSOR_DATA   31
+#define PUBLISH_PULSE_STOP    34
+// {publishSensorData Object}
+#define PUBLISH_SENSOR_DATA   35
 // {publishServoEvent Integer}
-#define PUBLISH_SERVO_EVENT   32
+#define PUBLISH_SERVO_EVENT   36
 // {publishStatus Long Integer}
-#define PUBLISH_STATUS    33
+#define PUBLISH_STATUS    37
 // {publishTrigger Pin}
-#define PUBLISH_TRIGGER   34
+#define PUBLISH_TRIGGER   38
 // {pulse int int int int}
-#define PULSE   35
+#define PULSE   39
 // {pulseStop}
-#define PULSE_STOP    36
-// {releaseI2cDevice int int}
-#define RELEASE_I2C_DEVICE    37
+#define PULSE_STOP    40
+// {releaseI2cDevice I2CControl int int}
+#define RELEASE_I2C_DEVICE    41
+// {sensorActivate SensorControl Object[]}
+#define SENSOR_ACTIVATE   42
+// {sensorDeactivate SensorControl}
+#define SENSOR_DEACTIVATE   43
 // {sensorPollingStart String}
-#define SENSOR_POLLING_START    38
+#define SENSOR_POLLING_START    44
 // {sensorPollingStop String}
-#define SENSOR_POLLING_STOP   39
-// {servoAttach Servo} - deleted method servoAttach, not device.attach
-#define SERVO_ATTACH    40
-// {servoDetach Servo}
-#define SERVO_DETACH    41
-// {servoEventsEnabled Servo boolean}
-#define SERVO_EVENTS_ENABLED    42
-// {servoSweepStart Servo}
-#define SERVO_SWEEP_START   43
-// {servoSweepStop Servo}
-#define SERVO_SWEEP_STOP    44
-// {servoWrite Servo}
-#define SERVO_WRITE   45
-// {servoWriteMicroseconds Servo}
-#define SERVO_WRITE_MICROSECONDS    46
+#define SENSOR_POLLING_STOP   45
+// {servoAttach ServoControl int}
+#define SERVO_ATTACH    46
+// {servoDetach ServoControl}
+#define SERVO_DETACH    47
+// {servoEventsEnabled ServoControl boolean}
+#define SERVO_EVENTS_ENABLED    48
+// {servoSetSpeed ServoControl}
+#define SERVO_SET_SPEED   49
+// {servoSweepStart ServoControl}
+#define SERVO_SWEEP_START   50
+// {servoSweepStop ServoControl}
+#define SERVO_SWEEP_STOP    51
+// {servoWrite ServoControl}
+#define SERVO_WRITE   52
+// {servoWriteMicroseconds ServoControl int}
+#define SERVO_WRITE_MICROSECONDS    53
+// {setController DeviceController}
+#define SET_CONTROLLER    54
 // {setDebounce int}
-#define SET_DEBOUNCE    47
+#define SET_DEBOUNCE    55
 // {setDebug boolean}
-#define SET_DEBUG   48
+#define SET_DEBUG   56
 // {setDigitalTriggerOnly Boolean}
-#define SET_DIGITAL_TRIGGER_ONLY    49
+#define SET_DIGITAL_TRIGGER_ONLY    57
 // {setLoadTimingEnabled boolean}
-#define SET_LOAD_TIMING_ENABLED   50
+#define SET_LOAD_TIMING_ENABLED   58
 // {setPWMFrequency Integer Integer}
-#define SET_PWMFREQUENCY    51
+#define SET_PWMFREQUENCY    59
 // {setSampleRate int}
-#define SET_SAMPLE_RATE   52
+#define SET_SAMPLE_RATE   60
 // {setSerialRate int}
-#define SET_SERIAL_RATE   53
-// {setServoSpeed Servo}
-#define SET_SERVO_SPEED   54
+#define SET_SERIAL_RATE   61
 // {setTrigger int int int}
-#define SET_TRIGGER   55
+#define SET_TRIGGER   62
 // {softReset}
-#define SOFT_RESET    56
+#define SOFT_RESET    63
 ///// INO GENERATED DEFINITION END //////
 
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
+
 
 
 // TODO: Move these into ArduinoMsgCodec  and re-generate ...
@@ -638,18 +653,18 @@ class MrlServo : public Device {
     // this method "may" be called with a pin or pin & pos depending on
     // config size
     void deviceAttach(unsigned char config[], int configSize){
-    	if (configSize < 1 || configSize > 2){
-    		publishError(ERROR_DOES_NOT_EXIST,F("MrlServo invalid attach config size"));
-    		return;
-    	}
+      if (configSize < 1 || configSize > 2){
+        publishError(ERROR_DOES_NOT_EXIST,F("MrlServo invalid attach config size"));
+        return;
+      }
 
-    	pin = config[0];
-    	attach(pin);
-    	if (configSize == 2){
-    		targetPos = config[1];
-    		servo->write(targetPos);
-    		currentPos = targetPos;
-    	}
+      pin = config[0];
+      attach(pin);
+      if (configSize == 2){
+        targetPos = config[1];
+        servo->write(targetPos);
+        currentPos = targetPos;
+      }
     }
 
     // This method is equivalent to Arduino's Servo.attach(pin) - (no pos)
@@ -1539,7 +1554,7 @@ void processCommand() {
   case SERVO_WRITE_MICROSECONDS:
     ((MrlServo*)getDevice(ioCmd[1]))->servoWriteMicroseconds(ioCmd[2]);
     break;
-  case SET_SERVO_SPEED:
+  case SERVO_SET_SPEED:
     ((MrlServo*)getDevice(ioCmd[1]))->setSpeed(ioCmd[2]);
     break;
   case SERVO_DETACH:
@@ -1590,14 +1605,10 @@ void processCommand() {
   case SOFT_RESET:
     softReset();
     break;
-  case ADD_SENSOR_DATA_LISTENER:
-      // TODO: replace this with simple attachDevice call.
-      // addSensorDataListener();
-    break;
   case SENSOR_POLLING_START:
     sensorPollingStart();
     break;
-  case ATTACH_DEVICE:
+  case DEVICE_ATTACH:
     attachDevice();
   break;
   case SENSOR_POLLING_STOP:
@@ -1933,7 +1944,7 @@ void attachDevice() {
     break;
   }
   case DEVICE_TYPE_SERVO: {
-	devicePtr = new MrlServo(type);
+  devicePtr = new MrlServo(type);
     break;
   }
   case DEVICE_TYPE_I2C: {
