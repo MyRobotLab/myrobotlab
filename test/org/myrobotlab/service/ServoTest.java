@@ -2,6 +2,8 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.fail;
 
+import java.util.List;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -52,17 +54,78 @@ public class ServoTest {
 	@Test
 	public void testAttach() throws Exception {
 		
+		// creation ...
 		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+		Adafruit16CServoDriver afdriver = (Adafruit16CServoDriver)Runtime.start("afdriver", "Adafruit16CServoDriver");
+		Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
+		Servo servo02 = (Servo)Runtime.start("servo02", "Servo");
+
+		Serial serial = arduino.getSerial();
+		// really I have to call refresh first ? :P
+		serial.refresh();
+		List<String> ports = serial.getPortNames();
+		for (String port: ports){
+			log.info(port);
+		}
+		
+		
+		// User code begin ...
+		// should be clear & easy !!
+		
+		// microcontroller connect ...
 		arduino.connect("COM5");
-		Servo servo = (Servo)Runtime.start("servo01", "Servo");
+		
+		
 		// arduino.setDebug(true);
 		
-		// device controller attaching device
-		arduino.attach(servo, 8);
-		servo.moveTo(30);
-		servo.moveTo(130);
-		servo.moveTo(30);
-		servo.moveTo(130);
+		// should this be valid ?
+		servo01.attach(arduino, 8);
+		
+		// servo move methods
+		servo01.moveTo(30);
+		servo01.moveTo(130);
+		servo01.moveTo(30);
+		servo01.moveTo(130);
+		
+		servo02.attach(afdriver, 8);
+		
+		
+		// this is valid
+		servo01.attach(arduino, 8, 40); // this attaches the device, calls Servo.attach(8), then Servo.write(40)
+		servo02.attach(afdriver, 8, 40);
+		// IS IT Equivalent to this ?
+		
+		// energize to different pin
+		servo01.attach(7);
+		servo02.attach(7);
+		
+		// servo move methods
+		servo01.moveTo(30);
+		servo02.moveTo(30);
+		servo01.moveTo(130);
+		servo02.moveTo(130);
+		servo01.moveTo(30);
+		servo02.moveTo(30);
+		servo01.moveTo(130);
+		servo02.moveTo(130);
+		
+		// servo detach
+		servo01.detach();
+		servo02.detach();
+		
+		// should re-attach
+		// with the same pin & pos
+		servo01.attach();
+		servo02.attach();
+		
+		// detaching the device
+		servo01.detach(arduino); // test servo02.detach(arduino); error ?
+		servo02.detach(afdriver);
+		
+		// errors / boundary cases
+//		servo01.attach(arduino, 8, 40);
+		servo02.attach(arduino, 8, 40); // same pin? 
+		servo01.attach(arduino, 8, 40); // already attached ?
 		
 	}
 

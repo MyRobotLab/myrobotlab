@@ -244,7 +244,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     }
     String motorName = String.format("%s_m%d", getName(), motorNum);
     deviceNameToNumber.put(motorName, motorNum);
-    Motor m = new Motor(motorName);
+    MotorDualPwm m = new MotorDualPwm(motorName);
     m.startService();
     motors.put(motorName, m);
     m.broadcastState();
@@ -351,25 +351,13 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 
 
 @Override
-public void attachDevice(DeviceControl device, Object... config) throws Exception {
+public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public void detachDevice(DeviceControl device) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void attach(MotorControl motor, int port) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void attach(MotorControl motor, int powerPin, int dirPin) {
+public void deviceDetach(DeviceControl device) {
 	// TODO Auto-generated method stub
 	
 }

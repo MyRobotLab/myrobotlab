@@ -14,11 +14,11 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.SensorData;
-import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.RangeListener;
-import org.myrobotlab.service.interfaces.SensorDataListener;
+import org.myrobotlab.service.interfaces.SensorControl;
+import org.myrobotlab.service.interfaces.SensorController;
 import org.slf4j.Logger;
 
 /**
@@ -27,7 +27,7 @@ import org.slf4j.Logger;
  * connected to an android.
  *
  */
-public class UltrasonicSensor extends Service implements RangeListener, SensorDataListener {
+public class UltrasonicSensor extends Service implements RangeListener, SensorControl {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,15 +35,7 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 
 	public final Set<String> types = new HashSet<String>(Arrays.asList("SR04"));
 	private int pings;
-	// private int max;
-
-	// private int min;
-	// private int sampleRate;
-
-	// TODO - avg ?
-
-	// private int sensorMinCM;
-	// private int sensorMaxCM;
+	
 	private Integer trigPin = null;
 	private Integer echoPin = null;
 	private String type = "SR04";
@@ -56,7 +48,7 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 
 	transient private BlockingQueue<Integer> data = new LinkedBlockingQueue<Integer>();
 
-	private transient Microcontroller controller;
+	private transient SensorController controller;
 
 	String controllerName;
 
@@ -76,21 +68,15 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 		addListener("publishRange", service.getName(), "onRange");
 	}
 
-	public void attach(String port, int pin) throws Exception {
-		attach(port, pin, pin);
-	}
-
-	public void attach(String port, int trigPin, int echoPin) throws Exception {
-		controller = (Microcontroller) startPeer("controller");
-		controllerName = controller.getName();
+	public void attach(SensorController controller, int trigPin, int echoPin) throws Exception {
+		this.controller = controller;
 		this.trigPin = trigPin;
 		this.echoPin = echoPin;
-		this.controller.connect(port); // THIS BETTER BLOCK UNTIL READY !
-		controller.attachDevice(this, new int[]{trigPin, echoPin});
+		controller.deviceAttach(this, trigPin, echoPin);
 	}
 
 	// FIXME - should be MicroController Interface ..
-	public Microcontroller getController() {
+	public SensorController getController() {
 		return controller;
 	}
 
@@ -156,11 +142,11 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 		// controller.sensorPollingStart(getName(), timeoutMS); ?? FIXME - add
 		// timeoutMs as part of attach config or
 		// setting in a command method
-		controller.sensorPollingStart(getName());
+		controller.sensorActivate(this, timeoutMS);
 	}
 
 	public void stopRanging() {
-		controller.sensorPollingStop(getName());
+		controller.sensorDeactivate(this);
 	}
 
 	// probably should do this in a util class
@@ -251,20 +237,33 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 	public String getType() {
 		return type;
 	}
-
-	@Override
-	public Integer getDeviceType() {
-		return DeviceControl.SENSOR_TYPE_ULTRASONIC;
-	}
-
+	
 	@Override
 	public void onSensorData(SensorData data) {
 		// TODO Auto-generated method stub
 
 	}
 
+	// FIXME should be done in "default" interface or abstract class :P
+	@Override
+	public boolean isAttached() {
+		return controller != null;
+	}
+
 	@Override
 	public void setController(DeviceController controller) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void activate(Object... conf) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deactivate() {
 		// TODO Auto-generated method stub
 		
 	}

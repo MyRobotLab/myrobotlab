@@ -334,117 +334,117 @@ void LinkedList<T>::clear() {
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE BEGIN -----------
 ///// INO GENERATED DEFINITION BEGIN //////
 // {publishMRLCommError Integer}
-#define PUBLISH_MRLCOMM_ERROR		1
+#define PUBLISH_MRLCOMM_ERROR    1
 // {getVersion}
-#define GET_VERSION		2
+#define GET_VERSION   2
 // {publishVersion Integer}
-#define PUBLISH_VERSION		3
+#define PUBLISH_VERSION   3
 // {addSensorDataListener SensorDataListener int[]}
-#define ADD_SENSOR_DATA_LISTENER		4
+#define ADD_SENSOR_DATA_LISTENER    4
 // {analogReadPollingStart Integer Integer}
-#define ANALOG_READ_POLLING_START		5
+#define ANALOG_READ_POLLING_START   5
 // {analogReadPollingStop int}
-#define ANALOG_READ_POLLING_STOP		6
+#define ANALOG_READ_POLLING_STOP    6
 // {analogWrite int int}
-#define ANALOG_WRITE		7
+#define ANALOG_WRITE    7
 // {attachDevice DeviceControl Object[]}
-#define ATTACH_DEVICE		8
+#define ATTACH_DEVICE   8
 // {createI2cDevice int int String}
-#define CREATE_I2C_BUS		9
+#define CREATE_I2C_BUS    9
 // {detachDevice DeviceControl}
-#define DETACH_DEVICE		10
+#define DETACH_DEVICE   10
 // {digitalReadPollingStart Integer Integer}
-#define DIGITAL_READ_POLLING_START		11
+#define DIGITAL_READ_POLLING_START    11
 // {digitalReadPollingStop int}
-#define DIGITAL_READ_POLLING_STOP		12
+#define DIGITAL_READ_POLLING_STOP   12
 // {digitalWrite int int}
-#define DIGITAL_WRITE		13
+#define DIGITAL_WRITE   13
 // {fixPinOffset Integer}
-#define FIX_PIN_OFFSET		14
+#define FIX_PIN_OFFSET    14
 // {getBoardInfo}
-#define GET_BOARD_INFO		15
+#define GET_BOARD_INFO    15
 // {i2cRead int int byte[] int}
-#define I2C_READ		16
+#define I2C_READ    16
 // {i2cWrite int int byte[] int}
-#define I2C_WRITE		17
+#define I2C_WRITE   17
 // {i2cWriteRead int int byte[] int byte[] int}
-#define I2C_WRITE_READ		18
+#define I2C_WRITE_READ    18
 // {intsToString int[] int int}
-#define INTS_TO_STRING		19
+#define INTS_TO_STRING    19
 // {motorMove MotorControl}
-#define MOTOR_MOVE		20
+#define MOTOR_MOVE    20
 // {motorMoveTo MotorControl}
-#define MOTOR_MOVE_TO		21
+#define MOTOR_MOVE_TO   21
 // {motorReset MotorControl}
-#define MOTOR_RESET		22
+#define MOTOR_RESET   22
 // {motorStop MotorControl}
-#define MOTOR_STOP		23
+#define MOTOR_STOP    23
 // {pinMode Integer Integer}
-#define PIN_MODE		24
+#define PIN_MODE    24
 // {publishAttachedDevice DeviceControl}
-#define PUBLISH_ATTACHED_DEVICE		25
+#define PUBLISH_ATTACHED_DEVICE   25
 // {publishDebug String}
-#define PUBLISH_DEBUG		26
+#define PUBLISH_DEBUG   26
 // {publishMessageAck}
-#define PUBLISH_MESSAGE_ACK		27
+#define PUBLISH_MESSAGE_ACK   27
 // {publishPin Pin}
-#define PUBLISH_PIN		28
+#define PUBLISH_PIN   28
 // {publishPulse Long}
-#define PUBLISH_PULSE		29
+#define PUBLISH_PULSE   29
 // {publishPulseStop Integer}
-#define PUBLISH_PULSE_STOP		30
+#define PUBLISH_PULSE_STOP    30
 // {publishSensorData SensorData}
-#define PUBLISH_SENSOR_DATA		31
+#define PUBLISH_SENSOR_DATA   31
 // {publishServoEvent Integer}
-#define PUBLISH_SERVO_EVENT		32
+#define PUBLISH_SERVO_EVENT   32
 // {publishStatus Long Integer}
-#define PUBLISH_STATUS		33
+#define PUBLISH_STATUS    33
 // {publishTrigger Pin}
-#define PUBLISH_TRIGGER		34
+#define PUBLISH_TRIGGER   34
 // {pulse int int int int}
-#define PULSE		35
+#define PULSE   35
 // {pulseStop}
-#define PULSE_STOP		36
+#define PULSE_STOP    36
 // {releaseI2cDevice int int}
-#define RELEASE_I2C_DEVICE		37
+#define RELEASE_I2C_DEVICE    37
 // {sensorPollingStart String}
-#define SENSOR_POLLING_START		38
+#define SENSOR_POLLING_START    38
 // {sensorPollingStop String}
-#define SENSOR_POLLING_STOP		39
+#define SENSOR_POLLING_STOP   39
 // {servoAttach Servo} - deleted method servoAttach, not device.attach
-#define SERVO_ATTACH		40
+#define SERVO_ATTACH    40
 // {servoDetach Servo}
-#define SERVO_DETACH		41
+#define SERVO_DETACH    41
 // {servoEventsEnabled Servo boolean}
-#define SERVO_EVENTS_ENABLED		42
+#define SERVO_EVENTS_ENABLED    42
 // {servoSweepStart Servo}
-#define SERVO_SWEEP_START		43
+#define SERVO_SWEEP_START   43
 // {servoSweepStop Servo}
-#define SERVO_SWEEP_STOP		44
+#define SERVO_SWEEP_STOP    44
 // {servoWrite Servo}
-#define SERVO_WRITE		45
+#define SERVO_WRITE   45
 // {servoWriteMicroseconds Servo}
-#define SERVO_WRITE_MICROSECONDS		46
+#define SERVO_WRITE_MICROSECONDS    46
 // {setDebounce int}
-#define SET_DEBOUNCE		47
+#define SET_DEBOUNCE    47
 // {setDebug boolean}
-#define SET_DEBUG		48
+#define SET_DEBUG   48
 // {setDigitalTriggerOnly Boolean}
-#define SET_DIGITAL_TRIGGER_ONLY		49
+#define SET_DIGITAL_TRIGGER_ONLY    49
 // {setLoadTimingEnabled boolean}
-#define SET_LOAD_TIMING_ENABLED		50
+#define SET_LOAD_TIMING_ENABLED   50
 // {setPWMFrequency Integer Integer}
-#define SET_PWMFREQUENCY		51
+#define SET_PWMFREQUENCY    51
 // {setSampleRate int}
-#define SET_SAMPLE_RATE		52
+#define SET_SAMPLE_RATE   52
 // {setSerialRate int}
-#define SET_SERIAL_RATE		53
+#define SET_SERIAL_RATE   53
 // {setServoSpeed Servo}
-#define SET_SERVO_SPEED		54
+#define SET_SERVO_SPEED   54
 // {setTrigger int int int}
-#define SET_TRIGGER		55
+#define SET_TRIGGER   55
 // {softReset}
-#define SOFT_RESET		56
+#define SOFT_RESET    56
 ///// INO GENERATED DEFINITION END //////
 
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
@@ -482,7 +482,7 @@ void LinkedList<T>::clear() {
 * Device types start as 1 - so if anyone forgot to
 * define their device it will error - rather default
 * to a device they may not want
-*   the DEVICE_TYPE_NOT_FOUND will manage the error instead of have it do random stuff
+*        the DEVICE_TYPE_NOT_FOUND will manage the error instead of have it do random stuff
 */
 
 // TODO: consider rename to DEVICE_TYPE_UNKNOWN ?  currently this isn't called anywhere
@@ -585,8 +585,7 @@ class Pin {
 
 class Device {
   public:
-    // TODO: consider making this Device(int deviceType, int[] config) so the device always has a handle to it's original config.
-    // GroG - agreed
+
     Device(int deviceType) {
       type = deviceType;
     }
@@ -599,6 +598,8 @@ class Device {
     // GroG - I think its good here - a uniform state description across all devices is if they are DEVICE_STATE_ACTIVE or DEVICE_STATE_DEACTIVE
     // subclasses can/should define their os substate - eg ULTRASONIC_STATE_WAITING_PULSE etc..
     virtual void update(unsigned long loopCount) {}; // all devices must implement this to update their state.
+    // the universal attach - follows Java-Land Controller.deviceAttach method
+    virtual void deviceAttach(unsigned char config[], int configSize) {};
 };
 
 /**
@@ -634,9 +635,27 @@ class MrlServo : public Device {
       delete servo;
     }
 
+    // this method "may" be called with a pin or pin & pos depending on
+    // config size
+    void deviceAttach(unsigned char config[], int configSize){
+    	if (configSize < 1 || configSize > 2){
+    		publishError(ERROR_DOES_NOT_EXIST,F("MrlServo invalid attach config size"));
+    		return;
+    	}
+
+    	pin = config[0];
+    	attach(pin);
+    	if (configSize == 2){
+    		targetPos = config[1];
+    		servo->write(targetPos);
+    		currentPos = targetPos;
+    	}
+    }
+
+    // This method is equivalent to Arduino's Servo.attach(pin) - (no pos)
     void attach(int pin){
-    	servo->attach(pin);
-    	// TODO-KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
+      servo->attach(pin);
+      // TODO-KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
     }
 
     void update(unsigned long loopCount) {
@@ -676,6 +695,8 @@ class MrlServo : public Device {
     // TODO: consider moving all Serial.write stuff out of device classes! -KW
     // I don't want devices knowing about the serial port directly.
     // consider a lifecycle where a device yeilds a message  to publish perhaps.
+    // GR - this would be good - I've had issues with varargs and memory leaks before
+    // perhaps as Mats mentioned - we can just supply a new array sendMsg(PUBLISH_THINGY, d0, d1, d(n));
     void publishServoEvent(int eventType) {
       Serial.write(MAGIC_NUMBER);
       Serial.write(5); // size = 1 FN + 1 INDEX + 1 eventType + 1 curPos
@@ -770,7 +791,7 @@ class MrlStepper : public Device {
 };
 
 /**
- * Analog Pin Array Sensor 
+ * Analog Pin Array Sensor
  * This represents a set of pins that can be sampled
  */
 class MrlAnalogPinArray : public Device {
@@ -1251,7 +1272,7 @@ class MrlNeopixel:public Device{
 /***********************************************************************
  * GLOBAL VARIABLES
  * TODO - work on reducing globals and pass as parameters
- */
+*/
 
 // The mighty device List.  This contains all active devices that are attached to the arduino.
 LinkedList<Device*> deviceList;
@@ -1300,7 +1321,7 @@ int addDevice(Device*);
  **********************************************************************/
 
 /***********************************************************************
- * STANDARD ARDUINO BEGIN 
+ * STANDARD ARDUINO BEGIN
  * setup() is called when the serial port is opened unless you hack the 
  * serial port on your arduino
  * 
@@ -1325,7 +1346,7 @@ void setup() {
  * main loop any arduino sketch runs
  */
 void loop() {
-  // increment how many times we've run 
+  // increment how many times we've run
   // TODO: handle overflow here after 32k runs, i suspect this might blow up? 
   ++loopCount;
   // get a command and process it from the serial port (if available.)
@@ -1373,8 +1394,12 @@ void softReset() {
  * This adds a device to the current set of active devices in the deviceList.
  * 
  * FIXME - G: I think dynamic array would work better
- * at least for the deviceList 
+ * at least for the deviceList
  * TODO: KW: i think it's pretty dynamic now.
+ * G: the nextDeviceId & Id leaves something to be desired - and the "index" does
+ * not spin through the deviceList to find it .. a dynamic array of pointers would only
+ * expand if it could not accomidate the current number of devices, when a device was
+ * removed - the slot could be re-used by the next device request
  */
 int addDevice(Device* device) {
   deviceList.add(device);
@@ -1469,142 +1494,146 @@ bool getCommand() {
 void processCommand() {
   // TODO-KW: make this switch statement go away.. or move somewhere else..
   // it'd be nice to have command.process(ioCmd[])  ..
+  // GR: - and then what a switch in command.process(?) ?
+
+  // FIXME - all case X: should have scope operator { } !
   switch (ioCmd[0]) {
-    // === system pass through begin ===
-    case DIGITAL_WRITE:
-      digitalWrite(ioCmd[1], ioCmd[2]);
+  // === system pass through begin ===
+  case DIGITAL_WRITE:
+    digitalWrite(ioCmd[1], ioCmd[2]);
+    break;
+  case ANALOG_WRITE:{
+    analogWrite(ioCmd[1], ioCmd[2]);
+    break;
+  }
+  case PIN_MODE:{
+    pinMode(ioCmd[1], ioCmd[2]);
+    break;
+  }
+  case SERVO_ATTACH:{
+    // Servo.attach(pin)
+  int pin = ioCmd[2];
+  publishDebug("SERVO_ATTACH " + String(pin));
+  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
+  s->attach(pin);
+  publishDebug("SERVO_ATTACHED ");
+    break;
+  }
+  case SERVO_SWEEP_START:
+    //startSweep(min,max,step)
+    ((MrlServo*)getDevice(ioCmd[1]))->startSweep(ioCmd[2],ioCmd[3],ioCmd[4]);
+    break;
+  case SERVO_SWEEP_STOP:
+    ((MrlServo*)getDevice(ioCmd[1]))->stopSweep();
+    break;
+  case SERVO_EVENTS_ENABLED:
+    // PUBLISH_SERVO_EVENT seem to do the same thing
+    servoEventsEnabled();
+    break;
+  case SERVO_WRITE:
+    ((MrlServo*)getDevice(ioCmd[1]))->servoWrite(ioCmd[2]);
+    break;
+  case PUBLISH_SERVO_EVENT:
+    ((MrlServo*)getDevice(ioCmd[1]))->servoEventEnabled(ioCmd[2]);
+    break;
+  case SERVO_WRITE_MICROSECONDS:
+    ((MrlServo*)getDevice(ioCmd[1]))->servoWriteMicroseconds(ioCmd[2]);
+    break;
+  case SET_SERVO_SPEED:
+    ((MrlServo*)getDevice(ioCmd[1]))->setSpeed(ioCmd[2]);
+    break;
+  case SERVO_DETACH:
+    servoDetach();
+    break;
+  case SET_LOAD_TIMING_ENABLED:
+    setLoadTimingEnabled();
+    break;
+  case SET_PWMFREQUENCY:
+    setPWMFrequency(ioCmd[1], ioCmd[2]);
+    break;
+  case ANALOG_READ_POLLING_START:
+    analogReadPollingStart();
+    break;
+  case ANALOG_READ_POLLING_STOP:
+    analogReadPollingStop();
+    break;
+  case DIGITAL_READ_POLLING_START:
+    digitalReadPollingStart();
+    break;
+  case DIGITAL_READ_POLLING_STOP:
+    digitalReadPollingStop();
       break;
-    case ANALOG_WRITE:{
-      analogWrite(ioCmd[1], ioCmd[2]);
-      break;
-    }
-    case PIN_MODE:{
-      pinMode(ioCmd[1], ioCmd[2]);
-      break;
-    }
-    case SERVO_ATTACH:{
-      // Servo.attach(pin)
-	    int pin = ioCmd[2];
-	    publishDebug("SERVO_ATTACH " + String(pin));
-  	  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
-	    s->attach(pin);
-  	  publishDebug("SERVO_ATTACHED ");
-      break;
-    }
-    case SERVO_SWEEP_START:
-      //startSweep(min,max,step)
-      ((MrlServo*)getDevice(ioCmd[1]))->startSweep(ioCmd[2],ioCmd[3],ioCmd[4]);
-      break;
-    case SERVO_SWEEP_STOP:
-      ((MrlServo*)getDevice(ioCmd[1]))->stopSweep();
-      break;
-    case SERVO_EVENTS_ENABLED:
-      // PUBLISH_SERVO_EVENT seem to do the same thing
-      servoEventsEnabled();
-      break;
-    case SERVO_WRITE:
-      ((MrlServo*)getDevice(ioCmd[1]))->servoWrite(ioCmd[2]);
-      break;
-    case PUBLISH_SERVO_EVENT:
-      ((MrlServo*)getDevice(ioCmd[1]))->servoEventEnabled(ioCmd[2]);
-      break;
-    case SERVO_WRITE_MICROSECONDS:
-      ((MrlServo*)getDevice(ioCmd[1]))->servoWriteMicroseconds(ioCmd[2]);
-      break;
-    case SET_SERVO_SPEED:
-      ((MrlServo*)getDevice(ioCmd[1]))->setSpeed(ioCmd[2]);
-      break;
-    case SERVO_DETACH:
-      servoDetach();
-      break;
-    case SET_LOAD_TIMING_ENABLED:
-      setLoadTimingEnabled();
-      break;
-    case SET_PWMFREQUENCY:
-      setPWMFrequency(ioCmd[1], ioCmd[2]);
-      break;
-    case ANALOG_READ_POLLING_START:
-      analogReadPollingStart();
-      break;
-    case ANALOG_READ_POLLING_STOP:
-      analogReadPollingStop();
-      break;
-    case DIGITAL_READ_POLLING_START:
-      digitalReadPollingStart();
-      break;
-    case DIGITAL_READ_POLLING_STOP:
-      digitalReadPollingStop();
-      break;
-    case PULSE:
-      ((MrlPulse*)getDevice(ioCmd[1]))->pulse(ioCmd);
-      break;
-    case PULSE_STOP:
-      ((MrlPulse*)getDevice(ioCmd[1]))->pulseStop();
-      break;
-    case SET_TRIGGER:
-      setTrigger();
-      break;
-    case SET_DEBOUNCE:
-      setDebounce();
-      break;
-    case SET_DIGITAL_TRIGGER_ONLY:
-      setDigitalTriggerOnly();
-      break;
-    case SET_SERIAL_RATE:
-      setSerialRate();
-      break;
-    case GET_VERSION:
-      publishVersion();
-      break;
-    case SET_SAMPLE_RATE:
-      setSampleRate();
-      break;
-    case SOFT_RESET:
-      softReset();
-      break;
-    case ADD_SENSOR_DATA_LISTENER:
+  case PULSE:
+    ((MrlPulse*)getDevice(ioCmd[1]))->pulse(ioCmd);
+    break;
+  case PULSE_STOP:
+    ((MrlPulse*)getDevice(ioCmd[1]))->pulseStop();
+    break;
+  case SET_TRIGGER:
+    setTrigger();
+    break;
+  case SET_DEBOUNCE:
+    setDebounce();
+    break;
+  case SET_DIGITAL_TRIGGER_ONLY:
+    setDigitalTriggerOnly();
+    break;
+  case SET_SERIAL_RATE:
+    setSerialRate();
+    break;
+  case GET_VERSION:
+    publishVersion();
+    break;
+  case SET_SAMPLE_RATE:
+    setSampleRate();
+    break;
+  case SOFT_RESET:
+    softReset();
+    break;
+  case ADD_SENSOR_DATA_LISTENER:
       // TODO: replace this with simple attachDevice call.
       // addSensorDataListener();
-      break;
-    case SENSOR_POLLING_START:
-      sensorPollingStart();
-      break;
-    case ATTACH_DEVICE:
-	    attachDevice();
-	    break;
-    case SENSOR_POLLING_STOP:
-      sensorPollingStop();
-      break;
-    // Start of i2c read and writes
-    case I2C_READ:
+    break;
+  case SENSOR_POLLING_START:
+    sensorPollingStart();
+    break;
+  case ATTACH_DEVICE:
+    attachDevice();
+  break;
+  case SENSOR_POLLING_STOP:
+    sensorPollingStop();
+    break;
+  // Start of i2c read and writes
+  case I2C_READ:
       ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cRead(&ioCmd[0]);
-      break;
-    case I2C_WRITE:
+    break;
+  case I2C_WRITE:
       ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cWrite(&ioCmd[0]);
-      break;
-    case I2C_WRITE_READ:
+    break;
+  case I2C_WRITE_READ:
       ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[0]);
-      break;
+    break;
     case SET_DEBUG:
-      debug = ioCmd[1];
-      if (debug) {
-        publishDebug(F("Debug logging enabled."));
-      }
-      break;
-    case GET_BOARD_INFO:
-      publishBoardInfo();
-      break;
+    debug = ioCmd[1];
+    if (debug) {
+      publishDebug(F("Debug logging enabled."));
+    }
+    break;
+  case GET_BOARD_INFO:
+    publishBoardInfo();
+    break;
     case NEOPIXEL_WRITE_MATRIX:
       ((MrlNeopixel*)getDevice(ioCmd[1]))->neopixelWriteMatrix(ioCmd);
       break;
-    default:
-      publishError(ERROR_UNKOWN_CMD);
-      break;
+  default:
+    publishError(ERROR_UNKOWN_CMD);
+    break;
   } // end switch
   // ack that we got a command (should we ack it first? or after we process the command?)
   publishCommandAck();
   // reset command buffer to be ready to receive the next command.
   // KW: we should only need to set the byteCount back to zero. clearing this array is just for safety sake i guess?
+  // GR: yup
   memset(ioCmd, 0, sizeof(ioCmd));
   byteCount = 0;
 } // process Command
@@ -1792,6 +1821,25 @@ void updateStatus() {
   lastMicros = micros();
 }
 
+
+/***********************************************************************
+ * SERVO_ATTACH -
+ *
+ * GroG says - this should be removed - the resetting the setp & events is
+ * an assumption - the call is very simple - no longer calling a method here
+ * - its being called in the MrlServo class
+ *
+ */
+void servoAttach() {
+
+  MrlServo* s = (MrlServo*)getDevice(ioCmd[1]);
+
+  // Servo takes 1 pin
+  s->servo->attach(ioCmd[2]);
+  s->step = 1;
+  s->eventsEnabled = false;
+}
+
 /**********************************************************************
  * ATTACH DEVICES BEGIN
  *
@@ -1818,91 +1866,99 @@ void updateStatus() {
  */
 void attachDevice() {
   // TOOD:KW check free memory to see if we can attach a new device. o/w return an error!
-	// we're creating a new device. auto increment it
-	// TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
-	//       Arduino will run out of memory before that happen.
-	//       A mecanism that will call a softReset() when MRL disconnect will prevent that
-	// we want to echo back the name
-	// and send the config in a nice neat package to
-	// the attach method which creates the device
-	int nameSize = ioCmd[2];
+  // we're creating a new device. auto increment it
+  // TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
+  //       Arduino will run out of memory before that happen.
+  //       A mecanism that will call a softReset() when MRL disconnect will prevent that
+  // we want to echo back the name
+  // and send the config in a nice neat package to
+  // the attach method which creates the device
+  int nameSize = ioCmd[2];
 
-	// get config size
-	int configSizePos = 3 + nameSize;
-	int configSize = ioCmd[configSizePos];
-	configPos = configSizePos + 1;
+  // get config size
+  int configSizePos = 3 + nameSize;
+  int configSize = ioCmd[configSizePos];
+  configPos = configSizePos + 1;
 
-	// MAKE NOTE: I've chosen to have config & configPos globals
-	// this is primarily to avoid the re-allocation/de-allocation of the config buffer
-	// but part of me thinks it should be a local var passed into the function to avoid
-	// the dangers of global var ... fortunately Arduino is single threaded
-	// It also makes sense to pass in config on the constructor of a new device
-	// based on device type - "you inflate the correct device with the correct config"
-	// but I went on the side of globals & hopefully avoiding more memory management and fragmentation
+  // MAKE NOTE: I've chosen to have config & configPos globals
+  // this is primarily to avoid the re-allocation/de-allocation of the config buffer
+  // but part of me thinks it should be a local var passed into the function to avoid
+  // the dangers of global var ... fortunately Arduino is single threaded
+  // It also makes sense to pass in config on the constructor of a new device
+  // based on device type - "you inflate the correct device with the correct config"
+  // but I went on the side of globals & hopefully avoiding more memory management and fragmentation
 
-	// move config off ioCmd into config buffer
-	for (int i = 0; i < configSize; ++i){
-		config[i] = ioCmd[configPos + i];
-	}
-
-	int deviceType = ioCmd[1];
-	Device* devicePtr = 0;
-	// KW: remove this switch statement by making "attach(int[]) a virtual method on the device base class.
-	// perhaps a factory to produce the devicePtr based on the deviceType.. 
-	// currently the attach logic is embeded in the constructors ..  maybe we can make that a more official
-	// lifecycle for the devices..  
-	// check out the make_stooge method on https://sourcemaking.com/design_patterns/factory_method/cpp/1
-	// This is really how we should do this.  (methinks)
-	switch (deviceType) {
-  	case SENSOR_TYPE_ANALOG_PIN_ARRAY: {
-	  	devicePtr = attachAnalogPinArray();
-		  break;
-  	}
-	  case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
-		  devicePtr = attachDigitalPinArray();
-  		break;
-	  }
-  	case SENSOR_TYPE_PULSE: {
-	  	devicePtr = attachPulse();
-		  break;
-  	}
-	  case SENSOR_TYPE_ULTRASONIC: {
-		  devicePtr = attachUltrasonic();
-  		break;
-	  }
-  	case DEVICE_TYPE_STEPPER: {
-	  	devicePtr = attachStepper();
-		  break;
-	  }
-  	case DEVICE_TYPE_MOTOR: {
-	  	devicePtr = attachMotor();
-		  break;
-	  }
-	  case DEVICE_TYPE_SERVO: {
-		  devicePtr = attachServo();
-	  	break;
-	  }
-	  case DEVICE_TYPE_I2C: {
-		  devicePtr = attachI2C();
-  		break;
-	  }
-	  case DEVICE_TYPE_NEOPIXEL: {
-	    devicePtr = attachNeopixel();
-	  }
-  	default: {
-		  // TODO: publish error message
-	  	publishDebug("Unknown Message Type.");
-		  break;
-	  }
+  // move config off ioCmd into config buffer
+  for (int i = 0; i < configSize; ++i){
+    config[i] = ioCmd[configPos + i];
   }
 
-  // KW: a sort of null pointer case? TODO: maybe move this into default branch of switch above?
-  if (devicePtr) {
-	  devicePtr->id = nextDeviceId;
-  	addDevice(devicePtr);
-	  publishAttachedDevice(devicePtr->id, nameSize, 3);
-  	nextDeviceId++;
+  int type = ioCmd[1];
+  Device* devicePtr = 0;
+  // KW: remove this switch statement by making "attach(int[]) a virtual method on the device base class.
+  // perhaps a factory to produce the devicePtr based on the deviceType..
+  // currently the attach logic is embeded in the constructors ..  maybe we can make that a more official
+  // lifecycle for the devices..
+  // check out the make_stooge method on https://sourcemaking.com/design_patterns/factory_method/cpp/1
+  // This is really how we should do this.  (methinks)
+
+        // GR: I agree ..  "attach" should be a universal concept of devices, yet it does not need to be implmented
+        // in the constructor .. so I'm for making a virtualized attach, but just like Java-Land the attach
+        // needs to have size sent in with the config since it can be variable array
+        // e.g.  attach(int[] config, configSize)
+
+  switch (type) {
+  case SENSOR_TYPE_ANALOG_PIN_ARRAY: {
+    devicePtr = attachAnalogPinArray();
+    break;
   }
+  case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
+    devicePtr = attachDigitalPinArray();
+    break;
+  }
+  case SENSOR_TYPE_PULSE: {
+    devicePtr = attachPulse();
+    break;
+  }
+  case SENSOR_TYPE_ULTRASONIC: {
+    devicePtr = attachUltrasonic();
+    break;
+  }
+  case DEVICE_TYPE_STEPPER: {
+    devicePtr = attachStepper();
+    break;
+  }
+  case DEVICE_TYPE_MOTOR: {
+    devicePtr = attachMotor();
+    break;
+  }
+  case DEVICE_TYPE_SERVO: {
+	devicePtr = new MrlServo(type);
+    break;
+  }
+  case DEVICE_TYPE_I2C: {
+    devicePtr = attachI2C();
+    break;
+  }
+    case DEVICE_TYPE_NEOPIXEL: {
+      devicePtr = attachNeopixel();
+    }
+  default: {
+    // TODO: publish error message
+      publishDebug("Unknown Message Type.");
+    break;
+  }
+}
+
+if (devicePtr) {
+  devicePtr->id = nextDeviceId;
+  devicePtr->deviceAttach(config, configSize);
+  addDevice(devicePtr);
+  publishAttachedDevice(devicePtr->id, nameSize, 3);
+  nextDeviceId++;
+}
+
+       // GR: I would assume devicePtr->attach(config, configSize) would be called here
 }
 
 /**
@@ -1959,14 +2015,6 @@ Device* attachDigitalPinArray() {
   // TODO: add the list of pins to the array <-- not necessary until a request to read/poll a pin is received
   // KW: Ok, so a digital pin array is something you should dynamically specify which pins are in it ?
   return pinArray;
-}
-
-// KW: this should move into a device.attach() method on the MrlServo class/
-// get rid of the attach* methods here and move them to the device classes.
-Device* attachServo() {
-  int pin = config[0];
-  MrlServo* mrlServo = new MrlServo(pin);
-  return mrlServo;
 }
 
 Device* attachPulse() {
@@ -2126,4 +2174,4 @@ void publishBoardInfo() {
   Serial.flush();
 }
 
-/** ================= publish methods end ================== */
+// ================= publish methods end ==================

@@ -11,6 +11,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.Microcontroller;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -99,96 +100,6 @@ public List<Pin> getPinList() {
 	return null;
 }
 
-@Override
-public void sensorPollingStart(String name) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void sensorPollingStop(String name) {
-	// TODO Auto-generated method stub
-	
-}
-
-
-@Override
-public void servoDetach(Servo servo) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void servoSweepStart(Servo servo) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void servoSweepStop(Servo servo) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void servoWrite(Servo servo) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void servoWriteMicroseconds(Servo servo) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public boolean servoEventsEnabled(Servo servo, boolean enabled) {
-	// TODO Auto-generated method stub
-	return false;
-}
-
-@Override
-public void setServoSpeed(Servo servo) {
-	// TODO Auto-generated method stub
-	
-}
-
-
-@Override
-public void detachDevice(DeviceControl device) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void attachDevice(DeviceControl device, Object... config) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void servoAttach(Servo servo, int pin) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void attach(Servo servo, int pin) {
-	attachDevice(servo, new int[]{pin});
-}
-
-@Override
-public void detach(Servo servo) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public Integer getPin(Servo servo) {
-	// TODO Auto-generated method stub
-	return null;
-}
 
 
 @Override
@@ -200,6 +111,66 @@ public void connect(String port, int rate, int databits, int stopbits, int parit
 
 @Override
 public void connect(String port) {
+	// TODO Auto-generated method stub
+	
+}
+@Override
+public void servoAttach(ServoControl servo, int pin) {
+	// TODO Auto-generated method stub
+	
+}
+
+
+@Override
+public void servoSweepStart(ServoControl servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void servoSweepStop(ServoControl servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void servoWrite(ServoControl servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void servoWriteMicroseconds(ServoControl servo, int uS) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public boolean servoEventsEnabled(ServoControl servo, boolean enabled) {
+	// TODO Auto-generated method stub
+	return false;
+}
+
+@Override
+public void servoSetSpeed(ServoControl servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void servoDetach(ServoControl servo) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void deviceDetach(DeviceControl device) {
 	// TODO Auto-generated method stub
 	
 }

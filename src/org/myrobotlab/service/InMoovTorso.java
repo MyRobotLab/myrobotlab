@@ -57,9 +57,9 @@ public class InMoovTorso extends Service {
     */
     
     // NEW WAY
-    arduino.attach(topStom, 27);
-    arduino.attach(topStom, 28);
-    arduino.attach(topStom, 29);
+    arduino.servoAttach(topStom, 27);
+    arduino.servoAttach(topStom, 28);
+    arduino.servoAttach(topStom, 29);
 
     topStom.setMinMax(60, 120);
     midStom.setMinMax(0, 180);
@@ -77,15 +77,15 @@ public class InMoovTorso extends Service {
    * @return
    */
   public boolean attach() {
-    boolean result = true;
+ 
     sleep(InMoov.attachPauseMs);
-    result &= topStom.attach();
+    topStom.attach();
     sleep(InMoov.attachPauseMs);
-    result &= midStom.attach();
+    midStom.attach();
     sleep(InMoov.attachPauseMs);
-    result &= lowStom.attach();
+    lowStom.attach();
     sleep(InMoov.attachPauseMs);
-    return result;
+    return true;
   }
 
   @Override
@@ -210,9 +210,9 @@ public class InMoovTorso extends Service {
     */
 	  
 
-	    arduino.attach(topStom, topStomPin);
-	    arduino.attach(topStom, midStomPin);
-	    arduino.attach(topStom, lowStomPin);
+	    arduino.servoAttach(topStom, topStomPin);
+	    arduino.servoAttach(topStom, midStomPin);
+	    arduino.servoAttach(topStom, lowStomPin);
   }
 
   public void setSpeed(Double topStom, Double midStom, Double lowStom) {

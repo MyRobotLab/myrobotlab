@@ -25,12 +25,6 @@
 
 package org.myrobotlab.service;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -41,7 +35,6 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.data.SensorData;
-import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
@@ -59,71 +52,16 @@ import org.slf4j.Logger;
  *         H-bridges output
  * 
  */
-public class Motor extends Service implements MotorControl, SensorDataListener, EncoderListener {
+public abstract class Motor extends Service implements MotorControl, SensorDataListener, EncoderListener {
 
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(Motor.class);
 
-  // //////////////// Motor Types Begin
-  // ////////////////////////////////////////
 
-  /**
-   * TYPE_PWM_DIR is the type of motor controller which has a digital direction
-   * pin. If this pin is high the motor travels in one direction if the pin is
-   * low the motor travels in the reverse direction
-   * 
-   */
-  public final static String TYPE_SIMPLE = "simple pwm dir";
-
-  /**
-   * TYPE_LPWM_RPWM - is a motor controller which one pin is pulsed to go one
-   * way and the other pin is pulsed to go the other way .. both low or both
-   * high invalid? Does one pin need to be held high or low while the other is
-   * pulsed.
-   */
-  public final static String TYPE_2_PWM = "2 pwm";
-
-  /**
-   * motor with psuedo (fake) encoder. Pulses are done by the micro-controller
-   * with something like a Arduino digitalWrite 0/1 the pulses are sent both to
-   * the pin & back through the serial line as a "control not feedback" encoder
-   */
-  public final static String TYPE_PULSE_STEP = "pulse step";
-
-  /**
-   * Ya - we'll be supporting stepper soon
-   */
-  public final static String TYPE_STEPPER = "stepper";
-
-  // pin "types" - to used in different motor "types"
-  public final static String PIN_TYPE_PWM = "pwm pin";
-  public final static String PIN_TYPE_DIR = "dir pin";
-  public final static String PIN_TYPE_PWM_LEFT = "pwm left pin";
-  public final static String PIN_TYPE_PWM_RIGHT = "pwm right pin";
-  public final static String PIN_TYPE_PULSE = "pulse pin";
-
-  // SENSOR INFO BEGI
-
-  public final static String ENCODER_TYPE_NONE = "none";
-  public final static String ENCODER_TYPE_SIMPLE = "simple";
-
-  // control
-  /**
-   * FIXME - move motor - pin driver logic into Motor (it is common across all
-   * micro-controllers) for the 2 types of motor controller
-   * 
-   * Make "named" Peer versus direct controller reference
-   */
-
-  // //////////////// Motor Types End ////////////////////////////////////////
-
-  transient private MotorController controller = null;
-  String controllerName = null;
+  protected transient MotorController controller = null;
 
   boolean locked = false;
-
-  Map<String, Integer> pinMap = new TreeMap<String, Integer>();
 
   /**
    * the power level requested - varies between -1.0 <--> 1.0
@@ -140,12 +78,6 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
   transient MotorEncoder encoder = null;
 
-  String type = TYPE_SIMPLE;
-  String encoderType = ENCODER_TYPE_NONE;
-
-  Set<String> types = new HashSet<String>();
-  Set<String> encoderTypes = new HashSet<String>();
-
   // FIXME - implements an Encoder interface
   // get a named instance - stopping and tarting should not be creating &
   // destroying
@@ -153,34 +85,8 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
   public Motor(String n) {
     super(n);
-    types.add(TYPE_SIMPLE);
-    types.add(TYPE_2_PWM);
-    types.add(TYPE_PULSE_STEP);
-    encoderTypes.add(ENCODER_TYPE_NONE);
-    encoderTypes.add(ENCODER_TYPE_SIMPLE);
   }
 
-  @Override
-  public void detach() {
-    controller.detachDevice(this);
-    controllerName = null; // FIXME - should only have controllerName and
-    // not isAttached - test for null
-    controller = null;
-    broadcastState();
-    // return ret;
-    return;
-
-  }
-
-  /* NON STANDARD - USE getController
-  public String getControllerName() {
-    if (controller != null) {
-      return controller.getName();
-    }
-    return null;
-  }
-  */
-  
   public DeviceController getController(){
 	  return controller;
   }
@@ -201,15 +107,13 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
   @Override
   public boolean isAttached() {
-    return controllerName != null;
+    return controller != null;
   }
 
   @Override
   public boolean isInverted() {
     return powerMap.isInverted();
   }
-
-  // --------- Motor (front end) API End ----------------------------
 
   @Override
   public void lock() {
@@ -239,9 +143,6 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
     controller.motorMove(this);
   }
 
-  public Integer getPin(String name) {
-    return pinMap.get(name);
-  }
 
   @Override
   public void moveTo(int newPos, Double powerLevel) {
@@ -264,7 +165,6 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
   @Override
   public void setController(DeviceController controller) {
     this.controller = (MotorController)controller;
-    this.controllerName = controller.getName();
   }
 
   @Override
@@ -285,7 +185,6 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
   @Override
   public void stop() {
-    // move(0.0);
     powerLevel = 0.0;
     controller.motorStop(this);
   }
@@ -303,98 +202,12 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
     locked = false;
   }
 
-  public String getMotorType() {
-    return type;
-  }
-
-  public String getEncoderType() {
-    return encoderType;
-  }
-
-  public void setEncoderType(String type) {
-    encoderType = type;
-  }
-
+  // FIXME - related to update(SensorData) no ?
   public Integer updatePosition(Integer position) {
     currentPos = position;
     return position;
   }
  
-  @Override
-  public boolean hasSensor() {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public int[] getControlPins() {
-    log.info("getControlPins");
-    int[] ret = new int[pinMap.size()];
-    int index = 0;
-    for (String pin : pinMap.keySet()) {
-      Integer x = pinMap.get(pin);
-      log.info(String.format("[%d] = %s (%d)", index, pin, x));
-      ret[index] = x;
-      ++index;
-    }
-    return ret;
-  }
-
-  public String[] getMotorTypes() {
-    return types.toArray(new String[types.size()]);
-  }
-
-  public void setTypePulseStep(Integer pulsePin, Integer dirPin) throws MRLException {
-    this.type = TYPE_PULSE_STEP;
-    pinMap.clear();
-    pinMap.put(PIN_TYPE_PULSE, pulsePin);
-    pinMap.put(PIN_TYPE_DIR, dirPin);
-  }
-
-  public void setTypeStepper() {
-    // TODO Auto-generated method stub
-
-  }
-
-  public void setType2Pwm(Integer leftPwm, Integer rightPwm) {
-    this.type = TYPE_2_PWM;
-    pinMap.clear();
-    pinMap.put(PIN_TYPE_PWM_LEFT, leftPwm);
-    pinMap.put(PIN_TYPE_PWM_RIGHT, rightPwm);
-  }
-
-  public void setTypeSimple(Integer pwmPin, Integer dirPin) {
-    this.type = TYPE_SIMPLE;
-    pinMap.clear();
-    pinMap.put(PIN_TYPE_PWM, pwmPin);
-    pinMap.put(PIN_TYPE_DIR, dirPin);
-  }
-
-  /**
-   * all logic defining the configuration points of a motor type are in this one
-   * method
-   * 
-   * @param type
-   * @throws MRLException
-   */
-  /*
-   * public void setType(String type) throws MRLException { if
-   * (!types.contains(type)){ throw new MRLException("%s not valid", type); }
-   * 
-   * 
-   * 
-   * this.type = type; }
-   */
-
-
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Motor.class.getCanonicalName());
@@ -457,7 +270,6 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
       arduino.analogWrite(6, 0);
 
       Motor m1 = (Motor) Runtime.start("m1", "Motor");
-      m1.setTypeSimple(pwmPin, dirPin);
 
       /*
        * m1.setType2Pwm(leftPwm, rightPwm); m1.setTypeStepper();
@@ -511,24 +323,6 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
     }
 
   }
-/*  I DONT THINK MOTOR NEEDS THESE
-@Override
-public SensorData publishSensorData(SensorData data) {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-@Override
-public void addSensorDataListener(SensorDataListener listener, int[] config) {
-	// TODO Auto-generated method stub
-	
-}
-*/
-
-@Override
-public Integer getDeviceType() {
-	return DeviceControl.DEVICE_TYPE_MOTOR;
-}
 
 @Override
 public void update(SensorData data) {
@@ -554,5 +348,9 @@ public void setEncoder(Encoder encoder) {
 	
 }
 
+public void detach(MotorController controller) {		
+	controller.deviceDetach(this);
+	controller = null;
+}
 
 }

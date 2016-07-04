@@ -8,9 +8,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.sensor.AnalogPinSensor;
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.Motor;
+import org.myrobotlab.service.MotorDualPwm;
 import org.myrobotlab.service.PID2;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.SensorData;
@@ -41,7 +40,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
 
   private PID2 pid;
   private String key = "test";
-  private Motor motor;
+  private MotorDualPwm motor;
 
   private int count = 0;
   private int rate = 5;
@@ -121,8 +120,8 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     arduino.connect(port);
     // wait for the arduino to actually connect!
     // Start the motor and attach it to the arduino.
-    motor = (Motor)Runtime.createAndStart("motor", "Motor");
-    motor.setType2Pwm(leftPwm, rightPwm);
+    motor = (MotorDualPwm)Runtime.createAndStart("motor", "MotorDualPwm");
+    motor.setPwmPins(leftPwm, rightPwm);
     motor.setController((MotorController)arduino);
     // Sensor callback
     // arduino.analogReadPollingStart(potPin);
@@ -130,8 +129,8 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     
     // pin zero sample rate 1.  (TODO: fix the concept of a sample rate!)
     // we actually want it to be specified in Hz..  not cycles ...
-    AnalogPinSensor feedbackPot = new AnalogPinSensor(0,1);
-    feedbackPot.addSensorDataListener(this, null); // null config is this right ?
+    // AnalogPinSensor feedbackPot = new AnalogPinSensor(0,1);
+    // feedbackPot.addSensorDataListener(this); // null config is this right ?
     // arduino.sensorAttach(feedbackPot);
     
     if (enableLoadTiming) {
@@ -305,12 +304,6 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     return sb.toString();
   }
 
-@Override
-public Integer getDeviceType() {
-	// TODO Auto-generated method stub
-	return null;
-}
-
 
 @Override
 public void update(SensorData data) {
@@ -328,6 +321,12 @@ public void setController(DeviceController controller) {
 public DeviceController getController() {
 	// TODO Auto-generated method stub
 	return null;
+}
+
+@Override
+public boolean isAttached() {
+	// TODO Auto-generated method stub
+	return false;
 }
 
 }

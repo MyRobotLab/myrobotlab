@@ -18,19 +18,19 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
  * AdaFruit 16-Channel PWM / Servo Driver
  * 
- * @author GroG
+ * @author Mats
  * 
  *         References : http://www.ladyada.net/make/mshield/use.html
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
@@ -105,8 +105,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public String controllerName;
 	public boolean isControllerSet = false;
 
-	// Servo
-	private boolean isAttached = false;
 
 	/**
 	 * @Mats - added by GroG - was wondering if this would help, probably you need
@@ -232,7 +230,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	// @Override
 	public boolean isAttached() {
-		return isAttached;
+		return controller != null;
 	}
 
 	/**
@@ -298,54 +296,64 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
 
+	/**
+	 * this would have been nice to have Java 8 and a default implmentation in this interface which does Servo sweeping 
+	 * in the Servo (already implmented) and only if the controller can does it do sweeping on the "controller"
+	 * 
+	 * For example MrlComm can sweep internally (or it used to be implemented)
+	 */
 	@Override
-	public void servoSweepStart(Servo servo) {
-		// TODO Auto-generated method stub
-
+	public void servoSweepStart(ServoControl servo) {
+		log.info("Adafruit16C can not do sweeping on the controller - sweeping must be done in ServoControl");
 	}
 
 	@Override
-	public void servoSweepStop(Servo servo) {
-		// TODO Auto-generated method stub
-
+	public void servoSweepStop(ServoControl servo) {
+		log.info("Adafruit16C can not do sweeping on the controller - sweeping must be done in ServoControl");
 	}
 
+	
 	@Override
-	public void servoWrite(Servo servo) {
+	public void servoWrite(ServoControl servo) {
 		if (!pwmFreqSet) {
 			setPWMFreq(pwmFreq);
 		}
-		log.info(String.format("servoWrite %s deviceAddress %s targetOutput %d", servo.getName(), deviceAddress, servo.targetOutput));
-		int pulseWidthOff = SERVOMIN + (int) (servo.targetOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
-		setServo(getPin(servo), pulseWidthOff);
+		log.info(String.format("servoWrite %s deviceAddress %s targetOutput %d", servo.getName(), deviceAddress, servo.getTargetOutput()));
+		int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
+		setServo(servo.getPin(), pulseWidthOff);
 	}
 
 	@Override
-	public void servoWriteMicroseconds(Servo servo) {
+	public void servoWriteMicroseconds(ServoControl servo, int uS) {
 		if (!pwmFreqSet) {
 			setPWMFreq(pwmFreq);
 		}
+		int pin = servo.getPin();
 		// 1000 ms => 150, 2000 ms => 600
-		int pulseWidthOff = (int) (servo.uS * 0.45) - 300;
+		int pulseWidthOff = (int) (uS * 0.45) - 300;
 		// since pulseWidthOff can be larger than > 256 it needs to be
 		// sent as 2 bytes
-		log.info(String.format("servoWriteMicroseconds %s deviceAddress x%02X pin %s pulse %d", servo.getName(), deviceAddress, getPin(servo), pulseWidthOff));
+		log.info(String.format("servoWriteMicroseconds %s deviceAddress x%02X pin %s pulse %d", servo.getName(), deviceAddress, pin, pulseWidthOff));
 
-		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (getPin(servo) * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
+		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
 
 	@Override
-	public boolean servoEventsEnabled(Servo servo, boolean enabled) {
+	public boolean servoEventsEnabled(ServoControl servo, boolean enabled) {
 		// @GroG. What is this method supposed to do ?
 		// return arduino.servoEventsEnabled(servo, enabled);
+		// Grog says - if you want feedback from the microcontroller to say when a servo has stopped
+		// when its moving at sub speed ...  
+		// perhaps cannot do this with Adafruit16CServoDriver
+
 		return enabled;
 	}
 
 	@Override
-	public void setServoSpeed(Servo servo) {
+	public void servoSetSpeed(ServoControl servo) {
 		// TODO Auto-generated method stub.
-
+		// perhaps cannot do this with Adafruit16CServoDriver
 	}
 
 	/**
@@ -370,65 +378,18 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	/**
-	 * THESE ARE SERVO COMMANDS ! NOT REQUEST TO ATTACH OR DETACH THE SERVO AS A
-	 * DEVICE !!!
-	 */
-	@Override
-	public void servoAttach(Servo servo, int pin) {
-		// TODO Implement something ? Or not ?
-		// Grog says,
-		// this is a (possibly an Arduino specific method call) which energizes a
-		// servo
-		// with a new pin equivalent to the Arduino's Servo.attach(int) - different
-		// from the low level concept of connecting a generalized device to this
-		// controller
-	}
-
-	/**
 	 * Stop sending pulses to the servo, relax
 	 */
 	@Override
-	public void servoDetach(Servo servo) {
-		int pin = getPin(servo);
+	public void servoDetach(ServoControl servo) {
+		int pin = servo.getPin();
 		setPWM(pin, 4096, 0);
 	}
 
 	@Override
-	public void attachDevice(DeviceControl device, Object... config) {
-		// TODO - any more setup required
-		// Commented out. Can't have any Ardino specific methods here. /Mats
-		// arduino.attachDevice(device, config);
-		// @Grog. What is this methods expected to do here.
-
-		// Grog says,
-		// The method is a low level call for a DeviceController to attach a Device
-		// you may pass any necessary config in order to properly initialize a
-		// device.
-		// If your Controller supports controlling multiple types of devices - for
-		// example,
-		// DynamixelServos & Servos - this method would be all where all the
-		// "common" logic
-		// to attach a device to its controller would be shared ..
-		//
-		// you can look at Arduino.attachDevice as an example...
-		// Arduino will need to support multiple DeviceControllers in addition to
-		// multiple Devices to control
-		// the common logic for all of them run through attachDevice
-
+	public DeviceController getController() {
+		return controller;
 	}
-
-	@Override
-	public void detachDevice(DeviceControl servo) {
-		// Commented out. Can't have any Ardino specific methods here. /Mats
-		// arduino.detachDevice(servo);
-		// @Grog. What is this methods expected to do here.
-	}
-
-	/**
-	 * I do not remember if the I2C Servo driver has a concept of
-	 * Servo.attach/detach like Arduino <Servo.h> does. I would think it does,
-	 * this really means go and stay at a position, vs power off to the servo
-	 */
 
 	/**
 	 * Device attach - this should be creating the I2C device on MRLComm for the
@@ -453,42 +414,38 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * servo requests to i2c writes using the I2CControl interface
 	 * 
 	 */
-	@Override
-	public void attach(Servo servo, int pin) {
-
-		if (servo == null) {
-			error("trying to attach null servo");
-		}
-
-		servo.setController(this);
-		servoNameToPin.put(servo.getName(), pin);
-		isAttached = true;
-	}
 
 	/**
-	 * Complete detach. Stop sending pulses to the servo and remove it from the
-	 * list of servos
+	 * if your device controller can provided several {Type}Controller interfaces, there
+	 * might be commonality between all of them.  e.g. initialization of data structures, preparing 
+	 * communication, sending control and config messages, etc.. - if there is commonality, it could
+	 * be handled here - where Type specific methods call this method
 	 */
+	
+	// FIXME how many do we want to support ??
+	// this device attachment is overloaded on the Arduino side ...
+	
 	@Override
-	public void detach(Servo servo) {
-		servoDetach(servo);
+	public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
+		// only need to handle servos :)
+		// this is easy
+		ServoControl servo = (ServoControl)device;
+		// servo.setController(this); Do not set any "ServoControl" data like this Not necessary
+		// should initial pos be a requirement ?
+		servoNameToPin.put(servo.getName(), servo.getPin());
+	}
+
+	@Override
+	public void deviceDetach(DeviceControl servo) {
+		// de-energize pin
+		servoDetach((ServoControl)servo);
 		servoNameToPin.remove(servo.getName());
-		isAttached = false;
 	}
 
 	@Override
-	public Integer getPin(Servo servo) {
-		return servoNameToPin.get(servo.getName());
-	}
-
-	@Override
-	public DeviceController getController() {
-		return controller;
-	}
-
-	@Override
-	public Integer getDeviceType() {
-		return DeviceControl.DEVICE_TYPE_I2C;
+	public void servoAttach(ServoControl servo, int pin) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

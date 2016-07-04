@@ -260,9 +260,4 @@ public class AdafruitIna219 extends Service implements I2CControl{
 		return meta;
 	}
 
-	@Override
-	public Integer getDeviceType() {
-		return DeviceControl.DEVICE_TYPE_I2C;
-	}
-
 }

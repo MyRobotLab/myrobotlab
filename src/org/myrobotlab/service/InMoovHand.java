@@ -111,12 +111,12 @@ public class InMoovHand extends Service implements LeapDataListener {
     */
     
     // NEW WAY
-    arduino.attach(thumb, 2);
-    arduino.attach(index, 3);
-    arduino.attach(majeure, 4);
-    arduino.attach(ringFinger, 5);
-    arduino.attach(pinky, 6);
-    arduino.attach(wrist, 7);
+    arduino.servoAttach(thumb, 2);
+    arduino.servoAttach(index, 3);
+    arduino.servoAttach(majeure, 4);
+    arduino.servoAttach(ringFinger, 5);
+    arduino.servoAttach(pinky, 6);
+    arduino.servoAttach(wrist, 7);
   }
 
   /**
@@ -434,12 +434,12 @@ public class InMoovHand extends Service implements LeapDataListener {
     */
     
     // NEW WAY
-    arduino.attach(thumb, thumbPin);
-    arduino.attach(index, indexPin);
-    arduino.attach(majeure, majeurePin);
-    arduino.attach(ringFinger, ringFingerPin);
-    arduino.attach(pinky, pinkyPin);
-    arduino.attach(wrist, wristPin);
+    arduino.servoAttach(thumb, thumbPin);
+    arduino.servoAttach(index, indexPin);
+    arduino.servoAttach(majeure, majeurePin);
+    arduino.servoAttach(ringFinger, ringFingerPin);
+    arduino.servoAttach(pinky, pinkyPin);
+    arduino.servoAttach(wrist, wristPin);
   }
 
   public void setRest(int thumb, int index, int majeure, int ringFinger, int pinky) {

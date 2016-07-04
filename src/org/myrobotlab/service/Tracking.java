@@ -672,8 +672,8 @@ public class Tracking extends Service {
   public void connect(String port, int xPin, int yPin, int cameraIndex) throws IOException {
     arduino.connect(port);
 
-    arduino.attach(x, xPin);
-    arduino.attach(y, yPin);
+    arduino.servoAttach(x, xPin);
+    arduino.servoAttach(y, yPin);
     opencv.setCameraIndex(cameraIndex);
 
     x.attach();

@@ -250,7 +250,7 @@ public class ServoOrchestrator extends Service {
       int max = settingsitemholder[middleright_shownitem].max;
       servos[middleright_shownitem] = (Servo) Runtime.start("so." + middleright_shownitem, "Servo");
       servos[middleright_shownitem].setMinMax(min, max);
-      arduino.attach(servos[middleright_shownitem], pin);
+      arduino.servoAttach(servos[middleright_shownitem], pin);
       servos[middleright_shownitem].attach();
       sogui_ref.middleright_attach_button.setText("Detach");
       settingsitemholder[middleright_shownitem].attached = true;

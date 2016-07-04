@@ -26,74 +26,111 @@
 package org.myrobotlab.service.interfaces;
 
 public interface ServoControl extends DeviceControl {
+	
+	
+	// FIXME - do we want to support this & what do we expect from
+	// 1. should it be energized when initially attached?
+	// 2. should the position be set initially on attach ?
+	// 3. should rest be set by pos if its not set already .. ie .. is the pos passed in on attach the "rest" position of the servo ?
+	// 4. should we 'please' rename servo.attach(pin) to servo.energize(pin) !!!!
+	void attach(ServoController controller, int pin) throws Exception;
+	
+	void attach(ServoController controller, int pin, Integer pos) throws Exception;
 
- 
-  /**
-   * Re-attaches (re-energizes) the servo on its current pin
-   * 
-   * @return
-   */
-  public boolean attach();
-  
-  /**
-   * Re-attaches (re-energizes) the servo on its current pin
-   * 
-   * @return
-   */
-  public boolean attach(int pin);
+	void detach(ServoController controller);
+	
 
-  
-  /**
-   * calls Servo.detach() on MRLComm
-   * 
-   * @return
-   */
-  public boolean detach();
+	/**
+	 * Re-attaches (re-energizes) the servo on its current pin
+	 * 
+	 * @return
+	 */
+	public void attach();
+
+	/**
+	 * Re-attaches (re-energizes) the servo on its current pin
+	 * 
+	 * @return
+	 */
+	public void attach(int pin);
+
+	/**
+	 * calls Servo.detach() on MRLComm
+	 * 
+	 * @return
+	 */
+	public void detach();
+
+	/**
+	 * Moves the servo to a specific location. Typically, a servo has 0 to 180
+	 * positions - each increment corresponding to a degree
+	 * 
+	 * @param newPos
+	 */
+	public void moveTo(int newPos);
+
+	/**
+	 * limits input of servo - to prevent damage or problems if servos should
+	 * not move thier full range
+	 * 
+	 * @param max
+	 */
+	public void setMinMax(int min, int max);
+
+	/**
+	 * fractional speed settings
+	 * 
+	 * @param speed
+	 */
+	public void setSpeed(double speed);
+
+	/**
+	 * stops the servo if currently in motion servo must be moving at
+	 * incremental speed for a stop to work (setSpeed < 1.0)
+	 */
+	public void stop();
 
 
-  /**
-   * Moves the servo to a specific location. Typically, a servo has 0 to
-   * 180 positions - each increment corresponding to a degree
-   * 
-   * @param newPos
-   */
-  public void moveTo(int newPos);
+	/**
+	 * configuration method - a method the controller will call when the servo
+	 * is attached.
+	 * 
+	 * What should happen is if (controller != null) { pin =
+	 * controller.servoGetPin(); } return pin; This returns the pin info the
+	 * controller has - updates the Servo's pin and returns the refreshed data.
+	 * Not worth it. What will happen is the pin which was set on the servo will
+	 * simply be returned
+	 * 
+	 * @return
+	 */
+	public Integer getPin();
 
-  /**
-   * Attach a servo controller to the servo. The servo and servo controller
-   * "should be in the same instance of MRL and this reference to another
-   * service should be ok.
-   * 
-   * The servo controller uses this method to pass a reference of itself to the
-   * servo, to be used directly.
-   */
+	/**
+	 * minimal sweep position
+	 * sweep data need for the controller
+	 * @return
+	 */
+	public int getSweepMin();
 
-  /*  PUSHED UP INTO DeviceControl.setController(DeviceController controller)
-  public void setController(ServoController controller);
-  */
+	/**
+	 * max sweep position
+	 * sweep data need for the controller
+	 * @return
+	 */
+	public int getSweepMax();
 
+	/**
+	 * sweep step
+	 * sweep data need for the controller
+	 * @return
+	 */
+	public int getSweepStep();
 
-  /**
-   * limits input of servo - to prevent damage or problems if servos should not
-   * move thier full range
-   * 
-   * @param max
-   */
-  public void setMinMax(int min, int max);
+	/**
+	 * the calculated output for the servo
+	 */
+	public Integer getTargetOutput();
 
- 
-
-  /**
-   * fractional speed settings
-   * 
-   * @param speed
-   */
-  public void setSpeed(double speed);
-
-  /**
-   * stops the servo if currently in motion servo must be moving at incremental
-   * speed for a stop to work (setSpeed < 1.0)
-   */
-  public void stop();
+	public double getSpeed();
 
 }

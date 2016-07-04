@@ -59,10 +59,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     */
     
     // NEW WAY
-    arduino.attach(bicep, 8);
-    arduino.attach(bicep, 9);
-    arduino.attach(bicep, 10);
-    arduino.attach(bicep, 11);
+    arduino.servoAttach(bicep, 8);
+    arduino.servoAttach(bicep, 9);
+    arduino.servoAttach(bicep, 10);
+    arduino.servoAttach(bicep, 11);
 
     bicep.setMinMax(5, 90);
     rotate.setMinMax(40, 180);
@@ -82,16 +82,15 @@ public class InMoovArm extends Service implements IKJointAngleListener {
    * @return
    */
   public boolean attach() {
-    boolean result = true;
     sleep(InMoov.attachPauseMs);
-    result &= bicep.attach();
+    bicep.attach();
     sleep(InMoov.attachPauseMs);
-    result &= rotate.attach();
+    rotate.attach();
     sleep(InMoov.attachPauseMs);
-    result &= shoulder.attach();
+    shoulder.attach();
     sleep(InMoov.attachPauseMs);
-    result &= omoplate.attach();
-    return result;
+    omoplate.attach();
+    return true;
   }
 
   @Override
