@@ -121,9 +121,8 @@ public:
 // Initialize LinkedList with false values
 template<typename T>
 LinkedList<T>::LinkedList() {
-  // TODO: this causes a warning in the arduino compiler
-  root=false;
-  last=false;
+  root=NULL;
+  last=NULL;
   _size=0;
   lastNodeGot = root;
   lastIndexGot = 0;
@@ -139,8 +138,7 @@ LinkedList<T>::~LinkedList() {
     root=root->next;
     delete tmp;
   }
-  // TODO: avoid the warning in the arduino compiler here.
-  last = false;
+  last = NULL;
   _size=0;
   isCached = false;
 }
@@ -195,7 +193,7 @@ template<typename T>
 bool LinkedList<T>::add(T _t) {
   ListNode<T> *tmp = new ListNode<T>();
   tmp->data = _t;
-  tmp->next = false;
+  tmp->next = NULL;
   if(root) {
     // Already have elements inserted
     last->next = tmp;
@@ -241,7 +239,7 @@ T LinkedList<T>::pop() {
     ListNode<T> *tmp = getNode(_size - 2);
     T ret = tmp->next->data;
     delete(tmp->next);
-    tmp->next = false;
+    tmp->next = NULL;
     last = tmp;
     _size--;
     return ret;
@@ -249,8 +247,8 @@ T LinkedList<T>::pop() {
     // Only one element left on the list
     T ret = root->data;
     delete(root);
-    root = false;
-    last = false;
+    root = NULL;
+    last = NULL;
     _size = 0;
     return ret;
   }
@@ -464,7 +462,6 @@ void LinkedList<T>::clear() {
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
 
 
-
 // TODO: Move these into ArduinoMsgCodec  and re-generate ...
 #define PUBLISH_BOARD_INFO 71
 #define NEOPIXEL_WRITE_MATRIX 72
@@ -545,7 +542,6 @@ void LinkedList<T>::clear() {
 /***********************************************************************
  * NEOPIXEL DEFINE
  */
-// PORTC BIT7 = pin 30
 #define PIXEL_PORT PORTC
 #define PIXEL_DDR DDRC
 //timing for the neopixel communication
@@ -604,8 +600,10 @@ class Device {
     Device(int deviceType) {
       type = deviceType;
     }
-    ~Device(){
+    virtual ~Device(){
       // default destructor for the device class. 
+      // destructor is set as virtual to call the destructor of the subclass. 
+      // destructor should be done in the subclass level
     }
     int id; // the all important id of the sensor - equivalent to the "name" - used in callbacks
     int type; // what type of device is this?
@@ -627,12 +625,13 @@ class MrlServo : public Device {
     bool isMoving;
     bool isSweeping;
     int targetPos;
-    int currentPos;
+    float currentPos;
     int speed; // servos have a "speed" associated with them that's not part of the base servo driver
     bool eventsEnabled;
-    int step;
+    float step;
     int min;
     int max;
+    unsigned long lastUpdate;
 
     MrlServo(int p) : Device(DEVICE_TYPE_SERVO) {
        pin = p;
@@ -643,6 +642,9 @@ class MrlServo : public Device {
        // create the servo
        servo = new Servo();
        eventsEnabled = false;
+       lastUpdate = 0;
+       currentPos = 0.0;
+       targetPos = 0;
     }
 
     ~MrlServo() {
@@ -678,21 +680,15 @@ class MrlServo : public Device {
     }
 
     void update(unsigned long loopCount) {
-      // TODO: implement me. / test This seems to be just for sweeping stuffs? The first part is also use when Servo.speed!=100
-      //It's possible that the servo never reach the targetPos if servo->step!=1
-      if (isMoving && servo != 0) {
-        if (currentPos != targetPos) {
-          // caclulate the appropriate modulus to drive
-          // the servo to the next position
-          // TODO - check for speed > 0 && speed < 100 - send ERROR back?
-          int speedModulus = (100 - speed) * 10;
-          // speed=99 will not be 99% of speed=100
-          if (loopCount % speedModulus == 0) {
-            int increment = step * ((currentPos < targetPos) ? 1 : -1);
-            // move the servo an increment
-            currentPos = currentPos + increment;
-            servo->write(currentPos);
-            if (eventsEnabled)
+      if (lastUpdate+10>millis() || servo == NULL) return;
+      if (isMoving) {
+        if ((int)currentPos != targetPos) {
+          currentPos += step;
+          if((step > 0.0 && (int)currentPos > targetPos) || (step < 0.0 && (int)currentPos < targetPos)){
+            currentPos=targetPos; 
+          }
+          servo->write((int)currentPos);
+          if (eventsEnabled){
               publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
           }
         } else {
@@ -702,6 +698,7 @@ class MrlServo : public Device {
             } else {
               targetPos = min;
             }
+            step*=-1;
           } else {
             if (eventsEnabled)
               publishServoEvent(SERVO_EVENT_STOPPED);
@@ -723,7 +720,7 @@ class MrlServo : public Device {
       Serial.write(id); // send my id
       // write the long value out
       Serial.write(eventType);
-      Serial.write(currentPos);
+      Serial.write((int)currentPos);
       Serial.write(targetPos);
       Serial.flush();
     }
@@ -733,18 +730,23 @@ class MrlServo : public Device {
     }
     
     void servoWrite(int position) {
-      if (speed == 100 && servo != 0) {
+      if (servo == NULL) return
+      if (speed == 100) {
         // move at regular/full 100% speed
         targetPos = position;
         currentPos = position;
         isMoving = false;
-        // servo->attach(8);
         servo->write(position);
         if (eventsEnabled)
           publishServoEvent(SERVO_EVENT_STOPPED);
       } else if (speed < 100 && speed > 0) {
         targetPos = position;
         isMoving = true;
+        int baseSpeed=(int)(60.0/0.14); // deg/sec base on speed of HS805B servo 6V under no load //should be modifiable
+        long delta=targetPos-currentPos;
+        float currentSpeed=(baseSpeed*speed)/100;
+        long timeToReach=abs((delta))*1000/currentSpeed; // time to reach target in ms
+        step=((float)delta*10/timeToReach);
       }
     }
 
@@ -762,6 +764,7 @@ class MrlServo : public Device {
       this->min = min;
       this->max = max;
       this->step = step;
+      targetPos = max;
       isMoving = true;
       isSweeping = true;
     }
@@ -1195,7 +1198,7 @@ class MrlNeopixel:public Device{
     PIXEL_DDR |= bitmask;
     lastShow=0;
     Pixel pixel=Pixel();
-    for (int i=1; i<=numPixel; i++) {
+    for (unsigned int i=1; i<=numPixel; i++) {
       pixels[i] = pixel;
     }
     newData=true;
@@ -1266,7 +1269,7 @@ class MrlNeopixel:public Device{
     if (!state) return;
     //be sure we wait at least 6us before sending new data
     if ((lastShow+(RES/1000UL))>micros()) return;
-    for(int p=1; p<=numPixel;p++){
+    for(unsigned int p=1; p<=numPixel;p++){
       sendPixel(pixels[p]);
     }
     lastShow=micros();
@@ -1334,7 +1337,7 @@ void publishDebug(String message);
  */
 Device* getDevice(int id);
 void removeDevice(int id);
-int addDevice(Device*);
+void addDevice(Device*);
 /**
  * DEVICE LIST ACCESS METHODS END
  **********************************************************************/
@@ -1420,7 +1423,7 @@ void softReset() {
  * expand if it could not accomidate the current number of devices, when a device was
  * removed - the slot could be re-used by the next device request
  */
-int addDevice(Device* device) {
+void addDevice(Device* device) {
   deviceList.add(device);
 }
 
@@ -1834,7 +1837,6 @@ void updateStatus() {
   lastMicros = micros();
 }
 
-
 /**********************************************************************
  * ATTACH DEVICES BEGIN
  *
@@ -1896,6 +1898,8 @@ void attachDevice() {
   // lifecycle for the devices..
   // check out the make_stooge method on https://sourcemaking.com/design_patterns/factory_method/cpp/1
   // This is really how we should do this.  (methinks)
+	// Cal: the make_stooge method is certainly more C++ like, but essentially do the same thing as we do, 
+	// it just move this big switch to another place
 
         // GR: I agree ..  "attach" should be a universal concept of devices, yet it does not need to be implmented
         // in the constructor .. so I'm for making a virtualized attach, but just like Java-Land the attach
@@ -1945,6 +1949,7 @@ void attachDevice() {
   }
 }
 
+  // KW: a sort of null pointer case? TODO: maybe move this into default branch of switch above?
 if (devicePtr) {
   devicePtr->id = nextDeviceId;
   devicePtr->deviceAttach(config, configSize);
@@ -1952,8 +1957,6 @@ if (devicePtr) {
   publishAttachedDevice(devicePtr->id, nameSize, 3);
   nextDeviceId++;
 }
-
-       // GR: I would assume devicePtr->attach(config, configSize) would be called here
 }
 
 /**
