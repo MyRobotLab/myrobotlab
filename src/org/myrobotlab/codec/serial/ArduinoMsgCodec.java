@@ -265,7 +265,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {publishPulseStop Integer} 
 	public final static int PUBLISH_PULSE_STOP =		34;
 
-	// {publishSensorData SensorData} 
+	// {publishSensorData Object} 
 	public final static int PUBLISH_SENSOR_DATA =		35;
 
 	// {publishServoEvent Integer} 

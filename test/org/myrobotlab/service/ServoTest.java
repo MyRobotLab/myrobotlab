@@ -79,7 +79,7 @@ public class ServoTest {
 		// arduino.setDebug(true);
 		
 		// should this be valid ?
-		servo01.attach(arduino, 8);
+		servo01.attach(arduino, 8, 30);
 		
 		// servo move methods
 		servo01.moveTo(30);
