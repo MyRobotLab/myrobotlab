@@ -48,11 +48,11 @@ public class InMoovHead extends Service {
     */
     
     // NEW WAY
-    arduino.attach(neck, 12);
-    arduino.attach(rothead, 13);
-    arduino.attach(jaw, 26);
-    arduino.attach(eyeX, 22);
-    arduino.attach(eyeY, 24);
+    arduino.servoAttach(neck, 12);
+    arduino.servoAttach(rothead, 13);
+    arduino.servoAttach(jaw, 26);
+    arduino.servoAttach(eyeX, 22);
+    arduino.servoAttach(eyeY, 24);
 
 
     neck.setMinMax(20, 160);
@@ -246,11 +246,11 @@ public class InMoovHead extends Service {
     jaw.setPin(jawPin);
     */
 
-    arduino.attach(rothead, headXPin);
-    arduino.attach(neck, headYPin);
-    arduino.attach(eyeX, eyeXPin);
-    arduino.attach(eyeY, eyeYPin);
-    arduino.attach(jaw, jawPin);
+    arduino.servoAttach(rothead, headXPin);
+    arduino.servoAttach(neck, headYPin);
+    arduino.servoAttach(eyeX, eyeXPin);
+    arduino.servoAttach(eyeY, eyeYPin);
+    arduino.servoAttach(jaw, jawPin);
 
   }
 

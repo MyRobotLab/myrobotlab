@@ -13,7 +13,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.DeviceControl;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -313,15 +312,16 @@ public class RasPi extends Service implements I2CController {
 	}
 
 	@Override
-	public void attachDevice(DeviceControl device, Object... config) throws Exception {
+	public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void detachDevice(DeviceControl device) {
+	public void deviceDetach(DeviceControl device) {
 		// TODO Auto-generated method stub
 		
 	}
+
 
 }

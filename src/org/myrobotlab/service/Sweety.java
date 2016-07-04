@@ -170,19 +170,19 @@ public class Sweety extends Service {
     */
     
 	  // NEW WAY
-    arduino.attach(rightForearm, 34);
-    arduino.attach(leftForearm, 35);
-    arduino.attach(rightShoulder, 36);
-    arduino.attach(leftShoulder, 37);
-    arduino.attach(rightArm, 38);
-    arduino.attach(neck, 39);
-    arduino.attach(leftEye, 40);
-    arduino.attach(leftArm, 41);
-    arduino.attach(rightEye, 42);
-    arduino.attach(leftHand, 43);
-    arduino.attach(rightWrist, 44);
-    arduino.attach(leftWrist, 45);
-    arduino.attach(rightHand, 46);
+    arduino.servoAttach(rightForearm, 34);
+    arduino.servoAttach(leftForearm, 35);
+    arduino.servoAttach(rightShoulder, 36);
+    arduino.servoAttach(leftShoulder, 37);
+    arduino.servoAttach(rightArm, 38);
+    arduino.servoAttach(neck, 39);
+    arduino.servoAttach(leftEye, 40);
+    arduino.servoAttach(leftArm, 41);
+    arduino.servoAttach(rightEye, 42);
+    arduino.servoAttach(leftHand, 43);
+    arduino.servoAttach(rightWrist, 44);
+    arduino.servoAttach(leftWrist, 45);
+    arduino.servoAttach(rightHand, 46);
   }
 
   /**
@@ -642,12 +642,12 @@ public class Sweety extends Service {
     USbackRight = (UltrasonicSensor) startPeer("USbackRight");
     USbackLeft = (UltrasonicSensor) startPeer("USbackLeft");
 
-    USfront.attach(port, frontUltrasonicTrig, frontUltrasonicEcho);
-    USfrontRight.attach(port, front_rightUltrasonicTrig, front_rightUltrasonicEcho);
-    USfrontLeft.attach(port, front_leftUltrasonicTrig, front_leftUltrasonicEcho);
-    USback.attach(port, backUltrasonicTrig, backUltrasonicEcho);
-    USbackRight.attach(port, back_rightUltrasonicTrig, back_rightUltrasonicEcho);
-    USbackLeft.attach(port, back_leftUltrasonicTrig, back_leftUltrasonicEcho);
+    USfront.attach(arduino, frontUltrasonicTrig, frontUltrasonicEcho);
+    USfrontRight.attach(arduino, front_rightUltrasonicTrig, front_rightUltrasonicEcho);
+    USfrontLeft.attach(arduino, front_leftUltrasonicTrig, front_leftUltrasonicEcho);
+    USback.attach(arduino, backUltrasonicTrig, backUltrasonicEcho);
+    USbackRight.attach(arduino, back_rightUltrasonicTrig, back_rightUltrasonicEcho);
+    USbackLeft.attach(arduino, back_leftUltrasonicTrig, back_leftUltrasonicEcho);
   }
 
   /**
@@ -659,9 +659,9 @@ public class Sweety extends Service {
     rightTracker.opencv.stopCapture();
     leftTracker.releaseService();
     rightTracker.releaseService();
-    arduino.attach(neck, 39);
-    arduino.attach(leftEye, 40);
-    arduino.attach(rightEye, 42);
+    arduino.servoAttach(neck, 39);
+    arduino.servoAttach(leftEye, 40);
+    arduino.servoAttach(rightEye, 42);
 
     saying("the tracking if stopped.");
   }

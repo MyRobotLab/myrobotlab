@@ -453,7 +453,7 @@ public class ArduinoTest {
     // arduino.servoAttach(servo, servoPin);
 
     // common way
-    arduino.attach(servo, servoPin);
+    arduino.servoAttach(servo, servoPin);
 
     // another way
     // servo.setPin(servoPin);
@@ -462,7 +462,7 @@ public class ArduinoTest {
     assertTrue(servo.isAttached());
 
     // re-entrant test
-    arduino.attach(servo, servoPin);
+    arduino.servoAttach(servo, servoPin);
 
     assertTrue(servo.isAttached());
     // assertEquals(servoPin, servo.getPin().intValue());

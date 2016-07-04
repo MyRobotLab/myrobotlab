@@ -58,6 +58,20 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
   public static final int MAGIC_NUMBER = 170; // 10101010
   public static final int MRLCOMM_VERSION = 37;
   
+  // ------  device type mapping constants
+  
+ 	public static final int DEVICE_TYPE_NOT_FOUND = 0;
+	public static final int SENSOR_TYPE_ANALOG_PIN_ARRAY = 1;
+	public static final int SENSOR_TYPE_DIGITAL_PIN_ARRAY = 2;
+	public static final int SENSOR_TYPE_PULSE = 3;
+	public static final int SENSOR_TYPE_ULTRASONIC = 4;
+		
+	public static final int DEVICE_TYPE_STEPPER = 5;
+	public static final int DEVICE_TYPE_MOTOR = 6;
+	public static final int DEVICE_TYPE_SERVO = 7;
+	public static final int DEVICE_TYPE_I2C = 8;
+	public static final int DEVICE_TYPE_NEOPIXEL = 9;
+  
   // ----------- event types -------------------
   public static final int STEPPER_EVENT_STOP = 1;
   public static final int STEPPER_EVENT_STEP = 2;
@@ -67,6 +81,19 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
+
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NOT_FOUND;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_TYPE_ANALOG_PIN_ARRAY;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_TYPE_DIGITAL_PIN_ARRAY;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_TYPE_PULSE;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_TYPE_ULTRASONIC;
+	
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_STEPPER;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_MOTOR;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_SERVO;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_I2C;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NEOPIXEL;
+	
 
   <%=javaStaticImports%>
   */

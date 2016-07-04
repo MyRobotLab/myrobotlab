@@ -3,7 +3,7 @@ package org.myrobotlab.service.interfaces;
 import org.myrobotlab.service.data.SensorData;
 
 /**
- * A SensorDataListener is a (microcontroller) Device which can read data
+ * A SensorDataListener Device which can read data
  *
  */
 public interface SensorDataListener extends DeviceControl {  
@@ -28,17 +28,5 @@ public interface SensorDataListener extends DeviceControl {
      * @param data - the sensor data
      */
     public void onSensorData(SensorData data);
-    
-   
-    /**
-     * Sensors types should be handled as static string values
-     * in Sensors (they are microcontroller agnostic)
-     * 
-     * @return
-     */
-    /*  DEPRECATED by getDeviceType()
-    public int getSensorType();
-    
-    */
     
 }

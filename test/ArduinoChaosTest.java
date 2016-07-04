@@ -202,9 +202,9 @@ public class ArduinoChaosTest {
     
     
     Motor motor = (Motor)Runtime.createAndStart("motor", "Motor");
-    motor.setType2Pwm(leftPwm, rightPwm);
+    // motor.setType2Pwm(leftPwm, rightPwm);
     // motor.attach(arduino);
-    arduino.attachDevice(motor, null); // null  config is this right ?
+    // arduino.attachDevice(motor); // null  config is this right ?
 
 
 //    servo.attach();

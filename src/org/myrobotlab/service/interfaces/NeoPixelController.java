@@ -25,30 +25,12 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface NeopixelControl extends DeviceControl {
+import java.util.List;
 
-  /**
-   * SetPixel: defining the pixels of the pixel matrix. Setting pixels are not send directly to the Neopixel Hardware
-   * but send with the sendPixelMatrix() method
-   * 
-   * @param address - value 1 to numPixel
-   * @param red    - value 0-255
-   * @param green  - value 0-255
-   * @param blue   - value 0-255
-   */
-  public void setPixel(int address, int red, int green, int blue);
+import org.myrobotlab.service.NeoPixel;
 
-  /**
-   * Send a matrix of pixel to the neopixel hardware
-   */
-  public void sendPixelMatrix();
+public interface NeoPixelController extends DeviceController {
+    
+  public void neoPixelWriteMatrix(NeoPixel neopixel, List<Integer> msg);
   
-  public int getPin();
-  
-  public int getNumPixel();
-  
-  public void turnOff();
-  
-  public void turnOn();
-
 }

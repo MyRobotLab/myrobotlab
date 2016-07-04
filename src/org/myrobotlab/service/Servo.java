@@ -34,7 +34,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
-import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -124,6 +123,24 @@ public class Servo extends Service implements ServoControl {
 
 	public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Servo.class.getCanonicalName());
+		meta.addDescription("Controls a servo");
+		meta.addCategory("motor", "control");
+
+		return meta;
+	}
+
+
 	transient ServoController controller;
 
 	String controllerName = null;
@@ -133,21 +150,13 @@ public class Servo extends Service implements ServoControl {
 	private int rest = 90;
 
 	private long lastActivityTime = 0;
+	
+	private Integer pin;
 
 	/**
 	 * the requested INPUT position of the servo
 	 */
 	Integer targetPos;
-
-	/**
-	 * the calculated output for the servo
-	 */
-	Integer targetOutput;
-
-	/**
-	 * writeMicroseconds value
-	 */
-	Integer uS;
 
 	/**
 	 * Pin is "gone" - it only is needed at the time of attaching the device -
@@ -165,39 +174,34 @@ public class Servo extends Service implements ServoControl {
 	// private Integer pin;
 
 	/**
+	 * the calculated output for the servo
+	 */
+	Integer targetOutput;
+
+
+	/**
 	 * list of names of possible controllers
 	 */
 	ArrayList<String> controllers;
-
 	/**
 	 * current speed of the servo
 	 */
 	Double speed = 1.0;
-
 	// FIXME - currently is only computer control - needs to be either
 	// microcontroller or computer
 	boolean isSweeping = false;
 	int sweepMin = 0;
 	int sweepMax = 180;
 	int sweepDelay = 1;
+
 	int sweepStep = 1;
 	boolean sweepOneWay = false;
 
 	// sweep types
 	// TODO - computer implemented speed control (non-sweep)
 	boolean speedControlOnUC = false;
-	transient Thread sweeper = null;
 
-	/**
-	 * isAttached represents if the
-	 * 
-	 * usually isAttached would be determined by whether the controller != null
-	 * however detach() is a meaningful method on the micro-controller side and
-	 * many services want to be able to detach() and re-attach() without a
-	 * reference to the controller - that is why this boolean variable must be
-	 * kept in sync
-	 */
-	private boolean isAttached = false;
+	transient Thread sweeper = null;
 
 	/**
 	 * feedback of both incremental position and stops. would allow blocking
@@ -215,63 +219,39 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * Equivalent to Arduino's Servo.attach(pin).
-	 * It energizes the servo sending pulses to maintain its current position.
-	 */
-	@Override
-	public boolean attach(int pin) {
-		lastActivityTime = System.currentTimeMillis();
-		if (isAttached) {
-			log.info("{}.attach() - already attached - nothing to do", getName());
-			return false;
-		}
-
-		if (controller == null) {
-			error("%s's controller is not set", getName());
-			return false;
-		}
-
-		controller.servoAttach(this, controller.getPin(this));
-		isAttached = true;
-		broadcastState();
-		return isAttached;
-	}
-
-	/**
 	 * Re-attach to servo's current pin. The pin must have be set previously.
 	 * Equivalent to Arduino's Servo.attach(currentPin)
 	 */
 	@Override
-	public boolean attach() {
+	public void attach() {
+		attach(pin);
+	}
 
-		Integer pin = controller.getPin(this);
-		if (pin == null) {
-			error("pin is not set");
-			return false;
-		}
-
-		return attach(pin);
+	/**
+	 * Equivalent to Arduino's Servo.attach(pin).
+	 * It energizes the servo sending pulses to maintain its current position.
+	 */
+	@Override
+	public void attach(int pin) {
+		lastActivityTime = System.currentTimeMillis();
+		controller.servoAttach(this, pin);
+		this.pin = pin;
+		broadcastState();
 	}
 
 	/**
 	 * Equivalent to Arduino's Servo.detach() it de-energizes the servo
 	 */
 	@Override
-	public boolean detach() {
-		if (!isAttached) {
-			log.info("{}.detach() - already detach - attach first", getName());
-			return false;
-		}
+	public void detach() {
+		controller.servoDetach(this);
+		broadcastState();
+	}
 
-		if (controller != null) {
-			controller.detachDevice(this);
-			isAttached = false;
-			// changed state
-			broadcastState();
-			return true;
-		}
-
-		return false;
+	public boolean eventsEnabled(boolean b) {
+		isEventsEnabled = b;
+		controller.servoEventsEnabled(this, b);
+		return b;
 	}
 
 	@Override
@@ -295,6 +275,13 @@ public class Servo extends Service implements ServoControl {
 		return mapper.getMaxOutput();
 	}
 
+	/*
+	 * @Override public Integer getPin() {
+	 * 
+	 * return pin; }
+	 * 
+	 */
+
 	public Double getMin() {
 		return mapper.getMinY();
 	}
@@ -307,13 +294,6 @@ public class Servo extends Service implements ServoControl {
 		return mapper.getMinOutput();
 	}
 
-	/*
-	 * @Override public Integer getPin() {
-	 * 
-	 * return pin; }
-	 * 
-	 */
-
 	public Integer getPos() {
 		return targetPos;
 	}
@@ -323,7 +303,7 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public boolean isAttached() {
-		return isAttached;
+		return controller != null;
 	}
 
 	public boolean isInverted() {
@@ -341,13 +321,9 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public void moveTo(int pos) {
+	
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
-			return;
-		}
-
-		if (!isAttached) {
-			warn("servo not attached");
 			return;
 		}
 
@@ -359,7 +335,6 @@ public class Servo extends Service implements ServoControl {
 
 		// update the web gui that we've moved..
 		// broadcastState();
-
 		invoke("publishServoEvent", targetOutput);
 	}
 
@@ -418,19 +393,16 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/*
-	 * @Override public boolean setController(String controller) {
+	 * (non-Javadoc)
 	 * 
-	 * ServoController sc = (ServoController) Runtime.getService(controller); if
-	 * (sc == null) { return false; }
-	 * 
-	 * return setController(sc); }
+	 * @see org.myrobotlab.service.interfaces.ServoControl#setPin(int)
 	 */
-
-	public boolean eventsEnabled(boolean b) {
-		isEventsEnabled = b;
-		controller.servoEventsEnabled(this, b);
-		return b;
-	}
+	/*
+	 * @Override public boolean setPin(int pin) { log.info(String.format(
+	 * "setting %s pin to %d", getName(), pin)); if (isAttached()) { warn(
+	 * "%s can not set pin %d when servo is attached", getName(), pin); return
+	 * false; } this.pin = pin; broadcastState(); return true; }
+	 */
 
 	public void setInverted(boolean invert) {
 		mapper.setInverted(invert);
@@ -443,32 +415,14 @@ public class Servo extends Service implements ServoControl {
 		broadcastState();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.myrobotlab.service.interfaces.ServoControl#setPin(int)
-	 */
-	/*
-	 * @Override public boolean setPin(int pin) { log.info(String.format(
-	 * "setting %s pin to %d", getName(), pin)); if (isAttached()) { warn(
-	 * "%s can not set pin %d when servo is attached", getName(), pin); return
-	 * false; } this.pin = pin; broadcastState(); return true; }
-	 */
-
 	public int setRest(int i) {
 		rest = i;
 		return rest;
 	}
 
 	public void setSpeed(double speed) {
-
 		this.speed = speed;
-
-		if (controller == null) {
-			error("setSpeed - controller not set");
-			return;
-		}
-		controller.setServoSpeed(this);
+		controller.servoSetSpeed(this);
 	}
 
 	// choose to handle sweep on arduino or in MRL on host computer thread.
@@ -555,26 +509,23 @@ public class Servo extends Service implements ServoControl {
 	 */
 	public void writeMicroseconds(Integer uS) {
 		log.info("writeMicroseconds({})", uS);
-		this.uS = uS;
-
-		if (controller == null) {
-			error(String.format("%s's controller is not set", getName()));
-			return;
-		}
-
-		// TODO -
-
-		// FIXME - currently their is no timerPosition
-		// this could be gotten with 100 * outputY for some valid range
-
-		controller.servoWriteMicroseconds(this);
+		controller.servoWriteMicroseconds(this, uS);
 		lastActivityTime = System.currentTimeMillis();
-
-		// trying out broadcast after
-		// position change
 		broadcastState();
 	}
 
+	/*
+	@Override
+	public void setPin(int pin) {
+		this.pin = pin;
+	}
+	*/
+
+	@Override
+	public Integer getPin() {
+		return pin;
+	}
+	
 	public static void main(String[] args) throws InterruptedException {
 
 		LoggingFactory.getInstance().configure();
@@ -585,7 +536,7 @@ public class Servo extends Service implements ServoControl {
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.connect("COM5");
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
-			arduino.attachDevice(servo, new int[] { 8 });
+			servo.attach(arduino, 8);
 			// servo.attach(arduino, 8);
 			// servo.attach(
 
@@ -616,26 +567,55 @@ public class Servo extends Service implements ServoControl {
 
 	}
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = new ServiceType(Servo.class.getCanonicalName());
-		meta.addDescription("Controls a servo");
-		meta.addCategory("motor", "control");
-
-		return meta;
+	@Override
+	public int getSweepMin() {
+		return sweepMin;
 	}
 
 	@Override
-	public Integer getDeviceType() {
-		return DeviceControl.DEVICE_TYPE_SERVO;
+	public int getSweepMax() {
+		return sweepMax;
 	}
 
+	@Override
+	public int getSweepStep() {
+		return sweepStep;
+	}
+
+	@Override
+	public Integer getTargetOutput() {
+		return targetOutput;
+	}
+
+	@Override
+	public double getSpeed() {
+		return speed;
+	}
+
+	@Override
+	public void attach(ServoController controller, int pin) throws Exception {
+		attach(controller, pin, null);
+	}
+
+	@Override
+	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
+		this.pin = pin;
+		this.controller = controller;
+		if (pos != null){
+			targetPos = pos;
+			controller.deviceAttach(this, pin, pos);
+		} else {
+			controller.deviceAttach(this, pin);
+		}
+	}
+
+	@Override
+	public void detach(ServoController controller) {
+		// detach the this device from the controller
+		controller.deviceDetach(this);
+		// remove the this controller's reference
+		this.controller = null;
+	}
+
+	
 }

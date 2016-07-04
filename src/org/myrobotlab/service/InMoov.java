@@ -1040,7 +1040,7 @@ public class InMoov extends Service {
      //  mouthControl.jaw.setPin(26);
       mouthControl.arduino.connect(port);
       // NEW WAY
-      mouthControl.arduino.attach(mouthControl.jaw, 26);
+      mouthControl.arduino.servoAttach(mouthControl.jaw, 26);
       arduinos.put(port, mouthControl.arduino);
       String p = mouthControl.getArduino().getSerial().getPortName();
       if (p != null) {

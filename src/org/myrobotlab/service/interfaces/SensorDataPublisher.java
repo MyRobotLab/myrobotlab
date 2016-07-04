@@ -36,7 +36,7 @@ public interface SensorDataPublisher {
   // this is what gets invoked in mrl
   public SensorData publishSensorData(SensorData data);
   // this is to attach something that listens to the output of this sensor data.
-  public void addSensorDataListener(SensorDataListener listener, int[] config);
+  // public void addSensorDataListener(SensorDataListener listener, int[] config);
  
   public String getName();
   // hmm. Should take a microcontroller?

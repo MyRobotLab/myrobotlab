@@ -240,7 +240,7 @@ public class ArduinoBindingsGenerator {
 
     long ts = System.currentTimeMillis();
     FileIO.toFile(String.format("ArduinoMsgCodec.%d.py", ts), python);
-    FileIO.toFile(String.format("ArduinoMsgCodec.java", ts), java);
+    FileIO.toFile("src/org/myrobotlab/codec/serial/" + String.format("ArduinoMsgCodec.java", ts), java);
     FileIO.toFile(String.format("ArduinoMsgCodec.%d.ino", ts), MRLComm);
 
     // String ret = String.format("%s\n\n%s", ino.toString(),

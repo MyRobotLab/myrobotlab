@@ -5263,10 +5263,6 @@ public class Mpu6050 extends Service implements I2CControl {
 		return meta;
 	}
 
-	@Override
-	public Integer getDeviceType() {
-		return DeviceControl.DEVICE_TYPE_I2C;
-	}
 
 	@Override
 	public void setController(DeviceController controller) {

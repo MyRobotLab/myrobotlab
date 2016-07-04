@@ -213,10 +213,10 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 					}
 					controller.setSelectedItem(sc.getName());
 
-					Integer scPin = sc.getPin(servo);
+					Integer servoPin = servo.getPin();
 
-					if (scPin != null)
-						pin.setSelectedItem(scPin);
+					if (servoPin != null)
+						pin.setSelectedItem(servoPin);
 				}
 
 				if (servo.isAttached()) {

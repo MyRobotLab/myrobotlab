@@ -27,29 +27,7 @@ package org.myrobotlab.service.interfaces;
 
 public interface MotorController extends DeviceController {
 
-	/**
-	 * typed motorAttach, typed for a reason - the MotorControl's attach should
-	 * always be used any of the following methods expect the MotorControl to be
-	 * valid and filled with the appropriate data by the time it's "attached" to
-	 * the motor controller, so.... the only parameter needed is the motor
-	 * 
-	 * @param motor
-	 * @throws MRLException
-	 */
-	// public void motorAttach(MotorControl motor) throws Exception;
-
-	// ======== new interface end ===================
-	
-	/*********************************************************
-	 * HIGH LEVEL ATTACHES BEGIN
-	 */
-	public void attach(MotorControl motor, int port);
-	public void attach(MotorControl motor, int powerPin, int dirPin);
-	
-	/**
-	 * HIGH LEVEL ATTACHES END
-	 *******************************************************/
-	
+		
 	/**
 	 * 
 	 * request for motor to move the motor can be queried for the new powerlevel

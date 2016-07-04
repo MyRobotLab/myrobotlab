@@ -19,10 +19,4 @@ public class DigitalPinSensor implements SensorDataPublisher {
     return null;
   }
 
-  @Override
-  public void addSensorDataListener(SensorDataListener listener, int[] config) {
-    // TODO Auto-generated method stub
-    
-  }
-
 }

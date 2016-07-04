@@ -29,39 +29,28 @@ import org.myrobotlab.sensor.Encoder;
 
 public interface MotorControl extends  DeviceControl { // SensorDataPublisher, SensorDataListener, NameProvider, MessageSubscriber {
 
-  /**
-   * detaches the motor from the motor controller
-   * 
-   * @return
-   */
-  public void detach();
+  public void attach(MotorController controller) throws Exception;
+  
+  public void detach(MotorController controller);
 
-  public String getName();
+  double getPowerLevel();
 
-  /**
-   * get the current power level of the motor
-   * 
-   * @return
-   */
-  public double getPowerLevel();
+  double getPowerOutput();
 
-  /**
-   * reports if a motor is attached to a motor controller
-   */
-  public boolean isAttached();
+  int getTargetPos();
 
   /**
    * query the motor as to its inverted status
    * 
    * @return
    */
-  public boolean isInverted();
+  boolean isInverted();
 
   /**
    * locks the motor so no other commands will affect it until it becomes
    * unlocked
    */
-  public void lock();
+  void lock();
 
   /**
    * Move is the most common motor command. The command accepts a parameter of
@@ -73,7 +62,7 @@ public interface MotorControl extends  DeviceControl { // SensorDataPublisher, S
    * @param power
    *          - new power level
    */
-  public void move(double power);
+  void move(double power);
 
   /**
    * moveTo moves the motor to a specific location. Typically, an encoder is
@@ -81,7 +70,7 @@ public interface MotorControl extends  DeviceControl { // SensorDataPublisher, S
    * 
    * @param newPos
    */
-  public void moveTo(int newPos);
+  void moveTo(int newPos);
 
   /**
    * moveTo moves the motor to a specific location. Typically, an encoder is
@@ -89,24 +78,10 @@ public interface MotorControl extends  DeviceControl { // SensorDataPublisher, S
    * 
    * @param newPos
    */
-  public void moveTo(int newPos, Double power);
+  void moveTo(int newPos, Double power);
 
-  /**
-   * Attach a motor controller to the motor. The motor and motor controller
-   * "should be in the same instance of MRL and this reference to another
-   * service should be ok.
-   * 
-   * The motor controller uses this method to pass a reference of itself to the
-   * motor, to be used directly
-   */
-  /* PUSHED UP INTO DeviceControl.setController(DeviceController controller)
-  public void setController(MotorController controller);
-  */
-  
-  // NON-STANDARD - use getController
-  // public String getControllerName();
 
-  public void setEncoder(Encoder encoder);
+  void setEncoder(Encoder encoder);
 
   /**
    * change the motors direction such that negative power levels become
@@ -115,39 +90,19 @@ public interface MotorControl extends  DeviceControl { // SensorDataPublisher, S
    * 
    * @param invert
    */
-  public void setInverted(boolean invert);
+  void setInverted(boolean invert);
 
-  public void stop();
+  void stop();
 
   /**
    * a safety mechanism - stop and lock will stop and lock the motor no other
    * commands will affect the motor until it is "unlocked"
    */
-  public void stopAndLock();
+  void stopAndLock();
 
   /**
    * unlocks the motor, so other commands can affect it
    */
-  public void unlock();
-
-  boolean hasSensor();
-
-  int[] getControlPins();
-
-  String getType();
-
-  String[] getMotorTypes();
-
-  double getPowerOutput();
-
-  public boolean isLocal();
-
-  public void broadcastState();
-
-  public String getMotorType();
-
-  public Integer getPin(String pinTypeDir);
-
-  public int getTargetPos();
+  void unlock();
 
 }

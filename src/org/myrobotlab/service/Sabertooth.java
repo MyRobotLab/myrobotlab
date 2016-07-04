@@ -369,8 +369,8 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 			Motor motor01 = (Motor) Runtime.start("motor01", "Motor");
 			Motor motor02 = (Motor) Runtime.start("motor02", "Motor");
 
-			mc.attach(motor01, 1);
-			mc.attach(motor02, 2);
+			motor01.attach(mc);
+			motor02.attach(mc);
 
 			motor01.move(0);
 			motor01.move(0.15);
@@ -419,46 +419,7 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 		serial.open(port, rate, databits, stopbits, parity);
 	}
 
-	
-	@Override
-	public void attachDevice(DeviceControl device, Object... config) throws Exception {
-		// TODO implement !
-		
-	}
 
-	@Override
-	public void detachDevice(DeviceControl device) {
-		// NOOP for Sabertooth ?
-	}
-
-	/**
-	 * Motor Controller specific method for attaching a motor In the case of a
-	 * SaberTooth - we will need the motor name (of course) and the motor port
-	 * number - SaberTooth supports 2 (M1 & M2)
-	 * 
-	 * @param motorName
-	 * @param motorPort
-	 * @return
-	 */
-
-	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin) {
-		return motorAttach(motorName, pwrPin, dirPin, null);
-	}
-
-	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin, Integer encoderPin) {
-		error("motorAttach with pins not supported");
-		return false;
-	}
-
-	@Override
-	public void attach(MotorControl motor, int port) {
-		
-	}
-
-	@Override
-	public void attach(MotorControl motor, int powerPin, int dirPin) {
-		error("2 pin attach not supported for motors - did you want 2 pin control - attach(motor, port) ?");
-	}
 
 	@Override
 	public String getBoardType() {
@@ -473,15 +434,16 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 	}
 
 	@Override
-	public void sensorPollingStart(String name) {
+	public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void sensorPollingStop(String name) {
+	public void deviceDetach(DeviceControl device) {
 		// TODO Auto-generated method stub
 		
 	}
+
 
 }

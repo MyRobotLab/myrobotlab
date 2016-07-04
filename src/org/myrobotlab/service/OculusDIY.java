@@ -186,11 +186,6 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 		return meta;
 	}
 
-	@Override
-	public Integer getDeviceType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public void update(SensorData sd) {
@@ -224,6 +219,12 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	public DeviceController getController() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public boolean isAttached() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

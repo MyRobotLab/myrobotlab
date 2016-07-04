@@ -174,12 +174,12 @@ public class Plantoid extends Service {
 		 * pan.setController(arduino); tilt.setController(arduino);
 		 * 
 		 */
-		arduino.attach(leg1, 2);
-		arduino.attach(leg2, 3);
-		arduino.attach(leg3, 4);
-		arduino.attach(leg4, 5);
-		arduino.attach(pan, 6);
-		arduino.attach(tilt, 7);
+		arduino.servoAttach(leg1, 2);
+		arduino.servoAttach(leg2, 3);
+		arduino.servoAttach(leg3, 4);
+		arduino.servoAttach(leg4, 5);
+		arduino.servoAttach(pan, 6);
+		arduino.servoAttach(tilt, 7);
 
 		pan.setRest(90);
 		tilt.setRest(90);
