@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 public class ServoTest {
 
 	public final static Logger log = LoggerFactory.getLogger(ServoTest.class);
-	
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}
@@ -53,52 +53,70 @@ public class ServoTest {
 
 	@Test
 	public void testAttach() throws Exception {
-		
+
 		// creation ...
-		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-		Adafruit16CServoDriver afdriver = (Adafruit16CServoDriver)Runtime.start("afdriver", "Adafruit16CServoDriver");
-		Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
-		Servo servo02 = (Servo)Runtime.start("servo02", "Servo");
+		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+		Adafruit16CServoDriver afdriver = (Adafruit16CServoDriver) Runtime.start("afdriver", "Adafruit16CServoDriver");
+		Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+		Servo servo02 = (Servo) Runtime.start("servo02", "Servo");
 
 		Serial serial = arduino.getSerial();
 		// really I have to call refresh first ? :P
 		serial.refresh();
 		List<String> ports = serial.getPortNames();
-		for (String port: ports){
+		for (String port : ports) {
 			log.info(port);
 		}
-		
-		
+
 		// User code begin ...
 		// should be clear & easy !!
-		
+
 		// microcontroller connect ...
 		arduino.connect("COM5");
-		
-		
-		// arduino.setDebug(true);
-		
-		// should this be valid ?
+		arduino.setDebug(true);
+
+		// ServoControl Methods begin --------------
+		// are both these valid ?
+		// gut feeling says no - they should not be
+		// servo01.attach(arduino, 8);
 		servo01.attach(arduino, 8, 30);
-		
+		// FIXME is attach re-entrant ???
+
 		// servo move methods
 		servo01.moveTo(30);
 		servo01.moveTo(130);
 		servo01.moveTo(30);
 		servo01.moveTo(130);
+
+		servo01.detach();
+
+		// no move after detach test
+		servo01.moveTo(30);
+		servo01.moveTo(130);
+		servo01.moveTo(30);
+		servo01.moveTo(130);
 		
+		// move after detach/re-attach
+		servo01.attach();
+		servo01.moveTo(30);
+		servo01.moveTo(130);
+		servo01.moveTo(30);
+		servo01.moveTo(130);
+		
+		
+
 		servo02.attach(afdriver, 8);
-		
-		
+
 		// this is valid
-		servo01.attach(arduino, 8, 40); // this attaches the device, calls Servo.attach(8), then Servo.write(40)
+		servo01.attach(arduino, 8, 40); // this attaches the device, calls
+										// Servo.attach(8), then Servo.write(40)
 		servo02.attach(afdriver, 8, 40);
 		// IS IT Equivalent to this ?
-		
+
 		// energize to different pin
 		servo01.attach(7);
 		servo02.attach(7);
-		
+
 		// servo move methods
 		servo01.moveTo(30);
 		servo02.moveTo(30);
@@ -108,25 +126,25 @@ public class ServoTest {
 		servo02.moveTo(30);
 		servo01.moveTo(130);
 		servo02.moveTo(130);
-		
+
 		// servo detach
 		servo01.detach();
 		servo02.detach();
-		
+
 		// should re-attach
 		// with the same pin & pos
 		servo01.attach();
 		servo02.attach();
-		
+
 		// detaching the device
 		servo01.detach(arduino); // test servo02.detach(arduino); error ?
 		servo02.detach(afdriver);
-		
+
 		// errors / boundary cases
-//		servo01.attach(arduino, 8, 40);
-		servo02.attach(arduino, 8, 40); // same pin? 
+		// servo01.attach(arduino, 8, 40);
+		servo02.attach(arduino, 8, 40); // same pin?
 		servo01.attach(arduino, 8, 40); // already attached ?
-		
+
 	}
 
 	@Test
@@ -308,30 +326,29 @@ public class ServoTest {
 	public void testGetDeviceType() {
 		fail("Not yet implemented");
 	}
-	
+
 	public static void main(String[] args) {
-	    try {
+		try {
 
-	      LoggingFactory.getInstance().configure();
-	      LoggingFactory.getInstance().setLevel(Level.INFO);
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-	      ServoTest.setUpBeforeClass();
-	      ServoTest test = new ServoTest();
-	      test.setUp();
-	      
-	      // structured testing begins
-	      test.testAttach();
+			ServoTest.setUpBeforeClass();
+			ServoTest test = new ServoTest();
+			test.setUp();
 
-	      JUnitCore junit = new JUnitCore();
-	      Result result = junit.run(ServoTest.class);
-	      log.info("Result: {}", result);
-	     
-	      // Runtime.dump();
+			// structured testing begins
+			test.testAttach();
 
-	    } catch (Exception e) {
-	      log.error("test threw",e);
-	    }
-	  }
+			JUnitCore junit = new JUnitCore();
+			Result result = junit.run(ServoTest.class);
+			log.info("Result: {}", result);
 
+			// Runtime.dump();
+
+		} catch (Exception e) {
+			log.error("test threw", e);
+		}
+	}
 
 }
