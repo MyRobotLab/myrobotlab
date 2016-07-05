@@ -80,6 +80,7 @@ public interface ServoControl extends DeviceControl {
 
 	/**
 	 * fractional speed settings
+	 * 0.0 to 1.0 
 	 * 
 	 * @param speed
 	 */
