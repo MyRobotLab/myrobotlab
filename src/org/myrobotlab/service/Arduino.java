@@ -33,8 +33,6 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_S
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.FIX_PIN_OFFSET;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_BOARD_INFO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_CONTROLLER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_MRL_DEVICE_TYPE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE_READ;
@@ -72,7 +70,6 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_WRITE_MICROSECONDS;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_CONTROLLER;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_DEBOUNCE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_DEBUG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_DIGITAL_TRIGGER_ONLY;
@@ -109,6 +106,7 @@ import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
+import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.SensorControl;
 import org.myrobotlab.service.interfaces.SensorController;
@@ -255,11 +253,6 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
 	public transient static final int BOARD_TYPE_ID_MEGA = 1;
 	public transient static final int BOARD_TYPE_ID_UNO = 2;
-	
-	// temporary ----------
-	public final static int PUBLISH_BOARD_INFO = 71;
-	public final static int NEOPIXEL_WRITE_MATRIX = 77;
-	
 	
 	/**
 	 * board type - UNO Mega etc..
@@ -1499,16 +1492,29 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		
 		// FIXME - this will be need to be more type specific
 		if (device instanceof MotorControl){
-			return 6;
+			return DEVICE_TYPE_MOTOR;
+		} 
+		
+		if (device instanceof Arduino){
+			return SENSOR_TYPE_DIGITAL_PIN_ARRAY;
 		} 
 
+		// FixMe this does not follow spec..
+		// of Control Controller
+		if (device instanceof UltrasonicSensor){
+			return SENSOR_TYPE_ULTRASONIC;
+		} 
 		
 		if (device instanceof Servo){
-			return 7;
+			return DEVICE_TYPE_SERVO;
 		} 
 		
 		if (device instanceof I2CControl){
-			return 8;
+			return DEVICE_TYPE_I2C;
+		} 
+		
+		if (device instanceof NeoPixelControl){
+			return DEVICE_TYPE_NEOPIXEL;
 		} 
 				
 		throw new IllegalArgumentException(String.format("a mrl device type for %s of type %s could not be found ", device.getName(), device.getClass().getCanonicalName()));
@@ -2160,7 +2166,6 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		
 	}
 
-
 	@Override
 	public void neoPixelWriteMatrix(NeoPixel neopixel, List<Integer> msg){
 	  int id=getDeviceId(neopixel);
@@ -2170,7 +2175,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	  for (int i=0; i<msg.size(); i++){
 	    buffer[i+2]=msg.get(i);
 	  }
-	  sendMsg(NEOPIXEL_WRITE_MATRIX,buffer);
+	  sendMsg(NEO_PIXEL_WRITE_MATRIX,buffer);
 	}
 	
 
