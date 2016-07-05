@@ -332,131 +332,125 @@ void LinkedList<T>::clear() {
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE BEGIN -----------
 ///// INO GENERATED DEFINITION BEGIN //////
 // {publishMRLCommError Integer}
-#define PUBLISH_MRLCOMM_ERROR    1
+#define PUBLISH_MRLCOMM_ERROR		1
 // {getVersion}
-#define GET_VERSION   2
+#define GET_VERSION		2
 // {publishVersion Integer}
-#define PUBLISH_VERSION   3
+#define PUBLISH_VERSION		3
 // {analogReadPollingStart Integer Integer}
-#define ANALOG_READ_POLLING_START   4
+#define ANALOG_READ_POLLING_START		4
 // {analogReadPollingStop int}
-#define ANALOG_READ_POLLING_STOP    5
+#define ANALOG_READ_POLLING_STOP		5
 // {analogWrite int int}
-#define ANALOG_WRITE    6
+#define ANALOG_WRITE		6
 // {createI2cDevice I2CControl int int}
-#define CREATE_I2C_DEVICE   7
+#define CREATE_I2C_DEVICE		7
 // {deviceAttach DeviceControl Object[]}
-#define DEVICE_ATTACH   8
+#define DEVICE_ATTACH		8
 // {deviceDetach DeviceControl}
-#define DEVICE_DETACH   9
+#define DEVICE_DETACH		9
 // {digitalReadPollingStart Integer Integer}
-#define DIGITAL_READ_POLLING_START    10
+#define DIGITAL_READ_POLLING_START		10
 // {digitalReadPollingStop int}
-#define DIGITAL_READ_POLLING_STOP   11
+#define DIGITAL_READ_POLLING_STOP		11
 // {digitalWrite int int}
-#define DIGITAL_WRITE   12
+#define DIGITAL_WRITE		12
 // {fixPinOffset Integer}
-#define FIX_PIN_OFFSET    13
+#define FIX_PIN_OFFSET		13
 // {getBoardInfo}
-#define GET_BOARD_INFO    14
-// {getController}
-#define GET_CONTROLLER    15
-// {getMrlDeviceType DeviceControl}
-#define GET_MRL_DEVICE_TYPE   16
+#define GET_BOARD_INFO		14
 // {i2cRead I2CControl int int byte[] int}
-#define I2C_READ    17
+#define I2C_READ		15
 // {i2cWrite I2CControl int int byte[] int}
-#define I2C_WRITE   18
+#define I2C_WRITE		16
 // {i2cWriteRead I2CControl int int byte[] int byte[] int}
-#define I2C_WRITE_READ    19
+#define I2C_WRITE_READ		17
 // {intsToString int[] int int}
-#define INTS_TO_STRING    20
+#define INTS_TO_STRING		18
 // {isAttached}
-#define IS_ATTACHED   21
+#define IS_ATTACHED		19
 // {motorMove MotorControl}
-#define MOTOR_MOVE    22
+#define MOTOR_MOVE		20
 // {motorMoveTo MotorControl}
-#define MOTOR_MOVE_TO   23
+#define MOTOR_MOVE_TO		21
 // {motorReset MotorControl}
-#define MOTOR_RESET   24
+#define MOTOR_RESET		22
 // {motorStop MotorControl}
-#define MOTOR_STOP    25
+#define MOTOR_STOP		23
 // {neoPixelWriteMatrix NeoPixel List}
-#define NEO_PIXEL_WRITE_MATRIX    26
-// {pinMode Integer Integer}
-#define PIN_MODE    27
+#define NEO_PIXEL_WRITE_MATRIX		24
+// {pinMode int String}
+#define PIN_MODE		25
 // {publishAttachedDevice String}
-#define PUBLISH_ATTACHED_DEVICE   28
+#define PUBLISH_ATTACHED_DEVICE		26
 // {publishBoardInfo MrlCommStatus}
-#define PUBLISH_BOARD_INFO    29
+#define PUBLISH_BOARD_INFO		27
 // {publishDebug String}
-#define PUBLISH_DEBUG   30
+#define PUBLISH_DEBUG		28
 // {publishMessageAck}
-#define PUBLISH_MESSAGE_ACK   31
+#define PUBLISH_MESSAGE_ACK		29
 // {publishPin Pin}
-#define PUBLISH_PIN   32
+#define PUBLISH_PIN		30
 // {publishPulse Long}
-#define PUBLISH_PULSE   33
+#define PUBLISH_PULSE		31
 // {publishPulseStop Integer}
-#define PUBLISH_PULSE_STOP    34
+#define PUBLISH_PULSE_STOP		32
 // {publishSensorData Object}
-#define PUBLISH_SENSOR_DATA   35
+#define PUBLISH_SENSOR_DATA		33
 // {publishServoEvent Integer}
-#define PUBLISH_SERVO_EVENT   36
+#define PUBLISH_SERVO_EVENT		34
 // {publishStatus Long Integer}
-#define PUBLISH_STATUS    37
+#define PUBLISH_STATUS		35
 // {publishTrigger Pin}
-#define PUBLISH_TRIGGER   38
+#define PUBLISH_TRIGGER		36
 // {pulse int int int int}
-#define PULSE   39
+#define PULSE		37
 // {pulseStop}
-#define PULSE_STOP    40
+#define PULSE_STOP		38
 // {releaseI2cDevice I2CControl int int}
-#define RELEASE_I2C_DEVICE    41
+#define RELEASE_I2C_DEVICE		39
 // {sensorActivate SensorControl Object[]}
-#define SENSOR_ACTIVATE   42
+#define SENSOR_ACTIVATE		40
 // {sensorDeactivate SensorControl}
-#define SENSOR_DEACTIVATE   43
+#define SENSOR_DEACTIVATE		41
 // {sensorPollingStart String}
-#define SENSOR_POLLING_START    44
+#define SENSOR_POLLING_START		42
 // {sensorPollingStop String}
-#define SENSOR_POLLING_STOP   45
+#define SENSOR_POLLING_STOP		43
 // {servoAttach ServoControl int}
-#define SERVO_ATTACH    46
+#define SERVO_ATTACH		44
 // {servoDetach ServoControl}
-#define SERVO_DETACH    47
+#define SERVO_DETACH		45
 // {servoEventsEnabled ServoControl boolean}
-#define SERVO_EVENTS_ENABLED    48
+#define SERVO_EVENTS_ENABLED		46
 // {servoSetSpeed ServoControl}
-#define SERVO_SET_SPEED   49
+#define SERVO_SET_SPEED		47
 // {servoSweepStart ServoControl}
-#define SERVO_SWEEP_START   50
+#define SERVO_SWEEP_START		48
 // {servoSweepStop ServoControl}
-#define SERVO_SWEEP_STOP    51
+#define SERVO_SWEEP_STOP		49
 // {servoWrite ServoControl}
-#define SERVO_WRITE   52
+#define SERVO_WRITE		50
 // {servoWriteMicroseconds ServoControl int}
-#define SERVO_WRITE_MICROSECONDS    53
-// {setController DeviceController}
-#define SET_CONTROLLER    54
+#define SERVO_WRITE_MICROSECONDS		51
 // {setDebounce int}
-#define SET_DEBOUNCE    55
+#define SET_DEBOUNCE		52
 // {setDebug boolean}
-#define SET_DEBUG   56
+#define SET_DEBUG		53
 // {setDigitalTriggerOnly Boolean}
-#define SET_DIGITAL_TRIGGER_ONLY    57
+#define SET_DIGITAL_TRIGGER_ONLY		54
 // {setLoadTimingEnabled boolean}
-#define SET_LOAD_TIMING_ENABLED   58
+#define SET_LOAD_TIMING_ENABLED		55
 // {setPWMFrequency Integer Integer}
-#define SET_PWMFREQUENCY    59
+#define SET_PWMFREQUENCY		56
 // {setSampleRate int}
-#define SET_SAMPLE_RATE   60
+#define SET_SAMPLE_RATE		57
 // {setSerialRate int}
-#define SET_SERIAL_RATE   61
+#define SET_SERIAL_RATE		58
 // {setTrigger int int int}
-#define SET_TRIGGER   62
+#define SET_TRIGGER		59
 // {softReset}
-#define SOFT_RESET    63
+#define SOFT_RESET		60
 ///// INO GENERATED DEFINITION END //////
 
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
@@ -631,6 +625,8 @@ class MrlServo : public Device {
     float step;
     int min;
     int max;
+    // TODO: remove this, the last update timestamp is 
+    // computed at the end of the main loop once for all devices.
     unsigned long lastUpdate;
 
     MrlServo(int p) : Device(DEVICE_TYPE_SERVO) {
@@ -706,6 +702,7 @@ class MrlServo : public Device {
           }
         }
       }
+      lastUpdate=millis();
     }
     
     // TODO: consider moving all Serial.write stuff out of device classes! -KW
@@ -730,7 +727,7 @@ class MrlServo : public Device {
     }
     
     void servoWrite(int position) {
-      if (servo == NULL) return
+      if (servo == NULL) return;
       if (speed == 100) {
         // move at regular/full 100% speed
         targetPos = position;

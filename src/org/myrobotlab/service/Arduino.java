@@ -33,8 +33,6 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_S
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.FIX_PIN_OFFSET;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_BOARD_INFO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_CONTROLLER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_MRL_DEVICE_TYPE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE_READ;
@@ -72,7 +70,6 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_WRITE_MICROSECONDS;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_CONTROLLER;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_DEBOUNCE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_DEBUG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_DIGITAL_TRIGGER_ONLY;
@@ -109,6 +106,7 @@ import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
+import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.SensorControl;
@@ -1495,16 +1493,29 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		
 		// FIXME - this will be need to be more type specific
 		if (device instanceof MotorControl){
-			return 6;
+			return DEVICE_TYPE_MOTOR;
+		} 
+		
+		if (device instanceof Arduino){
+			return SENSOR_TYPE_DIGITAL_PIN_ARRAY;
 		} 
 
+		// FixMe this does not follow spec..
+		// of Control Controller
+		if (device instanceof UltrasonicSensor){
+			return SENSOR_TYPE_ULTRASONIC;
+		} 
 		
 		if (device instanceof Servo){
-			return 7;
+			return DEVICE_TYPE_SERVO;
 		} 
 		
 		if (device instanceof I2CControl){
-			return 8;
+			return DEVICE_TYPE_I2C;
+		} 
+		
+		if (device instanceof NeoPixelControl){
+			return DEVICE_TYPE_NEOPIXEL;
 		} 
     if (device instanceof NeoPixelControl){
       return 9;
@@ -2158,7 +2169,6 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		// TODO Auto-generated method stub
 		
 	}
-
 
 	@Override
 	public void neoPixelWriteMatrix(NeoPixel neopixel, List<Integer> msg){
