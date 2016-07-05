@@ -706,6 +706,7 @@ class MrlServo : public Device {
           }
         }
       }
+      lastUpdate=millis();
     }
     
     // TODO: consider moving all Serial.write stuff out of device classes! -KW
@@ -730,7 +731,7 @@ class MrlServo : public Device {
     }
     
     void servoWrite(int position) {
-      if (servo == NULL) return
+      if (servo == NULL) return;
       if (speed == 100) {
         // move at regular/full 100% speed
         targetPos = position;
