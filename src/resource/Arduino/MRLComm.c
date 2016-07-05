@@ -625,6 +625,8 @@ class MrlServo : public Device {
     float step;
     int min;
     int max;
+    // TODO: remove this, the last update timestamp is 
+    // computed at the end of the main loop once for all devices.
     unsigned long lastUpdate;
 
     MrlServo(int p) : Device(DEVICE_TYPE_SERVO) {
