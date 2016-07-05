@@ -110,6 +110,7 @@ import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NeoPixelController;
+import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.SensorControl;
 import org.myrobotlab.service.interfaces.SensorController;
 import org.myrobotlab.service.interfaces.SensorDataListener;
@@ -255,11 +256,6 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
 	public transient static final int BOARD_TYPE_ID_MEGA = 1;
 	public transient static final int BOARD_TYPE_ID_UNO = 2;
-	
-	// temporary ----------
-	public final static int PUBLISH_BOARD_INFO = 71;
-	public final static int NEOPIXEL_WRITE_MATRIX = 77;
-	
 	
 	/**
 	 * board type - UNO Mega etc..
@@ -1510,6 +1506,9 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		if (device instanceof I2CControl){
 			return 8;
 		} 
+    if (device instanceof NeoPixelControl){
+      return 9;
+    } 
 				
 		throw new IllegalArgumentException(String.format("a mrl device type for %s of type %s could not be found ", device.getName(), device.getClass().getCanonicalName()));
 	}
@@ -2170,7 +2169,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	  for (int i=0; i<msg.size(); i++){
 	    buffer[i+2]=msg.get(i);
 	  }
-	  sendMsg(NEOPIXEL_WRITE_MATRIX,buffer);
+	  sendMsg(NEO_PIXEL_WRITE_MATRIX,buffer);
 	}
 	
 

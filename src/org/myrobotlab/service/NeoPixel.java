@@ -84,6 +84,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
 	 */
 	ArrayList<String> controllers;
 	public String controllerName;
+	
+	boolean isAttached=false;
 
 	public Integer pin;
 	public boolean off = false;
@@ -117,6 +119,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 	}
 
 	public boolean isAttached() {
+	  isAttached = controller != null;
 		return controller != null;
 	}
 
@@ -217,6 +220,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
 		meta.addCategory("Neopixel, Control");
 		return meta;
 	}
+	public void attach(String controllerName, int pin, int numPixel) throws Exception {
+	  attach((NeoPixelController) Runtime.getService(controllerName),pin,numPixel);
+	}
 
 	@Override
 	public void attach(NeoPixelController controller, int pin, int numPixel) throws Exception {
@@ -234,6 +240,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 		setController(controller);
 
 		controller.deviceAttach(this, pin, numPixel);
+		isAttached = true;
 		broadcastState();
 	}
 
@@ -247,6 +254,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
 		this.controller = (NeoPixelController) controller;
 		controllerName = this.controller.getName();
 	}
+	
+	public void detach(){
+	  detach(controller);
+	}
 
 	@Override
 	public void detach(NeoPixelController controller) {
@@ -254,6 +265,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
 		controller.deviceDetach(this);
 		// setting controller reference to null
 		controller = null;
+		isAttached = false;
+		refreshControllers();
 		broadcastState();
 	}
 
@@ -270,10 +283,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.connect("COM15");
 			// arduino.setDebug(true);
-			NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "Neopixel");
+			NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
 			webgui.startBrowser("http://localhost:8888/#/service/neopixel");
 			// arduino.setLoadTimingEnabled(true);
-			neopixel.attach(arduino, 31, 16);
+			neopixel.attach(arduino, 33, 16);
 			PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
 			neopixel.setPixel(pix);
 			neopixel.writeMatrix();
