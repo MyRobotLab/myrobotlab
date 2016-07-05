@@ -58,12 +58,14 @@ public class NeoPixel extends Service implements NeoPixelControl {
 		public int red;
 		public int blue;
 		public int green;
+		public boolean changed;
 
 		PixelColor(int address, int red, int green, int blue) {
 			this.address = address;
 			this.red = red;
 			this.blue = blue;
 			this.green = green;
+			changed=true;
 		}
 
 		PixelColor() {
@@ -71,6 +73,13 @@ public class NeoPixel extends Service implements NeoPixelControl {
 			red = 0;
 			blue = 0;
 			green = 0;
+			changed=true;
+		}
+		public boolean isEqual(PixelColor pix){
+		  if(pix.red==red && pix.green==green && pix.blue==blue){
+		    return true;
+		  }
+		  return false;
 		}
 	}
 
@@ -132,6 +141,13 @@ public class NeoPixel extends Service implements NeoPixelControl {
 		if (off)
 			return;
 		if (pixel.address <= getNumPixel()) {
+		  PixelColor pix=pixelMatrix.get(pixel.address);
+		  if(pix!=null && !pix.isEqual(pixel)){
+		    pixel.changed = true;
+		  }
+		  else{
+		    pixel.changed = false;
+		  }
 			pixelMatrix.put(pixel.address, pixel);
 		} else {
 			log.info("Pixel address over the number of pixel");
@@ -147,8 +163,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
 		msg.add(pixel.green);
 		msg.add(pixel.blue);
 		controller.neoPixelWriteMatrix(this, msg);
-		savedPixelMatrix.clear();
-		savedPixelMatrix.add(pixel);
+		//savedPixelMatrix.clear();
+		//savedPixelMatrix.add(pixel);
 	}
 
 	public void sendPixel(int address, int red, int green, int blue) {
@@ -163,10 +179,16 @@ public class NeoPixel extends Service implements NeoPixelControl {
 		List<Integer> msg = new ArrayList<Integer>();
 		while (i.hasNext()) {
 			Map.Entry<Integer, PixelColor> me = (Map.Entry<Integer, PixelColor>) i.next();
-			msg.add(me.getValue().address);
-			msg.add(me.getValue().red);
-			msg.add(me.getValue().green);
-			msg.add(me.getValue().blue);
+      PixelColor pix=me.getValue();
+      //will only send if the pixel value have changed
+			if(pix.changed){
+  			msg.add(pix.address);
+  			msg.add(pix.red);
+  			msg.add(pix.green);
+  			msg.add(pix.blue);
+  			pix.changed=false;
+  			me.setValue(pix);
+			}
 			savedPixelMatrix.add(me.getValue());
 			if (msg.size() > 32) {
 				if (!off)
