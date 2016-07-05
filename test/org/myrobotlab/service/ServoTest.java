@@ -79,15 +79,25 @@ public class ServoTest {
 		// are both these valid ?
 		// gut feeling says no - they should not be
 		// servo01.attach(arduino, 8);
-		servo01.attach(arduino, 8, 30);
+		servo01.attach(arduino, 8, 130);
 		// FIXME is attach re-entrant ???
 
-		// servo move methods
+		servo01.setSpeed(0.02);
+		
+		
+		servo01.moveTo(130);
+		servo01.moveTo(30);
+		
+		servo01.setSpeed(0.2);
+		servo01.moveTo(130);
+		servo01.moveTo(30);
+		servo01.moveTo(130);
+		servo01.setSpeed(1.0);
 		servo01.moveTo(30);
 		servo01.moveTo(130);
 		servo01.moveTo(30);
 		servo01.moveTo(130);
-
+		
 		servo01.detach();
 
 		// no move after detach test
@@ -105,12 +115,14 @@ public class ServoTest {
 		
 		
 
-		servo02.attach(afdriver, 8);
+		//servo02.attach(afdriver, 8);
 
 		// this is valid
-		servo01.attach(arduino, 8, 40); // this attaches the device, calls
+		// FIXME --- THIS IS NOT RE-ENTRANT !!!
+		// servo01.attach(arduino, 8, 40); // this attaches the device, calls
 										// Servo.attach(8), then Servo.write(40)
-		servo02.attach(afdriver, 8, 40);
+		// FIXME --- THIS IS NOT RE-ENTRANT !!!
+		//servo02.attach(afdriver, 8, 40);
 		// IS IT Equivalent to this ?
 
 		// energize to different pin

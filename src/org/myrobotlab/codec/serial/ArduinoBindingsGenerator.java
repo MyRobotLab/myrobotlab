@@ -121,6 +121,9 @@ public class ArduinoBindingsGenerator {
 
     exclude.add("getDeviceId");
 
+    exclude.add("setController");
+    exclude.add("getController");
+    exclude.add("getMrlDeviceType");
     
     exclude.add("getServoIndex");
     exclude.add("getBoardType");
