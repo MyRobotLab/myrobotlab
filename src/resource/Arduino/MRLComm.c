@@ -456,9 +456,6 @@ void LinkedList<T>::clear() {
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
 
 
-// TODO: Move these into ArduinoMsgCodec  and re-generate ...
-#define PUBLISH_BOARD_INFO 71
-#define NEOPIXEL_WRITE_MATRIX 72
 ///// INO GENERATED DEFINITION END //////
 
 // TODO: the max message size isn't auto generated but
@@ -604,7 +601,7 @@ class Device {
     int state; // state - single at the moment to handle all the finite states of the sensors (todo maybe this moves into the subclasses?)
     // GroG - I think its good here - a uniform state description across all devices is if they are DEVICE_STATE_ACTIVE or DEVICE_STATE_DEACTIVE
     // subclasses can/should define their os substate - eg ULTRASONIC_STATE_WAITING_PULSE etc..
-    virtual void update(unsigned long loopCount) {}; // all devices must implement this to update their state.
+    virtual void update(unsigned long lastMicros) {}; // all devices must implement this to update their state.
     // the universal attach - follows Java-Land Controller.deviceAttach method
     virtual void deviceAttach(unsigned char config[], int configSize) {};
 };
@@ -627,10 +624,13 @@ class MrlServo : public Device {
     int max;
     // TODO: remove this, the last update timestamp is 
     // computed at the end of the main loop once for all devices.
+    // CAL:no, this is still need. We need to know when THIS device do it's last update operation. 
+    //     calling update will check if it's time to do the update operations.
+    //     ie: for the servo update, updating  the position is done each 10ms wich is more than enough considering
+    //     the speed of the servo. but call to update will be more in the range of 10us depending of the load on the
+    //     microcontroller
     unsigned long lastUpdate;
-
-    MrlServo(int p) : Device(DEVICE_TYPE_SERVO) {
-       pin = p;
+    MrlServo() : Device(DEVICE_TYPE_SERVO) {
        isMoving = false;
        isSweeping = false;
        speed = 100;// 100% speed
@@ -668,6 +668,7 @@ class MrlServo : public Device {
     // This method is equivalent to Arduino's Servo.attach(pin) - (no pos)
     void attach(int pin){
       servo->attach(pin);
+      servo->write((int)currentPos); //return to it's last know state
       // TODO-KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
     }
 
@@ -675,17 +676,18 @@ class MrlServo : public Device {
       servo->detach();
     }
 
-    void update(unsigned long loopCount) {
-      if (lastUpdate+10>millis() || servo == NULL) return;
+    void update(unsigned long lastMicros) {
+      if (lastUpdate+10>millis() || servo == NULL) 
+        return;
       if (isMoving) {
         if ((int)currentPos != targetPos) {
           currentPos += step;
-          if((step > 0.0 && (int)currentPos > targetPos) || (step < 0.0 && (int)currentPos < targetPos)){
+          if((step > 0.0 && (int)currentPos > targetPos) || (step < 0.0 && (int)currentPos < targetPos)) {
             currentPos=targetPos; 
           }
           servo->write((int)currentPos);
           if (eventsEnabled){
-              publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
+            publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
           }
         } else {
           if (isSweeping) {
@@ -727,15 +729,13 @@ class MrlServo : public Device {
     }
     
     void servoWrite(int position) {
-      if (servo == NULL) return;
+      if (servo == NULL) 
+        return;
       if (speed == 100) {
         // move at regular/full 100% speed
         targetPos = position;
-        currentPos = position;
-        isMoving = false;
-        servo->write(position);
-        if (eventsEnabled)
-          publishServoEvent(SERVO_EVENT_STOPPED);
+        isMoving = true;
+        step=targetPos-(int)currentPos;
       } else if (speed < 100 && speed > 0) {
         targetPos = position;
         isMoving = true;
@@ -805,7 +805,7 @@ class MrlStepper : public Device {
     MrlStepper() : Device(DEVICE_TYPE_STEPPER) {
 
     }
-    void update(unsigned long loopCount) {
+    void update(unsigned long lastMicros) {
     }
 };
 
@@ -828,7 +828,7 @@ class MrlAnalogPinArray : public Device {
     }
     // TODO: remove the direct write to the serial here..  devices shouldn't 
     // have a direct handle to the serial port.
-    void update(unsigned long loopCount) {
+    void update(unsigned long lastMicros) {
       if (pins.size() > 0) {
         Serial.write(MAGIC_NUMBER);
         Serial.write(2 + pins.size() * 2);
@@ -869,7 +869,7 @@ class MrlDigitalPinArray : public Device {
 
     }
     // devices shouldn't have a direct handle to the serial port..
-    void update(unsigned long loopCount) {
+    void update(unsigned long lastMicros) {
       if (pins.size() > 0) {
         Serial.write(MAGIC_NUMBER);
         Serial.write(2 + pins.size() * 1);
@@ -913,7 +913,7 @@ class MrlPulse : public Device {
     void pulseStop() {
       pin->state = PUBLISH_PULSE_STOP;
     }
-    void update(unsigned long loopCount) {
+    void update(unsigned long lastMicros) {
       //this need work
       if (type == 0) return;
       lastValue = (lastValue == 0) ? 1 : 0;
@@ -980,7 +980,7 @@ class MrlUltrasonic : public Device {
       }
 
     }
-    void update(unsigned long loopCount) {
+    void update(unsigned long lastMicros) {
       //This need to be reworked
       if (type == 0) return;
       Pin* pin = pins.get(0);
@@ -1086,7 +1086,7 @@ class MrlI2CBus : public Device {
         Serial.write(PUBLISH_SENSOR_DATA);
         Serial.write(ioCmd[1]); // DEVICE_INDEX
         Serial.write(ioCmd[3]); // I2CADDRESS
-        } else {
+      } else {
         // Start an mrlcomm message
         Serial.write(MAGIC_NUMBER);
         // size of the mrlcomm message
@@ -1146,7 +1146,7 @@ class MrlI2CBus : public Device {
         }
       }
     }
-    void update(unsigned long loopCount) {
+    void update(unsigned long lastMicros) {
       //Nothing to do
     }
 };
@@ -1177,8 +1177,18 @@ class MrlNeopixel:public Device{
   uint8_t bitmask;
   unsigned long lastShow;
   bool newData;
-  MrlNeopixel(int pin, unsigned int num_pixel):Device(DEVICE_TYPE_NEOPIXEL){
-    numPixel = num_pixel;
+  MrlNeopixel():Device(DEVICE_TYPE_NEOPIXEL){
+  }
+  ~MrlNeopixel(){
+    delete pixels;
+  }
+  void deviceAttach(unsigned char config[], int configSize){
+    if (configSize != 2){
+      publishError(ERROR_DOES_NOT_EXIST,F("MrlNeopixel invalid attach config size"));
+      return;
+    }
+    int pin=config[0];
+    numPixel=config[1];
     pixels = new Pixel[numPixel+1];
     if(BOARD==BOARD_TYPE_ID_UNKNOWN) {
       publishError(ERROR_DOES_NOT_EXIST,F("Board not supported"));
@@ -1200,10 +1210,7 @@ class MrlNeopixel:public Device{
     }
     newData=true;
   }
-  ~MrlNeopixel(){
-    delete pixels;
-  }
- inline void sendBit(bool bitVal){
+  inline void sendBit(bool bitVal){
     uint8_t bit=bitmask;
     if (bitVal) {        // 0 bit
       PIXEL_PORT |= bit;
@@ -1281,7 +1288,7 @@ class MrlNeopixel:public Device{
     }
     newData=true;
   }
-  void update(unsigned long loopCount){
+  void update(unsigned long lastMicros){
     if((lastShow+33000)>micros() || !newData) return; //update 30 times/sec if there is new data to show
     show();
   }
@@ -1309,7 +1316,7 @@ unsigned char ioCmd[MAX_MSG_SIZE];  // message buffer for all inbound messages
 unsigned char config[MAX_MSG_SIZE];  // config buffer
 int configPos = 0; // position of the beginning of config in the ioCmd message
 
-int byteCount = 0;
+int byteCount = 0; //used for getCommand method
 unsigned long loopCount = 0; // main loop count
 // TODO: this is referenced nowhere. remove? 
 unsigned int debounceDelay = 50; // in ms
@@ -1534,7 +1541,7 @@ void processCommand() {
 	  publishDebug("SERVO_ATTACH " + String(pin));
 	  MrlServo* servo = (MrlServo*)getDevice(ioCmd[1]);
 	  servo->attach(pin);
-	  publishDebug("SERVO_ATTACHED");
+	  publishDebug(F("SERVO_ATTACHED"));
       break;
   }
   case SERVO_SWEEP_START:
@@ -1640,7 +1647,7 @@ void processCommand() {
   case GET_BOARD_INFO:
     publishBoardInfo();
     break;
-    case NEOPIXEL_WRITE_MATRIX:
+    case NEO_PIXEL_WRITE_MATRIX:
       ((MrlNeopixel*)getDevice(ioCmd[1]))->neopixelWriteMatrix(ioCmd);
       break;
   default:
@@ -1808,7 +1815,7 @@ void updateDevices() {
   // iterate through our device list and call update on them.
   for (int i = 0; i < deviceList.size(); i++) {
     // TODO: implement more effecient list iterator
-    deviceList.get(i)->update(loopCount);
+    deviceList.get(i)->update(lastMicros);
   } // end for each device
 }
 
@@ -1862,8 +1869,6 @@ void attachDevice() {
   // TOOD:KW check free memory to see if we can attach a new device. o/w return an error!
   // we're creating a new device. auto increment it
   // TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
-  //       Arduino will run out of memory before that happen.
-  //       A mecanism that will call a softReset() when MRL disconnect will prevent that
   // we want to echo back the name
   // and send the config in a nice neat package to
   // the attach method which creates the device
@@ -1904,56 +1909,56 @@ void attachDevice() {
         // e.g.  attach(int[] config, configSize)
 
   switch (type) {
-  case SENSOR_TYPE_ANALOG_PIN_ARRAY: {
-    devicePtr = attachAnalogPinArray();
-    break;
-  }
-  case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
-    devicePtr = attachDigitalPinArray();
-    break;
-  }
-  case SENSOR_TYPE_PULSE: {
-    devicePtr = attachPulse();
-    break;
-  }
-  case SENSOR_TYPE_ULTRASONIC: {
-    devicePtr = attachUltrasonic();
-    break;
-  }
-  case DEVICE_TYPE_STEPPER: {
-    devicePtr = attachStepper();
-    break;
-  }
-  case DEVICE_TYPE_MOTOR: {
-    devicePtr = attachMotor();
-    break;
-  }
-  case DEVICE_TYPE_SERVO: {
-  devicePtr = new MrlServo(type);
-    break;
-  }
-  case DEVICE_TYPE_I2C: {
-    devicePtr = attachI2C();
-    break;
-  }
-    case DEVICE_TYPE_NEOPIXEL: {
-      devicePtr = attachNeopixel();
+    case SENSOR_TYPE_ANALOG_PIN_ARRAY: {
+      devicePtr = attachAnalogPinArray();
+      break;
     }
-  default: {
-    // TODO: publish error message
-      publishDebug("Unknown Message Type.");
-    break;
+    case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
+      devicePtr = attachDigitalPinArray();
+      break;
+    }
+    case SENSOR_TYPE_PULSE: {
+      devicePtr = attachPulse();
+      break;
+    }
+    case SENSOR_TYPE_ULTRASONIC: {
+      devicePtr = attachUltrasonic();
+      break;
+    }
+    case DEVICE_TYPE_STEPPER: {
+      devicePtr = attachStepper();
+      break;
+    }
+    case DEVICE_TYPE_MOTOR: {
+      devicePtr = attachMotor();
+      break;
+    }
+    case DEVICE_TYPE_SERVO: {
+      devicePtr = new MrlServo(); //no need to pass the type here
+      break;
+    }
+    case DEVICE_TYPE_I2C: {
+      devicePtr = attachI2C();
+      break;
+    }
+    case DEVICE_TYPE_NEOPIXEL: {
+      devicePtr = new MrlNeopixel();
+    }
+    default: {
+      // TODO: publish error message
+        publishDebug(F("Unknown Message Type."));
+      break;
+    }
   }
-}
 
   // KW: a sort of null pointer case? TODO: maybe move this into default branch of switch above?
-if (devicePtr) {
-  devicePtr->id = nextDeviceId;
-  devicePtr->deviceAttach(config, configSize);
-  addDevice(devicePtr);
-  publishAttachedDevice(devicePtr->id, nameSize, 3);
-  nextDeviceId++;
-}
+  if (devicePtr) {
+    devicePtr->id = nextDeviceId;
+    devicePtr->deviceAttach(config, configSize);
+    addDevice(devicePtr);
+    publishAttachedDevice(devicePtr->id, nameSize, 3);
+    nextDeviceId++;
+  }
 }
 
 /**
@@ -2034,13 +2039,6 @@ Device* attachMotor() {
 
 Device* attachI2C(){
   MrlI2CBus* device = new MrlI2CBus();
-  return device;
-}
-
-Device* attachNeopixel() {
-  int pin=config[0];
-  int numPixel=config[1];
-  MrlNeopixel* device = new MrlNeopixel(pin,numPixel);
   return device;
 }
 
