@@ -116,6 +116,7 @@ public:
   virtual T get(int index);
   /* Clear the entire array */
   virtual void clear();
+  virtual ListNode<T>* getRoot();
 };
 
 // Initialize LinkedList with false values
@@ -304,6 +305,10 @@ void LinkedList<T>::clear() {
     shift();
 }
 
+template<typename T>
+ListNode<T>* LinkedList<T>::getRoot() {
+  return root;
+}
 #endif
 
 #include <Servo.h>
@@ -1436,18 +1441,15 @@ void addDevice(Device* device) {
  * it returns null if the device isn't found.
  */
 Device* getDevice(int id) {
-  // TODO: more effecient lookup..use a linked list iterator here..  while (nextNode != null) sort of iteration..
-  int numDevices = deviceList.size();
-  for (int i = 0; i < numDevices; i++) {
-    Device* dev=deviceList.get(i);
-    if (dev->id == id) {
-      // it was found.
-      return dev;
+  ListNode<Device*>* node=deviceList.getRoot();
+  while (node != NULL) {
+    if(node->data->id == id) {
+      return node->data;
     }
+    node - node->next;
   }
-  // TODO: force this to return an error message
   publishError(ERROR_DOES_NOT_EXIST);
-  return 0; //returning a NULL ptr can cause runtime error
+  return NULL; //returning a NULL ptr can cause runtime error
   // you'll still get a runtime error if any field, member or method not
   // defined is accessed
 }
@@ -1812,11 +1814,12 @@ void servoEventsEnabled() {
  * pins
  */
 void updateDevices() {
+  ListNode<Device*>* node = deviceList.getRoot();
   // iterate through our device list and call update on them.
-  for (int i = 0; i < deviceList.size(); i++) {
-    // TODO: implement more effecient list iterator
-    deviceList.get(i)->update(lastMicros);
-  } // end for each device
+  while (node != NULL) {
+    node->data->update(lastMicros);
+    node = node->next;
+  }
 }
 
 /***********************************************************************
@@ -1989,16 +1992,16 @@ void publishAttachedDevice(int id, int nameSize, int namePos){
  * one passed in.
  */
 void detachDevice(int id) {
-  // TODO: more effecient device detach/removal by walking the list
-  // with a pointer
-  int numDevices = deviceList.size();
-  for (int i = 0; i < numDevices; i++) {
-    Device* device=deviceList.get(i);
-    if (device->id == id) {
-      delete device;
+  ListNode<Device*>* node = deviceList.getRoot();
+  int i=0;
+  while(node != NULL) {
+    if(node->data->id == id) {
+      delete node->data;
       deviceList.remove(i);
       break;
     }
+    node = node->next;
+    i++;
   }
 }
 
