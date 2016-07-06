@@ -14,6 +14,7 @@ import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
+import org.myrobotlab.service.interfaces.VoltageSensorControl;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -25,7 +26,7 @@ import org.slf4j.Logger;
  * 
  *         References : https://www.adafruit.com/products/904
  */
-public class AdafruitIna219 extends Service implements I2CControl{
+public class AdafruitIna219 extends Service implements I2CControl, VoltageSensorControl{
 
 	private static final long serialVersionUID = 1L;
 
@@ -168,10 +169,6 @@ public class AdafruitIna219 extends Service implements I2CControl{
 		return true;
 	}
 
-	public boolean isAttached() {
-		return isAttached;
-	}
-
 	/**
 	 * This method creates the i2c device
 	 */
@@ -191,20 +188,27 @@ public class AdafruitIna219 extends Service implements I2CControl{
 	 * This method sets the shunt resistance in ohms Default value is .1 Ohms (
 	 * R100 )
 	 */
-	void setShuntResistance(double ShuntResistance) {
-		shuntResistance = ShuntResistance;
+	// @Override
+	public void setShuntResistance(double shuntResistance) {
+		this.shuntResistance = shuntResistance;
 	}
 
+	// @Override
+	public double getShuntResistance() {
+		return shuntResistance;
+	}
+	
 	/**
 	 * This method reads and returns the power in milliWatts
 	 */
 	public void refresh() {
 
-		double power = getPower();
+		power = getPower();
 		broadcastState();
 	}
 
-	double getPower() {
+	// @Override
+	public double getPower() {
 		power = getBusVoltage() * getCurrent();
 		return power;
 	}
@@ -212,7 +216,8 @@ public class AdafruitIna219 extends Service implements I2CControl{
 	/**
 	 * This method reads and returns the shunt current in milliAmperes
 	 */
-	double getCurrent() {
+	// @Override
+	public double getCurrent() {
 		current = getShuntVoltage() / shuntResistance;
 		return current;
 	}
@@ -220,7 +225,8 @@ public class AdafruitIna219 extends Service implements I2CControl{
 	/**
 	 * This method reads and returns the shunt Voltage in milliVolts
 	 */
-	double getShuntVoltage() {
+	// @Override
+	public double getShuntVoltage() {
 		byte[] writebuffer = { INA219_SHUNTVOLTAGE };
 		byte[] readbuffer = { 0x0, 0x0 };
 		controller.i2cWrite(this,Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
@@ -234,7 +240,8 @@ public class AdafruitIna219 extends Service implements I2CControl{
 	/**
 	 * This method reads and returns the bus Voltage in milliVolts
 	 */
-	double getBusVoltage() {
+	// @Override
+	public double getBusVoltage() {
 		byte[] writebuffer = { INA219_BUSVOLTAGE };
 		byte[] readbuffer = { 0x0, 0x0 };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
@@ -258,6 +265,12 @@ public class AdafruitIna219 extends Service implements I2CControl{
 		meta.addCategory("shield", "sensor");
 		meta.setSponsor("Mats");
 		return meta;
+	}
+
+	@Override
+	public boolean isAttached() {
+		// TODO Auto-generated method stub
+		return isAttached;
 	}
 
 }

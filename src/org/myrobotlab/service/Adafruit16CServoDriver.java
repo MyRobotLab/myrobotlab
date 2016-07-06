@@ -58,11 +58,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	private int pwmFreq = 60;
 	private boolean pwmFreqSet = false;
 
+	// List of possible addresses. Used by the GUI.
 	public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E",
 			"0x4F", "0x50", "0x51", "0x52", "0x53", "0x54", "0x55", "0x56", "0x57", "0x58", "0x59", "0x5A", "0x5B", "0x5C", "0x5D", "0x5E", "0x5F");
-
+	// Default address
 	public String deviceAddress = "0x40";
-
 	/**
 	 * This address is to address all Adafruit16CServoDrivers on the i2c bus Don't
 	 * use this address for any other device on the i2c bus since it will cause
@@ -78,12 +78,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public static final int PCA9685_MODE1 = 0x00; // Mode 1 register
 	public static final byte PCA9685_SLEEP = 0x10; // Set sleep mode, before
 	// changing prescale value
-	public static final byte PCA9685_AUTOINCREMENT = 0x20; // Set autoincrement
-	// to
-	// be able to write
-	// more than one
-	// byte
-	// in sequence
+	public static final byte PCA9685_AUTOINCREMENT = 0x20; // Set autoincrement to
+																													// be able to write
+																													// more than one byte
+																													// in sequence
 
 	public static final byte PCA9685_PRESCALE = (byte) 0xFE; // PreScale
 	// register
@@ -105,11 +103,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public String controllerName;
 	public boolean isControllerSet = false;
 
-
 	/**
 	 * @Mats - added by GroG - was wondering if this would help, probably you need
 	 *       a reverse index too ?
-	 * @GroG - I only need servoNameToPin
+	 * @GroG - I only need servoNameToPin yet. To be able to sweep some more
+	 *         values may be needed
 	 */
 	HashMap<String, Integer> servoNameToPin = new HashMap<String, Integer>();
 
@@ -128,10 +126,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 	}
 
+	
 	public void onRegistered(ServiceInterface s) {
 		refreshControllers();
 		broadcastState();
-
 	}
 
 	/*
@@ -152,10 +150,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * @param controllerName
 	 *          = The name of the i2c controller
 	 * @param deviceBus
-	 *          = i2c bus Ignored by Arduino Should be "1" for the RasPi "0"-"7"
-	 *          for I2CMux
+	 *          = i2c bus Should be "1" for Arduino and RasPi 
+	 *          										"0"-"7" for I2CMux
 	 * @param deviceAddress
-	 *          = The i2c address of the PCA9685 ( "0x60" - "0x7F")
+	 *          = The i2c address of the PCA9685 ( "0x40" - "0x5F")
 	 * @return
 	 */
 	// @Override
@@ -196,6 +194,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		return true;
 	}
 
+	@Override
 	public void unsetController() {
 		controller = null;
 		this.deviceBus = null;
@@ -223,7 +222,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	public void begin() {
-
 		byte[] buffer = { PCA9685_MODE1, 0x0 };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
@@ -297,8 +295,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	/**
-	 * this would have been nice to have Java 8 and a default implmentation in this interface which does Servo sweeping 
-	 * in the Servo (already implmented) and only if the controller can does it do sweeping on the "controller"
+	 * this would have been nice to have Java 8 and a default implmentation in
+	 * this interface which does Servo sweeping in the Servo (already implmented)
+	 * and only if the controller can does it do sweeping on the "controller"
 	 * 
 	 * For example MrlComm can sweep internally (or it used to be implemented)
 	 */
@@ -312,7 +311,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		log.info("Adafruit16C can not do sweeping on the controller - sweeping must be done in ServoControl");
 	}
 
-	
 	@Override
 	public void servoWrite(ServoControl servo) {
 		if (!pwmFreqSet) {
@@ -343,9 +341,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public boolean servoEventsEnabled(ServoControl servo, boolean enabled) {
 		// @GroG. What is this method supposed to do ?
 		// return arduino.servoEventsEnabled(servo, enabled);
-		// Grog says - if you want feedback from the microcontroller to say when a servo has stopped
-		// when its moving at sub speed ...  
+		// Grog says - if you want feedback from the microcontroller to say when a
+		// servo has stopped
+		// when its moving at sub speed ...
 		// perhaps cannot do this with Adafruit16CServoDriver
+		// Mats says - We don't have any feedback from the servos, but to send
+		// an event when the sweep stops should not be a problem
 
 		return enabled;
 	}
@@ -354,6 +355,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public void servoSetSpeed(ServoControl servo) {
 		// TODO Auto-generated method stub.
 		// perhaps cannot do this with Adafruit16CServoDriver
+		// Mats says. It can be done in this service. But not by the board.
 	}
 
 	/**
@@ -398,6 +400,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * It will need to keep track of the "pin" to I2C address, and whenever a
 	 * ServoControl.moveTo(79) - the Servo will tell this controller its name &
 	 * location to move.
+	 * Mats says. The board has a single i2c address that doesn't change.
+	 * The Arduino only needs to keep track of the i2c bs, not all devices that can
+	 * communicate thru it. I.e. This service should keep track of servos,
+	 * not the Arduino or the Raspi. 
+	 * 
 	 * 
 	 * This service will translate the name & location to an I2C address & value
 	 * write request to the MRLComm device.
@@ -411,26 +418,48 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * I.e except for this bunch of comments :-)
 	 * 
 	 * It implements the methods defined in the ServoController and translates the
-	 * servo requests to i2c writes using the I2CControl interface
+	 * servo requests to i2c writes defined in the I2CControl interface
 	 * 
 	 */
 
 	/**
-	 * if your device controller can provided several {Type}Controller interfaces, there
-	 * might be commonality between all of them.  e.g. initialization of data structures, preparing 
-	 * communication, sending control and config messages, etc.. - if there is commonality, it could
-	 * be handled here - where Type specific methods call this method
+	 * if your device controller can provided several {Type}Controller interfaces,
+	 * there might be commonality between all of them. e.g. initialization of data
+	 * structures, preparing communication, sending control and config messages,
+	 * etc.. - if there is commonality, it could be handled here - where Type
+	 * specific methods call this method
+	 * 
+	 * This is a software representation of a board that uses the i2c protocol.
+	 * It uses the methods defined in the I2CController interface to write
+	 * servo-commands.
+	 * The I2CControl interface defines the common methods for all devices that use the
+	 * i2c protocol. 
+	 * In most services I wiil define addition <device>Control methods, but this
+	 * service is a "middle man" so it implements the ServoController methods and
+	 * should not have any "own" methods. 
+	 *
+	 * After our explanation of the roles of <device>Control and <device>Controller
+	 * it's clear to me that any device that uses the i2c protocol needs to implement
+	 * to <device>Control methods:
+	 * 		I2CControl that is the generic interface for any i2c device
+	 * 		<device>Control, that defines the specific methods for that device.
+	 *    For example the MPU6050 should implement both I2CControl and MPU6050Control
+	 *    or perhaps a AccGyroControl interface that would define the common methods
+	 *    that a Gyro/Accelerometer/Magnetometer device should implement.
 	 */
-	
+
 	// FIXME how many do we want to support ??
 	// this device attachment is overloaded on the Arduino side ...
-	
+	// Currently its only Servo, but it's also possible to implement
+	// MotorController and any device that requires pwm, like a LED dimmer.
+
 	@Override
 	public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
 		// only need to handle servos :)
 		// this is easy
-		ServoControl servo = (ServoControl)device;
-		// servo.setController(this); Do not set any "ServoControl" data like this Not necessary
+		ServoControl servo = (ServoControl) device;
+		// servo.setController(this); Do not set any "ServoControl" data like this
+		// Not necessary
 		// should initial pos be a requirement ?
 		servoNameToPin.put(servo.getName(), servo.getPin());
 	}
@@ -438,14 +467,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	@Override
 	public void deviceDetach(DeviceControl servo) {
 		// de-energize pin
-		servoDetach((ServoControl)servo);
+		servoDetach((ServoControl) servo);
 		servoNameToPin.remove(servo.getName());
 	}
 
 	@Override
 	public void servoAttach(ServoControl servo, int pin) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
