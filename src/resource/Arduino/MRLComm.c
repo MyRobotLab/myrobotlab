@@ -1446,7 +1446,7 @@ Device* getDevice(int id) {
     if(node->data->id == id) {
       return node->data;
     }
-    node - node->next;
+    node = node->next;
   }
   publishError(ERROR_DOES_NOT_EXIST);
   return NULL; //returning a NULL ptr can cause runtime error
