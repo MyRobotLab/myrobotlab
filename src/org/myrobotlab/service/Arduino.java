@@ -1379,11 +1379,21 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 		String name = device.getName();
 		
+		// check to see if we are already attached as the device controller
+		// btw - this potentially will be a problem if its operating in a different
+		// process - the controller will probably be transient
+		DeviceController dc = device.getController();
+		if (dc == this){
+			log.info("%s already attached at device level - nothing to do", device.getName());
+			return;
+		}
+		
 		// check to see if this device is already attached
 		if (this != device.getController()){
 			device.setController(this);
 		}
 		
+		// ??
 		if (deviceList.containsKey(name)){
 			DeviceMapping map = deviceList.get(name);
 			if (map.getId() == null){

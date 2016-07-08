@@ -81,6 +81,8 @@ public class ServoTest {
 		// gut feeling says no - they should not be
 		// servo01.attach(arduino, 8);
 		servo01.attach(arduino, 8, 40);
+		servo01.attach(arduino, 8, 30);
+		
 		servo02.attach(arduino, 7, 40);
 		// FIXME is attach re-entrant ???
 		
