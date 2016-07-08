@@ -600,8 +600,18 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
-		this.pin = pin;
-		this.controller = controller;
+		/* THIS CHECK IS DONE AT A LOWER LEVEL IN THE CONTROLLER
+		if (this.controller == controller){
+			log.info("already attached to controller - nothing to do");
+			return;
+		} else if (this.controller != null && this.controller != controller ){
+			log.warn("already attached to controller %s - please detach before attaching to controller %s", this.controller.getName(), controller.getName());
+			return;
+		}
+		*/
+		
+		// ORDER IS IMPORTANT !!!
+		// attach the Control to the Controller first
 		if (pos != null) {
 			targetPos = pos;
 			if (rest == null) {
@@ -614,6 +624,10 @@ public class Servo extends Service implements ServoControl {
 			}
 			controller.deviceAttach(this, pin);
 		}
+		
+		// SET THE DATA 
+		this.pin = pin;
+		this.controller = controller;
 	}
 
 	@Override
