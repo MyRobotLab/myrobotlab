@@ -600,7 +600,7 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
-		/* THIS CHECK IS DONE AT A LOWER LEVEL IN THE CONTROLLER
+		
 		if (this.controller == controller){
 			log.info("already attached to controller - nothing to do");
 			return;
@@ -608,7 +608,7 @@ public class Servo extends Service implements ServoControl {
 			log.warn("already attached to controller %s - please detach before attaching to controller %s", this.controller.getName(), controller.getName());
 			return;
 		}
-		*/
+		
 		
 		// ORDER IS IMPORTANT !!!
 		// attach the Control to the Controller first
