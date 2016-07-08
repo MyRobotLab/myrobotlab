@@ -106,6 +106,17 @@ public interface ServoControl extends DeviceControl {
 	 * @return
 	 */
 	public Integer getPin();
+	
+	/**
+	 * a default position for the servo
+	 * @param rest
+	 */
+	public void setRest(int rest);
+	
+	/**
+	 * command to move to the rest position
+	 */
+	public void rest();
 
 	/**
 	 * minimal sweep position

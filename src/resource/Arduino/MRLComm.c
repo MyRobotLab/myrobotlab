@@ -745,9 +745,12 @@ class MrlServo : public Device {
         targetPos = position;
         isMoving = true;
         int baseSpeed=(int)(60.0/0.14); // deg/sec base on speed of HS805B servo 6V under no load //should be modifiable
-        long delta=targetPos-currentPos;
+        long delta=targetPos-(int)currentPos;
         float currentSpeed=(baseSpeed*speed)/100;
         long timeToReach=abs((delta))*1000/currentSpeed; // time to reach target in ms
+        if(timeToReach==0){
+          timeToReach=1;
+        }
         step=((float)delta*10/timeToReach);
       }
     }

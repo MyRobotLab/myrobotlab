@@ -56,6 +56,7 @@ public class ServoTest {
 
 		// creation ...
 		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+		Runtime.start("gui", "GUIService");
 		Adafruit16CServoDriver afdriver = (Adafruit16CServoDriver) Runtime.start("afdriver", "Adafruit16CServoDriver");
 		Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
 		Servo servo02 = (Servo) Runtime.start("servo02", "Servo");
@@ -73,24 +74,48 @@ public class ServoTest {
 
 		// microcontroller connect ...
 		arduino.connect("COM5");
-		arduino.setDebug(true);
+		// arduino.setDebug(true);
 
 		// ServoControl Methods begin --------------
 		// are both these valid ?
 		// gut feeling says no - they should not be
 		// servo01.attach(arduino, 8);
-		servo01.attach(arduino, 8, 130);
+		servo01.attach(arduino, 8, 40);
+		servo02.attach(arduino, 7, 40);
 		// FIXME is attach re-entrant ???
+		
+		servo01.broadcastState();
+		servo02.broadcastState();
 
 		servo01.setSpeed(0.02);
+		servo02.setSpeed(0.02);
 		
+		/*
+		servo02.setSpeed(1.0);
+		servo01.setSpeed(1.0);
+		*/
+		
+		// sub speed single move
+		servo01.moveTo(30);
+		servo01.moveTo(31);
+		servo01.moveTo(30);
+		servo01.moveTo(31);
+		servo01.moveTo(30);
 		
 		servo01.moveTo(130);
+		servo02.moveTo(130);
 		servo01.moveTo(30);
+		servo02.moveTo(30);
+		
+		servo01.broadcastState();
+		servo02.broadcastState();
 		
 		servo01.setSpeed(0.2);
+		servo02.setSpeed(0.2);
 		servo01.moveTo(130);
+		servo02.moveTo(130);
 		servo01.moveTo(30);
+		servo02.moveTo(30);
 		servo01.moveTo(130);
 		servo01.setSpeed(1.0);
 		servo01.moveTo(30);
@@ -126,10 +151,33 @@ public class ServoTest {
 		// IS IT Equivalent to this ?
 
 		// energize to different pin
-		servo01.attach(7);
-		servo02.attach(7);
+		// servo01.attach(7);
+		arduino.setDebug(true);
+		
+		
+		servo01.moveTo(130);
+		servo01.moveTo(30);
+		// servo02.attach(7);
 
 		// servo move methods
+		servo02.moveTo(30);
+		servo02.moveTo(130);
+		
+		servo02.detach();
+		servo02.moveTo(30);
+		servo02.moveTo(130);
+		servo02.moveTo(30);
+		servo02.moveTo(130);
+	
+		servo02.attach();
+		servo02.moveTo(30);
+		servo02.moveTo(130);
+		servo02.moveTo(30);
+		servo02.moveTo(130);
+		servo02.moveTo(30);
+		servo02.moveTo(130);
+
+		/*
 		servo01.moveTo(30);
 		servo02.moveTo(30);
 		servo01.moveTo(130);
@@ -138,6 +186,7 @@ public class ServoTest {
 		servo02.moveTo(30);
 		servo01.moveTo(130);
 		servo02.moveTo(130);
+		*/
 
 		// servo detach
 		servo01.detach();
@@ -155,7 +204,7 @@ public class ServoTest {
 		// errors / boundary cases
 		// servo01.attach(arduino, 8, 40);
 		servo02.attach(arduino, 8, 40); // same pin?
-		servo01.attach(arduino, 8, 40); // already attached ?
+		servo01.attach(arduino, 7, 40); // already attached ?
 
 	}
 
