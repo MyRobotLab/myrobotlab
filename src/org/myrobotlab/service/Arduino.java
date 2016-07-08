@@ -4,6 +4,7 @@ package org.myrobotlab.service;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_ATTACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_DETACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_I2C;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_MOTOR;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NEOPIXEL;
@@ -2137,7 +2138,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	@Override
 	public void deviceDetach(DeviceControl device) {
-		// TODO Auto-generated method stub
+		sendMsg(DEVICE_DETACH, getDeviceId(device));
 		
 	}
 

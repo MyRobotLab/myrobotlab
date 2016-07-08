@@ -649,8 +649,10 @@ class MrlServo : public Device {
     }
 
     ~MrlServo() {
-      servo->detach();
-      delete servo;
+    	if (servo){
+    		servo->detach();
+    		delete servo;
+    	}
     }
 
     // this method "may" be called with a pin or pin & pos depending on
@@ -1628,7 +1630,10 @@ void processCommand() {
     sensorPollingStart();
     break;
   case DEVICE_ATTACH:
-    attachDevice();
+    deviceAttach();
+  break;
+  case DEVICE_DETACH:
+    deviceDetach(ioCmd[1]);
   break;
   case SENSOR_POLLING_STOP:
     sensorPollingStop();
@@ -1728,14 +1733,14 @@ void analogReadPollingStart() {
 
 // ANALOG_READ_POLLING_STOP
 void analogReadPollingStop() {
-  // TODO: remove this method and use detachDevice() / removeDevice?()
+  // TODO: remove this method and use deviceDetach() / removeDevice?()
   //Pin& pin = pins[ioCmd[1]];
   //pin.isActive = false;
 }
 
 // DIGITAL_READ_POLLING_START
 void digitalReadPollingStart() {
-  // TODO: remove this and replace iwth attachDevice()
+  // TODO: remove this and replace iwth deviceAttach()
   //int pinIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
   //Pin& pin = pins[pinIndex];
   //pin.sensorIndex = 0; // FORCE ARDUINO TO BE OUR SERVICE - DUNNO IF THIS IS GOOD/BAD
@@ -1871,7 +1876,7 @@ void updateStatus() {
  * implemented as a ptr it will be 4 bytes - if it is a generics id
  * it could be implemented with 1 byte
  */
-void attachDevice() {
+void deviceAttach() {
   // TOOD:KW check free memory to see if we can attach a new device. o/w return an error!
   // we're creating a new device. auto increment it
   // TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
@@ -1990,21 +1995,14 @@ void publishAttachedDevice(int id, int nameSize, int namePos){
 }
 
 /**
- * detachDevice - this method will walk through the device list
- * and remove the first one that has an id that matches the
- * one passed in.
+ * deviceDetach - get the device
+ * if it exists delete it and remove it from the deviceList
  */
-void detachDevice(int id) {
-  ListNode<Device*>* node = deviceList.getRoot();
-  int i=0;
-  while(node != NULL) {
-    if(node->data->id == id) {
-      delete node->data;
-      deviceList.remove(i);
-      break;
-    }
-    node = node->next;
-    i++;
+void deviceDetach(int id) {
+  Device* device = getDevice(id);
+  if (device){
+	  deviceList.remove(id);
+	  delete device;
   }
 }
 
