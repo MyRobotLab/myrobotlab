@@ -87,8 +87,10 @@ public class ServoTest {
 		servo01.broadcastState();
 		servo02.broadcastState();
 
+		/*
 		servo01.setSpeed(0.02);
 		servo02.setSpeed(0.02);
+		*/
 		
 		/*
 		servo02.setSpeed(1.0);
@@ -101,6 +103,24 @@ public class ServoTest {
 		servo01.moveTo(30);
 		servo01.moveTo(31);
 		servo01.moveTo(30);
+		
+		servo01.moveTo(130);
+		servo02.moveTo(130);
+		servo01.moveTo(30);
+		servo02.moveTo(30);
+		
+		arduino.setDebug(true);
+		
+		// detaching the device
+		servo01.detach(arduino); // test servo02.detach(arduino); error ?
+		// servo02.detach(afdriver); // TEST CASE - THIS FAILED - THEN RE-ATTACHED DID SPLIT BRAIN FIXME
+		servo02.detach(arduino);
+
+		// errors / boundary cases
+		// servo01.attach(arduino, 8, 40);
+		servo02.attach(arduino, 8, 40); // same pin?
+		servo01.attach(arduino, 7, 40); // already attached ?
+		
 		
 		servo01.moveTo(130);
 		servo02.moveTo(130);
@@ -197,14 +217,12 @@ public class ServoTest {
 		servo01.attach();
 		servo02.attach();
 
-		// detaching the device
-		servo01.detach(arduino); // test servo02.detach(arduino); error ?
-		servo02.detach(afdriver);
-
-		// errors / boundary cases
-		// servo01.attach(arduino, 8, 40);
-		servo02.attach(arduino, 8, 40); // same pin?
-		servo01.attach(arduino, 7, 40); // already attached ?
+	
+		
+		servo02.moveTo(30);
+		servo02.moveTo(130);
+		servo02.moveTo(30);
+		servo02.moveTo(130);
 
 	}
 
