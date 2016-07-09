@@ -1,16 +1,11 @@
 package org.myrobotlab.service.interfaces;
 
-public abstract class PinDefinition {
+public class PinDefinition {
 	
-	Integer address;
-	
-	public abstract boolean isAnalog();
+	public String address;
 
-	public abstract boolean isPwm();
-
-	public abstract boolean isDigital();
+	public boolean isAnalog;
+	public boolean isPwm;
+	public boolean isDigital;
 	
-	public Integer getAddress(){
-		return address;
-	}
 }
