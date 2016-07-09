@@ -54,9 +54,13 @@ public class ServoTest {
 	@Test
 	public void testAttach() throws Exception {
 
+		// FIXME - test state change - mrl gets restarted arduino doesn't what happens - how to handle gracefully
+		// FIXME - test enabled Events
+		// FIXME - make abstract class from interfaces to attempt to do Java 8 interfaces with default
+		
 		// creation ...
 		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-		Runtime.start("gui", "GUIService");
+		Runtime.start("gui", "WebGui");
 		Adafruit16CServoDriver afdriver = (Adafruit16CServoDriver) Runtime.start("afdriver", "Adafruit16CServoDriver");
 		Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
 		Servo servo02 = (Servo) Runtime.start("servo02", "Servo");
@@ -84,6 +88,7 @@ public class ServoTest {
 		servo01.attach(arduino, 8, 30);
 		
 		servo02.attach(arduino, 7, 40);
+		servo01.eventsEnabled(true);
 		// FIXME is attach re-entrant ???
 		
 		servo01.broadcastState();
