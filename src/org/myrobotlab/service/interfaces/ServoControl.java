@@ -35,6 +35,7 @@ public interface ServoControl extends DeviceControl {
 	// 4. should we 'please' rename servo.attach(pin) to servo.energize(pin) !!!!
 	void attach(ServoController controller, int pin) throws Exception;
 	
+	// preferred - sets control
 	void attach(ServoController controller, int pin, Integer pos) throws Exception;
 
 	void detach(ServoController controller);
@@ -106,6 +107,17 @@ public interface ServoControl extends DeviceControl {
 	 * @return
 	 */
 	public Integer getPin();
+	
+	/**
+	 * a default position for the servo
+	 * @param rest
+	 */
+	public void setRest(int rest);
+	
+	/**
+	 * command to move to the rest position
+	 */
+	public void rest();
 
 	/**
 	 * minimal sweep position
