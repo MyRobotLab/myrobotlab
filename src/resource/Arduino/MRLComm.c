@@ -554,6 +554,133 @@ ListNode<T>* LinkedList<T>::getRoot() {
 
 void publishError(int type, String message);
 
+/**********************************************************************
+ * MrlMsg - This class is responsible to send the messages to MRL in
+ *          java-land
+ */
+class MrlMsg{
+  public:
+  LinkedList<byte> dataBuffer;
+  int type;  // message id ie PUBLISH_VERSION
+  int deviceId;
+  // those variable allow to count the data and add the number to the dataBuffer
+  int dataSizePos;
+  int dataSizeCount;
+  bool dataCountEnabled;
+
+  MrlMsg(int msgType){
+    type=msgType;
+    deviceId = -1;
+    dataCountEnabled = false;
+  }
+
+  MrlMsg(int msgType, int id) {
+    type=msgType;
+    deviceId = id;
+    dataCountEnabled = false;
+  }
+
+  // addData overload methods
+  void addData(byte data) {
+    dataBuffer.add(data);
+    dataSizeCount++;
+  }
+
+  void addData(int data) {
+    addData((byte)data);
+  }
+
+  void addData(unsigned int data) {
+    addData((byte)data);
+  }
+
+  void addData(unsigned char* dataArray, int size, bool inclDataSize = false) {
+    if (inclDataSize) {
+      dataBuffer.add((byte)size);
+    }
+    for (int i = 0; i < size; i++){
+      dataBuffer.add((byte)dataArray[i]);
+    }
+    dataSizeCount += size;
+  }
+
+  void addData(long data) {
+    addData((unsigned long)data);
+  }
+
+  void addData(unsigned long data) {
+    dataBuffer.add((byte)((data >> 24) & 0xFF));
+    dataBuffer.add((byte)((data >> 16) & 0xFF));
+    dataBuffer.add((byte)((data >> 8) & 0xFF));
+    dataBuffer.add((byte)(data & 0xFF));
+    dataSizeCount += 4;
+  }
+
+  void addData(String &data, bool inclDataSize = false) {
+    if (inclDataSize) {
+      dataBuffer.add((byte)data.length());
+    }
+    for(int i=0; i < data.length(); i++){
+      dataBuffer.add(data[i]);
+    }
+    dataSizeCount += data.length();
+  }
+  void addData(int data[], int size, bool inclDataSize = false) {
+    if (inclDataSize) {
+      dataBuffer.add((byte)size);
+    }
+    for(int i=0; i < size; i++){
+      dataBuffer.add(data[i]);
+    }
+    dataSizeCount += size;
+  }
+  void addData16(int data) {
+    addData16((unsigned int)data);
+  }
+  void addData16(unsigned int data) {
+    dataBuffer.add((byte)(data >> 8));
+    dataBuffer.add((byte)(data & 0xFF));
+    dataSizeCount += 2;
+  }
+
+  // enabled the data counter
+  void countData(){
+    dataCountEnabled = true;
+    dataSizeCount = 0;
+    dataSizePos = dataBuffer.size();
+  }
+
+  // add the data counter at the saved position
+  void addDataCount(){
+    dataCountEnabled = false;
+    dataBuffer.add(dataSizePos,(byte)dataSizeCount);
+  }
+
+  // send the message to Serial
+  void sendMsg() {
+    if (dataCountEnabled) {
+      addDataCount();
+    }
+    int dataSize=dataBuffer.size();
+    int msgSize=dataSize+1;
+    if (deviceId > -1) {
+      msgSize+=1;
+    }
+    Serial.write(MAGIC_NUMBER);
+    Serial.write(msgSize);
+    Serial.write(type);
+    if (deviceId > -1) {
+      Serial.write(deviceId);
+    }
+    ListNode<byte>* node = dataBuffer.getRoot();
+    while (node != NULL) {
+      Serial.write(node->data);
+      node = node->next;
+    }
+    Serial.flush();
+  }
+};
+
 /***********************************************************************
  * PIN - This class represents one of the pins on the arduino and it's
  * status in MRLComm.
@@ -650,9 +777,9 @@ class MrlServo : public Device {
 
     ~MrlServo() {
     	if (servo){
-    		servo->detach();
-    		delete servo;
-    	}
+        servo->detach();
+        delete servo;
+      }
     }
 
     // this method "may" be called with a pin or pin & pos depending on
@@ -675,7 +802,7 @@ class MrlServo : public Device {
     // This method is equivalent to Arduino's Servo.attach(pin) - (no pos)
     void attach(int pin){
       servo->attach(pin);
-      servo->write((int)currentPos); //return to it's last know state
+      servo->write((int)currentPos); //return to it's last know state (may be 0 if currentPos is not set)
       // TODO-KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
     }
 
@@ -720,15 +847,11 @@ class MrlServo : public Device {
     // GR - this would be good - I've had issues with varargs and memory leaks before
     // perhaps as Mats mentioned - we can just supply a new array sendMsg(PUBLISH_THINGY, d0, d1, d(n));
     void publishServoEvent(int eventType) {
-      Serial.write(MAGIC_NUMBER);
-      Serial.write(5); // size = 1 FN + 1 INDEX + 1 eventType + 1 curPos
-      Serial.write(PUBLISH_SERVO_EVENT);
-      Serial.write(id); // send my id
-      // write the long value out
-      Serial.write(eventType);
-      Serial.write((int)currentPos);
-      Serial.write(targetPos);
-      Serial.flush();
+      MrlMsg msg(PUBLISH_SERVO_EVENT,id);
+      msg.addData(eventType);
+      msg.addData((int)currentPos);
+      msg.addData(targetPos);
+      msg.sendMsg();
     }
     
     void servoEventEnabled(int value) {
@@ -1086,30 +1209,13 @@ class MrlI2CBus : public Device {
     void i2cRead(unsigned char* ioCmd) {
 
       int answer = WIRE.requestFrom((uint8_t)ioCmd[3], (uint8_t)ioCmd[4]); // reqest a number of bytes to read
-      if (answer==0) {
-        //Report an error with I2C communication by returning a 1 length data size //i.e a message size if 1 byte containing only PUBLISH_SENSOR_DATA
-        // Start an mrlcomm message
-        Serial.write(MAGIC_NUMBER);
-        // size of the mrlcomm message
-        Serial.write(3);
-        // mrlcomm function
-        Serial.write(PUBLISH_SENSOR_DATA);
-        Serial.write(ioCmd[1]); // DEVICE_INDEX
-        Serial.write(ioCmd[3]); // I2CADDRESS
-      } else {
-        // Start an mrlcomm message
-        Serial.write(MAGIC_NUMBER);
-        // size of the mrlcomm message
-        Serial.write(1 + ioCmd[4]);
-        // mrlcomm function
-        Serial.write(PUBLISH_SENSOR_DATA);
-        Serial.write(ioCmd[1]); // DEVICE_INDEX
-        Serial.write(1+answer); // DATA_SIZE ( add 1 byte for the i2caddress )
-        Serial.write(ioCmd[3]); // I2CADDRESS
-        for (int i = 1; i<answer; i++) {
-          Serial.write(Wire.read());
-        }
+      MrlMsg msg(PUBLISH_SENSOR_DATA);
+      msg.addData(ioCmd[1]);
+      msg.addData(ioCmd[3]);
+      for (int i = 1; i<answer; i++) {
+        msg.addData(Wire.read());
       }
+      msg.sendMsg();
     }
 
     // I2WRITE | DEVICE_INDEX | I2CADDRESS | DATA_SIZE | DATA.....
@@ -1132,29 +1238,13 @@ class MrlI2CBus : public Device {
       WIRE.write(ioCmd[5]);             // device memory address to read from
       WIRE.endTransmission();
       int answer = WIRE.requestFrom((uint8_t)ioCmd[3], (uint8_t)ioCmd[4]); // reqest a number of bytes to read
-      if (answer==0) {
-        //Report an error with I2C communication by returning a 1 length data size //i.e a message size if 1 byte containing only PUBLISH_SENSOR_DATA
-        // Start an mrlcomm message
-        Serial.write(MAGIC_NUMBER);
-        // size of the mrlcomm message
-        Serial.write(3);
-        // mrlcomm function
-        Serial.write(PUBLISH_SENSOR_DATA);
-        Serial.write(ioCmd[2]); // DEVICE_INDEX
-        Serial.write(ioCmd[3]); // I2CADDRESS
-        } else {
-        // Start an mrlcomm message
-        Serial.write(MAGIC_NUMBER);
-        // size of the mrlcomm message
-        Serial.write(3 + ioCmd[4]);
-        // mrlcomm function
-        Serial.write(PUBLISH_SENSOR_DATA);
-        Serial.write(ioCmd[2]); // DEVICE_INDEX
-        Serial.write(ioCmd[3]); // I2CADDRESS
-        for (int i = 1; i<answer; i++) {
-          Serial.write(Wire.read());
-        }
+      MrlMsg msg(PUBLISH_SENSOR_DATA);
+      msg.addData(ioCmd[2]);
+      msg.addData(ioCmd[3]);
+      for (int i = 1; i<answer; i++) {
+        msg.addData(Wire.read());
       }
+      msg.sendMsg();
     }
     void update(unsigned long lastMicros) {
       //Nothing to do
@@ -1312,10 +1402,12 @@ class MrlNeopixel:public Device{
 
 // The mighty device List.  This contains all active devices that are attached to the arduino.
 LinkedList<Device*> deviceList;
+// CAL: I feel like nextDeviceId should be a static in MrlDevice and increment by the subclass each time a device is create.
+//      it have no use outside of the device environment
 unsigned int nextDeviceId = 0;
 
 // MRLComm message buffer and current count from serial port ( MAGIC | MSGSIZE | FUNCTION | PAYLOAD ...
-int msgSize = 0; // the NUM_BYTES of current message (second byte of mrlcomm protocol)
+//int msgSize = 0; // the NUM_BYTES of current message (second byte of mrlcomm protocol)
 
 unsigned char ioCmd[MAX_MSG_SIZE];  // message buffer for all inbound messages
 
@@ -1323,10 +1415,10 @@ unsigned char ioCmd[MAX_MSG_SIZE];  // message buffer for all inbound messages
 // for this originates from ioCmd
 // KW, i think this should move to the constuctor of the device classes.  devices should have a handle to their configs.
 // KW : i just don't like this being global..it's a lot of state to keep global.. not to mention it's a copy of what's in ioCmd 
-unsigned char config[MAX_MSG_SIZE];  // config buffer
-int configPos = 0; // position of the beginning of config in the ioCmd message
+// CAL: I remove the config array and turn it into a pointer inside ioCmd. So now it's an alias of ioCmd with an offset
+unsigned char* config;
 
-int byteCount = 0; //used for getCommand method
+//int byteCount = 0; //used for getCommand method - move as static in getCommand()
 unsigned long loopCount = 0; // main loop count
 // TODO: this is referenced nowhere. remove? 
 unsigned int debounceDelay = 50; // in ms
@@ -1474,6 +1566,8 @@ Device* getDevice(int id) {
  *                false if the serial port is still waiting on a command.
  */
 bool getCommand() {
+  static int byteCount;
+  static int msgSize;
   // handle serial data begin
   int bytesAvailable = Serial.available();
   if (bytesAvailable > 0) {
@@ -1508,6 +1602,7 @@ bool getCommand() {
       // if received header + msg
       if (byteCount == 2 + msgSize) {
         // we've reach the end of the command, just return true .. we've got it
+        byteCount=0;
         return true;
       }
     }
@@ -1648,7 +1743,7 @@ void processCommand() {
   case I2C_WRITE_READ:
       ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[0]);
     break;
-    case SET_DEBUG:
+  case SET_DEBUG:
     debug = ioCmd[1];
     if (debug) {
       publishDebug(F("Debug logging enabled."));
@@ -1657,7 +1752,7 @@ void processCommand() {
   case GET_BOARD_INFO:
     publishBoardInfo();
     break;
-    case NEO_PIXEL_WRITE_MATRIX:
+  case NEO_PIXEL_WRITE_MATRIX:
       ((MrlNeopixel*)getDevice(ioCmd[1]))->neopixelWriteMatrix(ioCmd);
       break;
   default:
@@ -1670,7 +1765,7 @@ void processCommand() {
   // KW: we should only need to set the byteCount back to zero. clearing this array is just for safety sake i guess?
   // GR: yup
   memset(ioCmd, 0, sizeof(ioCmd));
-  byteCount = 0;
+  //byteCount = 0;
 } // process Command
 
 /**
@@ -1888,8 +1983,8 @@ void deviceAttach() {
   // get config size
   int configSizePos = 3 + nameSize;
   int configSize = ioCmd[configSizePos];
-  configPos = configSizePos + 1;
-
+  int configPos = configSizePos + 1;
+  config = ioCmd+configPos;
   // MAKE NOTE: I've chosen to have config & configPos globals
   // this is primarily to avoid the re-allocation/de-allocation of the config buffer
   // but part of me thinks it should be a local var passed into the function to avoid
@@ -1897,11 +1992,7 @@ void deviceAttach() {
   // It also makes sense to pass in config on the constructor of a new device
   // based on device type - "you inflate the correct device with the correct config"
   // but I went on the side of globals & hopefully avoiding more memory management and fragmentation
-
-  // move config off ioCmd into config buffer
-  for (int i = 0; i < configSize; ++i){
-    config[i] = ioCmd[configPos + i];
-  }
+  // CAL: change config to a pointer in ioCmd (save some memory) so config[0] = ioCmd[configPos]
 
   int type = ioCmd[1];
   Device* devicePtr = 0;
@@ -1949,7 +2040,7 @@ void deviceAttach() {
       break;
     }
     case DEVICE_TYPE_I2C: {
-      devicePtr = attachI2C();
+      devicePtr = new MrlI2CBus();
       break;
     }
     case DEVICE_TYPE_NEOPIXEL: {
@@ -1979,19 +2070,9 @@ void deviceAttach() {
  *
  */
 void publishAttachedDevice(int id, int nameSize, int namePos){
-  Serial.write(MAGIC_NUMBER);
-  int size = 1 + /* PUBLISH_ATTACHED_DEVICE */ + 1 /* NEW_DEVICE_INDEX */ + 1 /* NAME_STR_SIZE */+ nameSize /* NAME */;
-  Serial.write(size); // # of bytes to follow
-
-  Serial.write(PUBLISH_ATTACHED_DEVICE); /* PUBLISH_ATTACHED_DEVICE */
-  Serial.write(id); /* NEW_DEVICE_INDEX */
-  Serial.write(nameSize); /* NAME_STR_SIZE */
-
-  for (int i = 0; i  < nameSize; i++) { /* NAME */
-    Serial.write(ioCmd[namePos+i]);
-  }
-
-  Serial.flush();
+  MrlMsg msg(PUBLISH_ATTACHED_DEVICE,id);
+  msg.addData(ioCmd+namePos,nameSize,true);
+  msg.sendMsg();
 }
 
 /**
@@ -2041,11 +2122,6 @@ Device* attachMotor() {
   return device;
 }
 
-Device* attachI2C(){
-  MrlI2CBus* device = new MrlI2CBus();
-  return device;
-}
-
 /**
  * ATTACH DEVICES END
 **********************************************************************/
@@ -2065,11 +2141,9 @@ Device* attachI2C(){
  */
 // KW: remove this, force an error message.
 void publishError(int type) {
-  Serial.write(MAGIC_NUMBER);
-  Serial.write(2); // bytes to follow, size = 1 FN + 1 TYPE
-  Serial.write(PUBLISH_MRLCOMM_ERROR);
-  Serial.write(type);
-  Serial.flush();
+  MrlMsg msg(PUBLISH_MRLCOMM_ERROR);
+  msg.addData(type);
+  msg.sendMsg();
 }
 
 /**
@@ -2077,13 +2151,10 @@ void publishError(int type) {
  * 
  */
 void publishError(int type, String message) {
-  Serial.write(MAGIC_NUMBER);
-  Serial.write(3+message.length()); // size = 1 FN + 1 TYPE
-  Serial.write(PUBLISH_MRLCOMM_ERROR);
-  Serial.write(type);
-  // TODO: ensure that this is decoded on the java side properly.
-  Serial.print(message);
-  Serial.flush();
+  MrlMsg msg(PUBLISH_MRLCOMM_ERROR);
+  msg.addData(type);
+  msg.addData(message);
+  msg.sendMsg();
 }
 
 /**
@@ -2091,11 +2162,9 @@ void publishError(int type, String message) {
  * MAGIC_NUMBER|2|MRLCOMM_VERSION
  */
 void publishVersion() {
-  Serial.write(MAGIC_NUMBER);
-  Serial.write(2); // size
-  Serial.write(PUBLISH_VERSION);
-  Serial.write((byte)MRLCOMM_VERSION);
-  Serial.flush();
+  MrlMsg msg(PUBLISH_VERSION);
+  msg.addData(MRLCOMM_VERSION);
+  msg.sendMsg();
 }
 
 /**
@@ -2107,21 +2176,10 @@ void publishVersion() {
  * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
  */
 void publishStatus(unsigned long loadTime, int freeMemory) {
-  Serial.write(MAGIC_NUMBER);
-  Serial.write(7); // size 1 FN + 4 bytes of unsigned long
-  Serial.write(PUBLISH_STATUS);
-
-  // write the long value out
-  Serial.write((byte)(loadTime >> 24));
-  Serial.write((byte)(loadTime >> 16));
-  Serial.write((byte)(loadTime >> 8));
-  Serial.write((byte)loadTime & 0xff);
-
-  // write the int value out
-  Serial.write((byte)(freeMemory >> 8));
-  Serial.write((byte)freeMemory & 0xff);
-
-  Serial.flush();
+  MrlMsg msg(PUBLISH_STATUS);
+  msg.addData(loadTime);
+  msg.addData16(freeMemory);
+  msg.sendMsg();
 }
 
 /**
@@ -2129,12 +2187,10 @@ void publishStatus(unsigned long loadTime, int freeMemory) {
  * MAGIC_NUMBER|2|PUBLISH_MESSAGE_ACK|FUNCTION
  */
 void publishCommandAck() {
-  Serial.write(MAGIC_NUMBER);
-  Serial.write(2); // bytes to follow, size 1 FN + 1 bytes (the function that we're acking.)
-  Serial.write(PUBLISH_MESSAGE_ACK);
+  MrlMsg msg(PUBLISH_MESSAGE_ACK);
   // the function that we're ack-ing
-  Serial.write(ioCmd[0]);
-  Serial.flush();
+  msg.addData(ioCmd[0]);
+  msg.sendMsg();
 }
 
 /**
@@ -2149,12 +2205,9 @@ void publishDebug(String message) {
     // NOTE-KW:  If this method gets called excessively I have seen memory corruption in the 
     // arduino where it seems to be getting a null string passed in as "message"
     // very very very very very odd..  I suspect a bug in the arduino hardware/software
-    Serial.flush();
-    Serial.write(MAGIC_NUMBER);
-    Serial.write(1+message.length());
-    Serial.write(PUBLISH_DEBUG);
-    Serial.print(message);
-    Serial.flush();
+    MrlMsg msg(PUBLISH_DEBUG);
+    msg.addData(message);
+    msg.sendMsg();
   }
 }
 
@@ -2164,11 +2217,9 @@ void publishDebug(String message) {
  * return the board type (mega/uno) that can use in javaland for the pin layout
  */
 void publishBoardInfo() {
-  Serial.write(MAGIC_NUMBER);
-  Serial.write(2); // bytes which follow
-  Serial.write(PUBLISH_BOARD_INFO);
-  Serial.write(BOARD);
-  Serial.flush();
+  MrlMsg msg(PUBLISH_BOARD_INFO);
+  msg.addData(BOARD);
+  msg.sendMsg();
 }
 
 // ================= publish methods end ==================
