@@ -39,6 +39,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
@@ -128,8 +129,15 @@ public class NeoPixel extends Service implements NeoPixelControl {
 	}
 
 	public boolean isAttached() {
-	  isAttached = controller != null;
-		return controller != null;
+	  if(controller != null){
+	    if(((Arduino) controller).getDeviceId((DeviceControl)this)!=null) {
+	      isAttached=true;
+	      return true;
+	    }
+	    controller = null;
+	  }
+	  isAttached = false;
+		return false;
 	}
 
 	public void setPixel(int address, int red, int green, int blue) {
@@ -191,12 +199,12 @@ public class NeoPixel extends Service implements NeoPixelControl {
 			}
 			savedPixelMatrix.add(me.getValue());
 			if (msg.size() > 32) {
-				if (!off)
+				if (!off && isAttached)
 					controller.neoPixelWriteMatrix(this, msg);
 				msg.clear();
 			}
 		}
-		if (!off)
+		if (!off && isAttached())
 			controller.neoPixelWriteMatrix(this, msg);
 		broadcastState();
 	}
@@ -259,7 +267,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 			setPixel(new PixelColor(i, 0, 0, 0));
 		}
 
-		setController(controller);
+		//setController(controller);
 
 		controller.deviceAttach(this, pin, numPixel);
 		isAttached = true;
@@ -304,14 +312,17 @@ public class NeoPixel extends Service implements NeoPixelControl {
 			Runtime.start("python", "Python");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.connect("COM15");
-			// arduino.setDebug(true);
+			arduino.setDebug(true);
 			NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
 			webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-			// arduino.setLoadTimingEnabled(true);
-			neopixel.attach(arduino, 33, 16);
+			neopixel.attach(arduino, 3, 16);
 			PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
 			neopixel.setPixel(pix);
 			neopixel.writeMatrix();
+			//arduino.setLoadTimingEnabled(true);
+			Servo servo=(Servo)Runtime.start("servo","Servo");
+			servo.attach(arduino, 5);
+			servo.moveTo(180);
 		} catch (Exception e) {
 			Logging.logError(e);
 		}

@@ -895,7 +895,11 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		switch (function) {
 		case PUBLISH_MRLCOMM_ERROR: {
 			++error_mrl_to_arduino_rx_cnt;
-			error("MRL->Arduino rx %d type %d", error_mrl_to_arduino_rx_cnt, message[1]);
+      StringBuilder payload = new StringBuilder();
+      for (int i = 2; i < msgSize; i++) {
+        payload.append((char) message[i]);
+      }
+			error("MRL->Arduino rx %d type %d: %s", error_mrl_to_arduino_rx_cnt, message[1], payload);
 			break;
 		}
 		case PUBLISH_VERSION: {
