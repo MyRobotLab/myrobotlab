@@ -140,17 +140,16 @@ public class Servo extends Service implements ServoControl {
 		return meta;
 	}
 
-
 	transient ServoController controller;
 
 	String controllerName = null;
 
 	private Mapper mapper = new Mapper(0, 180, 0, 180);
 
-	private int rest = 90;
+	private Integer rest = 90;
 
 	private long lastActivityTime = 0;
-	
+
 	private Integer pin;
 
 	/**
@@ -177,7 +176,6 @@ public class Servo extends Service implements ServoControl {
 	 * the calculated output for the servo
 	 */
 	Integer targetOutput;
-
 
 	/**
 	 * list of names of possible controllers
@@ -228,13 +226,13 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * Equivalent to Arduino's Servo.attach(pin).
-	 * It energizes the servo sending pulses to maintain its current position.
+	 * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
+	 * pulses to maintain its current position.
 	 */
 	@Override
 	public void attach(int pin) {
 		lastActivityTime = System.currentTimeMillis();
-		controller.servoAttach(this, pin);
+		getController().servoAttach(this, pin);
 		this.pin = pin;
 		broadcastState();
 	}
@@ -244,18 +242,21 @@ public class Servo extends Service implements ServoControl {
 	 */
 	@Override
 	public void detach() {
-		controller.servoDetach(this);
+		getController().servoDetach(this);
 		broadcastState();
 	}
 
 	public boolean eventsEnabled(boolean b) {
 		isEventsEnabled = b;
-		controller.servoEventsEnabled(this, b);
+		getController().servoEventsEnabled(this, b);
 		return b;
 	}
 
 	@Override
 	public ServoController getController() {
+		if (controller == null) {
+			error("%s's controller is null, perhaps you need to %s.attach(controller, pin, pos) ?", getName(), getName());
+		}
 		return controller;
 	}
 
@@ -321,7 +322,7 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public void moveTo(int pos) {
-	
+
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
 			return;
@@ -330,12 +331,16 @@ public class Servo extends Service implements ServoControl {
 		targetPos = pos;
 		targetOutput = mapper.calcInt(targetPos);
 
-		controller.servoWrite(this);
+		getController().servoWrite(this);
 		lastActivityTime = System.currentTimeMillis();
 
 		// update the web gui that we've moved..
 		// broadcastState();
 		invoke("publishServoEvent", targetOutput);
+	}
+
+	private void controllerError() {
+		error(String.format("%s's controller is not set - you probably need to servo.attach(controller, pin, pos)", getName()));
 	}
 
 	/**
@@ -415,14 +420,13 @@ public class Servo extends Service implements ServoControl {
 		broadcastState();
 	}
 
-	public int setRest(int i) {
-		rest = i;
-		return rest;
+	public void setRest(int rest) {
+		this.rest = rest;
 	}
 
 	public void setSpeed(double speed) {
 		this.speed = speed;
-		controller.servoSetSpeed(this);
+		getController().servoSetSpeed(this);
 	}
 
 	// choose to handle sweep on arduino or in MRL on host computer thread.
@@ -443,7 +447,7 @@ public class Servo extends Service implements ServoControl {
 	public void stop() {
 		isSweeping = false;
 		sweeper = null;
-		controller.servoSweepStop(this);
+		getController().servoSweepStop(this);
 		broadcastState();
 	}
 
@@ -473,7 +477,7 @@ public class Servo extends Service implements ServoControl {
 
 		// FIXME - CONTROLLER TYPE SWITCH
 		if (speedControlOnUC) {
-			controller.servoSweepStart(this); // delay &
+			getController().servoSweepStart(this); // delay &
 			// step
 			// implemented
 		} else {
@@ -509,23 +513,20 @@ public class Servo extends Service implements ServoControl {
 	 */
 	public void writeMicroseconds(Integer uS) {
 		log.info("writeMicroseconds({})", uS);
-		controller.servoWriteMicroseconds(this, uS);
+		getController().servoWriteMicroseconds(this, uS);
 		lastActivityTime = System.currentTimeMillis();
 		broadcastState();
 	}
 
 	/*
-	@Override
-	public void setPin(int pin) {
-		this.pin = pin;
-	}
-	*/
+	 * @Override public void setPin(int pin) { this.pin = pin; }
+	 */
 
 	@Override
 	public Integer getPin() {
 		return pin;
 	}
-	
+
 	public static void main(String[] args) throws InterruptedException {
 
 		LoggingFactory.getInstance().configure();
@@ -599,23 +600,44 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
-		this.pin = pin;
-		this.controller = controller;
-		if (pos != null){
+		
+		if (this.controller == controller){
+			log.info("already attached to controller - nothing to do");
+			return;
+		} else if (this.controller != null && this.controller != controller ){
+			log.warn("already attached to controller %s - please detach before attaching to controller %s", this.controller.getName(), controller.getName());
+			return;
+		}
+		
+		
+		// ORDER IS IMPORTANT !!!
+		// attach the Control to the Controller first
+		if (pos != null) {
 			targetPos = pos;
+			if (rest == null) {
+				rest = pos;
+			}
 			controller.deviceAttach(this, pin, pos);
 		} else {
+			if (rest == null) {
+				rest = 90;
+			}
 			controller.deviceAttach(this, pin);
 		}
+		
+		// SET THE DATA 
+		this.pin = pin;
+		this.controller = controller;
 	}
 
 	@Override
 	public void detach(ServoController controller) {
-		// detach the this device from the controller
-		controller.deviceDetach(this);
-		// remove the this controller's reference
-		this.controller = null;
+		if (this.controller == controller) {
+			// detach the this device from the controller
+			controller.deviceDetach(this);
+			// remove the this controller's reference
+			this.controller = null;
+		}
 	}
 
-	
 }

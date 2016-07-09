@@ -461,7 +461,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		// servo.setController(this); Do not set any "ServoControl" data like this
 		// Not necessary
 		// should initial pos be a requirement ?
-		servoNameToPin.put(servo.getName(), servo.getPin());
+		// This will fail because the pin data has not yet been set in Servo
+		// servoNameToPin.put(servo.getName(), servo.getPin());
+		int pin = (int)conf[0];
+		servoNameToPin.put(servo.getName(), pin);
 	}
 
 	@Override
