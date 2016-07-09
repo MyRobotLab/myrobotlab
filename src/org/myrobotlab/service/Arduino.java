@@ -1389,7 +1389,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		// process - the controller will probably be transient
 		DeviceController dc = device.getController();
 		if (dc == this){
-			log.info("%s already attached at device level - nothing to do", device.getName());
+			log.info(String.format("%s already attached at device level - nothing to do", device.getName()));
 			return;
 		}
 		
