@@ -33,6 +33,4 @@ public interface NeoPixelController extends DeviceController {
     
   public void neoPixelWriteMatrix(NeoPixel neopixel, List<Integer> msg);
   
-  //public Integer getDeviceId(NeoPixel neopixel);
-  
 }
