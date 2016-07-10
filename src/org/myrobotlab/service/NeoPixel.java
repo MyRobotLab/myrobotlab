@@ -315,7 +315,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 			arduino.setDebug(true);
 			NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
 			webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-			neopixel.attach(arduino, 3, 16);
+			neopixel.attach(arduino, 33, 16);
 			PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
 			neopixel.setPixel(pix);
 			neopixel.writeMatrix();
