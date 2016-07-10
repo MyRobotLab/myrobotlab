@@ -3,6 +3,7 @@ package org.myrobotlab.control;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -13,6 +14,8 @@ import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.interfaces.PinDefinition;
+import org.myrobotlab.service.Runtime;
 
 public class Motor_ArduinoGUI extends MotorControllerPanel implements ActionListener {
 
@@ -29,7 +32,7 @@ public class Motor_ArduinoGUI extends MotorControllerPanel implements ActionList
   String arduinoName;
   String motorName;
 
-  ArrayList<Pin> pinList = null;
+  List<PinDefinition> pinList = null;
 
   public Motor_ArduinoGUI(GUIService myService, String motorName, String controllerName) {
     super();
@@ -38,34 +41,26 @@ public class Motor_ArduinoGUI extends MotorControllerPanel implements ActionList
     this.motorName = motorName;
 
     // FIXME - BLOCKING I BORKED
-    Arduino o = (Arduino) myService.sendBlocking(controllerName, "publishState", (Object[]) null);
+    Arduino o = (Arduino) Runtime.getService(controllerName);
 
-    if (o == null) {
-      pinList = new ArrayList<Pin>();
-      for (int i = 2; i < 52; ++i) {
-        Pin p = new Pin();
-        p.type = Pin.PWM_VALUE;
-        p.pin = i;
-        pinList.add(p);
-      }
-    } else {
-      pinList = o.getPinList();
-    }
+
+     pinList = o.getPinList();
+    
 
     for (int i = 0; i < pinList.size(); ++i) {
-      Pin pin = pinList.get(i);
+      PinDefinition pindef = pinList.get(i);
       /*
        * nice green coloring - but impossible to match ;P if (pin.type ==
        * Pin.PWM_VALUE) { powerPin.addItem(String.format(
        * "<html><font color=white bgcolor=green>%d</font></html>", pin.pin)); }
        * else { powerPin.addItem(String.format("%d", pin.pin)); }
        */
-      powerPin.addItem(String.format("%d", pin.pin));
+      powerPin.addItem(String.format("%d", pindef.getAddress()));
     }
 
     for (int i = 0; i < pinList.size(); ++i) {
-      Pin pin = pinList.get(i);
-      directionPin.addItem(String.format("%d", pin.pin));
+    	PinDefinition pin = pinList.get(i);
+      directionPin.addItem(String.format("%d", pin.getAddress()));
     }
 
     setBorder(BorderFactory.createTitledBorder("type - Arduino with Simple 2 bit H-bridge"));

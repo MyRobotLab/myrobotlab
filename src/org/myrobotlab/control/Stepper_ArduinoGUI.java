@@ -2,7 +2,7 @@ package org.myrobotlab.control;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.interfaces.PinDefinition;
 
 public class Stepper_ArduinoGUI extends StepperControllerPanel implements ActionListener {
 
@@ -26,7 +27,7 @@ public class Stepper_ArduinoGUI extends StepperControllerPanel implements Action
   String arduinoName;
   String motorName;
 
-  ArrayList<Pin> pinList = null;
+  List<PinDefinition> pinList = null;
 
   public Stepper_ArduinoGUI(GUIService myService, String motorName, String controllerName) {
     super();
@@ -37,17 +38,17 @@ public class Stepper_ArduinoGUI extends StepperControllerPanel implements Action
     pinList = o.getPinList();
 
     for (int i = 0; i < pinList.size(); ++i) {
-      Pin pin = pinList.get(i);
-      if (pin.type == Pin.PWM_VALUE) {
-        powerPin.addItem(String.format("<html><font color=white bgcolor=green>%d</font></html>", pin.pin));
+      PinDefinition pin = pinList.get(i);
+      if (pin.isPwm()) {
+        powerPin.addItem(String.format("<html><font color=white bgcolor=green>%s</font></html>", pin.getAddress()));
       } else {
-        powerPin.addItem(String.format("%d", pin.pin));
+        powerPin.addItem(String.format("%d", pin.getAddress()));
       }
     }
 
     for (int i = 0; i < pinList.size(); ++i) {
-      Pin pin = pinList.get(i);
-      directionPin.addItem(String.format("%d", pin.pin));
+      PinDefinition pin = pinList.get(i);
+      directionPin.addItem(String.format("%d", pin.getAddress()));
     }
 
     setBorder(BorderFactory.createTitledBorder("type - Arduino with Simple 2 bit H-bridge"));

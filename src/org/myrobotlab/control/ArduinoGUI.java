@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
@@ -64,6 +65,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.interfaces.PinDefinition;
 
 public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControlEventHandler, ItemListener {
 
@@ -119,7 +121,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
    */
   ArrayList<PinComponent> pinComponentList = null;
 
-  ArrayList<Pin> pinList = null;
+  List<PinDefinition> pinList = null;
   public ArduinoGUI self;
   SerializableImage sensorImage = null;
 
