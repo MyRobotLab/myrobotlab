@@ -6,15 +6,15 @@ public interface PinArrayController extends DeviceController {
 
 	public List<PinDefinition> pinArrayGetPinList();
 	
-	public Integer pinArrayRead(int address);
+	public int pinArrayRead(int address);
 	
-	public Integer pinArrayRead(String address);
+	public int pinArrayRead(String address);
 	
 	public void pinArraySetMode(int address, String mode);
 	
 	public void pinArraySetMode(String address, String mode);
 
-	public void pinArrayWrite(int address, Integer value);
+	public void pinArrayWrite(int address, int value);
 	
-	public void pinArrayWrite(String address, Integer value);
+	public void pinArrayWrite(String address, int value);
 }
