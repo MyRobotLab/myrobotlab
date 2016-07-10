@@ -191,6 +191,8 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	}
 
 	public Sketch sketch;
+	
+	public String arduinoIdePath;
 
 	private static final long serialVersionUID = 1L;
 
@@ -2172,5 +2174,9 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	  sendMsg(NEO_PIXEL_WRITE_MATRIX,buffer);
 	}
 	
+	public void uploadSketch(String arduinoIdePath){
+	  this.arduinoIdePath=arduinoIdePath;
+	  log.info(String.format("arduino IDE Path=%s", arduinoIdePath));
+	}
 
 }
