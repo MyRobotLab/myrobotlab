@@ -24,6 +24,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.interfaces.PinDefinition;
 import org.slf4j.Logger;
 
 /**
@@ -543,7 +544,7 @@ public class ArduinoTest {
 
     assertEquals(Arduino.BOARD_TYPE_MEGA, arduino.getBoardType());
 
-    List<Pin> pins = arduino.getPinList();
+    List<PinDefinition> pins = arduino.getPinList();
     assertEquals(70, pins.size());
 
     arduino.setBoard(boardType);
@@ -558,7 +559,7 @@ public class ArduinoTest {
 
     assertEquals(Arduino.BOARD_TYPE_UNO, arduino.getBoardType());
 
-    List<Pin> pins = arduino.getPinList();
+    List<PinDefinition> pins = arduino.getPinList();
     assertEquals(20, pins.size());
 
     arduino.setBoard(boardType);
