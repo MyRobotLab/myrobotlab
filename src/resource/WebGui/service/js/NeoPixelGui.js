@@ -1,6 +1,6 @@
-angular.module('mrlapp.service.NeoPixelGui', [])
-.controller('NeoPixelGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
-    $log.info('NeoPixelGuiCtrl');
+angular.module('mrlapp.service.NeopixelGui', [])
+.controller('NeopixelGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
+    $log.info('NeopixelGuiCtrl');
     var _self = this;
     var msg = this.msg;
     
@@ -84,6 +84,6 @@ angular.module('mrlapp.service.NeoPixelGui', [])
     var runtimeName = mrl.getRuntime().name;
     mrl.subscribe(runtimeName, 'getServiceNamesFromInterface');
     mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface');
-    mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.NeoPixelController');
+    mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.NeopixelController');
 }
 ]);

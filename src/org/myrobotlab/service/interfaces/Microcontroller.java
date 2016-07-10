@@ -1,9 +1,5 @@
 package org.myrobotlab.service.interfaces;
 
-import java.util.List;
-
-import org.myrobotlab.service.data.Pin;
-
 // FIXME add SensorController
 public interface Microcontroller extends DeviceController {
 
@@ -25,7 +21,5 @@ public interface Microcontroller extends DeviceController {
 	public String getBoardType();
 
 	public Integer getVersion();
-
-	public List<Pin> getPinList();
 
 }

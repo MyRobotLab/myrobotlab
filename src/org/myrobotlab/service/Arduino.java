@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.framework.Service;
@@ -73,6 +74,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
@@ -84,7 +86,10 @@ import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
-import org.myrobotlab.service.interfaces.NeoPixelControl;
+import org.myrobotlab.service.interfaces.PinArrayControl;
+import org.myrobotlab.service.interfaces.PinArrayController;
+import org.myrobotlab.service.interfaces.PinDataListener;
+import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.SensorControl;
 import org.myrobotlab.service.interfaces.SensorController;
 import org.myrobotlab.service.interfaces.SensorDataListener;
@@ -100,9 +105,9 @@ import org.slf4j.Logger;
  * board. Data can be passed back from the digital or analog ports by request to
  * start polling. The serial port can be wireless (bluetooth), rf, or wired. The
  * communication protocol supported is in MRLComm.ino
- * 
+ *
  * Should support nearly all Arduino board types
- * 
+ *
  * digitalRead() works on all pins. It will just round the analog value received
  * and present it to you. If analogRead(A0) is greater than or equal to 512,
  * digitalRead(A0) will be 1, else 0. digitalWrite() works on all pins, with
@@ -111,58 +116,58 @@ import org.slf4j.Logger;
  * analogRead() works only on analog pins. It can take any value between 0 and
  * 1023. analogWrite() works on all analog pins and all digital PWM pins. You
  * can supply it any value between 0 and 255
- * 
+ *
  * TODO - make microcontroller interface - getPins digitalWrite analogWrite
  * writeMicroseconds pinMode etc.. TODO - remove all non-microcontroller methods
  * TODO - call-back parseData() from serial service --> to MicroController - so
  * microcontoller can parse format messages to universal REST format
- * 
+ *
  * TODO - set trigger in combination of polling should be a universal
  * microcontroller function
- * 
- * 
+ *
+ *
  * // need a method to identify type of board //
  * http://forum.arduino.cc/index.php?topic=100557.0
- * 
+ *
  * public static final int STEPPER_EVENT_STOP = 1; public static final int
  * STEPPER_TYPE_POLOLU = 1; public static final int CUSTOM_MSG = 50;
- * 
+ *
  * FUTURE UPLOADS
  * https://pragprog.com/magazines/2011-04/advanced-arduino-hacking
- * 
+ *
  */
 
 /**
- * 
+ *
  * Interface Design Mantra
- * 
+ *
  * MRL runs on a computer. An Arduino is a Mircro controller. For all the things
  * in MRL which need an Arduino - there is a physical connection. E.g Servo
  * --plugs into--> Arduino --plugs into--> Computer running MRL or Motor --plugs
  * into--> Arduino --plugs into--> Computer running MRL
- * 
+ *
  * so in short - the communication between these services Motor & Arduino or
  * Servo & Arduino can be optimized, because the services will never be remote
  * from one another.
- * 
+ *
  * The whole publish, invoke subscribe messaging system works great, is fairly
  * efficient, and can work remotely. But an optimization here might be a good
  * thing if we have to route data from Serial -> Arduino -> Motor -> WebGui ->
  * Angular UI !
- * 
+ *
  * We will use standard Java callback Listener patterns. It should enforce the
  * methods needed from appropriate interfaces.
- * 
+ *
  * Arduino will have maps of other services it currently needs to callback to.
  * It possibly will have wrapper classes around those services in order to
  * prevent serialization issues (with the actual service marked as transient)
- * 
+ *
  * If the "controller" is marked as transient in object which is attached - this
  * possibly will fix cyclical serialization issues
  *
  */
 
-public class Arduino extends Service implements Microcontroller, I2CBusControl, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController, SensorDataPublisher, DeviceController, SensorController{
+public class Arduino extends Service implements Microcontroller, PinArrayControl, PinArrayController, I2CBusControl, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController, SensorDataPublisher, DeviceController, SensorController{
 
 	public static class Sketch implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -212,27 +217,27 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * FIXME ! - these processor types ! - something we are not interested in and
 	 * do not have to deal with - we are far more interested in NUM_DIGITAL_PINS
 	 * and "board pin layouts" -
-	 * 
+	 *
 	 * As far as I can tell board types are in variants 1.0.5 Arduino IDE includes
-	 * 
+	 *
 	 * This is the best reference I have found regarding actual pin capabilities
 	 * https://learn.sparkfun.com/tutorials/arduino-comparison-guide#totally-
 	 * tabular Uno & Duemilanove have 14 digital pins (6 PWM) & 6 analog - total
 	 * 20 Mini & Pro have 14 digital pins (8 PWM) & 6 analog - total 20
-	 * 
+	 *
 	 * ATmega328 Boards 32kB Program Space // 1 UART // 6 PWM // 4-8 Analog Inputs
 	 * // 9-14 Digital I/O ATmega2560 Arduino Mega's 256kB Program Space // 4
 	 * UARTs // 14 PWM // 16 Analog Inputs // 54 Digital I/O -
-	 * 
+	 *
 	 * So at the moment .. there is only Uno & Mega !!!
-	 * 
+	 *
 	 */
 	public transient static final String BOARD_TYPE_UNO = "Uno";
 	public transient static final String BOARD_TYPE_MEGA = "Mega";
 	public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
 	public transient static final int BOARD_TYPE_ID_MEGA = 1;
 	public transient static final int BOARD_TYPE_ID_UNO = 2;
-	
+
 	/**
 	 * board type - UNO Mega etc..
 	 */
@@ -241,7 +246,8 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	/**
 	 * pin description of board
 	 */
-	ArrayList<Pin> pinList = null;
+	Map<String, PinDefinition> pinList = null;
+	Map<Integer, PinDefinition> pinIndex = null;
 
 	public static final int HIGH = 0x1;
 	public static final int LOW = 0x0;
@@ -292,106 +298,106 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * map here .. the deviceList contains DeviceMapping & DeviceMappings have Object[] config
 	 * you can add your I2CDeviceMap to config - because it would be "config" for your
 	 * DeviceControl.DEVICE_TYPE_I2C
-	 * 
+	 *
 	 * I think it might be could to pull as much I2C definitions as possible - what I mean to say
 	 * is I2C is its "own" thing - for example I2CDeviceMap exists currently in both Arduino & Raspi and
 	 * its the same definition - it deserves to exist on its own (perhaps in its own package name?) and
 	 * Arduino & RasPi services should share that definition..
-	 * 
-	 * A I2CDeviceController interface should be defined too .. 
+	 *
+	 * A I2CDeviceController interface should be defined too ..
 	 * the signatures would follow the same pattern as all DeviceController & DeviceControl interfaces..
-	 * 
+	 *
 	 * You already have a I2CControl which should be derived from DeviceControl..
-	 * 
-	 * You needs an I2CController (derived from DeviceController) - 
+	 *
+	 * You needs an I2CController (derived from DeviceController) -
 	 * 		the controllers purpose is to implement the low level details so I2Control methods can be done
-	 * 
+	 *
 	 * I2Control methods are :
 	 *  	void createI2cDevice(int busAddress, int deviceAddress); // pure i2c no serviceName
 	 *  	void releaseI2cDevice(int busAddress, int deviceAddress);
 	 *  	void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size);
 	 *  	int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size);
-	 *  
-	 * I2CController methods could be 
+	 *
+	 * I2CController methods could be
 	 *  	void createI2cDevice(I2Control control, int busAddress, int deviceAddress); // don't need serviceName - you have the whole service in "control" parameter
 	 *  	void releaseI2cDevice(I2Control control, int busAddress, int deviceAddress);
 	 *  	void i2cWrite(I2Control control, int busAddress, int deviceAddress, byte[] buffer, int size);
 	 *  	int i2cRead(I2Control control, int busAddress, int deviceAddress, byte[] buffer, int size);
-	 *  
+	 *
 	 * The I2CControl method implementation would be potentially very simple - they would just call the controller's method with
 	 * "this" as a first parameter... e.g.
-	 * 
+	 *
 	 * 		void createI2cDevice(int busAddress, int deviceAddress, String serviceName){
 	 * 					controller.createI2cDevice(this, busAddress, deviceAddress)
 	 * 		}
-	 * 
+	 *
 	 * This pattern follows MotorController / MotorControl & ServoController / ServoControl .. & Soon to be
 	 * PinArrayController / PinArrayControl, SerialController / SerialControl
-	 * 
+	 *
 	 * This abstraction is structured enough to follow, yet necessary to provide the implementation differences between say
 	 * RasPi & Arduino for I2C ... or Serial control .. e.g. using a Serial service to read & write over USB vs Using Arduino
 	 * to create and relay serial reads & writes over a different set of pins (Mega pins 14-19)
-	 * 
+	 *
 	 * The plans I have for SerialControl & SerialController (not yet defined - but similar to I2cControll & I2cController) is
 	 * SerialControl provides basic reads & writes - the SerialController provides the same methods, but with the SerialControl
 	 * as the first parameter - Arduino would be a service which implemented both SerialControl & SerialController
-	 * 
+	 *
 	 * A service which "needed" Serial control .. say a NeoPixel Ring would allow attachment to a Serial service directly through
-	 * FTDI (https://github.com/tdicola/Adafruit_NeoPixel_FTDI)  or attachment to an Arduino Mega on pin 14 & 15. 
+	 * FTDI (https://github.com/tdicola/Adafruit_NeoPixel_FTDI)  or attachment to an Arduino Mega on pin 14 & 15.
 	 * The business logic of driving the NeoPixel with serial commands would be in the NeoPixel service.
-	 * 
+	 *
 	 *  GroG
-	 *  
+	 *
 	 *  Comments on the above from Mats
-	 *  Hi GroG. 
-	 *  
-	 *  Thanks for writing and explaining about the responsibilities for the different interfaces. 
+	 *  Hi GroG.
+	 *
+	 *  Thanks for writing and explaining about the responsibilities for the different interfaces.
 	 *  I understand now that I have made a mistake when implementing I2CControl in RasPi, Ardino and I2cMux.
 	 *  They all should implement I2CController
 	 *  The services for i2c devices like Adafruit16CServoDriver, AdafruitIna219, I2cMux and Mpu6050 should implement I2CControl.
-	 *  I will rework that so that everything follows the same pattern. 
-	 *  
-	 *  About using the deviceList. 
+	 *  I will rework that so that everything follows the same pattern.
+	 *
+	 *  About using the deviceList.
 	 *  My understanding was/is that adding a device to the devicelist also would create a corresponding device in MRLComm.
 	 *  Since a single i2c bus may contain as many as 127 addressable devices that would potentially use a lot of memory in MRLComm.
 	 *  So I want to create a new device that represents a single I2CBus and that device should be added to the devicelist and also be created in
-	 *  MRLComm. 
+	 *  MRLComm.
 	 *  That is the reason that I also created a new i2cDevices list to keep track of the different i2c devices.
-	 *  
+	 *
 	 *  If we can add the i2c devices to the devicelist without creating a device in MRLComm, then that's perhaps a better way.
 	 *  In that case we still need a i2cbus device that will be a MrlI2CDevice object.
-	 *  To make it clear what it actually represents, I would like to rename it to MrlI2cBus. 
-	 *  
+	 *  To make it clear what it actually represents, I would like to rename it to MrlI2cBus.
+	 *
 	 *  About I2CDeviceMap.
 	 *  If we can add the i2c devices to the devicelist without creating a device in MRLComm then I2CDeviceMap isn't needed at all
 	 *  in this Arduino service. So that's one option that needs to be explored / discussed.
-	 *  
+	 *
 	 *  If that's not possible, then an other option is to keep the i2cDevices list using I2CDeviceMap.
 	 *  I tried to use the same definition of it in both RasPi and Arduino.
-	 *  However the I2CDeviceMap in RasPi is based on definitions in pi4j. 
+	 *  However the I2CDeviceMap in RasPi is based on definitions in pi4j.
 	 *  In the RasPi service both I2CBus and I2CDevice are objects defined in pi4j.
 	 *  So I redefined I2CDeviceMap in this Arduino service to only use Strings, not objects.
 	 *  They are not the same in this service and RasPi even if they share the same names.
-	 *  
+	 *
 	 *  The third option is to keep the i2cDevices list but use DeviceMapping.
-	 *  
-	 *  I hope that I have been able to explain what I have done and the reasons for it. 
-	 *  So what way do you think is the best? Other people are also welcome to express their opinions.   
-	 *   
-	 *  About I2CControl. 
-	 *  Since I2CControl should be the methods on the high level, I don't think that 
+	 *
+	 *  I hope that I have been able to explain what I have done and the reasons for it.
+	 *  So what way do you think is the best? Other people are also welcome to express their opinions.
+	 *
+	 *  About I2CControl.
+	 *  Since I2CControl should be the methods on the high level, I don't think that
 	 *  the low level I2CController methods should be replicated.
-	 *  It's one thing to use the I2CController method calls, something completley 
-	 *  different to implement them. 
+	 *  It's one thing to use the I2CController method calls, something completley
+	 *  different to implement them.
 	 *  For example Arduino and RasPi implements the methods defined in the I2CController interface.
 	 *  Adafruit16CServoController and Mpu6050 use the methods in the I2CController interface.
-	 *  So I agree on the methods in I2CController, but not on the I2CControl methods that you suggested. 
+	 *  So I agree on the methods in I2CController, but not on the I2CControl methods that you suggested.
 	 *  For example, I don't want a Python script create an Adafruit16CServoDriver and then
-	 *  use Adafruit16CServoDriver.i2cWrite(...) to directly make i2c reads and writes. 
-	 *  That would be really strange. 
+	 *  use Adafruit16CServoDriver.i2cWrite(...) to directly make i2c reads and writes.
+	 *  That would be really strange.
 	 *  I'm fine with a Python script using Arduino or RasPi to do i2c reads and writes since it
 	 *  is defined in the I2CController interface.
-	 * 
+	 *
 	 * </pre>
 	 */
 	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
@@ -423,7 +429,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	/**
 	 * start analog polling of selected pin
-	 * 
+	 *
 	 * @param pin
 	 */
 	public void analogReadPollingStart(Integer pin, Integer sampleRate) {
@@ -465,7 +471,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	/**
 	 * stop the selected pin from polling analog reads
-	 * 
+	 *
 	 * @param pin
 	 */
 	public void analogReadPollingStop(int pin) {
@@ -490,7 +496,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	/**
 	 * default params to connect to Arduino & MRLComm.ino
-	 * 
+	 *
 	 * @param port
 	 * @return
 	 * @throws IOException
@@ -522,7 +528,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * NoSuchMethodException, SecurityException, IllegalArgumentException,
 	 * InvocationTargetException { Serial uart = serial.createVirtualUART();
 	 * uart.setCodec("arduino"); connect(serial.getName()); return uart; }
-	 * 
+	 *
 	 * static public VirtualDevice createVirtual(String port) throws IOException{
 	 * // Once device to rule them all ? - I think that would work.. VirtualDevice
 	 * virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice"); //
@@ -530,31 +536,47 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * virtual.createVirtualArduino(port); return virtual; }
 	 */
 
-	public ArrayList<Pin> createPinList() {
-		pinList = new ArrayList<Pin>();
-		int pinType = Pin.DIGITAL_VALUE;
+	public Map<String, PinDefinition> createPinList() {
+		pinList = new HashMap<String, PinDefinition>();
+		pinIndex = new HashMap<Integer, PinDefinition>();
+
 		if (board != null && board.toLowerCase().contains("mega")) {
 			for (int i = 0; i < 70; ++i) {
+				PinDefinition pindef = new PinDefinition();
+				String name = null;
 				if (i < 1 || (i > 13 && i < 54)) {
-					pinType = Pin.DIGITAL_VALUE;
+					name = String.format("D%d", i);
+					pindef.setDigital(true);
 				} else if (i > 53) {
-					pinType = Pin.ANALOG_VALUE;
+					name = String.format("A%d", i - 54);
+					pindef.setAnalog(true);
 				} else {
-					pinType = Pin.PWM_VALUE;
+					name = String.format("D%d", i);
+					pindef.setPwm(true);
 				}
-				pinList.add(new Pin(i, pinType, 0, getName()));
+				pindef.setName(name);
+				pindef.setAddress(i);
+				pinList.put(name, pindef);
+				pinIndex.put(i, pindef);
 			}
 		} else {
 			for (int i = 0; i < 20; ++i) {
+				PinDefinition pindef = new PinDefinition();
+				String name = null;
 				if (i < 14) {
-					pinType = Pin.DIGITAL_VALUE;
+					name = String.format("D%d", i);
+					pindef.setDigital(true);
 				} else {
-					pinType = Pin.ANALOG_VALUE;
+					pindef.setAnalog(true);
+					name = String.format("A%d", i - 14);
 				}
 				if (i == 3 || i == 5 || i == 6 || i == 9 || i == 10 || i == 11) {
-					pinType = Pin.PWM_VALUE;
+					pindef.setPwm(true);
+					name = String.format("D%d", i);
 				}
-				pinList.add(new Pin(i, pinType, 0, getName()));
+				pindef.setAddress(i);
+				pinList.put(String.format("A%d", i), pindef);
+				pinIndex.put(i, pindef);
 			}
 		}
 		return pinList;
@@ -562,7 +584,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	/**
 	 * start polling data from the selected pin
-	 * 
+	 *
 	 * @param pin
 	 */
 	public void digitalReadPollingStart(int pin) throws IOException {
@@ -576,17 +598,11 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	/**
 	 * stop polling the selected pin
-	 * 
+	 *
 	 * @param pin
 	 */
 	public void digitalReadPollingStop(int pin) {
 		sendMsg(DIGITAL_READ_POLLING_STOP, pin);
-	}
-
-	public void digitalWrite(int address, int value) {
-		info("digitalWrite (%d,%d) to %s", address, value, serial.getName());
-		sendMsg(DIGITAL_WRITE, address, value);
-		pinList.get(address).value = value;
 	}
 
 	public void disconnect() {
@@ -601,15 +617,18 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		return board;
 	}
 
+	/*
+
 	@Override
 	public ArrayList<Pin> getPinList() {
 		return pinList;
 	}
+	*/
 
 	/**
 	 * Use the serial service for serial activities ! No reason to replicate
 	 * methods
-	 * 
+	 *
 	 * @return
 	 */
 	public Serial getSerial() {
@@ -624,9 +643,9 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * GOOD DESIGN (for Arduino hardware Async) !! - blocking version of
 	 * getVersion - blocks on publishVersion method returns null if 1 second
 	 * timeout is reached.
-	 * 
+	 *
 	 * This is a good pattern for future blocking methods.
-	 * 
+	 *
 	 * @return
 	 */
 	public Integer getVersion() {
@@ -677,19 +696,19 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * public void motorAttach(MotorControl motor) throws MRLException { if
 	 * (!motor.isLocal()) { throw new MRLException(
 	 * "motor is not in the same MRL instance as the motor controller"); }
-	 * 
+	 *
 	 * int[] controlPins = motor.getControlPins(); for (int i = 0; i <
 	 * controlPins.length; ++i) { pinMode(controlPins[i], OUTPUT); }
-	 * 
+	 *
 	 * String type = motor.getType();
-	 * 
+	 *
 	 * if (type == null) { throw new IllegalArgumentException(""); }
-	 * 
+	 *
 	 * // if we have a pulse step - we can do a form // of false encoding :P if
 	 * (motor.getType().equals(Motor.TYPE_PULSE_STEP)) { // TODO - add other //
 	 * "real" // encoders // the pwm pin in a pulse step motor "is" the encoder //
 	 * sensorAttach(motor); TODO attachDevice }
-	 * 
+	 *
 	 * motor.setController(this); motor.broadcastState(); }
 	 */
 
@@ -735,7 +754,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		log.info("motorMoveTo targetPos {} powerLevel {}", mc.getTargetPos(), mc.getPowerLevel());
 
 		Class<?> type = mc.getClass();
-		
+
 		// if pulser (with or without fake encoder
 		// send a series of pulses !
 		// with current direction
@@ -783,13 +802,13 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * Callback for Serial service - local (not remote) although a
 	 * publish/subscribe could be created - this method is called by a thread
 	 * waiting on the Serial's RX BlockingQueue
-	 * 
+	 *
 	 * Other services may use the same technique or subscribe to a Serial's
 	 * publishByte method
-	 * 
+	 *
 	 * it might be worthwhile to look in optimizing reads into arrays vs single
 	 * byte processing .. but maybe there would be no gain
-	 * 
+	 *
 	 */
 
 	// FIXME - onByte(int[] data)
@@ -800,7 +819,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 			 * Archtype InputStream read - rxtxLib does not have this straightforward
 			 * design, but the details of how it behaves is is handled in the Serial
 			 * service and we are given a unified interface
-			 * 
+			 *
 			 * The "read()" is data taken from a blocking queue in the Serial service.
 			 * If we want to support blocking functions in Arduino then we'll
 			 * "publish" to our local queues
@@ -913,13 +932,15 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 			invoke("publishVersion", mrlCommVersion);
 			break;
 		}
-		// DEPRECATED - handled by PUBLISH_SENSOR_DATA
+		// DEPRECATED - handled by PUBLISH_PIN_DATA
 		case PUBLISH_PIN: {
+			/*
 			Pin pin = pinList.get(message[1]);
 			pin.value = ((message[2] & 0xFF) << 8) + (message[3] & 0xFF);
 			// TODO ? local callback - no thread single invoke -
 			// publishLocalCallbacks("publishPin", )
 			invoke("publishPin", pin);
+			*/
 			break;
 		}
 		case PUBLISH_STATUS: {
@@ -949,12 +970,12 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		/**
 		 * PUBLISH_DEVICE_ATTACHED - is the callback from MRLComm to bind a service
 		 * with its id
-		 * 
+		 *
 		 * <pre>
-		 * MSG STRUCTURE 0 					1 					2 			  3+ 
+		 * MSG STRUCTURE 0 					1 					2 			  3+
 		 * 		PUBLISH_ATTACHED_DEVICE | NEW_DEVICE_ID | NAME_STR_SIZE | NAME
 		 * </pre>
-		 * 
+		 *
 		 */
 		case PUBLISH_ATTACHED_DEVICE: {
 
@@ -1080,7 +1101,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	/**
 	 * when a device becomes attached to MRLComm
-	 * 
+	 *
 	 * @param device
 	 * @return
 	 */
@@ -1148,18 +1169,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		return code;
 	}
 
-	/**
-	 * This method is called with Pin data whene a pin value is changed on the
-	 * Arduino board the Arduino must be told to poll the desired pin(s). This is
-	 * done with a analogReadPollingStart(pin) or digitalReadPollingStart()
-	 */
 
-	public Pin publishPin(Pin p) {
-		// TODO: this is being replaced with PublishSensorData !
-		// log.info("Publish Pin: {}", p);
-		pinList.get(p.pin).value = p.value;
-		return p;
-	}
 
 	// ----------- MotorController API End ----------------
 
@@ -1208,7 +1218,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	/**
 	 * published stop of a pulse series this occurs when count # of pulses has
 	 * been reached or user intervention
-	 * 
+	 *
 	 * @param currentCount
 	 * @return
 	 */
@@ -1238,13 +1248,13 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	/**
 	 * MRL protocol method
-	 * 
+	 *
 	 * @param function
 	 * @param param1
 	 * @param param2
-	 * 
+	 *
 	 *          MAGIC_NUMBER|LENGTH|FUNCTION|PARAM0|PARAM1 ... |PARAM(N)
-	 * 
+	 *
 	 */
 	public synchronized void sendMsg(int function, int... params) {
 		// log.info("Sending Message : {}",
@@ -1343,28 +1353,28 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	/**
 	 * attachDevice is the core of attaching peripheries to a micro controller
-	 * 
+	 *
 	 * attachDevice sends a message within a message (passthrough) so that the
 	 * microcontroller code can initialize and create a new Device which is
 	 * applicable for the service requesting.
-	 * 
+	 *
 	 * Arduino will attach itself this way too as a Analog & Digital Pin array
-	 * 
+	 *
 	 * Comment from Mats: This service should create a DEVICE_TYPE_I2C by using
 	 * ATTACH_DEVICE the first time the createI2cDevice method is invoked. The
 	 * DEVICE_TYPE_I2C represents one i2c bus on the Arduino hardware. This
 	 * service needs to keep track of other services that are using the i2cbus,
 	 * but not MRLComm.
-	 * 
+	 *
 	 * the micro controller message format for ATTACH_DEVICE will be:
-	 * 
+	 *
 	 * <pre>
 	 *
 	 * MSG STRUCTURE
 	 *                    |<-- ioCmd starts here                                        |<-- config starts here
 	 * MAGIC_NUMBER|LENGTH|ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME .... (N)|CONFIG_SIZE|DATA0|DATA1 ...|DATA(N)
-	 * 
-	 * 
+	 *
+	 *
 	 * ATTACH_DEVICE - this method id
 	 * DEVICE_TYPE - the mrlcomm device type we are attaching
 	 * NAME_SIZE - the size of the name of the service of the device we are attaching
@@ -1378,14 +1388,14 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * attaching NAME_SIZE - the size of the name of the service of the device we
 	 * are attaching NAME .... (N) - the name data CONFIG_SIZE - the size of the
 	 * folloing config DATA0|DATA1 ...|DATA(N) - config data
-	 * 
+	 *
 	 * @param device
 	 */
 	@Override
 	public synchronized void deviceAttach(DeviceControl device, Object... config) {
 
 		String name = device.getName();
-		
+
 		// check to see if we are already attached as the device controller
 		// btw - this potentially will be a problem if its operating in a different
 		// process - the controller will probably be transient
@@ -1394,12 +1404,12 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 			log.info(String.format("%s already attached at device level - nothing to do", device.getName()));
 			return;
 		}
-		
+
 		// check to see if this device is already attached
 		if (this != device.getController()){
 			device.setController(this);
 		}
-		
+
 		// ??
 		if (deviceList.containsKey(name)){
 			DeviceMapping map = deviceList.get(name);
@@ -1409,7 +1419,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 				throw new IllegalArgumentException("half attached device - name already defined, no id");
 			}
 		}
-		
+
 		// get the device type int so mrl knows what type of device
 		// to create
 		int mrlDeviceType = getMrlDeviceType(device);
@@ -1477,42 +1487,39 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	/**
 	 * int identifier for MrlTypeDevice - this has to be in sync with
 	 * MRLComm's type ids
-	 * 
+	 *
 	 * @param device
 	 * @return
 	 */
 	private Integer getMrlDeviceType(DeviceControl device) {
-		
+
 		// FIXME - this will be need to be more type specific
 		if (device instanceof MotorControl){
 			return DEVICE_TYPE_MOTOR;
-		} 
-		
+		}
+
 		if (device instanceof Arduino){
 			return SENSOR_TYPE_DIGITAL_PIN_ARRAY;
-		} 
+		}
 
 		// FixMe this does not follow spec..
 		// of Control Controller
 		if (device instanceof UltrasonicSensor){
 			return SENSOR_TYPE_ULTRASONIC;
-		} 
-		
+		}
+
 		if (device instanceof Servo){
 			return DEVICE_TYPE_SERVO;
-		} 
-		
+		}
+
 		if (device instanceof I2CControl){
 			return DEVICE_TYPE_I2C;
-		} 
-		
+		}
+
 		if (device instanceof NeoPixelControl){
 			return DEVICE_TYPE_NEOPIXEL;
-		} 
-    if (device instanceof NeoPixelControl){
-      return 9;
-    } 
-				
+		}
+
 		throw new IllegalArgumentException(String.format("a mrl device type for %s of type %s could not be found ", device.getName(), device.getClass().getCanonicalName()));
 	}
 
@@ -1522,7 +1529,11 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	Integer getDeviceId(String name) {
 		if (deviceList.containsKey(name)) {
-			return deviceList.get(name).getId();
+			Integer id = deviceList.get(name).getId();
+			if (id == null){
+				error("cannot get device id for %s - device attempetd to attach - but I suspect something went wrong");
+			}
+			return id;
 		}
 		log.error("getDeviceId could not find device {}", name);
 		return null;
@@ -1532,10 +1543,10 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * sensorPollingStart begins general device read "polling". It puts the device
 	 * in a reading state. Its not really applicable to poll a Pin this way as it
 	 * refers to the "Device" level not the Pin.
-	 * 
+	 *
 	 * Putting a PinArray device into reading state might be a global setting to
 	 * turn on all polling pins
-	 * 
+	 *
 	 * @param deviceIndex
 	 */
 	public void sensorPollingStart(String name) {
@@ -1544,7 +1555,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	/**
 	 * Stops the "Device" from polling - puts the device into a non-reading state
-	 * 
+	 *
 	 * @param deviceIndex
 	 */
 
@@ -1588,7 +1599,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 
 	/**
 	 * easy way to set to a 54 pin arduino
-	 * 
+	 *
 	 * @return
 	 */
 	public String setBoardMega() {
@@ -1609,9 +1620,9 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * Debounce ensures that only a single signal will be acted upon for a single
 	 * opening or closing of a contact. the delay is the min number of pc cycles
 	 * must occur before a reading is taken
-	 * 
+	 *
 	 * Affects all reading of pins setting to 0 sets it off
-	 * 
+	 *
 	 * @param delay
 	 */
 	public void setDebounce(int delay) {
@@ -1681,7 +1692,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * loop count modulus - default is 1 which seems to be a bit high of a rate to
 	 * be broadcasting across the internet to several webclients :) valid ranges
 	 * are 1 to 32,767 (for Arduino's 2 byte signed integer)
-	 * 
+	 *
 	 * @param rate
 	 */
 	public int setSampleRate(int rate) {
@@ -1731,7 +1742,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	/**
 	 * set a pin trigger where a value will be sampled and an event will be signal
 	 * when the pin turns into a different state.
-	 * 
+	 *
 	 * @param pin
 	 * @param value
 	 * @return
@@ -1743,7 +1754,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	/**
 	 * set a pin trigger where a value will be sampled and an event will be signal
 	 * when the pin turns into a different state.
-	 * 
+	 *
 	 * @param pin
 	 * @param value
 	 * @param type
@@ -1757,7 +1768,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	/**
 	 * send a reset to Arduino - all polling is stopped and all other counters are
 	 * reset
-	 * 
+	 *
 	 * TODO - reset servos ? motors ? etc. ?
 	 */
 	public void softReset() {
@@ -1807,9 +1818,9 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
 	 * definitions.
-	 * 
+	 *
 	 * @return ServiceType - returns all the data
-	 * 
+	 *
 	 */
 	static public ServiceType getMetaData() {
 
@@ -1890,12 +1901,12 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 			/*
 			 * arduino.setLoadTimingEnabled(true); long ts =
 			 * System.currentTimeMillis();
-			 * 
+			 *
 			 * for (int i = 0; i < 10000; ++i){
 			 * arduino.sendMsg(ArduinoMsgCodec.GET_VERSION); // log.info("{}", i); }
-			 * 
+			 *
 			 * log.error("time {} ms", System.currentTimeMillis() - ts );
-			 * 
+			 *
 			 * for (int i = 0; i < 10000; ++i){
 			 * arduino.sendMsg(ArduinoMsgCodec.GET_VERSION); log.info("{}", i); }
 			 */
@@ -1915,11 +1926,11 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 			// Runtime.start("python", "Python");
 			// arduino.connect("COM18");
 			/*
-			 * 
-			 * 
+			 *
+			 *
 			 * arduino.getVersion(); Servo servo = (Servo) Runtime.start("servo",
 			 * "Servo"); servo.attach(arduino, 10);
-			 * 
+			 *
 			 * servo.moveTo(10); servo.moveTo(90); servo.moveTo(180);
 			 * servo.moveTo(90); servo.moveTo(10);
 			 */
@@ -1969,18 +1980,18 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 			/*
 			 * Serial serial = arduino.getSerial(); serial.connectTCP("localhost",
 			 * 9191); arduino.connect(serial.getPortName());
-			 * 
-			 * 
+			 *
+			 *
 			 * arduino.digitalWrite(13, 0); arduino.digitalWrite(13, 1);
 			 * arduino.digitalWrite(13, 0);
-			 * 
+			 *
 			 * arduino.analogReadPollingStart(15);
-			 * 
+			 *
 			 * // arduino.test("COM15");
-			 * 
+			 *
 			 * arduino.setSampleRate(500); arduino.setSampleRate(1000);
 			 * arduino.setSampleRate(5000); arduino.setSampleRate(10000);
-			 * 
+			 *
 			 * arduino.analogReadPollingStop(15);
 			 */
 
@@ -2001,7 +2012,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		// To add the i2c bus to the deviceList I need an device that represents
 		// the i2c bus here and in MRLComm
 		// This will only handle the creation of i2cBus.
-		I2CBusControl i2cBus = (I2CBusControl)this; 
+		I2CBusControl i2cBus = (I2CBusControl)this;
 		deviceAttach(i2cBus, getMrlDeviceType(control), busAddress);
 
 		// This part adds the service to the mapping between
@@ -2029,7 +2040,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 			i2cDevices.remove(key);
 		}
 		if (i2cDevices.isEmpty()) {
-			I2CBusControl i2cBus = (I2CBusControl)this; 
+			I2CBusControl i2cBus = (I2CBusControl)this;
 			deviceDetach(i2cBus);
 		}
 	}
@@ -2041,7 +2052,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		i2cRead(control, busAddress, deviceAddress, readBuffer, readSize);
 		return readSize;
 	}
-	
+
 	@Override
 	public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		int msgBuffer[] = new int[size + 1];
@@ -2051,7 +2062,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		}
 		sendMsg(I2C_WRITE, msgBuffer);
 	}
-	
+
 	@Override
 	public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		// Get the device index to the MRL i2c bus so that it can be added to
@@ -2059,8 +2070,8 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		// int deviceIndex = 1; // Change this to get the the deviceinex using
 		// SensorDataListener sensor = (SensorDataListener) deviceIndex.get(id);
 		// sendMsg(I2C_READ, deviceIndex, deviceAddress, size);
-		int deviceIndex = 0; // Get the deviceIndex to the I2CBus 
-		int msgBuffer[] = new int[]{deviceIndex, deviceAddress, size, buffer[size]}; 
+		int deviceIndex = 0; // Get the deviceIndex to the I2CBus
+		int msgBuffer[] = new int[]{deviceIndex, deviceAddress, size, buffer[size]};
 		sendMsg(I2C_READ, msgBuffer);
 		int retry = 0;
 		int retryMax = 1000;
@@ -2103,7 +2114,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	public SensorData publishSensorData(SensorData data) {
 		return data;
 	}
-	
+
 
 	/**
 	 * THESE ARE SERVO COMMANDS ! NOT REQUEST TO ATTACH OR DETACH THE SERVO AS A
@@ -2115,8 +2126,8 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		sendMsg(SERVO_DETACH, getDeviceId(servo), id);
 	}
 
-	
-	/** 
+
+	/**
 	 * DeviceControl methods. In this case they represents the I2CBusControl
 	 * Not sure if this is good to use the Arduino as an I2CBusControl
 	 * Exploring different alternatives. I may have to rethink.
@@ -2142,13 +2153,13 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	@Override
 	public void sensorActivate(SensorControl sensor, Object... conf) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void sensorDeactivate(SensorControl sensor) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -2159,7 +2170,7 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	@Override
 	public void deviceDetach(DeviceControl device) {
 		sendMsg(DEVICE_DETACH, getDeviceId(device));
-		
+
 	}
 
 	@Override
@@ -2173,10 +2184,130 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 	  }
 	  sendMsg(NEO_PIXEL_WRITE_MATRIX,buffer);
 	}
-	
 	public void uploadSketch(String arduinoIdePath){
 	  this.arduinoIdePath=arduinoIdePath;
 	  log.info(String.format("arduino IDE Path=%s", arduinoIdePath));
 	}
+
+
+	// PIN CONTROL //////////////////////////////////
+	// FIXME implement
+	// digitalRead for digital pins
+	// analogRead for analog pins
+	// block for callback
+	@Override
+	public int read(int address) {
+		// TODO Auto-generated method stub
+		return -1;
+	}
+
+	@Override
+	public int read(String pinName) {
+		return read(pinList.get(pinName).getAddress());
+	}
+
+	@Override
+	public void setMode(int address, String mode) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setMode(String address, String mode) {
+		// TODO Auto-generated method stub
+
+	}
+
+
+
+	@Override
+	public List<PinDefinition> getPinList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	// PIN CONTROLLER //////////////////////////////////
+
+	@Override
+	public List<PinDefinition> pinArrayGetPinList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int pinArrayRead(int address) {
+		// TODO Auto-generated method stub
+		return -1;
+	}
+
+	@Override
+	public int pinArrayRead(String address) {
+		// TODO Auto-generated method stub
+		return -1;
+	}
+
+	@Override
+	public void pinArraySetMode(int address, String mode) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void pinArraySetMode(String address, String mode) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * PinArrayControl method
+	 */
+	@Override
+	public void write(int address, int value) {
+		pinArrayWrite(address, value);
+	}
+
+	/**
+	 * PinArrayControl method
+	 */
+	@Override
+	public void write(String pinName, int value) {
+		pinArrayWrite(pinName, value);
+	}
+
+	/**
+	 *
+	 * @param address
+	 * @param value
+	 */
+	public void digitalWrite(int address, int value) {
+
+	}
+
+	@Override
+	public void pinArrayWrite(int address, int value) {
+		info("digitalWrite (%d,%d) to %s", address, value, serial.getName());
+		sendMsg(DIGITAL_WRITE, address, value);
+		pinIndex.get(address).getPinData().value = value;
+	}
+
+	@Override
+	public void pinArrayWrite(String name, int value) {
+		info("digitalWrite (%d,%d) to %s", name, value, serial.getName());
+		sendMsg(DIGITAL_WRITE, pinList.get(name).getAddress(), value);
+		pinList.get(name).getPinData().value = value;
+	}
+
+
+	/**
+	 * This method is called with Pin data whene a pin value is changed on the
+	 * Arduino board the Arduino must be told to poll the desired pin(s). This is
+	 * done with a analogReadPollingStart(pin) or digitalReadPollingStart()
+	 */
+
+	public PinData publishPinData(PinData pinData) {
+		pinList.get(pinData.address).setPinData(pinData);
+		return pinData;
+	}
+
 
 }

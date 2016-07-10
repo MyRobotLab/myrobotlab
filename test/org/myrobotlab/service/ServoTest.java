@@ -426,9 +426,11 @@ public class ServoTest {
 			// structured testing begins
 			test.testAttach();
 
+			/* START JUNIT
 			JUnitCore junit = new JUnitCore();
 			Result result = junit.run(ServoTest.class);
 			log.info("Result: {}", result);
+			*/
 
 			// Runtime.dump();
 
