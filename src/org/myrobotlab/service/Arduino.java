@@ -84,6 +84,7 @@ import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
+import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.SensorControl;
 import org.myrobotlab.service.interfaces.SensorController;
 import org.myrobotlab.service.interfaces.SensorDataListener;
@@ -894,7 +895,11 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		switch (function) {
 		case PUBLISH_MRLCOMM_ERROR: {
 			++error_mrl_to_arduino_rx_cnt;
-			error("MRL->Arduino rx %d type %d", error_mrl_to_arduino_rx_cnt, message[1]);
+      StringBuilder payload = new StringBuilder();
+      for (int i = 2; i < msgSize; i++) {
+        payload.append((char) message[i]);
+      }
+			error("MRL->Arduino rx %d type %d: %s", error_mrl_to_arduino_rx_cnt, message[1], payload);
 			break;
 		}
 		case PUBLISH_VERSION: {
@@ -1502,6 +1507,9 @@ public class Arduino extends Service implements Microcontroller, I2CBusControl, 
 		if (device instanceof NeoPixelControl){
 			return DEVICE_TYPE_NEOPIXEL;
 		} 
+    if (device instanceof NeoPixelControl){
+      return 9;
+    } 
 				
 		throw new IllegalArgumentException(String.format("a mrl device type for %s of type %s could not be found ", device.getName(), device.getClass().getCanonicalName()));
 	}
