@@ -145,5 +145,4 @@
   #define BOARD BOARD_TYPE_ID_UNKNOWN
 #endif
 
-
 #endif
