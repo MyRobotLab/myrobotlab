@@ -18,8 +18,10 @@
 	<!-- begin -->
     <uib-tab heading="MRLComm.c">
     	<span>Arduino IDE executable</span>
-    	<input type="text" ng-model="arduinoPath" onchange="setArduinoPath(arduinoPath)">
-    	<button class="btn btn-default pull-right" ng-click="setArduinoPath(arduinoPath)">Upload</button>
+    	Path<input type="text" ng-model="arduinoPath">
+    	Port<input type="text" ng-model="portName">
+    	Type<input type="text" ng-model="board">
+    	<button class="btn btn-default pull-right" ng-click="setArduinoPath(arduinoPath,portName,board)">Upload</button>
 		 <button class="btn btn-default pull-right" clipboard text="service.sketch.data"><span class="glyphicon glyphicon-copy"></span>Copy</button> 
 		 <div class="col-lg-12" style="height: 600px;" ui-ace="{
 												   useWrapMode : true,

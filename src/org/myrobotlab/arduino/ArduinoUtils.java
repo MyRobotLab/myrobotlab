@@ -5,14 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
+import org.myrobotlab.io.FileIO;
 import org.apache.commons.io.FileUtils;
 
 public class ArduinoUtils {
 
   // TODO: auto-discover?
-  private static String arduinoPath = "c:\\dev\\arduino-1.6.8\\";
+  public static String arduinoPath = "c:\\dev\\arduino-1.6.8\\";
   // TODO: fix this. a temp directory so we can upload the mrlcomm properly.
-  private static String destFilename = "\\MRLComm\\MRLComm.ino";
   private static String arduinoExecutable = "arduino";
   // not needed ?
   private static String commandPath = "";
@@ -21,18 +21,12 @@ public class ArduinoUtils {
   public static boolean uploadSketch(String port, String board) throws IOException, InterruptedException {
     if (!(board.equalsIgnoreCase("uno") || board.equalsIgnoreCase("mega"))) {
       // TODO: validate the proper set of values.
-      System.out.println("Invalid board type");
+      System.out.println(String.format("Invalid board type:%s",board));
       return false;
     }
     // Assume this is mrlcomm resource!
-    String sketchFilename = "src\\resource\\Arduino\\MRLComm.c";
+    String sketchFilename = "src\\resource\\Arduino\\MRLComm\\MRLComm.ino";
     File sketch = new File(sketchFilename);
-
-    // File src = new File("Arduino/MRLComm.c");
-    File dest = new File(arduinoPath + destFilename);
-    System.out.println("Copy from " + sketch.getAbsolutePath() + " to " + dest.getAbsolutePath());
-    // copy MRLComm.c to MRLComm/MRLComm.ino for compilation and upload.
-    FileUtils.copyFile(sketch, dest);
     // Create the command to run (and it's args.)
     String arduinoExe = arduinoPath + arduinoExecutable;
     ArrayList<String> args = new ArrayList<String>();
@@ -42,7 +36,7 @@ public class ArduinoUtils {
     args.add(port);
     args.add("--board");
     args.add("arduino:avr:" + board.toLowerCase());
-    args.add(dest.getAbsolutePath());
+    args.add(sketch.getAbsolutePath());
     // run the command.
     String result = runCommand(arduinoExe, args);
     // print stdout/err from running the command

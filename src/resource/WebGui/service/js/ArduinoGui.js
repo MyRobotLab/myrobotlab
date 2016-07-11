@@ -93,8 +93,8 @@ angular.module('mrlapp.service.ArduinoGui', [])
     }
     ;
     
-	$scope.setArduinoPath = function(arduinoPath){
-		msg.send('uploadSketch',arduinoPath);
+	$scope.setArduinoPath = function(arduinoPath,port,type){
+		msg.send('uploadSketch',arduinoPath,port,type);
 	};
 
     

@@ -97,6 +97,7 @@ import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.arduino.ArduinoUtils;
 import org.slf4j.Logger;
 
 /**
@@ -2184,9 +2185,21 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	  }
 	  sendMsg(NEO_PIXEL_WRITE_MATRIX,buffer);
 	}
-	public void uploadSketch(String arduinoIdePath){
+	public void uploadSketch(String arduinoIdePath,String port, String type){
 	  this.arduinoIdePath=arduinoIdePath;
 	  log.info(String.format("arduino IDE Path=%s", arduinoIdePath));
+    log.info(String.format("Port=%s", port));
+    log.info(String.format("type=%s", type));
+	  ArduinoUtils.arduinoPath=arduinoIdePath;
+	  try {
+      ArduinoUtils.uploadSketch(port, type);
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 	}
 
 
