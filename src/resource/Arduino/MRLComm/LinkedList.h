@@ -6,7 +6,6 @@
   Created by Ivan Seidel Gomes, March, 2013.
   Released into the public domain.
 */
-#include "Arduino.h"
 
 #ifndef LinkedList_h
 #define LinkedList_h
