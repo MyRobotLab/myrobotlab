@@ -1487,14 +1487,14 @@ class MrlComm{
       int v;
       return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
     }
-/***********************************************************************
- * PUBLISH DEVICES BEGIN
- * 
- * All serial IO should happen here to publish a MRLComm message.
- * TODO: move all serial IO into a controlled place this this below...
- * TODO: create MRLCommMessage class that can just send itself!
- * 
- */
+    /***********************************************************************
+     * PUBLISH DEVICES BEGIN
+     * 
+     * All serial IO should happen here to publish a MRLComm message.
+     * TODO: move all serial IO into a controlled place this this below...
+     * TODO: create MRLCommMessage class that can just send itself!
+     * 
+     */
     /**
      * Publish the MRLComm message
      * MAGIC_NUMBER|2|MRLCOMM_VERSION
@@ -1756,22 +1756,22 @@ class MrlComm{
         break;
       case DEVICE_ATTACH:
         deviceAttach();
-      break;
+        break;
       case DEVICE_DETACH:
         deviceDetach(ioCmd[1]);
-      break;
+        break;
       case SENSOR_POLLING_STOP:
         //sensorPollingStop();
         break;
       // Start of i2c read and writes
       case I2C_READ:
-          ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cRead(&ioCmd[0]);
+        ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cRead(&ioCmd[0]);
         break;
       case I2C_WRITE:
-          ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cWrite(&ioCmd[0]);
+        ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cWrite(&ioCmd[0]);
         break;
       case I2C_WRITE_READ:
-          ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[0]);
+        ((MrlI2CBus*)getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[0]);
         break;
       case SET_DEBUG:
         debug = ioCmd[1];
@@ -1783,8 +1783,8 @@ class MrlComm{
         publishBoardInfo();
         break;
       case NEO_PIXEL_WRITE_MATRIX:
-          ((MrlNeopixel*)getDevice(ioCmd[1]))->neopixelWriteMatrix(ioCmd);
-          break;
+        ((MrlNeopixel*)getDevice(ioCmd[1]))->neopixelWriteMatrix(ioCmd);
+        break;
       default:
         publishError(ERROR_UNKOWN_CMD);
         break;
