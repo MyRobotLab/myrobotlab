@@ -170,6 +170,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     msg.add(pixel.red);
     msg.add(pixel.green);
     msg.add(pixel.blue);
+    setPixel(pixel);
     controller.neoPixelWriteMatrix(this, msg);
     //savedPixelMatrix.clear();
     //savedPixelMatrix.add(pixel);
@@ -199,7 +200,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       }
       savedPixelMatrix.add(me.getValue());
       if (msg.size() > 32) {
-        if (!off && isAttached)
+        if (!off && isAttached())
           controller.neoPixelWriteMatrix(this, msg);
         msg.clear();
       }
@@ -294,7 +295,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     // let the controller you want to detach this device
     controller.deviceDetach(this);
     // setting controller reference to null
-    controller = null;
+    this.controller = null;
     isAttached = false;
     refreshControllers();
     broadcastState();
