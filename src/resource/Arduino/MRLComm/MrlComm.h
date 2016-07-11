@@ -1,7 +1,15 @@
 #ifndef MrlComm_h
 #define MrlComm_h
 
+#include "Arduino.h"
+#include "ArduinoMsgCodec.h"
 #include "MrlMsg.h"
+#include "LinkedList.h"
+#include "MrlServo.h"
+#include "Device.h"
+#include "MrlI2cBus.h"
+#include "MrlNeopixel.h"
+
 /***********************************************************************
  * Class MrlComm
  * 

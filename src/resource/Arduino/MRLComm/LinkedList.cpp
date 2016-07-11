@@ -2,7 +2,6 @@
 #define LinkedList_cpp
 
 #include "LinkedList.h"
-#include "Arduino.h"
 
 // Initialize LinkedList with false values
 template<typename T>

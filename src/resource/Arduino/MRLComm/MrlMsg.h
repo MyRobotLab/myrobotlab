@@ -2,6 +2,7 @@
 #define MrlMsg_h
 
 #include "ArduinoMsgCodec.h"
+#include "LinkedList.h"
 
 #define MAX_MSG_SIZE 64
 
