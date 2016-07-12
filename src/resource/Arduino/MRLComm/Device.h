@@ -42,10 +42,7 @@
 
 class Device {
   public:
-
-    Device(int deviceType) {
-      type = deviceType;
-    }
+    Device(int deviceType);
     virtual ~Device(){
       // default destructor for the device class. 
       // destructor is set as virtual to call the destructor of the subclass. 
@@ -61,11 +58,7 @@ class Device {
     virtual bool deviceAttach(unsigned char config[], int configSize) {};
     static int nextDeviceId;
   protected:
-    void attachDevice() {
-      id = nextDeviceId;
-      nextDeviceId++;
-    }
+    void attachDevice();
 };
-int Device::nextDeviceId=0;
 
 #endif
