@@ -66,21 +66,42 @@ public class ArduinoPinArrayControlTest {
 	public void testWriteStringInteger() {
 		fail("Not yet implemented");
 	}
+	
+	public void logPins(List<PinDefinition> pins){
+		for (int i = 0; i < pins.size(); ++i){
+			log.info(pins.get(i).toString());
+		}
+	}
 
 	@Test
-	public void testGetPinList() {
+	public void testGetPinList() throws Exception {
 		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+		Runtime.start("gui", "GUIService");
+		Runtime.start("webgui", "WebGui");
+		
 		List<PinDefinition> pins = arduino.getPinList();
-		log.info("Arduino %s has %d pins", arduino.getBoardType(), pins.size());
+		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
+		logPins(pins);
 		
 		arduino.setBoardMega();
 		pins = arduino.getPinList();
-		log.info("Arduino %s has %d pins", arduino.getBoardType(), pins.size());
+		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
+		logPins(pins);
 	
-		arduino.setBoardMega();
+		arduino.setBoardUno();
 		pins = arduino.getPinList();
-		log.info("Arduino %s has %d pins", arduino.getBoardType(), pins.size());
+		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
+		logPins(pins);
+		
+		
 	
+		Pir pir = (Pir)Runtime.start("pir", "Pir");
+		UltrasonicSensor srf04 = (UltrasonicSensor)Runtime.start("srf04", "UltrasonicSensor");
+		
+		// pir.attach(arduino, "A0");
+		pir.attach(arduino, 14);
+		
+		srf04.attach(arduino, 10, 11);
 		
 	}
 
@@ -135,6 +156,8 @@ public class ArduinoPinArrayControlTest {
 			JUnitCore junit = new JUnitCore();
 			Result result = junit.run(ArduinoPinArrayControlTest.class);
 			log.info("Result: {}", result);
+			
+			
 
 			// Runtime.dump();
 

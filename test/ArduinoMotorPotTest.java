@@ -12,15 +12,15 @@ import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.MotorDualPwm;
 import org.myrobotlab.service.PID2;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.data.SensorEvent;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorController;
-import org.myrobotlab.service.interfaces.SensorDataListener;
+import org.myrobotlab.service.interfaces.SensorEventListener;
 import org.myrobotlab.test.TestUtils;
 import org.slf4j.Logger;
 
 @Ignore
-public class ArduinoMotorPotTest implements SensorDataListener {
+public class ArduinoMotorPotTest implements SensorEventListener {
 
   //public boolean uploadSketch = false;
   public boolean uploadSketch = false;
@@ -144,10 +144,11 @@ public class ArduinoMotorPotTest implements SensorDataListener {
   }
 
   @Override
-  public void onSensorData(SensorData data) {
+  public void onSensorEvent(SensorEvent event) {
     // about we downsample this call?
+	int[] data = (int[])event.getData();
     count++;
-    int value = data.data[0];
+    int value = data[0];
     log.info("Data: {}", data);
     pid.setInput(key, value);
     pid.compute(key);
@@ -174,24 +175,6 @@ public class ArduinoMotorPotTest implements SensorDataListener {
 
   }
 
-  @Override
-  public String getName() {
-    // a symbolic name for this sensor.
-    return "feedback";
-  }
-
-//  @Override
-//  public int getSensorType() {
-//    // potentiometer feedback is an analog pin.
-//    return ArduinoMsgCodec.SENSOR_TYPE_ANALOG_PIN;
-//  }
-
-//  @Override
-//  public int[] getSensorConfig() {
-//    // return the list of pins that are associated with this sensor.
-//    return new int[]{potPin};
-//  }
-  
   
   /**
    * Helper function to run a system command and return the stdout / stderr as a string
@@ -305,29 +288,6 @@ public class ArduinoMotorPotTest implements SensorDataListener {
   }
 
 
-@Override
-public void update(SensorData data) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void setController(DeviceController controller) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public DeviceController getController() {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-@Override
-public boolean isAttached() {
-	// TODO Auto-generated method stub
-	return false;
-}
 
 }
 
