@@ -14,6 +14,7 @@ angular.module('mrlapp.service.ArduinoGui', [])
     this.updateState = function(service) {
         $scope.service = service;
         $scope.board = service.board;
+        $scope.arduinoPath = service.arduinoIdePath;
         $scope.image = "service/arduino/" + service.board + ".png";
         
         // === service.serial begin ===
@@ -91,6 +92,11 @@ angular.module('mrlapp.service.ArduinoGui', [])
         }
     }
     ;
+    
+	$scope.setArduinoPath = function(arduinoPath,port,type){
+		msg.send('uploadSketch',arduinoPath,port,type);
+	};
+
     
     $scope.aceLoaded = function(editor) {
         // FIXME - can't we get a handle to it earlier ?
