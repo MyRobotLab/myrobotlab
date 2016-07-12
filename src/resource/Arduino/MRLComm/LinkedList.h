@@ -69,6 +69,8 @@ public:
   virtual ListNode<T>* getRoot();
 };
 
+#include "LinkedList.cpp"
+
 #endif
 
-#include "LinkedList.cpp"
+
