@@ -76,6 +76,9 @@ public class ArduinoPinArrayControlTest {
 	@Test
 	public void testGetPinList() throws Exception {
 		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+		Runtime.start("gui", "GUIService");
+		Runtime.start("webgui", "WebGui");
+		
 		List<PinDefinition> pins = arduino.getPinList();
 		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
 		logPins(pins);
@@ -89,6 +92,8 @@ public class ArduinoPinArrayControlTest {
 		pins = arduino.getPinList();
 		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
 		logPins(pins);
+		
+		
 	
 		Pir pir = (Pir)Runtime.start("pir", "Pir");
 		UltrasonicSensor srf04 = (UltrasonicSensor)Runtime.start("srf04", "UltrasonicSensor");
@@ -151,6 +156,8 @@ public class ArduinoPinArrayControlTest {
 			JUnitCore junit = new JUnitCore();
 			Result result = junit.run(ArduinoPinArrayControlTest.class);
 			log.info("Result: {}", result);
+			
+			
 
 			// Runtime.dump();
 

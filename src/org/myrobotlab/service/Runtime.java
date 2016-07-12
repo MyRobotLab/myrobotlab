@@ -1178,11 +1178,16 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         runtimeName = cmdline.getSafeArgument("-runtimeName", 0, "MRL");
       }
 
+      /*
+       * Previously the Agent remained running - and would siphon std:in & std:out
       if (cmdline.containsKey("-isAgent")) {
         logging.addAppender(Appender.IS_AGENT);
       } else if (cmdline.containsKey("-fromAgent")) {
         logging.addAppender(Appender.FROM_AGENT);
-      } else if (cmdline.containsKey("-logToConsole")) {
+      } else 
+      */
+    	  
+      if (cmdline.containsKey("-logToConsole")) {
         logging.addAppender(Appender.CONSOLE);
       } else {
         logging.addAppender(Appender.FILE, String.format("%s.log", runtimeName));
