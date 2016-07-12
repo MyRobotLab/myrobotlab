@@ -10,11 +10,11 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.data.OculusData;
-import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.data.SensorEvent;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.OculusDataListener;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
-import org.myrobotlab.service.interfaces.SensorDataListener;
+import org.myrobotlab.service.interfaces.SensorEventListener;
 import org.slf4j.Logger;
 
 /**
@@ -23,7 +23,7 @@ import org.slf4j.Logger;
  * build of MRLComm to work. Check with \@Alessandruino for questions.
  *
  */
-public class OculusDIY extends Service implements SensorDataListener, OculusDataPublisher, OculusDataListener {
+public class OculusDIY extends Service implements SensorEventListener, OculusDataPublisher, OculusDataListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -186,10 +186,9 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 		return meta;
 	}
 
-
 	@Override
-	public void update(SensorData sd) {
-		int[] data = sd.data;
+	public void onSensorEvent(SensorEvent event) {
+		int[] data = (int[])event.getData();
 		Integer ay = (Integer) data[0];
 		Integer mx = (Integer) data[1];
 		Integer headingint = (Integer) data[2];
@@ -203,28 +202,5 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 		System.out.println(head + "," + rothead);
 	}
 
-	@Override
-	public void onSensorData(SensorData data) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setController(DeviceController controller) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public DeviceController getController() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean isAttached() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 }
