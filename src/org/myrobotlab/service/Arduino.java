@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
+import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
@@ -97,6 +98,7 @@ import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.arduino.ArduinoUtils;
 import org.slf4j.Logger;
 
 /**
@@ -196,6 +198,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	public Sketch sketch;
+	
+	public String arduinoIdePath;
 
 	private static final long serialVersionUID = 1L;
 
@@ -2181,6 +2185,16 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	    buffer[i+2]=msg.get(i);
 	  }
 	  sendMsg(NEO_PIXEL_WRITE_MATRIX,buffer);
+	}
+	public void uploadSketch(String arduinoIdePath,String port, String type) throws IOException, MRLException, InterruptedException {
+	  arduinoIdePath=arduinoIdePath.trim();
+	  if (!arduinoIdePath.endsWith("\\")) arduinoIdePath+="\\";
+	  this.arduinoIdePath=arduinoIdePath;
+	  log.info(String.format("arduino IDE Path=%s", arduinoIdePath));
+    log.info(String.format("Port=%s", port));
+    log.info(String.format("type=%s", type));
+	  ArduinoUtils.arduinoPath=arduinoIdePath;
+	  ArduinoUtils.uploadSketch(port, type);
 	}
 
 
