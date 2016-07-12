@@ -80,7 +80,7 @@ class MrlMsg{
       if (inclDataSize) {
         dataBuffer.add((byte)data.length());
       }
-      for(int i=0; i < data.length(); i++){
+      for(unsigned int i=0; i < data.length(); i++){
         dataBuffer.add(data[i]);
       }
       dataSizeCount += data.length();
