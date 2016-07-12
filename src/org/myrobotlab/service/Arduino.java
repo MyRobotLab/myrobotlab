@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
+import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
@@ -2185,21 +2186,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	  }
 	  sendMsg(NEO_PIXEL_WRITE_MATRIX,buffer);
 	}
-	public void uploadSketch(String arduinoIdePath,String port, String type){
+	public void uploadSketch(String arduinoIdePath,String port, String type) throws IOException, MRLException, InterruptedException {
+	  arduinoIdePath=arduinoIdePath.trim();
+	  if (!arduinoIdePath.endsWith("\\")) arduinoIdePath+="\\";
 	  this.arduinoIdePath=arduinoIdePath;
 	  log.info(String.format("arduino IDE Path=%s", arduinoIdePath));
     log.info(String.format("Port=%s", port));
     log.info(String.format("type=%s", type));
 	  ArduinoUtils.arduinoPath=arduinoIdePath;
-	  try {
-      ArduinoUtils.uploadSketch(port, type);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+	  ArduinoUtils.uploadSketch(port, type);
 	}
 
 
