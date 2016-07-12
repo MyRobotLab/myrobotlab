@@ -21,9 +21,10 @@
     	Path<input type="text" ng-model="arduinoPath">
     	Port<input type="text" ng-model="portName">
     	Type<input type="text" ng-model="board">
+    	<button class="btn btn-default pull-right" ng-click="msg.openMrlComm()">Open in IDE</button>
     	<button class="btn btn-default pull-right" ng-click="setArduinoPath(arduinoPath,portName,board)">Upload</button>
-		 <button class="btn btn-default pull-right" clipboard text="service.sketch.data"><span class="glyphicon glyphicon-copy"></span>Copy</button> 
-		 <div class="col-lg-12" style="height: 600px;" ui-ace="{
+		 <button class="btn btn-default pull-right" clipboard text="service.sketch.data" ng-show="false"><span class="glyphicon glyphicon-copy" ng-show="false"></span>Copy</button> 
+		 <div class="col-lg-12" ng-show="false" style="height: 600px;" ui-ace="{
 												   useWrapMode : true,
 												   showGutter: true,
 												   theme:'chrome',
