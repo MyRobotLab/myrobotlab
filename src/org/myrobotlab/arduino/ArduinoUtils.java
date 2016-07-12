@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
-import org.myrobotlab.io.FileIO;
-import org.apache.commons.io.FileUtils;
 
 public class ArduinoUtils {
 
