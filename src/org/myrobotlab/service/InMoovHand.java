@@ -111,12 +111,12 @@ public class InMoovHand extends Service implements LeapDataListener {
     */
     
     // NEW WAY
-    arduino.servoAttach(thumb, 2);
-    arduino.servoAttach(index, 3);
-    arduino.servoAttach(majeure, 4);
-    arduino.servoAttach(ringFinger, 5);
-    arduino.servoAttach(pinky, 6);
-    arduino.servoAttach(wrist, 7);
+//    arduino.servoAttach(thumb, 2);
+//    arduino.servoAttach(index, 3);
+//    arduino.servoAttach(majeure, 4);
+//    arduino.servoAttach(ringFinger, 5);
+//    arduino.servoAttach(pinky, 6);
+//    arduino.servoAttach(wrist, 7);
   }
 
   /**
@@ -171,9 +171,9 @@ public class InMoovHand extends Service implements LeapDataListener {
    * 
    * @param port
    * @return
-   * @throws IOException
+   * @throws Exception 
    */
-  public boolean connect(String port) throws IOException {
+  public boolean connect(String port) throws Exception {
 
     if (arduino == null) {
       error("arduino is invalid");
@@ -187,7 +187,12 @@ public class InMoovHand extends Service implements LeapDataListener {
       return false;
     }
 
-    attach();
+    thumb.attach(arduino, 2);
+    index.attach(arduino, 3);
+    majeure.attach(arduino, 4);
+    ringFinger.attach(arduino, 5);
+    pinky.attach(arduino, 6);
+    wrist.attach(arduino, 7);
     setSpeed(0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
     rest();
     sleep(2000);

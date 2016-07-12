@@ -35,7 +35,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   transient public Arduino arduino;
   String side;
 
-  public InMoovArm(String n) {
+  public InMoovArm(String n) throws Exception {
     super(n);
     // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
     // FRAMEWORK !!!!!
@@ -59,11 +59,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     */
     
     // NEW WAY
-    arduino.servoAttach(bicep, 8);
-    arduino.servoAttach(bicep, 9);
-    arduino.servoAttach(bicep, 10);
-    arduino.servoAttach(bicep, 11);
-
+    
+    
     bicep.setMinMax(5, 90);
     rotate.setMinMax(40, 180);
     shoulder.setMinMax(0, 180);
@@ -116,8 +113,12 @@ public class InMoovArm extends Service implements IKJointAngleListener {
       error("arduino %s not connected", arduino.getName());
       return false;
     }
+    bicep.attach(arduino, 8);
+    rotate.attach(arduino, 9);
+    shoulder.attach(arduino, 10);
+    omoplate.attach(arduino, 11);
 
-    attach();
+    //attach();
     setSpeed(0.7, 0.7, 0.7, 0.7);
     rest();
     sleep(1000);

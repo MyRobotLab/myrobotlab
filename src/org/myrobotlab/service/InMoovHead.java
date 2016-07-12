@@ -48,11 +48,11 @@ public class InMoovHead extends Service {
     */
     
     // NEW WAY
-    arduino.servoAttach(neck, 12);
-    arduino.servoAttach(rothead, 13);
-    arduino.servoAttach(jaw, 26);
-    arduino.servoAttach(eyeX, 22);
-    arduino.servoAttach(eyeY, 24);
+//    arduino.servoAttach(neck, 12);
+//    arduino.servoAttach(rothead, 13);
+//    arduino.servoAttach(jaw, 26);
+//    arduino.servoAttach(eyeX, 22);
+//    arduino.servoAttach(eyeY, 24);
 
 
     neck.setMinMax(20, 160);
@@ -105,8 +105,12 @@ public class InMoovHead extends Service {
   // FIXME - make interface for Arduino / Servos !!!
   public boolean connect(String port) throws Exception {
     arduino.connect(port);
-
-    attach();
+    neck.attach(arduino, 12);
+    rothead.attach(arduino, 13);
+    jaw.attach(arduino, 26);
+    eyeX.attach(arduino, 22);
+    eyeY.attach(arduino, 24);
+//    attach();
     setSpeed(0.5, 0.5, 0.5, 0.5, 0.5);
     rest();
     sleep(1000);

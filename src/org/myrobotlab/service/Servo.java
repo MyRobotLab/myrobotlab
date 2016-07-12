@@ -255,7 +255,7 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public ServoController getController() {
 		if (controller == null) {
-			error("%s's controller is null, perhaps you need to %s.attach(controller, pin, pos) ?", getName(), getName());
+			//error("%s's controller is null, perhaps you need to %s.attach(controller, pin, pos) ?", getName(), getName());
 		}
 		return controller;
 	}
