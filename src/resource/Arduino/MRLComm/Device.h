@@ -53,9 +53,9 @@ class Device {
     int state; // state - single at the moment to handle all the finite states of the sensors (todo maybe this moves into the subclasses?)
     // GroG - I think its good here - a uniform state description across all devices is if they are DEVICE_STATE_ACTIVE or DEVICE_STATE_DEACTIVE
     // subclasses can/should define their os substate - eg ULTRASONIC_STATE_WAITING_PULSE etc..
-    virtual void update(unsigned long lastMicros) {}; // all devices must implement this to update their state.
+    virtual void update() {}; // all devices must implement this to update their state.
     // the universal attach - follows Java-Land Controller.deviceAttach method
-    virtual bool deviceAttach(unsigned char config[], int configSize) {};
+    virtual bool deviceAttach(unsigned char config[], int configSize);
     static int nextDeviceId;
   protected:
     void attachDevice();

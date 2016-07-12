@@ -29,7 +29,7 @@ class MrlUltrasonic : public Device {
       }
 
     }
-    void update(unsigned long lastMicros) {
+    void update() {
       //This need to be reworked
       if (type == 0) return;
       Pin* pin = pins.get(0);
