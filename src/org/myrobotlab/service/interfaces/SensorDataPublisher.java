@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.data.SensorEvent;
 
 /** 
 * Sensor Data Publisher Interface:
@@ -34,7 +34,7 @@ import org.myrobotlab.service.data.SensorData;
 */
 public interface SensorDataPublisher {
   // this is what gets invoked in mrl
-  public SensorData publishSensorData(SensorData data);
+  public SensorEvent publishSensorData(SensorEvent data);
   // this is to attach something that listens to the output of this sensor data.
   // public void addSensorDataListener(SensorDataListener listener, int[] config);
  
