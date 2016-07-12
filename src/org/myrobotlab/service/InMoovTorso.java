@@ -57,9 +57,9 @@ public class InMoovTorso extends Service {
     */
     
     // NEW WAY
-    arduino.servoAttach(topStom, 27);
-    arduino.servoAttach(topStom, 28);
-    arduino.servoAttach(topStom, 29);
+//    arduino.servoAttach(topStom, 27);
+//    arduino.servoAttach(topStom, 28);
+//    arduino.servoAttach(topStom, 29);
 
     topStom.setMinMax(60, 120);
     midStom.setMinMax(0, 180);
@@ -111,7 +111,10 @@ public class InMoovTorso extends Service {
       return false;
     }
 
-    attach();
+    topStom.attach(arduino, 27);
+    midStom.attach(arduino, 28);
+    lowStom.attach(arduino, 29);
+
     setSpeed(0.7, 0.7, 0.7);
     rest();
     sleep(4000);
