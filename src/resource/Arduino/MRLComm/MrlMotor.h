@@ -18,7 +18,7 @@ class MrlMotor : public Device {
       // they are MotorDualPwm MotorSimpleH and MotorPulse
       // Stepper should be its own MrlStepper
     }
-    void update(unsigned long loopCount) {
+    void update() {
       // we should update the pwm values for the control of the motor device  here
       // this is potentially where the hardware specific logic could go for various motor controllers
       // L298N vs IBT2 vs other...  maybe consider a subclass for the type of motor-controller.

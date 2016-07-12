@@ -48,11 +48,9 @@
 *  TODO - make MRLComm a c++ library
 */
 
-// TODO: this isn't ready for an official bump to mrl comm 35
-// when it's ready we can update ArduinoMsgCodec  (also need to see why it's not publishing "goodtimes" anymore.)
-#define MRLCOMM_VERSION         37
 
 // Included as a 3rd party arduino library from here: https://github.com/ivanseidel/LinkedList/
+#include "LinkedList.h"
 #include "MrlComm.h"
 
 /**

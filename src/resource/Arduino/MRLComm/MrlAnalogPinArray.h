@@ -24,7 +24,7 @@ class MrlAnalogPinArray : public Device {
     }
     // TODO: remove the direct write to the serial here..  devices shouldn't 
     // have a direct handle to the serial port.
-    void update(unsigned long lastMicros) {
+    void update() {
       if (pins.size() > 0) {
         Serial.write(MAGIC_NUMBER);
         Serial.write(2 + pins.size() * 2);

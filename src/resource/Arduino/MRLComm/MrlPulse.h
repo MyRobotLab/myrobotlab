@@ -31,7 +31,7 @@ class MrlPulse : public Device {
     void pulseStop() {
       pin->state = PUBLISH_PULSE_STOP;
     }
-    void update(unsigned long lastMicros) {
+    void update() {
       //this need work
       if (type == 0) return;
       lastValue = (lastValue == 0) ? 1 : 0;

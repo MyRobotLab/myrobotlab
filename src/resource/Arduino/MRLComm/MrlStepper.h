@@ -13,7 +13,7 @@ class MrlStepper : public Device {
     MrlStepper() : Device(DEVICE_TYPE_STEPPER) {
 
     }
-    void update(unsigned long lastMicros) {
+    void update() {
     }
 };
 
