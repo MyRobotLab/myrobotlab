@@ -2,13 +2,7 @@ package org.myrobotlab.service.data;
 
 import java.io.Serializable;
 
-/**
- * @author GroG
- * 
- * 
- * 
- */
-public class MyoData implements Serializable {
+public class MyoData {
 
   private static final long serialVersionUID = 1L;
 

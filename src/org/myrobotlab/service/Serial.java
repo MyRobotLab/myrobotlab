@@ -266,6 +266,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * parameter - addByteListener(SerialDataListener listener) will call this
    * method too rather than implementing its own local logic
    * 
+   * FIXME - DO THIS STUFF (AND THE PUBLISHING/TESTING) IN THE FRAMEWORK
+   * 
    * @param name
    */
   public void addByteListener(String name) {

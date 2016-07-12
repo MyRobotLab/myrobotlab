@@ -2,7 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.List;
 
-import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.data.PinEvent;
 
 public interface PinArrayControl extends DeviceControl {
 
@@ -35,6 +35,10 @@ public interface PinArrayControl extends DeviceControl {
 	
 	public void write(String pinName, int value);
 	
-	public PinData publishPinData(PinData pinData);
+	public PinEvent publishPinEvent(PinEvent pinData);
+	
+	public void attach(String listener, int pinAddress);
+	
+	public void attach(PinEventListener listener, int pinAddress);
 	
 }

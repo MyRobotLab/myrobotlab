@@ -13,9 +13,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.data.SensorData;
+import org.myrobotlab.service.data.SensorEvent;
 import org.myrobotlab.service.interfaces.DeviceController;
-import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.SensorControl;
 import org.myrobotlab.service.interfaces.SensorController;
@@ -64,6 +63,7 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorCo
 	// benefit
 	// of the "publishRange" method being affected by the Sensor service e.g.
 	// change units, sample rate, etc
+	// FIXME - NOT SERVICE .. possibly name or interface but not service
 	public void addRangeListener(Service service) {
 		addListener("publishRange", service.getName(), "onRange");
 	}
@@ -154,23 +154,6 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorCo
 		return b[3] & 0xFF | (b[2] & 0xFF) << 8 | (b[1] & 0xFF) << 16 | (b[0] & 0xFF) << 24;
 	}
 
-	@Override
-	public void update(SensorData raw) {
-		// FIXME - convert to appropriate range
-		// inches/meters/other kubits?
-		++pings;
-		lastRaw = byteArrayToInt(raw.data);
-		if (isBlocking) {
-			try {
-				data.put(lastRaw);
-			} catch (InterruptedException e) {
-				Logging.logError(e);
-			}
-		}
-
-		invoke("publishRange", lastRaw);
-	}
-
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -238,10 +221,28 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorCo
 		return type;
 	}
 	
+	/**
+	 * interface from SensorController
+	 * we expect a int[] of a count of (units)
+	 * until echo was heard - we will convert it 
+	 * to a preferered units here
+	 */
 	@Override
-	public void onSensorData(SensorData data) {
-		// TODO Auto-generated method stub
+	public void onSensorEvent(SensorEvent event) {
+		// FIXME - convert to appropriate range
+		// inches/meters/other kubits?
+		int[] rawData = (int[])event.getData();
+		++pings;
+		lastRaw = byteArrayToInt(rawData);
+		if (isBlocking) {
+			try {
+				data.put(lastRaw);
+			} catch (InterruptedException e) {
+				Logging.logError(e);
+			}
+		}
 
+		invoke("publishRange", lastRaw);
 	}
 
 	// FIXME should be done in "default" interface or abstract class :P
@@ -252,8 +253,7 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorCo
 
 	@Override
 	public void setController(DeviceController controller) {
-		// TODO Auto-generated method stub
-		
+		this.controller = (SensorController)controller;
 	}
 
 	@Override
@@ -264,6 +264,12 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorCo
 
 	@Override
 	public void deactivate() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void attach(SensorController controller, Object... conf) {
 		// TODO Auto-generated method stub
 		
 	}
