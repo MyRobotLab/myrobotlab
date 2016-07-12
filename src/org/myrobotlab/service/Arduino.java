@@ -56,6 +56,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SAMPLE_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERIAL_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -63,6 +64,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.awt.Desktop;
 
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.framework.MRLException;
@@ -2196,7 +2198,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	  ArduinoUtils.arduinoPath=arduinoIdePath;
 	  ArduinoUtils.uploadSketch(port, type);
 	}
-
+	public void openMrlComm() throws Exception{
+    File f=new File("src\\resource\\Arduino\\MRLComm\\MRLComm.ino");
+    if(f.exists()){
+      if(Desktop.isDesktopSupported()){
+        Desktop.getDesktop().open(f);
+      }
+    }
+	}
 
 	// PIN CONTROL //////////////////////////////////
 	// FIXME implement
