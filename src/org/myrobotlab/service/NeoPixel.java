@@ -84,15 +84,15 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
   }
 
-  HashMap<Integer, PixelColor> pixelMatrix = new HashMap<Integer, PixelColor>();
-  ArrayList<PixelColor> savedPixelMatrix = new ArrayList<PixelColor>();
+  public HashMap<Integer, PixelColor> pixelMatrix = new HashMap<Integer, PixelColor>();
+  public ArrayList<PixelColor> savedPixelMatrix = new ArrayList<PixelColor>();
 
-  int numPixel = 0;
+  public Integer numPixel;
 
   /**
    * list of names of possible controllers
    */
-  ArrayList<String> controllers;
+  public ArrayList<String> controllers;
   public String controllerName;
   
   boolean isAttached=false;
@@ -145,6 +145,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
     setPixel(pixel);
   }
 
+  public void setPixel(String address, String red, String green, String blue) {
+    PixelColor pixel = new PixelColor(Integer.parseInt(address), Integer.parseInt(red), Integer.parseInt(green), Integer.parseInt(blue));
+    setPixel(pixel);
+  }
+
   public void setPixel(PixelColor pixel) {
     if (off)
       return;
@@ -178,6 +183,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   public void sendPixel(int address, int red, int green, int blue) {
     PixelColor pixel = new PixelColor(address, red, green, blue);
+    sendPixel(pixel);
+  }
+
+  public void sendPixel(String address, String red, String green, String blue) {
+    PixelColor pixel = new PixelColor(Integer.parseInt(address), Integer.parseInt(red), Integer.parseInt(green), Integer.parseInt(blue));
     sendPixel(pixel);
   }
 
@@ -255,6 +265,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
     attach((NeoPixelController) Runtime.getService(controllerName),pin,numPixel);
   }
 
+  public void attach(String controllerName, String pin, String numPixel) throws Exception {
+    attach((NeoPixelController) Runtime.getService(controllerName),Integer.parseInt(pin),Integer.parseInt(numPixel));
+  }
+  
   @Override
   public void attach(NeoPixelController controller, int pin, int numPixel) throws Exception {
     this.pin = pin;
@@ -300,6 +314,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
     refreshControllers();
     broadcastState();
   }
+  
+  public void refresh(){
+    broadcastState();
+  }
 
   public static void main(String[] args) throws InterruptedException {
     LoggingFactory.getInstance().configure();
@@ -315,7 +333,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       arduino.connect("COM15");
       arduino.setDebug(true);
       NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
-      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
+      //webgui.startBrowser("http://localhost:8888/#/service/neopixel");
       neopixel.attach(arduino, 33, 16);
       PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
       neopixel.setPixel(pix);
