@@ -1940,7 +1940,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   static public Status noWorky(String userId) {
     Status status = null;
     try {
-      String retStr = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File("../agent.log"));
+      String retStr = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File("myrobotlab.log"));
       if (retStr.contains("Upload:")) {
         log.info("noWorky successfully sent - our crack team of experts will check it out !");
         status = Status.info("no worky sent");

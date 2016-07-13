@@ -59,7 +59,7 @@ public class LoggingSLF4J extends Logging {
     } else if (Appender.FILE.equalsIgnoreCase(type)) {
       FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
       fileAppender.setName(type);
-      fileAppender.setFile("agent.log"); // my
+      fileAppender.setFile("myrobotlab.log"); // my
       fileAppender.setEncoder(ple);
       fileAppender.setContext(lc);
       fileAppender.start();
