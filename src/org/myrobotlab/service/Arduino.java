@@ -201,6 +201,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public Sketch sketch;
 
 	public String arduinoIdePath;
+	
+	public String uploadSketchResult;
 
 	private static final long serialVersionUID = 1L;
 
@@ -2223,7 +2225,16 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		log.info(String.format("Port=%s", port));
 		log.info(String.format("type=%s", type));
 		ArduinoUtils.arduinoPath = arduinoIdePath;
+		uploadSketchResult="Uploading";
 		ArduinoUtils.uploadSketch(port, type);
+		if (ArduinoUtils.exitValue == 0) {
+		  uploadSketchResult="MRLComm successfully upload to arduino";
+		}
+		else {
+      uploadSketchResult="MRLComm failed upload to arduino";
+		}
+    log.info(uploadSketchResult);
+    broadcastState();
 	}
 
 	public void openMrlComm() throws Exception {
