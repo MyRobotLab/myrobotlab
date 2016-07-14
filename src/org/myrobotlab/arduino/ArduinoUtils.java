@@ -11,15 +11,17 @@ public class ArduinoUtils {
   // TODO: auto-discover?
   public static String arduinoPath = "c:\\dev\\arduino-1.6.8\\";
   // TODO: fix this. a temp directory so we can upload the mrlcomm properly.
-  private static String arduinoExecutable = "arduino";
+  private static String arduinoExecutable = "arduino_debug";
   // not needed ?
   private static String commandPath = "";
   private static String additionalEnv = "";
+  public static int exitValue;
 
   public static boolean uploadSketch(String port, String board) throws IOException, InterruptedException {
     if (!(board.equalsIgnoreCase("uno") || board.equalsIgnoreCase("mega"))) {
       // TODO: validate the proper set of values.
       System.out.println(String.format("Invalid board type:%s",board));
+      exitValue=1;
       return false;
     }
     // Assume this is mrlcomm resource!
@@ -28,13 +30,14 @@ public class ArduinoUtils {
     // Create the command to run (and it's args.)
     String arduinoExe = arduinoPath + arduinoExecutable;
     ArrayList<String> args = new ArrayList<String>();
-    // args.add("--verbose");
     args.add("--upload");
     args.add("--port");
     args.add(port);
     args.add("--board");
     args.add("arduino:avr:" + board.toLowerCase());
     args.add(sketch.getAbsolutePath());
+    args.add("--verbose-upload");
+    args.add("--preserve-temp-files");
     // run the command.
     String result = runCommand(arduinoExe, args);
     // print stdout/err from running the command
@@ -50,7 +53,7 @@ public class ArduinoUtils {
     } else {
       return false;
     }
-    
+
     
   }
 
@@ -121,10 +124,11 @@ public class ArduinoUtils {
 
     handle.destroy();
 
-    int exitValue = handle.exitValue();
+    exitValue = handle.exitValue();
     // print the output from the command
     System.out.println(outputBuilder.toString());
     System.out.println("Exit Value : " + exitValue);
+    outputBuilder.append("Exit Value : " + exitValue);
 
     return outputBuilder.toString();
   }
