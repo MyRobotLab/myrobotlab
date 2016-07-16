@@ -516,11 +516,16 @@ void MrlComm::deviceAttach() {
  * if it exists delete it and remove it from the deviceList
  */
 void MrlComm::deviceDetach(int id) {
-	Device* device = getDevice(id);
-	if (device) {
-		deviceList.remove(id);
-		delete device;
-	}
+  ListNode<Device*>* node = deviceList.getRoot();
+  int index=0;
+  while (node != NULL) {
+    if (node->data->id == id) {
+      delete node->data;
+      deviceList.remove(index);
+    }
+    node = node->next;
+    index++;
+  }
 }
 /**
  * getDevice - this method will look up a device by it's id in the device list.

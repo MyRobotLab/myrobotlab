@@ -249,7 +249,7 @@ public class NeoPixelGUI extends ServiceGUI implements ActionListener {
   }
   
   public void getPinList() {
-    for (int i = 30; i < 38; i++) {
+    for (int i = 0; i < 70; i++) {
       pinList.addItem(String.format("%d",i));
     }
   }

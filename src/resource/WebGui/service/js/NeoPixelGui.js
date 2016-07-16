@@ -11,7 +11,7 @@ angular.module('mrlapp.service.NeoPixelGui', [])
     $scope.pins = [];
     $scope.numPixels = [];
     
-    for (i = 30; i < 38; ++i) {
+    for (i = 0; i < 70; ++i) {
         $scope.pins.push(i);
     }
     for (i = 1; i <24 ; i++){
