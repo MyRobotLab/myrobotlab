@@ -67,7 +67,6 @@ import java.util.Map;
 
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
-import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
@@ -511,7 +510,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * @param port
 	 * @return
 	 * @throws IOException
-	 * @throws SerialDeviceException
 	 */
 	@Override
 	public void connect(String port, int rate, int databits, int stopbits, int parity) throws IOException {
@@ -525,8 +523,17 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		serial.open(port, rate, databits, stopbits, parity);
 
 		Integer version = getVersion();
+		version--;
 		if (version == null || version != MRLCOMM_VERSION) {
 			error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
+			if (arduinoIdePath != null && board != "" && board !=null){
+			  //sleep(1000);
+			  serial.disconnect();
+			  uploadSketch(arduinoIdePath, port, board);
+			  serial.open(port, rate, databits, stopbits, parity);
+			  version = getVersion();
+			  sleep(1000);
+			}
 			return;
 		}
 	}
@@ -1105,7 +1112,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			}
 			log.info("Board type returned by Arduino: {}", boardName);
 			log.info("Board type currently set: {}", board);
-			if (board == "" && boardId != BOARD_TYPE_ID_UNKNOWN) {
+			if ((board == "" || board == null) && boardId != BOARD_TYPE_ID_UNKNOWN) {
 				setBoard(boardName);
 				log.info("Board type set to: {}", board);
 			} else {
@@ -2216,7 +2223,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		sendMsg(NEO_PIXEL_WRITE_MATRIX, buffer);
 	}
 
-	public void uploadSketch(String arduinoIdePath, String port, String type) throws IOException, MRLException, InterruptedException {
+	public void uploadSketch(String arduinoIdePath, String port, String type) {
 		arduinoIdePath = arduinoIdePath.trim();
 		if (!arduinoIdePath.endsWith("\\"))
 			arduinoIdePath += "\\";
@@ -2226,7 +2233,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		log.info(String.format("type=%s", type));
 		ArduinoUtils.arduinoPath = arduinoIdePath;
 		uploadSketchResult="Uploading";
-		ArduinoUtils.uploadSketch(port, type);
+		try {
+      ArduinoUtils.uploadSketch(port, type);
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 		if (ArduinoUtils.exitValue == 0) {
 		  uploadSketchResult="MRLComm successfully upload to arduino";
 		}

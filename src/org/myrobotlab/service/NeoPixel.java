@@ -330,18 +330,19 @@ public class NeoPixel extends Service implements NeoPixelControl {
       Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      arduino.arduinoIdePath="C:\\Program Files (x86)\\Arduino";
       arduino.connect("COM15");
       arduino.setDebug(true);
-      NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
-      //webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-      neopixel.attach(arduino, 33, 16);
-      PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
-      neopixel.setPixel(pix);
-      neopixel.writeMatrix();
-      //arduino.setLoadTimingEnabled(true);
-      Servo servo=(Servo)Runtime.start("servo","Servo");
-      servo.attach(arduino, 5);
-      servo.moveTo(180);
+//      NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
+//      //webgui.startBrowser("http://localhost:8888/#/service/neopixel");
+//      neopixel.attach(arduino, 33, 16);
+//      PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
+//      neopixel.setPixel(pix);
+//      neopixel.writeMatrix();
+//      //arduino.setLoadTimingEnabled(true);
+//      Servo servo=(Servo)Runtime.start("servo","Servo");
+//      servo.attach(arduino, 5);
+//      servo.moveTo(180);
     } catch (Exception e) {
       Logging.logError(e);
     }

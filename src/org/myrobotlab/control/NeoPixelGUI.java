@@ -212,7 +212,7 @@ public class NeoPixelGUI extends ServiceGUI implements ActionListener {
 
     display.add(north, BorderLayout.NORTH);
     JPanel center = new JPanel();
-    center.setLayout(new GridLayout(0,1));
+    center.setLayout(new GridLayout(0,2));
     JPanel lineEnd=new JPanel();
     sendPixelMatrix.addActionListener(this);
     lineEnd.add(sendPixelMatrix);
