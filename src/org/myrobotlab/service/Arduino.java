@@ -523,7 +523,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		serial.open(port, rate, databits, stopbits, parity);
 
 		Integer version = getVersion();
-		version--;
 		if (version == null || version != MRLCOMM_VERSION) {
 			error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
 			if (arduinoIdePath != null && board != "" && board !=null){
