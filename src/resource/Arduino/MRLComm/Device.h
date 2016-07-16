@@ -24,16 +24,14 @@
 // TODO: consider rename to DEVICE_TYPE_UNKNOWN ?  currently this isn't called anywhere
 #define DEVICE_TYPE_NOT_FOUND           0
 
-#define SENSOR_TYPE_ANALOG_PIN_ARRAY    1
-#define SENSOR_TYPE_DIGITAL_PIN_ARRAY   2
-#define SENSOR_TYPE_PULSE               3
-#define SENSOR_TYPE_ULTRASONIC          4
+#define DEVICE_TYPE_ARDUINO			    1
 
 #define DEVICE_TYPE_STEPPER             5
 #define DEVICE_TYPE_MOTOR               6
 #define DEVICE_TYPE_SERVO               7
 #define DEVICE_TYPE_I2C                 8
 #define DEVICE_TYPE_NEOPIXEL            9
+
 
 /**
 * GLOBAL DEVICE TYPES END

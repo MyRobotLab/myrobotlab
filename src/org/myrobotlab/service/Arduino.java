@@ -197,10 +197,16 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 	}
 
+	/**
+	 * path of the Arduino IDE
+	 * must be set by user
+	 */
+	public String arduinoPath;
+	
 	public Sketch sketch;
 
 	public String arduinoIdePath;
-	
+
 	public String uploadSketchResult;
 
 	private static final long serialVersionUID = 1L;
@@ -430,7 +436,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		super(n);
 		serial = (Serial) createPeer("serial");
 		createPinList();
-		String mrlcomm = FileIO.resourceToString("Arduino/MRLComm.c");
+		String mrlcomm = FileIO.resourceToString("Arduino/MrlComm/MRLComm.ino");
 		setSketch(new Sketch("MRLComm", mrlcomm));
 		// add self as Pin Array Sensor Listener
 		// I don't like this..
@@ -535,23 +541,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			}
 			return;
 		}
-	}
 
-	// FIXME - DEPRECATE !!! only need createVirtual(port)
-	// TODO - should be override .. ??
-	/*
-	 * public Serial connectVirtualUART() throws IOException,
-	 * ClassNotFoundException, InstantiationException, IllegalAccessException,
-	 * NoSuchMethodException, SecurityException, IllegalArgumentException,
-	 * InvocationTargetException { Serial uart = serial.createVirtualUART();
-	 * uart.setCodec("arduino"); connect(serial.getName()); return uart; }
-	 *
-	 * static public VirtualDevice createVirtual(String port) throws
-	 * IOException{ // Once device to rule them all ? - I think that would
-	 * work.. VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual",
-	 * "VirtualDevice"); // this call would generate the instance of virtual
-	 * device needed virtual.createVirtualArduino(port); return virtual; }
-	 */
+		broadcastState();
+	}
 
 	public Map<String, PinDefinition> createPinList() {
 		pinMap = new HashMap<String, PinDefinition>();
@@ -691,7 +683,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 				log.info("getVersion attempt # {}", retry);
 			}
 		} catch (Exception e) {
-			Logging.logError(e);
+			log.error("could not get version", e);
 		}
 		if (mrlCommVersion == null) {
 			error(String.format("%s did not get response from arduino....", serial.getPortName()));
@@ -700,6 +692,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		} else {
 			info(String.format("%s connected on %s responded version %s ... goodtimes...", serial.getName(), serial.getPortName(), mrlCommVersion));
 		}
+
+		invoke("publishVersion", mrlCommVersion);
+
 		return mrlCommVersion;
 	}
 
@@ -2231,6 +2226,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		log.info(String.format("Port=%s", port));
 		log.info(String.format("type=%s", type));
 		ArduinoUtils.arduinoPath = arduinoIdePath;
+<<<<<<< HEAD
 		uploadSketchResult="Uploading";
 		try {
       ArduinoUtils.uploadSketch(port, type);
@@ -2241,14 +2237,17 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+=======
+		uploadSketchResult = "Uploading";
+		ArduinoUtils.uploadSketch(port, type);
+>>>>>>> stash
 		if (ArduinoUtils.exitValue == 0) {
-		  uploadSketchResult="MRLComm successfully upload to arduino";
+			uploadSketchResult = "MRLComm successfully upload to arduino";
+		} else {
+			uploadSketchResult = "MRLComm failed upload to arduino";
 		}
-		else {
-      uploadSketchResult="MRLComm failed upload to arduino";
-		}
-    log.info(uploadSketchResult);
-    broadcastState();
+		log.info(uploadSketchResult);
+		broadcastState();
 	}
 
 	public void openMrlComm() throws Exception {
@@ -2301,10 +2300,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 		PinDefinition pinDef = pinIndex.get(address);
 
-		if (pinDef.isPwm()) {			
+		if (pinDef.isPwm()) {
 			analogWrite(address, value);
 		} else {
-			digitalWrite(address, value);			
+			digitalWrite(address, value);
 		}
 		// cache value
 		pinDef.setValue(value);

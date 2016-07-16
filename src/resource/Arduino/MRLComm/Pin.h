@@ -16,12 +16,6 @@
  */
 class Pin {
   public:
-    // default constructor for a pin?
-    // at a minimum we need type and address A0 D4 etc...
-    Pin(int t, int addr) {
-      type = t;
-      address = addr;
-    };
     int type; // might be useful in control
     int address; // pin #
     int value;
@@ -37,6 +31,13 @@ class Pin {
     int rate;
     // remove me, needed for pulse
     int rateModulus;
+
+    // default constructor for a pin?
+    // at a minimum we need type and address A0 D4 etc...
+    Pin(int t, int addr) {
+      type = t;
+      address = addr;
+    };
 };
 
 #endif
