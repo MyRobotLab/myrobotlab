@@ -7,10 +7,9 @@
 			   <input class="form-control" type="text" ng-model="portName" ng-disabled="isConnected" uib-typeahead="portName for portName in serial.possiblePorts | filter:$viewValue | limitTo:8"/>
 			   <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="msg.refresh()">refresh</button></span>
 			   <!-- span class="input-group-btn"><button class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</button></span -->
-
 			     <select ng-model="board" ng-change="onBoardChange(board)" class="form-control">
-		   	  	<option>Uno</option>
-		   		<option>Mega</option>
+					<option>Uno</option>
+					<option>Mega</option>
 				</select>    
 		</div>
 		</div>	
@@ -21,7 +20,7 @@
 </div>
 <div class="row">
 	<div class="col-lg-12">
-			<br>{{service.board}} {{connectedStatus}} {{versionStatus}}<br>		
+			<br>{{service.board}} {{connectedStatus}} {{versionStatus}} {{mrlCommStatus.us}} {{mrlCommStatus.freeMemory}}<br>		
 	</div>
 </div>		
 <!-- end status and control for board to be viewed in above all tabs -->

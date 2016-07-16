@@ -3,8 +3,10 @@
     <button type="button" class="btn btn-default">scale</button>
     <button type="button" class="btn btn-default">rate</button>    
     <button type="button" class="btn btn-default" ng-click="msg.softReset()">reset</button>
+    <br>
 
     <canvas width="800" height="512" id="screen"></canvas>
+    <br>
 
      <div class="btn-group" role="group" aria-label="..." data-ng-repeat="(pinKey, pinDef) in pinIndex">    
        <button class="btn btn-default" type="button" ng-click="toggleTrace(pinDef)" ng-style="pinDef.style">{{ pinDef.name }}</button>

@@ -105,6 +105,13 @@ angular.module('mrlapp.service.PythonGui', [])
     }
     ;
     
+    $scope.exec = function() {
+        $log.info('here');
+        $scope.activeScriptIndex;
+        $log.info($scope.scripts);
+        $scope.editor.getValue();
+        msg.send('exec', $scope.editor.getValue());
+    }
     
     // now you can subscribe to the methods you want
     msg.subscribe('publishStdOut');

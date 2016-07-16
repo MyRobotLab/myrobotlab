@@ -36,6 +36,11 @@ angular.module('mrlapp.service.ArduinoGui', [])
             $scope.connectedStatus = "disconnected";
         }
         // === service.serial begin ===
+        if (service.mrlCommVersion != null){
+             $scope.versionStatus = " with firmware version " + service.mrlCommVersion;
+        } else {
+            $scope.versionStatus = null;
+        }
 
         if ($scope.isConnected) {
             msg.send("getVersion");            
@@ -57,6 +62,9 @@ angular.module('mrlapp.service.ArduinoGui', [])
             $scope.possiblePorts = inMsg.data[0];
             $scope.$apply();
             break;
+        case 'onBoardInfo':
+            $scope.mrlCommStatus = inMsg.data[0];
+        break;
         case 'onVersion':
             $scope.version = inMsg.data[0];
             if ($scope.version != service.mrlCommVersion) {
@@ -120,10 +128,10 @@ angular.module('mrlapp.service.ArduinoGui', [])
     $scope.aceChanged = function(e) {
     }
     ;
-    
  
     // get version
     msg.subscribe('publishVersion');   
+    msg.subscribe('publishBoardInfo');   
     msg.subscribe(this);
 }
 ]);
