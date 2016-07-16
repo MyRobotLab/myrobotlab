@@ -2222,9 +2222,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	public void uploadSketch(String arduinoIdePath, String port, String type) {
+		arduinoIdePath = arduinoIdePath.replace("\\", "/");
 		arduinoIdePath = arduinoIdePath.trim();
-		if (!arduinoIdePath.endsWith("\\")) {
-			arduinoIdePath += "\\";
+		if (!arduinoIdePath.endsWith("/")) {
+			arduinoIdePath += "/";
 		}
 
 		log.info(String.format("arduino IDE Path=%s", arduinoIdePath));

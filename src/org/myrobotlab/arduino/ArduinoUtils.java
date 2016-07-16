@@ -6,16 +6,26 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.sun.jna.Platform;
+
 public class ArduinoUtils {
 
   // TODO: auto-discover?
   public static String arduinoPath = "c:\\dev\\arduino-1.6.8\\";
   // TODO: fix this. a temp directory so we can upload the mrlcomm properly.
-  private static String arduinoExecutable = "arduino";
+  
   // not needed ?
   private static String commandPath = "";
   private static String additionalEnv = "";
   public static int exitValue;
+  
+  static public String getExeName(){
+	  if (Platform.isMac()){
+		  return "Arduino";
+	  }
+	  
+	  return "arduino";
+  }
 
   public static boolean uploadSketch(String port, String board) throws IOException, InterruptedException {
     if (!(board.equalsIgnoreCase("uno") || board.equalsIgnoreCase("mega"))) {
@@ -24,11 +34,11 @@ public class ArduinoUtils {
       exitValue=1;
       return false;
     }
-    // Assume this is mrlcomm resource!
-    String sketchFilename = "src\\resource\\Arduino\\MRLComm\\MRLComm.ino";
+    // Assume this is mrlcomm resource!  G-say: FIXME - this will ONLY work in eclipse !!!
+    String sketchFilename = "src/resource/Arduino/MRLComm/MRLComm.ino";
     File sketch = new File(sketchFilename);
     // Create the command to run (and it's args.)
-    String arduinoExe = arduinoPath + arduinoExecutable;
+    String arduinoExe = arduinoPath + getExeName();
     ArrayList<String> args = new ArrayList<String>();
     args.add("--upload");
     args.add("--port");
