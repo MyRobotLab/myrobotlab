@@ -530,7 +530,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
 			if (arduinoPath != null && board != "" && board != null) {
 				// sleep(1000);
-				serial.disconnect();
+				disconnect();
 				uploadSketch(arduinoPath, port, board);
 				serial.open(port, rate, databits, stopbits, parity);
 				version = getVersion();
@@ -625,6 +625,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	public void disconnect() {
+		mrlCommVersion = null;
 		serial.disconnect();
 		broadcastState();
 	}
