@@ -315,7 +315,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
     state.setText("not connected");
     version.setText("");
     openMrlComm.setEnabled(true);
-    arduinoPath.setText(myArduino.arduinoIdePath);
+    arduinoPath.setText(myArduino.arduinoPath);
   }
 
   public void onConnect(String portName) {

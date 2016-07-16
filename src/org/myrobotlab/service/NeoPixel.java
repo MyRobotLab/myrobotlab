@@ -330,7 +330,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      arduino.arduinoIdePath="C:\\Program Files (x86)\\Arduino";
+      arduino.arduinoPath="C:\\Program Files (x86)\\Arduino";
       arduino.connect("COM15");
       arduino.setDebug(true);
 //      NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");

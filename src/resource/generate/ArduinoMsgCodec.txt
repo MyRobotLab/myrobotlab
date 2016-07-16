@@ -62,7 +62,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
   
  	public static final int DEVICE_TYPE_NOT_FOUND = 0;
 	public static final int DEVICE_TYPE_ARDUINO = 1;
-		
+	public static final int DEVICE_TYPE_ULTRASONIC = 4;
 	public static final int DEVICE_TYPE_STEPPER = 5;
 	public static final int DEVICE_TYPE_MOTOR = 6;
 	public static final int DEVICE_TYPE_SERVO = 7;
