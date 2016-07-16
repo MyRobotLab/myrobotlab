@@ -6,10 +6,14 @@ angular.module('mrlapp.service.ArduinoGui', [])
     
     $scope.editor = null ;
     
-    $scope.statusLine = "";
     $scope.version = "unknown";
     $scope.board = "";
     $scope.image = "service/arduino/Uno.png";
+
+    $scope.connectedStatus = "";
+    $scope.versionStatus = "";
+    // Status - from the Arduino service
+    $scope.statusLine = "";
     
     this.updateState = function(service) {
         $scope.service = service;
@@ -17,26 +21,25 @@ angular.module('mrlapp.service.ArduinoGui', [])
         $scope.arduinoPath = service.arduinoIdePath;
         $scope.image = "service/arduino/" + service.board + ".png";
         
+        var serial = $scope.service.serial;
+
         // === service.serial begin ===
         $scope.serialName = service.serial.name;
-        $scope.isConnected = ($scope.service.serial.portName != null );
-        $scope.isConnectedImage = ($scope.service.serial.portName != null ) ? "connected" : "disconnected";
-        $scope.connectText = ($scope.service.serial.portName == null ) ? "connect" : "disconnect";
+        $scope.isConnected = (serial.portName != null );
+        $scope.isConnectedImage = (serial.portName != null ) ? "connected" : "disconnected";
+        
         if ($scope.isConnected) {
-            $scope.portName = $scope.service.serial.portName;
+            $scope.portName = serial.portName;
+            $scope.connectedStatus = "connected to " + serial.portName + " at " + serial.baudrate;
         } else {
-            $scope.portName = $scope.service.serial.lastPortName;
+            $scope.portName = serial.lastPortName;
+            $scope.connectedStatus = "disconnected";
         }
         // === service.serial begin ===
-        
-        $scope.statusLine = $scope.board;
+
         if ($scope.isConnected) {
-            $scope.statusLine += ' connected to ' + $scope.portName + ' version ' + $scope.version;
-        } else {
-            $scope.statusLine += ' disconnected'
-        }
-        
-        //$scope.version = service.mrlCommVersion;
+            msg.send("getVersion");            
+        } 
     }
     ;
     _self.updateState($scope.service);
@@ -48,6 +51,8 @@ angular.module('mrlapp.service.ArduinoGui', [])
         case 'onState':
             _self.updateState(inMsg.data[0]);
             $scope.$apply();
+        case 'onStatus':
+            $scope.statusLine = inMsg.data[0];
         case 'onPortNames':
             $scope.possiblePorts = inMsg.data[0];
             $scope.$apply();
@@ -59,6 +64,10 @@ angular.module('mrlapp.service.ArduinoGui', [])
             }
             $scope.$apply();
             break;
+        case 'onGetVersion':{
+            $scope.versionStatus = 'version ' + $scope.version;
+            break;
+        }
         case 'onRefresh':
             $scope.possiblePorts = inMsg.data[0];
             $scope.$apply();
@@ -114,8 +123,7 @@ angular.module('mrlapp.service.ArduinoGui', [])
     
  
     // get version
-    msg.subscribe('publishVersion');
-    msg.send("getVersion");
+    msg.subscribe('publishVersion');   
     msg.subscribe(this);
 }
 ]);

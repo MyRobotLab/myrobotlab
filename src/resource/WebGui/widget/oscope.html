@@ -1,28 +1,16 @@
-
-<!-- global buttons -->
 <div  class="btn-group" role="group" aria-label="...">    
     <button type="button" class="btn btn-default" ng-click="clearScreen()" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">clear screen </button>
     <button type="button" class="btn btn-default">scale</button>
     <button type="button" class="btn btn-default">rate</button>    
-    <button type="button" class="btn btn-default" ng-click="msg.softReset()">reset</button>    
+    <button type="button" class="btn btn-default" ng-click="msg.softReset()">reset</button>
 
-     <div class="btn-group" role="group" aria-label="..." data-ng-repeat="(pinKey, pin) in pinList">   
-      <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" ng-style="pinButtonList[pin.pin].style">{{ pinButtonList[pin.pin].text }}<span class="caret"></span></button>
-        <ul class="dropdown-menu" ng-style="pinButtonList[pin.pin].style">
-          <!-- TODO - pinMode - autoSets -->
-          <li><a href ng-click="toggleTrace(pin.pin)">read</a></li>
-          <li><a href ng-click="toggleTrace(pin.pin)">write</a></li>
-          <li><a href ng-click="toggleTrace(pin.pin)">analog write</a></li>
+    <canvas width="800" height="512" id="screen"></canvas>
 
-          <li><div ui-slider="angle" ng-model="angle" min="0" max="180" ng-type="number"  ng-change="moveTo(angle)" name="angle" class="ng-pristine ng-valid ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all" aria-disabled="false"><a class="ui-slider-handle ui-state-default ui-corner-all" href="#" style="left: 50%;"></a></div></li>
-  
-        </ul>
-      </div>
-  </div>
-
+     <div class="btn-group" role="group" aria-label="..." data-ng-repeat="(pinKey, pinDef) in pinIndex">    
+       <button class="btn btn-default" type="button" ng-click="toggleTrace(pinDef)" ng-style="pinDef.style">{{ pinDef.name }}</button>
+     </div>
 </div>
 
-<canvas width="800" height="512" id="screen"></canvas>
+
 
   

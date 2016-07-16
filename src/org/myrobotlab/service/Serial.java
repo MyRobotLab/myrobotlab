@@ -302,6 +302,22 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     outRX.clear();
     outTX.clear();
   }
+  
+  
+  /** 
+   * for backwards compatibility
+   * @param name
+   * @throws IOException
+   */
+  public void connect(String name) throws IOException{
+	  open(name);
+  }
+  
+  public void connect(String name, int baudRate, int dataBits, int stopBits, int parity) throws IOException{
+	  open(name);
+	  setParams(baudRate, dataBits, stopBits, parity);
+  }
+  
 
   public void open(String name) throws IOException {
 	  open(name, baudrate, databits, stopbits, parity);

@@ -79,6 +79,11 @@ public class ArduinoPinArrayControlTest {
 		Runtime.start("gui", "GUIService");
 		Runtime.start("webgui", "WebGui");
 		
+		arduino.connect("COM3");
+		
+		Serial serial = arduino.getSerial();
+		serial.disconnect();
+		
 		List<PinDefinition> pins = arduino.getPinList();
 		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
 		logPins(pins);
@@ -93,8 +98,9 @@ public class ArduinoPinArrayControlTest {
 		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
 		logPins(pins);
 		
+		arduino.connect("COM5");
 		
-	
+		
 		Pir pir = (Pir)Runtime.start("pir", "Pir");
 		UltrasonicSensor srf04 = (UltrasonicSensor)Runtime.start("srf04", "UltrasonicSensor");
 		

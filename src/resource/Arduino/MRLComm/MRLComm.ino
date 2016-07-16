@@ -57,13 +57,13 @@
 * FIXME - first rule of generate club is: whole file should be generated
 * so this needs to be turned itno a .h if necessary - but the manual munge
 * should be replaced
-* 
+*
 * Addendum up for vote:
-*   Second rule of generate club is , to complete the mission, this file must/should go away...  
+*   Second rule of generate club is , to complete the mission, this file must/should go away...
 *   It should be generated, completely.  device subclasses, #defines and all..  muahahahhah! project mayhem...
-* 
+*
 *   Third rule of generate club is, if something has no code and isn't used, remove it. If it has code, move the code.
-* 
+*
 */
 /***********************************************************************
  * GLOBAL VARIABLES
@@ -72,9 +72,9 @@
 MrlComm mrlComm;
 /***********************************************************************
  * STANDARD ARDUINO BEGIN
- * setup() is called when the serial port is opened unless you hack the 
+ * setup() is called when the serial port is opened unless you hack the
  * serial port on your arduino
- * 
+ *
  * Here we default out serial port to 115.2kbps.
 */
 void setup() {
@@ -87,16 +87,20 @@ void setup() {
   mrlComm.publishVersion();
   // publish the board type (uno/mega)
   mrlComm.publishBoardInfo();
+
+  // check to see if the "Arduino" device is attached ..
+  // it should(must) be device 0 !
+
 }
 
 /**
- * STANDARD ARDUINO LOOP BEGIN 
- * This method will be called over and over again by the arduino, it is the 
+ * STANDARD ARDUINO LOOP BEGIN
+ * This method will be called over and over again by the arduino, it is the
  * main loop any arduino sketch runs
  */
 void loop() {
   // increment how many times we've run
-  // TODO: handle overflow here after 32k runs, i suspect this might blow up? 
+  // TODO: handle overflow here after 32k runs, i suspect this might blow up?
   mrlComm.loopCount++;
   // get a command and process it from the serial port (if available.)
   mrlComm.readCommand();
