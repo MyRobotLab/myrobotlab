@@ -456,10 +456,11 @@ void MrlComm::deviceAttach() {
 	// e.g.  attach(int[] config, configSize)
 
 	switch (type) {
-	case SENSOR_TYPE_ARDUINO: {
+	case DEVICE_TYPE_ARDUINO: {
 		//devicePtr = attachAnalogPinArray();
 		break;
 	}
+	/*
 	case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
 		//devicePtr = attachDigitalPinArray();
 		break;
@@ -468,7 +469,8 @@ void MrlComm::deviceAttach() {
 		//devicePtr = attachPulse();
 		break;
 	}
-	case SENSOR_TYPE_ULTRASONIC: {
+	*/
+	case DEVICE_TYPE_ULTRASONIC: {
 		//devicePtr = attachUltrasonic();
 		break;
 	}

@@ -53,18 +53,7 @@
 #include "LinkedList.h"
 #include "MrlComm.h"
 
-/**
-* FIXME - first rule of generate club is: whole file should be generated
-* so this needs to be turned itno a .h if necessary - but the manual munge
-* should be replaced
-*
-* Addendum up for vote:
-*   Second rule of generate club is , to complete the mission, this file must/should go away...
-*   It should be generated, completely.  device subclasses, #defines and all..  muahahahhah! project mayhem...
-*
-*   Third rule of generate club is, if something has no code and isn't used, remove it. If it has code, move the code.
-*
-*/
+
 /***********************************************************************
  * GLOBAL VARIABLES
  * TODO - work on reducing globals and pass as parameters
@@ -110,43 +99,3 @@ void loop() {
   mrlComm.updateStatus();
 } // end of big loop
 
-/**
- * STANDARD ARDUINO LOOP END
- */
-
-// ANALOG_READ_POLLING_START
-void analogReadPollingStart() {
-  // TODO: remove this method.. potentially replace with device attach.
-  // if you have a device attached,and it's a pin, implicitly, we're polling.
-  //int pinIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
-  //Pin& pin = pins[pinIndex];
-  // TODO: remove this method and only use sensorAttach ..
-  //pin.sensorIndex = 0; // FORCE ARDUINO TO BE OUR SERVICE - DUNNO IF THIS IS GOOD/BAD
-  //pin.sensorType = SENSOR_TYPE_ANALOG_PIN_READER; // WIERD - mushing of roles/responsibilities
-  //pin.isActive = true;
-  //pin.rateModulus= (ioCmd[2] << 8)+ioCmd[3];
-}
-
-// DIGITAL_READ_POLLING_START
-void digitalReadPollingStart() {
-  // TODO: remove this and replace iwth deviceAttach()
-  //int pinIndex = ioCmd[1]; // + DIGITAL_PIN_COUNT / DIGITAL_PIN_OFFSET
-  //Pin& pin = pins[pinIndex];
-  //pin.sensorIndex = 0; // FORCE ARDUINO TO BE OUR SERVICE - DUNNO IF THIS IS GOOD/BAD
-  //pin.sensorType = SENSOR_TYPE_DIGITAL_PIN_READER; // WIERD - mushing of roles/responsibilities
-  //pin.isActive = true;
-  //pin.rateModulus=(ioCmd[2] << 8) + ioCmd[3];
-}
-
-// digital_READ_POLLING_STOP
-void digitalReadPollingStop() {
-  //Device* d = getDevice(ioCmd[1]);
-  //Pin* pin = d->pins.get(0);
-  // pin.isActive = false;
-  //int pin = ioCmd[1];
-  //removeAndShift(digitalReadPin, digitalReadPollingPinCount, pin);
-  //break;
-  // FIXME - these should just be attributes of the pin
-}
-
-// ================= publish methods end ==================

@@ -25,7 +25,7 @@
 #define DEVICE_TYPE_NOT_FOUND           0
 
 #define DEVICE_TYPE_ARDUINO			    1
-
+#define DEVICE_TYPE_ULTRASONIC          4
 #define DEVICE_TYPE_STEPPER             5
 #define DEVICE_TYPE_MOTOR               6
 #define DEVICE_TYPE_SERVO               7

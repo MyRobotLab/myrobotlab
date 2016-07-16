@@ -79,10 +79,9 @@ public class ArduinoPinArrayControlTest {
 		Runtime.start("gui", "GUIService");
 		Runtime.start("webgui", "WebGui");
 		
-		arduino.connect("COM3");
+		arduino.connect("COM5");
 		
-		Serial serial = arduino.getSerial();
-		serial.disconnect();
+		arduino.disconnect();
 		
 		List<PinDefinition> pins = arduino.getPinList();
 		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());

@@ -59,13 +59,10 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
   public static final int MRLCOMM_VERSION = 37;
   
   // ------  device type mapping constants
-  
- 	public static final int DEVICE_TYPE_NOT_FOUND = 0;
-	public static final int SENSOR_TYPE_ANALOG_PIN_ARRAY = 1;
-	public static final int SENSOR_TYPE_DIGITAL_PIN_ARRAY = 2;
-	public static final int SENSOR_TYPE_PULSE = 3;
-	public static final int SENSOR_TYPE_ULTRASONIC = 4;
-		
+	
+	public static final int DEVICE_TYPE_NOT_FOUND = 0;
+	public static final int DEVICE_TYPE_ARDUINO = 1;
+	public static final int DEVICE_TYPE_ULTRASONIC = 4;
 	public static final int DEVICE_TYPE_STEPPER = 5;
 	public static final int DEVICE_TYPE_MOTOR = 6;
 	public static final int DEVICE_TYPE_SERVO = 7;

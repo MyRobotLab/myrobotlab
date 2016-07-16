@@ -36,8 +36,8 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_STOP;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_TYPE_DIGITAL_PIN_ARRAY;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_TYPE_ULTRASONIC;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ARDUINO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ULTRASONIC;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_DETACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_EVENTS_ENABLED;
@@ -198,14 +198,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
-	 * path of the Arduino IDE
-	 * must be set by user
+	 * path of the Arduino IDE must be set by user
 	 */
 	public String arduinoPath;
-	
-	public Sketch sketch;
 
-	public String arduinoIdePath;
+	public Sketch sketch;
 
 	public String uploadSketchResult;
 
@@ -531,13 +528,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		Integer version = getVersion();
 		if (version == null || version != MRLCOMM_VERSION) {
 			error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
-			if (arduinoIdePath != null && board != "" && board !=null){
-			  //sleep(1000);
-			  serial.disconnect();
-			  uploadSketch(arduinoIdePath, port, board);
-			  serial.open(port, rate, databits, stopbits, parity);
-			  version = getVersion();
-			  sleep(1000);
+			if (arduinoPath != null && board != "" && board != null) {
+				// sleep(1000);
+				serial.disconnect();
+				uploadSketch(arduinoPath, port, board);
+				serial.open(port, rate, databits, stopbits, parity);
+				version = getVersion();
+				sleep(1000);
 			}
 			return;
 		}
@@ -629,6 +626,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	public void disconnect() {
 		serial.disconnect();
+		broadcastState();
+	}
+
+	public void refresh() {
+		serial.refresh();
+		broadcastState();
 	}
 
 	public void getBoardInfo() {
@@ -1521,13 +1524,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 
 		if (device instanceof Arduino) {
-			return SENSOR_TYPE_DIGITAL_PIN_ARRAY;
+			return DEVICE_TYPE_ARDUINO;
 		}
 
 		// FixMe this does not follow spec..
 		// of Control Controller
 		if (device instanceof UltrasonicSensor) {
-			return SENSOR_TYPE_ULTRASONIC;
+			return DEVICE_TYPE_ULTRASONIC;
 		}
 
 		if (device instanceof Servo) {
@@ -2219,28 +2222,25 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	public void uploadSketch(String arduinoIdePath, String port, String type) {
 		arduinoIdePath = arduinoIdePath.trim();
-		if (!arduinoIdePath.endsWith("\\"))
+		if (!arduinoIdePath.endsWith("\\")) {
 			arduinoIdePath += "\\";
-		this.arduinoIdePath = arduinoIdePath;
+		}
+
 		log.info(String.format("arduino IDE Path=%s", arduinoIdePath));
 		log.info(String.format("Port=%s", port));
 		log.info(String.format("type=%s", type));
-		ArduinoUtils.arduinoPath = arduinoIdePath;
-<<<<<<< HEAD
-		uploadSketchResult="Uploading";
-		try {
-      ArduinoUtils.uploadSketch(port, type);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-=======
+		if (arduinoIdePath != null && !arduinoIdePath.equals(ArduinoUtils.arduinoPath)) {
+			this.arduinoPath = arduinoIdePath;
+			ArduinoUtils.arduinoPath = arduinoIdePath;
+			save();
+		}
 		uploadSketchResult = "Uploading";
-		ArduinoUtils.uploadSketch(port, type);
->>>>>>> stash
+		try {
+			ArduinoUtils.uploadSketch(port, type);
+		} catch (Exception e) {
+			log.info("ArduinoUtils threw trying to upload", e);
+		}
+
 		if (ArduinoUtils.exitValue == 0) {
 			uploadSketchResult = "MRLComm successfully upload to arduino";
 		} else {
