@@ -1,0 +1,11 @@
+{
+  "name": "mrl-bower-install-plus",
+  "version": "0.0.1",
+  "description": "Script for MRL for bundling only needed files from bower dependencies for the webgui",
+  "main": "bower-install-plus.js",
+  "bin": {
+    "mrl-bower-install-plus": "./mrl-bower-install-plus.js"
+  },
+  "author": "LunDev",
+  "license": "ISC"
+}

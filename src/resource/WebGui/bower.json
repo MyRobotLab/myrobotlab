@@ -1,33 +1,100 @@
 {
-  "name": "myrobotlab-webgui",
-  "description": "The official WebGui for MyRobotLab",
-  "version": "0.0.0",
-  "homepage": "https://github.com/MyRobotLab/myrobotlab",
-  "license": "Apache-2.0",
-  "private": true,
-  "dependencies": {
-    "angular": "1.5.6",
-    "angular-mocks": "1.5.6",
-    "angular-animate": "1.5.6",
-    "angular-ui-router": "0.3.1",
-    "ui-router-extras": "0.1.2",
-    "angular-bootstrap": "1.3.3",
-    "oclazyload": "1.0.9",
-    "bootstrap": "3.3.6",
-    "jquery": "2.2.4",
-    "jquery-ui": "1.11.4",
-    "normalize-css": "4.1.1",
-    "atmosphere.js": "atmosphere#~2.3.2",
-    "d3": "3.5.17",
-    "nvd3": "1.8.3",
-    "angularjs-nvd3-directives": "0.0.7",
-    "angular-ui-ace": "bower",
-    "three.js": "threejs#*"
-  },
-  "resolutions": {
-    "angular-ui-router": "0.3.1",
-    "angular": "1.5.6",
-    "d3": "3.5.17",
-    "nvd3": "1.8.3"
-  }
+    "name": "myrobotlab-webgui",
+    "description": "The official WebGui for MyRobotLab",
+    "version": "0.0.0",
+    "homepage": "https://github.com/MyRobotLab/myrobotlab",
+    "license": "Apache-2.0",
+    "private": true,
+    "dependencies": {
+        "angular": "1.5.6",
+        "angular-mocks": "1.5.6",
+        "angular-animate": "1.5.6",
+        "angular-ui-router": "0.3.1",
+        "ui-router-extras": "0.1.2",
+        "angular-bootstrap": "1.3.3",
+        "oclazyload": "1.0.9",
+        "bootstrap": "3.3.6",
+        "jquery": "2.2.4",
+        "jquery-ui": "1.11.4",
+        "normalize-css": "4.1.1",
+        "atmosphere.js": "atmosphere#~2.3.2",
+        "d3": "3.5.17",
+        "nvd3": "1.8.3",
+        "angularjs-nvd3-directives": "0.0.7",
+        "angular-ui-ace": "bower",
+        "three.js": "threejs#*"
+    },
+    "resolutions": {
+        "angular-ui-router": "0.3.1",
+        "angular": "1.5.6",
+        "d3": "3.5.17",
+        "nvd3": "1.8.3"
+    },
+    "install": {
+        "path": "app/libgen",
+		"oldpath" : "app/bower_components",
+        "files": {
+			"ace-builds": [
+				"src-min-noconflict/ace.js"
+			],
+            "angular": [
+                "angular.min.js"
+            ],
+			"angular-animate": [
+				"angular-animate.min.js"
+			],
+			"angular-bootstrap": [
+				"ui-bootstrap-tpls.min.js"
+			],
+			"angularjs-nvd3-directives": [
+				"dist/angularjs-nvd3-directives.min.js"
+			],
+			"angular-ui-ace": [
+				"ui-ace.min.js"
+			],
+			"angular-ui-router": [
+				"release/angular-ui-router.min.js"
+			],
+			"atmosphere.js": [
+				"atmosphere.min.js"
+			],
+			"bootstrap": [
+				"dist/css/bootstrap.min.css",
+				"dist/css/bootstrap-theme.min.css",
+			    "dist/js/bootstrap.min.js",
+				"dist/fonts/glyphicons-halflings-regular.eot",
+				"dist/fonts/glyphicons-halflings-regular.svg",
+				"dist/fonts/glyphicons-halflings-regular.ttf",
+				"dist/fonts/glyphicons-halflings-regular.woff",
+				"dist/fonts/glyphicons-halflings-regular.woff2"
+			],
+			"d3": [
+				"d3.min.js"
+			],
+			"jquery": [
+				"dist/jquery.min.js"
+			],
+			"jquery-ui": [
+				"jquery-ui.min.js",
+				"themes/base/jquery-ui.min.css"
+			],
+			"normalize-css": [
+				"normalize.css"
+			],
+			"nvd3": [
+				"build/nv.d3.min.js",
+				"build/nv.d3.min.css"
+			],
+			"oclazyload": [
+				"dist/ocLazyLoad.min.js"
+			],
+			"three.js": [
+				"build/three.min.js",
+				"examples/js/loaders/AssimpJSONLoader.js"
+			],
+			"ui-router-extras": [
+				"release/ct-ui-router-extras.min.js"
+			]
+        }
+    }
 }
