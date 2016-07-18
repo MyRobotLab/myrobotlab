@@ -134,7 +134,7 @@ public class ArduinoMotorPotTest implements SensorEventListener {
     // arduino.sensorAttach(feedbackPot);
     
     if (enableLoadTiming) {
-      arduino.setLoadTimingEnabled(true);
+      arduino.enableBoardStatus();
     }
     // stop the motor initially
     motor.move(0);

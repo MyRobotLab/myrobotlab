@@ -14,9 +14,7 @@
 
     <!-- python example resource scripts begin -->
     <div class="btn-group" uib-dropdown is-open="status.isopen">
-    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">    
-	  <span data-intro="here are some examples you can play with" data-position="top" class="glyphicon glyphicon-open">examples</span>
-    </button>	
+    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">examples</button>	
     <ul uib-dropdown-menu>
       <li ng-repeat="(key, value) in service.exampleUrls" ng-class="navClass('{{key}}')"> <a href='' ng-click="msg.loadPyRobotLabServiceScript(key)">{{key}}</a>       
         </li>
@@ -26,9 +24,7 @@
 
     <!-- python open resource scripts begin -->
     <div class="btn-group" uib-dropdown is-open="status.isopen">
-    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">
-      <span data-intro="open scripts from your .myrobotlab directory" data-position="top" class="glyphicon glyphicon-open">open</span><!-- span class="caret"></span-->
-    </button>	
+    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">open</button>	
     <ul uib-dropdown-menu>
       <li ng-repeat="script in service.localPythonFiles" ng-class="navClass('{{script}}')"> <a href='' ng-click="msg.loadUserScript(script)">{{script}}</a>       
         </li>
@@ -47,7 +43,7 @@
 
 Active index: {{ activeTabIndex  }} <br /> script count: {{ scripts.length }} <br />
             
-<input type="button" value="Add Script" ng-click="addScript()" />
+<input class="btn btn-default" type="button" value="Add Script" ng-click="addScript()" />
 
 <uib-tabset active="activeTabIndex">
 	<uib-tab ng-repeat="script in scripts" heading="{{script.name}}">

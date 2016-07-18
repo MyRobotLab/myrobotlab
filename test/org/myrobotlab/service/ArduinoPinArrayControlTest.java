@@ -9,8 +9,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -76,14 +74,20 @@ public class ArduinoPinArrayControlTest {
 	@Test
 	public void testGetPinList() throws Exception {
 		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-		Runtime.start("gui", "GUIService");
+		// Runtime.start("gui", "GUIService");
 		Runtime.start("webgui", "WebGui");
+		
+		List<PinDefinition> pins = null; 
 		
 		arduino.connect("COM5");
 		
+		arduino.enableBoardStatus();
+		arduino.disableBoardStatus();
+				
+		/*
 		arduino.disconnect();
 		
-		List<PinDefinition> pins = arduino.getPinList();
+		pins = arduino.getPinList();
 		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
 		logPins(pins);
 		
@@ -91,13 +95,14 @@ public class ArduinoPinArrayControlTest {
 		pins = arduino.getPinList();
 		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
 		logPins(pins);
+		*/
 	
 		arduino.setBoardUno();
 		pins = arduino.getPinList();
 		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
 		logPins(pins);
 		
-		arduino.connect("COM5");
+		// arduino.connect("COM5");
 		
 		
 		Pir pir = (Pir)Runtime.start("pir", "Pir");
@@ -158,9 +163,11 @@ public class ArduinoPinArrayControlTest {
 			// structured testing begins
 			test.testGetPinList();
 
+			/*
 			JUnitCore junit = new JUnitCore();
 			Result result = junit.run(ArduinoPinArrayControlTest.class);
 			log.info("Result: {}", result);
+			*/
 			
 			
 

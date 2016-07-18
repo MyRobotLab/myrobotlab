@@ -145,6 +145,8 @@ public class ArduinoBindingsGenerator {
     exclude.add("detach");
 
     exclude.add("getPin");
+    exclude.add("setMode");
+    exclude.add("uploadSketch");
 
     exclude.add("publishStepperEvent");
     exclude.add("setStepperSpeed");
@@ -179,6 +181,8 @@ public class ArduinoBindingsGenerator {
     exclude.add("getSensorType");
     exclude.add("update");
     exclude.add("stopService");
+    exclude.add("refresh");
+    exclude.add("pinNameToAddress");
 
     exclude.add("refreshVersion");
     exclude.add("getPortName");
@@ -229,9 +233,9 @@ public class ArduinoBindingsGenerator {
     log.info(javaBindingsInit.toString());
 
     // file template filtering
-    String java = FileIO.toString("src/resource/generate/ArduinoMsgCodec.txt");
+    String java = FileIO.toString("src/resource/generate/ArduinoMsgCodec.java.template");
     String python = FileIO.toString("src/resource/generate/pythonTemplate.txt");
-    String MRLComm = FileIO.toString("src/resource/generate/MRLComm.txt");
+    String MRLComm = FileIO.toString("src/resource/generate/ArduinoMsgCodec.h.template");
 
     // merge data with template
     for (String key : snr.keySet()) {
@@ -244,7 +248,7 @@ public class ArduinoBindingsGenerator {
     long ts = System.currentTimeMillis();
     FileIO.toFile(String.format("ArduinoMsgCodec.%d.py", ts), python);
     FileIO.toFile("src/org/myrobotlab/codec/serial/" + String.format("ArduinoMsgCodec.java", ts), java);
-    FileIO.toFile(String.format("ArduinoMsgCodec.%d.ino", ts), MRLComm);
+    FileIO.toFile(String.format("src/resource/Arduino/MRLComm/ArduinoMsgCodec.h", ts), MRLComm);
 
     // String ret = String.format("%s\n\n%s", ino.toString(),
     // java.toString());

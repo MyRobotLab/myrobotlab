@@ -53,7 +53,6 @@
 #include "LinkedList.h"
 #include "MrlComm.h"
 
-
 /***********************************************************************
  * GLOBAL VARIABLES
  * TODO - work on reducing globals and pass as parameters
@@ -95,7 +94,7 @@ void loop() {
   mrlComm.readCommand();
   // update devices
   mrlComm.updateDevices();
-  // update memory & timing
-  mrlComm.updateStatus();
+  // send back load time and memory
+  mrlComm.publishBoardStatus();
 } // end of big loop
 
