@@ -1,4 +1,5 @@
 #include "MrlComm.h"
+#include "MrlArduino.h"
 
 MrlComm::MrlComm() {
 	softReset();
@@ -20,13 +21,15 @@ void MrlComm::softReset() {
 }
 
 /***********************************************************************
- * UPDATE STATUS 
+ * PUBLISH_BOARD_STATUS
  * This function updates the average time it took to run the main loop
- * and reports it back with a publishStatus MRLComm message
+ * and reports it back with a publishBoardStatus MRLComm message
  *
  * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
+ *
+ * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
  */
-void MrlComm::updateStatus() {
+void MrlComm::publishBoardStatus() {
 	// protect against a divide by zero in the division.
 	unsigned long avgTiming = 0;
 	if (loadTimingModulus != 0) {
@@ -35,7 +38,10 @@ void MrlComm::updateStatus() {
 	// report load time
 	if (loadTimingEnabled && (loopCount % loadTimingModulus == 0)) {
 		// send the average loop timing.
-		publishStatus(avgTiming, getFreeRam());
+		MrlMsg msg(PUBLISH_BOARD_STATUS);
+		msg.addData(avgTiming);
+		msg.addData16(getFreeRam());
+		msg.sendMsg();
 	}
 	// update the timestamp of this update.
 	lastMicros = micros();
@@ -133,20 +139,7 @@ void MrlComm::publishAttachedDevice(int id, int nameSize, int namePos) {
 	msg.addData(ioCmd + namePos, nameSize, true);
 	msg.sendMsg();
 }
-/**
- * publishStatus
- * This method is for performance profiling, it returns back the amount of time
- * it took to run the loop() method and how much memory was free after that 
- * loop method ran.
- * 
- * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
- */
-void MrlComm::publishStatus(unsigned long loadTime, int freeMemory) {
-	MrlMsg msg(PUBLISH_STATUS);
-	msg.addData(loadTime);
-	msg.addData16(freeMemory);
-	msg.sendMsg();
-}
+
 /***********************************************************************
  * SERIAL METHODS BEGIN
  */
@@ -266,25 +259,13 @@ void MrlComm::processCommand() {
 		publishDebug("SERVO_DETACHED");
 		break;
 	}
-	case SET_LOAD_TIMING_ENABLED:
+	case ENABLE_BOARD_STATUS:
 		loadTimingEnabled = ioCmd[1];
 		//loadTimingModulus = ioCmd[2];
 		loadTimingModulus = 1;
 		break;
 	case SET_PWMFREQUENCY:
 		setPWMFrequency(ioCmd[1], ioCmd[2]);
-		break;
-	case ANALOG_READ_POLLING_START:
-		//analogReadPollingStart();
-		break;
-	case ANALOG_READ_POLLING_STOP:
-		//analogReadPollingStop();
-		break;
-	case DIGITAL_READ_POLLING_START:
-		//digitalReadPollingStart();
-		break;
-	case DIGITAL_READ_POLLING_STOP:
-		//digitalReadPollingStop();
 		break;
 	case PULSE:
 		//((MrlPulse*)getDevice(ioCmd[1]))->pulse(ioCmd);
@@ -341,7 +322,7 @@ void MrlComm::processCommand() {
 			publishDebug(F("Debug logging enabled."));
 		}
 		break;
-	case GET_BOARD_INFO:
+	case PUBLISH_BOARD_INFO:
 		publishBoardInfo();
 		break;
 	case NEO_PIXEL_WRITE_MATRIX:
@@ -460,16 +441,16 @@ void MrlComm::deviceAttach() {
 		//devicePtr = attachAnalogPinArray();
 		break;
 	}
-	/*
-	case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
-		//devicePtr = attachDigitalPinArray();
-		break;
-	}
-	case SENSOR_TYPE_PULSE: {
-		//devicePtr = attachPulse();
-		break;
-	}
-	*/
+		/*
+		 case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
+		 //devicePtr = attachDigitalPinArray();
+		 break;
+		 }
+		 case SENSOR_TYPE_PULSE: {
+		 //devicePtr = attachPulse();
+		 break;
+		 }
+		 */
 	case DEVICE_TYPE_ULTRASONIC: {
 		//devicePtr = attachUltrasonic();
 		break;
@@ -516,16 +497,16 @@ void MrlComm::deviceAttach() {
  * if it exists delete it and remove it from the deviceList
  */
 void MrlComm::deviceDetach(int id) {
-  ListNode<Device*>* node = deviceList.getRoot();
-  int index=0;
-  while (node != NULL) {
-    if (node->data->id == id) {
-      delete node->data;
-      deviceList.remove(index);
-    }
-    node = node->next;
-    index++;
-  }
+	ListNode<Device*>* node = deviceList.getRoot();
+	int index = 0;
+	while (node != NULL) {
+		if (node->data->id == id) {
+			delete node->data;
+			deviceList.remove(index);
+		}
+		node = node->next;
+		index++;
+	}
 }
 /**
  * getDevice - this method will look up a device by it's id in the device list.

@@ -56,7 +56,6 @@ class MrlComm{
     void publishError(int type, String message);
     void publishCommandAck();
     void publishAttachedDevice(int id, int nameSize, int namePos);
-    void publishStatus(unsigned long loadTime, int freeMemory);
     bool getCommand();
     void processCommand();
     void setPWMFrequency(int address, int prescalar);
@@ -68,7 +67,7 @@ class MrlComm{
   public:
     unsigned long loopCount; // main loop count
     MrlComm();
-    void updateStatus();
+    void publishBoardStatus();
     void publishVersion();
     void publishBoardInfo();
     void readCommand();

@@ -39,7 +39,7 @@ public class ArduinoChaosTest {
     Arduino arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
     //Serial serial = (Serial) arduino.getSerial();
 
-    arduino.board= board;
+    arduino.boardType= board;
     arduino.connect("COM30");
    
 
@@ -71,9 +71,9 @@ public class ArduinoChaosTest {
     
     
     // TODO: is this a digital or analog pin?
-    arduino.pinMode(2, Arduino.INPUT);
+    arduino.pinMode(2, "INPUT");
     Thread.sleep(1000);
-    arduino.pinMode(2, Arduino.OUTPUT);
+    arduino.pinMode(2, "OUTPUT");
     Thread.sleep(1000);
     Servo servo = (Servo)Runtime.createAndStart("servo", "Servo");
     // servo.setPin(13);
@@ -101,9 +101,9 @@ public class ArduinoChaosTest {
     Thread.sleep(1000);
     arduino.servoDetach(servo);
     Thread.sleep(1000);
-    arduino.setLoadTimingEnabled(true);
+    arduino.enableBoardStatus();
     Thread.sleep(1000);
-    arduino.setLoadTimingEnabled(false);
+    arduino.enableBoardStatus();
     
     Thread.sleep(1000);
     arduino.setPWMFrequency(1, 100);
@@ -115,9 +115,9 @@ public class ArduinoChaosTest {
 
     Thread.sleep(1000);
     int digitalPin = 3;
-    arduino.digitalReadPollingStart(digitalPin);
+    arduino.enablePinEvents(digitalPin);
     Thread.sleep(1000);
-    arduino.digitalReadPollingStop(digitalPin);
+    arduino.disablePinEvents(digitalPin);
     Thread.sleep(1000);
 
     int pulsePin = 1;
@@ -198,7 +198,7 @@ public class ArduinoChaosTest {
     System.out.println("Press the any key to continue.");
     System.in.read();
     
-    arduino.setLoadTimingEnabled(false);
+    arduino.enableBoardStatus();
     
     
     Motor motor = (Motor)Runtime.createAndStart("motor", "Motor");

@@ -61,6 +61,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
   // ------  device type mapping constants
   
  	public static final int DEVICE_TYPE_NOT_FOUND = 0;
+ 	
 	public static final int DEVICE_TYPE_ARDUINO = 1;
 	public static final int DEVICE_TYPE_ULTRASONIC = 4;
 	public static final int DEVICE_TYPE_STEPPER = 5;
@@ -80,11 +81,11 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
 
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NOT_FOUND;
-	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_TYPE_ANALOG_PIN_ARRAY;
-	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_TYPE_DIGITAL_PIN_ARRAY;
-	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_TYPE_PULSE;
-	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_TYPE_ULTRASONIC;
 	
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ARDUINO;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ULTRASONIC;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_STEPPER;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_MOTOR;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_STEPPER;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_MOTOR;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_SERVO;
@@ -292,83 +293,6 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	}
 
     
-    
-      public static void main(String[] args) {
-    
-        try {
-          LoggingFactory.getInstance().configure();
-          LoggingFactory.getInstance().setLevel(Level.INFO);
-          LoggingFactory.getInstance().addAppender("FILE");
-    
-          // begin ----
-    
-          log.info("===setUpBeforeClass===");
-          // LoggingFactory.getInstance().setLevel(Level.INFO);
-          Runtime.start("gui", "GUIService");
-          Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-          Serial serial = arduino.getSerial();
-          serial.record("out");
-    
-          // rxtxLib
-          arduino.connect("COM15");
-    
-          // arduino.connectTCP("localhost", 9191);
-    
-          arduino.pinMode(10, 1);
-          arduino.digitalWrite(10, 1);
-          arduino.analogReadPollingStart(0);
-          // uart = serial.createVirtualUART();
-          arduino.analogReadPollingStop(0);
-          arduino.analogReadPollingStart(0);
-          arduino.analogReadPollingStop(0);
-          arduino.analogReadPollingStart(0);
-          arduino.analogReadPollingStop(0);
-    
-          serial.stopRecording();
-          // Test test = (org.myrobotlab.service.Test) Runtime.start("test",
-          // "Test");
-    
-          // / end ---
-    
-          /*
-           * ArduinoMsgCodec codec = new ArduinoMsgCodec();
-           * 
-           * FileOutputStream test = new FileOutputStream(new File("out.bin"));
-           * 
-           * for (int j = 0; j < 4; ++j) { for (int i = 0; i < 100; ++i) { int[]
-           * data = codec.encode(String.format("publishPin/15/%d/%d\n", j, i)); for
-           * (int z = 0; z < data.length; ++z){ test.write(data[z]); } } }
-           * 
-           * test.close();
-           */
-    
-          /*
-           * 
-           * // digitalWrite/9/1 StringBuilder sb = new StringBuilder();
-           * sb.append(codec.decode(170)); sb.append(codec.decode(3));
-           * sb.append(codec.decode(7)); sb.append(codec.decode(9));
-           * sb.append(codec.decode(1));
-           * 
-           * sb.append(codec.decode(170)); sb.append(codec.decode(3));
-           * sb.append(codec.decode(7)); sb.append(codec.decode(11));
-           * sb.append(codec.decode(0));
-           * 
-           * log.info(String.format("[%s]", sb.toString()));
-           * 
-           * codec.encode(sb.toString());
-           * 
-           * Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino"); Serial
-           * serial = arduino.getSerial(); serial.record();
-           * serial.processRxByte(170); serial.processRxByte(3);
-           * serial.processRxByte(7); serial.processRxByte(9);
-           * serial.processRxByte(1);
-           */
-    
-        } catch (Exception e) {
-          Logging.logError(e);
-        }
-    
-      }
 
   
 }

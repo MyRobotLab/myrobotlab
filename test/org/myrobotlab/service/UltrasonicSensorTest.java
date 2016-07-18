@@ -222,9 +222,7 @@ public class UltrasonicSensorTest {
 
     uart.stopRecording();
 
-    arduino.setLoadTimingEnabled(true);
-    arduino.setLoadTimingEnabled(false);
-
+   
     sensor.startRanging();
     log.info("here");
 

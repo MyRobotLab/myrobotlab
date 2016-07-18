@@ -1,9 +1,12 @@
-#ifndef MrlAnalogPinArray_h
-#define MrlAnalogPinArray_h
+#ifndef MrlArduino_h
+#define MrlArduino_h
+
+#define ANALOG			    1
+#define DIGITAL			    2
 
 #include "Device.h"
 #include "LinkedList.h"
-#include "MrlMsg.h"
+#include "Pin.h"
 
 /**
  * MrlArduino device is a device which manages reads from pins
@@ -14,39 +17,11 @@
 class MrlArduino: public Device {
 public:
 	LinkedList<Pin*> pins; // the pins currently assigned to this sensor 0
-	MrlArduino() :
-			Device(SENSOR_TYPE_ARDUINO) {
-	}
-	~MrlArduino() {
-		while (pins.size() > 0) {
-			delete pins.pop();
-		}
-	}
 
-	void update() {
-		if (pins.size() > 0) {
+	MrlArduino();
+	~MrlArduino();
 
-			MrlMsg msg(PUBLISH_SENSOR_DATA);
-		    msg.addData(id); // device Index
-		    msg.addData(ioCmd[3]);
-
-			for (int i = 0; i < pins.size(); ++i) {
-				Pin* pin = pins.get(i);
-				// TODO: moe the analog read outside of thie method and pass it in!
-				if (pin->type == ANALOG)	{
-					pin->value = analogRead(pin->address);
-				} else {
-					pin->value = digitalRead(pin->address);
-				}
-
-				msg.addData(pin->address);
-				msg.addData16(pin->value);
-
-			}
-
-			msg.sendMsg();
-		}
-	}
+	void update();
 };
 
 #endif

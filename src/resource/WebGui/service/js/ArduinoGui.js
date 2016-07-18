@@ -7,7 +7,7 @@ angular.module('mrlapp.service.ArduinoGui', [])
     $scope.editor = null ;
     
     $scope.version = "unknown";
-    $scope.board = "";
+    $scope.boardType = "";
     $scope.image = "service/arduino/Uno.png";
 
     $scope.connectedStatus = "";
@@ -17,9 +17,9 @@ angular.module('mrlapp.service.ArduinoGui', [])
     
     this.updateState = function(service) {
         $scope.service = service;
-        $scope.board = service.board;
+        $scope.boardType = service.boardType;
         $scope.arduinoPath = service.arduinoIdePath;
-        $scope.image = "service/arduino/" + service.board + ".png";
+        $scope.image = "service/arduino/" + service.boardType + ".png";
         
         var serial = $scope.service.serial;
 
@@ -103,9 +103,9 @@ angular.module('mrlapp.service.ArduinoGui', [])
     ;
     
     // $scope display methods
-    $scope.onBoardChange = function(board) {
-        if ($scope.service.board != board) {
-            msg.send('setBoard', board);
+    $scope.onBoardChange = function(boardType) {
+        if ($scope.service.boardType != boardType) {
+            msg.send('setBoard', boardType);
         }
     }
     ;

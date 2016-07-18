@@ -27,9 +27,9 @@ public interface PinArrayControl extends DeviceControl {
 	 */
 	public int read(String pinName);
 	
-	public void setMode(int address, String mode);
+	public void pinMode(int address, String mode);
 	
-	public void setMode(String address, String mode);
+	public void pinMode(String address, String mode);
 
 	public void write(int address, int value);
 	

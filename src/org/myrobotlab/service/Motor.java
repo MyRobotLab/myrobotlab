@@ -290,8 +290,8 @@ public abstract class Motor extends Service implements MotorControl, SensorEvent
       m1.moveTo(250);
       m1.moveTo(250);
 
-      arduino.setLoadTimingEnabled(true);
-      arduino.setLoadTimingEnabled(false);
+      arduino.enableBoardStatus();
+      arduino.disableBoardStatus();
       m1.stop();
       m1.move(0.5);
       m1.moveTo(200);

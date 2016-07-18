@@ -475,7 +475,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
         mrlcommPanel.add(new JLabel("Type"));
         mrlcommPanel.add(boardType);
         mrlcommPanel.add(uploadMrlComm);
-        mrlcommPanel.add(uploadResult);
+        // mrlcommPanel.add(uploadResult); FIXME super long message makes gui unmanagble
         tabs.insertTab("mrlcomm", null, mrlcommPanel, "mrlcomm", 0);
         tabs.setTabComponentAt(0, new TabControl2(self,tabs,mrlcommPanel,"mrlcomm"));
       }
