@@ -360,6 +360,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         }).start();
         process.waitFor();
       } catch (IOException | InterruptedException ex) {
+        error("Please install NodeJS or make sure the path to your installation is correct.");
         Logging.logError(ex);
       }
     }
