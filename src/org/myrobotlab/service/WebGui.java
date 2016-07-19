@@ -1,9 +1,11 @@
 package org.myrobotlab.service;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -333,8 +335,37 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public void start() {
+    //setup libaries if running in IDE
+    //-> requires NodeJS to be installed !
+    if (!FileIO.isJar()) {
+      //feel free to refactor / improve !
+      try {
+        //probably only Windows \/ dunno about Linux or Mac ...
+        String[] cmd = {"C:/Program Files/nodejs/npm.cmd", "install"};
+        ProcessBuilder processBuilder = new ProcessBuilder(cmd);
+        processBuilder.directory(new File("src/resource/WebGui").getAbsoluteFile());
+        final Process process = processBuilder.start();
+        new Thread(new Runnable() {
+          @Override
+          public void run() {
+            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = null; 
+            try {
+              while ((line = input.readLine()) != null)
+                info(line);
+            } catch (IOException ex) {
+              Logging.logError(ex);
+            }
+          }
+        }).start();
+        process.waitFor();
+      } catch (IOException | InterruptedException ex) {
+        Logging.logError(ex);
+      }
+    }
+    
+    //begin starting webgui
     try {
-
       if (port == null) {
         port = 8888;
       }
