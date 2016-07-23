@@ -43,6 +43,16 @@ class MrlMsg{
     void countData();
     void addDataCount();
     void sendMsg(); 
+
+    static long toInt(unsigned char* buffer, int start) {
+          return (buffer[start] << 8) + buffer[start + 1];
+        }
+
+    static long toLong(unsigned char* buffer, int start) {
+    	return (((long)buffer[start] << 24) +
+                 ((long)buffer[start + 1] << 16) +
+                 (buffer[start + 2] << 8) + buffer[start + 3]);
+       }
 };
 
 #endif

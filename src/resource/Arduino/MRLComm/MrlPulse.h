@@ -23,7 +23,7 @@ class MrlPulse : public Device {
     void pulse(unsigned char* ioCmd) {
       if (!pin) return;
       pin->count = 0;
-      pin->target = toUnsignedLongfromBigEndian(ioCmd,2);
+      pin->target = toLong(ioCmd,2);
       pin->rate = ioCmd[6];
       pin->rateModulus = ioCmd[7];
       pin->state = PUBLISH_SENSOR_DATA;
@@ -67,11 +67,7 @@ class MrlPulse : public Device {
       // TODO: support publishPuse!
       // publishPulse(pin.state, pin.sensorIndex, pin.address, pin.count);
     }
-    unsigned long toUnsignedLongfromBigEndian(unsigned char* buffer, int start) {
-      return (((unsigned long)buffer[start] << 24) +
-              ((unsigned long)buffer[start + 1] << 16) +
-              (buffer[start + 2] << 8) + buffer[start + 3]);
-    }
+
 };
 
 #endif
