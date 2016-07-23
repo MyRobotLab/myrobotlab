@@ -1,7 +1,6 @@
 #ifndef MrlComm_h
 #define MrlComm_h
 
-#include "Arduino.h"
 #include "ArduinoMsgCodec.h"
 #include "MrlMsg.h"
 #include "LinkedList.h"
@@ -9,26 +8,26 @@
 #include "Device.h"
 #include "MrlI2cBus.h"
 #include "MrlNeopixel.h"
+#include "Pin.h"
 
-/**
-* FIXME - first rule of generate club is: whole file should be generated
-* so this needs to be turned itno a .h if necessary - but the manual munge
-* should be replaced
-*
-* Addendum up for vote:
-*   Second rule of generate club is , to complete the mission, this file must/should go away...
-*   It should be generated, completely.  device subclasses, #defines and all..  muahahahhah! project mayhem...
-*
-*   Third rule of generate club is, if something has no code and isn't used, remove it. If it has code, move the code.
-*
-*/
-
-// TODO: this isn't ready for an official bump to mrl comm 35
-// when it's ready we can update ArduinoMsgCodec  (also need to see why it's not publishing "goodtimes" anymore.)
+// TODO - standard convention of dev versions are odd release is even ?
 #define MRLCOMM_VERSION         37
 
+// Arduino Device defines
+
+#define ANALOG			    1
+#define DIGITAL			    2
+
+
 /***********************************************************************
- * Class MrlComm
+ * Class MrlComm -
+ * This class represents the Arduino service as a device.
+ * It can hosts devices such as Motors, Servos, Steppers, Sensors, etc.
+ * You can dynamically add or remove devices, and the deviceList should be in
+ * synch with the Java-Land deviceList.
+ * It has a list of pins which can be read from or written to.
+ * It also follows some of the same methods as the Device in Device.h
+ * It has an update() which is called each loop to do any necessary processing
  * 
 */
 class MrlComm{
@@ -38,6 +37,10 @@ class MrlComm{
      */
     // The mighty device List.  This contains all active devices that are attached to the arduino.
     LinkedList<Device*> deviceList;
+
+    // list of pins currently being read from - can contain both digital and analog
+    LinkedList<Pin*> pins;
+
     // MRLComm message buffer and current count from serial port ( MAGIC | MSGSIZE | FUNCTION | PAYLOAD ...
     unsigned char ioCmd[MAX_MSG_SIZE];  // message buffer for all inbound messages
     unsigned char* config;
@@ -46,8 +49,8 @@ class MrlComm{
     bool debug;
     int byteCount;
     int msgSize;
-    bool loadTimingEnabled;
-    int loadTimingModulus; // the frequency in which to report the load timing metrics (in number of main loops)
+    bool enableBoardStatus;
+    unsigned int publishBoardStatusModulus; // the frequency in which to report the load timing metrics (in number of main loops)
     unsigned long lastMicros; // timestamp of last loop (if stats enabled.)
     void softReset();
     int getFreeRam();
@@ -64,6 +67,8 @@ class MrlComm{
     void deviceDetach(int id);
     Device* getDevice(int id);
     void addDevice(Device* device);
+    void update();
+
   public:
     unsigned long loopCount; // main loop count
     MrlComm();

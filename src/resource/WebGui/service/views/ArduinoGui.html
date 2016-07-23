@@ -19,8 +19,11 @@
 	  </div>			
 </div>
 <div class="row">
-	<div class="col-lg-12">
-			<br>{{service.boardType}} {{connectedStatus}} {{versionStatus}} {{mrlCommStatus.us}} {{mrlCommStatus.freeMemory}}<br>		
+	<div class="col-lg-12"><!-- TODO reduce this with show -->
+			{{service.boardType}} {{connectedStatus}} {{versionStatus}} <br>		
+			 <span ng-show="mrlComm.us != null">load {{mrlComm.us}}</span> 
+			 <span ng-show="mrlComm.sram != null">sram {{mrlComm.sram}}</span> 			  
+			 <span ng-show="mrlComm.deviceCount != null">devices {{mrlComm.deviceCount}}</span> 			  
 	</div>
 </div>		
 <!-- end status and control for board to be viewed in above all tabs -->
@@ -47,18 +50,9 @@
 
     	<!-- current implementation will not work as a jar -->
     	<!-- button class="btn btn-default pull-right" ng-click="msg.openMrlComm()">Open in IDE</button -->
-    	<button class="btn btn-default pull-right" ng-click="setArduinoPath(service.arduinoPath,portName,service.boardType)">Upload</button>
-    	<!--
-		<button class="btn btn-default pull-right" clipboard text="service.sketch.data" ng-show="false"><span class="glyphicon glyphicon-copy" ng-show="false"></span>Copy</button> 		 
-		  <div class="col-lg-12" ng-show="false" style="height: 600px;" ui-ace="{
-												   useWrapMode : true,
-												   showGutter: true,
-												   theme:'chrome',
-												   mode: 'c_cpp',
-												   firstLineNumber: 1,
-												   onLoad: aceLoaded,
-												   onChange: aceChanged}">
-		</div>   -->
+    	<button class="btn btn-default pull-right" ng-click="setArduinoPath(service.arduinoPath,portName,service.boardType)" ng-disabled="!portName">Upload</button>
+    	<button class="btn btn-default pull-right" ng-model="mrlComm.enableBoardStatus" uib-btn-checkbox ng-change="(mrlComm.enableBoardStatus)?msg.enableBoardStatus():msg.disableBoardStatus()">Status</button>
+    
 		<pre>
 {{service.uploadSketchResult}}
 		</pre>

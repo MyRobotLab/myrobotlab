@@ -1,15 +1,5 @@
-<div class="navbar navbar-inverse" role="navigation">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/">MyRobotLab</a>
-        </div>
-        <div class="collapse navbar-collapse navbar-ex1-collapse">
+<div class="navbar navbar-inverse container-fluid" role="navigation">
+        <a class="navbar-brand" href="/">MyRobotLab</a>
 
             <ul class="nav navbar-nav">
                 <li><a href="http://myrobotlab.org">{{platform.branch}} {{platform.arch}}.{{platform.bitness}}.{{platform.os}} {{platform.mrlVersion}}</a></li>
@@ -35,27 +25,7 @@
                     <form class="navbar-form">
                         <!--TODO - green png if connected - if not re-connect button-->
                         <span ng-if="connected"><img src="../../connected.png" alt=""></span>
-                        <span ng-if="!connected"><img src="../../disconnected.png" alt=""></span>
-                        <div class="input-group" uib-dropdown>
-                            <input type="text" class="form-control" style="width: 200px"
-                                   placeholder="Status" ng-model="firststatus" readonly>
-                            <div class="input-group-btn" uib-dropdown-toggle>
-                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Status">
-                                    <i class="glyphicon glyphicon-dashboard"></i>
-                                </button>
-                            </div>
-                            <ul uib-dropdown-menu style="width: 240px">
-                                <li ng-repeat="status in statuslist| reverse track by $index">
-                                    <a href="">
-                                        <div ng-if="status.level == 'debug'"><i class="glyphicon glyphicon-record"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-primary">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
-                                        <div ng-if="status.level == 'info'"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-info">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
-                                        <div ng-if="status.level == 'warn'"><i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-warning">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
-                                        <div ng-if="status.level == 'error'"><i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-danger">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
-                                        <div ng-if="status.level != 'debug' && status.level != 'info' && status.level != 'warn' && status.level != 'error'"><i class="glyphicon glyphicon-question-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-default">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                        <span ng-if="!connected"><img src="../../disconnected.png" alt=""></span>                        
                     </form>
                 </li>              
                 <!--Great Search MaVo !-->
@@ -127,6 +97,14 @@
         </div>
     </div>
 </div>
+<div class="col-lg-12" align="center">
+    <div ng-if="status.level == 'debug'">&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-primary">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+    <div ng-if="status.level == 'info'">&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-info">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+    <div ng-if="status.level == 'warn'">&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-warning">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+    <div ng-if="status.level == 'error'">&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-danger">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+    <div ng-if="status.level != 'debug' && status.level != 'info' && status.level != 'warn' && status.level != 'error'"><i class="glyphicon glyphicon-question-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-default">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+</div>
+
 <!--Background Texts-->
 <div style="position: absolute; left: 300px; top: 300px; z-index: -1; height: 10px; transform: rotate(-45deg); font-size: 75px;">
     MyRobotLab

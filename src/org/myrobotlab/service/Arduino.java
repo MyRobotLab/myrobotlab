@@ -1,64 +1,39 @@
 package org.myrobotlab.service;
 
 
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
-
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NOT_FOUND;
-
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ARDUINO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ULTRASONIC;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_STEPPER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_MOTOR;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_STEPPER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_MOTOR;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_SERVO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_I2C;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NEOPIXEL;
-
-
-	///// java static import definition - DO NOT MODIFY - Begin //////
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CREATE_I2C_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_DETACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ARDUINO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_I2C;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_MOTOR;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NEOPIXEL;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_SERVO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ULTRASONIC;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DISABLE_BOARD_STATUS;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DISABLE_PIN_EVENTS;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ENABLE_BOARD_STATUS;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ENABLE_PIN_EVENTS;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE_READ;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.INTS_TO_STRING;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.IS_ATTACHED;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE_TO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_RESET;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_STOP;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.NEO_PIXEL_WRITE_MATRIX;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_ATTACHED_DEVICE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_BOARD_INFO;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_BOARD_STATUS;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_DEBUG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MESSAGE_ACK;
+///// java static import definition - DO NOT MODIFY - Begin //////
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PIN_EVENT;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SENSOR_DATA;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_TRIGGER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.READ;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.RELEASE_I2C_DEVICE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_ACTIVATE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_DEACTIVATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_ATTACH;
@@ -76,8 +51,6 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_PWMFREQUENCY;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SAMPLE_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERIAL_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SOFT_RESET;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.WRITE;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -89,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.arduino.ArduinoUtils;
+import org.myrobotlab.arduino.MrlMsg;
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -213,14 +187,16 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 */
 	public static class BoardStatus {
 		public Long us;
-		public Integer freeMemory;
+		public Integer sram;
+		public Integer deviceCount; // deviceList with types
 		// FIXME - list of current devices ids & their types ?
 		// ie the deviceList
 		// List<Integer, Integer>
 
-		public BoardStatus(Long us, Integer freeMemory) {
+		public BoardStatus(Long us, Integer sram, Integer deviceCount) {
 			this.us = us;
-			this.freeMemory = freeMemory;
+			this.sram = sram;
+			this.deviceCount = deviceCount;
 		}
 	}
 	
@@ -506,8 +482,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	/**
 	 * board type - UNO Mega etc..
+	 * 
+	 * if the user 'connects' first then the info could come from the
+	 * board .. but if the user wants to upload first a npe will be thrown
+	 * so we default it here to Uno
 	 */
-	public String boardType;
+	public String boardType = "Uno";
 
 	/**
 	 * pin named map of all the pins on the board
@@ -695,7 +675,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	int pinEventsDefaultRate = 8000;
 
-	int boardStatusDefaultRate = 1000;
+	int publishBoardStatusModulus = 1000;
 
 	public Arduino(String n) {
 		super(n);
@@ -1068,13 +1048,20 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	public void enableBoardStatus() {
-		enableBoardStatus(boardStatusDefaultRate);
+		enableBoardStatus(publishBoardStatusModulus);
 	}
 	
 	public void enableBoardStatus(int rate) {
-		sendMsg(ENABLE_BOARD_STATUS);
+		this.publishBoardStatusModulus = rate;
+		MrlMsg msg = new MrlMsg(ENABLE_BOARD_STATUS);
+		msg.addData16(rate);
+		sendMsg(msg);
 	}
 	
+	public void sendMsg(MrlMsg msg) {
+		sendMsg(msg.getMethod(), msg.getList());
+	}
+
 	public void disableBoardStatus(){
 		sendMsg(DISABLE_BOARD_STATUS);
 	}
@@ -1626,10 +1613,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			break;
 		}
 		case PUBLISH_BOARD_STATUS: {
-			long microsPerLoop = Serial.bytesToInt(message, 1, 4);
-			int freeMemory = (int) Serial.bytesToInt(message, 5, 2);
-			info("load %d us - memory %d bytes", microsPerLoop, freeMemory);
-			invoke("publishStatus", new BoardStatus(microsPerLoop, freeMemory));
+			long microsPerLoop = Serial.bytesToInt(message, 1, 2);
+			int sram = (int) Serial.bytesToInt(message, 3, 2);
+			int deviceCount = (int) Serial.bytesToInt(message, 5, 2);
+			info("load %d us - sram %d bytes  device count %d", microsPerLoop, sram, deviceCount);
+			invoke("publishBoardStatus", new BoardStatus(microsPerLoop, sram, deviceCount));
 			break;
 		}
 

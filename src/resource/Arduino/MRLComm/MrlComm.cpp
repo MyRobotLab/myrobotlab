@@ -1,5 +1,5 @@
 #include "MrlComm.h"
-#include "MrlArduino.h"
+
 
 MrlComm::MrlComm() {
 	softReset();
@@ -14,8 +14,8 @@ void MrlComm::softReset() {
 	}
 	//resetting var to default
 	loopCount = 0;
-	loadTimingModulus = 1000;
-	loadTimingEnabled = false;
+	publishBoardStatusModulus = 10000;
+	enableBoardStatus = false;
 	Device::nextDeviceId = 0;
 	debug = false;
 }
@@ -30,21 +30,29 @@ void MrlComm::softReset() {
  * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
  */
 void MrlComm::publishBoardStatus() {
+
 	// protect against a divide by zero in the division.
-	unsigned long avgTiming = 0;
-	if (loadTimingModulus != 0) {
-		avgTiming = (micros() - lastMicros) / loadTimingModulus;
+	if (publishBoardStatusModulus == 0) {
+		publishBoardStatusModulus = 10000;
 	}
-	// report load time
-	if (loadTimingEnabled && (loopCount % loadTimingModulus == 0)) {
+
+	unsigned int avgTiming = 0;
+    unsigned long now = micros();
+
+	avgTiming = (now - lastMicros) / publishBoardStatusModulus;
+
+	// report board status
+	if (enableBoardStatus && (loopCount % publishBoardStatusModulus == 0)) {
+
 		// send the average loop timing.
 		MrlMsg msg(PUBLISH_BOARD_STATUS);
-		msg.addData(avgTiming);
+		msg.addData16(avgTiming);
 		msg.addData16(getFreeRam());
+		msg.addData16(deviceList.size());
 		msg.sendMsg();
 	}
 	// update the timestamp of this update.
-	lastMicros = micros();
+	lastMicros = now;
 }
 
 int MrlComm::getFreeRam() {
@@ -260,9 +268,12 @@ void MrlComm::processCommand() {
 		break;
 	}
 	case ENABLE_BOARD_STATUS:
-		loadTimingEnabled = ioCmd[1];
-		//loadTimingModulus = ioCmd[2];
-		loadTimingModulus = 1;
+		enableBoardStatus = true;
+		publishBoardStatusModulus = (unsigned int)MrlMsg::toInt(ioCmd, 1);
+		publishDebug("modulus is " + String(publishBoardStatusModulus));
+		break;
+	case DISABLE_BOARD_STATUS:
+		enableBoardStatus = false;
 		break;
 	case SET_PWMFREQUENCY:
 		setPWMFrequency(ioCmd[1], ioCmd[2]);
@@ -539,6 +550,7 @@ Device* MrlComm::getDevice(int id) {
 void MrlComm::addDevice(Device* device) {
 	deviceList.add(device);
 }
+
 /***********************************************************************
  * UPDATE DEVICES BEGIN
  * updateDevices updates each type of device put on the device list
@@ -549,6 +561,11 @@ void MrlComm::addDevice(Device* device) {
  * pins
  */
 void MrlComm::updateDevices() {
+
+	// update self - the first device which
+	// is type Arduino
+	update();
+
 	ListNode<Device*>* node = deviceList.getRoot();
 	// iterate through our device list and call update on them.
 	while (node != NULL) {
@@ -556,4 +573,37 @@ void MrlComm::updateDevices() {
 		node = node->next;
 	}
 }
+
+/***********************************************************************
+ * UPDATE BEGIN
+ * updates self - reads pins both analog and digital
+ * sends pin data back
+ */
+void MrlComm::update()
+{
+		if (pins.size() > 0) {
+
+			MrlMsg msg(PUBLISH_SENSOR_DATA); // the callback id
+		    // msg.addData(id); // the device Index (non-Id is the Arduino Device
+
+			for (int i = 0; i < pins.size(); ++i) {
+				Pin* pin = pins.get(i);
+				// TODO: moe the analog read outside of thie method and pass it in!
+				if (pin->type == ANALOG)	{
+					pin->value = analogRead(pin->address);
+				} else {
+					pin->value = digitalRead(pin->address);
+				}
+
+				// loading both analog & digital data
+				msg.addData(pin->address);
+				msg.addData16(pin->value);
+
+			}
+
+			// sending back the message
+			msg.sendMsg();
+		}
+}
+
 

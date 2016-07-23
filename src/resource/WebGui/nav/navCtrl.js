@@ -22,7 +22,8 @@ angular.module('mrlapp.nav')
                 $scope.statuslist = statusSvc.getStatuses();
                 statusSvc.subscribeToUpdates(function (status) {
                     $timeout(function () {
-                        $scope.firststatus = status.name + " " + status.level + " " + status.detail;
+                        // $scope.firststatus = status.name + " " + status.level + " " + status.detail;
+                        $scope.status = status;
                     });
                 });
 

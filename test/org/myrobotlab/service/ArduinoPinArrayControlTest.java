@@ -76,6 +76,12 @@ public class ArduinoPinArrayControlTest {
 		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 		// Runtime.start("gui", "GUIService");
 		Runtime.start("webgui", "WebGui");
+		Runtime.start("python", "Python");
+		
+		boolean skip = true;
+		if (skip){
+			return;
+		}
 		
 		List<PinDefinition> pins = null; 
 		
