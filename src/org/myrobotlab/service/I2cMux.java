@@ -94,8 +94,15 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 	@Override
 	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
-		// TODO Create a devicelist to be able to pass reads back
-		controller.createI2cDevice((I2CControl) this, busAddress, deviceAddress);
+		// TODO 
+		// Create a devicelist to be able to pass reads back if needed. 
+		// Currently only a pass thru / return structure
+		// controller.createI2cDevice((I2CControl) this, busAddress, deviceAddress);
+	}
+
+	@Override
+	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
+			// controller.releaseI2cDevice(this, busAddress, deviceAddress);
 	}
 	
 	/**
@@ -104,10 +111,12 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	 */
 	// @Override
 	public boolean setController(String controllerName, String deviceBus, String deviceAddress) {
+		this.controllerName = controllerName;
 		return setController((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
 	}
 
 	public boolean setController(String controllerName) {
+		this.controllerName = controllerName;
 		return setController((I2CController) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
 	}
 	
@@ -161,11 +170,6 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 	public boolean isAttached() {
 		return isAttached;
-	}
-
-	@Override
-	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
-			controller.releaseI2cDevice(this, busAddress, deviceAddress);
 	}
 
 	public void setMuxBus(int deviceBus) {
