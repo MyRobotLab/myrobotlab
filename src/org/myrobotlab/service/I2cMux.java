@@ -172,11 +172,11 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 		return isAttached;
 	}
 
-	public void setMuxBus(int deviceBus) {
+	public void setMuxBus(int busAddress) {
 		byte bus[] = new byte[1];
-		bus[0] = (byte) (1 << deviceBus);
+		bus[0] = (byte) (1 << busAddress);
+		log.debug(String.format("setMux this.deviceBus %s this.deviceAddress %s bus[0] %s", this.deviceBus, this.deviceAddress, bus[0]));
 		controller.i2cWrite(this, Integer.parseInt(this.deviceBus), Integer.decode(this.deviceAddress), bus, bus.length);
-		;
 	}
 	
 	@Override
@@ -185,7 +185,6 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
 		controller.i2cWrite(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
-		;
 	}
 	/**
 	 * TODO Add demuxing. i.e the route back to the caller
