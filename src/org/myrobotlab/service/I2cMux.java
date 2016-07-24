@@ -140,10 +140,24 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 		log.info(String.format("%s setController %s", getName(), controllerName));
 		
+		createDevice();
 		broadcastState();
 		return true;
 	}
+	
+	/**
+	 * This method creates the i2c device
+	 */
+	boolean createDevice() {
+		if (controller != null) {
+				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+		}
 
+		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
+		return true;
+	}
+	
 	public void unsetController() {
 		controller = null;
 		controllerName = null;
