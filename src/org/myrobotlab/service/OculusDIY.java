@@ -10,11 +10,11 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.data.OculusData;
-import org.myrobotlab.service.data.SensorEvent;
+import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.OculusDataListener;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
-import org.myrobotlab.service.interfaces.SensorEventListener;
+import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -23,7 +23,7 @@ import org.slf4j.Logger;
  * build of MRLComm to work. Check with \@Alessandruino for questions.
  *
  */
-public class OculusDIY extends Service implements SensorEventListener, OculusDataPublisher, OculusDataListener {
+public class OculusDIY extends Service implements SensorDataListener, OculusDataPublisher, OculusDataListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -187,7 +187,7 @@ public class OculusDIY extends Service implements SensorEventListener, OculusDat
 	}
 
 	@Override
-	public void onSensorEvent(SensorEvent event) {
+	public void onSensorData(SensorData event) {
 		int[] data = (int[])event.getData();
 		Integer ay = (Integer) data[0];
 		Integer mx = (Integer) data[1];

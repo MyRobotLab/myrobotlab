@@ -1,8 +1,8 @@
 package org.myrobotlab.sensor;
 
-import org.myrobotlab.service.data.SensorEvent;
+import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.Microcontroller;
-import org.myrobotlab.service.interfaces.SensorEventListener;
+import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
 
 public class AnalogPinSensor implements SensorDataPublisher {
@@ -25,7 +25,7 @@ public class AnalogPinSensor implements SensorDataPublisher {
 
 
   @Override
-  public SensorEvent publishSensorData(SensorEvent data) {
+  public SensorData publishSensorData(SensorData data) {
     return data;
   }
 

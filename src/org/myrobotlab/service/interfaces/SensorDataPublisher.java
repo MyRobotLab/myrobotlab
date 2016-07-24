@@ -25,21 +25,16 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.service.data.SensorEvent;
+import org.myrobotlab.service.data.SensorData;
 
 /** 
 * Sensor Data Publisher Interface:
 * not a service
 * e.g. UltrasonicSensor /AnalogPinSensor / DigitialPinSensor
 */
-public interface SensorDataPublisher {
-  // this is what gets invoked in mrl
-  public SensorEvent publishSensorData(SensorEvent data);
-  // this is to attach something that listens to the output of this sensor data.
-  // public void addSensorDataListener(SensorDataListener listener, int[] config);
+public interface SensorDataPublisher extends NameProvider {
+
+  public SensorData publishSensorData(SensorData data);
  
-  public String getName();
-  // hmm. Should take a microcontroller?
-  
 }
 
