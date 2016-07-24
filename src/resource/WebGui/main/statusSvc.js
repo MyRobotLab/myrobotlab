@@ -21,18 +21,18 @@ angular.module('mrlapp.main.statusSvc', [])
                 //END_Status_Notification
 
                 //START_Status
-                var statuslist = [];
+                var statusList = [];
 
                 this.addStatus = function (status) {
-                    statuslist.push(status);
+                    statusList.push(status);
                 };
 
                 this.getStatuses = function () {
-                    return statuslist;
+                    return statusList;
                 };
 
                 this.clearStatuses = function () {
-                    statuslist = [];
+                    statusList = [];
                 };
 
                 var onStatus = function (statusMsg) {
@@ -42,18 +42,5 @@ angular.module('mrlapp.main.statusSvc', [])
                 mrl.subscribeToMethod(onStatus, "onStatus");
                 //END_Status
 
-                //maybe let this evolve into it's own service?
-                //START_Alers
-                var addAlertCallback;
-
-                this.registerAddAlertCallback = function (cb) {
-                    addAlertCallback = cb;
-                };
-
-                this.addAlert = function (type, msg) {
-                    addAlertCallback(type, msg);
-                };
-
-                //TODO - closeAlert ?
-                //END_Alerts
+   
             }]);

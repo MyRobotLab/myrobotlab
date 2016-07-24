@@ -1,22 +1,16 @@
 package org.myrobotlab.service.data;
 
-public class PinEvent extends Event {
+public class PinData extends SensorData {
 	private static final long serialVersionUID = 1L;
 	Integer address;
-	Integer value;
 	
-	public PinEvent(String source, Integer address, Integer value){
-		this.source = source;
+	public PinData(Integer address, Integer value){
+		super(value);
 		this.address = address;
-		this.value = value;
 	}
 
-	public Integer getValue() {
-		return value;
-	}
-
-	public void setValue(Integer value) {
-		this.value = value;
+	public int getValue() {
+		return (int)data;
 	}
 
 	public Integer getAddress() {
