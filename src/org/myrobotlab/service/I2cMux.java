@@ -175,7 +175,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	public void setMuxBus(int busAddress) {
 		byte bus[] = new byte[1];
 		bus[0] = (byte) (1 << busAddress);
-		log.debug(String.format("setMux this.deviceBus %s this.deviceAddress %s bus[0] %s", this.deviceBus, this.deviceAddress, bus[0]));
+		log.info(String.format("setMux this.deviceBus %s this.deviceAddress %s bus[0] %s", this.deviceBus, this.deviceAddress, bus[0]));
 		controller.i2cWrite(this, Integer.parseInt(this.deviceBus), Integer.decode(this.deviceAddress), bus, bus.length);
 	}
 	
