@@ -29,16 +29,13 @@ public interface PinArrayControl extends DeviceControl {
 	
 	public void pinMode(int address, String mode);
 	
-	// public void pinMode(String address, String mode);
-
 	public void write(int address, int value);
-	
-	// public void write(String pinName, int value);
 	
 	public PinData publishPinEvent(PinData pinData);
 	
+	// FIXME attach(String listener, null) -> listens to all pins - pin array comes back ?
 	public void attach(String listener, int pinAddress);
 	
-	public void attach(PinDataListener listener, int pinAddress);
+	public void attach(PinListener listener, int pinAddress);
 	
 }

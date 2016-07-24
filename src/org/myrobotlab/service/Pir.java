@@ -8,10 +8,10 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinArrayControl;
-import org.myrobotlab.service.interfaces.PinDataListener;
+import org.myrobotlab.service.interfaces.PinListener;
 import org.slf4j.Logger;
 
-public class Pir extends Service implements PinDataListener {
+public class Pir extends Service implements PinListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -49,7 +49,7 @@ public class Pir extends Service implements PinDataListener {
 	}
 
 	@Override
-	public void onPinData(PinData pindata) {
+	public void onPin(PinData pindata) {
 		// TODO Auto-generated method stub
 
 	}
