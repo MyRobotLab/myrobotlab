@@ -10,6 +10,14 @@
 #define ECHO_STATE_GOOD_RANGE               6
 #define ECHO_STATE_TIMEOUT                  7
 
+
+// Pin Types must be in sync
+// with Arduino.getMrlPinType
+
+#define DIGITAL			    0
+#define ANALOG			    1
+
+
 /***********************************************************************
  * PIN - This class represents one of the pins on the arduino and it's
  * status in MRLComm.
@@ -19,7 +27,7 @@ class Pin {
     int type; // might be useful in control
     int address; // pin #
     int value;
-    int state; // state of the pin - not sure if needed - reading | writing | some other state ?
+    // int state; // state of the pin - not sure if needed - reading | writing | some other state ? - dont add  it until necessary
     // int readModulus; // rate of reading or publish sensor data
     int debounce; // long lastDebounceTime - minDebounceTime
     // number of reads ?
@@ -28,9 +36,9 @@ class Pin {
     // to support pulse.
     int count;
     // remove me
-    int rate;
+    // int rate;
     // remove me, needed for pulse
-    int rateModulus;
+    // int rateModulus;
 
     // default constructor for a pin?
     // at a minimum we need type and address A0 D4 etc...

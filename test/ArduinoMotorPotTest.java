@@ -12,15 +12,15 @@ import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.MotorDualPwm;
 import org.myrobotlab.service.PID2;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.data.SensorEvent;
+import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorController;
-import org.myrobotlab.service.interfaces.SensorEventListener;
+import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.myrobotlab.test.TestUtils;
 import org.slf4j.Logger;
 
 @Ignore
-public class ArduinoMotorPotTest implements SensorEventListener {
+public class ArduinoMotorPotTest implements SensorDataListener {
 
   //public boolean uploadSketch = false;
   public boolean uploadSketch = false;
@@ -144,7 +144,7 @@ public class ArduinoMotorPotTest implements SensorEventListener {
   }
 
   @Override
-  public void onSensorEvent(SensorEvent event) {
+  public void onSensorData(SensorData event) {
     // about we downsample this call?
 	int[] data = (int[])event.getData();
     count++;
@@ -286,6 +286,12 @@ public class ArduinoMotorPotTest implements SensorEventListener {
     }
     return sb.toString();
   }
+
+@Override
+public boolean isLocal() {
+	// TODO Auto-generated method stub
+	return true;
+}
 
 
 

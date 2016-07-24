@@ -4,7 +4,11 @@ import org.myrobotlab.service.interfaces.DeviceControl;
 
 public class DeviceMapping {
 	
-	DeviceControl device;
+	// transient too help prevent infinite recursion in gson 
+	// encoding since Arduino will have a reference
+	// to itself as a device
+	transient DeviceControl device;
+	
 	/**
 	 * the unique integer id for this device
 	 */

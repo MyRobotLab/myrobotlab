@@ -13,12 +13,6 @@
 // TODO - standard convention of dev versions are odd release is even ?
 #define MRLCOMM_VERSION         37
 
-// Arduino Device defines
-
-#define ANALOG			    1
-#define DIGITAL			    2
-
-
 /***********************************************************************
  * Class MrlComm -
  * This class represents the Arduino service as a device.
@@ -39,7 +33,7 @@ class MrlComm{
     LinkedList<Device*> deviceList;
 
     // list of pins currently being read from - can contain both digital and analog
-    LinkedList<Pin*> pins;
+    LinkedList<Pin*> pinList;
 
     // MRLComm message buffer and current count from serial port ( MAGIC | MSGSIZE | FUNCTION | PAYLOAD ...
     unsigned char ioCmd[MAX_MSG_SIZE];  // message buffer for all inbound messages
@@ -59,8 +53,6 @@ class MrlComm{
     void publishError(int type, String message);
     void publishCommandAck();
     void publishAttachedDevice(int id, int nameSize, int namePos);
-    bool getCommand();
-    void processCommand();
     void setPWMFrequency(int address, int prescalar);
     void setSerialRate();
     void deviceAttach();
@@ -75,7 +67,8 @@ class MrlComm{
     void publishBoardStatus();
     void publishVersion();
     void publishBoardInfo();
-    void readCommand();
+    bool readCommand();
+    void processCommand();
     void updateDevices();
 };
 
