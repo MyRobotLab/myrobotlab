@@ -1,23 +1,26 @@
 package org.myrobotlab.service.data;
 
-public class PinData extends SensorData {
+import java.io.Serializable;
+
+public class PinData implements Serializable {
 	private static final long serialVersionUID = 1L;
 	Integer address;
+	Integer value;
 	
-	public PinData(Integer address, Integer value){
-		super(value);
+	public PinData(int address, int value){
 		this.address = address;
+		this.value = value;
 	}
 
 	public int getValue() {
-		return (int)data;
+		return value;
 	}
 
 	public Integer getAddress() {
 		return address;
 	}
 
-	public void setAddress(Integer address) {
+	public void setAddress(int address) {
 		this.address = address;
 	}
 

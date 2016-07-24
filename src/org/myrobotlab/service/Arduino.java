@@ -87,7 +87,7 @@ import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
-import org.myrobotlab.service.interfaces.PinDataListener;
+import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.SensorControl;
 import org.myrobotlab.service.interfaces.SensorController;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
@@ -500,7 +500,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 */
 	Map<Integer, PinDefinition> pinIndex = null;
 
-	transient Map<String, PinDataListener> pinEventListeners = new HashMap<String, PinDataListener>();
+	transient Map<String, PinListener> pinEventListeners = new HashMap<String, PinListener>();
 
 	/**
 	 * Devices - string name index of device we need 2 indexes for sensors
@@ -719,7 +719,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	@Override
-	public void attach(PinDataListener listener, int address) {
+	public void attach(PinListener listener, int address) {
 		String name = listener.getName();
 		if (listener.isLocal()) {
 			// direct callback
@@ -739,7 +739,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 */
 	@Override
 	public void attach(String listener, int address) {
-		attach((PinDataListener) Runtime.getService(listener), address);
+		attach((PinListener) Runtime.getService(listener), address);
 	}
 
 	public void connect(String port) throws IOException {
@@ -2444,7 +2444,19 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 */
 	@Override
 	public void onSensorData(SensorData data) {
-		log.info("here");
+		
+		// at the moment we do not need a 'type'
+		// all sensor array data will be sent here ..
+		
+		// this is MRLComms raw data handled in the context of 
+		// a Sensor's onSensorData - so this method is specific for
+		// transforming 'Arduino' specific data to a useful form
+		// Since Arduino's useful data are pins we convert the pin values
+		// read into an array of pins
+		
+		// convert to a pin array of pin data
+		// for(int i = 0; i < data.
+		// log.info("here");
 	}
 
 
