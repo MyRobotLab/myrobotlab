@@ -21,12 +21,12 @@ bool MrlCmd::readCommand(){
 	// handle serial data begin
 	int bytesAvailable = available();
 	if (bytesAvailable > 0) {
-		MrlMsg::publishDebug("RXBUFF:" + String(bytesAvailable));
+		//MrlMsg::publishDebug("RXBUFF:" + String(bytesAvailable));
 		// now we should loop over the available bytes .. not just read one by one.
 		for (int i = 0; i < bytesAvailable; i++) {
 			// read the incoming byte:
 			unsigned char newByte = read();
-			MrlMsg::publishDebug("RX:" + String(newByte));
+			//MrlMsg::publishDebug("RX:" + String(newByte));
 			++byteCount;
 			// checking first byte - beginning of message?
 			if (byteCount == 1 && newByte != MAGIC_NUMBER) {

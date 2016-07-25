@@ -66,12 +66,6 @@ MrlComm mrlComm;
  * Here we default out serial port to 115.2kbps.
 */
 void setup() {
-  //Serial.begin(115200);        // connect to the serial port
-//  while (!Serial){
-	  // nicer than tight {} loop
-	  // since it calls yield()
-//	  delay(100);
-//  };
   // TODO: the arduino service might get a few garbage bytes before we're able
   // to run, we should consider some additional logic here like a "publishReset"
   // publish version on startup so it's immediately available for mrl.
@@ -92,9 +86,7 @@ void loop() {
   // TODO: handle overflow here after 32k runs, i suspect this might blow up?
   mrlComm.loopCount++;
   // get a command and process it from the serial port (if available.)
-  if (mrlComm.readCommand()) {
-	  mrlComm.processCommand();
-  }
+  mrlComm.readCommand();
   // update devices
   mrlComm.updateDevices();
   // send back load time and memory

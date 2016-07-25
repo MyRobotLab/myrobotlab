@@ -28,6 +28,7 @@ class MrlIo {
 		int available();
 		void end();
 		void flush();
+   void test();
 };
 
 #endif
