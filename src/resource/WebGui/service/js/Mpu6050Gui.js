@@ -100,14 +100,12 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     			container.appendChild( renderer.domElement );
     		}
         	
-    		/*
-        	teapot.rotation.x = $scope.gyroDegreeX / (2 * Math.PI);
-        	teapot.rotation.y = $scope.gyroDegreeY / (2 * Math.PI);
-        	teapot.rotation.z = $scope.gyroDegreeZ / (2 * Math.PI);
-        	*/ 
+        	// teapot.rotation.x = $scope.gyroDegreeX / (2 * Math.PI);
+        	// teapot.rotation.y = $scope.gyroDegreeY / (2 * Math.PI);
+        	// teapot.rotation.z = $scope.gyroDegreeZ / (2 * Math.PI);
+         
     		
         	quaternion = ($scope.SEq_1,$scope.SEq_2,$scope.SEq_3,$scope.SEq_4);
-        	// var rotation = new THREE.Euler().setFromQuaternion( quaternion, eulerOrder );
         	teapot.applyQuaternion(quaternion);
         	
             renderer.render( scene, camera );
