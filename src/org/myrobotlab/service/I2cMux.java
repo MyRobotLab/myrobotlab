@@ -68,7 +68,6 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 	public I2cMux(String n) {
 		super(n);
-
 		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 	}
 
@@ -226,9 +225,9 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	@Override
 	public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		setMuxBus(busAddress);
-		controller.i2cRead(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
-		log.info(String.format("i2cRead. Requested %s bytes, received %s bytes", size, buffer.length));
-		return buffer.length;
+		int bytesRead = controller.i2cRead(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
+		log.info(String.format("i2cRead. Requested %s bytes, received %s bytes", size, bytesRead));
+		return bytesRead;
 	}
 
 	/**
