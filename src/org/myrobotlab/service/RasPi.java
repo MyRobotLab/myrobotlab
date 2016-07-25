@@ -270,17 +270,18 @@ public class RasPi extends Service implements I2CController {
 
 	@Override
 	public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
+		int bytesRead = 0;
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		log.info(String.format("i2cRead busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
 		I2CDeviceMap devicedata = i2cDevices.get(key);
 		try {
-			devicedata.device.read(buffer, 0, buffer.length);
+			bytesRead = devicedata.device.read(buffer, 0, buffer.length);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Logging.logError(e);
 		}
 		;
-		return buffer.length;
+		return bytesRead;
 	}
 
 	@Override
