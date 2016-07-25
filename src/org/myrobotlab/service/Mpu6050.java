@@ -1043,7 +1043,8 @@ public class Mpu6050 extends Service implements I2CControl {
   
 	/** Filter the raw values using the algorithms described in this paper:
 	 * http://www.x-io.co.uk/res/doc/madgwick_internal_report.pdf
-	 * This filter is using the IMU algorithm
+	 * This filter is using the IMU algorithm i.e only Gyro and acclerometer, 
+	 * no magnetometer
 	 */
 	void filterUpdate(double w_x, double w_y, double w_z, double a_x, double a_y, double a_z)	{
 
