@@ -1131,11 +1131,13 @@ public class Mpu6050 extends Service implements I2CControl {
     if (forceMagnitudeApprox > 8192 && forceMagnitudeApprox < 32768)
     {
 	// Turning around the X axis results in a vector on the Y-axis
-        pitchAcc = Math.atan2(acc_y, acc_y) * 180 / Math.PI;
+        // pitchAcc = Math.atan2(acc_y, acc_y) * 180 / Math.PI;
+        pitchAcc = Math.atan2(acc_y, acc_y);
         pitch = pitch * 0.98 + pitchAcc * 0.02;
  
 	// Turning around the Y axis results in a vector on the X-axis
-        rollAcc = Math.atan2(acc_x, acc_z) * 180 / Math.PI;
+        // rollAcc = Math.atan2(acc_x, acc_z) * 180 / Math.PI;
+        rollAcc = Math.atan2(acc_x, acc_z);
         roll = roll * 0.98 + rollAcc * 0.02;
     }
 	}
