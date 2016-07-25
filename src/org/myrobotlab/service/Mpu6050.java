@@ -852,7 +852,7 @@ public class Mpu6050 extends Service implements I2CControl {
 	public boolean isAttached = false;
 
 	// System constants for the imuFilter
-	static double deltat = 0.05f; // sampling period in seconds (shown as 50 ms)
+	static double deltat = 0.001f; // sampling period in seconds (shown as 1 ms)
 	static double gyroMeasError = 3.14159265358979f * (5.0f / 180.0f); // gyroscope measurement error in rad/s (shown as 5 deg/s)
 	static double beta = Math.sqrt(3.0f / 4.0f) * gyroMeasError; // compute beta
 	public double SEq_1 = 1.0f, SEq_2 = 0.0f, SEq_3 = 0.0f, SEq_4 = 0.0f; // estimated orientation quaternion elements with initial conditions
