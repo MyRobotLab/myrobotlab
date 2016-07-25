@@ -10,7 +10,6 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
         templateUrl: 'widget/oscope.html',
         link: function(scope, element) {
             var _self = this;
-            
             // WE DO NEED the service name who created us !
             // and to make oscopes work with other services they 
             // need to implement the same control & callback interfaces
@@ -53,29 +52,25 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                 var size = Object.keys(pinIndex).length
                 scope.pinIndex = pinIndex;
                 colorsHsv = gradient.hsv(size);
-                
                 // pass over pinIndex add display data
                 for (var key in pinIndex) {
                     if (!pinIndex.hasOwnProperty(key)) {
                         continue;
                     }
-                   
                     var pinDef = pinIndex[key];
-                    
                     // adding style
-                    var color = colorsHsv[parseInt(key)];                    
+                    var color = colorsHsv[parseInt(key)];
                     pinDef.style = {
                         'background-color': color.toHexString()
                     };
                     pinDef.color = color;
-                    pinDef.state = false; // off
-                    
+                    pinDef.state = false;
+                    // off
                     pinDef.posX = 0;
                     pinDef.posY = 0;
                     pinDef.count = 0;
-                    pinDef.colorHexString = color.toHexString();            
+                    pinDef.colorHexString = color.toHexString();
                 }
-                
             }
             // FIXME this should be _self.onMsg = function(inMsg)
             this.onMsg = function(inMsg) {
@@ -86,13 +81,42 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                     setTraceButtons(inMsg.data[0].pinIndex);
                     scope.$apply();
                     break;
+                case 'onPinArray':
+                    pinArray = inMsg.data[0];
+                    for (i = 0; i < pinArray.length; ++i) {
+                                data = pinArray[i];
+                        // FIXME - (optimization) pin should not have to send pintype - its known
+                        // when pinButtonList is built
+                        
+                        pinData = scope.pinData[data.address];
+                        button = scope.pinButtonList[data.address];
+                        var y = scope.height - data.value;
+                        // this certainly did not work
+                        // ctx.putImageData(id, pinData.posX, pinData.posY);
+                        _self.ctx.beginPath();
+                        // from
+                        _self.ctx.moveTo(pinData.posX, pinData.posY);
+                        // to
+                        pinData.posX++;
+                        pinData.posY = y * scope.hscale;
+                        _self.ctx.lineTo(pinData.posX, pinData.posY);
+                        // color
+                        _self.ctx.strokeStyle = pinData.colorHexString;
+                        // draw it
+                        _self.ctx.stroke();
+                        _self.ctx.closePath();
+                        if (pinData.posX == scope.width) {
+                            pinData.posX = 0;
+                            scope.clearScreen();
+                        }
+                    }
+                    break;
                 case 'onPin':
                     // FIXME - (optimization) pin should not have to send pintype - its known
                     // when pinButtonList is built
                     inPin = inMsg.data[0];
                     pinData = scope.pinData[inPin.pin];
                     button = scope.pinButtonList[inPin.pin];
-                    
                     var y = scope.height - inPin.value;
                     // this certainly did not work
                     // ctx.putImageData(id, pinData.posX, pinData.posY);
@@ -134,7 +158,6 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                 _self.ctx.fill();
             }
             scope.toggleTrace = function(pinDef) {
-                
                 var highlight = pinDef.color.getOriginalInput();
                 if (pinDef.state) {
                     // on to off
@@ -180,7 +203,7 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
             mrl.subscribeToService(_self.onMsg, name);
             // this siphons off a single subscribe to the webgui
             // so it will be broadcasted back to angular
-            mrl.subscribe(name, 'publishPin');
+            mrl.subscribe(name, 'publishPinArray');
             // initializing display data      
             setTraceButtons(service.pinIndex);
             // set up call backs to interfaces

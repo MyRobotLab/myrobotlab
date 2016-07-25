@@ -115,9 +115,9 @@ public class ArduinoChaosTest {
 
     Thread.sleep(1000);
     int digitalPin = 3;
-    arduino.enablePinEvents(digitalPin);
+    arduino.enablePin(digitalPin);
     Thread.sleep(1000);
-    arduino.disablePinEvents(digitalPin);
+    arduino.disablePin(digitalPin);
     Thread.sleep(1000);
 
     int pulsePin = 1;

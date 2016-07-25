@@ -42,7 +42,7 @@ class Pin {
 
     // default constructor for a pin?
     // at a minimum we need type and address A0 D4 etc...
-    Pin(int t, int addr) {
+    Pin(int addr, int t) {
       type = t;
       address = addr;
     };

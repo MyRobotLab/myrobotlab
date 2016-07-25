@@ -1,6 +1,5 @@
 #include "MrlComm.h"
 
-
 MrlComm::MrlComm() {
 	softReset();
 	byteCount = 0;
@@ -37,7 +36,7 @@ void MrlComm::publishBoardStatus() {
 	}
 
 	unsigned int avgTiming = 0;
-    unsigned long now = micros();
+	unsigned long now = micros();
 
 	avgTiming = (now - lastMicros) / publishBoardStatusModulus;
 
@@ -147,7 +146,6 @@ void MrlComm::publishAttachedDevice(int id, int nameSize, int namePos) {
 	msg.addData(ioCmd + namePos, nameSize, true);
 	msg.sendMsg();
 }
-
 
 /**
  * readCommand() - This is the main method to read new data from the serial port,
@@ -262,27 +260,36 @@ void MrlComm::processCommand() {
 	}
 	case ENABLE_BOARD_STATUS:
 		enableBoardStatus = true;
-		publishBoardStatusModulus = (unsigned int)MrlMsg::toInt(ioCmd, 1);
+		publishBoardStatusModulus = (unsigned int) MrlMsg::toInt(ioCmd, 1);
 		publishDebug("modulus is " + String(publishBoardStatusModulus));
 		break;
 
-	// ENABLE_PIN_EVENTS | ADDRESS | PIN TYPE 0 = DIGITAL | 1 = ANALOG
-	case ENABLE_PIN_EVENTS:{
+		// ENABLE_PIN | ADDRESS | PIN TYPE 0 = DIGITAL | 1 = ANALOG
+	case ENABLE_PIN: {
 		int address = ioCmd[1];
 		int type = ioCmd[2];
 
-		if (type == DIGITAL){
+		// don't add it twice
+		for (int i = 0; i < pinList.size(); ++i) {
+			Pin* pin = pinList.get(i);
+			if (pin->address == address) {
+				// TODO already exists error?
+				break;
+			}
+		}
+
+		if (type == DIGITAL) {
 			pinMode(address, INPUT);
 		}
 		Pin* p = new Pin(address, type);
 		pinList.add(p);
 		break;
 	}
-	case DISABLE_PIN_EVENTS:{
+	case DISABLE_PIN: {
 		int address = ioCmd[1];
 		for (int i = 0; i < pinList.size(); ++i) {
 			Pin* pin = pinList.get(i);
-			if (pin->address == address){
+			if (pin->address == address) {
 				pinList.remove(i);
 				delete pin;
 				break;
@@ -598,33 +605,31 @@ void MrlComm::updateDevices() {
  * updates self - reads from the pinList both analog and digital
  * sends pin data back
  */
-void MrlComm::update()
-{
-		if (pinList.size() > 0) {
+void MrlComm::update() {
+	if (pinList.size() > 0) {
 
-			// device id for our Arduino is always 0
-			MrlMsg msg(PUBLISH_SENSOR_DATA, 0); // the callback id
+		// device id for our Arduino is always 0
+		MrlMsg msg(PUBLISH_SENSOR_DATA, 0); // the callback id
 
-			// size of payload - 1 byte for address + 2 bytes per pin read
-			// this is an optimization in that we send back "all" the read pin data in a
-			// standard 2 byte package - digital reads don't need both bytes, but the
-			// sending it all back in 1 msg and the simplicity is well worth it
-			msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
-			for (int i = 0; i < pinList.size(); ++i) {
-				Pin* pin = pinList.get(i);
-				// TODO: moe the analog read outside of thie method and pass it in!
-				if (pin->type == ANALOG)	{
-					pin->value = analogRead(pin->address);
-				} else {
-					pin->value = digitalRead(pin->address);
-				}
-
-				// loading both analog & digital data
-				msg.addData(pin->address); // 1 byte
-				msg.addData16(pin->value); // 2 bytes
+		// size of payload - 1 byte for address + 2 bytes per pin read
+		// this is an optimization in that we send back "all" the read pin data in a
+		// standard 2 byte package - digital reads don't need both bytes, but the
+		// sending it all back in 1 msg and the simplicity is well worth it
+		msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
+		for (int i = 0; i < pinList.size(); ++i) {
+			Pin* pin = pinList.get(i);
+			// TODO: moe the analog read outside of thie method and pass it in!
+			if (pin->type == ANALOG) {
+				pin->value = analogRead(pin->address);
+			} else {
+				pin->value = digitalRead(pin->address);
 			}
-			msg.sendMsg();
-		}
-}
 
+			// loading both analog & digital data
+			msg.addData(pin->address); // 1 byte
+			msg.addData16(pin->value); // 2 bytes
+		}
+		msg.sendMsg();
+	}
+}
 

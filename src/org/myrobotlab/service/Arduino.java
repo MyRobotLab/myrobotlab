@@ -13,7 +13,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ULTRASONIC
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DISABLE_BOARD_STATUS;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ENABLE_BOARD_STATUS;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ENABLE_PIN_EVENTS;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ENABLE_PIN;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
@@ -27,7 +27,6 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_BOARD_STATUS;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_DEBUG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MESSAGE_ACK;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PIN_EVENT;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SENSOR_DATA;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
@@ -58,8 +57,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.MrlMsg;
@@ -86,12 +87,13 @@ import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.PinArrayControl;
+import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.SensorControl;
 import org.myrobotlab.service.interfaces.SensorController;
-import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.myrobotlab.service.interfaces.SensorDataListener;
+import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -316,7 +318,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			boolean startAnalogPolling = true;
 
 			if (startAnalogPolling) {
-				arduino.enablePinEvents(7);
+				arduino.enablePin(7);
 			}
 
 			if (testMotor) {
@@ -499,8 +501,20 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * the definitive sequence of pins - "true address"
 	 */
 	Map<Integer, PinDefinition> pinIndex = null;
-
-	transient Map<String, PinListener> pinEventListeners = new HashMap<String, PinListener>();
+	
+	
+	transient Map<String, PinArrayListener> pinArrayListeners = new HashMap<String, PinArrayListener>();
+	
+	/**
+	 * map of pin listeners
+	 */
+	transient Map<String, PinListener> pinListeners = new HashMap<String, PinListener>();
+	
+	/**
+	 * the map of pins which the pin listeners are listening too - if the set is null
+	 * they are listening to "any" published pin
+	 */
+	Map<String, Set<Integer>> pinSets = new HashMap<String, Set<Integer>>();
 
 	/**
 	 * Devices - string name index of device we need 2 indexes for sensors
@@ -657,24 +671,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	private int numAck = 0;
 
-	/*
-	private int fixPinOffset(Integer pin) {
-		int actualPin = 0;
-		if (board.toLowerCase().contains("mega")) {
-			actualPin = pin - 53;
-		} else {
-			actualPin = pin - 14;
-		}
-		return actualPin;
-	}
-	*/
-	
-	/*
-	public void analogReadPollingStart(int pin) {
-		enablePinEvents(pin, 1);
-	}
-	*/
-
 	int pinEventsDefaultRate = 8000;
 
 	int publishBoardStatusModulus = 1000;
@@ -718,21 +714,38 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		sendMsg(ANALOG_WRITE, address, value);
 	}
 
+	/**
+	 * attach a pin listener who listens to a specific pin
+	 * FIXME - implement the 'specific' pin
+	 */
 	@Override
 	public void attach(PinListener listener, int address) {
 		String name = listener.getName();
 		if (listener.isLocal()) {
-			// direct callback
-			pinEventListeners.put(name, listener);
+			// setup for direct callback
+			pinListeners.put(name, listener);
+			Set<Integer> pins = null;
+			if (pinSets.containsKey(listener.getName())){
+				pins = pinSets.get(listener.getName());
+			} else {
+				pins = new HashSet<Integer>();
+			}
 		} else {
-			// pub sub
-			addListener("publishRX", name, "onByte");
-			addListener("publishConnect", name, "onConnect");
-			addListener("publishDisconnect", name, "onDisconnect");
+			// setup for pub sub
+			addListener("publishPin", name, "onPin"); 
 		}
-
 	}
 
+	/**
+	 * attach a pin listener which listens for an
+	 * array of all active pins
+	 */
+	@Override
+	public void attach(PinArrayListener listener) {
+		pinArrayListeners.put(listener.getName(), listener);
+	}
+
+	
 	/**
 	 * String interface - this allows you to easily use url 
 	 * api requests like  /attach/nameOfListener/3
@@ -1019,35 +1032,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		sendMsg(DIGITAL_WRITE, address, value);
 	}
 
-	public void disablePinEvents(int pin){
+	public void disablePin(int pin){
 		
 	}
-
-	/**
-	 * start polling data from the selected pin
-	 *
-	 * @param pin
-	 */
-	/*
-	public void digitalReadPollingStart(int pin) throws IOException {
-		digitalReadPollingStart(pin, 1);
-	}
-
-	public void digitalReadPollingStart(Integer pin, Integer sampleRate) {
-		sendMsg(PIN_MODE, pin, INPUT);
-		sendMsg(DIGITAL_READ_POLLING_START, pin, (sampleRate >> 8) & 0xff, sampleRate & 0xff);
-	}
-	*/
-	/**
-	 * stop polling the selected pin
-	 *
-	 * @param pin
-	 */
-	/*
-	public void digitalReadPollingStop(int pin) {
-		sendMsg(DIGITAL_READ_POLLING_STOP, pin);
-	}
-	*/
 	
 	public void disconnect() {
 		mrlCommVersion = null;
@@ -1079,19 +1066,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 *
 	 * @param pin
 	 */
-	public void enablePinEvents(int address) {
+	public void enablePin(int address) {
 		if (!isConnected()){
-			error("must be connected to enable pins");
+			error("must be connected to enable pins"); 
 			return;
 		}
-		MrlMsg msg = new MrlMsg(ENABLE_PIN_EVENTS);
+		MrlMsg msg = new MrlMsg(ENABLE_PIN);
 		msg.addData(address);
 		PinDefinition pin = pinIndex.get(address);
 		msg.addData(getMrlPinType(pin));
 		// TODO - make this Hz so everyone is happy :)
 		// msg.addData16(rate); // 
 		sendMsg(msg);
-		
 	}
 
 	/**
@@ -1626,16 +1612,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			invoke("publishVersion", mrlCommVersion);
 			break;
 		}
-		// DEPRECATED - handled by PUBLISH_PIN_DATA
-		case PUBLISH_PIN_EVENT: {
-			/*
-			 * Pin pin = pinList.get(message[1]); pin.value = ((message[2] &
-			 * 0xFF) << 8) + (message[3] & 0xFF); // TODO ? local callback - no
-			 * thread single invoke - // publishLocalCallbacks("publishPin", )
-			 * invoke("publishPin", pin);
-			 */
-			break;
-		}
 		case PUBLISH_BOARD_STATUS: {
 			long microsPerLoop = Serial.bytesToInt(message, 1, 2);
 			int sram = (int) Serial.bytesToInt(message, 3, 2);
@@ -1840,10 +1816,21 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * is done with a analogReadPollingStart(pin) or digitalReadPollingStart()
 	 */
 
-	public PinData publishPinEvent(PinData pinEvent) {
-		pinIndex.get(pinEvent.getAddress()).setValue(pinEvent.getValue());
-		return pinEvent;
+	public PinData publishPin(PinData pinData) {
+		// caching last value
+		pinIndex.get(pinData.getAddress()).setValue(pinData.getValue());
+		return pinData;
 	}
+	
+	/**
+	 * publish all read pin data in one array at once
+	 */
+	public PinData[] publishPinArray(PinData[] pinData) {
+		// FIXME - update all cache
+		//pinIndex.get(pinEvent.getAddress()).setValue(pinEvent.getValue());
+		return pinData;
+	}
+
 
 	public Long publishPulse(Long pulseCount) {
 		return pulseCount;
@@ -2065,10 +2052,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		sendMsg(function, p);
 	}
 
-	// @Override
-	// public void update(Object data) {
-	// invoke("publishPin", data);
-	// }
 
 	@Override
 	public void sensorActivate(SensorControl sensor, Object... conf) {
@@ -2454,10 +2437,35 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// Since Arduino's useful data are pins we convert the pin values
 		// read into an array of pins
 		
+		// we publish both pins and arrays of pins 
+		// it depends what other services have registered for
+		
+		// regardless we need to convert it all to PinData
+		
+		// it better be an array[] of ints with tuples in the form
+		// | address | msb | lsb | ...
+		int[] rawPinData = (int[]) data.getData();
+		
+		int pinDataCnt = rawPinData.length/3; /* length / (1 address + 1 msg + 1 lsb) */
+		if (rawPinData.length%3 != 0){
+			log.error("something is wrong - expecting 3 bytes per pin data");
+		}
+		
+		PinData[] pinArray = new PinData[pinDataCnt];
+		
+		// parse sort reduce ...
+		for (int i = 0; i < pinArray.length; ++i){
+			pinArray[i] = new PinData(rawPinData[3 * i], Serial.bytesToInt(rawPinData, (3 * i) + 1, 2));
+		}
+		
+		
+		invoke("publishPinArray", new Object[]{pinArray});
+		
 		// convert to a pin array of pin data
 		// for(int i = 0; i < data.
 		// log.info("here");
 	}
+
 
 
 }

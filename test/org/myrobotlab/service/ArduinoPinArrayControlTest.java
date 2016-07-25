@@ -79,8 +79,10 @@ public class ArduinoPinArrayControlTest {
 		Runtime.start("python", "Python");
 		
 		arduino.connect("COM5");
-		arduino.enablePinEvents(14);
-		arduino.disablePinEvents(14);
+		arduino.enablePin(14);
+		arduino.enablePin(16);
+		arduino.enablePin(17);
+		arduino.disablePin(14);
 		
 		boolean skip = true;
 		if (skip){

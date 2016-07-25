@@ -437,11 +437,11 @@ public class Plantoid extends Service {
 	 */
 	public void startPolling() {
 		arduino.setSampleRate(sampleRate);
-		arduino.enablePinEvents(soildMoisture);
-		arduino.enablePinEvents(tempHumidity);
-		arduino.enablePinEvents(leftLight);
-		arduino.enablePinEvents(rightLight);
-		arduino.enablePinEvents(airQuality);
+		arduino.enablePin(soildMoisture);
+		arduino.enablePin(tempHumidity);
+		arduino.enablePin(leftLight);
+		arduino.enablePin(rightLight);
+		arduino.enablePin(airQuality);
 	}
 
 	public void startScanning() {
@@ -540,11 +540,11 @@ public class Plantoid extends Service {
 	 * shut down polling of analog sensors
 	 */
 	public void stopPolling() {
-		arduino.disablePinEvents(soildMoisture);
-		arduino.enablePinEvents(tempHumidity);
-		arduino.enablePinEvents(leftLight);
-		arduino.enablePinEvents(rightLight);
-		arduino.enablePinEvents(airQuality);
+		arduino.disablePin(soildMoisture);
+		arduino.enablePin(tempHumidity);
+		arduino.enablePin(leftLight);
+		arduino.enablePin(rightLight);
+		arduino.enablePin(airQuality);
 	}
 
 	public void stopScanning() {
