@@ -934,6 +934,7 @@ public class Mpu6050 extends Service implements I2CControl {
 
 		log.info(String.format("%s setController %s", getName(), controllerName));
 		createDevice();
+		setSleepEnabled(false);
 		broadcastState();
 		return true;
 	}
