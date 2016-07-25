@@ -99,7 +99,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	@Override
 	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
 		// Create a new i2c device in case it doesn't already exists.
-		String key = String.format("%d.%d", this.deviceBus, deviceAddress);
+		String key = String.format("%s.%d", this.deviceBus, deviceAddress);
 		if (i2cDevices.containsKey(key)){
 			// Nothing to do, already exists
 		}
