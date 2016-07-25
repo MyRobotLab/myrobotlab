@@ -124,6 +124,60 @@ void MrlComm::readCommand() {
 	if (mrlCmd->readCommand()) {
 		processCommand();
 	}
+=======
+
+/**
+ * readCommand() - This is the main method to read new data from the serial port,
+ * when a full mrlcomm message is read from the serial port.
+ * return values: true if the serial port read a full mrlcomm command
+ *                false if the serial port is still waiting on a command.
+ */
+bool MrlComm::readCommand() {
+	static int byteCount;
+	static int msgSize;
+	// handle serial data begin
+	int bytesAvailable = Serial.available();
+	if (bytesAvailable > 0) {
+		publishDebug("RXBUFF:" + String(bytesAvailable));
+		// now we should loop over the available bytes .. not just read one by one.
+		for (int i = 0; i < bytesAvailable; i++) {
+			// read the incoming byte:
+			unsigned char newByte = Serial.read();
+			publishDebug("RX:" + String(newByte));
+			++byteCount;
+			// checking first byte - beginning of message?
+			if (byteCount == 1 && newByte != MAGIC_NUMBER) {
+				publishError(ERROR_SERIAL);
+				// reset - try again
+				byteCount = 0;
+				// return false;
+			}
+			if (byteCount == 2) {
+				// get the size of message
+				// todo check msg < 64 (MAX_MSG_SIZE)
+				if (newByte > 64) {
+					// TODO - send error back
+					byteCount = 0;
+					continue; // GroG - I guess  we continue now vs return false on error conditions?
+				}
+				msgSize = newByte;
+			}
+			if (byteCount > 2) {
+				// fill in msg data - (2) headbytes -1 (offset)
+				ioCmd[byteCount - 3] = newByte;
+			}
+			// if received header + msg
+			if (byteCount == 2 + msgSize) {
+				// we've reach the end of the command, just return true .. we've got it
+				byteCount = 0;
+				return true;
+			}
+		}
+	} // if Serial.available
+	  // we only partially read a command.  (or nothing at all.)
+	return false;
+
+>>>>>>> refs/heads/develop
 }
 // This function will switch the current command and call
 // the associated function with the command
@@ -190,6 +244,32 @@ void MrlComm::processCommand() {
 		publishBoardStatusModulus = (unsigned int)MrlMsg::toInt(ioCmd, 1);
 		MrlMsg::publishDebug("modulus is " + String(publishBoardStatusModulus));
 		break;
+
+	// ENABLE_PIN_EVENTS | ADDRESS | PIN TYPE 0 = DIGITAL | 1 = ANALOG
+	case ENABLE_PIN_EVENTS:{
+		int address = ioCmd[1];
+		int type = ioCmd[2];
+
+		if (type == DIGITAL){
+			pinMode(address, INPUT);
+		}
+		Pin* p = new Pin(address, type);
+		pinList.add(p);
+		break;
+	}
+	case DISABLE_PIN_EVENTS:{
+		int address = ioCmd[1];
+		for (int i = 0; i < pinList.size(); ++i) {
+			Pin* pin = pinList.get(i);
+			if (pin->address == address){
+				pinList.remove(i);
+				delete pin;
+				break;
+			}
+		}
+
+		break;
+	}
 	case DISABLE_BOARD_STATUS:
 		enableBoardStatus = false;
 		break;
@@ -494,18 +574,23 @@ void MrlComm::updateDevices() {
 
 /***********************************************************************
  * UPDATE BEGIN
- * updates self - reads pins both analog and digital
+ * updates self - reads from the pinList both analog and digital
  * sends pin data back
  */
 void MrlComm::update()
 {
-		if (pins.size() > 0) {
+		if (pinList.size() > 0) {
 
-			MrlMsg msg(PUBLISH_SENSOR_DATA); // the callback id
-		    // msg.addData(id); // the device Index (non-Id is the Arduino Device
+			// device id for our Arduino is always 0
+			MrlMsg msg(PUBLISH_SENSOR_DATA, 0); // the callback id
 
-			for (int i = 0; i < pins.size(); ++i) {
-				Pin* pin = pins.get(i);
+			// size of payload - 1 byte for address + 2 bytes per pin read
+			// this is an optimization in that we send back "all" the read pin data in a
+			// standard 2 byte package - digital reads don't need both bytes, but the
+			// sending it all back in 1 msg and the simplicity is well worth it
+			msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
+			for (int i = 0; i < pinList.size(); ++i) {
+				Pin* pin = pinList.get(i);
 				// TODO: moe the analog read outside of thie method and pass it in!
 				if (pin->type == ANALOG)	{
 					pin->value = analogRead(pin->address);
@@ -514,12 +599,9 @@ void MrlComm::update()
 				}
 
 				// loading both analog & digital data
-				msg.addData(pin->address);
-				msg.addData16(pin->value);
-
+				msg.addData(pin->address); // 1 byte
+				msg.addData16(pin->value); // 2 bytes
 			}
-
-			// sending back the message
 			msg.sendMsg();
 		}
 }

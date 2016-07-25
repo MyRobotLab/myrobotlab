@@ -94,8 +94,15 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 	@Override
 	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
-		// TODO Create a devicelist to be able to pass reads back
-		controller.createI2cDevice((I2CControl) this, busAddress, deviceAddress);
+		// TODO 
+		// Create a devicelist to be able to pass reads back if needed. 
+		// Currently only a pass thru / return structure
+		// controller.createI2cDevice((I2CControl) this, busAddress, deviceAddress);
+	}
+
+	@Override
+	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
+			// controller.releaseI2cDevice(this, busAddress, deviceAddress);
 	}
 	
 	/**
@@ -104,10 +111,12 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	 */
 	// @Override
 	public boolean setController(String controllerName, String deviceBus, String deviceAddress) {
+		this.controllerName = controllerName;
 		return setController((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
 	}
 
 	public boolean setController(String controllerName) {
+		this.controllerName = controllerName;
 		return setController((I2CController) Runtime.getService(controllerName), this.deviceBus, this.deviceAddress);
 	}
 	
@@ -131,10 +140,24 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 		log.info(String.format("%s setController %s", getName(), controllerName));
 		
+		createDevice();
 		broadcastState();
 		return true;
 	}
+	
+	/**
+	 * This method creates the i2c device
+	 */
+	boolean createDevice() {
+		if (controller != null) {
+				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+		}
 
+		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
+		return true;
+	}
+	
 	public void unsetController() {
 		controller = null;
 		controllerName = null;
@@ -163,16 +186,11 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 		return isAttached;
 	}
 
-	@Override
-	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
-			controller.releaseI2cDevice(this, busAddress, deviceAddress);
-	}
-
-	public void setMuxBus(int deviceBus) {
+	public void setMuxBus(int busAddress) {
 		byte bus[] = new byte[1];
-		bus[0] = (byte) (1 << deviceBus);
+		bus[0] = (byte) (1 << busAddress);
+		log.info(String.format("setMux this.deviceBus %s this.deviceAddress %s bus[0] %s", this.deviceBus, this.deviceAddress, bus[0]));
 		controller.i2cWrite(this, Integer.parseInt(this.deviceBus), Integer.decode(this.deviceAddress), bus, bus.length);
-		;
 	}
 	
 	@Override
@@ -181,7 +199,6 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
 		log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
 		controller.i2cWrite(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
-		;
 	}
 	/**
 	 * TODO Add demuxing. i.e the route back to the caller

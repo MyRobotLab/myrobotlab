@@ -2,7 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.List;
 
-import org.myrobotlab.service.data.PinEvent;
+import org.myrobotlab.service.data.PinData;
 
 public interface PinArrayControl extends DeviceControl {
 
@@ -29,16 +29,13 @@ public interface PinArrayControl extends DeviceControl {
 	
 	public void pinMode(int address, String mode);
 	
-	public void pinMode(String address, String mode);
-
 	public void write(int address, int value);
 	
-	public void write(String pinName, int value);
+	public PinData publishPinEvent(PinData pinData);
 	
-	public PinEvent publishPinEvent(PinEvent pinData);
-	
+	// FIXME attach(String listener, null) -> listens to all pins - pin array comes back ?
 	public void attach(String listener, int pinAddress);
 	
-	public void attach(PinEventListener listener, int pinAddress);
+	public void attach(PinListener listener, int pinAddress);
 	
 }

@@ -67,7 +67,11 @@ MrlComm mrlComm;
 */
 void setup() {
   //Serial.begin(115200);        // connect to the serial port
-  //while (!Serial){};
+//  while (!Serial){
+	  // nicer than tight {} loop
+	  // since it calls yield()
+//	  delay(100);
+//  };
   // TODO: the arduino service might get a few garbage bytes before we're able
   // to run, we should consider some additional logic here like a "publishReset"
   // publish version on startup so it's immediately available for mrl.
@@ -75,9 +79,6 @@ void setup() {
   mrlComm.publishVersion();
   // publish the board type (uno/mega)
   mrlComm.publishBoardInfo();
-
-  // check to see if the "Arduino" device is attached ..
-  // it should(must) be device 0 !
 
 }
 
@@ -91,7 +92,9 @@ void loop() {
   // TODO: handle overflow here after 32k runs, i suspect this might blow up?
   mrlComm.loopCount++;
   // get a command and process it from the serial port (if available.)
-  mrlComm.readCommand();
+  if (mrlComm.readCommand()) {
+	  mrlComm.processCommand();
+  }
   // update devices
   mrlComm.updateDevices();
   // send back load time and memory

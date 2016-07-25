@@ -34,12 +34,12 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
-import org.myrobotlab.service.data.SensorEvent;
+import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
-import org.myrobotlab.service.interfaces.SensorEventListener;
+import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -52,7 +52,7 @@ import org.slf4j.Logger;
  *         H-bridges output
  * 
  */
-public abstract class Motor extends Service implements MotorControl, SensorEventListener, EncoderListener {
+public abstract class Motor extends Service implements MotorControl, SensorDataListener, EncoderListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -326,7 +326,7 @@ public abstract class Motor extends Service implements MotorControl, SensorEvent
 
 
 @Override
-public void onSensorEvent(SensorEvent data) {
+public void onSensorData(SensorData data) {
 	// TODO Auto-generated method stub
 	
 }
