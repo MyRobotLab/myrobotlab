@@ -24,5 +24,8 @@ public class PinData implements Serializable {
 		this.address = address;
 	}
 
+	public String toString(){
+		return String.format("address=%d value=%d", address, value);
+	}
 	
 }

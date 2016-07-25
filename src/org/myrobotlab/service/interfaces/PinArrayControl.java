@@ -31,11 +31,15 @@ public interface PinArrayControl extends DeviceControl {
 	
 	public void write(int address, int value);
 	
-	public PinData publishPinEvent(PinData pinData);
+	public PinData publishPin(PinData pinData);
+	
+	public PinData[] publishPinArray(PinData[] pinData);
 	
 	// FIXME attach(String listener, null) -> listens to all pins - pin array comes back ?
 	public void attach(String listener, int pinAddress);
 	
 	public void attach(PinListener listener, int pinAddress);
+	
+	public void attach(PinArrayListener listener);
 	
 }
