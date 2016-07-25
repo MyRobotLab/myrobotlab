@@ -3,6 +3,20 @@
 	max-width: none
 }
 
+#statusDisplay{
+    margin: 0 !important;
+    padding: 0 !important;  
+}
+
+.navbar{	 
+	 margin: 0 !important;
+   /* padding: 0 !important;  */
+}
+
+#newService{
+ left:0;
+ width:470px;   
+}
 .panel-default{
 /*
     	border: 2px solid;

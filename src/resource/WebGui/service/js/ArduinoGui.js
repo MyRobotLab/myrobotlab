@@ -139,6 +139,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     msg.subscribe('publishVersion');
     msg.subscribe('publishBoardInfo');
     msg.subscribe('publishBoardStatus');
+    msg.subscribe('publishSensorData');
     msg.subscribe(this);
 }
 ]);

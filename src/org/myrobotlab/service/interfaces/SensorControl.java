@@ -1,6 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
-public interface SensorControl extends SensorEventListener, DeviceControl {
+public interface SensorControl extends SensorDataListener, DeviceControl {
 	
 	public void attach(SensorController controller, Object...conf);
 	

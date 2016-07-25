@@ -13,7 +13,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.data.SensorEvent;
+import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.SensorControl;
@@ -228,7 +228,7 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorCo
 	 * to a preferered units here
 	 */
 	@Override
-	public void onSensorEvent(SensorEvent event) {
+	public void onSensorData(SensorData event) {
 		// FIXME - convert to appropriate range
 		// inches/meters/other kubits?
 		int[] rawData = (int[])event.getData();

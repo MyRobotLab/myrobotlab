@@ -136,7 +136,6 @@ public class RasPi extends Service implements I2CController {
 			I2CDevice device = i2c.getDevice(deviceAddress);
 			I2CBus bus = I2CFactory.getInstance(busAddress);
 			String key = String.format("%d.%d", busAddress, deviceAddress);
-
 			I2CDeviceMap devicedata = new I2CDeviceMap();
 			if (i2cDevices.containsKey(key)) {
 				log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, control.getName()));
@@ -145,6 +144,7 @@ public class RasPi extends Service implements I2CController {
 			  devicedata.device = device;
 			  devicedata.serviceName = control.getName();
 			  i2cDevices.put(key, devicedata);
+			  log.info(String.format("Created device for %s with busAddress %s deviceaddress %s key %s", control.getName(), busAddress, deviceAddress, key));
 
 			// PCF8574GpioProvider pcf = new PCF8574GpioProvider(busAddress,
 			// deviceAddress);
@@ -253,10 +253,14 @@ public class RasPi extends Service implements I2CController {
 	@Override
 	public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
-		log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+		log.info(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+		for (int i=0; i < size; i++){
+			log.info(String.format("buffer %s %s", i, buffer[i]));	
+		}
 		I2CDeviceMap devicedata = i2cDevices.get(key);
 		try {
-			devicedata.device.write(buffer, 0, buffer.length);
+			
+			devicedata.device.write(buffer, 0, size);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Logging.logError(e);
@@ -267,7 +271,7 @@ public class RasPi extends Service implements I2CController {
 	@Override
 	public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
-		log.debug(String.format("i2cRead busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+		log.info(String.format("i2cRead busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
 		I2CDeviceMap devicedata = i2cDevices.get(key);
 		try {
 			devicedata.device.read(buffer, 0, buffer.length);
