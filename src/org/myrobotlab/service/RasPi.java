@@ -265,7 +265,6 @@ public class RasPi extends Service implements I2CController {
 			// TODO Auto-generated catch block
 			Logging.logError(e);
 		}
-		;
 	}
 
 	@Override
@@ -280,7 +279,7 @@ public class RasPi extends Service implements I2CController {
 			// TODO Auto-generated catch block
 			Logging.logError(e);
 		}
-		;
+
 		return bytesRead;
 	}
 
@@ -294,7 +293,7 @@ public class RasPi extends Service implements I2CController {
 			// TODO Auto-generated catch block
 			Logging.logError(e);
 		}
-		;
+		
 		return readBuffer.length;
 	}
 
