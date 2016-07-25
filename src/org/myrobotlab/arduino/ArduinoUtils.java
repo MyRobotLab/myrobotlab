@@ -58,7 +58,7 @@ public class ArduinoUtils {
 		args.add("arduino:avr:" + board.toLowerCase());
 		args.add(sketch.getAbsolutePath());
 		// args.add("--verbose-upload");
-		args.add("--preserve-temp-files");
+		//args.add("--preserve-temp-files");
 		// run the command.
 		String result = runCommand(arduinoExe, args);
 		// print stdout/err from running the command

@@ -4,6 +4,11 @@
 MrlComm::MrlComm() {
 	softReset();
 	byteCount = 0;
+	mrlCmd = new MrlCmd(MRL_IO_SERIAL_0);
+}
+
+MrlComm::~MrlComm(){
+	delete mrlCmd;
 }
 /***********************************************************************
  * UTILITY METHODS BEGIN
@@ -89,43 +94,7 @@ void MrlComm::publishBoardInfo() {
 	msg.addData(BOARD);
 	msg.sendMsg();
 }
-/**
- * Publish Debug - return a text debug message back to the java based arduino service in MRL
- * MAGIC_NUMBER|1+MSG_LENGTH|MESSAGE_BYTES
- * 
- * This method will publish a string back to the Arduino service for debugging purproses.
- * 
- */
-void MrlComm::publishDebug(String message) {
-	if (debug) {
-		// NOTE-KW:  If this method gets called excessively I have seen memory corruption in the
-		// arduino where it seems to be getting a null string passed in as "message"
-		// very very very very very odd..  I suspect a bug in the arduino hardware/software
-		MrlMsg msg(PUBLISH_DEBUG);
-		msg.addData(message);
-		msg.sendMsg();
-	}
-}
-/**
- * send an error message/code back to MRL.
- * MAGIC_NUMBER|2|PUBLISH_MRLCOMM_ERROR|ERROR_CODE
- */
-// KW: remove this, force an error message.
-void MrlComm::publishError(int type) {
-	MrlMsg msg(PUBLISH_MRLCOMM_ERROR);
-	msg.addData(type);
-	msg.sendMsg();
-}
-/**
- * Send an error message along with the error code
- * 
- */
-void MrlComm::publishError(int type, String message) {
-	MrlMsg msg(PUBLISH_MRLCOMM_ERROR);
-	msg.addData(type);
-	msg.addData(message);
-	msg.sendMsg();
-}
+
 /**
  * Publish the acknowledgement of the command received and processed.
  * MAGIC_NUMBER|2|PUBLISH_MESSAGE_ACK|FUNCTION
@@ -133,7 +102,7 @@ void MrlComm::publishError(int type, String message) {
 void MrlComm::publishCommandAck() {
 	MrlMsg msg(PUBLISH_MESSAGE_ACK);
 	// the function that we're ack-ing
-	msg.addData(ioCmd[0]);
+	msg.addData(mrlCmd->getIoCmd(0));
 	msg.sendMsg();
 }
 /**
@@ -144,7 +113,7 @@ void MrlComm::publishCommandAck() {
  */
 void MrlComm::publishAttachedDevice(int id, int nameSize, int namePos) {
 	MrlMsg msg(PUBLISH_ATTACHED_DEVICE, id);
-	msg.addData(ioCmd + namePos, nameSize, true);
+	msg.addData(mrlCmd->getIoCmd() + namePos, nameSize, true);
 	msg.sendMsg();
 }
 
@@ -152,61 +121,9 @@ void MrlComm::publishAttachedDevice(int id, int nameSize, int namePos) {
  * SERIAL METHODS BEGIN
  */
 void MrlComm::readCommand() {
-	if (getCommand()) {
+	if (mrlCmd->readCommand()) {
 		processCommand();
 	}
-}
-/**
- * getCommand() - This is the main method to read new data from the serial port, 
- * when a full mrlcomm message is read from the serial port.
- * return values: true if the serial port read a full mrlcomm command
- *                false if the serial port is still waiting on a command.
- */
-bool MrlComm::getCommand() {
-	static int byteCount;
-	static int msgSize;
-	// handle serial data begin
-	int bytesAvailable = Serial.available();
-	if (bytesAvailable > 0) {
-		publishDebug("RXBUFF:" + String(bytesAvailable));
-		// now we should loop over the available bytes .. not just read one by one.
-		for (int i = 0; i < bytesAvailable; i++) {
-			// read the incoming byte:
-			unsigned char newByte = Serial.read();
-			publishDebug("RX:" + String(newByte));
-			++byteCount;
-			// checking first byte - beginning of message?
-			if (byteCount == 1 && newByte != MAGIC_NUMBER) {
-				publishError(ERROR_SERIAL);
-				// reset - try again
-				byteCount = 0;
-				// return false;
-			}
-			if (byteCount == 2) {
-				// get the size of message
-				// todo check msg < 64 (MAX_MSG_SIZE)
-				if (newByte > 64) {
-					// TODO - send error back
-					byteCount = 0;
-					continue; // GroG - I guess  we continue now vs return false on error conditions?
-				}
-				msgSize = newByte;
-			}
-			if (byteCount > 2) {
-				// fill in msg data - (2) headbytes -1 (offset)
-				ioCmd[byteCount - 3] = newByte;
-			}
-			// if received header + msg
-			if (byteCount == 2 + msgSize) {
-				// we've reach the end of the command, just return true .. we've got it
-				byteCount = 0;
-				return true;
-			}
-		}
-	} // if Serial.available
-	  // we only partially read a command.  (or nothing at all.)
-	return false;
-
 }
 // This function will switch the current command and call
 // the associated function with the command
@@ -216,6 +133,7 @@ bool MrlComm::getCommand() {
  */
 void MrlComm::processCommand() {
 	// FIXME - all case X: should have scope operator { } !
+	unsigned char* ioCmd = mrlCmd->getIoCmd();
 	switch (ioCmd[0]) {
 	// === system pass through begin ===
 	case DIGITAL_WRITE:
@@ -231,10 +149,10 @@ void MrlComm::processCommand() {
 	}
 	case SERVO_ATTACH: {
 		int pin = ioCmd[2];
-		publishDebug("SERVO_ATTACH " + String(pin));
+		MrlMsg::publishDebug("SERVO_ATTACH " + String(pin));
 		MrlServo* servo = (MrlServo*) getDevice(ioCmd[1]);
 		servo->attach(pin);
-		publishDebug(F("SERVO_ATTACHED"));
+		MrlMsg::publishDebug(F("SERVO_ATTACHED"));
 		break;
 	}
 	case SERVO_SWEEP_START:
@@ -262,15 +180,15 @@ void MrlComm::processCommand() {
 		((MrlServo*) getDevice(ioCmd[1]))->setSpeed(ioCmd[2]);
 		break;
 	case SERVO_DETACH: {
-		publishDebug("SERVO_DETACH " + String(ioCmd[1]));
+		MrlMsg::publishDebug("SERVO_DETACH " + String(ioCmd[1]));
 		((MrlServo*) getDevice(ioCmd[1]))->detach();
-		publishDebug("SERVO_DETACHED");
+		MrlMsg::publishDebug("SERVO_DETACHED");
 		break;
 	}
 	case ENABLE_BOARD_STATUS:
 		enableBoardStatus = true;
 		publishBoardStatusModulus = (unsigned int)MrlMsg::toInt(ioCmd, 1);
-		publishDebug("modulus is " + String(publishBoardStatusModulus));
+		MrlMsg::publishDebug("modulus is " + String(publishBoardStatusModulus));
 		break;
 	case DISABLE_BOARD_STATUS:
 		enableBoardStatus = false;
@@ -330,7 +248,7 @@ void MrlComm::processCommand() {
 	case SET_DEBUG:
 		debug = ioCmd[1];
 		if (debug) {
-			publishDebug(F("Debug logging enabled."));
+			MrlMsg::publishDebug(F("Debug logging enabled."));
 		}
 		break;
 	case PUBLISH_BOARD_INFO:
@@ -340,7 +258,7 @@ void MrlComm::processCommand() {
 		((MrlNeopixel*) getDevice(ioCmd[1]))->neopixelWriteMatrix(ioCmd);
 		break;
 	default:
-		publishError(ERROR_UNKOWN_CMD);
+		MrlMsg::publishError(ERROR_UNKOWN_CMD);
 		break;
 	} // end switch
 	  // ack that we got a command (should we ack it first? or after we process the command?)
@@ -348,7 +266,7 @@ void MrlComm::processCommand() {
 	// reset command buffer to be ready to receive the next command.
 	// KW: we should only need to set the byteCount back to zero. clearing this array is just for safety sake i guess?
 	// GR: yup
-	memset(ioCmd, 0, sizeof(ioCmd));
+	//memset(ioCmd, 0, sizeof(ioCmd));
 	//byteCount = 0;
 } // process Command
 /***********************************************************************
@@ -379,9 +297,8 @@ void MrlComm::setPWMFrequency(int address, int prescalar) {
 
 // SET_SERIAL_RATE
 void MrlComm::setSerialRate() {
-	Serial.end();
-	delay(500);
-	Serial.begin(ioCmd[1]);
+	mrlCmd->end();
+	mrlCmd->begin(MRL_IO_SERIAL_0,mrlCmd->getIoCmd(1));
 }
 
 /**********************************************************************
@@ -415,6 +332,7 @@ void MrlComm::deviceAttach() {
 	// we want to echo back the name
 	// and send the config in a nice neat package to
 	// the attach method which creates the device
+	unsigned char* ioCmd = mrlCmd->getIoCmd();
 	int nameSize = ioCmd[2];
 
 	// get config size
@@ -487,7 +405,7 @@ void MrlComm::deviceAttach() {
 	}
 	default: {
 		// TODO: publish error message
-		publishDebug(F("Unknown Message Type."));
+		MrlMsg::publishDebug(F("Unknown Message Type."));
 		break;
 	}
 	}
@@ -498,7 +416,7 @@ void MrlComm::deviceAttach() {
 			addDevice(devicePtr);
 			publishAttachedDevice(devicePtr->id, nameSize, 3);
 		} else {
-			publishError(ERROR_UNKOWN_SENSOR, F("DEVICE not attached"));
+			MrlMsg::publishError(ERROR_UNKOWN_SENSOR, F("DEVICE not attached"));
 			delete devicePtr;
 		}
 	}
@@ -531,7 +449,7 @@ Device* MrlComm::getDevice(int id) {
 		}
 		node = node->next;
 	}
-	publishError(ERROR_DOES_NOT_EXIST);
+	MrlMsg::publishError(ERROR_DOES_NOT_EXIST);
 	return NULL; //returning a NULL ptr can cause runtime error
 	// you'll still get a runtime error if any field, member or method not
 	// defined is accessed

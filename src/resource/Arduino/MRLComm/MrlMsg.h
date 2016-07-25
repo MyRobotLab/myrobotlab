@@ -3,8 +3,8 @@
 
 #include "ArduinoMsgCodec.h"
 #include "LinkedList.h"
+#include "MrlIo.h"
 
-#define MAX_MSG_SIZE 64
 
 // ------ error types ------
 #define ERROR_SERIAL            1
@@ -17,7 +17,7 @@
  * MrlMsg - This class is responsible to send the messages to MRL in
  *          java-land
  */
-class MrlMsg{
+class MrlMsg : public MrlIo{
   private:
     LinkedList<byte> dataBuffer;
     int type;  // message id ie PUBLISH_VERSION
@@ -53,6 +53,9 @@ class MrlMsg{
                  ((long)buffer[start + 1] << 16) +
                  (buffer[start + 2] << 8) + buffer[start + 3]);
        }
+    static void publishDebug(String message);
+    static void publishError(int type);
+    static void publishError(int type, String message);
 };
 
 #endif

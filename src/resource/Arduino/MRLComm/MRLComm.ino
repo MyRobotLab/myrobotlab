@@ -66,8 +66,8 @@ MrlComm mrlComm;
  * Here we default out serial port to 115.2kbps.
 */
 void setup() {
-  Serial.begin(115200);        // connect to the serial port
-  while (!Serial){};
+  //Serial.begin(115200);        // connect to the serial port
+  //while (!Serial){};
   // TODO: the arduino service might get a few garbage bytes before we're able
   // to run, we should consider some additional logic here like a "publishReset"
   // publish version on startup so it's immediately available for mrl.
