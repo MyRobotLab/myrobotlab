@@ -32,7 +32,7 @@ public class ArduinoUtils {
 			return "Arduino";
 		}
 
-		return "arduino";
+		return "arduino_debug";
 	}
 
 	public static boolean uploadSketch(String port, String board) throws IOException, InterruptedException {

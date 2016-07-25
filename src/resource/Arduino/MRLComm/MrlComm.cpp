@@ -5,6 +5,7 @@ MrlComm::MrlComm() {
 	softReset();
 	byteCount = 0;
 	mrlCmd = new MrlCmd(MRL_IO_SERIAL_0);
+
 }
 
 MrlComm::~MrlComm(){
@@ -124,61 +125,8 @@ void MrlComm::readCommand() {
 	if (mrlCmd->readCommand()) {
 		processCommand();
 	}
-=======
-
-/**
- * readCommand() - This is the main method to read new data from the serial port,
- * when a full mrlcomm message is read from the serial port.
- * return values: true if the serial port read a full mrlcomm command
- *                false if the serial port is still waiting on a command.
- */
-bool MrlComm::readCommand() {
-	static int byteCount;
-	static int msgSize;
-	// handle serial data begin
-	int bytesAvailable = Serial.available();
-	if (bytesAvailable > 0) {
-		publishDebug("RXBUFF:" + String(bytesAvailable));
-		// now we should loop over the available bytes .. not just read one by one.
-		for (int i = 0; i < bytesAvailable; i++) {
-			// read the incoming byte:
-			unsigned char newByte = Serial.read();
-			publishDebug("RX:" + String(newByte));
-			++byteCount;
-			// checking first byte - beginning of message?
-			if (byteCount == 1 && newByte != MAGIC_NUMBER) {
-				publishError(ERROR_SERIAL);
-				// reset - try again
-				byteCount = 0;
-				// return false;
-			}
-			if (byteCount == 2) {
-				// get the size of message
-				// todo check msg < 64 (MAX_MSG_SIZE)
-				if (newByte > 64) {
-					// TODO - send error back
-					byteCount = 0;
-					continue; // GroG - I guess  we continue now vs return false on error conditions?
-				}
-				msgSize = newByte;
-			}
-			if (byteCount > 2) {
-				// fill in msg data - (2) headbytes -1 (offset)
-				ioCmd[byteCount - 3] = newByte;
-			}
-			// if received header + msg
-			if (byteCount == 2 + msgSize) {
-				// we've reach the end of the command, just return true .. we've got it
-				byteCount = 0;
-				return true;
-			}
-		}
-	} // if Serial.available
-	  // we only partially read a command.  (or nothing at all.)
-	return false;
-
->>>>>>> refs/heads/develop
 }
+
 // This function will switch the current command and call
 // the associated function with the command
 /**
@@ -203,10 +151,12 @@ void MrlComm::processCommand() {
 	}
 	case SERVO_ATTACH: {
 		int pin = ioCmd[2];
-		MrlMsg::publishDebug("SERVO_ATTACH " + String(pin));
+		if(debug)
+		    MrlMsg::publishDebug("SERVO_ATTACH " + String(pin));
 		MrlServo* servo = (MrlServo*) getDevice(ioCmd[1]);
 		servo->attach(pin);
-		MrlMsg::publishDebug(F("SERVO_ATTACHED"));
+		if(debug)
+		    MrlMsg::publishDebug(F("SERVO_ATTACHED"));
 		break;
 	}
 	case SERVO_SWEEP_START:
@@ -234,15 +184,18 @@ void MrlComm::processCommand() {
 		((MrlServo*) getDevice(ioCmd[1]))->setSpeed(ioCmd[2]);
 		break;
 	case SERVO_DETACH: {
-		MrlMsg::publishDebug("SERVO_DETACH " + String(ioCmd[1]));
+		if (debug)
+		    MrlMsg::publishDebug("SERVO_DETACH " + String(ioCmd[1]));
 		((MrlServo*) getDevice(ioCmd[1]))->detach();
-		MrlMsg::publishDebug("SERVO_DETACHED");
+		if (debug)
+		    MrlMsg::publishDebug("SERVO_DETACHED");
 		break;
 	}
 	case ENABLE_BOARD_STATUS:
 		enableBoardStatus = true;
 		publishBoardStatusModulus = (unsigned int)MrlMsg::toInt(ioCmd, 1);
-		MrlMsg::publishDebug("modulus is " + String(publishBoardStatusModulus));
+		if(debug)
+		    MrlMsg::publishDebug("modulus is " + String(publishBoardStatusModulus));
 		break;
 
 	// ENABLE_PIN_EVENTS | ADDRESS | PIN TYPE 0 = DIGITAL | 1 = ANALOG

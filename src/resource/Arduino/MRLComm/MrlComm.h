@@ -69,7 +69,7 @@ class MrlComm{
     void publishBoardStatus();
     void publishVersion();
     void publishBoardInfo();
-    bool readCommand();
+    void readCommand();
     void processCommand();
     void updateDevices();
 };

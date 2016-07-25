@@ -10,29 +10,25 @@ MrlIo::~MrlIo(){
 	//end();
 }
 
-bool MrlIo::begin(int ioType, long speed) {
-	if (openIo & (1 << ioType)){
+bool MrlIo::begin(int _ioType, long speed) {
+	if (openIo & (1 << _ioType)){
 		//port already open
-		this->ioType = ioType;
+		ioType = _ioType;
 		return true;
 	}
-	switch (ioType){
+	switch (_ioType){
 		case MRL_IO_SERIAL_0:
 			serial = &Serial;
-			//Serial.begin(speed);
 			break;
 #if BOARD == BOARD_TYPE_MEGA
 		case MRL_IO_SERIAL_1:
 			serial = &Serial1;
-			//Serial1.begin(speed);
 			break;
 		case MRL_IO_SERIAL_2:
 			serial = &Serial2;
-			//Serial2.begin(speed);
 			break;
 		case MRL_IO_SERIAL_3:
 			serial = &Serial3;
-			//Serial3.begin(speed);
 			break;
 #endif
 		default:
@@ -40,7 +36,7 @@ bool MrlIo::begin(int ioType, long speed) {
 			break;
 	}
 	serial->begin(speed);
-	this->ioType == ioType;
+	ioType == _ioType;
 	openIo |= (1 << ioType);
 	return true;
 }
@@ -73,9 +69,11 @@ int MrlIo::read() {
 }
 
 int MrlIo::available() {
+  //serial->println(ioType);
 	if(!(openIo & (1 << ioType))){
 		//port close
 		ioType = MRL_IO_NOT_DEFINED;
+    
 		return 0;
 	}
 	return serial->available();
@@ -102,3 +100,5 @@ void MrlIo::flush() {
 	}
 	serial->flush();
 }
+
+
