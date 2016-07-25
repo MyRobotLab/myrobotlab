@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
@@ -10,6 +11,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Arduino.I2CDeviceMap;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -50,6 +52,8 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	public String deviceBus = "1";
 	
 	private boolean isAttached = false;
+
+	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -94,15 +98,26 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 	@Override
 	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
-		// TODO 
-		// Create a devicelist to be able to pass reads back if needed. 
-		// Currently only a pass thru / return structure
-		// controller.createI2cDevice((I2CControl) this, busAddress, deviceAddress);
+		// Create a new i2c device in case it doesn't already exists.
+		String key = String.format("%d.%d", this.deviceBus, deviceAddress);
+		if (i2cDevices.containsKey(key)){
+			// Nothing to do, already exists
+		}
+		else
+		{
+			I2CDeviceMap deviceData = new I2CDeviceMap();
+			deviceData.busAddress = Integer.parseInt(this.deviceBus);
+			deviceData.deviceAddress = deviceAddress;
+			deviceData.control = this;
+			controller.createI2cDevice(this, deviceData.busAddress, deviceAddress);		
+		}
 	}
 
 	@Override
 	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
-			// controller.releaseI2cDevice(this, busAddress, deviceAddress);
+		// Can't release the device at the lowest level since several devices may exist
+		// with the same i2c address. It can always be reused.
+		// controller.releaseI2cDevice(this, busAddress, deviceAddress);
 	}
 	
 	/**
