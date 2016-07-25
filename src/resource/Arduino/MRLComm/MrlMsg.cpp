@@ -4,12 +4,14 @@ MrlMsg::MrlMsg(int msgType) {
 	type = msgType;
 	deviceId = -1;
 	dataCountEnabled = false;
+	begin(MRL_IO_SERIAL_0,115200);
 }
 
 MrlMsg::MrlMsg(int msgType, int id) {
 	type = msgType;
 	deviceId = id;
 	dataCountEnabled = false;
+	begin(MRL_IO_SERIAL_0,115200);
 }
 
 // addData overload methods
@@ -101,17 +103,54 @@ void MrlMsg::sendMsg() {
 	if (deviceId > -1) {
 		msgSize += 1;
 	}
-	Serial.write(MAGIC_NUMBER);
-	Serial.write(msgSize);
-	Serial.write(type);
+	write(MAGIC_NUMBER);
+	write(msgSize);
+	write(type);
 	if (deviceId > -1) {
-		Serial.write(deviceId);
+		write(deviceId);
 	}
 	ListNode<byte>* node = dataBuffer.getRoot();
 	while (node != NULL) {
-		Serial.write(node->data);
+		write(node->data);
 		node = node->next;
 	}
-	Serial.flush();
+	flush();
 }
 
+/**
+ * Publish Debug - return a text debug message back to the java based arduino service in MRL
+ * MAGIC_NUMBER|1+MSG_LENGTH|MESSAGE_BYTES
+ *
+ * This method will publish a string back to the Arduino service for debugging purproses.
+ *
+ */
+
+void MrlMsg::publishDebug(String message){
+	// NOTE-KW:  If this method gets called excessively I have seen memory corruption in the
+	// arduino where it seems to be getting a null string passed in as "message"
+	// very very very very very odd..  I suspect a bug in the arduino hardware/software
+	MrlMsg msg(PUBLISH_DEBUG);
+	msg.addData(message);
+	msg.sendMsg();
+}
+
+/**
+ * send an error message/code back to MRL.
+ * MAGIC_NUMBER|2|PUBLISH_MRLCOMM_ERROR|ERROR_CODE
+ */
+// KW: remove this, force an error message.
+void MrlMsg::publishError(int type) {
+	MrlMsg msg(PUBLISH_MRLCOMM_ERROR);
+	msg.addData(type);
+	msg.sendMsg();
+}
+/**
+ * Send an error message along with the error code
+ *
+ */
+void MrlMsg::publishError(int type, String message) {
+	MrlMsg msg(PUBLISH_MRLCOMM_ERROR);
+	msg.addData(type);
+	msg.addData(message);
+	msg.sendMsg();
+}

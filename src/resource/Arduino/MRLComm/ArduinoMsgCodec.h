@@ -143,6 +143,8 @@
 
 #if defined(ARDUINO_AVR_MEGA2560)
   #define BOARD BOARD_TYPE_ID_MEGA
+#elif defined(ARDUINO_AVR_ADK)
+  #define BOARD BOARD_TYPE_ID_MEGA
 #elif defined(ARDUINO_AVR_UNO)
   #define BOARD BOARD_TYPE_ID_UNO
 #else

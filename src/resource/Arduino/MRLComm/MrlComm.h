@@ -3,6 +3,7 @@
 
 #include "ArduinoMsgCodec.h"
 #include "MrlMsg.h"
+#include "MrlCmd.h"
 #include "LinkedList.h"
 #include "MrlServo.h"
 #include "Device.h"
@@ -42,7 +43,7 @@ class MrlComm{
     LinkedList<Pin*> pins;
 
     // MRLComm message buffer and current count from serial port ( MAGIC | MSGSIZE | FUNCTION | PAYLOAD ...
-    unsigned char ioCmd[MAX_MSG_SIZE];  // message buffer for all inbound messages
+    //unsigned char ioCmd[MAX_MSG_SIZE];  // message buffer for all inbound messages
     unsigned char* config;
     // performance metrics  and load timing
     // global debug setting, if set to true publishDebug will write to the serial port.
@@ -52,9 +53,9 @@ class MrlComm{
     bool enableBoardStatus;
     unsigned int publishBoardStatusModulus; // the frequency in which to report the load timing metrics (in number of main loops)
     unsigned long lastMicros; // timestamp of last loop (if stats enabled.)
+    MrlCmd* mrlCmd;
     void softReset();
     int getFreeRam();
-    void publishDebug(String message);
     void publishError(int type);
     void publishError(int type, String message);
     void publishCommandAck();
@@ -72,6 +73,7 @@ class MrlComm{
   public:
     unsigned long loopCount; // main loop count
     MrlComm();
+    ~MrlComm();
     void publishBoardStatus();
     void publishVersion();
     void publishBoardInfo();
