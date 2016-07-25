@@ -940,7 +940,7 @@ public class Mpu6050 extends Service implements I2CControl {
 
 		log.info(String.format("%s setController %s", getName(), controllerName));
 		createDevice();
-		setSleepEnabled(false);
+		initialize();
 		broadcastState();
 		return true;
 	}
@@ -1028,16 +1028,16 @@ public class Mpu6050 extends Service implements I2CControl {
 		gyroX = (byte) readbuffer[8] << 8 | readbuffer[9] & 0xFF;
 		gyroY = (byte) readbuffer[10] << 8 | readbuffer[11] & 0xFF;
 		gyroZ = (byte) readbuffer[12] << 8 | readbuffer[13] & 0xFF;
-		// Convert acceleration to G assuming min-max 2G
+		// Convert acceleration to G assuming min-max 2G as set in initialize()
 		accelGX = accelX / 16384.0;
 		accelGY = accelY / 16384.0;
 		accelGZ = accelZ / 16384.0;
 		// Convert temp to degrees Celcius
 		temperatureC = (temperature / 340.0) + 36.53;
-		// Convert gyro to G ( assuming max +-2000 degrees/s )
-		gyroDegreeX = gyroX / 16.0;
-		gyroDegreeY = gyroY / 16.0;
-		gyroDegreeZ = gyroZ / 16.0;
+		// Convert gyro to degrees/s ( assuming max +-250 degrees/s ) as set in initialize()
+		gyroDegreeX = gyroX / 131;
+		gyroDegreeY = gyroY / 131;
+		gyroDegreeZ = gyroZ / 131;
 		// broadcastState();
 	}
   
