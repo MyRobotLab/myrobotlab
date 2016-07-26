@@ -43,8 +43,7 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
 			fitLid,
 			blinn);
     
-    var teapot = new THREE.Mesh(teapotGeometry, phongMaterial);
-    
+    var teapot = new THREE.Mesh(teapotGeometry, phongMaterial);   
 	var quarternion = new THREE.Quaternion(); 
 		
     scene.add(ambientLight);
@@ -80,6 +79,8 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
         $scope.SEq_2 = service.SEq_2;
         $scope.SEq_3 = service.SEq_3
         $scope.SEq_4 = service.SEq_4;
+        $scope.roll  = service.roll;
+        $scope.pitch = service.pitch;
     }
     ;
     
@@ -105,9 +106,12 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
         	// teapot.rotation.z = $scope.gyroDegreeZ / (2 * Math.PI);
          
     		
-        	quaternion = ($scope.SEq_1,$scope.SEq_2,$scope.SEq_3,$scope.SEq_4);
-        	teapot.applyQuaternion(quaternion);
+        	// quaternion = ($scope.SEq_1,$scope.SEq_2,$scope.SEq_3,$scope.SEq_4);
+        	// teapot.applyMatrix.makeRotationFromQuaternion(quaternion);
         	
+        	teapot.rotation.x = $scope.roll;
+        	teapot.rotation.y = $scope.pitch;
+    		
             renderer.render( scene, camera );
             break;
         default:
