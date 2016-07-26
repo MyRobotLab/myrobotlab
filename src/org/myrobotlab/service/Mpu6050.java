@@ -858,8 +858,9 @@ public class Mpu6050 extends Service implements I2CControl {
 	public double SEq_1 = 1.0f, SEq_2 = 0.0f, SEq_3 = 0.0f, SEq_4 = 0.0f; // estimated orientation quaternion elements with initial conditions
 	
   // Pitch and Roll for ComplementaryFilter
-  public double pitch =  0;
-  public double roll  =  0;
+	public double filtered_x_angle;
+	public double filtered_y_angle;
+	public double filtered_z_angle;
   
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -1116,30 +1117,28 @@ public class Mpu6050 extends Service implements I2CControl {
 		}
 	
 	void complementaryFilter(double gyro_x, double gyro_y, double gyro_z, double acc_x, double acc_y, double acc_z){
-    double pitchAcc, rollAcc;               
-    double GYROSCOPE_SENSITIVITY = 65.536;
-     
-    double dt = 0.05;
-    
-    // Integrate the gyroscope data -> int(angularSpeed) = angle
-    pitch += (gyro_x / GYROSCOPE_SENSITIVITY) * dt; // Angle around the X-axis
-    roll  -= (gyro_y / GYROSCOPE_SENSITIVITY) * dt;    // Angle around the Y-axis
- 
-    // Compensate for drift with accelerometer data if !bullshit
-    // Sensitivity = -2 to 2 G at 16Bit -> 2G = 32768 && 0.5G = 8192
-    double forceMagnitudeApprox = Math.abs(acc_x) + Math.abs(acc_y) + Math.abs(acc_z);
-    if (forceMagnitudeApprox > 8192 && forceMagnitudeApprox < 32768)
-    {
-	// Turning around the X axis results in a vector on the Y-axis
-        // pitchAcc = Math.atan2(acc_y, acc_y) * 180 / Math.PI;
-        pitchAcc = Math.atan2(acc_y, acc_y);
-        pitch = pitch * 0.98 + pitchAcc * 0.02;
- 
-	// Turning around the Y axis results in a vector on the X-axis
-        // rollAcc = Math.atan2(acc_x, acc_z) * 180 / Math.PI;
-        rollAcc = Math.atan2(acc_x, acc_z);
-        roll = roll * 0.98 + rollAcc * 0.02;
-    }
+		// Calclations here are based on the information from 
+	  // https://www.youtube.com/watch?v=qmd6CVrlHOM
+    // http://www.geekmomprojects.com/gyroscopes-and-accelerometers-on-a-chip/
+		// Thank's Debra
+		// All angles are calculatd in radians
+		double dt = 0.05;
+		double gyroPortion = .96;
+		double accPortion = 1 - gyroPortion;
+		// Calculate the rotations from the accelerometer
+		double acc_x_angle = Math.atan(acc_x / Math.sqrt((acc_y * acc_y) + (acc_z * acc_z)));
+		double acc_y_angle = Math.atan(acc_y / Math.sqrt((acc_x * acc_x) + (acc_z * acc_z)));
+		double acc_z_angle = Math.atan(Math.sqrt((acc_x * acc_x) + (acc_y * acc_y)) / acc_z);
+		
+		// Calculate the change in direction from the Gyro
+		double gyro_x_angle =  filtered_x_angle + (dt * gyro_x / 131) * (Math.PI / 180);   
+		double gyro_y_angle =  filtered_y_angle + (dt * gyro_y / 131) * (Math.PI / 180);  
+		double gyro_z_angle =  filtered_z_angle + (dt * gyro_z / 131) * (Math.PI / 180);  
+		
+		filtered_x_angle = gyroPortion * gyro_x_angle + accPortion * acc_x_angle;
+		filtered_y_angle = gyroPortion * gyro_y_angle + accPortion * acc_y_angle;
+		filtered_z_angle = gyroPortion * gyro_z_angle + accPortion * acc_z_angle;
+		
 	}
 	public int dmpInitialize() {
 		// reset device

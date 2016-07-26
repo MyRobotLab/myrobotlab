@@ -79,8 +79,9 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
         $scope.SEq_2 = service.SEq_2;
         $scope.SEq_3 = service.SEq_3
         $scope.SEq_4 = service.SEq_4;
-        $scope.roll  = service.roll;
-        $scope.pitch = service.pitch;
+        $scope.filtered_x_angle = service.filtered_x_angle;
+        $scope.filtered_y_angle = service.filtered_y_angle;
+        $scope.filtered_z_angle = service.filtered_z_angle;
     }
     ;
     
@@ -108,10 +109,11 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     		
         	// quaternion = ($scope.SEq_1,$scope.SEq_2,$scope.SEq_3,$scope.SEq_4);
         	// teapot.applyMatrix.makeRotationFromQuaternion(quaternion);
-        	
-        	teapot.rotation.x = $scope.roll;
-        	teapot.rotation.y = $scope.pitch;
     		
+        	teapot.rotation.x = $scope.filtered_x_angle;
+        	teapot.rotation.y = $scope.filtered_y_angle;
+        	teapot.rotation.z = $scope.filtered_z_angle;
+        	
             renderer.render( scene, camera );
             break;
         default:
