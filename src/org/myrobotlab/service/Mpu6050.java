@@ -857,6 +857,10 @@ public class Mpu6050 extends Service implements I2CControl {
 	static double beta = Math.sqrt(3.0f / 4.0f) * gyroMeasError; // compute beta
 	public double SEq_1 = 1.0f, SEq_2 = 0.0f, SEq_3 = 0.0f, SEq_4 = 0.0f; // estimated orientation quaternion elements with initial conditions
 	
+  // Pitch and Roll for ComplementaryFilter
+  public double pitch =  0;
+  public double roll  =  0;
+  
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 
@@ -940,7 +944,7 @@ public class Mpu6050 extends Service implements I2CControl {
 
 		log.info(String.format("%s setController %s", getName(), controllerName));
 		createDevice();
-		setSleepEnabled(false);
+		initialize();
 		broadcastState();
 		return true;
 	}
@@ -1008,6 +1012,7 @@ public class Mpu6050 extends Service implements I2CControl {
 	public void refresh() {
 		getRaw();
 		filterUpdate(gyroDegreeX * Math.PI / 180, gyroDegreeY * Math.PI / 180, gyroDegreeZ * Math.PI / 180, accelGX, accelGY, accelGZ);
+		complementaryFilter(gyroX, gyroY, gyroZ, accelX, accelY, accelZ);
 		broadcastState();
 	}
 
@@ -1028,25 +1033,28 @@ public class Mpu6050 extends Service implements I2CControl {
 		gyroX = (byte) readbuffer[8] << 8 | readbuffer[9] & 0xFF;
 		gyroY = (byte) readbuffer[10] << 8 | readbuffer[11] & 0xFF;
 		gyroZ = (byte) readbuffer[12] << 8 | readbuffer[13] & 0xFF;
-		// Convert acceleration to G assuming min-max 2G
+		// Convert acceleration to G assuming min-max 2G as set in initialize()
 		accelGX = accelX / 16384.0;
 		accelGY = accelY / 16384.0;
 		accelGZ = accelZ / 16384.0;
 		// Convert temp to degrees Celcius
 		temperatureC = (temperature / 340.0) + 36.53;
-		// Convert gyro to G ( assuming max +-2000 degrees/s )
-		gyroDegreeX = gyroX / 16.0;
-		gyroDegreeY = gyroY / 16.0;
-		gyroDegreeZ = gyroZ / 16.0;
+		// Convert gyro to degrees/s ( assuming max +-250 degrees/s ) as set in initialize()
+		gyroDegreeX = gyroX / 131;
+		gyroDegreeY = gyroY / 131;
+		gyroDegreeZ = gyroZ / 131;
 		// broadcastState();
 	}
   
 	/** Filter the raw values using the algorithms described in this paper:
 	 * http://www.x-io.co.uk/res/doc/madgwick_internal_report.pdf
-	 * This filter is using the IMU algorithm
+	 * This filter is using the IMU algorithm i.e only Gyro and acclerometer, 
+	 * no magnetometer
 	 */
 	void filterUpdate(double w_x, double w_y, double w_z, double a_x, double a_y, double a_z)	{
-
+		// float a_x, a_y, a_z; // accelerometer measurements
+		// float w_x, w_y, w_z; // gyroscope measurements in rad/s
+		
 		// Local system variables
 		double norm; // vector norm
 		double SEqDot_omega_1, SEqDot_omega_2, SEqDot_omega_3, SEqDot_omega_4; // quaternion derrivative from gyroscopes elements
@@ -1107,6 +1115,32 @@ public class Mpu6050 extends Service implements I2CControl {
 		SEq_4 /= norm;
 		}
 	
+	void complementaryFilter(double gyro_x, double gyro_y, double gyro_z, double acc_x, double acc_y, double acc_z){
+    double pitchAcc, rollAcc;               
+    double GYROSCOPE_SENSITIVITY = 65.536;
+     
+    double dt = 0.05;
+    
+    // Integrate the gyroscope data -> int(angularSpeed) = angle
+    pitch += (gyro_x / GYROSCOPE_SENSITIVITY) * dt; // Angle around the X-axis
+    roll  -= (gyro_y / GYROSCOPE_SENSITIVITY) * dt;    // Angle around the Y-axis
+ 
+    // Compensate for drift with accelerometer data if !bullshit
+    // Sensitivity = -2 to 2 G at 16Bit -> 2G = 32768 && 0.5G = 8192
+    double forceMagnitudeApprox = Math.abs(acc_x) + Math.abs(acc_y) + Math.abs(acc_z);
+    if (forceMagnitudeApprox > 8192 && forceMagnitudeApprox < 32768)
+    {
+	// Turning around the X axis results in a vector on the Y-axis
+        // pitchAcc = Math.atan2(acc_y, acc_y) * 180 / Math.PI;
+        pitchAcc = Math.atan2(acc_y, acc_y);
+        pitch = pitch * 0.98 + pitchAcc * 0.02;
+ 
+	// Turning around the Y axis results in a vector on the X-axis
+        // rollAcc = Math.atan2(acc_x, acc_z) * 180 / Math.PI;
+        rollAcc = Math.atan2(acc_x, acc_z);
+        roll = roll * 0.98 + rollAcc * 0.02;
+    }
+	}
 	public int dmpInitialize() {
 		// reset device
 		log.info("Resetting MPU6050...");
