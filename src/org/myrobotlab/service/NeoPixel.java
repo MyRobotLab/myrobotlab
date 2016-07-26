@@ -324,9 +324,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
     LoggingFactory.getInstance().setLevel(Level.INFO);
 
     try {
-      //WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       //webgui.autoStartBrowser(false);
-      //webgui.startService();
+      webgui.startService();
       Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
@@ -338,7 +338,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       arduino1.connect(arduino, "Serial1");
 //      //arduino.setDebug(true);
       NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
-//      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
+      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
       neopixel.attach(arduino1, 5, 16);
       sleep(50);
       PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
