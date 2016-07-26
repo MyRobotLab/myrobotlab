@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CONTROLLER_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_DETACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ARDUINO;
@@ -19,10 +20,12 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MSG_ROUTE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.NEO_PIXEL_WRITE_MATRIX;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_ATTACHED_DEVICE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_BOARD_INFO;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_BOARD_STATUS;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_DEBUG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MESSAGE_ACK;
@@ -58,9 +61,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.MrlMsg;
@@ -72,6 +77,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.NeoPixel.PixelColor;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.PinData;
@@ -683,8 +689,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public static final int MRL_IO_SERIAL_3 = 4;
   public int controllerAttachAs = MRL_IO_NOT_DEFINED;
   HashMap<Integer,Arduino> attachedController = new HashMap<Integer, Arduino>();
-  public final static int CONTROLLER_ATTACH =    80;
-  public final static int MSG_ROUTE =    81;
+  //public final static int CONTROLLER_ATTACH =    80;
+  //public final static int MSG_ROUTE =    81;
 
 	
 
@@ -839,7 +845,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         error("Unknow serial port");
         return;
 	  }
-	  controller.attachController(this, controllerAttachAs);
+	  controller.controllerAttach(this, controllerAttachAs);
     Integer version = getVersion();
     if (version == null || version != MRLCOMM_VERSION) {
       error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
@@ -847,7 +853,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     broadcastState();
 	}
 	
-	public void attachController(Arduino controller, int serialPort){
+	public void controllerAttach(Arduino controller, int serialPort){
 	  attachedController.put(serialPort, controller);
 	  MrlMsg msg = new MrlMsg(CONTROLLER_ATTACH);
 	  msg.addData(serialPort);
@@ -1097,7 +1103,16 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	
 	public void disconnect() {
 		mrlCommVersion = null;
-		serial.disconnect();
+		for (Arduino controller : attachedController.values()) {
+		  controller.disconnect();
+		}
+		attachedController.clear();
+		if(controllerAttachAs != MRL_IO_NOT_DEFINED) {
+		  controllerAttachAs = MRL_IO_NOT_DEFINED;
+		}
+		else {
+		  serial.disconnect();
+		}
 		broadcastState();
 	}
 
@@ -1808,7 +1823,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			log.info("MRLComm Debug Message {}", payload);
 			break;
 		}
-		/*
 		case PUBLISH_BOARD_INFO: {
 			int boardId = message[1];
 			String boardName = "";
@@ -1824,16 +1838,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 				break;
 			}
 			log.info("Board type returned by Arduino: {}", boardName);
-			log.info("Board type currently set: {}", board);
-			if ((board == "" || board == null) && boardId != BOARD_TYPE_ID_UNKNOWN) {
+			log.info("Board type currently set: {}", boardType);
+			if ((boardType == "" || boardType == null) && boardId != BOARD_TYPE_ID_UNKNOWN) {
 				setBoard(boardName);
-				log.info("Board type set to: {}", board);
+				log.info("Board type set to: {}", boardType);
 			} else {
 				log.info("No change in board type");
 			}
 			break;
 		}
-		*/
 		case MSG_ROUTE: {
 		  int[] newMsg = new int[MAX_MSG_SIZE];
 		  for (int i = 2; i < msgSize; i++){
@@ -2549,6 +2562,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// log.info("here");
 	}
 
+	public void publishBoardInfo(){
+	  
+	}
 
-
+	public void msgRoute(){
+	  
+	}
 }

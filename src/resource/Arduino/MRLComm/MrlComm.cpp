@@ -35,6 +35,7 @@ void MrlComm::softReset() {
     if (mrlCmd[i] != NULL){
       mrlCmd[i]->end();
       delete mrlCmd[i];
+      mrlCmd[i] = NULL;
     }
   }
 }

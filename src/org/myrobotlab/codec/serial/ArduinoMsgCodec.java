@@ -98,6 +98,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CONTROLLER_ATTACH;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CREATE_I2C_DEVICE;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_ATTACH;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_DETACH;
@@ -116,6 +117,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE_TO;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_RESET;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_STOP;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MSG_ROUTE;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.NEO_PIXEL_WRITE_MATRIX;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ON_SENSOR_DATA;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
@@ -172,179 +174,185 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {analogWrite int int} 
 	public final static int ANALOG_WRITE =		4;
 
+	// {controllerAttach Arduino int} 
+	public final static int CONTROLLER_ATTACH =		5;
+
 	// {createI2cDevice I2CControl int int} 
-	public final static int CREATE_I2C_DEVICE =		5;
+	public final static int CREATE_I2C_DEVICE =		6;
 
 	// {deviceAttach DeviceControl Object[]} 
-	public final static int DEVICE_ATTACH =		6;
+	public final static int DEVICE_ATTACH =		7;
 
 	// {deviceDetach DeviceControl} 
-	public final static int DEVICE_DETACH =		7;
+	public final static int DEVICE_DETACH =		8;
 
 	// {digitalWrite int int} 
-	public final static int DIGITAL_WRITE =		8;
+	public final static int DIGITAL_WRITE =		9;
 
 	// {disableBoardStatus} 
-	public final static int DISABLE_BOARD_STATUS =		9;
+	public final static int DISABLE_BOARD_STATUS =		10;
 
 	// {disablePin int} 
-	public final static int DISABLE_PIN =		10;
+	public final static int DISABLE_PIN =		11;
 
 	// {enableBoardStatus int} 
-	public final static int ENABLE_BOARD_STATUS =		11;
+	public final static int ENABLE_BOARD_STATUS =		12;
 
 	// {enablePin int} 
-	public final static int ENABLE_PIN =		12;
+	public final static int ENABLE_PIN =		13;
 
 	// {getMrlPinType PinDefinition} 
-	public final static int GET_MRL_PIN_TYPE =		13;
+	public final static int GET_MRL_PIN_TYPE =		14;
 
 	// {i2cRead I2CControl int int byte[] int} 
-	public final static int I2C_READ =		14;
+	public final static int I2C_READ =		15;
 
 	// {i2cWrite I2CControl int int byte[] int} 
-	public final static int I2C_WRITE =		15;
+	public final static int I2C_WRITE =		16;
 
 	// {i2cWriteRead I2CControl int int byte[] int byte[] int} 
-	public final static int I2C_WRITE_READ =		16;
+	public final static int I2C_WRITE_READ =		17;
 
 	// {intsToString int[] int int} 
-	public final static int INTS_TO_STRING =		17;
+	public final static int INTS_TO_STRING =		18;
 
 	// {isAttached} 
-	public final static int IS_ATTACHED =		18;
+	public final static int IS_ATTACHED =		19;
 
 	// {motorMove MotorControl} 
-	public final static int MOTOR_MOVE =		19;
+	public final static int MOTOR_MOVE =		20;
 
 	// {motorMoveTo MotorControl} 
-	public final static int MOTOR_MOVE_TO =		20;
+	public final static int MOTOR_MOVE_TO =		21;
 
 	// {motorReset MotorControl} 
-	public final static int MOTOR_RESET =		21;
+	public final static int MOTOR_RESET =		22;
 
 	// {motorStop MotorControl} 
-	public final static int MOTOR_STOP =		22;
+	public final static int MOTOR_STOP =		23;
+
+	// {msgRoute} 
+	public final static int MSG_ROUTE =		24;
 
 	// {neoPixelWriteMatrix NeoPixel List} 
-	public final static int NEO_PIXEL_WRITE_MATRIX =		23;
+	public final static int NEO_PIXEL_WRITE_MATRIX =		25;
 
 	// {onSensorData SensorData} 
-	public final static int ON_SENSOR_DATA =		24;
+	public final static int ON_SENSOR_DATA =		26;
 
-	// {pinMode String String} 
-	public final static int PIN_MODE =		25;
+	// {pinMode int String} 
+	public final static int PIN_MODE =		27;
 
 	// {publishAttachedDevice String} 
-	public final static int PUBLISH_ATTACHED_DEVICE =		26;
+	public final static int PUBLISH_ATTACHED_DEVICE =		28;
 
 	// {publishBoardInfo BoardInfo} 
-	public final static int PUBLISH_BOARD_INFO =		27;
+	public final static int PUBLISH_BOARD_INFO =		29;
 
 	// {publishBoardStatus BoardStatus} 
-	public final static int PUBLISH_BOARD_STATUS =		28;
+	public final static int PUBLISH_BOARD_STATUS =		30;
 
 	// {publishDebug String} 
-	public final static int PUBLISH_DEBUG =		29;
+	public final static int PUBLISH_DEBUG =		31;
 
 	// {publishMessageAck} 
-	public final static int PUBLISH_MESSAGE_ACK =		30;
+	public final static int PUBLISH_MESSAGE_ACK =		32;
 
 	// {publishPin PinData} 
-	public final static int PUBLISH_PIN =		31;
+	public final static int PUBLISH_PIN =		33;
 
 	// {publishPinArray PinData[]} 
-	public final static int PUBLISH_PIN_ARRAY =		32;
+	public final static int PUBLISH_PIN_ARRAY =		34;
 
 	// {publishPulse Long} 
-	public final static int PUBLISH_PULSE =		33;
+	public final static int PUBLISH_PULSE =		35;
 
 	// {publishPulseStop Integer} 
-	public final static int PUBLISH_PULSE_STOP =		34;
+	public final static int PUBLISH_PULSE_STOP =		36;
 
 	// {publishSensorData SensorData} 
-	public final static int PUBLISH_SENSOR_DATA =		35;
+	public final static int PUBLISH_SENSOR_DATA =		37;
 
 	// {publishServoEvent Integer} 
-	public final static int PUBLISH_SERVO_EVENT =		36;
+	public final static int PUBLISH_SERVO_EVENT =		38;
 
 	// {publishTrigger Pin} 
-	public final static int PUBLISH_TRIGGER =		37;
+	public final static int PUBLISH_TRIGGER =		39;
 
 	// {pulse int int int int} 
-	public final static int PULSE =		38;
+	public final static int PULSE =		40;
 
 	// {pulseStop} 
-	public final static int PULSE_STOP =		39;
+	public final static int PULSE_STOP =		41;
 
-	// {read String} 
-	public final static int READ =		40;
+	// {read int} 
+	public final static int READ =		42;
 
 	// {releaseI2cDevice I2CControl int int} 
-	public final static int RELEASE_I2C_DEVICE =		41;
+	public final static int RELEASE_I2C_DEVICE =		43;
 
 	// {sensorActivate SensorControl Object[]} 
-	public final static int SENSOR_ACTIVATE =		42;
+	public final static int SENSOR_ACTIVATE =		44;
 
 	// {sensorDeactivate SensorControl} 
-	public final static int SENSOR_DEACTIVATE =		43;
+	public final static int SENSOR_DEACTIVATE =		45;
 
 	// {sensorPollingStart String} 
-	public final static int SENSOR_POLLING_START =		44;
+	public final static int SENSOR_POLLING_START =		46;
 
 	// {sensorPollingStop String} 
-	public final static int SENSOR_POLLING_STOP =		45;
+	public final static int SENSOR_POLLING_STOP =		47;
 
 	// {servoAttach ServoControl int} 
-	public final static int SERVO_ATTACH =		46;
+	public final static int SERVO_ATTACH =		48;
 
 	// {servoDetach ServoControl} 
-	public final static int SERVO_DETACH =		47;
+	public final static int SERVO_DETACH =		49;
 
 	// {servoEventsEnabled ServoControl boolean} 
-	public final static int SERVO_EVENTS_ENABLED =		48;
+	public final static int SERVO_EVENTS_ENABLED =		50;
 
 	// {servoSetSpeed ServoControl} 
-	public final static int SERVO_SET_SPEED =		49;
+	public final static int SERVO_SET_SPEED =		51;
 
 	// {servoSweepStart ServoControl} 
-	public final static int SERVO_SWEEP_START =		50;
+	public final static int SERVO_SWEEP_START =		52;
 
 	// {servoSweepStop ServoControl} 
-	public final static int SERVO_SWEEP_STOP =		51;
+	public final static int SERVO_SWEEP_STOP =		53;
 
 	// {servoWrite ServoControl} 
-	public final static int SERVO_WRITE =		52;
+	public final static int SERVO_WRITE =		54;
 
 	// {servoWriteMicroseconds ServoControl int} 
-	public final static int SERVO_WRITE_MICROSECONDS =		53;
+	public final static int SERVO_WRITE_MICROSECONDS =		55;
 
 	// {setDebounce int} 
-	public final static int SET_DEBOUNCE =		54;
+	public final static int SET_DEBOUNCE =		56;
 
 	// {setDebug boolean} 
-	public final static int SET_DEBUG =		55;
+	public final static int SET_DEBUG =		57;
 
 	// {setDigitalTriggerOnly Boolean} 
-	public final static int SET_DIGITAL_TRIGGER_ONLY =		56;
+	public final static int SET_DIGITAL_TRIGGER_ONLY =		58;
 
 	// {setPWMFrequency Integer Integer} 
-	public final static int SET_PWMFREQUENCY =		57;
+	public final static int SET_PWMFREQUENCY =		59;
 
 	// {setSampleRate int} 
-	public final static int SET_SAMPLE_RATE =		58;
+	public final static int SET_SAMPLE_RATE =		60;
 
 	// {setSerialRate int} 
-	public final static int SET_SERIAL_RATE =		59;
+	public final static int SET_SERIAL_RATE =		61;
 
 	// {setTrigger int int int} 
-	public final static int SET_TRIGGER =		60;
+	public final static int SET_TRIGGER =		62;
 
 	// {softReset} 
-	public final static int SOFT_RESET =		61;
+	public final static int SOFT_RESET =		63;
 
 	// {write int int} 
-	public final static int WRITE =		62;
+	public final static int WRITE =		64;
 
 
   static {
@@ -359,6 +367,9 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 		byteToMethod.put(ANALOG_WRITE,"analogWrite");
 		methodToByte.put("analogWrite",ANALOG_WRITE);
+
+		byteToMethod.put(CONTROLLER_ATTACH,"controllerAttach");
+		methodToByte.put("controllerAttach",CONTROLLER_ATTACH);
 
 		byteToMethod.put(CREATE_I2C_DEVICE,"createI2cDevice");
 		methodToByte.put("createI2cDevice",CREATE_I2C_DEVICE);
@@ -413,6 +424,9 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 		byteToMethod.put(MOTOR_STOP,"motorStop");
 		methodToByte.put("motorStop",MOTOR_STOP);
+
+		byteToMethod.put(MSG_ROUTE,"msgRoute");
+		methodToByte.put("msgRoute",MSG_ROUTE);
 
 		byteToMethod.put(NEO_PIXEL_WRITE_MATRIX,"neoPixelWriteMatrix");
 		methodToByte.put("neoPixelWriteMatrix",NEO_PIXEL_WRITE_MATRIX);
@@ -735,6 +749,10 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		return "ANALOG_WRITE";
 
 	}
+	case ArduinoMsgCodec.CONTROLLER_ATTACH:{
+		return "CONTROLLER_ATTACH";
+
+	}
 	case ArduinoMsgCodec.CREATE_I2C_DEVICE:{
 		return "CREATE_I2C_DEVICE";
 
@@ -805,6 +823,10 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	}
 	case ArduinoMsgCodec.MOTOR_STOP:{
 		return "MOTOR_STOP";
+
+	}
+	case ArduinoMsgCodec.MSG_ROUTE:{
+		return "MSG_ROUTE";
 
 	}
 	case ArduinoMsgCodec.NEO_PIXEL_WRITE_MATRIX:{
