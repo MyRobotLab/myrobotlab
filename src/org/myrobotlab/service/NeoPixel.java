@@ -344,6 +344,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
       PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
       neopixel.setPixel(pix);
       neopixel.writeMatrix();
+      NeoPixel neopixel1 = (NeoPixel) Runtime.start("neopixel1", "NeoPixel");
+      neopixel1.attach(arduino, 5, 16);
 //      //arduino.setLoadTimingEnabled(true);
 //      Servo servo=(Servo)Runtime.start("servo","Servo");
 //      servo.attach(arduino, 5);
