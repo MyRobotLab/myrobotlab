@@ -20,7 +20,7 @@ bool MrlIo::begin(int _ioType, long speed) {
 		case MRL_IO_SERIAL_0:
 			serial = &Serial;
 			break;
-#if BOARD == BOARD_TYPE_MEGA
+#if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
 		case MRL_IO_SERIAL_1:
 			serial = &Serial1;
 			break;
@@ -38,6 +38,7 @@ bool MrlIo::begin(int _ioType, long speed) {
 	serial->begin(speed);
 	ioType == _ioType;
 	openIo |= (1 << ioType);
+  //delay(500);
 	return true;
 }
 
@@ -47,6 +48,12 @@ void MrlIo::write(unsigned char value) {
 		ioType = MRL_IO_NOT_DEFINED;
 		return;
 	}
+// if(ioType==MRL_IO_SERIAL_0){
+//  Serial.write(value);
+// }
+// else if(ioType==MRL_IO_SERIAL_1){
+//  Serial1.write(value);
+// }
 	serial->write(value);
 }
 

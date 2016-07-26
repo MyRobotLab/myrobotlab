@@ -19,6 +19,7 @@ public:
 	bool readCommand();
 	unsigned char* getIoCmd();
 	unsigned char getIoCmd(int pos);
+	int getMsgSize();
 };
 
 #endif

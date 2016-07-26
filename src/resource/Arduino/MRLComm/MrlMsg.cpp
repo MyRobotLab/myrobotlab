@@ -95,6 +95,7 @@ void MrlMsg::addDataCount() {
 
 // send the message to Serial
 void MrlMsg::sendMsg() {
+ // publishDebug("Sending msg");
 	if (dataCountEnabled) {
 		addDataCount();
 	}

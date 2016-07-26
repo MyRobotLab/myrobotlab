@@ -6,7 +6,7 @@
 
 #define MRL_IO_NOT_DEFINED 0
 #define MRL_IO_SERIAL_0 1
-#if BOARD==BOARD_TYPE_MEGA
+#if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
 	#define MRL_IO_SERIAL_1 2
 	#define MRL_IO_SERIAL_2 3
 	#define MRL_IO_SERIAL_3 4
