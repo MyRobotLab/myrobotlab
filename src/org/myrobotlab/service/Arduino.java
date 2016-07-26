@@ -676,14 +676,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	int publishBoardStatusModulus = 1000;
 	
-	Arduino rootController = null;
+	transient Arduino rootController = null;
 	public static final int MRL_IO_NOT_DEFINED = 0;
   public static final int MRL_IO_SERIAL_0 = 1;
   public static final int MRL_IO_SERIAL_1 = 2;
   public static final int MRL_IO_SERIAL_2 = 3;
   public static final int MRL_IO_SERIAL_3 = 4;
-  public int controllerAttachAs = MRL_IO_NOT_DEFINED;
-  HashMap<Integer,Arduino> attachedController = new HashMap<Integer, Arduino>();
+  public transient int controllerAttachAs = MRL_IO_NOT_DEFINED;
+  transient HashMap<Integer,Arduino> attachedController = new HashMap<Integer, Arduino>();
 
 	
 
@@ -810,7 +810,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 	
 	// this allow to connect a controller to another controller with Serial1, Serial2, Serial3 on a mega board
-	public void connect(Arduino controller, String serialPort){
+	public void connect(Arduino controller, String serialPort) throws IOException{
 	  if (controller == null){
       error("setting null as controller");
       return;
@@ -824,6 +824,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	    return;
 	  }
 	  rootController = controller;
+	  //connect("COM15");
+	  serial = rootController.serial;
 	  switch (serialPort){
 	    case "Serial1":
 	      controllerAttachAs = MRL_IO_SERIAL_1;
@@ -1078,7 +1080,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	public void deviceDetach(DeviceControl device) {
 		sendMsg(DEVICE_DETACH, getDeviceId(device));
-
 	}
 
 	/**
@@ -1103,6 +1104,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		attachedController.clear();
 		if(controllerAttachAs != MRL_IO_NOT_DEFINED) {
 		  controllerAttachAs = MRL_IO_NOT_DEFINED;
+		  serial = (Serial) createPeer("serial");
 		}
 		else {
 		  serial.disconnect();
