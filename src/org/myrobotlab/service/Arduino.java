@@ -61,11 +61,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.MrlMsg;
@@ -77,7 +75,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.NeoPixel.PixelColor;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.PinData;
@@ -668,8 +665,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	// perhaps when we connect to the serial port, MRLComm can just have the
 	// version waiting?
 	public int retryMax = 3;
-	
-	
 	public int retryConnectDelay = 1500;
 	
 	// make sure this is sync'd across threads,
@@ -689,8 +684,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public static final int MRL_IO_SERIAL_3 = 4;
   public int controllerAttachAs = MRL_IO_NOT_DEFINED;
   HashMap<Integer,Arduino> attachedController = new HashMap<Integer, Arduino>();
-  //public final static int CONTROLLER_ATTACH =    80;
-  //public final static int MSG_ROUTE =    81;
 
 	
 
@@ -846,6 +839,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         return;
 	  }
 	  controller.controllerAttach(this, controllerAttachAs);
+	  softReset();
     Integer version = getVersion();
     if (version == null || version != MRLCOMM_VERSION) {
       error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
