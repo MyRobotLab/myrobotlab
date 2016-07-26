@@ -537,7 +537,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	int error_mrl_to_arduino_rx_cnt;
 
 	int byteCount;
-	int msgSize;
+	public int msgSize;
 
 	transient int[] msg = new int[MAX_MSG_SIZE];
 	// i2c This needs to be volatile because it will be updated in a different
@@ -674,6 +674,19 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	int pinEventsDefaultRate = 8000;
 
 	int publishBoardStatusModulus = 1000;
+	
+	Arduino rootController = null;
+	public static final int MRL_IO_NOT_DEFINED = 0;
+  public static final int MRL_IO_SERIAL_0 = 1;
+  public static final int MRL_IO_SERIAL_1 = 2;
+  public static final int MRL_IO_SERIAL_2 = 3;
+  public static final int MRL_IO_SERIAL_3 = 4;
+  public int controllerAttachAs = MRL_IO_NOT_DEFINED;
+  HashMap<Integer,Arduino> attachedController = new HashMap<Integer, Arduino>();
+  public final static int CONTROLLER_ATTACH =    80;
+  public final static int MSG_ROUTE =    81;
+
+	
 
 	public Arduino(String n) {
 		super(n);
@@ -754,6 +767,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void attach(String listener, int address) {
 		attach((PinListener) Runtime.getService(listener), address);
 	}
+	
+	
 
 	public void connect(String port) throws IOException {
 		// call the other method here.
@@ -793,6 +808,50 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 
 		broadcastState();
+	}
+	
+	// this allow to connect a controller to another controller with Serial1, Serial2, Serial3 on a mega board
+	public void connect(Arduino controller, String serialPort){
+	  if (controller == null){
+      error("setting null as controller");
+      return;
+	  }
+	  if (controller == this){
+	    error("controller can't attach to itself");
+	    return;
+	  }
+	  if (!controller.boardType.equalsIgnoreCase("mega")){
+	    error("You must connect to a Mega controller");
+	    return;
+	  }
+	  rootController = controller;
+	  switch (serialPort){
+	    case "Serial1":
+	      controllerAttachAs = MRL_IO_SERIAL_1;
+	      break;
+      case "Serial2":
+        controllerAttachAs = MRL_IO_SERIAL_2;
+        break;
+      case "Serial3":
+        controllerAttachAs = MRL_IO_SERIAL_3;
+        break;
+      default:
+        error("Unknow serial port");
+        return;
+	  }
+	  controller.attachController(this, controllerAttachAs);
+    Integer version = getVersion();
+    if (version == null || version != MRLCOMM_VERSION) {
+      error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
+    }
+    broadcastState();
+	}
+	
+	public void attachController(Arduino controller, int serialPort){
+	  attachedController.put(serialPort, controller);
+	  MrlMsg msg = new MrlMsg(CONTROLLER_ATTACH);
+	  msg.addData(serialPort);
+	  sendMsg(msg);
 	}
 
 	@Override
@@ -1077,7 +1136,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		msg.addData(getMrlPinType(pin));
 		// TODO - make this Hz so everyone is happy :)
 		// msg.addData16(rate); // 
-		sendMsg(msg);
 	}
 
 	/**
@@ -1119,7 +1177,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		if (deviceList.containsKey(name)) {
 			Integer id = deviceList.get(name).getId();
 			if (id == null) {
-				error("cannot get device id for %s - device attempetd to attach - but I suspect something went wrong");
+				error("cannot get device id for %s - device attempetd to attach - but I suspect something went wrong", name);
 			}
 			return id;
 		}
@@ -1302,6 +1360,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// include that we must have gotten a valid MRLComm version number.
 		if (serial != null && serial.isConnected() && mrlCommVersion != null) {
 			return true;
+		}
+		if(rootController != null && rootController.isConnected() && mrlCommVersion != null){
+		  return true;
 		}
 		return false;
 	}
@@ -1648,7 +1709,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		 *
 		 */
 		case PUBLISH_ATTACHED_DEVICE: {
-
+		  
 			int newDeviceId = message[1];
 			int nameStrSize = message[2];
 			String deviceName = intsToString(message, 3, nameStrSize);
@@ -1773,6 +1834,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			break;
 		}
 		*/
+		case MSG_ROUTE: {
+		  int[] newMsg = new int[MAX_MSG_SIZE];
+		  for (int i = 2; i < msgSize; i++){
+		    newMsg[i-2] = message[i];
+		  }
+      attachedController.get(message[1]).msgSize = msgSize - 2;
+		  attachedController.get(message[1]).processMessage(newMsg);
+		  break;
+		}
 		default: {
 			// FIXME - use formatter for message
 			error("unknown serial event %d", function);
@@ -1949,48 +2019,62 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 *
 	 */
 	public synchronized void sendMsg(int function, int... params) {
-		// log.info("Sending Message : {}",
-		// ArduinoMsgCodec.functionToString(function));
-		// if (log.isDebugEnabled()) {
-		// log.debug("Sending Arduino message funciton {}",
-		// ArduinoMsgCodec.functionToString(function));
-		// }
-		// some sanity checking.
-		if (!serial.isConnected()) {
-			log.warn("Serial port is not connected, unable to send message.");
-			return;
-		}
-		// don't even attempt to send it if we know it's a bogus message.
-		// TODO: we need to account for the magic byte & length bytes. max
-		// message size is 64-2 (potentially)
-		if (params.length > MAX_MSG_SIZE) {
-			log.error("Arduino Message size was large! Function {} Size {}", function, params.length);
-			return;
-		}
-		// System.out.println("Sending Message " + function );
-		try {
-			// Minimum MRLComm message is 3 bytes(int).
-			// MAGIC_NUMBER|LENGTH|FUNCTION|PARAM0|PARAM1 would be valid
-			int[] msgToSend = new int[3 + params.length];
-			msgToSend[0] = MAGIC_NUMBER;
-			msgToSend[1] = 1 + params.length;
-			msgToSend[2] = function;
-			for (int i = 0; i < params.length; i++) {
-				// What if the int is > 127 ?
-				msgToSend[3 + i] = params[i];
-			}
-			// send the message as an array. (serial port actually writes 1 byte
-			// at a time anyway.. oh well.)
-
-			// set a flag that a message is in flight.
-			ackRecieved = false;
-			// notify();
-
-			// Technically this is the only thing that needs to be synchronized
-			// i think.
-			synchronized (msgToSend) {
-				serial.write(msgToSend);
-			}
+	  if(rootController != null){
+	    MrlMsg msg = new MrlMsg(MSG_ROUTE);
+	    msg.addData(controllerAttachAs);
+	    msg.addData(function);
+	      for (int i = 0; i < params.length; i++) {
+	        msg.addData(params[i]);
+	      }
+	    rootController.sendMsg(msg);
+	  }
+	  else{
+  		// log.info("Sending Message : {}",
+  		// ArduinoMsgCodec.functionToString(function));
+  		// if (log.isDebugEnabled()) {
+  		// log.debug("Sending Arduino message funciton {}",
+  		// ArduinoMsgCodec.functionToString(function));
+  		// }
+  		// some sanity checking.
+  		if (!serial.isConnected()) {
+  			log.warn("Serial port is not connected, unable to send message.");
+  			return;
+  		}
+  		// don't even attempt to send it if we know it's a bogus message.
+  		// TODO: we need to account for the magic byte & length bytes. max
+  		// message size is 64-2 (potentially)
+  		if (params.length > MAX_MSG_SIZE) {
+  			log.error("Arduino Message size was large! Function {} Size {}", function, params.length);
+  			return;
+  		}
+  		// System.out.println("Sending Message " + function );
+  		try {
+  			// Minimum MRLComm message is 3 bytes(int).
+  			// MAGIC_NUMBER|LENGTH|FUNCTION|PARAM0|PARAM1 would be valid
+  			int[] msgToSend = new int[3 + params.length];
+  			msgToSend[0] = MAGIC_NUMBER;
+  			msgToSend[1] = 1 + params.length;
+  			msgToSend[2] = function;
+  			for (int i = 0; i < params.length; i++) {
+  				// What if the int is > 127 ?
+  				msgToSend[3 + i] = params[i];
+  			}
+  			// send the message as an array. (serial port actually writes 1 byte
+  			// at a time anyway.. oh well.)
+  
+  			// set a flag that a message is in flight.
+  			ackRecieved = false;
+  			// notify();
+  
+  			// Technically this is the only thing that needs to be synchronized
+  			// i think.
+  			synchronized (msgToSend) {
+  				serial.write(msgToSend);
+  			}
+  		  } catch (Exception e) {
+  		    error("sendMsg " + e.getMessage());
+  		  }
+  		}
 			// TODO: wait for an ack of the message to arrive!
 			long start = System.currentTimeMillis();
 			// wait a max of 100 for the ack.
@@ -2004,7 +2088,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 				// sleep 1 nanosecond?!
 				// Thread.sleep(0,1);
 				// sleep 1 millisecond
-				Thread.sleep(1);
+				//Thread.sleep(1);
+				sleep(1);
 				// log.info("Waiting on ack {}", numAck);
 				long delta = System.currentTimeMillis() - start;
 				// timeout waiting for the ack.
@@ -2035,11 +2120,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			// This helps avoid the arduino dropping messages and getting
 			// lost/disconnected.
 			if (delay > 0) {
-				Thread.sleep(delay);
+				//Thread.sleep(delay);
+			  sleep(delay);
 			}
-		} catch (Exception e) {
-			error("sendMsg " + e.getMessage());
-		}
 
 	}
 

@@ -133,7 +133,10 @@
 #define WRITE		62
 ///// INO GENERATED DEFINITION END //////
 
-
+#define CONTROLLER_ATTACH 80
+#define MSG_ROUTE 81
+#define ENABLE_PIN_EVENTS 82
+#define DISABLE_PIN_EVENTS 83
 /*******************************************************************
  * serial protocol functions
  */

@@ -70,3 +70,6 @@ unsigned char MrlCmd::getIoCmd(int pos){
 	return ioCmd[pos];
 }
 
+int MrlCmd::getMsgSize(){
+	return msgSize;
+}

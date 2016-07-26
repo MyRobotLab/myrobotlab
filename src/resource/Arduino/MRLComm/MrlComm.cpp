@@ -4,12 +4,19 @@
 MrlComm::MrlComm() {
 	softReset();
 	byteCount = 0;
-	mrlCmd = new MrlCmd(MRL_IO_SERIAL_0);
+	mrlCmd[0] = new MrlCmd(MRL_IO_SERIAL_0);
+  for (int i = 1; i < (sizeof(mrlCmd)/sizeof(MrlCmd*)); i++){
+    mrlCmd[i] = NULL;
+  }
 
 }
 
 MrlComm::~MrlComm(){
-	delete mrlCmd;
+  for (int i = 0; i < (sizeof(mrlCmd)/sizeof(MrlCmd*)); i++){
+		if (mrlCmd[i] != NULL){
+			delete mrlCmd[i];
+		}
+	}
 }
 /***********************************************************************
  * UTILITY METHODS BEGIN
@@ -24,6 +31,12 @@ void MrlComm::softReset() {
 	enableBoardStatus = false;
 	Device::nextDeviceId = 0;
 	debug = false;
+  for (int i = 1; i < (sizeof(mrlCmd)/sizeof(MrlCmd*)); i++){
+    if (mrlCmd[i] != NULL){
+      mrlCmd[i]->end();
+      delete mrlCmd[i];
+    }
+  }
 }
 
 /***********************************************************************
@@ -100,10 +113,10 @@ void MrlComm::publishBoardInfo() {
  * Publish the acknowledgement of the command received and processed.
  * MAGIC_NUMBER|2|PUBLISH_MESSAGE_ACK|FUNCTION
  */
-void MrlComm::publishCommandAck() {
+void MrlComm::publishCommandAck(int function) {
 	MrlMsg msg(PUBLISH_MESSAGE_ACK);
 	// the function that we're ack-ing
-	msg.addData(mrlCmd->getIoCmd(0));
+	msg.addData(function);
 	msg.sendMsg();
 }
 /**
@@ -112,9 +125,9 @@ void MrlComm::publishCommandAck() {
  * PUBLISH_ATTACHED_DEVICE | NEW_DEVICE_INDEX | NAME_STR_SIZE | NAME
  *
  */
-void MrlComm::publishAttachedDevice(int id, int nameSize, int namePos) {
+void MrlComm::publishAttachedDevice(int id, int nameSize, unsigned char* name) {
 	MrlMsg msg(PUBLISH_ATTACHED_DEVICE, id);
-	msg.addData(mrlCmd->getIoCmd() + namePos, nameSize, true);
+	msg.addData(name, nameSize, true);
 	msg.sendMsg();
 }
 
@@ -122,8 +135,12 @@ void MrlComm::publishAttachedDevice(int id, int nameSize, int namePos) {
  * SERIAL METHODS BEGIN
  */
 void MrlComm::readCommand() {
-	if (mrlCmd->readCommand()) {
-		processCommand();
+  for (int i = 0; i < (sizeof(mrlCmd)/sizeof(MrlCmd*)); i++){
+		if(mrlCmd[i] != NULL){
+			if (mrlCmd[i]->readCommand()) {
+				processCommand(i+1);
+			}
+		}
 	}
 }
 
@@ -133,9 +150,18 @@ void MrlComm::readCommand() {
  * processCommand() - once the main loop has read an mrlcomm message from the 
  * serial port, this method will be called.
  */
-void MrlComm::processCommand() {
+void MrlComm::processCommand(int ioType) {
+  unsigned char* ioCmd = mrlCmd[ioType-1]->getIoCmd();
+  if (ioType != MRL_IO_SERIAL_0){
+    MrlMsg msg = MrlMsg(MSG_ROUTE);
+    msg.addData(ioType);
+    msg.addData(ioCmd,mrlCmd[ioType-1]->getMsgSize());
+    msg.sendMsg();
+  //  MrlMsg::publishDebug("not from Serial, ioType" + String(ioType));
+    return;
+  }
 	// FIXME - all case X: should have scope operator { } !
-	unsigned char* ioCmd = mrlCmd->getIoCmd();
+   // MrlMsg::publishDebug("not from Serial:" + String(ioCmd[0]));
 	switch (ioCmd[0]) {
 	// === system pass through begin ===
 	case DIGITAL_WRITE:
@@ -260,7 +286,7 @@ void MrlComm::processCommand() {
 		//sensorPollingStart();
 		break;
 	case DEVICE_ATTACH:
-		deviceAttach();
+		deviceAttach(ioCmd);
 		break;
 	case DEVICE_DETACH:
 		deviceDetach(ioCmd[1]);
@@ -290,12 +316,22 @@ void MrlComm::processCommand() {
 	case NEO_PIXEL_WRITE_MATRIX:
 		((MrlNeopixel*) getDevice(ioCmd[1]))->neopixelWriteMatrix(ioCmd);
 		break;
+	case CONTROLLER_ATTACH:
+		mrlCmd[ioCmd[1]-1] = new MrlCmd(ioCmd[1]);
+		break;
+	case MSG_ROUTE: {
+		MrlMsg msg(ioCmd[2]);
+		msg.addData(ioCmd+3, mrlCmd[ioType-1]->getMsgSize()-3);
+		msg.begin(ioCmd[1],115200);
+		msg.sendMsg();
+		break;
+	}
 	default:
 		MrlMsg::publishError(ERROR_UNKOWN_CMD);
 		break;
 	} // end switch
 	  // ack that we got a command (should we ack it first? or after we process the command?)
-	publishCommandAck();
+	publishCommandAck(ioCmd[0]);
 	// reset command buffer to be ready to receive the next command.
 	// KW: we should only need to set the byteCount back to zero. clearing this array is just for safety sake i guess?
 	// GR: yup
@@ -330,8 +366,8 @@ void MrlComm::setPWMFrequency(int address, int prescalar) {
 
 // SET_SERIAL_RATE
 void MrlComm::setSerialRate() {
-	mrlCmd->end();
-	mrlCmd->begin(MRL_IO_SERIAL_0,mrlCmd->getIoCmd(1));
+	//mrlCmd->end();
+	//mrlCmd->begin(MRL_IO_SERIAL_0,mrlCmd->getIoCmd(1));
 }
 
 /**********************************************************************
@@ -358,14 +394,14 @@ void MrlComm::setSerialRate() {
  * implemented as a ptr it will be 4 bytes - if it is a generics id
  * it could be implemented with 1 byte
  */
-void MrlComm::deviceAttach() {
+void MrlComm::deviceAttach(unsigned char* ioCmd) {
 	// TOOD:KW check free memory to see if we can attach a new device. o/w return an error!
 	// we're creating a new device. auto increment it
 	// TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
 	// we want to echo back the name
 	// and send the config in a nice neat package to
 	// the attach method which creates the device
-	unsigned char* ioCmd = mrlCmd->getIoCmd();
+	//unsigned char* ioCmd = mrlCmd->getIoCmd();
 	int nameSize = ioCmd[2];
 
 	// get config size
@@ -447,7 +483,7 @@ void MrlComm::deviceAttach() {
 	if (devicePtr) {
 		if (devicePtr->deviceAttach(config, configSize)) {
 			addDevice(devicePtr);
-			publishAttachedDevice(devicePtr->id, nameSize, 3);
+			publishAttachedDevice(devicePtr->id, nameSize, ioCmd+3);
 		} else {
 			MrlMsg::publishError(ERROR_UNKOWN_SENSOR, F("DEVICE not attached"));
 			delete devicePtr;

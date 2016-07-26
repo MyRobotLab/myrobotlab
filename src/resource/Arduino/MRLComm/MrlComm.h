@@ -47,16 +47,20 @@ class MrlComm{
     bool enableBoardStatus;
     unsigned int publishBoardStatusModulus; // the frequency in which to report the load timing metrics (in number of main loops)
     unsigned long lastMicros; // timestamp of last loop (if stats enabled.)
-    MrlCmd* mrlCmd;
+#if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
+    MrlCmd* mrlCmd[4];
+#else
+    MrlCmd* mrlCmd[1];
+#endif
     void softReset();
     int getFreeRam();
     void publishError(int type);
     void publishError(int type, String message);
-    void publishCommandAck();
-    void publishAttachedDevice(int id, int nameSize, int namePos);
+    void publishCommandAck(int function);
+    void publishAttachedDevice(int id, int nameSize, unsigned char* name);
     void setPWMFrequency(int address, int prescalar);
     void setSerialRate();
-    void deviceAttach();
+    void deviceAttach(unsigned char* ioCmd);
     void deviceDetach(int id);
     Device* getDevice(int id);
     void addDevice(Device* device);
@@ -70,7 +74,7 @@ class MrlComm{
     void publishVersion();
     void publishBoardInfo();
     void readCommand();
-    void processCommand();
+    void processCommand(int ioType);
     void updateDevices();
 };
 

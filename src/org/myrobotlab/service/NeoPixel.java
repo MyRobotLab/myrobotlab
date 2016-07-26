@@ -87,7 +87,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public HashMap<Integer, PixelColor> pixelMatrix = new HashMap<Integer, PixelColor>();
   public ArrayList<PixelColor> savedPixelMatrix = new ArrayList<PixelColor>();
 
-  public Integer numPixel;
+  public Integer numPixel = 0;
 
   /**
    * list of names of possible controllers
@@ -324,19 +324,23 @@ public class NeoPixel extends Service implements NeoPixelControl {
     LoggingFactory.getInstance().setLevel(Level.INFO);
 
     try {
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
+      //WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      //webgui.autoStartBrowser(false);
+      //webgui.startService();
       Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.arduinoPath="C:\\Program Files (x86)\\Arduino";
       arduino.setBoardMega();
       arduino.connect("COM15");
-      arduino.setDebug(true);
+      Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
+      arduino1.setBoardUno();
+      arduino1.connect(arduino, "Serial1");
+//      //arduino.setDebug(true);
       NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
-      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-      neopixel.attach(arduino, 5, 16);
+//      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
+      neopixel.attach(arduino1, 5, 16);
+      sleep(50);
       PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
       neopixel.setPixel(pix);
       neopixel.writeMatrix();
