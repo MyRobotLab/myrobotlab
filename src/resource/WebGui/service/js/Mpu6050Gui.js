@@ -67,18 +67,19 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
         $scope.deviceBus = service.deviceBus;
         $scope.deviceAddressList = service.deviceAddressList;
         $scope.deviceAddress = service.deviceAddress;
+        
         $scope.isAttached = service.isAttached;
+        
         $scope.accelGX = service.accelGX;
         $scope.accelGY = service.accelGY;
         $scope.accelGZ = service.accelGZ;
+        
         $scope.temperatureC = service.temperatureC;
+
         $scope.gyroDegreeX = service.gyroDegreeX;
         $scope.gyroDegreeY = service.gyroDegreeY;
         $scope.gyroDegreeZ = service.gyroDegreeZ;
-        $scope.SEq_1 = service.SEq_1;
-        $scope.SEq_2 = service.SEq_2;
-        $scope.SEq_3 = service.SEq_3
-        $scope.SEq_4 = service.SEq_4;
+
         $scope.filtered_x_angle = service.filtered_x_angle;
         $scope.filtered_y_angle = service.filtered_y_angle;
         $scope.filtered_z_angle = service.filtered_z_angle;
@@ -101,15 +102,7 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     		} else {
     			container.appendChild( renderer.domElement );
     		}
-        	
-        	// teapot.rotation.x = $scope.gyroDegreeX / (2 * Math.PI);
-        	// teapot.rotation.y = $scope.gyroDegreeY / (2 * Math.PI);
-        	// teapot.rotation.z = $scope.gyroDegreeZ / (2 * Math.PI);
-         
-    		
-        	// quaternion = ($scope.SEq_1,$scope.SEq_2,$scope.SEq_3,$scope.SEq_4);
-        	// teapot.applyMatrix.makeRotationFromQuaternion(quaternion);
-    		
+    		// Rotate the teapot based on the filtered x, y, z values
         	teapot.rotation.x = $scope.filtered_x_angle;
         	teapot.rotation.y = $scope.filtered_y_angle;
         	teapot.rotation.z = $scope.filtered_z_angle;
