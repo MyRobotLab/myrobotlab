@@ -4,15 +4,15 @@ MrlComm::MrlComm() {
 	softReset();
 	byteCount = 0;
 	mrlCmd[0] = new MrlCmd(MRL_IO_SERIAL_0);
-  for (int i = 1; i < (sizeof(mrlCmd)/sizeof(MrlCmd*)); i++){
-    mrlCmd[i] = NULL;
-  }
+	for (int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+		mrlCmd[i] = NULL;
+	}
 
 }
 
-MrlComm::~MrlComm(){
-  for (int i = 0; i < (sizeof(mrlCmd)/sizeof(MrlCmd*)); i++){
-		if (mrlCmd[i] != NULL){
+MrlComm::~MrlComm() {
+	for (int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+		if (mrlCmd[i] != NULL) {
 			delete mrlCmd[i];
 		}
 	}
@@ -30,13 +30,13 @@ void MrlComm::softReset() {
 	enableBoardStatus = false;
 	Device::nextDeviceId = 0;
 	debug = false;
-  for (int i = 1; i < (sizeof(mrlCmd)/sizeof(MrlCmd*)); i++){
-    if (mrlCmd[i] != NULL){
-      mrlCmd[i]->end();
-      delete mrlCmd[i];
-      mrlCmd[i] = NULL;
-    }
-  }
+	for (int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+		if (mrlCmd[i] != NULL) {
+			mrlCmd[i]->end();
+			delete mrlCmd[i];
+			mrlCmd[i] = NULL;
+		}
+	}
 }
 
 /***********************************************************************
@@ -56,7 +56,7 @@ void MrlComm::publishBoardStatus() {
 	}
 
 	unsigned int avgTiming = 0;
-    unsigned long now = micros();
+	unsigned long now = micros();
 
 	avgTiming = (now - lastMicros) / publishBoardStatusModulus;
 
@@ -135,10 +135,10 @@ void MrlComm::publishAttachedDevice(int id, int nameSize, unsigned char* name) {
  * SERIAL METHODS BEGIN
  */
 void MrlComm::readCommand() {
-  for (int i = 0; i < (sizeof(mrlCmd)/sizeof(MrlCmd*)); i++){
-		if(mrlCmd[i] != NULL){
+	for (int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+		if (mrlCmd[i] != NULL) {
 			if (mrlCmd[i]->readCommand()) {
-				processCommand(i+1);
+				processCommand(i + 1);
 			}
 		}
 	}
@@ -151,17 +151,17 @@ void MrlComm::readCommand() {
  * serial port, this method will be called.
  */
 void MrlComm::processCommand(int ioType) {
-  unsigned char* ioCmd = mrlCmd[ioType-1]->getIoCmd();
-  if (ioType != MRL_IO_SERIAL_0){
-    MrlMsg msg = MrlMsg(MSG_ROUTE);
-    msg.addData(ioType);
-    msg.addData(ioCmd,mrlCmd[ioType-1]->getMsgSize());
-    msg.sendMsg();
-  //  MrlMsg::publishDebug("not from Serial, ioType" + String(ioType));
-    return;
-  }
+	unsigned char* ioCmd = mrlCmd[ioType - 1]->getIoCmd();
+	if (ioType != MRL_IO_SERIAL_0) {
+		MrlMsg msg = MrlMsg(MSG_ROUTE);
+		msg.addData(ioType);
+		msg.addData(ioCmd, mrlCmd[ioType - 1]->getMsgSize());
+		msg.sendMsg();
+		//  MrlMsg::publishDebug("not from Serial, ioType" + String(ioType));
+		return;
+	}
 	// FIXME - all case X: should have scope operator { } !
-   // MrlMsg::publishDebug("not from Serial:" + String(ioCmd[0]));
+	// MrlMsg::publishDebug("not from Serial:" + String(ioCmd[0]));
 	switch (ioCmd[0]) {
 	// === system pass through begin ===
 	case DIGITAL_WRITE:
@@ -177,12 +177,12 @@ void MrlComm::processCommand(int ioType) {
 	}
 	case SERVO_ATTACH: {
 		int pin = ioCmd[2];
-		if(debug)
-		    MrlMsg::publishDebug("SERVO_ATTACH " + String(pin));
+		if (debug)
+			MrlMsg::publishDebug("SERVO_ATTACH " + String(pin));
 		MrlServo* servo = (MrlServo*) getDevice(ioCmd[1]);
 		servo->attach(pin);
-		if(debug)
-		    MrlMsg::publishDebug(F("SERVO_ATTACHED"));
+		if (debug)
+			MrlMsg::publishDebug(F("SERVO_ATTACHED"));
 		break;
 	}
 	case SERVO_SWEEP_START:
@@ -211,40 +211,41 @@ void MrlComm::processCommand(int ioType) {
 		break;
 	case SERVO_DETACH: {
 		if (debug)
-		    MrlMsg::publishDebug("SERVO_DETACH " + String(ioCmd[1]));
+			MrlMsg::publishDebug("SERVO_DETACH " + String(ioCmd[1]));
 		((MrlServo*) getDevice(ioCmd[1]))->detach();
 		if (debug)
-		    MrlMsg::publishDebug("SERVO_DETACHED");
+			MrlMsg::publishDebug("SERVO_DETACHED");
 		break;
 	}
 	case ENABLE_BOARD_STATUS:
 		enableBoardStatus = true;
 		publishBoardStatusModulus = (unsigned int) MrlMsg::toInt(ioCmd, 1);
-		if(debug)
-		    MrlMsg::publishDebug("modulus is " + String(publishBoardStatusModulus));
+		if (debug)
+			MrlMsg::publishDebug(
+					"modulus is " + String(publishBoardStatusModulus));
 		break;
 
-	// ENABLE_PIN_EVENTS | ADDRESS | PIN TYPE 0 = DIGITAL | 1 = ANALOG
-	case ENABLE_PIN:{
+		// ENABLE_PIN_EVENTS | ADDRESS | PIN TYPE 0 = DIGITAL | 1 = ANALOG
+	case ENABLE_PIN: {
 		int address = ioCmd[1];
 		int type = ioCmd[2];
 		// don't add it twice
- 		for (int i = 0; i < pinList.size(); ++i) {
- 			Pin* pin = pinList.get(i);
- 			if (pin->address == address) {
- 				// TODO already exists error?
- 				break;
- 			}
- 		}
+		for (int i = 0; i < pinList.size(); ++i) {
+			Pin* pin = pinList.get(i);
+			if (pin->address == address) {
+				// TODO already exists error?
+				break;
+			}
+		}
 
-		if (type == DIGITAL){
+		if (type == DIGITAL) {
 			pinMode(address, INPUT);
 		}
 		Pin* p = new Pin(address, type);
 		pinList.add(p);
 		break;
 	}
-	case DISABLE_PIN:{
+	case DISABLE_PIN: {
 		int address = ioCmd[1];
 		for (int i = 0; i < pinList.size(); ++i) {
 			Pin* pin = pinList.get(i);
@@ -253,6 +254,16 @@ void MrlComm::processCommand(int ioType) {
 				delete pin;
 				break;
 			}
+		}
+
+		break;
+	}
+
+	case DISABLE_PINS: {
+		for (int i = 0; i < pinList.size(); ++i) {
+			Pin* pin = pinList.get(i);
+			pinList.remove(i);
+			delete pin;
 		}
 
 		break;
@@ -325,12 +336,12 @@ void MrlComm::processCommand(int ioType) {
 		((MrlNeopixel*) getDevice(ioCmd[1]))->neopixelWriteMatrix(ioCmd);
 		break;
 	case CONTROLLER_ATTACH:
-		mrlCmd[ioCmd[1]-1] = new MrlCmd(ioCmd[1]);
+		mrlCmd[ioCmd[1] - 1] = new MrlCmd(ioCmd[1]);
 		break;
 	case MSG_ROUTE: {
 		MrlMsg msg(ioCmd[2]);
-		msg.addData(ioCmd+3, mrlCmd[ioType-1]->getMsgSize()-3);
-		msg.begin(ioCmd[1],115200);
+		msg.addData(ioCmd + 3, mrlCmd[ioType - 1]->getMsgSize() - 3);
+		msg.begin(ioCmd[1], 115200);
 		msg.sendMsg();
 		break;
 	}
@@ -491,7 +502,7 @@ void MrlComm::deviceAttach(unsigned char* ioCmd) {
 	if (devicePtr) {
 		if (devicePtr->deviceAttach(config, configSize)) {
 			addDevice(devicePtr);
-			publishAttachedDevice(devicePtr->id, nameSize, ioCmd+3);
+			publishAttachedDevice(devicePtr->id, nameSize, ioCmd + 3);
 		} else {
 			MrlMsg::publishError(ERROR_UNKOWN_SENSOR, F("DEVICE not attached"));
 			delete devicePtr;
@@ -588,7 +599,7 @@ void MrlComm::update() {
 		for (int i = 0; i < pinList.size(); ++i) {
 			Pin* pin = pinList.get(i);
 			// TODO: moe the analog read outside of thie method and pass it in!
-			if (pin->type == ANALOG)	{
+			if (pin->type == ANALOG) {
 				pin->value = analogRead(pin->address);
 			} else {
 				pin->value = digitalRead(pin->address);
@@ -601,5 +612,4 @@ void MrlComm::update() {
 		msg.sendMsg();
 	}
 }
-
 

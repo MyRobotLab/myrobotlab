@@ -1,41 +1,70 @@
 package org.myrobotlab.service;
 
 
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
+
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NOT_FOUND;
+
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ARDUINO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ULTRASONIC;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_STEPPER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_MOTOR;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_STEPPER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_MOTOR;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_SERVO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_I2C;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NEOPIXEL;
+
+
+	///// java static import definition - DO NOT MODIFY - Begin //////
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CONTROLLER_ATTACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CREATE_I2C_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_DETACH;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ARDUINO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_I2C;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_MOTOR;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NEOPIXEL;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_SERVO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ULTRASONIC;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DISABLE_BOARD_STATUS;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DISABLE_PIN;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DISABLE_PINS;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ENABLE_BOARD_STATUS;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ENABLE_PIN;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_MRL_PIN_TYPE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE_READ;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.INTS_TO_STRING;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.IS_ATTACHED;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE_TO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_RESET;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MSG_ROUTE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.NEO_PIXEL_WRITE_MATRIX;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ON_SENSOR_DATA;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_ATTACHED_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_BOARD_INFO;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_BOARD_STATUS;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_DEBUG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MESSAGE_ACK;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PIN;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PIN_ARRAY;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SENSOR_DATA;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_TRIGGER;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.READ;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.RELEASE_I2C_DEVICE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_ACTIVATE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_DEACTIVATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_ATTACH;
@@ -53,6 +82,8 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_PWMFREQUENCY;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SAMPLE_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERIAL_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SOFT_RESET;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.WRITE;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -1093,7 +1124,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	public void disablePin(int pin){
+		MrlMsg msg = new MrlMsg(DISABLE_PIN);
+		msg.addData(pin);
+		sendMsg(msg);
 		
+	}
+	
+	public void disablePins(){
+		MrlMsg msg = new MrlMsg(DISABLE_PINS);
+		sendMsg(msg);
 	}
 	
 	public void disconnect() {
@@ -1142,11 +1181,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			return;
 		}
 		MrlMsg msg = new MrlMsg(ENABLE_PIN);
-		msg.addData(address);
+		msg.addData(address); // ANALOG 1 DIGITAL 0
 		PinDefinition pin = pinIndex.get(address);
-		msg.addData(getMrlPinType(pin));
+		msg.addData(getMrlPinType(pin)); // pinType
 		// TODO - make this Hz so everyone is happy :)
 		// msg.addData16(rate); // 
+		sendMsg(msg);
 	}
 
 	/**

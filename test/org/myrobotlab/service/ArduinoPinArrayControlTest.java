@@ -79,6 +79,7 @@ public class ArduinoPinArrayControlTest {
 		Runtime.start("python", "Python");
 		
 		arduino.connect("COM5");
+		// arduino.setDebug(true);
 		arduino.enablePin(14);
 		arduino.enablePin(16);
 		arduino.enablePin(17);

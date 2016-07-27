@@ -24,6 +24,9 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
             scope.height = 0;
             //scope.hscale = 0.5;
             scope.hscale = 1.0;
+
+            var x = 0;
+            
             var gradient = tinygradient([// tinycolor('#ff0000'),       // tinycolor object
             // {r: 0, g: 255, b: 0},       // RGB object
             {
@@ -84,31 +87,30 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                 case 'onPinArray':
                     pinArray = inMsg.data[0];
                     for (i = 0; i < pinArray.length; ++i) {
-                                data = pinArray[i];
+                        data = pinArray[i];
                         // FIXME - (optimization) pin should not have to send pintype - its known
                         // when pinButtonList is built
-                        
-                        pinData = scope.pinData[data.address];
-                        button = scope.pinButtonList[data.address];
+                        pinData = scope.pinIndex[data.address];
                         var y = scope.height - data.value;
                         // this certainly did not work
-                        // ctx.putImageData(id, pinData.posX, pinData.posY);
+                        // ctx.putImageData(id, x, pinData.posY);
                         _self.ctx.beginPath();
                         // from
-                        _self.ctx.moveTo(pinData.posX, pinData.posY);
+                        _self.ctx.moveTo(x, pinData.posY);
                         // to
-                        pinData.posX++;
+                        x++;
                         pinData.posY = y * scope.hscale;
-                        _self.ctx.lineTo(pinData.posX, pinData.posY);
+                        _self.ctx.lineTo(x, pinData.posY);
                         // color
                         _self.ctx.strokeStyle = pinData.colorHexString;
                         // draw it
                         _self.ctx.stroke();
-                        _self.ctx.closePath();
-                        if (pinData.posX == scope.width) {
-                            pinData.posX = 0;
+                        _self.ctx.closePath();                        
+                    }
+
+                    if (x == scope.width) {
+                            x = 0;
                             scope.clearScreen();
-                        }
                     }
                     break;
                 case 'onPin':
@@ -166,13 +168,7 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                     pinDef.style = {
                         'background-color': newColor.toHexString()
                     };
-                    if (pinDef.type == 1) {
-                        // digital
-                        mrl.sendTo(name, 'digitalReadPollingStop', pin);
-                    } else {
-                        // analog
-                        mrl.sendTo(name, 'analogReadPollingStop', pin);
-                    }
+                    mrl.sendTo(name, 'disablePin', pinDef.address);
                     pinDef.state = false;
                 } else {
                     // off to on
@@ -181,14 +177,7 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                     pinDef.style = {
                         'background-color': newColor.toHexString()
                     };
-                    mrl.sendTo(name, 'analogReadPollingStart', pinDef.address);
-                    if (pinDef.type == 1) {
-                        // digital
-                        mrl.sendTo(name, 'digitalReadPollingStart', pin);
-                    } else {
-                        // analog
-                        mrl.sendTo(name, 'analogReadPollingStart', pin);
-                    }
+                    mrl.sendTo(name, 'enablePin', pinDef.address);
                     pinDef.state = true;
                 }
             }
