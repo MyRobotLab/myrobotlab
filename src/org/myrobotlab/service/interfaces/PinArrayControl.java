@@ -42,4 +42,10 @@ public interface PinArrayControl extends DeviceControl {
 	
 	public void attach(PinArrayListener listener);
 	
+	public void enablePin(int address);
+	
+	public void disablePin(int address);
+	
+	public void disablePins();
+	
 }

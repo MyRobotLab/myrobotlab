@@ -66,6 +66,9 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             // FIXME - onStatus needs to be handled in the Framework !!!
             // $scope.statusLine = data;
             break;
+        case 'onPinArray':
+         // a NOOP - but necessary 
+        break;
         case 'onPortNames':
             $scope.possiblePorts = data;
             $scope.$apply();
@@ -139,7 +142,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     msg.subscribe('publishVersion');
     msg.subscribe('publishBoardInfo');
     msg.subscribe('publishBoardStatus');
-    msg.subscribe('publishSensorData');
+   // msg.subscribe('publishSensorData');
     msg.subscribe(this);
 }
 ]);
