@@ -10,7 +10,15 @@ angular.module('mrlapp.service.NeoPixelGui', [])
     $scope.controllers = [];
     $scope.pins = [];
     $scope.numPixels = [];
-    
+    $scope.animations = [];
+    $scope.animationData = {
+      "animation": '',
+      "red": 0,
+      "green": 0,
+      "blue": 0,
+      "speed": 1
+    };
+      
     for (i = 0; i < 70; ++i) {
         $scope.pins.push(i);
     }
@@ -28,6 +36,10 @@ angular.module('mrlapp.service.NeoPixelGui', [])
         $scope.controllers = service.controllers;
         $scope.pixels = service.savedPixelMatrix;
         $scope.off = service.off;
+        $scope.animations = service.animations;
+        $scope.animation = service.animation;
+	    $scope.animationSettingColor = service.animationSettingColor;
+	    $scope.animationSettingSpeed = service.animationSettingSpeed;
      }
     ;
     
@@ -71,6 +83,11 @@ angular.module('mrlapp.service.NeoPixelGui', [])
 
     $scope.setPixel = function(inPixel) {
         $scope.numPixel = inPixel;
+    }
+    
+    $scope.setAnimationSetting = function(animation) {
+    	$scope.animationData.animation = animation;
+    	msg.send('setAnimationSetting',animation);
     }
 
     // regrettably the onMethodMap dynamic
