@@ -108,8 +108,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public List<String> animations = Arrays.asList("Stop", "Color Wipe");
   public String animation ="No animation";
   public boolean[] animationSetting = {false,false}; // red, green, blue, speed
-  boolean animationSettingColor = false;
-  boolean animationSettingSpeed = false;
+  public boolean animationSettingColor = false;
+  public boolean animationSettingSpeed = false;
   HashMap<Integer, boolean[]> animationSettings = new HashMap<Integer, boolean[]>();
       
   public NeoPixel(String n) {
@@ -339,9 +339,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
     LoggingFactory.getInstance().setLevel(Level.INFO);
 
     try {
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
+//      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+//      webgui.autoStartBrowser(false);
+//      webgui.startService();
       Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
@@ -353,7 +353,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 //      arduino1.connect(arduino, "Serial1");
 //      //arduino.setDebug(true);
       NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
-      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
+//      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
       neopixel.attach(arduino, 29, 16);
       sleep(50);
       PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
