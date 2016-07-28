@@ -76,5 +76,16 @@ public interface NeoPixelControl extends DeviceControl {
 	public void turnOff();
 
 	public void turnOn();
+	
+	/**
+	 * setAnimation
+	 * @param animation - preprogramed animation
+	 * @param red       - value 0-255 - set base color for the animation
+	 * @param green     - value 0-255 - set base color for the animation
+	 * @param blue      - value 0-255 - set base color for the animation
+	 * @param speed     - set speed of the animation 1 = fastest (update every ~30ms), 100 = 100 times slower than 1 value
+	 */
+	public void setAnimation(int animation, int red, int green, int blue, int speed);
+  public void setAnimation(String animation, int red, int green, int blue, int speed);
 
 }

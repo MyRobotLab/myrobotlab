@@ -38,6 +38,9 @@
     (((P) >= 0 && (P) <= 7) ? sendBitD(V) : (((P) >= 8 && (P) <= 13) ? sendBitB(V) : sendBitC(V)))
 #endif
 
+#define NEOPIXEL_ANIMATION_STOP 0
+#define NEOPIXEL_ANIMATION_COLOR_WIPE 1
+
 
 /*****************************
  * Neopixel device
@@ -52,6 +55,8 @@ struct Pixel{
   unsigned char blue;
   unsigned char green;
   Pixel();
+  void clearPixel();
+  void setPixel(unsigned char red, unsigned char green, unsigned char blue);
 };
 
 class MrlNeopixel:public Device{
@@ -62,8 +67,13 @@ class MrlNeopixel:public Device{
     unsigned long lastShow;
     bool newData;
     int pin;
+    unsigned char _baseColorRed;
+    unsigned char _baseColorGreen;
+    unsigned char _baseColorBlue;
+    unsigned int _speed;
+    byte _animation;
   public:
-  MrlNeopixel():Device(DEVICE_TYPE_NEOPIXEL){};
+  MrlNeopixel();
   ~MrlNeopixel();
   bool deviceAttach(unsigned char config[], int configSize);
   inline void sendBitB(bool bitVal);
@@ -84,6 +94,9 @@ class MrlNeopixel:public Device{
   void show();
   void neopixelWriteMatrix(unsigned char* ioCmd);
   void update();
+  void setAnimation(unsigned char* config);
+  void animationStop();
+  void animationColorWipe();
 };
 
 
