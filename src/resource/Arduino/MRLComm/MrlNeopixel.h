@@ -41,6 +41,7 @@
 #define NEOPIXEL_ANIMATION_NO_ANIMATION 0
 #define NEOPIXEL_ANIMATION_STOP 1
 #define NEOPIXEL_ANIMATION_COLOR_WIPE 2
+#define NEOPIXEL_ANIMATION_LARSON_SCANNER 3
 
 
 /*****************************
@@ -76,6 +77,7 @@ class MrlNeopixel:public Device{
     int _pos;
     int _count;
     bool _off;
+    int _dir;
   public:
   MrlNeopixel();
   ~MrlNeopixel();
@@ -101,6 +103,7 @@ class MrlNeopixel:public Device{
   void setAnimation(unsigned char* config);
   void animationStop();
   void animationColorWipe();
+  void animationLarsonScanner();
 };
 
 

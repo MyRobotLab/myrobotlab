@@ -612,6 +612,9 @@ void MrlNeopixel::update() {
 	case NEOPIXEL_ANIMATION_COLOR_WIPE:
 		animationColorWipe();
 		break;
+  case NEOPIXEL_ANIMATION_LARSON_SCANNER:
+    animationLarsonScanner();
+    break;
 	default:
 		MrlMsg::publishError(ERROR_DOES_NOT_EXIST,
 				F("Neopixel animation do not exist"));
@@ -636,6 +639,7 @@ void MrlNeopixel::setAnimation(unsigned char* config){
   _pos=1;
   _count=0;
   _off=false;
+  _dir=1;
   newData=true;
 }
 
@@ -663,3 +667,33 @@ void MrlNeopixel::animationColorWipe() {
   else lastShow = millis();
   newData = true;
 }
+
+void MrlNeopixel::animationLarsonScanner() {
+  if(!((_count++)%_speed)) {
+    for(int i = 1; i <= numPixel; i++){
+      pixels[i].clearPixel();
+    }
+    int pos = _pos;
+    for(int i = -2; i <= 2; i++){
+      pos = _pos + i;
+      if (pos < 1)
+        pos += numPixel;
+      if (pos > numPixel)
+        pos -= numPixel;
+      int j = (abs(i) * 10)+1;
+      pixels[pos].setPixel(_baseColorRed / j, _baseColorGreen /j, _baseColorBlue / j);
+    }
+    _pos += _dir;
+    if (_pos < 1) {
+      pos = 2;
+      _dir = -_dir;
+   }
+    else if(_pos > numPixel) {
+      _pos = numPixel - 1;
+      _dir = -_dir;
+    }
+  }
+  else lastShow = millis();
+  newData = true;  
+}
+
