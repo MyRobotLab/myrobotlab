@@ -104,8 +104,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public static transient final int NEOPIXEL_ANIMATION_NO_ANIMATION = 0;
   public static transient final int NEOPIXEL_ANIMATION_STOP = 1;
   public static transient final int NEOPIXEL_ANIMATION_COLOR_WIPE = 2;
-
-  public List<String> animations = Arrays.asList("Stop", "Color Wipe");
+  public static transient final int NEOPIXEL_ANIMATION_LARSON_SCANNER = 3;
+  
+  public List<String> animations = Arrays.asList("Stop", "Color Wipe", "Larson Scanner");
   public String animation ="No animation";
   public boolean[] animationSetting = {false,false}; // red, green, blue, speed
   public boolean animationSettingColor = false;
@@ -116,6 +117,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     super(n);
     animationSettings.put(NEOPIXEL_ANIMATION_STOP, new boolean[]{false,false});
     animationSettings.put(NEOPIXEL_ANIMATION_COLOR_WIPE, new boolean[]{true,true});
+    animationSettings.put(NEOPIXEL_ANIMATION_LARSON_SCANNER, new boolean[]{true,true});
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
   }
 
@@ -358,7 +360,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       sleep(50);
       PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
       neopixel.setPixel(pix);
-      neopixel.setAnimation(2, 255, 48, 0, 1);
+      neopixel.setAnimation(3, 200, 0, 0, 10);
 //      //arduino.setLoadTimingEnabled(true);
 //      Servo servo=(Servo)Runtime.start("servo","Servo");
 //      servo.attach(arduino, 5);
@@ -386,6 +388,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
         return "Stop";
       case NEOPIXEL_ANIMATION_COLOR_WIPE:
         return "Color Wipe";
+      case NEOPIXEL_ANIMATION_LARSON_SCANNER:
+        return "Larson Scanner";
       default:
         log.error("Unknow Animation type {}", animation);
         return "No Animation";
@@ -410,6 +414,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
         return NEOPIXEL_ANIMATION_STOP;
       case "Color Wipe":
         return NEOPIXEL_ANIMATION_COLOR_WIPE;
+      case "Larson Scanner":
+        return NEOPIXEL_ANIMATION_LARSON_SCANNER;
       default:
         log.error("Unknow Animation type {}", animation);
         return NEOPIXEL_ANIMATION_STOP;
