@@ -99,6 +99,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   public Integer pin;
   public boolean off = false;
+  
+  public static transient int NEOPIXEL_ANIMATION_STOP = 0;
+  public static transient int NEOPIXEL_ANIMATION_COLOR_WIPE = 1;
+
 
   public NeoPixel(String n) {
     super(n);
@@ -333,19 +337,17 @@ public class NeoPixel extends Service implements NeoPixelControl {
       arduino.arduinoPath="C:\\Program Files (x86)\\Arduino";
       arduino.setBoardMega();
       arduino.connect("COM15");
-      Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
-      arduino1.setBoardUno();
-      arduino1.connect(arduino, "Serial1");
+//      Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
+//      arduino1.setBoardUno();
+//      arduino1.connect(arduino, "Serial1");
 //      //arduino.setDebug(true);
       NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
-      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-      neopixel.attach(arduino1, 5, 16);
+//      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
+      neopixel.attach(arduino, 5, 16);
       sleep(50);
       PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
       neopixel.setPixel(pix);
       neopixel.writeMatrix();
-      NeoPixel neopixel1 = (NeoPixel) Runtime.start("neopixel1", "NeoPixel");
-      neopixel1.attach(arduino, 5, 16);
 //      //arduino.setLoadTimingEnabled(true);
 //      Servo servo=(Servo)Runtime.start("servo","Servo");
 //      servo.attach(arduino, 5);
@@ -356,4 +358,28 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   }
 
+  @Override
+  public void setAnimation(int animation, int red, int green, int blue, int speed) {
+    //protect against 0 and negative speed
+    if (speed < 1) speed = 1;
+    controller.neoPixelSetAnimation(animation, red, green, blue, speed);
+  }
+
+  @Override
+  public void setAnimation(String animation, int red, int green, int blue, int speed) {
+    setAnimation(animationStringToInt(animation), red, green, blue, speed);
+  }
+
+  int animationStringToInt(String animation) {
+    switch(animation) {
+      case "Stop":
+        return NEOPIXEL_ANIMATION_STOP;
+      case "Color Wipe":
+        return NEOPIXEL_ANIMATION_COLOR_WIPE;
+      default:
+        log.error("Unknow Animation type {}", animation);
+        return NEOPIXEL_ANIMATION_STOP;
+    }
+    
+  }
 }

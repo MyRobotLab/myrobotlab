@@ -44,6 +44,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE_TO;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_RESET;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MSG_ROUTE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.NEO_PIXEL_SET_ANIMATION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.NEO_PIXEL_WRITE_MATRIX;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ON_SENSOR_DATA;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
@@ -2605,4 +2606,16 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void msgRoute(){
 	  
 	}
+
+  @Override
+  public void neoPixelSetAnimation(int animation, int red, int green, int blue, int speed) {
+    MrlMsg msg = new MrlMsg(NEO_PIXEL_SET_ANIMATION);
+    msg.addData(6); //size of the config
+    msg.addData(animation);
+    msg.addData(red);
+    msg.addData(green);
+    msg.addData(blue);
+    msg.addData16(speed);
+    sendMsg(msg);
+  }
 }

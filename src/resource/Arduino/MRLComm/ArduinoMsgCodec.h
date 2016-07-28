@@ -57,86 +57,88 @@
 #define MOTOR_STOP		24
 // {msgRoute} 
 #define MSG_ROUTE		25
+// {neoPixelSetAnimation int int int int int} 
+#define NEO_PIXEL_SET_ANIMATION		26
 // {neoPixelWriteMatrix NeoPixel List} 
-#define NEO_PIXEL_WRITE_MATRIX		26
+#define NEO_PIXEL_WRITE_MATRIX		27
 // {onSensorData SensorData} 
-#define ON_SENSOR_DATA		27
-// {pinMode int int} 
-#define PIN_MODE		28
+#define ON_SENSOR_DATA		28
+// {pinMode String String} 
+#define PIN_MODE		29
 // {publishAttachedDevice String} 
-#define PUBLISH_ATTACHED_DEVICE		29
+#define PUBLISH_ATTACHED_DEVICE		30
 // {publishBoardInfo BoardInfo} 
-#define PUBLISH_BOARD_INFO		30
+#define PUBLISH_BOARD_INFO		31
 // {publishBoardStatus BoardStatus} 
-#define PUBLISH_BOARD_STATUS		31
+#define PUBLISH_BOARD_STATUS		32
 // {publishDebug String} 
-#define PUBLISH_DEBUG		32
+#define PUBLISH_DEBUG		33
 // {publishMessageAck} 
-#define PUBLISH_MESSAGE_ACK		33
+#define PUBLISH_MESSAGE_ACK		34
 // {publishPin PinData} 
-#define PUBLISH_PIN		34
+#define PUBLISH_PIN		35
 // {publishPinArray PinData[]} 
-#define PUBLISH_PIN_ARRAY		35
+#define PUBLISH_PIN_ARRAY		36
 // {publishPulse Long} 
-#define PUBLISH_PULSE		36
+#define PUBLISH_PULSE		37
 // {publishPulseStop Integer} 
-#define PUBLISH_PULSE_STOP		37
+#define PUBLISH_PULSE_STOP		38
 // {publishSensorData SensorData} 
-#define PUBLISH_SENSOR_DATA		38
+#define PUBLISH_SENSOR_DATA		39
 // {publishServoEvent Integer} 
-#define PUBLISH_SERVO_EVENT		39
+#define PUBLISH_SERVO_EVENT		40
 // {publishTrigger Pin} 
-#define PUBLISH_TRIGGER		40
+#define PUBLISH_TRIGGER		41
 // {pulse int int int int} 
-#define PULSE		41
+#define PULSE		42
 // {pulseStop} 
-#define PULSE_STOP		42
-// {read int} 
-#define READ		43
+#define PULSE_STOP		43
+// {read String} 
+#define READ		44
 // {releaseI2cDevice I2CControl int int} 
-#define RELEASE_I2C_DEVICE		44
+#define RELEASE_I2C_DEVICE		45
 // {sensorActivate SensorControl Object[]} 
-#define SENSOR_ACTIVATE		45
+#define SENSOR_ACTIVATE		46
 // {sensorDeactivate SensorControl} 
-#define SENSOR_DEACTIVATE		46
+#define SENSOR_DEACTIVATE		47
 // {sensorPollingStart String} 
-#define SENSOR_POLLING_START		47
+#define SENSOR_POLLING_START		48
 // {sensorPollingStop String} 
-#define SENSOR_POLLING_STOP		48
+#define SENSOR_POLLING_STOP		49
 // {servoAttach ServoControl int} 
-#define SERVO_ATTACH		49
+#define SERVO_ATTACH		50
 // {servoDetach ServoControl} 
-#define SERVO_DETACH		50
+#define SERVO_DETACH		51
 // {servoEventsEnabled ServoControl boolean} 
-#define SERVO_EVENTS_ENABLED		51
+#define SERVO_EVENTS_ENABLED		52
 // {servoSetSpeed ServoControl} 
-#define SERVO_SET_SPEED		52
+#define SERVO_SET_SPEED		53
 // {servoSweepStart ServoControl} 
-#define SERVO_SWEEP_START		53
+#define SERVO_SWEEP_START		54
 // {servoSweepStop ServoControl} 
-#define SERVO_SWEEP_STOP		54
+#define SERVO_SWEEP_STOP		55
 // {servoWrite ServoControl} 
-#define SERVO_WRITE		55
+#define SERVO_WRITE		56
 // {servoWriteMicroseconds ServoControl int} 
-#define SERVO_WRITE_MICROSECONDS		56
+#define SERVO_WRITE_MICROSECONDS		57
 // {setDebounce int} 
-#define SET_DEBOUNCE		57
+#define SET_DEBOUNCE		58
 // {setDebug boolean} 
-#define SET_DEBUG		58
+#define SET_DEBUG		59
 // {setDigitalTriggerOnly Boolean} 
-#define SET_DIGITAL_TRIGGER_ONLY		59
+#define SET_DIGITAL_TRIGGER_ONLY		60
 // {setPWMFrequency Integer Integer} 
-#define SET_PWMFREQUENCY		60
+#define SET_PWMFREQUENCY		61
 // {setSampleRate int} 
-#define SET_SAMPLE_RATE		61
+#define SET_SAMPLE_RATE		62
 // {setSerialRate int} 
-#define SET_SERIAL_RATE		62
+#define SET_SERIAL_RATE		63
 // {setTrigger int int int} 
-#define SET_TRIGGER		63
+#define SET_TRIGGER		64
 // {softReset} 
-#define SOFT_RESET		64
+#define SOFT_RESET		65
 // {write int int} 
-#define WRITE		65
+#define WRITE		66
 ///// INO GENERATED DEFINITION END //////
 
 
