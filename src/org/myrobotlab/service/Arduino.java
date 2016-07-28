@@ -2608,8 +2608,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
   @Override
-  public void neoPixelSetAnimation(int animation, int red, int green, int blue, int speed) {
+  public void neoPixelSetAnimation(NeoPixel neopixel, int animation, int red, int green, int blue, int speed) {
     MrlMsg msg = new MrlMsg(NEO_PIXEL_SET_ANIMATION);
+    msg.addData(getDeviceId(neopixel));
     msg.addData(6); //size of the config
     msg.addData(animation);
     msg.addData(red);

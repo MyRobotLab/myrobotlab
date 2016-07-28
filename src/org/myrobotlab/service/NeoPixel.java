@@ -100,8 +100,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public Integer pin;
   public boolean off = false;
   
-  public static transient int NEOPIXEL_ANIMATION_STOP = 0;
-  public static transient int NEOPIXEL_ANIMATION_COLOR_WIPE = 1;
+  public static transient int NEOPIXEL_ANIMATION_STOP = 1;
+  public static transient int NEOPIXEL_ANIMATION_COLOR_WIPE = 2;
 
 
   public NeoPixel(String n) {
@@ -328,9 +328,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
     LoggingFactory.getInstance().setLevel(Level.INFO);
 
     try {
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+  //    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       //webgui.autoStartBrowser(false);
-      webgui.startService();
+  //    webgui.startService();
       Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
@@ -343,11 +343,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
 //      //arduino.setDebug(true);
       NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
 //      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-      neopixel.attach(arduino, 5, 16);
+      neopixel.attach(arduino, 29, 16);
       sleep(50);
-      PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
+      PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
       neopixel.setPixel(pix);
-      neopixel.writeMatrix();
+      neopixel.setAnimation(2, 255, 48, 0, 1);
 //      //arduino.setLoadTimingEnabled(true);
 //      Servo servo=(Servo)Runtime.start("servo","Servo");
 //      servo.attach(arduino, 5);
@@ -362,7 +362,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public void setAnimation(int animation, int red, int green, int blue, int speed) {
     //protect against 0 and negative speed
     if (speed < 1) speed = 1;
-    controller.neoPixelSetAnimation(animation, red, green, blue, speed);
+    controller.neoPixelSetAnimation(this, animation, red, green, blue, speed);
   }
 
   @Override

@@ -20,7 +20,7 @@ MrlNeopixel::MrlNeopixel():Device(DEVICE_TYPE_NEOPIXEL) {
 	_baseColorRed = 0;
 	_baseColorGreen = 0;
 	_baseColorBlue = 0;
-	_animation = NEOPIXEL_ANIMATION_STOP;
+	_animation = 0;
 }
 
 MrlNeopixel::~MrlNeopixel() {
@@ -578,13 +578,14 @@ inline void MrlNeopixel::sendPixel(Pixel p) {
 void MrlNeopixel::show() {
 	if (!state)
 		return;
-	//be sure we wait at least 6us before sending new data
-	if ((lastShow + (RES / 1000UL)) > micros())
+	//be sure we wait at least 6ms before sending new data
+	if ((lastShow + (RES / 1000UL)) > millis())
+//  if ((lastShow + RES) > millis())
 		return;
 	for (unsigned int p = 1; p <= numPixel; p++) {
 		sendPixel(pixels[p]);
 	}
-	lastShow = micros();
+	lastShow = millis();
 	newData = false;
 
 }
@@ -599,9 +600,12 @@ void MrlNeopixel::neopixelWriteMatrix(unsigned char* ioCmd) {
 }
 
 void MrlNeopixel::update() {
-	if ((lastShow + 33000) > micros() || !newData)
+	if ((lastShow + 33) > millis()){
 		return; //update 30 times/sec if there is new data to show
+	}
 	switch (_animation) {
+  case NEOPIXEL_ANIMATION_NO_ANIMATION:
+    break;
 	case NEOPIXEL_ANIMATION_STOP:
 		animationStop();
 		break;
@@ -613,36 +617,49 @@ void MrlNeopixel::update() {
 				F("Neopixel animation do not exist"));
 		break;
 	}
-	show();
+	if(newData){
+	  show();
+	}
 }
 
 void MrlNeopixel::setAnimation(unsigned char* config){
-	unsigned char size = config[1];
+	unsigned char size = config[0];
 	if (size != 6){
 		MrlMsg::publishError(ERROR_DOES_NOT_EXIST, F("Wrong config size for Neopixel setAnimation"));
 		return;
 	}
-	_animation = config[2];
-	_baseColorRed = config[3];
-	_baseColorGreen = config[4];
-	_baseColorBlue = config[5];
-	_speed = (config[6] << 8) + config[7];
+	_animation = config[1];
+	_baseColorRed = config[2];
+	_baseColorGreen = config[3];
+	_baseColorBlue = config[4];
+	_speed = (config[5] << 8) + config[6];
+  _pos=1;
+  _count=0;
+  _off=false;
+  newData=true;
 }
 
 void MrlNeopixel::animationStop() {
 	for (int i = 1; i <= numPixel; i++) {
 		pixels[i].clearPixel();
 	}
+  _animation = NEOPIXEL_ANIMATION_NO_ANIMATION;
 	newData = true;
 }
 
 void MrlNeopixel::animationColorWipe() {
-	static int pos = 0;
-	if(pos > numPixel) {
-		return;
+  if(!((_count++)%_speed)) {
+  	if(_off) {
+      pixels[_pos++].setPixel(0, 0, 0);
+  	}
+    else{
+  		pixels[_pos++].setPixel(_baseColorRed, _baseColorGreen, _baseColorBlue);
+    }
+    if(_pos > numPixel) {
+      _pos = 1;
+      _off = !_off;
+    }
 	}
-	if(!(pos%_speed)) {
-		pixels[pos++].setPixel(_baseColorRed, _baseColorGreen, _baseColorBlue);
-		newData = true;
-	}
+  else lastShow = millis();
+  newData = true;
 }

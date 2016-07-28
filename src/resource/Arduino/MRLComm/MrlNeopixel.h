@@ -38,8 +38,9 @@
     (((P) >= 0 && (P) <= 7) ? sendBitD(V) : (((P) >= 8 && (P) <= 13) ? sendBitB(V) : sendBitC(V)))
 #endif
 
-#define NEOPIXEL_ANIMATION_STOP 0
-#define NEOPIXEL_ANIMATION_COLOR_WIPE 1
+#define NEOPIXEL_ANIMATION_NO_ANIMATION 0
+#define NEOPIXEL_ANIMATION_STOP 1
+#define NEOPIXEL_ANIMATION_COLOR_WIPE 2
 
 
 /*****************************
@@ -72,6 +73,9 @@ class MrlNeopixel:public Device{
     unsigned char _baseColorBlue;
     unsigned int _speed;
     byte _animation;
+    int _pos;
+    int _count;
+    bool _off;
   public:
   MrlNeopixel();
   ~MrlNeopixel();
