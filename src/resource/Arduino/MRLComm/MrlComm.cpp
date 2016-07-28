@@ -336,7 +336,7 @@ void MrlComm::processCommand(int ioType) {
 		((MrlNeopixel*) getDevice(ioCmd[1]))->neopixelWriteMatrix(ioCmd);
 		break;
 	case NEO_PIXEL_SET_ANIMATION:
-		((MrlNeopixel*) getDevice(ioCmd[1]))->setAnimation(ioCmd);
+		((MrlNeopixel*) getDevice(ioCmd[1]))->setAnimation(ioCmd+2);
 		break;
 	case CONTROLLER_ATTACH:
 		mrlCmd[ioCmd[1] - 1] = new MrlCmd(ioCmd[1]);
