@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Arrays;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -100,12 +101,21 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public Integer pin;
   public boolean off = false;
   
-  public static transient int NEOPIXEL_ANIMATION_STOP = 1;
-  public static transient int NEOPIXEL_ANIMATION_COLOR_WIPE = 2;
+  public static transient final int NEOPIXEL_ANIMATION_NO_ANIMATION = 0;
+  public static transient final int NEOPIXEL_ANIMATION_STOP = 1;
+  public static transient final int NEOPIXEL_ANIMATION_COLOR_WIPE = 2;
 
-
+  public List<String> animations = Arrays.asList("Stop", "Color Wipe");
+  public String animation ="No animation";
+  public boolean[] animationSetting = {false,false}; // red, green, blue, speed
+  boolean animationSettingColor = false;
+  boolean animationSettingSpeed = false;
+  HashMap<Integer, boolean[]> animationSettings = new HashMap<Integer, boolean[]>();
+      
   public NeoPixel(String n) {
     super(n);
+    animationSettings.put(NEOPIXEL_ANIMATION_STOP, new boolean[]{false,false});
+    animationSettings.put(NEOPIXEL_ANIMATION_COLOR_WIPE, new boolean[]{true,true});
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
   }
 
@@ -237,6 +247,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       PixelColor pixel = new PixelColor(i, 0, 0, 0);
       setPixel(pixel);
     }
+    setAnimationStop();
     writeMatrix();
     off = true;
   }
@@ -328,9 +339,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
     LoggingFactory.getInstance().setLevel(Level.INFO);
 
     try {
-  //    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      //webgui.autoStartBrowser(false);
-  //    webgui.startService();
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
       Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
@@ -342,7 +353,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 //      arduino1.connect(arduino, "Serial1");
 //      //arduino.setDebug(true);
       NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
-//      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
+      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
       neopixel.attach(arduino, 29, 16);
       sleep(50);
       PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
@@ -363,6 +374,22 @@ public class NeoPixel extends Service implements NeoPixelControl {
     //protect against 0 and negative speed
     if (speed < 1) speed = 1;
     controller.neoPixelSetAnimation(this, animation, red, green, blue, speed);
+    this.animation = animationIntToString(animation);
+    broadcastState();
+  }
+
+  String animationIntToString( int animation) {
+    switch(animation) {
+      case NEOPIXEL_ANIMATION_NO_ANIMATION:
+        return "No animation";
+      case NEOPIXEL_ANIMATION_STOP:
+        return "Stop";
+      case NEOPIXEL_ANIMATION_COLOR_WIPE:
+        return "Color Wipe";
+      default:
+        log.error("Unknow Animation type {}", animation);
+        return "No Animation";
+    }
   }
 
   @Override
@@ -370,8 +397,15 @@ public class NeoPixel extends Service implements NeoPixelControl {
     setAnimation(animationStringToInt(animation), red, green, blue, speed);
   }
 
+  @Override
+  public void setAnimation(String animation, String red, String green, String blue, String speed) {
+    setAnimation(animationStringToInt(animation), Integer.parseInt(red), Integer.parseInt(green), Integer.parseInt(blue), Integer.parseInt(speed));
+  }
+
   int animationStringToInt(String animation) {
     switch(animation) {
+      case "No animation":
+        return NEOPIXEL_ANIMATION_NO_ANIMATION;
       case "Stop":
         return NEOPIXEL_ANIMATION_STOP;
       case "Color Wipe":
@@ -381,5 +415,18 @@ public class NeoPixel extends Service implements NeoPixelControl {
         return NEOPIXEL_ANIMATION_STOP;
     }
     
+  }
+
+  @Override
+  public void setAnimationSetting(String animation) {
+    // TODO Auto-generated method stub
+    animationSetting = animationSettings.get(animationStringToInt(animation));
+    animationSettingColor = animationSetting[0];
+    animationSettingSpeed = animationSetting[1];
+    broadcastState();
+  }
+  
+  public void setAnimationStop() {
+    setAnimation(NEOPIXEL_ANIMATION_STOP,0,0,0,0);
   }
 }

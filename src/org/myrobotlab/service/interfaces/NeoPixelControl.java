@@ -87,5 +87,9 @@ public interface NeoPixelControl extends DeviceControl {
 	 */
 	public void setAnimation(int animation, int red, int green, int blue, int speed);
   public void setAnimation(String animation, int red, int green, int blue, int speed);
+  public void setAnimation(String animation, String red, String green, String blue, String speed);
+  
+  public void setAnimationSetting(String animation);
+
 
 }
