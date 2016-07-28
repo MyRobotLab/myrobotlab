@@ -18,6 +18,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.PID2.PIDData;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -54,9 +55,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	transient public I2CController controller;
 
-	// Variable to ensure that a PWM freqency has been set before starting PWM
-	private int pwmFreq = 60;
-	private boolean pwmFreqSet = false;
+	// Constant for default PWM freqency
+	private static int pwmFreq = 60;
 
 	// List of possible addresses. Used by the GUI.
 	public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E",
@@ -109,7 +109,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * @GroG - I only need servoNameToPin yet. To be able to sweep some more
 	 *         values may be needed
 	 */
-	HashMap<String, Integer> servoNameToPin = new HashMap<String, Integer>();
+  class ServoData {
+  	int pin;
+  	boolean pwmFreqSet = false;
+  	int pwmFreq;
+  }
+  
+	HashMap<String, ServoData> servoMap = new HashMap<String, ServoData>();
 
 	public static void main(String[] args) {
 
@@ -188,8 +194,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		this.controller = controller;
 		this.deviceBus = deviceBus;
 		this.deviceAddress = deviceAddress;
+		
+		createDevice();
 		isControllerSet = true;
-
 		broadcastState();
 		return true;
 	}
@@ -220,7 +227,20 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		log.info(String.format("Setting device address to %s", deviceAddress));
 		this.deviceAddress = deviceAddress;
 	}
+	
+	/**
+	 * This method creates the i2c device
+	 */
+	boolean createDevice() {
+		if (controller != null) {
+				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+		}
 
+		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
+		return true;
+	}
+	
 	public void begin() {
 		byte[] buffer = { PCA9685_MODE1, 0x0 };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
@@ -254,8 +274,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 		int prescale_value = Math.round(osc_clock / precision / hz) - 1;
 		// Set sleep mode before changing PWM freqency
-		byte[] buffer1 = { PCA9685_MODE1, PCA9685_SLEEP };
-		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer1, buffer1.length);
+		byte[] writeBuffer = { PCA9685_MODE1, PCA9685_SLEEP };
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writeBuffer, writeBuffer.length);
 
 		// Wait 1 millisecond until the oscillator has stabilized
 		try {
@@ -313,8 +333,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	@Override
 	public void servoWrite(ServoControl servo) {
-		if (!pwmFreqSet) {
-			setPWMFreq(pwmFreq);
+    ServoData servoData = servoMap.get(servo.getName());
+		if (!servoData.pwmFreqSet) {
+			setPWMFreq(servoData.pwmFreq);
 		}
 		log.info(String.format("servoWrite %s deviceAddress %s targetOutput %d", servo.getName(), deviceAddress, servo.getTargetOutput()));
 		int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
@@ -323,9 +344,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	@Override
 	public void servoWriteMicroseconds(ServoControl servo, int uS) {
-		if (!pwmFreqSet) {
-			setPWMFreq(pwmFreq);
+    ServoData servoData = servoMap.get(servo.getName());
+		if (!servoData.pwmFreqSet) {
+			setPWMFreq(servoData.pwmFreq);
 		}
+		
 		int pin = servo.getPin();
 		// 1000 ms => 150, 2000 ms => 600
 		int pulseWidthOff = (int) (uS * 0.45) - 300;
@@ -377,15 +400,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		 * "RasPi", "our RasPi");
 		 */
 		return meta;
-	}
-
-	/**
-	 * Stop sending pulses to the servo, relax
-	 */
-	@Override
-	public void servoDetach(ServoControl servo) {
-		int pin = servo.getPin();
-		setPWM(pin, 4096, 0);
 	}
 
 	@Override
@@ -463,21 +477,34 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		// should initial pos be a requirement ?
 		// This will fail because the pin data has not yet been set in Servo
 		// servoNameToPin.put(servo.getName(), servo.getPin());
-		int pin = (int)conf[0];
-		servoNameToPin.put(servo.getName(), pin);
+		ServoData servoData = new ServoData();
+	  servoData.pin = (int)conf[0];	
+	  servoData.pwmFreqSet = false;
+	  servoData.pwmFreq = pwmFreq;
+		servoMap.put(servo.getName(), servoData);
 	}
 
-	@Override
+	@Override 
 	public void deviceDetach(DeviceControl servo) {
-		// de-energize pin
 		servoDetach((ServoControl) servo);
-		servoNameToPin.remove(servo.getName());
+		servoMap.remove(servo.getName());
 	}
-
+	
+	/**
+	 * Start sending pulses to the servo
+	 * 
+	 */
 	@Override
 	public void servoAttach(ServoControl servo, int pin) {
-		// TODO Auto-generated method stub
-
+		servoWrite(servo);
 	}
 
+	/**
+	 * Stop sending pulses to the servo, relax
+	 */
+	@Override
+	public void servoDetach(ServoControl servo) {
+		int pin = servo.getPin();
+		setPWM(pin, 4096, 0);
+	}
 }
