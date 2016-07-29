@@ -43,7 +43,11 @@
 #define NEOPIXEL_ANIMATION_COLOR_WIPE 2
 #define NEOPIXEL_ANIMATION_LARSON_SCANNER 3
 #define NEOPIXEL_ANIMATION_THEATER_CHASE 4
-
+#define NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW 5
+#define NEOPIXEL_ANIMATION_RAINBOW 6
+#define NEOPIXEL_ANIMATION_RAINBOW_CYCLE 7
+#define NEOPIXEL_ANIMATION_FLASH_RANDOM 8
+#define NEOPIXEL_ANIMATION_IRONMAN 9
 
 /*****************************
  * Neopixel device
@@ -79,6 +83,8 @@ class MrlNeopixel:public Device{
     int _count;
     bool _off;
     int _dir;
+    int _step;
+    unsigned char _alpha;
   public:
   MrlNeopixel();
   ~MrlNeopixel();
@@ -106,6 +112,12 @@ class MrlNeopixel:public Device{
   void animationColorWipe();
   void animationLarsonScanner();
   void animationTheaterChase();
+  void animationWheel(unsigned char WheelPos, Pixel& pixel);
+  void animationTheaterChaseRainbow();
+  void animationRainbow();
+  void animationRainbowCycle();
+  void animationFlashRandom();
+  void animationIronman();
 };
 
 
