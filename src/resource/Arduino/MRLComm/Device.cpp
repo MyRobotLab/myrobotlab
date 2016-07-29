@@ -9,7 +9,7 @@ void Device::attachDevice() {
   nextDeviceId++;
 }
 
-int Device::nextDeviceId=0;
+int Device::nextDeviceId=1; // device 0 is Arduino
 
 bool Device::deviceAttach(unsigned char config[], int configSize) {
   return false; 
