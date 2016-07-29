@@ -42,6 +42,7 @@
 #define NEOPIXEL_ANIMATION_STOP 1
 #define NEOPIXEL_ANIMATION_COLOR_WIPE 2
 #define NEOPIXEL_ANIMATION_LARSON_SCANNER 3
+#define NEOPIXEL_ANIMATION_THEATER_CHASE 4
 
 
 /*****************************
@@ -104,6 +105,7 @@ class MrlNeopixel:public Device{
   void animationStop();
   void animationColorWipe();
   void animationLarsonScanner();
+  void animationTheaterChase();
 };
 
 
