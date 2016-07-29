@@ -113,6 +113,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   	int pin;
   	boolean pwmFreqSet = false;
   	int pwmFreq;
+  	float sweepMin = 0;
+  	float sweepMax = 180;
+  	float sweepDelay = 1;
+  	int sweepStep = 1;
+  	boolean isSweeping = false;
+  	boolean sweepOneWay = false;
   }
   
 	HashMap<String, ServoData> servoMap = new HashMap<String, ServoData>();
