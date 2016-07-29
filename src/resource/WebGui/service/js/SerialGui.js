@@ -57,7 +57,7 @@ angular.module('mrlapp.service.SerialGui', [])
     //-> you will receive all messages routed to your service here
     // FIXME - why this function on the scope? why is it on gui ? - i believe it should be on this.onMsg
     this.onMsg = function(msg) {
-        $log.info('CALLBACK - ' + msg.method);
+        //$log.info('CALLBACK - ' + msg.method);
         switch (msg.method) {
         case 'onPortNames':
             $scope.possiblePorts = msg.data[0];

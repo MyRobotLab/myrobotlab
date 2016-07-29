@@ -28,7 +28,7 @@ void MrlComm::softReset() {
 	loopCount = 0;
 	publishBoardStatusModulus = 10000;
 	enableBoardStatus = false;
-	Device::nextDeviceId = 0;
+	Device::nextDeviceId = 1; // device 0 is Arduino
 	debug = false;
 	for (int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
 		if (mrlCmd[i] != NULL) {

@@ -2,6 +2,10 @@
 
  dependencies - tinygradient, tinycolor
 
+ FIXME - all data $scope.oscope
+
+ FIXME - all msgs / onMsg need to mirror the service gui this directive was put into
+ - that should not be the case
 
 */
 angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log', function($compile, mrl, $log) {
@@ -22,11 +26,11 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
             scope.pinIndex = {};
             scope.width = 0;
             scope.height = 0;
+            scope.oscope = {};
+            scope.oscope.name = 'screen';
             //scope.hscale = 0.5;
             scope.hscale = 1.0;
-
             var x = 0;
-            
             var gradient = tinygradient([// tinycolor('#ff0000'),       // tinycolor object
             // {r: 0, g: 255, b: 0},       // RGB object
             {
@@ -85,58 +89,47 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                     scope.$apply();
                     break;
                 case 'onPinArray':
+                    x++;
                     pinArray = inMsg.data[0];
                     for (i = 0; i < pinArray.length; ++i) {
-                        data = pinArray[i];
-                        // FIXME - (optimization) pin should not have to send pintype - its known
-                        // when pinButtonList is built
-                        pinData = scope.pinIndex[data.address];
-                        var y = scope.height - data.value;
+                        pinData = pinArray[i];
+                        pinDef = scope.pinIndex[pinData.address];
+                        if (angular.isUndefined(pinDef.stats)) {
+                            pinDef.stats = {
+                                min: 1024,
+                                max: 0,
+                                totalValue: 0,
+                                totalSample: 0
+                            }
+                        } else {
+                            // TODO - sample rate Hz
+                            pinDef.stats.totalSample++;
+                            pinDef.stats.totalValue += pinData.value;
+                            if (pinData.value < pinDef.stats.min) {
+                                pinDef.stats.min = pinData.value;
+                            }
+                            if (pinData.value > pinDef.stats.max) {
+                                pinDef.stats.max = pinData.value;
+                            }
+                        }
+                        var y = scope.height - pinData.value;
                         // this certainly did not work
-                        // ctx.putImageData(id, x, pinData.posY);
+                        // ctx.putImageData(id, x, pinDev.posY);
                         _self.ctx.beginPath();
                         // from
-                        _self.ctx.moveTo(x, pinData.posY);
+                        _self.ctx.moveTo(x, pinDef.posY);
                         // to
-                        x++;
-                        pinData.posY = y * scope.hscale;
-                        _self.ctx.lineTo(x, pinData.posY);
+                        pinDef.posY = y * scope.hscale;
+                        _self.ctx.lineTo(x, pinDef.posY);
                         // color
-                        _self.ctx.strokeStyle = pinData.colorHexString;
+                        _self.ctx.strokeStyle = pinDef.colorHexString;
                         // draw it
                         _self.ctx.stroke();
-                        _self.ctx.closePath();                        
+                        _self.ctx.closePath();
                     }
-
-                    if (x == scope.width) {
-                            x = 0;
-                            scope.clearScreen();
-                    }
-                    break;
-                case 'onPin':
-                    // FIXME - (optimization) pin should not have to send pintype - its known
-                    // when pinButtonList is built
-                    inPin = inMsg.data[0];
-                    pinData = scope.pinData[inPin.pin];
-                    button = scope.pinButtonList[inPin.pin];
-                    var y = scope.height - inPin.value;
-                    // this certainly did not work
-                    // ctx.putImageData(id, pinData.posX, pinData.posY);
-                    _self.ctx.beginPath();
-                    // from
-                    _self.ctx.moveTo(pinData.posX, pinData.posY);
-                    // to
-                    pinData.posX++;
-                    pinData.posY = y * scope.hscale;
-                    _self.ctx.lineTo(pinData.posX, pinData.posY);
-                    // color
-                    _self.ctx.strokeStyle = pinData.colorHexString;
-                    // draw it
-                    _self.ctx.stroke();
-                    _self.ctx.closePath();
-                    if (pinData.posX == scope.width) {
-                        pinData.posX = 0;
-                        scope.clearScreen();
+                    if (x > scope.width) {
+                        x = 0;
+                        scope.clearScreen(pinArray);
                     }
                     break;
                 case 'onTX':
@@ -150,14 +143,28 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                 }
             }
             ;
-            scope.clearScreen = function() {
-                _self.ctx = screen.getContext('2d');
-                // ctx.scale(1, -1); // flip y around for cartesian - bad idea :P
-                // scope.width = screen.width;
-                //scope.height = screen.height;
-                _self.ctx.rect(0, 0, scope.width, scope.height * scope.hscale);
-                _self.ctx.fillStyle = "black";
-                _self.ctx.fill();
+            scope.clearScreen = function(pinArray) {
+                for (i = 0; i < pinArray.length; ++i) {
+                    pinData = pinArray[i];
+                    pinDef = scope.pinIndex[pinData.address];
+                    _self.ctx = screen.getContext('2d');
+                    // ctx.scale(1, -1); // flip y around for cartesian - bad idea :P
+                    // scope.width = screen.width;
+                    //scope.height = screen.height;
+                    _self.ctx.rect(0, 0, scope.width, scope.height * scope.hscale);
+                    _self.ctx.fillStyle = "black";
+                    _self.ctx.fill();
+                    _self.ctx.fillStyle = "white";
+                    stats = pinDef.stats;
+                    _self.ctx.fillText(pinDef.name + (' AVG ' + (stats.totalValue / stats.totalSample)).substring(0,11) + ' MIN ' + stats.min + ' MAX ' + stats.max , 10, 18);
+                }
+            }
+            _self.scaleX = 1;
+            _self.scaleY = 1;
+            scope.zoomIn = function() {
+                _self.scaleX += 1;
+                _self.scaleY += 1;
+                _self.ctx.scale(_self.scaleX, _self.scaleY);
             }
             scope.toggleTrace = function(pinDef) {
                 var highlight = pinDef.color.getOriginalInput();
@@ -204,6 +211,8 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                 $log.error("could not find oscope screen")
             }
             _self.ctx = screen.getContext('2d');
+            //_self.ctx.font="12px Georgia";
+            _self.ctx.font = "16px Aria";
             // ctx.scale(1, -1); // flip y around for cartesian - bad idea :P
             scope.width = screen.width;
             scope.height = screen.height;
