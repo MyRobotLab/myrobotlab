@@ -493,6 +493,7 @@ void MrlComm::deviceAttach(unsigned char* ioCmd) {
 	}
 	case DEVICE_TYPE_NEOPIXEL: {
 		devicePtr = new MrlNeopixel();
+    break;
 	}
 	default: {
 		// TODO: publish error message

@@ -263,7 +263,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       PixelColor pixel = new PixelColor(i, 0, 0, 0);
       setPixel(pixel);
     }
-    setAnimationStop();
+    animationStop();
     writeMatrix();
     off = true;
   }
@@ -435,7 +435,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   int animationStringToInt(String animation) {
     switch(animation) {
       case "No animation":
-        return NEOPIXEL_ANIMATION_NO_ANIMATION;
+        return NEOPIXEL_ANIMATION_STOP;
       case "Stop":
         return NEOPIXEL_ANIMATION_STOP;
       case "Color Wipe":
@@ -470,7 +470,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     broadcastState();
   }
   
-  public void setAnimationStop() {
+  public void animationStop() {
     setAnimation(NEOPIXEL_ANIMATION_STOP,0,0,0,0);
   }
 }
