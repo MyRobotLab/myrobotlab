@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -99,10 +98,41 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   public Integer pin;
   public boolean off = false;
-
+  
+  public static transient final int NEOPIXEL_ANIMATION_NO_ANIMATION = 0;
+  public static transient final int NEOPIXEL_ANIMATION_STOP = 1;
+  public static transient final int NEOPIXEL_ANIMATION_COLOR_WIPE = 2;
+  public static transient final int NEOPIXEL_ANIMATION_LARSON_SCANNER = 3;
+  public static transient final int NEOPIXEL_ANIMATION_THEATER_CHASE = 4;
+  public static transient final int NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW = 5;
+  public static transient final int NEOPIXEL_ANIMATION_RAINBOW = 6;
+  public static transient final int NEOPIXEL_ANIMATION_RAINBOW_CYCLE = 7;
+  public static transient final int NEOPIXEL_ANIMATION_FLASH_RANDOM = 8;
+  public static transient final int NEOPIXEL_ANIMATION_IRONMAN = 9;
+  
+  public List<String> animations;
+  public transient String animation ="No animation";
+  public transient boolean[] animationSetting = {false,false}; // red, green, blue, speed
+  public transient boolean animationSettingColor = false;
+  public transient boolean animationSettingSpeed = false;
+  transient HashMap<Integer, boolean[]> animationSettings = new HashMap<Integer, boolean[]>();
+      
   public NeoPixel(String n) {
     super(n);
+    animationSettings.put(NEOPIXEL_ANIMATION_STOP, new boolean[]{false,false});
+    animationSettings.put(NEOPIXEL_ANIMATION_COLOR_WIPE, new boolean[]{true,true});
+    animationSettings.put(NEOPIXEL_ANIMATION_LARSON_SCANNER, new boolean[]{true,true});
+    animationSettings.put(NEOPIXEL_ANIMATION_THEATER_CHASE, new boolean[]{true,true});
+    animationSettings.put(NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW, new boolean[]{false,true});
+    animationSettings.put(NEOPIXEL_ANIMATION_RAINBOW, new boolean[]{false,true});
+    animationSettings.put(NEOPIXEL_ANIMATION_RAINBOW_CYCLE, new boolean[]{false,true});
+    animationSettings.put(NEOPIXEL_ANIMATION_FLASH_RANDOM, new boolean[]{true,true});
+    animationSettings.put(NEOPIXEL_ANIMATION_IRONMAN, new boolean[]{true,true});
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    animations.clear();
+    for(int i = 1; i < 10; i++){
+      animations.add(animationIntToString(i));
+    }
   }
 
   public void onRegistered(ServiceInterface s) {
@@ -233,6 +263,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       PixelColor pixel = new PixelColor(i, 0, 0, 0);
       setPixel(pixel);
     }
+    setAnimationStop();
     writeMatrix();
     off = true;
   }
@@ -324,28 +355,26 @@ public class NeoPixel extends Service implements NeoPixelControl {
     LoggingFactory.getInstance().setLevel(Level.INFO);
 
     try {
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      //webgui.autoStartBrowser(false);
-      webgui.startService();
+//      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+//      webgui.autoStartBrowser(false);
+//      webgui.startService();
       Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.arduinoPath="C:\\Program Files (x86)\\Arduino";
       arduino.setBoardMega();
       arduino.connect("COM15");
-      Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
-      arduino1.setBoardUno();
-      arduino1.connect(arduino, "Serial1");
+//      Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
+//      arduino1.setBoardUno();
+//      arduino1.connect(arduino, "Serial1");
 //      //arduino.setDebug(true);
       NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
-      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-      neopixel.attach(arduino1, 5, 16);
+//      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
+      neopixel.attach(arduino, 29, 16);
       sleep(50);
-      PixelColor pix = new NeoPixel.PixelColor(1, 255, 0, 0);
+      PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
       neopixel.setPixel(pix);
-      neopixel.writeMatrix();
-      NeoPixel neopixel1 = (NeoPixel) Runtime.start("neopixel1", "NeoPixel");
-      neopixel1.attach(arduino, 5, 16);
+      neopixel.setAnimation(NEOPIXEL_ANIMATION_IRONMAN, 255, 0, 0, 1);
 //      //arduino.setLoadTimingEnabled(true);
 //      Servo servo=(Servo)Runtime.start("servo","Servo");
 //      servo.attach(arduino, 5);
@@ -356,4 +385,92 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   }
 
+  @Override
+  public void setAnimation(int animation, int red, int green, int blue, int speed) {
+    //protect against 0 and negative speed
+    if (speed < 1) speed = 1;
+    controller.neoPixelSetAnimation(this, animation, red, green, blue, speed);
+    this.animation = animationIntToString(animation);
+    broadcastState();
+  }
+
+  String animationIntToString( int animation) {
+    switch(animation) {
+      case NEOPIXEL_ANIMATION_NO_ANIMATION:
+        return "No animation";
+      case NEOPIXEL_ANIMATION_STOP:
+        return "Stop";
+      case NEOPIXEL_ANIMATION_COLOR_WIPE:
+        return "Color Wipe";
+      case NEOPIXEL_ANIMATION_LARSON_SCANNER:
+        return "Larson Scanner";
+      case NEOPIXEL_ANIMATION_THEATER_CHASE:
+        return "Theater Chase";
+      case NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW:
+        return "Theater Chase Rainbow";
+      case NEOPIXEL_ANIMATION_RAINBOW:
+        return "Rainbow";
+      case NEOPIXEL_ANIMATION_RAINBOW_CYCLE:
+        return "Rainbow Cycle";
+      case NEOPIXEL_ANIMATION_FLASH_RANDOM:
+        return "Flash Random";
+      case NEOPIXEL_ANIMATION_IRONMAN:
+        return "Ironman";
+      default:
+        log.error("Unknow Animation type {}", animation);
+        return "No Animation";
+    }
+  }
+
+  @Override
+  public void setAnimation(String animation, int red, int green, int blue, int speed) {
+    setAnimation(animationStringToInt(animation), red, green, blue, speed);
+  }
+
+  @Override
+  public void setAnimation(String animation, String red, String green, String blue, String speed) {
+    setAnimation(animationStringToInt(animation), Integer.parseInt(red), Integer.parseInt(green), Integer.parseInt(blue), Integer.parseInt(speed));
+  }
+
+  int animationStringToInt(String animation) {
+    switch(animation) {
+      case "No animation":
+        return NEOPIXEL_ANIMATION_NO_ANIMATION;
+      case "Stop":
+        return NEOPIXEL_ANIMATION_STOP;
+      case "Color Wipe":
+        return NEOPIXEL_ANIMATION_COLOR_WIPE;
+      case "Larson Scanner":
+        return NEOPIXEL_ANIMATION_LARSON_SCANNER;
+      case "Theater Chase":
+        return NEOPIXEL_ANIMATION_THEATER_CHASE;
+      case "Theater Chase Rainbow":
+        return NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW;
+      case "Rainbow":
+        return NEOPIXEL_ANIMATION_RAINBOW;
+      case "Rainbow Cycle":
+        return NEOPIXEL_ANIMATION_RAINBOW_CYCLE;
+      case "Flash Random":
+        return NEOPIXEL_ANIMATION_FLASH_RANDOM;
+      case "Ironman":
+        return NEOPIXEL_ANIMATION_IRONMAN;
+      default:
+        log.error("Unknow Animation type {}", animation);
+        return NEOPIXEL_ANIMATION_STOP;
+    }
+    
+  }
+
+  @Override
+  public void setAnimationSetting(String animation) {
+    // TODO Auto-generated method stub
+    animationSetting = animationSettings.get(animationStringToInt(animation));
+    animationSettingColor = animationSetting[0];
+    animationSettingSpeed = animationSetting[1];
+    broadcastState();
+  }
+  
+  public void setAnimationStop() {
+    setAnimation(NEOPIXEL_ANIMATION_STOP,0,0,0,0);
+  }
 }

@@ -38,6 +38,16 @@
     (((P) >= 0 && (P) <= 7) ? sendBitD(V) : (((P) >= 8 && (P) <= 13) ? sendBitB(V) : sendBitC(V)))
 #endif
 
+#define NEOPIXEL_ANIMATION_NO_ANIMATION 0
+#define NEOPIXEL_ANIMATION_STOP 1
+#define NEOPIXEL_ANIMATION_COLOR_WIPE 2
+#define NEOPIXEL_ANIMATION_LARSON_SCANNER 3
+#define NEOPIXEL_ANIMATION_THEATER_CHASE 4
+#define NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW 5
+#define NEOPIXEL_ANIMATION_RAINBOW 6
+#define NEOPIXEL_ANIMATION_RAINBOW_CYCLE 7
+#define NEOPIXEL_ANIMATION_FLASH_RANDOM 8
+#define NEOPIXEL_ANIMATION_IRONMAN 9
 
 /*****************************
  * Neopixel device
@@ -52,6 +62,8 @@ struct Pixel{
   unsigned char blue;
   unsigned char green;
   Pixel();
+  void clearPixel();
+  void setPixel(unsigned char red, unsigned char green, unsigned char blue);
 };
 
 class MrlNeopixel:public Device{
@@ -62,8 +74,19 @@ class MrlNeopixel:public Device{
     unsigned long lastShow;
     bool newData;
     int pin;
+    unsigned char _baseColorRed;
+    unsigned char _baseColorGreen;
+    unsigned char _baseColorBlue;
+    unsigned int _speed;
+    byte _animation;
+    int _pos;
+    int _count;
+    bool _off;
+    int _dir;
+    int _step;
+    unsigned char _alpha;
   public:
-  MrlNeopixel():Device(DEVICE_TYPE_NEOPIXEL){};
+  MrlNeopixel();
   ~MrlNeopixel();
   bool deviceAttach(unsigned char config[], int configSize);
   inline void sendBitB(bool bitVal);
@@ -84,6 +107,17 @@ class MrlNeopixel:public Device{
   void show();
   void neopixelWriteMatrix(unsigned char* ioCmd);
   void update();
+  void setAnimation(unsigned char* config);
+  void animationStop();
+  void animationColorWipe();
+  void animationLarsonScanner();
+  void animationTheaterChase();
+  void animationWheel(unsigned char WheelPos, Pixel& pixel);
+  void animationTheaterChaseRainbow();
+  void animationRainbow();
+  void animationRainbowCycle();
+  void animationFlashRandom();
+  void animationIronman();
 };
 
 
