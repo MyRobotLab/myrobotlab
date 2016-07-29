@@ -598,7 +598,6 @@ public class Servo extends Service implements ServoControl {
 		attach((ServoController)Runtime.getService(controllerName), pin, null);
 	}
 	
-	
 	@Override
 	public void attach(ServoController controller, int pin) throws Exception {
 		attach(controller, pin, null);
