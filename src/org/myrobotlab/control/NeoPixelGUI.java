@@ -49,7 +49,7 @@ import org.slf4j.Logger;
 public class NeoPixelGUI extends ServiceGUI implements ActionListener {
 
   static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(AdafruitIna219GUI.class);
+  public final static Logger log = LoggerFactory.getLogger(NeoPixelGUI.class);
 
   String attach = "attach";
   String detach = "detach";

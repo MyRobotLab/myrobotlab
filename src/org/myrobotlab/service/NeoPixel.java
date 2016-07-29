@@ -105,20 +105,26 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public static transient final int NEOPIXEL_ANIMATION_STOP = 1;
   public static transient final int NEOPIXEL_ANIMATION_COLOR_WIPE = 2;
   public static transient final int NEOPIXEL_ANIMATION_LARSON_SCANNER = 3;
+  public static transient final int NEOPIXEL_ANIMATION_THEATER_CHASE = 4;
   
-  public List<String> animations = Arrays.asList("Stop", "Color Wipe", "Larson Scanner");
-  public String animation ="No animation";
-  public boolean[] animationSetting = {false,false}; // red, green, blue, speed
-  public boolean animationSettingColor = false;
-  public boolean animationSettingSpeed = false;
-  HashMap<Integer, boolean[]> animationSettings = new HashMap<Integer, boolean[]>();
+  public List<String> animations;
+  public transient String animation ="No animation";
+  public transient boolean[] animationSetting = {false,false}; // red, green, blue, speed
+  public transient boolean animationSettingColor = false;
+  public transient boolean animationSettingSpeed = false;
+  transient HashMap<Integer, boolean[]> animationSettings = new HashMap<Integer, boolean[]>();
       
   public NeoPixel(String n) {
     super(n);
     animationSettings.put(NEOPIXEL_ANIMATION_STOP, new boolean[]{false,false});
     animationSettings.put(NEOPIXEL_ANIMATION_COLOR_WIPE, new boolean[]{true,true});
     animationSettings.put(NEOPIXEL_ANIMATION_LARSON_SCANNER, new boolean[]{true,true});
+    animationSettings.put(NEOPIXEL_ANIMATION_THEATER_CHASE, new boolean[]{true,true});
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    animations.clear();
+    for(int i = 1; i < 5; i++){
+      animations.add(animationIntToString(i));
+    }
   }
 
   public void onRegistered(ServiceInterface s) {
@@ -360,7 +366,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       sleep(50);
       PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
       neopixel.setPixel(pix);
-      neopixel.setAnimation(3, 200, 0, 0, 10);
+      neopixel.setAnimation(4, 200, 0, 0, 1);
 //      //arduino.setLoadTimingEnabled(true);
 //      Servo servo=(Servo)Runtime.start("servo","Servo");
 //      servo.attach(arduino, 5);
@@ -390,6 +396,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
         return "Color Wipe";
       case NEOPIXEL_ANIMATION_LARSON_SCANNER:
         return "Larson Scanner";
+      case NEOPIXEL_ANIMATION_THEATER_CHASE:
+        return "Theater Chase";
       default:
         log.error("Unknow Animation type {}", animation);
         return "No Animation";
@@ -416,6 +424,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
         return NEOPIXEL_ANIMATION_COLOR_WIPE;
       case "Larson Scanner":
         return NEOPIXEL_ANIMATION_LARSON_SCANNER;
+      case "Theater Chase":
+        return NEOPIXEL_ANIMATION_THEATER_CHASE;
       default:
         log.error("Unknow Animation type {}", animation);
         return NEOPIXEL_ANIMATION_STOP;

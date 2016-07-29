@@ -615,6 +615,9 @@ void MrlNeopixel::update() {
   case NEOPIXEL_ANIMATION_LARSON_SCANNER:
     animationLarsonScanner();
     break;
+  case NEOPIXEL_ANIMATION_THEATER_CHASE:
+    animationTheaterChase();
+    break;
 	default:
 		MrlMsg::publishError(ERROR_DOES_NOT_EXIST,
 				F("Neopixel animation do not exist"));
@@ -691,6 +694,25 @@ void MrlNeopixel::animationLarsonScanner() {
     else if(_pos > numPixel) {
       _pos = numPixel - 1;
       _dir = -_dir;
+    }
+  }
+  else lastShow = millis();
+  newData = true;  
+}
+
+void MrlNeopixel::animationTheaterChase(){
+  if(!((_count++)%_speed)) {
+    for (int i = 0; i <= numPixel; i+=3){
+      if(i + _pos <= numPixel){
+        pixels[i + _pos].clearPixel();
+      }
+    }
+    _pos++;
+    if(_pos >= 4) _pos = 1;
+    for (int i = 0; i <= numPixel; i+=3){
+      if(i + _pos <= numPixel){
+        pixels[i + _pos].setPixel(_baseColorRed, _baseColorGreen, _baseColorBlue);
+      }
     }
   }
   else lastShow = millis();
