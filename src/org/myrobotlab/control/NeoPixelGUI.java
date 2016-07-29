@@ -304,7 +304,7 @@ public class NeoPixelGUI extends ServiceGUI implements ActionListener {
   
   private void getAnimationList() {
     List<String> anim = boundService.animations;
-    animationList.addItem("");
+    animationList.addItem("No animation");
     for (int i = 0; i < anim.size(); i++){
       animationList.addItem(anim.get(i));
     }
