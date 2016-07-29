@@ -32,5 +32,6 @@ import org.myrobotlab.service.NeoPixel;
 public interface NeoPixelController extends DeviceController {
     
   public void neoPixelWriteMatrix(NeoPixel neopixel, List<Integer> msg);
+  public void neoPixelSetAnimation(NeoPixel neopixel, int animation, int red, int green, int blue, int speed);
   
 }

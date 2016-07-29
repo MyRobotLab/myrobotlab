@@ -30,6 +30,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -47,7 +49,7 @@ import org.slf4j.Logger;
 public class NeoPixelGUI extends ServiceGUI implements ActionListener {
 
   static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(AdafruitIna219GUI.class);
+  public final static Logger log = LoggerFactory.getLogger(NeoPixelGUI.class);
 
   String attach = "attach";
   String detach = "detach";
@@ -75,6 +77,19 @@ public class NeoPixelGUI extends ServiceGUI implements ActionListener {
   
   JButton sendPixelMatrix = new JButton("Send Pixel Matrix");
   JButton turnOnOff = new JButton("Turn Off");
+  
+  JLabel animation = new JLabel("No animation");
+  JComboBox<String> animationList = new JComboBox<String>();
+  JLabel labelRed = new JLabel("Red");
+  JLabel labelGreen = new JLabel("Green");
+  JLabel labelBlue = new JLabel("Blue");
+  JLabel labelSpeed = new JLabel("Speed");
+  JPanel animColor = new JPanel();
+  JTextField animRed = new JTextField(3);
+  JTextField animGreen = new JTextField(3);
+  JTextField animBlue = new JTextField(3);
+  JTextField animSpeed = new JTextField(4);
+  JButton animStart = new JButton("Start Animation");
 
   public NeoPixelGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
@@ -114,13 +129,19 @@ public class NeoPixelGUI extends ServiceGUI implements ActionListener {
         turnOnOff.setText("Turn On");
       }
     }
-    for (int i = 0; i < 25; i++){
+    for (int i = 0; i < 25; i++) {
       if(o == setPixel[i]){
         myService.send(boundServiceName, "setPixel", pixelAddress[i].getText(), pixelRed[i].getText(), pixelGreen[i].getText(), pixelBlue[i].getText());
       }
-      if(o == sendPixel[i]){
+      if(o == sendPixel[i]) {
         myService.send(boundServiceName, "sendPixel", pixelAddress[i].getText(), pixelRed[i].getText(), pixelGreen[i].getText(), pixelBlue[i].getText());
       }
+    }
+    if(o == animationList) {
+      myService.send(boundServiceName, "setAnimationSetting", animationList.getSelectedItem());
+    }
+    if(o == animStart) {
+      myService.send(boundServiceName, "setAnimation", animationList.getSelectedItem(), animRed.getText(), animGreen.getText(), animBlue.getText(), animSpeed.getText());
     }
   }
 
@@ -141,12 +162,18 @@ public class NeoPixelGUI extends ServiceGUI implements ActionListener {
     controller.setSelectedItem(neopixel.getControllerName());
     pinList.setSelectedItem(neopixel.pin);
     pixelList.setSelectedItem(neopixel.numPixel.toString());
+    animStart.setEnabled(neopixel.isAttached());
     if (neopixel.isAttached()) {
+      animColor.setVisible(neopixel.animationSettingColor);
+      labelSpeed.setVisible(neopixel.animationSettingSpeed);
+      animSpeed.setVisible(neopixel.animationSettingSpeed);
       attachButton.setText(detach);
       controller.setEnabled(false);
       pinList.setEnabled(false);
       pixelList.setEnabled(false);
       refresh.setEnabled(true);
+      animation.setText(neopixel.animation);
+      animationList.setEnabled(true);
       for (int i = 0; i < neopixel.savedPixelMatrix.size() ; i++ ) {
         pixelAddress[i].setVisible(true);
         pixelRed[i].setVisible(true);
@@ -172,11 +199,15 @@ public class NeoPixelGUI extends ServiceGUI implements ActionListener {
       sendPixelMatrix.setEnabled(true);
       turnOnOff.setEnabled(true);
     } else {
+      animColor.setVisible(false);
+      labelSpeed.setVisible(neopixel.animationSettingSpeed);
+      animSpeed.setVisible(neopixel.animationSettingSpeed);
       attachButton.setText(attach);
       controller.setEnabled(true);
       pinList.setEnabled(true);
       pixelList.setEnabled(true);
       refresh.setEnabled(false);
+      animationList.setEnabled(false);
       for (int i = 0; i < 25 ; i++){
         setPixel[i].setEnabled(false);
         sendPixel[i].setEnabled(false);
@@ -211,6 +242,28 @@ public class NeoPixelGUI extends ServiceGUI implements ActionListener {
     refresh.addActionListener(this);
 
     display.add(north, BorderLayout.NORTH);
+    JPanel anim = new JPanel();
+    anim.add(new JLabel("Current Animation:"));
+    anim.add(animation);
+    anim.add(animationList);
+    animColor.add(labelRed);
+    animColor.add(animRed);
+    animRed.setText("0");
+    animColor.add(labelGreen);
+    animColor.add(animGreen);
+    animGreen.setText("0");
+    animColor.add(labelBlue);
+    animColor.add(animBlue);
+    animBlue.setText("0");
+    anim.add(animColor);
+    anim.add(labelSpeed);
+    anim.add(animSpeed);
+    animSpeed.setText("1");
+    anim.add(animStart);
+    animStart.addActionListener(this);
+    animationList.addActionListener(this);
+    display.add(anim, BorderLayout.CENTER);
+    
     JPanel center = new JPanel();
     center.setLayout(new GridLayout(0,2));
     JPanel lineEnd=new JPanel();
@@ -243,11 +296,20 @@ public class NeoPixelGUI extends ServiceGUI implements ActionListener {
       line1.add(sendPixel[i]);
       center.add(line1);
     }
-    display.add(center, BorderLayout.CENTER);
+    display.add(center, BorderLayout.SOUTH);
     getPinList();
     getPixelList();
+    getAnimationList();
   }
   
+  private void getAnimationList() {
+    List<String> anim = boundService.animations;
+    animationList.addItem("");
+    for (int i = 0; i < anim.size(); i++){
+      animationList.addItem(anim.get(i));
+    }
+  }
+
   public void getPinList() {
     for (int i = 0; i < 70; i++) {
       pinList.addItem(String.format("%d",i));
