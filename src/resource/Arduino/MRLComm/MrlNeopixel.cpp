@@ -618,6 +618,21 @@ void MrlNeopixel::update() {
   case NEOPIXEL_ANIMATION_THEATER_CHASE:
     animationTheaterChase();
     break;
+  case NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW:
+    animationTheaterChaseRainbow();
+    break;
+  case NEOPIXEL_ANIMATION_RAINBOW:
+    animationRainbow();
+    break;
+  case NEOPIXEL_ANIMATION_RAINBOW_CYCLE:
+    animationRainbowCycle();
+    break;
+  case NEOPIXEL_ANIMATION_FLASH_RANDOM:
+    animationFlashRandom();
+    break;
+  case NEOPIXEL_ANIMATION_IRONMAN:
+    animationIronman();
+    break;
 	default:
 		MrlMsg::publishError(ERROR_DOES_NOT_EXIST,
 				F("Neopixel animation do not exist"));
@@ -639,10 +654,12 @@ void MrlNeopixel::setAnimation(unsigned char* config){
 	_baseColorGreen = config[3];
 	_baseColorBlue = config[4];
 	_speed = (config[5] << 8) + config[6];
-  _pos=1;
-  _count=0;
-  _off=false;
-  _dir=1;
+  _pos = 1;
+  _count = 0;
+  _off = false;
+  _dir = 1;
+  _step = 1;
+  _alpha = 50;
   newData=true;
 }
 
@@ -700,7 +717,7 @@ void MrlNeopixel::animationLarsonScanner() {
   newData = true;  
 }
 
-void MrlNeopixel::animationTheaterChase(){
+void MrlNeopixel::animationTheaterChase() {
   if(!((_count++)%_speed)) {
     for (int i = 0; i <= numPixel; i+=3){
       if(i + _pos <= numPixel){
@@ -713,6 +730,108 @@ void MrlNeopixel::animationTheaterChase(){
       if(i + _pos <= numPixel){
         pixels[i + _pos].setPixel(_baseColorRed, _baseColorGreen, _baseColorBlue);
       }
+    }
+  }
+  else lastShow = millis();
+  newData = true;  
+}
+
+void MrlNeopixel::animationWheel(unsigned char WheelPos, Pixel& pixel) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    pixel.setPixel(255 - WheelPos * 3, 0 , WheelPos * 3);
+  }
+  else if(WheelPos < 170) {
+    WheelPos -= 85;
+    pixel.setPixel(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  else {
+    WheelPos -= 170;
+    pixel.setPixel(WheelPos * 3, 255 - WheelPos * 3, 0);
+  }
+}
+
+void MrlNeopixel::animationTheaterChaseRainbow() {
+  if(!((_count++)%_speed)) {
+    for (int i = 0; i <= numPixel; i+=3){
+      if(i + _pos <= numPixel){
+        pixels[i + _pos].clearPixel();
+      }
+    }
+    _pos++;
+    if(_pos >= 4) _pos = 1;
+    for (int i = 0; i <= numPixel; i+=3){
+      if(i + _pos <= numPixel){
+        animationWheel((_baseColorRed + i), pixels[i + _pos]);
+      }
+    }
+    _baseColorRed++;
+  }
+  else lastShow = millis();
+  newData = true;  
+}
+
+void MrlNeopixel::animationRainbow() {
+  if(!((_count++)%_speed)) {
+    for (int i = 0; i <= numPixel; i++){
+      animationWheel((_baseColorRed + i), pixels[i]);
+    }
+    _baseColorRed++;
+  }
+  else lastShow = millis();
+  newData = true;  
+}
+
+void MrlNeopixel::animationRainbowCycle() {
+  if(!((_count++)%_speed)) {
+    for (int i = 0; i <= numPixel; i++){
+      animationWheel((i * 256 / numPixel) + _baseColorRed, pixels[i]);
+    }
+    _baseColorRed++;
+  }
+  else lastShow = millis();
+  newData = true;  
+}
+
+void MrlNeopixel::animationFlashRandom() {
+  if(!((_count++)%_speed)) {
+    if(_step == 1){
+      _pos = random(numPixel)+1;
+    }
+    if (_step < 6){
+      int r = (_baseColorRed * _step) / 5;
+      int g = (_baseColorGreen * _step) / 5;
+      int b = (_baseColorBlue * _step) / 5;
+      pixels[_pos].setPixel(r, g, b);
+    }
+    else{
+      int r = (_baseColorRed * (11-_step)) / 5;
+      int g = (_baseColorGreen * (11-_step)) / 5;
+      int b = (_baseColorBlue * (11-_step)) / 5;
+      pixels[_pos].setPixel(r, g, b);
+    }
+    _step++;
+    if(_step > 11) _step = 1;
+  }
+  else lastShow = millis();
+  newData = true;  
+}
+
+void MrlNeopixel::animationIronman() {
+  if(!((_count++)%_speed)) {
+    int flip = random(32);
+    if (flip > 22) _dir = -_dir;
+    _alpha += 5 * _dir;
+    if (_alpha < 0) {
+      _alpha = 0;
+      _dir = 1;
+    }
+    if (_alpha > 100) {
+      _alpha = 100;
+      _dir = -1;
+    }
+    for (int i = 1; i <= numPixel; i++){
+      pixels[i].setPixel((_baseColorRed * _alpha) / 100, (_baseColorGreen * _alpha) / 100, (_baseColorBlue * _alpha) / 100);  
     }
   }
   else lastShow = millis();
