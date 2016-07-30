@@ -48,9 +48,12 @@ public class ArduinoUtils {
 		// from /resource
 		//not working
 	  FileIO.extractResources();
-	  String sketchFilename = FileIO.class.getResource("/resource/Arduino/MRLComm/MRLComm.ino").getPath();
-		//String sketchFilename = "resource/Arduino/MRLComm/MRLComm.ino";
+		String sketchFilename = "resource/Arduino/MRLComm/MRLComm.ino";
 		File sketch = new File(sketchFilename);
+		if (!sketch.exists()){
+		  sketchFilename = "src/resource/Arduino/MRLComm/MRLComm.ino";
+		  sketch = new File(sketchFilename);
+		}
 		// Create the command to run (and it's args.)
 		String arduinoExe = arduinoPath + getExeName();
 		ArrayList<String> args = new ArrayList<String>();
