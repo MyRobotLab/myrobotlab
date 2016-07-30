@@ -26,6 +26,7 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -110,7 +111,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public static transient final int NEOPIXEL_ANIMATION_FLASH_RANDOM = 8;
   public static transient final int NEOPIXEL_ANIMATION_IRONMAN = 9;
   
-  public List<String> animations;
+  public List<String> animations = Arrays.asList("No animation","Stop","Color Wipe","Larson Scanner","Theater Chase","Theater Chase Rainbow","Rainbow","Rainbow Cycle","Flash Random","Ironman");
   public transient String animation ="No animation";
   public transient boolean[] animationSetting = {false,false}; // red, green, blue, speed
   public transient boolean animationSettingColor = false;
@@ -129,10 +130,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
     animationSettings.put(NEOPIXEL_ANIMATION_FLASH_RANDOM, new boolean[]{true,true});
     animationSettings.put(NEOPIXEL_ANIMATION_IRONMAN, new boolean[]{true,true});
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
-    animations.clear();
-    for(int i = 1; i < 10; i++){
-      animations.add(animationIntToString(i));
-    }
   }
 
   public void onRegistered(ServiceInterface s) {
