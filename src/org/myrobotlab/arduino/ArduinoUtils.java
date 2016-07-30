@@ -46,12 +46,9 @@ public class ArduinoUtils {
 		// Assume this is mrlcomm resource!
 		// G-say: FIXME - this will ONLY work in eclipse !!! - should extract it
 		// from /resource
-		File dir = new File("MRLComm");
-		if(!dir.exists()) {
-		  FileIO.extractResource("Arduino/MRLComm", "MRLComm");
-		}
-		//String sketchFilename = "src/resource/Arduino/MRLComm/MRLComm.ino";
-		String sketchFilename = "MRLComm/MRLComm.ino";
+		//not working
+	  FileIO.extractResources();
+		String sketchFilename = "src/resource/Arduino/MRLComm/MRLComm.ino";
 		File sketch = new File(sketchFilename);
 		// Create the command to run (and it's args.)
 		String arduinoExe = arduinoPath + getExeName();
