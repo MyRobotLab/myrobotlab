@@ -1,21 +1,13 @@
 <!-- begin status and control for board to be viewed in above all tabs -->
 <div class="row">
 		<div class="col-lg-8">
-		<div class="input-group">
-			   <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="msg.connect(portName, service.serial.baudrate, service.serial.databits, service.serial.stopbits, service.serial.parity)">connect</button></span>
-			   <span class="input-group-btn"><button class="btn btn-default" ng-show="isConnected" ng-click="msg.disconnect()">disconnect</button></span>
-			   <input class="form-control" type="text" ng-model="portName" ng-disabled="isConnected" uib-typeahead="portName for portName in service.serial.possiblePorts | filter:$viewValue | limitTo:8"/>
-			   <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="msg.refresh()">refresh</button></span>
-			   <!-- span class="input-group-btn"><button class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</button></span -->
+		<port service-name="{{service.serial.name}}" ></port>		
 			     <select ng-model="boardType" ng-change="onBoardChange(boardType)" class="form-control">
 					<option>Uno</option>
 					<option>Mega</option>
 				</select>    
-		</div>
 		</div>	
 	  <div class="col-md-4">
-		 <img ng-src="../{{isConnectedImage}}.png" /> <!-- TODO - make directive -->
-		 <label ng-show="isConnected">{{stats.lineSpeed}} Kbps</label>
 	  </div>			
 </div>
 <div class="row">

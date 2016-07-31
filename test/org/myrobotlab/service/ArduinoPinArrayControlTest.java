@@ -80,10 +80,12 @@ public class ArduinoPinArrayControlTest {
 		
 		arduino.connect("COM5");
 		// arduino.setDebug(true);
+		/*
 		arduino.enablePin(14);
 		arduino.enablePin(16);
 		arduino.enablePin(17);
 		arduino.disablePin(14);
+		*/
 		
 		boolean skip = true;
 		if (skip){
