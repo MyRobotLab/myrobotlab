@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
 import org.slf4j.Logger;
@@ -45,9 +46,14 @@ public class ArduinoUtils {
 		// Assume this is mrlcomm resource!
 		// G-say: FIXME - this will ONLY work in eclipse !!! - should extract it
 		// from /resource
-
-		String sketchFilename = "src/resource/Arduino/MRLComm/MRLComm.ino";
+		//not working
+	  FileIO.extractResources();
+		String sketchFilename = "resource/Arduino/MRLComm/MRLComm.ino";
 		File sketch = new File(sketchFilename);
+		if (!sketch.exists()){
+		  sketchFilename = "src/resource/Arduino/MRLComm/MRLComm.ino";
+		  sketch = new File(sketchFilename);
+		}
 		// Create the command to run (and it's args.)
 		String arduinoExe = arduinoPath + getExeName();
 		ArrayList<String> args = new ArrayList<String>();
