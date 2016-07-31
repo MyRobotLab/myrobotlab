@@ -599,7 +599,9 @@ void MrlComm::update() {
 		// this is an optimization in that we send back "all" the read pin data in a
 		// standard 2 byte package - digital reads don't need both bytes, but the
 		// sending it all back in 1 msg and the simplicity is well worth it
-		msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
+		//msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
+		msg.countData();
+		msg.autoSend(57);
 		for (int i = 0; i < pinList.size(); ++i) {
 			Pin* pin = pinList.get(i);
 			// TODO: moe the analog read outside of thie method and pass it in!
