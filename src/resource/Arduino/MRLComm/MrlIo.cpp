@@ -36,7 +36,7 @@ bool MrlIo::begin(int _ioType, long speed) {
 			break;
 	}
 	serial->begin(speed);
-	ioType == _ioType;
+	ioType = _ioType;
 	openIo |= (1 << ioType);
   //delay(500);
 	return true;

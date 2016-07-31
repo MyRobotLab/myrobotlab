@@ -664,7 +664,7 @@ void MrlNeopixel::setAnimation(unsigned char* config){
 }
 
 void MrlNeopixel::animationStop() {
-	for (int i = 1; i <= numPixel; i++) {
+	for (unsigned int i = 1; i <= numPixel; i++) {
 		pixels[i].clearPixel();
 	}
   _animation = NEOPIXEL_ANIMATION_NO_ANIMATION;
@@ -679,7 +679,7 @@ void MrlNeopixel::animationColorWipe() {
     else{
   		pixels[_pos++].setPixel(_baseColorRed, _baseColorGreen, _baseColorBlue);
     }
-    if(_pos > numPixel) {
+    if(_pos > (int)numPixel) {
       _pos = 1;
       _off = !_off;
     }
@@ -690,7 +690,7 @@ void MrlNeopixel::animationColorWipe() {
 
 void MrlNeopixel::animationLarsonScanner() {
   if(!((_count++)%_speed)) {
-    for(int i = 1; i <= numPixel; i++){
+    for(unsigned int i = 1; i <= numPixel; i++){
       pixels[i].clearPixel();
     }
     int pos = _pos;
@@ -698,7 +698,7 @@ void MrlNeopixel::animationLarsonScanner() {
       pos = _pos + i;
       if (pos < 1)
         pos += numPixel;
-      if (pos > numPixel)
+      if (pos > (int)numPixel)
         pos -= numPixel;
       int j = (abs(i) * 10)+1;
       pixels[pos].setPixel(_baseColorRed / j, _baseColorGreen /j, _baseColorBlue / j);
@@ -708,7 +708,7 @@ void MrlNeopixel::animationLarsonScanner() {
       pos = 2;
       _dir = -_dir;
    }
-    else if(_pos > numPixel) {
+    else if(_pos > (int)numPixel) {
       _pos = numPixel - 1;
       _dir = -_dir;
     }
@@ -719,14 +719,14 @@ void MrlNeopixel::animationLarsonScanner() {
 
 void MrlNeopixel::animationTheaterChase() {
   if(!((_count++)%_speed)) {
-    for (int i = 0; i <= numPixel; i+=3){
+    for (unsigned int i = 0; i <= numPixel; i+=3){
       if(i + _pos <= numPixel){
         pixels[i + _pos].clearPixel();
       }
     }
     _pos++;
     if(_pos >= 4) _pos = 1;
-    for (int i = 0; i <= numPixel; i+=3){
+    for (unsigned int i = 0; i <= numPixel; i+=3){
       if(i + _pos <= numPixel){
         pixels[i + _pos].setPixel(_baseColorRed, _baseColorGreen, _baseColorBlue);
       }
@@ -753,14 +753,14 @@ void MrlNeopixel::animationWheel(unsigned char WheelPos, Pixel& pixel) {
 
 void MrlNeopixel::animationTheaterChaseRainbow() {
   if(!((_count++)%_speed)) {
-    for (int i = 0; i <= numPixel; i+=3){
+    for (unsigned int i = 0; i <= numPixel; i+=3){
       if(i + _pos <= numPixel){
         pixels[i + _pos].clearPixel();
       }
     }
     _pos++;
     if(_pos >= 4) _pos = 1;
-    for (int i = 0; i <= numPixel; i+=3){
+    for (unsigned int i = 0; i <= numPixel; i+=3){
       if(i + _pos <= numPixel){
         animationWheel((_baseColorRed + i), pixels[i + _pos]);
       }
@@ -773,7 +773,7 @@ void MrlNeopixel::animationTheaterChaseRainbow() {
 
 void MrlNeopixel::animationRainbow() {
   if(!((_count++)%_speed)) {
-    for (int i = 0; i <= numPixel; i++){
+    for (unsigned int i = 0; i <= numPixel; i++){
       animationWheel((_baseColorRed + i), pixels[i]);
     }
     _baseColorRed++;
@@ -784,7 +784,7 @@ void MrlNeopixel::animationRainbow() {
 
 void MrlNeopixel::animationRainbowCycle() {
   if(!((_count++)%_speed)) {
-    for (int i = 0; i <= numPixel; i++){
+    for (unsigned int i = 0; i <= numPixel; i++){
       animationWheel((i * 256 / numPixel) + _baseColorRed, pixels[i]);
     }
     _baseColorRed++;
@@ -822,15 +822,15 @@ void MrlNeopixel::animationIronman() {
     int flip = random(32);
     if (flip > 22) _dir = -_dir;
     _alpha += 5 * _dir;
-    if (_alpha < 0) {
-      _alpha = 0;
+    if (_alpha < 5) {
+      _alpha = 5;
       _dir = 1;
     }
     if (_alpha > 100) {
       _alpha = 100;
       _dir = -1;
     }
-    for (int i = 1; i <= numPixel; i++){
+    for (unsigned int i = 1; i <= numPixel; i++){
       pixels[i].setPixel((_baseColorRed * _alpha) / 100, (_baseColorGreen * _alpha) / 100, (_baseColorBlue * _alpha) / 100);  
     }
   }

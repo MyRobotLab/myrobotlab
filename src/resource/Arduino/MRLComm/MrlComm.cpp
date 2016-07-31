@@ -4,14 +4,14 @@ MrlComm::MrlComm() {
 	softReset();
 	byteCount = 0;
 	mrlCmd[0] = new MrlCmd(MRL_IO_SERIAL_0);
-	for (int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+	for (unsigned int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
 		mrlCmd[i] = NULL;
 	}
 
 }
 
 MrlComm::~MrlComm() {
-	for (int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+	for (unsigned int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
 		if (mrlCmd[i] != NULL) {
 			delete mrlCmd[i];
 		}
@@ -30,7 +30,7 @@ void MrlComm::softReset() {
 	enableBoardStatus = false;
 	Device::nextDeviceId = 1; // device 0 is Arduino
 	debug = false;
-	for (int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+	for (unsigned int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
 		if (mrlCmd[i] != NULL) {
 			mrlCmd[i]->end();
 			delete mrlCmd[i];
@@ -135,7 +135,7 @@ void MrlComm::publishAttachedDevice(int id, int nameSize, unsigned char* name) {
  * SERIAL METHODS BEGIN
  */
 void MrlComm::readCommand() {
-	for (int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+	for (unsigned int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
 		if (mrlCmd[i] != NULL) {
 			if (mrlCmd[i]->readCommand()) {
 				processCommand(i + 1);
