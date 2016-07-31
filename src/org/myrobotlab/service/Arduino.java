@@ -4,9 +4,7 @@ package org.myrobotlab.service;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
-
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NOT_FOUND;
-
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ARDUINO;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ULTRASONIC;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_STEPPER;
@@ -102,6 +100,7 @@ import org.myrobotlab.arduino.MrlMsg;
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.i2c.I2CBus;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -202,7 +201,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class Arduino extends Service implements Microcontroller, PinArrayControl, I2CBusControl, I2CController, SerialDataListener, ServoController, MotorController,
+public class Arduino extends Service implements Microcontroller, PinArrayControl, I2CController, SerialDataListener, ServoController, MotorController,
 		NeoPixelController, SensorDataPublisher, DeviceController, SensorController, SensorDataListener {
 
 	/**
@@ -894,12 +893,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// Create the i2c bus device in MRLComm the first time this method is
 		// invoked.
 		// Add the i2c device to the list of i2cDevices
-		// Pattern: attachDevice(device, Object... config)
+		// Pattern: deviceAttach(device, Object... config)
 		// To add the i2c bus to the deviceList I need an device that represents
 		// the i2c bus here and in MRLComm
 		// This will only handle the creation of i2cBus.
-		I2CBusControl i2cBus = (I2CBusControl) this;
-		deviceAttach(i2cBus, getMrlDeviceType(control), busAddress);
+		I2CBus i2cBus = new I2CBus(String.format("I2CBus%s", busAddress));
+		deviceAttach(i2cBus, getMrlDeviceType(i2cBus), busAddress);
 
 		// This part adds the service to the mapping between
 		// busAddress||DeviceAddress
@@ -915,7 +914,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			i2cDevices.put(key, devicedata);
 		}
 	}
-
+	
+	@Override
+	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
+		// TODO Auto-generated method stub
+		// This method should delete the i2c device entry from the list of
+		// I2CDevices
+		String key = String.format("%d.%d", busAddress, deviceAddress);
+		if (i2cDevices.containsKey(key)) {
+			i2cDevices.remove(key);
+		}
+	}
+	
 	public Map<String, PinDefinition> createPinList() {
 		pinMap = new HashMap<String, PinDefinition>();
 		pinIndex = new HashMap<Integer, PinDefinition>();
@@ -983,12 +993,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * applicable for the service requesting.
 	 *
 	 * Arduino will attach itself this way too as a Analog & Digital Pin array
-	 *
-	 * Comment from Mats: This service should create a DEVICE_TYPE_I2C by using
-	 * ATTACH_DEVICE the first time the createI2cDevice method is invoked. The
-	 * DEVICE_TYPE_I2C represents one i2c bus on the Arduino hardware. This
-	 * service needs to keep track of other services that are using the i2cbus,
-	 * but not MRLComm.
 	 *
 	 * the micro controller message format for ATTACH_DEVICE will be:
 	 *
@@ -1265,7 +1269,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			return DEVICE_TYPE_SERVO;
 		}
 
-		if (device instanceof I2CControl) {
+		if (device instanceof I2CBusControl) {
 			return DEVICE_TYPE_I2C;
 		}
 
@@ -1352,7 +1356,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// int deviceIndex = 1; // Change this to get the the deviceinex using
 		// SensorDataListener sensor = (SensorDataListener) deviceIndex.get(id);
 		// sendMsg(I2C_READ, deviceIndex, deviceAddress, size);
-		int deviceIndex = 0; // Get the deviceIndex to the I2CBus
+		String i2cBus = String.format("I2CBus%s", busAddress);
+		DeviceMapping map;
+		map = deviceList.get(i2cBus);
+		int deviceIndex = map.getId(); // Device index to the I2CBus 
 		int msgBuffer[] = new int[] { deviceIndex, deviceAddress, size, buffer[size] };
 		sendMsg(I2C_READ, msgBuffer);
 		int retry = 0;
@@ -1385,19 +1392,21 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	@Override
 	public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
-		int msgBuffer[] = new int[size + 1];
-		msgBuffer[0] = deviceAddress;
+		String i2cBus = String.format("I2CBus%s", busAddress);
+		DeviceMapping deviceMapping = deviceList.get(i2cBus);
+		int id = deviceMapping.getId();
+		int msgBuffer[] = new int[size + 3];
+		msgBuffer[0] = 	id; // Device index to the I2CBus 
+		msgBuffer[1] = deviceAddress;
+		msgBuffer[2] = size;
 		for (int i = 0; i < size; i++) {
-			msgBuffer[i + 1] = (int) buffer[i] & 0xFF;
+			msgBuffer[i + 3] = (int) buffer[i] & 0xff;
 		}
 		sendMsg(I2C_WRITE, msgBuffer);
 	}
 
-	// ----------- MotorController API End ----------------
-
 	@Override
 	public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
-		// TODO Auto-generated method stub
 		i2cWrite(control, busAddress, deviceAddress, writeBuffer, writeSize);
 		i2cRead(control, busAddress, deviceAddress, readBuffer, readSize);
 		return readSize;
@@ -2032,21 +2041,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void refresh() {
 		serial.refresh();
 		broadcastState();
-	}
-
-	@Override
-	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
-		// TODO Auto-generated method stub
-		// This method should delete the i2c device entry from the list of
-		// I2CDevices
-		String key = String.format("%d.%d", busAddress, deviceAddress);
-		if (i2cDevices.containsKey(key)) {
-			i2cDevices.remove(key);
-		}
-		if (i2cDevices.isEmpty()) {
-			I2CBusControl i2cBus = (I2CBusControl) this;
-			deviceDetach(i2cBus);
-		}
 	}
 
 	@Override
