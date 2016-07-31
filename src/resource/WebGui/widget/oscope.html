@@ -7,21 +7,14 @@
     <br>
 
     <div data-ng-repeat="(pinKey, pinDef) in pinIndex">   
-
-    state={{oscope.trace[pinKey].state}} blah={{blah.display}} <div data-ng-hide="{{blah.display}}"> OINK OINK ! </div>
-     <div ng-show="{{!blah.display}}"> 
-        <!-- TODO - this should become a 'trace' directive -->
-        
-       
-        <canvas width="800" height="200" id="{{ 'oscope-address-' + pinKey}}" ng-show="{{!blah.display}}"></canvas>
+    <!-- state={{oscope.trace[pinKey].state}} blah.display={{blah.display}} -->
+     <div ng-show="oscope.trace[pinKey].state"> 
+        <!-- TODO - this should become a 'trace' directive -->       
+        <canvas width="800" height="200" id="{{ 'oscope-address-' + pinKey}}"></canvas>
         </div>
-        <hr/>
     </div>
-
     <br>
-
      <div class="btn-group" role="group" aria-label="..." data-ng-repeat="(pinKey, pinDef) in pinIndex">    
-       <!-- canvas width="800" height="200" id="{{pinKey}}" ></canvas -->
        <button class="btn btn-default" type="button" ng-click="toggleTrace(pinDef)" ng-style="oscope.trace[pinKey].style">{{ pinDef.name }}</button>
      </div>
 </div>

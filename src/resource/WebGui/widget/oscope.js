@@ -22,10 +22,13 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
     return {
         restrict: "E",
         templateUrl: 'widget/oscope.html',
+        
         scope: {
             serviceName: '@',
             hide:'='
         },
+       
+        // scope: true,
         link: function(scope, element) {
             var _self = this;
             var name = scope.serviceName;
