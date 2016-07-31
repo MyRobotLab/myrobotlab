@@ -9,7 +9,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     $scope.connectedStatus = "";
     $scope.versionStatus = "";
     $scope.boardStatus = 0;
-    $scope.singleModel = 0;
+    $scope.singleModel = 0;    
     // The MrlComm object !
     // this represents the state of MrlComm
     // and (potentially) all its state data
