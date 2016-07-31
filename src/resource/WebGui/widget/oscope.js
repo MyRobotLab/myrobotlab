@@ -8,12 +8,13 @@
  - that should not be the case
 
  TODO !!! - 
+ 		  *  subscribe only to the single service.method which is neeeded !
+ 		  *  line artifact on screen from last position
           *  all data in _self.oscope
           *  dynamically adjustable screen size
           *  zoom
           *  multi-line overlay (no erase)
           *  trace directive
-          *  no crappy scope parent stuff
           *  all parameters passed in
           *  list dependencies
 
@@ -22,12 +23,9 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
     return {
         restrict: "E",
         templateUrl: 'widget/oscope.html',
-        
         scope: {
-            serviceName: '@',
-            hide:'='
+            serviceName: '@'
         },
-       
         // scope: true,
         link: function(scope, element) {
             var _self = this;
@@ -149,20 +147,23 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                             ctx.rect(0, 0, width, height);
                             ctx.fillStyle = "black";
                             ctx.fill();
+                            var highlight = trace.color.getOriginalInput();
+                            highlight.s = "90%";
+                            var newColor = tinycolor(highlight);                            
                             ctx.fillStyle = trace.colorHexString;
                             // TODO - highlight saturtion of text
                             ctx.fillText('MAX ' + stats.max + '   ' + pinDef.name + ' ' + pinData.address, 10, 20);
                             ctx.fillText(('AVG ' + (stats.totalValue / stats.totalSample)).substring(0, 11), 10, 98);
                             ctx.fillText('MIN ' + stats.min, 10, 180);
+                            trace.posX = 0;
                         }
                         // draw it
                         ctx.stroke();
-                        ctx.closePath();
+                        ctx.closePath();                       
                     }
                     // for each pin
                     if (x > width) {
                         x = 0;
-                        trace.posX = 0;
                     }
                     break;
                 default:
@@ -196,7 +197,6 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
             scope.toggleTrace = function(pinDef) {
                 var trace = scope.oscope.trace[pinDef.address];
                 var highlight = trace.color.getOriginalInput();
-
                 if (trace.state) {
                     scope.blah.display = false;
                     // on to off
@@ -220,13 +220,15 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                 }
             }
             ;
-            // FIXME !!! - route only publishPinArray - not all the others 
-            // this sends everything which is sent to angular
-            // here for this service
+
+            // FIXME FIXME FIXME ->> THIS SHOULD WORK subscribeToServiceMethod  <- but doesnt
+
             mrl.subscribeToService(_self.onMsg, name);
             // this siphons off a single subscribe to the webgui
             // so it will be broadcasted back to angular
             mrl.subscribe(name, 'publishPinArray');
+
+            mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray');
             // initializing display data      
             setTraceButtons(service.pinIndex);
         }
