@@ -6,11 +6,23 @@
     <button type="button" class="btn btn-default" ng-click="msg.softReset()">reset</button>
     <br>
 
-    <canvas width="800" height="200" id="screen" ng-attr-id="screen" ></canvas>
+    <div data-ng-repeat="(pinKey, pinDef) in pinIndex">   
+
+    state={{oscope.trace[pinKey].state}} blah={{blah.display}} <div data-ng-hide="{{blah.display}}"> OINK OINK ! </div>
+     <div ng-show="{{!blah.display}}"> 
+        <!-- TODO - this should become a 'trace' directive -->
+        
+       
+        <canvas width="800" height="200" id="{{ 'oscope-address-' + pinKey}}" ng-show="{{!blah.display}}"></canvas>
+        </div>
+        <hr/>
+    </div>
+
     <br>
 
      <div class="btn-group" role="group" aria-label="..." data-ng-repeat="(pinKey, pinDef) in pinIndex">    
-       <button class="btn btn-default" type="button" ng-click="toggleTrace(pinDef)" ng-style="pinDef.style">{{ pinDef.name }}</button>
+       <!-- canvas width="800" height="200" id="{{pinKey}}" ></canvas -->
+       <button class="btn btn-default" type="button" ng-click="toggleTrace(pinDef)" ng-style="oscope.trace[pinKey].style">{{ pinDef.name }}</button>
      </div>
 </div>
 
