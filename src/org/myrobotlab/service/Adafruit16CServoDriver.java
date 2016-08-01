@@ -135,6 +135,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	public Adafruit16CServoDriver(String n) {
 		super(n);
+		refreshControllers();
 		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 	}
 

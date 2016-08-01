@@ -147,6 +147,7 @@ public class Ads1115 extends Service implements I2CControl, Ads1115Control{
 
 	public Ads1115(String n) {
 		super(n);
+		refreshControllers();
 		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 	}
 
@@ -459,9 +460,8 @@ public class Ads1115 extends Service implements I2CControl, Ads1115Control{
   
   int readRegister(int reg) {
 		byte[] writebuffer = {ADS1015_REG_POINTER_CONVERT};
-		controller.i2cWrite(this,Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
-		byte[] readbuffer = { 0x0, 0x0 };
-		controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
+		byte[] readbuffer = new byte[2];
+		controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length, readbuffer, readbuffer.length);
 		return ((int)readbuffer[0]) << 8 | (int)(readbuffer[1] & 0xff); 
   }
 
