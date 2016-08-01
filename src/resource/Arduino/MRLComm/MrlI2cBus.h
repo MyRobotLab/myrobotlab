@@ -23,8 +23,10 @@
  */
 class MrlI2CBus : public Device {
   private:
+	int bus;
   public:
     MrlI2CBus();
+    bool deviceAttach(unsigned char config[], int configSize);
     void i2cRead(unsigned char* ioCmd);
     void i2cWrite(unsigned char* ioCmd);
     void i2cWriteRead(unsigned char* ioCmd);
