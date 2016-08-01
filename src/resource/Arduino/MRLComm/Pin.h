@@ -35,8 +35,6 @@ class Pin {
     // TODO: review/remove move the following members
     // to support pulse.
     int count;
-    // remove me
-    // int rate;
     // remove me, needed for pulse
     // int rateModulus;
 

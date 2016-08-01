@@ -89,6 +89,10 @@ class MrlNeopixel:public Device{
   MrlNeopixel();
   ~MrlNeopixel();
   bool deviceAttach(unsigned char config[], int configSize);
+  //I did not manage to have the neopixel working on dynamic PORT variable
+  //so I need to do separated method depending on the PORT the pin use
+  //I know there is way to do it without duplicating method, but did not manage
+  //to get this worky
   inline void sendBitB(bool bitVal);
   inline void sendBitC(bool bitVal);
   inline void sendBitD(bool bitVal);

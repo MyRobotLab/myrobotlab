@@ -9,7 +9,7 @@
 // ===== published sub-types based on device type begin ===
 #define  SERVO_EVENT_STOPPED          1
 #define  SERVO_EVENT_POSITION_UPDATE  2
-// ===== published sub-types based on device type begin ===
+// ===== published sub-types based on device type end ===
 
 /**
  * Servo Device

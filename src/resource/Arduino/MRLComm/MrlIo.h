@@ -4,6 +4,14 @@
 #include <Arduino.h>
 #include "ArduinoMsgCodec.h"
 
+/********************************************************************
+ * MrlIo class manage the read / write for communication with MRL
+ * or other device
+ * 
+ * It currently only support Serial communication on 
+ * Serial (Mega and Uno) and Serial1, Serial2, Serial3 on Mega 
+ */
+
 #define MRL_IO_NOT_DEFINED 0
 #define MRL_IO_SERIAL_0 1
 #if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
@@ -28,7 +36,7 @@ class MrlIo {
 		int available();
 		void end();
 		void flush();
-   void test();
+    bool checkOpenPort();
 };
 
 #endif

@@ -42,10 +42,8 @@
 * Requirements: MyRobotLab running on a computer & a serial connection
 *
 *  TODO - need a method to identify type of board http://forum.arduino.cc/index.php?topic=100557.0
-*  TODO - getBoardInfo() - returns board info !
 *  TODO - getPinInfo() - returns pin info !
 *  TODO - implement with std::vector vs linked list - https://github.com/maniacbug/StandardCplusplus/blob/master/README.md
-*  TODO - make MRLComm a c++ library
 */
 
 
@@ -55,7 +53,6 @@
 
 /***********************************************************************
  * GLOBAL VARIABLES
- * TODO - work on reducing globals and pass as parameters
 */
 MrlComm mrlComm;
 /***********************************************************************

@@ -36,8 +36,6 @@ class MrlComm{
     // list of pins currently being read from - can contain both digital and analog
     LinkedList<Pin*> pinList;
 
-    // MRLComm message buffer and current count from serial port ( MAGIC | MSGSIZE | FUNCTION | PAYLOAD ...
-    //unsigned char ioCmd[MAX_MSG_SIZE];  // message buffer for all inbound messages
     unsigned char* config;
     // performance metrics  and load timing
     // global debug setting, if set to true publishDebug will write to the serial port.
@@ -54,15 +52,13 @@ class MrlComm{
 #endif
     void softReset();
     int getFreeRam();
-    void publishError(int type);
-    void publishError(int type, String message);
     void publishCommandAck(int function);
     void publishAttachedDevice(int id, int nameSize, unsigned char* name);
     void setPWMFrequency(int address, int prescalar);
     void setSerialRate();
     void deviceAttach(unsigned char* ioCmd);
-    void deviceDetach(int id);
-    Device* getDevice(int id);
+    void deviceDetach(unsigned int id);
+    Device* getDevice(unsigned int id);
     void addDevice(Device* device);
     void update();
 

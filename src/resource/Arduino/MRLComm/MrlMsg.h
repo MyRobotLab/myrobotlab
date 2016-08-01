@@ -12,6 +12,7 @@
 #define ERROR_ALREADY_EXISTS    3
 #define ERROR_DOES_NOT_EXIST    4
 #define ERROR_UNKOWN_SENSOR     5
+#define ERROR_OTHER             6
 
 /**********************************************************************
  * MrlMsg - This class is responsible to send the messages to MRL in
