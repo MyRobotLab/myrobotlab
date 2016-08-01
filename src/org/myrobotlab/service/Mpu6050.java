@@ -886,6 +886,7 @@ public class Mpu6050 extends Service implements I2CControl {
 
 	public Mpu6050(String n) {
 		super(n);
+		refreshControllers();
 		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 	}
 
@@ -987,12 +988,14 @@ public class Mpu6050 extends Service implements I2CControl {
 	 */
 	boolean createDevice() {
 		if (controller != null) {
-				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 				controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				log.info(String.format("Created device on bus: %s address %s", deviceBus, deviceAddress));
+				return true;
 		}
-
-		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
-		return true;
+		else {
+			log.error(String.format("Cannot create device on bus: %s address, no controller selected", deviceBus, deviceAddress));
+		  return false;
+		}
 	}
 
 	/**

@@ -131,6 +131,7 @@ public class I2cMuxGUI extends ServiceGUI implements ActionListener {
 		north.add(deviceAddressList);
 		attachButton.addActionListener(this);
 
+		refreshControllers();
 		getDeviceBusList();
 		getDeviceAddressList();
 

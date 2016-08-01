@@ -77,7 +77,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 
 	public AdafruitIna219(String n) {
 		super(n);
-
+		refreshControllers();
 		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 	}
 
