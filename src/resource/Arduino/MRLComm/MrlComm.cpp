@@ -317,13 +317,13 @@ void MrlComm::processCommand(int ioType) {
 		break;
 		// Start of i2c read and writes
 	case I2C_READ:
-		((MrlI2CBus*) getDevice(ioCmd[1]))->i2cRead(&ioCmd[0]);
+		((MrlI2CBus*) getDevice(ioCmd[1]))->i2cRead(ioCmd);
 		break;
 	case I2C_WRITE:
-		((MrlI2CBus*) getDevice(ioCmd[1]))->i2cWrite(&ioCmd[0]);
+		((MrlI2CBus*) getDevice(ioCmd[1]))->i2cWrite(ioCmd);
 		break;
 	case I2C_WRITE_READ:
-		((MrlI2CBus*) getDevice(ioCmd[1]))->i2cWriteRead(&ioCmd[0]);
+		((MrlI2CBus*) getDevice(ioCmd[1]))->i2cWriteRead(ioCmd);
 		break;
 	case SET_DEBUG:
 		debug = ioCmd[1];
