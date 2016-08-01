@@ -1438,8 +1438,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 					readBuffer[i] = i2cData[i];
 					log.info(String.format("i2cReturnData returned ix %s value %s", i, readBuffer[i]));
 				}
+				return i2cDataSize;
 			}
-			return i2cDataSize;
+			// Time out, no data returned
+			return -1;
 		}
 	}
 
