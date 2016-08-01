@@ -1373,10 +1373,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			Logging.logError(e);
 		}
 		if (i2cDataReturned) {
-			log.info(String.format("i2cReturnData returned %s bytes to caller %s.", i2cDataSize, control.getName()));
+			log.debug(String.format("i2cReturnData returned %s bytes to caller %s.", i2cDataSize, control.getName()));
 			for (int i = 0; i < i2cDataSize; i++) {
 				buffer[i] = i2cData[i];
-				log.info(String.format("i2cReturnData returned ix %s value %s", i, buffer[i]));
+				log.debug(String.format("i2cReturnData returned ix %s value %s", i, buffer[i]));
 			}
 			return i2cDataSize;
 		}
@@ -1433,10 +1433,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 				Logging.logError(e);
 			}
 			if (i2cDataReturned) {
-				log.info(String.format("i2cReturnData returned %s bytes to caller %s.", i2cDataSize, control.getName()));
+				log.debug(String.format("i2cReturnData returned %s bytes to caller %s.", i2cDataSize, control.getName()));
 				for (int i = 0; i < i2cDataSize; i++) {
 					readBuffer[i] = i2cData[i];
-					log.info(String.format("i2cReturnData returned ix %s value %s", i, readBuffer[i]));
+					log.debug(String.format("i2cReturnData returned ix %s value %s", i, readBuffer[i]));
 				}
 				return i2cDataSize;
 			}
