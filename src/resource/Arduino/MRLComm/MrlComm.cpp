@@ -85,8 +85,6 @@ int MrlComm::getFreeRam() {
  * PUBLISH DEVICES BEGIN
  *
  * All serial IO should happen here to publish a MRLComm message.
- * TODO: move all serial IO into a controlled place this this below...
- * TODO: create MRLCommMessage class that can just send itself!
  *
  */
 /**
@@ -134,11 +132,15 @@ void MrlComm::publishAttachedDevice(int id, int nameSize, unsigned char* name) {
 /***********************************************************************
  * SERIAL METHODS BEGIN
  */
+
+ /**
+  * loop thru the possible IO port and read input if the port is defined
+  */
 void MrlComm::readCommand() {
 	for (unsigned int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
 		if (mrlCmd[i] != NULL) {
 			if (mrlCmd[i]->readCommand()) {
-				processCommand(i + 1);
+				processCommand(i + 1); //ioType is index +1
 			}
 		}
 	}
@@ -153,6 +155,7 @@ void MrlComm::readCommand() {
 void MrlComm::processCommand(int ioType) {
 	unsigned char* ioCmd = mrlCmd[ioType - 1]->getIoCmd();
 	if (ioType != MRL_IO_SERIAL_0) {
+    // msg is not from MRL... wrap it and send it toward MRL
 		MrlMsg msg = MrlMsg(MSG_ROUTE);
 		msg.addData(ioType);
 		msg.addData(ioCmd, mrlCmd[ioType - 1]->getMsgSize());
@@ -224,7 +227,6 @@ void MrlComm::processCommand(int ioType) {
 			MrlMsg::publishDebug(
 					"modulus is " + String(publishBoardStatusModulus));
 		break;
-
 		// ENABLE_PIN_EVENTS | ADDRESS | PIN TYPE 0 = DIGITAL | 1 = ANALOG
 	case ENABLE_PIN: {
 		int address = ioCmd[1];
@@ -233,11 +235,11 @@ void MrlComm::processCommand(int ioType) {
 		for (int i = 0; i < pinList.size(); ++i) {
 			Pin* pin = pinList.get(i);
 			if (pin->address == address) {
-				// TODO already exists error?
+        String error = F("Pin already enabled: Pin ");
+				MrlMsg::publishError(ERROR_ALREADY_EXISTS, error + String(address));
 				break;
 			}
 		}
-
 		if (type == DIGITAL) {
 			pinMode(address, INPUT);
 		}
@@ -247,25 +249,25 @@ void MrlComm::processCommand(int ioType) {
 	}
 	case DISABLE_PIN: {
 		int address = ioCmd[1];
-		for (int i = 0; i < pinList.size(); ++i) {
-			Pin* pin = pinList.get(i);
-			if (pin->address == address) {
-				pinList.remove(i);
-				delete pin;
-				break;
-			}
-		}
-
+    ListNode<Pin*>* node = pinList.getRoot();
+    int index = 0;
+    while (node != NULL) {
+      if (node->data->address == address) {
+        delete node->data;
+        pinList.remove(index);
+        break;
+      }
+      node = node->next;
+      index++;
+    }
 		break;
 	}
-
 	case DISABLE_PINS: {
 		for (int i = 0; i < pinList.size(); ++i) {
 			Pin* pin = pinList.get(i);
 			pinList.remove(i);
 			delete pin;
 		}
-
 		break;
 	}
 	case DISABLE_BOARD_STATUS:
@@ -352,13 +354,8 @@ void MrlComm::processCommand(int ioType) {
 		MrlMsg::publishError(ERROR_UNKOWN_CMD);
 		break;
 	} // end switch
-	  // ack that we got a command (should we ack it first? or after we process the command?)
+	  // ack that we got a command 
 	publishCommandAck(ioCmd[0]);
-	// reset command buffer to be ready to receive the next command.
-	// KW: we should only need to set the byteCount back to zero. clearing this array is just for safety sake i guess?
-	// GR: yup
-	//memset(ioCmd, 0, sizeof(ioCmd));
-	//byteCount = 0;
 } // process Command
 /***********************************************************************
  * CONTROL METHODS BEGIN
@@ -418,12 +415,15 @@ void MrlComm::setSerialRate() {
  */
 void MrlComm::deviceAttach(unsigned char* ioCmd) {
 	// TOOD:KW check free memory to see if we can attach a new device. o/w return an error!
-	// we're creating a new device. auto increment it
+  //      CAL hard to know how much memory a device used. And the update method will also use an undefined amount of memory
 	// TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
+  if (Device::nextDeviceId == 65535){
+    MrlMsg::publishError(ERROR_OTHER,F("Maximum number of device attached"));
+    return;
+  }
 	// we want to echo back the name
 	// and send the config in a nice neat package to
 	// the attach method which creates the device
-	//unsigned char* ioCmd = mrlCmd->getIoCmd();
 	int nameSize = ioCmd[2];
 
 	// get config size
@@ -431,26 +431,18 @@ void MrlComm::deviceAttach(unsigned char* ioCmd) {
 	int configSize = ioCmd[configSizePos];
 	int configPos = configSizePos + 1;
 	config = ioCmd + configPos;
-	// MAKE NOTE: I've chosen to have config & configPos globals
-	// this is primarily to avoid the re-allocation/de-allocation of the config buffer
-	// but part of me thinks it should be a local var passed into the function to avoid
-	// the dangers of global var ... fortunately Arduino is single threaded
-	// It also makes sense to pass in config on the constructor of a new device
+	// It makes sense to pass in config on the constructor of a new device
 	// based on device type - "you inflate the correct device with the correct config"
-	// but I went on the side of globals & hopefully avoiding more memory management and fragmentation
 	// CAL: change config to a pointer in ioCmd (save some memory) so config[0] = ioCmd[configPos]
 
 	int type = ioCmd[1];
 	Device* devicePtr = 0;
 	// KW: remove this switch statement by making "attach(int[]) a virtual method on the device base class.
 	// perhaps a factory to produce the devicePtr based on the deviceType..
-	// currently the attach logic is embeded in the constructors ..  maybe we can make that a more official
-	// lifecycle for the devices..
 	// check out the make_stooge method on https://sourcemaking.com/design_patterns/factory_method/cpp/1
 	// This is really how we should do this.  (methinks)
 	// Cal: the make_stooge method is certainly more C++ like, but essentially do the same thing as we do,
 	// it just move this big switch to another place
-
 	// GR: I agree ..  "attach" should be a universal concept of devices, yet it does not need to be implmented
 	// in the constructor .. so I'm for making a virtualized attach, but just like Java-Land the attach
 	// needs to have size sent in with the config since it can be variable array
@@ -461,16 +453,6 @@ void MrlComm::deviceAttach(unsigned char* ioCmd) {
 		//devicePtr = attachAnalogPinArray();
 		break;
 	}
-		/*
-		 case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
-		 //devicePtr = attachDigitalPinArray();
-		 break;
-		 }
-		 case SENSOR_TYPE_PULSE: {
-		 //devicePtr = attachPulse();
-		 break;
-		 }
-		 */
 	case DEVICE_TYPE_ULTRASONIC: {
 		//devicePtr = attachUltrasonic();
 		break;
@@ -484,7 +466,7 @@ void MrlComm::deviceAttach(unsigned char* ioCmd) {
 		break;
 	}
 	case DEVICE_TYPE_SERVO: {
-		devicePtr = new MrlServo(); //no need to pass the type here
+		devicePtr = new MrlServo(); 
 		break;
 	}
 	case DEVICE_TYPE_I2C: {
@@ -497,7 +479,7 @@ void MrlComm::deviceAttach(unsigned char* ioCmd) {
 	}
 	default: {
 		// TODO: publish error message
-		MrlMsg::publishDebug(F("Unknown Message Type."));
+		MrlMsg::publishError(ERROR_UNKOWN_SENSOR,F("Unknown Device Type."));
 		break;
 	}
 	}
@@ -517,13 +499,14 @@ void MrlComm::deviceAttach(unsigned char* ioCmd) {
  * deviceDetach - get the device
  * if it exists delete it and remove it from the deviceList
  */
-void MrlComm::deviceDetach(int id) {
+void MrlComm::deviceDetach(unsigned int id) {
 	ListNode<Device*>* node = deviceList.getRoot();
 	int index = 0;
 	while (node != NULL) {
 		if (node->data->id == id) {
 			delete node->data;
 			deviceList.remove(index);
+      break;
 		}
 		node = node->next;
 		index++;
@@ -533,7 +516,7 @@ void MrlComm::deviceDetach(int id) {
  * getDevice - this method will look up a device by it's id in the device list.
  * it returns null if the device isn't found.
  */
-Device* MrlComm::getDevice(int id) {
+Device* MrlComm::getDevice(unsigned int id) {
 	ListNode<Device*>* node = deviceList.getRoot();
 	while (node != NULL) {
 		if (node->data->id == id) {
@@ -543,8 +526,6 @@ Device* MrlComm::getDevice(int id) {
 	}
 	MrlMsg::publishError(ERROR_DOES_NOT_EXIST);
 	return NULL; //returning a NULL ptr can cause runtime error
-	// you'll still get a runtime error if any field, member or method not
-	// defined is accessed
 }
 /**
  * This adds a device to the current set of active devices in the deviceList.
@@ -599,7 +580,6 @@ void MrlComm::update() {
 		// this is an optimization in that we send back "all" the read pin data in a
 		// standard 2 byte package - digital reads don't need both bytes, but the
 		// sending it all back in 1 msg and the simplicity is well worth it
-		//msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
 		msg.countData();
 		msg.autoSend(57);
 		for (int i = 0; i < pinList.size(); ++i) {

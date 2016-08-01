@@ -4,7 +4,7 @@
 /***********************************************************************
  * DEVICE
  * index - unique identifier for this device (used to look up the device in the device list.)
- * type  - type of device  (SENSOR_TYPE_DIGITAL_PIN_ARRAY |  SENSOR_TYPE_ANALOG_PIN_ARRAY | SENSOR_TYPE_DIGITAL_PIN | SENSOR_TYPE_PULSE | SENSOR_TYPE_ULTRASONIC)
+ * type  - type of device  (DEVICE_TYPE_ARDUINO | DEVICE_TYPE_ULTRASONIC | DEVICE_TYPE_SERVO | ...)
  * pins  - this is the list of pins that are associated with this device (Pin)
 */
 
@@ -18,13 +18,11 @@
 * Device types start as 1 - so if anyone forgot to
 * define their device it will error - rather default
 * to a device they may not want
-*        the DEVICE_TYPE_NOT_FOUND will manage the error instead of have it do random stuff
 */
 
-// TODO: consider rename to DEVICE_TYPE_UNKNOWN ?  currently this isn't called anywhere
-#define DEVICE_TYPE_NOT_FOUND           0
+#define DEVICE_TYPE_UNKNOWN             0
 
-#define DEVICE_TYPE_ARDUINO			    1
+#define DEVICE_TYPE_ARDUINO			        1
 #define DEVICE_TYPE_ULTRASONIC          4
 #define DEVICE_TYPE_STEPPER             5
 #define DEVICE_TYPE_MOTOR               6
@@ -46,7 +44,7 @@ class Device {
       // destructor is set as virtual to call the destructor of the subclass. 
       // destructor should be done in the subclass level
     }
-    int id; // the all important id of the sensor - equivalent to the "name" - used in callbacks
+    unsigned int id; // the all important id of the sensor - equivalent to the "name" - used in callbacks
     int type; // what type of device is this?
     int state; // state - single at the moment to handle all the finite states of the sensors (todo maybe this moves into the subclasses?)
     // GroG - I think its good here - a uniform state description across all devices is if they are DEVICE_STATE_ACTIVE or DEVICE_STATE_DEACTIVE
@@ -54,7 +52,7 @@ class Device {
     virtual void update() {}; // all devices must implement this to update their state.
     // the universal attach - follows Java-Land Controller.deviceAttach method
     virtual bool deviceAttach(unsigned char config[], int configSize);
-    static int nextDeviceId;
+    static unsigned int nextDeviceId;
   protected:
     void attachDevice();
 };

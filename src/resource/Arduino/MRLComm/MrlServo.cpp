@@ -4,7 +4,6 @@ MrlServo::MrlServo() : Device(DEVICE_TYPE_SERVO) {
    isMoving = false;
    isSweeping = false;
    speed = 100;// 100% speed
-   // TODO: target/curent position?
    // create the servo
    servo = new Servo();
    eventsEnabled = false;
@@ -44,7 +43,7 @@ bool MrlServo::deviceAttach(unsigned char config[], int configSize){
 void MrlServo::attach(int pin){
   servo->attach(pin);
   servo->write((int)currentPos); //return to it's last know state (may be 0 if currentPos is not set)
-  // TODO-KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
+  // KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
 }
 
 void MrlServo::detach(){
