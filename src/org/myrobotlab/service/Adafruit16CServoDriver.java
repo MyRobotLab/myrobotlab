@@ -99,7 +99,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public static final int precision = 4096; // pwm_precision
 
 	// i2c controller
-	public ArrayList<String> controllers;
+	public List<String> controllers;
 	public String controllerName;
 	public boolean isControllerSet = false;
 
@@ -148,7 +148,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	/*
 	 * Refresh the list of running services that can be selected in the GUI
 	 */
-	public ArrayList<String> refreshControllers() {
+	public List<String> refreshControllers() {
 		controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
 		return controllers;
 	}

@@ -616,7 +616,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * @throws SocketException
    * @throws UnknownHostException
    */
-  static public ArrayList<String> getLocalAddresses() {
+  static public List<String> getLocalAddresses() {
     log.info("getLocalAddresses");
     ArrayList<String> ret = new ArrayList<String>();
 
@@ -653,7 +653,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   // @TargetApi(9)
-  static public ArrayList<String> getLocalHardwareAddresses() {
+  static public List<String> getLocalHardwareAddresses() {
     log.info("getLocalHardwareAddresses");
     ArrayList<String> ret = new ArrayList<String>();
     try {
@@ -879,7 +879,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return ret;
   }
 
-  public static ArrayList<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
+  public static List<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
     return getServiceNamesFromInterface(Class.forName(interfaze));
   }
 
@@ -887,7 +887,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * @param interfaceName
    * @return service names which match
    */
-  public static ArrayList<String> getServiceNamesFromInterface(Class<?> interfaze) {
+  public static List<String> getServiceNamesFromInterface(Class<?> interfaze) {
     ArrayList<String> ret = new ArrayList<String>();
     ArrayList<ServiceInterface> services = getServicesFromInterface(interfaze);
     for (int i = 0; i < services.size(); ++i) {
@@ -1335,7 +1335,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     // FIXME - Security determines what to export
     // for each gateway
 
-    ArrayList<String> remoteGateways = getServiceNamesFromInterface(Gateway.class);
+    List<String> remoteGateways = getServiceNamesFromInterface(Gateway.class);
     for (int ri = 0; ri < remoteGateways.size(); ++ri) {
       String n = remoteGateways.get(ri);
       // Communicator gateway = (Communicator)registry.get(n);

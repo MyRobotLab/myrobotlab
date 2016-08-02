@@ -847,7 +847,7 @@ public class Mpu6050 extends Service implements I2CControl {
 	public static final int dmpAddress7 = 0x60;
 	public static final int[] dmpUpdates7 = { 0x00, 0x40, 0x00, 0x00 };
 
-	public ArrayList<String> controllers;
+	public List<String> controllers;
 	public String controllerName;
 	public boolean isAttached = false;
 
@@ -896,7 +896,7 @@ public class Mpu6050 extends Service implements I2CControl {
 
 	}
 
-	public ArrayList<String> refreshControllers() {
+	public List<String> refreshControllers() {
 		controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
 		return controllers;
 	}

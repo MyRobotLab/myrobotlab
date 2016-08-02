@@ -57,7 +57,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 	public int scaleRange = 32; // 32V = bus full-scale range
 	public int pga = 8; // 320 mV = shunt full-scale range
 
-	public ArrayList<String> controllers;
+	public List<String> controllers;
 	public String controllerName;
 
 	private boolean isAttached = false;
@@ -87,7 +87,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 
 	}
 
-	public ArrayList<String> refreshControllers() {
+	public List<String> refreshControllers() {
 		controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
 		return controllers;
 	}
