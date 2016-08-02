@@ -40,7 +40,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 	transient I2CController controller;
 
-	public ArrayList<String> controllers = new ArrayList<String>();
+	public List<String> controllers = new ArrayList<String>();
 	public String controllerName;
 
 	public List<String> deviceAddressList = Arrays.asList("0x70", "0x71", "0x72", "0x73", "0x74", "0x75", "0x76", "0x77");

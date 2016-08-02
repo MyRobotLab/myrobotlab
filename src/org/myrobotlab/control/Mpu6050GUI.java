@@ -278,7 +278,7 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 			@Override
 			public void run() {
 
-				ArrayList<String> v = boundService.refreshControllers();
+				List<String> v = boundService.refreshControllers();
 				controller.removeAllItems();
 				for (int i = 0; i < v.size(); ++i) {
 					controller.addItem(v.get(i));

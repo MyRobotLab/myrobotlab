@@ -53,7 +53,7 @@ public class Ads1115 extends Service implements I2CControl, Ads1115Control{
 
 	int gain = 0;
 	
-	public ArrayList<String> controllers;
+	public List<String> controllers;
 	public String controllerName;
 	private boolean isAttached = false;
 
@@ -157,7 +157,7 @@ public class Ads1115 extends Service implements I2CControl, Ads1115Control{
 
 	}
 
-	public ArrayList<String> refreshControllers() {
+	public List<String> refreshControllers() {
 		controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
 		return controllers;
 	}

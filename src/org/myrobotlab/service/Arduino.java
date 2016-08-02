@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
@@ -13,6 +14,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_MOTOR;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_SERVO;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_I2C;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_NEOPIXEL;
+
 
 ///// java static import definition - DO NOT MODIFY - Begin //////
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
@@ -204,7 +206,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		NeoPixelController, SensorDataPublisher, DeviceController, SensorController, SensorDataListener {
 
 	/**
-	 * BoardInfo is all info which needs to be published once after connection
+	 * BoardInfo is all info which needs to be published once
+	 * after connection
 	 */
 	public static class BoardInfo {
 		public Integer type;
@@ -223,7 +226,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		public Long us;
 		public Integer sram;
 		public Integer deviceCount; // deviceList with types
-
 		// FIXME - list of current devices ids & their types ?
 		// ie the deviceList
 		// List<Integer, Integer>
@@ -297,7 +299,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public static final int MOTOR_FORWARD = 1;
 
 	public static final int MOTOR_BACKWARD = 0;
-
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
@@ -323,7 +324,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	static String intsToString(int[] ints, int begin) {
 		return intsToString(ints, begin, ints.length - begin);
 	}
-
 	static String intsToString(int[] ints, int begin, int length) {
 		byte[] b = new byte[length];
 		for (int i = 0; i < length; ++i) {
@@ -331,7 +331,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 		return new String(b);
 	}
-
 	public static void main(String[] args) {
 		try {
 
@@ -501,7 +500,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			Logging.logError(e);
 		}
 	}
-
 	/**
 	 * path of the Arduino IDE must be set by user
 	 */
@@ -535,12 +533,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 */
 	Map<Integer, PinDefinition> pinIndex = null;
 
+	
 	transient Map<String, PinArrayListener> pinArrayListeners = new HashMap<String, PinArrayListener>();
 
 	/**
 	 * map of pin listeners
 	 */
-	transient Map<String, PinListener> pinListeners = new HashMap<String, PinListener>();
+	transient Map<Integer, List<PinListener>> pinListeners = new HashMap<Integer, List<PinListener>>();
 
 	/**
 	 * the map of pins which the pin listeners are listening too - if the set is
@@ -756,23 +755,29 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
-	 * attach a pin listener who listens to a specific pin FIXME - implement the
-	 * 'specific' pin
+	 * attach a pin listener who listens to a specific pin
+	 * FIXME - implement the 'specific' pin
 	 */
 	@Override
 	public void attach(PinListener listener, int address) {
 		String name = listener.getName();
+		
+		
 		if (listener.isLocal()) {
-			// setup for direct callback
-			pinListeners.put(name, listener);
-			Set<Integer> pins = null;
-			if (pinSets.containsKey(listener.getName())) {
-				pins = pinSets.get(listener.getName());
+			List<PinListener> list = null;
+			if (pinListeners.containsKey(address)){
+				list = pinListeners.get(address);
 			} else {
-				pins = new HashSet<Integer>();
+				list = new ArrayList<PinListener>();
 			}
+			list.add(listener);			
+			pinListeners.put(address,  list);
+			
 		} else {
 			// setup for pub sub
+			// FIXME - there is an architectual problem here
+			// locally it works - but remotely - outbox would need to know specifics of 
+			// the data its sending 
 			addListener("publishPin", name, "onPin");
 		}
 	}
@@ -834,8 +839,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		broadcastState();
 	}
 
-	// this allow to connect a controller to another controller with Serial1,
-	// Serial2, Serial3 on a mega board
+	// this allow to connect a controller to another controller with Serial1, Serial2, Serial3 on a mega board
 	public void connect(Arduino controller, String serialPort) throws IOException {
 		if (controller == null) {
 			error("setting null as controller");
@@ -1009,10 +1013,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 *
 	 * </pre>
 	 *
-	 * ATTACH_DEVICE - this method id DEVICE_TYPE - the mrlcomm device type we are
-	 * attaching NAME_SIZE - the size of the name of the service of the device we
-	 * are attaching NAME .... (N) - the name data CONFIG_SIZE - the size of the
-	 * folloing config DATA0|DATA1 ...|DATA(N) - config data
+	 * ATTACH_DEVICE - this method id DEVICE_TYPE - the mrlcomm device type we
+	 * are attaching NAME_SIZE - the size of the name of the service of the
+	 * device we are attaching NAME .... (N) - the name data CONFIG_SIZE - the
+	 * size of the folloing config DATA0|DATA1 ...|DATA(N) - config data
 	 *
 	 * @param device
 	 */
@@ -2608,10 +2612,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// | address | msb | lsb | ...
 		int[] rawPinData = (int[]) data.getData();
 
-		int pinDataCnt = rawPinData.length / 3; /*
-																						 * length / (1 address + 1 msg + 1
-																						 * lsb)
-																						 */
+		int pinDataCnt = rawPinData.length/3; /* length / (1 address + 1 msg + 1 lsb) */
 		if (rawPinData.length % 3 != 0) {
 			log.error("something is wrong - expecting 3 bytes per pin data");
 		}
@@ -2620,14 +2621,26 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 		// parse sort reduce ...
 		for (int i = 0; i < pinArray.length; ++i) {
-			pinArray[i] = new PinData(rawPinData[3 * i], Serial.bytesToInt(rawPinData, (3 * i) + 1, 2));
+			PinData pinData = new PinData(rawPinData[3 * i], Serial.bytesToInt(rawPinData, (3 * i) + 1, 2));
+			pinArray[i] = pinData;
+			int address = pinData.getAddress();
+			
+			// handle individual pins
+			if (pinListeners.containsKey(address)){
+				List<PinListener> list = pinListeners.get(address);
+				for (int j = 0; j < list.size(); ++j){
+					PinListener pinListner = list.get(j);
+					if (pinListner.isLocal()){
+						pinListner.onPin(pinData);
+					} else {
+						invoke("publishPin", pinData);
+					}
+				}
+			}
 		}
 
+		// publish array
 		invoke("publishPinArray", new Object[] { pinArray });
-
-		// convert to a pin array of pin data
-		// for(int i = 0; i < data.
-		// log.info("here");
 	}
 
 	public void publishBoardInfo() {

@@ -158,7 +158,7 @@ public class I2cMuxGUI extends ServiceGUI implements ActionListener {
 			@Override
 			public void run() {
 
-				ArrayList<String> v = boundService.controllers;
+				List<String> v = boundService.controllers;
 				controller.removeAllItems();
 				if (v != null) {
 					for (int i = 0; i < v.size(); ++i) {
