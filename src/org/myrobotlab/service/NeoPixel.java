@@ -85,14 +85,14 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public HashMap<Integer, PixelColor> pixelMatrix = new HashMap<Integer, PixelColor>();
-  public ArrayList<PixelColor> savedPixelMatrix = new ArrayList<PixelColor>();
+  public List<PixelColor> savedPixelMatrix = new ArrayList<PixelColor>();
 
   public Integer numPixel = 0;
 
   /**
    * list of names of possible controllers
    */
-  public ArrayList<String> controllers;
+  public List<String> controllers;
   public String controllerName;
   
   boolean isAttached=false;
@@ -137,7 +137,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     broadcastState();
   }
 
-  public ArrayList<String> refreshControllers() {
+  public List<String> refreshControllers() {
     controllers = Runtime.getServiceNamesFromInterface(NeoPixelController.class);
     return controllers;
   }

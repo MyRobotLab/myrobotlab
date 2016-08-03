@@ -34,8 +34,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
@@ -378,7 +378,7 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
     trace.add(addTrace, gc);
 
     ++gc.gridx;
-    ArrayList<String> v = Runtime.getServiceNamesFromInterface(SensorDataPublisher.class);
+    List<String> v = Runtime.getServiceNamesFromInterface(SensorDataPublisher.class);
     traceController = new JComboBox(v.toArray());
     trace.add(traceController, gc);
 

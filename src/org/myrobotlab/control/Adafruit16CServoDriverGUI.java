@@ -179,7 +179,7 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 			@Override
 			public void run() {
 
-				ArrayList<String> v = boundService.refreshControllers();
+				List<String> v = boundService.refreshControllers();
 				controllerList.removeAllItems();
 				for (int i = 0; i < v.size(); ++i) {
 					controllerList.addItem(v.get(i));

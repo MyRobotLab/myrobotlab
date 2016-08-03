@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.util.List;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -13,20 +15,15 @@ import org.slf4j.Logger;
 
 public class Pir extends Service implements PinListener {
 
-	private static final long serialVersionUID = 1L;
-
 	public final static Logger log = LoggerFactory.getLogger(Pir.class);
 
-	PinArrayControl pinControl;
-
-	public Pir(String n) {
-		super(n);
-	}
-
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
 	 * definitions.
+	 * 
 	 * 
 	 * @return ServiceType - returns all the data
 	 * 
@@ -43,29 +40,101 @@ public class Pir extends Service implements PinListener {
 		return meta;
 	}
 
-	public void attach(PinArrayControl control, int pin) {
-		this.pinControl = control;
-		pinControl.attach(this, pin);
-	}
+	public static void main(String[] args) {
+		try {
 
-	@Override
-	public void onPin(PinData pindata) {
-		// TODO Auto-generated method stub
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
 
+			Runtime.start("pir", "Pir");
+			Runtime.start("gui", "GUIService");
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 	
-	  public static void main(String[] args) {
-		    try {
+	boolean isActive = false;
+	boolean isEnabled = false;
 
-		      LoggingFactory.getInstance().configure();
-		      LoggingFactory.getInstance().setLevel(Level.INFO);
+	Integer pin;
 
-		      Runtime.start("pir", "Pir");
-		      Runtime.start("gui", "GUIService");
+	PinArrayControl pinControl;
+	List<String> controllers;
 
-		    } catch (Exception e) {
-		      Logging.logError(e);
-		    }
-		  }
+	public Pir(String n) {
+		super(n);
+	}
+
+	public void attach(PinArrayControl control, int pin) {
+		this.pinControl = control;
+		this.pin = pin;
+		pinControl.attach(this, pin);
+	}
+	
+	public void disable(){
+		if (pinControl == null){
+			error("pin control not set");
+			return;
+		}
+		
+		if (pin == null){
+			error("pin not set");
+			return;
+		}
+		
+		pinControl.disablePin(pin);
+		isEnabled = false;
+		broadcastState();
+	}
+	
+	public void enable(){
+		if (pinControl == null){
+			error("pin control not set");
+			return;
+		}
+		
+		if (pin == null){
+			error("pin not set");
+			return;
+		}
+		
+		pinControl.enablePin(pin);
+		isEnabled = true;
+		broadcastState();
+	}
+	
+	public List<String> refresh(){
+		controllers = Runtime.getServiceNamesFromInterface(PinArrayControl.class);
+		broadcastState();
+		return controllers;
+	}
+	
+	@Override
+	public void onPin(PinData pindata) {
+		// log.info("onPin {}", pindata);
+		 boolean sense = (pindata.getValue() != 0);
+		 
+		 if (isActive != sense){
+			 // state change
+			 invoke("publishSense", sense);
+			 isActive = sense;
+		 }
+	}
+	
+	public Boolean publishSense(Boolean b){
+		return b;
+	}
+	
+	public void setPin(int pin){
+		this.pin = pin;
+		broadcastState();
+	}
+	
+
+	public void setPinArrayControl(PinArrayControl pinControl){
+		this.pinControl = pinControl;
+		broadcastState();
+	}
 
 }
