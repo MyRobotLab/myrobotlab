@@ -10,7 +10,8 @@ import org.myrobotlab.service.interfaces.SensorDataListener;
 public class I2CBus implements DeviceController, I2CBusControl, SensorDataListener{
 
 	String name;
-	I2CBusController controller;
+	// transient too help prevent infinite recursion in gson 
+	transient I2CBusController controller;
 	
 	public I2CBus(String Name){
 		this.name = Name;
