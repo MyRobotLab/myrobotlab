@@ -23,6 +23,10 @@ angular.module('mrlapp.service.Ads1115Gui', [])
         $scope.adc1 = service.adc1;
         $scope.adc2 = service.adc2;
         $scope.adc3 = service.adc3;
+        $scope.voltage0 = service.voltage0;
+        $scope.voltage1 = service.voltage1;
+        $scope.voltage2 = service.voltage2;
+        $scope.voltage3 = service.voltage3;
     }
     ;
     

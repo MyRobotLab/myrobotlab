@@ -328,7 +328,7 @@ public class NeoPixelGUI extends ServiceGUI implements ActionListener {
 
         boundService.refreshControllers();
         controller.removeAllItems();
-        ArrayList<String> c = boundService.controllers; 
+        List<String> c = boundService.controllers; 
         for (int i = 0; i < c.size(); ++i) {
           controller.addItem(c.get(i));
         }
