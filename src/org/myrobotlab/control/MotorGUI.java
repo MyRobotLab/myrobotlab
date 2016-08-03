@@ -31,6 +31,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -196,7 +197,7 @@ public class MotorGUI extends ServiceGUI implements ActionListener, ChangeListen
 
     controllerPanel.setBorder(BorderFactory.createTitledBorder("controller"));
 
-    ArrayList<String> v = Runtime.getServiceNamesFromInterface(MotorController.class);
+    List<String> v = Runtime.getServiceNamesFromInterface(MotorController.class);
     v.add(0, "");
     controllerSelect = new JComboBox(v.toArray());
     controllerPanel.add(controllerSelect, BorderLayout.WEST);

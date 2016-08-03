@@ -9,6 +9,9 @@
 
 /**
  * I2C bus
+ * TODO:KW? don't allow this class to write directly to the global serial port
+ * device classes shouldn't have a direct handle to the serial port, rather have
+ * a mrlmessage class that it returns.
  * TODO: Mats
  * The I2CBus device represents one I2C bus. 
  * It's the SDA (data line) and SCL pins (clock line) that is used to 

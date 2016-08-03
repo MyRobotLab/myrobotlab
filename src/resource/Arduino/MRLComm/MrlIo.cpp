@@ -9,9 +9,7 @@ MrlIo::MrlIo() {
 MrlIo::~MrlIo(){
 	//end();
 }
-/***
- * begin() method will select wich serial port (other comm port) the derived class will use
- */
+
 bool MrlIo::begin(int _ioType, long speed) {
 	if (openIo & (1 << _ioType)){
 		//port already open
@@ -38,33 +36,62 @@ bool MrlIo::begin(int _ioType, long speed) {
 			break;
 	}
 	serial->begin(speed);
-	ioType = _ioType;
+	ioType == _ioType;
 	openIo |= (1 << ioType);
+  //delay(500);
 	return true;
 }
 
 void MrlIo::write(unsigned char value) {
-  if (!checkOpenPort()) return;
+	if(!(openIo & (1 << ioType))){
+		//port close
+		ioType = MRL_IO_NOT_DEFINED;
+		return;
+	}
+// if(ioType==MRL_IO_SERIAL_0){
+//  Serial.write(value);
+// }
+// else if(ioType==MRL_IO_SERIAL_1){
+//  Serial1.write(value);
+// }
 	serial->write(value);
 }
 
 void MrlIo::write(unsigned char* buffer, int len) {
-  if (!checkOpenPort()) return;
+	if(!(openIo & (1 << ioType))){
+		//port close
+		ioType = MRL_IO_NOT_DEFINED;
+		return;
+	}
 	serial->write(buffer, len);
 }
 
 int MrlIo::read() {
-  if (!checkOpenPort()) return -1;
+	if(!(openIo & (1 << ioType))){
+		//port close
+		ioType = MRL_IO_NOT_DEFINED;
+		return -1;
+	}
 	return serial->read();
 }
 
 int MrlIo::available() {
-  if (!checkOpenPort()) return 0;
+  //serial->println(ioType);
+	if(!(openIo & (1 << ioType))){
+		//port close
+		ioType = MRL_IO_NOT_DEFINED;
+    
+		return 0;
+	}
 	return serial->available();
 }
 
 void MrlIo::end() {
-  if (!checkOpenPort()) return;
+	if (!(openIo & (1 << ioType))){
+		//port already close
+		ioType = MRL_IO_NOT_DEFINED;
+		return;
+	}
 	serial->end();
 	serial = NULL;
 	openIo &= ~(1 << ioType);
@@ -73,7 +100,6 @@ void MrlIo::end() {
 }
 
 void MrlIo::flush() {
-  if (!checkOpenPort()) return;
 	if (!(openIo & (1 << ioType))){
 		//port already close
 		ioType = MRL_IO_NOT_DEFINED;
@@ -82,12 +108,4 @@ void MrlIo::flush() {
 	serial->flush();
 }
 
-bool MrlIo::checkOpenPort(){
-  if (!(openIo & (1 << ioType))){
-    //port already close
-    ioType = MRL_IO_NOT_DEFINED;
-    return false;
-  }
-  return true;
-}
 
