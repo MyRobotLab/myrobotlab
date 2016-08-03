@@ -565,6 +565,13 @@
 			<classpath refid="compile.classpath" />
 		</javac>
 		<echo>compile end</echo>
+		
+		<!-- FIXME - move somewhere else?, doesn't belong here -->
+		<echo>webgui install start</echo>
+		<exec executable="cmd" dir="${src}/resource/WebGui">
+			<arg line="/c npm install" />
+		</exec>
+		<echo>webgui install end</echo>
 	</target>
 
 	<!-- create myrobotlab.jar -->
@@ -593,7 +600,14 @@
 		<!-- copy file="${repo}/serviceData.xml" todir="${build}/classes/resource/framework" / -->
 		<!-- copy file="${repo}/serviceData.json" todir="${build}/classes/resource/framework" / -->
 		
-		
+		<!-- remove unnecessary WebGui files -->
+		<delete dir="${build}/classes/resource/WebGui/app/bower_components" />
+		<delete dir="${build}/classes/resource/WebGui/node_modules" />
+		<delete dir="${build}/classes/resource/WebGui/mrl-bower-install-plus" />
+		<delete dir="${build}/classes/resource/WebGui/e2e-tests" />
+		<delete verbose="true" includeemptydirs="true">
+			<fileset dir="${build}/classes/resource/WebGui/app" includes="**/*_test.js" />
+		</delete>
 
 		<jar jarfile="${build}/lib/myrobotlab.jar" basedir="${build}/classes">
 			<!-- excludes="org/myrobotlab/boot/" -->
