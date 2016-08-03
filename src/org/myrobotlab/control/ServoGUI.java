@@ -31,7 +31,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.List;
+import java.util.ArrayList;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -402,7 +402,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 				controllerModel.removeAllElements();
 				// FIXME - get Local services relative to the servo
 				controllerModel.addElement("");
-				List<String> v = Runtime.getServiceNamesFromInterface(ServoController.class);
+				ArrayList<String> v = Runtime.getServiceNamesFromInterface(ServoController.class);
 				for (int i = 0; i < v.size(); ++i) {
 					controllerModel.addElement(v.get(i));
 				}

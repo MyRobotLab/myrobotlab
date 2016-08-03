@@ -322,7 +322,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
       selector |= Module.MASK_LED; // LED OFF
       log.info(String.format("0x%s", Integer.toHexString(selector)));
 
-      List<String> ips = Runtime.getLocalAddresses();
+      ArrayList<String> ips = Runtime.getLocalAddresses();
 
       for (int i = 0; i < ips.size(); ++i) {
         log.info(ips.get(i));
@@ -603,7 +603,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
       String ip = "";
       String mac = "";
 
-      List<String> addresses = Runtime.getLocalAddresses();
+      ArrayList<String> addresses = Runtime.getLocalAddresses();
       if (addresses.size() != 1) {
         error(String.format("incorrect number of ip addresses %d", addresses.size()));
       }
@@ -612,7 +612,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
         ip = addresses.get(0);
       }
 
-      List<String> macs = Runtime.getLocalHardwareAddresses();
+      ArrayList<String> macs = Runtime.getLocalHardwareAddresses();
       if (macs.size() != 1) {
         error(String.format("incorrect number of mac addresses %d", addresses.size()));
       }

@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -180,7 +180,7 @@ public class Servo extends Service implements ServoControl {
 	/**
 	 * list of names of possible controllers
 	 */
-	List<String> controllers;
+	ArrayList<String> controllers;
 	/**
 	 * current speed of the servo
 	 */
@@ -361,7 +361,7 @@ public class Servo extends Service implements ServoControl {
 	 * 
 	 * @return
 	 */
-	public List<String> refreshControllers() {
+	public ArrayList<String> refreshControllers() {
 		controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
 		return controllers;
 	}
