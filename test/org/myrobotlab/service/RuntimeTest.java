@@ -2,7 +2,7 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -39,13 +39,13 @@ public class RuntimeTest {
 
   @Test
   public void testGetLocalAddresses() {
-    List<String> addresses = Runtime.getLocalAddresses();
+    ArrayList<String> addresses = Runtime.getLocalAddresses();
     Assert.assertNotNull(addresses);
   }
 
   @Test
   public void testGetLocalHardwareAddresses() {
-    List<String> addresses = Runtime.getLocalHardwareAddresses();
+    ArrayList<String> addresses = Runtime.getLocalHardwareAddresses();
     Assert.assertNotNull(addresses);
   }
 

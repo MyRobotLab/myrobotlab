@@ -29,25 +29,25 @@ void MrlI2CBus::i2cWrite(unsigned char* ioCmd) {
 	WIRE.endTransmission();
 }
 
-// I2CREAD | DEVICE_INDEX | I2CADDRESS | DATASIZE
-// PUBLISH_SENSOR_DATA | DEVICE_INDEX | DATASIZE | DATA ....
+// I2CREAD | DEVICE_INDEX | I2CADDRESS | DATA_SIZE
+// PUBLISH_SENSOR_DATA | DEVICE_INDEX | I2CADDRESS | DATA ....
 // DEVICE_INDEX = Index to the I2C bus
 // I2CADDRESS = The address of the i2c device
 // DATA_SIZE = The number of bytes to read from the i2c device
 void MrlI2CBus::i2cRead(unsigned char* ioCmd) {
 
-	int answer = WIRE.requestFrom(ioCmd[2], ioCmd[3]); // reqest a number of bytes to read
+	int answer = WIRE.requestFrom((uint8_t) ioCmd[3], (uint8_t) ioCmd[4]); // reqest a number of bytes to read
 	MrlMsg msg(PUBLISH_SENSOR_DATA);
-	msg.addData(ioCmd[1]); // DEVICE_INDEX
-	msg.addData(ioCmd[3]); // DATASIZE
+	msg.addData(ioCmd[1]);
+	msg.addData(ioCmd[3]);
 	for (int i = 1; i < answer; i++) {
 		msg.addData(Wire.read());
 	}
 	msg.sendMsg();
 }
 
-// I2WRITEREAD | DEVICE_INDEX | I2CADDRESS | DATASIZE | DEVICE_MEMORY_ADDRESS
-// PUBLISH_SENSOR_DATA | DEVICE_INDEX | DATASIZE | DATA ....
+// I2WRITEREAD | DEVICE_INDEX | I2CADDRESS | DATASIZE | DEVICE_MEMORY_ADDRESS | DATA.....
+// PUBLISH_SENSOR_DATA | DEVICE_INDEX | I2CADDRESS | DATA ....
 // DEVICE_INDEX = Index to the I2C bus
 // I2CADDRESS = The address of the i2c device
 // DATA_SIZE = The number of bytes to read from the i2c device
@@ -55,10 +55,10 @@ void MrlI2CBus::i2cWriteRead(unsigned char* ioCmd) {
 	WIRE.beginTransmission(ioCmd[2]); // address to the i2c device
 	WIRE.write(ioCmd[4]);             // device memory address to read from
 	WIRE.endTransmission();
-	int answer = WIRE.requestFrom((uint8_t) ioCmd[2], (uint8_t) ioCmd[3]); // reqest a number of bytes to read
+	int answer = WIRE.requestFrom((uint8_t) ioCmd[3], (uint8_t) ioCmd[2]); // reqest a number of bytes to read
 	MrlMsg msg(PUBLISH_SENSOR_DATA);
-	msg.addData(ioCmd[1]); // DEVICE_INDEX
-	msg.addData(ioCmd[3]); // DATASIZE
+	msg.addData(ioCmd[1]);
+	msg.addData(ioCmd[2]);
 	for (int i = 1; i < answer; i++) {
 		msg.addData(Wire.read());
 	}

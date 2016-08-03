@@ -599,7 +599,7 @@ public class RemoteAdapter extends Service implements Gateway {
 
       // else LOCAL
       // add (this) services connections
-      List<String> addr = Runtime.getLocalAddresses();
+      ArrayList<String> addr = Runtime.getLocalAddresses();
       for (int i = 0; i < addr.size(); ++i) {
         Connection tcpConn = new Connection();
         // theoretically you could advertise udp too (and others)
