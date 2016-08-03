@@ -825,6 +825,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		Integer version = getVersion();
 		if (version == null || version != MRLCOMM_VERSION) {
 			error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
+			/*
 			if (arduinoPath != null && boardType != "" && boardType != null) {
 				// sleep(1000);
 				disconnect();
@@ -833,6 +834,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 				version = getVersion();
 				sleep(1000);
 			}
+			*/
 			return;
 		}
 
