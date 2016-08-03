@@ -17,3 +17,22 @@
   <div class="col-md-2">
   </div>
 </div>
+<div class="row">
+<div class="col-lg-3">
+    <label for="service.baudrate">rate</label>
+    <input type="text" class="form-control input-sm" ng-readonly="isConnected" ng-model="service.baudrate" uib-typeahead="baudrate for baudrate in possibleBaud | filter:$viewValue | limitTo:8">
+</div>
+<div class="col-lg-3">    
+    <label for="service.databits">data bits</label>
+    <input type="text" size="3" ng-readonly="isConnected" ng-model="service.databits" class="form-control">
+</div>
+<div class="col-lg-3">
+    <label for="service.stopbits">stop bits</label>
+    <input type="text" ng-readonly="isConnected" ng-model="service.stopbits" class="form-control">
+</div>
+<div class="col-lg-3">
+    <label for="service.parity">parity</label>
+    <input type="text" ng-readonly="isConnected" ng-model="service.parity" class="form-control">
+</div>
+</div>
+<hr/>

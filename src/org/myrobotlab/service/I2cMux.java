@@ -40,7 +40,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 	transient I2CController controller;
 
-	public ArrayList<String> controllers = new ArrayList<String>();
+	public List<String> controllers = new ArrayList<String>();
 	public String controllerName;
 
 	public List<String> deviceAddressList = Arrays.asList("0x70", "0x71", "0x72", "0x73", "0x74", "0x75", "0x76", "0x77");
@@ -51,6 +51,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	public String deviceBus = "1";
 
 	private boolean isAttached = false;
+	private int lastBusAddress = -1;
 
 	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
@@ -68,6 +69,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
 	public I2cMux(String n) {
 		super(n);
+		refreshControllers();
 		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 	}
 
@@ -200,7 +202,6 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	}
 
 	public void setMuxBus(int busAddress) {
-		int lastBusAddress = -1;
 		if (busAddress != lastBusAddress) {
 			byte bus[] = new byte[1];
 			bus[0] = (byte) (1 << busAddress);
@@ -226,7 +227,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		setMuxBus(busAddress);
 		int bytesRead = controller.i2cRead(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
-		log.debug(String.format("i2cRead. Requested %s bytes, received %s bytes", size, bytesRead));
+		log.info(String.format("i2cRead. Requested %s bytes, received %s byte", size, bytesRead));
 		return bytesRead;
 	}
 
