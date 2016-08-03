@@ -1421,6 +1421,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			msgBuffer[0] = id;
 			msgBuffer[1] = deviceAddress;
 			msgBuffer[2] = readSize;
+			msgBuffer[3] = writeBuffer[0];
 			sendMsg(I2C_WRITE_READ, msgBuffer);
 			int retry = 0;
 			int retryMax = 1000; // ( About 1000ms = s)
