@@ -435,7 +435,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
 	public Port connectPort(Port newPort, SerialDataListener listener) throws IOException {
 		port = newPort;
-		portName = port.getName();
+		// portName = port.getName();
 		ports.put(port.getName(), port);
 		portNames.add(port.getName());
 		invoke("getPortNames");
@@ -447,7 +447,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 			port.open();
 		}
 		port.listen(listeners);
-		connectedPorts.put(portName, newPort);
+		connectedPorts.put(port.getName(), newPort);
 
 		// FYI !!!
 		// give us a second before we advertise the port
@@ -461,9 +461,12 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 			// NOT A GOOD OPTIMIZATION - AS THE "EVENT" IS MUCH MORE IMPORTANT
 			// THAN THE SPEED OF THE DATA
 			// listeners.get(key).onConnect(portName);
-			send(listeners.get(key).getName(), "onConnect", portName);
+			send(listeners.get(key).getName(), "onConnect", port.getName());
 		}
 
+		// we have a portName and we are connected
+		portName = port.getName();
+		
 		// save(); why?
 		broadcastState();
 		return port;
