@@ -15,7 +15,7 @@
     "karma-firefox-launcher": "^1.0.0",
     "karma-jasmine": "^1.0.2",
     "karma-junit-reporter": "^1.0.0",
-    "mrl-bower-install-plus": "file:mrl-bower-install-plus-0.0.1.tgz",
+    "mrl-bower-install-plus": "lundev/mrl-bower-install-plus",
     "protractor": "^3.3.0",
     "shelljs": "^0.7.0"
   },
