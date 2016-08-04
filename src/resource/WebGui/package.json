@@ -17,7 +17,7 @@
     "karma-junit-reporter": "^1.0.0",
     "protractor": "^3.3.0",
     "shelljs": "^0.7.0",
-	"mrl-bower-install-plus": "file:/mrl-bower-install-plus"
+	"mrl-bower-install-plus": "file:mrl-bower-install-plus"
   },
   "scripts": {
     "postinstall": "bower install && \"node_modules/.bin/mrl-bower-install-plus\"",
