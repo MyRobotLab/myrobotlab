@@ -16,7 +16,8 @@
     "karma-jasmine": "^1.0.2",
     "karma-junit-reporter": "^1.0.0",
     "protractor": "^3.3.0",
-    "shelljs": "^0.7.0"
+    "shelljs": "^0.7.0",
+	"mrl-bower-install-plus": "file:mrl-bower-install-plus"
   },
   "scripts": {
     "postinstall": "bower install && \"node_modules/.bin/mrl-bower-install-plus\"",
@@ -29,8 +30,5 @@
     "update-webdriver": "webdriver-manager update",
     "preprotractor": "npm run update-webdriver",
     "protractor": "protractor e2e-tests/protractor.conf.js"
-  },
-  "dependencies": {
-    "mrl-bower-install-plus": "file:mrl-bower-install-plus"
   }
 }
