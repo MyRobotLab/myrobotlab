@@ -41,7 +41,6 @@ public class MouthControl extends Service {
     */
     
     // NEW WAY
-    arduino.servoAttach(jaw, 7);
     
     // TODO: mouth should probably implement speech synthesis.
     // in a way of speaking, one day, people may be able to read the lips
@@ -68,7 +67,7 @@ public class MouthControl extends Service {
     }
 
     // arduino.servoAttach(jaw);
-    jaw.attach();
+    arduino.servoAttach(jaw, 7);
     return true;
   }
 
