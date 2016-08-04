@@ -349,7 +349,7 @@ void MrlComm::processCommand(int ioType) {
 		break;
 	}
 	case SERVO_SET_MAX_VELOCITY: {
-		((MrlServo*) getDevice(ioCmd[1]))->setMaxVelocity(ioCmd[2] << 8 + ioCmd[3]);
+		((MrlServo*) getDevice(ioCmd[1]))->setMaxVelocity(MrlMsg::toInt(ioCmd,3));
 		break;
 	}
 	default:

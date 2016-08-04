@@ -647,7 +647,7 @@ public class Servo extends Service implements ServoControl {
 		}
 	}
 
-	public void setVelocity(int velocity) {
+	public void setMaxVelocity(int velocity) {
 	  this.maxVelocity   = velocity;
 	  getController().servoSetMaxVelocity(this);
 	}
