@@ -929,7 +929,7 @@ public class Mpu6050 extends Service implements I2CControl {
 	 */
 	public boolean setController(I2CController controller, String deviceBus, String deviceAddress) {
 		if (controller == null) {
-			error("setting null as controller");
+			log.error("setting null as controller");
 			return false;
 		}
 		controllerName = controller.getName();
@@ -1050,12 +1050,18 @@ public class Mpu6050 extends Service implements I2CControl {
    http://www.geekmomprojects.com/gyroscopes-and-accelerometers-on-a-chip/
 	 Thank's Debra
 	*/
-	
+	double lastnow = 0;
 	void complementaryFilter(double gyro_x, double gyro_y, double gyro_z, double acc_x, double acc_y, double acc_z){
 
 		// All angles are calculatd in radians
-		double dt = 0.05;
-		double gyroPortion = .96;
+		long now = System.currentTimeMillis();
+		if (lastnow == 0){
+			lastnow = now - .05;
+		}
+		double dt = (now - lastnow) / 1000;
+		lastnow = now;
+
+		double gyroPortion = .90;
 		double accPortion = 1 - gyroPortion;
 		// Calculate the rotations from the accelerometer
 		double acc_x_angle = Math.atan(acc_x / Math.sqrt((acc_y * acc_y) + (acc_z * acc_z)));

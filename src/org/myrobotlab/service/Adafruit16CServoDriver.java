@@ -514,4 +514,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		int pin = servo.getPin();
 		setPWM(pin, 4096, 0);
 	}
+
+  @Override
+  public void servoSetMaxVelocity(ServoControl servo) {
+    // TODO Auto-generated method stub.
+    // perhaps cannot do this with Adafruit16CServoDriver
+    // Mats says. It can be done in this service. But not by the board.
+    
+  }
 }

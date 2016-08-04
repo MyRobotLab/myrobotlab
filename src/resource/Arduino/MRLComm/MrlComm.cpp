@@ -348,6 +348,10 @@ void MrlComm::processCommand(int ioType) {
 		msg.sendMsg();
 		break;
 	}
+	case SERVO_SET_MAX_VELOCITY: {
+		((MrlServo*) getDevice(ioCmd[1]))->setMaxVelocity(MrlMsg::toInt(ioCmd,3));
+		break;
+	}
 	default:
 		MrlMsg::publishError(ERROR_UNKOWN_CMD);
 		break;
