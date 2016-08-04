@@ -568,8 +568,11 @@
 		
 		<!-- FIXME - move somewhere else?, doesn't belong here -->
 		<echo>webgui install start</echo>
-		<exec executable="cmd" dir="${src}/resource/WebGui">
+		<!--<exec executable="cmd" dir="${src}/resource/WebGui">
 			<arg line="/c npm install" />
+		</exec>-->
+		<exec executable="/bin/sh" dir="${src}/resource/WebGui">
+			<arg line="-c npm install" />
 		</exec>
 		<echo>webgui install end</echo>
 	</target>

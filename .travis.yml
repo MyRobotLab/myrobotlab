@@ -8,6 +8,7 @@ jdk:
 - oraclejdk8
 - oraclejdk7
 - openjdk7
+node_js: "4.4.7"
 
 # whitelist
 # branches:
