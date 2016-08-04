@@ -194,8 +194,8 @@ void MrlComm::processCommand(int ioType) {
 		((MrlServo*) getDevice(ioCmd[1]))->stopSweep();
 		break;
 	case SERVO_EVENTS_ENABLED:
-		// PUBLISH_SERVO_EVENT seem to do the same thing
-		//servoEventsEnabled();
+		// This switches servo PUBLISH_SERVO_EVENT on or of
+		((MrlServo*) getDevice(ioCmd[1]))->eventsEnabled(ioCmd[2]);
 		break;
 	case SERVO_WRITE:
 		((MrlServo*) getDevice(ioCmd[1]))->servoWrite(ioCmd[2]);

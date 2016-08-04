@@ -79,6 +79,11 @@ public class ArduinoPinArrayControlTest {
 		Runtime.start("python", "Python");
 		
 		arduino.connect("COM5");
+		
+		Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
+		servo01.attach(arduino, 7);
+		
+		
 		// arduino.setDebug(true);
 		/*
 		arduino.enablePin(14);
