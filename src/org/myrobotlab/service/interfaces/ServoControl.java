@@ -28,7 +28,7 @@ package org.myrobotlab.service.interfaces;
 public interface ServoControl extends DeviceControl {
 	
 	
-	// FIXME - do we want to support this & what do we expect from
+  // FIXME - do we want to support this & what do we expect from
 	// 1. should it be energized when initially attached?
 	// 2. should the position be set initially on attach ?
 	// 3. should rest be set by pos if its not set already .. ie .. is the pos passed in on attach the "rest" position of the servo ?
@@ -148,5 +148,7 @@ public interface ServoControl extends DeviceControl {
 	public Integer getTargetOutput();
 
 	public double getSpeed();
+
+  public int getMaxVelocity();
 
 }

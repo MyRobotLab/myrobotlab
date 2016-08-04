@@ -207,6 +207,8 @@ public class Servo extends Service implements ServoControl {
 	 */
 	boolean isEventsEnabled = false;
 
+  private int maxVelocity = 425;
+
 	public Servo(String n) {
 		super(n);
 		lastActivityTime = System.currentTimeMillis();
@@ -645,4 +647,13 @@ public class Servo extends Service implements ServoControl {
 		}
 	}
 
+	public void setVelocity(int velocity) {
+	  this.maxVelocity   = velocity;
+	  getController().servoSetMaxVelocity(this);
+	}
+
+  @Override
+  public int getMaxVelocity() {
+    return maxVelocity;
+  }
 }

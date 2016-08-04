@@ -28,6 +28,7 @@ class MrlServo : public Device {
     int min;
     int max;
     unsigned long lastUpdate;
+    unsigned int baseSpeed;
   public:
     MrlServo();
     ~MrlServo();
@@ -42,6 +43,7 @@ class MrlServo : public Device {
     void setSpeed(int speed);
     void startSweep(int min, int max, int step);
     void stopSweep();
+    void setMaxVelocity(unsigned int velocity);
 };
 
 #endif

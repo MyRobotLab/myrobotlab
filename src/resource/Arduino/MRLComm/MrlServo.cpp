@@ -101,7 +101,7 @@ void MrlServo::servoWrite(int position) {
   } else if (speed < 100 && speed > 0) {
     targetPos = position;
     isMoving = true;
-    int baseSpeed=(int)(60.0/0.14); // deg/sec base on speed of HS805B servo 6V under no load //should be modifiable
+    //int baseSpeed=(int)(60.0/0.14); // deg/sec base on speed of HS805B servo 6V under no load //should be modifiable
     long delta=targetPos-(int)currentPos;
     float currentSpeed=(baseSpeed*speed)/100;
     long timeToReach=abs((delta))*1000/currentSpeed; // time to reach target in ms
@@ -140,4 +140,7 @@ void MrlServo::stopSweep() {
   isSweeping = false;
 }
 
+void MrlServo::setMaxVelocity(unsigned int velocity){
+	baseSpeed = velocity;
+}
 

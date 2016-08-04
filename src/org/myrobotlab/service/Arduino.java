@@ -70,6 +70,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_DETACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_EVENTS_ENABLED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_SPEED;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_MAX_VELOCITY;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_WRITE;
@@ -2666,4 +2667,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		msg.addData16(speed);
 		sendMsg(msg);
 	}
+
+  @Override
+  public void servoSetMaxVelocity(ServoControl servo) {
+    MrlMsg msg = new MrlMsg(SERVO_SET_MAX_VELOCITY);
+    msg.addData(getDeviceId(servo));
+    msg.addData(2);
+    msg.addData16(servo.getMaxVelocity());
+    sendMsg(msg);
+  }
 }
