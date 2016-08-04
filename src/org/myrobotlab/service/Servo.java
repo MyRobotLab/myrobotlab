@@ -144,13 +144,13 @@ public class Servo extends Service implements ServoControl {
 
 	String controllerName = null;
 
-	private Mapper mapper = new Mapper(0, 180, 0, 180);
+	Mapper mapper = new Mapper(0, 180, 0, 180);
 
-	private Integer rest = 90;
+	Integer rest = 90;
 
-	private long lastActivityTime = 0;
+	long lastActivityTime = 0;
 
-	private Integer pin;
+	Integer pin;
 
 	/**
 	 * the requested INPUT position of the servo
@@ -254,9 +254,6 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public ServoController getController() {
-		if (controller == null) {
-			//error("%s's controller is null, perhaps you need to %s.attach(controller, pin, pos) ?", getName(), getName());
-		}
 		return controller;
 	}
 
@@ -379,7 +376,9 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public void setController(DeviceController controller) {
 		if (controller == null) {
-			error("setting null as controller");
+			info("setting controller to null");
+			this.controllerName = null;
+			this.controller = null;
 			return;
 		}
 
@@ -394,6 +393,7 @@ public class Servo extends Service implements ServoControl {
 		 */
 
 		this.controller = (ServoController) controller;
+		this.controllerName = controller.getName();
 		broadcastState();
 	}
 
@@ -603,6 +603,7 @@ public class Servo extends Service implements ServoControl {
 		attach(controller, pin, null);
 	}
 
+	// FIXME - setController is very deficit in its abilities - compared to the complexity of this
 	@Override
 	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
 		
@@ -633,6 +634,8 @@ public class Servo extends Service implements ServoControl {
 		// SET THE DATA 
 		this.pin = pin;
 		this.controller = controller;
+		this.controllerName = controller.getName();
+		broadcastState();
 	}
 
 	@Override
@@ -642,6 +645,7 @@ public class Servo extends Service implements ServoControl {
 			controller.deviceDetach(this);
 			// remove the this controller's reference
 			this.controller = null;
+			this.controllerName = null;
 		}
 	}
 

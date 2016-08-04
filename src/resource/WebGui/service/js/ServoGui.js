@@ -58,8 +58,15 @@ angular.module('mrlapp.service.ServoGui', [])
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service;
-        $scope.pos.value = service.targetPos;
-        $scope.posStatus.value = service.targetPos;
+        if (service.targetPos == null){
+            $scope.pos.value = service.rest;
+            $scope.posStatus.value = service.rest;
+        } else {
+            $scope.pos.value = service.targetPos;
+            $scope.posStatus.value = service.targetPos;
+        }     
+        
+        
         $scope.controllerName = service.controllerName;
         $scope.speed = service.speed;
         $scope.isAttached = service.isAttached;
