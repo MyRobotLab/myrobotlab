@@ -4,14 +4,14 @@ MrlComm::MrlComm() {
 	softReset();
 	byteCount = 0;
 	mrlCmd[0] = new MrlCmd(MRL_IO_SERIAL_0);
-	for (int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+	for (unsigned int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
 		mrlCmd[i] = NULL;
 	}
 
 }
 
 MrlComm::~MrlComm() {
-	for (int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+	for (unsigned int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
 		if (mrlCmd[i] != NULL) {
 			delete mrlCmd[i];
 		}
@@ -30,7 +30,7 @@ void MrlComm::softReset() {
 	enableBoardStatus = false;
 	Device::nextDeviceId = 1; // device 0 is Arduino
 	debug = false;
-	for (int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+	for (unsigned int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
 		if (mrlCmd[i] != NULL) {
 			mrlCmd[i]->end();
 			delete mrlCmd[i];
@@ -135,7 +135,7 @@ void MrlComm::publishAttachedDevice(int id, int nameSize, unsigned char* name) {
  * SERIAL METHODS BEGIN
  */
 void MrlComm::readCommand() {
-	for (int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
+	for (unsigned int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
 		if (mrlCmd[i] != NULL) {
 			if (mrlCmd[i]->readCommand()) {
 				processCommand(i + 1);
@@ -193,15 +193,8 @@ void MrlComm::processCommand(int ioType) {
 	case SERVO_SWEEP_STOP:
 		((MrlServo*) getDevice(ioCmd[1]))->stopSweep();
 		break;
-	case SERVO_EVENTS_ENABLED:
-		// This switches servo PUBLISH_SERVO_EVENT on or of
-		((MrlServo*) getDevice(ioCmd[1]))->eventsEnabled(ioCmd[2]);
-		break;
 	case SERVO_WRITE:
 		((MrlServo*) getDevice(ioCmd[1]))->servoWrite(ioCmd[2]);
-		break;
-	case PUBLISH_SERVO_EVENT:
-		((MrlServo*) getDevice(ioCmd[1]))->servoEventEnabled(ioCmd[2]);
 		break;
 	case SERVO_WRITE_MICROSECONDS:
 		((MrlServo*) getDevice(ioCmd[1]))->servoWriteMicroseconds(ioCmd[2]);
@@ -506,7 +499,9 @@ void MrlComm::deviceAttach(unsigned char* ioCmd) {
 	}
 	}
 
-	// KW: a sort of null pointer case? TODO: maybe move this into default branch of switch above?
+	// if we have a device - then attach it and call its attach method with config passed in
+	// and send back a publishedAttachedDevice with its name - so Arduino-Java land knows
+	// it was successfully attached
 	if (devicePtr) {
 		if (devicePtr->deviceAttach(config, configSize)) {
 			addDevice(devicePtr);

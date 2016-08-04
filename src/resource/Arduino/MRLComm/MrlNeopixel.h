@@ -79,7 +79,7 @@ class MrlNeopixel:public Device{
     unsigned char _baseColorBlue;
     unsigned int _speed;
     byte _animation;
-    int _pos;
+    unsigned int _pos;
     int _count;
     bool _off;
     int _dir;

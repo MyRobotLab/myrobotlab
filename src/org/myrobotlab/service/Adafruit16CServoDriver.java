@@ -368,20 +368,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	@Override
-	public boolean servoEventsEnabled(ServoControl servo, boolean enabled) {
-		// @GroG. What is this method supposed to do ?
-		// return arduino.servoEventsEnabled(servo, enabled);
-		// Grog says - if you want feedback from the microcontroller to say when a
-		// servo has stopped
-		// when its moving at sub speed ...
-		// perhaps cannot do this with Adafruit16CServoDriver
-		// Mats says - We don't have any feedback from the servos, but to send
-		// an event when the sweep stops should not be a problem
-
-		return enabled;
-	}
-
-	@Override
 	public void servoSetSpeed(ServoControl servo) {
 		// TODO Auto-generated method stub.
 		// perhaps cannot do this with Adafruit16CServoDriver

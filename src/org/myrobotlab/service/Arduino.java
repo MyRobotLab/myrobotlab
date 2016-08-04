@@ -1805,7 +1805,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			// uber good -
 			// TODO - deprecate ServoControl interface - not
 			// needed Servo is abstraction enough
-			Servo servo = (Servo) deviceList.get(id).getDevice();
+			Servo servo = (Servo) deviceIndex.get(id).getDevice();
 			servo.invoke("publishServoEvent", currentPos & 0xff);
 			break;
 		}
@@ -2277,18 +2277,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void servoDetach(ServoControl servo) {
 		int id = getDeviceId(servo);
 		sendMsg(SERVO_DETACH, getDeviceId(servo), id);
-	}
-
-	@Override
-	public boolean servoEventsEnabled(ServoControl servo, boolean enabled) {
-		log.info(String.format("setServoEventsEnabled %s %b", servo.getName(), enabled));
-		int id = getDeviceId(servo);
-		if (enabled) {
-			sendMsg(SERVO_EVENTS_ENABLED, id, TRUE);
-		} else {
-			sendMsg(SERVO_EVENTS_ENABLED, id, FALSE);
-		}
-		return true;
 	}
 
 	@Override

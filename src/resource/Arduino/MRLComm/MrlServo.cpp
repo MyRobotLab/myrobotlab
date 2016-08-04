@@ -7,7 +7,6 @@ MrlServo::MrlServo() : Device(DEVICE_TYPE_SERVO) {
    // TODO: target/curent position?
    // create the servo
    servo = new Servo();
-   eventsEnabled = false;
    lastUpdate = 0;
    currentPos = 0.0;
    targetPos = 0;
@@ -61,9 +60,6 @@ void MrlServo::update() {
         currentPos=targetPos; 
       }
       servo->write((int)currentPos);
-      if (eventsEnabled){
-        publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
-      }
     } else {
       if (isSweeping) {
         if (targetPos == min) {
@@ -73,8 +69,6 @@ void MrlServo::update() {
         }
         step*=-1;
       } else {
-        if (eventsEnabled)
-          publishServoEvent(SERVO_EVENT_STOPPED);
         isMoving = false;
       }
     }
@@ -110,10 +104,6 @@ void MrlServo::servoWrite(int position) {
     }
     step=((float)delta*10/timeToReach);
   }
-}
-
-void MrlServo::servoEventEnabled(int value) {
-  eventsEnabled=value;
 }
 
 void MrlServo::servoWriteMicroseconds(int position) {

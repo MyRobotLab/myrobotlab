@@ -23,7 +23,6 @@ class MrlServo : public Device {
     int targetPos;
     float currentPos;
     int speed; // servos have a "speed" associated with them that's not part of the base servo driver
-    bool eventsEnabled;
     float step;
     int min;
     int max;
@@ -38,7 +37,6 @@ class MrlServo : public Device {
     void update();
     void publishServoEvent(int eventType);
     void servoWrite(int position);
-    void servoEventEnabled(int value);
     void servoWriteMicroseconds(int position);
     void setSpeed(int speed);
     void startSweep(int min, int max, int step);
