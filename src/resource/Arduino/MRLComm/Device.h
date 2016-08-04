@@ -53,7 +53,7 @@ class Device {
     // subclasses can/should define their os substate - eg ULTRASONIC_STATE_WAITING_PULSE etc..
     virtual void update() {}; // all devices must implement this to update their state.
     // the universal attach - follows Java-Land Controller.deviceAttach method
-    virtual bool deviceAttach(unsigned char config[], int configSize);
+    virtual bool deviceAttach(unsigned char[], int);
     static int nextDeviceId;
   protected:
     void attachDevice();

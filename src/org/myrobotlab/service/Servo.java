@@ -207,7 +207,7 @@ public class Servo extends Service implements ServoControl {
 	 */
 	boolean isEventsEnabled = false;
 
-  private int maxVelocity = 425;
+	private int maxVelocity = 425;
 
 	public Servo(String n) {
 		super(n);
@@ -250,7 +250,7 @@ public class Servo extends Service implements ServoControl {
 
 	public boolean eventsEnabled(boolean b) {
 		isEventsEnabled = b;
-		getController().servoEventsEnabled(this, b);
+		broadcastState();
 		return b;
 	}
 
@@ -333,9 +333,10 @@ public class Servo extends Service implements ServoControl {
 		getController().servoWrite(this);
 		lastActivityTime = System.currentTimeMillis();
 
-		// update the web gui that we've moved..
-		// broadcastState();
-		invoke("publishServoEvent", targetOutput);
+		if (isEventsEnabled) {
+			// update others of our position change
+			invoke("publishServoEvent", targetOutput);
+		}
 	}
 
 	private void controllerError() {
@@ -597,27 +598,27 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void attach(String controllerName, int pin) throws Exception {
-		attach((ServoController)Runtime.getService(controllerName), pin, null);
+		attach((ServoController) Runtime.getService(controllerName), pin, null);
 	}
-	
+
 	@Override
 	public void attach(ServoController controller, int pin) throws Exception {
 		attach(controller, pin, null);
 	}
 
-	// FIXME - setController is very deficit in its abilities - compared to the complexity of this
+	// FIXME - setController is very deficit in its abilities - compared to the
+	// complexity of this
 	@Override
 	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
-		
-		if (this.controller == controller){
+
+		if (this.controller == controller) {
 			log.info("already attached to controller - nothing to do");
 			return;
-		} else if (this.controller != null && this.controller != controller ){
+		} else if (this.controller != null && this.controller != controller) {
 			log.warn("already attached to controller %s - please detach before attaching to controller %s", this.controller.getName(), controller.getName());
 			return;
 		}
-		
-		
+
 		// ORDER IS IMPORTANT !!!
 		// attach the Control to the Controller first
 		if (pos != null) {
@@ -632,8 +633,8 @@ public class Servo extends Service implements ServoControl {
 			}
 			controller.deviceAttach(this, pin);
 		}
-		
-		// SET THE DATA 
+
+		// SET THE DATA
 		this.pin = pin;
 		this.controller = controller;
 		this.controllerName = controller.getName();
@@ -652,12 +653,12 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public void setMaxVelocity(int velocity) {
-	  this.maxVelocity   = velocity;
-	  getController().servoSetMaxVelocity(this);
+		this.maxVelocity = velocity;
+		getController().servoSetMaxVelocity(this);
 	}
 
-  @Override
-  public int getMaxVelocity() {
-    return maxVelocity;
-  }
+	@Override
+	public int getMaxVelocity() {
+		return maxVelocity;
+	}
 }

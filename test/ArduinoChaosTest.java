@@ -82,8 +82,8 @@ public class ArduinoChaosTest {
     arduino.servoSweepStart(servo);
     Thread.sleep(1000);
     arduino.servoSweepStop(servo);
-    Thread.sleep(1000);
-    arduino.servoEventsEnabled(servo, true);
+
+
     Thread.sleep(1000);
     // TODO : this blows up
     // arduino.servoWrite(servo);
