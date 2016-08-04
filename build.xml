@@ -571,8 +571,11 @@
 		<!--<exec executable="cmd" dir="${src}/resource/WebGui">
 			<arg line="/c npm install" />
 		</exec>-->
-		<exec executable="/bin/sh" dir="${src}/resource/WebGui">
+		<!--<exec executable="/bin/sh" dir="${src}/resource/WebGui">
 			<arg line="-c npm install" />
+		</exec>-->
+		<exec executable="npm" dir="${src}/resource/WebGui">
+			<arg value="install" />
 		</exec>
 		<echo>webgui install end</echo>
 	</target>
