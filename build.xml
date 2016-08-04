@@ -609,7 +609,6 @@
 		<!-- remove unnecessary WebGui files -->
 		<delete dir="${build}/classes/resource/WebGui/app/bower_components" />
 		<delete dir="${build}/classes/resource/WebGui/node_modules" />
-		<delete dir="${build}/classes/resource/WebGui/mrl-bower-install-plus" />
 		<delete dir="${build}/classes/resource/WebGui/e2e-tests" />
 		<delete verbose="true" includeemptydirs="true">
 			<fileset dir="${build}/classes/resource/WebGui/app" includes="**/*_test.js" />
