@@ -152,7 +152,7 @@ inline void MrlNeopixel::sendBitC(bool bitVal) {
 	// Here I have been generous and not tried to squeeze the gap tight but instead erred on the side of lots of extra time.
 	// This has thenice side effect of avoid glitches on very long strings becuase
 }
-#if defined(ARDUINO_AVR_MEGA2560)
+#if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
 
 inline void MrlNeopixel::sendBitL(bool bitVal) {
 	uint8_t bit=bitmask;
@@ -822,13 +822,10 @@ void MrlNeopixel::animationIronman() {
     int flip = random(32);
     if (flip > 22) _dir = -_dir;
     _alpha += 5 * _dir;
-    /* as the compiler warns this will always be false
-     * by the definition it is an unsigned char
-    if (_alpha < 0) {
-      _alpha = 0;
+    if (_alpha < 5) {
+      _alpha = 5;
       _dir = 1;
     }
-    */
     if (_alpha > 100) {
       _alpha = 100;
       _dir = -1;

@@ -280,17 +280,21 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * UARTs // 14 PWM // 16 Analog Inputs // 54 Digital I/O -
 	 *
 	 * So at the moment .. there is only Uno & Mega !!!
+	 * 
+	 * With the new upload method, Gael need to have support for ADK Mega
 	 *
 	 */
 
 	// Java-land defintion
-	public transient static final String BOARD_TYPE_UNO = "Uno";
-	public transient static final String BOARD_TYPE_MEGA = "Mega";
+	public transient static final String BOARD_TYPE_UNO = "uno";
+	public transient static final String BOARD_TYPE_MEGA = "mega";
+	public transient static final String BOARD_TYPE_MEGA_ADK = "megaADK";
 
 	// MrlComm definition
 	public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
 	public transient static final int BOARD_TYPE_ID_MEGA = 1;
 	public transient static final int BOARD_TYPE_ID_UNO = 2;
+	public transient static final int BOARD_TYPE_ID_ADK_MEGA = 3;
 
 	public static final int HIGH = 0x1;
 	public static final int LOW = 0x0;
@@ -852,7 +856,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			error("controller can't attach to itself");
 			return;
 		}
-		if (!controller.boardType.equalsIgnoreCase("mega")) {
+		if (!controller.boardType.toLowerCase().contains("mega")) {
 			error("You must connect to a Mega controller");
 			return;
 		}
@@ -2344,7 +2348,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return boardType;
 	}
 
-	/**
+  public String setBoardMegaADK() {
+    boardType = BOARD_TYPE_MEGA_ADK;
+    createPinList();
+    broadcastState();
+    return boardType;
+  }
+
+  /**
 	 * DeviceControl methods. In this case they represents the I2CBusControl Not
 	 * sure if this is good to use the Arduino as an I2CBusControl Exploring
 	 * different alternatives. I may have to rethink. Alternate solutions are
@@ -2533,7 +2544,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 
 		uploadSketchResult = String.format("Uploaded %s ", new Date());
-
+		
 		boolean connectedState = isConnected();
 		try {
 
