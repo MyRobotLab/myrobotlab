@@ -54,18 +54,7 @@ public class MotorDualPwm extends Motor {
 		super(n);
 	}
 	
-	public void setPwmPins(int leftPin, int rightPin) {
-		this.leftPin = leftPin;
-		this.rightPin = rightPin;
-	}
-	
-	public Integer getLeftPin() {
-		return leftPin;
-	}
-	
-	public Integer getRightPin() {
-		return rightPin;
-	}
+
 
 
 	/**

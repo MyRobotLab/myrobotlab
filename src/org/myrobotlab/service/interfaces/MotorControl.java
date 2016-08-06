@@ -25,84 +25,89 @@
 
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.sensor.Encoder;
 
-public interface MotorControl extends  DeviceControl { // SensorDataPublisher, SensorDataListener, NameProvider, MessageSubscriber {
+public interface MotorControl extends DeviceControl { // SensorDataPublisher,
+														// SensorDataListener,
+														// NameProvider,
+														// MessageSubscriber {
 
-  public void attach(MotorController controller) throws Exception;
-  
-  public void detach(MotorController controller);
+	public void attach(MotorController controller) throws Exception;
 
-  double getPowerLevel();
+	public void detach(MotorController controller);
 
-  double getPowerOutput();
+	double getPowerLevel();
 
-  int getTargetPos();
+	double getPowerOutput();
 
-  /**
-   * query the motor as to its inverted status
-   * 
-   * @return
-   */
-  boolean isInverted();
+	int getTargetPos();
 
-  /**
-   * locks the motor so no other commands will affect it until it becomes
-   * unlocked
-   */
-  void lock();
+	/**
+	 * query the motor as to its inverted status
+	 * 
+	 * @return
+	 */
+	boolean isInverted();
 
-  /**
-   * Move is the most common motor command. The command accepts a parameter of
-   * power which can be of the range -1.0 to 1.0. Negative values are in one
-   * direction and positive values are in the opposite value. For example -1.0
-   * would be maximum power in a counter clock-wise direction and 0.9 would be
-   * 90% power in a clockwise direction. 0.0 of course would be stop
-   * 
-   * @param power
-   *          - new power level
-   */
-  void move(double power);
+	/**
+	 * locks the motor so no other commands will affect it until it becomes
+	 * unlocked
+	 */
+	void lock();
 
-  /**
-   * moveTo moves the motor to a specific location. Typically, an encoder is
-   * needed in order to provide feedback data
-   * 
-   * @param newPos
-   */
-  void moveTo(int newPos);
+	/**
+	 * Move is the most common motor command. The command accepts a parameter of
+	 * power which can be of the range -1.0 to 1.0. Negative values are in one
+	 * direction and positive values are in the opposite value. For example -1.0
+	 * would be maximum power in a counter clock-wise direction and 0.9 would be
+	 * 90% power in a clockwise direction. 0.0 of course would be stop
+	 * 
+	 * @param power
+	 *            - new power level
+	 */
+	void move(double power);
 
-  /**
-   * moveTo moves the motor to a specific location. Typically, an encoder is
-   * needed in order to provide feedback data
-   * 
-   * @param newPos
-   */
-  void moveTo(int newPos, Double power);
+	/**
+	 * moveTo moves the motor to a specific location. Typically, an encoder is
+	 * needed in order to provide feedback data
+	 * 
+	 * @param newPos
+	 */
+	void moveTo(int newPos);
 
+	/**
+	 * moveTo moves the motor to a specific location. Typically, an encoder is
+	 * needed in order to provide feedback data
+	 * 
+	 * @param newPos
+	 */
+	void moveTo(int newPos, Double power);
 
-  void setEncoder(Encoder encoder);
+	void setEncoder(Encoder encoder);
 
-  /**
-   * change the motors direction such that negative power levels become
-   * clockwise if previous levels were counter clockwise and positive power
-   * levels would become counter clockwise
-   * 
-   * @param invert
-   */
-  void setInverted(boolean invert);
+	/**
+	 * change the motors direction such that negative power levels become
+	 * clockwise if previous levels were counter clockwise and positive power
+	 * levels would become counter clockwise
+	 * 
+	 * @param invert
+	 */
+	void setInverted(boolean invert);
 
-  void stop();
+	void stop();
 
-  /**
-   * a safety mechanism - stop and lock will stop and lock the motor no other
-   * commands will affect the motor until it is "unlocked"
-   */
-  void stopAndLock();
+	/**
+	 * a safety mechanism - stop and lock will stop and lock the motor no other
+	 * commands will affect the motor until it is "unlocked"
+	 */
+	void stopAndLock();
 
-  /**
-   * unlocks the motor, so other commands can affect it
-   */
-  void unlock();
+	/**
+	 * unlocks the motor, so other commands can affect it
+	 */
+	void unlock();
+
+	public MotorConfig getConfig();
 
 }

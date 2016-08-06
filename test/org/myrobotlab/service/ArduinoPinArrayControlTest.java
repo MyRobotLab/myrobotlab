@@ -83,6 +83,12 @@ public class ArduinoPinArrayControlTest {
 		Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
 		servo01.attach(arduino, 7);
 		
+		servo01.info("hello 1");
+		servo01.info("hello 2");
+		servo01.warn("warning here 1");
+		servo01.warn("warning here 2");
+		servo01.error("error here 1");
+		servo01.error("error here 2");
 		
 		// arduino.setDebug(true);
 		/*
