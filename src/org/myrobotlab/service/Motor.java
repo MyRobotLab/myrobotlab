@@ -83,7 +83,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
 	transient MotorEncoder encoder = null;
 
-	transient MotorConfig config;
+	MotorConfig config;
 
 	// FIXME - implements an Encoder interface
 	// get a named instance - stopping and tarting should not be creating &

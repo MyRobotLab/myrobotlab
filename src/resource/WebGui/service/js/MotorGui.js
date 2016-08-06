@@ -22,11 +22,13 @@ angular.module('mrlapp.service.MotorGui', []).controller('MotorGuiCtrl', ['$scop
         $scope.newEncoderType = service.encoderType;
         $scope.newEncoderPin = service.encoderPin;
         $scope.newController = service.controllerName;
-        var type = service.config.type;
-        $scope.newType = type;
-        if (type == 'MotorConfigDualPwm') {
-            $scope.newPin0 = service.config.leftPin;
-            $scope.newPin1 = service.config.rightPin;
+        if (service.config != null ) {
+            var type = service.config.type;
+            $scope.newType = type;
+            if (type == 'MotorConfigDualPwm') {
+                $scope.newPin0 = service.config.leftPin;
+                $scope.newPin1 = service.config.rightPin;
+            }
         }
         $scope.position = service.currentPos;
         $scope.isAttached = !(angular.isUndefined(service.controllerName) || service.controllerName === null );
@@ -69,17 +71,14 @@ angular.module('mrlapp.service.MotorGui', []).controller('MotorGuiCtrl', ['$scop
         $log.info('moveTo');
         msg.send('moveTo', $scope.moveToPos);
     }
-
-    $scope.moveLeft = function() {        
+    $scope.moveLeft = function() {
         $scope.service.powerLevel = $scope.service.powerLevel - 0.1;
         msg.send('move', $scope.service.powerLevel);
     }
-
-   $scope.moveRight = function() {        
+    $scope.moveRight = function() {
         $scope.service.powerLevel = $scope.service.powerLevel + 0.1;
         msg.send('move', $scope.service.powerLevel);
     }
-
     msg.subscribe("updatePosition")
     var runtimeName = mrl.getRuntime().name;
     // subscribe from Runtime --> WebGui (gateway)
