@@ -5,6 +5,10 @@ public class MotorConfigSimpleH extends MotorConfig {
 	Integer pwrPin;
 	Integer dirPin;
 	
+	public MotorConfigSimpleH(){
+		
+	}
+	
 	public MotorConfigSimpleH(int pwrPin, int dirPin) {
 		this.pwrPin = pwrPin;
 		this.dirPin = dirPin;

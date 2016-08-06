@@ -83,12 +83,14 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
 	transient MotorEncoder encoder = null;
 
-	MotorConfig config;
+	transient MotorConfig config;
 
 	// FIXME - implements an Encoder interface
 	// get a named instance - stopping and tarting should not be creating &
 	// destroying
 	transient Object lock = new Object();
+
+	String controllerName;
 
 	public Motor(String n) {
 		super(n);
@@ -148,6 +150,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 			return;
 		}
 		controller.motorMove(this);
+		broadcastState();
 	}
 
 	@Override
@@ -161,6 +164,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 		// targetPos = encoderMap.calc(newPos);
 		targetPos = newPos;
 		controller.motorMoveTo(this);
+		broadcastState();
 	}
 
 	@Override
@@ -191,8 +195,10 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
 	@Override
 	public void stop() {
+		log.info("{}.stop()", getName());
 		powerLevel = 0.0;
 		controller.motorStop(this);
+		broadcastState();
 	}
 
 	@Override
@@ -200,12 +206,14 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 		log.info("stopAndLock");
 		move(0.0);
 		lock();
+		broadcastState();
 	}
 
 	@Override
 	public void unlock() {
 		log.info("unLock");
 		locked = false;
+		broadcastState();
 	}
 
 	// FIXME - related to update(SensorData) no ?
@@ -351,20 +359,28 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	public void detach(MotorController controller) {
 		controller.deviceDetach(this);
 		controller = null;
+		controllerName = null;
+		broadcastState();
 	}
 
 	@Override
 	public void attach(MotorController controller) throws Exception {
 		this.controller = controller;
+		if (controller != null){
+			controllerName = controller.getName();
+		}
+		broadcastState();
 	}
 	
 	///////   config start ////////////////////////
 	public void setPwmPins(int leftPin, int rightPin) {
 		config = new MotorConfigDualPwm(leftPin, rightPin);
+		broadcastState();
 	}
 	
 	public void setPwrDirPins(int pwrPin, int dirPin){
 		config = new MotorConfigSimpleH(pwrPin, dirPin);
+		broadcastState();
 	}
 
 	@Override
