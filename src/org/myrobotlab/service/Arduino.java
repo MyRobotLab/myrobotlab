@@ -1499,17 +1499,19 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 		if (MotorConfigSimpleH.class == type) {
 			MotorConfigSimpleH config = (MotorConfigSimpleH)c;
-			MotorSimpleH motor = (MotorSimpleH) mc;
 			sendMsg(DIGITAL_WRITE, config.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
 			sendMsg(ANALOG_WRITE, config.getPwrPin(), (int) Math.abs(powerOutput));
-		} else if (MotorDualPwm.class == type) {
+		} else if (MotorConfigDualPwm.class == type) {
 			MotorConfigDualPwm config = (MotorConfigDualPwm)c;
 			if (powerOutput < 0) {
 				sendMsg(ANALOG_WRITE, config.getLeftPin(), 0);
 				sendMsg(ANALOG_WRITE, config.getRightPin(), (int) Math.abs(powerOutput));
-			} else {
+			} else if (powerOutput > 0) {
 				sendMsg(ANALOG_WRITE, config.getRightPin(), 0);
 				sendMsg(ANALOG_WRITE, config.getLeftPin(), (int) Math.abs(powerOutput));
+			} else {
+				sendMsg(ANALOG_WRITE, config.getRightPin(), 0);
+				sendMsg(ANALOG_WRITE, config.getLeftPin(), 0);
 			}
 		} else if (MotorPulse.class == type) {
 			MotorPulse motor = (MotorPulse) mc;
@@ -1580,10 +1582,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		if (MotorConfigPulse.class == type) {
 			MotorConfigPulse config = (MotorConfigPulse) mc.getConfig();
 			sendMsg(PULSE_STOP, config.getPulsePin());
-		} else if (MotorSimpleH.class == type) {
-			MotorSimpleH motor = (MotorSimpleH) mc;
-			sendMsg(ANALOG_WRITE, motor.getPwrPin(), 0);
-		} else if (MotorDualPwm.class == type) {
+		} else if (MotorConfigSimpleH.class == type) {
+			MotorConfigSimpleH config = (MotorConfigSimpleH) mc.getConfig();
+			sendMsg(ANALOG_WRITE, config.getPwrPin(), 0);
+		} else if (MotorConfigDualPwm.class == type) {
 			MotorConfigDualPwm config = (MotorConfigDualPwm) mc.getConfig();
 			sendMsg(ANALOG_WRITE, config.getLeftPin(), 0);
 			sendMsg(ANALOG_WRITE, config.getRightPin(), 0);

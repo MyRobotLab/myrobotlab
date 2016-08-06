@@ -244,7 +244,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     }
     String motorName = String.format("%s_m%d", getName(), motorNum);
     deviceNameToNumber.put(motorName, motorNum);
-    MotorDualPwm m = new MotorDualPwm(motorName);
+    Motor m = new Motor(motorName);
     m.startService();
     motors.put(motorName, m);
     m.broadcastState();

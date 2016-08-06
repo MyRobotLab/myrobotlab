@@ -62,6 +62,8 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	public final static Logger log = LoggerFactory.getLogger(Motor.class);
 
 	protected transient MotorController controller = null;
+	
+	String types [] = MotorConfig.getTypes();
 
 	boolean locked = false;
 
@@ -353,8 +355,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
 	@Override
 	public void attach(MotorController controller) throws Exception {
-		// TODO Auto-generated method stub
-		
+		this.controller = controller;
 	}
 	
 	///////   config start ////////////////////////

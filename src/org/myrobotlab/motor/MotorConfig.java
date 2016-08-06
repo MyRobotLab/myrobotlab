@@ -4,8 +4,10 @@ public abstract class MotorConfig {
 	
 	String type = this.getClass().getSimpleName();//.getType();//MotorConfigDualPwm.class.getSimpleName();;
 	
-	public String[] getTypes() {
-		return new String[]{MotorConfigSimpleH.class.getSimpleName(), MotorConfigDualPwm.class.getSimpleName(), MotorConfigPulse.class.getSimpleName()};
+	static String [] types = new String[]{MotorConfigSimpleH.class.getSimpleName(), MotorConfigDualPwm.class.getSimpleName(), MotorConfigPulse.class.getSimpleName()};
+	
+	static public String[] getTypes() {
+		return types;
 	}
 	
 	public String getType() {
