@@ -42,7 +42,7 @@ public interface ServoControl extends DeviceControl {
 	
 	// added since it's used by the ServoGUI
 	void attach(String controllerName, int pin) throws Exception;
-
+  void detach(String controllerName);
 	/**
 	 * Re-attaches (re-energizes) the servo on its current pin
 	 * FIXME - should be renamed to energize

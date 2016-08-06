@@ -24,7 +24,7 @@
    <input type="text" class="form-control" ng-model="pin" ng-disabled="isAttached"><!-- FIXME - type-ahead -->  
      
    <span class="input-group-btn">
-         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach()">detach</button>
+         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach</button>
          <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName, pin)">attach</button>
    </span>
   </div>

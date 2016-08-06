@@ -24,6 +24,9 @@ void MrlComm::softReset() {
 	while (deviceList.size() > 0) {
 		delete deviceList.pop();
 	}
+  while (pinList.size() > 0) {
+    delete pinList.pop();
+  }
 	//resetting var to default
 	loopCount = 0;
 	publishBoardStatusModulus = 10000;
@@ -240,25 +243,24 @@ void MrlComm::processCommand(int ioType) {
 	}
 	case DISABLE_PIN: {
 		int address = ioCmd[1];
-		for (int i = 0; i < pinList.size(); ++i) {
-			Pin* pin = pinList.get(i);
-			if (pin->address == address) {
-				pinList.remove(i);
-				delete pin;
-				break;
-			}
-		}
-
+    ListNode<Pin*>* node = pinList.getRoot();
+    int index = 0;
+    while (node != NULL) {
+      if (node->data->address == address) {
+        delete node->data;
+        pinList.remove(index);
+        break;
+      }
+      node = node->next;
+      index++;
+    }
 		break;
 	}
 
 	case DISABLE_PINS: {
-		for (int i = 0; i < pinList.size(); ++i) {
-			Pin* pin = pinList.get(i);
-			pinList.remove(i);
-			delete pin;
-		}
-
+    while (pinList.size() > 0) {
+      delete pinList.pop();
+    }
 		break;
 	}
 	case DISABLE_BOARD_STATUS:
@@ -523,6 +525,7 @@ void MrlComm::deviceDetach(int id) {
 		if (node->data->id == id) {
 			delete node->data;
 			deviceList.remove(index);
+      break;
 		}
 		node = node->next;
 		index++;
@@ -601,8 +604,10 @@ void MrlComm::update() {
 		//msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
 		msg.countData();
 		msg.autoSend(57);
-		for (int i = 0; i < pinList.size(); ++i) {
-			Pin* pin = pinList.get(i);
+    ListNode<Pin*>* node = pinList.getRoot();
+    // iterate through our device list and call update on them.
+    while (node != NULL) {
+			Pin* pin = node->data;
 			// TODO: moe the analog read outside of thie method and pass it in!
 			if (pin->type == ANALOG) {
 				pin->value = analogRead(pin->address);
@@ -613,8 +618,9 @@ void MrlComm::update() {
 			// loading both analog & digital data
 			msg.addData(pin->address); // 1 byte
 			msg.addData16(pin->value); // 2 bytes
-		}
-		msg.sendMsg();
+      node = node->next;
+    }
+    msg.sendMsg();
 	}
 }
 
