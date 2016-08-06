@@ -4,6 +4,7 @@ public class MotorConfigSimpleH extends MotorConfig {
 
 	Integer pwrPin;
 	Integer dirPin;
+	Integer pwmFreq;
 	
 	public MotorConfigSimpleH(int pwrPin, int dirPin) {
 		this.pwrPin = pwrPin;
@@ -18,4 +19,12 @@ public class MotorConfigSimpleH extends MotorConfig {
 		return pwrPin;
 	}
 
-}
+	public Integer getPwmFreq(){
+		return this.pwmFreq;
+	}
+	
+	public void setPwmFreq(Integer pwmFreq){
+		this.pwmFreq = pwmFreq;
+	}
+}	
+

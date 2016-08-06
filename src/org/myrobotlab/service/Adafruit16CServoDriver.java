@@ -8,6 +8,12 @@
 
 package org.myrobotlab.service;
 
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_SERVO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,6 +24,10 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.motor.MotorConfig;
+import org.myrobotlab.motor.MotorConfigDualPwm;
+import org.myrobotlab.motor.MotorConfigSimpleH;
+import org.myrobotlab.motor.MotorConfigPulse;
 import org.myrobotlab.service.PID2.PIDData;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
@@ -26,6 +36,8 @@ import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.MotorControl;
+import org.myrobotlab.service.interfaces.MotorController;
 import org.slf4j.Logger;
 
 /**
@@ -37,91 +49,127 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
 
-public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController {
+public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController {
 	/** version of the library */
-	static public final String VERSION = "0.9";
+	static public final String						VERSION								= "0.9";
 
-	private static final long serialVersionUID = 1L;
+	private static final long							serialVersionUID			= 1L;
 
 	// Depending on your servo make, the pulse width min and max may vary, you
 	// want these to be as small/large as possible without hitting the hard stop
 	// for max range. You'll have to tweak them as necessary to match the servos
 	// you have!
 	//
-	public final static int SERVOMIN = 150; // this is the 'minimum' pulse
+	public final static int								SERVOMIN							= 150;																																			// this
+																																																																					// is
+																																																																					// the
+																																																																					// 'minimum'
+																																																																					// pulse
 	// length count (out of 4096)
-	public final static int SERVOMAX = 600; // this is the 'maximum' pulse
+	public final static int								SERVOMAX							= 600;																																			// this
+																																																																					// is
+																																																																					// the
+																																																																					// 'maximum'
+																																																																					// pulse
 	// length count (out of 4096)
 
-	transient public I2CController controller;
+	transient public I2CController				controller;
 
 	// Constant for default PWM freqency
-	private static int pwmFreq = 60;
+	private static int										pwmFreq								= 60;
 
 	// List of possible addresses. Used by the GUI.
-	public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E",
-			"0x4F", "0x50", "0x51", "0x52", "0x53", "0x54", "0x55", "0x56", "0x57", "0x58", "0x59", "0x5A", "0x5B", "0x5C", "0x5D", "0x5E", "0x5F");
+	public List<String>										deviceAddressList			= Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48", "0x49", "0x4A", "0x4B",
+																																	"0x4C", "0x4D", "0x4E", "0x4F", "0x50", "0x51", "0x52", "0x53", "0x54", "0x55", "0x56", "0x57", "0x58", "0x59",
+																																	"0x5A", "0x5B", "0x5C", "0x5D", "0x5E", "0x5F");
 	// Default address
-	public String deviceAddress = "0x40";
+	public String													deviceAddress					= "0x40";
 	/**
 	 * This address is to address all Adafruit16CServoDrivers on the i2c bus Don't
 	 * use this address for any other device on the i2c bus since it will cause
 	 * collisions.
 	 */
-	public String broadcastAddress = "0x70";
+	public String													broadcastAddress			= "0x70";
 
-	public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
-	public String deviceBus = "1";
+	public List<String>										deviceBusList					= Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
+	public String													deviceBus							= "1";
 
-	public transient final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriver.class.getCanonicalName());
+	public transient final static Logger	log										= LoggerFactory.getLogger(Adafruit16CServoDriver.class.getCanonicalName());
 
-	public static final int PCA9685_MODE1 = 0x00; // Mode 1 register
-	public static final byte PCA9685_SLEEP = 0x10; // Set sleep mode, before
+	public static final int								PCA9685_MODE1					= 0x00;																																		// Mode
+																																																																					// 1
+																																																																					// register
+	public static final byte							PCA9685_SLEEP					= 0x10;																																		// Set
+																																																																					// sleep
+																																																																					// mode,
+																																																																					// before
 	// changing prescale value
-	public static final byte PCA9685_AUTOINCREMENT = 0x20; // Set autoincrement to
-																													// be able to write
-																													// more than one byte
-																													// in sequence
+	public static final byte							PCA9685_AUTOINCREMENT	= 0x20;																																		// Set
+																																																																					// autoincrement
+	// to
+	// be able to write
+	// more than one
+	// byte
+	// in sequence
 
-	public static final byte PCA9685_PRESCALE = (byte) 0xFE; // PreScale
+	public static final byte							PCA9685_PRESCALE			= (byte) 0xFE;																															// PreScale
 	// register
 
 	// Pin PWM addresses 4 bytes repeats for each pin so I only define pin 0
 	// The rest of the addresses are calculated based on pin numbers
-	public static final int PCA9685_LED0_ON_L = 0x06; // First LED address Low
-	public static final int PCA9685_LED0_ON_H = 0x07; // First LED address High
-	public static final int PCA9685_LED0_OFF_L = 0x08; // First LED address Low
-	public static final int PCA9685_LED0_OFF_H = 0x08; // First LED address High
+	public static final int								PCA9685_LED0_ON_L			= 0x06;																																		// First
+																																																																					// LED
+																																																																					// address
+																																																																					// Low
+	public static final int								PCA9685_LED0_ON_H			= 0x07;																																		// First
+																																																																					// LED
+																																																																					// address
+																																																																					// High
+	public static final int								PCA9685_LED0_OFF_L		= 0x08;																																		// First
+																																																																					// LED
+																																																																					// address
+																																																																					// Low
+	public static final int								PCA9685_LED0_OFF_H		= 0x08;																																		// First
+																																																																					// LED
+																																																																					// address
+																																																																					// High
 
 	// public static final int PWM_FREQ = 60; // default frequency for servos
-	public static final int osc_clock = 25000000; // clock frequency of the
+	public static final int								osc_clock							= 25000000;																																// clock
+																																																																					// frequency
+																																																																					// of
+																																																																					// the
 	// internal clock
-	public static final int precision = 4096; // pwm_precision
+	public static final int								precision							= 4096;																																		// pwm_precision
 
 	// i2c controller
-	public List<String> controllers;
-	public String controllerName;
-	public boolean isControllerSet = false;
+	public List<String>										controllers;
+	public String													controllerName;
+	public boolean												isControllerSet				= false;
 
 	/**
 	 * @Mats - added by GroG - was wondering if this would help, probably you need
 	 *       a reverse index too ?
 	 * @GroG - I only need servoNameToPin yet. To be able to sweep some more
-	 *         values may be needed
+	 *       values may be needed
 	 */
-  class ServoData {
-  	int pin;
-  	boolean pwmFreqSet = false;
-  	int pwmFreq;
-  	float sweepMin = 0;
-  	float sweepMax = 180;
-  	float sweepDelay = 1;
-  	int sweepStep = 1;
-  	boolean isSweeping = false;
-  	boolean sweepOneWay = false;
-  }
-  
-	HashMap<String, ServoData> servoMap = new HashMap<String, ServoData>();
+	class ServoData {
+		int			pin;
+		boolean	pwmFreqSet	= false;
+		int			pwmFreq;
+		float		sweepMin		= 0;
+		float		sweepMax		= 180;
+		float		sweepDelay	= 1;
+		int			sweepStep		= 1;
+		boolean	isSweeping	= false;
+		boolean	sweepOneWay	= false;
+	}
+
+	HashMap<String, ServoData>	servoMap				= new HashMap<String, ServoData>();
+
+	// Motor related constants
+	public static final int			MOTOR_FORWARD		= 1;
+	public static final int			MOTOR_BACKWARD	= 0;
 
 	public static void main(String[] args) {
 
@@ -139,7 +187,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 	}
 
-	
 	public void onRegistered(ServiceInterface s) {
 		refreshControllers();
 		broadcastState();
@@ -163,8 +210,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * @param controllerName
 	 *          = The name of the i2c controller
 	 * @param deviceBus
-	 *          = i2c bus Should be "1" for Arduino and RasPi 
-	 *          										"0"-"7" for I2CMux
+	 *          = i2c bus Should be "1" for Arduino and RasPi "0"-"7" for I2CMux
 	 * @param deviceAddress
 	 *          = The i2c address of the PCA9685 ( "0x40" - "0x5F")
 	 * @return
@@ -201,7 +247,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		this.controller = controller;
 		this.deviceBus = deviceBus;
 		this.deviceAddress = deviceAddress;
-		
+
 		createDevice();
 		isControllerSet = true;
 		broadcastState();
@@ -234,26 +280,28 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		log.info(String.format("Setting device address to %s", deviceAddress));
 		this.deviceAddress = deviceAddress;
 	}
-	
+
 	/**
 	 * This method creates the i2c device
 	 */
 	boolean createDevice() {
 		if (controller != null) {
-				// controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+			// controller.releaseI2cDevice(this, Integer.parseInt(deviceBus),
+			// Integer.decode(deviceAddress));
+			controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 		}
 
 		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
 		return true;
 	}
-	
+
 	public void begin() {
 		byte[] buffer = { PCA9685_MODE1, 0x0 };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
 
 	// @Override
+	// boolean DeviceControl.isAttached()
 	public boolean isAttached() {
 		return controller != null;
 	}
@@ -276,7 +324,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * 
 	 * @param hz
 	 */
-	public void setPWMFreq(Integer hz) { // Analog servos run at ~60 Hz updates
+	public void setPWMFreq(int pin, Integer hz) { // Analog servos run at ~60 Hz
+																								// updates
 		log.info(String.format("servoPWMFreq %s hz", hz));
 
 		int prescale_value = Math.round(osc_clock / precision / hz) - 1;
@@ -340,9 +389,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	@Override
 	public void servoWrite(ServoControl servo) {
-    ServoData servoData = servoMap.get(servo.getName());
+		ServoData servoData = servoMap.get(servo.getName());
 		if (!servoData.pwmFreqSet) {
-			setPWMFreq(servoData.pwmFreq);
+			setPWMFreq(servoData.pin, servoData.pwmFreq);
 		}
 		log.info(String.format("servoWrite %s deviceAddress %s targetOutput %d", servo.getName(), deviceAddress, servo.getTargetOutput()));
 		int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
@@ -351,11 +400,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	@Override
 	public void servoWriteMicroseconds(ServoControl servo, int uS) {
-    ServoData servoData = servoMap.get(servo.getName());
+		ServoData servoData = servoMap.get(servo.getName());
 		if (!servoData.pwmFreqSet) {
-			setPWMFreq(servoData.pwmFreq);
+			setPWMFreq(servoData.pin, servoData.pwmFreq);
 		}
-		
+
 		int pin = servo.getPin();
 		// 1000 ms => 150, 2000 ms => 600
 		int pulseWidthOff = (int) (uS * 0.45) - 300;
@@ -406,11 +455,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * <Servo.h> servos - it DOES NOT need to create "Servo" devices in MRLComm.
 	 * It will need to keep track of the "pin" to I2C address, and whenever a
 	 * ServoControl.moveTo(79) - the Servo will tell this controller its name &
-	 * location to move.
-	 * Mats says. The board has a single i2c address that doesn't change.
-	 * The Arduino only needs to keep track of the i2c bs, not all devices that can
-	 * communicate thru it. I.e. This service should keep track of servos,
-	 * not the Arduino or the Raspi. 
+	 * location to move. Mats says. The board has a single i2c address that
+	 * doesn't change. The Arduino only needs to keep track of the i2c bs, not all
+	 * devices that can communicate thru it. I.e. This service should keep track
+	 * of servos, not the Arduino or the Raspi.
 	 * 
 	 * 
 	 * This service will translate the name & location to an I2C address & value
@@ -436,23 +484,22 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * etc.. - if there is commonality, it could be handled here - where Type
 	 * specific methods call this method
 	 * 
-	 * This is a software representation of a board that uses the i2c protocol.
-	 * It uses the methods defined in the I2CController interface to write
-	 * servo-commands.
-	 * The I2CControl interface defines the common methods for all devices that use the
-	 * i2c protocol. 
-	 * In most services I wiil define addition <device>Control methods, but this
-	 * service is a "middle man" so it implements the ServoController methods and
-	 * should not have any "own" methods. 
+	 * This is a software representation of a board that uses the i2c protocol. It
+	 * uses the methods defined in the I2CController interface to write
+	 * servo-commands. The I2CControl interface defines the common methods for all
+	 * devices that use the i2c protocol. In most services I wiil define addition
+	 * <device>Control methods, but this service is a "middle man" so it
+	 * implements the ServoController methods and should not have any "own"
+	 * methods.
 	 *
-	 * After our explanation of the roles of <device>Control and <device>Controller
-	 * it's clear to me that any device that uses the i2c protocol needs to implement
-	 * to <device>Control methods:
-	 * 		I2CControl that is the generic interface for any i2c device
-	 * 		<device>Control, that defines the specific methods for that device.
-	 *    For example the MPU6050 should implement both I2CControl and MPU6050Control
-	 *    or perhaps a AccGyroControl interface that would define the common methods
-	 *    that a Gyro/Accelerometer/Magnetometer device should implement.
+	 * After our explanation of the roles of <device>Control and
+	 * <device>Controller it's clear to me that any device that uses the i2c
+	 * protocol needs to implement to <device>Control methods: I2CControl that is
+	 * the generic interface for any i2c device <device>Control, that defines the
+	 * specific methods for that device. For example the MPU6050 should implement
+	 * both I2CControl and MPU6050Control or perhaps a AccGyroControl interface
+	 * that would define the common methods that a Gyro/Accelerometer/Magnetometer
+	 * device should implement.
 	 */
 
 	// FIXME how many do we want to support ??
@@ -462,27 +509,29 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	@Override
 	public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
-		// only need to handle servos :)
-		// this is easy
+		if (device instanceof ServoControl) {
+			servoAttach((ServoControl) device, Object.class);
+		}
+	}
+
+	void servoAttach(ServoControl device, Object... conf) {
 		ServoControl servo = (ServoControl) device;
-		// servo.setController(this); Do not set any "ServoControl" data like this
-		// Not necessary
 		// should initial pos be a requirement ?
 		// This will fail because the pin data has not yet been set in Servo
 		// servoNameToPin.put(servo.getName(), servo.getPin());
 		ServoData servoData = new ServoData();
-	  servoData.pin = (int)conf[0];	
-	  servoData.pwmFreqSet = false;
-	  servoData.pwmFreq = pwmFreq;
+		servoData.pin = (int) conf[0];
+		servoData.pwmFreqSet = false;
+		servoData.pwmFreq = pwmFreq;
 		servoMap.put(servo.getName(), servoData);
 	}
 
-	@Override 
+	@Override
 	public void deviceDetach(DeviceControl servo) {
 		servoDetach((ServoControl) servo);
 		servoMap.remove(servo.getName());
 	}
-	
+
 	/**
 	 * Start sending pulses to the servo
 	 * 
@@ -501,11 +550,145 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		setPWM(pin, 4096, 0);
 	}
 
-  @Override
-  public void servoSetMaxVelocity(ServoControl servo) {
-    // TODO Auto-generated method stub.
-    // perhaps cannot do this with Adafruit16CServoDriver
-    // Mats says. It can be done in this service. But not by the board.
-    
-  }
+	@Override
+	public void servoSetMaxVelocity(ServoControl servo) {
+		// TODO Auto-generated method stub.
+		// perhaps cannot do this with Adafruit16CServoDriver
+		// Mats says: It can be done in this service. But not by the board.
+
+	}
+
+	@Override
+	public void motorMove(MotorControl mc) {
+
+		MotorConfig c = mc.getConfig();
+
+		if (c == null) {
+			error("motor config not set");
+			return;
+		}
+
+		Class<?> type = mc.getClass().getClass();
+
+		double powerOutput = mc.getPowerOutput();
+
+		if (MotorConfigSimpleH.class == type) {
+			MotorConfigSimpleH config = (MotorConfigSimpleH) c;
+			if (config.getPwmFreq() == null) {
+				config.setPwmFreq(500);
+				setPWMFreq(config.getPwrPin(), config.getPwmFreq());
+			}
+			setPinValue(config.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
+			setAnalogValue(config.getPwrPin(), powerOutput);
+		} else if (MotorConfigDualPwm.class == type) {
+			MotorConfigDualPwm config = (MotorConfigDualPwm) c;
+			if (powerOutput < 0) {
+				setAnalogValue(config.getLeftPin(), 0);
+				setAnalogValue(config.getRightPin(), Math.abs(powerOutput));
+			} else if (powerOutput > 0) {
+				setAnalogValue(config.getRightPin(), 0);
+				setAnalogValue(config.getLeftPin(), Math.abs(powerOutput));
+			} else {
+				setAnalogValue(config.getRightPin(), 0);
+				setAnalogValue(config.getLeftPin(), 0);
+			}
+		} else if (MotorPulse.class == type) {
+			MotorPulse motor = (MotorPulse) mc;
+			// sdsendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT),
+			// 0);
+			// TODO implement with a -1 for "endless" pulses or a different
+			// command parameter :P
+			// TODO Change to setPwmFreq I guess
+			// setPwmFreq(motor.getPulsePin(), (int) Math.abs(powerOutput));
+		} else {
+			error("motorMove for motor type %s not supported", type);
+		}
+	}
+
+	@Override
+	public void motorMoveTo(MotorControl mc) {
+		// speed parameter?
+		// modulo - if < 1
+		// speed = 1 else
+		log.info("motorMoveTo targetPos {} powerLevel {}", mc.getTargetPos(), mc.getPowerLevel());
+
+		Class<?> type = mc.getClass();
+
+		// if pulser (with or without fake encoder
+		// send a series of pulses !
+		// with current direction
+		if (MotorPulse.class == type) {
+			MotorPulse motor = (MotorPulse) mc;
+			// check motor direction
+			// send motor direction
+			// TODO powerLevel = 100 * powerlevel
+
+			// FIXME !!! - this will have to send a Long for targetPos at some
+			// point !!!!
+			double target = Math.abs(motor.getTargetPos());
+
+			int b0 = (int) target & 0xff;
+			int b1 = ((int) target >> 8) & 0xff;
+			int b2 = ((int) target >> 16) & 0xff;
+			int b3 = ((int) target >> 24) & 0xff;
+
+			// TODO FIXME
+			// sendMsg(PULSE, deviceList.get(motor.getName()).id, b3, b2, b1,
+			// b0, (int) motor.getPowerLevel(), feedbackRate);
+		}
+
+	}
+
+	@Override
+	public void motorStop(MotorControl mc) {
+		MotorConfig c = mc.getConfig();
+
+		if (c == null) {
+			error("motor config not set");
+			return;
+		}
+
+		Class<?> type = mc.getConfig().getClass();
+
+		if (MotorConfigPulse.class == type) {
+			MotorConfigPulse config = (MotorConfigPulse) mc.getConfig();
+			setAnalogValue(config.getPulsePin(), 0);
+		} else if (MotorConfigSimpleH.class == type) {
+			MotorConfigSimpleH config = (MotorConfigSimpleH) mc.getConfig();
+			if (config.getPwmFreq() == null) {
+				config.setPwmFreq(500);
+				setPWMFreq(config.getPwrPin(), config.getPwmFreq());
+			}
+			setAnalogValue(config.getPwrPin(), 0);
+		} else if (MotorConfigDualPwm.class == type) {
+			MotorConfigDualPwm config = (MotorConfigDualPwm) mc.getConfig();
+			setAnalogValue(config.getLeftPin(), 0);
+			setAnalogValue(config.getRightPin(), 0);
+		}
+
+	}
+
+	@Override
+	public void motorReset(MotorControl motor) {
+		// perhaps this should be in the motor control
+		// motor.reset();
+		// opportunity to reset variables on the controller
+		// sendMsg(MOTOR_RESET, motor.getind);
+
+	}
+
+	public void setPinValue(int pin, Integer value) {
+		if (value == 1) {
+			setPWM(pin, 4096, 0);
+		} else {
+			setPWM(pin, 0, 4096);
+		}
+	}
+
+	public void setAnalogValue(int pin, double powerOutput) {
+
+		int powerOn = (int) powerOutput * 4096;
+		int powerOff = 4096 - powerOn;
+		setPWM(pin, powerOn, powerOff);
+	}
 }
