@@ -1838,7 +1838,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			DeviceMapping deviceMapping = deviceList.get(deviceName);
 			deviceMapping.setId(newDeviceId);
 			deviceIndex.put(newDeviceId, deviceList.get(deviceName));
-
 			invoke("publishAttachedDevice", deviceName);
 
 			info("==== ATTACHED DEVICE %s WITH MRLDEVICE %d ====", deviceName, newDeviceId);
