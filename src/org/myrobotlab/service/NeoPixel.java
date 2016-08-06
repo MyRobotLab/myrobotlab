@@ -299,6 +299,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   
   @Override
   public void attach(NeoPixelController controller, int pin, int numPixel) throws Exception {
+    subscribe(controller.getName(), "publishAttachedDevice");
     this.pin = pin;
     this.numPixel = numPixel;
 
@@ -313,8 +314,20 @@ public class NeoPixel extends Service implements NeoPixelControl {
     //setController(controller);
 
     controller.deviceAttach(this, pin, numPixel);
-    isAttached = true;
+    int count = 0;
+    while(!isAttached){
+      count++;
+      sleep(100);
+      if (count > 4) break;
+    }
     broadcastState();
+  }
+
+  public void onAttachedDevice(String deviceName){
+    if (deviceName.equals(this.getName())){
+      isAttached = true;
+      broadcastState();
+    }
   }
 
   @Override

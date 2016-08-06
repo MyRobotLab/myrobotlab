@@ -209,6 +209,8 @@ public class Servo extends Service implements ServoControl {
 
 	private int maxVelocity = 425;
 
+  private boolean isAttached = false;
+
 	public Servo(String n) {
 		super(n);
 		lastActivityTime = System.currentTimeMillis();
@@ -236,6 +238,7 @@ public class Servo extends Service implements ServoControl {
 		lastActivityTime = System.currentTimeMillis();
 		getController().servoAttach(this, pin);
 		this.pin = pin;
+    isAttached = true;
 		broadcastState();
 	}
 
@@ -245,6 +248,7 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public void detach() {
 		getController().servoDetach(this);
+    isAttached = false;
 		broadcastState();
 	}
 
@@ -303,7 +307,8 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public boolean isAttached() {
-		return controller != null;
+	  return isAttached ;
+		//return controller != null;
 	}
 
 	public boolean isInverted() {
@@ -610,6 +615,7 @@ public class Servo extends Service implements ServoControl {
 	// complexity of this
 	@Override
 	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
+    subscribe(controller.getName(), "publishAttachedDevice");
 
 		if (this.controller == controller) {
 			log.info("already attached to controller - nothing to do");
@@ -638,8 +644,27 @@ public class Servo extends Service implements ServoControl {
 		this.pin = pin;
 		this.controller = controller;
 		this.controllerName = controller.getName();
+		int count = 0;
+		while(!isAttached){
+		  count++;
+		  sleep(100);
+		  if (count > 4) break;
+		}
+    //this.isAttached = true;
 		broadcastState();
 	}
+	
+	public void onAttachedDevice(String deviceName){
+	  if (deviceName.equals(this.getName())){
+	    isAttached = true;
+	    broadcastState();
+	  }
+	}
+	
+  @Override
+  public void detach(String controllerName) {
+    detach((ServoController) Runtime.getService(controllerName));
+  }
 
 	@Override
 	public void detach(ServoController controller) {
@@ -649,6 +674,8 @@ public class Servo extends Service implements ServoControl {
 			// remove the this controller's reference
 			this.controller = null;
 			this.controllerName = null;
+			isAttached = false;
+			broadcastState();
 		}
 	}
 
