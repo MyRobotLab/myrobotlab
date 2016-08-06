@@ -98,6 +98,8 @@ public class MotorTest {
 		
 		arduino.connect("COM5"); 
 
+		
+		
 		motor01.move(0.3);
 		motor01.move(0.1);
 		motor01.move(1.0);
@@ -107,6 +109,9 @@ public class MotorTest {
 		motor01.move(-0.2);
 		motor01.move(0.0);
 		motor01.stop();
+		
+		motor01.save();
+		motor01.load();
 		
 		motor01.detach(arduino);
 	}

@@ -2,8 +2,15 @@ package org.myrobotlab.motor;
 
 public class MotorConfigDualPwm extends MotorConfig {
 
+
+	private static final long serialVersionUID = 1L;
 	Integer leftPin;
 	Integer rightPin;
+	
+	public MotorConfigDualPwm(){
+		
+	}
+	
 	
 	public MotorConfigDualPwm(int leftPin, int rightPin){
 		this.leftPin = leftPin;
