@@ -456,9 +456,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * It will need to keep track of the "pin" to I2C address, and whenever a
 	 * ServoControl.moveTo(79) - the Servo will tell this controller its name &
 	 * location to move. Mats says. The board has a single i2c address that
-	 * doesn't change. The Arduino only needs to keep track of the i2c bs, not all
-	 * devices that can communicate thru it. I.e. This service should keep track
-	 * of servos, not the Arduino or the Raspi.
+	 * doesn't change. The Arduino only needs to keep track of the i2c bus, not
+	 * all devices that can communicate thru it. I.e. This service should keep
+	 * track of servos, not the Arduino or the Raspi.
 	 * 
 	 * 
 	 * This service will translate the name & location to an I2C address & value
@@ -486,9 +486,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * 
 	 * This is a software representation of a board that uses the i2c protocol. It
 	 * uses the methods defined in the I2CController interface to write
-	 * servo-commands. The I2CControl interface defines the common methods for all
-	 * devices that use the i2c protocol. In most services I wiil define addition
-	 * <device>Control methods, but this service is a "middle man" so it
+	 * servo-commands. The I2CController interface defines the common methods for
+	 * all devices that use the i2c protocol. In most services I will define
+	 * addition <device>Control methods, but this service is a "middle man" so it
 	 * implements the ServoController methods and should not have any "own"
 	 * methods.
 	 *
@@ -510,7 +510,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	@Override
 	public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
 		if (device instanceof ServoControl) {
-			servoAttach((ServoControl) device, Object.class);
+			servoAttach((ServoControl) device, conf);
 		}
 	}
 
@@ -579,18 +579,18 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 				setPWMFreq(config.getPwrPin(), config.getPwmFreq());
 			}
 			setPinValue(config.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
-			setAnalogValue(config.getPwrPin(), powerOutput);
+			setPinValue(config.getPwrPin(), powerOutput);
 		} else if (MotorConfigDualPwm.class == type) {
 			MotorConfigDualPwm config = (MotorConfigDualPwm) c;
 			if (powerOutput < 0) {
-				setAnalogValue(config.getLeftPin(), 0);
-				setAnalogValue(config.getRightPin(), Math.abs(powerOutput));
+				setPinValue(config.getLeftPin(), 0);
+				setPinValue(config.getRightPin(), Math.abs(powerOutput));
 			} else if (powerOutput > 0) {
-				setAnalogValue(config.getRightPin(), 0);
-				setAnalogValue(config.getLeftPin(), Math.abs(powerOutput));
+				setPinValue(config.getRightPin(), 0);
+				setPinValue(config.getLeftPin(), Math.abs(powerOutput));
 			} else {
-				setAnalogValue(config.getRightPin(), 0);
-				setAnalogValue(config.getLeftPin(), 0);
+				setPinValue(config.getRightPin(), 0);
+				setPinValue(config.getLeftPin(), 0);
 			}
 		} else if (MotorPulse.class == type) {
 			MotorPulse motor = (MotorPulse) mc;
@@ -652,18 +652,18 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 		if (MotorConfigPulse.class == type) {
 			MotorConfigPulse config = (MotorConfigPulse) mc.getConfig();
-			setAnalogValue(config.getPulsePin(), 0);
+			setPinValue(config.getPulsePin(), 0);
 		} else if (MotorConfigSimpleH.class == type) {
 			MotorConfigSimpleH config = (MotorConfigSimpleH) mc.getConfig();
 			if (config.getPwmFreq() == null) {
 				config.setPwmFreq(500);
 				setPWMFreq(config.getPwrPin(), config.getPwmFreq());
 			}
-			setAnalogValue(config.getPwrPin(), 0);
+			setPinValue(config.getPwrPin(), 0);
 		} else if (MotorConfigDualPwm.class == type) {
 			MotorConfigDualPwm config = (MotorConfigDualPwm) mc.getConfig();
-			setAnalogValue(config.getLeftPin(), 0);
-			setAnalogValue(config.getRightPin(), 0);
+			setPinValue(config.getLeftPin(), 0);
+			setPinValue(config.getRightPin(), 0);
 		}
 
 	}
@@ -677,18 +677,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	}
 
-	public void setPinValue(int pin, Integer value) {
-		if (value == 1) {
-			setPWM(pin, 4096, 0);
+	public void setPinValue(int pin, double powerOutput) {
+		if (powerOutput < 0 || powerOutput > 1) {
+			log.error(String.format("Adafruit16CServoDriver setPinValue. Value must be between 0 and 1 but is %s. Value ignored", powerOutput));
 		} else {
-			setPWM(pin, 0, 4096);
+			int powerOn = (int) (powerOutput * 4096);
+			int powerOff = 4096 - powerOn;
+			setPWM(pin, powerOn, powerOff);
 		}
-	}
-
-	public void setAnalogValue(int pin, double powerOutput) {
-
-		int powerOn = (int) powerOutput * 4096;
-		int powerOff = 4096 - powerOn;
-		setPWM(pin, powerOn, powerOff);
 	}
 }
