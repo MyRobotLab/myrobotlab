@@ -67,7 +67,7 @@ public class MouthControl extends Service {
     }
 
     // arduino.servoAttach(jaw);
-    arduino.servoAttach(jaw, 7);
+    arduino.servoAttach(jaw, 26);
     return true;
   }
 
