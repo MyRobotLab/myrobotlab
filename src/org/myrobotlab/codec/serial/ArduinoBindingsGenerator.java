@@ -192,6 +192,7 @@ public class ArduinoBindingsGenerator {
     exclude.add("createVirtual");
     exclude.add("getMetaData");
     exclude.add("processMessage");
+    exclude.add("enabledHeartbeat");
 
     int index = 0;
 

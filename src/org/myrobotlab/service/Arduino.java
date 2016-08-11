@@ -17,6 +17,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DISABLE_PINS;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ENABLE_BOARD_STATUS;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ENABLE_PIN;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.HEARTBEAT;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_READ;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.I2C_WRITE_READ;
@@ -704,6 +705,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public static final int MRL_IO_SERIAL_3 = 4;
 	public transient int controllerAttachAs = MRL_IO_NOT_DEFINED;
 	transient HashMap<Integer, Arduino> attachedController = new HashMap<Integer, Arduino>();
+	
+	boolean heartbeat = false;
 
 	public Arduino(String n) {
 		super(n);
@@ -1917,6 +1920,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			// TODO: do i need to call notify?
 			// notify();
 			// TODO: something more async for notification on this mutex.
+			heartbeat = true;
 			break;
 		}
 		case PUBLISH_DEBUG: {
@@ -2694,5 +2698,22 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		msg.addData(2);
 		msg.addData16(servo.getMaxVelocity());
 		sendMsg(msg);
+	}
+	
+	public void enabledHeartbeat() {
+	  heartbeat = true;
+	  addTask("heartbeat",1000,"heartbeat");
+	}
+	
+	public void heartbeat() {
+	  if (!heartbeat) {
+	    log.info("No answer from controller:{}. Disconnecting...",this.getName());
+	    purgeTask("heartbeat");
+	    if (isConnected()){
+	      disconnect();
+	    }
+	  }
+	  heartbeat = false;
+	  sendMsg(HEARTBEAT);
 	}
 }
