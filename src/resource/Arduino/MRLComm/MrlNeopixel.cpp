@@ -24,6 +24,8 @@ MrlNeopixel::MrlNeopixel():Device(DEVICE_TYPE_NEOPIXEL) {
 }
 
 MrlNeopixel::~MrlNeopixel() {
+	animationStop();
+	show();
 	delete pixels;
 }
 

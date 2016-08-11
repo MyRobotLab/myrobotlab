@@ -52,6 +52,9 @@ class MrlComm{
 #else
     MrlCmd* mrlCmd[1];
 #endif
+    bool heartbeat;
+    bool heartbeatEnabled;
+    unsigned long lastHeartbeatUpdate;
     void softReset();
     int getFreeRam();
     void publishError(int type);

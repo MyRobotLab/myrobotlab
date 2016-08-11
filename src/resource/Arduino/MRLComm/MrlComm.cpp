@@ -40,6 +40,9 @@ void MrlComm::softReset() {
 			mrlCmd[i] = NULL;
 		}
 	}
+	heartbeat = false;
+	heartbeatEnabled = false;
+	lastHeartbeatUpdate = 0;
 }
 
 /***********************************************************************
@@ -347,11 +350,17 @@ void MrlComm::processCommand(int ioType) {
 		((MrlServo*) getDevice(ioCmd[1]))->setMaxVelocity(MrlMsg::toInt(ioCmd,3));
 		break;
 	}
+	case HEARTBEAT: {
+		heartbeatEnable = true;
+		break;
+	}
 	default:
 		MrlMsg::publishError(ERROR_UNKOWN_CMD);
 		break;
 	} // end switch
 	  // ack that we got a command (should we ack it first? or after we process the command?)
+	heartbeat = true;
+	lastHeartbeatUpdate = millis();
 	publishCommandAck(ioCmd[0]);
 	// reset command buffer to be ready to receive the next command.
 	// KW: we should only need to set the byteCount back to zero. clearing this array is just for safety sake i guess?
@@ -592,6 +601,15 @@ void MrlComm::updateDevices() {
  * sends pin data back
  */
 void MrlComm::update() {
+	unsigned long now = millis();
+	if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) {
+		if (!heartbeat) {
+			softReset();
+			return;
+		}
+		heartbeat = false;
+		lastHeartbeatUpdate = now;
+	}
 	if (pinList.size() > 0) {
 
 		// device id for our Arduino is always 0
