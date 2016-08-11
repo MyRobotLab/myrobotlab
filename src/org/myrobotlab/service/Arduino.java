@@ -217,7 +217,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public static class I2CDeviceMap {
 		public int busAddress;
 		public int deviceAddress;
-		public I2CControl control;
+		public transient I2CControl control;
 	}
 
 	public static class Sketch implements Serializable {
