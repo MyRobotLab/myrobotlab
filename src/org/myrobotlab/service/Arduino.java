@@ -1108,13 +1108,20 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 */
 	public void digitalWrite(int address, int value) {
 		sendMsg(DIGITAL_WRITE, address, value);
+		PinDefinition pinDef = pinIndex.get(address);
+		invoke("publishPinDefinition", pinDef);
 	}
 
-	public void disablePin(int pin) {
+	public void disablePin(int address) {
+		if (!isConnected()) {
+			error("must be connected to disable pins");
+			return;
+		}
 		MrlMsg msg = new MrlMsg(DISABLE_PIN);
-		msg.addData(pin);
+		msg.addData(address);
 		sendMsg(msg);
-
+		PinDefinition pinDef = pinIndex.get(address);
+		invoke("publishPinDefinition", pinDef);
 	}
 
 	public void disablePins() {
@@ -1169,10 +1176,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		MrlMsg msg = new MrlMsg(ENABLE_PIN);
 		msg.addData(address); // ANALOG 1 DIGITAL 0
 		PinDefinition pin = pinIndex.get(address);
+		
 		msg.addData(getMrlPinType(pin)); // pinType
 		// TODO - make this Hz so everyone is happy :)
 		// msg.addData16(rate); //
 		sendMsg(msg);
+		
+		pin.setEnabled(true);
+		invoke("publishPinDefinition", pin);
 	}
 
 	/**
@@ -1716,6 +1727,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	public void pinMode(int address, int mode) {
 		sendMsg(PIN_MODE, address, mode);
+		PinDefinition pinDef = pinIndex.get(address);
+		invoke("publishPinDefinition", pinDef);
 	}
 
 	@Override
@@ -2005,6 +2018,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// FIXME - update all cache
 		// pinIndex.get(pinEvent.getAddress()).setValue(pinEvent.getValue());
 		return pinData;
+	}
+	
+	/**
+	 * method to communicate changes in pinmode or state changes
+	 * @param pinDef
+	 * @return
+	 */
+	public PinDefinition publishPinDefinition(PinDefinition pinDef){
+		return pinDef;
 	}
 
 	public Long publishPulse(Long pulseCount) {
@@ -2314,7 +2336,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void servoWriteMicroseconds(ServoControl servo, int uS) {
 		int id = getDeviceId(servo);
 		log.info(String.format("writeMicroseconds %s %d id %d", servo.getName(), uS, id));
-		sendMsg(SERVO_WRITE_MICROSECONDS, id, uS);
+		MrlMsg msg = new MrlMsg(SERVO_WRITE_MICROSECONDS, id);
+		msg.addData16(uS);
+		sendMsg(msg);
 	}
 
 	public String setBoard(String board) {

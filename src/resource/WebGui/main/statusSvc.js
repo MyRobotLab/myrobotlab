@@ -39,6 +39,7 @@ angular.module('mrlapp.main.statusSvc', [])
                     _self.addStatus(statusMsg.data[0]);
                     notifyAllOfUpdate(statusMsg.data[0]);
                 };
+                
                 mrl.subscribeToMethod(onStatus, "onStatus");
                 //END_Status
 

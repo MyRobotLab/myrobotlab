@@ -4,6 +4,25 @@ public class PinDefinition {
 
 	String name;
 	Integer address;
+	// String color; ?? 
+
+	/**
+	 * on Arduino this means actively reading
+	 */
+	boolean enabled = false;
+	
+	/**
+	 * pin mode INPUT or OUTPUT
+	 */
+	String mode; 
+	
+	/**
+	 * statistics
+	 */
+	int totalSamples;
+	int min;
+	int max;
+	int avg;
 
 	boolean isAnalog;
 
@@ -114,6 +133,24 @@ public class PinDefinition {
 	public boolean isTx(){
 		return isTx;
 	}
+	
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
 }
 
 

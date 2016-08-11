@@ -388,4 +388,18 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 		return config;
 	}
 
+	// GOOD CANIDATE FOR JAVA 8 - "DEFAULT" INTERFACE IMPLEMENTATION
+	// WHY REPEAT THIS IN ALL SERVICES ? :P
+	@Override
+	public void attach(String controllerName) throws Exception {
+		attach((MotorController)Runtime.getService(controllerName));
+	}
+
+	// GOOD CANIDATE FOR JAVA 8 - "DEFAULT" INTERFACE IMPLEMENTATION
+	// WHY REPEAT THIS IN ALL SERVICES ? :P
+	@Override
+	public void detach(String controllerName) {
+		detach((MotorController)Runtime.getService(controllerName));
+	}
+
 }
