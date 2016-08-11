@@ -526,6 +526,8 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
       // speech.setVoice("Ryan");
       // TODO: fix the volume control
       // speech.setVolume(0);
+      speech.speakBlocking("does this work");
+      speech.speakBlocking("uh oh");
       speech.speakBlocking("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
       speech.speakBlocking("I'm afraid I can't do that.");
 

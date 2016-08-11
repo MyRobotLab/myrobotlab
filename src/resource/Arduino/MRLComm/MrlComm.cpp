@@ -200,7 +200,7 @@ void MrlComm::processCommand(int ioType) {
 		((MrlServo*) getDevice(ioCmd[1]))->servoWrite(ioCmd[2]);
 		break;
 	case SERVO_WRITE_MICROSECONDS:
-		((MrlServo*) getDevice(ioCmd[1]))->servoWriteMicroseconds(ioCmd[2]);
+		((MrlServo*) getDevice(ioCmd[1]))->servoWriteMicroseconds(MrlMsg::toInt(ioCmd, 2));
 		break;
 	case SERVO_SET_SPEED:
 		((MrlServo*) getDevice(ioCmd[1]))->setSpeed(ioCmd[2]);
