@@ -351,7 +351,7 @@ void MrlComm::processCommand(int ioType) {
 		break;
 	}
 	case HEARTBEAT: {
-		heartbeatEnable = true;
+		heartbeatEnabled = true;
 		break;
 	}
 	default:
