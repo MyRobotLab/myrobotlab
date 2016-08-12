@@ -6,6 +6,7 @@ public class MotorConfigDualPwm extends MotorConfig {
 	private static final long serialVersionUID = 1L;
 	Integer leftPin;
 	Integer rightPin;
+	Integer pwmFreq;
 	
 	public MotorConfigDualPwm(){
 		
@@ -28,6 +29,14 @@ public class MotorConfigDualPwm extends MotorConfig {
 	
 	public Integer getRightPin() {
 		return rightPin;
+	}
+	
+	public Integer getPwmFreq(){
+		return this.pwmFreq;
+	}
+	
+	public void setPwmFreq(Integer pwmFreq){
+		this.pwmFreq = pwmFreq;
 	}
 	
 	static public void main(String[] args){
