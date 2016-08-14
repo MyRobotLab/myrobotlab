@@ -154,7 +154,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 					if (attachButton.getText().equals("attach")) {
 						send("attach", controller.getSelectedItem(), pin.getSelectedItem());
 					} else {
-						send("detach");
+						send("detach", controller.getSelectedItem());
 					}
 					return;
 				}
