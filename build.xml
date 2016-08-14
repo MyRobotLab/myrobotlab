@@ -578,11 +578,7 @@
 	         <arg value="${build}/classes/resource/framework"/>
 	         <classpath>
 	         	<path refid="compile.classpath"/>
-	         	<path path="${build}/classes"/>
-	           <!-- pathelement location="dist/test.jar"/ 	         	
-		           <pathelement refid="compile.classpath"/>
-		           <pathelement path="${build}/classes"/>
-	         	-->
+	         	<path path="${build}/classes"/>	          
 	         </classpath>
 		</java>
 		

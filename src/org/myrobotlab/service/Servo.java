@@ -209,7 +209,7 @@ public class Servo extends Service implements ServoControl {
 
 	private int maxVelocity = 425;
 
-  private boolean isAttached = false;
+	private boolean isAttached = false;
 
 	public Servo(String n) {
 		super(n);
@@ -238,7 +238,7 @@ public class Servo extends Service implements ServoControl {
 		lastActivityTime = System.currentTimeMillis();
 		getController().servoAttach(this, pin);
 		this.pin = pin;
-    isAttached = true;
+		isAttached = true;
 		broadcastState();
 	}
 
@@ -248,7 +248,7 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public void detach() {
 		getController().servoDetach(this);
-    isAttached = false;
+		isAttached = false;
 		broadcastState();
 	}
 
@@ -279,13 +279,6 @@ public class Servo extends Service implements ServoControl {
 		return mapper.getMaxOutput();
 	}
 
-	/*
-	 * @Override public Integer getPin() {
-	 * 
-	 * return pin; }
-	 * 
-	 */
-
 	public Double getMin() {
 		return mapper.getMinY();
 	}
@@ -307,17 +300,11 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public boolean isAttached() {
-	  return isAttached ;
-		//return controller != null;
+		return isAttached;
 	}
 
 	public boolean isInverted() {
 		return mapper.isInverted();
-	}
-
-	// only if the sweep control is controled by computer and not arduino
-	public boolean isSweeping() {
-		return isSweeping;
 	}
 
 	public void map(double minX, double maxX, double minY, double maxY) {
@@ -342,10 +329,6 @@ public class Servo extends Service implements ServoControl {
 			// update others of our position change
 			invoke("publishServoEvent", targetOutput);
 		}
-	}
-
-	private void controllerError() {
-		error(String.format("%s's controller is not set - you probably need to servo.attach(controller, pin, pos)", getName()));
 	}
 
 	/**
@@ -615,7 +598,7 @@ public class Servo extends Service implements ServoControl {
 	// complexity of this
 	@Override
 	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
-    subscribe(controller.getName(), "publishAttachedDevice");
+		subscribe(controller.getName(), "publishAttachedDevice");
 
 		if (this.controller == controller) {
 			log.info("already attached to controller - nothing to do");
@@ -645,26 +628,27 @@ public class Servo extends Service implements ServoControl {
 		this.controller = controller;
 		this.controllerName = controller.getName();
 		int count = 0;
-		while(!isAttached){
-		  count++;
-		  sleep(100);
-		  if (count > 4) break;
+		while (!isAttached) {
+			count++;
+			sleep(100);
+			if (count > 4)
+				break;
 		}
-    //this.isAttached = true;
+		// this.isAttached = true;
 		broadcastState();
 	}
-	
-	public void onAttachedDevice(String deviceName){
-	  if (deviceName.equals(this.getName())){
-	    isAttached = true;
-	    broadcastState();
-	  }
+
+	public void onAttachedDevice(String deviceName) {
+		if (deviceName.equals(this.getName())) {
+			isAttached = true;
+			broadcastState();
+		}
 	}
-	
-  @Override
-  public void detach(String controllerName) {
-    detach((ServoController) Runtime.getService(controllerName));
-  }
+
+	@Override
+	public void detach(String controllerName) {
+		detach((ServoController) Runtime.getService(controllerName));
+	}
 
 	@Override
 	public void detach(ServoController controller) {
