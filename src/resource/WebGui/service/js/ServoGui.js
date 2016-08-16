@@ -8,15 +8,17 @@ angular.module('mrlapp.service.ServoGui', [])
     //$scope.controller = '';
     $scope.controllerName = '';
     $scope.controllers = [];
+    $scope.isControllerSet = '';
     $scope.pins = [];
     $scope.pin = '';
     $scope.min = 0;
     $scope.max = 180;
     $scope.angle = 0;
     
-    for (i = 0; i < 54; ++i) {
-        $scope.pins.push(i);
-    }
+    $scope.pinList = [];
+    // for (i = 0; i < 54; ++i) {
+    //     $scope.pins.push(i);
+    // }
     
     //control 
     //Slider config with callbacks
@@ -70,10 +72,12 @@ angular.module('mrlapp.service.ServoGui', [])
         $scope.controllerName = service.controllerName;
         $scope.speed = service.speed;
         $scope.isAttached = service.isAttached;
+        $scope.isControllerSet = service.isControllerSet;
         $scope.pin = service.pin;
         $scope.rest = service.rest;
         $scope.min = service.mapper.minOutput;
         $scope.max = service.mapper.maxOutput;
+        $scope.pinList = service.pinList;
     }
     ;
     

@@ -12,20 +12,20 @@
       </ul>
   </span>
    
-   <input type="text" class="form-control" ng-model="controllerName" ng-disabled="isAttached"><!-- FIXME - type-ahead -->  
+   <input type="text" class="form-control" ng-model="controllerName" ng-disabled="isControllerSet"><!-- FIXME - type-ahead -->  
 
   <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
       <a href id="simple-dropdown" uib-dropdown-toggle>pin<span class="caret"></span></a>
       <ul uib-dropdown-menu>
-        <li ng-repeat="newPin in pins"><a href ng-click="setPin(newPin)">{{newPin}}</a></li>
+        <li ng-repeat="newPin in pinList"><a href ng-click="setPin(newPin)">{{newPin}}</a></li>
       </ul>
   </span>
 
-   <input type="text" class="form-control" ng-model="pin" ng-disabled="isAttached"><!-- FIXME - type-ahead -->  
+   <input type="text" class="form-control" ng-model="pin" ng-disabled="isControllerSet"><!-- FIXME - type-ahead -->  
      
    <span class="input-group-btn">
-         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach</button>
-         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName, pin)">attach</button>
+         <button class="btn btn-default" ng-show="isControllerSet"  ng-click="msg.detach(controllerName)">detach</button>
+         <button class="btn btn-default" ng-show="!isControllerSet"  ng-click="msg.attach(controllerName, pin)">attach</button>
    </span>
   </div>
 
