@@ -92,7 +92,8 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 	JComboBox<String> controller = new JComboBox<String>();
 
-	JComboBox<Integer> pin = new JComboBox<Integer>();
+	// JComboBox<Integer> pin = new JComboBox<Integer>();
+	JComboBox<Integer> pinList = new JComboBox<Integer>();
 	DefaultComboBoxModel<String> controllerModel = new DefaultComboBoxModel<String>();
 
 	DefaultComboBoxModel<Integer> pinModel = new DefaultComboBoxModel<Integer>();
@@ -152,7 +153,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 
 				if (o == attachButton) {
 					if (attachButton.getText().equals("attach")) {
-						send("attach", controller.getSelectedItem(), pin.getSelectedItem());
+						send("attach", controller.getSelectedItem(), pinList.getSelectedItem());
 					} else {
 						send("detach", controller.getSelectedItem());
 					}
@@ -216,17 +217,17 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 					Integer servoPin = servo.getPin();
 
 					if (servoPin != null)
-						pin.setSelectedItem(servoPin);
+						pinList.setSelectedItem(servoPin);
 				}
 
-				if (servo.isAttached()) {
+				if (servo.isControllerSet()) {
 					attachButton.setText("detach");
 					controller.setEnabled(false);
-					pin.setEnabled(false);
+					pinList.setEnabled(false);
 				} else {
 					attachButton.setText("attach");
 					controller.setEnabled(true);
-					pin.setEnabled(true);
+					pinList.setEnabled(true);
 				}
 
 				if (servo.getPos() == null) {
@@ -293,7 +294,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 		control.add(new JLabel("pin"), gc);
 
 		++gc.gridx;
-		control.add(pin, gc);
+		control.add(pinList, gc);
 
 		display.add(control);
 		display.add(input);
@@ -320,7 +321,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 		right.addActionListener(this);
 		controller.addActionListener(this);
 		attachButton.addActionListener(this);
-		pin.addActionListener(this);
+		pinList.addActionListener(this);
 
 		// http://stackoverflow.com/questions/6205433/jcombobox-focus-and-mouse-click-events-not-working
 		// jComboBox1.getEditor().getEditorComponent().addMouseListener(...);
@@ -339,9 +340,16 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 		}
 		// controller.getEditor().getEditorComponent().addMouseListener(this);
 		controller.setModel(controllerModel);
-		pin.setModel(pinModel);
+		pinList.setModel(pinModel);
 
 		refreshControllers();
+	}
+	
+	public void getPinList() {
+		List<Integer> mbl = myServo.pinList;
+		for (int i = 0; i < mbl.size(); i++) {
+			pinList.addItem(mbl.get(i));
+		}
 	}
 
 	@Override
@@ -414,13 +422,13 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 
 	public void removeListeners() {
 		controller.removeActionListener(this);
-		pin.removeActionListener(this);
+		pinList.removeActionListener(this);
 		slider.removeChangeListener(sliderListener);
 	}
 
 	public void restoreListeners() {
 		controller.addActionListener(this);
-		pin.addActionListener(this);
+		pinList.addActionListener(this);
 		slider.addChangeListener(sliderListener);
 	}
 

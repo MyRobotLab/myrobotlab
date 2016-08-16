@@ -25,6 +25,8 @@
 
 package org.myrobotlab.service;
 
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
@@ -151,6 +153,7 @@ public class Servo extends Service implements ServoControl {
 	long lastActivityTime = 0;
 
 	Integer pin;
+	public List<Integer> pinList = new ArrayList<Integer>();
 
 	/**
 	 * the requested INPUT position of the servo
@@ -210,10 +213,18 @@ public class Servo extends Service implements ServoControl {
 	private int maxVelocity = 425;
 
 	private boolean isAttached = false;
+	private boolean isControllerSet = false;
 
 	public Servo(String n) {
 		super(n);
+		createPinList();
 		lastActivityTime = System.currentTimeMillis();
+	}
+
+	void createPinList(){
+		for (int i = 0; i < 54; i++) {
+			pinList.add((Integer)i);	
+		}
 	}
 
 	public void addServoEventListener(NameProvider service) {
@@ -301,6 +312,10 @@ public class Servo extends Service implements ServoControl {
 
 	public boolean isAttached() {
 		return isAttached;
+	}
+	
+	public boolean isControllerSet() {
+			return isControllerSet;
 	}
 
 	public boolean isInverted() {
@@ -641,6 +656,7 @@ public class Servo extends Service implements ServoControl {
 	public void onAttachedDevice(String deviceName) {
 		if (deviceName.equals(this.getName())) {
 			isAttached = true;
+			isControllerSet = true;
 			broadcastState();
 		}
 	}
@@ -657,8 +673,9 @@ public class Servo extends Service implements ServoControl {
 			controller.deviceDetach(this);
 			// remove the this controller's reference
 			this.controller = null;
-			this.controllerName = null;
+			// this.controllerName = null;
 			isAttached = false;
+			isControllerSet = false;
 			broadcastState();
 		}
 	}
