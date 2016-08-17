@@ -79,6 +79,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	// Constant for default PWM freqency
 	private static int										pwmFreq								= 60;
+	final static int											minPwmFreq						= 24;
+	final static int											maxPwmFreq						= 1526;
 
 	// List of possible addresses. Used by the GUI.
 	public List<String>										deviceAddressList			= Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48", "0x49", "0x4A", "0x4B",
@@ -144,13 +146,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 																																																																					// addressHigh
 
 	// public static final int PWM_FREQ = 60; // default frequency for servos
-	public static final int								osc_clock							= 25000000;																																// clock
+	public static final float							osc_clock							= 25000000;																																// clock
 																																																																					// frequency
 																																																																					// of
 																																																																					// the
 																																																																					// internal
 																																																																					// clock
-	public static final int								precision							= 4096;																																		// pwm_precision
+	public static final float							precision							= 4096;																																		// pwm_precision
 
 	// i2c controller
 	public List<String>										controllers;
@@ -180,6 +182,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	// Motor related constants
 	public static final int			MOTOR_FORWARD		= 1;
 	public static final int			MOTOR_BACKWARD	= 0;
+	public static final int     defaultMotorPwmFreq = 1000;
 
 	/**
 	 * pin named map of all the pins on the board
@@ -340,8 +343,21 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * @param hz
 	 */
 	public void setPWMFreq(int pin, Integer hz) { // Analog servos run at ~60 Hz
-																								// updates
-		int prescale_value = Math.round(osc_clock / precision / hz) - 1;
+
+		float prescale_value;
+
+		if (hz < minPwmFreq) {
+			log.error(String.format("Minimum PWMFreq is %s Hz, requested freqency is %s Hz, clamping to minimum", minPwmFreq, hz));
+			hz = minPwmFreq;
+			prescale_value = 255;
+		} else if (hz > maxPwmFreq) {
+			log.error(String.format("Maximum PWMFreq is %s Hz, requested frequency is %s Hz, clamping to maximum", maxPwmFreq, hz));
+			hz = maxPwmFreq;
+			prescale_value = 3;
+		} else {
+			prescale_value = Math.round(osc_clock / precision / hz) - 1;
+		}
+
 		log.info(String.format("PWMFreq %s hz, prescale_value calculated to %s", hz, prescale_value));
 		// Set sleep mode before changing PWM freqency
 		byte[] writeBuffer = { PCA9685_MODE1, PCA9685_SLEEP };
@@ -384,7 +400,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	/**
-	 * this would have been nice to have Java 8 and a default implmentation in
+	 * this would have been nice to have Java 8 and a default implementation in
 	 * this interface which does Servo sweeping in the Servo (already implemented)
 	 * and only if the controller can does it do sweeping on the "controller"
 	 * 
@@ -436,26 +452,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		// Mats says. It can be done in this service. But not by the board.
 	}
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = new ServiceType(Adafruit16CServoDriver.class.getCanonicalName());
-		meta.addDescription("Adafruit 16-Channel PWM/Servo Driver");
-		meta.addCategory("shield", "servo & pwm");
-		meta.setSponsor("Mats");
-		/*
-		 * meta.addPeer("arduino", "Arduino", "our Arduino"); meta.addPeer("raspi",
-		 * "RasPi", "our RasPi");
-		 */
-		return meta;
-	}
 
 	@Override
 	public DeviceController getController() {
@@ -598,7 +594,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		if (MotorConfigSimpleH.class == type) {
 			MotorConfigSimpleH config = (MotorConfigSimpleH) c;
 			if (config.getPwmFreq() == null) {
-				config.setPwmFreq(500);
+				config.setPwmFreq(defaultMotorPwmFreq);
 				setPWMFreq(config.getPwrPin(), config.getPwmFreq());
 			}
 			setPinValue(config.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
@@ -607,7 +603,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			MotorConfigDualPwm config = (MotorConfigDualPwm) c;
 			log.info(String.format("Adafruti16C Motor DualPwm motorMove, powerOutput = %s", powerOutput));
 			if (config.getPwmFreq() == null) {
-				config.setPwmFreq(500);
+				config.setPwmFreq(defaultMotorPwmFreq);
 				setPWMFreq(config.getLeftPin(), config.getPwmFreq());
 				setPWMFreq(config.getRightPin(), config.getPwmFreq());
 			}
@@ -722,11 +718,16 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		if (powerOutput == 0) {
 			powerOn = 4096;
 			powerOff = 0;
-		} else {
-			powerOn = 0;
-			powerOff = (int) (powerOutput * 4096);
-			setPWM(pin, powerOn, powerOff);
+		} else  if (powerOutput == 1){
+			powerOn= 0;
+			powerOff = 1;
 		}
+		else {
+			powerOn = (int) (powerOutput * 4096);
+			powerOff = 4095;
+		}
+		log.info(String.format("powerOutput = %s, powerOn = %s, powerOff = %s", powerOutput, powerOn, powerOff));
+		setPWM(pin, powerOn, powerOff);
 	}
 
 	public List<PinDefinition> getPinList() {
@@ -747,6 +748,27 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			pinIndex.put(i, pindef);
 		}
 		return pinMap;
+	}
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Adafruit16CServoDriver.class.getCanonicalName());
+		meta.addDescription("Adafruit 16-Channel PWM/Servo Driver");
+		meta.addCategory("shield", "servo & pwm");
+		meta.setSponsor("Mats");
+		/*
+		 * meta.addPeer("arduino", "Arduino", "our Arduino"); meta.addPeer("raspi",
+		 * "RasPi", "our RasPi");
+		 */
+		return meta;
 	}
 
 }
