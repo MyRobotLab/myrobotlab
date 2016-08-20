@@ -61,7 +61,7 @@ import org.slf4j.Logger;
  * simple
  *
  */
-public class ServoGUI extends ServiceGUI implements ActionListener, MouseListener {
+public class ServoGUI extends ServiceGUI implements ActionListener {
 
 	private class SliderListener implements ChangeListener {
 		@Override
@@ -94,7 +94,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 
 	// JComboBox<Integer> pin = new JComboBox<Integer>();
 	JComboBox<Integer> pinList = new JComboBox<Integer>();
-	DefaultComboBoxModel<String> controllerModel = new DefaultComboBoxModel<String>();
+	// DefaultComboBoxModel<String> controllerModel = new DefaultComboBoxModel<String>();
 
 	DefaultComboBoxModel<Integer> pinModel = new DefaultComboBoxModel<Integer>();
 	JTextField posMin = new JTextField("0");
@@ -205,13 +205,11 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 			public void run() {
 
 				removeListeners();
+				refreshControllers();
 
 				ServoController sc = servo.getController();
 
 				if (sc != null) {
-					if (controllerModel.getIndexOf(sc.getName()) < 0) {
-						controllerModel.addElement(sc.getName());
-					}
 					controller.setSelectedItem(sc.getName());
 
 					Integer servoPin = servo.getPin();
@@ -327,9 +325,10 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 		// jComboBox1.getEditor().getEditorComponent().addMouseListener(...);
 		// have to add mouse listener to the MetalComboButton embedded in the
 		// JComboBox
-		Component[] comps = controller.getComponents();
-		for (int i = 0; i < comps.length; i++) {
-			comps[i].addMouseListener(this); // JComboBox composite listener -
+		//* No longer needed
+		// Component[] comps = controller.getComponents();
+		//for (int i = 0; i < comps.length; i++) {
+			//comps[i].addMouseListener(this); // JComboBox composite listener -
 			// have to get all the sub
 			// components
 			/*
@@ -337,9 +336,9 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 			 * mouseClicked(MouseEvent me) { System.out.println("clicked"); }
 			 * });
 			 */
-		}
+		// }
+
 		// controller.getEditor().getEditorComponent().addMouseListener(this);
-		controller.setModel(controllerModel);
 		pinList.setModel(pinModel);
 
 		refreshControllers();
@@ -352,19 +351,6 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 		}
 	}
 
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		log.info("clicked");
-
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		log.info("entered");
-
-	}
 
 	// a controller has been set
 	/*
@@ -382,40 +368,18 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 	 * }
 	 */
 
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		log.info("exited");
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		log.info("controller pressed");
-		refreshControllers();
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		log.info("released");
-	}
-
 	public void refreshControllers() {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				// FIXME - would newing? a new DefaultComboBoxModel be better?
-				controllerModel.removeAllElements();
-				// FIXME - get Local services relative to the servo
-				controllerModel.addElement("");
-				List<String> v = Runtime.getServiceNamesFromInterface(ServoController.class);
-				for (int i = 0; i < v.size(); ++i) {
-					controllerModel.addElement(v.get(i));
+
+				myServo.refreshControllers();
+				controller.removeAllItems();
+				List<String> c = myServo.controllers;	
+				for (int i = 0; i < c.size(); ++i) {
+					controller.addItem(c.get(i));
 				}
-				controller.invalidate();
-				// if isAttached() - select the correct one
+				controller.setSelectedItem(myServo.controllerName);
 			}
 		});
 	}
