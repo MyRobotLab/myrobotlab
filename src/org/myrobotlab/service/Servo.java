@@ -38,6 +38,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.NameProvider;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
@@ -144,7 +145,7 @@ public class Servo extends Service implements ServoControl {
 
 	transient ServoController controller;
 
-	String controllerName = null;
+	public String controllerName = null;
 
 	Mapper mapper = new Mapper(0, 180, 0, 180);
 
@@ -183,7 +184,7 @@ public class Servo extends Service implements ServoControl {
 	/**
 	 * list of names of possible controllers
 	 */
-	List<String> controllers;
+	public List<String> controllers;
 	/**
 	 * current speed of the servo
 	 */
@@ -218,9 +219,17 @@ public class Servo extends Service implements ServoControl {
 	public Servo(String n) {
 		super(n);
 		createPinList();
+		refreshControllers();
+		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 		lastActivityTime = System.currentTimeMillis();
 	}
+	
+	public void onRegistered(ServiceInterface s) {
+		refreshControllers();
+		broadcastState();
 
+	}
+	
 	void createPinList(){
 		for (int i = 0; i < 54; i++) {
 			pinList.add((Integer)i);	
