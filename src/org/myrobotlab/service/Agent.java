@@ -974,6 +974,11 @@ public class Agent extends Service {
 			ArrayList<String> inArgs = new ArrayList<String>();
 			// -agent \"-params -service ... \" string encoded
 			CmdLine runtimeArgs = new CmdLine(args);
+
+            if (runtimeArgs.containsKey("-h") || runtimeArgs.containsKey("-help") || runtimeArgs.containsKey("--help")) {
+		        Runtime.mainHelp();
+		        return;
+		    }
 			
 			if (runtimeArgs.containsKey("-version")){
 				System.out.println(String.format("%s branch %s version %s", platform.getBranch(), platform.getPlatformId(), platform.getVersion()));
