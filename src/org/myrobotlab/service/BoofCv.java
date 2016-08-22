@@ -16,13 +16,13 @@ import boofcv.abst.tracker.TrackerObjectQuad;
 import boofcv.factory.tracker.FactoryTrackerObjectQuad;
 import boofcv.struct.image.GrayU8;
 
-public class BoofCV extends Service implements Point2DfPublisher, Point2DfListener {
+public class BoofCv extends Service implements Point2DfPublisher, Point2DfListener {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(BoofCV.class);
+  public final static Logger log = LoggerFactory.getLogger(BoofCv.class);
 
-  public BoofCV(String n) {
+  public BoofCv(String n) {
     super(n);
   }
 
@@ -36,7 +36,7 @@ public class BoofCV extends Service implements Point2DfPublisher, Point2DfListen
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(BoofCV.class.getCanonicalName());
+    ServiceType meta = new ServiceType(BoofCv.class.getCanonicalName());
     meta.addDescription("used as a general template");
     meta.setAvailable(false);
     // add dependency if necessary

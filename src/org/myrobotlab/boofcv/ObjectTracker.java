@@ -22,7 +22,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 
-import org.myrobotlab.service.BoofCV;
+import org.myrobotlab.service.BoofCv;
 import org.myrobotlab.service.data.Point2Df;
 
 public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseListener, MouseMotionListener {
@@ -31,7 +31,7 @@ public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseL
    * 
    */
   private static final long serialVersionUID = 1L;
-  BoofCV myService = null;
+  BoofCv myService = null;
   TrackerObjectQuad<T> tracker;
 
   // location of the target being tracked
