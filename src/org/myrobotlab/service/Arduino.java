@@ -2101,8 +2101,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	// block for callback
 	@Override
 	public int read(int address) {
-		// TODO Auto-generated method stub
-		return -1;
+		return pinIndex.get(address).getValue();
 	}
 
 	@Override
