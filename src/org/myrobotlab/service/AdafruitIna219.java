@@ -126,6 +126,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 		this.controller = controller;
 		this.deviceBus = deviceBus;
 		this.deviceAddress = deviceAddress;
+		createDevice();
 		isAttached = true;
 
 		log.info(String.format("%s setController %s", getName(), controllerName));
@@ -143,6 +144,20 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 		broadcastState();
 	}
 
+	/**
+	 * This method creates the i2c device
+	 */
+	boolean createDevice() {
+		if (controller != null) {
+			// controller.releaseI2cDevice(this, Integer.parseInt(deviceBus),
+			// Integer.decode(deviceAddress));
+			controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+		}
+
+		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
+		return true;
+	}
+	
 	public I2CController getController() {
 		return controller;
 	}
