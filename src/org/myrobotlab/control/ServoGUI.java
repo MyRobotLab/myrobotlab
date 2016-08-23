@@ -153,7 +153,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener {
 
 				if (o == attachButton) {
 					if (attachButton.getText().equals("attach")) {
-						send("attach", controller.getSelectedItem(), pinList.getSelectedItem());
+						send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem());
 					} else {
 						send("detach", controller.getSelectedItem());
 					}
