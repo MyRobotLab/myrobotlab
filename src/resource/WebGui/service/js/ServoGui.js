@@ -9,16 +9,13 @@ angular.module('mrlapp.service.ServoGui', [])
     $scope.controllerName = '';
     $scope.controllers = [];
     $scope.isControllerSet = '';
-    $scope.pins = [];
+    $scope.pinsList = [];
     $scope.pin = '';
     $scope.min = 0;
     $scope.max = 180;
     $scope.angle = 0;
     
     $scope.pinList = [];
-    // for (i = 0; i < 54; ++i) {
-    //     $scope.pins.push(i);
-    // }
     
     //control 
     //Slider config with callbacks
