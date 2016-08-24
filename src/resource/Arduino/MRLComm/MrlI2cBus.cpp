@@ -40,7 +40,7 @@ void MrlI2CBus::i2cRead(unsigned char* ioCmd) {
 	MrlMsg msg(PUBLISH_SENSOR_DATA);
 	msg.addData(ioCmd[1]); // DEVICE_INDEX
 	msg.addData(ioCmd[3]); // DATASIZE
-	for (int i = 1; i < answer; i++) {
+	for (int i = 0; i < answer; i++) {
 		msg.addData(Wire.read());
 	}
 	msg.sendMsg();
@@ -59,7 +59,7 @@ void MrlI2CBus::i2cWriteRead(unsigned char* ioCmd) {
 	MrlMsg msg(PUBLISH_SENSOR_DATA);
 	msg.addData(ioCmd[1]); // DEVICE_INDEX
 	msg.addData(ioCmd[3]); // DATASIZE
-	for (int i = 1; i < answer; i++) {
+	for (int i = 0; i < answer; i++) {
 		msg.addData(Wire.read());
 	}
 	msg.sendMsg();
