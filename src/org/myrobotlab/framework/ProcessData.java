@@ -30,6 +30,7 @@ public class ProcessData implements Serializable {
   public String version;
   public Long startTs = null;
   public Long stopTs = null;
+  public String jarPath = null;
 
   public String javaExe = null;
 
@@ -48,7 +49,7 @@ public class ProcessData implements Serializable {
 
   transient public Process process;
   transient public Monitor monitor;
-  transient public Invoker service;
+  static transient public Invoker service;
 
   ArrayList<String> in = null;
 
@@ -69,13 +70,19 @@ public class ProcessData implements Serializable {
           // data.isRunning = true;
           data.state = STATE_RUNNING;
           data.state = "running";
-          data.process.waitFor();
+          // don't wait if there is no agent
+          if (service != null) {
+        	  data.process.waitFor();
+          }
         }
       } catch (Exception e) {
       }
 
       // FIXME - invoke("terminatedProcess(name))
-      data.service.invoke("publishTerminated", data.id);
+      
+      if (ProcessData.service != null){
+    	  ProcessData.service.invoke("publishTerminated", data.id);
+      }
       data.state = STATE_STOPPED;
       data.state = "stopped";
     }
@@ -84,7 +91,7 @@ public class ProcessData implements Serializable {
 
   public ProcessData(Invoker service, Integer id, String branch, String version, String name, Process process) {
     this.id = id;
-    this.service = service;
+    ProcessData.service = service;
     this.name = name;
     this.branch = branch;
     this.version = version;
@@ -98,7 +105,6 @@ public class ProcessData implements Serializable {
    */
   public ProcessData(ProcessData pd) {
     this.id = pd.id;
-    this.service = pd.service;
     this.name = pd.name;
     this.branch = pd.branch;
     this.version = pd.version;
@@ -130,8 +136,9 @@ public class ProcessData implements Serializable {
    * @param defaultBranch
    * @param defaultVersion
    */
-  public ProcessData(Invoker service, String[] inCmdLine, String defaultBranch, String defaultVersion) {
-    this.service = service;
+  public ProcessData(Invoker service, String jarPath, String[] inCmdLine, String defaultBranch, String defaultVersion) {
+	  ProcessData.service = service;
+	  this.jarPath = jarPath;
 
     // String protectedDomain =
     // URLDecoder.decode(Agent.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),
@@ -153,10 +160,12 @@ public class ProcessData implements Serializable {
         continue;
       }
 
+      /*
       if (cmd.equals("-version")) {
         version = inCmdLine[i + 1];
         continue;
       }
+      */
 
       if (cmd.equals("-service")) {
         userDefinedServices = true;
@@ -221,7 +230,7 @@ public class ProcessData implements Serializable {
     // 2.7.0 interface :(
     // http://www.jython.org/archive/21/docs/registry.html
     // http://bugs.jython.org/issue2355
-    String classpath = String.format("./myrobotlab.%s.jar%s./libraries/jar/jython.jar%s./libraries/jar/*%s./bin%s./build/classes", version, ps, ps, ps, ps);
+    String classpath = String.format("%s%s./libraries/jar/jython.jar%s./libraries/jar/*%s./bin%s./build/classes", jarPath,ps, ps, ps, ps);
     cmd.add(classpath);
 
     cmd.add("org.myrobotlab.service.Runtime");

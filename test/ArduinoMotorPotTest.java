@@ -7,9 +7,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.sensor.AnalogPinSensor;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.PID2;
@@ -122,20 +120,20 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     // wait for the arduino to actually connect!
     // Start the motor and attach it to the arduino.
     motor = (Motor)Runtime.createAndStart("motor", "Motor");
-    motor.setType2Pwm(leftPwm, rightPwm);
-    motor.attach((MotorController)arduino);
+    motor.setPwmPins(leftPwm, rightPwm);
+    motor.setController((MotorController)arduino);
     // Sensor callback
     // arduino.analogReadPollingStart(potPin);
     // arduino.sensorAttach(this);
     
     // pin zero sample rate 1.  (TODO: fix the concept of a sample rate!)
     // we actually want it to be specified in Hz..  not cycles ...
-    AnalogPinSensor feedbackPot = new AnalogPinSensor(0,1);
-    feedbackPot.addSensorDataListener(this);
-    arduino.sensorAttach(feedbackPot);
+    // AnalogPinSensor feedbackPot = new AnalogPinSensor(0,1);
+    // feedbackPot.addSensorDataListener(this); // null config is this right ?
+    // arduino.sensorAttach(feedbackPot);
     
     if (enableLoadTiming) {
-      arduino.setLoadTimingEnabled(true);
+      arduino.enableBoardStatus();
     }
     // stop the motor initially
     motor.move(0);
@@ -145,16 +143,17 @@ public class ArduinoMotorPotTest implements SensorDataListener {
   }
 
   @Override
-  public void onSensorData(SensorData data) {
+  public void onSensorData(SensorData event) {
     // about we downsample this call?
+	int[] data = (int[])event.getData();
     count++;
-    
+    int value = data[0];
     log.info("Data: {}", data);
-    pid.setInput(key,data.value);
+    pid.setInput(key, value);
     pid.compute(key);
     double output = pid.getOutput(key);
     log.info("Data {} , Output : {}", data, output);
-    if (Math.abs(pid.getSetpoint(key) - data.value) > tolerance) {
+    if (Math.abs(pid.getSetpoint(key) - value) > tolerance) {
       // log.info("Setting pin mode as a test.");
      //  arduino.pinMode(6,0);
      // arduino.analogWrite(6, 0);
@@ -175,24 +174,6 @@ public class ArduinoMotorPotTest implements SensorDataListener {
 
   }
 
-  @Override
-  public String getName() {
-    // a symbolic name for this sensor.
-    return "feedback";
-  }
-
-//  @Override
-//  public int getSensorType() {
-//    // potentiometer feedback is an analog pin.
-//    return ArduinoMsgCodec.SENSOR_TYPE_ANALOG_PIN;
-//  }
-
-//  @Override
-//  public int[] getSensorConfig() {
-//    // return the list of pins that are associated with this sensor.
-//    return new int[]{potPin};
-//  }
-  
   
   /**
    * Helper function to run a system command and return the stdout / stderr as a string
@@ -304,6 +285,14 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     }
     return sb.toString();
   }
+
+@Override
+public boolean isLocal() {
+	// TODO Auto-generated method stub
+	return true;
+}
+
+
 
 }
 

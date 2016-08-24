@@ -61,6 +61,7 @@ angular
         url: document.location.origin.toString() + '/api/messages',
         transport: 'websocket',
         enableProtocol: true,
+        fallbackTransport: 'long-polling',
         // trackMessageLength: true,
         // maxTextMessageSize: 10000000,
         //maxBinaryMessageSize: 10000000,

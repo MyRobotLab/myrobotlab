@@ -33,6 +33,7 @@ public class InMoovHead extends Service {
     arduino = (Arduino) createPeer("arduino");
 
     // connection details
+    /* OLD WAYs
     neck.setPin(12);
     rothead.setPin(13);
     jaw.setPin(26);
@@ -44,6 +45,15 @@ public class InMoovHead extends Service {
     jaw.setController(arduino);
     eyeX.setController(arduino);
     eyeY.setController(arduino);
+    */
+    
+    // NEW WAY
+//    arduino.servoAttach(neck, 12);
+//    arduino.servoAttach(rothead, 13);
+//    arduino.servoAttach(jaw, 26);
+//    arduino.servoAttach(eyeX, 22);
+//    arduino.servoAttach(eyeY, 24);
+
 
     neck.setMinMax(20, 160);
     rothead.setMinMax(30, 150);
@@ -95,8 +105,12 @@ public class InMoovHead extends Service {
   // FIXME - make interface for Arduino / Servos !!!
   public boolean connect(String port) throws Exception {
     arduino.connect(port);
-
-    attach();
+    neck.attach(arduino, 12);
+    rothead.attach(arduino, 13);
+    jaw.attach(arduino, 26);
+    eyeX.attach(arduino, 22);
+    eyeY.attach(arduino, 24);
+//    attach();
     setSpeed(0.5, 0.5, 0.5, 0.5, 0.5);
     rest();
     sleep(1000);
@@ -227,11 +241,21 @@ public class InMoovHead extends Service {
 
   public void setpins(int headXPin, int headYPin, int eyeXPin, int eyeYPin, int jawPin) {
     log.info(String.format("setPins %d %d %d %d %d", headXPin, headYPin, eyeXPin, eyeYPin, jawPin));
+
+    /*
     rothead.setPin(headXPin);
     neck.setPin(headYPin);
     eyeX.setPin(eyeXPin);
     eyeY.setPin(eyeYPin);
     jaw.setPin(jawPin);
+    */
+
+    arduino.servoAttach(rothead, headXPin);
+    arduino.servoAttach(neck, headYPin);
+    arduino.servoAttach(eyeX, eyeXPin);
+    arduino.servoAttach(eyeY, eyeYPin);
+    arduino.servoAttach(jaw, jawPin);
+
   }
 
   public void setSpeed(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {

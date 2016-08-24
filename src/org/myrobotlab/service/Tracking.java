@@ -400,9 +400,9 @@ public class Tracking extends Service {
           if (scan) {
             int xpos = x.getPos();
 
-            if (xpos + scanXStep >= x.getMax() && scanXStep > 0 || xpos + scanXStep <= x.getMin() && scanXStep < 0) {
+            if (xpos + scanXStep >= x.getMaxInput() && scanXStep > 0 || xpos + scanXStep <= x.getMinInput() && scanXStep < 0) {
               scanXStep = scanXStep * -1;
-              int newY = (int) (y.getMin() + (Math.random() * (y.getMax() - y.getMin())));
+              int newY = (int) (y.getMinInput() + (Math.random() * (y.getMaxInput() - y.getMinInput())));
               y.moveTo(newY);
             }
 
@@ -422,11 +422,11 @@ public class Tracking extends Service {
       case STATE_FACE_DETECT_LOST_TRACK:
         int xpos = x.getPos();
 
-        if (xpos >= x.getMax() && scanXStep > 0) {
+        if (xpos >= x.getMaxInput() && scanXStep > 0) {
           scanXStep = scanXStep * -1;
         }
 
-        if (xpos <= x.getMin() && scanXStep < 0) {
+        if (xpos <= x.getMinInput() && scanXStep < 0) {
           scanXStep = scanXStep * -1;
         }
 
@@ -563,7 +563,7 @@ public class Tracking extends Service {
     // directly ???
     // if I'm at my min & and the target is further min - don't compute
     // pid
-    if ((currentXServoPos <= x.getMin() && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= x.getMax() && xSetpoint - targetPoint.x > 0)) {
+    if ((currentXServoPos <= x.getMinInput() && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= x.getMaxInput() && xSetpoint - targetPoint.x > 0)) {
       error(String.format("%d x limit out of range", currentXServoPos));
     } else {
 
@@ -581,7 +581,7 @@ public class Tracking extends Service {
       }
     }
 
-    if ((currentYServoPos <= y.getMin() && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= y.getMax() && ySetpoint - targetPoint.y > 0)) {
+    if ((currentYServoPos <= y.getMinInput() && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= y.getMaxInput() && ySetpoint - targetPoint.y > 0)) {
       error(String.format("%d y limit out of range", currentYServoPos));
     } else {
       if (pid.compute("y")) {
@@ -665,29 +665,15 @@ public class Tracking extends Service {
 
   }
 
-  public void connect(String port) throws IOException {
-
-    if (getX().getPin() == null) {
-      error("x pin not set");
-      return;
-    }
-    if (getY().getPin() == null) {
-      error("y pin not set");
-      return;
-    }
-
-    connect(port, getX().getPin(), getY().getPin(), getOpenCV().getCameraIndex());
-  }
-
   public void connect(String port, int xPin, int yPin) throws IOException {
     connect(port, xPin, yPin, 0);
   }
 
-  public void connect(String port, int xPin, int yPin, int cameraIndex) {
+  public void connect(String port, int xPin, int yPin, int cameraIndex) throws IOException {
     arduino.connect(port);
 
-    x.setPin(xPin);
-    y.setPin(yPin);
+    arduino.servoAttach(x, xPin);
+    arduino.servoAttach(y, yPin);
     opencv.setCameraIndex(cameraIndex);
 
     x.attach();

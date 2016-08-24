@@ -1,157 +1,253 @@
 package org.myrobotlab.service;
 
+import static org.junit.Assert.*;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
+import org.slf4j.Logger;
 
 public class MotorTest {
 
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
+	public final static Logger log = LoggerFactory.getLogger(MotorTest.class);
 
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
+	static Motor motor01 = null;
+	static Arduino arduino = null;
 
-  @Before
-  public void setUp() throws Exception {
-  }
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+	}
 
-  @After
-  public void tearDown() throws Exception {
-  }
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+	}
 
-  @Test
-  public final void testGetCategories() {
-    // fail("Not yet implemented");
-  }
+	@Before
+	public void setUp() throws Exception {
+	}
 
-  @Test
-  public final void testGetDescription() {
-    // fail("Not yet implemented");
-  }
+	@After
+	public void tearDown() throws Exception {
+	}
 
-  @Test
-  public final void testMain() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testMotor() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testMotor() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetController() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testDetach() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetPowerLevel() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetControllerName() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetPowerOutput() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetPowerLevel() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetPowerMap() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testGetPowerMap() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testIsAttached() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testIsAttached() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testIsInverted() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testIsInverted() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testLock() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testLock() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testMapEncoder() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testMapEncoder() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testMapPower() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testMapPower() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testMove() throws Exception {
+		Runtime.start("webgui", "WebGui");
+		arduino = (Arduino)Runtime.start("arduino", "Arduino");
+		motor01 = (Motor)Runtime.start("motor01", "Motor");
+		motor01.setPwmPins(3, 4);
+		motor01.attach(arduino);
+		
+		arduino.connect("COM5"); 
 
-  @Test
-  public final void testMove() {
-    // fail("Not yet implemented");
-  }
+		
+		
+		motor01.move(0.3);
+		motor01.move(0.1);
+		motor01.move(1.0);
+		motor01.move(5.0);
 
-  @Test
-  public final void testMoveForDoubleDouble() {
-    // fail("Not yet implemented");
-  }
+		motor01.move(-0.1);
+		motor01.move(-0.2);
+		motor01.move(0.0);
+		motor01.stop();
+		
+		motor01.save();
+		motor01.load();
+		
+		motor01.detach(arduino);
+	}
 
-  @Test
-  public final void testMoveForDoubleDoubleBoolean() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testMoveToIntDouble() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testMoveTo() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testMoveToInt() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testPublishChangePos() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSetController() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetController() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSetInverted() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetCurrentPos() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSetMinMax() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetInverted() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testSetPowerLevel() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetMinMax() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testStop() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testSetSpeed() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testStopAndLock() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testStop() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testUnlock() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testStopAndLock() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testUpdatePosition() {
+		// fail("Not yet implemented");
+	}
 
-  @Test
-  public final void testUnlock() {
-    // fail("Not yet implemented");
-  }
+	@Test
+	public void testGetMetaData() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testGetTargetPos() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testMain() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testOnSensorData() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testPulse() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testSetEncoder() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testDetach() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testAttach() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testSetPwmPins() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testSetPwrDirPins() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testGetConfig() {
+		// fail("Not yet implemented");
+	}
+
+	public static void main(String[] args) {
+		try {
+
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
+
+			MotorTest.setUpBeforeClass();
+			MotorTest test = new MotorTest();
+			test.testMove();
+
+			JUnitCore junit = new JUnitCore();
+			Result result = junit.run(MotorTest.class);
+			log.info("Result was: {}", result);
+			// WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
+			// ServiceInterface gui = Runtime.start("gui", "GUIService");
+
+			Runtime.dump();
+
+			log.info("here");
+			// serial.removeByteListener(gui.getName());
+			// uart.removeByteListener(gui.getName());
+
+			Runtime.dump();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
 
 }

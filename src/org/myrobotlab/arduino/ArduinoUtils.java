@@ -5,176 +5,212 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
-import org.apache.commons.io.FileUtils;
+
+import org.myrobotlab.io.FileIO;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Arduino;
+import org.slf4j.Logger;
+
+import com.sun.jna.Platform;
 
 public class ArduinoUtils {
 
-  // TODO: auto-discover?
-  private static String arduinoPath = "c:\\dev\\arduino-1.6.8\\";
-  // TODO: fix this. a temp directory so we can upload the mrlcomm properly.
-  private static String destFilename = "\\MRLComm\\MRLComm.ino";
-  private static String arduinoExecutable = "arduino";
-  // not needed ?
-  private static String commandPath = "";
-  private static String additionalEnv = "";
+	public transient final static Logger log = LoggerFactory.getLogger(ArduinoUtils.class);
 
-  public static boolean uploadSketch(String port, String board) throws IOException, InterruptedException {
-    if (!(board.equalsIgnoreCase("uno") || board.equalsIgnoreCase("mega"))) {
-      // TODO: validate the proper set of values.
-      System.out.println("Invalid board type");
-      return false;
-    }
-    // Assume this is mrlcomm resource!
-    String sketchFilename = "src\\resource\\Arduino\\MRLComm.c";
-    File sketch = new File(sketchFilename);
+	// TODO: auto-discover?
+	public static String arduinoPath = "c:\\dev\\arduino-1.6.8\\";
+	// TODO: fix this. a temp directory so we can upload the mrlcomm properly.
 
-    // File src = new File("Arduino/MRLComm.c");
-    File dest = new File(arduinoPath + destFilename);
-    System.out.println("Copy from " + sketch.getAbsolutePath() + " to " + dest.getAbsolutePath());
-    // copy MRLComm.c to MRLComm/MRLComm.ino for compilation and upload.
-    FileUtils.copyFile(sketch, dest);
-    // Create the command to run (and it's args.)
-    String arduinoExe = arduinoPath + arduinoExecutable;
-    ArrayList<String> args = new ArrayList<String>();
-    // args.add("--verbose");
-    args.add("--upload");
-    args.add("--port");
-    args.add(port);
-    args.add("--board");
-    args.add("arduino:avr:" + board.toLowerCase());
-    args.add(dest.getAbsolutePath());
-    // run the command.
-    String result = runCommand(arduinoExe, args);
-    // print stdout/err from running the command
-    System.out.println("Result..." + result);
+	public static StringBuilder outputBuilder;
 
-    System.out.println("Uploaded Sketch.");
-    System.out.flush();
-    // take a breath...  We think it probably worked?  but not sure..
-    Thread.sleep(2000);
-    
-    if (result.trim().endsWith(" bytes.")) {
-      return true;
-    } else {
-      return false;
-    }
-    
-    
-  }
+	// not needed ?
+	private static String commandPath = "";
+	private static String additionalEnv = "";
+	public static int exitValue;
 
+	static public String getExeName() {
+		if (Platform.isMac()) {
+			return "Arduino";
+		}
 
+		return "arduino_debug";
+	}
 
-  /**
-   * Helper function to run a system command and return the stdout / stderr as a string
-   * 
-   * @param program
-   * @param args
-   * @return
-   * @throws IOException
-   * @throws InterruptedException
-   */
-  protected static String runCommand(String program , ArrayList<String> args) throws IOException, InterruptedException {
+	public static boolean uploadSketch(String port, String board) throws IOException, InterruptedException {
+		if (!(board.equalsIgnoreCase("uno") || board.equalsIgnoreCase("mega") || board.equalsIgnoreCase("megaADK"))) {
+			// TODO: validate the proper set of values.
+			System.out.println(String.format("Invalid board type:%s", board));
+			exitValue = 1;
+			return false;
+		}
+		// Assume this is mrlcomm resource!
+		// G-say: FIXME - this will ONLY work in eclipse !!! - should extract it
+		// from /resource
+		//not working
+	  FileIO.extractResources();
+		String sketchFilename = "resource/Arduino/MRLComm/MRLComm.ino";
+		File sketch = new File(sketchFilename);
+		if (!sketch.exists()){
+		  sketchFilename = "src/resource/Arduino/MRLComm/MRLComm.ino";
+		  sketch = new File(sketchFilename);
+		}
+		// Create the command to run (and it's args.)
+		String arduinoExe = arduinoPath + getExeName();
+		ArrayList<String> args = new ArrayList<String>();
+		args.add("--upload");
+		args.add("--port");
+		args.add(port);
+		args.add("--board");
+		args.add("arduino:avr:" + board);
+		args.add(sketch.getAbsolutePath());
+		// args.add("--verbose-upload");
+		//args.add("--preserve-temp-files");
+		// run the command.
+		String result = runCommand(arduinoExe, args);
+		// print stdout/err from running the command
+		log.info("Result..." + result);
 
-    ArrayList<String> command = new ArrayList<String>();
-    command.add(program);
-    if (args != null) {
-      for (String arg : args) {
-        command.add(arg);
-      }
-    }
-    System.out.println("RUNNING COMMAND :" + join(command," "));
+		log.info("Uploaded Sketch.");
 
-    ProcessBuilder builder = new ProcessBuilder(command);
-    // we need to specify environment variables
-    Map<String, String> environment = builder.environment();
+		// take a breath... We think it probably worked? but not sure..
+		
+		
+		Thread.sleep(2000);
+		
+		// G-says : the following does not return correctly
+		// if it correctly compiles but fails to upload
 
-    String ldLibPath = commandPath;
-    if (additionalEnv.length() >0) {
-      ldLibPath += ":" + additionalEnv;
-    }
+		if (result.trim().endsWith(" bytes.")) {
+			return true;
+		} else {
+			return false;
+		}
 
-    environment.put("LD_LIBRARY_PATH", ldLibPath);
-    Process handle = builder.start();
+	}
 
-    InputStream stdErr = handle.getErrorStream();
-    InputStream stdOut = handle.getInputStream();
+	/**
+	 * Helper function to run a system command and return the stdout / stderr as
+	 * a string
+	 * 
+	 * @param program
+	 * @param args
+	 * @return
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	protected static String runCommand(String program, ArrayList<String> args) throws InterruptedException {
 
-    // TODO: we likely don't need this
-    // OutputStream stdIn = handle.getOutputStream();
+		ArrayList<String> command = new ArrayList<String>();
+		command.add(program);
+		if (args != null) {
+			for (String arg : args) {
+				command.add(arg);
+			}
+		}
+		System.out.println("RUNNING COMMAND :" + join(command, " "));
 
-    StringBuilder outputBuilder = new StringBuilder();
-    byte[] buff = new byte[4096];
+		ProcessBuilder builder = new ProcessBuilder(command);
+		// we need to specify environment variables
+		Map<String, String> environment = builder.environment();
 
-    // TODO: should we read both of these streams? 
-    // if we break out of the first loop is the process terminated?
+		String ldLibPath = commandPath;
+		if (additionalEnv.length() > 0) {
+			ldLibPath += ":" + additionalEnv;
+		}
 
-    // read stderr
-    for (int n; (n = stdErr.read(buff)) != -1;) {
-      outputBuilder.append(new String(buff, 0, n));
-    }
-    // read stdout
-    for (int n; (n = stdOut.read(buff)) != -1;) {
-      outputBuilder.append(new String(buff, 0, n));
-    }
-    
-    stdOut.close();
-    stdErr.close();
+		environment.put("LD_LIBRARY_PATH", ldLibPath);
+		try {
+			Process handle = builder.start();
 
-    // TODO: stdin if we use it.
-    // stdIn.close();
+			InputStream stdErr = handle.getErrorStream();
+			InputStream stdOut = handle.getInputStream();
 
-    // the process should be closed by now?
+			// TODO: we likely don't need this
+			// OutputStream stdIn = handle.getOutputStream();
 
-    handle.waitFor();
+			outputBuilder = new StringBuilder();
+			byte[] buff = new byte[4096];
 
-    handle.destroy();
+			// TODO: should we read both of these streams?
+			// if we break out of the first loop is the process terminated?
 
-    int exitValue = handle.exitValue();
-    // print the output from the command
-    System.out.println(outputBuilder.toString());
-    System.out.println("Exit Value : " + exitValue);
+			// read stderr
+			for (int n; (n = stdErr.read(buff)) != -1;) {
+				outputBuilder.append(new String(buff, 0, n));
+			}
+			// read stdout
+			for (int n; (n = stdOut.read(buff)) != -1;) {
+				outputBuilder.append(new String(buff, 0, n));
+			}
 
-    return outputBuilder.toString();
-  }
+			stdOut.close();
+			stdErr.close();
 
-  /**
-   * Helper function to run a program , return the stderr / stdout as a string and 
-   * to catch any exceptions that occur
-   * 
-   * @param cmd
-   * @param args
-   * @return
-   */
-  protected String RunAndCatch(String cmd, ArrayList<String> args) {
-    String returnValue;
-    try {
-      returnValue = runCommand(cmd, args);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      returnValue = e.getMessage();
-      e.printStackTrace();
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      returnValue = e.getMessage();
-      e.printStackTrace();
-    }
-    return returnValue;
-  }
+			// TODO: stdin if we use it.
+			// stdIn.close();
 
-  // TODO: this should be on a string utils static class.
-  private static String join(ArrayList<String> list, String joinChar) {
-    StringBuilder sb = new StringBuilder();
-    int i = 0;
-    int size = list.size();
-    for (String part : list) {
-      i++;
-      sb.append(part);
-      if (i != size) {
-        sb.append(joinChar);
-      }
-    }
-    return sb.toString();
-  }
+			// the process should be closed by now?
 
+			handle.waitFor();
+
+			handle.destroy();
+
+			exitValue = handle.exitValue();
+			// print the output from the command
+			System.out.println(outputBuilder.toString());
+			System.out.println("Exit Value : " + exitValue);
+			outputBuilder.append("Exit Value : " + exitValue);
+
+			return outputBuilder.toString();
+		} catch (IOException e) {
+			exitValue = 5;
+			return e.getMessage();
+			// throw e;
+		}
+	}
+
+	/**
+	 * Helper function to run a program , return the stderr / stdout as a string
+	 * and to catch any exceptions that occur
+	 * 
+	 * @param cmd
+	 * @param args
+	 * @return
+	 */
+	protected String RunAndCatch(String cmd, ArrayList<String> args) {
+		String returnValue;
+		try {
+			returnValue = runCommand(cmd, args);
+			// }
+			// catch (IOException e) {
+			// // TODO Auto-generated catch block
+			// returnValue = e.getMessage();
+			// e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			returnValue = e.getMessage();
+			e.printStackTrace();
+		}
+		return returnValue;
+	}
+
+	// TODO: this should be on a string utils static class.
+	private static String join(ArrayList<String> list, String joinChar) {
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		int size = list.size();
+		for (String part : list) {
+			i++;
+			sb.append(part);
+			if (i != size) {
+				sb.append(joinChar);
+			}
+		}
+		return sb.toString();
+	}
+
+	public static String getOutput() {
+		return outputBuilder.toString();
+	}
 
 }

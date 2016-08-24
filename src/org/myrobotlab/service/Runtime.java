@@ -616,7 +616,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * @throws SocketException
    * @throws UnknownHostException
    */
-  static public ArrayList<String> getLocalAddresses() {
+  static public List<String> getLocalAddresses() {
     log.info("getLocalAddresses");
     ArrayList<String> ret = new ArrayList<String>();
 
@@ -653,7 +653,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   // @TargetApi(9)
-  static public ArrayList<String> getLocalHardwareAddresses() {
+  static public List<String> getLocalHardwareAddresses() {
     log.info("getLocalHardwareAddresses");
     ArrayList<String> ret = new ArrayList<String>();
     try {
@@ -879,7 +879,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return ret;
   }
 
-  public static ArrayList<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
+  public static List<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
     return getServiceNamesFromInterface(Class.forName(interfaze));
   }
 
@@ -887,7 +887,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * @param interfaceName
    * @return service names which match
    */
-  public static ArrayList<String> getServiceNamesFromInterface(Class<?> interfaze) {
+  public static List<String> getServiceNamesFromInterface(Class<?> interfaze) {
     ArrayList<String> ret = new ArrayList<String>();
     ArrayList<ServiceInterface> services = getServicesFromInterface(interfaze);
     for (int i = 0; i < services.size(); ++i) {
@@ -965,7 +965,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   /**
    * unique id's are need for sendBlocking - to uniquely identify the message
    * this is a method to support that - it is unique within a process, but not
-   * accross processes
+   * across processes
    * 
    * @return a unique id
    */
@@ -1178,11 +1178,16 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         runtimeName = cmdline.getSafeArgument("-runtimeName", 0, "MRL");
       }
 
+      /*
+       * Previously the Agent remained running - and would siphon std:in & std:out
       if (cmdline.containsKey("-isAgent")) {
         logging.addAppender(Appender.IS_AGENT);
       } else if (cmdline.containsKey("-fromAgent")) {
         logging.addAppender(Appender.FROM_AGENT);
-      } else if (cmdline.containsKey("-logToConsole")) {
+      } else 
+      */
+    	  
+      if (cmdline.containsKey("-logToConsole")) {
         logging.addAppender(Appender.CONSOLE);
       } else {
         logging.addAppender(Appender.FILE, String.format("%s.log", runtimeName));
@@ -1330,7 +1335,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     // FIXME - Security determines what to export
     // for each gateway
 
-    ArrayList<String> remoteGateways = getServiceNamesFromInterface(Gateway.class);
+    List<String> remoteGateways = getServiceNamesFromInterface(Gateway.class);
     for (int ri = 0; ri < remoteGateways.size(); ++ri) {
       String n = remoteGateways.get(ri);
       // Communicator gateway = (Communicator)registry.get(n);
@@ -1494,7 +1499,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         // maps :P
         runtime.invoke("released", sw);
       } catch (Exception e) {
-        runtime.error("%s threw while stopping");
+        runtime.error(String.format("%s threw while stopping",e));
         Logging.logError(e);
       }
     }
@@ -1935,7 +1940,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   static public Status noWorky(String userId) {
     Status status = null;
     try {
-      String retStr = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File("../agent.log"));
+      String retStr = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File("myrobotlab.log"));
       if (retStr.contains("Upload:")) {
         log.info("noWorky successfully sent - our crack team of experts will check it out !");
         status = Status.info("no worky sent");

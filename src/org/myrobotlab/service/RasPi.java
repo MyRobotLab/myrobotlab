@@ -12,7 +12,9 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
 
 import com.pi4j.io.gpio.GpioController;
@@ -34,12 +36,12 @@ import com.pi4j.wiringpi.SoftPwm;
  * 
  */
 // TODO Ensure that only one instance of RasPi can execute on each RaspBerry PI
-public class RasPi extends Service implements I2CControl {
+public class RasPi extends Service implements I2CController {
 
-	public static class Device {
+	public static class I2CDeviceMap {
 		public I2CBus bus;
 		public I2CDevice device;
-		public String type;
+		public String serviceName;
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -55,7 +57,7 @@ public class RasPi extends Service implements I2CControl {
 	// i2c bus
 	public static I2CBus i2c;
 
-	HashMap<String, Device> devices = new HashMap<String, Device>();
+	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -127,21 +129,22 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	// FIXME - create low level I2CDevice
-	public void createDevice(int busAddress, int deviceAddress, String type) {
+	@Override
+	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
 
 		try {
 			I2CDevice device = i2c.getDevice(deviceAddress);
 			I2CBus bus = I2CFactory.getInstance(busAddress);
 			String key = String.format("%d.%d", busAddress, deviceAddress);
-
-			Device devicedata = new Device();
-			if (devices.containsKey(key)) {
-				log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, type));
+			I2CDeviceMap devicedata = new I2CDeviceMap();
+			if (i2cDevices.containsKey(key)) {
+				log.error(String.format("Device %s %s %s already exists.", busAddress, deviceAddress, control.getName()));
 			} else
 				devicedata.bus = bus;
-			devicedata.device = device;
-			devicedata.type = type;
-			devices.put(key, devicedata);
+			  devicedata.device = device;
+			  devicedata.serviceName = control.getName();
+			  i2cDevices.put(key, devicedata);
+			  log.info(String.format("Created device for %s with busAddress %s deviceaddress %s key %s", control.getName(), busAddress, deviceAddress, key));
 
 			// PCF8574GpioProvider pcf = new PCF8574GpioProvider(busAddress,
 			// deviceAddress);
@@ -169,10 +172,10 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	@Override
-	public void releaseDevice(int busAddress, int deviceAddress) {
+	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
 
 		String key = String.format("%d.%d", busAddress, deviceAddress);
-		devices.remove(key);
+		i2cDevices.remove(key);
 
 	}
 
@@ -248,45 +251,44 @@ public class RasPi extends Service implements I2CControl {
 	}
 
 	@Override
-	public void i2cWrite(int busAddress, int deviceAddress, byte[] buffer, int size) {
+	public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
-		log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
-		Device devicedata = devices.get(key);
+		I2CDeviceMap devicedata = i2cDevices.get(key);
 		try {
-			devicedata.device.write(buffer, 0, buffer.length);
+			
+			devicedata.device.write(buffer, 0, size);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Logging.logError(e);
 		}
-		;
 	}
 
 	@Override
-	public int i2cRead(int busAddress, int deviceAddress, byte[] buffer, int size) {
+	public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
+		int bytesRead = 0;
 		String key = String.format("%d.%d", busAddress, deviceAddress);
-		log.debug(String.format("i2cRead busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
-		Device devicedata = devices.get(key);
+		I2CDeviceMap devicedata = i2cDevices.get(key);
 		try {
-			devicedata.device.read(buffer, 0, buffer.length);
+			bytesRead = devicedata.device.read(buffer, 0, buffer.length);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Logging.logError(e);
 		}
-		;
-		return buffer.length;
+
+		return bytesRead;
 	}
 
 	@Override
-	public int i2cWriteRead(int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+	public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
 		String key = String.format("%d.%d", busAddress, deviceAddress);
-		Device devicedata = devices.get(key);
+		I2CDeviceMap devicedata = i2cDevices.get(key);
 		try {
 			devicedata.device.read(writeBuffer, 0, writeBuffer.length, readBuffer, 0, readBuffer.length);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Logging.logError(e);
 		}
-		;
+		
 		return readBuffer.length;
 	}
 
@@ -307,5 +309,18 @@ public class RasPi extends Service implements I2CControl {
 		meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
 		return meta;
 	}
+
+	@Override
+	public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deviceDetach(DeviceControl device) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

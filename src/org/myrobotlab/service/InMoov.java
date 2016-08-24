@@ -907,7 +907,7 @@ public class InMoov extends Service {
     startRightArm(rightPort);
 
     startHeadTracking(leftPort);
-    startEyesTracking(leftPort);
+    startEyesTracking(leftPort, 22, 24);
 
     speakBlocking("startup sequence completed");
   }
@@ -937,14 +937,14 @@ public class InMoov extends Service {
     return ear;
   }
 
-  public Tracking startEyesTracking(String port) throws Exception {
+  public Tracking startEyesTracking(String port, int xPin, int yPin) throws Exception {
     speakBlocking("starting eyes tracking");
 
     if (head == null) {
       startHead(port);
     }
     eyesTracking = (Tracking) startPeer("eyesTracking");
-    eyesTracking.connect(port);
+    eyesTracking.connect(port, xPin, yPin);
     arduinos.put(port, eyesTracking.arduino);
     return eyesTracking;
   }
@@ -992,7 +992,7 @@ public class InMoov extends Service {
       startHead(port);
     }
     headTracking = (Tracking) startPeer("headTracking");
-    headTracking.connect(port);
+    headTracking.connect(port, 5, 6);
     arduinos.put(port, headTracking.arduino);
     return headTracking;
   }
@@ -1036,8 +1036,11 @@ public class InMoov extends Service {
       }
 
       mouthControl = (MouthControl) startPeer("mouthControl");
-      mouthControl.jaw.setPin(26);
+      // OLD WAY
+     //  mouthControl.jaw.setPin(26);
       mouthControl.arduino.connect(port);
+      // NEW WAY
+      mouthControl.arduino.servoAttach(mouthControl.jaw, 26);
       arduinos.put(port, mouthControl.arduino);
       String p = mouthControl.getArduino().getSerial().getPortName();
       if (p != null) {
@@ -1093,7 +1096,7 @@ public class InMoov extends Service {
       Arduino arduino = arduinos.get(port);
       // arduino.connect(port);
       // arduino.setSampleRate(8000);
-      arduino.digitalReadPollingStart(pin, 8000);
+      arduino.enablePin(pin);
       pirPin = pin;
       arduino.addListener("publishPin", this.getName(), "publishPin");
 

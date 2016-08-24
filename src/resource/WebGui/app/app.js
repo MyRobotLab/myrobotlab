@@ -22,6 +22,7 @@ angular.module('mrlapp', [
     //'ngclipboard',
     'angular-clipboard',
     'rzModule',
+    'ngFlash',
     //'charts',
     'nvd3ChartDirectives',
     'ui.ace', //funky editor

@@ -25,61 +25,25 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.service.Servo;
 
-public interface ServoController extends NameProvider, MicrocontrollerPeripheral {
 
-  public final static String servoWrite = "servoWrite";
-  public final static String servoAttach = "servoAttach";
-  public final static String servoDetach = "servoDetach";
+public interface ServoController extends DeviceController {
 
-  /**
-   * servoAttach - attach the servo to a specific pin on the controller
-   * 
-   * @param name
-   *          - name of the servo
-   * @param pin
-   *          - pin number
-   * @return boolean boolean
-   */
-  public boolean servoAttach(Servo servo);
+	void servoAttach(ServoControl servo, int pin);
 
-  /**
-   * servoDetach - detach the servo from a specific pin on the controller
-   * 
-   * @param name
-   *          - name of the servo
-   * @return boolean
-   */
-  boolean servoDetach(Servo servo);
+	void servoSweepStart(ServoControl servo);
 
-  void servoSweepStart(Servo servo);
+	void servoSweepStop(ServoControl servo);
 
-  public void servoSweepStop(Servo servo);
+	// FIXME - method should be renamed to servoMoveTo  (Write is Arduino specific)
+	void servoWrite(ServoControl servo);
 
-  /**
-   * servoWrite - move the servo at an angle between 0 - 180
-   * 
-   * @param name
-   *          - name of the servo
-   * @param newPos
-   *          - positive or negative relative amount to move the servo
-   * @return void
-   */
-  void servoWrite(Servo servo);
+	void servoWriteMicroseconds(ServoControl servo, int uS);
 
-  public void servoWriteMicroseconds(Servo servo);
+	void servoSetSpeed(ServoControl servo);
 
-  public boolean servoEventsEnabled(Servo servo);
+	void servoDetach(ServoControl servo);
 
-  /**
-   * return the current pin this servo is attached to
-   * 
-   * @param servoName
-   * @return
-   */
-  // public Integer getServoPin(String servoName);
-
-  public void setServoSpeed(Servo servo);
+  void servoSetMaxVelocity(ServoControl servo);
 
 }

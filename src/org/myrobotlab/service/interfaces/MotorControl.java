@@ -25,135 +25,90 @@
 
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.sensor.Encoder;
 
-public interface MotorControl extends SensorDataPublisher, SensorDataListener, NameProvider, MessageSubscriber {
+public interface MotorControl extends DeviceControl { 
 
-  /**
-   * detaches the motor from the motor controller
-   * 
-   * @return
-   */
-  public void detach();
+	// a good canidate for Java-8 'default' interface method
+	// implementation of all attach(String name) { attach(Runtime.getService(name)); } 
+	public void attach(String controllerName) throws Exception;
+	public void attach(MotorController controller) throws Exception;
 
-  public String getName();
+	public void detach(String controllerName);
+	public void detach(MotorController controller);
 
-  /**
-   * get the current power level of the motor
-   * 
-   * @return
-   */
-  public double getPowerLevel();
+	double getPowerLevel();
 
-  /**
-   * reports if a motor is attached to a motor controller
-   */
-  public boolean isAttached();
+	double getPowerOutput();
 
-  /**
-   * query the motor as to its inverted status
-   * 
-   * @return
-   */
-  public boolean isInverted();
+	int getTargetPos();
 
-  /**
-   * locks the motor so no other commands will affect it until it becomes
-   * unlocked
-   */
-  public void lock();
+	/**
+	 * query the motor as to its inverted status
+	 * 
+	 * @return
+	 */
+	boolean isInverted();
 
-  /**
-   * Move is the most common motor command. The command accepts a parameter of
-   * power which can be of the range -1.0 to 1.0. Negative values are in one
-   * direction and positive values are in the opposite value. For example -1.0
-   * would be maximum power in a counter clock-wise direction and 0.9 would be
-   * 90% power in a clockwise direction. 0.0 of course would be stop
-   * 
-   * @param power
-   *          - new power level
-   */
-  public void move(double power);
+	/**
+	 * locks the motor so no other commands will affect it until it becomes
+	 * unlocked
+	 */
+	void lock();
 
-  /**
-   * moveTo moves the motor to a specific location. Typically, an encoder is
-   * needed in order to provide feedback data
-   * 
-   * @param newPos
-   */
-  public void moveTo(int newPos);
+	/**
+	 * Move is the most common motor command. The command accepts a parameter of
+	 * power which can be of the range -1.0 to 1.0. Negative values are in one
+	 * direction and positive values are in the opposite value. For example -1.0
+	 * would be maximum power in a counter clock-wise direction and 0.9 would be
+	 * 90% power in a clockwise direction. 0.0 of course would be stop
+	 * 
+	 * @param power
+	 *            - new power level
+	 */
+	void move(double power);
 
-  /**
-   * moveTo moves the motor to a specific location. Typically, an encoder is
-   * needed in order to provide feedback data
-   * 
-   * @param newPos
-   */
-  public void moveTo(int newPos, Double power);
+	/**
+	 * moveTo moves the motor to a specific location. Typically, an encoder is
+	 * needed in order to provide feedback data
+	 * 
+	 * @param newPos
+	 */
+	void moveTo(int newPos);
 
-  /**
-   * Attach a motor controller to the motor. The motor and motor controller
-   * "should be in the same instance of MRL and this reference to another
-   * service should be ok.
-   * 
-   * The motor controller uses this method to pass a reference of itself to the
-   * motor, to be used directly
-   */
-  public void setController(MotorController controller);
+	/**
+	 * moveTo moves the motor to a specific location. Typically, an encoder is
+	 * needed in order to provide feedback data
+	 * 
+	 * @param newPos
+	 */
+	void moveTo(int newPos, Double power);
 
-  public void setEncoder(Encoder encoder);
+	void setEncoder(Encoder encoder);
 
-  /**
-   * change the motors direction such that negative power levels become
-   * clockwise if previous levels were counter clockwise and positive power
-   * levels would become counter clockwise
-   * 
-   * @param invert
-   */
-  public void setInverted(boolean invert);
+	/**
+	 * change the motors direction such that negative power levels become
+	 * clockwise if previous levels were counter clockwise and positive power
+	 * levels would become counter clockwise
+	 * 
+	 * @param invert
+	 */
+	void setInverted(boolean invert);
 
-  public void stop();
+	void stop();
 
-  /**
-   * a safety mechanism - stop and lock will stop and lock the motor no other
-   * commands will affect the motor until it is "unlocked"
-   */
-  public void stopAndLock();
+	/**
+	 * a safety mechanism - stop and lock will stop and lock the motor no other
+	 * commands will affect the motor until it is "unlocked"
+	 */
+	void stopAndLock();
 
-  /**
-   * unlocks the motor, so other commands can affect it
-   */
-  public void unlock();
+	/**
+	 * unlocks the motor, so other commands can affect it
+	 */
+	void unlock();
 
-  /**
-   * a safety limit
-   * 
-   * @param max
-   */
-  // public void setMaxPower(float max);
-
-  boolean hasSensor();
-
-  int[] getControlPins();
-
-  String getType();
-
-  String[] getMotorTypes();
-
-  double getPowerOutput();
-
-  public void attach(String controllerName) throws Exception;
-
-  public void attach(MotorController uC) throws Exception;
-
-  public boolean isLocal();
-
-  public void broadcastState();
-
-  public String getMotorType();
-
-  public Integer getPin(String pinTypeDir);
-
-  public int getTargetPos();
+	public MotorConfig getConfig();
 
 }

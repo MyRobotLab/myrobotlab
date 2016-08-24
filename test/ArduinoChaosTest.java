@@ -39,8 +39,9 @@ public class ArduinoChaosTest {
     Arduino arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
     //Serial serial = (Serial) arduino.getSerial();
 
-    arduino.board= board;
+    arduino.boardType= board;
     arduino.connect("COM30");
+   
 
     // let the board connect
     Thread.sleep(2000);
@@ -57,9 +58,9 @@ public class ArduinoChaosTest {
     // Start testing the functions one by one to make sure we're worky!
     
     // debug enable/disable first.
-    arduino.enableMRLCommDebug();
+    arduino.setDebug(true);
     Thread.sleep(1000);
-    arduino.disableMRLCommDebug();
+    arduino.setDebug(false);
     Thread.sleep(1000);
     // Now iterate all of the possible commands
     
@@ -70,19 +71,19 @@ public class ArduinoChaosTest {
     
     
     // TODO: is this a digital or analog pin?
-    arduino.pinMode(2, Arduino.INPUT);
+    arduino.pinMode(2, "INPUT");
     Thread.sleep(1000);
-    arduino.pinMode(2, Arduino.OUTPUT);
+    arduino.pinMode(2, "OUTPUT");
     Thread.sleep(1000);
     Servo servo = (Servo)Runtime.createAndStart("servo", "Servo");
-    servo.setPin(13);
-    arduino.servoAttach(servo);
+    // servo.setPin(13);
+    // arduino.servoAttach(servo);
     Thread.sleep(1000);
     arduino.servoSweepStart(servo);
     Thread.sleep(1000);
     arduino.servoSweepStop(servo);
-    Thread.sleep(1000);
-    arduino.servoEventsEnabled(servo);
+
+
     Thread.sleep(1000);
     // TODO : this blows up
     // arduino.servoWrite(servo);
@@ -100,9 +101,9 @@ public class ArduinoChaosTest {
     Thread.sleep(1000);
     arduino.servoDetach(servo);
     Thread.sleep(1000);
-    arduino.setLoadTimingEnabled(true);
+    arduino.enableBoardStatus();
     Thread.sleep(1000);
-    arduino.setLoadTimingEnabled(false);
+    arduino.enableBoardStatus();
     
     Thread.sleep(1000);
     arduino.setPWMFrequency(1, 100);
@@ -114,9 +115,9 @@ public class ArduinoChaosTest {
 
     Thread.sleep(1000);
     int digitalPin = 3;
-    arduino.digitalReadPollingStart(digitalPin);
+    arduino.enablePin(digitalPin);
     Thread.sleep(1000);
-    arduino.digitalReadPollingStop(digitalPin);
+    arduino.disablePin(digitalPin);
     Thread.sleep(1000);
 
     int pulsePin = 1;
@@ -154,10 +155,10 @@ public class ArduinoChaosTest {
     
     Thread.sleep(1000);
     AnalogPinSensor s = new AnalogPinSensor(3, 2);
-    arduino.sensorAttach(s);
+    // arduino.sensorAttach(s);
     Thread.sleep(1000);
     // ?!
-    arduino.sensorPollingStart("A0", 123);
+    // arduino.sensorPollingStart("A0", 123);
     Thread.sleep(1000);
     arduino.sensorPollingStop("A0");
     
@@ -197,13 +198,13 @@ public class ArduinoChaosTest {
     System.out.println("Press the any key to continue.");
     System.in.read();
     
-    arduino.setLoadTimingEnabled(false);
+    arduino.enableBoardStatus();
     
     
     Motor motor = (Motor)Runtime.createAndStart("motor", "Motor");
-    motor.setType2Pwm(leftPwm, rightPwm);
+    // motor.setType2Pwm(leftPwm, rightPwm);
     // motor.attach(arduino);
-    arduino.motorAttach(motor);
+    // arduino.attachDevice(motor); // null  config is this right ?
 
 
 //    servo.attach();

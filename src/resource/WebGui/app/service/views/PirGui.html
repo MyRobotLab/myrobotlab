@@ -1,0 +1,21 @@
+
+    <div class="col-lg-1">
+        <img ng-src="{{(service.isActive)?'../../red.png':'../../grey.png'}}" />    
+    </div>
+    <div class="col-lg-3">
+    <label for="pin">&nbsp;</label>
+        <button class="btn btn-default" ng-show="!service.isEnabled" ng-click="enable()">enable</button>
+        <button class="btn btn-default" ng-show="service.isEnabled" ng-click="disable()">disable</button>
+    </div>
+    <div class="col-lg-4">
+    <label for="controller">control</label>            
+        <input class="form-control" id="controller" type="text" ng-model="service.pinControl.name" ng-disabled="service.isAttached"/>
+    </div>
+    <div class="col-lg-4">
+        <label for="pin">pin</label>
+        <input class="form-control" id="pin" type="text" ng-model="service.pin" ng-disabled="service.isAttached"/>
+    </div>
+
+
+
+

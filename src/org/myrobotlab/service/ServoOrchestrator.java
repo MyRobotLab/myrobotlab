@@ -239,17 +239,18 @@ public class ServoOrchestrator extends Service {
     }
   }
 
-  public void middleright_attach_button() {
+  public void middleright_attach_button() throws Exception {
     if (!settingsitemholder[middleright_shownitem].attached) {
       settingsitemholder[middleright_shownitem].arduinopos = sogui_ref.middleright_arduino_list.getSelectedIndex();
       settingsitemholder[middleright_shownitem].pinpos = sogui_ref.middleright_pin_list.getSelectedIndex();
-      String arduino = (String) sogui_ref.middleright_arduino_list.getSelectedValue();
+      String arduinoName = (String) sogui_ref.middleright_arduino_list.getSelectedValue();
+      Arduino arduino = (Arduino)Runtime.getService(arduinoName);
       int pin = Integer.parseInt((String) sogui_ref.middleright_pin_list.getSelectedValue());
       int min = settingsitemholder[middleright_shownitem].min;
       int max = settingsitemholder[middleright_shownitem].max;
       servos[middleright_shownitem] = (Servo) Runtime.start("so." + middleright_shownitem, "Servo");
       servos[middleright_shownitem].setMinMax(min, max);
-      servos[middleright_shownitem].attach(arduino, pin);
+      arduino.servoAttach(servos[middleright_shownitem], pin);
       servos[middleright_shownitem].attach();
       sogui_ref.middleright_attach_button.setText("Detach");
       settingsitemholder[middleright_shownitem].attached = true;

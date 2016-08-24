@@ -35,7 +35,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   transient public Arduino arduino;
   String side;
 
-  public InMoovArm(String n) {
+  public InMoovArm(String n) throws Exception {
     super(n);
     // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
     // FRAMEWORK !!!!!
@@ -46,6 +46,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     arduino = (Arduino) createPeer("arduino");
 
     // connection details
+    /* OLD WAY
     bicep.setPin(8);
     rotate.setPin(9);
     shoulder.setPin(10);
@@ -55,7 +56,11 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     rotate.setController(arduino);
     shoulder.setController(arduino);
     omoplate.setController(arduino);
-
+    */
+    
+    // NEW WAY
+    
+    
     bicep.setMinMax(5, 90);
     rotate.setMinMax(40, 180);
     shoulder.setMinMax(0, 180);
@@ -74,16 +79,15 @@ public class InMoovArm extends Service implements IKJointAngleListener {
    * @return
    */
   public boolean attach() {
-    boolean result = true;
     sleep(InMoov.attachPauseMs);
-    result &= bicep.attach();
+    bicep.attach();
     sleep(InMoov.attachPauseMs);
-    result &= rotate.attach();
+    rotate.attach();
     sleep(InMoov.attachPauseMs);
-    result &= shoulder.attach();
+    shoulder.attach();
     sleep(InMoov.attachPauseMs);
-    result &= omoplate.attach();
-    return result;
+    omoplate.attach();
+    return true;
   }
 
   @Override
@@ -109,8 +113,12 @@ public class InMoovArm extends Service implements IKJointAngleListener {
       error("arduino %s not connected", arduino.getName());
       return false;
     }
+    bicep.attach(arduino, 8);
+    rotate.attach(arduino, 9);
+    shoulder.attach(arduino, 10);
+    omoplate.attach(arduino, 11);
 
-    attach();
+    //attach();
     setSpeed(0.7, 0.7, 0.7, 0.7);
     rest();
     sleep(1000);
@@ -251,6 +259,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   // ------------- added set pins
+  /* OLD WAY
   public void setpins(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
 
     log.info(String.format("setPins %d %d %d %d %d %d", bicep, rotate, shoulder, omoplate));
@@ -260,7 +269,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     this.shoulder.setPin(shoulder);
     this.omoplate.setPin(omoplate);
   }
-
+ 	*/
+ 
   public void setRotate(Servo rotate) {
     this.rotate = rotate;
   }

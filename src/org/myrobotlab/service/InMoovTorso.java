@@ -46,6 +46,7 @@ public class InMoovTorso extends Service {
     arduino = (Arduino) createPeer("arduino");
 
     // connection details
+    /*
     topStom.setPin(27);
     midStom.setPin(28);
     lowStom.setPin(29);
@@ -53,6 +54,12 @@ public class InMoovTorso extends Service {
     topStom.setController(arduino);
     midStom.setController(arduino);
     lowStom.setController(arduino);
+    */
+    
+    // NEW WAY
+//    arduino.servoAttach(topStom, 27);
+//    arduino.servoAttach(topStom, 28);
+//    arduino.servoAttach(topStom, 29);
 
     topStom.setMinMax(60, 120);
     midStom.setMinMax(0, 180);
@@ -70,15 +77,15 @@ public class InMoovTorso extends Service {
    * @return
    */
   public boolean attach() {
-    boolean result = true;
+ 
     sleep(InMoov.attachPauseMs);
-    result &= topStom.attach();
+    topStom.attach();
     sleep(InMoov.attachPauseMs);
-    result &= midStom.attach();
+    midStom.attach();
     sleep(InMoov.attachPauseMs);
-    result &= lowStom.attach();
+    lowStom.attach();
     sleep(InMoov.attachPauseMs);
-    return result;
+    return true;
   }
 
   @Override
@@ -104,7 +111,10 @@ public class InMoovTorso extends Service {
       return false;
     }
 
-    attach();
+    topStom.attach(arduino, 27);
+    midStom.attach(arduino, 28);
+    lowStom.attach(arduino, 29);
+
     setSpeed(0.7, 0.7, 0.7);
     rest();
     sleep(4000);
@@ -194,11 +204,18 @@ public class InMoovTorso extends Service {
   }
 
   // ------------- added set pins
-  public void setpins(Integer topStom, Integer midStom, Integer lowStom) {
+  public void setpins(Integer topStomPin, Integer midStomPin, Integer lowStomPin) {
     // createPeers();
+	  /*
     this.topStom.setPin(topStom);
     this.midStom.setPin(midStom);
     this.lowStom.setPin(lowStom);
+    */
+	  
+
+	    arduino.servoAttach(topStom, topStomPin);
+	    arduino.servoAttach(topStom, midStomPin);
+	    arduino.servoAttach(topStom, lowStomPin);
   }
 
   public void setSpeed(Double topStom, Double midStom, Double lowStom) {

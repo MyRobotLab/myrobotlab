@@ -25,81 +25,130 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface ServoControl {
+public interface ServoControl extends DeviceControl {
+	
+	
+  // FIXME - do we want to support this & what do we expect from
+	// 1. should it be energized when initially attached?
+	// 2. should the position be set initially on attach ?
+	// 3. should rest be set by pos if its not set already .. ie .. is the pos passed in on attach the "rest" position of the servo ?
+	// 4. should we 'please' rename servo.attach(pin) to servo.energize(pin) !!!!
+	void attach(ServoController controller, int pin) throws Exception;
+	
+	// preferred - sets control
+	void attach(ServoController controller, int pin, Integer pos) throws Exception;
 
-  // FIXME - add sweep and other fun methods
-  // extend Motor ???
-  /**
-   * re-attaches servo to controller it was last attached to
-   * 
-   * @return
-   */
-  public boolean attach();
+	void detach(ServoController controller);
+	
+	// added since it's used by the ServoGUI
+	void attach(String controllerName, int pin) throws Exception;
+  void detach(String controllerName);
+	/**
+	 * Re-attaches (re-energizes) the servo on its current pin
+	 * FIXME - should be renamed to energize
+	 * 
+	 * @return
+	 */
+	public void attach();
 
-  public boolean attach(String controller, Integer pin);
+	/**
+	 * Re-attaches (re-energizes) the servo on its current pin
+	 * FIXME - should be renamed to energize(pin)
+	 * @return
+	 */
+	public void attach(int pin);
 
-  /**
-   * detaches the servo from the controller
-   * 
-   * @return
-   */
-  public boolean detach();
+	/**
+	 * calls Servo.detach() on MRLComm
+	 * FIXME - should be renamed to de-energize (heh .. hyphons :P)
+	 * @return
+	 */
+	public void detach();
 
-  public String getControllerName();
+	/**
+	 * Moves the servo to a specific location. Typically, a servo has 0 to 180
+	 * positions - each increment corresponding to a degree
+	 * 
+	 * @param newPos
+	 */
+	public void moveTo(int newPos);
 
-  public String getName();
+	/**
+	 * limits input of servo - to prevent damage or problems if servos should
+	 * not move thier full range
+	 * 
+	 * @param max
+	 */
+	public void setMinMax(int min, int max);
 
-  public Integer getPin();
+	/**
+	 * fractional speed settings
+	 * 0.0 to 1.0 
+	 * 
+	 * @param speed
+	 */
+	public void setSpeed(double speed);
 
-  /**
-   * moveTo moves the servo to a specific location. Typically, a servo has 0 to
-   * 180 positions
-   * 
-   * @param newPos
-   */
-  public void moveTo(int newPos);
+	/**
+	 * stops the servo if currently in motion servo must be moving at
+	 * incremental speed for a stop to work (setSpeed < 1.0)
+	 */
+	public void stop();
 
-  /**
-   * Attach a servo controller to the servo. The servo and servo controller
-   * "should be in the same instance of MRL and this reference to another
-   * service should be ok.
-   * 
-   * The servo controller uses this method to pass a reference of itself to the
-   * servo, to be used directly.
-   */
 
-  public boolean setController(ServoController controller);
+	/**
+	 * configuration method - a method the controller will call when the servo
+	 * is attached.
+	 * 
+	 * What should happen is if (controller != null) { pin =
+	 * controller.servoGetPin(); } return pin; This returns the pin info the
+	 * controller has - updates the Servo's pin and returns the refreshed data.
+	 * Not worth it. What will happen is the pin which was set on the servo will
+	 * simply be returned
+	 * 
+	 * @return
+	 */
+	public Integer getPin();
+	
+	/**
+	 * a default position for the servo
+	 * @param rest
+	 */
+	public void setRest(int rest);
+	
+	/**
+	 * command to move to the rest position
+	 */
+	public void rest();
 
-  public boolean setController(String controller);
+	/**
+	 * minimal sweep position
+	 * sweep data need for the controller
+	 * @return
+	 */
+	public int getSweepMin();
 
-  /**
-   * limits input of servo - to prevent damage or problems if servos should not
-   * move thier full range
-   * 
-   * @param max
-   */
-  public void setMinMax(int min, int max);
+	/**
+	 * max sweep position
+	 * sweep data need for the controller
+	 * @return
+	 */
+	public int getSweepMax();
 
-  /**
-   * memory of the controllers pin - so that it can be re-attached after a
-   * detach
-   * 
-   * @return
-   */
-  public boolean setPin(int pin);
+	/**
+	 * sweep step
+	 * sweep data need for the controller
+	 * @return
+	 */
+	public int getSweepStep();
 
-  /**
-   * fractional speed settings
-   * 
-   * @param speed
-   */
-  // public void setSpeed(int speed);
-  public void setSpeed(double speed);
+	/**
+	 * the calculated output for the servo
+	 */
+	public Integer getTargetOutput();
 
-  /**
-   * stops the servo if currently in motion servo must be moving at incremental
-   * speed for a stop to work (setSpeed < 1.0)
-   */
-  public void stop();
+	public double getSpeed();
+
+  public int getMaxVelocity();
 
 }

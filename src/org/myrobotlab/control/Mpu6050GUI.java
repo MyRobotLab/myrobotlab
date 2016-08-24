@@ -30,6 +30,7 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -41,7 +42,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Mpu6050;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.I2CControl;
 import org.slf4j.Logger;
 
 public class Mpu6050GUI extends ServiceGUI implements ActionListener {
@@ -54,6 +54,13 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
 	JButton attachButton = new JButton(attach);
 
 	JComboBox<String> controller = new JComboBox<String>();
+	JComboBox<String> deviceAddressList = new JComboBox<String>();
+	JComboBox<String> deviceBusList = new JComboBox<String>();
+
+	JLabel controllerLabel     = new JLabel("Controller");
+	JLabel deviceBusLabel     = new JLabel("Bus");
+	JLabel deviceAddressLabel = new JLabel("Address");
+	
   JButton refresh = new JButton("refresh");
 
   JLabel accelX = new JLabel();
@@ -64,24 +71,27 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
   JLabel gyroY = new JLabel();
   JLabel gyroZ = new JLabel();
 
-  Mpu6050 myMpu6050 = null;
+  Mpu6050 boundService = null;
   
   public Mpu6050GUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
-		myMpu6050 = (Mpu6050) Runtime.getService(boundServiceName);
+		boundService = (Mpu6050) Runtime.getService(boundServiceName);
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();
     if (o == refresh) {
-      myService.send(boundServiceName, "getRaw");
+      myService.send(boundServiceName, "refresh");
     }
 		if (o == attachButton) {
 			if (attachButton.getText().equals(attach)) {
 				int index = controller.getSelectedIndex();
 				if (index != -1) {
-					myService.send(boundServiceName, attach, controller.getSelectedItem());
+					myService.send(boundServiceName, attach, 
+							controller.getSelectedItem(),
+							deviceBusList.getSelectedItem(),
+							deviceAddressList.getSelectedItem());
 				}
 			} else {
 				myService.send(boundServiceName, detach);
@@ -106,12 +116,20 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
   	
 		refreshControllers();
 		controller.setSelectedItem(mpu6050.getControllerName());
+		deviceBusList.setSelectedItem(mpu6050.deviceBus);
+		deviceAddressList.setSelectedItem(mpu6050.deviceAddress);
 		if (mpu6050.isAttached()) {
 			attachButton.setText(detach);
 			controller.setEnabled(false);
+			deviceBusList.setEnabled(false);
+			deviceAddressList.setEnabled(false);
+			refresh.setEnabled(true);
 		} else {
 			attachButton.setText(attach);
 			controller.setEnabled(true);
+			deviceBusList.setEnabled(true);
+			deviceAddressList.setEnabled(true);
+			refresh.setEnabled(false);
 		}
 		
     accelX.setText(String.format("%.3f", mpu6050.accelGX));
@@ -138,137 +156,134 @@ public class Mpu6050GUI extends ServiceGUI implements ActionListener {
     c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 1;
     c.gridy = 0;
-		display.add(controller);
-		attachButton.addActionListener(this);	
+		display.add(controllerLabel);
 
-		c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 2;
-    c.gridy = 0;
-		display.add(attachButton);
+    c.gridx++;
+		display.add(controller);
 		
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 3;
-    c.gridy = 0;
+    c.gridx++;
+		display.add(deviceBusLabel);
+
+    c.gridx++;
+		display.add(deviceBusList);
+		
+    c.gridx++;
+		display.add(deviceAddressLabel);
+
+    c.gridx++;
+		display.add(deviceAddressList);
+		
+    c.gridx++;
+		display.add(attachButton);
+    attachButton.addActionListener(this);
+		
+    c.gridx++;
     display.add(refresh, c);
     refresh.addActionListener(this);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 1;
-    c.gridy = 1;
+    c.gridy++;
+    c.gridy++;
     display.add(new JLabel("AccelX  :"), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 2;
-    c.gridy = 1;
+    c.gridx++;
     display.add(accelX, c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 3;
-    c.gridy = 1;
+    c.gridx++;
     display.add(new JLabel(" G "), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 1;
-    c.gridy = 2;
+    c.gridy++;
     display.add(new JLabel("AccelY  :"), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 2;
-    c.gridy = 2;
+    c.gridx++;
     display.add(accelY, c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 3;
-    c.gridy = 2;
+    c.gridx++;
     display.add(new JLabel(" G "), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 1;
-    c.gridy = 3;
+    c.gridy++;
     display.add(new JLabel("AccelZ  :"), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 2;
-    c.gridy = 3;
+    c.gridx++;
     display.add(accelZ, c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 3;
-    c.gridy = 3;
+    c.gridx++;
     display.add(new JLabel(" G "), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 1;
-    c.gridy = 5;
+    c.gridy++;
+    c.gridy++;
     display.add(new JLabel("Temperature : "), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 2;
-    c.gridy = 5;
+    c.gridx++;
     display.add(temperature, c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 3;
-    c.gridy = 5;
+    c.gridx++;
     display.add(new JLabel(" degrees Celcius"), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 1;
-    c.gridy = 7;
+    c.gridy++;
     display.add(new JLabel("GyroX  :"), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 2;
-    c.gridy = 7;
+    c.gridx++;
     display.add(gyroX, c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 3;
-    c.gridy = 7;
+    c.gridx++;
     display.add(new JLabel(" degrees/s"), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 1;
-    c.gridy = 8;
+    c.gridy++;
     display.add(new JLabel("GyroY  :"), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 2;
-    c.gridy = 8;
+    c.gridx++;
     display.add(gyroY, c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 3;
-    c.gridy = 8;
+    c.gridx++;
     display.add(new JLabel(" degrees/s"), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 1;
-    c.gridy = 9;
+    c.gridy++;
     display.add(new JLabel("GyroZ  :"), c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 2;
-    c.gridy = 9;
+    c.gridx++;
     display.add(gyroZ, c);
 
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 3;
-    c.gridy = 9;
+    c.gridx++;
     display.add(new JLabel(" degrees/s"), c);
-
+    
+		refreshControllers();
+		getDeviceBusList();
+		getDeviceAddressList();
   }
+  
+	public void getDeviceBusList() {
+		List<String> mbl = boundService.deviceBusList;
+		for (int i = 0; i < mbl.size(); i++) {
+			deviceBusList.addItem(mbl.get(i));
+		}
+	}
+	
+	public void getDeviceAddressList() {
+
+		List<String> mal = boundService.deviceAddressList;
+		for (int i = 0; i < mal.size(); i++) {
+			deviceAddressList.addItem(mal.get(i));
+		}
+	}
+	
 	public void refreshControllers() {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 
-				ArrayList<String> v = myMpu6050.refreshControllers();
+				List<String> v = boundService.refreshControllers();
 				controller.removeAllItems();
 				for (int i = 0; i < v.size(); ++i) {
 					controller.addItem(v.get(i));
 				}
-				controller.setSelectedItem(myMpu6050.getControllerName());
+				controller.setSelectedItem(boundService.getControllerName());
 			}
 		});
 	}

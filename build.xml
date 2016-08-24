@@ -145,7 +145,7 @@
 	<!-- FIXME - fixme with ivy -->
 	<path id="compile.classpath">
 		<pathelement location="bin" />
-		<pathelement location="${repo}/org.wikidata.wdtk/0.5.0/wdtk-client-0.5.0.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.7.0/wdtk-client-0.7.0.jar"/>
 		<pathelement location="${repo}/com.mxgraph.jgraph/1.6.1.2/jgraphx.jar"/>
 		<pathelement location="${repo}/com.sun.java3d/1.5.1/j3dcore.jar"/>
 		<pathelement location="${repo}/com.sun.java3d/1.5.1/j3dutils.jar"/>
@@ -289,7 +289,10 @@
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/webcam-capture-0.3.10.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/bridj-0.6.2.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/sosia.jar"/>
-		
+	
+                <!-- MJpeg frame grabber -->
+		<pathelement location="${repo}/net.sf.jipcam/0.9.1/jipcam-0.9.1.jar"/>
+	
 		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-arch-x86_64-w64-mingw32.jar"/>
 		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-noarch-5.4.jar"/>
 		<pathelement location="${repo}/com.coobird.thumbnail/0.4.2/thumbnailator-0.4.2-all.jar"/>
@@ -588,11 +591,7 @@
 	         <arg value="${build}/classes/resource/framework"/>
 	         <classpath>
 	         	<path refid="compile.classpath"/>
-	         	<path path="${build}/classes"/>
-	           <!-- pathelement location="dist/test.jar"/ 	         	
-		           <pathelement refid="compile.classpath"/>
-		           <pathelement path="${build}/classes"/>
-	         	-->
+	         	<path path="${build}/classes"/>	          
 	         </classpath>
 		</java>
 		

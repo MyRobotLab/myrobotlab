@@ -304,9 +304,9 @@ public class ServiceInterfaceTest {
 
   public static List<String> listAllServices() throws ClassNotFoundException {
     // TODO: should this be replaced with a call to Runtime ?
-    List<Class> classes = ServiceInterfaceTest.getClassesForPackage("org.myrobotlab.service");
+    List<Class<?>> classes = ServiceInterfaceTest.getClassesForPackage("org.myrobotlab.service");
     List<String> services = new ArrayList<String>();
-    for (Class c : classes) {
+    for (Class<?> c : classes) {
       // System.out.println("CLASS:" + c.toString());
       HashSet<String> superClasses = new HashSet<String>();
       Class x = c;
@@ -343,7 +343,7 @@ public class ServiceInterfaceTest {
    *           http://stackoverflow.com/questions/1498122/java-loop-on-all-the-
    *           classes-in-the-classpath
    */
-  private static List<Class> getClassesForPackage(String pckgname) throws ClassNotFoundException {
+  private static List<Class<?>> getClassesForPackage(String pckgname) throws ClassNotFoundException {
     // This will hold a list of directories matching the pckgname. There may be
     // more than one if a package is split over multiple jars/paths
     ArrayList<File> directories = new ArrayList<File>();
@@ -366,7 +366,7 @@ public class ServiceInterfaceTest {
       throw new ClassNotFoundException("IOException was thrown when trying to get all resources for " + pckgname);
     }
 
-    ArrayList<Class> classes = new ArrayList<Class>();
+    ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
     // For every directory identified capture all the .class files
     for (File directory : directories) {
       if (directory.exists()) {

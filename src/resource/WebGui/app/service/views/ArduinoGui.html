@@ -1,46 +1,30 @@
+<!-- begin status and control for board to be viewed in above all tabs -->
+
+		<div class="col-lg-8">
+		<port service-name="{{service.serial.name}}" ></port>		
+			     <select ng-model="boardType" ng-change="onBoardChange(boardType)" class="form-control">
+					<option>uno</option>
+					<option>mega</option>
+					<option>megaADK</option>
+				</select>    
+		</div>	
+	  <div class="col-md-4">
+	  </div>			
+
+	<div class="col-lg-12"><!-- TODO reduce this with show -->
+			{{service.boardType}} {{connectedStatus}} {{versionStatus}} <br>		
+			 <span ng-show="mrlComm.us != null">load {{mrlComm.us}}</span> 
+			 <span ng-show="mrlComm.sram != null">sram {{mrlComm.sram}}</span> 			  
+			 <span ng-show="mrlComm.deviceCount != null">devices {{mrlComm.deviceCount}}</span> 			  
+	</div>
+
+<!-- end status and control for board to be viewed in above all tabs -->
+
+<div class="col-lg-12">
 <uib-tabset active="active">
 	<!-- begin -->
-    <uib-tab index="0" heading="Status">
-		<div class="col-lg-4">
-		<div class="input-group">
-			   <input class="form-control" type="text" ng-model="portName" ng-disabled="isConnected" uib-typeahead="portName for portName in serial.possiblePorts | filter:$viewValue | limitTo:8"/>
-			   <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">refresh</button></span>
-			   <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</button></span>
-			   <span class="input-group-btn"><button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button></span>
-			   <!-- span class="input-group-btn"><button class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</button></span -->
-		</div>
-		</div>
-		<div class="col-lg-8">
-		{{statusLine}}
-		</div>
-    </uib-tab>
-	<!-- end -->
-	<!-- begin -->
-    <uib-tab heading="MRLComm.c">
-		 <button class="btn btn-default pull-right" clipboard text="service.sketch.data"><span class="glyphicon glyphicon-copy"></span>Copy</button> 
-		 <div class="col-lg-12" style="height: 600px;" ui-ace="{
-												   useWrapMode : true,
-												   showGutter: true,
-												   theme:'chrome',
-												   mode: 'c_cpp',
-												   firstLineNumber: 1,
-												   onLoad: aceLoaded,
-												   onChange: aceChanged}">
-		</div>
-    </uib-tab>
-	<!-- end -->
-	<!-- begin -->
-    <uib-tab heading="Settings">
-		   <label for="type">board</label>
-		   <select ng-model="board" ng-change="onBoardChange(board)" class="form-control">
-		   	  	<option>Uno</option>
-		   		<option>Mega</option>
-			</select>    
-    </uib-tab>
-	<!-- end -->
-	<!-- begin -->
     <uib-tab heading="Oscope">
- 		<oscope id="oscope" ng-model="service.name" ></oscope>
+ 		<oscope id="oscope" service-name="{{service.name}}" ></oscope>
     </uib-tab>
 	<!-- end -->
 	<!-- begin -->
@@ -49,4 +33,24 @@
     </uib-tab>
 	<!-- end -->
 
+		<!-- begin -->
+    <uib-tab heading="Settings">
+    	<span>Arduino IDE executable</span>
+    	
+    	<!-- AngularJs preferred access is through an object - most if not all data points should be in $scope.service - so "take" data from there -->
+    	Path<input type="text" class="form-control" ng-model="service.arduinoPath">
+
+    	<!-- current implementation will not work as a jar -->
+    	<!-- button class="btn btn-default pull-right" ng-click="msg.openMrlComm()">Open in IDE</button -->
+    	<button class="btn btn-default pull-right" ng-click="setArduinoPath(service.arduinoPath,portName,service.boardType)" ng-disabled="!portName">Upload</button>
+    	<button class="btn btn-default pull-right" ng-model="mrlComm.enableBoardStatus" uib-btn-checkbox ng-change="(mrlComm.enableBoardStatus)?msg.enableBoardStatus():msg.disableBoardStatus()">Status</button>
+    
+		<pre>
+{{service.uploadSketchResult}}
+		</pre>
+		   
+    </uib-tab>
+	<!-- end -->
+
 </uib-tabset>
+</div>

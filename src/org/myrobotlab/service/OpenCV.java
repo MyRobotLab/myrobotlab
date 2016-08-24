@@ -65,7 +65,10 @@ import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
+import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterFaceDetect2;
+import org.myrobotlab.opencv.OpenCVFilterPyramidDown;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.data.Point2Df;
@@ -755,13 +758,21 @@ public class OpenCV extends VideoSource {
 
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     // Runtime.start("right", "OpenCV");
-    opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
+   // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
+    //opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
+
     // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
-    opencv.setInputSource(INPUT_SOURCE_CAMERA);
+    // opencv.setInputSource(INPUT_SOURCE_CAMERA);
+    //opencv.setInputSource(INPUT_SOURCE_NETWORK);
+//    opencv.setInputFileName("http://192.168.4.112:8080/?action=stream");
+    //opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
-    // opencv.addFilter("facerec", "FaceRecognizer");
-
-    // OpenCVFilterFaceRecognizer facerec = new
+    //opencv.addFilter("facerec", "FaceRecognizer");
+    
+    OpenCVFilterPyramidDown pyramid = new OpenCVFilterPyramidDown("pyramid");
+    opencv.addFilter(pyramid);
+    OpenCVFilterFaceDetect2 facedetect2 = new OpenCVFilterFaceDetect2("facedetect2");
+    opencv.addFilter(facedetect2);
     // OpenCVFilterFaceRecognizer("facerec");
 
     // String trainingDir = "C:\\training";
@@ -772,7 +783,7 @@ public class OpenCV extends VideoSource {
 
     // VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
     // vs.attach(opencv);
-    // opencv.capture();
+    opencv.capture();
     // opencvLeft.capture();
     // opencvRight.capture();
 
@@ -867,6 +878,14 @@ public class OpenCV extends VideoSource {
     meta.addDependency("org.bytedeco.javacv", "1.1");
     meta.addDependency("pl.sarxos.webcam", "0.3.10");
     return meta;
+  }
+
+  public boolean isStreamerEnabled() {
+    return streamerEnabled;
+  }
+
+  public void setStreamerEnabled(boolean streamerEnabled) {
+    this.streamerEnabled = streamerEnabled;
   }
 
 }

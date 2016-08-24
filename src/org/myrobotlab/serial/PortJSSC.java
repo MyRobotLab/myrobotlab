@@ -24,7 +24,7 @@ import jssc.SerialPortList;
  *         Serial service or ports.
  * 
  */
-public class PortJSSC extends Port implements PortSource, SerialPortEventListener, Serializable {
+public class PortJSSC extends Port implements SerialControl, SerialPortEventListener, Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -113,7 +113,7 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
       port.openPort();
       port.setParams(rate, dataBits, stopBits, parity);
     } catch (Exception e) {
-      throw new IOException(e);
+      throw new IOException(String.format("could not open port %s  rate %d dataBits %d stopBits %d parity %d", portName, rate, dataBits, stopBits, parity), e);
     }
   }
 
@@ -122,10 +122,11 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 
       listening = false;
       readingThread = null;// is dead anyway
+      
       port.closePort();
       // FIXME - JSSC issue (IMHO)
       // if a listener doesn't exist it throws ? meh :P
-      port.removeEventListener();
+      // port.removeEventListener();
       // port.notifyOnDataAvailable(false);
     } catch (Exception e) {
       Logging.logError(e);

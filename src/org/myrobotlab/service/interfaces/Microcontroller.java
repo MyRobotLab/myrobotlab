@@ -1,24 +1,25 @@
 package org.myrobotlab.service.interfaces;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+// FIXME add SensorController
+public interface Microcontroller extends DeviceController {
 
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.service.data.Pin;
+	/**
+	 * Connects the DeviceController to something 'real' so it can provide the
+	 * control it needs
+	 * 
+	 * @param port
+	 * @throws Exception
+	 */
+	public void connect(String port) throws Exception;
 
-public interface Microcontroller {
+	public void connect(String port, int rate, int databits, int stopbits, int parity) throws Exception;
 
-  // connectivity
-  public void connect(String port);
-  public void disconnect();
-  public boolean isConnected();
+	public void disconnect();
 
-  // metadata about the controller
-  public String getBoardType();
-  public Integer getVersion();
-  public List<Pin> getPinList();
-  
-  public boolean sensorAttach(SensorDataPublisher sensor);
-  
+	public boolean isConnected();
+
+	public String getBoardType();
+
+	public Integer getVersion();
+
 }

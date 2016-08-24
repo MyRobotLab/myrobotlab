@@ -43,7 +43,7 @@ public class Pingdar extends Service {
   transient private UltrasonicSensor sensor;
   // TODO - changed to XDar - make RangeSensor interface -> publishRange
   // TODO - set default sample rate
-  private boolean isAttached = false;
+  // private boolean isAttached = false;
   private Long lastRange;
 
   private Integer lastPos;
@@ -82,33 +82,28 @@ public class Pingdar extends Service {
 
   // ----------- interface begin ----------------
 
-  public boolean attach(Arduino arduino, String port, UltrasonicSensor sensor, int trigPin, int echoPin, Servo servo, int servoPin) throws IOException {
+  public boolean attach(Arduino arduino, String port, UltrasonicSensor sensor, int trigPin, int echoPin, Servo servo, int servoPin) throws Exception {
     this.arduino = arduino;
     this.sensor = sensor;
     this.servo = servo;
 
-    if (isAttached) {
-      warn("already attached - detach first");
-    }
-
+   
     arduino.connect(port);
 
+    // TODO - FIX ME
+    /*
     if (!sensor.attach(port, trigPin, echoPin)) {
       error("could not attach sensor");
       return false;
     }
+    */
 
     // FIXME sensor.addRangeListener
     // publishRange --> onRange
     sensor.addRangeListener(this);
     servo.addServoEventListener(this);
-
-    if (!servo.attach(arduino, servoPin)) {
-      error("could not attach servo");
-      return false;
-    }
-
-    isAttached = true;
+    arduino.servoAttach(servo, servoPin);
+    
     return true;
   }
 
@@ -119,7 +114,7 @@ public class Pingdar extends Service {
   // complexity - no service creation
   // attach (port trigPin echoPin servoPin) <- min complexity - service
   // creation on peers
-  public boolean attach(String port, int trigPin, int echoPin, int servoPin) throws IOException {
+  public boolean attach(String port, int trigPin, int echoPin, int servoPin) throws Exception {
     return attach(arduino, port, sensor, trigPin, echoPin, servo, servoPin);
   }
 
@@ -199,10 +194,6 @@ public class Pingdar extends Service {
     this.sweepMax = sweepMax;
     this.step = 1; // FIXME STEP
 
-    if (!isAttached) {
-      error("not attached");
-      return false;
-    }
     // TODO - configurable speed
     sensor = getSensor();
     servo = getServo();

@@ -50,7 +50,7 @@ public class UltrasonicSensorTest {
 
     // Runtime.start("gui", "GUIService");
     sensor = (UltrasonicSensor) Runtime.start("arduino", "UltrasonicSensor");
-    arduino = sensor.getController();
+    arduino = (Arduino)sensor.getController();
     serial = arduino.getSerial();
 
     catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
@@ -206,7 +206,8 @@ public class UltrasonicSensorTest {
 
     String port = "COM15";
 
-    sensor.attach(port, triggerPin, echoPin);
+    // TODO FIXME
+    // sensor.attach(port, triggerPin, echoPin);
     // arduino.re
     // TODO - VIRTUAL NULL MODEM WITH TEST DATA !!!!
     // RECORD FROM ACTUAL SENSOR !!!
@@ -221,9 +222,7 @@ public class UltrasonicSensorTest {
 
     uart.stopRecording();
 
-    arduino.setLoadTimingEnabled(true);
-    arduino.setLoadTimingEnabled(false);
-
+   
     sensor.startRanging();
     log.info("here");
 

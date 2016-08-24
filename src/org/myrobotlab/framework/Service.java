@@ -102,6 +102,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     public Task(Task s) {
       this.msg = s.msg;
       this.interval = s.interval;
+      this.taskName = s.taskName;
     }
 
     @Override
@@ -113,10 +114,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
         Task t = new Task(this);
         // clear history list - becomes "new" message
         t.msg.historyList.clear();
-        if (timer == null) {
-          timer = new Timer(String.format("%s.timer", getName()));
+        Timer timer = tasks.get(taskName);
+        if (timer != null) {
+          //timer = new Timer(String.format("%s.timer", getName()));
+          timer.schedule(t, interval);
         }
-        timer.schedule(t, interval);
       }
     }
 

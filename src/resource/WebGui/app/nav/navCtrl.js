@@ -1,6 +1,6 @@
 angular.module('mrlapp.nav')
-        .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc', 'serviceSvc', 'noWorkySvc',
-            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, serviceSvc, noWorkySvc) {
+        .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc', 'serviceSvc', 'noWorkySvc','Flash',
+            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, serviceSvc, noWorkySvc, Flash) {
 
                 //connection state LED
                 $scope.connected = mrl.isConnected();
@@ -13,38 +13,19 @@ angular.module('mrlapp.nav')
 
                 // load type ahead service types
                 $scope.possibleServices = mrl.getPossibleServices();
-                // console.log('possibleServices', $scope.possibleServices);
 
                 // get platform information for display
                 $scope.platform = mrl.getPlatform();
 
-                //service statuses
-                $scope.statuslist = statusSvc.getStatuses();
+                // status info warn error
+                $scope.statusList = statusSvc.getStatuses();
                 statusSvc.subscribeToUpdates(function (status) {
                     $timeout(function () {
-                        $scope.firststatus = status.name + " " + status.level + " " + status.detail;
+                        // $scope.firststatus = status.name + " " + status.level + " " + status.detail;
+                        $scope.status = status;
+                        // var id = Flash.create('success', status.level + ' ' + status.name + ' ' + status.detail + ' ', 0, {class: 'custom-class', id: 'custom-id'}, true);
                     });
                 });
-
-                //START_Alerts
-                $scope.alerts = [
-//                    {type: 'danger', msg: 'Oh snap! Change a few things up and try submitting again.'},
-//                    {type: 'success', msg: 'Well done! You successfully read this important alert message.'}
-                ];
-
-                $scope.addAlert = function (type, msg) {
-                    $scope.alerts.push({
-                        type: type,
-                        msg: msg
-                    });
-                };
-
-                $scope.closeAlert = function (index) {
-                    $scope.alerts.splice(index, 1);
-                };
-
-                statusSvc.registerAddAlertCallback($scope.addAlert);
-                //END_Alerts
 
                 $scope.showAll = serviceSvc.showAll;
                 $scope.showminlist = false;
@@ -64,7 +45,6 @@ angular.module('mrlapp.nav')
                         animation: true,
                         templateUrl: 'nav/shutdown.html',
                         controller: 'shutdownCtrl',
-//                        size: 'sm',
                         resolve: {
                             type: function () {
                                 return type;
@@ -78,8 +58,6 @@ angular.module('mrlapp.nav')
                         animation: true,
                         templateUrl: 'nav/about.html',
                         controller: 'aboutCtrl'
-//                        size: 'sm',
-//                        scope: $scope
                     });
                 };
 
@@ -114,10 +92,6 @@ angular.module('mrlapp.nav')
                     item.posx = 15;
                     item.posy = 0;
                     item.notifyPositionChanged();
-//                    //scroll to selected service
-//                    $location.hash(item.name + '_' + item.panelname);
-//                    $anchorScroll();
-
                     $scope.searchSelectedPanel = '';
                 };
                 //END_Search

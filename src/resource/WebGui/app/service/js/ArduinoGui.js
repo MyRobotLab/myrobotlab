@@ -1,80 +1,109 @@
-angular.module('mrlapp.service.ArduinoGui', [])
-.controller('ArduinoGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
+angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('ArduinoGuiCtrl');
     var _self = this;
     var msg = this.msg;
-    
     $scope.editor = null ;
-    
-    $scope.statusLine = "";
     $scope.version = "unknown";
-    $scope.board = "";
+    $scope.boardType = "";
     $scope.image = "service/arduino/Uno.png";
-    
+    $scope.connectedStatus = "";
+    $scope.versionStatus = "";
+    $scope.boardStatus = 0;
+    $scope.singleModel = 0;    
+    // The MrlComm object !
+    // this represents the state of MrlComm
+    // and (potentially) all its state data
+    $scope.mrlComm = {
+        "boardType": null,
+        "deviceCount": null ,
+        "deviceList": null ,
+        "enableBoardStatus":false,
+        "sram": null ,
+        "us": null ,
+        "version": null
+    };
+    // Status - from the Arduino service
+    $scope.statusLine = "";
     this.updateState = function(service) {
         $scope.service = service;
-        $scope.board = service.board;
-        $scope.image = "service/arduino/" + service.board + ".png";
-        
+        $scope.boardType = service.boardType;
+        $scope.arduinoPath = service.arduinoIdePath;
+        $scope.image = "service/arduino/" + service.boardType + ".png";
+        var serial = $scope.service.serial;
         // === service.serial begin ===
         $scope.serialName = service.serial.name;
-        $scope.isConnected = ($scope.service.serial.portName != null );
-        $scope.isConnectedImage = ($scope.service.serial.portName != null ) ? "connected" : "disconnected";
-        $scope.connectText = ($scope.service.serial.portName == null ) ? "connect" : "disconnect";
+        $scope.isConnected = (serial.portName != null );
+        $scope.isConnectedImage = (serial.portName != null ) ? "connected" : "disconnected";
         if ($scope.isConnected) {
-            $scope.portName = $scope.service.serial.portName;
+            $scope.portName = serial.portName;
+            $scope.connectedStatus = "connected to " + serial.portName + " at " + serial.baudrate;
         } else {
-            $scope.portName = $scope.service.serial.lastPortName;
+            $scope.portName = serial.lastPortName;
+            $scope.connectedStatus = "disconnected";
         }
         // === service.serial begin ===
-        
-        $scope.statusLine = $scope.board;
-        if ($scope.isConnected) {
-            $scope.statusLine += ' connected to ' + $scope.portName + ' version ' + $scope.version;
+        if (service.mrlCommVersion != null ) {
+            $scope.versionStatus = " with firmware version " + service.mrlCommVersion;
         } else {
-            $scope.statusLine += ' disconnected'
+            $scope.versionStatus = null ;
         }
-        
-        //$scope.version = service.mrlCommVersion;
+        if ($scope.isConnected) {
+            msg.send("getVersion");
+        }
     }
     ;
     _self.updateState($scope.service);
-    
     this.onMsg = function(inMsg) {
         // TODO - make "super call" as below
         // this.constructor.prototype.onMsg.call(this, inMsg);
+        var data = inMsg.data[0];
         switch (inMsg.method) {
         case 'onState':
-            _self.updateState(inMsg.data[0]);
-            $scope.$apply();
-        case 'onPortNames':
-            $scope.possiblePorts = inMsg.data[0];
+            _self.updateState(data);
             $scope.$apply();
             break;
+        case 'onStatus':
+            // FIXME - onStatus needs to be handled in the Framework !!!
+            // $scope.statusLine = data;
+            break;
+        case 'onPinArray':
+         // a NOOP - but necessary 
+        break;
+        case 'onPortNames':
+            $scope.possiblePorts = data;
+            $scope.$apply();
+            break;
+        case 'onBoardInfo':
+            $scope.mrlCommStatus = data;
+            break;
         case 'onVersion':
-            $scope.version = inMsg.data[0];
+            $scope.version = data;
             if ($scope.version != service.mrlCommVersion) {
                 $scope.version = "expected version or MRLComm.c is " + service.mrlCommVersion + " board returned " + $scope.version + " please upload version " + service.mrlCommVersion;
             }
             $scope.$apply();
             break;
         case 'onRefresh':
-            $scope.possiblePorts = inMsg.data[0];
+            $scope.possiblePorts = data;
             $scope.$apply();
             break;
             // FIXME - this should be in a prototype    
         case 'onStatus':
             // backend update 
             // FIXME - SHOULD BE MODIFYING PARENT'S STATUS
-            // $scope.updateState(inMsg.data[0]);
+            // $scope.updateState(data);
             // $scope.$apply();
             break;
+        case 'onBoardStatus':
+                $scope.mrlComm.us = data.us;
+                $scope.mrlComm.sram = data.sram;
+                $scope.mrlComm.deviceCount = data.deviceCount;
+            break;
         case 'onPin':
-            
             break;
         case 'onTX':
             ++$scope.txCount;
-            $scope.tx += inMsg.data[0];
+            $scope.tx += data;
             $scope.$apply();
             break;
         default:
@@ -83,15 +112,17 @@ angular.module('mrlapp.service.ArduinoGui', [])
         }
     }
     ;
-    
     // $scope display methods
-    $scope.onBoardChange = function(board) {
-        if ($scope.service.board != board) {
-            msg.send('setBoard', board);
+    $scope.onBoardChange = function(boardType) {
+        if ($scope.service.boardType != boardType) {
+            msg.send('setBoard', boardType);
         }
     }
     ;
-    
+    $scope.setArduinoPath = function(arduinoPath, port, type) {
+        msg.send('uploadSketch', arduinoPath, port, type);
+    }
+    ;
     $scope.aceLoaded = function(editor) {
         // FIXME - can't we get a handle to it earlier ?
         $scope.editor = editor;
@@ -101,15 +132,17 @@ angular.module('mrlapp.service.ArduinoGui', [])
         editor.setValue($scope.service.sketch.data, -1);
     }
     ;
-    
-    $scope.aceChanged = function(e) {
+    $scope.aceChanged = function(e) {}
+    ;
+    $scope.oink = function(e) {
+        $log.info('hello');
     }
     ;
-    
- 
     // get version
     msg.subscribe('publishVersion');
-    msg.send("getVersion");
+    msg.subscribe('publishBoardInfo');
+    msg.subscribe('publishBoardStatus');
+   // msg.subscribe('publishSensorData');
     msg.subscribe(this);
 }
 ]);

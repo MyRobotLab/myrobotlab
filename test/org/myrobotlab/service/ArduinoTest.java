@@ -24,6 +24,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.interfaces.PinDefinition;
 import org.slf4j.Logger;
 
 /**
@@ -184,7 +185,7 @@ public class ArduinoTest {
   }
 
   @Test
-  public final void testConnect() {
+  public final void testConnect() throws IOException {
     log.info("testConnect - begin");
     arduino.disconnect();
     arduino.connect(vport);
@@ -225,7 +226,7 @@ public class ArduinoTest {
   }
 
   @Test
-  public final void testDisconnect() {
+  public final void testDisconnect() throws IOException {
     log.info("testDisconnect");
     arduino.disconnect();
     assertTrue(!arduino.isConnected());
@@ -441,7 +442,7 @@ public class ArduinoTest {
   }
 
   @Test
-  public final void testServoAttachServoInteger() {
+  public final void testServoAttachServoInteger() throws Exception {
     log.info("testServoAttachServoInteger");
     Servo servo = (Servo) Runtime.start("servo", "Servo");
 
@@ -453,7 +454,7 @@ public class ArduinoTest {
     // arduino.servoAttach(servo, servoPin);
 
     // common way
-    servo.attach(arduino, servoPin);
+    arduino.servoAttach(servo, servoPin);
 
     // another way
     // servo.setPin(servoPin);
@@ -462,11 +463,11 @@ public class ArduinoTest {
     assertTrue(servo.isAttached());
 
     // re-entrant test
-    servo.attach(arduino, servoPin);
+    arduino.servoAttach(servo, servoPin);
 
     assertTrue(servo.isAttached());
-    assertEquals(servoPin, servo.getPin().intValue());
-    assertEquals(arduino.getName(), servo.getControllerName());
+    // assertEquals(servoPin, servo.getPin().intValue());
+    assertEquals(arduino.getName(), servo.getController());
 
     assertEquals("servoAttach/7/9/5/115/101/114/118/111\n", uart.decode());
     servo.moveTo(0);
@@ -490,8 +491,8 @@ public class ArduinoTest {
     servo.attach();
     assertEquals("servoAttach/7/9/5/115/101/114/118/111\n", uart.decode());
     assertTrue(servo.isAttached());
-    assertEquals(servoPin, servo.getPin().intValue());
-    assertEquals(arduino.getName(), servo.getControllerName());
+    //assertEquals(servoPin, servo.getPin().intValue());
+    assertEquals(arduino.getName(), servo.getController());
 
     servo.moveTo(90);
     assertEquals("servoWrite/7/90\n", uart.decode());
@@ -543,7 +544,7 @@ public class ArduinoTest {
 
     assertEquals(Arduino.BOARD_TYPE_MEGA, arduino.getBoardType());
 
-    List<Pin> pins = arduino.getPinList();
+    List<PinDefinition> pins = arduino.getPinList();
     assertEquals(70, pins.size());
 
     arduino.setBoard(boardType);
@@ -558,7 +559,7 @@ public class ArduinoTest {
 
     assertEquals(Arduino.BOARD_TYPE_UNO, arduino.getBoardType());
 
-    List<Pin> pins = arduino.getPinList();
+    List<PinDefinition> pins = arduino.getPinList();
     assertEquals(20, pins.size());
 
     arduino.setBoard(boardType);

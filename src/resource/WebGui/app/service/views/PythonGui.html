@@ -1,22 +1,14 @@
 <!-- file menu button bar begin -->
 <div class="btn-group">
-    
-
 <div ng-intro-options="IntroOptions" ng-intro-method="CallMe"
 		     ng-intro-oncomplete="CompletedEvent" ng-intro-onexit="ExitEvent"
 		     ng-intro-onchange="ChangeEvent" ng-intro-onbeforechange="BeforeChangeEvent"
 		     ng-intro-onafterchange="AfterChangeEvent"
 		     ng-intro-autostart="ShouldAutoStart"></div>
 
-
-<a class="btn btn-large btn-success" ng-click="CallMe();">Demo</a>
-		
-
     <!-- python example resource scripts begin -->
     <div class="btn-group" uib-dropdown is-open="status.isopen">
-    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">    
-	  <span data-intro="here are some examples you can play with" data-position="top" class="glyphicon glyphicon-open">examples</span>
-    </button>	
+    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">examples</button>	
     <ul uib-dropdown-menu>
       <li ng-repeat="(key, value) in service.exampleUrls" ng-class="navClass('{{key}}')"> <a href='' ng-click="msg.loadPyRobotLabServiceScript(key)">{{key}}</a>       
         </li>
@@ -26,10 +18,8 @@
 
     <!-- python open resource scripts begin -->
     <div class="btn-group" uib-dropdown is-open="status.isopen">
-    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">
-      <span data-intro="open scripts from your .myrobotlab directory" data-position="top" class="glyphicon glyphicon-open">open</span><!-- span class="caret"></span-->
-    </button>	
-    <ul uib-dropdown-menu>
+    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">open</button>	
+    <ul uib-dropdown-menu>      
       <li ng-repeat="script in service.localPythonFiles" ng-class="navClass('{{script}}')"> <a href='' ng-click="msg.loadUserScript(script)">{{script}}</a>       
         </li>
     </ul>
@@ -38,16 +28,26 @@
 
     <!-- python example resource files end -->
 
-  <button type="button" class="btn btn-default" ng-click="msg.exec(editor.getValue())"><span class="glyphicon glyphicon-play"></span>execute</button>
+  <button type="button" class="btn btn-default" ng-click="exec()"><span class="glyphicon glyphicon-play"></span>execute</button>
   <button type="button" class="btn btn-default" ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
   <button type="button" class="btn btn-default" ng-click="msg.saveCurrentScript()"><span class="glyphicon glyphicon-save"></span>save</button>
   
 </div>
 <!-- file menu button bar end theme:'twilight',--> 
+<br/>
 
-Active index: {{ activeTabIndex  }} <br /> script count: {{ scripts.length }} <br />
+<form class="form-inline">
+  <div class="form-group">
+    <label for="exampleInputName2">script location</label>
+    <input type="text" class="form-control" id="exampleInputName2" ng-model="service.localScriptDir"/>
+    <button type="button" class="btn btn-default" ng-click="msg.setLocalScriptDir(service.localScriptDir)">update</button>
+  </div>
+</form>
+
+<br/>
+Active index: {{ activeTabIndex  }}  script count: {{ scripts.length }} <br />
             
-<input type="button" value="Add Script" ng-click="addScript()" />
+<input class="btn btn-default" type="button" value="Add Script" ng-click="addScript()" />
 
 <uib-tabset active="activeTabIndex">
 	<uib-tab ng-repeat="script in scripts" heading="{{script.name}}">
