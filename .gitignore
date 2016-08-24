@@ -46,3 +46,7 @@
 /opennlp/
 Thumbs.db
 /src/resource/WebGui/nbproject/private/
+manifest.mf
+nbbuild.xml
+nbproject/
+untitled.py
