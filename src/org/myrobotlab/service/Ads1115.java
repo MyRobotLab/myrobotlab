@@ -29,7 +29,6 @@ import org.slf4j.Logger;
  * 
  * @author Mats
  * 
- *         References :
  *         https://learn.adafruit.com/adafruit-4-channel-adc-breakouts
  *         /programming The code here is to a large extent based on the Adafruit
  *         C++ libraries here: https://github.com/adafruit/Adafruit_ADS1X15
@@ -74,22 +73,26 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	public class Publisher extends Thread {
 
 		public Publisher(String name) {
-			super(String.format("%s.sweeper", name));
+			super(String.format("%s.publisher", name));
 		}
 
 		@Override
 		public void run() {
 
+			log.info(String.format("New publisher instance started at a sample frequency of %s Hz", sampleFreq));
+			long sleepTime = 1000 / (long) sampleFreq;
+			isPublishing = true;
 			try {
 				while (isPublishing) {
-					Thread.sleep((long) sampleRate * 1000);
+					Thread.sleep(sleepTime);
+					publishPinData();
 				}
 
 			} catch (Exception e) {
-				isPublishing = false;
 				if (e instanceof InterruptedException) {
 					info("shutting down Publisher");
 				} else {
+					isPublishing = false;
 					logException(e);
 				}
 			}
@@ -99,7 +102,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 			int pinDataCnt = 4;
 			PinData[] pinArray = new PinData[pinDataCnt];
-			
+
 			for (int i = 0; i < pinArray.length; ++i) {
 				PinData pinData = new PinData(i, read(i));
 				pinArray[i] = pinData;
@@ -388,7 +391,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	 */
 	Map<String, Set<Integer>>									pinSets													= new HashMap<String, Set<Integer>>();
 
-	double																		sampleRate											= 1;																													// Set
+	double																		sampleFreq											= 1;																													// Set
 																																																																					// default
 																																																																					// sample
 																																																																					// rate
@@ -958,11 +961,13 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 			return;
 		}
 
+		log.info(String.format("enablePin %s", address));
 		PinDefinition pin = pinIndex.get(address);
 		pin.setEnabled(true);
 		invoke("publishPinDefinition", pin);
 
 		if (!isPublishing) {
+			log.info(String.format("Starting a new publisher instance"));
 			publisher = new Publisher(getName());
 			publisher.start();
 		}
@@ -971,7 +976,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	@Override
 	public void disablePin(int address) {
 		if (controller == null) {
-			error("must be connected to disable pins");
+			log.error("Must be connected to disable pins");
 			return;
 		}
 		PinDefinition pin = pinIndex.get(address);
@@ -990,21 +995,20 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	public Map<String, PinDefinition> createPinList() {
-		pinMap = new HashMap<String, PinDefinition>();
+		pinMap   = new HashMap<String, PinDefinition>();
 		pinIndex = new HashMap<Integer, PinDefinition>();
 
 		for (int i = 0; i < 4; ++i) {
 			PinDefinition pindef = new PinDefinition();
-			String name = null;
+			String name = String.format("A%d", i);
 			pindef.setRx(false);
 			pindef.setTx(false);
 			pindef.setAnalog(true);
-			name = String.format("A%d", i);
 			pindef.setPwm(false);
 			pindef.setName(name);
 			pindef.setAddress(i);
-			pindef.setMode("INPUT"); // Input
-			pinMap.put(String.format("A%d", i), pindef);
+			pindef.setMode("INPUT"); 
+			pinMap.put(name, pindef);
 			pinIndex.put(i, pindef);
 		}
 
@@ -1027,13 +1031,21 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	 */
 	public double setSampleRate(double rate) {
 		if (rate < 0) {
-			log.error(String.format("setSampleRate. Rate must be > 0. Ignored %s, returning to %s", rate, this.sampleRate));
-			return this.sampleRate;
+			log.error(String.format("setSampleRate. Rate must be > 0. Ignored %s, returning to %s", rate, this.sampleFreq));
+			return this.sampleFreq;
 		}
-		this.sampleRate = rate;
+		this.sampleFreq = rate;
 		return rate;
 	}
-
+	/**
+	 * method to communicate changes in pinmode or state changes
+	 * @param pinDef
+	 * @return
+	 */
+	public PinDefinition publishPinDefinition(PinDefinition pinDef){
+		return pinDef;
+	}
+	
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
