@@ -55,8 +55,8 @@ angular.module('mrlapp.service').directive('port', ['$compile', 'mrl', '$log', f
             }
             // onMsg
             ;
-            scope.connect = function() {
-                mrl.sendTo(scope.service.name, 'connect');
+            scope.connect = function(portName, rate, dataBits, stopBits, parity) {
+                mrl.sendTo(scope.service.name, 'connect', portName, rate, dataBits, stopBits, parity);
             }
             ;
             scope.refresh = function() {
