@@ -9,15 +9,21 @@ angular.module('mrlapp.service.PythonGui', [])
     
     // init scope values
     $scope.output = '';
+
+    // $scope.currentScript = null;
+
+    /*
     $scope.currentScript = {
         name: 'untitled',
         code: ''
     };
+    */
     
     $scope.activeScriptIndex = 0;
 
     $scope.scripts = [];
-    $scope.scripts.push($scope.currentScript);
+
+    // $scope.scripts.push($scope.currentScript);
     
     
     // the awesome ace editor 1
@@ -38,8 +44,10 @@ angular.module('mrlapp.service.PythonGui', [])
         // which will show on the html service body
         $scope.service = service;
         // TODO make something like "script"
+        if (service.currentScript != null)
         $scope.editor.setValue(service.currentScript.code);
-        $scope.currentScript = service.currentScript; 
+        // $scope.currentScript = service.currentScript; 
+        $scope.scripts.push(service.currentScript.code);
     }
     ;
     

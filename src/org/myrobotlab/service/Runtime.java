@@ -1260,7 +1260,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     System.out.println("-logLevel <DEBUG | INFO | WARNING | ERROR> # log level");
     System.out.println("-service <name1 Type1 name2 Type2 ...>     # create and start list of services, e.g. -service gui GUIService");
     System.out.println("example:");
-    String helpString = "java -Djava.library.path=./libraries/native/x86.32.windows org.myrobotlab.service.Runtime -service gui GUIService -logLevel INFO -logToConsole";
+    String helpString = "java -Djava.library.path=./libraries/native/x86.32.windows org.myrobotlab.service.Runtime -service webgui WebGui gui GUIService -logLevel INFO -logToConsole";
     System.out.println(helpString);
   }
 
