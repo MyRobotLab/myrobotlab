@@ -48,27 +48,6 @@ import org.slf4j.Logger;
  */
 public class Python extends Service {
 
-	int interpreterThreadCount = 0;
-
-	List<File> currentFileList = new ArrayList<File>();
-
-	String localScriptDir = new File(".").getAbsolutePath();
-
-	Map<String, String> exampleUrls = new TreeMap<String, String>();
-	List<String> localPythonFiles = new ArrayList<String>();
-
-	/**
-	 * current working directory root there are multiple filesystems we can load
-	 * scripts from github urls | jar:file /resources | /resource exploded |
-	 * .myrobotlab directory | workind directory | root of file system this
-	 * variable is to tell which root to begin with
-	 */
-
-	/**
-	 * current working directory
-	 */
-	String cwd = null;
-
 	/**
 	 * this thread handles all callbacks to Python process all input and sets
 	 * msg handles
@@ -90,6 +69,8 @@ public class Python extends Service {
 					Message msg = inputQueue.take();
 
 					try {
+						// FIXME - remove all msg_ .. its the old way .. :P
+
 						// serious bad bug in it which I think I fixed - the
 						// msgHandle is really the data coming from a callback
 						// it can originate from the same calling function such
@@ -156,9 +137,9 @@ public class Python extends Service {
 	}
 
 	class PIThread extends Thread {
-		public boolean executing = false;
 		private String code;
 		private PyObject compiledCode;
+		public boolean executing = false;
 
 		PIThread(String name, PyObject compiledCode) {
 			super(name);
@@ -207,13 +188,11 @@ public class Python extends Service {
 		}
 	}
 
-	public void finishedExecutingScript() {
-	}
-
 	public static class Script implements Serializable {
-		private static final long serialVersionUID = 1L;
-		private String name;
-		private String code;
+		static final long serialVersionUID = 1L;
+		String code;
+		String location;
+		String name;
 
 		public Script(String name, String script) {
 			this.name = name;
@@ -245,40 +224,23 @@ public class Python extends Service {
 		}
 	}
 
-	private static final long serialVersionUID = 1L;
-
 	public final static transient Logger log = LoggerFactory.getLogger(Python.class);
-
-	transient PythonInterpreter interp = null;
-
-	transient PIThread interpThread = null;
-
-	// FIXME - this is messy !
-	transient HashMap<String, Script> scripts = new HashMap<String, Script>();
-
-	transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
-
-	transient InputQueueThread inputQueueThread;
 	// TODO this needs to be moved into an actual cache if it is to be used
 	// Cache of compile python code
 	private static final transient HashMap<String, PyObject> objectCache;
 
+	/**
+	 * current working directory root there are multiple filesystems we can load
+	 * scripts from github urls | jar:file /resources | /resource exploded |
+	 * .myrobotlab directory | workind directory | root of file system this
+	 * variable is to tell which root to begin with
+	 */
+
+	private static final long serialVersionUID = 1L;
+
 	static {
 		objectCache = new HashMap<String, PyObject>();
 	}
-
-	String inputScript = null;
-	String setupScript = null;
-	String msgHandlerScript = null;
-
-	private Script currentScript = new Script("untitled.py", "");
-	boolean pythonConsoleInitialized = false;
-
-	String initialServiceScript = "";
-
-	String rootPath = null;
-
-	String modulesDir = "pythonModules";
 
 	/**
 	 * Get a compiled version of the python call.
@@ -304,9 +266,70 @@ public class Python extends Service {
 		return compiled;
 	}
 
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Python.class.getCanonicalName());
+		meta.addDescription("Python ID");
+		meta.addCategory("programming", "control");
+
+		// Its now part of myrobotlab.jar - unzipped in
+		// build.xml (part of myrobotlab.jar now)
+		// meta.addDependency("org.python.core", "2.7.0");
+
+		return meta;
+	}
+
 	public static final String getSafeReferenceName(String name) {
 		return name.replaceAll("[/ .-]", "_");
 	}
+
+	/**
+	 * pyrobotlab python service urls - created for referencing script
+	 */
+	Map<String, String> exampleUrls = new TreeMap<String, String>();
+
+	transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
+	transient InputQueueThread inputQueueThread;
+	transient PythonInterpreter interp = null;
+	transient PIThread interpThread = null;
+
+	int interpreterThreadCount = 0;
+
+	/**
+	 * local current directory of python script any new python script will get
+	 * localScriptDir prefix
+	 */
+	String localScriptDir = new File(getCfgDir()).getAbsolutePath();
+
+	/**
+	 * local pthon files of current script directory
+	 */
+	List<String> localPythonFiles = new ArrayList<String>();
+
+	/**
+	 * default location for python modules
+	 */
+	String modulesDir = "pythonModules";
+
+	boolean pythonConsoleInitialized = false;
+
+	/**
+	 * opened scripts
+	 */
+	HashMap<String, Script> openedScripts = new HashMap<String, Script>();
+
+	/**
+	 * current script which will be executed / saved / etc..
+	 */
+	Script currentScript;
 
 	/**
 	 * 
@@ -335,32 +358,13 @@ public class Python extends Service {
 			initScript.append(serviceScript);
 		}
 
-		initialServiceScript = initScript.toString();
-		exec(initialServiceScript, false); // FIXME - shouldn't be done in the
-		// constructor - e.g.
-		// "initServicesScripts()"
-		// register for addition of new services
+		exec(initScript.toString(), false); // FIXME - shouldn't be done in the
 
-		// TODO subscribe("/registered");
 		subscribe(Runtime.getInstance().getName(), "registered");
 		log.info(String.format("created python %s", getName()));
 
 		log.info("creating module directory pythonModules");
 		new File("pythonModules").mkdir();
-
-		// get file references from Python resources
-		// FIXME - add root defintions - like below
-		/*
-		 * currentFileList.add(new File("examples")); currentFileList.add(new
-		 * File("local")); currentFileList.add(new File("pyrobotlab"));
-		 */
-		/*
-		 * currentFileList[3] = new File("home"); currentFileList[4] = new
-		 * File("pyrobotlab");
-		 */
-		/*
-		 * try { setCwd("examples"); } catch (Exception e) { error(e); }
-		 */
 
 		// I love ServiceData !
 		ServiceData sd = ServiceData.getLocalInstance();
@@ -374,9 +378,18 @@ public class Python extends Service {
 		}
 
 		localPythonFiles = getFileListing();
+		
+		// open a new untitled script
+		if (currentScript == null){
+			openScript(localScriptDir + File.separator + "untitledS.py", "");
+		}
 	}
-
-	// PyObject interp.eval(String s) - for verifying?
+	
+	public void openScript(String scriptName, String code){
+		currentScript = new Script(scriptName, code);
+		openedScripts.put(scriptName, currentScript);
+		broadcastState();
+	}
 
 	/**
 	 * append more Python to the current script
@@ -421,51 +434,28 @@ public class Python extends Service {
 		// ??? - do we need to extract {jar}/Lib/site.py ???
 
 		Properties props = new Properties();
-		if (!FileIO.isJar()) {
-			props.put("python.home", "build/classes"); // hmm should be /Lib
-														// ./Lib
-														// classpath relative
-														// path or
-														// other ?
-		} // else undefined and the Agent will give you a bogus jython.jar :P
-		props.put("python.console.encoding", "UTF-8"); // Used to prevent:
-														// console:
-														// Failed to install '':
-														// java.nio.charset.UnsupportedCharsetException:
-														// cp0.
-		props.put("python.security.respectJavaAccessibility", "false"); // don't
-																		// respect
-																		// java
-																		// accessibility,
-																		// so
-																		// that
-																		// we
-																		// can
-																		// access
-																		// protected
-																		// members
-																		// on
-																		// subclasses
-		props.put("python.import.site", "false");
 
-		// Build up the python.path
 		/*
-		 * StringBuilder sb = new StringBuilder();
-		 * sb.append(System.getProperty("java.class.path")); for (String p :
-		 * pythonPath) { sb.append(":").append(p);
+		 * Used to prevent: console: Failed to install '':
+		 * java.nio.charset.UnsupportedCharsetException: cp0.
 		 */
+		props.put("python.console.encoding", "UTF-8");
+
+		/*
+		 * don't respect java accessibility, so that we can access protected
+		 * members on subclasses
+		 */
+		props.put("python.security.respectJavaAccessibility", "false");
+		props.put("python.import.site", "false");
 
 		Properties preprops = System.getProperties();
 
 		PythonInterpreter.initialize(preprops, props, new String[0]);
 
-		// PySystemState.initialize();
 		interp = new PythonInterpreter();
 
 		PySystemState sys = Py.getSystemState();
-		if (rootPath != null) {
-			sys.path.append(new PyString(rootPath));
-		}
+
 		if (modulesDir != null) {
 			sys.path.append(new PyString(modulesDir));
 		}
@@ -476,6 +466,13 @@ public class Python extends Service {
 				+ String.format("myService = Runtime.getService(\"%s\")\n", getName());
 		PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
 		interp.exec(compiled);
+	}
+
+	public String eval(String method) {
+		String jsonMethod = String.format("%s()", method);
+		PyObject o = interp.eval(jsonMethod);
+		String ret = o.toString();
+		return ret;
 	}
 
 	public void exec() {
@@ -554,12 +551,12 @@ public class Python extends Service {
 		}
 	}
 
-	public void execAndWait(String code) {
-		exec(code, true, true);
-	}
-
 	public void execAndWait() {
 		exec(currentScript.code, true, true);
+	}
+
+	public void execAndWait(String code) {
+		exec(code, true, true);
 	}
 
 	/**
@@ -589,16 +586,12 @@ public class Python extends Service {
 		inputQueue.add(msg);
 	}
 
-	public String eval(String method) {
-		String jsonMethod = String.format("%s()", method);
-		PyObject o = interp.eval(jsonMethod);
-		String ret = o.toString();
-		return ret;
-	}
-
 	public void execResource(String filename) {
 		String script = FileIO.resourceToString(filename);
 		exec(script);
+	}
+
+	public void finishedExecutingScript() {
 	}
 
 	/**
@@ -640,19 +633,6 @@ public class Python extends Service {
 		return null;
 	}
 
-	public void setLocalScriptDir(String path) {
-		File dir = new File(path);
-		if (!dir.isDirectory()){
-			error("%s is not a directory");
-		}
-		
-		localScriptDir = dir.getAbsolutePath();
-		
-		getFileListing();
-		save();
-		broadcastState();
-	}
-
 	/**
 	 * Get the current script.
 	 * 
@@ -666,6 +646,31 @@ public class Python extends Service {
 		boolean ret = loadScriptFromFile(filename);
 		exec();
 		return ret;
+	}
+
+	/**
+	 * load a script from the myrobotlab.jar - location of example scripts are
+	 * /resource/Python/examples
+	 * 
+	 * @param filename
+	 *            name of file to load
+	 * @return true if successfully loaded
+	 */
+	public void loadPyRobotLabServiceScript(String serviceType) {
+		String serviceScript = GitHub.getPyRobotLabScript(serviceType);
+		loadScript(String.format("%s.py", serviceType), serviceScript);
+	}
+
+	public boolean loadScript(String scriptName, String code) {
+		if (code != null) {
+			log.info("replacing current script with {}", scriptName);
+			// currentScript = new Script(scriptName, newCode);
+			openScript(scriptName, code);
+			return true;
+		} else {
+			error(String.format("%s a not valid script", scriptName));
+			return false;
+		}
 	}
 
 	/**
@@ -685,31 +690,6 @@ public class Python extends Service {
 		return loadScript(filename, data);
 	}
 
-	public boolean loadScript(String scriptName, String newCode) {
-		if (newCode != null) {
-			log.info("replacing current script with {}", scriptName);
-			currentScript = new Script(scriptName, newCode);
-			broadcastState();
-			return true;
-		} else {
-			error(String.format("%s a not valid script", scriptName));
-			return false;
-		}
-	}
-
-	/**
-	 * load a script from the myrobotlab.jar - location of example scripts are
-	 * /resource/Python/examples
-	 * 
-	 * @param filename
-	 *            name of file to load
-	 * @return true if successfully loaded
-	 */
-	public void loadPyRobotLabServiceScript(String serviceType) {
-		String serviceScript = GitHub.getPyRobotLabScript(serviceType);
-		loadScript(String.format("%s.py", serviceType), serviceScript);
-	}
-
 	/**
 	 * Loads script from the users .myrobotlab directory - maintain the only
 	 * non-absolute filename
@@ -726,6 +706,20 @@ public class Python extends Service {
 		} else {
 			error(String.format("%s a not valid script", filename));
 		}
+	}
+
+	public void onRegistered(ServiceInterface s) {
+
+		String registerScript = "";
+
+		// load the import
+		// RIXME - RuntimeGlobals & static values for unknown
+		if (!"unknown".equals(s.getSimpleName())) {
+			registerScript = String.format("from org.myrobotlab.service import %s\n", s.getSimpleName());
+		}
+
+		registerScript += String.format("%s = Runtime.getService(\"%s\")\n", getSafeReferenceName(s.getName()), s.getName());
+		exec(registerScript, false);
 	}
 
 	/**
@@ -769,20 +763,6 @@ public class Python extends Service {
 		return data;
 	}
 
-	public void onRegistered(ServiceInterface s) {
-
-		String registerScript = "";
-
-		// load the import
-		// RIXME - RuntimeGlobals & static values for unknown
-		if (!"unknown".equals(s.getSimpleName())) {
-			registerScript = String.format("from org.myrobotlab.service import %s\n", s.getSimpleName());
-		}
-
-		registerScript += String.format("%s = Runtime.getService(\"%s\")\n", getSafeReferenceName(s.getName()), s.getName());
-		exec(registerScript, false);
-	}
-
 	public boolean saveAndReplaceCurrentScript(String name, String code) {
 		currentScript.name = name;
 		currentScript.code = code;
@@ -791,7 +771,7 @@ public class Python extends Service {
 
 	public boolean saveCurrentScript() {
 		try {
-			FileOutputStream out = new FileOutputStream(getCFGDir() + File.separator + currentScript.name);
+			FileOutputStream out = new FileOutputStream(localScriptDir + File.separator + currentScript.name);
 			out.write(currentScript.code.getBytes());
 			out.close();
 			return true;
@@ -799,6 +779,19 @@ public class Python extends Service {
 			Logging.logError(e);
 		}
 		return false;
+	}
+
+	public void setLocalScriptDir(String path) {
+		File dir = new File(path);
+		if (!dir.isDirectory()) {
+			error("%s is not a directory");
+		}
+
+		localScriptDir = dir.getAbsolutePath();
+
+		getFileListing();
+		save();
+		broadcastState();
 	}
 
 	@Override
@@ -843,27 +836,6 @@ public class Python extends Service {
 	public void stopService() {
 		super.stopService();
 		stop();// release the interpeter
-	}
-
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = new ServiceType(Python.class.getCanonicalName());
-		meta.addDescription("Python ID");
-		meta.addCategory("programming", "control");
-
-		// Its now part of myrobotlab.jar - unzipped in
-		// build.xml (part of myrobotlab.jar now)
-		// meta.addDependency("org.python.core", "2.7.0");
-
-		return meta;
 	}
 
 	public static void main(String[] args) {

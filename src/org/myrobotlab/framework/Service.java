@@ -421,7 +421,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    * @return
    */
-  public static String getCFGDir() {
+  public static String getCfgDir() {
     return cfgDir;
   }
 
