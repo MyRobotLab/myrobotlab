@@ -1,7 +1,11 @@
 package org.myrobotlab.kinematics;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Servo;
+import org.myrobotlab.math.MathUtils;
 import org.slf4j.Logger;
+
+//import marytts.util.math.MathUtils;
 
 /**
  * A link class to encapsulate the D-H parameters for a given link in a robotic
@@ -32,6 +36,8 @@ public class DHLink {
 
   public transient final static Logger log = LoggerFactory.getLogger(DHLink.class);
 
+  public Servo servo=null;
+  
   // private Matrix m;
   // TODO: add max/min angle
   public DHLink(String name, double d, double r, double theta, double alpha) {
@@ -46,6 +52,19 @@ public class DHLink {
     this.type = DHLinkType.REVOLUTE;
     // m = resolveMatrix();
   }
+  
+  public DHLink(DHLink copy){
+    this.d = copy.d;
+    this.theta = copy.theta;
+    this.r = copy.r;
+    this.alpha = copy.alpha;
+    this.type = copy.type;
+    this.min = copy.min;
+    this.max = copy.max;
+    this.name = copy.name;
+    //don't copy the servo;
+  }
+  
 
   /**
    * return a 4x4 homogenous transformation matrix for the given D-H parameters
@@ -54,10 +73,13 @@ public class DHLink {
    */
   public Matrix resolveMatrix() {
     Matrix m = new Matrix(4, 4);
-
+    double targetOutput=0;
+    if(servo!=null){
+      targetOutput = servo.targetOutput;
+    }
     // elements we need
-    double cosTheta = Math.cos(theta);
-    double sinTheta = Math.sin(theta);
+    double cosTheta = Math.cos(theta +  MathUtils.degToRad(targetOutput));
+    double sinTheta = Math.sin(theta +  MathUtils.degToRad(targetOutput));
     double cosAlpha = Math.cos(alpha);
     double sinAlpha = Math.sin(alpha);
 
@@ -230,4 +252,7 @@ public class DHLink {
     this.name = name;
   }
 
+  public void setServo(Servo servo) {
+    this.servo = servo;
+  }
 }
