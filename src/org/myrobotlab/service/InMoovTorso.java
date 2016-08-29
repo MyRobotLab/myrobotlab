@@ -124,12 +124,18 @@ public class InMoovTorso extends Service {
   }
 
   public void detach() {
-    topStom.detach();
-    sleep(InMoov.attachPauseMs);
-    midStom.detach();
-    sleep(InMoov.attachPauseMs);
-    lowStom.detach();
-    sleep(InMoov.attachPauseMs);
+    if (topStom != null) {
+      topStom.detach();
+      sleep(InMoov.attachPauseMs);
+    } 
+    if (midStom != null) {
+      midStom.detach();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (lowStom != null) {
+      lowStom.detach();
+      sleep(InMoov.attachPauseMs);
+    }
   }
 
   public long getLastActivityTime() {
