@@ -121,15 +121,25 @@ public class InMoovHead extends Service {
 
   public void detach() {
     sleep(InMoov.attachPauseMs);
-    rothead.detach();
-    sleep(InMoov.attachPauseMs);
-    neck.detach();
-    sleep(InMoov.attachPauseMs);
-    eyeX.detach();
-    sleep(InMoov.attachPauseMs);
-    eyeY.detach();
-    sleep(InMoov.attachPauseMs);
-    jaw.detach();
+    if (rothead != null) {
+      rothead.detach();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (neck != null) {
+      neck.detach();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (eyeX != null) {
+      eyeX.detach();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (eyeY != null) {
+      eyeY.detach();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (jaw != null) {
+      jaw.detach();
+    }
   }
 
   public long getLastActivityTime() {
