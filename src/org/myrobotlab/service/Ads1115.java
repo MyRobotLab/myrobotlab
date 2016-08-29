@@ -17,11 +17,11 @@ import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.slf4j.Logger;
 
 /**
@@ -90,7 +90,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 			} catch (Exception e) {
 				if (e instanceof InterruptedException) {
-					info("shutting down Publisher");
+					log.info("Shutting down Publisher");
 				} else {
 					isPublishing = false;
 					logException(e);
@@ -100,7 +100,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 		void publishPinData() {
 
-			int pinDataCnt = 4;
 			PinData[] pinArray = new PinData[pinDataCnt];
 
 			for (int i = 0; i < pinArray.length; ++i) {
@@ -130,6 +129,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	// Publisher
 	boolean																		isPublishing										= false;
 	transient Thread													publisher												= null;
+	int pinDataCnt = 4;
 	//
 
 	private static final long									serialVersionUID								= 1L;
@@ -141,7 +141,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	 * public static final byte INA219_SHUNTVOLTAGE = 0x01; public static final
 	 * byte INA219_BUSVOLTAGE = 0x02;
 	 */
-	public List<String>												deviceAddressList								= Arrays.asList("0x48", "0x48", "0x4A", "0x4B");
+	public List<String>												deviceAddressList								= Arrays.asList("0x48", "0x49", "0x4A", "0x4B");
 
 	public String															deviceAddress										= "0x48";
 
@@ -482,9 +482,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 	public void unsetController() {
 		controller = null;
-		controllerName = null;
-		this.deviceBus = null;
-		this.deviceAddress = null;
 		isAttached = false;
 		broadcastState();
 	}
@@ -880,7 +877,8 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 	@Override
 	public int read(int address) {
-		return readADC_SingleEnded(address);
+		pinIndex.get(address).setValue(readADC_SingleEnded(address));
+		return pinIndex.get(address).getValue();
 	}
 
 	@Override
@@ -986,7 +984,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 	@Override
 	public void disablePins() {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < pinDataCnt; i++) {
 			disablePin(i);
 		}
 		if (isPublishing) {
@@ -998,7 +996,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		pinMap   = new HashMap<String, PinDefinition>();
 		pinIndex = new HashMap<Integer, PinDefinition>();
 
-		for (int i = 0; i < 4; ++i) {
+		for (int i = 0; i < pinDataCnt; ++i) {
 			PinDefinition pindef = new PinDefinition();
 			String name = String.format("A%d", i);
 			pindef.setRx(false);

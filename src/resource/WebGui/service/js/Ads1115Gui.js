@@ -39,6 +39,9 @@ angular.module('mrlapp.service.Ads1115Gui', [])
             _self.updateState(data);
             $scope.$apply();
             break;
+        case 'onPinArray':
+            // a NOOP - but necessary 
+           break;
         default:
             $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method);
             break;
