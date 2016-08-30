@@ -1,11 +1,15 @@
 package org.myrobotlab.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.genetic.GeneticAlgorithm;
+import org.myrobotlab.genetic.Chromosome;
+import org.myrobotlab.genetic.Genetic;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.kinematics.Matrix;
@@ -33,7 +37,7 @@ import org.slf4j.Logger;
  * @author kwatters
  * 
  */
-public class InverseKinematics3D extends Service implements IKJointAnglePublisher, PointsListener {
+public class InverseKinematics3D extends Service implements IKJointAnglePublisher, PointsListener, Genetic {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(InverseKinematics3D.class.getCanonicalName());
@@ -46,6 +50,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   private Matrix inputMatrix = null;
 
   transient InputTrackingThread trackingThread = null;
+  
+  Point goTo;
 
   public InverseKinematics3D(String n) {
     super(n);
@@ -418,4 +424,80 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     return meta;
   }
 
+  public void setDHLink (String name, double d, double theta, double r, double alpha) {
+    DHLink dhLink = new DHLink(name, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
+    currentArm.addLink(dhLink);
+  }
+  
+  public void setDHLink (Servo servo, double d, double theta, double r, double alpha) {
+    DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
+    dhLink.setServo(servo);
+    currentArm.addLink(dhLink);
+  }
+  
+  public void setNewDHRobotArm() {
+    currentArm = new DHRobotArm();
+  }
+  
+ 
+  
+  public void moveTo(int x, int y, int z) {
+    goTo = new Point((double)x,(double)y,(double)z,0.0,0.0,0.0);
+    GeneticAlgorithm GA = new GeneticAlgorithm(this, 100, currentArm.getNumLinks(), 8, 0.9, 0.01);
+    GA.setGeneticClass(this);
+    Chromosome bestFit = GA.doGeneration(500);
+    for (int i = 0; i < currentArm.getNumLinks(); i++){
+      currentArm.getLink(i).servo.moveToOutput((Double)bestFit.getDecodedGenome().get(i));
+    }
+  }
+
+  @Override
+  public void calcFitness(ArrayList<Chromosome> pool) {
+    // TODO Auto-generated method stub
+    for (Chromosome chromosome : pool) {
+      DHRobotArm arm = new DHRobotArm();
+      double fitnessMult = 1;
+      for (int i = 0; i < currentArm.getNumLinks(); i++){
+        DHLink newLink = new DHLink(currentArm.getLink(i));
+        newLink.setTheta(newLink.getTheta()+MathUtils.degToRad((double)chromosome.getDecodedGenome().get(i)));
+        Double delta = currentArm.getLink(i).servo.targetOutput-(Double)chromosome.getDecodedGenome().get(i);
+        if (delta == 0) {
+          fitnessMult +=Math.sqrt(currentArm.getLink(i).servo.getMaxVelocity()/10);
+        }
+        else {
+          fitnessMult += Math.sqrt(currentArm.getLink(i).servo.getMaxVelocity()/10)/delta;
+          //fitnessMult *= 1/10;
+        }
+        arm.addLink(newLink);
+      }
+      Point potLocation = arm.getPalmPosition();
+      Double distance = Math.sqrt(Math.pow(potLocation.getX()-goTo.getX(), 2)+Math.pow(potLocation.getY()-goTo.getY(), 2) +  Math.pow(potLocation.getZ()-goTo.getZ(), 2));
+      //fitnessMult *= Math.pow(0.01, currentArm.getNumLinks());
+      Double fitness = fitnessMult/distance*1000;
+      if (fitness < 0) fitness *=-1;
+      chromosome.setFitness(fitness);
+    }
+    return;
+  }
+
+  @Override
+  public void decode(ArrayList<Chromosome> chromosomes) {
+    // TODO Auto-generated method stub
+    for (Chromosome chromosome : chromosomes ){
+      int pos=0;
+      ArrayList<Object>decodedGenome = new ArrayList<Object>();
+      for (DHLink link: currentArm.getLinks()){
+        Double value=0.0;
+        for (int i= pos; i< chromosome.getGenome().length() && i < pos+8; i++){
+          if(chromosome.getGenome().charAt(i) == '1') value += 1 << i-pos; 
+        }
+        pos += 8;
+        if (value < link.servo.getMinOutput()) value = (double)link.servo.targetOutput;
+        if (value > link.servo.getMaxOutput()) value = (double)link.servo.targetOutput;
+        decodedGenome.add(value);
+      }
+      chromosome.setDecodedGenome(decodedGenome);
+    }
+  }
+  
 }

@@ -159,7 +159,7 @@ public class Servo extends Service implements ServoControl {
 	/**
 	 * the requested INPUT position of the servo
 	 */
-	Integer targetPos;
+	Integer targetPos=0;
 
 	/**
 	 * Pin is "gone" - it only is needed at the time of attaching the device -
@@ -179,7 +179,7 @@ public class Servo extends Service implements ServoControl {
 	/**
 	 * the calculated output for the servo
 	 */
-	Integer targetOutput;
+	public Integer targetOutput;
 
 	/**
 	 * list of names of possible controllers
@@ -698,4 +698,24 @@ public class Servo extends Service implements ServoControl {
 	public int getMaxVelocity() {
 		return maxVelocity;
 	}
+
+  public void moveToOutput(Double moveTo) {
+    // TODO Auto-generated method stub
+    if (controller == null) {
+      error(String.format("%s's controller is not set", getName()));
+      return;
+    }
+
+    //targetPos = pos;
+    targetOutput = moveTo.intValue();
+
+    getController().servoWrite(this);
+    lastActivityTime = System.currentTimeMillis();
+
+    if (isEventsEnabled) {
+      // update others of our position change
+      invoke("publishServoEvent", targetOutput);
+    }
+    
+  }
 }
