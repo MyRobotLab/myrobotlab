@@ -443,7 +443,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   
   public void moveTo(int x, int y, int z) {
     goTo = new Point((double)x,(double)y,(double)z,0.0,0.0,0.0);
-    GeneticAlgorithm GA = new GeneticAlgorithm(100, currentArm.getNumLinks(), 8, 0.9, 0.1);
+    GeneticAlgorithm GA = new GeneticAlgorithm(this, 100, currentArm.getNumLinks(), 8, 0.9, 0.01);
     GA.setGeneticClass(this);
     Chromosome bestFit = GA.doGeneration(500);
     for (int i = 0; i < currentArm.getNumLinks(); i++){
@@ -462,16 +462,17 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
         newLink.setTheta(newLink.getTheta()+MathUtils.degToRad((double)chromosome.getDecodedGenome().get(i)));
         Double delta = currentArm.getLink(i).servo.targetOutput-(Double)chromosome.getDecodedGenome().get(i);
         if (delta == 0) {
-          fitnessMult *=currentArm.getLink(i).servo.getMaxVelocity();
+          fitnessMult +=Math.sqrt(currentArm.getLink(i).servo.getMaxVelocity()/10);
         }
         else {
-          fitnessMult *= currentArm.getLink(i).servo.getMaxVelocity()/delta;
+          fitnessMult += Math.sqrt(currentArm.getLink(i).servo.getMaxVelocity()/10)/delta;
+          //fitnessMult *= 1/10;
         }
         arm.addLink(newLink);
       }
       Point potLocation = arm.getPalmPosition();
       Double distance = Math.sqrt(Math.pow(potLocation.getX()-goTo.getX(), 2)+Math.pow(potLocation.getY()-goTo.getY(), 2) +  Math.pow(potLocation.getZ()-goTo.getZ(), 2));
-      fitnessMult = 1;
+      //fitnessMult *= Math.pow(0.01, currentArm.getNumLinks());
       Double fitness = fitnessMult/distance*1000;
       if (fitness < 0) fitness *=-1;
       chromosome.setFitness(fitness);
@@ -491,8 +492,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
           if(chromosome.getGenome().charAt(i) == '1') value += 1 << i-pos; 
         }
         pos += 8;
-        if (value < link.servo.getMinOutput()) value = link.servo.getMinOutput();
-        if (value > link.servo.getMaxOutput()) value = link.servo.getMaxOutput();
+        if (value < link.servo.getMinOutput()) value = (double)link.servo.targetOutput;
+        if (value > link.servo.getMaxOutput()) value = (double)link.servo.targetOutput;
         decodedGenome.add(value);
       }
       chromosome.setDecodedGenome(decodedGenome);
