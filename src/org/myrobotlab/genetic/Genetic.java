@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 
 /**
- * @author Christian
+ * @author Christian/Calamity
  *
  */
 public interface Genetic {

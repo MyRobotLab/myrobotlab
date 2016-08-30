@@ -3,6 +3,33 @@ package org.myrobotlab.genetic;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * Genetic Algorithms implementation
+ * 
+ * This implementation of the Genetic algorithms describe on this site http://www.ai-junkie.com/ga/intro/gat1.html
+ * 
+ * The principle is simple, you have a bank of chromosomes that contains a serie of bits that can be decoded by your application
+ * Each chromosomes are then check to see how they can solve what you try to intend, and get a score (fitness) to express how good they solves it.
+ * Chromosomes are then picks at random from the pool, with chromosomes weighted by their fitness, then recombine (swap part of their bits serie)
+ * and mutate (changing random bits in their serie) and put into a new pool of chromosome (generation). The algorithm run a number of generation
+ * and try to improve his best fitting chromosome.
+ * 
+ * Usage: 
+ *    implements Genetic interface in the class you want to use the algorithm for the decode (how you convert the serie of bits to your data)
+ *        and the calcFitness  (give a score to your chromosome) methods
+ *    Instanciate GeneticAlgorithm with it's config parameters
+ *        populationSize: number of chromosome in the pool
+ *        genomeSize: the number of gene in your chromosome (the number of data you want to use)
+ *        geneSize: the number of byte you use for each gene (data)
+ *        recombinationRate: Is the chance that two chromosomes get mixed together, 0.7 is usually a good start
+ *        mutationRate: Is the chance that a giving bit get modified, 0.001 is usually a good start
+ *    call doGeneration(number of generation) to get the best fitting chromosome    
+ *
+ * The parameters are very empiric. They will influence how quick and precise the chromosome will evolve toward your best solution. 
+ * 
+ * @author Christian/Calamity
+ *
+ */
 
 public class GeneticAlgorithm {
 
@@ -12,16 +39,14 @@ public class GeneticAlgorithm {
   ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
   int geneSize = 8;
   private Genetic geneticClass;
-  public GeneticAlgorithm() {
-    
-  }
 
-  public GeneticAlgorithm(int populationSize, int genomeSize, int geneSize, double recombinationRate, double mutationRate) {
+  public GeneticAlgorithm(Genetic geneticClass, int populationSize, int genomeSize, int geneSize, double recombinationRate, double mutationRate) {
     // TODO Auto-generated constructor stub
     populationPoolSize = populationSize;
     this.recombinationRate = recombinationRate;
     this.mutationRate = mutationRate;
     this.geneSize = geneSize;
+    this.geneticClass = geneticClass;
     for (int i = 0; i < populationSize; i++) {
       Chromosome chromo = new Chromosome(genomeSize * geneSize);
       chromosomes.add(chromo);
