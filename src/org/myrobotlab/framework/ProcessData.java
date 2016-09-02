@@ -239,6 +239,10 @@ public class ProcessData implements Serializable {
       cmd.add("-service");
       cmd.add("webgui");
       cmd.add("WebGui");
+      cmd.add("log");
+      cmd.add("Log");
+      cmd.add("cli");
+      cmd.add("Cli");
       cmd.add("gui");
       cmd.add("GUIService");
       cmd.add("python");
