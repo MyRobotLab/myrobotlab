@@ -158,7 +158,7 @@ public class Agent extends Service {
 
 	public Agent(String n) {
 		super(n);
-		log.info("Agent {} PID {} is alive", n, Runtime.getPid());
+		log.info("Agent {} Pid {} is alive", n, Runtime.getPid());
 		agentJVMArgs = Runtime.getJVMArgs();
 		if (currentBranch == null) {
 			currentBranch = platform.getBranch();

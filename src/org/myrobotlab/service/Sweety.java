@@ -32,7 +32,7 @@ public class Sweety extends Service {
   transient public Tracking rightTracker;
   transient public ProgramAB chatBot;
   transient public OpenNi openni;
-  transient public PID pid;
+  transient public Pid pid;
   transient public HtmlFilter htmlFilter;
 
   transient Servo leftForearm;
@@ -673,12 +673,12 @@ public class Sweety extends Service {
     if (openni == null) {
       System.out.println("starting kinect");
       openni = (OpenNi) startPeer("openni");
-      pid = (PID) startPeer("pid");
+      pid = (Pid) startPeer("pid");
 
-      pid.setMode(PID.MODE_AUTOMATIC);
-      pid.setOutputRange(-1, 1);
-      pid.setPID(10.0, 0.0, 1.0);
-      pid.setControllerDirection(0);
+      pid.setMode("kinect", Pid.MODE_AUTOMATIC);
+      pid.setOutputRange("kinect", -1, 1);
+      pid.setPID("kinect", 10.0, 0.0, 1.0);
+      pid.setControllerDirection("kinect", 0);
 
       // re-mapping of skeleton !
       // openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
@@ -813,7 +813,7 @@ public class Sweety extends Service {
     meta.addPeer("leftHand", "Servo", "servo");
     meta.addPeer("leftWrist", "Servo", "servo");
     meta.addPeer("openni", "OpenNi", "openni");
-    meta.addPeer("pid", "PID", "pid");
+    meta.addPeer("pid", "Pid", "pid");
 
     return meta;
   }

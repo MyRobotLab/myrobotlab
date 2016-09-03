@@ -29,7 +29,7 @@ import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.motor.MotorConfigDualPwm;
 import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.motor.MotorConfigPulse;
-import org.myrobotlab.service.PID2.PIDData;
+import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;

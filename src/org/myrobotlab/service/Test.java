@@ -464,7 +464,7 @@ public class Test extends Service implements StatusListener {
     /*
      * Status status = Status.info("========TESTING============="); log.info(
      * "===========INFO TESTING========"); log.info(String.format(
-     * "TEST PID = %s", Runtime.getPid())); // big hammer System.exit(0); return
+     * "TEST Pid = %s", Runtime.getPid())); // big hammer System.exit(0); return
      * status;
      */
 
