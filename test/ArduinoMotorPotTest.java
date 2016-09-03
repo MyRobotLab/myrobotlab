@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Motor;
-import org.myrobotlab.service.PID2;
+import org.myrobotlab.service.Pid;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.MotorController;
@@ -37,7 +37,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
   private double ki = 0.020;
   private double kd = 0.020;
 
-  private PID2 pid;
+  private Pid pid;
   private String key = "test";
   private Motor motor;
 
@@ -101,7 +101,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     // initialize the logger 
     TestUtils.initEnvirionment();
     // Create the pid controller 
-    pid = (PID2)Runtime.createAndStart("pid", "PID2");
+    pid = (Pid)Runtime.createAndStart("pid", "Pid");
     // # set the pid parameters KP KI KD  (for now just porportial control)
     pid.setPID(key, kp, ki, kd);
     int direction = 1;

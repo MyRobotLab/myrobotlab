@@ -97,7 +97,7 @@ public class Tracking extends Service {
   private String state = STATE_IDLE;
 
   // ------ PEER SERVICES BEGIN------
-  transient public PID2 pid;
+  transient public Pid pid;
   transient public OpenCV opencv;
   transient public Arduino arduino;
   transient public Servo x, y;
@@ -159,7 +159,7 @@ public class Tracking extends Service {
     // createPeer("X","Servo") <-- create peer of default type
     x = (Servo) createPeer("x");
     y = (Servo) createPeer("y");
-    pid = (PID2) createPeer("pid");
+    pid = (Pid) createPeer("pid");
     opencv = (OpenCV) createPeer("opencv");
     arduino = (Arduino) createPeer("arduino");
 
@@ -171,15 +171,15 @@ public class Tracking extends Service {
     setDefaultPreFilters();
 
     pid.setPID("x", 5.0, 5.0, 0.1);
-    pid.setControllerDirection("x", PID.DIRECTION_DIRECT);
-    pid.setMode("x", PID.MODE_AUTOMATIC);
+    pid.setControllerDirection("x", Pid.DIRECTION_DIRECT);
+    pid.setMode("x", Pid.MODE_AUTOMATIC);
     pid.setOutputRange("x", -10, 10); // <- not correct - based on maximum
     pid.setSampleTime("x", 30);
     pid.setSetpoint("x", 0.5); // set center
 
     pid.setPID("y", 5.0, 5.0, 0.1);
-    pid.setControllerDirection("y", PID.DIRECTION_DIRECT);
-    pid.setMode("y", PID.MODE_AUTOMATIC);
+    pid.setControllerDirection("y", Pid.DIRECTION_DIRECT);
+    pid.setMode("y", Pid.MODE_AUTOMATIC);
     pid.setOutputRange("y", -10, 10); // <- not correct - based on maximum
     pid.setSampleTime("y", 30);
     pid.setSetpoint("y", 0.5); // set center
@@ -263,7 +263,7 @@ public class Tracking extends Service {
     return x;
   }
 
-  public PID2 getPID() {
+  public Pid getPID() {
     return pid;
   }
 
@@ -500,7 +500,7 @@ public class Tracking extends Service {
     super.startService();
     x = (Servo) startPeer("x");
     y = (Servo) startPeer("y");
-    pid = (PID2) startPeer("pid");
+    pid = (Pid) startPeer("pid");
     arduino = (Arduino) startPeer("arduino");
     opencv = (OpenCV) startPeer("opencv");
     rest();
@@ -733,7 +733,7 @@ public class Tracking extends Service {
     meta.addCategory("vision", "video", "sensor", "control");
     meta.addPeer("x", "Servo", "pan servo");
     meta.addPeer("y", "Servo", "tilt servo");
-    meta.addPeer("pid", "PID2", "PID service - for all your pid needs");
+    meta.addPeer("pid", "Pid", "Pid service - for all your pid needs");
     meta.addPeer("opencv", "OpenCV", "Tracking OpenCV instance");
     meta.addPeer("arduino", "Arduino", "Tracking Arduino instance");
     return meta;

@@ -50,7 +50,7 @@ import org.slf4j.Logger;
  */
 
 public class RobotPlatform extends Service {
-  // FIXME - just use PID - remove this
+  // FIXME - just use Pid - remove this
   class PIDThread extends Thread {
     boolean isRunning = true;
     int feedback = 0;
@@ -78,7 +78,7 @@ public class RobotPlatform extends Service {
           // save power command, target heading, and time into array
           // (round-robin the array)
 
-          // compute PID of (800ms target) with - current feedback
+          // compute Pid of (800ms target) with - current feedback
           // Output = kp * error + ki * errSum + kd * dErr;
 
           // speed at the moment is unsafe - browns out at 50% power
@@ -187,23 +187,23 @@ public class RobotPlatform extends Service {
   public long endMotion = 0;
 
   /*
-   * This is a (first) attempt of making a PID (PD) (P) controller for turning.
+   * This is a (first) attempt of making a Pid (PD) (P) controller for turning.
    * This article
    * (http://www.inpharmix.com/jps/PID_Controller_For_Lego_Mindstorms_Robots
    * .html) was EXTREMELY helpful for someone (like me) who has never
-   * implemented a PID controller.
+   * implemented a Pid controller.
    * 
    * The added complexity for Video Tracking feed back is the HUGE delay in the
    * feedback stream (up to 1.5 seconds) TODO - encapsulate into a utility -
    * generalize for all to use PIDUtil PIDThread Reference :
    * http://www.arduino.cc/playground/Code/PIDLibrary - Arduino's library, would
-   * be helpful on local PID applications http://brettbeauregard.com/blog
+   * be helpful on local Pid applications http://brettbeauregard.com/blog
    * /2011/04/improving-the-beginners-pid-introduction/ - quick and excellent
    * explanation http://en.wikipedia.org/wiki/Lead-lag_compensator - for
    * lead/lag compensation http://brettbeauregard.com/blog/2011/04/improving-the
    * -beginners-pid-introduction/ - REALLY NICE FORMULA/CODE SNIPPET
    * 
-   * startHeadingPID startDistancePID ... or one PID two errors?
+   * startHeadingPID startDistancePID ... or one Pid two errors?
    * 
    * deltaHeading ~= error
    * 
@@ -419,7 +419,7 @@ public class RobotPlatform extends Service {
   }
 
   // command to change heading and/or position
-  public void setTargetHeading(int value) // maintainHeading ?? if PID is
+  public void setTargetHeading(int value) // maintainHeading ?? if Pid is
   // operating
   {
     headingTarget = value;
