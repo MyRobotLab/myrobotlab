@@ -40,9 +40,7 @@ public class Cli extends Service {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(Cli.class);
-  // public final static HashSet<String> cmdSet = new HashSet<String>();
-
-  // commands
+ 
   public final static String cd = "cd";
   public final static String pwd = "pwd";
   public final static String ls = "ls";
@@ -59,18 +57,16 @@ public class Cli extends Service {
   transient FileOutputStream fos;
 
   String cwd = "/";
-  // String prompt = "(:";
   String prompt = "#";
 
   // active relay - could be list - but lets start simple
   String attached = null;
   // transient OutputStream attachedIn = null;
   transient BufferedWriter attachedIn = null;
-
   transient StreamGobbler attachedOut = null;
 
   // ================= Decoder Begin =================
-
+  // FIXME - tab to autoComplete !
   // FIXME - needs refactor / merge with StreamGobbler
   // FIXME - THIS CONCEPT IS SOOOOOO IMPORTANT
   // - its a Central Point Controller - where input (any InputStream) can send
@@ -89,7 +85,7 @@ public class Cli extends Service {
     String outputEncoding = CodecUtils.TYPE_JSON; // REST JSON
 
     public Decoder(Cli cli, String name, InputStream is) {
-      super(String.format("Decoder_%s", name));
+      super(String.format("cli-decoder-%s", name));
       this.cli = cli;
       this.name = name;
       this.is = is;
@@ -101,17 +97,10 @@ public class Cli extends Service {
     public void run() {
       try {
         InputStreamReader in = new InputStreamReader(is);
-        // BufferedReader br = new BufferedReader(in); // < FIXME ? is
-        // Buffered
-        // Necessary?
         writePrompt();
-
         String line = null;
-
         char c = 0;
 
-        // FIXME FIXME FIXME - line.split(" ") - invoke(line[0], line)
-        // "One Handler to Rule them All !"
         while ((c = (char) in.read()) != -1) {
 
           // handle up arrow - tab autoComplet - and regular \n
@@ -124,9 +113,6 @@ public class Cli extends Service {
             sb.setLength(0);
           }
 
-          // FIXME - must read char by char to process up-arrow history commands
-          // in.read()
-          // FIXME - tab to autoComplete !
           line = line.trim();
 
           if (line.length() == 0) {
