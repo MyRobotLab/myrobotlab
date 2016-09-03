@@ -392,9 +392,7 @@ public class PID2 extends Service {
         Service.sleep(30);
         if (pid.compute(key)) {
           log.info(String.format("%d %f", i, pid.getOutput(key)));
-        } else {
-          log.warn("not ready");
-        }
+        } 
       }
 
     } catch (Exception e) {
