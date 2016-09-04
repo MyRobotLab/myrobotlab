@@ -2223,6 +2223,17 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 				return r;
 			}
 			log.info(ret);
+		} else if (platform.isMac()){
+			String ret = Runtime.execToString("pmset -g batt");
+			int pos0 = ret.indexOf("Battery-0");
+			if (pos0 != -1){
+				pos0 = pos0 + 10;
+				int pos1 = ret.indexOf("%", pos0);
+				String dble = ret.substring(pos0, pos1).trim();
+				Double r =  Double.parseDouble(dble);		
+				return r;
+			}
+			log.info(ret);
 		}
 
 		} catch (Exception e) {
