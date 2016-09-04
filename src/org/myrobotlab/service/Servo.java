@@ -25,7 +25,6 @@
 
 package org.myrobotlab.service;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,6 +125,7 @@ public class Servo extends Service implements ServoControl {
 
 	public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
+
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
@@ -212,9 +212,12 @@ public class Servo extends Service implements ServoControl {
 	boolean isEventsEnabled = false;
 
 	private int maxVelocity = 425;
+	
 
 	private boolean isAttached = false;
 	private boolean isControllerSet = false;
+
+  private Double speedScale = 1.0;
 
 	public Servo(String n) {
 		super(n);
@@ -440,7 +443,7 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public void setSpeed(double speed) {
-		this.speed = speed;
+		this.speed = speed / speedScale;
 		getController().servoSetSpeed(this);
 	}
 
@@ -666,6 +669,7 @@ public class Servo extends Service implements ServoControl {
 		if (deviceName.equals(this.getName())) {
 			isAttached = true;
 			isControllerSet = true;
+			setMaxVelocity(maxVelocity);
 			broadcastState();
 		}
 	}
@@ -691,7 +695,9 @@ public class Servo extends Service implements ServoControl {
 
 	public void setMaxVelocity(int velocity) {
 		this.maxVelocity = velocity;
-		getController().servoSetMaxVelocity(this);
+		if (isControllerSet()){
+		  getController().servoSetMaxVelocity(this);
+		}
 	}
 
 	@Override
@@ -717,5 +723,14 @@ public class Servo extends Service implements ServoControl {
       invoke("publishServoEvent", targetOutput);
     }
     
+  }
+  
+  public void setSpeedScale(Double speedScale) {
+    if (speedScale >= 1.0){
+      this.speedScale  = speedScale;
+    }
+    else{
+      log.info("speedScale must be >= 1.0");
+    }
   }
 }
