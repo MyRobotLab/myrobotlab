@@ -2214,6 +2214,14 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 			
 		} else if (platform.isLinux()){
 			String ret = Runtime.execToString("acpitool");
+			int pos0 = ret.indexOf("Charging, ");
+			if (pos0 != -1){
+				pos0 = pos0 + 10;
+				int pos1 = ret.indexOf("%", pos0);
+				String dble = ret.substring(pos0, pos1).trim();
+				Double r =  Double.parseDouble(dble);		
+				return r;
+			}
 			log.info(ret);
 		}
 
