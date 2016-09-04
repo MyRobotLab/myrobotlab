@@ -1061,6 +1061,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
+			
+			Double level = Runtime.getBatteryLevel();
+			log.info("" + level);
 
 			Runtime.start("python", "Python");
 			Runtime.start("arduino", "Arduino");
