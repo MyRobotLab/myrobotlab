@@ -196,5 +196,6 @@
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-http-client-jdo-1.22.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/jdo2-api-2.3-eb.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sf.jipcam/0.9.1/jipcam-0.9.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.apache.commons.exec/1.3.0/commons-exec-1.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
