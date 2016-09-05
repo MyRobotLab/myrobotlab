@@ -35,6 +35,7 @@ import java.util.TreeMap;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
@@ -2189,52 +2190,61 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	}
 
 	static public String execToString(String command) throws Exception {
+		log.info("execToString(\"{}\")", command);
+		log.info("==========begin proc env============");
+		Map<String,String> vars = EnvironmentUtils.getProcEnvironment();
+		for (String key: vars.keySet()){
+			log.info("{}={}", key, vars.get(key));
+		}
+		log.info("==========end proc env============");
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		CommandLine commandline = CommandLine.parse(command);
 		DefaultExecutor exec = new DefaultExecutor();
 		PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
 		exec.setStreamHandler(streamHandler);
-		exec.execute(commandline);
-		return (outputStream.toString());
+		exec.execute(commandline, EnvironmentUtils.getProcEnvironment());
+		String result = outputStream.toString();
+		log.info("returns\n{}", result);
+		return result;
 	}
 
 	public static Double getBatteryLevel() {
 		Platform platform = Platform.getLocalInstance();
 		try {
-		if (platform.isWindows()) {
+			if (platform.isWindows()) {
 				String ret = Runtime.execToString("WMIC.exe PATH Win32_Battery Get EstimatedChargeRemaining");
 				int pos0 = ret.indexOf("\n");
-				if (pos0 != -1){
+				if (pos0 != -1) {
 					pos0 = pos0 + 1;
 					int pos1 = ret.indexOf("\n", pos0);
 					String dble = ret.substring(pos0, pos1).trim();
-					Double r =  Double.parseDouble(dble);		
+					Double r = Double.parseDouble(dble);
 					return r;
 				}
-			
-		} else if (platform.isLinux()){
-			String ret = Runtime.execToString("acpitool");
-			int pos0 = ret.indexOf("Charging, ");
-			if (pos0 != -1){
-				pos0 = pos0 + 10;
-				int pos1 = ret.indexOf("%", pos0);
-				String dble = ret.substring(pos0, pos1).trim();
-				Double r =  Double.parseDouble(dble);		
-				return r;
+
+			} else if (platform.isLinux()) {
+				String ret = Runtime.execToString("acpitool");
+				int pos0 = ret.indexOf("Charging, ");
+				if (pos0 != -1) {
+					pos0 = pos0 + 10;
+					int pos1 = ret.indexOf("%", pos0);
+					String dble = ret.substring(pos0, pos1).trim();
+					Double r = Double.parseDouble(dble);
+					return r;
+				}
+				log.info(ret);
+			} else if (platform.isMac()) {
+				String ret = Runtime.execToString("pmset -g batt");
+				int pos0 = ret.indexOf("Battery-0");
+				if (pos0 != -1) {
+					pos0 = pos0 + 10;
+					int pos1 = ret.indexOf("%", pos0);
+					String dble = ret.substring(pos0, pos1).trim();
+					Double r = Double.parseDouble(dble);
+					return r;
+				}
+				log.info(ret);
 			}
-			log.info(ret);
-		} else if (platform.isMac()){
-			String ret = Runtime.execToString("pmset -g batt");
-			int pos0 = ret.indexOf("Battery-0");
-			if (pos0 != -1){
-				pos0 = pos0 + 10;
-				int pos1 = ret.indexOf("%", pos0);
-				String dble = ret.substring(pos0, pos1).trim();
-				Double r =  Double.parseDouble(dble);		
-				return r;
-			}
-			log.info(ret);
-		}
 
 		} catch (Exception e) {
 			log.info("execToString threw", e);
