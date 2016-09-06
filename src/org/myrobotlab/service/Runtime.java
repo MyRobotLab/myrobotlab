@@ -2267,7 +2267,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		Platform platform = Platform.getLocalInstance();
 		try {
 			if (platform.isWindows()) {
-				String ret = Runtime.execute("cmd.exe", "/C", "WMIC.exe", "PATH", "Win32_Battery", "Get", "EstimatedChargeRemaining");
+				// String ret = Runtime.execute("cmd.exe", "/C", "WMIC.exe", "PATH", "Win32_Battery", "Get", "EstimatedChargeRemaining");
+				String ret = Runtime.execute("WMIC.exe", "PATH", "Win32_Battery", "Get", "EstimatedChargeRemaining");
 				int pos0 = ret.indexOf("\n");
 				if (pos0 != -1) {
 					pos0 = pos0 + 1;
