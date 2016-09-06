@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,10 +31,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
@@ -290,7 +285,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	 */
 	public final static void createAndStartServices(CmdLine cmdline) {
 
-		System.out.println(String.format("createAndStartServices service count %1$d", cmdline.getArgumentCount("-service") / 2));
+		log.info(String.format("createAndStartServices service count %1$d", cmdline.getArgumentCount("-service") / 2));
 
 		if (cmdline.getArgumentCount("-service") > 0 && cmdline.getArgumentCount("-service") % 2 == 0) {
 
@@ -322,7 +317,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 			 * else if (cmdline.hasSwitch("-list")) { Runtime runtime =
 			 * Runtime.getInstance(); if (runtime == null) {
 			 * 
-			 * } else { System.out.println(getServiceTypeNames()); } return; }
+			 * } else { log.info(getServiceTypeNames()); } return; }
 			 */
 		mainHelp();
 	}
@@ -593,7 +588,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 					 * Thread.UncaughtExceptionHandler() {
 					 * 
 					 * @Override public void uncaughtException(Thread t,
-					 * Throwable e) { //System.out.println(t.getName() + ": " +
+					 * Throwable e) { //log.info(t.getName() + ": " +
 					 * e); log.error(String.format(
 					 * "============ WHOOP WHOOP WHOOP WHOOP WHOOP WHOOP Thread %s threw %s ============"
 					 * , t.getName(), e.getMessage())); // MyWorker worker = new
@@ -1796,32 +1791,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	 * @param params
 	 * @return
 	 */
-	static public String exec(String[] params) {
-
-		String ret = null;
-
-		// java.lang.Runtime r = java.lang.Runtime.getRuntime();
-		try {
-
-			ProcessBuilder builder = new ProcessBuilder(params);
-			Process process = builder.start();
-			String ligne = "";
-
-			BufferedReader output = getOutput(process);
-			while ((ligne = output.readLine()) != null) {
-				System.out.println(ligne);
-			}
-
-			String stdErr = getInputAsString(process.getErrorStream());
-			// ret = stdOut;
-			// Process p = r.exec(params);
-			// return p.exitValue();
-		} catch (IOException e) {
-			logException(e);
-		}
-
-		return ret;
-		// return 0;
+	static public String exec(String program) {
+		return execute(program, null, null, null, null);
 	}
 
 	private static BufferedReader getOutput(Process p) {
@@ -2189,30 +2160,114 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		return Runtime.getInstance().getName();
 	}
 
-	static public String execToString(String command) throws Exception {
-		log.info("execToString(\"{}\")", command);
-		log.info("==========begin proc env============");
-		Map<String,String> vars = EnvironmentUtils.getProcEnvironment();
-		for (String key: vars.keySet()){
-			log.info("{}={}", key, vars.get(key));
+	
+	static public String execute(String... args){
+		if (args == null || args.length == 0){
+			log.error("execute invalid number of args");
+			return null;
 		}
-		log.info("==========end proc env============");
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		CommandLine commandline = CommandLine.parse(command);
-		DefaultExecutor exec = new DefaultExecutor();
-		PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
-		exec.setStreamHandler(streamHandler);
-		exec.execute(commandline, EnvironmentUtils.getProcEnvironment());
-		String result = outputStream.toString();
-		log.info("returns\n{}", result);
-		return result;
+		String program = args[0];
+		List<String> list = null;
+		
+		if (args.length > 1){
+			list = new ArrayList<String>();
+			for (int i = 1; i < args.length; ++i){
+				list.add(args[i]);
+			}
+		}
+		
+		return execute(program, list, null, null, null);
+	}
+	/**
+	 * FIXME - return a POJO - because there are lots of downstream which would want different parts of the results
+	 * FIXME - stream gobbler reconciled - threaded stream consumption
+	 * FIXME - watchdog - a good idea
+	 * FIXME - most common use case would be returning a string i would think
+	 * FIXME - ProcessData & ProcessData2 reconciled 
+	 * 
+	 * @param program
+	 * @param args
+	 * @param workingDir
+	 * @param additionalEnv
+	 * @return
+	 */
+	static public String execute(String program, List<String> args, String workingDir, Map<String,String> additionalEnv, Boolean block) {
+		
+		log.info("execToString(\"{} {}\")", program, args);
+		
+		ArrayList<String> command = new ArrayList<String>();
+		command.add(program);
+		if (args != null) {
+			for (String arg : args) {
+				command.add(arg);
+			}
+		}
+		
+		Integer exitValue = null;
+
+		ProcessBuilder builder = new ProcessBuilder(command);
+
+		Map<String, String> environment = builder.environment();
+		if (additionalEnv != null){
+			environment.putAll(additionalEnv);
+		}
+		StringBuilder outputBuilder;
+		
+		try {
+			Process handle = builder.start();
+
+			InputStream stdErr = handle.getErrorStream();
+			InputStream stdOut = handle.getInputStream();
+
+			// TODO: we likely don't need this
+			// OutputStream stdIn = handle.getOutputStream();
+
+			outputBuilder = new StringBuilder();
+			byte[] buff = new byte[4096];
+
+			// TODO: should we read both of these streams?
+			// if we break out of the first loop is the process terminated?
+
+			// read stderr
+			for (int n; (n = stdErr.read(buff)) != -1;) {
+				outputBuilder.append(new String(buff, 0, n));
+			}
+			// read stdout
+			for (int n; (n = stdOut.read(buff)) != -1;) {
+				outputBuilder.append(new String(buff, 0, n));
+			}
+
+			stdOut.close();
+			stdErr.close();
+
+			// TODO: stdin if we use it.
+			// stdIn.close();
+
+			// the process should be closed by now?
+
+			handle.waitFor();
+
+			handle.destroy();
+
+			exitValue = handle.exitValue();
+			// print the output from the command
+			System.out.println(outputBuilder.toString());
+			System.out.println("Exit Value : " + exitValue);
+			outputBuilder.append("Exit Value : " + exitValue);
+
+			return outputBuilder.toString();
+		} catch (Exception e) {
+			log.error("execute threw", e);
+			exitValue = 5;
+			return e.getMessage();
+		}
 	}
 
 	public static Double getBatteryLevel() {
 		Platform platform = Platform.getLocalInstance();
 		try {
 			if (platform.isWindows()) {
-				String ret = Runtime.execToString("WMIC.exe PATH Win32_Battery Get EstimatedChargeRemaining");
+				String ret = Runtime.execute("WMIC.exe", "PATH", "Win32_Battery", "Get", "EstimatedChargeRemaining");
 				int pos0 = ret.indexOf("\n");
 				if (pos0 != -1) {
 					pos0 = pos0 + 1;
@@ -2223,7 +2278,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 				}
 
 			} else if (platform.isLinux()) {
-				String ret = Runtime.execToString("acpitool");
+				String ret = Runtime.execute("acpitool");
 				int pos0 = ret.indexOf("Charging, ");
 				if (pos0 != -1) {
 					pos0 = pos0 + 10;
@@ -2234,7 +2289,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 				}
 				log.info(ret);
 			} else if (platform.isMac()) {
-				String ret = Runtime.execToString("pmset -g batt");
+				String ret = Runtime.execute("pmset -g batt");
 				int pos0 = ret.indexOf("Battery-0");
 				if (pos0 != -1) {
 					pos0 = pos0 + 10;
