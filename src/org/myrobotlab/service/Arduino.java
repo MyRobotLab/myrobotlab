@@ -46,6 +46,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_DETACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_MAX_VELOCITY;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_VELOCITY;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_SPEED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_STOP;
@@ -703,6 +704,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public static final int MRL_IO_SERIAL_1 = 2;
 	public static final int MRL_IO_SERIAL_2 = 3;
 	public static final int MRL_IO_SERIAL_3 = 4;
+
 	public transient int controllerAttachAs = MRL_IO_NOT_DEFINED;
 	transient HashMap<Integer, Arduino> attachedController = new HashMap<Integer, Arduino>();
 	
@@ -2715,4 +2717,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	  heartbeat = false;
 	  sendMsg(HEARTBEAT);
 	}
+
+  @Override
+  public void servoSetVelocity(ServoControl servo) {
+    // TODO Auto-generated method stub
+    MrlMsg msg = new MrlMsg(SERVO_SET_VELOCITY);
+    msg.addData(getDeviceId(servo));
+    msg.addData(2);
+    msg.addData16(servo.getVelocity());
+    sendMsg(msg);
+  }
 }
