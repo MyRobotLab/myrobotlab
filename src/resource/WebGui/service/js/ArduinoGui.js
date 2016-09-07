@@ -124,6 +124,18 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     }
     ;
     $scope.upload = function(arduinoPath, portDirectiveScope, type) {
+        if (angular.isUndefined(arduinoPath) || arduinoPath == null || arduinoPath == "" ){
+            msg.send('error', 'arduino path is not set');
+            return;
+        }
+        if (angular.isUndefined(portDirectiveScope.portName) || portDirectiveScope.portName == null || portDirectiveScope.portName == "" ){
+            msg.send('error', 'port name not set');
+            return;
+        }
+        if (angular.isUndefined(type) || type == null || type == "" ){
+            msg.send('error', 'board type not set');
+            return;
+        }
         msg.send('uploadSketch', arduinoPath, portDirectiveScope.portName, type);
     }
     ;
