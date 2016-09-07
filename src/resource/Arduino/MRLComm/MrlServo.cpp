@@ -10,6 +10,7 @@ MrlServo::MrlServo() : Device(DEVICE_TYPE_SERVO) {
    lastUpdate = 0;
    currentPos = 0.0;
    targetPos = 0;
+   velocity = 0;
 }
 
 MrlServo::~MrlServo() {
@@ -87,17 +88,17 @@ void MrlServo::publishServoEvent(int eventType) {
 void MrlServo::servoWrite(int position) {
   if (servo == NULL) 
     return;
-  if (speed == 100) {
+  if (speed == 100 && velocity == 0) {
     // move at regular/full 100% speed
     targetPos = position;
     isMoving = true;
     step=targetPos-(int)currentPos;
-  } else if (speed < 100 && speed > 0) {
+  } else /*if (speed < 100 && speed > 0)*/ {
     targetPos = position;
     isMoving = true;
     //int baseSpeed=(int)(60.0/0.14); // deg/sec base on speed of HS805B servo 6V under no load //should be modifiable
     long delta=targetPos-(int)currentPos;
-    float currentSpeed=(baseSpeed*speed)/100;
+    float currentSpeed=(velocity*speed)/100;
     long timeToReach=abs((delta))*1000/currentSpeed; // time to reach target in ms
     if(timeToReach==0){
       timeToReach=1;
@@ -132,5 +133,9 @@ void MrlServo::stopSweep() {
 
 void MrlServo::setMaxVelocity(unsigned int velocity){
 	baseSpeed = velocity;
+}
+
+void MrlServo::setVelocity(unsigned int velocity) {
+	this->velocity = velocity;
 }
 

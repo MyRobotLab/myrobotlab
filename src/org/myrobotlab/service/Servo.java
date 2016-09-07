@@ -219,6 +219,8 @@ public class Servo extends Service implements ServoControl {
 
   private Double speedScale = 1.0;
 
+  private int velocity = 0;
+
 	public Servo(String n) {
 		super(n);
 		createPinList();
@@ -670,6 +672,7 @@ public class Servo extends Service implements ServoControl {
 			isAttached = true;
 			isControllerSet = true;
 			setMaxVelocity(maxVelocity);
+			setVelocity(velocity);
 			broadcastState();
 		}
 	}
@@ -700,7 +703,14 @@ public class Servo extends Service implements ServoControl {
 		}
 	}
 
-	@Override
+  public void setVelocity(int velocity) {
+    this.velocity = velocity;
+    if (isControllerSet()){
+      getController().servoSetVelocity(this);
+    }
+  }
+
+  @Override
 	public int getMaxVelocity() {
 		return maxVelocity;
 	}
@@ -732,5 +742,11 @@ public class Servo extends Service implements ServoControl {
     else{
       log.info("speedScale must be >= 1.0");
     }
+  }
+
+  @Override
+  public int getVelocity() {
+    // TODO Auto-generated method stub
+    return velocity;
   }
 }
