@@ -2072,6 +2072,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
     invoke("publishStatus", ret);
     return ret;
   }
+  
+  
+  public Status error(String msg) {
+    Status ret = Status.error(msg);
+    ret.name = getName();
+    invoke("publishStatus", ret);
+    return ret;
+  }  
 
   public Status warn(String msg) {
     Status ret = Status.warn(msg);
