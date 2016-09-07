@@ -150,6 +150,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_DETACH;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_MAX_VELOCITY;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_SPEED;
+	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_VELOCITY;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_START;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_STOP;
 	import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_WRITE;
@@ -258,7 +259,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {onSensorData SensorData} 
 	public final static int ON_SENSOR_DATA =		30;
 
-	// {pinMode int int} 
+	// {pinMode int String} 
 	public final static int PIN_MODE =		31;
 
 	// {publishAttachedDevice String} 
@@ -306,7 +307,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {pulseStop} 
 	public final static int PULSE_STOP =		46;
 
-	// {read String} 
+	// {read int} 
 	public final static int READ =		47;
 
 	// {releaseI2cDevice I2CControl int int} 
@@ -336,47 +337,50 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {servoSetSpeed ServoControl} 
 	public final static int SERVO_SET_SPEED =		56;
 
+	// {servoSetVelocity ServoControl} 
+	public final static int SERVO_SET_VELOCITY =		57;
+
 	// {servoSweepStart ServoControl} 
-	public final static int SERVO_SWEEP_START =		57;
+	public final static int SERVO_SWEEP_START =		58;
 
 	// {servoSweepStop ServoControl} 
-	public final static int SERVO_SWEEP_STOP =		58;
+	public final static int SERVO_SWEEP_STOP =		59;
 
 	// {servoWrite ServoControl} 
-	public final static int SERVO_WRITE =		59;
+	public final static int SERVO_WRITE =		60;
 
 	// {servoWriteMicroseconds ServoControl int} 
-	public final static int SERVO_WRITE_MICROSECONDS =		60;
+	public final static int SERVO_WRITE_MICROSECONDS =		61;
 
 	// {setBoardMegaADK} 
-	public final static int SET_BOARD_MEGA_ADK =		61;
+	public final static int SET_BOARD_MEGA_ADK =		62;
 
 	// {setDebounce int} 
-	public final static int SET_DEBOUNCE =		62;
+	public final static int SET_DEBOUNCE =		63;
 
 	// {setDebug boolean} 
-	public final static int SET_DEBUG =		63;
+	public final static int SET_DEBUG =		64;
 
 	// {setDigitalTriggerOnly Boolean} 
-	public final static int SET_DIGITAL_TRIGGER_ONLY =		64;
+	public final static int SET_DIGITAL_TRIGGER_ONLY =		65;
 
 	// {setPWMFrequency Integer Integer} 
-	public final static int SET_PWMFREQUENCY =		65;
+	public final static int SET_PWMFREQUENCY =		66;
 
 	// {setSampleRate int} 
-	public final static int SET_SAMPLE_RATE =		66;
+	public final static int SET_SAMPLE_RATE =		67;
 
 	// {setSerialRate int} 
-	public final static int SET_SERIAL_RATE =		67;
+	public final static int SET_SERIAL_RATE =		68;
 
 	// {setTrigger int int int} 
-	public final static int SET_TRIGGER =		68;
+	public final static int SET_TRIGGER =		69;
 
 	// {softReset} 
-	public final static int SOFT_RESET =		69;
+	public final static int SOFT_RESET =		70;
 
 	// {write int int} 
-	public final static int WRITE =		70;
+	public final static int WRITE =		71;
 
 
   static {
@@ -547,6 +551,9 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 		byteToMethod.put(SERVO_SET_SPEED,"servoSetSpeed");
 		methodToByte.put("servoSetSpeed",SERVO_SET_SPEED);
+
+		byteToMethod.put(SERVO_SET_VELOCITY,"servoSetVelocity");
+		methodToByte.put("servoSetVelocity",SERVO_SET_VELOCITY);
 
 		byteToMethod.put(SERVO_SWEEP_START,"servoSweepStart");
 		methodToByte.put("servoSweepStart",SERVO_SWEEP_START);
@@ -997,6 +1004,10 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	}
 	case ArduinoMsgCodec.SERVO_SET_SPEED:{
 		return "SERVO_SET_SPEED";
+
+	}
+	case ArduinoMsgCodec.SERVO_SET_VELOCITY:{
+		return "SERVO_SET_VELOCITY";
 
 	}
 	case ArduinoMsgCodec.SERVO_SWEEP_START:{

@@ -350,6 +350,10 @@ void MrlComm::processCommand(int ioType) {
 		((MrlServo*) getDevice(ioCmd[1]))->setMaxVelocity(MrlMsg::toInt(ioCmd,3));
 		break;
 	}
+	case SERVO_SET_VELOCITY: {
+		((MrlServo*) getDevice(ioCmd[1]))->setVelocity(MrlMsg::toInt(ioCmd,3));
+		break;
+	}
 	case HEARTBEAT: {
 		heartbeatEnabled = true;
 		break;
