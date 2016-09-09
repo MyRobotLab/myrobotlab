@@ -124,6 +124,8 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     }
     ;
     $scope.upload = function(arduinoPath, portDirectiveScope, type) {
+        // FIXME !!! - nicer global check empty method
+        // FIXME !!! - parent error warn info - publishes to the appropriate service
         if (angular.isUndefined(arduinoPath) || arduinoPath == null || arduinoPath == "" ){
             msg.send('error', 'arduino path is not set');
             return;

@@ -38,8 +38,8 @@
 
 <form class="form-inline">
   <div class="form-group">
-    <label for="exampleInputName2">script location</label>
-    <input type="text" class="form-control" id="exampleInputName2" ng-model="service.localScriptDir"/>
+    <label for="location">script location</label>
+    <input type="text" class="form-control" id="location" ng-model="service.localScriptDir"/>
     <button type="button" class="btn btn-default" ng-click="msg.setLocalScriptDir(service.localScriptDir)">update</button>
   </div>
 </form>
@@ -50,9 +50,9 @@ Active index: {{ activeTabIndex  }}  script count: {{ scripts.length }} <br />
 <input class="btn btn-default" type="button" value="Add Script" ng-click="addScript()" />
 
 <uib-tabset active="activeTabIndex">
-	<uib-tab ng-repeat="script in scripts" heading="{{script.name}}">
+	<uib-tab ng-repeat="script in scripts" index="$index + 1" heading="{{script.name}}" select="tabSelected(script)">
 		<div style="height: 300px;width: 100%;" ui-ace="{
-		                                       useWrapMode : true,
+		                                       useWrapMode : false,
 		                                       showGutter: true,		                                       
                                                theme:'chrome',
 		                                       mode: 'python',
