@@ -88,7 +88,13 @@ void MrlServo::publishServoEvent(int eventType) {
 void MrlServo::servoWrite(int position) {
   if (servo == NULL) 
     return;
-  if (speed == 100 && velocity == 0) {
+  if (speed == 100) {
+	targetPos = position;
+	isMoving = false;
+	currentPos = position;
+	servo->write(position);
+  }
+  else if (speed == 100 && velocity == 0) {
     // move at regular/full 100% speed
     targetPos = position;
     isMoving = true;
