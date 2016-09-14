@@ -75,7 +75,7 @@ public class DHLink {
     Matrix m = new Matrix(4, 4);
     double targetOutput=0;
     if(servo!=null){
-      targetOutput = servo.targetOutput;
+      targetOutput = servo.getPos().doubleValue();
     }
     // elements we need
     double cosTheta = Math.cos(theta +  MathUtils.degToRad(targetOutput));
