@@ -10,6 +10,8 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.genetic.GeneticAlgorithm;
 import org.myrobotlab.genetic.Chromosome;
 import org.myrobotlab.genetic.Genetic;
+import org.myrobotlab.kinematics.CollisionDectection;
+import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.kinematics.Matrix;
@@ -52,6 +54,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   transient InputTrackingThread trackingThread = null;
   
   Point goTo;
+  private CollisionDectection collisionItems = new CollisionDectection();
 
   public InverseKinematics3D(String n) {
     super(n);
@@ -219,18 +222,22 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     // TODO: pass a better datastructure?
     invoke("publishJointPositions", (Object) jointPositionMap);
   }
-
+  
   public double[][] createJointPositionMap() {
+    return createJointPositionMap(currentArm);
+  }
 
-    double[][] jointPositionMap = new double[currentArm.getNumLinks() + 1][3];
+  public double[][] createJointPositionMap(DHRobotArm arm) {
+
+    double[][] jointPositionMap = new double[arm.getNumLinks() + 1][3];
 
     // first position is the origin... second is the end of the first link
     jointPositionMap[0][0] = 0;
     jointPositionMap[0][1] = 0;
     jointPositionMap[0][2] = 0;
 
-    for (int i = 1; i <= currentArm.getNumLinks(); i++) {
-      Point jp = currentArm.getJointPosition(i - 1);
+    for (int i = 1; i <= arm.getNumLinks(); i++) {
+      Point jp = arm.getJointPosition(i - 1);
       jointPositionMap[i][0] = jp.getX();
       jointPositionMap[i][1] = jp.getY();
       jointPositionMap[i][2] = jp.getZ();
@@ -443,11 +450,13 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   
   public void moveTo(int x, int y, int z) {
     goTo = new Point((double)x,(double)y,(double)z,0.0,0.0,0.0);
-    GeneticAlgorithm GA = new GeneticAlgorithm(this, 100, currentArm.getNumLinks(), 8, 0.9, 0.01);
+    GeneticAlgorithm GA = new GeneticAlgorithm(this, 150, currentArm.getNumLinks(), 8, 0.9, 0.1);
     GA.setGeneticClass(this);
-    Chromosome bestFit = GA.doGeneration(500);
+    Chromosome bestFit = GA.doGeneration(200);
+    DHRobotArm checkedArm = simulateMove(bestFit.getDecodedGenome());
     for (int i = 0; i < currentArm.getNumLinks(); i++){
-      currentArm.getLink(i).servo.moveToOutput((Double)bestFit.getDecodedGenome().get(i));
+      //currentArm.getLink(i).servo.moveTo(((Double)bestFit.getDecodedGenome().get(i)).intValue());
+      currentArm.getLink(i).servo.moveTo(((Double)(checkedArm.getLink(i).getThetaDegrees()-currentArm.getLink(i).getThetaDegrees())).intValue());
     }
   }
 
@@ -460,16 +469,17 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       for (int i = 0; i < currentArm.getNumLinks(); i++){
         DHLink newLink = new DHLink(currentArm.getLink(i));
         newLink.setTheta(newLink.getTheta()+MathUtils.degToRad((double)chromosome.getDecodedGenome().get(i)));
-        Double delta = currentArm.getLink(i).servo.targetOutput-(Double)chromosome.getDecodedGenome().get(i);
+        Double delta = currentArm.getLink(i).servo.getPos().doubleValue()-(Double)chromosome.getDecodedGenome().get(i);
         if (delta == 0) {
-          fitnessMult +=Math.sqrt(currentArm.getLink(i).servo.getMaxVelocity()/10);
+          fitnessMult +=Math.sqrt(currentArm.getLink(i).servo.getVelocity()*currentArm.getLink(i).servo.getSpeed()/10);
         }
         else {
-          fitnessMult += Math.sqrt(currentArm.getLink(i).servo.getMaxVelocity()/10)/delta;
+          fitnessMult += Math.sqrt(currentArm.getLink(i).servo.getVelocity()*currentArm.getLink(i).servo.getSpeed()/10)/delta;
           //fitnessMult *= 1/10;
         }
         arm.addLink(newLink);
       }
+      arm = simulateMove(chromosome.getDecodedGenome());
       Point potLocation = arm.getPalmPosition();
       Double distance = Math.sqrt(Math.pow(potLocation.getX()-goTo.getX(), 2)+Math.pow(potLocation.getY()-goTo.getY(), 2) +  Math.pow(potLocation.getZ()-goTo.getZ(), 2));
       //fitnessMult *= Math.pow(0.01, currentArm.getNumLinks());
@@ -492,12 +502,85 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
           if(chromosome.getGenome().charAt(i) == '1') value += 1 << i-pos; 
         }
         pos += 8;
-        if (value < link.servo.getMinOutput()) value = (double)link.servo.targetOutput;
-        if (value > link.servo.getMaxOutput()) value = (double)link.servo.targetOutput;
+        if (value < link.servo.getMinInput()) value = link.servo.getPos().doubleValue();
+        if (value > link.servo.getMaxOutput()) value = link.servo.getPos().doubleValue();
         decodedGenome.add(value);
       }
       chromosome.setDecodedGenome(decodedGenome);
     }
   }
+  private DHRobotArm simulateMove(ArrayList<Object> decodedGenome) {
+    // TODO Auto-generated method stub
+    double time = 0.2;
+    boolean isMoving = true;
+    DHRobotArm oldArm = currentArm;
+    while (isMoving) {
+      isMoving = false;
+      DHRobotArm newArm = new DHRobotArm();
+      //log.info("time: {}", time);
+      for (int i = 0; i < currentArm.getNumLinks(); i++) {
+        DHLink newLink = new DHLink(currentArm.getLink(i));
+        double degrees=currentArm.getLink(i).servo.getPos().doubleValue();
+        double deltaDegree = java.lang.Math.abs(degrees - (Double)decodedGenome.get(i));
+        double deltaDegree2 = time * (Integer)currentArm.getLink(i).servo.getVelocity();
+        if (deltaDegree < 0.0){
+          deltaDegree *= -1;
+        }
+        if (deltaDegree > deltaDegree2) {
+          deltaDegree = deltaDegree2;
+          isMoving = true;
+        }
+        if (degrees > ((Double)decodedGenome.get(i)).intValue()) {
+          degrees -= deltaDegree;
+        }
+        else if (degrees < ((Double)decodedGenome.get(i)).intValue()) {
+          degrees += deltaDegree;
+        }
+       // log.info("{}:{}",currentArm.getLink(i).getThetaDegrees(), newLink.getThetaDegrees());
+        newLink.setTheta(newLink.getTheta() + MathUtils.degToRad(degrees));
+        //log.info("{}",newLink.getThetaDegrees());
+        newArm.addLink(newLink);
+        //log.info("{}: {}", currentArm.getLink(i).getName(), degrees);
+      }
+      double[][] jp = createJointPositionMap(newArm);
+      //send data to the collision detector class
+      for (int i = 0; i < currentArm.getNumLinks(); i++) {
+        CollisionItem ci = new CollisionItem(new Point(jp[i][0], jp[i][1], jp[i][2], 0 , 0, 0), new Point(jp[i+1][0], jp[i+1][1], jp[i+1][2], 0, 0, 0), currentArm.getLink(i).getName());
+        if (i != currentArm.getNumLinks()-1) {
+          ci.addIgnore(currentArm.getLink(i+1).getName());
+        }
+        collisionItems.addItem(ci);
+      }
+      collisionItems.runTest();
+      if (collisionItems.haveCollision() ){
+        //log.info("Collision at {} - {}", collisionItems.getCollisionPoint()[0], collisionItems.getCollisionPoint()[1]);
+        return oldArm;
+      }
+      oldArm = newArm;
+      //log.info("time: {} Position:{}", ((Double)time).floatValue(), newArm.getPalmPosition().toString());
+      //log.info("collision: {}", collisionItems.haveCollision());
+      for (int i = 1; i < jp.length;  i++){
+        //log.info("jp:{} {} - {} - {}", newArm.getLink(i-1).getName(), ((Double)jp[i][0]).intValue(), ((Double)jp[i][1]).intValue(), ((Double)jp[i][2]).intValue());
+      }
+      time += 0.2;
+    }
+    return oldArm;
+  }
   
+  public String addObject(double oX, double oY, double oZ, double eX, double eY, double eZ, String name, double radius) {
+    return addObject(new Point(oX, oY, oZ, 0, 0, 0), new Point(eX, eY, eZ, 0, 0, 0), name, radius);
+  }
+
+  public String addObject(Point origin, Point end, String name, double radius) {
+    CollisionItem item = new CollisionItem(origin, end, name, radius);
+    collisionItems.addItem(item);
+    return item.getName();
+  }
+  public String addObject(String name, double radius) {
+    return addObject(new Point(0, 0, 0, 0, 0, 0), new Point(0, 0, 0, 0, 0, 0), name, radius);
+  }
+  
+  public void clearObject(){
+    collisionItems.clearItem();
+  }
 }
