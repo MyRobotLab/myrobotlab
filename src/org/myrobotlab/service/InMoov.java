@@ -828,8 +828,20 @@ public class InMoov extends Service {
     }
   }
 
+  public void setArmVelocity(String which, Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+    if (!arms.containsKey(which)) {
+      error("setArmVelocity %s does not exist", which);
+    } else {
+      arms.get(which).setVelocity(bicep, rotate, shoulder, omoplate);
+    }
+  }
+
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
+  }
+
+  public void setHandVelocity(String which, Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky) {
+    setHandVelocity(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
@@ -840,8 +852,20 @@ public class InMoov extends Service {
     }
   }
 
+  public void setHandVelocity(String which, Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    if (!hands.containsKey(which)) {
+      error("setHandSpeed %s does not exist", which);
+    } else {
+      hands.get(which).setVelocity(thumb, index, majeure, ringFinger, pinky, wrist);
+    }
+  }
+
   public void setHeadSpeed(Double rothead, Double neck) {
     setHeadSpeed(rothead, neck, null, null, null);
+  }
+
+  public void setHeadVelocity(Integer rothead, Integer neck) {
+    setHeadVelocity(rothead, neck, null, null, null);
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
@@ -849,6 +873,14 @@ public class InMoov extends Service {
       head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
     } else {
       log.warn("setHeadSpeed - I have no head");
+    }
+  }
+
+  public void setHeadVelocity(Integer rothead, Integer neck, Integer eyeXSpeed, Integer eyeYSpeed, Integer jawSpeed) {
+    if (head != null) {
+      head.setVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
+    } else {
+      log.warn("setHeadVelocity - I have no head");
     }
   }
 
@@ -861,6 +893,14 @@ public class InMoov extends Service {
       torso.setSpeed(topStom, midStom, lowStom);
     } else {
       log.warn("setTorsoSpeed - I have no torso");
+    }
+  }
+
+  public void setTorsoVelocity(Integer topStom, Integer midStom, Integer lowStom) {
+    if (torso != null) {
+      torso.setVelocity(topStom, midStom, lowStom);
+    } else {
+      log.warn("setTorsoVelocity - I have no torso");
     }
   }
 

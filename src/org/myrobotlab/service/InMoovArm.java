@@ -443,4 +443,11 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return meta;
   }
 
+  public void setVelocity(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+    this.bicep.setVelocity(bicep);
+    this.rotate.setVelocity(rotate);
+    this.shoulder.setVelocity(shoulder);
+    this.omoplate.setVelocity(omoplate);
+  }
+
 }

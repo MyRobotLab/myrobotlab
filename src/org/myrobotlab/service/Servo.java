@@ -211,16 +211,14 @@ public class Servo extends Service implements ServoControl {
 	 */
 	boolean isEventsEnabled = false;
 
-	private int maxVelocity = 425;
+	private int maxVelocity = 500;
 	
 
 	private boolean isAttached = false;
 	private boolean isControllerSet = false;
 
-  private Double speedScale = 1.0;
-
   private int velocity = 0;
-
+  
 	public Servo(String n) {
 		super(n);
 		createPinList();
@@ -229,7 +227,8 @@ public class Servo extends Service implements ServoControl {
 		lastActivityTime = System.currentTimeMillis();
 	}
 	
-	public void onRegistered(ServiceInterface s) {
+
+  public void onRegistered(ServiceInterface s) {
 		refreshControllers();
 		broadcastState();
 
@@ -444,9 +443,20 @@ public class Servo extends Service implements ServoControl {
 		this.rest = rest;
 	}
 
+	/**
+	 * setSpeed is deprecated, new function for speed control is setVelocity()
+	 */
 	public void setSpeed(double speed) {
-		this.speed = speed / speedScale;
-		getController().servoSetSpeed(this);
+	  if(speed <= 0.1d) setVelocity(6);
+	  else if (speed <= 0.2d) setVelocity(7);
+	  else if (speed <= 0.3d) setVelocity(8);
+	  else if (speed <= 0.4d) setVelocity(9);
+	  else if (speed <= 0.5d) setVelocity(11);
+	  else if (speed <= 0.6d) setVelocity(13);
+	  else if (speed <= 0.7d) setVelocity(18);
+	  else if (speed <= 0.8d) setVelocity(27);
+	  else if (speed <= 0.9d) setVelocity(54);
+	  else setVelocity(0);
 	}
 
 	// choose to handle sweep on arduino or in MRL on host computer thread.
@@ -618,6 +628,11 @@ public class Servo extends Service implements ServoControl {
 		attach((ServoController) Runtime.getService(controllerName), pin, null);
 	}
 
+  @Override
+  public void attach(String controllerName, int pin, Integer pos) throws Exception {
+    attach((ServoController) Runtime.getService(controllerName), pin, pos);
+  }
+
 	@Override
 	public void attach(ServoController controller, int pin) throws Exception {
 		attach(controller, pin, null);
@@ -703,7 +718,10 @@ public class Servo extends Service implements ServoControl {
 		}
 	}
 
-  public void setVelocity(int velocity) {
+  public void setVelocity(Integer velocity) {
+    if (velocity == null) {
+      return;
+    }
     this.velocity = velocity;
     if (isControllerSet()){
       getController().servoSetVelocity(this);
@@ -735,14 +753,6 @@ public class Servo extends Service implements ServoControl {
     
   }
   
-  public void setSpeedScale(Double speedScale) {
-    if (speedScale >= 1.0){
-      this.speedScale  = speedScale;
-    }
-    else{
-      log.info("speedScale must be >= 1.0");
-    }
-  }
 
   @Override
   public int getVelocity() {

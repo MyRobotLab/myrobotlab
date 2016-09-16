@@ -205,9 +205,6 @@ void MrlComm::processCommand(int ioType) {
 	case SERVO_WRITE_MICROSECONDS:
 		((MrlServo*) getDevice(ioCmd[1]))->servoWriteMicroseconds(MrlMsg::toInt(ioCmd, 2));
 		break;
-	case SERVO_SET_SPEED:
-		((MrlServo*) getDevice(ioCmd[1]))->setSpeed(ioCmd[2]);
-		break;
 	case SERVO_DETACH: {
 		if (debug)
 			MrlMsg::publishDebug("SERVO_DETACH " + String(ioCmd[1]));
