@@ -22,13 +22,12 @@ class MrlServo : public Device {
     bool isSweeping;
     int targetPos;
     float currentPos;
-    int speed; // servos have a "speed" associated with them that's not part of the base servo driver
-    float step;
     int min;
     int max;
     unsigned long lastUpdate;
-    unsigned int baseSpeed;
-    unsigned int velocity;
+    unsigned int velocity; // in deg/sec
+    int sweepStep;
+    unsigned int maxVelocity;
   public:
     MrlServo();
     ~MrlServo();
@@ -36,10 +35,8 @@ class MrlServo : public Device {
     void attach(int pin);
     void detach();
     void update();
-    void publishServoEvent(int eventType);
     void servoWrite(int position);
     void servoWriteMicroseconds(int position);
-    void setSpeed(int speed);
     void startSweep(int min, int max, int step);
     void stopSweep();
     void setMaxVelocity(unsigned int velocity);

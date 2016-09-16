@@ -446,14 +446,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	@Override
-	public void servoSetSpeed(ServoControl servo) {
-		// TODO Auto-generated method stub.
-		// perhaps cannot do this with Adafruit16CServoDriver
-		// Mats says. It can be done in this service. But not by the board.
-	}
-
-
-	@Override
 	public DeviceController getController() {
 		return controller;
 	}

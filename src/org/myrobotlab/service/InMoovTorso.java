@@ -284,4 +284,10 @@ public class InMoovTorso extends Service {
 
     return meta;
   }
+
+  public void setVelocity(Integer topStom, Integer midStom, Integer lowStom) {
+    this.topStom.setVelocity(topStom);
+    this.midStom.setVelocity(midStom);
+    this.lowStom.setVelocity(lowStom);
+   }
 }

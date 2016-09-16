@@ -40,8 +40,6 @@ public interface ServoController extends DeviceController {
 
 	void servoWriteMicroseconds(ServoControl servo, int uS);
 
-	void servoSetSpeed(ServoControl servo);
-
 	void servoDetach(ServoControl servo);
 
   void servoSetMaxVelocity(ServoControl servo);
