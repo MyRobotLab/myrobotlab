@@ -451,18 +451,16 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   public void moveTo(int x, int y, int z) {
     goTo = new Point((double)x,(double)y,(double)z,0.0,0.0,0.0);
     GeneticAlgorithm GA = new GeneticAlgorithm(this, 150, currentArm.getNumLinks(), 8, 0.9, 0.1);
-    GA.setGeneticClass(this);
-    Chromosome bestFit = GA.doGeneration(200);
+    Chromosome bestFit = GA.doGeneration(200); // this is the number of time the chromosome pool will be recombined and mutate
     DHRobotArm checkedArm = simulateMove(bestFit.getDecodedGenome());
+    // using a dhlink with no servo will crash here
     for (int i = 0; i < currentArm.getNumLinks(); i++){
-      //currentArm.getLink(i).servo.moveTo(((Double)bestFit.getDecodedGenome().get(i)).intValue());
       currentArm.getLink(i).servo.moveTo(((Double)(checkedArm.getLink(i).getThetaDegrees()-currentArm.getLink(i).getThetaDegrees())).intValue());
     }
   }
 
   @Override
   public void calcFitness(ArrayList<Chromosome> pool) {
-    // TODO Auto-generated method stub
     for (Chromosome chromosome : pool) {
       DHRobotArm arm = new DHRobotArm();
       double fitnessMult = 1;
@@ -475,14 +473,12 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
         }
         else {
           fitnessMult += Math.sqrt(currentArm.getLink(i).servo.getVelocity()*currentArm.getLink(i).servo.getSpeed()/10)/delta;
-          //fitnessMult *= 1/10;
         }
         arm.addLink(newLink);
       }
       arm = simulateMove(chromosome.getDecodedGenome());
       Point potLocation = arm.getPalmPosition();
       Double distance = Math.sqrt(Math.pow(potLocation.getX()-goTo.getX(), 2)+Math.pow(potLocation.getY()-goTo.getY(), 2) +  Math.pow(potLocation.getZ()-goTo.getZ(), 2));
-      //fitnessMult *= Math.pow(0.01, currentArm.getNumLinks());
       Double fitness = fitnessMult/distance*1000;
       if (fitness < 0) fitness *=-1;
       chromosome.setFitness(fitness);
