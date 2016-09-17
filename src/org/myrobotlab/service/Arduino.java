@@ -47,7 +47,6 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_DETACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_MAX_VELOCITY;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_VELOCITY;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_SPEED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_WRITE;
@@ -2303,18 +2302,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void servoDetach(ServoControl servo) {
 		int id = getDeviceId(servo);
 		sendMsg(SERVO_DETACH, getDeviceId(servo), id);
-	}
-
-	@Override
-	public void servoSetSpeed(ServoControl servo) {
-		Double speed = servo.getSpeed();
-		if (speed == null || speed < 0.0f || speed > 1.0f) {
-			error("speed %f out of bounds", speed);
-			return;
-		}
-
-		int id = getDeviceId(servo);
-		sendMsg(SERVO_SET_SPEED, id, (int) (speed * 100));
 	}
 
 	// FIXME - do sweep single method call from ServoControl

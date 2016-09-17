@@ -1,16 +1,14 @@
 #include "MrlServo.h"
 
 MrlServo::MrlServo() : Device(DEVICE_TYPE_SERVO) {
-   isMoving = false;
-   isSweeping = false;
-   speed = 100;// 100% speed
-   // TODO: target/curent position?
-   // create the servo
-   servo = new Servo();
-   lastUpdate = 0;
-   currentPos = 0.0;
-   targetPos = 0;
-   velocity = 0;
+  isMoving = false;
+  isSweeping = false;
+  // create the servo
+  servo = new Servo();
+  lastUpdate = 0;
+  currentPos = 0.0;
+  targetPos = 0;
+  velocity = 0;
 }
 
 MrlServo::~MrlServo() {
@@ -52,59 +50,51 @@ void MrlServo::detach(){
 }
 
 void MrlServo::update() {
-  if (lastUpdate+10>millis() || servo == NULL) 
-    return;
+  //it may have an imprecision of +- 1 due to the conversion of currentPos to int
   if (isMoving) {
     if ((int)currentPos != targetPos) {
-      currentPos += step;
-      if((step > 0.0 && (int)currentPos > targetPos) || (step < 0.0 && (int)currentPos < targetPos)) {
-        currentPos=targetPos; 
+      long deltaTime = millis() - lastUpdate;
+      float step = velocity * deltaTime;
+      step /= 1000; //for deg/ms;
+      if (isSweeping) {
+        step = sweepStep;
       }
+      if (velocity == 0) { // when velocity == 0, it mean full speed ahead
+        step = targetPos - currentPos;
+      }
+      else if ((int)currentPos > targetPos) {
+        step *=-1;
+      }
+      currentPos += step;
+      if ((step > 0.0 && (int)currentPos > targetPos) || (step < 0.0 && (int)currentPos < targetPos)) {
+        currentPos = targetPos;
+      }
+      lastUpdate = millis();
       servo->write((int)currentPos);
-    } else {
+    }
+    else {
       if (isSweeping) {
         if (targetPos == min) {
           targetPos = max;
-        } else {
+        }
+        else {
           targetPos = min;
         }
-        step*=-1;
-      } else {
+        sweepStep *= -1;
+      }
+      else {
         isMoving = false;
       }
     }
   }
-  lastUpdate=millis();
-}
-
-void MrlServo::publishServoEvent(int eventType) {
-  MrlMsg msg(PUBLISH_SERVO_EVENT,id);
-  msg.addData(eventType);
-  msg.addData((int)currentPos);
-  msg.addData(targetPos);
-  msg.sendMsg();
 }
 
 void MrlServo::servoWrite(int position) {
   if (servo == NULL) 
     return;
-  if (speed == 100 && velocity == 0) {
-    // move at regular/full 100% speed
-    targetPos = position;
-    isMoving = true;
-    step=targetPos-(int)currentPos;
-  } else /*if (speed < 100 && speed > 0)*/ {
-    targetPos = position;
-    isMoving = true;
-    //int baseSpeed=(int)(60.0/0.14); // deg/sec base on speed of HS805B servo 6V under no load //should be modifiable
-    long delta=targetPos-(int)currentPos;
-    float currentSpeed=(velocity*speed)/100;
-    long timeToReach=abs((delta))*1000/currentSpeed; // time to reach target in ms
-    if(timeToReach==0){
-      timeToReach=1;
-    }
-    step=((float)delta*10/timeToReach);
-  }
+  targetPos = position;
+  isMoving = true;
+  lastUpdate = millis();
 }
 
 void MrlServo::servoWriteMicroseconds(int position) {
@@ -113,14 +103,10 @@ void MrlServo::servoWriteMicroseconds(int position) {
   }
 }
 
-void MrlServo::setSpeed(int speed) {
-  this->speed = speed;
-}
-
 void MrlServo::startSweep(int min, int max, int step) {
   this->min = min;
   this->max = max;
-  this->step = step;
+  sweepStep = step;
   targetPos = max;
   isMoving = true;
   isSweeping = true;
@@ -132,10 +118,10 @@ void MrlServo::stopSweep() {
 }
 
 void MrlServo::setMaxVelocity(unsigned int velocity){
-	baseSpeed = velocity;
+  maxVelocity = velocity;
 }
 
 void MrlServo::setVelocity(unsigned int velocity) {
-	this->velocity = velocity;
+  this->velocity = velocity;
 }
 

@@ -211,16 +211,14 @@ public class Servo extends Service implements ServoControl {
 	 */
 	boolean isEventsEnabled = false;
 
-	private int maxVelocity = 425;
+	private int maxVelocity = 500;
 	
 
 	private boolean isAttached = false;
 	private boolean isControllerSet = false;
 
-  private Double speedScale = 1.0;
-
   private int velocity = 0;
-
+  
 	public Servo(String n) {
 		super(n);
 		createPinList();
@@ -229,7 +227,8 @@ public class Servo extends Service implements ServoControl {
 		lastActivityTime = System.currentTimeMillis();
 	}
 	
-	public void onRegistered(ServiceInterface s) {
+
+  public void onRegistered(ServiceInterface s) {
 		refreshControllers();
 		broadcastState();
 
@@ -444,9 +443,52 @@ public class Servo extends Service implements ServoControl {
 		this.rest = rest;
 	}
 
+	/**
+	 * setSpeed is deprecated, new function for speed control is setVelocity()
+	 */
 	public void setSpeed(double speed) {
-		this.speed = speed / speedScale;
-		getController().servoSetSpeed(this);
+	  
+	  // KWATTERS: The realtionship between the old set speed value and actual angular velocity was exponential.
+	  // To create a model to map these, I took the natural log of the speed values, computed a linear regression line
+	  // y=mx+b
+	  // And then convert it back to exponential space with the e^y   
+	  // approximating this with the equation
+	  // val = e ^ (slope * x + intercept) 
+	  // slope & intercept were fitted by taking a linear regression of the log values
+	  // of the mapping.
+
+	  //  Speed,NewFunction,OldMeasured
+    //  0.1,3,6
+    //  0.2,5,7
+    //  0.3,7,9
+    //  0.4,9,9
+    //  0.5,13,11
+    //  0.6,19,13
+    //  0.7,26,18
+    //  0.8,36,27
+    //  0.9,50,54
+	  
+	  // These 2 values can be tweaked for a slightly different curve that fits the observed data.
+	  double slope = 3.25;
+	  double intercept = 1;
+	      
+	  double vel = Math.exp(slope * speed + intercept);
+	  // set velocity to 0.0 if the speed = 1.0.. This skips the velicity calculation logic.
+	  if (speed >= 1.0) {
+	    vel = 0.0;
+	  }
+	  setVelocity((int)vel);
+	  // Method from build 1670
+    //	  if(speed <= 0.1d) setVelocity(6);
+    //	  else if (speed <= 0.2d) setVelocity(7);
+    //	  else if (speed <= 0.3d) setVelocity(8);
+    //	  else if (speed <= 0.4d) setVelocity(9);
+    //	  else if (speed <= 0.5d) setVelocity(11);
+    //	  else if (speed <= 0.6d) setVelocity(13);
+    //	  else if (speed <= 0.7d) setVelocity(18);
+    //	  else if (speed <= 0.8d) setVelocity(27);
+    //	  else if (speed <= 0.9d) setVelocity(54);
+    //	  else setVelocity(0);
 	}
 
 	// choose to handle sweep on arduino or in MRL on host computer thread.
@@ -618,6 +660,11 @@ public class Servo extends Service implements ServoControl {
 		attach((ServoController) Runtime.getService(controllerName), pin, null);
 	}
 
+  @Override
+  public void attach(String controllerName, int pin, Integer pos) throws Exception {
+    attach((ServoController) Runtime.getService(controllerName), pin, pos);
+  }
+
 	@Override
 	public void attach(ServoController controller, int pin) throws Exception {
 		attach(controller, pin, null);
@@ -703,7 +750,10 @@ public class Servo extends Service implements ServoControl {
 		}
 	}
 
-  public void setVelocity(int velocity) {
+  public void setVelocity(Integer velocity) {
+    if (velocity == null) {
+      return;
+    }
     this.velocity = velocity;
     if (isControllerSet()){
       getController().servoSetVelocity(this);
@@ -735,14 +785,6 @@ public class Servo extends Service implements ServoControl {
     
   }
   
-  public void setSpeedScale(Double speedScale) {
-    if (speedScale >= 1.0){
-      this.speedScale  = speedScale;
-    }
-    else{
-      log.info("speedScale must be >= 1.0");
-    }
-  }
 
   @Override
   public int getVelocity() {

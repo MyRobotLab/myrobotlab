@@ -344,4 +344,23 @@ public class InMoovHead extends Service {
     return meta;
   }
 
+  public void setVelocity(Integer headXSpeed, Integer headYSpeed, Integer eyeXSpeed, Integer eyeYSpeed, Integer jawSpeed) {
+    if (log.isDebugEnabled()) {
+      log.debug(String.format("%s setVelocity %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed));
+    }
+    rothead.setVelocity(headXSpeed);
+    neck.setVelocity(headYSpeed);
+    // it's possible to pass null for the eye and jaw speeds
+    if (eyeXSpeed != null) {
+      eyeX.setVelocity(eyeXSpeed);
+    }
+    if (eyeYSpeed != null) {
+      eyeY.setVelocity(eyeYSpeed);
+    }
+    if (jawSpeed != null) {
+      jaw.setVelocity(jawSpeed);
+    }
+
+  }
+
 }
