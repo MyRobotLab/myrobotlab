@@ -153,4 +153,6 @@ public interface ServoControl extends DeviceControl {
 
   int getVelocity();
 
+  void attach(String controllerName, int pin, Integer pos) throws Exception;
+
 }

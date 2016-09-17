@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -588,5 +586,14 @@ public class InMoovHand extends Service implements LeapDataListener {
 
     return meta;
   }
+
+  public void setVelocity(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    this.thumb.setVelocity(thumb);
+    this.index.setVelocity(index);
+    this.majeure.setVelocity(majeure);
+    this.ringFinger.setVelocity(ringFinger);
+    this.pinky.setVelocity(pinky);
+    this.wrist.setVelocity(wrist);
+ }
 
 }
