@@ -764,16 +764,19 @@ public class Servo extends Service implements ServoControl {
 	public int getMaxVelocity() {
 		return maxVelocity;
 	}
-
+  
   public void moveToOutput(Double moveTo) {
-    // TODO Auto-generated method stub
+    moveToOutput(moveTo.intValue());
+  }
+
+  public void moveToOutput(Integer moveTo) {
     if (controller == null) {
       error(String.format("%s's controller is not set", getName()));
       return;
     }
 
     //targetPos = pos;
-    targetOutput = moveTo.intValue();
+    targetOutput = moveTo;
 
     getController().servoWrite(this);
     lastActivityTime = System.currentTimeMillis();
