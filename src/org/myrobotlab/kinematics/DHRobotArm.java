@@ -172,7 +172,21 @@ public class DHRobotArm {
     // double ws = m.elements[3][3];
     // log.debug("World Scale : " + ws);
     // TODO: pass /compute the roll pitch and yaw ..
-    Point palm = new Point(x, y, z, 0, 0, 0);
+    
+    double pitch = Math.atan2(-1.0*(m.elements[2][0]), Math.sqrt(m.elements[0][0]*m.elements[0][0] + m.elements[1][0]*m.elements[1][0]));
+    double roll = 0;
+    double yaw = 0;
+    if (pitch == Math.PI/2) {
+      yaw = Math.atan2(m.elements[0][1], m.elements[1][1]);
+    }
+    else if (pitch == -1 * Math.PI/2) {
+      yaw = Math.atan2(m.elements[0][1], m.elements[1][1]) *-1;
+    }
+    else {
+      roll = Math.atan2(m.elements[0][1], m.elements[2][2]);
+      yaw = Math.atan2(m.elements[1][0], m.elements[0][0]);
+    }
+    Point palm = new Point(x, y, z, pitch * 180 / Math.PI, roll * 180 / Math.PI, yaw * 180 / Math.PI);
     return palm;
   }
 
