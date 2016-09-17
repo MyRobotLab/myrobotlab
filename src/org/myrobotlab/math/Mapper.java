@@ -41,14 +41,6 @@ public final class Mapper implements Serializable {
   }
 
   final public double calc(double in) {
-    if (in < minOutput) {
-      log.warn("clipping {} to {}", in, minX);
-      return minX;
-    }
-    if (in > maxOutput) {
-      log.warn("clipping {} to {}", in, maxX);
-      return maxX;
-    }
     double c = minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
     if (c < minOutput) {
       log.warn("clipping {} to {}", c, minOutput);
@@ -101,12 +93,12 @@ public final class Mapper implements Serializable {
   }
 
   public void setMax(double max) {
-    //maxOutput = max;
-    maxX = max;
+    maxOutput = max;
+    //maxX = max;
   }
 
   public void setMin(double min) {
-    minX = min;
+    minOutput = min;
   }
 
   public double getMinOutput() {

@@ -320,8 +320,8 @@ public class Tracking extends Service {
     x.rest();
     y.rest();
 
-    lastXServoPos = x.getPos();
-    lastYServoPos = y.getPos();
+    lastXServoPos = x.getTargetOutput();
+    lastYServoPos = y.getTargetOutput();
   }
 
   public void scan() {
@@ -398,12 +398,12 @@ public class Tracking extends Service {
           faceFoundFrameCount = 0;
 
           if (scan) {
-            int xpos = x.getPos();
+            int xpos = x.getTargetOutput();
 
-            if (xpos + scanXStep >= x.getMaxInput() && scanXStep > 0 || xpos + scanXStep <= x.getMinInput() && scanXStep < 0) {
+            if (xpos + scanXStep >= x.getMax() && scanXStep > 0 || xpos + scanXStep <= x.getMin() && scanXStep < 0) {
               scanXStep = scanXStep * -1;
-              int newY = (int) (y.getMinInput() + (Math.random() * (y.getMaxInput() - y.getMinInput())));
-              y.moveTo(newY);
+              int newY = (int) (y.getMin() + (Math.random() * (y.getMax() - y.getMin())));
+              y.moveToOutput(newY);
             }
 
             x.moveTo(xpos + scanXStep);
@@ -420,17 +420,17 @@ public class Tracking extends Service {
 
       // FIXME - remove not used
       case STATE_FACE_DETECT_LOST_TRACK:
-        int xpos = x.getPos();
+        int xpos = x.getTargetOutput();
 
-        if (xpos >= x.getMaxInput() && scanXStep > 0) {
+        if (xpos >= x.getMax() && scanXStep > 0) {
           scanXStep = scanXStep * -1;
         }
 
-        if (xpos <= x.getMinInput() && scanXStep < 0) {
+        if (xpos <= x.getMin() && scanXStep < 0) {
           scanXStep = scanXStep * -1;
         }
 
-        x.moveTo(xpos + scanXStep);
+        x.moveToOutput(xpos + scanXStep);
 
         break;
 
@@ -556,22 +556,22 @@ public class Tracking extends Service {
 
     pid.setInput("x", targetPoint.x);
     pid.setInput("y", targetPoint.y);
-    int currentXServoPos = x.getPos();
-    int currentYServoPos = y.getPos();
+    int currentXServoPos = x.getTargetOutput();
+    int currentYServoPos = y.getTargetOutput();
 
     // TODO - work on removing currentX/YServoPos - and use the servo's
     // directly ???
     // if I'm at my min & and the target is further min - don't compute
     // pid
-    if ((currentXServoPos <= x.getMinInput() && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= x.getMaxInput() && xSetpoint - targetPoint.x > 0)) {
+    if ((currentXServoPos <= x.getMin() && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= x.getMax() && xSetpoint - targetPoint.x > 0)) {
       error(String.format("%d x limit out of range", currentXServoPos));
     } else {
 
       if (pid.compute("x")) {
         currentXServoPos += (int) pid.getOutput("x");
         if (currentXServoPos != lastXServoPos) {
-          x.moveTo(currentXServoPos);
-          currentXServoPos = x.getPos();
+          x.moveToOutput(currentXServoPos);
+          currentXServoPos = x.getTargetOutput();
           lastXServoPos = currentXServoPos;
         }
         // TODO - canidate for "move(int)" ?
@@ -581,14 +581,14 @@ public class Tracking extends Service {
       }
     }
 
-    if ((currentYServoPos <= y.getMinInput() && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= y.getMaxInput() && ySetpoint - targetPoint.y > 0)) {
+    if ((currentYServoPos <= y.getMin() && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= y.getMax() && ySetpoint - targetPoint.y > 0)) {
       error(String.format("%d y limit out of range", currentYServoPos));
     } else {
       if (pid.compute("y")) {
         currentYServoPos += (int) pid.getOutput("y");
         if (currentYServoPos != lastYServoPos) {
-          y.moveTo(currentYServoPos);
-          currentYServoPos = y.getPos();
+          y.moveToOutput(currentYServoPos);
+          currentYServoPos = y.getTargetOutput();
           lastYServoPos = currentYServoPos;
         }
       } else {
