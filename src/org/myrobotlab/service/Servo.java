@@ -657,23 +657,32 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void attach(String controllerName, int pin) throws Exception {
-		attach((ServoController) Runtime.getService(controllerName), pin, null);
+		attach((ServoController) Runtime.getService(controllerName), pin, null, null);
 	}
 
   @Override
   public void attach(String controllerName, int pin, Integer pos) throws Exception {
-    attach((ServoController) Runtime.getService(controllerName), pin, pos);
+    attach((ServoController) Runtime.getService(controllerName), pin, pos, null);
   }
 
-	@Override
+  @Override
+  public void attach(String controllerName, int pin, Integer pos, Integer velocity) throws Exception {
+    attach((ServoController) Runtime.getService(controllerName), pin, pos, velocity);
+  }
+
+  @Override
 	public void attach(ServoController controller, int pin) throws Exception {
-		attach(controller, pin, null);
+		attach(controller, pin, null, null);
 	}
+
+	 public void attach(ServoController controller, int pin, Integer pos) throws Exception {
+	   attach(controller, pin, null, null);
+	 }
 
 	// FIXME - setController is very deficit in its abilities - compared to the
 	// complexity of this
 	@Override
-	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
+	public void attach(ServoController controller, int pin, Integer pos, Integer velocity) throws Exception {
 		subscribe(controller.getName(), "publishAttachedDevice");
 
 		if (this.controller == controller) {
@@ -686,17 +695,18 @@ public class Servo extends Service implements ServoControl {
 
 		// ORDER IS IMPORTANT !!!
 		// attach the Control to the Controller first
+		if (velocity == null) velocity = 0;
 		if (pos != null) {
 			targetPos = pos;
 			if (rest == null) {
 				rest = pos;
 			}
-			controller.deviceAttach(this, pin, pos);
+			controller.deviceAttach(this, pin, pos, (velocity >> 8) &0xFF, velocity &0xFF);
 		} else {
 			if (rest == null) {
 				rest = 90;
 			}
-			controller.deviceAttach(this, pin);
+			controller.deviceAttach(this, pin, rest, (velocity >> 8) &0xFF, velocity &0xFF);
 		}
 
 		// SET THE DATA
@@ -704,12 +714,15 @@ public class Servo extends Service implements ServoControl {
 		this.controller = controller;
 		this.controllerName = controller.getName();
 		int count = 0;
+		this.targetOutput = rest;
+		this.velocity = velocity;
 		while (!isAttached) {
 			count++;
 			sleep(100);
 			if (count > 4)
 				break;
 		}
+		moveTo(rest);
 		// this.isAttached = true;
 		broadcastState();
 	}
