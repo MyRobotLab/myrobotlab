@@ -45,6 +45,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   public final static Logger log = LoggerFactory.getLogger(InverseKinematics3D.class.getCanonicalName());
 
   private DHRobotArm currentArm = null;
+  
+  private HashMap<String, DHRobotArm> arms = new HashMap<String, DHRobotArm>();
 
   // we will track the joystick input to specify our velocity.
   private Point joystickLinearVelocity = new Point(0, 0, 0, 0, 0, 0);
@@ -55,6 +57,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   
   Point goTo;
   private CollisionDectection collisionItems = new CollisionDectection();
+  
+  public static final int IK_COMPUTE_METHOD_PI_JACOBIAN = 1;
+  public static final int IK_COMPUTE_METHOD_GENETIC_ALGORYTHM = 2;
+  
+  private int computeMethod = IK_COMPUTE_METHOD_PI_JACOBIAN;
 
   public InverseKinematics3D(String n) {
     super(n);
@@ -132,16 +139,37 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       this.isTracking = isTracking;
     }
   }
+  
+  public void changeArm(String arm) {
+    if (arms.containsKey(arm)) {
+      currentArm = arms.get(arm);
+    }
+    else {
+      log.info("IK service have no data for {}", arm);
+    }
+    
+  }
 
   public Point currentPosition() {
     return currentArm.getPalmPosition();
   }
 
+  public Point currentPosition(String arm) {
+    if (arms.containsKey(arm)) {
+      return arms.get(arm).getPalmPosition();
+    }
+    log.info("IK service have no data for {}", arm);
+    return new Point(0, 0, 0, 0, 0, 0);
+  }
+  
   public void moveTo(double x, double y, double z) {
     // TODO: allow passing roll pitch and yaw
     moveTo(new Point(x, y, z, 0, 0, 0));
   }
 
+  public void moveTo(String arm, double x, double y, double z) {
+    moveTo(arm, new Point(x, y, z, 0, 0, 0));
+  }
   /**
    * This create a rotation and translation matrix that will be applied on the
    * "moveTo" call.
@@ -192,6 +220,13 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     currentArm.centerAllJoints();
     publishTelemetry();
   }
+  
+  public void centerAllJoints(String arm) {
+    if (arms.containsKey(arm)) {
+      arms.get(arm).centerAllJoints();
+    }
+    log.info("IK service have no data for {}", arm);
+  }
 
   public void moveTo(Point p) {
 
@@ -199,11 +234,28 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     if (inputMatrix != null) {
       p = rotateAndTranslate(p);
     }
-    boolean success = currentArm.moveToGoal(p);
-
+    boolean success = false;
+    if(computeMethod == IK_COMPUTE_METHOD_PI_JACOBIAN) {
+      success = currentArm.moveToGoal(p);
+    }
+    else if (computeMethod == IK_COMPUTE_METHOD_GENETIC_ALGORYTHM) {
+      goTo = p;
+      GeneticAlgorithm GA = new GeneticAlgorithm(this, 150, currentArm.getNumLinks(), 8, 0.9, 0.1);
+      Chromosome bestFit = GA.doGeneration(200); // this is the number of time the chromosome pool will be recombined and mutate
+      DHRobotArm checkedArm = simulateMove(bestFit.getDecodedGenome());
+      // using a dhlink with no servo will crash here
+      for (int i = 0; i < currentArm.getNumLinks(); i++){
+        currentArm.getLink(i).servo.moveTo(((Double)(checkedArm.getLink(i).getThetaDegrees()-currentArm.getLink(i).getThetaDegrees())).intValue());
+      }
+    }
     if (success) {
       publishTelemetry();
     }
+  }
+  
+  public void moveTo(String arm, Point p) {
+    changeArm(arm);
+    moveTo(p);
   }
 
   public void publishTelemetry() {
@@ -226,6 +278,12 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   public double[][] createJointPositionMap() {
     return createJointPositionMap(currentArm);
   }
+  
+  public double[][] createJointPositionMap(String arm) {
+    changeArm(arm);
+    return createJointPositionMap(currentArm);
+  }
+  
 
   public double[][] createJointPositionMap(DHRobotArm arm) {
 
@@ -248,8 +306,20 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   public DHRobotArm getCurrentArm() {
     return currentArm;
   }
+  
+  public DHRobotArm getArm(String arm) {
+    if (arms.containsKey(arm)) {
+      return arms.get(arm);
+    }
+    else return currentArm;
+  }
 
   public void setCurrentArm(DHRobotArm currentArm) {
+    this.currentArm = currentArm;
+  }
+  
+  public void addArm(String name, DHRobotArm currentArm) {
+    arms.put(name, currentArm);
     this.currentArm = currentArm;
   }
 
@@ -442,11 +512,21 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     currentArm.addLink(dhLink);
   }
   
+  public void setDHLink (String armName, String name, double d, double theta, double r, double alpha) {
+    changeArm(armName);
+    setDHLink(name, d, theta, r, alpha);
+  }  
+  
+  public void setDHLink (String armName, Servo servo, double d, double theta, double r, double alpha) {
+    changeArm(armName);
+    setDHLink(servo, d, theta, r, alpha);
+  }  
+  
   public void setNewDHRobotArm() {
     currentArm = new DHRobotArm();
   }
   
- 
+  
   
   public void moveTo(int x, int y, int z) {
     goTo = new Point((double)x,(double)y,(double)z,0.0,0.0,0.0);
@@ -459,6 +539,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     }
   }
 
+  public void moveTo(String arm, int x, int y, int z) {
+    changeArm(arm);
+    moveTo(x, y, z);
+  }
+  
   @Override
   public void calcFitness(ArrayList<Chromosome> pool) {
     for (Chromosome chromosome : pool) {
@@ -578,5 +663,13 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   
   public void clearObject(){
     collisionItems.clearItem();
+  }
+  
+  public void setComputeMethodPSIJacobian() {
+    computeMethod = IK_COMPUTE_METHOD_PI_JACOBIAN;
+  }
+  
+  public void setComputeMethodGeneticAlgorythm() {
+    computeMethod = IK_COMPUTE_METHOD_GENETIC_ALGORYTHM;
   }
 }
