@@ -35,12 +35,6 @@ public class MouthControl extends Service {
     arduino = (Arduino) createPeer("arduino");
     mouth = (SpeechSynthesis) createPeer("mouth");
     
-    /* OLD WAY
-    jaw.setPin(7);
-    jaw.setController(arduino);
-    */
-    
-    // NEW WAY
     
     // TODO: mouth should probably implement speech synthesis.
     // in a way of speaking, one day, people may be able to read the lips

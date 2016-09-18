@@ -732,7 +732,6 @@ public class Servo extends Service implements ServoControl {
 			isAttached = true;
 			isControllerSet = true;
 			setMaxVelocity(maxVelocity);
-			setVelocity(velocity);
 			broadcastState();
 		}
 	}
