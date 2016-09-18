@@ -64,8 +64,11 @@ public class CodecUtils {
   // private transient static Gson gson = new
   // GsonBuilder().setDateFormat("yyyy-MM-dd
   // HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-  private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+  private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().setExclusionStrategies(new AnnotationExclusionStrategy()).create();
   // FIXME - switch to Jackson
+	// Changed by Mats to use an AnnotationExclusionStrategy
+	// See http://stackoverflow.com/questions/4802887/gson-how-to-exclude-specific-fields-from-serialization-without-annotations?rq=1
+	// for reference.
 
   private static boolean initialized = false;
 
