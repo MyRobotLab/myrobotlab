@@ -1,7 +1,13 @@
 package org.myrobotlab.service.interfaces;
 
-public class PinDefinition {
+import java.io.Serializable;
 
+public class PinDefinition implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 1L;
 	String name;
 	Integer address;
 	// String color; ?? 
