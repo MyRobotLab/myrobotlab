@@ -88,7 +88,6 @@ public class ServoTest {
 		servo02.attach(arduino, 7, 40);
 		servo01.eventsEnabled(true);
 		// FIXME is attach re-entrant ???
-		
 		servo01.broadcastState();
 		servo02.broadcastState();
 

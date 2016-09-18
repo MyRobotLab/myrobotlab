@@ -1096,7 +1096,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// the mapping of the two.
 
 		sendMsg(DEVICE_ATTACH, msgBody);
-
+    int count = 0;
+    while (deviceList.get(device.getName()).getId() == null) {
+      count++;
+      sleep(100);
+      if (count > 4)
+        break;
+    }
 	}
 
 	@Override
