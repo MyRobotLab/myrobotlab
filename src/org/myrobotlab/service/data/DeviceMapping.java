@@ -1,12 +1,16 @@
 package org.myrobotlab.service.data;
 
+import java.io.Serializable;
+
 import org.myrobotlab.codec.Exclude;
 import org.myrobotlab.service.interfaces.DeviceControl;
 
-import com.google.gson.annotations.Expose;
+public class DeviceMapping implements Serializable{	
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 1L;
 
-public class DeviceMapping {
-	
 	// transient too help prevent infinite recursion in gson 
 	// encoding since Arduino will have a reference
 	// to itself as a device
@@ -25,7 +29,7 @@ public class DeviceMapping {
 	 */
 	Object[] config;
 	
-	public DeviceMapping(DeviceControl device, Object... config){
+	public DeviceMapping(DeviceControl device, Object... config) {
 		this.device = device;
 		this.config = config;
 	}
