@@ -526,7 +526,9 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     currentArm = new DHRobotArm();
   }
   
-  
+  public void moveTo(int x , int y, int z, int roll, int pitch, int yaw) {
+    moveTo(new Point(x, y, z, roll, pitch, yaw));
+  }
   
   public void moveTo(int x, int y, int z) {
     goTo = new Point((double)x,(double)y,(double)z,0.0,0.0,0.0);
@@ -554,16 +556,23 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
         newLink.setTheta(newLink.getTheta()+MathUtils.degToRad((double)chromosome.getDecodedGenome().get(i)));
         Double delta = currentArm.getLink(i).servo.getPos().doubleValue()-(Double)chromosome.getDecodedGenome().get(i);
         if (delta == 0) {
-          fitnessMult +=Math.sqrt(currentArm.getLink(i).servo.getVelocity()*currentArm.getLink(i).servo.getSpeed()/10);
+          fitnessMult +=Math.sqrt(currentArm.getLink(i).servo.getVelocity()/10);
         }
         else {
-          fitnessMult += Math.sqrt(currentArm.getLink(i).servo.getVelocity()*currentArm.getLink(i).servo.getSpeed()/10)/delta;
+          fitnessMult += Math.sqrt(currentArm.getLink(i).servo.getVelocity()/10)/delta;
         }
         arm.addLink(newLink);
       }
       arm = simulateMove(chromosome.getDecodedGenome());
       Point potLocation = arm.getPalmPosition();
       Double distance = Math.sqrt(Math.pow(potLocation.getX()-goTo.getX(), 2)+Math.pow(potLocation.getY()-goTo.getY(), 2) +  Math.pow(potLocation.getZ()-goTo.getZ(), 2));
+      //not sure about weight for roll/pitch/yaw. adding a wrist will probably help
+      double dRoll = (potLocation.getRoll() - goTo.getRoll())/360;
+      fitnessMult*=(1-dRoll)*10000;
+      double dPitch = (potLocation.getPitch() - goTo.getPitch())/360;
+      fitnessMult*=(1-dPitch)*10000;
+      double dYaw = (potLocation.getYaw() - goTo.getYaw())/360;
+      fitnessMult*=(1-dYaw)*10000;
       Double fitness = fitnessMult/distance*1000;
       if (fitness < 0) fitness *=-1;
       chromosome.setFitness(fitness);
@@ -584,7 +593,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
         }
         pos += 8;
         if (value < link.servo.getMinInput()) value = link.servo.getPos().doubleValue();
-        if (value > link.servo.getMaxOutput()) value = link.servo.getPos().doubleValue();
+        if (value > link.servo.getMaxInput()) value = link.servo.getPos().doubleValue();
         decodedGenome.add(value);
       }
       chromosome.setDecodedGenome(decodedGenome);
