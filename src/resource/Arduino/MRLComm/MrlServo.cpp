@@ -21,7 +21,7 @@ MrlServo::~MrlServo() {
 // this method "may" be called with a pin or pin & pos depending on
 // config size
 bool MrlServo::deviceAttach(unsigned char config[], int configSize){
-  if (configSize < 1 || configSize > 2){
+  if (configSize < 1 || configSize > 4){
     MrlMsg msg(PUBLISH_MRLCOMM_ERROR);
     msg.addData(ERROR_DOES_NOT_EXIST);
     msg.addData(String(F("MrlServo invalid attach config size")));
@@ -30,10 +30,13 @@ bool MrlServo::deviceAttach(unsigned char config[], int configSize){
   attachDevice();
   pin = config[0];
   attach(pin);
-  if (configSize == 2){
-    targetPos = config[1];
-    servo->write(targetPos);
-    currentPos = targetPos;
+  if (configSize == 2) {
+    velocity = 0;
+    servoWrite(config[1]);
+  }
+  else if (configSize == 4) {
+    velocity = MrlMsg::toInt(config,2);
+    servoWrite(config[1]);
   }
   return true;
 }

@@ -75,7 +75,7 @@ public class ServoTest {
 		// should be clear & easy !!
 
 		// microcontroller connect ...
-		arduino.connect("COM5");
+		arduino.connect("COM15");
 		// arduino.setDebug(true);
 
 		// ServoControl Methods begin --------------
