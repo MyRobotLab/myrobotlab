@@ -491,7 +491,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			String pathInfo = request.getPathInfo();
 			String[] parts = null;
 			
-			log.info("%s %s", request.getMethod(), pathInfo);
+			log.info("{} {}", request.getMethod(), pathInfo);
 
 			// Broadcaster bc = r.getBroadcaster();
 			// if (bc != null || r.getBroadcaster() != broadcaster){
@@ -1071,7 +1071,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 			Runtime.start("python", "Python");
 			Runtime.start("arduino", "Arduino");
-			Runtime.start("srf05", "UltrasonicSensor");
+			//Runtime.start("srf05", "UltrasonicSensor");
 			Runtime.start("webgui", "WebGui");
 
 		} catch (Exception e) {
