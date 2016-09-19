@@ -29,15 +29,21 @@ bool MrlServo::deviceAttach(unsigned char config[], int configSize){
   }
   attachDevice();
   pin = config[0];
-  attach(pin);
   if (configSize == 2) {
     velocity = 0;
-    servoWrite(config[1]);
+    //servoWrite(config[1]);
+    servo->write(config[1]);
+    currentPos = config[1];
+    targetPos = config[1];
   }
   else if (configSize == 4) {
     velocity = MrlMsg::toInt(config,2);
-    servoWrite(config[1]);
+    //servoWrite(config[1]);
+    servo->write(config[1]);
+    currentPos = config[1];
+    targetPos = config[1];
   }
+  servo->attach(pin);
   return true;
 }
 
