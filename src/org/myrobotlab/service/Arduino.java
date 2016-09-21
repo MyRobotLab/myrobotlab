@@ -539,12 +539,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * Devices - string name index of device we need 2 indexes for sensors
 	 * because they will be referenced by name OR by index
 	 */
-	HashMap<String, DeviceMapping> deviceList = new HashMap<String, DeviceMapping>();
+	transient HashMap<String, DeviceMapping> deviceList = new HashMap<String, DeviceMapping>();
 
 	/**
 	 * id reference of sensor, key is the MRLComm device id
 	 */
-	HashMap<Integer, DeviceMapping> deviceIndex = new HashMap<Integer, DeviceMapping>();
+	transient HashMap<Integer, DeviceMapping> deviceIndex = new HashMap<Integer, DeviceMapping>();
 
 	/**
 	 * Serial service - the Arduino's serial connection
