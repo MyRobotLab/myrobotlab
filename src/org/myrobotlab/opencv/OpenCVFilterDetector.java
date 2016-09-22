@@ -43,7 +43,7 @@ public class OpenCVFilterDetector extends OpenCVFilter {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDetector.class.getCanonicalName());
 
   transient BackgroundSubtractor mog;
-  IplImage foreground;
+  transient IplImage foreground;
 
   public int history = 10;
   public float threshold = 128f;

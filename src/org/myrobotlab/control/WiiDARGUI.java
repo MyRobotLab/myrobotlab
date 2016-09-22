@@ -60,8 +60,8 @@ public class WiiDARGUI extends ServiceGUI implements ListSelectionListener, Vide
   Graphics cam = null;
   Graphics graph = null;
 
-  BufferedImage camImage = null;
-  BufferedImage graphImage = null;
+  transient BufferedImage camImage = null;
+  transient BufferedImage graphImage = null;
 
   int width = 1024;
   int height = 768;
