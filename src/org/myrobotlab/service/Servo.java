@@ -695,18 +695,19 @@ public class Servo extends Service implements ServoControl {
 
 		// ORDER IS IMPORTANT !!!
 		// attach the Control to the Controller first
-		if (velocity == null) velocity = 0;
+		if (velocity == null) velocity = this.velocity;
 		if (pos != null) {
 			targetPos = pos;
+			targetOutput = mapper.calcInt(targetPos);
 			if (rest == null) {
 				rest = pos;
 			}
-			controller.deviceAttach(this, pin, pos, (velocity >> 8) &0xFF, velocity &0xFF);
+			controller.deviceAttach(this, pin, targetOutput, (velocity >> 8) &0xFF, velocity &0xFF);
 		} else {
 			if (rest == null) {
 				rest = 90;
 			}
-			controller.deviceAttach(this, pin, rest, (velocity >> 8) &0xFF, velocity &0xFF);
+			controller.deviceAttach(this, pin, targetOutput, (velocity >> 8) &0xFF, velocity &0xFF);
 		}
 
 		// SET THE DATA
@@ -722,7 +723,7 @@ public class Servo extends Service implements ServoControl {
 			if (count > 4)
 				break;
 		}
-		moveTo(rest);
+		//moveTo(rest);
 		// this.isAttached = true;
 		broadcastState();
 	}
