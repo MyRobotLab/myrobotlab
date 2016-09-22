@@ -47,13 +47,13 @@ public class OpenCVFilterColorTrack extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterColorTrack.class.getCanonicalName());
 
-  IplImage hsv = null;
-  IplImage hue = null;
-  IplImage thresholded = null;
-  IplImage thresholded2 = null;
-  IplImage value = null;
-  IplImage saturation = null;
-  IplImage mask = null;
+  transient IplImage hsv = null;
+  transient IplImage hue = null;
+  transient IplImage thresholded = null;
+  transient IplImage thresholded2 = null;
+  transient IplImage value = null;
+  transient IplImage saturation = null;
+  transient IplImage mask = null;
 
   CvScalar hsv_min = null;
   CvScalar hsv_max = null;
