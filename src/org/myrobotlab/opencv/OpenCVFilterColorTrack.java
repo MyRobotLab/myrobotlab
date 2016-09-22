@@ -60,7 +60,7 @@ public class OpenCVFilterColorTrack extends OpenCVFilter {
   CvScalar hsv_min2 = null;
   CvScalar hsv_max2 = null;
 
-  BufferedImage frameBuffer = null;
+  transient BufferedImage frameBuffer = null;
 
   public OpenCVFilterColorTrack() {
     super();
