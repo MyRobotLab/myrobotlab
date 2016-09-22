@@ -7,8 +7,8 @@ public class OpenNiData {
   public Skeleton skeleton;
   public PImage depthPImage;
   public PImage rbgPImage;
-  public BufferedImage depth;
-  public BufferedImage rgb;
+  transient public BufferedImage depth;
+  transient public BufferedImage rgb;
   public int[] depthMap;
-  public BufferedImage display;
+  transient public BufferedImage display;
 }

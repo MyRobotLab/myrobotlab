@@ -63,7 +63,7 @@ public class SerializableImage implements Serializable {
   /**
    * internal buffered image
    */
-  private BufferedImage image;
+  transient private BufferedImage image;
 
   /**
    * jpg encoded byte buffer - TODO offer type png tff etc? TODO - consider
