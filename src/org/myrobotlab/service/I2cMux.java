@@ -53,7 +53,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	private boolean isAttached = false;
 	private int lastBusAddress = -1;
 
-	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
+	transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
