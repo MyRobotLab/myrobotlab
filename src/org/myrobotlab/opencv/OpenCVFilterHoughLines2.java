@@ -53,14 +53,14 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterHoughLines2.class.getCanonicalName());
 
-  IplImage gray = null;
+  transient IplImage gray = null;
 
   double lowThreshold = 0.0;
   double highThreshold = 50.0;
   int apertureSize = 5;
   // CvMemStorage storage = null;
   Pointer storage = null;
-  IplImage inlines = null;
+  transient IplImage inlines = null;
 
   CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
 

@@ -35,7 +35,7 @@ public class OpenCVFilterCreateHistogram extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterCreateHistogram.class.getCanonicalName());
 
-  IplImage buffer = null;
+  transient IplImage buffer = null;
 
   public OpenCVFilterCreateHistogram() {
     super();

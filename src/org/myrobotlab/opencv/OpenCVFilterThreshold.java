@@ -38,7 +38,7 @@ public class OpenCVFilterThreshold extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterThreshold.class.getCanonicalName());
-  IplImage gray = null;
+  transient IplImage gray = null;
 
   public float lowThreshold = 0.0f;
   public float highThreshold = 256.0f;

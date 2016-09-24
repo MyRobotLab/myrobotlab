@@ -48,7 +48,7 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSampleImage.class.getCanonicalName());
 
-  IplImage buffer = null;
+  transient IplImage buffer = null;
 
   Image fileImage = null;
   Graphics2D graphics = null;

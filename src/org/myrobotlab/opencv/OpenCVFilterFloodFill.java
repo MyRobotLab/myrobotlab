@@ -42,7 +42,7 @@ public class OpenCVFilterFloodFill extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFloodFill.class.getCanonicalName());
 
-  IplImage buffer = null;
+  transient IplImage buffer = null;
 
   CvPoint startPoint = cvPoint(180, 120);
   CvScalar fillColor = cvScalar(255.0, 0.0, 0.0, 1.0);
