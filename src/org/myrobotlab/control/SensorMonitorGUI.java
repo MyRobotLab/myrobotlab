@@ -273,7 +273,7 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
   JComboBox tracePin = null;
   JComboBox triggerPin = null;
 
-  BufferedImage sensorImage = null;
+  transient BufferedImage sensorImage = null;
 
   Graphics g = null;
 

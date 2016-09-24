@@ -97,7 +97,7 @@ public class VideoProcessor implements Runnable, Serializable {
   private transient FrameGrabber grabber = null;
   transient Thread videoThread = null;
 
-  private ArrayList<OpenCVFilter> filters = new ArrayList<OpenCVFilter>();
+  transient private ArrayList<OpenCVFilter> filters = new ArrayList<OpenCVFilter>();
 
   transient SimpleDateFormat sdf = new SimpleDateFormat();
 

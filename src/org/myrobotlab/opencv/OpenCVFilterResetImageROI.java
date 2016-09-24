@@ -35,9 +35,9 @@ public class OpenCVFilterResetImageROI extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterResetImageROI.class.getCanonicalName());
 
-  IplImage src = null;
+  transient IplImage src = null;
 
-  IplImage dst = null;
+  transient IplImage dst = null;
 
   public OpenCVFilterResetImageROI() {
     super();
