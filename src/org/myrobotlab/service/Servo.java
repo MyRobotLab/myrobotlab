@@ -217,7 +217,7 @@ public class Servo extends Service implements ServoControl {
 	private boolean isAttached = false;
 	private boolean isControllerSet = false;
 
-  private int velocity = 0;
+  private int velocity = 500;
   
 	public Servo(String n) {
 		super(n);
@@ -475,7 +475,7 @@ public class Servo extends Service implements ServoControl {
 	  double vel = Math.exp(slope * speed + intercept);
 	  // set velocity to 0.0 if the speed = 1.0.. This skips the velicity calculation logic.
 	  if (speed >= 1.0) {
-	    vel = 0.0;
+	    vel = maxVelocity;
 	  }
 	  setVelocity((int)vel);
 	  // Method from build 1670
