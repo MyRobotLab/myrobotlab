@@ -177,7 +177,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		boolean	sweepOneWay	= false;
 	}
 
-	HashMap<String, ServoData>	servoMap				= new HashMap<String, ServoData>();
+	transient HashMap<String, ServoData>	servoMap				= new HashMap<String, ServoData>();
 
 	// Motor related constants
 	public static final int			MOTOR_FORWARD		= 1;
