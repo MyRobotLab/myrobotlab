@@ -707,6 +707,8 @@ public class Servo extends Service implements ServoControl {
 			if (rest == null) {
 				rest = 90;
 			}
+			targetPos = rest;
+			targetOutput = mapper.calcInt(targetPos);
 			controller.deviceAttach(this, pin, targetOutput, (velocity >> 8) &0xFF, velocity &0xFF);
 		}
 
@@ -715,7 +717,6 @@ public class Servo extends Service implements ServoControl {
 		this.controller = controller;
 		this.controllerName = controller.getName();
 		int count = 0;
-		this.targetOutput = rest;
 		this.velocity = velocity;
 		while (!isAttached) {
 			count++;
