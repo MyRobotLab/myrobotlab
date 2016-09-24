@@ -676,7 +676,7 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	 public void attach(ServoController controller, int pin, Integer pos) throws Exception {
-	   attach(controller, pin, null, null);
+	   attach(controller, pin, pos, null);
 	 }
 
 	// FIXME - setController is very deficit in its abilities - compared to the
