@@ -563,7 +563,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
         }
         arm.addLink(newLink);
       }
-      arm = simulateMove(chromosome.getDecodedGenome());
+      //arm = simulateMove(chromosome.getDecodedGenome());
       Point potLocation = arm.getPalmPosition();
       Double distance = Math.sqrt(Math.pow(potLocation.getX()-goTo.getX(), 2)+Math.pow(potLocation.getY()-goTo.getY(), 2) +  Math.pow(potLocation.getZ()-goTo.getZ(), 2));
       //not sure about weight for roll/pitch/yaw. adding a wrist will probably help
@@ -592,8 +592,14 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
           if(chromosome.getGenome().charAt(i) == '1') value += 1 << i-pos; 
         }
         pos += 8;
-        if (value < link.servo.getMinInput()) value = link.servo.getPos().doubleValue();
-        if (value > link.servo.getMaxInput()) value = link.servo.getPos().doubleValue();
+        if (link.servo.isInverted()){
+          if (value > link.servo.getMinInput()) value = link.servo.getPos().doubleValue();
+          if (value < link.servo.getMaxInput()) value = link.servo.getPos().doubleValue();
+        }
+        else{
+          if (value < link.servo.getMinInput()) value = link.servo.getPos().doubleValue();
+          if (value > link.servo.getMaxInput()) value = link.servo.getPos().doubleValue();
+        }
         decodedGenome.add(value);
       }
       chromosome.setDecodedGenome(decodedGenome);
