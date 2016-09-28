@@ -68,6 +68,10 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   private int geneticGeneration = 300;
   private boolean geneticComputeSimulation = false;
 
+  private HashMap<String, Servo> currentServos = new HashMap<String, Servo>();
+  private HashMap<String, HashMap<String, Servo>> servos = new HashMap<String, HashMap<String, Servo>>();
+  
+
   public InverseKinematics3D(String n) {
     super(n);
     // TODO: init
@@ -148,6 +152,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   public void changeArm(String arm) {
     if (arms.containsKey(arm)) {
       currentArm = arms.get(arm);
+      currentServos = servos.get(arm);
     }
     else {
       log.info("IK service have no data for {}", arm);
@@ -250,7 +255,10 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       DHRobotArm checkedArm = simulateMove(bestFit.getDecodedGenome());
       // using a dhlink with no servo will crash here
       for (int i = 0; i < currentArm.getNumLinks(); i++){
-        currentArm.getLink(i).servo.moveTo(((Double)(checkedArm.getLink(i).getThetaDegrees()-currentArm.getLink(i).getThetaDegrees())).intValue());
+        currentServos.get(currentArm.getLink(i).getName()).moveTo(((Double)(checkedArm.getLink(i).getThetaDegrees()-currentArm.getLink(i).getThetaDegrees())).intValue());
+        //currentServos.get(currentArm.getLink(i).getName()).moveTo(checkedArm.getLink(i).getPositionValueDeg().intValue());
+        //currentArm.getLink(i).addPositionValue(checkedArm.getLink(i).getPositionValueDeg());
+        currentArm.getLink(i).addPositionValue(((Double)(checkedArm.getLink(i).getThetaDegrees()-currentArm.getLink(i).getThetaDegrees())).intValue());
       }
       if (collisionItems.haveCollision()) {
         
@@ -516,7 +524,10 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   
   public void setDHLink (Servo servo, double d, double theta, double r, double alpha) {
     DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
-    dhLink.setServo(servo);
+    currentServos.put(servo.getName(), servo);
+    dhLink.addPositionValue(servo.getPos());
+    dhLink.setMin(servo.getMinInput());
+    dhLink.setMax(servo.getMaxInput());
     currentArm.addLink(dhLink);
   }
   
@@ -555,13 +566,15 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       double fitnessMult = 1;
       for (int i = 0; i < currentArm.getNumLinks(); i++){
         DHLink newLink = new DHLink(currentArm.getLink(i));
-        newLink.setTheta(newLink.getTheta()+MathUtils.degToRad((double)chromosome.getDecodedGenome().get(i)));
-        Double delta = currentArm.getLink(i).servo.getPos().doubleValue()-(Double)chromosome.getDecodedGenome().get(i);
+        //newLink.setTheta(newLink.getTheta()+MathUtils.degToRad((double)chromosome.getDecodedGenome().get(i)));
+        newLink.addPositionValue((double)chromosome.getDecodedGenome().get(i));
+        //Double delta = currentArm.getLink(i).servo.getPos().doubleValue()-(Double)chromosome.getDecodedGenome().get(i);
+        Double delta = currentServos.get(currentArm.getLink(i).getName()).getPos().doubleValue() - (Double)chromosome.getDecodedGenome().get(i);
         if (delta == 0) {
-          fitnessMult +=Math.sqrt(currentArm.getLink(i).servo.getVelocity()/10);
+          fitnessMult += Math.abs(Math.sqrt(currentServos.get(currentArm.getLink(i).getName()).getVelocity()/10));
         }
         else {
-          fitnessMult += Math.sqrt(currentArm.getLink(i).servo.getVelocity()/10)/delta;
+          fitnessMult += Math.abs(Math.sqrt(currentServos.get(currentArm.getLink(i).getName()).getVelocity()/10)/delta);
         }
         arm.addLink(newLink);
       }
@@ -572,11 +585,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       Double distance = Math.sqrt(Math.pow(potLocation.getX()-goTo.getX(), 2)+Math.pow(potLocation.getY()-goTo.getY(), 2) +  Math.pow(potLocation.getZ()-goTo.getZ(), 2));
       //not sure about weight for roll/pitch/yaw. adding a wrist will probably help
       double dRoll = (potLocation.getRoll() - goTo.getRoll())/360;
-      fitnessMult*=(1-dRoll)*10000;
+//      fitnessMult*=(1-dRoll)*10000;
       double dPitch = (potLocation.getPitch() - goTo.getPitch())/360;
-      fitnessMult*=(1-dPitch)*10000;
+//      fitnessMult*=(1-dPitch)*10000;
       double dYaw = (potLocation.getYaw() - goTo.getYaw())/360;
-      fitnessMult*=(1-dYaw)*10000;
+//      fitnessMult*=(1-dYaw)*10000;
       Double fitness = fitnessMult/distance*1000;
       if (fitness < 0) fitness *=-1;
       chromosome.setFitness(fitness);
@@ -596,13 +609,14 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
           if(chromosome.getGenome().charAt(i) == '1') value += 1 << i-pos; 
         }
         pos += 8;
-        if (link.servo.isInverted()){
-          if (value > link.servo.getMinInput()) value = link.servo.getPos().doubleValue();
-          if (value < link.servo.getMaxInput()) value = link.servo.getPos().doubleValue();
+        //if (link.servo.isInverted()){
+        if (currentServos.get(link.getName()).isInverted()) {
+          if (value > link.getMin()) value = currentServos.get(link.getName()).getPos().doubleValue();
+          if (value < link.getMax()) value = currentServos.get(link.getName()).getPos().doubleValue();
         }
         else{
-          if (value < link.servo.getMinInput()) value = link.servo.getPos().doubleValue();
-          if (value > link.servo.getMaxInput()) value = link.servo.getPos().doubleValue();
+          if (value < link.getMin()) value = currentServos.get(link.getName()).getPos().doubleValue();
+          if (value > link.getMax()) value = currentServos.get(link.getName()).getPos().doubleValue();
         }
         decodedGenome.add(value);
       }
@@ -620,9 +634,10 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       //log.info("time: {}", time);
       for (int i = 0; i < currentArm.getNumLinks(); i++) {
         DHLink newLink = new DHLink(currentArm.getLink(i));
-        double degrees=currentArm.getLink(i).servo.getPos().doubleValue();
+        //double degrees=currentArm.getLink(i).servo.getPos().doubleValue();
+        double degrees = currentServos.get(currentArm.getLink(i).getName()).getPos().doubleValue();
         double deltaDegree = java.lang.Math.abs(degrees - (Double)decodedGenome.get(i));
-        double deltaDegree2 = time * (Integer)currentArm.getLink(i).servo.getVelocity();
+        double deltaDegree2 = time * (Integer)currentServos.get(currentArm.getLink(i).getName()).getVelocity();
         if (deltaDegree < 0.0){
           deltaDegree *= -1;
         }
