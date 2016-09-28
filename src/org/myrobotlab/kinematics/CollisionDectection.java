@@ -57,10 +57,6 @@ public class CollisionDectection {
           //item 1 is in the ignore list of item 2
           continue;
         }
-        if (item.getName().equals("bicep") && citem.getName().equals("obstacle")) {
-          int i =0;
-          i++;
-        }
         // need to not compare item already done;
         if (citem.isDone(citem.getName())) {
           continue;
@@ -173,4 +169,10 @@ public class CollisionDectection {
     return collisionPoint;
   }
   
+  public void addIgnore(String object1, String object2) {
+    if (items.containsKey(object1)) {
+      items.get(object1).addIgnore(object2);
+    }
+    
+  }
 }
