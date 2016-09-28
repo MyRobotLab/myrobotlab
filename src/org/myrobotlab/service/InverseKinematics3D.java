@@ -584,11 +584,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       Point potLocation = arm.getPalmPosition();
       Double distance = Math.sqrt(Math.pow(potLocation.getX()-goTo.getX(), 2)+Math.pow(potLocation.getY()-goTo.getY(), 2) +  Math.pow(potLocation.getZ()-goTo.getZ(), 2));
       //not sure about weight for roll/pitch/yaw. adding a wrist will probably help
-      double dRoll = (potLocation.getRoll() - goTo.getRoll())/360;
+//      double dRoll = (potLocation.getRoll() - goTo.getRoll())/360;
 //      fitnessMult*=(1-dRoll)*10000;
-      double dPitch = (potLocation.getPitch() - goTo.getPitch())/360;
+//      double dPitch = (potLocation.getPitch() - goTo.getPitch())/360;
 //      fitnessMult*=(1-dPitch)*10000;
-      double dYaw = (potLocation.getYaw() - goTo.getYaw())/360;
+//      double dYaw = (potLocation.getYaw() - goTo.getYaw())/360;
 //      fitnessMult*=(1-dYaw)*10000;
       Double fitness = fitnessMult/distance*1000;
       if (fitness < 0) fitness *=-1;
