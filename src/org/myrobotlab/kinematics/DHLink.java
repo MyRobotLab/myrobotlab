@@ -1,7 +1,6 @@
 package org.myrobotlab.kinematics;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Servo;
 import org.myrobotlab.math.MathUtils;
 import org.slf4j.Logger;
 
