@@ -40,10 +40,9 @@ public class Sweety extends Service {
   transient Servo rightShoulder;
   transient Servo leftShoulder;
   transient Servo rightArm;
-  transient Servo neck;
-  transient Servo leftEye;
+  transient Servo neckTilt;
+  transient Servo neckPan;
   transient Servo leftArm;
-  transient Servo rightEye;
   transient Servo rightHand;
   transient Servo rightWrist;
   transient Servo leftHand;
@@ -83,16 +82,15 @@ public class Sweety extends Service {
   int LATCH = 48;
   int DATA = 49;
 
-  // variable for servomotors infos ( min, max, neutral )
+  // variable for servomotors angles ( min, max, neutral )
   int leftForearmMin = 70;
   int rightForearmMin = 0;
   int rightShoulderMin = 2;
   int leftShoulderMin = 5;
   int rightArmMin = 0;
-  int neckMin = 55;
-  int leftEyeMin = 25;
+  int neckTiltMin = 55;
+  int neckPanMin = 25;
   int leftArmMin = 70;
-  int rightEyeMin = 80;
   int rightHandMin = 10;
   int rightWristMin = 0;
   int leftHandMin = 80;
@@ -103,26 +101,24 @@ public class Sweety extends Service {
   int rightShoulderMax = 155;
   int leftShoulderMax = 160;
   int rightArmMax = 80;
-  int neckMax = 105;
-  int leftEyeMax = 125;
+  int neckTiltMax = 105;
+  int neckPanMax = 125;
   int leftArmMax = 160;
-  int rightEyeMax = 180;
   int rightHandMax = 75;
   int rightWristMax = 180;
   int leftHandMax = 150;
   int leftWristMax = 180;
 
   int leftForearmNeutral = 150;
-  int rightForearmNeutral = 5;
-  int rightShoulderNeutral = 2;
+  int rightForearmNeutral = 0;
+  int rightShoulderNeutral = 0;
   int leftShoulderNeutral = 160;
-  int rightArmNeutral = 2;
-  int neckNeutral = 75;
-  int leftEyeNeutral = 75;
-  int leftArmNeutral = 155;
-  int rightEyeNeutral = 127;
-  int rightHandNeutral = 10;
-  int rightWristNeutral = 116;
+  int rightArmNeutral = 0;
+  int neckTiltNeutral = 75;
+  int neckPanNeutral = 75;
+  int leftArmNeutral = 150;
+  int rightHandNeutral = 0;
+  int rightWristNeutral = 112;
   int leftHandNeutral = 150;
   int leftWristNeutral = 85;
 
@@ -153,36 +149,20 @@ public class Sweety extends Service {
  * @throws Exception 
    */
   public void attach() throws Exception {
-	  /* OLD  WAY
-    rightForearm.attach(arduino.getName(), 34);
-    leftForearm.attach(arduino.getName(), 35);
-    rightShoulder.attach(arduino.getName(), 36);
-    leftShoulder.attach(arduino.getName(), 37);
-    rightArm.attach(arduino.getName(), 38);
-    neck.attach(arduino.getName(), 39);
-    leftEye.attach(arduino.getName(), 40);
-    leftArm.attach(arduino.getName(), 41);
-    rightEye.attach(arduino.getName(), 42);
-    leftHand.attach(arduino.getName(), 43);
-    rightWrist.attach(arduino.getName(), 44);
-    leftWrist.attach(arduino.getName(), 45);
-    rightHand.attach(arduino.getName(), 46);
-    */
+	
+    rightForearm.attach(arduino, 34);
+    leftForearm.attach(arduino, 35);
+    rightShoulder.attach(arduino, 36);
+    leftShoulder.attach(arduino, 37);
+    rightArm.attach(arduino, 38);
+    neckTilt.attach(arduino, 39);
+    neckPan.attach(arduino, 40);
+    leftArm.attach(arduino, 41);
+    leftHand.attach(arduino, 43);
+    rightWrist.attach(arduino, 44);
+    leftWrist.attach(arduino, 45);
+    rightHand.attach(arduino, 46);
     
-	  // NEW WAY
-    arduino.servoAttach(rightForearm, 34);
-    arduino.servoAttach(leftForearm, 35);
-    arduino.servoAttach(rightShoulder, 36);
-    arduino.servoAttach(leftShoulder, 37);
-    arduino.servoAttach(rightArm, 38);
-    arduino.servoAttach(neck, 39);
-    arduino.servoAttach(leftEye, 40);
-    arduino.servoAttach(leftArm, 41);
-    arduino.servoAttach(rightEye, 42);
-    arduino.servoAttach(leftHand, 43);
-    arduino.servoAttach(rightWrist, 44);
-    arduino.servoAttach(leftWrist, 45);
-    arduino.servoAttach(rightHand, 46);
   }
 
   /**
@@ -207,9 +187,8 @@ public class Sweety extends Service {
     leftShoulder.detach();
     rightArm.detach();
     leftArm.detach();
-    neck.detach();
-    leftEye.detach();
-    rightEye.detach();
+    neckTilt.detach();
+    neckPan.detach();
     rightHand.detach();
     rightWrist.detach();
     leftHand.detach();
@@ -218,24 +197,20 @@ public class Sweety extends Service {
 
   // TODO Correct the head function for new head
   /**
-   * Move the head . Use : head(neckAngle, rightEyeAngle, leftEyeAngle -1 mean
+   * Move the head . Use : head(neckTiltAngle, neckPanAngle -1 mean
    * "no change"
    */
-  public void setHeadPosition(Integer neckAngle, Integer rightEyeAngle, Integer leftEyeAngle) {
+  public void setHeadPosition(Integer neckTiltAngle, Integer neckPanAngle) {
 
-    if (neckAngle == -1) {
-      neckAngle = neck.getPos();
+    if (neckTiltAngle == -1) {
+      neckTiltAngle = neckTilt.getPos();
     }
-    if (rightEyeAngle == -1) {
-      rightEyeAngle = rightEye.getPos();
-    }
-    if (leftEyeAngle == -1) {
-      leftEyeAngle = leftEye.getPos();
+    if (neckPanAngle == -1) {
+      neckPanAngle = neckPan.getPos();
     }
 
-    neck.moveTo(neckAngle);
-    rightEye.moveTo(rightEyeAngle);
-    leftEye.moveTo(leftEyeAngle);
+    neckTilt.moveTo(neckTiltAngle);
+    neckPan.moveTo(neckPanAngle);
   }
 
   /**
@@ -438,7 +413,7 @@ public class Sweety extends Service {
     if (pos == "neutral") {
       setLeftArmPosition(leftShoulderNeutral, leftArmNeutral, leftForearmNeutral, leftWristNeutral, leftHandNeutral);
       setRightArmPosition(rightShoulderNeutral, rightArmNeutral, rightForearmNeutral, rightWristNeutral, rightHandNeutral);
-      setHeadPosition(neckNeutral, rightEyeNeutral, leftEyeNeutral);
+      setHeadPosition(neckTiltNeutral, neckPanNeutral);
     }
     /*
      * Template else if (pos == ""){ setLeftArmPosition(, , , 85, 150);
@@ -448,27 +423,27 @@ public class Sweety extends Service {
     else if (pos == "yes") {
       setLeftArmPosition(0, 95, 136, 85, 150);
       setRightArmPosition(155, 55, 5, 116, 10);
-      setHeadPosition(75, 127, 75);
+      setHeadPosition(75, 85);
     } else if (pos == "concenter") {
       setLeftArmPosition(37, 116, 85, 85, 150);
       setRightArmPosition(109, 43, 54, 116, 10);
-      setHeadPosition(97, 127, 75);
+      setHeadPosition(75, 85);
     } else if (pos == "showLeft") {
       setLeftArmPosition(68, 63, 160, 85, 150);
       setRightArmPosition(2, 76, 40, 116, 10);
-      setHeadPosition(85, 127, 75);
+      setHeadPosition(75, 85);
     } else if (pos == "showRight") {
       setLeftArmPosition(145, 79, 93, 85, 150);
       setRightArmPosition(80, 110, 5, 116, 10);
-      setHeadPosition(75, 127, 75);
+      setHeadPosition(75, 85);
     } else if (pos == "handsUp") {
       setLeftArmPosition(0, 79, 93, 85, 150);
       setRightArmPosition(155, 76, 40, 116, 10);
-      setHeadPosition(75, 127, 75);
+      setHeadPosition(75, 85);
     } else if (pos == "carryBags") {
       setLeftArmPosition(145, 79, 93, 85, 150);
       setRightArmPosition(2, 76, 40, 116, 10);
-      setHeadPosition(75, 127, 75);
+      setHeadPosition(75, 85);
     }
 
   }
@@ -482,10 +457,9 @@ public class Sweety extends Service {
     rightShoulder.publishState();
     leftShoulder.publishState();
     rightArm.publishState();
-    neck.publishState();
-    leftEye.publishState();
+    neckTilt.publishState();
+    neckPan.publishState();
     leftArm.publishState();
-    rightEye.publishState();
     rightHand.publishState();
     rightWrist.publishState();
     leftHand.publishState();
@@ -571,10 +545,9 @@ public class Sweety extends Service {
     rightShoulder = (Servo) startPeer("rightShoulder");
     leftShoulder = (Servo) startPeer("leftShoulder");
     rightArm = (Servo) startPeer("rightArm");
-    neck = (Servo) startPeer("neck");
-    leftEye = (Servo) startPeer("leftEye");
+    neckTilt = (Servo) startPeer("neckTilt");
+    neckPan = (Servo) startPeer("neckPan");
     leftArm = (Servo) startPeer("leftArm");
-    rightEye = (Servo) startPeer("rightEye");
     rightHand = (Servo) startPeer("rightHand");
     rightWrist = (Servo) startPeer("rightWrist");
     leftHand = (Servo) startPeer("leftHand");
@@ -585,10 +558,9 @@ public class Sweety extends Service {
     rightShoulder.setMinMax(rightShoulderMin, rightShoulderMax);
     leftShoulder.setMinMax(leftShoulderMin, leftShoulderMax);
     rightArm.setMinMax(rightArmMin, rightArmMax);
-    neck.setMinMax(neckMin, neckMax);
-    leftEye.setMinMax(leftEyeMin, leftEyeMax);
+    neckTilt.setMinMax(neckTiltMin, neckTiltMax);
+    neckPan.setMinMax(neckPanMin, neckPanMax);
     leftArm.setMinMax(leftArmMin, leftArmMax);
-    rightEye.setMinMax(rightEyeMin, rightEyeMax);
     rightHand.setMinMax(rightHandMin, rightHandMax);
     rightWrist.setMinMax(rightWristMin, rightWristMax);
     leftHand.setMinMax(leftHandMin, leftHandMax);
@@ -599,17 +571,16 @@ public class Sweety extends Service {
   /**
    * Start the tracking services
    */
-  public void startTrack(String port, int leftCameraIndex, int rightCameraIndex) throws Exception {
-    neck.detach();
-    rightEye.detach();
-    leftEye.detach();
+  // TODO modify this function too fit new sweety head
+  /*public void startTrack(String port, int leftCameraIndex, int rightCameraIndex) throws Exception {
+    neckTilt.detach();
+    neckPan.detach();
 
     leftTracker = (Tracking) startPeer("leftTracker");
-    /* OLD WAY
-    leftTracker.y.setPin(39); // neck
-    leftTracker.x.setPin(40); // right eye
-    leftTracker.connect(port);
-    */
+    // OLD WAY
+    //leftTracker.y.setPin(39); // neckTilt
+    //leftTracker.connect(port);
+    
     leftTracker.connect(port, 40, 39);
 
     leftTracker.pid.invert("y");
@@ -617,11 +588,10 @@ public class Sweety extends Service {
     leftTracker.opencv.capture();
 
     rightTracker = (Tracking) startPeer("rightTracker");
-    /* OLD WAY
-    rightTracker.x.setPin(42); // right eye
-    rightTracker.connect(port);
-    rightTracker.y.setPin(50); // nothing
-    */
+    // OLD WAY
+    //rightTracker.connect(port);
+    //rightTracker.y.setPin(50); // nothing
+    
     
     rightTracker.connect(port, 42, 50);
     
@@ -629,7 +599,7 @@ public class Sweety extends Service {
     rightTracker.opencv.setCameraIndex(rightCameraIndex);
     rightTracker.opencv.capture();
     saying("tracking activated.");
-  }
+  }/*
 
   /**
    * Start the ultrasonic sensors services
@@ -659,9 +629,8 @@ public class Sweety extends Service {
     rightTracker.opencv.stopCapture();
     leftTracker.releaseService();
     rightTracker.releaseService();
-    arduino.servoAttach(neck, 39);
-    arduino.servoAttach(leftEye, 40);
-    arduino.servoAttach(rightEye, 42);
+    arduino.servoAttach(neckTilt, 39);
+    arduino.servoAttach(neckPan, 40);
 
     saying("the tracking if stopped.");
   }
@@ -737,7 +706,7 @@ public class Sweety extends Service {
     script
         .append(String.format("Sweety.setLeftArmPosition(%d,%d,%d,%d,%d)\n", leftShoulder.getPos(), leftArm.getPos(), leftForearm.getPos(), leftWrist.getPos(), leftHand.getPos()));
     script.append(indentSpace);
-    script.append(String.format("Sweety.setHeadPosition(%d,%d,%d)\n", neck.getPos(), leftEye.getPos(), rightEye.getPos()));
+    script.append(String.format("Sweety.setHeadPosition(%d,%d)\n", neckTilt.getPos(), neckPan.getPos()));
 
     send("python", "appendScript", script.toString());
 
@@ -804,10 +773,9 @@ public class Sweety extends Service {
     meta.addPeer("rightShoulder", "Servo", "servo");
     meta.addPeer("leftShoulder", "Servo", "servo");
     meta.addPeer("rightArm", "Servo", "servo");
-    meta.addPeer("neck", "Servo", "servo");
-    meta.addPeer("leftEye", "Servo", "servo");
+    meta.addPeer("neckTilt", "Servo", "servo");
+    meta.addPeer("neckPan", "Servo", "servo");
     meta.addPeer("leftArm", "Servo", "servo");
-    meta.addPeer("rightEye", "Servo", "servo");
     meta.addPeer("rightHand", "Servo", "servo");
     meta.addPeer("rightWrist", "Servo", "servo");
     meta.addPeer("leftHand", "Servo", "servo");
