@@ -4,7 +4,6 @@
 package org.myrobotlab.kinematics;
 
 import java.util.HashMap;
-import org.slf4j.Logger;
 
 /**
  * @author Christian
