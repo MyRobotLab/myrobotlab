@@ -251,18 +251,42 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     else if (computeMethod == IK_COMPUTE_METHOD_GENETIC_ALGORYTHM) {
       goTo = p;
       GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, currentArm.getNumLinks(), 8, geneticRecombinationRate, geneticMutationRate);
-      Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the number of time the chromosome pool will be recombined and mutate
-      DHRobotArm checkedArm = simulateMove(bestFit.getDecodedGenome());
-      // using a dhlink with no servo will crash here
-      for (int i = 0; i < currentArm.getNumLinks(); i++){
-        //currentServos.get(currentArm.getLink(i).getName()).moveTo(((Double)(checkedArm.getLink(i).getThetaDegrees()-currentArm.getLink(i).getThetaDegrees())).intValue());
-        currentServos.get(currentArm.getLink(i).getName()).moveTo(checkedArm.getLink(i).getPositionValueDeg().intValue());
-        currentArm.getLink(i).addPositionValue(checkedArm.getLink(i).getPositionValueDeg());
-        //currentArm.getLink(i).addPositionValue(((Double)(checkedArm.getLink(i).getThetaDegrees()-currentArm.getLink(i).getThetaDegrees())).intValue());
-      }
-      if (collisionItems.haveCollision()) {
+      HashMap<Integer,Integer> lastIteration = new HashMap<Integer,Integer>();
+      int retry = 0;
+      while (retry++ < 10) {
+        Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the number of time the chromosome pool will be recombined and mutate
+        //DHRobotArm checkedArm = simulateMove(bestFit.getDecodedGenome());
+        currentArm = simulateMove(bestFit.getDecodedGenome());
+        for (int i = 0; i < currentArm.getNumLinks(); i++){
+          currentServos.get(currentArm.getLink(i).getName()).moveTo(currentArm.getLink(i).getPositionValueDeg().intValue());
+        }
+        if (collisionItems.haveCollision()) {
+          int i=0;
+          while (i < currentArm.getNumLinks()) {
+            ArrayList<Object> tempPos = new ArrayList<Object>();
+            for (DHLink tempLink : currentArm.getLinks()) {
+              tempPos.add(tempLink.getPositionValueDeg());
+            }
+            if (lastIteration.containsKey(i)){
+              lastIteration.put(i, lastIteration.get(i)-5);
+            }
+            else {
+              lastIteration.put(i, -5);
+            }
+            tempPos.set(i, (Double)tempPos.get(i) + lastIteration.get(i));
+            if ((Double)tempPos.get(i) > MathUtils.radToDeg(currentArm.getLink(i).getMin()-currentArm.getLink(i).getInitialTheta())) {
+              simulateMove(tempPos);
+              if (!collisionItems.haveCollision()){
+                currentArm.getLink(i).incrRotate(MathUtils.degToRad(lastIteration.get(i)));
+                break;
+              }
+            }
+            i++;
+          }
+        }
+        else break;
         
-      }
+      } 
     }
     if (success) {
       publishTelemetry();
@@ -526,8 +550,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
     currentServos.put(servo.getName(), servo);
     dhLink.addPositionValue(servo.getPos());
-    dhLink.setMin(servo.getMinInput());
-    dhLink.setMax(servo.getMaxInput());
+    dhLink.setMin(MathUtils.degToRad(theta + Math.min(servo.getMinInput(), servo.getMaxInput())));
+    dhLink.setMax(MathUtils.degToRad(theta + Math.max(servo.getMaxInput(), servo.getMinInput())));
     currentArm.addLink(dhLink);
   }
   
@@ -600,7 +624,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       if (fitnessTime < 0.1) {
         fitnessTime = 0.1;
       }
-      Double fitness = (fitnessMult/distance*1000) + (1/fitnessTime*.1);
+      Double fitness = (fitnessMult/distance*1000);// + (1/fitnessTime*.01);
       if (fitness < 0) fitness *=-1;
       chromosome.setFitness(fitness);
     }
@@ -619,15 +643,14 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
           if(chromosome.getGenome().charAt(i) == '1') value += 1 << i-pos; 
         }
         pos += 8;
-        //if (link.servo.isInverted()){
-        if (currentServos.get(link.getName()).isInverted()) {
-          if (value > link.getMin()) value = currentServos.get(link.getName()).getPos().doubleValue();
-          if (value < link.getMax()) value = currentServos.get(link.getName()).getPos().doubleValue();
-        }
-        else{
-          if (value < link.getMin()) value = currentServos.get(link.getName()).getPos().doubleValue();
-          if (value > link.getMax()) value = currentServos.get(link.getName()).getPos().doubleValue();
-        }
+//        if (currentServos.get(link.getName()).isInverted()) {
+//          if (value > MathUtils.radToDeg(link.getMin()-link.getInitialTheta())) value = link.getPositionValueDeg();
+//          if (value < MathUtils.radToDeg(link.getMax()-link.getInitialTheta())) value = link.getPositionValueDeg();
+//        }
+//        else{
+        if (value < MathUtils.radToDeg(link.getMin()-link.getInitialTheta())) value = link.getPositionValueDeg();
+        if (value > MathUtils.radToDeg(link.getMax()-link.getInitialTheta())) value = link.getPositionValueDeg();
+//        }
         decodedGenome.add(value);
       }
       chromosome.setDecodedGenome(decodedGenome);
