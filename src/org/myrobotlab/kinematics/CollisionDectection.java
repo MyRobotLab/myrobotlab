@@ -13,6 +13,7 @@ public class CollisionDectection {
   transient HashMap<String, CollisionItem> items= new HashMap<String,CollisionItem>();
   private boolean collision;
   private Point[] collisionPoint = {new Point(0,0,0,0,0,0),new Point(0,0,0,0,0,0)};
+  private CollisionItem[] collisionItems = new CollisionItem[2];
   
   
   public CollisionDectection() {
@@ -110,6 +111,8 @@ public class CollisionDectection {
           collision = true;
           collisionPoint[0] = point1;
           collisionPoint[1] = point2;
+          collisionItems[0] = item;
+          collisionItems[1] = citem;
           return;
         }
       }
@@ -173,5 +176,9 @@ public class CollisionDectection {
       items.get(object1).addIgnore(object2);
     }
     
+  }
+  
+  public CollisionItem[] getCollisionItem() {
+    return collisionItems;
   }
 }

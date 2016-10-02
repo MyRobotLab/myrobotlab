@@ -20,6 +20,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.service.Servo.IKData;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.PointsListener;
@@ -254,21 +255,19 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, currentArm.getNumLinks(), 8, geneticRecombinationRate, geneticMutationRate);
       HashMap<Integer,Integer> lastIteration = new HashMap<Integer,Integer>();
       int retry = 0;
-      long timeToWait;
+      long timeToWait = 0;
       while (retry++ < 10) {
         Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the number of time the chromosome pool will be recombined and mutate
         //DHRobotArm checkedArm = simulateMove(bestFit.getDecodedGenome());
         currentArm = simulateMove(bestFit.getDecodedGenome());
-        timeToWait = (long)(time*1000);
         for (int i = 0; i < currentArm.getNumLinks(); i++){
           Servo servo = currentServos.get(currentArm.getLink(i).getName());
-          long test = System.currentTimeMillis();
           while (timeToWait + servo.lastActivityTime > System.currentTimeMillis()) {
             sleep(1);
           }
           servo.moveTo(currentArm.getLink(i).getPositionValueDeg().intValue());
-          
         }
+        timeToWait = (long)(time*1000);
         if (collisionItems.haveCollision()) {
           //collision avoiding need to be improved
           int i=0;
@@ -294,8 +293,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
                     sleep(1);
                   }
                   servo.moveTo(currentArm.getLink(k).getPositionValueDeg().intValue());
-                  
                 }
+                timeToWait = (long) (time*1000);
                 break;
               }
             }
@@ -566,6 +565,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   
   public void setDHLink (Servo servo, double d, double theta, double r, double alpha) {
     DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
+    servo.addIKServoEventListener(this);
     currentServos.put(servo.getName(), servo);
     dhLink.addPositionValue(servo.getPos());
     dhLink.setMin(MathUtils.degToRad(theta + Math.min(servo.getMinInput(), servo.getMaxInput())));
@@ -771,5 +771,13 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   
   public void objectAddIgnore(String object1, String object2) {
     collisionItems.addIgnore(object1, object2);
+  }
+  
+  public void onIKServoEvent(IKData data) {
+    for (DHLink l: currentArm.getLinks()) {
+      if (l.getName().equals(data.name)){
+        l.addPositionValue(data.pos.doubleValue());
+      }
+    }
   }
 }
