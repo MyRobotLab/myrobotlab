@@ -125,7 +125,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener {
 				Object o = event.getSource();
 				if (o == controller) {
 					String controllerName = (String) controller.getSelectedItem();
-					log.info(String.format("controller event %s", controllerName));
+					log.debug(String.format("controller event %s", controllerName));
 					if (controllerName != null && controllerName.length() > 0) {
 
 						// NOT WORTH IT - JUST BUILD 48 PINS !!!

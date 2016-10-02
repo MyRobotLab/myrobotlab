@@ -219,6 +219,11 @@ public class Servo extends Service implements ServoControl {
 
   private int velocity = 500;
   
+  class IKData {
+    String name;
+    Integer pos;
+  }
+  
 	public Servo(String n) {
 		super(n);
 		createPinList();
@@ -244,7 +249,12 @@ public class Servo extends Service implements ServoControl {
 		addListener("publishServoEvent", service.getName(), "onServoEvent");
 	}
 
-	/**
+  public void addIKServoEventListener(NameProvider service) {
+    eventsEnabled(true);
+    addListener("publishIKServoEvent", service.getName(), "onIKServoEvent");
+  }
+
+  /**
 	 * Re-attach to servo's current pin. The pin must have be set previously.
 	 * Equivalent to Arduino's Servo.attach(currentPin)
 	 */
@@ -356,6 +366,11 @@ public class Servo extends Service implements ServoControl {
 		if (isEventsEnabled) {
 			// update others of our position change
 			invoke("publishServoEvent", targetOutput);
+			IKData data = new IKData();
+			data.name = getName();
+			data.pos = targetPos;
+			invoke("publishIKServoEvent", data);
+			broadcastState();
 		}
 	}
 
@@ -807,5 +822,9 @@ public class Servo extends Service implements ServoControl {
   public int getVelocity() {
     // TODO Auto-generated method stub
     return velocity;
+  }
+  
+  public IKData publishIKServoEvent(IKData data){
+    return data;
   }
 }
