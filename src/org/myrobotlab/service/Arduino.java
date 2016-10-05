@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CONTROLLER_ATTACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CUSTOM_MSG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_DETACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ARDUINO;
@@ -31,6 +32,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_ATTACHED_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_BOARD_INFO;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_BOARD_STATUS;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_CUSTOM_MSG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_DEBUG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MESSAGE_ACK;
 ///// java static import definition - DO NOT MODIFY - Begin //////
@@ -1973,6 +1975,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			attachedController.get(message[1]).processMessage(newMsg);
 			break;
 		}
+		case PUBLISH_CUSTOM_MSG: {
+		  int[] data = new int[msgSize-2];
+		  for (int i = 2; i < msgSize; i++) {
+		    data[i-2] = message[i];
+		  }
+		  invoke("publishCustomMsg",data);
+		  break;
+		}
 		default: {
 			// FIXME - use formatter for message
 			error("unknown serial event %d", function);
@@ -2719,5 +2729,22 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.addData(2);
     msg.addData16(servo.getVelocity());
     sendMsg(msg);
+  }
+  
+  public void customMsg(int... params) {
+    MrlMsg msg = new MrlMsg(CUSTOM_MSG);
+    msg.addData(params.length);
+    for (int i : params) {
+      if (i > 255) {
+        log.info("customMsg can only accept bytes value (0-255)");
+        return;
+      }
+      msg.addData(i);
+    }
+    sendMsg(msg);
+  }
+  
+  public int[] publishCustomMsg(int[] data) {
+    return data;
   }
 }

@@ -211,7 +211,7 @@ public class Servo extends Service implements ServoControl {
 	 */
 	boolean isEventsEnabled = false;
 
-	private int maxVelocity = 500;
+	private int maxVelocity = 5000;
 	
 
 	private boolean isAttached = false;
