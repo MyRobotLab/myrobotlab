@@ -66,7 +66,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   private int geneticPoolSize = 200;
   private double geneticMutationRate = 0.01;
   private double geneticRecombinationRate = 0.7;
-  private int geneticGeneration = 500;
+  private int geneticGeneration = 300;
   private boolean geneticComputeSimulation = false;
 
   private HashMap<String, Servo> currentServos = new HashMap<String, Servo>();
@@ -253,10 +253,10 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     else if (computeMethod == IK_COMPUTE_METHOD_GENETIC_ALGORYTHM) {
       goTo = p;
       GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, currentArm.getNumLinks(), 8, geneticRecombinationRate, geneticMutationRate);
-      HashMap<Integer,Integer> lastIteration = new HashMap<Integer,Integer>();
+      //HashMap<Integer,Integer> lastIteration = new HashMap<Integer,Integer>();
       int retry = 0;
       long timeToWait = 0;
-      while (retry++ < 10) {
+      while (retry++ < 100) {
         Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the number of time the chromosome pool will be recombined and mutate
         //DHRobotArm checkedArm = simulateMove(bestFit.getDecodedGenome());
         currentArm = simulateMove(bestFit.getDecodedGenome());
@@ -270,36 +270,58 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
         timeToWait = (long)(time*1000);
         if (collisionItems.haveCollision()) {
           //collision avoiding need to be improved
-          int i=0;
-          while (i < currentArm.getNumLinks()) {
-            ArrayList<Object> tempPos = new ArrayList<Object>();
-            for (DHLink tempLink : currentArm.getLinks()) {
-              tempPos.add(tempLink.getPositionValueDeg());
-            }
-            if (lastIteration.containsKey(i)){
-              lastIteration.put(i, lastIteration.get(i)-5);
-            }
-            else {
-              lastIteration.put(i, -5);
-            }
-            tempPos.set(i, (Double)tempPos.get(i) + lastIteration.get(i));
-            if ((Double)tempPos.get(i) > MathUtils.radToDeg(currentArm.getLink(i).getMin()-currentArm.getLink(i).getInitialTheta())) {
-              simulateMove(tempPos);
-              if (!collisionItems.haveCollision()){
-                currentArm.getLink(i).incrRotate(MathUtils.degToRad(lastIteration.get(i)));
-                for (int k = 0; k < currentArm.getNumLinks(); k++){
-                  Servo servo = currentServos.get(currentArm.getLink(k).getName());
-                  while (timeToWait + servo.lastActivityTime > System.currentTimeMillis()) {
-                    sleep(1);
-                  }
-                  servo.moveTo(currentArm.getLink(k).getPositionValueDeg().intValue());
-                }
-                timeToWait = (long) (time*1000);
+          CollisionItem ci = null;
+          int itemIndex = 0;
+          int linkIndex = 0;
+          for (DHLink l : currentArm.getLinks()) {
+            for (itemIndex = 0; itemIndex < 2; itemIndex++) {
+              if (l.getName().equals(collisionItems.getCollisionItem()[itemIndex].getName())) {
+                ci = collisionItems.getCollisionItem()[itemIndex];
                 break;
               }
             }
-            i++;
+            linkIndex++;
+            if (ci != null) break; //we have the item to watch
           }
+          if (ci == null) {
+            log.info("Collision between static item {} and {} detected", collisionItems.getCollisionItem()[0].getName(), collisionItems.getCollisionItem()[1].getName());
+            break; //collision is between items that we can't control
+          }
+          int dmove = 0;
+          int deltaMove = 5;
+          if (collisionItems.getCollisionPoint()[itemIndex].getX() >= collisionItems.getCollisionPoint()[1-itemIndex].getX()) {
+            dmove+=deltaMove;
+          }
+          else dmove-=deltaMove;
+          if (collisionItems.getCollisionPoint()[itemIndex].getY() >= collisionItems.getCollisionPoint()[1-itemIndex].getY()) {
+            dmove+=deltaMove;
+          }
+          else dmove-=deltaMove;
+          if (collisionItems.getCollisionPoint()[itemIndex].getZ() >= collisionItems.getCollisionPoint()[1-itemIndex].getZ()) {
+            dmove+=deltaMove;
+          }
+          else dmove-=deltaMove;
+          ArrayList<Object> tempPos = new ArrayList<Object>();
+          for (DHLink l : currentArm.getLinks()) {
+            Point actPoint = currentArm.getJointPosition(linkIndex);
+            Double distAct = actPoint.distanceTo(collisionItems.getCollisionPoint()[1-itemIndex]);
+            l.incrRotate(MathUtils.degToRad(dmove));
+            Point newPoint = currentArm.getJointPosition(linkIndex);
+            Double distNew = newPoint.distanceTo(collisionItems.getCollisionPoint()[1-itemIndex]);
+            if (distAct < distNew) {
+              l.incrRotate(MathUtils.degToRad(dmove * -2));
+            }
+            tempPos.add(l.getPositionValueDeg());
+          }
+          currentArm = simulateMove(tempPos);
+          for (int k = 0; k < currentArm.getNumLinks(); k++){
+            Servo servo = currentServos.get(currentArm.getLink(k).getName());
+            while (timeToWait + servo.lastActivityTime > System.currentTimeMillis()) {
+              sleep(1);
+            }
+            servo.moveTo(currentArm.getLink(k).getPositionValueDeg().intValue());
+          }
+          timeToWait = (long) (time*1000);
         }
         else break;
         
@@ -608,19 +630,10 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       double fitnessMult = 1;
       double fitnessTime = 0;
       for (int i = 0; i < currentArm.getNumLinks(); i++){
+        //copy the value of the currentArm
         DHLink newLink = new DHLink(currentArm.getLink(i));
-        //newLink.setTheta(newLink.getTheta()+MathUtils.degToRad((double)chromosome.getDecodedGenome().get(i)));
         newLink.addPositionValue((double)chromosome.getDecodedGenome().get(i));
-        //Double delta = currentArm.getLink(i).servo.getPos().doubleValue()-(Double)chromosome.getDecodedGenome().get(i);
-        //Double delta = currentServos.get(currentArm.getLink(i).getName()).getPos().doubleValue() - (Double)chromosome.getDecodedGenome().get(i);
         Double delta = currentArm.getLink(i).getPositionValueDeg() - (Double)chromosome.getDecodedGenome().get(i);
-//        if (delta == 0) {
-//          fitnessMult += Math.abs(Math.sqrt(currentServos.get(currentArm.getLink(i).getName()).getVelocity()/10));
-//        }
-//        else {
-//          fitnessMult += Math.abs(Math.sqrt(currentServos.get(currentArm.getLink(i).getName()).getVelocity()/10)/delta);
-//        }
-
         double timeOfMove = Math.abs(delta / currentServos.get(currentArm.getLink(i).getName()).getVelocity());
         if (timeOfMove > fitnessTime) {
           fitnessTime = timeOfMove;
@@ -628,10 +641,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
         arm.addLink(newLink);
       }
       if (geneticComputeSimulation) {
+        //work well but long computing time
         arm = simulateMove(chromosome.getDecodedGenome());
       }
       Point potLocation = arm.getPalmPosition();
-      Double distance = Math.sqrt(Math.pow(potLocation.getX()-goTo.getX(), 2)+Math.pow(potLocation.getY()-goTo.getY(), 2) +  Math.pow(potLocation.getZ()-goTo.getZ(), 2));
+      Double distance = potLocation.distanceTo(goTo);
       //not sure about weight for roll/pitch/yaw. adding a wrist will probably help
 //      double dRoll = (potLocation.getRoll() - goTo.getRoll())/360;
 //      fitnessMult*=(1-dRoll)*10000;
@@ -642,13 +656,14 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       if (fitnessTime < 0.1) {
         fitnessTime = 0.1;
       }
+      //fitness is the score showing how close the results is to the target position
       Double fitness = (fitnessMult/distance*1000);// + (1/fitnessTime*.01);
       if (fitness < 0) fitness *=-1;
       chromosome.setFitness(fitness);
     }
     return;
   }
-
+  // convert the genetic algorythm to the data we want to use
   @Override
   public void decode(ArrayList<Chromosome> chromosomes) {
     // TODO Auto-generated method stub
@@ -661,23 +676,19 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
           if(chromosome.getGenome().charAt(i) == '1') value += 1 << i-pos; 
         }
         pos += 8;
-//        if (currentServos.get(link.getName()).isInverted()) {
-//          if (value > MathUtils.radToDeg(link.getMin()-link.getInitialTheta())) value = link.getPositionValueDeg();
-//          if (value < MathUtils.radToDeg(link.getMax()-link.getInitialTheta())) value = link.getPositionValueDeg();
-//        }
-//        else{
         if (value < MathUtils.radToDeg(link.getMin()-link.getInitialTheta())) value = link.getPositionValueDeg();
         if (value > MathUtils.radToDeg(link.getMax()-link.getInitialTheta())) value = link.getPositionValueDeg();
-//        }
         decodedGenome.add(value);
       }
       chromosome.setDecodedGenome(decodedGenome);
     }
   }
   private DHRobotArm simulateMove(ArrayList<Object> decodedGenome) {
+    // simulate movement of the servos in time to get an approximation of their position
     time = 0.1;
     boolean isMoving = true;
     DHRobotArm oldArm = currentArm;
+    // stop simulating when all servo reach position
     while (isMoving) {
       isMoving = false;
       DHRobotArm newArm = new DHRobotArm();
