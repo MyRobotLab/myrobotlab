@@ -43,6 +43,10 @@ void MrlComm::softReset() {
 	heartbeat = false;
 	heartbeatEnabled = false;
 	lastHeartbeatUpdate = 0;
+	for (unsigned int i = 0; i < MAX_MSG_SIZE; i++) {
+	  customMsg[i] = 0;
+	}
+	customMsgSize = 0;
 }
 
 /***********************************************************************
@@ -355,6 +359,13 @@ void MrlComm::processCommand(int ioType) {
 		heartbeatEnabled = true;
 		break;
 	}
+	case CUSTOM_MSG: {
+	  for (byte i = 0; i < ioCmd[1] && customMsgSize < 64; i++) {
+	    customMsg[customMsgSize] = ioCmd[i+2];
+	    customMsgSize++;
+	  }
+	  break;
+	}
 	default:
 		MrlMsg::publishError(ERROR_UNKOWN_CMD);
 		break;
@@ -641,5 +652,22 @@ void MrlComm::update() {
     }
     msg.sendMsg();
 	}
+}
+
+unsigned int MrlComm::getCustomMsg() {
+  if (customMsgSize == 0) {
+    return 0;
+  }
+  int retval = customMsg[0];
+  for (int i = 0; i < customMsgSize-1; i++) {
+    customMsg[i] = customMsg[i+1];
+  }
+  customMsg[customMsgSize] = 0;
+  customMsgSize--;
+  return retval;
+}
+
+int MrlComm::getCustomMsgSize() {
+  return customMsgSize;
 }
 
