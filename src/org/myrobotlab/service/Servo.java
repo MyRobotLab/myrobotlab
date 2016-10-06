@@ -211,13 +211,13 @@ public class Servo extends Service implements ServoControl {
 	 */
 	boolean isEventsEnabled = false;
 
-	private int maxVelocity = 5000;
+	private int maxVelocity = 0;
 	
 
 	private boolean isAttached = false;
 	private boolean isControllerSet = false;
 
-  private int velocity = 500;
+  private int velocity = 0;
   
   class IKData {
     String name;
