@@ -463,24 +463,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
     return ret;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(AcapelaSpeech.class.getCanonicalName());
-    meta.addDescription("Acapela group speech synthesis service.");
-    meta.addCategory("speech");
-    meta.setSponsor("GroG");
-    meta.addPeer("audioFile", "AudioFile", "audioFile");
-    meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
-    return meta;
-  }
-
   // audioData to utterance map TODO: revisit the design of this
   HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
 
@@ -550,5 +532,22 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
       Logging.logError(e);
     }
   }
-
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+    ServiceType meta = new ServiceType(AcapelaSpeech.class.getCanonicalName());
+    meta.addDescription("Acapela group speech synthesis service.");
+    meta.addCategory("speech");
+    meta.setSponsor("GroG");
+    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
+    meta.addDependency("org.apache.commons.httpclient", "4.2.5");
+    return meta;
+  }
 }
