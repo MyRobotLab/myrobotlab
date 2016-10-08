@@ -339,6 +339,7 @@ public class Bno055 extends Service implements I2CControl {
     event.orientation.y = (((int)(rbuffer[2] & 0xFF)) | (((int)(rbuffer[3] & 0xFF)) << 8))/16.0; 
     event.orientation.z = (((int)(rbuffer[4] & 0xFF)) | (((int)(rbuffer[5] & 0xFF)) << 8))/16.0; 
     return event;
+    
   }
   
 }
