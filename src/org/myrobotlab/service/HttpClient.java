@@ -90,7 +90,10 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     ServiceType meta = new ServiceType(HttpClient.class.getCanonicalName());
     meta.addDescription("an HTTP client, used to fetch information on the web");
     meta.addCategory("network");
-    meta.addDependency("org.apache.commons.httpclient", "4.2.5");
+    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    // TODO: this depends on an apache http 3x jar also!
+    meta.addDependency("commons-httpclient", "3.1");
+    
     return meta;
   }
 
