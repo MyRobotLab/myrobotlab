@@ -1419,7 +1419,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			DeviceMapping map;
 			map = deviceList.get(i2cBus);
 			int id = map.getId(); // Device index to the I2CBus
-			int msgBuffer[] = new int[3];
+			int msgBuffer[] = new int[4];
 			msgBuffer[0] = id;
 			msgBuffer[1] = deviceAddress;
 			msgBuffer[2] = readSize;
