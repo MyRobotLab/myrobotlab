@@ -41,6 +41,7 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
     meta.setAvailable(false);
     // add dependency if necessary
     meta.addDependency("net.sourceforge.boofcv", "0.23");
+    meta.addDependency("pl.sarxos.webcam", "0.3.10");
     meta.addCategory("general");
     return meta;
   }
