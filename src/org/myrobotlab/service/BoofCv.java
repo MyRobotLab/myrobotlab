@@ -40,7 +40,7 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
     meta.addDescription("used as a general template");
     meta.setAvailable(false);
     // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
+    meta.addDependency("net.sourceforge.boofcv", "0.23");
     meta.addCategory("general");
     return meta;
   }
