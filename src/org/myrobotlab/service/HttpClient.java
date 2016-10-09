@@ -42,6 +42,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.myrobotlab.framework.Service;
@@ -97,7 +98,7 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     return meta;
   }
 
-  transient DefaultHttpClient client;
+  transient CloseableHttpClient client;
 
   transient HashMap<String, String> formFields = new HashMap<String, String>();
 
