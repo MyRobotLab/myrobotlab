@@ -39,12 +39,11 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.myrobotlab.framework.Service;
@@ -74,15 +73,16 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
   // default voice
   public String voice = "Ryan";
   public HashSet<String> voices = new HashSet<String>();
-  transient PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
   // this is a peer service.
   transient AudioFile audioFile = null;
   // TODO: fix the volume control
   // private float volume = 1.0f;
+  
+  transient CloseableHttpClient client;
 
   public AcapelaSpeech(String n) {
     super(n);
-    connectionManager.setMaxTotal(10);
+
     // TODO: be country/language aware when asking for voices?
     // maybe have a get voices by language/locale
     // Arabic
@@ -236,6 +236,10 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
   public void startService() {
     super.startService();
+    if (client == null) {
+        // new MultiThreadedHttpConnectionManager()
+        client = HttpClients.createDefault();
+    }
     audioFile = (AudioFile) startPeer("audioFile");
     audioFile.startService();
     subscribe(audioFile.getName(), "publishAudioStart");
@@ -273,7 +277,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
   public String getMp3Url(String toSpeak) {
     HttpPost post = null;
     try {
-      HttpClient client = new DefaultHttpClient(connectionManager);
+      
       // request form & send text
       String url = "http://www.acapela-group.com/demo-tts/DemoHTML5Form_V2.php?langdemo=Powered+by+%3Ca+href%3D%22http%3A%2F%2Fwww.acapela-vaas.com"
           + "%22%3EAcapela+Voice+as+a+Service%3C%2Fa%3E.+For+demo+and+evaluation+purpose+only%2C+for+commercial+use+of+generated+sound+files+please+go+to+"
@@ -324,7 +328,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
     HttpGet get = null;
     byte[] b = null;
     try {
-      HttpClient client = new DefaultHttpClient(connectionManager);
       HttpResponse response = null;
       // fetch file
       get = new HttpGet(mp3Url);
