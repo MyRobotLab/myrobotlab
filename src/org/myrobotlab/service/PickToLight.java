@@ -21,7 +21,9 @@ import org.apache.http.auth.params.AuthPNames;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.AuthPolicy;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -674,13 +676,15 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     String ret = "";
 
     try {
-      DefaultHttpClient httpclient = new DefaultHttpClient();
+      CloseableHttpClient client = HttpClients.createDefault();
       List<String> authpref = new ArrayList<String>();
+      /* ALL DEPRECATED
       authpref.add(AuthPolicy.NTLM);
-      httpclient.getParams().setParameter(AuthPNames.TARGET_AUTH_PREF, authpref);
+      client.getParams().setParameter(AuthPNames.TARGET_AUTH_PREF, authpref);
       NTCredentials creds = new NTCredentials(mesUser, mesPassword, "", mesDomain);
-      httpclient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
-
+      client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
+	  */
+      
       HttpContext localContext = new BasicHttpContext();
       HttpPost post = new HttpPost(mesEndpoint);
 
@@ -692,7 +696,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
       post.addHeader("SOAPAction", soapAction);
       post.addHeader("Content-Type", "text/xml; charset=utf-8");
 
-      HttpResponse response = httpclient.execute(post, localContext);
+      HttpResponse response = client.execute(post, localContext);
       HttpEntity entity = response.getEntity();
       ret = EntityUtils.toString(entity);
 
@@ -979,12 +983,12 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     String ret = "";
 
     try {
-      DefaultHttpClient httpclient = new DefaultHttpClient();
+      DefaultHttpClient client = new DefaultHttpClient();
       List<String> authpref = new ArrayList<String>();
       authpref.add(AuthPolicy.NTLM);
-      httpclient.getParams().setParameter(AuthPNames.TARGET_AUTH_PREF, authpref);
+      client.getParams().setParameter(AuthPNames.TARGET_AUTH_PREF, authpref);
       NTCredentials creds = new NTCredentials(mesUser, mesPassword, "", mesDomain);
-      httpclient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
+      client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
 
       HttpContext localContext = new BasicHttpContext();
       HttpPost post = new HttpPost(mesEndpoint);
@@ -997,7 +1001,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
       post.addHeader("SOAPAction", soapAction);
       post.addHeader("Content-Type", "text/xml; charset=utf-8");
 
-      HttpResponse response = httpclient.execute(post, localContext);
+      HttpResponse response = client.execute(post, localContext);
       HttpEntity entity = response.getEntity();
       ret = EntityUtils.toString(entity);
 
@@ -1162,7 +1166,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     meta.addPeer("raspi", "RasPi", "raspi");
     meta.addPeer("webgui", "WebGui", "web server interface");
     // FIXME - should use static methos from HttpClient
-    meta.addDependency("org.apache.commons.httpclient", "4.2.5");
+    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
 
     return meta;
   }
