@@ -151,4 +151,12 @@ public interface ServoControl extends DeviceControl {
 
   public int getMaxVelocity();
 
+  int getVelocity();
+
+  void attach(String controllerName, int pin, Integer pos) throws Exception;
+
+  void attach(ServoController controller, int pin, Integer pos, Integer velocity) throws Exception;
+
+  void attach(String controllerName, int pin, Integer pos, Integer velocity) throws Exception;
+
 }

@@ -32,28 +32,6 @@ public class InMoovHead extends Service {
     neck = (Servo) createPeer("neck");
     arduino = (Arduino) createPeer("arduino");
 
-    // connection details
-    /* OLD WAYs
-    neck.setPin(12);
-    rothead.setPin(13);
-    jaw.setPin(26);
-    eyeX.setPin(22);
-    eyeY.setPin(24);
-
-    neck.setController(arduino);
-    rothead.setController(arduino);
-    jaw.setController(arduino);
-    eyeX.setController(arduino);
-    eyeY.setController(arduino);
-    */
-    
-    // NEW WAY
-//    arduino.servoAttach(neck, 12);
-//    arduino.servoAttach(rothead, 13);
-//    arduino.servoAttach(jaw, 26);
-//    arduino.servoAttach(eyeX, 22);
-//    arduino.servoAttach(eyeY, 24);
-
 
     neck.setMinMax(20, 160);
     rothead.setMinMax(30, 150);
@@ -67,6 +45,8 @@ public class InMoovHead extends Service {
     jaw.setRest(10);
     eyeX.setRest(80);
     eyeY.setRest(90);
+    
+    setVelocity(45,45,45,45,45);
 
   }
 
@@ -105,16 +85,11 @@ public class InMoovHead extends Service {
   // FIXME - make interface for Arduino / Servos !!!
   public boolean connect(String port) throws Exception {
     arduino.connect(port);
-    neck.attach(arduino, 12);
-    rothead.attach(arduino, 13);
-    jaw.attach(arduino, 26);
-    eyeX.attach(arduino, 22);
-    eyeY.attach(arduino, 24);
-//    attach();
-    setSpeed(0.5, 0.5, 0.5, 0.5, 0.5);
-    rest();
-    sleep(1000);
-    setSpeed(1.0, 1.0, 1.0, 1.0, 1.0);
+    neck.attach(arduino, 12, neck.getRest(), neck.getVelocity());
+    rothead.attach(arduino, 13, rothead.getRest(), rothead.getVelocity());
+    jaw.attach(arduino, 26, jaw.getRest(), jaw.getVelocity());
+    eyeX.attach(arduino, 22, eyeX.getRest(), eyeX.getVelocity());
+    eyeY.attach(arduino, 24, eyeY.getRest(), eyeY.getVelocity());
     broadcastState();
     return true;
   }
@@ -342,6 +317,25 @@ public class InMoovHead extends Service {
     meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
 
     return meta;
+  }
+
+  public void setVelocity(Integer headXSpeed, Integer headYSpeed, Integer eyeXSpeed, Integer eyeYSpeed, Integer jawSpeed) {
+    if (log.isDebugEnabled()) {
+      log.debug(String.format("%s setVelocity %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed));
+    }
+    rothead.setVelocity(headXSpeed);
+    neck.setVelocity(headYSpeed);
+    // it's possible to pass null for the eye and jaw speeds
+    if (eyeXSpeed != null) {
+      eyeX.setVelocity(eyeXSpeed);
+    }
+    if (eyeYSpeed != null) {
+      eyeY.setVelocity(eyeYSpeed);
+    }
+    if (jawSpeed != null) {
+      jaw.setVelocity(jawSpeed);
+    }
+
   }
 
 }

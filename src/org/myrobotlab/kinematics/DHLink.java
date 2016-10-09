@@ -1,7 +1,6 @@
 package org.myrobotlab.kinematics;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Servo;
 import org.myrobotlab.math.MathUtils;
 import org.slf4j.Logger;
 
@@ -30,14 +29,13 @@ public class DHLink {
   // -180 / +180 as min/max i guess?
   private double min = -Math.PI;
   private double max = Math.PI;
+  private double initialTheta;
 
   // TODO: figure this out.
   private String name;
 
   public transient final static Logger log = LoggerFactory.getLogger(DHLink.class);
 
-  public Servo servo=null;
-  
   // private Matrix m;
   // TODO: add max/min angle
   public DHLink(String name, double d, double r, double theta, double alpha) {
@@ -47,6 +45,7 @@ public class DHLink {
     this.d = d;
     this.r = r;
     this.theta = theta;
+    initialTheta = theta;
     this.alpha = alpha;
     //
     this.type = DHLinkType.REVOLUTE;
@@ -62,7 +61,7 @@ public class DHLink {
     this.min = copy.min;
     this.max = copy.max;
     this.name = copy.name;
-    //don't copy the servo;
+    this.initialTheta = copy.initialTheta;
   }
   
 
@@ -73,13 +72,9 @@ public class DHLink {
    */
   public Matrix resolveMatrix() {
     Matrix m = new Matrix(4, 4);
-    double targetOutput=0;
-    if(servo!=null){
-      targetOutput = servo.targetOutput;
-    }
     // elements we need
-    double cosTheta = Math.cos(theta +  MathUtils.degToRad(targetOutput));
-    double sinTheta = Math.sin(theta +  MathUtils.degToRad(targetOutput));
+    double cosTheta = Math.cos(theta);
+    double sinTheta = Math.sin(theta);
     double cosAlpha = Math.cos(alpha);
     double sinAlpha = Math.sin(alpha);
 
@@ -252,7 +247,16 @@ public class DHLink {
     this.name = name;
   }
 
-  public void setServo(Servo servo) {
-    this.servo = servo;
+  public void addPositionValue(double positionDeg) {
+    theta = initialTheta + MathUtils.degToRad(positionDeg);
+  }
+  
+  public double getInitialTheta() {
+    return initialTheta;
+  }
+  
+  public Double getPositionValueDeg() {
+    //return (theta - initialTheta) * 180 / Math.PI;
+    return (theta * 180/Math.PI) - (initialTheta*180/Math.PI); 
   }
 }

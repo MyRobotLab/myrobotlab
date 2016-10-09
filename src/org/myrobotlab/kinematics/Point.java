@@ -186,4 +186,8 @@ public class Point {
     return p2;
   }
 
+  public Double distanceTo(Point point) {
+    Point calcPoint = subtract(point);
+    return Math.sqrt(Math.pow(calcPoint.getX(), 2) + Math.pow(calcPoint.getY(), 2) + Math.pow(calcPoint.getZ(), 2));
+  }
 }

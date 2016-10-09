@@ -77,17 +77,17 @@ public class OpenCVFilterMotionTemplate extends OpenCVFilter {
 	final int N = 4;
 
 	// ring image buffer
-	IplImage[] buf = null;
+	transient IplImage[] buf = null;
 	int last = 0;
 
 	// temporary images
-	IplImage mhi = null; // MHI
-	IplImage orient = null; // orientation
-	IplImage mask = null; // valid orientation mask
+	transient IplImage mhi = null; // MHI
+	transient IplImage orient = null; // orientation
+	transient IplImage mask = null; // valid orientation mask
 	IplImage segmask = null; // motion segmentation map
 	CvMemStorage storage = null; // temporary storage
 
-	IplImage motion = null;
+	transient IplImage motion = null;
 
 	public OpenCVFilterMotionTemplate() {
 		super();

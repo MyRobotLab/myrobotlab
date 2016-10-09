@@ -158,7 +158,7 @@ public class Agent extends Service {
 
 	public Agent(String n) {
 		super(n);
-		log.info("Agent {} PID {} is alive", n, Runtime.getPid());
+		log.info("Agent {} Pid {} is alive", n, Runtime.getPid());
 		agentJVMArgs = Runtime.getJVMArgs();
 		if (currentBranch == null) {
 			currentBranch = platform.getBranch();
@@ -711,8 +711,10 @@ public class Agent extends Service {
 			String dyPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}", platformId);
 			env.put("DYLD_LIBRARY_PATH", dyPath);
 		} else if (platform.isWindows()) {
-			String path = String.format("PATH=%%CD%%\\libraries\\native;PATH=%%CD%%\\libraries\\native\\%s;%%PATH%%", platformId);
-			env.put("PATH", path);
+			// this just borks the path in Windows - additionally (unlike Linux) - i don't think you need native code on the PATH
+			// and Windows does not have a LD_LIBRARY_PATH
+			// String path = String.format("PATH=%%CD%%\\libraries\\native;PATH=%%CD%%\\libraries\\native\\%s;%%PATH%%", platformId);
+			// env.put("PATH", path);
 			// we need to sanitize against a non-ascii username
 			// work around for Jython bug in 2.7.0...
 			env.put("APPDATA", "%%CD%%");
@@ -975,7 +977,7 @@ public class Agent extends Service {
 			// -agent \"-params -service ... \" string encoded
 			CmdLine runtimeArgs = new CmdLine(args);
 
-            if (runtimeArgs.containsKey("-h") || runtimeArgs.containsKey("-help") || runtimeArgs.containsKey("--help")) {
+            if (runtimeArgs.containsKey("-?") || runtimeArgs.containsKey("-h") || runtimeArgs.containsKey("-help") || runtimeArgs.containsKey("--help")) {
 		        Runtime.mainHelp();
 		        return;
 		    }
@@ -1018,11 +1020,12 @@ public class Agent extends Service {
 
 			if (runtimeArgs.containsKey("-test")) {
 				serviceTest();
-
 			} else {
+				// FIXME - add option to persist
+				if (runtimeArgs.containsKey("-keepAlive")){
+					Runtime.start("agent", "Agent");
+				}
 				p = spawn(args); // <-- agent's is now in charge of first
-				// mrl
-				// instance
 			}
 
 			// change of design - agent will try to shutdown

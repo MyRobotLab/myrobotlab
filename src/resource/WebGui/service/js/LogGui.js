@@ -42,6 +42,16 @@ angular.module('mrlapp.service.LogGui', [])
             break;
         case 'onLogEvent':
             $scope.log += '\n' + msg.data[0];
+            // TODO: test this.
+            var maxLength = 50000;
+            var length = $scope.log.length;
+            if (length > maxLength) {
+            	// avoid if newline is the first char.. 
+            	var nextLine = $scope.log.indexOf("\n",1);
+            	if (nextLine != -1) {
+            		$scope.log = $scope.log.substring(nextLine, length);
+            	} 
+            }
             $scope.$apply();
             break;
         default:

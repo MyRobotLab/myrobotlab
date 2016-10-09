@@ -97,7 +97,7 @@ public class Tracking extends Service {
   private String state = STATE_IDLE;
 
   // ------ PEER SERVICES BEGIN------
-  transient public PID2 pid;
+  transient public Pid pid;
   transient public OpenCV opencv;
   transient public Arduino arduino;
   transient public Servo x, y;
@@ -159,7 +159,7 @@ public class Tracking extends Service {
     // createPeer("X","Servo") <-- create peer of default type
     x = (Servo) createPeer("x");
     y = (Servo) createPeer("y");
-    pid = (PID2) createPeer("pid");
+    pid = (Pid) createPeer("pid");
     opencv = (OpenCV) createPeer("opencv");
     arduino = (Arduino) createPeer("arduino");
 
@@ -171,15 +171,15 @@ public class Tracking extends Service {
     setDefaultPreFilters();
 
     pid.setPID("x", 5.0, 5.0, 0.1);
-    pid.setControllerDirection("x", PID.DIRECTION_DIRECT);
-    pid.setMode("x", PID.MODE_AUTOMATIC);
+    pid.setControllerDirection("x", Pid.DIRECTION_DIRECT);
+    pid.setMode("x", Pid.MODE_AUTOMATIC);
     pid.setOutputRange("x", -10, 10); // <- not correct - based on maximum
     pid.setSampleTime("x", 30);
     pid.setSetpoint("x", 0.5); // set center
 
     pid.setPID("y", 5.0, 5.0, 0.1);
-    pid.setControllerDirection("y", PID.DIRECTION_DIRECT);
-    pid.setMode("y", PID.MODE_AUTOMATIC);
+    pid.setControllerDirection("y", Pid.DIRECTION_DIRECT);
+    pid.setMode("y", Pid.MODE_AUTOMATIC);
     pid.setOutputRange("y", -10, 10); // <- not correct - based on maximum
     pid.setSampleTime("y", 30);
     pid.setSetpoint("y", 0.5); // set center
@@ -263,7 +263,7 @@ public class Tracking extends Service {
     return x;
   }
 
-  public PID2 getPID() {
+  public Pid getPID() {
     return pid;
   }
 
@@ -320,8 +320,8 @@ public class Tracking extends Service {
     x.rest();
     y.rest();
 
-    lastXServoPos = x.getPos();
-    lastYServoPos = y.getPos();
+    lastXServoPos = x.getTargetOutput();
+    lastYServoPos = y.getTargetOutput();
   }
 
   public void scan() {
@@ -398,12 +398,12 @@ public class Tracking extends Service {
           faceFoundFrameCount = 0;
 
           if (scan) {
-            int xpos = x.getPos();
+            int xpos = x.getTargetOutput();
 
-            if (xpos + scanXStep >= x.getMax() && scanXStep > 0 || xpos + scanXStep <= x.getMin() && scanXStep < 0) {
+            if (xpos + scanXStep >= Math.max(x.getMax(), x.getMin()) && scanXStep > 0 || xpos + scanXStep <= Math.min(x.getMin(), x.getMax()) && scanXStep < 0) {
               scanXStep = scanXStep * -1;
-              int newY = (int) (y.getMin() + (Math.random() * (y.getMax() - y.getMin())));
-              y.moveTo(newY);
+              int newY = (int) (Math.min(y.getMin(), y.getMax()) + (Math.random() * (Math.max(y.getMax(), y.getMin()) - Math.min(y.getMin(), y.getMax()))));
+              y.moveToOutput(newY);
             }
 
             x.moveTo(xpos + scanXStep);
@@ -420,17 +420,17 @@ public class Tracking extends Service {
 
       // FIXME - remove not used
       case STATE_FACE_DETECT_LOST_TRACK:
-        int xpos = x.getPos();
+        int xpos = x.getTargetOutput();
 
-        if (xpos >= x.getMax() && scanXStep > 0) {
+        if (xpos >= Math.max(x.getMax(), x.getMin()) && scanXStep > 0) {
           scanXStep = scanXStep * -1;
         }
 
-        if (xpos <= x.getMin() && scanXStep < 0) {
+        if (xpos <= Math.min(x.getMin(), x.getMax()) && scanXStep < 0) {
           scanXStep = scanXStep * -1;
         }
 
-        x.moveTo(xpos + scanXStep);
+        x.moveToOutput(xpos + scanXStep);
 
         break;
 
@@ -500,7 +500,7 @@ public class Tracking extends Service {
     super.startService();
     x = (Servo) startPeer("x");
     y = (Servo) startPeer("y");
-    pid = (PID2) startPeer("pid");
+    pid = (Pid) startPeer("pid");
     arduino = (Arduino) startPeer("arduino");
     opencv = (OpenCV) startPeer("opencv");
     rest();
@@ -556,22 +556,27 @@ public class Tracking extends Service {
 
     pid.setInput("x", targetPoint.x);
     pid.setInput("y", targetPoint.y);
-    int currentXServoPos = x.getPos();
-    int currentYServoPos = y.getPos();
+    int currentXServoPos = x.getTargetOutput();
+    int currentYServoPos = y.getTargetOutput();
 
     // TODO - work on removing currentX/YServoPos - and use the servo's
     // directly ???
     // if I'm at my min & and the target is further min - don't compute
     // pid
-    if ((currentXServoPos <= x.getMin() && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= x.getMax() && xSetpoint - targetPoint.x > 0)) {
+    if ((currentXServoPos <= Math.min(x.getMin(), x.getMax()) && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= Math.max(x.getMin(), x.getMax()) && xSetpoint - targetPoint.x > 0)) {
       error(String.format("%d x limit out of range", currentXServoPos));
     } else {
 
       if (pid.compute("x")) {
-        currentXServoPos += (int) pid.getOutput("x");
+        if(x.isInverted()) {
+          currentXServoPos -= (int) pid.getOutput("x");
+        }
+        else{
+          currentXServoPos += (int) pid.getOutput("x");
+        }
         if (currentXServoPos != lastXServoPos) {
-          x.moveTo(currentXServoPos);
-          currentXServoPos = x.getPos();
+          x.moveToOutput(currentXServoPos);
+          currentXServoPos = x.getTargetOutput();
           lastXServoPos = currentXServoPos;
         }
         // TODO - canidate for "move(int)" ?
@@ -581,14 +586,19 @@ public class Tracking extends Service {
       }
     }
 
-    if ((currentYServoPos <= y.getMin() && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= y.getMax() && ySetpoint - targetPoint.y > 0)) {
+    if ((currentYServoPos <= Math.min(y.getMin(), y.getMax()) && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= Math.max(y.getMin(), y.getMax()) && ySetpoint - targetPoint.y > 0)) {
       error(String.format("%d y limit out of range", currentYServoPos));
     } else {
       if (pid.compute("y")) {
-        currentYServoPos += (int) pid.getOutput("y");
+        if (y.isInverted()) {
+          currentYServoPos -= (int) pid.getOutput("y");
+        }
+        else {
+          currentYServoPos += (int) pid.getOutput("y");
+        }
         if (currentYServoPos != lastYServoPos) {
-          y.moveTo(currentYServoPos);
-          currentYServoPos = y.getPos();
+          y.moveToOutput(currentYServoPos);
+          currentYServoPos = y.getTargetOutput();
           lastYServoPos = currentYServoPos;
         }
       } else {
@@ -733,7 +743,7 @@ public class Tracking extends Service {
     meta.addCategory("vision", "video", "sensor", "control");
     meta.addPeer("x", "Servo", "pan servo");
     meta.addPeer("y", "Servo", "tilt servo");
-    meta.addPeer("pid", "PID2", "PID service - for all your pid needs");
+    meta.addPeer("pid", "Pid", "Pid service - for all your pid needs");
     meta.addPeer("opencv", "OpenCV", "Tracking OpenCV instance");
     meta.addPeer("arduino", "Arduino", "Tracking Arduino instance");
     return meta;

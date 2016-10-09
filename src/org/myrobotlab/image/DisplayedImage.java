@@ -22,7 +22,7 @@ public class DisplayedImage extends JPanel implements ActionListener {
   public final static Logger log = LoggerFactory.getLogger(DisplayedImage.class);
 
   private static final long serialVersionUID = 1L;
-  BufferedImage image; // Stores the actual image.
+  transient BufferedImage image; // Stores the actual image.
   Timer timer; // Timer for the FadeIn Effect.
   private float alpha = 0f; // Stores the alpha value.
   private int hImage, wImage; // Stores the height and width of an image.

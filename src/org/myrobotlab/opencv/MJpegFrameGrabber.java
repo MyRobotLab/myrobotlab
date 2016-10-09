@@ -19,7 +19,7 @@ public class MJpegFrameGrabber extends FrameGrabber {
 
   private URL url;
   private MjpegInputStream mStream;
-  private Java2DFrameConverter converter = new Java2DFrameConverter();
+  transient private Java2DFrameConverter converter = new Java2DFrameConverter();
   
   public MJpegFrameGrabber(String uri) {
     super();

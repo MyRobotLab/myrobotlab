@@ -89,7 +89,7 @@ angular.module('mrlapp.service.JoystickGui', [])
             $scope.pulseData = inMsg.data[0];
             $scope.$apply();
             break;
-        case 'onInput':
+        case 'onJoystickInput':
             input = inMsg.data[0];
             $scope.input = input;
             
@@ -116,7 +116,7 @@ angular.module('mrlapp.service.JoystickGui', [])
     }
     ;
     
-    msg.subscribe('publishInput');
+    msg.subscribe('publishJoystickInput');
     msg.subscribe(this);
     
     $scope.xAxisTickFormatFunction = function() {

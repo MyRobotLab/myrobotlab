@@ -39,7 +39,7 @@ public class OpenCVFilterSampleArray extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSampleArray.class.getCanonicalName());
 
-  IplImage buffer = null;
+  transient IplImage buffer = null;
 
   transient BufferedImage frameBuffer = null;
 

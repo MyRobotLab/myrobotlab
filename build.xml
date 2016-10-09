@@ -145,7 +145,14 @@
 	<!-- FIXME - fixme with ivy -->
 	<path id="compile.classpath">
 		<pathelement location="bin" />
-		<pathelement location="${repo}/org.wikidata.wdtk/0.7.0/wdtk-client-0.7.0.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.7.0/wdtk-wikibaseapi-0.7.0.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.7.0/wdtk-datamodel-0.7.0.jar" />
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/commons-codec-1.9.jar" />
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/commons-logging-1.2.jar" />
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/httpclient-4.5.2.jar" />
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/httpcore-4.4.4.jar" />
+		<pathelement location="${repo}/org.apache.commons.commons-lang3/3.3.2/commons-lang3-3.3.2.jar" />
+		<pathelement location="${repo}/commons-httpclient/3.1/commons-httpclient-3.1.jar" />
 		<pathelement location="${repo}/com.mxgraph.jgraph/1.6.1.2/jgraphx.jar"/>
 		<pathelement location="${repo}/com.sun.java3d/1.5.1/j3dcore.jar"/>
 		<pathelement location="${repo}/com.sun.java3d/1.5.1/j3dutils.jar"/>
@@ -188,13 +195,6 @@
 		<pathelement location="${repo}/org.drjava.java/20120818/dynamicjava-base.jar"/>
 		<pathelement location="${repo}/org.drjava.java/20120818/plt.jar"/>
 		<pathelement location="${repo}/net.sourceforge.tess4j/1.1/tess4j.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/commons-codec-1.6.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/commons-logging-1.1.1.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/fluent-hc-4.2.5.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/httpclient-4.2.5.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/httpclient-cache-4.2.5.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/httpcore-4.2.4.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/httpmime-4.2.5.jar"/>
 		<pathelement location="${repo}/com.wolfram.alpha/1.1/WolframAlpha-1.1.jar"/>
 		<pathelement location="${repo}/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
 		<pathelement location="${repo}/edu.northwestern.topcodes/1.0/topcodes.jar"/>
@@ -282,6 +282,7 @@
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/slick-util.jar"/>
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/glamour-lwjgl-1.0.8.jar"/>
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/math-1.0.4.jar"/>
+ <!--  TODO: need guava 18 for elastic search. -->
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/guava-17.0.jar"/>
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jscience-4.3.1.jar"/>
 		<!-- end oculus stuff.. TODO: clean it up! -->
@@ -351,7 +352,8 @@
 		<pathelement location="${repo}/com.google.client/1.22.0/google-http-client-jackson2-1.22.0.jar"/>
 		<pathelement location="${repo}/com.google.client/1.22.0/google-http-client-jdo-1.22.0.jar"/>
 		<pathelement location="${repo}/com.google.client/1.22.0/jdo2-api-2.3-eb.jar"/>
-		
+	
+	
 
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
@@ -552,7 +554,7 @@
 		
 		<!-- python -->
 		<unzip src="${repo}/org.python.core/2.7.0/jython-2.7.0.jar" dest="${build}/classes" />
-		
+				
 		<!-- for client -->
 
 	</target>

@@ -13,13 +13,15 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.TextListener;
+import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
 import com.memetix.mst.detect.Detect;
 import com.memetix.mst.language.Language;
 import com.memetix.mst.translate.Translate;
 
-public class AzureTranslator extends Service {
+public class AzureTranslator extends Service implements TextListener, TextPublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -90,6 +92,27 @@ public class AzureTranslator extends Service {
     meta.addCategory("translation", "cloud", "ai");
     meta.addDependency("com.azure.translator", "0.6.2");
     return meta;
+  }
+
+  @Override
+  public String publishText(String text) {
+    return text;
+  }
+
+  @Override
+  public void addTextListener(TextListener service) {
+    addListener("publishText", service.getName(), "onText");
+  }
+
+  @Override
+  public void onText(String text) {
+      String cleanText;
+      try {
+        cleanText = translate(text);
+        invoke("publishText", cleanText);
+      } catch (Exception e) {
+        log.error("Unable to translate text! {} {}", text, e);
+      }
   }
 
 }
