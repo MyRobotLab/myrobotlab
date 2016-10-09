@@ -530,6 +530,11 @@ public class OledSsd1306 extends Service implements I2CControl {
 		ssd1306_command(contrast);
 	}
 
+	public void display(int[] image){
+		buffer = image.clone();
+		display();
+	}
+	
 	public void display() {
 		ssd1306_command(SSD1306_COLUMNADDR);
 		ssd1306_command(0); // Column start address (0 = reset)
