@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.httpclient.HttpException;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -72,10 +72,6 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
 
   private static final long serialVersionUID = 1L;
 
-  // this httpclient should be thread safe -
-  // transient org.apache.commons.httpclient.De client = null;
-  // DefaultHttpClient client = new DefaultHttpClient();
-
   public final static Logger log = LoggerFactory.getLogger(HttpClient.class);
 
   /**
@@ -92,9 +88,6 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     meta.addDescription("an HTTP client, used to fetch information on the web");
     meta.addCategory("network");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
-    // TODO: this depends on an apache http 3x jar also!
-    meta.addDependency("commons-httpclient", "3.1");
-    
     return meta;
   }
 
@@ -146,7 +139,7 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
       return new String(response.data);
     }
     return null;
-  }
+  } 
 
   public byte[] getBytes(String uri) throws ClientProtocolException, IOException {
     return processResponse((HttpUriRequest) new HttpGet(uri), null).data;
@@ -193,7 +186,7 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     return processResponse((HttpUriRequest) new HttpPost(uri), fields).data;
   }
 
-  public HttpData processResponse(HttpUriRequest request, HashMap<String, String> fields) throws HttpException, IOException {
+  public HttpData processResponse(HttpUriRequest request, HashMap<String, String> fields) throws IOException {
     HttpData data = new HttpData(request.getURI().toString());
     if (fields == null) {
 
