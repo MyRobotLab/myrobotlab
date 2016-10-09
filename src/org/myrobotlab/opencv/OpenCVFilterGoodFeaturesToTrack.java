@@ -57,10 +57,10 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGoodFeaturesToTrack.class.getCanonicalName());
 
-  IplImage grey = null;
-  IplImage eig = null;
-  IplImage temp = null;
-  IplImage mask = null; // ROI
+  transient IplImage grey = null;
+  transient IplImage eig = null;
+  transient IplImage temp = null;
+  transient IplImage mask = null; // ROI
 
   public int maxPointCount = 46;
   public int totalIterations = 0;

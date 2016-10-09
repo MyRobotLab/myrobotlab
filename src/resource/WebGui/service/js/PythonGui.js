@@ -1,56 +1,18 @@
-angular.module('mrlapp.service.PythonGui', [])
-.controller('PythonGuiCtrl', ['$log', '$scope', 'mrl', '$timeout', function($log, $scope, mrl, $timeout) {
+angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$log', '$scope', 'mrl', '$timeout', function($log, $scope, mrl, $timeout) {
     $log.info('PythonGuiCtrl');
     _self = this;
     var msg = this.msg;
-    
-    // The all powerful name !
     var name = $scope.name;
-    
     // init scope values
     $scope.output = '';
-
-    // $scope.currentScript = null;
-
-    /*
-    $scope.currentScript = {
-        name: 'untitled',
-        code: ''
-    };
-    */
-    
-    $scope.activeScriptIndex = 0;
-
+    $scope.activeTabIndex = 0;
     $scope.scripts = [];
 
-    // $scope.scripts.push($scope.currentScript);
-    
-    
-    // the awesome ace editor 1
-    $scope.editor = null ;
-    
-    // This method recieves a updated service 
-    // whenever {service}.broadcastState() is called
-    // Typically this is called when you know the service
-    // internal state has changed - and you want to broadcast
-    // the information to all listeners.
-    // Sometimes the service itself will call broadcast state
-    // when there has been an important state change.
-    // For example the Serial service calls broadcast state when
-    // it connects or disconnects from a serial port
-    // FIXME - framework level update of mrl's registry
+    // IF update of 'currentScript' not equal to webgui version - create new tab ?
     this.updateState = function(service) {
-        // this is where we update all gui components through the scope
-        // which will show on the html service body
         $scope.service = service;
-        // TODO make something like "script"
-        if (service.currentScript != null)
-        $scope.editor.setValue(service.currentScript.code);
-        // $scope.currentScript = service.currentScript; 
-        $scope.scripts.push(service.currentScript.code);
     }
     ;
-    
     this.onMsg = function(msg) {
         switch (msg.method) {
             // FIXME - bury it ?
@@ -73,7 +35,6 @@ angular.module('mrlapp.service.PythonGui', [])
         }
     }
     ;
-    
     // utility methods //
     // gets script name from full path name
     $scope.getName = function(path) {
@@ -86,64 +47,55 @@ angular.module('mrlapp.service.PythonGui', [])
         return path;
     }
     
-    ////// ace editor related callbacks begin ///////
+    //----- ace editors related callbacks begin -----//
     $scope.aceLoaded = function(e) {
         $log.info("ace loaded");
         // Options
-        $scope.editor = e;
-        //editor.setReadOnly(true);
+        $scope.scripts[$scope.scripts.length - 1].editor = e;  
     }
     ;
-    
     $scope.aceChanged = function(e) {
         $log.info("ace changed");
-        //
     }
-    
+    //----- ace editors related callbacks end -----//
     $scope.addScript = function() {
         var newScript = {
             name: 'Script ' + ($scope.scripts.length + 1),
             code: ''
         };
         $scope.scripts.push(newScript);
-        $timeout(function() {
-            $scope.activeScriptIndex = ($scope.scripts.length - 1);
+        $timeout(function() {// $scope.activeTabIndex = ($scope.scripts.length - 1);
         });
-        console.log($scope.activeScriptIndex);
+        console.log($scope.activeTabIndex);
     }
     ;
-    
     $scope.exec = function() {
-        $log.info('here');
-        $scope.activeScriptIndex;
-        $log.info($scope.scripts);
-        $scope.editor.getValue();
-        msg.send('exec', $scope.editor.getValue());
+        // $log.info('here');
+        // $scope.activeTabIndex;
+        // $log.info($scope.scripts[$scope.activeTabIndex]);
+        msg.send('exec', $scope.scripts[$scope.activeTabIndex - 1].editor.getValue());
     }
-    
-    // now you can subscribe to the methods you want
+    $scope.tabSelected = function(script) {
+        $log.info('here');
+        // need to get a handle on hte tab's ui / text
+        // $scope.editors.setValue(script.code);
+    }
+    /*
+    $scope.active = function() {
+
+        $log.info('here');
+        var x = $scope.scripts.filter(function(pane) {
+            return scripts.script;
+        })[0];
+
+        return $scope.scripts.filter(function(pane) {
+            return script.active;
+        })[0];
+    }
+    ;
+    */
     msg.subscribe('publishStdOut');
-    
-    // or send control commands
     msg.send("attachPythonConsole");
-    
-    // The last thing needed is
-    // subscriptions for the framework for this controller
-    // it will also process a variety of calls and connect
-    // the route for several callbacks
-    
-    // One of the callbacks is a method generator
-    // it calls getMethodMap on the service
-    // the the callback comes back the data in the MethodMap
-    // has enough information to dynamically build js methods
-    // and attach them to scope. 
-    
-    // Here is some example html.
-    // preface: the Java Python Service has a method Python.loadScriptFromFile(String filename), which loads
-    // a file from the directory mrl is running from.  
-    // The "ONLY" code needed is ng-click="msg.loadScriptFromFile('test.py') ! 
-    // <button type="button" class="btn btn-default" ng-click="msg.loadScriptFromFile('test.py')">
-    
     msg.subscribe(this);
 }
 ]);

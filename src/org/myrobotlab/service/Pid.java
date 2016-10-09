@@ -24,7 +24,7 @@
  * References :
  * A port of the great library of
  * 
- * Arduino PID2 Library - Version 1.0.1
+ * Arduino Pid Library - Version 1.0.1
  * by Brett Beauregard <br3ttb@gmail.com> brettbeauregard.com
  *
  * This Library is licensed under a GPLv3 License
@@ -37,6 +37,7 @@
 package org.myrobotlab.service;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -48,15 +49,15 @@ import org.slf4j.Logger;
 
 /**
  * 
- * PID2 - control service from
+ * Pid - control service from
  * 
  * http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-
- * introduction/ This will likely get merged/replaced with PID service.
+ * introduction/ This will likely get merged/replaced with Pid service.
  * 
  */
-public class PID2 extends Service {
+public class Pid extends Service {
 
-  class PIDData {
+  public static class PidData {
     private double dispKp; // * we'll hold on to the tuning parameters in
     // user-entered
     private double dispKi; // format for display purposes
@@ -73,7 +74,7 @@ public class PID2 extends Service {
     private double output; // This creates a hard link between the variables
     // and
     // the
-    private double setpoint; // PID2, freeing the user from having to
+    private double setpoint; // Pid, freeing the user from having to
     // constantly
     // tell us
     // what these values are. with pointers we'll just know.
@@ -89,7 +90,7 @@ public class PID2 extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(PID2.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(Pid.class.getCanonicalName());
   // mode
   static final public int MODE_AUTOMATIC = 1;
 
@@ -99,9 +100,9 @@ public class PID2 extends Service {
 
   static final public int DIRECTION_REVERSE = 1;
 
-  private HashMap<String, PIDData> data = new HashMap<String, PIDData>();
+  private Map<String, PidData> data = new HashMap<String, PidData>();
 
-  public PID2(String n) {
+  public Pid(String n) {
     super(n);
   }
 
@@ -115,7 +116,7 @@ public class PID2 extends Service {
    * ***************************************************************
    */
   public boolean compute(String key) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
 
     if (!piddata.inAuto)
       return false;
@@ -132,7 +133,7 @@ public class PID2 extends Service {
         piddata.ITerm = piddata.outMin;
       double dInput = (piddata.input - piddata.lastInput);
 
-      /* compute PID2 Output */
+      /* compute Pid Output */
       double output = piddata.kp * error + piddata.ITerm - piddata.kd * dInput;
 
       if (output > piddata.outMax)
@@ -154,43 +155,43 @@ public class PID2 extends Service {
   }
 
   public int getControllerDirection(String key) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     return piddata.controllerDirection;
   }
 
   public double getKd(String key) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     return piddata.dispKd;
   }
 
   public double getKi(String key) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     return piddata.dispKi;
   }
 
   public double getKp(String key) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     return piddata.dispKp;
   }
 
   public int getMode(String key) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     return piddata.inAuto ? MODE_AUTOMATIC : MODE_MANUAL;
   }
 
   public double getOutput(String key) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     return piddata.output + piddata.outCenter;
   }
 
   public void setOutput(String key, double Output) {
     setMode(key, MODE_MANUAL);
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     piddata.output = Output - piddata.outCenter;
   }
 
   public double getSetpoint(String key) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     return piddata.setpoint;
   }
 
@@ -201,7 +202,7 @@ public class PID2 extends Service {
    * ********************************
    */
   public void init(String key) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     piddata.ITerm = piddata.output;
     piddata.lastInput = piddata.input;
     if (piddata.ITerm > piddata.outMax)
@@ -223,14 +224,14 @@ public class PID2 extends Service {
 
   /*
    * SetControllerDirection(...)***********************************************
-   * ** The PID2 will either be connected to a DIRECT acting process (+Output
+   * ** The Pid will either be connected to a DIRECT acting process (+Output
    * leads to +Input) or a REVERSE acting process(+Output leads to -Input.) we
    * need to know which one, because otherwise we may increase the output when
    * we should be decreasing. This is called from the constructor. *************
    * ***************************************************************
    */
   public void setControllerDirection(String key, Integer direction) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     if (piddata.inAuto && direction != piddata.controllerDirection) {
       piddata.kp = (0 - piddata.kp);
       piddata.ki = (0 - piddata.ki);
@@ -241,7 +242,7 @@ public class PID2 extends Service {
   }
 
   public void setInput(String key, double input) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     piddata.input = input;
   }
 
@@ -253,7 +254,7 @@ public class PID2 extends Service {
    * ******************************
    */
   public void setMode(String key, int Mode) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     boolean newAuto = (Mode == MODE_AUTOMATIC);
     if ((newAuto == !piddata.inAuto)
         && (Mode == MODE_AUTOMATIC)) { /* we just went from manual to auto */
@@ -274,7 +275,7 @@ public class PID2 extends Service {
    * ************************************************************************
    */
   public void setOutputRange(String key, double Min, double Max) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     if (Min >= Max) {
       error("min >= max");
       return;
@@ -306,7 +307,7 @@ public class PID2 extends Service {
    * *********************************************
    */
   public void setPID(String key, Double Kp, Double Ki, Double Kd) {
-    PIDData piddata = new PIDData();
+    PidData piddata = new PidData();
 
     if (Kp < 0 || Ki < 0 || Kd < 0) {
       error("kp < 0 || ki < 0 || kd < 0");
@@ -343,7 +344,7 @@ public class PID2 extends Service {
    * ****************************************************************
    */
   public void setSampleTime(String key, int NewSampleTime) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     if (NewSampleTime > 0) {
       double ratio = (double) NewSampleTime / (double) piddata.sampleTime;
       piddata.ki *= ratio;
@@ -355,7 +356,7 @@ public class PID2 extends Service {
   }
 
   public void setSetpoint(String key, double setPoint) {
-    PIDData piddata = data.get(key);
+    PidData piddata = data.get(key);
     piddata.setpoint = setPoint;
   }
 
@@ -374,7 +375,7 @@ public class PID2 extends Service {
       log.error("error");
       log.info("info");
 
-      PID2 pid = new PID2("pid");
+      Pid pid = new Pid("pid");
       pid.startService();
       String key = "test";
       pid.setPID(key, 2.0, 5.0, 1.0);
@@ -392,9 +393,7 @@ public class PID2 extends Service {
         Service.sleep(30);
         if (pid.compute(key)) {
           log.info(String.format("%d %f", i, pid.getOutput(key)));
-        } else {
-          log.warn("not ready");
-        }
+        } 
       }
 
     } catch (Exception e) {
@@ -412,10 +411,14 @@ public class PID2 extends Service {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(PID2.class.getCanonicalName());
-    meta.addDescription("A proportional integral derivative controller (PID controller) commonly used in industrial control systems");
+    ServiceType meta = new ServiceType(Pid.class.getCanonicalName());
+    meta.addDescription("A proportional integral derivative controller (Pid controller) commonly used in industrial control systems");
     meta.addCategory("control", "industrial");
     return meta;
   }
+
+public Map<String, PidData> getPidData() {
+	return data;
+}
 
 }

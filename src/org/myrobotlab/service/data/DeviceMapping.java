@@ -1,12 +1,23 @@
 package org.myrobotlab.service.data;
 
+import java.io.Serializable;
+
+import org.myrobotlab.codec.Exclude;
 import org.myrobotlab.service.interfaces.DeviceControl;
 
-public class DeviceMapping {
-	
+public class DeviceMapping implements Serializable{	
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 1L;
+
 	// transient too help prevent infinite recursion in gson 
 	// encoding since Arduino will have a reference
 	// to itself as a device
+	// transient DeviceControl device;
+	// Changed by Mats to use an AnnotationExclusionStrategy
+	// See http://stackoverflow.com/questions/4802887/gson-how-to-exclude-specific-fields-from-serialization-without-annotations?rq=1
+	// for reference
 	transient DeviceControl device;
 	
 	/**
@@ -18,7 +29,7 @@ public class DeviceMapping {
 	 */
 	Object[] config;
 	
-	public DeviceMapping(DeviceControl device, Object... config){
+	public DeviceMapping(DeviceControl device, Object... config) {
 		this.device = device;
 		this.config = config;
 	}

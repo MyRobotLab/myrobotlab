@@ -57,7 +57,7 @@ public class RasPi extends Service implements I2CController {
 	// i2c bus
 	public static I2CBus i2c;
 
-	HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
+	transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();

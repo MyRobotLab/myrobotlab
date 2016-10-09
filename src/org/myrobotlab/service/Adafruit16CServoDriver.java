@@ -29,7 +29,7 @@ import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.motor.MotorConfigDualPwm;
 import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.motor.MotorConfigPulse;
-import org.myrobotlab.service.PID2.PIDData;
+import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -177,7 +177,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		boolean	sweepOneWay	= false;
 	}
 
-	HashMap<String, ServoData>	servoMap				= new HashMap<String, ServoData>();
+	transient HashMap<String, ServoData>	servoMap				= new HashMap<String, ServoData>();
 
 	// Motor related constants
 	public static final int			MOTOR_FORWARD		= 1;
@@ -444,14 +444,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
-
-	@Override
-	public void servoSetSpeed(ServoControl servo) {
-		// TODO Auto-generated method stub.
-		// perhaps cannot do this with Adafruit16CServoDriver
-		// Mats says. It can be done in this service. But not by the board.
-	}
-
 
 	@Override
 	public DeviceController getController() {
@@ -770,5 +762,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		 */
 		return meta;
 	}
+
+  @Override
+  public void servoSetVelocity(ServoControl servo) {
+    // TODO Auto-generated method stub
+    
+  }
 
 }

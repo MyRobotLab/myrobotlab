@@ -125,7 +125,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener {
 				Object o = event.getSource();
 				if (o == controller) {
 					String controllerName = (String) controller.getSelectedItem();
-					log.info(String.format("controller event %s", controllerName));
+					log.debug(String.format("controller event %s", controllerName));
 					if (controllerName != null && controllerName.length() > 0) {
 
 						// NOT WORTH IT - JUST BUILD 48 PINS !!!
@@ -153,7 +153,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener {
 
 				if (o == attachButton) {
 					if (attachButton.getText().equals("attach")) {
-						send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem());
+						send("attach", controller.getSelectedItem(), (int)pinList.getSelectedItem(), (Integer)slider.getValue());
 					} else {
 						send("detach", controller.getSelectedItem());
 					}

@@ -37,7 +37,7 @@ public class OpenCVFilterNot extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterNot.class.getCanonicalName());
 
-  IplImage buffer = null;
+  transient IplImage buffer = null;
 
   public OpenCVFilterNot() {
     super();

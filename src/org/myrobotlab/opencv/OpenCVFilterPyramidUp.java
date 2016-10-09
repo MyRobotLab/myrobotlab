@@ -39,7 +39,7 @@ public class OpenCVFilterPyramidUp extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterPyramidUp.class.getCanonicalName());
 
-  IplImage dst = null;
+  transient IplImage dst = null;
 
   int filter = 7;
 

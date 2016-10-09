@@ -9,7 +9,7 @@ import org.myrobotlab.service.interfaces.Invoker;
 import org.slf4j.Logger;
 
 /**
- * Simple class representing an operating system process
+ * Simple class representing an operating system mrl process
  * 
  * @author GroG
  *
@@ -34,26 +34,19 @@ public class ProcessData implements Serializable {
 
   public String javaExe = null;
 
-  // public String classpath = null;
   public String jniLibraryPath = null;
   public String jnaLibraryPath = null;
   public String Xmx = null;
 
   boolean userDefinedServices = false;
-  // TODO - additional jvm args
-  // public String jvmArgs = Runtime.getJVMArgs();
-
-  // public boolean isRunning = false;
-  public String state = STATE_STOPPED; // running | stopped | unknown
-  // public List<String> cmdLine = new ArrayList<String> ();
-
+  
+  public String state = STATE_STOPPED; 
+  
   transient public Process process;
   transient public Monitor monitor;
   static transient public Invoker service;
 
   ArrayList<String> in = null;
-
-  // public boolean autoUpdate = false;
 
   public static class Monitor extends Thread {
     ProcessData data;
@@ -130,6 +123,8 @@ public class ProcessData implements Serializable {
   }
 
   /**
+   * FIXME - is too much catering to mrl execution ...
+   * 
    * convert an String[] into a valid ProcessData
    * 
    * @param inCmdLine
@@ -160,12 +155,6 @@ public class ProcessData implements Serializable {
         continue;
       }
 
-      /*
-      if (cmd.equals("-version")) {
-        version = inCmdLine[i + 1];
-        continue;
-      }
-      */
 
       if (cmd.equals("-service")) {
         userDefinedServices = true;
@@ -188,26 +177,8 @@ public class ProcessData implements Serializable {
 
     javaExe = String.format("%s%sbin%s%s", System.getProperty("java.home"), fs, fs, exeName);
 
-    // jniLibraryPath =
-    // String.format("-Djava.library.path=libraries/native%slibraries/native/%s",
-    // ps, platform.getPlatformId());
     jniLibraryPath = "-Djava.library.path=libraries/native";
     jnaLibraryPath = "-Djna.library.path=libraries/native";
-
-    /*
-     * TODO - relay additional JVM Args !!! or do you have to do this since
-     * additional parameters are simply appended !!!
-     * 
-     * Set<String> clientJVMArgs = new HashSet<String>(); log.info("jvmArgs {}",
-     * Arrays.toString(agentJVMArgs.toArray())); for (int i = 0; i <
-     * agentJVMArgs.size(); ++i) { String agentJVMArg = agentJVMArgs.get(i); if
-     * (!agentJVMArg.startsWith("-agent") &&
-     * !agentJVMArg.startsWith("-Dfile.encoding")) {
-     * clientJVMArgs.add(agentJVMArg); } }
-     * 
-     * // jvm args relayed to clients for (String jvmArg : clientJVMArgs) {
-     * cmd.add(jvmArg); }
-     */
 
   }
 

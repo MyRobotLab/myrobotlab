@@ -37,9 +37,9 @@ public class OpenCVFilterRepetitiveAnd extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterRepetitiveAnd.class.getCanonicalName());
 
-  IplImage buffer = null;
+  transient IplImage buffer = null;
   // IplImage out = null;
-  IplImage[] memory = new IplImage[5];
+  transient IplImage[] memory = new IplImage[5];
 
   public OpenCVFilterRepetitiveAnd() {
     super();

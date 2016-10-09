@@ -43,6 +43,10 @@ void MrlComm::softReset() {
 	heartbeat = false;
 	heartbeatEnabled = false;
 	lastHeartbeatUpdate = 0;
+	for (unsigned int i = 0; i < MAX_MSG_SIZE; i++) {
+	  customMsg[i] = 0;
+	}
+	customMsgSize = 0;
 }
 
 /***********************************************************************
@@ -205,9 +209,6 @@ void MrlComm::processCommand(int ioType) {
 	case SERVO_WRITE_MICROSECONDS:
 		((MrlServo*) getDevice(ioCmd[1]))->servoWriteMicroseconds(MrlMsg::toInt(ioCmd, 2));
 		break;
-	case SERVO_SET_SPEED:
-		((MrlServo*) getDevice(ioCmd[1]))->setSpeed(ioCmd[2]);
-		break;
 	case SERVO_DETACH: {
 		if (debug)
 			MrlMsg::publishDebug("SERVO_DETACH " + String(ioCmd[1]));
@@ -350,9 +351,20 @@ void MrlComm::processCommand(int ioType) {
 		((MrlServo*) getDevice(ioCmd[1]))->setMaxVelocity(MrlMsg::toInt(ioCmd,3));
 		break;
 	}
+	case SERVO_SET_VELOCITY: {
+		((MrlServo*) getDevice(ioCmd[1]))->setVelocity(MrlMsg::toInt(ioCmd,3));
+		break;
+	}
 	case HEARTBEAT: {
 		heartbeatEnabled = true;
 		break;
+	}
+	case CUSTOM_MSG: {
+	  for (byte i = 0; i < ioCmd[1] && customMsgSize < 64; i++) {
+	    customMsg[customMsgSize] = ioCmd[i+2];
+	    customMsgSize++;
+	  }
+	  break;
 	}
 	default:
 		MrlMsg::publishError(ERROR_UNKOWN_CMD);
@@ -640,5 +652,22 @@ void MrlComm::update() {
     }
     msg.sendMsg();
 	}
+}
+
+unsigned int MrlComm::getCustomMsg() {
+  if (customMsgSize == 0) {
+    return 0;
+  }
+  int retval = customMsg[0];
+  for (int i = 0; i < customMsgSize-1; i++) {
+    customMsg[i] = customMsg[i+1];
+  }
+  customMsg[customMsgSize] = 0;
+  customMsgSize--;
+  return retval;
+}
+
+int MrlComm::getCustomMsgSize() {
+  return customMsgSize;
 }
 

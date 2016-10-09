@@ -6,35 +6,27 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 public class StreamGobbler extends Thread {
-  public final static Logger log = LoggerFactory.getLogger("");
+  public final static Logger log = LoggerFactory.getLogger(StreamGobbler.class);
 
   InputStream is;
   ArrayList<OutputStream> os;
 
   String type;
-  String tag;
 
   public StreamGobbler(InputStream is, ArrayList<OutputStream> os, String type) {
     super(String.format("streamgobbler_%s_%s", type, Runtime.getPid()));
-    // this.tag = String.format("%s_%s<<", type, Runtime.getPID());
-    // this.tag = "";
     this.is = is;
     this.os = os;
-    // this.type = type;
   }
 
   @Override
   public void run() {
     try {
-      /*
-       * InputStreamReader in = new InputStreamReader(is); BufferedReader br =
-       * new BufferedReader(in);
-       */
+      
       String line = null;
       int c = -1;
       char ch = '\0';
@@ -65,8 +57,7 @@ public class StreamGobbler extends Thread {
         }
       }
     } catch (IOException e) {
-      log.error(tag + "leaving StreamGobbler");
-      Logging.logError(e);
+      log.error("StreamGobbler threw", e);
     }
     /*
      * NO CLOSING !?!?!?!?

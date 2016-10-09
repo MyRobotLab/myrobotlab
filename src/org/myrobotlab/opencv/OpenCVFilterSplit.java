@@ -43,7 +43,7 @@ public class OpenCVFilterSplit extends OpenCVFilter {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSplit.class.getCanonicalName());
 
   public final String splitKey = String.format("%s_SPLIT", name);;
-  public IplImage splitImage;
+  transient public IplImage splitImage;
 
   public OpenCVFilterSplit() {
     super();

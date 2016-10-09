@@ -12,7 +12,7 @@
 #include "Pin.h"
 
 // TODO - standard convention of dev versions are odd release is even ?
-#define MRLCOMM_VERSION         37
+#define MRLCOMM_VERSION         38
 
 /***********************************************************************
  * Class MrlComm -
@@ -55,6 +55,8 @@ class MrlComm{
     bool heartbeat;
     bool heartbeatEnabled;
     unsigned long lastHeartbeatUpdate;
+    unsigned int customMsg[MAX_MSG_SIZE];
+    int customMsgSize;
     void softReset();
     int getFreeRam();
     void publishError(int type);
@@ -79,6 +81,8 @@ class MrlComm{
     void readCommand();
     void processCommand(int ioType);
     void updateDevices();
+    unsigned int getCustomMsg();
+    int getCustomMsgSize();
 };
 
 #endif

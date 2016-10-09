@@ -97,9 +97,9 @@ public class OpenCVFilterMouse extends OpenCVFilter {
   double lowThreshold = 90.0;
   double highThreshold = 210.0;
   int apertureSize = 3;
-  IplImage gray = null;
+  transient IplImage gray = null;
 
-  IplImage src = null;
+  transient IplImage src = null;
 
   ArrayList<CvPoint> path = new ArrayList<CvPoint>();
   HashMap<String, CvPoint> unique = new HashMap<String, CvPoint>();

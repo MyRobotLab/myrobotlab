@@ -52,7 +52,7 @@ public class OpenCVFilterSURF extends OpenCVFilter {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSURF.class.getCanonicalName());
   public Settings settings = new Settings();
   public ObjectFinder objectFinder = null;
-  private IplImage object = null;
+  transient private IplImage object = null;
 
   public OpenCVFilterSURF() {
     super();

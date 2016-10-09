@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 public class PipelineFrameGrabber extends FrameGrabber {
 
   public final static Logger log = LoggerFactory.getLogger(PipelineFrameGrabber.class.getCanonicalName());
-  BlockingQueue<Frame> blockingData;
+  transient BlockingQueue<Frame> blockingData;
   String sourceKey = "";
 
   public PipelineFrameGrabber(BlockingQueue<Frame> queue) {

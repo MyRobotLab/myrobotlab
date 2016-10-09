@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -91,32 +89,9 @@ public class InMoovHand extends Service implements LeapDataListener {
     ringFinger.setRest(2);
     pinky.setRest(2);
     wrist.setRest(90);
-
-    // connection details
-    /* OLD WAY
-    thumb.setPin(2);
-    index.setPin(3);
-    majeure.setPin(4);
-    ringFinger.setPin(5);
-    pinky.setPin(6);
-    wrist.setPin(7);
     
+    setVelocity(45, 45, 45, 45, 45, 45);
 
-    thumb.setController(arduino);
-    index.setController(arduino);
-    majeure.setController(arduino);
-    ringFinger.setController(arduino);
-    pinky.setController(arduino);
-    wrist.setController(arduino);
-    */
-    
-    // NEW WAY
-//    arduino.servoAttach(thumb, 2);
-//    arduino.servoAttach(index, 3);
-//    arduino.servoAttach(majeure, 4);
-//    arduino.servoAttach(ringFinger, 5);
-//    arduino.servoAttach(pinky, 6);
-//    arduino.servoAttach(wrist, 7);
   }
 
   /**
@@ -187,16 +162,12 @@ public class InMoovHand extends Service implements LeapDataListener {
       return false;
     }
 
-    thumb.attach(arduino, 2);
-    index.attach(arduino, 3);
-    majeure.attach(arduino, 4);
-    ringFinger.attach(arduino, 5);
-    pinky.attach(arduino, 6);
-    wrist.attach(arduino, 7);
-    setSpeed(0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
-    rest();
-    sleep(2000);
-    setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+    thumb.attach(arduino, 2, thumb.getRest(), thumb.getVelocity());
+    index.attach(arduino, 3, index.getRest(), index.getVelocity());
+    majeure.attach(arduino, 4, majeure.getRest(), majeure.getVelocity());
+    ringFinger.attach(arduino, 5, ringFinger.getRest(), ringFinger.getVelocity());
+    pinky.attach(arduino, 6, pinky.getRest(), pinky.getVelocity());
+    wrist.attach(arduino, 7, wrist.getRest(), wrist.getVelocity());
     broadcastState();
     return true;
   }
@@ -588,5 +559,14 @@ public class InMoovHand extends Service implements LeapDataListener {
 
     return meta;
   }
+
+  public void setVelocity(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    this.thumb.setVelocity(thumb);
+    this.index.setVelocity(index);
+    this.majeure.setVelocity(majeure);
+    this.ringFinger.setVelocity(ringFinger);
+    this.pinky.setVelocity(pinky);
+    this.wrist.setVelocity(wrist);
+ }
 
 }

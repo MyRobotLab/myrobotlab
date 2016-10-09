@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CONTROLLER_ATTACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.CUSTOM_MSG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_DETACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_ARDUINO;
@@ -31,6 +32,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_ATTACHED_DEVICE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_BOARD_INFO;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_BOARD_STATUS;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_CUSTOM_MSG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_DEBUG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MESSAGE_ACK;
 ///// java static import definition - DO NOT MODIFY - Begin //////
@@ -46,7 +48,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_DETACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_MAX_VELOCITY;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_SPEED;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SET_VELOCITY;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_WRITE;
@@ -539,12 +541,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * Devices - string name index of device we need 2 indexes for sensors
 	 * because they will be referenced by name OR by index
 	 */
-	HashMap<String, DeviceMapping> deviceList = new HashMap<String, DeviceMapping>();
+	transient HashMap<String, DeviceMapping> deviceList = new HashMap<String, DeviceMapping>();
 
 	/**
 	 * id reference of sensor, key is the MRLComm device id
 	 */
-	HashMap<Integer, DeviceMapping> deviceIndex = new HashMap<Integer, DeviceMapping>();
+	transient HashMap<Integer, DeviceMapping> deviceIndex = new HashMap<Integer, DeviceMapping>();
 
 	/**
 	 * Serial service - the Arduino's serial connection
@@ -703,6 +705,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public static final int MRL_IO_SERIAL_1 = 2;
 	public static final int MRL_IO_SERIAL_2 = 3;
 	public static final int MRL_IO_SERIAL_3 = 4;
+
 	public transient int controllerAttachAs = MRL_IO_NOT_DEFINED;
 	transient HashMap<Integer, Arduino> attachedController = new HashMap<Integer, Arduino>();
 	
@@ -1095,7 +1098,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// the mapping of the two.
 
 		sendMsg(DEVICE_ATTACH, msgBody);
-
+    int count = 0;
+    while (deviceList.get(device.getName()).getId() == null) {
+      count++;
+      sleep(100);
+      if (count > 4)
+        break;
+    }
 	}
 
 	@Override
@@ -1410,7 +1419,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			DeviceMapping map;
 			map = deviceList.get(i2cBus);
 			int id = map.getId(); // Device index to the I2CBus
-			int msgBuffer[] = new int[3];
+			int msgBuffer[] = new int[4];
 			msgBuffer[0] = id;
 			msgBuffer[1] = deviceAddress;
 			msgBuffer[2] = readSize;
@@ -1966,6 +1975,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			attachedController.get(message[1]).processMessage(newMsg);
 			break;
 		}
+		case PUBLISH_CUSTOM_MSG: {
+		  int[] data = new int[msgSize-2];
+		  for (int i = 2; i < msgSize; i++) {
+		    data[i-2] = message[i];
+		  }
+		  invoke("publishCustomMsg",data);
+		  break;
+		}
 		default: {
 			// FIXME - use formatter for message
 			error("unknown serial event %d", function);
@@ -2301,18 +2318,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void servoDetach(ServoControl servo) {
 		int id = getDeviceId(servo);
 		sendMsg(SERVO_DETACH, getDeviceId(servo), id);
-	}
-
-	@Override
-	public void servoSetSpeed(ServoControl servo) {
-		Double speed = servo.getSpeed();
-		if (speed == null || speed < 0.0f || speed > 1.0f) {
-			error("speed %f out of bounds", speed);
-			return;
-		}
-
-		int id = getDeviceId(servo);
-		sendMsg(SERVO_SET_SPEED, id, (int) (speed * 100));
 	}
 
 	// FIXME - do sweep single method call from ServoControl
@@ -2715,4 +2720,31 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	  heartbeat = false;
 	  sendMsg(HEARTBEAT);
 	}
+
+  @Override
+  public void servoSetVelocity(ServoControl servo) {
+    // TODO Auto-generated method stub
+    MrlMsg msg = new MrlMsg(SERVO_SET_VELOCITY);
+    msg.addData(getDeviceId(servo));
+    msg.addData(2);
+    msg.addData16(servo.getVelocity());
+    sendMsg(msg);
+  }
+  
+  public void customMsg(int... params) {
+    MrlMsg msg = new MrlMsg(CUSTOM_MSG);
+    msg.addData(params.length);
+    for (int i : params) {
+      if (i > 255) {
+        log.info("customMsg can only accept bytes value (0-255)");
+        return;
+      }
+      msg.addData(i);
+    }
+    sendMsg(msg);
+  }
+  
+  public int[] publishCustomMsg(int[] data) {
+    return data;
+  }
 }
