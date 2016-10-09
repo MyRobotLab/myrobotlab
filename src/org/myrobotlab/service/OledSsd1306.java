@@ -56,8 +56,7 @@ public class OledSsd1306 extends Service implements I2CControl {
 
 	public List<String>							controllers																		= new ArrayList<String>();
 	public String										controllerName;
-	transient public I2CController	controller;
-	transient public Arduino				pinControl;																																																		// Remove
+	transient public I2CController	controller;																																														// Remove
 																																																																									// this
 																																																																									// when
 																																																																									// PinArrayControl
@@ -141,7 +140,7 @@ public class OledSsd1306 extends Service implements I2CControl {
 	// Buffer for the OLED
 	public int											SSD1306_LCDWIDTH															= 128;
 	public int											SSD1306_LCDHEIGHT															= 64;
-	public short[]									buffer;
+	public int[]	  								buffer;
 																																																																									// pin
 	private int											vccstate;																																																			// vccstate																																																			// vccstate
 	private int											rotation;
@@ -225,7 +224,6 @@ public class OledSsd1306 extends Service implements I2CControl {
 
 		controllerName = controller.getName();
 		this.controller = controller;
-		this.pinControl = (Arduino) controller;
 		this.deviceBus = deviceBus;
 		this.deviceAddress = deviceAddress;
 
@@ -286,17 +284,17 @@ public class OledSsd1306 extends Service implements I2CControl {
 		if (displayType == SSD1306_128_64) {
 			SSD1306_LCDWIDTH = 128;
 			SSD1306_LCDHEIGHT = 64;
-			buffer = new short[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8];
+			buffer = new int[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8];
 			buffer = SSD1306_128_64Data.clone();
 		} else if (displayType == SSD1306_128_32) {
 			SSD1306_LCDWIDTH = 128;
 			SSD1306_LCDHEIGHT = 32;
-			buffer = new short[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8];
+			buffer = new int[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8];
 			buffer = SSD1306_128_32Data.clone();
 		} else if (displayType == SSD1306_96_16) {
 			SSD1306_LCDWIDTH = 96;
 			SSD1306_LCDHEIGHT = 16;
-			buffer = new short[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8];
+			buffer = new int[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8];
 			buffer = SSD1306_96_16Data.clone();
 		} else {
 			log.error(String.format("DisplayType %s not implemented.", displayType));
@@ -651,7 +649,8 @@ public class OledSsd1306 extends Service implements I2CControl {
 		switch (color) {
 		case WHITE:
 			while (w > 0) {
-				pBuf = (pBuf + 1) | mask;
+				buffer[pBuf] = buffer[pBuf] | mask;
+				pBuf++;
 				w--;
 			}
 			;
@@ -659,14 +658,16 @@ public class OledSsd1306 extends Service implements I2CControl {
 		case BLACK:
 			mask = ~mask;
 			while (w > 0) {
-				pBuf = (pBuf + 1) & mask;
+				buffer[pBuf] = buffer[pBuf]  & mask;
+				pBuf++;
 				w--;
 			}
 			;
 			break;
 		case INVERSE:
 			while (w > 0) {
-				pBuf = (pBuf + 1) ^ mask;
+				buffer[pBuf] = buffer[pBuf] ^ mask;
+				pBuf++;
 				w--;
 			}
 			;
@@ -771,13 +772,13 @@ public class OledSsd1306 extends Service implements I2CControl {
 
 			switch (color) {
 			case WHITE:
-				pBuf = pBuf | mask;
+				buffer[pBuf] = buffer[pBuf] | mask;
 				break;
 			case BLACK:
-				pBuf = pBuf & ~mask;
+				buffer[pBuf] = buffer[pBuf]  & ~mask;
 				break;
 			case INVERSE:
-				pBuf = pBuf ^ mask;
+				buffer[pBuf] = buffer[pBuf]  ^ mask;
 				break;
 			}
 
@@ -797,7 +798,7 @@ public class OledSsd1306 extends Service implements I2CControl {
 															// performance of the black/white write version
 															// with an extra comparison per loop
 				do {
-					pBuf = ~(pBuf);
+					buffer[pBuf] = ~(buffer[pBuf]);
 
 					// adjust the buffer forward 8 rows worth of data
 					pBuf += SSD1306_LCDWIDTH;
@@ -812,7 +813,7 @@ public class OledSsd1306 extends Service implements I2CControl {
 
 				do {
 					// write our value in
-					pBuf = val;
+					buffer[pBuf] = val;
 
 					// adjust the buffer forward 8 rows worth of data
 					pBuf += SSD1306_LCDWIDTH;
@@ -835,13 +836,13 @@ public class OledSsd1306 extends Service implements I2CControl {
 			int mask = postmask[mod];
 			switch (color) {
 			case WHITE:
-				pBuf = pBuf | mask;
+				buffer[pBuf] = buffer[pBuf] | mask;
 				break;
 			case BLACK:
-				pBuf = pBuf & ~mask;
+				buffer[pBuf] = buffer[pBuf] & ~mask;
 				break;
 			case INVERSE:
-				pBuf = pBuf ^ mask;
+				buffer[pBuf] = buffer[pBuf] ^ mask;
 				break;
 			}
 		}
