@@ -550,7 +550,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
     meta.setSponsor("GroG");
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
-    meta.addDependency("org.apache.commons.httpclient", "4.2.5");
+    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
     return meta;
   }
 }
