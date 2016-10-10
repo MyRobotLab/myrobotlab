@@ -334,7 +334,9 @@ public class Bno055 extends Service implements I2CControl {
     BNO055Event event = new BNO055Event();
     byte[] wbuffer = new byte[] {BNO055_EULER_H_LSB_ADDR};
     byte[] rbuffer = new byte[6];
-    controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), wbuffer, wbuffer.length, rbuffer, rbuffer.length);
+    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), wbuffer, wbuffer.length);
+    controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), rbuffer, rbuffer.length);
+    log.info("Bno055 i2c Read return {}", rbuffer);
     event.orientation.x = (((int)(rbuffer[0] & 0xFF)) | (((int)(rbuffer[1] & 0xFF)) << 8))/16.0; 
     event.orientation.y = (((int)(rbuffer[2] & 0xFF)) | (((int)(rbuffer[3] & 0xFF)) << 8))/16.0; 
     event.orientation.z = (((int)(rbuffer[4] & 0xFF)) | (((int)(rbuffer[5] & 0xFF)) << 8))/16.0; 
