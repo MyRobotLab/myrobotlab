@@ -620,16 +620,15 @@ public class OledSsd1306 extends Service implements I2CControl {
 		for (int i = 0; i < (SSD1306_LCDWIDTH * SSD1306_LCDHEIGHT / 8) - 1; i++) {
 			// send a bunch of data in one xmission
 			// Wire.beginTransmission(_i2caddr);
-			byte writeBuffer[] = new byte[33]; // 17
+			byte writeBuffer[] = new byte[17]; 
 			int writeBufferIx = 0;
 			writeBuffer[writeBufferIx] = 0x40;
-			for (int x = 0; x < 32; x++) { // 16
+			for (int x = 0; x < 16; x++) { 
 				writeBufferIx++;
 				writeBuffer[writeBufferIx] = (byte) buffer[i];
 				// WIRE_WRITE(buffer[i]);
 				i++;
 			}
-			i--;
 			i--;
 			// Wire.endTransmission();
 			controller.i2cWrite((I2CControl) this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writeBuffer, writeBuffer.length);
