@@ -933,7 +933,6 @@ public class RemoteAdapter extends Service implements Gateway {
     meta.addDescription("allows remote communication between applets, or remote instances of myrobotlab");
     meta.addCategory("connectivity", "network", "framework");
 		meta.addDependency("org.atmosphere.nettosphere", "2.3.0");
-		// meta.addDependency("org.apache.commons.httpclient", "4.5.2");
 		
     return meta;
   }
