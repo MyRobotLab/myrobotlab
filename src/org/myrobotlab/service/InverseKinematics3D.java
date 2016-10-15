@@ -405,8 +405,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   public static void main(String[] args) throws Exception {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     Runtime.createAndStart("python", "Python");
     Runtime.createAndStart("gui", "GUIService");

@@ -190,12 +190,18 @@ public class Python extends Service {
 
 	public static class Script implements Serializable {
 		static final long serialVersionUID = 1L;
-		String code;
+		/**
+		 * unique location & key of the script
+		 * e.g. /mrl/scripts/myScript.py
+		 */
 		String location;
-		String name;
+		/**
+		 * actual code/contents of the script
+		 */
+		String code;
 
 		public Script(String name, String script) {
-			this.name = name;
+			this.location = name;
 			// DOS2UNIX line endings.
 			// This seems to get triggered when people use editors that don't do
 			// the cr/lf thing very well..
@@ -212,7 +218,7 @@ public class Python extends Service {
 		}
 
 		public String getName() {
-			return name;
+			return location;
 		}
 
 		public void setCode(String code) {
@@ -220,7 +226,7 @@ public class Python extends Service {
 		}
 
 		public void setName(String name) {
-			this.name = name;
+			this.location = name;
 		}
 	}
 
@@ -577,12 +583,11 @@ public class Python extends Service {
 	 * @param methodName
 	 */
 	public void execMethod(String method) {
-		Message msg = createMessage(getName(), method, null);
-		inputQueue.add(msg);
+		execMethod(getName(), method, (Object[])null);
 	}
 
-	public void execMethod(String method, String param1) {
-		Message msg = createMessage(getName(), method, new Object[] { param1 });
+	public void execMethod(String method, Object...parms) {
+		Message msg = createMessage(getName(), method, parms);
 		inputQueue.add(msg);
 	}
 
@@ -595,6 +600,9 @@ public class Python extends Service {
 	}
 
 	/**
+	 * DEPRECATE - use online examples only ... (possibly you can package &
+	 * include filename listing during build process)
+	 * 
 	 * gets the listing of current example python scripts in the myrobotlab.jar
 	 * under /Python/examples
 	 * 
@@ -642,11 +650,6 @@ public class Python extends Service {
 		return currentScript;
 	}
 
-	public boolean loadAndExec(String filename) throws IOException {
-		boolean ret = loadScriptFromFile(filename);
-		exec();
-		return ret;
-	}
 
 	/**
 	 * load a script from the myrobotlab.jar - location of example scripts are
@@ -658,19 +661,7 @@ public class Python extends Service {
 	 */
 	public void loadPyRobotLabServiceScript(String serviceType) {
 		String serviceScript = GitHub.getPyRobotLabScript(serviceType);
-		loadScript(String.format("%s.py", serviceType), serviceScript);
-	}
-
-	public boolean loadScript(String scriptName, String code) {
-		if (code != null) {
-			log.info("replacing current script with {}", scriptName);
-			// currentScript = new Script(scriptName, newCode);
-			openScript(scriptName, code);
-			return true;
-		} else {
-			error(String.format("%s a not valid script", scriptName));
-			return false;
-		}
+		openScript(String.format("%s.py", serviceType), serviceScript);
 	}
 
 	/**
@@ -679,36 +670,18 @@ public class Python extends Service {
 	 * can be done programatically on a different machine we want to broadcast
 	 * our changed state to other listeners (possibly the GUIService)
 	 * 
-	 * 
 	 * @param filename
 	 *            - name of file to load
 	 * @return - success if loaded
 	 * @throws IOException
 	 */
-	public boolean loadScriptFromFile(String filename) throws IOException {
+	public void openScriptFromFile(String filename) throws IOException {
 		log.info("loadScriptFromFile {}", filename);
 		String data = FileIO.toString(filename);
-		return loadScript(filename, data);
+		openScript(filename, data);
 	}
 
-	/**
-	 * Loads script from the users .myrobotlab directory - maintain the only
-	 * non-absolute filename
-	 * 
-	 * @param filename
-	 * @return true if successfully loaded
-	 * @throws IOException
-	 */
-	public void loadUserScript(String filename) throws IOException {
-		log.info("loadUserScript {}", filename);
-		String newCode = FileIO.toString(localScriptDir + File.separator + filename);
-		if (newCode != null) {
-			loadScript(filename, newCode);
-		} else {
-			error(String.format("%s a not valid script", filename));
-		}
-	}
-
+	
 	public void onRegistered(ServiceInterface s) {
 
 		String registerScript = "";
@@ -765,14 +738,14 @@ public class Python extends Service {
 	}
 
 	public boolean saveAndReplaceCurrentScript(String name, String code) {
-		currentScript.name = name;
+		currentScript.location = name;
 		currentScript.code = code;
 		return saveCurrentScript();
 	}
 
 	public boolean saveCurrentScript() {
 		try {
-			FileOutputStream out = new FileOutputStream(localScriptDir + File.separator + currentScript.name);
+			FileOutputStream out = new FileOutputStream(localScriptDir + File.separator + currentScript.location);
 			out.write(currentScript.code.getBytes());
 			out.close();
 			return true;
@@ -849,6 +822,7 @@ public class Python extends Service {
 			// String f = "C:\\Program Files\\blah.1.py";
 			// log.info(getName(f));
 			Runtime.start("python", "Python");
+			Runtime.start("webgui", "WebGui");
 
 			// python.error("this is an error");
 			// python.loadScriptFromResource("VirtualDevice/Arduino.py");
@@ -868,7 +842,6 @@ public class Python extends Service {
 			 * 
 			 * Runtime.createAndStart("gui", "GUIService");
 			 */
-			Runtime.start("webgui", "WebGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);

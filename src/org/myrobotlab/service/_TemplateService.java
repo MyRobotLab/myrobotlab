@@ -40,8 +40,7 @@ public class _TemplateService extends Service {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.INFO);
+      LoggingFactory.init(Level.INFO);
 
       Runtime.start("template", "_TemplateService");
       Runtime.start("gui", "GUIService");

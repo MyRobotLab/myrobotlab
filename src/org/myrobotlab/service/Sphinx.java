@@ -256,8 +256,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
   public static void main(String[] args) {
 
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
     try {
       Sphinx ear = (Sphinx) Runtime.createAndStart("ear", "Sphinx");
       SpeechSynthesis speech = new MarySpeech("speech");

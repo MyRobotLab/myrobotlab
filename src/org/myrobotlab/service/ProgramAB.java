@@ -717,8 +717,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public static void main(String s[]) throws IOException {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel("INFO");
+    LoggingFactory.init("INFO");
 
     // Runtime.createAndStart("gui", "GUIService");
     Runtime.createAndStart("webgui", "WebGui");

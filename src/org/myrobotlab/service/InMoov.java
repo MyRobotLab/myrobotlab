@@ -1349,8 +1349,7 @@ public class InMoov extends Service {
 
   public static void main(String[] args) {
     try {
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.INFO);
+      LoggingFactory.init(Level.INFO);
 
       VirtualDevice v1 = (VirtualDevice) Runtime.start("v1", "VirtualDevice");
       VirtualDevice v2 = (VirtualDevice) Runtime.start("v2", "VirtualDevice");

@@ -587,8 +587,7 @@ public class Repo implements Serializable {
 
   public static void main(String[] args) {
     try {
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.INFO);
+      LoggingFactory.init(Level.INFO);
 
       /**
        * TODO - test with all directories missing test as "one jar"

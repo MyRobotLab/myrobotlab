@@ -314,8 +314,7 @@ public class Joystick extends Service {
   }
 
   public static void main(String args[]) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     // First you need to create controller.
     // http://theuzo007.wordpress.com/2012/09/02/joystick-in-java-with-jinput/

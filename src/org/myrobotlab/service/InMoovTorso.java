@@ -25,8 +25,7 @@ public class InMoovTorso extends Service {
   transient public Arduino arduino;
 
   static public void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
     try {
       InMoovTorso torso = (InMoovTorso) Runtime.createAndStart("torso", "InMoovTorso");
       torso.connect("COM4");

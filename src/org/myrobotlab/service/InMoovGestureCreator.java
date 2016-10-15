@@ -89,8 +89,7 @@ public class InMoovGestureCreator extends Service {
 
   public static void main(String[] args) throws InterruptedException {
 
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
     try {
 
       Runtime.start("gui", "GUIService");

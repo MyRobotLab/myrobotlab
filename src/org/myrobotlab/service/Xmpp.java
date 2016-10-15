@@ -474,8 +474,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
     // more stuff
 
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
 

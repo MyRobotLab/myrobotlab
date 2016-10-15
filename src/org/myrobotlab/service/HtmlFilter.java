@@ -25,8 +25,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   private String postHtmlTag = "</pre>";
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel("INFO");
+    LoggingFactory.init("INFO");
 
     try {
       Runtime.createAndStart("gui", "GUIService");

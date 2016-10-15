@@ -276,8 +276,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
   Properties properties = new Properties();
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     try {
       // Runtime.getStartInfo();

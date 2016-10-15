@@ -321,10 +321,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public static void main(String[] args) {
 		try {
 
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
-
-			//
+			LoggingFactory.init(Level.INFO);
+			
 			Arduino arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
 			// Serial serial = (Serial) arduino.getSerial();
 

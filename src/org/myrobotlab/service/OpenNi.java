@@ -890,13 +890,12 @@ public class OpenNi extends Service // implements
   }
 
   public static void main(String s[]) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel("INFO");
+    LoggingFactory.init("INFO");
 
     Runtime.createAndStart("gui", "GUIService");
     Runtime.createAndStart("python", "Python");
 
-    OpenNi openni = (OpenNi) Runtime.createAndStart("openni", "OpenNI");
+    OpenNi openni = (OpenNi) Runtime.createAndStart("openni", "OpenNi");
     openni.startUserTracking();
     // openni.recordSingleFrame();
     // openni.startHandTracking();
