@@ -30,8 +30,7 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
   public final static Logger log = LoggerFactory.getLogger(AzureTranslator.class);
 
   public static void main(String[] args) throws Exception {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
     try {
 
       AzureTranslator translator = (AzureTranslator) Runtime.start("translator", "AzureTranslator");

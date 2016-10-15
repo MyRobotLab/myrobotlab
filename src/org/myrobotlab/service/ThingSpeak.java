@@ -8,7 +8,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.net.HTTPRequest;
+import org.myrobotlab.net.HttpRequest;
 import org.myrobotlab.service.data.Pin;
 import org.slf4j.Logger;
 
@@ -39,8 +39,7 @@ public class ThingSpeak extends Service {
   int intervalSeconds = 20;
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     try {
       // BasicConfigurator.
@@ -118,7 +117,7 @@ public class ThingSpeak extends Service {
         url.append(String.format("&field%d=%s", i + 1, o.toString()));
       }
 
-      HTTPRequest request = new HTTPRequest(url.toString());
+      HttpRequest request = new HttpRequest(url.toString());
       result = request.getString();
       log.info(String.format("ThingSpeak returned %s", result));
 

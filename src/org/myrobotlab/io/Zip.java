@@ -18,7 +18,6 @@ import java.util.zip.ZipInputStream;
 
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
@@ -52,12 +51,17 @@ public class Zip {
 
     }
 
-    log.debug(String.format("extractFromResource (%s,%s)", resourcePath, targetDirectory));
+    log.debug(String.format("extract (%s, %s, %s, %s, %b)", resourcePath, targetDirectory, filter, resourceType, overwrite));
 
     // String filter = "resource/";
     InputStream source = null;
 
     if (FILE.equals(resourceType)) {
+      File check = new File(resourcePath);
+      if (!check.exists() || check.isDirectory()){
+    	  log.error("cannot extract self [{}]", resourcePath);
+    	  return;
+      }
       source = new FileInputStream(resourcePath);
     } else {
       source = ClassLoader.class.getResourceAsStream(resourcePath);
@@ -79,7 +83,7 @@ public class Zip {
 
         if (filter == null || entry.getName().startsWith(filter)) {
 
-          String filename = entry.getName().substring(filter.length());
+          String filename = (filter==null)?entry.getName():entry.getName().substring(filter.length());
           // File file = new File(target, entry.getName());
           File file = new File(target, filename);
 
@@ -104,7 +108,7 @@ public class Zip {
         }
       }
     } catch (IOException e) {
-      Logging.logError(e);
+      log.error("", e);
       throw e;
     } finally {
       in.close();
@@ -201,8 +205,7 @@ public class Zip {
 
   public static void main(String[] args) throws ZipException, IOException {
 
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     ArrayList<String> files = listDirectoryContents("myrobotlab.jar", "resource/Python/");
     for (int i = 0; i < files.size(); ++i) {
