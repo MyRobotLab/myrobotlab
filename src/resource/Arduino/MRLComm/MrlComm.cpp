@@ -229,6 +229,7 @@ void MrlComm::processCommand(int ioType) {
 	case ENABLE_PIN: {
 		int address = ioCmd[1];
 		int type = ioCmd[2];
+		int rate = MrlMsg::toInt(ioCmd, 3);
 		// don't add it twice
 		for (int i = 0; i < pinList.size(); ++i) {
 			Pin* pin = pinList.get(i);
@@ -241,7 +242,8 @@ void MrlComm::processCommand(int ioType) {
 		if (type == DIGITAL) {
 			pinMode(address, INPUT);
 		}
-		Pin* p = new Pin(address, type);
+		Pin* p = new Pin(address, type, rate);
+		p->lastUpdate = 0;
 		pinList.add(p);
 		break;
 	}
@@ -623,7 +625,6 @@ void MrlComm::update() {
 		lastHeartbeatUpdate = now;
 	}
 	if (pinList.size() > 0) {
-
 		// device id for our Arduino is always 0
 		MrlMsg msg(PUBLISH_SENSOR_DATA, 0); // the callback id
 
@@ -638,17 +639,20 @@ void MrlComm::update() {
     // iterate through our device list and call update on them.
     while (node != NULL) {
 			Pin* pin = node->data;
-			// TODO: moe the analog read outside of thie method and pass it in!
-			if (pin->type == ANALOG) {
-				pin->value = analogRead(pin->address);
-			} else {
-				pin->value = digitalRead(pin->address);
-			}
+			if (pin->rate == 0 || (now-pin->lastUpdate > pin->lastUpdate + (1000 / pin->rate))) {
+			  pin->lastUpdate = now;
+        // TODO: moe the analog read outside of thie method and pass it in!
+        if (pin->type == ANALOG) {
+          pin->value = analogRead(pin->address);
+        } else {
+          pin->value = digitalRead(pin->address);
+        }
 
-			// loading both analog & digital data
-			msg.addData(pin->address); // 1 byte
-			msg.addData16(pin->value); // 2 bytes
-      node = node->next;
+        // loading both analog & digital data
+        msg.addData(pin->address); // 1 byte
+        msg.addData16(pin->value); // 2 bytes
+        node = node->next;
+      }
     }
     msg.sendMsg();
 	}
