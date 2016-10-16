@@ -27,8 +27,7 @@ public class MultiWii extends Service {
   public final static Logger log = LoggerFactory.getLogger(MultiWii.class);
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
 

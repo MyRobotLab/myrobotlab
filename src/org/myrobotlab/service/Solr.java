@@ -55,8 +55,7 @@ public class Solr extends Service implements DocumentListener {
    */
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
     try {
       Solr solr = (Solr) Runtime.start("solr", "Solr");
       Runtime.start("gui", "GUIService");

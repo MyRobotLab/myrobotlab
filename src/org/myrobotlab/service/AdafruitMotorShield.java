@@ -128,8 +128,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 
   public static void main(String[] args) {
 
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     try {
       // FIXME !!! - don't use Adafruit's library - do your own stepper control

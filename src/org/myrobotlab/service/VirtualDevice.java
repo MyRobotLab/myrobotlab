@@ -76,7 +76,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
     createVirtualSerial(portName);
     String newCode = FileIO.resourceToString("VirtualDevice/Arduino.py");
     log.info(newCode);
-    logic.loadScript("Arduino.py", newCode);
+    logic.openScript("Arduino.py", newCode);
     logic.execAndWait();
   }
 
@@ -266,8 +266,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
   }
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
 

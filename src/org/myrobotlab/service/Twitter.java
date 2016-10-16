@@ -41,8 +41,7 @@ public class Twitter extends Service {
   twitter4j.Twitter twitter = null;
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.WARN);
+    LoggingFactory.init(Level.WARN);
 
     try {
       Twitter twitter = new Twitter("twitter");

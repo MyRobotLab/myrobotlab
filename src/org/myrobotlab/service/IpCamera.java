@@ -89,8 +89,7 @@ public class IpCamera extends Service {
   public final static int FOSCAM_ALARM_MAIL_ENABLED = 1;
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
       IpCamera foscam = new IpCamera("foscam");

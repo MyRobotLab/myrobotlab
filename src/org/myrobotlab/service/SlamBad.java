@@ -71,8 +71,7 @@ public class SlamBad extends Service {
   transient MyEnv env;
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.WARN);
+    LoggingFactory.init(Level.WARN);
 
     SlamBad slambad = (SlamBad) Runtime.start("slambad", "SlamBad");
 

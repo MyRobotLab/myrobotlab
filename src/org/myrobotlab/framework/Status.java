@@ -178,8 +178,7 @@ public class Status implements Serializable {// extends Exception {
   }
 
   public static void main(String[] args) throws IOException, InterruptedException {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     Status test = new Status("i am pessimistic");
     // Status subTest = new Status("i am sub pessimistic");

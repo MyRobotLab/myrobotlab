@@ -157,8 +157,7 @@ public class Clock extends Service {
   }
 
   public static void main(String[] args) throws Exception {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     String test = "tcp";
 

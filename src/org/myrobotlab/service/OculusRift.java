@@ -438,8 +438,7 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
   }
 
   public static void main(String s[]) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel("INFO");
+    LoggingFactory.init("INFO");
     // Runtime.createAndStart("gui", "GUIService");
     Runtime.createAndStart("python", "Python");
     OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
