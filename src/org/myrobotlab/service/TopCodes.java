@@ -37,8 +37,7 @@ public class TopCodes extends Service {
   transient Scanner scanner = new Scanner();
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     try {
       Runtime runtime = Runtime.getInstance();

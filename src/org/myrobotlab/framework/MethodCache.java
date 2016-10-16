@@ -94,8 +94,7 @@ public class MethodCache {
 
   public static void main(String[] args) throws IOException, InterruptedException {
     try {
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.INFO);
+      LoggingFactory.init(Level.INFO);
       MethodCache mc = MethodCache.getInstance();
       // Class[] paramsTypes = new Class[] { String.class, Double.class,
       // Double.class, Double.class, Double.class };

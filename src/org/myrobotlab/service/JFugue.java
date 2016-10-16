@@ -50,8 +50,7 @@ public class JFugue extends Service {
   // TODO - look at JavaSoundDemo - they have a synth & mixer there
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
     JFugue jfugue = (JFugue) Runtime.start("jfugue", "JFugue");
     jfugue.play("C");
     jfugue.playRythm("O..oO...O..oOO..");

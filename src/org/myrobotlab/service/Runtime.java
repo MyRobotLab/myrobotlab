@@ -50,7 +50,7 @@ import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.net.HTTPRequest;
+import org.myrobotlab.net.HttpRequest;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.RepoInstallListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -1945,7 +1945,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	static public Status noWorky(String userId) {
 		Status status = null;
 		try {
-			String retStr = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File("myrobotlab.log"));
+			String retStr = HttpRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File(LoggingFactory.getLogFileName()));
 			if (retStr.contains("Upload:")) {
 				log.info("noWorky successfully sent - our crack team of experts will check it out !");
 				status = Status.info("no worky sent");

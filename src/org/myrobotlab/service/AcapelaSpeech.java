@@ -503,8 +503,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
   }
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
     try {
       // Runtime.start("webgui", "WebGui");
       AcapelaSpeech speech = (AcapelaSpeech) Runtime.start("speech", "AcapelaSpeech");

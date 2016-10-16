@@ -69,7 +69,7 @@ public class Client extends JApplet {
   public void init() {
     this.setSize(500, 600);
     try {
-      LoggingFactory.getInstance().setLevel(Level.WARN);
+      LoggingFactory.init(Level.WARN);
       // determine network details - can only accurately determine applet
       // IP from server request
       codeBaseHostAddress = getCodeBase().getHost();

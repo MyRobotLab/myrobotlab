@@ -71,13 +71,13 @@ public class ProcessData implements Serializable {
       } catch (Exception e) {
       }
 
-      // FIXME - invoke("terminatedProcess(name))
+      data.state = STATE_STOPPED;
+      data.state = "stopped";
       
       if (ProcessData.service != null){
     	  ProcessData.service.invoke("publishTerminated", data.id);
       }
-      data.state = STATE_STOPPED;
-      data.state = "stopped";
+      
     }
 
   }

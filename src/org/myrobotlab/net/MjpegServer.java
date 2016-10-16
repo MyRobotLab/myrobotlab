@@ -126,8 +126,7 @@ public class MjpegServer extends NanoHTTPD {
    */
   public static void main(String[] args) {
     try {
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.INFO);
+      LoggingFactory.init(Level.INFO);
       MjpegServer server = new MjpegServer(9090);
       server.start();
       log.info("here");

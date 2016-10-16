@@ -329,7 +329,7 @@ public class ServiceData implements Serializable {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.getInstance().configure();
+      LoggingFactory.init();
       // LoggingFactory.getInstance().setLevel("INFO");
       // LoggingFactory.getInstance().addAppender(Appender.FILE);
       String path = "";

@@ -699,8 +699,7 @@ public class Tracking extends Service {
   public static void main(String[] args) {
 
     try {
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.INFO);
+      LoggingFactory.init(Level.INFO);
       int xPin = 7;
       int yPin = 10;
       int cameraIndex = 0;

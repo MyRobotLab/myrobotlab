@@ -31,8 +31,7 @@ public class ImageDisplay extends Service {
   transient List<JFrame> frames = new ArrayList<JFrame>();
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
       // String path =

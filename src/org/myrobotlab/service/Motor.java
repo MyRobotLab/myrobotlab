@@ -25,6 +25,8 @@
 
 package org.myrobotlab.service;
 
+import java.util.List;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -43,6 +45,7 @@ import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
 import org.myrobotlab.service.interfaces.SensorDataListener;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -62,6 +65,10 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	public final static Logger log = LoggerFactory.getLogger(Motor.class);
 
 	protected transient MotorController controller = null;
+	/**
+	 * list of names of possible controllers
+	 */
+	public List<String>				controllers;
 	
 	String types [] = MotorConfig.getTypes();
 
@@ -94,8 +101,19 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
 	public Motor(String n) {
 		super(n);
+		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 	}
 
+	public void onRegistered(ServiceInterface s) {
+		refreshControllers();
+		broadcastState();
+	}
+	
+	public List<String> refreshControllers() {
+		controllers = Runtime.getServiceNamesFromInterface(MotorControl.class);
+		return controllers;
+	}
+	
 	public DeviceController getController() {
 		return controller;
 	}
