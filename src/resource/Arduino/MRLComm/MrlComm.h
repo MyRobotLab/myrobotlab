@@ -12,7 +12,7 @@
 #include "Pin.h"
 
 // TODO - standard convention of dev versions are odd release is even ?
-#define MRLCOMM_VERSION         39
+#define MRLCOMM_VERSION         40
 
 /***********************************************************************
  * Class MrlComm -
