@@ -2,22 +2,18 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
-import org.myrobotlab.service.interfaces.PinArrayControl;
-import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
-import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -49,7 +45,7 @@ import org.slf4j.Logger;
  * DEALINGS IN THE SOFTWARE. ===============================================
  */
 
-public class Bno055 extends Service implements I2CControl, PinArrayControl {
+public class Bno055 extends Service implements I2CControl {
 
   private static final long serialVersionUID = 1L;
 
@@ -409,8 +405,6 @@ public class Bno055 extends Service implements I2CControl, PinArrayControl {
   
   private OperationMode mode;
 
-  private int InterruptPin;
-  
   public class BNO055Data {
     public double w;
     public double x;
@@ -1278,10 +1272,6 @@ public class Bno055 extends Service implements I2CControl, PinArrayControl {
     i2cWrite(register.INT_MSK, int_msk);
   }
   
-  public void setInterruptPin(int pin) {
-    InterruptPin = pin;
-  }
-  
   public void EnableInterrupt(InterruptType it, boolean xAxis, boolean yAxis, boolean zAxis, int threshold, int duration) {
     byte int_en = (byte) (i2cWriteReadRegByte(register.INT_EN) | (0xFF & it.mask));
     byte int_msk = (byte) (i2cWriteReadRegByte(register.INT_MSK) | (0xFF & it.mask));
@@ -1628,83 +1618,6 @@ public class Bno055 extends Service implements I2CControl, PinArrayControl {
     }
   }
 
-  @Override
-  public List<PinDefinition> getPinList() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public int read(int address) {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public int read(String pinName) {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public void pinMode(int address, String mode) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void write(int address, int value) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public PinData publishPin(PinData pinData) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public PinData[] publishPinArray(PinData[] pinData) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void attach(String listener, int pinAddress) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void attach(PinListener listener, int pinAddress) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void attach(PinArrayListener listener) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void enablePin(int address) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void disablePin(int address) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void disablePins() {
-    // TODO Auto-generated method stub
-    
-  }
 
 
 }
