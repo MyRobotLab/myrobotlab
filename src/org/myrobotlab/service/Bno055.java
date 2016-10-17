@@ -355,8 +355,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     EULER_ANGLE_RAD       ((byte)0x01, (byte)0b100, 2, "radian"),
     TEMP_C                ((byte)0x00, (byte)0b10000, 4, "C"),
     TEMP_F                ((byte)0x01, (byte)0b10000, 4, "F"),
-    OUTPUT_FORMAT_WINDOWS ((byte)0x00, (byte)0b10000000, 7, "Output Format Window"), //-180° to +180° (turning clockwise increases values)
-    OUTPUT_FORMAT_ANDROID ((byte)0x01, (byte)0b10000000, 7, "Output Format Android"), //+180° to -180° (turning clockwise decreases values)
+    OUTPUT_FORMAT_WINDOWS ((byte)0x00, (byte)0b10000000, 7, "Output Format Window"), 
+    OUTPUT_FORMAT_ANDROID ((byte)0x01, (byte)0b10000000, 7, "Output Format Android"), 
     MAG                   ((byte)0x00, (byte)0b0, 0, "Micro Tesla"),
     QUAT                  ((byte)0x00, (byte)0b0, 0, "");
     public byte value;
