@@ -3,17 +3,17 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
-import org.myrobotlab.service.interfaces.PinDefinition;
+import org.myrobotlab.service.interfaces.PinArrayControl;
+import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -45,7 +45,7 @@ import org.slf4j.Logger;
  * DEALINGS IN THE SOFTWARE. ===============================================
  */
 
-public class Bno055 extends Service implements I2CControl {
+public class Bno055 extends Service implements I2CControl, PinListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -405,6 +405,14 @@ public class Bno055 extends Service implements I2CControl {
   
   private OperationMode mode;
 
+  private PinArrayControl pinControl = null;
+
+  private Integer pin = null;
+
+	private boolean isEnabled = false;
+
+	public boolean isActive = false;
+
   public class BNO055Data {
     public double w;
     public double x;
@@ -434,20 +442,6 @@ public class Bno055 extends Service implements I2CControl {
 
     try {
 
-      /*
-       * Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "Mpu6050");
-       * Runtime.start("gui", "GUIService");
-       */
-
-      /*
-       * Arduino arduino = (Arduino) Runtime.start("Arduino","Arduino");
-       * arduino.connect("COM4"); mpu6050.setController(arduino);
-       */
-
-      /*
-       * RasPi raspi = (RasPi) Runtime.start("RasPi","RasPi");
-       * mpu6050.setController(raspi); mpu6050.dmpInitialize();
-       */
       int[] buffer = new int[] { (int) 0xff, (int) 0xd0 };
       int a = (byte) buffer[0] << 8 | buffer[1] & 0xff;
       log.info(String.format("0xffd0 should be -48 is = %s", a));
@@ -689,9 +683,9 @@ public class Bno055 extends Service implements I2CControl {
     //controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), rbuffer, rbuffer.length);
     controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), wbuffer, wbuffer.length, rbuffer, rbuffer.length);
     log.info("Bno055 i2c Read return {}", rbuffer);
-    event.orientation.x = (((int)(rbuffer[0] & 0xFF)) | (((int)(rbuffer[1] & 0xFF)) << 8))/16.0; 
-    event.orientation.y = (((int)(rbuffer[2] & 0xFF)) | (((int)(rbuffer[3] & 0xFF)) << 8))/16.0; 
-    event.orientation.z = (((int)(rbuffer[4] & 0xFF)) | (((int)(rbuffer[5] & 0xFF)) << 8))/16.0; 
+    event.orientation.x = (((int)(rbuffer[0] & 0xFF)) | (((int)(rbuffer[1])) << 8))/16.0; 
+    event.orientation.y = (((int)(rbuffer[2] & 0xFF)) | (((int)(rbuffer[3])) << 8))/16.0; 
+    event.orientation.z = (((int)(rbuffer[4] & 0xFF)) | (((int)(rbuffer[5])) << 8))/16.0; 
     return event;
     
   }
@@ -926,14 +920,14 @@ public class Bno055 extends Service implements I2CControl {
     retval.unit = Unit.ACC_M_S2;
     if (unit == Unit.ACC_MG.value) {
       retval.unit = Unit.ACC_MG;
-      retval.x = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8));
-      retval.y = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8));
-      retval.z = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8));
+      retval.x = (double)((data[0] & 0xFF) + ((data[1]) << 8));
+      retval.y = (double)((data[2] & 0xFF) + ((data[3]) << 8));
+      retval.z = (double)((data[4] & 0xFF) + ((data[5]) << 8));
     }
     else {
-      retval.x = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8)) / 100;
-      retval.y = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8)) / 100;
-      retval.z = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8)) / 100;
+      retval.x = (double)((data[0] & 0xFF) + ((data[1]) << 8)) / 100;
+      retval.y = (double)((data[2] & 0xFF) + ((data[3]) << 8)) / 100;
+      retval.z = (double)((data[4] & 0xFF) + ((data[5]) << 8)) / 100;
     }
     return retval;
   }
@@ -943,9 +937,9 @@ public class Bno055 extends Service implements I2CControl {
     byte[] data = new byte[6];
     i2cWriteReadReg(register.MAG_DATA_X_LSB, data, data.length);
     retval.unit = Unit.MAG;
-    retval.x = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8)) / 16;
-    retval.y = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8)) / 16;
-    retval.z = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8)) / 16;
+    retval.x = (double)((data[0] & 0xFF) + ((data[1]) << 8)) / 16;
+    retval.y = (double)((data[2] & 0xFF) + ((data[3]) << 8)) / 16;
+    retval.z = (double)((data[4] & 0xFF) + ((data[5]) << 8)) / 16;
     return retval;
   }
   
@@ -957,14 +951,14 @@ public class Bno055 extends Service implements I2CControl {
     retval.unit = Unit.ANGULAR_RATE_DPS;
     if (unit == Unit.ANGULAR_RATE_RPS.value) {
       retval.unit = Unit.ANGULAR_RATE_RPS;
-      retval.x = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8) / 900);
-      retval.y = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8) / 900);
-      retval.z = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8) / 900);
+      retval.x = (double)((data[0] & 0xFF) + ((data[1]) << 8) / 900);
+      retval.y = (double)((data[2] & 0xFF) + ((data[3]) << 8) / 900);
+      retval.z = (double)((data[4] & 0xFF) + ((data[5]) << 8) / 900);
     }
     else {
-      retval.x = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8)) / 16;
-      retval.y = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8)) / 16;
-      retval.z = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8)) / 16;
+      retval.x = (double)((data[0] & 0xFF) + ((data[1]) << 8)) / 16;
+      retval.y = (double)((data[2] & 0xFF) + ((data[3]) << 8)) / 16;
+      retval.z = (double)((data[4] & 0xFF) + ((data[5]) << 8)) / 16;
     }
     return retval;
   }
@@ -977,14 +971,14 @@ public class Bno055 extends Service implements I2CControl {
     retval.unit = Unit.EULER_ANGLE_DEG;
     if (unit == Unit.EULER_ANGLE_RAD.value) {
       retval.unit = Unit.EULER_ANGLE_RAD;
-      retval.yaw = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8) / 900);
-      retval.roll = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8) / 900);
-      retval.pitch = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8) / 900);
+      retval.yaw = (double)((data[0] & 0xFF) + ((data[1]) << 8) / 900);
+      retval.roll = (double)((data[2] & 0xFF) + ((data[3]) << 8) / 900);
+      retval.pitch = (double)((data[4] & 0xFF) + ((data[5]) << 8) / 900);
     }
     else {
-      retval.yaw = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8)) / 16;
-      retval.roll = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8)) / 16;
-      retval.pitch = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8)) / 16;
+      retval.yaw = (double)((data[0] & 0xFF) + ((data[1]) << 8)) / 16;
+      retval.roll = (double)((data[2] & 0xFF) + ((data[3]) << 8)) / 16;
+      retval.pitch = (double)((data[4] & 0xFF) + ((data[5]) << 8)) / 16;
     }
     return retval;
   }
@@ -994,10 +988,10 @@ public class Bno055 extends Service implements I2CControl {
     byte[] data = new byte[8];
     i2cWriteReadReg(register.QUA_DATA_W_LSB, data, data.length);
     retval.unit = Unit.QUAT;
-    retval.w = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8)) / (1 << 14);
-    retval.x = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8)) / (1 << 14);
-    retval.y = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8)) / (1 << 14);
-    retval.z = (double)((data[6] & 0xFF) + ((data[7] & 0xFF) << 8)) / (1 << 14);
+    retval.w = (double)((data[0] & 0xFF) + ((data[1]) << 8)) / (1 << 14);
+    retval.x = (double)((data[2] & 0xFF) + ((data[3]) << 8)) / (1 << 14);
+    retval.y = (double)((data[4] & 0xFF) + ((data[5]) << 8)) / (1 << 14);
+    retval.z = (double)((data[6] & 0xFF) + ((data[7]) << 8)) / (1 << 14);
     return retval;
   }
 
@@ -1009,14 +1003,14 @@ public class Bno055 extends Service implements I2CControl {
     retval.unit = Unit.ACC_M_S2;
     if (unit == Unit.ACC_MG.value) {
       retval.unit = Unit.ACC_MG;
-      retval.x = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8));
-      retval.y = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8));
-      retval.z = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8));
+      retval.x = (double)((data[0] & 0xFF) + ((data[1]) << 8));
+      retval.y = (double)((data[2] & 0xFF) + ((data[3]) << 8));
+      retval.z = (double)((data[4] & 0xFF) + ((data[5]) << 8));
     }
     else {
-      retval.x = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8)) / 100;
-      retval.y = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8)) / 100;
-      retval.z = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8)) / 100;
+      retval.x = (double)((data[0] & 0xFF) + ((data[1]) << 8)) / 100;
+      retval.y = (double)((data[2] & 0xFF) + ((data[3]) << 8)) / 100;
+      retval.z = (double)((data[4] & 0xFF) + ((data[5]) << 8)) / 100;
     }
     return retval;
   }
@@ -1029,14 +1023,14 @@ public class Bno055 extends Service implements I2CControl {
     retval.unit = Unit.ACC_M_S2;
     if (unit == Unit.ACC_MG.value) {
       retval.unit = Unit.ACC_MG;
-      retval.x = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8));
-      retval.y = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8));
-      retval.z = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8));
+      retval.x = (double)((data[0] & 0xFF) + ((data[1]) << 8));
+      retval.y = (double)((data[2] & 0xFF) + ((data[3]) << 8));
+      retval.z = (double)((data[4] & 0xFF) + ((data[5]) << 8));
     }
     else {
-      retval.x = (double)((data[0] & 0xFF) + ((data[1] & 0xFF) << 8)) / 100;
-      retval.y = (double)((data[2] & 0xFF) + ((data[3] & 0xFF) << 8)) / 100;
-      retval.z = (double)((data[4] & 0xFF) + ((data[5] & 0xFF) << 8)) / 100;
+      retval.x = (double)((data[0] & 0xFF) + ((data[1]) << 8)) / 100;
+      retval.y = (double)((data[2] & 0xFF) + ((data[3]) << 8)) / 100;
+      retval.z = (double)((data[4] & 0xFF) + ((data[5]) << 8)) / 100;
     }
     return retval;
   }
@@ -1070,7 +1064,7 @@ public class Bno055 extends Service implements I2CControl {
     return retval;
   }
   
-  public void setCalibrationOffset(Device device, int xOffset, int yOffset, int zOffset, Unit unit) {
+  public void setCalibrationOffset(Device device, float xOffset, float yOffset, float zOffset, Unit unit) {
     switch (device) {
       case ACCELEROMETER: {
         if (unit==Unit.ACC_M_S2) {
@@ -1088,12 +1082,12 @@ public class Bno055 extends Service implements I2CControl {
         unitSelection(unit);
         OperationMode modeback = this.mode;
         setMode(OperationMode.CONFIG);
-        i2cWrite(register.ACC_OFFSET_X_LSB, (byte)(xOffset & 0xFF));
-        i2cWrite(register.ACC_OFFSET_X_MSB, (byte)((xOffset >> 8) & 0xFF));
-        i2cWrite(register.ACC_OFFSET_Y_LSB, (byte)(yOffset & 0xFF));
-        i2cWrite(register.ACC_OFFSET_Y_MSB, (byte)((yOffset >> 8) & 0xFF));
-        i2cWrite(register.ACC_OFFSET_Z_LSB, (byte)(zOffset & 0xFF));
-        i2cWrite(register.ACC_OFFSET_Z_MSB, (byte)((zOffset >> 8) & 0xFF));
+        i2cWrite(register.ACC_OFFSET_X_LSB, (byte)((byte)xOffset & 0xFF));
+        i2cWrite(register.ACC_OFFSET_X_MSB, (byte)(((int)xOffset >> 8) & 0xFF));
+        i2cWrite(register.ACC_OFFSET_Y_LSB, (byte)((int)yOffset & 0xFF));
+        i2cWrite(register.ACC_OFFSET_Y_MSB, (byte)(((int)yOffset >> 8) & 0xFF));
+        i2cWrite(register.ACC_OFFSET_Z_LSB, (byte)((int)zOffset & 0xFF));
+        i2cWrite(register.ACC_OFFSET_Z_MSB, (byte)(((int)zOffset >> 8) & 0xFF));
         setMode(modeback);
         return;
       }
@@ -1104,12 +1098,12 @@ public class Bno055 extends Service implements I2CControl {
         unitSelection(unit);
         OperationMode modeback = this.mode;
         setMode(OperationMode.CONFIG);
-        i2cWrite(register.MAG_OFFSET_X_LSB, (byte)(xOffset & 0xFF));
-        i2cWrite(register.MAG_OFFSET_X_MSB, (byte)((xOffset >> 8) & 0xFF));
-        i2cWrite(register.MAG_OFFSET_Y_LSB, (byte)(yOffset & 0xFF));
-        i2cWrite(register.MAG_OFFSET_Y_MSB, (byte)((yOffset >> 8) & 0xFF));
-        i2cWrite(register.MAG_OFFSET_Z_LSB, (byte)(zOffset & 0xFF));
-        i2cWrite(register.MAG_OFFSET_Z_MSB, (byte)((zOffset >> 8) & 0xFF));
+        i2cWrite(register.MAG_OFFSET_X_LSB, (byte)((int)xOffset & 0xFF));
+        i2cWrite(register.MAG_OFFSET_X_MSB, (byte)(((int)xOffset >> 8) & 0xFF));
+        i2cWrite(register.MAG_OFFSET_Y_LSB, (byte)((int)yOffset & 0xFF));
+        i2cWrite(register.MAG_OFFSET_Y_MSB, (byte)(((int)yOffset >> 8) & 0xFF));
+        i2cWrite(register.MAG_OFFSET_Z_LSB, (byte)((int)zOffset & 0xFF));
+        i2cWrite(register.MAG_OFFSET_Z_MSB, (byte)(((int)zOffset >> 8) & 0xFF));
         setMode(modeback);
         return;
       }
@@ -1131,12 +1125,12 @@ public class Bno055 extends Service implements I2CControl {
         unitSelection(unit);
         OperationMode modeback = this.mode;
         setMode(OperationMode.CONFIG);
-        i2cWrite(register.GYR_OFFSET_X_LSB, (byte)(xOffset & 0xFF));
-        i2cWrite(register.GYR_OFFSET_X_MSB, (byte)((xOffset >> 8) & 0xFF));
-        i2cWrite(register.GYR_OFFSET_Y_LSB, (byte)(yOffset & 0xFF));
-        i2cWrite(register.GYR_OFFSET_Y_MSB, (byte)((yOffset >> 8) & 0xFF));
-        i2cWrite(register.GYR_OFFSET_Z_LSB, (byte)(zOffset & 0xFF));
-        i2cWrite(register.GYR_OFFSET_Z_MSB, (byte)((zOffset >> 8) & 0xFF));
+        i2cWrite(register.GYR_OFFSET_X_LSB, (byte)((int)xOffset & 0xFF));
+        i2cWrite(register.GYR_OFFSET_X_MSB, (byte)(((int)xOffset >> 8) & 0xFF));
+        i2cWrite(register.GYR_OFFSET_Y_LSB, (byte)((int)yOffset & 0xFF));
+        i2cWrite(register.GYR_OFFSET_Y_MSB, (byte)(((int)yOffset >> 8) & 0xFF));
+        i2cWrite(register.GYR_OFFSET_Z_LSB, (byte)((int)zOffset & 0xFF));
+        i2cWrite(register.GYR_OFFSET_Z_MSB, (byte)(((int)zOffset >> 8) & 0xFF));
         setMode(modeback);
         return;
       }
@@ -1152,9 +1146,9 @@ public class Bno055 extends Service implements I2CControl {
       case ACCELEROMETER: {
         byte[] value = new byte[6];
         i2cWriteReadReg(register.ACC_OFFSET_X_LSB, value, value.length);
-        data.x = (value[0] & 0xFF) + ((value[1] & 0xFF) << 8);
-        data.y = (value[2] & 0xFF) + ((value[3] & 0xFF) << 8);
-        data.z = (value[4] & 0xFF) + ((value[5] & 0xFF) << 8);
+        data.x = (value[0] & 0xFF) + ((value[1]) << 8);
+        data.y = (value[2] & 0xFF) + ((value[3]) << 8);
+        data.z = (value[4] & 0xFF) + ((value[5]) << 8);
         if(((unitvalue & Unit.ACC_M_S2.mask) >> Unit.ACC_M_S2.shift) == Unit.ACC_M_S2.value) {
           data.unit = Unit.ACC_M_S2;
           data.x /= 100;
@@ -1170,9 +1164,9 @@ public class Bno055 extends Service implements I2CControl {
       case MAGNETOMETER: {
         byte[] value = new byte[6];
         i2cWriteReadReg(register.MAG_OFFSET_X_LSB, value, value.length);
-        data.x = (value[0] & 0xFF) + ((value[1] & 0xFF) << 8);
-        data.y = (value[2] & 0xFF) + ((value[3] & 0xFF) << 8);
-        data.z = (value[4] & 0xFF) + ((value[5] & 0xFF) << 8);
+        data.x = (value[0] & 0xFF) + ((value[1]) << 8);
+        data.y = (value[2] & 0xFF) + ((value[3]) << 8);
+        data.z = (value[4] & 0xFF) + ((value[5]) << 8);
         data.unit = Unit.MAG;
         data.x /= 16;
         data.y /= 16;
@@ -1183,9 +1177,9 @@ public class Bno055 extends Service implements I2CControl {
       case GYROSCOPE: {
         byte[] value = new byte[6];
         i2cWriteReadReg(register.GYR_OFFSET_X_LSB, value, value.length);
-        data.x = (value[0] & 0xFF) + ((value[1] & 0xFF) << 8);
-        data.y = (value[2] & 0xFF) + ((value[3] & 0xFF) << 8);
-        data.z = (value[4] & 0xFF) + ((value[5] & 0xFF) << 8);
+        data.x = (value[0] & 0xFF) + ((value[1]) << 8);
+        data.y = (value[2] & 0xFF) + ((value[3]) << 8);
+        data.z = (value[4] & 0xFF) + ((value[5]) << 8);
         if(((unitvalue & Unit.ANGULAR_RATE_DPS.mask) >> Unit.ANGULAR_RATE_DPS.shift) == Unit.ANGULAR_RATE_DPS.value) {
           data.unit = Unit.ANGULAR_RATE_DPS;
           data.x /= 16;
@@ -1242,12 +1236,12 @@ public class Bno055 extends Service implements I2CControl {
     setMode(OperationMode.CONFIG);
     switch(device) {
       case ACCELEROMETER: {
-        int retval = (i2cWriteReadRegByte(register.ACC_RADIUS_LSB) & 0xFF) + ((i2cWriteReadRegByte(register.ACC_RADIUS_MSB) & 0xFF) << 8);
+        int retval = (i2cWriteReadRegByte(register.ACC_RADIUS_LSB) & 0xFF) + ((i2cWriteReadRegByte(register.ACC_RADIUS_MSB)) << 8);
         setMode(modeback);
         return retval;
       }
       case MAGNETOMETER: {
-        int retval = (i2cWriteReadRegByte(register.MAG_RADIUS_LSB) & 0xFF) + ((i2cWriteReadRegByte(register.MAG_RADIUS_MSB) & 0xFF) << 8);
+        int retval = (i2cWriteReadRegByte(register.MAG_RADIUS_LSB) & 0xFF) + ((i2cWriteReadRegByte(register.MAG_RADIUS_MSB)) << 8);
         setMode(modeback);
         return retval;
       }
@@ -1258,21 +1252,21 @@ public class Bno055 extends Service implements I2CControl {
     }
   }
   
-  public void EnableInterrupt(InterruptType interruptType){
+  public void enableInterrupt(InterruptType interruptType){
     byte int_en = (byte) (i2cWriteReadRegByte(register.INT_EN) | (0xFF & interruptType.mask));
     byte int_msk = (byte) (i2cWriteReadRegByte(register.INT_MSK) | (0xFF & interruptType.mask));
     i2cWrite(register.INT_EN, int_en);
     i2cWrite(register.INT_MSK, int_msk);
   }
   
-  public void DisableInterrupt(InterruptType interruptType){
+  public void disableInterrupt(InterruptType interruptType){
     byte int_en = (byte) (i2cWriteReadRegByte(register.INT_EN) & (~interruptType.mask));
     byte int_msk = (byte) (i2cWriteReadRegByte(register.INT_MSK) & (~interruptType.mask));
     i2cWrite(register.INT_EN, int_en);
     i2cWrite(register.INT_MSK, int_msk);
   }
   
-  public void EnableInterrupt(InterruptType it, boolean xAxis, boolean yAxis, boolean zAxis, int threshold, int duration) {
+  public void enableInterrupt(InterruptType it, boolean xAxis, boolean yAxis, boolean zAxis, float threshold, int duration) {
     byte int_en = (byte) (i2cWriteReadRegByte(register.INT_EN) | (0xFF & it.mask));
     byte int_msk = (byte) (i2cWriteReadRegByte(register.INT_MSK) | (0xFF & it.mask));
     OperationMode modeback = this.mode;
@@ -1305,7 +1299,7 @@ public class Bno055 extends Service implements I2CControl {
         default:
           break;
         }
-        i2cWrite(register.ACC_NM_THRES, (byte) (threshold & 0xFF));
+        i2cWrite(register.ACC_NM_THRES, (byte) ((int)threshold & 0xFF));
         byte acc_sm_set=0;
         if (it == InterruptType.ACC_NM) {
           acc_sm_set |= 1;
@@ -1343,7 +1337,7 @@ public class Bno055 extends Service implements I2CControl {
         default:
           break;
         }
-        i2cWrite(register.ACC_AM_THRES, (byte) (threshold & 0xFF));
+        i2cWrite(register.ACC_AM_THRES, (byte) ((int)threshold & 0xFF));
         byte acc_int_set = i2cWriteReadRegByte(register.ACC_INT_SETTINGS);
         if (xAxis) acc_int_set |= 0b100;
         else acc_int_set &= 0b11111011;
@@ -1384,7 +1378,7 @@ public class Bno055 extends Service implements I2CControl {
         default:
           break;
         }
-        i2cWrite(register.ACC_HG_THRES, (byte) (threshold & 0xFF));
+        i2cWrite(register.ACC_HG_THRES, (byte) ((int)threshold & 0xFF));
         break;
         
       }
@@ -1420,9 +1414,9 @@ public class Bno055 extends Service implements I2CControl {
         default:
           break;
         }
-        i2cWrite(register.GYR_HR_X_SET, (byte) (threshold & 0b11111));
-        i2cWrite(register.GYR_HR_Y_SET, (byte) (threshold & 0b11111));
-        i2cWrite(register.GYR_HR_Z_SET, (byte) (threshold & 0b11111));
+        i2cWrite(register.GYR_HR_X_SET, (byte) ((int)threshold & 0b11111));
+        i2cWrite(register.GYR_HR_Y_SET, (byte) ((int)threshold & 0b11111));
+        i2cWrite(register.GYR_HR_Z_SET, (byte) ((int)threshold & 0b11111));
         break;
       }
       case GYR_AM: {
@@ -1433,8 +1427,10 @@ public class Bno055 extends Service implements I2CControl {
         else gyr_int_set &= 0b11101101;
         if (zAxis) gyr_int_set |= 0b100;
         else gyr_int_set &= 0b11011011;
+        //gyr_int_set |= 0b1000000;
         i2cWrite(register.GYR_INT_SETTING, gyr_int_set);
         duration = ((int)(duration / 4) -1) & 0b11;
+        //duration |= 0b1100;
         i2cWrite(register.GYR_AM_SET, (byte)duration);
         GyroscopeConfig range = getGyrRange();
         switch (range) {
@@ -1455,7 +1451,7 @@ public class Bno055 extends Service implements I2CControl {
         default:
           break;
         }
-        i2cWrite(register.GYR_AM_THRES, (byte) (threshold & 0xFF));
+        i2cWrite(register.GYR_AM_THRES, (byte) ((int)threshold & 0xFF));
       }
     }
     i2cWrite(register.INT_EN, int_en);
@@ -1506,7 +1502,7 @@ public class Bno055 extends Service implements I2CControl {
     byte sys_trigger = i2cWriteReadRegByte(register.SYS_TRIGGGER);
     sys_trigger |= 1;
     i2cWrite(register.SYS_TRIGGGER, sys_trigger);
-    sleep(100);
+    sleep(1000);
     byte st_result = i2cWriteReadRegByte(register.ST_RESULT);
     if ((st_result & 0b1) > 0) log.info("Accelerator test passed");
     else log.info("Accelerator test failed");
@@ -1520,10 +1516,10 @@ public class Bno055 extends Service implements I2CControl {
   
   public void showCalibrationStatus() {
     byte calib_stat = i2cWriteReadRegByte(register.CALIB_STAT);
-    log.info("Calibration level for Accelerator: {}", calib_stat & 0b1100);
+    log.info("Calibration level for Accelerator: {}", (calib_stat & 0b1100) >> 2);
     log.info("Calibration level for Magnetometer: {}", calib_stat & 0b11);
-    log.info("Calibration level for Gyroscope: {}", calib_stat & 0b110000);
-    log.info("Calibration level for System: {}", calib_stat & 0b11000000);
+    log.info("Calibration level for Gyroscope: {}", (calib_stat & 0b110000) >> 4);
+    log.info("Calibration level for System: {}", (calib_stat & 0b11000000) >> 6);
   }
   
   public void showSystemStatus() {
@@ -1539,23 +1535,23 @@ public class Bno055 extends Service implements I2CControl {
       break;
     }
     case 0x02: {
-      log.info("System Idle");
+      log.info("Initializing peripherals");
       break;
     }
     case 0x03: {
-      log.info("System Idle");
+      log.info("System Initialization");
       break;
     }
     case 0x04: {
-      log.info("System Idle");
+      log.info("Executing self test");
       break;
     }
     case 0x05: {
-      log.info("System Idle");
+      log.info("Sensor fusion algorithm running");
       break;
     }
     case 0x06: {
-      log.info("System Idle");
+      log.info("System running without fusion algorithm");
       break;
     }
     default: {
@@ -1617,7 +1613,65 @@ public class Bno055 extends Service implements I2CControl {
     }
     }
   }
+  
+  public void attachInterruptPin(PinArrayControl control, int pin) {
+	  pinControl = control;
+	  this.pin = pin;
+	  control.attach(this, pin);
+  }
 
+  @Override
+  public void onPin(PinData pindata) {
+  	
+		 boolean sense = (pindata.getValue() != 0);
+		 
+		 if (!isActive && sense){
+			 // state change
+			 isActive = true;
+			 int data = 1;// (int)(i2cWriteReadRegByte(register.INT_STA))
+			 invoke("publishInterrupt", data);
+		 }
+  }
 
+	public void disablePin(){
+		if (pinControl == null){
+			error("pin control not set");
+			return;
+		}
+		
+		if (pin == null){
+			error("pin not set");
+			return;
+		}
+		
+		pinControl.disablePin(pin);
+		isEnabled = false;
+		broadcastState();
+	}
+	
+	public void enablePin(){
+		if (pinControl == null){
+			error("pin control not set");
+			return;
+		}
+		
+		if (pin == null){
+			error("pin not set");
+			return;
+		}
+		
+		pinControl.enablePin(pin, 10);
+		isEnabled = true;
+		broadcastState();
+	}
 
+	public int publishInterrupt(int data) {
+		return data;
+	}
+
+	public void resetInterrupt() {
+		byte sys_trigger = 1 << 6;
+		i2cWrite(register.SYS_TRIGGGER, sys_trigger);
+		isActive = false;
+	}
 }

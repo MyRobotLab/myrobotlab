@@ -1061,4 +1061,10 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		return meta;
 	}
 
+	@Override
+	public void enablePin(int address, int rate) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
