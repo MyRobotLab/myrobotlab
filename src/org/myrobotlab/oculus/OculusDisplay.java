@@ -199,15 +199,16 @@ public class OculusDisplay implements Runnable {
   private void internalInit() {
     // constructor
     // start up hmd libs
-    Hmd.initialize();
-    try {
-      Thread.sleep(400);
-    } catch (InterruptedException e) {
-      throw new IllegalStateException(e);
+    if (hmd == null) {
+      Hmd.initialize();
+      try {
+        Thread.sleep(400);
+      } catch (InterruptedException e) {
+        throw new IllegalStateException(e);
+      }
+      // create it  (this should be owned by the Oculus service i think? and passed in with setHmd(hmd)
+      hmd = Hmd.create();
     }
-
-    // create it
-    hmd = Hmd.create();
     if (null == hmd) {
       throw new IllegalStateException("Unable to initialize HMD");
     }
@@ -547,6 +548,14 @@ public class OculusDisplay implements Runnable {
     // TODO : noop
     OculusDisplay test = new OculusDisplay();
     test.run();
+  }
+
+  public Hmd getHmd() {
+    return hmd;
+  }
+
+  public void setHmd(Hmd hmd) {
+    this.hmd = hmd;
   }
 
 }
