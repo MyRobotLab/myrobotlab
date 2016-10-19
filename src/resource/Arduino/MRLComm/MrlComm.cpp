@@ -637,6 +637,7 @@ void MrlComm::update() {
 		msg.autoSend(57);
     ListNode<Pin*>* node = pinList.getRoot();
     // iterate through our device list and call update on them.
+    unsigned int msgSent = 0;
     while (node != NULL) {
 			Pin* pin = node->data;
 			if (pin->rate == 0 || (now-pin->lastUpdate > pin->lastUpdate + (1000 / pin->rate))) {
@@ -647,14 +648,15 @@ void MrlComm::update() {
         } else {
           pin->value = digitalRead(pin->address);
         }
-
+        
         // loading both analog & digital data
         msg.addData(pin->address); // 1 byte
         msg.addData16(pin->value); // 2 bytes
+        msgSent++;
         node = node->next;
       }
     }
-    msg.sendMsg();
+    if (msgSent) msg.sendMsg();
 	}
 }
 
