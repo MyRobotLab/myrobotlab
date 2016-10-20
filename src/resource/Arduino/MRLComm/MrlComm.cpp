@@ -640,7 +640,7 @@ void MrlComm::update() {
     unsigned int msgSent = 0;
     while (node != NULL) {
 			Pin* pin = node->data;
-			if (pin->rate == 0 || (now-pin->lastUpdate > pin->lastUpdate + (1000 / pin->rate))) {
+			if (pin->rate == 0 || (now > pin->lastUpdate + (1000 / pin->rate))) {
 			  pin->lastUpdate = now;
         // TODO: moe the analog read outside of thie method and pass it in!
         if (pin->type == ANALOG) {
@@ -653,8 +653,8 @@ void MrlComm::update() {
         msg.addData(pin->address); // 1 byte
         msg.addData16(pin->value); // 2 bytes
         msgSent++;
-        node = node->next;
       }
+      node = node->next;
     }
     if (msgSent) msg.sendMsg();
 	}
