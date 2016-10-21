@@ -8,12 +8,6 @@
 
 package org.myrobotlab.service;
 
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_SERVO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,7 +23,6 @@ import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.motor.MotorConfigDualPwm;
 import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.motor.MotorConfigPulse;
-import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -45,7 +38,7 @@ import org.slf4j.Logger;
 /**
  * AdaFruit 16-Channel PWM / Servo Driver
  * 
- * @author Mats
+ * @author GroG and Mats
  * 
  *         References : http://www.ladyada.net/make/mshield/use.html
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
@@ -313,6 +306,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			// Integer.decode(deviceAddress));
 			controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 		}
+		else {
+			log.error("Can't create device until the controller has been set");
+			return false;
+		}
 
 		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
 		return true;
@@ -451,11 +448,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	/**
-	 * Device attach - this should be creating the I2C device on MRLComm for the
+	 * Device attach - this should be creating the I2C bus on MRLComm for the
 	 * "first" servo if not already created - Since this does not use the Arduino
 	 * <Servo.h> servos - it DOES NOT need to create "Servo" devices in MRLComm.
 	 * It will need to keep track of the "pin" to I2C address, and whenever a
-	 * ServoControl.moveTo(79) - the Servo will tell this controller its name &
+	 * ServoControl.moveTo(pos) - the Servo will tell this controller its name &
 	 * location to move. Mats says. The board has a single i2c address that
 	 * doesn't change. The Arduino only needs to keep track of the i2c bus, not
 	 * all devices that can communicate thru it. I.e. This service should keep
@@ -465,7 +462,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * This service will translate the name & location to an I2C address & value
 	 * write request to the MRLComm device.
 	 * 
-	 * Mats comments on the above MRLComm should not know anything about the
+	 * Mats comments on the above. MRLComm should not know anything about the
 	 * servos in this case. This service keeps track of the servos. MRLComm should
 	 * not know anything about what addresses are used on the i2c bus MRLComm
 	 * should initiate the i2c bus when it receives the first i2c write or read
