@@ -522,11 +522,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		// should initial pos be a requirement ?
 		// This will fail because the pin data has not yet been set in Servo
 		// servoNameToPin.put(servo.getName(), servo.getPin());
+		String servoName = servo.getName();
 		ServoData servoData = new ServoData();
 		servoData.pin = (int) conf[0];
 		servoData.pwmFreqSet = false;
 		servoData.pwmFreq = pwmFreq;
-		servoMap.put(servo.getName(), servoData);
+		servoMap.put(servoName, servoData);
+		invoke("publishAttachedDevice", servoName);
 	}
 
 	void motorAttach(MotorControl device, Object... conf) {
@@ -534,6 +536,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		 * This is where motor data could be initialized. So far all motor data this
 		 * service needs can be requested from the motors config
 		 */
+		MotorControl motor = (MotorControl) device;
+		invoke("publishAttachedDevice", motor.getName());
 	}
 
 	@Override
@@ -542,6 +546,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		servoMap.remove(servo.getName());
 	}
 
+	public String publishAttachedDevice(String deviceName) {
+		return deviceName;
+	}
+	
 	/**
 	 * Start sending pulses to the servo
 	 * 
