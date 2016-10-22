@@ -418,6 +418,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		ServoData servoData = servoMap.get(servo.getName());
 		if (!servoData.pwmFreqSet) {
 			setPWMFreq(servoData.pin, servoData.pwmFreq);
+			servoData.pwmFreqSet = true;
 		}
 		log.debug(String.format("servoWrite %s deviceAddress %s targetOutput %d", servo.getName(), deviceAddress, servo.getTargetOutput()));
 		int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
@@ -429,6 +430,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		ServoData servoData = servoMap.get(servo.getName());
 		if (!servoData.pwmFreqSet) {
 			setPWMFreq(servoData.pin, servoData.pwmFreq);
+			servoData.pwmFreqSet = true;
 		}
 
 		int pin = servo.getPin();
