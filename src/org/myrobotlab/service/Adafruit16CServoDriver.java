@@ -391,7 +391,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public void setServo(Integer pin, Integer pulseWidthOff) {
 		// since pulseWidthOff can be larger than > 256 it needs to be
 		// sent as 2 bytes
-		log.info(String.format("setServo %s deviceAddress %s pin %s pulse %s", pin, deviceAddress, pin, pulseWidthOff));
+		log.debug(String.format("setServo %s deviceAddress %s pin %s pulse %s", pin, deviceAddress, pin, pulseWidthOff));
 		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
@@ -600,7 +600,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			setPinValue(config.getPwrPin(), powerOutput);
 		} else if (MotorConfigDualPwm.class == type) {
 			MotorConfigDualPwm config = (MotorConfigDualPwm) c;
-			log.info(String.format("Adafruti16C Motor DualPwm motorMove, powerOutput = %s", powerOutput));
+			log.info(String.format("Adafrutit16C Motor DualPwm motorMove, powerOutput = %s", powerOutput));
 			if (config.getPwmFreq() == null) {
 				config.setPwmFreq(defaultMotorPwmFreq);
 				setPWMFreq(config.getLeftPin(), config.getPwmFreq());
