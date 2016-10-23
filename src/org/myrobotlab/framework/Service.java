@@ -1475,7 +1475,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * @param o
    */
   public void out(String method, Object o) {
-    Message m = createMessage("", method, o); // create a un-named message
+    Message m = createMessage(null, method, o); // create a un-named message
     // as output
 
     if (m.sender.length() == 0) {

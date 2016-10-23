@@ -39,6 +39,8 @@ public interface MotorControl extends DeviceControl {
 	public void detach(MotorController controller);
 
 	double getPowerLevel();
+	
+	public void setPowerLevel(double power);
 
 	double getPowerOutput();
 

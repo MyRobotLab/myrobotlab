@@ -17,8 +17,7 @@ public class JFugueTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     jfugue = (JFugue) Runtime.start("jfugue", "JFugue");
   }

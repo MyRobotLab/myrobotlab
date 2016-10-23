@@ -201,5 +201,11 @@
 	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/httpclient-4.5.2.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/httpcore-4.4.4.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.commons.commons-lang3/3.3.2/commons-lang3-3.3.2.jar"/>
+	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-annotations-2.5.0.jar"/>
+	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-core-2.5.0.jar"/>
+	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-databind-2.5.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-dumpfiles-0.7.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-storage-0.7.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-util-0.7.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

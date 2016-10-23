@@ -258,7 +258,7 @@ public class Bno055 extends Service implements I2CControl {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Mpu6050.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Bno055.class);
     meta.addDescription("General BNO055 acclerometer and gyro");
     meta.addCategory("microcontroller", "sensor");
     meta.setSponsor("Christian");
