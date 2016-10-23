@@ -8,12 +8,6 @@
 
 package org.myrobotlab.service;
 
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DEVICE_TYPE_SERVO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,7 +23,6 @@ import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.motor.MotorConfigDualPwm;
 import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.motor.MotorConfigPulse;
-import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -45,7 +38,7 @@ import org.slf4j.Logger;
 /**
  * AdaFruit 16-Channel PWM / Servo Driver
  * 
- * @author Mats
+ * @author GroG and Mats
  * 
  *         References : http://www.ladyada.net/make/mshield/use.html
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
@@ -313,6 +306,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			// Integer.decode(deviceAddress));
 			controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 		}
+		else {
+			log.error("Can't create device until the controller has been set");
+			return false;
+		}
 
 		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
 		return true;
@@ -394,7 +391,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public void setServo(Integer pin, Integer pulseWidthOff) {
 		// since pulseWidthOff can be larger than > 256 it needs to be
 		// sent as 2 bytes
-		log.info(String.format("setServo %s deviceAddress %s pin %s pulse %s", pin, deviceAddress, pin, pulseWidthOff));
+		log.debug(String.format("setServo %s deviceAddress %s pin %s pulse %s", pin, deviceAddress, pin, pulseWidthOff));
 		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
@@ -421,6 +418,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		ServoData servoData = servoMap.get(servo.getName());
 		if (!servoData.pwmFreqSet) {
 			setPWMFreq(servoData.pin, servoData.pwmFreq);
+			servoData.pwmFreqSet = true;
 		}
 		log.debug(String.format("servoWrite %s deviceAddress %s targetOutput %d", servo.getName(), deviceAddress, servo.getTargetOutput()));
 		int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
@@ -432,6 +430,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		ServoData servoData = servoMap.get(servo.getName());
 		if (!servoData.pwmFreqSet) {
 			setPWMFreq(servoData.pin, servoData.pwmFreq);
+			servoData.pwmFreqSet = true;
 		}
 
 		int pin = servo.getPin();
@@ -451,11 +450,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	/**
-	 * Device attach - this should be creating the I2C device on MRLComm for the
+	 * Device attach - this should be creating the I2C bus on MRLComm for the
 	 * "first" servo if not already created - Since this does not use the Arduino
 	 * <Servo.h> servos - it DOES NOT need to create "Servo" devices in MRLComm.
 	 * It will need to keep track of the "pin" to I2C address, and whenever a
-	 * ServoControl.moveTo(79) - the Servo will tell this controller its name &
+	 * ServoControl.moveTo(pos) - the Servo will tell this controller its name &
 	 * location to move. Mats says. The board has a single i2c address that
 	 * doesn't change. The Arduino only needs to keep track of the i2c bus, not
 	 * all devices that can communicate thru it. I.e. This service should keep
@@ -465,7 +464,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * This service will translate the name & location to an I2C address & value
 	 * write request to the MRLComm device.
 	 * 
-	 * Mats comments on the above MRLComm should not know anything about the
+	 * Mats comments on the above. MRLComm should not know anything about the
 	 * servos in this case. This service keeps track of the servos. MRLComm should
 	 * not know anything about what addresses are used on the i2c bus MRLComm
 	 * should initiate the i2c bus when it receives the first i2c write or read
@@ -523,11 +522,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		// should initial pos be a requirement ?
 		// This will fail because the pin data has not yet been set in Servo
 		// servoNameToPin.put(servo.getName(), servo.getPin());
+		String servoName = servo.getName();
 		ServoData servoData = new ServoData();
 		servoData.pin = (int) conf[0];
 		servoData.pwmFreqSet = false;
 		servoData.pwmFreq = pwmFreq;
-		servoMap.put(servo.getName(), servoData);
+		servoMap.put(servoName, servoData);
+		invoke("publishAttachedDevice", servoName);
 	}
 
 	void motorAttach(MotorControl device, Object... conf) {
@@ -535,6 +536,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		 * This is where motor data could be initialized. So far all motor data this
 		 * service needs can be requested from the motors config
 		 */
+		MotorControl motor = (MotorControl) device;
+		invoke("publishAttachedDevice", motor.getName());
 	}
 
 	@Override
@@ -543,6 +546,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		servoMap.remove(servo.getName());
 	}
 
+	public String publishAttachedDevice(String deviceName) {
+		return deviceName;
+	}
+	
 	/**
 	 * Start sending pulses to the servo
 	 * 
@@ -593,7 +600,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			setPinValue(config.getPwrPin(), powerOutput);
 		} else if (MotorConfigDualPwm.class == type) {
 			MotorConfigDualPwm config = (MotorConfigDualPwm) c;
-			log.info(String.format("Adafruti16C Motor DualPwm motorMove, powerOutput = %s", powerOutput));
+			log.info(String.format("Adafrutit16C Motor DualPwm motorMove, powerOutput = %s", powerOutput));
 			if (config.getPwmFreq() == null) {
 				config.setPwmFreq(defaultMotorPwmFreq);
 				setPWMFreq(config.getLeftPin(), config.getPwmFreq());

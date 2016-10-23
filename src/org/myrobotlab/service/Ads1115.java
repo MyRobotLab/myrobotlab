@@ -145,7 +145,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 	public String															deviceAddress										= "0x48";
 
-	public List<String>												deviceBusList										= Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
+	public List<String>												deviceBusList										= Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
 	public String															deviceBus												= "1";
 
 	public int																adc0														= 0;
@@ -865,7 +865,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 	@Override
 	public boolean isAttached() {
-		// TODO Auto-generated method stub
 		return isAttached;
 	}
 
@@ -1059,6 +1058,13 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		meta.addCategory("shield", "sensor");
 		meta.setSponsor("Mats");
 		return meta;
+	}
+
+	@Override
+	// TODO Implement individula sample rates per pin
+	public void enablePin(int address, int rate) {
+		setSampleRate(rate);
+		enablePin(address);
 	}
 
 }
