@@ -41,7 +41,7 @@ public class Scanner extends Thread {
           // byte[] sendData =
           // "DISCOVER_FUIFSERVER_REQUEST".getBytes();
           //
-          Message msg = myService.createMessage("", "getConnections", null);
+          Message msg = myService.createMessage(null, "getConnections", null);
           byte[] msgBuf = org.myrobotlab.codec.CodecUtils.getBytes(msg);
 
           DatagramPacket sendPacket;
@@ -134,13 +134,13 @@ public class Scanner extends Thread {
               ObjectInputStream inBytes = new ObjectInputStream(new ByteArrayInputStream(receivePacket.getData()));
               Message retMsg = (Message) inBytes.readObject();
               myService.info("response from instance %s", retMsg);
-              if (!retMsg.method.equals("publishNewConnection")) {
-                myService.error("not an publishNewConnection message");
+              if (!retMsg.method.equals("publishConnection")) {
+                myService.error("not an publishConnection message");
                 continue;
               } else {
                 List<Connection> conns = (List<Connection>) retMsg.data[0];
                 for (int i = 0; i < conns.size(); ++i) {
-                  myService.invoke("publishNewConnection", conns.get(i));
+                  myService.invoke("publishConnection", conns.get(i));
                 }
               }
               /*

@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.net.Connection;
 
 public interface Gateway {
@@ -56,15 +57,13 @@ public interface Gateway {
 
   public String getPrefix(URI protocolKey);
 
-  // String getName();
-
   /**
    * the publishing point
    * 
    * @param keys
    * @return
    */
-  public Connection publishNewConnection(Connection keys);
+  public Connection publishConnect(Connection keys);
 
   public void sendRemote(final String key, final Message msg) throws URISyntaxException;
 
@@ -85,4 +84,9 @@ public interface Gateway {
    */
   public void sendRemote(final URI key, final Message msg);
 
+  // begin new interface methods -----------------------
+  
+  public String publishConnect();
+  public String publishDisconnect();
+  public Status publishError();
 }

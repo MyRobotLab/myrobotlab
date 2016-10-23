@@ -668,8 +668,7 @@ public class ArduinoTest {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.INFO);
+      LoggingFactory.init(Level.INFO);
 
       ArduinoTest.setUpBeforeClass();
       ArduinoTest test = new ArduinoTest();

@@ -7,10 +7,6 @@ angular.module('mrlapp.service.RemoteAdapterGui', [])
     $scope.connectText = "connect";
     $scope.scanText = "scan";
     
-    // publishNewConnection
-    // onNewConnection - callback & results from scan
-    
-    
     this.onMsg = function(msg) {
         
         switch (msg.method) {

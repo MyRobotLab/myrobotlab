@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -87,13 +88,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	 * mrl://gateway/(protocol key)
 	 */
 
-	// gson only serializes - non static & non transient fields
-	// has to be HashMap - because null is self
+
 	/**
 	 * environments of running mrl instances - the null environment is the
 	 * current local
 	 */
-	static private final HashMap<URI, ServiceEnvironment> environments = new HashMap<URI, ServiceEnvironment>();
+	static private final Map<URI, ServiceEnvironment> environments = new HashMap<URI, ServiceEnvironment>();
 
 	/**
 	 * a registry of all services regardless of which environment they came from
@@ -104,7 +104,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	/**
 	 * map to hide methods we are not interested in
 	 */
-	// FIXME - REMOVE ALL STATICS !!!
 	static private HashSet<String> hideMethods = new HashSet<String>();
 
 	static private boolean needsRestart = false;
@@ -423,7 +422,16 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
 	public static String dump() {
 		try {
-
+			
+			FileOutputStream dump = new FileOutputStream("environments.json");
+			dump.write(CodecUtils.toJson(environments).getBytes());
+			dump.close();
+			
+			dump = new FileOutputStream("registry.json");
+			dump.write(CodecUtils.toJson(registry).getBytes());
+			dump.close();
+			
+			
 			StringBuffer sb = new StringBuffer().append("\ninstances:\n");
 			Map<URI, ServiceEnvironment> sorted = environments;
 			Iterator<URI> hkeys = sorted.keySet().iterator();
@@ -856,11 +864,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	}
 
 	/**
-	 * 
+	 * get all environments
 	 * @return
 	 */
 	public static HashMap<URI, ServiceEnvironment> getEnvironments() {
-		// return copy
 		return new HashMap<URI, ServiceEnvironment>(environments);
 	}
 
@@ -1292,10 +1299,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		}
 	}
 
-	// ---------- Java Runtime wrapper functions end --------
 	/**
 	 * 
-	 * FIXME - need Platform information (reference from within service ???
+	 * register - this method enters the service into the registery of services
+	 * 
 	 * 
 	 * @param url
 	 * @param s
@@ -1310,31 +1317,21 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 			se = environments.get(url);
 		}
 
-		if (s == null) {
-			// register null is how
-			// initial communication starts
-			// between two instances
+		/**
+		 * register with null data is how initial communication
+		 * starts between 2 mrl instances (1st msg)
+		 */
+		if (s == null) {			
 			return null;
 		}
-
+		
 		String name = s.getName();
-
-		if (se.serviceDirectory.containsKey(name)) {
-			log.info("attempting to register {} which is already registered in {}", name, url);
-			if (runtime != null) {
-				runtime.invoke("collision", name);// necessary ? collisions are
-				// 'expected' in mrl's
-				// evolution
-				log.info("collision registering {}", name);
-				// runtime.error(String.format(" name collision or already
-				// registered with %s", name));
-			}
-			return s;// <--- BUG ?!?!? WHAT ABOUT THE REMOTE GATEWAYS !!!
-		}
 
 		// REMOTE BROADCAST to all foreign environments
 		// FIXME - Security determines what to export
 		// for each gateway
+		
+		// RELAY - xforwarder name grows remote1.remote2.remote3 ....
 
 		List<String> remoteGateways = getServiceNamesFromInterface(Gateway.class);
 		for (int ri = 0; ri < remoteGateways.size(); ++ri) {
@@ -1354,7 +1351,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 				if (uri != null && gateway.getName().equals(uri.getHost()) && !uri.equals(s.getInstanceId())) {
 					log.info(String.format("gateway %s sending registration of %s remote to %s", gateway.getName(), name, uri));
 					// FIXME - Security determines what to export
-					Message msg = runtime.createMessage("", "register", s);
+					Message msg = runtime.createMessage(null, "register", s);
 					// ((Communicator) gateway).sendRemote(uri, msg);
 					// //mrl://remote2/tcp://127.0.0.1:50488 <-- wrong
 					// sendingRemote is wrong
@@ -1765,17 +1762,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		log.info("checking for updates");
 	}
 
-	/**
-	 * collision event - when a registration is attempted but there is a name
-	 * collision
-	 * 
-	 * @param name
-	 *            - the name of the two Services with the same name
-	 * @return
-	 */
-	public String collision(String name) {
-		return name;
-	}
 
 	static public String getInputAsString(InputStream is) {
 		try (java.util.Scanner s = new java.util.Scanner(is)) {
@@ -1793,10 +1779,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	 */
 	static public String exec(String program) {
 		return execute(program, null, null, null, null);
-	}
-
-	private static BufferedReader getOutput(Process p) {
-		return new BufferedReader(new InputStreamReader(p.getInputStream()));
 	}
 
 	/**

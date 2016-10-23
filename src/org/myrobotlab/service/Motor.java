@@ -110,7 +110,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	}
 	
 	public List<String> refreshControllers() {
-		controllers = Runtime.getServiceNamesFromInterface(MotorControl.class);
+		controllers = Runtime.getServiceNamesFromInterface(MotorController.class);
 		return controllers;
 	}
 	
