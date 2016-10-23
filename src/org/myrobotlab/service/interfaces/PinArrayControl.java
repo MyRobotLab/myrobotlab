@@ -47,5 +47,7 @@ public interface PinArrayControl extends DeviceControl {
 	public void disablePin(int address);
 	
 	public void disablePins();
+
+	public void enablePin(int address, int rate);
 	
 }

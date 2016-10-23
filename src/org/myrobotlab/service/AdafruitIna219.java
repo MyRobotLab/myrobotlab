@@ -41,7 +41,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 
 	public String deviceAddress = "0x40";
 
-	public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
+	public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
 	public String deviceBus = "1";
 
 	public int busVoltage = 0;
