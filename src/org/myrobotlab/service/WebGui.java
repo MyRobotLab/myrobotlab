@@ -197,7 +197,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	}
 
 	@Override
-	public Connection publishNewConnection(Connection keys) {
+	public Connection publishConnect(Connection keys) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1070,12 +1070,30 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			log.info("" + level);
 
 			Runtime.start("python", "Python");
-			Runtime.start("arduino", "Arduino");
+			// Runtime.start("arduino", "Arduino");
 			//Runtime.start("srf05", "UltrasonicSensor");
 			Runtime.start("webgui", "WebGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+
+	@Override
+	public String publishConnect() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String publishDisconnect() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Status publishError() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

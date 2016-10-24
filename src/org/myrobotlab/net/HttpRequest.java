@@ -56,8 +56,8 @@ import org.slf4j.Logger;
  * 
  */
 
-public class HTTPRequest {
-  public final static Logger log = LoggerFactory.getLogger(HTTPRequest.class.getCanonicalName());
+public class HttpRequest {
+  public final static Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
   URLConnection connection;
 
@@ -79,7 +79,7 @@ public class HTTPRequest {
     // http = new HTTPRequest("http://www.google.com");
     // String s = http.getString();
 
-    HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File("myrobotlab.log"));
+    HttpRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File(LoggingFactory.getLogFileName()));
 
     /*
      * 
@@ -225,7 +225,7 @@ public class HTTPRequest {
    *          the string representation of the URL to send request to
    * @throws IOException
    */
-  public HTTPRequest(String urlString) throws IOException {
+  public HttpRequest(String urlString) throws IOException {
     this(new URL(urlString));
   }
 
@@ -236,7 +236,7 @@ public class HTTPRequest {
    *          the URL to send request to
    * @throws IOException
    */
-  public HTTPRequest(URL url) throws IOException {
+  public HttpRequest(URL url) throws IOException {
     this(url.openConnection());
   }
 
@@ -247,7 +247,7 @@ public class HTTPRequest {
    *          an already open URL connection
    * @throws IOException
    */
-  public HTTPRequest(URLConnection connection) throws IOException {
+  public HttpRequest(URLConnection connection) throws IOException {
     log.info("http request for " + connection.getURL());
     this.connection = connection;
     connection.setDoOutput(true);
@@ -560,7 +560,7 @@ public class HTTPRequest {
    * @see #setParameters
    */
   public InputStream post(URL url, Map<String, String> parameters) throws IOException {
-    return new HTTPRequest(url).post(parameters);
+    return new HttpRequest(url).post(parameters);
   }
 
   /**
@@ -577,7 +577,7 @@ public class HTTPRequest {
    * @see #setParameters
    */
   public InputStream post(URL url, Map<String, String> cookies, Map<String, String> parameters) throws IOException {
-    return new HTTPRequest(url).post(cookies, parameters);
+    return new HttpRequest(url).post(cookies, parameters);
   }
 
   /**
@@ -591,7 +591,7 @@ public class HTTPRequest {
    * @see #setParameters
    */
   public InputStream post(URL url, Object[] parameters) throws IOException {
-    return new HTTPRequest(url).post(parameters);
+    return new HttpRequest(url).post(parameters);
   }
 
   /**
@@ -606,7 +606,7 @@ public class HTTPRequest {
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1) throws IOException {
-    return new HTTPRequest(url).post(name1, value1);
+    return new HttpRequest(url).post(name1, value1);
   }
 
   /**
@@ -625,7 +625,7 @@ public class HTTPRequest {
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1, String name2, Object value2) throws IOException {
-    return new HTTPRequest(url).post(name1, value1, name2, value2);
+    return new HttpRequest(url).post(name1, value1, name2, value2);
   }
 
   /**
@@ -648,7 +648,7 @@ public class HTTPRequest {
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1, String name2, Object value2, String name3, Object value3) throws IOException {
-    return new HTTPRequest(url).post(name1, value1, name2, value2, name3, value3);
+    return new HttpRequest(url).post(name1, value1, name2, value2, name3, value3);
   }
 
   /**
@@ -675,7 +675,7 @@ public class HTTPRequest {
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1, String name2, Object value2, String name3, Object value3, String name4, Object value4) throws IOException {
-    return new HTTPRequest(url).post(name1, value1, name2, value2, name3, value3, name4, value4);
+    return new HttpRequest(url).post(name1, value1, name2, value2, name3, value3, name4, value4);
   }
 
   /**
@@ -692,7 +692,7 @@ public class HTTPRequest {
    * @see #setParameters
    */
   public InputStream post(URL url, String[] cookies, Object[] parameters) throws IOException {
-    return new HTTPRequest(url).post(cookies, parameters);
+    return new HttpRequest(url).post(cookies, parameters);
   }
 
   public void postCookies() {

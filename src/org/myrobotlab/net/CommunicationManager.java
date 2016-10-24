@@ -131,8 +131,7 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
   }
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.WARN);
+    LoggingFactory.init(Level.WARN);
 
     // TODO - send a verify for service & another verify for method ?
 

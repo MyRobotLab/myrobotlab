@@ -14,10 +14,13 @@ import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 
 import static org.myrobotlab.service.data.OledSsd1306Data.SSD1306_128_64Data;
 import static org.myrobotlab.service.data.OledSsd1306Data.SSD1306_128_32Data;
 import static org.myrobotlab.service.data.OledSsd1306Data.SSD1306_96_16Data;
+import static org.myrobotlab.service.data.OledSsd1306Data.FONT;
 
 import org.slf4j.Logger;
 
@@ -33,14 +36,18 @@ import org.slf4j.Logger;
  * 
  *         This service builds is a conversion from of the Arduino library above
  *         to Java
- *        
- *         Some OLED's are wired for SPI and need to be changed according to this instruction so that you can use
- *         the i2c protocol ( as implemented in this program )
- *         
- *         http://electronics.stackexchange.com/questions/164680/ssd1306-display-isp-connection-or-i2c-according-to-resistors
- *         
- *         NB. Some OLED's need a reset pulse at power on. It can be generated using one of the pin's on the Arduino or
- *         by adding a 100nF capacitor between the reset pin and GND, and a 10K resistor betwen the reset pin and VCC 
+ * 
+ *         Some OLED's are wired for SPI and need to be changed according to
+ *         this instruction so that you can use the i2c protocol ( as
+ *         implemented in this program )
+ * 
+ *         http://electronics.stackexchange.com/questions/164680/ssd1306-display
+ *         -isp-connection-or-i2c-according-to-resistors
+ * 
+ *         NB. Some OLED's need a reset pulse at power on. It can be generated
+ *         using one of the pin's on the Arduino or by adding a 100nF capacitor
+ *         between the reset pin and GND, and a 10K resistor betwen the reset
+ *         pin and VCC
  * 
  */
 public class OledSsd1306 extends Service implements I2CControl {
@@ -56,7 +63,7 @@ public class OledSsd1306 extends Service implements I2CControl {
 
 	public List<String>							controllers																		= new ArrayList<String>();
 	public String										controllerName;
-	transient public I2CController	controller;																																														// Remove
+	transient public I2CController	controller;																																																		// Remove
 																																																																									// this
 																																																																									// when
 																																																																									// PinArrayControl
@@ -75,7 +82,7 @@ public class OledSsd1306 extends Service implements I2CControl {
 	public List<String>							deviceBusList																	= Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
 	public String										deviceBus																			= "1";
 
-	//private boolean									isAttached																		= false;
+	// private boolean isAttached = false;
 	// Constants for the SSD1306
 	public static short							SSD1306_SETCONTRAST														= 0x81;
 	public static short							SSD1306_DISPLAYALLON_RESUME										= 0xA4;
@@ -140,9 +147,11 @@ public class OledSsd1306 extends Service implements I2CControl {
 	// Buffer for the OLED
 	public int											SSD1306_LCDWIDTH															= 128;
 	public int											SSD1306_LCDHEIGHT															= 64;
-	public int[]	  								buffer;
-																																																																									// pin
-	private int											vccstate;																																																			// vccstate																																																			// vccstate
+	public int[]										buffer;
+	// pin
+	private int											vccstate;																																																			// vccstate
+																																																																									// //
+																																																																									// vccstate
 	private int											rotation;
 
 	static int											premask[]																			= { 0x00, 0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE };
@@ -247,11 +256,9 @@ public class OledSsd1306 extends Service implements I2CControl {
 
 	public void unsetController() {
 		/*
-		controller = null;
-		controllerName = null;
-		this.deviceBus = null;
-		this.deviceAddress = null;
-		*/
+		 * controller = null; controllerName = null; this.deviceBus = null;
+		 * this.deviceAddress = null;
+		 */
 		isControllerSet = false;
 		broadcastState();
 	}
@@ -270,11 +277,10 @@ public class OledSsd1306 extends Service implements I2CControl {
 
 		return controlerName;
 	}
-  /*
-	public boolean isAttached() {
-		return isAttached;
-	}
-*/
+
+	/*
+	 * public boolean isAttached() { return isAttached; }
+	 */
 	/**
 	 * Initiate the buffer with data for the size of the OLED screen
 	 * 
@@ -301,62 +307,120 @@ public class OledSsd1306 extends Service implements I2CControl {
 		}
 	}
 
-	// TODO Implement graphics functions
-	int width() {
-		return 0;
+	int getWidth() {
+		return SSD1306_LCDWIDTH;
 	}
 
-	int height() {
-		return 0;
+	int getHeight() {
+		return SSD1306_LCDHEIGHT;
 	}
 
-	int getRotation() {
-		return 0;
+	public synchronized void setPixel(int x, int y, boolean on) {
+		final int pos = x + (y / 8) * SSD1306_LCDWIDTH;
+		if (on) {
+			this.buffer[pos] |= (1 << (y & 0x07));
+		} else {
+			this.buffer[pos] &= ~(1 << (y & 0x07));
+		}
 	}
 
-	// the most basic function, set a single pixel ( Not sure of I want to copy
-	// all that )
-	// width() and height() are defined in Adafruit GXF library (
-	void drawPixel(int x, int y, int color) {
-		int tmpx;
-		if ((x < 0) || (x >= width()) || (y < 0) || (y >= height()))
-			return;
+	void drawBitmap(int x, int y, int[] bitmap, int w, int h, boolean on) {
 
-		// check rotation, move pixel around if necessary
-		switch (getRotation()) {
-		case 1:
-			// ssd1306_swap(x, y);
-			tmpx = x;
-			x = y;
-			y = tmpx;
-			x = SSD1306_LCDWIDTH - x - 1;
-			break;
-		case 2:
-			x = SSD1306_LCDWIDTH - x - 1;
-			y = SSD1306_LCDHEIGHT - y - 1;
-			break;
-		case 3:
-			// ssd1306_swap(x, y);
-			tmpx = x;
-			x = y;
-			y = tmpx;
-			y = SSD1306_LCDHEIGHT - y - 1;
-			break;
+		int i, j, byteWidth = (w + 7) / 8;
+		int aByte = 0;
+
+		for (j = 0; j < h; j++) {
+			for (i = 0; i < w; i++) {
+				if ((i & 7)>0) {
+					aByte <<= 1;
+				} else {
+					aByte = bitmap[j * byteWidth + i / 8];
+				}
+				
+				if ((aByte & 0x80)>0) {
+					setPixel(x + i, y + j, on);
+				}
+				else {
+					setPixel(x + i, y + j, !on);
+				}
+			}
+		}
+	}
+
+	public synchronized void drawString(String string, int x, int y, boolean on) {
+		int posX = x;
+		int posY = y;
+		for (char c : string.toCharArray()) {
+			if (c == '\n') {
+				posY += 8;
+				posX = x;
+			}
+			if (posX >= 0 && posX + 5 < this.getWidth() && posY >= 0 && posY + 7 < this.getHeight()) {
+				drawChar(c, posX, posY, on);
+			}
+			posX += 6;
+		}
+	}
+
+	public synchronized void drawStringCentered(String string, int y, boolean on) {
+		final int strSizeX = string.length() * 5 + string.length() - 1;
+		final int x = (this.getWidth() - strSizeX) / 2;
+		drawString(string, x, y, on);
+	}
+
+	public synchronized void clearRect(int x, int y, int width, int height, boolean on) {
+		for (int posX = x; posX < x + width; ++posX) {
+			for (int posY = y; posY < y + height; ++posY) {
+				setPixel(posX, posY, on);
+			}
+		}
+	}
+
+	public synchronized void drawChar(char c, int x, int y, boolean on) {
+		if (c > 255) {
+			c = '?';
 		}
 
-		// x is which column
-		switch (color) {
-		case WHITE:
-			buffer[x + (y / 8) * SSD1306_LCDWIDTH] |= (1 << (y & 7));
-			break;
-		case BLACK:
-			buffer[x + (y / 8) * SSD1306_LCDWIDTH] &= ~(1 << (y & 7));
-			break;
-		case INVERSE:
-			buffer[x + (y / 8) * SSD1306_LCDWIDTH] ^= (1 << (y & 7));
-			break;
-		}
+		for (int i = 0; i < 5; ++i) {
+			int line = FONT[(c * 5) + i];
 
+			for (int j = 0; j < 8; ++j) {
+				if ((line & 0x01) > 0) {
+					setPixel(x + i, y + j, on);
+				}
+				line >>= 1;
+			}
+		}
+	}
+
+	/**
+	 * draws the given image over the current image buffer. The image is
+	 * automatically converted to a binary image (if it not already is).
+	 * <p/>
+	 * Note that the current buffer is not cleared before, so if you want the
+	 * image to completely overwrite the current display content you need to call
+	 * clear() before.
+	 *
+	 * @param image
+	 * @param x
+	 * @param y
+	 */
+	public synchronized void drawImage(BufferedImage image, int x, int y) {
+		BufferedImage tmpImage = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_BYTE_BINARY);
+		tmpImage.getGraphics().drawImage(image, x, y, null);
+
+		int index = 0;
+		int pixelval;
+		final byte[] pixels = ((DataBufferByte) tmpImage.getRaster().getDataBuffer()).getData();
+		for (int posY = 0; posY < SSD1306_LCDHEIGHT; posY++) {
+			for (int posX = 0; posX < SSD1306_LCDWIDTH / 8; posX++) {
+				for (int bit = 0; bit < 8; bit++) {
+					pixelval = (byte) ((pixels[index / 8] >> (8 - bit)) & 0x01);
+					setPixel(posX * 8 + bit, posY, pixelval > 0);
+					index++;
+				}
+			}
+		}
 	}
 
 	void begin(int vccstate) {
@@ -530,6 +594,11 @@ public class OledSsd1306 extends Service implements I2CControl {
 		ssd1306_command(contrast);
 	}
 
+	public void display(int[] image) {
+		buffer = image.clone();
+		display();
+	}
+
 	public void display() {
 		ssd1306_command(SSD1306_COLUMNADDR);
 		ssd1306_command(0); // Column start address (0 = reset)
@@ -548,13 +617,13 @@ public class OledSsd1306 extends Service implements I2CControl {
 		}
 
 		// I2C
-		for (int i = 0; i < (SSD1306_LCDWIDTH * SSD1306_LCDHEIGHT / 8); i++) {
+		for (int i = 0; i < (SSD1306_LCDWIDTH * SSD1306_LCDHEIGHT / 8) - 1; i++) {
 			// send a bunch of data in one xmission
 			// Wire.beginTransmission(_i2caddr);
-			byte writeBuffer[] = new byte[17];
+			byte writeBuffer[] = new byte[17]; 
 			int writeBufferIx = 0;
 			writeBuffer[writeBufferIx] = 0x40;
-			for (int x = 0; x < 16; x++) {
+			for (int x = 0; x < 16; x++) { 
 				writeBufferIx++;
 				writeBuffer[writeBufferIx] = (byte) buffer[i];
 				// WIRE_WRITE(buffer[i]);
@@ -571,6 +640,13 @@ public class OledSsd1306 extends Service implements I2CControl {
 	void clearDisplay() {
 		for (int i = 0; i < buffer.length; i++) {
 			buffer[i] = 0;
+		}
+	}
+
+	// fill everything
+	void fillDisplay() {
+		for (int i = 0; i < buffer.length; i++) {
+			buffer[i] = 0xff;
 		}
 	}
 
@@ -658,7 +734,7 @@ public class OledSsd1306 extends Service implements I2CControl {
 		case BLACK:
 			mask = ~mask;
 			while (w > 0) {
-				buffer[pBuf] = buffer[pBuf]  & mask;
+				buffer[pBuf] = buffer[pBuf] & mask;
 				pBuf++;
 				w--;
 			}
@@ -775,10 +851,10 @@ public class OledSsd1306 extends Service implements I2CControl {
 				buffer[pBuf] = buffer[pBuf] | mask;
 				break;
 			case BLACK:
-				buffer[pBuf] = buffer[pBuf]  & ~mask;
+				buffer[pBuf] = buffer[pBuf] & ~mask;
 				break;
 			case INVERSE:
-				buffer[pBuf] = buffer[pBuf]  ^ mask;
+				buffer[pBuf] = buffer[pBuf] ^ mask;
 				break;
 			}
 

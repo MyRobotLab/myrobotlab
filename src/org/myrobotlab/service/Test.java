@@ -917,8 +917,7 @@ public class Test extends Service implements StatusListener {
   // publishState() - filter on Errors
   // FIXME - FILE COMMUNICATION !!!!
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
     try {
 
       Test test = (Test) Runtime.start("test", "Test");

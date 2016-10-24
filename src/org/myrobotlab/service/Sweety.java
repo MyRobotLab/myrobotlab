@@ -128,8 +128,7 @@ public class Sweety extends Service {
   public int delaytimeletter = 1;
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
 

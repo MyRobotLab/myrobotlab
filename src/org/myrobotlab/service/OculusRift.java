@@ -82,7 +82,7 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
   transient public OculusHeadTracking headTracker = null;
 
   // for single camera support, mirror the images
-  private boolean mirrorLeftCamera = false;
+  private boolean mirrorLeftCamera = true;
 
   public static class RiftFrame {
     public SerializableImage left;
@@ -236,6 +236,7 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
       // thread.
       // display.run();
       display.oculus = this;
+      display.setHmd(hmd);
       display.start();
       log.info("Oculus display started and running.");
     } else {
@@ -438,8 +439,7 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
   }
 
   public static void main(String s[]) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel("INFO");
+    LoggingFactory.init("INFO");
     // Runtime.createAndStart("gui", "GUIService");
     Runtime.createAndStart("python", "Python");
     OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
@@ -450,6 +450,10 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
     // call this once you've updated the affine stuff?
     rift.updateAffine();
 
+    
+    rift.initContext();
+    
+    
     rift.logOrientation();
     // TODO: configuration to enable left/right camera roll tracking.
     // while (true) {

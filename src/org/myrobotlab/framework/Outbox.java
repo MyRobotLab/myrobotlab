@@ -142,7 +142,7 @@ public class Outbox implements Runnable, Serializable {
       // WARNING - broadcast apparently means name == ""
       // why would a message with my name be in my outbox ??? - FIXME
       // deprecate that logic
-      if (msg.name.length() > 0) { // commented out recently -> &&
+      if (msg.name != null) { // commented out recently -> &&
         // !myService.getName().equals(msg.name)
         log.debug("{} configured to RELAY ", msg.getName());
         comm.send(msg);

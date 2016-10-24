@@ -36,15 +36,17 @@ class Pin {
     // to support pulse.
     int count;
     // remove me
-    // int rate;
+    unsigned int rate;
+    unsigned long lastUpdate;
     // remove me, needed for pulse
     // int rateModulus;
 
     // default constructor for a pin?
     // at a minimum we need type and address A0 D4 etc...
-    Pin(int addr, int t) {
+    Pin(int addr, int t, unsigned int rate) {
       type = t;
       address = addr;
+      this->rate = rate;
     };
 };
 

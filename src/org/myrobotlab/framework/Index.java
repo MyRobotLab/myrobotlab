@@ -23,8 +23,7 @@ public class Index<T> {
   // private static int valueCount = 0;
 
   public static void main(String[] args) throws IOException {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     Index<ServiceReservation> reservations = new Index<ServiceReservation>();
 

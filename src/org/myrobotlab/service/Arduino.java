@@ -321,10 +321,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public static void main(String[] args) {
 		try {
 
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
-
-			//
+			LoggingFactory.init(Level.INFO);
+			
 			Arduino arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
 			// Serial serial = (Serial) arduino.getSerial();
 
@@ -1180,7 +1178,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 *
 	 * @param pin
 	 */
-	public void enablePin(int address) {
+	public void enablePin(int address, int rate) {
 		if (!isConnected()) {
 			error("must be connected to enable pins");
 			return;
@@ -1191,11 +1189,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		
 		msg.addData(getMrlPinType(pin)); // pinType
 		// TODO - make this Hz so everyone is happy :)
-		// msg.addData16(rate); //
+		msg.addData16(rate); //
 		sendMsg(msg);
 		
 		pin.setEnabled(true);
 		invoke("publishPinDefinition", pin);
+	}
+	
+	public void enablePin(int address) {
+	  enablePin(address, 0);
 	}
 
 	/**

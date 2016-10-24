@@ -102,8 +102,7 @@ public final class MRLListener implements Serializable {
   }
 
   public static void main(String args[]) throws InterruptedException, IOException {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     try {
       // MRLListener listener = new MRLListener("thrower/pitch");

@@ -50,8 +50,7 @@ public class ChessGame extends Service {
   String hmoveMsg = "";
 
   public static void main(String[] args) throws ClassNotFoundException {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     try {
       Runtime.start("chessgame", "ChessGame");

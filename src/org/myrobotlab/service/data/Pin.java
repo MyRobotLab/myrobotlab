@@ -86,8 +86,7 @@ public class Pin implements Serializable {
 
   public static void main(String[] args) {
     try {
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.INFO);
+      LoggingFactory.init(Level.INFO);
       Pin pin = new Pin();
       pin.pin = 5;
       pin.source = "here";

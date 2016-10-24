@@ -274,14 +274,16 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
           int itemIndex = 0;
           int linkIndex = 0;
           for (DHLink l : currentArm.getLinks()) {
+        	boolean foundIt = false;
             for (itemIndex = 0; itemIndex < 2; itemIndex++) {
               if (l.getName().equals(collisionItems.getCollisionItem()[itemIndex].getName())) {
                 ci = collisionItems.getCollisionItem()[itemIndex];
+                foundIt = true;
                 break;
               }
             }
+            if (foundIt) break; //we have the item to watch
             linkIndex++;
-            if (ci != null) break; //we have the item to watch
           }
           if (ci == null) {
             log.info("Collision between static item {} and {} detected", collisionItems.getCollisionItem()[0].getName(), collisionItems.getCollisionItem()[1].getName());
@@ -403,8 +405,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   public static void main(String[] args) throws Exception {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     Runtime.createAndStart("python", "Python");
     Runtime.createAndStart("gui", "GUIService");

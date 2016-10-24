@@ -361,8 +361,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public static void main(String[] args) throws InterruptedException {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");

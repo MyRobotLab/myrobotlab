@@ -19,8 +19,7 @@ public class ConnectionNodeList extends JPanel {
   public JList nodeList;
 
   public static void main(String s[]) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     JFrame frame = new JFrame("List Example");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

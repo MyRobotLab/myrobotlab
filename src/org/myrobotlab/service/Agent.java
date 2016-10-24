@@ -129,6 +129,8 @@ public class Agent extends Service {
 	static transient SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd:HH:mm:ss");
 
 	static Platform platform = Platform.getLocalInstance();
+	
+	static CmdLine runtimeArgs;
 
 	static String currentBranch = platform.getBranch();
 	static String currentVersion = platform.getVersion();
@@ -150,10 +152,11 @@ public class Agent extends Service {
 	static String versionUrlTemplate = "http://mrl-bucket-01.s3.amazonaws.com/current/%s/version.txt";
 	static String versionsListUrlTemplate = "http://mrl-bucket-01.s3.amazonaws.com/";
 
-	static boolean checkRemoteBranchesOnStartup = false;
+	static boolean checkRemoteVersions = false;
 
 	static String latestRemote;
 
+	
 	static Agent agent;
 
 	public Agent(String n) {
@@ -170,7 +173,7 @@ public class Agent extends Service {
 		// add my branch
 		// possibleBranches.add(agentBranch);
 
-		if (checkRemoteBranchesOnStartup) {
+		if (checkRemoteVersions) {
 			// TODO - turn into asynchronous call
 			// so no connection will not lead to an irritating 'wait' timeout
 			getRemoteBranches();
@@ -423,7 +426,7 @@ public class Agent extends Service {
 		// get local versions
 		File branchFolder = new File(currentBranch);
 		if (!branchFolder.isDirectory()) {
-			log.error("%s not a directory", currentBranch);
+			log.error("{} not a directory", currentBranch);
 		} else {
 			File[] listOfFiles = branchFolder.listFiles();
 			for (int i = 0; i < listOfFiles.length; ++i) {
@@ -561,6 +564,30 @@ public class Agent extends Service {
 
 	static public Integer publishTerminated(Integer id) {
 		log.info("terminated %d %s", id, getName(id));
+		
+		if (!processes.containsKey(id)){
+			log.error("processes {} not found");
+			return id;
+		}
+
+		// if you don't fork with Agent allowed to 
+		// exist without instances - then
+		if (!runtimeArgs.containsKey("-fork")){
+			// spin through instances - if I'm the only
+			// thing left - terminate
+			boolean processesStillRunning = false;
+			for (ProcessData pd : processes.values()){
+				if (pd.isRunning()){
+					processesStillRunning = true;
+					break;
+				}
+			}
+			
+			if (!processesStillRunning){
+				shutdown();
+			}
+		}
+		
 		if (agent != null) {
 			agent.broadcastState();
 		}
@@ -697,7 +724,9 @@ public class Agent extends Service {
 
 	static public String setBranch(String branch) {
 		currentBranch = branch;
-		getPossibleVersions();
+		if (checkRemoteVersions){
+			getPossibleVersions();
+		}
 		return currentBranch;
 	}
 
@@ -975,7 +1004,7 @@ public class Agent extends Service {
 			// String[] agentArgs = new String[0];
 			ArrayList<String> inArgs = new ArrayList<String>();
 			// -agent \"-params -service ... \" string encoded
-			CmdLine runtimeArgs = new CmdLine(args);
+			runtimeArgs = new CmdLine(args);
 
             if (runtimeArgs.containsKey("-?") || runtimeArgs.containsKey("-h") || runtimeArgs.containsKey("-help") || runtimeArgs.containsKey("--help")) {
 		        Runtime.mainHelp();
@@ -1021,11 +1050,14 @@ public class Agent extends Service {
 			if (runtimeArgs.containsKey("-test")) {
 				serviceTest();
 			} else {
-				// FIXME - add option to persist
-				if (runtimeArgs.containsKey("-keepAlive")){
+				if (!runtimeArgs.containsKey("-fork")){
 					Runtime.start("agent", "Agent");
 				}
-				p = spawn(args); // <-- agent's is now in charge of first
+				if (!runtimeArgs.containsKey("-client")){
+					p = spawn(args); // <-- agent's is now in charge of first
+				} else {
+					Runtime.start("cli", "Cli");
+				}
 			}
 
 			// change of design - agent will try to shutdown
@@ -1036,7 +1068,7 @@ public class Agent extends Service {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace(System.out);
+			log.error("unsuccessful spawn", e);
 		} finally {
 			// big hammer
 			// System.out.println("Agent.main leaving");- with static args it doesnt really 'start'

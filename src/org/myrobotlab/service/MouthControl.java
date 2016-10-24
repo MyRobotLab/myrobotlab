@@ -222,8 +222,7 @@ public class MouthControl extends Service {
   }
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
     try {
       // LoggingFactory.getInstance().setLevel(Level.INFO);
       MouthControl MouthControl = new MouthControl("MouthControl");
