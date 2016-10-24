@@ -35,8 +35,7 @@ public class Mail extends Service {
   public final static Logger log = LoggerFactory.getLogger(Mail.class.getCanonicalName());
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.WARN);
+    LoggingFactory.init(Level.WARN);
 
     try {
       Mail mail = new Mail("mail");

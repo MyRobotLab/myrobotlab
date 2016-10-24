@@ -17,8 +17,7 @@ public class TextTransform extends Service implements TextListener, TextPublishe
   public final static Logger log = LoggerFactory.getLogger(TextTransform.class);
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
 

@@ -364,8 +364,7 @@ public class ProcParser {
   }
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel("DEBUG");
+    LoggingFactory.init("DEBUG");
 
     Integer v = ProcParser.getArmInstructionVersion();
     log.info("{}", v);

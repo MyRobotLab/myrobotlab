@@ -22,7 +22,7 @@ import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
-import org.myrobotlab.net.HTTPRequest;
+import org.myrobotlab.net.HttpRequest;
 import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 
@@ -39,31 +39,12 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
   GUIService gui;
 
   public static void main(String[] args) throws Exception {
-    LoggingFactory.getInstance().configure();
+    LoggingFactory.init();
 
     log.info("[{}]", "1060M.20130227.0733".compareTo("1059M.20130227.0722"));
     log.info("[{}]", "1059M.20130227.0722".compareTo("1060M.20130227.0733"));
 
-    // HTTPRequest logPoster = new HTTPRequest(new
-    // URL("http://myrobotlab.org/myrobotlab_log/postLogFile.php"));
-    HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File("myrobotlab.log"));
-    // logPoster.setParameter("file", "myrobotlab.log", new
-    // FileInputStream(new File("myrobotlab.log")));
-    // logPoster.setParameter("file", new File("myrobotlab.log"));
-    // logPoster.setc
-    /*
-     * InputStream in = logPoster.post().getInputStream(); //read it with
-     * BufferedReader BufferedReader br = new BufferedReader( new
-     * InputStreamReader(in));
-     * 
-     * StringBuilder sb = new StringBuilder();
-     * 
-     * String line; while ((line = br.readLine()) != null) { sb.append(line); }
-     * 
-     * System.out.println(sb.toString());
-     * 
-     * br.close();
-     */
+    HttpRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File(LoggingFactory.getLogFileName()));
   }
 
   public AboutDialog(GUIService gui) {

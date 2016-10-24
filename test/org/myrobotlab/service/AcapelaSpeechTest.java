@@ -222,8 +222,7 @@ public class AcapelaSpeechTest {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.DEBUG);
+      LoggingFactory.init(Level.DEBUG);
 
       JUnitCore junit = new JUnitCore();
       Result result = junit.run(AcapelaSpeechTest.class);

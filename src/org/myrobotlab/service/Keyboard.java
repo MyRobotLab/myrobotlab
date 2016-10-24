@@ -45,8 +45,7 @@ public class Keyboard extends Service {
   boolean isBlocking = false;
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     Keyboard keyboard = (Keyboard) Runtime.start("keyboard", "Keyboard");
     keyboard.stopService();

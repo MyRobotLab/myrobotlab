@@ -110,8 +110,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 
   public static void main(String[] args) {
 
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
     try {
 
       Object object = new Object();

@@ -121,6 +121,7 @@ public class PeerDiscovery {
     this.group = group;
     this.port = port;
 
+    // http://stackoverflow.com/questions/30360797/udp-broadcast-client-in-java
     bcastSocket = new DatagramSocket(port);
     broadcastAddress = new InetSocketAddress("255.255.255.255", port);
 

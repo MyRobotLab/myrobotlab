@@ -60,8 +60,7 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.INFO);
+      LoggingFactory.init(Level.INFO);
 
       // ImageType<Planar<GrayU8>> colorType = ImageType.pl(3,GrayU8.class);
 

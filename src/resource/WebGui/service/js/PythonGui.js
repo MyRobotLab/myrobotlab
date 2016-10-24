@@ -4,13 +4,26 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     var msg = this.msg;
     var name = $scope.name;
     // init scope values
+    $scope.service = mrl.getService(name);
     $scope.output = '';
     $scope.activeTabIndex = 0;
-    $scope.scripts = [];
+    $scope.activeScript = null;
+    $scope.scripts = {};//$scope.service.openedScripts; FIX -> call updateState($scope.service);
 
     // IF update of 'currentScript' not equal to webgui version - create new tab ?
     this.updateState = function(service) {
         $scope.service = service;
+        angular.forEach(service.openedScripts ,function(value, key){
+                if(!angular.isDefined($scope.scripts[key])){
+                    $scope.scripts[key] = value;
+                }
+
+                /*
+                if(!angular.isDefined($scope.scripts[key].editor)){
+
+                }
+                */
+            })
     }
     ;
     this.onMsg = function(msg) {
@@ -50,8 +63,6 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     //----- ace editors related callbacks begin -----//
     $scope.aceLoaded = function(e) {
         $log.info("ace loaded");
-        // Options
-        $scope.scripts[$scope.scripts.length - 1].editor = e;  
     }
     ;
     $scope.aceChanged = function(e) {
@@ -73,10 +84,11 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         // $log.info('here');
         // $scope.activeTabIndex;
         // $log.info($scope.scripts[$scope.activeTabIndex]);
-        msg.send('exec', $scope.scripts[$scope.activeTabIndex - 1].editor.getValue());
+        msg.send('exec', $scope.activeScript);
     }
     $scope.tabSelected = function(script) {
         $log.info('here');
+        $scope.activeScript = script;
         // need to get a handle on hte tab's ui / text
         // $scope.editors.setValue(script.code);
     }

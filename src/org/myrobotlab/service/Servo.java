@@ -292,6 +292,10 @@ public class Servo extends Service implements ServoControl {
 		return b;
 	}
 
+	public void onServoEvent(Integer pos){
+		moveTo((int) pos);
+	}
+	
 	@Override
 	public ServoController getController() {
 		return controller;

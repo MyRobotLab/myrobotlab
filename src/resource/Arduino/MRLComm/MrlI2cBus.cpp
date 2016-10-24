@@ -4,6 +4,8 @@ MrlI2CBus::MrlI2CBus() :
 		Device(DEVICE_TYPE_I2C) {
 	if (TWCR == 0) { //// do this check so that Wire only gets initialized once
 		WIRE.begin();
+	    // Force 400 KHz i2c
+		WIRE.setClock(400000L);
 	}
 }
 
