@@ -24,7 +24,6 @@ public class TcpServer implements Runnable {
 	 */
 	transient private HashMap<URI, TcpThread> tcpClientList = new HashMap<URI, TcpThread>();
 
-	// FIXME - refactor RemoteAdapter myService to Gateway interface
 	transient RemoteAdapter myService = null;
 	transient ServerSocket serverSocket = null;
 	transient ObjectOutputStream out;
