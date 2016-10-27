@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -32,6 +33,8 @@ import org.slf4j.Logger;
  *
  */
 public class InMoov extends Service {
+
+  private static final String GESTURES_DIRECTORY = "gestures";
 
   private static final long serialVersionUID = 1L;
 
@@ -1077,7 +1080,7 @@ public class InMoov extends Service {
 
       mouthControl = (MouthControl) startPeer("mouthControl");
       // OLD WAY
-     //  mouthControl.jaw.setPin(26);
+      //  mouthControl.jaw.setPin(26);
       mouthControl.arduino.connect(port);
       // NEW WAY
       mouthControl.arduino.servoAttach(mouthControl.jaw, 26);
@@ -1318,19 +1321,13 @@ public class InMoov extends Service {
   }
 
   public void loadGestures() {
-    loadGestures("gestures");
+    loadGestures(GESTURES_DIRECTORY);
   }
 
   public void loadGestures(String directory) {
     // TODO: iterate over each of the python files in the directory
     // and load them into the python interpreter.
-    File dir = new File(directory);
-    dir.mkdirs();
-    if (!dir.isDirectory()) {
-      // TODO: maybe create the directory ?
-      log.warn("Gestures directory {} doest not exist.", directory);
-      return;
-    }
+    File dir = makeGesturesDirectory(directory);
 
     for (File f : dir.listFiles()) {
       if (f.getName().toLowerCase().endsWith(".py")) {
@@ -1347,6 +1344,63 @@ public class InMoov extends Service {
     }
   }
 
+  private File makeGesturesDirectory(String directory) {
+    File dir = new File(directory);
+    dir.mkdirs();
+    if (!dir.isDirectory()) {
+      // TODO: maybe create the directory ?
+      log.warn("Gestures directory {} doest not exist.", directory);
+      return null;
+    }
+    return dir;
+  }
+
+  public void saveGesture(String gestureName, String directory) {
+    // TODO: consider the gestures directory as a property on the inmoov
+    String gestureMethod = mapGestureNameToPythonMethod(gestureName);   
+    String gestureFilename = directory + File.separator + gestureMethod + ".py";
+    File gestureFile = new File(gestureFilename);    
+    if (gestureFile.exists()) {
+      log.warn("Gesture file {} already exists.. not overwiting it.", gestureFilename);
+      return;
+    }
+    FileWriter gestureWriter = null;
+    try {
+      gestureWriter = new FileWriter(gestureFile);
+      // print the first line of the python file
+      gestureWriter.write("def " + gestureMethod + "():\n");
+      // now for each servo, we should write out the approperiate moveTo statement
+      // TODO: consider doing this only for the inmoov services.. but for now.. i think
+      // we want all servos that are currently in the system?  
+      for (ServiceInterface service : Runtime.getServices()) {
+        if (service instanceof Servo) {
+          int pos = ((Servo) service).getPos();
+          gestureWriter.write("  " + service.getName() + ".moveTo(" + pos + ")\n");
+        }
+      }
+      gestureWriter.write("\n");
+      gestureWriter.close();
+    } catch (IOException e) {
+      log.warn("Error writing gestures file {}", gestureFilename);
+      e.printStackTrace();
+      return;
+    }    
+    // TODO: consider writing out cooresponding AIML?    
+  }
+  
+  private String mapGestureNameToPythonMethod(String gestureName) {
+    // TODO: some fancier mapping?
+    String methodName = gestureName.replaceAll(" ", "");
+    return methodName;
+  }
+
+  public void saveGesture(String gestureName) {
+
+    // TODO: allow a user to save a gesture to the gestures directory
+    saveGesture(gestureName, GESTURES_DIRECTORY);
+
+  }
+
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
@@ -1355,7 +1409,7 @@ public class InMoov extends Service {
       VirtualDevice v2 = (VirtualDevice) Runtime.start("v2", "VirtualDevice");
 
       v1.createVirtualArduino("COM1"); // hmm can to virtual Arduinos be created
-                                       // with one VirtualDevice???
+      // with one VirtualDevice???
       v2.createVirtualArduino("COM2");
 
       // Runtime.start("webgui", "WebGui");
