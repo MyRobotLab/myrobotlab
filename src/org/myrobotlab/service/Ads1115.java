@@ -67,7 +67,7 @@ import org.slf4j.Logger;
 
 public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	/**
-	 * Publisher - Publishes pin data at a regulat interval
+	 * Publisher - Publishes pin data at a regular interval
 	 * 
 	 */
 	public class Publisher extends Thread {
@@ -128,7 +128,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 	// Publisher
 	boolean																		isPublishing										= false;
-	transient Thread													publisher												= null;
+	transient Publisher													publisher												= null;
 	int pinDataCnt = 4;
 	//
 

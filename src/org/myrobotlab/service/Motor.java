@@ -79,7 +79,9 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	 */
 	
 	double powerLevel = 0;
-
+	double maxPower = 1.0;
+	double minPower = -1.0;
+	
 	Mapper powerMap = new Mapper(-1.0, 1.0, -255.0, 255.0);
 
 	// position
@@ -161,8 +163,15 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	@Override
 	// not relative ! - see moveStep
 	public void move(double power) {
-		log.info("{}.move({})", getName(), power);
+		log.debug("{}.move({})", getName(), power);
+		if (power > maxPower) {
+			power = maxPower;
+		}
+		if (power < minPower){
+			power = minPower;
+		}
 		powerLevel = power;
+		
 		if (locked) {
 			log.warn("motor locked");
 			return;
