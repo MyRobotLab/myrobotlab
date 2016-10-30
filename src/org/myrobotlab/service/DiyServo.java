@@ -361,6 +361,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 												// Motor input
 		pid.setSampleTime(pidKey, sampleTime); // Sets the sample time
 		pid.setSetpoint(pidKey, setPoint);
+		pid.startService();
 	}
 
 	/**
