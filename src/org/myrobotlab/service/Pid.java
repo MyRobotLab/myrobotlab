@@ -100,7 +100,7 @@ public class Pid extends Service {
 
   static final public int DIRECTION_REVERSE = 1;
 
-  private Map<String, PidData> data = new HashMap<String, PidData>();
+  public Map<String, PidData> data = new HashMap<String, PidData>();
 
   public Pid(String n) {
     super(n);
@@ -141,7 +141,9 @@ public class Pid extends Service {
       else if (output < piddata.outMin)
         output = piddata.outMin;
       piddata.output = output;
-
+      
+      broadcastState();
+      
       /* Remember some variables for next time */
       piddata.lastInput = piddata.input;
       piddata.lastTime = now;
