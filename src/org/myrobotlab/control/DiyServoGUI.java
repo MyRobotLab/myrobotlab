@@ -75,38 +75,38 @@ public class DiyServoGUI extends ServiceGUI implements ActionListener {
 		}
 	}
 
-	public final static Logger	log										= LoggerFactory.getLogger(DiyServoGUI.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(DiyServoGUI.class.getCanonicalName());
 
-	static final long						serialVersionUID			= 1L;
+	static final long serialVersionUID = 1L;
 
-	final String								attachMotor						= "attach motor";
-	final String								detachMotor						= "detach motor";
+	final String attachMotorController = "attach motor controller";
+	final String detachMotorController = "detach motor controller";
 
-	final String								attachAnalog					= "attach analog input";
-	final String								detachAnalog					= "detach analog input";
+	final String attachAnalog = "attach analog input";
+	final String detachAnalog = "detach analog input";
 
-	JLabel											boundPos							= null;
-	JButton											attachButton					= new JButton(attachMotor);
-	JButton											attachListenerButton	= new JButton(attachAnalog);
+	JLabel boundPos = null;
+	JButton attachButton = new JButton(attachMotorController);
+	JButton attachListenerButton = new JButton(attachAnalog);
 
-	JButton											updateLimitsButton		= new JButton("update limits");
+	JButton updateLimitsButton = new JButton("update limits");
 
-	JSlider											slider								= new JSlider(0, 180, 90);
-	BasicArrowButton						right									= new BasicArrowButton(BasicArrowButton.EAST);
+	JSlider slider = new JSlider(0, 180, 90);
+	BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
 
-	BasicArrowButton						left									= new BasicArrowButton(BasicArrowButton.WEST);
+	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 
-	JComboBox<String>						controllerList				= new JComboBox<String>();
-	JComboBox<String>						pinArrayControlList		= new JComboBox<String>();
-	JComboBox<Integer>					pinList								= new JComboBox<Integer>();
+	JComboBox<String> controllerList = new JComboBox<String>();
+	JComboBox<String> pinArrayControlList = new JComboBox<String>();
+	JComboBox<Integer> pinList = new JComboBox<Integer>();
 
-	JTextField									posMin								= new JTextField("0");
+	JTextField posMin = new JTextField("0");
 
-	JTextField									posMax								= new JTextField("180");
+	JTextField posMax = new JTextField("180");
 
-	DiyServo										myServo								= null;
+	DiyServo myServo = null;
 
-	SliderListener							sliderListener				= new SliderListener();
+	SliderListener sliderListener = new SliderListener();
 
 	public DiyServoGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
@@ -136,7 +136,7 @@ public class DiyServoGUI extends ServiceGUI implements ActionListener {
 
 				if (o == attachButton) {
 					log.info("attachButton pressed");
-					if (attachButton.getText().equals(attachMotor)) {
+					if (attachButton.getText().equals(attachMotorController)) {
 						send("attach", controllerList.getSelectedItem());
 					} else {
 						send("detach", controllerList.getSelectedItem());
@@ -205,10 +205,10 @@ public class DiyServoGUI extends ServiceGUI implements ActionListener {
 				}
 
 				if (servo.isControllerSet()) {
-					attachButton.setText(detachMotor);
+					attachButton.setText(detachMotorController);
 					controllerList.setEnabled(false);
 				} else {
-					attachButton.setText(attachMotor);
+					attachButton.setText(attachMotorController);
 					controllerList.setEnabled(true);
 				}
 
@@ -287,7 +287,7 @@ public class DiyServoGUI extends ServiceGUI implements ActionListener {
 
 		gc.gridx = 0;
 		gc.gridy = 0;
-		control2.add(new JLabel("TEST"));
+		// control2.add(new JLabel("TEST"));
 
 		gc.gridx = 0;
 		++gc.gridy;
@@ -335,7 +335,8 @@ public class DiyServoGUI extends ServiceGUI implements ActionListener {
 	 * public void displayController(final ServoController sc, final ServoGUI
 	 * mygui) { SwingUtilities.invokeLater(new Runnable() { public void run() {
 	 * controller.removeActionListener(mygui); pinModel.removeAllElements(); //
-	 * FIXME - get Local services relative to the servo pinModel.addElement(null);
+	 * FIXME - get Local services relative to the servo
+	 * pinModel.addElement(null);
 	 * 
 	 * ArrayList<Pin> pinList = sc.getPinList(); for (int i = 0; i <
 	 * pinList.size(); ++i) { pinModel.addElement(pinList.get(i).pin); }
@@ -367,12 +368,12 @@ public class DiyServoGUI extends ServiceGUI implements ActionListener {
 		pinList.removeAllItems();
 		if (myServo.pinControlName != null) {
 			PinArrayControl tmpControl = (PinArrayControl) Runtime.getService(myServo.pinControlName);
-			if (tmpControl != null){
-			List<PinDefinition> mbl = tmpControl.getPinList();
-			for (int i = 0; i < mbl.size(); i++) {
-				PinDefinition pinData = mbl.get(i);
-				pinList.addItem(pinData.getAddress());
-			}
+			if (tmpControl != null) {
+				List<PinDefinition> mbl = tmpControl.getPinList();
+				for (int i = 0; i < mbl.size(); i++) {
+					PinDefinition pinData = mbl.get(i);
+					pinList.addItem(pinData.getAddress());
+				}
 			}
 			pinList.setSelectedItem(myServo.pin);
 		}

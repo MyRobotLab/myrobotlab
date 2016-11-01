@@ -41,7 +41,12 @@ import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.motor.MotorConfig;
+import org.myrobotlab.motor.MotorConfigDualPwm;
+import org.myrobotlab.motor.MotorConfigPulse;
+import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.service.interfaces.MotorControl;
+import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
@@ -137,6 +142,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	public class MotorUpdater extends Thread {
 
 		double lastOutput = 0;
+
 		public MotorUpdater(String name) {
 			super(String.format("%s.MotorUpdater", name));
 		}
@@ -151,9 +157,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 						if (pid.compute(pidKey)) {
 							double setPoint = pid.getSetpoint(pidKey);
 							double output = pid.getOutput(pidKey);
-							log.debug(String.format("setPoint(%s), processVariable(%s), output(%s)",setPoint, processVariable, output));
-							if (output != lastOutput){
-								controller.move(output);
+							log.debug(String.format("setPoint(%s), processVariable(%s), output(%s)", setPoint,
+									processVariable, output));
+							if (output != lastOutput) {
+								// controller.move(output);
+								controller.motorMove((MotorControl) this);
 								lastOutput = output;
 							}
 						}
@@ -176,9 +184,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
 	public final static Logger log = LoggerFactory.getLogger(DiyServo.class);
 
-	// Controller for the Motor
-	transient MotorControl controller;
+	// MotorController
+	transient MotorController controller;
 	public String controllerName = null;
+	MotorConfig config;
 
 	// Reference to the Analog input service
 	public List<String> pinArrayControls; // List
@@ -268,8 +277,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	public Pid pid;
 	private String pidKey;
 	private double kp = 0.020;
-	private double ki = 0.001 ;   // 0.020;
-	private double kd = 0.0;    // 0.020;
+	private double ki = 0.001; // 0.020;
+	private double kd = 0.0; // 0.020;
 	public double setPoint = 90; // Intial
 									// setpoint
 									// corresponding
@@ -400,11 +409,26 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	@Override
 	// TODO DeActivate the motor and PID
 	public void detach() {
-		controller.move(0);
+		controller.motorStop((MotorControl) this);
 		isAttached = false;
 		broadcastState();
 	}
 
+	///////   config start ////////////////////////
+	public void setPwmPins(int leftPin, int rightPin) {
+		config = new MotorConfigDualPwm(leftPin, rightPin);
+		broadcastState();
+	}
+	
+	public void setPwrDirPins(int pwrPin, int dirPin){
+		config = new MotorConfigSimpleH(pwrPin, dirPin);
+		broadcastState();
+	}
+
+	public MotorConfig getConfig() {
+		return config;
+	}
+	
 	/**
 	 * Method to check if events are enabled or not
 	 * 
@@ -522,7 +546,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	 * @return
 	 */
 	public List<String> refreshControllers() {
-		controllers = Runtime.getServiceNamesFromInterface(MotorControl.class);
+		controllers = Runtime.getServiceNamesFromInterface(MotorController.class);
 		return controllers;
 	}
 
@@ -551,7 +575,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		}
 
 		log.info(String.format("%s setController %s", getName(), controller.getName()));
-		this.controller = (MotorControl) controller;
+		this.controller = (MotorController) controller;
 		this.controllerName = controller.getName();
 		broadcastState();
 	}
@@ -700,15 +724,12 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 			Runtime.start("gui", "GUIService");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.connect("COM3");
-			Motor motor = (Motor) Runtime.start("motor", "Motor");
-			motor.setPwmPins(3, 4);
-			motor.attach(arduino);
 
 			Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
 			ads.setController(arduino, "1", "0x48");
 
 			DiyServo dyiServo = (DiyServo) Runtime.start("DiyServo", "DiyServo");
-			dyiServo.attach(motor);
+			dyiServo.attach(arduino);
 			dyiServo.attach((PinArrayControl) ads, 0); // PIN 14 = A0
 
 			// Servo Servo = (Servo) Runtime.start("Servo", "Servo");
@@ -766,10 +787,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	}
 
 	public void attach(String controllerName) throws Exception {
-		attach((MotorControl) Runtime.getService(controllerName));
+		attach((MotorController) Runtime.getService(controllerName));
 	}
 
-	public void attach(MotorControl controller) throws Exception {
+	public void attach(MotorController controller) throws Exception {
 		this.controller = controller;
 		if (controller != null) {
 			controllerName = controller.getName();
@@ -778,18 +799,19 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		broadcastState();
 	}
 
+
 	@Override
 	public void detach(String controllerName) {
 		ServiceInterface si = Runtime.getService(controllerName);
-		if (si instanceof MotorControl) {
-			detach((MotorControl) Runtime.getService(controllerName));
+		if (si instanceof MotorController) {
+			detach((MotorController) Runtime.getService(controllerName));
 		}
 		if (si instanceof PinArrayControl) {
 			detach((PinArrayControl) Runtime.getService(controllerName));
 		}
 	}
 
-	public void detach(MotorControl controller) {
+	public void detach(MotorController controller) {
 		if (this.controller == controller) {
 			this.controller = null;
 			isAttached = false;
