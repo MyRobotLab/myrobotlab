@@ -45,6 +45,7 @@ import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.motor.MotorConfigDualPwm;
 import org.myrobotlab.motor.MotorConfigPulse;
 import org.myrobotlab.motor.MotorConfigSimpleH;
+import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinArrayControl;
@@ -76,7 +77,7 @@ import org.slf4j.Logger;
  *         analog feedback.
  */
 
-public class DiyServo extends Service implements ServoControl, PinListener {
+public class DiyServo extends Service implements ServoControl, MotorControl, PinListener {
 
 	/**
 	 * Sweeper
@@ -142,9 +143,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	public class MotorUpdater extends Thread {
 
 		double lastOutput = 0;
-
-		public MotorUpdater(String name) {
-			super(String.format("%s.MotorUpdater", name));
+		MotorControl mc;
+		
+		public MotorUpdater(MotorControl mc) {
+			super(String.format("%s.MotorUpdater", mc.getName()));
+			this.mc = mc;
 		}
 
 		@Override
@@ -161,7 +164,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 									processVariable, output));
 							if (output != lastOutput) {
 								// controller.move(output);
-								controller.motorMove((MotorControl) this);
+								controller.motorMove(mc);
 								lastOutput = output;
 							}
 						}
@@ -177,7 +180,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 				}
 			}
 		}
-
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -511,7 +513,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		}
 
 		if (motorUpdater == null) {
-			motorUpdater = new MotorUpdater(this.getName());
+			motorUpdater = new MotorUpdater(this);
 			motorUpdater.run();
 		}
 
@@ -948,5 +950,65 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		meta.addPeer("Pid", "Pid", "PID service");
 
 		return meta;
+	}
+
+	@Override
+	public double getPowerLevel() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setPowerLevel(double power) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public double getPowerOutput() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getTargetPos() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void lock() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void move(double power) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void moveTo(int newPos, Double power) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setEncoder(Encoder encoder) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void stopAndLock() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void unlock() {
+		// TODO Auto-generated method stub
+		
 	}
 }
