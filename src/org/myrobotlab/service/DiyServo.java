@@ -143,9 +143,9 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	public class MotorUpdater extends Thread {
 
 		double lastOutput = 0;
-		MotorControl mc;
+		DiyServo mc;
 		
-		public MotorUpdater(MotorControl mc) {
+		public MotorUpdater(DiyServo mc) {
 			super(String.format("%s.MotorUpdater", mc.getName()));
 			this.mc = mc;
 		}
@@ -160,11 +160,12 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 						if (pid.compute(pidKey)) {
 							double setPoint = pid.getSetpoint(pidKey);
 							double output = pid.getOutput(pidKey);
+							mc.setPowerLevel(output);
 							log.debug(String.format("setPoint(%s), processVariable(%s), output(%s)", setPoint,
 									processVariable, output));
 							if (output != lastOutput) {
 								// controller.move(output);
-								controller.motorMove(mc);
+								controller.motorMove((MotorControl) mc);
 								lastOutput = output;
 							}
 						}
@@ -331,6 +332,11 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	// variable
 	transient MotorUpdater motorUpdater;
 
+	double powerLevel = 0;
+	double maxPower = 1.0;
+	double minPower = -1.0;
+	
+	Mapper powerMap = new Mapper(-1.0, 1.0, -255.0, 255.0);
 	/**
 	 * Constructor
 	 * 
@@ -954,20 +960,17 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 
 	@Override
 	public double getPowerLevel() {
-		// TODO Auto-generated method stub
-		return 0;
+		return powerLevel;
 	}
 
 	@Override
 	public void setPowerLevel(double power) {
-		// TODO Auto-generated method stub
-		
+		this.powerLevel = power;
 	}
 
 	@Override
 	public double getPowerOutput() {
-		// TODO Auto-generated method stub
-		return 0;
+		return powerMap.calc(powerLevel);
 	}
 
 	@Override
