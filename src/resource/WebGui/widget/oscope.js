@@ -31,15 +31,17 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
             var _self = this;
             var name = scope.serviceName;
             var service = mrl.getService(name);
-            var minY = 20;
-            var maxY = 180;
-            // FIXME - possibly screen specific
+            var mode = 'read';
+            // 'read' || 'write'
             var width = 800;
-            var height = 200;
+            var height = 100;
+            var margin = 10;
+            var minY = margin;
+            var maxY = height - margin;
             var scaleX = 1;
             var scaleY = 1;
-            scope.blah = {};
-            scope.blah.display = false;
+            // scope.blah = {};
+            // scope.blah.display = false;
             scope.pinIndex = {};
             var x = 0;
             var gradient = tinygradient([// tinycolor('#ff0000'),       // tinycolor object
@@ -60,7 +62,7 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
             //'gold'                      // named color
             ]);
             scope.oscope = {};
-            scope.oscope.trace = {};
+            scope.oscope.traces = {};
             // display update interfaces
             // defintion stage
             var setTraceButtons = function(pinIndex) {
@@ -75,12 +77,15 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                     if (!pinIndex.hasOwnProperty(key)) {
                         continue;
                     }
-                    scope.oscope.trace[key] = {};
-                    var trace = scope.oscope.trace[key];
+                    scope.oscope.traces[key] = {};
+                    var trace = scope.oscope.traces[key];
                     // adding style
                     var color = colorsHsv[parseInt(key)];
-                    trace.style = {
+                    trace.readStyle = {
                         'background-color': color.toHexString()
+                    };
+                    trace.writeStyle = {
+                        'background-color': '#eee'
                     };
                     trace.color = color;
                     trace.state = false;
@@ -110,14 +115,14 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                     x++;
                     pinArray = inMsg.data[0];
                     for (i = 0; i < pinArray.length; ++i) {
+                        // get pin data & definition
                         pinData = pinArray[i];
                         pinDef = scope.pinIndex[pinData.address];
                         // get correct screen and references
                         var screen = document.getElementById('oscope-address-' + pinData.address);
                         var ctx = screen.getContext('2d');
-                        var trace = scope.oscope.trace[pinData.address];
+                        var trace = scope.oscope.traces[pinData.address];
                         var stats = trace.stats;
-                        ctx.font = "16px Aria";
                         // TODO - sample rate Hz
                         trace.stats.totalSample++;
                         trace.stats.totalValue += pinData.value;
@@ -143,23 +148,25 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                         ctx.strokeStyle = trace.colorHexString;
                         // blank screen
                         // TODO - continuous pan would be better
+                        ctx.stroke();
+                        // blank screen if trace reaches end
                         if (x > width) {
+                            ctx.font = "10px Aria";
                             ctx.rect(0, 0, width, height);
                             ctx.fillStyle = "black";
                             ctx.fill();
                             var highlight = trace.color.getOriginalInput();
                             highlight.s = "90%";
-                            var newColor = tinycolor(highlight);                            
+                            var newColor = tinycolor(highlight);
                             ctx.fillStyle = trace.colorHexString;
                             // TODO - highlight saturtion of text
-                            ctx.fillText('MAX ' + stats.max + '   ' + pinDef.name + ' ' + pinData.address, 10, 20);
-                            ctx.fillText(('AVG ' + (stats.totalValue / stats.totalSample)).substring(0, 11), 10, 98);
-                            ctx.fillText('MIN ' + stats.min, 10, 180);
+                            ctx.fillText('MAX ' + stats.max + '   ' + pinDef.name + ' ' + pinData.address, 10, minY);
+                            ctx.fillText(('AVG ' + (stats.totalValue / stats.totalSample)).substring(0, 11), 10, height / 2);
+                            ctx.fillText('MIN ' + stats.min, 10, maxY);
                             trace.posX = 0;
                         }
                         // draw it
-                        ctx.stroke();
-                        ctx.closePath();                       
+                        ctx.closePath();
                     }
                     // for each pin
                     if (x > width) {
@@ -194,40 +201,49 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                 _self.ctx.scale(scaleX, scaleY);
             }
             ;
-            scope.toggleTrace = function(pinDef) {
-                var trace = scope.oscope.trace[pinDef.address];
-                var highlight = trace.color.getOriginalInput();
+            scope.activateTrace = function(pinDef) {
+                var trace = scope.oscope.traces[pinDef.address];
                 if (trace.state) {
-                    scope.blah.display = false;
-                    // on to off
-                    highlight.s = "40%";
-                    var newColor = color = tinycolor(highlight);
-                    trace.style = {
-                        'background-color': newColor.toHexString()
-                    };
+                    toggleReadButton(trace);
                     mrl.sendTo(name, 'disablePin', pinDef.address);
                     trace.state = false;
                 } else {
-                    scope.blah.display = true;
-                    // off to on
-                    highlight.s = "90%";
-                    var newColor = color = tinycolor(highlight);
-                    trace.style = {
-                        'background-color': newColor.toHexString()
-                    };
+                    toggleReadButton(trace);
                     mrl.sendTo(name, 'enablePin', pinDef.address);
                     trace.state = true;
                 }
             }
             ;
-
+            scope.reset = function() {
+                mrl.sendTo(name, 'disablePins');
+            }
+            ;
+            var toggleReadButton = function(trace) {
+                var highlight = trace.color.getOriginalInput();
+                if (trace.state) {
+                    // scope.blah.display = false;
+                    // on to off
+                    highlight.s = "40%";
+                    var newColor = color = tinycolor(highlight);
+                    trace.readStyle = {
+                        'background-color': newColor.toHexString()
+                    };
+                } else {
+                    // scope.blah.display = true;
+                    // off to on
+                    highlight.s = "90%";
+                    var newColor = color = tinycolor(highlight);
+                    trace.readStyle = {
+                        'background-color': newColor.toHexString()
+                    };
+                }
+            }
+            ;
             // FIXME FIXME FIXME ->> THIS SHOULD WORK subscribeToServiceMethod  <- but doesnt
-
             mrl.subscribeToService(_self.onMsg, name);
             // this siphons off a single subscribe to the webgui
             // so it will be broadcasted back to angular
             mrl.subscribe(name, 'publishPinArray');
-
             mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray');
             // initializing display data      
             setTraceButtons(service.pinIndex);

@@ -74,8 +74,7 @@ public class Incubator extends Service {
   }
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
     LoggingFactory.getInstance().addAppender(Appender.FILE);
 
     Runtime.start("incubator", "Incubator");

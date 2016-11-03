@@ -526,10 +526,6 @@ public class GUIService extends Service implements WindowListener, ActionListene
     }
 
     try {
-
-      // String ret =
-      // HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php",
-      // logon, "file", new File("myrobotlab.log"));
       if (Runtime.noWorky(logon).isInfo()) {
         JOptionPane.showMessageDialog(getFrame(), "log file sent, Thank you", "Sent !", JOptionPane.INFORMATION_MESSAGE);
       } else {

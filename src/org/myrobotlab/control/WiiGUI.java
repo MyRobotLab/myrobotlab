@@ -49,7 +49,7 @@ public class WiiGUI extends ServiceGUI implements ListSelectionListener, VideoGU
 
   VideoWidget video0 = null;
   Graphics cam = null;
-  BufferedImage camImage = null;
+  transient BufferedImage camImage = null;
 
   int width = 1024;
   int height = 768;

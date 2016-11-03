@@ -69,8 +69,7 @@ public class Cron extends Service {
   public ArrayList<Task> tasks = new ArrayList<Task>();
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
       Cron cron = (Cron) Runtime.start("cron", "Cron");// new

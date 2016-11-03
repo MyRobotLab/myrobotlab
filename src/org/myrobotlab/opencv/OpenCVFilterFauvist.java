@@ -41,8 +41,8 @@ public class OpenCVFilterFauvist extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFauvist.class.getCanonicalName());
 
-  IplImage gray = null;
-  IplImage inlines = null;
+  transient IplImage gray = null;
+  transient IplImage inlines = null;
 
   double lowThreshold = 0.0;
   double highThreshold = 50.0;

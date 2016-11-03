@@ -94,10 +94,13 @@ public final class FindFile { // implements FilenameFilter
   public static List<File> findByExtension(String root, String extensions) throws FileNotFoundException {
     return find(root, "([^\\s]+(\\.(?i)(" + extensions + "))$)", true, false);
   }
+  
+  public static List<File> findByExtension(String root, String extensions, boolean recurse) throws FileNotFoundException {
+	    return find(root, "([^\\s]+(\\.(?i)(" + extensions + "))$)", recurse, false);
+  }
 
   public static void main(String... aArgs) throws FileNotFoundException {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.ERROR);
+    LoggingFactory.init(Level.ERROR);
 
     try {
       List<File> files = FindFile.findDirs("./bin");

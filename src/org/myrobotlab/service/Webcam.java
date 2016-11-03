@@ -100,8 +100,7 @@ public class Webcam extends Service {
   }
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
 

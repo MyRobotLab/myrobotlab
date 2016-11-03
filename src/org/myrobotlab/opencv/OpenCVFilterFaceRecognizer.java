@@ -90,8 +90,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private CascadeClassifier mouthCascade;
   // TODO: why the heck do we need to convert back and forth, and is this
   // effecient?!?!
-  private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-  private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
+  transient private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+  transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
   private HashMap<Integer, String> idToLabelMap = new HashMap<Integer, String>();
 

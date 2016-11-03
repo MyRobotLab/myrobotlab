@@ -184,7 +184,7 @@ public class Adafruit16CServoDriverTest {
 		driver.setServo(0, SERVOMAX);
 
 		// begin();
-		driver.setPWMFreq(60);
+		driver.setPWMFreq(0, 60);
 
 		for (int i = SERVOMIN; i < SERVOMAX; ++i) {
 			driver.setPWM(0, 0, i);

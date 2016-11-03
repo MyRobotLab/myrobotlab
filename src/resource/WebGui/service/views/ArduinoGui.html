@@ -1,25 +1,25 @@
 <!-- begin status and control for board to be viewed in above all tabs -->
-<div class="row">
+
 		<div class="col-lg-8">
-		<port service-name="{{service.serial.name}}" ></port>		
+		<port service-name="{{service.serial.name}}" ng-model="formPort" ></port>		
 			     <select ng-model="boardType" ng-change="onBoardChange(boardType)" class="form-control">
-					<option>Uno</option>
-					<option>Mega</option>
+					<option>uno</option>
+					<option>mega</option>
+					<option>megaADK</option>
 				</select>    
 		</div>	
 	  <div class="col-md-4">
 	  </div>			
-</div>
-<div class="row">
+
 	<div class="col-lg-12"><!-- TODO reduce this with show -->
 			{{service.boardType}} {{connectedStatus}} {{versionStatus}} <br>		
 			 <span ng-show="mrlComm.us != null">load {{mrlComm.us}}</span> 
 			 <span ng-show="mrlComm.sram != null">sram {{mrlComm.sram}}</span> 			  
 			 <span ng-show="mrlComm.deviceCount != null">devices {{mrlComm.deviceCount}}</span> 			  
 	</div>
-</div>		
+
 <!-- end status and control for board to be viewed in above all tabs -->
-<div class="row">
+
 <div class="col-lg-12">
 <uib-tabset active="active">
 	<!-- begin -->
@@ -38,11 +38,12 @@
     	<span>Arduino IDE executable</span>
     	
     	<!-- AngularJs preferred access is through an object - most if not all data points should be in $scope.service - so "take" data from there -->
-    	Path<input type="text" class="form-control" ng-model="service.arduinoPath">
+    	Path<input type="text" class="form-control" id="arduinoPath" ng-model="service.arduinoPath">
 
     	<!-- current implementation will not work as a jar -->
     	<!-- button class="btn btn-default pull-right" ng-click="msg.openMrlComm()">Open in IDE</button -->
-    	<button class="btn btn-default pull-right" ng-click="setArduinoPath(service.arduinoPath,portName,service.boardType)" ng-disabled="!portName">Upload</button>
+    	<!-- FIXME - for an successful upload the "FIELDS!" portname, arduinoPath & boardType all need to be filled in -->
+    	<button class="btn btn-default pull-right" ng-click="upload(service.arduinoPath, formPort, boardType)">Upload</button>
     	<button class="btn btn-default pull-right" ng-model="mrlComm.enableBoardStatus" uib-btn-checkbox ng-change="(mrlComm.enableBoardStatus)?msg.enableBoardStatus():msg.disableBoardStatus()">Status</button>
     
 		<pre>
@@ -53,5 +54,4 @@
 	<!-- end -->
 
 </uib-tabset>
-</div>
 </div>

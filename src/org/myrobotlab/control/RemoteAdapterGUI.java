@@ -99,14 +99,14 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
   @Override
   public void attachGUI() {
     subscribe("publishState", "getState", RemoteAdapter.class);
-    subscribe("publishNewConnection", "onNewConnection", Connection.class);
+    subscribe("publishConnect");
     send("broadcastState");
   }
 
   @Override
   public void detachGUI() {
     unsubscribe("publishState", "getState", RemoteAdapter.class);
-    unsubscribe("publishNewConnection", "onNewConnection", Connection.class);
+    unsubscribe("publishConnection", "onNewConnection", Connection.class);
   }
 
   public void getState(final RemoteAdapter remote) {

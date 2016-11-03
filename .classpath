@@ -43,13 +43,6 @@
 	<classpathentry kind="lib" path="/repo/org.drjava.java/20120818/dynamicjava-base.jar"/>
 	<classpathentry kind="lib" path="/repo/org.drjava.java/20120818/plt.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/1.1/tess4j.jar"/>
-	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.2.5/commons-codec-1.6.jar"/>
-	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.2.5/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.2.5/fluent-hc-4.2.5.jar"/>
-	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.2.5/httpclient-4.2.5.jar"/>
-	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.2.5/httpclient-cache-4.2.5.jar"/>
-	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.2.5/httpcore-4.2.4.jar"/>
-	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.2.5/httpmime-4.2.5.jar"/>
 	<classpathentry kind="lib" path="/repo/com.wolfram.alpha/1.1/WolframAlpha-1.1.jar"/>
 	<classpathentry kind="lib" path="/repo/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
 	<classpathentry kind="lib" path="/repo/edu.northwestern.topcodes/1.0/topcodes.jar"/>
@@ -105,7 +98,6 @@
 	<classpathentry kind="lib" path="/repo/net.java.games.jinput/2.0.5/jutils-1.0.0.jar"/>
 	<classpathentry kind="lib" path="build-lib/tools.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/glamour-lwjgl-1.0.8.jar"/>
-	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/guava-17.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/jna-4.2.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/jovr-0.7.0.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/jscience-4.3.1.jar"/>
@@ -154,7 +146,6 @@
 	<classpathentry kind="lib" path="/repo/com.sun.speech.freetts/1.2/freetts.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.1.2/freetts-de-1.0.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.1.2/freetts-en_us-1.0.jar"/>
-	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.5.0/wdtk-client-0.5.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-core.jar"/>
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
@@ -190,11 +181,31 @@
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-api-client-1.22.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-oauth-client-1.22.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-http-client-1.22.0.jar"/>
-	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/jsr305-1.3.9.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-http-client-gson-1.22.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-http-client-jackson2-1.22.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-http-client-jdo-1.22.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/jdo2-api-2.3-eb.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sf.jipcam/0.9.1/jipcam-0.9.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/elasticsearch-2.4.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/lucene-core-5.5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/guava-18.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/jsr166e-1.1.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/joda-time-2.9.4.jar"/>
+	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/t-digest-3.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/hppc-0.7.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/jackson-core-2.8.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-wikibaseapi-0.7.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-datamodel-0.7.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/commons-codec-1.9.jar"/>
+	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/httpclient-4.5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/httpcore-4.4.4.jar"/>
+	<classpathentry kind="lib" path="/repo/org.apache.commons.commons-lang3/3.3.2/commons-lang3-3.3.2.jar"/>
+	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-annotations-2.5.0.jar"/>
+	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-core-2.5.0.jar"/>
+	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-databind-2.5.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-dumpfiles-0.7.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-storage-0.7.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-util-0.7.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

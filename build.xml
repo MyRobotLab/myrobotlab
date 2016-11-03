@@ -84,7 +84,7 @@
 -->
 
 <!-- The MyRobotLab ant build.xml  -->
-<project name="myrobotlab" default="jar" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
+<project name="myrobotlab" default="dist" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
@@ -145,12 +145,10 @@
 	<!-- FIXME - fixme with ivy -->
 	<path id="compile.classpath">
 		<pathelement location="bin" />
-		<pathelement location="${repo}/org.wikidata.wdtk/0.5.0/wdtk-client-0.5.0.jar"/>
 		<pathelement location="${repo}/com.mxgraph.jgraph/1.6.1.2/jgraphx.jar"/>
 		<pathelement location="${repo}/com.sun.java3d/1.5.1/j3dcore.jar"/>
 		<pathelement location="${repo}/com.sun.java3d/1.5.1/j3dutils.jar"/>
 		<pathelement location="${repo}/com.sun.java3d/1.5.1/vecmath.jar"/>
-		<pathelement location="${repo}/com.sun.speech.freetts/1.2/freetts.jar"/>
 		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/batch.jar"/>
 		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/jsapi-1.0-base.jar"/>
 		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/sphinx4.jar"/>
@@ -158,14 +156,12 @@
 		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
 		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
 		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.jar"/>
-		<pathelement location="${repo}/gnu.io.rxtx/2.1-7r2/RXTXcomm.jar"/>
 		<pathelement location="${repo}/javaFlacEncoder.FLAC_FileEncoder/0.1/javaFlacEncoder-0.1.jar"/>
 		<pathelement location="${repo}/javax.speech.recognition/1.0/jsapi.jar"/>
 		<pathelement location="${repo}/javax.vecmath/1.5.1/vecmath.jar"/>
 		<pathelement location="${repo}/javazoom.jl.player/1.0.1/jl1.0.1.jar"/>
 		<pathelement location="${repo}/net.sourceforge.simbad/1.4/simbad-1.4.jar"/>
 		<pathelement location="${repo}/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar"/>
-		<pathelement location="${repo}/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
 		<pathelement location="${repo}/org.op.chess/1.0.0/ChessBoard.jar"/>
 		<pathelement location="${repo}/org.python.core/2.7.0/jython-2.7.0.jar"/>
 		<pathelement location="${repo}/org.tritonus.share.sampled.floatsamplebuffer/0.3.6/tritonus_share-0.3.6.jar"/>
@@ -179,26 +175,15 @@
 		<pathelement location="${repo}/com.sun.mail/1.4.5/smtp.jar"/>
 		<pathelement location="${repo}/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar"/>
 		<pathelement location="${repo}/org.fife.autocomplete/2.0.4/autocomplete.jar"/>
-		<pathelement location="${repo}/com.googlecode.jssc/2.8.0/jssc-2.8.0.jar"/>
 		<pathelement location="${repo}/com.googlecode.chatterbot/1.2.1/chatter-bot-api.jar"/>
-		<pathelement location="${repo}/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-core.jar"/>
-		<pathelement location="${repo}/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
 		<pathelement location="${repo}/it.sauronsoftware.cron4j/2.2.5/cron4j-2.2.5.jar"/>
 		<pathelement location="${repo}/org.drjava.java/20120818/asm-3.1.jar"/>
 		<pathelement location="${repo}/org.drjava.java/20120818/dynamicjava-base.jar"/>
 		<pathelement location="${repo}/org.drjava.java/20120818/plt.jar"/>
 		<pathelement location="${repo}/net.sourceforge.tess4j/1.1/tess4j.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/commons-codec-1.6.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/commons-logging-1.1.1.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/fluent-hc-4.2.5.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/httpclient-4.2.5.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/httpclient-cache-4.2.5.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/httpcore-4.2.4.jar"/>
-		<pathelement location="${repo}/org.apache.commons.httpclient/4.2.5/httpmime-4.2.5.jar"/>
 		<pathelement location="${repo}/com.wolfram.alpha/1.1/WolframAlpha-1.1.jar"/>
 		<pathelement location="${repo}/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
 		<pathelement location="${repo}/edu.northwestern.topcodes/1.0/topcodes.jar"/>
-
 		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-core-4.1.6.jar"/>
 		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-tcp-4.1.6.jar"/>
 		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-im-4.1.6.jar"/>
@@ -206,117 +191,105 @@
 		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/jxmpp-core-0.4.2.jar"/>
 		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/jxmpp-util-cache-0.4.2.jar"/>
 		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-java7-4.1.6.jar"/>
-		
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-async-3.0.5.jar"/>
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-core-3.0.5.jar"/>
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-examples-3.0.5.jar"/>
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-media-support-3.0.5.jar"/>
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-stream-3.0.5.jar"/>
 		<pathelement location="${repo}/com.googlecode.simpleopenni/1.96/SimpleOpenNI.jar"/>
-		<pathelement location="${repo}/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar"/>
-		<pathelement location="${repo}/org.alicebot.ab/0.0.1-kw/program-ab-kw-0.0.1.jar"/>
-		<pathelement location="${repo}/org.json/20090211/json-20090211.jar"/>
 		<pathelement location="${repo}/com.leapmotion/2.1.3/LeapJava.jar"/>
 		<pathelement location="${repo}/se.comhem.chess/1.1.2/cuckoo112.jar"/>
 		<pathelement location="${repo}/javazoom.spi/1.9.5/mp3spi1.9.5.jar"/>
 		<pathelement location="${repo}/org.junit/4.11/hamcrest-core-1.3.jar"/>
 		<pathelement location="${repo}/org.apache.solr/4.10.2/noggit-0.5.jar"/>
+		<pathelement location="${repo}/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar"/>
 		<pathelement location="${repo}/org.apache.solr/4.10.2/solr-solrj-4.10.2.jar"/>
 		<pathelement location="${repo}/org.apache.solr/4.10.2/commons-io-2.3.jar"/>
 		<pathelement location="${repo}/org.eclipse.paho/1.0/org.eclipse.paho.client.mqttv3_1.0.0.jar"/>
 		<pathelement location="${repo}/org.junit/4.11/junit-4.11.jar"/>
 		<pathelement location="${repo}/com.google.gson/2.2.4/gson-2.2.4.jar"/>
-		<pathelement location="${repo}/net.java.games.jinput/20120914/jinput.jar"/>
+		<pathelement location="${repo}/net.java.games.jinput/2.0.5/jinput-2.0.5.jar"/>
+		<pathelement location="${repo}/net.java.games.jinput/2.0.5/jinput-platform-2.0.5-natives-windows.jar"/>
 		<pathelement location="${repo}/io.netty/3.10.0/netty-3.10.0.Final.jar"/>
-
 		<pathelement location="${repo}/org.atmosphere.nettosphere/2.3.0/geronimo-servlet_3.0_spec-1.0.jar"/>
 		<pathelement location="${repo}/org.atmosphere.nettosphere/2.3.0/nettosphere-assembly-2.3.0.jar"/>
 		<pathelement location="${repo}/org.atmosphere.nettosphere/2.3.0/wasync-2.1.3-20150917-all.jar"/>
-		
 		<pathelement location="${repo}/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-1.0-20150502.231737-1-windows-x86_64.jar"/>
 		<pathelement location="${repo}/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-0.11.jar"/>
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-server-7.6.13.v20130916.jar"/>
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-servlet-7.6.13.v20130916.jar"/>
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-util-7.6.13.v20130916.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/marytts-runtime-5.1.2.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/marytts-common-5.1.2.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/marytts-signalproc-5.1.2.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/emotionml-checker-java-1.1.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/jtok-core-1.9.1.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/commons-colleciton-3.2.1.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/commons-lang-2.6.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/hsqldb-2.0.0.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/log4j-1.2.16.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/freetts-de-1.0.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/freetts-en_us-1.0.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/icu4j-54.1.1.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/voice-cmu-slt-hsmm-5.1.2.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-en-5.1.2.jar"/>
+		<pathelement location="${repo}/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
+		<pathelement location="${repo}/com.googlecode.jssc/2.8.0/jssc-2.8.0.jar"/>
+		<pathelement location="${repo}/gnu.io.rxtx/2.1-7r2/RXTXcomm.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-de-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-en-5.1.2.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-fr-5.1.2.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-it-5.1.2.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-ru-5.1.2.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-sv-5.1.2.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-te-5.1.2.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-tr-5.1.2.jar"/>
-		
+		<pathelement location="${repo}/marytts/5.1.2/voice-cmu-slt-hsmm-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/icu4j-54.1.1.jar"/>
+		<pathelement location="${repo}/org.jsoup/1.8.3/jsoup-1.8.3.jar"/>
+		<pathelement location="${repo}/net.java.games.jinput/2.0.5/jutils-1.0.0.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/glamour-lwjgl-1.0.8.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jna-4.2.0.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jovr-0.7.0.0.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jscience-4.3.1.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/lwjgl_util-2.9.3.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/lwjgl-2.9.3.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/lwjgl-platform-2.9.3-natives-windows.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/oria-resources-1.0.4.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/slick-util.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/xres-1.0.3.jar"/>
 		<pathelement location="${repo}/org.slf4j.logback/1.1.3/logback-classic-1.1.3.jar"/>
 		<pathelement location="${repo}/org.slf4j.logback/1.1.3/logback-core-1.1.3.jar"/>
 		<pathelement location="${repo}/org.slf4j.logback/1.1.3/slf4j-api-1.7.12.jar"/>
-		
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/math-1.0.4.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.1/javacpp.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.1/javacv.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.1/opencv.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.1/opencv-windows-x86_64.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.1/opencv-macosx-x86_64.jar"/>
-		
-		<pathelement location="${repo}/com.thalmic.myo/0.9.0/myo-java-0.9.1-SNAPSHOT.jar"/>
-
-		<!-- oculus stuff for display.  TODO: clean and re-order these -->
-		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jovr-0.7.0.0.jar"/>
-		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jna-4.2.0.jar"/>
-		<pathelement location="${repo}/org.saintandreas.jovr/0.7/lwjgl-2.9.3.jar"/>
-		<pathelement location="${repo}/org.saintandreas.jovr/0.7/lwjgl_util-2.9.3.jar"/>
-		<pathelement location="${repo}/org.saintandreas.jovr/0.7/oria-resources-1.0.4.jar"/>
-		<pathelement location="${repo}/org.saintandreas.jovr/0.7/xres-1.0.3.jar"/>
-		<pathelement location="${repo}/org.saintandreas.jovr/0.7/slick-util.jar"/>
-		<pathelement location="${repo}/org.saintandreas.jovr/0.7/glamour-lwjgl-1.0.8.jar"/>
-		<pathelement location="${repo}/org.saintandreas.jovr/0.7/math-1.0.4.jar"/>
-		<pathelement location="${repo}/org.saintandreas.jovr/0.7/guava-17.0.jar"/>
-		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jscience-4.3.1.jar"/>
-		<!-- end oculus stuff.. TODO: clean it up! -->
-		
+		<pathelement location="${repo}/org.bytedeco.javacv/1.1/ffmpeg.jar"/>
+		<pathelement location="${repo}/org.bytedeco.javacv/1.1/ffmpeg-windows-x86_64.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/webcam-capture-0.3.10.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/bridj-0.6.2.jar"/>
-		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/sosia.jar"/>
-	
-                <!-- MJpeg frame grabber -->
-		<pathelement location="${repo}/net.sf.jipcam/0.9.1/jipcam-0.9.1.jar"/>
-	
 		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-arch-x86_64-w64-mingw32.jar"/>
 		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-noarch-5.4.jar"/>
 		<pathelement location="${repo}/com.coobird.thumbnail/0.4.2/thumbnailator-0.4.2-all.jar"/>
-		
-		<!--feed4j stuff -->
 		<pathelement location="${repo}/feed4j/1.0/feed4j.jar"/>
 		<pathelement location="${repo}/feed4j/1.0/dom4j-1.6.1.jar"/>
 		<pathelement location="${repo}/feed4j/1.0/nekohtml.jar"/>
 		<pathelement location="${repo}/feed4j/1.0/xercesImpl.jar"/>
 		<pathelement location="${repo}/feed4j/1.0/xml-apis.jar"/>
-
-		<!-- for the document processing pipeline.. it'd be nice to refactor this out. -->
+		<pathelement location="${repo}/com.thalmic.myo/0.9.0/myo-java-0.9.1-SNAPSHOT.jar"/>
 		<pathelement location="${repo}/com.thoughtworks.xstream/1.4.7/xstream-1.4.7.jar"/>
 		<pathelement location="${repo}/org.apache.tika/1.11/tika-core-1.11.jar"/>
 		<pathelement location="${repo}/net.sf.opencsv/2.3/opencsv-2.3.jar"/>
-		<pathelement location="${repo}/org.jsoup/1.8.3/jsoup-1.8.3.jar"/> 
-		<pathelement location="${repo}/net.objecthunter.exp4j/0.4.7/exp4j-0.4.7.jar"/>
-        <!-- for OpenNLP stage in pipeline -->  
-        <pathelement location="${repo}/opennlp/1.6/opennlp-tools-1.6.0.jar"/>
-
-		<pathelement location="${repo}/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>	
-
+		<pathelement location="${repo}/opennlp/1.6/opennlp-tools-1.6.0.jar"/>
+		<pathelement location="${repo}/opennlp/1.6/opennlp-uima-1.6.0.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-runtime-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-common-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/commons-lang-2.6.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-signalproc-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/log4j-1.2.16.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/hsqldb-2.0.0.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/commons-collections-3.2.1.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/jtok-core-1.9.1.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/emotionml-checker-java-1.1.jar"/>
+		<pathelement location="${repo}/com.sun.speech.freetts/1.2/freetts.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/freetts-de-1.0.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/freetts-en_us-1.0.jar"/>
+		<pathelement location="${repo}/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>
+		<pathelement location="${repo}/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-core.jar"/>
+		<pathelement location="${repo}/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
 		<pathelement location="${repo}/org.node/0.1.1/nodyn-0.1.1-20141121.193443-283.jar"/>
-		
+		<pathelement location="${repo}/org.json/20090211/json-20090211.jar"/>
+		<pathelement location="${repo}/org.alicebot.ab/0.0.1-kw/program-ab-kw-0.0.1.jar"/>
+		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/sosia.jar"/>
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-android-0.23.jar"/>
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-calibration-0.23.jar"/>
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-feature-0.23.jar"/>
@@ -340,18 +313,37 @@
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/xmlpull-1.1.3.1.jar"/>
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/xpp3_min-1.1.4c.jar"/>
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/xstream-1.4.7.jar"/>
-
+		<pathelement location="${repo}/net.objecthunter.exp4j/0.4.7/exp4j-0.4.7.jar"/>
 		<pathelement location="${repo}/com.google.vision/1.22.0/google-api-services-vision-v1-rev16-1.22.0.jar"/>
-		
 		<pathelement location="${repo}/com.google.client/1.22.0/google-api-client-1.22.0.jar"/>
 		<pathelement location="${repo}/com.google.client/1.22.0/google-oauth-client-1.22.0.jar"/>
 		<pathelement location="${repo}/com.google.client/1.22.0/google-http-client-1.22.0.jar"/>
-		<pathelement location="${repo}/com.google.client/1.22.0/jsr305-1.3.9.jar"/>
 		<pathelement location="${repo}/com.google.client/1.22.0/google-http-client-gson-1.22.0.jar"/>
 		<pathelement location="${repo}/com.google.client/1.22.0/google-http-client-jackson2-1.22.0.jar"/>
 		<pathelement location="${repo}/com.google.client/1.22.0/google-http-client-jdo-1.22.0.jar"/>
 		<pathelement location="${repo}/com.google.client/1.22.0/jdo2-api-2.3-eb.jar"/>
-		
+		<pathelement location="${repo}/net.sf.jipcam/0.9.1/jipcam-0.9.1.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/elasticsearch-2.4.0.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/lucene-core-5.5.2.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/guava-18.0.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/jsr166e-1.1.0.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/joda-time-2.9.4.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/t-digest-3.0.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/hppc-0.7.1.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/jackson-core-2.8.1.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.7.0/wdtk-wikibaseapi-0.7.0.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.7.0/wdtk-datamodel-0.7.0.jar"/>
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/commons-codec-1.9.jar"/>
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/commons-logging-1.2.jar"/>
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/httpclient-4.5.2.jar"/>
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/httpcore-4.4.4.jar"/>
+		<pathelement location="${repo}/org.apache.commons.commons-lang3/3.3.2/commons-lang3-3.3.2.jar"/>
+		<pathelement location="${repo}/com.fasterxml.jackson.core/2.5.0/jackson-annotations-2.5.0.jar"/>
+		<pathelement location="${repo}/com.fasterxml.jackson.core/2.5.0/jackson-core-2.5.0.jar"/>
+		<pathelement location="${repo}/com.fasterxml.jackson.core/2.5.0/jackson-databind-2.5.0.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.7.0/wdtk-dumpfiles-0.7.0.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.7.0/wdtk-storage-0.7.0.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.7.0/wdtk-util-0.7.0.jar"/>
 
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
@@ -552,7 +544,7 @@
 		
 		<!-- python -->
 		<unzip src="${repo}/org.python.core/2.7.0/jython-2.7.0.jar" dest="${build}/classes" />
-		
+				
 		<!-- for client -->
 
 	</target>
@@ -578,11 +570,7 @@
 	         <arg value="${build}/classes/resource/framework"/>
 	         <classpath>
 	         	<path refid="compile.classpath"/>
-	         	<path path="${build}/classes"/>
-	           <!-- pathelement location="dist/test.jar"/ 	         	
-		           <pathelement refid="compile.classpath"/>
-		           <pathelement path="${build}/classes"/>
-	         	-->
+	         	<path path="${build}/classes"/>	          
 	         </classpath>
 		</java>
 		

@@ -1,12 +1,8 @@
 package org.myrobotlab.service;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,9 +36,7 @@ public class Cli extends Service {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(Cli.class);
-  // public final static HashSet<String> cmdSet = new HashSet<String>();
-
-  // commands
+ 
   public final static String cd = "cd";
   public final static String pwd = "pwd";
   public final static String ls = "ls";
@@ -50,27 +44,25 @@ public class Cli extends Service {
   public final static String question = "?";
 
   transient private HashMap<String, Pipe> pipes = new HashMap<String, Pipe>();
-  // my "real" in & out
+  // my "real" std:in & std:out
   transient Decoder in;
   transient OutputStream os;
 
   ArrayList<String> history = new ArrayList<String>();
 
-  transient FileOutputStream fos;
+  // transient FileOutputStream fos;
 
   String cwd = "/";
-  // String prompt = "(:";
   String prompt = "#";
 
   // active relay - could be list - but lets start simple
   String attached = null;
   // transient OutputStream attachedIn = null;
-  transient BufferedWriter attachedIn = null;
-
+  transient OutputStream attachedIn = null;
   transient StreamGobbler attachedOut = null;
 
   // ================= Decoder Begin =================
-
+  // FIXME - tab to autoComplete !
   // FIXME - needs refactor / merge with StreamGobbler
   // FIXME - THIS CONCEPT IS SOOOOOO IMPORTANT
   // - its a Central Point Controller - where input (any InputStream) can send
@@ -86,10 +78,10 @@ public class Cli extends Service {
     // TODO ecoding defaults & methods to change
     // FIXME - need reference to OutputStream to return
     String inputEncoding = CodecUtils.TYPE_URI; // REST JSON
-    String outputEncoding = CodecUtils.TYPE_JSON; // REST JSON
+    String outputEncoding = CodecUtils.TYPE_JSON; // JSON / JSON MSG
 
     public Decoder(Cli cli, String name, InputStream is) {
-      super(String.format("Decoder_%s", name));
+      super(String.format("cli-decoder-%s", name));
       this.cli = cli;
       this.name = name;
       this.is = is;
@@ -100,40 +92,36 @@ public class Cli extends Service {
     @Override
     public void run() {
       try {
-        InputStreamReader in = new InputStreamReader(is);
-        // BufferedReader br = new BufferedReader(in); // < FIXME ? is
-        // Buffered
-        // Necessary?
         writePrompt();
-
         String line = null;
+        int c = 0;
 
-        char c = 0;
-
-        // FIXME FIXME FIXME - line.split(" ") - invoke(line[0], line)
-        // "One Handler to Rule them All !"
-        while ((c = (char) in.read()) != -1) {
+        while ((c = is.read()) != -1) {
 
           // handle up arrow - tab autoComplet - and regular \n
           // if not one of these - then append the next character
           if (c != '\n') {
-            sb.append(c);
+            sb.append((char)c);
             continue;
           } else {
             line = sb.toString();
             sb.setLength(0);
           }
 
-          // FIXME - must read char by char to process up-arrow history commands
-          // in.read()
-          // FIXME - tab to autoComplete !
           line = line.trim();
+          
+          // order of precedence
+          // 1. execute cli methods
+          // 2. execute service methods
+          // 3. execute Runtime methods
 
           if (line.length() == 0) {
             writePrompt();
             continue;
           }
 
+          // FIXME - don't need a buffered writer here
+          // everything should be OutputStream
           if (attachedIn != null) {
             if ("detach".equals(line)) {
               // multiple in future mabye
@@ -143,8 +131,7 @@ public class Cli extends Service {
 
             // relaying command to another process
             try {
-              attachedIn.write(line);
-              attachedIn.newLine();
+              attachedIn.write(String.format("%s\n",line).getBytes());
               attachedIn.flush();
             } catch (Exception e) {
               log.error("std:in ---(agent)---X---> process ({})", name);
@@ -216,22 +203,7 @@ public class Cli extends Service {
                 // reference !!!
                 out(CodecUtils.toJson(ret).getBytes());
               }
-              /*
-               * Old Way Message msg = Encoder.decodePathInfo(path); if (msg !=
-               * null) { info("incoming msg[%s]", msg);
-               * 
-               * // get service - is this a security breech ? ServiceInterface
-               * si = Runtime.getService(msg.name); Object ret =
-               * si.invoke(msg.method, msg.data);
-               * 
-               * // want message ? or just data ? // configurable ... // if you
-               * data with tags - you might as well do // message ! // - return
-               * only callbacks this way -> // si.in(msg); if (ret != null &&
-               * ret instanceof Serializable) { // configurable use log or
-               * system.out ? // FIXME - make getInstance configurable //
-               * Encoder // reference !!! out(Encoder.toJson(ret).getBytes()); }
-               * }
-               */
+              
             } catch (Exception e) {
               Logging.logError(e);
             }
@@ -244,10 +216,12 @@ public class Cli extends Service {
         log.error("leaving Decoder");
         Logging.logError(e);
       }
+      
       /*
        * DON'T CLOSE - WE MAY WANT TO RE-ATTACH finally {
        * FileIO.closeStream(is); }
        */
+      log.info("LEAVING STDIN READING!");
     }
 
   }
@@ -280,8 +254,7 @@ public class Cli extends Service {
       }
 
       // relaying command to another process
-      attachedIn.write(line);
-      attachedIn.newLine();
+      attachedIn.write(String.format("%s\n",line).getBytes());
       attachedIn.flush();
       // writePrompt();
       return null;
@@ -436,7 +409,7 @@ public class Cli extends Service {
     Pipe pipe = pipes.get(name);
     attached = name;
     // stdin will now be relayed and not interpreted
-    attachedIn = new BufferedWriter(new OutputStreamWriter(pipe.in));
+    attachedIn = pipe.in;
     // need to fire up StreamGobbler
     // (new Process) --- stdout --> (Agent Process) StreamGobbler --->
     // stdout
@@ -446,9 +419,11 @@ public class Cli extends Service {
       outRelay.add(os);
     }
 
+    /*
     if (fos != null) {
       outRelay.add(fos);
     }
+    */
 
     attachedOut = new StreamGobbler(pipe.out, outRelay, name);
     attachedOut.start();
@@ -483,16 +458,17 @@ public class Cli extends Service {
 
     try {
       // if I'm an agent I'll do dual logging
+    	/*
       if (fos == null && Runtime.isAgent()) {
         fos = new FileOutputStream("agent.log");
       }
+      */
     } catch (Exception e) {
       Logging.logError(e);
     }
   }
 
   public String cd(String path) {
-    // in.cwd = path;
     cwd = path;
     return path;
   }
@@ -558,10 +534,12 @@ public class Cli extends Service {
       os.flush();
     }
 
+    /*
     if (fos != null) {
       fos.write(data);
       fos.flush();
     }
+    */
     // }
     invoke("stdout", data);
   }
@@ -598,10 +576,12 @@ public class Cli extends Service {
       }
       os = null;
 
+      /*
       if (fos != null) {
         fos.close();
       }
       fos = null;
+      */
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -624,8 +604,7 @@ public class Cli extends Service {
   }
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel("ERROR");
+    LoggingFactory.init("ERROR");
 
     try {
 

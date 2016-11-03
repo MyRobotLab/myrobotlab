@@ -160,8 +160,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   }
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
       Runtime.start("webgui", "WebGui");

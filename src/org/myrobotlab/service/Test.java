@@ -464,7 +464,7 @@ public class Test extends Service implements StatusListener {
     /*
      * Status status = Status.info("========TESTING============="); log.info(
      * "===========INFO TESTING========"); log.info(String.format(
-     * "TEST PID = %s", Runtime.getPid())); // big hammer System.exit(0); return
+     * "TEST Pid = %s", Runtime.getPid())); // big hammer System.exit(0); return
      * status;
      */
 
@@ -917,8 +917,7 @@ public class Test extends Service implements StatusListener {
   // publishState() - filter on Errors
   // FIXME - FILE COMMUNICATION !!!!
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
     try {
 
       Test test = (Test) Runtime.start("test", "Test");

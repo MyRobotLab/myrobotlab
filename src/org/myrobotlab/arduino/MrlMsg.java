@@ -11,6 +11,16 @@ public class MrlMsg {
 	public transient final static Logger log = LoggerFactory.getLogger(MrlMsg.class);
 	
 	Integer msgType;
+	/**
+	 * device id - this identifies the device on the MrlComm deviceList
+	 * For example a servo might be device id 1, in that case this variable should be 1
+	 * to identify which device the message should be routed to
+	 * 
+	 * Arduino system calls (e.g. pinMode, digitalWrite, analogWrite) will have
+	 * device id == null
+	 * 
+	 */
+	Integer id; 
 
 	/**
 	 * data are really bytes - but signed byte is such a PITA - we will use ints
@@ -42,6 +52,12 @@ public class MrlMsg {
 	}
 
 	// add msg name or id ???
+
+	public MrlMsg(int msgType, int id) {
+		this.msgType = msgType;
+		this.id = id;
+		dataBuffer.add(id);
+	}
 
 	/**
 	 * default add a byte of data

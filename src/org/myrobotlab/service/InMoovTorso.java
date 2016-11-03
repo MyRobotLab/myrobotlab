@@ -25,8 +25,7 @@ public class InMoovTorso extends Service {
   transient public Arduino arduino;
 
   static public void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
     try {
       InMoovTorso torso = (InMoovTorso) Runtime.createAndStart("torso", "InMoovTorso");
       torso.connect("COM4");
@@ -45,22 +44,6 @@ public class InMoovTorso extends Service {
     lowStom = (Servo) createPeer("lowStom");
     arduino = (Arduino) createPeer("arduino");
 
-    // connection details
-    /*
-    topStom.setPin(27);
-    midStom.setPin(28);
-    lowStom.setPin(29);
-
-    topStom.setController(arduino);
-    midStom.setController(arduino);
-    lowStom.setController(arduino);
-    */
-    
-    // NEW WAY
-//    arduino.servoAttach(topStom, 27);
-//    arduino.servoAttach(topStom, 28);
-//    arduino.servoAttach(topStom, 29);
-
     topStom.setMinMax(60, 120);
     midStom.setMinMax(0, 180);
     lowStom.setMinMax(0, 180);
@@ -68,6 +51,9 @@ public class InMoovTorso extends Service {
     topStom.setRest(90);
     midStom.setRest(90);
     lowStom.setRest(90);
+
+    setVelocity(5,5,5);
+  
   }
 
   /**
@@ -111,25 +97,27 @@ public class InMoovTorso extends Service {
       return false;
     }
 
-    topStom.attach(arduino, 27);
-    midStom.attach(arduino, 28);
-    lowStom.attach(arduino, 29);
+    topStom.attach(arduino, 27, topStom.getRest(), topStom.getVelocity());
+    midStom.attach(arduino, 28, midStom.getRest(), midStom.getVelocity());
+    lowStom.attach(arduino, 29, lowStom.getRest(), lowStom.getVelocity());
 
-    setSpeed(0.7, 0.7, 0.7);
-    rest();
-    sleep(4000);
-    setSpeed(1.0, 1.0, 1.0);
     broadcastState();
     return true;
   }
 
   public void detach() {
-    topStom.detach();
-    sleep(InMoov.attachPauseMs);
-    midStom.detach();
-    sleep(InMoov.attachPauseMs);
-    lowStom.detach();
-    sleep(InMoov.attachPauseMs);
+    if (topStom != null) {
+      topStom.detach();
+      sleep(InMoov.attachPauseMs);
+    } 
+    if (midStom != null) {
+      midStom.detach();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (lowStom != null) {
+      lowStom.detach();
+      sleep(InMoov.attachPauseMs);
+    }
   }
 
   public long getLastActivityTime() {
@@ -278,4 +266,10 @@ public class InMoovTorso extends Service {
 
     return meta;
   }
+
+  public void setVelocity(Integer topStom, Integer midStom, Integer lowStom) {
+    this.topStom.setVelocity(topStom);
+    this.midStom.setVelocity(midStom);
+    this.lowStom.setVelocity(lowStom);
+   }
 }

@@ -20,8 +20,7 @@ public class BeagleBoardBlack extends Service {
   public final static Logger log = LoggerFactory.getLogger(BeagleBoardBlack.class);
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.WARN);
+    LoggingFactory.init(Level.WARN);
 
     try {
       BeagleBoardBlack bbb = new BeagleBoardBlack("bbb");

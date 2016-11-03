@@ -228,12 +228,16 @@
     <template>He's a character from Guitar Hero!</template>
   </category>
   
-  <!--  call out to pannous. -->
+
+  <!--  call out to pannous.  This seems completely busted at the moment.
+        pannous is asking for SSL, but their cert is bogus, and it's not returning anything
+        useful any more.  kwatters: I recommend we implement our own search interface for  
+        looking up pictures of things. -->
   <category>
-    <pattern>SHOW ME *</pattern>
-    <template><srai>PICTUREBLAB <star/></srai>
-    <sraix default="PICFAILED" hint="pic" service="pannous">SHOW ME <star/></sraix>
+    <pattern>SHOW ME INMOOV</pattern>
+    <template>Search of pannous returned this: <sraix default="PICFAILED" hint="pic" service="pannous">SHOW ME <star/></sraix>
     </template>
   </category>
+
   
 </aiml>

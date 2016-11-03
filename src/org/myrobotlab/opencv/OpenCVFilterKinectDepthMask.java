@@ -74,14 +74,14 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepthMask.class.getCanonicalName());
 
-  IplImage kinectDepth = null;
-  IplImage ktemp = null;
-  IplImage ktemp2 = null;
-  IplImage black = null;
-  IplImage itemp = null;
-  IplImage itemp2 = null;
-  IplImage gray = null;
-  IplImage mask = null;
+  transient IplImage kinectDepth = null;
+  transient IplImage ktemp = null;
+  transient IplImage ktemp2 = null;
+  transient IplImage black = null;
+  transient IplImage itemp = null;
+  transient IplImage itemp2 = null;
+  transient IplImage gray = null;
+  transient IplImage mask = null;
 
   // Make memory - do not optimize - will only lead to bugs
   // the correct optimization would be NOT TO PUBLISH

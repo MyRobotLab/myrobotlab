@@ -25,8 +25,7 @@ public class ArduinoChaosTest {
 
     boolean upload = false;
     
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     String port = "COM30";
     String board = Arduino.BOARD_TYPE_UNO;
@@ -82,8 +81,8 @@ public class ArduinoChaosTest {
     arduino.servoSweepStart(servo);
     Thread.sleep(1000);
     arduino.servoSweepStop(servo);
-    Thread.sleep(1000);
-    arduino.servoEventsEnabled(servo, true);
+
+
     Thread.sleep(1000);
     // TODO : this blows up
     // arduino.servoWrite(servo);

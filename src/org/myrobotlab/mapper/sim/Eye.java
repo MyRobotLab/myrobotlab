@@ -65,7 +65,7 @@ public class Eye extends SensorDevice {
    */
   public class EyeJPanel extends JPanel {
     private static final long serialVersionUID = 1L;
-    BufferedImage bim;
+    transient BufferedImage bim;
 
     public EyeJPanel() {
       Dimension d = new Dimension(imageWidth, imageHeight);
@@ -130,7 +130,7 @@ public class Eye extends SensorDevice {
 
   protected int tempRGBABuffer[];
   // the rendered offscreen image
-  BufferedImage visionImage;
+  transient BufferedImage visionImage;
 
   protected int imageWidth;
 

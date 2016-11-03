@@ -234,8 +234,7 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   public static void main(String[] args) throws Exception {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     final String KEY_FILE = "c:/tempPass/howto.key";
     final String PWD_FILE = "c:/tempPass/howto.properties";

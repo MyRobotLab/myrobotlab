@@ -1,0 +1,35 @@
+<div class="row">
+  <div class="col-lg-12">
+
+   <!-- simple dropdown -->
+  <div class="input-group">
+  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
+      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isControllerSet">controller<span class="caret"></span></a>
+      <ul uib-dropdown-menu>
+        <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)"><a href>{{possibleController}}</a></li>
+      </ul>
+  </span>
+   
+   <input type="text" ng-readonly="true" class="form-control" ng-model="controllerName"><!-- FIXME - type-ahead -->  
+     
+  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
+      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isControllerSet">deviceBus<span class="caret"></span></a>
+      <ul uib-dropdown-menu>
+        <li ng-repeat="possibledeviceBus in deviceBusList" ng-click="setDeviceBus(possibledeviceBus)"><a href>{{possibledeviceBus}}</a></li>
+      </ul>
+  </span>
+   <input type="text" ng-readonly="true" class="form-control" ng-model="deviceBus"><!-- FIXME - type-ahead -->  
+   
+     <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
+      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isControllerSet">deviceAddress<span class="caret"></span></a>
+      <ul uib-dropdown-menu>
+        <li ng-repeat="possibleDeviceAddress in deviceAddressList" ng-click="setDeviceAddress(possibleDeviceAddress)"><a href>{{possibleDeviceAddress}}</a></li>
+      </ul>
+  </span>
+   <input type="text" ng-readonly="true" class="form-control" ng-model="deviceAddress"><!-- FIXME - type-ahead -->  
+   
+   <span class="input-group-btn">
+         <button class="btn btn-default" ng-show="isControllerSet"  ng-click="msg.unsetController()">unsetController</button>
+         <button class="btn btn-default" ng-show="!isControllerSet"  ng-click="msg.setController(controllerName,deviceBus,deviceAddress)">setController</button>  
+         
+  </div>

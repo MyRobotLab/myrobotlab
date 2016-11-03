@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.httpclient.HttpException;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -42,7 +42,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -71,10 +72,6 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
 
   private static final long serialVersionUID = 1L;
 
-  // this httpclient should be thread safe -
-  // transient org.apache.commons.httpclient.De client = null;
-  // DefaultHttpClient client = new DefaultHttpClient();
-
   public final static Logger log = LoggerFactory.getLogger(HttpClient.class);
 
   /**
@@ -90,11 +87,11 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     ServiceType meta = new ServiceType(HttpClient.class.getCanonicalName());
     meta.addDescription("an HTTP client, used to fetch information on the web");
     meta.addCategory("network");
-    meta.addDependency("org.apache.commons.httpclient", "4.2.5");
+    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
     return meta;
   }
 
-  transient DefaultHttpClient client;
+  transient CloseableHttpClient client;
 
   transient HashMap<String, String> formFields = new HashMap<String, String>();
 
@@ -142,7 +139,7 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
       return new String(response.data);
     }
     return null;
-  }
+  } 
 
   public byte[] getBytes(String uri) throws ClientProtocolException, IOException {
     return processResponse((HttpUriRequest) new HttpGet(uri), null).data;
@@ -189,7 +186,7 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     return processResponse((HttpUriRequest) new HttpPost(uri), fields).data;
   }
 
-  public HttpData processResponse(HttpUriRequest request, HashMap<String, String> fields) throws HttpException, IOException {
+  public HttpData processResponse(HttpUriRequest request, HashMap<String, String> fields) throws IOException {
     HttpData data = new HttpData(request.getURI().toString());
     if (fields == null) {
 
@@ -254,7 +251,7 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     super.startService();
     if (client == null) {
       // new MultiThreadedHttpConnectionManager()
-      client = new DefaultHttpClient();
+      client = HttpClients.createDefault();
     }
   }
 
@@ -268,8 +265,7 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   // TODO - authentication !
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
 

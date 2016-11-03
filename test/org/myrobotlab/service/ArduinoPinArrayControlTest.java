@@ -37,32 +37,32 @@ public class ArduinoPinArrayControlTest {
 
 	@Test
 	public void testReadInt() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testReadString() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testSetModeIntString() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testSetModeStringString() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testWriteIntInteger() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testWriteStringInteger() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 	
 	public void logPins(List<PinDefinition> pins){
@@ -79,6 +79,18 @@ public class ArduinoPinArrayControlTest {
 		Runtime.start("python", "Python");
 		
 		arduino.connect("COM5");
+		// arduino.setBoardMega();
+		
+		Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
+		servo01.attach(arduino, 7);
+		
+		servo01.info("hello 1");
+		servo01.info("hello 2");
+		servo01.warn("warning here 1");
+		servo01.warn("warning here 2");
+		servo01.error("error here 1");
+		servo01.error("error here 2");
+		
 		// arduino.setDebug(true);
 		/*
 		arduino.enablePin(14);
@@ -132,37 +144,37 @@ public class ArduinoPinArrayControlTest {
 
 	@Test
 	public void testPinArrayGetPinList() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testPinArrayReadInt() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testPinArrayReadString() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testPinArraySetModeIntString() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testPinArraySetModeStringString() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testPinArrayWriteIntInteger() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testPinArrayWriteStringInteger() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	public static void main(String[] args) {

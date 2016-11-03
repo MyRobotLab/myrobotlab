@@ -19,133 +19,137 @@ import java.util.TreeMap;
  */
 public class ServiceType implements Serializable, Comparator<ServiceType> {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  String name;
+	String name;
 
-  String state = null;
-  Integer workingLevel = null;
-  /**
-   * description of what the service does
-   */
-  String description = null;
-  /**
-   * the single sponsor of this service
-   */
-  String sponsor;
-  /**
-   * ready for release
-   */
-  Boolean ready = false;
+	String state = null;
+	Integer workingLevel = null;
+	/**
+	 * description of what the service does
+	 */
+	String description = null;
+	/**
+	 * the single sponsor of this service
+	 */
+	String sponsor;
+	/**
+	 * ready for release
+	 */
+	Boolean ready = false;
 
-  /**
-   * available in the UI(s)
-   */
-  Boolean available = true; // why not ? :P
+	/**
+	 * available in the UI(s)
+	 */
+	Boolean available = true; // why not ? :P
 
-  /**
-   * what is left todo on this service for it to be ready for release
-   */
-  String todo;
+	/**
+	 * what is left todo on this service for it to be ready for release
+	 */
+	String todo;
 
-  /**
-   * dependency keys of with key structure {org}-{version}
-   */
-  public HashSet<String> dependencies = new HashSet<String>();
-  public HashSet<String> categories = new HashSet<String>();
-  public TreeMap<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
+	/**
+	 * dependency keys of with key structure {org}-{version}
+	 */
+	public HashSet<String> dependencies = new HashSet<String>();
+	public HashSet<String> categories = new HashSet<String>();
+	public TreeMap<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
 
-  public ServiceType() {
-  }
+	public ServiceType() {
+	}
 
-  public ServiceType(String name) {
-    this.name = name;
-  }
+	public ServiceType(Class<?> clazz) {
+		this.name = clazz.getCanonicalName();
+	}
 
-  public void addDependency(String org, String version) {
-    dependencies.add(String.format("%s/%s", org, version));
-  }
+	public ServiceType(String name) {
+		this.name = name;
+	}
 
-  @Override
-  public int compare(ServiceType o1, ServiceType o2) {
-    return o1.name.compareTo(o2.name);
-  }
+	public void addDependency(String org, String version) {
+		dependencies.add(String.format("%s/%s", org, version));
+	}
 
-  public String getName() {
-    return name;
-  }
+	@Override
+	public int compare(ServiceType o1, ServiceType o2) {
+		return o1.name.compareTo(o2.name);
+	}
 
-  public String getSimpleName() {
-    if (name == null) {
-      return null;
-    }
-    if (name.indexOf(".") == -1) {
-      return name;
-    }
-    return name.substring(name.lastIndexOf('.') + 1);
-  }
+	public String getName() {
+		return name;
+	}
 
-  public boolean isAvailable() {
-    return (available != null && available == true);
-  }
+	public String getSimpleName() {
+		if (name == null) {
+			return null;
+		}
+		if (name.indexOf(".") == -1) {
+			return name;
+		}
+		return name.substring(name.lastIndexOf('.') + 1);
+	}
 
-  public int size() {
-    return dependencies.size();
-  }
+	public boolean isAvailable() {
+		return (available != null && available == true);
+	}
 
-  @Override
-  public String toString() {
-    return name;
-  }
+	public int size() {
+		return dependencies.size();
+	}
 
-  public void addDescription(String description) {
-    this.description = description;
-  }
+	@Override
+	public String toString() {
+		return name;
+	}
 
-  public void addCategory(String... categories) {
-    for (int i = 0; i < categories.length; ++i) {
-      this.categories.add(categories[i]);
-    }
-  }
+	public void addDescription(String description) {
+		this.description = description;
+	}
 
-  public void addPeer(String name, String peerType, String comment) {
-    peers.put(name, new ServiceReservation(name, peerType, comment));
-  }
+	public void addCategory(String... categories) {
+		for (int i = 0; i < categories.length; ++i) {
+			this.categories.add(categories[i]);
+		}
+	}
 
-  public void sharePeer(String key, String actualName, String peerType, String comment) {
-    peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
-  }
+	public void addPeer(String name, String peerType, String comment) {
+		peers.put(name, new ServiceReservation(name, peerType, comment));
+	}
 
-  public void addRootPeer(String actualName, String peerType, String comment) {
-    peers.put(actualName, new ServiceReservation(actualName, actualName, peerType, comment, true));
-  }
+	public void sharePeer(String key, String actualName, String peerType, String comment) {
+		peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
+	}
 
-  public void setAvailable(boolean b) {
-    this.available = b;
-  }
+	public void addRootPeer(String actualName, String peerType, String comment) {
+		peers.put(actualName, new ServiceReservation(actualName, actualName, peerType, comment, true));
+	}
 
-  public Set<String> getDependencies() {
-    return dependencies;
-  }
+	public void setAvailable(boolean b) {
+		this.available = b;
+	}
 
-  public TreeMap<String, ServiceReservation> getPeers() {
-    return peers;
-  }
+	public Set<String> getDependencies() {
+		return dependencies;
+	}
 
-  public void setSponsor(String sponsor) {
-    this.sponsor = sponsor;
-  }
+	public TreeMap<String, ServiceReservation> getPeers() {
+		return peers;
+	}
 
-  public void setReady(boolean b) {
-    this.ready = b;
-  }
+	public void setSponsor(String sponsor) {
+		this.sponsor = sponsor;
+	}
 
-  public void addTodo(String todo) {
-    this.todo = todo;
-  }
+	public void setReady(boolean b) {
+		this.ready = b;
+	}
 
-  public String getDescription() {
-    return description;
-  }
+	public void addTodo(String todo) {
+		this.todo = todo;
+	}
+
+	public String getDescription() {
+		return description;
+	}
 
 }

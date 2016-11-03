@@ -19,7 +19,7 @@ public class SarxosFrameGrabber extends FrameGrabber {
   private int cameraIndex = 0;
   public int desiredWidth = 640;
   public int desiredHeight = 480;
-  private Java2DFrameConverter converter = new Java2DFrameConverter();
+  transient private Java2DFrameConverter converter = new Java2DFrameConverter();
 
   public SarxosFrameGrabber(int cameraIndex) {
     super();

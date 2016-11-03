@@ -56,7 +56,7 @@ public class GraphicsGUI extends ServiceGUI implements VideoGUISource {
   public final static Logger log = LoggerFactory.getLogger(GraphicsGUI.class.toString());
 
   VideoWidget video = null;
-  BufferedImage graph = null;
+  transient BufferedImage graph = null;
   Graphics g = null;
 
   public GraphicsGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {

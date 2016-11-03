@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -32,6 +33,8 @@ import org.slf4j.Logger;
  *
  */
 public class InMoov extends Service {
+
+  private static final String GESTURES_DIRECTORY = "gestures";
 
   private static final long serialVersionUID = 1L;
 
@@ -93,7 +96,7 @@ public class InMoov extends Service {
 
   transient public OpenNi openni;
 
-  transient public PID2 pid;
+  transient public Pid pid;
 
   boolean copyGesture = false;
   boolean firstSkeleton = true;
@@ -828,8 +831,20 @@ public class InMoov extends Service {
     }
   }
 
+  public void setArmVelocity(String which, Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+    if (!arms.containsKey(which)) {
+      error("setArmVelocity %s does not exist", which);
+    } else {
+      arms.get(which).setVelocity(bicep, rotate, shoulder, omoplate);
+    }
+  }
+
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
+  }
+
+  public void setHandVelocity(String which, Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky) {
+    setHandVelocity(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
@@ -840,8 +855,20 @@ public class InMoov extends Service {
     }
   }
 
+  public void setHandVelocity(String which, Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    if (!hands.containsKey(which)) {
+      error("setHandSpeed %s does not exist", which);
+    } else {
+      hands.get(which).setVelocity(thumb, index, majeure, ringFinger, pinky, wrist);
+    }
+  }
+
   public void setHeadSpeed(Double rothead, Double neck) {
     setHeadSpeed(rothead, neck, null, null, null);
+  }
+
+  public void setHeadVelocity(Integer rothead, Integer neck) {
+    setHeadVelocity(rothead, neck, null, null, null);
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
@@ -849,6 +876,14 @@ public class InMoov extends Service {
       head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
     } else {
       log.warn("setHeadSpeed - I have no head");
+    }
+  }
+
+  public void setHeadVelocity(Integer rothead, Integer neck, Integer eyeXSpeed, Integer eyeYSpeed, Integer jawSpeed) {
+    if (head != null) {
+      head.setVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
+    } else {
+      log.warn("setHeadVelocity - I have no head");
     }
   }
 
@@ -861,6 +896,14 @@ public class InMoov extends Service {
       torso.setSpeed(topStom, midStom, lowStom);
     } else {
       log.warn("setTorsoSpeed - I have no torso");
+    }
+  }
+
+  public void setTorsoVelocity(Integer topStom, Integer midStom, Integer lowStom) {
+    if (torso != null) {
+      torso.setVelocity(topStom, midStom, lowStom);
+    } else {
+      log.warn("setTorsoVelocity - I have no torso");
     }
   }
 
@@ -1037,7 +1080,7 @@ public class InMoov extends Service {
 
       mouthControl = (MouthControl) startPeer("mouthControl");
       // OLD WAY
-     //  mouthControl.jaw.setPin(26);
+      //  mouthControl.jaw.setPin(26);
       mouthControl.arduino.connect(port);
       // NEW WAY
       mouthControl.arduino.servoAttach(mouthControl.jaw, 26);
@@ -1067,9 +1110,9 @@ public class InMoov extends Service {
     if (openni == null) {
       speakBlocking("starting kinect");
       openni = (OpenNi) startPeer("openni");
-      pid = (PID2) startPeer("pid");
+      pid = (Pid) startPeer("pid");
 
-      pid.setMode("kinect", PID.MODE_AUTOMATIC);
+      pid.setMode("kinect", Pid.MODE_AUTOMATIC);
       pid.setOutputRange("kinect", -1, 1);
       pid.setPID("kinect", 10.0, 0.0, 1.0);
       pid.setControllerDirection("kinect", 0);
@@ -1278,19 +1321,13 @@ public class InMoov extends Service {
   }
 
   public void loadGestures() {
-    loadGestures("gestures");
+    loadGestures(GESTURES_DIRECTORY);
   }
 
   public void loadGestures(String directory) {
     // TODO: iterate over each of the python files in the directory
     // and load them into the python interpreter.
-    File dir = new File(directory);
-    dir.mkdirs();
-    if (!dir.isDirectory()) {
-      // TODO: maybe create the directory ?
-      log.warn("Gestures directory {} doest not exist.", directory);
-      return;
-    }
+    File dir = makeGesturesDirectory(directory);
 
     for (File f : dir.listFiles()) {
       if (f.getName().toLowerCase().endsWith(".py")) {
@@ -1307,16 +1344,72 @@ public class InMoov extends Service {
     }
   }
 
+  private File makeGesturesDirectory(String directory) {
+    File dir = new File(directory);
+    dir.mkdirs();
+    if (!dir.isDirectory()) {
+      // TODO: maybe create the directory ?
+      log.warn("Gestures directory {} doest not exist.", directory);
+      return null;
+    }
+    return dir;
+  }
+
+  public void saveGesture(String gestureName, String directory) {
+    // TODO: consider the gestures directory as a property on the inmoov
+    String gestureMethod = mapGestureNameToPythonMethod(gestureName);   
+    String gestureFilename = directory + File.separator + gestureMethod + ".py";
+    File gestureFile = new File(gestureFilename);    
+    if (gestureFile.exists()) {
+      log.warn("Gesture file {} already exists.. not overwiting it.", gestureFilename);
+      return;
+    }
+    FileWriter gestureWriter = null;
+    try {
+      gestureWriter = new FileWriter(gestureFile);
+      // print the first line of the python file
+      gestureWriter.write("def " + gestureMethod + "():\n");
+      // now for each servo, we should write out the approperiate moveTo statement
+      // TODO: consider doing this only for the inmoov services.. but for now.. i think
+      // we want all servos that are currently in the system?  
+      for (ServiceInterface service : Runtime.getServices()) {
+        if (service instanceof Servo) {
+          int pos = ((Servo) service).getPos();
+          gestureWriter.write("  " + service.getName() + ".moveTo(" + pos + ")\n");
+        }
+      }
+      gestureWriter.write("\n");
+      gestureWriter.close();
+    } catch (IOException e) {
+      log.warn("Error writing gestures file {}", gestureFilename);
+      e.printStackTrace();
+      return;
+    }    
+    // TODO: consider writing out cooresponding AIML?    
+  }
+  
+  private String mapGestureNameToPythonMethod(String gestureName) {
+    // TODO: some fancier mapping?
+    String methodName = gestureName.replaceAll(" ", "");
+    return methodName;
+  }
+
+  public void saveGesture(String gestureName) {
+
+    // TODO: allow a user to save a gesture to the gestures directory
+    saveGesture(gestureName, GESTURES_DIRECTORY);
+
+  }
+
   public static void main(String[] args) {
     try {
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.INFO);
+      LoggingFactory.init(Level.INFO);
 
       VirtualDevice v1 = (VirtualDevice) Runtime.start("v1", "VirtualDevice");
       VirtualDevice v2 = (VirtualDevice) Runtime.start("v2", "VirtualDevice");
 
       v1.createVirtualArduino("COM1"); // hmm can to virtual Arduinos be created
-                                       // with one VirtualDevice???
+      // with one VirtualDevice???
       v2.createVirtualArduino("COM2");
 
       // Runtime.start("webgui", "WebGui");
@@ -1459,7 +1552,7 @@ public class InMoov extends Service {
     meta.addPeer("mouthControl", "MouthControl", "MouthControl");
     meta.addPeer("opencv", "OpenCV", "InMoov OpenCV service");
     meta.addPeer("openni", "OpenNi", "Kinect service");
-    meta.addPeer("pid", "PID2", "PID2 service");
+    meta.addPeer("pid", "Pid", "Pid service");
 
     return meta;
   }

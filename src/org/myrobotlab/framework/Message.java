@@ -135,8 +135,7 @@ public class Message implements Serializable {
    * @throws InterruptedException
    */
   public static void main(String[] args) throws InterruptedException {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     Message msg = new Message();
     msg.method = "myMethod";

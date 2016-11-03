@@ -20,7 +20,7 @@
 #define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
 
 // Arduino Mega Pins
-#if defined(ARDUINO_AVR_MEGA2560)
+#if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
   #define digitalPinToSendBit(P,V) \
     (((P) >= 22 && (P) <= 29) ? sendBitA(V) : \
         ((((P) >= 10 && (P) <= 13) || ((P) >= 50 && (P) <= 53)) ? sendBitB(V) : \
@@ -79,7 +79,7 @@ class MrlNeopixel:public Device{
     unsigned char _baseColorBlue;
     unsigned int _speed;
     byte _animation;
-    int _pos;
+    unsigned int _pos;
     int _count;
     bool _off;
     int _dir;
@@ -92,7 +92,7 @@ class MrlNeopixel:public Device{
   inline void sendBitB(bool bitVal);
   inline void sendBitC(bool bitVal);
   inline void sendBitD(bool bitVal);
-#if defined(ARDUINO_AVR_MEGA2560)
+#if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
   inline void sendBitA(bool bitVal);
   inline void sendBitE(bool bitVal);
   inline void sendBitF(bool bitVal);
