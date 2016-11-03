@@ -288,14 +288,27 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     }
     return ret;
   }
+  
+  public void setAudioEffects(String effects) {
+	  marytts.setAudioEffects(effects);
+  }
 
   public static void main(String[] args) {
     LoggingFactory.getInstance().configure();
     LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
     try {
-      Runtime.start("webgui", "WebGui");
+      //Runtime.start("webgui", "WebGui");
       MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
+      
+      //examples are generously copied from marytts.signalproc.effects.EffectsApplier.java L319-324
+      //String strEffectsAndParams = "FIRFilter+Robot(amount=50)";
+      String strEffectsAndParams = "Robot(amount=100)+Chorus(delay1=866, amp1=0.24, delay2=300, amp2=-0.40,)";
+   	  //String strEffectsAndParams = "Robot(amount=80)+Stadium(amount=50)";
+   	  //String strEffectsAndParams = "FIRFilter(type=3,fc1=6000, fc2=10000) + Robot";
+   	  //String strEffectsAndParams = "Stadium(amount=40) + Robot(amount=87) + Whisper(amount=65)+FIRFilter(type=1,fc1=1540;)++";
+   	  mary.setAudioEffects(strEffectsAndParams);
+      
       // mary.setVoice("dfki-spike en_GB male unitselection general");
       // mary.speak("hello");
       // mary.speak("world");
