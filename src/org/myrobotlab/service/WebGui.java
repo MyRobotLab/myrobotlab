@@ -197,7 +197,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	}
 
 	@Override
-	public Connection publishNewConnection(Connection keys) {
+	public Connection publishConnect(Connection keys) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -488,6 +488,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			AtmosphereResponse response = r.getResponse();
 			InputStream in = r.getRequest().getInputStream();
 			out = r.getResponse().getOutputStream();
+			String pathInfo = request.getPathInfo();
+			String[] parts = null;
+			
+			log.info("{} {}", request.getMethod(), pathInfo);
 
 			// Broadcaster bc = r.getBroadcaster();
 			// if (bc != null || r.getBroadcaster() != broadcaster){
@@ -509,11 +513,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			if (headers.containsKey("accept")) {
 				log.debug(String.format(String.format("out encoding : accept %s", headers.get("accept"))));
 			}
-
-			// FIXME reconstruct REST request & log
-			String pathInfo = request.getPathInfo();
-			String[] parts = null;
-
+			
 			// GET vs POST - post assumes low-level messaging
 			// GET is high level synchronous
 			// String httpMethod = request.getMethod();
@@ -626,7 +626,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			if (body != null) {
 				b = new String(body);
 			}
-			log.info(String.format("POST Body [%s]", b));
+			
+			
+			if (b != null){
+				log.info(String.format("POST Body [%s]", b));
+			}
 
 			// FIXED ME
 			// 1. get method "name" and incoming ordinal - generate method
@@ -1061,14 +1065,35 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
+			
+			Double level = Runtime.getBatteryLevel();
+			log.info("" + level);
 
 			Runtime.start("python", "Python");
-			Runtime.start("arduino", "Arduino");
-			Runtime.start("srf05", "UltrasonicSensor");
+			// Runtime.start("arduino", "Arduino");
+			//Runtime.start("srf05", "UltrasonicSensor");
 			Runtime.start("webgui", "WebGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+
+	@Override
+	public String publishConnect() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String publishDisconnect() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Status publishError() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

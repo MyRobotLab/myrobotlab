@@ -43,8 +43,7 @@ public class Email {
   public static void main(String args[]) throws AddressException, MessagingException {
     try {
 
-      LoggingFactory.getInstance().configure();
-      LoggingFactory.getInstance().setLevel(Level.ERROR);
+      LoggingFactory.init(Level.ERROR);
 
       Email email = new Email();
       // email.setGmailServer();

@@ -15,9 +15,9 @@ public class ImageFileFrameGrabber extends FrameGrabber {
 
   public final static Logger log = LoggerFactory.getLogger(ImageFileFrameGrabber.class.getCanonicalName());
 
-  private IplImage image;
-  private IplImage lastImage;
-  private HashMap<String, IplImage> cache = new HashMap<String, IplImage>();
+  transient private IplImage image;
+  transient private IplImage lastImage;
+  transient private HashMap<String, IplImage> cache = new HashMap<String, IplImage>();
   private int frameCounter = 0;
   public String path;
   transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();

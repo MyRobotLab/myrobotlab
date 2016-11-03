@@ -94,6 +94,7 @@ public final class Mapper implements Serializable {
 
   public void setMax(double max) {
     maxOutput = max;
+    //maxX = max;
   }
 
   public void setMin(double min) {

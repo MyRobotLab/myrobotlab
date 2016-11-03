@@ -19,4 +19,28 @@ public class LoggingFactory {
     return null;
   }
 
+
+public static void init() {
+	init(null);
+}
+
+public static void init(String level) {
+	Logging logging = getInstance();
+	logging.configure();
+	if (level != null){
+		logging.setLevel(level);
+	}
+}
+
+/**
+ * at the moment "myrobotlab.log" - although it
+ * could be based on runtime name - if its different from default
+ * and multiple processes are running from the same directory
+ * or "myrobotlab.{ts}.log"
+ * @return
+ */
+public static String getLogFileName() {
+	return "myrobotlab.log";
+}
+
 }

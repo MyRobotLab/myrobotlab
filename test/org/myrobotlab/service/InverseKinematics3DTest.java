@@ -24,7 +24,7 @@ public class InverseKinematics3DTest {
     // loosing rank
     // in our jacobian!
     ik3d.centerAllJoints();
-    ik3d.moveTo(100, 0, 50);
+    ik3d.moveTo(100.0, 0.0, 50.0);
     Point p = ik3d.currentPosition();
     double[][] positions = ik3d.createJointPositionMap();
     int x = positions[0].length;

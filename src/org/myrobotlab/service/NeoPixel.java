@@ -299,6 +299,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   
   @Override
   public void attach(NeoPixelController controller, int pin, int numPixel) throws Exception {
+    subscribe(controller.getName(), "publishAttachedDevice");
     this.pin = pin;
     this.numPixel = numPixel;
 
@@ -313,8 +314,20 @@ public class NeoPixel extends Service implements NeoPixelControl {
     //setController(controller);
 
     controller.deviceAttach(this, pin, numPixel);
-    isAttached = true;
+    int count = 0;
+    while(!isAttached){
+      count++;
+      sleep(100);
+      if (count > 4) break;
+    }
     broadcastState();
+  }
+
+  public void onAttachedDevice(String deviceName){
+    if (deviceName.equals(this.getName())){
+      isAttached = true;
+      broadcastState();
+    }
   }
 
   @Override
@@ -348,8 +361,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public static void main(String[] args) throws InterruptedException {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     try {
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
@@ -368,14 +380,14 @@ public class NeoPixel extends Service implements NeoPixelControl {
       NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
 //      webgui.startBrowser("http://localhost:8888/#/service/neopixel");
       neopixel.attach(arduino, 29, 16);
-      sleep(50);
+      //sleep(50);
       PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
       neopixel.setPixel(pix);
       neopixel.setAnimation(NEOPIXEL_ANIMATION_IRONMAN, 255, 0, 0, 1);
-//      //arduino.setLoadTimingEnabled(true);
-//      Servo servo=(Servo)Runtime.start("servo","Servo");
-//      servo.attach(arduino, 5);
-//      servo.moveTo(180);
+      //arduino.setLoadTimingEnabled(true);
+      Servo servo=(Servo)Runtime.start("servo","Servo");
+      servo.attach(arduino, 5);
+      servo.moveTo(180);
     } catch (Exception e) {
       Logging.logError(e);
     }

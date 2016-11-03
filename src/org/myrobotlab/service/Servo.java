@@ -25,6 +25,7 @@
 
 package org.myrobotlab.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
@@ -36,6 +37,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.NameProvider;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
@@ -123,6 +125,7 @@ public class Servo extends Service implements ServoControl {
 
 	public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
+
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
@@ -142,20 +145,21 @@ public class Servo extends Service implements ServoControl {
 
 	transient ServoController controller;
 
-	String controllerName = null;
+	public String controllerName = null;
 
-	private Mapper mapper = new Mapper(0, 180, 0, 180);
+	Mapper mapper = new Mapper(0, 180, 0, 180);
 
-	private Integer rest = 90;
+	Integer rest = 90;
 
-	private long lastActivityTime = 0;
+	long lastActivityTime = 0;
 
-	private Integer pin;
+	Integer pin;
+	public List<Integer> pinList = new ArrayList<Integer>();
 
 	/**
 	 * the requested INPUT position of the servo
 	 */
-	Integer targetPos;
+	Integer targetPos=0;
 
 	/**
 	 * Pin is "gone" - it only is needed at the time of attaching the device -
@@ -175,12 +179,12 @@ public class Servo extends Service implements ServoControl {
 	/**
 	 * the calculated output for the servo
 	 */
-	Integer targetOutput;
+	public Integer targetOutput;
 
 	/**
 	 * list of names of possible controllers
 	 */
-	List<String> controllers;
+	public List<String> controllers;
 	/**
 	 * current speed of the servo
 	 */
@@ -207,16 +211,50 @@ public class Servo extends Service implements ServoControl {
 	 */
 	boolean isEventsEnabled = false;
 
+	private int maxVelocity = 0;
+	
+
+	private boolean isAttached = false;
+	private boolean isControllerSet = false;
+
+  private int velocity = 0;
+  
+  class IKData {
+    String name;
+    Integer pos;
+  }
+  
 	public Servo(String n) {
 		super(n);
+		createPinList();
+		refreshControllers();
+		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 		lastActivityTime = System.currentTimeMillis();
+	}
+	
+
+  public void onRegistered(ServiceInterface s) {
+		refreshControllers();
+		broadcastState();
+
+	}
+	
+	void createPinList(){
+		for (int i = 0; i < 54; i++) {
+			pinList.add((Integer)i);	
+		}
 	}
 
 	public void addServoEventListener(NameProvider service) {
 		addListener("publishServoEvent", service.getName(), "onServoEvent");
 	}
 
-	/**
+  public void addIKServoEventListener(NameProvider service) {
+    eventsEnabled(true);
+    addListener("publishIKServoEvent", service.getName(), "onIKServoEvent");
+  }
+
+  /**
 	 * Re-attach to servo's current pin. The pin must have be set previously.
 	 * Equivalent to Arduino's Servo.attach(currentPin)
 	 */
@@ -234,6 +272,7 @@ public class Servo extends Service implements ServoControl {
 		lastActivityTime = System.currentTimeMillis();
 		getController().servoAttach(this, pin);
 		this.pin = pin;
+		isAttached = true;
 		broadcastState();
 	}
 
@@ -243,20 +282,22 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public void detach() {
 		getController().servoDetach(this);
+		isAttached = false;
 		broadcastState();
 	}
 
 	public boolean eventsEnabled(boolean b) {
 		isEventsEnabled = b;
-		getController().servoEventsEnabled(this, b);
+		broadcastState();
 		return b;
 	}
 
+	public void onServoEvent(Integer pos){
+		moveTo((int) pos);
+	}
+	
 	@Override
 	public ServoController getController() {
-		if (controller == null) {
-			//error("%s's controller is null, perhaps you need to %s.attach(controller, pin, pos) ?", getName(), getName());
-		}
 		return controller;
 	}
 
@@ -275,13 +316,6 @@ public class Servo extends Service implements ServoControl {
 	public Double getMaxOutput() {
 		return mapper.getMaxOutput();
 	}
-
-	/*
-	 * @Override public Integer getPin() {
-	 * 
-	 * return pin; }
-	 * 
-	 */
 
 	public Double getMin() {
 		return mapper.getMinY();
@@ -304,16 +338,15 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public boolean isAttached() {
-		return controller != null;
+		return isAttached;
+	}
+	
+	public boolean isControllerSet() {
+			return isControllerSet;
 	}
 
 	public boolean isInverted() {
 		return mapper.isInverted();
-	}
-
-	// only if the sweep control is controled by computer and not arduino
-	public boolean isSweeping() {
-		return isSweeping;
 	}
 
 	public void map(double minX, double maxX, double minY, double maxY) {
@@ -334,13 +367,15 @@ public class Servo extends Service implements ServoControl {
 		getController().servoWrite(this);
 		lastActivityTime = System.currentTimeMillis();
 
-		// update the web gui that we've moved..
-		// broadcastState();
-		invoke("publishServoEvent", targetOutput);
-	}
-
-	private void controllerError() {
-		error(String.format("%s's controller is not set - you probably need to servo.attach(controller, pin, pos)", getName()));
+		if (isEventsEnabled) {
+			// update others of our position change
+			invoke("publishServoEvent", targetOutput);
+			IKData data = new IKData();
+			data.name = getName();
+			data.pos = targetPos;
+			invoke("publishIKServoEvent", data);
+			broadcastState();
+		}
 	}
 
 	/**
@@ -379,7 +414,9 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public void setController(DeviceController controller) {
 		if (controller == null) {
-			error("setting null as controller");
+			info("setting controller to null");
+			this.controllerName = null;
+			this.controller = null;
 			return;
 		}
 
@@ -394,6 +431,7 @@ public class Servo extends Service implements ServoControl {
 		 */
 
 		this.controller = (ServoController) controller;
+		this.controllerName = controller.getName();
 		broadcastState();
 	}
 
@@ -424,9 +462,52 @@ public class Servo extends Service implements ServoControl {
 		this.rest = rest;
 	}
 
+	/**
+	 * setSpeed is deprecated, new function for speed control is setVelocity()
+	 */
 	public void setSpeed(double speed) {
-		this.speed = speed;
-		getController().servoSetSpeed(this);
+	  
+	  // KWATTERS: The realtionship between the old set speed value and actual angular velocity was exponential.
+	  // To create a model to map these, I took the natural log of the speed values, computed a linear regression line
+	  // y=mx+b
+	  // And then convert it back to exponential space with the e^y   
+	  // approximating this with the equation
+	  // val = e ^ (slope * x + intercept) 
+	  // slope & intercept were fitted by taking a linear regression of the log values
+	  // of the mapping.
+
+	  //  Speed,NewFunction,OldMeasured
+    //  0.1,3,6
+    //  0.2,5,7
+    //  0.3,7,9
+    //  0.4,9,9
+    //  0.5,13,11
+    //  0.6,19,13
+    //  0.7,26,18
+    //  0.8,36,27
+    //  0.9,50,54
+	  
+	  // These 2 values can be tweaked for a slightly different curve that fits the observed data.
+	  double slope = 3.25;
+	  double intercept = 1;
+	      
+	  double vel = Math.exp(slope * speed + intercept);
+	  // set velocity to 0.0 if the speed = 1.0.. This skips the velicity calculation logic.
+	  if (speed >= 1.0) {
+	    vel = maxVelocity;
+	  }
+	  setVelocity((int)vel);
+	  // Method from build 1670
+    //	  if(speed <= 0.1d) setVelocity(6);
+    //	  else if (speed <= 0.2d) setVelocity(7);
+    //	  else if (speed <= 0.3d) setVelocity(8);
+    //	  else if (speed <= 0.4d) setVelocity(9);
+    //	  else if (speed <= 0.5d) setVelocity(11);
+    //	  else if (speed <= 0.6d) setVelocity(13);
+    //	  else if (speed <= 0.7d) setVelocity(18);
+    //	  else if (speed <= 0.8d) setVelocity(27);
+    //	  else if (speed <= 0.9d) setVelocity(54);
+    //	  else setVelocity(0);
 	}
 
 	// choose to handle sweep on arduino or in MRL on host computer thread.
@@ -595,44 +676,90 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void attach(String controllerName, int pin) throws Exception {
-		attach((ServoController)Runtime.getService(controllerName), pin, null);
-	}
-	
-	@Override
-	public void attach(ServoController controller, int pin) throws Exception {
-		attach(controller, pin, null);
+		attach((ServoController) Runtime.getService(controllerName), pin, null, null);
 	}
 
+  @Override
+  public void attach(String controllerName, int pin, Integer pos) throws Exception {
+    attach((ServoController) Runtime.getService(controllerName), pin, pos, null);
+  }
+
+  @Override
+  public void attach(String controllerName, int pin, Integer pos, Integer velocity) throws Exception {
+    attach((ServoController) Runtime.getService(controllerName), pin, pos, velocity);
+  }
+
+  @Override
+	public void attach(ServoController controller, int pin) throws Exception {
+		attach(controller, pin, null, null);
+	}
+
+	 public void attach(ServoController controller, int pin, Integer pos) throws Exception {
+	   attach(controller, pin, pos, null);
+	 }
+
+	// FIXME - setController is very deficit in its abilities - compared to the
+	// complexity of this
 	@Override
-	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
-		
-		if (this.controller == controller){
+	public void attach(ServoController controller, int pin, Integer pos, Integer velocity) throws Exception {
+		subscribe(controller.getName(), "publishAttachedDevice");
+
+		if (this.controller == controller) {
 			log.info("already attached to controller - nothing to do");
 			return;
-		} else if (this.controller != null && this.controller != controller ){
+		} else if (this.controller != null && this.controller != controller) {
 			log.warn("already attached to controller %s - please detach before attaching to controller %s", this.controller.getName(), controller.getName());
 			return;
 		}
-		
-		
+
 		// ORDER IS IMPORTANT !!!
 		// attach the Control to the Controller first
+		if (velocity == null) velocity = this.velocity;
 		if (pos != null) {
 			targetPos = pos;
+			targetOutput = mapper.calcInt(targetPos);
 			if (rest == null) {
 				rest = pos;
 			}
-			controller.deviceAttach(this, pin, pos);
+			controller.deviceAttach(this, pin, targetOutput, (velocity >> 8) &0xFF, velocity &0xFF);
 		} else {
 			if (rest == null) {
 				rest = 90;
 			}
-			controller.deviceAttach(this, pin);
+			targetPos = rest;
+			targetOutput = mapper.calcInt(targetPos);
+			controller.deviceAttach(this, pin, targetOutput, (velocity >> 8) &0xFF, velocity &0xFF);
 		}
-		
-		// SET THE DATA 
+
+		// SET THE DATA
 		this.pin = pin;
 		this.controller = controller;
+		this.controllerName = controller.getName();
+		int count = 0;
+		this.velocity = velocity;
+		while (!isAttached) {
+			count++;
+			sleep(100);
+			if (count > 4)
+				break;
+		}
+		//moveTo(rest);
+		// this.isAttached = true;
+		broadcastState();
+	}
+
+	public void onAttachedDevice(String deviceName) {
+		if (deviceName.equals(this.getName())) {
+			isAttached = true;
+			isControllerSet = true;
+			setMaxVelocity(maxVelocity);
+			broadcastState();
+		}
+	}
+
+	@Override
+	public void detach(String controllerName) {
+		detach((ServoController) Runtime.getService(controllerName));
 	}
 
 	@Override
@@ -642,7 +769,66 @@ public class Servo extends Service implements ServoControl {
 			controller.deviceDetach(this);
 			// remove the this controller's reference
 			this.controller = null;
+			// this.controllerName = null;
+			isAttached = false;
+			isControllerSet = false;
+			broadcastState();
 		}
 	}
 
+	public void setMaxVelocity(int velocity) {
+		this.maxVelocity = velocity;
+		if (isControllerSet()){
+		  getController().servoSetMaxVelocity(this);
+		}
+	}
+
+  public void setVelocity(Integer velocity) {
+    if (velocity == null) {
+      return;
+    }
+    this.velocity = velocity;
+    if (isControllerSet()){
+      getController().servoSetVelocity(this);
+    }
+  }
+
+  @Override
+	public int getMaxVelocity() {
+		return maxVelocity;
+	}
+  
+  public void moveToOutput(Double moveTo) {
+    moveToOutput(moveTo.intValue());
+  }
+
+  public void moveToOutput(Integer moveTo) {
+    if (controller == null) {
+      error(String.format("%s's controller is not set", getName()));
+      return;
+    }
+
+    //targetPos = pos;
+    targetOutput = moveTo;
+
+    getController().servoWrite(this);
+    lastActivityTime = System.currentTimeMillis();
+
+    if (isEventsEnabled) {
+      // update others of our position change
+      invoke("publishServoEvent", targetOutput);
+    }
+    
+  }
+  
+
+  @Override
+  public int getVelocity() {
+    // TODO Auto-generated method stub
+    return velocity;
+  }
+  
+  public IKData publishIKServoEvent(IKData data){
+    return data;
+  }
 }

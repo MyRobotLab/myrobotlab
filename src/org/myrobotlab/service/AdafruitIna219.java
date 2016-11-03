@@ -41,11 +41,11 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 
 	public String deviceAddress = "0x40";
 
-	public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
+	public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
 	public String deviceBus = "1";
 
 	public int busVoltage = 0;
-	public int shuntVoltage = 0;
+	public double shuntVoltage = 0;
 	public double current = 0.0;
 	public double power = 0.0;
 
@@ -70,6 +70,11 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 			AdafruitIna219 adafruitINA219 = (AdafruitIna219) Runtime.start("AdafruitIna219", "AdafruitIna219");
 			Runtime.start("gui", "GUIService");
 
+			byte msb = (byte)0x83;
+			byte lsb = (byte)0x00;
+			double test = (double)((((int)msb) << 8 | (int)lsb & 0xff)) * .01;
+			log.info(String.format("msb = %s, lsb = %s, test = %s", msb, lsb, test));
+			// (((int)(readbuffer[0] & 0xff) << 5)) | ((int)(readbuffer[1] >> 3));
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -126,6 +131,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 		this.controller = controller;
 		this.deviceBus = deviceBus;
 		this.deviceAddress = deviceAddress;
+		createDevice();
 		isAttached = true;
 
 		log.info(String.format("%s setController %s", getName(), controllerName));
@@ -143,6 +149,20 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 		broadcastState();
 	}
 
+	/**
+	 * This method creates the i2c device
+	 */
+	boolean createDevice() {
+		if (controller != null) {
+			// controller.releaseI2cDevice(this, Integer.parseInt(deviceBus),
+			// Integer.decode(deviceAddress));
+			controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+		}
+
+		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
+		return true;
+	}
+	
 	public I2CController getController() {
 		return controller;
 	}
@@ -209,7 +229,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 
 	// @Override
 	public double getPower() {
-		power = getBusVoltage() * getCurrent();
+		power = getBusVoltage() * getCurrent() / 1000;
 		return power;
 	}
 
@@ -233,7 +253,8 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 		controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
 		// log.info(String.format("getShuntVoltage x%02X x%02X", readbuffer[0],
 		// readbuffer[1]));
-		shuntVoltage = (((int) (readbuffer[0]) << 8) + ((int) readbuffer[1] & 0xff));
+		// The shuntVoltage is signed so the MSB can have sign bits, that needs to remain
+		shuntVoltage = (double)((((int)readbuffer[0]) << 8 | (int)readbuffer[1] & 0xff)) * .01;
 		return shuntVoltage;
 	}
 
@@ -246,8 +267,13 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 		byte[] readbuffer = { 0x0, 0x0 };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
 		controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
-		busVoltage = (((int) (readbuffer[0]) << 8 & 0xffff) + ((int) readbuffer[1] & 0xf8)) * 4;
-		return busVoltage;
+		// A bit tricky conversion. The LSB needs to be right shifted 3 bits, so the MSB needs to be left shifted (8-3) = 5  bits 
+		// And bytes are signed in Java so first a mask of 0xff needs to be applied to the MSB to remove the sign
+		int rawBusVoltage = (((int)readbuffer[0] & 0xff) << 8 | (int)readbuffer[1] & 0xff) >> 3;
+		log.debug(String.format("Busvoltage high byte = %s, low byte = %s, rawBusVoltagee = %s", readbuffer[0], readbuffer[1], rawBusVoltage));
+	  // LSB = 4mV, so multiply wit 4 to get the volatage in mV  
+		busVoltage = rawBusVoltage * 4; 
+		return busVoltage ; 
 	}
 
 	/**

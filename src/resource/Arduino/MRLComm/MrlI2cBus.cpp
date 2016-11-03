@@ -4,6 +4,8 @@ MrlI2CBus::MrlI2CBus() :
 		Device(DEVICE_TYPE_I2C) {
 	if (TWCR == 0) { //// do this check so that Wire only gets initialized once
 		WIRE.begin();
+	    // Force 400 KHz i2c
+		WIRE.setClock(400000L);
 	}
 }
 
@@ -40,7 +42,7 @@ void MrlI2CBus::i2cRead(unsigned char* ioCmd) {
 	MrlMsg msg(PUBLISH_SENSOR_DATA);
 	msg.addData(ioCmd[1]); // DEVICE_INDEX
 	msg.addData(ioCmd[3]); // DATASIZE
-	for (int i = 1; i < answer; i++) {
+	for (int i = 0; i < answer; i++) {
 		msg.addData(Wire.read());
 	}
 	msg.sendMsg();
@@ -59,7 +61,7 @@ void MrlI2CBus::i2cWriteRead(unsigned char* ioCmd) {
 	MrlMsg msg(PUBLISH_SENSOR_DATA);
 	msg.addData(ioCmd[1]); // DEVICE_INDEX
 	msg.addData(ioCmd[3]); // DATASIZE
-	for (int i = 1; i < answer; i++) {
+	for (int i = 0; i < answer; i++) {
 		msg.addData(Wire.read());
 	}
 	msg.sendMsg();

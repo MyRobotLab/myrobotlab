@@ -102,6 +102,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     public Task(Task s) {
       this.msg = s.msg;
       this.interval = s.interval;
+      this.taskName = s.taskName;
     }
 
     @Override
@@ -113,10 +114,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
         Task t = new Task(this);
         // clear history list - becomes "new" message
         t.msg.historyList.clear();
-        if (timer == null) {
-          timer = new Timer(String.format("%s.timer", getName()));
+        Timer timer = tasks.get(taskName);
+        if (timer != null) {
+          //timer = new Timer(String.format("%s.timer", getName()));
+          timer.schedule(t, interval);
         }
-        timer.schedule(t, interval);
       }
     }
 
@@ -419,7 +421,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    * @return
    */
-  public static String getCFGDir() {
+  public static String getCfgDir() {
     return cfgDir;
   }
 
@@ -1473,7 +1475,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * @param o
    */
   public void out(String method, Object o) {
-    Message m = createMessage("", method, o); // create a un-named message
+    Message m = createMessage(null, method, o); // create a un-named message
     // as output
 
     if (m.sender.length() == 0) {
@@ -2070,6 +2072,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
     invoke("publishStatus", ret);
     return ret;
   }
+  
+  
+  public Status error(String msg) {
+    Status ret = Status.error(msg);
+    ret.name = getName();
+    invoke("publishStatus", ret);
+    return ret;
+  }  
 
   public Status warn(String msg) {
     Status ret = Status.warn(msg);

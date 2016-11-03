@@ -61,7 +61,7 @@ import org.slf4j.Logger;
  * simple
  *
  */
-public class ServoGUI extends ServiceGUI implements ActionListener, MouseListener {
+public class ServoGUI extends ServiceGUI implements ActionListener {
 
 	private class SliderListener implements ChangeListener {
 		@Override
@@ -92,8 +92,9 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 	JComboBox<String> controller = new JComboBox<String>();
 
-	JComboBox<Integer> pin = new JComboBox<Integer>();
-	DefaultComboBoxModel<String> controllerModel = new DefaultComboBoxModel<String>();
+	// JComboBox<Integer> pin = new JComboBox<Integer>();
+	JComboBox<Integer> pinList = new JComboBox<Integer>();
+	// DefaultComboBoxModel<String> controllerModel = new DefaultComboBoxModel<String>();
 
 	DefaultComboBoxModel<Integer> pinModel = new DefaultComboBoxModel<Integer>();
 	JTextField posMin = new JTextField("0");
@@ -124,7 +125,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 				Object o = event.getSource();
 				if (o == controller) {
 					String controllerName = (String) controller.getSelectedItem();
-					log.info(String.format("controller event %s", controllerName));
+					log.debug(String.format("controller event %s", controllerName));
 					if (controllerName != null && controllerName.length() > 0) {
 
 						// NOT WORTH IT - JUST BUILD 48 PINS !!!
@@ -152,9 +153,9 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 
 				if (o == attachButton) {
 					if (attachButton.getText().equals("attach")) {
-						send("attach", controller.getSelectedItem(), pin.getSelectedItem());
+						send("attach", controller.getSelectedItem(), (int)pinList.getSelectedItem(), (Integer)slider.getValue());
 					} else {
-						send("detach");
+						send("detach", controller.getSelectedItem());
 					}
 					return;
 				}
@@ -204,29 +205,27 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 			public void run() {
 
 				removeListeners();
+				refreshControllers();
 
 				ServoController sc = servo.getController();
 
 				if (sc != null) {
-					if (controllerModel.getIndexOf(sc.getName()) < 0) {
-						controllerModel.addElement(sc.getName());
-					}
 					controller.setSelectedItem(sc.getName());
 
 					Integer servoPin = servo.getPin();
 
 					if (servoPin != null)
-						pin.setSelectedItem(servoPin);
+						pinList.setSelectedItem(servoPin);
 				}
 
-				if (servo.isAttached()) {
+				if (servo.isControllerSet()) {
 					attachButton.setText("detach");
 					controller.setEnabled(false);
-					pin.setEnabled(false);
+					pinList.setEnabled(false);
 				} else {
 					attachButton.setText("attach");
 					controller.setEnabled(true);
-					pin.setEnabled(true);
+					pinList.setEnabled(true);
 				}
 
 				if (servo.getPos() == null) {
@@ -293,7 +292,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 		control.add(new JLabel("pin"), gc);
 
 		++gc.gridx;
-		control.add(pin, gc);
+		control.add(pinList, gc);
 
 		display.add(control);
 		display.add(input);
@@ -320,15 +319,16 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 		right.addActionListener(this);
 		controller.addActionListener(this);
 		attachButton.addActionListener(this);
-		pin.addActionListener(this);
+		pinList.addActionListener(this);
 
 		// http://stackoverflow.com/questions/6205433/jcombobox-focus-and-mouse-click-events-not-working
 		// jComboBox1.getEditor().getEditorComponent().addMouseListener(...);
 		// have to add mouse listener to the MetalComboButton embedded in the
 		// JComboBox
-		Component[] comps = controller.getComponents();
-		for (int i = 0; i < comps.length; i++) {
-			comps[i].addMouseListener(this); // JComboBox composite listener -
+		//* No longer needed
+		// Component[] comps = controller.getComponents();
+		//for (int i = 0; i < comps.length; i++) {
+			//comps[i].addMouseListener(this); // JComboBox composite listener -
 			// have to get all the sub
 			// components
 			/*
@@ -336,27 +336,21 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 			 * mouseClicked(MouseEvent me) { System.out.println("clicked"); }
 			 * });
 			 */
-		}
+		// }
+
 		// controller.getEditor().getEditorComponent().addMouseListener(this);
-		controller.setModel(controllerModel);
-		pin.setModel(pinModel);
+		pinList.setModel(pinModel);
 
 		refreshControllers();
 	}
-
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		log.info("clicked");
-
+	
+	public void getPinList() {
+		List<Integer> mbl = myServo.pinList;
+		for (int i = 0; i < mbl.size(); i++) {
+			pinList.addItem(mbl.get(i));
+		}
 	}
 
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		log.info("entered");
-
-	}
 
 	// a controller has been set
 	/*
@@ -374,53 +368,31 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 	 * }
 	 */
 
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		log.info("exited");
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		log.info("controller pressed");
-		refreshControllers();
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		log.info("released");
-	}
-
 	public void refreshControllers() {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				// FIXME - would newing? a new DefaultComboBoxModel be better?
-				controllerModel.removeAllElements();
-				// FIXME - get Local services relative to the servo
-				controllerModel.addElement("");
-				List<String> v = Runtime.getServiceNamesFromInterface(ServoController.class);
-				for (int i = 0; i < v.size(); ++i) {
-					controllerModel.addElement(v.get(i));
+
+				myServo.refreshControllers();
+				controller.removeAllItems();
+				List<String> c = myServo.controllers;	
+				for (int i = 0; i < c.size(); ++i) {
+					controller.addItem(c.get(i));
 				}
-				controller.invalidate();
-				// if isAttached() - select the correct one
+				controller.setSelectedItem(myServo.controllerName);
 			}
 		});
 	}
 
 	public void removeListeners() {
 		controller.removeActionListener(this);
-		pin.removeActionListener(this);
+		pinList.removeActionListener(this);
 		slider.removeChangeListener(sliderListener);
 	}
 
 	public void restoreListeners() {
 		controller.addActionListener(this);
-		pin.addActionListener(this);
+		pinList.addActionListener(this);
 		slider.addChangeListener(sliderListener);
 	}
 

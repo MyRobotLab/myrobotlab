@@ -134,8 +134,7 @@ public class AudioCapture extends Service {
   // ===================================//
 
   public static void main(String[] args) throws InterruptedException {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     try {
 

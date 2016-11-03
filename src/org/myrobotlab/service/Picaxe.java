@@ -102,8 +102,7 @@ public class Picaxe extends Service // implements SerialPortEventListener,
   public transient PICAXEThread myPICAXE = null;
 
   public static void main(String[] args) throws Exception {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init(Level.DEBUG);
 
     // RemoteAdapter remote = new RemoteAdapter("remote");
     // remote.startService();

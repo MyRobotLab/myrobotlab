@@ -53,8 +53,7 @@ public class WiiBot extends Service {
   int speedLeft = 0;
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.WARN);
+    LoggingFactory.init(Level.WARN);
     try {
 
       WiiBot wiibot = new WiiBot("wiibot");

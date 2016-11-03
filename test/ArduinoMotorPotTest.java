@@ -9,11 +9,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.MotorDualPwm;
-import org.myrobotlab.service.PID2;
+import org.myrobotlab.service.Motor;
+import org.myrobotlab.service.Pid;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.SensorData;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.myrobotlab.test.TestUtils;
@@ -38,9 +37,9 @@ public class ArduinoMotorPotTest implements SensorDataListener {
   private double ki = 0.020;
   private double kd = 0.020;
 
-  private PID2 pid;
+  private Pid pid;
   private String key = "test";
-  private MotorDualPwm motor;
+  private Motor motor;
 
   private int count = 0;
   private int rate = 5;
@@ -102,7 +101,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     // initialize the logger 
     TestUtils.initEnvirionment();
     // Create the pid controller 
-    pid = (PID2)Runtime.createAndStart("pid", "PID2");
+    pid = (Pid)Runtime.createAndStart("pid", "Pid");
     // # set the pid parameters KP KI KD  (for now just porportial control)
     pid.setPID(key, kp, ki, kd);
     int direction = 1;
@@ -120,7 +119,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     arduino.connect(port);
     // wait for the arduino to actually connect!
     // Start the motor and attach it to the arduino.
-    motor = (MotorDualPwm)Runtime.createAndStart("motor", "MotorDualPwm");
+    motor = (Motor)Runtime.createAndStart("motor", "Motor");
     motor.setPwmPins(leftPwm, rightPwm);
     motor.setController((MotorController)arduino);
     // Sensor callback

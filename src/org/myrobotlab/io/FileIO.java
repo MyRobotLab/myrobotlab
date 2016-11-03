@@ -721,8 +721,7 @@ public class FileIO {
 
     // File f = new File(uri.getPath()); - handle depending on scheme?
 
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     FileIO.extract("/C:/mrl.test/current/myrobotlab.jar", "/resource/framework/serviceData.json", "C:\\mrl.test\\current\\.myrobotlab\\serviceData.json");
 

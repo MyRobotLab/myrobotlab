@@ -23,7 +23,7 @@ angular.module('mrlapp.nav')
                     $timeout(function () {
                         // $scope.firststatus = status.name + " " + status.level + " " + status.detail;
                         $scope.status = status;
-                        var id = Flash.create('success', status.level + ' ' + status.name + ' ' + status.detail + ' ', 0, {class: 'custom-class', id: 'custom-id'}, true);
+                        // var id = Flash.create('success', status.level + ' ' + status.name + ' ' + status.detail + ' ', 0, {class: 'custom-class', id: 'custom-id'}, true);
                     });
                 });
 

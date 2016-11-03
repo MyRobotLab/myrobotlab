@@ -7,7 +7,8 @@ angular.module('mrlapp.service').directive('port', ['$compile', 'mrl', '$log', f
         restrict: "E",
         templateUrl: 'widget/port.html',
         scope: {
-            serviceName: '@'
+            serviceName: '@',
+            portDirectiveScope : "=ngModel"
         },
         // scope: true,
         link: function(scope, element) {
@@ -24,6 +25,9 @@ angular.module('mrlapp.service').directive('port', ['$compile', 'mrl', '$log', f
                 } else {
                     scope.portName = scope.service.lastPortName;
                 }
+
+                // getting the data back from the directive to the controller
+                // scope.obj.portName = scope.portName;
             }
             _self.updateState(scope.service);
             _self.onMsg = function(inMsg) {
@@ -55,8 +59,8 @@ angular.module('mrlapp.service').directive('port', ['$compile', 'mrl', '$log', f
             }
             // onMsg
             ;
-            scope.connect = function() {
-                mrl.sendTo(scope.service.name, 'connect');
+            scope.connect = function(portName, rate, dataBits, stopBits, parity) {
+                mrl.sendTo(scope.service.name, 'connect', portName, rate, dataBits, stopBits, parity);
             }
             ;
             scope.refresh = function() {
@@ -71,6 +75,7 @@ angular.module('mrlapp.service').directive('port', ['$compile', 'mrl', '$log', f
             mrl.subscribeToServiceMethod(_self.onMsg, name, 'refresh');
             mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishState');
             mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishStats');
+            scope.portDirectiveScope = scope;
         }
     };
 }

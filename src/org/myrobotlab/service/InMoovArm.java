@@ -45,22 +45,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     omoplate = (Servo) createPeer("omoplate");
     arduino = (Arduino) createPeer("arduino");
 
-    // connection details
-    /* OLD WAY
-    bicep.setPin(8);
-    rotate.setPin(9);
-    shoulder.setPin(10);
-    omoplate.setPin(11);
-
-    bicep.setController(arduino);
-    rotate.setController(arduino);
-    shoulder.setController(arduino);
-    omoplate.setController(arduino);
-    */
-    
-    // NEW WAY
-    
-    
     bicep.setMinMax(5, 90);
     rotate.setMinMax(40, 180);
     shoulder.setMinMax(0, 180);
@@ -70,6 +54,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     rotate.setRest(90);
     shoulder.setRest(30);
     omoplate.setRest(10);
+    
+    setVelocity(5, 5, 5, 5);
   }
 
   /**
@@ -113,28 +99,31 @@ public class InMoovArm extends Service implements IKJointAngleListener {
       error("arduino %s not connected", arduino.getName());
       return false;
     }
-    bicep.attach(arduino, 8);
-    rotate.attach(arduino, 9);
-    shoulder.attach(arduino, 10);
-    omoplate.attach(arduino, 11);
+    bicep.attach(arduino, 8, bicep.getRest(), bicep.getVelocity());
+    rotate.attach(arduino, 9, rotate.getRest(), rotate.getVelocity());
+    shoulder.attach(arduino, 10, shoulder.getRest(), shoulder.getVelocity());
+    omoplate.attach(arduino, 11, omoplate.getRest(), omoplate.getVelocity());
 
-    //attach();
-    setSpeed(0.7, 0.7, 0.7, 0.7);
-    rest();
-    sleep(1000);
-    setSpeed(1.0, 1.0, 1.0, 1.0);
     broadcastState();
     return true;
   }
 
   public void detach() {
-    bicep.detach();
-    sleep(InMoov.attachPauseMs);
-    rotate.detach();
-    sleep(InMoov.attachPauseMs);
-    shoulder.detach();
-    sleep(InMoov.attachPauseMs);
-    omoplate.detach();
+    if (bicep != null) {
+      bicep.detach();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (rotate != null) {
+      rotate.detach();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (shoulder != null) {
+      shoulder.detach();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (omoplate != null) {
+      omoplate.detach();
+    }
   }
 
   public Arduino getArduino() {
@@ -433,6 +422,13 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
 
     return meta;
+  }
+
+  public void setVelocity(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+    this.bicep.setVelocity(bicep);
+    this.rotate.setVelocity(rotate);
+    this.shoulder.setVelocity(shoulder);
+    this.omoplate.setVelocity(omoplate);
   }
 
 }

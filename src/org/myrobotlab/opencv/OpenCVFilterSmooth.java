@@ -38,7 +38,7 @@ public class OpenCVFilterSmooth extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSmooth.class.getCanonicalName());
 
-  IplImage buffer = null;
+  transient IplImage buffer = null;
 
   public OpenCVFilterSmooth() {
     super();

@@ -53,8 +53,7 @@ public class Pingdar extends Service {
   long rangeAvg = 0;
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     Runtime.createAndStart("gui", "GUIService");
     // Runtime.createAndStart("webgui", "WebGui");

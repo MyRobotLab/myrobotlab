@@ -43,8 +43,7 @@ public class UltrasonicSensorTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init(Level.INFO);
 
     log.info("setUpBeforeClass");
 

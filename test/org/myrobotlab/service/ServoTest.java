@@ -75,7 +75,7 @@ public class ServoTest {
 		// should be clear & easy !!
 
 		// microcontroller connect ...
-		arduino.connect("COM5");
+		arduino.connect("COM15");
 		// arduino.setDebug(true);
 
 		// ServoControl Methods begin --------------
@@ -88,7 +88,6 @@ public class ServoTest {
 		servo02.attach(arduino, 7, 40);
 		servo01.eventsEnabled(true);
 		// FIXME is attach re-entrant ???
-		
 		servo01.broadcastState();
 		servo02.broadcastState();
 

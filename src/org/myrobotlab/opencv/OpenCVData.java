@@ -81,7 +81,7 @@ public class OpenCVData implements Serializable {
   // THIS IS A COPY OF SOURCES !!! - which means this is a copy of the
   // references of
   // SOURCES !!!
-  private HashMap<String, Object> data = new HashMap<String, Object>();
+  public transient HashMap<String, Object> data = new HashMap<String, Object>();
 
   // TODO add KEY_INPUT .. take away from OpenCV
   public static final String KEY_DEPTH = "depth";

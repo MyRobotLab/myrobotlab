@@ -1,7 +1,10 @@
 package org.myrobotlab.kinematics;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.MathUtils;
 import org.slf4j.Logger;
+
+//import marytts.util.math.MathUtils;
 
 /**
  * A link class to encapsulate the D-H parameters for a given link in a robotic
@@ -26,6 +29,7 @@ public class DHLink {
   // -180 / +180 as min/max i guess?
   private double min = -Math.PI;
   private double max = Math.PI;
+  private double initialTheta;
 
   // TODO: figure this out.
   private String name;
@@ -41,11 +45,25 @@ public class DHLink {
     this.d = d;
     this.r = r;
     this.theta = theta;
+    initialTheta = theta;
     this.alpha = alpha;
     //
     this.type = DHLinkType.REVOLUTE;
     // m = resolveMatrix();
   }
+  
+  public DHLink(DHLink copy){
+    this.d = copy.d;
+    this.theta = copy.theta;
+    this.r = copy.r;
+    this.alpha = copy.alpha;
+    this.type = copy.type;
+    this.min = copy.min;
+    this.max = copy.max;
+    this.name = copy.name;
+    this.initialTheta = copy.initialTheta;
+  }
+  
 
   /**
    * return a 4x4 homogenous transformation matrix for the given D-H parameters
@@ -54,7 +72,6 @@ public class DHLink {
    */
   public Matrix resolveMatrix() {
     Matrix m = new Matrix(4, 4);
-
     // elements we need
     double cosTheta = Math.cos(theta);
     double sinTheta = Math.sin(theta);
@@ -230,4 +247,16 @@ public class DHLink {
     this.name = name;
   }
 
+  public void addPositionValue(double positionDeg) {
+    theta = initialTheta + MathUtils.degToRad(positionDeg);
+  }
+  
+  public double getInitialTheta() {
+    return initialTheta;
+  }
+  
+  public Double getPositionValueDeg() {
+    //return (theta - initialTheta) * 180 / Math.PI;
+    return (theta * 180/Math.PI) - (initialTheta*180/Math.PI); 
+  }
 }

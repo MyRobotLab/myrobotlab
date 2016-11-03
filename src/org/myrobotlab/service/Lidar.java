@@ -44,8 +44,7 @@ public class Lidar extends Service implements SerialDataListener {
   String info; // used for outputting log.info messages
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.WARN);
+    LoggingFactory.init(Level.WARN);
 
     try {
 
