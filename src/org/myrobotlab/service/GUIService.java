@@ -292,6 +292,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
         }
 
         frame.pack();
+        frame.repaint();
 
       }
     });
@@ -353,6 +354,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
     }
 
     frame.pack();
+    frame.repaint();
     return tabs;
   }
 
@@ -419,6 +421,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
       frame.setJMenuBar(buildMenu());
       frame.setVisible(true);
       frame.pack();
+      frame.repaint();
 
       isDisplaying = true;
     }
@@ -542,6 +545,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
       @Override
       public void run() {
         frame.pack();
+        frame.repaint();
       }
     });
   }
@@ -627,6 +631,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
           guiServiceGUI.rebuildGraph();
         }
         frame.pack();
+        frame.repaint();
       }
     });
   }

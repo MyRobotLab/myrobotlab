@@ -136,15 +136,15 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	/**
-	 * MotorUpdater The control loop to update the motor service with new values
-	 * based on the PID calculations
+	 * MotorUpdater The control loop to update the MotorController with new
+	 * values based on the PID calculations
 	 * 
 	 */
 	public class MotorUpdater extends Thread {
 
 		double lastOutput = 0;
 		DiyServo mc;
-		
+
 		public MotorUpdater(DiyServo mc) {
 			super(String.format("%s.MotorUpdater", mc.getName()));
 			this.mc = mc;
@@ -192,33 +192,25 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	public String controllerName = null;
 	MotorConfig config;
 
-	// Reference to the Analog input service
-	public List<String> pinArrayControls; // List
-											// of
-											// available
-											// services
-											// for
-											// analog
-											// inpt
-	transient PinArrayControl pinArrayControl; // Handle
-												// to
-												// the
-												// selected
-												// analog
-												// input
-												// service
-	public String pinControlName; // Name
-									// of
-									// the
+	/**
+	 * // Reference to the Analog input service
+	 */
+	public List<String> pinArrayControls;
+	/**
+	 * // Handle to the selected analog input service and it's name
+	 */
+	transient PinArrayControl pinArrayControl;
+	public String pinControlName;
 
-	// selected
-	// analog
-	// input
-	// service
-
+	/**
+	 * List of available pins on the analog input service
+	 */
 	public List<Integer> pinList = new ArrayList<Integer>();
 	public Integer pin;
 
+	/**
+	 * mapper to be able to remap input values
+	 */
 	Mapper mapper = new Mapper(0, 180, 0, 180);
 
 	Integer rest = 90;
@@ -239,10 +231,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	 * list of names of possible controllers
 	 */
 	public List<String> controllers;
-	/**
-	 * current speed of the servo
-	 */
-	Double speed = 1.0;
+
 	// FIXME - currently is only computer control - needs to be either
 	// microcontroller or computer
 	boolean isSweeping = false;
@@ -252,10 +241,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 
 	int sweepStep = 1;
 	boolean sweepOneWay = false;
-
-	// sweep types
-	// TODO - computer implemented speed control (non-sweep)
-	boolean speedControlOnUC = false;
 
 	transient Thread sweeper = null;
 
@@ -335,8 +320,9 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	double powerLevel = 0;
 	double maxPower = 1.0;
 	double minPower = -1.0;
-	
+
 	Mapper powerMap = new Mapper(-1.0, 1.0, -255.0, 255.0);
+
 	/**
 	 * Constructor
 	 * 
@@ -422,13 +408,13 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		broadcastState();
 	}
 
-	///////   config start ////////////////////////
+	/////// config start ////////////////////////
 	public void setPwmPins(int leftPin, int rightPin) {
 		config = new MotorConfigDualPwm(leftPin, rightPin);
 		broadcastState();
 	}
-	
-	public void setPwrDirPins(int pwrPin, int dirPin){
+
+	public void setPwrDirPins(int pwrPin, int dirPin) {
 		config = new MotorConfigSimpleH(pwrPin, dirPin);
 		broadcastState();
 	}
@@ -436,7 +422,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	public MotorConfig getConfig() {
 		return config;
 	}
-	
+
 	/**
 	 * Method to check if events are enabled or not
 	 * 
@@ -615,17 +601,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		this.rest = rest;
 	}
 
-	public void setSpeed(double speed) {
-		this.speed = speed;
-		// TODO Replace with PID / Motor logic
-		// getController().servoSetSpeed(this);
-	}
-
-	// choose to handle sweep on arduino or in MRL on host computer thread.
-	public void setSpeedControlOnUC(boolean b) {
-		speedControlOnUC = b;
-	}
-
 	public void setSweepDelay(int delay) {
 		sweepDelay = delay;
 	}
@@ -668,20 +643,12 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		this.sweepStep = step;
 		this.sweepOneWay = oneWay;
 
-		// FIXME - CONTROLLER TYPE SWITCH
-		// In case PID is implemented in Arduino, this could happen
-		if (speedControlOnUC) {
-			// getController().servoSweepStart(this); // delay &
-			// step
-			// implemented
-		} else {
-			if (isSweeping) {
-				stop();
-			}
-
-			sweeper = new Sweeper(getName());
-			sweeper.start();
+		if (isSweeping) {
+			stop();
 		}
+
+		sweeper = new Sweeper(getName());
+		sweeper.start();
 
 		isSweeping = true;
 		broadcastState();
@@ -789,11 +756,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		return targetOutput;
 	}
 
-	@Override
-	public double getSpeed() {
-		return speed;
-	}
-
 	public void attach(String controllerName) throws Exception {
 		attach((MotorController) Runtime.getService(controllerName));
 	}
@@ -806,7 +768,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		}
 		broadcastState();
 	}
-
 
 	@Override
 	public void detach(String controllerName) {
@@ -891,12 +852,39 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		broadcastState();
 	}
 
-	//
-	// A bunch of unused methods from ServoControl. Perhaps I should create a
-	// new
+	@Override
+	public int getVelocity() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public double getPowerLevel() {
+		return powerLevel;
+	}
+
+	@Override
+	public void setPowerLevel(double power) {
+		this.powerLevel = power;
+	}
+
+	@Override
+	public double getPowerOutput() {
+		return powerMap.calc(powerLevel);
+	}
+	
+	@Override
+	public int getTargetPos() {
+		return targetPos;
+	}
+	
+	/**
+	// A bunch of unimplemented methods from ServoControl and MotorControl.
+	// Perhaps I should create a new
 	// DiyServoControl interface.
 	// I was hoping to be able to avoid that, but might be a better solution
-
+   */
 	@Override
 	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
 		// TODO Auto-generated method stub
@@ -916,12 +904,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public int getVelocity() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public void attach(String controllerName, int pin, Integer pos) throws Exception {
 		// TODO Auto-generated method stub
 
@@ -936,6 +918,54 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	@Override
 	public void attach(String controllerName, int pin, Integer pos, Integer velocity) throws Exception {
 		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void lock() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void move(double power) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void moveTo(int newPos, Double power) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setEncoder(Encoder encoder) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void stopAndLock() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void unlock() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public double getSpeed() {
+		log.error("speed is depreciated, use getVelocity instead");
+		return 0;
+	}
+
+	@Override
+	public void setSpeed(double speed) {
+		log.error("speed is depreciated, use setVelocity instead");
 
 	}
 
@@ -958,60 +988,4 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		return meta;
 	}
 
-	@Override
-	public double getPowerLevel() {
-		return powerLevel;
-	}
-
-	@Override
-	public void setPowerLevel(double power) {
-		this.powerLevel = power;
-	}
-
-	@Override
-	public double getPowerOutput() {
-		return powerMap.calc(powerLevel);
-	}
-
-	@Override
-	public int getTargetPos() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void lock() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void move(double power) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void moveTo(int newPos, Double power) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setEncoder(Encoder encoder) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void stopAndLock() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void unlock() {
-		// TODO Auto-generated method stub
-		
-	}
 }
