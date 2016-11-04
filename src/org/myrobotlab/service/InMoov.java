@@ -1079,11 +1079,10 @@ public class InMoov extends Service {
       }
 
       mouthControl = (MouthControl) startPeer("mouthControl");
-      // OLD WAY
-      //  mouthControl.jaw.setPin(26);
+  
       mouthControl.arduino.connect(port);
-      // NEW WAY
-      mouthControl.arduino.servoAttach(mouthControl.jaw, 26);
+      mouthControl.jaw.attach(mouthControl.arduino,26);
+
       arduinos.put(port, mouthControl.arduino);
       String p = mouthControl.getArduino().getSerial().getPortName();
       if (p != null) {
@@ -1112,9 +1111,10 @@ public class InMoov extends Service {
       openni = (OpenNi) startPeer("openni");
       pid = (Pid) startPeer("pid");
 
+      pid.setPID("kinect", 10.0, 0.0, 1.0);
       pid.setMode("kinect", Pid.MODE_AUTOMATIC);
       pid.setOutputRange("kinect", -1, 1);
-      pid.setPID("kinect", 10.0, 0.0, 1.0);
+
       pid.setControllerDirection("kinect", 0);
 
       // re-mapping of skeleton !
