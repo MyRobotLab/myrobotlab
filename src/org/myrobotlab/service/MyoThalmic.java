@@ -390,6 +390,7 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
     ServiceType meta = new ServiceType(MyoThalmic.class.getCanonicalName());
     meta.addDescription("Myo service to control with the Myo armband");
     meta.addCategory("control", "sensor");
+    meta.addDependency("com.thalmic.myo", "0.9.0");
     return meta;
   }
 
