@@ -982,7 +982,8 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		ServiceType meta = new ServiceType(DiyServo.class.getCanonicalName());
 		meta.addDescription("Controls a motor so that it can be used as a Servo");
 		meta.addCategory("motor", "control");
-		meta.addPeer("Motor", "Motor", "Servo motor");
+		meta.addPeer("Arduino", "Arduino", "MotorController");
+		meta.addPeer("Adafruit16CServoDriver", "Adafruit16CServoDriver", "MotorController");
 		meta.addPeer("Pid", "Pid", "PID service");
 
 		return meta;
