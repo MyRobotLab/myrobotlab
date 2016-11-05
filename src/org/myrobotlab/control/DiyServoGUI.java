@@ -125,13 +125,13 @@ public class DiyServoGUI extends ServiceGUI implements ActionListener {
 				if (o == controllerList) {
 					String controllerName = (String) controllerList.getSelectedItem();
 					myServo.controllerName = controllerName;
-					log.info(String.format("controllerList event %s", controllerName));
+					log.debug(String.format("controllerList event %s", controllerName));
 				}
 
 				if (o == pinArrayControlList) {
 					String pinControlName = (String) pinArrayControlList.getSelectedItem();
 					myServo.pinControlName = pinControlName;
-					log.info(String.format("pinArrayControList event %s", pinControlName));
+					log.debug(String.format("pinArrayControList event %s", pinControlName));
 				}
 
 				if (o == attachButton) {
