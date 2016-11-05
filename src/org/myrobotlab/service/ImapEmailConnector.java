@@ -41,7 +41,7 @@ public class ImapEmailConnector extends AbstractConnector {
   private String username;
   private String password;
   private String folderName = "INBOX";
-  private String docIdPrefix = "email_";
+  private transient String docIdPrefix = "email_";
   private transient Store store;
 
   public ImapEmailConnector(String name) {
