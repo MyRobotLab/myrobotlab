@@ -81,7 +81,6 @@
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-server-7.6.13.v20130916.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-servlet-7.6.13.v20130916.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-util-7.6.13.v20130916.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
 	<classpathentry kind="lib" path="/repo/com.googlecode.jssc/2.8.0/jssc-2.8.0.jar"/>
 	<classpathentry kind="lib" path="/repo/gnu.io.rxtx/2.1-7r2/RXTXcomm.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-de-5.1.2.jar"/>
@@ -207,5 +206,7 @@
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-dumpfiles-0.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-storage-0.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-util-0.7.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jfugue.music/5.0/jfugue-5.0.7.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jfugue.music/5.0/gervill.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
