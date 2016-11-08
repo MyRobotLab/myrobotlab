@@ -207,6 +207,5 @@
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-storage-0.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-util-0.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jfugue.music/5.0/jfugue-5.0.7.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jfugue.music/5.0/gervill.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
