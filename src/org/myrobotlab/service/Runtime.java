@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -2290,6 +2291,23 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		return null;
 	}
 
+	// TODO: a better way to code these variants? 
+	public static void setLocale(String country, String language, String variant) {
+	  Locale runtimeLocale = new Locale(country, language, variant);
+	  Locale.setDefault(runtimeLocale);
+	}
+
+	public static void setLocale(String language, String country) {
+   Locale runtimeLocale = new Locale(language, country);   
+   Locale.setDefault(runtimeLocale);
+ }
+
+  public static void setLocale(String language) {
+   System.setProperty("user.language", language);
+   Locale runtimeLocale = new Locale(language);   
+   Locale.setDefault(runtimeLocale);
+ }
+	
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
