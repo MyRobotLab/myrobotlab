@@ -6,6 +6,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.string.StringUtil;
 
 /**
  * A service that will either strip out html from input text or wrap the input
@@ -23,7 +24,11 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   // if stripHtml is false these tags are used to wrap the input text
   private String preHtmlTag = "<pre>";
   private String postHtmlTag = "</pre>";
-
+  
+  private boolean stripAccents = false;
+  private boolean lowercase = false;
+  private boolean trim = true;
+  
   public static void main(String[] args) {
     LoggingFactory.init("INFO");
 
@@ -112,7 +117,19 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     // TODO: something fancier but this works for now.
     String cleanText = text.replaceAll("\\<.*?\\>", " ");
     cleanText = cleanText.replaceAll("  ", " ");
-    return cleanText.trim();
+    
+    if (isStripAccents()) {
+      cleanText = StringUtil.removeAccents(cleanText);
+    }
+    
+    if (isLowercase()) {
+      cleanText = cleanText.toLowerCase();
+    }
+    
+    if (isTrim()) {
+      cleanText = cleanText.trim();
+    }
+    return cleanText;
   }
 
   /**
@@ -130,6 +147,30 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     meta.addCategory("data", "filter");
 
     return meta;
+  }
+
+  public boolean isStripAccents() {
+    return stripAccents;
+  }
+
+  public void setStripAccents(boolean stripAccents) {
+    this.stripAccents = stripAccents;
+  }
+
+  public boolean isLowercase() {
+    return lowercase;
+  }
+
+  public void setLowercase(boolean lowercase) {
+    this.lowercase = lowercase;
+  }
+
+  public boolean isTrim() {
+    return trim;
+  }
+
+  public void setTrim(boolean trim) {
+    this.trim = trim;
   }
 
 }

@@ -13,6 +13,7 @@ import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.string.StringUtil;
 
 /**
  * 
@@ -66,7 +67,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     // not sure.
     String cleantext = text.toLowerCase().trim();
     if (isStripAccents()) {
-      cleantext = removeAccents(cleantext);
+      cleantext = StringUtil.removeAccents(cleantext);
       log.info("Cleaned Text {}" ,cleantext);
     }
     /*
@@ -82,16 +83,6 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     
     return cleantext;
   }
-
-  public static String removeAccents(String text) {
-    if (text == null) {
-      return null;
-    } else {
-      String clean =  Normalizer.normalize(text, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-      return clean;
-    }
-  }
-  
   
   @Override
   public void listeningEvent() {
@@ -110,14 +101,13 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     log.info("Recognized : >{}<", text);
     String cleanedText = text.toLowerCase().trim();
     if (isStripAccents()) {
-      cleanedText = removeAccents(cleanedText);
+      cleanedText = StringUtil.removeAccents(cleanedText);
     }
     if (commands.containsKey(cleanedText)) {
       // If we have a command. send it when we recognize...
       Command cmd = commands.get(cleanedText);
       send(cmd.name, cmd.method, cmd.params);
     }
-
     return cleanedText;
   }
 
