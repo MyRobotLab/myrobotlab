@@ -35,7 +35,7 @@
 #define DISABLE_PINS		13
 // {enableBoardStatus int} 
 #define ENABLE_BOARD_STATUS		14
-// {enablePin int} 
+// {enablePin int int} 
 #define ENABLE_PIN		15
 // {getMrlPinType PinDefinition} 
 #define GET_MRL_PIN_TYPE		16
@@ -69,7 +69,7 @@
 #define NEO_PIXEL_WRITE_MATRIX		30
 // {onSensorData SensorData} 
 #define ON_SENSOR_DATA		31
-// {pinMode int String} 
+// {pinMode int int} 
 #define PIN_MODE		32
 // {publishAttachedDevice String} 
 #define PUBLISH_ATTACHED_DEVICE		33
@@ -166,11 +166,17 @@
 #define BOARD_TYPE_ID_UNKNOWN 0
 #define BOARD_TYPE_ID_MEGA    1
 #define BOARD_TYPE_ID_UNO     2
+#define BOARD_TYPE_ID_NANO    3
+#define BOARD_TYPE_ID_ADK     4
 
-#if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
+#if defined(ARDUINO_AVR_MEGA2560)
   #define BOARD BOARD_TYPE_ID_MEGA
+#elif defined(ARDUINO_AVR_ADK)
+  #define BOARD BOARD_TYPE_ID_ADK
 #elif defined(ARDUINO_AVR_UNO)
   #define BOARD BOARD_TYPE_ID_UNO
+#elif defined(ARDUINO_AVR_NANO)
+  #define BOARD BOARD_TYPE_ID_NANO
 #else
   #define BOARD BOARD_TYPE_ID_UNKNOWN
 #endif

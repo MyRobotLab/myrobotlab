@@ -188,6 +188,7 @@ public class ArduinoBindingsGenerator {
     exclude.add("getPortName");
     exclude.add("setBoardMega");
     exclude.add("setBoardUno");
+    exclude.add("setBoardNano");
 
     exclude.add("createVirtual");
     exclude.add("getMetaData");

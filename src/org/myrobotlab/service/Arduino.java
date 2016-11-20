@@ -268,12 +268,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public transient static final String BOARD_TYPE_UNO = "uno";
 	public transient static final String BOARD_TYPE_MEGA = "mega";
 	public transient static final String BOARD_TYPE_MEGA_ADK = "megaADK";
+	public transient static final String BOARD_TYPE_NANO = "nano";
 
 	// MrlComm definition
 	public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
 	public transient static final int BOARD_TYPE_ID_MEGA = 1;
 	public transient static final int BOARD_TYPE_ID_UNO = 2;
-	public transient static final int BOARD_TYPE_ID_ADK_MEGA = 3;
+	public transient static final int BOARD_TYPE_ID_NANO = 3;
+	public transient static final int BOARD_TYPE_ID_ADK_MEGA = 4;
 
 	public static final int HIGH = 0x1;
 	public static final int LOW = 0x0;
@@ -1951,9 +1953,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			case BOARD_TYPE_ID_MEGA:
 				boardName = BOARD_TYPE_MEGA;
 				break;
+			case BOARD_TYPE_ID_ADK_MEGA:
+				boardName = BOARD_TYPE_MEGA_ADK;
+				break;
 			case BOARD_TYPE_ID_UNO:
 				boardName = BOARD_TYPE_UNO;
 				break;
+			case BOARD_TYPE_ID_NANO:
+				boardName = BOARD_TYPE_NANO;
 			default:
 				boardName = "Unknown";
 				break;
@@ -2377,12 +2384,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return boardType;
 	}
 
-  public String setBoardMegaADK() {
-    boardType = BOARD_TYPE_MEGA_ADK;
-    createPinList();
-    broadcastState();
-    return boardType;
-  }
+	public String setBoardNano() {
+		boardType = BOARD_TYPE_NANO;
+		createPinList();
+		broadcastState();
+		return boardType;
+	}
+    public String setBoardMegaADK() {
+      boardType = BOARD_TYPE_MEGA_ADK;
+       createPinList();
+      broadcastState();
+      return boardType;
+    }
 
   /**
 	 * DeviceControl methods. In this case they represents the I2CBusControl Not
