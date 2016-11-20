@@ -37,7 +37,7 @@ public class ArduinoUtils {
 	}
 
 	public static boolean uploadSketch(String port, String board) throws IOException, InterruptedException {
-		if (!(board.equalsIgnoreCase("uno") || board.equalsIgnoreCase("mega") || board.equalsIgnoreCase("megaADK"))) {
+		if (!(board.equalsIgnoreCase("uno") || board.equalsIgnoreCase("mega") || board.equalsIgnoreCase("megaADK") || board.equalsIgnoreCase("nano"))) {
 			// TODO: validate the proper set of values.
 			System.out.println(String.format("Invalid board type:%s", board));
 			exitValue = 1;
@@ -61,7 +61,12 @@ public class ArduinoUtils {
 		args.add("--port");
 		args.add(port);
 		args.add("--board");
-		args.add("arduino:avr:" + board);
+		if (board.equalsIgnoreCase("nano")) {
+			args.add("arduino:avr:" + board + ":cpu=atmega328");
+		}
+		else {
+			args.add("arduino:avr:" + board);
+		}
 		args.add(sketch.getAbsolutePath());
 		// args.add("--verbose-upload");
 		//args.add("--preserve-temp-files");

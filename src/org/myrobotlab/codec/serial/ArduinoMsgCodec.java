@@ -56,7 +56,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
-  public static final int MRLCOMM_VERSION = 40;
+  public static final int MRLCOMM_VERSION = 41;
   
   // ------  device type mapping constants
   
@@ -212,7 +212,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {enableBoardStatus int} 
 	public final static int ENABLE_BOARD_STATUS =		14;
 
-	// {enablePin int} 
+	// {enablePin int int} 
 	public final static int ENABLE_PIN =		15;
 
 	// {getMrlPinType PinDefinition} 
@@ -263,7 +263,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {onSensorData SensorData} 
 	public final static int ON_SENSOR_DATA =		31;
 
-	// {pinMode int String} 
+	// {pinMode int int} 
 	public final static int PIN_MODE =		32;
 
 	// {publishAttachedDevice String} 
