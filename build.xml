@@ -191,7 +191,7 @@
 		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/jxmpp-core-0.4.2.jar"/>
 		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/jxmpp-util-cache-0.4.2.jar"/>
 		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-java7-4.1.6.jar"/>
-		<pathelement location="${repo}/org.jnativehook/2.0.3/jnativehook.jar"/>
+		<pathelement location="${repo}/org.jnativehook/2.0.3/jnativehook-2.0.3.jar"/>
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-async-3.0.5.jar"/>
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-core-3.0.5.jar"/>
 		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-examples-3.0.5.jar"/>
