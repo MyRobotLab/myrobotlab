@@ -21,6 +21,13 @@
  * 
  * Enjoy !
  * 
+ * This service uses jnativehook so that keyboard events will be listened to even
+ * if the GUI doesn't have focus
+ * 
+ * References:
+ * 
+ * https://github.com/kwhat/jnativehook/
+ * https://github.com/kwhat/jnativehook/wiki/Swing
  * */
 
 package org.myrobotlab.control;
@@ -50,6 +57,7 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
+import org.jnativehook.SwingDispatchService;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
@@ -186,6 +194,8 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
 	}
     
     keyboard = new Keyboard();
+    
+    GlobalScreen.setEventDispatcher(new SwingDispatchService());
     GlobalScreen.addNativeKeyListener(keyboard);
     
     CheckBoxChange checkBoxChange = new CheckBoxChange();
