@@ -159,6 +159,8 @@ public class Keyboard extends Service {
     meta.addDescription("keyboard interface");
     meta.addCategory("control");
 
+    meta.addDependency("org.jnativehook", "2.0.3");
+    
     return meta;
   }
 
