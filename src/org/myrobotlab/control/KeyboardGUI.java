@@ -25,7 +25,7 @@
 
 package org.myrobotlab.control;
 
-import java.awt.event.KeyEvent;
+// import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -70,10 +70,11 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
     }
   }
 
-  public class Keyboard implements KeyListener, NativeKeyListener{
+  // public class Keyboard implements KeyListener, NativeKeyListener{
+  public class Keyboard implements NativeKeyListener{	  
 
     SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss:SSS");
-
+/*
     @Override
     public void keyPressed(KeyEvent keyEvent) {
 
@@ -105,17 +106,24 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
     public void keyTyped(KeyEvent keyEvent) {
       // log.error("Typed" + keyEvent);
     }
-    
-    public void nativeKeyPressed(NativeKeyEvent e) {
-        // publishKey(NativeKeyEvent.getKeyText(e.getKeyCode()));
+*/    
+    public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent) {
+    	
+        int code = nativeKeyEvent.getKeyCode();
+        String text = NativeKeyEvent.getKeyText(code);
 
-        if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
-            try {
-  			GlobalScreen.unregisterNativeHook();
-  		  } catch (NativeHookException e1) {
-  			// TODO Auto-generated catch block
-  			e1.printStackTrace();
-  		  }
+        if (sendStrings) {
+          // keyBuffer.append(b)
+          if (code == NativeKeyEvent.VC_ENTER) {
+            myService.send(boundServiceName, "keyCommand", keyBuffer.toString());
+            addLogEntry(sdf.format(cal.getTime()) + " " + keyBuffer.toString());
+            keyBuffer.setLength(0);
+          } else {
+            keyBuffer.append(text);
+          }
+        } else {
+          myService.send(boundServiceName, "keyCommand", text);
+          addLogEntry(sdf.format(cal.getTime()) + " " + nativeKeyEvent.getKeyCode() + " " + NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
         }
     }
 
@@ -169,13 +177,16 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
   @Override
   public void init() {
 
-    keyboard = new Keyboard();
+
     try {
 		GlobalScreen.registerNativeHook();
 	} catch (NativeHookException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
+    
+    keyboard = new Keyboard();
+    GlobalScreen.addNativeKeyListener(keyboard);
     
     CheckBoxChange checkBoxChange = new CheckBoxChange();
     // build input begin ------------------
@@ -186,7 +197,7 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
         "<html><body><table><tr><td align=\"center\">click here</td></tr><tr><td align=\"center\">for keyboard</td></tr><tr><td align=\"center\">control.</td></tr></table></body></html>");
 
     display.add(keyboardButton, gc);
-    keyboardButton.addKeyListener(keyboard);
+    // keyboardButton.addKeyListener(keyboard);
 
     ++gc.gridx;
     display.add(sendStringsCheckBox, gc);
