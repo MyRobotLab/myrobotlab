@@ -46,6 +46,11 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.keyboard.NativeKeyListener;
+
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
@@ -65,7 +70,7 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
     }
   }
 
-  public class Keyboard implements KeyListener {
+  public class Keyboard implements KeyListener, NativeKeyListener{
 
     SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss:SSS");
 
@@ -100,7 +105,28 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
     public void keyTyped(KeyEvent keyEvent) {
       // log.error("Typed" + keyEvent);
     }
+    
+    public void nativeKeyPressed(NativeKeyEvent e) {
+        // publishKey(NativeKeyEvent.getKeyText(e.getKeyCode()));
 
+        if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
+            try {
+  			GlobalScreen.unregisterNativeHook();
+  		  } catch (NativeHookException e1) {
+  			// TODO Auto-generated catch block
+  			e1.printStackTrace();
+  		  }
+        }
+    }
+
+    public void nativeKeyReleased(NativeKeyEvent e) {
+        // publishKey(NativeKeyEvent.getKeyText(e.getKeyCode()));
+        // System.out.println("Key Released: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
+    }
+
+    public void nativeKeyTyped(NativeKeyEvent e) {
+        // System.out.println("Key Typed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
+    }
   }
 
   public final static Logger log = LoggerFactory.getLogger(KeyboardGUI.class.getCanonicalName());
@@ -144,6 +170,13 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
   public void init() {
 
     keyboard = new Keyboard();
+    try {
+		GlobalScreen.registerNativeHook();
+	} catch (NativeHookException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+    
     CheckBoxChange checkBoxChange = new CheckBoxChange();
     // build input begin ------------------
     sendStringsCheckBox = new JCheckBox();
