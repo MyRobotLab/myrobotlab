@@ -180,6 +180,12 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
 
   @Override
   public void detachGUI() {
+	    try {
+			GlobalScreen.unregisterNativeHook();
+		} catch (NativeHookException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
   }
 
   @Override
