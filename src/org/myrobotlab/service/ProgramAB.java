@@ -18,9 +18,9 @@ import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
 import org.alicebot.ab.Chat;
 import org.alicebot.ab.Predicates;
-import org.apache.commons.io.IOUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
@@ -670,8 +670,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // create a string that represents the predicates file
       String inputPredicateStream = "name:" + userName;
       // load those predicates
-      chat.predicates.getPredicateDefaultsFromInputStream(IOUtils.toInputStream(inputPredicateStream));
-
+      chat.predicates.getPredicateDefaultsFromInputStream(FileIO.toInputStream(inputPredicateStream));
     }
     // this.currentBotName = botName;
     // String userName = chat.predicates.get("name");
