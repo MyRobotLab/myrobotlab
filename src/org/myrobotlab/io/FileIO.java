@@ -1283,8 +1283,8 @@ public class FileIO {
   }
   
   // Taken from Commons-io IOUtils
-  public static InputStream toInputStream(String filename) {
-    return toInputStream(filename, Charset.defaultCharset());
+  public static InputStream toInputStream(String input) {
+    return toInputStream(input, Charset.defaultCharset());
   }
 
   // Taken from Commons-io IOUtils
