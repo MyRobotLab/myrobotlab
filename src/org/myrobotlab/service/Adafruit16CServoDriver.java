@@ -61,13 +61,15 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			servoData = servoMap.get(name);
 			servoData.isMoving = true;
 			this.name = name;
+			log.info(String.format("SpeedControl %s created", name));
 		}
 
 		@Override
 		public void run() {
 
+			log.info(String.format("SpeedControl %s running", name));
 			try {
-				while (servoData.isMoving = true) {
+				while (servoData.isMoving) {
 					servoData = servoMap.get(name);
 					if (servoData.targetOutput > servoData.currentOutput) {
 						servoData.currentOutput += 1;
@@ -76,6 +78,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 					} else {
 						// We have reached the position so shutdown the thread
 						servoData.isMoving = false;
+						log.info(String.format("SpeedControl %s shut down", name));
 					}
 					int pulseWidthOff = SERVOMIN + (int) (servoData.currentOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
 					setServo(servoData.pin, pulseWidthOff);
@@ -86,7 +89,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			} catch (Exception e) {
 				servoData.isMoving = false;
 				if (e instanceof InterruptedException) {
-					info("Shutting down MotorUpdater");
+					log.info(String.format("SpeedControl %s shut down", name));
 				} else {
 					logException(e);
 				}
@@ -488,9 +491,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		} else {
 			servoData.targetOutput = servo.getTargetOutput();
 			// Start a thread to handle the speed for this servo
-			if (servoData.isMoving == false) {
-				servoData.speedcontrol = new SpeedControl(servo.getName());
-			}
+			if (servoData.currentOutput != servoData.targetOutput && !servoData.isMoving) {
+			  servoData.speedcontrol = new SpeedControl(servo.getName());
+			  servoData.speedcontrol.start();
+		    }
 		}
 	}
 
