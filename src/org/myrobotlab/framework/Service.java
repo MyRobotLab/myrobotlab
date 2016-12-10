@@ -1857,18 +1857,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     instanceId = uri;
   }
 
-  /*
-   * static public setErrorEmail(String to, String host, String user, String
-   * password){
-   * 
-   * }
-   */
-
-  public String setLogLevel(String level) {
-    Logging logging = LoggingFactory.getInstance();
-    logging.setLevel(this.getClass().getCanonicalName(), level);
-    return level;
-  }
 
   /**
    * rarely should this be used. Gateways use it to provide x-route natting
