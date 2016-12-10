@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -130,7 +131,7 @@ public class RasPi extends Service implements I2CController {
 
 	// FIXME - create low level I2CDevice
 	@Override
-	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
+	public void i2cAttach(I2CControl control, int busAddress, int deviceAddress) {
 
 		try {
 			I2CDevice device = i2c.getDevice(deviceAddress);
@@ -311,16 +312,18 @@ public class RasPi extends Service implements I2CController {
 	}
 
 	@Override
-	public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
-		// TODO Auto-generated method stub
-		
+	public void deviceDetach(DeviceControl device) {
+		// clean up if necessary
 	}
 
 	@Override
-	public void deviceDetach(DeviceControl device) {
-		// TODO Auto-generated method stub
-		
+	public int getDeviceCount() {
+		return i2cDevices.size();
 	}
 
+	@Override
+	public Set<String> getDeviceNames() {
+		return i2cDevices.keySet();
+	}
 
 }

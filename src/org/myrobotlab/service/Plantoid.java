@@ -436,7 +436,7 @@ public class Plantoid extends Service {
 	 * polled
 	 */
 	public void startPolling() {
-		arduino.setSampleRate(sampleRate);
+		// arduino.setSampleRate(sampleRate);
 		arduino.enablePin(soildMoisture);
 		arduino.enablePin(tempHumidity);
 		arduino.enablePin(leftLight);

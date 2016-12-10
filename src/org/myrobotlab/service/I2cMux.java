@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -97,7 +98,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	}
 
 	@Override
-	public void createI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
+	public void i2cAttach(I2CControl control, int busAddress, int deviceAddress) {
 		// Create a new i2c device in case it doesn't already exists.
 		String key = String.format("%s.%d", this.deviceBus, deviceAddress);
 		if (i2cDevices.containsKey(key)) {
@@ -107,7 +108,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 			deviceData.busAddress = Integer.parseInt(this.deviceBus);
 			deviceData.deviceAddress = deviceAddress;
 			deviceData.control = this;
-			controller.createI2cDevice(this, deviceData.busAddress, deviceAddress);
+			controller.i2cAttach(this, deviceData.busAddress, deviceAddress);
 		}
 	}
 
@@ -166,7 +167,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	boolean createDevice() {
 		if (controller != null) {
 			controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-			controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+			controller.i2cAttach(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 		}
 
 		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
@@ -266,15 +267,18 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	}
 
 	@Override
-	public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
-		// TODO Auto-generated method stub
-
+	public void deviceDetach(DeviceControl device) {
+		// clean up if necessary
 	}
 
 	@Override
-	public void deviceDetach(DeviceControl device) {
-		// TODO Auto-generated method stub
+	public int getDeviceCount() {
+		return i2cDevices.size();
+	}
 
+	@Override
+	public Set<String> getDeviceNames() {
+		return i2cDevices.keySet();
 	}
 
 }

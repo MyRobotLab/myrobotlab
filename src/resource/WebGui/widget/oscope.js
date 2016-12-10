@@ -40,6 +40,8 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
             var maxY = height - margin;
             var scaleX = 1;
             var scaleY = 1;
+
+            scope.readWrite = 'read'; // button toggle read/write
             // scope.blah = {};
             // scope.blah.display = false;
             scope.pinIndex = {};

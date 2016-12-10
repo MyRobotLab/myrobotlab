@@ -15,6 +15,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SerialDataListener;
+import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
@@ -397,7 +398,7 @@ public class Gps extends Service implements SerialDataListener {
     return results;
   }
 
-  public Serial getSerial() throws Exception {
+  public SerialDevice getSerial() throws Exception {
     return serial;
   }
 

@@ -62,10 +62,9 @@ public class VideoStreamer extends VideoSink {
     super(name);
   }
 
-  public boolean attach(String videoSource) {
+  public void attach(String videoSource) {
     VideoSource vs = (VideoSource) Runtime.getService(videoSource);
     attach(vs);
-    return true;
   }
 
   @Override

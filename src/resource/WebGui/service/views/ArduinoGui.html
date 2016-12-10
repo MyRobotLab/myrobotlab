@@ -45,7 +45,7 @@
     	<!-- button class="btn btn-default pull-right" ng-click="msg.openMrlComm()">Open in IDE</button -->
     	<!-- FIXME - for an successful upload the "FIELDS!" portname, arduinoPath & boardType all need to be filled in -->
     	<button class="btn btn-default pull-right" ng-click="upload(service.arduinoPath, formPort, boardType)">Upload</button>
-    	<button class="btn btn-default pull-right" ng-model="mrlComm.enableBoardStatus" uib-btn-checkbox ng-change="(mrlComm.enableBoardStatus)?msg.enableBoardStatus():msg.disableBoardStatus()">Status</button>
+    	<button class="btn btn-default pull-right" ng-model="mrlComm.enableBoardStatus" uib-btn-checkbox ng-change="(mrlComm.enableBoardStatus)?msg.enableBoardStatus(true):msg.disableBoardStatus(false)">Status</button>
     
 		<pre>
 {{service.uploadSketchResult}}

@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -61,15 +62,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			servoData = servoMap.get(name);
 			servoData.isMoving = true;
 			this.name = name;
-			log.info(String.format("SpeedControl %s created", name));
 		}
 
 		@Override
 		public void run() {
 
-			log.info(String.format("SpeedControl %s running", name));
 			try {
-				while (servoData.isMoving) {
+				while (servoData.isMoving = true) {
 					servoData = servoMap.get(name);
 					if (servoData.targetOutput > servoData.currentOutput) {
 						servoData.currentOutput += 1;
@@ -78,7 +77,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 					} else {
 						// We have reached the position so shutdown the thread
 						servoData.isMoving = false;
-						log.info(String.format("SpeedControl %s shut down", name));
 					}
 					int pulseWidthOff = SERVOMIN + (int) (servoData.currentOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
 					setServo(servoData.pin, pulseWidthOff);
@@ -89,7 +87,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			} catch (Exception e) {
 				servoData.isMoving = false;
 				if (e instanceof InterruptedException) {
-					log.info(String.format("SpeedControl %s shut down", name));
+					info("Shutting down MotorUpdater");
 				} else {
 					logException(e);
 				}
@@ -343,7 +341,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		if (controller != null) {
 			if (this.deviceAddress != deviceAddress) {
 				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.i2cAttach(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 			}
 		}
 		log.info(String.format("Setting device address to %s", deviceAddress));
@@ -357,7 +355,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		if (controller != null) {
 			// controller.releaseI2cDevice(this, Integer.parseInt(deviceBus),
 			// Integer.decode(deviceAddress));
-			controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+			controller.i2cAttach(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 		} else {
 			log.error("Can't create device until the controller has been set");
 			return false;
@@ -491,10 +489,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		} else {
 			servoData.targetOutput = servo.getTargetOutput();
 			// Start a thread to handle the speed for this servo
-			if (servoData.currentOutput != servoData.targetOutput && !servoData.isMoving) {
-			  servoData.speedcontrol = new SpeedControl(servo.getName());
-			  servoData.speedcontrol.start();
-		    }
+			if (servoData.isMoving == false) {
+				servoData.speedcontrol = new SpeedControl(servo.getName());
+			}
 		}
 	}
 
@@ -577,21 +574,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * Gyro/Accelerometer/Magnetometer device should implement.
 	 */
 
-	// FIXME how many do we want to support ??
-	// this device attachment is overloaded on the Arduino side ...
-	// Currently its only Servo, but it's also possible to implement
-	// MotorController and any device that requires pwm, like a LED dimmer.
-
-	@Override
-	public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
-		if (device instanceof ServoControl) {
-			servoAttach((ServoControl) device, conf);
-		}
-		if (device instanceof MotorControl) {
-			motorAttach((MotorControl) device, conf);
-		}
-	}
-
+	@Deprecated // use attach(ServoControl servo)
 	void servoAttach(ServoControl device, Object... conf) {
 		ServoControl servo = (ServoControl) device;
 		// should initial pos be a requirement ?
@@ -605,6 +588,15 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		servoMap.put(servoName, servoData);
 		invoke("publishAttachedDevice", servoName);
 	}
+	
+	public void attach(ServoControl servo) {
+		ServoData servoData = new ServoData();
+		servoData.pin = servo.getPin();
+		servoData.pwmFreqSet = false;
+		servoData.pwmFreq = pwmFreq;
+		servoMap.put(servo.getName(), servoData);
+		invoke("publishAttachedDevice", servo.getName());
+	}
 
 	void motorAttach(MotorControl device, Object... conf) {
 		/*
@@ -615,7 +607,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		invoke("publishAttachedDevice", motor.getName());
 	}
 
-	@Override
 	public void deviceDetach(DeviceControl servo) {
 		servoDetach((ServoControl) servo);
 		servoMap.remove(servo.getName());
@@ -850,6 +841,22 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public void servoSetVelocity(ServoControl servo) {
 		ServoData servoData = servoMap.get(servo.getName());
 		servoData.velocity = servo.getVelocity();
+	}
+
+	@Override
+	public void attach(ServoControl servo, int pin) {
+		servo.setPin(pin);
+		attach(servo);
+	}
+
+	@Override
+	public int getDeviceCount() {
+		return servoMap.size();
+	}
+
+	@Override
+	public Set<String> getDeviceNames() {
+		return servoMap.keySet();
 	}
 
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="org/myrobotlab/opencv/OpenCVFilterMotionTemplate.java" kind="src" path="src">
+	<classpathentry excluding="org/myrobotlab/opencv/OpenCVFilterMotionTemplate.java|resource/Arduino/generate/*" kind="src" path="src">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="myrobotlab/libraries/native"/>
 		</attributes>
@@ -69,7 +69,7 @@
 	<classpathentry kind="lib" path="/repo/org.apache.solr/4.10.2/commons-io-2.3.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.paho/1.0/org.eclipse.paho.client.mqttv3_1.0.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.junit/4.11/junit-4.11.jar"/>
-	<classpathentry kind="lib" path="/repo/com.google.gson/2.2.4/gson-2.2.4.jar"/>
+	<classpathentry kind="lib" path="/repo/com.google.gson/2.8.0/gson-2.8.0.jar"/>
 	<classpathentry kind="lib" path="/repo/net.java.games.jinput/2.0.5/jinput-2.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/net.java.games.jinput/2.0.5/jinput-platform-2.0.5-natives-windows.jar"/>
 	<classpathentry kind="lib" path="/repo/io.netty/3.10.0/netty-3.10.0.Final.jar"/>
@@ -207,6 +207,5 @@
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-storage-0.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-util-0.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jnativehook/2.0.3/jnativehook-2.0.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

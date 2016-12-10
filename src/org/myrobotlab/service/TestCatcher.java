@@ -275,13 +275,6 @@ public class TestCatcher extends Service implements SerialDataListener {
    * 
    */
 
-  public void startService() {
-    super.startService();
-    startPeer("t01");
-    startPeer("t02");
-    startPeer("opencv");
-  }
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.DEBUG);
 

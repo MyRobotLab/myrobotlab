@@ -63,7 +63,8 @@ public class MotorPulse extends Motor {
 	@Override
 	public void attach(MotorController controller) throws Exception {
 		this.controller = controller;
-		controller.deviceAttach(this, pulsePin);
+		// FIXME controller.motorPulseAttach(pulsePin);
+		// controller.deviceAttach(this, pulsePin);
 	}
 	
 	

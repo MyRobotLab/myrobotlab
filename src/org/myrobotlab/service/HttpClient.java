@@ -63,10 +63,12 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  *         TODO - asynchronous call back similar to AngularJS promise - or at
- *         least a callback method is call .. onHttpResponse
+ *         least a callback method is called .. onHttpResponse
  * 
- *         Synchronous or Asynchrounous - Synchronous by default, Asynchronous
+ *         Synchronous or Asynchronous - Synchronous by default, Asynchronous
  *         if a callback method is supplied or Non-Blocking method is called
+ *         
+ *         Check out - Fluent interface - https://hc.apache.org/httpcomponents-client-ga/tutorial/html/fluent.html
  */
 public class HttpClient extends Service implements HttpDataListener, HttpResponseListener {
 

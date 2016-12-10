@@ -17,6 +17,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.service.interfaces.SerialDataListener;
+import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
@@ -120,7 +121,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
    * @throws IOException
    */
 
-  public Serial connectVirtualUart(String myPort, String uartPort) throws IOException {
+  public SerialDevice connectVirtualUart(String myPort, String uartPort) throws IOException {
 
     // get port names
     if (myPort == null) {
@@ -158,7 +159,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
     return uart;
   }
 
-  public Serial createVirtualUart() throws IOException {
+  public SerialDevice createVirtualUart() throws IOException {
     return connectVirtualUart(null, null);
   }
 
