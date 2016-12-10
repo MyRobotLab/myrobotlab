@@ -1,9 +1,6 @@
 #ifndef MrlServo_h
 #define MrlServo_h
 
-#include <Servo.h>
-#include "Device.h"
-#include "MrlMsg.h"
 
 // servo event types
 // ===== published sub-types based on device type begin ===
@@ -25,15 +22,16 @@ class MrlServo : public Device {
     int min;
     int max;
     unsigned long lastUpdate;
-    unsigned int velocity; // in deg/sec
+    int velocity; // in deg/sec  |  velocity < 0 == no speed control
     int sweepStep;
     unsigned int maxVelocity;
+
   public:
-    MrlServo();
+    MrlServo(int deviceId);
     ~MrlServo();
-    bool deviceAttach(unsigned char config[], int configSize);
-    void attach(int pin);
-    void detach();
+    bool attach(byte pin, byte initPos, int initVelocity);
+    void enablePwm(int pin);
+    void disablePwm();
     void update();
     void servoWrite(int position);
     void servoWriteMicroseconds(int position);

@@ -1,8 +1,7 @@
 #ifndef MrlNeopixel_h
 #define MrlNeopixel_h
 
-#include "Device.h"
-#include "MrlMsg.h"
+#include <Arduino.h>
 
 /***********************************************************************
  * NEOPIXEL DEFINE
@@ -49,6 +48,8 @@
 #define NEOPIXEL_ANIMATION_FLASH_RANDOM 8
 #define NEOPIXEL_ANIMATION_IRONMAN 9
 
+class Msg;
+
 /*****************************
  * Neopixel device
  * 
@@ -86,9 +87,9 @@ class MrlNeopixel:public Device{
     int _step;
     unsigned char _alpha;
   public:
-  MrlNeopixel();
+  MrlNeopixel(int deviceId);
   ~MrlNeopixel();
-  bool deviceAttach(unsigned char config[], int configSize);
+  bool attach(byte pin, long numPixels);
   inline void sendBitB(bool bitVal);
   inline void sendBitC(bool bitVal);
   inline void sendBitD(bool bitVal);
@@ -105,9 +106,9 @@ class MrlNeopixel:public Device{
   inline void sendByte(unsigned char byte);
   inline void sendPixel(Pixel p);
   void show();
-  void neopixelWriteMatrix(unsigned char* ioCmd);
+  void neopixelWriteMatrix(byte bufferSize, const byte*buffer);
   void update();
-  void setAnimation(unsigned char* config);
+  void setAnimation ( byte animation,  byte red,  byte green,  byte blue,  int speed);
   void animationStop();
   void animationColorWipe();
   void animationLarsonScanner();

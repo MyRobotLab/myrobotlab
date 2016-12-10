@@ -39,12 +39,10 @@ import org.myrobotlab.motor.MotorConfigDualPwm;
 import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
-import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
-import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -58,7 +56,7 @@ import org.slf4j.Logger;
  *         H-bridges output
  * 
  */
-public class Motor extends Service implements MotorControl, SensorDataListener, EncoderListener {
+public class Motor extends Service implements MotorControl, EncoderListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -81,7 +79,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	double powerLevel = 0;
 	double maxPower = 1.0;
 	double minPower = -1.0;
-	
+
 	Mapper powerMap = new Mapper(-1.0, 1.0, -255.0, 255.0);
 
 	// position
@@ -135,8 +133,8 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	}
 
 	@Override
-	public boolean isAttached() {
-		return controller != null;
+	public boolean isAttached(MotorController controller) {
+		return this.controller == controller;
 	}
 
 	@Override
@@ -203,7 +201,12 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	public void setController(DeviceController controller) {
 		this.controller = (MotorController) controller;
 	}
-
+	
+	@Override
+	public void unsetController() {
+		this.controller = null;
+	}
+	
 	@Override
 	public void setInverted(boolean invert) {
 		powerMap.setInverted(invert);
@@ -331,8 +334,8 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 			m1.moveTo(250);
 			m1.moveTo(250);
 
-			arduino.enableBoardStatus();
-			arduino.disableBoardStatus();
+			arduino.enableBoardStatus(true);
+			arduino.enableBoardStatus(false);
 			m1.stop();
 			m1.move(0.5);
 			m1.moveTo(200);
@@ -365,11 +368,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
 	}
 
-	@Override
-	public void onSensorData(SensorData data) {
-		// TODO Auto-generated method stub
 
-	}
 
 	@Override
 	public void pulse() {
@@ -415,18 +414,9 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 		return config;
 	}
 
-	// GOOD CANIDATE FOR JAVA 8 - "DEFAULT" INTERFACE IMPLEMENTATION
-	// WHY REPEAT THIS IN ALL SERVICES ? :P
 	@Override
-	public void attach(String controllerName) throws Exception {
-		attach((MotorController)Runtime.getService(controllerName));
-	}
-
-	// GOOD CANIDATE FOR JAVA 8 - "DEFAULT" INTERFACE IMPLEMENTATION
-	// WHY REPEAT THIS IN ALL SERVICES ? :P
-	@Override
-	public void detach(String controllerName) {
-		detach((MotorController)Runtime.getService(controllerName));
+	public boolean isAttached() {
+		return controller != null;
 	}
 
 }

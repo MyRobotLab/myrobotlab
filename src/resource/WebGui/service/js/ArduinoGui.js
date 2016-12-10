@@ -51,9 +51,12 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         } else {
             $scope.versionStatus = null ;
         }
+        // infinite loop
+        /*
         if ($scope.isConnected) {
-            msg.send("getVersion");
+            msg.send("getBoardInfo");
         }
+        */
     }
     ;
     _self.updateState($scope.service);

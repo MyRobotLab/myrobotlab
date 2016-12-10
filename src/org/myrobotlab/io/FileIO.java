@@ -25,7 +25,6 @@
 package org.myrobotlab.io;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,7 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -49,7 +47,6 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
-import org.apache.commons.io.Charsets;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -1280,22 +1277,6 @@ public class FileIO {
       propMap.put(key.toString(), props.getProperty(key.toString()));
     }
     return propMap;
-  }
-  
-  // Taken from Commons-io IOUtils
-  public static InputStream toInputStream(String input) {
-    return toInputStream(input, Charset.defaultCharset());
-  }
-
-  // Taken from Commons-io IOUtils
-  public static InputStream toInputStream(String input, Charset encoding) {
-    return new ByteArrayInputStream(input.getBytes(Charsets.toCharset(encoding)));
-  }
-  
-  // Taken from Commons-io IOUtils
-  public static InputStream toInputStream(String input, String encoding) throws IOException {
-    byte[] bytes = input.getBytes(Charsets.toCharset(encoding));
-    return new ByteArrayInputStream(bytes);
   }
 
 }

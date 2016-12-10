@@ -24,9 +24,8 @@
  * */
 
 package org.myrobotlab.service.interfaces;
-import org.myrobotlab.service.data.SensorData;
 
 public interface I2CBusController extends DeviceController {
 
-	public void i2cReturnData(SensorData data);
+	public void i2cReturnData(int[] data);
 }

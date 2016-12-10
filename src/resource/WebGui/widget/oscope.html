@@ -13,11 +13,12 @@
         <!-- per screen buttons .. button type="button" class="btn btn-default" ng-click="zoomIn()">+</button -->
         </div>
     </div>
-    <br><button class="btn btn-default" type="button">write</button>
-     <div class="btn-group" role="group" aria-label="..." data-ng-repeat="(pinKey, pinDef) in pinIndex">    
+    <br/>
+    <button class="btn btn-default" type="button">read</button><!-- TODO - read/write toggle -->
+     <div class="btn-group" role="group" ng-show="readWrite == 'read'" data-ng-repeat="(pinKey, pinDef) in pinIndex">    
        <button class="btn btn-default" type="button" ng-click="activateTrace(pinDef)" ng-style="oscope.traces[pinKey].readStyle">{{ pinDef.name }}</button>
      </div>
-     <div class="btn-group" role="group" aria-label="..." data-ng-repeat="(pinKey, pinDef) in pinIndex">    
+     <div class="btn-group" role="group" ng-show="readWrite == 'write'"  data-ng-repeat="(pinKey, pinDef) in pinIndex">    
        <button class="btn btn-default" type="button" ng-click="activateTrace(pinDef)" ng-style="oscope.traces[pinKey].writeStyle">{{ pinDef.name }}</button>
      </div>
 </div>

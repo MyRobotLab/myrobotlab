@@ -2062,11 +2062,15 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	 * service - it will only set that Service type's log level
 	 * 
 	 */
-	@Override
-	public String setLogLevel(String level) {
+	static public String setLogLevel(String level) {
+		log.info("setLogLevel {}", level);
 		Logging logging = LoggingFactory.getInstance();
 		logging.setLevel(level);
 		return level;
+	}
+	
+	static public void disableLogging(){
+		setLogLevel("DISABLE");
 	}
 
 	/**

@@ -1,10 +1,6 @@
 #ifndef MrlPulse_h
 #define MrlPulse_h
 
-#include "Device.h"
-#include "Pin.h"
-#include "MrlMsg.h"
-
 /**
  * Pulse Sensor Device
  * TODO: add a description about this device! How does it work? What is it?

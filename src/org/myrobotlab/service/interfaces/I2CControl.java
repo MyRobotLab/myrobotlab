@@ -31,7 +31,6 @@ public interface I2CControl extends DeviceControl {
 	public boolean setController(String controllerName);
 	public boolean setController(I2CController controller);
 	public boolean setController(I2CController controller, String deviceBus, String deviceAddress);
-	public void unsetController();
 	
 	public void setDeviceBus(String deviceBus);
 	public void setDeviceAddress(String deviceAddress);

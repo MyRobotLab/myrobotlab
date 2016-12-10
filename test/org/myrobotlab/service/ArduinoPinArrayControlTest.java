@@ -108,8 +108,8 @@ public class ArduinoPinArrayControlTest {
 		
 		arduino.connect("COM5");
 		
-		arduino.enableBoardStatus();
-		arduino.disableBoardStatus();
+		arduino.enableBoardStatus(true);
+		arduino.enableBoardStatus(false);
 				
 		/*
 		arduino.disconnect();

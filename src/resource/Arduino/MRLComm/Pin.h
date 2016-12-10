@@ -1,16 +1,6 @@
 #ifndef Pin_h
 #define Pin_h
 
-// ECHO FINITE STATE MACHINE - NON BLOCKING PULSIN
-#define ECHO_STATE_START                    1
-#define ECHO_STATE_TRIG_PULSE_BEGIN         2
-#define ECHO_STATE_TRIG_PULSE_END           3
-#define ECHO_STATE_MIN_PAUSE_PRE_LISTENING  4
-#define ECHO_STATE_LISTENING                5
-#define ECHO_STATE_GOOD_RANGE               6
-#define ECHO_STATE_TIMEOUT                  7
-
-
 // Pin Types must be in sync
 // with Arduino.getMrlPinType
 

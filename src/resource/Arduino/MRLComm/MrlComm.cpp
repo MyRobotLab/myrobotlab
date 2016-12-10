@@ -1,52 +1,36 @@
+#include "MrlSerialRelay.h"
+#include "Msg.h"
+#include "Device.h"
+#include "Pin.h"
+#include "MrlNeopixel.h"
+#include "Servo.h"
+#include "MrlServo.h"
+#include "MrlI2cBus.h"
+#include "MrlUltrasonicSensor.h"
+#include "LinkedList.h"
 #include "MrlComm.h"
 
-MrlComm::MrlComm() {
-	softReset();
-	byteCount = 0;
-	mrlCmd[0] = new MrlCmd(MRL_IO_SERIAL_0);
-	for (unsigned int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
-		mrlCmd[i] = NULL;
-	}
+/**
+ <pre>
+ Schema Type Conversions
 
+ Schema      ARDUINO					Java							Range
+ none		byte/unsigned char		int (cuz Java byte bites)		1 byte - 0 to 255
+ boolean	boolean					boolean							0 1
+ b16		int						int (short)						2 bytes	-32,768 to 32,767
+ b32		long					int								4 bytes -2,147,483,648 to 2,147,483, 647
+ bu32		unsigned long			long							0 to 4,294,967,295
+ str		char*, size				String							variable length
+ []			byte[], size			int[]							variable length
+ </pre>
+ */
+
+MrlComm::MrlComm() {
+	msg = Msg::getInstance(this);
+	softReset();
 }
 
 MrlComm::~MrlComm() {
-	for (unsigned int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
-		if (mrlCmd[i] != NULL) {
-			delete mrlCmd[i];
-		}
-	}
-}
-/***********************************************************************
- * UTILITY METHODS BEGIN
- */
-void MrlComm::softReset() {
-	while (deviceList.size() > 0) {
-		delete deviceList.pop();
-	}
-  while (pinList.size() > 0) {
-    delete pinList.pop();
-  }
-	//resetting var to default
-	loopCount = 0;
-	publishBoardStatusModulus = 10000;
-	enableBoardStatus = false;
-	Device::nextDeviceId = 1; // device 0 is Arduino
-	debug = false;
-	for (unsigned int i = 1; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
-		if (mrlCmd[i] != NULL) {
-			mrlCmd[i]->end();
-			delete mrlCmd[i];
-			mrlCmd[i] = NULL;
-		}
-	}
-	heartbeat = false;
-	heartbeatEnabled = false;
-	lastHeartbeatUpdate = 0;
-	for (unsigned int i = 0; i < MAX_MSG_SIZE; i++) {
-	  customMsg[i] = 0;
-	}
-	customMsgSize = 0;
 }
 
 /***********************************************************************
@@ -71,14 +55,13 @@ void MrlComm::publishBoardStatus() {
 	avgTiming = (now - lastMicros) / publishBoardStatusModulus;
 
 	// report board status
-	if (enableBoardStatus && (loopCount % publishBoardStatusModulus == 0)) {
-
-		// send the average loop timing.
-		MrlMsg msg(PUBLISH_BOARD_STATUS);
-		msg.addData16(avgTiming);
-		msg.addData16(getFreeRam());
-		msg.addData16(deviceList.size());
-		msg.sendMsg();
+	if (boardStatusEnabled && (loopCount % publishBoardStatusModulus == 0)) {
+		byte deviceSummary[deviceList.size() * 2];
+		for (int i = 0; i < deviceList.size(); ++i) {
+			deviceSummary[i] = deviceList.get(i)->id;
+			deviceSummary[i + 1] = deviceList.get(i)->type;
+		}
+		msg->publishBoardStatus(avgTiming, getFreeRam(), deviceSummary, deviceList.size() * 2);
 	}
 	// update the timestamp of this update.
 	lastMicros = now;
@@ -91,469 +74,6 @@ int MrlComm::getFreeRam() {
 	return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 
-/***********************************************************************
- * PUBLISH DEVICES BEGIN
- *
- * All serial IO should happen here to publish a MRLComm message.
- * TODO: move all serial IO into a controlled place this this below...
- * TODO: create MRLCommMessage class that can just send itself!
- *
- */
-/**
- * Publish the MRLComm message
- * MAGIC_NUMBER|2|MRLCOMM_VERSION
- */
-void MrlComm::publishVersion() {
-	MrlMsg msg(PUBLISH_VERSION);
-	msg.addData(MRLCOMM_VERSION);
-	msg.sendMsg();
-}
-/**
- * publishBoardInfo()
- * MAGIC_NUMBER|2|PUBLISH_BOARD_INFO|BOARD
- * return the board type (mega/uno) that can use in javaland for the pin layout
- */
-void MrlComm::publishBoardInfo() {
-	MrlMsg msg(PUBLISH_BOARD_INFO);
-	msg.addData(BOARD);
-	msg.sendMsg();
-}
-
-/**
- * Publish the acknowledgement of the command received and processed.
- * MAGIC_NUMBER|2|PUBLISH_MESSAGE_ACK|FUNCTION
- */
-void MrlComm::publishCommandAck(int function) {
-	MrlMsg msg(PUBLISH_MESSAGE_ACK);
-	// the function that we're ack-ing
-	msg.addData(function);
-	msg.sendMsg();
-}
-/**
- * PUBLISH_ATTACHED_DEVICE
- * MSG STRUCTURE
- * PUBLISH_ATTACHED_DEVICE | NEW_DEVICE_INDEX | NAME_STR_SIZE | NAME
- *
- */
-void MrlComm::publishAttachedDevice(int id, int nameSize, unsigned char* name) {
-	MrlMsg msg(PUBLISH_ATTACHED_DEVICE, id);
-	msg.addData(name, nameSize, true);
-	msg.sendMsg();
-}
-
-/***********************************************************************
- * SERIAL METHODS BEGIN
- */
-void MrlComm::readCommand() {
-	for (unsigned int i = 0; i < (sizeof(mrlCmd) / sizeof(MrlCmd*)); i++) {
-		if (mrlCmd[i] != NULL) {
-			if (mrlCmd[i]->readCommand()) {
-				processCommand(i + 1);
-			}
-		}
-	}
-}
-
-// This function will switch the current command and call
-// the associated function with the command
-/**
- * processCommand() - once the main loop has read an mrlcomm message from the 
- * serial port, this method will be called.
- */
-void MrlComm::processCommand(int ioType) {
-	unsigned char* ioCmd = mrlCmd[ioType - 1]->getIoCmd();
-	if (ioType != MRL_IO_SERIAL_0) {
-		MrlMsg msg = MrlMsg(MSG_ROUTE);
-		msg.addData(ioType);
-		msg.addData(ioCmd, mrlCmd[ioType - 1]->getMsgSize());
-		msg.sendMsg();
-		//  MrlMsg::publishDebug("not from Serial, ioType" + String(ioType));
-		return;
-	}
-	// FIXME - all case X: should have scope operator { } !
-	// MrlMsg::publishDebug("not from Serial:" + String(ioCmd[0]));
-	switch (ioCmd[0]) {
-	// === system pass through begin ===
-	case DIGITAL_WRITE:
-		digitalWrite(ioCmd[1], ioCmd[2]);
-		break;
-	case ANALOG_WRITE: {
-		analogWrite(ioCmd[1], ioCmd[2]);
-		break;
-	}
-	case PIN_MODE: {
-		pinMode(ioCmd[1], ioCmd[2]);
-		break;
-	}
-	case SERVO_ATTACH: {
-		int pin = ioCmd[2];
-		if (debug)
-			MrlMsg::publishDebug("SERVO_ATTACH " + String(pin));
-		MrlServo* servo = (MrlServo*) getDevice(ioCmd[1]);
-		servo->attach(pin);
-		if (debug)
-			MrlMsg::publishDebug(F("SERVO_ATTACHED"));
-		break;
-	}
-	case SERVO_SWEEP_START:
-		//startSweep(min,max,step)
-		((MrlServo*) getDevice(ioCmd[1]))->startSweep(ioCmd[2], ioCmd[3],
-				ioCmd[4]);
-		break;
-	case SERVO_SWEEP_STOP:
-		((MrlServo*) getDevice(ioCmd[1]))->stopSweep();
-		break;
-	case SERVO_WRITE:
-		((MrlServo*) getDevice(ioCmd[1]))->servoWrite(ioCmd[2]);
-		break;
-	case SERVO_WRITE_MICROSECONDS:
-		((MrlServo*) getDevice(ioCmd[1]))->servoWriteMicroseconds(MrlMsg::toInt(ioCmd, 2));
-		break;
-	case SERVO_DETACH: {
-		if (debug)
-			MrlMsg::publishDebug("SERVO_DETACH " + String(ioCmd[1]));
-		((MrlServo*) getDevice(ioCmd[1]))->detach();
-		if (debug)
-			MrlMsg::publishDebug("SERVO_DETACHED");
-		break;
-	}
-	case ENABLE_BOARD_STATUS:
-		enableBoardStatus = true;
-		publishBoardStatusModulus = (unsigned int) MrlMsg::toInt(ioCmd, 1);
-		if (debug)
-			MrlMsg::publishDebug(
-					"modulus is " + String(publishBoardStatusModulus));
-		break;
-
-		// ENABLE_PIN_EVENTS | ADDRESS | PIN TYPE 0 = DIGITAL | 1 = ANALOG
-	case ENABLE_PIN: {
-		int address = ioCmd[1];
-		int type = ioCmd[2];
-		int rate = MrlMsg::toInt(ioCmd, 3);
-		// don't add it twice
-		for (int i = 0; i < pinList.size(); ++i) {
-			Pin* pin = pinList.get(i);
-			if (pin->address == address) {
-				// TODO already exists error?
-				break;
-			}
-		}
-
-		if (type == DIGITAL) {
-			pinMode(address, INPUT);
-		}
-		Pin* p = new Pin(address, type, rate);
-		p->lastUpdate = 0;
-		pinList.add(p);
-		break;
-	}
-	case DISABLE_PIN: {
-		int address = ioCmd[1];
-    ListNode<Pin*>* node = pinList.getRoot();
-    int index = 0;
-    while (node != NULL) {
-      if (node->data->address == address) {
-        delete node->data;
-        pinList.remove(index);
-        break;
-      }
-      node = node->next;
-      index++;
-    }
-		break;
-	}
-
-	case DISABLE_PINS: {
-    while (pinList.size() > 0) {
-      delete pinList.pop();
-    }
-		break;
-	}
-	case DISABLE_BOARD_STATUS:
-		enableBoardStatus = false;
-		break;
-	case SET_PWMFREQUENCY:
-		setPWMFrequency(ioCmd[1], ioCmd[2]);
-		break;
-	case PULSE:
-		//((MrlPulse*)getDevice(ioCmd[1]))->pulse(ioCmd);
-		break;
-	case PULSE_STOP:
-		//((MrlPulse*)getDevice(ioCmd[1]))->pulseStop();
-		break;
-	case SET_TRIGGER:
-		//setTrigger();
-		break;
-	case SET_DEBOUNCE:
-		//setDebounce();
-		break;
-	case SET_DIGITAL_TRIGGER_ONLY:
-		//setDigitalTriggerOnly();
-		break;
-	case SET_SERIAL_RATE:
-		setSerialRate();
-		break;
-	case GET_VERSION:
-		publishVersion();
-		break;
-	case SET_SAMPLE_RATE:
-		//setSampleRate();
-		break;
-	case SOFT_RESET:
-		softReset();
-		break;
-	case SENSOR_POLLING_START:
-		//sensorPollingStart();
-		break;
-	case DEVICE_ATTACH:
-		deviceAttach(ioCmd);
-		break;
-	case DEVICE_DETACH:
-		deviceDetach(ioCmd[1]);
-		break;
-	case SENSOR_POLLING_STOP:
-		//sensorPollingStop();
-		break;
-		// Start of i2c read and writes
-	case I2C_READ:
-		((MrlI2CBus*) getDevice(ioCmd[1]))->i2cRead(ioCmd);
-		break;
-	case I2C_WRITE:
-		((MrlI2CBus*) getDevice(ioCmd[1]))->i2cWrite(ioCmd);
-		break;
-	case I2C_WRITE_READ:
-		((MrlI2CBus*) getDevice(ioCmd[1]))->i2cWriteRead(ioCmd);
-		break;
-	case SET_DEBUG:
-		debug = ioCmd[1];
-		if (debug) {
-			MrlMsg::publishDebug(F("Debug logging enabled."));
-		}
-		break;
-	case PUBLISH_BOARD_INFO:
-		publishBoardInfo();
-		break;
-	case NEO_PIXEL_WRITE_MATRIX:
-		((MrlNeopixel*) getDevice(ioCmd[1]))->neopixelWriteMatrix(ioCmd);
-		break;
-	case NEO_PIXEL_SET_ANIMATION:
-		((MrlNeopixel*) getDevice(ioCmd[1]))->setAnimation(ioCmd+2);
-		break;
-	case CONTROLLER_ATTACH:
-		mrlCmd[ioCmd[1] - 1] = new MrlCmd(ioCmd[1]);
-		break;
-	case MSG_ROUTE: {
-		MrlMsg msg(ioCmd[2]);
-		msg.addData(ioCmd + 3, mrlCmd[ioType - 1]->getMsgSize() - 3);
-		msg.begin(ioCmd[1], 115200);
-		msg.sendMsg();
-		break;
-	}
-	case SERVO_SET_MAX_VELOCITY: {
-		((MrlServo*) getDevice(ioCmd[1]))->setMaxVelocity(MrlMsg::toInt(ioCmd,3));
-		break;
-	}
-	case SERVO_SET_VELOCITY: {
-		((MrlServo*) getDevice(ioCmd[1]))->setVelocity(MrlMsg::toInt(ioCmd,3));
-		break;
-	}
-	case HEARTBEAT: {
-		heartbeatEnabled = true;
-		break;
-	}
-	case CUSTOM_MSG: {
-	  for (byte i = 0; i < ioCmd[1] && customMsgSize < 64; i++) {
-	    customMsg[customMsgSize] = ioCmd[i+2];
-	    customMsgSize++;
-	  }
-	  break;
-	}
-	default:
-		MrlMsg::publishError(ERROR_UNKOWN_CMD);
-		break;
-	} // end switch
-	  // ack that we got a command (should we ack it first? or after we process the command?)
-	heartbeat = true;
-	lastHeartbeatUpdate = millis();
-	publishCommandAck(ioCmd[0]);
-	// reset command buffer to be ready to receive the next command.
-	// KW: we should only need to set the byteCount back to zero. clearing this array is just for safety sake i guess?
-	// GR: yup
-	//memset(ioCmd, 0, sizeof(ioCmd));
-	//byteCount = 0;
-} // process Command
-/***********************************************************************
- * CONTROL METHODS BEGIN
- * These methods map one to one for each MRLComm command that comes in.
- * 
- * TODO - add text api
- */
-
-// SET_PWMFREQUENCY
-void MrlComm::setPWMFrequency(int address, int prescalar) {
-	// FIXME - different boards have different timers
-	// sets frequency of pwm of analog
-	// FIXME - us ifdef appropriate uC which
-	// support these clocks TCCR0B
-	int clearBits = 0x07;
-	if (address == 0x25) {
-		TCCR0B &= ~clearBits;
-		TCCR0B |= prescalar;
-	} else if (address == 0x2E) {
-		TCCR1B &= ~clearBits;
-		TCCR1B |= prescalar;
-	} else if (address == 0xA1) {
-		TCCR2B &= ~clearBits;
-		TCCR2B |= prescalar;
-	}
-}
-
-// SET_SERIAL_RATE
-void MrlComm::setSerialRate() {
-	//mrlCmd->end();
-	//mrlCmd->begin(MRL_IO_SERIAL_0,mrlCmd->getIoCmd(1));
-}
-
-/**********************************************************************
- * ATTACH DEVICES BEGIN
- *
- *<pre>
- *
- * MSG STRUCTURE
- *                    |<-- ioCmd starts here                                        |<-- config starts here
- * MAGIC_NUMBER|LENGTH|ATTACH_DEVICE|DEVICE_TYPE|NAME_SIZE|NAME .... (N)|CONFIG_SIZE|DATA0|DATA1 ...|DATA(N)
- *
- * ATTACH_DEVICE - this method id
- * DEVICE_TYPE - the mrlcomm device type we are attaching
- * NAME_SIZE - the size of the name of the service of the device we are attaching
- * NAME .... (N) - the name data
- * CONFIG_SIZE - the size of the folloing config
- * DATA0|DATA1 ...|DATA(N) - config data
- *
- *</pre>
- *
- * Device types are defined in org.myrobotlab.service.interface.Device
- * TODO crud Device operations create remove (update not needed?) delete
- * TODO probably need getDeviceId to decode id from Arduino.java - because if its
- * implemented as a ptr it will be 4 bytes - if it is a generics id
- * it could be implemented with 1 byte
- */
-void MrlComm::deviceAttach(unsigned char* ioCmd) {
-	// TOOD:KW check free memory to see if we can attach a new device. o/w return an error!
-	// we're creating a new device. auto increment it
-	// TODO: consider what happens if we overflow on this auto-increment. (very unlikely. but possible)
-	// we want to echo back the name
-	// and send the config in a nice neat package to
-	// the attach method which creates the device
-	//unsigned char* ioCmd = mrlCmd->getIoCmd();
-	int nameSize = ioCmd[2];
-
-	// get config size
-	int configSizePos = 3 + nameSize;
-	int configSize = ioCmd[configSizePos];
-	int configPos = configSizePos + 1;
-	config = ioCmd + configPos;
-	// MAKE NOTE: I've chosen to have config & configPos globals
-	// this is primarily to avoid the re-allocation/de-allocation of the config buffer
-	// but part of me thinks it should be a local var passed into the function to avoid
-	// the dangers of global var ... fortunately Arduino is single threaded
-	// It also makes sense to pass in config on the constructor of a new device
-	// based on device type - "you inflate the correct device with the correct config"
-	// but I went on the side of globals & hopefully avoiding more memory management and fragmentation
-	// CAL: change config to a pointer in ioCmd (save some memory) so config[0] = ioCmd[configPos]
-
-	int type = ioCmd[1];
-	Device* devicePtr = 0;
-	// KW: remove this switch statement by making "attach(int[]) a virtual method on the device base class.
-	// perhaps a factory to produce the devicePtr based on the deviceType..
-	// currently the attach logic is embeded in the constructors ..  maybe we can make that a more official
-	// lifecycle for the devices..
-	// check out the make_stooge method on https://sourcemaking.com/design_patterns/factory_method/cpp/1
-	// This is really how we should do this.  (methinks)
-	// Cal: the make_stooge method is certainly more C++ like, but essentially do the same thing as we do,
-	// it just move this big switch to another place
-
-	// GR: I agree ..  "attach" should be a universal concept of devices, yet it does not need to be implmented
-	// in the constructor .. so I'm for making a virtualized attach, but just like Java-Land the attach
-	// needs to have size sent in with the config since it can be variable array
-	// e.g.  attach(int[] config, configSize)
-
-	switch (type) {
-	case DEVICE_TYPE_ARDUINO: {
-		//devicePtr = attachAnalogPinArray();
-		break;
-	}
-		/*
-		 case SENSOR_TYPE_DIGITAL_PIN_ARRAY: {
-		 //devicePtr = attachDigitalPinArray();
-		 break;
-		 }
-		 case SENSOR_TYPE_PULSE: {
-		 //devicePtr = attachPulse();
-		 break;
-		 }
-		 */
-	case DEVICE_TYPE_ULTRASONIC: {
-		//devicePtr = attachUltrasonic();
-		break;
-	}
-	case DEVICE_TYPE_STEPPER: {
-		//devicePtr = attachStepper();
-		break;
-	}
-	case DEVICE_TYPE_MOTOR: {
-		//devicePtr = attachMotor();
-		break;
-	}
-	case DEVICE_TYPE_SERVO: {
-		devicePtr = new MrlServo(); //no need to pass the type here
-		break;
-	}
-	case DEVICE_TYPE_I2C: {
-		devicePtr = new MrlI2CBus();
-		break;
-	}
-	case DEVICE_TYPE_NEOPIXEL: {
-		devicePtr = new MrlNeopixel();
-    break;
-	}
-	default: {
-		// TODO: publish error message
-		MrlMsg::publishDebug(F("Unknown Message Type."));
-		break;
-	}
-	}
-
-	// if we have a device - then attach it and call its attach method with config passed in
-	// and send back a publishedAttachedDevice with its name - so Arduino-Java land knows
-	// it was successfully attached
-	if (devicePtr) {
-		if (devicePtr->deviceAttach(config, configSize)) {
-			addDevice(devicePtr);
-			publishAttachedDevice(devicePtr->id, nameSize, ioCmd + 3);
-		} else {
-			MrlMsg::publishError(ERROR_UNKOWN_SENSOR, F("DEVICE not attached"));
-			delete devicePtr;
-		}
-	}
-}
-/**
- * deviceDetach - get the device
- * if it exists delete it and remove it from the deviceList
- */
-void MrlComm::deviceDetach(int id) {
-	ListNode<Device*>* node = deviceList.getRoot();
-	int index = 0;
-	while (node != NULL) {
-		if (node->data->id == id) {
-			delete node->data;
-			deviceList.remove(index);
-      break;
-		}
-		node = node->next;
-		index++;
-	}
-}
 /**
  * getDevice - this method will look up a device by it's id in the device list.
  * it returns null if the device isn't found.
@@ -566,7 +86,8 @@ Device* MrlComm::getDevice(int id) {
 		}
 		node = node->next;
 	}
-	MrlMsg::publishError(ERROR_DOES_NOT_EXIST);
+
+	msg->publishError(F("device does not exist"));
 	return NULL; //returning a NULL ptr can cause runtime error
 	// you'll still get a runtime error if any field, member or method not
 	// defined is accessed
@@ -582,8 +103,9 @@ Device* MrlComm::getDevice(int id) {
  * expand if it could not accomidate the current number of devices, when a device was
  * removed - the slot could be re-used by the next device request
  */
-void MrlComm::addDevice(Device* device) {
+Device* MrlComm::addDevice(Device* device) {
 	deviceList.add(device);
+	return device;
 }
 
 /***********************************************************************
@@ -617,63 +139,368 @@ void MrlComm::updateDevices() {
 void MrlComm::update() {
 	unsigned long now = millis();
 	if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) {
-		if (!heartbeat) {
-			softReset();
-			return;
-		}
-		heartbeat = false;
+		softReset();
 		lastHeartbeatUpdate = now;
+		return;
 	}
+
 	if (pinList.size() > 0) {
-		// device id for our Arduino is always 0
-		MrlMsg msg(PUBLISH_SENSOR_DATA, 0); // the callback id
 
 		// size of payload - 1 byte for address + 2 bytes per pin read
 		// this is an optimization in that we send back "all" the read pin data in a
 		// standard 2 byte package - digital reads don't need both bytes, but the
 		// sending it all back in 1 msg and the simplicity is well worth it
-		//msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
-		msg.countData();
-		msg.autoSend(57);
-    ListNode<Pin*>* node = pinList.getRoot();
-    // iterate through our device list and call update on them.
-    unsigned int msgSent = 0;
-    while (node != NULL) {
+		// msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
+
+		ListNode<Pin*>* node = pinList.getRoot();
+		// iterate through our device list and call update on them.
+		unsigned int dataCount = 0;
+		while (node != NULL) {
 			Pin* pin = node->data;
 			if (pin->rate == 0 || (now > pin->lastUpdate + (1000 / pin->rate))) {
-			  pin->lastUpdate = now;
-        // TODO: moe the analog read outside of thie method and pass it in!
-        if (pin->type == ANALOG) {
-          pin->value = analogRead(pin->address);
-        } else {
-          pin->value = digitalRead(pin->address);
-        }
-        
-        // loading both analog & digital data
-        msg.addData(pin->address); // 1 byte
-        msg.addData16(pin->value); // 2 bytes
-        msgSent++;
-      }
-      node = node->next;
-    }
-    if (msgSent) msg.sendMsg();
+				pin->lastUpdate = now;
+				// TODO: move the analog read outside of this method and pass it in!
+				if (pin->type == ANALOG) {
+					pin->value = analogRead(pin->address);
+				} else {
+					pin->value = digitalRead(pin->address);
+				}
+
+				// loading both analog & digital data
+				msg->add(pin->address); // 1 byte
+				msg->add16(pin->value); // 2 byte b16 value
+
+				++dataCount;
+			}
+			node = node->next;
+		}
+		if (dataCount) {
+			msg->publishPinArray(msg->getBuffer(), msg->getBufferSize());
+		}
 	}
 }
 
-unsigned int MrlComm::getCustomMsg() {
-  if (customMsgSize == 0) {
-    return 0;
-  }
-  int retval = customMsg[0];
-  for (int i = 0; i < customMsgSize-1; i++) {
-    customMsg[i] = customMsg[i+1];
-  }
-  customMsg[customMsgSize] = 0;
-  customMsgSize--;
-  return retval;
-}
-
 int MrlComm::getCustomMsgSize() {
-  return customMsgSize;
+	return customMsgSize;
 }
 
+void MrlComm::processCommand() {
+	msg->processCommand();
+	if (ackEnabled) {
+		msg->publishAck(msg->getMethod());
+	}
+}
+
+void MrlComm::enableAck(bool enabled) {
+	ackEnabled = enabled;
+}
+
+bool MrlComm::readMsg() {
+	return msg->readMsg();
+}
+
+void MrlComm::begin(HardwareSerial& serial) {
+
+	// TODO: the arduino service might get a few garbage bytes before we're able
+	// to run, we should consider some additional logic here like a "publishReset"
+	// publish version on startup so it's immediately available for mrl.
+	// TODO: see if we can purge the current serial port buffers
+
+	while (!serial) {
+		; // wait for serial port to connect. Needed for native USB
+	}
+
+	// clear serial
+	serial.flush();
+
+	msg->begin(serial);
+
+	// send 3 boardInfos to PC to announce,
+	// Hi I'm an Arduino with version x, board type y, and I'm ready :)
+	for (int i = 0; i < 5; ++i) {
+		msg->publishBoardInfo(MRLCOMM_VERSION, BOARD);
+		serial.flush();
+	}
+}
+
+/****************************************************************
+ *               GENERATED METHOD INTERFACE BEGIN
+ * All methods signatures below this line are controlled by arduinoMsgs.schema
+ * The implementation contains custom logic - but the signature is generated
+ *
+ */
+
+// > getBoardInfo
+void MrlComm::getBoardInfo() {
+	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD);
+}
+
+// > echo/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
+/*
+ void MrlComm::echo(long sInt, byte name1Size, const char*name1, byte b8,
+ unsigned long bui32, long bi32, byte b9, byte name2Size,
+ const char*name2, byte configSize, const byte*config,
+ unsigned long bui322) {
+ */
+void MrlComm::echo(unsigned long b32) {
+	msg->publishEcho(b32);
+}
+
+// > controllerAttach/serialPort
+// TODO - talk to calamity
+void MrlComm::controllerAttach(byte serialPort) {
+	msg->publishDebug(String("controllerAttach " + String(serialPort)));
+}
+
+// > customMsg/[] msg
+// from PC --> loads customMsg buffer
+void MrlComm::customMsg(byte msgSize, const byte*msg) {
+	for (byte i = 0; i < msgSize && msgSize < 64; i++) {
+		customMsgBuffer[i] = msg[i];	// *(msg + i);
+	}
+	customMsgSize = msgSize;
+}
+
+/**
+ * deviceDetach - get the device
+ * if it exists delete it and remove it from the deviceList
+ */
+// > deviceDetach/deviceId
+void MrlComm::deviceDetach(byte id) {
+	ListNode<Device*>* node = deviceList.getRoot();
+	int index = 0;
+	while (node != NULL) {
+		if (node->data->id == id) {
+			delete node->data;
+			deviceList.remove(index);
+			break;
+		}
+		node = node->next;
+		index++;
+	}
+}
+
+// > disablePin/pin
+void MrlComm::disablePin(byte address) {
+	ListNode<Pin*>* node = pinList.getRoot();
+	int index = 0;
+	while (node != NULL) {
+		if (node->data->address == address) {
+			delete node->data;
+			pinList.remove(index);
+			break;
+		}
+		node = node->next;
+		index++;
+	}
+}
+
+// > disablePins
+void MrlComm::disablePins() {
+	while (pinList.size() > 0) {
+		delete pinList.pop();
+	}
+}
+
+// > enableBoardStatus
+void MrlComm::enableBoardStatus(bool enabled) {
+	// msg->publishDebug("enableBoardStatus");
+	boardStatusEnabled = enabled;
+}
+
+// > enableHeartbeat/bool enabled
+void MrlComm::enableHeartbeat(bool enabled) {
+	heartbeatEnabled = enabled;
+}
+
+// > enablePin/address/type/b16 rate
+void MrlComm::enablePin(byte address, byte type, int rate) {
+	// don't add it twice
+	for (int i = 0; i < pinList.size(); ++i) {
+		Pin* pin = pinList.get(i);
+		if (pin->address == address) {
+			// TODO already exists error?
+			return;
+		}
+	}
+
+	if (type == DIGITAL) {
+		pinMode(address, INPUT);
+	}
+	Pin* p = new Pin(address, type, rate);
+	p->lastUpdate = 0;
+	pinList.add(p);
+}
+
+// > heartbeat
+void MrlComm::heartbeat() {
+	lastHeartbeatUpdate = millis();
+}
+
+// > i2cBusAttach/deviceId/i2cBus
+void MrlComm::i2cBusAttach(byte deviceId, byte i2cBus) {
+	MrlI2CBus* i2cbus = (MrlI2CBus*) addDevice(new MrlI2CBus(deviceId));
+	i2cbus->attach(i2cBus);
+}
+
+// > i2cRead/deviceId/deviceAddress/size
+void MrlComm::i2cRead(byte deviceId, byte deviceAddress, byte size) {
+	((MrlI2CBus*) getDevice(deviceId))->i2cRead(deviceAddress, size);
+}
+
+// > i2cWrite/deviceId/deviceAddress/[] data
+void MrlComm::i2cWrite(byte deviceId, byte deviceAddress, byte dataSize, const byte*data) {
+	((MrlI2CBus*) getDevice(deviceId))->i2cWrite(deviceAddress, dataSize, data);
+}
+
+// > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
+void MrlComm::i2cWriteRead(byte deviceId, byte deviceAddress, byte readSize, byte writeValue) {
+	((MrlI2CBus*) getDevice(deviceId))->i2cWriteRead(deviceAddress, readSize, writeValue);
+}
+
+// > neoPixelAttach/pin/b16 numPixels
+void MrlComm::neoPixelAttach(byte deviceId, byte pin, long numPixels) {
+	MrlNeopixel* neo = (MrlNeopixel*) addDevice(new MrlNeopixel(deviceId));
+	neo->attach(pin, numPixels);
+}
+
+// > neoPixelAttach/pin/b16 numPixels
+void MrlComm::neoPixelSetAnimation(byte deviceId, byte animation, byte red, byte green, byte blue, int speed) {
+	((MrlNeopixel*) getDevice(deviceId))->setAnimation(animation, red, green, blue, speed);
+}
+
+// > neoPixelWriteMatrix/deviceId/[] buffer
+void MrlComm::neoPixelWriteMatrix(byte deviceId, byte bufferSize, const byte*buffer) {
+	((MrlNeopixel*) getDevice(deviceId))->neopixelWriteMatrix(bufferSize, buffer);
+}
+
+// > servoAttach/deviceId/pin/targetOutput/b16 velocity
+void MrlComm::servoAttach(byte deviceId, byte pin, byte targetOutput, int velocity) {
+	MrlServo* servo = new MrlServo(deviceId);
+	addDevice(servo);
+	// not your mama's attach - this is attaching/initializing the MrlDevice
+	servo->attach(pin, targetOutput, velocity);
+}
+
+// > servoEnablePwm/deviceId/pin
+void MrlComm::servoEnablePwm(byte deviceId, byte pin) {
+	MrlServo* servo = (MrlServo*) getDevice(deviceId);
+	servo->enablePwm(pin);
+}
+
+// > servoDisablePwm/deviceId
+void MrlComm::servoDisablePwm(byte deviceId) {
+	MrlServo* servo = (MrlServo*) getDevice(deviceId);
+	servo->disablePwm();
+}
+
+// > servoSetMaxVelocity/deviceId/b16 maxVelocity
+void MrlComm::servoSetMaxVelocity(byte deviceId, int maxVelocity) {
+	MrlServo* servo = (MrlServo*) getDevice(deviceId);
+	servo->setMaxVelocity(maxVelocity);
+}
+
+// > servoSetVelocity/deviceId/b16 velocity
+void MrlComm::servoSetVelocity(byte deviceId, int velocity) {
+	MrlServo* servo = (MrlServo*) getDevice(deviceId);
+	servo->setVelocity(velocity);
+}
+
+void MrlComm::servoSweepStart(byte deviceId, byte min, byte max, byte step) {
+	MrlServo* servo = (MrlServo*) getDevice(deviceId);
+	servo->startSweep(min, max, step);
+}
+
+void MrlComm::servoSweepStop(byte deviceId) {
+	MrlServo* servo = (MrlServo*) getDevice(deviceId);
+	servo->stopSweep();
+}
+
+void MrlComm::servoWrite(byte deviceId, byte target) {
+	msg->publishDebug("MrlComm::servoWrite - servoWrite" + String(deviceId));
+	MrlServo* servo = (MrlServo*) getDevice(deviceId);
+	msg->publishDebug("got - servoWrite" + String(deviceId));
+	servo->servoWrite(target);
+	msg->publishDebug("got - wrote" + String(deviceId));
+}
+
+void MrlComm::servoWriteMicroseconds(byte deviceId, int ms) {
+	MrlServo* servo = (MrlServo*) getDevice(deviceId);
+	servo->servoWriteMicroseconds(ms);
+}
+
+void MrlComm::setDebug(bool enabled) {
+	msg->debug = enabled;
+}
+
+void MrlComm::setSerialRate(long rate) {
+	msg->publishDebug("setSerialRate " + String(rate));
+}
+
+// TODO - implement
+// > setTrigger/pin/value
+void MrlComm::setTrigger(byte pin, byte triggerValue) {
+	msg->publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(triggerValue));
+}
+
+// TODO - implement
+// > setDebounce/pin/delay
+void MrlComm::setDebounce(byte pin, byte delay) {
+	msg->publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(delay));
+}
+
+// TODO - implement
+// > serialAttach/deviceId/relayPin
+void MrlComm::serialAttach(byte deviceId, byte relayPin) {
+	MrlSerialRelay* relay = new MrlSerialRelay(deviceId);
+	addDevice(relay);
+	relay->attach(relayPin);
+}
+
+// TODO - implement
+// > serialRelay/deviceId/[] data
+void MrlComm::serialRelay(byte deviceId, byte dataSize, const byte* data) {
+	MrlSerialRelay* relay = (MrlSerialRelay*) getDevice(deviceId);
+  //msg->publishDebug("serialRelay (" + String(dataSize) + "," + String(deviceId));
+	relay->write(data, dataSize);
+}
+
+// > softReset
+void MrlComm::softReset() {
+	// removing devices & pins
+	while (deviceList.size() > 0) {
+		delete deviceList.pop();
+	}
+
+	while (pinList.size() > 0) {
+		delete pinList.pop();
+	}
+
+	//resetting variables to default
+	loopCount = 0;
+	publishBoardStatusModulus = 10000;
+	boardStatusEnabled = false;
+	msg->debug = false;
+	heartbeatEnabled = false;
+	lastHeartbeatUpdate = 0;
+	for (unsigned int i = 0; i < MAX_MSG_SIZE; i++) {
+		customMsgBuffer[i] = 0;
+	}
+	customMsgSize = 0;
+}
+
+// > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
+void MrlComm::ultrasonicSensorAttach(byte deviceId, byte triggerPin, byte echoPin) {
+	MrlUltrasonicSensor* sensor = (MrlUltrasonicSensor*) addDevice(new MrlUltrasonicSensor(deviceId));
+	sensor->attach(triggerPin, echoPin);
+}
+// > ultrasonicSensorStartRanging/deviceId
+void MrlComm::ultrasonicSensorStartRanging(byte deviceId) {
+	MrlUltrasonicSensor* sensor = (MrlUltrasonicSensor*)getDevice(deviceId);
+	sensor->startRanging();
+}
+// > ultrasonicSensorStopRanging/deviceId
+void MrlComm::ultrasonicSensorStopRanging(byte deviceId) {
+	MrlUltrasonicSensor* sensor = (MrlUltrasonicSensor*)getDevice(deviceId);
+	sensor->stopRanging();
+}

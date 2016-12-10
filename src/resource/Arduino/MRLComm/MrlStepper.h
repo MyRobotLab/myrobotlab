@@ -5,8 +5,6 @@
  * Stepper Device
  */
  
-#include "Device.h"
- 
 class MrlStepper : public Device {
   // details of the different motor controls/types
   public:

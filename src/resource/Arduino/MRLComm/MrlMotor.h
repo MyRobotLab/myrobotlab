@@ -4,8 +4,7 @@
 /**
  * Motor Device
  */
- 
-#include "Device.h" 
+
  
 class MrlMotor : public Device {
   // details of the different motor controls/types

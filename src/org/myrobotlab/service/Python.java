@@ -583,7 +583,8 @@ public class Python extends Service {
 	 * @param methodName
 	 */
 	public void execMethod(String method) {
-		execMethod(getName(), method, (Object[])null);
+		// execMethod(getName(), method, (Object[])null);
+		execMethod(method, (Object[])null);
 	}
 
 	public void execMethod(String method, Object...parms) {
@@ -823,6 +824,7 @@ public class Python extends Service {
 			// log.info(getName(f));
 			Runtime.start("python", "Python");
 			Runtime.start("webgui", "WebGui");
+			Runtime.start("gui", "GUIService");
 
 			// python.error("this is an error");
 			// python.loadScriptFromResource("VirtualDevice/Arduino.py");

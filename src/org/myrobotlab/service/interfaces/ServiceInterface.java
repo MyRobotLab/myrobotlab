@@ -97,4 +97,16 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameProvide
   public String getDescription();
 
   public Map<String, MethodEntry> getMethodMap();
+  
+  /**
+   * the "routing" attach - routes to a specific strongly typed attach of the service
+   * if it exists
+   * @param name
+   */
+  /* HEH - this did not work - trying to generalize that which should not be generalized :P
+  public void attach(String name) throws Exception;
+  
+  public void attach(ServiceInterface instance) throws Exception;
+  */
+  
 }

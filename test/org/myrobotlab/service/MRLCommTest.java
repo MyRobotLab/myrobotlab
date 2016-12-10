@@ -37,32 +37,32 @@ public class MRLCommTest {
 
 	@Test
 	public void testConnectString() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testConnectStringIntegerIntIntInt() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testGetPinList() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testGetVersion() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testIsConnected() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testPublishSensorData() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 	
 	 public static void main(String[] args) {

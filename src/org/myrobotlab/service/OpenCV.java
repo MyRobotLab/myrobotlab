@@ -163,6 +163,8 @@ public class OpenCV extends VideoSource {
   public boolean undockDisplay = false;
 
   // track the state of opencv. capturing true/false?
+  // FIXME - there should be a bool isCapturing() - part of VideoCapture interface !
+  // additionally this should not be public but package scope protected (ie no declaration)
   public boolean capturing = false;
 
   // TODO: a peer, but in the future , we should use WebGui and it's http

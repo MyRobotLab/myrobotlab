@@ -270,7 +270,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	 */
 	boolean createDevice() {
 		if (controller != null) {
-			controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+			controller.i2cAttach(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 		}
 
 		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
@@ -306,7 +306,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		if (controller != null) {
 			if (deviceAddress != DeviceAddress) {
 				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.i2cAttach(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 			}
 		}
 
@@ -410,7 +410,6 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		return pinData;
 	}
 
-	@Override
 	public void attach(String listener, int pinAddress) {
 		attach((PinListener) Runtime.getService(listener), pinAddress);
 	}
