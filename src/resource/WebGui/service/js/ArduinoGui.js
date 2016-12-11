@@ -51,9 +51,12 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         } else {
             $scope.versionStatus = null ;
         }
+        // infinite loop
+        /*
         if ($scope.isConnected) {
-            msg.send("getVersion");
+            msg.send("getBoardInfo");
         }
+        */
     }
     ;
     _self.updateState($scope.service);
@@ -101,7 +104,8 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         case 'onBoardStatus':
                 $scope.mrlComm.us = data.us;
                 $scope.mrlComm.sram = data.sram;
-                $scope.mrlComm.deviceCount = data.deviceCount;
+                $scope.mrlComm.deviceSummary = data.deviceSummary;
+                $scope.$apply();
             break;
         case 'onPin':
             break;

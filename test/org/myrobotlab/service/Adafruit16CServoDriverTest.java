@@ -12,12 +12,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FileIO.FileComparisonException;
+import org.myrobotlab.service.interfaces.SerialDevice;
 
 public class Adafruit16CServoDriverTest {
 
 	static Adafruit16CServoDriver driver = null;
 	static Arduino arduino = null;
-	static Serial serial = null;
+	static SerialDevice serial = null;
 	static VirtualDevice virtual = null;
 
 	@BeforeClass
@@ -167,7 +168,7 @@ public class Adafruit16CServoDriverTest {
 
 		Serial uart = virtual.getUart("v1");
 		uart.open("v1");
-		uart.record("test/Adafruit16CServoDriver/test");
+		uart.record();
 		arduino.connect("v0");
 
 		driver.setServo(0, SERVOMIN);

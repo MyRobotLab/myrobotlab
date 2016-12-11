@@ -35,20 +35,19 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.motor.MotorConfig;
+import org.myrobotlab.motor.MotorConfigDualPwm;
+import org.myrobotlab.motor.MotorConfigSimpleH;
+import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.DeviceController;
+import org.myrobotlab.service.interfaces.MotorControl;
+import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NameProvider;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.motor.MotorConfig;
-import org.myrobotlab.motor.MotorConfigDualPwm;
-import org.myrobotlab.motor.MotorConfigPulse;
-import org.myrobotlab.motor.MotorConfigSimpleH;
-import org.myrobotlab.sensor.Encoder;
-import org.myrobotlab.service.interfaces.MotorControl;
-import org.myrobotlab.service.interfaces.MotorController;
-import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -161,8 +160,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 							double setPoint = pid.getSetpoint(pidKey);
 							double output = pid.getOutput(pidKey);
 							mc.setPowerLevel(output);
-							log.debug(String.format("setPoint(%s), processVariable(%s), output(%s)", setPoint,
-									processVariable, output));
+							log.debug(String.format("setPoint(%s), processVariable(%s), output(%s)", setPoint, processVariable, output));
 							if (output != lastOutput) {
 								// controller.move(output);
 								controller.motorMove((MotorControl) mc);
@@ -403,7 +401,9 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	@Override
 	// TODO DeActivate the motor and PID
 	public void detach() {
-		controller.motorStop((MotorControl) this);
+		if (controller != null) {
+			controller.motorStop((MotorControl) this);
+		}
 		isAttached = false;
 		broadcastState();
 	}
@@ -824,11 +824,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		attach(pinArrayControlName, (int) pin);
 	}
 
-	@Override
-	public void attach(String pinArrayControlName, int pin) throws Exception {
-		attach((PinArrayControl) Runtime.getService(pinArrayControlName), pin);
-	}
-
 	public void attach(PinArrayControl pinArrayControl, int pin) throws Exception {
 		this.pinArrayControl = pinArrayControl;
 		if (pinArrayControl != null) {
@@ -858,7 +853,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		return 0;
 	}
 
-
 	@Override
 	public double getPowerLevel() {
 		return powerLevel;
@@ -873,20 +867,19 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	public double getPowerOutput() {
 		return powerMap.calc(powerLevel);
 	}
-	
+
 	@Override
 	public int getTargetPos() {
 		return targetPos;
 	}
-	
+
 	/**
-	// A bunch of unimplemented methods from ServoControl and MotorControl.
-	// Perhaps I should create a new
-	// DiyServoControl interface.
-	// I was hoping to be able to avoid that, but might be a better solution
-   */
+	 * // A bunch of unimplemented methods from ServoControl and MotorControl.
+	 * // Perhaps I should create a new // DiyServoControl interface. // I was
+	 * hoping to be able to avoid that, but might be a better solution
+	 */
 	@Override
-	public void attach(ServoController controller, int pin, Integer pos) throws Exception {
+	public void attach(ServoController controller, Integer pin, Integer pos) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
@@ -898,25 +891,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public void attach(ServoController controller, int pin) throws Exception {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void attach(String controllerName, int pin, Integer pos) throws Exception {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void attach(ServoController controller, int pin, Integer pos, Integer velocity) throws Exception {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void attach(String controllerName, int pin, Integer pos, Integer velocity) throws Exception {
+	public void attach(ServoController controller, Integer pin) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
@@ -987,6 +962,39 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		meta.addPeer("Pid", "Pid", "PID service");
 
 		return meta;
+	}
+
+	@Override
+	public void unsetController() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setPin(int pin) {
+		this.pin = pin;
+	}
+
+	@Override
+	public void attach(ServoController controller, Integer pin, Integer pos, Integer velocity) throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override // FIXME - could be in ServoBase
+	public boolean isAttached(ServoController controller) {
+		return this.controller == controller;
+	}
+
+	@Override
+	public boolean isAttached(MotorController controller) {
+		return this.controller == controller;
+	}
+
+	@Override
+	public void setVelocity(Integer velocity) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

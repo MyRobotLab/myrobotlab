@@ -231,24 +231,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 					// ie connection value and current port
 					setPortStatus();
 
-					// WARNING
-					// don't use the same output formatters as the serial
-					// service
-					// they might have a different state when they are writing
-					// out to a file...
-					String key = mySerial.getRXCodecKey();
-					if (key != null && !key.equals(rxFormatter.getKey())) {
-						// create new formatter from type key
-						rxFormatter = Codec.getDecoder(key, myService);
-						// TODO - set the reqTXFormat box .. too lazy :P -
-						// hopefully
-						reqFormat.setSelectedItem(key);
-					}
-					key = mySerial.getTXCodecKey();
-					if (key != null && !key.equals(txFormatter.getKey())) {
-						// create new formatter from type key
-						txFormatter = Codec.getDecoder(key, myService);
-					}
+			
 
 					ports.addItemListener(myself);
 					reqFormat.addItemListener(myself);

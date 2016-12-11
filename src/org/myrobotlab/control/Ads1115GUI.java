@@ -28,7 +28,6 @@ package org.myrobotlab.control;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -42,6 +41,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Ads1115;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
 
 public class Ads1115GUI extends ServiceGUI implements ActionListener {
@@ -53,7 +53,7 @@ public class Ads1115GUI extends ServiceGUI implements ActionListener {
 	String detach = "unsetController";
 	JButton attachButton = new JButton(attach);
 
-	JComboBox<String> controller = new JComboBox<String>();
+	JComboBox<String> controllerName = new JComboBox<String>();
 	JComboBox<String> deviceAddressList = new JComboBox<String>();
 	JComboBox<String> deviceBusList = new JComboBox<String>();
 
@@ -84,10 +84,10 @@ public class Ads1115GUI extends ServiceGUI implements ActionListener {
 		}
 		if (o == attachButton) {
 			if (attachButton.getText().equals(attach)) {
-				int index = controller.getSelectedIndex();
+				int index = controllerName.getSelectedIndex();
 				if (index != -1) {
 					myService.send(boundServiceName, attach, 
-							controller.getSelectedItem(),
+							controllerName.getSelectedItem(),
 							deviceBusList.getSelectedItem(),
 							deviceAddressList.getSelectedItem());
 				}
@@ -111,18 +111,19 @@ public class Ads1115GUI extends ServiceGUI implements ActionListener {
 	public void getState(Ads1115 ads1115) {
 
 		refreshControllers();
-		controller.setSelectedItem(ads1115.getControllerName());
+		I2CController controller = ads1115.getController();
+		controllerName.setSelectedItem(ads1115.getControllerName());
 		deviceBusList.setSelectedItem(ads1115.deviceBus);
 		deviceAddressList.setSelectedItem(ads1115.deviceAddress);
-		if (ads1115.isAttached()) {
+		if (controller != null) {
 			attachButton.setText(detach);
-			controller.setEnabled(false);
+			controllerName.setEnabled(false);
 			deviceBusList.setEnabled(false);
 			deviceAddressList.setEnabled(false);
 			refresh.setEnabled(true);
 		} else {
 			attachButton.setText(attach);
-			controller.setEnabled(true);
+			controllerName.setEnabled(true);
 			deviceBusList.setEnabled(true);
 			deviceAddressList.setEnabled(true);
 			refresh.setEnabled(false);
@@ -141,7 +142,7 @@ public class Ads1115GUI extends ServiceGUI implements ActionListener {
 		display.setLayout(new BorderLayout());
 		JPanel north = new JPanel();
 		north.add(controllerLabel);
-		north.add(controller);
+		north.add(controllerName);
 		north.add(deviceBusLabel);		
 		north.add(deviceBusList);
 		north.add(deviceAddressLabel);
@@ -192,12 +193,12 @@ public class Ads1115GUI extends ServiceGUI implements ActionListener {
 			public void run() {
 
 				boundService.refreshControllers();
-				controller.removeAllItems();
+				controllerName.removeAllItems();
 				List<String> c = boundService.controllers;	
 				for (int i = 0; i < c.size(); ++i) {
-					controller.addItem(c.get(i));
+					controllerName.addItem(c.get(i));
 				}
-				controller.setSelectedItem(boundService.getControllerName());
+				controllerName.setSelectedItem(boundService.getControllerName());
 			}
 		});
 	}

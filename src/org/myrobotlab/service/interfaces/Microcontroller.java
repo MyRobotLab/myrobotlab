@@ -1,5 +1,7 @@
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.arduino.BoardInfo;
+
 // FIXME add SensorController
 public interface Microcontroller extends DeviceController {
 
@@ -20,6 +22,6 @@ public interface Microcontroller extends DeviceController {
 
 	public String getBoardType();
 
-	public Integer getVersion();
+	public BoardInfo getBoardInfo();
 
 }

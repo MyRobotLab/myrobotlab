@@ -28,18 +28,14 @@ package org.myrobotlab.service.interfaces;
 import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.sensor.Encoder;
 
-public interface MotorControl extends DeviceControl { 
+public interface MotorControl extends DeviceControl, RelativePositionControl {
 
-	// a good canidate for Java-8 'default' interface method
-	// implementation of all attach(String name) { attach(Runtime.getService(name)); } 
-	public void attach(String controllerName) throws Exception;
 	public void attach(MotorController controller) throws Exception;
 
-	public void detach(String controllerName);
 	public void detach(MotorController controller);
 
 	double getPowerLevel();
-	
+
 	public void setPowerLevel(double power);
 
 	double getPowerOutput();
@@ -58,18 +54,6 @@ public interface MotorControl extends DeviceControl {
 	 * unlocked
 	 */
 	void lock();
-
-	/**
-	 * Move is the most common motor command. The command accepts a parameter of
-	 * power which can be of the range -1.0 to 1.0. Negative values are in one
-	 * direction and positive values are in the opposite value. For example -1.0
-	 * would be maximum power in a counter clock-wise direction and 0.9 would be
-	 * 90% power in a clockwise direction. 0.0 of course would be stop
-	 * 
-	 * @param power
-	 *            - new power level
-	 */
-	void move(double power);
 
 	/**
 	 * moveTo moves the motor to a specific location. Typically, an encoder is
@@ -113,4 +97,17 @@ public interface MotorControl extends DeviceControl {
 
 	public MotorConfig getConfig();
 
+	/**
+	 * testing if a 'specific' motor controller is attached
+	 * @param controller
+	 * @return
+	 */
+	boolean isAttached(MotorController controller);
+
+	/**
+	 * general test if the motor is ready without having to supply
+	 * the specific motor controller
+	 * @return
+	 */
+	boolean isAttached();
 }

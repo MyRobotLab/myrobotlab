@@ -187,7 +187,7 @@ public class Incubator extends Service {
         ret.add(Status.error("%s.py does not exist", shortName));
       } else {
         // uart99.connect("UART99");
-        uart99.recordRX(String.format("%s.rx", shortName)); // FIXME
+        uart99.record(); // FIXME
         // FILENAME
         // OVERLOAD
         python.exec(py);

@@ -60,6 +60,7 @@ import javax.swing.text.DefaultCaret;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.control.widget.DigitalButton;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.Util;
@@ -326,7 +327,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
   @Override
   public void attachGUI() {
     subscribe("publishPin", "publishPin", Pin.class);
-    subscribe("publishVersion", "publishVersion", Integer.class);
+    // subscribe("publishVersion", "publishVersion", Integer.class);
     subscribe("publishState", "getState", Arduino.class);
 //    subscribe("getPortNames", "onPortNames", List.class);
     subscribe("getPorts", "getPorts", String.class);
@@ -338,7 +339,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
     send("publishState");
   }
 
-
+  @Deprecated
   public void publishVersion(Integer xver) {
     if (xver != null) {
       version.setText(xver + "");
@@ -718,7 +719,15 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 
           if (arduino.isConnected()) {
             onConnect(arduino.getPortName());
-            send("getVersion");
+            // send("getVersion");
+            arduino.getBoardInfo();
+          }
+          
+          BoardInfo boardInfo = myArduino.getBoardInfo();
+          if (!boardInfo.isValid()){
+        	  version.setText("unkown");
+          } else {
+        	  version.setText("" + boardInfo.getVersion());
           }
 
           // update panels based on state change

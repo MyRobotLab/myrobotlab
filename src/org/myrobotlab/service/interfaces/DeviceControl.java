@@ -16,16 +16,23 @@ public interface DeviceControl extends NameProvider {
 
 	/**
 	 * sets the controller for this device
+	 * 
 	 * @param controller
 	 */
 	public void setController(DeviceController controller);
+	
 
 	/**
 	 * gets the controller for this device
+	 * 
 	 * @return
 	 */
 	public DeviceController getController();
 
+	// FIXME - this should be
+	// public void detach(DeviceController controller) !!! - @GroG
+	public void unsetController();
+	
 	/**
 	 * returns if the DeviceController has been set or not
 	 * @return

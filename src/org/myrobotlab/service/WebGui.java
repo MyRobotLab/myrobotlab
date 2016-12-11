@@ -53,6 +53,8 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 //import org.myrobotlab.webgui.WebGUIServlet;
 import org.slf4j.Logger;
 
+import com.google.gson.JsonSyntaxException;
+
 /**
  * 
  * WebGui - This service is the AngularJS based GUI TODO - messages & services
@@ -720,7 +722,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// depend on codec being used
 			// FIXME - currently a keyword - "json" internally defines the codec
 			// - getMimeType !!
-
+			
 		} catch (Exception e) {
 			handleError(httpMethod, out, codec, e, apiTypeKey);
 		}
@@ -830,7 +832,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// getName() ? -> should it be AngularJS client name ?
 		Message msg = createMessage(getName(), CodecUtils.getCallBackName(method), ret);
 		if (CodecUtils.API_TYPE_SERVICES.equals(apiTypeKey)) {
-			codec.encode(out, msg.data[0]);
+			// for the purpose of only returning the data
+			// e.g. http://api/services/runtime/getUptime -> return the uptime only not the message
+			if (msg.data == null){
+				codec.encode(out, null);
+			} else {
+				// return the return type
+				codec.encode(out, msg.data[0]);
+			}
 		} else {
 			// API_TYPE_MESSAGES
 			codec.encode(out, msg);
