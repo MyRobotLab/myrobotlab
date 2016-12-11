@@ -473,7 +473,13 @@ public class MaryInstaller {
 
 	private void showProgressPanel(List<ComponentDescription> comps, boolean install) {
 		final ProgressWorker pp = new ProgressWorker(comps, install);
-		new Thread(pp).start();
+		Thread t = new Thread(pp);
+		t.start();
+		try {
+			t.join();
+		} catch (InterruptedException e) {
+			System.err.println("Wait interrupted!");
+		}
 	}
 	
 	public Map<String, LanguageComponentDescription> getLanguages() {
