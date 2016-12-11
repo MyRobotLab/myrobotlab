@@ -413,7 +413,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
 	public boolean isActive = false;
 
-  public class BNO055Data {
+  public class Bno055Data {
     public double w;
     public double x;
     public double y;
@@ -426,7 +426,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     Unit unit;   
   }
   
-  public class BNO055Event {
+  public class Bno055Event {
     public int version;
     public long timestamp = System.currentTimeMillis();
     public class Orientation {
@@ -555,7 +555,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
    */
   boolean createDevice() {
     if (controller != null) {
-        controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+        controller.i2cAttach(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
         log.info(String.format("Created device on bus: %s address %s", deviceBus, deviceAddress));
         return true;
     }
@@ -675,8 +675,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     sleep(20);
   }
 
-  public BNO055Event getEvent() {
-    BNO055Event event = new BNO055Event();
+  public Bno055Event getEvent() {
+    Bno055Event event = new Bno055Event();
     byte[] wbuffer = new byte[] {register.EUL_HEADING_LSB.value};
     byte[] rbuffer = new byte[6];
     //controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), wbuffer, wbuffer.length);
@@ -912,8 +912,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     return i2cWriteReadRegByte(reg);
   }
   
-  public BNO055Data getAccelerationData() {
-    BNO055Data retval = new BNO055Data();
+  public Bno055Data getAccelerationData() {
+    Bno055Data retval = new Bno055Data();
     byte[] data = new byte[6];
     i2cWriteReadReg(register.ACC_DATA_X_LSB, data, data.length);
     byte unit = (byte) ((i2cWriteReadRegByte(register.UNIT_SEL) & Unit.ACC_M_S2.mask) >> Unit.ACC_M_S2.shift);
@@ -932,8 +932,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     return retval;
   }
   
-  public BNO055Data getMagneticFieldStrength() {
-    BNO055Data retval = new BNO055Data();
+  public Bno055Data getMagneticFieldStrength() {
+    Bno055Data retval = new Bno055Data();
     byte[] data = new byte[6];
     i2cWriteReadReg(register.MAG_DATA_X_LSB, data, data.length);
     retval.unit = Unit.MAG;
@@ -943,8 +943,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     return retval;
   }
   
-  public BNO055Data getAngularVelocity() {
-    BNO055Data retval = new BNO055Data();
+  public Bno055Data getAngularVelocity() {
+    Bno055Data retval = new Bno055Data();
     byte[] data = new byte[6];
     i2cWriteReadReg(register.GYR_DATA_X_LSB, data, data.length);
     byte unit = (byte) ((i2cWriteReadRegByte(register.UNIT_SEL) & Unit.ANGULAR_RATE_DPS.mask) >> Unit.ANGULAR_RATE_DPS.shift);
@@ -963,8 +963,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     return retval;
   }
   
-  public BNO055Data getOrientationEuler() {
-    BNO055Data retval = new BNO055Data();
+  public Bno055Data getOrientationEuler() {
+    Bno055Data retval = new Bno055Data();
     byte[] data = new byte[6];
     i2cWriteReadReg(register.EUL_HEADING_LSB, data, data.length);
     byte unit = (byte) ((i2cWriteReadRegByte(register.UNIT_SEL) & Unit.EULER_ANGLE_DEG.mask) >> Unit.EULER_ANGLE_DEG.shift);
@@ -983,8 +983,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     return retval;
   }
   
-  public BNO055Data getOrientationQuaternion() {
-    BNO055Data retval = new BNO055Data();
+  public Bno055Data getOrientationQuaternion() {
+    Bno055Data retval = new Bno055Data();
     byte[] data = new byte[8];
     i2cWriteReadReg(register.QUA_DATA_W_LSB, data, data.length);
     retval.unit = Unit.QUAT;
@@ -995,8 +995,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     return retval;
   }
 
-  public BNO055Data getLinearAcceleration() {
-    BNO055Data retval = new BNO055Data();
+  public Bno055Data getLinearAcceleration() {
+    Bno055Data retval = new Bno055Data();
     byte[] data = new byte[6];
     i2cWriteReadReg(register.LIA_DATA_X_LSB, data, data.length);
     byte unit = (byte) ((i2cWriteReadRegByte(register.UNIT_SEL) & Unit.ACC_M_S2.mask) >> Unit.ACC_M_S2.shift);
@@ -1015,8 +1015,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     return retval;
   }
 
-  public BNO055Data getGravityVector() {
-    BNO055Data retval = new BNO055Data();
+  public Bno055Data getGravityVector() {
+    Bno055Data retval = new Bno055Data();
     byte[] data = new byte[6];
     i2cWriteReadReg(register.GRV_DATA_X_LSB, data, data.length);
     byte unit = (byte) ((i2cWriteReadRegByte(register.UNIT_SEL) & Unit.ACC_M_S2.mask) >> Unit.ACC_M_S2.shift);
@@ -1049,8 +1049,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     setMode(modeback);
   }
 
-  public BNO055Data getTemperature() {
-    BNO055Data retval = new BNO055Data();
+  public Bno055Data getTemperature() {
+    Bno055Data retval = new Bno055Data();
     byte data = i2cWriteReadRegByte(register.TEMP);
     byte unit = (byte) ((i2cWriteReadRegByte(register.UNIT_SEL) & Unit.TEMP_C.mask) >> Unit.TEMP_C.shift);
     retval.unit = Unit.TEMP_C;
@@ -1137,8 +1137,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     }
   }
   
-  public BNO055Data getCalibrationOffset(Device device) {
-    BNO055Data data = new BNO055Data();
+  public Bno055Data getCalibrationOffset(Device device) {
+    Bno055Data data = new Bno055Data();
     OperationMode modeback = this.mode;
     setMode(OperationMode.CONFIG);
     byte unitvalue = i2cWriteReadRegByte(register.UNIT_SEL);

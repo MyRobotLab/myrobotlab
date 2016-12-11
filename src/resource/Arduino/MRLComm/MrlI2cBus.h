@@ -1,8 +1,6 @@
 #ifndef MrlI2cBus_h
 #define MrlI2cBus_h
 
-#include "Device.h"
-#include "MrlMsg.h"
 
 #define WIRE Wire
 #include <Wire.h>
@@ -28,11 +26,11 @@ class MrlI2CBus : public Device {
   private:
 	int bus;
   public:
-    MrlI2CBus();
-    bool deviceAttach(unsigned char config[], int configSize);
-    void i2cRead(unsigned char* ioCmd);
-    void i2cWrite(unsigned char* ioCmd);
-    void i2cWriteRead(unsigned char* ioCmd);
+    MrlI2CBus(int deviceId);
+    bool attach(byte bus);
+    void i2cRead(byte deviceAddress, byte size);
+    void i2cWrite(byte deviceAddress, byte dataSize, const byte*data);
+    void i2cWriteRead(byte deviceAddress, byte readSize, byte writeValue);
     void update();
 };
 

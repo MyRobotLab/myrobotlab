@@ -1,16 +1,9 @@
+#include "ArduinoMsgCodec.h"
+#include "Msg.h"
 #include "Device.h"
 
-Device::Device(int deviceType) {
+Device::Device(byte deviceId, byte deviceType) {
+  id = deviceId;
   type = deviceType;
-}
-
-void Device::attachDevice() {
-  id = nextDeviceId;
-  nextDeviceId++;
-}
-
-int Device::nextDeviceId=1; // device 0 is Arduino
-
-bool Device::deviceAttach(unsigned char[], int) {
-  return false; 
+  msg = Msg::getInstance();
 }

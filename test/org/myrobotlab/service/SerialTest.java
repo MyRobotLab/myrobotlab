@@ -2,8 +2,6 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -20,7 +18,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.myrobotlab.codec.serial.Codec;
 import org.myrobotlab.codec.serial.DecimalCodec;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -40,7 +37,7 @@ public class SerialTest {
   static Serial serial = null;
   static TestCatcher catcher = null;
 
-  static VirtualDevice virtual = null;
+  static VirtualArduino virtual = null;
   static Serial uart = null;
   static Python logic = null;
   static String vport = "vport";
@@ -56,14 +53,12 @@ public class SerialTest {
     // Runtime.start("gui", "GUIService");
     serial = (Serial) Runtime.start("serial", "Serial");
     catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
-    virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-    virtual.createVirtualSerial(vport);
+    virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+    virtual.connect(vport);
 
-    uart = virtual.getUart(vport);
+    uart = virtual.getSerial();
     uart.setTimeout(300);
-
-    logic = virtual.getLogic();
-
+    Thread.sleep(100);
     serial.open(vport);
     Thread.sleep(300);
 
@@ -102,8 +97,6 @@ public class SerialTest {
       serial.open(vport);
     }
 
-    serial.setCodec("decimal");
-    uart.setCodec("decimal");
 
     serial.addByteListener(catcher);
   }
@@ -522,7 +515,7 @@ public class SerialTest {
 
   @Test
   public final void testIsRecording() throws Exception {
-    serial.record("out");
+    serial.record();
     assertTrue(serial.isRecording());
     int x = 65;
     serial.write(65);
@@ -680,72 +673,23 @@ public class SerialTest {
       return;
     }
 
-    // ==== null codec test ===
-    log.info("codec null test");
-    serial.setCodec(null);
-
-    String rxKey = serial.getRXCodecKey();
-    assertNull(rxKey);
-
-    Codec rxcodec = serial.getRXCodec();
-    assertNull(rxcodec);
-
-    String txKey = serial.getTXCodecKey();
-    assertNull(txKey);
-
-    Codec txcodec = serial.getTXCodec();
-    assertNull(txcodec);
+ 
 
     testReadAndWrite();
 
     // ==== decimal codec test ===
-    serial.setCodec("decimal");
+    // serial.setCodec("decimal");
 
-    rxKey = serial.getRXCodecKey();
-    assertEquals("decimal", rxKey);
-
-    rxcodec = serial.getRXCodec();
-    assertNotNull(rxcodec);
-
-    txKey = serial.getTXCodecKey();
-    assertEquals("decimal", txKey);
-
-    txcodec = serial.getTXCodec();
-    assertNotNull(txcodec);
-
+  
     testReadAndWrite();
 
     // ==== hex codec test ===
-    serial.setCodec("hex");
-
-    rxKey = serial.getRXCodecKey();
-    assertEquals("hex", rxKey);
-
-    rxcodec = serial.getRXCodec();
-    assertNotNull(rxcodec);
-
-    txKey = serial.getTXCodecKey();
-    assertEquals("hex", txKey);
-
-    txcodec = serial.getTXCodec();
-    assertNotNull(txcodec);
+ 
 
     testReadAndWrite();
 
     // ==== ascii codec test ===
-    serial.setCodec("ascii");
-
-    rxKey = serial.getRXCodecKey();
-    assertEquals("ascii", rxKey);
-
-    rxcodec = serial.getRXCodec();
-    assertNotNull(rxcodec);
-
-    txKey = serial.getTXCodecKey();
-    assertEquals("ascii", txKey);
-
-    txcodec = serial.getTXCodec();
-    assertNotNull(txcodec);
+   
 
     testReadAndWrite();
   }

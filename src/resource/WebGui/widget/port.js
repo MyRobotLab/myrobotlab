@@ -66,8 +66,9 @@ angular.module('mrlapp.service').directive('port', ['$compile', 'mrl', '$log', f
             scope.refresh = function() {
                 mrl.sendTo(scope.service.name, 'refresh');
             }
-            scope.disconnect = function() {
-                mrl.sendTo(scope.service.name, 'disconnect')
+
+            scope.settings = function() {
+                //mrl.sendTo(scope.service.name, 'disconnect')
             }
             ;
             // subscribes

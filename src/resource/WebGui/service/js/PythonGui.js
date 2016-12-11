@@ -84,7 +84,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         // $log.info('here');
         // $scope.activeTabIndex;
         // $log.info($scope.scripts[$scope.activeTabIndex]);
-        msg.send('exec', $scope.activeScript);
+        msg.send('exec', $scope.activeScript.code);
     }
     $scope.tabSelected = function(script) {
         $log.info('here');
@@ -92,20 +92,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         // need to get a handle on hte tab's ui / text
         // $scope.editors.setValue(script.code);
     }
-    /*
-    $scope.active = function() {
-
-        $log.info('here');
-        var x = $scope.scripts.filter(function(pane) {
-            return scripts.script;
-        })[0];
-
-        return $scope.scripts.filter(function(pane) {
-            return script.active;
-        })[0];
-    }
-    ;
-    */
+  
     msg.subscribe('publishStdOut');
     msg.send("attachPythonConsole");
     msg.subscribe(this);

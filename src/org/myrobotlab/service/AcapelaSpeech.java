@@ -66,6 +66,7 @@ import org.slf4j.Logger;
  * voice. That mp3 is then cached and played back by the AudioFile service.
  * 
  */
+@Deprecated // close source, closed service, no fun
 public class AcapelaSpeech extends Service implements TextListener, SpeechSynthesis, AudioListener {
 
   transient public final static Logger log = LoggerFactory.getLogger(AcapelaSpeech.class);
@@ -544,9 +545,9 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
    */
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(AcapelaSpeech.class.getCanonicalName());
-    meta.addDescription("Acapela group speech synthesis service.");
+    meta.setAvailable(false);
+    meta.addDescription("Acapela - no longer supported");
     meta.addCategory("speech");
-    meta.setSponsor("GroG");
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");

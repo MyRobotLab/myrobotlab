@@ -19,7 +19,7 @@ public interface I2CController extends DeviceController {
 	 * @param serviceName
 	 *          name of the service that invokes the createI2cDevice 
 	 */
-	void createI2cDevice(I2CControl control, int busAddress, int deviceAddress);
+	void i2cAttach(I2CControl control, int busAddress, int deviceAddress);
 
 	/**
 	 * This method returns and already existing I2CDevice

@@ -24,8 +24,8 @@
    <input type="text" class="form-control" ng-model="pin" ng-disabled="isControllerSet"><!-- FIXME - type-ahead -->  
      
    <span class="input-group-btn">
-         <button class="btn btn-default" ng-show="isControllerSet"  ng-click="msg.detach(controllerName)">detach</button>
-         <button class="btn btn-default" ng-show="!isControllerSet"  ng-click="msg.attach(controllerName, pin, pos.value)">attach</button>
+         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach</button>
+         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName, pin, pos.value)">attach</button>
    </span>
   </div>
 

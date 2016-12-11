@@ -13,21 +13,23 @@ public class CodecMessage implements Codec {
 
   public final static Logger log = LoggerFactory.getLogger(CodecMessage.class);
 
-  private transient static Gson mapper = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
+  // private transient static Gson mapper = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
+  private transient static Gson mapper = new GsonBuilder().create();//.setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 
   public static final byte[] FQ_D = "d".getBytes();
 
   @Override
   public void encode(OutputStream out, Object obj) throws IOException {
-
-    // TODO - test if Message .. if not wrap it ..
-
-    out.write(mapper.toJson(obj).getBytes());
+	  byte[] json = null;
+	 //  synchronized (mapper) { // GRRR .. GSON is NOT Thread Safe !
+	  // log.info("about to serialize a {}", obj.getClass().getCanonicalName());
+	    json = mapper.toJson(obj).getBytes();
+	 //  }
+    out.write(json);
     // jackson stream way !
     // mapper.writeValue(out, obj);
   }
 
-  // probably should be Object too instead of byte[] :)
   @Override
   public Object[] decodeArray(Object data) throws Exception {
     // ITS GOT TO BE STRING - it just has to be !!! :)

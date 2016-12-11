@@ -1,6 +1,9 @@
+#include <Servo.h>
+#include "Msg.h"
+#include "Device.h"
 #include "MrlServo.h"
 
-MrlServo::MrlServo() : Device(DEVICE_TYPE_SERVO) {
+MrlServo::MrlServo(int deviceId) : Device(deviceId, DEVICE_TYPE_SERVO) {
   isMoving = false;
   isSweeping = false;
   // create the servo
@@ -8,7 +11,7 @@ MrlServo::MrlServo() : Device(DEVICE_TYPE_SERVO) {
   lastUpdate = 0;
   currentPos = 0.0;
   targetPos = 0;
-  velocity = 0;
+  velocity = -1;
 }
 
 MrlServo::~MrlServo() {
@@ -20,44 +23,29 @@ MrlServo::~MrlServo() {
 
 // this method "may" be called with a pin or pin & pos depending on
 // config size
-bool MrlServo::deviceAttach(unsigned char config[], int configSize){
-  if (configSize < 1 || configSize > 4){
-    MrlMsg msg(PUBLISH_MRLCOMM_ERROR);
-    msg.addData(ERROR_DOES_NOT_EXIST);
-    msg.addData(String(F("MrlServo invalid attach config size")));
-    return false;
-  }
-  attachDevice();
-  pin = config[0];
-  if (configSize == 2) {
-    velocity = 0;
-    //servoWrite(config[1]);
-    servo->write(config[1]);
-    currentPos = config[1];
-    targetPos = config[1];
-  }
-  else if (configSize == 4) {
-    velocity = MrlMsg::toInt(config,2);
-    //servoWrite(config[1]);
-    servo->write(config[1]);
-    currentPos = config[1];
-    targetPos = config[1];
-  }
+bool MrlServo::attach(byte pin, byte initPos, int initVelocity){
+  // msg->publishDebug("MrlServo.deviceAttach !!!");
+  servo->write(initPos);
+  currentPos = initPos;
+  targetPos = initPos;
+  velocity = initVelocity;
   servo->attach(pin);
   return true;
 }
 
 // This method is equivalent to Arduino's Servo.attach(pin) - (no pos)
-void MrlServo::attach(int pin){
+void MrlServo::enablePwm(int pin){
+  this->pin = pin;
   servo->attach(pin);
   servo->write((int)currentPos); //return to it's last know state (may be 0 if currentPos is not set)
   // TODO-KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
 }
 
-void MrlServo::detach(){
+void MrlServo::disablePwm(){
   servo->detach();
 }
 
+// FIXME - what happened to events ?
 void MrlServo::update() {
   //it may have an imprecision of +- 1 due to the conversion of currentPos to int
   if (isMoving) {
@@ -68,7 +56,7 @@ void MrlServo::update() {
       if (isSweeping) {
         step = sweepStep;
       }
-      if (velocity == 0) { // when velocity == 0, it mean full speed ahead
+      if (velocity < 0) { // when velocity < 0, it mean full speed ahead
         step = targetPos - currentPos;
       }
       else if ((int)currentPos > targetPos) {
