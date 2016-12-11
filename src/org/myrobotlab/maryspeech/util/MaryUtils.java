@@ -126,7 +126,7 @@ public class MaryUtils {
 		List<String> result = new ArrayList<String>();
 		boolean inLetters = false;
 		int partstart = 0;
-		final String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZÃ„Ã–ÃœabcdefghijklmnopqrstuvwxyzÃ¤Ã¶Ã¼ÃŸ";
+		final String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜabcdefghijklmnopqrstuvwxyzäöüß";
 		final String splitters = "\n \t\"=<>&;";
 
 		for (int i = 0; i < s.length(); i++) {
