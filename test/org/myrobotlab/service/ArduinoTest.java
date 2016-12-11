@@ -1,9 +1,15 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -38,18 +44,21 @@ public class ArduinoTest implements PinArrayListener {
 	public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
 
 	static boolean useVirtualHardware = true;
-
 	static String port = "COM4";
 
+	// things to test
 	static Arduino arduino = null;
 	static Serial serial = null;
 
+	// virtual hardware
 	static VirtualArduino virtual = null;
 	static Serial uart = null;
 
 	int servoPin = 6;
 	int enablePin = 15;
 	int writeAddress = 6;
+	
+	Map<Integer, PinData> pinData = new HashMap<Integer, PinData>();
 
 	// FIXME - test for re-entrant !!!!
 	// FIXME - single switch for virtual versus "real" hardware
@@ -77,11 +86,12 @@ public class ArduinoTest implements PinArrayListener {
 	@Before
 	public void setUp() throws Exception {
 
-		// expected state of arduino is no devices ?
-		// & connected ?
+		/**
+		 * Arduino's expected state before each test is
+		 * 'connected' with no devices, no pins enabled
+		 */
 
 		arduino.connect(port);
-
 		arduino.reset();
 
 		serial.clear();
@@ -89,52 +99,42 @@ public class ArduinoTest implements PinArrayListener {
 
 		uart.clear();
 		uart.setTimeout(100);
+		
+		pinData.clear();
 	}
 
 	@Test
 	public void testReleaseService() {
-		// fail("Not yet implemented");
+		arduino.releaseService();
+		// better re-start it
+		arduino = (Arduino)Runtime.start("arduino", "Arduino");
 	}
 
-	@Test
-	public void testStartService() {
-		// fail("Not yet implemented");
-	}
-
-	@Test
-	public void testStopService() {
-		// fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetMetaData() {
-		// fail("Not yet implemented");
-	}
-
-	@Test
-	public void testArduino() {
-		// fail("Not yet implemented");
-	}
 
 	@Test
 	public final void testAnalogWrite() throws InterruptedException, IOException {
 		log.info("testAnalogWrite");
 
-		uart.startRecording();
 		arduino.analogWrite(10, 0);
-		// assertEquals("analogWrite/10/0\n", decoded);
+		assertVirtualPinValue(10, 0);
 
 		arduino.analogWrite(10, 127);
-
-		// assertEquals("analogWrite/10/127\n", decoded);
+		assertVirtualPinValue(10, 127);
 
 		arduino.analogWrite(10, 128);
-		// assertEquals("analogWrite/10/128\n", decoded);
+		assertVirtualPinValue(10, 128);
 
 		arduino.analogWrite(10, 255);
-		// assertEquals("analogWrite/10/255\n", decoded);
-
+		assertVirtualPinValue(10, 255);
+		
 		arduino.error("test");
+	}
+
+	private void assertVirtualPinValue(int address, int value) {
+		if (virtual != null){
+			assertTrue(virtual.readBlocking(address, 50) == value);
+			virtual.clearPinQueue(address);
+		}
 	}
 
 	@Test
@@ -213,10 +213,8 @@ public class ArduinoTest implements PinArrayListener {
 
 	@Test
 	public void testDisablePins() {
-		// reset
-
 		// enable 2 pins
-
+		
 		// verify we're not getting data
 	}
 
@@ -281,17 +279,15 @@ public class ArduinoTest implements PinArrayListener {
 
 	@Test
 	public void testEnablePinInt() {
+
 		// set board type
-		arduino.connect(port);
+		
 		arduino.enablePin(enablePin);
 		arduino.attach(this);
-	}
-
-	@Test
-	public void testEnablePinIntInt() {
-		arduino.connect(port);
-		arduino.enablePin(enablePin);
-
+		sleep(50);
+		assertTrue(pinData.containsKey(enablePin));
+		arduino.disablePin(enablePin);
+		
 	}
 
 	@Test
@@ -1006,11 +1002,15 @@ public class ArduinoTest implements PinArrayListener {
 	@Override
 	public void onPinArray(PinData[] pindata) {
 		log.info("onPinArray size {}", pindata.length);
+		for (int i = 0; i < pindata.length; ++i){
+			pinData.put(pindata[i].getAddress(),pindata[i]);
+		}
 	}
 
 	public static void main(String[] args) {
 		try {
-			LoggingFactory.init();
+			LoggingFactory.init("INFO");
+			
 			// Runtime.start("webgui", "WebGui");
 			// Runtime.start("gui", "GUIService");
 

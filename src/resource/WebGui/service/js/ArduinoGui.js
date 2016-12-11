@@ -104,7 +104,8 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         case 'onBoardStatus':
                 $scope.mrlComm.us = data.us;
                 $scope.mrlComm.sram = data.sram;
-                $scope.mrlComm.deviceCount = data.deviceCount;
+                $scope.mrlComm.deviceSummary = data.deviceSummary;
+                $scope.$apply();
             break;
         case 'onPin':
             break;
