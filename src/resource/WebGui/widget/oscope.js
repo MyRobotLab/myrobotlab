@@ -40,8 +40,8 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
             var maxY = height - margin;
             var scaleX = 1;
             var scaleY = 1;
-
-            scope.readWrite = 'read'; // button toggle read/write
+            scope.readWrite = 'read';
+            // button toggle read/write
             // scope.blah = {};
             // scope.blah.display = false;
             scope.pinIndex = {};
@@ -65,6 +65,8 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
             ]);
             scope.oscope = {};
             scope.oscope.traces = {};
+            scope.oscope.writeStates = {};
+            
             // display update interfaces
             // defintion stage
             var setTraceButtons = function(pinIndex) {
@@ -181,6 +183,10 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                 }
             }
             ;
+            scope.toggleReadWrite = function() {
+                scope.readWrite = (scope.readWrite == 'write') ? 'read' : 'write';
+            }
+            ;
             scope.clearScreen = function(pinArray) {
                 for (i = 0; i < pinArray.length; ++i) {
                     pinData = pinArray[i];
@@ -220,6 +226,22 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                 mrl.sendTo(name, 'disablePins');
             }
             ;
+            scope.write = function(pinDef) {
+                if (pinDef.charAt(0) == 'A') {
+                    toggleWriteButton(trace);
+                    mrl.sendTo(name, 'analogWrite', 1);
+                    trace.state = false;
+                } else {
+                    toggleWriteButton(trace);
+                    mrl.sendTo(name, 'digitalWrite', pinDef.address);
+                    trace.state = true;
+                }
+            }
+            ;
+            scope.reset = function() {
+                mrl.sendTo(name, 'disablePins');
+            }
+            ;
             var toggleReadButton = function(trace) {
                 var highlight = trace.color.getOriginalInput();
                 if (trace.state) {
@@ -239,8 +261,29 @@ angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log',
                         'background-color': newColor.toHexString()
                     };
                 }
-            }
-            ;
+            };
+
+            var toggleWriteButton = function(trace) {
+                var highlight = trace.color.getOriginalInput();
+                if (trace.state) {
+                    // scope.blah.display = false;
+                    // on to off
+                    highlight.s = "40%";
+                    var newColor = color = tinycolor(highlight);
+                    trace.readStyle = {
+                        'background-color': newColor.toHexString()
+                    };
+                } else {
+                    // scope.blah.display = true;
+                    // off to on
+                    highlight.s = "90%";
+                    var newColor = color = tinycolor(highlight);
+                    trace.readStyle = {
+                        'background-color': newColor.toHexString()
+                    };
+                }
+            };
+
             // FIXME FIXME FIXME ->> THIS SHOULD WORK subscribeToServiceMethod  <- but doesnt
             mrl.subscribeToService(_self.onMsg, name);
             // this siphons off a single subscribe to the webgui

@@ -7,9 +7,12 @@ import static org.myrobotlab.arduino.VirtualMsg.MRLCOMM_VERSION;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
@@ -44,6 +47,37 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 	// list of pins currently being read from - can contain both digital and
 	// analog
 	LinkedList<Pin> pinList = new LinkedList<Pin>();
+
+	class VirtualPin {
+		public VirtualPin(Pin pin) {
+			this.pin = pin;
+		}
+
+		Pin pin;
+		BlockingQueue<Integer> queue = new LinkedBlockingQueue<Integer>();
+		public void setValue(Integer value) {
+			pin.value = value;
+			try {
+				queue.put(value);
+			} catch (InterruptedException e) {}
+		}
+		public int getValue() {
+			return pin.value;
+		}
+		
+		public Integer getBlockingValue(int address, int timeout) {
+			try {
+				return queue.poll(timeout, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {}
+			return null;
+		}
+	}
+
+	/**
+	 * represents actual hardware resource pool to preserve state of the
+	 * hardware
+	 */
+	Map<Integer, VirtualPin> hardwarePins = new HashMap<Integer, VirtualPin>();
 
 	// MRLComm message buffer and current count from serial port ( MAGIC |
 	// MSGSIZE | FUNCTION | PAYLOAD ...
@@ -92,11 +126,16 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 
 	public class MrlNeopixel extends Device {
 
-		MrlNeopixel(int deviceId, int type) {
+		public MrlNeopixel(Integer deviceId) {
 			super(deviceId, Msg.DEVICE_TYPE_NEOPIXEL);
 		}
 
 		public void setAnimation(Integer animation, Integer red, Integer green, Integer blue, Integer speed) {
+			// TODO Auto-generated method stub
+
+		}
+
+		public void attach(Integer pin, Integer numPixels) {
 			// TODO Auto-generated method stub
 
 		}
@@ -273,6 +312,11 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 		uart = (Serial) createPeer("uart");
 		setBoardUno();
 		boardInfo.setVersion(MRLCOMM_VERSION);
+
+		for (int i = 0; i < 70; ++i) {
+			Pin pin = new Pin(i, 0, 0);
+			hardwarePins.put(i, new VirtualPin(pin));
+		}
 	}
 
 	public long micros() {
@@ -391,7 +435,7 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 	}
 
 	private Integer getFreeRam() {
-		return 925;
+		return 910 + getRandom(0, 20);
 	}
 
 	@Override
@@ -728,12 +772,24 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 	}
 
 	public void neoPixelAttach(Integer deviceId, Integer pin, Integer numPixels) {
-		// TODO Auto-generated method stub
-
+		MrlNeopixel neo = (MrlNeopixel) addDevice(new MrlNeopixel(deviceId));
+		neo.attach(pin, numPixels);
 	}
 
-	public void analogWrite(Integer pin, Integer value) {
-		log.info("analogWrite({}, {})", pin, value);
+	public void analogWrite(Integer address, Integer value) {
+		log.info("analogWrite({}, {})", address, value);
+		hardwarePins.get(address).setValue(value);
+	}
+
+	public Pin getPin(int address) {
+		for (int i = 0; i < pinList.size(); ++i) {
+			Pin pin = pinList.get(i);
+			if (pin.address == address) {
+				return pin;
+			}
+		}
+
+		return null;
 	}
 
 	public void digitalWrite(Integer pin, Integer value) {
@@ -931,6 +987,20 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 		} catch (Exception e) {
 			log.error("main threw", e);
 		}
+	}
+
+	public int read(int address) {
+		// Pin pin = getPin(address);
+		return hardwarePins.get(address).getValue();
+	}
+
+	public int readBlocking(int address, int timeout) {
+		// Pin pin = getPin(address);
+		return hardwarePins.get(address).getBlockingValue(address, timeout);
+	}
+
+	public void clearPinQueue(int address) {
+		hardwarePins.get(address).queue.clear();
 	}
 
 }

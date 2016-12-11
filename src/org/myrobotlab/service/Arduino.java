@@ -1396,7 +1396,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		log.info("publishPinArray {}", data);
 		// if subscribers -
 		// look for subscribed pins and publish them
-
+		
 		int pinDataCnt = data.length / 3;
 		PinData[] pinArray = new PinData[pinDataCnt];
 
@@ -1419,7 +1419,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 				}
 			}
 		}
-
+		
+		for (String name : pinArrayListeners.keySet()){
+			PinArrayListener pal = pinArrayListeners.get(name);
+			pal.onPinArray(pinArray);
+		}
 		return pinArray;
 	}
 
