@@ -295,7 +295,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 		installer.installSelectedLanguagesAndVoices(toInstall);
 		log.info("moving files to correct places ...");
 		File srcDir = new File(System.getProperty("mary.base") + "/lib");
-		File destDir = new File ("libaries/jar");
+		File destDir = new File ("libraries/jar");
 		try {
 			FileUtils.copyDirectory(srcDir, destDir);
 			log.info("finished marytts component installation");
