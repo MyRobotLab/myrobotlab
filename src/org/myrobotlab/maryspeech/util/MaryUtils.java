@@ -589,7 +589,7 @@ public class MaryUtils {
 			'\u00c2', 'A', // Ã‚
 			'\u00c3', 'A', // 
 			'\u00c5', 'A', // Ã…
-			//'\u00c6', 'Ã„', // Ã†
+			'\u00c6', '�', // Ã†
 			'\u00c7', 'C', // Ã‡
 			'\u00c8', 'E', // Ãˆ
 			'\u00c9', 'E', // Ã‰
@@ -604,7 +604,7 @@ public class MaryUtils {
 			'\u00d3', 'O', // Ã“
 			'\u00d4', 'O', // 
 			'\u00d5', 'O', // Ã•
-			//'\u00d8', 'Ã–', // Ã˜
+			'\u00d8', '�', // Ã˜
 			'\u00d9', 'U', // Ã™
 			'\u00da', 'U', // 
 			'\u00db', 'U', // Ã›
@@ -614,7 +614,7 @@ public class MaryUtils {
 			'\u00e2', 'a', // Ã¢
 			'\u00e3', 'a', // Ã£
 			'\u00e5', 'a', // Ã¥
-			//'\u00e6', 'Ã¤', // Ã¦
+			'\u00e6', '�', // Ã¦
 			'\u00e7', 'c', // Ã§
 			'\u00e8', 'e', // Ã¨
 			'\u00e9', 'e', // Ã©
@@ -629,7 +629,7 @@ public class MaryUtils {
 			'\u00f3', 'o', // Ã³
 			'\u00f4', 'o', // Ã´
 			'\u00f5', 'o', // 
-			//'\u00f8', 'Ã¶', // Ã¸
+			'\u00f8', '�', // Ã¸
 			'\u00f9', 'u', // Ã¹
 			'\u00fa', 'u', // 
 			'\u00fb', 'u', // Ã»
@@ -699,8 +699,8 @@ public class MaryUtils {
 			'\u00df', 's', // ÃŸ
 	};
 
-	protected static final char[] germanToAsciiLetterTable = new char[] { /**'Ã„',**/ 'A', /**'Ã–',**/ 'O', /**',**/ 'U', /**'Ã¤',**/ 'a', /**'Ã¶',**/ 'o', /**'Ã¼',**/
-			'u', /**'ÃŸ',**/ 's' };
+	protected static final char[] germanToAsciiLetterTable = new char[] { '�', 'A', '�', 'O', '�', 'U',  '�',  'a','�',  'o', '�',
+			'u', '�', 's' };
 
 	private static String normaliseUnicode(String unicodeText, char[] mappings) {
 		String result = unicodeText;
