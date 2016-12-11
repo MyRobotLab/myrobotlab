@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -12,8 +13,10 @@ import java.util.Set;
 import javax.sound.sampled.AudioInputStream;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -290,8 +293,16 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 		
 		log.info("starting marytts component installation:" + toInstall);
 		installer.installSelectedLanguagesAndVoices(toInstall);
-		log.info("finished marytts component installation");
-		log.info("PLEASE RESTART TO APPLY CHANGES !!!");
+		log.info("moving files to correct places ...");
+		File srcDir = new File(System.getProperty("mary.base") + "/lib");
+		File destDir = new File ("libaries/jar");
+		try {
+			FileUtils.copyDirectory(srcDir, destDir);
+			log.info("finished marytts component installation");
+			log.info("PLEASE RESTART TO APPLY CHANGES !!!");
+		} catch (IOException e) {
+			log.error("moving files FAILED!");
+		}
 	}
 
 	public static void main(String[] args) {
