@@ -43,7 +43,7 @@ public class NaturalReaderSpeech extends Service implements TextListener, Speech
   // TODO: natural reader has this voice.. there are others
   // but for now.. only Ryan is wired in.. it maps to voice id "33"
   public String voice = "Ryan";
- // public HashSet<String> voices = new HashSet<String>();
+  public HashMap<String, Integer> voiceMap = new HashMap<String,Integer>();
   transient AudioFile audioFile = null;
   // private float volume = 1.0f;
   transient CloseableHttpClient client;
@@ -69,6 +69,50 @@ public class NaturalReaderSpeech extends Service implements TextListener, Speech
     audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
     // needed because of an ssl error on the natural reader site
     System.setProperty("jsse.enableSNIExtension", "false");
+    
+    voiceMap.put("Mike",1);
+    voiceMap.put("Crystal",11);
+    voiceMap.put("Rich",13);
+    voiceMap.put("Ray",14);
+    voiceMap.put("Heather",26); 
+    voiceMap.put("Laura",17);
+    voiceMap.put("Lauren",17);
+    voiceMap.put("Ryan",33);
+    voiceMap.put("Peter",31);
+    voiceMap.put("Rachel",32);
+    voiceMap.put("Charles",2);
+    voiceMap.put("Audrey",3);
+    voiceMap.put("Graham",25);
+    voiceMap.put("Bruno",22);
+    voiceMap.put("Alice",21);
+    voiceMap.put("Alain",7);
+    voiceMap.put("Juliette",8); 
+    voiceMap.put("Klaus",28);
+    voiceMap.put("Sarah",35);
+    voiceMap.put("Reiner",5);
+    voiceMap.put("Klara",6);
+    voiceMap.put("Rose",20);
+    voiceMap.put("Alberto",19); 
+    voiceMap.put("Vittorio",36);
+    voiceMap.put("Chiara",23);
+    voiceMap.put("Anjali",4);
+    voiceMap.put("Arnaud",9);
+    voiceMap.put("Giovanni",10); 
+    voiceMap.put("Crystal",11);
+    voiceMap.put("Francesca",12);
+    voiceMap.put("Claire",15);
+    voiceMap.put("Julia",16);
+    voiceMap.put("Mel",18);
+    voiceMap.put("Juli",27);
+    voiceMap.put("Laura",29);
+    voiceMap.put("Lucy",30);
+    voiceMap.put("Salma",34);
+    voiceMap.put("Tracy",37);
+    voiceMap.put("Lulu",38);
+    voiceMap.put("Sakura",39);
+    voiceMap.put("Mehdi",40);
+
+    
   }
 
   public AudioFile getAudioFile() {
@@ -78,7 +122,12 @@ public class NaturalReaderSpeech extends Service implements TextListener, Speech
   @Override
   public ArrayList<String> getVoices() {
     // TODO:return the list of voices names for this.
+   
+    ArrayList<String> voices = new ArrayList<String>();
+    voices.addAll(voices);
     
+
+     
 //    Mike
 //    Crystal
 //    Ray
@@ -129,9 +178,12 @@ public class NaturalReaderSpeech extends Service implements TextListener, Speech
       // TODO Auto-generated catch block
       e.printStackTrace();
     }    
+    
+    int voiceId = voiceMap.get(voice);
+    
     // TODO: expose thge "r=33" as the selection for Ryans voice.
     // TOOD: also the speed setting is passed in as s= 
-    String url = "https://api.naturalreaders.com/v2/tts/?t=" + encoded + "&r=33&s=0";
+    String url = "https://api.naturalreaders.com/v2/tts/?t=" + encoded + "&r="+voiceId+"&s=0";
     log.info("URL FOR AUDIO:{}",url);
     return url;
   }
@@ -314,7 +366,10 @@ public class NaturalReaderSpeech extends Service implements TextListener, Speech
 
   @Override
   public boolean setVoice(String voice) {
-    // TODO this is ignored..  only Ryan is enabled currently.
+    if (voiceMap.containsKey(voice)) {
+      this.voice = voice;
+      return true;
+    }
     return false;
   }
 
@@ -347,7 +402,10 @@ public class NaturalReaderSpeech extends Service implements TextListener, Speech
 //       speech.getMP3ForSpeech("hello world");
       
       speech.speakBlocking("does this work");
+      
+      speech.setVoice("Lauren");
 
+      speech.speakBlocking("horray for worky!");
   
     //}
   }
