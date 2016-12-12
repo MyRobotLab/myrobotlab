@@ -36,10 +36,10 @@ MrlNeopixel::~MrlNeopixel() {
 
 bool MrlNeopixel::attach(byte pin, long numPixels) {
 	pixels = new Pixel[numPixels + 1];
-	if (BOARD == BOARD_TYPE_ID_UNKNOWN) { // REALLY ? WHY ?
-		msg->publishError(F("Board not supported"));
-		return false;
-	}
+	//if (BOARD == BOARD_TYPE_ID_UNKNOWN) { // REALLY ? WHY ?
+	//	msg->publishError(F("Board not supported"));
+	//	return false;
+	//}
 	state = 1;
 	bitmask = digitalPinToBitMask(pin);
 	pinMode(pin, OUTPUT);
@@ -49,6 +49,7 @@ bool MrlNeopixel::attach(byte pin, long numPixels) {
 		pixels[i] = pixel;
 	}
 	newData = true;
+  msg->publishDebug("Neopixel attached");
 	return true;
 }
 
@@ -655,6 +656,7 @@ void MrlNeopixel::setAnimation ( byte animation,  byte red,  byte green,  byte b
 	_step = 1;
 	_alpha = 50;
 	newData = true;
+  msg->publishDebug("Neopixel set Animation");
 }
 
 void MrlNeopixel::animationStop() {

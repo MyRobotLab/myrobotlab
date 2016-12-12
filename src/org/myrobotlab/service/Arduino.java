@@ -86,10 +86,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public transient static final int BOARD_TYPE_ID_MEGA = 1;
 	public transient static final int BOARD_TYPE_ID_UNO = 2;
 	public transient static final int BOARD_TYPE_ID_ADK_MEGA = 3;
+	public transient static final int BOARD_TYPE_ID_NANO = 4;
 
 	public transient static final String BOARD_TYPE_MEGA = "mega";
 	public transient static final String BOARD_TYPE_MEGA_ADK = "megaADK";
 	public transient static final String BOARD_TYPE_UNO = "uno";
+	public transient static final String BOARD_TYPE_NANO = "nano";
 
 	public static final int INPUT = 0x0;
 	public static final int OUTPUT = 0x1;
@@ -1078,6 +1080,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	// > neoPixelAttach/deviceId/pin/b32 numPixels
 	public void neoPixelAttach(NeoPixel neopixel, int pin, int numPixels) {
+		Integer deviceId = attachDevice(neopixel, new Object[] { pin, numPixels });
 		msg.neoPixelAttach(getDeviceId(neopixel)/* byte */, pin/* byte */, numPixels/* b32 */);
 	}
 	
