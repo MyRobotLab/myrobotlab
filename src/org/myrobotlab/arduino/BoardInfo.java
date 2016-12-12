@@ -39,6 +39,12 @@ public class BoardInfo {
 		case Arduino.BOARD_TYPE_ID_UNO:
 			boardName = Arduino.BOARD_TYPE_UNO;
 			break;
+		case Arduino.BOARD_TYPE_ID_NANO:
+			boardName = Arduino.BOARD_TYPE_NANO;
+			break;
+		case Arduino.BOARD_TYPE_ID_ADK_MEGA:
+			boardName = Arduino.BOARD_TYPE_MEGA_ADK;
+			break;
 		default:
 			boardName = "unknown";
 			break;
