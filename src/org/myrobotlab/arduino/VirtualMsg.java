@@ -251,7 +251,6 @@ public class VirtualMsg {
 	transient private VirtualArduino arduino;
 	
 	transient private SerialDevice serial;
-	public boolean debug;
 
 	/**
 	 * want to grab it when SerialDevice is created

@@ -85,11 +85,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
 	public transient static final int BOARD_TYPE_ID_MEGA = 1;
 	public transient static final int BOARD_TYPE_ID_UNO = 2;
-	public transient static final int BOARD_TYPE_ID_ADK_MEGA = 3;
+	public transient static final int BOARD_TYPE_ID_NANO = 3;
+	public transient static final int BOARD_TYPE_ID_ADK_MEGA = 4;
 
 	public transient static final String BOARD_TYPE_MEGA = "mega";
 	public transient static final String BOARD_TYPE_MEGA_ADK = "megaADK";
 	public transient static final String BOARD_TYPE_UNO = "uno";
+	public transient static final String BOARD_TYPE_NANO = "nano";
+	
 
 	public static final int INPUT = 0x0;
 	public static final int OUTPUT = 0x1;
@@ -129,19 +132,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 			LoggingFactory.init(Level.INFO);
 
-			/*
-			 * InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
-			 * VirtualDevice virtual = (VirtualDevice)Runtime.start("virtual",
-			 * "VirtualDevice"); virtual.createVirtualSerial("COM7");
-			 * 
-			 * String leftPort = "COM5"; String rightPort = "COM7";
-			 * i01.startAll(leftPort, rightPort);
-			 * 
-			 * InMoovTorso torso = i01.startTorso(leftPort);
-			 * i01.torso.topStom.detach(); i01.torso.topStom.attach("i01.left",
-			 * 49);
-			 */
-
 			Runtime.start("webgui", "WebGui");
 			Runtime.start("gui", "GUIService");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
@@ -153,9 +143,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			// log.info(arduino.getBoardType());
 			// if connect - possibly you can set the board type correctly
 			// arduino.getBoardInfo();
-			arduino.setBoardMega();
-			arduino.connect("COM4");
-			arduino.enablePin(54);
+			// arduino.setBoardMega();
+			arduino.connect("COM5");
+			// arduino.enablePin(54);
 
 			boolean done = true;
 			if (done) {
@@ -1648,16 +1638,31 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * @return
 	 */
 	public String setBoardMega() {
-		return setBoard(BOARD_TYPE_MEGA);
-	}
-
-	public String setBoardMegaADK() {
-		return setBoard(BOARD_TYPE_MEGA_ADK);
+		boardType = BOARD_TYPE_MEGA;
+		createPinList();
+		broadcastState();
+		return boardType;
 	}
 
 	public String setBoardUno() {
-		return setBoard(BOARD_TYPE_UNO);
+		boardType = BOARD_TYPE_UNO;
+		createPinList();
+		broadcastState();
+		return boardType;
 	}
+
+	public String setBoardNano() {
+		boardType = BOARD_TYPE_NANO;
+		createPinList();
+		broadcastState();
+		return boardType;
+	}
+    public String setBoardMegaADK() {
+      boardType = BOARD_TYPE_MEGA_ADK;
+       createPinList();
+      broadcastState();
+      return boardType;
+    }
 
 	/**
 	 * DeviceControl methods. In this case they represents the I2CBusControl Not
