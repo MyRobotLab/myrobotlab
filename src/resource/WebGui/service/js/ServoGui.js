@@ -5,8 +5,9 @@ angular.module('mrlapp.service.ServoGui', [])
     var msg = this.msg;
     
     // init
-    //$scope.controller = '';
-    $scope.controllerName = '';
+    // my controllers name
+    $scope.controllerName = 'HALLO';
+    // set of possible controllers
     $scope.controllers = [];
     $scope.isControllerSet = '';
     $scope.pinsList = [];
@@ -14,6 +15,16 @@ angular.module('mrlapp.service.ServoGui', [])
     $scope.min = 0;
     $scope.max = 180;
     $scope.angle = 0;
+    // $scope.email_notify_pref = { unit: 'hours', num: 1 };
+    $scope.email_notify_pref = 3600;
+
+    $scope.selectedController = {
+        controllerName:null
+    };
+    
+    $scope.onSelectItem = function(item, model, label) {
+        console.log(item);
+    };
     
     $scope.pinList = [];
     
@@ -78,6 +89,7 @@ angular.module('mrlapp.service.ServoGui', [])
     }
     ;
     
+    // initialize our state
     _self.updateState($scope.service);
     
     this.onMsg = function(inMsg) {
@@ -92,7 +104,6 @@ angular.module('mrlapp.service.ServoGui', [])
         // but perhaps its come to mean
         // feedback from the service.moveTo
         case 'onServoEvent':
-            //$scope.pin.value = data;
             $scope.posStatus.value = data;
             $scope.$apply();
             break;

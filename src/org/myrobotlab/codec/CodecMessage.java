@@ -14,27 +14,20 @@ public class CodecMessage implements Codec {
 
   public final static Logger log = LoggerFactory.getLogger(CodecMessage.class);
 
-  // private transient static Gson mapper = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
-  private transient static Gson mapper = new GsonBuilder().create();//.setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
+  // private transient static Gson mapper = new
+  // GsonBuilder().setDateFormat("yyyy-MM-dd
+  // HH:mm:ss.SSS").disableHtmlEscaping().create();
+  private transient static Gson mapper = new GsonBuilder().create();// .setDateFormat("yyyy-MM-dd
+                                                                    // HH:mm:ss.SSS").disableHtmlEscaping().create();
 
   public static final byte[] FQ_D = "d".getBytes();
 
   @Override
   public void encode(OutputStream out, Object obj) throws IOException {
-	  byte[] json = null;
-	 //  synchronized (mapper) { // GRRR .. GSON is NOT Thread Safe !
-	  // log.info("about to serialize a {}", obj.getClass().getCanonicalName());
-	  Message m = (Message)obj;
-	  if (m.data != null){
-	    log.error("method {} data {}", m.method, m.data[0]);
-	  } else {
-	    log.error("method {}", m.method);
-	  }
-	    json = mapper.toJson(obj).getBytes();
-	 //  }
+    byte[] json = null;
+   
+    json = mapper.toJson(obj).getBytes();
     out.write(json);
-    // jackson stream way !
-    // mapper.writeValue(out, obj);
   }
 
   @Override
@@ -43,7 +36,6 @@ public class CodecMessage implements Codec {
     String instr = (String) data;
     // array of Strings ? - don't want to double encode !
     Object[] ret = mapper.fromJson(instr, Object[].class);
-    // TODO Auto-generated method stub
     return ret;
   }
 
