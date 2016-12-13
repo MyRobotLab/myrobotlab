@@ -1035,7 +1035,7 @@ public class ArduinoTest implements PinArrayListener {
 
 			// arduino.setBoardUno(); always better to "not" set
 
-			// Runtime.start("webgui", "WebGui");
+			Runtime.start("webgui", "WebGui");
 			test.enablePin = (arduino.getBoardType().contains("mega")) ? 54 : 15; // A0
 																					// for
 																					// Mega

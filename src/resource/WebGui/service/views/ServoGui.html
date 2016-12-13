@@ -1,14 +1,6 @@
 <div class="col-lg-12">
   
-<service-query interface="org.myrobotlab.service.interfaces.ServoController" ng-model="controllerName" selection="controllerName"></service-query>
 
-  
-    <div>
-        Directive
-    <time-duration ng-model="test"></time-duration>
-        Sample bound input
-    <input ng-model="test">
-    </div>
     <rzslider rz-slider-model="pos.value" rz-slider-options="pos.options"/>
     <rzslider rz-slider-model="posStatus.value" style="rz-pointer-disabled" ng-show="service.isEventsEnabled" rz-slider-options="posStatus.options"/>
     {{controllerName}}
@@ -16,7 +8,8 @@
 
     <!-- simple dropdown -->
     <div class="input-group">
-        <span class="input-group-btn">
+    <service-query interface="org.myrobotlab.service.interfaces.ServoController" ng-model="controllerName" selection="controllerName"></service-query>
+        <span class="input-group-btn">            
             <button class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">attach</button>
         </span>
         <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
