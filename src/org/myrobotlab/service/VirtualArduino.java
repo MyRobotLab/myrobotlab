@@ -714,7 +714,7 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 		loopCount = 0;
 		publishBoardStatusModulus = 10000;
 		boardStatusEnabled = false;
-		msg.debug = false;
+		// msg.debug = false;
 		heartbeatEnabled = false;
 		lastHeartbeatUpdate = 0;
 		for (int i = 0; i < MAX_MSG_SIZE; i++) {
@@ -792,9 +792,9 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 		return null;
 	}
 
-	public void digitalWrite(Integer pin, Integer value) {
-		// TODO Auto-generated method stub
-
+	public void digitalWrite(Integer address, Integer value) {
+		log.info("analogWrite({}, {})", address, value);
+		hardwarePins.get(address).setValue(value);
 	}
 
 	public void disablePin(Integer pinAddress) {

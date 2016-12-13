@@ -59,7 +59,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 46;
+	public static final int MRLCOMM_VERSION = 47;
 
 	// ------ device type mapping constants
 	
@@ -251,7 +251,6 @@ public class VirtualMsg {
 	transient private VirtualArduino arduino;
 	
 	transient private SerialDevice serial;
-	public boolean debug;
 
 	/**
 	 * want to grab it when SerialDevice is created

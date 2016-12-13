@@ -39,6 +39,12 @@ public class BoardInfo {
 		case Arduino.BOARD_TYPE_ID_UNO:
 			boardName = Arduino.BOARD_TYPE_UNO;
 			break;
+		case Arduino.BOARD_TYPE_ID_ADK_MEGA:
+			boardName = Arduino.BOARD_TYPE_MEGA_ADK;
+			break;
+		case Arduino.BOARD_TYPE_ID_NANO:
+			boardName = Arduino.BOARD_TYPE_NANO;
+			break;
 		default:
 			boardName = "unknown";
 			break;
@@ -78,6 +84,8 @@ public class BoardInfo {
 			boardId = Arduino.BOARD_TYPE_ID_ADK_MEGA;
 		} else if(Arduino.BOARD_TYPE_UNO.equals(board)){
 			boardId = Arduino.BOARD_TYPE_ID_UNO;
+		} else if(Arduino.BOARD_TYPE_NANO.equals(board)){
+			boardId = Arduino.BOARD_TYPE_ID_NANO;
 		} else {
 			boardId = Arduino.BOARD_TYPE_ID_UNKNOWN;
 		}

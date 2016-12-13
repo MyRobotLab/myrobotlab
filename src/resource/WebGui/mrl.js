@@ -381,6 +381,18 @@ angular
     this.isUndefinedOrNull = function(val) {
         return angular.isUndefined(val) || val === null ;
     }
+
+    this.getServicesFromInterface = function(interface){
+       var ret = [];
+       for (var name in registry){
+           var service = registry[name];
+            // see if a service has the same input interface
+            if (!angular.isUndefined(service.interfaceSet[interface])){
+                ret.push(registry[name]);
+            }
+       } 
+       return ret;
+    }
     
     this.getService = function(name) {
         if (this.isUndefinedOrNull(registry[name])) {
@@ -768,6 +780,9 @@ angular
             },
             getRuntime: function() {
                 return _self.runtime;
+            },
+            getServicesFromInterface: function(name) {
+                return _self.getServicesFromInterface(name);
             },
             getService: function(name) {
                 return _self.getService(name);
