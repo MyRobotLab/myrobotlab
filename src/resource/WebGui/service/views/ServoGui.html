@@ -5,8 +5,9 @@
 
    <!-- simple dropdown -->
   <div class="input-group">
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-      <a href id="simple-dropdown" uib-dropdown-toggle>controller<span class="caret"></span></a>
+  <service-query interface="org.myrobotlab.service.interfaces.ServoController" ng-disabled="isControllerSet"></service-query>
+  <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">attach</button></span>
+  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">controller
       <ul uib-dropdown-menu>
         <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)"><a href>{{possibleController}}</a></li>
       </ul>
@@ -24,8 +25,8 @@
    <input type="text" class="form-control" ng-model="pin" ng-disabled="isControllerSet"><!-- FIXME - type-ahead -->  
      
    <span class="input-group-btn">
-         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach</button>
-         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName, pin, pos.value)">attach</button>
+         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach pin</button>
+         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName, pin, pos.value)">attach pin</button>
    </span>
   </div>
 

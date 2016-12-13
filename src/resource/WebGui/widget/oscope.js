@@ -19,7 +19,7 @@
           *  list dependencies
 
 */
-angular.module('mrlapp.service').directive('oscope', ['$compile', 'mrl', '$log', function($compile, mrl, $log) {
+angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mrl, $log) {
     return {
         restrict: "E",
         templateUrl: 'widget/oscope.html',
