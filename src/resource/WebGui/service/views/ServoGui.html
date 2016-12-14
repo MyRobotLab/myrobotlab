@@ -3,24 +3,16 @@
 
     <rzslider rz-slider-model="pos.value" rz-slider-options="pos.options"/>
     <rzslider rz-slider-model="posStatus.value" style="rz-pointer-disabled" ng-show="service.isEventsEnabled" rz-slider-options="posStatus.options"/>
-    {{controllerName}}
+    {{controllerName}} {{selection}}
   
 
     <!-- simple dropdown -->
     <div class="input-group">
-    <service-query interface="org.myrobotlab.service.interfaces.ServoController" ng-model="controllerName" selection="controllerName"></service-query>
-        <span class="input-group-btn">            
-            <button class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">attach</button>
-        </span>
-        <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-            controller
-            
-            <ul uib-dropdown-menu>
-                <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)">
-                    <a href>{{possibleController}}</a>
-                </li>
-            </ul>
-        </span>
+    <service-query interface="org.myrobotlab.service.interfaces.ServoController" select="setSelectedController(name)" ng-model="possibleController"></service-query>
+    <span class="input-group-btn">            
+       <button class="btn btn-default" ng-show="!isConnected" ng-click="setControllerName(possibleController)">attach</button>
+    </span>
+        
         <input type="text" class="form-control" ng-model="controllerName" ng-disabled="isControllerSet">
         <!-- FIXME - type-ahead -->
         <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">

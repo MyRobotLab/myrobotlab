@@ -9,42 +9,29 @@ angular.module('mrlapp.service').directive('serviceQuery', ['mrl', '$log', funct
         restrict: "E",
         template: tpl,
         require: 'ngModel',
-        // replace: true,
+        // define isolated scope bindings with parent bindings
         scope: {
             // serviceName: '@',
             interface: '@',
-            selection: '='
+            select: "&" // callback after a typeahead is selected
         },
-        // scope: true,
+        controller: function($scope) {
+            $scope.onSelect = function(item, model, label) {
+                $scope.item = item;
+                $scope.controllerName = label;
+                $scope.model = model;
+                $scope.label = label;
+                $scope.selection = label;
+                $scope.select({
+                    name: $scope.label
+                });
+            }
+        },
+        // build up typeahead with query to the registry for 
+        // services which implement applicable interfaces
         link: function(scope, iElement, iAttrs, ngModelCtrl) {
-            var _self = this;
             var interface = scope.interface;
-            // _self.ngModelCtrl = ngModelCtrl;
             scope.services = mrl.getServicesFromInterface(interface);
-            scope.onSelect = function(item, model, label) {
-                scope.$item = item;
-                scope.controllerName = label;
-                scope.$model = model;
-                scope.$label = label;
-                $log.info('here');
-                $log.info(_self.ngModelCtrl);
-                scope.controllerName = c;
-            }
-            scope.ngModelOptionsSelected = function(value) {
-                if (arguments.length) {
-                    _selected = value;
-                } else {
-                    return _selected;
-                }
-            }
-            ;
-            // FIXME FIXME FIXME ->> THIS SHOULD WORK subscribeToServiceMethod  <- but doesnt
-            // mrl.subscribeToService(_self.onMsg, name);
-            // this siphons off a single subscribe to the webgui
-            // so it will be broadcasted back to angular
-            // mrl.subscribe(name, 'publishPinArray');
-            // mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray');
-            // initializing display data      
         }
     };
 }

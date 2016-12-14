@@ -7,6 +7,7 @@ angular.module('mrlapp.service.ServoGui', [])
     // init
     // my controllers name
     $scope.controllerName = 'HALLO';
+    $scope.possibleController = 'DOH';
     // set of possible controllers
     $scope.controllers = [];
     $scope.isControllerSet = '';
@@ -17,6 +18,8 @@ angular.module('mrlapp.service.ServoGui', [])
     $scope.angle = 0;
     // $scope.email_notify_pref = { unit: 'hours', num: 1 };
     $scope.email_notify_pref = 3600;
+
+    $scope.selection = 'oldController';
 
     $scope.selectedController = {
         controllerName:null
@@ -152,6 +155,10 @@ angular.module('mrlapp.service.ServoGui', [])
     // for some reason Js resolved msg.sweep(null, null, null, null) :P
     $scope.sweep = function() {
         msg.send('sweep');
+    }
+
+    $scope.setSelectedController=function(name){
+        $log.info('setSelectedController - ' + name);
     }
 
     msg.subscribe("publishServoEvent");
