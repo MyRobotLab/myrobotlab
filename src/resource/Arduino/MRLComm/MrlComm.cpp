@@ -185,6 +185,7 @@ int MrlComm::getCustomMsgSize() {
 }
 
 void MrlComm::processCommand() {
+  
 	msg->processCommand();
 	if (ackEnabled) {
 		msg->publishAck(msg->getMethod());
@@ -360,6 +361,8 @@ void MrlComm::i2cWriteRead(byte deviceId, byte deviceAddress, byte readSize, byt
 
 // > neoPixelAttach/pin/b16 numPixels
 void MrlComm::neoPixelAttach(byte deviceId, byte pin, long numPixels) {
+       //msg->publishDebug("MrlNeopixel.deviceAttach !!!");
+
 	MrlNeopixel* neo = (MrlNeopixel*) addDevice(new MrlNeopixel(deviceId));
  msg->publishDebug("id"+String(deviceId));
 	neo->attach(pin, numPixels);
@@ -367,6 +370,7 @@ void MrlComm::neoPixelAttach(byte deviceId, byte pin, long numPixels) {
 
 // > neoPixelAttach/pin/b16 numPixels
 void MrlComm::neoPixelSetAnimation(byte deviceId, byte animation, byte red, byte green, byte blue, int speed) {
+  msg->publishDebug("MrlNeopixel.setAnimation!!!");
 	((MrlNeopixel*) getDevice(deviceId))->setAnimation(animation, red, green, blue, speed);
 }
 
@@ -505,3 +509,16 @@ void MrlComm::ultrasonicSensorStopRanging(byte deviceId) {
 	MrlUltrasonicSensor* sensor = (MrlUltrasonicSensor*)getDevice(deviceId);
 	sensor->stopRanging();
 }
+
+unsigned int MrlComm::getCustomMsg() {
+   if (customMsgSize == 0) {
+     return 0;
+   }
+   int retval = customMsg[0];
+   for (int i = 0; i < customMsgSize-1; i++) {
+     customMsg[i] = customMsg[i+1];
+   }
+   customMsg[customMsgSize] = 0;
+   customMsgSize--;
+   return retval;
+ }
