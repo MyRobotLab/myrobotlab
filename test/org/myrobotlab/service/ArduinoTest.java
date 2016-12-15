@@ -55,7 +55,7 @@ public class ArduinoTest implements PinArrayListener {
 	static Serial uart = null;
 
 	int servoPin = 6;
-	int enablePin = 15;
+	String enablePin = "A1";
 	int writeAddress = 6;
 	
 	Map<Integer, PinData> pinData = new HashMap<Integer, PinData>();
@@ -279,15 +279,12 @@ public class ArduinoTest implements PinArrayListener {
 
 	@Test
 	public void testEnablePinInt() {
-
 		// set board type
-		
 		arduino.enablePin(enablePin);
 		arduino.attach(this);
 		sleep(50);
-		assertTrue(pinData.containsKey(enablePin));
+		assertTrue(pinData.containsKey(arduino.getAddress(enablePin)));
 		arduino.disablePin(enablePin);
-		
 	}
 
 	@Test
@@ -1011,7 +1008,7 @@ public class ArduinoTest implements PinArrayListener {
 		try {
 			LoggingFactory.init("INFO");
 			
-			// Runtime.start("webgui", "WebGui");
+			Runtime.start("webgui", "WebGui");
 			// Runtime.start("gui", "GUIService");
 
 			// test a "real" arduino
@@ -1029,23 +1026,20 @@ public class ArduinoTest implements PinArrayListener {
 				virtual.connect(port);
 			}
 			arduino.connect(port);
+			
+			Servo servo01 = (Servo)Runtime.start("servo", "Servo");
+			
+		   boolean b = true;
+	      if (b) {
+	        return;
+	      }
 
 			test.testGetVersion();
 			test.testServoAttachServoInteger();
-
-			// arduino.setBoardUno(); always better to "not" set
-
-			Runtime.start("webgui", "WebGui");
-			test.enablePin = (arduino.getBoardType().contains("mega")) ? 54 : 15; // A0
-																					// for
-																					// Mega
 			test.testEnableBoardStatus();
 			test.testEnablePinInt();
 
-			boolean b = true;
-			if (b) {
-				return;
-			}
+	
 
 			// test specific method
 			test.testServoAttachServoInteger();
@@ -1055,7 +1049,7 @@ public class ArduinoTest implements PinArrayListener {
 			Result result = junit.run(ArduinoTest.class);
 			log.info("Result was: {}", result);
 
-			Runtime.dump();
+			// Runtime.dump();
 
 		} catch (Exception e) {
 			Logging.logError(e);

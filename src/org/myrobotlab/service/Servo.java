@@ -213,6 +213,11 @@ public class Servo extends Service implements ServoControl {
 
 	private int maxVelocity = 0;
 
+	// GroG says,
+	// FIXME - do "final" refactor with attachPin/detachPin and
+	// only use controllerName to determine service to service attach !!!
+	// to determine if a service is attached is ->  controllerName != null
+	// to determine if a pin is attached is isPinAttached
 	private boolean isAttached = false;
 	private boolean isControllerSet = false;
 

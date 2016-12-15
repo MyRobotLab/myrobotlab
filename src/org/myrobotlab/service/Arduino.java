@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -505,7 +504,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     if (boardType != null && boardType.toLowerCase().contains("mega")) {
       for (int i = 0; i < 70; ++i) {
         PinDefinition pindef = new PinDefinition();
-        String name = null;
+        String pinName = null;
         if (i == 0) {
           pindef.setRx(true);
         }
@@ -513,24 +512,24 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
           pindef.setTx(true);
         }
         if (i < 1 || (i > 13 && i < 54)) {
-          name = String.format("D%d", i);
+          pinName = String.format("D%d", i);
           pindef.setDigital(true);
         } else if (i > 53) {
-          name = String.format("A%d", i - 54);
+          pinName = String.format("A%d", i - 54);
           pindef.setAnalog(true);
         } else {
-          name = String.format("D%d", i);
+          pinName = String.format("D%d", i);
           pindef.setPwm(true);
         }
-        pindef.setName(name);
+        pindef.setName(pinName);
         pindef.setAddress(i);
-        pinMap.put(name, pindef);
+        pinMap.put(pinName, pindef);
         pinIndex.put(i, pindef);
       }
     } else {
       for (int i = 0; i < 20; ++i) {
         PinDefinition pindef = new PinDefinition();
-        String name = null;
+        String pinName = null;
         if (i == 0) {
           pindef.setRx(true);
         }
@@ -538,19 +537,19 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
           pindef.setTx(true);
         }
         if (i < 14) {
-          name = String.format("D%d", i);
+          pinName = String.format("D%d", i);
           pindef.setDigital(true);
         } else {
           pindef.setAnalog(true);
-          name = String.format("A%d", i - 14);
+          pinName = String.format("A%d", i - 14);
         }
         if (i == 3 || i == 5 || i == 6 || i == 9 || i == 10 || i == 11) {
           pindef.setPwm(true);
-          name = String.format("D%d", i);
+          pinName = String.format("D%d", i);
         }
-        pindef.setName(name);
+        pindef.setName(pinName);
         pindef.setAddress(i);
-        pinMap.put(String.format("A%d", i), pindef);
+        pinMap.put(pinName, pindef);
         pinIndex.put(i, pindef);
       }
     }
@@ -652,6 +651,16 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // > enablePin/address/type/b16 rate
   public void enablePin(int address) {
     enablePin(address, 0);
+  }
+  
+  public void enablePin(String address){
+    PinDefinition pd = pinMap.get(address);
+    enablePin(pd.getAddress());
+  }
+  
+  public void disablePin(String address){
+    PinDefinition pd = pinMap.get(address);
+    disablePin(pd.getAddress());
   }
 
   /**
@@ -1388,6 +1397,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // caching last value
     pinIndex.get(pinData.getAddress()).setValue(pinData.getValue());
     return pinData;
+  }
+  
+  public Integer getAddress(String pinName){
+    if (pinMap.containsKey(pinName)){
+      return pinMap.get(pinName).getAddress();
+    }
+    return null;
   }
 
   // < publishPinArray/[] data
