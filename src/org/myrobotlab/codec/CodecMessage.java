@@ -3,7 +3,6 @@ package org.myrobotlab.codec;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -24,12 +23,6 @@ public class CodecMessage implements Codec {
 	  byte[] json = null;
 	 //  synchronized (mapper) { // GRRR .. GSON is NOT Thread Safe !
 	  // log.info("about to serialize a {}", obj.getClass().getCanonicalName());
-	  Message m = (Message)obj;
-	  if (m.data != null){
-	    log.error("method {} data {}", m.method, m.data[0]);
-	  } else {
-	    log.error("method {}", m.method);
-	  }
 	    json = mapper.toJson(obj).getBytes();
 	 //  }
     out.write(json);

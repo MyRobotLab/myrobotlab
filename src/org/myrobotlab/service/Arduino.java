@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.BoardInfo;
@@ -131,11 +130,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.ERROR);
+      LoggingFactory.init(Level.INFO);
 
       Runtime.start("webgui", "WebGui");
-      // Runtime.start("gui", "GUIService");
-      // Runtime.start("python", "Python");
+      Runtime.start("gui", "GUIService");
+      Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       Serial serial = arduino.getSerial();
       // Runtime.start("gui", "GUIService");
@@ -202,7 +201,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    */
   public String arduinoPath;
 
-  transient Map<Integer, Arduino> attachedController = new ConcurrentHashMap<Integer, Arduino>();
+  transient HashMap<Integer, Arduino> attachedController = new HashMap<Integer, Arduino>();
 
   /**
    * board info "from" MrlComm - which can be different from what the user say's
@@ -226,13 +225,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   /**
    * id reference of sensor, key is the MRLComm device id
    */
-  transient Map<Integer, DeviceMapping> deviceIndex = new ConcurrentHashMap<Integer, DeviceMapping>();
+  transient HashMap<Integer, DeviceMapping> deviceIndex = new HashMap<Integer, DeviceMapping>();
 
   /**
    * Devices - string name index of device we need 2 indexes for sensors because
    * they will be referenced by name OR by index
    */
-  transient Map<String, DeviceMapping> deviceList = new ConcurrentHashMap<String, DeviceMapping>();
+  transient HashMap<String, DeviceMapping> deviceList = new HashMap<String, DeviceMapping>();
 
   int error_arduino_to_mrl_rx_cnt = 0;
 
@@ -252,7 +251,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   volatile int i2cDataSize;
 
-  Map<String, I2CDeviceMap> i2cDevices = new ConcurrentHashMap<String, I2CDeviceMap>();
+  HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
   transient int[] ioCmd = new int[MAX_MSG_SIZE];
 
@@ -262,7 +261,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   Integer nextDeviceId = 0;
   int numAck = 0;
-  transient Map<String, PinArrayListener> pinArrayListeners = new ConcurrentHashMap<String, PinArrayListener>();
+  transient Map<String, PinArrayListener> pinArrayListeners = new HashMap<String, PinArrayListener>();
 
   /**
    * the definitive sequence of pins - "true address"
@@ -272,7 +271,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   /**
    * map of pin listeners
    */
-  transient Map<Integer, List<PinListener>> pinListeners = new ConcurrentHashMap<Integer, List<PinListener>>();
+  transient Map<Integer, List<PinListener>> pinListeners = new HashMap<Integer, List<PinListener>>();
 
   /**
    * pin named map of all the pins on the board
@@ -410,7 +409,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     } else {
       info("%s connected on %s %s responded version %s ... goodtimes...", serial.getName(), controller.getName(), serialPort, version);
     }
-// GAP    broadcastState();
+    broadcastState();
   }
 
   // @Calamity - I like your method signature - but I think it
@@ -492,7 +491,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       error(e.getMessage());
     }
 
-// GAP    broadcastState();
+    broadcastState();
   }
 
   public void controllerAttach(Arduino controller, int serialPort) {
@@ -501,8 +500,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   public Map<String, PinDefinition> createPinList() {
-    pinMap = new ConcurrentHashMap<String, PinDefinition>();
-    pinIndex = new ConcurrentHashMap<Integer, PinDefinition>();
+    pinMap = new HashMap<String, PinDefinition>();
+    pinIndex = new HashMap<Integer, PinDefinition>();
 
     if (boardType != null && boardType.toLowerCase().contains("mega")) {
       for (int i = 0; i < 70; ++i) {
@@ -1293,10 +1292,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   // < publishBoardInfo/version/boardType
   public BoardInfo publishBoardInfo(Integer version/* byte */, Integer boardType/* byte */) {
-    boolean broadcast = false;
-    if (version != boardInfo.getVersion() || boardType != boardInfo.getBoardType()){
-      broadcast = true;
-    }
     boardInfo.setVersion(version);
     boardInfo.setType(boardType);
 
@@ -1312,10 +1307,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     synchronized (boardInfo) {
       boardInfo.notifyAll();
-    }
-    
-    if (broadcast){
-      broadcastState();
     }
 
     return boardInfo;
@@ -1635,7 +1626,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     log.info("setting board to type {}", board);
     this.boardType = board;
     createPinList();
-    // broadcastState();
+    broadcastState();
     return board;
   }
 
