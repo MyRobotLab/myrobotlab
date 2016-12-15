@@ -9,7 +9,7 @@
  * 							src\resource\Arduino\generate\ArduinoMsgCodec.template.h
  */
 
-#define MRLCOMM_VERSION			47
+#define MRLCOMM_VERSION			48
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
@@ -143,6 +143,7 @@
 #define BOARD_TYPE_ID_UNO     	2
 #define BOARD_TYPE_ID_MEGA_ADK	3
 #define BOARD_TYPE_ID_NANO     	4
+#define BOARD_TYPE_ID_PRO_MINI	5
 
 #if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
   #define BOARD BOARD_TYPE_ID_MEGA
@@ -152,6 +153,8 @@
   #define BOARD BOARD_TYPE_ID_MEGA_ADK
 #elif defined(ARDUINO_AVR_NANO)
   #define BOARD BOARD_TYPE_ID_NANO
+#elif defined(ARDUINO_AVR_PRO)
+  #define BOARD BOARD_TYPE_ID_PRO_MINI
 #else
   #define BOARD BOARD_TYPE_ID_UNKNOWN
 #endif
