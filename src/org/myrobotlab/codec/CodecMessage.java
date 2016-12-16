@@ -3,7 +3,6 @@ package org.myrobotlab.codec;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -27,6 +26,7 @@ public class CodecMessage implements Codec {
     byte[] json = null;
    
     json = mapper.toJson(obj).getBytes();
+
     out.write(json);
   }
 

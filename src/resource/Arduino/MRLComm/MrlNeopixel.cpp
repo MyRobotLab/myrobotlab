@@ -35,11 +35,14 @@ MrlNeopixel::~MrlNeopixel() {
 }
 
 bool MrlNeopixel::attach(byte pin, long numPixels) {
+  // msg->publishDebug("MrlNeopixel.deviceAttach !!!" + String(pin));
 	pixels = new Pixel[numPixels + 1];
 	//if (BOARD == BOARD_TYPE_ID_UNKNOWN) { // REALLY ? WHY ?
 	//	msg->publishError(F("Board not supported"));
 	//	return false;
 	//}
+ this->pin = pin;
+ this->numPixel = numPixels;
 	state = 1;
 	bitmask = digitalPinToBitMask(pin);
 	pinMode(pin, OUTPUT);
@@ -49,7 +52,7 @@ bool MrlNeopixel::attach(byte pin, long numPixels) {
 		pixels[i] = pixel;
 	}
 	newData = true;
-  msg->publishDebug("Neopixel attached");
+  //msg->publishDebug("Neopixel attached");
 	return true;
 }
 
@@ -462,6 +465,7 @@ inline void MrlNeopixel::sendBitE(bool bitVal) {
 }
 
 inline void MrlNeopixel::sendBitA(bool bitVal) {
+  //msg->publishDebug("MrlNeopixel.deviceAttach !!!");
 	//Serial.println(bitmask);
 	uint8_t bit=bitmask;
 	if (bitVal) {        // 0 bit
@@ -560,6 +564,7 @@ inline void MrlNeopixel::sendBitD(bool bitVal) {
 }
 
 inline void MrlNeopixel::sendByte(unsigned char byte) {
+  //msg->publishDebug("MrlNeopixel.sendByte !!!");
 	for (unsigned char bit = 0; bit < 8; bit++) {
 		bool val = bitRead(byte, 7);
 		digitalPinToSendBit(pin, val);
@@ -570,12 +575,14 @@ inline void MrlNeopixel::sendByte(unsigned char byte) {
 }
 
 inline void MrlNeopixel::sendPixel(Pixel p) {
+ // msg->publishDebug("MrlNeopixel.sendPixel !!!");
 	sendByte(p.green); // Neopixel wants colors in green then red then blue order
 	sendByte(p.red);
 	sendByte(p.blue);
 }
 
 void MrlNeopixel::show() {
+  //msg->publishDebug("MrlNeopixel.show !!!");
 	if (!state)
 		return;
 	//be sure we wait at least 6ms before sending new data
@@ -656,7 +663,7 @@ void MrlNeopixel::setAnimation ( byte animation,  byte red,  byte green,  byte b
 	_step = 1;
 	_alpha = 50;
 	newData = true;
-  msg->publishDebug("Neopixel set Animation");
+ // msg->publishDebug("Neopixel set Animation" + String(animation));
 }
 
 void MrlNeopixel::animationStop() {
@@ -815,6 +822,7 @@ void MrlNeopixel::animationFlashRandom() {
 }
 
 void MrlNeopixel::animationIronman() {
+  //msg->publishDebug("MrlNeopixel.animation Ironman !!!");
 	if (!((_count++) % _speed)) {
 		int flip = random(32);
 		if (flip > 22)

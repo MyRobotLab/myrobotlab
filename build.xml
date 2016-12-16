@@ -584,7 +584,7 @@
 
 		<echo>compile start</echo>
 		<!-- compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}/classes" debug="true" includeantruntime="false">			
+		<javac srcdir="${src}" destdir="${build}/classes" debug="true" includeantruntime="false" encoding="UTF-8">
 			<!-- exclude name="org/myrobotlab/service/ExcludeBrokenFile.java" / --> 
 			<exclude name="org/myrobotlab/opencv/OpenCVFilterMotionTemplate.java"/> 	
 			<exclude name="resource/**"/> 
@@ -688,7 +688,7 @@
 	<!-- compile the unit tests prior to running them. -->
 	<target name="compiletests" depends="compile" description="compile the test source ">
 		<echo>compile tests start</echo>
-		<javac srcdir="test" destdir="build/test" debug="true" includeantruntime="false">
+		<javac srcdir="test" destdir="build/test" debug="true" includeantruntime="false" encoding="UTF-8">
 			<classpath>
 				<path refid="test.classpath" />
 				<path refid="compile.classpath" />

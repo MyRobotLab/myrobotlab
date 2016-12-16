@@ -45,6 +45,9 @@ public class BoardInfo {
 		case Arduino.BOARD_TYPE_ID_NANO:
 			boardName = Arduino.BOARD_TYPE_NANO;
 			break;
+		case Arduino.BOARD_TYPE_ID_PRO_MINI:
+			boardName = Arduino.BOARD_TYPE_PRO_MINI;
+			break;
 		default:
 			boardName = "unknown";
 			break;
@@ -86,6 +89,8 @@ public class BoardInfo {
 			boardId = Arduino.BOARD_TYPE_ID_UNO;
 		} else if(Arduino.BOARD_TYPE_NANO.equals(board)){
 			boardId = Arduino.BOARD_TYPE_ID_NANO;
+		} else if(Arduino.BOARD_TYPE_PRO_MINI.equals(board)){
+			boardId = Arduino.BOARD_TYPE_ID_PRO_MINI;
 		} else {
 			boardId = Arduino.BOARD_TYPE_ID_UNKNOWN;
 		}

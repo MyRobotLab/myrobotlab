@@ -87,11 +87,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public transient static final int BOARD_TYPE_ID_UNO = 2;
   public transient static final int BOARD_TYPE_ID_ADK_MEGA = 3;
   public transient static final int BOARD_TYPE_ID_NANO = 4;
+  public transient static final int BOARD_TYPE_ID_PRO_MINI = 5;
 
   public transient static final String BOARD_TYPE_MEGA = "mega";
   public transient static final String BOARD_TYPE_MEGA_ADK = "megaADK";
   public transient static final String BOARD_TYPE_UNO = "uno";
   public transient static final String BOARD_TYPE_NANO = "nano";
+  public transient static final String BOARD_TYPE_PRO_MINI = "pro mini";
 
   public static final int INPUT = 0x0;
   public static final int OUTPUT = 0x1;
@@ -128,11 +130,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.ERROR);
+      LoggingFactory.init(Level.INFO);
 
       Runtime.start("webgui", "WebGui");
-      // Runtime.start("gui", "GUIService");
-      // Runtime.start("python", "Python");
+      Runtime.start("gui", "GUIService");
+      Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       Serial serial = arduino.getSerial();
       // Runtime.start("gui", "GUIService");
