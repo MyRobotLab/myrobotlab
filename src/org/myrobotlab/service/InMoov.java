@@ -134,7 +134,8 @@ public class InMoov extends Service {
   boolean useEyesForTracking = false;
 
   // static String speechService = "MarySpeech";
-  static String speechService = "AcapelaSpeech";
+  // static String speechService = "AcapelaSpeech";
+  static String speechService = "NaturalReaderSpeech";
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   public InMoov(String n) {
