@@ -10,7 +10,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 /**
@@ -27,7 +26,7 @@ public class Sweety extends Service {
   transient public Arduino arduino;
   transient public WebkitSpeechRecognition ear;
   transient public WebGui webGui;
-  transient public SpeechSynthesis mouth;
+  transient public MarySpeech mouth;
   transient public Tracking leftTracker;
   transient public Tracking rightTracker;
   transient public ProgramAB chatBot;
@@ -520,6 +519,13 @@ public class Sweety extends Service {
     delaytimestop = d2;
     delaytimeletter = d3;
   }
+  
+  public void setLanguage(String lang){
+	  mouth.setLanguage(lang);
+  }
+  public void setVoice(String voice){
+	  mouth.setVoice(voice);
+  }
 
   @Override
   public void startService() {
@@ -528,9 +534,7 @@ public class Sweety extends Service {
     arduino = (Arduino) startPeer("arduino");
     chatBot = (ProgramAB) startPeer("chatBot");
     htmlFilter = (HtmlFilter) startPeer("htmlFilter");
-    mouth = (SpeechSynthesis) startPeer("mouth");
-    mouth.setLanguage("FR");
-    mouth.setVoice("Antoine");
+    mouth = (MarySpeech) startPeer("mouth");
     ear = (WebkitSpeechRecognition) startPeer("ear");
     webGui = (WebGui) startPeer("webGui");
     subscribe(mouth.getName(), "publishStartSpeaking");
@@ -752,7 +756,7 @@ public class Sweety extends Service {
 
     // put peer definitions in
     meta.addPeer("arduino", "Arduino", "arduino");
-    meta.addPeer("mouth", "AcapelaSpeech", "sweetys mouth");
+    meta.addPeer("mouth", "MarySpeech", "sweetys mouth");
     meta.addPeer("ear", "WebkitSpeechRecognition", "ear");
     meta.addPeer("chatBot", "ProgramAB", "chatBot");
     meta.addPeer("leftTracker", "Tracking", "leftTracker");

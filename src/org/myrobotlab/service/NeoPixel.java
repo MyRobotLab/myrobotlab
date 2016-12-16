@@ -304,7 +304,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
 	@Override
 	public void attach(NeoPixelController controller, int pin, int numPixel) throws Exception {
-		subscribe(controller.getName(), "publishAttachedDevice");
+		//subscribe(controller.getName(), "publishAttachedDevice");
 		this.pin = pin;
 		this.numPixel = numPixel;
 
@@ -368,27 +368,27 @@ public class NeoPixel extends Service implements NeoPixelControl {
 		LoggingFactory.init(Level.INFO);
 
 		try {
-			WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+			//WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
 			// webgui.autoStartBrowser(false);
-			webgui.startService();
+			//webgui.startService();
 			Runtime.start("gui", "GUIService");
 			Runtime.start("python", "Python");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.arduinoPath = "C:\\Program Files (x86)\\Arduino";
 			arduino.setBoardMega();
 			arduino.connect("COM15");
-			// Arduino arduino1 = (Arduino) Runtime.start("arduino1",
-			// "Arduino");
+			arduino.setDebug(true);
+			Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
 			// arduino1.setBoardUno();
-			// arduino1.connect(arduino, "Serial1");
+			 arduino1.connect(arduino, "Serial1");
 			// //arduino.setDebug(true);
 			NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
 			// webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-			neopixel.attach(arduino, 29, 16);
+			neopixel.attach(arduino1, 3, 16);
 			// sleep(50);
 			//PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
 			//neopixel.setPixel(pix);
-			//neopixel.setAnimation(NEOPIXEL_ANIMATION_IRONMAN, 255, 0, 0, 1);
+			neopixel.setAnimation(NEOPIXEL_ANIMATION_IRONMAN, 255, 0, 0, 1);
 			// arduino.setLoadTimingEnabled(true);
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
 			servo.attach(arduino, 5);
