@@ -824,7 +824,7 @@ public class ArduinoTest implements PinArrayListener {
 		assertTrue(arduino.getDeviceNames().contains(servo.getName()));
 		
 		// detach it
-		arduino.deviceDetach(servo);
+		arduino.detach(servo);
 		
 		// verify its detached
 		assertFalse(arduino.getDeviceNames().contains(servo.getName()));
@@ -856,7 +856,7 @@ public class ArduinoTest implements PinArrayListener {
 		}
 
 		// can we attach to a different pin?
-		servo.attach(servoPin + 1);		
+		servo.attachPin(servoPin + 1);		
 		if (virtual != null) {
 			sleep(100);
 			assertTrue(mrlServo.pin == servoPin + 1);
@@ -872,7 +872,7 @@ public class ArduinoTest implements PinArrayListener {
 		}
 
 		// attach to the correct pin again
-		servo.attach(servoPin);
+		servo.attachPin(servoPin);
 		servo.moveTo(30);
 		servo.moveTo(130);
 		servo.moveTo(30);
@@ -892,7 +892,7 @@ public class ArduinoTest implements PinArrayListener {
 		// assertEquals("servoWrite/7/0\n", uart.decode());
 
 		// detach
-		servo.detach();
+		servo.detachPin();
 		// assertEquals("servoDetach/7/0\n", uart.decode());
 
 		servo.moveTo(10);

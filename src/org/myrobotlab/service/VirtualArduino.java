@@ -1003,4 +1003,14 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 		hardwarePins.get(address).queue.clear();
 	}
 
+  public void servoAttachPin(Integer deviceId, Integer pin) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public void servoDetachPin(Integer deviceId) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

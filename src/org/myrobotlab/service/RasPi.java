@@ -312,7 +312,7 @@ public class RasPi extends Service implements I2CController {
 	}
 
 	@Override
-	public void deviceDetach(DeviceControl device) {
+	public void detach(DeviceControl device) {
 		// clean up if necessary
 	}
 

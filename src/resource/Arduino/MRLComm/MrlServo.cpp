@@ -34,14 +34,14 @@ bool MrlServo::attach(byte pin, byte initPos, int initVelocity){
 }
 
 // This method is equivalent to Arduino's Servo.attach(pin) - (no pos)
-void MrlServo::enablePwm(int pin){
+void MrlServo::attachPin(int pin){
   this->pin = pin;
   servo->attach(pin);
   servo->write((int)currentPos); //return to it's last know state (may be 0 if currentPos is not set)
   // TODO-KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
 }
 
-void MrlServo::disablePwm(){
+void MrlServo::detachPin(){
   servo->detach();
 }
 

@@ -26,7 +26,9 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -379,7 +381,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	 */
 	@Override
 	public void attach() {
-		attach(pin);
+		attachPin(pin);
 		broadcastState();
 	}
 
@@ -388,7 +390,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	 * pulses to maintain its current position.
 	 */
 	@Override
-	public void attach(int pin) {
+	public void attachPin(int pin) {
 		// TODO Activate the motor and PID
 		lastActivityTime = System.currentTimeMillis();
 		isAttached = true;
@@ -400,7 +402,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	 */
 	@Override
 	// TODO DeActivate the motor and PID
-	public void detach() {
+	public void detachPin() {
 		if (controller != null) {
 			controller.motorStop((MotorControl) this);
 		}
@@ -472,6 +474,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		return rest;
 	}
 
+	// FIXME - change to isPinAttached()
 	public boolean isAttached() {
 		return isAttached;
 	}
@@ -551,7 +554,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 
 	@Override
 	public void releaseService() {
-		detach();
+		detachPin();
 		super.releaseService();
 	}
 
@@ -559,6 +562,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		moveTo(rest);
 	}
 
+	/*
 	@Override
 	public void setController(DeviceController controller) {
 		if (controller == null) {
@@ -573,6 +577,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		this.controllerName = controller.getName();
 		broadcastState();
 	}
+	*/
 
 	/*
 	 * (non-Javadoc)
@@ -965,12 +970,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public void unsetController() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void setPin(int pin) {
 		this.pin = pin;
 	}
@@ -996,5 +995,19 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		// TODO Auto-generated method stub
 
 	}
+
+  @Override
+  public boolean isAttached(String name) {
+    return (controller != null && controller.getName().equals(name));
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
 
 }

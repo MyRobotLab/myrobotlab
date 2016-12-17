@@ -37,7 +37,7 @@ public interface ServoController extends DeviceController {
 	/**
 	 * Arduino's servo.attach(pin) which is just energizing on a pin
 	 */
-	void servoAttach(ServoControl servo, int pin);
+	void servoAttachPin(ServoControl servo, int pin);
 
 	void servoSweepStart(ServoControl servo);
 
@@ -47,7 +47,7 @@ public interface ServoController extends DeviceController {
 
 	void servoWriteMicroseconds(ServoControl servo, int uS);
 
-	void servoDetach(ServoControl servo);
+	void servoDetachPin(ServoControl servo);
 
 	void servoSetMaxVelocity(ServoControl servo);
 

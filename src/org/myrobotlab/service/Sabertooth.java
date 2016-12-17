@@ -333,12 +333,12 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 		return meta;
 	}
 
-	public void motorAttach(MotorControl motor, int portNumber) {
+	public void motorAttach(MotorControl motor, int portNumber) throws Exception {
 		MotorData data = new MotorData();
 		data.motor = motor;
 		data.portNumber = portNumber;
 		motors.put(motor.getName(), data);
-		motor.setController(this);
+		motor.attach(this);
 	}
 
 	///////////// start new methods /////////////////
@@ -436,7 +436,7 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 	}
 
 	@Override
-	public void deviceDetach(DeviceControl device) {
+	public void detach(DeviceControl device) {
 		motors.remove(device);
 	}
 

@@ -174,12 +174,12 @@ public class Plantoid extends Service {
 		 * pan.setController(arduino); tilt.setController(arduino);
 		 * 
 		 */
-		arduino.servoAttach(leg1, 2);
-		arduino.servoAttach(leg2, 3);
-		arduino.servoAttach(leg3, 4);
-		arduino.servoAttach(leg4, 5);
-		arduino.servoAttach(pan, 6);
-		arduino.servoAttach(tilt, 7);
+		arduino.servoAttachPin(leg1, 2);
+		arduino.servoAttachPin(leg2, 3);
+		arduino.servoAttachPin(leg3, 4);
+		arduino.servoAttachPin(leg4, 5);
+		arduino.servoAttachPin(pan, 6);
+		arduino.servoAttachPin(tilt, 7);
 
 		pan.setRest(90);
 		tilt.setRest(90);
@@ -246,10 +246,10 @@ public class Plantoid extends Service {
 	 * detaches the legs only
 	 */
 	public void detachLegs() {
-		leg1.detach();
-		leg2.detach();
-		leg3.detach();
-		leg4.detach();
+		leg1.detachPin();
+		leg2.detachPin();
+		leg3.detachPin();
+		leg4.detachPin();
 	}
 
 	// ------- servos begin -----------
@@ -258,8 +258,8 @@ public class Plantoid extends Service {
 	 * detaches the pan tilt only
 	 */
 	public void detachPanTilt() {
-		pan.detach();
-		tilt.detach();
+		pan.detachPin();
+		tilt.detachPin();
 	}
 
 	/**

@@ -110,19 +110,19 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   public void detach() {
     if (bicep != null) {
-      bicep.detach();
+      bicep.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (rotate != null) {
-      rotate.detach();
+      rotate.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (shoulder != null) {
-      shoulder.detach();
+      shoulder.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (omoplate != null) {
-      omoplate.detach();
+      omoplate.detachPin();
     }
   }
 

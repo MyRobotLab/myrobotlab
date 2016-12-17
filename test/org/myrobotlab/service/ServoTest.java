@@ -147,7 +147,7 @@ public class ServoTest {
 		servo01.moveTo(30);
 		servo01.moveTo(130);
 		
-		servo01.detach();
+		servo01.detachPin();
 
 		// no move after detach test
 		servo01.moveTo(30);
@@ -187,7 +187,7 @@ public class ServoTest {
 		servo02.moveTo(30);
 		servo02.moveTo(130);
 		
-		servo02.detach();
+		servo02.detachPin();
 		servo02.moveTo(30);
 		servo02.moveTo(130);
 		servo02.moveTo(30);
@@ -213,8 +213,8 @@ public class ServoTest {
 		*/
 
 		// servo detach
-		servo01.detach();
-		servo02.detach();
+		servo01.detachPin();
+		servo02.detachPin();
 
 		// should re-attach
 		// with the same pin & pos

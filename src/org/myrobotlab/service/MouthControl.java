@@ -61,7 +61,7 @@ public class MouthControl extends Service {
     }
 
     // arduino.servoAttach(jaw);
-    arduino.servoAttach(jaw, 26);
+    arduino.servoAttachPin(jaw, 26);
     return true;
   }
 
@@ -158,7 +158,7 @@ public class MouthControl extends Service {
     if (autoAttach && jaw != null) {
       if (jaw.isAttached()) {
         // attach the jaw if it's not attached.
-        jaw.detach();
+        jaw.detachPin();
       }
     }
   }

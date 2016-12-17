@@ -1,13 +1,13 @@
 <!-- begin status and control for board to be viewed in above all tabs -->
 
 		<div class="col-lg-8">
-		<port service-name="{{service.serial.name}}" ng-model="formPort" ></port>		
-			     <select ng-model="boardType" ng-change="onBoardChange(boardType)" class="form-control">
-					<option>uno</option>
-					<option>mega</option>
-					<option>megaADK</option>
-					<option>nano</option>
-				</select>    
+		<port id="{{service.name + 'port'}}" port-test="{{service.name}}" service-name="{{service.serial.name}}"></port>		
+		 <select ng-model="boardType" ng-change="onBoardChange(boardType)" class="form-control">
+			<option>uno</option>
+			<option>mega</option>
+			<option>megaADK</option>
+			<option>nano</option>
+		</select>    
 		</div>	
 	  <div class="col-md-4">
 	  </div>			

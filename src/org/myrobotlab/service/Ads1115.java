@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -453,10 +454,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
 
-	@Override
-	public void setController(DeviceController controller) {
-		setController(controller);
-	}
 
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
@@ -863,10 +860,24 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		return ((int) readbuffer[0]) << 8 | (int) (readbuffer[1] & 0xff);
 	}
 
-	@Override
-	public boolean isAttached() {
-		return isAttached;
-	}
+  /**
+   * GOOD DESIGN - this method is the same pretty much for all Services
+   * could be a Java 8 default implementation to the interface
+   */
+  @Override
+  public boolean isAttached(String name) {
+    return (controller != null && controller.getName().equals(name));
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
+
 
 	@Override
 	public List<PinDefinition> getPinList() {
@@ -1065,5 +1076,15 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		setSampleRate(rate);
 		enablePin(address);
 	}
+	
+	 // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
 
 }

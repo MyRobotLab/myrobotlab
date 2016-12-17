@@ -179,18 +179,18 @@ public class Sweety extends Service {
    * detach the servos from arduino pins
    */
   public void detach() {
-    rightForearm.detach();
-    leftForearm.detach();
-    rightShoulder.detach();
-    leftShoulder.detach();
-    rightArm.detach();
-    leftArm.detach();
-    neckTilt.detach();
-    neckPan.detach();
-    rightHand.detach();
-    rightWrist.detach();
-    leftHand.detach();
-    leftWrist.detach();
+    rightForearm.detachPin();
+    leftForearm.detachPin();
+    rightShoulder.detachPin();
+    leftShoulder.detachPin();
+    rightArm.detachPin();
+    leftArm.detachPin();
+    neckTilt.detachPin();
+    neckPan.detachPin();
+    rightHand.detachPin();
+    rightWrist.detachPin();
+    leftHand.detachPin();
+    leftWrist.detachPin();
   }
 
   // TODO Correct the head function for new head
@@ -632,8 +632,8 @@ public class Sweety extends Service {
     rightTracker.opencv.stopCapture();
     leftTracker.releaseService();
     rightTracker.releaseService();
-    arduino.servoAttach(neckTilt, 39);
-    arduino.servoAttach(neckPan, 40);
+    arduino.servoAttachPin(neckTilt, 39);
+    arduino.servoAttachPin(neckPan, 40);
 
     saying("the tracking if stopped.");
   }

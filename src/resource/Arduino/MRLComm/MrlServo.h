@@ -30,8 +30,8 @@ class MrlServo : public Device {
     MrlServo(int deviceId);
     ~MrlServo();
     bool attach(byte pin, byte initPos, int initVelocity);
-    void enablePwm(int pin);
-    void disablePwm();
+    void attachPin(int pin);
+    void detachPin();
     void update();
     void servoWrite(int position);
     void servoWriteMicroseconds(int position);

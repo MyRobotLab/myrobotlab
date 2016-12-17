@@ -27,6 +27,7 @@ import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates7;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -5024,11 +5025,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	}
 
 	@Override
-	public void setController(DeviceController controller) {
-		setController(controller);
-	}
-
-	@Override
 	public Orientation publishOrientation(Orientation data) {
 		return data;
 	}
@@ -5059,5 +5055,29 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	public void detach(OrientationListener listener) {
 		listeners.remove(listener);
 	}
+
+	 // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
+
+  @Override
+  public boolean isAttached(String name) {
+    return (controller != null && controller.getName().equals(name));
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
 
 }

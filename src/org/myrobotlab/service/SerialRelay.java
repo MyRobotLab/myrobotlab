@@ -1,5 +1,8 @@
 package org.myrobotlab.service;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -106,13 +109,6 @@ public class SerialRelay extends Service implements SerialDevice, DeviceControl 
     }
   }
 
-  @Override
-  public void setController(DeviceController controller) {
-    // TODO Auto-generated method stub
-    if (!isAttached()) {
-      attach((Arduino)controller, listener, controllerAttachAs);
-    }
-  }
 
   @Override
   public DeviceController getController() {
@@ -120,18 +116,19 @@ public class SerialRelay extends Service implements SerialDevice, DeviceControl 
   }
 
   @Override
-  public boolean isAttached() {
-    if (controller != null && controller.isConnected() && controller.getDeviceId(this) != null) {
-      return true;
-    }
-    return false;
+  public boolean isAttached(String name) {
+    return (controller != null && controller.getName().equals(name));
   }
 
   @Override
-  public void unsetController() {
-    controller.deviceDetach(this);
-    controller = null;
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
   }
+
 
   public int[] onSerialData(SerialRelayData data) {
     if (data.deviceId == controller.getDeviceId(this)){
@@ -143,6 +140,16 @@ public class SerialRelay extends Service implements SerialDevice, DeviceControl 
       return data.data;
     }
     return new int[0];//new byte[] {0};
+  }
+  
+  // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
   }
 
 }

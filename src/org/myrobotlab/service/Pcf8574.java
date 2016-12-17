@@ -228,11 +228,6 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
 
-	@Override
-	public void setController(DeviceController controller) {
-		setController(controller);
-	}
-
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
@@ -325,9 +320,8 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		return ((int) readbuffer[0]) & 0xff;
 	}
 
-	@Override
 	public boolean isAttached() {
-		return isAttached;
+		return controller != null;
 	}
 
 	@Override
@@ -562,5 +556,27 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	 // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
+
+  @Override
+  public boolean isAttached(String name) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

@@ -1,8 +1,9 @@
 package org.myrobotlab.service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -10,12 +11,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.DeviceControl;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
-import org.myrobotlab.service.interfaces.VoltageSensorControl;
 import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.myrobotlab.service.interfaces.VoltageSensorControl;
 import org.slf4j.Logger;
 
 //import com.pi4j.io.i2c.I2CBus;
@@ -114,10 +113,6 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
 	
-	@Override
-	public void setController(DeviceController controller) {
-		setController(controller);
-	}
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
@@ -294,9 +289,44 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 	}
 
 	@Override
-	public boolean isAttached() {
-		// TODO Auto-generated method stub
-		return isAttached;
+	public boolean isAttached(String name) {
+		for (int i = 0; i < controllers.size(); ++i){
+		  if (controllers.get(i).equals(name)){
+		    return true;
+		  }
+		}
+		return (name.equals(controllerName));
 	}
+	
+	 // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    for (int i = 0; i < controllers.size(); ++i){
+      ret.add(controllers.get(i));
+    }
+    if (controllerName != null){
+      ret.add(controllerName);
+    }
+    return ret;
+  }
+
+  /**
+   * valid for a control or controller which can only have a single
+   * other service attached
+   * @return
+   */
+  public boolean isAttached() {
+    return (controller != null);
+  }
 
 }

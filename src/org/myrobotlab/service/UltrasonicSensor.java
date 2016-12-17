@@ -194,17 +194,15 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
 		return type;
 	}
 
-	@Override
-	public void setController(DeviceController controller) {
-		this.controller = (UltrasonicSensorController) controller;
-		broadcastState();
-	}
-
-	@Override
-	public void unsetController() {
-		this.controller = null;
-		broadcastState();
-	}
+  // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
 
 	public Integer onUltrasonicSensorData(Integer rawData) {
 		// data comes in 'raw' and leaves as Range
@@ -288,8 +286,17 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
 	}
 
 	@Override
-	public boolean isAttached() {
+	public boolean isAttached(String name) {
 		return controller != null;
 	}
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
 
 }

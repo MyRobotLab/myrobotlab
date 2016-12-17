@@ -97,23 +97,23 @@ public class InMoovHead extends Service {
   public void detach() {
     sleep(InMoov.attachPauseMs);
     if (rothead != null) {
-      rothead.detach();
+      rothead.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (neck != null) {
-      neck.detach();
+      neck.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (eyeX != null) {
-      eyeX.detach();
+      eyeX.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (eyeY != null) {
-      eyeY.detach();
+      eyeY.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (jaw != null) {
-      jaw.detach();
+      jaw.detachPin();
     }
   }
 
@@ -235,11 +235,11 @@ public class InMoovHead extends Service {
     jaw.setPin(jawPin);
     */
 
-    arduino.servoAttach(rothead, headXPin);
-    arduino.servoAttach(neck, headYPin);
-    arduino.servoAttach(eyeX, eyeXPin);
-    arduino.servoAttach(eyeY, eyeYPin);
-    arduino.servoAttach(jaw, jawPin);
+    arduino.servoAttachPin(rothead, headXPin);
+    arduino.servoAttachPin(neck, headYPin);
+    arduino.servoAttachPin(eyeX, eyeXPin);
+    arduino.servoAttachPin(eyeY, eyeYPin);
+    arduino.servoAttachPin(jaw, jawPin);
 
   }
 

@@ -218,7 +218,7 @@ public class ServoGUI extends ServiceGUI implements ActionListener {
 						pinList.setSelectedItem(servoPin);
 				}
 
-				if (servo.isControllerSet()) {
+				if (servo.isAttached()) {
 					attachButton.setText("detach");
 					controller.setEnabled(false);
 					pinList.setEnabled(false);

@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -262,12 +263,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	}
 
 	@Override
-	public void setController(DeviceController controller) {
-		setController(controller);
-	}
-
-	@Override
-	public void deviceDetach(DeviceControl device) {
+	public void detach(DeviceControl device) {
 		// clean up if necessary
 	}
 
@@ -280,5 +276,29 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	public Set<String> getDeviceNames() {
 		return i2cDevices.keySet();
 	}
+	
+	 // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
+
+  @Override
+  public boolean isAttached(String name) {
+    return (controller != null && controller.getName().equals(name));
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
 
 }

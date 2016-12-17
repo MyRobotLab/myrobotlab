@@ -42,7 +42,7 @@ angular.module('mrlapp.service').directive('serviceQuery', ['mrl', '$log', funct
         },
         // build up typeahead with query to the registry for 
         // services which implement applicable interfaces
-        link: function(scope, iElement, iAttrs, ngModelCtrl) {
+        link: function(scope, iElement, attrs, ngModelCtrl) {
 
             // builds appropriate list of services which it can 'attach' to
             var interface = scope.interface;

@@ -54,9 +54,7 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl {
 	
 	public boolean isAttached(ServoController controller);
 
-	// should this be in Device Control - its not "ServoControl" specific
 	void detach(ServoController controller);
-	void detach(String controllerName);
 
 	/**
 	 * VERY DIFFERENT FROM SERVICE ATTACHEMENT !!!
@@ -76,20 +74,19 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl {
 	public void setVelocity(Integer velocity);
 
 	/**
-	 * Re-attaches (re-energizes) the servo on its current pin FIXME - should be
-	 * renamed to energize(pin)
-	 * 
+	 * Re-attaches (re-energizes) the servo on its current pin
 	 * @return
 	 */
-	public void attach(int pin);
+	public void attachPin(int pin);
 
 	/**
-	 * calls Servo.detach() on MRLComm FIXME - should be renamed to de-energize
-	 * (heh .. hyphons :P)
+	 * changed from detach to 
+	 * detachPin to stop the confusion of detaching
+	 * a controller vs a pin
 	 * 
 	 * @return
 	 */
-	public void detach();
+	public void detachPin();
 
 	/**
 	 * limits input of servo - to prevent damage or problems if servos should
