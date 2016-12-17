@@ -8,7 +8,7 @@ public interface DeviceController extends NameProvider {
 	// and 'typed' attach
 	// void deviceAttach(DeviceControl device, Object... conf) throws Exception;
 
-	void deviceDetach(DeviceControl device);
+	void detach(DeviceControl device);
 	
 	/**
 	 * @return - the current count of devices its controlling

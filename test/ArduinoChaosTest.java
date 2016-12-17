@@ -97,7 +97,7 @@ public class ArduinoChaosTest {
     Thread.sleep(1000);
     servo.setSpeed(0);
     Thread.sleep(1000);
-    arduino.servoDetach(servo);
+    arduino.servoDetachPin(servo);
     Thread.sleep(1000);
     arduino.enableBoardStatus(true);
     Thread.sleep(1000);

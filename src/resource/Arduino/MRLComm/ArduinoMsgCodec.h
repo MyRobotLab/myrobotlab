@@ -102,10 +102,10 @@
 #define SET_DEBOUNCE 38
 // > servoAttach/deviceId/pin/initPos/b16 initVelocity
 #define SERVO_ATTACH 39
-// > servoEnablePwm/deviceId/pin
-#define SERVO_ENABLE_PWM 40
-// > servoDisablePwm/deviceId
-#define SERVO_DISABLE_PWM 41
+// > servoAttachPin/deviceId/pin
+#define SERVO_ATTACH_PIN 40
+// > servoDetachPin/deviceId
+#define SERVO_DETACH_PIN 41
 // > servoSetMaxVelocity/deviceId/b16 maxVelocity
 #define SERVO_SET_MAX_VELOCITY 42
 // > servoSetVelocity/deviceId/b16 velocity

@@ -2,7 +2,10 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -596,11 +599,6 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     return meta;
   }
 
-
-  @Override
-  public void setController(DeviceController controller) {
-    setController(controller);
-  }
   public boolean begin() {
     return begin(OperationMode.NDOF);
   }
@@ -1674,4 +1672,33 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 		i2cWrite(register.SYS_TRIGGGER, sys_trigger);
 		isActive = false;
 	}
+	
+	 // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
+
+  /**
+   * GOOD DESIGN - this method is the same pretty much for all Services
+   * could be a Java 8 default implementation to the interface
+   */
+  @Override
+  public boolean isAttached(String name) {
+    return (controller != null && controller.getName().equals(name));
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
+
 }

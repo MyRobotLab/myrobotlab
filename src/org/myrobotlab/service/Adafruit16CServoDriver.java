@@ -11,6 +11,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -296,11 +297,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
 
-	@Override
-	public void setController(DeviceController controller) {
-		setController(controller);
-	}
-
 	public boolean setController(I2CController controller, String deviceBus, String deviceAddress) {
 		if (controller == null) {
 			error("setting null as controller");
@@ -319,15 +315,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		isControllerSet = true;
 		broadcastState();
 		return true;
-	}
-
-	@Override
-	public void unsetController() {
-		controller = null;
-		this.deviceBus = null;
-		this.deviceAddress = null;
-		isControllerSet = false;
-		broadcastState();
 	}
 
 	@Override
@@ -607,8 +594,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		invoke("publishAttachedDevice", motor.getName());
 	}
 
-	public void deviceDetach(DeviceControl servo) {
-		servoDetach((ServoControl) servo);
+	public void detach(DeviceControl servo) {
+		servoDetachPin((ServoControl) servo);
 		servoMap.remove(servo.getName());
 	}
 
@@ -621,7 +608,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * 
 	 */
 	@Override
-	public void servoAttach(ServoControl servo, int pin) {
+	public void servoAttachPin(ServoControl servo, int pin) {
 		servoWrite(servo);
 	}
 
@@ -629,7 +616,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * Stop sending pulses to the servo, relax
 	 */
 	@Override
-	public void servoDetach(ServoControl servo) {
+	public void servoDetachPin(ServoControl servo) {
 		int pin = servo.getPin();
 		setPWM(pin, 4096, 0);
 	}
@@ -858,5 +845,43 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public Set<String> getDeviceNames() {
 		return servoMap.keySet();
 	}
+
+  /**
+   * we can only have one controller for this control
+   * - so it's easy - just detach
+   */
+ 
+  // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+    this.deviceBus = null;
+    this.deviceAddress = null;
+    isControllerSet = false;
+    broadcastState();
+  }
+  
+  /**
+   * GOOD DESIGN - this method is the same pretty much for all Services
+   * could be a Java 8 default implementation to the interface
+   */
+  @Override
+  public boolean isAttached(String name) {
+    return (controller != null && controller.getName().equals(name));
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
+
 
 }

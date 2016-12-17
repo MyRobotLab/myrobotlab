@@ -1,8 +1,17 @@
 package org.myrobotlab.service;
 
+import static org.myrobotlab.service.data.OledSsd1306Data.FONT;
+import static org.myrobotlab.service.data.OledSsd1306Data.SSD1306_128_32Data;
+import static org.myrobotlab.service.data.OledSsd1306Data.SSD1306_128_64Data;
+import static org.myrobotlab.service.data.OledSsd1306Data.SSD1306_96_16Data;
+
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -14,14 +23,6 @@ import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-
-import static org.myrobotlab.service.data.OledSsd1306Data.SSD1306_128_64Data;
-import static org.myrobotlab.service.data.OledSsd1306Data.SSD1306_128_32Data;
-import static org.myrobotlab.service.data.OledSsd1306Data.SSD1306_96_16Data;
-import static org.myrobotlab.service.data.OledSsd1306Data.FONT;
-
 import org.slf4j.Logger;
 
 /**
@@ -943,13 +944,30 @@ public class OledSsd1306 extends Service implements I2CControl {
 	}
 
 	@Override
-	public void setController(DeviceController controller) {
-		log.error("Method void setController(DeviceController controller) in OledSsd1306 not implemented");
+	public boolean isAttached(String name) {
+		return (controller != null && controller.getName().equals(name));
 	}
+	
+	 // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
 
-	@Override
-	public boolean isAttached() {
-		return isControllerSet;
-	}
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    for (int i = 0; i < controllers.size(); ++i){
+      ret.add(controllers.get(i));
+    }
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
 
 }

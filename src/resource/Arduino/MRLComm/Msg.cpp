@@ -108,10 +108,10 @@ Msg* Msg::getInstance() {
 	void setDebounce( byte pin,  byte delay);
 	// > servoAttach/deviceId/pin/initPos/b16 initVelocity
 	void servoAttach( byte deviceId,  byte pin,  byte initPos,  int initVelocity);
-	// > servoEnablePwm/deviceId/pin
-	void servoEnablePwm( byte deviceId,  byte pin);
-	// > servoDisablePwm/deviceId
-	void servoDisablePwm( byte deviceId);
+	// > servoAttachPin/deviceId/pin
+	void servoAttachPin( byte deviceId,  byte pin);
+	// > servoDetachPin/deviceId
+	void servoDetachPin( byte deviceId);
 	// > servoSetMaxVelocity/deviceId/b16 maxVelocity
 	void servoSetMaxVelocity( byte deviceId,  int maxVelocity);
 	// > servoSetVelocity/deviceId/b16 velocity
@@ -483,18 +483,18 @@ void Msg::processCommand() {
 			mrlComm->servoAttach( deviceId,  pin,  initPos,  initVelocity);
 			break;
 	}
-	case SERVO_ENABLE_PWM: { // servoEnablePwm
+	case SERVO_ATTACH_PIN: { // servoAttachPin
 			byte deviceId = ioCmd[startPos+1]; // bu8
 			startPos += 1;
 			byte pin = ioCmd[startPos+1]; // bu8
 			startPos += 1;
-			mrlComm->servoEnablePwm( deviceId,  pin);
+			mrlComm->servoAttachPin( deviceId,  pin);
 			break;
 	}
-	case SERVO_DISABLE_PWM: { // servoDisablePwm
+	case SERVO_DETACH_PIN: { // servoDetachPin
 			byte deviceId = ioCmd[startPos+1]; // bu8
 			startPos += 1;
-			mrlComm->servoDisablePwm( deviceId);
+			mrlComm->servoDetachPin( deviceId);
 			break;
 	}
 	case SERVO_SET_MAX_VELOCITY: { // servoSetMaxVelocity

@@ -101,7 +101,7 @@ public class Pingdar extends Service {
     // publishRange --> onRange
     sensor.addRangeListener(this);
     servo.addServoEventListener(this);
-    arduino.servoAttach(servo, servoPin);
+    arduino.servoAttachPin(servo, servoPin);
     
     return true;
   }

@@ -102,8 +102,8 @@
 # http://myrobotlab.org/service/Servo
 
 > servoAttach/deviceId/pin/initPos/b16 initVelocity
-> servoEnablePwm/deviceId/pin
-> servoDisablePwm/deviceId
+> servoAttachPin/deviceId/pin
+> servoDetachPin/deviceId
 > servoSetMaxVelocity/deviceId/b16 maxVelocity
 > servoSetVelocity/deviceId/b16 velocity
 > servoSweepStart/deviceId/min/max/step

@@ -158,10 +158,10 @@ public class Msg {
 	public final static int SET_DEBOUNCE = 38;
 	// > servoAttach/deviceId/pin/initPos/b16 initVelocity
 	public final static int SERVO_ATTACH = 39;
-	// > servoEnablePwm/deviceId/pin
-	public final static int SERVO_ENABLE_PWM = 40;
-	// > servoDisablePwm/deviceId
-	public final static int SERVO_DISABLE_PWM = 41;
+	// > servoAttachPin/deviceId/pin
+	public final static int SERVO_ATTACH_PIN = 40;
+	// > servoDetachPin/deviceId
+	public final static int SERVO_DETACH_PIN = 41;
 	// > servoSetMaxVelocity/deviceId/b16 maxVelocity
 	public final static int SERVO_SET_MAX_VELOCITY = 42;
 	// > servoSetVelocity/deviceId/b16 velocity
@@ -1205,16 +1205,16 @@ public class Msg {
 	  }
 	}
 
-	public void servoEnablePwm(Integer deviceId/*byte*/, Integer pin/*byte*/) {
+	public void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 1); // size
-			write(SERVO_ENABLE_PWM); // msgType = 40
+			write(SERVO_ATTACH_PIN); // msgType = 40
 			write(deviceId);
 			write(pin);
  
 			if(record != null){
-				txBuffer.append("> servoEnablePwm");
+				txBuffer.append("> servoAttachPin");
 				txBuffer.append("/");
 				txBuffer.append(deviceId);
 				txBuffer.append("/");
@@ -1229,15 +1229,15 @@ public class Msg {
 	  }
 	}
 
-	public void servoDisablePwm(Integer deviceId/*byte*/) {
+	public void servoDetachPin(Integer deviceId/*byte*/) {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1); // size
-			write(SERVO_DISABLE_PWM); // msgType = 41
+			write(SERVO_DETACH_PIN); // msgType = 41
 			write(deviceId);
  
 			if(record != null){
-				txBuffer.append("> servoDisablePwm");
+				txBuffer.append("> servoDetachPin");
 				txBuffer.append("/");
 				txBuffer.append(deviceId);
 				txBuffer.append("\n");
@@ -1634,11 +1634,11 @@ public class Msg {
 		case SERVO_ATTACH:{
 			return "servoAttach";
 		}
-		case SERVO_ENABLE_PWM:{
-			return "servoEnablePwm";
+		case SERVO_ATTACH_PIN:{
+			return "servoAttachPin";
 		}
-		case SERVO_DISABLE_PWM:{
-			return "servoDisablePwm";
+		case SERVO_DETACH_PIN:{
+			return "servoDetachPin";
 		}
 		case SERVO_SET_MAX_VELOCITY:{
 			return "servoSetMaxVelocity";

@@ -138,9 +138,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       Serial serial = arduino.getSerial();
       // Runtime.start("gui", "GUIService");
-      //List<String> ports = serial.getPortNames();
-      //log.info(Arrays.toString(ports.toArray()));
-      //arduino.setBoardMega();
+      // List<String> ports = serial.getPortNames();
+      // log.info(Arrays.toString(ports.toArray()));
+      // arduino.setBoardMega();
       // log.info(arduino.getBoardType());
       // if connect - possibly you can set the board type correctly
       // arduino.getBoardInfo();
@@ -159,7 +159,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // Runtime.start("gui", "GUIService");
       servo.attach(arduino, 7);
       // servo.detach(arduino);
-      servo.attach(9);
+      servo.attachPin(9);
 
       // servo.detach(arduino);
       // arduino.servoDetach(servo); Arduino power save - "detach()"
@@ -349,7 +349,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     map.setId(nextDeviceId);
     deviceList.put(device.getName(), map);
     deviceIndex.put(nextDeviceId, map);
-    device.setController(this);
     ++nextDeviceId;
     return map.getId();
   }
@@ -409,7 +408,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     } else {
       info("%s connected on %s %s responded version %s ... goodtimes...", serial.getName(), controller.getName(), serialPort, version);
     }
-// GAP    broadcastState();
+    // GAP broadcastState();
   }
 
   // @Calamity - I like your method signature - but I think it
@@ -491,7 +490,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       error(e.getMessage());
     }
 
-// GAP    broadcastState();
+    // GAP broadcastState();
   }
 
   public void controllerAttach(Arduino controller, int serialPort) {
@@ -525,7 +524,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         }
         pindef.setName(pinName);
         pindef.setAddress(i);
+        // pinMap is a translation map
+        // we put both string address and 'name' and
+        // any other aliases we want the 'real' pin to be identified by
         pinMap.put(pinName, pindef);
+        pinMap.put(String.format("%d", i), pindef);
         pinIndex.put(i, pindef);
       }
     } else {
@@ -552,6 +555,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         pindef.setName(pinName);
         pindef.setAddress(i);
         pinMap.put(pinName, pindef);
+        pinMap.put(String.format("%d", i), pindef);
         pinIndex.put(i, pindef);
       }
     }
@@ -563,18 +567,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.customMsg(params);
   }
 
-  public void detach(DeviceControl device) {
-    deviceDetach(device);
-  }
-
   @Override
   // > deviceDetach/deviceId
-  public void deviceDetach(DeviceControl device) {
-    // FIXME - unsetController needs to be:
-    // device.detachController(Controller controller) &
-    // device.detachController()
-    // with type specific device.detach(this) & device.detach() ? (too general?)
-    device.unsetController();
+  public void detach(DeviceControl device) {
+    // TODO check / detach - must be careful of infinit loop
+    // if (device.isAttached()){
+    //
+    // }
     log.info("detaching device {}", device.getName());
     msg.deviceDetach(getDeviceId(device));
     if (deviceList.containsKey(device.getName())) {
@@ -654,13 +653,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void enablePin(int address) {
     enablePin(address, 0);
   }
-  
-  public void enablePin(String address){
+
+  public void enablePin(String address) {
     PinDefinition pd = pinMap.get(address);
     enablePin(pd.getAddress());
   }
-  
-  public void disablePin(String address){
+
+  public void disablePin(String address) {
     PinDefinition pd = pinMap.get(address);
     disablePin(pd.getAddress());
   }
@@ -1303,7 +1302,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // < publishBoardInfo/version/boardType
   public BoardInfo publishBoardInfo(Integer version/* byte */, Integer boardType/* byte */) {
     boolean broadcast = false;
-    if (version != boardInfo.getVersion() || boardType != boardInfo.getBoardType()){
+    if (version != boardInfo.getVersion() || boardType != boardInfo.getBoardType()) {
       broadcast = true;
     }
     boardInfo.setVersion(version);
@@ -1322,8 +1321,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     synchronized (boardInfo) {
       boardInfo.notifyAll();
     }
-    
-    if (broadcast){
+
+    if (broadcast) {
       broadcastState();
     }
 
@@ -1400,9 +1399,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     pinIndex.get(pinData.getAddress()).setValue(pinData.getValue());
     return pinData;
   }
-  
-  public Integer getAddress(String pinName){
-    if (pinMap.containsKey(pinName)){
+
+  public Integer getAddress(String pinName) {
+    if (pinMap.containsKey(pinName)) {
       return pinMap.get(pinName).getAddress();
     }
     return null;
@@ -1534,7 +1533,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       DeviceMapping dmap = deviceList.get(name);
       DeviceControl device = dmap.getDevice();
       log.info("unsetting device {}", name);
-      device.unsetController();
+      device.detach(name);
     }
 
     // reset Java-land
@@ -1588,14 +1587,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    */
   @Override
   // > servoEnablePwm/deviceId/pin
-  public void servoAttach(ServoControl servo, int pin) {
-    msg.servoEnablePwm(getDeviceId(servo), pin);
+  public void servoAttachPin(ServoControl servo, int pin) {
+    msg.servoAttachPin(getDeviceId(servo), pin);
   }
 
   @Override
   // > servoDisablePwm/deviceId
-  public void servoDetach(ServoControl servo) {
-    msg.servoDisablePwm(getDeviceId(servo));
+  public void servoDetachPin(ServoControl servo) {
+    msg.servoDetachPin(getDeviceId(servo));
   }
 
   @Override
@@ -1694,14 +1693,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    * different alternatives. I may have to rethink. Alternate solutions are
    * welcome. /Mats.
    */
-
-  // TODO - probably be used by Arduino --controls--> other Arduino through
-  // relay serial
-  @Override
-  public void setController(DeviceController controller) {
-    // TODO Auto-generated method stub
-    // Not sure what to do here. I don't want to create an infinite loop
-  }
 
   /**
    * Debounce ensures that only a single signal will be acted upon for a single
@@ -1836,11 +1827,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.ultrasonicSensorStopRanging(getDeviceId(sensor));
   }
 
-  @Override
-  public void unsetController() {
-    // NOOP as Arduino is its own controller
-  }
-
   public void uploadSketch(String arduinoPath) throws IOException {
     uploadSketch(arduinoPath, serial.getLastPortName());
   }
@@ -1919,17 +1905,30 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     pinDef.setValue(value);
   }
 
-  @Override
-  public boolean isAttached() {
-    return true; // I am my own controller ;)
-  }
-
   public int getDeviceCount() {
     return deviceList.size();
   }
 
   @Override
   public Set<String> getDeviceNames() {
+    return deviceList.keySet();
+  }
+
+  @Override
+  public void detach(String controllerName) {
+    // GOOD DESIGN !!! - THIS HAS INPUT STRING - AND WILL
+    // ROUTE WITH THE APPROPRIATE TYPE - AUTO-MAGICALLY !!!
+    invoke("detach", Runtime.getService(controllerName));
+  }
+
+  // GOOD DESIGN !!!
+  @Override
+  public boolean isAttached(String name) {
+    return deviceList.containsKey(name);
+  }
+
+  @Override
+  public Set<String> getAttached() {
     return deviceList.keySet();
   }
 

@@ -25,7 +25,9 @@
 
 package org.myrobotlab.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -198,16 +200,6 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 	}
 
 	@Override
-	public void setController(DeviceController controller) {
-		this.controller = (MotorController) controller;
-	}
-	
-	@Override
-	public void unsetController() {
-		this.controller = null;
-	}
-	
-	@Override
 	public void setInverted(boolean invert) {
 		powerMap.setInverted(invert);
 	}
@@ -323,7 +315,7 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 			// m1.attach(arduino, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);
 			// m1.attach(arduino, Motor.TYPE_2_PWM, pwmPin, dirPin);
 			// m1.attach(arduino, Motor.TYPE_SIMPLE, pwmPin, dirPin);
-			m1.setController((MotorController) arduino);
+			m1.attach((MotorController) arduino);
 
 			m1.move(1.0);
 			m1.move(-1.0);
@@ -383,7 +375,7 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 	}
 
 	public void detach(MotorController controller) {
-		controller.deviceDetach(this);
+		controller.detach(this);
 		controller = null;
 		controllerName = null;
 		broadcastState();
@@ -418,5 +410,29 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 	public boolean isAttached() {
 		return controller != null;
 	}
+
+	// TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
+  
+  @Override
+  public boolean isAttached(String name) {
+    return (controller != null && controller.getName().equals(name));
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
 
 }

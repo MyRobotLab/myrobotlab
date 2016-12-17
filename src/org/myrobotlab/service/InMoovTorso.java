@@ -107,15 +107,15 @@ public class InMoovTorso extends Service {
 
   public void detach() {
     if (topStom != null) {
-      topStom.detach();
+      topStom.detachPin();
       sleep(InMoov.attachPauseMs);
     } 
     if (midStom != null) {
-      midStom.detach();
+      midStom.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (lowStom != null) {
-      lowStom.detach();
+      lowStom.detachPin();
       sleep(InMoov.attachPauseMs);
     }
   }
@@ -201,9 +201,9 @@ public class InMoovTorso extends Service {
     */
 	  
 
-	    arduino.servoAttach(topStom, topStomPin);
-	    arduino.servoAttach(topStom, midStomPin);
-	    arduino.servoAttach(topStom, lowStomPin);
+	    arduino.servoAttachPin(topStom, topStomPin);
+	    arduino.servoAttachPin(topStom, midStomPin);
+	    arduino.servoAttachPin(topStom, lowStomPin);
   }
 
   public void setSpeed(Double topStom, Double midStom, Double lowStom) {

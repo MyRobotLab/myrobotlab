@@ -154,7 +154,7 @@ public class Tracking extends Service {
   // reservatinos ?
   // e.g if I come to the party does the reservations get updated or do I
   // crash the party ??
-  public Tracking(String n) {
+  public Tracking(String n) throws Exception {
     super(n);
     // createPeer("X","Servo") <-- create peer of default type
     x = (Servo) createPeer("x");
@@ -184,8 +184,8 @@ public class Tracking extends Service {
     pid.setSampleTime("y", 30);
     pid.setSetpoint("y", 0.5); // set center
 
-    x.setController(arduino);
-    y.setController(arduino);
+    x.attach(arduino);
+    y.attach(arduino);
   }
 
   public void addPreFilter(OpenCVFilter filter) {
@@ -682,8 +682,8 @@ public class Tracking extends Service {
   public void connect(String port, int xPin, int yPin, int cameraIndex) throws IOException {
     arduino.connect(port);
 
-    arduino.servoAttach(x, xPin);
-    arduino.servoAttach(y, yPin);
+    arduino.servoAttachPin(x, xPin);
+    arduino.servoAttachPin(y, yPin);
     opencv.setCameraIndex(cameraIndex);
 
     x.attach();

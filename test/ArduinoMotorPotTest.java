@@ -120,7 +120,7 @@ public class ArduinoMotorPotTest {
     // Start the motor and attach it to the arduino.
     motor = (Motor)Runtime.createAndStart("motor", "Motor");
     motor.setPwmPins(leftPwm, rightPwm);
-    motor.setController((MotorController)arduino);
+    motor.attach((MotorController)arduino);
     // Sensor callback
     // arduino.analogReadPollingStart(potPin);
     // arduino.sensorAttach(this);

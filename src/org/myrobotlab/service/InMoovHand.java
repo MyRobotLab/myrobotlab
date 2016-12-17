@@ -185,27 +185,27 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public void detach() {
 	if (thumb != null) {
-      thumb.detach();
+      thumb.detachPin();
       sleep(InMoov.attachPauseMs);
 	}
     if (index != null) {
-      index.detach();
+      index.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (majeure != null) {
-      majeure.detach();
+      majeure.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (ringFinger != null) {
-      ringFinger.detach();
+      ringFinger.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (pinky != null) {
-      pinky.detach();
+      pinky.detachPin();
       sleep(InMoov.attachPauseMs);
     }
     if (wrist != null) {
-      wrist.detach();
+      wrist.detachPin();
     }
    
     
@@ -423,12 +423,12 @@ public class InMoovHand extends Service implements LeapDataListener {
     */
     
     // NEW WAY
-    arduino.servoAttach(thumb, thumbPin);
-    arduino.servoAttach(index, indexPin);
-    arduino.servoAttach(majeure, majeurePin);
-    arduino.servoAttach(ringFinger, ringFingerPin);
-    arduino.servoAttach(pinky, pinkyPin);
-    arduino.servoAttach(wrist, wristPin);
+    arduino.servoAttachPin(thumb, thumbPin);
+    arduino.servoAttachPin(index, indexPin);
+    arduino.servoAttachPin(majeure, majeurePin);
+    arduino.servoAttachPin(ringFinger, ringFingerPin);
+    arduino.servoAttachPin(pinky, pinkyPin);
+    arduino.servoAttachPin(wrist, wristPin);
   }
 
   public void setRest(int thumb, int index, int majeure, int ringFinger, int pinky) {

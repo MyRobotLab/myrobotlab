@@ -388,15 +388,15 @@ void MrlComm::servoAttach(byte deviceId, byte pin, byte targetOutput, int veloci
 }
 
 // > servoEnablePwm/deviceId/pin
-void MrlComm::servoEnablePwm(byte deviceId, byte pin) {
+void MrlComm::servoAttachPin(byte deviceId, byte pin) {
 	MrlServo* servo = (MrlServo*) getDevice(deviceId);
-	servo->enablePwm(pin);
+	servo->attachPin(pin);
 }
 
 // > servoDisablePwm/deviceId
-void MrlComm::servoDisablePwm(byte deviceId) {
+void MrlComm::servoDetachPin(byte deviceId) {
 	MrlServo* servo = (MrlServo*) getDevice(deviceId);
-	servo->disablePwm();
+	servo->detachPin();
 }
 
 // > servoSetMaxVelocity/deviceId/b16 maxVelocity
@@ -514,11 +514,11 @@ unsigned int MrlComm::getCustomMsg() {
    if (customMsgSize == 0) {
      return 0;
    }
-   int retval = customMsg[0];
+   int retval = customMsgBuffer[0];
    for (int i = 0; i < customMsgSize-1; i++) {
-     customMsg[i] = customMsg[i+1];
+     customMsgBuffer[i] = customMsgBuffer[i+1];
    }
-   customMsg[customMsgSize] = 0;
+   customMsgBuffer[customMsgSize] = 0;
    customMsgSize--;
    return retval;
  }

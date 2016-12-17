@@ -158,10 +158,10 @@ public class VirtualMsg {
 	public final static int SET_DEBOUNCE = 38;
 	// > servoAttach/deviceId/pin/initPos/b16 initVelocity
 	public final static int SERVO_ATTACH = 39;
-	// > servoEnablePwm/deviceId/pin
-	public final static int SERVO_ENABLE_PWM = 40;
-	// > servoDisablePwm/deviceId
-	public final static int SERVO_DISABLE_PWM = 41;
+	// > servoAttachPin/deviceId/pin
+	public final static int SERVO_ATTACH_PIN = 40;
+	// > servoDetachPin/deviceId
+	public final static int SERVO_DETACH_PIN = 41;
 	// > servoSetMaxVelocity/deviceId/b16 maxVelocity
 	public final static int SERVO_SET_MAX_VELOCITY = 42;
 	// > servoSetVelocity/deviceId/b16 velocity
@@ -222,8 +222,8 @@ public class VirtualMsg {
 	// public void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/){}
 	// public void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/){}
 	// public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*byte*/, Integer initVelocity/*b16*/){}
-	// public void servoEnablePwm(Integer deviceId/*byte*/, Integer pin/*byte*/){}
-	// public void servoDisablePwm(Integer deviceId/*byte*/){}
+	// public void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/){}
+	// public void servoDetachPin(Integer deviceId/*byte*/){}
 	// public void servoSetMaxVelocity(Integer deviceId/*byte*/, Integer maxVelocity/*b16*/){}
 	// public void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/){}
 	// public void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/){}
@@ -599,25 +599,25 @@ public class VirtualMsg {
 			}
 			break;
 		}
-		case SERVO_ENABLE_PWM: {
+		case SERVO_ATTACH_PIN: {
 			Integer deviceId = ioCmd[startPos+1]; // bu8
 			startPos += 1;
 			Integer pin = ioCmd[startPos+1]; // bu8
 			startPos += 1;
 			if(invoke){
-				arduino.invoke("servoEnablePwm",  deviceId,  pin);
+				arduino.invoke("servoAttachPin",  deviceId,  pin);
 			} else { 
- 				arduino.servoEnablePwm( deviceId,  pin);
+ 				arduino.servoAttachPin( deviceId,  pin);
 			}
 			break;
 		}
-		case SERVO_DISABLE_PWM: {
+		case SERVO_DETACH_PIN: {
 			Integer deviceId = ioCmd[startPos+1]; // bu8
 			startPos += 1;
 			if(invoke){
-				arduino.invoke("servoDisablePwm",  deviceId);
+				arduino.invoke("servoDetachPin",  deviceId);
 			} else { 
- 				arduino.servoDisablePwm( deviceId);
+ 				arduino.servoDetachPin( deviceId);
 			}
 			break;
 		}
@@ -1171,11 +1171,11 @@ public class VirtualMsg {
 		case SERVO_ATTACH:{
 			return "servoAttach";
 		}
-		case SERVO_ENABLE_PWM:{
-			return "servoEnablePwm";
+		case SERVO_ATTACH_PIN:{
+			return "servoAttachPin";
 		}
-		case SERVO_DISABLE_PWM:{
-			return "servoDisablePwm";
+		case SERVO_DETACH_PIN:{
+			return "servoDetachPin";
 		}
 		case SERVO_SET_MAX_VELOCITY:{
 			return "servoSetMaxVelocity";

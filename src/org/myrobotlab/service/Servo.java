@@ -27,7 +27,9 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -36,7 +38,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -218,8 +219,7 @@ public class Servo extends Service implements ServoControl {
 	// only use controllerName to determine service to service attach !!!
 	// to determine if a service is attached is ->  controllerName != null
 	// to determine if a pin is attached is isPinAttached
-	private boolean isAttached = false;
-	private boolean isControllerSet = false;
+	boolean isPinAttached = false;
 
 	Integer velocity = -1;
 
@@ -260,10 +260,13 @@ public class Servo extends Service implements ServoControl {
 	/**
 	 * Re-attach to servo's current pin. The pin must have be set previously.
 	 * Equivalent to Arduino's Servo.attach(currentPin)
+	 * 
+	 * TODO ? should have been named attachPin()
+	 * 
 	 */
 	@Override
 	public void attach() {
-		attach(pin);
+		attachPin(pin);
 	}
 
 	/**
@@ -271,11 +274,11 @@ public class Servo extends Service implements ServoControl {
 	 * pulses to maintain its current position.
 	 */
 	@Override
-	public void attach(int pin) {
+	public void attachPin(int pin) {
 		lastActivityTime = System.currentTimeMillis();
-		controller.servoAttach(this, pin);
+		controller.servoAttachPin(this, pin);
 		this.pin = pin;
-		isAttached = true;
+		isPinAttached = true;
 		broadcastState();
 	}
 
@@ -283,9 +286,9 @@ public class Servo extends Service implements ServoControl {
 	 * Equivalent to Arduino's Servo.detach() it de-energizes the servo
 	 */
 	@Override
-	public void detach() {
+	public void detachPin() {
 		if (controller != null){
-			controller.servoDetach(this);
+			controller.servoDetachPin(this);
 		}
 		broadcastState();
 	}
@@ -341,12 +344,15 @@ public class Servo extends Service implements ServoControl {
 		return rest;
 	}
 
+	// FIXME - change name to isPinAttached()
+	// python scripts might use this ? :(
 	public boolean isAttached() {
-		return isAttached;
+	  // this is not pin attach
+	  return controller != null;
 	}
-
-	public boolean isControllerSet() {
-		return isControllerSet;
+	
+	public boolean isPinAttached(){
+	  return isPinAttached;
 	}
 
 	public boolean isInverted() {
@@ -407,7 +413,7 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void releaseService() {
-		detach();
+		detachPin();
 		detach(controller);
 		super.releaseService();
 	}
@@ -416,13 +422,14 @@ public class Servo extends Service implements ServoControl {
 		moveTo(rest);
 	}
 
+	/*
 	@Override
 	public void setController(DeviceController controller) {
 		if (controller == null) {
 			info("setting controller to null");
 			this.controllerName = null;
 			this.controller = null;
-			this.isAttached = false;
+			this.isPinAttached = false;
 			return;
 		}
 
@@ -430,17 +437,10 @@ public class Servo extends Service implements ServoControl {
 
 		this.controller = (ServoController) controller;
 		this.controllerName = controller.getName();
-		this.isAttached = true;
+		this.isPinAttached = true;
 		broadcastState();
 	}
-
-	@Override
-	public void unsetController() {
-		this.controller = null;
-		this.controllerName = null;
-		this.isAttached = false;
-		broadcastState();
-	}
+	*/
 
 	public void setInverted(boolean invert) {
 		mapper.setInverted(invert);
@@ -634,6 +634,14 @@ public class Servo extends Service implements ServoControl {
 		return speed;
 	}
 
+	// This was originally named setController
+	// and Tracking service depended on it to set 
+	// the servos to a controller where pins could
+	// be assigned later... 
+  public void attach(ServoController controller) throws Exception {
+    attach(controller, null);
+  }
+	
 	public void attach(String controllerName, int pin) throws Exception {
 		attach((ServoController) Runtime.getService(controllerName), pin, null, null);
 	}
@@ -665,7 +673,7 @@ public class Servo extends Service implements ServoControl {
 	public void attach(ServoController controller, Integer pin, Integer pos, Integer velocity) throws Exception {
 
 		if (isAttached(controller)) {
-			log.info("already attached to controller - nothing to do");
+			log.info("{} servo attached to controller {}", getName(), this.controller.getName());
 			return;
 		} else if (this.controller != null && this.controller != controller) {
 			log.warn("already attached to controller %s - please detach before attaching to controller %s", this.controller.getName(), controller.getName());
@@ -687,7 +695,6 @@ public class Servo extends Service implements ServoControl {
 		this.pin = pin;
 		this.controller = controller;
 		this.controllerName = controller.getName();
-		isControllerSet = true;
 
 		// now attach the controller
 		// the controller better have
@@ -711,19 +718,18 @@ public class Servo extends Service implements ServoControl {
 	public void detach(ServoController controller) {
 		if (this.controller == controller) {
 			// detach the this device from the controller
-			controller.deviceDetach(this);
+			controller.detach(this);
 			// remove the this controller's reference
 			this.controller = null;
-			// this.controllerName = null;
-			isAttached = false;
-			isControllerSet = false;
+			this.controllerName = null;
+			isPinAttached = false;
 			broadcastState();
 		}
 	}
 
 	public void setMaxVelocity(int velocity) {
 		this.maxVelocity = velocity;
-		if (isControllerSet()) {
+		if (controller != null) {
 			controller.servoSetMaxVelocity(this);
 		}
 	}
@@ -733,7 +739,7 @@ public class Servo extends Service implements ServoControl {
 			return;
 		}
 		this.velocity = velocity;
-		if (isControllerSet()) {
+		if (controller != null) {
 			controller.servoSetVelocity(this);
 		}
 	}
@@ -797,11 +803,11 @@ public class Servo extends Service implements ServoControl {
 			servo.moveTo(90);
 			servo.setRest(30);
 			
-			servo.attach(8);
+			servo.attachPin(8);
 			servo.moveTo(90);
 			servo.moveTo(30);
 
-			servo.attach(9);
+			servo.attachPin(9);
 			servo.moveTo(90);
 			servo.setRest(30);
 
@@ -822,7 +828,7 @@ public class Servo extends Service implements ServoControl {
 			servo.moveTo(90);
 			servo.moveTo(30);
 
-			servo.attach(9);
+			servo.attachPin(9);
 			servo.moveTo(90);
 			servo.setRest(30);
 
@@ -858,5 +864,19 @@ public class Servo extends Service implements ServoControl {
 	public void setPin(int pin) {
 		this.pin = pin;
 	}
+
+  @Override
+  public boolean isAttached(String name) {
+    return (controller != null && controller.getName().equals(name));
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
 
 }
