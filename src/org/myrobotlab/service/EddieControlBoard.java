@@ -421,7 +421,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     keyboard = (Keyboard) startPeer("keyboard");
     keyboard.addKeyListener(this);
     python = (Python) Runtime.start("python", "Python");
-    mouth = (SpeechSynthesis) Runtime.start("mouth", "AcapelaSpeech");
+    mouth = (SpeechSynthesis) Runtime.start("mouth", "NaturalReaderSpeech");
   }
 
   public void startWebGUI() throws Exception {

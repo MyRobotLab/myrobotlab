@@ -343,10 +343,7 @@ public class AudioFile extends Service {
       // "AudioFile");
       // MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
 
-      log.info(AcapelaSpeech.getDNA().toString());
-      AcapelaSpeech robot1 = (AcapelaSpeech) Runtime.start("robot1", "AcapelaSpeech");
-      // AcapelaSpeech robot1 = (AcapelaSpeech) Runtime.createAndStart("robot1",
-      // "AcapelaSpeech");
+      NaturalReaderSpeech robot1 = (NaturalReaderSpeech) Runtime.start("robot1", "NaturalReaderSpeech");
       AudioFile audio = robot1.getAudioFile();
 
       log.info(audio.getTrack());
