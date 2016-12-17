@@ -514,11 +514,11 @@ unsigned int MrlComm::getCustomMsg() {
    if (customMsgSize == 0) {
      return 0;
    }
-   int retval = customMsg[0];
+   int retval = customMsgBuffer[0];
    for (int i = 0; i < customMsgSize-1; i++) {
-     customMsg[i] = customMsg[i+1];
+     customMsgBuffer[i] = customMsgBuffer[i+1];
    }
-   customMsg[customMsgSize] = 0;
+   customMsgBuffer[customMsgSize] = 0;
    customMsgSize--;
    return retval;
  }
