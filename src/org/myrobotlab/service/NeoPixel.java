@@ -319,13 +319,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 		// setController(controller);
 
 		controller.neoPixelAttach(this, pin, numPixel);
-		int count = 0;
-		while (!isAttached) {
-			count++;
-			sleep(100);
-			if (count > 4)
-				break;
-		}
+		isAttached = true;
 		broadcastState();
 	}
 
@@ -378,21 +372,25 @@ public class NeoPixel extends Service implements NeoPixelControl {
 			arduino.setBoardMega();
 			arduino.connect("COM15");
 			arduino.setDebug(true);
-			Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
+			//Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
 			// arduino1.setBoardUno();
-			 arduino1.connect(arduino, "Serial1");
+			 //arduino1.connect(arduino, "Serial1");
 			// //arduino.setDebug(true);
 			NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
 			// webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-			neopixel.attach(arduino1, 3, 16);
+			neopixel.attach(arduino, 3, 16);
 			// sleep(50);
-			//PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
+			PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
 			//neopixel.setPixel(pix);
-			neopixel.setAnimation(NEOPIXEL_ANIMATION_IRONMAN, 255, 0, 0, 1);
-			// arduino.setLoadTimingEnabled(true);
+			neopixel.sendPixel(pix);
+			//neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 255, 0, 0, 1);
+			//arduino.enableBoardStatus(true);
+			//neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 0, 255, 0, 1);
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
 			servo.attach(arduino, 5);
 			servo.moveTo(180);
+			sleep(2000);
+			//neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 200, 0, 0, 1);
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
