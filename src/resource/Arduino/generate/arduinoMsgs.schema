@@ -110,6 +110,7 @@
 > servoSweepStop/deviceId
 > servoWrite/deviceId/target
 > servoWriteMicroseconds/deviceId/b16 ms
+> servoSetAcceleration/deviceId/b16 acceleration
 # not used as originally intended - as event information
 # < publishServoEvent/deviceId/eventType/currentPos/targetPos
 

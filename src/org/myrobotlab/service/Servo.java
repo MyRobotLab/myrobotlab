@@ -223,6 +223,8 @@ public class Servo extends Service implements ServoControl {
 
 	Integer velocity = -1;
 
+	Integer acceleration = -1;
+	
 	class IKData {
 		String name;
 		Integer pos;
@@ -737,6 +739,16 @@ public class Servo extends Service implements ServoControl {
 			controller.servoSetVelocity(this);
 		}
 	}
+	
+	public void setAcceleration(Integer acceleration) {
+		if (acceleration == null) {
+			return;
+		}
+		this.acceleration = acceleration;
+		if (isControllerSet()) {
+			controller.servoSetAcceleration(this);
+		}
+	}
 
 	@Override
 	public int getMaxVelocity() {
@@ -775,6 +787,7 @@ public class Servo extends Service implements ServoControl {
 	public IKData publishIKServoEvent(IKData data) {
 		return data;
 	}
+	
 
 	public static void main(String[] args) throws InterruptedException {
 		try {
@@ -857,6 +870,11 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public void setPin(int pin) {
 		this.pin = pin;
+	}
+
+	@Override
+	public Integer getAcceleration() {
+		return acceleration;
 	}
 
 }
