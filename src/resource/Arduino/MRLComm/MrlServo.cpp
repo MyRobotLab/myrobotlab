@@ -12,6 +12,8 @@ MrlServo::MrlServo(int deviceId) : Device(deviceId, DEVICE_TYPE_SERVO) {
   currentPos = 0.0;
   targetPos = 0;
   velocity = -1;
+  acceleration = 1;
+  moveStart = 0;
 }
 
 MrlServo::~MrlServo() {
@@ -51,7 +53,15 @@ void MrlServo::update() {
   if (isMoving) {
     if ((int)currentPos != targetPos) {
       long deltaTime = millis() - lastUpdate;
-      float step = velocity * deltaTime;
+      float _velocity = velocity;
+      if (acceleration != -1) {
+        _velocity *= acceleration * pow(((float)(millis()- moveStart)) / 1000,2) / 10;
+        //msg->publishDebug(String(_velocity));
+        if (_velocity > velocity) {
+          _velocity = velocity;
+        }
+      }
+      float step = _velocity * deltaTime;
       step /= 1000; //for deg/ms;
       if (isSweeping) {
         step = sweepStep;
@@ -92,6 +102,7 @@ void MrlServo::servoWrite(int position) {
   targetPos = position;
   isMoving = true;
   lastUpdate = millis();
+  moveStart = lastUpdate;
 }
 
 void MrlServo::servoWriteMicroseconds(int position) {
@@ -118,7 +129,11 @@ void MrlServo::setMaxVelocity(unsigned int velocity){
   maxVelocity = velocity;
 }
 
-void MrlServo::setVelocity(unsigned int velocity) {
+void MrlServo::setVelocity(int velocity) {
   this->velocity = velocity;
+}
+
+void MrlServo::setAcceleration(int acceleration) {
+  this->acceleration = acceleration;
 }
 

@@ -174,20 +174,22 @@ public class Msg {
 	public final static int SERVO_WRITE = 46;
 	// > servoWriteMicroseconds/deviceId/b16 ms
 	public final static int SERVO_WRITE_MICROSECONDS = 47;
+	// > servoSetAcceleration/deviceId/b16 acceleration
+	public final static int SERVO_SET_ACCELERATION = 48;
 	// > serialAttach/deviceId/relayPin
-	public final static int SERIAL_ATTACH = 48;
+	public final static int SERIAL_ATTACH = 49;
 	// > serialRelay/deviceId/[] data
-	public final static int SERIAL_RELAY = 49;
+	public final static int SERIAL_RELAY = 50;
 	// < publishSerialData/deviceId/[] data
-	public final static int PUBLISH_SERIAL_DATA = 50;
+	public final static int PUBLISH_SERIAL_DATA = 51;
 	// > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-	public final static int ULTRASONIC_SENSOR_ATTACH = 51;
+	public final static int ULTRASONIC_SENSOR_ATTACH = 52;
 	// > ultrasonicSensorStartRanging/deviceId
-	public final static int ULTRASONIC_SENSOR_START_RANGING = 52;
+	public final static int ULTRASONIC_SENSOR_START_RANGING = 53;
 	// > ultrasonicSensorStopRanging/deviceId
-	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 53;
+	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 54;
 	// < publishUltrasonicSensorData/deviceId/b16 echoTime
-	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 54;
+	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 55;
 
 
 /**
@@ -1397,11 +1399,35 @@ public class Msg {
 	  }
 	}
 
+	public void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
+		try {
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 2); // size
+			write(SERVO_SET_ACCELERATION); // msgType = 48
+			write(deviceId);
+			writeb16(acceleration);
+ 
+			if(record != null){
+				txBuffer.append("> servoSetAcceleration");
+				txBuffer.append("/");
+				txBuffer.append(deviceId);
+				txBuffer.append("/");
+				txBuffer.append(acceleration);
+				txBuffer.append("\n");
+				record.write(txBuffer.toString().getBytes());
+				txBuffer.setLength(0);
+			}
+
+	  } catch (Exception e) {
+	  			serial.error(e);
+	  }
+	}
+
 	public void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 1); // size
-			write(SERIAL_ATTACH); // msgType = 48
+			write(SERIAL_ATTACH); // msgType = 49
 			write(deviceId);
 			write(relayPin);
  
@@ -1425,7 +1451,7 @@ public class Msg {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1 + (1 + data.length)); // size
-			write(SERIAL_RELAY); // msgType = 49
+			write(SERIAL_RELAY); // msgType = 50
 			write(deviceId);
 			write(data);
  
@@ -1449,7 +1475,7 @@ public class Msg {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 1 + 1); // size
-			write(ULTRASONIC_SENSOR_ATTACH); // msgType = 51
+			write(ULTRASONIC_SENSOR_ATTACH); // msgType = 52
 			write(deviceId);
 			write(triggerPin);
 			write(echoPin);
@@ -1476,7 +1502,7 @@ public class Msg {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1); // size
-			write(ULTRASONIC_SENSOR_START_RANGING); // msgType = 52
+			write(ULTRASONIC_SENSOR_START_RANGING); // msgType = 53
 			write(deviceId);
  
 			if(record != null){
@@ -1497,7 +1523,7 @@ public class Msg {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1); // size
-			write(ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 53
+			write(ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 54
 			write(deviceId);
  
 			if(record != null){
@@ -1657,6 +1683,9 @@ public class Msg {
 		}
 		case SERVO_WRITE_MICROSECONDS:{
 			return "servoWriteMicroseconds";
+		}
+		case SERVO_SET_ACCELERATION:{
+			return "servoSetAcceleration";
 		}
 		case SERIAL_ATTACH:{
 			return "serialAttach";

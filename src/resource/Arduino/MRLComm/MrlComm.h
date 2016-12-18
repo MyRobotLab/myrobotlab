@@ -132,6 +132,8 @@ public:
 	void servoWrite( byte deviceId,  byte target);
 	// > servoWriteMicroseconds/deviceId/b16 ms
 	void servoWriteMicroseconds( byte deviceId,  int ms);
+	// > servoSetAcceleration/deviceId/b16 acceleration
+	void servoSetAcceleration( byte deviceId,  int acceleration);
 	// > serialAttach/deviceId/relayPin
 	void serialAttach( byte deviceId,  byte relayPin);
 	// > serialRelay/deviceId/[] data

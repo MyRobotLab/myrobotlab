@@ -118,20 +118,22 @@
 #define SERVO_WRITE 46
 // > servoWriteMicroseconds/deviceId/b16 ms
 #define SERVO_WRITE_MICROSECONDS 47
+// > servoSetAcceleration/deviceId/b16 acceleration
+#define SERVO_SET_ACCELERATION 48
 // > serialAttach/deviceId/relayPin
-#define SERIAL_ATTACH 48
+#define SERIAL_ATTACH 49
 // > serialRelay/deviceId/[] data
-#define SERIAL_RELAY 49
+#define SERIAL_RELAY 50
 // < publishSerialData/deviceId/[] data
-#define PUBLISH_SERIAL_DATA 50
+#define PUBLISH_SERIAL_DATA 51
 // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-#define ULTRASONIC_SENSOR_ATTACH 51
+#define ULTRASONIC_SENSOR_ATTACH 52
 // > ultrasonicSensorStartRanging/deviceId
-#define ULTRASONIC_SENSOR_START_RANGING 52
+#define ULTRASONIC_SENSOR_START_RANGING 53
 // > ultrasonicSensorStopRanging/deviceId
-#define ULTRASONIC_SENSOR_STOP_RANGING 53
+#define ULTRASONIC_SENSOR_STOP_RANGING 54
 // < publishUltrasonicSensorData/deviceId/b16 echoTime
-#define PUBLISH_ULTRASONIC_SENSOR_DATA 54
+#define PUBLISH_ULTRASONIC_SENSOR_DATA 55
 
 
 

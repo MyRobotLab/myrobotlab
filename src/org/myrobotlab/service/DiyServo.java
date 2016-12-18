@@ -997,4 +997,10 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 
 	}
 
+	@Override
+	public Integer getAcceleration() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

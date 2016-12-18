@@ -1933,4 +1933,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return deviceList.keySet();
   }
 
+	@Override
+	public void servoSetAcceleration(ServoControl servo) {
+		// TODO Auto-generated method stub
+		msg.servoSetAcceleration(getDeviceId(servo), servo.getAcceleration());
+	}
+
 }

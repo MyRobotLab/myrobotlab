@@ -171,5 +171,6 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl {
 	int getVelocity();
 	
 	void setPin(int pin);
+	public Integer getAcceleration();
 
 }
