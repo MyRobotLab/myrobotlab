@@ -189,7 +189,7 @@ public class Servo extends Service implements ServoControl {
 	/**
 	 * current speed of the servo
 	 */
-	Double speed = 1.0;
+	// Double speed = 1.0; NOT USED ANYMORE
 	// FIXME - currently is only computer control - needs to be either
 	// microcontroller or computer
 	boolean isSweeping = false;
@@ -492,7 +492,7 @@ public class Servo extends Service implements ServoControl {
 		double intercept = 1;
 
 		double vel = Math.exp(slope * speed + intercept);
-		// set velocity to 0.0 if the speed = 1.0.. This skips the velicity
+		// set velocity to 0.0 if the speed = 1.0.. This skips the velocity
 		// calculation logic.
 		if (speed >= 1.0) {
 			vel = maxVelocity;
@@ -629,10 +629,12 @@ public class Servo extends Service implements ServoControl {
 		return targetOutput;
 	}
 
+	/*
 	@Override
 	public double getSpeed() {
 		return speed;
 	}
+	*/
 
 	// This was originally named setController
 	// and Tracking service depended on it to set 

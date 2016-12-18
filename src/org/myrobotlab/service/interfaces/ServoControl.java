@@ -161,7 +161,7 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl {
 	 */
 	public Integer getTargetOutput();
 
-	public double getSpeed();
+	// public double getSpeed();
 
 	public int getMaxVelocity();
 

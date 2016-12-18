@@ -1012,8 +1012,8 @@ public class ArduinoTest implements PinArrayListener {
 			// Runtime.start("gui", "GUIService");
 
 			// test a "real" arduino
-			useVirtualHardware = true;
-			port = "COM10";
+			useVirtualHardware = false;
+			port = "COM5";
 			// port = "COM4";
 			// port = "COM99";
 
