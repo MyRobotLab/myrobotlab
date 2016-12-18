@@ -211,7 +211,7 @@ public class Servo extends Service implements ServoControl {
 	 */
 	boolean isEventsEnabled = false;
 
-	private int maxVelocity = 0;
+	private int maxVelocity = -1;
 
 	// GroG says,
 	// FIXME - do "final" refactor with attachPin/detachPin and
