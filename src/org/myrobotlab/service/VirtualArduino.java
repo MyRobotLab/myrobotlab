@@ -209,6 +209,11 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 		public void setVelocity(int velocity) {
 			this.velocity = velocity;
 		}
+
+		public void setAcceleration(Integer acceleration) {
+			// TODO Auto-generated method stub
+			
+		}
 	};
 
 	public class MrlUltrasonicSensor extends Device {
@@ -841,6 +846,11 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 	public void servoSetVelocity(Integer deviceId, Integer velocity) {
 		MrlServo servo = (MrlServo) getDevice(deviceId);
 		servo.setVelocity(velocity);
+	}
+
+	public void servoSetAcceleration(Integer deviceId, Integer acceleration) {
+		MrlServo servo = (MrlServo) getDevice(deviceId);
+		servo.setAcceleration(acceleration);
 	}
 
 	public void servoSweepStart(Integer deviceId, Integer min, Integer max, Integer step) {

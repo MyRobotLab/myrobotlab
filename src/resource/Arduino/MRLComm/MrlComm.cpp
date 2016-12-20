@@ -411,6 +411,11 @@ void MrlComm::servoSetVelocity(byte deviceId, int velocity) {
 	servo->setVelocity(velocity);
 }
 
+void MrlComm::servoSetAcceleration(byte deviceId, int acceleration) {
+  MrlServo* servo = (MrlServo*) getDevice(deviceId);
+  servo->setAcceleration(acceleration);
+}
+
 void MrlComm::servoSweepStart(byte deviceId, byte min, byte max, byte step) {
 	MrlServo* servo = (MrlServo*) getDevice(deviceId);
 	servo->startSweep(min, max, step);

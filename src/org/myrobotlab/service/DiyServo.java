@@ -555,6 +555,9 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	@Override
 	public void releaseService() {
 		detachPin();
+		if (controller != null){
+		  detach(controller);
+		}
 		super.releaseService();
 	}
 
@@ -938,12 +941,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public double getSpeed() {
-		log.error("speed is depreciated, use getVelocity instead");
-		return 0;
-	}
-
-	@Override
 	public void setSpeed(double speed) {
 		log.error("speed is depreciated, use setVelocity instead");
 
@@ -1009,5 +1006,12 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
     }
     return ret;
   }
+  
+  	@Override
+	public Integer getAcceleration() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+  
 
 }

@@ -59,7 +59,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 48;
+	public static final int MRLCOMM_VERSION = 49;
 
 	// ------ device type mapping constants
 	
@@ -174,20 +174,22 @@ public class VirtualMsg {
 	public final static int SERVO_WRITE = 46;
 	// > servoWriteMicroseconds/deviceId/b16 ms
 	public final static int SERVO_WRITE_MICROSECONDS = 47;
+	// > servoSetAcceleration/deviceId/b16 acceleration
+	public final static int SERVO_SET_ACCELERATION = 48;
 	// > serialAttach/deviceId/relayPin
-	public final static int SERIAL_ATTACH = 48;
+	public final static int SERIAL_ATTACH = 49;
 	// > serialRelay/deviceId/[] data
-	public final static int SERIAL_RELAY = 49;
+	public final static int SERIAL_RELAY = 50;
 	// < publishSerialData/deviceId/[] data
-	public final static int PUBLISH_SERIAL_DATA = 50;
+	public final static int PUBLISH_SERIAL_DATA = 51;
 	// > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-	public final static int ULTRASONIC_SENSOR_ATTACH = 51;
+	public final static int ULTRASONIC_SENSOR_ATTACH = 52;
 	// > ultrasonicSensorStartRanging/deviceId
-	public final static int ULTRASONIC_SENSOR_START_RANGING = 52;
+	public final static int ULTRASONIC_SENSOR_START_RANGING = 53;
 	// > ultrasonicSensorStopRanging/deviceId
-	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 53;
+	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 54;
 	// < publishUltrasonicSensorData/deviceId/b16 echoTime
-	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 54;
+	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 55;
 
 
 /**
@@ -230,6 +232,7 @@ public class VirtualMsg {
 	// public void servoSweepStop(Integer deviceId/*byte*/){}
 	// public void servoWrite(Integer deviceId/*byte*/, Integer target/*byte*/){}
 	// public void servoWriteMicroseconds(Integer deviceId/*byte*/, Integer ms/*b16*/){}
+	// public void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/){}
 	// public void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/){}
 	// public void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/){}
 	// public void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/){}
@@ -695,6 +698,18 @@ public class VirtualMsg {
 			}
 			break;
 		}
+		case SERVO_SET_ACCELERATION: {
+			Integer deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			Integer acceleration = b16(ioCmd, startPos+1);
+			startPos += 2; //b16
+			if(invoke){
+				arduino.invoke("servoSetAcceleration",  deviceId,  acceleration);
+			} else { 
+ 				arduino.servoSetAcceleration( deviceId,  acceleration);
+			}
+			break;
+		}
 		case SERIAL_ATTACH: {
 			Integer deviceId = ioCmd[startPos+1]; // bu8
 			startPos += 1;
@@ -1007,7 +1022,7 @@ public class VirtualMsg {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1 + (1 + data.length)); // size
-			write(PUBLISH_SERIAL_DATA); // msgType = 50
+			write(PUBLISH_SERIAL_DATA); // msgType = 51
 			write(deviceId);
 			write(data);
  
@@ -1031,7 +1046,7 @@ public class VirtualMsg {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 2); // size
-			write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 54
+			write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 55
 			write(deviceId);
 			writeb16(echoTime);
  
@@ -1194,6 +1209,9 @@ public class VirtualMsg {
 		}
 		case SERVO_WRITE_MICROSECONDS:{
 			return "servoWriteMicroseconds";
+		}
+		case SERVO_SET_ACCELERATION:{
+			return "servoSetAcceleration";
 		}
 		case SERIAL_ATTACH:{
 			return "serialAttach";

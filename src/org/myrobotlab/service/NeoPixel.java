@@ -329,7 +329,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
     broadcastState();
   }
-
+  
   public void attach(DeviceController controller) {
     if (controller == null) {
       error("setting null as controller");
@@ -391,8 +391,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
       Logging.logError(e);
     }
 
-  }
 
+  }
+  
   @Override
   public void setAnimation(int animation, int red, int green, int blue, int speed) {
     // protect against 0 and negative speed

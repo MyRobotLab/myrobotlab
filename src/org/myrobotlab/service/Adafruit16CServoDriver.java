@@ -884,4 +884,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
 
+	@Override
+	public void servoSetAcceleration(ServoControl servo) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

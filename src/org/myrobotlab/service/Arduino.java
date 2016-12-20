@@ -1914,6 +1914,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return deviceList.keySet();
   }
 
+
   @Override
   public void detach(String controllerName) {
     // GOOD DESIGN !!! - THIS HAS INPUT STRING - AND WILL
@@ -1931,5 +1932,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public Set<String> getAttached() {
     return deviceList.keySet();
   }
+
+	@Override
+	public void servoSetAcceleration(ServoControl servo) {
+		// TODO Auto-generated method stub
+		msg.servoSetAcceleration(getDeviceId(servo), servo.getAcceleration());
+	}
 
 }

@@ -582,7 +582,6 @@ inline void MrlNeopixel::sendPixel(Pixel p) {
 }
 
 void MrlNeopixel::show() {
-  //msg->publishDebug("MrlNeopixel.show !!!");
 	if (!state)
 		return;
 	//be sure we wait at least 6ms before sending new data
@@ -598,10 +597,12 @@ void MrlNeopixel::show() {
 }
 
 void MrlNeopixel::neopixelWriteMatrix(byte bufferSize, const byte*buffer) {
-	for (int i = 3; i < bufferSize + 3; i += 4) {
-		pixels[i].red = buffer[i + 1];
-		pixels[i].green = buffer[i + 2];
-		pixels[i].blue = buffer[i + 3];
+  byte _bufferSize = buffer[1];
+  //msg->publishDebug(String(_bufferSize)+"-"+String(buffer[2])+"-"+String(buffer[3]));
+	for (int i = 2; i < _bufferSize; i += 4) {
+		pixels[buffer[i]].red = buffer[i + 1];
+		pixels[buffer[i]].green = buffer[i + 2];
+		pixels[buffer[i]].blue = buffer[i + 3];
 	}
 	newData = true;
 }
@@ -663,7 +664,6 @@ void MrlNeopixel::setAnimation ( byte animation,  byte red,  byte green,  byte b
 	_step = 1;
 	_alpha = 50;
 	newData = true;
- // msg->publishDebug("Neopixel set Animation" + String(animation));
 }
 
 void MrlNeopixel::animationStop() {
@@ -696,7 +696,7 @@ void MrlNeopixel::animationLarsonScanner() {
 		for (unsigned int i = 1; i <= numPixel; i++) {
 			pixels[i].clearPixel();
 		}
-		unsigned int pos = _pos;
+		int pos = _pos;
 		for (int i = -2; i <= 2; i++) {
 			pos = _pos + i;
 			if (pos < 1)
