@@ -212,7 +212,7 @@ public class Servo extends Service implements ServoControl {
 	 */
 	boolean isEventsEnabled = false;
 
-	private int maxVelocity = 0;
+	private int maxVelocity = -1;
 
 	// GroG says,
 	// FIXME - do "final" refactor with attachPin/detachPin and
@@ -223,6 +223,8 @@ public class Servo extends Service implements ServoControl {
 
 	Integer velocity = -1;
 
+	Integer acceleration = -1;
+	
 	class IKData {
 		String name;
 		Integer pos;
@@ -745,6 +747,16 @@ public class Servo extends Service implements ServoControl {
 			controller.servoSetVelocity(this);
 		}
 	}
+	
+	public void setAcceleration(Integer acceleration) {
+		if (acceleration == null) {
+			return;
+		}
+		this.acceleration = acceleration;
+		if (controller != null) {
+			controller.servoSetAcceleration(this);
+		}
+	}
 
 	@Override
 	public int getMaxVelocity() {
@@ -783,6 +795,7 @@ public class Servo extends Service implements ServoControl {
 	public IKData publishIKServoEvent(IKData data) {
 		return data;
 	}
+	
 
 	public static void main(String[] args) throws InterruptedException {
 		try {
@@ -880,5 +893,10 @@ public class Servo extends Service implements ServoControl {
     }
     return ret;
   }
+
+	@Override
+	public Integer getAcceleration() {
+		return acceleration;
+	}
 
 }

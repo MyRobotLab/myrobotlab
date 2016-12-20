@@ -53,6 +53,7 @@ public interface ServoController extends DeviceController {
 
 	void servoSetVelocity(ServoControl servo);
 
+	void servoSetAcceleration(ServoControl servo);
 	
 
 }

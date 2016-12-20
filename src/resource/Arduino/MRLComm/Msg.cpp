@@ -124,6 +124,8 @@ Msg* Msg::getInstance() {
 	void servoWrite( byte deviceId,  byte target);
 	// > servoWriteMicroseconds/deviceId/b16 ms
 	void servoWriteMicroseconds( byte deviceId,  int ms);
+	// > servoSetAcceleration/deviceId/b16 acceleration
+	void servoSetAcceleration( byte deviceId,  int acceleration);
 	// > serialAttach/deviceId/relayPin
 	void serialAttach( byte deviceId,  byte relayPin);
 	// > serialRelay/deviceId/[] data
@@ -244,7 +246,7 @@ void Msg::publishPinArray(const byte* data,  byte dataSize) {
 void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + 1 + (1 + dataSize)); // size
-  write(PUBLISH_SERIAL_DATA); // msgType = 50
+  write(PUBLISH_SERIAL_DATA); // msgType = 51
   write(deviceId);
   write((byte*)data, dataSize);
   flush();
@@ -254,7 +256,7 @@ void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
 void Msg::publishUltrasonicSensorData( byte deviceId,  int echoTime) {
   write(MAGIC_NUMBER);
   write(1 + 1 + 2); // size
-  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 54
+  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 55
   write(deviceId);
   writeb16(echoTime);
   flush();
@@ -545,6 +547,14 @@ void Msg::processCommand() {
 			int ms = b16(ioCmd, startPos+1);
 			startPos += 2; //b16
 			mrlComm->servoWriteMicroseconds( deviceId,  ms);
+			break;
+	}
+	case SERVO_SET_ACCELERATION: { // servoSetAcceleration
+			byte deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			int acceleration = b16(ioCmd, startPos+1);
+			startPos += 2; //b16
+			mrlComm->servoSetAcceleration( deviceId,  acceleration);
 			break;
 	}
 	case SERIAL_ATTACH: { // serialAttach
