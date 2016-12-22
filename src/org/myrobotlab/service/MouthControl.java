@@ -61,7 +61,9 @@ public class MouthControl extends Service {
     }
 
     // arduino.servoAttach(jaw);
-    arduino.servoAttach(jaw, 26);
+    jaw.attach(arduino, 26);
+    
+    //arduino.servoAttach(jaw, 26);
     return true;
   }
 
@@ -166,6 +168,7 @@ public class MouthControl extends Service {
   public synchronized void onEndSpeaking(String utterance) {
     log.info("Mouth control recognized end speaking.");
     // TODO: consider a jaw move to closed position
+    //this will only work if the mouth animation ends before it end playing the voice.
     if (jaw != null && jaw.isAttached()) {
       jaw.moveTo(mouthClosedPos);
     }
