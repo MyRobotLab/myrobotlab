@@ -12,7 +12,7 @@ MrlServo::MrlServo(int deviceId) : Device(deviceId, DEVICE_TYPE_SERVO) {
   currentPos = 0.0;
   targetPos = 0;
   velocity = -1;
-  acceleration = 1;
+  acceleration = -1;
   moveStart = 0;
 }
 
@@ -53,6 +53,7 @@ void MrlServo::update() {
   if (isMoving) {
     if ((int)currentPos != targetPos) {
       long deltaTime = millis() - lastUpdate;
+      lastUpdate = millis();
       float _velocity = velocity;
       if (acceleration != -1) {
         _velocity *= acceleration * pow(((float)(millis()- moveStart)) / 1000,2) / 10;
@@ -76,7 +77,6 @@ void MrlServo::update() {
       if ((step > 0.0 && (int)currentPos > targetPos) || (step < 0.0 && (int)currentPos < targetPos)) {
         currentPos = targetPos;
       }
-      lastUpdate = millis();
       servo->write((int)currentPos);
     }
     else {
