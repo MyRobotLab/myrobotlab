@@ -372,13 +372,13 @@ public class NeoPixel extends Service implements NeoPixelControl {
 			arduino.setBoardMega();
 			arduino.connect("COM15");
 			arduino.setDebug(true);
-			//Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
+			Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
 			// arduino1.setBoardUno();
-			 //arduino1.connect(arduino, "Serial1");
+			arduino1.connect(arduino, "Serial2");
 			// //arduino.setDebug(true);
 			NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
 			// webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-			neopixel.attach(arduino, 3, 16);
+			neopixel.attach(arduino1, 8, 16);
 			// sleep(50);
 			PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
 			//neopixel.setPixel(pix);
