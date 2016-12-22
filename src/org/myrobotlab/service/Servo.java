@@ -288,6 +288,7 @@ public class Servo extends Service implements ServoControl {
 	public void detach() {
 		if (controller != null){
 			controller.servoDetach(this);
+			isAttached = false;
 		}
 		broadcastState();
 	}
