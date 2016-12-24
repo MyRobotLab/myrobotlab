@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -41,7 +42,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.DeviceControl;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -117,9 +117,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
       "Flash Random", "Ironman");
   public transient String animation = "No animation";
   public transient boolean[] animationSetting = { false, false }; // red,
-  // green,
-  // blue,
-  // speed
+                                  // green,
+                                  // blue,
+                                  // speed
   public transient boolean animationSettingColor = false;
   public transient boolean animationSettingSpeed = false;
   transient HashMap<Integer, boolean[]> animationSettings = new HashMap<Integer, boolean[]>();
@@ -303,43 +303,33 @@ public class NeoPixel extends Service implements NeoPixelControl {
     attach((NeoPixelController) Runtime.getService(controllerName), Integer.parseInt(pin), Integer.parseInt(numPixel));
   }
 
+ 
   @Override
-  public void attach(NeoPixelController controller, int pin, int numPixel) throws Exception {
-    // subscribe(controller.getName(), "publishAttachedDevice");
+  public void attach(NeoPixelController controller, int pin, int numPixel){
+    if (controller == null) {
+      error("setting null as controller");
+      return;
+    }
+    
     this.pin = pin;
     this.numPixel = numPixel;
 
     // clear the old matrix
     pixelMatrix.clear();
-
+    
     // create a new matrix
     for (int i = 1; i < numPixel + 1; i++) {
       setPixel(new PixelColor(i, 0, 0, 0));
     }
 
-    // setController(controller);
-
     controller.neoPixelAttach(this, pin, numPixel);
-    int count = 0;
-    while (!isAttached) {
-      count++;
-      sleep(100);
-      if (count > 4)
-        break;
-    }
+    
+    log.info(String.format("%s setController %s", getName(), controller.getName()));
+    this.controller = controller;
+    controllerName = this.controller.getName();
+    isAttached = true;
     broadcastState();
   }
-  
-  public void attach(DeviceController controller) {
-    if (controller == null) {
-      error("setting null as controller");
-      return;
-    }
-    log.info(String.format("%s setController %s", getName(), controller.getName()));
-    this.controller = (NeoPixelController) controller;
-    controllerName = this.controller.getName();
-  }
-
 
   @Override
   public void detach(NeoPixelController controller) {
@@ -362,9 +352,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
     LoggingFactory.init(Level.INFO);
 
     try {
-      // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      //WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.autoStartBrowser(false);
-      // webgui.startService();
+      //webgui.startService();
       Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
@@ -374,26 +364,30 @@ public class NeoPixel extends Service implements NeoPixelControl {
       arduino.setDebug(true);
       Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
       // arduino1.setBoardUno();
-      arduino1.connect(arduino, "Serial1");
+      arduino1.connect(arduino, "Serial2");
       // //arduino.setDebug(true);
       NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
       // webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-      neopixel.attach(arduino1, 3, 16);
+      neopixel.attach(arduino1, 8, 16);
       // sleep(50);
-      // PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
-      // neopixel.setPixel(pix);
-      neopixel.setAnimation(NEOPIXEL_ANIMATION_IRONMAN, 255, 0, 0, 1);
-      // arduino.setLoadTimingEnabled(true);
+      PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
+      //neopixel.setPixel(pix);
+      neopixel.sendPixel(pix);
+      //neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 255, 0, 0, 1);
+      //arduino.enableBoardStatus(true);
+      //neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 0, 255, 0, 1);
       Servo servo = (Servo) Runtime.start("servo", "Servo");
       servo.attach(arduino, 5);
       servo.moveTo(180);
+      sleep(2000);
+      //neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 200, 0, 0, 1);
     } catch (Exception e) {
       Logging.logError(e);
     }
 
 
   }
-  
+
   @Override
   public void setAnimation(int animation, int red, int green, int blue, int speed) {
     // protect against 0 and negative speed
@@ -406,29 +400,29 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   String animationIntToString(int animation) {
     switch (animation) {
-      case NEOPIXEL_ANIMATION_NO_ANIMATION:
-        return "No animation";
-      case NEOPIXEL_ANIMATION_STOP:
-        return "Stop";
-      case NEOPIXEL_ANIMATION_COLOR_WIPE:
-        return "Color Wipe";
-      case NEOPIXEL_ANIMATION_LARSON_SCANNER:
-        return "Larson Scanner";
-      case NEOPIXEL_ANIMATION_THEATER_CHASE:
-        return "Theater Chase";
-      case NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW:
-        return "Theater Chase Rainbow";
-      case NEOPIXEL_ANIMATION_RAINBOW:
-        return "Rainbow";
-      case NEOPIXEL_ANIMATION_RAINBOW_CYCLE:
-        return "Rainbow Cycle";
-      case NEOPIXEL_ANIMATION_FLASH_RANDOM:
-        return "Flash Random";
-      case NEOPIXEL_ANIMATION_IRONMAN:
-        return "Ironman";
-      default:
-        log.error("Unknow Animation type {}", animation);
-        return "No Animation";
+    case NEOPIXEL_ANIMATION_NO_ANIMATION:
+      return "No animation";
+    case NEOPIXEL_ANIMATION_STOP:
+      return "Stop";
+    case NEOPIXEL_ANIMATION_COLOR_WIPE:
+      return "Color Wipe";
+    case NEOPIXEL_ANIMATION_LARSON_SCANNER:
+      return "Larson Scanner";
+    case NEOPIXEL_ANIMATION_THEATER_CHASE:
+      return "Theater Chase";
+    case NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW:
+      return "Theater Chase Rainbow";
+    case NEOPIXEL_ANIMATION_RAINBOW:
+      return "Rainbow";
+    case NEOPIXEL_ANIMATION_RAINBOW_CYCLE:
+      return "Rainbow Cycle";
+    case NEOPIXEL_ANIMATION_FLASH_RANDOM:
+      return "Flash Random";
+    case NEOPIXEL_ANIMATION_IRONMAN:
+      return "Ironman";
+    default:
+      log.error("Unknow Animation type {}", animation);
+      return "No Animation";
     }
   }
 
@@ -444,29 +438,29 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   int animationStringToInt(String animation) {
     switch (animation) {
-      case "No animation":
-        return NEOPIXEL_ANIMATION_STOP;
-      case "Stop":
-        return NEOPIXEL_ANIMATION_STOP;
-      case "Color Wipe":
-        return NEOPIXEL_ANIMATION_COLOR_WIPE;
-      case "Larson Scanner":
-        return NEOPIXEL_ANIMATION_LARSON_SCANNER;
-      case "Theater Chase":
-        return NEOPIXEL_ANIMATION_THEATER_CHASE;
-      case "Theater Chase Rainbow":
-        return NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW;
-      case "Rainbow":
-        return NEOPIXEL_ANIMATION_RAINBOW;
-      case "Rainbow Cycle":
-        return NEOPIXEL_ANIMATION_RAINBOW_CYCLE;
-      case "Flash Random":
-        return NEOPIXEL_ANIMATION_FLASH_RANDOM;
-      case "Ironman":
-        return NEOPIXEL_ANIMATION_IRONMAN;
-      default:
-        log.error("Unknow Animation type {}", animation);
-        return NEOPIXEL_ANIMATION_STOP;
+    case "No animation":
+      return NEOPIXEL_ANIMATION_STOP;
+    case "Stop":
+      return NEOPIXEL_ANIMATION_STOP;
+    case "Color Wipe":
+      return NEOPIXEL_ANIMATION_COLOR_WIPE;
+    case "Larson Scanner":
+      return NEOPIXEL_ANIMATION_LARSON_SCANNER;
+    case "Theater Chase":
+      return NEOPIXEL_ANIMATION_THEATER_CHASE;
+    case "Theater Chase Rainbow":
+      return NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW;
+    case "Rainbow":
+      return NEOPIXEL_ANIMATION_RAINBOW;
+    case "Rainbow Cycle":
+      return NEOPIXEL_ANIMATION_RAINBOW_CYCLE;
+    case "Flash Random":
+      return NEOPIXEL_ANIMATION_FLASH_RANDOM;
+    case "Ironman":
+      return NEOPIXEL_ANIMATION_IRONMAN;
+    default:
+      log.error("Unknow Animation type {}", animation);
+      return NEOPIXEL_ANIMATION_STOP;
     }
 
   }
@@ -486,29 +480,21 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   @Override
   public void detach(String controllerName) {
-    if (controller == null || !controllerName.equals(controller.getName())) {
-      return;
-    }
-    controller.detach(this);
-    controller = null;
+    // TODO Auto-generated method stub
+    
   }
 
-  /**
-   * GOOD DESIGN - this method is the same pretty much for all Services
-   * could be a Java 8 default implementation to the interface
-   */
   @Override
   public boolean isAttached(String name) {
-    return (controller != null && controller.getName().equals(name));
+    return controller != null && name.equals(controller.getName());
   }
 
   @Override
   public Set<String> getAttached() {
-    HashSet<String> ret = new HashSet<String>();
+    Set<String> ret = new HashSet<String>();
     if (controller != null){
       ret.add(controller.getName());
     }
     return ret;
   }
-
 }
