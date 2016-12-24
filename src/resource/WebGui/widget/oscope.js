@@ -178,7 +178,10 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                     }
                     break;
                 default:
-                    console.log("ERROR - unhandled method " + inMsg.method);
+                    // since we subscribed to "All" of Arduino's methods - most will escape here
+                    // no reason to put an error .. however, it would be better to "Only" susbscribe to the ones
+                    // we want
+                    // console.log("ERROR - unhandled method " + inMsg.method);
                     break;
                 }
             }
