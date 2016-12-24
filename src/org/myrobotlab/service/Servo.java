@@ -289,6 +289,7 @@ public class Servo extends Service implements ServoControl {
 	 */
 	@Override
 	public void detachPin() {
+	  this.isPinAttached = false;
 		if (controller != null){
 			controller.servoDetachPin(this);
 		}

@@ -1594,6 +1594,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   @Override
   // > servoDisablePwm/deviceId
   public void servoDetachPin(ServoControl servo) {
+    log.info("{}.detachPin({})", servo.getName(), servo.getPin());
     msg.servoDetachPin(getDeviceId(servo));
   }
 

@@ -172,20 +172,17 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 			return true;
 		}
 
-		public void enablePwm(int pin) {
-			this.pin = pin;
-			// servo->attach(pin);
-			// ->write((int)currentPos); //return to it's last know state (may
-			// be 0 if currentPos is not set)
-			// TODO-KW: we should always have a moveTo for safety, o/w we have
-			// no idea what angle we're going to start up at.. maybe
-		}
-
-		public void disablePwm() {
-		}
-
 		public void update() {
 		}
+		
+		public void detachPin(){
+		  log.info("{}.detachPin()", getName());
+		}
+		
+    public void attachPin(int pin){
+      log.info("{}.attachPin({})", getName(), pin);
+      this.pin = pin;
+    }
 
 		public void servoWrite(int position) {
 			targetPos = position;
@@ -828,15 +825,7 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 		servo.attach(pin, initPos, initVelocity);
 	}
 
-	public void servoEnablePwm(Integer deviceId, Integer pin) {
-		MrlServo servo = (MrlServo) getDevice(deviceId);
-		servo.enablePwm(pin);
-	}
 
-	public void servoDisablePwm(Integer deviceId) {
-		// TODO Auto-generated method stub
-
-	}
 
 	public void servoSetMaxVelocity(Integer deviceId, Integer maxVelocity) {
 		MrlServo servo = (MrlServo) getDevice(deviceId);
@@ -1014,13 +1003,11 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 	}
 
   public void servoAttachPin(Integer deviceId, Integer pin) {
-    // TODO Auto-generated method stub
-    
+    ((MrlServo)getDevice(deviceId)).attachPin(pin);
   }
 
   public void servoDetachPin(Integer deviceId) {
-    // TODO Auto-generated method stub
-    
+    ((MrlServo)getDevice(deviceId)).detachPin();
   }
 
 }

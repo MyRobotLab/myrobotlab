@@ -8,6 +8,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.pin = null ;
     $scope.min = 0;
     $scope.max = 180;
+    $scope.possibleController = null;
+    $scope.testTime = 300;
     // TODO - should be able to build this based on
     // current selection of controller
     $scope.pinList = [];
@@ -31,7 +33,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         options: {
             floor: 0,
             ceil: 180,
-            getSelectionBarColor: "black",
+            // getSelectionBarColor: "black",
             readOnly: true,
             onStart: function() {},
             onChange: function() {// msg.send('moveTo', $scope.pos.value);
@@ -49,6 +51,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             $scope.pos.value = service.targetPos;
             $scope.posStatus.value = service.targetPos;
         }
+        $scope.possibleController = service.controllerName;
         $scope.controllerName = service.controllerName;
         $scope.speed = service.speed;
         $scope.pin = service.pin;
@@ -92,6 +95,9 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         ;
     }
     ;
+    $scope.getSelectionBarColor = function(){
+        return "black";
+    };
     $scope.isAttached = function() {
         return $scope.service.controllerName != null ;
     }
@@ -121,7 +127,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     }
     $scope.attachController = function() {
         $log.info("attachController");
-        msg.send('attach', $scope.controllerName, $scope.pin, $scope.rest);
+        msg.send('attach', $scope.possibleController, $scope.pin, $scope.rest);
         // msg.attach($scope.controllerName, $scope.pin, 90);
     }
     msg.subscribe("publishServoEvent");
