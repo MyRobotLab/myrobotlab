@@ -52,16 +52,23 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl {
 	void attach(ServoController controller, Integer pin, Integer pos) throws Exception;
 	void attach(ServoController controller, Integer pin, Integer pos, Integer velocity) throws Exception;
 	
+	/**
+	 * determines if a 'specific' controller is currently attached
+	 * @param controller
+	 * @return
+	 */
 	public boolean isAttached(ServoController controller);
 
+	/**
+	 * detaches a 'specific' controller
+	 * @param controller
+	 */
 	void detach(ServoController controller);
 
 	/**
-	 * VERY DIFFERENT FROM SERVICE ATTACHEMENT !!!
-	 * (an unfortunate use of name)
-	 * Re-attaches (re-energizes) the servo on its current pin FIXME - should be
-	 * renamed to energize
-	 * 
+	 * attach "Pin" - simple command to energize the pin.
+	 * Equivalent to Arduino library's servo.attach(pin) with pin
+	 * number coming from the servo
 	 * @return
 	 */
 	public void attach();
@@ -75,14 +82,13 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl {
 
 	/**
 	 * Re-attaches (re-energizes) the servo on its current pin
+	 * NOT RELATED TO CONTROLLER ATTACH/DETACH !
 	 * @return
 	 */
 	public void attachPin(int pin);
 
 	/**
-	 * changed from detach to 
-	 * detachPin to stop the confusion of detaching
-	 * a controller vs a pin
+   * detaching a pin (NOT RELATED TO DETACHING A SERVICE !)
 	 * 
 	 * @return
 	 */

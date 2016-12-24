@@ -59,7 +59,7 @@ public class Msg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 49;
+	public static final int MRLCOMM_VERSION = 50;
 
 	// ------ device type mapping constants
 	

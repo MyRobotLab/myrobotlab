@@ -291,7 +291,7 @@ public class Servo extends Service implements ServoControl {
 	public void detachPin() {
 	  this.isPinAttached = false;
 		if (controller != null){
-			controller.servoDetachPin(this);
+			controller.servoDetachPin(this);		
 		}
 		broadcastState();
 	}
