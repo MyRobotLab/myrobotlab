@@ -85,14 +85,14 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl {
 	 * NOT RELATED TO CONTROLLER ATTACH/DETACH !
 	 * @return
 	 */
-	public void attachPin(int pin);
+	public void attach(int pin);
 
 	/**
    * detaching a pin (NOT RELATED TO DETACHING A SERVICE !)
 	 * 
 	 * @return
 	 */
-	public void detachPin();
+	public void detach();
 
 	/**
 	 * limits input of servo - to prevent damage or problems if servos should

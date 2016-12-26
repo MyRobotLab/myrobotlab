@@ -179,18 +179,18 @@ public class Sweety extends Service {
    * detach the servos from arduino pins
    */
   public void detach() {
-    rightForearm.detachPin();
-    leftForearm.detachPin();
-    rightShoulder.detachPin();
-    leftShoulder.detachPin();
-    rightArm.detachPin();
-    leftArm.detachPin();
-    neckTilt.detachPin();
-    neckPan.detachPin();
-    rightHand.detachPin();
-    rightWrist.detachPin();
-    leftHand.detachPin();
-    leftWrist.detachPin();
+    rightForearm.detach();
+    leftForearm.detach();
+    rightShoulder.detach();
+    leftShoulder.detach();
+    rightArm.detach();
+    leftArm.detach();
+    neckTilt.detach();
+    neckPan.detach();
+    rightHand.detach();
+    rightWrist.detach();
+    leftHand.detach();
+    leftWrist.detach();
   }
 
   // TODO Correct the head function for new head

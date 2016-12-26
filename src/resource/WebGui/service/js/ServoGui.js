@@ -53,7 +53,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         }
         $scope.possibleController = service.controllerName;
         $scope.controllerName = service.controllerName;
-        $scope.speed = service.speed;
+        $scope.velocity = service.velocity;
         $scope.pin = service.pin;
         $scope.rest = service.rest;
         $scope.min = service.mapper.minOutput;
@@ -102,8 +102,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         return $scope.service.controllerName != null ;
     }
     ;
-    $scope.update = function(speed, rest, min, max) {
-        msg.send("setSpeed", speed);
+    $scope.update = function(velocity, rest, min, max) {
+        msg.send("setVelocity", velocity);
         msg.send("setRest", rest);
         msg.send("setMinMax", min, max);
     }

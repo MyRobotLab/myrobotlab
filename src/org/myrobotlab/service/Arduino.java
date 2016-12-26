@@ -159,7 +159,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // Runtime.start("gui", "GUIService");
       servo.attach(arduino, 7);
       // servo.detach(arduino);
-      servo.attachPin(9);
+      servo.attach(9);
 
       // servo.detach(arduino);
       // arduino.servoDetach(servo); Arduino power save - "detach()"

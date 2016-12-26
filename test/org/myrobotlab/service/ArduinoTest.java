@@ -43,8 +43,8 @@ public class ArduinoTest implements PinArrayListener {
 
 	public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
 
-	static boolean useVirtualHardware = true;
-	static String port = "COM4";
+	static boolean useVirtualHardware = false;
+	static String port = "COM5";
 
 	// things to test
 	static Arduino arduino = null;
@@ -54,7 +54,7 @@ public class ArduinoTest implements PinArrayListener {
 	static VirtualArduino virtual = null;
 	static Serial uart = null;
 
-	int servoPin = 6;
+	int servoPin = 7;
 	String enablePin = "A1";
 	int writeAddress = 6;
 	
@@ -856,7 +856,7 @@ public class ArduinoTest implements PinArrayListener {
 		}
 
 		// can we attach to a different pin?
-		servo.attachPin(servoPin + 1);		
+		servo.attach(servoPin + 1);		
 		if (virtual != null) {
 			sleep(100);
 			assertTrue(mrlServo.pin == servoPin + 1);
@@ -872,7 +872,7 @@ public class ArduinoTest implements PinArrayListener {
 		}
 
 		// attach to the correct pin again
-		servo.attachPin(servoPin);
+		servo.attach(servoPin);
 		servo.moveTo(30);
 		servo.moveTo(130);
 		servo.moveTo(30);
@@ -892,7 +892,7 @@ public class ArduinoTest implements PinArrayListener {
 		// assertEquals("servoWrite/7/0\n", uart.decode());
 
 		// detach
-		servo.detachPin();
+		servo.detach();
 		// assertEquals("servoDetach/7/0\n", uart.decode());
 
 		servo.moveTo(10);
@@ -1012,7 +1012,7 @@ public class ArduinoTest implements PinArrayListener {
 			// Runtime.start("gui", "GUIService");
 
 			// test a "real" arduino
-			useVirtualHardware = true;
+			useVirtualHardware = false;
 			port = "COM5";
 			// port = "COM4";
 			// port = "COM99";

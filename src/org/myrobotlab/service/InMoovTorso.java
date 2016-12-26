@@ -107,15 +107,15 @@ public class InMoovTorso extends Service {
 
   public void detach() {
     if (topStom != null) {
-      topStom.detachPin();
+      topStom.detach();
       sleep(InMoov.attachPauseMs);
     } 
     if (midStom != null) {
-      midStom.detachPin();
+      midStom.detach();
       sleep(InMoov.attachPauseMs);
     }
     if (lowStom != null) {
-      lowStom.detachPin();
+      lowStom.detach();
       sleep(InMoov.attachPauseMs);
     }
   }

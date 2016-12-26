@@ -97,23 +97,23 @@ public class InMoovHead extends Service {
   public void detach() {
     sleep(InMoov.attachPauseMs);
     if (rothead != null) {
-      rothead.detachPin();
+      rothead.detach();
       sleep(InMoov.attachPauseMs);
     }
     if (neck != null) {
-      neck.detachPin();
+      neck.detach();
       sleep(InMoov.attachPauseMs);
     }
     if (eyeX != null) {
-      eyeX.detachPin();
+      eyeX.detach();
       sleep(InMoov.attachPauseMs);
     }
     if (eyeY != null) {
-      eyeY.detachPin();
+      eyeY.detach();
       sleep(InMoov.attachPauseMs);
     }
     if (jaw != null) {
-      jaw.detachPin();
+      jaw.detach();
     }
   }
 
