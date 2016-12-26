@@ -127,7 +127,7 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 
 	@Override
 	public double getPowerOutput() {
-		return powerMap.calc(powerLevel);
+		return powerMap.calcOutput(powerLevel);
 	}
 
 	public Mapper getPowerMap() {

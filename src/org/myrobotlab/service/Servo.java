@@ -148,7 +148,7 @@ public class Servo extends Service implements ServoControl {
 
 	public String controllerName = null;
 
-	Mapper mapper = new Mapper(0, 180, 0, 180);
+	Mapper mapper = new Mapper(0, 180, 544, 2400);
 
 	int rest = 90;
 
@@ -224,6 +224,8 @@ public class Servo extends Service implements ServoControl {
 	Integer velocity = -1;
 
 	Integer acceleration = -1;
+
+	private Integer lastPos;
 	
 	class IKData {
 		String name;
@@ -374,9 +376,9 @@ public class Servo extends Service implements ServoControl {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
-
+		lastPos = targetPos;
 		targetPos = pos;
-		targetOutput = mapper.calcInt(targetPos);
+		targetOutput = mapper.calcOutputInt(targetPos);
 
 		controller.servoWrite(this);
 		lastActivityTime = System.currentTimeMillis();
@@ -695,7 +697,7 @@ public class Servo extends Service implements ServoControl {
 			targetPos = rest;
 		}
 
-		targetOutput = mapper.calcInt(targetPos);
+		targetOutput = mapper.calcOutputInt(targetPos);
 
 		// SET THE DATA
 		this.pin = pin;
@@ -748,11 +750,15 @@ public class Servo extends Service implements ServoControl {
 		if (velocity == null) {
 			return;
 		}
+		if (maxVelocity != -1 && velocity > maxVelocity) {
+			velocity = maxVelocity;
+		}
 		this.velocity = velocity;
 		if (controller != null) {
 			controller.servoSetVelocity(this);
 		}
 	}
+	
 	
 	public void setAcceleration(Integer acceleration) {
 		if (acceleration == null) {
@@ -903,6 +909,34 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public Integer getAcceleration() {
 		return acceleration;
+	}
+	
+	public Double getCurrentPos() {
+		Double currentPos = null;
+		if (velocity == -1) {
+			return targetPos.doubleValue();
+		}
+		else {
+			long currentTime = System.currentTimeMillis();
+			double dOutput = velocity * (currentTime - lastActivityTime) / 1000;
+			if (mapper.getMaxOutput() > 500) {
+				dOutput *= (2400 - 544) / 180; 
+			}
+			log.info("dOutput = {}",mapper.calcInput(dOutput));
+			if (targetPos > lastPos) {
+				currentPos = mapper.calcInput(mapper.calcOutput(lastPos) + dOutput);
+				if (currentPos > targetPos) {
+					currentPos = targetPos.doubleValue();
+				}
+			}
+			else{
+				currentPos = mapper.calcInput(mapper.calcOutput(lastPos) - dOutput);
+				if (currentPos < targetPos) {
+					currentPos = targetPos.doubleValue();
+				}
+			}
+			return currentPos;
+		}
 	}
 
 }

@@ -273,7 +273,7 @@ public class MotorGUI extends ServiceGUI implements ActionListener, ChangeListen
     Object source = ce.getSource();
     if (power == source) {
       // powerValue.setText(power.getValue() + "%");
-      powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerMap().calc(power.getScaledValue())));
+      powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerMap().calcOutput(power.getScaledValue())));
       myService.send(boundServiceName, "move", power.getScaledValue());
     }
   }

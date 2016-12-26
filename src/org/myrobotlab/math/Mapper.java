@@ -40,7 +40,7 @@ public final class Mapper implements Serializable {
 		}
 	}
 
-	final public double calc(double in) {
+	final public double calcOutput(double in) {
 		double c = minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
 		if (c < minOutput) {
 			log.warn("clipping {} to {}", c, minOutput);
@@ -53,13 +53,25 @@ public final class Mapper implements Serializable {
 		return c;
 	}
 
-	final public int calcInt(int in) {
-		return (int) calc(in);
+	final public int calcOutputInt(int in) {
+		return (int) calcOutput(in);
 	}
 
-	final public int calcInt(double in) {
-		return (int) calc(in);
+	final public int calcOutputInt(double in) {
+		return (int) calcOutput(in);
 	}
+	
+	final public double calcInput(double out) {
+		double c = minX + ((out - minY) * (maxX - minX)) / (maxY - minY);
+		if (c < minX) {
+			return minX;
+		}
+		if (c > maxX) {
+			return maxX;
+		}
+		return c;
+	}
+	
 
 	public Double getMaxX() {
 		return maxX;

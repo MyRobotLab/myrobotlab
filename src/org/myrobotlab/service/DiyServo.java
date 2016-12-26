@@ -513,7 +513,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		}
 
 		targetPos = pos;
-		targetOutput = mapper.calcInt(targetPos);
+		targetOutput = mapper.calcOutputInt(targetPos);
 
 		pid.setSetpoint(pidKey, targetOutput);
 		lastActivityTime = System.currentTimeMillis();
@@ -873,7 +873,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 
 	@Override
 	public double getPowerOutput() {
-		return powerMap.calc(powerLevel);
+		return powerMap.calcOutput(powerLevel);
 	}
 
 	@Override

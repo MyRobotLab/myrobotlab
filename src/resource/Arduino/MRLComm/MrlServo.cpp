@@ -62,6 +62,9 @@ void MrlServo::update() {
           _velocity = velocity;
         }
       }
+      if(targetPos > 500) {
+        _velocity = map(_velocity, 0, 180, 544, 2400) - 544;
+      }
       float step = _velocity * deltaTime;
       step /= 1000; //for deg/ms;
       if (isSweeping) {

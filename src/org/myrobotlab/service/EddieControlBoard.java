@@ -188,11 +188,11 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 
   public void go(float left, float right) throws Exception {
     log.info(String.format("go %f %f", left, right));
-    int l = mapper.calcInt(left);
+    int l = mapper.calcOutputInt(left);
     if (l > 127) {
       l = 128 - l;
     }
-    int r = mapper.calcInt(right);
+    int r = mapper.calcOutputInt(right);
     if (r > 127) {
       r = 128 - r;
     }
