@@ -381,7 +381,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	 */
 	@Override
 	public void attach() {
-		attachPin(pin);
+		attach(pin);
 		broadcastState();
 	}
 
@@ -390,7 +390,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	 * pulses to maintain its current position.
 	 */
 	@Override
-	public void attachPin(int pin) {
+	public void attach(int pin) {
 		// TODO Activate the motor and PID
 		lastActivityTime = System.currentTimeMillis();
 		isAttached = true;
@@ -402,7 +402,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	 */
 	@Override
 	// TODO DeActivate the motor and PID
-	public void detachPin() {
+	public void detach() {
 		if (controller != null) {
 			controller.motorStop((MotorControl) this);
 		}
@@ -554,7 +554,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 
 	@Override
 	public void releaseService() {
-		detachPin();
+		detach();
 		if (controller != null){
 		  detach(controller);
 		}

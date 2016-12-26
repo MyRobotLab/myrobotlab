@@ -185,27 +185,27 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public void detach() {
 	if (thumb != null) {
-      thumb.detachPin();
+      thumb.detach();
       sleep(InMoov.attachPauseMs);
 	}
     if (index != null) {
-      index.detachPin();
+      index.detach();
       sleep(InMoov.attachPauseMs);
     }
     if (majeure != null) {
-      majeure.detachPin();
+      majeure.detach();
       sleep(InMoov.attachPauseMs);
     }
     if (ringFinger != null) {
-      ringFinger.detachPin();
+      ringFinger.detach();
       sleep(InMoov.attachPauseMs);
     }
     if (pinky != null) {
-      pinky.detachPin();
+      pinky.detach();
       sleep(InMoov.attachPauseMs);
     }
     if (wrist != null) {
-      wrist.detachPin();
+      wrist.detach();
     }
    
     

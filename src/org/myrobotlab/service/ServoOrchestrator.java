@@ -254,7 +254,7 @@ public class ServoOrchestrator extends Service {
       sogui_ref.middleright_attach_button.setText("Detach");
       settingsitemholder[middleright_shownitem].attached = true;
     } else {
-      servos[middleright_shownitem].detachPin();
+      servos[middleright_shownitem].detach();
       servos[middleright_shownitem] = null;
       sogui_ref.middleright_attach_button.setText("Attach");
       settingsitemholder[middleright_shownitem].attached = false;

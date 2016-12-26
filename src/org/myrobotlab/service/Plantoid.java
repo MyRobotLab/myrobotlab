@@ -246,10 +246,10 @@ public class Plantoid extends Service {
 	 * detaches the legs only
 	 */
 	public void detachLegs() {
-		leg1.detachPin();
-		leg2.detachPin();
-		leg3.detachPin();
-		leg4.detachPin();
+		leg1.detach();
+		leg2.detach();
+		leg3.detach();
+		leg4.detach();
 	}
 
 	// ------- servos begin -----------
@@ -258,8 +258,8 @@ public class Plantoid extends Service {
 	 * detaches the pan tilt only
 	 */
 	public void detachPanTilt() {
-		pan.detachPin();
-		tilt.detachPin();
+		pan.detach();
+		tilt.detach();
 	}
 
 	/**

@@ -268,7 +268,7 @@ public class Servo extends Service implements ServoControl {
 	 */
 	@Override
 	public void attach() {
-		attachPin(pin);
+		attach(pin);
 	}
 
 	/**
@@ -276,7 +276,7 @@ public class Servo extends Service implements ServoControl {
 	 * pulses to maintain its current position.
 	 */
 	@Override
-	public void attachPin(int pin) {
+	public void attach(int pin) {
 		lastActivityTime = System.currentTimeMillis();
 		controller.servoAttachPin(this, pin);
 		this.pin = pin;
@@ -286,9 +286,10 @@ public class Servo extends Service implements ServoControl {
 
 	/**
 	 * Equivalent to Arduino's Servo.detach() it de-energizes the servo
+	 * IT DOES NOT DETACH THE SERVO CONTROLLER !!!
 	 */
 	@Override
-	public void detachPin() {
+	public void detach() {
 	  this.isPinAttached = false;
 		if (controller != null){
 			controller.servoDetachPin(this);		
@@ -416,7 +417,7 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void releaseService() {
-		detachPin();
+		detach();
 		detach(controller);
 		super.releaseService();
 	}
@@ -705,6 +706,10 @@ public class Servo extends Service implements ServoControl {
 		// the controller better have
 		// isAttach(ServoControl) to prevent infinit loop
 		controller.attach(this, pin);
+		sleep(300);
+		// the controller is attached now
+		// its time to attach the pin
+		attach(pin);
 		
 		broadcastState();
 	}
@@ -819,11 +824,11 @@ public class Servo extends Service implements ServoControl {
 			servo.moveTo(90);
 			servo.setRest(30);
 			
-			servo.attachPin(8);
+			servo.attach(8);
 			servo.moveTo(90);
 			servo.moveTo(30);
 
-			servo.attachPin(9);
+			servo.attach(9);
 			servo.moveTo(90);
 			servo.setRest(30);
 
@@ -844,7 +849,7 @@ public class Servo extends Service implements ServoControl {
 			servo.moveTo(90);
 			servo.moveTo(30);
 
-			servo.attachPin(9);
+			servo.attach(9);
 			servo.moveTo(90);
 			servo.setRest(30);
 

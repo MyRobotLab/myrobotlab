@@ -22,13 +22,13 @@
         </span>
         <input type="text" class="form-control" placeholder="pin" ng-model="pin">
         <span class="input-group-btn">
-            <button class="btn btn-default" ng-show="service.isPinAttached" ng-click="msg.detachPin()">detach pin</button>
-            <button class="btn btn-default" ng-show="!service.isPinAttached" ng-click="msg.attachPin(pin)">attach pin</button>
+            <button class="btn btn-default" ng-show="service.isPinAttached" ng-click="msg.detach()">detach pin</button>
+            <button class="btn btn-default" ng-show="!service.isPinAttached" ng-click="msg.attach(pin)">attach pin</button>
         </span>
     </div>
     <div class="input-group">
         <span class="input-group-addon">speed</span>
-        <input type="text" class="form-control" ng-model="speed" uib-tooltip="fractional speed 0.0 to 1.0">
+        <input type="text" class="form-control" ng-model="velocity" uib-tooltip="fractional speed 0.0 to 1.0">
         <span class="input-group-addon">rest</span>
         <input type="text" class="form-control" ng-model="rest" uib-tooltip="resting position of servo">
         <span class="input-group-addon">min</span>
