@@ -108,7 +108,7 @@
 > servoSetVelocity/deviceId/b16 velocity
 > servoSweepStart/deviceId/min/max/step
 > servoSweepStop/deviceId
-> servoWrite/deviceId/target
+> servoWrite/deviceId/b16 target
 > servoWriteMicroseconds/deviceId/b16 ms
 > servoSetAcceleration/deviceId/b16 acceleration
 # not used as originally intended - as event information

@@ -128,8 +128,8 @@ public:
 	void servoSweepStart( byte deviceId,  byte min,  byte max,  byte step);
 	// > servoSweepStop/deviceId
 	void servoSweepStop( byte deviceId);
-	// > servoWrite/deviceId/target
-	void servoWrite( byte deviceId,  byte target);
+	// > servoWrite/deviceId/b16 target
+	void servoWrite( byte deviceId,  int target);
 	// > servoWriteMicroseconds/deviceId/b16 ms
 	void servoWriteMicroseconds( byte deviceId,  int ms);
 	// > servoSetAcceleration/deviceId/b16 acceleration

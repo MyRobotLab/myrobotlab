@@ -59,7 +59,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 51;
+	public static final int MRLCOMM_VERSION = 52;
 
 	// ------ device type mapping constants
 	
@@ -170,7 +170,7 @@ public class VirtualMsg {
 	public final static int SERVO_SWEEP_START = 44;
 	// > servoSweepStop/deviceId
 	public final static int SERVO_SWEEP_STOP = 45;
-	// > servoWrite/deviceId/target
+	// > servoWrite/deviceId/b16 target
 	public final static int SERVO_WRITE = 46;
 	// > servoWriteMicroseconds/deviceId/b16 ms
 	public final static int SERVO_WRITE_MICROSECONDS = 47;
@@ -230,7 +230,7 @@ public class VirtualMsg {
 	// public void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/){}
 	// public void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/){}
 	// public void servoSweepStop(Integer deviceId/*byte*/){}
-	// public void servoWrite(Integer deviceId/*byte*/, Integer target/*byte*/){}
+	// public void servoWrite(Integer deviceId/*byte*/, Integer target/*b16*/){}
 	// public void servoWriteMicroseconds(Integer deviceId/*byte*/, Integer ms/*b16*/){}
 	// public void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/){}
 	// public void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/){}
@@ -677,8 +677,8 @@ public class VirtualMsg {
 		case SERVO_WRITE: {
 			Integer deviceId = ioCmd[startPos+1]; // bu8
 			startPos += 1;
-			Integer target = ioCmd[startPos+1]; // bu8
-			startPos += 1;
+			Integer target = b16(ioCmd, startPos+1);
+			startPos += 2; //b16
 			if(invoke){
 				arduino.invoke("servoWrite",  deviceId,  target);
 			} else { 

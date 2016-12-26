@@ -120,8 +120,8 @@ Msg* Msg::getInstance() {
 	void servoSweepStart( byte deviceId,  byte min,  byte max,  byte step);
 	// > servoSweepStop/deviceId
 	void servoSweepStop( byte deviceId);
-	// > servoWrite/deviceId/target
-	void servoWrite( byte deviceId,  byte target);
+	// > servoWrite/deviceId/b16 target
+	void servoWrite( byte deviceId,  int target);
 	// > servoWriteMicroseconds/deviceId/b16 ms
 	void servoWriteMicroseconds( byte deviceId,  int ms);
 	// > servoSetAcceleration/deviceId/b16 acceleration
@@ -536,8 +536,8 @@ void Msg::processCommand() {
 	case SERVO_WRITE: { // servoWrite
 			byte deviceId = ioCmd[startPos+1]; // bu8
 			startPos += 1;
-			byte target = ioCmd[startPos+1]; // bu8
-			startPos += 1;
+			int target = b16(ioCmd, startPos+1);
+			startPos += 2; //b16
 			mrlComm->servoWrite( deviceId,  target);
 			break;
 	}

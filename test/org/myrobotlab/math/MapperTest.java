@@ -20,7 +20,7 @@ public class MapperTest {
     double testValue = 15;
     double expectedResult = 150;
     Mapper myMapper = new Mapper(10, 18, 100, 180);
-    double actualResult = myMapper.calc(testValue);
+    double actualResult = myMapper.calcOutput(testValue);
     assertEquals("calc(15) should return 150", expectedResult, actualResult, 3);
   }
 

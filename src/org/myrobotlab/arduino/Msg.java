@@ -59,7 +59,7 @@ public class Msg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 51;
+	public static final int MRLCOMM_VERSION = 52;
 
 	// ------ device type mapping constants
 	
@@ -170,7 +170,7 @@ public class Msg {
 	public final static int SERVO_SWEEP_START = 44;
 	// > servoSweepStop/deviceId
 	public final static int SERVO_SWEEP_STOP = 45;
-	// > servoWrite/deviceId/target
+	// > servoWrite/deviceId/b16 target
 	public final static int SERVO_WRITE = 46;
 	// > servoWriteMicroseconds/deviceId/b16 ms
 	public final static int SERVO_WRITE_MICROSECONDS = 47;
@@ -1351,13 +1351,13 @@ public class Msg {
 	  }
 	}
 
-	public void servoWrite(Integer deviceId/*byte*/, Integer target/*byte*/) {
+	public void servoWrite(Integer deviceId/*byte*/, Integer target/*b16*/) {
 		try {
 			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
+			write(1 + 1 + 2); // size
 			write(SERVO_WRITE); // msgType = 46
 			write(deviceId);
-			write(target);
+			writeb16(target);
  
 			if(record != null){
 				txBuffer.append("> servoWrite");

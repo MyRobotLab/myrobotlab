@@ -426,12 +426,9 @@ void MrlComm::servoSweepStop(byte deviceId) {
 	servo->stopSweep();
 }
 
-void MrlComm::servoWrite(byte deviceId, byte target) {
-	msg->publishDebug("MrlComm::servoWrite - servoWrite" + String(deviceId));
+void MrlComm::servoWrite(byte deviceId, int target) {
 	MrlServo* servo = (MrlServo*) getDevice(deviceId);
-	msg->publishDebug("got - servoWrite" + String(deviceId));
 	servo->servoWrite(target);
-	msg->publishDebug("got - wrote" + String(deviceId));
 }
 
 void MrlComm::servoWriteMicroseconds(byte deviceId, int ms) {
