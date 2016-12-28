@@ -148,7 +148,7 @@ public class Servo extends Service implements ServoControl {
 
 	public String controllerName = null;
 
-	Mapper mapper = new Mapper(0, 180, 544, 2400);
+	Mapper mapper = new Mapper(0, 180, 0, 180);
 
 	int rest = 90;
 
@@ -226,6 +226,8 @@ public class Servo extends Service implements ServoControl {
 	Integer acceleration = -1;
 
 	private Integer lastPos;
+
+	private boolean autoAttach = false;
 	
 	class IKData {
 		String name;
@@ -376,13 +378,27 @@ public class Servo extends Service implements ServoControl {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
+		if (!isPinAttached()){
+			if (autoAttach){
+				attach();
+			}
+			else {
+				log.error("Servo {} not attached", getName());
+			}
+		}
 		lastPos = targetPos;
 		targetPos = pos;
-		targetOutput = mapper.calcOutputInt(targetPos);
+		targetOutput = degreeToMicroseconds(mapper.calcOutput(targetPos));
 
 		controller.servoWrite(this);
 		lastActivityTime = System.currentTimeMillis();
-
+		
+		if (autoAttach) {
+			if (velocity != -1) {
+				
+			}
+		}
+		
 		if (isEventsEnabled) {
 			// update others of our position change
 			invoke("publishServoEvent", targetOutput);
@@ -632,7 +648,7 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public Integer getTargetOutput() {
-		return targetOutput;
+		return degreeToMicroseconds(targetOutput).intValue();
 	}
 
 	/*
@@ -697,7 +713,7 @@ public class Servo extends Service implements ServoControl {
 			targetPos = rest;
 		}
 
-		targetOutput = mapper.calcOutputInt(targetPos);
+		targetOutput = degreeToMicroseconds(mapper.calcOutput(targetPos));
 
 		// SET THE DATA
 		this.pin = pin;
@@ -775,9 +791,9 @@ public class Servo extends Service implements ServoControl {
 		return maxVelocity;
 	}
 
-	public void moveToOutput(Double moveTo) {
-		moveToOutput(moveTo.intValue());
-	}
+//	public void moveToOutput(Double moveTo) {
+//		moveToOutput(moveTo.intValue());
+//	}
 
 	public void moveToOutput(Integer moveTo) {
 		if (controller == null) {
@@ -911,6 +927,11 @@ public class Servo extends Service implements ServoControl {
 		return acceleration;
 	}
 	
+	/**
+	 * getCurrentPos() - return the calculated position of the servo
+	 * use lastActivityTime and velocity for the computation
+	 * @return the current position of the servo
+	 */
 	public Double getCurrentPos() {
 		Double currentPos = null;
 		if (velocity == -1) {
@@ -938,5 +959,28 @@ public class Servo extends Service implements ServoControl {
 			return currentPos;
 		}
 	}
-
+	
+	/**
+	 * enableAutoAttach will attach a servo when ask to move and detach it when the move is complete
+	 * @param autoAttach 
+	 */
+	public void enableAutoAttach(boolean autoAttach) {
+		this.autoAttach = autoAttach;
+	}
+	
+	/**
+	 * degreeToMicroseconds - convert a value to send to servo from degree (0-180) to microseconds (544-2400)
+	 * @param degree
+	 * @return
+	 */
+	public Integer degreeToMicroseconds(double degree) {
+		if (degree >= 544) return (int)degree;
+		return (int)(degree * (2400 - 544) / 180);
+	}
+	
+	public Integer microsecondsToDegree(double microseconds) {
+		if (microseconds <= 180) return (int)microseconds;
+		return (int)(microseconds * 180 / (2400 - 544));
+	}
+	
 }
