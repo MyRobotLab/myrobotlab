@@ -834,6 +834,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 					timer.cancel();
 					timer.purge();
 					timer = null;
+					tasks.remove(taskName);
 				} catch (Exception e) {
 					log.info(e.getMessage());
 				}
@@ -851,6 +852,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 					timer.cancel();
 					timer.purge();
 					timer = null;
+					tasks.remove(taskName);
 				} catch (Exception e) {
 					log.info(e.getMessage());
 				}

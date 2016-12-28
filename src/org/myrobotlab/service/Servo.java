@@ -228,6 +228,8 @@ public class Servo extends Service implements ServoControl {
 	private Integer lastPos;
 
 	private boolean autoAttach = false;
+
+	public long defaultDetachDelay=10000;
 	
 	class IKData {
 		String name;
@@ -286,6 +288,7 @@ public class Servo extends Service implements ServoControl {
 		this.pin = pin;
 		isPinAttached = true;
 		broadcastState();
+		invoke("publishServoAttach", getName());
 	}
 
 	/**
@@ -299,6 +302,7 @@ public class Servo extends Service implements ServoControl {
 			controller.servoDetachPin(this);		
 		}
 		broadcastState();
+		invoke("publishServoDetach", getName());
 	}
 
 	public boolean eventsEnabled(boolean b) {
@@ -395,7 +399,7 @@ public class Servo extends Service implements ServoControl {
 		
 		if (autoAttach) {
 			if (velocity != -1) {
-				
+				this.addTask("DetachServo", 250, "autoDetach");
 			}
 		}
 		
@@ -816,7 +820,6 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public int getVelocity() {
-		// TODO Auto-generated method stub
 		return velocity;
 	}
 
@@ -975,12 +978,32 @@ public class Servo extends Service implements ServoControl {
 	 */
 	public Integer degreeToMicroseconds(double degree) {
 		if (degree >= 544) return (int)degree;
-		return (int)(degree * (2400 - 544) / 180);
+		return (int)(degree * (2400 - 544) / 180)+544;
 	}
 	
 	public Integer microsecondsToDegree(double microseconds) {
 		if (microseconds <= 180) return (int)microseconds;
-		return (int)(microseconds * 180 / (2400 - 544));
+		return (int)((microseconds - 544) * 180 / (2400 - 544));
+	}
+	
+	public void autoDetach() {
+		if(getCurrentPos().intValue() == targetPos) { //servo reach position
+			detach();
+			purgeTask("DetachServo");
+			return;
+		}
+		if (System.currentTimeMillis() - lastActivityTime > defaultDetachDelay ) { //default detach delay
+			detach();
+			purgeTask("DetachServo");
+		}
+	}
+	
+	public String publishServoAttach(String name) {
+		return name;
+	}
+	
+	public String publishServoDetach(String name) {
+		return name;
 	}
 	
 }
