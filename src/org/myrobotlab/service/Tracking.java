@@ -402,11 +402,11 @@ public class Tracking extends Service {
 
             if (xpos + scanXStep >= Math.max(x.getMax(), x.getMin()) && scanXStep > 0 || xpos + scanXStep <= Math.min(x.getMin(), x.getMax()) && scanXStep < 0) {
               scanXStep = scanXStep * -1;
-              int newY = (int) (Math.min(y.getMin(), y.getMax()) + (Math.random() * (Math.max(y.getMax(), y.getMin()) - Math.min(y.getMin(), y.getMax()))));
+              int newY = (int)(Math.min(y.getMin(), y.getMax()) + (Math.random() * (Math.max(y.getMax(), y.getMin()) - Math.min(y.getMin(), y.getMax()))));
               y.moveToOutput(newY);
             }
 
-            x.moveTo(xpos + scanXStep);
+            x.moveToOutput(xpos + scanXStep);
           }
           // state = STATE_FACE_DETECT_LOST_TRACK;
         }
@@ -569,10 +569,10 @@ public class Tracking extends Service {
 
       if (pid.compute("x")) {
         if(x.isInverted()) {
-          currentXServoPos -= (int) pid.getOutput("x");
+          currentXServoPos -= pid.getOutput("x");
         }
         else{
-          currentXServoPos += (int) pid.getOutput("x");
+          currentXServoPos += pid.getOutput("x");
         }
         if (currentXServoPos != lastXServoPos) {
           x.moveToOutput(currentXServoPos);
