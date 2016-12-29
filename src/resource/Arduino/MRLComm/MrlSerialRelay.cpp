@@ -11,7 +11,7 @@ MrlSerialRelay::~MrlSerialRelay() {
 }
 
 bool MrlSerialRelay::attach(byte serialPort){
-  // msg->publishDebug("MrlSerialRelay.deviceAttach !!!");
+  // msg->publishDebug("MrlSerialRelay.deviceAttach !");
   this->serialPort = serialPort;
   switch(serialPort){
   case MRL_IO_SERIAL_0:
