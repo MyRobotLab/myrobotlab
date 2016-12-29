@@ -380,7 +380,7 @@ void MrlComm::neoPixelWriteMatrix(byte deviceId, byte bufferSize, const byte*buf
 }
 
 // > servoAttach/deviceId/pin/targetOutput/b16 velocity
-void MrlComm::servoAttach(byte deviceId, byte pin, byte targetOutput, int velocity) {
+void MrlComm::servoAttach(byte deviceId, byte pin, int targetOutput, int velocity) {
 	MrlServo* servo = new MrlServo(deviceId);
 	addDevice(servo);
 	// not your mama's attach - this is attaching/initializing the MrlDevice

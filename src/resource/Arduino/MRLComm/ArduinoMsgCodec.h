@@ -9,7 +9,7 @@
  * 							src\resource\Arduino\generate\ArduinoMsgCodec.template.h
  */
 
-#define MRLCOMM_VERSION			52
+#define MRLCOMM_VERSION			53
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
@@ -100,7 +100,7 @@
 #define SET_TRIGGER 37
 // > setDebounce/pin/delay
 #define SET_DEBOUNCE 38
-// > servoAttach/deviceId/pin/initPos/b16 initVelocity
+// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
 #define SERVO_ATTACH 39
 // > servoAttachPin/deviceId/pin
 #define SERVO_ATTACH_PIN 40

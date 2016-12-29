@@ -101,7 +101,7 @@
 # Servo
 # http://myrobotlab.org/service/Servo
 
-> servoAttach/deviceId/pin/initPos/b16 initVelocity
+> servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
 > servoAttachPin/deviceId/pin
 > servoDetachPin/deviceId
 > servoSetMaxVelocity/deviceId/b16 maxVelocity

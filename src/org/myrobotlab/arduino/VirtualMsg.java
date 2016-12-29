@@ -59,7 +59,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 52;
+	public static final int MRLCOMM_VERSION = 53;
 
 	// ------ device type mapping constants
 	
@@ -156,7 +156,7 @@ public class VirtualMsg {
 	public final static int SET_TRIGGER = 37;
 	// > setDebounce/pin/delay
 	public final static int SET_DEBOUNCE = 38;
-	// > servoAttach/deviceId/pin/initPos/b16 initVelocity
+	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
 	public final static int SERVO_ATTACH = 39;
 	// > servoAttachPin/deviceId/pin
 	public final static int SERVO_ATTACH_PIN = 40;
@@ -223,7 +223,7 @@ public class VirtualMsg {
 	// public void pinMode(Integer pin/*byte*/, Integer mode/*byte*/){}
 	// public void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/){}
 	// public void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/){}
-	// public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*byte*/, Integer initVelocity/*b16*/){}
+	// public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/){}
 	// public void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/){}
 	// public void servoDetachPin(Integer deviceId/*byte*/){}
 	// public void servoSetMaxVelocity(Integer deviceId/*byte*/, Integer maxVelocity/*b16*/){}
@@ -591,8 +591,8 @@ public class VirtualMsg {
 			startPos += 1;
 			Integer pin = ioCmd[startPos+1]; // bu8
 			startPos += 1;
-			Integer initPos = ioCmd[startPos+1]; // bu8
-			startPos += 1;
+			Integer initPos = b16(ioCmd, startPos+1);
+			startPos += 2; //b16
 			Integer initVelocity = b16(ioCmd, startPos+1);
 			startPos += 2; //b16
 			if(invoke){

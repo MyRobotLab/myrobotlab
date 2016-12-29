@@ -448,7 +448,6 @@ public class InMoov extends Service {
     if (type != null) {
       return type;
     }
-
     if (RIGHT.equals(side)) {
       return Arduino.BOARD_TYPE_UNO;
     }
