@@ -59,7 +59,7 @@ public class Msg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 52;
+	public static final int MRLCOMM_VERSION = 53;
 
 	// ------ device type mapping constants
 	
@@ -156,7 +156,7 @@ public class Msg {
 	public final static int SET_TRIGGER = 37;
 	// > setDebounce/pin/delay
 	public final static int SET_DEBOUNCE = 38;
-	// > servoAttach/deviceId/pin/initPos/b16 initVelocity
+	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
 	public final static int SERVO_ATTACH = 39;
 	// > servoAttachPin/deviceId/pin
 	public final static int SERVO_ATTACH_PIN = 40;
@@ -1177,14 +1177,14 @@ public class Msg {
 	  }
 	}
 
-	public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*byte*/, Integer initVelocity/*b16*/) {
+	public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/) {
 		try {
 			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 1 + 2); // size
+			write(1 + 1 + 1 + 2 + 2); // size
 			write(SERVO_ATTACH); // msgType = 39
 			write(deviceId);
 			write(pin);
-			write(initPos);
+			writeb16(initPos);
 			writeb16(initVelocity);
  
 			if(record != null){

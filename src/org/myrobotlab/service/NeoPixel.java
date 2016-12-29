@@ -310,6 +310,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("setting null as controller");
       return;
     }
+    if(isAttached) {
+    	log.info("Neopixel already attached");
+    	return;
+    }
     
     this.pin = pin;
     this.numPixel = numPixel;

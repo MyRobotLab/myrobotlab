@@ -31,7 +31,7 @@ class MrlServo : public Device {
   public:
     MrlServo(int deviceId);
     ~MrlServo();
-    bool attach(byte pin, byte initPos, int initVelocity);
+    bool attach(byte pin, int initPos, int initVelocity);
     void attachPin(int pin);
     void detachPin();
     void update();

@@ -368,6 +368,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       error("You must connect to a Mega controller");
       return;
     }
+    if (controllerAttachAs != MRL_IO_NOT_DEFINED) {
+    	log.info("controller already attached");
+    	return;
+    }
     SerialRelay relay = (SerialRelay) Runtime.createAndStart("relay", "SerialRelay");
     switch (serialPort) {
       case "Serial1":
@@ -1757,7 +1761,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     super.startService();
     try {
       serial = (Serial) startPeer("serial");
-      msg = new Msg(this, serial);
+      if (msg == null) {
+      	msg = new Msg(this, serial);
+      }
       // FIXME - dynamically additive - if codec key has never been used -
       // add key
       // serial.getOutbox().setBlocking(true);

@@ -106,8 +106,8 @@ Msg* Msg::getInstance() {
 	void setTrigger( byte pin,  byte triggerValue);
 	// > setDebounce/pin/delay
 	void setDebounce( byte pin,  byte delay);
-	// > servoAttach/deviceId/pin/initPos/b16 initVelocity
-	void servoAttach( byte deviceId,  byte pin,  byte initPos,  int initVelocity);
+	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
+	void servoAttach( byte deviceId,  byte pin,  int initPos,  int initVelocity);
 	// > servoAttachPin/deviceId/pin
 	void servoAttachPin( byte deviceId,  byte pin);
 	// > servoDetachPin/deviceId
@@ -478,8 +478,8 @@ void Msg::processCommand() {
 			startPos += 1;
 			byte pin = ioCmd[startPos+1]; // bu8
 			startPos += 1;
-			byte initPos = ioCmd[startPos+1]; // bu8
-			startPos += 1;
+			int initPos = b16(ioCmd, startPos+1);
+			startPos += 2; //b16
 			int initVelocity = b16(ioCmd, startPos+1);
 			startPos += 2; //b16
 			mrlComm->servoAttach( deviceId,  pin,  initPos,  initVelocity);
