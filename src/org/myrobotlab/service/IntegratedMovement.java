@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.genetic.GeneticAlgorithm;
@@ -22,7 +20,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.Servo.IKData;
-import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.PointsListener;
 import org.slf4j.Logger;
@@ -206,9 +203,6 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
           	sleep(10);
           }
         }
-//          while (timeToWait + servo.lastActivityTime > System.currentTimeMillis()) {
-//            sleep(1);
-//          }
         for (int i = 0; i < currentArm.getNumLinks(); i++){
           Servo servo = currentServos.get(currentArm.getLink(i).getName());
           servo.moveTo(currentArm.getLink(i).getPositionValueDeg().intValue());
