@@ -103,7 +103,7 @@ public class MouthControl extends Service {
     log.info("move moving to :" + text);
     if (jaw != null) { // mouthServo.moveTo(Mouthopen);
       if (autoAttach) {
-        if (!jaw.isAttached()) {
+        if (!jaw.isPinAttached()) {
           // attach the jaw if it's not attached.
           jaw.attach();
         }
@@ -156,7 +156,7 @@ public class MouthControl extends Service {
 
     // We're done annimating, lets detach the jaw while not in use.
     if (autoAttach && jaw != null) {
-      if (jaw.isAttached()) {
+      if (jaw.isPinAttached()) {
         // attach the jaw if it's not attached.
         jaw.detach();
       }
