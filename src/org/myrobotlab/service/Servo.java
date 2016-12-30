@@ -391,6 +391,12 @@ public class Servo extends Service implements ServoControl {
 			}
 		}
 		lastPos = targetPos;
+		if (pos < mapper.getMinX()) {
+			pos = mapper.getMinX().intValue();
+		}
+		if (pos > mapper.getMaxX()) {
+			pos = mapper.getMaxX().intValue();
+		}
 		targetPos = pos;
 		targetOutput = degreeToMicroseconds(mapper.calcOutput(targetPos));
 
@@ -946,18 +952,40 @@ public class Servo extends Service implements ServoControl {
 			if (mapper.getMaxOutput() > 500) {
 				dOutput *= (2400 - 544) / 180; 
 			}
-			log.info("dOutput = {}",mapper.calcInput(dOutput));
+			//log.info("dOutput = {}",mapper.calcInput(dOutput));
 			if (targetPos > lastPos) {
-				currentPos = mapper.calcInput(mapper.calcOutput(lastPos) + dOutput);
-				if (currentPos > targetPos) {
-					currentPos = targetPos.doubleValue();
+				if (mapper.getMaxY() > mapper.getMinY()) {
+					currentPos = mapper.calcInput(mapper.calcOutput(lastPos) + dOutput);
+					if (currentPos > targetPos) {
+						currentPos = targetPos.doubleValue();
+					}
+				}
+				else{
+					currentPos = mapper.calcInput(mapper.calcOutput(lastPos) - dOutput);
+					if (currentPos > targetPos) {
+						currentPos = targetPos.doubleValue();
+					}
 				}
 			}
-			else{
-				currentPos = mapper.calcInput(mapper.calcOutput(lastPos) - dOutput);
-				if (currentPos < targetPos) {
-					currentPos = targetPos.doubleValue();
+			else if (targetPos < lastPos) {
+				if (mapper.getMaxY() > mapper.getMinY()) {
+					currentPos = mapper.calcInput(mapper.calcOutput(lastPos) - dOutput);
+					if (currentPos < targetPos) {
+						currentPos = targetPos.doubleValue();
+					}
 				}
+				else {
+					currentPos = mapper.calcInput(mapper.calcOutput(lastPos) + dOutput);
+					if (currentPos < targetPos) {
+						currentPos = targetPos.doubleValue();
+					}
+				}
+			}
+			else {
+				currentPos = targetPos.doubleValue();
+			}
+			if (currentPos.isNaN()) {
+				return targetPos.doubleValue();
 			}
 			return currentPos;
 		}

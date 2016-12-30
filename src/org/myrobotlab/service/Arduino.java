@@ -1760,15 +1760,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void startService() {
     super.startService();
     try {
-      serial = (Serial) startPeer("serial");
       if (msg == null) {
+      	serial = (Serial) startPeer("serial");
       	msg = new Msg(this, serial);
-      }
       // FIXME - dynamically additive - if codec key has never been used -
       // add key
       // serial.getOutbox().setBlocking(true);
       // inbox.setBlocking(true);
-      serial.addByteListener(this);
+      	serial.addByteListener(this);
+      }
     } catch (Exception e) {
       Logging.logError(e);
     }
