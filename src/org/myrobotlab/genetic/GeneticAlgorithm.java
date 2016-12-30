@@ -83,7 +83,6 @@ public class GeneticAlgorithm {
   }
   
   private Chromosome RandomWheel(ArrayList<Chromosome> chromosomes, Double totalFitness) {
-    // TODO Auto-generated method stub
     Random rand = new Random();
     double randomNumber = rand.nextInt(totalFitness.intValue());
     Double fitnessCount = 0.0;
@@ -97,7 +96,6 @@ public class GeneticAlgorithm {
   }
 
   public void setGeneticClass(Genetic geneticClass) {
-    // TODO Auto-generated method stub
     this.geneticClass = geneticClass;
   }
 
