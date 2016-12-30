@@ -35,7 +35,7 @@ MrlNeopixel::~MrlNeopixel() {
 }
 
 bool MrlNeopixel::attach(byte pin, long numPixels) {
-  // msg->publishDebug("MrlNeopixel.deviceAttach !!!" + String(pin));
+  // msg->publishDebug("MrlNeopixel.deviceAttach !" + String(pin));
 	pixels = new Pixel[numPixels + 1];
 	//if (BOARD == BOARD_TYPE_ID_UNKNOWN) { // REALLY ? WHY ?
 	//	msg->publishError(F("Board not supported"));
@@ -465,7 +465,7 @@ inline void MrlNeopixel::sendBitE(bool bitVal) {
 }
 
 inline void MrlNeopixel::sendBitA(bool bitVal) {
-  //msg->publishDebug("MrlNeopixel.deviceAttach !!!");
+  //msg->publishDebug("MrlNeopixel.deviceAttach !");
 	//Serial.println(bitmask);
 	uint8_t bit=bitmask;
 	if (bitVal) {        // 0 bit
@@ -564,7 +564,7 @@ inline void MrlNeopixel::sendBitD(bool bitVal) {
 }
 
 inline void MrlNeopixel::sendByte(unsigned char byte) {
-  //msg->publishDebug("MrlNeopixel.sendByte !!!");
+  //msg->publishDebug("MrlNeopixel.sendByte !");
 	for (unsigned char bit = 0; bit < 8; bit++) {
 		bool val = bitRead(byte, 7);
 		digitalPinToSendBit(pin, val);
@@ -575,7 +575,7 @@ inline void MrlNeopixel::sendByte(unsigned char byte) {
 }
 
 inline void MrlNeopixel::sendPixel(Pixel p) {
- // msg->publishDebug("MrlNeopixel.sendPixel !!!");
+ // msg->publishDebug("MrlNeopixel.sendPixel !");
 	sendByte(p.green); // Neopixel wants colors in green then red then blue order
 	sendByte(p.red);
 	sendByte(p.blue);
@@ -822,7 +822,7 @@ void MrlNeopixel::animationFlashRandom() {
 }
 
 void MrlNeopixel::animationIronman() {
-  //msg->publishDebug("MrlNeopixel.animation Ironman !!!");
+  //msg->publishDebug("MrlNeopixel.animation Ironman !");
 	if (!((_count++) % _speed)) {
 		int flip = random(32);
 		if (flip > 22)
