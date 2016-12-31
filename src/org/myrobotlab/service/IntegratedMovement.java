@@ -235,23 +235,52 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
           //current implementation add a bias toward outside position
           Point newPos = currentPosition();
           newPos.setX(newPos.getX()+collisionItems.getCollisionPoint()[itemIndex].getX()-collisionItems.getCollisionPoint()[1-itemIndex].getX());
-          newPos.setY(newPos.getX()+collisionItems.getCollisionPoint()[itemIndex].getY()-collisionItems.getCollisionPoint()[1-itemIndex].getY());
+          newPos.setY(newPos.getY()+collisionItems.getCollisionPoint()[itemIndex].getY()-collisionItems.getCollisionPoint()[1-itemIndex].getY());
           newPos.setZ(newPos.getZ()+collisionItems.getCollisionPoint()[itemIndex].getZ()-collisionItems.getCollisionPoint()[1-itemIndex].getZ());
           Point ori=collisionItems.getCollisionItem()[1-itemIndex].getOrigin();
           Point end=collisionItems.getCollisionItem()[1-itemIndex].getEnd();
           Point colPoint = collisionItems.getCollisionPoint()[1-itemIndex];
-          double oc = Math.sqrt(((ori.getX() - colPoint.getX()) * (ori.getX() - colPoint.getX())) + ((ori.getY() - colPoint.getY()) * (ori.getY() - colPoint.getY())) + ((ori.getZ() - colPoint.getZ()) * (ori.getZ() - colPoint.getZ())));
-          double ec = Math.sqrt(((end.getX() - colPoint.getX()) * (end.getX() - colPoint.getX())) + ((end.getY() - colPoint.getY()) * (end.getY() - colPoint.getY())) + ((end.getZ() - colPoint.getZ()) * (end.getZ() - colPoint.getZ())));
-          if (oc > ec) {
-            newPos.setX(newPos.getX()+colPoint.getX()-end.getX());
-            newPos.setY(newPos.getX()+colPoint.getY()-end.getY());
-            newPos.setZ(newPos.getZ()+colPoint.getZ()-end.getZ());
+          if (collisionItems.getCollisionLocation()[1-itemIndex] > 0.0 || collisionItems.getCollisionLocation()[1-itemIndex] < 1.0) { // collision on the side of item
+          	if (collisionItems.getCollisionLocation()[1-itemIndex] < 0.5) { //collision near the origin
+              newPos.setX(newPos.getX()+ori.getX()-colPoint.getX());
+              newPos.setY(newPos.getY()+ori.getY()-colPoint.getY());
+              newPos.setZ(newPos.getZ()+ori.getZ()-colPoint.getZ());
+          	}
+          	else { //collision near the end
+              newPos.setX(newPos.getX()+end.getX()-colPoint.getX());
+              newPos.setY(newPos.getY()+end.getY()-colPoint.getY());
+              newPos.setZ(newPos.getZ()+end.getZ()-colPoint.getZ());
+          	}
           }
-          else {
-            newPos.setX(newPos.getX()+colPoint.getX()-ori.getX());
-            newPos.setY(newPos.getX()+colPoint.getY()-ori.getY());
-            newPos.setZ(newPos.getZ()+colPoint.getZ()-ori.getZ());
+          //move away by the radius of the part
+          double length = collisionItems.getCollisionItem()[1-itemIndex].getLength();
+          double ratio = collisionItems.getCollisionItem()[itemIndex].getRadius() / length;
+          double[] vector = collisionItems.getCollisionItem()[1-itemIndex].getVector();
+          for (int i=0; i<3; i++){
+          	vector[i] *= ratio;
           }
+        	if (collisionItems.getCollisionLocation()[1-itemIndex] < 0.5) { //collision near the origin
+            newPos.setX(newPos.getX() - vector[0]);
+            newPos.setY(newPos.getY() - vector[1]);
+            newPos.setZ(newPos.getZ() - vector[2]);
+        	}
+        	else {
+            newPos.setX(newPos.getX() + vector[0]);
+            newPos.setY(newPos.getY() + vector[1]);
+            newPos.setZ(newPos.getZ() + vector[2]);
+        	}
+//          double oc = Math.sqrt(((ori.getX() - colPoint.getX()) * (ori.getX() - colPoint.getX())) + ((ori.getY() - colPoint.getY()) * (ori.getY() - colPoint.getY())) + ((ori.getZ() - colPoint.getZ()) * (ori.getZ() - colPoint.getZ())));
+//          double ec = Math.sqrt(((end.getX() - colPoint.getX()) * (end.getX() - colPoint.getX())) + ((end.getY() - colPoint.getY()) * (end.getY() - colPoint.getY())) + ((end.getZ() - colPoint.getZ()) * (end.getZ() - colPoint.getZ())));
+//          if (oc > ec) {
+//            newPos.setX(newPos.getX()+colPoint.getX()-end.getX());
+//            newPos.setY(newPos.getX()+colPoint.getY()-end.getY());
+//            newPos.setZ(newPos.getZ()+colPoint.getZ()-end.getZ());
+//          }
+//          else {
+//            newPos.setX(newPos.getX()+colPoint.getX()-ori.getX());
+//            newPos.setY(newPos.getX()+colPoint.getY()-ori.getY());
+//            newPos.setZ(newPos.getZ()+colPoint.getZ()-ori.getZ());
+//          }
           Point oldGoTo = goTo;
           moveTo(newPos);
           goTo = oldGoTo;

@@ -14,6 +14,7 @@ public class CollisionDectection {
   private boolean collision;
   private Point[] collisionPoint = {new Point(0,0,0,0,0,0),new Point(0,0,0,0,0,0)};
   private CollisionItem[] collisionItems = new CollisionItem[2];
+  private double[] collisionLocation = new double[2];
   
   
   public CollisionDectection() {
@@ -116,6 +117,8 @@ public class CollisionDectection {
           collisionPoint[1] = point2;
           collisionItems[0] = item;
           collisionItems[1] = citem;
+          collisionLocation[0] = tk[0];
+          collisionLocation[1] = tk[1];
           return;
         }
       }
@@ -211,4 +214,7 @@ public class CollisionDectection {
   	return retval;		
   }		
   
+  public double[] getCollisionLocation(){
+  	return collisionLocation;
+  }
 }

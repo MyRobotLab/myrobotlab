@@ -118,4 +118,8 @@ public class CollisionItem {
   	}		
   	return vectorT;		
   }		
+  
+  public double getLength(){
+  	return (Math.sqrt(Math.pow(origin.getX()-end.getX(), 2)+Math.pow(origin.getY()-end.getY(), 2)+Math.pow(origin.getZ()-end.getZ(), 2)));
+  }
 }
