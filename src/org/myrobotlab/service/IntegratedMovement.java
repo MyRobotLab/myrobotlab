@@ -531,8 +531,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     servo.addIKServoEventListener(this);
     currentServos.put(servo.getName(), servo);
     dhLink.addPositionValue(servo.getPos());
-    dhLink.setMin(MathUtils.degToRad(theta + Math.min(servo.getMinInput(), servo.getMaxInput())));
-    dhLink.setMax(MathUtils.degToRad(theta + Math.max(servo.getMaxInput(), servo.getMinInput())));
+    dhLink.setMin(MathUtils.degToRad(theta + Math.min(servo.getMin(), servo.getMax())));
+    dhLink.setMax(MathUtils.degToRad(theta + Math.max(servo.getMax(), servo.getMin())));
     currentArm.addLink(dhLink);
   }
   
@@ -637,7 +637,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
         DHLink newLink = new DHLink(currentArm.getLink(i));
         double degrees = currentArm.getLink(i).getPositionValueDeg();
         double deltaDegree = java.lang.Math.abs(degrees - (Double)decodedGenome.get(i));
-        double deltaDegree2 = time * (Integer)currentServos.get(currentArm.getLink(i).getName()).getVelocity();
+        double deltaDegree2 = time * currentServos.get(currentArm.getLink(i).getName()).getVelocity();
         if (deltaDegree >= deltaDegree2) {
           deltaDegree = deltaDegree2;
           isMoving = true;

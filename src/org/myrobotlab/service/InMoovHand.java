@@ -89,7 +89,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     pinky.setRest(2);
     wrist.setRest(90);
     
-    setVelocity(45, 45, 45, 45, 45, 45);
+    setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
 
   }
 
@@ -559,7 +559,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     return meta;
   }
 
-  public void setVelocity(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+  public void setVelocity(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     this.thumb.setVelocity(thumb);
     this.index.setVelocity(index);
     this.majeure.setVelocity(majeure);

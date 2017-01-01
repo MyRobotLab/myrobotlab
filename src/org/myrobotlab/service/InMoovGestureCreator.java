@@ -1150,7 +1150,7 @@ public class InMoovGestureCreator extends Service {
           }
 
           Double min = servo.getMin();
-          int res = servo.getRest();
+          double res = servo.getRest();
           Double max = servo.getMax();
 
           servoitemholder[i1][i2].min.setText(min + "");

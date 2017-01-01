@@ -43,7 +43,7 @@ public class ArduinoTest implements PinArrayListener {
 
 	public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
 
-	static boolean useVirtualHardware = false;
+	static boolean useVirtualHardware = true;
 	static String port = "COM5";
 
 	// things to test

@@ -220,7 +220,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	/**
 	 * the requested INPUT position of the servo
 	 */
-	Integer targetPos;
+	Double targetPos;
 
 	/**
 	 * the calculated output for the servo
@@ -235,8 +235,8 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	// FIXME - currently is only computer control - needs to be either
 	// microcontroller or computer
 	boolean isSweeping = false;
-	int sweepMin = 0;
-	int sweepMax = 180;
+	double sweepMin = 0;
+	double sweepMax = 180;
 	int sweepDelay = 1;
 
 	int sweepStep = 1;
@@ -442,35 +442,16 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		return lastActivityTime;
 	}
 
-	public Double getMax() {
-		return mapper.getMaxY();
-	}
-
-	public Double getMaxInput() {
+	public double getMax() {
 		return mapper.getMaxX();
 	}
 
-	public Double getMaxOutput() {
-		return mapper.getMaxOutput();
-	}
-
-	public Double getMin() {
-		return mapper.getMinY();
-	}
-
-	public Double getMinInput() {
-		return mapper.getMinX();
-	}
-
-	public Double getMinOutput() {
-		return mapper.getMinOutput();
-	}
-
-	public Integer getPos() {
+	
+	public double getPos() {
 		return targetPos;
 	}
 
-	public int getRest() {
+	public double getRest() {
 		return rest;
 	}
 
@@ -500,7 +481,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	 * The most important method, that tells the servo what position it should
 	 * move to
 	 */
-	public void moveTo(int pos) {
+	public void moveTo(double pos) {
 
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
@@ -599,7 +580,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public void setMinMax(int min, int max) {
+	public void setMinMax(double min, double max) {
 		mapper.setMin(min);
 		mapper.setMax(max);
 		broadcastState();
@@ -628,13 +609,13 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	public void sweep() {
-		int min = mapper.getMinX().intValue();
-		int max = mapper.getMaxX().intValue();
-		sweep(min, max, 1, 1);
+		double min = mapper.getMinX();
+		double max = mapper.getMaxX();
+		// sweep(min, max, 1, 1);
 	}
 
-	public void sweep(int min, int max) {
-		sweep(min, max, 1, 1);
+	public void sweep(double min, double max) {
+		// sweep(min, max, 1, 1);
 	}
 
 	// FIXME - is it really speed control - you don't currently thread for
@@ -712,7 +693,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 			ads.setController(arduino, "1", "0x48");
 
 			DiyServo dyiServo = (DiyServo) Runtime.start("DiyServo", "DiyServo");
-			dyiServo.attach(arduino);
+			dyiServo.attach((ServoController)arduino);
 			dyiServo.attach((PinArrayControl) ads, 0); // PIN 14 = A0
 
 			// Servo Servo = (Servo) Runtime.start("Servo", "Servo");
@@ -745,22 +726,12 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public int getSweepMin() {
-		return sweepMin;
+	public double getMin() {
+		return mapper.getMinX();
 	}
 
 	@Override
-	public int getSweepMax() {
-		return sweepMax;
-	}
-
-	@Override
-	public int getSweepStep() {
-		return sweepStep;
-	}
-
-	@Override
-	public Integer getTargetOutput() {
+	public double getTargetOutput() {
 		return targetOutput;
 	}
 
@@ -810,7 +781,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public int getMaxVelocity() {
+	public double getMaxVelocity() {
 		return maxVelocity;
 	}
 
@@ -856,12 +827,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public int getVelocity() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public double getPowerLevel() {
 		return powerLevel;
 	}
@@ -877,7 +842,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public int getTargetPos() {
+	public double getTargetPos() {
 		return targetPos;
 	}
 
@@ -887,7 +852,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	 * hoping to be able to avoid that, but might be a better solution
 	 */
 	@Override
-	public void attach(ServoController controller, Integer pin, Integer pos) throws Exception {
+	public void attach(ServoController controller, int pin, double pos) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
@@ -899,7 +864,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public void attach(ServoController controller, Integer pin) throws Exception {
+	public void attach(ServoController controller, int pin) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
@@ -917,7 +882,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public void moveTo(int newPos, Double power) {
+	public void moveTo(double newPos, Double power) {
 		// TODO Auto-generated method stub
 
 	}
@@ -972,7 +937,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public void attach(ServoController controller, Integer pin, Integer pos, Integer velocity) throws Exception {
+	public void attach(ServoController controller, int pin, double pos, double velocity) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
@@ -985,12 +950,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	@Override
 	public boolean isAttached(MotorController controller) {
 		return this.controller == controller;
-	}
-
-	@Override
-	public void setVelocity(Integer velocity) {
-		// TODO Auto-generated method stub
-
 	}
 
   @Override
@@ -1008,10 +967,27 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
   }
   
   	@Override
-	public Integer getAcceleration() {
-		// TODO Auto-generated method stub
-		return null;
+	public double getAcceleration() {
+		return 1.0;
 	}
+
+    @Override
+    public void setVelocity(double velocity) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public double getVelocity() {
+      // TODO Auto-generated method stub
+      return 0;
+    }
+
+    @Override
+    public void attach(ServoController controller) throws Exception {
+      // TODO Auto-generated method stub
+      
+    }
   
 
 }

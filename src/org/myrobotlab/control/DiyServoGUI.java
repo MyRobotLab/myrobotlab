@@ -222,22 +222,17 @@ public class DiyServoGUI extends ServiceGUI implements ActionListener {
 					pinList.setEnabled(true);
 				}
 
-				if (servo.getPos() == null) {
-					boundPos.setText("");
-				} else {
-					int pos = servo.getPos();
-					boundPos.setText(Integer.toString(pos));
-					slider.setValue(pos);
-				}
+				
+					double pos = servo.getPos();
+					boundPos.setText(Double.toString(pos));
+					slider.setValue((int)pos);
+				
 
-				// In the inverted case, these are reversed
-				int min = Math.min(servo.getMinInput().intValue(), servo.getMaxInput().intValue());
-				int max = Math.max(servo.getMinInput().intValue(), servo.getMaxInput().intValue());
-				slider.setMinimum(min);
-				slider.setMaximum(max);
+				slider.setMinimum((int)servo.getMin());
+				slider.setMaximum((int)servo.getMax());
 
-				posMin.setText(servo.getMin().toString());
-				posMax.setText(servo.getMax().toString());
+				posMin.setText(servo.getMin() + "");
+				posMax.setText(servo.getMax() + "");
 
 				restoreListeners();
 			}

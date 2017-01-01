@@ -8,6 +8,6 @@ public interface AbsolutePositionControl {
 	 * 
 	 * @param newPos
 	 */
-	public void moveTo(int newPos);
+	public void moveTo(double newPos);
 
 }

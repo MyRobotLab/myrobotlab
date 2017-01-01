@@ -12,16 +12,16 @@ public final class Mapper implements Serializable {
 	public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
 	// input range
-	Double minX;
-	Double maxX;
+	double minX;
+	double maxX;
 
 	// output range
-	Double minY;
-	Double maxY;
+	double minY;
+	double maxY;
 
 	// clipping
-	Double minOutput;
-	Double maxOutput;
+	double minOutput;
+	double maxOutput;
 
 	boolean inverted = false;
 
@@ -73,19 +73,19 @@ public final class Mapper implements Serializable {
 	}
 	
 
-	public Double getMaxX() {
+	public double getMaxX() {
 		return maxX;
 	}
 
-	public Double getMaxY() {
+	public double getMaxY() {
 		return maxY;
 	}
 
-	public Double getMinX() {
+	public double getMinX() {
 		return minX;
 	}
 
-	public Double getMinY() {
+	public double getMinY() {
 		return minY;
 	}
 

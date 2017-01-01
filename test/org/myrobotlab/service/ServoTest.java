@@ -82,7 +82,8 @@ public class ServoTest {
 		// are both these valid ?
 		// gut feeling says no - they should not be
 		// servo01.attach(arduino, 8);
-		servo01.attach(arduino, 8, 40);
+		servo01.moveTo(30);
+		servo01.attach(arduino, 8, 40.0);
 		servo01.attach(arduino, 8, 30);
 		
 		servo02.attach(arduino, 7, 40);

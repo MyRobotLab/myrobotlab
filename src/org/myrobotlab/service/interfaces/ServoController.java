@@ -43,7 +43,7 @@ public interface ServoController extends DeviceController {
 
 	void servoSweepStop(ServoControl servo);
 
-	void servoWrite(ServoControl servo);
+	void servoMoveTo(ServoControl servo);
 
 	void servoWriteMicroseconds(ServoControl servo, int uS);
 

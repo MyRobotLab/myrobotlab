@@ -114,26 +114,24 @@
 #define SERVO_SWEEP_START 44
 // > servoSweepStop/deviceId
 #define SERVO_SWEEP_STOP 45
-// > servoWrite/deviceId/b16 target
-#define SERVO_WRITE 46
-// > servoWriteMicroseconds/deviceId/b16 ms
-#define SERVO_WRITE_MICROSECONDS 47
+// > servoMoveToMicroseconds/deviceId/b16 target
+#define SERVO_MOVE_TO_MICROSECONDS 46
 // > servoSetAcceleration/deviceId/b16 acceleration
-#define SERVO_SET_ACCELERATION 48
+#define SERVO_SET_ACCELERATION 47
 // > serialAttach/deviceId/relayPin
-#define SERIAL_ATTACH 49
+#define SERIAL_ATTACH 48
 // > serialRelay/deviceId/[] data
-#define SERIAL_RELAY 50
+#define SERIAL_RELAY 49
 // < publishSerialData/deviceId/[] data
-#define PUBLISH_SERIAL_DATA 51
+#define PUBLISH_SERIAL_DATA 50
 // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-#define ULTRASONIC_SENSOR_ATTACH 52
+#define ULTRASONIC_SENSOR_ATTACH 51
 // > ultrasonicSensorStartRanging/deviceId
-#define ULTRASONIC_SENSOR_START_RANGING 53
+#define ULTRASONIC_SENSOR_START_RANGING 52
 // > ultrasonicSensorStopRanging/deviceId
-#define ULTRASONIC_SENSOR_STOP_RANGING 54
+#define ULTRASONIC_SENSOR_STOP_RANGING 53
 // < publishUltrasonicSensorData/deviceId/b16 echoTime
-#define PUBLISH_ULTRASONIC_SENSOR_DATA 55
+#define PUBLISH_ULTRASONIC_SENSOR_DATA 54
 
 
 

@@ -120,10 +120,8 @@ Msg* Msg::getInstance() {
 	void servoSweepStart( byte deviceId,  byte min,  byte max,  byte step);
 	// > servoSweepStop/deviceId
 	void servoSweepStop( byte deviceId);
-	// > servoWrite/deviceId/b16 target
-	void servoWrite( byte deviceId,  int target);
-	// > servoWriteMicroseconds/deviceId/b16 ms
-	void servoWriteMicroseconds( byte deviceId,  int ms);
+	// > servoMoveToMicroseconds/deviceId/b16 target
+	void servoMoveToMicroseconds( byte deviceId,  int target);
 	// > servoSetAcceleration/deviceId/b16 acceleration
 	void servoSetAcceleration( byte deviceId,  int acceleration);
 	// > serialAttach/deviceId/relayPin
@@ -246,7 +244,7 @@ void Msg::publishPinArray(const byte* data,  byte dataSize) {
 void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + 1 + (1 + dataSize)); // size
-  write(PUBLISH_SERIAL_DATA); // msgType = 51
+  write(PUBLISH_SERIAL_DATA); // msgType = 50
   write(deviceId);
   write((byte*)data, dataSize);
   flush();
@@ -256,7 +254,7 @@ void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
 void Msg::publishUltrasonicSensorData( byte deviceId,  int echoTime) {
   write(MAGIC_NUMBER);
   write(1 + 1 + 2); // size
-  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 55
+  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 54
   write(deviceId);
   writeb16(echoTime);
   flush();
@@ -533,20 +531,12 @@ void Msg::processCommand() {
 			mrlComm->servoSweepStop( deviceId);
 			break;
 	}
-	case SERVO_WRITE: { // servoWrite
+	case SERVO_MOVE_TO_MICROSECONDS: { // servoMoveToMicroseconds
 			byte deviceId = ioCmd[startPos+1]; // bu8
 			startPos += 1;
 			int target = b16(ioCmd, startPos+1);
 			startPos += 2; //b16
-			mrlComm->servoWrite( deviceId,  target);
-			break;
-	}
-	case SERVO_WRITE_MICROSECONDS: { // servoWriteMicroseconds
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			int ms = b16(ioCmd, startPos+1);
-			startPos += 2; //b16
-			mrlComm->servoWriteMicroseconds( deviceId,  ms);
+			mrlComm->servoMoveToMicroseconds( deviceId,  target);
 			break;
 	}
 	case SERVO_SET_ACCELERATION: { // servoSetAcceleration

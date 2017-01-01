@@ -825,6 +825,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	public HashMap<String, Timer> getTasks() {
 		return tasks;
 	}
+	
+	public boolean containsTask(String taskName){
+	  return tasks.containsKey(taskName);
+	}
 
 	public void purgeTask(String taskName) {
 		if (tasks.containsKey(taskName)) {
@@ -1375,7 +1379,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			// TODO - optimize with a paramter TypeConverter & Map
 			// c.getMethod - returns on EXACT match - not "Working" match
 			Method[] allMethods = c.getMethods(); // ouch
-			log.warn(String.format("ouch! need to search through %d methods", allMethods.length));
+			log.warn(String.format("searching through %d methods", allMethods.length));
 
 			for (Method m : allMethods) {
 				String mname = m.getName();
@@ -1394,6 +1398,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 					// put return object onEvent
 					out(method, retobj);
 					// we've found a match. put that in the cache.
+					log.debug("caching method cache key {}", methodCacheKey);
 					LRUMethodCache.getInstance().addCacheEntry(methodCacheKey, m);
 					return retobj;
 				} catch (Exception e1) {

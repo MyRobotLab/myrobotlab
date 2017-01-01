@@ -46,7 +46,7 @@ public class InMoovHead extends Service {
     eyeX.setRest(80);
     eyeY.setRest(90);
     
-    setVelocity(45,45,45,45,45);
+    setVelocity(45.0,45.0,45.0,45.0,45.0);
 
   }
 
@@ -319,7 +319,7 @@ public class InMoovHead extends Service {
     return meta;
   }
 
-  public void setVelocity(Integer headXSpeed, Integer headYSpeed, Integer eyeXSpeed, Integer eyeYSpeed, Integer jawSpeed) {
+  public void setVelocity(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
     if (log.isDebugEnabled()) {
       log.debug(String.format("%s setVelocity %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed));
     }

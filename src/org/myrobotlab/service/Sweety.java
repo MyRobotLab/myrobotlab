@@ -198,7 +198,7 @@ public class Sweety extends Service {
    * Move the head . Use : head(neckTiltAngle, neckPanAngle -1 mean
    * "no change"
    */
-  public void setHeadPosition(Integer neckTiltAngle, Integer neckPanAngle) {
+  public void setHeadPosition(double neckTiltAngle, double neckPanAngle) {
 
     if (neckTiltAngle == -1) {
       neckTiltAngle = neckTilt.getPos();
@@ -215,7 +215,7 @@ public class Sweety extends Service {
    * Move the right arm . Use : leftArm(shoulder angle, arm angle, forearm
    * angle, wrist angle, hand angle) -1 mean "no change"
    */
-  public void setRightArmPosition(Integer shoulderAngle, Integer armAngle, Integer forearmAngle, Integer wristAngle, Integer handAngle) {
+  public void setRightArmPosition(double shoulderAngle, double armAngle, double forearmAngle, double wristAngle, double handAngle) {
 
     // TODO protect against self collision
     if (shoulderAngle == -1) {
@@ -245,7 +245,7 @@ public class Sweety extends Service {
    * Move the left arm . Use : leftArm(shoulder angle, arm angle, forearm angle,
    * wrist angle, hand angle) -1 mean "no change"
    */
-  public void setLeftArmPosition(Integer shoulderAngle, Integer armAngle, Integer forearmAngle, Integer wristAngle, Integer handAngle) {
+  public void setLeftArmPosition(double shoulderAngle, double armAngle, double forearmAngle, double wristAngle, double handAngle) {
     // TODO protect against self collision with -> servoName.getPos()
     if (shoulderAngle == -1) {
       shoulderAngle = leftShoulder.getPos();
