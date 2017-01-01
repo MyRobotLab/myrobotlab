@@ -1010,4 +1010,8 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
     ((MrlServo)getDevice(deviceId)).detachPin();
   }
 
+  public void servoMoveToMicroseconds(Integer deviceId, Integer target) {
+    log.info("servoMoveToMicroseconds {} {}", deviceId, target);
+  }
+
 }

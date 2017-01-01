@@ -52,7 +52,7 @@ public class InMoovTorso extends Service {
     midStom.setRest(90);
     lowStom.setRest(90);
 
-    setVelocity(5,5,5);
+    setVelocity(5.0,5.0,5.0);
   
   }
 
@@ -267,7 +267,7 @@ public class InMoovTorso extends Service {
     return meta;
   }
 
-  public void setVelocity(Integer topStom, Integer midStom, Integer lowStom) {
+  public void setVelocity(Double topStom, Double midStom, Double lowStom) {
     this.topStom.setVelocity(topStom);
     this.midStom.setVelocity(midStom);
     this.lowStom.setVelocity(lowStom);

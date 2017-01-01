@@ -65,7 +65,6 @@ import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect2;
 import org.myrobotlab.opencv.OpenCVFilterPyramidDown;
@@ -106,7 +105,7 @@ import static org.bytedeco.javacpp.opencv_videostab.*;
  * Audet : https://github.com/bytedeco/javacv
  * 
  */
-public class OpenCV extends VideoSource {
+public class OpenCV extends Service implements VideoSource {
 
   // FIXME - don't return BufferedImage return SerializableImage always !
 

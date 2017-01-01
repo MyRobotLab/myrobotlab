@@ -16,6 +16,7 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
@@ -56,6 +57,7 @@ public class InMoov extends Service {
   // port index, local references
 
   // this is good, because arduino's ultimately are identified by port keys
+  // FIXME - should be controllers ServoControllers not Arduinos
   HashMap<String, Arduino> arduinos = new HashMap<String, Arduino>();
 
   // services which do not require a body part
@@ -448,6 +450,7 @@ public class InMoov extends Service {
     if (type != null) {
       return type;
     }
+
     if (RIGHT.equals(side)) {
       return Arduino.BOARD_TYPE_UNO;
     }
@@ -831,7 +834,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void setArmVelocity(String which, Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+  public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     if (!arms.containsKey(which)) {
       error("setArmVelocity %s does not exist", which);
     } else {
@@ -843,7 +846,7 @@ public class InMoov extends Service {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  public void setHandVelocity(String which, Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky) {
+  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
     setHandVelocity(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
@@ -855,7 +858,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void setHandVelocity(String which, Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     if (!hands.containsKey(which)) {
       error("setHandSpeed %s does not exist", which);
     } else {
@@ -867,7 +870,7 @@ public class InMoov extends Service {
     setHeadSpeed(rothead, neck, null, null, null);
   }
 
-  public void setHeadVelocity(Integer rothead, Integer neck) {
+  public void setHeadVelocity(Double rothead, Double neck) {
     setHeadVelocity(rothead, neck, null, null, null);
   }
 
@@ -879,7 +882,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void setHeadVelocity(Integer rothead, Integer neck, Integer eyeXSpeed, Integer eyeYSpeed, Integer jawSpeed) {
+  public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
     if (head != null) {
       head.setVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
     } else {
@@ -899,7 +902,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void setTorsoVelocity(Integer topStom, Integer midStom, Integer lowStom) {
+  public void setTorsoVelocity(Double topStom, Double midStom, Double lowStom) {
     if (torso != null) {
       torso.setVelocity(topStom, midStom, lowStom);
     } else {
@@ -988,7 +991,7 @@ public class InMoov extends Service {
     }
     eyesTracking = (Tracking) startPeer("eyesTracking");
     eyesTracking.connect(port, xPin, yPin);
-    arduinos.put(port, eyesTracking.arduino);
+    arduinos.put(port, (Arduino)eyesTracking.getArduino());
     return eyesTracking;
   }
 
@@ -1036,7 +1039,7 @@ public class InMoov extends Service {
     }
     headTracking = (Tracking) startPeer("headTracking");
     headTracking.connect(port, 5, 6);
-    arduinos.put(port, headTracking.arduino);
+    arduinos.put(port, (Arduino)headTracking.controller);
     return headTracking;
   }
 
@@ -1374,7 +1377,7 @@ public class InMoov extends Service {
       // we want all servos that are currently in the system?  
       for (ServiceInterface service : Runtime.getServices()) {
         if (service instanceof Servo) {
-          int pos = ((Servo) service).getPos();
+          double pos = ((Servo) service).getPos();
           gestureWriter.write("  " + service.getName() + ".moveTo(" + pos + ")\n");
         }
       }

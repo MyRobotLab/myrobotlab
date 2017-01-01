@@ -59,6 +59,11 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 public class Arduino extends Service implements Microcontroller, PinArrayControl, I2CBusController, I2CController, SerialDataListener, ServoController, MotorController,
     NeoPixelController, UltrasonicSensorController, DeviceController, RecordControl, SerialRelayListener {
 
+  
+  public static final int MIN_PULSE_WIDTH     =   544;     // the shortest pulse sent to a servo  
+  public static final int MAX_PULSE_WIDTH     =  2400;    // the longest pulse sent to a servo 
+  public static final int DEFAULT_PULSE_WIDTH =  1500;   
+  
   public static class AckLock {
     volatile boolean acknowledged = false;
   }
@@ -125,6 +130,21 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     meta.addCategory("microcontroller");
     meta.addPeer("serial", "Serial", "serial device for this Arduino");
     return meta;
+  }
+  
+  /**
+   * degreeToMicroseconds - convert a value to send to servo from degree (0-180)
+   * to microseconds (544-2400)
+   * 
+   * @param degree
+   * @return
+   */
+  public Integer degreeToMicroseconds(double degree) {
+    // if (degree >= 544) return (int)degree; - G-> I don't think
+    // this is a good idea, if they want to use microseconds - then let them use
+    // the controller.servoWriteMicroseconds method
+    // this method vs mapping I think was a good idea.. :)
+    return (int)Math.round((degree * (2400 - 544) / 180) + 544);
   }
 
   public static void main(String[] args) {
@@ -1560,20 +1580,23 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     }
     // query configuration out
     int pin = servo.getPin();
-    int targetOutput = servo.getTargetOutput();
-    int velocity = servo.getVelocity();
+    // targetOutput is ALWAYS ALWAYS degreeees
+    double targetOutput = servo.getTargetOutput();
+    double velocity = servo.getVelocity();
 
     // this saves original "attach" configuration - and maintains internal data
     // structures
     // and does DeviceControl.attach(this)
     Integer deviceId = attachDevice(servo, new Object[] { pin, targetOutput, velocity });
 
-    // send data to micro-controller
-    msg.servoAttach(deviceId, pin, targetOutput, velocity);
+    // send data to micro-controller - convert degrees to microseconds
+    int uS = degreeToMicroseconds(targetOutput);
+    msg.servoAttach(deviceId, pin, uS, (int)velocity);
 
     // the callback - servo better have a check
-    // isAttached(ServoControl) to prevent infinit loop
-    servo.attach(this, pin, targetOutput, velocity);
+    // isAttached(ServoControl) to prevent infinite loop
+    // servo.attach(this, pin, targetOutput, velocity);
+    servo.attach(this);
   }
 
   public boolean isAttached(DeviceControl device) {
@@ -1605,21 +1628,23 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   @Override
   // > servoSetMaxVelocity/deviceId/b16 maxVelocity
   public void servoSetMaxVelocity(ServoControl servo) {
-    msg.servoSetMaxVelocity(getDeviceId(servo), servo.getMaxVelocity());
+    msg.servoSetMaxVelocity(getDeviceId(servo), (int)servo.getMaxVelocity());
   }
 
   @Override
   // > servoSetVelocity/deviceId/b16 velocity
   public void servoSetVelocity(ServoControl servo) {
-    msg.servoSetVelocity(getDeviceId(servo), servo.getVelocity());
+    msg.servoSetVelocity(getDeviceId(servo), (int)servo.getVelocity());
   }
 
+  // FIXME - this needs fixing .. should be microseconds - but interface still needs
+  // to be in degrees & we don't want to pass double over serial lines
   @Override
   // > servoSweepStart/deviceId/min/max/step
   public void servoSweepStart(ServoControl servo) {
     int deviceId = getDeviceId(servo);
-    log.info(String.format("servoSweep %s id %d min %d max %d step %d", servo.getName(), deviceId, servo.getSweepMin(), servo.getSweepMax(), servo.getSweepStep()));
-    msg.servoSweepStart(deviceId, servo.getSweepMin(), servo.getSweepMax(), servo.getSweepStep());
+    log.info(String.format("servoSweep %s id %d min %d max %d step %d", servo.getName(), deviceId, servo.getMin(), servo.getMax(), servo.getVelocity()));
+    msg.servoSweepStart(deviceId, (int)servo.getMin(), (int)servo.getMax(),(int) servo.getVelocity());
   }
 
   @Override
@@ -1630,13 +1655,19 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   /**
    * servo.write(angle) https://www.arduino.cc/en/Reference/ServoWrite
+   * The msg to mrl will always contain microseconds - but this
+   * method will (like the Arduino Servo.write) accept both degrees or microseconds.
+   * The code is ported from Arduino's Servo.cpp
    */
   @Override
   // > servoWrite/deviceId/target
-  public void servoWrite(ServoControl servo) {
+  public void servoMoveTo(ServoControl servo) {
     int deviceId = getDeviceId(servo);
-    log.info("servoWrite {} {} id {}", servo.getName(), servo.getTargetOutput(), deviceId);
-    msg.servoWrite(deviceId, servo.getTargetOutput().intValue());
+    // getTargetOutput ALWAYS ALWAYS Degrees !
+    // so we convert to microseconds
+    int us = degreeToMicroseconds(servo.getTargetOutput());
+    log.info("servoMoveToMicroseconds servo {} id {} {}->{} us", servo.getName(), deviceId, servo.getPos(), us);
+    msg.servoMoveToMicroseconds(deviceId, us);
   }
 
   /**
@@ -1648,7 +1679,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void servoWriteMicroseconds(ServoControl servo, int uS) {
     int deviceId = getDeviceId(servo);
     log.info(String.format("writeMicroseconds %s %d id %d", servo.getName(), uS, deviceId));
-    msg.servoWriteMicroseconds(deviceId, uS);
+    // msg.servoWriteMicroseconds(deviceId, uS);
+    // lets use speed control
+    msg.servoMoveToMicroseconds(deviceId, uS);
   }
 
   public String setBoard(String board) {
@@ -1943,7 +1976,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	public void servoSetAcceleration(ServoControl servo) {
 		// TODO Auto-generated method stub
-		msg.servoSetAcceleration(getDeviceId(servo), servo.getAcceleration());
+		msg.servoSetAcceleration(getDeviceId(servo), (int)servo.getAcceleration());
 	}
 
 }

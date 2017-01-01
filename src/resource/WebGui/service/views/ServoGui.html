@@ -36,7 +36,7 @@
         <span class="input-group-addon">max</span>
         <input type="text" class="form-control" ng-model="max" uib-tooltip="maximum allowed position of servo">
         <span class="input-group-btn">
-            <button class="btn btn-default" type="button" ng-click="update(speed, rest, min, max)">update</button>
+            <button class="btn btn-default" type="button" ng-click="update(velocity, rest, min, max)">update</button>
             <button class="btn btn-default" type="button" ng-click="sweep()" ng-show="!service.isSweeping">sweep</button>
             <button class="btn btn-default" type="button" ng-click="msg.stop()" ng-show="service.isSweeping">stop</button>
             <button class="btn btn-default" type="button" ng-click="msg.eventsEnabled(eventsEnabled)" ng-model="eventsEnabled" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">events</button>

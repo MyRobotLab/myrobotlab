@@ -9,8 +9,8 @@ MrlServo::MrlServo(int deviceId) : Device(deviceId, DEVICE_TYPE_SERVO) {
   // create the servo
   servo = new Servo();
   lastUpdate = 0;
-  currentPos = 0.0;
-  targetPos = 0;
+  currentPosUs = 0.0;
+  targetPosUs = 0;
   velocity = -1;
   acceleration = -1;
   moveStart = 0;
@@ -25,11 +25,11 @@ MrlServo::~MrlServo() {
 
 // this method "may" be called with a pin or pin & pos depending on
 // config size
-bool MrlServo::attach(byte pin, int initPos, int initVelocity){
+bool MrlServo::attach(byte pin, int initPosUs, int initVelocity){
   // msg->publishDebug("MrlServo.deviceAttach !");
-  servo->write(initPos);
-  currentPos = initPos;
-  targetPos = initPos;
+  servo->writeMicroseconds(initPosUs);
+  currentPosUs = initPosUs;
+  targetPosUs = initPosUs;
   velocity = initVelocity;
   servo->attach(pin);
   return true;
@@ -39,7 +39,7 @@ bool MrlServo::attach(byte pin, int initPos, int initVelocity){
 void MrlServo::attachPin(int pin){
   this->pin = pin;
   servo->attach(pin);
-  servo->write((int)currentPos); //return to it's last know state (may be 0 if currentPos is not set)
+  servo->writeMicroseconds(currentPosUs); //return to it's last know state (may be 0 if currentPosUs is not set)
   // TODO-KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
 }
 
@@ -49,9 +49,9 @@ void MrlServo::detachPin(){
 
 // FIXME - what happened to events ?
 void MrlServo::update() {
-  //it may have an imprecision of +- 1 due to the conversion of currentPos to int
+  //it may have an imprecision of +- 1 due to the conversion of currentPosUs to int
   if (isMoving) {
-    if ((int)currentPos != targetPos) {
+    if (currentPosUs != targetPosUs) {
       long deltaTime = millis() - lastUpdate;
       lastUpdate = millis();
       float _velocity = velocity;
@@ -62,7 +62,7 @@ void MrlServo::update() {
           _velocity = velocity;
         }
       }
-      if(targetPos > 500) {
+      if(targetPosUs > 500) {
         _velocity = map(_velocity, 0, 180, 544, 2400) - 544;
       }
       float step = _velocity * deltaTime;
@@ -71,24 +71,24 @@ void MrlServo::update() {
         step = sweepStep;
       }
       if (velocity < 0) { // when velocity < 0, it mean full speed ahead
-        step = targetPos - currentPos;
+        step = targetPosUs - currentPosUs;
       }
-      else if ((int)currentPos > targetPos) {
+      else if (currentPosUs > targetPosUs) {
         step *=-1;
       }
-      currentPos += step;
-      if ((step > 0.0 && (int)currentPos > targetPos) || (step < 0.0 && (int)currentPos < targetPos)) {
-        currentPos = targetPos;
+      currentPosUs += step;
+      if ((step > 0.0 && currentPosUs > targetPosUs) || (step < 0.0 && currentPosUs < targetPosUs)) {
+        currentPosUs = targetPosUs;
       }
-      servo->write((int)currentPos);
+      servo->writeMicroseconds(currentPosUs);
     }
     else {
       if (isSweeping) {
-        if (targetPos == min) {
-          targetPos = max;
+        if (targetPosUs == minUs) {
+          targetPosUs = maxUs;
         }
         else {
-          targetPos = min;
+          targetPosUs = minUs;
         }
         sweepStep *= -1;
       }
@@ -99,26 +99,29 @@ void MrlServo::update() {
   }
 }
 
-void MrlServo::servoWrite(int position) {
+
+void MrlServo::moveToMicroseconds(int position) {
   if (servo == NULL) 
     return;
-  targetPos = position;
+  targetPosUs = position;
   isMoving = true;
   lastUpdate = millis();
   moveStart = lastUpdate;
 }
 
+/*
 void MrlServo::servoWriteMicroseconds(int position) {
   if (servo) {
     servo->writeMicroseconds(position);
   }
 }
+*/
 
-void MrlServo::startSweep(int min, int max, int step) {
-  this->min = min;
-  this->max = max;
+void MrlServo::startSweep(int minUs, int maxUs, int step) {
+  this->minUs = minUs;
+  this->maxUs = maxUs;
   sweepStep = step;
-  targetPos = max;
+  targetPosUs = maxUs;
   isMoving = true;
   isSweeping = true;
 }

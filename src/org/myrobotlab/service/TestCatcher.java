@@ -274,6 +274,10 @@ public class TestCatcher extends Service implements SerialDataListener {
    * @return ServiceType - returns all the data
    * 
    */
+  
+  public double testDouble(double d){
+    return d;
+  }
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.DEBUG);

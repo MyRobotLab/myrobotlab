@@ -82,7 +82,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 					int pulseWidthOff = SERVOMIN + (int) (servoData.currentOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
 					setServo(servoData.pin, pulseWidthOff);
 					// Calculate next step for the the new value for the motor
-					Thread.sleep(1000 / servoData.velocity);
+					Thread.sleep((int)(1000 / servoData.velocity));
 				}
 
 			} catch (Exception e) {
@@ -215,10 +215,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		boolean pwmFreqSet = false;
 		int pwmFreq;
 		SpeedControl speedcontrol;
-		int velocity = 0;
+		double velocity = 0;
 		boolean isMoving = false;
-		int targetOutput;
-		int currentOutput;
+		double targetOutput;
+		double currentOutput;
 	}
 
 	transient HashMap<String, ServoData> servoMap = new HashMap<String, ServoData>();
@@ -458,14 +458,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	@Override
-	public void servoWrite(ServoControl servo) {
+	public void servoMoveTo(ServoControl servo) {
 		ServoData servoData = servoMap.get(servo.getName());
 		if (!servoData.pwmFreqSet) {
 			setPWMFreq(servoData.pin, servoData.pwmFreq);
 			servoData.pwmFreqSet = true;
 		}
 		// Move at max speed
-		if (servoData.velocity == 0) {
+		if (servoData.velocity == -1) {
 			servoData.currentOutput = servo.getTargetOutput();
 			servoData.targetOutput = servo.getTargetOutput();
 			log.debug(String.format("servoWrite %s deviceAddress %s targetOutput %d", servo.getName(), deviceAddress,
@@ -609,7 +609,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 */
 	@Override
 	public void servoAttachPin(ServoControl servo, int pin) {
-		servoWrite(servo);
+		servoMoveTo(servo);
 	}
 
 	/**

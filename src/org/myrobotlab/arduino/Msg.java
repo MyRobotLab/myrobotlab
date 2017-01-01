@@ -170,26 +170,24 @@ public class Msg {
 	public final static int SERVO_SWEEP_START = 44;
 	// > servoSweepStop/deviceId
 	public final static int SERVO_SWEEP_STOP = 45;
-	// > servoWrite/deviceId/b16 target
-	public final static int SERVO_WRITE = 46;
-	// > servoWriteMicroseconds/deviceId/b16 ms
-	public final static int SERVO_WRITE_MICROSECONDS = 47;
+	// > servoMoveToMicroseconds/deviceId/b16 target
+	public final static int SERVO_MOVE_TO_MICROSECONDS = 46;
 	// > servoSetAcceleration/deviceId/b16 acceleration
-	public final static int SERVO_SET_ACCELERATION = 48;
+	public final static int SERVO_SET_ACCELERATION = 47;
 	// > serialAttach/deviceId/relayPin
-	public final static int SERIAL_ATTACH = 49;
+	public final static int SERIAL_ATTACH = 48;
 	// > serialRelay/deviceId/[] data
-	public final static int SERIAL_RELAY = 50;
+	public final static int SERIAL_RELAY = 49;
 	// < publishSerialData/deviceId/[] data
-	public final static int PUBLISH_SERIAL_DATA = 51;
+	public final static int PUBLISH_SERIAL_DATA = 50;
 	// > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-	public final static int ULTRASONIC_SENSOR_ATTACH = 52;
+	public final static int ULTRASONIC_SENSOR_ATTACH = 51;
 	// > ultrasonicSensorStartRanging/deviceId
-	public final static int ULTRASONIC_SENSOR_START_RANGING = 53;
+	public final static int ULTRASONIC_SENSOR_START_RANGING = 52;
 	// > ultrasonicSensorStopRanging/deviceId
-	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 54;
+	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 53;
 	// < publishUltrasonicSensorData/deviceId/b16 echoTime
-	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 55;
+	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 54;
 
 
 /**
@@ -1351,16 +1349,16 @@ public class Msg {
 	  }
 	}
 
-	public void servoWrite(Integer deviceId/*byte*/, Integer target/*b16*/) {
+	public void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 2); // size
-			write(SERVO_WRITE); // msgType = 46
+			write(SERVO_MOVE_TO_MICROSECONDS); // msgType = 46
 			write(deviceId);
 			writeb16(target);
  
 			if(record != null){
-				txBuffer.append("> servoWrite");
+				txBuffer.append("> servoMoveToMicroseconds");
 				txBuffer.append("/");
 				txBuffer.append(deviceId);
 				txBuffer.append("/");
@@ -1375,35 +1373,11 @@ public class Msg {
 	  }
 	}
 
-	public void servoWriteMicroseconds(Integer deviceId/*byte*/, Integer ms/*b16*/) {
-		try {
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 2); // size
-			write(SERVO_WRITE_MICROSECONDS); // msgType = 47
-			write(deviceId);
-			writeb16(ms);
- 
-			if(record != null){
-				txBuffer.append("> servoWriteMicroseconds");
-				txBuffer.append("/");
-				txBuffer.append(deviceId);
-				txBuffer.append("/");
-				txBuffer.append(ms);
-				txBuffer.append("\n");
-				record.write(txBuffer.toString().getBytes());
-				txBuffer.setLength(0);
-			}
-
-	  } catch (Exception e) {
-	  			serial.error(e);
-	  }
-	}
-
 	public void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 2); // size
-			write(SERVO_SET_ACCELERATION); // msgType = 48
+			write(SERVO_SET_ACCELERATION); // msgType = 47
 			write(deviceId);
 			writeb16(acceleration);
  
@@ -1427,7 +1401,7 @@ public class Msg {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 1); // size
-			write(SERIAL_ATTACH); // msgType = 49
+			write(SERIAL_ATTACH); // msgType = 48
 			write(deviceId);
 			write(relayPin);
  
@@ -1451,7 +1425,7 @@ public class Msg {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1 + (1 + data.length)); // size
-			write(SERIAL_RELAY); // msgType = 50
+			write(SERIAL_RELAY); // msgType = 49
 			write(deviceId);
 			write(data);
  
@@ -1475,7 +1449,7 @@ public class Msg {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 1 + 1); // size
-			write(ULTRASONIC_SENSOR_ATTACH); // msgType = 52
+			write(ULTRASONIC_SENSOR_ATTACH); // msgType = 51
 			write(deviceId);
 			write(triggerPin);
 			write(echoPin);
@@ -1502,7 +1476,7 @@ public class Msg {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1); // size
-			write(ULTRASONIC_SENSOR_START_RANGING); // msgType = 53
+			write(ULTRASONIC_SENSOR_START_RANGING); // msgType = 52
 			write(deviceId);
  
 			if(record != null){
@@ -1523,7 +1497,7 @@ public class Msg {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 1); // size
-			write(ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 54
+			write(ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 53
 			write(deviceId);
  
 			if(record != null){
@@ -1678,11 +1652,8 @@ public class Msg {
 		case SERVO_SWEEP_STOP:{
 			return "servoSweepStop";
 		}
-		case SERVO_WRITE:{
-			return "servoWrite";
-		}
-		case SERVO_WRITE_MICROSECONDS:{
-			return "servoWriteMicroseconds";
+		case SERVO_MOVE_TO_MICROSECONDS:{
+			return "servoMoveToMicroseconds";
 		}
 		case SERVO_SET_ACCELERATION:{
 			return "servoSetAcceleration";

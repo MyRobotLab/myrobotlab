@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
@@ -28,7 +29,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class VideoStreamer extends VideoSink {
+public class VideoStreamer extends Service implements VideoSink {
 
   private static final long serialVersionUID = 1L;
 

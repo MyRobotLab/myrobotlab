@@ -40,7 +40,7 @@ public interface MotorControl extends DeviceControl, RelativePositionControl {
 
 	double getPowerOutput();
 
-	int getTargetPos();
+	double getTargetPos();
 
 	/**
 	 * query the motor as to its inverted status
@@ -61,7 +61,7 @@ public interface MotorControl extends DeviceControl, RelativePositionControl {
 	 * 
 	 * @param newPos
 	 */
-	void moveTo(int newPos);
+	void moveTo(double newPos);
 
 	/**
 	 * moveTo moves the motor to a specific location. Typically, an encoder is
@@ -69,7 +69,7 @@ public interface MotorControl extends DeviceControl, RelativePositionControl {
 	 * 
 	 * @param newPos
 	 */
-	void moveTo(int newPos, Double power);
+	void moveTo(double newPos, Double power);
 
 	void setEncoder(Encoder encoder);
 

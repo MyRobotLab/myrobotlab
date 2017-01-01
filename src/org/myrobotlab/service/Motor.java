@@ -85,8 +85,8 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 	Mapper powerMap = new Mapper(-1.0, 1.0, -255.0, 255.0);
 
 	// position
-	int currentPos = 0;
-	int targetPos = 0;
+	double currentPos = 0;
+	double targetPos = 0;
 
 	Mapper encoderMap = new Mapper(-800.0, 800.0, -800.0, 800.0);
 
@@ -181,7 +181,7 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 	}
 
 	@Override
-	public void moveTo(int newPos, Double powerLevel) {
+	public void moveTo(double newPos, Double powerLevel) {
 		this.powerLevel = powerLevel;
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
@@ -195,7 +195,7 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 	}
 
 	@Override
-	public void moveTo(int newPos) {
+	public void moveTo(double newPos) {
 		moveTo(newPos, null);
 	}
 
@@ -254,7 +254,7 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 	}
 
 	@Override
-	public int getTargetPos() {
+	public double getTargetPos() {
 		return targetPos;
 	}
 

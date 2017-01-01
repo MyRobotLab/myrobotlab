@@ -17,10 +17,10 @@ class MrlServo : public Device {
     int pin;
     bool isMoving;
     bool isSweeping;
-    int targetPos;
-    float currentPos;
-    int min;
-    int max;
+    int targetPosUs;
+    int currentPosUs;
+    int minUs;
+    int maxUs;
     unsigned long lastUpdate;
     int velocity; // in deg/sec  |  velocity < 0 == no speed control
     int sweepStep;
@@ -35,9 +35,11 @@ class MrlServo : public Device {
     void attachPin(int pin);
     void detachPin();
     void update();
-    void servoWrite(int position);
-    void servoWriteMicroseconds(int position);
-    void startSweep(int min, int max, int step);
+    // with speed control
+    void moveToMicroseconds(int position);
+    // without speed control ? necessary ?
+    // void servoWriteMicroseconds(int position);
+    void startSweep(int minUs, int maxUs, int step);
     void stopSweep();
     void setMaxVelocity(unsigned int velocity);
     void setVelocity(int velocity);
