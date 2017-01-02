@@ -220,7 +220,7 @@
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-server-7.6.13.v20130916.jar"/>
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-servlet-7.6.13.v20130916.jar"/>
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-util-7.6.13.v20130916.jar"/>
-		<pathelement location="${repo}/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
+		<pathelement location="${repo}/org.jfugue.music/5.0/jfugue-5.0.7.jar"/>
 		<pathelement location="${repo}/com.googlecode.jssc/2.8.0/jssc-2.8.0.jar"/>
 		<pathelement location="${repo}/gnu.io.rxtx/2.1-7r2/RXTXcomm.jar"/>
 		<pathelement location="${repo}/org.jsoup/1.8.3/jsoup-1.8.3.jar"/>

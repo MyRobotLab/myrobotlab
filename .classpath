@@ -185,57 +185,55 @@
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-dumpfiles-0.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-storage-0.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-util-0.7.0.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jnativehook/2.0.3/jnativehook-2.0.3.jar"/>
-<!--MaryTTS-->	
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-builder-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-client-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-common-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-de-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-en-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-fr-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-it-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-lb-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-ru-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-sv-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-te-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-tr-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-redstart-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-runtime-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-signalproc-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-transcription-5.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/voice-cmu-slt-hsmm-5.2.jar"/>
-<!--MaryTTS-dependencies-->
-<classpathentry kind="lib" path="/repo/marytts/5.2/emotionml-checker-java-1.1.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/commons-collections-3.2.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/commons-lang-2.6.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/commons-io-2.5.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/log4j-1.2.16.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/junit-4.12.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/mysql-connector-java-5.1.16.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/oro-2.0.8.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/groovy-all-2.4.5.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/diff4j-1.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/guava-14.0.1.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/icu4j-54.1.1.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/fast-md5-2.7.1.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/jtok-core-1.9.3.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/jama-1.0.3.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/Jampack-1.0.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/trove4j-2.0.2.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/weka-dev-3.7.6.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/httpcore-4.1.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/httpcore-nio-4.1.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/opennlp-maxent-3.0.3.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/opennlp-tools-1.5.3.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/fest-assert-1.4.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/hamcrest-all-1.3.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/hsqldb-2.0.0.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/java-diff-1.1.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/swing-layout-1.0.3.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/testng-6.9.11.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/xmlunit-1.6.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/sgt-3.0.jar"/>
-<classpathentry kind="lib" path="/repo/marytts/5.2/mwdumper-1.16.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-builder-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-client-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-common-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-de-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-en-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-fr-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-it-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-lb-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-ru-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-sv-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-te-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-tr-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-redstart-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-runtime-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-signalproc-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-transcription-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/voice-cmu-slt-hsmm-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/emotionml-checker-java-1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/commons-collections-3.2.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/commons-io-2.5.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/mysql-connector-java-5.1.16.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/groovy-all-2.4.5.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/diff4j-1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/guava-14.0.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/icu4j-54.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/fast-md5-2.7.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/jtok-core-1.9.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/jama-1.0.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/Jampack-1.0.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/trove4j-2.0.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/weka-dev-3.7.6.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/httpcore-4.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/httpcore-nio-4.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/opennlp-maxent-3.0.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/opennlp-tools-1.5.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/fest-assert-1.4.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/hamcrest-all-1.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/hsqldb-2.0.0.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/java-diff-1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/swing-layout-1.0.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/testng-6.9.11.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/xmlunit-1.6.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/sgt-3.0.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/mwdumper-1.16.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jfugue.music/5.0/jfugue-5.0.7.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
