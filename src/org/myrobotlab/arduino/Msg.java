@@ -108,9 +108,9 @@ public class Msg {
 	public final static int HEARTBEAT = 12;
 	// < publishHeartbeat
 	public final static int PUBLISH_HEARTBEAT = 13;
-	// > echo/f32 myFloat
+	// > echo/f32 myFloat/myByte/f32 secondFloat
 	public final static int ECHO = 14;
-	// < publishEcho/f32 myFloat
+	// < publishEcho/f32 myFloat/myByte/f32 secondFloat
 	public final static int PUBLISH_ECHO = 15;
 	// > controllerAttach/serialPort
 	public final static int CONTROLLER_ATTACH = 16;
@@ -200,7 +200,7 @@ public class Msg {
 	// public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/){}
 	// public void publishAck(Integer function/*byte*/){}
 	// public void publishHeartbeat(){}
-	// public void publishEcho(Float myFloat/*f32*/){}
+	// public void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/){}
 	// public void publishCustomMsg(int[] msg/*[]*/){}
 	// public void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/){}
 	// public void publishAttachedDevice(Integer deviceId/*byte*/, String deviceName/*str*/){}
@@ -336,15 +336,23 @@ public class Msg {
 		case PUBLISH_ECHO: {
 			Float myFloat = f32(ioCmd, startPos+1);
 			startPos += 4; //f32
+			Integer myByte = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			Float secondFloat = f32(ioCmd, startPos+1);
+			startPos += 4; //f32
 			if(invoke){
-				arduino.invoke("publishEcho",  myFloat);
+				arduino.invoke("publishEcho",  myFloat,  myByte,  secondFloat);
 			} else { 
- 				arduino.publishEcho( myFloat);
+ 				arduino.publishEcho( myFloat,  myByte,  secondFloat);
 			}
 			if(record != null){
 				rxBuffer.append("< publishEcho");
 				rxBuffer.append("/");
 				rxBuffer.append(myFloat);
+				rxBuffer.append("/");
+				rxBuffer.append(myByte);
+				rxBuffer.append("/");
+				rxBuffer.append(secondFloat);
 			rxBuffer.append("\n");
 			try{
 				record.write(rxBuffer.toString().getBytes());
@@ -739,17 +747,23 @@ public class Msg {
 	  }
 	}
 
-	public void echo(Float myFloat/*f32*/) {
+	public void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
 		try {
 			write(MAGIC_NUMBER);
-			write(1 + 4); // size
+			write(1 + 4 + 1 + 4); // size
 			write(ECHO); // msgType = 14
 			writef32(myFloat);
+			write(myByte);
+			writef32(secondFloat);
  
 			if(record != null){
 				txBuffer.append("> echo");
 				txBuffer.append("/");
 				txBuffer.append(myFloat);
+				txBuffer.append("/");
+				txBuffer.append(myByte);
+				txBuffer.append("/");
+				txBuffer.append(secondFloat);
 				txBuffer.append("\n");
 				record.write(txBuffer.toString().getBytes());
 				txBuffer.setLength(0);
@@ -1724,12 +1738,15 @@ public class Msg {
 		return ret;
 	}
 
-	// float 32 bit bucket
+  // float 32 bit bucket
   public float f32(int[] buffer, int start/*=0*/) {
-    return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
-        + (buffer[start + 2] << 8) + buffer[start + 3]);
+    byte[] b = new byte[4];
+    for (int i = 0; i < 4; ++i){
+      b[i] = (byte)buffer[start + i];
+    }
+    float f = ByteBuffer.wrap(b).order(ByteOrder.BIG_ENDIAN).getFloat();
+    return f;
   }
-
 
 	void write(int b8) throws Exception {
 
