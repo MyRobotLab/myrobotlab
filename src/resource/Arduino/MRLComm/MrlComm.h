@@ -84,8 +84,8 @@ public:
 	void enableHeartbeat( boolean enabled);
 	// > heartbeat
 	void heartbeat();
-	// > echo/bu32 sInt
-	void echo( unsigned long sInt);
+	// > echo/f32 myFloat
+	void echo( float myFloat);
 	// > controllerAttach/serialPort
 	void controllerAttach( byte serialPort);
 	// > customMsg/[] msg

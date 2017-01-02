@@ -3,6 +3,8 @@ package org.myrobotlab.arduino;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import org.myrobotlab.logging.Level;
@@ -106,9 +108,9 @@ public class VirtualMsg {
 	public final static int HEARTBEAT = 12;
 	// < publishHeartbeat
 	public final static int PUBLISH_HEARTBEAT = 13;
-	// > echo/bu32 sInt
+	// > echo/f32 myFloat
 	public final static int ECHO = 14;
-	// < publishEcho/bu32 sInt
+	// < publishEcho/f32 myFloat
 	public final static int PUBLISH_ECHO = 15;
 	// > controllerAttach/serialPort
 	public final static int CONTROLLER_ATTACH = 16;
@@ -203,7 +205,7 @@ public class VirtualMsg {
 	// public void enableAck(Boolean enabled/*bool*/){}
 	// public void enableHeartbeat(Boolean enabled/*bool*/){}
 	// public void heartbeat(){}
-	// public void echo(Long sInt/*bu32*/){}
+	// public void echo(Float myFloat/*f32*/){}
 	// public void controllerAttach(Integer serialPort/*byte*/){}
 	// public void customMsg(int[] msg/*[]*/){}
 	// public void deviceDetach(Integer deviceId/*byte*/){}
@@ -364,12 +366,12 @@ public class VirtualMsg {
 			break;
 		}
 		case ECHO: {
-			Long sInt = bu32(ioCmd, startPos+1);
-			startPos += 4; //bu32
+			Float myFloat = f32(ioCmd, startPos+1);
+			startPos += 4; //f32
 			if(invoke){
-				arduino.invoke("echo",  sInt);
+				arduino.invoke("echo",  myFloat);
 			} else { 
- 				arduino.echo( sInt);
+ 				arduino.echo( myFloat);
 			}
 			break;
 		}
@@ -844,17 +846,17 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishEcho(Long sInt/*bu32*/) {
+	public void publishEcho(Float myFloat/*f32*/) {
 		try {
 			write(MAGIC_NUMBER);
 			write(1 + 4); // size
 			write(PUBLISH_ECHO); // msgType = 15
-			writebu32(sInt);
+			writef32(myFloat);
  
 			if(record != null){
 				txBuffer.append("> publishEcho");
 				txBuffer.append("/");
-				txBuffer.append(sInt);
+				txBuffer.append(myFloat);
 				txBuffer.append("\n");
 				record.write(txBuffer.toString().getBytes());
 				txBuffer.setLength(0);
@@ -1259,6 +1261,12 @@ public class VirtualMsg {
 		return ret;
 	}
 
+	// float 32 bit bucket
+  public float f32(int[] buffer, int start/*=0*/) {
+    return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
+        + (buffer[start + 2] << 8) + buffer[start + 3]);
+  }
+
 
 	void write(int b8) throws Exception {
 
@@ -1291,6 +1299,15 @@ public class VirtualMsg {
 		write(b32 >> 16 & 0xFF);
 		write(b32 >> 8 & 0xFF);
 		write(b32 & 0xFF);
+	}
+	
+	void writef32(float f32) throws Exception {
+    //  int x = Float.floatToIntBits(f32);
+    byte[] f = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(f32).array();
+    write(f[3] & 0xFF);
+    write(f[2] & 0xFF);
+    write(f[1] & 0xFF);
+    write(f[0] & 0xFF);
 	}
 	
 	void writebu32(long b32) throws Exception {

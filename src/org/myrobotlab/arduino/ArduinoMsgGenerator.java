@@ -277,6 +277,8 @@ public class ArduinoMsgGenerator {
       return "byte*";
     } else if (idlType.equals("bool")) {
       return "bool";
+    } else if (idlType.equals("f32")) {
+      return "float";
     } else if (idlType.equals("")) {
       return "byte";
     }
@@ -299,6 +301,8 @@ public class ArduinoMsgGenerator {
       return "int[]";
     } else if (idlType.equals("bool")) {
       return "Boolean";
+    } else if (idlType.equals("f32")) {
+      return "Float";
     } else if (idlType.equals("")) {
       return "Integer";
     }
@@ -321,6 +325,8 @@ public class ArduinoMsgGenerator {
       return 1;
     } else if (idlType.equals("")) {
       return 1;
+    } else if (idlType.equals("f32")) {
+      return 4;
     } else if (idlType.equals("str")) {
       return -1;
     } else if (idlType.equals("[]")) {

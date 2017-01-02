@@ -50,9 +50,9 @@
 #define HEARTBEAT 12
 // < publishHeartbeat
 #define PUBLISH_HEARTBEAT 13
-// > echo/bu32 sInt
+// > echo/f32 myFloat
 #define ECHO 14
-// < publishEcho/bu32 sInt
+// < publishEcho/f32 myFloat
 #define PUBLISH_ECHO 15
 // > controllerAttach/serialPort
 #define CONTROLLER_ATTACH 16

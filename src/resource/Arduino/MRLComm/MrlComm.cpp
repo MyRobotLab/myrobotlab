@@ -243,8 +243,10 @@ void MrlComm::getBoardInfo() {
  const char*name2, byte configSize, const byte*config,
  unsigned long bui322) {
  */
-void MrlComm::echo(unsigned long b32) {
-	msg->publishEcho(b32);
+void MrlComm::echo(float myFloat) {
+	msg->publishDebug(String("echo float " + String(myFloat)));
+	msg->publishDebug(String("pi is " + String(3.141529)));
+	// msg->publishEcho(myFloat);
 }
 
 // > controllerAttach/serialPort

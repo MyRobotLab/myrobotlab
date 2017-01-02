@@ -3,6 +3,8 @@ package org.myrobotlab.arduino;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import org.myrobotlab.logging.Level;
@@ -170,6 +172,12 @@ public class %javaClass% {
 		return ret;
 	}
 
+	// float 32 bit bucket
+  public float f32(int[] buffer, int start/*=0*/) {
+    return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
+        + (buffer[start + 2] << 8) + buffer[start + 3]);
+  }
+
 
 	void write(int b8) throws Exception {
 
@@ -202,6 +210,15 @@ public class %javaClass% {
 		write(b32 >> 16 & 0xFF);
 		write(b32 >> 8 & 0xFF);
 		write(b32 & 0xFF);
+	}
+	
+	void writef32(float f32) throws Exception {
+    //  int x = Float.floatToIntBits(f32);
+    byte[] f = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(f32).array();
+    write(f[3] & 0xFF);
+    write(f[2] & 0xFF);
+    write(f[1] & 0xFF);
+    write(f[0] & 0xFF);
 	}
 	
 	void writebu32(long b32) throws Exception {

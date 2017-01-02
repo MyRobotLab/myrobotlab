@@ -19,6 +19,7 @@
 #   b16			int						int (short)						2 bytes	-32,768 to 32,767
 #   b32			long					int								4 bytes -2,147,483,648 to 2,147,483, 647
 #   bu32		unsigned long			long							0 to 4,294,967,295
+#   float		float 4  bytes			float							3.4028235E+38 to -3.4028235E+38
 #   str			char*, size				String							variable length
 #   []			byte[], size			int[]							variable length
 #
@@ -48,8 +49,8 @@
 # parameter echo testing
 #> echo/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
 #< publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
-> echo/bu32 sInt
-< publishEcho/bu32 sInt
+> echo/f32 myFloat
+< publishEcho/f32 myFloat
 
 # calamity we should discuss
 > controllerAttach/serialPort
