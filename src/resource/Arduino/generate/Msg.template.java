@@ -172,12 +172,15 @@ public class %javaClass% {
 		return ret;
 	}
 
-	// float 32 bit bucket
+  // float 32 bit bucket
   public float f32(int[] buffer, int start/*=0*/) {
-    return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
-        + (buffer[start + 2] << 8) + buffer[start + 3]);
+    byte[] b = new byte[4];
+    for (int i = 0; i < 4; ++i){
+      b[i] = (byte)buffer[start + i];
+    }
+    float f = ByteBuffer.wrap(b).order(ByteOrder.BIG_ENDIAN).getFloat();
+    return f;
   }
-
 
 	void write(int b8) throws Exception {
 

@@ -162,7 +162,7 @@ public class ArduinoTest implements PinArrayListener {
 		for (int i = 0; i < 20; ++i) {
 			// arduino.connect(port);
 			// arduino.enableAck(true);
-			arduino.echo(90.57F);
+			arduino.echo(90.57F, 129, 30.123F);
 			/*
 			arduino.echo(30003030L + i);
 			arduino.echo(2L);

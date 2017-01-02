@@ -49,8 +49,8 @@
 # parameter echo testing
 #> echo/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
 #< publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
-> echo/f32 myFloat
-< publishEcho/f32 myFloat
+> echo/f32 myFloat/myByte/f32 secondFloat
+< publishEcho/f32 myFloat/myByte/f32 secondFloat
 
 # calamity we should discuss
 > controllerAttach/serialPort

@@ -1380,12 +1380,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // < publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[]
   // config/bu32 bui322
   // < publishEcho/bu32 sInt
-  public void publishEcho(float myFloat) {
-    log.info("myFloat {} ", myFloat);
+  public void publishEcho(float myFloat, int myByte, float secondFloat) {
+    log.info("myFloat {} {} {} ", myFloat, myByte, secondFloat);
   }
 
-  public void echo(float myFloat) {
-    msg.echo(myFloat);
+  public void echo(float myFloat, int myByte, float secondFloat) {
+    msg.echo(myFloat, myByte, secondFloat);
   }
 
   /**
@@ -1830,7 +1830,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // 2139062143
       // msg.echo(2147483647, "hello", 33, 2147483647L, 32767, 25, "oink
       // oink", config, 2147483647L);
-      msg.echo(3.14159F);
+      msg.echo(3.14159F, 17, 345.123F);
       // msg.echo(32767, "hello 1", 127, 2147418111, 32767, 8, "name 2 is
       // here", config, 534332);
       // 2147418111
@@ -1979,4 +1979,5 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		msg.servoSetAcceleration(getDeviceId(servo), (int)servo.getAcceleration());
 	}
 
+ 
 }
