@@ -212,10 +212,15 @@ void Msg::writeb32(const long b32){
 }
 
 void Msg::writef32(const float f32){
-	write((int)f32 >> 24 & 0xFF);
-	write((int)f32 >> 16 & 0xFF);
-	write((int)f32 >> 8 & 0xFF);
-	write((int)f32 & 0xFF);
+	byte temp [4];
+
+    float newFloat = 0;
+    memcpy(temp, &f32, sizeof(newFloat));
+
+	write(temp[3]);
+	write(temp[2]);
+	write(temp[1]);
+	write(temp[0]);
 }
 
 void Msg::writebu32(const unsigned long bu32){
