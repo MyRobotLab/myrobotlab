@@ -84,6 +84,7 @@ public:
     static int b16(const unsigned char* buffer, const int start = 0);
     static long b32(const unsigned char* buffer, const int start = 0);
     static unsigned long bu32(const unsigned char* buffer, const int start = 0);
+    static float f32(const unsigned char* buffer, const int start = 0);
 
     // FIXME - remove publishBoardInfo() .. its generated
     static void publishBoardInfo();
@@ -95,7 +96,7 @@ public:
 	void publishBoardInfo( byte version,  byte boardType);
 	void publishAck( byte function);
 	void publishHeartbeat();
-	void publishEcho( unsigned long sInt);
+	void publishEcho( float myFloat);
 	void publishCustomMsg(const byte* msg,  byte msgSize);
 	void publishI2cData( byte deviceId, const byte* data,  byte dataSize);
 	void publishAttachedDevice( byte deviceId, const char* deviceName,  byte deviceNameSize);
@@ -116,6 +117,7 @@ public:
 	void writeb16(const int value);
 	void writeb32(const long value);
 	void writebu32(const unsigned long value);
+	void writef32(const float value);
 	void write(const unsigned char* buffer, int len);
 	bool readMsg();
 	byte getMethod();

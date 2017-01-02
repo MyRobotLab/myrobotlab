@@ -160,12 +160,15 @@ public class ArduinoTest implements PinArrayListener {
 	@Test
 	public void testConnectString() {
 		for (int i = 0; i < 20; ++i) {
-			arduino.connect(port);
+			// arduino.connect(port);
 			// arduino.enableAck(true);
+			arduino.echo(90.57F);
+			/*
 			arduino.echo(30003030L + i);
 			arduino.echo(2L);
 			arduino.echo(-1L);
-			arduino.disconnect();
+			*/
+			// arduino.disconnect();
 		}
 
 	}
@@ -1008,7 +1011,7 @@ public class ArduinoTest implements PinArrayListener {
 		try {
 			LoggingFactory.init("INFO");
 			
-			Runtime.start("webgui", "WebGui");
+			// Runtime.start("webgui", "WebGui");
 			// Runtime.start("gui", "GUIService");
 
 			// test a "real" arduino
@@ -1019,13 +1022,17 @@ public class ArduinoTest implements PinArrayListener {
 
 			ArduinoTest test = new ArduinoTest();
 			ArduinoTest.setUpBeforeClass();
-
+			
 			// arduino.record();
 
 			if (virtual != null) {
 				virtual.connect(port);
 			}
 			arduino.connect(port);
+			
+			arduino.setDebug(true);
+			
+			test.testConnectString();
 			
 			Servo servo01 = (Servo)Runtime.start("servo", "Servo");
 			

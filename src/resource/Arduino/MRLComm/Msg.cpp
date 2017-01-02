@@ -76,8 +76,8 @@ Msg* Msg::getInstance() {
 	void enableHeartbeat( boolean enabled);
 	// > heartbeat
 	void heartbeat();
-	// > echo/bu32 sInt
-	void echo( unsigned long sInt);
+	// > echo/f32 myFloat
+	void echo( float myFloat);
 	// > controllerAttach/serialPort
 	void controllerAttach( byte serialPort);
 	// > customMsg/[] msg
@@ -174,11 +174,11 @@ void Msg::publishHeartbeat() {
   reset();
 }
 
-void Msg::publishEcho( unsigned long sInt) {
+void Msg::publishEcho( float myFloat) {
   write(MAGIC_NUMBER);
   write(1 + 4); // size
   write(PUBLISH_ECHO); // msgType = 15
-  writebu32(sInt);
+  writef32(myFloat);
   flush();
   reset();
 }
@@ -321,9 +321,9 @@ void Msg::processCommand() {
 			break;
 	}
 	case ECHO: { // echo
-			unsigned long sInt = bu32(ioCmd, startPos+1);
-			startPos += 4; //bu32
-			mrlComm->echo( sInt);
+			float myFloat = f32(ioCmd, startPos+1);
+			startPos += 4; //f32
+			mrlComm->echo( myFloat);
 			break;
 	}
 	case CONTROLLER_ATTACH: { // controllerAttach
@@ -627,6 +627,15 @@ long Msg::b32(const byte* buffer, const int start/*=0*/) {
     return result;
 }
 
+float Msg::f32(const byte* buffer, const int start/*=0*/) {
+
+	const byte * ptr = buffer + start;
+
+    float newFloat = 0;
+    memcpy(&newFloat, ptr, sizeof(newFloat));
+    return newFloat;
+}
+
 unsigned long Msg::bu32(const byte* buffer, const int start/*=0*/) {
     unsigned long result = 0;
     for (int i = 0; i < 4; i++) {
@@ -717,6 +726,18 @@ void Msg::writeb32(const long b32){
 	write(b32 >> 16 & 0xFF);
 	write(b32 >> 8 & 0xFF);
 	write(b32 & 0xFF);
+}
+
+void Msg::writef32(const float f32){
+	byte temp [4];
+
+    float newFloat = 0;
+    memcpy(temp, &f32, sizeof(newFloat));
+
+	write(temp[3]);
+	write(temp[2]);
+	write(temp[1]);
+	write(temp[0]);
 }
 
 void Msg::writebu32(const unsigned long bu32){

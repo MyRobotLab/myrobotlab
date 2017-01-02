@@ -739,9 +739,9 @@ public class VirtualArduino extends Service implements SerialDataListener, Recor
 		msg.publishHeartbeat();
 	}
 
-	public void echo(Long sInt) {
-		log.info("varduino.echo {}", sInt);
-		msg.publishEcho(sInt);
+	public void echo(Float myFloat) {
+		log.info("varduino.echo {}", myFloat);
+		msg.publishEcho(myFloat);
 	}
 
 	public void controllerAttach(Integer serialPort) {
