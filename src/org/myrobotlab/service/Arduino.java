@@ -63,10 +63,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public static final int MIN_PULSE_WIDTH     =   544;     // the shortest pulse sent to a servo  
   public static final int MAX_PULSE_WIDTH     =  2400;    // the longest pulse sent to a servo 
   public static final int DEFAULT_PULSE_WIDTH =  1500;   
-  
-  public static class AckLock {
-    volatile boolean acknowledged = false;
-  }
 
   public static class I2CDeviceMap {
     public int busAddress;
@@ -213,9 +209,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   // FIXME - not working correctly yet
-  boolean ackEnabled = false;
+  // boolean ackEnabled = true;
 
-  transient AckLock ackRecievedLock = new AckLock();
   /**
    * path of the Arduino IDE must be set by user
    */
@@ -484,8 +479,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // have a DTR CDR line in the virtual port as use this as a signal
       // of
       // connection
+      
+      // by default ack'ing is now on..
+      // but with this first msg there is no msg before it,
+      // and there is a high probability that the board is not really ready
+      // and this msg along with the ack will be ignored
+      // so we turn of ack'ing locally
+      msg.enableAcks(false);
       msg.getBoardInfo();
-      // getBoardInfo();
+      
 
       log.info("waiting for boardInfo lock..........");
       synchronized (boardInfo) {
@@ -508,6 +510,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       } else {
         info("%s connected on %s responded version %s ... goodtimes...", serial.getName(), serial.getPortName(), version);
       }
+      
+      msg.enableAcks(true);
 
     } catch (Exception e) {
       log.error("serial open threw", e);
@@ -652,8 +656,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   // > enableAck/bool enabled
   public void enableAck(boolean enabled) {
-    ackEnabled = enabled;
-    msg.enableAck(enabled);
+    // ackEnabled = enabled;
+    // enable both sides acking Java & MrlComm
+    msg.enableAcks(enabled);
   }
 
   // > enableBoardStatus/bool enabled
@@ -1199,10 +1204,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
         // Our 'first' getBoardInfo may not receive a acknowledgement
         // so this should be disabled until boadInfo is valid
+        
+/** acking is done in Msg  !
         if (boardInfo.isValid() && ackEnabled) {
           synchronized (ackRecievedLock) {
             try {
-              ackRecievedLock.wait(2000);
+              long ts = System.currentTimeMillis();
+              log.info("***** starting wait *****");
+              ackRecievedLock.wait(10000);
+              log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
             } catch (InterruptedException e) {// don't care}
             }
 
@@ -1211,6 +1221,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
             }
           }
         }
+***/        
 
         // clean up memory/buffers
         msgSize = 0;
@@ -1295,12 +1306,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // < publishAck/function
   public void publishAck(Integer function/* byte */) {
     log.info("Message Ack received: =={}==", Msg.methodToString(function));
-
-    synchronized (ackRecievedLock) {
-      ackRecievedLock.acknowledged = true;
-      ackRecievedLock.notifyAll();
-    }
-
+    
+    msg.ackReceived(function);
+    
     numAck++;
     heartbeat = true;
   }

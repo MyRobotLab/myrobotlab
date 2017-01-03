@@ -67,6 +67,16 @@ public class %javaClass% {
 	
 	boolean invoke = true;
 	
+	boolean ackEnabled = true;
+	
+	 public static class AckLock {
+	    // first is always true - since there
+	    // is no msg to be acknowledged...
+	    volatile boolean acknowledged = true;
+	  }
+	 
+	transient AckLock ackRecievedLock = new AckLock();
+	
 	// recording related
 	transient FileOutputStream record = null;
 	transient StringBuilder rxBuffer = new StringBuilder();
@@ -286,7 +296,49 @@ public class %javaClass% {
 		}
 		}
 	}
+  
+  /**
+   * enable acks on both sides Arduino/Java-Land
+   * and MrlComm-land
+   */
+  public void enableAcks(boolean b){
+    // disable local blocking
+	  ackEnabled = b;
+	  // if (!localOnly){
+	  // shutdown MrlComm from sending acks
+	  // below is a method only in Msg.java not in VirtualMsg.java
+	  // it depends on the definition of enableAck in arduinoMsg.schema  
+	  // %enableAck%
+	  // }
+	}
+	
+	public void waitForAck(){
+	  if (!ackEnabled || ackRecievedLock.acknowledged){
+	    return;
+	  }
+    synchronized (ackRecievedLock) {
+      try {
+        long ts = System.currentTimeMillis();
+        // log.info("***** starting wait *****");
+        ackRecievedLock.wait(2000);
+        // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
+      } catch (InterruptedException e) {// don't care}
+      }
 
+      if (!ackRecievedLock.acknowledged) {
+        //log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
+        log.error("Ack not received");
+      }
+    }
+	}
+	
+	public void ackReceived(int function){
+	   synchronized (ackRecievedLock) {
+	      ackRecievedLock.acknowledged = true;
+	      ackRecievedLock.notifyAll();
+	    }
+	}
+	
 	public static void main(String[] args) {
 		try {
 
