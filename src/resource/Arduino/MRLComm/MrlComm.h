@@ -58,7 +58,7 @@ public:
     int getFreeRam();
     Device* getDevice(int id);
 
-    bool ackEnabled = false;
+    bool ackEnabled = true;
 
     Device* addDevice(Device* device);
     void update();
