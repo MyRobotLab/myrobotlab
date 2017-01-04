@@ -1521,12 +1521,12 @@ public class InMoov extends Service {
     meta.sharePeer("rightHand.arduino", "right", "Arduino", "shared right arduino");
 
     meta.sharePeer("eyesTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-    meta.sharePeer("eyesTracking.arduino", "left", "Arduino", "shared head Arduino");
+    meta.sharePeer("eyesTracking.controller", "left", "Arduino", "shared head Arduino");
     meta.sharePeer("eyesTracking.x", "head.eyeX", "Servo", "shared servo");
     meta.sharePeer("eyesTracking.y", "head.eyeY", "Servo", "shared servo");
 
     meta.sharePeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-    meta.sharePeer("headTracking.arduino", "left", "Arduino", "shared head Arduino");
+    meta.sharePeer("headTracking.controller", "left", "Arduino", "shared head Arduino");
     meta.sharePeer("headTracking.x", "head.rothead", "Servo", "shared servo");
     meta.sharePeer("headTracking.y", "head.neck", "Servo", "shared servo");
 
