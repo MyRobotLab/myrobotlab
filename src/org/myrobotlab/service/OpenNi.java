@@ -648,6 +648,7 @@ public class OpenNi extends Service // implements
     // we should be able to use this to compute the depth for each pixel in
     // the RGB image.
     data.depthMap = context.depthMap();
+    data.depthMapRW = context.depthMapRealWorld();
 
     if (enableRGB) {
       data.rbgPImage = context.rgbImage();

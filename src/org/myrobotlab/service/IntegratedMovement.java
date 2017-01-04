@@ -13,12 +13,15 @@ import org.myrobotlab.kinematics.CollisionDectection;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
+import org.myrobotlab.kinematics.Map3D;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.openni.OpenNiData;
+import org.myrobotlab.openni.PVector;
 import org.myrobotlab.service.Servo.IKData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.PointsListener;
@@ -89,6 +92,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }		
   		
   private MoveInfo moveInfo = null;
+	private OpenNi openni = null;
+	
+	private Map3D map3d = new Map3D();
   
   public IntegratedMovement(String n) {
     super(n);
@@ -187,7 +193,6 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, currentArm.getNumLinks(), 8, geneticRecombinationRate, geneticMutationRate);
       //HashMap<Integer,Integer> lastIteration = new HashMap<Integer,Integer>();
       int retry = 0;
-      long timeToWait = 0;
       stopMoving = false;
       while (retry++ < 100) {
       	if (stopMoving) {		
@@ -208,12 +213,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
           servo.moveTo(currentArm.getLink(i).getPositionValueDeg().intValue());
         }
         log.info("moving to {}", currentPosition());
-        timeToWait = (long)(time*1000);
         if (collisionItems.haveCollision()) {
           //collision avoiding need to be improved
           CollisionItem ci = null;
           int itemIndex = 0;
-          int linkIndex = 0;
           for (DHLink l : currentArm.getLinks()) {
         	boolean foundIt = false;
             for (itemIndex = 0; itemIndex < 2; itemIndex++) {
@@ -224,7 +227,6 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
               }
             }
             if (foundIt) break; //we have the item to watch
-            linkIndex++;
           }
           if (ci == null) {
             log.info("Collision between static item {} and {} detected", collisionItems.getCollisionItem()[0].getName(), collisionItems.getCollisionItem()[1].getName());
@@ -398,6 +400,15 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     this.currentArm = currentArm;
   }
   
+  public void setCurrentArm(String name) {
+  	if (arms.get(name) != null) {
+  		this.currentArm = arms.get(name);
+  	}
+  	else {
+  		log.info("Arm do not exist");
+  	}
+  }
+  
   public void addArm(String name, DHRobotArm currentArm) {
     arms.put(name, currentArm);
     this.currentArm = currentArm;
@@ -517,6 +528,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ServiceType meta = new ServiceType(InverseKinematics3D.class.getCanonicalName());
     meta.addDescription("a 3D kinematics service supporting D-H parameters");
     meta.addCategory("robot", "control");
+    meta.addPeer("openni", "OpenNi", "Kinect service");
 
     return meta;
   }
@@ -546,8 +558,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     setDHLink(servo, d, theta, r, alpha);
   }  
   
-  public void setNewDHRobotArm() {
+  public void setNewDHRobotArm(String name) {
     currentArm = new DHRobotArm();
+  	arms.put(name, currentArm);
   }
   
   public void moveTo(int x , int y, int z, int roll, int pitch, int yaw) {
@@ -814,5 +827,20 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   	stopMoving = true;		
   }		
   		
+  public OpenNi startOpenNI() throws Exception {
+    if (openni == null) {
+      openni = (OpenNi) startPeer("openni");
+      openni.startUserTracking();
+      this.subscribe(openni.getName(), "publishOpenNIData", this.getName(), "onOpenNiData");
+    }
+    return openni;
+  }
+  
+  public void onOpenNiData(OpenNiData data){
+//		int[] depthData = data.depthMap;
+//		PVector[] depthDataRW = data.depthMapRW;
+//		log.info("{}",depthDataRW[320+120*640]);
+  	map3d.processDepthMap(data);
+  }
   		
 }
