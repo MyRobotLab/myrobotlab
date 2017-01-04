@@ -195,7 +195,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
       fields = formFields;
     }
 
-    if (request.getClass().equals(HttpPost.class) && formFields.size() > 0) {
+    // Mats changed 2017-01-03. I think it was a bug 
+    // if (request.getClass().equals(HttpPost.class) && formFields.size() > 0)
+    if (request.getClass().equals(HttpPost.class) && fields.size() > 0) {
       List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(fields.size());
       for (String nvPairKey : fields.keySet()) {
         nameValuePairs.add(new BasicNameValuePair(nvPairKey, fields.get(nvPairKey)));
