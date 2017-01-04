@@ -373,7 +373,9 @@ public class ServoGUI extends ServiceGUI implements ActionListener {
         for (int i = 0; i < c.size(); ++i) {
           controller.addItem(c.get(i));
         }
-        controller.setSelectedItem(myServo.getController().getName());
+        if (myServo.getController() != null) {
+          controller.setSelectedItem(myServo.getController().getName());
+        }
       }
     });
   }
