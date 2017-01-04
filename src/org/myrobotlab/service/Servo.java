@@ -652,6 +652,7 @@ public class Servo extends Service implements ServoControl {
     this.pin = pin;
     this.targetPos = pos;
     this.velocity = velocity;
+    attach(controller);
   }
 
   public boolean isAttached(ServoController controller) {
