@@ -18,7 +18,7 @@ class MrlServo : public Device {
     bool isMoving;
     bool isSweeping;
     int targetPosUs;
-    int currentPosUs;
+    float currentPosUs;
     int minUs;
     int maxUs;
     unsigned long lastUpdate;

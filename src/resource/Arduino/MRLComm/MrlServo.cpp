@@ -51,7 +51,7 @@ void MrlServo::detachPin(){
 void MrlServo::update() {
   //it may have an imprecision of +- 1 due to the conversion of currentPosUs to int
   if (isMoving) {
-    if (currentPosUs != targetPosUs) {
+    if ((int)currentPosUs != targetPosUs) {
       long deltaTime = millis() - lastUpdate;
       lastUpdate = millis();
       float _velocity = velocity;
@@ -71,16 +71,16 @@ void MrlServo::update() {
         step = sweepStep;
       }
       if (velocity < 0) { // when velocity < 0, it mean full speed ahead
-        step = targetPosUs - currentPosUs;
+        step = targetPosUs - (int)currentPosUs;
       }
       else if (currentPosUs > targetPosUs) {
         step *=-1;
       }
       currentPosUs += step;
-      if ((step > 0.0 && currentPosUs > targetPosUs) || (step < 0.0 && currentPosUs < targetPosUs)) {
+      if ((step > 0.0 && (int)currentPosUs > targetPosUs) || (step < 0.0 && (int)currentPosUs < targetPosUs)) {
         currentPosUs = targetPosUs;
       }
-      servo->writeMicroseconds(currentPosUs);
+      servo->writeMicroseconds((int)currentPosUs);
     }
     else {
       if (isSweeping) {
