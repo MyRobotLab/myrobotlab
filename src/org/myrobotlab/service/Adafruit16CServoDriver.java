@@ -478,6 +478,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			// Start a thread to handle the speed for this servo
 			if (servoData.isMoving == false) {
 				servoData.speedcontrol = new SpeedControl(servo.getName());
+				servoData.speedcontrol.start();
 			}
 		}
 	}
