@@ -1010,7 +1010,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 	}
 
 	// TODO: remove this method use write(int[] b) instead
-	public void write(int b) throws Exception {
+	synchronized public void write(int b) throws Exception {
 
 
 		if (connectedPorts.size() == 0) {
@@ -1032,7 +1032,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 		}		
 	}
 
-	public void write(int[] data) throws Exception {
+	synchronized public void write(int[] data) throws Exception {
 		// If the port is JSSC we can just write the array.
 		for (String portName : connectedPorts.keySet()) {
 			Port writePort = connectedPorts.get(portName);
