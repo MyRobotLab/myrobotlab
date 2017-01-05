@@ -44,16 +44,18 @@ public class Map3D {
 			for (int y = 0; y < heighImage; y+=skip) {
 				int index = x + y*widthImage;
 				PVector loc = null;
-				for (float z = closestDistance; z < depthData[index].z - skip; z+=(float)skip) {
-					loc = PVector.div(depthData[index], depthData[index].z);
-					loc = PVector.mult(loc, z);
-					addCoordValue(loc.x, loc.y, loc.z, CoordStateValue.EMPTY);
-				}
-				addCoordValue(depthData[index].x, depthData[index].y, depthData[index].z, CoordStateValue.FILL);
-				for (float z = depthData[index].z + (float)skip; z < fartestDistance; z+=(float)skip) {
-					loc = PVector.div(depthData[index], depthData[index].z);
-					loc = PVector.mult(loc, z);
-					addCoordValue(loc.x, loc.y, loc.z, CoordStateValue.UNDEFINED);
+				if (depthData[index].z > closestDistance) {
+					for (float z = closestDistance; z < depthData[index].z - skip; z+=(float)skip) {
+						loc = PVector.div(depthData[index], depthData[index].z);
+						loc = PVector.mult(loc, z);
+						addCoordValue(loc.x, loc.y, loc.z, CoordStateValue.EMPTY);
+					}
+					addCoordValue(depthData[index].x, depthData[index].y, depthData[index].z, CoordStateValue.FILL);
+					for (float z = depthData[index].z + (float)skip; z < fartestDistance; z+=(float)skip) {
+						loc = PVector.div(depthData[index], depthData[index].z);
+						loc = PVector.mult(loc, z);
+						addCoordValue(loc.x, loc.y, loc.z, CoordStateValue.UNDEFINED);
+					}
 				}
 			}
 		}
