@@ -67,9 +67,10 @@ public class Map3D {
 	}
 	
 	private void addCoordValue(int xpos, int ypos, int zpos, CoordStateValue value) {
+		//convert to the coordinate use by our ik engine
 		int posx = xpos/skip*skip;
-		int posy = ypos/skip*skip;
-		int posz = xpos/skip*skip;
+		int posy = zpos/skip*skip;
+		int posz = ypos/skip*skip;
 		HashMap<Integer,HashMap<Integer,CoordStateValue>> y = coordValue.get(posx);
 		if (y == null) {
 			y = new HashMap<Integer,HashMap<Integer,CoordStateValue>>();
