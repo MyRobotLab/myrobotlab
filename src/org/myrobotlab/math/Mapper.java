@@ -26,6 +26,11 @@ public final class Mapper implements Serializable {
 	boolean inverted = false;
 
 	public Mapper(double minX, double maxX, double minY, double maxY) {
+	  
+	  if (maxY - minY == 0){
+	    log.error("maxY - minY == 0 ..  DIVIDE BY ZERO ERROR COMING !" );
+	  }
+	  
 		this.minX = minX;
 		this.maxX = maxX;
 		this.minY = minY;
