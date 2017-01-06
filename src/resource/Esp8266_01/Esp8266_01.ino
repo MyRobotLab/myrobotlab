@@ -12,7 +12,7 @@
       Then search for esp8266 and install it
     You also need to install the libraries used
       In Arduino IDE select Sketch => Include Library => Manage Libraries =>  
-      Install ESP8266WiFi, ESP8266WebServer and ArduinoJson libraries
+      Install ESP8266WiFi, ESP8266WebServer, ESP8266mDSN and ArduinoJson libraries
  
       You also need to connect the ESP8266 to your USB port, using either a development board or a FTDI cable.
       To set the ESP8266 in flash mode, so that you can upload the program, GPIO0 needs to be connected to GND 
@@ -20,24 +20,37 @@
       It's possible that this sketch can be used with other ESP8266 variants, but that needs to be tested
 
       Change ssid and password to match the network you want to connect to.
-      After upload is complete you can open the serial monitor to see what ip-address that has been assigned
+      After upload is complete you can open the serial monitor to see what ip-address that has been assigned.
       If you don't see it, try to unplug the USB and the reopen the serial monitor
-
-      Alternativley, if you can guess the ip-address you can try connecting to the ESP8266 with a web browser using just
-      http://<esp8266-ip-address>
-      If you find it, it will respond with a welcome message 
+      The you can connect using http://<esp8266-ip-address>
+      
+      This sketch also supports multicast DNS: 
+      https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266mDNS
+      It already supported on Mac
+      On Windows you need to install "Bonjour". https://support.apple.com/kb/DL999?viewlocale=en_US&locale=en_US
+      On Linux install "Avahli" http://avahi.org/ 
+      
+      Then you can connect using this link:
+      http://esp8266-01.local
+      
+      It will respond with a welcome message and show what ip-address that is being used.
+      If you want to change the name it's set in variable  
  */
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
 #include <ArduinoJson.h>
 #include<Wire.h>
 #include<stdlib.h>
 
 ESP8266WebServer server;
+MDNSResponder mdns;
 
-const char* ssid = "<your ssid>";
-const char* password = "<your password>";
+const char* ssid = "<your-wifi-ssid>";
+const char* password = "<your-wifi-password>";
+const char* hostName = "esp8266-01";
+IPAddress ipaddress;
 
 const String BusLabel = "bus:";
 const String DeviceLabel = "device:";
@@ -72,16 +85,24 @@ void setup() {
   Serial.println("WiFi connected");
   
   // Print the IP address
-  Serial.println(WiFi.localIP());
-
+  ipaddress = WiFi.localIP();
+  Serial.println(ipaddress);
+  
+  // 
+  if (mdns.begin(hostName,ipaddress)) {
+    Serial.println("MDNS Responder Started.");
+  }
+  
   // Setup the different routes to response methods
-  server.on("/",[](){server.send(200, "text/html", "Welcome to <b>ESP8266</b> and the <b>i2c interface</b>");});
+  server.on("/",rootResponse);
   server.on("/i2cWrite",i2cWrite);
   server.on("/i2cRead",i2cRead);
   
   // Start the server
   server.begin();
   Serial.println("Server started");
+
+  MDNS.addService("http","tcp",80);
 }
 
 void loop() {
@@ -89,6 +110,25 @@ void loop() {
   server.handleClient();
 }
 
+/*
+  Response when accessing the esp8266-01 root
+*/ 
+void rootResponse(){
+    
+  String msg = "Welcome to <b>ESP8266</b> and the <b>i2c interface</b><p><b>Hostname: </b>";
+  msg = msg + String(hostName);
+  msg = msg + "<p><b>Ip-address: </b>";
+  msg = msg +  DisplayAddress(ipaddress);
+  server.send(200, "text/html", msg); 
+} 
+
+String DisplayAddress(IPAddress address)
+{
+ return String(address[0]) + "." + 
+        String(address[1]) + "." + 
+        String(address[2]) + "." + 
+        String(address[3]);
+}
 /*
  * Read from an i2c device
  */
