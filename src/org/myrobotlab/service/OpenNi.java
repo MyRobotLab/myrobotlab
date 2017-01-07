@@ -68,7 +68,12 @@ public class OpenNi extends Service // implements
             getData();
           } else if ("hands".equals(type)) {
             drawHand();
-          } else {
+            
+          } 
+          else if ("map3D".equals(type)) {
+          	get3DData();
+          }
+          else {
             error("unknown worker %s", type);
             isRunning = false;
           }
@@ -633,6 +638,13 @@ public class OpenNi extends Service // implements
   public String format(PVector v) {
     return String.format("%d %d %d", Math.round(v.x), Math.round(v.y), Math.round(v.z));
   }
+  
+  void get3DData() {
+  	OpenNiData data = new OpenNiData();
+  	context.update();
+  	data.depthMapRW = context.depthMapRealWorld();
+    invoke("publishOpenNIData", data);
+  }
 
   void getData() {
 
@@ -648,7 +660,7 @@ public class OpenNi extends Service // implements
     // we should be able to use this to compute the depth for each pixel in
     // the RGB image.
     data.depthMap = context.depthMap();
-    data.depthMapRW = context.depthMapRealWorld();
+    //data.depthMapRW = context.depthMapRealWorld();
 
     if (enableRGB) {
       data.rbgPImage = context.rgbImage();
@@ -872,6 +884,27 @@ public class OpenNi extends Service // implements
     worker.start();
   }
 
+  public void start3DData() {
+    if (context == null) {
+      error("could not get context");
+      return;
+    }
+
+    if (context.isInit() == false) {
+      error("Can't init SimpleOpenNI, maybe the camera is not connected!");
+      return;
+    }
+    enableDepth(true);
+    info("starting user worker");
+    if (worker != null) {
+      stopCapture();
+    }
+    worker = new Worker("map3D");
+    worker.start();
+  	
+  }
+  
+  
   // shutdown worker
   public void stopCapture() {
     if (worker != null) {

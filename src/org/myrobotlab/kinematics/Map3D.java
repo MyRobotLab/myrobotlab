@@ -5,6 +5,7 @@ package org.myrobotlab.kinematics;
 
 import java.util.HashMap;
 
+import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.PVector;
 
@@ -34,6 +35,8 @@ public class Map3D {
 	
 	public int skip = 10;
 	HashMap<Integer,HashMap<Integer,HashMap<Integer,CoordStateValue>>> coordValue = new HashMap<Integer,HashMap<Integer,HashMap<Integer,CoordStateValue>>>();
+	private Point kinectPosition;
+	
 	public Map3D() {
 		
 	}
@@ -44,7 +47,7 @@ public class Map3D {
 			for (int y = 0; y < heighImage; y+=skip) {
 				int index = x + y*widthImage;
 				PVector loc = null;
-				if (depthData[index].z > closestDistance) {
+				if (depthData[index].z > closestDistance && depthData[index].z <= fartestDistance) {
 					for (float z = closestDistance; z < depthData[index].z - skip; z+=(float)skip) {
 						loc = PVector.div(depthData[index], depthData[index].z);
 						loc = PVector.mult(loc, z);
@@ -57,6 +60,13 @@ public class Map3D {
 						addCoordValue(loc.x, loc.y, loc.z, CoordStateValue.UNDEFINED);
 					}
 				}
+				if (depthData[index].z > fartestDistance) {
+					for (float z = closestDistance; z <= depthData[index].z; z+=(float)skip) {
+						loc = PVector.div(depthData[index], depthData[index].z);
+						loc = PVector.mult(loc, z);
+						addCoordValue(loc.x, loc.y, loc.z, CoordStateValue.EMPTY);
+					}
+				}
 			}
 		}
 	}
@@ -67,35 +77,50 @@ public class Map3D {
 	}
 	
 	private void addCoordValue(int xpos, int ypos, int zpos, CoordStateValue value) {
-		//convert to the coordinate use by our ik engine
-		int posx = xpos/skip*skip;
-		int posy = zpos/skip*skip;
-		int posz = ypos/skip*skip;
-		HashMap<Integer,HashMap<Integer,CoordStateValue>> y = coordValue.get(posx);
+		//need to rotate and translate the location depending on the position of the kinect
+		//rotate
+    double roll = MathUtils.degToRad(kinectPosition.getRoll());
+    double pitch = MathUtils.degToRad(kinectPosition.getPitch());
+    double yaw = MathUtils.degToRad(kinectPosition.getYaw());
+    Matrix trMatrix = Matrix.translation(kinectPosition.getX(), kinectPosition.getY(), kinectPosition.getZ());
+    Matrix rotMatrix = Matrix.zRotation(roll).multiply(Matrix.yRotation(yaw).multiply(Matrix.xRotation(pitch)));
+    Matrix inputMatrix = trMatrix.multiply(rotMatrix);
+
+    Point pOut = new Point(inputMatrix.elements[0][0], inputMatrix.elements[1][0], inputMatrix.elements[2][0], roll, pitch, yaw);
+		
+		//translate
+//		double posx = xpos + kinectPosition.getX();
+//		double posy = zpos + kinectPosition.getY();
+//		double posz = ypos + kinectPosition.getZ();
+		//convert to the coordinate use by our ik engine and reduce the resolution
+		double posx = (int)((int)pOut.getX()/skip*skip);
+		double posy = (int)((int)pOut.getY()/skip*skip);
+		double posz = (int)((int)pOut.getZ()/skip*skip);
+		HashMap<Integer,HashMap<Integer,CoordStateValue>> y = coordValue.get((int)posx);
 		if (y == null) {
 			y = new HashMap<Integer,HashMap<Integer,CoordStateValue>>();
 		}
-		HashMap<Integer,CoordStateValue> z = y.get(posy);
+		HashMap<Integer,CoordStateValue> z = y.get((int)posy);
 		if (z == null) {
 			z = new HashMap<Integer,CoordStateValue>();
 		}
 		switch (value){
 			case EMPTY:
-				if (z.get(posz) != null) {
-					z.remove(posz);
+				if (z.get((int)posz) != null) {
+					z.remove((int)posz);
 				}
 				break;
 			case FILL:
-				z.put(posz, value);
+				z.put((int)posz, value);
 				break;
 			case UNDEFINED:
-				if (z.get(posz) == null){
-					z.put(posz, value);
+				if (z.get((int)posz) == null){
+					z.put((int)posz, value);
 				}
 				break;
 		}
-		y.put(posy, z);
-		coordValue.put(posx, y);
+		y.put((int)posy, z);
+		coordValue.put((int)posx, y);
 	}
 	
 	public CoordStateValue getCoordValue(double xpos, double ypos, double zpos) {
@@ -116,6 +141,10 @@ public class Map3D {
 		}
 		return CoordStateValue.FILL; //return FILL even if it's undefined (we don't know if it's fill or not, better not go.
 		//return z.get(posz);
+	}
+
+	public void updateKinectPosition(Point currentPosition) {
+		kinectPosition = currentPosition;
 	}
 }
 
