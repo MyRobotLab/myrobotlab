@@ -29,15 +29,15 @@ public class MathUtils {
 	/*
 	 * Converts Gray encoded values to their corresponding decimal value
 	 */
-	static public int grayToDecimal(int gray) {
+	static public int decimalToGray(int decimal) {
 
-		return (gray ^ (gray >> 1));
+		return (decimal ^ (decimal >> 1));
 	}
 
 	/*
 	 * Converts a decimal number to it's corresponding Gray encoded value
 	 */
-	static public int decimalToGray(int gray) {
+	static public int grayToDecimal(int gray) {
 		gray ^= (gray >> 16);
 		gray ^= (gray >> 8);
 		gray ^= (gray >> 4);
