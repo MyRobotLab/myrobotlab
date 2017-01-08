@@ -105,7 +105,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public void changeArm(String arm) {
     if (arms.containsKey(arm)) {
       currentArm = arms.get(arm);
-      currentServos = servos.get(arm);
+      //currentServos = servos.get(arm);
     }
     else {
       log.info("IK service have no data for {}", arm);
@@ -205,7 +205,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
         currentArm = simulateMove(bestFit.getDecodedGenome());
         for (int i = 0; i < currentArm.getNumLinks(); i++){
           Servo servo = currentServos.get(currentArm.getLink(i).getName());
-          while (!servo.isMoving()){
+          while (servo.isMoving()){
           	sleep(10);
           }
         }
@@ -537,6 +537,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public void setDHLink (String name, double d, double theta, double r, double alpha) {
     DHLink dhLink = new DHLink(name, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
     currentArm.addLink(dhLink);
+    arms.put(currentArm.name, currentArm);
   }
   
   public void setDHLink (Servo servo, double d, double theta, double r, double alpha) {
@@ -547,6 +548,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     dhLink.setMin(MathUtils.degToRad(theta + Math.min(servo.getMin(), servo.getMax())));
     dhLink.setMax(MathUtils.degToRad(theta + Math.max(servo.getMax(), servo.getMin())));
     currentArm.addLink(dhLink);
+    arms.put(currentArm.name, currentArm);
   }
   
   public void setDHLink (String armName, String name, double d, double theta, double r, double alpha) {
@@ -557,10 +559,12 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public void setDHLink (String armName, Servo servo, double d, double theta, double r, double alpha) {
     changeArm(armName);
     setDHLink(servo, d, theta, r, alpha);
+    arms.put(currentArm.name, currentArm);
   }  
   
   public void setNewDHRobotArm(String name) {
     currentArm = new DHRobotArm();
+    currentArm.name = name;
   	arms.put(name, currentArm);
   }
   
@@ -625,7 +629,15 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       int pos=0;
       ArrayList<Object>decodedGenome = new ArrayList<Object>();
       for (DHLink link: currentArm.getLinks()){
-      	Mapper map = new Mapper(0,2047,link.getMin(),link.getMax());
+      	Servo servo = currentServos.get(link.getName());
+      	Mapper map = null;
+      	if(servo.getMin() == servo.getMax()) {
+      		decodedGenome.add(servo.getMin());
+      		continue;
+      	}
+      	else {
+      		map = new Mapper(0,2047,servo.getMin(),servo.getMax());
+      	}
         Double value=0.0;
         for (int i= pos; i< chromosome.getGenome().length() && i < pos+11; i++){
           if(chromosome.getGenome().charAt(i) == '1') value += 1 << i-pos; 

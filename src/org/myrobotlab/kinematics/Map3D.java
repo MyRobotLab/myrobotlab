@@ -86,7 +86,7 @@ public class Map3D {
     Matrix rotMatrix = Matrix.zRotation(roll).multiply(Matrix.yRotation(yaw).multiply(Matrix.xRotation(pitch)));
     Matrix inputMatrix = trMatrix.multiply(rotMatrix);
 
-    Point pOut = new Point(inputMatrix.elements[0][0], inputMatrix.elements[1][0], inputMatrix.elements[2][0], roll, pitch, yaw);
+    Point pOut = new Point(inputMatrix.elements[0][0], inputMatrix.elements[1][0], inputMatrix.elements[2][0], 0, 0, 0);
 		
 		//translate
 //		double posx = xpos + kinectPosition.getX();
