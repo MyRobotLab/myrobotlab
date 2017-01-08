@@ -99,21 +99,12 @@ public final class Mapper implements Serializable {
 	}
 
 	public void setInverted(boolean invert) {
-		if (invert && !inverted) {
-			// change state from non-inverted to inverted
-			double t = minX;
-			minX = maxX;
-			maxX = t;
-			inverted = true;
-		} else if (invert && inverted) {
-			// change state from inverted to non-inverted
-			double t = minX;
-			minX = maxX;
-			maxX = t;
-			inverted = false;
-		} else {
-			// inverted to inverted & non-inverted to non-inverted
-			// do nothing
+		if (invert != inverted) {
+			// change state 
+			double t = minY;
+			minY = maxY;
+			maxY = t;
+			inverted = invert;
 		}
 	}
 
