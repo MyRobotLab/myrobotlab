@@ -820,6 +820,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	 * @param name
 	 */
 	public void addTask(String name, int interval, String method, Object... params) {
+	  if (tasks.containsKey(name)){
+	    log.warn("already have active task \"%s\"", name);
+	    return;
+	  }
 		Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), name)));
 		Task task = new Task(name, interval, getName(), method, params);
 		timer.schedule(task, 0);
@@ -836,6 +840,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 	public void purgeTask(String taskName) {
 		if (tasks.containsKey(taskName)) {
+		  log.info("remove task {}", taskName);
 			Timer timer = tasks.get(taskName);
 			if (timer != null) {
 				try {

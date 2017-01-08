@@ -326,8 +326,8 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 			m1.moveTo(250);
 			m1.moveTo(250);
 
-			arduino.enableBoardStatus(true);
-			arduino.enableBoardStatus(false);
+			arduino.enableBoardInfo(true);
+			arduino.enableBoardInfo(false);
 			m1.stop();
 			m1.move(0.5);
 			m1.moveTo(200);

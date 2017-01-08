@@ -345,7 +345,7 @@ public class Esp8266_01 extends Service implements I2CController {
 		meta.addDescription("ESP8266-01 service to communicate using i2c");
 		meta.addCategory("i2c", "control");
 		meta.setSponsor("Mats");
-		meta.addPeer("httpclient", "HttpClient", "Http client service");
+	    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
 
 		return meta;
 	}

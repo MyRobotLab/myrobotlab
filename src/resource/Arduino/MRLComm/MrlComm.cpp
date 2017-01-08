@@ -61,7 +61,8 @@ void MrlComm::publishBoardStatus() {
 			deviceSummary[i] = deviceList.get(i)->id;
 			deviceSummary[i + 1] = deviceList.get(i)->type;
 		}
-		msg->publishBoardStatus(avgTiming, getFreeRam(), deviceSummary, deviceList.size() * 2);
+		// FIXME !!! - merge in changes from VirtualArduino
+		// msg->publishBoardStatus(avgTiming, getFreeRam(), deviceSummary, deviceList.size() * 2);
 	}
 	// update the timestamp of this update.
 	lastMicros = now;
@@ -219,9 +220,19 @@ void MrlComm::begin(HardwareSerial& serial) {
 	// send 3 boardInfos to PC to announce,
 	// Hi I'm an Arduino with version x, board type y, and I'm ready :)
 	for (int i = 0; i < 5; ++i) {
-		msg->publishBoardInfo(MRLCOMM_VERSION, BOARD);
+		publishBoardInfo();
 		serial.flush();
 	}
+}
+
+void MrlComm::publishBoardInfo(){
+	byte deviceSummary[deviceList.size() * 2];
+	for (int i = 0; i < deviceList.size(); ++i) {
+		deviceSummary[i] = deviceList.get(i)->id;
+		deviceSummary[i + 1] = deviceList.get(i)->type;
+	}
+
+	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD, 0, getFreeRam(), deviceSummary, sizeof(deviceSummary));
 }
 
 /****************************************************************
@@ -233,7 +244,8 @@ void MrlComm::begin(HardwareSerial& serial) {
 
 // > getBoardInfo
 void MrlComm::getBoardInfo() {
-	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD);
+	// msg->publishBoardInfo(MRLCOMM_VERSION, BOARD);
+   publishBoardInfo();
 }
 
 // > echo/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
@@ -308,15 +320,19 @@ void MrlComm::disablePins() {
 }
 
 // > enableBoardStatus
-void MrlComm::enableBoardStatus(bool enabled) {
+/*
+void MrlComm::enableBoardInfo(bool enabled) {
 	// msg->publishDebug("enableBoardStatus");
 	boardStatusEnabled = enabled;
 }
+*/
 
 // > enableHeartbeat/bool enabled
+/*
 void MrlComm::enableHeartbeat(bool enabled) {
 	heartbeatEnabled = enabled;
 }
+*/
 
 // > enablePin/address/type/b16 rate
 void MrlComm::enablePin(byte address, byte type, int rate) {
@@ -338,9 +354,11 @@ void MrlComm::enablePin(byte address, byte type, int rate) {
 }
 
 // > heartbeat
+/*
 void MrlComm::heartbeat() {
 	lastHeartbeatUpdate = millis();
 }
+*/
 
 // > i2cBusAttach/deviceId/i2cBus
 void MrlComm::i2cBusAttach(byte deviceId, byte i2cBus) {

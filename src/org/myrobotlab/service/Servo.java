@@ -172,12 +172,12 @@ public class Servo extends Service implements ServoControl {
   /**
    * the requested INPUT position of the servo
    */
-  double targetPos = 0;
+  double targetPos = rest;
 
   /**
    * the calculated output for the servo
    */
-  double targetOutput;
+  Double targetOutput;
 
   /**
    * list of names of possible controllers
@@ -945,6 +945,10 @@ public class Servo extends Service implements ServoControl {
    */
   @Override
   public double getTargetOutput() {
+    if (targetOutput == null){
+      targetPos = rest;
+      targetOutput = mapper.calcOutput(rest); 
+    }
     return targetOutput;
   }
 

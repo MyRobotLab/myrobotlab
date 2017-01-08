@@ -64,10 +64,11 @@ public class %javaClass% {
 	public static final int MRLCOMM_VERSION = %MRLCOMM_VERSION%;
 
 	// ------ device type mapping constants
+	int method = -1;
 	
 	boolean invoke = true;
 	
-	boolean ackEnabled = true;
+	boolean ackEnabled = %ackEnabled%;
 	
 	 public static class AckLock {
 	    // first is always true - since there
@@ -337,6 +338,10 @@ public class %javaClass% {
 	      ackRecievedLock.acknowledged = true;
 	      ackRecievedLock.notifyAll();
 	    }
+	}
+	
+	public int getMethod(){
+	  return method;
 	}
 	
 	public static void main(String[] args) {
