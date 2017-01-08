@@ -603,7 +603,7 @@ public class Servo extends Service implements ServoControl {
       return;
     }
 
-    targetOutput = mapper.calcOutput(targetPos);
+    targetOutput = getTargetOutput();//mapper.calcOutput(targetPos);
 
     // set the controller
     this.controller = controller;
@@ -946,9 +946,9 @@ public class Servo extends Service implements ServoControl {
   @Override
   public double getTargetOutput() {
     if (targetPos == null){
-      targetPos = rest;
-      targetOutput = mapper.calcOutput(rest); 
+      targetPos = rest;      
     }
+    targetOutput = mapper.calcOutput(targetPos); 
     return targetOutput;
   }
 
