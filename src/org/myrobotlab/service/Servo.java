@@ -926,9 +926,9 @@ public class Servo extends Service implements ServoControl {
   @Override
   public double getTargetOutput() {
     if (targetPos == null){
-      targetPos = rest;
-      targetOutput = mapper.calcOutput(rest); 
+      targetPos = rest;      
     }
+    targetOutput = mapper.calcOutput(rest); 
     return targetOutput;
   }
 
