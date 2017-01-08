@@ -8,24 +8,22 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     $scope.image = "service/arduino/Uno.png";
     $scope.connectedStatus = "";
     $scope.versionStatus = "";
-    $scope.boardStatus = 0;
-    $scope.singleModel = 0;    
+    // $scope.boardInfo = 0;
+    $scope.singleModel = 0; 
+
+    $scope.boardInfo = {
+        "boardType": null,
+        "deviceCount": null ,
+        "deviceList": null ,
+        "enableBoardInfo":false,
+        "sram": null ,
+        "us": null ,
+        "version": null
+    }   
 
     // for port directive
     $scope.portDirectiveScope = {};
     
-    // The MrlComm object !
-    // this represents the state of MrlComm
-    // and (potentially) all its state data
-    $scope.mrlComm = {
-        "boardType": null,
-        "deviceCount": null ,
-        "deviceList": null ,
-        "enableBoardStatus":false,
-        "sram": null ,
-        "us": null ,
-        "version": null
-    };
     // Status - from the Arduino service
     $scope.statusLine = "";
     this.updateState = function(service) {
@@ -81,7 +79,8 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             $scope.$apply();
             break;
         case 'onBoardInfo':
-            $scope.mrlCommStatus = data;
+            $scope.boardInfo = data;
+            $scope.$apply();
             break;
         case 'onVersion':
             $scope.version = data;
@@ -100,13 +99,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             // FIXME - SHOULD BE MODIFYING PARENT'S STATUS
             // $scope.updateState(data);
             // $scope.$apply();
-            break;
-        case 'onBoardStatus':
-                $scope.mrlComm.us = data.us;
-                $scope.mrlComm.sram = data.sram;
-                $scope.mrlComm.deviceSummary = data.deviceSummary;
-                $scope.$apply();
-            break;
+            break;        
         case 'onPin':
             break;
         case 'onTX':
@@ -163,7 +156,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     // get version
     msg.subscribe('publishVersion');
     msg.subscribe('publishBoardInfo');
-    msg.subscribe('publishBoardStatus');
+    msg.subscribe('publishBoardInfo');
    // msg.subscribe('publishSensorData');
     msg.subscribe(this);
 }

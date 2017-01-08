@@ -68,8 +68,6 @@ public:
     // <generatedCallBacks>
 	// > getBoardInfo
 	void getBoardInfo();
-	// > enableBoardStatus/bool enabled
-	void enableBoardStatus( boolean enabled);
 	// > enablePin/address/type/b16 rate
 	void enablePin( byte address,  byte type,  int rate);
 	// > setDebug/bool enabled
@@ -80,10 +78,6 @@ public:
 	void softReset();
 	// > enableAck/bool enabled
 	void enableAck( boolean enabled);
-	// > enableHeartbeat/bool enabled
-	void enableHeartbeat( boolean enabled);
-	// > heartbeat
-	void heartbeat();
 	// > echo/f32 myFloat/myByte/f32 secondFloat
 	void echo( float myFloat,  byte myByte,  float secondFloat);
 	// > controllerAttach/serialPort

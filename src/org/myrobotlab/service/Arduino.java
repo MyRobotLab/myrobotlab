@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.BoardInfo;
-import org.myrobotlab.arduino.BoardStatus;
+// import org.myrobotlab.arduino.BoardStatus;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.Service;
@@ -58,11 +58,6 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 
 public class Arduino extends Service implements Microcontroller, PinArrayControl, I2CBusController, I2CController, SerialDataListener, ServoController, MotorController,
     NeoPixelController, UltrasonicSensorController, DeviceController, RecordControl, SerialRelayListener {
-
-  
-  public static final int MIN_PULSE_WIDTH     =   544;     // the shortest pulse sent to a servo  
-  public static final int MAX_PULSE_WIDTH     =  2400;    // the longest pulse sent to a servo 
-  public static final int DEFAULT_PULSE_WIDTH =  1500;   
 
   public static class I2CDeviceMap {
     public int busAddress;
@@ -302,6 +297,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   public String uploadSketchResult;
 
+  private long boardInfoRequestTs;
+
   public Arduino(String n) {
     super(n);
     serial = (Serial) createPeer("serial");
@@ -411,7 +408,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       try {
         long waitTime = System.currentTimeMillis();
         boardInfo.wait(4500); // max wait 4.5 seconds - for port to
-        log.info("waited {} ms for Arduino {} to say hello", System.currentTimeMillis() - waitTime, getName());
+        log.info("waited {} ms for Arduino {} to say hello.....", System.currentTimeMillis() - waitTime, getName());
       } catch (InterruptedException e) {
       }
     }
@@ -661,23 +658,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.enableAcks(enabled);
   }
 
-  // > enableBoardStatus/bool enabled
-  public void enableBoardStatus(Boolean enabled) {
-    msg.enableBoardStatus(enabled);
-  }
-
-  // > enableHeartbeat/bool enabled
-  public void enableHeartbeat(Boolean enabled) {
-    if (enabled) {
-      heartbeat = true;
-      addTask("heartbeat", 1000, "heartbeat");
+  // msg
+  // > enableBoardInfo/bool enabled
+  public void enableBoardInfo(Boolean enabled) {
+    // msg.enableBoardInfo(enabled);
+    if (enabled){
+      addTask("getBoardInfo", 1000, "sendBoardInfoRequest");
     } else {
-      heartbeat = false;
-      purgeTask("heartbeat");
+      purgeTask("getBoardInfo");
     }
-    msg.enableHeartbeat(enabled);
+    
   }
-
+  
   // > enablePin/address/type/b16 rate
   public void enablePin(int address) {
     enablePin(address, 0);
@@ -717,6 +709,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // results in a serial infinit loop
     // msg.getBoardInfo();
     return boardInfo;
+  }
+  
+  public void sendBoardInfoRequest(){
+    boardInfoRequestTs = System.currentTimeMillis();
+    msg.getBoardInfo();
   }
 
   @Override
@@ -801,6 +798,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    * and resets
    */
   // > heartbeat
+  /*
   public void heartbeat() {
     if (!heartbeat) {
       log.info("No answer from controller:{}. Disconnecting...", this.getName());
@@ -815,6 +813,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     heartbeat = false;
     msg.heartbeat();
   }
+  */
 
   @Override
   public void i2cAttach(I2CControl control, int busAddress, int deviceAddress) {
@@ -1331,14 +1330,19 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return deviceName;
   }
 
-  // < publishBoardInfo/version/boardType
-  public BoardInfo publishBoardInfo(Integer version/* byte */, Integer boardType/* byte */) {
+  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
+  public BoardInfo publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, int[] deviceSummary/*[]*/) {
+    long now = System.currentTimeMillis();
     boolean broadcast = false;
     if (version != boardInfo.getVersion() || boardType != boardInfo.getBoardType()) {
       broadcast = true;
     }
     boardInfo.setVersion(version);
+    boardInfo.setMicrosPerLoop(microsPerLoop);
     boardInfo.setType(boardType);
+    boardInfo.setSram(sram);
+    boardInfo.setDeviceSummary(arrayToDeviceSummary(deviceSummary));
+    boardInfo.heartbeatMs = now - boardInfoRequestTs;
 
     log.info("Version return by Arduino: {}", boardInfo.getVersion());
     log.info("Board type returned by Arduino: {}", boardInfo.getName());
@@ -1361,9 +1365,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return boardInfo;
   }
 
-  // < publishBoardStatus/b16 microsPerLoop/b16 sram/[] deviceSummary
-  public BoardStatus publishBoardStatus(Integer microsPerLoop/* b16 */, Integer sram/* b16 */, int[] deviceSummary/* byte */) {
-    log.info("publishBoardStatus {} us, {} sram, {} devices", microsPerLoop, sram, deviceSummary);
+  DeviceSummary[] arrayToDeviceSummary(int []deviceSummary){
     DeviceSummary[] ds = new DeviceSummary[deviceSummary.length / 2];
     for (int i = 0; i < deviceSummary.length / 2; ++i) {
       int id = deviceSummary[i];
@@ -1371,8 +1373,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       DeviceSummary ds0 = new DeviceSummary(getDeviceName(id), id, Msg.deviceTypeToString(typeId), typeId);
       ds[i] = ds0;
     }
-    return new BoardStatus(microsPerLoop, sram, ds);
+    return ds;
   }
+  
+  // < publishBoardStatus/b16 microsPerLoop/b16 sram/[] deviceSummary
+  // public BoardStatus publishBoardStatus(Integer microsPerLoop/* b16 */, Integer sram/* b16 */, int[] deviceSummary/* byte */) {
+  /*
+  public BoardInfo publishBoardStatus(Integer version, Integer boardType2, Integer microsPerLoop, Integer sram, int[] deviceSummary) {
+    log.info("publishBoardStatus {} us, {} sram, {} devices", microsPerLoop, sram, deviceSummary);
+    
+    return new BoardStatus(microsPerLoop, sram, arrayToDeviceSummary(deviceSummary));
+  }
+  */
 
   // < publishCustomMsg/[] msg
   public int[] publishCustomMsg(int[] msg/* [] */) {
