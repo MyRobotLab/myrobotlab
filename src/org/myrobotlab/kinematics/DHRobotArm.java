@@ -13,6 +13,8 @@ public class DHRobotArm {
   private int maxIterations = 1000;
 
   private ArrayList<DHLink> links;
+  
+  public String name;
 
   // for debugging ..
   public transient InverseKinematics3D ik3D = null;
@@ -177,14 +179,14 @@ public class DHRobotArm {
     double roll = 0;
     double yaw = 0;
     if (pitch == Math.PI/2) {
-      yaw = Math.atan2(m.elements[0][1], m.elements[1][1]);
+      roll =  Math.atan2(m.elements[0][1], m.elements[1][1]);
     }
     else if (pitch == -1 * Math.PI/2) {
-      yaw = Math.atan2(m.elements[0][1], m.elements[1][1]) *-1;
+      roll = Math.atan2(m.elements[0][1], m.elements[1][1]) *-1;
     }
     else {
-      roll = Math.atan2(m.elements[0][1], m.elements[2][2]);
-      yaw = Math.atan2(m.elements[1][0], m.elements[0][0]);
+      roll = Math.atan2(m.elements[2][1]/Math.cos(pitch), m.elements[2][2])/Math.cos(pitch);
+      yaw = Math.atan2(m.elements[1][0]/Math.cos(pitch), m.elements[0][0]/Math.cos(pitch)) - Math.PI/2;
     }
     Point palm = new Point(x, y, z, pitch * 180 / Math.PI, roll * 180 / Math.PI, yaw * 180 / Math.PI);
     return palm;
