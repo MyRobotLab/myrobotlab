@@ -1013,7 +1013,7 @@ public class ArduinoTest implements PinArrayListener {
 		try {
 			LoggingFactory.init("INFO");
 			
-			Runtime.start("webgui", "WebGui");
+			// Runtime.start("webgui", "WebGui");
 			// Runtime.start("gui", "GUIService");
 
 			// test a "real" arduino
@@ -1037,8 +1037,17 @@ public class ArduinoTest implements PinArrayListener {
 			
 			test.testConnectString();
 			
-			Servo servo01 = (Servo)Runtime.start("servo", "Servo");
+			Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
+			Servo servo02 = (Servo)Runtime.start("servo02", "Servo");
 			
+			servo01.setRest(3);
+			servo02.setRest(140);
+			
+			servo01.attach(arduino, 7);
+      arduino.attach(servo01, 7);
+      arduino.attach(servo01, 8);
+			
+      
 		   boolean b = true;
 	      if (b) {
 	        return;
