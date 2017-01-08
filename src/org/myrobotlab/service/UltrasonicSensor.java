@@ -257,8 +257,8 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
 			srf04.attach("COM10", trigPin, echoPin);
 
 			Arduino arduino = (Arduino) srf04.getController();
-			arduino.enableBoardStatus(true);
-			arduino.enableBoardStatus(false);
+			arduino.enableBoardInfo(true);
+			arduino.enableBoardInfo(false);
 			arduino.setDebug(false);
 
 			Servo servo = (Servo) Runtime.start("servo", "Servo");

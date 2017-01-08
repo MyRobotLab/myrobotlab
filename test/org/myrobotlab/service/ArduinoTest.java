@@ -266,10 +266,10 @@ public class ArduinoTest implements PinArrayListener {
 
 		org.myrobotlab.service.Test test = (org.myrobotlab.service.Test) Runtime.start("test", "Test");
 		test.subscribe(arduino.getName(), "publishBoardStatus");
-		arduino.enableBoardStatus(true);
+		arduino.enableBoardInfo(true);
 		// FIXME notify with timeout
 
-		arduino.enableBoardStatus(false);
+		arduino.enableBoardInfo(false);
 	}
 
 	@Test
@@ -913,7 +913,7 @@ public class ArduinoTest implements PinArrayListener {
 		servo.moveTo(90);
 		// assertEquals("servoWrite/7/90\n", uart.decode());
 
-		arduino.enableBoardStatus(true);
+		arduino.enableBoardInfo(true);
 
 		servo.startService();
 
@@ -1013,7 +1013,7 @@ public class ArduinoTest implements PinArrayListener {
 		try {
 			LoggingFactory.init("INFO");
 			
-			// Runtime.start("webgui", "WebGui");
+			Runtime.start("webgui", "WebGui");
 			// Runtime.start("gui", "GUIService");
 
 			// test a "real" arduino

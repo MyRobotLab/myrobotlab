@@ -224,6 +224,7 @@ public class ArduinoMsgGenerator {
     virtualJava = virtualJava.replace("%javaClass%", "VirtualMsg");
     virtualJava = virtualJava.replace("%javaArduinoClass%", "VirtualArduino");
 
+    fileSnr.put("%ackEnabled%", "true");
     // process substitutions
     for (String searchKey : fileSnr.keySet()) {
       idlToHpp = idlToHpp.replace(searchKey, fileSnr.get(searchKey));
@@ -239,7 +240,8 @@ public class ArduinoMsgGenerator {
     fileSnr.put("%javaMethods%", vJavaMethods.toString());
     fileSnr.put("%javaGeneratedCallBacks%", vJavaGeneratedCallBacks.toString());
 
-    fileSnr.put("%enableAck%", "// enableAck(b);");
+    // process virtual msgs
+    fileSnr.put("%ackEnabled%", "false");
     for (String searchKey : fileSnr.keySet()) {
       virtualJava = virtualJava.replace(searchKey, fileSnr.get(searchKey));
     }

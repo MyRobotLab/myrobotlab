@@ -60,8 +60,6 @@ Msg* Msg::getInstance() {
  *
  	// > getBoardInfo
 	void getBoardInfo();
-	// > enableBoardStatus/bool enabled
-	void enableBoardStatus( boolean enabled);
 	// > enablePin/address/type/b16 rate
 	void enablePin( byte address,  byte type,  int rate);
 	// > setDebug/bool enabled
@@ -72,10 +70,6 @@ Msg* Msg::getInstance() {
 	void softReset();
 	// > enableAck/bool enabled
 	void enableAck( boolean enabled);
-	// > enableHeartbeat/bool enabled
-	void enableHeartbeat( boolean enabled);
-	// > heartbeat
-	void heartbeat();
 	// > echo/f32 myFloat/myByte/f32 secondFloat
 	void echo( float myFloat,  byte myByte,  float secondFloat);
 	// > controllerAttach/serialPort
@@ -147,12 +141,15 @@ void Msg::publishMRLCommError(const char* errorMsg,  byte errorMsgSize) {
   reset();
 }
 
-void Msg::publishBoardInfo( byte version,  byte boardType) {
+void Msg::publishBoardInfo( byte version,  byte boardType,  int microsPerLoop,  int sram, const byte* deviceSummary,  byte deviceSummarySize) {
   write(MAGIC_NUMBER);
-  write(1 + 1 + 1); // size
+  write(1 + 1 + 1 + 2 + 2 + (1 + deviceSummarySize)); // size
   write(PUBLISH_BOARD_INFO); // msgType = 3
   write(version);
   write(boardType);
+  writeb16(microsPerLoop);
+  writeb16(sram);
+  write((byte*)deviceSummary, deviceSummarySize);
   flush();
   reset();
 }
@@ -160,16 +157,8 @@ void Msg::publishBoardInfo( byte version,  byte boardType) {
 void Msg::publishAck( byte function) {
   write(MAGIC_NUMBER);
   write(1 + 1); // size
-  write(PUBLISH_ACK); // msgType = 10
+  write(PUBLISH_ACK); // msgType = 9
   write(function);
-  flush();
-  reset();
-}
-
-void Msg::publishHeartbeat() {
-  write(MAGIC_NUMBER);
-  write(1); // size
-  write(PUBLISH_HEARTBEAT); // msgType = 13
   flush();
   reset();
 }
@@ -177,7 +166,7 @@ void Msg::publishHeartbeat() {
 void Msg::publishEcho( float myFloat,  byte myByte,  float secondFloat) {
   write(MAGIC_NUMBER);
   write(1 + 4 + 1 + 4); // size
-  write(PUBLISH_ECHO); // msgType = 15
+  write(PUBLISH_ECHO); // msgType = 11
   writef32(myFloat);
   write(myByte);
   writef32(secondFloat);
@@ -188,7 +177,7 @@ void Msg::publishEcho( float myFloat,  byte myByte,  float secondFloat) {
 void Msg::publishCustomMsg(const byte* msg,  byte msgSize) {
   write(MAGIC_NUMBER);
   write(1 + (1 + msgSize)); // size
-  write(PUBLISH_CUSTOM_MSG); // msgType = 18
+  write(PUBLISH_CUSTOM_MSG); // msgType = 14
   write((byte*)msg, msgSize);
   flush();
   reset();
@@ -197,7 +186,7 @@ void Msg::publishCustomMsg(const byte* msg,  byte msgSize) {
 void Msg::publishI2cData( byte deviceId, const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + 1 + (1 + dataSize)); // size
-  write(PUBLISH_I2C_DATA); // msgType = 24
+  write(PUBLISH_I2C_DATA); // msgType = 20
   write(deviceId);
   write((byte*)data, dataSize);
   flush();
@@ -207,20 +196,9 @@ void Msg::publishI2cData( byte deviceId, const byte* data,  byte dataSize) {
 void Msg::publishAttachedDevice( byte deviceId, const char* deviceName,  byte deviceNameSize) {
   write(MAGIC_NUMBER);
   write(1 + 1 + (1 + deviceNameSize)); // size
-  write(PUBLISH_ATTACHED_DEVICE); // msgType = 33
+  write(PUBLISH_ATTACHED_DEVICE); // msgType = 29
   write(deviceId);
   write((byte*)deviceName, deviceNameSize);
-  flush();
-  reset();
-}
-
-void Msg::publishBoardStatus( int microsPerLoop,  int sram, const byte* deviceSummary,  byte deviceSummarySize) {
-  write(MAGIC_NUMBER);
-  write(1 + 2 + 2 + (1 + deviceSummarySize)); // size
-  write(PUBLISH_BOARD_STATUS); // msgType = 34
-  writeb16(microsPerLoop);
-  writeb16(sram);
-  write((byte*)deviceSummary, deviceSummarySize);
   flush();
   reset();
 }
@@ -228,7 +206,7 @@ void Msg::publishBoardStatus( int microsPerLoop,  int sram, const byte* deviceSu
 void Msg::publishDebug(const char* debugMsg,  byte debugMsgSize) {
   write(MAGIC_NUMBER);
   write(1 + (1 + debugMsgSize)); // size
-  write(PUBLISH_DEBUG); // msgType = 35
+  write(PUBLISH_DEBUG); // msgType = 30
   write((byte*)debugMsg, debugMsgSize);
   flush();
   reset();
@@ -237,7 +215,7 @@ void Msg::publishDebug(const char* debugMsg,  byte debugMsgSize) {
 void Msg::publishPinArray(const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + (1 + dataSize)); // size
-  write(PUBLISH_PIN_ARRAY); // msgType = 36
+  write(PUBLISH_PIN_ARRAY); // msgType = 31
   write((byte*)data, dataSize);
   flush();
   reset();
@@ -246,7 +224,7 @@ void Msg::publishPinArray(const byte* data,  byte dataSize) {
 void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + 1 + (1 + dataSize)); // size
-  write(PUBLISH_SERIAL_DATA); // msgType = 50
+  write(PUBLISH_SERIAL_DATA); // msgType = 45
   write(deviceId);
   write((byte*)data, dataSize);
   flush();
@@ -256,7 +234,7 @@ void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
 void Msg::publishUltrasonicSensorData( byte deviceId,  int echoTime) {
   write(MAGIC_NUMBER);
   write(1 + 1 + 2); // size
-  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 54
+  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 49
   write(deviceId);
   writeb16(echoTime);
   flush();
@@ -272,12 +250,6 @@ void Msg::processCommand() {
 	switch (method) {
 	case GET_BOARD_INFO: { // getBoardInfo
 			mrlComm->getBoardInfo();
-			break;
-	}
-	case ENABLE_BOARD_STATUS: { // enableBoardStatus
-			boolean enabled = (ioCmd[startPos+1]);
-			startPos += 1;
-			mrlComm->enableBoardStatus( enabled);
 			break;
 	}
 	case ENABLE_PIN: { // enablePin
@@ -310,16 +282,6 @@ void Msg::processCommand() {
 			boolean enabled = (ioCmd[startPos+1]);
 			startPos += 1;
 			mrlComm->enableAck( enabled);
-			break;
-	}
-	case ENABLE_HEARTBEAT: { // enableHeartbeat
-			boolean enabled = (ioCmd[startPos+1]);
-			startPos += 1;
-			mrlComm->enableHeartbeat( enabled);
-			break;
-	}
-	case HEARTBEAT: { // heartbeat
-			mrlComm->heartbeat();
 			break;
 	}
 	case ECHO: { // echo

@@ -64,10 +64,11 @@ public class VirtualMsg {
 	public static final int MRLCOMM_VERSION = 53;
 
 	// ------ device type mapping constants
+	int method = -1;
 	
 	boolean invoke = true;
 	
-	boolean ackEnabled = true;
+	boolean ackEnabled = false;
 	
 	 public static class AckLock {
 	    // first is always true - since there
@@ -96,110 +97,100 @@ public class VirtualMsg {
 	public final static int PUBLISH_MRLCOMM_ERROR = 1;
 	// > getBoardInfo
 	public final static int GET_BOARD_INFO = 2;
-	// < publishBoardInfo/version/boardType
+	// < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
 	public final static int PUBLISH_BOARD_INFO = 3;
-	// > enableBoardStatus/bool enabled
-	public final static int ENABLE_BOARD_STATUS = 4;
 	// > enablePin/address/type/b16 rate
-	public final static int ENABLE_PIN = 5;
+	public final static int ENABLE_PIN = 4;
 	// > setDebug/bool enabled
-	public final static int SET_DEBUG = 6;
+	public final static int SET_DEBUG = 5;
 	// > setSerialRate/b32 rate
-	public final static int SET_SERIAL_RATE = 7;
+	public final static int SET_SERIAL_RATE = 6;
 	// > softReset
-	public final static int SOFT_RESET = 8;
+	public final static int SOFT_RESET = 7;
 	// > enableAck/bool enabled
-	public final static int ENABLE_ACK = 9;
+	public final static int ENABLE_ACK = 8;
 	// < publishAck/function
-	public final static int PUBLISH_ACK = 10;
-	// > enableHeartbeat/bool enabled
-	public final static int ENABLE_HEARTBEAT = 11;
-	// > heartbeat
-	public final static int HEARTBEAT = 12;
-	// < publishHeartbeat
-	public final static int PUBLISH_HEARTBEAT = 13;
+	public final static int PUBLISH_ACK = 9;
 	// > echo/f32 myFloat/myByte/f32 secondFloat
-	public final static int ECHO = 14;
+	public final static int ECHO = 10;
 	// < publishEcho/f32 myFloat/myByte/f32 secondFloat
-	public final static int PUBLISH_ECHO = 15;
+	public final static int PUBLISH_ECHO = 11;
 	// > controllerAttach/serialPort
-	public final static int CONTROLLER_ATTACH = 16;
+	public final static int CONTROLLER_ATTACH = 12;
 	// > customMsg/[] msg
-	public final static int CUSTOM_MSG = 17;
+	public final static int CUSTOM_MSG = 13;
 	// < publishCustomMsg/[] msg
-	public final static int PUBLISH_CUSTOM_MSG = 18;
+	public final static int PUBLISH_CUSTOM_MSG = 14;
 	// > deviceDetach/deviceId
-	public final static int DEVICE_DETACH = 19;
+	public final static int DEVICE_DETACH = 15;
 	// > i2cBusAttach/deviceId/i2cBus
-	public final static int I2C_BUS_ATTACH = 20;
+	public final static int I2C_BUS_ATTACH = 16;
 	// > i2cRead/deviceId/deviceAddress/size
-	public final static int I2C_READ = 21;
+	public final static int I2C_READ = 17;
 	// > i2cWrite/deviceId/deviceAddress/[] data
-	public final static int I2C_WRITE = 22;
+	public final static int I2C_WRITE = 18;
 	// > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
-	public final static int I2C_WRITE_READ = 23;
+	public final static int I2C_WRITE_READ = 19;
 	// < publishI2cData/deviceId/[] data
-	public final static int PUBLISH_I2C_DATA = 24;
+	public final static int PUBLISH_I2C_DATA = 20;
 	// > neoPixelAttach/deviceId/pin/b32 numPixels
-	public final static int NEO_PIXEL_ATTACH = 25;
+	public final static int NEO_PIXEL_ATTACH = 21;
 	// > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-	public final static int NEO_PIXEL_SET_ANIMATION = 26;
+	public final static int NEO_PIXEL_SET_ANIMATION = 22;
 	// > neoPixelWriteMatrix/deviceId/[] buffer
-	public final static int NEO_PIXEL_WRITE_MATRIX = 27;
+	public final static int NEO_PIXEL_WRITE_MATRIX = 23;
 	// > analogWrite/pin/value
-	public final static int ANALOG_WRITE = 28;
+	public final static int ANALOG_WRITE = 24;
 	// > digitalWrite/pin/value
-	public final static int DIGITAL_WRITE = 29;
+	public final static int DIGITAL_WRITE = 25;
 	// > disablePin/pin
-	public final static int DISABLE_PIN = 30;
+	public final static int DISABLE_PIN = 26;
 	// > disablePins
-	public final static int DISABLE_PINS = 31;
+	public final static int DISABLE_PINS = 27;
 	// > pinMode/pin/mode
-	public final static int PIN_MODE = 32;
+	public final static int PIN_MODE = 28;
 	// < publishAttachedDevice/deviceId/str deviceName
-	public final static int PUBLISH_ATTACHED_DEVICE = 33;
-	// < publishBoardStatus/b16 microsPerLoop/b16 sram/[] deviceSummary
-	public final static int PUBLISH_BOARD_STATUS = 34;
+	public final static int PUBLISH_ATTACHED_DEVICE = 29;
 	// < publishDebug/str debugMsg
-	public final static int PUBLISH_DEBUG = 35;
+	public final static int PUBLISH_DEBUG = 30;
 	// < publishPinArray/[] data
-	public final static int PUBLISH_PIN_ARRAY = 36;
+	public final static int PUBLISH_PIN_ARRAY = 31;
 	// > setTrigger/pin/triggerValue
-	public final static int SET_TRIGGER = 37;
+	public final static int SET_TRIGGER = 32;
 	// > setDebounce/pin/delay
-	public final static int SET_DEBOUNCE = 38;
+	public final static int SET_DEBOUNCE = 33;
 	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
-	public final static int SERVO_ATTACH = 39;
+	public final static int SERVO_ATTACH = 34;
 	// > servoAttachPin/deviceId/pin
-	public final static int SERVO_ATTACH_PIN = 40;
+	public final static int SERVO_ATTACH_PIN = 35;
 	// > servoDetachPin/deviceId
-	public final static int SERVO_DETACH_PIN = 41;
+	public final static int SERVO_DETACH_PIN = 36;
 	// > servoSetMaxVelocity/deviceId/b16 maxVelocity
-	public final static int SERVO_SET_MAX_VELOCITY = 42;
+	public final static int SERVO_SET_MAX_VELOCITY = 37;
 	// > servoSetVelocity/deviceId/b16 velocity
-	public final static int SERVO_SET_VELOCITY = 43;
+	public final static int SERVO_SET_VELOCITY = 38;
 	// > servoSweepStart/deviceId/min/max/step
-	public final static int SERVO_SWEEP_START = 44;
+	public final static int SERVO_SWEEP_START = 39;
 	// > servoSweepStop/deviceId
-	public final static int SERVO_SWEEP_STOP = 45;
+	public final static int SERVO_SWEEP_STOP = 40;
 	// > servoMoveToMicroseconds/deviceId/b16 target
-	public final static int SERVO_MOVE_TO_MICROSECONDS = 46;
+	public final static int SERVO_MOVE_TO_MICROSECONDS = 41;
 	// > servoSetAcceleration/deviceId/b16 acceleration
-	public final static int SERVO_SET_ACCELERATION = 47;
+	public final static int SERVO_SET_ACCELERATION = 42;
 	// > serialAttach/deviceId/relayPin
-	public final static int SERIAL_ATTACH = 48;
+	public final static int SERIAL_ATTACH = 43;
 	// > serialRelay/deviceId/[] data
-	public final static int SERIAL_RELAY = 49;
+	public final static int SERIAL_RELAY = 44;
 	// < publishSerialData/deviceId/[] data
-	public final static int PUBLISH_SERIAL_DATA = 50;
+	public final static int PUBLISH_SERIAL_DATA = 45;
 	// > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-	public final static int ULTRASONIC_SENSOR_ATTACH = 51;
+	public final static int ULTRASONIC_SENSOR_ATTACH = 46;
 	// > ultrasonicSensorStartRanging/deviceId
-	public final static int ULTRASONIC_SENSOR_START_RANGING = 52;
+	public final static int ULTRASONIC_SENSOR_START_RANGING = 47;
 	// > ultrasonicSensorStopRanging/deviceId
-	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 53;
+	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 48;
 	// < publishUltrasonicSensorData/deviceId/b16 echoTime
-	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 54;
+	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 49;
 
 
 /**
@@ -207,14 +198,11 @@ public class VirtualMsg {
  */
 	
 	// public void getBoardInfo(){}
-	// public void enableBoardStatus(Boolean enabled/*bool*/){}
 	// public void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/){}
 	// public void setDebug(Boolean enabled/*bool*/){}
 	// public void setSerialRate(Integer rate/*b32*/){}
 	// public void softReset(){}
 	// public void enableAck(Boolean enabled/*bool*/){}
-	// public void enableHeartbeat(Boolean enabled/*bool*/){}
-	// public void heartbeat(){}
 	// public void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/){}
 	// public void controllerAttach(Integer serialPort/*byte*/){}
 	// public void customMsg(int[] msg/*[]*/){}
@@ -285,23 +273,13 @@ public class VirtualMsg {
 	
 	public void processCommand(int[] ioCmd) {
 		int startPos = 0;
-		int method = ioCmd[startPos];
+		method = ioCmd[startPos];
 		switch (method) {
 		case GET_BOARD_INFO: {
 			if(invoke){
 				arduino.invoke("getBoardInfo");
 			} else { 
  				arduino.getBoardInfo();
-			}
-			break;
-		}
-		case ENABLE_BOARD_STATUS: {
-			Boolean enabled = (ioCmd[startPos+1] == 0)?false:true;
-			startPos += 1;
-			if(invoke){
-				arduino.invoke("enableBoardStatus",  enabled);
-			} else { 
- 				arduino.enableBoardStatus( enabled);
 			}
 			break;
 		}
@@ -354,24 +332,6 @@ public class VirtualMsg {
 				arduino.invoke("enableAck",  enabled);
 			} else { 
  				arduino.enableAck( enabled);
-			}
-			break;
-		}
-		case ENABLE_HEARTBEAT: {
-			Boolean enabled = (ioCmd[startPos+1] == 0)?false:true;
-			startPos += 1;
-			if(invoke){
-				arduino.invoke("enableHeartbeat",  enabled);
-			} else { 
- 				arduino.enableHeartbeat( enabled);
-			}
-			break;
-		}
-		case HEARTBEAT: {
-			if(invoke){
-				arduino.invoke("heartbeat");
-			} else { 
- 				arduino.heartbeat();
 			}
 			break;
 		}
@@ -805,16 +765,19 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/) {
+	public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, int[] deviceSummary/*[]*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
+			write(1 + 1 + 1 + 2 + 2 + (1 + deviceSummary.length)); // size
 			write(PUBLISH_BOARD_INFO); // msgType = 3
 			write(version);
 			write(boardType);
+			writeb16(microsPerLoop);
+			writeb16(sram);
+			write(deviceSummary);
  
      if (ackEnabled){
        // we just wrote - block threads sending
@@ -827,6 +790,12 @@ public class VirtualMsg {
 				txBuffer.append(version);
 				txBuffer.append("/");
 				txBuffer.append(boardType);
+				txBuffer.append("/");
+				txBuffer.append(microsPerLoop);
+				txBuffer.append("/");
+				txBuffer.append(sram);
+				txBuffer.append("/");
+				txBuffer.append(Arrays.toString(deviceSummary));
 				txBuffer.append("\n");
 				record.write(txBuffer.toString().getBytes());
 				txBuffer.setLength(0);
@@ -844,7 +813,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + 1); // size
-			write(PUBLISH_ACK); // msgType = 10
+			write(PUBLISH_ACK); // msgType = 9
 			write(function);
  
      if (ackEnabled){
@@ -866,32 +835,6 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishHeartbeat() {
-		try {
-		  if (ackEnabled){
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1); // size
-			write(PUBLISH_HEARTBEAT); // msgType = 13
- 
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
-			if(record != null){
-				txBuffer.append("> publishHeartbeat");
-				txBuffer.append("\n");
-				record.write(txBuffer.toString().getBytes());
-				txBuffer.setLength(0);
-			}
-
-	  } catch (Exception e) {
-	  			serial.error(e);
-	  }
-	}
-
 	public void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
 		try {
 		  if (ackEnabled){
@@ -899,7 +842,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + 4 + 1 + 4); // size
-			write(PUBLISH_ECHO); // msgType = 15
+			write(PUBLISH_ECHO); // msgType = 11
 			writef32(myFloat);
 			write(myByte);
 			writef32(secondFloat);
@@ -934,7 +877,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + (1 + msg.length)); // size
-			write(PUBLISH_CUSTOM_MSG); // msgType = 18
+			write(PUBLISH_CUSTOM_MSG); // msgType = 14
 			write(msg);
  
      if (ackEnabled){
@@ -963,7 +906,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + 1 + (1 + data.length)); // size
-			write(PUBLISH_I2C_DATA); // msgType = 24
+			write(PUBLISH_I2C_DATA); // msgType = 20
 			write(deviceId);
 			write(data);
  
@@ -995,7 +938,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + 1 + (1 + deviceName.length())); // size
-			write(PUBLISH_ATTACHED_DEVICE); // msgType = 33
+			write(PUBLISH_ATTACHED_DEVICE); // msgType = 29
 			write(deviceId);
 			write(deviceName);
  
@@ -1020,41 +963,6 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishBoardStatus(Integer microsPerLoop/*b16*/, Integer sram/*b16*/, int[] deviceSummary/*[]*/) {
-		try {
-		  if (ackEnabled){
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 2 + 2 + (1 + deviceSummary.length)); // size
-			write(PUBLISH_BOARD_STATUS); // msgType = 34
-			writeb16(microsPerLoop);
-			writeb16(sram);
-			write(deviceSummary);
- 
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
-			if(record != null){
-				txBuffer.append("> publishBoardStatus");
-				txBuffer.append("/");
-				txBuffer.append(microsPerLoop);
-				txBuffer.append("/");
-				txBuffer.append(sram);
-				txBuffer.append("/");
-				txBuffer.append(Arrays.toString(deviceSummary));
-				txBuffer.append("\n");
-				record.write(txBuffer.toString().getBytes());
-				txBuffer.setLength(0);
-			}
-
-	  } catch (Exception e) {
-	  			serial.error(e);
-	  }
-	}
-
 	public void publishDebug(String debugMsg/*str*/) {
 		try {
 		  if (ackEnabled){
@@ -1062,7 +970,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + (1 + debugMsg.length())); // size
-			write(PUBLISH_DEBUG); // msgType = 35
+			write(PUBLISH_DEBUG); // msgType = 30
 			write(debugMsg);
  
      if (ackEnabled){
@@ -1091,7 +999,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + (1 + data.length)); // size
-			write(PUBLISH_PIN_ARRAY); // msgType = 36
+			write(PUBLISH_PIN_ARRAY); // msgType = 31
 			write(data);
  
      if (ackEnabled){
@@ -1120,7 +1028,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + 1 + (1 + data.length)); // size
-			write(PUBLISH_SERIAL_DATA); // msgType = 50
+			write(PUBLISH_SERIAL_DATA); // msgType = 45
 			write(deviceId);
 			write(data);
  
@@ -1152,7 +1060,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 2); // size
-			write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 54
+			write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 49
 			write(deviceId);
 			writeb16(echoTime);
  
@@ -1189,9 +1097,6 @@ public class VirtualMsg {
 		case PUBLISH_BOARD_INFO:{
 			return "publishBoardInfo";
 		}
-		case ENABLE_BOARD_STATUS:{
-			return "enableBoardStatus";
-		}
 		case ENABLE_PIN:{
 			return "enablePin";
 		}
@@ -1209,15 +1114,6 @@ public class VirtualMsg {
 		}
 		case PUBLISH_ACK:{
 			return "publishAck";
-		}
-		case ENABLE_HEARTBEAT:{
-			return "enableHeartbeat";
-		}
-		case HEARTBEAT:{
-			return "heartbeat";
-		}
-		case PUBLISH_HEARTBEAT:{
-			return "publishHeartbeat";
 		}
 		case ECHO:{
 			return "echo";
@@ -1278,9 +1174,6 @@ public class VirtualMsg {
 		}
 		case PUBLISH_ATTACHED_DEVICE:{
 			return "publishAttachedDevice";
-		}
-		case PUBLISH_BOARD_STATUS:{
-			return "publishBoardStatus";
 		}
 		case PUBLISH_DEBUG:{
 			return "publishDebug";
@@ -1547,7 +1440,7 @@ public class VirtualMsg {
 	  // shutdown MrlComm from sending acks
 	  // below is a method only in Msg.java not in VirtualMsg.java
 	  // it depends on the definition of enableAck in arduinoMsg.schema  
-	  // // enableAck(b);
+	  // enableAck(b);
 	  // }
 	}
 	
@@ -1576,6 +1469,10 @@ public class VirtualMsg {
 	      ackRecievedLock.acknowledged = true;
 	      ackRecievedLock.notifyAll();
 	    }
+	}
+	
+	public int getMethod(){
+	  return method;
 	}
 	
 	public static void main(String[] args) {

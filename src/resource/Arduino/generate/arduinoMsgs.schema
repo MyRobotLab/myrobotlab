@@ -28,8 +28,10 @@
 # Arduino Diagnostics and Status
 < publishMRLCommError/str errorMsg
 > getBoardInfo
-< publishBoardInfo/version/boardType
-> enableBoardStatus/bool enabled
+< publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
+# removed - for simplicity, merged data into BoardInfo
+# < publishBoardStatus/b16 microsPerLoop/b16 sram/[] deviceSummary
+# > enableBoardInfo/bool enabled # simplified - just goes to Arduino-Javaland now
 > enablePin/address/type/b16 rate
 > setDebug/bool enabled
 > setSerialRate/b32 rate
@@ -39,11 +41,11 @@
 > enableAck/bool enabled
 < publishAck/function
 
-
+# no longer needed - getBoardInfo is used as heartbeat
 # Heartbeat
-> enableHeartbeat/bool enabled
-> heartbeat
-< publishHeartbeat
+# > enableHeartbeat/bool enabled
+# > heartbeat
+# < publishHeartbeat
 
 
 # parameter echo testing
@@ -83,7 +85,6 @@
 > disablePins
 > pinMode/pin/mode
 < publishAttachedDevice/deviceId/str deviceName
-< publishBoardStatus/b16 microsPerLoop/b16 sram/[] deviceSummary
 < publishDebug/str debugMsg
 # devices now can easily publish on their own channels
 # generalized publishSensorData is deprecated

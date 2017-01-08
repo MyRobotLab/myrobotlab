@@ -28,110 +28,100 @@
 #define PUBLISH_MRLCOMM_ERROR 1
 // > getBoardInfo
 #define GET_BOARD_INFO 2
-// < publishBoardInfo/version/boardType
+// < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
 #define PUBLISH_BOARD_INFO 3
-// > enableBoardStatus/bool enabled
-#define ENABLE_BOARD_STATUS 4
 // > enablePin/address/type/b16 rate
-#define ENABLE_PIN 5
+#define ENABLE_PIN 4
 // > setDebug/bool enabled
-#define SET_DEBUG 6
+#define SET_DEBUG 5
 // > setSerialRate/b32 rate
-#define SET_SERIAL_RATE 7
+#define SET_SERIAL_RATE 6
 // > softReset
-#define SOFT_RESET 8
+#define SOFT_RESET 7
 // > enableAck/bool enabled
-#define ENABLE_ACK 9
+#define ENABLE_ACK 8
 // < publishAck/function
-#define PUBLISH_ACK 10
-// > enableHeartbeat/bool enabled
-#define ENABLE_HEARTBEAT 11
-// > heartbeat
-#define HEARTBEAT 12
-// < publishHeartbeat
-#define PUBLISH_HEARTBEAT 13
+#define PUBLISH_ACK 9
 // > echo/f32 myFloat/myByte/f32 secondFloat
-#define ECHO 14
+#define ECHO 10
 // < publishEcho/f32 myFloat/myByte/f32 secondFloat
-#define PUBLISH_ECHO 15
+#define PUBLISH_ECHO 11
 // > controllerAttach/serialPort
-#define CONTROLLER_ATTACH 16
+#define CONTROLLER_ATTACH 12
 // > customMsg/[] msg
-#define CUSTOM_MSG 17
+#define CUSTOM_MSG 13
 // < publishCustomMsg/[] msg
-#define PUBLISH_CUSTOM_MSG 18
+#define PUBLISH_CUSTOM_MSG 14
 // > deviceDetach/deviceId
-#define DEVICE_DETACH 19
+#define DEVICE_DETACH 15
 // > i2cBusAttach/deviceId/i2cBus
-#define I2C_BUS_ATTACH 20
+#define I2C_BUS_ATTACH 16
 // > i2cRead/deviceId/deviceAddress/size
-#define I2C_READ 21
+#define I2C_READ 17
 // > i2cWrite/deviceId/deviceAddress/[] data
-#define I2C_WRITE 22
+#define I2C_WRITE 18
 // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
-#define I2C_WRITE_READ 23
+#define I2C_WRITE_READ 19
 // < publishI2cData/deviceId/[] data
-#define PUBLISH_I2C_DATA 24
+#define PUBLISH_I2C_DATA 20
 // > neoPixelAttach/deviceId/pin/b32 numPixels
-#define NEO_PIXEL_ATTACH 25
+#define NEO_PIXEL_ATTACH 21
 // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-#define NEO_PIXEL_SET_ANIMATION 26
+#define NEO_PIXEL_SET_ANIMATION 22
 // > neoPixelWriteMatrix/deviceId/[] buffer
-#define NEO_PIXEL_WRITE_MATRIX 27
+#define NEO_PIXEL_WRITE_MATRIX 23
 // > analogWrite/pin/value
-#define ANALOG_WRITE 28
+#define ANALOG_WRITE 24
 // > digitalWrite/pin/value
-#define DIGITAL_WRITE 29
+#define DIGITAL_WRITE 25
 // > disablePin/pin
-#define DISABLE_PIN 30
+#define DISABLE_PIN 26
 // > disablePins
-#define DISABLE_PINS 31
+#define DISABLE_PINS 27
 // > pinMode/pin/mode
-#define PIN_MODE 32
+#define PIN_MODE 28
 // < publishAttachedDevice/deviceId/str deviceName
-#define PUBLISH_ATTACHED_DEVICE 33
-// < publishBoardStatus/b16 microsPerLoop/b16 sram/[] deviceSummary
-#define PUBLISH_BOARD_STATUS 34
+#define PUBLISH_ATTACHED_DEVICE 29
 // < publishDebug/str debugMsg
-#define PUBLISH_DEBUG 35
+#define PUBLISH_DEBUG 30
 // < publishPinArray/[] data
-#define PUBLISH_PIN_ARRAY 36
+#define PUBLISH_PIN_ARRAY 31
 // > setTrigger/pin/triggerValue
-#define SET_TRIGGER 37
+#define SET_TRIGGER 32
 // > setDebounce/pin/delay
-#define SET_DEBOUNCE 38
+#define SET_DEBOUNCE 33
 // > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
-#define SERVO_ATTACH 39
+#define SERVO_ATTACH 34
 // > servoAttachPin/deviceId/pin
-#define SERVO_ATTACH_PIN 40
+#define SERVO_ATTACH_PIN 35
 // > servoDetachPin/deviceId
-#define SERVO_DETACH_PIN 41
+#define SERVO_DETACH_PIN 36
 // > servoSetMaxVelocity/deviceId/b16 maxVelocity
-#define SERVO_SET_MAX_VELOCITY 42
+#define SERVO_SET_MAX_VELOCITY 37
 // > servoSetVelocity/deviceId/b16 velocity
-#define SERVO_SET_VELOCITY 43
+#define SERVO_SET_VELOCITY 38
 // > servoSweepStart/deviceId/min/max/step
-#define SERVO_SWEEP_START 44
+#define SERVO_SWEEP_START 39
 // > servoSweepStop/deviceId
-#define SERVO_SWEEP_STOP 45
+#define SERVO_SWEEP_STOP 40
 // > servoMoveToMicroseconds/deviceId/b16 target
-#define SERVO_MOVE_TO_MICROSECONDS 46
+#define SERVO_MOVE_TO_MICROSECONDS 41
 // > servoSetAcceleration/deviceId/b16 acceleration
-#define SERVO_SET_ACCELERATION 47
+#define SERVO_SET_ACCELERATION 42
 // > serialAttach/deviceId/relayPin
-#define SERIAL_ATTACH 48
+#define SERIAL_ATTACH 43
 // > serialRelay/deviceId/[] data
-#define SERIAL_RELAY 49
+#define SERIAL_RELAY 44
 // < publishSerialData/deviceId/[] data
-#define PUBLISH_SERIAL_DATA 50
+#define PUBLISH_SERIAL_DATA 45
 // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-#define ULTRASONIC_SENSOR_ATTACH 51
+#define ULTRASONIC_SENSOR_ATTACH 46
 // > ultrasonicSensorStartRanging/deviceId
-#define ULTRASONIC_SENSOR_START_RANGING 52
+#define ULTRASONIC_SENSOR_START_RANGING 47
 // > ultrasonicSensorStopRanging/deviceId
-#define ULTRASONIC_SENSOR_STOP_RANGING 53
+#define ULTRASONIC_SENSOR_STOP_RANGING 48
 // < publishUltrasonicSensorData/deviceId/b16 echoTime
-#define PUBLISH_ULTRASONIC_SENSOR_DATA 54
+#define PUBLISH_ULTRASONIC_SENSOR_DATA 49
 
 
 
