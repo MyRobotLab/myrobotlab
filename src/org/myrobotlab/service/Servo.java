@@ -172,7 +172,7 @@ public class Servo extends Service implements ServoControl {
   /**
    * the requested INPUT position of the servo
    */
-  double targetPos = 0;
+  double targetPos = rest;
 
   /**
    * the calculated output for the servo
