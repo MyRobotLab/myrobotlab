@@ -126,7 +126,7 @@ public final class Mapper implements Serializable {
 	}
 	
 	public String toString(){
-	 return String.format("map(%f,%f,%f,%f)", minX, maxX, minY, maxY);
+	 return String.format("map(%.2f,%.2f,%.2f,%.2f)", minX, maxX, minY, maxY);
 	}
 
 }
