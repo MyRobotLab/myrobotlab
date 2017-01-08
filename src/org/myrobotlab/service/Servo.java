@@ -172,7 +172,7 @@ public class Servo extends Service implements ServoControl {
   /**
    * the requested INPUT position of the servo
    */
-  double targetPos = rest;
+  Double targetPos;
 
   /**
    * the calculated output for the servo
@@ -358,7 +358,7 @@ public class Servo extends Service implements ServoControl {
       pos = mapper.getMaxX();
     }
     targetPos = pos;
-    targetOutput = mapper.calcOutput(targetPos); // calculated degrees
+    targetOutput = getTargetOutput();// mapper.calcOutput(targetPos); // calculated degrees
 
     // calculated degrees
     controller.servoMoveTo(this);
@@ -925,7 +925,7 @@ public class Servo extends Service implements ServoControl {
    */
   @Override
   public double getTargetOutput() {
-    if (targetOutput == null){
+    if (targetPos == null){
       targetPos = rest;
       targetOutput = mapper.calcOutput(rest); 
     }
