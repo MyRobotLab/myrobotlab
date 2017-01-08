@@ -132,7 +132,7 @@ public class ArduinoMotorPotTest {
     // arduino.sensorAttach(feedbackPot);
     
     if (enableLoadTiming) {
-      arduino.enableBoardStatus(true);
+      arduino.enableBoardInfo(true);
     }
     // stop the motor initially
     motor.move(0);

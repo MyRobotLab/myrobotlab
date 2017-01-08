@@ -3,100 +3,119 @@ package org.myrobotlab.arduino;
 import org.myrobotlab.service.Arduino;
 
 /**
- * BoardInfo is all info which needs to be published only once after
- * connection
+ * BoardInfo is all info which needs to be published only once after connection
  */
 public class BoardInfo {
-	
-	Integer boardId;
-	Integer version;
-	String boardName;
-	boolean valid = false;
 
-	public BoardInfo() {
-		setType(-1);
-	}
-	
-	public BoardInfo(int version, int boardId){
-		this.version = version;
-		this.boardId = boardId;
-	}
+  Integer boardId;
+  Integer version;
+  String boardName;
+  boolean valid = false;
 
-	public String getName() {
-		return boardName;
-	}
+  Integer sram;
+  Integer microsPerLoop;
+  DeviceSummary[] deviceSummary; // deviceList with types
+  
+  // if true it boardInfo will be published at a regular 1s interval
+  boolean enableBoardInfo = false;
+  public long heartbeatMs;
 
-	public boolean isUnknown() {
-		return (boardName == null) || boardName.equals("unknown");
-	}
+  public BoardInfo() {
+    setType(-1);
+  }
 
-	public void setType(int boardId) {
-		this.boardId = boardId;
-		switch (boardId) {
-		case Arduino.BOARD_TYPE_ID_MEGA:
-			boardName = Arduino.BOARD_TYPE_MEGA;
-			break;
-		case Arduino.BOARD_TYPE_ID_UNO:
-			boardName = Arduino.BOARD_TYPE_UNO;
-			break;
-		case Arduino.BOARD_TYPE_ID_ADK_MEGA:
-			boardName = Arduino.BOARD_TYPE_MEGA_ADK;
-			break;
-		case Arduino.BOARD_TYPE_ID_NANO:
-			boardName = Arduino.BOARD_TYPE_NANO;
-			break;
-		case Arduino.BOARD_TYPE_ID_PRO_MINI:
-			boardName = Arduino.BOARD_TYPE_PRO_MINI;
-			break;
-		default:
-			boardName = "unknown";
-			break;
-		}
-	}
+  public BoardInfo(int version, int boardId) {
+    this.version = version;
+    this.boardId = boardId;
+  }
 
-	/**
-	 * called on disconnect()
-	 * so it can re-initalize if connected to a different 
-	 * arduino
-	 */
-	public void reset() {
-		boardId = -1;
-		version = null;
-		boardName = null;
-		valid = false;
-	}
+  public String getName() {
+    return boardName;
+  }
 
-	public Integer getVersion() {
-		return version;
-	}
+  public boolean isUnknown() {
+    return (boardName == null) || boardName.equals("unknown");
+  }
 
-	public void setVersion(Integer version) {
-		valid = true;
-		this.version = version; 
-	}
+  public void setType(int boardId) {
+    this.boardId = boardId;
+    switch (boardId) {
+      case Arduino.BOARD_TYPE_ID_MEGA:
+        boardName = Arduino.BOARD_TYPE_MEGA;
+        break;
+      case Arduino.BOARD_TYPE_ID_UNO:
+        boardName = Arduino.BOARD_TYPE_UNO;
+        break;
+      case Arduino.BOARD_TYPE_ID_ADK_MEGA:
+        boardName = Arduino.BOARD_TYPE_MEGA_ADK;
+        break;
+      case Arduino.BOARD_TYPE_ID_NANO:
+        boardName = Arduino.BOARD_TYPE_NANO;
+        break;
+      case Arduino.BOARD_TYPE_ID_PRO_MINI:
+        boardName = Arduino.BOARD_TYPE_PRO_MINI;
+        break;
+      default:
+        boardName = "unknown";
+        break;
+    }
+  }
 
-	public boolean isValid() {
-		return valid;
-	}
+  /**
+   * called on disconnect() so it can re-initalize if connected to a different
+   * arduino
+   */
+  public void reset() {
+    boardId = -1;
+    version = null;
+    boardName = null;
+    valid = false;
+  }
 
-	public void setType(String board) {
-		boardName = board;
-		if(Arduino.BOARD_TYPE_MEGA.equals(board)){
-			boardId = Arduino.BOARD_TYPE_ID_MEGA;
-		} else if(Arduino.BOARD_TYPE_MEGA_ADK.equals(board)){
-			boardId = Arduino.BOARD_TYPE_ID_ADK_MEGA;
-		} else if(Arduino.BOARD_TYPE_UNO.equals(board)){
-			boardId = Arduino.BOARD_TYPE_ID_UNO;
-		} else if(Arduino.BOARD_TYPE_NANO.equals(board)){
-			boardId = Arduino.BOARD_TYPE_ID_NANO;
-		} else if(Arduino.BOARD_TYPE_PRO_MINI.equals(board)){
-			boardId = Arduino.BOARD_TYPE_ID_PRO_MINI;
-		} else {
-			boardId = Arduino.BOARD_TYPE_ID_UNKNOWN;
-		}
-	}
+  public Integer getVersion() {
+    return version;
+  }
 
-	public int getBoardType() {
-		return boardId;
-	}
+  public void setVersion(Integer version) {
+    valid = true;
+    this.version = version;
+  }
+
+  public boolean isValid() {
+    return valid;
+  }
+
+  public void setType(String board) {
+    boardName = board;
+    if (Arduino.BOARD_TYPE_MEGA.equals(board)) {
+      boardId = Arduino.BOARD_TYPE_ID_MEGA;
+    } else if (Arduino.BOARD_TYPE_MEGA_ADK.equals(board)) {
+      boardId = Arduino.BOARD_TYPE_ID_ADK_MEGA;
+    } else if (Arduino.BOARD_TYPE_UNO.equals(board)) {
+      boardId = Arduino.BOARD_TYPE_ID_UNO;
+    } else if (Arduino.BOARD_TYPE_NANO.equals(board)) {
+      boardId = Arduino.BOARD_TYPE_ID_NANO;
+    } else if (Arduino.BOARD_TYPE_PRO_MINI.equals(board)) {
+      boardId = Arduino.BOARD_TYPE_ID_PRO_MINI;
+    } else {
+      boardId = Arduino.BOARD_TYPE_ID_UNKNOWN;
+    }
+  }
+
+  public int getBoardType() {
+    return boardId;
+  }
+
+  public void setMicrosPerLoop(int microsPerLoop){
+    this.microsPerLoop = microsPerLoop;
+  }
+
+  public void setSram(Integer sram) {
+    this.sram = sram;
+  }
+  
+  public void setDeviceSummary(DeviceSummary[] deviceSummary) {
+    this.deviceSummary = deviceSummary;
+  }
+  
 }

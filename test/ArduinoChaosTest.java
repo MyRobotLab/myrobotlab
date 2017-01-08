@@ -99,9 +99,9 @@ public class ArduinoChaosTest {
     Thread.sleep(1000);
     arduino.servoDetachPin(servo);
     Thread.sleep(1000);
-    arduino.enableBoardStatus(true);
+    arduino.enableBoardInfo(true);
     Thread.sleep(1000);
-    arduino.enableBoardStatus(false);
+    arduino.enableBoardInfo(false);
     
     Thread.sleep(1000);
  
@@ -193,7 +193,7 @@ public class ArduinoChaosTest {
     System.out.println("Press the any key to continue.");
     System.in.read();
     
-    arduino.enableBoardStatus(true);
+    arduino.enableBoardInfo(true);
     
     
     Motor motor = (Motor)Runtime.createAndStart("motor", "Motor");

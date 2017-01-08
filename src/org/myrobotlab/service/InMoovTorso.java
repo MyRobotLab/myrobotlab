@@ -27,8 +27,12 @@ public class InMoovTorso extends Service {
   static public void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     try {
-      InMoovTorso torso = (InMoovTorso) Runtime.createAndStart("torso", "InMoovTorso");
+      VirtualArduino v = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+      
+      v.connect("COM4");
+      InMoovTorso torso = (InMoovTorso) Runtime.start("i01.torso", "InMoovTorso");
       torso.connect("COM4");
+      Runtime.start("webgui", "WebGui");
       torso.test();
     } catch (Exception e) {
       Logging.logError(e);

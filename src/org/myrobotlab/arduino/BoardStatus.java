@@ -7,9 +7,6 @@ package org.myrobotlab.arduino;
  */
 public class BoardStatus {
 	public DeviceSummary[] deviceSummary; // deviceList with types
-	// FIXME - list of current devices ids & their types ?
-	// ie the deviceList
-	// List<Integer, Integer>
 	public Integer sram;
 	public Integer us;
 
