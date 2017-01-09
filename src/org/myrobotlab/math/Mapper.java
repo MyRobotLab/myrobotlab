@@ -124,5 +124,9 @@ public final class Mapper implements Serializable {
 	public double getMaxOutput() {
 		return maxOutput;
 	}
+	
+	public String toString(){
+	 return String.format("map(%.2f,%.2f,%.2f,%.2f)", minX, maxX, minY, maxY);
+	}
 
 }
