@@ -864,7 +864,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 //		int[] depthData = data.depthMap;
 //		PVector[] depthDataRW = data.depthMapRW;
 //		log.info("{}",depthDataRW[320+120*640]);
-  	map3d.processDepthMap(data);
+  	if (this.inbox.size() < 50) {
+  		map3d.processDepthMap(data);
+  	}
   }
   		
   public void setKinectName(String kinectName) {

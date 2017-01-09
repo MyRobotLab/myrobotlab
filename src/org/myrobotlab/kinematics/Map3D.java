@@ -84,9 +84,10 @@ public class Map3D {
     double yaw = MathUtils.degToRad(kinectPosition.getYaw());
     Matrix trMatrix = Matrix.translation(kinectPosition.getX(), kinectPosition.getY(), kinectPosition.getZ());
     Matrix rotMatrix = Matrix.zRotation(roll).multiply(Matrix.yRotation(yaw).multiply(Matrix.xRotation(pitch)));
-    Matrix inputMatrix = trMatrix.multiply(rotMatrix);
+    Matrix coord = Matrix.translation(xpos, zpos, ypos);
+    Matrix inputMatrix = trMatrix.multiply(rotMatrix).multiply(coord);
 
-    Point pOut = new Point(inputMatrix.elements[0][0], inputMatrix.elements[1][0], inputMatrix.elements[2][0], 0, 0, 0);
+    Point pOut = new Point(inputMatrix.elements[0][3], inputMatrix.elements[1][3], inputMatrix.elements[2][3], 0, 0, 0);
 		
 		//translate
 //		double posx = xpos + kinectPosition.getX();
