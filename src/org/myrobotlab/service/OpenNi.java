@@ -642,7 +642,12 @@ public class OpenNi extends Service // implements
   void get3DData() {
   	OpenNiData data = new OpenNiData();
   	context.update();
+  	data.depthPImage = context.depthImage();
   	data.depthMapRW = context.depthMapRealWorld();
+    data.depth = data.depthPImage.getImage();
+    frame = data.depth;
+    ++frameNumber;
+    g2d = frame.createGraphics();
     invoke("publishOpenNIData", data);
   }
 
