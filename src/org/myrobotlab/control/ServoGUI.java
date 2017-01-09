@@ -229,9 +229,11 @@ public class ServoGUI extends ServiceGUI implements ActionListener {
           pinList.setEnabled(true);
         }
 
-        double pos = servo.getPos();
+        Double pos = servo.getPos();
+        if (pos != null){
         boundPos.setText(Double.toString(pos));
-        slider.setValue((int) pos);
+        slider.setValue(pos.intValue());
+        }
 
         // In the inverted case, these are reversed
         slider.setMinimum((int)servo.getMin());
