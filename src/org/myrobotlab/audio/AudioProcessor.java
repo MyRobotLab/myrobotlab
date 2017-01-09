@@ -82,6 +82,11 @@ public class AudioProcessor extends Thread {
     try {
 
       File file = new File(data.file);
+      if (file.length() == 0){
+        // bail ?
+        log.error(String.format("audio file %s 0 byte length", file.getName()));
+        return data;
+      }
       AudioInputStream in = AudioSystem.getAudioInputStream(file);
       AudioFormat baseFormat = in.getFormat();
       AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16, baseFormat.getChannels(), baseFormat.getChannels() * 2,
