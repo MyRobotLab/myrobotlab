@@ -230,14 +230,14 @@ public class ServoGUI extends ServiceGUI implements ActionListener {
         }
 
         Double pos = servo.getPos();
-        if (pos != null){
-        boundPos.setText(Double.toString(pos));
-        slider.setValue(pos.intValue());
+        if (pos != null) {
+          boundPos.setText(Double.toString(pos));
+          slider.setValue(pos.intValue());
         }
 
         // In the inverted case, these are reversed
-        slider.setMinimum((int)servo.getMin());
-        slider.setMaximum((int)servo.getMax());
+        slider.setMinimum((int) servo.getMin());
+        slider.setMaximum((int) servo.getMax());
 
         posMin.setText(servo.getMin() + "");
         posMax.setText(servo.getMax() + "");
