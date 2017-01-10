@@ -418,79 +418,16 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public static void main(String[] args) throws Exception {
     LoggingFactory.init(Level.INFO);
 
-    Runtime.createAndStart("python", "Python");
-    Runtime.createAndStart("gui", "GUIService");
+    //Runtime.createAndStart("python", "Python");
+    //Runtime.createAndStart("gui", "GUIService");
 
-    InverseKinematics3D inversekinematics = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
-    // InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
-    inversekinematics.setCurrentArm(InMoovArm.getDHRobotArm());
-    //
-    inversekinematics.getCurrentArm().setIk3D(inversekinematics);
-    // Create a new DH Arm.. simpler for initial testing.
-    // d , r, theta , alpha
-    // DHRobotArm testArm = new DHRobotArm();
-    // testArm.addLink(new DHLink("one" ,400,0,0,90));
-    // testArm.addLink(new DHLink("two" ,300,0,0,90));
-    // testArm.addLink(new DHLink("three",200,0,0,0));
-    // testArm.addLink(new DHLink("two", 0,0,0,0));
-    // inversekinematics.setCurrentArm(testArm);
-    // set up our input translation/rotation
-    //
-    // if (false) {
-    // double dx = 400.0;
-    // double dy = -600.0;
-    // double dz = -350.0;
-    // double roll = 0.0;
-    // double pitch = 0.0;
-    // double yaw = 0.0;
-    // inversekinematics.createInputMatrix(dx, dy, dz, roll, pitch, yaw);
-    // }
-
-    // Rest position...
-    // Point rest = new Point(100,-300,0,0,0,0);
-    // rest.
-    // inversekinematics.moveTo(rest);
-
-    // LeapMotion lm = (LeapMotion)Runtime.start("leap", "LeapMotion");
-    // lm.addPointsListener(inversekinematics);
-
-    boolean attached = true;
-    if (attached) {
-      // set up the left inmoov arm
-      InMoovArm leftArm = (InMoovArm) Runtime.start("leftArm", "InMoovArm");
-      leftArm.connect("COM21");
-      // leftArm.omoplate.setMinMax(0, 180);
-      // attach the publish joint angles to the on JointAngles for the inmoov
-      // arm.
-      inversekinematics.addListener("publishJointAngles", leftArm.getName(), "onJointAngles");
-    }
-
-    // Runtime.createAndStart("gui", "GUIService");
-    // OpenCV cv1 = (OpenCV)Runtime.createAndStart("cv1", "OpenCV");
-    // OpenCVFilterAffine aff1 = new OpenCVFilterAffine("aff1");
-    // aff1.setAngle(270);
-    // aff1.setDx(-80);
-    // aff1.setDy(-80);
-    // cv1.addFilter(aff1);
-    //
-    // cv1.setCameraIndex(0);
-    // cv1.capture();
-    // cv1.undockDisplay(true);
-
-    /*
-     * GUIService gui = new GUIService("gui"); gui.startService();
-     */
-
-    Joystick joystick = (Joystick) Runtime.start("joystick", "Joystick");
-    joystick.setController(2);
-
-    // joystick.startPolling();
-
-    // attach the joystick input to the ik3d service.
-    joystick.addInputListener(inversekinematics);
-
-    Runtime.start("webgui", "WebGui");
-    Runtime.start("log", "Log");
+    HashMap<String,Integer> test = new HashMap<String,Integer>();
+    test.put("x", 43);
+    Integer y = test.get("x");
+    y++;
+    test.put("x",y);
+    Integer z = test.get("x");
+    log.info("Value is {}",z);
   }
 
   @Override
@@ -865,7 +802,11 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 //		PVector[] depthDataRW = data.depthMapRW;
 //		log.info("{}",depthDataRW[320+120*640]);
   	if (this.inbox.size() < 50) {
+  		long a = System.currentTimeMillis();
+  		log.info("start {}",a);
   		map3d.processDepthMap(data);
+  		long b = System.currentTimeMillis();
+  		log.info("end {} - {} - {}",b, b-a, this.inbox.size());
   	}
   }
   		
