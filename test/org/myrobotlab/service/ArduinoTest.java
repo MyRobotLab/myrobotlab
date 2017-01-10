@@ -1040,6 +1040,7 @@ public class ArduinoTest implements PinArrayListener {
 			Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
 			Servo servo02 = (Servo)Runtime.start("servo02", "Servo");
 			
+			servo01.setMinMax(10, 175);
 			servo01.setInverted(true);
 			servo01.setRest(157);
 			servo02.setRest(140);

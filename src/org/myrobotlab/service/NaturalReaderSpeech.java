@@ -205,6 +205,9 @@ public class NaturalReaderSpeech extends Service implements TextListener, Speech
       HttpEntity entity = response.getEntity();
       // cache the mp3 content
       b = FileIO.toByteArray(entity.getContent());
+      if (b == null || b.length == 0){
+        error("%s returned 0 byte file !!! - it may block you", getName());
+      }
       EntityUtils.consume(entity);
     } catch (Exception e) {
       Logging.logError(e);

@@ -350,7 +350,7 @@ public class AudioFile extends Service {
 
       // audio.track("sound effects");
       audio.track("explosion");
-      audio.play("explosion.mp3");
+      audio.play("alert.mp3");
 
       /*
        * mary.speak("warning warning. danger will robinson danger"); mary.speak(
