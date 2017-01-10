@@ -124,6 +124,16 @@ public class ArduinoUtils {
 		}
 
 		environment.put("LD_LIBRARY_PATH", ldLibPath);
+		// on windows i need to append to the path
+		
+		// TODO: move run command into it's own util class
+		// TODO: allow people to pass in environment variables in the method sig 
+		String path = environment.get("Path");
+		if (path != null) {
+			path += ";.\\mimic";
+			environment.put("Path", path);
+		}
+		
 		try {
 			Process handle = builder.start();
 
@@ -182,7 +192,7 @@ public class ArduinoUtils {
 	 * @param args
 	 * @return
 	 */
-	protected String RunAndCatch(String cmd, ArrayList<String> args) {
+	public static String RunAndCatch(String cmd, ArrayList<String> args) {
 		String returnValue;
 		try {
 			returnValue = runCommand(cmd, args);
