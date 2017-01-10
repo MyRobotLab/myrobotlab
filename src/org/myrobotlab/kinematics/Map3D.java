@@ -31,11 +31,16 @@ public class Map3D {
 	public int heighImage = 480;
 	public int maxDepthValue = 2000;
 	public int closestDistance = 450;
-	public int fartestDistance = 1000;
+	public int fartestDistance = 1500;
 	
 	public int skip = 10;
-	HashMap<Integer,HashMap<Integer,HashMap<Integer,CoordStateValue>>> coordValue = new HashMap<Integer,HashMap<Integer,HashMap<Integer,CoordStateValue>>>();
+	HashMap<Integer,HashMap<Integer,HashMap<Integer,Map3DPoint>>> coordValue = new HashMap<Integer,HashMap<Integer,HashMap<Integer,Map3DPoint>>>();
 	private Point kinectPosition;
+	
+	class Map3DPoint {
+		CoordStateValue value = CoordStateValue.UNDEFINED;
+		boolean usedForObject = false;
+	}
 	
 	public Map3D() {
 		
@@ -61,7 +66,7 @@ public class Map3D {
 					}
 				}
 				if (depthData[index].z > fartestDistance) {
-					for (float z = closestDistance; z <= depthData[index].z; z+=(float)skip) {
+					for (float z = closestDistance; z <= depthData[index].z && z <= fartestDistance; z+=(float)skip) {
 						loc = PVector.div(depthData[index], depthData[index].z);
 						loc = PVector.mult(loc, z);
 						addCoordValue(loc.x, loc.y, loc.z, CoordStateValue.EMPTY);
@@ -83,7 +88,7 @@ public class Map3D {
     double pitch = MathUtils.degToRad(kinectPosition.getPitch());
     double yaw = MathUtils.degToRad(kinectPosition.getYaw());
     Matrix trMatrix = Matrix.translation(kinectPosition.getX(), kinectPosition.getY(), kinectPosition.getZ());
-    Matrix rotMatrix = Matrix.zRotation(roll).multiply(Matrix.yRotation(yaw).multiply(Matrix.xRotation(pitch)));
+    Matrix rotMatrix = Matrix.xRotation(roll).multiply(Matrix.yRotation(pitch).multiply(Matrix.zRotation(yaw)));
     Matrix coord = Matrix.translation(xpos, zpos, ypos);
     Matrix inputMatrix = trMatrix.multiply(rotMatrix).multiply(coord);
 
@@ -97,13 +102,13 @@ public class Map3D {
 		double posx = (int)((int)pOut.getX()/skip*skip);
 		double posy = (int)((int)pOut.getY()/skip*skip);
 		double posz = (int)((int)pOut.getZ()/skip*skip);
-		HashMap<Integer,HashMap<Integer,CoordStateValue>> y = coordValue.get((int)posx);
+		HashMap<Integer,HashMap<Integer,Map3DPoint>> y = coordValue.get((int)posx);
 		if (y == null) {
-			y = new HashMap<Integer,HashMap<Integer,CoordStateValue>>();
+			y = new HashMap<Integer,HashMap<Integer,Map3DPoint>>();
 		}
-		HashMap<Integer,CoordStateValue> z = y.get((int)posy);
+		HashMap<Integer,Map3DPoint> z = y.get((int)posy);
 		if (z == null) {
-			z = new HashMap<Integer,CoordStateValue>();
+			z = new HashMap<Integer,Map3DPoint>();
 		}
 		switch (value){
 			case EMPTY:
@@ -111,14 +116,20 @@ public class Map3D {
 					z.remove((int)posz);
 				}
 				break;
-			case FILL:
-				z.put((int)posz, value);
+			case FILL: {
+				Map3DPoint o = new Map3DPoint();
+				o.value = value;
+				z.put((int)posz, o);
 				break;
-			case UNDEFINED:
+			}
+			case UNDEFINED:{
 				if (z.get((int)posz) == null){
-					z.put((int)posz, value);
+					Map3DPoint o = new Map3DPoint();
+					o.value = value;
+					z.put((int)posz, o);
 				}
 				break;
+			}
 		}
 		y.put((int)posy, z);
 		coordValue.put((int)posx, y);
@@ -132,11 +143,11 @@ public class Map3D {
 		int posx = xpos/skip*skip;
 		int posy = ypos/skip*skip;
 		int posz = xpos/skip*skip;
-		HashMap<Integer,HashMap<Integer,CoordStateValue>> y = coordValue.get(posx);
+		HashMap<Integer,HashMap<Integer,Map3DPoint>> y = coordValue.get(posx);
 		if (y == null) {
 			return CoordStateValue.EMPTY;
 		}
-		HashMap<Integer,CoordStateValue> z = y.get(posy);
+		HashMap<Integer,Map3DPoint> z = y.get(posy);
 		if (z == null) {
 			return CoordStateValue.EMPTY;
 		}
