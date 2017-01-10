@@ -55,8 +55,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 */
 	public class SpeedControl extends Thread {
 
-		ServoData servoData;
+		volatile ServoData servoData;
 		String name;
+		long now;
+		long lastExecution;
+		long tickLength;
 		
 		public SpeedControl(String name) {
 			super(String.format("%s.SpeedControl", name));
@@ -68,27 +71,46 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		@Override
 		public void run() {
 
+			log.debug(String.format("Speed control started for %s", name));
+			servoData = servoMap.get(name);
+			log.debug(String.format("Moving from %s to %s at %s degrees/second", servoData.currentOutput, servoData.targetOutput, servoData.velocity));
 			try {
-				while (servoData.isMoving = true) {
-					servoData = servoMap.get(name);
-					if (servoData.targetOutput > servoData.currentOutput) {
-						servoData.currentOutput += 1;
-					} else if (servoData.targetOutput < servoData.currentOutput) {
-						servoData.currentOutput -= 1;
-					} else {
+				lastExecution = System.currentTimeMillis();
+				while (servoData.isMoving) {
+					now = System.currentTimeMillis();
+					tickLength = now - lastExecution;
+					if (servoData.currentOutput < servoData.targetOutput) { // Move in positive direction
+						servoData.currentOutput += (servoData.velocity * tickLength * 0.001);
+						if (servoData.currentOutput >= servoData.targetOutput){
+							servoData.currentOutput = servoData.targetOutput;
+							servoData.isMoving = false;
+						}
+					} else if (servoData.currentOutput > servoData.targetOutput) { // Move in negative direction
+						servoData.currentOutput -= (servoData.velocity * tickLength * 0.001);
+						if (servoData.currentOutput <= servoData.targetOutput){
+							servoData.currentOutput = servoData.targetOutput;
+							servoData.isMoving = false;
+						}
+					}
+					else {				  
 						// We have reached the position so shutdown the thread
 						servoData.isMoving = false;
+						log.debug("This line should not repeat");
 					}
 					int pulseWidthOff = SERVOMIN + (int) (servoData.currentOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
 					setServo(servoData.pin, pulseWidthOff);
-					// Calculate next step for the the new value for the motor
-					Thread.sleep((int)(1000 / servoData.velocity));
+					// Sleep 100ms before sending next position
+					lastExecution = now;
+					log.debug(String.format("Sent %s using a %s tick", servoData.currentOutput, tickLength));
+					Thread.sleep(100);
 				}
-
+				
+				log.debug("Shuting down SpeedControl");
+				
 			} catch (Exception e) {
 				servoData.isMoving = false;
 				if (e instanceof InterruptedException) {
-					info("Shutting down MotorUpdater");
+					log.debug("Shuting down SpeedControl");
 				} else {
 					logException(e);
 				}
@@ -215,7 +237,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		boolean pwmFreqSet = false;
 		int pwmFreq;
 		SpeedControl speedcontrol;
-		double velocity = 0;
+		double velocity = -1;
+		double acceleration = -1;
 		boolean isMoving = false;
 		double targetOutput;
 		double currentOutput;
@@ -466,14 +489,16 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		}
 		// Move at max speed
 		if (servoData.velocity == -1) {
+			log.debug("Ada move at max speed");
 			servoData.currentOutput = servo.getTargetOutput();
 			servoData.targetOutput = servo.getTargetOutput();
-			log.debug(String.format("servoWrite %s deviceAddress %s targetOutput %d", servo.getName(), deviceAddress,
+			log.debug(String.format("servoWrite %s deviceAddress %s targetOutput %f", servo.getName(), deviceAddress,
 					servo.getTargetOutput()));
 			int pulseWidthOff = SERVOMIN
 					+ (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
 			setServo(servo.getPin(), pulseWidthOff);
 		} else {
+			log.debug(String.format("Ada move at velocity %s degrees/s", servoData.velocity));
 			servoData.targetOutput = servo.getTargetOutput();
 			// Start a thread to handle the speed for this servo
 			if (servoData.isMoving == false) {
@@ -496,7 +521,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		int pulseWidthOff = (int) (uS * 0.45) - 300;
 		// since pulseWidthOff can be larger than > 256 it needs to be
 		// sent as 2 bytes
-		log.info(String.format("servoWriteMicroseconds %s deviceAddress x%02X pin %s pulse %d", servo.getName(),
+		log.debug(String.format("servoWriteMicroseconds %s deviceAddress x%02X pin %s pulse %d", servo.getName(),
 				deviceAddress, pin, pulseWidthOff));
 
 		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff),
@@ -887,7 +912,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	@Override
 	public void servoSetAcceleration(ServoControl servo) {
-		// TODO Auto-generated method stub
+		ServoData servoData = servoMap.get(servo.getName());
+		servoData.acceleration = servo.getAcceleration();
 		
 	}
 
