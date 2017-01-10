@@ -580,7 +580,12 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public double getPos() {
-    return targetPos;
+    if (targetPos == null){
+      return rest;
+    }
+    else {
+      return targetPos;
+    }
   }
 
   // This was originally named setController
