@@ -627,6 +627,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		servoData.pin = servo.getPin();
 		servoData.pwmFreqSet = false;
 		servoData.pwmFreq = pwmFreq;
+		servoData.isEnergized = true;
 		servoMap.put(servo.getName(), servoData);
 		invoke("publishAttachedDevice", servo.getName());
 	}
