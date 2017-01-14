@@ -401,7 +401,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     }
     relay.attach(controller, this, controllerAttachAs);
     msg = new Msg(this, relay);
-    msg.softReset(); // needed because there is no serial connect
+    msg.softReset(); // needed because there is no serial connect <- GroG says - this is heavy handed no?
+    enableBoardInfo(true); // start the heartbeat getBoardInfo
     msg.getBoardInfo();
     log.info("waiting for boardInfo lock..........");
     synchronized (boardInfo) {
@@ -483,6 +484,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // and this msg along with the ack will be ignored
       // so we turn of ack'ing locally
       msg.enableAcks(false);
+      enableBoardInfo(true); // start the heartbeat getBoardInfo
       msg.getBoardInfo();
       
 
