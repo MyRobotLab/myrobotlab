@@ -22,15 +22,16 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.arduino.virtual.MrlServo;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
-import org.myrobotlab.service.VirtualArduino.MrlServo;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
+import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
@@ -52,7 +53,7 @@ public class ArduinoTest implements PinArrayListener {
 
 	// virtual hardware
 	static VirtualArduino virtual = null;
-	static Serial uart = null;
+	static SerialDevice uart = null;
 
 	int servoPin = 7;
 	String enablePin = "A1";
@@ -1013,7 +1014,7 @@ public class ArduinoTest implements PinArrayListener {
 		try {
 			LoggingFactory.init("INFO");
 			
-			// Runtime.start("webgui", "WebGui");
+			Runtime.start("webgui", "WebGui");
 			// Runtime.start("gui", "GUIService");
 
 			// test a "real" arduino
@@ -1024,6 +1025,9 @@ public class ArduinoTest implements PinArrayListener {
 
 			ArduinoTest test = new ArduinoTest();
 			ArduinoTest.setUpBeforeClass();
+			
+			Pir pir = (Pir)Runtime.start("pir","Pir");
+			pir.attach(arduino, 7);
 			
 			// arduino.record();
 

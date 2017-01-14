@@ -53,7 +53,7 @@ public class UltrasonicSensorTest {
 		}
 
 		catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
-		uart = virtual.getSerial();
+		uart = (Serial)virtual.getSerial();
 		// uart.setTimeout(100); // don't want to hang when decoding results...
 	}
 

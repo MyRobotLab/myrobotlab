@@ -12,14 +12,13 @@ class Pin;
 
 
 /***********************************************************************
- * Class MrlComm -
- * This class represents the Arduino service as a device.
- * It can hosts devices such as Motors, Servos, Steppers, Sensors, etc.
- * You can dynamically add or remove devices, and the deviceList should be in
- * synch with the Java-Land deviceList.
- * It has a list of pins which can be read from or written to.
- * It also follows some of the same methods as the Device in Device.h
- * It has an update() which is called each loop to do any necessary processing
+   * Class MrlComm - This class represents the Arduino service as a device. It
+   * can hosts devices such as Motors, Servos, Steppers, Sensors, etc. You can
+   * dynamically add or remove devices, and the deviceList should be in synch
+   * with the Java-Land deviceList. It has a list of pins which can be read from
+   * or written to. It also follows some of the same methods as the Device in
+   * Device.h It has an update() which is called each loop to do any necessary
+   * processing
  * 
 */
 class MrlComm{
@@ -27,24 +26,25 @@ class MrlComm{
     /**
      * "global var"
      */
-    // The mighty device List.  This contains all active devices that are attached to the arduino.
+  // The mighty device List. This contains all active devices that are attached
+  // to the arduino.
     LinkedList<Device*> deviceList;
 
-    // list of pins currently being read from - can contain both digital and analog
+  // list of pins currently being read from - can contain both digital and
+  // analog
     LinkedList<Pin*> pinList;
 
-    // MRLComm message buffer and current count from serial port ( MAGIC | MSGSIZE | FUNCTION | PAYLOAD ...
-    //unsigned char ioCmd[MAX_MSG_SIZE];  // message buffer for all inbound messages
     unsigned char* config;
     // performance metrics  and load timing
     // global debug setting, if set to true publishDebug will write to the serial port.
     int byteCount;
     int msgSize;
-    bool boardStatusEnabled;
-    unsigned int publishBoardStatusModulus; // the frequency in which to report the load timing metrics (in number of main loops)
-    unsigned long lastMicros; // timestamp of last loop (if stats enabled.)
 
-    bool heartbeatEnabled = false;
+ // last time board info was published
+  long lastBoardInfoUs;
+
+    boolean boardStatusEnabled;
+ 
     unsigned long lastHeartbeatUpdate;
 
     byte customMsgBuffer[MAX_MSG_SIZE];
