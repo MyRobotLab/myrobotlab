@@ -14,14 +14,15 @@
  <pre>
  Schema Type Conversions
 
- Schema      ARDUINO					Java							Range
- none		byte/unsigned char		int (cuz Java byte bites)		1 byte - 0 to 255
- boolean	boolean					boolean							0 1
- b16		int						int (short)						2 bytes	-32,768 to 32,767
- b32		long					int								4 bytes -2,147,483,648 to 2,147,483, 647
- bu32		unsigned long			long							0 to 4,294,967,295
- str		char*, size				String							variable length
- []			byte[], size			int[]							variable length
+ Schema         Arduino                         Java                              Range
+ none           byte/unsigned char		int (cuz Java byte bites)         1 byte - 0 to 255
+ boolean        boolean                         boolean                           0 1
+ b16            int                             int (short)                       2 bytes	-32,768 to 32,767
+ b32            long                            int                               4 bytes -2,147,483,648 to 2,147,483, 647
+ bu32           unsigned long			long                              0 to 4,294,967,295
+ str            char*, size                     String                            variable length
+ []             byte[], size                    int[]                             variable length
+ f32            float                           double                            4 bytes
  </pre>
  */
 
@@ -33,40 +34,7 @@ MrlComm::MrlComm() {
 MrlComm::~MrlComm() {
 }
 
-/***********************************************************************
- * PUBLISH_BOARD_STATUS
- * This function updates the average time it took to run the main loop
- * and reports it back with a publishBoardStatus MRLComm message
- *
- * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
- *
- * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
- */
-void MrlComm::publishBoardStatus() {
 
-	// protect against a divide by zero in the division.
-	if (publishBoardStatusModulus == 0) {
-		publishBoardStatusModulus = 10000;
-	}
-
-	unsigned int avgTiming = 0;
-	unsigned long now = micros();
-
-	avgTiming = (now - lastMicros) / publishBoardStatusModulus;
-
-	// report board status
-	if (boardStatusEnabled && (loopCount % publishBoardStatusModulus == 0)) {
-		byte deviceSummary[deviceList.size() * 2];
-		for (int i = 0; i < deviceList.size(); ++i) {
-			deviceSummary[i] = deviceList.get(i)->id;
-			deviceSummary[i + 1] = deviceList.get(i)->type;
-		}
-		// FIXME !!! - merge in changes from VirtualArduino
-		// msg->publishBoardStatus(avgTiming, getFreeRam(), deviceSummary, deviceList.size() * 2);
-	}
-	// update the timestamp of this update.
-	lastMicros = now;
-}
 
 int MrlComm::getFreeRam() {
 	// KW: In the future the arduino might have more than an 32/64k of ram. an int might not be enough here to return.
@@ -89,7 +57,7 @@ Device* MrlComm::getDevice(int id) {
 	}
 
 	msg->publishError(F("device does not exist"));
-	return NULL; //returning a NULL ptr can cause runtime error
+	return NULL; //returning a null ptr can cause runtime error
 	// you'll still get a runtime error if any field, member or method not
 	// defined is accessed
 }
@@ -133,23 +101,27 @@ void MrlComm::updateDevices() {
 }
 
 /***********************************************************************
- * UPDATE BEGIN
- * updates self - reads from the pinList both analog and digital
+   * UPDATE BEGIN updates self - reads from the pinList both analog and digital
  * sends pin data back
  */
 void MrlComm::update() {
+       // this counts cycles of updates
+       // until it is reset after sending publishBoardInfo
+        ++loopCount;
 	unsigned long now = millis();
-	if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) {
-		softReset();
+	if ((now - lastHeartbeatUpdate > 1000)) {
+		// softReset(); - not ready yet to commit to resetting
 		lastHeartbeatUpdate = now;
 		return;
 	}
 
 	if (pinList.size() > 0) {
 
-		// size of payload - 1 byte for address + 2 bytes per pin read
-		// this is an optimization in that we send back "all" the read pin data in a
-		// standard 2 byte package - digital reads don't need both bytes, but the
+      // size of payload - 1 int for address + 2 bytes per pin read
+      // this is an optimization in that we send back "all" the read pin
+      // data in a
+      // standard 2 int package - digital reads don't need both bytes,
+      // but the
 		// sending it all back in 1 msg and the simplicity is well worth it
 		// msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
 
@@ -193,18 +165,19 @@ void MrlComm::processCommand() {
 	}
 }
 
-void MrlComm::enableAck(bool enabled) {
+void MrlComm::enableAck(boolean enabled) {
 	ackEnabled = enabled;
 }
 
-bool MrlComm::readMsg() {
+boolean MrlComm::readMsg() {
 	return msg->readMsg();
 }
 
 void MrlComm::begin(HardwareSerial& serial) {
 
 	// TODO: the arduino service might get a few garbage bytes before we're able
-	// to run, we should consider some additional logic here like a "publishReset"
+        // to run, we should consider some additional logic here like a
+        // "publishReset"
 	// publish version on startup so it's immediately available for mrl.
 	// TODO: see if we can purge the current serial port buffers
 
@@ -217,7 +190,7 @@ void MrlComm::begin(HardwareSerial& serial) {
 
 	msg->begin(serial);
 
-	// send 3 boardInfos to PC to announce,
+	// send 5 boardInfos to PC to announce,
 	// Hi I'm an Arduino with version x, board type y, and I'm ready :)
 	for (int i = 0; i < 5; ++i) {
 		publishBoardInfo();
@@ -225,20 +198,32 @@ void MrlComm::begin(HardwareSerial& serial) {
 	}
 }
 
+/***********************************************************************
+   * PUBLISH_BOARD_INFO This function updates the average time it took to run
+   * the main loop and reports it back with a publishBoardStatus MRLComm message
+   *
+   * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
+   *
+   * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
+   */
+
 void MrlComm::publishBoardInfo(){
 	byte deviceSummary[deviceList.size() * 2];
 	for (int i = 0; i < deviceList.size(); ++i) {
 		deviceSummary[i] = deviceList.get(i)->id;
 		deviceSummary[i + 1] = deviceList.get(i)->type;
 	}
-
-	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD, 0, getFreeRam(), deviceSummary, sizeof(deviceSummary));
+        
+        long now = micros();
+	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), deviceSummary, sizeof(deviceSummary));
+        lastBoardInfoUs = now;
+        loopCount = 0;
 }
 
 /****************************************************************
- *               GENERATED METHOD INTERFACE BEGIN
- * All methods signatures below this line are controlled by arduinoMsgs.schema
- * The implementation contains custom logic - but the signature is generated
+   * GENERATED METHOD INTERFACE BEGIN All methods signatures below this line are
+   * controlled by arduinoMsgs.schema The implementation contains custom logic -
+   * but the signature is generated
  *
  */
 
@@ -249,12 +234,6 @@ void MrlComm::getBoardInfo() {
 }
 
 // > echo/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
-/*
- void MrlComm::echo(long sInt, byte name1Size, const char*name1, byte b8,
- unsigned long bui32, long bi32, byte b9, byte name2Size,
- const char*name2, byte configSize, const byte*config,
- unsigned long bui322) {
- */
 void MrlComm::echo(float myFloat, byte myByte, float mySecondFloat) {
 	msg->publishDebug(String("echo float " + String(myFloat)));
 	msg->publishDebug(String("echo byte " + String(myByte)));
@@ -319,20 +298,6 @@ void MrlComm::disablePins() {
 	}
 }
 
-// > enableBoardStatus
-/*
-void MrlComm::enableBoardInfo(bool enabled) {
-	// msg->publishDebug("enableBoardStatus");
-	boardStatusEnabled = enabled;
-}
-*/
-
-// > enableHeartbeat/bool enabled
-/*
-void MrlComm::enableHeartbeat(bool enabled) {
-	heartbeatEnabled = enabled;
-}
-*/
 
 // > enablePin/address/type/b16 rate
 void MrlComm::enablePin(byte address, byte type, int rate) {
@@ -353,12 +318,6 @@ void MrlComm::enablePin(byte address, byte type, int rate) {
 	pinList.add(p);
 }
 
-// > heartbeat
-/*
-void MrlComm::heartbeat() {
-	lastHeartbeatUpdate = millis();
-}
-*/
 
 // > i2cBusAttach/deviceId/i2cBus
 void MrlComm::i2cBusAttach(byte deviceId, byte i2cBus) {
@@ -453,14 +412,7 @@ void MrlComm::servoMoveToMicroseconds(byte deviceId, int target) {
 	servo->moveToMicroseconds(target);
 }
 
-/*
-void MrlComm::servoWriteMicroseconds(byte deviceId, int ms) {
-	MrlServo* servo = (MrlServo*) getDevice(deviceId);
-	servo->servoWriteMicroseconds(ms);
-}
-*/
-
-void MrlComm::setDebug(bool enabled) {
+void MrlComm::setDebug(boolean enabled) {
 	msg->debug = enabled;
 }
 
@@ -509,12 +461,10 @@ void MrlComm::softReset() {
 
 	//resetting variables to default
 	loopCount = 0;
-	publishBoardStatusModulus = 10000;
 	boardStatusEnabled = false;
 	msg->debug = false;
-	heartbeatEnabled = false;
 	lastHeartbeatUpdate = 0;
-	for (unsigned int i = 0; i < MAX_MSG_SIZE; i++) {
+	for (int i = 0; i < MAX_MSG_SIZE; i++) {
 		customMsgBuffer[i] = 0;
 	}
 	customMsgSize = 0;
@@ -525,11 +475,13 @@ void MrlComm::ultrasonicSensorAttach(byte deviceId, byte triggerPin, byte echoPi
 	MrlUltrasonicSensor* sensor = (MrlUltrasonicSensor*) addDevice(new MrlUltrasonicSensor(deviceId));
 	sensor->attach(triggerPin, echoPin);
 }
+
 // > ultrasonicSensorStartRanging/deviceId
 void MrlComm::ultrasonicSensorStartRanging(byte deviceId) {
 	MrlUltrasonicSensor* sensor = (MrlUltrasonicSensor*)getDevice(deviceId);
 	sensor->startRanging();
 }
+
 // > ultrasonicSensorStopRanging/deviceId
 void MrlComm::ultrasonicSensorStopRanging(byte deviceId) {
 	MrlUltrasonicSensor* sensor = (MrlUltrasonicSensor*)getDevice(deviceId);

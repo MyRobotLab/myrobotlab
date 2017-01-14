@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import org.myrobotlab.logging.Level;
 
+import org.myrobotlab.arduino.virtual.MrlComm;
+
 /**
  * <pre>
  * 
@@ -30,7 +32,7 @@ import org.myrobotlab.logging.Level;
 
  All message editing should be done in the arduinoMsg.schema
 
- The binary wire format of an VirtualArduino is:
+ The binary wire format of an MrlComm is:
 
  MAGIC_NUMBER|MSG_SIZE|METHOD_NUMBER|PARAM0|PARAM1 ...
  
@@ -44,14 +46,14 @@ import org.myrobotlab.service.VirtualArduino;
 
 import java.io.FileOutputStream;
 import java.util.Arrays;
-import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
- * Singlton messaging interface to an VirtualArduino
+ * Singlton messaging interface to an MrlComm
  *
  * @author GroG
  *
@@ -62,10 +64,20 @@ public class VirtualMsg {
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
 	public static final int MRLCOMM_VERSION = 53;
+	
+	// send buffer
+  int sendBufferSize = 0;
+  int sendBuffer[] = new int[MAX_MSG_SIZE];
+  
+  // recv buffer
+  int ioCmd[] = new int[MAX_MSG_SIZE];
+  
+  int byteCount = 0;
+  int msgSize = 0;
 
 	// ------ device type mapping constants
 	int method = -1;
-	
+	public boolean debug = false;
 	boolean invoke = true;
 	
 	boolean ackEnabled = false;
@@ -240,15 +252,19 @@ public class VirtualMsg {
 	
 	public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
 
-	public VirtualMsg(VirtualArduino arduino, SerialDevice serial) {
+	public VirtualMsg(MrlComm arduino, SerialDevice serial) {
 		this.arduino = arduino;
 		this.serial = serial;
+	}
+	
+	public void begin(SerialDevice serial){
+	  this.serial = serial;
 	}
 
 	// transient private Msg instance;
 
 	// ArduinoSerialCallBacks - TODO - extract interface
-	transient private VirtualArduino arduino;
+	transient private MrlComm arduino;
 	
 	transient private SerialDevice serial;
 
@@ -259,7 +275,7 @@ public class VirtualMsg {
 	 * @return
 	 */
 	/*
-	static public synchronized Msg getInstance(VirtualArduino arduino, SerialDevice serial) {
+	static public synchronized Msg getInstance(MrlComm arduino, SerialDevice serial) {
 		if (instance == null) {
 			instance = new Msg();
 		}
@@ -270,6 +286,14 @@ public class VirtualMsg {
 		return instance;
 	}
 	*/
+	
+	public void setInvoke(boolean b){
+	  invoke = b;
+	}
+	
+	public void processCommand(){
+	  processCommand(ioCmd);
+	}
 	
 	public void processCommand(int[] ioCmd) {
 		int startPos = 0;
@@ -761,7 +785,7 @@ public class VirtualMsg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("publishMRLCommError threw",e);
 	  }
 	}
 
@@ -802,7 +826,7 @@ public class VirtualMsg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("publishBoardInfo threw",e);
 	  }
 	}
 
@@ -831,7 +855,7 @@ public class VirtualMsg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("publishAck threw",e);
 	  }
 	}
 
@@ -866,7 +890,7 @@ public class VirtualMsg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("publishEcho threw",e);
 	  }
 	}
 
@@ -895,7 +919,7 @@ public class VirtualMsg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("publishCustomMsg threw",e);
 	  }
 	}
 
@@ -927,7 +951,7 @@ public class VirtualMsg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("publishI2cData threw",e);
 	  }
 	}
 
@@ -959,7 +983,7 @@ public class VirtualMsg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("publishAttachedDevice threw",e);
 	  }
 	}
 
@@ -988,7 +1012,7 @@ public class VirtualMsg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("publishDebug threw",e);
 	  }
 	}
 
@@ -1017,7 +1041,7 @@ public class VirtualMsg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("publishPinArray threw",e);
 	  }
 	}
 
@@ -1049,7 +1073,7 @@ public class VirtualMsg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("publishSerialData threw",e);
 	  }
 	}
 
@@ -1081,7 +1105,7 @@ public class VirtualMsg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("publishUltrasonicSensorData threw",e);
 	  }
 	}
 
@@ -1287,7 +1311,59 @@ public class VirtualMsg {
     float f = ByteBuffer.wrap(b).order(ByteOrder.BIG_ENDIAN).getFloat();
     return f;
   }
+  
+  public boolean readMsg() throws Exception {
+    // handle serial data begin
+    int bytesAvailable = serial.available();
+    if (bytesAvailable > 0) {
+      //publishDebug("RXBUFF:" + String(bytesAvailable));
+      // now we should loop over the available bytes .. not just read one by one.
+      for (int i = 0; i < bytesAvailable; i++) {
+        // read the incoming byte:
+        int newByte = serial.read();
+        //publishDebug("RX:" + String(newByte));
+        ++byteCount;
+        // checking first byte - beginning of message?
+        if (byteCount == 1 && newByte != VirtualMsg.MAGIC_NUMBER) {
+          publishError(F("error serial"));
+          // reset - try again
+          byteCount = 0;
+          // return false;
+        }
+        if (byteCount == 2) {
+          // get the size of message
+          // todo check msg < 64 (MAX_MSG_SIZE)
+          if (newByte > 64) {
+            // TODO - send error back
+            byteCount = 0;
+            continue; // GroG - I guess  we continue now vs return false on error conditions?
+          }
+          msgSize = newByte;
+        }
+        if (byteCount > 2) {
+          // fill in msg data - (2) headbytes -1 (offset)
+          ioCmd[byteCount - 3] = newByte;
+        }
+        // if received header + msg
+        if (byteCount == 2 + msgSize) {
+          // we've reach the end of the command, just return true .. we've got it
+          byteCount = 0;
+          return true;
+        }
+      }
+    } // if Serial.available
+      // we only partially read a command.  (or nothing at all.)
+    return false;
+  }
 
+  String F(String msg) {
+    return msg;
+  }
+  
+  public void publishError(String error) {
+    log.error(error);
+  }
+  
 	void write(int b8) throws Exception {
 
 		if ((b8 < 0) || (b8 > 255)) {
@@ -1475,6 +1551,16 @@ public class VirtualMsg {
 	  return method;
 	}
 	
+
+  public void add(int value) {
+    sendBuffer[sendBufferSize] = (value & 0xFF);
+    sendBufferSize += 1;
+  }
+  
+  public int[] getBuffer() {    
+    return sendBuffer;
+  }
+	
 	public static void main(String[] args) {
 		try {
 
@@ -1496,7 +1582,7 @@ public class VirtualMsg {
 			virtual.connectVirtualUart(port, port + "UART");
 			*/
 			
-			VirtualArduino arduino = (VirtualArduino)Runtime.start("arduino","VirtualArduino");
+			MrlComm arduino = (MrlComm)Runtime.start("arduino","MrlComm");
 			Servo servo01 = (Servo)Runtime.start("servo01","Servo");
 			
 			/*

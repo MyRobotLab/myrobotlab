@@ -2,7 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 import java.io.IOException;
 
-public interface SerialDevice extends LoggingSink {
+public interface SerialDevice {
 
 	void open(String name) throws Exception;
 
@@ -26,7 +26,15 @@ public interface SerialDevice extends LoggingSink {
 	// write(byte[] b) IOException
 	void write(byte[] data) throws Exception;
 	
-	void write(int data) throws Exception;	
+	void write(int data) throws Exception;
+
+  void clear();
+
+  void setTimeout(int timeoutMs);
+
+  void flush();
+
+  int available();	
 	
 	/// void flush() throws Exception; JSSC doesn't have flush .. what the heck ?
 

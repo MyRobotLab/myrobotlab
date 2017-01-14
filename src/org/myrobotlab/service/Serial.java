@@ -1327,4 +1327,13 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 		return lastPortName;
 	}
 
+  @Override
+  public void setTimeout(int timeoutMs) {
+  }
+
+  @Override
+  public void flush() {
+   
+  }
+
 }

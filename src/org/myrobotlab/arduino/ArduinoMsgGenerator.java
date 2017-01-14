@@ -222,7 +222,7 @@ public class ArduinoMsgGenerator {
 
     virtualJava = virtualJava.replace("%arduino%", "virtual");
     virtualJava = virtualJava.replace("%javaClass%", "VirtualMsg");
-    virtualJava = virtualJava.replace("%javaArduinoClass%", "VirtualArduino");
+    virtualJava = virtualJava.replace("%javaArduinoClass%", "MrlComm");
 
     fileSnr.put("%ackEnabled%", "true");
     // process substitutions

@@ -78,9 +78,6 @@ void setup() {
  * main loop any arduino sketch runs
  */
 void loop() {
-	// increment how many times we've run
-	// TODO: handle overflow here after 32k runs, i suspect this might blow up?
-	mrlComm.loopCount++;
 	// get a command and process it from
 	// the serial port (if available.)
 	if (mrlComm.readMsg()) {
@@ -89,6 +86,7 @@ void loop() {
 	// update devices
 	mrlComm.updateDevices();
 	// send back load time and memory
-	mrlComm.publishBoardStatus();
+        // driven by getBoardInfo now !!!
+        // mrlComm.publishBoardStatus();
 } // end of big loop
 

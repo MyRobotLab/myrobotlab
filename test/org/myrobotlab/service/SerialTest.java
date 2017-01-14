@@ -56,7 +56,7 @@ public class SerialTest {
     virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
     virtual.connect(vport);
 
-    uart = virtual.getSerial();
+    uart = (Serial)virtual.getSerial();
     uart.setTimeout(300);
     Thread.sleep(100);
     serial.open(vport);
