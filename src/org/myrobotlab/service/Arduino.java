@@ -637,6 +637,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   public void disconnect() {
+    enableBoardInfo(false);
     // boardInfo is not valid after disconnect
     // because we might be connecting to a different Arduino
     boardInfo.reset();
@@ -1256,6 +1257,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   @Override
   public String onDisconnect(String portName) {
     info("%s disconnected from %s", getName(), portName);
+    enableAck(false);
     return portName;
   }
 
