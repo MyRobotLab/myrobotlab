@@ -20,7 +20,7 @@ import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
-public class VirtualArduino extends Service implements  RecordControl {
+public class VirtualArduino extends Service implements RecordControl {
 
   private static final long serialVersionUID = 1L;
 
@@ -64,7 +64,7 @@ public class VirtualArduino extends Service implements  RecordControl {
     MrlCommIno ino;
 
     InoScriptRunner(VirtualArduino virtual, MrlCommIno ino) {
-      super(String.format("%s.mrlcomm",virtual.getName()));
+      super(String.format("%s.mrlcomm", virtual.getName()));
       this.virtual = virtual;
       this.ino = ino;
     }
@@ -166,19 +166,13 @@ public class VirtualArduino extends Service implements  RecordControl {
   }
 
   /*
-  @Override
-  public String onConnect(String portName) {
-    return portName;
-  }
-
-  @Override
-  public String onDisconnect(String portName) {
-    return portName;
-  }
-  */
+   * @Override public String onConnect(String portName) { return portName; }
+   * 
+   * @Override public String onDisconnect(String portName) { return portName; }
+   */
 
   public void start() {
-    if (runner != null){
+    if (runner != null) {
       log.warn("running ino script already");
       return;
     }
@@ -219,7 +213,7 @@ public class VirtualArduino extends Service implements  RecordControl {
   public void startService() {
     super.startService();
     uart = (Serial) startPeer("uart");
-    // uart.addByteListener(this);    
+    // uart.addByteListener(this);
     start();
   }
 
@@ -249,24 +243,15 @@ public class VirtualArduino extends Service implements  RecordControl {
 
       LoggingFactory.init();
 
-      VirtualArduino varduino = null;
-
-      String port = "COM42";
-      boolean useVirtual = true;
-
-      Runtime.start("gui", "GUIService");
+      String port = "COM5";
       Runtime.start("webgui", "WebGui");
-      // Runtime.start("python", "Python");
 
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      arduino.record();
-      log.info("ports " + Arrays.toString(arduino.getSerial().getPortNames().toArray()));
-      if (useVirtual) {
-        varduino = (VirtualArduino) Runtime.create("varduino", "VirtualArduino");
-        varduino.setPortName(port);
-        Runtime.start("varduino", "VirtualArduino");
-        varduino.setBoardMega();// .setBoardUno();
-      }
+      VirtualArduino varduino = (VirtualArduino) Runtime.start("varduino", "VirtualArduino");
+      // connect the virtual uart
+      // varduino.setPortName(port);
+
+      // connect the arduino to the other end
       arduino.connect(port);
       arduino.enablePin(54);
 

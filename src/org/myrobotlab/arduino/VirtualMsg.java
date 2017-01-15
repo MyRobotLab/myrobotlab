@@ -109,7 +109,7 @@ public class VirtualMsg {
 	public final static int PUBLISH_MRLCOMM_ERROR = 1;
 	// > getBoardInfo
 	public final static int GET_BOARD_INFO = 2;
-	// < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
+	// < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/activePins/[] deviceSummary
 	public final static int PUBLISH_BOARD_INFO = 3;
 	// > enablePin/address/type/b16 rate
 	public final static int ENABLE_PIN = 4;
@@ -789,18 +789,19 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, int[] deviceSummary/*[]*/) {
+	public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 2 + 2 + (1 + deviceSummary.length)); // size
+			write(1 + 1 + 1 + 2 + 2 + 1 + (1 + deviceSummary.length)); // size
 			write(PUBLISH_BOARD_INFO); // msgType = 3
 			write(version);
 			write(boardType);
 			writeb16(microsPerLoop);
 			writeb16(sram);
+			write(activePins);
 			write(deviceSummary);
  
      if (ackEnabled){
@@ -818,6 +819,8 @@ public class VirtualMsg {
 				txBuffer.append(microsPerLoop);
 				txBuffer.append("/");
 				txBuffer.append(sram);
+				txBuffer.append("/");
+				txBuffer.append(activePins);
 				txBuffer.append("/");
 				txBuffer.append(Arrays.toString(deviceSummary));
 				txBuffer.append("\n");

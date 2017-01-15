@@ -1055,6 +1055,7 @@ public class ArduinoTest implements PinArrayListener {
       arduino.attach(servo01, 7);
       arduino.attach(servo01, 8);
 			
+      // arduino.disconnect();
       
 		   boolean b = true;
 	      if (b) {

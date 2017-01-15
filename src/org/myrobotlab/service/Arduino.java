@@ -1335,7 +1335,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
-  public BoardInfo publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, int[] deviceSummary/*[]*/) {
+  public BoardInfo publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins, int[] deviceSummary/*[]*/) {
     long now = System.currentTimeMillis();
     boolean broadcast = false;
     if (version != boardInfo.getVersion() || boardType != boardInfo.getBoardType()) {
@@ -1345,6 +1345,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     boardInfo.setMicrosPerLoop(microsPerLoop);
     boardInfo.setType(boardType);
     boardInfo.setSram(sram);
+    boardInfo.setActivePins(activePins);
     boardInfo.setDeviceSummary(arrayToDeviceSummary(deviceSummary));
     boardInfo.heartbeatMs = now - boardInfoRequestTs;
 

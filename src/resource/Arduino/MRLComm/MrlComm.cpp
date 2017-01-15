@@ -215,7 +215,7 @@ void MrlComm::publishBoardInfo(){
 	}
         
         long now = micros();
-	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), deviceSummary, sizeof(deviceSummary));
+	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
         lastBoardInfoUs = now;
         loopCount = 0;
 }
