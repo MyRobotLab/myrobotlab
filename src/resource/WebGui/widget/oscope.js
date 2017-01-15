@@ -66,11 +66,10 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             scope.oscope = {};
             scope.oscope.traces = {};
             scope.oscope.writeStates = {};
-            
             // display update interfaces
             // defintion stage
             var setTraceButtons = function(pinIndex) {
-                if (pinIndex == null ) {
+                if (pinIndex == null) {
                     return;
                 }
                 var size = Object.keys(pinIndex).length
@@ -155,6 +154,9 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                         ctx.stroke();
                         // blank screen if trace reaches end
                         if (x > width) {
+                            trace.state = true;
+                            scope.highlight(trace, true);
+                            //scope.toggleReadButton(pinDef);
                             ctx.font = "10px Aria";
                             ctx.rect(0, 0, width, height);
                             ctx.fillStyle = "black";
@@ -248,6 +250,14 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             var toggleReadButton = function(trace) {
                 var highlight = trace.color.getOriginalInput();
                 if (trace.state) {
+                    scope.highlight(trace, false);
+                } else {
+                    scope.highlight(trace, true);
+                }
+            };
+            scope.highlight = function(trace, on) {
+                var highlight = trace.color.getOriginalInput();
+                if (!on) {
                     // scope.blah.display = false;
                     // on to off
                     highlight.s = "40%";
@@ -264,8 +274,8 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                         'background-color': newColor.toHexString()
                     };
                 }
-            };
-
+            }
+            ;
             var toggleWriteButton = function(trace) {
                 var highlight = trace.color.getOriginalInput();
                 if (trace.state) {
@@ -286,7 +296,6 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                     };
                 }
             };
-
             // FIXME FIXME FIXME ->> THIS SHOULD WORK subscribeToServiceMethod  <- but doesnt
             mrl.subscribeToService(_self.onMsg, name);
             // this siphons off a single subscribe to the webgui
