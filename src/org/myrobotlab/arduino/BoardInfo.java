@@ -14,6 +14,7 @@ public class BoardInfo {
 
   Integer sram;
   Integer microsPerLoop;
+  Integer activePins;
   DeviceSummary[] deviceSummary; // deviceList with types
   
   // if true it boardInfo will be published at a regular 1s interval
@@ -116,6 +117,10 @@ public class BoardInfo {
   
   public void setDeviceSummary(DeviceSummary[] deviceSummary) {
     this.deviceSummary = deviceSummary;
+  }
+
+  public void setActivePins(Integer activePins) {
+    this.activePins = activePins;
   }
   
 }

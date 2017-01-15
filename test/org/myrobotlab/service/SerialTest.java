@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.codec.serial.DecimalCodec;
+import org.myrobotlab.codec.serial.HexCodec;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -37,7 +38,7 @@ public class SerialTest {
   static Serial serial = null;
   static TestCatcher catcher = null;
 
-  static VirtualArduino virtual = null;
+  static VirtualDevice virtual = null;
   static Serial uart = null;
   static Python logic = null;
   static String vport = "vport";
@@ -53,10 +54,10 @@ public class SerialTest {
     // Runtime.start("gui", "GUIService");
     serial = (Serial) Runtime.start("serial", "Serial");
     catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
-    virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-    virtual.connect(vport);
+    virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
+    virtual.createVirtualSerial(vport);
 
-    uart = virtual.getSerial();
+    uart = (Serial)virtual.getUart(vport);
     uart.setTimeout(300);
     Thread.sleep(100);
     serial.open(vport);
@@ -267,6 +268,7 @@ public class SerialTest {
     // Set<Thread> names = getDeadThreads();
 
     logThreads();
+    // serial.removeAllListeners();
 
     // serial --> uart
     serial.write(0);
@@ -522,9 +524,10 @@ public class SerialTest {
     serial.stopRecording();
     assertFalse(serial.isRecording());
 
-    String data = FileIO.toString("out.tx.dec");
-    DecimalCodec dec = new DecimalCodec(null);
-    assertEquals(dec.decode(x), data);
+    String data = FileIO.toString("serial.tx.hex");
+    HexCodec hex = new HexCodec(null);
+    // DecimalCodec dec = new DecimalCodec(null);
+    assertEquals(Integer.parseInt(hex.decode(x).trim()), Integer.parseInt(data.trim()));
   }
 
   @Test

@@ -14,6 +14,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinArrayListener;
+import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
@@ -34,7 +35,7 @@ public class InMoovTest implements PinArrayListener {
 
 	// virtual hardware
 	static VirtualArduino virtual = null;
-	static Serial uart = null;
+	static SerialDevice uart = null;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {

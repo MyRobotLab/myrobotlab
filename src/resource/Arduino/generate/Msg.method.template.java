@@ -14,6 +14,6 @@
      }
 %javaSendRecord%
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("%name% threw",e);
 	  }
 	}

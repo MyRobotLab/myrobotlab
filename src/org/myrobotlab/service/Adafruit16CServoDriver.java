@@ -55,9 +55,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 */
 	public class SpeedControl extends Thread {
 
-		ServoData servoData;
+		volatile ServoData servoData;
 		String name;
-		
+		long now;
+		long lastExecution;
+		long deltaTime;
+
 		public SpeedControl(String name) {
 			super(String.format("%s.SpeedControl", name));
 			servoData = servoMap.get(name);
@@ -68,27 +71,64 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		@Override
 		public void run() {
 
+			log.info(String.format("Speed control started for %s", name));
+			servoData = servoMap.get(name);
+			log.debug(String.format("Moving from %s to %s at %s degrees/second", servoData.currentOutput, servoData.targetOutput, servoData.velocity));
 			try {
-				while (servoData.isMoving = true) {
-					servoData = servoMap.get(name);
-					if (servoData.targetOutput > servoData.currentOutput) {
-						servoData.currentOutput += 1;
-					} else if (servoData.targetOutput < servoData.currentOutput) {
-						servoData.currentOutput -= 1;
+				lastExecution = System.currentTimeMillis();
+				double _velocity;
+				if (servoData.acceleration == -1) {
+					_velocity = servoData.velocity;
+				} else {
+					_velocity = 0;
+				}
+				while (servoData.isMoving && servoData.isEnergized) {
+					now = System.currentTimeMillis();
+					deltaTime = now - lastExecution;
+					if (servoData.acceleration != -1) {
+						_velocity = _velocity + (servoData.acceleration * deltaTime * 0.001);
+						if (_velocity > servoData.velocity) {
+							_velocity = servoData.velocity;
+						}
+					}
+
+					if (servoData.currentOutput < servoData.targetOutput) { // Move
+																			// in
+																			// positive
+																			// direction
+						servoData.currentOutput += (_velocity * deltaTime) * 0.001;
+						if (servoData.currentOutput >= servoData.targetOutput) {
+							servoData.currentOutput = servoData.targetOutput;
+							servoData.isMoving = false;
+						}
+					} else if (servoData.currentOutput > servoData.targetOutput) { // Move
+																					// in
+																					// negative
+																					// direction
+						servoData.currentOutput -= (_velocity * deltaTime * 0.001);
+						if (servoData.currentOutput <= servoData.targetOutput) {
+							servoData.currentOutput = servoData.targetOutput;
+							servoData.isMoving = false;
+						}
 					} else {
 						// We have reached the position so shutdown the thread
 						servoData.isMoving = false;
+						log.debug("This line should not repeat");
 					}
 					int pulseWidthOff = SERVOMIN + (int) (servoData.currentOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
 					setServo(servoData.pin, pulseWidthOff);
-					// Calculate next step for the the new value for the motor
-					Thread.sleep((int)(1000 / servoData.velocity));
+					// Sleep 100ms before sending next position
+					lastExecution = now;
+					log.info(String.format("Sent %s using a %s tick at velocity %s", servoData.currentOutput, deltaTime, _velocity));
+					Thread.sleep(50);
 				}
+
+				log.info("Shuting down SpeedControl");
 
 			} catch (Exception e) {
 				servoData.isMoving = false;
 				if (e instanceof InterruptedException) {
-					info("Shutting down MotorUpdater");
+					log.debug("Shuting down SpeedControl");
 				} else {
 					logException(e);
 				}
@@ -128,9 +168,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	final static int maxPwmFreq = 1526;
 
 	// List of possible addresses. Used by the GUI.
-	public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46",
-			"0x47", "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E", "0x4F", "0x50", "0x51", "0x52", "0x53",
-			"0x54", "0x55", "0x56", "0x57", "0x58", "0x59", "0x5A", "0x5B", "0x5C", "0x5D", "0x5E", "0x5F");
+	public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E",
+			"0x4F", "0x50", "0x51", "0x52", "0x53", "0x54", "0x55", "0x56", "0x57", "0x58", "0x59", "0x5A", "0x5B", "0x5C", "0x5D", "0x5E", "0x5F");
 	// Default address
 	public String deviceAddress = "0x40";
 	/**
@@ -215,10 +254,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		boolean pwmFreqSet = false;
 		int pwmFreq;
 		SpeedControl speedcontrol;
-		double velocity = 0;
+		double velocity = -1;
+		double acceleration = -1;
 		boolean isMoving = false;
 		double targetOutput;
 		double currentOutput;
+		boolean isEnergized = false;
 	}
 
 	transient HashMap<String, ServoData> servoMap = new HashMap<String, ServoData>();
@@ -367,8 +408,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 */
 	public void setPWM(Integer pin, Integer pulseWidthOn, Integer pulseWidthOff) {
 
-		byte[] buffer = { (byte) (PCA9685_LED0_ON_L + (pin * 4)), (byte) (pulseWidthOn & 0xff),
-				(byte) (pulseWidthOn >> 8), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
+		byte[] buffer = { (byte) (PCA9685_LED0_ON_L + (pin * 4)), (byte) (pulseWidthOn & 0xff), (byte) (pulseWidthOn >> 8), (byte) (pulseWidthOff & 0xff),
+				(byte) (pulseWidthOff >> 8) };
+		log.info(String.format("Writing pin %s, pulesWidthOn %s, pulseWidthOff %s", pin, pulseWidthOn, pulseWidthOff));
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
 
@@ -382,13 +424,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		float prescale_value;
 
 		if (hz < minPwmFreq) {
-			log.error(String.format("Minimum PWMFreq is %s Hz, requested freqency is %s Hz, clamping to minimum",
-					minPwmFreq, hz));
+			log.error(String.format("Minimum PWMFreq is %s Hz, requested freqency is %s Hz, clamping to minimum", minPwmFreq, hz));
 			hz = minPwmFreq;
 			prescale_value = 255;
 		} else if (hz > maxPwmFreq) {
-			log.error(String.format("Maximum PWMFreq is %s Hz, requested frequency is %s Hz, clamping to maximum",
-					maxPwmFreq, hz));
+			log.error(String.format("Maximum PWMFreq is %s Hz, requested frequency is %s Hz, clamping to maximum", maxPwmFreq, hz));
 			hz = maxPwmFreq;
 			prescale_value = 3;
 		} else {
@@ -398,8 +438,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		log.info(String.format("PWMFreq %s hz, prescale_value calculated to %s", hz, prescale_value));
 		// Set sleep mode before changing PWM freqency
 		byte[] writeBuffer = { PCA9685_MODE1, PCA9685_SLEEP };
-		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writeBuffer,
-				writeBuffer.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writeBuffer, writeBuffer.length);
 
 		// Wait 1 millisecond until the oscillator has stabilized
 		try {
@@ -432,11 +471,16 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public void setServo(Integer pin, Integer pulseWidthOff) {
 		// since pulseWidthOff can be larger than > 256 it needs to be
 		// sent as 2 bytes
-		log.debug(
-				String.format("setServo %s deviceAddress %s pin %s pulse %s", pin, deviceAddress, pin, pulseWidthOff));
-		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff),
-				(byte) (pulseWidthOff >> 8) };
-		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+		/*
+		 * log.debug(
+		 * String.format("setServo %s deviceAddress %s pin %s pulse %s", pin,
+		 * deviceAddress, pin, pulseWidthOff)); byte[] buffer = { (byte)
+		 * (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff),
+		 * (byte) (pulseWidthOff >> 8) }; controller.i2cWrite(this,
+		 * Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer,
+		 * buffer.length);
+		 */
+		setPWM(pin, 4095, pulseWidthOff);
 	}
 
 	/**
@@ -464,21 +508,24 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			setPWMFreq(servoData.pin, servoData.pwmFreq);
 			servoData.pwmFreqSet = true;
 		}
-		// Move at max speed
-		if (servoData.velocity == -1) {
-			servoData.currentOutput = servo.getTargetOutput();
-			servoData.targetOutput = servo.getTargetOutput();
-			log.debug(String.format("servoWrite %s deviceAddress %s targetOutput %d", servo.getName(), deviceAddress,
-					servo.getTargetOutput()));
-			int pulseWidthOff = SERVOMIN
-					+ (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
-			setServo(servo.getPin(), pulseWidthOff);
-		} else {
-			servoData.targetOutput = servo.getTargetOutput();
-			// Start a thread to handle the speed for this servo
-			if (servoData.isMoving == false) {
-				servoData.speedcontrol = new SpeedControl(servo.getName());
-				servoData.speedcontrol.start();
+
+		if (servoData.isEnergized) {
+			// Move at max speed
+			if (servoData.velocity == -1) {
+				log.debug("Ada move at max speed");
+				servoData.currentOutput = servo.getTargetOutput();
+				servoData.targetOutput = servo.getTargetOutput();
+				log.debug(String.format("servoWrite %s deviceAddress %s targetOutput %f", servo.getName(), deviceAddress, servo.getTargetOutput()));
+				int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
+				setServo(servo.getPin(), pulseWidthOff);
+			} else {
+				log.debug(String.format("Ada move at velocity %s degrees/s", servoData.velocity));
+				servoData.targetOutput = servo.getTargetOutput();
+				// Start a thread to handle the speed for this servo
+				if (servoData.isMoving == false) {
+					servoData.speedcontrol = new SpeedControl(servo.getName());
+					servoData.speedcontrol.start();
+				}
 			}
 		}
 	}
@@ -496,11 +543,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		int pulseWidthOff = (int) (uS * 0.45) - 300;
 		// since pulseWidthOff can be larger than > 256 it needs to be
 		// sent as 2 bytes
-		log.info(String.format("servoWriteMicroseconds %s deviceAddress x%02X pin %s pulse %d", servo.getName(),
-				deviceAddress, pin, pulseWidthOff));
+		log.debug(String.format("servoWriteMicroseconds %s deviceAddress x%02X pin %s pulse %d", servo.getName(), deviceAddress, pin, pulseWidthOff));
 
-		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff),
-				(byte) (pulseWidthOff >> 8) };
+		byte[] buffer = { (byte) (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
 
@@ -576,12 +621,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		servoMap.put(servoName, servoData);
 		invoke("publishAttachedDevice", servoName);
 	}
-	
+
 	public void attach(ServoControl servo) {
 		ServoData servoData = new ServoData();
 		servoData.pin = servo.getPin();
 		servoData.pwmFreqSet = false;
 		servoData.pwmFreq = pwmFreq;
+		servoData.isEnergized = true;
 		servoMap.put(servo.getName(), servoData);
 		invoke("publishAttachedDevice", servo.getName());
 	}
@@ -610,6 +656,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 */
 	@Override
 	public void servoAttachPin(ServoControl servo, int pin) {
+		ServoData servoData = servoMap.get(servo.getName());
+		servoData.pin = pin;
+		servoData.isEnergized = true;
 		servoMoveTo(servo);
 	}
 
@@ -618,8 +667,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 */
 	@Override
 	public void servoDetachPin(ServoControl servo) {
-		int pin = servo.getPin();
-		setPWM(pin, 4096, 0);
+		ServoData servoData = servoMap.get(servo.getName());
+		setPWM(servoData.pin, 4096, 0);
+		servoData.isEnergized = false;
+		
 	}
 
 	@Override
@@ -627,6 +678,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		// TODO Auto-generated method stub.
 		// perhaps cannot do this with Adafruit16CServoDriver
 		// Mats says: It can be done in this service. But not by the board.
+		log.warn("servoSetMaxVelocity not implemented in Adafruit16CServoDriver");
 
 	}
 
@@ -758,12 +810,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public void setPinValue(int pin, double powerOutput) {
 		log.info(String.format("Adafruit16C setPinValue, pin = %s, powerOutput = %s", pin, powerOutput));
 		if (powerOutput < 0) {
-			log.error(String.format("Adafruit16CServoDriver setPinValue. Value below zero (%s). Defaulting to 0.",
-					powerOutput));
+			log.error(String.format("Adafruit16CServoDriver setPinValue. Value below zero (%s). Defaulting to 0.", powerOutput));
 			powerOutput = 0;
 		} else if (powerOutput > 1) {
-			log.error(
-					String.format("Adafruit16CServoDriver setPinValue. Value > 1 (%s). Defaulting to 1", powerOutput));
+			log.error(String.format("Adafruit16CServoDriver setPinValue. Value > 1 (%s). Defaulting to 1", powerOutput));
 			powerOutput = 1;
 		}
 
@@ -847,48 +897,48 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		return servoMap.keySet();
 	}
 
-  /**
-   * we can only have one controller for this control
-   * - so it's easy - just detach
-   */
- 
-  // TODO - this could be Java 8 default interface implementation
-  @Override
-  public void detach(String controllerName) {
-    if (controller == null || !controllerName.equals(controller.getName())) {
-      return;
-    }
-    controller.detach(this);
-    controller = null;
-    this.deviceBus = null;
-    this.deviceAddress = null;
-    isControllerSet = false;
-    broadcastState();
-  }
-  
-  /**
-   * GOOD DESIGN - this method is the same pretty much for all Services
-   * could be a Java 8 default implementation to the interface
-   */
-  @Override
-  public boolean isAttached(String name) {
-    return (controller != null && controller.getName().equals(name));
-  }
+	/**
+	 * we can only have one controller for this control - so it's easy - just
+	 * detach
+	 */
 
-  @Override
-  public Set<String> getAttached() {
-    HashSet<String> ret = new HashSet<String>();
-    if (controller != null){
-      ret.add(controller.getName());
-    }
-    return ret;
-  }
+	// TODO - this could be Java 8 default interface implementation
+	@Override
+	public void detach(String controllerName) {
+		if (controller == null || !controllerName.equals(controller.getName())) {
+			return;
+		}
+		controller.detach(this);
+		controller = null;
+		this.deviceBus = null;
+		this.deviceAddress = null;
+		isControllerSet = false;
+		broadcastState();
+	}
 
+	/**
+	 * GOOD DESIGN - this method is the same pretty much for all Services could
+	 * be a Java 8 default implementation to the interface
+	 */
+	@Override
+	public boolean isAttached(String name) {
+		return (controller != null && controller.getName().equals(name));
+	}
+
+	@Override
+	public Set<String> getAttached() {
+		HashSet<String> ret = new HashSet<String>();
+		if (controller != null) {
+			ret.add(controller.getName());
+		}
+		return ret;
+	}
 
 	@Override
 	public void servoSetAcceleration(ServoControl servo) {
-		// TODO Auto-generated method stub
-		
+		ServoData servoData = servoMap.get(servo.getName());
+		servoData.acceleration = servo.getAcceleration();
+
 	}
 
 }

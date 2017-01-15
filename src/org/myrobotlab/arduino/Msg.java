@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import org.myrobotlab.logging.Level;
 
+import org.myrobotlab.arduino.virtual.MrlComm;
+
 /**
  * <pre>
  * 
@@ -62,10 +64,20 @@ public class Msg {
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
 	public static final int MRLCOMM_VERSION = 53;
+	
+	// send buffer
+  int sendBufferSize = 0;
+  int sendBuffer[] = new int[MAX_MSG_SIZE];
+  
+  // recv buffer
+  int ioCmd[] = new int[MAX_MSG_SIZE];
+  
+  int byteCount = 0;
+  int msgSize = 0;
 
 	// ------ device type mapping constants
 	int method = -1;
-	
+	public boolean debug = false;
 	boolean invoke = true;
 	
 	boolean ackEnabled = true;
@@ -97,7 +109,7 @@ public class Msg {
 	public final static int PUBLISH_MRLCOMM_ERROR = 1;
 	// > getBoardInfo
 	public final static int GET_BOARD_INFO = 2;
-	// < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
+	// < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/activePins/[] deviceSummary
 	public final static int PUBLISH_BOARD_INFO = 3;
 	// > enablePin/address/type/b16 rate
 	public final static int ENABLE_PIN = 4;
@@ -198,7 +210,7 @@ public class Msg {
  */
 	
 	// public void publishMRLCommError(String errorMsg/*str*/){}
-	// public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, int[] deviceSummary/*[]*/){}
+	// public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/){}
 	// public void publishAck(Integer function/*byte*/){}
 	// public void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/){}
 	// public void publishCustomMsg(int[] msg/*[]*/){}
@@ -216,6 +228,10 @@ public class Msg {
 	public Msg(Arduino arduino, SerialDevice serial) {
 		this.arduino = arduino;
 		this.serial = serial;
+	}
+	
+	public void begin(SerialDevice serial){
+	  this.serial = serial;
 	}
 
 	// transient private Msg instance;
@@ -244,9 +260,17 @@ public class Msg {
 	}
 	*/
 	
+	public void setInvoke(boolean b){
+	  invoke = b;
+	}
+	
+	public void processCommand(){
+	  processCommand(ioCmd);
+	}
+	
 	public void processCommand(int[] ioCmd) {
 		int startPos = 0;
-		int method = ioCmd[startPos];
+		method = ioCmd[startPos];
 		switch (method) {
 		case PUBLISH_MRLCOMM_ERROR: {
 			String errorMsg = str(ioCmd, startPos+2, ioCmd[startPos+1]);
@@ -278,12 +302,14 @@ public class Msg {
 			startPos += 2; //b16
 			Integer sram = b16(ioCmd, startPos+1);
 			startPos += 2; //b16
+			Integer activePins = ioCmd[startPos+1]; // bu8
+			startPos += 1;
 			int[] deviceSummary = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
 			startPos += 1 + ioCmd[startPos+1];
 			if(invoke){
-				arduino.invoke("publishBoardInfo",  version,  boardType,  microsPerLoop,  sram,  deviceSummary);
+				arduino.invoke("publishBoardInfo",  version,  boardType,  microsPerLoop,  sram,  activePins,  deviceSummary);
 			} else { 
- 				arduino.publishBoardInfo( version,  boardType,  microsPerLoop,  sram,  deviceSummary);
+ 				arduino.publishBoardInfo( version,  boardType,  microsPerLoop,  sram,  activePins,  deviceSummary);
 			}
 			if(record != null){
 				rxBuffer.append("< publishBoardInfo");
@@ -295,6 +321,8 @@ public class Msg {
 				rxBuffer.append(microsPerLoop);
 				rxBuffer.append("/");
 				rxBuffer.append(sram);
+				rxBuffer.append("/");
+				rxBuffer.append(activePins);
 				rxBuffer.append("/");
 				rxBuffer.append(Arrays.toString(deviceSummary));
 			rxBuffer.append("\n");
@@ -548,7 +576,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("getBoardInfo threw",e);
 	  }
 	}
 
@@ -583,7 +611,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("enablePin threw",e);
 	  }
 	}
 
@@ -612,7 +640,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("setDebug threw",e);
 	  }
 	}
 
@@ -641,7 +669,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("setSerialRate threw",e);
 	  }
 	}
 
@@ -667,7 +695,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("softReset threw",e);
 	  }
 	}
 
@@ -696,7 +724,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("enableAck threw",e);
 	  }
 	}
 
@@ -731,7 +759,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("echo threw",e);
 	  }
 	}
 
@@ -760,7 +788,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("controllerAttach threw",e);
 	  }
 	}
 
@@ -789,7 +817,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("customMsg threw",e);
 	  }
 	}
 
@@ -818,7 +846,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("deviceDetach threw",e);
 	  }
 	}
 
@@ -850,7 +878,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("i2cBusAttach threw",e);
 	  }
 	}
 
@@ -885,7 +913,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("i2cRead threw",e);
 	  }
 	}
 
@@ -920,7 +948,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("i2cWrite threw",e);
 	  }
 	}
 
@@ -958,7 +986,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("i2cWriteRead threw",e);
 	  }
 	}
 
@@ -993,7 +1021,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("neoPixelAttach threw",e);
 	  }
 	}
 
@@ -1037,7 +1065,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("neoPixelSetAnimation threw",e);
 	  }
 	}
 
@@ -1069,7 +1097,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("neoPixelWriteMatrix threw",e);
 	  }
 	}
 
@@ -1101,7 +1129,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("analogWrite threw",e);
 	  }
 	}
 
@@ -1133,7 +1161,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("digitalWrite threw",e);
 	  }
 	}
 
@@ -1162,7 +1190,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("disablePin threw",e);
 	  }
 	}
 
@@ -1188,7 +1216,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("disablePins threw",e);
 	  }
 	}
 
@@ -1220,7 +1248,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("pinMode threw",e);
 	  }
 	}
 
@@ -1252,7 +1280,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("setTrigger threw",e);
 	  }
 	}
 
@@ -1284,7 +1312,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("setDebounce threw",e);
 	  }
 	}
 
@@ -1322,7 +1350,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("servoAttach threw",e);
 	  }
 	}
 
@@ -1354,7 +1382,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("servoAttachPin threw",e);
 	  }
 	}
 
@@ -1383,7 +1411,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("servoDetachPin threw",e);
 	  }
 	}
 
@@ -1415,7 +1443,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("servoSetMaxVelocity threw",e);
 	  }
 	}
 
@@ -1447,7 +1475,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("servoSetVelocity threw",e);
 	  }
 	}
 
@@ -1485,7 +1513,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("servoSweepStart threw",e);
 	  }
 	}
 
@@ -1514,7 +1542,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("servoSweepStop threw",e);
 	  }
 	}
 
@@ -1546,7 +1574,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("servoMoveToMicroseconds threw",e);
 	  }
 	}
 
@@ -1578,7 +1606,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("servoSetAcceleration threw",e);
 	  }
 	}
 
@@ -1610,7 +1638,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("serialAttach threw",e);
 	  }
 	}
 
@@ -1642,7 +1670,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("serialRelay threw",e);
 	  }
 	}
 
@@ -1677,7 +1705,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("ultrasonicSensorAttach threw",e);
 	  }
 	}
 
@@ -1706,7 +1734,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("ultrasonicSensorStartRanging threw",e);
 	  }
 	}
 
@@ -1735,7 +1763,7 @@ public class Msg {
 			}
 
 	  } catch (Exception e) {
-	  			serial.error(e);
+	  			log.error("ultrasonicSensorStopRanging threw",e);
 	  }
 	}
 
@@ -1941,7 +1969,59 @@ public class Msg {
     float f = ByteBuffer.wrap(b).order(ByteOrder.BIG_ENDIAN).getFloat();
     return f;
   }
+  
+  public boolean readMsg() throws Exception {
+    // handle serial data begin
+    int bytesAvailable = serial.available();
+    if (bytesAvailable > 0) {
+      //publishDebug("RXBUFF:" + String(bytesAvailable));
+      // now we should loop over the available bytes .. not just read one by one.
+      for (int i = 0; i < bytesAvailable; i++) {
+        // read the incoming byte:
+        int newByte = serial.read();
+        //publishDebug("RX:" + String(newByte));
+        ++byteCount;
+        // checking first byte - beginning of message?
+        if (byteCount == 1 && newByte != VirtualMsg.MAGIC_NUMBER) {
+          publishError(F("error serial"));
+          // reset - try again
+          byteCount = 0;
+          // return false;
+        }
+        if (byteCount == 2) {
+          // get the size of message
+          // todo check msg < 64 (MAX_MSG_SIZE)
+          if (newByte > 64) {
+            // TODO - send error back
+            byteCount = 0;
+            continue; // GroG - I guess  we continue now vs return false on error conditions?
+          }
+          msgSize = newByte;
+        }
+        if (byteCount > 2) {
+          // fill in msg data - (2) headbytes -1 (offset)
+          ioCmd[byteCount - 3] = newByte;
+        }
+        // if received header + msg
+        if (byteCount == 2 + msgSize) {
+          // we've reach the end of the command, just return true .. we've got it
+          byteCount = 0;
+          return true;
+        }
+      }
+    } // if Serial.available
+      // we only partially read a command.  (or nothing at all.)
+    return false;
+  }
 
+  String F(String msg) {
+    return msg;
+  }
+  
+  public void publishError(String error) {
+    log.error(error);
+  }
+  
 	void write(int b8) throws Exception {
 
 		if ((b8 < 0) || (b8 > 255)) {
@@ -2128,6 +2208,16 @@ public class Msg {
 	public int getMethod(){
 	  return method;
 	}
+	
+
+  public void add(int value) {
+    sendBuffer[sendBufferSize] = (value & 0xFF);
+    sendBufferSize += 1;
+  }
+  
+  public int[] getBuffer() {    
+    return sendBuffer;
+  }
 	
 	public static void main(String[] args) {
 		try {
