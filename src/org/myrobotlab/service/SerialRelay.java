@@ -152,4 +152,28 @@ public class SerialRelay extends Service implements SerialDevice, DeviceControl 
     controller = null;
   }
 
+  @Override
+  public void clear() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void setTimeout(int timeoutMs) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void flush() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public int available() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
 }

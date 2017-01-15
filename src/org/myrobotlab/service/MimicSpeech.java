@@ -184,7 +184,10 @@ public class MimicSpeech extends Service implements TextListener, SpeechSynthesi
 	
 	public static void main(String[] args) throws Exception {
 		MimicSpeech mimic = (MimicSpeech)Runtime.createAndStart("mimic", "MimicSpeech");
+		mimic.speakBlocking("test me");
 		mimic.speakBlocking("Hello world");
+		mimic.speakBlocking("i am mimic");
+		mimic.speakBlocking("to be or not to be that is the question weather tis nobler in the mind to suffer the slings and arrows of outrageous fortune or to take arms against a sea of troubles");
 	}
 
 }

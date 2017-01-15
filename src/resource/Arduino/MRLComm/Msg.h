@@ -93,7 +93,7 @@ public:
 
 	// generated send (PC <-- MrlComm) methods
 	void publishMRLCommError(const char* errorMsg,  byte errorMsgSize);
-	void publishBoardInfo( byte version,  byte boardType,  int microsPerLoop,  int sram, const byte* deviceSummary,  byte deviceSummarySize);
+	void publishBoardInfo( byte version,  byte boardType,  int microsPerLoop,  int sram,  byte activePins, const byte* deviceSummary,  byte deviceSummarySize);
 	void publishAck( byte function);
 	void publishEcho( float myFloat,  byte myByte,  float secondFloat);
 	void publishCustomMsg(const byte* msg,  byte msgSize);

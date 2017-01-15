@@ -1,8 +1,6 @@
 #ifndef MrlI2cBus_h
 #define MrlI2cBus_h
 
-
-#define WIRE Wire
 #include <Wire.h>
 
 /**

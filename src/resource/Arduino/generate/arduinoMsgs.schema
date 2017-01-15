@@ -28,7 +28,7 @@
 # Arduino Diagnostics and Status
 < publishMRLCommError/str errorMsg
 > getBoardInfo
-< publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
+< publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/activePins/[] deviceSummary
 # removed - for simplicity, merged data into BoardInfo
 # < publishBoardStatus/b16 microsPerLoop/b16 sram/[] deviceSummary
 # > enableBoardInfo/bool enabled # simplified - just goes to Arduino-Javaland now

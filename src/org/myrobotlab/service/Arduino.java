@@ -401,7 +401,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     }
     relay.attach(controller, this, controllerAttachAs);
     msg = new Msg(this, relay);
-    msg.softReset(); // needed because there is no serial connect
+    msg.softReset(); // needed because there is no serial connect <- GroG says - this is heavy handed no?
+    enableBoardInfo(true); // start the heartbeat getBoardInfo
     msg.getBoardInfo();
     log.info("waiting for boardInfo lock..........");
     synchronized (boardInfo) {
@@ -483,6 +484,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // and this msg along with the ack will be ignored
       // so we turn of ack'ing locally
       msg.enableAcks(false);
+      enableBoardInfo(true); // start the heartbeat getBoardInfo
       msg.getBoardInfo();
       
 
@@ -635,6 +637,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   public void disconnect() {
+    enableBoardInfo(false);
     // boardInfo is not valid after disconnect
     // because we might be connecting to a different Arduino
     boardInfo.reset();
@@ -1254,6 +1257,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   @Override
   public String onDisconnect(String portName) {
     info("%s disconnected from %s", getName(), portName);
+    enableAck(false);
     return portName;
   }
 
@@ -1331,7 +1335,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
-  public BoardInfo publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, int[] deviceSummary/*[]*/) {
+  public BoardInfo publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins, int[] deviceSummary/*[]*/) {
     long now = System.currentTimeMillis();
     boolean broadcast = false;
     if (version != boardInfo.getVersion() || boardType != boardInfo.getBoardType()) {
@@ -1341,6 +1345,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     boardInfo.setMicrosPerLoop(microsPerLoop);
     boardInfo.setType(boardType);
     boardInfo.setSram(sram);
+    boardInfo.setActivePins(activePins);
     boardInfo.setDeviceSummary(arrayToDeviceSummary(deviceSummary));
     boardInfo.heartbeatMs = now - boardInfoRequestTs;
 

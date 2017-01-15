@@ -5,9 +5,9 @@
 MrlI2CBus::MrlI2CBus(int deviceId) :
 		Device(deviceId, DEVICE_TYPE_I2C) {
 	if (TWCR == 0) { //// do this check so that Wire only gets initialized once
-		WIRE.begin();
+		Wire.begin();
 	    // Force 400 KHz i2c
-		WIRE.setClock(400000L);
+		Wire.setClock(400000L);
 	}
 }
 
@@ -19,11 +19,11 @@ bool MrlI2CBus::attach(byte bus) {
 // I2CWRITE | DEVICE_INDEX | I2CADDRESS | DATASIZE | DATA.....
 void MrlI2CBus::i2cWrite(byte deviceAddress, byte dataSize, const byte*data) {
 
-	WIRE.beginTransmission(deviceAddress);    // address to the i2c device
+	Wire.beginTransmission(deviceAddress);    // address to the i2c device
 	for (int i = 0; i < dataSize; i++) { // data to write
-		WIRE.write(data[i]);
+		Wire.write(data[i]);
 	}
-	WIRE.endTransmission();
+	Wire.endTransmission();
 }
 
 // I2CREAD | DEVICE_INDEX | I2CADDRESS | DATASIZE
@@ -33,7 +33,7 @@ void MrlI2CBus::i2cWrite(byte deviceAddress, byte dataSize, const byte*data) {
 // DATA_SIZE = The number of bytes to read from the i2c device
 void MrlI2CBus::i2cRead(byte deviceAddress, byte size) {
 
-	int answer = WIRE.requestFrom(deviceAddress, size); // reqest a number of bytes to read
+	int answer = Wire.requestFrom(deviceAddress, size); // reqest a number of bytes to read
 
 	for (int i = 0; i < answer; i++) {
 		msg->add(Wire.read());
@@ -49,10 +49,10 @@ void MrlI2CBus::i2cRead(byte deviceAddress, byte size) {
 // I2CADDRESS = The address of the i2c device
 // DATA_SIZE = The number of bytes to read from the i2c device
 void MrlI2CBus::i2cWriteRead(byte deviceAddress, byte readSize, byte writeValue) {
-	WIRE.beginTransmission(writeValue); // address to the i2c device
-	WIRE.write(writeValue);             // device memory address to read from
-	WIRE.endTransmission();
-	int answer = WIRE.requestFrom(deviceAddress, readSize); // reqest a number of bytes to read
+	Wire.beginTransmission(writeValue); // address to the i2c device
+	Wire.write(writeValue);             // device memory address to read from
+	Wire.endTransmission();
+	int answer = Wire.requestFrom(deviceAddress, readSize); // reqest a number of bytes to read
 
 	for (int i = 0; i < answer; i++) {
 		msg->add(Wire.read());
