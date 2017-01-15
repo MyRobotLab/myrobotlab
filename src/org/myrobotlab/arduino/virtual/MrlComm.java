@@ -750,4 +750,8 @@ public class MrlComm {
     return msg;
   }
 
+  public void begin(org.myrobotlab.service.Serial serial) {
+    
+  }
+
 }
