@@ -28,7 +28,7 @@
 #define PUBLISH_MRLCOMM_ERROR 1
 // > getBoardInfo
 #define GET_BOARD_INFO 2
-// < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
+// < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/activePins/[] deviceSummary
 #define PUBLISH_BOARD_INFO 3
 // > enablePin/address/type/b16 rate
 #define ENABLE_PIN 4

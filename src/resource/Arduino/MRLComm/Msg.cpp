@@ -141,14 +141,15 @@ void Msg::publishMRLCommError(const char* errorMsg,  byte errorMsgSize) {
   reset();
 }
 
-void Msg::publishBoardInfo( byte version,  byte boardType,  int microsPerLoop,  int sram, const byte* deviceSummary,  byte deviceSummarySize) {
+void Msg::publishBoardInfo( byte version,  byte boardType,  int microsPerLoop,  int sram,  byte activePins, const byte* deviceSummary,  byte deviceSummarySize) {
   write(MAGIC_NUMBER);
-  write(1 + 1 + 1 + 2 + 2 + (1 + deviceSummarySize)); // size
+  write(1 + 1 + 1 + 2 + 2 + 1 + (1 + deviceSummarySize)); // size
   write(PUBLISH_BOARD_INFO); // msgType = 3
   write(version);
   write(boardType);
   writeb16(microsPerLoop);
   writeb16(sram);
+  write(activePins);
   write((byte*)deviceSummary, deviceSummarySize);
   flush();
   reset();

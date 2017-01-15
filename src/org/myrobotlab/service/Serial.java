@@ -938,7 +938,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
 	public void reset() {
 		clear();
-		setTimeout(null);
+		// setTimeout(null);
 		rxCount = 0;
 		txCount = 0;
 	}
@@ -964,9 +964,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 	 * @param timeout
 	 * @return
 	 */
-	public Integer setTimeout(Integer timeout) {
+	@Override
+	public void setTimeout(int timeout) {
 		timeoutMS = timeout;
-		return timeout;
 	}
 
 	public void stopRecording() {
@@ -1327,9 +1327,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 		return lastPortName;
 	}
 
-  @Override
-  public void setTimeout(int timeoutMs) {
-  }
 
   @Override
   public void flush() {

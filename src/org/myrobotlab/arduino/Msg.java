@@ -109,7 +109,7 @@ public class Msg {
 	public final static int PUBLISH_MRLCOMM_ERROR = 1;
 	// > getBoardInfo
 	public final static int GET_BOARD_INFO = 2;
-	// < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
+	// < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/activePins/[] deviceSummary
 	public final static int PUBLISH_BOARD_INFO = 3;
 	// > enablePin/address/type/b16 rate
 	public final static int ENABLE_PIN = 4;
@@ -210,7 +210,7 @@ public class Msg {
  */
 	
 	// public void publishMRLCommError(String errorMsg/*str*/){}
-	// public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, int[] deviceSummary/*[]*/){}
+	// public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/){}
 	// public void publishAck(Integer function/*byte*/){}
 	// public void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/){}
 	// public void publishCustomMsg(int[] msg/*[]*/){}
@@ -302,12 +302,14 @@ public class Msg {
 			startPos += 2; //b16
 			Integer sram = b16(ioCmd, startPos+1);
 			startPos += 2; //b16
+			Integer activePins = ioCmd[startPos+1]; // bu8
+			startPos += 1;
 			int[] deviceSummary = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
 			startPos += 1 + ioCmd[startPos+1];
 			if(invoke){
-				arduino.invoke("publishBoardInfo",  version,  boardType,  microsPerLoop,  sram,  deviceSummary);
+				arduino.invoke("publishBoardInfo",  version,  boardType,  microsPerLoop,  sram,  activePins,  deviceSummary);
 			} else { 
- 				arduino.publishBoardInfo( version,  boardType,  microsPerLoop,  sram,  deviceSummary);
+ 				arduino.publishBoardInfo( version,  boardType,  microsPerLoop,  sram,  activePins,  deviceSummary);
 			}
 			if(record != null){
 				rxBuffer.append("< publishBoardInfo");
@@ -319,6 +321,8 @@ public class Msg {
 				rxBuffer.append(microsPerLoop);
 				rxBuffer.append("/");
 				rxBuffer.append(sram);
+				rxBuffer.append("/");
+				rxBuffer.append(activePins);
 				rxBuffer.append("/");
 				rxBuffer.append(Arrays.toString(deviceSummary));
 			rxBuffer.append("\n");

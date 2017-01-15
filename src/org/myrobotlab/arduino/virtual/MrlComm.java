@@ -449,7 +449,7 @@ public class MrlComm {
     }
 
     long now = micros();
-    msg.publishBoardInfo(MRLCOMM_VERSION, boardInfo.getBoardType(), (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), deviceSummary);
+    msg.publishBoardInfo(MRLCOMM_VERSION, boardInfo.getBoardType(), (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary);
     lastBoardInfoUs = now;
     loopCount = 0;
   }
