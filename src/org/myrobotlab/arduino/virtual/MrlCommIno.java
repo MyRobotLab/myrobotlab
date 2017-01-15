@@ -77,10 +77,10 @@ public class MrlCommIno {
    */
   public void setup() {
 
-    // Serial.begin(115200);
+    //Serial.begin(115200);
 
     // start with standard serial & rate
-    // mrlComm.begin(Serial);
+    mrlComm.begin(Serial);
   }
 
   /**
