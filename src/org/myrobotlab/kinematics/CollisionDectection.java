@@ -3,6 +3,7 @@
  */
 package org.myrobotlab.kinematics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -41,9 +42,9 @@ public class CollisionDectection {
     collision = false;
     for (CollisionItem item : items.values()){
       //vect1 = vector of the line between the extremity of the first item
-      double[] vect1 = item.getVector();
+      //double[] vect1 = item.getVector();
       //par1 = parametric formula of vect1
-      double[][] par1 = item.calcPar(vect1, 1);//[x,y,z][c,t,k]
+      //double[][] par1 = item.calcPar(vect1, 1);//[x,y,z][c,t,k]
       item.clearDone();
       for (CollisionItem citem : items.values()) {
         if (citem.getName().equals(item.getName())) {
@@ -217,4 +218,17 @@ public class CollisionDectection {
   public double[] getCollisionLocation(){
   	return collisionLocation;
   }
+
+	public void removeKinectObject() {
+		ArrayList<String> toRemove = new ArrayList<String>();
+		for ( CollisionItem ci : items.values()) {
+			if (ci.isFromKinect()) {
+				toRemove.add(ci.name);
+			}
+		}
+		for (int i = 0; i < toRemove.size(); i++) {
+			items.remove(toRemove.get(i));
+		}
+		
+	}
 }

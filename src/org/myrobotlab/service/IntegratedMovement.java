@@ -14,6 +14,7 @@ import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.kinematics.Map3D;
+import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
@@ -65,7 +66,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   private boolean geneticComputeSimulation = false;
 
   private HashMap<String, Servo> currentServos = new HashMap<String, Servo>();
-  private HashMap<String, HashMap<String, Servo>> servos = new HashMap<String, HashMap<String, Servo>>();
+  //private HashMap<String, HashMap<String, Servo>> servos = new HashMap<String, HashMap<String, Servo>>();
   private double time;
   
   private boolean stopMoving = false;		
@@ -96,6 +97,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 	
 	private Map3D map3d = new Map3D();
 	private String kinectName = "kinect";
+	private boolean ProcessKinectData = false;
   
   public IntegratedMovement(String n) {
     super(n);
@@ -656,6 +658,12 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     return addObject(new Point(0, 0, 0, 0, 0, 0), new Point(0, 0, 0, 0, 0, 0), name, radius);
   }
   
+  public String addObject(HashMap<Integer[],Map3DPoint> cloudMap) {
+  	CollisionItem item = new CollisionItem(cloudMap);
+  	collisionItems.addItem(item);
+  	return item.getName();
+  }
+  
   public void clearObject(){
     collisionItems.clearItem();
   }
@@ -802,14 +810,32 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 //		PVector[] depthDataRW = data.depthMapRW;
 //		log.info("{}",depthDataRW[320+120*640]);
   	if (this.inbox.size() < 50) {
-  		long a = System.currentTimeMillis();
-  		log.info("start {}",a);
-  		map3d.processDepthMap(data);
-  		long b = System.currentTimeMillis();
-  		log.info("end {} - {} - {}",b, b-a, this.inbox.size());
+  		if (ProcessKinectData) {
+  			ProcessKinectData = false;
+	  		long a = System.currentTimeMillis();
+	  		log.info("start {}",a);
+	  		map3d.processDepthMap(data);
+	  		removeKinectObject();
+	  		ArrayList<HashMap<Integer[],Map3DPoint>> object = map3d.getObject();
+	  		for (int i = 0; i < object.size(); i++) {
+	  			addObject(object.get(i));
+	  		}
+	  		long b = System.currentTimeMillis();
+	  		log.info("end {} - {} - {}",b, b-a, this.inbox.size());
+  		}
   	}
   }
-  		
+
+  private void removeKinectObject() {
+		collisionItems.removeKinectObject();
+		
+	}
+
+
+	public void processKinectData(){
+  	ProcessKinectData = true;
+  }
+  
   public void setKinectName(String kinectName) {
   	this.kinectName = kinectName;
   }
