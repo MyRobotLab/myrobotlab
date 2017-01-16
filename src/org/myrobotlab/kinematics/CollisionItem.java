@@ -136,7 +136,8 @@ public class CollisionItem {
   		origin = origin.add(delta);
   		end = end.subtract(delta);
   	}
-  	else if (backpoint.contains(closestPointToCornerType[0]) && backpoint.contains(closestPointToCornerType[1]) && backpoint.contains(closestPointToCornerType[2])){
+  	else {
+  	//else if (backpoint.contains(closestPointToCornerType[0]) && backpoint.contains(closestPointToCornerType[1]) && backpoint.contains(closestPointToCornerType[2])){
   		//cylinder seen from the side (both end and origin at similar distance from the kinect
   		//can be horizontal or vertical need to test wich fit the best
   		if (distanceToCorner[8] < distanceToCorner[9]) {
@@ -150,12 +151,12 @@ public class CollisionItem {
     		radius = Math.max(((max[0]-min[0])/2), max[1]-min[1]);
   		}
   	}
-  	else { //other shape... for now doing cylinder seen from end side
-  		//origin is in the front (minY), radius = max(maxX-minX, maxZ-minZ), end = maxY
-  		origin = new Point((double)((max[0]-min[0])/2)+min[0],(double)min[1],(double)((max[2]-min[2])/2)+min[2],0,0,0);
-  		end = new Point((double)((max[0]-min[0])/2)+min[0],(double)max[1],(double)((max[2]-min[2])/2)+min[2],0,0,0);
-  		radius = Math.max(((max[0]-min[0])/2), (max[2]-min[2])/2);
-  	}
+//  	else { //other shape... for now doing cylinder seen from end side
+//  		//origin is in the front (minY), radius = max(maxX-minX, maxZ-minZ), end = maxY
+//  		origin = new Point((double)((max[0]-min[0])/2)+min[0],(double)min[1],(double)((max[2]-min[2])/2)+min[2],0,0,0);
+//  		end = new Point((double)((max[0]-min[0])/2)+min[0],(double)max[1],(double)((max[2]-min[2])/2)+min[2],0,0,0);
+//  		radius = Math.max(((max[0]-min[0])/2), (max[2]-min[2])/2);
+//  	}
   	fromKinect = true;
   	Log.info(name);
   	Log.info(" origin ", origin.getX(), ",", origin.getY(), ",", origin.getZ());
