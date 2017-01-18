@@ -14,14 +14,15 @@ import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.kinematics.Map3D;
+import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;
-import org.myrobotlab.openni.PVector;
 import org.myrobotlab.service.Servo.IKData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.PointsListener;
@@ -65,7 +66,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   private boolean geneticComputeSimulation = false;
 
   private HashMap<String, Servo> currentServos = new HashMap<String, Servo>();
-  private HashMap<String, HashMap<String, Servo>> servos = new HashMap<String, HashMap<String, Servo>>();
+  //private HashMap<String, HashMap<String, Servo>> servos = new HashMap<String, HashMap<String, Servo>>();
   private double time;
   
   private boolean stopMoving = false;		
@@ -95,6 +96,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 	private OpenNi openni = null;
 	
 	private Map3D map3d = new Map3D();
+	private String kinectName = "kinect";
+	private boolean ProcessKinectData = false;
   
   public IntegratedMovement(String n) {
     super(n);
@@ -104,7 +107,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public void changeArm(String arm) {
     if (arms.containsKey(arm)) {
       currentArm = arms.get(arm);
-      currentServos = servos.get(arm);
+      //currentServos = servos.get(arm);
     }
     else {
       log.info("IK service have no data for {}", arm);
@@ -190,7 +193,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     }
     else if (computeMethod == IK_COMPUTE_METHOD_GENETIC_ALGORYTHM) {
       goTo = p;
-      GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, currentArm.getNumLinks(), 8, geneticRecombinationRate, geneticMutationRate);
+      GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, currentArm.getNumLinks(), 11, geneticRecombinationRate, geneticMutationRate);
       //HashMap<Integer,Integer> lastIteration = new HashMap<Integer,Integer>();
       int retry = 0;
       stopMoving = false;
@@ -204,13 +207,13 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
         currentArm = simulateMove(bestFit.getDecodedGenome());
         for (int i = 0; i < currentArm.getNumLinks(); i++){
           Servo servo = currentServos.get(currentArm.getLink(i).getName());
-          while (servo.getCurrentPos().intValue() != servo.getPos()){
+          while (servo.isMoving()){
           	sleep(10);
           }
         }
         for (int i = 0; i < currentArm.getNumLinks(); i++){
           Servo servo = currentServos.get(currentArm.getLink(i).getName());
-          servo.moveTo(currentArm.getLink(i).getPositionValueDeg().intValue());
+          servo.moveTo(currentArm.getLink(i).getPositionValueDeg());
         }
         log.info("moving to {}", currentPosition());
         if (collisionItems.haveCollision()) {
@@ -417,79 +420,16 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public static void main(String[] args) throws Exception {
     LoggingFactory.init(Level.INFO);
 
-    Runtime.createAndStart("python", "Python");
-    Runtime.createAndStart("gui", "GUIService");
+    //Runtime.createAndStart("python", "Python");
+    //Runtime.createAndStart("gui", "GUIService");
 
-    InverseKinematics3D inversekinematics = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
-    // InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
-    inversekinematics.setCurrentArm(InMoovArm.getDHRobotArm());
-    //
-    inversekinematics.getCurrentArm().setIk3D(inversekinematics);
-    // Create a new DH Arm.. simpler for initial testing.
-    // d , r, theta , alpha
-    // DHRobotArm testArm = new DHRobotArm();
-    // testArm.addLink(new DHLink("one" ,400,0,0,90));
-    // testArm.addLink(new DHLink("two" ,300,0,0,90));
-    // testArm.addLink(new DHLink("three",200,0,0,0));
-    // testArm.addLink(new DHLink("two", 0,0,0,0));
-    // inversekinematics.setCurrentArm(testArm);
-    // set up our input translation/rotation
-    //
-    // if (false) {
-    // double dx = 400.0;
-    // double dy = -600.0;
-    // double dz = -350.0;
-    // double roll = 0.0;
-    // double pitch = 0.0;
-    // double yaw = 0.0;
-    // inversekinematics.createInputMatrix(dx, dy, dz, roll, pitch, yaw);
-    // }
-
-    // Rest position...
-    // Point rest = new Point(100,-300,0,0,0,0);
-    // rest.
-    // inversekinematics.moveTo(rest);
-
-    // LeapMotion lm = (LeapMotion)Runtime.start("leap", "LeapMotion");
-    // lm.addPointsListener(inversekinematics);
-
-    boolean attached = true;
-    if (attached) {
-      // set up the left inmoov arm
-      InMoovArm leftArm = (InMoovArm) Runtime.start("leftArm", "InMoovArm");
-      leftArm.connect("COM21");
-      // leftArm.omoplate.setMinMax(0, 180);
-      // attach the publish joint angles to the on JointAngles for the inmoov
-      // arm.
-      inversekinematics.addListener("publishJointAngles", leftArm.getName(), "onJointAngles");
-    }
-
-    // Runtime.createAndStart("gui", "GUIService");
-    // OpenCV cv1 = (OpenCV)Runtime.createAndStart("cv1", "OpenCV");
-    // OpenCVFilterAffine aff1 = new OpenCVFilterAffine("aff1");
-    // aff1.setAngle(270);
-    // aff1.setDx(-80);
-    // aff1.setDy(-80);
-    // cv1.addFilter(aff1);
-    //
-    // cv1.setCameraIndex(0);
-    // cv1.capture();
-    // cv1.undockDisplay(true);
-
-    /*
-     * GUIService gui = new GUIService("gui"); gui.startService();
-     */
-
-    Joystick joystick = (Joystick) Runtime.start("joystick", "Joystick");
-    joystick.setController(2);
-
-    // joystick.startPolling();
-
-    // attach the joystick input to the ik3d service.
-    joystick.addInputListener(inversekinematics);
-
-    Runtime.start("webgui", "WebGui");
-    Runtime.start("log", "Log");
+    HashMap<String,Integer> test = new HashMap<String,Integer>();
+    test.put("x", 43);
+    Integer y = test.get("x");
+    y++;
+    test.put("x",y);
+    Integer z = test.get("x");
+    log.info("Value is {}",z);
   }
 
   @Override
@@ -536,6 +476,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public void setDHLink (String name, double d, double theta, double r, double alpha) {
     DHLink dhLink = new DHLink(name, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
     currentArm.addLink(dhLink);
+    arms.put(currentArm.name, currentArm);
   }
   
   public void setDHLink (Servo servo, double d, double theta, double r, double alpha) {
@@ -546,6 +487,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     dhLink.setMin(MathUtils.degToRad(theta + Math.min(servo.getMin(), servo.getMax())));
     dhLink.setMax(MathUtils.degToRad(theta + Math.max(servo.getMax(), servo.getMin())));
     currentArm.addLink(dhLink);
+    arms.put(currentArm.name, currentArm);
   }
   
   public void setDHLink (String armName, String name, double d, double theta, double r, double alpha) {
@@ -556,10 +498,12 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public void setDHLink (String armName, Servo servo, double d, double theta, double r, double alpha) {
     changeArm(armName);
     setDHLink(servo, d, theta, r, alpha);
+    arms.put(currentArm.name, currentArm);
   }  
   
   public void setNewDHRobotArm(String name) {
     currentArm = new DHRobotArm();
+    currentArm.name = name;
   	arms.put(name, currentArm);
   }
   
@@ -620,18 +564,30 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   // convert the genetic algorythm to the data we want to use
   @Override
   public void decode(ArrayList<Chromosome> chromosomes) {
-    // TODO Auto-generated method stub
     for (Chromosome chromosome : chromosomes ){
       int pos=0;
       ArrayList<Object>decodedGenome = new ArrayList<Object>();
       for (DHLink link: currentArm.getLinks()){
+      	Servo servo = currentServos.get(link.getName());
+      	Mapper map = null;
+      	if(servo.getMin() == servo.getMax()) {
+      		decodedGenome.add(servo.getMin());
+      		continue;
+      	}
+      	else {
+      		map = new Mapper(0,2047,servo.getMin(),servo.getMax());
+      	}
         Double value=0.0;
-        for (int i= pos; i< chromosome.getGenome().length() && i < pos+8; i++){
+        for (int i= pos; i< chromosome.getGenome().length() && i < pos+11; i++){
           if(chromosome.getGenome().charAt(i) == '1') value += 1 << i-pos; 
         }
-        pos += 8;
-        if (value < MathUtils.radToDeg(link.getMin()-link.getInitialTheta())) value = link.getPositionValueDeg();
-        if (value > MathUtils.radToDeg(link.getMax()-link.getInitialTheta())) value = link.getPositionValueDeg();
+        pos += 11;
+        value = map.calcOutput(value);
+        if (value.isNaN()) {
+        	value = link.getPositionValueDeg();
+        }
+        //if (value < MathUtils.radToDeg(link.getMin()-link.getInitialTheta())) value = link.getPositionValueDeg();
+        //if (value > MathUtils.radToDeg(link.getMax()-link.getInitialTheta())) value = link.getPositionValueDeg();
         decodedGenome.add(value);
       }
       chromosome.setDecodedGenome(decodedGenome);
@@ -684,7 +640,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       for (int i = 1; i < jp.length;  i++){
         //log.info("jp:{} {} - {} - {}", newArm.getLink(i-1).getName(), ((Double)jp[i][0]).intValue(), ((Double)jp[i][1]).intValue(), ((Double)jp[i][2]).intValue());
       }
-      time += 0.2;
+      time += 0.1;
     }
     return oldArm;
   }
@@ -700,6 +656,12 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
   public String addObject(String name, double radius) {
     return addObject(new Point(0, 0, 0, 0, 0, 0), new Point(0, 0, 0, 0, 0, 0), name, radius);
+  }
+  
+  public String addObject(HashMap<Integer[],Map3DPoint> cloudMap) {
+  	CollisionItem item = new CollisionItem(cloudMap);
+  	collisionItems.addItem(item);
+  	return item.getName();
   }
   
   public void clearObject(){
@@ -739,10 +701,15 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
   
   public void onIKServoEvent(IKData data) {
-    for (DHLink l: currentArm.getLinks()) {
-      if (l.getName().equals(data.name)){
-        l.addPositionValue(data.pos.doubleValue());
-      }
+  	for (DHRobotArm a : arms.values()) {
+	    for (DHLink l: a.getLinks()) {
+	      if (l.getName().equals(data.name)){
+	        l.addPositionValue(data.pos.doubleValue());
+	      }
+	    }
+    }
+    if (openni != null) {
+    	map3d.updateKinectPosition(currentPosition(kinectName));
     }
   }
   
@@ -830,7 +797,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public OpenNi startOpenNI() throws Exception {
     if (openni == null) {
       openni = (OpenNi) startPeer("openni");
-      openni.startUserTracking();
+     // openni.startUserTracking();
+      openni.start3DData();
+      map3d.updateKinectPosition(currentPosition(kinectName));
       this.subscribe(openni.getName(), "publishOpenNIData", this.getName(), "onOpenNiData");
     }
     return openni;
@@ -840,7 +809,34 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 //		int[] depthData = data.depthMap;
 //		PVector[] depthDataRW = data.depthMapRW;
 //		log.info("{}",depthDataRW[320+120*640]);
-  	map3d.processDepthMap(data);
+  	if (this.inbox.size() < 50) {
+  		if (ProcessKinectData) {
+  			ProcessKinectData = false;
+	  		long a = System.currentTimeMillis();
+	  		log.info("start {}",a);
+	  		map3d.processDepthMap(data);
+	  		removeKinectObject();
+	  		ArrayList<HashMap<Integer[],Map3DPoint>> object = map3d.getObject();
+	  		for (int i = 0; i < object.size(); i++) {
+	  			addObject(object.get(i));
+	  		}
+	  		long b = System.currentTimeMillis();
+	  		log.info("end {} - {} - {}",b, b-a, this.inbox.size());
+  		}
+  	}
   }
-  		
+
+  private void removeKinectObject() {
+		collisionItems.removeKinectObject();
+		
+	}
+
+
+	public void processKinectData(){
+  	ProcessKinectData = true;
+  }
+  
+  public void setKinectName(String kinectName) {
+  	this.kinectName = kinectName;
+  }
 }

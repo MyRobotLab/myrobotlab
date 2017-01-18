@@ -108,7 +108,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 		@Override
 		public void run() {
-			log.debug("task %s running - next run %s", taskName, MathUtils.msToString(interval));
+			//info("task %s running - next run %s", taskName, MathUtils.msToString(interval));
 			getInbox().add(msg);
 
 			if (interval > 0) {
@@ -118,7 +118,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
 				Timer timer = tasks.get(taskName);
 				if (timer != null) {
 					// timer = new Timer(String.format("%s.timer", getName()));
-					timer.schedule(t, interval);
+					try{
+						timer.schedule(t, interval);
+					}
+					catch(IllegalStateException e){
+					}
 				}
 			}
 		}
