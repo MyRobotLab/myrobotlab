@@ -98,7 +98,6 @@ public:
 	void publishEcho( float myFloat,  byte myByte,  float secondFloat);
 	void publishCustomMsg(const byte* msg,  byte msgSize);
 	void publishI2cData( byte deviceId, const byte* data,  byte dataSize);
-	void publishAttachedDevice( byte deviceId, const char* deviceName,  byte deviceNameSize);
 	void publishDebug(const char* debugMsg,  byte debugMsgSize);
 	void publishPinArray(const byte* data,  byte dataSize);
 	void publishSerialData( byte deviceId, const byte* data,  byte dataSize);
