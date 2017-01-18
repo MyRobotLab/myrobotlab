@@ -203,6 +203,7 @@ public class Servo extends Service implements ServoControl {
    * moveTo if desired
    */
   boolean isEventsEnabled = false;
+  boolean isIKEventEnabled = false;
 
   double maxVelocity = -1;
 
@@ -222,6 +223,7 @@ public class Servo extends Service implements ServoControl {
   boolean autoAttach = false;
 
   public long defaultDetachDelay = 10000;
+	private boolean moving;
 
   class IKData {
     String name;
@@ -246,7 +248,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   public void addIKServoEventListener(NameProvider service) {
-    eventsEnabled(true);
+    isIKEventEnabled = true;
     addListener("publishIKServoEvent", service.getName(), "onIKServoEvent");
   }
 
@@ -364,15 +366,20 @@ public class Servo extends Service implements ServoControl {
     controller.servoMoveTo(this);
     lastActivityTime = System.currentTimeMillis();
 
-    if (autoAttach) {
-      if (velocity != -1) {
-        this.addTask("DetachServo", 250, "autoDetach");
-      }
-    }
+	  if (velocity > 0.0) {
+	  	moving = true;
+	  	if (this.getTasks().containsKey("EndMoving")){
+	  		purgeTask("endMoving");
+	  	}
+	    addTask("EndMoving", timeToMove(), "endMoving");
+	  }
 
     if (isEventsEnabled) {
       // update others of our position change
       invoke("publishServoEvent", targetOutput);
+      broadcastState();
+    }
+    if (isIKEventEnabled) {
       IKData data = new IKData();
       data.name = getName();
       data.pos = targetPos;
@@ -886,6 +893,19 @@ public class Servo extends Service implements ServoControl {
       return currentPos;
     }
   }
+  
+  /**
+   * return time to move the servo to the target position, in ms
+   * @return
+   */
+  int timeToMove() {
+  	if (velocity <= 0.0) {
+  		return 1;
+  	}
+  	double delta = Math.abs(mapper.calcOutput(targetPos) - mapper.calcOutput(lastPos));
+  	double time = delta / velocity * 1000;
+  	return (int)time;
+  }
 
   /**
    * enableAutoAttach will attach a servo when ask to move and detach it when
@@ -904,16 +924,16 @@ public class Servo extends Service implements ServoControl {
   }
 
   public void autoDetach() {
-    if (getCurrentPos().intValue() == targetPos) { // servo reach position
+    if (getCurrentPos() == targetPos) { // servo reach position
       detach();
-      purgeTask("DetachServo");
+      //purgeTask("DetachServo");
       return;
     }
     if (System.currentTimeMillis() - lastActivityTime > defaultDetachDelay) { // default
                                                                               // detach
                                                                               // delay
       detach();
-      purgeTask("DetachServo");
+      //purgeTask("DetachServo");
     }
   }
 
@@ -937,4 +957,16 @@ public class Servo extends Service implements ServoControl {
     return targetOutput;
   }
 
+  public void endMoving(){
+  	if (autoAttach){
+  		detach();
+  	}
+  	moving = false;
+ 		purgeTask("EndMoving");
+  }
+
+	public boolean isMoving() {
+		return moving;
+	}
+  
 }
