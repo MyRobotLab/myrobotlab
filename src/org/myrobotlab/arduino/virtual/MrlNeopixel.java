@@ -1,11 +1,12 @@
 package org.myrobotlab.arduino.virtual;
 
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.service.VirtualArduino;
 
 public class MrlNeopixel extends Device {
 
-  public MrlNeopixel(int deviceId) {
-    super(deviceId, Msg.DEVICE_TYPE_NEOPIXEL);
+  public MrlNeopixel(int deviceId, VirtualArduino virtual) {
+    super(deviceId, Msg.DEVICE_TYPE_NEOPIXEL, virtual);
   }
 
   public void setAnimation(Integer animation, Integer red, Integer green, Integer blue, Integer speed) {

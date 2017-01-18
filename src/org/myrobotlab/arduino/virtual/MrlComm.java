@@ -9,8 +9,6 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.VirtualArduino;
-import org.myrobotlab.service.interfaces.SerialDevice;
-import org.python.jline.internal.Log;
 
   ///////////// MrlComm.h ///////////////
   // forward defines to break circular dependency
@@ -203,7 +201,7 @@ public class MrlComm {
     return System.nanoTime() / 1000;
   }
 
-  public int getRandom(int min, int max) {
+  static public int getRandom(int min, int max) {
     return min + (int) (Math.random() * ((max - min) + 1));
   }
 
@@ -547,7 +545,7 @@ public class MrlComm {
 
   // > i2cBusAttach/deviceId/i2cBus
   public void i2cBusAttach(int deviceId, int i2cBus) {
-    MrlI2CBus i2cbus = (MrlI2CBus) addDevice(new MrlI2CBus(deviceId));
+    MrlI2CBus i2cbus = (MrlI2CBus) addDevice(new MrlI2CBus(deviceId, virtual));
     i2cbus.attach(i2cBus);
   }
 
@@ -570,7 +568,7 @@ public class MrlComm {
   public void neoPixelAttach(int deviceId, int pin, long numPixels) {
     // msg.publishDebug("MrlNeopixel.deviceAttach!");
 
-    MrlNeopixel neo = (MrlNeopixel) addDevice(new MrlNeopixel(deviceId));
+    MrlNeopixel neo = (MrlNeopixel) addDevice(new MrlNeopixel(deviceId, virtual));
     msg.publishDebug("id" + String(deviceId));
     neo.attach(pin, numPixels);
   }
@@ -587,11 +585,11 @@ public class MrlComm {
   }
 
   // > servoAttach/deviceId/pin/targetOutput/b16 velocity
-  public void servoAttach(int deviceId, int pin, int initialPosUs, int velocity) {
-    MrlServo servo = new MrlServo(deviceId);
+  public void servoAttach(int deviceId, int pin, int initialPosUs, int velocity, String name) {
+    MrlServo servo = new MrlServo(deviceId, virtual);
     addDevice(servo);
     // not your mama's attach - this is attaching/initializing the MrlDevice
-    servo.attach(pin, initialPosUs, velocity);
+    servo.attach(pin, initialPosUs, velocity, name);
   }
 
   // > servoEnablePwm/deviceId/pin
@@ -695,7 +693,7 @@ public class MrlComm {
 
   // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
   public void ultrasonicSensorAttach(int deviceId, int triggerPin, int echoPin) {
-    MrlUltrasonicSensor sensor = (MrlUltrasonicSensor) addDevice(new MrlUltrasonicSensor(deviceId));
+    MrlUltrasonicSensor sensor = (MrlUltrasonicSensor) addDevice(new MrlUltrasonicSensor(deviceId, virtual));
     sensor.attach(triggerPin, echoPin);
   }
 

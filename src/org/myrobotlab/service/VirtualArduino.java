@@ -2,7 +2,6 @@ package org.myrobotlab.service;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -18,6 +17,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDevice;
+import org.myrobotlab.service.interfaces.Simulator;
 import org.slf4j.Logger;
 
 public class VirtualArduino extends Service implements RecordControl {
@@ -32,6 +32,8 @@ public class VirtualArduino extends Service implements RecordControl {
   transient MrlCommIno ino;
 
   transient MrlComm mrlComm;
+  
+  transient Simulator simulator;
 
   transient Serial uart;
   String portName = "COM42";
@@ -236,6 +238,18 @@ public class VirtualArduino extends Service implements RecordControl {
 
   public void clearPinQueue(int address) {
     mrlComm.pinList.clear();
+  }
+  
+  public Simulator getSimulator(){
+    return simulator;
+  }
+  
+  public void attach(Simulator simulator){
+    this.simulator = simulator;
+  }
+  
+  public MrlComm getMrlComm(){
+    return mrlComm;
   }
 
   public static void main(String[] args) {

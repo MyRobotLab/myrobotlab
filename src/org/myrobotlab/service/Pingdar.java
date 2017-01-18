@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -19,10 +17,10 @@ public class Pingdar extends Service {
 
   public static class Point {
 
-    public float r;
-    public float theta;
+    public double r;
+    public double theta;
 
-    public Point(float servoPos, float z) {
+    public Point(double servoPos, double z) {
       this.theta = servoPos;
       this.r = z;
     }
@@ -44,36 +42,13 @@ public class Pingdar extends Service {
   // TODO - changed to XDar - make RangeSensor interface -> publishRange
   // TODO - set default sample rate
   // private boolean isAttached = false;
-  private Long lastRange;
+  private Integer lastRange;
 
-  private Integer lastPos;
+  private Double lastPos;
 
   private int rangeCount = 0;
 
   long rangeAvg = 0;
-
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    Runtime.createAndStart("gui", "GUIService");
-    // Runtime.createAndStart("webgui", "WebGui");
-    /*
-     * Serial.createNullModemCable("uart", "COM10"); Serial serial =
-     * (Serial)Runtime.createAndStart("uart", "Serial");
-     * 
-     * serial.connect("uart");
-     */
-
-    Runtime.start("pingdar", "Pingdar");
-
-    // Runtime.createAndStart("gui", "GUIService");
-
-    // pingdar.attach("COM15", 7, 8, 9);
-    // pingdar.sweep();
-    /*
-     * GUIService gui = new GUIService("gui"); gui.startService();
-     */
-  }
 
   public Pingdar(String n) {
     super(n);
@@ -86,23 +61,23 @@ public class Pingdar extends Service {
     this.sensor = sensor;
     this.servo = servo;
 
-   
     arduino.connect(port);
 
     // TODO - FIX ME
     /*
-    if (!sensor.attach(port, trigPin, echoPin)) {
-      error("could not attach sensor");
-      return false;
-    }
-    */
+     * if (!sensor.attach(port, trigPin, echoPin)) { error(
+     * "could not attach sensor"); return false; }
+     */
 
     // FIXME sensor.addRangeListener
     // publishRange --> onRange
     sensor.addRangeListener(this);
+    // FIXME - servo events NoWorky !
+    // FIXME - optimization would be take the pos & range at the same time 
     servo.addServoEventListener(this);
-    arduino.servoAttachPin(servo, servoPin);
-    
+    // from the Arduino and send it back in on packet ..
+    arduino.attach(servo, servoPin);
+
     return true;
   }
 
@@ -133,7 +108,7 @@ public class Pingdar extends Service {
 
   // sensor data has come in
   // grab the latest position
-  public Long onRange(Long range) {
+  public Integer onRange(Integer range) {
     info("range %d", range);
     // filter too low
     // TODO this should be done on the Arduino
@@ -152,7 +127,7 @@ public class Pingdar extends Service {
     return lastRange;
   }
 
-  public Integer onServoEvent(Integer pos) {
+  public Double onServoEvent(Double pos) {
     info("pos %d", pos);
     lastPos = pos;
     if (rangeCount > 0) {
@@ -228,6 +203,26 @@ public class Pingdar extends Service {
     meta.addPeer("servo", "Servo", "servo");
 
     return meta;
+  }
+
+  public static void main(String[] args) {
+    try {
+      LoggingFactory.init(Level.INFO);
+
+      int trigPin = 7;
+      int echoPin = 8;
+      int servoPin = 9;
+
+      Runtime.createAndStart("gui", "GUIService");
+
+      Pingdar pingdar = (Pingdar) Runtime.start("pingdar", "Pingdar");
+      pingdar.attach("COM5", trigPin, echoPin, servoPin);
+      pingdar.sweep(30, 140);
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+
   }
 
 }

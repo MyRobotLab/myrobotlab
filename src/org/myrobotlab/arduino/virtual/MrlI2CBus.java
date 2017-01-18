@@ -1,6 +1,7 @@
 package org.myrobotlab.arduino.virtual;
 
 import org.myrobotlab.arduino.VirtualMsg;
+import org.myrobotlab.service.VirtualArduino;
 
 public class MrlI2CBus extends Device {
   
@@ -8,8 +9,8 @@ public class MrlI2CBus extends Device {
   int bus;
 
 
-  MrlI2CBus(int deviceId) {
-    super (deviceId, VirtualMsg.DEVICE_TYPE_I2C);
+  MrlI2CBus(int deviceId, VirtualArduino virtual) {
+    super (deviceId, VirtualMsg.DEVICE_TYPE_I2C, virtual);
   if (TWCR == 0) { //// do this check so that Wire only gets initialized once
     Wire.begin();
       // Force 400 KHz i2c

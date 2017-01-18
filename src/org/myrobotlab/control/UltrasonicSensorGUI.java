@@ -98,7 +98,7 @@ public class UltrasonicSensorGUI extends ServiceGUI implements ActionListener {
 
   }
 
-  public void onRange(final Long r) {
+  public void onRange(final Integer r) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {

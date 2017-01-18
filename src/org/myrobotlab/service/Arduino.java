@@ -1308,7 +1308,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    */
   // < publishAck/function
   public void publishAck(Integer function/* byte */) {
-    log.info("Message Ack received: =={}==", Msg.methodToString(function));
+    log.debug("Message Ack received: =={}==", Msg.methodToString(function));
     
     msg.ackReceived(function);
     
@@ -1316,7 +1316,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     heartbeat = true;
   }
 
-  public String publishAttachedDevice(int deviceId/* byte */, String deviceName/* str */) {
+  /** No longer needed .. Arduino service controls device list - MrlComm does not
+  public String publishAttachedDevice(int deviceId, String deviceName) {
 
     if (!deviceList.containsKey(deviceName)) {
       error("PUBLISH_ATTACHED_DEVICE deviceName %s not found !", deviceName);
@@ -1333,6 +1334,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     return deviceName;
   }
+  */
 
   // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
   public BoardInfo publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins, int[] deviceSummary/*[]*/) {
@@ -1349,14 +1351,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     boardInfo.setDeviceSummary(arrayToDeviceSummary(deviceSummary));
     boardInfo.heartbeatMs = now - boardInfoRequestTs;
 
-    log.info("Version return by Arduino: {}", boardInfo.getVersion());
-    log.info("Board type returned by Arduino: {}", boardInfo.getName());
-    log.info("Board type currently set: {}", boardType);
+    log.debug("Version return by Arduino: {}", boardInfo.getVersion());
+    log.debug("Board type returned by Arduino: {}", boardInfo.getName());
+    log.debug("Board type currently set: {}", boardType);
     if (!boardInfo.isUnknown()) {
       setBoard(boardInfo.getName());
-      log.info("Board type set to: {}", boardType);
+      log.debug("Board type set to: {}", boardType);
     } else {
-      log.info("No change in board type");
+      log.debug("No change in board type");
     }
 
     synchronized (boardInfo) {
@@ -1616,7 +1618,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     // send data to micro-controller - convert degrees to microseconds
     int uS = degreeToMicroseconds(targetOutput);
-    msg.servoAttach(deviceId, pin, uS, (int)velocity);
+    msg.servoAttach(deviceId, pin, uS, (int)velocity, servo.getName());
 
     // the callback - servo better have a check
     // isAttached(ServoControl) to prevent infinite loop
@@ -1710,7 +1712,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   public String setBoard(String board) {
-    log.info("setting board to type {}", board);
+    log.debug("setting board to type {}", board);
     this.boardType = board;
     createPinList();
     // broadcastState();
