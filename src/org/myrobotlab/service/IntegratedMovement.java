@@ -465,7 +465,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(InverseKinematics3D.class.getCanonicalName());
+    ServiceType meta = new ServiceType(IntegratedMovement.class.getCanonicalName());
     meta.addDescription("a 3D kinematics service supporting D-H parameters");
     meta.addCategory("robot", "control");
     meta.addPeer("openni", "OpenNi", "Kinect service");
