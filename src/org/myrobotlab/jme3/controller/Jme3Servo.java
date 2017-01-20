@@ -9,6 +9,7 @@ import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 /**
@@ -19,7 +20,7 @@ import com.jme3.scene.shape.Box;
 public class Jme3Servo extends Jme3Object implements VirtualServo {
 
   // jme3 side
-  transient Node node;
+  transient Spatial node;
 
   int posUs;
 
@@ -75,7 +76,13 @@ public class Jme3Servo extends Jme3Object implements VirtualServo {
     /** Load a teapot model (OBJ file from test-data) */
     //     geometry = (Geometry) assetManager.loadModel("Models/Teapot/Teapot.obj");
     // node = (Node)assetManager.loadModel("Models/InMoovHead/InMoovHead.j3o");
-    node = (Node)assetManager.loadModel("Models/InMoovHead/InMoovHead.blend");
+    // node = (Node)assetManager.loadModel("Models/InMoovHead/InMoovHead.blend");
+    node = assetManager.loadModel("Models/Teapot/Teapot.obj");
+    /*
+    node = assetManager.loadModel("Models/InMoovHead/InMoovHead.j3o");
+    node = assetManager.loadModel("Models/VirtualInMoov236/VirtualInMoov236.j3odata");
+    node = assetManager.loadModel("Models/VirtualInMoov236/VirtualInMoov236.j3o");
+    */
     // node.scale(4.0f, 4.0f, 4.0f);
     // node.setLocalTranslation(0.0f,-2.5f,-4.0f);
     
@@ -109,7 +116,7 @@ public class Jme3Servo extends Jme3Object implements VirtualServo {
 
   @Override
   public Node getNode() {
-    return node;
+    return null;
   }
 
   @Override

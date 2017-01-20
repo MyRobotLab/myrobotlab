@@ -11,8 +11,8 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.RangeListener;
+import org.myrobotlab.service.interfaces.RangePublisher;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import org.slf4j.Logger;
  * UltrasonicSensor implements RangeListener just for testing purposes
  *
  */
-public class UltrasonicSensor extends Service implements RangeListener, UltrasonicSensorControl {
+public class UltrasonicSensor extends Service implements RangeListener, RangePublisher, UltrasonicSensorControl {
 
 	private static final long serialVersionUID = 1L;
 
@@ -42,13 +42,13 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
 	private Integer echoPin = null;
 	private String type = "SR04";
 
-	private Integer lastRaw;
-	private Integer lastRange;
+	private Double lastRaw;
+	private Double lastRange;
 
 	// for blocking asynchronous data
 	private boolean isBlocking = false;
 
-	transient private BlockingQueue<Integer> data = new LinkedBlockingQueue<Integer>();
+	transient private BlockingQueue<Double> data = new LinkedBlockingQueue<Double>();
 
 	private transient UltrasonicSensorController controller;
 
@@ -129,12 +129,12 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
 	}
 
 	@Override
-	public void onRange(Long range) {
+	public void onRange(Double range) {
 		log.info(String.format("RANGE: %d", range));
 	}
 
 	/* FIXME !!! IMPORTANT PUT IN INTERFACE & REMOVE SELF FROM ARDUINO !!! */
-	public Integer publishRange(Integer range) {
+	public Double publishRange(Double range) {
 
 		++pings;
 
@@ -204,8 +204,9 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
     controller.detach(this);
     controller = null;
   }
-
-	public Integer onUltrasonicSensorData(Integer rawData) {
+  
+  @Override
+	public Double onUltrasonicSensorData(Double rawData) {
 		// data comes in 'raw' and leaves as Range
 		// TODO implement changes based on type of sensor SRF04 vs SRF05
 		// TODO implement units preferred
@@ -217,7 +218,7 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
 
 		++pings;
 		lastRaw = rawData;
-		Integer range = (int) (rawData * multiplier);
+		Double range = (rawData * multiplier);
 		if (isBlocking) {
 			try {
 				data.put(lastRaw);
@@ -284,6 +285,7 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
       servo.moveTo(30);
 
       srf04.startRanging();
+      
 
       for (int i = 0; i < 100; ++i) {
         servo.moveTo(30);

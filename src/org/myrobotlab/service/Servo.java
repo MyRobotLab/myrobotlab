@@ -76,50 +76,41 @@ public class Servo extends Service implements ServoControl {
     public Sweeper(String name) {
       super(String.format("%s.sweeper", name));
     }
+    
+    /**
+     * Sweeping works on input, a thread is used as the "controller" (this is input)
+     * and input sweeps back and forth - the servo parameters know what
+     * to do for output
+     */
 
     @Override
     public void run() {
+      
+      double sweepMin = 0.0;
+      double sweepMax = 0.0;
+      // start in the middle
+      double sweepPos = mapper.getMinX() + (mapper.getMaxX() - mapper.getMinX())/2;
+      isSweeping = true;
 
       try {
         while (isSweeping) {
-          // increment position that we should go to.
-          if (targetPos < mapper.getMaxX() && sweepStep >= 0) { // GroG: dunno
-                                                                // if this
-                                                                // should be
-                                                                // MaxX or
-                                                                // MaxOutputX
-            targetPos += sweepStep;
-          } else if (targetPos > mapper.getMinOutput() && sweepStep < 0) {// GroG:
-                                                                          // dunno
-                                                                          // if
-                                                                          // this
-                                                                          // should
-                                                                          // be
-                                                                          // MinX
-                                                                          // or
-                                                                          // MinOutputX
-            targetPos += sweepStep;
-          }
-
-          // switch directions or exit if we are sweeping 1 way
-          if ((targetPos <= mapper.getMinX() && sweepStep < 0) || (targetPos >= mapper.getMaxX() && sweepStep > 0)) {
-            if (sweepOneWay) {
-              isSweeping = false;
-              break;
-            }
+          
+          // set our range to be inside 'real' min & max input
+          sweepMin = mapper.getMinX() + 1;
+          sweepMax = mapper.getMaxX() - 1;
+      
+          // if pos is too small or too big flip direction
+          if (sweepPos >= sweepMax || sweepPos <= sweepMin){
             sweepStep = sweepStep * -1;
           }
-          moveTo(targetPos);
+          
+          sweepPos += sweepStep;
+          moveTo(sweepPos);
           Thread.sleep(sweepDelay);
         }
 
       } catch (Exception e) {
-        isSweeping = false;
-        if (e instanceof InterruptedException) {
-          info("shutting down sweeper");
-        } else {
-          logException(e);
-        }
+        isSweeping = false;        
       }
     }
 
@@ -316,6 +307,15 @@ public class Servo extends Service implements ServoControl {
   public double getMin() {
     return mapper.getMinX();
   }
+  
+  public double getMaxInput() {
+    return mapper.getMaxInput();
+  }
+
+  public double getMinInput() {
+    return mapper.getMinInput();
+  }
+  
 
   @Override
   public double getRest() {
@@ -422,8 +422,17 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public void setMinMax(double min, double max) {
+    // THIS IS A BUG - BUT CORRECTING IT BURNS OLD SCRIPT'S SERVOS !!
+    mapper.setMinMaxOutput(min, max);
+    /* THIS IS A BUG default setMinMax setMin & setMax IS INPUT NOT OUTPUT !!!!
     mapper.setMin(min);
     mapper.setMax(max);
+    */
+    broadcastState();
+  }
+  
+  public void setMinMaxInput(double min, double max){
+    mapper.setMinMaxInput(min, max);
     broadcastState();
   }
 
@@ -525,9 +534,11 @@ public class Servo extends Service implements ServoControl {
   }
 
   public void sweep(double min, double max, int delay, double step, boolean oneWay) {
-
+    mapper.setMinMaxInput(min, max);
+    /* THIS IS A BUGG !!!
     mapper.setMin(min);
     mapper.setMax(max);
+    */
 
     this.sweepDelay = delay;
     this.sweepStep = step;
