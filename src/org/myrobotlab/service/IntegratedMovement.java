@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,16 +73,18 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   private boolean stopMoving = false;		
 	
   public enum ObjectPointLocation {		
-  	ORIGIN_CENTER (0x01),		
-  	ORIGIN_SIDE (0x02),		
-  	END_SIDE(0x04),		
-  	END_CENTER(0x05),		
-  	CLOSEST_POINT(0x06),		
-  	CENTER(0x07),		
-  	CENTER_SIDE(0x08);		
-  	int value;		
-  	private ObjectPointLocation(int value) {		
-  		this.value = value;		
+  	ORIGIN_CENTER (0x01,"Center Origin"),		
+  	ORIGIN_SIDE (0x02, "Side Origin"),		
+  	END_SIDE(0x04, "Side End"),		
+  	END_CENTER(0x05, "Center End"),		
+  	CLOSEST_POINT(0x06, "Closest Point"),		
+  	CENTER(0x07, "Center"),		
+  	CENTER_SIDE(0x08, "Side Center");		
+  	public int value;		
+  	public String location;
+  	private ObjectPointLocation(int value, String location) {		
+  		this.value = value;
+  		this.location = location;
   	}		
   }		
   		
@@ -95,7 +98,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   private MoveInfo moveInfo = null;
 	private OpenNi openni = null;
 	
-	private Map3D map3d = new Map3D();
+	public Map3D map3d = new Map3D();
 	private String kinectName = "kinect";
 	private boolean ProcessKinectData = false;
   
@@ -196,10 +199,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, currentArm.getNumLinks(), 11, geneticRecombinationRate, geneticMutationRate);
       //HashMap<Integer,Integer> lastIteration = new HashMap<Integer,Integer>();
       int retry = 0;
-      stopMoving = false;
+      //stopMoving = false;
       while (retry++ < 100) {
       	if (stopMoving) {		
-      		stopMoving = false;		
+      		//stopMoving = false;		
       		break;		
       	}		
         Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the number of time the chromosome pool will be recombined and mutate
@@ -215,6 +218,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
           Servo servo = currentServos.get(currentArm.getLink(i).getName());
           servo.moveTo(currentArm.getLink(i).getPositionValueDeg());
         }
+        this.
         log.info("moving to {}", currentPosition());
         if (collisionItems.haveCollision()) {
           //collision avoiding need to be improved
@@ -287,7 +291,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 //            newPos.setZ(newPos.getZ()+colPoint.getZ()-ori.getZ());
 //          }
           Point oldGoTo = goTo;
-          moveTo(newPos);
+          if(!stopMoving) moveTo(newPos);
           goTo = oldGoTo;
 //          int dmove = 0;
 //          int deltaMove = 5;
@@ -420,16 +424,127 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public static void main(String[] args) throws Exception {
     LoggingFactory.init(Level.INFO);
 
-    //Runtime.createAndStart("python", "Python");
-    //Runtime.createAndStart("gui", "GUIService");
+    Runtime.createAndStart("python", "Python");
+    Runtime.createAndStart("gui", "GUIService");
+    IntegratedMovement ik = (IntegratedMovement) Runtime.start("ik", "IntegratedMovement");
+    Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+    arduino.connect("COM22");
+    arduino.enableBoardInfo(false);
+    //define and attach servo
+    //map is set so servo accept angle as input, output where
+    //they need to go so that their part they where attach to
+    //move by the input degree
+    Servo mtorso = (Servo)Runtime.start("mtorso","Servo");
+    mtorso.attach(arduino,26,90);
+    mtorso.map(15,165,148,38);
+    //#mtorso.setMinMax(35,150);
+    mtorso.setVelocity(13);
+    mtorso.moveTo(90);
+    Servo ttorso = (Servo) Runtime.start("ttorso","Servo");
+    ttorso.attach(arduino,7,90);
+    ttorso.map(80,100,92,118);
+    //ttorso.setInverted(False)
+    //#ttorso.setMinMax(85,125)
+    ttorso.setVelocity(13);
+    ttorso.moveTo(90);
+    Servo omoplate = (Servo) Runtime.start("omoplate","Servo");
+    omoplate.attach(arduino,11,10);
+    omoplate.map(10,70,10,70);
+    omoplate.setVelocity(15);
+    //#omoplate.setMinMax(10,70)
+    omoplate.moveTo(10);
+    Servo shoulder = (Servo) Runtime.start("shoulder","Servo");
+    shoulder.attach(arduino,6,30);
+    shoulder.map(0,180,0,180);
+    //#shoulder.setMinMax(0,180)
+    shoulder.setVelocity(14);
+    shoulder.moveTo(20);
+    Servo rotate = (Servo) Runtime.start("rotate","Servo");
+    rotate.attach(arduino,9,90);
+    rotate.map(46,160,46,160);
+    //#rotate.setMinMax(46,180)
+    rotate.setVelocity(18);
+    rotate.moveTo(90);
+    Servo bicep = (Servo) Runtime.start("bicep","Servo");
+    bicep.attach(arduino,8,10);
+    bicep.map(5,60,5,80);
+    bicep.setVelocity(26);
+    //#bicep.setMinMax(5,90)
+    bicep.moveTo(10);
+    Servo wrist = (Servo) Runtime.start("wrist","Servo");
+    wrist.attach(arduino,7,10);
+    //#wrist.map(45,135,45,135)
+    wrist.map(90,90,90,90);
+    wrist.setVelocity(26);
+    //#bicep.setMinMax(5,90)
+    wrist.moveTo(90);
+    Servo finger = (Servo) Runtime.start("finger","Servo");
+    finger.attach(arduino,8,90);
+    finger.map(90,90,90,90);
+    finger.setVelocity(26);
+    //#bicep.setMinMax(5,90)
+    finger.moveTo(90);
 
-    HashMap<String,Integer> test = new HashMap<String,Integer>();
-    test.put("x", 43);
-    Integer y = test.get("x");
-    y++;
-    test.put("x",y);
-    Integer z = test.get("x");
-    log.info("Value is {}",z);
+    //#define the DH parameters for the ik service
+    ik.setNewDHRobotArm("leftArm");
+    ik.setDHLink(mtorso,113,90,0,-90);
+    ik.setDHLink(ttorso,0,90+65.6,346,0);
+    ik.setDHLink(omoplate,0,-5.6+24.4+180,55,-90);
+    ik.setDHLink(shoulder,77,-20+90,0,90);
+    ik.setDHLink(rotate,284,90,40,90);
+    ik.setDHLink(bicep,0,-7+24.4+90,300,90);
+    //#ik.setDHLink(wrist,00,-90,200,0)
+    ik.setDHLink(wrist,00,-90,100,-90);
+    //print ik.currentPosition();
+
+    ik.setDHLink(finger,00,00,300,0);
+
+    ik.setNewDHRobotArm("kinect");
+    ik.setDHLink(mtorso,113,90,0,-90);
+    ik.setDHLink(ttorso,0,90+90,110,-90);
+    ik.setDHLink("camera",0,90,10,90);
+
+    //#define object, each dh link are set as an object, but the
+    //#start point and end point will be update by the ik service, but still need
+    //#a name and a radius
+    //#static object need a start point, an end point, a name and a radius 
+    ik.clearObject();
+    ik.addObject(0.0, 0.0, 0.0, 0.0, 0.0, -150.0, "base", 150.0);
+    ik.addObject("mtorso", 150.0);
+    ik.addObject("ttorso", 10.0);
+    ik.addObject("omoplate", 10.0);
+    ik.addObject("shoulder", 50.0);
+    ik.addObject("rotate", 50.0);
+    ik.addObject("bicep", 60.0);
+    ik.addObject("wrist", 70.0);
+    ik.addObject("finger",10.0);
+    //#ik.addObject(-1000.0, 300, 0, 1000, 300, 00, "obstacle",40)
+    //#ik.addObject(360,540,117,360, 550,107,"cymbal",200)
+    //#ik.addObject(90,530,-180,300,545,-181,"bell", 25)
+    //#ik.addObject(-170,640,-70,-170,720,-250,"tom",150)
+
+
+    //print ik.currentPosition();
+
+
+
+    //#setting ik parameters for the computing
+    ik.setComputeMethodGeneticAlgorythm();
+    ik.setGeneticComputeSimulation(false);
+
+    //#move to a position
+    ik.moveTo("leftArm",350,400,700);
+    //ik.moveTo(280,190,-345);
+    //#ik.moveTo("cymbal",ik.ObjectPointLocation.ORIGIN_SIDE, 0,0,5)
+    //#mtorso.moveTo(45)
+    //print ik.currentPosition("leftArm")
+
+    //print "kinect Position" + str(ik.currentPosition("kinect"));
+
+    ik.startOpenNI();
+    
+    ik.processKinectData();
+
   }
 
   @Override
@@ -530,11 +645,13 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       for (int i = 0; i < currentArm.getNumLinks(); i++){
         //copy the value of the currentArm
         DHLink newLink = new DHLink(currentArm.getLink(i));
-        newLink.addPositionValue((double)chromosome.getDecodedGenome().get(i));
-        Double delta = currentArm.getLink(i).getPositionValueDeg() - (Double)chromosome.getDecodedGenome().get(i);
-        double timeOfMove = Math.abs(delta / currentServos.get(currentArm.getLink(i).getName()).getVelocity());
-        if (timeOfMove > fitnessTime) {
-          fitnessTime = timeOfMove;
+        if (chromosome.getDecodedGenome() != null) {
+	        newLink.addPositionValue((double)chromosome.getDecodedGenome().get(i));
+	        Double delta = currentArm.getLink(i).getPositionValueDeg() - (Double)chromosome.getDecodedGenome().get(i);
+	        double timeOfMove = Math.abs(delta / currentServos.get(currentArm.getLink(i).getName()).getVelocity());
+	        if (timeOfMove > fitnessTime) {
+	          fitnessTime = timeOfMove;
+	        }
         }
         arm.addLink(newLink);
       }
@@ -569,6 +686,11 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       ArrayList<Object>decodedGenome = new ArrayList<Object>();
       for (DHLink link: currentArm.getLinks()){
       	Servo servo = currentServos.get(link.getName());
+      	if (servo == null) {
+      		decodedGenome.add(null);
+      		continue;
+      	}
+      	
       	Mapper map = null;
       	if(servo.getMin() == servo.getMax()) {
       		decodedGenome.add(servo.getMin());
@@ -602,6 +724,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     while (isMoving) {
       isMoving = false;
       DHRobotArm newArm = new DHRobotArm();
+      newArm.name = currentArm.name;
       for (int i = 0; i < currentArm.getNumLinks(); i++) {
         DHLink newLink = new DHLink(currentArm.getLink(i));
         double degrees = currentArm.getLink(i).getPositionValueDeg();
@@ -714,6 +837,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
   
   public void moveTo(String name, ObjectPointLocation location, int xoffset, int yoffset, int zoffset) {		
+  	stopMoving = false;
   	moveInfo = new MoveInfo();		
   	moveInfo.offset = new Point(xoffset, yoffset, zoffset, 0, 0, 0);		
   	moveInfo.targetItem = collisionItems.getItem(name);		
@@ -797,33 +921,28 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public OpenNi startOpenNI() throws Exception {
     if (openni == null) {
       openni = (OpenNi) startPeer("openni");
-     // openni.startUserTracking();
       openni.start3DData();
       map3d.updateKinectPosition(currentPosition(kinectName));
-      this.subscribe(openni.getName(), "publishOpenNIData", this.getName(), "onOpenNiData");
+      //this.subscribe(openni.getName(), "publishOpenNIData", this.getName(), "onOpenNiData");
     }
     return openni;
   }
   
   public void onOpenNiData(OpenNiData data){
-//		int[] depthData = data.depthMap;
-//		PVector[] depthDataRW = data.depthMapRW;
-//		log.info("{}",depthDataRW[320+120*640]);
-  	if (this.inbox.size() < 50) {
-  		if (ProcessKinectData) {
-  			ProcessKinectData = false;
-	  		long a = System.currentTimeMillis();
-	  		log.info("start {}",a);
-	  		map3d.processDepthMap(data);
-	  		removeKinectObject();
-	  		ArrayList<HashMap<Integer[],Map3DPoint>> object = map3d.getObject();
-	  		for (int i = 0; i < object.size(); i++) {
-	  			addObject(object.get(i));
-	  		}
-	  		long b = System.currentTimeMillis();
-	  		log.info("end {} - {} - {}",b, b-a, this.inbox.size());
+		if (ProcessKinectData) {
+			ProcessKinectData = false;
+  		long a = System.currentTimeMillis();
+  		log.info("start {}",a);
+  		map3d.processDepthMap(data);
+  		removeKinectObject();
+  		ArrayList<HashMap<Integer[],Map3DPoint>> object = map3d.getObject();
+  		for (int i = 0; i < object.size(); i++) {
+  			addObject(object.get(i));
   		}
-  	}
+  		long b = System.currentTimeMillis();
+  		log.info("end {} - {} - {}",b, b-a, this.inbox.size());
+  		broadcastState();
+		}
   }
 
   private void removeKinectObject() {
@@ -834,9 +953,24 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
 	public void processKinectData(){
   	ProcessKinectData = true;
+  	onOpenNiData(openni.get3DData());
   }
   
   public void setKinectName(String kinectName) {
   	this.kinectName = kinectName;
   }
+
+
+	public HashMap<String, CollisionItem> getCollisionObject() {
+		return collisionItems.getItems();
+	}
+
+
+	public ObjectPointLocation[] getEnumLocationValue() {
+		return ObjectPointLocation.values();
+	}
+	
+	public Collection<DHRobotArm> getArms() {
+		return this.arms.values();
+	}
 }

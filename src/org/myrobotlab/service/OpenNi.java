@@ -639,7 +639,7 @@ public class OpenNi extends Service // implements
     return String.format("%d %d %d", Math.round(v.x), Math.round(v.y), Math.round(v.z));
   }
   
-  void get3DData() {
+  public OpenNiData get3DData() {
   	OpenNiData data = new OpenNiData();
   	context.update();
   	data.depthPImage = context.depthImage();
@@ -649,6 +649,7 @@ public class OpenNi extends Service // implements
     ++frameNumber;
     g2d = frame.createGraphics();
     invoke("publishOpenNIData", data);
+    return data;
   }
 
   void getData() {

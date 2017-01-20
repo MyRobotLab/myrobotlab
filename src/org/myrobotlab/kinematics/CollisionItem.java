@@ -133,8 +133,8 @@ public class CollisionItem {
   		vA.div(lengthOfA);
   		vA.mult((float) radius);
   		Point delta = new Point(vA.x,vA.y,vA.z,0,0,0);
-  		origin = origin.add(delta);
-  		end = end.subtract(delta);
+  		origin = origin.subtract(delta);
+  		end = end.add(delta);
   	}
   	else {
   	//else if (backpoint.contains(closestPointToCornerType[0]) && backpoint.contains(closestPointToCornerType[1]) && backpoint.contains(closestPointToCornerType[2])){
