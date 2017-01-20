@@ -222,7 +222,7 @@ public class Servo extends Service implements ServoControl {
 
   boolean autoAttach = false;
 
-  public long defaultDetachDelay = 10000;
+  public int defaultDetachDelay = 10000;
 	private boolean moving;
 
   class IKData {
@@ -368,8 +368,8 @@ public class Servo extends Service implements ServoControl {
 
 	  if (velocity > 0.0) {
 	  	moving = true;
-	  	if (this.getTasks().containsKey("EndMoving")){
-	  		purgeTask("endMoving");
+	  	if (getTasks().containsKey("EndMoving")){
+	  		purgeTask("EndMoving");
 	  	}
 	    addTask("EndMoving", timeToMove(), "endMoving");
 	  }
@@ -958,11 +958,14 @@ public class Servo extends Service implements ServoControl {
   }
 
   public void endMoving(){
-  	if (autoAttach){
+  	if (getTasks().containsKey("EndMoving")){
+  		purgeTask("EndMoving");
+  	}
+  	if (autoAttach && isPinAttached()){
+  		if (velocity < 0) sleep(defaultDetachDelay);
   		detach();
   	}
   	moving = false;
- 		purgeTask("EndMoving");
   }
 
 	public boolean isMoving() {

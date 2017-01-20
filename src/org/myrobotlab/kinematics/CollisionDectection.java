@@ -231,4 +231,8 @@ public class CollisionDectection {
 		}
 		
 	}
+
+	public HashMap<String, CollisionItem> getItems() {
+		return items;
+	}
 }
