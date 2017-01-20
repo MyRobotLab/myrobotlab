@@ -60,7 +60,7 @@ public class UltrasonicSensorGUI extends ServiceGUI implements ActionListener {
     // commented out subscription due to this class being used for
     // un-defined gui's
 
-    subscribe("publishRange", "onRange", long.class);
+    subscribe("publishRange", "onRange", Double.class);
     subscribe("publishState", "getState", UltrasonicSensor.class);
 
     // send("publishState");
@@ -98,12 +98,12 @@ public class UltrasonicSensorGUI extends ServiceGUI implements ActionListener {
 
   }
 
-  public void onRange(final Integer r) {
+  public void onRange(final Double r) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
         range.setValue(r.intValue());
-        range.setString(String.format("%d cm", r));
+        range.setString(String.format("%d cm", r.intValue()));
       }
     });
 

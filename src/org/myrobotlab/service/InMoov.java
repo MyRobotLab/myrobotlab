@@ -16,7 +16,6 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;

@@ -1524,7 +1524,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // < publishUltrasonicSensorData/deviceId/b16 echoTime
   public Integer publishUltrasonicSensorData(Integer deviceId, Integer echoTime) {
     // log.info("echoTime {}", echoTime);
-    ((UltrasonicSensor) getDevice(deviceId)).onUltrasonicSensorData(echoTime);
+    ((UltrasonicSensor) getDevice(deviceId)).onUltrasonicSensorData(echoTime.doubleValue());
     return echoTime;
   }
 

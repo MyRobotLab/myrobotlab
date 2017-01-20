@@ -232,17 +232,22 @@
 	<classpathentry kind="lib" path="/repo/marytts/5.2/sgt-3.0.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.2/mwdumper-1.16.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jfugue.music/5.0/jfugue-5.0.7.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/eventbus.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jbullet.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jinput.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-bullet-natives.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-bullet.jar"/>
+	
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-core.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-effects.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-jbullet.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-jogl.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-lwjgl-natives.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-lwjgl.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jinput.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jbullet.jar"/>
+    <classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-jbullet.jar"/>
+    <classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-desktop.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-testdata.jar"/>
+    
+	<!-- 
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/eventbus.jar"/>	
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-bullet-natives.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-bullet.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-effects.jar"/>	
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-terrain.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jogl-all.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/lwjgl.jar"/>
@@ -256,15 +261,13 @@
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jglfont-core.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-android.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-blender.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-bullet-natives-android.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-desktop.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-bullet-natives-android.jar"/>	
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-ios.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-jogg.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-networking.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-niftygui.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-openal-soft-natives-android.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-plugins.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-testdata.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/joal.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/launch4j.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/nifty-default-controls-javadoc.jar"/>
@@ -275,7 +278,7 @@
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/stack-alloc.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/xmlpull-xpp3.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/inmoov-head.jar"/>
-	
+	 -->
 	<!-- 
 	<classpathentry kind="lib" path="/repo/net.java.games.jinput/2.0.5/jinput-2.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/net.java.games.jinput/2.0.5/jinput-platform-2.0.5-natives-windows.jar"/>
