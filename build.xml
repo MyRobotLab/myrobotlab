@@ -374,6 +374,18 @@
 		<pathelement location="${repo}/marytts/5.2/xmlunit-1.6.jar"/>
 		<pathelement location="${repo}/marytts/5.2/sgt-3.0.jar"/>
 		<pathelement location="${repo}/marytts/5.2/mwdumper-1.16.jar"/>
+		
+		<!-- jmonkey begin -->
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-core.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-jogl.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-lwjgl-natives.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-lwjgl.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jinput.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jbullet.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-jbullet.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-desktop.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-testdata.jar"/>
+		<!-- jmonkey end -->
 
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
