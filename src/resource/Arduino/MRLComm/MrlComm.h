@@ -108,8 +108,8 @@ public:
 	void setTrigger( byte pin,  byte triggerValue);
 	// > setDebounce/pin/delay
 	void setDebounce( byte pin,  byte delay);
-	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
-	void servoAttach( byte deviceId,  byte pin,  int initPos,  int initVelocity);
+	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
+	void servoAttach( byte deviceId,  byte pin,  int initPos,  int initVelocity,  byte nameSize, const char*name);
 	// > servoAttachPin/deviceId/pin
 	void servoAttachPin( byte deviceId,  byte pin);
 	// > servoDetachPin/deviceId

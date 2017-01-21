@@ -1,6 +1,7 @@
 package org.myrobotlab.arduino.virtual;
 
 import org.myrobotlab.arduino.VirtualMsg;
+import org.myrobotlab.service.VirtualArduino;
 
 public class MrlUltrasonicSensor extends Device {
   NewPing newping;
@@ -13,7 +14,7 @@ public class MrlUltrasonicSensor extends Device {
     }
 
     public Integer ping_cm() {
-      return 35;
+      return MrlComm.getRandom(34, 98);
     }
   }
 
@@ -29,8 +30,8 @@ public class MrlUltrasonicSensor extends Device {
     return "" + (x);
   }
 
-  public MrlUltrasonicSensor(int deviceId) {
-    super(deviceId, VirtualMsg.DEVICE_TYPE_ULTRASONICSENSOR);
+  public MrlUltrasonicSensor(int deviceId, VirtualArduino virtual) {
+    super(deviceId, VirtualMsg.DEVICE_TYPE_ULTRASONICSENSOR, virtual);
     msg.publishDebug("ctor NewPing " + String(deviceId));
   }
 

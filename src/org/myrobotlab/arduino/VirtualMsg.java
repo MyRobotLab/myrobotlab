@@ -161,48 +161,46 @@ public class VirtualMsg {
 	public final static int DISABLE_PINS = 27;
 	// > pinMode/pin/mode
 	public final static int PIN_MODE = 28;
-	// < publishAttachedDevice/deviceId/str deviceName
-	public final static int PUBLISH_ATTACHED_DEVICE = 29;
 	// < publishDebug/str debugMsg
-	public final static int PUBLISH_DEBUG = 30;
+	public final static int PUBLISH_DEBUG = 29;
 	// < publishPinArray/[] data
-	public final static int PUBLISH_PIN_ARRAY = 31;
+	public final static int PUBLISH_PIN_ARRAY = 30;
 	// > setTrigger/pin/triggerValue
-	public final static int SET_TRIGGER = 32;
+	public final static int SET_TRIGGER = 31;
 	// > setDebounce/pin/delay
-	public final static int SET_DEBOUNCE = 33;
-	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
-	public final static int SERVO_ATTACH = 34;
+	public final static int SET_DEBOUNCE = 32;
+	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
+	public final static int SERVO_ATTACH = 33;
 	// > servoAttachPin/deviceId/pin
-	public final static int SERVO_ATTACH_PIN = 35;
+	public final static int SERVO_ATTACH_PIN = 34;
 	// > servoDetachPin/deviceId
-	public final static int SERVO_DETACH_PIN = 36;
+	public final static int SERVO_DETACH_PIN = 35;
 	// > servoSetMaxVelocity/deviceId/b16 maxVelocity
-	public final static int SERVO_SET_MAX_VELOCITY = 37;
+	public final static int SERVO_SET_MAX_VELOCITY = 36;
 	// > servoSetVelocity/deviceId/b16 velocity
-	public final static int SERVO_SET_VELOCITY = 38;
+	public final static int SERVO_SET_VELOCITY = 37;
 	// > servoSweepStart/deviceId/min/max/step
-	public final static int SERVO_SWEEP_START = 39;
+	public final static int SERVO_SWEEP_START = 38;
 	// > servoSweepStop/deviceId
-	public final static int SERVO_SWEEP_STOP = 40;
+	public final static int SERVO_SWEEP_STOP = 39;
 	// > servoMoveToMicroseconds/deviceId/b16 target
-	public final static int SERVO_MOVE_TO_MICROSECONDS = 41;
+	public final static int SERVO_MOVE_TO_MICROSECONDS = 40;
 	// > servoSetAcceleration/deviceId/b16 acceleration
-	public final static int SERVO_SET_ACCELERATION = 42;
+	public final static int SERVO_SET_ACCELERATION = 41;
 	// > serialAttach/deviceId/relayPin
-	public final static int SERIAL_ATTACH = 43;
+	public final static int SERIAL_ATTACH = 42;
 	// > serialRelay/deviceId/[] data
-	public final static int SERIAL_RELAY = 44;
+	public final static int SERIAL_RELAY = 43;
 	// < publishSerialData/deviceId/[] data
-	public final static int PUBLISH_SERIAL_DATA = 45;
+	public final static int PUBLISH_SERIAL_DATA = 44;
 	// > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-	public final static int ULTRASONIC_SENSOR_ATTACH = 46;
+	public final static int ULTRASONIC_SENSOR_ATTACH = 45;
 	// > ultrasonicSensorStartRanging/deviceId
-	public final static int ULTRASONIC_SENSOR_START_RANGING = 47;
+	public final static int ULTRASONIC_SENSOR_START_RANGING = 46;
 	// > ultrasonicSensorStopRanging/deviceId
-	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 48;
+	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 47;
 	// < publishUltrasonicSensorData/deviceId/b16 echoTime
-	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 49;
+	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 48;
 
 
 /**
@@ -233,7 +231,7 @@ public class VirtualMsg {
 	// public void pinMode(Integer pin/*byte*/, Integer mode/*byte*/){}
 	// public void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/){}
 	// public void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/){}
-	// public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/){}
+	// public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/){}
 	// public void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/){}
 	// public void servoDetachPin(Integer deviceId/*byte*/){}
 	// public void servoSetMaxVelocity(Integer deviceId/*byte*/, Integer maxVelocity/*b16*/){}
@@ -592,10 +590,12 @@ public class VirtualMsg {
 			startPos += 2; //b16
 			Integer initVelocity = b16(ioCmd, startPos+1);
 			startPos += 2; //b16
+			String name = str(ioCmd, startPos+2, ioCmd[startPos+1]);
+			startPos += 1 + ioCmd[startPos+1];
 			if(invoke){
-				arduino.invoke("servoAttach",  deviceId,  pin,  initPos,  initVelocity);
+				arduino.invoke("servoAttach",  deviceId,  pin,  initPos,  initVelocity,  name);
 			} else { 
- 				arduino.servoAttach( deviceId,  pin,  initPos,  initVelocity);
+ 				arduino.servoAttach( deviceId,  pin,  initPos,  initVelocity,  name);
 			}
 			break;
 		}
@@ -958,38 +958,6 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishAttachedDevice(Integer deviceId/*byte*/, String deviceName/*str*/) {
-		try {
-		  if (ackEnabled){
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + (1 + deviceName.length())); // size
-			write(PUBLISH_ATTACHED_DEVICE); // msgType = 29
-			write(deviceId);
-			write(deviceName);
- 
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
-			if(record != null){
-				txBuffer.append("> publishAttachedDevice");
-				txBuffer.append("/");
-				txBuffer.append(deviceId);
-				txBuffer.append("/");
-				txBuffer.append(deviceName);
-				txBuffer.append("\n");
-				record.write(txBuffer.toString().getBytes());
-				txBuffer.setLength(0);
-			}
-
-	  } catch (Exception e) {
-	  			log.error("publishAttachedDevice threw",e);
-	  }
-	}
-
 	public void publishDebug(String debugMsg/*str*/) {
 		try {
 		  if (ackEnabled){
@@ -997,7 +965,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + (1 + debugMsg.length())); // size
-			write(PUBLISH_DEBUG); // msgType = 30
+			write(PUBLISH_DEBUG); // msgType = 29
 			write(debugMsg);
  
      if (ackEnabled){
@@ -1026,7 +994,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + (1 + data.length)); // size
-			write(PUBLISH_PIN_ARRAY); // msgType = 31
+			write(PUBLISH_PIN_ARRAY); // msgType = 30
 			write(data);
  
      if (ackEnabled){
@@ -1055,7 +1023,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + 1 + (1 + data.length)); // size
-			write(PUBLISH_SERIAL_DATA); // msgType = 45
+			write(PUBLISH_SERIAL_DATA); // msgType = 44
 			write(deviceId);
 			write(data);
  
@@ -1087,7 +1055,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 2); // size
-			write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 49
+			write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 48
 			write(deviceId);
 			writeb16(echoTime);
  
@@ -1198,9 +1166,6 @@ public class VirtualMsg {
 		}
 		case PIN_MODE:{
 			return "pinMode";
-		}
-		case PUBLISH_ATTACHED_DEVICE:{
-			return "publishAttachedDevice";
 		}
 		case PUBLISH_DEBUG:{
 			return "publishDebug";
