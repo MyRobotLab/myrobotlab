@@ -66,6 +66,7 @@ public class IntegratedMovementGUI extends ServiceGUI implements ActionListener 
 	JButton stop = new JButton("Stop");
 	JButton process = new JButton("Process Kinect Data");
 	JComboBox<String> arm = new JComboBox<String>();
+	JButton visualize = new JButton("Visualize");
 
   public IntegratedMovementGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
@@ -91,6 +92,9 @@ public class IntegratedMovementGUI extends ServiceGUI implements ActionListener 
     }
     if (o == arm) {
     	myService.send(boundServiceName, "setCurrentArm", arm.getSelectedItem());
+    }
+    if (o == visualize) {
+    	myService.send(boundServiceName, "visualize");
     }
   }
 
@@ -164,6 +168,8 @@ public class IntegratedMovementGUI extends ServiceGUI implements ActionListener 
     line.add(arm);
     north.add(line);
     line = new JPanel();
+    visualize.addActionListener(this);
+    line.add(visualize);
     north.add(line);
     line = new JPanel();
     north.add(line);

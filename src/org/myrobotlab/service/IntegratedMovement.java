@@ -18,6 +18,7 @@ import org.myrobotlab.kinematics.Map3D;
 import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.kinematics.TestJmeIntegratedMovement;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -972,6 +973,13 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 	
 	public Collection<DHRobotArm> getArms() {
 		return this.arms.values();
+	}
+	
+	public void visualize() {
+		TestJmeIntegratedMovement app = new TestJmeIntegratedMovement();
+		app.setObjects(getCollisionObject());
+		app.start();
+
 	}
 }
 
