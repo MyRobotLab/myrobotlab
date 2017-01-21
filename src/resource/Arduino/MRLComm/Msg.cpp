@@ -100,8 +100,8 @@ Msg* Msg::getInstance() {
 	void setTrigger( byte pin,  byte triggerValue);
 	// > setDebounce/pin/delay
 	void setDebounce( byte pin,  byte delay);
-	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
-	void servoAttach( byte deviceId,  byte pin,  int initPos,  int initVelocity);
+	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
+	void servoAttach( byte deviceId,  byte pin,  int initPos,  int initVelocity,  byte nameSize, const char*name);
 	// > servoAttachPin/deviceId/pin
 	void servoAttachPin( byte deviceId,  byte pin);
 	// > servoDetachPin/deviceId
@@ -194,20 +194,10 @@ void Msg::publishI2cData( byte deviceId, const byte* data,  byte dataSize) {
   reset();
 }
 
-void Msg::publishAttachedDevice( byte deviceId, const char* deviceName,  byte deviceNameSize) {
-  write(MAGIC_NUMBER);
-  write(1 + 1 + (1 + deviceNameSize)); // size
-  write(PUBLISH_ATTACHED_DEVICE); // msgType = 29
-  write(deviceId);
-  write((byte*)deviceName, deviceNameSize);
-  flush();
-  reset();
-}
-
 void Msg::publishDebug(const char* debugMsg,  byte debugMsgSize) {
   write(MAGIC_NUMBER);
   write(1 + (1 + debugMsgSize)); // size
-  write(PUBLISH_DEBUG); // msgType = 30
+  write(PUBLISH_DEBUG); // msgType = 29
   write((byte*)debugMsg, debugMsgSize);
   flush();
   reset();
@@ -216,7 +206,7 @@ void Msg::publishDebug(const char* debugMsg,  byte debugMsgSize) {
 void Msg::publishPinArray(const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + (1 + dataSize)); // size
-  write(PUBLISH_PIN_ARRAY); // msgType = 31
+  write(PUBLISH_PIN_ARRAY); // msgType = 30
   write((byte*)data, dataSize);
   flush();
   reset();
@@ -225,7 +215,7 @@ void Msg::publishPinArray(const byte* data,  byte dataSize) {
 void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + 1 + (1 + dataSize)); // size
-  write(PUBLISH_SERIAL_DATA); // msgType = 45
+  write(PUBLISH_SERIAL_DATA); // msgType = 44
   write(deviceId);
   write((byte*)data, dataSize);
   flush();
@@ -235,7 +225,7 @@ void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
 void Msg::publishUltrasonicSensorData( byte deviceId,  int echoTime) {
   write(MAGIC_NUMBER);
   write(1 + 1 + 2); // size
-  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 49
+  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 48
   write(deviceId);
   writeb16(echoTime);
   flush();
@@ -449,7 +439,10 @@ void Msg::processCommand() {
 			startPos += 2; //b16
 			int initVelocity = b16(ioCmd, startPos+1);
 			startPos += 2; //b16
-			mrlComm->servoAttach( deviceId,  pin,  initPos,  initVelocity);
+			const char* name = (char*)ioCmd+startPos+2;
+			byte nameSize = ioCmd[startPos+1];
+			startPos += 1 + ioCmd[startPos+1];
+			mrlComm->servoAttach( deviceId,  pin,  initPos,  initVelocity,  nameSize, name);
 			break;
 	}
 	case SERVO_ATTACH_PIN: { // servoAttachPin

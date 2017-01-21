@@ -11,8 +11,8 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.RangeListener;
+import org.myrobotlab.service.interfaces.RangePublisher;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import org.slf4j.Logger;
  * UltrasonicSensor implements RangeListener just for testing purposes
  *
  */
-public class UltrasonicSensor extends Service implements RangeListener, UltrasonicSensorControl {
+public class UltrasonicSensor extends Service implements RangeListener, RangePublisher, UltrasonicSensorControl {
 
 	private static final long serialVersionUID = 1L;
 
@@ -42,13 +42,13 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
 	private Integer echoPin = null;
 	private String type = "SR04";
 
-	private Integer lastRaw;
-	private Integer lastRange;
+	private Double lastRaw;
+	private Double lastRange;
 
 	// for blocking asynchronous data
 	private boolean isBlocking = false;
 
-	transient private BlockingQueue<Integer> data = new LinkedBlockingQueue<Integer>();
+	transient private BlockingQueue<Double> data = new LinkedBlockingQueue<Double>();
 
 	private transient UltrasonicSensorController controller;
 
@@ -85,6 +85,7 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
 		peerController.connect(port);
 		// attach it
 		attach(peerController, trigPin, echoPin);
+		controller = peerController;
 	}
 
 	public void attach(UltrasonicSensorController controller, Integer trigPin, Integer echoPin) throws Exception {
@@ -128,12 +129,12 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
 	}
 
 	@Override
-	public void onRange(Long range) {
+	public void onRange(Double range) {
 		log.info(String.format("RANGE: %d", range));
 	}
 
 	/* FIXME !!! IMPORTANT PUT IN INTERFACE & REMOVE SELF FROM ARDUINO !!! */
-	public Integer publishRange(Integer range) {
+	public Double publishRange(Double range) {
 
 		++pings;
 
@@ -203,8 +204,9 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
     controller.detach(this);
     controller = null;
   }
-
-	public Integer onUltrasonicSensorData(Integer rawData) {
+  
+  @Override
+	public Double onUltrasonicSensorData(Double rawData) {
 		// data comes in 'raw' and leaves as Range
 		// TODO implement changes based on type of sensor SRF04 vs SRF05
 		// TODO implement units preferred
@@ -216,7 +218,7 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
 
 		++pings;
 		lastRaw = rawData;
-		Integer range = (int) (rawData * multiplier);
+		Double range = (rawData * multiplier);
 		if (isBlocking) {
 			try {
 				data.put(lastRaw);
@@ -239,51 +241,6 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
 		multiplier = 0.393701;
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.init();
-
-		try {
-
-			UltrasonicSensor srf04 = (UltrasonicSensor) Runtime.start("srf04", "UltrasonicSensor");
-			// Runtime.start("python", "Python");
-			// Runtime.start("gui", "GUIService");
-			Runtime.start("webgui", "WebGui");
-
-			int trigPin = 8;
-			int echoPin = 7;
-
-			// TODO test with externally supplied arduino
-
-			srf04.attach("COM10", trigPin, echoPin);
-
-			Arduino arduino = (Arduino) srf04.getController();
-			arduino.enableBoardInfo(true);
-			arduino.enableBoardInfo(false);
-			arduino.setDebug(false);
-
-			Servo servo = (Servo) Runtime.start("servo", "Servo");
-			servo.attach(arduino, 6);
-			servo.moveTo(30);
-
-			srf04.startRanging();
-
-			for (int i = 0; i < 100; ++i) {
-				servo.moveTo(30);
-				servo.moveTo(160);
-				servo.moveTo(10);
-				servo.moveTo(180);
-			}
-
-			arduino.setDebug(false);
-
-			srf04.stopRanging();
-
-			arduino.setDebug(false);
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
 
 	@Override
 	public boolean isAttached(String name) {
@@ -298,5 +255,55 @@ public class UltrasonicSensor extends Service implements RangeListener, Ultrason
     }
     return ret;
   }
+  
+  public static void main(String[] args) {
+    LoggingFactory.init("INFO");
+
+    try {
+
+      VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+      UltrasonicSensor srf04 = (UltrasonicSensor) Runtime.start("srf04", "UltrasonicSensor");
+      // Runtime.start("python", "Python");
+      Runtime.start("gui", "GUIService");
+      Runtime.start("webgui", "WebGui");
+
+      int trigPin = 8;
+      int echoPin = 7;
+
+      // TODO test with externally supplied arduino
+      // virtual.connect("COM10");
+
+      srf04.attach("COM5", trigPin, echoPin);
+
+      Arduino arduino = (Arduino) srf04.getController();
+      // arduino.enableBoardInfo(true);
+      // arduino.enableBoardInfo(false);
+      // arduino.setDebug(false);
+
+      Servo servo = (Servo) Runtime.start("servo", "Servo");
+      servo.attach(arduino, 6);
+      servo.moveTo(30);
+
+      srf04.startRanging();
+      
+
+      for (int i = 0; i < 100; ++i) {
+        servo.moveTo(30);
+        servo.moveTo(160);
+        servo.moveTo(10);
+        servo.moveTo(180);
+      }
+
+      arduino.setDebug(false);
+
+      srf04.stopRanging();
+
+      arduino.setDebug(false);
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
 
 }

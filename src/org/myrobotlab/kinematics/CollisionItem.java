@@ -257,4 +257,5 @@ public class CollisionItem {
   public boolean isFromKinect() {
   	return fromKinect;
   }
+  
 }

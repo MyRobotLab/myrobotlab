@@ -74,13 +74,13 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 
   @Override
   public void attachGUI() {
-    subscribe("publishPingdar", "onSinglePoint", Point.class);
+    subscribe("publishPingdar", "onPingdar", Point.class);
     // subscribe("publishSweepData", "publishSweepData", ArrayList.class);
   }
 
   @Override
   public void detachGUI() {
-    unsubscribe("publishPingdar", "onSinglePoint", Point.class);
+    unsubscribe("publishPingdar", "onPingdar", Point.class);
     // unsubscribe("publishSweepData", "publishSweepData", ArrayList.class);
   }
 
@@ -136,7 +136,7 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
     gc.gridy = 5;
   }
 
-  public Point onSinglePoint(Point p) {
+  public Point onPingdar(Point p) {
     int x;
     int y;
     int x0;

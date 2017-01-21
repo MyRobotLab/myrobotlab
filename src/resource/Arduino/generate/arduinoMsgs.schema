@@ -84,7 +84,8 @@
 > disablePin/pin
 > disablePins
 > pinMode/pin/mode
-< publishAttachedDevice/deviceId/str deviceName
+# no longer used
+# < publishAttachedDevice/deviceId/str deviceName
 < publishDebug/str debugMsg
 # devices now can easily publish on their own channels
 # generalized publishSensorData is deprecated
@@ -103,7 +104,7 @@
 # Servo
 # http://myrobotlab.org/service/Servo
 
-> servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
+> servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
 > servoAttachPin/deviceId/pin
 > servoDetachPin/deviceId
 > servoSetMaxVelocity/deviceId/b16 maxVelocity
