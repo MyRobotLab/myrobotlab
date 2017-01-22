@@ -60,6 +60,7 @@ import javax.swing.text.DefaultCaret;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.control.widget.DigitalButton;
 import org.myrobotlab.image.SerializableImage;
@@ -304,12 +305,13 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
       log.info("DigitalButton");
     }
     if (o == openMrlComm){
+      myService.send(boundServiceName, "setArduinoPath", arduinoPath.getText());
       myService.send(boundServiceName, "openMrlComm");
-      arduinoPath.setText(myArduino.arduinoPath);
     }
+    
     if (o == uploadMrlComm){
+      myService.send(boundServiceName, "setArdinoPath", arduinoPath.getText());
       uploadResult.setText("Uploading Sketch");
-      arduinoPath.setText(myArduino.arduinoPath);
       myService.send(boundServiceName, "uploadSketch",arduinoPath.getText(),ports.getText(),boardType.getText());
     }
   }
@@ -730,6 +732,10 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
         	  version.setText("unkown");
           } else {
         	  version.setText("" + boardInfo.getVersion());
+          }
+          
+          if (Arduino.getArduinoPath() != null){
+            arduinoPath.setText(Arduino.getArduinoPath());
           }
 
           // update panels based on state change
