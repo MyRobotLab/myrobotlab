@@ -305,9 +305,11 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
     }
     if (o == openMrlComm){
       myService.send(boundServiceName, "openMrlComm");
+      arduinoPath.setText(myArduino.arduinoPath);
     }
     if (o == uploadMrlComm){
       uploadResult.setText("Uploading Sketch");
+      arduinoPath.setText(myArduino.arduinoPath);
       myService.send(boundServiceName, "uploadSketch",arduinoPath.getText(),ports.getText(),boardType.getText());
     }
   }

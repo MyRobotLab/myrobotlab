@@ -14,6 +14,8 @@ class MrlUltrasonicSensor : public Device {
     unsigned int maxDistanceCm;
     bool isRanging = false;
 
+    unsigned long lastDistance;
+
     NewPing* newping;
 
     MrlUltrasonicSensor(int deviceId);
