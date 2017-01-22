@@ -103,7 +103,7 @@ public class ArduinoUtils {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	protected static String runCommand(String program, ArrayList<String> args) throws InterruptedException {
+	public static String runCommand(String program, ArrayList<String> args) throws InterruptedException {
 
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(program);
