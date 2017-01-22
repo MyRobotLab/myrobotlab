@@ -128,6 +128,10 @@ public class IntegratedMovementGUI extends ServiceGUI implements ActionListener 
 	  			moveLocation[i].setVisible(true);
 	  			move[i].setVisible(true);
 	  		}
+	  		else {
+	  			moveLocation[i].setVisible(false);
+	  			move[i].setVisible(false);
+	  		}
 	  		i++;
   		}
   	}
