@@ -146,8 +146,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   /**
    * path of the Arduino IDE must be set by user
+   * should not be static - since gson will not serialize it,
+   * and it won't be 'saved()'
    */
-  static public String arduinoPath;
+  public String arduinoPath;
 
   transient Map<Integer, Arduino> attachedController = new ConcurrentHashMap<Integer, Arduino>();
 
@@ -1962,11 +1964,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.servoSetAcceleration(getDeviceId(servo), (int) servo.getAcceleration());
   }
   
-  static public void setArduinoPath(String path){
+  public void setArduinoPath(String path){
     arduinoPath = path;
   }
   
-  static public String getArduinoPath(){
+  public String getArduinoPath(){
     return arduinoPath;
   }
   
