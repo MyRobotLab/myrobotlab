@@ -436,6 +436,7 @@ public class ArduinoTest implements PinArrayListener {
 	@Test
 	public void testOnSensorData() {
 		// fail("Not yet implemented");
+	  log.info("testOnSensorData");
 	}
 
 	@Test

@@ -147,7 +147,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   /**
    * path of the Arduino IDE must be set by user
    */
-  public String arduinoPath;
+  static public String arduinoPath;
 
   transient Map<Integer, Arduino> attachedController = new ConcurrentHashMap<Integer, Arduino>();
 
@@ -1959,8 +1959,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   @Override
   public void servoSetAcceleration(ServoControl servo) {
-    // TODO Auto-generated method stub
     msg.servoSetAcceleration(getDeviceId(servo), (int) servo.getAcceleration());
+  }
+  
+  static public void setArduinoPath(String path){
+    arduinoPath = path;
+  }
+  
+  static public String getArduinoPath(){
+    return arduinoPath;
   }
   
   public static void main(String[] args) {
@@ -1972,6 +1979,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      
+      boolean done = true;
+      if (done){
+        return;
+      }
+      
       Serial serial = arduino.getSerial();
       // Runtime.start("gui", "GUIService");
       // List<String> ports = serial.getPortNames();
@@ -1983,11 +1996,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // arduino.setBoardMega();
       arduino.connect("COM5");
       // arduino.enablePin(54);
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // arduino.uploadSketch("C:\\tools\\arduino-1.6.9");
 
