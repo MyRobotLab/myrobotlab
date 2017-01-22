@@ -6,12 +6,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Arduino;
 import org.slf4j.Logger;
 
-import com.sun.jna.Platform;
 
 public class ArduinoUtils {
 
@@ -29,7 +28,8 @@ public class ArduinoUtils {
 	public static int exitValue;
 
 	static public String getExeName() {
-		if (Platform.isMac()) {
+	  Platform platform = Platform.getLocalInstance();
+		if (platform.isMac()) {
 			return "Arduino";
 		}
 
