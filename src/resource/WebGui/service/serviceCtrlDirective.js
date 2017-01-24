@@ -14,11 +14,7 @@ angular.module('mrlapp.service')
                             return angular.isUndefined(val) || val === null;
                         };
 
-                        scope.panelconfig = {};
-                        scope.panelconfig.setPanelCount = function (number) {
-                            $log.info('setting panelcount', number);
-                            serviceSvc.notifyPanelCountChanged(scope.panel.name, number);
-                        };
+                        scope.panelconfig = {};                       
 
                         //prepare dynamic controller injection
                         var html = '<div service-ctrl-next '

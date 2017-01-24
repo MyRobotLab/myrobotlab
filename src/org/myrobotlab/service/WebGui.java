@@ -53,8 +53,6 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 //import org.myrobotlab.webgui.WebGUIServlet;
 import org.slf4j.Logger;
 
-import com.google.gson.JsonSyntaxException;
-
 /**
  * 
  * WebGui - This service is the AngularJS based GUI TODO - messages & services
@@ -502,6 +500,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 			// good debug material
 			// log.info("sessionId {}", r);
+			// String sessionId = request.getSession(true).getId(); 
 			if (log.isDebugEnabled()) {
 				String sessionId = r.getAtmosphereResourceEvent().getResource().getRequest().getSession().getId();
 				log.debug("sessionId {}", sessionId);
