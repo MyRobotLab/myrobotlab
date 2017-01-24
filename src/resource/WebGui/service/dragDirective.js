@@ -16,7 +16,7 @@ angular.module('mrlapp.service')
                                 // Prevent default dragging of selected content
                                 event.preventDefault();
 
-                                serviceSvc.putPanelZIndexOnTop(scope.panel.name, scope.panel.panelname);
+                                serviceSvc.putPanelZIndexOnTop(scope.panel.name);
 
                                 element.css({
                                     cursor: 'move'
@@ -32,9 +32,10 @@ angular.module('mrlapp.service')
                             scope.panel.notifyPositionChanged();
                         }
 
-                        function mouseup() {
+                        function mouseup(event) {
                             $document.off('mousemove', mousemove);
                             $document.off('mouseup', mouseup);
+                            // TODO send change of position to WebGui !!!
                             element.css({
                                 cursor: 'auto'
                             });

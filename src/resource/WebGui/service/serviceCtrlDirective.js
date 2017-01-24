@@ -19,14 +19,6 @@ angular.module('mrlapp.service')
                             $log.info('setting panelcount', number);
                             serviceSvc.notifyPanelCountChanged(scope.panel.name, number);
                         };
-                        scope.panelconfig.setPanelNames = function (names) {
-                            $log.info('setting panelnames', names);
-                            serviceSvc.notifyPanelNamesChanged(scope.panel.name, names);
-                        };
-                        scope.panelconfig.setPanelShowNames = function (show) {
-                            $log.info('setting panelshownames', show);
-                            serviceSvc.notifyPanelShowNamesChanged(scope.panel.name, show);
-                        };
 
                         //prepare dynamic controller injection
                         var html = '<div service-ctrl-next '
@@ -36,7 +28,7 @@ angular.module('mrlapp.service')
                                 + 'msginterface="msginterface" '
                                 + 'msgmethods="msgmethods" '
                                 + 'panelconfig="panelconfig" '
-                                + 'size="panel.size" panelname="panel.panelname" cb="cb"'
+                                + 'size="panel.size" cb="cb"'
                                 + '></div>';
 
 
@@ -45,10 +37,10 @@ angular.module('mrlapp.service')
                         }, function () {
                             if (!isUndefinedOrNull(scope.panel.templatestatus) && scope.panel.templatestatus == 'loaded') {
                                 watch();
-                                $log.info('deps loaded, start ctrl', scope.panel.name, scope.panel.panelname);
+                                $log.info('deps loaded, start ctrl', scope.panel.name);
 
                                 mrl.createMsgInterface(scope.panel.name).then(function (msg_) {
-                                    $log.info('msgInterface received', scope.panel.name, scope.panel.panelname);
+                                    $log.info('msgInterface received', scope.panel.name);
                                     scope.panel.msg_ = msg_;
                                     scope.msginterface = msg_;
                                     scope.msgmethods = msg_.temp.msg;

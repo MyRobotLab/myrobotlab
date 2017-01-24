@@ -79,14 +79,14 @@ angular.module('mrlapp.nav')
                     //expand panel if minified
                     if (item.list == 'min') {
                         item.panelsize.aktsize = item.panelsize.oldsize;
-                        serviceSvc.movePanelToList(item.name, item.panelname, 'main');
+                        serviceSvc.movePanelToList(item.name);
                     }
                     //show panel if hidden
                     if (item.hide) {
                         item.hide = false;
                     }
                     //put panel on top
-                    serviceSvc.putPanelZIndexOnTop(item.name, item.panelname);
+                    serviceSvc.putPanelZIndexOnTop(item.name);
                     item.notifyZIndexChanged();
                     //move panel to top of page
                     item.posx = 15;

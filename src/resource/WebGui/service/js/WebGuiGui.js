@@ -15,6 +15,7 @@ angular.module('mrlapp.service.WebGuiGui', [])
 
                 // init scope variables
                 $scope.pulseData = '';
+                //$scope.saveP
 
                 this.onMsg = function (inMsg) {
                     switch (inMsg.method) {
