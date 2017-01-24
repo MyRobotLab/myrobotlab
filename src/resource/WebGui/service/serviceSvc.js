@@ -1,5 +1,6 @@
 angular.module('mrlapp.service').service('serviceSvc', ['mrl', '$log', '$http', '$templateCache', '$timeout', '$ocLazyLoad', '$q', function(mrl, $log, $http, $templateCache, $timeout, $ocLazyLoad, $q) {
     var _self = this;
+    // all the gui info regarding a panel
     _self.panels = {};
     var ready = false;
     var deferred;
@@ -78,13 +79,11 @@ angular.module('mrlapp.service').service('serviceSvc', ['mrl', '$log', '$http', 
         }
         ;
         var addPanel = function(service) {
-            var panelname = 'main';
-            
-            if (_self.panels.hasOwnProperty(service.name)){
+            //var panelname = 'main';
+            if (_self.panels.hasOwnProperty(service.name)) {
                 $log.warn(service.name + ' already has panel');
                 return;
             }
-
             lastPosY += 40;
             var posy = lastPosY;
             //zindex
@@ -109,16 +108,20 @@ angular.module('mrlapp.service').service('serviceSvc', ['mrl', '$log', '$http', 
                 size: 'free',
                 height: 0,
                 //the height of this panel
-                width: 800, // TODO - getPreferredWidth
-                posx: 15, // TODO - load() posx ?
+                width: 800,
+                // TODO - getPreferredWidth
+                posx: 15,
+                // TODO - load() posx ?
                 //the x-position of this panel
-                posy: posy, // TODO - load posy
+                posy: posy,
+                // TODO - load posy
                 //the y-position of this panel
-                zindex: zindex, // TODO - load posy
+                zindex: zindex,
+                // TODO - load posy
                 //the zindex of this panel
                 hide: false //if this panel should be hidden // TODO -load hide...
             };
-            service.panels[panelname] = _self.panels[service.name];
+            service.panels['main'] = _self.panels[service.name];
         };
         _self.addService = function(name, temp) {
             //create a new service and load it's template (and create it's panels)
@@ -133,7 +136,7 @@ angular.module('mrlapp.service').service('serviceSvc', ['mrl', '$log', '$http', 
                 //the state the loading of the template is in (loading, loaded, notfound)
                 panelcount: 1,
                 //number of panels this service owns
-                panelnames: null,
+                //panelnames: null,
                 //which panels should show their name?
                 //                            panelsizes: null, //what sizes do the panels have
                 panels: {},
@@ -176,6 +179,7 @@ angular.module('mrlapp.service').service('serviceSvc', ['mrl', '$log', '$http', 
             notifyAllOfUpdate();
         }
         ;
+        // TODO remove it then - if it will be abused ... 
         _self.controllerscope = function(name, scope) {
             //puts a reference to the scope of a service
             //in the service & it's panels
@@ -187,48 +191,6 @@ angular.module('mrlapp.service').service('serviceSvc', ['mrl', '$log', '$http', 
             for (var panel in services[name].panels) {
                 _self.panels[name].scope = scope;
             }
-        }
-        ;
-        _self.notifyPanelCountChanged = function(name, count) {
-            //service want's to change the amount of panels
-            var oldcount = services[name].panelcount;
-            $log.info('notifyPanelCountChanged', name, oldcount, count);
-            if (oldcount != count) {
-                services[name].panelcount = count;
-                var diff = count - oldcount;
-                if (diff < 0) {
-                    for (var i = oldcount - 1; i > count - 1; i++) {
-                        var panelname;
-                        if (isUndefinedOrNull(services[name].panelnames) || isUndefinedOrNull(services[name].panelnames[i])) {
-                            panelname = 'panel' + i.toString();
-                        } else {
-                            panelname = services[name].panelnames[i];
-                        }
-                        delete _self.panels[name];
-                    }
-                } else if (diff > 0) {
-                    var serviceexp = services[name];
-                    for (var i = oldcount; i < count; i++) {
-                        addPanel(serviceexp, i);
-                    }
-                }
-                notifyAllOfUpdate();
-            } else {//Huh?!
-            //oldNumber == newNumber -> ??? - Are you serious?
-            }
-        }
-        ;
-        _self.notifyPanelNamesChanged = function(name, names) {
-            //service want's to change the panel-names
-            $log.info('notifyPanelNamesChanged', name, names);
-            var counter = 0;            
-            services[name].panels = {};
-            angular.forEach(_self.panels, function(value, key) {
-                if (value.name == name) {
-                    services[name].panels[value.panelname] = _self.panels[name];
-                }
-            });
-            services[name].panelnames = names;
         }
         ;
         _self.putPanelZIndexOnTop = function(name, panelname) {
@@ -332,9 +294,7 @@ angular.module('mrlapp.service').service('serviceSvc', ['mrl', '$log', '$http', 
             }
         }
         ready = true;
-        //                    if (isUndefinedOrNull(deferred)) {
-        //                        deferred.resolve();
-        //                    }
-    };
+       
+    }; // end of function run()
 }
 ]);

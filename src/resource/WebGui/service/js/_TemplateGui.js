@@ -12,12 +12,7 @@ angular.module('mrlapp.service.TemplateGui', [])
                 // get fresh copy
                 $scope.service = mrl.getService($scope.service.name);
                 
-                _self.updateState($scope.service);
-
-                //$scope.service is your service-object, it is the representation of the service running in mrl
-
-                //with this method, you can set how many panels you would like to show
-                this.panelconfig.setPanelCount(1);
+                _self.updateState($scope.service);           
                 
                 //set custom-sizes
                 this.panelconfig.setPanelSizes({
