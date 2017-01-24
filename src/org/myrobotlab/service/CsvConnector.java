@@ -14,7 +14,7 @@ import org.myrobotlab.string.StringUtil;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-public class CSVConnector extends AbstractConnector {
+public class CsvConnector extends AbstractConnector {
 
   private static final long serialVersionUID = 1L;
   private String filename;
@@ -27,7 +27,7 @@ public class CSVConnector extends AbstractConnector {
   private int skipRows = 1;
   private boolean firstRowAsColumns = false;
 
-  public CSVConnector(String name) {
+  public CsvConnector(String name) {
     super(name);
   }
 
@@ -230,7 +230,7 @@ public class CSVConnector extends AbstractConnector {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(CSVConnector.class.getCanonicalName());
+    ServiceType meta = new ServiceType(CsvConnector.class.getCanonicalName());
     meta.addDescription("This service crawls a csv file and publishes each row as a document");
     meta.addCategory("ingest");
     return meta;

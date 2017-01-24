@@ -18,10 +18,7 @@ angular.module('mrlapp.service.TemplateGui', [])
 
                 //with this method, you can set how many panels you would like to show
                 this.panelconfig.setPanelCount(1);
-                //set custom panel-names
-                this.panelconfig.setPanelNames(['me1', 'me2', 'me3']);
-                //set if panel-name should be shown or hidden (true->show)
-                this.panelconfig.setPanelShowNames({me1: false, me2: true, me3: false});
+                
                 //set custom-sizes
                 this.panelconfig.setPanelSizes({
                     me1: {
