@@ -151,17 +151,17 @@ angular.module('mrlapp.service').service('serviceSvc', ['mrl', '$log', '$http', 
                 $http.get('service/views/' + services[name].simpleName + 'Gui.html').then(function(response) {
                     $templateCache.put(services[name].simpleName + 'Gui.html', response.data);
                     services[name].templatestatus = 'loaded';
-                    addPanel(services[name], 0);
+                    addPanel(services[name]);
                     notifyAllOfUpdate();
                 }, function(response) {
                     services[name].templatestatus = 'notfound';
-                    addPanel(services[name], 0);
+                    addPanel(services[name]);
                     notifyAllOfUpdate();
                 });
             }, function(e) {
                 $log.warn('lazy-loading wasnt successful:', services[name].simpleName);
                 services[name].templatestatus = 'notfound';
-                addPanel(services[name], 0);
+                addPanel(services[name]);
                 notifyAllOfUpdate();
             });
         }
@@ -170,9 +170,10 @@ angular.module('mrlapp.service').service('serviceSvc', ['mrl', '$log', '$http', 
             //remove a service and it's panels
             $log.info('removing service', name);
             //remove panels
-            for (var panel in services[name].panels) {
-                delete panels[name];
+            if (name in _self.panels){
+                delete _self.panels[name];
             }
+            
             //remove service
             delete services[name];
             //update !
@@ -188,9 +189,10 @@ angular.module('mrlapp.service').service('serviceSvc', ['mrl', '$log', '$http', 
             //->and should otherwise only be used in VERY SPECIAL cases !!!
             $log.info('registering controllers scope', name, scope);
             services[name].scope = scope;
-            for (var panel in services[name].panels) {
-                _self.panels[name].scope = scope;
+            if ('scope' in _self.panels[name]){
+                $log.warn('replacing an existing scope for ' + name);
             }
+            _self.panels[name].scope = scope;
         }
         ;
         _self.putPanelZIndexOnTop = function(name, panelname) {

@@ -71,7 +71,7 @@ angular.module('mrlapp.service')
                         console.log(scope.name, 'serviceCtrlNext-link');
 
 //                        mrl.subscribeToService(scope.guictrl.onMsg, scope.name);
-                        serviceSvc.controllerscope(scope.name, scope);
+                         serviceSvc.controllerscope(scope.name, scope);
                     }
                 };
             }]);

@@ -16,7 +16,7 @@ angular.module('mrlapp.views')
                         $scope.panels = $filter('panellist')($scope.allpanels, 'main');
                         $log.info('panels-main', $scope.panels);
                         if ($scope.view_tab == 'default' && !isUndefinedOrNull($scope.panels) && !isUndefinedOrNull($scope.panels[0])) {
-                            $scope.view_tab = $scope.panels[0].name + '/' + $scope.panels[0].panelname;
+                            $scope.view_tab = $scope.panels[0].name;
                         }
                     });
                 };
