@@ -59,7 +59,7 @@ const String BufferLabel = "buffer:";
 
 bool i2cInitiated = false;
   
-int16_t bus;
+int16_t bus = 0;
 int16_t device;
 int16_t size; 
 String i2cBuffer;  
@@ -114,11 +114,53 @@ void loop() {
   Response when accessing the esp8266-01 root
 */ 
 void rootResponse(){
-    
-  String msg = "Welcome to <b>ESP8266</b> and the <b>i2c interface</b><p><b>Hostname: </b>";
+
+  Serial.println("rootResponse");
+  int error;
+  int nDevices; 
+
+  String msg = "<!DOCTYPE html><html><head><style>table, th, td {border: 1px solid black;border-collapse: collapse;}</style></head><body>";
+  msg = msg + "Welcome to <b>ESP8266</b> and the <b>i2c interface</b><p><b>Hostname: </b>";
   msg = msg + String(hostName);
   msg = msg + "<p><b>Ip-address: </b>";
   msg = msg +  DisplayAddress(ipaddress);
+  msg = msg + "<p>";
+  msg = msg + "<table><tr><th><b>Address</b></th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>a</th><th>b</th><th>c</th><th>d</th><th>e</th><th>f</th>" ;
+  // Loop over all i2c addresses to create a map of all connected devices
+  Serial.println("Scanning i2c devices");
+  if (!i2cInitiated) i2cBegin(bus);
+  nDevices = 0;
+  for(int address = 0; address < 127; address++ ){
+    Serial.println(address);
+    // The i2c_scanner uses the return value of
+    // the Write.endTransmisstion to see if
+    // a device did acknowledge to the address.
+    // if (address == 0){msg = msg + "<tr>";}
+    if (address % 16 == 0){msg = msg + "</tr><tr><td></td>";}
+
+    if (address > 3){
+      Wire.beginTransmission(address);
+      error = Wire.endTransmission();
+    }
+    else {
+      error = 4;
+    }
+     
+    if (error == 0){
+      if (address<16){
+        msg = msg + "<td>0x0" + String(address, HEX) + "</td>";
+        }
+      else{
+        msg = msg + "<td>0x" + String(address, HEX) + "</td>";
+        }
+      nDevices++;
+      }
+    else {
+        msg = msg + "<td>----</td>";
+      }  
+    }
+
+  msg = msg + "<td>----</td></tr></table></body>";
   server.send(200, "text/html", msg); 
 } 
 
@@ -282,4 +324,3 @@ void i2cBegin(int16_t bus){
   }
   i2cInitiated = true;
 }
-
