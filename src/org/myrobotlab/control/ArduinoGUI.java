@@ -67,6 +67,7 @@ import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.PinDefinition;
 
@@ -304,9 +305,12 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
       log.info("DigitalButton");
     }
     if (o == openMrlComm){
+      myService.send(boundServiceName, "setArduinoPath", arduinoPath.getText());
       myService.send(boundServiceName, "openMrlComm");
     }
+    
     if (o == uploadMrlComm){
+      myService.send(boundServiceName, "setArduinoPath", arduinoPath.getText());
       uploadResult.setText("Uploading Sketch");
       myService.send(boundServiceName, "uploadSketch",arduinoPath.getText(),ports.getText(),boardType.getText());
     }
@@ -729,6 +733,16 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
           } else {
         	  version.setText("" + boardInfo.getVersion());
           }
+          
+          
+          arduinoPath.setText(myArduino.getArduinoPath());
+          
+          Serial serial = myArduino.getSerial();
+          
+          if (serial != null){
+            ports.setText(serial.getLastPortName());
+          }
+          
 
           // update panels based on state change
           // TODO - check what state the panels are to see if a

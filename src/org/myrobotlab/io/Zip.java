@@ -121,15 +121,15 @@ public class Zip {
 
   // e.g. Zip.extractFromFile("./myrobotlab.jar", "./", "resource");
   static public void extractFromFile(String resourcePath, String targetDirectory, String filter) throws IOException {
-    extract(resourcePath, targetDirectory, filter, FILE, false);
+    extract(resourcePath, targetDirectory, filter, FILE, true);
   }
 
   static public void extractFromResource(String resourcePath, String targetDirectory) throws IOException {
-    extract(resourcePath, targetDirectory, null, RESOURCE, false);
+    extract(resourcePath, targetDirectory, null, RESOURCE, true);
   }
 
   static public void extractFromResource(String resourcePath, String targetDirectory, String filter) throws IOException {
-    extract(resourcePath, targetDirectory, filter, RESOURCE, false);
+    extract(resourcePath, targetDirectory, filter, RESOURCE, true);
   }
 
   static public void extractFromSelf() throws IOException {

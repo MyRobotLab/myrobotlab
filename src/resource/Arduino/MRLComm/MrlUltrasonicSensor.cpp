@@ -5,6 +5,7 @@
 MrlUltrasonicSensor::MrlUltrasonicSensor(int deviceId) :
 		Device(deviceId, DEVICE_TYPE_ULTRASONICSENSOR) {
 	msg->publishDebug("ctor NewPing " + String(deviceId));
+	lastDistance = 0;
 }
 
 MrlUltrasonicSensor::~MrlUltrasonicSensor() {
@@ -32,6 +33,12 @@ void MrlUltrasonicSensor::update() {
 	if (!isRanging) {
 		return;
 	}
-	msg->publishUltrasonicSensorData(id, newping->ping_cm());
+	unsigned long distance = newping->ping_cm();
+
+	if (lastDistance != distance){
+		msg->publishUltrasonicSensorData(id, distance);
+	}
+
+	lastDistance = distance;
 }
 
