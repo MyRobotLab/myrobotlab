@@ -281,6 +281,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
             newPos.setY(newPos.getY() + vector[1]);
             newPos.setZ(newPos.getZ() + vector[2]);
         	}
+        	this.outbox.notify();
           Point oldGoTo = goTo;
           if(!stopMoving) moveTo(newPos);
           goTo = oldGoTo;
