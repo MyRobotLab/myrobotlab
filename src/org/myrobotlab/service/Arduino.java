@@ -4,6 +4,7 @@ import static org.myrobotlab.arduino.Msg.MAGIC_NUMBER;
 import static org.myrobotlab.arduino.Msg.MAX_MSG_SIZE;
 import static org.myrobotlab.arduino.Msg.MRLCOMM_VERSION;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.i2c.I2CBus;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -122,7 +124,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     meta.addPeer("serial", "Serial", "serial device for this Arduino");
     return meta;
   }
-  
+
   /**
    * degreeToMicroseconds - convert a value to send to servo from degree (0-180)
    * to microseconds (544-2400)
@@ -135,79 +137,17 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // this is a good idea, if they want to use microseconds - then let them use
     // the controller.servoWriteMicroseconds method
     // this method vs mapping I think was a good idea.. :)
-    return (int)Math.round((degree * (2400 - 544) / 180) + 544);
+    return (int) Math.round((degree * (2400 - 544) / 180) + 544);
   }
 
-  public static void main(String[] args) {
-    try {
-
-      LoggingFactory.init(Level.INFO);
-
-      Runtime.start("webgui", "WebGui");
-      Runtime.start("gui", "GUIService");
-      Runtime.start("python", "Python");
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      Serial serial = arduino.getSerial();
-      // Runtime.start("gui", "GUIService");
-      // List<String> ports = serial.getPortNames();
-      // log.info(Arrays.toString(ports.toArray()));
-      // arduino.setBoardMega();
-      // log.info(arduino.getBoardType());
-      // if connect - possibly you can set the board type correctly
-      // arduino.getBoardInfo();
-      // arduino.setBoardMega();
-      arduino.connect("COM5");
-      // arduino.enablePin(54);
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      // arduino.uploadSketch("C:\\tools\\arduino-1.6.9");
-
-      Servo servo = (Servo) Runtime.start("servo", "Servo");
-      // Runtime.start("gui", "GUIService");
-      servo.attach(arduino, 7);
-      // servo.detach(arduino);
-      servo.attach(9);
-
-      // servo.detach(arduino);
-      // arduino.servoDetach(servo); Arduino power save - "detach()"
-
-      servo.moveTo(0);
-      servo.moveTo(180);
-      servo.setInverted(true);
-      servo.moveTo(0);
-      servo.moveTo(180);
-      servo.setInverted(true);
-      servo.moveTo(0);
-      servo.moveTo(180);
-      // arduino.attachDevice(servo, null);
-      // servo.attach();
-      int angle = 0;
-      int max = 5000;
-      while (true) {
-        // System.out.println(angle);
-        angle++;
-        servo.moveTo(angle % 180);
-        if (angle > max) {
-          break;
-        }
-      }
-      System.out.println("done with loop..");
-      log.info("here");
-
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
 
   // FIXME - not working correctly yet
   // boolean ackEnabled = true;
 
   /**
    * path of the Arduino IDE must be set by user
+   * should not be static - since gson will not serialize it,
+   * and it won't be 'saved()'
    */
   public String arduinoPath;
 
@@ -381,8 +321,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       return;
     }
     if (controllerAttachAs != MRL_IO_NOT_DEFINED) {
-    	log.info("controller already attached");
-    	return;
+      log.info("controller already attached");
+      return;
     }
     SerialRelay relay = (SerialRelay) Runtime.createAndStart("relay", "SerialRelay");
     switch (serialPort) {
@@ -401,7 +341,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     }
     relay.attach(controller, this, controllerAttachAs);
     msg = new Msg(this, relay);
-    msg.softReset(); // needed because there is no serial connect <- GroG says - this is heavy handed no?
+    msg.softReset(); // needed because there is no serial connect <- GroG says -
+                     // this is heavy handed no?
     enableBoardInfo(true); // start the heartbeat getBoardInfo
     msg.getBoardInfo();
     log.info("waiting for boardInfo lock..........");
@@ -477,7 +418,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // have a DTR CDR line in the virtual port as use this as a signal
       // of
       // connection
-      
+
       // by default ack'ing is now on..
       // but with this first msg there is no msg before it,
       // and there is a high probability that the board is not really ready
@@ -486,7 +427,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       msg.enableAcks(false);
       enableBoardInfo(true); // start the heartbeat getBoardInfo
       msg.getBoardInfo();
-      
 
       log.info("waiting for boardInfo lock..........");
       synchronized (boardInfo) {
@@ -509,7 +449,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       } else {
         info("%s connected on %s responded version %s ... goodtimes...", serial.getName(), serial.getPortName(), version);
       }
-      
+
       msg.enableAcks(true);
 
     } catch (Exception e) {
@@ -665,14 +605,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // > enableBoardInfo/bool enabled
   public void enableBoardInfo(Boolean enabled) {
     // msg.enableBoardInfo(enabled);
-    if (enabled){
+    if (enabled) {
       addTask("getBoardInfo", 1000, "sendBoardInfoRequest");
     } else {
       purgeTask("getBoardInfo");
     }
-    
+
   }
-  
+
   // > enablePin/address/type/b16 rate
   public void enablePin(int address) {
     enablePin(address, 0);
@@ -713,8 +653,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // msg.getBoardInfo();
     return boardInfo;
   }
-  
-  public void sendBoardInfoRequest(){
+
+  public void sendBoardInfoRequest() {
     boardInfoRequestTs = System.currentTimeMillis();
     msg.getBoardInfo();
   }
@@ -802,21 +742,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    */
   // > heartbeat
   /*
-  public void heartbeat() {
-    if (!heartbeat) {
-      log.info("No answer from controller:{}. Disconnecting...", this.getName());
-      purgeTask("heartbeat");
-      if (isConnected()) {
-        disconnect();
-      }
-    }
-
-    // resetting to false - publishHeartbeat will set to
-    // true (hopefully before the next heartbeat)
-    heartbeat = false;
-    msg.heartbeat();
-  }
-  */
+   * public void heartbeat() { if (!heartbeat) { log.info(
+   * "No answer from controller:{}. Disconnecting...", this.getName());
+   * purgeTask("heartbeat"); if (isConnected()) { disconnect(); } }
+   * 
+   * // resetting to false - publishHeartbeat will set to // true (hopefully
+   * before the next heartbeat) heartbeat = false; msg.heartbeat(); }
+   */
 
   @Override
   public void i2cAttach(I2CControl control, int busAddress, int deviceAddress) {
@@ -1206,24 +1138,19 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
         // Our 'first' getBoardInfo may not receive a acknowledgement
         // so this should be disabled until boadInfo is valid
-        
-/** acking is done in Msg  !
-        if (boardInfo.isValid() && ackEnabled) {
-          synchronized (ackRecievedLock) {
-            try {
-              long ts = System.currentTimeMillis();
-              log.info("***** starting wait *****");
-              ackRecievedLock.wait(10000);
-              log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
-            } catch (InterruptedException e) {// don't care}
-            }
 
-            if (!ackRecievedLock.acknowledged) {
-              log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
-            }
-          }
-        }
-***/        
+        /**
+         * acking is done in Msg ! if (boardInfo.isValid() && ackEnabled) {
+         * synchronized (ackRecievedLock) { try { long ts =
+         * System.currentTimeMillis(); log.info("***** starting wait *****");
+         * ackRecievedLock.wait(10000); log.info("*****  waited {} ms *****",
+         * (System.currentTimeMillis() - ts)); } catch (InterruptedException e)
+         * {// don't care} }
+         * 
+         * if (!ackRecievedLock.acknowledged) { log.error(
+         * "Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck); }
+         * } }
+         ***/
 
         // clean up memory/buffers
         msgSize = 0;
@@ -1309,35 +1236,36 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // < publishAck/function
   public void publishAck(Integer function/* byte */) {
     log.debug("Message Ack received: =={}==", Msg.methodToString(function));
-    
+
     msg.ackReceived(function);
-    
+
     numAck++;
     heartbeat = true;
   }
 
-  /** No longer needed .. Arduino service controls device list - MrlComm does not
-  public String publishAttachedDevice(int deviceId, String deviceName) {
+  /**
+   * No longer needed .. Arduino service controls device list - MrlComm does not
+   * public String publishAttachedDevice(int deviceId, String deviceName) {
+   * 
+   * if (!deviceList.containsKey(deviceName)) { error(
+   * "PUBLISH_ATTACHED_DEVICE deviceName %s not found !", deviceName); }
+   * 
+   * DeviceMapping deviceMapping = deviceList.get(deviceName);
+   * deviceMapping.setId(deviceId); deviceIndex.put(deviceId,
+   * deviceList.get(deviceName));
+   * 
+   * // REMOVE invoke("publishAttachedDevice", deviceName);
+   * 
+   * info("==== ATTACHED DEVICE %s WITH MRLDEVICE %d ====", deviceName,
+   * deviceId);
+   * 
+   * return deviceName; }
+   */
 
-    if (!deviceList.containsKey(deviceName)) {
-      error("PUBLISH_ATTACHED_DEVICE deviceName %s not found !", deviceName);
-    }
-
-    DeviceMapping deviceMapping = deviceList.get(deviceName);
-    deviceMapping.setId(deviceId);
-    deviceIndex.put(deviceId, deviceList.get(deviceName));
-
-    // REMOVE
-    invoke("publishAttachedDevice", deviceName);
-
-    info("==== ATTACHED DEVICE %s WITH MRLDEVICE %d ====", deviceName, deviceId);
-
-    return deviceName;
-  }
-  */
-
-  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[] deviceSummary
-  public BoardInfo publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins, int[] deviceSummary/*[]*/) {
+  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[]
+  // deviceSummary
+  public BoardInfo publishBoardInfo(Integer version/* byte */, Integer boardType/* byte */, Integer microsPerLoop/* b16 */, Integer sram/* b16 */, Integer activePins,
+      int[] deviceSummary/* [] */) {
     long now = System.currentTimeMillis();
     boolean broadcast = false;
     if (version != boardInfo.getVersion() || boardType != boardInfo.getBoardType()) {
@@ -1372,7 +1300,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return boardInfo;
   }
 
-  DeviceSummary[] arrayToDeviceSummary(int []deviceSummary){
+  DeviceSummary[] arrayToDeviceSummary(int[] deviceSummary) {
     DeviceSummary[] ds = new DeviceSummary[deviceSummary.length / 2];
     for (int i = 0; i < deviceSummary.length / 2; ++i) {
       int id = deviceSummary[i];
@@ -1382,16 +1310,19 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     }
     return ds;
   }
-  
+
   // < publishBoardStatus/b16 microsPerLoop/b16 sram/[] deviceSummary
-  // public BoardStatus publishBoardStatus(Integer microsPerLoop/* b16 */, Integer sram/* b16 */, int[] deviceSummary/* byte */) {
+  // public BoardStatus publishBoardStatus(Integer microsPerLoop/* b16 */,
+  // Integer sram/* b16 */, int[] deviceSummary/* byte */) {
   /*
-  public BoardInfo publishBoardStatus(Integer version, Integer boardType2, Integer microsPerLoop, Integer sram, int[] deviceSummary) {
-    log.info("publishBoardStatus {} us, {} sram, {} devices", microsPerLoop, sram, deviceSummary);
-    
-    return new BoardStatus(microsPerLoop, sram, arrayToDeviceSummary(deviceSummary));
-  }
-  */
+   * public BoardInfo publishBoardStatus(Integer version, Integer boardType2,
+   * Integer microsPerLoop, Integer sram, int[] deviceSummary) { log.info(
+   * "publishBoardStatus {} us, {} sram, {} devices", microsPerLoop, sram,
+   * deviceSummary);
+   * 
+   * return new BoardStatus(microsPerLoop, sram,
+   * arrayToDeviceSummary(deviceSummary)); }
+   */
 
   // < publishCustomMsg/[] msg
   public int[] publishCustomMsg(int[] msg/* [] */) {
@@ -1618,7 +1549,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     // send data to micro-controller - convert degrees to microseconds
     int uS = degreeToMicroseconds(targetOutput);
-    msg.servoAttach(deviceId, pin, uS, (int)velocity, servo.getName());
+    msg.servoAttach(deviceId, pin, uS, (int) velocity, servo.getName());
 
     // the callback - servo better have a check
     // isAttached(ServoControl) to prevent infinite loop
@@ -1655,23 +1586,24 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   @Override
   // > servoSetMaxVelocity/deviceId/b16 maxVelocity
   public void servoSetMaxVelocity(ServoControl servo) {
-    msg.servoSetMaxVelocity(getDeviceId(servo), (int)servo.getMaxVelocity());
+    msg.servoSetMaxVelocity(getDeviceId(servo), (int) servo.getMaxVelocity());
   }
 
   @Override
   // > servoSetVelocity/deviceId/b16 velocity
   public void servoSetVelocity(ServoControl servo) {
-    msg.servoSetVelocity(getDeviceId(servo), (int)servo.getVelocity());
+    msg.servoSetVelocity(getDeviceId(servo), (int) servo.getVelocity());
   }
 
-  // FIXME - this needs fixing .. should be microseconds - but interface still needs
+  // FIXME - this needs fixing .. should be microseconds - but interface still
+  // needs
   // to be in degrees & we don't want to pass double over serial lines
   @Override
   // > servoSweepStart/deviceId/min/max/step
   public void servoSweepStart(ServoControl servo) {
     int deviceId = getDeviceId(servo);
     log.info(String.format("servoSweep %s id %d min %d max %d step %d", servo.getName(), deviceId, servo.getMin(), servo.getMax(), servo.getVelocity()));
-    msg.servoSweepStart(deviceId, (int)servo.getMin(), (int)servo.getMax(),(int) servo.getVelocity());
+    msg.servoSweepStart(deviceId, (int) servo.getMin(), (int) servo.getMax(), (int) servo.getVelocity());
   }
 
   @Override
@@ -1681,10 +1613,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   /**
-   * servo.write(angle) https://www.arduino.cc/en/Reference/ServoWrite
-   * The msg to mrl will always contain microseconds - but this
-   * method will (like the Arduino Servo.write) accept both degrees or microseconds.
-   * The code is ported from Arduino's Servo.cpp
+   * servo.write(angle) https://www.arduino.cc/en/Reference/ServoWrite The msg
+   * to mrl will always contain microseconds - but this method will (like the
+   * Arduino Servo.write) accept both degrees or microseconds. The code is
+   * ported from Arduino's Servo.cpp
    */
   @Override
   // > servoWrite/deviceId/target
@@ -1821,13 +1753,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     super.startService();
     try {
       if (msg == null) {
-      	serial = (Serial) startPeer("serial");
-      	msg = new Msg(this, serial);
-      // FIXME - dynamically additive - if codec key has never been used -
-      // add key
-      // serial.getOutbox().setBlocking(true);
-      // inbox.setBlocking(true);
-      	serial.addByteListener(this);
+        serial = (Serial) startPeer("serial");
+        msg = new Msg(this, serial);
+        // FIXME - dynamically additive - if codec key has never been used -
+        // add key
+        // serial.getOutbox().setBlocking(true);
+        // inbox.setBlocking(true);
+        serial.addByteListener(this);
       }
     } catch (Exception e) {
       Logging.logError(e);
@@ -1981,7 +1913,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return deviceList.keySet();
   }
 
-
   @Override
   public void detach(String controllerName) {
     // GOOD DESIGN !!! - THIS HAS INPUT STRING - AND WILL
@@ -2000,11 +1931,112 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return deviceList.keySet();
   }
 
-	@Override
-	public void servoSetAcceleration(ServoControl servo) {
-		// TODO Auto-generated method stub
-		msg.servoSetAcceleration(getDeviceId(servo), (int)servo.getAcceleration());
-	}
+  public void openMrlComm() {
+    try {
+      String mrlCommFiles = null;
+      if (FileIO.isJar()){
+        mrlCommFiles = "resource/Arduino/MRLComm";
+        Zip.extractFromSelf("resource/Arduino/MRLComm", "resource/Arduino/MRLComm");        
+      } else {
+        // running in IDE ?
+        mrlCommFiles = "src/resource/Arduino/MRLComm";
+      }
+      File mrlCommDir = new File(mrlCommFiles);
+      if (!mrlCommDir.exists() || !mrlCommDir.isDirectory()){
+        error("%s is not a valid directory", mrlCommDir);
+        return;
+      }
+      String exePath = FileIO.gluePaths(arduinoPath, ArduinoUtils.getExeName());
+      String inoPath = FileIO.gluePaths(mrlCommDir.getAbsolutePath(), "/MrlComm.ino");
+      List<String> cmd = new ArrayList<String>();
+      cmd.add(exePath);
+      cmd.add(inoPath);
+      ProcessBuilder builder = new ProcessBuilder(cmd);
+      builder.start();
+      
+    } catch (Exception e) {
+      log.error("openMrlComm threw", e);
+    }
+  }
 
- 
+  @Override
+  public void servoSetAcceleration(ServoControl servo) {
+    msg.servoSetAcceleration(getDeviceId(servo), (int) servo.getAcceleration());
+  }
+  
+  public void setArduinoPath(String path){
+    arduinoPath = path;
+  }
+  
+  public String getArduinoPath(){
+    return arduinoPath;
+  }
+  
+  public static void main(String[] args) {
+    try {
+
+      LoggingFactory.init(Level.INFO);
+
+      // Runtime.start("webgui", "WebGui");
+      Runtime.start("gui", "GUIService");
+      Runtime.start("python", "Python");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      
+      boolean done = true;
+      if (done){
+        return;
+      }
+      
+      Serial serial = arduino.getSerial();
+      // Runtime.start("gui", "GUIService");
+      // List<String> ports = serial.getPortNames();
+      // log.info(Arrays.toString(ports.toArray()));
+      // arduino.setBoardMega();
+      // log.info(arduino.getBoardType());
+      // if connect - possibly you can set the board type correctly
+      // arduino.getBoardInfo();
+      // arduino.setBoardMega();
+      arduino.connect("COM5");
+      // arduino.enablePin(54);
+
+      // arduino.uploadSketch("C:\\tools\\arduino-1.6.9");
+
+      Servo servo = (Servo) Runtime.start("servo", "Servo");
+      // Runtime.start("gui", "GUIService");
+      servo.attach(arduino, 7);
+      // servo.detach(arduino);
+      servo.attach(9);
+
+      // servo.detach(arduino);
+      // arduino.servoDetach(servo); Arduino power save - "detach()"
+
+      servo.moveTo(0);
+      servo.moveTo(180);
+      servo.setInverted(true);
+      servo.moveTo(0);
+      servo.moveTo(180);
+      servo.setInverted(true);
+      servo.moveTo(0);
+      servo.moveTo(180);
+      // arduino.attachDevice(servo, null);
+      // servo.attach();
+      int angle = 0;
+      int max = 5000;
+      while (true) {
+        // System.out.println(angle);
+        angle++;
+        servo.moveTo(angle % 180);
+        if (angle > max) {
+          break;
+        }
+      }
+      System.out.println("done with loop..");
+      log.info("here");
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
+
 }

@@ -3,7 +3,7 @@
 #include "Device.h"
 #include "Pin.h"
 #include "MrlNeopixel.h"
-#include "Servo.h"
+#include <Servo.h>
 #include "MrlServo.h"
 #include "MrlI2cBus.h"
 #include "MrlUltrasonicSensor.h"
@@ -364,6 +364,9 @@ void MrlComm::neoPixelWriteMatrix(byte deviceId, byte bufferSize, const byte*buf
 void MrlComm::servoAttach(byte deviceId, byte pin, int initialPosUs, int velocity, byte nameSize, const char*name){
 	MrlServo* servo = new MrlServo(deviceId);
 	addDevice(servo);
+	if (name == NULL || nameSize == 0){
+		msg->publishError("servo need name");
+	}
 	// not your mama's attach - this is attaching/initializing the MrlDevice
 	servo->attach(pin, initialPosUs, velocity);
 }

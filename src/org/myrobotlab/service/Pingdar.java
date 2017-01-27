@@ -156,17 +156,15 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
   }
 
   public void stop() {
-    super.stopService();
     sensor.stopRanging();
-    servo.eventsEnabled(false);
     servo.stop();
   }
 
-  public boolean sweep() {
-    return sweep(sweepMin, sweepMax);
+  public void sweep() {
+    sweep(sweepMin, sweepMax);
   }
 
-  public boolean sweep(int sweepMin, int sweepMax) {
+  public void sweep(int sweepMin, int sweepMax) {
     this.sweepMin = sweepMin;
     this.sweepMax = sweepMax;
     this.step = 1;
@@ -181,11 +179,10 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
     // servo.setSpeed(60);
     servo.setVelocity(30);
     servo.eventsEnabled(true);
+    
+    sensor.startRanging();
     // STEP ???
     servo.sweep(sweepMin, sweepMax, 100, step);
-
-    sensor.startRanging();
-    return true;
   }
 
   /**
@@ -264,7 +261,6 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
       // virtual.connect("COM5");
 
       Pingdar pingdar = (Pingdar) Runtime.start("pingdar", "Pingdar");
-      pingdar.getController();
       pingdar.attach("COM5", trigPin, echoPin, servoPin);
       pingdar.sweep(70, 100);
       // pingdar.stopRanging();
