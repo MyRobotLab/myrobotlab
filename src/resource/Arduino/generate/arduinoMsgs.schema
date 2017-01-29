@@ -54,9 +54,6 @@
 > echo/f32 myFloat/myByte/f32 secondFloat
 < publishEcho/f32 myFloat/myByte/f32 secondFloat
 
-# calamity we should discuss
-> controllerAttach/serialPort
-
 # Custom Messages
 > customMsg/[] msg
 < publishCustomMsg/[] msg
@@ -107,7 +104,6 @@
 > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
 > servoAttachPin/deviceId/pin
 > servoDetachPin/deviceId
-> servoSetMaxVelocity/deviceId/b16 maxVelocity
 > servoSetVelocity/deviceId/b16 velocity
 > servoSweepStart/deviceId/min/max/step
 > servoSweepStop/deviceId
@@ -117,7 +113,7 @@
 # > servoWriteMicroseconds/deviceId/b16 ms
 > servoSetAcceleration/deviceId/b16 acceleration
 # not used as originally intended - as event information
-# < publishServoEvent/deviceId/eventType/currentPos/targetPos
+< publishServoEvent/deviceId/eventType/currentPos/targetPos
 
 # Serial - for relaying serial data to a different pin
 # I suspect this should model the same pattern as Servo

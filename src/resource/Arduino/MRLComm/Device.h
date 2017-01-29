@@ -31,6 +31,7 @@ class Device {
     int type; // what type of device is this?
     int state; // state - single at the moment to handle all the finite states of the sensors (todo maybe this moves into the subclasses?)
     virtual void update() {}; // all devices must implement this to update their state.
+    virtual void onDisconnect() {}; //all devices must implement this to react when the communication with MRL is broken
 
     Msg* msg; // Msg is the generated interface for all communication
 

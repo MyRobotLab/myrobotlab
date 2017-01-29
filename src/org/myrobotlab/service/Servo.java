@@ -214,7 +214,13 @@ public class Servo extends Service implements ServoControl {
 
   public int defaultDetachDelay = 10000;
 	private boolean moving;
+	private double currentPosInput;
 
+	public transient static final int SERVO_EVENT_STOPPED = 1;
+	public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
+	
+	
+	
   class IKData {
     String name;
     Double pos;
@@ -234,6 +240,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   public void addServoEventListener(NameProvider service) {
+  	isEventsEnabled = true;
     addListener("publishServoEvent", service.getName(), "onServoEvent");
   }
 
@@ -274,7 +281,7 @@ public class Servo extends Service implements ServoControl {
    */
   @Override
   public void detach() {
-    this.isPinAttached = false;
+    isPinAttached = false;
     if (controller != null) {
       controller.servoDetachPin(this);
     }
@@ -365,26 +372,26 @@ public class Servo extends Service implements ServoControl {
     controller.servoMoveTo(this);
     lastActivityTime = System.currentTimeMillis();
 
-	  if (velocity > 0.0) {
-	  	moving = true;
-	  	if (getTasks().containsKey("EndMoving")){
-	  		purgeTask("EndMoving");
-	  	}
-	    addTask("EndMoving", timeToMove(), "endMoving");
-	  }
+//	  if (velocity > 0.0) {
+//	  	moving = true;
+//	  	if (getTasks().containsKey("EndMoving")){
+//	  		purgeTask("EndMoving");
+//	  	}
+//	    addTask("EndMoving", timeToMove(), "endMoving");
+//	  }
 
-    if (isEventsEnabled) {
-      // update others of our position change
-      invoke("publishServoEvent", targetOutput);
-      broadcastState();
-    }
-    if (isIKEventEnabled) {
-      IKData data = new IKData();
-      data.name = getName();
-      data.pos = targetPos;
-      invoke("publishIKServoEvent", data);
-      broadcastState();
-    }
+//    if (isEventsEnabled) {
+//      // update others of our position change
+//      invoke("publishServoEvent", targetOutput); //shouldn't be publishing targetPos?
+//      broadcastState();
+//    }
+//    if (isIKEventEnabled) {
+//      IKData data = new IKData();
+//      data.name = getName();
+//      data.pos = targetPos;
+//      invoke("publishIKServoEvent", data);
+//      broadcastState();
+//    }
   }
 
   /**
@@ -696,16 +703,14 @@ public class Servo extends Service implements ServoControl {
 
   public void setMaxVelocity(int velocity) {
     this.maxVelocity = velocity;
-    if (controller != null) {
-      controller.servoSetMaxVelocity(this);
-    }
   }
 
   public void setVelocity(double velocity) {
     if (maxVelocity != -1 && velocity > maxVelocity) {
       velocity = maxVelocity;
+      log.info("Trying to set velocity to a value greater than max velocity");
     }
-    this.velocity = velocity;
+    velocity = velocity;
     if (controller != null) {
       controller.servoSetVelocity(this);
     }
@@ -855,48 +860,7 @@ public class Servo extends Service implements ServoControl {
    * @return the current position of the servo
    */
   public Double getCurrentPos() {
-    Double currentPos = null;
-    if (velocity == -1) {
-      return targetPos;
-    } else {
-      long currentTime = System.currentTimeMillis();
-      double dOutput = velocity * (currentTime - lastActivityTime) / 1000;
-      if (mapper.getMaxOutput() > 500) {
-        dOutput *= (2400 - 544) / 180;
-      }
-      log.info("dOutput = {}", mapper.calcInput(dOutput));
-      if (targetPos > lastPos) {
-        if (mapper.getMaxY() > mapper.getMinY()) {
-          currentPos = mapper.calcInput(mapper.calcOutput(lastPos) + dOutput);
-          if (currentPos > targetPos) {
-            currentPos = targetPos;
-          }
-        } else {
-          currentPos = mapper.calcInput(mapper.calcOutput(lastPos) - dOutput);
-          if (currentPos > targetPos) {
-            currentPos = targetPos;
-          }
-        }
-      } else if (targetPos < lastPos) {
-        if (mapper.getMaxY() > mapper.getMinY()) {
-          currentPos = mapper.calcInput(mapper.calcOutput(lastPos) - dOutput);
-          if (currentPos < targetPos) {
-            currentPos = targetPos;
-          }
-        } else {
-          currentPos = mapper.calcInput(mapper.calcOutput(lastPos) + dOutput);
-          if (currentPos < targetPos) {
-            currentPos = targetPos;
-          }
-        }
-      } else {
-        currentPos = targetPos;
-      }
-      if (currentPos.isNaN()) {
-        return targetPos;
-      }
-      return currentPos;
-    }
+    return currentPosInput;
   }
   
   /**
@@ -967,7 +931,6 @@ public class Servo extends Service implements ServoControl {
   		purgeTask("EndMoving");
   	}
   	if (autoAttach && isPinAttached()){
-  		if (velocity < 0) sleep(defaultDetachDelay);
   		detach();
   	}
   	moving = false;
@@ -975,6 +938,30 @@ public class Servo extends Service implements ServoControl {
 
 	public boolean isMoving() {
 		return moving;
+	}
+
+	public void onServoEvent(Integer eventType, Integer currentPos, Integer targetPos) {
+		currentPosInput = mapper.calcInput(currentPos.doubleValue());
+		if (isEventsEnabled) {
+			invoke("publishServoEvent", currentPosInput);
+		}
+		if (isIKEventEnabled) {
+			IKData data = new IKData();
+			data.name = getName();
+			data.pos = currentPosInput;
+			invoke("publishIKServoEvent", data);
+		}
+		if (eventType == SERVO_EVENT_STOPPED && autoAttach && isPinAttached()) {
+			if (velocity > -1) {
+				detach();
+			}
+			else {
+				if (getTasks().containsKey("EndMoving")) {
+					purgeTask("EndMoving");
+				}
+				addTask("EndMoving",defaultDetachDelay, "endMoving");
+			}
+		}
 	}
   
 }

@@ -32,15 +32,15 @@ bool MrlServo::attach(byte pin, int initPosUs, int initVelocity){
   targetPosUs = initPosUs;
   velocity = initVelocity;
   servo->attach(pin);
+  publishServoEvent(SERVO_EVENT_STOPPED);
   return true;
 }
 
 // This method is equivalent to Arduino's Servo.attach(pin) - (no pos)
 void MrlServo::attachPin(int pin){
   this->pin = pin;
-  servo->attach(pin);
   servo->writeMicroseconds(currentPosUs); //return to it's last know state (may be 0 if currentPosUs is not set)
-  // TODO-KW: we should always have a moveTo for safety, o/w we have no idea what angle we're going to start up at.. maybe
+  servo->attach(pin);
 }
 
 void MrlServo::detachPin(){
@@ -76,11 +76,20 @@ void MrlServo::update() {
       else if (currentPosUs > targetPosUs) {
         step *=-1;
       }
+      int previousCurrentPosUs = (int)currentPosUs;
       currentPosUs += step;
       if ((step > 0.0 && (int)currentPosUs > targetPosUs) || (step < 0.0 && (int)currentPosUs < targetPosUs)) {
         currentPosUs = targetPosUs;
       }
-      servo->writeMicroseconds((int)currentPosUs);
+      if (previousCurrentPosUs != (int)currentPosUs) {
+        servo->writeMicroseconds((int)currentPosUs);
+        if ((int)currentPosUs == targetPosUs) {
+          publishServoEvent(SERVO_EVENT_STOPPED);
+        }
+        else {
+          publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
+        }
+      }
     }
     else {
       if (isSweeping) {
@@ -107,15 +116,8 @@ void MrlServo::moveToMicroseconds(int position) {
   isMoving = true;
   lastUpdate = millis();
   moveStart = lastUpdate;
+  publishServoEvent(SERVO_EVENT_STOPPED);
 }
-
-/*
-void MrlServo::servoWriteMicroseconds(int position) {
-  if (servo) {
-    servo->writeMicroseconds(position);
-  }
-}
-*/
 
 void MrlServo::startSweep(int minUs, int maxUs, int step) {
   this->minUs = minUs;
@@ -131,9 +133,6 @@ void MrlServo::stopSweep() {
   isSweeping = false;
 }
 
-void MrlServo::setMaxVelocity(unsigned int velocity){
-  maxVelocity = velocity;
-}
 
 void MrlServo::setVelocity(int velocity) {
   this->velocity = velocity;
@@ -142,3 +141,8 @@ void MrlServo::setVelocity(int velocity) {
 void MrlServo::setAcceleration(int acceleration) {
   this->acceleration = acceleration;
 }
+
+void MrlServo::publishServoEvent(int type) {
+  msg->publishServoEvent(id, type, (int)currentPosUs, targetPosUs);
+}
+

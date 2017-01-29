@@ -474,12 +474,6 @@ public class MrlComm {
     msg.publishEcho(myFloat, myByte & 0xFF, mySecondFloat);
   }
 
-  // > controllerAttach/serialPort
-  // TODO - talk to calamity
-  public void controllerAttach(int serialPort) {
-    msg.publishDebug(String("controllerAttach " + String(serialPort)));
-  }
-
   // > customMsg/[] msg
   // from PC -. loads customMsg buffer
   public void customMsg(int[] msg) {
@@ -602,12 +596,6 @@ public class MrlComm {
   public void servoDetachPin(int deviceId) {
     MrlServo servo = (MrlServo) getDevice(deviceId);
     servo.detachPin();
-  }
-
-  // > servoSetMaxVelocity/deviceId/b16 maxVelocity
-  public void servoSetMaxVelocity(int deviceId, int maxVelocity) {
-    MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.setMaxVelocity(maxVelocity);
   }
 
   // > servoSetVelocity/deviceId/b16 velocity

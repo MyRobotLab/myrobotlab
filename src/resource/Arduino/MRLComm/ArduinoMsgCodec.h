@@ -9,7 +9,7 @@
  * 							src\resource\Arduino\generate\ArduinoMsgCodec.template.h
  */
 
-#define MRLCOMM_VERSION			53
+#define MRLCOMM_VERSION			54
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
@@ -46,80 +46,78 @@
 #define ECHO 10
 // < publishEcho/f32 myFloat/myByte/f32 secondFloat
 #define PUBLISH_ECHO 11
-// > controllerAttach/serialPort
-#define CONTROLLER_ATTACH 12
 // > customMsg/[] msg
-#define CUSTOM_MSG 13
+#define CUSTOM_MSG 12
 // < publishCustomMsg/[] msg
-#define PUBLISH_CUSTOM_MSG 14
+#define PUBLISH_CUSTOM_MSG 13
 // > deviceDetach/deviceId
-#define DEVICE_DETACH 15
+#define DEVICE_DETACH 14
 // > i2cBusAttach/deviceId/i2cBus
-#define I2C_BUS_ATTACH 16
+#define I2C_BUS_ATTACH 15
 // > i2cRead/deviceId/deviceAddress/size
-#define I2C_READ 17
+#define I2C_READ 16
 // > i2cWrite/deviceId/deviceAddress/[] data
-#define I2C_WRITE 18
+#define I2C_WRITE 17
 // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
-#define I2C_WRITE_READ 19
+#define I2C_WRITE_READ 18
 // < publishI2cData/deviceId/[] data
-#define PUBLISH_I2C_DATA 20
+#define PUBLISH_I2C_DATA 19
 // > neoPixelAttach/deviceId/pin/b32 numPixels
-#define NEO_PIXEL_ATTACH 21
+#define NEO_PIXEL_ATTACH 20
 // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-#define NEO_PIXEL_SET_ANIMATION 22
+#define NEO_PIXEL_SET_ANIMATION 21
 // > neoPixelWriteMatrix/deviceId/[] buffer
-#define NEO_PIXEL_WRITE_MATRIX 23
+#define NEO_PIXEL_WRITE_MATRIX 22
 // > analogWrite/pin/value
-#define ANALOG_WRITE 24
+#define ANALOG_WRITE 23
 // > digitalWrite/pin/value
-#define DIGITAL_WRITE 25
+#define DIGITAL_WRITE 24
 // > disablePin/pin
-#define DISABLE_PIN 26
+#define DISABLE_PIN 25
 // > disablePins
-#define DISABLE_PINS 27
+#define DISABLE_PINS 26
 // > pinMode/pin/mode
-#define PIN_MODE 28
+#define PIN_MODE 27
 // < publishDebug/str debugMsg
-#define PUBLISH_DEBUG 29
+#define PUBLISH_DEBUG 28
 // < publishPinArray/[] data
-#define PUBLISH_PIN_ARRAY 30
+#define PUBLISH_PIN_ARRAY 29
 // > setTrigger/pin/triggerValue
-#define SET_TRIGGER 31
+#define SET_TRIGGER 30
 // > setDebounce/pin/delay
-#define SET_DEBOUNCE 32
+#define SET_DEBOUNCE 31
 // > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
-#define SERVO_ATTACH 33
+#define SERVO_ATTACH 32
 // > servoAttachPin/deviceId/pin
-#define SERVO_ATTACH_PIN 34
+#define SERVO_ATTACH_PIN 33
 // > servoDetachPin/deviceId
-#define SERVO_DETACH_PIN 35
-// > servoSetMaxVelocity/deviceId/b16 maxVelocity
-#define SERVO_SET_MAX_VELOCITY 36
+#define SERVO_DETACH_PIN 34
 // > servoSetVelocity/deviceId/b16 velocity
-#define SERVO_SET_VELOCITY 37
+#define SERVO_SET_VELOCITY 35
 // > servoSweepStart/deviceId/min/max/step
-#define SERVO_SWEEP_START 38
+#define SERVO_SWEEP_START 36
 // > servoSweepStop/deviceId
-#define SERVO_SWEEP_STOP 39
+#define SERVO_SWEEP_STOP 37
 // > servoMoveToMicroseconds/deviceId/b16 target
-#define SERVO_MOVE_TO_MICROSECONDS 40
+#define SERVO_MOVE_TO_MICROSECONDS 38
 // > servoSetAcceleration/deviceId/b16 acceleration
-#define SERVO_SET_ACCELERATION 41
+#define SERVO_SET_ACCELERATION 39
+// < publishServoEvent/deviceId/eventType/currentPos/targetPos
+#define PUBLISH_SERVO_EVENT 40
 // > serialAttach/deviceId/relayPin
-#define SERIAL_ATTACH 42
+#define SERIAL_ATTACH 41
 // > serialRelay/deviceId/[] data
-#define SERIAL_RELAY 43
+#define SERIAL_RELAY 42
 // < publishSerialData/deviceId/[] data
-#define PUBLISH_SERIAL_DATA 44
+#define PUBLISH_SERIAL_DATA 43
 // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-#define ULTRASONIC_SENSOR_ATTACH 45
+#define ULTRASONIC_SENSOR_ATTACH 44
 // > ultrasonicSensorStartRanging/deviceId
-#define ULTRASONIC_SENSOR_START_RANGING 46
+#define ULTRASONIC_SENSOR_START_RANGING 45
 // > ultrasonicSensorStopRanging/deviceId
-#define ULTRASONIC_SENSOR_STOP_RANGING 47
+#define ULTRASONIC_SENSOR_STOP_RANGING 46
 // < publishUltrasonicSensorData/deviceId/b16 echoTime
-#define PUBLISH_ULTRASONIC_SENSOR_DATA 48
+#define PUBLISH_ULTRASONIC_SENSOR_DATA 47
 
 
 
