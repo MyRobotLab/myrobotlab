@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div class="row">
-        <div ng-repeat="panel in allpanels"
+        <div ng-repeat="panel in allPanels"
              service-ctrl-directive
              panel="panel">
             <!--maybe move this to somewhere general?-->
@@ -9,7 +9,7 @@
         <!--migrate to Angular UI Bootstrap when they offer one-->
         <div class="col-sm-2">
             <ul class="nav nav-tabs nav-stacked nav-pills" role="tablist">
-                <li ng-repeat="panel in allpanels"
+                <li ng-repeat="panel in allPanels"
                     ng-class="{'active': view_tab == panel.name}">
                     <!--maybe move this to somewhere general? - seperate from tabs first-->
                     <a class="btn pull-left" ng-click="changeTab(panel.name)" href="">

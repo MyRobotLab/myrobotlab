@@ -1,16 +1,16 @@
 angular.module('mrlapp.views')
-        .controller('mainViewCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', 'serviceSvc', '$state',
-            function ($scope, $log, $filter, $timeout, mrl, serviceSvc, $state) {
+        .controller('mainViewCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', 'panelSvc', '$state',
+            function ($scope, $log, $filter, $timeout, mrl, panelSvc, $state) {
                 $log.info('mainViewCtrl');
 
                 //service-panels & update-routine
                 var panelsUpdated = function (panels) {
-                    $scope.allpanels = panels;
+                    $scope.allPanels = panels;
                     $timeout(function () {
-                        $scope.panels = $filter('panellist')($scope.allpanels, 'main');
+                        $scope.panels = $filter('panellist')($scope.allPanels, 'main');
                         $log.info('panels-main', $scope.panels);
                     });
                 };
-                panelsUpdated(serviceSvc.getPanelsList());
-                serviceSvc.subscribeToUpdates(panelsUpdated);
+                panelsUpdated(panelSvc.getPanelsList());
+                panelSvc.subscribeToUpdates(panelsUpdated);
             }]);

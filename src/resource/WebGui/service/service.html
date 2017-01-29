@@ -1,4 +1,4 @@
-<div id="{{::panel.name}}_{{::panel.panelname}}" ng-show="!panel.hide">
+<div id="{{::panel.name}}" ng-show="!panel.hide">
     <div class="panel panel-default">
         <div class="panel-heading" drag-directive>
             <!--header-->
@@ -34,7 +34,7 @@
                             </a>
                         </li>                      
                         <li>
-                            <a href="" ng-click="servicemenuDropdownOpen = false;panel.hide = !panel.hide">
+                            <a href="" ng-click="servicemenuDropdownOpen = false;panel.svc.hide(panel.name)">
                                 <span ng-show="!panel.hide">
                                     <i class="glyphicon glyphicon-eye-close"></i>
                                     &nbsp;&nbsp;hide
