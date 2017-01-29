@@ -1,10 +1,11 @@
-<div class="col-md-6">
+<div class="col-md-12">
     <label>port</label>
     <div class="input-group">
         <input class="form-control" type="text" ng-model="port" placeholder="{{service.port}}"/>
         <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.setPort(port)">update</button></span>
         <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.save()">save</button></span>
         <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.extract(true)">extract</button></span>
+        <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.loadPanels()">load desktop</button></span>
         <!-- span class="input-group-btn"><button class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</button></span -->
     </div>
 </div>

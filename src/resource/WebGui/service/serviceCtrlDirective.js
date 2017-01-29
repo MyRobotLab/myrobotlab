@@ -1,5 +1,5 @@
 angular.module('mrlapp.service')
-        .directive('serviceCtrlDirective', ['$compile', '$log', 'mrl', 'serviceSvc', function ($compile, $log, mrl, serviceSvc) {
+        .directive('serviceCtrlDirective', ['$compile', '$log', 'mrl', 'panelSvc', function ($compile, $log, mrl, panelSvc) {
                 return {
                     scope: {
                         //"=" -> binding to items in parent-scope specified by attribute
@@ -51,7 +51,7 @@ angular.module('mrlapp.service')
                     }
                 };
             }])
-        .directive('serviceCtrlNext', ['mrl', 'serviceSvc', function (mrl, serviceSvc) {
+        .directive('serviceCtrlNext', ['mrl', 'panelSvc', function (mrl, panelSvc) {
                 //dynamic controller
                 return {
                     scope: {
@@ -71,7 +71,7 @@ angular.module('mrlapp.service')
                         console.log(scope.name, 'serviceCtrlNext-link');
 
 //                        mrl.subscribeToService(scope.guictrl.onMsg, scope.name);
-                         serviceSvc.controllerscope(scope.name, scope);
+                         panelSvc.controllerscope(scope.name, scope);
                     }
                 };
             }]);
