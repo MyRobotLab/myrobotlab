@@ -109,9 +109,10 @@ void MrlComm::update() {
        // until it is reset after sending publishBoardInfo
         ++loopCount;
 	unsigned long now = millis();
-	if ((now - lastHeartbeatUpdate > 1000)) {
-		// softReset(); - not ready yet to commit to resetting
+	if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) {
+    onDisconnect();
 		lastHeartbeatUpdate = now;
+    heartbeatEnabled = false;
 		return;
 	}
 
@@ -169,7 +170,7 @@ void MrlComm::enableAck(boolean enabled) {
 	ackEnabled = enabled;
 }
 
-boolean MrlComm::readMsg() {
+bool MrlComm::readMsg() {
 	return msg->readMsg();
 }
 
@@ -240,12 +241,6 @@ void MrlComm::echo(float myFloat, byte myByte, float mySecondFloat) {
 	msg->publishDebug(String("echo float2 " + String(mySecondFloat)));
 	// msg->publishDebug(String("pi is " + String(3.141529)));
 	msg->publishEcho(myFloat, myByte, mySecondFloat);
-}
-
-// > controllerAttach/serialPort
-// TODO - talk to calamity
-void MrlComm::controllerAttach(byte serialPort) {
-	msg->publishDebug(String("controllerAttach " + String(serialPort)));
 }
 
 // > customMsg/[] msg
@@ -383,12 +378,6 @@ void MrlComm::servoDetachPin(byte deviceId) {
 	servo->detachPin();
 }
 
-// > servoSetMaxVelocity/deviceId/b16 maxVelocity
-void MrlComm::servoSetMaxVelocity(byte deviceId, int maxVelocity) {
-	MrlServo* servo = (MrlServo*) getDevice(deviceId);
-	servo->setMaxVelocity(maxVelocity);
-}
-
 // > servoSetVelocity/deviceId/b16 velocity
 void MrlComm::servoSetVelocity(byte deviceId, int velocity) {
 	MrlServo* servo = (MrlServo*) getDevice(deviceId);
@@ -471,6 +460,7 @@ void MrlComm::softReset() {
 		customMsgBuffer[i] = 0;
 	}
 	customMsgSize = 0;
+  heartbeatEnabled = true;
 }
 
 // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
@@ -503,3 +493,14 @@ unsigned int MrlComm::getCustomMsg() {
    customMsgSize--;
    return retval;
  }
+
+ void MrlComm::onDisconnect() {
+  ListNode<Device*>* node = deviceList.getRoot();
+  // iterate through our device list and call update on them.
+  while (node != NULL) {
+    node->data->onDisconnect();
+    node = node->next;
+  }
+  boardStatusEnabled = false;
+ }
+

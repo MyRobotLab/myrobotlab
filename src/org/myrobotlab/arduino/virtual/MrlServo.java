@@ -16,6 +16,8 @@ public class MrlServo extends Device {
   
   public final static Logger log = LoggerFactory.getLogger(MrlServo.class);
 
+	public static final int SERVO_EVENT_STOPPED = 2;
+
   VirtualServo servo; // servo pointer - in case our device is a servo
   public  int pin;
   public  boolean isMoving;
@@ -69,10 +71,10 @@ boolean attach(int pin, int initPosUs, int initVelocity, String name){
   targetPosUs = initPosUs;
   velocity = initVelocity;
   servo.attach(pin);
+  //publishServoEvent(SERVO_EVENT_STOPPED);
   return true;
   }
 
- 
   public void update() {
   }
 
@@ -123,5 +125,10 @@ boolean attach(int pin, int initPosUs, int initVelocity, String name){
     }
 
   }
+//  private void publishServoEvent(int type) {
+//	// TODO Auto-generated method stub
+//	
+//}
+
 };
 

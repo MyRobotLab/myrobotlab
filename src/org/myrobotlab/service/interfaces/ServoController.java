@@ -49,8 +49,6 @@ public interface ServoController extends DeviceController {
 
 	void servoDetachPin(ServoControl servo);
 
-	void servoSetMaxVelocity(ServoControl servo);
-
 	void servoSetVelocity(ServoControl servo);
 
 	void servoSetAcceleration(ServoControl servo);

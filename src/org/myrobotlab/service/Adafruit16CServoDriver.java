@@ -673,7 +673,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		
 	}
 
-	@Override
 	public void servoSetMaxVelocity(ServoControl servo) {
 		// TODO Auto-generated method stub.
 		// perhaps cannot do this with Adafruit16CServoDriver
