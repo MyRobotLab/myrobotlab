@@ -59,7 +59,7 @@
 					</div>
 					<input type="text" class="form-control"
 						ng-model="searchSelectedPanel" placeholder="Search"
-						uib-typeahead="panel as panel.name for panel in allPanels | filter:{name:$viewValue}"
+						uib-typeahead="panel as panel.name for panel in panels | filter:{name:$viewValue}"
 						typeahead-min-length="0"
 						typeahead-template-url="nav/templates/searchtemplate.html"
 						typeahead-on-select='searchOnSelect($item, $model, $label)'>
@@ -145,12 +145,14 @@
 	{{platform.mrlVersion}}</div>
 -->
 <!--min-list-->
+<!--
 <div
 	style="height: 80vh; width: 200px; z-index: 100; position: fixed; right: 200px; background-color: lightgray;"
 	ng-show="showminlist" sticky offset="50">
 	<div ng-repeat="panel in minlist" panel-drctv panel="panel">
 	</div>
 </div>
+-->
 
 
 

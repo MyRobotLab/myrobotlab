@@ -19,14 +19,19 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
         });
     });
     $scope.showAll = panelSvc.showAll;
-    $scope.showminlist = false;
+
     //service-panels & update-routine (also used for search)
+    // populated for search
+    
     var panelsUpdated = function(panels) {
-        $scope.allPanels = panels;
-        $scope.minlist = $filter('panellist')($scope.allPanels, 'min');
+        $scope.panels = panels;
+        // $scope.minlist = $filter('panellist')($scope.panels, 'min');
     };
-    panelsUpdated(panelSvc.getPanelsList());
+    
+    // maintains some for of subscription ... onRegistered I'd assume
     panelSvc.subscribeToUpdates(panelsUpdated);
+
+
     $scope.shutdown = function(type) {
         var modalInstance = $uibModal.open({
             animation: true,
@@ -61,7 +66,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
     ;
     //START_Search
     //panels are retrieved above (together with minlist)
-    $log.info('searchPanels', $scope.allPanels);
+    $log.info('searchPanels', $scope.panels);
     $scope.searchOnSelect = function(item, model, label) {
         //expand panel if minified
         if (item.list == 'min') {

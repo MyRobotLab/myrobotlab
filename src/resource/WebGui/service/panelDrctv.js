@@ -1,4 +1,4 @@
-angular.module('mrlapp.service') // TODO - renaame panelDirective
+angular.module('mrlapp.service') 
         .directive('panelDrctv', [function () {
                 return {
                     scope: {

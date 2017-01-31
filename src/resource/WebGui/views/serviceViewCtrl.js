@@ -11,10 +11,10 @@ angular.module('mrlapp.views')
 
                 //service-panel(s) & update-routine
                 var panelsUpdated = function (panels) {
-                    $scope.allPanels = panels;
+                    $scope.panels = panels;
                     $timeout(function () {
                         var temp;
-                        angular.forEach($scope.allPanels, function (value, key) {
+                        angular.forEach($scope.panels, function (value, key) {
                             if (value.name == $scope.servicename) {
                                 temp = value;
                             }

@@ -11,9 +11,9 @@ angular.module('mrlapp.views')
 
                 //service-panels & update-routine
                 var panelsUpdated = function (panels) {
-                    $scope.allPanels = panels;
+                    $scope.panels = panels;
                     $timeout(function () {
-                        $scope.panels = $filter('panellist')($scope.allPanels, 'main');
+                        $scope.panels = $filter('panellist')($scope.panels, 'main');
                         $log.info('panels-main', $scope.panels);
                         if ($scope.view_tab == 'default' && !isUndefinedOrNull($scope.panels) && !isUndefinedOrNull($scope.panels[0])) {
                             $scope.view_tab = $scope.panels[0].name;
