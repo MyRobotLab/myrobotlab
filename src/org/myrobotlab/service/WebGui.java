@@ -970,6 +970,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	 * @param panel
 	 */
 	public void savePanel(Panel panel) {
+	  if (panel.name == null){
+	    log.error("panel name is null!");
+	    return;
+	  }
 		panels.put(panel.name, panel);
 		save();
 	}
@@ -1131,27 +1135,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		return meta;
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-			
-			Double level = Runtime.getBatteryLevel();
-			log.info("" + level);
-
-			VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
-			virtual.connect("COM5");
-			Runtime.start("python", "Python");
-			// Runtime.start("arduino", "Arduino");
-			//Runtime.start("srf05", "UltrasonicSensor");
-			Runtime.start("webgui", "WebGui");
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-
+	
 	@Override
 	public String publishConnect() {
 		// TODO Auto-generated method stub
@@ -1169,4 +1153,26 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.INFO);
+
+    try {
+      
+      Double level = Runtime.getBatteryLevel();
+      log.info("" + level);
+
+      VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+      virtual.connect("COM5");
+      Runtime.start("python", "Python");
+      // Runtime.start("arduino", "Arduino");
+      //Runtime.start("srf05", "UltrasonicSensor");
+      Runtime.start("webgui", "WebGui");
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
 }

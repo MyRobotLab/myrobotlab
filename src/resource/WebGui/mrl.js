@@ -40,15 +40,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     var connectedCallbacks = [];
     var deferred = null;
     var msgInterfaces = {};
-    // connectivity related begins
-    // required by AtmosphereJS
     // https://github.com/Atmosphere/atmosphere/wiki/jQuery.atmosphere.js-atmosphere.js-API
     // See the following link for all websocket configuration 
     // https://raw.githubusercontent.com/Atmosphere/atmosphere-javascript/master/modules/javascript/src/main/webapp/javascript/atmosphere.js
     this.request = {
         url: document.location.origin.toString() + '/api/messages',
         transport: 'websocket',
-        // maxRequest: 100, - does not appear to work ..
+        maxRequest: 100,
         enableProtocol: true,
         fallbackTransport: 'long-polling',
         // trackMessageLength: true,

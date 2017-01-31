@@ -5,9 +5,9 @@ angular.module('mrlapp.views')
 
                 //service-panels & update-routine
                 var panelsUpdated = function (panels) {
-                    $scope.allPanels = panels;
+                    $scope.panels = panels;
                     $timeout(function () {
-                        $scope.panels = $filter('panellist')($scope.allPanels, 'main');
+                        $scope.panels = $filter('panellist')($scope.panels, 'main');
                         $log.info('panels-main', $scope.panels);
                     });
                 };
