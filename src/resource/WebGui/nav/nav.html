@@ -59,7 +59,7 @@
 					</div>
 					<input type="text" class="form-control"
 						ng-model="searchSelectedPanel" placeholder="Search"
-						uib-typeahead="panel as panel.name for panel in allpanels | filter:{name:$viewValue}"
+						uib-typeahead="panel as panel.name for panel in panels | filter:{name:$viewValue}"
 						typeahead-min-length="0"
 						typeahead-template-url="nav/templates/searchtemplate.html"
 						typeahead-on-select='searchOnSelect($item, $model, $label)'>
@@ -134,6 +134,7 @@
 -->
 
 <!--Background Texts-->
+<!--
 <div
 	style="position: absolute; left: 300px; top: 300px; z-index: -1; height: 10px; transform: rotate(-45deg); font-size: 75px;">
 	MyRobotLab</div>
@@ -142,13 +143,16 @@
 	{{platform.branch}}
 	{{platform.arch}}.{{platform.bitness}}.{{platform.os}}
 	{{platform.mrlVersion}}</div>
+-->
 <!--min-list-->
+<!--
 <div
 	style="height: 80vh; width: 200px; z-index: 100; position: fixed; right: 200px; background-color: lightgray;"
 	ng-show="showminlist" sticky offset="50">
-	<div ng-repeat="panel in minlist" service-directive panel="panel">
+	<div ng-repeat="panel in minlist" panel-drctv panel="panel">
 	</div>
 </div>
+-->
 
 
 

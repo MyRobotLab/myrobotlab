@@ -49,7 +49,12 @@ public class CodecUtils {
   public final static String SCHEME_BASE64 = "base64";
 
   public final static String API_TYPE_MESSAGES = "messages";
+  /**
+   * use API_TYPE_SERVICE
+   */
+  @Deprecated
   public final static String API_TYPE_SERVICES = "services";
+  public static final String API_TYPE_SERVICE = "service";
 
   // TODO change to mime-type
   public final static String TYPE_MESSAGES = "messages";
@@ -417,7 +422,7 @@ public class CodecUtils {
     return String.format("org.myrobotlab.service.%s", type);
   }
 
-  static final String JSON = "application/javascript";
+  static final String JSON = "application/javascript";  
 
   // start fresh :P
   // FIXME should probably use a object factory and interface vs static methods

@@ -30,7 +30,7 @@ angular.module('mrlapp.service')
                         }, function () {
                             if (!isUndefinedOrNull(scope.panel.scope)) {
                                 watch();
-                                $log.info('got scope! using it', scope.panel.name, scope.panel.panelname);
+                                $log.info('got scope! using it', scope.panel.name);
                                 var newscope = scope.panel.scope;
                                 var html = $templateCache.get(scope.panel.simpleName + 'Gui.html');
                                 elem.html(html).show();

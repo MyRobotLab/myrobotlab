@@ -917,7 +917,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 	 * @param interfaze
 	 * @return services which match
 	 */
-	public static ArrayList<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
+	public static synchronized ArrayList<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
 		ArrayList<ServiceInterface> ret = new ArrayList<ServiceInterface>();
 
 		Iterator<String> it = registry.keySet().iterator();

@@ -1,5 +1,5 @@
-angular.module('mrlapp.service')
-        .directive('serviceDirective', [function () {
+angular.module('mrlapp.service') 
+        .directive('panelDrctv', [function () {
                 return {
                     scope: {
                         //"=" -> binding to items in parent-scope specified by attribute
@@ -32,7 +32,7 @@ angular.module('mrlapp.service')
 
                         scope.panel.notifyZIndexChanged = function () {
                             element.css({
-                                'z-index': scope.panel.zindex
+                                'z-index': scope.panel.zIndex
                             });
                         };
                         scope.panel.notifyZIndexChanged();
@@ -45,8 +45,8 @@ angular.module('mrlapp.service')
 
                         scope.panel.notifyPositionChanged = function () {
                             element.css({
-                                top: scope.panel.posy + 'px',
-                                left: scope.panel.posx + 'px'
+                                top: scope.panel.posY + 'px',
+                                left: scope.panel.posX + 'px'
                             });
                         };
                         scope.panel.notifyPositionChanged();
