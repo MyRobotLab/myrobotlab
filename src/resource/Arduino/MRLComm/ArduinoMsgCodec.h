@@ -130,6 +130,7 @@
 #define BOARD_TYPE_ID_MEGA_ADK	3
 #define BOARD_TYPE_ID_NANO     	4
 #define BOARD_TYPE_ID_PRO_MINI	5
+#define BOARD_TYPE_ID_ESP8266   6
 
 #if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
   #define BOARD BOARD_TYPE_ID_MEGA
@@ -141,6 +142,9 @@
   #define BOARD BOARD_TYPE_ID_NANO
 #elif defined(ARDUINO_AVR_PRO)
   #define BOARD BOARD_TYPE_ID_PRO_MINI
+#elif defined(ARDUINO_ESP8266_ESP12) 
+  #define BOARD BOARD_TYPE_ID_ESP8266
+  //#define ESP8266
 #else
   #define BOARD BOARD_TYPE_ID_UNKNOWN
 #endif

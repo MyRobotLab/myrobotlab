@@ -3,6 +3,12 @@
 
 #include "ArduinoMsgCodec.h"
 #include "MrlSerialRelay.h"
+#if defined(ESP8266)
+  #include <WebSocketsServer.h>
+  extern "C" {
+    #include "user_interface.h"
+  }
+#endif
 
 // forward defines to break circular dependency
 class Device;
@@ -152,6 +158,10 @@ public:
     void begin(HardwareSerial& serial);
     bool readMsg();
     void onDisconnect();
+#if defined(ESP8266)
+    void begin(WebSocketsServer& wsServer);
+    void webSocketEvent(unsigned char num, WStype_t type, unsigned char* payload, unsigned int lenght);
+#endif
 };
   
 #endif
