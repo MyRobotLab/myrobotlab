@@ -1,3 +1,4 @@
+#include <Wire.h>
 /**
  * <pre>
  *
@@ -646,7 +647,7 @@ bool Msg::readMsg() {
 			// if received header + msg
 			if (byteCount == 2 + msgSize) {
 				// we've reach the end of the command, just return true .. we've got it
-				byteCount = 0;
+ 			byteCount = 0;
 				return true;
 			}
 		}
@@ -719,9 +720,20 @@ void Msg::flush() {
 	return serial->flush();
 }
 
-void Msg::begin(HardwareSerial& hardwareSerial){
-	serial = &hardwareSerial;
+#if defined(ESP8266)
+void Msg::begin(WebSocketsServer& wsServer){
+  serial = new MrlWS(wsServer);
 }
+
+void Msg::webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t lenght) {
+  serial->webSocketEvent(num, type, payload, lenght);
+}
+#else
+void Msg::begin(HardwareSerial& hardwareSerial){
+  serial = &hardwareSerial;
+}
+
+#endif
 
 byte Msg::getMethod(){
 	return ioCmd[0];

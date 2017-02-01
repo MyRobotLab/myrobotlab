@@ -4,11 +4,11 @@
 
 MrlI2CBus::MrlI2CBus(int deviceId) :
 		Device(deviceId, DEVICE_TYPE_I2C) {
-	if (TWCR == 0) { //// do this check so that Wire only gets initialized once
+//	if (TWCR == 0) { //// do this check so that Wire only gets initialized once
 		Wire.begin();
 	    // Force 400 KHz i2c
 		Wire.setClock(400000L);
-	}
+//	}
 }
 
 bool MrlI2CBus::attach(byte bus) {

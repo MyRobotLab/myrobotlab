@@ -38,9 +38,14 @@ MrlComm::~MrlComm() {
 
 int MrlComm::getFreeRam() {
 	// KW: In the future the arduino might have more than an 32/64k of ram. an int might not be enough here to return.
+  #ifndef ESP8266
 	extern int __heap_start, *__brkval;
 	int v;
 	return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+ #else
+  return system_get_free_heap_size();
+ #endif
+ return 0;
 }
 
 /**
@@ -174,6 +179,16 @@ bool MrlComm::readMsg() {
 	return msg->readMsg();
 }
 
+#if defined(ESP8266)
+void MrlComm::begin(WebSocketsServer& wsServer) {
+  msg->begin(wsServer);
+}
+
+void MrlComm::webSocketEvent(unsigned char num, WStype_t type, unsigned char* payload, unsigned int lenght) {
+  msg->webSocketEvent(num, type, payload, lenght);
+}
+#else
+
 void MrlComm::begin(HardwareSerial& serial) {
 
 	// TODO: the arduino service might get a few garbage bytes before we're able
@@ -199,6 +214,8 @@ void MrlComm::begin(HardwareSerial& serial) {
 	}
 }
 
+#endif
+
 /***********************************************************************
    * PUBLISH_BOARD_INFO This function updates the average time it took to run
    * the main loop and reports it back with a publishBoardStatus MRLComm message
@@ -216,7 +233,9 @@ void MrlComm::publishBoardInfo(){
 	}
         
         long now = micros();
-	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
+        int load = (now - lastBoardInfoUs)/loopCount;
+	//msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
+ msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  load, getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
         lastBoardInfoUs = now;
         loopCount = 0;
 }

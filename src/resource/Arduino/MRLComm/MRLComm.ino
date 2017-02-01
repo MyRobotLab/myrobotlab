@@ -51,12 +51,23 @@
 // Included as a 3rd party arduino library from here: https://github.com/ivanseidel/LinkedList/
 #include "LinkedList.h"
 #include "MrlComm.h"
+#include <Wire.h>
+#if defined(ESP8266)
+  #include <WebSocketsServer.h>
+#endif
 
 /***********************************************************************
  * GLOBAL VARIABLES
  * TODO - work on reducing globals and pass as parameters
  */
 MrlComm mrlComm;
+#if defined(ESP8266)
+  WebSocketsServer webSocket = WebSocketsServer(81);
+
+  void webSocketEvent(unsigned char num, WStype_t type, unsigned char* payload, unsigned int lenght){
+    mrlComm.webSocketEvent(num, type, payload, lenght);
+  }
+#endif
 /***********************************************************************
  * STANDARD ARDUINO BEGIN
  * setup() is called when the serial port is opened unless you hack the
@@ -66,10 +77,17 @@ MrlComm mrlComm;
  */
 void setup() {
 
+  Wire.begin();
+  
 	Serial.begin(115200);
 
 	// start with standard serial & rate
+#if defined(ESP8266)
+  webSocket.onEvent(webSocketEvent);
+  mrlComm.begin(webSocket);
+#else
 	mrlComm.begin(Serial);
+#endif
 }
 
 /**
@@ -80,6 +98,7 @@ void setup() {
 void loop() {
 	// get a command and process it from
 	// the serial port (if available.)
+//  wdt_disable();
 	if (mrlComm.readMsg()) {
 		mrlComm.processCommand();
 	}
@@ -88,5 +107,7 @@ void loop() {
 	// send back load time and memory
         // driven by getBoardInfo now !!!
         // mrlComm.publishBoardStatus();
+  webSocket.loop();
 } // end of big loop
+
 
