@@ -19,7 +19,7 @@ MrlWS::MrlWS(WebSocketsServer& wsServer) {
         USE_SERIAL.flush();
         delay(1000);
 }
-WiFiMulti.addAP("VIDEOTRON9077","UWMF97AMJ9T4N");
+WiFiMulti.addAP("SSID","PASS");
   while (WiFiMulti.run() != WL_CONNECTED) {
     delay(100);
   }
