@@ -1,6 +1,6 @@
 angular.module('mrlapp.main.mainCtrl')
-        .controller('loadingCtrl', ['$scope', '$log', 'mrl', 'serviceSvc', '$state', '$previousState',
-            function ($scope, $log, mrl, serviceSvc, $state, $previousState) {
+        .controller('loadingCtrl', ['$scope', '$log', 'mrl', 'panelSvc', '$state', '$previousState',
+            function ($scope, $log, mrl, panelSvc, $state, $previousState) {
                 $log.info('loadingCtrl');
 
                 var isUndefinedOrNull = function (val) {
@@ -10,16 +10,16 @@ angular.module('mrlapp.main.mainCtrl')
                 $scope.mrlReady = false;
                 $scope.serviceSvcReady = false;
                 mrl.init().then(function () {
-                    $log.info('mrl inited!');
+                    $log.info('mrl initialized!');
                     $scope.mrlReady = true;
-                    if (serviceSvc.isReady()) {
-                        $log.info('serviceSvc is already ready', serviceSvc);
+                    if (panelSvc.isReady()) {
+                        $log.info('panelSvc is already ready', panelSvc);
                         $scope.serviceSvcReady = true;
                         go();
                     } else {
-                        $log.info('wating for serviceSvc to become ready');
-                        serviceSvc.waitToBecomeReady().then(function () {
-                            $log.info('serviceSvc is now ready', serviceSvc);
+                        $log.info('wating for panelSvc to become ready');
+                        panelSvc.waitToBecomeReady().then(function () {
+                            $log.info('panelSvc is now ready', panelSvc);
                             $scope.serviceSvcReady = true;
                             go();
                         });

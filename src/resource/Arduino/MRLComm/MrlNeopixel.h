@@ -72,7 +72,7 @@ struct Pixel{
 
 class MrlNeopixel:public Device{
   private:
-    int numPixel;  
+    int numPixel;
     Pixel* pixels;
     uint8_t bitmask;
     unsigned long lastShow;

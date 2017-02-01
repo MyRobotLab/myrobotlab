@@ -597,9 +597,9 @@ void MrlNeopixel::show() {
 }
 
 void MrlNeopixel::neopixelWriteMatrix(byte bufferSize, const byte*buffer) {
-  byte _bufferSize = buffer[1];
+  // byte _bufferSize = buffer[1];
   //msg->publishDebug(String(_bufferSize)+"-"+String(buffer[2])+"-"+String(buffer[3]));
-	for (int i = 2; i < _bufferSize; i += 4) {
+	for (int i = 0; i < bufferSize; i += 4) {
 		pixels[buffer[i]].red = buffer[i + 1];
 		pixels[buffer[i]].green = buffer[i + 2];
 		pixels[buffer[i]].blue = buffer[i + 3];

@@ -1050,16 +1050,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // > neoPixelWriteMatrix/deviceId/[] buffer
   public void neoPixelWriteMatrix(NeoPixel neopixel, List<Integer> data) {
     int id = getDeviceId(neopixel);
+    /*
     int[] buffer = new int[data.size() + 2];
     buffer[0] = id;
     buffer[1] = data.size();
     for (int i = 0; i < data.size(); i++) {
       buffer[i + 2] = data.get(i);
     }
-    // calamity, you can parameter the schema with id if you want ... size
-    // travels with arrays
-    // so you don't need to send size separately, different parameters can
-    // make it more clear to read
+    */
+    int[] buffer = new int[data.size()];
+    for (int i = 0; i < data.size(); ++i){
+      buffer[i] = data.get(i);
+    }
     msg.neoPixelWriteMatrix(getDeviceId(neopixel), buffer);
   }
 

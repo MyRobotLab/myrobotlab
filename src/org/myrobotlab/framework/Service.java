@@ -368,8 +368,19 @@ public abstract class Service extends MessageService implements Runnable, Serial
 				// !(Modifier.isPublic(f.getModifiers())
 				// Hmmm JSON mappers do hacks to get by
 				// IllegalAccessExceptions.... Hmmmmm
-				if (!Modifier.isPublic(f.getModifiers()) || f.getName().equals("log") || Modifier.isTransient(f.getModifiers()) || Modifier.isStatic(f.getModifiers())
-						|| Modifier.isFinal(f.getModifiers())) {
+				
+				// GROG - recent change from this
+				// if ((!Modifier.isPublic(modifiers) 
+				// to this
+				String fname = f.getName();
+				/*
+				if (fname.equals("desktops") || fname.equals("useLocalResources") ){
+				  log.info("here");
+				}
+				*/
+				
+				if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers)
+						|| Modifier.isFinal(modifiers)) {
 					log.debug(String.format("skipping %s", f.getName()));
 					continue;
 				}
@@ -377,29 +388,34 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 				log.info(String.format("setting %s", f.getName()));
 				/*
-				 * if (Modifier.isStatic(f.getModifiers()) ||
-				 * Modifier.isFinal(f.getModifiers())) { continue; }
+				 * if (Modifier.isStatic(modifiers) ||
+				 * Modifier.isFinal(modifiers)) { continue; }
 				 */
 
+				// GroG - this is new 1/26/2017 - needed to get webgui data to load
+				f.setAccessible(true);
+				Field targetField = targetClass.getDeclaredField(f.getName());
+        targetField.setAccessible(true);
+        
 				if (t.equals(java.lang.Boolean.TYPE)) {
-					targetClass.getDeclaredField(f.getName()).setBoolean(target, f.getBoolean(source));
+					targetField.setBoolean(target, f.getBoolean(source));
 				} else if (t.equals(java.lang.Character.TYPE)) {
-					targetClass.getDeclaredField(f.getName()).setChar(target, f.getChar(source));
+					targetField.setChar(target, f.getChar(source));
 				} else if (t.equals(java.lang.Byte.TYPE)) {
-					targetClass.getDeclaredField(f.getName()).setByte(target, f.getByte(source));
+					targetField.setByte(target, f.getByte(source));
 				} else if (t.equals(java.lang.Short.TYPE)) {
-					targetClass.getDeclaredField(f.getName()).setShort(target, f.getShort(source));
+					targetField.setShort(target, f.getShort(source));
 				} else if (t.equals(java.lang.Integer.TYPE)) {
-					targetClass.getDeclaredField(f.getName()).setInt(target, f.getInt(source));
+					targetField.setInt(target, f.getInt(source));
 				} else if (t.equals(java.lang.Long.TYPE)) {
-					targetClass.getDeclaredField(f.getName()).setLong(target, f.getLong(source));
+					targetField.setLong(target, f.getLong(source));
 				} else if (t.equals(java.lang.Float.TYPE)) {
-					targetClass.getDeclaredField(f.getName()).setFloat(target, f.getFloat(source));
+					targetField.setFloat(target, f.getFloat(source));
 				} else if (t.equals(java.lang.Double.TYPE)) {
-					targetClass.getDeclaredField(f.getName()).setDouble(target, f.getDouble(source));
+					targetField.setDouble(target, f.getDouble(source));
 				} else {
-					log.info(String.format("setting reference to remote object %s", f.getName()));
-					targetClass.getDeclaredField(f.getName()).set(target, f.get(source));
+					log.info(String.format("setting reference to remote object %s", f.getName()));					
+					targetField.set(target, f.get(source));
 				}
 			} catch (Exception e) {
 				Logging.logError(e);
