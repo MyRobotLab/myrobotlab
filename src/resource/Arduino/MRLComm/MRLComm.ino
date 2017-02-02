@@ -107,7 +107,9 @@ void loop() {
 	// send back load time and memory
         // driven by getBoardInfo now !!!
         // mrlComm.publishBoardStatus();
-  webSocket.loop();
+  #if defined(ESP8266)
+    webSocket.loop();
+  #endif
 } // end of big loop
 
 
