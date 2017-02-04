@@ -19,6 +19,8 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
     // TODO - refactor
     var deferred;
     //check if mrl.js is already connected and wait for it if it is not
+
+/*
     if (!mrl.isConnected()) {
         $log.info('wait for mrl.js to become connected ...');
         var subscribeFunction = function(connected) {
@@ -32,6 +34,11 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
     } else {
         run();
     }
+*/    
+
+
+    // mrl.waitUntilReady();
+    
     this.isReady = function() {
         return ready;
     }
@@ -303,5 +310,8 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
         ready = true;
     };
     // end of function run()
+
+    run();
+   // run();
 }
 ]);

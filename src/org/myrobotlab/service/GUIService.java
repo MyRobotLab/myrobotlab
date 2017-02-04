@@ -184,10 +184,11 @@ public class GUIService extends Service implements WindowListener, ActionListene
 
   public GUIService(String n) {
     super(n);
+   
+    subscribe(Runtime.getRuntimeName(), "released");
+
     Runtime.getInstance().addListener("registered", n, "registered");
     Runtime.getInstance().addListener("released", n, "released");
-    // TODO - add the release route too
-    // load();// <-- HA was looking all over for it
   }
 
   public void about() {
@@ -595,7 +596,12 @@ public class GUIService extends Service implements WindowListener, ActionListene
     buildTabPanels();
   }
 
+  public void onReleased(final Service s){
+    log.info("here");
+  }
+  
   public Service released(final Service s) {
+    log.info("releasing");
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {

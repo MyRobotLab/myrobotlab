@@ -27,15 +27,28 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'mrlapp.service', //Service & Co. (/service)
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
+    console.log('app.js');
     $urlRouterProvider.otherwise("/main");
     $stateProvider.state('loading', {
         url: "/loading",
         templateUrl: "main/loading.html",
-        controller: 'loadingCtrl'
+        controller: 'loadingCtrl',
+        resolve: {
+            test: function($stateParams, mrl) {
+                console.log('calling mrl.init() from router')
+                return mrl.init();
+            }
+        }
     }).state('main', {
         url: "/main",
         template: "<div ui-view></div>",
-        controller: 'mainCtrl'
+        controller: 'mainCtrl',
+        resolve: {
+            test: function($stateParams, mrl) {
+                console.log('calling mrl.init() from router')
+                return mrl.init();
+            }
+        }
     }).state('main.main', {
         views: {
             '': {
@@ -49,11 +62,23 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
                 templateUrl: 'views/mainView.html',
                 controller: 'mainViewCtrl'
             }
+        },
+        resolve: {
+            test: function($stateParams, mrl) {
+                console.log('calling mrl.init() from router')
+                return mrl.init();
+            }
         }
     }).state('tabs', {
         url: "/tabs",
         template: "<div ui-view></div>",
-        controller: 'mainCtrl'
+        controller: 'mainCtrl',
+        resolve: {
+            test: function($stateParams, mrl) {
+                console.log('calling mrl.init() from router')
+                return mrl.init();
+            }
+        }
     }).state('tabs.main', {
         views: {
             '': {
@@ -67,11 +92,23 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
                 templateUrl: 'views/tabsView.html',
                 controller: 'tabsViewCtrl'
             }
+        },
+        resolve: {
+            test: function($stateParams, mrl) {
+                console.log('calling mrl.init() from router')
+                return mrl.init();
+            }
         }
     }).state('serviceView', {
         url: '/service/:servicename',
         template: "<div ui-view></div>",
-        controller: 'mainCtrl'
+        controller: 'mainCtrl',
+        resolve: {
+            test: function($stateParams, mrl) {
+                console.log('calling mrl.init() from router')
+                return mrl.init();
+            }
+        }
     }).state('serviceView.main', {
         views: {
             '': {
@@ -80,7 +117,13 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
             'navbar@serviceView.main': {},
             'content@serviceView.main': {
                 templateUrl: 'views/serviceView.html',
-                controller: 'serviceViewCtrl'
+                controller: 'serviceViewCtrl',
+                resolve: {
+                    test: function($stateParams, mrl) {
+                        console.log('calling mrl.init() from router')
+                        return mrl.init();
+                    }
+                }
             }
         }
     });

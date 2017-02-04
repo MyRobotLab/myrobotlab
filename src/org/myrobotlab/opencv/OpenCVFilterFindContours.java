@@ -30,6 +30,7 @@ import static org.bytedeco.javacpp.opencv_core.cvClearMemStorage;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvCreateMemStorage;
 //import static org.bytedeco.javacpp.opencv_core.cvDrawRect;
+import static org.bytedeco.javacpp.opencv_core.cvGetSeqElem;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
@@ -45,6 +46,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.opencv_core.CvContour;
@@ -57,6 +59,7 @@ import org.bytedeco.javacpp.opencv_core.CvSeq;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.data.Point2Df;
 import org.myrobotlab.service.data.Rectangle;
 import org.slf4j.Logger;
 //import static org.bytedeco.javacpp.opencv_core.cvFont;
@@ -80,7 +83,7 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
   boolean useMinArea = true;
 
   public boolean publishBoundingBox = true;
-  public boolean publishPolygon = false;
+  public boolean publishPolygon = true;
 
   boolean useMaxArea = false;
   int minArea = 150;
@@ -98,7 +101,11 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
   transient CvSeq contourPointer = new CvSeq();
   transient CvPoint drawPoint0 = cvPoint(0, 0);
   transient CvPoint drawPoint1 = cvPoint(0, 0);
-  transient CvMemStorage cvStorage = null;
+  transient CvMemStorage storage = null;
+  
+  // floor finder related
+  CvPoint origin =  null;
+  public List<Point2Df> edgePoints;
 
   public OpenCVFilterFindContours() {
     super();
@@ -156,8 +163,8 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    if (cvStorage == null) {
-      cvStorage = cvCreateMemStorage(0);
+    if (storage == null) {
+      storage = cvCreateMemStorage(0);
     }
 
     grey = cvCreateImage(cvGetSize(image), 8, 1);
@@ -175,15 +182,15 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
       grey = image.clone();
     }
 
-    cvFindContours(grey, cvStorage, contourPointer, Loader.sizeof(CvContour.class), 0, CV_CHAIN_APPROX_SIMPLE);
-    CvSeq contour = contourPointer;
+    cvFindContours(grey, storage, contourPointer, Loader.sizeof(CvContour.class), 0, CV_CHAIN_APPROX_SIMPLE);
+    CvSeq contours = contourPointer;
     ArrayList<Rectangle> list = new ArrayList<Rectangle>();
 
-    while (contour != null && !contour.isNull()) {
-      if (contour.elem_size() > 0) { // TODO - limit here for
+    while (contours != null && !contours.isNull()) {
+      if (contours.elem_size() > 0) { // TODO - limit here for
         // "TOOOO MANY !!!!"
 
-        CvRect rect = cvBoundingRect(contour, 0);
+        CvRect rect = cvBoundingRect(contours, 0);
 
         minArea = 600;
 
@@ -229,11 +236,22 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 
           list.add(box);
 
+          log.info("box {}", box);
+          
+          if (origin == null){
+            origin = new CvPoint(width/2, 10 /*height ??*/);
+          }
+          
           if (publishPolygon) {
             // CvSeq points = cvApproxPoly(contour,
             // Loader.sizeof(CvContour.class), cvStorage, CV_POLY_APPROX_DP,
             // cvContourPerimeter(contour) * 0.02, 1);
-            cvApproxPoly(contour, Loader.sizeof(CvContour.class), cvStorage, CV_POLY_APPROX_DP, cvContourPerimeter(contour) * 0.02, 1);
+            // CvSeq result = cvApproxPoly(contours, Loader.sizeof(CvContour.class), storage, CV_POLY_APPROX_DP, cvContourPerimeter(contours)*0.02, 0)
+            CvSeq result = cvApproxPoly(contours, Loader.sizeof(CvContour.class), storage, CV_POLY_APPROX_DP, cvContourPerimeter(contours) * 0.02, 1);
+            for(int i = 0; i < result.total(); i++ ) {
+              CvPoint point = new CvPoint(cvGetSeqElem(result, i));
+              log.info("point {}", point);
+            }
           }
           // Polygon polygon = new Polygon();
           // iterate through points - points.total() build awt Polygon
@@ -277,7 +295,7 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
          */
 
       }
-      contour = contour.h_next();
+      contours = contours.h_next();
     }
 
     // FIXME - sources could use this too
@@ -286,7 +304,7 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 
     // cvPutText(display, " " + cnt, cvPoint(10, 14), font, CvScalar.RED);
     // log.error("x");
-    cvClearMemStorage(cvStorage);
+    cvClearMemStorage(storage);
 
     // display(image, data);
 

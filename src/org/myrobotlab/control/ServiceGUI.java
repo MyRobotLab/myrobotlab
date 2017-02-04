@@ -127,7 +127,11 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
       } else if ("undock".equals(cmd)) {
         undockPanel();
       } else if ("release".equals(cmd)) {
-        myService.send(Runtime.getInstance().getName(), "releaseService", label);
+        // myService.send(Runtime.getInstance().getName(), "releaseService", label); WRONG 
+        // send to target service
+        // below is correct
+        myService.send(sw.getName(), "releaseService");
+        // log.info("cmd");
       } else if ("prevent export".equals(cmd)) {
         myService.send(label, "allowExport", false);
       } else if ("allow export".equals(cmd)) {
