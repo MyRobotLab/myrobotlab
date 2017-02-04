@@ -38,9 +38,14 @@ MrlComm::~MrlComm() {
 
 int MrlComm::getFreeRam() {
 	// KW: In the future the arduino might have more than an 32/64k of ram. an int might not be enough here to return.
+  #ifndef ESP8266
 	extern int __heap_start, *__brkval;
 	int v;
 	return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+ #else
+  return system_get_free_heap_size();
+ #endif
+ return 0;
 }
 
 /**
@@ -109,9 +114,10 @@ void MrlComm::update() {
        // until it is reset after sending publishBoardInfo
         ++loopCount;
 	unsigned long now = millis();
-	if ((now - lastHeartbeatUpdate > 1000)) {
-		// softReset(); - not ready yet to commit to resetting
+	if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) {
+    onDisconnect();
 		lastHeartbeatUpdate = now;
+    heartbeatEnabled = false;
 		return;
 	}
 
@@ -169,9 +175,19 @@ void MrlComm::enableAck(boolean enabled) {
 	ackEnabled = enabled;
 }
 
-boolean MrlComm::readMsg() {
+bool MrlComm::readMsg() {
 	return msg->readMsg();
 }
+
+#if defined(ESP8266)
+void MrlComm::begin(WebSocketsServer& wsServer) {
+  msg->begin(wsServer);
+}
+
+void MrlComm::webSocketEvent(unsigned char num, WStype_t type, unsigned char* payload, unsigned int lenght) {
+  msg->webSocketEvent(num, type, payload, lenght);
+}
+#else
 
 void MrlComm::begin(HardwareSerial& serial) {
 
@@ -198,6 +214,8 @@ void MrlComm::begin(HardwareSerial& serial) {
 	}
 }
 
+#endif
+
 /***********************************************************************
    * PUBLISH_BOARD_INFO This function updates the average time it took to run
    * the main loop and reports it back with a publishBoardStatus MRLComm message
@@ -215,7 +233,9 @@ void MrlComm::publishBoardInfo(){
 	}
         
         long now = micros();
-	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
+        int load = (now - lastBoardInfoUs)/loopCount;
+	//msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
+ msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  load, getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
         lastBoardInfoUs = now;
         loopCount = 0;
 }
@@ -240,12 +260,6 @@ void MrlComm::echo(float myFloat, byte myByte, float mySecondFloat) {
 	msg->publishDebug(String("echo float2 " + String(mySecondFloat)));
 	// msg->publishDebug(String("pi is " + String(3.141529)));
 	msg->publishEcho(myFloat, myByte, mySecondFloat);
-}
-
-// > controllerAttach/serialPort
-// TODO - talk to calamity
-void MrlComm::controllerAttach(byte serialPort) {
-	msg->publishDebug(String("controllerAttach " + String(serialPort)));
 }
 
 // > customMsg/[] msg
@@ -383,12 +397,6 @@ void MrlComm::servoDetachPin(byte deviceId) {
 	servo->detachPin();
 }
 
-// > servoSetMaxVelocity/deviceId/b16 maxVelocity
-void MrlComm::servoSetMaxVelocity(byte deviceId, int maxVelocity) {
-	MrlServo* servo = (MrlServo*) getDevice(deviceId);
-	servo->setMaxVelocity(maxVelocity);
-}
-
 // > servoSetVelocity/deviceId/b16 velocity
 void MrlComm::servoSetVelocity(byte deviceId, int velocity) {
 	MrlServo* servo = (MrlServo*) getDevice(deviceId);
@@ -471,6 +479,7 @@ void MrlComm::softReset() {
 		customMsgBuffer[i] = 0;
 	}
 	customMsgSize = 0;
+  heartbeatEnabled = true;
 }
 
 // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
@@ -503,3 +512,14 @@ unsigned int MrlComm::getCustomMsg() {
    customMsgSize--;
    return retval;
  }
+
+ void MrlComm::onDisconnect() {
+  ListNode<Device*>* node = deviceList.getRoot();
+  // iterate through our device list and call update on them.
+  while (node != NULL) {
+    node->data->onDisconnect();
+    node = node->next;
+  }
+  boardStatusEnabled = false;
+ }
+

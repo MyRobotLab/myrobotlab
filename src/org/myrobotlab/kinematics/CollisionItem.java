@@ -9,6 +9,12 @@ import java.util.UUID;
 import org.myrobotlab.openni.PVector;
 import org.python.jline.internal.Log;
 
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.VertexBuffer.Type;
+import com.jme3.util.BufferUtils;
+
 public class CollisionItem {
   Point origin = null;
   Point end = null;
@@ -17,6 +23,8 @@ public class CollisionItem {
   ArrayList<String> ignore = new ArrayList<String>();
   ArrayList<String> done = new ArrayList<String>();
   boolean fromKinect = false;
+  HashMap<Integer[], Map3DPoint> cloudMap;
+  
   /**
    * @param origin
    * @param end
@@ -41,6 +49,7 @@ public class CollisionItem {
   
   public CollisionItem(HashMap<Integer[],Map3DPoint> cloudMap) {
   	name = UUID.randomUUID().toString();
+  	this.cloudMap = cloudMap;
   	buildCollisionItem(cloudMap);
   }
 
@@ -258,4 +267,5 @@ public class CollisionItem {
   	return fromKinect;
   }
   
+
 }

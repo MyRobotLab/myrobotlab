@@ -1,3 +1,4 @@
+#include <Wire.h>
 /**
  * <pre>
  *
@@ -72,8 +73,6 @@ Msg* Msg::getInstance() {
 	void enableAck( boolean enabled);
 	// > echo/f32 myFloat/myByte/f32 secondFloat
 	void echo( float myFloat,  byte myByte,  float secondFloat);
-	// > controllerAttach/serialPort
-	void controllerAttach( byte serialPort);
 	// > customMsg/[] msg
 	void customMsg( byte msgSize, const byte*msg);
 	// > deviceDetach/deviceId
@@ -106,8 +105,6 @@ Msg* Msg::getInstance() {
 	void servoAttachPin( byte deviceId,  byte pin);
 	// > servoDetachPin/deviceId
 	void servoDetachPin( byte deviceId);
-	// > servoSetMaxVelocity/deviceId/b16 maxVelocity
-	void servoSetMaxVelocity( byte deviceId,  int maxVelocity);
 	// > servoSetVelocity/deviceId/b16 velocity
 	void servoSetVelocity( byte deviceId,  int velocity);
 	// > servoSweepStart/deviceId/min/max/step
@@ -178,7 +175,7 @@ void Msg::publishEcho( float myFloat,  byte myByte,  float secondFloat) {
 void Msg::publishCustomMsg(const byte* msg,  byte msgSize) {
   write(MAGIC_NUMBER);
   write(1 + (1 + msgSize)); // size
-  write(PUBLISH_CUSTOM_MSG); // msgType = 14
+  write(PUBLISH_CUSTOM_MSG); // msgType = 13
   write((byte*)msg, msgSize);
   flush();
   reset();
@@ -187,7 +184,7 @@ void Msg::publishCustomMsg(const byte* msg,  byte msgSize) {
 void Msg::publishI2cData( byte deviceId, const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + 1 + (1 + dataSize)); // size
-  write(PUBLISH_I2C_DATA); // msgType = 20
+  write(PUBLISH_I2C_DATA); // msgType = 19
   write(deviceId);
   write((byte*)data, dataSize);
   flush();
@@ -197,7 +194,7 @@ void Msg::publishI2cData( byte deviceId, const byte* data,  byte dataSize) {
 void Msg::publishDebug(const char* debugMsg,  byte debugMsgSize) {
   write(MAGIC_NUMBER);
   write(1 + (1 + debugMsgSize)); // size
-  write(PUBLISH_DEBUG); // msgType = 29
+  write(PUBLISH_DEBUG); // msgType = 28
   write((byte*)debugMsg, debugMsgSize);
   flush();
   reset();
@@ -206,8 +203,20 @@ void Msg::publishDebug(const char* debugMsg,  byte debugMsgSize) {
 void Msg::publishPinArray(const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + (1 + dataSize)); // size
-  write(PUBLISH_PIN_ARRAY); // msgType = 30
+  write(PUBLISH_PIN_ARRAY); // msgType = 29
   write((byte*)data, dataSize);
+  flush();
+  reset();
+}
+
+void Msg::publishServoEvent( byte deviceId,  byte eventType,  byte currentPos,  byte targetPos) {
+  write(MAGIC_NUMBER);
+  write(1 + 1 + 1 + 1 + 1); // size
+  write(PUBLISH_SERVO_EVENT); // msgType = 40
+  write(deviceId);
+  write(eventType);
+  write(currentPos);
+  write(targetPos);
   flush();
   reset();
 }
@@ -215,7 +224,7 @@ void Msg::publishPinArray(const byte* data,  byte dataSize) {
 void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + 1 + (1 + dataSize)); // size
-  write(PUBLISH_SERIAL_DATA); // msgType = 44
+  write(PUBLISH_SERIAL_DATA); // msgType = 43
   write(deviceId);
   write((byte*)data, dataSize);
   flush();
@@ -225,7 +234,7 @@ void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
 void Msg::publishUltrasonicSensorData( byte deviceId,  int echoTime) {
   write(MAGIC_NUMBER);
   write(1 + 1 + 2); // size
-  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 48
+  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 47
   write(deviceId);
   writeb16(echoTime);
   flush();
@@ -283,12 +292,6 @@ void Msg::processCommand() {
 			float secondFloat = f32(ioCmd, startPos+1);
 			startPos += 4; //f32
 			mrlComm->echo( myFloat,  myByte,  secondFloat);
-			break;
-	}
-	case CONTROLLER_ATTACH: { // controllerAttach
-			byte serialPort = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->controllerAttach( serialPort);
 			break;
 	}
 	case CUSTOM_MSG: { // customMsg
@@ -457,14 +460,6 @@ void Msg::processCommand() {
 			byte deviceId = ioCmd[startPos+1]; // bu8
 			startPos += 1;
 			mrlComm->servoDetachPin( deviceId);
-			break;
-	}
-	case SERVO_SET_MAX_VELOCITY: { // servoSetMaxVelocity
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			int maxVelocity = b16(ioCmd, startPos+1);
-			startPos += 2; //b16
-			mrlComm->servoSetMaxVelocity( deviceId,  maxVelocity);
 			break;
 	}
 	case SERVO_SET_VELOCITY: { // servoSetVelocity
@@ -652,7 +647,7 @@ bool Msg::readMsg() {
 			// if received header + msg
 			if (byteCount == 2 + msgSize) {
 				// we've reach the end of the command, just return true .. we've got it
-				byteCount = 0;
+ 			byteCount = 0;
 				return true;
 			}
 		}
@@ -725,9 +720,20 @@ void Msg::flush() {
 	return serial->flush();
 }
 
-void Msg::begin(HardwareSerial& hardwareSerial){
-	serial = &hardwareSerial;
+#if defined(ESP8266)
+void Msg::begin(WebSocketsServer& wsServer){
+  serial = new MrlWS(wsServer);
 }
+
+void Msg::webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t lenght) {
+  serial->webSocketEvent(num, type, payload, lenght);
+}
+#else
+void Msg::begin(HardwareSerial& hardwareSerial){
+  serial = &hardwareSerial;
+}
+
+#endif
 
 byte Msg::getMethod(){
 	return ioCmd[0];

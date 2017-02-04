@@ -35,7 +35,7 @@ public class Map3D {
 	public int closestDistance = 450;
 	public int fartestDistance = 1000;
 	
-	public int skip = 10;
+	public int skip = 6;
 	HashMap<Integer,HashMap<Integer,HashMap<Integer,Map3DPoint>>> coordValue = new HashMap<Integer,HashMap<Integer,HashMap<Integer,Map3DPoint>>>();
 	private Point kinectPosition;
 	//ArrayList<Map3DPoint> cloudMap = new ArrayList<Map3DPoint>();
