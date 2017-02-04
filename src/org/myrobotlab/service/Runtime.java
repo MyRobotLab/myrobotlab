@@ -59,6 +59,8 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
+import twitter4j.examples.directmessage.SendDirectMessage;
+
 /**
  * Runtime is responsible for the creation and removal of all Services and the
  * associated static registries It maintains state information regarding
@@ -1403,13 +1405,23 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 			rt.error("release could not find %s", name);
 			return false;
 		}
-		ServiceInterface sw = registry.remove(name);
-		if (sw.isLocal()) {
-			sw.stopService();
-		}
+    
+		// send msg to service to self terminate
+    rt.send(name, "releaseService");
+    
+    // get reference from registry
+		ServiceInterface sw = registry.get(name);
+		
+		// you have to send released before removing from registry
+		rt.invoke("released", sw);
+		
+		// remove from registry
+		registry.remove(name);
+		
+		// remove from environments
 		ServiceEnvironment se = environments.get(sw.getInstanceId());
 		se.serviceDirectory.remove(name);
-		rt.invoke("released", sw);
+		
 		log.info("released {}", name);
 		return true;
 	}

@@ -784,7 +784,7 @@ public class OpenCV extends Service implements VideoSource {
 
     // VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
     // vs.attach(opencv);
-    opencv.capture();
+    // opencv.capture();
     // opencvLeft.capture();
     // opencvRight.capture();
 

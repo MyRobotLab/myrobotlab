@@ -1381,8 +1381,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 					keyBuilder.append(o);
 				}
 			}
-			String methodCacheKey = c.toString() + "_" + keyBuilder.toString();
-			Method mC = LRUMethodCache.getInstance().getCacheEntry(methodCacheKey);
+		
+			Method mC = LRUMethodCache.getInstance().getCacheEntry(obj, method, paramTypes);
 			if (mC != null) {
 				// We found a cached hit! lets invoke on that.
 				try {
@@ -1423,8 +1423,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 					// put return object onEvent
 					out(method, retobj);
 					// we've found a match. put that in the cache.
-					log.debug("caching method cache key {}", methodCacheKey);
-					LRUMethodCache.getInstance().addCacheEntry(methodCacheKey, m);
+					log.debug("caching method cache key");
+					LRUMethodCache.getInstance().addCacheEntry(obj, method, paramTypes, m);
 					return retobj;
 				} catch (Exception e1) {
 					log.error(String.format("boom goes method %s", m.getName()));

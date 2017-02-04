@@ -16,7 +16,7 @@
 // TODO - gateways should make a hello() method available through their interface
 // infomation returned - gateway name - mrl protokey ? & Runtime name
 angular.module('mrlapp.mrl', []).provider('mrl', [function() {
-    console.log('mrl.init');
+    console.log('mrl.js');
     var _self = this;
     // The name of the gateway I am
     // currently attached to
@@ -284,6 +284,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.onClose = function(response) {
         connected = false;
         console.log('websocket, onclose');
+        // I doubt the following is correct or needed
+        // just because the connection to the WebGui service fails
+        // does not mean callbacks should be removed ...
+
         if (response.state == "unsubscribe") {
             console.log('Info: ' + transport + ' closed.');
         }
@@ -464,7 +468,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // the special $get method called when
     // a service gets instantiated for the 1st time?
     // it also represents config's view of the provider
-    // when we inject our provider into a function by way of the provider name ("mrl"), Angular will call $get to retrieve the object to inject
+    // when we inject our provider into a function by way of the provider name ("mrl"), Angular will call $get to 
+    // retrieve the object to inject
     this.$get = function($q, $log) {
         this.connect = function(url, proxy) {
             if (connected) {
@@ -489,6 +494,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 $log.error("connect deferred - result error");
                 var error = error;
             });
+
+            // - not needed ? - just mrl.init() - return deferred.promise; // added to resolve in ui-route
         }
         ;
         this.onError = function(response) {
@@ -680,6 +687,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 _self.addService(service);
             },
             init: function() {
+                console.log('mrl.init()')
                 if (connected) {
                     return true;
                 }

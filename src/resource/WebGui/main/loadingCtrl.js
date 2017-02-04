@@ -1,14 +1,15 @@
 angular.module('mrlapp.main.mainCtrl')
         .controller('loadingCtrl', ['$scope', '$log', 'mrl', 'panelSvc', '$state', '$previousState',
             function ($scope, $log, mrl, panelSvc, $state, $previousState) {
-                $log.info('loadingCtrl');
-
+                $log.info('loadingCtrl.js');
+                // test();
                 var isUndefinedOrNull = function (val) {
                     return angular.isUndefined(val) || val === null;
                 };
 
                 $scope.mrlReady = false;
                 $scope.serviceSvcReady = false;
+                /*
                 mrl.init().then(function () {
                     $log.info('mrl initialized!');
                     $scope.mrlReady = true;
@@ -27,6 +28,7 @@ angular.module('mrlapp.main.mainCtrl')
                 }, function (msg_) {
                     $log.info('mrl.init()-meh!');
                 });
+                */
 
                 var go = function () {
                     var previousstate = $previousState.get();
