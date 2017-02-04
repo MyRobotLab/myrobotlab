@@ -17,6 +17,7 @@
 #define CYCLES_PER_SEC (F_CPU)
 #define NS_PER_CYCLE ( NS_PER_SEC / CYCLES_PER_SEC )
 #define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
+#ifndef ESP8266
 
 // Arduino Mega Pins
 #if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
@@ -36,7 +37,9 @@
   #define digitalPinToSendBit(P,V) \
     (((P) >= 0 && (P) <= 7) ? sendBitD(V) : (((P) >= 8 && (P) <= 13) ? sendBitB(V) : sendBitC(V)))
 #endif
-
+#else
+  #define digitalPinToSendBit(P,V) return
+#endif
 #define NEOPIXEL_ANIMATION_NO_ANIMATION 0
 #define NEOPIXEL_ANIMATION_STOP 1
 #define NEOPIXEL_ANIMATION_COLOR_WIPE 2
@@ -90,6 +93,7 @@ class MrlNeopixel:public Device{
   MrlNeopixel(int deviceId);
   ~MrlNeopixel();
   bool attach(byte pin, long numPixels);
+#ifndef ESP8266
   inline void sendBitB(bool bitVal);
   inline void sendBitC(bool bitVal);
   inline void sendBitD(bool bitVal);
@@ -102,6 +106,7 @@ class MrlNeopixel:public Device{
   inline void sendBitJ(bool bitVal);
   inline void sendBitK(bool bitVal);
   inline void sendBitL(bool bitVal);
+#endif
 #endif
   inline void sendByte(unsigned char byte);
   inline void sendPixel(Pixel p);
@@ -119,6 +124,7 @@ class MrlNeopixel:public Device{
   void animationRainbowCycle();
   void animationFlashRandom();
   void animationIronman();
+  void onDisconnect();
 };
 
 

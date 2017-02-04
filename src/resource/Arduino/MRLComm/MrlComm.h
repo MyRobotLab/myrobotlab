@@ -3,6 +3,12 @@
 
 #include "ArduinoMsgCodec.h"
 #include "MrlSerialRelay.h"
+#if defined(ESP8266)
+  #include <WebSocketsServer.h>
+  extern "C" {
+    #include "user_interface.h"
+  }
+#endif
 
 // forward defines to break circular dependency
 class Device;
@@ -53,6 +59,8 @@ class MrlComm{
     // handles all messages to and from pc
     Msg* msg;
 
+    bool heartbeatEnabled;
+
 public:
     // utility methods
     int getFreeRam();
@@ -80,8 +88,6 @@ public:
 	void enableAck( boolean enabled);
 	// > echo/f32 myFloat/myByte/f32 secondFloat
 	void echo( float myFloat,  byte myByte,  float secondFloat);
-	// > controllerAttach/serialPort
-	void controllerAttach( byte serialPort);
 	// > customMsg/[] msg
 	void customMsg( byte msgSize, const byte*msg);
 	// > deviceDetach/deviceId
@@ -114,8 +120,6 @@ public:
 	void servoAttachPin( byte deviceId,  byte pin);
 	// > servoDetachPin/deviceId
 	void servoDetachPin( byte deviceId);
-	// > servoSetMaxVelocity/deviceId/b16 maxVelocity
-	void servoSetMaxVelocity( byte deviceId,  int maxVelocity);
 	// > servoSetVelocity/deviceId/b16 velocity
 	void servoSetVelocity( byte deviceId,  int velocity);
 	// > servoSweepStart/deviceId/min/max/step
@@ -153,6 +157,11 @@ public:
     int getCustomMsgSize();
     void begin(HardwareSerial& serial);
     bool readMsg();
+    void onDisconnect();
+#if defined(ESP8266)
+    void begin(WebSocketsServer& wsServer);
+    void webSocketEvent(unsigned char num, WStype_t type, unsigned char* payload, unsigned int lenght);
+#endif
 };
   
 #endif

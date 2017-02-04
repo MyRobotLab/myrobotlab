@@ -55,7 +55,7 @@ bool MrlNeopixel::attach(byte pin, long numPixels) {
   //msg->publishDebug("Neopixel attached");
 	return true;
 }
-
+#ifndef ESP8266
 inline void MrlNeopixel::sendBitB(bool bitVal) {
 #ifndef VIRTUAL_ARDUINO_H
 	uint8_t bit = bitmask;
@@ -562,7 +562,7 @@ inline void MrlNeopixel::sendBitD(bool bitVal) {
 	}
   #endif
 }
-
+#endif
 inline void MrlNeopixel::sendByte(unsigned char byte) {
   //msg->publishDebug("MrlNeopixel.sendByte !");
 	for (unsigned char bit = 0; bit < 8; bit++) {
@@ -844,5 +844,10 @@ void MrlNeopixel::animationIronman() {
 	} else
 		lastShow = millis();
 	newData = true;
+}
+
+void MrlNeopixel::onDisconnect() {
+  setAnimation(NEOPIXEL_ANIMATION_THEATER_CHASE, 255, 0, 0, 1);
+  
 }
 

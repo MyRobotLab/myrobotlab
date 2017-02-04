@@ -460,11 +460,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // GAP broadcastState();
   }
 
-  public void controllerAttach(Arduino controller, int serialPort) {
-    attachedController.put(serialPort, controller);
-    msg.controllerAttach(serialPort);
-  }
-
   public Map<String, PinDefinition> createPinList() {
     pinMap = new ConcurrentHashMap<String, PinDefinition>();
     pinIndex = new ConcurrentHashMap<Integer, PinDefinition>();
@@ -1585,11 +1580,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.servoDetachPin(getDeviceId(servo));
   }
 
-  @Override
-  // > servoSetMaxVelocity/deviceId/b16 maxVelocity
-  public void servoSetMaxVelocity(ServoControl servo) {
-    msg.servoSetMaxVelocity(getDeviceId(servo), (int) servo.getMaxVelocity());
-  }
 
   @Override
   // > servoSetVelocity/deviceId/b16 velocity
@@ -2039,6 +2029,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       Logging.logError(e);
     }
   }
+
+	public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
+		// TODO Auto-generated method stub
+    ((Servo) getDevice(deviceId)).onServoEvent(eventType, currentPos, targetPos);
+    return currentPos;
+	}
 
 
 }

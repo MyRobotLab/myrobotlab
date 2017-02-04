@@ -102,6 +102,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 	public Map3D map3d = new Map3D();
 	private String kinectName = "kinect";
 	private boolean ProcessKinectData = false;
+	
+	TestJmeIntegratedMovement jmeApp = null;
   
   public IntegratedMovement(String n) {
     super(n);
@@ -279,57 +281,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
             newPos.setY(newPos.getY() + vector[1]);
             newPos.setZ(newPos.getZ() + vector[2]);
         	}
-//          double oc = Math.sqrt(((ori.getX() - colPoint.getX()) * (ori.getX() - colPoint.getX())) + ((ori.getY() - colPoint.getY()) * (ori.getY() - colPoint.getY())) + ((ori.getZ() - colPoint.getZ()) * (ori.getZ() - colPoint.getZ())));
-//          double ec = Math.sqrt(((end.getX() - colPoint.getX()) * (end.getX() - colPoint.getX())) + ((end.getY() - colPoint.getY()) * (end.getY() - colPoint.getY())) + ((end.getZ() - colPoint.getZ()) * (end.getZ() - colPoint.getZ())));
-//          if (oc > ec) {
-//            newPos.setX(newPos.getX()+colPoint.getX()-end.getX());
-//            newPos.setY(newPos.getX()+colPoint.getY()-end.getY());
-//            newPos.setZ(newPos.getZ()+colPoint.getZ()-end.getZ());
-//          }
-//          else {
-//            newPos.setX(newPos.getX()+colPoint.getX()-ori.getX());
-//            newPos.setY(newPos.getX()+colPoint.getY()-ori.getY());
-//            newPos.setZ(newPos.getZ()+colPoint.getZ()-ori.getZ());
-//          }
+        	this.outbox.notify();
           Point oldGoTo = goTo;
           if(!stopMoving) moveTo(newPos);
           goTo = oldGoTo;
-//          int dmove = 0;
-//          int deltaMove = 5;
-//          if (collisionItems.getCollisionPoint()[itemIndex].getX() >= collisionItems.getCollisionPoint()[1-itemIndex].getX()) {
-//            dmove+=deltaMove;
-//          }
-//          else dmove-=deltaMove;
-//          if (collisionItems.getCollisionPoint()[itemIndex].getY() >= collisionItems.getCollisionPoint()[1-itemIndex].getY()) {
-//            dmove+=deltaMove;
-//          }
-//          else dmove-=deltaMove;
-//          if (collisionItems.getCollisionPoint()[itemIndex].getZ() >= collisionItems.getCollisionPoint()[1-itemIndex].getZ()) {
-//            dmove+=deltaMove;
-//          }
-//          else dmove-=deltaMove;
-//          ArrayList<Object> tempPos = new ArrayList<Object>();
-//          for (DHLink l : currentArm.getLinks()) {
-//            Point actPoint = currentArm.getJointPosition(linkIndex);
-//            Double distAct = actPoint.distanceTo(collisionItems.getCollisionPoint()[1-itemIndex]);
-//            l.incrRotate(MathUtils.degToRad(dmove));
-//            Point newPoint = currentArm.getJointPosition(linkIndex);
-//            Double distNew = newPoint.distanceTo(collisionItems.getCollisionPoint()[1-itemIndex]);
-//            if (distAct < distNew) {
-//              l.incrRotate(MathUtils.degToRad(dmove * -2));
-//            }
-//            tempPos.add(l.getPositionValueDeg());
-//          }
-//          currentArm = simulateMove(tempPos);
-//          for (int k = 0; k < currentArm.getNumLinks(); k++){
-//            Servo servo = currentServos.get(currentArm.getLink(k).getName());
-//            while (timeToWait + servo.lastActivityTime > System.currentTimeMillis()) {
-//              sleep(1);
-//            }
-//            servo.moveTo(currentArm.getLink(k).getPositionValueDeg().intValue());
-//          }
-//          log.info("moving to {}", currentPosition());
-//          timeToWait = (long) (time*1000);
           if (moveInfo != null) {		
           	goTo = moveToObject();		
           }		
@@ -534,7 +489,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.setGeneticComputeSimulation(false);
 
     //#move to a position
-    ik.moveTo("leftArm",350,400,700);
+    ik.moveTo("leftArm",260,410,-120);
     //ik.moveTo(280,190,-345);
     //#ik.moveTo("cymbal",ik.ObjectPointLocation.ORIGIN_SIDE, 0,0,5)
     //#mtorso.moveTo(45)
@@ -835,6 +790,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     if (openni != null) {
     	map3d.updateKinectPosition(currentPosition(kinectName));
     }
+    if (jmeApp != null) {
+    	jmeApp.updateObjects(collisionItems.getItems());
+    }
   }
   
   public void moveTo(String name, ObjectPointLocation location, int xoffset, int yoffset, int zoffset) {		
@@ -976,9 +934,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 	}
 	
 	public void visualize() {
-		TestJmeIntegratedMovement app = new TestJmeIntegratedMovement();
-		app.setObjects(getCollisionObject());
-		app.start();
+		jmeApp = new TestJmeIntegratedMovement();
+		jmeApp.setObjects(getCollisionObject());
+		jmeApp.start();
 
 	}
 }
