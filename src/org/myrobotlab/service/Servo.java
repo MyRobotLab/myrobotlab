@@ -710,7 +710,7 @@ public class Servo extends Service implements ServoControl {
       velocity = maxVelocity;
       log.info("Trying to set velocity to a value greater than max velocity");
     }
-    velocity = velocity;
+    this.velocity = velocity;
     if (controller != null) {
       controller.servoSetVelocity(this);
     }
