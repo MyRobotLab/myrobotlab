@@ -398,7 +398,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public boolean isAttached() {
 		return controller != null;
 	}
-
+    
 	/**
 	 * Set the PWM pulsewidth
 	 * 
@@ -622,16 +622,26 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		invoke("publishAttachedDevice", servoName);
 	}
 
-	public void attach(ServoControl servo) {
+	public void attach(ServoControl servo) throws Exception  {
+	    if (isAttached(servo)) {
+	        log.info("servo {} already attached", servo.getName());
+	        return;
+	      }
 		ServoData servoData = new ServoData();
 		servoData.pin = servo.getPin();
+		servoData.targetOutput = servo.getTargetOutput();
+		servoData.velocity = servo.getVelocity();
 		servoData.pwmFreqSet = false;
 		servoData.pwmFreq = pwmFreq;
 		servoData.isEnergized = true;
 		servoMap.put(servo.getName(), servoData);
-		invoke("publishAttachedDevice", servo.getName());
+	    servo.attach(this);
 	}
-
+	
+	public boolean isAttached(DeviceControl device) {
+		    return servoMap.containsKey(device.getName());
+    }
+	
 	void motorAttach(MotorControl device, Object... conf) {
 		/*
 		 * This is where motor data could be initialized. So far all motor data
@@ -658,8 +668,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public void servoAttachPin(ServoControl servo, int pin) {
 		ServoData servoData = servoMap.get(servo.getName());
 		servoData.pin = pin;
-		servoData.isEnergized = true;
-		servoMoveTo(servo);
+		// servoData.isEnergized = true;
+		// servoMoveTo(servo);
 	}
 
 	/**
@@ -881,7 +891,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	}
 
 	@Override
-	public void attach(ServoControl servo, int pin) {
+	public void attach(ServoControl servo, int pin)  throws Exception {
 		servo.setPin(pin);
 		attach(servo);
 	}
