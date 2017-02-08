@@ -189,7 +189,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   boolean heartbeat = false;
 
-  I2CBus i2cBus;
+  I2CBus i2cBus = null;
 
   volatile byte[] i2cData = new byte[64];
 
