@@ -285,6 +285,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 		Adafruit16CServoDriver driver = (Adafruit16CServoDriver) Runtime.start("pwm", "Adafruit16CServoDriver");
 		log.info("Driver {}", driver);
+		Runtime.start("gui", "GuiService");
 
 	}
 
@@ -865,7 +866,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 		ServiceType meta = new ServiceType(Adafruit16CServoDriver.class.getCanonicalName());
 		meta.addDescription("Adafruit 16-Channel PWM/Servo Driver");
-		meta.addCategory("shield", "servo & pwm");
+		meta.addCategory("servo", "motor", "i2c");
 		meta.setSponsor("Mats");
 		/*
 		 * meta.addPeer("arduino", "Arduino", "our Arduino");

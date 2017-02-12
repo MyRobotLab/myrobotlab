@@ -62,7 +62,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		try {
 			I2cMux i2cMux = (I2cMux) Runtime.start("i2cMux", "I2CMux");
-			Runtime.start("gui", "GUIService");
+			Runtime.start("gui", "GuiService");
 
 		} catch (Exception e) {
 			Logging.logError(e);

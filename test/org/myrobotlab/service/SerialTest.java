@@ -51,7 +51,7 @@ public class SerialTest {
 
     log.info("setUpBeforeClass");
 
-    // Runtime.start("gui", "GUIService");
+    // Runtime.start("gui", "GuiService");
     serial = (Serial) Runtime.start("serial", "Serial");
     catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
     virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
@@ -766,7 +766,7 @@ public class SerialTest {
       Result result = junit.run(SerialTest.class);
       log.info("Result: {}", result);
       // WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
-      // ServiceInterface gui = Runtime.start("gui", "GUIService");
+      // ServiceInterface gui = Runtime.start("gui", "GuiService");
 
       Runtime.dump();
 

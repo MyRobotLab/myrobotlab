@@ -61,7 +61,9 @@ public class Android extends Service {
 
       // Android template = (Android) Runtime.start("template",
       // "_TemplateService");
-      Runtime.start("gui", "GUIService");
+
+      Runtime.start("anrdoi", "Android");
+      Runtime.start("gui", "GuiService");
 
     } catch (Exception e) {
       Logging.logError(e);

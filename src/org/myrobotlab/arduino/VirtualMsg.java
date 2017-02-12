@@ -1554,7 +1554,7 @@ public class VirtualMsg {
 			LoggingFactory.init(Level.INFO);
 			
 			/*
-			Runtime.start("gui","GUIService");
+			Runtime.start("gui","GuiService");
 			VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
 			virtual.connectVirtualUart(port, port + "UART");
 			*/

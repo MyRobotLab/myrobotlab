@@ -301,7 +301,7 @@ public class Security extends Service implements AuthorizationProvider {
    * 
    * Security security = new Security("security"); security.startService();
    * 
-   * Runtime.createAndStart("gui", "GUIService");
+   * Runtime.createAndStart("gui", "GuiService");
    * 
    * }
    */
@@ -329,7 +329,7 @@ public class Security extends Service implements AuthorizationProvider {
      * allowExportByType.put("XMPP", false);
      * allowExportByType.put("RemoteAdapter", false);
      * allowExportByType.put("WebGui", false);
-     * allowExportByType.put("GUIService", false);
+     * allowExportByType.put("GuiService", false);
      * 
      * allowExportByType.put("Java", false); allowExportByType.put("Python",
      * false);

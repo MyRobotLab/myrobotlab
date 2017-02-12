@@ -58,7 +58,7 @@ public class ServiceInterfaceTest {
     // don't log well anymore.
     whiteListServices.add("Cli");
     // gui service will probably blow up if you are running in a console.
-    whiteListServices.add("GUIService");
+    whiteListServices.add("GuiService");
     // leap motion blows up because java.libary.path not having the leap deps.
     whiteListServices.add("LeapMotion");
     // jna lib path stuff

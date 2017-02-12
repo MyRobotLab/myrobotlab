@@ -52,7 +52,7 @@ public class VideoStreamer extends Service implements VideoSink {
       opencv.addFilter("pyramidDown", "PyramidDown");
       opencv.capture();
 
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "GuiService");
 
     } catch (Exception e) {
       Logging.logError(e);

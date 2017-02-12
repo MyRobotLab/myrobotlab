@@ -131,7 +131,7 @@ public class Plantoid extends Service {
 			// Runtime.createAndStart("python", "Python");
 			// Runtime.createAndStart("webgui", "WebGui");
 			/*
-			 * GUIService gui = new GUIService("gui"); gui.startService();
+			 * GuiService gui = new GuiService("gui"); gui.startService();
 			 */
 		} catch (Exception e) {
 			Logging.logError(e);

@@ -274,6 +274,12 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     try {
 
       HttpClient client = (HttpClient) Runtime.start("client", "HttpClient");
+      Runtime.start("gui", "GuiService");
+      boolean done = true;
+      
+      if (done){
+        return;
+      }
       // this is how a listener might subscribe
       // TODO - put dynamically subscribing into framework
       // with interface inspection ??

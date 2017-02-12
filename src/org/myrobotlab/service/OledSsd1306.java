@@ -163,7 +163,7 @@ public class OledSsd1306 extends Service implements I2CControl {
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		try {
 			OledSsd1306 oledSsd1306 = (OledSsd1306) Runtime.start("OledSsd1306", "OledSsd1306");
-			Runtime.start("gui", "GUIService");
+			Runtime.start("gui", "GuiService");
 
 		} catch (Exception e) {
 			Logging.logError(e);

@@ -130,7 +130,7 @@ public class Servo extends Service implements ServoControl {
 
     ServiceType meta = new ServiceType(Servo.class.getCanonicalName());
     meta.addDescription("Controls a servo");
-    meta.addCategory("motor", "control");
+    meta.addCategory("motor", "control", "servo");
 
     return meta;
   }
@@ -753,16 +753,25 @@ public class Servo extends Service implements ServoControl {
 
   public static void main(String[] args) throws InterruptedException {
     try {
-      LoggingFactory.init(Level.INFO);
+      LoggingFactory.init();
 
       // Runtime.start("webgui", "WebGui");
-      // Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "GuiService");
+      Runtime.start("servo", "Servo");
+      
+      boolean done = true;
+      if (done){
+        return;
+      }
+     
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.record();
+      
       // arduino.getSerial().record();
 
       log.info("ports {}", Arrays.toString(arduino.getSerial().getPortNames().toArray()));
       arduino.connect("COM10");
+      
 
       log.info("ready here");
       // arduino.ackEnabled = true;

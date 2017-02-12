@@ -18,7 +18,7 @@ public class StreamGobbler extends Thread {
   String type;
 
   public StreamGobbler(InputStream is, ArrayList<OutputStream> os, String type) {
-    super(String.format("streamgobbler_%s_%s", type, Runtime.getPid()));
+    super(String.format("streamgobbler_%s_%s", type, Runtime.getInstance().getPid()));
     this.is = is;
     this.os = os;
   }
