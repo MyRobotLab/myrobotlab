@@ -411,7 +411,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 		try {
 			Ads1115 ads1115 = (Ads1115) Runtime.start("Ads1115", "Ads1115");
-			Runtime.start("gui", "Swing");
+			Runtime.start("gui", "SwingGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);

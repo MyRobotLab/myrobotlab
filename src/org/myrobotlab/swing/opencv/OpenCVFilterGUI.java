@@ -37,7 +37,7 @@ import javax.swing.border.TitledBorder;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public abstract class OpenCVFilterGUI {
@@ -47,7 +47,7 @@ public abstract class OpenCVFilterGUI {
   JPanel main = new JPanel(new BorderLayout());
   JPanel display = new JPanel(new GridBagLayout());
   final String boundServiceName;
-  final Swing myGUI;
+  final SwingGui myGUI;
   final public GridBagConstraints gc = new GridBagConstraints();
 
   FilterWrapper boundFilter = null;
@@ -55,7 +55,7 @@ public abstract class OpenCVFilterGUI {
   JComboBox sources = new JComboBox();
   ComboBoxModel sourcesModel = new ComboBoxModel(this);
 
-  public OpenCVFilterGUI(String boundFilterName, String boundServiceName, Swing myGUI) {
+  public OpenCVFilterGUI(String boundFilterName, String boundServiceName, SwingGui myGUI) {
     name = boundFilterName;
     this.boundServiceName = boundServiceName;
     this.myGUI = myGUI;

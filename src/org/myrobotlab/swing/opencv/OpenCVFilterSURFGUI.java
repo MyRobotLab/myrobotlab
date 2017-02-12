@@ -38,13 +38,13 @@ import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterSURF;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterSURFGUI extends OpenCVFilterGUI implements ActionListener {
 
   JTextField objectFilename = new JTextField("objectFilename", 200);
 
-  public OpenCVFilterSURFGUI(String boundFilterName, String boundServiceName, Swing myService) {
+  public OpenCVFilterSURFGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     objectFilename.addActionListener(this);
     TitledBorder title;

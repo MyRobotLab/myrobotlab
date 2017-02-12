@@ -86,7 +86,7 @@ public class Database extends Service {
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			Runtime.start("template", "_TemplateService");
-			Runtime.start("gui", "Swing");
+			Runtime.start("gui", "SwingGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);

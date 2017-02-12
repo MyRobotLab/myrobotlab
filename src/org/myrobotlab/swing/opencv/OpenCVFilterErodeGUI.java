@@ -33,13 +33,13 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterErode;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterErodeGUI extends OpenCVFilterGUI implements ActionListener {
 
   JComboBox<Integer> iterations = new JComboBox<Integer>(new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
 
-  public OpenCVFilterErodeGUI(String boundFilterName, String boundServiceName, Swing myService) {
+  public OpenCVFilterErodeGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
     iterations.addActionListener(this);

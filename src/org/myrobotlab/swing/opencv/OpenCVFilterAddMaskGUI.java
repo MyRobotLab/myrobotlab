@@ -32,11 +32,11 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterAddMask;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterAddMaskGUI extends OpenCVFilterGUI implements ActionListener {
 
-  public OpenCVFilterAddMaskGUI(String boundFilterName, String boundServiceName, Swing myService) {
+  public OpenCVFilterAddMaskGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     // ComboBoxModel list = new ComboBoxModel(this);
   }

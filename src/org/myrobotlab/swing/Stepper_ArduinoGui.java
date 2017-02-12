@@ -10,14 +10,14 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.PinDefinition;
 
 public class Stepper_ArduinoGui extends StepperControllerPanel implements ActionListener {
 
   private static final long serialVersionUID = 1L;
-  private Swing myService;
+  private SwingGui myService;
 
   JLabel powerPinLabel = new JLabel("<html>power pin<br><font color=white bgcolor=green>speed control</font></html>");
   JLabel directionPinLabel = new JLabel("direction pin");
@@ -29,7 +29,7 @@ public class Stepper_ArduinoGui extends StepperControllerPanel implements Action
 
   List<PinDefinition> pinList = null;
 
-  public Stepper_ArduinoGui(Swing myService, String motorName, String controllerName) {
+  public Stepper_ArduinoGui(SwingGui myService, String motorName, String controllerName) {
     super();
     this.myService = myService;
     this.arduinoName = controllerName;

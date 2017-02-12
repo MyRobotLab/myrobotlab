@@ -63,7 +63,7 @@ public class Android extends Service {
       // "_TemplateService");
 
       Runtime.start("anrdoi", "Android");
-      Runtime.start("gui", "Swing");
+      Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

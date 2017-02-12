@@ -41,7 +41,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import org.myrobotlab.service.Clock;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 
 public class ClockGui extends ServiceGui implements ActionListener {
 
@@ -61,7 +61,7 @@ public class ClockGui extends ServiceGui implements ActionListener {
   JTextField interval = new JTextField("1000");
   JTextField data = new JTextField(10);
 
-  public ClockGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public ClockGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     display.setLayout(new BorderLayout());

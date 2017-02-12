@@ -74,7 +74,7 @@ public class ArduinoPinArrayControlTest {
 	@Test
 	public void testGetPinList() throws Exception {
 		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-		// Runtime.start("gui", "Swing");
+		// Runtime.start("gui", "SwingGui");
 		Runtime.start("webgui", "WebGui");
 		Runtime.start("python", "Python");
 		

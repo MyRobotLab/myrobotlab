@@ -45,7 +45,7 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.ToolTip;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
@@ -121,13 +121,13 @@ public class SwingOutMethodDialog extends JDialog implements ActionListener {
   public final static Logger log = LoggerFactory.getLogger(SwingOutMethodDialog.class);
   private static final long serialVersionUID = 1L;
 
-  Swing myService = null;
+  SwingGui myService = null;
 
   SwingGraphVertex v = null; // vertex who generated this dialog
 
   ArrayList<MethodData> data = new ArrayList<MethodData>();
 
-  SwingOutMethodDialog(Swing myService, String title, SwingGraphVertex v) {
+  SwingOutMethodDialog(SwingGui myService, String title, SwingGraphVertex v) {
     super(myService.getFrame(), title, true);
     this.v = v;
     this.myService = myService;

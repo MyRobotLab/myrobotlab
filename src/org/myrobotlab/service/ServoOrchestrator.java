@@ -97,7 +97,7 @@ public class ServoOrchestrator extends Service {
     LoggingFactory.init(Level.INFO);
     try {
 
-      Runtime.start("gui", "Swing");
+      Runtime.start("gui", "SwingGui");
       Runtime.start("servoorchestrator", "ServoOrchestrator");
 
     } catch (Exception e) {

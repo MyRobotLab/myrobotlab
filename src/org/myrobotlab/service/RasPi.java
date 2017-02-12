@@ -81,7 +81,7 @@ public class RasPi extends Service implements I2CController {
 
 		Runtime.createAndStart(String.format("ras%d", i), "Runtime");
 		Runtime.createAndStart(String.format("rasPi%d", i), "RasPi");
-		Runtime.createAndStart(String.format("rasGUI%d", i), "Swing");
+		Runtime.createAndStart(String.format("rasGUI%d", i), "SwingGui");
 		Runtime.createAndStart(String.format("rasPython%d", i), "Python");
 		// Runtime.createAndStart(String.format("rasClock%d",i), "Clock");
 		Runtime.createAndStart(String.format("rasRemote%d", i), "RemoteAdapter");

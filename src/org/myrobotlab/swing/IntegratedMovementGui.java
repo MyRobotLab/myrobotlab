@@ -41,7 +41,7 @@ import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.IntegratedMovement;
 import org.myrobotlab.service.IntegratedMovement.ObjectPointLocation;
 import org.myrobotlab.service.Runtime;
@@ -68,7 +68,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
 	JComboBox<String> arm = new JComboBox<String>();
 	JButton visualize = new JButton("Visualize");
 
-  public IntegratedMovementGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public IntegratedMovementGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     boundService = (IntegratedMovement) Runtime.getService(boundServiceName);
 

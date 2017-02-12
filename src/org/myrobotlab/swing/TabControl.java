@@ -23,7 +23,7 @@ import javax.swing.SwingUtilities;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
@@ -61,21 +61,21 @@ public class TabControl extends JLabel implements ActionListener, MouseListener,
   TabControlWindowAdapter windowAdapter = new TabControlWindowAdapter();
 
   // JFrame top;
-  Swing myService;
+  SwingGui myService;
 
   JMenuItem allowExportMenuItem;
 
   String filename = null;
 
-  public TabControl(Swing gui, JTabbedPane parent, Container myPanel, String boundServiceName) {
+  public TabControl(SwingGui gui, JTabbedPane parent, Container myPanel, String boundServiceName) {
     this(gui, parent, myPanel, boundServiceName, boundServiceName, null, null);
   }
 
-  public TabControl(Swing gui, JTabbedPane parent, Container myPanel, String boundServiceName, Color foreground, Color background) {
+  public TabControl(SwingGui gui, JTabbedPane parent, Container myPanel, String boundServiceName, Color foreground, Color background) {
     this(gui, parent, myPanel, boundServiceName, boundServiceName, foreground, background);
   }
 
-  public TabControl(Swing gui, JTabbedPane parent, Container myPanel, String boundServiceName, String txt) {
+  public TabControl(SwingGui gui, JTabbedPane parent, Container myPanel, String boundServiceName, String txt) {
     super(txt);
     this.parent = parent;
     this.myPanel = myPanel;
@@ -109,7 +109,7 @@ public class TabControl extends JLabel implements ActionListener, MouseListener,
     addMouseMotionListener(this);
   }
 
-  public TabControl(Swing gui, JTabbedPane parent, Container myPanel, String boundServiceName, String txt, Color foreground, Color background) {
+  public TabControl(SwingGui gui, JTabbedPane parent, Container myPanel, String boundServiceName, String txt, Color foreground, Color background) {
     this(gui, parent, myPanel, boundServiceName, txt);
     if (foreground != null) {
       setForeground(foreground);
@@ -119,7 +119,7 @@ public class TabControl extends JLabel implements ActionListener, MouseListener,
     }
   }
 
-  public TabControl(Swing gui, JTabbedPane parent, Container myPanel, String boundServiceName, String txt, String filename) {
+  public TabControl(SwingGui gui, JTabbedPane parent, Container myPanel, String boundServiceName, String txt, String filename) {
     this(gui, parent, myPanel, boundServiceName, txt);
     this.filename = filename;
   }
@@ -241,8 +241,8 @@ public class TabControl extends JLabel implements ActionListener, MouseListener,
 
   /**
    * undocks a tabbed panel into a JFrame FIXME - NORMALIZE - there are similar
-   * methods in Swing FIXME - there needs to be clear pattern replacement -
-   * this is a decorator - I think... (also it will always be Swing)
+   * methods in SwingGui FIXME - there needs to be clear pattern replacement -
+   * this is a decorator - I think... (also it will always be SwingGui)
    * 
    */
   public void undockPanel() {

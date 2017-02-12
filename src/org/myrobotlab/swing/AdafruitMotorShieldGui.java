@@ -44,7 +44,7 @@ import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.AdafruitMotorShield;
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public class AdafruitMotorShieldGui extends ServiceGui implements ListSelectionListener {
@@ -67,7 +67,7 @@ public class AdafruitMotorShieldGui extends ServiceGui implements ListSelectionL
 
   JLayeredPane imageMap;
 
-  public AdafruitMotorShieldGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public AdafruitMotorShieldGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     getAFPanel();
     display.add(imageMap);

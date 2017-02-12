@@ -58,7 +58,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.PinDefinition;
@@ -173,7 +173,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
     }
   }
 
-  public ArduinoGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public ArduinoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     self = this;
     

@@ -37,7 +37,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 //import org.myrobotlab.service.WiiDAR;
 import org.myrobotlab.service.Pingdar.Point;
 import org.myrobotlab.service.interfaces.VideoGUISource;
@@ -68,7 +68,7 @@ public class PingdarGui extends ServiceGui implements ListSelectionListener, Vid
 
   int cnt = 0;
 
-  public PingdarGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public PingdarGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     screen = new VideoWidget(boundServiceName, myService, tabs);

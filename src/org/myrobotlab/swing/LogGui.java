@@ -10,7 +10,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.ImageButton;
 
 public class LogGui extends ServiceGui implements ActionListener {
@@ -20,7 +20,7 @@ public class LogGui extends ServiceGui implements ActionListener {
   JTextArea log = new JTextArea(20, 40);
   ImageButton clearButton;
 
-  public LogGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public LogGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     display.setLayout(new BorderLayout());

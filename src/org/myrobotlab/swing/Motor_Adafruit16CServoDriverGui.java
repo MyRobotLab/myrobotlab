@@ -11,7 +11,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
 import org.myrobotlab.service.Adafruit16CServoDriver;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.PinDefinition;
@@ -20,7 +20,7 @@ import org.myrobotlab.service.Runtime;
 public class Motor_Adafruit16CServoDriverGui extends MotorControllerPanel implements ActionListener {
 
   private static final long serialVersionUID = 1L;
-  private Swing myService;
+  private SwingGui myService;
 
   // JLabel powerPinLabel = new
   // JLabel("<html>power pin<br><font color=white bgcolor=green>speed
@@ -35,7 +35,7 @@ public class Motor_Adafruit16CServoDriverGui extends MotorControllerPanel implem
   
   List<PinDefinition> pinList = null;
 
-  public Motor_Adafruit16CServoDriverGui(Swing myService, String motorName, String controllerName) {
+  public Motor_Adafruit16CServoDriverGui(SwingGui myService, String motorName, String controllerName) {
     super();
     this.myService = myService;
     this.adaName = controllerName;

@@ -718,7 +718,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public static void main(String s[]) throws IOException {
     LoggingFactory.init("INFO");
 
-    // Runtime.createAndStart("gui", "Swing");
+    // Runtime.createAndStart("gui", "SwingGui");
     Runtime.createAndStart("webgui", "WebGui");
 
     ProgramAB ai = (ProgramAB) Runtime.createAndStart("simple", "ProgramAB");

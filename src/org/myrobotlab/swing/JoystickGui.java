@@ -45,7 +45,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Joystick;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.JoystickData;
@@ -72,7 +72,7 @@ public class JoystickGui extends ServiceGui implements ActionListener {
 
   private JoystickCompassPanel xyPanel, zrzPanel, rxryPanel, hatPanel;
 
-  public JoystickGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public JoystickGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     self = this;
 

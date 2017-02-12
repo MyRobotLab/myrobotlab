@@ -375,7 +375,7 @@ public class Pid extends Service {
       log.error("error");
       log.info("info");
 
-      Runtime.start("gui", "Swing");
+      Runtime.start("gui", "SwingGui");
       Pid pid = (Pid)Runtime.start("pid", "Pid");
       String key = "test";
       pid.setPID(key, 2.0, 5.0, 1.0);
@@ -385,7 +385,7 @@ public class Pid extends Service {
       pid.setSetpoint(key, 100);
       pid.setSampleTime(key, 40);
 
-      // Swing gui = new Swing("gui");
+      // SwingGui gui = new SwingGui("gui");
       // gui.startService();
 
       for (int i = 0; i < 200; ++i) {

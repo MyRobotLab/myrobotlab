@@ -37,7 +37,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.WolframAlpha;
 import org.myrobotlab.service._TemplateService;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class WolframAlphaGui extends ServiceGui implements ActionListener {
   private JEditorPane result = new JEditorPane();
   private JTextField query = new JTextField();
 
-  public WolframAlphaGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public WolframAlphaGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     display.setLayout(new BorderLayout());

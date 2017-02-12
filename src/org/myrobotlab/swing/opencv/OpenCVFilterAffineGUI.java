@@ -42,7 +42,7 @@ import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.SliderWithText;
 
 public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeListener, ActionListener {
@@ -51,7 +51,7 @@ public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeList
   JTextField dX = new JTextField("dX", 10);
   JTextField dY = new JTextField("dY", 10);
 
-  public OpenCVFilterAffineGUI(String boundFilterName, String boundServiceName, Swing myService) {
+  public OpenCVFilterAffineGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     angle.addChangeListener(this);
     dX.addActionListener(this);

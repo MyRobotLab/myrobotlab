@@ -39,7 +39,7 @@ import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterCanny;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.SliderWithText;
 
 public class OpenCVFilterCannyGUI extends OpenCVFilterGUI implements ChangeListener {
@@ -64,7 +64,7 @@ public class OpenCVFilterCannyGUI extends OpenCVFilterGUI implements ChangeListe
   // or
   // 7
 
-  public OpenCVFilterCannyGUI(String boundFilterName, String boundServiceName, Swing myService) {
+  public OpenCVFilterCannyGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
     lowThreshold.addChangeListener(this);

@@ -35,7 +35,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.UltrasonicSensor;
 import org.slf4j.Logger;
 
@@ -46,7 +46,7 @@ public class UltrasonicSensorGui extends ServiceGui implements ActionListener {
 
   JProgressBar range;
 
-  public UltrasonicSensorGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public UltrasonicSensorGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     display.setLayout(new BorderLayout());
 

@@ -368,7 +368,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 			log.info("this is an info test");
 			log.warn("this is an warn test");
 			log.error("this is an error test");
-			// Runtime.start("gui", "Swing");
+			// Runtime.start("gui", "SwingGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);

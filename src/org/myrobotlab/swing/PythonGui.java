@@ -62,7 +62,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Python.Script;
 import org.myrobotlab.swing.widget.Console;
@@ -71,7 +71,7 @@ import org.myrobotlab.swing.widget.ImageButton;
 import org.myrobotlab.ui.autocomplete.MRLCompletionProvider;
 
 /**
- * Python Swing
+ * Python SwingGui
  * 
  * @author SwedaKonsult
  * 
@@ -185,7 +185,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
    * @param boundServiceName
    * @param myService
    */
-  public PythonGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public PythonGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     javaConsole = new Console();
@@ -281,7 +281,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
     EditorPanel panel = new EditorPanel(script);
     editorTabs.addTab(panel.getDisplayName(), panel.panel);
     log.info(panel.getEditor().getFileFullPath());
-    // Swing gui = myService;// FIXME - bad bad bad ...
+    // SwingGui gui = myService;// FIXME - bad bad bad ...
 
     // -------- here ----------------
 

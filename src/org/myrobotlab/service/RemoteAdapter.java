@@ -455,7 +455,7 @@ public class RemoteAdapter extends Service implements Gateway {
 			RemoteAdapter remote = (RemoteAdapter) Runtime.start("remote", "RemoteAdapter");
 			// remote.connect("tcp://demo.myrobotlab.org:6767");
 			// remote.websocket("http://demo.myrobotlab.org:8888/api/messages");
-			Runtime.start("gui", "Swing");
+			Runtime.start("gui", "SwingGui");
 			remote.startListening();
 
 		} catch (Exception e) {

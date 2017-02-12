@@ -1970,7 +1970,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       LoggingFactory.init(Level.INFO);
 
       // Runtime.start("webgui", "WebGui");
-      Runtime.start("gui", "Swing");
+      Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       
@@ -1980,7 +1980,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       }
       
       Serial serial = arduino.getSerial();
-      // Runtime.start("gui", "Swing");
+      // Runtime.start("gui", "SwingGui");
       // List<String> ports = serial.getPortNames();
       // log.info(Arrays.toString(ports.toArray()));
       // arduino.setBoardMega();
@@ -1994,7 +1994,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // arduino.uploadSketch("C:\\tools\\arduino-1.6.9");
 
       Servo servo = (Servo) Runtime.start("servo", "Servo");
-      // Runtime.start("gui", "Swing");
+      // Runtime.start("gui", "SwingGui");
       servo.attach(arduino, 7);
       // servo.detach(arduino);
       servo.attach(9);

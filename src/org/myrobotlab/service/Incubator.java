@@ -86,7 +86,7 @@ public class Incubator extends Service {
      * 
      * incubator.testPythonScripts();
      * 
-     * // Runtime.createAndStart("gui", "Swing");
+     * // Runtime.createAndStart("gui", "SwingGui");
      */
 
   }
@@ -418,7 +418,7 @@ public class Incubator extends Service {
       // String script;
       List<File> list = FileIO.listResourceContents("Python/examples");
 
-      Runtime.createAndStart("gui", "Swing");
+      Runtime.createAndStart("gui", "SwingGui");
       python = (Python) startPeer("python");
       // InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
 
@@ -448,7 +448,7 @@ public class Incubator extends Service {
       // String script;
       List<File> list = FileIO.listResourceContents("Python/examples");
 
-      Runtime.createAndStart("gui", "Swing");
+      Runtime.createAndStart("gui", "SwingGui");
       python = (Python) startPeer("python");
       // InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
 

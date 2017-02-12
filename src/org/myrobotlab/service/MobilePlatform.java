@@ -515,7 +515,7 @@ public class MobilePlatform extends Service {
       // "_TemplateService");
 
       Runtime.start("mobile", "MobilePlatform");
-      Runtime.start("gui", "Swing");
+      Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

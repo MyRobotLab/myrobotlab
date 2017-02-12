@@ -41,7 +41,7 @@ import javax.swing.JFrame;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
@@ -54,10 +54,10 @@ public class SwingInMethodDialog extends JDialog implements ActionListener {
 
   private static final long serialVersionUID = 1L;
 
-  Swing myService = null;
+  SwingGui myService = null;
   SwingGraphVertex v = null; // vertex who generated this dialog
 
-  SwingInMethodDialog(Swing myService, String title, SwingGraphVertex v) {
+  SwingInMethodDialog(SwingGui myService, String title, SwingGraphVertex v) {
     super(myService.getFrame(), title, true);
     this.v = v;
     this.myService = myService;
@@ -135,7 +135,7 @@ public class SwingInMethodDialog extends JDialog implements ActionListener {
       mxGraph graph = myService.getGraph();
       Object parent = graph.getDefaultParent();
       HashMap<String, mxCell> serviceCells = myService.getCells();
-      graph.insertEdge(parent, null, SwingGui.formatMethodString(listener.topicMethod, listener.callbackMethod), serviceCells.get(srcService),
+      graph.insertEdge(parent, null, SwingGuiGui.formatMethodString(listener.topicMethod, listener.callbackMethod), serviceCells.get(srcService),
           serviceCells.get(listener.callbackName));
 
       this.dispose();
@@ -153,7 +153,7 @@ public class SwingInMethodDialog extends JDialog implements ActionListener {
         ret.append(t[t.length - 1]);
         if (i < me.parameterTypes.length - 1) {
           ret.append(","); // TODO - NOT POSSIBLE TO CONNECT IN
-          // Swing -
+          // SwingGui -
           // FILTER OUT?
         }
       }

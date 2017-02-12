@@ -79,7 +79,7 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.opencv.VideoSources;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.VideoGUISource;
@@ -230,7 +230,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
   };
 
   /**
-   * Swing defaults for grabber types
+   * SwingGui defaults for grabber types
    */
   private ActionListener grabberTypeListener = new ActionListener() {
     @Override
@@ -330,7 +330,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 
   /*
    * onState is an interface function which allow the interface of the
-   * Swing Bound service to update graphical portions of the Swing
+   * SwingGui Bound service to update graphical portions of the SwingGui
    * based on data changes.
    * 
    * The entire service is sent and it is this functions responsibility to
@@ -344,7 +344,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
    */
   final static String prefix = "OpenCVFilter";
 
-  public OpenCVGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public OpenCVGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     self = this;
 
