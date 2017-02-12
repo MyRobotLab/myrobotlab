@@ -39,7 +39,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Ads1115;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -70,7 +70,7 @@ public class Ads1115Gui extends ServiceGui implements ActionListener {
 
 	Ads1115 boundService = null;
 
-	public Ads1115Gui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+	public Ads1115Gui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		boundService = (Ads1115) Runtime.getService(boundServiceName);
 

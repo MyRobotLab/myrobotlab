@@ -1132,7 +1132,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
 			Serial serial = (Serial) Runtime.start("serial", "Serial");
 			// Runtime.start("arduino", "Arduino");
-			Runtime.start("gui", "GuiService");
+			Runtime.start("gui", "Swing");
 			
 			 boolean done = true;
 	      if (done) {
@@ -1146,7 +1146,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 		
 			int timeout = 500;// 500 ms serial timeout
 
-			// Runtime.start("gui", "GuiService");
+			// Runtime.start("gui", "Swing");
 			// Runtime.start("webgui", "WebGui");
 
 			// get serial handle and creates a uart & virtual null modem cable

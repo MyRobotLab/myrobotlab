@@ -43,7 +43,7 @@ public class Blocks extends Service {
       LoggingFactory.init(Level.INFO);
 
       Runtime.start("template", "_TemplateService");
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "Swing");
 
     } catch (Exception e) {
       Logging.logError(e);

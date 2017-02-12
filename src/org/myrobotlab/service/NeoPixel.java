@@ -356,7 +356,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       //WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.autoStartBrowser(false);
       //webgui.startService();
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "Swing");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.arduinoPath = "C:\\Program Files (x86)\\Arduino";

@@ -41,7 +41,7 @@ import javax.swing.SwingUtilities;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.AdafruitIna219;
 import org.myrobotlab.service.I2cMux;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
@@ -64,7 +64,7 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
 	
 	I2cMux boundService = null;
 
-	public I2cMuxGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+	public I2cMuxGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		boundService = (I2cMux) Runtime.getService(boundServiceName);
 

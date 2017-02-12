@@ -14,7 +14,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.ProgramAB.Response;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   private JButton saveAIML = new JButton("Save AIML");
   private JButton savePredicates = new JButton("Save Predicates");
 
-  public ProgramABGui(String boundServiceName, GuiService myService, JTabbedPane tabs) {
+  public ProgramABGui(String boundServiceName, Swing myService, JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     this.boundServiceName = boundServiceName;
 

@@ -79,14 +79,14 @@ public class Incubator extends Service {
 
     Runtime.start("incubator", "Incubator");
 
-    // incubator.servoArduinoOpenCVGuiService();
+    // incubator.servoArduinoOpenCVSwing();
 
     /*
      * incubator.installAll(); // incubator.startTest();
      * 
      * incubator.testPythonScripts();
      * 
-     * // Runtime.createAndStart("gui", "GuiService");
+     * // Runtime.createAndStart("gui", "Swing");
      */
 
   }
@@ -418,7 +418,7 @@ public class Incubator extends Service {
       // String script;
       List<File> list = FileIO.listResourceContents("Python/examples");
 
-      Runtime.createAndStart("gui", "GuiService");
+      Runtime.createAndStart("gui", "Swing");
       python = (Python) startPeer("python");
       // InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
 
@@ -448,7 +448,7 @@ public class Incubator extends Service {
       // String script;
       List<File> list = FileIO.listResourceContents("Python/examples");
 
-      Runtime.createAndStart("gui", "GuiService");
+      Runtime.createAndStart("gui", "Swing");
       python = (Python) startPeer("python");
       // InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
 

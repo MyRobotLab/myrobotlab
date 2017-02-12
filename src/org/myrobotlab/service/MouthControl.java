@@ -229,7 +229,7 @@ public class MouthControl extends Service {
       MouthControl MouthControl = new MouthControl("MouthControl");
       MouthControl.startService();
 
-      Runtime.createAndStart("gui", "GuiService");
+      Runtime.createAndStart("gui", "Swing");
 
       MouthControl.autoAttach = true;
       MouthControl.onStartSpeaking("test on");

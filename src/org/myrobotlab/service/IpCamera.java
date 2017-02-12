@@ -97,7 +97,7 @@ public class IpCamera extends Service {
 
       foscam.startService();
 
-      GuiService gui = new GuiService("gui");
+      Swing gui = new Swing("gui");
       gui.startService();
 
     } catch (Exception e) {

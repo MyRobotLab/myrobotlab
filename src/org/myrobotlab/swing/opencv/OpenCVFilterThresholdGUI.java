@@ -40,7 +40,7 @@ import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterThreshold;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 
 public class OpenCVFilterThresholdGUI extends OpenCVFilterGUI {
 
@@ -87,7 +87,7 @@ public class OpenCVFilterThresholdGUI extends OpenCVFilterGUI {
 
   AdjustSlider change = new AdjustSlider();
 
-  public OpenCVFilterThresholdGUI(String boundFilterName, String boundServiceName, GuiService myService) {
+  public OpenCVFilterThresholdGUI(String boundFilterName, String boundServiceName, Swing myService) {
     super(boundFilterName, boundServiceName, myService);
 
     lowThreshold.setName("lowThreshold");

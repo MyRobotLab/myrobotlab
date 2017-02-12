@@ -43,7 +43,7 @@ public class Tutorial extends Service {
       LoggingFactory.init(Level.INFO);
 
       Runtime.start("tutorial", "Tutorial");
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "Swing");
 
     } catch (Exception e) {
       Logging.logError(e);

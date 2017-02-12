@@ -1127,7 +1127,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * Listening service (STT) such that when the system is speaking it does not
    * try to listen & act on its own speech (feedback loop)
    * 
-   * FIXME - the GuiService currently has attachGUI() and detachGUI() - these
+   * FIXME - the Swing currently has attachGUI() and detachGUI() - these
    * are to bind Services with their swing views/tab panels. It should be
    * generalized to this attach method
    * 
@@ -1160,7 +1160,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * returns if the Service has a display - this would be any Service who had a
-   * display system GuiService (Swing) would be an example, most Services would
+   * display system Swing (Swing) would be an example, most Services would
    * return false keeps the framework display type agnostic
    * 
    * @return

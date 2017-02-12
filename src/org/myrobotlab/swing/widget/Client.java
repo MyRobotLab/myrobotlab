@@ -37,7 +37,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.slf4j.Logger;
 
 public class Client extends JApplet {
@@ -51,7 +51,7 @@ public class Client extends JApplet {
   private InetAddress appletAddress = null;
   private String codeBaseHostAddress = null;
 
-  private GuiService guiService;
+  private Swing guiService;
 
   public Client() {
     super();
@@ -82,9 +82,9 @@ public class Client extends JApplet {
        * cfg.setRoot(appletAddress.getHostName()); cfg.set("servicePort", 0); //
        * Applet - can not have a service port
        */
-      // TODO - hardcode set GuiService to display only appropriate
+      // TODO - hardcode set Swing to display only appropriate
       // components !!!
-      guiService = new GuiService(appletAddress.getHostName() + " gui");
+      guiService = new Swing(appletAddress.getHostName() + " gui");
       guiService.startService();
 
       if (codeBaseHostAddress.length() == 0) {

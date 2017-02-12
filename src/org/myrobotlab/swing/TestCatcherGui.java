@@ -33,7 +33,7 @@ import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 
 import org.myrobotlab.framework.MRLListener;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.TestCatcher;
 
 public class TestCatcherGui extends ServiceGui {
@@ -42,7 +42,7 @@ public class TestCatcherGui extends ServiceGui {
   JLabel catchInteger = new JLabel("0");
   JButton bindCatchIntegerButton = null;
 
-  public TestCatcherGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public TestCatcherGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     display.add(new JLabel("catchInteger : "));

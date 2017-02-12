@@ -33,7 +33,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.slf4j.Logger;
 
 public class SecurityGui extends ServiceGui implements ActionListener {
@@ -41,7 +41,7 @@ public class SecurityGui extends ServiceGui implements ActionListener {
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(SecurityGui.class);
 
-  public SecurityGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public SecurityGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
   }
 

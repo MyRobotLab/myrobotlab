@@ -36,7 +36,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Blender;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.slf4j.Logger;
 
 public class BlenderGui extends ServiceGui implements ActionListener {
@@ -46,7 +46,7 @@ public class BlenderGui extends ServiceGui implements ActionListener {
 
   JButton connect = new JButton("connect");
 
-  public BlenderGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public BlenderGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     display.setLayout(new BorderLayout());

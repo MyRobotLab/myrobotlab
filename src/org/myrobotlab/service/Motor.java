@@ -338,7 +338,7 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 
     try {
       
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "Swing");
       Runtime.start("motor", "Motor");
       boolean done = true;
       if (done){
@@ -350,7 +350,7 @@ public class Motor extends Service implements MotorControl, EncoderListener {
       String port = "COM15";
 
       // Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      // Runtime.createAndStart("gui", "GuiService");
+      // Runtime.createAndStart("gui", "Swing");
       // Runtime.createAndStart("webgui", "WebGui");
       // arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
       // arduino.connect(port);

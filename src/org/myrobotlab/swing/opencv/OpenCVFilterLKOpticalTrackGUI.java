@@ -39,7 +39,7 @@ import javax.swing.event.ChangeListener;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterLKOpticalTrack;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.swing.widget.SliderWithText;
 
 public class OpenCVFilterLKOpticalTrackGUI extends OpenCVFilterGUI implements ActionListener, ChangeListener {
@@ -51,7 +51,7 @@ public class OpenCVFilterLKOpticalTrackGUI extends OpenCVFilterGUI implements Ac
   JButton getFeatures = new JButton("get features");
   JButton clearPoints = new JButton("clear points");
 
-  public OpenCVFilterLKOpticalTrackGUI(String boundFilterName, String boundServiceName, GuiService myService) {
+  public OpenCVFilterLKOpticalTrackGUI(String boundFilterName, String boundServiceName, Swing myService) {
     super(boundFilterName, boundServiceName, myService);
 
     maxPointCount.setName("maxCount");

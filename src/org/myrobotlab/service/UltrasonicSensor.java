@@ -264,7 +264,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
       VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
       UltrasonicSensor srf04 = (UltrasonicSensor) Runtime.start("srf04", "UltrasonicSensor");
       // Runtime.start("python", "Python");
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "Swing");
       Runtime.start("webgui", "WebGui");
 
       int trigPin = 8;

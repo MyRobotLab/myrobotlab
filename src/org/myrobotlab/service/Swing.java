@@ -68,7 +68,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.swing.GuiServiceGui;
+import org.myrobotlab.swing.SwingGui;
 import org.myrobotlab.swing.RuntimeGui;
 import org.myrobotlab.swing.ServiceGui;
 import org.myrobotlab.swing.TabControl2;
@@ -81,22 +81,22 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.view.mxGraph;
 
 /**
- * GuiService - This is the java swing based GUI for MyRobotLab. This service
+ * Swing - This is the java swing based GUI for MyRobotLab. This service
  * allows other services control features to be displayed. It is the service
  * which you "see" when you start MyRobotLab. It provides a service tab for
  * other services. With its own tab it provides a map of message routes and
  * icons of currently running services.
  * 
- * GuiService -> Look at service registry GuiService -> attempt to create a
- * panel for each registered service GuiService -> create panel GuiService ->
+ * Swing -> Look at service registry Swing -> attempt to create a
+ * panel for each registered service Swing -> create panel Swing ->
  * panel.init(this, serviceName); panel.send(Notify, someoutputfn, GUIName,
  * panel.inputfn, data);
  *
- * serviceName (source) --> GuiService-> msg Arduino arduino01 -> post message
+ * serviceName (source) --> Swing-> msg Arduino arduino01 -> post message
  * -> outbox -> outbound -> notifyList -> reference of sender? (NO) will not
  * transport across process boundry
  * 
- * serviceGUI needs a Runtime Arduino arduin-> post back (data) --> GuiService -
+ * serviceGUI needs a Runtime Arduino arduin-> post back (data) --> Swing -
  * look up serviceGUI by senders name ServiceGUI->invoke(data)
  * 
  * References :
@@ -104,11 +104,11 @@ import com.mxgraph.view.mxGraph;
  * Tabs-On-JTabbedPaneI-Now-A-breeze
  * 
  */
-public class GuiService extends Service implements WindowListener, ActionListener, Serializable {
+public class Swing extends Service implements WindowListener, ActionListener, Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  transient public final static Logger log = LoggerFactory.getLogger(GuiService.class);
+  transient public final static Logger log = LoggerFactory.getLogger(Swing.class);
 
   String graphXML = "";
   String lastTabVisited;
@@ -124,10 +124,10 @@ public class GuiService extends Service implements WindowListener, ActionListene
   // I think this is all deprecated now
   // transient JMenuItem recording = new JMenuItem("start recording");
  //  transient JMenuItem loadRecording = new JMenuItem("load recording");
-  transient GuiServiceGui guiServiceGui = null;
+  transient SwingGui guiServiceGui = null;
 
   // FIXME - supply Welcome type - create WelcomeGUI type - with
-  // boundServiceName this GuiService
+  // boundServiceName this Swing
   transient Welcome welcome = null;
   transient HashMap<String, ServiceGui> serviceGuiMap = new HashMap<String, ServiceGui>();
   transient JLabel status = new JLabel("status");
@@ -177,7 +177,7 @@ public class GuiService extends Service implements WindowListener, ActionListene
     }
   }
 
-  public GuiService(String n) {
+  public Swing(String n) {
     super(n);
     // subscribe to services being added and removed
     subscribe(Runtime.getRuntimeName(), "released");
@@ -213,7 +213,7 @@ public class GuiService extends Service implements WindowListener, ActionListene
   }
 
   /**
-   * add a service tab to the GuiService
+   * add a service tab to the Swing
    * 
    * @param serviceName
    *          - name of service to add
@@ -250,7 +250,7 @@ public class GuiService extends Service implements WindowListener, ActionListene
           ++index;
         }
 
-        guiServiceGui = (GuiServiceGui) serviceGuiMap.get(getName());
+        guiServiceGui = (SwingGui) serviceGuiMap.get(getName());
         if (guiServiceGui != null) {
           guiServiceGui.rebuildGraph();
         }
@@ -259,7 +259,7 @@ public class GuiService extends Service implements WindowListener, ActionListene
         if (c instanceof TabControl2) {
           // TabControl2 tc = (TabControl2) c;
           if (!sw.isLocal()) {
-            Color hsv = GuiService.getColorFromURI(sw.getInstanceId());
+            Color hsv = Swing.getColorFromURI(sw.getInstanceId());
             tabs.setBackgroundAt(index, hsv);
           }
         }
@@ -290,7 +290,7 @@ public class GuiService extends Service implements WindowListener, ActionListene
   }
 
   /**
-   * builds all the service tabs for the first time called when GuiService
+   * builds all the service tabs for the first time called when Swing
    * starts
    * 
    * @return
@@ -495,7 +495,7 @@ public class GuiService extends Service implements WindowListener, ActionListene
 
   public void noWorky() {
     // String img =
-    // GuiService.class.getResource("/resource/expert.jpg").toString();
+    // Swing.class.getResource("/resource/expert.jpg").toString();
     String logon = (String) JOptionPane.showInputDialog(getFrame(),
         "<html>This will send your myrobotlab.log file<br><p align=center>to our crack team of experts,<br> please type your myrobotlab.org user</p></html>", "No Worky!",
         JOptionPane.WARNING_MESSAGE, Util.getResourceIcon("expert.jpg"), null, null);
@@ -530,7 +530,7 @@ public class GuiService extends Service implements WindowListener, ActionListene
     // FIXME - problem with collisions of this service's methods
     // and dialog methods ?!?!?
 
-    // if the method name is == to a method in the GuiService
+    // if the method name is == to a method in the Swing
     if (methodSet.contains(m.method)) {
       // process the message like a regular service
       return true;
@@ -603,7 +603,7 @@ public class GuiService extends Service implements WindowListener, ActionListene
         unsubscribe(name, "publishStatus");
         unsubscribe(name, "publishState");
 
-        guiServiceGui = (GuiServiceGui) serviceGuiMap.get(getName());
+        guiServiceGui = (SwingGui) serviceGuiMap.get(getName());
         if (guiServiceGui != null) {
           guiServiceGui.rebuildGraph();
         }
@@ -762,7 +762,7 @@ public class GuiService extends Service implements WindowListener, ActionListene
       // "RemoteAdapter");
       // remote.setDefaultPrefix("raspi");
       // remote.connect("tcp://127.0.0.1:6767");
-      GuiService gui = (GuiService) Runtime.start("gui", "GuiService");
+      Swing gui = (Swing) Runtime.start("gui", "Swing");
       Runtime.start("python", "Python");
       gui.startService();
 
@@ -781,7 +781,7 @@ public class GuiService extends Service implements WindowListener, ActionListene
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(GuiService.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Swing.class.getCanonicalName());
     meta.addDescription("Service used to graphically display and control other services");
     meta.addCategory("location");
     meta.addCategory("display");

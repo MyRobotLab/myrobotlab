@@ -39,7 +39,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Mpu6050;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
@@ -73,7 +73,7 @@ public class Mpu6050Gui extends ServiceGui implements ActionListener {
 
   Mpu6050 boundService = null;
   
-  public Mpu6050Gui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public Mpu6050Gui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 		boundService = (Mpu6050) Runtime.getService(boundServiceName);
 

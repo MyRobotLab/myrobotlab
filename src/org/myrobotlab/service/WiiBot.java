@@ -46,7 +46,7 @@ public class WiiBot extends Service {
   transient Servo servo = new Servo("servo");
   transient OpenCV opencv = new OpenCV("opencv");
   transient WiiDar wiidar = new WiiDar("wiidar");
-  transient GuiService gui = new GuiService("gui");
+  transient Swing gui = new Swing("gui");
 
   int speedRight = 0;
 

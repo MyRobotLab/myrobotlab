@@ -48,7 +48,7 @@ public class Twitter extends Service {
 
       twitter.startService();
 
-      Runtime.createAndStart("gui", "GuiService");
+      Runtime.createAndStart("gui", "Swing");
 
       twitter.setSecurity("xxx", "xxx", "xxx", "xxx");
       twitter.configure();
@@ -68,7 +68,7 @@ public class Twitter extends Service {
       // SerializableImage.class);
 
       /*
-       * GuiService gui = new GuiService("gui"); gui.startService();
+       * Swing gui = new Swing("gui"); gui.startService();
        */
 
     } catch (Exception e) {

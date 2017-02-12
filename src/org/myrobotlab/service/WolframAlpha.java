@@ -37,12 +37,12 @@ public class WolframAlpha extends Service {
       WolframAlpha template = new WolframAlpha("wolfram");
       template.startService();
 
-      Runtime.createAndStart("gui", "GuiService");
+      Runtime.createAndStart("gui", "Swing");
     } catch (Exception e) {
       Logging.logError(e);
     }
     /*
-     * GuiService gui = new GuiService("gui"); gui.startService();
+     * Swing gui = new Swing("gui"); gui.startService();
      */
   }
 

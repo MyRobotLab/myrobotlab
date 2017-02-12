@@ -69,7 +69,7 @@ public class SensorMonitor extends Service {
       sm.startService();
 
       Runtime.createAndStart("arduino", "Arduino");
-      Runtime.createAndStart("gui", "GuiService");
+      Runtime.createAndStart("gui", "Swing");
 
       /*
        * 

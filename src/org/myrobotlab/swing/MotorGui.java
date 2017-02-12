@@ -45,7 +45,7 @@ import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.Pin;
@@ -112,7 +112,7 @@ public class MotorGui extends ServiceGui implements ActionListener, ChangeListen
   // FIXME put in sub gui
   ArrayList<Pin> pinList = null;
 
-  public MotorGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public MotorGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     // controllerPanel begin ------------------

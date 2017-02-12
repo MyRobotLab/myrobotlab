@@ -33,7 +33,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.memory.Node;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.RasPi;
 import org.slf4j.Logger;
 
@@ -42,7 +42,7 @@ public class RasPiGui extends ServiceGui implements ActionListener {
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(RasPiGui.class);
 
-  public RasPiGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public RasPiGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
   }
 

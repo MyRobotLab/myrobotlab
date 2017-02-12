@@ -116,7 +116,7 @@ public class Picaxe extends Service // implements SerialPortEventListener,
 
     // PICAXE.addListener("pulse", "log", "log", Integer.class);
 
-    // GuiService gui = new GuiService("gui");
+    // Swing gui = new Swing("gui");
     // gui.startService();
     //
 

@@ -26,11 +26,11 @@
 package org.myrobotlab.swing.opencv;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 
 public class OpenCVFilterFindContoursGUI extends OpenCVFilterGUI {
 
-  public OpenCVFilterFindContoursGUI(String boundFilterName, String boundServiceName, GuiService myService) {
+  public OpenCVFilterFindContoursGUI(String boundFilterName, String boundServiceName, Swing myService) {
     super(boundFilterName, boundServiceName, myService);
 
   }

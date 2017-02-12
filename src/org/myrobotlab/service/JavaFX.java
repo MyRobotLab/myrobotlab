@@ -56,7 +56,7 @@ public class JavaFX extends Service {
 
       LoggingFactory.init(Level.INFO);
       JavaFX javafx = (JavaFX) Runtime.start("javafx", "JavaFX");
-      // Runtime.start("gui", "GuiService");
+      // Runtime.start("gui", "Swing");
 
     } catch (Exception e) {
       Logging.logError(e);

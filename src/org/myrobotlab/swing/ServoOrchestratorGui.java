@@ -26,7 +26,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service._TemplateService;
 import org.slf4j.Logger;
 
@@ -83,7 +83,7 @@ public class ServoOrchestratorGui extends ServiceGui implements ActionListener, 
 
   public JCheckBox bottomright_click_checkbox;
 
-  public ServoOrchestratorGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public ServoOrchestratorGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     myService.send(boundServiceName, "setsoguireference", ServoOrchestratorGui.this);
     

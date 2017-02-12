@@ -756,7 +756,7 @@ public class Servo extends Service implements ServoControl {
       LoggingFactory.init(Level.INFO);
 
       // Runtime.start("webgui", "WebGui");
-      // Runtime.start("gui", "GuiService");
+      // Runtime.start("gui", "Swing");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.record();
       // arduino.getSerial().record();

@@ -35,7 +35,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.image.SerializableImage;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 
 public class VideoWidget extends ServiceGui {
 
@@ -45,11 +45,11 @@ public class VideoWidget extends ServiceGui {
   int videoDisplayXPos = 0;
   int videoDisplayYPos = 0;
 
-  public VideoWidget(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public VideoWidget(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
   }
 
-  public VideoWidget(final String boundFilterName, final GuiService myService, final JTabbedPane tabs, boolean allowFork) {
+  public VideoWidget(final String boundFilterName, final Swing myService, final JTabbedPane tabs, boolean allowFork) {
     this(boundFilterName, myService, tabs);
     this.allowFork = allowFork;
   }

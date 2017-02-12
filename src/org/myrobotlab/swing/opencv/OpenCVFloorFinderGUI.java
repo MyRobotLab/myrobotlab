@@ -37,7 +37,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 
 public class OpenCVFloorFinderGUI extends OpenCVFilterGUI {
 
@@ -77,7 +77,7 @@ public class OpenCVFloorFinderGUI extends OpenCVFilterGUI {
 
   AdjustSlider change = new AdjustSlider();
 
-  public OpenCVFloorFinderGUI(String boundFilterName, String boundServiceName, GuiService myService) {
+  public OpenCVFloorFinderGUI(String boundFilterName, String boundServiceName, Swing myService) {
     super(boundFilterName, boundServiceName, myService);
 
     lowThreshold.setName("lowThreshold");

@@ -28,11 +28,11 @@ package org.myrobotlab.swing.opencv;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 
 public class OpenCVFilterMatchTemplateGUI extends OpenCVFilterGUI {
 
-  public OpenCVFilterMatchTemplateGUI(String boundFilterName, String boundServiceName, GuiService myService) {
+  public OpenCVFilterMatchTemplateGUI(String boundFilterName, String boundServiceName, Swing myService) {
     super(boundFilterName, boundServiceName, myService);
 
   }

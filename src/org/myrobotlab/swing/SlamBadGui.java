@@ -30,7 +30,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JTabbedPane;
 
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SlamBad;
 
@@ -40,7 +40,7 @@ public class SlamBadGui extends ServiceGui implements ActionListener {
 
   SlamBad mySimbad = null;
 
-  public SlamBadGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public SlamBadGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     mySimbad = (SlamBad) Runtime.getService(boundServiceName);
   }

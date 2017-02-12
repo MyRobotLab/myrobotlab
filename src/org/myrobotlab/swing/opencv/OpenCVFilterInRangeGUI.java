@@ -40,7 +40,7 @@ import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterInRange;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.swing.widget.SliderWithText;
 
 public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeListener {
@@ -59,7 +59,7 @@ public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeLis
 
   OpenCVFilterInRange myFilter = null;
 
-  public OpenCVFilterInRangeGUI(String boundFilterName, String boundServiceName, GuiService myService) {
+  public OpenCVFilterInRangeGUI(String boundFilterName, String boundServiceName, Swing myService) {
     super(boundFilterName, boundServiceName, myService);
     // myFilter = (OpenCVFilterInRange) myOpenCVFilter;
     // myFilter.useHue = true;

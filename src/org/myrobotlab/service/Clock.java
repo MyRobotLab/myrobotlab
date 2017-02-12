@@ -177,7 +177,7 @@ public class Clock extends Service {
 				// remote.scan();
 				// remote.setDefaultPrefix("raspi");
 				Runtime.start(String.format("clock%d", i), "Clock");
-				Runtime.start(String.format("gui", i), "GuiService");
+				Runtime.start(String.format("gui", i), "Swing");
 				// Runtime.start(String.format("python", i), "Python");
 
 				remote.connect("tcp://127.0.0.1:6767");
@@ -211,7 +211,7 @@ public class Clock extends Service {
 			security.allowExportByType("Runtime", false);
 			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
 			Clock clock = (Clock) Runtime.createAndStart(String.format("clock%d", i), "Clock");
-			Runtime.createAndStart(String.format("gui%d", i), "GuiService");
+			Runtime.createAndStart(String.format("gui%d", i), "Swing");
 
 			xmpp1.connect("talk.google.com", 5222, "robot02@myrobotlab.org", "mrlRocks!");
 

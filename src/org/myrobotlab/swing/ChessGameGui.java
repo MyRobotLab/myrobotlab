@@ -50,7 +50,7 @@ import org.myrobotlab.chess.Constants;
 import org.myrobotlab.chess.HMove;
 import org.myrobotlab.chess.Search;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.op.chess.ChessBoard;
 
 public class ChessGameGui extends ServiceGui implements Constants, VetoableChangeListener, PropertyChangeListener {
@@ -131,7 +131,7 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
     return t;
   }
 
-  public ChessGameGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public ChessGameGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
 

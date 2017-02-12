@@ -41,23 +41,23 @@ import javax.swing.JFrame;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 import com.mxgraph.model.mxCell;
 import com.mxgraph.view.mxGraph;
 
-public class GuiServiceInMethodDialog extends JDialog implements ActionListener {
+public class SwingInMethodDialog extends JDialog implements ActionListener {
 
-  public final static Logger log = LoggerFactory.getLogger(GuiServiceOutMethodDialog.class);
+  public final static Logger log = LoggerFactory.getLogger(SwingOutMethodDialog.class);
 
   private static final long serialVersionUID = 1L;
 
-  GuiService myService = null;
-  GuiServiceGraphVertex v = null; // vertex who generated this dialog
+  Swing myService = null;
+  SwingGraphVertex v = null; // vertex who generated this dialog
 
-  GuiServiceInMethodDialog(GuiService myService, String title, GuiServiceGraphVertex v) {
+  SwingInMethodDialog(Swing myService, String title, SwingGraphVertex v) {
     super(myService.getFrame(), title, true);
     this.v = v;
     this.myService = myService;
@@ -135,7 +135,7 @@ public class GuiServiceInMethodDialog extends JDialog implements ActionListener 
       mxGraph graph = myService.getGraph();
       Object parent = graph.getDefaultParent();
       HashMap<String, mxCell> serviceCells = myService.getCells();
-      graph.insertEdge(parent, null, GuiServiceGui.formatMethodString(listener.topicMethod, listener.callbackMethod), serviceCells.get(srcService),
+      graph.insertEdge(parent, null, SwingGui.formatMethodString(listener.topicMethod, listener.callbackMethod), serviceCells.get(srcService),
           serviceCells.get(listener.callbackName));
 
       this.dispose();
@@ -153,7 +153,7 @@ public class GuiServiceInMethodDialog extends JDialog implements ActionListener 
         ret.append(t[t.length - 1]);
         if (i < me.parameterTypes.length - 1) {
           ret.append(","); // TODO - NOT POSSIBLE TO CONNECT IN
-          // GuiService -
+          // Swing -
           // FILTER OUT?
         }
       }

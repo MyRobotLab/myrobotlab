@@ -207,7 +207,7 @@ public class UltrasonicSensorTest {
 			LoggingFactory.init();
 			// FIXME - base class static method .webGui() & .gui()
 			// Runtime.start("webgui", "WebGui");
-			// Runtime.start("gui", "GuiService");
+			// Runtime.start("gui", "Swing");
 
 			// test a "real" arduino
 			useVirtualHardware = true;

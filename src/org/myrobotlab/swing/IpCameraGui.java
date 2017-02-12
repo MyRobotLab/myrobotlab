@@ -43,7 +43,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.IpCamera;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.swing.widget.DirectionWidget;
@@ -151,7 +151,7 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
 
   DirectionEventListener dirEventListener = new DirectionEventListener();
 
-  public IpCameraGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public IpCameraGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     myIPCamera = (IpCamera) Runtime.getService(boundServiceName);
     direction.setDirectionListener(dirEventListener);

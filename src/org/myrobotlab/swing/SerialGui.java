@@ -52,7 +52,7 @@ import org.myrobotlab.codec.serial.DecimalCodec;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Serial;
 import org.python.netty.handler.codec.CodecException;
@@ -103,7 +103,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	// create virtual port
 	// create null modem cable
 
-	public SerialGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+	public SerialGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		myself = this;
 		mySerial = (Serial) Runtime.getService(boundServiceName);

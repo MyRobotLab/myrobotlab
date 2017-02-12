@@ -32,7 +32,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JTabbedPane;
 
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 
 public class AudioCaptureGui extends ServiceGui {
 
@@ -42,7 +42,7 @@ public class AudioCaptureGui extends ServiceGui {
   final JButton stopBtn = new JButton("Stop");
   final JButton playBtn = new JButton("Playback");
 
-  public AudioCaptureGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public AudioCaptureGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     // Register anonymous listeners

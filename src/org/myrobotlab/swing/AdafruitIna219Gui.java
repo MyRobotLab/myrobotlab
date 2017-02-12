@@ -40,7 +40,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.AdafruitIna219;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
@@ -70,7 +70,7 @@ public class AdafruitIna219Gui extends ServiceGui implements ActionListener {
 
 	AdafruitIna219 boundService = null;
 
-	public AdafruitIna219Gui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+	public AdafruitIna219Gui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		boundService = (AdafruitIna219) Runtime.getService(boundServiceName);
 

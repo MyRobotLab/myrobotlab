@@ -44,7 +44,7 @@ import javax.swing.plaf.basic.BasicArrowButton;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.DiyServo;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
@@ -52,7 +52,7 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
 /**
- * Servo GuiService - displays details of Servo state Lesson learned ! Servos to
+ * Servo Swing - displays details of Servo state Lesson learned ! Servos to
  * properly function need to be attached to a controller This gui previously
  * sent messages to the controller. To simplify things its important to send
  * messages only to the bound Servo - and let it attach to the controller versus
@@ -109,7 +109,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
 	SliderListener sliderListener = new SliderListener();
 
-	public DiyServoGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+	public DiyServoGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		myServo = (DiyServo) Runtime.getService(boundServiceName);
 		slider.addChangeListener(sliderListener);
@@ -126,7 +126,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
   
 	}
 
-	// GuiService's action processing section - data from user
+	// Swing's action processing section - data from user
 	@Override
 	public void actionPerformed(final ActionEvent event) {
 		SwingUtilities.invokeLater(new Runnable() {

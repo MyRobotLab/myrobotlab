@@ -9,13 +9,13 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.data.Pin;
 
 public class Stepper_AdafruitMotorShieldGui extends StepperControllerPanel implements ActionListener {
 
   private static final long serialVersionUID = 1L;
-  private GuiService myService;
+  private Swing myService;
 
   JLabel stepperPortLabel = new JLabel("stepper port");
   JComboBox<String> stepperPort = new JComboBox<String>();
@@ -25,7 +25,7 @@ public class Stepper_AdafruitMotorShieldGui extends StepperControllerPanel imple
 
   ArrayList<Pin> pinList = null;
 
-  public Stepper_AdafruitMotorShieldGui(GuiService myService, String stepperName, String controllerName) {
+  public Stepper_AdafruitMotorShieldGui(Swing myService, String stepperName, String controllerName) {
     super();
     this.myService = myService;
     this.arduinoName = controllerName;
@@ -74,7 +74,7 @@ public class Stepper_AdafruitMotorShieldGui extends StepperControllerPanel imple
   }
 
   /**
-   * method to update the GuiService from StepperController data
+   * method to update the Swing from StepperController data
    */
   @Override
   public void setData(Object[] data) {
