@@ -36,7 +36,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.image.SerializableImage;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Tracking;
 
 public class TrackingGui extends ServiceGui {
@@ -54,7 +54,7 @@ public class TrackingGui extends ServiceGui {
 
   VideoWidget video0 = null;
 
-  public TrackingGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public TrackingGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     video0 = new VideoWidget(boundServiceName, myService, tabs, false);

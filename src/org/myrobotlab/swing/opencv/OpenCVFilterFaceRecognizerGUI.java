@@ -38,14 +38,14 @@ import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterFaceRecognizerGUI extends OpenCVFilterGUI implements ActionListener {
 
   private JTextField trainName = new JTextField("trainName", 10);
   private JCheckBox trainMode = new JCheckBox();
 
-  public OpenCVFilterFaceRecognizerGUI(String boundFilterName, String boundServiceName, Swing myService) {
+  public OpenCVFilterFaceRecognizerGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     // build the config for this filter.
     TitledBorder title = BorderFactory.createTitledBorder("Face Recognizer");

@@ -79,7 +79,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.swing.widget.ImageNameRenderer;
@@ -168,7 +168,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     }
   };
 
-  public RuntimeGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public RuntimeGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     // required - it "might" be a foreign Runtime...
     myRuntime = (Runtime) Runtime.getService(boundServiceName);

@@ -166,7 +166,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
       LeapMotion leap = new LeapMotion("leap");
       leap.startService();
-      Runtime.start("gui", "Swing");
+      Runtime.start("gui", "SwingGui");
       Runtime.start("webgui", "WebGui");
 
       // Have the sample listener receive events from the controller

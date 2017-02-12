@@ -32,7 +32,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.VirtualDevice;
 import org.slf4j.Logger;
 
@@ -41,7 +41,7 @@ public class VirtualDeviceGui extends ServiceGui implements ActionListener {
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(VirtualDeviceGui.class);
 
-  public VirtualDeviceGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public VirtualDeviceGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
   }
 

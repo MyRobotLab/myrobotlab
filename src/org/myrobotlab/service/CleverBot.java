@@ -36,7 +36,7 @@ public class CleverBot extends Service {
 
       log.info("here");
       /*
-       * Swing gui = new Swing("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
     } catch (Exception e) {
       Logging.logError(e);

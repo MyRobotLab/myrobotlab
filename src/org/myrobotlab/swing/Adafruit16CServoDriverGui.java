@@ -41,7 +41,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Adafruit16CServoDriver;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
@@ -64,7 +64,7 @@ public class Adafruit16CServoDriverGui extends ServiceGui implements ActionListe
 
 	Adafruit16CServoDriver boundService = null;
 
-	public Adafruit16CServoDriverGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+	public Adafruit16CServoDriverGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		boundService = (Adafruit16CServoDriver) Runtime.getService(boundServiceName);
     

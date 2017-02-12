@@ -34,7 +34,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterFaceDetectGUI extends OpenCVFilterGUI implements ActionListener {
 
@@ -44,7 +44,7 @@ public class OpenCVFilterFaceDetectGUI extends OpenCVFilterGUI implements Action
       "haarcascade_mcs_lefteye.xml", "haarcascade_mcs_mouth.xml", "haarcascade_mcs_nose.xml", "haarcascade_mcs_rightear.xml", "haarcascade_mcs_righteye.xml",
       "haarcascade_mcs_upperbody.xml", "haarcascade_profileface.xml", "haarcascade_righteye_2splits.xml", "haarcascade_upperbody.xml" });
 
-  public OpenCVFilterFaceDetectGUI(String boundFilterName, String boundServiceName, Swing myService) {
+  public OpenCVFilterFaceDetectGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
     cascadeFile.addActionListener(this);

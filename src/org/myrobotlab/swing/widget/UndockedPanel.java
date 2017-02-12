@@ -12,7 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 /**
@@ -46,11 +46,11 @@ public class UndockedPanel implements Serializable {
 
   transient private JFrame frame;
 
-  transient private Swing gui;
+  transient private SwingGui gui;
 
   TabControlWindowAdapter windowAdapter = new TabControlWindowAdapter();
 
-  public UndockedPanel(Swing gui) {
+  public UndockedPanel(SwingGui gui) {
     this.gui = gui;
   }
 

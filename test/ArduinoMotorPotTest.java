@@ -96,7 +96,7 @@ public class ArduinoMotorPotTest {
       uploadMRLComm(port, boardType);
     
     boolean enableLoadTiming = false;
-    // Runtime.create("gui", "Swing");
+    // Runtime.create("gui", "SwingGui");
     // initialize the logger 
     TestUtils.initEnvirionment();
     // Create the pid controller 

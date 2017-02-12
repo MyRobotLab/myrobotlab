@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.OculusRift;
 import org.myrobotlab.service.OculusRift.RiftFrame;
 import org.myrobotlab.service.interfaces.VideoGUISource;
@@ -22,7 +22,7 @@ public class OculusRiftGui extends ServiceGui implements VideoGUISource, ActionL
   VideoWidget leftEye = null;
   VideoWidget rightEye = null;
 
-  public OculusRiftGui(String boundServiceName, Swing myService, JTabbedPane tabs) {
+  public OculusRiftGui(String boundServiceName, SwingGui myService, JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     // Create the 2 video widgets

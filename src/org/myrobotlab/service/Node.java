@@ -85,7 +85,7 @@ public class Node extends Service {
     try {
 
       Node node = (Node) Runtime.start("node", "Node");
-      // Runtime.start("gui", "Swing");
+      // Runtime.start("gui", "SwingGui");
       node.runMain((String[])null);
 
     } catch (Exception e) {

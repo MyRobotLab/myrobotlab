@@ -80,7 +80,7 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
       app.process();
 
       // BoofCV template = (BoofCV) Runtime.start("template", "BoofCV");
-      // Runtime.start("gui", "Swing");
+      // Runtime.start("gui", "SwingGui");
     } catch (Exception e) {
       Logging.logError(e);
     }

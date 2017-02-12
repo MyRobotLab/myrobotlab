@@ -59,7 +59,7 @@ public class Console implements Appender<ILoggingEvent> {
 
   /**
    * to begin logging call this function Log must not begin before the
-   * Swing has finished drawing. For some reason, if log entries are
+   * SwingGui has finished drawing. For some reason, if log entries are
    * written to a JScrollPane before the gui has completed the whole gui will
    * tank
    * 

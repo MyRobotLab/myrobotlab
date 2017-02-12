@@ -45,7 +45,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   /*
    * TODO - make step calls NON BLOCKING 1. make step calls non-blocking - they
    * don't block MRL - but they block the processing of the Arduino which is not
-   * needed (or desired) 2. nice Swing for steppers 3. release
+   * needed (or desired) 2. nice SwingGui for steppers 3. release
    * functionality 4. style set <-- easy
    */
 
@@ -134,7 +134,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
       // FIXME !!! - don't use Adafruit's library - do your own stepper control
       // through "pure" MRLComm.ino
       AdafruitMotorShield fruity = (AdafruitMotorShield) Runtime.createAndStart("fruity", "AdafruitMotorShield");
-      Runtime.createAndStart("gui01", "Swing");
+      Runtime.createAndStart("gui01", "SwingGui");
 
       fruity.connect("COM3");
 

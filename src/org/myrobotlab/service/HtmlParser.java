@@ -19,7 +19,7 @@ public class HtmlParser extends Service {
     try {
 
       Runtime.start("jsoup", "Jsoup");
-      Runtime.start("gui", "Swing");
+      Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

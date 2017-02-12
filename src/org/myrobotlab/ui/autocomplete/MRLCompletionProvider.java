@@ -33,7 +33,7 @@ import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.reflection.Locator;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.JavaCompletionProvider;
 import org.slf4j.Logger;
 
@@ -45,10 +45,10 @@ public class MRLCompletionProvider extends JavaCompletionProvider {
   /**
    * Logger for this guy.
    */
-  public final static Logger log = LoggerFactory.getLogger(Swing.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(SwingGui.class.getCanonicalName());
 
   /**
-   * Create the modifiers HTML string that will be used in the Swing.
+   * Create the modifiers HTML string that will be used in the SwingGui.
    * 
    * @param modifiers
    * @return empty string if there are no modifiers that meet our criteria

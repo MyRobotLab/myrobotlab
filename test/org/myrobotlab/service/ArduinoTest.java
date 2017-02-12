@@ -1016,7 +1016,7 @@ public class ArduinoTest implements PinArrayListener {
 			LoggingFactory.init("INFO");
 			
 			Runtime.start("webgui", "WebGui");
-			// Runtime.start("gui", "Swing");
+			// Runtime.start("gui", "SwingGui");
 
 			// test a "real" arduino
 			useVirtualHardware = false;

@@ -39,7 +39,7 @@ import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.Util;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.ServiceGui;
 
 public class PhotoReelWidget extends ServiceGui {
@@ -104,7 +104,7 @@ public class PhotoReelWidget extends ServiceGui {
 
   public int lastImageWidth = 0;
 
-  public PhotoReelWidget(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public PhotoReelWidget(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     
 

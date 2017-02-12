@@ -40,7 +40,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.net.Connection;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.RemoteAdapter;
 import org.myrobotlab.swing.widget.ConnectionNodeList;
 
@@ -62,7 +62,7 @@ public class RemoteAdapterGui extends ServiceGui implements ActionListener {
 
   RemoteAdapter myRemote = null;
 
-  public RemoteAdapterGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public RemoteAdapterGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     display.setLayout(new BorderLayout());

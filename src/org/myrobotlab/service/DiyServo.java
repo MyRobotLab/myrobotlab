@@ -685,7 +685,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		try {
 			// Runtime.start("webgui", "WebGui");
-			Runtime.start("gui", "Swing");
+			Runtime.start("gui", "SwingGui");
 			Runtime.start("DiyServo", "DiyServo");
 			
 			boolean done = true;

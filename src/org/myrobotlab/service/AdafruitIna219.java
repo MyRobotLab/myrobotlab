@@ -67,7 +67,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 
 		try {
 			AdafruitIna219 adafruitINA219 = (AdafruitIna219) Runtime.start("AdafruitIna219", "AdafruitIna219");
-			Runtime.start("gui", "Swing");
+			Runtime.start("gui", "SwingGui");
 
 			byte msb = (byte)0x83;
 			byte lsb = (byte)0x00;

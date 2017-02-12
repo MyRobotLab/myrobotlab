@@ -113,7 +113,7 @@ public class JMonkeyEngine extends Service implements Simulator {
 
       LoggingFactory.init();
 
-      Runtime.start("gui", "Swing");
+      Runtime.start("gui", "SwingGui");
 
       
       Servo servo = (Servo)Runtime.start("servo", "Servo");

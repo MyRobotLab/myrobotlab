@@ -1431,7 +1431,7 @@ public class InMoov extends Service {
 
     /*
      * 
-     * Runtime.createAndStart("gui", "Swing");
+     * Runtime.createAndStart("gui", "SwingGui");
      * Runtime.createAndStart("python", "Python");
      * 
      * InMoov i01 = (InMoov)Runtime.createAndStart("i01","InMoov");
@@ -1466,7 +1466,7 @@ public class InMoov extends Service {
      * Serial serial0 = new Serial("UART15"); serial0.startService();
      * serial0.connect("UART15");
      * 
-     * Runtime.createAndStart("gui", "Swing");
+     * Runtime.createAndStart("gui", "SwingGui");
      * Runtime.createAndStart("python", "Python");
      * 
      * InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");

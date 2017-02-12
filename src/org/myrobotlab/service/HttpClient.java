@@ -274,7 +274,7 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     try {
 
       HttpClient client = (HttpClient) Runtime.start("client", "HttpClient");
-      Runtime.start("gui", "Swing");
+      Runtime.start("gui", "SwingGui");
       boolean done = true;
       
       if (done){

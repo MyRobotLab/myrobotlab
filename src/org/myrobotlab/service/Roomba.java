@@ -109,7 +109,7 @@ public class Roomba extends Service {
        * 
        * roomba.setHardwareHandshake(false);
        */
-      Swing gui = new Swing("gui");
+      SwingGui gui = new SwingGui("gui");
       gui.startService();
 
     } catch (Exception e) {

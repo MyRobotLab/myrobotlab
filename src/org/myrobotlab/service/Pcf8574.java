@@ -186,7 +186,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 
 		try {
 			Pcf8574 pcf8574t = (Pcf8574) Runtime.start("Pcf8574t", "Pcf8574t");
-			Runtime.start("gui", "Swing");
+			Runtime.start("gui", "SwingGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);

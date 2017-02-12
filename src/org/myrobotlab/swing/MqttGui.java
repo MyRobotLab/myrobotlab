@@ -39,7 +39,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Mqtt;
 import org.myrobotlab.service.Mqtt.MqttMsg;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class MqttGui extends ServiceGui implements ActionListener {
   int qos = 2;
 
 
-  public MqttGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
+  public MqttGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     
     recvData.setEditable(false);

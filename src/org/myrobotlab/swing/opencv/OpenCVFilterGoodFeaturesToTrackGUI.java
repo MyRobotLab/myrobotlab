@@ -34,7 +34,7 @@ import javax.swing.event.ChangeListener;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterGoodFeaturesToTrack;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.SliderWithText;
 
 public class OpenCVFilterGoodFeaturesToTrackGUI extends OpenCVFilterGUI {
@@ -80,7 +80,7 @@ public class OpenCVFilterGoodFeaturesToTrackGUI extends OpenCVFilterGUI {
 
   AdjustSlider change = new AdjustSlider();
 
-  public OpenCVFilterGoodFeaturesToTrackGUI(String boundFilterName, String boundServiceName, Swing myService) {
+  public OpenCVFilterGoodFeaturesToTrackGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
     maxPointCount.setName("maxPointCount");

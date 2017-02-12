@@ -102,9 +102,9 @@ public class Cron extends Service {
       // 3. Tony - status ? and generated xml responses - "update" looks
       // ok
 
-      // Runtime.createAndStart("gui", "Swing");
+      // Runtime.createAndStart("gui", "SwingGui");
       /*
-       * Swing gui = new Swing("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
     } catch (Exception e) {
       Logging.logError(e);

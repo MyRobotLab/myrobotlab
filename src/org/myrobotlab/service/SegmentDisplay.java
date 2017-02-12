@@ -43,7 +43,7 @@ public class SegmentDisplay extends Service {
       LoggingFactory.init(Level.INFO);
 
       Runtime.start("template", "_TemplateService");
-      Runtime.start("gui", "Swing");
+      Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

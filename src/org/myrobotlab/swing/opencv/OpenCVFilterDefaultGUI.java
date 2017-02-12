@@ -33,11 +33,11 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.service.Swing;
+import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterDefaultGUI extends OpenCVFilterGUI implements ActionListener {
 
-  public OpenCVFilterDefaultGUI(String boundFilterName, String boundServiceName, Swing myService) {
+  public OpenCVFilterDefaultGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
     display.add(new JLabel("no available parameters"));

@@ -42,7 +42,7 @@ public class WikiDataFetcher extends Service {
 			WikiDataFetcher wiki = (WikiDataFetcher) Runtime.start("wikiDataFetcher", "WikiDataFetcher");
 			EntityDocument doc = wiki.getWiki("Halloween");
 			log.info(doc.toString());
-			Runtime.start("gui", "Swing");
+			Runtime.start("gui", "SwingGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);
