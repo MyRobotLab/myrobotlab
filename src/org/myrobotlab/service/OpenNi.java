@@ -932,7 +932,7 @@ public class OpenNi extends Service // implements
   public static void main(String s[]) {
     LoggingFactory.init("INFO");
 
-    Runtime.createAndStart("gui", "GuiService");
+    Runtime.createAndStart("gui", "Swing");
     Runtime.createAndStart("python", "Python");
 
     OpenNi openni = (OpenNi) Runtime.createAndStart("openni", "OpenNi");

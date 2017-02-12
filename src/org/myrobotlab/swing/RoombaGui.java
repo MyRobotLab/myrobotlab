@@ -57,7 +57,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.roomba.RoombaComm;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Roomba;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
@@ -89,7 +89,7 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
     return Util.getImageIcon("Roomba/" + path);
   }
 
-  public RoombaGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public RoombaGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     roombacomm = (Roomba) Runtime.getService(boundServiceName);
     display.setLayout(new BorderLayout());
@@ -543,7 +543,7 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
 
   /**
    * setPorts is called by onState - which is called when the Arduino changes
-   * port state is NOT called by the GuiService component
+   * port state is NOT called by the Swing component
    * 
    * @param p
    *          FIXME - there should be a corresponding gui element for the

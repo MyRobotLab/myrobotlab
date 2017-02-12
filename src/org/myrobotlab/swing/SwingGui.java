@@ -47,10 +47,10 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.myrobotlab.framework.MRLListener;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.swing.GuiServiceGraphVertex.Type;
+import org.myrobotlab.swing.SwingGraphVertex.Type;
 import org.myrobotlab.swing.widget.Style;
 import org.w3c.dom.Document;
 
@@ -67,7 +67,7 @@ import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxEdgeStyle;
 import com.mxgraph.view.mxGraph;
 
-public class GuiServiceGui extends ServiceGui {
+public class SwingGui extends ServiceGui {
 
   class ButtonListener implements ActionListener {
 
@@ -171,7 +171,7 @@ public class GuiServiceGui extends ServiceGui {
     return methodString;
   }
 
-  public GuiServiceGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public SwingGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
 
@@ -243,7 +243,7 @@ public class GuiServiceGui extends ServiceGui {
 
       // register
       mxCodecRegistry.addPackage("org.myrobotlab.control");
-      mxCodecRegistry.register(new mxCellCodec(new org.myrobotlab.swing.GuiServiceGraphVertex()));
+      mxCodecRegistry.register(new mxCellCodec(new org.myrobotlab.swing.SwingGraphVertex()));
       mxCodecRegistry.register(new mxCellCodec(Type.INPORT));
 
       // load
@@ -263,7 +263,7 @@ public class GuiServiceGui extends ServiceGui {
         log.debug("service {}", s);
 
         mxCell m = (mxCell) services[i];
-        GuiServiceGraphVertex v = (GuiServiceGraphVertex) m.getValue();
+        SwingGraphVertex v = (SwingGraphVertex) m.getValue();
         log.debug(v.name);
         serviceCells.put(v.name, m);
         // serviceCells.put(arg0, s.);
@@ -336,11 +336,11 @@ public class GuiServiceGui extends ServiceGui {
             if (m.isVertex()) {
               // TODO - edges get filtered through here too - need
               // to process - (String) type
-              GuiServiceGraphVertex v = (GuiServiceGraphVertex) m.getValue();
+              SwingGraphVertex v = (SwingGraphVertex) m.getValue();
               if (v.displayName.equals("out")) {
-                new GuiServiceOutMethodDialog(myService, "out method", v);
+                new SwingOutMethodDialog(myService, "out method", v);
               } else if (v.displayName.equals("in")) {
-                new GuiServiceInMethodDialog(myService, "in method", v);
+                new SwingInMethodDialog(myService, "in method", v);
               }
             } else if (m.isEdge()) {
               log.error("isEdge");
@@ -363,7 +363,7 @@ public class GuiServiceGui extends ServiceGui {
 
     log.debug("buildLocalServiceGraph-begin");
     Map<String, ServiceInterface> services = Runtime.getRegistry();
-    log.debug("GuiServiceGUI service count " + Runtime.getRegistry().size());
+    log.debug("SwingGUI service count " + Runtime.getRegistry().size());
 
     TreeMap<String, ServiceInterface> sortedMap = new TreeMap<String, ServiceInterface>(services);
     Iterator<String> it = sortedMap.keySet().iterator();
@@ -398,7 +398,7 @@ public class GuiServiceGui extends ServiceGui {
         displayName = sw.getInstanceId() + "\n" + displayName;
       }
 
-      mxCell v1 = (mxCell) graph.insertVertex(parent, null, new GuiServiceGraphVertex(serviceName, canonicalName, displayName, toolTip, GuiServiceGraphVertex.Type.SERVICE), x, y,
+      mxCell v1 = (mxCell) graph.insertVertex(parent, null, new SwingGraphVertex(serviceName, canonicalName, displayName, toolTip, SwingGraphVertex.Type.SERVICE), x, y,
           100, 50, "shape=image;image=/resource/" + canonicalName + ".png");
           // "ROUNDED;fillColor=" + blockColor);
 
@@ -418,7 +418,7 @@ public class GuiServiceGui extends ServiceGui {
       geo1.setOffset(new mxPoint(-PORT_RADIUS, -PORT_RADIUS));
       geo1.setRelative(true);
 
-      mxCell inport = new mxCell(new GuiServiceGraphVertex(serviceName, canonicalName, "in", toolTip, GuiServiceGraphVertex.Type.INPORT), geo1,
+      mxCell inport = new mxCell(new SwingGraphVertex(serviceName, canonicalName, "in", toolTip, SwingGraphVertex.Type.INPORT), geo1,
           "shape=ellipse;perimter=ellipsePerimeter;fillColor=" + blockColor);
 
       inport.setVertex(true);
@@ -427,7 +427,7 @@ public class GuiServiceGui extends ServiceGui {
       geo2.setOffset(new mxPoint(-PORT_RADIUS, -PORT_RADIUS));
       geo2.setRelative(true);
 
-      mxCell outport = new mxCell(new GuiServiceGraphVertex(serviceName, canonicalName, "out", toolTip, GuiServiceGraphVertex.Type.OUTPORT), geo2,
+      mxCell outport = new mxCell(new SwingGraphVertex(serviceName, canonicalName, "out", toolTip, SwingGraphVertex.Type.OUTPORT), geo2,
           "shape=ellipse;perimter=ellipsePerimeter;fillColor=" + blockColor);
 
       outport.setVertex(true);
@@ -503,7 +503,7 @@ public class GuiServiceGui extends ServiceGui {
 
         mxCell m = (mxCell) cell;
 
-        GuiServiceGraphVertex sw = (GuiServiceGraphVertex) m.getValue();
+        SwingGraphVertex sw = (SwingGraphVertex) m.getValue();
         if (sw != null) {
           return sw.toolTip;
         } else {

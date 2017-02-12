@@ -245,7 +245,7 @@ public class Keyboard extends Service {
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
-    Runtime.start("gui", "GuiService");
+    Runtime.start("gui", "Swing");
     Keyboard keyboard = (Keyboard) Runtime.start("keyboard", "Keyboard");
     // keyboard.stopService();
 

@@ -51,7 +51,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 
   public final static Logger log = LoggerFactory.getLogger(ServiceGui.class);
   public final String boundServiceName;
-  public final GuiService myService; // FIXME - rename gui
+  public final Swing myService; // FIXME - rename gui
 
   /**
    * display is the panel to be added to the JTabbedPane it has border layout
@@ -99,7 +99,7 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
   protected ServiceGui self;
   boolean isHidden = false;
 
-  public ServiceGui(final String boundServiceName, final GuiService myService, JTabbedPane tabs) {
+  public ServiceGui(final String boundServiceName, final Swing myService, JTabbedPane tabs) {
     self = this;
     this.boundServiceName = boundServiceName;
     this.myService = myService;
@@ -256,7 +256,7 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
   }
 
   /**
-   * hook for GuiService framework to query each panel before release checking
+   * hook for Swing framework to query each panel before release checking
    * if any panel needs user input before shutdown
    * 
    * @return
@@ -314,7 +314,7 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
   @Override
   /**
    * undocks a tabbed panel into a JFrame FIXME - NORMALIZE - there are similar
-   * methods in GuiService FIXME - there needs to be clear pattern replacement -
+   * methods in Swing FIXME - there needs to be clear pattern replacement -
    * this is a decorator - I think... (also it will always be Swing)
    * 
    */

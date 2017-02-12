@@ -11,7 +11,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.PinDefinition;
@@ -20,7 +20,7 @@ import org.myrobotlab.service.Runtime;
 public class Motor_ArduinoGui extends MotorControllerPanel implements ActionListener {
 
   private static final long serialVersionUID = 1L;
-  private GuiService myService;
+  private Swing myService;
 
   // JLabel powerPinLabel = new
   // JLabel("<html>power pin<br><font color=white bgcolor=green>speed
@@ -34,7 +34,7 @@ public class Motor_ArduinoGui extends MotorControllerPanel implements ActionList
 
   List<PinDefinition> pinList = null;
 
-  public Motor_ArduinoGui(GuiService myService, String motorName, String controllerName) {
+  public Motor_ArduinoGui(Swing myService, String motorName, String controllerName) {
     super();
     this.myService = myService;
     this.arduinoName = controllerName;

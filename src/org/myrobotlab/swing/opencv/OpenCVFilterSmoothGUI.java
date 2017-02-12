@@ -29,14 +29,14 @@ import javax.swing.JButton;
 import javax.swing.JTextField;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 
 public class OpenCVFilterSmoothGUI extends OpenCVFilterGUI {
 
   JButton button = new JButton("smooth me");
   JTextField kernel = new JTextField("3");
 
-  public OpenCVFilterSmoothGUI(String boundFilterName, String boundServiceName, GuiService myService) {
+  public OpenCVFilterSmoothGUI(String boundFilterName, String boundServiceName, Swing myService) {
     super(boundFilterName, boundServiceName, myService);
     display.add(button);
     display.add(kernel);

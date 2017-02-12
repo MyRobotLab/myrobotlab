@@ -34,7 +34,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Wii.IRData;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.myrobotlab.swing.widget.Number;
@@ -87,7 +87,7 @@ public class WiiGui extends ServiceGui implements ListSelectionListener, VideoGU
   int sweepTimeDelta = 0;
   int deltaTime = 0;
 
-  public WiiGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public WiiGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     video0 = new VideoWidget(boundServiceName, myService, tabs);

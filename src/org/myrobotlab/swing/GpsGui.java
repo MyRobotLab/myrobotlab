@@ -32,7 +32,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service._TemplateService;
 import org.slf4j.Logger;
 
@@ -47,7 +47,7 @@ public class GpsGui extends ServiceGui implements ActionListener {
   private JLabel speedTextField = new JLabel();
   private JLabel headingTextField = new JLabel();
 
-  public GpsGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public GpsGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     log.info("HERE !!!!");
     setTitle("gps");

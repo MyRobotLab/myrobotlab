@@ -283,7 +283,7 @@ public class Blender extends Service {
       // create masters
       Blender blender = (Blender) Runtime.start("blender", "Blender");
       // gui
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "Swing");
 
       // connect blender service
       if (!blender.connect()) {
@@ -343,7 +343,7 @@ public class Blender extends Service {
        * blender.getVersion(); // blender.toJson(); // blender.toJson();
        */
 
-      // Runtime.start("gui", "GuiService");
+      // Runtime.start("gui", "Swing");
 
     } catch (Exception e) {
       Logging.logError(e);

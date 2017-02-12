@@ -154,7 +154,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
       Servo servo = new Servo("servo");
       servo.startService();
 
-      // GuiService gui = new GuiService("gui");
+      // Swing gui = new Swing("gui");
       // gui.startService();
 
       wii.getWiimotes();

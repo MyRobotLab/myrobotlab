@@ -84,7 +84,7 @@ public class SlamBad extends Service {
      * 
      * env.add(new Box(new Vector3d(3, 0, 0), new Vector3f(1, 1, 1), env));
      */
-    Runtime.start("gui", "GuiService");
+    Runtime.start("gui", "Swing");
 
   }
 

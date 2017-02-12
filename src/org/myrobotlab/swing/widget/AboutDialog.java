@@ -23,7 +23,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.HttpRequest;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.slf4j.Logger;
 
 public class AboutDialog extends JDialog implements ActionListener, MouseListener {
@@ -36,7 +36,7 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
   JButton ok = null;
   JFrame parent = null;
   JLabel versionLabel = new JLabel(org.myrobotlab.service.Runtime.getVersion());
-  GuiService gui;
+  Swing gui;
 
   public static void main(String[] args) throws Exception {
     LoggingFactory.init();
@@ -47,7 +47,7 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
     HttpRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File(LoggingFactory.getLogFileName()));
   }
 
-  public AboutDialog(GuiService gui) {
+  public AboutDialog(Swing gui) {
     super(gui.getFrame(), "about", true);
     this.gui = gui;
     this.parent = gui.getFrame();

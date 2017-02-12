@@ -181,8 +181,8 @@ public class WiiDar extends Service {
   /*
    * // TODO remoe these service ----- DEBUG ONLY ------ BEGIN Wii wii = new
    * Wii("wii"); Arduino arduino = new Arduino("arduino"); Servo servo = new
-   * Servo("servo"); // OpenCV opencv = new OpenCV("opencv"); GuiService gui =
-   * new GuiService("gui"); // TODO remoe these service ----- DEBUG ONLY ------
+   * Servo("servo"); // OpenCV opencv = new OpenCV("opencv"); Swing gui =
+   * new Swing("gui"); // TODO remoe these service ----- DEBUG ONLY ------
    * END
    */
 
@@ -312,7 +312,7 @@ public class WiiDar extends Service {
 
       WiiDar wiidar = new WiiDar("wiidar");
       wiidar.startService();
-      Runtime.createAndStart("gui", "GuiService");
+      Runtime.createAndStart("gui", "Swing");
       // wiidar.startRobot();
 
     } catch (Exception e) {

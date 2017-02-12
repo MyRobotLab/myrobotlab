@@ -47,7 +47,7 @@ public class Pir extends Service implements PinListener {
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			Runtime.start("pir", "Pir");
-			Runtime.start("gui", "GuiService");
+			Runtime.start("gui", "Swing");
 
 		} catch (Exception e) {
 			Logging.logError(e);

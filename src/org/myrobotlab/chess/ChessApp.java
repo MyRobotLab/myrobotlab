@@ -3,7 +3,7 @@ package org.myrobotlab.chess;
 //
 //  ChessApp.java
 //  A simple Java Swing applet to play chess.
-//  Copyright (c) 2001 Peter Hunter. GuiService was originally based on code
+//  Copyright (c) 2001 Peter Hunter. Swing was originally based on code
 //  by David Dagon (c) 1997 David Dagon and is used with his permission.
 //  The search code is heavily based on Tom Kerrigan's tscp, for which he
 //  owns the copyright, and is used with his permission. All rights are

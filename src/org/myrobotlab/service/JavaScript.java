@@ -91,7 +91,7 @@ public class JavaScript extends Service {
 
       JavaScript javascript = (JavaScript) Runtime.start("javascript", "JavaScript");
       javascript.exec("java.lang.System.out.println(\"hello world\");");
-      // Runtime.start("gui", "GuiService");
+      // Runtime.start("gui", "Swing");
 
     } catch (Exception e) {
       Logging.logError(e);

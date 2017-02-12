@@ -60,7 +60,7 @@ public class SerialRelay extends Service implements SerialDevice, DeviceControl 
       LoggingFactory.init(Level.INFO);
 
       Runtime.start("template", "SerialRelay");
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "Swing");
       Runtime.start("python", "Python");
       
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");

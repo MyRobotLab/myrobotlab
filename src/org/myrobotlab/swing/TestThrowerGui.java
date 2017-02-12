@@ -35,7 +35,7 @@ import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 
 public class TestThrowerGui extends ServiceGui {
 
@@ -50,7 +50,7 @@ public class TestThrowerGui extends ServiceGui {
   JLabel throwVideoLabel = new JLabel("");
   JLabel throwSerialLabel = new JLabel("");
 
-  public TestThrowerGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public TestThrowerGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
 
     display.setSize(400, 200);

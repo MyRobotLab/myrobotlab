@@ -255,7 +255,7 @@ public class Test extends Service implements StatusListener {
 	 * script; ArrayList<File> list =
 	 * FileIO.listInternalContents("/resource/Python/examples");
 	 * 
-	 * Runtime.createAndStart("gui", "GuiService"); python = (Python)
+	 * Runtime.createAndStart("gui", "Swing"); python = (Python)
 	 * startPeer("python"); // InMoov i01 = (InMoov)
 	 * Runtime.createAndStart("i01", "InMoov");
 	 * 
@@ -276,7 +276,7 @@ public class Test extends Service implements StatusListener {
 	 * script; ArrayList<File> list =
 	 * FileIO.listInternalContents("/resource/Python/examples");
 	 * 
-	 * Runtime.createAndStart("gui", "GuiService"); python = (Python)
+	 * Runtime.createAndStart("gui", "Swing"); python = (Python)
 	 * startPeer("python"); // InMoov i01 = (InMoov)
 	 * Runtime.createAndStart("i01", "InMoov");
 	 * 
@@ -950,7 +950,7 @@ public class Test extends Service implements StatusListener {
 
 			// Runtime.start("cli", "Cli");
 			Agent agent = (Agent) Runtime.start("agent", "Agent");
-			String[] cmdline = new String[] { "-fromAgent", "-service", "guiservice", "GuiService" };
+			String[] cmdline = new String[] { "-fromAgent", "-service", "guiservice", "Swing" };
 			agent.spawn(cmdline);
 
 			// requirements:

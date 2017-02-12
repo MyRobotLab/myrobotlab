@@ -41,7 +41,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.InMoov;
 import org.slf4j.Logger;
 
@@ -76,7 +76,7 @@ public class InMoovGui extends ServiceGui implements ActionListener {
 
   VideoWidget opencv;
 
-  public InMoovGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public InMoovGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     templates.put("hand", handTemplate);
     templates.put("arm", armTemplate);

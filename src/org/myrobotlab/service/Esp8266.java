@@ -24,7 +24,7 @@ public class Esp8266 extends Service {
     try {
 
       Runtime.start("esp", "Esp8266");
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "Swing");
 
     } catch (Exception e) {
       Logging.logError(e);

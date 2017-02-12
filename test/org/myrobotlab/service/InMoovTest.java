@@ -110,7 +110,7 @@ public class InMoovTest implements PinArrayListener {
       InMoovTest.setUpBeforeClass();
       
      // Runtime.start("webgui", "WebGui");
-     //  Runtime.start("gui", "GuiService");
+     //  Runtime.start("gui", "Swing");
       Runtime.start("python", "Python");
 
       

@@ -40,7 +40,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OledSsd1306;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
@@ -59,7 +59,7 @@ public class OledSsd1306Gui extends ServiceGui implements ActionListener {
 
 	OledSsd1306 boundService = null;
 
-	public OledSsd1306Gui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+	public OledSsd1306Gui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		boundService = (OledSsd1306) Runtime.getService(boundServiceName);
 

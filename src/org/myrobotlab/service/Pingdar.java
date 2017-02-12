@@ -255,7 +255,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
       int echoPin = 7;
       int servoPin = 9;
 
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "Swing");
       
       VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual","VirtualArduino");
       // virtual.connect("COM5");

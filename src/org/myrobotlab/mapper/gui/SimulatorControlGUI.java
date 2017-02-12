@@ -43,7 +43,7 @@ import javax.swing.JRadioButton;
 import org.myrobotlab.mapper.sim.Simulator;
 
 /**
- * The GuiService panel for controlling the simulator.
+ * The Swing panel for controlling the simulator.
  */
 public class SimulatorControlGUI extends JPanel implements ActionListener {
 

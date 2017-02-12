@@ -475,7 +475,7 @@ public class OpenCV extends Service implements VideoSource {
   }
 
   /**
-   * Callback from the GuiService to the appropriate filter funnel through here
+   * Callback from the Swing to the appropriate filter funnel through here
    */
   public void invokeFilterMethod(String filterName, String method, Object... params) {
     OpenCVFilter filter = getFilter(filterName);
@@ -743,7 +743,7 @@ public class OpenCV extends Service implements VideoSource {
     // https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
     //
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
-    Runtime.start("gui", "GuiService");
+    Runtime.start("gui", "Swing");
 
     org.apache.log4j.BasicConfigurator.configure();
     LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -838,10 +838,10 @@ public class OpenCV extends Service implements VideoSource {
     // opencv.capture();
     // opencv.captureFromImageFile("C:\\mrl\\myrobotlab\\image0.png");
 
-    // Runtime.createAndStart("gui", "GuiService");
+    // Runtime.createAndStart("gui", "Swing");
     // opencv.test();
     /*
-     * Runtime.createAndStart("gui", "GuiService"); RemoteAdapter remote =
+     * Runtime.createAndStart("gui", "Swing"); RemoteAdapter remote =
      * (RemoteAdapter) Runtime.start("ocvremote", "RemoteAdapter");
      * remote.connect("tcp://localhost:6767");
      * 

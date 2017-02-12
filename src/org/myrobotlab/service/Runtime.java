@@ -714,7 +714,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * export to another instance of MRL. The objective of filtering may help
    * resolve functionality, security, or technical issues. For example, the
    * Dalvik JVM can only run certain Services. It would be error prone to export
-   * a GuiService to a jvm which does not support swing.
+   * a Swing to a jvm which does not support swing.
    * 
    * Since the map of Services is made for export - it is NOT a copy but
    * references
@@ -1298,9 +1298,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     System.out.println("-runtimeName <runtime name>                # rename the Runtime service - prevents multiple instance name collisions");
     System.out.println("-logToConsole                              # redirects logging to console");
     System.out.println("-logLevel <DEBUG | INFO | WARNING | ERROR> # log level");
-    System.out.println("-service <name1 Type1 name2 Type2 ...>     # create and start list of services, e.g. -service gui GuiService");
+    System.out.println("-service <name1 Type1 name2 Type2 ...>     # create and start list of services, e.g. -service gui Swing");
     System.out.println("example:");
-    String helpString = "java -Djava.library.path=./libraries/native/x86.32.windows org.myrobotlab.service.Runtime -service webgui WebGui gui GuiService -logLevel INFO -logToConsole";
+    String helpString = "java -Djava.library.path=./libraries/native/x86.32.windows org.myrobotlab.service.Runtime -service webgui WebGui gui Swing -logLevel INFO -logToConsole";
     System.out.println(helpString);
   }
 

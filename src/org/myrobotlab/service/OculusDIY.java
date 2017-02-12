@@ -155,7 +155,7 @@ public class OculusDIY extends Service implements OrientationListener {
 			// OculusDIY oculus = (OculusDIY) Runtime.start("oculus",
 			// "OculusDIY");
 			Runtime.start("python", "Python");
-			Runtime.start("gui", "GuiService");
+			Runtime.start("gui", "Swing");
 			// oculus.connect("COM15");
 
 		} catch (Exception e) {

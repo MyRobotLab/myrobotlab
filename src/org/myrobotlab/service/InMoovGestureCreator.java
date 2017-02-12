@@ -92,7 +92,7 @@ public class InMoovGestureCreator extends Service {
     LoggingFactory.init(Level.INFO);
     try {
 
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "Swing");
       Runtime.start("inmoovgesturecreator", "InMoovGestureCreator");
 
     } catch (Exception e) {

@@ -27,7 +27,7 @@ package org.myrobotlab.swing;
 
 import java.io.Serializable;
 
-public class GuiServiceGraphVertex implements Serializable {
+public class SwingGraphVertex implements Serializable {
   public static enum Type {
     SERVICE, INPORT, OUTPORT
   }
@@ -41,10 +41,10 @@ public class GuiServiceGraphVertex implements Serializable {
 
   public Type type;
 
-  public GuiServiceGraphVertex() {
+  public SwingGraphVertex() {
   }
 
-  public GuiServiceGraphVertex(String name, String canonicalName, String displayName, String toolTip, Type t) {
+  public SwingGraphVertex(String name, String canonicalName, String displayName, String toolTip, Type t) {
     this.name = name;
     this.canonicalName = canonicalName;
     this.displayName = displayName;

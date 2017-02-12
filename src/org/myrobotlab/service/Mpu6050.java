@@ -547,7 +547,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
 			/*
 			 * Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "Mpu6050");
-			 * Runtime.start("gui", "GuiService");
+			 * Runtime.start("gui", "Swing");
 			 */
 
 			/*

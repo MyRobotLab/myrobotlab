@@ -327,7 +327,7 @@ public class Joystick extends Service {
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
       // joy.mapId("x", "rx");
       joy.map("y", -1, 1, 0, 180);
-      // Runtime.start("gui", "GuiService");
+      // Runtime.start("gui", "Swing");
       // joy.test();
 
       /*

@@ -33,7 +33,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service._TemplateService;
 import org.slf4j.Logger;
 
@@ -45,7 +45,7 @@ public class _TemplateServiceGui extends ServiceGui implements ActionListener {
   JLabel var1 = new JLabel("0.0");
   JLabel var2 = new JLabel("1.0");
 
-  public _TemplateServiceGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
+  public _TemplateServiceGui(final String boundServiceName, final Swing myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     
     setTitle("status");

@@ -9,14 +9,14 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
-import org.myrobotlab.service.GuiService;
+import org.myrobotlab.service.Swing;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.data.Pin;
 
 public class Motor_SaberToothGui extends MotorControllerPanel implements ActionListener {
 
   private static final long serialVersionUID = 1L;
-  private GuiService myService;
+  private Swing myService;
 
   JLabel motorPortLabel = new JLabel("motor port");
   JComboBox<String> motorPort = new JComboBox<String>();
@@ -26,7 +26,7 @@ public class Motor_SaberToothGui extends MotorControllerPanel implements ActionL
 
   ArrayList<Pin> pinList = null;
 
-  public Motor_SaberToothGui(GuiService myService, String motorName, String controllerName) {
+  public Motor_SaberToothGui(Swing myService, String motorName, String controllerName) {
     super();
     this.myService = myService;
     this.arduinoName = controllerName;
@@ -65,7 +65,7 @@ public class Motor_SaberToothGui extends MotorControllerPanel implements ActionL
   }
 
   /**
-   * method to update the GuiService from MotorController data
+   * method to update the Swing from MotorController data
    */
   @Override
   public void set(Motor motor) {

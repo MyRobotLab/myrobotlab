@@ -250,7 +250,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
       arduino.setBoardMega();
       arduino.connect(portName);
 
-      // Runtime.start("gui", "GuiService");
+      // Runtime.start("gui", "Swing");
       Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {

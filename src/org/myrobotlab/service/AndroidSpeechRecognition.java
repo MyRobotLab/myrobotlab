@@ -116,7 +116,7 @@ public class AndroidSpeechRecognition extends Service implements TextPublisher {
     LoggingFactory.init(Level.INFO);
     try {
 
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "Swing");
       Runtime.start("avr", "AndroidSpeechRecognition");
 
     } catch (Exception e) {
