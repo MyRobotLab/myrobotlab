@@ -1973,7 +1973,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       Runtime.start("gui", "GuiService");
       Runtime.start("python", "Python");
       // Runtime.start("webgui", "WebGui");
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      Arduino arduino = (Arduino) Runtime.create("arduino", "Arduino");
       /*
       Runtime.start("arduino01", "Arduino");
       Runtime.start("arduino02", "Arduino");
