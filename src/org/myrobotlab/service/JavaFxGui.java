@@ -11,15 +11,15 @@ import org.slf4j.Logger;
 
 import javafx.application.Application;
 
-public class JavaFX extends Service {
+public class JavaFxGui extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(JavaFX.class);
+  public final static Logger log = LoggerFactory.getLogger(JavaFxGui.class);
 
   transient Gui gui;
 
-  public JavaFX(String n) {
+  public JavaFxGui(String n) {
     super(n);
   }
 
@@ -33,7 +33,7 @@ public class JavaFX extends Service {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(JavaFX.class.getCanonicalName());
+    ServiceType meta = new ServiceType(JavaFxGui.class.getCanonicalName());
     meta.addDescription("used as a general template");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
@@ -55,7 +55,7 @@ public class JavaFX extends Service {
     try {
 
       LoggingFactory.init(Level.INFO);
-      JavaFX javafx = (JavaFX) Runtime.start("javafx", "JavaFX");
+      JavaFxGui javafx = (JavaFxGui) Runtime.start("javafx", "JavaFX");
       // Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
