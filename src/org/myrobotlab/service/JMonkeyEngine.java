@@ -100,7 +100,7 @@ public class JMonkeyEngine extends Service implements Simulator {
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
-    meta.addCategory("general");
+    meta.addCategory("simulator");
     return meta;
   }
 
