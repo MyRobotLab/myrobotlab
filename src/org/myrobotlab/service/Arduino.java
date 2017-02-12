@@ -189,7 +189,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   boolean heartbeat = false;
 
-  I2CBus i2cBus;
+  I2CBus i2cBus = null;
 
   volatile byte[] i2cData = new byte[64];
 
@@ -1970,23 +1970,17 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       LoggingFactory.init(Level.INFO);
 
       // Runtime.start("webgui", "WebGui");
-      Runtime.start("gui", "GuiService");
+      Runtime.start("gui", "GUIService");
       Runtime.start("python", "Python");
-      // Runtime.start("webgui", "WebGui");
-      Arduino arduino = (Arduino) Runtime.create("arduino", "Arduino");
-      /*
-      Runtime.start("arduino01", "Arduino");
-      Runtime.start("arduino02", "Arduino");
-      Runtime.start("arduino03", "Arduino");
-      Runtime.start("arduino04", "Arduino");
-      */
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      
       boolean done = true;
       if (done){
         return;
       }
       
       Serial serial = arduino.getSerial();
-      // Runtime.start("gui", "GuiService");
+      // Runtime.start("gui", "GUIService");
       // List<String> ports = serial.getPortNames();
       // log.info(Arrays.toString(ports.toArray()));
       // arduino.setBoardMega();
@@ -2000,7 +1994,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // arduino.uploadSketch("C:\\tools\\arduino-1.6.9");
 
       Servo servo = (Servo) Runtime.start("servo", "Servo");
-      // Runtime.start("gui", "GuiService");
+      // Runtime.start("gui", "GUIService");
       servo.attach(arduino, 7);
       // servo.detach(arduino);
       servo.attach(9);

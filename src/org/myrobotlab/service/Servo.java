@@ -130,7 +130,7 @@ public class Servo extends Service implements ServoControl {
 
     ServiceType meta = new ServiceType(Servo.class.getCanonicalName());
     meta.addDescription("Controls a servo");
-    meta.addCategory("motor", "control", "servo");
+    meta.addCategory("motor", "control");
 
     return meta;
   }
@@ -710,7 +710,7 @@ public class Servo extends Service implements ServoControl {
       velocity = maxVelocity;
       log.info("Trying to set velocity to a value greater than max velocity");
     }
-    velocity = velocity;
+    this.velocity = velocity;
     if (controller != null) {
       controller.servoSetVelocity(this);
     }
@@ -753,25 +753,16 @@ public class Servo extends Service implements ServoControl {
 
   public static void main(String[] args) throws InterruptedException {
     try {
-      LoggingFactory.init();
+      LoggingFactory.init(Level.INFO);
 
       // Runtime.start("webgui", "WebGui");
-      Runtime.start("gui", "GuiService");
-      Runtime.start("servo", "Servo");
-      
-      boolean done = true;
-      if (done){
-        return;
-      }
-     
+      // Runtime.start("gui", "GUIService");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.record();
-      
       // arduino.getSerial().record();
 
       log.info("ports {}", Arrays.toString(arduino.getSerial().getPortNames().toArray()));
       arduino.connect("COM10");
-      
 
       log.info("ready here");
       // arduino.ackEnabled = true;
