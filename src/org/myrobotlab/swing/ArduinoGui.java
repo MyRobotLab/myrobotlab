@@ -27,7 +27,6 @@ package org.myrobotlab.swing;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
@@ -54,15 +53,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.text.DefaultCaret;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rtextarea.RTextScrollPane;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.Util;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GuiService;
 import org.myrobotlab.service.Serial;
@@ -99,9 +93,6 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
   JLabel version = new JLabel();
 
   JComboBox<String> boardTypes = new JComboBox<String>(BOARD_TYPES);
-
-  final RSyntaxTextArea editor = new RSyntaxTextArea();
-  final RTextScrollPane editorScrollPane = new RTextScrollPane(editor);
 
   static final long serialVersionUID = 1L;
 
@@ -141,16 +132,15 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
   HashMap<Integer, TraceData> traceData = new HashMap<Integer, TraceData>();
 
   DigitalButton uploadButton = null;
-  
+
   JButton openMrlComm = new JButton("Open in Arduino IDE");
-  
-  JTextField arduinoPath= new JTextField(20);
-  
+
+  JTextField arduinoPath = new JTextField(20);
+
   JTextField ports = new JTextField(5);
-  JTextField boardType= new JTextField(5);
+  JTextField boardType = new JTextField(5);
   JButton uploadMrlComm = new JButton("Upload MRLComm");
   JLabel uploadResult = new JLabel();
-
 
   /**
    * Get the number of lines in a file by counting the number of newline
@@ -186,38 +176,31 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
   public ArduinoGui(final String boundServiceName, final GuiService myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     self = this;
+    
+    
+    state.setText("not connected");
+    statePanel.add(boardTypes);
+    statePanel.add(new JLabel("state: "));
+    statePanel.add(state);
+    statePanel.add(new JLabel("     version: "));
+    statePanel.add(version);
 
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+    addTopLine(statePanel);
+    localTabs.setTabPlacement(SwingConstants.RIGHT);
 
-        state.setText("not connected");
-        statePanel.add(boardTypes);
-        statePanel.add(new JLabel("state: "));
-        statePanel.add(state);
-        statePanel.add(new JLabel("     version: "));
-        statePanel.add(version);
+    getPinPanel();
+    getOscopePanel();
+    // getEditorPanel();
+    getMrlCommPanel();
 
-        addTopLine(state, statePanel);
-  
-        // ---------------- localTabs begin ----------------------
-        localTabs.setTabPlacement(SwingConstants.RIGHT);
-
-        getPinPanel();
-        getOscopePanel();
-        //getEditorPanel();
-        getMrlCommPanel();
-
-        addLine(localTabs);
-        
-        serialRefresh.addActionListener(self);
-        softReset.addActionListener(self);
-        serialDisconnect.addActionListener(self);
-        boardTypes.addItemListener(self);
-        openMrlComm.addActionListener(self);
-        uploadMrlComm.addActionListener(self);
-      }
-    });
+    addLine(localTabs);
+    serialRefresh.addActionListener(self);
+    softReset.addActionListener(self);
+    serialDisconnect.addActionListener(self);
+    boardTypes.addItemListener(self);
+    openMrlComm.addActionListener(self);
+    uploadMrlComm.addActionListener(self);
+    
   }
 
   /**
@@ -335,15 +318,15 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
       log.info("DigitalButton");
     }
-    if (o == openMrlComm){
+    if (o == openMrlComm) {
       myService.send(boundServiceName, "setArduinoPath", arduinoPath.getText());
       myService.send(boundServiceName, "openMrlComm");
     }
-    
-    if (o == uploadMrlComm){
+
+    if (o == uploadMrlComm) {
       myService.send(boundServiceName, "setArduinoPath", arduinoPath.getText());
       uploadResult.setText("Uploading Sketch");
-      myService.send(boundServiceName, "uploadSketch",arduinoPath.getText(),ports.getText(),boardType.getText());
+      myService.send(boundServiceName, "uploadSketch", arduinoPath.getText(), ports.getText(), boardType.getText());
     }
   }
 
@@ -364,13 +347,13 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
     subscribe("publishPin", "publishPin", Pin.class);
     // subscribe("publishVersion", "publishVersion", Integer.class);
     subscribe("publishState", "onState", Arduino.class);
-//    subscribe("getPortNames", "onPortNames", List.class);
+    // subscribe("getPortNames", "onPortNames", List.class);
     subscribe("getPorts", "getPorts", String.class);
     subscribe("onConnect", "onConnect", String.class);
     subscribe("onDisconnect", "onDisconnect", String.class);
     // subscribe("setBoard", "setBoard", String.class);
     // myService.send(boundServiceName, "broadcastState");
-    //send("getPortNames");
+    // send("getPortNames");
     send("publishState");
   }
 
@@ -386,7 +369,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
     unsubscribe("publishPin");
     unsubscribe("publishVersion");
     unsubscribe("publishState");
-    //unsubscribe("getPortNames", "getPortNames", ArrayList.class);
+    // unsubscribe("getPortNames", "getPortNames", ArrayList.class);
     unsubscribe("onConnect");
     unsubscribe("onDisconnect");
   }
@@ -427,7 +410,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
         }
 
         imageMap = new JLayeredPane();
- //        imageMap.setPreferredSize(size);
+        // imageMap.setPreferredSize(size);
         pinComponentList = new ArrayList<PinComponent>();
 
         // set correct arduino image
@@ -498,7 +481,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
       }
     });
   }
-  public void getMrlCommPanel(){
+
+  public void getMrlCommPanel() {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
@@ -512,41 +496,10 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
         mrlcommPanel.add(boardType);
         mrlcommPanel.add(uploadMrlComm);
         // mrlcommPanel.setPreferredSize(new Dimension(800, 600));
-        // mrlcommPanel.add(uploadResult); FIXME super long message makes gui unmanagble
+        // mrlcommPanel.add(uploadResult); FIXME super long message makes gui
+        // unmanagble
         localTabs.insertTab("mrlcomm", null, mrlcommPanel, "mrlcomm", 0);
-        localTabs.setTabComponentAt(0, new TabControl2(self,localTabs,mrlcommPanel,"mrlcomm"));
-      }
-    });
-  }
-
-  public void getEditorPanel() {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        // editor.setEnabled(false);
-        String resourcePath = "Arduino/MRLComm.c";
-        log.info(String.format("loadResourceFile %s", resourcePath));
-        String sketch = FileIO.resourceToString(resourcePath);
-
-        // editorPanel.add(editor, BorderLayout.CENTER);
-
-        editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_C);
-        editor.setCodeFoldingEnabled(true);
-        editor.setAntiAliasingEnabled(true);
-
-        editor.setText(sketch);
-
-        // editorScrollPane.setPreferredSize(new Dimension(800, 600));
-
-        localTabs.insertTab("mrlcomm", null, editorScrollPane, "mrlcomm", 0);
-        localTabs.setTabComponentAt(0, new TabControl2(self, localTabs, editorScrollPane, "mrlcomm"));
-        // myService.getFrame().pack();
-
-        DefaultCaret caret = (DefaultCaret) editor.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-        Cursor cursor = new Cursor(0);
-        editor.setCursor(cursor);
-        editor.setCaretPosition(0);
+        localTabs.setTabComponentAt(0, new TabControl2(self, localTabs, mrlcommPanel, "mrlcomm"));
       }
     });
   }
@@ -758,23 +711,21 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
             // send("getVersion");
             arduino.getBoardInfo();
           }
-          
+
           BoardInfo boardInfo = myArduino.getBoardInfo();
-          if (!boardInfo.isValid()){
-        	  version.setText("unkown");
+          if (!boardInfo.isValid()) {
+            version.setText("unkown");
           } else {
-        	  version.setText("" + boardInfo.getVersion());
+            version.setText("" + boardInfo.getVersion());
           }
-          
-          
+
           arduinoPath.setText(myArduino.getArduinoPath());
-          
+
           Serial serial = myArduino.getSerial();
-          
-          if (serial != null){
+
+          if (serial != null) {
             ports.setText(serial.getLastPortName());
           }
-          
 
           // update panels based on state change
           // TODO - check what state the panels are to see if a
@@ -793,7 +744,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
       @Override
       public void run() {
 
-        log.info("PinData:{}",pin);
+        log.info("PinData:{}", pin);
 
         if (!traceData.containsKey(pin.pin)) {
           TraceData td = new TraceData();
