@@ -381,7 +381,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     LoggingFactory.init(Level.INFO);
 
     Runtime.createAndStart("python", "Python");
-    Runtime.createAndStart("gui", "GUIService");
+    Runtime.createAndStart("gui", "GuiService");
     IntegratedMovement ik = (IntegratedMovement) Runtime.start("ik", "IntegratedMovement");
     Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
     arduino.connect("COM22");

@@ -50,7 +50,7 @@ public class InMoovHand extends Service implements LeapDataListener {
       arduino.digitalWrite(13, 1);
 
       InMoovHand rightHand = new InMoovHand("r01");
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "GuiService");
       rightHand.connect("COM15");
       rightHand.startService();
       Runtime.createAndStart("webgui", "WebGui");
@@ -61,7 +61,7 @@ public class InMoovHand extends Service implements LeapDataListener {
       rightHand.closePinch();
       rightHand.rest();
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * GuiService gui = new GuiService("gui"); gui.startService();
        */
 
     } catch (Exception e) {

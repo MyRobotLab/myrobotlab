@@ -79,7 +79,7 @@ public class MRLCommTest {
 		      Result result = junit.run(ArduinoTest.class);
 		      log.info("Result was: {}", result);
 		      // WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
-		      // ServiceInterface gui = Runtime.start("gui", "GUIService");
+		      // ServiceInterface gui = Runtime.start("gui", "GuiService");
 
 		      Runtime.dump();
 

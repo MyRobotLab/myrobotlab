@@ -287,11 +287,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
     ServiceType meta = new ServiceType(NeoPixel.class.getCanonicalName());
     meta.addDescription("Control a Neopixel hardware");
-    meta.setAvailable(true); // false if you do not want it viewable in a
-    // gui
-    // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
-    meta.addCategory("Neopixel, Control");
+    meta.setAvailable(true); // false if you do not want it viewable in a    
+    meta.addCategory("control","display");
     return meta;
   }
 
@@ -359,7 +356,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       //WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.autoStartBrowser(false);
       //webgui.startService();
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "GuiService");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.arduinoPath = "C:\\Program Files (x86)\\Arduino";

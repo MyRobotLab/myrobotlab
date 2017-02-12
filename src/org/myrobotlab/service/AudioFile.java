@@ -449,7 +449,7 @@ public class AudioFile extends Service {
         AudioFile player = new AudioFile("player");
         // player.playFile(filename, true);
         player.startService();
-        Runtime.createAndStart("gui", "GUIService");
+        Runtime.createAndStart("gui", "GuiService");
 
         joystick.setController(2);
         joystick.broadcastState();

@@ -67,7 +67,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 
 		try {
 			AdafruitIna219 adafruitINA219 = (AdafruitIna219) Runtime.start("AdafruitIna219", "AdafruitIna219");
-			Runtime.start("gui", "GUIService");
+			Runtime.start("gui", "GuiService");
 
 			byte msb = (byte)0x83;
 			byte lsb = (byte)0x00;
@@ -283,7 +283,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 
 		ServiceType meta = new ServiceType(AdafruitIna219.class.getCanonicalName());
 		meta.addDescription("Adafruit INA219 Voltage and Current sensor Service");
-		meta.addCategory("shield", "sensor");
+		meta.addCategory("shield", "sensor", "i2c");
 		meta.setSponsor("Mats");
 		return meta;
 	}

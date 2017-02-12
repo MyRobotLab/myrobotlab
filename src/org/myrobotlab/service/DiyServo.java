@@ -685,16 +685,22 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		try {
 			// Runtime.start("webgui", "WebGui");
-			Runtime.start("gui", "GUIService");
-			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			arduino.connect("COM3");
+			Runtime.start("gui", "GuiService");
+			Runtime.start("DiyServo", "DiyServo");
+			
+			boolean done = true;
+			if (done){
+			  return;
+			}
+			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			// arduino.connect("COM3");
 
-			Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
-			ads.setController(arduino, "1", "0x48");
+			// Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
+			// ads.setController(arduino, "1", "0x48");
 
 			DiyServo dyiServo = (DiyServo) Runtime.start("DiyServo", "DiyServo");
-			dyiServo.attach((ServoController)arduino);
-			dyiServo.attach((PinArrayControl) ads, 0); // PIN 14 = A0
+			// dyiServo.attach((ServoController)arduino);
+			// dyiServo.attach((PinArrayControl) ads, 0); // PIN 14 = A0
 
 			// Servo Servo = (Servo) Runtime.start("Servo", "Servo");
 
@@ -923,7 +929,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 
 		ServiceType meta = new ServiceType(DiyServo.class.getCanonicalName());
 		meta.addDescription("Controls a motor so that it can be used as a Servo");
-		meta.addCategory("motor", "control");
+		meta.addCategory("motor", "control", "servo");
 		meta.addPeer("Arduino", "Arduino", "MotorController");
 		meta.addPeer("Adafruit16CServoDriver", "Adafruit16CServoDriver", "MotorController");
 		meta.addPeer("Pid", "Pid", "PID service");

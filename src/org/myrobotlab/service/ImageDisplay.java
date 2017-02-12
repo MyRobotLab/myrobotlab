@@ -40,7 +40,7 @@ public class ImageDisplay extends Service {
       String path3 = "http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg";
 
       ImageDisplay imageDisplay = (ImageDisplay) Runtime.start("ImageDisplay", "ImageDisplay");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "GuiService");
       Runtime.start("python", "Python");
       // Runtime.start("webgui", "WebGui");
       imageDisplay.display("https://www.cloudflare.com/ssl/ssl.png");

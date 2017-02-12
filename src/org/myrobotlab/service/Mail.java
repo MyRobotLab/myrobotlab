@@ -41,7 +41,7 @@ public class Mail extends Service {
       Mail mail = new Mail("mail");
       mail.startService();
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * GuiService gui = new GuiService("gui"); gui.startService();
        */
     } catch (Exception e) {
       Logging.logError(e);

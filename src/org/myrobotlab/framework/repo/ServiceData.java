@@ -171,7 +171,7 @@ public class ServiceData implements Serializable {
             category = sd.categoryTypes.get(cat);
           } else {
             category = new Category();
-            category.name = category.name;
+            category.name = cat;
           }
           category.serviceTypes.add(serviceType.getName());
           sd.categoryTypes.put(cat, category);

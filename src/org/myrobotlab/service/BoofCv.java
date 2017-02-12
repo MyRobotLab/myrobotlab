@@ -42,7 +42,7 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
     // add dependency if necessary
     meta.addDependency("net.sourceforge.boofcv", "0.23");
     meta.addDependency("pl.sarxos.webcam", "0.3.10");
-    meta.addCategory("general");
+    meta.addCategory("vision", "video");
     return meta;
   }
 
@@ -80,7 +80,7 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
       app.process();
 
       // BoofCV template = (BoofCV) Runtime.start("template", "BoofCV");
-      // Runtime.start("gui", "GUIService");
+      // Runtime.start("gui", "GuiService");
     } catch (Exception e) {
       Logging.logError(e);
     }
