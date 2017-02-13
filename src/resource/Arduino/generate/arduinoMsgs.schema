@@ -113,7 +113,7 @@
 # > servoWriteMicroseconds/deviceId/b16 ms
 > servoSetAcceleration/deviceId/b16 acceleration
 # not used as originally intended - as event information
-< publishServoEvent/deviceId/eventType/currentPos/targetPos
+< publishServoEvent/deviceId/eventType/b16 currentPos/b16 targetPos
 
 # Serial - for relaying serial data to a different pin
 # I suspect this should model the same pattern as Servo

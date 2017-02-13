@@ -1,4 +1,3 @@
-#include <Wire.h>
 /**
  * <pre>
  *
@@ -209,14 +208,14 @@ void Msg::publishPinArray(const byte* data,  byte dataSize) {
   reset();
 }
 
-void Msg::publishServoEvent( byte deviceId,  byte eventType,  byte currentPos,  byte targetPos) {
+void Msg::publishServoEvent( byte deviceId,  byte eventType,  int currentPos,  int targetPos) {
   write(MAGIC_NUMBER);
-  write(1 + 1 + 1 + 1 + 1); // size
+  write(1 + 1 + 1 + 2 + 2); // size
   write(PUBLISH_SERVO_EVENT); // msgType = 40
   write(deviceId);
   write(eventType);
-  write(currentPos);
-  write(targetPos);
+  writeb16(currentPos);
+  writeb16(targetPos);
   flush();
   reset();
 }
@@ -647,7 +646,7 @@ bool Msg::readMsg() {
 			// if received header + msg
 			if (byteCount == 2 + msgSize) {
 				// we've reach the end of the command, just return true .. we've got it
- 			byteCount = 0;
+				byteCount = 0;
 				return true;
 			}
 		}
@@ -720,20 +719,9 @@ void Msg::flush() {
 	return serial->flush();
 }
 
-#if defined(ESP8266)
-void Msg::begin(WebSocketsServer& wsServer){
-  serial = new MrlWS(wsServer);
-}
-
-void Msg::webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t lenght) {
-  serial->webSocketEvent(num, type, payload, lenght);
-}
-#else
 void Msg::begin(HardwareSerial& hardwareSerial){
-  serial = &hardwareSerial;
+	serial = &hardwareSerial;
 }
-
-#endif
 
 byte Msg::getMethod(){
 	return ioCmd[0];

@@ -204,7 +204,7 @@ public class DHRobotArm {
     // we know where we are.. we know where we want to go.
     int numSteps = 0;
     double iterStep = 0.25;
-    double errorThreshold = 0.5;
+    double errorThreshold = 0.05;
     // what's the current point
     while (true) {
       numSteps++;

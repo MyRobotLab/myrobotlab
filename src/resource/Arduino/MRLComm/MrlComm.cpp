@@ -523,3 +523,7 @@ unsigned int MrlComm::getCustomMsg() {
   boardStatusEnabled = false;
  }
 
+ void MrlComm::sendCustomMsg(const byte* customMsg, byte size) {
+  msg->publishCustomMsg(customMsg, size);
+ }
+

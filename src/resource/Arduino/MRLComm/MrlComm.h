@@ -158,6 +158,7 @@ public:
     void begin(HardwareSerial& serial);
     bool readMsg();
     void onDisconnect();
+    void sendCustomMsg(const byte* msg, byte size);
 #if defined(ESP8266)
     void begin(WebSocketsServer& wsServer);
     void webSocketEvent(unsigned char num, WStype_t type, unsigned char* payload, unsigned int lenght);

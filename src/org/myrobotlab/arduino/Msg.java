@@ -63,7 +63,7 @@ public class Msg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 54;
+	public static final int MRLCOMM_VERSION = 55;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -183,7 +183,7 @@ public class Msg {
 	public final static int SERVO_MOVE_TO_MICROSECONDS = 38;
 	// > servoSetAcceleration/deviceId/b16 acceleration
 	public final static int SERVO_SET_ACCELERATION = 39;
-	// < publishServoEvent/deviceId/eventType/currentPos/targetPos
+	// < publishServoEvent/deviceId/eventType/b16 currentPos/b16 targetPos
 	public final static int PUBLISH_SERVO_EVENT = 40;
 	// > serialAttach/deviceId/relayPin
 	public final static int SERIAL_ATTACH = 41;
@@ -213,7 +213,7 @@ public class Msg {
 	// public void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/){}
 	// public void publishDebug(String debugMsg/*str*/){}
 	// public void publishPinArray(int[] data/*[]*/){}
-	// public void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*byte*/, Integer targetPos/*byte*/){}
+	// public void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/){}
 	// public void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/){}
 	// public void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/){}
 	
@@ -473,10 +473,10 @@ public class Msg {
 			startPos += 1;
 			Integer eventType = ioCmd[startPos+1]; // bu8
 			startPos += 1;
-			Integer currentPos = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			Integer targetPos = ioCmd[startPos+1]; // bu8
-			startPos += 1;
+			Integer currentPos = b16(ioCmd, startPos+1);
+			startPos += 2; //b16
+			Integer targetPos = b16(ioCmd, startPos+1);
+			startPos += 2; //b16
 			if(invoke){
 				arduino.invoke("publishServoEvent",  deviceId,  eventType,  currentPos,  targetPos);
 			} else { 
@@ -558,7 +558,7 @@ public class Msg {
 
 	// Java-land --to--> MrlComm
 
-	public void getBoardInfo() {
+	public synchronized void getBoardInfo() {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -584,7 +584,7 @@ public class Msg {
 	  }
 	}
 
-	public void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
+	public synchronized void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -619,7 +619,7 @@ public class Msg {
 	  }
 	}
 
-	public void setDebug(Boolean enabled/*bool*/) {
+	public synchronized void setDebug(Boolean enabled/*bool*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -648,7 +648,7 @@ public class Msg {
 	  }
 	}
 
-	public void setSerialRate(Integer rate/*b32*/) {
+	public synchronized void setSerialRate(Integer rate/*b32*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -677,7 +677,7 @@ public class Msg {
 	  }
 	}
 
-	public void softReset() {
+	public synchronized void softReset() {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -703,7 +703,7 @@ public class Msg {
 	  }
 	}
 
-	public void enableAck(Boolean enabled/*bool*/) {
+	public synchronized void enableAck(Boolean enabled/*bool*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -732,7 +732,7 @@ public class Msg {
 	  }
 	}
 
-	public void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
+	public synchronized void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -767,7 +767,7 @@ public class Msg {
 	  }
 	}
 
-	public void customMsg(int[] msg/*[]*/) {
+	public synchronized void customMsg(int[] msg/*[]*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -796,7 +796,7 @@ public class Msg {
 	  }
 	}
 
-	public void deviceDetach(Integer deviceId/*byte*/) {
+	public synchronized void deviceDetach(Integer deviceId/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -825,7 +825,7 @@ public class Msg {
 	  }
 	}
 
-	public void i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
+	public synchronized void i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -857,7 +857,7 @@ public class Msg {
 	  }
 	}
 
-	public void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
+	public synchronized void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -892,7 +892,7 @@ public class Msg {
 	  }
 	}
 
-	public void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
+	public synchronized void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -927,7 +927,7 @@ public class Msg {
 	  }
 	}
 
-	public void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
+	public synchronized void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -965,7 +965,7 @@ public class Msg {
 	  }
 	}
 
-	public void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
+	public synchronized void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1000,7 +1000,7 @@ public class Msg {
 	  }
 	}
 
-	public void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
+	public synchronized void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1044,7 +1044,7 @@ public class Msg {
 	  }
 	}
 
-	public void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
+	public synchronized void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1076,7 +1076,7 @@ public class Msg {
 	  }
 	}
 
-	public void analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
+	public synchronized void analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1108,7 +1108,7 @@ public class Msg {
 	  }
 	}
 
-	public void digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
+	public synchronized void digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1140,7 +1140,7 @@ public class Msg {
 	  }
 	}
 
-	public void disablePin(Integer pin/*byte*/) {
+	public synchronized void disablePin(Integer pin/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1169,7 +1169,7 @@ public class Msg {
 	  }
 	}
 
-	public void disablePins() {
+	public synchronized void disablePins() {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1195,7 +1195,7 @@ public class Msg {
 	  }
 	}
 
-	public void pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
+	public synchronized void pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1227,7 +1227,7 @@ public class Msg {
 	  }
 	}
 
-	public void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
+	public synchronized void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1259,7 +1259,7 @@ public class Msg {
 	  }
 	}
 
-	public void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
+	public synchronized void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1291,7 +1291,7 @@ public class Msg {
 	  }
 	}
 
-	public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
+	public synchronized void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1332,7 +1332,7 @@ public class Msg {
 	  }
 	}
 
-	public void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
+	public synchronized void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1364,7 +1364,7 @@ public class Msg {
 	  }
 	}
 
-	public void servoDetachPin(Integer deviceId/*byte*/) {
+	public synchronized void servoDetachPin(Integer deviceId/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1393,7 +1393,7 @@ public class Msg {
 	  }
 	}
 
-	public void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
+	public synchronized void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1425,7 +1425,7 @@ public class Msg {
 	  }
 	}
 
-	public void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
+	public synchronized void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1463,7 +1463,7 @@ public class Msg {
 	  }
 	}
 
-	public void servoSweepStop(Integer deviceId/*byte*/) {
+	public synchronized void servoSweepStop(Integer deviceId/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1492,7 +1492,7 @@ public class Msg {
 	  }
 	}
 
-	public void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
+	public synchronized void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1524,7 +1524,7 @@ public class Msg {
 	  }
 	}
 
-	public void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
+	public synchronized void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1556,7 +1556,7 @@ public class Msg {
 	  }
 	}
 
-	public void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
+	public synchronized void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1588,7 +1588,7 @@ public class Msg {
 	  }
 	}
 
-	public void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
+	public synchronized void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1620,7 +1620,7 @@ public class Msg {
 	  }
 	}
 
-	public void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
+	public synchronized void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1655,7 +1655,7 @@ public class Msg {
 	  }
 	}
 
-	public void ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
+	public synchronized void ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1684,7 +1684,7 @@ public class Msg {
 	  }
 	}
 
-	public void ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
+	public synchronized void ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();

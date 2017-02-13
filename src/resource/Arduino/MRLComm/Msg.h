@@ -31,9 +31,6 @@
 
 #include <Arduino.h>
 #include "ArduinoMsgCodec.h"
-#if defined(ESP8266)
-  #include "MrlWS.h"
-#endif
 
 // forward defines to break circular dependency
 class MrlComm;
@@ -54,11 +51,7 @@ private:
 	byte sendBuffer[MAX_MSG_SIZE];
 
 	// serial references
-#ifndef ESP8266
 	HardwareSerial* serial;
-#else
-  MrlWS* serial;
-#endif
 
 	// heartbeat
 	bool heartbeat;
@@ -107,7 +100,7 @@ public:
 	void publishI2cData( byte deviceId, const byte* data,  byte dataSize);
 	void publishDebug(const char* debugMsg,  byte debugMsgSize);
 	void publishPinArray(const byte* data,  byte dataSize);
-	void publishServoEvent( byte deviceId,  byte eventType,  byte currentPos,  byte targetPos);
+	void publishServoEvent( byte deviceId,  byte eventType,  int currentPos,  int targetPos);
 	void publishSerialData( byte deviceId, const byte* data,  byte dataSize);
 	void publishUltrasonicSensorData( byte deviceId,  int echoTime);
 
@@ -116,6 +109,7 @@ public:
 	void processCommand();
 
 	// io
+	void begin(HardwareSerial& hardwareSerial);
 	void write(const unsigned char value);
 	void writebool(const bool value);
 	void writeb16(const int value);
@@ -125,12 +119,7 @@ public:
 	void write(const unsigned char* buffer, int len);
 	bool readMsg();
 	byte getMethod();
-#if defined(ESP8266)
-  void begin(WebSocketsServer& wsServer);
-  void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t lenght);
-#else
-  void begin(HardwareSerial& hardwareSerial);
-#endif
+
 };
 
 #endif // Mrl_h
