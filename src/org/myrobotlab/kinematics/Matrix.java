@@ -218,12 +218,12 @@ public class Matrix {
    * @return a new matrix which is equal to the product of this*m
    */
   public Matrix multiply(Matrix m) {
+    Matrix ret = new Matrix(numRows, m.numCols);
     if (numCols != m.numRows) {
       System.out.println("dimensions bad in multiply()");
-      return null;
+      return ret;
     }
 
-    Matrix ret = new Matrix(numRows, m.numCols);
 
     for (int r = 0; r < numRows; r++)
       for (int c = 0; c < m.numCols; c++) {

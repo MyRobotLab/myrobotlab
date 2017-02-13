@@ -221,9 +221,12 @@ public class Servo extends Service implements ServoControl {
 	
 	
 	
-  class IKData {
-    String name;
-    Double pos;
+  public class IKData {
+    public String name;
+    public Double pos;
+		public Integer state;
+		public double velocity;
+		public Double targetPos;
   }
 
   public Servo(String n) {
@@ -886,10 +889,10 @@ public class Servo extends Service implements ServoControl {
     this.autoAttach = autoAttach;
   }
 
-  public Integer microsecondsToDegree(double microseconds) {
+  public double microsecondsToDegree(int microseconds) {
     if (microseconds <= 180)
-      return (int) microseconds;
-    return (int) ((microseconds - 544) * 180 / (2400 - 544));
+      return microseconds;
+    return (double)(microseconds - 544) * 180 / (2400 - 544);
   }
 
   public void autoDetach() {
@@ -940,8 +943,9 @@ public class Servo extends Service implements ServoControl {
 		return moving;
 	}
 
-	public void onServoEvent(Integer eventType, Integer currentPos, Integer targetPos) {
-		currentPosInput = mapper.calcInput(currentPos.doubleValue());
+	public void onServoEvent(Integer eventType, Integer currentPosUs, Integer targetPos) {
+		double currentPos = microsecondsToDegree(currentPosUs);
+		currentPosInput = mapper.calcInput(currentPos);
 		if (isEventsEnabled) {
 			invoke("publishServoEvent", currentPosInput);
 		}
@@ -949,6 +953,9 @@ public class Servo extends Service implements ServoControl {
 			IKData data = new IKData();
 			data.name = getName();
 			data.pos = currentPosInput;
+			data.state = eventType;
+			data.velocity = velocity;
+			data.targetPos = this.targetPos;
 			invoke("publishIKServoEvent", data);
 		}
 		if (eventType == SERVO_EVENT_STOPPED && autoAttach && isPinAttached()) {
@@ -964,4 +971,10 @@ public class Servo extends Service implements ServoControl {
 		}
 	}
   
+	public void onIMAngles(Object[] data) {
+		String name = (String)data[0];
+		if (name.equals(this.getName())) {
+			moveTo((double)data[1]);
+		}
+	}
 }

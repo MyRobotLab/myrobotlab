@@ -783,7 +783,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   	for (DHRobotArm a : arms.values()) {
 	    for (DHLink l: a.getLinks()) {
 	      if (l.getName().equals(data.name)){
-	        l.addPositionValue(data.pos.doubleValue());
+	        l.addPositionValue(data.pos);
 	      }
 	    }
     }

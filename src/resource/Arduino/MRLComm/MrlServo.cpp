@@ -81,7 +81,7 @@ void MrlServo::update() {
       if ((step > 0.0 && (int)currentPosUs > targetPosUs) || (step < 0.0 && (int)currentPosUs < targetPosUs)) {
         currentPosUs = targetPosUs;
       }
-      if (previousCurrentPosUs != (int)currentPosUs) {
+      if (!(previousCurrentPosUs == (int)currentPosUs)) {
         servo->writeMicroseconds((int)currentPosUs);
         if ((int)currentPosUs == targetPosUs) {
           publishServoEvent(SERVO_EVENT_STOPPED);

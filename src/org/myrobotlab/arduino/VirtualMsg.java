@@ -63,7 +63,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 54;
+	public static final int MRLCOMM_VERSION = 55;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -183,7 +183,7 @@ public class VirtualMsg {
 	public final static int SERVO_MOVE_TO_MICROSECONDS = 38;
 	// > servoSetAcceleration/deviceId/b16 acceleration
 	public final static int SERVO_SET_ACCELERATION = 39;
-	// < publishServoEvent/deviceId/eventType/currentPos/targetPos
+	// < publishServoEvent/deviceId/eventType/b16 currentPos/b16 targetPos
 	public final static int PUBLISH_SERVO_EVENT = 40;
 	// > serialAttach/deviceId/relayPin
 	public final static int SERIAL_ATTACH = 41;
@@ -734,7 +734,7 @@ public class VirtualMsg {
 
 	// Java-land --to--> MrlComm
 
-	public void publishMRLCommError(String errorMsg/*str*/) {
+	public synchronized void publishMRLCommError(String errorMsg/*str*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -763,7 +763,7 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
+	public synchronized void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -807,7 +807,7 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishAck(Integer function/*byte*/) {
+	public synchronized void publishAck(Integer function/*byte*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -836,7 +836,7 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
+	public synchronized void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -871,7 +871,7 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishCustomMsg(int[] msg/*[]*/) {
+	public synchronized void publishCustomMsg(int[] msg/*[]*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -900,7 +900,7 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+	public synchronized void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -932,7 +932,7 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishDebug(String debugMsg/*str*/) {
+	public synchronized void publishDebug(String debugMsg/*str*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -961,7 +961,7 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishPinArray(int[] data/*[]*/) {
+	public synchronized void publishPinArray(int[] data/*[]*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -990,18 +990,18 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*byte*/, Integer targetPos/*byte*/) {
+	public synchronized void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 1 + 1); // size
+			write(1 + 1 + 1 + 2 + 2); // size
 			write(PUBLISH_SERVO_EVENT); // msgType = 40
 			write(deviceId);
 			write(eventType);
-			write(currentPos);
-			write(targetPos);
+			writeb16(currentPos);
+			writeb16(targetPos);
  
      if (ackEnabled){
        // we just wrote - block threads sending
@@ -1028,7 +1028,7 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+	public synchronized void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1060,7 +1060,7 @@ public class VirtualMsg {
 	  }
 	}
 
-	public void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
+	public synchronized void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();

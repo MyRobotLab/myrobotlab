@@ -31,6 +31,7 @@ import java.util.Random;
  *
  */
 
+
 public class GeneticAlgorithm {
 
   double recombinationRate = 0.7;
@@ -48,6 +49,18 @@ public class GeneticAlgorithm {
     this.geneSize = geneSize;
     this.geneticClass = geneticClass;
     for (int i = 0; i < populationSize; i++) {
+      Chromosome chromo = new Chromosome(genomeSize * geneSize);
+      chromosomes.add(chromo);
+    }
+  }
+  
+  public GeneticAlgorithm(Genetic geneticClass, int genomeSize, GeneticParameters param) {
+  	populationPoolSize = param.getGeneticPoolSize();
+  	recombinationRate = param.getGeneticRecombinationRate();
+  	mutationRate = param.getGeneticMutationRate();
+  	geneSize = genomeSize;
+  	this.geneticClass = geneticClass;
+    for (int i = 0; i < populationPoolSize; i++) {
       Chromosome chromo = new Chromosome(genomeSize * geneSize);
       chromosomes.add(chromo);
     }

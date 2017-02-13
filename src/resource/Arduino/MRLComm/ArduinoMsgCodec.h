@@ -9,7 +9,7 @@
  * 							src\resource\Arduino\generate\ArduinoMsgCodec.template.h
  */
 
-#define MRLCOMM_VERSION			54
+#define MRLCOMM_VERSION			55
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
@@ -102,7 +102,7 @@
 #define SERVO_MOVE_TO_MICROSECONDS 38
 // > servoSetAcceleration/deviceId/b16 acceleration
 #define SERVO_SET_ACCELERATION 39
-// < publishServoEvent/deviceId/eventType/currentPos/targetPos
+// < publishServoEvent/deviceId/eventType/b16 currentPos/b16 targetPos
 #define PUBLISH_SERVO_EVENT 40
 // > serialAttach/deviceId/relayPin
 #define SERIAL_ATTACH 41
@@ -130,7 +130,6 @@
 #define BOARD_TYPE_ID_MEGA_ADK	3
 #define BOARD_TYPE_ID_NANO     	4
 #define BOARD_TYPE_ID_PRO_MINI	5
-#define BOARD_TYPE_ID_ESP8266   6
 
 #if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
   #define BOARD BOARD_TYPE_ID_MEGA
@@ -142,9 +141,6 @@
   #define BOARD BOARD_TYPE_ID_NANO
 #elif defined(ARDUINO_AVR_PRO)
   #define BOARD BOARD_TYPE_ID_PRO_MINI
-#elif defined(ARDUINO_ESP8266_ESP12) 
-  #define BOARD BOARD_TYPE_ID_ESP8266
-  //#define ESP8266
 #else
   #define BOARD BOARD_TYPE_ID_UNKNOWN
 #endif

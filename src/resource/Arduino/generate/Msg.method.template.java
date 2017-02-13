@@ -1,5 +1,5 @@
 
-	public void %name%(%javaMethodParameters%) {
+	public synchronized void %name%(%javaMethodParameters%) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
