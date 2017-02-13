@@ -40,7 +40,6 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.motor.MotorConfigDualPwm;
 import org.myrobotlab.motor.MotorConfigSimpleH;
-import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -78,7 +77,7 @@ import org.slf4j.Logger;
  *         analog feedback.
  */
 
-public class DiyServo extends Service implements ServoControl, MotorControl, PinListener {
+public class DiyServo extends Service implements ServoControl, PinListener {
 
 	/**
 	 * Sweeper
@@ -832,25 +831,10 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		broadcastState();
 	}
 
-	@Override
-	public double getPowerLevel() {
-		return powerLevel;
-	}
-
-	@Override
 	public void setPowerLevel(double power) {
 		this.powerLevel = power;
 	}
 
-	@Override
-	public double getPowerOutput() {
-		return powerMap.calcOutput(powerLevel);
-	}
-
-	@Override
-	public double getTargetPos() {
-		return targetPos;
-	}
 
 	/**
 	 * // A bunch of unimplemented methods from ServoControl and MotorControl.
@@ -871,42 +855,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 
 	@Override
 	public void attach(ServoController controller, int pin) throws Exception {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void lock() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void move(double power) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void moveTo(double newPos, Double power) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setEncoder(Encoder encoder) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void stopAndLock() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void unlock() {
 		// TODO Auto-generated method stub
 
 	}
@@ -953,10 +901,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		return this.controller == controller;
 	}
 
-	@Override
-	public boolean isAttached(MotorController controller) {
-		return this.controller == controller;
-	}
 
   @Override
   public boolean isAttached(String name) {
