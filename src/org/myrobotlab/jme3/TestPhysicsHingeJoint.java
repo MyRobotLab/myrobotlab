@@ -25,8 +25,8 @@ public class TestPhysicsHingeJoint extends SimpleApplication implements AnalogLi
   private void setupKeys() {
       inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_H));
       inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_K));
-      inputManager.addMapping("Swing", new KeyTrigger(KeyInput.KEY_SPACE));
-      inputManager.addListener(this, "Left", "Right", "Swing");
+      inputManager.addMapping("SwingGui", new KeyTrigger(KeyInput.KEY_SPACE));
+      inputManager.addListener(this, "Left", "Right", "SwingGui");
   }
 
   public void onAnalog(String binding, float value, float tpf) {
@@ -36,7 +36,7 @@ public class TestPhysicsHingeJoint extends SimpleApplication implements AnalogLi
       else if(binding.equals("Right")){
           joint.enableMotor(true, -1, .1f);
       }
-      else if(binding.equals("Swing")){
+      else if(binding.equals("SwingGui")){
           joint.enableMotor(false, 0, 0);
       }
   }

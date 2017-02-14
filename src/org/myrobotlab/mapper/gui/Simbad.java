@@ -141,7 +141,7 @@ public class Simbad extends JFrame implements ActionListener {
       return null;
   }
 
-  /** Create the main GUIService. Only called once. */
+  /** Create the main SwingGui. Only called once. */
   private void createGUI() {
     desktop.setFocusable(true);
     getContentPane().add(desktop);
@@ -151,7 +151,7 @@ public class Simbad extends JFrame implements ActionListener {
   }
 
   /**
-   * Creates the windows as Swing InternalFrames
+   * Creates the windows as SwingGui InternalFrames
    */
   private void createInternalFrames() {
     worldWindow = new WorldWindow(world);

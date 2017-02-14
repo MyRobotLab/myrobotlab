@@ -11,7 +11,7 @@ import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
-public interface ServiceInterface extends ServiceQueue, LoggingSink, NameProvider, MessageSubscriber, MessageSender {
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender {
 
   /**
    * this is a local method which adds a request from some foreign service with

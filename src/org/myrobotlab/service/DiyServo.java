@@ -40,7 +40,6 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.motor.MotorConfigDualPwm;
 import org.myrobotlab.motor.MotorConfigSimpleH;
-import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -78,7 +77,7 @@ import org.slf4j.Logger;
  *         analog feedback.
  */
 
-public class DiyServo extends Service implements ServoControl, MotorControl, PinListener {
+public class DiyServo extends Service implements ServoControl, PinListener {
 
 	/**
 	 * Sweeper
@@ -685,16 +684,22 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		try {
 			// Runtime.start("webgui", "WebGui");
-			Runtime.start("gui", "GUIService");
-			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			arduino.connect("COM3");
+			Runtime.start("gui", "SwingGui");
+			Runtime.start("DiyServo", "DiyServo");
+			
+			boolean done = true;
+			if (done){
+			  return;
+			}
+			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			// arduino.connect("COM3");
 
-			Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
-			ads.setController(arduino, "1", "0x48");
+			// Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
+			// ads.setController(arduino, "1", "0x48");
 
 			DiyServo dyiServo = (DiyServo) Runtime.start("DiyServo", "DiyServo");
-			dyiServo.attach((ServoController)arduino);
-			dyiServo.attach((PinArrayControl) ads, 0); // PIN 14 = A0
+			// dyiServo.attach((ServoController)arduino);
+			// dyiServo.attach((PinArrayControl) ads, 0); // PIN 14 = A0
 
 			// Servo Servo = (Servo) Runtime.start("Servo", "Servo");
 
@@ -826,25 +831,10 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		broadcastState();
 	}
 
-	@Override
-	public double getPowerLevel() {
-		return powerLevel;
-	}
-
-	@Override
 	public void setPowerLevel(double power) {
 		this.powerLevel = power;
 	}
 
-	@Override
-	public double getPowerOutput() {
-		return powerMap.calcOutput(powerLevel);
-	}
-
-	@Override
-	public double getTargetPos() {
-		return targetPos;
-	}
 
 	/**
 	 * // A bunch of unimplemented methods from ServoControl and MotorControl.
@@ -870,42 +860,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 	}
 
 	@Override
-	public void lock() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void move(double power) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void moveTo(double newPos, Double power) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setEncoder(Encoder encoder) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void stopAndLock() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void unlock() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void setSpeed(double speed) {
 		log.error("speed is depreciated, use setVelocity instead");
 
@@ -923,7 +877,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 
 		ServiceType meta = new ServiceType(DiyServo.class.getCanonicalName());
 		meta.addDescription("Controls a motor so that it can be used as a Servo");
-		meta.addCategory("motor", "control");
+		meta.addCategory("motor", "control", "servo");
 		meta.addPeer("Arduino", "Arduino", "MotorController");
 		meta.addPeer("Adafruit16CServoDriver", "Adafruit16CServoDriver", "MotorController");
 		meta.addPeer("Pid", "Pid", "PID service");
@@ -947,10 +901,6 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 		return this.controller == controller;
 	}
 
-	@Override
-	public boolean isAttached(MotorController controller) {
-		return this.controller == controller;
-	}
 
   @Override
   public boolean isAttached(String name) {

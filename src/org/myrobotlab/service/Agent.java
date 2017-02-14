@@ -155,13 +155,12 @@ public class Agent extends Service {
 	static boolean checkRemoteVersions = false;
 
 	static String latestRemote;
-
 	
 	static Agent agent;
 
 	public Agent(String n) {
 		super(n);
-		log.info("Agent {} Pid {} is alive", n, Runtime.getPid());
+		log.info("Agent {} Pid {} is alive", n, Runtime.getInstance().getPid());
 		agentJVMArgs = Runtime.getJVMArgs();
 		if (currentBranch == null) {
 			currentBranch = platform.getBranch();

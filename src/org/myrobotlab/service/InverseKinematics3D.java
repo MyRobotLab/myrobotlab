@@ -245,7 +245,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     LoggingFactory.getInstance().setLevel(Level.INFO);
 
     Runtime.createAndStart("python", "Python");
-    Runtime.createAndStart("gui", "GUIService");
+    Runtime.createAndStart("gui", "SwingGui");
 
     InverseKinematics3D inversekinematics = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
     // InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
@@ -291,7 +291,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       inversekinematics.addListener("publishJointAngles", leftArm.getName(), "onJointAngles");
     }
 
-    // Runtime.createAndStart("gui", "GUIService");
+    // Runtime.createAndStart("gui", "SwingGui");
     // OpenCV cv1 = (OpenCV)Runtime.createAndStart("cv1", "OpenCV");
     // OpenCVFilterAffine aff1 = new OpenCVFilterAffine("aff1");
     // aff1.setAngle(270);
@@ -304,7 +304,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     // cv1.undockDisplay(true);
 
     /*
-     * GUIService gui = new GUIService("gui"); gui.startService();
+     * SwingGui gui = new SwingGui("gui"); gui.startService();
      */
 
     Joystick joystick = (Joystick) Runtime.start("joystick", "Joystick");

@@ -34,7 +34,7 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     try {
 
       AzureTranslator translator = (AzureTranslator) Runtime.start("translator", "AzureTranslator");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
       log.info("Translator service instance: {}", translator);
 
     } catch (Exception e) {

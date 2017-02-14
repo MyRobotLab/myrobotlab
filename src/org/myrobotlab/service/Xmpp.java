@@ -482,7 +482,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
       Xmpp xmpp1 = (Xmpp) Runtime.createAndStart("xmpp", "Xmpp");
       // Runtime.start(String.format("clock%d", i), "Clock");
-      // Runtime.start("gui", "GUIService");
+      // Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
       // HMMM is fully qualified name important ???
       // grog.robot01@myrobotlab.org vs grog.robot01 ???

@@ -285,7 +285,7 @@ public class TestCatcher extends Service implements SerialDataListener {
     try {
 
       Runtime.start("c01", "TestCatcher");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
 
       /*
        * TestThrower thrower = new TestThrower("thrower");

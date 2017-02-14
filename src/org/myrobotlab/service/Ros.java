@@ -20,7 +20,7 @@ public class Ros extends Service {
       Ros ros = new Ros("ros");
       ros.startService();
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
 
     } catch (Exception e) {

@@ -1110,8 +1110,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
 	public static void main(String[] args) {
 
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+		LoggingFactory.init(Level.INFO);
 
 		// TODO - test blocking / non blocking / time-out blocking / reading an
 		// array (or don't bother?) or do with length? num bytes to block or
@@ -1132,17 +1131,22 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 		try {
 
 			Serial serial = (Serial) Runtime.start("serial", "Serial");
+			// Runtime.start("arduino", "Arduino");
+			Runtime.start("gui", "SwingGui");
+			
+			 boolean done = true;
+	      if (done) {
+	        return;
+	      }
+
+	      
 			Runtime.start("python", "Python");
 			Runtime.start("webgui", "WebGui");
 
-			boolean done = true;
-			if (done) {
-				return;
-			}
-
+		
 			int timeout = 500;// 500 ms serial timeout
 
-			// Runtime.start("gui", "GUIService");
+			// Runtime.start("gui", "SwingGui");
 			// Runtime.start("webgui", "WebGui");
 
 			// get serial handle and creates a uart & virtual null modem cable

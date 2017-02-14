@@ -39,9 +39,9 @@ public class TesseractOcr extends Service {
       TesseractOcr tesseract = new TesseractOcr("tesseract");
       tesseract.startService();
 
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
     } catch (Exception e) {
       Logging.logError(e);

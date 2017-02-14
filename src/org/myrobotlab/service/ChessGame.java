@@ -55,7 +55,7 @@ public class ChessGame extends Service {
     try {
       Runtime.start("chessgame", "ChessGame");
       Runtime.start("python", "Python");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
     } catch (Exception e) {
       Logging.logError(e);
     }

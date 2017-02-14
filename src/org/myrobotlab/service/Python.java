@@ -412,7 +412,7 @@ public class Python extends Service {
 	/**
 	 * runs the pythonConsole.py script which creates a Python Console object
 	 * and redirect stdout & stderr to published data - these are hooked by the
-	 * GUIService
+	 * SwingGui
 	 */
 	public void attachPythonConsole() {
 		if (!pythonConsoleInitialized) {
@@ -597,6 +597,9 @@ public class Python extends Service {
 		exec(script);
 	}
 
+	/**
+	 * publishing method when a script is finished
+	 */
 	public void finishedExecutingScript() {
 	}
 
@@ -667,9 +670,9 @@ public class Python extends Service {
 
 	/**
 	 * this method can be used to load a Python script from the Python's local
-	 * file system, which may not be the GUIService's local system. Because it
+	 * file system, which may not be the SwingGui's local system. Because it
 	 * can be done programatically on a different machine we want to broadcast
-	 * our changed state to other listeners (possibly the GUIService)
+	 * our changed state to other listeners (possibly the SwingGui)
 	 * 
 	 * @param filename
 	 *            - name of file to load
@@ -819,12 +822,12 @@ public class Python extends Service {
 
 		try {
 
-			// Runtime.start("gui", "GUIService");
+			// Runtime.start("gui", "SwingGui");
 			// String f = "C:\\Program Files\\blah.1.py";
 			// log.info(getName(f));
 			Runtime.start("python", "Python");
 			Runtime.start("webgui", "WebGui");
-			Runtime.start("gui", "GUIService");
+			Runtime.start("gui", "SwingGui");
 
 			// python.error("this is an error");
 			// python.loadScriptFromResource("VirtualDevice/Arduino.py");
@@ -842,7 +845,7 @@ public class Python extends Service {
 			 * ObjectInputStream in = new ObjectInputStream(fis); Object x =
 			 * in.readObject(); in.close();
 			 * 
-			 * Runtime.createAndStart("gui", "GUIService");
+			 * Runtime.createAndStart("gui", "SwingGui");
 			 */
 
 		} catch (Exception e) {
