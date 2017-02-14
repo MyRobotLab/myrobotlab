@@ -27,7 +27,7 @@ public class ChessGameManager extends Service {
 
       Runtime.start("chessgame", "ChessGameManager");
 
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

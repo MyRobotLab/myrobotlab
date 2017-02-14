@@ -32,9 +32,9 @@ public class InverseKinematics extends Service {
     inversekinematics.setPoint(200, 200, 200);
     inversekinematics.compute();
 
-    Runtime.createAndStart("gui", "GUIService");
+    Runtime.createAndStart("gui", "SwingGui");
     /*
-     * GUIService gui = new GUIService("gui"); gui.startService();
+     * SwingGui gui = new SwingGui("gui"); gui.startService();
      */
   }
 

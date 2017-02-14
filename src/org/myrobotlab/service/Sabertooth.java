@@ -402,14 +402,14 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 
 			// Motor m2 = (Motor) Runtime.createAndStart("m2", "Motor");
 
-			// Runtime.start("gui", "GUIService");
+			// Runtime.start("gui", "SwingGui");
 			Runtime.start("webgui", "WebGui");
 			Runtime.start("motor", "Motor");
 
 			saber.driveForwardMotor1(100);
 
 			/*
-			 * GUIService gui = new GUIService("gui"); gui.startService();
+			 * SwingGui gui = new SwingGui("gui"); gui.startService();
 			 */
 		} catch (Exception e) {
 			Logging.logError(e);

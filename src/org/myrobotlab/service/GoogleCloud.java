@@ -299,7 +299,7 @@ public class GoogleCloud extends Service {
       // LoggingFactory.getInstance().setLevel(Level.INFO);
 
       GoogleCloud google = (GoogleCloud) Runtime.start("google", "GoogleCloud");
-      // Runtime.start("gui", "GUIService");
+      // Runtime.start("gui", "SwingGui");
 
       if (args.length != 2) {
         System.err.println("Usage:");

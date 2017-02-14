@@ -19,17 +19,14 @@ public class Instantiator {
     try {
       return getThrowableNewInstance(cast, classname, params);
     } catch (ClassNotFoundException e) {
-      // quiet no class
       log.info(String.format("class %s not found", classname));
     } catch (Exception e) {
-      // noisy otherwise
-      Logging.logError(e);
+      log.error("getNewInstance failed", e);
     }
     return null;
   }
 
   static public Object getNewInstance(String classname) {
-
     return getNewInstance((Class<?>[]) null, classname, (Object[]) null);
   }
 

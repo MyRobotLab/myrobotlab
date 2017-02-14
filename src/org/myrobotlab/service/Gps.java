@@ -175,9 +175,9 @@ public class Gps extends Service implements SerialDataListener {
       Python python = new Python("python");
       python.startService();
 
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
 
     } catch (Exception e) {

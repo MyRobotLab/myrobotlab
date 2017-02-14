@@ -100,7 +100,7 @@ public class JMonkeyEngine extends Service implements Simulator {
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
-    meta.addCategory("general");
+    meta.addCategory("simulator");
     return meta;
   }
 
@@ -111,9 +111,9 @@ public class JMonkeyEngine extends Service implements Simulator {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.INFO);
+      LoggingFactory.init();
 
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
 
       
       Servo servo = (Servo)Runtime.start("servo", "Servo");

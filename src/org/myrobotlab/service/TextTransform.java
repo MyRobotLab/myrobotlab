@@ -23,7 +23,7 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 
       Runtime.start("transform", "TextTransform");
 
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

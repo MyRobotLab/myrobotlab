@@ -710,7 +710,7 @@ public class Tracking extends Service {
       tracker.startService();
       tracker.faceDetect();
 
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
       // OpenCV opencv = tracker.getOpenCV();
       // opencv.setFrameGrabberType(OpenCV.GR)
       // .capture()

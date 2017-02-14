@@ -2,8 +2,8 @@ package org.myrobotlab.chess;
 
 //
 //  ChessApp.java
-//  A simple Java Swing applet to play chess.
-//  Copyright (c) 2001 Peter Hunter. GUIService was originally based on code
+//  A simple Java SwingGui applet to play chess.
+//  Copyright (c) 2001 Peter Hunter. SwingGui was originally based on code
 //  by David Dagon (c) 1997 David Dagon and is used with his permission.
 //  The search code is heavily based on Tom Kerrigan's tscp, for which he
 //  owns the copyright, and is used with his permission. All rights are
@@ -70,7 +70,7 @@ public final class ChessApp extends JApplet implements Constants, VetoableChange
    */
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(ChessApp.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(ChessApp.class);
   private Board board = new Board();
   private Search searcher = new Search();
   private ChessBoard chessView;
