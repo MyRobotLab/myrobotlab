@@ -25,7 +25,6 @@
 
 package org.myrobotlab.swing;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -37,11 +36,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
@@ -52,9 +49,9 @@ import org.myrobotlab.codec.serial.DecimalCodec;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Serial;
+import org.myrobotlab.service.SwingGui;
 import org.python.netty.handler.codec.CodecException;
 import org.slf4j.Logger;
 
@@ -68,25 +65,20 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	JComboBox<String> ports = new JComboBox<String>();
 	JButton refresh = new JButton("refresh");
 
-	JButton createVirtualUART = new JButton("create virtual uart");
+	JButton createVirtualPort = new JButton("create virtual uart");
 	JButton record = new JButton();
-	// JButton sendTx = new JButton("send tx from file");
 	JButton connectButton = new JButton();
 
 	JLabel connectLight = new JLabel();
 
-	JTextArea rx = new JTextArea(20, 10);
+	JTextArea rx = new JTextArea(10, 10);
 	JLabel rxTotal = new JLabel("0");
 	JLabel txTotal = new JLabel("0");
-	String delimiter = " ";
-	Integer width = 16;
-	JTextField widthMenu = new JTextField("16");
 
 	int rxCount = 0;
 	int txCount = 0;
 
-	// JTextField sendData = new JTextField(40);
-	JTextArea tx = new JTextArea(10, 60);
+	JTextArea tx = new JTextArea(10, 10);
 	JButton send = new JButton("send");
 	JButton sendFile = new JButton("send file");
 
@@ -97,64 +89,36 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	Codec rxFormatter = new DecimalCodec(myService);
 	Codec txFormatter = new DecimalCodec(myService);
 
-	// TODO
-	// save data to file button
-	// send file
-	// create virtual port
-	// create null modem cable
-
 	public SerialGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		myself = this;
 		mySerial = (Serial) Runtime.getService(boundServiceName);
-		
+		rx.setEditable(false);
+		autoScroll(true);
 
-    display.setLayout(new BorderLayout());
+		addTopGroup(null, "port ", ports, refresh, connectLight, " ", reqFormat, createVirtualPort, record,
+				connectButton);
 
-    JPanel north = new JPanel();
-    north.add(new JLabel("port "));
-    north.add(ports);
-    north.add(refresh);
-    north.add(connectLight);
-    north.add(new JLabel(" "));
-    north.add(reqFormat);
-    north.add(new JLabel("width "));
-    north.add(widthMenu);
-    north.add(createVirtualUART);
-    north.add(record);
-    north.add(connectButton);
-    // north.add(sendTx);
+		addLine(new JScrollPane(rx));
+		addLine(new JScrollPane(tx));
+		// addGroup("rx", new JScrollPane(rx));
+		// addGroup("tx", new JScrollPane(tx));
+		/*
+		 * addGroup("rx", rx); addGroup("tx", tx);
+		 * 
+		 * JPanel textArea = new JPanel(new GridLayout(0, 1)); textArea.add(new
+		 * JLabel("rx")); textArea.add(new JScrollPane(rx)); textArea.add(new
+		 * JLabel("tx")); textArea.add(new JScrollPane(tx)); addLine(textArea);
+		 */
+		addBottomGroup(null, send, sendFile, "rx", rxTotal, "tx", txTotal);
 
-    display.add(north, BorderLayout.NORTH);
-
-    rx.setEditable(false);
-    JScrollPane scrollPanelRX = new JScrollPane(rx);
-    JScrollPane scrollPanelTX = new JScrollPane(tx);
-
-    autoScroll(true);
-
-    display.add(scrollPanelRX, BorderLayout.CENTER);
-
-    JPanel south = new JPanel();
-
-    south.add(scrollPanelTX);
-    south.add(send);
-    south.add(sendFile);
-    south.add(new JLabel("rx"));
-    south.add(rxTotal);
-    south.add(new JLabel("tx"));
-    south.add(txTotal);
-    display.add(south, BorderLayout.SOUTH);
-
-    createVirtualUART.addActionListener(this);
-    send.addActionListener(this);
-    sendFile.addActionListener(this);
-    record.addActionListener(this);
-    connectButton.addActionListener(this);
-    reqFormat.addItemListener(this);
-    refresh.addActionListener(this);
-
-    // zod ports.addItemListener(this);
+		createVirtualPort.addActionListener(this);
+		send.addActionListener(this);
+		sendFile.addActionListener(this);
+		record.addActionListener(this);
+		connectButton.addActionListener(this);
+		reqFormat.addItemListener(this);
+		refresh.addActionListener(this);
 	}
 
 	@Override
@@ -173,11 +137,11 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 			// TODO: make this connect/disconnect
 			if (mySerial.isConnected()) {
 				mySerial.disconnect();
-				connectButton.setText("Connect");
+				connectButton.setText("connect");
 			} else {
 				try {
 					mySerial.open((String) ports.getSelectedItem());
-					connectButton.setText("Disconnect");
+					connectButton.setText("disconnect");
 				} catch (Exception e2) {
 					myService.error("could not connect");
 					log.error("connect in gui threw", e2);
@@ -185,8 +149,8 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 			}
 
 		}
-		if (o == createVirtualUART) {
-			send("createVirtualUART");
+		if (o == createVirtualPort) {
+			send("createVirtualPort");
 		}
 		if (o == refresh) {
 			send("refresh");
@@ -213,10 +177,10 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 	@Override
 	public void subscribeGui() {
-		subscribe("publishRX", "publishRX", Integer.class);
-		subscribe("publishTX", "publishTX", Integer.class);
-		subscribe("publishState", "onState", Serial.class);
-		subscribe("getPortNames", "onPortNames", List.class);
+		subscribe("publishRX");
+		subscribe("publishTX");
+		subscribe("publishState");
+		subscribe("getPortNames");
 		// forces scan of ports
 		send("refresh");
 		send("getPortNames");
@@ -240,9 +204,9 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 	@Override
 	public void unsubscribeGui() {
-		unsubscribe("publishRX", "publishRX", String.class);
-		unsubscribe("publishTX", "publishTX", String.class);
-		unsubscribe("publishState", "onState", Serial.class);
+		unsubscribe("publishRX");
+		unsubscribe("publishTX");
+		unsubscribe("publishState");
 	}
 
 	public void onPortNames(final List<String> inPorts) {
@@ -279,29 +243,22 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 					// ie connection value and current port
 					setPortStatus();
 
-			
-
 					ports.addItemListener(myself);
 					reqFormat.addItemListener(myself);
 
+					if (!serial.isRecording()) {
+						record.setText("record");
+					} else {
+						record.setText("stop recording");
+					}
+					if (serial.isConnected()) {
+						connectButton.setText("disconnect");
+					} else {
+						connectButton.setText("connect");
+					}
 				} catch (Exception e) {
-					Logging.logError(e);
+					log.error("onState threw", e);
 				}
-
-				if (!serial.isRecording()) {
-					// captureRX.setText(serial.getRXFileName()); } else {
-					record.setText("record");
-				} else {
-					record.setText("stop recording");
-				}
-
-				if (serial.isConnected()) {
-					connectButton.setText("Disconnect");
-				} else {
-					connectButton.setText("Connect");
-				}
-
-				// if (mySerial.getRXFormatter())
 			}
 		});
 	}
@@ -334,8 +291,8 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	}
 
 	/**
-	 * publishRX displays the "interpreted" byte it is interpreted by the
-	 * Serial's service selected "format"
+	 * onRX displays the "interpreted" byte it is interpreted by the Serial's
+	 * service selected "format"
 	 * 
 	 * FORMAT_DECIMEL is a 3 digit decimal in ascii FORMAT_RAW is interpreted as
 	 * 1 byte = 1 ascii char FORMAT_HEX is 2 digit asci hex
@@ -344,7 +301,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	 * @throws BadLocationException
 	 * @throws CodecException
 	 */
-	public final void publishRX(final Integer data) throws BadLocationException {
+	public final void onRX(final Integer data) throws BadLocationException {
 		++rxCount;
 		String formatted = rxFormatter.decode(data);
 		rx.append(formatted);
@@ -353,29 +310,12 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 			doc.remove(0, formatted.length());
 		}
 
-		// rx.append(String.format("%s ", data));
-		/*
-		 * if (!mySerial.getDisplayFormat().equals(Serial.DISPLAY_RAW) && width
-		 * != null && rxCount % width == 0) { rx.append("\n"); }
-		 */
-		/*
-		 * FIXME FIXME FIXME THE CODEC SHOULD FORMAT !!!!! if (width != null &&
-		 * rxCount % width == 0) { rx.append("\n"); }
-		 */
 		rxTotal.setText(String.format("%d", rxCount));
 	}
 
-	public final void publishTX(final Integer data) {
+	public final void onTX(final Integer data) {
 		++txCount;
 		tx.append(txFormatter.decode(data));
-		/*
-		 * if (!mySerial.getDisplayFormat().equals(Serial.DISPLAY_RAW) && width
-		 * != null && txCount % width == 0) { tx.append("\n"); }
-		 */
-		/*
-		 * FIXME FIXME FIXME THE CODEC SHOULD FORMAT !!!!! if (width != null &&
-		 * txCount % width == 0) { tx.append("\n"); }
-		 */
 		txTotal.setText(String.format("%d", txCount));
 	}
 

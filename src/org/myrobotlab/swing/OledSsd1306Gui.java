@@ -65,7 +65,7 @@ public class OledSsd1306Gui extends ServiceGui implements ActionListener {
 
 
     // build input begin ------------------
-   addLine(addPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
+   addLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
 
 
     refreshControllers();

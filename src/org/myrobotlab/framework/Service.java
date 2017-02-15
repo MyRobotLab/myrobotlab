@@ -301,16 +301,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
         }
 
       }
-
-      // recursion loop
-      /*
-       * for (int x = 0; x < peers.size(); ++x) { ServiceReservation peersr =
-       * peers.get(x); buildDNA(myDNA, Peers.getPeerKey(myKey, peersr.key),
-       * peersr.fullTypeName, peersr.comment); }
-       */
     } catch (Exception e) {
-      Logging.logError(e);
-      log.debug(String.format("%s does not have a getMetaData ", fullClassName));
+      log.error(String.format("%s does not have a getMetaData ", fullClassName));
     }
   }
 
@@ -410,7 +402,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
           targetField.set(target, f.get(source));
         }
       } catch (Exception e) {
-        Logging.logError(e);
+        log.error("copy failed", e);
       }
     }
     return target;
@@ -482,27 +474,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
       m = c.getMethod(methodName, params);
 
       tip = m.getAnnotation(ToolTip.class);
-    } catch (SecurityException e) {
-      logException(e);
-    } catch (NoSuchMethodException e) {
-      logException(e);
-    } catch (ClassNotFoundException e) {
-      // TODO Auto-generated catch block
-      logException(e);
+    } catch (Exception e) {
+    	log.error("getMethodToolTip failed", e);
     }
 
     if (tip == null) {
       return null;
     }
     return tip.value();
-  }
-
-  /**
-   * 
-   * @param e
-   */
-  public final static void logException(final Throwable e) {
-    log.error(stackToString(e));
   }
 
   static public void logTimeEnable(Boolean b) {
@@ -688,7 +667,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     try {
       Thread.sleep(millis);
     } catch (InterruptedException e) {
-      logException(e);
     }
   }
 
@@ -1829,7 +1807,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       try {
         recorder.write(msg);
       } catch (IOException e) {
-        logException(e);
+        log.error("recording failed", e);
       }
     }
     outbox.add(msg);
@@ -1875,7 +1853,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         returnContainer.wait(timeout); // NEW !!! TIMEOUT !!!!
       }
     } catch (InterruptedException e) {
-      logException(e);
+      log.error("interrupted", e);
     }
 
     return returnContainer[0];

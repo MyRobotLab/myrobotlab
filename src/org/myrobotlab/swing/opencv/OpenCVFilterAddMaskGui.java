@@ -28,46 +28,34 @@ package org.myrobotlab.swing.opencv;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JComboBox;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.opencv.OpenCVFilterErode;
+import org.myrobotlab.opencv.OpenCVFilterAddMask;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFilterErodeGUI extends OpenCVFilterGUI implements ActionListener {
+public class OpenCVFilterAddMaskGui extends OpenCVFilterGui implements ActionListener {
 
-  JComboBox<Integer> iterations = new JComboBox<Integer>(new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
-
-  public OpenCVFilterErodeGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterAddMaskGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
-
-    iterations.addActionListener(this);
-    display.add(iterations);
-
+    // ComboBoxModel list = new ComboBoxModel(this);
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    Object o = e.getSource();
-    OpenCVFilterErode bf = (OpenCVFilterErode) boundFilter.filter;
-
-    if (o == iterations) {
-      bf.numberOfIterations = (Integer) iterations.getSelectedItem();
-    }
-
+    // Object o = e.getSource();
+    OpenCVFilterAddMask bf = (OpenCVFilterAddMask) boundFilter.filter;
     setFilterState(bf);
   }
 
   // @Override
-  public void attachGUI() {
-    log.debug("attachGUI");
-
+  public void attachGui() {
+    log.debug("attachGui");
   }
 
   // @Override
-  public void detachGUI() {
-    log.debug("detachGUI");
+  public void detachGui() {
+    log.debug("detachGui");
 
   }
 
@@ -76,8 +64,8 @@ public class OpenCVFilterErodeGUI extends OpenCVFilterGUI implements ActionListe
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        OpenCVFilterErode bf = (OpenCVFilterErode) filterWrapper.filter;
-        iterations.setSelectedItem(bf.numberOfIterations);
+        OpenCVFilterAddMask bf = (OpenCVFilterAddMask) filterWrapper.filter;
+        sources.setSelectedItem(bf.sourceName);
       }
     });
   }

@@ -45,13 +45,13 @@ import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.SliderWithText;
 
-public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeListener, ActionListener {
+public class OpenCVFilterAffineGui extends OpenCVFilterGui implements ChangeListener, ActionListener {
 
   SliderWithText angle = new SliderWithText(JSlider.HORIZONTAL, 0, 360, 0);
   JTextField dX = new JTextField("dX", 10);
   JTextField dY = new JTextField("dY", 10);
 
-  public OpenCVFilterAffineGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterAffineGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     angle.addChangeListener(this);
     dX.addActionListener(this);

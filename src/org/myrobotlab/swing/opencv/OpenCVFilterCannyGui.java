@@ -29,7 +29,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 import javax.swing.BorderFactory;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -39,62 +38,38 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.opencv.OpenCVFilterThreshold;
+import org.myrobotlab.opencv.OpenCVFilterCanny;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.swing.widget.SliderWithText;
 
-public class OpenCVFilterThresholdGUI extends OpenCVFilterGUI {
+public class OpenCVFilterCannyGui extends OpenCVFilterGui implements ChangeListener {
 
-  public class AdjustSlider implements ChangeListener {
+  SliderWithText lowThreshold = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 0);
+  SliderWithText highThreshold = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 256);
+  SliderWithText apertureSize = new SliderWithText(JSlider.HORIZONTAL, 1, 3, 1); // docs
+  // say
+  // 1
+  // 3
+  // 5
+  // 7
+  // ...
+  // but
+  // 1
+  // craches
+  // -
+  // will
+  // use
+  // 3
+  // 5
+  // or
+  // 7
 
-    @Override
-    public void stateChanged(ChangeEvent e) {
-      OpenCVFilterThreshold bf = (OpenCVFilterThreshold) boundFilter.filter;
-      JSlider2 slider = (JSlider2) e.getSource();
-      if (slider.getName().equals("lowThreshold")) {
-        bf.lowThreshold = slider.getValue();
-      } else if (slider.getName().equals("lowThreshold")) {
-        bf.highThreshold = slider.getValue();
-      }
-      slider.value.setText("" + slider.getValue());
-      setFilterState(bf);
-    }
-  }
-
-  public class JSlider2 extends JSlider {
-    private static final long serialVersionUID = 1L;
-    JLabel value = new JLabel();
-
-    public JSlider2(int vertical, int i, int j, int k) {
-      super(vertical, i, j, k);
-      value.setText("" + k);
-    }
-
-  }
-
-  JSlider2 lowThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 0);
-
-  JSlider2 highThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 256);
-
-  // CV_THRESH_BINARY
-  // CV_THRESH_BINARY_INV
-  // CV_THRESH_TRUNC
-  // CV_THRESH_TOZERO
-  // CV_THRESH_TOZERO_INV
-
-  JSlider2 apertureSize = new JSlider2(JSlider.HORIZONTAL, 1, 3, 1);
-
-  JComboBox<String> type = new JComboBox<String>(new String[] { "CV_THRESH_BINARY", "CV_THRESH_BINARY_INV", "CV_THRESH_TRUNC", "CV_THRESH_TOZERO", "CV_THRESH_TOZERO_INV" });
-
-  AdjustSlider change = new AdjustSlider();
-
-  public OpenCVFilterThresholdGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterCannyGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
-    lowThreshold.setName("lowThreshold");
-    highThreshold.setName("highThreshold");
-
-    lowThreshold.addChangeListener(change);
-    highThreshold.addChangeListener(change);
+    lowThreshold.addChangeListener(this);
+    highThreshold.addChangeListener(this);
+    apertureSize.addChangeListener(this);
 
     GridBagConstraints gc2 = new GridBagConstraints();
 
@@ -123,31 +98,46 @@ public class OpenCVFilterThresholdGUI extends OpenCVFilterGUI {
     gc2.gridx = 0;
 
     j = new JPanel(new GridBagLayout());
-    title = BorderFactory.createTitledBorder("type");
+    title = BorderFactory.createTitledBorder("apertureSize");
     j.setBorder(title);
-    // j.add(apertureSize);
-    // j.add(apertureSize.value);
-    j.add(type);
+    j.add(apertureSize);
+    j.add(apertureSize.value);
     display.add(j, gc2);
 
   }
 
+  // FIXME - update components :)
   @Override
   public void getFilterState(final FilterWrapper filterWrapper) {
     boundFilter = filterWrapper;
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        OpenCVFilterThreshold bf = (OpenCVFilterThreshold) filterWrapper.filter;
-        lowThreshold.setValueIsAdjusting(true);
-        lowThreshold.setValue((int) bf.lowThreshold);
-        lowThreshold.setValueIsAdjusting(false);
-
-        highThreshold.setValueIsAdjusting(true);
-        highThreshold.setValue((int) bf.highThreshold);
-        highThreshold.setValueIsAdjusting(false);
+        // OpenCVFilterCanny bf = (OpenCVFilterCanny) filterWrapper.filter;
+        // TODO: not implemented?
       }
     });
+
+  }
+
+  @Override
+  public void stateChanged(ChangeEvent e) {
+
+    Object o = e.getSource();
+    OpenCVFilterCanny bf = (OpenCVFilterCanny) boundFilter.filter;
+
+    if (o == apertureSize) {
+      bf.apertureSize = apertureSize.getValue() * 2 + 1;
+      apertureSize.setText(bf.apertureSize);
+    } else if (o == highThreshold) {
+      bf.highThreshold = highThreshold.getValue();
+      highThreshold.setText(highThreshold.getValue());
+    } else if (o == lowThreshold) {
+      bf.lowThreshold = lowThreshold.getValue();
+      lowThreshold.setText(lowThreshold.getValue());
+    }
+
+    setFilterState(bf);
 
   }
 

@@ -25,37 +25,53 @@
 
 package org.myrobotlab.swing.opencv;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
+
 import org.myrobotlab.opencv.FilterWrapper;
+import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFilterFindContoursGUI extends OpenCVFilterGUI {
+public class OpenCVFilterDefaultGui extends OpenCVFilterGui implements ActionListener {
 
-  public OpenCVFilterFindContoursGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterDefaultGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
+    display.add(new JLabel("no available parameters"));
   }
 
-  public void apply() {
-    log.debug("apply");
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    // Object o = e.getSource();
+    OpenCVFilter bf = boundFilter.filter;
+    setFilterState(bf);
+  }
+
+  // @Override
+  public void attachGui() {
+    log.debug("attachGui");
 
   }
 
   // @Override
-  public void attachGUI() {
-    log.debug("attachGUI");
-
-  }
-
-  // @Override
-  public void detachGUI() {
-    log.debug("detachGUI");
+  public void detachGui() {
+    log.debug("detachGui");
 
   }
 
   @Override
-  public void getFilterState(FilterWrapper filter) {
-    // TODO Auto-generated method stub
-
+  public void getFilterState(final FilterWrapper filterWrapper) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        // OpenCVFilter bf = filterWrapper.filter;
+        // TODO: what should this method do? local assignment of "bf" does
+        // nothing.
+      }
+    });
   }
 
 }

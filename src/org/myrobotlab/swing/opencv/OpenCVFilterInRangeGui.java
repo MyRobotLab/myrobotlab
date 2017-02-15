@@ -43,7 +43,7 @@ import org.myrobotlab.opencv.OpenCVFilterInRange;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.SliderWithText;
 
-public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeListener {
+public class OpenCVFilterInRangeGui extends OpenCVFilterGui implements ChangeListener {
 
   JCheckBox useHue = new JCheckBox();
   SliderWithText hueMin = new SliderWithText(JSlider.VERTICAL, 0, 256, 0);
@@ -59,7 +59,7 @@ public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeLis
 
   OpenCVFilterInRange myFilter = null;
 
-  public OpenCVFilterInRangeGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterInRangeGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     // myFilter = (OpenCVFilterInRange) myOpenCVFilter;
     // myFilter.useHue = true;
