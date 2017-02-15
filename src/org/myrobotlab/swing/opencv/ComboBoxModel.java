@@ -23,7 +23,7 @@ public class ComboBoxModel implements MutableComboBoxModel, ActionListener {
   private static final HashMap<String, ArrayList<String>> possibleSources = new HashMap<String, ArrayList<String>>();
 
   private String selected;
-  private OpenCVFilterGUI filterGUI;
+  private OpenCVFilterGui filterGui;
 
   public static void addElement(String name, String source) {
     model.addElement(source);
@@ -50,15 +50,15 @@ public class ComboBoxModel implements MutableComboBoxModel, ActionListener {
     }
   }
 
-  public ComboBoxModel(OpenCVFilterGUI openCVFilterGUI) {
-    this.filterGUI = openCVFilterGUI;
+  public ComboBoxModel(OpenCVFilterGui openCVFilterGui) {
+    this.filterGui = openCVFilterGui;
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
     JComboBox<String> input = (JComboBox<String>) e.getSource();
     if ((String) input.getSelectedItem() != null) {
-      filterGUI.boundFilter.filter.sourceKey = (String) input.getSelectedItem();
+      filterGui.boundFilter.filter.sourceKey = (String) input.getSelectedItem();
     }
   }
 

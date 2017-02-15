@@ -129,7 +129,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 				if (e instanceof InterruptedException) {
 					info("shutting down sweeper");
 				} else {
-					logException(e);
+					log.error("sweeper threw", e);
 				}
 			}
 		}
@@ -177,7 +177,7 @@ public class DiyServo extends Service implements ServoControl, MotorControl, Pin
 				if (e instanceof InterruptedException) {
 					info("Shutting down MotorUpdater");
 				} else {
-					logException(e);
+					log.error("motor updater threw", e);
 				}
 			}
 		}

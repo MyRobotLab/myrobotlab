@@ -1,6 +1,6 @@
 /**
  *                    
- * @author GroG (at) myrobotlab.org
+ * @author greg (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -25,63 +25,61 @@
 
 package org.myrobotlab.swing.opencv;
 
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JComboBox;
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.opencv.OpenCVFilterDilate;
+import org.myrobotlab.opencv.OpenCVFilterSURF;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFilterDilateGUI extends OpenCVFilterGUI implements ActionListener {
+public class OpenCVFilterSurfGui extends OpenCVFilterGui implements ActionListener {
 
-  JComboBox<Integer> iterations = new JComboBox<Integer>(new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+  JTextField objectFilename = new JTextField("objectFilename", 200);
 
-  public OpenCVFilterDilateGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterSurfGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
-
-    iterations.addActionListener(this);
-    display.add(new JLabel("iterations  "));
-    display.add(iterations);
-
+    objectFilename.addActionListener(this);
+    TitledBorder title;
+    JPanel j = new JPanel(new GridBagLayout());
+    title = BorderFactory.createTitledBorder("SURF Config");
+    j.setBorder(title);
+    j.add(new JLabel("Filename"));
+    j.add(objectFilename);
+    display.add(j, gc);
   }
 
   @Override
-  public void actionPerformed(ActionEvent e) {
-    Object o = e.getSource();
-    OpenCVFilterDilate bf = (OpenCVFilterDilate) boundFilter.filter;
-
-    if (o == iterations) {
-      bf.numberOfIterations = (Integer) iterations.getSelectedItem();
+  public void actionPerformed(ActionEvent event) {
+    // TODO Auto-generated method stub
+    Object o = event.getSource();
+    OpenCVFilterSURF sf = (OpenCVFilterSURF) boundFilter.filter;
+    if (o == objectFilename) {
+      String val = ((JTextField) o).getText();
+      sf.loadObjectImageFilename(val);
+    } else {
+      log.warn("Inknown object invoked in surf filter ui");
     }
-
-    setFilterState(bf);
   }
 
-  // @Override
-  public void attachGUI() {
-    log.debug("attachGUI");
-
-  }
-
-  // @Override
-  public void detachGUI() {
-    log.debug("detachGUI");
-
-  }
-
+  // FIXME - update components :)
   @Override
   public void getFilterState(final FilterWrapper filterWrapper) {
+    boundFilter = filterWrapper;
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        OpenCVFilterDilate bf = (OpenCVFilterDilate) filterWrapper.filter;
-        iterations.setSelectedItem(bf.numberOfIterations);
+        // OpenCVFilterSURF af = (OpenCVFilterSURF) filterWrapper.filter;
+        // TODO: doesn't do anything yet ? not implemented?
       }
     });
-  }
 
+  }
 }

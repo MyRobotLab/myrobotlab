@@ -40,14 +40,14 @@ import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
-public abstract class OpenCVFilterGUI {
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGUI.class);
+public abstract class OpenCVFilterGui {
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGui.class);
 
   final String name;
   JPanel main = new JPanel(new BorderLayout());
   JPanel display = new JPanel(new GridBagLayout());
   final String boundServiceName;
-  final SwingGui myGUI;
+  final SwingGui myGui;
   final public GridBagConstraints gc = new GridBagConstraints();
 
   FilterWrapper boundFilter = null;
@@ -55,10 +55,10 @@ public abstract class OpenCVFilterGUI {
   JComboBox sources = new JComboBox();
   ComboBoxModel sourcesModel = new ComboBoxModel(this);
 
-  public OpenCVFilterGUI(String boundFilterName, String boundServiceName, SwingGui myGUI) {
+  public OpenCVFilterGui(String boundFilterName, String boundServiceName, SwingGui myGui) {
     name = boundFilterName;
     this.boundServiceName = boundServiceName;
-    this.myGUI = myGUI;
+    this.myGui = myGui;
 
     sources.addActionListener(sourcesModel);
 
@@ -84,7 +84,7 @@ public abstract class OpenCVFilterGUI {
   public abstract void getFilterState(final FilterWrapper filterWrapper);
 
   /*
-   * public abstract void attachGUI(); public abstract void detachGUI();
+   * public abstract void attachGui(); public abstract void detachGui();
    */
 
   public void initFilterState(OpenCVFilter filter) {
@@ -94,7 +94,7 @@ public abstract class OpenCVFilterGUI {
   }
 
   public void setFilterState(OpenCVFilter filter) {
-    myGUI.send(boundServiceName, "setFilterState", new FilterWrapper(name, filter));
+    myGui.send(boundServiceName, "setFilterState", new FilterWrapper(name, filter));
   }
 
   @Override

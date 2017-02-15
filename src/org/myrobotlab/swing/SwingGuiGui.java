@@ -45,9 +45,11 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service._TemplateService;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.swing.SwingGraphVertex.Type;
@@ -535,5 +537,22 @@ public class SwingGuiGui extends ServiceGui {
     graph.removeCells(graph.getChildCells(graph.getDefaultParent(), true, true));
     buildGraph();
   }
+  
+  /**
+   * Service State change - this method will be called when a "broadcastState"
+   * method is called which triggers a publishState.  This event handler is typically
+   * used when data or state information in the service has changed, and the UI should
+   * update to reflect this changed state.
+   * @param template
+   */
+  public void onState(SwingGui gui) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+
+      }
+    });
+  }
+
 
 }

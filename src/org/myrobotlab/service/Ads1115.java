@@ -94,7 +94,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 					log.info("Shutting down Publisher");
 				} else {
 					isPublishing = false;
-					logException(e);
+					log.error("publisher threw", e);
 				}
 			}
 		}
