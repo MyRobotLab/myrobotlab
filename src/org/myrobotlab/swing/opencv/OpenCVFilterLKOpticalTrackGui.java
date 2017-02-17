@@ -42,7 +42,7 @@ import org.myrobotlab.opencv.OpenCVFilterLKOpticalTrack;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.SliderWithText;
 
-public class OpenCVFilterLKOpticalTrackGUI extends OpenCVFilterGUI implements ActionListener, ChangeListener {
+public class OpenCVFilterLKOpticalTrackGui extends OpenCVFilterGui implements ActionListener, ChangeListener {
 
   SliderWithText maxPointCount = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 30);
   SliderWithText minDistance = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 10);
@@ -51,7 +51,7 @@ public class OpenCVFilterLKOpticalTrackGUI extends OpenCVFilterGUI implements Ac
   JButton getFeatures = new JButton("get features");
   JButton clearPoints = new JButton("clear points");
 
-  public OpenCVFilterLKOpticalTrackGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterLKOpticalTrackGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
     maxPointCount.setName("maxCount");
@@ -136,7 +136,7 @@ public class OpenCVFilterLKOpticalTrackGUI extends OpenCVFilterGUI implements Ac
     }
 
     // send the updated filter to OpenCV service
-    myGUI.send(boundServiceName, "setFilterState", boundFilter);
+    myGui.send(boundServiceName, "setFilterState", boundFilter);
   }
 
   @Override
@@ -195,7 +195,7 @@ public class OpenCVFilterLKOpticalTrackGUI extends OpenCVFilterGUI implements Ac
           // filter.blockSize = blockSize.getValue();
         }
 
-        myGUI.send(boundServiceName, "setFilterState", boundFilter);
+        myGui.send(boundServiceName, "setFilterState", boundFilter);
       } // else - adjust gui text only
     }
   }

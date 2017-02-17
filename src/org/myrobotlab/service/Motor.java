@@ -68,16 +68,16 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 	/**
 	 * list of names of possible controllers
 	 */
-	public List<String>				controllers;
-	
-	String types [] = MotorConfig.getTypes();
+	public List<String> controllers;
+
+	String types[] = MotorConfig.getTypes();
 
 	boolean locked = false;
 
 	/**
 	 * the power level requested - varies between -1.0 <--> 1.0
 	 */
-	
+
 	double powerLevel = 0;
 	double maxPower = 1.0;
 	double minPower = -1.0;
@@ -110,12 +110,12 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 		refreshControllers();
 		broadcastState();
 	}
-	
+
 	public List<String> refreshControllers() {
 		controllers = Runtime.getServiceNamesFromInterface(MotorController.class);
 		return controllers;
 	}
-	
+
 	public DeviceController getController() {
 		return controller;
 	}
@@ -167,11 +167,11 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 		if (power > maxPower) {
 			power = maxPower;
 		}
-		if (power < minPower){
+		if (power < minPower) {
 			power = minPower;
 		}
 		powerLevel = power;
-		
+
 		if (locked) {
 			log.warn("motor locked");
 			return;
@@ -280,19 +280,19 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 	@Override
 	public void attach(MotorController controller) throws Exception {
 		this.controller = controller;
-		if (controller != null){
+		if (controller != null) {
 			controllerName = controller.getName();
 		}
 		broadcastState();
 	}
-	
-	///////   config start ////////////////////////
+
+	/////// config start ////////////////////////
 	public void setPwmPins(int leftPin, int rightPin) {
 		config = new MotorConfigDualPwm(leftPin, rightPin);
 		broadcastState();
 	}
-	
-	public void setPwrDirPins(int pwrPin, int dirPin){
+
+	public void setPwrDirPins(int pwrPin, int dirPin) {
 		config = new MotorConfigSimpleH(pwrPin, dirPin);
 		broadcastState();
 	}
@@ -308,139 +308,138 @@ public class Motor extends Service implements MotorControl, EncoderListener {
 	}
 
 	// TODO - this could be Java 8 default interface implementation
-  @Override
-  public void detach(String controllerName) {
-    if (controller == null || !controllerName.equals(controller.getName())) {
-      return;
-    }
-    controller.detach(this);
-    controller = null;
-  }
-  
-  @Override
-  public boolean isAttached(String name) {
-    return (controller != null && controller.getName().equals(name));
-  }
+	@Override
+	public void detach(String controllerName) {
+		if (controller == null || !controllerName.equals(controller.getName())) {
+			return;
+		}
+		controller.detach(this);
+		controller = null;
+	}
 
-  @Override
-  public Set<String> getAttached() {
-    HashSet<String> ret = new HashSet<String>();
-    if (controller != null){
-      ret.add(controller.getName());
-    }
-    return ret;
-  }
+	@Override
+	public boolean isAttached(String name) {
+		return (controller != null && controller.getName().equals(name));
+	}
 
-  public static void main(String[] args) {
+	@Override
+	public Set<String> getAttached() {
+		HashSet<String> ret = new HashSet<String>();
+		if (controller != null) {
+			ret.add(controller.getName());
+		}
+		return ret;
+	}
 
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+	public static void main(String[] args) {
 
-    try {
-      
-      Runtime.start("gui", "SwingGui");
-      Runtime.start("motor", "Motor");
-      boolean done = true;
-      if (done){
-        return;
-      }
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
 
-      // FIXME - all testing or replacing of main code should be new JUnit
-      // tests - with virtual arduino !!!)
-      String port = "COM15";
+		try {
 
-      // Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      // Runtime.createAndStart("gui", "SwingGui");
-      // Runtime.createAndStart("webgui", "WebGui");
-      // arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
-      // arduino.connect(port);
-      // arduino.broadcastState();
+			Runtime.start("gui", "SwingGui");
+			Runtime.start("webgui", "WebGui");
+			Runtime.start("motor", "Motor");
+			Runtime.start("arduino", "Arduino");
+			boolean done = true;
+			if (done) {
+				return;
+			}
 
-      // Runtime.createAndStart("python", "Python");
+			// FIXME - all testing or replacing of main code should be new JUnit
+			// tests - with virtual arduino !!!)
+			String port = "COM15";
 
-      int pwmPin = 6;
-      int dirPin = 7;
+			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			// Runtime.createAndStart("gui", "SwingGui");
+			// Runtime.createAndStart("webgui", "WebGui");
+			// arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
+			// arduino.connect(port);
+			// arduino.broadcastState();
 
-      // int leftPwm = 6;
-      // int rightPwm = 7;
+			// Runtime.createAndStart("python", "Python");
 
-      // virtual hardware
-      /*
-       * VirtualDevice virtual = (VirtualDevice)Runtime.start("virtual",
-       * "VirtualDevice"); virtual.createVirtualArduino(port);
-       */
+			int pwmPin = 6;
+			int dirPin = 7;
 
-      // int encoderPin= 7;
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      arduino.connect(port);
+			// int leftPwm = 6;
+			// int rightPwm = 7;
 
-      arduino.pinMode(6, Arduino.OUTPUT);
-      arduino.pinMode(7, Arduino.OUTPUT);
+			// virtual hardware
+			/*
+			 * VirtualDevice virtual = (VirtualDevice)Runtime.start("virtual",
+			 * "VirtualDevice"); virtual.createVirtualArduino(port);
+			 */
 
-      arduino.digitalWrite(7, 1);
-      // arduino.digitalWrite(6, 1);
+			// int encoderPin= 7;
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			arduino.connect(port);
 
-      arduino.analogWrite(6, 255);
-      arduino.analogWrite(6, 200);
-      arduino.analogWrite(6, 100);
-      arduino.analogWrite(6, 0);
+			arduino.pinMode(6, Arduino.OUTPUT);
+			arduino.pinMode(7, Arduino.OUTPUT);
 
-      Motor m1 = (Motor) Runtime.start("m1", "Motor");
+			arduino.digitalWrite(7, 1);
+			// arduino.digitalWrite(6, 1);
 
-      /*
-       * m1.setType2Pwm(leftPwm, rightPwm); m1.setTypeStepper();
-       * m1.setTypePulseStep(pwmPin, dirPin);
-       */
-      // Runtime.start("webgui", "WebGui");
-      // m1.attach(arduino, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);
-      // m1.attach(arduino, Motor.TYPE_2_PWM, pwmPin, dirPin);
-      // m1.attach(arduino, Motor.TYPE_SIMPLE, pwmPin, dirPin);
-      m1.attach((MotorController) arduino);
+			arduino.analogWrite(6, 255);
+			arduino.analogWrite(6, 200);
+			arduino.analogWrite(6, 100);
+			arduino.analogWrite(6, 0);
 
-      m1.move(1.0);
-      m1.move(-1.0);
+			Motor m1 = (Motor) Runtime.start("m1", "Motor");
 
-      // TODO - overload with speed?
-      m1.moveTo(250);
-      m1.moveTo(700);
-      m1.moveTo(250);
-      m1.moveTo(250);
+			/*
+			 * m1.setType2Pwm(leftPwm, rightPwm); m1.setTypeStepper();
+			 * m1.setTypePulseStep(pwmPin, dirPin);
+			 */
+			// Runtime.start("webgui", "WebGui");
+			// m1.attach(arduino, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);
+			// m1.attach(arduino, Motor.TYPE_2_PWM, pwmPin, dirPin);
+			// m1.attach(arduino, Motor.TYPE_SIMPLE, pwmPin, dirPin);
+			m1.attach((MotorController) arduino);
 
-      arduino.enableBoardInfo(true);
-      arduino.enableBoardInfo(false);
-      m1.stop();
-      m1.move(0.5);
-      m1.moveTo(200);
-      m1.stop();
+			m1.move(1.0);
+			m1.move(-1.0);
 
-      // Runtime.start("webgui", "WebGui");
+			// TODO - overload with speed?
+			m1.moveTo(250);
+			m1.moveTo(700);
+			m1.moveTo(250);
+			m1.moveTo(250);
 
-      // arduino.motorAttach("m1", 8, 7, 54);
-      // m1.setType(Motor.TYPE_PWM_DIR_FE);
-      // arduino.setSampleRate(8000);
-      // m1.setSpeed(0.95);
-      /*
-       * arduino.motorAttach("m1", Motor.TYPE_FALSE_ENCODER, 8, 7);
-       * m1.moveTo(30); m1.moveTo(230); m1.moveTo(430); m1.moveTo(530);
-       * m1.moveTo(130); m1.moveTo(330);
-       */
-      // with encoder
-      // m1.moveTo(600);
+			arduino.enableBoardInfo(true);
+			arduino.enableBoardInfo(false);
+			m1.stop();
+			m1.move(0.5);
+			m1.moveTo(200);
+			m1.stop();
 
-      /*
-       * m1.stop(); m1.move(0.94); m1.stop(); m1.move(-0.94); m1.stop();
-       * 
-       * // arduino.motorAttach("m1", 8, 7, 54) ;
-       * 
-       * m1.moveTo(600f);
-       */
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
+			// Runtime.start("webgui", "WebGui");
 
-  }
+			// arduino.motorAttach("m1", 8, 7, 54);
+			// m1.setType(Motor.TYPE_PWM_DIR_FE);
+			// arduino.setSampleRate(8000);
+			// m1.setSpeed(0.95);
+			/*
+			 * arduino.motorAttach("m1", Motor.TYPE_FALSE_ENCODER, 8, 7);
+			 * m1.moveTo(30); m1.moveTo(230); m1.moveTo(430); m1.moveTo(530);
+			 * m1.moveTo(130); m1.moveTo(330);
+			 */
+			// with encoder
+			// m1.moveTo(600);
 
+			/*
+			 * m1.stop(); m1.move(0.94); m1.stop(); m1.move(-0.94); m1.stop();
+			 * 
+			 * // arduino.motorAttach("m1", 8, 7, 54) ;
+			 * 
+			 * m1.moveTo(600f);
+			 */
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 
-
+	}
 
 }

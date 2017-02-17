@@ -1099,7 +1099,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
 		ServiceType meta = new ServiceType(Serial.class.getCanonicalName());
 		meta.addDescription("reads and writes data to a serial port");
-		meta.addCategory("sensor", "microcontroller", "control");
+		meta.addCategory("sensor", "control");
 		meta.addDependency("com.googlecode.jssc", "2.8.0");
 		return meta;
 	}

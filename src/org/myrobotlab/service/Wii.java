@@ -217,8 +217,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
       try {
         Thread.sleep(500);
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        logException(e);
+        
       } // must slow down to initialize
 
       // force to correct state strobe state

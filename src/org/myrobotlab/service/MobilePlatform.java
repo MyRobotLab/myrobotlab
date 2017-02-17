@@ -287,8 +287,7 @@ public class MobilePlatform extends Service {
       log.error("move time " + (endMotion - beginMotion));
 
     } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      logException(e);
+      log.info("shutting down");
     }
 
     /*
@@ -479,8 +478,7 @@ public class MobilePlatform extends Service {
       try {
         lock.wait();
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        logException(e);
+    	  log.info("lock interrupted");
       }
     }
 

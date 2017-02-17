@@ -84,7 +84,7 @@ import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.myrobotlab.swing.opencv.ComboBoxModel;
-import org.myrobotlab.swing.opencv.OpenCVFilterGUI;
+import org.myrobotlab.swing.opencv.OpenCVFilterGui;
 import org.slf4j.Logger;
 
 public class OpenCVGui extends ServiceGui implements ListSelectionListener, VideoGUISource, ActionListener {
@@ -133,7 +133,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 
   JPanel filterParameters = new JPanel();
 
-  LinkedHashMap<String, OpenCVFilterGUI> guiFilters = new LinkedHashMap<String, OpenCVFilterGUI>();
+  LinkedHashMap<String, OpenCVFilterGui> guiFilters = new LinkedHashMap<String, OpenCVFilterGui>();
 
   // output
   JButton recordButton = new JButton("record");
@@ -555,7 +555,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     // addFilterToGUI(name, type);
   }
 
-  public OpenCVFilterGUI addFilterToGUI(String name, OpenCVFilter f) {
+  public OpenCVFilterGui addFilterToGUI(String name, OpenCVFilter f) {
 
     String type = f.getClass().getSimpleName();
     type = type.substring(prefix.length());
@@ -563,15 +563,15 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     currentFilterListModel.addElement(name);
 
     // get a gui filter
-    String guiType = "org.myrobotlab.control.opencv.OpenCVFilter" + type + "Gui";
+    String guiType = "org.myrobotlab.swing.opencv.OpenCVFilter" + type + "Gui";
 
-    OpenCVFilterGUI filtergui = null;
+    OpenCVFilterGui filtergui = null;
 
     // try creating one based on type
-    filtergui = (OpenCVFilterGUI) Instantiator.getNewInstance(guiType, name, boundServiceName, myService);
+    filtergui = (OpenCVFilterGui) Instantiator.getNewInstance(guiType, name, boundServiceName, myService);
     if (filtergui == null) {
       log.info(String.format("filter %s does not have a gui defined", type));
-      filtergui = (OpenCVFilterGUI) Instantiator.getNewInstance("org.myrobotlab.control.opencv.OpenCVFilterDefaultGUI", name, boundServiceName, myService);
+      filtergui = (OpenCVFilterGui) Instantiator.getNewInstance("org.myrobotlab.control.opencv.OpenCVFilterDefaultGui", name, boundServiceName, myService);
       if (filtergui == null) {
         log.error("could not create default filter gui");
         return null;
@@ -642,7 +642,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 
               // adding filters in gui - which are in the service
               if (!guiFilters.containsKey(name)) {
-                OpenCVFilterGUI guifilter = addFilterToGUI(name, f);
+                OpenCVFilterGui guifilter = addFilterToGUI(name, f);
                 // set the state of the filter gui - first one
                 // is
                 // free :)
@@ -782,7 +782,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 
   public void setFilterState(FilterWrapper filterData) {
     if (guiFilters.containsKey(filterData.name)) {
-      OpenCVFilterGUI gui = guiFilters.get(filterData.name);
+      OpenCVFilterGui gui = guiFilters.get(filterData.name);
       gui.getFilterState(filterData);
     } else {
       log.error(filterData.name + " does not contain a gui");
@@ -797,7 +797,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       log.info("gui valuechange setting to {}", filterName);
       if (filterName != null) {
         myService.send(boundServiceName, "setDisplayFilter", filterName);
-        OpenCVFilterGUI f = guiFilters.get(filterName);
+        OpenCVFilterGui f = guiFilters.get(filterName);
         if (f != null) {
           filterParameters.removeAll();
           filterParameters.add(f.getDisplay());

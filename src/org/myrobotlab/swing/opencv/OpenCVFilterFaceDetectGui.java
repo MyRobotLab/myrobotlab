@@ -36,7 +36,7 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFilterFaceDetectGUI extends OpenCVFilterGUI implements ActionListener {
+public class OpenCVFilterFaceDetectGui extends OpenCVFilterGui implements ActionListener {
 
   JComboBox<String> cascadeFile = new JComboBox<String>(new String[] { "haarcascade_eye.xml", "haarcascade_eye_tree_eyeglasses.xml", "haarcascade_frontalface_alt.xml",
       "haarcascade_frontalface_alt2.xml", "haarcascade_frontalface_alt_tree.xml", "haarcascade_frontalface_default.xml", "haarcascade_fullbody.xml",
@@ -44,7 +44,7 @@ public class OpenCVFilterFaceDetectGUI extends OpenCVFilterGUI implements Action
       "haarcascade_mcs_lefteye.xml", "haarcascade_mcs_mouth.xml", "haarcascade_mcs_nose.xml", "haarcascade_mcs_rightear.xml", "haarcascade_mcs_righteye.xml",
       "haarcascade_mcs_upperbody.xml", "haarcascade_profileface.xml", "haarcascade_righteye_2splits.xml", "haarcascade_upperbody.xml" });
 
-  public OpenCVFilterFaceDetectGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterFaceDetectGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
     cascadeFile.addActionListener(this);
@@ -67,14 +67,14 @@ public class OpenCVFilterFaceDetectGUI extends OpenCVFilterGUI implements Action
   }
 
   // @Override
-  public void attachGUI() {
-    log.debug("attachGUI");
+  public void attachGui() {
+    log.debug("attachGui");
 
   }
 
   // @Override
-  public void detachGUI() {
-    log.debug("detachGUI");
+  public void detachGui() {
+    log.debug("detachGui");
 
   }
 

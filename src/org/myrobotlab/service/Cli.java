@@ -294,6 +294,7 @@ public class Cli extends Service {
     } else {
 
       String path = null;
+      log.info("line length {}", line.length());
       if (line.startsWith("/")) {
         path = String.format("/%s%s", CodecUtils.PREFIX_API, line);
       } else {
@@ -596,7 +597,6 @@ public class Cli extends Service {
    * 
    */
   static public ServiceType getMetaData() {
-
     ServiceType meta = new ServiceType(Cli.class.getCanonicalName());
     meta.addDescription("command line interpreter interface");
     meta.addCategory("framework");

@@ -40,9 +40,7 @@ public class IpCamera extends Service {
             invoke("publishDisplay", new Object[] { getName(), bi });
           }
         }
-      } catch (Exception e) {
-
-        logException(e);
+      } catch (Exception e) {        
       }
     }
   }
@@ -196,8 +194,7 @@ public class IpCamera extends Service {
       }
       in.close();
     } catch (Exception e) {
-      logException(e);
-      // connectVideoStream(host, user, password);
+    	log.error("move threw", e);
     }
     return ret.toString();
   }

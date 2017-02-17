@@ -1,7 +1,9 @@
 <!-- begin status and control for board to be viewed in above all tabs -->
 
 		<div class="col-lg-8">
-		<port id="{{service.name + 'port'}}" port-test="{{service.name}}" service-name="{{service.serial.name}}"></port>		
+		<!-- FIXME - port is not working well in that the controller can not get the portname back from the port directive :(
+		<port id="{{service.name + 'port'}}" port-test="{{service.name}}" service-name="{{service.serial.name}}"></port>
+		-->		
 		 <select ng-model="boardType" ng-change="onBoardChange(boardType)" class="form-control">
 			<option>uno</option>
 			<option>mega</option>

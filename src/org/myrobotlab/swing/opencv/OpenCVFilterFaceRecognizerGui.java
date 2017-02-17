@@ -40,12 +40,12 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFilterFaceRecognizerGUI extends OpenCVFilterGUI implements ActionListener {
+public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements ActionListener {
 
   private JTextField trainName = new JTextField("trainName", 10);
   private JCheckBox trainMode = new JCheckBox();
 
-  public OpenCVFilterFaceRecognizerGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterFaceRecognizerGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     // build the config for this filter.
     TitledBorder title = BorderFactory.createTitledBorder("Face Recognizer");
@@ -98,14 +98,14 @@ public class OpenCVFilterFaceRecognizerGUI extends OpenCVFilterGUI implements Ac
   }
 
   // @Override
-  public void attachGUI() {
-    log.debug("attachGUI");
+  public void attachGui() {
+    log.debug("attachGui");
 
   }
 
   // @Override
-  public void detachGUI() {
-    log.debug("detachGUI");
+  public void detachGui() {
+    log.debug("detachGui");
 
   }
 

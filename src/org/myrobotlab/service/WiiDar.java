@@ -168,12 +168,9 @@ public class WiiDar extends Service {
         }
 
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        logException(e);
+        log.info("shutting down");
       }
-
     }
-
   }
 
   private static final long serialVersionUID = 1L;

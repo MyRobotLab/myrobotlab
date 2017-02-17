@@ -25,53 +25,31 @@
 
 package org.myrobotlab.swing.opencv;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFilterDefaultGUI extends OpenCVFilterGUI implements ActionListener {
+public class OpenCVFilterMatchTemplateGui extends OpenCVFilterGui {
 
-  public OpenCVFilterDefaultGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterMatchTemplateGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
-
-    display.add(new JLabel("no available parameters"));
-  }
-
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    // Object o = e.getSource();
-    OpenCVFilter bf = boundFilter.filter;
-    setFilterState(bf);
-  }
-
-  // @Override
-  public void attachGUI() {
-    log.debug("attachGUI");
-
-  }
-
-  // @Override
-  public void detachGUI() {
-    log.debug("detachGUI");
 
   }
 
   @Override
   public void getFilterState(final FilterWrapper filterWrapper) {
+    boundFilter = filterWrapper;
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        // OpenCVFilter bf = filterWrapper.filter;
-        // TODO: what should this method do? local assignment of "bf" does
-        // nothing.
+        // OpenCVFilterMatchTemplate bf = (OpenCVFilterMatchTemplate)
+        // filterWrapper.filter;
+        // TODO: what to do with the "bf" result?
+        // TODO: nothing here now because it didn't do anything before.
       }
     });
+
   }
 
 }
