@@ -5,6 +5,8 @@ package org.myrobotlab.kinematics;
 
 import java.util.HashMap;
 
+import org.python.jline.internal.Log;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -136,6 +138,7 @@ public class TestJmeIntegratedMovement extends SimpleApplication {
 	public void updateObjects(HashMap<String, CollisionItem> items) {
 		objects = items;
 		updateShape = true;
+		//Log.info("data updated",System.currentTimeMillis());
 	}
 
 }

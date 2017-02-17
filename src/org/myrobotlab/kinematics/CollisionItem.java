@@ -15,7 +15,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
-public class CollisionItem {
+public class CollisionItem implements Cloneable{
   Point origin = null;
   Point end = null;
   String name;
@@ -53,7 +53,19 @@ public class CollisionItem {
   	buildCollisionItem(cloudMap);
   }
 
-  private void buildCollisionItem(HashMap<Integer[], Map3DPoint> cloudMap) {
+  public CollisionItem(CollisionItem ci) {
+  	this.origin = ci.origin;
+  	this.end = ci.end;
+  	this.name = ci.name;
+  	this.radius = ci.radius;
+  	this.ignore = ci.ignore;
+  	this.done = ci.done;
+  	this.fromKinect = ci.fromKinect;
+  	this.cloudMap = ci.cloudMap;
+		
+	}
+
+	private void buildCollisionItem(HashMap<Integer[], Map3DPoint> cloudMap) {
 		//find the average point and the area cover by the cloudMap
   	double[] avg = new double[3];
   	int[] max = new int[]{-9999,-9999,-9999};

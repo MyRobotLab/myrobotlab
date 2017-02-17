@@ -301,11 +301,11 @@ public class Matrix {
    * @return a new matrix which is equal to the difference of this - m
    */
   public Matrix subtractFrom(Matrix m) {
-    if (numRows != m.numRows || numCols != m.numCols) {
-      System.out.println("dimensions bad in addTo()");
-      return null;
-    }
     Matrix ret = new Matrix(numRows, numCols);
+    if (numRows != m.numRows || numCols != m.numCols) {
+      System.out.println("dimensions bad in substractFrom()");
+      return ret;
+    }
 
     for (int r = 0; r < numRows; r++) {
       for (int c = 0; c < numCols; c++) {

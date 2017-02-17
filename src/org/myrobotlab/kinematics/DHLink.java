@@ -2,6 +2,7 @@ package org.myrobotlab.kinematics;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
 
 //import marytts.util.math.MathUtils;
@@ -37,7 +38,7 @@ public class DHLink {
   public transient final static Logger log = LoggerFactory.getLogger(DHLink.class);
   
   private double velocity;
-  private Integer state;
+  private Integer state = Servo.SERVO_EVENT_STOPPED;
   private Double targetPos;
   public boolean hasServo = false;
   public double servoMin;

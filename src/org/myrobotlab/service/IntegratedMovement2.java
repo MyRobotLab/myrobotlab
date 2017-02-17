@@ -50,7 +50,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   private Matrix inputMatrix = null;
 
   private Point goTo;
-  private CollisionDectection collisionItems = new CollisionDectection();
+  public CollisionDectection collisionItems = new CollisionDectection();
   
   
   GeneticParameters geneticParameters = new GeneticParameters();
@@ -149,28 +149,10 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
 
 
   public double[][] createJointPositionMap(String arm) {
-    return createJointPositionMap(getArm(arm));
+  	return engines.get(arm).createJointPositionMap();
+    //return createJointPositionMap(getArm(arm));
   }
   
-
-  public double[][] createJointPositionMap(DHRobotArm arm) {
-
-    double[][] jointPositionMap = new double[arm.getNumLinks() + 1][3];
-
-    // first position is the origin... second is the end of the first link
-    jointPositionMap[0][0] = 0;
-    jointPositionMap[0][1] = 0;
-    jointPositionMap[0][2] = 0;
-
-    for (int i = 1; i <= arm.getNumLinks(); i++) {
-      Point jp = arm.getJointPosition(i - 1);
-      jointPositionMap[i][0] = jp.getX();
-      jointPositionMap[i][1] = jp.getY();
-      jointPositionMap[i][2] = jp.getZ();
-    }
-    return jointPositionMap;
-  }
-
   public DHRobotArm getArm(String arm) {
     if (engines.containsKey(arm)) {
       return engines.get(arm).getDHRobotArm();
@@ -192,7 +174,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     LoggingFactory.init(Level.INFO);
 
     Runtime.createAndStart("python", "Python");
-    Runtime.createAndStart("gui", "GUIService");
+    Runtime.createAndStart("gui", "SwingGui");
     IntegratedMovement2 ik = (IntegratedMovement2) Runtime.start("ik", "IntegratedMovement2");
     Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
     arduino.connect("COM22");
@@ -220,57 +202,116 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     omoplate.setVelocity(15);
     //#omoplate.setMinMax(10,70)
     omoplate.moveTo(10);
+    Servo Romoplate = (Servo) Runtime.start("Romoplate","Servo");
+    Romoplate.attach(arduino,31,10);
+    Romoplate.map(10,70,10,70);
+    Romoplate.setVelocity(15);
+    //#omoplate.setMinMax(10,70)
+    Romoplate.moveTo(10);
     Servo shoulder = (Servo) Runtime.start("shoulder","Servo");
-    shoulder.attach(arduino,6,30);
+    shoulder.attach(arduino,26,30);
     shoulder.map(0,180,0,180);
     //#shoulder.setMinMax(0,180)
     shoulder.setVelocity(14);
     shoulder.moveTo(20);
+    Servo Rshoulder = (Servo) Runtime.start("Rshoulder","Servo");
+    Rshoulder.attach(arduino,6,30);
+    Rshoulder.map(0,180,0,180);
+    //#shoulder.setMinMax(0,180)
+    Rshoulder.setVelocity(14);
+    Rshoulder.moveTo(20);
     Servo rotate = (Servo) Runtime.start("rotate","Servo");
     rotate.attach(arduino,9,90);
     rotate.map(46,160,46,160);
     //#rotate.setMinMax(46,180)
     rotate.setVelocity(18);
     rotate.moveTo(90);
+    Servo Rrotate = (Servo) Runtime.start("Rrotate","Servo");
+    Rrotate.attach(arduino,29,90);
+    Rrotate.map(46,160,46,160);
+    //#rotate.setMinMax(46,180)
+    Rrotate.setVelocity(18);
+    Rrotate.moveTo(90);
     Servo bicep = (Servo) Runtime.start("bicep","Servo");
     bicep.attach(arduino,8,10);
     bicep.map(5,60,5,80);
     bicep.setVelocity(26);
     //#bicep.setMinMax(5,90)
     bicep.moveTo(10);
+    Servo Rbicep = (Servo) Runtime.start("Rbicep","Servo");
+    Rbicep.attach(arduino,28,10);
+    Rbicep.map(5,60,5,80);
+    Rbicep.setVelocity(26);
+    //#bicep.setMinMax(5,90)
+    Rbicep.moveTo(10);
     Servo wrist = (Servo) Runtime.start("wrist","Servo");
     wrist.attach(arduino,7,90);
     //#wrist.map(45,135,45,135)
-    wrist.map(90,91,90,91);
+    wrist.map(89.999,90.001,89.999,90.001);
     wrist.setVelocity(26);
     //#bicep.setMinMax(5,90)
     wrist.moveTo(90);
+    Servo Rwrist = (Servo) Runtime.start("Rwrist","Servo");
+    Rwrist.attach(arduino,27,90);
+    //#wrist.map(45,135,45,135)
+    Rwrist.map(89.999,90.001,89.999,90.001);
+    Rwrist.setVelocity(26);
+    //#bicep.setMinMax(5,90)
+    Rwrist.moveTo(90);
     Servo finger = (Servo) Runtime.start("finger","Servo");
-    finger.attach(arduino,8,90);
-    finger.map(90,91,90,91);
+    finger.attach(arduino,18,90);
+    finger.map(89.999,90.001,89.999,90.001);
     finger.setVelocity(26);
     //#bicep.setMinMax(5,90)
     finger.moveTo(90);
+    Servo Rfinger = (Servo) Runtime.start("Rfinger","Servo");
+    Rfinger.attach(arduino,38,90);
+    Rfinger.map(89.999,90.001,89.999,90.001);
+    Rfinger.setVelocity(26);
+    //#bicep.setMinMax(5,90)
+    Rfinger.moveTo(90);
 
     //#define the DH parameters for the ik service
+    ik.setNewDHRobotArm("rightArm");
+    ik.setDHLink("rightArm",mtorso,113,90,0,-90);
+    //ik.setDHLink("rightArm",ttorso,0,90+65.6,346,0);
+    ik.setDHLink("rightArm",ttorso,0,180,315,90);
+    ik.setDHLink("rightArm", "rightS", 143, 180, 0, 90);
+    ik.setDHLink("rightArm",omoplate,0,-5.6,55,-90);
+    ik.setDHLink("rightArm",shoulder,77,-20+90,0,90);
+    ik.setDHLink("rightArm",rotate,284,90,40,90);
+    ik.setDHLink("rightArm",bicep,0,-7+24.4+90,300,90);
+////////////    //#ik.setDHLink(wrist,00,-90,200,0)
+    ik.setDHLink("rightArm",wrist,00,-90,100,-90);
+//////////    //print ik.currentPosition();
+//////////
+    //ik.setDHLink("rightArm",finger,00,00,300,0);
+
+    ik.startEngine("rightArm");
+    
     ik.setNewDHRobotArm("leftArm");
     ik.setDHLink("leftArm",mtorso,113,90,0,-90);
-    ik.setDHLink("leftArm",ttorso,0,90+65.6,346,0);
-    ik.setDHLink("leftArm",omoplate,0,-5.6+24.4+180,55,-90);
-    ik.setDHLink("leftArm",shoulder,77,-20+90,0,90);
-    ik.setDHLink("leftArm",rotate,284,90,40,90);
-    ik.setDHLink("leftArm",bicep,0,-7+24.4+90,300,90);
-    //#ik.setDHLink(wrist,00,-90,200,0)
-    ik.setDHLink("leftArm",wrist,00,-90,100,-90);
-    //print ik.currentPosition();
-
-    ik.setDHLink("leftArm",finger,00,00,300,0);
-
-    ik.setNewDHRobotArm("kinect");
-    ik.setDHLink("kinect",mtorso,113,90,0,-90);
-    ik.setDHLink("kinect",ttorso,0,90+90,110,-90);
-    ik.setDHLink("kinect","camera",0,90,10,90);
-
+    ik.setDHLink("leftArm",ttorso,0,180,315,90);
+    //ik.setDHLink("leftArm",ttorso,0,180,297.5,90);
+    ik.setDHLink("leftArm", "leftS", -143, 180, 0, -90);
+    ik.setDHLink("leftArm",Romoplate,0,-5.6,55,90);
+    ik.setDHLink("leftArm",Rshoulder,-77,-20+90,0,-90);
+    ik.setDHLink("leftArm",Rrotate,-284,90,40,-90);
+    ik.setDHLink("leftArm",Rbicep,0,-7+24.4+90,300,90);
+////////////    //#ik.setDHLink(wrist,00,-90,200,0)
+    ik.setDHLink("leftArm",Rwrist,00,-90,100,-90);
+//////////    //print ik.currentPosition();
+//////////
+    //ik.setDHLink("leftArm",Rfinger,00,00,300,0);
+    ik.startEngine("leftArm");
+    
+//    ik.setNewDHRobotArm("kinect");
+//    ik.setDHLink("kinect",mtorso,113,90,0,-90);
+//    ik.setDHLink("kinect",ttorso,0,90+90,110,-90);
+//    ik.setDHLink("kinect","camera",0,90,10,90);
+//
+//    ik.startEngine("kinect");
+    
     //#define object, each dh link are set as an object, but the
     //#start point and end point will be update by the ik service, but still need
     //#a name and a radius
@@ -280,12 +321,21 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     ik.addObject("mtorso", 150.0);
     ik.addObject("ttorso", 10.0);
     ik.addObject("omoplate", 10.0);
+    ik.addObject("Romoplate", 10.0);
     ik.addObject("shoulder", 50.0);
+    ik.addObject("Rshoulder", 50.0);
     ik.addObject("rotate", 50.0);
+    ik.addObject("Rrotate", 50.0);
     ik.addObject("bicep", 60.0);
+    ik.addObject("Rbicep", 60.0);
     ik.addObject("wrist", 70.0);
-    ik.addObject("finger",10.0);
-    //#ik.addObject(-1000.0, 300, 0, 1000, 300, 00, "obstacle",40)
+    ik.addObject("Rwrist", 70.0);
+    ik.addObject("leftS", 10);
+    ik.addObject("rightS", 10);
+    ik.objectAddIgnore("leftS", "rightS");
+   // ik.addObject("finger",10.0);
+    //ik.addObject("Rfinger",10.0);
+    //ik.addObject(-1000.0, 300, 0, 1000, 300, 00, "obstacle",40);
     //#ik.addObject(360,540,117,360, 550,107,"cymbal",200)
     //#ik.addObject(90,530,-180,300,545,-181,"bell", 25)
     //#ik.addObject(-170,640,-70,-170,720,-250,"tom",150)
@@ -298,11 +348,12 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     //#setting ik parameters for the computing
 
     //#move to a position
-    ik.moveTo("leftArm",260,410,-120);
+    //ik.moveTo("leftArm",260,410,-120);
     //ik.moveTo(280,190,-345);
     //#ik.moveTo("cymbal",ik.ObjectPointLocation.ORIGIN_SIDE, 0,0,5)
     //#mtorso.moveTo(45)
     log.info(ik.currentPosition("leftArm").toString());
+    log.info(ik.currentPosition("rightArm").toString());
 //    shoulder.moveTo(90);
 //    sleep(1000);
 //    log.info(ik.currentPosition("leftArm").toString());
@@ -312,10 +363,27 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     //ik.startOpenNI();
     
     //ik.processKinectData();
+    //ik.holdTarget("leftArm", true);
+    ik.visualize();
 
   }
 
-  @Override
+  private void startEngine(String arm) {
+  	getEngine(arm).start();
+		
+	}
+
+	private Thread getEngine(String arm) {
+		if (engines.containsKey(arm)){
+			return engines.get(arm);
+		}
+		else {
+			log.info("no engines found {}", arm);
+			return null;
+		}
+	}
+
+	@Override
   public Map<String, Double> publishJointAngles(HashMap<String, Double> angleMap) {
     return angleMap;
   }
@@ -421,14 +489,6 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   public void onIKServoEvent(IKData data) {
   	for (IMEngine e : engines.values()) {
   		e.updateLinksPosition(data);
-//	    for (DHLink l: e.getDHRobotArm().getLinks()) {
-//	      if (l.getName().equals(data.name)){
-//	        l.addPositionValue(data.pos.doubleValue());
-//	        l.setState(data.state);
-//	        l.setVelocity(data.velocity);
-//	        l.setTargetPos(data.targetPos);
-//	      }
-//	    }
     }
     if (openni != null) {
     	map3d.updateKinectPosition(currentPosition(kinectName));
@@ -592,6 +652,10 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
 	public Object[] publishAngles(String name, double positionValueDeg) {
 		Object[] retval = new Object[]{(Object)name, (Object)positionValueDeg};
 		return retval;
+	}
+	
+	public void holdTarget(String arm, boolean holdEnabled) {
+		engines.get(arm).holdTarget(holdEnabled);
 	}
 }
 
