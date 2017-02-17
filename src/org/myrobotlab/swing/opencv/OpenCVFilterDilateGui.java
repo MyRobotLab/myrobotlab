@@ -1,6 +1,6 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author GroG (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -28,34 +28,48 @@ package org.myrobotlab.swing.opencv;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.opencv.OpenCVFilterAddMask;
+import org.myrobotlab.opencv.OpenCVFilterDilate;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFilterAddMaskGUI extends OpenCVFilterGUI implements ActionListener {
+public class OpenCVFilterDilateGui extends OpenCVFilterGui implements ActionListener {
 
-  public OpenCVFilterAddMaskGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  JComboBox<Integer> iterations = new JComboBox<Integer>(new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+
+  public OpenCVFilterDilateGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
-    // ComboBoxModel list = new ComboBoxModel(this);
+
+    iterations.addActionListener(this);
+    display.add(new JLabel("iterations  "));
+    display.add(iterations);
+
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    // Object o = e.getSource();
-    OpenCVFilterAddMask bf = (OpenCVFilterAddMask) boundFilter.filter;
+    Object o = e.getSource();
+    OpenCVFilterDilate bf = (OpenCVFilterDilate) boundFilter.filter;
+
+    if (o == iterations) {
+      bf.numberOfIterations = (Integer) iterations.getSelectedItem();
+    }
+
     setFilterState(bf);
   }
 
   // @Override
-  public void attachGUI() {
-    log.debug("attachGUI");
+  public void attachGui() {
+    log.debug("attachGui");
+
   }
 
   // @Override
-  public void detachGUI() {
-    log.debug("detachGUI");
+  public void detachGui() {
+    log.debug("detachGui");
 
   }
 
@@ -64,8 +78,8 @@ public class OpenCVFilterAddMaskGUI extends OpenCVFilterGUI implements ActionLis
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        OpenCVFilterAddMask bf = (OpenCVFilterAddMask) filterWrapper.filter;
-        sources.setSelectedItem(bf.sourceName);
+        OpenCVFilterDilate bf = (OpenCVFilterDilate) filterWrapper.filter;
+        iterations.setSelectedItem(bf.numberOfIterations);
       }
     });
   }

@@ -25,55 +25,123 @@
 
 package org.myrobotlab.swing;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultCaret;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Cli;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
-public class CliGui extends ServiceGui implements ActionListener {
+public class CliGui extends ServiceGui implements KeyListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(CliGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(CliGui.class);
 
-  public CliGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
-  }
+	JTextArea console = new JTextArea();
+	JScrollPane scrollPane = new JScrollPane(console);
+	StringBuilder input = new StringBuilder();
 
-  @Override
-  public void actionPerformed(ActionEvent arg0) {
+	public CliGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
+		super(boundServiceName, myService, tabs);
 
-  }
+		DefaultCaret caret = (DefaultCaret) console.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		console.setBackground(Color.BLACK);
+		console.setForeground(Color.GREEN);
+		scrollPane.setPreferredSize(new Dimension(5, 40));
+		addLine(scrollPane);
+		console.addKeyListener(this);
+	}
 
-  @Override
-  public void subscribeGui() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
+	public void keyPressed(KeyEvent e) {
+		log.info("keyPressed {} {} {}", e.getKeyCode(), e.getKeyChar(), input.length());
+		if (e.getKeyChar() == com.sun.glass.events.KeyEvent.VK_ALT) {
+			// e.consume();
+			return;
+		}
 
-    // subscribe("publishState", "onState", _TemplateService.class);
-    // send("publishState");
-  }
+		if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_DELETE) {
+			try {
+				input.delete(input.length() - 2, input.length() - 1);
+				/*
+				Document doc = console.getDocument();
+				doc.remove(doc.getLength() - 1, 1);
+				*/
+			} catch (Exception e2) {
+				log.error("doc", e2);
+			}
+			// e.consume();
+			return;
+		}
 
-  @Override
-  public void unsubscribeGui() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
+		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+			send("process", input.toString());
+			input.setLength(0);
+			// console.append("\n");
+			// e.consume();
+			return;
+		}
 
-    // unsubscribe("publishState", "onState", _TemplateService.class);
-  }
+		if (e.getKeyCode() > 31 && e.getKeyCode() < 128) {
+			input.append(e.getKeyChar());			
+		}
+	}
 
-  public void onState(Cli cli) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
 
-      }
-    });
-  }
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		/*
+		 * log.info("keyTyped {} {}", e.getKeyChar(), e.getKeyCode()); if
+		 * (e.getKeyCode() == KeyEvent.VK_UNDEFINED){ e.consume(); return; }
+		 * input.append(e.getKeyChar()); int len =
+		 * console.getDocument().getLength(); console.setCaretPosition(len);
+		 */
+	}
+
+	public void onPrompt(String out) {
+		console.append(out);
+		console.setCaretPosition(console.getDocument().getLength());
+	}
+
+	public void onState(Cli cli) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+			}
+		});
+	}
+
+	public void onStdout(String out) {
+		console.append(out);
+		console.setCaretPosition(console.getDocument().getLength());
+	}
+
+	@Override
+	public void subscribeGui() {
+		subscribe("stdout");
+		subscribe("getPrompt");
+		send("getPrompt");
+	}
+
+	@Override
+	public void unsubscribeGui() {
+		unsubscribe("stdout");
+		unsubscribe("getPrompt");
+	}
 
 }

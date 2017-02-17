@@ -39,7 +39,7 @@ import javax.swing.event.ChangeListener;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFloorFinderGUI extends OpenCVFilterGUI {
+public class OpenCVFloorFinderGui extends OpenCVFilterGui {
 
   public class AdjustSlider implements ChangeListener {
 
@@ -53,7 +53,7 @@ public class OpenCVFloorFinderGUI extends OpenCVFilterGUI {
       if (slider.getName().compareTo("apertureSize") == 0) {
         params[2] = slider.getValue() * 2 + 1;
       }
-      myGUI.send(boundServiceName, "setFilterCFG", params);
+      myGui.send(boundServiceName, "setFilterCFG", params);
       slider.value.setText("" + slider.getValue());
     }
   }
@@ -77,7 +77,7 @@ public class OpenCVFloorFinderGUI extends OpenCVFilterGUI {
 
   AdjustSlider change = new AdjustSlider();
 
-  public OpenCVFloorFinderGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFloorFinderGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
     lowThreshold.setName("lowThreshold");

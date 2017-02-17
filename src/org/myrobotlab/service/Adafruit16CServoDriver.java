@@ -130,7 +130,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 				if (e instanceof InterruptedException) {
 					log.debug("Shuting down SpeedControl");
 				} else {
-					logException(e);
+					log.error("speed control threw", e);
 				}
 			}
 		}

@@ -127,7 +127,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             msg.send('error', 'arduino path is not set');
             return;
         }
-        if (angular.isUndefined(portDirectiveScope.portName) || portDirectiveScope.portName == null || portDirectiveScope.portName == "" ){
+        if (angular.isUndefined(portDirectiveScope) || portDirectiveScope.portName == null || portDirectiveScope.portName == "" ){
             msg.send('error', 'port name not set');
             return;
         }

@@ -35,13 +35,13 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterDetector;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFilterDetectorGUI extends OpenCVFilterGUI implements ActionListener {
+public class OpenCVFilterDetectorGui extends OpenCVFilterGui implements ActionListener {
 
   String watchText = "watch foreground";
   String learnText = "learn background";
   JButton learn = new JButton(watchText);
 
-  public OpenCVFilterDetectorGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterDetectorGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
     display.add(learn);

@@ -25,30 +25,36 @@
 
 package org.myrobotlab.swing.opencv;
 
-import javax.swing.SwingUtilities;
-
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFilterMatchTemplateGUI extends OpenCVFilterGUI {
+public class OpenCVFilterFindContoursGui extends OpenCVFilterGui {
 
-  public OpenCVFilterMatchTemplateGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterFindContoursGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
   }
 
+  public void apply() {
+    log.debug("apply");
+
+  }
+
+  // @Override
+  public void attachGui() {
+    log.debug("attachGui");
+
+  }
+
+  // @Override
+  public void detachGui() {
+    log.debug("detachGui");
+
+  }
+
   @Override
-  public void getFilterState(final FilterWrapper filterWrapper) {
-    boundFilter = filterWrapper;
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        // OpenCVFilterMatchTemplate bf = (OpenCVFilterMatchTemplate)
-        // filterWrapper.filter;
-        // TODO: what to do with the "bf" result?
-        // TODO: nothing here now because it didn't do anything before.
-      }
-    });
+  public void getFilterState(FilterWrapper filter) {
+    // TODO Auto-generated method stub
 
   }
 

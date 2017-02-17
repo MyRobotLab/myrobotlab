@@ -31,12 +31,12 @@ import javax.swing.JTextField;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFilterSmoothGUI extends OpenCVFilterGUI {
+public class OpenCVFilterSmoothGui extends OpenCVFilterGui {
 
   JButton button = new JButton("smooth me");
   JTextField kernel = new JTextField("3");
 
-  public OpenCVFilterSmoothGUI(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterSmoothGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     display.add(button);
     display.add(kernel);
