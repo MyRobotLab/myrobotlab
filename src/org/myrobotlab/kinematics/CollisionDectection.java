@@ -10,19 +10,26 @@ import java.util.HashMap;
  * @author Christian
  *
  */
-public class CollisionDectection {
+public class CollisionDectection implements Cloneable {
   transient HashMap<String, CollisionItem> items= new HashMap<String,CollisionItem>();
   private boolean collision;
   private Point[] collisionPoint = {new Point(0,0,0,0,0,0),new Point(0,0,0,0,0,0)};
   private CollisionItem[] collisionItems = new CollisionItem[2];
   private double[] collisionLocation = new double[2];
   
+  public class CollisionResults {
+  	boolean haveCollision = false;
+  	Point[] collisionPoints = new Point[2];
+  	CollisionItem[] collisionItems = new CollisionItem[2];
+  	double collisionLocation[] = new double[2];
+ 	
+  }
   
   public CollisionDectection() {
     super();
   }
 
-  public void addItem(CollisionItem item) {
+  public synchronized void addItem(CollisionItem item) {
     if (items.containsKey(item.getName())) {
       CollisionItem updateItem = items.get(item.getName());
       updateItem.setOrigin(item.getOrigin());
@@ -38,7 +45,7 @@ public class CollisionDectection {
     items.put(item.getName(), item);
   }
 
-  public void runTest() {
+  public synchronized CollisionResults runTest() {
     collision = false;
     for (CollisionItem item : items.values()){
       //vect1 = vector of the line between the extremity of the first item
@@ -111,7 +118,7 @@ public class CollisionDectection {
           rad2=0;
         }
         item.haveDone(citem.getName());
-        if (d <= rad1 + rad2 /*&& ((tk[0] != 0 && tk[0] != 1.0) || (tk[1] != 0 && tk[1] != 1))*/) {
+        if (d <= rad1 + rad2 + 5 /*&& ((tk[0] != 0 && tk[0] != 1.0) || (tk[1] != 0 && tk[1] != 1))*/) {
           //we got a potential collision
           collision = true;
           collisionPoint[0] = point1;
@@ -120,10 +127,19 @@ public class CollisionDectection {
           collisionItems[1] = citem;
           collisionLocation[0] = tk[0];
           collisionLocation[1] = tk[1];
-          return;
+          CollisionResults retval = new CollisionResults();
+          retval.haveCollision = true;
+          retval.collisionPoints[0] = point1;
+          retval.collisionPoints[1] = point2;
+          retval.collisionItems[0] = item;
+          retval.collisionItems[1] = citem;
+          retval.collisionLocation[0] = tk[0];
+          retval.collisionLocation[1] = tk[1];
+          return retval;
         }
       }
     }
+    return new CollisionResults();
   }
   
   public double[] calcPerpendicularity(double[][] vectT, double[] vect) {
@@ -234,6 +250,21 @@ public class CollisionDectection {
 
 	public HashMap<String, CollisionItem> getItems() {
 		return items;
+	}
+	
+	public CollisionDectection clones() {
+		CollisionDectection retval = null;
+		try {
+			retval = (CollisionDectection) this.clone();
+			retval.items = (HashMap<String, CollisionItem>) items.clone();
+			for (CollisionItem ci:items.values()){
+				retval.items.put(ci.name, new CollisionItem(ci));
+			}
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return retval;
 	}
 }
 

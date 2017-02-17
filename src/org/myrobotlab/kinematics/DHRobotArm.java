@@ -4,9 +4,10 @@ import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.InverseKinematics3D;
+import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
 
-public class DHRobotArm {
+public class DHRobotArm implements Cloneable{
 
   transient public final static Logger log = LoggerFactory.getLogger(DHRobotArm.class);
 
@@ -32,7 +33,7 @@ public class DHRobotArm {
   public Matrix getJInverse() {
     // something small.
     // double delta = 0.000001;
-    double delta = 0.001;
+    double delta = 0.0001;
     int numLinks = this.getNumLinks();
     // we need a jacobian matrix that is 6 x numLinks
     // for now we'll only deal with x,y,z we can add rotation later. so only 3
@@ -88,7 +89,7 @@ public class DHRobotArm {
     return links.size();
   }
 
-  public Point getJointPosition(int index) {
+  public synchronized Point getJointPosition(int index) {
     if (index > this.links.size() || index < 0) {
       // TODO: bound check
       return null;
@@ -159,8 +160,8 @@ public class DHRobotArm {
     // log.debug("-------------------------");
     // log.debug(m);
     // TODO: validate this approach..
-    for (DHLink link : links) {
-      Matrix s = link.resolveMatrix();
+    for (int i = 0; i < links.size(); i++){
+      Matrix s = links.get(i).resolveMatrix();
       // log.debug(s);
       m = m.multiply(s);
       // log.debug("-------------------------");
@@ -265,4 +266,23 @@ public class DHRobotArm {
     ik3D = ik3d;
   }
 
+  public DHRobotArm clones() {
+			DHRobotArm retval = null;
+			try {
+				retval = (DHRobotArm) this.clone();
+				retval.links = (ArrayList<DHLink>) links.clone();
+			} catch (CloneNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return retval;
+  }
+  public boolean armMovementEnds() {
+  	for (DHLink link: links) {
+  		if (link.getState() != Servo.SERVO_EVENT_STOPPED) {
+  			return false;
+  		}
+  	}
+  	return true;
+  }
 }
