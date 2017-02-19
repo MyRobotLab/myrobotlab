@@ -107,7 +107,7 @@ public:
 	void publishI2cData( byte deviceId, const byte* data,  byte dataSize);
 	void publishDebug(const char* debugMsg,  byte debugMsgSize);
 	void publishPinArray(const byte* data,  byte dataSize);
-	void publishServoEvent( byte deviceId,  byte eventType,  byte currentPos,  byte targetPos);
+	void publishServoEvent( byte deviceId,  byte eventType,  int currentPos,  int targetPos);
 	void publishSerialData( byte deviceId, const byte* data,  byte dataSize);
 	void publishUltrasonicSensorData( byte deviceId,  int echoTime);
 
