@@ -82,6 +82,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 			"Arduino Pro or Pro Mini (3.3V, 8 MHz) w/ ATmega168", "Arduino NG or older w/ ATmega168",
 			"Arduino NG or older w/ ATmega8" };
 
+	// FIXME - double buffer 2 JPanels
 	class TraceData {
 		Color color = null;
 		String controllerName;
@@ -98,8 +99,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	}
 
 	JComboBox<String> ports = new JComboBox<String>();
+	
 
-	// JPanel statePanel = new JPanel();
 	JLabel state = new JLabel();
 	JLabel version = new JLabel();
 
@@ -110,14 +111,10 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
 	Graphics g = null;
 
-	JLayeredPane imageMap;
-
 	int lastTraceXPos = 0;
 	Arduino myArduino;
 
 	VideoWidget oscope = null;
-
-	JPanel oscopePanel = null;
 
 	/**
 	 * array list of graphical pin components built from pinList
@@ -126,6 +123,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
 	List<PinDefinition> pinList = null;
 	ArduinoGui self;
+
 	SerializableImage sensorImage = null;
 
 	JButton connect = new JButton("connect");
@@ -184,11 +182,10 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	public ArduinoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		self = this;
-
 		state.setText("not connected");
 
-		addTop(null, "port ", ports, connect, " state ", state);
-		addTop(null, "board ", 2, boardTypes, " version ", version);
+		addTop(null, " port:", ports, connect, " ", state);
+		addTop(null, " board:", 3, boardTypes, " version:", version);
 
 		localTabs.setTabPlacement(SwingConstants.RIGHT);
 		localTabs.setPreferredSize(new Dimension(300, 300));
@@ -198,6 +195,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 		addMrlCommPanel();
 
 		addLine(localTabs);
+
 		serialRefresh.addActionListener(self);
 		softReset.addActionListener(self);
 		connect.addActionListener(self);
@@ -263,16 +261,10 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
 			} else if (b.type == PinComponent.TYPE_INOUT) {
 				if ("out".equals(cmd)) {
-					// is now input
-					value = PinComponent.INPUT;
-					myService.send(boundServiceName, "pinMode", address, value);
-					myService.send(boundServiceName, "digitalReadPollingStart", address);
+					myService.send(boundServiceName, "enablePin", address);
 					b.toggle();
 				} else if ("in".equals(cmd)) {
-					// is now output
-					value = PinComponent.OUTPUT;
-					myService.send(boundServiceName, "pinMode", address, value);
-					myService.send(boundServiceName, "digitalReadPollingStop", address);
+					myService.send(boundServiceName, "disablePin", address);
 					b.toggle();
 				} else {
 					log.error(String.format("unknown digital pin cmd %s", cmd));
@@ -282,15 +274,11 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 				// digital pin
 				if (!pin.isAnalog) {
 					if (!pin.inOut.isOn) { // pin is off turn it on
-						value = PinComponent.INPUT;
-						myService.send(boundServiceName, "pinMode", address, value);
-						myService.send(boundServiceName, "digitalReadPollingStart", address);
+						myService.send(boundServiceName, "enablePin", address);
 						pin.inOut.setOn(); // in
 						b.setOn();
 					} else {
-						value = PinComponent.OUTPUT;
-						myService.send(boundServiceName, "pinMode", address, value);
-						myService.send(boundServiceName, "digitalReadPollingStop", address);
+						myService.send(boundServiceName, "diablePin", address);
 						pin.inOut.setOff();// out
 						b.setOff();
 					}
@@ -299,12 +287,12 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 					myService.send(boundServiceName, "pinMode", address, value);
 					// analog pin
 					if (pin.activeInActive.isOn) {
-						myService.send(boundServiceName, "analogReadPollingStop", address);
+						myService.send(boundServiceName, "enablePin", address);
 						pin.activeInActive.setOff();
 						pin.trace.setOff();
 						b.setOff();
 					} else {
-						myService.send(boundServiceName, "analogReadPollingStart", address);
+						myService.send(boundServiceName, "diablePin", address);
 						pin.activeInActive.setOn();
 						pin.trace.setOn();
 						b.setOn();
@@ -408,16 +396,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-
-				if (imageMap != null) {
-					localTabs.remove(imageMap);
-				}
-
-				imageMap = new JLayeredPane();
-				// imageMap.setPreferredSize(size);
+				JLayeredPane imageMap = new JLayeredPane();
 				pinComponentList = new ArrayList<PinComponent>();
 
-				// set correct arduino image
 				JLabel image = new JLabel();
 
 				ImageIcon dPic = Util.getImageIcon("Arduino/arduino.duemilanove.200.pins.png");
@@ -554,17 +535,10 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 			@Override
 			public void run() {
 
-				if (imageMap != null) {
-					localTabs.remove(imageMap);
-				}
-
 				pinComponentList = new ArrayList<PinComponent>();
-				imageMap = new JLayeredPane();
+				JLayeredPane imageMap = new JLayeredPane();
 				imageMap.setPreferredSize(size);
-
-				// set correct arduino image
 				JLabel image = new JLabel();
-
 				ImageIcon dPic = Util.getImageIcon("Arduino/mega.200.pins.png");
 				image.setIcon(dPic);
 				Dimension s = image.getPreferredSize();
@@ -662,11 +636,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 			@Override
 			public void run() {
 
-				if (oscopePanel != null) {
-					localTabs.remove(oscopePanel);
-				}
+				JPanel oscopePanel = null;
 
-				// CREATE SERVICE GUI !!!
 				oscopePanel = new JPanel(new GridBagLayout());
 				GridBagConstraints opgc = new GridBagConstraints();
 
@@ -789,8 +760,6 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 					// update panels based on state change
 					// TODO - check what state the panels are to see if a
 					// change is needed
-					addPinPanel();
-					addOscopePanel();
 					uploadResult.setText(myArduino.uploadSketchResult);
 				}
 			}

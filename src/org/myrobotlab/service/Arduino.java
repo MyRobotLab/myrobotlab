@@ -1996,7 +1996,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			virtual.connect("COM78");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			Runtime.start("cli", "Cli");
-			Runtime.start("webgui", "WebGui");
+			// Runtime.start("webgui", "WebGui");
 
 			boolean done = true;
 			if (done) {

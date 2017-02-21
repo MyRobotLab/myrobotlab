@@ -103,7 +103,7 @@ public class VirtualArduino extends Service implements RecordControl {
       log.info("already connected");
       return;
     }
-    connectVirtualUart(portName, portName + ".UART");
+    uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
   }
 
   static public ServiceType getMetaData() {
@@ -115,23 +115,6 @@ public class VirtualArduino extends Service implements RecordControl {
     meta.addPeer("uart", "Serial", "serial device for this Arduino");
     meta.addCategory("simulator");
     return meta;
-  }
-
-  // TODO - shouldn't this be part of Serial service ?
-  public SerialDevice connectVirtualUart(String myPort, String uartPort) throws IOException {
-
-    BlockingQueue<Integer> left = new LinkedBlockingQueue<Integer>();
-    BlockingQueue<Integer> right = new LinkedBlockingQueue<Integer>();
-
-    // add our virtual port
-    PortQueue vPort = new PortQueue(myPort, left, right);
-    Serial.ports.put(myPort, vPort);
-
-    PortQueue uPort = new PortQueue(uartPort, right, left);
-    uart.connectPort(uPort, uart);
-
-    log.info(String.format("connectToVirtualUart - creating uart %s <--> %s", myPort, uartPort));
-    return uart;
   }
 
   @Override

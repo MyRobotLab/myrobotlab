@@ -41,7 +41,8 @@ import org.slf4j.Logger;
  * Serial - a service that allows reading and writing to a serial port device.
  *
  */
-public class Serial extends Service implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice {
+public class Serial extends Service
+		implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice {
 
 	/**
 	 * general read timeout - 0 is infinite > 0 is number of milliseconds to
@@ -147,10 +148,10 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 	 * is null - we will let MRL figure out what is best.
 	 */
 	String hardwareLibrary = null;
-	
+
 	transient OutputStream recordRx = null;
 	transient OutputStream recordTx = null;
-	
+
 	static List<String> formats = null;
 	static String format = "hex";
 
@@ -246,7 +247,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 	public Serial(String n) {
 		super(n);
 		listeners.put(n, this);
-		if (formats == null){
+		if (formats == null) {
 			formats = new ArrayList<String>();
 			formats.add("bin");
 			formats.add("hex");
@@ -320,7 +321,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 		setParams(baudRate, dataBits, stopBits, parity);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.myrobotlab.service.SerialDevice#open(java.lang.String)
 	 */
 	@Override
@@ -471,7 +474,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
 		// we have a portName and we are connected
 		portName = port.getName();
-		
+
 		// save(); why?
 		broadcastState();
 		return port;
@@ -496,13 +499,15 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 	 */
 
 	public Port createHardwarePort(String name, int rate, int databits, int stopbits, int parity) {
-		log.info(String.format("creating %s port %s %d|%d|%d|%d", hardwareLibrary, name, rate, databits, stopbits, parity));
+		log.info(String.format("creating %s port %s %d|%d|%d|%d", hardwareLibrary, name, rate, databits, stopbits,
+				parity));
 		try {
 
 			hardwareLibrary = getHardwareLibrary();
 
 			Class<?> c = Class.forName(hardwareLibrary);
-			Constructor<?> constructor = c.getConstructor(new Class<?>[] { String.class, int.class, int.class, int.class, int.class });
+			Constructor<?> constructor = c
+					.getConstructor(new Class<?>[] { String.class, int.class, int.class, int.class, int.class });
 			Port hardwarePort = (Port) constructor.newInstance(name, rate, databits, stopbits, parity);
 
 			info("created  port %s %d|%d|%d|%d - goodtimes", name, rate, databits, stopbits, parity);
@@ -535,6 +540,32 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 		return portQueue;
 	}
 
+	static public Serial connectVirtualUart(String myPort) throws IOException {
+		return connectVirtualUart(null, myPort, String.format("%s.UART", myPort));
+	}
+
+	static public Serial connectVirtualUart(String myPort, String uartPort) throws IOException {
+		return connectVirtualUart(null, myPort, uartPort);
+	}
+
+	static public Serial connectVirtualUart(Serial uart, String myPort, String uartPort) throws IOException {
+
+		BlockingQueue<Integer> left = new LinkedBlockingQueue<Integer>();
+		BlockingQueue<Integer> right = new LinkedBlockingQueue<Integer>();
+
+		// add our virtual port
+		PortQueue vPort = new PortQueue(myPort, left, right);
+		Serial.ports.put(myPort, vPort);
+
+		PortQueue uPort = new PortQueue(uartPort, right, left);
+		if (uart == null) {
+			uart = (Serial) Runtime.start(String.format("%s.UART", myPort), "Serial");
+		}
+		uart.connectPort(uPort, uart);
+
+		log.info(String.format("connectToVirtualUart - creating uart %s <--> %s", myPort, uartPort));
+		return uart;
+	}
 
 	/**
 	 * disconnect = close + remove listeners all ports on serial network
@@ -627,7 +658,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 			Class<?> c = Class.forName(getHardwareLibrary());
 			return (SerialControl) c.newInstance();
 		} catch (Exception e) {
-			log.error("getPortSource",e);
+			log.error("getPortSource", e);
 		}
 
 		return null;
@@ -645,7 +676,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 	public int getTimeout() {
 		return timeoutMS;
 	}
-
 
 	public boolean isConnected() {
 		return portName != null;
@@ -674,11 +704,11 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 			blockingRX.add(newByte);
 		}
 
-		if (recordRx != null){
+		if (recordRx != null) {
 			// potentially variety of formats can be supported here
 			recordRx.write(String.format(" %02X", newByte).getBytes());
 		}
-		
+
 		return newByte;
 	}
 
@@ -745,7 +775,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 		return data;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.myrobotlab.service.SerialDevice#read()
 	 */
 	@Override
@@ -884,13 +916,12 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 		recordRx = new FileOutputStream(String.format("%s.rx.%s", getName(), Serial.format));
 		recordTx = new FileOutputStream(String.format("%s.tx.%s", getName(), Serial.format));
 	}
-	
+
 	public void setFormat(String format) throws Exception {
 		Serial.format = format;
 	}
-	
-	public List<String> getFormats()
-	{
+
+	public List<String> getFormats() {
 		return formats;
 	}
 
@@ -971,12 +1002,12 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
 	public void stopRecording() {
 		try {
-			if (recordRx != null){
+			if (recordRx != null) {
 				recordRx.close();
 				recordRx = null;
 			}
-			
-			if (recordTx != null){
+
+			if (recordTx != null) {
 				recordTx.close();
 				recordTx = null;
 			}
@@ -999,7 +1030,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 	}
 
 	// write(byte[] b) IOException
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.myrobotlab.service.SerialDevice#write(byte[])
 	 */
 	@Override
@@ -1011,7 +1044,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
 	// TODO: remove this method use write(int[] b) instead
 	synchronized public void write(int b) throws Exception {
-
 
 		if (connectedPorts.size() == 0) {
 			error("can not write to a closed port!");
@@ -1027,9 +1059,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 		invoke("publishTX", b);
 
 		++txCount;
-		if (recordTx != null){
+		if (recordTx != null) {
 			recordTx.write(String.format(" %02X", b).getBytes());
-		}		
+		}
 	}
 
 	synchronized public void write(int[] data) throws Exception {
@@ -1043,13 +1075,13 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 			for (int i = 0; i < data.length; ++i) {
 				// main line TX
 				invoke("publishTX", data[i]);
-				++txCount;				
+				++txCount;
 			}
 		}
-		
-		if (recordTx != null){
+
+		if (recordTx != null) {
 			for (int i = 0; i < data.length; ++i) {
-				recordTx.write(data[i]);				
+				recordTx.write(data[i]);
 			}
 		}
 	}
@@ -1133,17 +1165,15 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 			Serial serial = (Serial) Runtime.start("serial", "Serial");
 			// Runtime.start("arduino", "Arduino");
 			Runtime.start("gui", "SwingGui");
-			
-			 boolean done = true;
-	      if (done) {
-	        return;
-	      }
 
-	      
+			boolean done = true;
+			if (done) {
+				return;
+			}
+
 			Runtime.start("python", "Python");
 			Runtime.start("webgui", "WebGui");
 
-		
 			int timeout = 500;// 500 ms serial timeout
 
 			// Runtime.start("gui", "SwingGui");
@@ -1248,7 +1278,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 				log.info(String.format("written %d read back %d", i, readBack));
 				if (i < 256 && i > -1) {
 					if (readBack != i) {
-						throw new IOException(String.format("read back not the same as written for value %d %d !", i, readBack));
+						throw new IOException(
+								String.format("read back not the same as written for value %d %d !", i, readBack));
 					}
 				}
 			}
@@ -1284,9 +1315,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 			uart.stopRecording();
 
 			// ======= decimal format begin ===========
-		
+
 			// default non-binary format is ascii decimal
-			
+
 			// uart.record("test/Serial/uart.2");
 			serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte) 255 });
 			// we have to pause here momentarily
@@ -1331,11 +1362,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 		return lastPortName;
 	}
 
+	@Override
+	public void flush() {
 
-  @Override
-  public void flush() {
-   
-  }
-
+	}
 
 }
