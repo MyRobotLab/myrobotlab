@@ -111,18 +111,19 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 		// north = new JPanel(new GridLayout(0, 2)); 
 		
 		north = new JPanel(new GridBagLayout()); 
-		JPanel subNorth = new JPanel(new BorderLayout());
-		subNorth.add(north, BorderLayout.WEST);
+		/*
+		JPanel alignNw = new JPanel(new BorderLayout());
+		alignNw.add(north, BorderLayout.WEST);
+		*/
+		
 		west = new JPanel(new GridLayout(0, 2));
 		// center = new JPanel(); // vertical stack
 		// center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
 		center = new JPanel(new GridLayout(0, 2));
 		east = new JPanel(new GridLayout(0, 2));
-		// east = new JPanel(new GridLayout(0, 1)); // vertical stack
-		// new BoxLayout(east, BoxLayout.Y_AXIS);
 		south = new JPanel(new GridLayout(0, 2)); // flow
 
-		display.add(subNorth, BorderLayout.NORTH);
+		display.add(north, BorderLayout.NORTH);
 		display.add(east, BorderLayout.EAST);
 		display.add(center, BorderLayout.CENTER);
 		display.add(west, BorderLayout.WEST);
@@ -582,7 +583,7 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 
 	GridBagConstraints gcNorth = null;
 
-	public void addTop(String title, Object... components) {
+	public void addTop(String title, Object... components) {		
 		if (gcNorth == null) {
 			gcNorth = new GridBagConstraints();			
 			gcNorth.anchor = GridBagConstraints.WEST;
@@ -607,7 +608,7 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 				return;
 			}
 			if (o.getClass().equals(Integer.class)) {
-				gcNorth.gridwidth = 2;
+				gcNorth.gridwidth = (Integer)o;
 				continue;
 			}
 
@@ -617,8 +618,10 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 			} else {
 				j = (JComponent) o;
 			}
-			gcNorth.gridx += 1;
+			
 			north.add(j, gcNorth);
+			gcNorth.gridx += gcNorth.gridwidth;
+			gcNorth.gridwidth = 1;
 		}
 		gcNorth.gridy += 1;
 	}

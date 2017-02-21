@@ -63,11 +63,12 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	// menu
 	JComboBox<String> reqFormat = new JComboBox<String>(new String[] { "decimal", "hex", "ascii", "arduino" });
 	JComboBox<String> ports = new JComboBox<String>();
+	JButton connect = new JButton("connect");
 	JButton refresh = new JButton("refresh");
 
 	JButton createVirtualPort = new JButton("create virtual uart");
 	JButton record = new JButton();
-	JButton connectButton = new JButton();
+	
 
 	JLabel connectLight = new JLabel();
 
@@ -96,27 +97,18 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		rx.setEditable(false);
 		autoScroll(true);
 
-		addTopGroup(null, "port ", ports, refresh, connectLight, " ", reqFormat, createVirtualPort, record,
-				connectButton);
+		addTop(null, connectLight, "  port: ", ports, connect, refresh, " ", reqFormat, createVirtualPort, record);
 
 		addLine(new JScrollPane(rx));
 		addLine(new JScrollPane(tx));
-		// addGroup("rx", new JScrollPane(rx));
-		// addGroup("tx", new JScrollPane(tx));
-		/*
-		 * addGroup("rx", rx); addGroup("tx", tx);
-		 * 
-		 * JPanel textArea = new JPanel(new GridLayout(0, 1)); textArea.add(new
-		 * JLabel("rx")); textArea.add(new JScrollPane(rx)); textArea.add(new
-		 * JLabel("tx")); textArea.add(new JScrollPane(tx)); addLine(textArea);
-		 */
+		
 		addBottomGroup(null, send, sendFile, "rx", rxTotal, "tx", txTotal);
 
 		createVirtualPort.addActionListener(this);
 		send.addActionListener(this);
 		sendFile.addActionListener(this);
 		record.addActionListener(this);
-		connectButton.addActionListener(this);
+		connect.addActionListener(this);
 		reqFormat.addItemListener(this);
 		refresh.addActionListener(this);
 	}
@@ -133,15 +125,15 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 				send("broadcastState");
 			}
 		}
-		if (o == connectButton) {
+		if (o == connect) {
 			// TODO: make this connect/disconnect
 			if (mySerial.isConnected()) {
 				mySerial.disconnect();
-				connectButton.setText("connect");
+				connect.setText("connect");
 			} else {
 				try {
 					mySerial.open((String) ports.getSelectedItem());
-					connectButton.setText("disconnect");
+					connect.setText("disconnect");
 				} catch (Exception e2) {
 					myService.error("could not connect");
 					log.error("connect in gui threw", e2);
@@ -150,7 +142,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 		}
 		if (o == createVirtualPort) {
-			send("createVirtualPort");
+			send("connectVirtualUart", "COM88");
 		}
 		if (o == refresh) {
 			send("refresh");
@@ -211,7 +203,6 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 	public void onPortNames(final List<String> inPorts) {
 		ports.removeAllItems();
-		ports.addItem("");
 		for (int i = 0; i < inPorts.size(); ++i) {
 			ports.addItem(inPorts.get(i));
 		}
@@ -233,7 +224,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 					// prevent re-firing the event :P
 					reqFormat.removeItemListener(myself);
-					ports.removeItemListener(myself);
+					// ports.removeItemListener(myself);
 
 					mySerial = serial;
 					// refresh all the ports in the combo box
@@ -243,7 +234,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 					// ie connection value and current port
 					setPortStatus();
 
-					ports.addItemListener(myself);
+					// ports.addItemListener(myself);
 					reqFormat.addItemListener(myself);
 
 					if (!serial.isRecording()) {
@@ -252,9 +243,11 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 						record.setText("stop recording");
 					}
 					if (serial.isConnected()) {
-						connectButton.setText("disconnect");
+						connect.setText("disconnect");
+						ports.setEnabled(false);
 					} else {
-						connectButton.setText("connect");
+						connect.setText("connect");
+						ports.setEnabled(true);
 					}
 				} catch (Exception e) {
 					log.error("onState threw", e);
