@@ -32,6 +32,9 @@ public class ArduinoUtils {
 		if (platform.isMac()) {
 			return "Arduino";
 		}
+		if (platform.isLinux()) {
+			return "arduino";
+		}
 
 		return "arduino_debug";
 	}

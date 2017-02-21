@@ -173,7 +173,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	public transient int controllerAttachAs = MRL_IO_NOT_DEFINED;
 	/**
-	 * id reference of sensor, key is the MRLComm device id
+	 * id reference of sensor, key is the MrlComm device id
 	 */
 	transient Map<Integer, DeviceMapping> deviceIndex = new ConcurrentHashMap<Integer, DeviceMapping>();
 
@@ -243,8 +243,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		super(n);
 		serial = (Serial) createPeer("serial");
 		createPinList();
-		String mrlcomm = FileIO.resourceToString("Arduino/MrlComm/MRLComm.ino");
-		setSketch(new Sketch("MRLComm", mrlcomm));
+		String mrlcomm = FileIO.resourceToString("Arduino/MrlComm/MrlComm.ino");
+		setSketch(new Sketch("MrlComm", mrlcomm));
 
 		// add self as an attached device
 		// to handle pin events and other base
@@ -364,7 +364,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		if (version == null) {
 			error("%s did not get response from arduino....", serial.getPortName());
 		} else if (!version.equals(MRLCOMM_VERSION)) {
-			error("MRLComm.ino responded with version %s expected version is %s", version, MRLCOMM_VERSION);
+			error("MrlComm.ino responded with version %s expected version is %s", version, MRLCOMM_VERSION);
 		} else {
 			info("%s connected on %s %s responded version %s ... goodtimes...", serial.getName(), controller.getName(),
 					serialPort, version);
@@ -377,11 +377,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	// MrlDevice instead of replacing the service's serial service
 	// @grog - I don't mind using a MrlSerial device, as both way will
 	// essentially do the same thing. The difference is only where the
-	// messages will be send in MRLComm (processCommand vs update methods). It
+	// messages will be send in MrlComm (processCommand vs update methods). It
 	// could not be the same way as I2C because I2C read
 	// block and blocking is evil
 	// two thing I had in mind when I did it:
-	// 1- be able to connect MRLComm to a master MRLComm using different
+	// 1- be able to connect MrlComm to a master MrlComm using different
 	// communication protocol (Serial, I2C, bluetooth, wifi)
 	// but this also can be done with different device type
 	// 2- I also had in mind of having the Master arduino and it's slaves (chain
@@ -395,7 +395,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
-	 * default params to connect to Arduino & MRLComm.ino
+	 * default params to connect to Arduino & MrlComm.ino
 	 *
 	 * @param port
 	 * @return
@@ -451,7 +451,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			if (version == null) {
 				error("%s did not get response from arduino....", serial.getPortName());
 			} else if (!version.equals(MRLCOMM_VERSION)) {
-				error("MRLComm.ino responded with version %s expected version is %s", version, MRLCOMM_VERSION);
+				error("MrlComm.ino responded with version %s expected version is %s", version, MRLCOMM_VERSION);
 			} else {
 				info("%s connected on %s responded version %s ... goodtimes...", serial.getName(), serial.getPortName(),
 						version);
@@ -756,12 +756,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	public void i2cAttach(I2CControl control, int busAddress, int deviceAddress) {
 		// TODO Auto-generated method stub - I2C
-		// Create the i2c bus device in MRLComm the first time this method is
+		// Create the i2c bus device in MrlComm the first time this method is
 		// invoked.
 		// Add the i2c device to the list of i2cDevices
 		// Pattern: deviceAttach(device, Object... config)
 		// To add the i2c bus to the deviceList I need an device that represents
-		// the i2c bus here and in MRLComm
+		// the i2c bus here and in MrlComm
 		// This will only handle the creation of i2cBus.
 		if (i2cBus == null) {
 			i2cBus = new I2CBus(String.format("I2CBus%s", busAddress));
@@ -784,7 +784,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
-	 * Internal Arduino method to create an i2cBus object in MRLComm that is
+	 * Internal Arduino method to create an i2cBus object in MrlComm that is
 	 * shared between all i2c devices
 	 * 
 	 * @param control
@@ -811,7 +811,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		try {
 			/**
 			 * We will wait up to retryMax times to get the i2c data back from
-			 * MRLComm.c and wait 1 ms between each try. A blocking queue is not
+			 * MrlComm.c and wait 1 ms between each try. A blocking queue is not
 			 * needed, as this is only a single data element - and blocking is
 			 * not necessary.
 			 */
@@ -890,7 +890,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			try {
 				/**
 				 * We will wait up to retryMax times to get the i2c data back
-				 * from MRLComm.c and wait 1 ms between each try. A blocking
+				 * from MrlComm.c and wait 1 ms between each try. A blocking
 				 * queue is not needed, as this is only a single data element -
 				 * and blocking is not necessary.
 				 */
@@ -917,7 +917,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	@Override
 	public boolean isConnected() {
-		// include that we must have gotten a valid MRLComm version number.
+		// include that we must have gotten a valid MrlComm version number.
 		if (serial != null && serial.isConnected() && boardInfo.getVersion() != null) {
 			return true;
 		}
@@ -1941,11 +1941,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		try {
 			String mrlCommFiles = null;
 			if (FileIO.isJar()) {
-				mrlCommFiles = "resource/Arduino/MRLComm";
-				Zip.extractFromSelf("resource/Arduino/MRLComm", "resource/Arduino/MRLComm");
+				mrlCommFiles = "resource/Arduino/MrlComm";
+				Zip.extractFromSelf("resource/Arduino/MrlComm", "resource/Arduino/MrlComm");
 			} else {
 				// running in IDE ?
-				mrlCommFiles = "src/resource/Arduino/MRLComm";
+				mrlCommFiles = "src/resource/Arduino/MrlComm";
 			}
 			File mrlCommDir = new File(mrlCommFiles);
 			if (!mrlCommDir.exists() || !mrlCommDir.isDirectory()) {
