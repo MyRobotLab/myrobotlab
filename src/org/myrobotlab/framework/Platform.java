@@ -87,6 +87,10 @@ public class Platform implements Serializable {
         // TODO: revisit how we determine the architecture version
         platform.arch = "armv" + armv + ".hfp";
       }
+      
+      if ("aarch64".equals(arch)){
+    	  platform.arch = "arm";
+      }
 
       if (platform.arch == null) {
         platform.arch = arch;

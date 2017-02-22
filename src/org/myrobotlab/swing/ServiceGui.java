@@ -108,18 +108,11 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 		this.tabs = tabs;
 		this.tabControl = new TabControl2(this, myService.getTabs(), display, boundServiceName);
 
-		// north = new JPanel(new GridLayout(0, 2)); 
+		north = new JPanel(new GridBagLayout());
 		
-		north = new JPanel(new GridBagLayout()); 
-		/*
-		JPanel alignNw = new JPanel(new BorderLayout());
-		alignNw.add(north, BorderLayout.WEST);
-		*/
-		
+
 		west = new JPanel(new GridLayout(0, 2));
-		// center = new JPanel(); // vertical stack
-		// center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
-		center = new JPanel(new GridLayout(0, 2));
+		center = new JPanel(new GridBagLayout());
 		east = new JPanel(new GridLayout(0, 2));
 		south = new JPanel(new GridLayout(0, 2)); // flow
 
@@ -128,6 +121,14 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 		display.add(center, BorderLayout.CENTER);
 		display.add(west, BorderLayout.WEST);
 		display.add(south, BorderLayout.SOUTH);
+
+		// gcNorth.anchor = GridBagConstraints.WEST;
+		gcNorth.gridy = 0;
+		gcCenter.gridy = 0;
+		gcCenter.fill = GridBagConstraints.BOTH;
+		// gcCenter.fill = GridBagConstraints.HORIZONTAL;
+		gcCenter.weightx = 1;
+		gcCenter.weighty = 1;
 
 		// adding content to JTabbedPane ..
 		tabs.addTab(boundServiceName, display);
@@ -581,25 +582,24 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 		send("publishStatus", Status.error(errorMsg));
 	}
 
-	GridBagConstraints gcNorth = null;
+	GridBagConstraints gcNorth = new GridBagConstraints();
+	GridBagConstraints gcCenter = new GridBagConstraints();
 
-	public void addTop(String title, Object... components) {		
-		if (gcNorth == null) {
-			gcNorth = new GridBagConstraints();			
-			gcNorth.anchor = GridBagConstraints.WEST;
-			gcNorth.gridy = 0;
-		}
+	public void addTop(Object... components) {
+		addLinex(north, gcNorth, components);
+	}
+	
+	public void add(Object... components) {
+		addLinex(center, gcCenter, components);
+	}
+	
+	public void addLinex(JPanel panel, GridBagConstraints gc, Object... components) {
 
 		// reset - line
-		gcNorth.gridwidth = 1;
-		gcNorth.gridheight = 1;
-		gcNorth.gridx = 0;
+		gc.gridwidth = 1;
+		gc.gridheight = 1;
+		gc.gridx = 0;
 
-		if (title != null) {
-			TitledBorder t;
-			t = BorderFactory.createTitledBorder(title);
-			north.setBorder(t);
-		}
 		for (int i = 0; i < components.length; ++i) {
 			Object o = components[i];
 			JComponent j = null;
@@ -608,7 +608,7 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 				return;
 			}
 			if (o.getClass().equals(Integer.class)) {
-				gcNorth.gridwidth = (Integer)o;
+				gc.gridwidth = (Integer) o;
 				continue;
 			}
 
@@ -618,12 +618,12 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 			} else {
 				j = (JComponent) o;
 			}
-			
-			north.add(j, gcNorth);
-			gcNorth.gridx += gcNorth.gridwidth;
-			gcNorth.gridwidth = 1;
+
+			panel.add(j, gc);
+			gc.gridx += gc.gridwidth;
+			gc.gridwidth = 1;
 		}
-		gcNorth.gridy += 1;
+		gc.gridy += 1;
 	}
 
 }

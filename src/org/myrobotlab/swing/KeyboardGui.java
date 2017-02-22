@@ -58,10 +58,10 @@ public class KeyboardGui extends ServiceGui implements ActionListener {
 
   public KeyboardGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
-    setTitle("keyboard");
-    addLine("key", lastKey, "code", lastKeyCode);
+    setTopTitle("keyboard");
+    addTop(" key: ", lastKey, " code: ", lastKeyCode);
     setTitle("mouse");
-    addLine(mouseX, ",", mouseY);
+    add("(", mouseX, ",", mouseY , ")");
   }
 
   @Override
