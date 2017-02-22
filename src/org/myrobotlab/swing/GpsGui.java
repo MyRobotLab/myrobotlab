@@ -49,14 +49,13 @@ public class GpsGui extends ServiceGui implements ActionListener {
 
   public GpsGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
-    log.info("HERE !!!!");
     setTitle("gps");
-    addLine("String Type:", stringTypeTextField);
-    addLine("Current Latitude(degrees):", latitudeTextField);
-    addLine("Current Longitude(degrees):", longitudeTextField);
-    addLine("Current Altitude(meters):", altitudeTextField);
-    addLine("Current Speed(knots,kph):", speedTextField);
-    addLine("Current Heading(deg):", headingTextField);
+    add("gps string type:", stringTypeTextField);
+    add("latitude:", latitudeTextField);
+    add("longitude:", longitudeTextField);
+    add("altitude(meters):", altitudeTextField);
+    add("speed (knots,kph):", speedTextField);
+    add("heading (deg):", headingTextField);
   }
 
   @Override

@@ -57,8 +57,7 @@ public class CliGui extends ServiceGui implements KeyListener {
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		console.setBackground(Color.BLACK);
 		console.setForeground(Color.GREEN);
-		scrollPane.setPreferredSize(new Dimension(5, 40));
-		addLine(scrollPane);
+		add(scrollPane);
 		console.addKeyListener(this);
 	}
 

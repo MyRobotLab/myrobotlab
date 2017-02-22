@@ -97,7 +97,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		rx.setEditable(false);
 		autoScroll(true);
 
-		addTop(null, connectLight, "  port: ", ports, connect, refresh, " ", reqFormat, createVirtualPort, record);
+		addTop(connectLight, "  port: ", ports, connect, refresh, " ", reqFormat, createVirtualPort, record);
 
 		addLine(new JScrollPane(rx));
 		addLine(new JScrollPane(tx));
