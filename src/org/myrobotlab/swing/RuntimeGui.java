@@ -25,7 +25,6 @@
 
 package org.myrobotlab.swing;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -43,7 +42,6 @@ import java.util.TreeMap;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -57,7 +55,6 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.JToolBar;
 import javax.swing.JToolTip;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -79,8 +76,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.swing.widget.ImageNameRenderer;
 import org.myrobotlab.swing.widget.PossibleServicesRenderer;
@@ -188,11 +185,6 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     categories.setFixedCellWidth(100);
     categories.addListSelectionListener(this);
 
-    /*
-     * categories.setCellRenderer(currentServicesRenderer);
-     * categories.setFixedCellWidth(200);
-     */
-
     possibleServicesModel.addColumn("service");
     possibleServicesModel.addColumn("status");
 
@@ -211,11 +203,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     TableColumnModel cm = possibleServices.getColumnModel();
     cm.getColumn(0).setMaxWidth(300);
     cm.getColumn(1).setMaxWidth(60);
-    // TableColumn col = possibleServices.getColumnModel().getColumn(1);
-    // col.setPreferredWidth(10);
-    // possibleServices.setPreferredScrollableViewportSize(new Dimension(300,
-    // 480));
-    // set map to determine what types get rendered
+   
     possibleServices.setDefaultRenderer(ImageIcon.class, cellRenderer);
     possibleServices.setDefaultRenderer(ServiceType.class, cellRenderer);
     possibleServices.setDefaultRenderer(String.class, cellRenderer);
@@ -318,53 +306,18 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     releaseMenuItem.setIcon(Util.getScaledIcon(Util.getImage("release.png"), 0.50));
     popup.add(releaseMenuItem);
 
-    // make category filter buttons
-    JPanel filters = new JPanel(new GridBagLayout());
-    GridBagConstraints fgc = new GridBagConstraints();
-    ++fgc.gridy;
-    fgc.fill = GridBagConstraints.HORIZONTAL;
-    filters.add(new JLabel("category filters"), fgc);
-    ++fgc.gridy;
+   setTitle(myRuntime.getPlatform().toString());
 
-    if (myRuntime != Runtime.getInstance()) {
-      log.info("foreign runtime");
-    }
-
-    // category toolbar
-    ArrayList<Category> cats = serviceData.getCategories();
-
-    JPanel flowLayout = new JPanel();
-    flowLayout.setPreferredSize(new Dimension(300, 160));
-
-    JToolBar toolbar = new JToolBar();
-    JButton all = new JButton("all");
-    all.addActionListener(filterListener);
-    toolbar.add(all);
-    int t = 0;
-    for (int j = 0; j < cats.size(); ++j) {
-      t += 1;
-      JButton b = new JButton(cats.get(j).name);
-      b.addActionListener(filterListener);
-      toolbar.add(b);
-      if (t % 8 == 0) {
-        flowLayout.add(toolbar);
-        toolbar = new JToolBar();
-      }
-    }
-
-    flowLayout.add(toolbar);
-
-    setTitle(myRuntime.getPlatform().toString());
-    // addLine(createCategories(), new JScrollPane(possibleServices),
-    // createRunningServices());
+   
     JPanel flow = new JPanel();
     flow.add(createCategories());
     flow.add(possible);
     flow.add(createRunningServices());
     addLine(flow);
-    // addLine(new JScrollPane(categories), new JScrollPane(possibleServices),
-    // createRunningServices());
-    // display.add(createMenuBar(), BorderLayout.NORTH);
+    
+    
+   //  add(categories, possible, runningServices);
+    
     addTopLine(createMenuBar());
     getPossibleServices();
 

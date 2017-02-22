@@ -79,7 +79,7 @@ public class GoogleCloud extends Service {
     // add dependency if necessary
     meta.addDependency("com.google.client", "1.22.0");
     meta.addDependency("com.google.vision", "1.22.0");
-    meta.addCategory("cloud", "vision", "google");
+    meta.addCategory("cloud", "vision");
     return meta;
   }
 

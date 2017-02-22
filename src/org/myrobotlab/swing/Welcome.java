@@ -39,8 +39,8 @@ public class Welcome extends ServiceGui {
     super(boundServiceName, myService, tabs);
     JLabel image = new JLabel();
     image.setIcon(Util.getResourceIcon("mrl_logo.gif"));
-    addLine(image);
-    addBottomLine("<html><b><i>I for one, welcome our new robot overlords ...</i></b></html>");   
+    addTop(image);
+    addTop("<html><b><i>I for one, welcome our new robot overlords ...</i></b></html>");   
   }
 
   @Override

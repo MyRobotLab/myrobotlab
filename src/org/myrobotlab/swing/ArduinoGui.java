@@ -45,6 +45,7 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenuItem;
@@ -100,6 +101,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
 	JComboBox<String> ports = new JComboBox<String>();
 	
+	JFileChooser chooser = new JFileChooser();
 
 	JLabel state = new JLabel();
 	JLabel version = new JLabel();
@@ -143,7 +145,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	JTextField arduinoPath = new JTextField(20);
 
 	JTextField boardType = new JTextField(5);
-	JButton uploadMrlComm = new JButton("Upload MRLComm");
+	JButton uploadMrlComm = new JButton("Upload MrlComm");
 	JLabel uploadResult = new JLabel();
 
 	transient TextEditorPane editor;
@@ -184,8 +186,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 		self = this;
 		state.setText("not connected");
 
-		addTop(null, " port:", ports, connect, " ", state);
-		addTop(null, " board:", 3, boardTypes, " version:", version);
+		addTop(" port:", ports, connect, " ", state);
+		addTop(" board:", 3, boardTypes, " version:", version);
 
 		localTabs.setTabPlacement(SwingConstants.RIGHT);
 		localTabs.setPreferredSize(new Dimension(300, 300));
@@ -470,6 +472,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	public void addMrlCommPanel() {
 		SwingUtilities.invokeLater(new Runnable() {
 
+			
+
 			@Override
 			public void run() {
 				JPanel uploadPanel = new JPanel(new BorderLayout());
@@ -477,20 +481,20 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 				String pathToMrlComm = null;
 				String mrlIno = null;
 				try {
-					pathToMrlComm = "resource/Arduino/MRLComm/MRLComm.ino";
+					pathToMrlComm = "resource/Arduino/MrlComm/MrlComm.ino";
 					mrlIno = FileIO.toString(pathToMrlComm);
 				} catch (Exception e) {
 				}
 				try {
 					if (mrlIno == null) {
-						pathToMrlComm = "src/resource/Arduino/MRLComm/MRLComm.ino";
+						pathToMrlComm = "src/resource/Arduino/MrlComm/MrlComm.ino";
 						mrlIno = FileIO.toString(pathToMrlComm);
 					}
 				} catch (Exception e) {
 				}
 
 				// JPanel north = createFlowPanel(null, openMrlComm, "Arduino
-				// IDE Path ", arduinoPath, uploadMrlComm, "MRLComm.ino location
+				// IDE Path ", arduinoPath, uploadMrlComm, "MrlComm.ino location
 				// ", pathToMrlComm);
 
 				GridBagConstraints gc = new GridBagConstraints();
@@ -498,6 +502,13 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 				gc.gridy = 0;
 				JPanel top = new JPanel(new GridBagLayout());
 				top.add(new JLabel("Arduino IDE Path "), gc);
+				gc.gridx++;
+				
+				chooser.setCurrentDirectory(new java.io.File("."));
+			    chooser.setDialogTitle("Arduino");
+			    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			    
+				top.add(chooser, gc);
 				gc.gridx++;
 				top.add(arduinoPath, gc);
 				gc.gridx++;
@@ -508,7 +519,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 				gc.gridx = 0;
 				gc.gridy = 1;
 				gc.gridwidth = 2;
-				top.add(new JLabel("MRLComm.ino location "), gc);
+				top.add(new JLabel("MrlComm.ino location "), gc);
 				gc.gridx += 2;
 				top.add(new JLabel(pathToMrlComm), gc);
 
