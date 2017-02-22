@@ -419,6 +419,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     meta.addDescription("a 3D kinematics service supporting D-H parameters");
     meta.addCategory("robot", "control");
     meta.addPeer("openni", "OpenNi", "Kinect service");
+    meta.addDependency("inmoov", "1.0.0");
 
     return meta;
   }
