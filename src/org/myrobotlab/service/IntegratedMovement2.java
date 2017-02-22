@@ -479,7 +479,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   }
   
   public String addObject(Point origin, Point end, String name, double radius, String modelName) {
-    CollisionItem item = new CollisionItem(origin, end, name, radius, modelName);
+    CollisionItem item = new CollisionItem(origin, end, name, radius);
     collisionItems.addItem(item);
     return item.getName();
   }

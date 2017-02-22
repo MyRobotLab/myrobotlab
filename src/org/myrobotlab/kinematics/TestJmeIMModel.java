@@ -38,7 +38,7 @@ public class TestJmeIMModel extends SimpleApplication{
   
   @Override
   public void simpleInitApp() {
-    assetManager.registerLocator("src/resource/jme", FileLocator.class);
+    assetManager.registerLocator("inmoov/jm3/assets", FileLocator.class);
     Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
     mat.setColor("Color", ColorRGBA.Red);
    
