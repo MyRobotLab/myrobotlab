@@ -109,7 +109,7 @@ public class Servo extends Service implements ServoControl {
           Thread.sleep(sweepDelay);
         }
       } catch (Exception e) {
-      	isSweeping = false; 
+        isSweeping = false; 
       }
     }
 
@@ -213,20 +213,20 @@ public class Servo extends Service implements ServoControl {
   boolean autoAttach = false;
 
   public int defaultDetachDelay = 10000;
-	private boolean moving;
-	private double currentPosInput;
+  private boolean moving;
+  private double currentPosInput;
 
-	public transient static final int SERVO_EVENT_STOPPED = 1;
-	public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
-	
-	
-	
+  public transient static final int SERVO_EVENT_STOPPED = 1;
+  public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
+  
+  
+  
   public class IKData {
     public String name;
     public Double pos;
-		public Integer state;
-		public double velocity;
-		public Double targetPos;
+    public Integer state;
+    public double velocity;
+    public Double targetPos;
   }
 
   public Servo(String n) {
@@ -243,7 +243,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   public void addServoEventListener(NameProvider service) {
-  	isEventsEnabled = true;
+    isEventsEnabled = true;
     addListener("publishServoEvent", service.getName(), "onServoEvent");
   }
 
@@ -375,26 +375,7 @@ public class Servo extends Service implements ServoControl {
     controller.servoMoveTo(this);
     lastActivityTime = System.currentTimeMillis();
 
-//	  if (velocity > 0.0) {
-//	  	moving = true;
-//	  	if (getTasks().containsKey("EndMoving")){
-//	  		purgeTask("EndMoving");
-//	  	}
-//	    addTask("EndMoving", timeToMove(), "endMoving");
-//	  }
 
-//    if (isEventsEnabled) {
-//      // update others of our position change
-//      invoke("publishServoEvent", targetOutput); //shouldn't be publishing targetPos?
-//      broadcastState();
-//    }
-//    if (isIKEventEnabled) {
-//      IKData data = new IKData();
-//      data.name = getName();
-//      data.pos = targetPos;
-//      invoke("publishIKServoEvent", data);
-//      broadcastState();
-//    }
   }
 
   /**
@@ -431,9 +412,9 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public void setMinMax(double min, double max) {
-  	// THIS IS A BUG - BUT CORRECTING IT BURNS OLD SCRIPT'S SERVOS !!
-  	mapper.setMinMaxOutput(min, max);
-  	/* THIS IS A BUG default setMinMax setMin & setMax IS INPUT NOT OUTPUT !!!!
+    // THIS IS A BUG - BUT CORRECTING IT BURNS OLD SCRIPT'S SERVOS !!
+    mapper.setMinMaxOutput(min, max);
+    /* THIS IS A BUG default setMinMax setMin & setMax IS INPUT NOT OUTPUT !!!!
     mapper.setMin(min);
     mapper.setMax(max);
     */
@@ -538,7 +519,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   public void sweep(double min, double max, int delay, double step, boolean oneWay) {
-  	mapper.setMinMaxInput(min, max);
+    mapper.setMinMaxInput(min, max);
     /* THIS IS A BUGG !!!
     mapper.setMin(min);
     mapper.setMax(max);
@@ -871,12 +852,12 @@ public class Servo extends Service implements ServoControl {
    * @return
    */
   int timeToMove() {
-  	if (velocity <= 0.0) {
-  		return 1;
-  	}
-  	double delta = Math.abs(mapper.calcOutput(targetPos) - mapper.calcOutput(lastPos));
-  	double time = delta / velocity * 1000;
-  	return (int)time;
+    if (velocity <= 0.0) {
+      return 1;
+    }
+    double delta = Math.abs(mapper.calcOutput(targetPos) - mapper.calcOutput(lastPos));
+    double time = delta / velocity * 1000;
+    return (int)time;
   }
 
   /**
@@ -895,7 +876,7 @@ public class Servo extends Service implements ServoControl {
     return (double)(microseconds - 544) * 180 / (2400 - 544);
   }
 
-  public void autoDetach() {
+  private void autoDetach() {
     if (getCurrentPos() == targetPos) { // servo reach position
       detach();
       //purgeTask("DetachServo");
@@ -930,51 +911,51 @@ public class Servo extends Service implements ServoControl {
   }
 
   public void endMoving(){
-  	if (getTasks().containsKey("EndMoving")){
-  		purgeTask("EndMoving");
-  	}
-  	if (autoAttach && isPinAttached()){
-  		detach();
-  	}
-  	moving = false;
+    if (getTasks().containsKey("EndMoving")){
+      purgeTask("EndMoving");
+    }
+    if (autoAttach && isPinAttached()){
+      detach();
+    }
+    moving = false;
   }
 
-	public boolean isMoving() {
-		return moving;
-	}
+  public boolean isMoving() {
+    return moving;
+  }
 
-	public void onServoEvent(Integer eventType, Integer currentPosUs, Integer targetPos) {
-		double currentPos = microsecondsToDegree(currentPosUs);
-		currentPosInput = mapper.calcInput(currentPos);
-		if (isEventsEnabled) {
-			invoke("publishServoEvent", currentPosInput);
-		}
-		if (isIKEventEnabled) {
-			IKData data = new IKData();
-			data.name = getName();
-			data.pos = currentPosInput;
-			data.state = eventType;
-			data.velocity = velocity;
-			data.targetPos = this.targetPos;
-			invoke("publishIKServoEvent", data);
-		}
-		if (eventType == SERVO_EVENT_STOPPED && autoAttach && isPinAttached()) {
-			if (velocity > -1) {
-				detach();
-			}
-			else {
-				if (getTasks().containsKey("EndMoving")) {
-					purgeTask("EndMoving");
-				}
-				addTask("EndMoving",defaultDetachDelay, "endMoving");
-			}
-		}
-	}
+  public void onServoEvent(Integer eventType, Integer currentPosUs, Integer targetPos) {
+    double currentPos = microsecondsToDegree(currentPosUs);
+    currentPosInput = mapper.calcInput(currentPos);
+    if (isEventsEnabled) {
+      invoke("publishServoEvent", currentPosInput);
+    }
+    if (isIKEventEnabled) {
+      IKData data = new IKData();
+      data.name = getName();
+      data.pos = currentPosInput;
+      data.state = eventType;
+      data.velocity = velocity;
+      data.targetPos = this.targetPos;
+      invoke("publishIKServoEvent", data);
+    }
+    if (eventType == SERVO_EVENT_STOPPED && autoAttach && isPinAttached()) {
+      if (velocity > -1) {
+        detach();
+      }
+      else {
+        if (getTasks().containsKey("EndMoving")) {
+          purgeTask("EndMoving");
+        }
+        addTask("EndMoving",defaultDetachDelay, "endMoving");
+      }
+    }
+  }
   
-	public void onIMAngles(Object[] data) {
-		String name = (String)data[0];
-		if (name.equals(this.getName())) {
-			moveTo((double)data[1]);
-		}
-	}
+  public void onIMAngles(Object[] data) {
+    String name = (String)data[0];
+    if (name.equals(this.getName())) {
+      moveTo((double)data[1]);
+    }
+  }
 }

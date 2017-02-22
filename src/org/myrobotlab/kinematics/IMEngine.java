@@ -17,7 +17,7 @@ public class IMEngine extends Thread {
 	
 	DHRobotArm arm, computeArm;
 	private String name;
-	private Point target = null;
+	public Point target = null;
 	private double maxDistance = 5.0;
 	private Matrix inputMatrix = null;
 	private IntegratedMovement2 service = null;
@@ -57,7 +57,7 @@ public class IMEngine extends Thread {
 		Point lastPosition = arm.getPalmPosition();
 		while(true){
 			Point avoidPoint = checkCollision(arm, service.collisionItems);
-			if (target != null && arm.getPalmPosition().distanceTo(target) > maxDistance  /**&& arm.armMovementEnds()**/) {
+			if (target != null && arm.getPalmPosition().distanceTo(target) > maxDistance /** && arm.armMovementEnds()**/) {
 				Log.info("distance to target {}", arm.getPalmPosition().distanceTo(target));
 				Log.info(arm.getPalmPosition().toString());
 				move();
@@ -75,7 +75,7 @@ public class IMEngine extends Thread {
 				}
 			}
 			try {
-				sleep(00);
+				sleep(50);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -102,9 +102,16 @@ public class IMEngine extends Thread {
     int numSteps = 0;
     double iterStep = 0.01;
     double errorThreshold = 0.05;
-    int maxIterations = 800;
+    int maxIterations = 500;
     double totalTime = 0;
-    computeArm = (DHRobotArm) this.arm.clones();
+    try {
+      sleep(0);
+    }
+    catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+      computeArm = (DHRobotArm) this.arm.clones();
     // what's the current point
     while (true) {
     	//checkCollision(arm,service.collisionItems);
@@ -120,7 +127,7 @@ public class IMEngine extends Thread {
       Log.debug("Current Position " + currentPos);
       // vector to destination
       Point deltaPoint = goal.subtract(currentPos);
-      iterStep = .09/currentPos.distanceTo(goal);
+      iterStep = .8/currentPos.distanceTo(goal);
       Matrix dP = new Matrix(3, 1);
       dP.elements[0][0] = deltaPoint.getX();
       dP.elements[1][0] = deltaPoint.getY();
@@ -133,8 +140,12 @@ public class IMEngine extends Thread {
       	dTheta = jInverse.multiply(dP);
       //}
       //catch (NullPointerException e){
-      	
-      //}
+    	if (dTheta == null){
+        dTheta = new Matrix(computeArm.getNumLinks(), 1);
+        for (int i = 0; i < computeArm.getNumLinks(); i++) {
+          dTheta.elements[i][0] = 0.000001;
+        }
+      }
       // why is this zero?
       
       //Log.info("delta Theta + " + dTheta);
@@ -160,17 +171,6 @@ public class IMEngine extends Thread {
       Point avoidPoint = checkCollision(computeArm, computeCD);
       if (avoidPoint != null) {
       	goal = avoidPoint;
-      	//undo the last increment
-//        for (int i = 0; i < dTheta.getNumRows(); i++) {
-//        	DHLink link = arm.getLink(i);
-//        	if (link.hasServo) {
-//              // update joint positions! move towards the goal!
-//              double d = dTheta.elements[i][0];
-//              // incr rotate needs to be min/max aware here!
-//              arm.getLink(i).incrRotate(-d);
-////        		}
-//        	}
-//        }
       }
       
      
@@ -196,72 +196,73 @@ public class IMEngine extends Thread {
 	}
 
 	private Point checkCollision(DHRobotArm arm, CollisionDectection cd) {
-    double[][] jp = createJointPositionMap();
-    //send data to the collision detector class
-    for (int i = 0; i < arm.getNumLinks(); i++) {
-      CollisionItem ci = new CollisionItem(new Point(jp[i][0], jp[i][1], jp[i][2], 0 , 0, 0), new Point(jp[i+1][0], jp[i+1][1], jp[i+1][2], 0, 0, 0), arm.getLink(i).getName());
-      if (i != arm.getNumLinks()-1) {
-        ci.addIgnore(arm.getLink(i+1).getName());
-      }
-      cd.addItem(ci);
-    }
-    CollisionResults collisionResult = cd.runTest();
-    if (collisionResult.haveCollision) {
-    	//Log.info("collision detected");
-      CollisionItem ci = null;
-      int itemIndex = 0;
-      for (DHLink l : arm.getLinks()) {
-    	boolean foundIt = false;
-        for (itemIndex = 0; itemIndex < 2; itemIndex++) {
-          if (l.getName().equals(collisionResult.collisionItems[itemIndex].getName())) {
-            ci = collisionResult.collisionItems[itemIndex];
-            foundIt = true;
-            break;
-          }
-        }
-        if (foundIt) break; //we have the item to watch
-      }
-      if (ci == null) {
-        //Log.info("Collision between static item {} and {} detected", collisionResult.collisionItems[0].getName(), collisionResult.collisionItems[1].getName());
-        return null;
-      }
-      Point newPos = arm.getPalmPosition();
-      newPos = newPos.add(collisionResult.collisionPoints[itemIndex].subtract(collisionResult.collisionPoints[1-itemIndex]));//not sure this is ok
-      Point ori=collisionResult.collisionItems[1-itemIndex].getOrigin();
-      Point end=collisionResult.collisionItems[1-itemIndex].getEnd();
-      Point colPoint = collisionResult.collisionPoints[1-itemIndex];
-      if (collisionResult.collisionLocation[1-itemIndex] > 0.0 || collisionResult.collisionLocation[1-itemIndex] < 1.0) { // collision on the side of item
-      	if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision near the origin
-      		//newPos = newPos.add(ori).subtract(colPoint);
-//          newPos.setX(newPos.getX()+ori.getX()-colPoint.getX());
-//          newPos.setY(newPos.getY()+ori.getY()-colPoint.getY());
-//          newPos.setZ(newPos.getZ()+ori.getZ()-colPoint.getZ());
-      	}
-      	else { //collision near the end
-      		//newPos = newPos.add(end).subtract(colPoint);
-      	}
-      }
-      //move away  of the part
-      double length = collisionResult.collisionItems[1-itemIndex].getLength();
-      double ratio = collisionResult.collisionItems[itemIndex].getRadius() / length;
-      double[] vector = collisionResult.collisionItems[1-itemIndex].getVector();
-      for (int i=0; i<3; i++){
-      	vector[i] *= ratio;
-      }
-    	if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision near the origin
-        newPos.setX(newPos.getX() - vector[0]);
-        newPos.setY(newPos.getY() - vector[1]);
-        newPos.setZ(newPos.getZ() - vector[2]);
-    	}
-    	else {
-        newPos.setX(newPos.getX() + vector[0]);
-        newPos.setY(newPos.getY() + vector[1]);
-        newPos.setZ(newPos.getZ() + vector[2]);
-    	}      
-    	Log.info("Avoiding position toward ",newPos.toString());
-    	return newPos;
-    }
-    return null;
+	  return null;
+//    double[][] jp = createJointPositionMap();
+//    //send data to the collision detector class
+//    for (int i = 0; i < arm.getNumLinks(); i++) {
+//      CollisionItem ci = new CollisionItem(new Point(jp[i][0], jp[i][1], jp[i][2], 0 , 0, 0), new Point(jp[i+1][0], jp[i+1][1], jp[i+1][2], 0, 0, 0), arm.getLink(i).getName());
+//      if (i != arm.getNumLinks()-1) {
+//        ci.addIgnore(arm.getLink(i+1).getName());
+//      }
+//      cd.addItem(ci);
+//    }
+//    CollisionResults collisionResult = cd.runTest();
+//    if (collisionResult.haveCollision) {
+//    	//Log.info("collision detected");
+//      CollisionItem ci = null;
+//      int itemIndex = 0;
+//      for (DHLink l : arm.getLinks()) {
+//    	boolean foundIt = false;
+//        for (itemIndex = 0; itemIndex < 2; itemIndex++) {
+//          if (l.getName().equals(collisionResult.collisionItems[itemIndex].getName())) {
+//            ci = collisionResult.collisionItems[itemIndex];
+//            foundIt = true;
+//            break;
+//          }
+//        }
+//        if (foundIt) break; //we have the item to watch
+//      }
+//      if (ci == null) {
+//        //Log.info("Collision between static item {} and {} detected", collisionResult.collisionItems[0].getName(), collisionResult.collisionItems[1].getName());
+//        return null;
+//      }
+//      Point newPos = arm.getPalmPosition();
+//      newPos = newPos.add(collisionResult.collisionPoints[itemIndex].subtract(collisionResult.collisionPoints[1-itemIndex]));//not sure this is ok
+//      Point ori=collisionResult.collisionItems[1-itemIndex].getOrigin();
+//      Point end=collisionResult.collisionItems[1-itemIndex].getEnd();
+//      Point colPoint = collisionResult.collisionPoints[1-itemIndex];
+//      if (collisionResult.collisionLocation[1-itemIndex] > 0.0 || collisionResult.collisionLocation[1-itemIndex] < 1.0) { // collision on the side of item
+//      	if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision near the origin
+//      		newPos = newPos.add(ori).subtract(colPoint);
+////          newPos.setX(newPos.getX()+ori.getX()-colPoint.getX());
+////          newPos.setY(newPos.getY()+ori.getY()-colPoint.getY());
+////          newPos.setZ(newPos.getZ()+ori.getZ()-colPoint.getZ());
+//      	}
+//      	else { //collision near the end
+//      		newPos = newPos.add(end).subtract(colPoint);
+//      	}
+//      }
+//      //move away  of the part
+//      double length = collisionResult.collisionItems[1-itemIndex].getLength();
+//      double ratio = collisionResult.collisionItems[itemIndex].getRadius() / length;
+//      double[] vector = collisionResult.collisionItems[1-itemIndex].getVector();
+//      for (int i=0; i<3; i++){
+//      	vector[i] *= ratio;
+//      }
+//    	if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision near the origin
+//        newPos.setX(newPos.getX() - vector[0]);
+//        newPos.setY(newPos.getY() - vector[1]);
+//        newPos.setZ(newPos.getZ() - vector[2]);
+//    	}
+//    	else {
+//        newPos.setX(newPos.getX() + vector[0]);
+//        newPos.setY(newPos.getY() + vector[1]);
+//        newPos.setZ(newPos.getZ() + vector[2]);
+//    	}      
+//    	Log.info("Avoiding position toward ",newPos.toString());
+//    	return newPos;
+//    }
+//    return null;
 	}
 
 	private void publishAngles() {

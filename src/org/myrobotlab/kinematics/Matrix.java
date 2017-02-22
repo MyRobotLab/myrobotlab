@@ -165,7 +165,7 @@ public class Matrix {
   public Double dot(Matrix m) {
     if (numRows != m.numRows || numCols != m.numCols) {
       System.out.println("dimensions bad in dot()");
-      return null;
+      return 0.0;
     }
     double sum = 0;
 
@@ -247,52 +247,56 @@ public class Matrix {
     Matrix ak = new Matrix(numRows, 1);
     Matrix dk, ck, bk;
     Matrix R_plus;
-
-    for (r = 0; r < numRows; r++) {
-      ak.elements[r][0] = this.elements[r][0];
-    }
-
-    if (!ak.equals(0.0)) {
-      R_plus = ak.transpose().multiply(1.0 / (ak.dot(ak)));
-    } else {
-      R_plus = new Matrix(1, numCols);
-    }
-
-    while (k < this.numCols) {
-
+    try{
       for (r = 0; r < numRows; r++) {
-        ak.elements[r][0] = this.elements[r][k];
+        ak.elements[r][0] = this.elements[r][0];
       }
-
-      dk = R_plus.multiply(ak);
-      Matrix T = new Matrix(numRows, k);
-      for (r = 0; r < numRows; r++) {
-        for (c = 0; c < k; c++) {
-          T.elements[r][c] = this.elements[r][c];
-        }
-      }
-      ck = ak.subtractFrom(T.multiply(dk));
-
-      if (!ck.equals(0.0)) {
-        bk = ck.transpose().multiply(1.0 / (ck.dot(ck)));
+  
+      if (!ak.equals(0.0)) {
+        R_plus = ak.transpose().multiply(1.0 / (ak.dot(ak)));
       } else {
-        bk = dk.transpose().multiply(1.0 / (1.0 + dk.dot(dk))).multiply(R_plus);
+        R_plus = new Matrix(1, numCols);
       }
-
-      Matrix N = R_plus.subtractFrom(dk.multiply(bk));
-      R_plus = new Matrix(N.numRows + 1, N.numCols);
-
-      for (r = 0; r < N.numRows; r++) {
-        for (c = 0; c < N.numCols; c++) {
-          R_plus.elements[r][c] = N.elements[r][c];
+  
+      while (k < this.numCols) {
+  
+        for (r = 0; r < numRows; r++) {
+          ak.elements[r][0] = this.elements[r][k];
         }
+  
+        dk = R_plus.multiply(ak);
+        Matrix T = new Matrix(numRows, k);
+        for (r = 0; r < numRows; r++) {
+          for (c = 0; c < k; c++) {
+            T.elements[r][c] = this.elements[r][c];
+          }
+        }
+        ck = ak.subtractFrom(T.multiply(dk));
+  
+        if (!ck.equals(0.0)) {
+          bk = ck.transpose().multiply(1.0 / (ck.dot(ck)));
+        } else {
+          bk = dk.transpose().multiply(1.0 / (1.0 + dk.dot(dk))).multiply(R_plus);
+        }
+  
+        Matrix N = R_plus.subtractFrom(dk.multiply(bk));
+        R_plus = new Matrix(N.numRows + 1, N.numCols);
+  
+        for (r = 0; r < N.numRows; r++) {
+          for (c = 0; c < N.numCols; c++) {
+            R_plus.elements[r][c] = N.elements[r][c];
+          }
+        }
+        for (c = 0; c < N.numCols; c++) {
+          R_plus.elements[R_plus.numRows - 1][c] = bk.elements[0][c];
+        }
+        k++;
       }
-      for (c = 0; c < N.numCols; c++) {
-        R_plus.elements[R_plus.numRows - 1][c] = bk.elements[0][c];
-      }
-      k++;
+      return R_plus;
     }
-    return R_plus;
+    catch (ArrayIndexOutOfBoundsException e){
+      return null;
+    }
   }
 
   /**
