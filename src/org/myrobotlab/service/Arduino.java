@@ -1961,6 +1961,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			builder.start();
 
 		} catch (Exception e) {
+			error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
 			log.error("openMrlComm threw", e);
 		}
 	}
