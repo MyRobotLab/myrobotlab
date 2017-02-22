@@ -68,6 +68,7 @@ import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.swing.widget.DigitalButton;
+import org.myrobotlab.swing.widget.FileChooser;
 
 public class ArduinoGui extends ServiceGui implements ActionListener, TabControlEventHandler, ItemListener {
 
@@ -101,7 +102,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
 	JComboBox<String> ports = new JComboBox<String>();
 	
-	JFileChooser chooser = new JFileChooser();
+	FileChooser chooser = null;
 
 	JLabel state = new JLabel();
 	JLabel version = new JLabel();
@@ -502,15 +503,15 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 				gc.gridy = 0;
 				JPanel top = new JPanel(new GridBagLayout());
 				top.add(new JLabel("Arduino IDE Path "), gc);
-				gc.gridx++;
-				
-				chooser.setCurrentDirectory(new java.io.File("."));
-			    chooser.setDialogTitle("Arduino");
-			    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			    
-				top.add(chooser, gc);
+
 				gc.gridx++;
 				top.add(arduinoPath, gc);
+				gc.gridx++;
+				if (chooser == null){
+					chooser = new FileChooser("browse", arduinoPath);
+					chooser.filterDirsOnly();
+				}
+				top.add(chooser, gc);
 				gc.gridx++;
 				top.add(openMrlComm, gc);
 				gc.gridx++;
