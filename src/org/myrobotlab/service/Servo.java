@@ -215,6 +215,7 @@ public class Servo extends Service implements ServoControl {
   public int defaultDetachDelay = 10000;
   private boolean moving;
   private double currentPosInput;
+  private boolean autoDetach = false;
 
   public transient static final int SERVO_EVENT_STOPPED = 1;
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
@@ -870,24 +871,15 @@ public class Servo extends Service implements ServoControl {
     this.autoAttach = autoAttach;
   }
 
+  public void enableAutoDetach(boolean autoDetach) {
+    this.autoDetach = autoDetach;
+    isEventsEnabled = true;
+  }
+
   public double microsecondsToDegree(int microseconds) {
     if (microseconds <= 180)
       return microseconds;
     return (double)(microseconds - 544) * 180 / (2400 - 544);
-  }
-
-  private void autoDetach() {
-    if (getCurrentPos() == targetPos) { // servo reach position
-      detach();
-      //purgeTask("DetachServo");
-      return;
-    }
-    if (System.currentTimeMillis() - lastActivityTime > defaultDetachDelay) { // default
-                                                                              // detach
-                                                                              // delay
-      detach();
-      //purgeTask("DetachServo");
-    }
   }
 
   public String publishServoAttach(String name) {
@@ -910,7 +902,7 @@ public class Servo extends Service implements ServoControl {
     return targetOutput;
   }
 
-  public void endMoving(){
+  public void autoDetach(){
     if (getTasks().containsKey("EndMoving")){
       purgeTask("EndMoving");
     }
@@ -939,7 +931,7 @@ public class Servo extends Service implements ServoControl {
       data.targetPos = this.targetPos;
       invoke("publishIKServoEvent", data);
     }
-    if (eventType == SERVO_EVENT_STOPPED && autoAttach && isPinAttached()) {
+    if (eventType == SERVO_EVENT_STOPPED && autoDetach  && isPinAttached()) {
       if (velocity > -1) {
         detach();
       }
@@ -947,7 +939,7 @@ public class Servo extends Service implements ServoControl {
         if (getTasks().containsKey("EndMoving")) {
           purgeTask("EndMoving");
         }
-        addTask("EndMoving",defaultDetachDelay, "endMoving");
+        addTask("EndMoving",defaultDetachDelay, "autoDetach");
       }
     }
   }
