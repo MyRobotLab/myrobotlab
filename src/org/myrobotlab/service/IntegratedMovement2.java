@@ -16,7 +16,7 @@ import org.myrobotlab.kinematics.Map3D;
 import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.kinematics.TestJmeIntegratedMovement;
+import org.myrobotlab.kinematics.TestJmeIMModel;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -25,6 +25,8 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.Servo.IKData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.slf4j.Logger;
+
+import com.jme3.math.Vector3f;
 
 /**
  * 
@@ -57,39 +59,39 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
 
   private double time;
   
-  private boolean stopMoving = false;		
-	
-  public enum ObjectPointLocation {		
-  	ORIGIN_CENTER (0x01,"Center Origin"),		
-  	ORIGIN_SIDE (0x02, "Side Origin"),		
-  	END_SIDE(0x04, "Side End"),		
-  	END_CENTER(0x05, "Center End"),		
-  	CLOSEST_POINT(0x06, "Closest Point"),		
-  	CENTER(0x07, "Center"),		
-  	CENTER_SIDE(0x08, "Side Center");		
-  	public int value;		
-  	public String location;
-  	private ObjectPointLocation(int value, String location) {		
-  		this.value = value;
-  		this.location = location;
-  	}		
-  }		
-  		
-  private class MoveInfo {		
-  	Point offset = null;		
-  	CollisionItem targetItem = null;		
-  	ObjectPointLocation objectLocation = null;		
-  	DHLink lastLink = null;		
-  }		
-  		
+  private boolean stopMoving = false;   
+  
+  public enum ObjectPointLocation {   
+    ORIGIN_CENTER (0x01,"Center Origin"),   
+    ORIGIN_SIDE (0x02, "Side Origin"),    
+    END_SIDE(0x04, "Side End"),   
+    END_CENTER(0x05, "Center End"),   
+    CLOSEST_POINT(0x06, "Closest Point"),   
+    CENTER(0x07, "Center"),   
+    CENTER_SIDE(0x08, "Side Center");   
+    public int value;   
+    public String location;
+    private ObjectPointLocation(int value, String location) {   
+      this.value = value;
+      this.location = location;
+    }   
+  }   
+      
+  private class MoveInfo {    
+    Point offset = null;    
+    CollisionItem targetItem = null;    
+    ObjectPointLocation objectLocation = null;    
+    DHLink lastLink = null;   
+  }   
+      
   private MoveInfo moveInfo = null;
-	private OpenNi openni = null;
-	
-	private Map3D map3d = new Map3D();
-	private String kinectName = "kinect";
-	private boolean ProcessKinectData = false;
-	
-	private TestJmeIntegratedMovement jmeApp = null;
+  private OpenNi openni = null;
+  
+  private Map3D map3d = new Map3D();
+  private String kinectName = "kinect";
+  private boolean ProcessKinectData = false;
+  
+  private TestJmeIMModel jmeApp = null;
   
   public IntegratedMovement2(String n) {
     super(n);
@@ -108,15 +110,15 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   }
 
   public void moveTo(String arm, Point point) {
-  	if (engines.containsKey(arm)) {
-  		engines.get(arm).moveTo(point);
-  	}
-  	else {
-  		log.info("unknow arm {}", arm);
-  	}
-	}
+    if (engines.containsKey(arm)) {
+      engines.get(arm).moveTo(point);
+    }
+    else {
+      log.info("unknow arm {}", arm);
+    }
+  }
 
-	/**
+  /**
    * This create a rotation and translation matrix that will be applied on the
    * "moveTo" call.
    * 
@@ -142,14 +144,14 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     Matrix rotMatrix = Matrix.zRotation(roll).multiply(Matrix.yRotation(yaw).multiply(Matrix.xRotation(pitch)));
     inputMatrix = trMatrix.multiply(rotMatrix);
     for (IMEngine engine : engines.values()) {
-    	engine.setInputMatrix(inputMatrix);
+      engine.setInputMatrix(inputMatrix);
     }
     return inputMatrix;
   }
 
 
   public double[][] createJointPositionMap(String arm) {
-  	return engines.get(arm).createJointPositionMap();
+    return engines.get(arm).createJointPositionMap();
     //return createJointPositionMap(getArm(arm));
   }
   
@@ -158,15 +160,15 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
       return engines.get(arm).getDHRobotArm();
     }
     else {
-    	log.error("Unknow DHRobotArm {}", arm);
-    	DHRobotArm newArm = new DHRobotArm();
-    	newArm.name = arm;
-    	return newArm;
+      log.error("Unknow DHRobotArm {}", arm);
+      DHRobotArm newArm = new DHRobotArm();
+      newArm.name = arm;
+      return newArm;
     }
   }
 
   public void addArm(String name, DHRobotArm currentArm) {
-  	IMEngine newEngine = new IMEngine(name, currentArm, this);
+    IMEngine newEngine = new IMEngine(name, currentArm, this);
     engines.put(name, newEngine);
   }
 
@@ -317,7 +319,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     //#a name and a radius
     //#static object need a start point, an end point, a name and a radius 
     ik.clearObject();
-    ik.addObject(0.0, 0.0, 0.0, 0.0, 0.0, -150.0, "base", 150.0);
+    ik.addObject(150.0, 0.0, 0.0, 150.0, 0.0, -150.0, "base", 150.0);
     ik.addObject("mtorso", 150.0);
     ik.addObject("ttorso", 10.0);
     ik.addObject("omoplate", 10.0);
@@ -366,24 +368,34 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     //ik.holdTarget("leftArm", true);
     ik.visualize();
 
+    mtorso.moveTo(90);
+    ttorso.moveTo(90);
+    Romoplate.moveTo(10);
+    Rshoulder.moveTo(30);
+    Rrotate.moveTo(90);
+    Rbicep.moveTo(5);
+    omoplate.moveTo(10);
+    shoulder.moveTo(30);
+    rotate.moveTo(90);
+    bicep.moveTo(5);
   }
 
   private void startEngine(String arm) {
-  	getEngine(arm).start();
-		
-	}
+    getEngine(arm).start();
+    
+  }
 
-	private Thread getEngine(String arm) {
-		if (engines.containsKey(arm)){
-			return engines.get(arm);
-		}
-		else {
-			log.info("no engines found {}", arm);
-			return null;
-		}
-	}
+  private Thread getEngine(String arm) {
+    if (engines.containsKey(arm)){
+      return engines.get(arm);
+    }
+    else {
+      log.info("no engines found {}", arm);
+      return null;
+    }
+  }
 
-	@Override
+  @Override
   public Map<String, Double> publishJointAngles(HashMap<String, Double> angleMap) {
     return angleMap;
   }
@@ -403,58 +415,59 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(InverseKinematics3D.class.getCanonicalName());
+    ServiceType meta = new ServiceType(IntegratedMovement2.class.getCanonicalName());
     meta.addDescription("a 3D kinematics service supporting D-H parameters");
     meta.addCategory("robot", "control");
     meta.addPeer("openni", "OpenNi", "Kinect service");
-
+    meta.addDependency("inmoov.fr", "1.0.0");
+    meta.setAvailable(true);
     return meta;
   }
 
   public void setDHLink (String arm, String name, double d, double theta, double r, double alpha) {
-  	if (engines.containsKey(arm)) {
-	    DHLink dhLink = new DHLink(name, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
-	    IMEngine engine = engines.get(arm);
-	    DHRobotArm dhArm = engine.getDHRobotArm();
-	    dhArm.addLink(dhLink);
-	    engine.setDHRobotArm(dhArm);
-	    engines.put(arm, engine);
-  	}
-  	else {
-  		log.error("Unknow DH arm {}", arm);
-  	}
+    if (engines.containsKey(arm)) {
+      DHLink dhLink = new DHLink(name, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
+      IMEngine engine = engines.get(arm);
+      DHRobotArm dhArm = engine.getDHRobotArm();
+      dhArm.addLink(dhLink);
+      engine.setDHRobotArm(dhArm);
+      engines.put(arm, engine);
+    }
+    else {
+      log.error("Unknow DH arm {}", arm);
+    }
   }
   
   public void setDHLink (String arm, Servo servo, double d, double theta, double r, double alpha) {
-  	if (engines.containsKey(arm)) {
-  		IMEngine engine = engines.get(arm);
-  		DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
-  		servo.addIKServoEventListener(this);
-  		dhLink.addPositionValue(servo.getPos());
-  		dhLink.setMin(MathUtils.degToRad(theta + servo.getMinInput()));
-  		dhLink.setMax(MathUtils.degToRad(theta + servo.getMaxInput()));
-  		dhLink.setState(Servo.SERVO_EVENT_STOPPED);
-  		dhLink.setVelocity(servo.getVelocity());
-  		dhLink.setTargetPos(servo.targetPos);
-  		dhLink.servoMin = servo.getMinInput();
-  		dhLink.servoMax = servo.getMaxInput();
-  		dhLink.hasServo = true;
-  		DHRobotArm dhArm = engine.getDHRobotArm();
-  		dhArm.addLink(dhLink);
-  		engine.setDHRobotArm(dhArm);
-  		engines.put(arm, engine);
-  		servo.subscribe(getName(), "publishAngles", servo.getName(), "onIMAngles");
-  	}
-  	else {
-  		log.error("Unknow DH arm {}", arm);
-  	}
+    if (engines.containsKey(arm)) {
+      IMEngine engine = engines.get(arm);
+      DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
+      servo.addIKServoEventListener(this);
+      dhLink.addPositionValue(servo.getPos());
+      dhLink.setMin(MathUtils.degToRad(theta + servo.getMinInput()));
+      dhLink.setMax(MathUtils.degToRad(theta + servo.getMaxInput()));
+      dhLink.setState(Servo.SERVO_EVENT_STOPPED);
+      dhLink.setVelocity(servo.getVelocity());
+      dhLink.setTargetPos(servo.targetPos);
+      dhLink.servoMin = servo.getMinInput();
+      dhLink.servoMax = servo.getMaxInput();
+      dhLink.hasServo = true;
+      DHRobotArm dhArm = engine.getDHRobotArm();
+      dhArm.addLink(dhLink);
+      engine.setDHRobotArm(dhArm);
+      engines.put(arm, engine);
+      servo.subscribe(getName(), "publishAngles", servo.getName(), "onIMAngles");
+    }
+    else {
+      log.error("Unknow DH arm {}", arm);
+    }
   }
   
   public void setNewDHRobotArm(String name) {
-  	IMEngine engine = new IMEngine(name, this);
-  	engine.setInputMatrix(inputMatrix);
-  	engines.put(name, engine);
-  	
+    IMEngine engine = new IMEngine(name, this);
+    engine.setInputMatrix(inputMatrix);
+    engines.put(name, engine);
+    
   }
   
   
@@ -463,18 +476,27 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   }
 
   public String addObject(Point origin, Point end, String name, double radius) {
+    return addObject(origin, end, name, radius, null);
+  }
+  
+  public String addObject(Point origin, Point end, String name, double radius, String modelName) {
     CollisionItem item = new CollisionItem(origin, end, name, radius);
     collisionItems.addItem(item);
     return item.getName();
   }
+
+  public String addObject(String name, double radius, String modelName) {
+    return addObject(new Point(0, 0, 0, 0, 0, 0), new Point(0, 0, 0, 0, 0, 0), name, radius, modelName);
+  }
+  
   public String addObject(String name, double radius) {
-    return addObject(new Point(0, 0, 0, 0, 0, 0), new Point(0, 0, 0, 0, 0, 0), name, radius);
+    return addObject(name, radius, null);
   }
   
   public String addObject(HashMap<Integer[],Map3DPoint> cloudMap) {
-  	CollisionItem item = new CollisionItem(cloudMap);
-  	collisionItems.addItem(item);
-  	return item.getName();
+    CollisionItem item = new CollisionItem(cloudMap);
+    collisionItems.addItem(item);
+    return item.getName();
   }
   
   public void clearObject(){
@@ -487,100 +509,104 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   }
   
   public void onIKServoEvent(IKData data) {
-  	for (IMEngine e : engines.values()) {
-  		e.updateLinksPosition(data);
+    for (IMEngine e : engines.values()) {
+      e.updateLinksPosition(data);
     }
     if (openni != null) {
-    	map3d.updateKinectPosition(currentPosition(kinectName));
+      map3d.updateKinectPosition(currentPosition(kinectName));
     }
     if (jmeApp != null) {
-    	jmeApp.updateObjects(collisionItems.getItems());
+      //jmeApp.updateObjects(collisionItems.getItems());
+      jmeApp.updatePosition(data);
     }
   }
   
-  public void moveTo(String name, ObjectPointLocation location, int xoffset, int yoffset, int zoffset) {		
-//  	stopMoving = false;
-//  	moveInfo = new MoveInfo();		
-//  	moveInfo.offset = new Point(xoffset, yoffset, zoffset, 0, 0, 0);		
-//  	moveInfo.targetItem = collisionItems.getItem(name);		
-//  	moveInfo.objectLocation = location;		
-//  	if (moveInfo.targetItem == null){		
-//  		log.info("no items named {} found",name);		
-//  		moveInfo = null;		
-//  		return;		
-//  	}		
-//  	moveTo(moveToObject());		
-  }		
-  		
+  public void moveTo(String name, ObjectPointLocation location, int xoffset, int yoffset, int zoffset) {    
+//    stopMoving = false;
+//    moveInfo = new MoveInfo();    
+//    moveInfo.offset = new Point(xoffset, yoffset, zoffset, 0, 0, 0);    
+//    moveInfo.targetItem = collisionItems.getItem(name);   
+//    moveInfo.objectLocation = location;   
+//    if (moveInfo.targetItem == null){   
+//      log.info("no items named {} found",name);   
+//      moveInfo = null;    
+//      return;   
+//    }   
+//    moveTo(moveToObject());   
+  }   
+      
   private Point moveToObject() {
-		return goTo;		
-//  	Point[] point = new Point[2];		
-//  	moveInfo.lastLink = currentArm.getLink(currentArm.getNumLinks()-1);		
-//  	CollisionItem lastLinkItem = collisionItems.getItem(moveInfo.lastLink.getName());		
-//		Double[] vector = new Double[3];		
-//		boolean addRadius=false;		
-//  	switch (moveInfo.objectLocation) {		
-//  		case ORIGIN_CENTER: {		
-//  			point[0] = moveInfo.targetItem.getOrigin();		
-//  			break;		
-//  		}		
-//  		case END_CENTER: {		
-//  			point[0] = moveInfo.targetItem.getEnd();		
-//  			break;		
-//  		}		
-//  		case CLOSEST_POINT: {		
-//  			point = collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[2], vector);		
-//  			addRadius = true;		
-//  			break;		
-//  		}		
-//  		case ORIGIN_SIDE: {		
-//  			point[0] = moveInfo.targetItem.getOrigin();		
-//  			addRadius = true;		
-//  			break;		
-//  		}		
-//  		case END_SIDE: {		
-//  			point[0] = moveInfo.targetItem.getEnd();		
-//  			addRadius = true;		
-//  			break;		
-//  		}		
-//  		case CENTER_SIDE: {		
-//  			point = collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[]{0.5, 0.5}, vector);		
-//  			addRadius = true;		
-//  		}		
-//  		case CENTER: {		
-//  			point = collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[]{0.5, 0.5}, vector);		
-//  		}		
-//  	}		
-//  	if(addRadius) {		
-//  		double[] vectori = moveInfo.targetItem.getVector();		
-//  		double[] vectorT = moveInfo.targetItem.getVectorT();		
-//  		Point side0 = new Point(point[0].getX()+vectorT[0], point[0].getY()+vectorT[1], point[0].getZ()+vectorT[2], 0, 0, 0);		
-//  		Point pointF = side0;		
-//  		Point curPos = currentPosition();		
-//  		double d = Math.pow((side0.getX() - curPos.getX()),2) + Math.pow((side0.getY() - curPos.getY()),2) + Math.pow((side0.getZ() - curPos.getZ()),2);		
-//  		for (int i = 0; i < 360; i+=10) {		
-//  			double L = vectori[0]*vectori[0] + vectori[1]*vectori[1] + vectori[2]*vectori[2];		
-//  			double x = ((moveInfo.targetItem.getOrigin().getX()*(Math.pow(vectori[1],2)+Math.pow(vectori[2], 2)) - vectori[0] * (moveInfo.targetItem.getOrigin().getY()*vectori[1] + moveInfo.targetItem.getOrigin().getZ()*vectori[2] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getX() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * (-moveInfo.targetItem.getOrigin().getZ()*vectori[1] + moveInfo.targetItem.getOrigin().getY()*vectori[2] - vectori[2]*side0.getY() + vectori[1]*side0.getZ()) * Math.sin(MathUtils.degToRad(i))) / L;		
-//  			double y = ((moveInfo.targetItem.getOrigin().getY()*(Math.pow(vectori[0],2)+Math.pow(vectori[2], 2)) - vectori[1] * (moveInfo.targetItem.getOrigin().getX()*vectori[0] + moveInfo.targetItem.getOrigin().getZ()*vectori[2] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getY() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * ( moveInfo.targetItem.getOrigin().getZ()*vectori[0] - moveInfo.targetItem.getOrigin().getX()*vectori[2] + vectori[2]*side0.getX() - vectori[0]*side0.getZ()) * Math.sin(MathUtils.degToRad(i))) / L;		
-//  			double z = ((moveInfo.targetItem.getOrigin().getZ()*(Math.pow(vectori[0],2)+Math.pow(vectori[1], 2)) - vectori[2] * (moveInfo.targetItem.getOrigin().getX()*vectori[0] + moveInfo.targetItem.getOrigin().getY()*vectori[1] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getZ() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * (-moveInfo.targetItem.getOrigin().getY()*vectori[0] + moveInfo.targetItem.getOrigin().getX()*vectori[1] - vectori[1]*side0.getX() + vectori[0]*side0.getY()) * Math.sin(MathUtils.degToRad(i))) / L;		
-//  			Point check = new Point(x,y,z,0,0,0);		
-//    		double dt = Math.pow((check.getX() - curPos.getX()),2) + Math.pow((check.getY() - curPos.getY()),2) + Math.pow((check.getZ() - curPos.getZ()),2);		
-//    		if (dt < d) {		
-//    			pointF = check;		
-//    			d = dt;		
-//    		}		
-//  		}		
-//  		point[0] = pointF;		
-//  	}		
-//  	Point moveToPoint = point[0].add(moveInfo.offset);		
-//  	log.info("Moving to point {}", moveToPoint);		
-//  	return moveToPoint;		
-  }		
+    return goTo;    
+//    Point[] point = new Point[2];   
+//    moveInfo.lastLink = currentArm.getLink(currentArm.getNumLinks()-1);   
+//    CollisionItem lastLinkItem = collisionItems.getItem(moveInfo.lastLink.getName());   
+//    Double[] vector = new Double[3];    
+//    boolean addRadius=false;    
+//    switch (moveInfo.objectLocation) {    
+//      case ORIGIN_CENTER: {   
+//        point[0] = moveInfo.targetItem.getOrigin();   
+//        break;    
+//      }   
+//      case END_CENTER: {    
+//        point[0] = moveInfo.targetItem.getEnd();    
+//        break;    
+//      }   
+//      case CLOSEST_POINT: {   
+//        point = collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[2], vector);   
+//        addRadius = true;   
+//        break;    
+//      }   
+//      case ORIGIN_SIDE: {   
+//        point[0] = moveInfo.targetItem.getOrigin();   
+//        addRadius = true;   
+//        break;    
+//      }   
+//      case END_SIDE: {    
+//        point[0] = moveInfo.targetItem.getEnd();    
+//        addRadius = true;   
+//        break;    
+//      }   
+//      case CENTER_SIDE: {   
+//        point = collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[]{0.5, 0.5}, vector);    
+//        addRadius = true;   
+//      }   
+//      case CENTER: {    
+//        point = collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[]{0.5, 0.5}, vector);    
+//      }   
+//    }   
+//    if(addRadius) {   
+//      double[] vectori = moveInfo.targetItem.getVector();   
+//      double[] vectorT = moveInfo.targetItem.getVectorT();    
+//      Point side0 = new Point(point[0].getX()+vectorT[0], point[0].getY()+vectorT[1], point[0].getZ()+vectorT[2], 0, 0, 0);   
+//      Point pointF = side0;   
+//      Point curPos = currentPosition();   
+//      double d = Math.pow((side0.getX() - curPos.getX()),2) + Math.pow((side0.getY() - curPos.getY()),2) + Math.pow((side0.getZ() - curPos.getZ()),2);    
+//      for (int i = 0; i < 360; i+=10) {   
+//        double L = vectori[0]*vectori[0] + vectori[1]*vectori[1] + vectori[2]*vectori[2];   
+//        double x = ((moveInfo.targetItem.getOrigin().getX()*(Math.pow(vectori[1],2)+Math.pow(vectori[2], 2)) - vectori[0] * (moveInfo.targetItem.getOrigin().getY()*vectori[1] + moveInfo.targetItem.getOrigin().getZ()*vectori[2] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getX() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * (-moveInfo.targetItem.getOrigin().getZ()*vectori[1] + moveInfo.targetItem.getOrigin().getY()*vectori[2] - vectori[2]*side0.getY() + vectori[1]*side0.getZ()) * Math.sin(MathUtils.degToRad(i))) / L;   
+//        double y = ((moveInfo.targetItem.getOrigin().getY()*(Math.pow(vectori[0],2)+Math.pow(vectori[2], 2)) - vectori[1] * (moveInfo.targetItem.getOrigin().getX()*vectori[0] + moveInfo.targetItem.getOrigin().getZ()*vectori[2] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getY() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * ( moveInfo.targetItem.getOrigin().getZ()*vectori[0] - moveInfo.targetItem.getOrigin().getX()*vectori[2] + vectori[2]*side0.getX() - vectori[0]*side0.getZ()) * Math.sin(MathUtils.degToRad(i))) / L;   
+//        double z = ((moveInfo.targetItem.getOrigin().getZ()*(Math.pow(vectori[0],2)+Math.pow(vectori[1], 2)) - vectori[2] * (moveInfo.targetItem.getOrigin().getX()*vectori[0] + moveInfo.targetItem.getOrigin().getY()*vectori[1] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getZ() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * (-moveInfo.targetItem.getOrigin().getY()*vectori[0] + moveInfo.targetItem.getOrigin().getX()*vectori[1] - vectori[1]*side0.getX() + vectori[0]*side0.getY()) * Math.sin(MathUtils.degToRad(i))) / L;   
+//        Point check = new Point(x,y,z,0,0,0);   
+//        double dt = Math.pow((check.getX() - curPos.getX()),2) + Math.pow((check.getY() - curPos.getY()),2) + Math.pow((check.getZ() - curPos.getZ()),2);   
+//        if (dt < d) {   
+//          pointF = check;   
+//          d = dt;   
+//        }   
+//      }   
+//      point[0] = pointF;    
+//    }   
+//    Point moveToPoint = point[0].add(moveInfo.offset);    
+//    log.info("Moving to point {}", moveToPoint);    
+//    return moveToPoint;   
+  }   
   
-	public void stopMoving() {		
-  	stopMoving = true;		
-  }		
-  		
+  public void stopMoving() {
+    for (IMEngine engine: engines.values()) {
+      engine.target=null;
+    }
+    stopMoving = true;    
+  }   
+      
   public OpenNi startOpenNI() throws Exception {
     if (openni == null) {
       openni = (OpenNi) startPeer("openni");
@@ -592,70 +618,83 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   }
   
   public void onOpenNiData(OpenNiData data){
-		if (ProcessKinectData) {
-			ProcessKinectData = false;
-  		long a = System.currentTimeMillis();
-  		log.info("start {}",a);
-  		map3d.processDepthMap(data);
-  		removeKinectObject();
-  		ArrayList<HashMap<Integer[],Map3DPoint>> object = map3d.getObject();
-  		for (int i = 0; i < object.size(); i++) {
-  			addObject(object.get(i));
-  		}
-  		long b = System.currentTimeMillis();
-  		log.info("end {} - {} - {}",b, b-a, this.inbox.size());
-  		broadcastState();
-		}
+    if (ProcessKinectData) {
+      ProcessKinectData = false;
+      long a = System.currentTimeMillis();
+      log.info("start {}",a);
+      map3d.processDepthMap(data);
+      removeKinectObject();
+      ArrayList<HashMap<Integer[],Map3DPoint>> object = map3d.getObject();
+      for (int i = 0; i < object.size(); i++) {
+        addObject(object.get(i));
+      }
+      long b = System.currentTimeMillis();
+      log.info("end {} - {} - {}",b, b-a, this.inbox.size());
+      broadcastState();
+    }
   }
 
   private void removeKinectObject() {
-		collisionItems.removeKinectObject();
-		
-	}
+    collisionItems.removeKinectObject();
+    
+  }
 
 
-	public void processKinectData(){
-  	ProcessKinectData = true;
-  	onOpenNiData(openni.get3DData());
+  public void processKinectData(){
+    ProcessKinectData = true;
+    onOpenNiData(openni.get3DData());
   }
   
   public void setKinectName(String kinectName) {
-  	this.kinectName = kinectName;
+    this.kinectName = kinectName;
   }
 
 
-	public HashMap<String, CollisionItem> getCollisionObject() {
-		return collisionItems.getItems();
-	}
+  public HashMap<String, CollisionItem> getCollisionObject() {
+    return collisionItems.getItems();
+  }
 
 
-	public ObjectPointLocation[] getEnumLocationValue() {
-		return ObjectPointLocation.values();
-	}
-	
-	public Collection<DHRobotArm> getArms() {
-		return null;
-		//return this.arms.values();
-	}
-	
-	public void visualize() {
-		jmeApp = new TestJmeIntegratedMovement();
-		jmeApp.setObjects(getCollisionObject());
-		jmeApp.start();
+  public ObjectPointLocation[] getEnumLocationValue() {
+    return ObjectPointLocation.values();
+  }
+  
+  public Collection<DHRobotArm> getArms() {
+    return null;
+    //return this.arms.values();
+  }
+  
+  public void visualize() {
+    jmeApp = new TestJmeIMModel();
+    jmeApp.setObjects(getCollisionObject());
+    //jmeApp.setShowSettings(false);
+    jmeApp.start();
+    sleep(1000);
+    jmeApp.addPart("mtorso", "Models/mtorso.j3o", 600f, null, new Vector3f(0,0,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
+    jmeApp.addPart("ttorso", "Models/ttorso.j3o", 600f, "mtorso", new Vector3f(0,66.67f,0), Vector3f.UNIT_Z, (float)Math.toRadians(-90));
+    jmeApp.addPart("rightS", null, 600f, "ttorso", new Vector3f(0,179.55f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
+    jmeApp.addPart("Romoplate", "Models/Romoplate.j3o", 600f, "rightS", new Vector3f(-85.8f,0,0), Vector3f.UNIT_Z.mult(-1), (float)Math.toRadians(-10));
+    jmeApp.addPart("Rshoulder", "Models/Rshoulder.j3o", 600f, "Romoplate", new Vector3f(-8,-31.55f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
+    jmeApp.addPart("Rrotate", "Models/Rrotate.j3o", 600f, "Rshoulder", new Vector3f(-40,-15,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
+    jmeApp.addPart("Rbicep", "Models/Rbicep.j3o", 600f, "Rrotate", new Vector3f(0,-151,-20), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
+    jmeApp.addPart("leftS", null, 600f, "ttorso", new Vector3f(0,179.55f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
+    jmeApp.addPart("omoplate", "Models/omoplate.j3o", 600f, "leftS", new Vector3f(85.8f,0,0), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(-10));
+    jmeApp.addPart("shoulder", "Models/shoulder.j3o", 600f, "omoplate", new Vector3f(25,-31.55f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
+    jmeApp.addPart("rotate", "Models/rotate.j3o", 600f, "shoulder", new Vector3f(20,-13,0), Vector3f.UNIT_Y.mult(1), (float)Math.toRadians(-90));
+    jmeApp.addPart("bicep", "Models/bicep.j3o", 600f, "rotate", new Vector3f(0,-140,-20), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
+  }
 
-	}
-
-	public synchronized void sendAngles(String name, double positionValueDeg) {
-		invoke("publishAngles", name, positionValueDeg);
-	}
-	
-	public Object[] publishAngles(String name, double positionValueDeg) {
-		Object[] retval = new Object[]{(Object)name, (Object)positionValueDeg};
-		return retval;
-	}
-	
-	public void holdTarget(String arm, boolean holdEnabled) {
-		engines.get(arm).holdTarget(holdEnabled);
-	}
+  public synchronized void sendAngles(String name, double positionValueDeg) {
+    invoke("publishAngles", name, positionValueDeg);
+  }
+  
+  public Object[] publishAngles(String name, double positionValueDeg) {
+    Object[] retval = new Object[]{(Object)name, (Object)positionValueDeg};
+    return retval;
+  }
+  
+  public void holdTarget(String arm, boolean holdEnabled) {
+    engines.get(arm).holdTarget(holdEnabled);
+  }
 }
 
