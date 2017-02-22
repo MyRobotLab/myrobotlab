@@ -415,12 +415,12 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(InverseKinematics3D.class.getCanonicalName());
+    ServiceType meta = new ServiceType(IntegratedMovement2.class.getCanonicalName());
     meta.addDescription("a 3D kinematics service supporting D-H parameters");
     meta.addCategory("robot", "control");
     meta.addPeer("openni", "OpenNi", "Kinect service");
-    meta.addDependency("inmoov", "1.0.0");
-
+    meta.addDependency("inmoov.fr", "1.0.0");
+    meta.setAvailable(true);
     return meta;
   }
 
@@ -670,18 +670,18 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     //jmeApp.setShowSettings(false);
     jmeApp.start();
     sleep(1000);
-    jmeApp.addPart("mtorso", "inMoov/mtorso.j3o", 600f, null, new Vector3f(0,0,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
-    jmeApp.addPart("ttorso", "inMoov/ttorso.j3o", 600f, "mtorso", new Vector3f(0,66.67f,0), Vector3f.UNIT_Z, (float)Math.toRadians(-90));
+    jmeApp.addPart("mtorso", "Models/mtorso.j3o", 600f, null, new Vector3f(0,0,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
+    jmeApp.addPart("ttorso", "Models/ttorso.j3o", 600f, "mtorso", new Vector3f(0,66.67f,0), Vector3f.UNIT_Z, (float)Math.toRadians(-90));
     jmeApp.addPart("rightS", null, 600f, "ttorso", new Vector3f(0,179.55f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
-    jmeApp.addPart("Romoplate", "inMoov/Romoplate.j3o", 600f, "rightS", new Vector3f(-85.8f,0,0), Vector3f.UNIT_Z.mult(-1), (float)Math.toRadians(-10));
-    jmeApp.addPart("Rshoulder", "inMoov/Rshoulder.j3o", 600f, "Romoplate", new Vector3f(-8,-31.55f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
-    jmeApp.addPart("Rrotate", "inMoov/Rrotate.j3o", 600f, "Rshoulder", new Vector3f(-40,-15,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
-    jmeApp.addPart("Rbicep", "inMoov/Rbicep.j3o", 600f, "Rrotate", new Vector3f(0,-151,-20), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
+    jmeApp.addPart("Romoplate", "Models/Romoplate.j3o", 600f, "rightS", new Vector3f(-85.8f,0,0), Vector3f.UNIT_Z.mult(-1), (float)Math.toRadians(-10));
+    jmeApp.addPart("Rshoulder", "Models/Rshoulder.j3o", 600f, "Romoplate", new Vector3f(-8,-31.55f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
+    jmeApp.addPart("Rrotate", "Models/Rrotate.j3o", 600f, "Rshoulder", new Vector3f(-40,-15,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
+    jmeApp.addPart("Rbicep", "Models/Rbicep.j3o", 600f, "Rrotate", new Vector3f(0,-151,-20), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
     jmeApp.addPart("leftS", null, 600f, "ttorso", new Vector3f(0,179.55f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
-    jmeApp.addPart("omoplate", "inMoov/omoplate.j3o", 600f, "leftS", new Vector3f(85.8f,0,0), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(-10));
-    jmeApp.addPart("shoulder", "inMoov/shoulder.j3o", 600f, "omoplate", new Vector3f(25,-31.55f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
-    jmeApp.addPart("rotate", "inMoov/rotate.j3o", 600f, "shoulder", new Vector3f(20,-13,0), Vector3f.UNIT_Y.mult(1), (float)Math.toRadians(-90));
-    jmeApp.addPart("bicep", "inMoov/bicep.j3o", 600f, "rotate", new Vector3f(0,-140,-20), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
+    jmeApp.addPart("omoplate", "Models/omoplate.j3o", 600f, "leftS", new Vector3f(85.8f,0,0), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(-10));
+    jmeApp.addPart("shoulder", "Models/shoulder.j3o", 600f, "omoplate", new Vector3f(25,-31.55f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
+    jmeApp.addPart("rotate", "Models/rotate.j3o", 600f, "shoulder", new Vector3f(20,-13,0), Vector3f.UNIT_Y.mult(1), (float)Math.toRadians(-90));
+    jmeApp.addPart("bicep", "Models/bicep.j3o", 600f, "rotate", new Vector3f(0,-140,-20), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
   }
 
   public synchronized void sendAngles(String name, double positionValueDeg) {
