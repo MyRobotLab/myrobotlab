@@ -1749,6 +1749,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     log.info("os.arch [{}] getArch [{}]", System.getProperty("os.arch"), platform.getArch());
     log.info("getBitness [{}]", platform.getBitness());
     log.info("java.vm.name [{}] getVMName [{}]", vmName, platform.getVMName());
+    log.info("platform [{}}]", platform);
     log.info("version [{}]", Runtime.getVersion());
     log.info("root [{}]", FileIO.getRoot());
     log.info("cfg dir [{}]", FileIO.getCfgDir());

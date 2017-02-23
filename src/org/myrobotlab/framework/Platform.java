@@ -89,7 +89,7 @@ public class Platform implements Serializable {
       }
       
       if ("aarch64".equals(arch)){
-    	  platform.arch = "arm";
+    	  platform.arch = "armv8";
       }
 
       if (platform.arch == null) {
