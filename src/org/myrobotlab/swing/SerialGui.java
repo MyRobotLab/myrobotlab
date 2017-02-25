@@ -60,18 +60,21 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(SerialGui.class);
 
+	JLabel connectLight = new JLabel();
+	JComboBox<String> ports = new JComboBox<String>();
+
 	// menu
 	JComboBox<String> reqFormat = new JComboBox<String>(new String[] { "decimal", "hex", "ascii", "arduino" });
-	JComboBox<String> ports = new JComboBox<String>();
+
 	JButton connect = new JButton("connect");
 	JButton refresh = new JButton("refresh");
 
+	// FIXME !!!
 	JButton createVirtualPort = new JButton("create virtual uart");
+	JButton clear = new JButton("clear");
 	JButton record = new JButton();
-	
 
-	JLabel connectLight = new JLabel();
-
+	// recv data display
 	JTextArea rx = new JTextArea(10, 10);
 	JLabel rxTotal = new JLabel("0");
 	JLabel txTotal = new JLabel("0");
@@ -79,12 +82,14 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	int rxCount = 0;
 	int txCount = 0;
 
-	JTextArea tx = new JTextArea(10, 10);
+	// trasmit data display
+	JTextArea tx = new JTextArea(5, 10);
+	JTextArea toSend = new JTextArea(2, 10);
 	JButton send = new JButton("send");
 	JButton sendFile = new JButton("send file");
 
 	Serial mySerial = null;
-	final SerialGui myself;
+	final SerialGui self;
 
 	// gui's formatters
 	Codec rxFormatter = new DecimalCodec(myService);
@@ -92,16 +97,22 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 	public SerialGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
-		myself = this;
+		self = this;
 		mySerial = (Serial) Runtime.getService(boundServiceName);
 		rx.setEditable(false);
+		tx.setEditable(false);
 		autoScroll(true);
+		ports.setEditable(true);
 
-		addTop(connectLight, "  port: ", ports, connect, refresh, " ", reqFormat, createVirtualPort, record);
+		addTop(connectLight, "  port: ", ports, connect, refresh, " ", reqFormat, clear, record);
 
-		addLine(new JScrollPane(rx));
-		addLine(new JScrollPane(tx));
-		
+		// add("rx");
+		add(new JScrollPane(rx));
+		// add("tx");
+		add(new JScrollPane(tx));
+		add("send");
+		add(new JScrollPane(toSend));
+
 		addBottomGroup(null, send, sendFile, "rx", rxTotal, "tx", txTotal);
 
 		createVirtualPort.addActionListener(this);
@@ -111,6 +122,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		connect.addActionListener(this);
 		reqFormat.addItemListener(this);
 		refresh.addActionListener(this);
+		clear.addActionListener(this);
 	}
 
 	@Override
@@ -139,7 +151,10 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 					log.error("connect in gui threw", e2);
 				}
 			}
-
+		}
+		if (o == clear) {
+			rx.setText("");
+			tx.setText("");
 		}
 		if (o == createVirtualPort) {
 			send("connectVirtualUart", "COM88");
@@ -160,11 +175,10 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		}
 
 		if (o == send) {
-			String data = tx.getText();
+			String data = toSend.getText();
 			send("write", data.getBytes());
 			myService.info("sent [%s]", data);
 		}
-
 	}
 
 	@Override
@@ -176,6 +190,14 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		// forces scan of ports
 		send("refresh");
 		send("getPortNames");
+	}
+
+	@Override
+	public void unsubscribeGui() {
+		unsubscribe("publishRX");
+		unsubscribe("publishTX");
+		unsubscribe("publishState");
+		unsubscribe("getPortNames");
 	}
 
 	public void autoScroll(boolean b) {
@@ -192,13 +214,6 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		} else {
 			caretTX.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 		}
-	}
-
-	@Override
-	public void unsubscribeGui() {
-		unsubscribe("publishRX");
-		unsubscribe("publishTX");
-		unsubscribe("publishState");
 	}
 
 	public void onPortNames(final List<String> inPorts) {
@@ -223,7 +238,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 				try {
 
 					// prevent re-firing the event :P
-					reqFormat.removeItemListener(myself);
+					reqFormat.removeItemListener(self);
 					// ports.removeItemListener(myself);
 
 					mySerial = serial;
@@ -235,7 +250,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 					setPortStatus();
 
 					// ports.addItemListener(myself);
-					reqFormat.addItemListener(myself);
+					reqFormat.addItemListener(self);
 
 					if (!serial.isRecording()) {
 						record.setText("record");
@@ -313,7 +328,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	}
 
 	public void setPortStatus() {
-		ports.removeItemListener(myself);
+		ports.removeItemListener(self);
 		if (mySerial.isConnected()) {
 			connectLight.setIcon(Util.getImageIcon("green.png"));
 			log.info(String.format("displaying %s", mySerial.getPortName()));

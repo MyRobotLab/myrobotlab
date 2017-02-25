@@ -41,11 +41,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.myrobotlab.service.Runtime;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenuItem;
@@ -85,6 +85,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 			"Arduino NG or older w/ ATmega8" };
 
 	// FIXME - double buffer 2 JPanels
+	// FIXME - wigetize 
 	class TraceData {
 		Color color = null;
 		String controllerName;
@@ -106,6 +107,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
 	JLabel state = new JLabel();
 	JLabel version = new JLabel();
+	JLabel connectLight = new JLabel();
+	
 
 	JComboBox<String> boardTypes = new JComboBox<String>(BOARD_TYPES);
 
@@ -128,9 +131,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	ArduinoGui self;
 
 	SerializableImage sensorImage = null;
-
 	JButton connect = new JButton("connect");
-
 	JMenuItem serialRefresh = new JMenuItem("refresh");
 
 	Dimension size = new Dimension(DATA_WIDTH, DATA_HEIGHT);
@@ -185,10 +186,21 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	public ArduinoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		self = this;
+		// FIXME - this should be done in ServiceGui ! - it should auto-update onState in ServiceGui
+		// and ServiceGui should call overloaded method 
+		Arduino arduino = (Arduino)Runtime.getService(boundServiceName);
+		Serial serial = arduino.getSerial();
+		if (serial == null || !serial.isConnected()){
+			connectLight.setIcon(Util.getImageIcon("red.png"));
+		} else {
+			connectLight.setIcon(Util.getImageIcon("green.png"));
+		}
+		
+		ports.setEnabled(true);
 		state.setText("not connected");
 
-		addTop(" port:", ports, connect, " ", state);
-		addTop(" board:", 3, boardTypes, " version:", version);
+		addTop(connectLight, " port:", ports, connect, " ", state);
+		addTop(" board:", 4, boardTypes, " version:", version);
 
 		localTabs.setTabPlacement(SwingConstants.RIGHT);
 		localTabs.setPreferredSize(new Dimension(300, 300));
@@ -337,12 +349,16 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 		version.setText("");
 		openMrlComm.setEnabled(true);
 		arduinoPath.setText(myArduino.arduinoPath);
+		connectLight.setIcon(Util.getImageIcon("red.png"));
+		ports.setEnabled(true);
 	}
 
 	public void onConnect(String portName) {
 		state.setText(String.format("connected on port %s", portName));
 		ports.setSelectedItem(portName);
 		openMrlComm.setEnabled(false);
+		connectLight.setIcon(Util.getImageIcon("green.png"));
+		ports.setEnabled(false);
 	}
 
 	@Override
