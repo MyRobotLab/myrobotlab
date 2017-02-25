@@ -191,7 +191,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   @Override
   public void actionPerformed(ActionEvent ae) {
     String cmd = ae.getActionCommand();
-    Object source = ae.getSource();
+    // Object source = ae.getSource();
 
     if ("unhide all".equals(cmd)) {
       unhideAll();

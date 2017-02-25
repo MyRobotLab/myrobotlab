@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.net.Socket;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -375,6 +376,8 @@ public class Serial extends Service
 		this.databits = databits;
 		this.stopbits = stopbits;
 		this.parity = parity;
+		
+		lastPortName = portName;
 
 		// two possible logics to see if we are connected - look at the
 		// state of the port
@@ -399,8 +402,20 @@ public class Serial extends Service
 			return;
 		}
 
+		if (inPortName.toLowerCase().startsWith("tcp://")) {
+			try {
+				URI uri = new URI(inPortName);
+				connectTcp(uri.getHost(), uri.getPort());
+				return;
+			} catch (Exception e) {
+				// not a big fan of re-throwing exceptions,
+				// but I'll make an exception here
+				throw new IOException(e);
+			}
+		}
+
 		// #3 we dont have an existing port - so we'll try a hardware port
-		// connect at defaullt parameters - if you need custom parameters
+		// connect at default parameters - if you need custom parameters
 		// create the hardware port first
 		Port port = createHardwarePort(inPortName, baudrate, databits, stopbits, parity);
 		if (port == null) {
@@ -408,8 +423,7 @@ public class Serial extends Service
 		}
 
 		connectPort(port, null);
-
-		lastPortName = portName;
+		
 		// even when the JNI says it is connected
 		// rarely is everything ready to go
 		// give us half a second for all the buffers
