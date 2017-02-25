@@ -387,7 +387,8 @@ public class Servo extends Service implements ServoControl {
    * response
    */
 
-  public double publishServoEvent(double position) {
+  public Double publishServoEvent(Double position) {
+
     return position;
   }
 
@@ -873,7 +874,7 @@ public class Servo extends Service implements ServoControl {
 
   public void enableAutoDetach(boolean autoDetach) {
     this.autoDetach = autoDetach;
-    isEventsEnabled = true;
+    this.addServoEventListener(this);
   }
 
   public double microsecondsToDegree(int microseconds) {
@@ -931,16 +932,11 @@ public class Servo extends Service implements ServoControl {
       data.targetPos = this.targetPos;
       invoke("publishIKServoEvent", data);
     }
-    if (eventType == SERVO_EVENT_STOPPED && autoDetach  && isPinAttached()) {
-      if (velocity > -1) {
-        detach();
-      }
-      else {
-        if (getTasks().containsKey("EndMoving")) {
-          purgeTask("EndMoving");
-        }
-        addTask("EndMoving",defaultDetachDelay, "autoDetach");
-      }
+    if (eventType == SERVO_EVENT_STOPPED) {
+    	moving = false;
+    }
+    else {
+    	moving = true;
     }
   }
   
@@ -949,5 +945,19 @@ public class Servo extends Service implements ServoControl {
     if (name.equals(this.getName())) {
       moveTo((double)data[1]);
     }
+  }
+  
+  public void onServoEvent(Double position) {
+	    if (!isMoving() && autoDetach  && isPinAttached()) {
+	        if (velocity > -1) {
+	          detach();
+	        }
+	        else {
+	          if (getTasks().containsKey("EndMoving")) {
+	            purgeTask("EndMoving");
+	          }
+	          addTask("EndMoving",defaultDetachDelay, "autoDetach");
+	        }
+	      }
   }
 }
