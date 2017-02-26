@@ -1583,6 +1583,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	// > servoEnablePwm/deviceId/pin
 	public void servoAttachPin(ServoControl servo, int pin) {
+		log.info("{}.attachPin({})",servo.getName(), servo.getPin());
 		msg.servoAttachPin(getDeviceId(servo), pin);
 	}
 
@@ -1596,6 +1597,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	// > servoSetVelocity/deviceId/b16 velocity
 	public void servoSetVelocity(ServoControl servo) {
+		log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), (int) servo.getVelocity());
 		msg.servoSetVelocity(getDeviceId(servo), (int) servo.getVelocity());
 	}
 

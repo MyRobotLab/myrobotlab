@@ -27,6 +27,7 @@ import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.slf4j.Logger;
 
 import com.jme3.math.Vector3f;
+import com.jme3.system.AppSettings;
 
 /**
  * 
@@ -58,8 +59,6 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   GeneticParameters geneticParameters = new GeneticParameters();
 
   private double time;
-  
-  private boolean stopMoving = false;   
   
   public enum ObjectPointLocation {   
     ORIGIN_CENTER (0x01,"Center Origin"),   
@@ -215,13 +214,13 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     shoulder.map(0,180,0,180);
     //#shoulder.setMinMax(0,180)
     shoulder.setVelocity(14);
-    shoulder.moveTo(20);
+    shoulder.moveTo(30);
     Servo Rshoulder = (Servo) Runtime.start("Rshoulder","Servo");
     Rshoulder.attach(arduino,6,30);
     Rshoulder.map(0,180,0,180);
     //#shoulder.setMinMax(0,180)
     Rshoulder.setVelocity(14);
-    Rshoulder.moveTo(20);
+    Rshoulder.moveTo(30);
     Servo rotate = (Servo) Runtime.start("rotate","Servo");
     rotate.attach(arduino,9,90);
     rotate.map(46,160,46,160);
@@ -274,38 +273,38 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     Rfinger.moveTo(90);
 
     //#define the DH parameters for the ik service
-    ik.setNewDHRobotArm("rightArm");
-    ik.setDHLink("rightArm",mtorso,113,90,0,-90);
+    ik.setNewDHRobotArm("leftArm");
+    ik.setDHLink("leftArm",mtorso,113,90,0,-90);
     //ik.setDHLink("rightArm",ttorso,0,90+65.6,346,0);
-    ik.setDHLink("rightArm",ttorso,0,180,315,90);
-    ik.setDHLink("rightArm", "rightS", 143, 180, 0, 90);
-    ik.setDHLink("rightArm",omoplate,0,-5.6,55,-90);
-    ik.setDHLink("rightArm",shoulder,77,-20+90,0,90);
-    ik.setDHLink("rightArm",rotate,284,90,40,90);
-    ik.setDHLink("rightArm",bicep,0,-7+24.4+90,300,90);
+    ik.setDHLink("leftArm",ttorso,0,180,315,90);
+    ik.setDHLink("leftArm", "rightS", 143, 180, 0, 90);
+    ik.setDHLink("leftArm",omoplate,0,-5.6,55,-90);
+    ik.setDHLink("leftArm",shoulder,77,-20+90,0,90);
+    ik.setDHLink("leftArm",rotate,284,90,40,90);
+    ik.setDHLink("leftArm",bicep,0,-7+24.4+90,300,90);
 ////////////    //#ik.setDHLink(wrist,00,-90,200,0)
-    ik.setDHLink("rightArm",wrist,00,-90,100,-90);
+    ik.setDHLink("leftArm",wrist,00,-90,100,-90);
 //////////    //print ik.currentPosition();
 //////////
     //ik.setDHLink("rightArm",finger,00,00,300,0);
 
-    ik.startEngine("rightArm");
+    ik.startEngine("leftArm");
     
-    ik.setNewDHRobotArm("leftArm");
-    ik.setDHLink("leftArm",mtorso,113,90,0,-90);
-    ik.setDHLink("leftArm",ttorso,0,180,315,90);
+    ik.setNewDHRobotArm("rightArm");
+    ik.setDHLink("rightArm",mtorso,113,90,0,-90);
+    ik.setDHLink("rightArm",ttorso,0,180,315,90);
     //ik.setDHLink("leftArm",ttorso,0,180,297.5,90);
-    ik.setDHLink("leftArm", "leftS", -143, 180, 0, -90);
-    ik.setDHLink("leftArm",Romoplate,0,-5.6,55,90);
-    ik.setDHLink("leftArm",Rshoulder,-77,-20+90,0,-90);
-    ik.setDHLink("leftArm",Rrotate,-284,90,40,-90);
-    ik.setDHLink("leftArm",Rbicep,0,-7+24.4+90,300,90);
+    ik.setDHLink("rightArm", "leftS", -143, 180, 0, -90);
+    ik.setDHLink("rightArm",Romoplate,0,-5.6,55,90);
+    ik.setDHLink("rightArm",Rshoulder,-77,-20+90,0,-90);
+    ik.setDHLink("rightArm",Rrotate,-284,90,40,-90);
+    ik.setDHLink("rightArm",Rbicep,0,-7+24.4+90,300,90);
 ////////////    //#ik.setDHLink(wrist,00,-90,200,0)
-    ik.setDHLink("leftArm",Rwrist,00,-90,100,-90);
+    ik.setDHLink("rightArm",Rwrist,00,-90,100,-90);
 //////////    //print ik.currentPosition();
 //////////
     //ik.setDHLink("leftArm",Rfinger,00,00,300,0);
-    ik.startEngine("leftArm");
+    ik.startEngine("rightArm");
     
 //    ik.setNewDHRobotArm("kinect");
 //    ik.setDHLink("kinect",mtorso,113,90,0,-90);
@@ -603,8 +602,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   public void stopMoving() {
     for (IMEngine engine: engines.values()) {
       engine.target=null;
-    }
-    stopMoving = true;    
+    }    
   }   
       
   public OpenNi startOpenNI() throws Exception {
@@ -666,15 +664,23 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   
   public void visualize() {
     jmeApp = new TestJmeIMModel();
-    jmeApp.setObjects(getCollisionObject());
+    //jmeApp.setObjects(getCollisionObject());
     //jmeApp.setShowSettings(false);
+    AppSettings settings = new AppSettings(true);
+    settings.setResolution(640,480);
+    //settings.setEmulateMouse(false);
+    // settings.setUseJoysticks(false);
+    settings.setUseInput(false);
+    jmeApp.setSettings(settings);
+    jmeApp.setShowSettings(false);
+    jmeApp.setPauseOnLostFocus(false);
     jmeApp.start();
     sleep(1000);
     jmeApp.addPart("mtorso", "Models/mtorso.j3o", 600f, null, new Vector3f(0,0,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
     jmeApp.addPart("ttorso", "Models/ttorso.j3o", 600f, "mtorso", new Vector3f(0,66.67f,0), Vector3f.UNIT_Z, (float)Math.toRadians(-90));
     jmeApp.addPart("rightS", null, 600f, "ttorso", new Vector3f(0,179.55f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
     jmeApp.addPart("Romoplate", "Models/Romoplate.j3o", 600f, "rightS", new Vector3f(-85.8f,0,0), Vector3f.UNIT_Z.mult(-1), (float)Math.toRadians(-10));
-    jmeApp.addPart("Rshoulder", "Models/Rshoulder.j3o", 600f, "Romoplate", new Vector3f(-8,-31.55f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
+    jmeApp.addPart("Rshoulder", "Models/Rshoulder.j3o", 600f, "Romoplate", new Vector3f(-8,-31.55f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-45));
     jmeApp.addPart("Rrotate", "Models/Rrotate.j3o", 600f, "Rshoulder", new Vector3f(-40,-15,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
     jmeApp.addPart("Rbicep", "Models/Rbicep.j3o", 600f, "Rrotate", new Vector3f(0,-151,-20), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
     jmeApp.addPart("leftS", null, 600f, "ttorso", new Vector3f(0,179.55f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
