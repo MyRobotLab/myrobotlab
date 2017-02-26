@@ -88,6 +88,7 @@ public class Platform implements Serializable {
         platform.arch = "armv" + armv + ".hfp";
       }
       
+      // for Ordroid 64 !
       if ("aarch64".equals(arch)){
     	  platform.arch = "armv8";
       }

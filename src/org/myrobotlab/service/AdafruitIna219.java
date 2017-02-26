@@ -25,7 +25,7 @@ import org.slf4j.Logger;
  * 
  *         References : https://www.adafruit.com/products/904
  */
-public class AdafruitIna219 extends Service implements I2CControl, VoltageSensorControl{
+public class AdafruitIna219 extends Service implements I2CControl, VoltageSensorControl {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,8 +35,8 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 	public static final byte INA219_SHUNTVOLTAGE = 0x01;
 	public static final byte INA219_BUSVOLTAGE = 0x02;
 
-	public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E",
-			"0x4F");
+	public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46",
+			"0x47", "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E", "0x4F");
 
 	public String deviceAddress = "0x40";
 
@@ -62,18 +62,19 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 	private boolean isAttached = false;
 
 	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+		LoggingFactory.init(Level.INFO);
 
 		try {
 			AdafruitIna219 adafruitINA219 = (AdafruitIna219) Runtime.start("AdafruitIna219", "AdafruitIna219");
 			Runtime.start("gui", "SwingGui");
+			Runtime.start("webgui", "WebGui");
 
-			byte msb = (byte)0x83;
-			byte lsb = (byte)0x00;
-			double test = (double)((((int)msb) << 8 | (int)lsb & 0xff)) * .01;
+			byte msb = (byte) 0x83;
+			byte lsb = (byte) 0x00;
+			double test = (double) ((((int) msb) << 8 | (int) lsb & 0xff)) * .01;
 			log.info(String.format("msb = %s, lsb = %s, test = %s", msb, lsb, test));
-			// (((int)(readbuffer[0] & 0xff) << 5)) | ((int)(readbuffer[1] >> 3));
+			// (((int)(readbuffer[0] & 0xff) << 5)) | ((int)(readbuffer[1] >>
+			// 3));
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -97,8 +98,8 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 	}
 
 	/**
-	 * This methods sets the i2c Controller that will be used to communicate with
-	 * the i2c device
+	 * This methods sets the i2c Controller that will be used to communicate
+	 * with the i2c device
 	 */
 	// @Override
 	public boolean setController(String controllerName, String deviceBus, String deviceAddress) {
@@ -112,10 +113,10 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 	public boolean setController(I2CController controller) {
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
-	
+
 	/**
-	 * This methods sets the i2c Controller that will be used to communicate with
-	 * the i2c device
+	 * This methods sets the i2c Controller that will be used to communicate
+	 * with the i2c device
 	 */
 	public boolean setController(I2CController controller, String deviceBus, String deviceAddress) {
 		if (controller == null) {
@@ -157,7 +158,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
 		return true;
 	}
-	
+
 	public I2CController getController() {
 		return controller;
 	}
@@ -212,7 +213,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 	public double getShuntResistance() {
 		return shuntResistance;
 	}
-	
+
 	/**
 	 * This method reads and returns the power in milliWatts
 	 */
@@ -244,12 +245,15 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 	public double getShuntVoltage() {
 		byte[] writebuffer = { INA219_SHUNTVOLTAGE };
 		byte[] readbuffer = { 0x0, 0x0 };
-		controller.i2cWrite(this,Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
-		controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer,
+				writebuffer.length);
+		controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer,
+				readbuffer.length);
 		// log.info(String.format("getShuntVoltage x%02X x%02X", readbuffer[0],
 		// readbuffer[1]));
-		// The shuntVoltage is signed so the MSB can have sign bits, that needs to remain
-		shuntVoltage = (double)((((int)readbuffer[0]) << 8 | (int)readbuffer[1] & 0xff)) * .01;
+		// The shuntVoltage is signed so the MSB can have sign bits, that needs
+		// to remain
+		shuntVoltage = (double) ((((int) readbuffer[0]) << 8 | (int) readbuffer[1] & 0xff)) * .01;
 		return shuntVoltage;
 	}
 
@@ -260,15 +264,20 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 	public double getBusVoltage() {
 		byte[] writebuffer = { INA219_BUSVOLTAGE };
 		byte[] readbuffer = { 0x0, 0x0 };
-		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
-		controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
-		// A bit tricky conversion. The LSB needs to be right shifted 3 bits, so the MSB needs to be left shifted (8-3) = 5  bits 
-		// And bytes are signed in Java so first a mask of 0xff needs to be applied to the MSB to remove the sign
-		int rawBusVoltage = (((int)readbuffer[0] & 0xff) << 8 | (int)readbuffer[1] & 0xff) >> 3;
-		log.debug(String.format("Busvoltage high byte = %s, low byte = %s, rawBusVoltagee = %s", readbuffer[0], readbuffer[1], rawBusVoltage));
-	  // LSB = 4mV, so multiply wit 4 to get the volatage in mV  
-		busVoltage = rawBusVoltage * 4; 
-		return busVoltage ; 
+		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer,
+				writebuffer.length);
+		controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer,
+				readbuffer.length);
+		// A bit tricky conversion. The LSB needs to be right shifted 3 bits, so
+		// the MSB needs to be left shifted (8-3) = 5 bits
+		// And bytes are signed in Java so first a mask of 0xff needs to be
+		// applied to the MSB to remove the sign
+		int rawBusVoltage = (((int) readbuffer[0] & 0xff) << 8 | (int) readbuffer[1] & 0xff) >> 3;
+		log.debug(String.format("Busvoltage high byte = %s, low byte = %s, rawBusVoltagee = %s", readbuffer[0],
+				readbuffer[1], rawBusVoltage));
+		// LSB = 4mV, so multiply wit 4 to get the volatage in mV
+		busVoltage = rawBusVoltage * 4;
+		return busVoltage;
 	}
 
 	/**
@@ -290,43 +299,44 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 
 	@Override
 	public boolean isAttached(String name) {
-		for (int i = 0; i < controllers.size(); ++i){
-		  if (controllers.get(i).equals(name)){
-		    return true;
-		  }
+		for (int i = 0; i < controllers.size(); ++i) {
+			if (controllers.get(i).equals(name)) {
+				return true;
+			}
 		}
 		return (name.equals(controllerName));
 	}
-	
-	 // TODO - this could be Java 8 default interface implementation
-  @Override
-  public void detach(String controllerName) {
-    if (controller == null || !controllerName.equals(controller.getName())) {
-      return;
-    }
-    controller.detach(this);
-    controller = null;
-  }
 
-  @Override
-  public Set<String> getAttached() {
-    HashSet<String> ret = new HashSet<String>();
-    for (int i = 0; i < controllers.size(); ++i){
-      ret.add(controllers.get(i));
-    }
-    if (controllerName != null){
-      ret.add(controllerName);
-    }
-    return ret;
-  }
+	// TODO - this could be Java 8 default interface implementation
+	@Override
+	public void detach(String controllerName) {
+		if (controller == null || !controllerName.equals(controller.getName())) {
+			return;
+		}
+		controller.detach(this);
+		controller = null;
+	}
 
-  /**
-   * valid for a control or controller which can only have a single
-   * other service attached
-   * @return
-   */
-  public boolean isAttached() {
-    return (controller != null);
-  }
+	@Override
+	public Set<String> getAttached() {
+		HashSet<String> ret = new HashSet<String>();
+		for (int i = 0; i < controllers.size(); ++i) {
+			ret.add(controllers.get(i));
+		}
+		if (controllerName != null) {
+			ret.add(controllerName);
+		}
+		return ret;
+	}
+
+	/**
+	 * valid for a control or controller which can only have a single other
+	 * service attached
+	 * 
+	 * @return
+	 */
+	public boolean isAttached() {
+		return (controller != null);
+	}
 
 }

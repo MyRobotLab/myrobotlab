@@ -71,11 +71,13 @@ public class TabControl2 extends JLabel implements ActionListener, MouseListener
     releaseMenuItem.setIcon(Util.getImageIcon("release.png"));
     popup.add(releaseMenuItem);
 
+    /*
     allowExportMenuItem = new JMenuItem("prevent export");
     allowExportMenuItem.setActionCommand("prevent export");
     allowExportMenuItem.addActionListener(this);
     allowExportMenuItem.setIcon(Util.getImageIcon("preventExport.png"));
     popup.add(allowExportMenuItem);
+    */
 
     hide = new JMenuItem("hide");
     hide.setActionCommand("hide");
