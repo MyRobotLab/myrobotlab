@@ -30,13 +30,15 @@ public class ArduinoUtils {
 	static public String getExeName() {
 	  Platform platform = Platform.getLocalInstance();
 		if (platform.isMac()) {
-			return "Arduino";
+			return "Arduino"; // really it's capitalized ?
 		}
+		/*
 		if (platform.isLinux()) {
 			return "arduino";
 		}
+		*/
 
-		return "arduino_debug";
+		return "arduino";
 	}
 
 	public static boolean uploadSketch(String port, String board) throws IOException, InterruptedException {

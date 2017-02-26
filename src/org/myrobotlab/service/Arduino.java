@@ -61,6 +61,8 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 public class Arduino extends Service implements Microcontroller, PinArrayControl, I2CBusController, I2CController,
 		SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController,
 		DeviceController, RecordControl, SerialRelayListener {
+	
+	private static final long serialVersionUID = 1L;
 
 	public static class I2CDeviceMap {
 		public int busAddress;
@@ -78,8 +80,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			this.data = data;
 		}
 	}
-
-	private static final long serialVersionUID = 1L;
 
 	public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
 	public transient static final int BOARD_TYPE_ID_MEGA = 1;
