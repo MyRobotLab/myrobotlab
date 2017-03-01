@@ -116,7 +116,7 @@ void MrlServo::moveToMicroseconds(int position) {
   isMoving = true;
   lastUpdate = millis();
   moveStart = lastUpdate;
-  publishServoEvent(SERVO_EVENT_STOPPED);
+  //publishServoEvent(SERVO_EVENT_STOPPED);
 }
 
 void MrlServo::startSweep(int minUs, int maxUs, int step) {
