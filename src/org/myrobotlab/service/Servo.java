@@ -910,7 +910,7 @@ public class Servo extends Service implements ServoControl {
     if (autoAttach && isPinAttached()){
       detach();
     }
-    moving = false;
+    //moving = false;
   }
 
   public boolean isMoving() {
@@ -920,6 +920,12 @@ public class Servo extends Service implements ServoControl {
   public void onServoEvent(Integer eventType, Integer currentPosUs, Integer targetPos) {
     double currentPos = microsecondsToDegree(currentPosUs);
     currentPosInput = mapper.calcInput(currentPos);
+    if (eventType == SERVO_EVENT_STOPPED) {
+    	moving = false;
+    }
+    else {
+    	moving = true;
+    }
     if (isEventsEnabled) {
       invoke("publishServoEvent", currentPosInput);
     }
@@ -932,12 +938,6 @@ public class Servo extends Service implements ServoControl {
       data.targetPos = this.targetPos;
       invoke("publishIKServoEvent", data);
     }
-    if (eventType == SERVO_EVENT_STOPPED) {
-    	moving = false;
-    }
-    else {
-    	moving = true;
-    }
   }
   
   public void onIMAngles(Object[] data) {
@@ -948,6 +948,7 @@ public class Servo extends Service implements ServoControl {
   }
   
   public void onServoEvent(Double position) {
+	//log.info("{}.ServoEvent {}", getName(), position);
 	    if (!isMoving() && autoDetach  && isPinAttached()) {
 	        if (velocity > -1) {
 	          detach();

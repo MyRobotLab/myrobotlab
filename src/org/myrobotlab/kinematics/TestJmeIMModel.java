@@ -1,13 +1,10 @@
 package org.myrobotlab.kinematics;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.myrobotlab.service.Servo.IKData;
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.light.DirectionalLight;
@@ -32,61 +29,19 @@ public class TestJmeIMModel extends SimpleApplication{
     app.start();
   }
 
-  public void setObjects(HashMap<String, CollisionItem> collisionObject) {
-    
-  }
-  
   @Override
   public void simpleInitApp() {
     assetManager.registerLocator("inmoov/jm3/assets", FileLocator.class);
     Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
     mat.setColor("Color", ColorRGBA.Red);
    
-//    Spatial teapot = assetManager.loadModel("inMoov/mtorso.j3o");
-//    Material mat_default = new Material(
-//        assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");
-//    //teapot.setMaterial(mat_default);
-//    teapot.setLocalScale(600f);
-//    Node n1 = new Node("n1");
-//    n1.attachChild(teapot);
-//    rootNode.attachChild(n1);
-//    
-//    Spatial chest = assetManager.loadModel("inMoov/ttorso.j3o");
-//    //chest.setMaterial(mat_default);
-//    Node n2 = new Node("n2");
-//    chest.setLocalScale(600);
-//    n2.attachChild(chest);
-//    n1.attachChild(n2);
-//    n2.setLocalTranslation(0, 113*0.59f, 0);
-//    
-//    Node n3 = new Node("n3");
-//    //n3.setLocalScale(600);
-//    n2.attachChild(n3);
-//    n3.setLocalTranslation(0, 315*0.57f, 0);
-//    
-//    
-//    Spatial Romoplate = assetManager.loadModel("inMoov/Romoplate.j3o");
-//    Node n4 = new Node("n4");
-//    n4.attachChild(Romoplate);
-//    n3.attachChild(n4);
-//    //rootNode.attachChild(n4);
-//    Romoplate.setLocalScale(600);
-//    n4.setLocalTranslation(-143*0.60f, 0, 0);
-//    Vector3f test1 = n1.getWorldScale();
-//    Vector3f test2 = n2.getWorldScale();
-//    Vector3f test3 = n4.getWorldScale();
-    
-    
-    //n1.rotate(0, 3.1416f/2, 3.1416f/2);
-//    n2.rotate(0, 0, 3.1416f/16);
-//    n2.rotate(0, 0, -3.1416f/16);
-//    n4.rotate(0,0,0);
+
     DirectionalLight sun = new DirectionalLight();
     sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
     rootNode.addLight(sun);
     this.cam.setLocation(new Vector3f(0f,0f,900f));
-    rootNode.scale(1.0f);
-    rootNode.setLocalTranslation(0, 00, 0);
+    rootNode.scale(0.8f);
+    rootNode.setLocalTranslation(0, -200, 0);
     
     
 }
@@ -115,6 +70,7 @@ public class TestJmeIMModel extends SimpleApplication{
     if (modelPath != null) {
       Spatial spatial= assetManager.loadModel(modelPath);
       spatial.scale(modelScale);
+      spatial.setName(name);
       node.attachChild(spatial);
     }
     node.setLocalTranslation(relativePosition);

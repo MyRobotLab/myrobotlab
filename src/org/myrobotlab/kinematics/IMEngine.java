@@ -196,73 +196,72 @@ public class IMEngine extends Thread {
 	}
 
 	private Point checkCollision(DHRobotArm arm, CollisionDectection cd) {
-	  return null;
-//    double[][] jp = createJointPositionMap();
-//    //send data to the collision detector class
-//    for (int i = 0; i < arm.getNumLinks(); i++) {
-//      CollisionItem ci = new CollisionItem(new Point(jp[i][0], jp[i][1], jp[i][2], 0 , 0, 0), new Point(jp[i+1][0], jp[i+1][1], jp[i+1][2], 0, 0, 0), arm.getLink(i).getName());
-//      if (i != arm.getNumLinks()-1) {
-//        ci.addIgnore(arm.getLink(i+1).getName());
-//      }
-//      cd.addItem(ci);
-//    }
-//    CollisionResults collisionResult = cd.runTest();
-//    if (collisionResult.haveCollision) {
-//    	//Log.info("collision detected");
-//      CollisionItem ci = null;
-//      int itemIndex = 0;
-//      for (DHLink l : arm.getLinks()) {
-//    	boolean foundIt = false;
-//        for (itemIndex = 0; itemIndex < 2; itemIndex++) {
-//          if (l.getName().equals(collisionResult.collisionItems[itemIndex].getName())) {
-//            ci = collisionResult.collisionItems[itemIndex];
-//            foundIt = true;
-//            break;
-//          }
-//        }
-//        if (foundIt) break; //we have the item to watch
-//      }
-//      if (ci == null) {
-//        //Log.info("Collision between static item {} and {} detected", collisionResult.collisionItems[0].getName(), collisionResult.collisionItems[1].getName());
-//        return null;
-//      }
-//      Point newPos = arm.getPalmPosition();
-//      newPos = newPos.add(collisionResult.collisionPoints[itemIndex].subtract(collisionResult.collisionPoints[1-itemIndex]));//not sure this is ok
-//      Point ori=collisionResult.collisionItems[1-itemIndex].getOrigin();
-//      Point end=collisionResult.collisionItems[1-itemIndex].getEnd();
-//      Point colPoint = collisionResult.collisionPoints[1-itemIndex];
-//      if (collisionResult.collisionLocation[1-itemIndex] > 0.0 || collisionResult.collisionLocation[1-itemIndex] < 1.0) { // collision on the side of item
-//      	if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision near the origin
-//      		newPos = newPos.add(ori).subtract(colPoint);
-////          newPos.setX(newPos.getX()+ori.getX()-colPoint.getX());
-////          newPos.setY(newPos.getY()+ori.getY()-colPoint.getY());
-////          newPos.setZ(newPos.getZ()+ori.getZ()-colPoint.getZ());
-//      	}
-//      	else { //collision near the end
-//      		newPos = newPos.add(end).subtract(colPoint);
-//      	}
-//      }
-//      //move away  of the part
-//      double length = collisionResult.collisionItems[1-itemIndex].getLength();
-//      double ratio = collisionResult.collisionItems[itemIndex].getRadius() / length;
-//      double[] vector = collisionResult.collisionItems[1-itemIndex].getVector();
-//      for (int i=0; i<3; i++){
-//      	vector[i] *= ratio;
-//      }
-//    	if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision near the origin
-//        newPos.setX(newPos.getX() - vector[0]);
-//        newPos.setY(newPos.getY() - vector[1]);
-//        newPos.setZ(newPos.getZ() - vector[2]);
-//    	}
-//    	else {
-//        newPos.setX(newPos.getX() + vector[0]);
-//        newPos.setY(newPos.getY() + vector[1]);
-//        newPos.setZ(newPos.getZ() + vector[2]);
-//    	}      
-//    	Log.info("Avoiding position toward ",newPos.toString());
-//    	return newPos;
-//    }
-//    return null;
+    double[][] jp = createJointPositionMap();
+    //send data to the collision detector class
+    for (int i = 0; i < arm.getNumLinks(); i++) {
+      CollisionItem ci = new CollisionItem(new Point(jp[i][0], jp[i][1], jp[i][2], 0 , 0, 0), new Point(jp[i+1][0], jp[i+1][1], jp[i+1][2], 0, 0, 0), arm.getLink(i).getName());
+      if (i != arm.getNumLinks()-1) {
+        ci.addIgnore(arm.getLink(i+1).getName());
+      }
+      cd.addItem(ci);
+    }
+    CollisionResults collisionResult = cd.runTest();
+    if (collisionResult.haveCollision) {
+    	//Log.info("collision detected");
+      CollisionItem ci = null;
+      int itemIndex = 0;
+      for (DHLink l : arm.getLinks()) {
+    	boolean foundIt = false;
+        for (itemIndex = 0; itemIndex < 2; itemIndex++) {
+          if (l.getName().equals(collisionResult.collisionItems[itemIndex].getName())) {
+            ci = collisionResult.collisionItems[itemIndex];
+            foundIt = true;
+            break;
+          }
+        }
+        if (foundIt) break; //we have the item to watch
+      }
+      if (ci == null) {
+        //Log.info("Collision between static item {} and {} detected", collisionResult.collisionItems[0].getName(), collisionResult.collisionItems[1].getName());
+        return null;
+      }
+      Point newPos = arm.getPalmPosition();
+      newPos = newPos.add(collisionResult.collisionPoints[itemIndex].subtract(collisionResult.collisionPoints[1-itemIndex]));//not sure this is ok
+      Point ori=collisionResult.collisionItems[1-itemIndex].getOrigin();
+      Point end=collisionResult.collisionItems[1-itemIndex].getEnd();
+      Point colPoint = collisionResult.collisionPoints[1-itemIndex];
+      if (collisionResult.collisionLocation[1-itemIndex] > 0.0 || collisionResult.collisionLocation[1-itemIndex] < 1.0) { // collision on the side of item
+      	if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision near the origin
+      		newPos = newPos.add(ori).subtract(colPoint);
+//          newPos.setX(newPos.getX()+ori.getX()-colPoint.getX());
+//          newPos.setY(newPos.getY()+ori.getY()-colPoint.getY());
+//          newPos.setZ(newPos.getZ()+ori.getZ()-colPoint.getZ());
+      	}
+      	else { //collision near the end
+      		newPos = newPos.add(end).subtract(colPoint);
+      	}
+      }
+      //move away  of the part
+      double length = collisionResult.collisionItems[1-itemIndex].getLength();
+      double ratio = collisionResult.collisionItems[itemIndex].getRadius() / length;
+      double[] vector = collisionResult.collisionItems[1-itemIndex].getVector();
+      for (int i=0; i<3; i++){
+      	vector[i] *= ratio;
+      }
+    	if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision near the origin
+        newPos.setX(newPos.getX() - vector[0]);
+        newPos.setY(newPos.getY() - vector[1]);
+        newPos.setZ(newPos.getZ() - vector[2]);
+    	}
+    	else {
+        newPos.setX(newPos.getX() + vector[0]);
+        newPos.setY(newPos.getY() + vector[1]);
+        newPos.setZ(newPos.getZ() + vector[2]);
+    	}      
+    	Log.info("Avoiding position toward ",newPos.toString());
+    	return newPos;
+    }
+    return null;
 	}
 
 	private void publishAngles() {
