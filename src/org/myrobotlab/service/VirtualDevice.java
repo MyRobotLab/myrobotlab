@@ -139,15 +139,13 @@ public class VirtualDevice extends Service implements SerialDataListener {
   }
 
   @Override
-  public String onConnect(String portName) {
+  public void onConnect(String portName) {
     log.info("{}.onConnect {}", getName(), portName);
-    return portName;
   }
 
   @Override
-  public String onDisconnect(String portName) {
+  public void onDisconnect(String portName) {
     log.info("{}.onDisconnect {}", getName(), portName);
-    return portName;
   }
 
   /**

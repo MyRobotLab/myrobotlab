@@ -27,94 +27,77 @@ package org.myrobotlab.swing;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
 
-import org.myrobotlab.service.Clock;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.service.interfaces.SerialDevice;
+import org.myrobotlab.swing.widget.PortGui;
 
-// FIXME - add stopwatch capabilities
-public class ClockGui extends ServiceGui implements ActionListener {
+// FIXME - add stop watch capabilities
+public class VirtualArduinoGui extends ServiceGui implements ActionListener {
   static final long serialVersionUID = 1L;
-  JButton startClock = new JButton("start clock");
-
-  JLabel clockDisplay = new JLabel("<html><p style=\"font-size:30px;\">00:00:00.</p></html>");
-  String displayFormat = "<html><p style=\"font-size:30px\">%s</p></html>";
-  DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+  PortGui portgui;
+  JButton button = new JButton("button");
  
-  JTextField interval = new JTextField("1000", 30);
-  JTextField data = new JTextField(10);
- 
-  public ClockGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
+  public VirtualArduinoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);  
-    add(clockDisplay);
-    addBottomLine(startClock, interval, "ms");
-    clockDisplay.setText(String.format(displayFormat, dateFormat.format(new Date())));
-    startClock.addActionListener(this);
+    VirtualArduino virtual = (VirtualArduino)Runtime.getService(boundServiceName);
+    SerialDevice serial = virtual.getSerial();
+    portgui = new PortGui(serial.getName(), myService, tabs);
+    add(portgui.getDisplay());
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();
 
-    if (o == startClock) {
-      if (startClock.getText().compareTo("start clock") == 0) {
+    /*
+    if (o == connect) {
+      if (connect.getText().compareTo("start clock") == 0) {
         myService.send(boundServiceName, "setInterval", Integer.parseInt(interval.getText()));
-        myService.send(boundServiceName, "startClock");
+        myService.send(boundServiceName, "connect");
       } else {
         myService.send(boundServiceName, "stopClock");
       }
     }
     myService.send(boundServiceName, "publishState");
-  }
-
-  public void addClockEvent(Date time, String name, String method, Object... data) {
-    myService.send(boundServiceName, "addClockEvent", time, name, method, data);
+    */
   }
 
   @Override
   public void subscribeGui() {
-    subscribe("countdown");
-    subscribe("publishState");
-    subscribe("pulse");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("countdown");
-    unsubscribe("publishState");
-    unsubscribe("pulse");
   }
 
-  public void onState(final Clock c) {
+  public void onState(final VirtualArduino c) {
     /*
      * setText IS THREAD SAFE !!!!!
      *
      * SwingUtilities.invokeLater(new Runnable() { public void run() {
      */
 
+	  /*
     interval.setText((c.interval + ""));
 
     if (c.isClockRunning) {
-      startClock.setText("stop clock");
+      connect.setText("stop clock");
       data.setEnabled(false);
       interval.setEnabled(false);
     } else {
-      startClock.setText("start clock");
+      connect.setText("start clock");
       data.setEnabled(true);
       interval.setEnabled(true);
     }
+    */
   }
 
-  public void onPulse(Date date) {
-    clockDisplay.setText(String.format(displayFormat, dateFormat.format(date)));
-    // countdown(System.currentTimeMillis(), date.);
-  }
 
 }

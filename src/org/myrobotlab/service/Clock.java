@@ -119,7 +119,7 @@ public class Clock extends Service {
 
 	public void startClock() {
 		if (myClock == null) {
-			info("starting clock");
+			// info("starting clock");
 			isClockRunning = true;
 			myClock = new ClockThread();
 			invoke("clockStarted");
@@ -133,7 +133,7 @@ public class Clock extends Service {
 	public void stopClock() {
 
 		if (myClock != null) {
-			info("stopping clock");
+			// info("stopping clock");
 			log.info("stopping " + getName() + " myClock");
 			isClockRunning = false;
 			myClock.thread.interrupt();

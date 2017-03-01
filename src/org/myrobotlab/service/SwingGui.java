@@ -107,9 +107,8 @@ import com.mxgraph.view.mxGraph;
 public class SwingGui extends Service implements WindowListener, ActionListener, Serializable {
 
   private static final long serialVersionUID = 1L;
-
   transient public final static Logger log = LoggerFactory.getLogger(SwingGui.class);
-
+  
   String graphXML = "";
   String lastTabVisited;
   // TODO - make MTOD !! from internet
@@ -236,7 +235,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         String guiClass = String.format("org.myrobotlab.swing.%sGui", sw.getClass().getSimpleName());
 
         if (serviceGuiMap.containsKey(sw.getName())) {
-          log.debug(String.format("not creating %1$s gui - it already exists", sw.getName()));
+          log.debug("not creating {} gui - it already exists", sw.getName());
           return;
         }
 
