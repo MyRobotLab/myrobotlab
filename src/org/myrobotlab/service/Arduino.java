@@ -1178,11 +1178,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	@Override
-	public String onConnect(String portName) {
+	public void onConnect(String portName) {
 		info("%s connected to %s", getName(), portName);
 		// Get version should already have been called. don't call it again!
 		// getVersion();
-		return portName;
 	}
 
 	public void onCustomMsg(Integer ax, Integer ay, Integer az) {
@@ -1190,10 +1189,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	@Override
-	public String onDisconnect(String portName) {
+	public void onDisconnect(String portName) {
 		info("%s disconnected from %s", getName(), portName);
 		enableAck(false);
-		return portName;
 	}
 
 	public void pinMode(int pin, int mode) {
@@ -1583,6 +1581,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	// > servoEnablePwm/deviceId/pin
 	public void servoAttachPin(ServoControl servo, int pin) {
+		log.info("{}.attachPin({})",servo.getName(), servo.getPin());
 		msg.servoAttachPin(getDeviceId(servo), pin);
 	}
 
@@ -1596,6 +1595,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	// > servoSetVelocity/deviceId/b16 velocity
 	public void servoSetVelocity(ServoControl servo) {
+		log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), (int) servo.getVelocity());
 		msg.servoSetVelocity(getDeviceId(servo), (int) servo.getVelocity());
 	}
 

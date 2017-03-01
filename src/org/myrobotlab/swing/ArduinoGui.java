@@ -109,7 +109,6 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	JLabel version = new JLabel();
 	JLabel connectLight = new JLabel();
 	
-
 	JComboBox<String> boardTypes = new JComboBox<String>(BOARD_TYPES);
 
 	int DATA_WIDTH = 400;
