@@ -285,7 +285,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
       // Runtime.start("servo", "Servo");
       // Runtime.start("opencv", "OpenCV");
-      Runtime.start("twitter", "Twitter");
+      //Runtime.start("twitter", "Twitter");
       Runtime.start("gui", "SwingGui");
 
       boolean done = true;

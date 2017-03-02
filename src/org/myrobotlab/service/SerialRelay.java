@@ -176,4 +176,14 @@ public class SerialRelay extends Service implements SerialDevice, DeviceControl 
     return 0;
   }
 
+@Override
+public String publishConnect(String portName) {
+	return portName;
+}
+
+@Override
+public String publishDisconnect(String portName) {
+	return portName;
+}
+
 }

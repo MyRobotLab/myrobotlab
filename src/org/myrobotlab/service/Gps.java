@@ -853,15 +853,13 @@ public class Gps extends Service implements SerialDataListener {
   }
 
   @Override
-  public String onConnect(String portName) {
+  public void onConnect(String portName) {
     info("%s connected to %s", getName(), portName);
-    return portName;
   }
 
   @Override
-  public String onDisconnect(String portName) {
+  public void onDisconnect(String portName) {
     info("%s disconnected from %s", getName(), portName);
-    return portName;
   }
 
   /**

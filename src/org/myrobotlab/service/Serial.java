@@ -376,7 +376,7 @@ public class Serial extends Service
 		this.databits = databits;
 		this.stopbits = stopbits;
 		this.parity = parity;
-		
+
 		lastPortName = portName;
 
 		// two possible logics to see if we are connected - look at the
@@ -404,8 +404,7 @@ public class Serial extends Service
 
 		if (inPortName.toLowerCase().startsWith("tcp://")) {
 			try {
-				URI uri = new URI(inPortName);
-				connectTcp(uri.getHost(), uri.getPort());
+				connectTcp(inPortName);
 				return;
 			} catch (Exception e) {
 				// not a big fan of re-throwing exceptions,
@@ -423,7 +422,7 @@ public class Serial extends Service
 		}
 
 		connectPort(port, null);
-		
+
 		// even when the JNI says it is connected
 		// rarely is everything ready to go
 		// give us half a second for all the buffers
@@ -494,8 +493,8 @@ public class Serial extends Service
 		return port;
 	}
 
-	public boolean connectTcp(String host, int port) throws IOException {
-		Port tcpPort = createTCPPort(host, port, this);
+	public boolean connectTcp(String url) throws IOException {
+		Port tcpPort = createTCPPort(url, this);
 		connectPort(tcpPort, this);
 		return true;
 	}
@@ -536,12 +535,23 @@ public class Serial extends Service
 		return null;
 	}
 
-	public Port createTCPPort(String host, int tcpPort, SerialDataListener listener) throws IOException {
-		info("connectTCP %s %d", host, tcpPort);
+	public Port createTCPPort(String url, SerialDataListener listener) throws IOException {
+		info("connectTCP %s", url);
+		URI uri = null;
+		try {
+			uri = new URI(url);
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+		String scheme = uri.getScheme();
+		if (!scheme.toLowerCase().equals("tcp")){
+			throw new IOException(String.format("tcp:// only supported - requested %s", scheme));
+		}
 		@SuppressWarnings("resource")
-		Socket socket = new Socket(host, tcpPort);
-		String portName = String.format("%s.%s", getName(), socket.getRemoteSocketAddress().toString());
-		Port socketPort = new PortStream(portName, socket.getInputStream(), socket.getOutputStream());
+		Socket socket = new Socket(uri.getHost(), uri.getPort());
+		// String portName = String.format("%s.%s", getName(),
+		// socket.getRemoteSocketAddress().toString());
+		Port socketPort = new PortStream(url, socket.getInputStream(), socket.getOutputStream());
 		ports.put(portName, socketPort);
 		return socketPort;
 	}
@@ -727,15 +737,13 @@ public class Serial extends Service
 	}
 
 	@Override
-	public String onConnect(String portName) {
+	public void onConnect(String portName) {
 		info("%s connected to %s", getName(), portName);
-		return portName;
 	}
 
 	@Override
-	public String onDisconnect(String portName) {
+	public void onDisconnect(String portName) {
 		info("%s disconnected from %s", getName(), portName);
-		return portName;
 	}
 
 	/**

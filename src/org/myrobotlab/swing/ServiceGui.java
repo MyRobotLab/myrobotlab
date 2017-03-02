@@ -69,6 +69,10 @@ import org.slf4j.Logger;
 public abstract class ServiceGui extends WindowAdapter implements TabControlEventHandler {
 
 	public final static Logger log = LoggerFactory.getLogger(ServiceGui.class);
+
+	// unique name of this component
+	protected String name;
+
 	public final String boundServiceName;
 	public final SwingGui myService; // FIXME - rename gui
 
@@ -109,7 +113,6 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 		this.tabControl = new TabControl2(this, myService.getTabs(), display, boundServiceName);
 
 		north = new JPanel(new GridBagLayout());
-		
 
 		west = new JPanel(new GridLayout(0, 2));
 		center = new JPanel(new GridBagLayout());
@@ -588,11 +591,11 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 	public void addTop(Object... components) {
 		addLinex(north, gcNorth, components);
 	}
-	
+
 	public void add(Object... components) {
 		addLinex(center, gcCenter, components);
 	}
-	
+
 	public void addLinex(JPanel panel, GridBagConstraints gc, Object... components) {
 
 		// reset - line

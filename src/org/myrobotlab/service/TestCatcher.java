@@ -188,17 +188,15 @@ public class TestCatcher extends Service implements SerialDataListener {
   }
 
   @Override
-  public String onConnect(String portName) {
+  public void onConnect(String portName) {
     info("connected to %s", portName);
     addData("onConnect", portName);
-    return portName;
   }
 
   @Override
-  public String onDisconnect(String portName) {
+  public void onDisconnect(String portName) {
     info("disconnect to %s", portName);
     addData("onDisconnect", portName);
-    return portName;
   }
 
   public void checkMsg(String method) throws InterruptedException, IOException {

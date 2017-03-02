@@ -2,8 +2,6 @@ package org.myrobotlab.service;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.VirtualMsg;
@@ -14,13 +12,20 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.serial.PortQueue;
-import org.myrobotlab.service.interfaces.RecordControl;
+import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.service.interfaces.Simulator;
 import org.slf4j.Logger;
 
-public class VirtualArduino extends Service implements RecordControl {
+/**
+ * Virtual Arduino Simulator...  
+ * It emulates the Arduino, but we also try to maintain the internal state the Arduino would (at least
+ * on a software level)...
+ * 
+ * @author GroG
+ *
+ */
+public class VirtualArduino extends Service implements PortPublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -33,12 +38,16 @@ public class VirtualArduino extends Service implements RecordControl {
 
   transient MrlComm mrlComm;
   
+  /**
+   *  Blender, JMonkey, other ...
+   */
   transient Simulator simulator;
 
+  /**
+   * our emulated electronic UART
+   */
   transient Serial uart;
   String portName = "COM42";
-
-  // transient int[] ioCmd = new int[MAX_MSG_SIZE];
 
   transient VirtualMsg msg;
   BoardInfo boardInfo;
@@ -49,9 +58,6 @@ public class VirtualArduino extends Service implements RecordControl {
   transient InoScriptRunner runner = null;
 
   transient FileOutputStream record = null;
-  // for debuging & developing - need synchronized - both send & recv threads
-  transient StringBuffer recordRxBuffer = new StringBuffer();
-  transient StringBuffer recordTxBuffer = new StringBuffer();
 
   /**
    * This class is a thread which runs a (port) of MrlComm.ino. It does what the
@@ -107,37 +113,12 @@ public class VirtualArduino extends Service implements RecordControl {
   }
 
   static public ServiceType getMetaData() {
-
     ServiceType meta = new ServiceType(VirtualArduino.class.getCanonicalName());
     meta.addDescription("virtual hardware of for the Arduino!");
-    meta.setAvailable(true); // false if you do not want it viewable in a
-    // gui
+    meta.setAvailable(true); 
     meta.addPeer("uart", "Serial", "serial device for this Arduino");
     meta.addCategory("simulator");
     return meta;
-  }
-
-  @Override
-  public void record() throws Exception {
-    if (record == null) {
-      record = new FileOutputStream(String.format("%s.ard", getName()));
-    }
-  }
-
-  @Override
-  public void stopRecording() {
-    if (record != null) {
-      try {
-        record.close();
-      } catch (Exception e) {
-      }
-      record = null;
-    }
-  }
-
-  @Override
-  public boolean isRecording() {
-    return record != null;
   }
 
   public String setBoard(String board) {
@@ -149,12 +130,6 @@ public class VirtualArduino extends Service implements RecordControl {
     broadcastState();
     return board;
   }
-
-  /*
-   * @Override public String onConnect(String portName) { return portName; }
-   * 
-   * @Override public String onDisconnect(String portName) { return portName; }
-   */
 
   public void start() {
     if (runner != null) {
@@ -256,5 +231,17 @@ public class VirtualArduino extends Service implements RecordControl {
       log.error("main threw", e);
     }
   }
+
+@Override
+public String publishConnect(String portName) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public String publishDisconnect(String portName) {
+	// TODO Auto-generated method stub
+	return null;
+}
 
 }
