@@ -26,6 +26,7 @@ import org.myrobotlab.service.Servo.IKData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.slf4j.Logger;
 
+import com.jme3.app.SimpleApplication;
 import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
 
@@ -276,9 +277,9 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     ik.setNewDHRobotArm("leftArm");
     ik.setDHLink("leftArm",mtorso,113,90,0,-90);
     //ik.setDHLink("rightArm",ttorso,0,90+65.6,346,0);
-    ik.setDHLink("leftArm",ttorso,0,180,315,90);
+    ik.setDHLink("leftArm",ttorso,0,180,300,90);
     ik.setDHLink("leftArm", "rightS", 143, 180, 0, 90);
-    ik.setDHLink("leftArm",omoplate,0,-5.6,55,-90);
+    ik.setDHLink("leftArm",omoplate,0,-5.6,45,-90);
     ik.setDHLink("leftArm",shoulder,77,-20+90,0,90);
     ik.setDHLink("leftArm",rotate,284,90,40,90);
     ik.setDHLink("leftArm",bicep,0,-7+24.4+90,300,90);
@@ -292,10 +293,10 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     
     ik.setNewDHRobotArm("rightArm");
     ik.setDHLink("rightArm",mtorso,113,90,0,-90);
-    ik.setDHLink("rightArm",ttorso,0,180,315,90);
+    ik.setDHLink("rightArm",ttorso,0,180,300,90);
     //ik.setDHLink("leftArm",ttorso,0,180,297.5,90);
     ik.setDHLink("rightArm", "leftS", -143, 180, 0, -90);
-    ik.setDHLink("rightArm",Romoplate,0,-5.6,55,90);
+    ik.setDHLink("rightArm",Romoplate,0,-5.6,45,90);
     ik.setDHLink("rightArm",Rshoulder,-77,-20+90,0,-90);
     ik.setDHLink("rightArm",Rrotate,-284,90,40,-90);
     ik.setDHLink("rightArm",Rbicep,0,-7+24.4+90,300,90);
@@ -336,7 +337,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     ik.objectAddIgnore("leftS", "rightS");
    // ik.addObject("finger",10.0);
     //ik.addObject("Rfinger",10.0);
-    //ik.addObject(-1000.0, 300, 0, 1000, 300, 00, "obstacle",40);
+    //ik.addObject(-1000.0,400, 0, 1000, 400, 00, "obstacle",40);
     //#ik.addObject(360,540,117,360, 550,107,"cymbal",200)
     //#ik.addObject(90,530,-180,300,545,-181,"bell", 25)
     //#ik.addObject(-170,640,-70,-170,720,-250,"tom",150)
@@ -366,6 +367,40 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     //ik.processKinectData();
     //ik.holdTarget("leftArm", true);
     ik.visualize();
+    ik.jmeApp.addPart("ltorso", "Models/ltorso.j3o", 1, null, new Vector3f(0,0,0), Vector3f.UNIT_X.mult(1), (float)Math.toRadians(0));
+    ik.jmeApp.addPart("mtorso", "Models/mtorso.j3o", 1f, null, new Vector3f(0,0,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
+    ik.jmeApp.addPart("ttorso", "Models/ttorso1.j3o", 1f, "mtorso", new Vector3f(0,113f,0), Vector3f.UNIT_Z, (float)Math.toRadians(-90));
+    ik.jmeApp.addPart("rightS", null, 1f, "ttorso", new Vector3f(0,300f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
+    ik.jmeApp.addPart("Romoplate", "Models/Romoplate1.j3o", 1f, "rightS", new Vector3f(-143f,0,-20), Vector3f.UNIT_Z.mult(-1), (float)Math.toRadians(-10));
+    ik.jmeApp.addPart("Rshoulder", "Models/Rshoulder1.j3o", 1f, "Romoplate", new Vector3f(-23,-45f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
+    ik.jmeApp.addPart("Rrotate", "Models/rotate1.j3o", 1f, "Rshoulder", new Vector3f(-57,-55,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
+    ik.jmeApp.addPart("Rbicep", "Models/Rbicep1.j3o", 1f, "Rrotate", new Vector3f(0,-225,-30), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
+    ik.jmeApp.addPart("leftS", null, 1f, "ttorso", new Vector3f(0,300f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
+    ik.jmeApp.addPart("omoplate", "Models/Lomoplate1.j3o", 1f, "leftS", new Vector3f(143f,0,-20), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(-10));
+    ik.jmeApp.addPart("shoulder", "Models/Lshoulder.j3o", 1f, "omoplate", new Vector3f(10,-45f,15), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
+    ik.jmeApp.addPart("rotate", "Models/rotate1.j3o", 1f, "shoulder", new Vector3f(57,-55,0), Vector3f.UNIT_Y.mult(1), (float)Math.toRadians(-90));
+    ik.jmeApp.addPart("bicep", "Models/Lbicep.j3o", 1f, "rotate", new Vector3f(-10,-225,-30), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
+    ik.jmeApp.addPart("RWrist", "Models/RWristFinger.j3o", 1f, "Rbicep", new Vector3f(15,-290,-10), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
+    ik.jmeApp.addPart("LWrist", "Models/LWristFinger.j3o", 1f, "bicep", new Vector3f(0,-290,-20), Vector3f.UNIT_Y.mult(1), (float)Math.toRadians(-90));
+    ik.jmeApp.addPart("neck", "Models/neck.j3o", 1f, "ttorso", new Vector3f(0,452.5f,-45), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(0));
+    ik.jmeApp.addPart("neckroll", null, 1f, "neck", new Vector3f(0,0,0), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(2));
+    ik.jmeApp.addPart("head", "Models/head.j3o", 1f, "neckroll", new Vector3f(0,10,20), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(0));
+    ik.jmeApp.addPart("jaw", "Models/jaw.j3o", 1f, "head", new Vector3f(-5,63,-50), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(0));
+
+    //TODO add the object that can collide with the model
+    //ik.jmeApp.addObject();
+
+    //need to move a little so the position update
+    mtorso.moveTo(91);
+    ttorso.moveTo(91);
+    Romoplate.moveTo(11);
+    Rshoulder.moveTo(31);
+    Rrotate.moveTo(91);
+    Rbicep.moveTo(6);
+    omoplate.moveTo(11);
+    shoulder.moveTo(31);
+    rotate.moveTo(91);
+    bicep.moveTo(6);
 
     mtorso.moveTo(90);
     ttorso.moveTo(90);
@@ -667,7 +702,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     //jmeApp.setObjects(getCollisionObject());
     //jmeApp.setShowSettings(false);
     AppSettings settings = new AppSettings(true);
-    settings.setResolution(640,480);
+    settings.setResolution(1024,960);
     //settings.setEmulateMouse(false);
     // settings.setUseJoysticks(false);
     settings.setUseInput(false);
@@ -676,18 +711,6 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     jmeApp.setPauseOnLostFocus(false);
     jmeApp.start();
     sleep(1000);
-    jmeApp.addPart("mtorso", "Models/mtorso.j3o", 600f, null, new Vector3f(0,0,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
-    jmeApp.addPart("ttorso", "Models/ttorso.j3o", 600f, "mtorso", new Vector3f(0,66.67f,0), Vector3f.UNIT_Z, (float)Math.toRadians(-90));
-    jmeApp.addPart("rightS", null, 600f, "ttorso", new Vector3f(0,179.55f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
-    jmeApp.addPart("Romoplate", "Models/Romoplate.j3o", 600f, "rightS", new Vector3f(-85.8f,0,0), Vector3f.UNIT_Z.mult(-1), (float)Math.toRadians(-10));
-    jmeApp.addPart("Rshoulder", "Models/Rshoulder.j3o", 600f, "Romoplate", new Vector3f(-8,-31.55f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-45));
-    jmeApp.addPart("Rrotate", "Models/Rrotate.j3o", 600f, "Rshoulder", new Vector3f(-40,-15,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
-    jmeApp.addPart("Rbicep", "Models/Rbicep.j3o", 600f, "Rrotate", new Vector3f(0,-151,-20), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
-    jmeApp.addPart("leftS", null, 600f, "ttorso", new Vector3f(0,179.55f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
-    jmeApp.addPart("omoplate", "Models/omoplate.j3o", 600f, "leftS", new Vector3f(85.8f,0,0), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(-10));
-    jmeApp.addPart("shoulder", "Models/shoulder.j3o", 600f, "omoplate", new Vector3f(25,-31.55f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
-    jmeApp.addPart("rotate", "Models/rotate.j3o", 600f, "shoulder", new Vector3f(20,-13,0), Vector3f.UNIT_Y.mult(1), (float)Math.toRadians(-90));
-    jmeApp.addPart("bicep", "Models/bicep.j3o", 600f, "rotate", new Vector3f(0,-140,-20), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
   }
 
   public synchronized void sendAngles(String name, double positionValueDeg) {

@@ -8,17 +8,21 @@ import java.util.HashMap;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.jme3.InMoov3DApp;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
+import org.myrobotlab.service.Servo.IKData;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
+
+import com.jme3.system.AppSettings;
 
 /**
  * InMoov - The InMoov Service.
@@ -133,6 +137,8 @@ public class InMoov extends Service {
   boolean useHeadForTracking = true;
 
   boolean useEyesForTracking = false;
+
+  private InMoov3DApp vinMoovApp;
 
   // static String speechService = "MarySpeech";
   // static String speechService = "AcapelaSpeech";
@@ -1558,5 +1564,83 @@ public class InMoov extends Service {
 
     return meta;
   }
+  
+  public InMoov3DApp startVinMoov(){
+    if (vinMoovApp == null) {
+      vinMoovApp = new InMoov3DApp();
+      AppSettings settings = new AppSettings(true);
+      settings.setResolution(1024,960);
+      //settings.setEmulateMouse(false);
+      // settings.setUseJoysticks(false);
+      settings.setUseInput(false);
+      vinMoovApp.setSettings(settings);
+      vinMoovApp.setShowSettings(false);
+      vinMoovApp.setPauseOnLostFocus(false);
+      vinMoovApp.start();
+      sleep(3000);
+      if (torso != null) {
+        vinMoovApp.addServo("mtorso", torso.midStom);
+        torso.midStom.addIKServoEventListener(this);
+        vinMoovApp.addServo("ttorso", torso.topStom);
+        torso.topStom.addIKServoEventListener(this);
+      }
+      if (rightArm != null) {
+        vinMoovApp.addServo("Romoplate", rightArm.omoplate);
+        rightArm.omoplate.addIKServoEventListener(this);
+        vinMoovApp.addServo("Rshoulder", rightArm.shoulder);
+        rightArm.shoulder.addIKServoEventListener(this);
+        vinMoovApp.addServo("Rrotate", rightArm.rotate);
+        rightArm.rotate.addIKServoEventListener(this);
+        vinMoovApp.addServo("Rbicep", rightArm.bicep);
+        rightArm.bicep.addIKServoEventListener(this);
+      }
+      if (leftArm != null) {
+        vinMoovApp.addServo("omoplate", leftArm.omoplate);
+        leftArm.omoplate.addIKServoEventListener(this);
+        vinMoovApp.addServo("shoulder", leftArm.shoulder);
+        leftArm.shoulder.addIKServoEventListener(this);
+        vinMoovApp.addServo("rotate", leftArm.rotate);
+        leftArm.rotate.addIKServoEventListener(this);
+        vinMoovApp.addServo("bicep", leftArm.bicep);
+        leftArm.bicep.addIKServoEventListener(this);
+      }
+      if (rightHand != null) {
+        vinMoovApp.addServo("RWrist", rightHand.wrist);
+        rightHand.wrist.addIKServoEventListener(this);
+      }
+      if (leftHand != null) {
+        vinMoovApp.addServo("LWrist", leftHand.wrist);
+        leftHand.wrist.addIKServoEventListener(this);
+      }
+      if (head != null) {
+        vinMoovApp.addServo("neck", head.neck);
+        head.neck.addIKServoEventListener(this);
+        vinMoovApp.addServo("head", head.rothead);
+        head.rothead.addIKServoEventListener(this);
+        vinMoovApp.addServo("jaw", head.jaw);
+        head.jaw.addIKServoEventListener(this);
+      }
+    }
+    else {
+      log.info("VinMoov already started");
+      return vinMoovApp;
+    }
+    
+    return vinMoovApp;
+  }
 
+  public void onIKServoEvent(IKData data) {
+    if (vinMoovApp != null) {
+      vinMoovApp.updatePosition(data);
+    }
+  }
+  public void stopVinMoov() {
+    try{
+      vinMoovApp.stop();
+    }
+    catch (NullPointerException e){
+      
+    }
+    vinMoovApp = null;
+  }
 }
