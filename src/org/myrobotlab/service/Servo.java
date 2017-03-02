@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -216,6 +218,7 @@ public class Servo extends Service implements ServoControl {
   private boolean moving;
   private double currentPosInput;
   private boolean autoDetach = false;
+  private transient Timer detachTimer;
 
   public transient static final int SERVO_EVENT_STOPPED = 1;
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
@@ -907,7 +910,7 @@ public class Servo extends Service implements ServoControl {
     if (getTasks().containsKey("EndMoving")){
       purgeTask("EndMoving");
     }
-    if (autoAttach && isPinAttached()){
+    if (!isMoving() && autoAttach && isPinAttached()){
       detach();
     }
     //moving = false;
@@ -920,12 +923,6 @@ public class Servo extends Service implements ServoControl {
   public void onServoEvent(Integer eventType, Integer currentPosUs, Integer targetPos) {
     double currentPos = microsecondsToDegree(currentPosUs);
     currentPosInput = mapper.calcInput(currentPos);
-    if (eventType == SERVO_EVENT_STOPPED) {
-    	moving = false;
-    }
-    else {
-    	moving = true;
-    }
     if (isEventsEnabled) {
       invoke("publishServoEvent", currentPosInput);
     }
@@ -937,6 +934,12 @@ public class Servo extends Service implements ServoControl {
       data.velocity = velocity;
       data.targetPos = this.targetPos;
       invoke("publishIKServoEvent", data);
+    }
+    if (eventType == SERVO_EVENT_STOPPED) {
+      moving = false;
+    }
+    else {
+      moving = true;
     }
   }
   
@@ -954,11 +957,19 @@ public class Servo extends Service implements ServoControl {
 	          detach();
 	        }
 	        else {
-	          if (getTasks().containsKey("EndMoving")) {
-	            purgeTask("EndMoving");
+	          if (detachTimer != null){
+	            detachTimer.cancel();
+	            detachTimer = null;
 	          }
-	          addTask("EndMoving",defaultDetachDelay, "autoDetach");
+	          detachTimer = new Timer();
+	          detachTimer.schedule(new TimerTask(){
+	            @Override
+	            public void run() {
+	              detach();
+	              }
+	          }, (long)defaultDetachDelay);
+	            }
+	          //addTask("EndMoving",defaultDetachDelay, "autoDetach");
 	        }
 	      }
-  }
 }
