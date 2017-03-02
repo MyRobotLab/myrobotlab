@@ -1,10 +1,14 @@
 package org.myrobotlab.kinematics;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.myrobotlab.service.Servo.IKData;
+import org.python.jline.internal.Log;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.light.DirectionalLight;
@@ -29,18 +33,22 @@ public class TestJmeIMModel extends SimpleApplication{
     app.start();
   }
 
+  public void setObjects(HashMap<String, CollisionItem> collisionObject) {
+    
+  }
+  
   @Override
   public void simpleInitApp() {
     assetManager.registerLocator("inmoov/jm3/assets", FileLocator.class);
     Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
     mat.setColor("Color", ColorRGBA.Red);
-   
+    viewPort.setBackgroundColor(ColorRGBA.Gray);
 
     DirectionalLight sun = new DirectionalLight();
     sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
     rootNode.addLight(sun);
     this.cam.setLocation(new Vector3f(0f,0f,900f));
-    rootNode.scale(0.8f);
+    rootNode.scale(.5f);
     rootNode.setLocalTranslation(0, -200, 0);
     
     

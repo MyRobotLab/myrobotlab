@@ -5,7 +5,6 @@ package org.myrobotlab.kinematics;
 
 import org.myrobotlab.kinematics.CollisionDectection.CollisionResults;
 import org.myrobotlab.service.IntegratedMovement2;
-import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.Servo.IKData;
 import org.python.jline.internal.Log;
 
@@ -22,7 +21,6 @@ public class IMEngine extends Thread {
 	private Matrix inputMatrix = null;
 	private IntegratedMovement2 service = null;
 	private boolean noUpdatePosition = false;
-	private boolean waitForServo = false;
 	private boolean holdTargetEnabled = false;
 	private CollisionDectection computeCD;
 	
@@ -103,7 +101,6 @@ public class IMEngine extends Thread {
     double iterStep = 0.01;
     double errorThreshold = 0.05;
     int maxIterations = 500;
-    double totalTime = 0;
     try {
       sleep(0);
     }
@@ -166,8 +163,6 @@ public class IMEngine extends Thread {
             }
       	}
       }
-      totalTime += maxTimeToMove;
-      
       Point avoidPoint = checkCollision(computeArm, computeCD);
       if (avoidPoint != null) {
       	goal = avoidPoint;
@@ -248,18 +243,21 @@ public class IMEngine extends Thread {
       for (int i=0; i<3; i++){
       	vector[i] *= ratio;
       }
-    	if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision near the origin
+      if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision near the origin
         newPos.setX(newPos.getX() - vector[0]);
         newPos.setY(newPos.getY() - vector[1]);
         newPos.setZ(newPos.getZ() - vector[2]);
-    	}
-    	else {
+      }
+      else {
         newPos.setX(newPos.getX() + vector[0]);
         newPos.setY(newPos.getY() + vector[1]);
         newPos.setZ(newPos.getZ() + vector[2]);
-    	}      
-    	Log.info("Avoiding position toward ",newPos.toString());
-    	return newPos;
+      }     
+      //add a vector end point move toward the collision point
+      Point vtocollpoint = arm.getPalmPosition().subtract(colPoint);
+      newPos = newPos.add(vtocollpoint);
+      Log.info("Avoiding position toward ",newPos.toString());
+      return newPos;
     }
     return null;
 	}
@@ -269,7 +267,6 @@ public class IMEngine extends Thread {
 			service.sendAngles(link.getName(), link.getPositionValueDeg());
 			//if (link.hasServo) waitForServo ++;
 		}
-		waitForServo  = true;
 	}
 
 
@@ -327,7 +324,6 @@ public class IMEngine extends Thread {
 		    //Log.info("{} - {}", l.getName(), data.pos, data.state);
 		  }
 		}
-	  waitForServo = false;
 		
 	}
 

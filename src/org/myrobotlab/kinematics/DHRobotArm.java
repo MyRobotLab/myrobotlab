@@ -69,6 +69,9 @@ public class DHRobotArm implements Cloneable{
     // deltaTheta[i] to delta[x,y,z]
     Matrix jInverse = jacobian.pseudoInverse();
     // log.debug("Pseudo inverse Jacobian(p)approx\n" + jInverse);
+    if (jInverse == null){
+      jInverse = new Matrix(3, numLinks);
+    }
     return jInverse;
   }
 
