@@ -337,7 +337,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     ik.objectAddIgnore("leftS", "rightS");
    // ik.addObject("finger",10.0);
     //ik.addObject("Rfinger",10.0);
-    //ik.addObject(-1000.0,400, 0, 1000, 400, 00, "obstacle",40);
+    ik.addObject(-1000.0,400, 0, 1000, 400, 00, "obstacle",40);
     //#ik.addObject(360,540,117,360, 550,107,"cymbal",200)
     //#ik.addObject(90,530,-180,300,545,-181,"bell", 25)
     //#ik.addObject(-170,640,-70,-170,720,-250,"tom",150)
