@@ -46,7 +46,7 @@ public class NoGui extends ServiceGui implements ActionListener {
   public NoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     ServiceInterface si = Runtime.getService(boundServiceName);
-    addLine(String.format( "%s does not have a user interface", si.getSimpleName()));
+    addTopLine(String.format( "%s does not have a user interface", si.getSimpleName()));
   }
 
   @Override

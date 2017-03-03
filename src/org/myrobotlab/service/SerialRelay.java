@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
@@ -29,7 +30,6 @@ public class SerialRelay extends Service implements SerialDevice, DeviceControl 
   private transient SerialRelayListener listener;
 
   private int controllerAttachAs;
-  
 
   public SerialRelay(String n) {
     super(n);
@@ -184,6 +184,21 @@ public String publishConnect(String portName) {
 @Override
 public String publishDisconnect(String portName) {
 	return portName;
+}
+
+@Override
+public boolean isConnected() {
+	return controller != null;
+}
+
+@Override
+public String getPortName() {
+	return controller.getSerial().getPortName();
+}
+
+@Override
+public List<String> getPortNames() {
+	return controller.getSerial().getPortNames();
 }
 
 }

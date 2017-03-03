@@ -48,8 +48,6 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   // Deprecate ?? What is this??
   public String getType();
 
-  public boolean hasDisplay();
-
   public boolean hasPeers();
 
   public boolean load();
