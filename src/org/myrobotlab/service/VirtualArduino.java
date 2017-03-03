@@ -25,7 +25,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class VirtualArduino extends Service implements PortPublisher {
+public class VirtualArduino extends Service {
 
   private static final long serialVersionUID = 1L;
 
@@ -231,17 +231,5 @@ public class VirtualArduino extends Service implements PortPublisher {
       log.error("main threw", e);
     }
   }
-
-@Override
-public String publishConnect(String portName) {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-@Override
-public String publishDisconnect(String portName) {
-	// TODO Auto-generated method stub
-	return null;
-}
 
 }
