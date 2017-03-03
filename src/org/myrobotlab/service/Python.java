@@ -826,7 +826,7 @@ public class Python extends Service {
 			// String f = "C:\\Program Files\\blah.1.py";
 			// log.info(getName(f));
 			Runtime.start("python", "Python");
-			Runtime.start("webgui", "WebGui");
+			// Runtime.start("webgui", "WebGui");
 			Runtime.start("gui", "SwingGui");
 
 			// python.error("this is an error");

@@ -49,7 +49,7 @@ public class VirtualArduinoGui extends ServiceGui implements ActionListener {
     VirtualArduino virtual = (VirtualArduino)Runtime.getService(boundServiceName);
     SerialDevice serial = virtual.getSerial();
     portgui = new PortGui(serial.getName(), myService, tabs);
-    add(portgui.getDisplay());
+    addTop(portgui.getDisplay());
   }
 
   @Override
