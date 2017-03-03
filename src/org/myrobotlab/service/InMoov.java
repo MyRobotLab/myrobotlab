@@ -138,7 +138,7 @@ public class InMoov extends Service {
 
   boolean useEyesForTracking = false;
 
-  private InMoov3DApp vinMoovApp;
+  transient InMoov3DApp vinMoovApp;
 
   // static String speechService = "MarySpeech";
   // static String speechService = "AcapelaSpeech";

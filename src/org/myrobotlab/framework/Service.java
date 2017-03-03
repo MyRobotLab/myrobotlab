@@ -917,13 +917,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * framework interface for Services which can display themselves most will not
-   * implement this method. keeps the framework display type agnostic
-   */
-  public void display() {
-  }
-
-  /**
    * ` called typically from a remote system When 2 MRL instances are connected
    * they contain serialized non running Service in a registry, which is
    * maintained by the Runtime. The data can be stale.
@@ -959,6 +952,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     for (int i = 0; i < methods.length; ++i) {
       ret[i] = methods[i].getName();
     }
+    Arrays.sort(ret);
     return ret;
   }
 
@@ -1134,18 +1128,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
   @Override
   public String getType() {
     return getClass().getCanonicalName();
-  }
-
-  /**
-   * returns if the Service has a display - this would be any Service who had a
-   * display system SwingGui (SwingGui) would be an example, most Services would
-   * return false keeps the framework display type agnostic
-   * 
-   * @return
-   */
-  @Override
-  public boolean hasDisplay() {
-    return false;
   }
 
   public boolean hasError() {

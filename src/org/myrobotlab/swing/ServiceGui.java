@@ -69,10 +69,6 @@ import org.slf4j.Logger;
 public abstract class ServiceGui extends WindowAdapter implements TabControlEventHandler {
 
 	public final static Logger log = LoggerFactory.getLogger(ServiceGui.class);
-
-	// unique name of this component
-	protected String name;
-
 	public final String boundServiceName;
 	public final SwingGui myService; // FIXME - rename gui
 
