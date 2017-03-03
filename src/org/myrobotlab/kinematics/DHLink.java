@@ -43,6 +43,7 @@ public class DHLink {
   public boolean hasServo = false;
   public double servoMin;
   public double servoMax;
+  private Double currentPos = 0.0;
   // private Matrix m;
   // TODO: add max/min angle
   public DHLink(String name, double d, double r, double theta, double alpha) {
@@ -75,6 +76,7 @@ public class DHLink {
     this.hasServo = copy.hasServo;
     this.servoMax = copy.servoMax;
     this.servoMin = copy.servoMin;
+    this.currentPos = copy.currentPos;
   }
   
 
@@ -302,5 +304,14 @@ public class DHLink {
 	public void setTargetPos(Double targetPos2) {
 		this.targetPos = targetPos2;
 	}
+
+  public void setCurrentPos(double pos) {
+    currentPos = pos;
+    
+  }
+  
+  public Double getCurrentPos(){
+    return currentPos;
+  }
 }
 

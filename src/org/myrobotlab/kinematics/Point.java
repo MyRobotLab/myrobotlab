@@ -190,4 +190,12 @@ public class Point {
     Point calcPoint = subtract(point);
     return Math.sqrt(Math.pow(calcPoint.getX(), 2) + Math.pow(calcPoint.getY(), 2) + Math.pow(calcPoint.getZ(), 2));
   }
+  
+  public Point unitVector(double unitSize){
+    if (magnitude() == 0){
+     return this;
+    }
+    Point retval = multiplyXYZ(unitSize/magnitude());
+    return retval;
+  }
 }
