@@ -488,13 +488,11 @@ public class Incubator extends Service {
    * 
    */
   static public ServiceType getMetaData() {
-
     ServiceType meta = new ServiceType(Incubator.class.getCanonicalName());
     meta.addDescription("This connector will connect to an IMAP based email server and crawl the emails");
-    meta.addCategory("testing", "framework");
+    meta.addCategory("testing");
     meta.addPeer("python", "Python", "shared python instance");
     meta.addPeer("xmpp", "Xmpp", "Xmpp service");
-
     return meta;
   }
 

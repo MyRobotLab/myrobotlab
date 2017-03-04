@@ -430,16 +430,6 @@ public class Serial extends Service
 		// sleep(1500);
 	}
 
-	/**
-	 * FIXME - implement connects to a FilePlayer details of tx/rx and timing
-	 * can be part os a SerialFilePlayer implementation
-	 * 
-	 * @param name
-	 */
-	public boolean connectFilePlayer(String name) {
-		//
-		return false;
-	}
 
 	/**
 	 * FIXME - implement Baddass loopback null/modem cable - auto creates a new
