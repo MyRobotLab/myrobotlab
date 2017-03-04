@@ -115,4 +115,8 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		}
 	}
 
+	public String getSelected() {
+		return (String)ports.getSelectedItem();
+	}
+
 }
