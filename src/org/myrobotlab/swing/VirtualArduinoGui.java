@@ -55,18 +55,6 @@ public class VirtualArduinoGui extends ServiceGui implements ActionListener {
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();
-
-    /*
-    if (o == connect) {
-      if (connect.getText().compareTo("start clock") == 0) {
-        myService.send(boundServiceName, "setInterval", Integer.parseInt(interval.getText()));
-        myService.send(boundServiceName, "connect");
-      } else {
-        myService.send(boundServiceName, "stopClock");
-      }
-    }
-    myService.send(boundServiceName, "publishState");
-    */
   }
 
   @Override
@@ -78,25 +66,6 @@ public class VirtualArduinoGui extends ServiceGui implements ActionListener {
   }
 
   public void onState(final VirtualArduino c) {
-    /*
-     * setText IS THREAD SAFE !!!!!
-     *
-     * SwingUtilities.invokeLater(new Runnable() { public void run() {
-     */
-
-	  /*
-    interval.setText((c.interval + ""));
-
-    if (c.isClockRunning) {
-      connect.setText("stop clock");
-      data.setEnabled(false);
-      interval.setEnabled(false);
-    } else {
-      connect.setText("start clock");
-      data.setEnabled(true);
-      interval.setEnabled(true);
-    }
-    */
   }
 
 

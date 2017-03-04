@@ -1425,11 +1425,14 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    *          of the service to be released
    * @return whether or not it successfully released the service
    */
+  
+  // FIXME - clean up subscriptions from released
   public synchronized static boolean release(String name) {
     log.info("releasing service {}", name);
     Runtime rt = getInstance();
+   
     if (!registry.containsKey(name)) {
-      rt.error("release could not find %s", name);
+      rt.info("%s already released", name);
       return false;
     }
 
