@@ -224,7 +224,7 @@ public class VirtualArduino extends Service {
       // varduino.setPortName(port);
 
       // connect the arduino to the other end
-      arduino.connect(port);
+      varduino.connect(port);
       arduino.enablePin(54);
 
     } catch (Exception e) {

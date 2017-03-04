@@ -16,8 +16,9 @@ public class MrlServo extends Device {
   
   public final static Logger log = LoggerFactory.getLogger(MrlServo.class);
 
-	public static final int SERVO_EVENT_STOPPED = 2;
-
+	public static final int SERVO_EVENT_STOPPED = 1;
+	public static final int SERVO_EVENT_POSITION_UPDATE = 2;
+	
   VirtualServo servo; // servo pointer - in case our device is a servo
   public  int pin;
   public  boolean isMoving;
@@ -76,6 +77,63 @@ boolean attach(int pin, int initPosUs, int initVelocity, String name){
   }
 
   public void update() {
+    //it may have an imprecision of +- 1 due to the conversion of currentPosUs to int
+    if (isMoving) {
+      if ((int)currentPosUs != targetPosUs) {
+        long deltaTime = millis() - lastUpdate;
+        lastUpdate = millis();
+        float _velocity = velocity;
+        if (acceleration != -1) {
+          _velocity *= acceleration * Math.pow(((float)(millis()- moveStart)) / 1000,2) / 10;
+          //msg->publishDebug(String(_velocity));
+          if (_velocity > velocity) {
+            _velocity = velocity;
+          }
+        }
+        if(targetPosUs > 500) {
+          _velocity = map(_velocity, 0, 180, 544, 2400) - 544;
+        }
+        float step = _velocity * deltaTime;
+        step /= 1000; //for deg/ms;
+        if (isSweeping) {
+          step = sweepStep;
+        }
+        if (velocity < 0) { // when velocity < 0, it mean full speed ahead
+          step = targetPosUs - (int)currentPosUs;
+        }
+        else if (currentPosUs > targetPosUs) {
+          step *=-1;
+        }
+        int previousCurrentPosUs = (int)currentPosUs;
+        currentPosUs += step;
+        if ((step > 0.0 && (int)currentPosUs > targetPosUs) || (step < 0.0 && (int)currentPosUs < targetPosUs)) {
+          currentPosUs = targetPosUs;
+        }
+        if (!(previousCurrentPosUs == (int)currentPosUs)) {
+          servo.writeMicroseconds((int)currentPosUs);
+          if ((int)currentPosUs == targetPosUs) {
+            publishServoEvent(SERVO_EVENT_STOPPED);
+          }
+          else {
+            publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
+          }
+        }
+      }
+      else {
+        if (isSweeping) {
+          if (targetPosUs == minUs) {
+            targetPosUs = maxUs;
+          }
+          else {
+            targetPosUs = minUs;
+          }
+          sweepStep *= -1;
+        }
+        else {
+          isMoving = false;
+        }
+      }
+    }
   }
 
   public void detachPin() {
@@ -123,12 +181,21 @@ boolean attach(int pin, int initPosUs, int initVelocity, String name){
     if (servo != null){
       servo.writeMicroseconds(posUs);
     }
-
+    if (servo == null) 
+      return;
+    targetPosUs = posUs;
+    isMoving = true;
+    lastUpdate = millis();
+    moveStart = lastUpdate;
   }
-//  private void publishServoEvent(int type) {
-//	// TODO Auto-generated method stub
-//	
-//}
+  private void publishServoEvent(int type) {
+    msg.publishServoEvent(id, type, (int)currentPosUs, targetPosUs);
+	
+  }
+  
+  private float map(float value, int inMin, int inMax, int outMin, int outMax) {
+    return outMin + ((value - inMin) * (outMax - outMin)) / (inMax - outMax);
+  }
 
 };
 
