@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.myrobotlab.service.Runtime;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -63,12 +62,15 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.Arduino;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.PinDefinition;
+import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.swing.widget.DigitalButton;
 import org.myrobotlab.swing.widget.FileChooser;
+import org.myrobotlab.swing.widget.PortGui;
 
 public class ArduinoGui extends ServiceGui implements ActionListener, TabControlEventHandler, ItemListener {
 
@@ -100,14 +102,12 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 		int total = 0;
 		int traceStart = 0;
 	}
-
-	JComboBox<String> ports = new JComboBox<String>();
 	
 	FileChooser chooser = null;
 
-	JLabel state = new JLabel();
 	JLabel version = new JLabel();
-	JLabel connectLight = new JLabel();
+	
+	PortGui portGui;
 	
 	JComboBox<String> boardTypes = new JComboBox<String>(BOARD_TYPES);
 
@@ -130,8 +130,6 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	ArduinoGui self;
 
 	SerializableImage sensorImage = null;
-	JButton connect = new JButton("connect");
-	JMenuItem serialRefresh = new JMenuItem("refresh");
 
 	Dimension size = new Dimension(DATA_WIDTH, DATA_HEIGHT);
 
@@ -185,21 +183,15 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	public ArduinoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		self = this;
+		
 		// FIXME - this should be done in ServiceGui ! - it should auto-update onState in ServiceGui
 		// and ServiceGui should call overloaded method 
 		Arduino arduino = (Arduino)Runtime.getService(boundServiceName);
-		Serial serial = arduino.getSerial();
-		if (serial == null || !serial.isConnected()){
-			connectLight.setIcon(Util.getImageIcon("red.png"));
-		} else {
-			connectLight.setIcon(Util.getImageIcon("green.png"));
-		}
+	    SerialDevice serial = arduino.getSerial();		
+		portGui = new PortGui(serial.getName(), myService, tabs);
 		
-		ports.setEnabled(true);
-		state.setText("not connected");
-
-		addTop(connectLight, " port:", ports, connect, " ", state);
-		addTop(" board:", 4, boardTypes, " version:", version);
+		addTop(3, portGui.getDisplay(), " version:", version);
+		addTop(" board:", boardTypes);
 
 		localTabs.setTabPlacement(SwingConstants.RIGHT);
 		localTabs.setPreferredSize(new Dimension(300, 300));
@@ -210,13 +202,10 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
 		addLine(localTabs);
 
-		serialRefresh.addActionListener(self);
 		softReset.addActionListener(self);
-		connect.addActionListener(self);
 		boardTypes.addItemListener(self);
 		openMrlComm.addActionListener(self);
 		uploadMrlComm.addActionListener(self);
-
 	}
 
 	/**
@@ -228,23 +217,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 		Object o = e.getSource();
 		String cmd = e.getActionCommand();
 
-		if (o == serialRefresh) {
-			myService.send(boundServiceName, "publishState");
-			return;
-		}
-
 		if (o == softReset) {
 			myService.send(boundServiceName, "softReset");
 			return;
-		}
-
-		if (o == connect) {
-			String state = connect.getText();
-			if (state.equals("connect")) {
-				myService.send(boundServiceName, "connect", ports.getSelectedItem());
-			} else {
-				myService.send(boundServiceName, "disconnect");
-			}
 		}
 
 		// buttons
@@ -332,7 +307,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 				error(String.format("%s is not a valid directory", path));
 				return;
 			}
-			String port = (String) ports.getSelectedItem();
+			String port = portGui.getSelected();
 			if (port == null || port.equals("")) {
 				error("please set port");
 				return;
@@ -344,20 +319,13 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	}
 
 	public void onDisconnect(String portName) {
-		state.setText("not connected");
 		version.setText("");
 		openMrlComm.setEnabled(true);
 		arduinoPath.setText(myArduino.arduinoPath);
-		connectLight.setIcon(Util.getImageIcon("red.png"));
-		ports.setEnabled(true);
 	}
 
 	public void onConnect(String portName) {
-		state.setText(String.format("connected on port %s", portName));
-		ports.setSelectedItem(portName);
 		openMrlComm.setEnabled(false);
-		connectLight.setIcon(Util.getImageIcon("green.png"));
-		ports.setEnabled(false);
 	}
 
 	@Override
@@ -751,12 +719,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
 					if (arduino.isConnected()) {
 						onConnect(arduino.getPortName());
-						arduino.getBoardInfo();
-						ports.setEnabled(false);
-						connect.setText("disconnect");
-					} else {
-						ports.setEnabled(true);
-						connect.setText("connect");
+						arduino.getBoardInfo();						
 					}
 
 					BoardInfo boardInfo = myArduino.getBoardInfo();
@@ -770,19 +733,6 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
 					Serial serial = myArduino.getSerial();
 					List<String> p = serial.getPortNames();
-					ports.removeAllItems();
-					// ports.addItem(""); - perhaps not..
-					for (String pn : p) {
-						ports.addItem(pn);
-					}
-
-					if (serial != null) {
-						if (serial.getPortName() == null) {
-							ports.setSelectedItem(serial.getLastPortName());
-						} else {
-							ports.setSelectedItem(serial.getPortName());
-						}
-					}
 
 					// update panels based on state change
 					// TODO - check what state the panels are to see if a

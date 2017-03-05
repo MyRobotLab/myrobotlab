@@ -316,8 +316,16 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 	}
 
 	public void subscribe(String method, String callback, Class<?>... parameterType) {
+		
+		// send a message to the service - to subscribe to a method 
 		MRLListener listener = new MRLListener(method, myService.getName(), callback);
 		myService.send(boundServiceName, "addListener", listener);
+		
+		// here is the new magic secret sauce !!!
+		// this is in mrl.js / panelSvc.js too
+		// add that method in SwingGui's message routing to get the callback to 'this' 
+		// tab panel, or widget - in mrl.js too along with other subscriptions to types
+		myService.subscribeToServiceMethod(String.format("%s.%s", boundServiceName, callback), this);
 	}
 
 	@Override
