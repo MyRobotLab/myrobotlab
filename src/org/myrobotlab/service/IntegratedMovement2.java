@@ -26,7 +26,6 @@ import org.myrobotlab.service.Servo.IKData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.slf4j.Logger;
 
-import com.jme3.app.SimpleApplication;
 import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
 
@@ -59,8 +58,6 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   
   GeneticParameters geneticParameters = new GeneticParameters();
 
-  private double time;
-  
   public enum ObjectPointLocation {   
     ORIGIN_CENTER (0x01,"Center Origin"),   
     ORIGIN_SIDE (0x02, "Side Origin"),    
@@ -697,20 +694,25 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     //return this.arms.values();
   }
   
-  public void visualize() {
+  public void visualize() throws InterruptedException {
     jmeApp = new TestJmeIMModel();
     //jmeApp.setObjects(getCollisionObject());
     //jmeApp.setShowSettings(false);
     AppSettings settings = new AppSettings(true);
-    settings.setResolution(1024,960);
-    //settings.setEmulateMouse(false);
-    // settings.setUseJoysticks(false);
-    settings.setUseInput(false);
+    settings.setResolution(800,600);
+    //settings.setUseInput(false);
     jmeApp.setSettings(settings);
     jmeApp.setShowSettings(false);
     jmeApp.setPauseOnLostFocus(false);
+    jmeApp.setService(this);
     jmeApp.start();
-    sleep(1000);
+    //need to wait for jmeApp to be ready or the models won't load
+    synchronized (this) {
+      wait(5000);
+    }
+//    while (!jmeApp.isReady()) {
+//      sleep(10);
+//    }
   }
 
   public synchronized void sendAngles(String name, double positionValueDeg) {

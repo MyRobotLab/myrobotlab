@@ -6,11 +6,20 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.myrobotlab.service.IntegratedMovement2;
 import org.myrobotlab.service.Servo.IKData;
 import org.python.jline.internal.Log;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
+import com.jme3.input.ChaseCamera;
+import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
+import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseAxisTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -26,6 +35,8 @@ public class TestJmeIMModel extends SimpleApplication{
   private HashMap<String, Node> nodes = new HashMap<String, Node>();
   private Queue<IKData> eventQueue = new ConcurrentLinkedQueue<IKData>();
   private Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
+  private boolean ready = false;
+  private IntegratedMovement2 service;
 
    
   public static void main(String[] args) {
@@ -43,17 +54,49 @@ public class TestJmeIMModel extends SimpleApplication{
     Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
     mat.setColor("Color", ColorRGBA.Red);
     viewPort.setBackgroundColor(ColorRGBA.Gray);
-
+    inputManager.setCursorVisible(true);
+    flyCam.setEnabled(false);
+    Node node = new Node("cam");
+    node.setLocalTranslation(0, 300, 0);
+    rootNode.attachChild(node);
+//    ChaseCamera chaseCam = new ChaseCamera(cam, node, inputManager);
+//    chaseCam.setDefaultDistance(900);
+//    chaseCam.setMaxDistance(2000);
+//    chaseCam.setDefaultHorizontalRotation((float)Math.toRadians(90));
+//    chaseCam.setZoomSensitivity(10);
     DirectionalLight sun = new DirectionalLight();
     sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
     rootNode.addLight(sun);
-    this.cam.setLocation(new Vector3f(0f,0f,900f));
-    rootNode.scale(.5f);
+    cam.setLocation(new Vector3f(0f,0f,900f));
+    rootNode.scale(.40f);
     rootNode.setLocalTranslation(0, -200, 0);
-    
-    
+    ready = true;
+    synchronized (service) {
+      if (service!= null){
+        
+      }
+      service.notifyAll();
+    }
+    inputManager.addMapping("MouseClickL", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+    inputManager.addListener(analogListener, "MouseClickL");
+    inputManager.addMapping("MouseClickR", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+    inputManager.addListener(analogListener, "MouseClickR");
+    inputManager.addMapping("MMouseUp", new MouseAxisTrigger(MouseInput.AXIS_WHEEL,false));
+    inputManager.addListener(analogListener, "MMouseUp");
+    inputManager.addMapping("MMouseDown", new MouseAxisTrigger(MouseInput.AXIS_WHEEL,true));
+    inputManager.addListener(analogListener, "MMouseDown");
+    inputManager.addMapping("Left",  new KeyTrigger(KeyInput.KEY_A),
+        new KeyTrigger(KeyInput.KEY_LEFT)); // A and left arrow
+    inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D),
+        new KeyTrigger(KeyInput.KEY_RIGHT)); // D and right arrow    
+    inputManager.addMapping("Up",  new KeyTrigger(KeyInput.KEY_W),
+        new KeyTrigger(KeyInput.KEY_UP)); // A and left arrow
+    inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S),
+        new KeyTrigger(KeyInput.KEY_DOWN)); // D and right arrow    
+    inputManager.addListener(analogListener, new String[]{"Left","Right","Up","Down"});
 }
 
+ 
   /**
    * 
    * @param name : name of the part
@@ -123,4 +166,62 @@ public class TestJmeIMModel extends SimpleApplication{
       
     }
   }
+  
+  public boolean isReady() {
+    return ready;
+  }
+
+  public void setService(IntegratedMovement2 integratedMovement2) {
+    service = integratedMovement2;
+    
+  }
+  private ActionListener actionListener = new ActionListener() {
+    public void onAction(String name, boolean keyPressed, float tpf) {
+      if (name.equals("MouseClickL")) {
+        //rotate+= keyPressed;
+        rootNode.rotate(0, 1, 0);
+        //Log.info(rotate);
+      }
+//      if (name.equals("Rotate")) {
+//        Vector3f camloc = cam.getLocation();
+//        camloc.x += 10;
+//        cam.setLocation(camloc);
+//      }
+       /** TODO: test for mapping names and implement actions */
+    }
+  };
+  
+  private AnalogListener analogListener = new AnalogListener() {
+    public void onAnalog(String name, float keyPressed, float tpf) {
+      if (name.equals("MouseClickL")) {
+        //rotate+= keyPressed;
+        rootNode.rotate(0, -keyPressed, 0);
+        //Log.info(rotate);
+      }
+      else if (name.equals("MouseClickR")) {
+        //rotate+= keyPressed;
+        rootNode.rotate(0, keyPressed, 0);
+        //Log.info(rotate);
+      }
+      else if (name.equals("MMouseUp")){
+        rootNode.setLocalScale(rootNode.getLocalScale().mult(1.05f));
+      }
+      else if (name.equals("MMouseDown")){
+        rootNode.setLocalScale(rootNode.getLocalScale().mult(0.95f));
+      }
+      else if (name.equals("Up")){
+        rootNode.move(0, keyPressed*100, 0);
+      }
+      else if (name.equals("Down")){
+        rootNode.move(0, -keyPressed*100, 0);
+      }
+      else if (name.equals("Left")){
+        rootNode.move(-keyPressed*100, 0, 0);
+      }
+      else if (name.equals("Right")){
+        rootNode.move(keyPressed*100, 0, 0);
+      }
+    }
+  };
+
 }

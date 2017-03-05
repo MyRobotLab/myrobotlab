@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.Servo.IKData;
@@ -12,8 +12,13 @@ import org.python.jline.internal.Log;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
+import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.AnalogListener;
+import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseAxisTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.DirectionalLight;
-import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
@@ -28,9 +33,9 @@ import com.jme3.system.AppSettings;
 public class InMoov3DApp extends SimpleApplication{
   private HashMap<String, Node> nodes = new HashMap<String, Node>();
   private Queue<IKData> eventQueue = new ConcurrentLinkedQueue<IKData>();
-  private Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
   private HashMap<String, Node> servoToNode = new HashMap<String, Node>();
   private HashMap<String, Mapper> maps = new HashMap<String, Mapper>();
+  private Service service = null;
 
    
   public static void main(String[] args) {
@@ -49,14 +54,35 @@ public class InMoov3DApp extends SimpleApplication{
   @Override
   public void simpleInitApp() {
     assetManager.registerLocator("inmoov/jm3/assets", FileLocator.class);
-    Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
-    mat.setColor("Color", ColorRGBA.Red);
+
+    inputManager.setCursorVisible(true);
+    flyCam.setEnabled(false);
+    cam.setLocation(new Vector3f(0f,0f,900f));
+
+    inputManager.addMapping("MouseClickL", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+    inputManager.addListener(analogListener, "MouseClickL");
+    inputManager.addMapping("MouseClickR", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+    inputManager.addListener(analogListener, "MouseClickR");
+    inputManager.addMapping("MMouseUp", new MouseAxisTrigger(MouseInput.AXIS_WHEEL,false));
+    inputManager.addListener(analogListener, "MMouseUp");
+    inputManager.addMapping("MMouseDown", new MouseAxisTrigger(MouseInput.AXIS_WHEEL,true));
+    inputManager.addListener(analogListener, "MMouseDown");
+    inputManager.addMapping("Left",  new KeyTrigger(KeyInput.KEY_A),
+        new KeyTrigger(KeyInput.KEY_LEFT)); // A and left arrow
+    inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D),
+        new KeyTrigger(KeyInput.KEY_RIGHT)); // D and right arrow    
+    inputManager.addMapping("Up",  new KeyTrigger(KeyInput.KEY_W),
+        new KeyTrigger(KeyInput.KEY_UP)); // A and left arrow
+    inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S),
+        new KeyTrigger(KeyInput.KEY_DOWN)); // D and right arrow    
+    inputManager.addListener(analogListener, new String[]{"Left","Right","Up","Down"});
+
+    
     viewPort.setBackgroundColor(ColorRGBA.Gray);
 
     DirectionalLight sun = new DirectionalLight();
     sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
     rootNode.addLight(sun);
-    this.cam.setLocation(new Vector3f(0f,0f,900f));
     rootNode.scale(.5f);
     rootNode.setLocalTranslation(0, -200, 0);
     
@@ -150,7 +176,7 @@ public class InMoov3DApp extends SimpleApplication{
     spatial = assetManager.loadModel("Models/rotate1.j3o");
     spatial.setName("Rrotate");
     node.attachChild(spatial);
-    node.setLocalTranslation(new Vector3f(-57,-55,0));
+    node.setLocalTranslation(new Vector3f(-57,-55,8));
     rotationMask = Vector3f.UNIT_Y.mult(-1);
     node.setUserData("rotationMask_x", rotationMask.x);
     node.setUserData("rotationMask_y", rotationMask.y);
@@ -165,7 +191,7 @@ public class InMoov3DApp extends SimpleApplication{
     spatial = assetManager.loadModel("Models/Rbicep1.j3o");
     spatial.setName("Rbicep");
     node.attachChild(spatial);
-    node.setLocalTranslation(new Vector3f(0,-225,-30));
+    node.setLocalTranslation(new Vector3f(-5,-225,-32));
     rotationMask = Vector3f.UNIT_X.mult(-1);
     node.setUserData("rotationMask_x", rotationMask.x);
     node.setUserData("rotationMask_y", rotationMask.y);
@@ -194,7 +220,7 @@ public class InMoov3DApp extends SimpleApplication{
     spatial = assetManager.loadModel("Models/Lomoplate1.j3o");
     spatial.setName("omoplate");
     node.attachChild(spatial);
-    node.setLocalTranslation(new Vector3f(143,0,-20));
+    node.setLocalTranslation(new Vector3f(143,0,-15));
     rotationMask = Vector3f.UNIT_Z.mult(1);
     node.setUserData("rotationMask_x", rotationMask.x);
     node.setUserData("rotationMask_y", rotationMask.y);
@@ -209,7 +235,7 @@ public class InMoov3DApp extends SimpleApplication{
     spatial = assetManager.loadModel("Models/Lshoulder.j3o");
     spatial.setName("shoulder");
     node.attachChild(spatial);
-    node.setLocalTranslation(new Vector3f(10,-45,15));
+    node.setLocalTranslation(new Vector3f(10,-45,5));
     rotationMask = Vector3f.UNIT_X.mult(-1);
     node.setUserData("rotationMask_x", rotationMask.x);
     node.setUserData("rotationMask_y", rotationMask.y);
@@ -224,7 +250,7 @@ public class InMoov3DApp extends SimpleApplication{
     spatial = assetManager.loadModel("Models/rotate1.j3o");
     spatial.setName("rotate");
     node.attachChild(spatial);
-    node.setLocalTranslation(new Vector3f(57,-55,0));
+    node.setLocalTranslation(new Vector3f(65,-58,-3));
     rotationMask = Vector3f.UNIT_Y.mult(1);
     node.setUserData("rotationMask_x", rotationMask.x);
     node.setUserData("rotationMask_y", rotationMask.y);
@@ -239,7 +265,7 @@ public class InMoov3DApp extends SimpleApplication{
     spatial = assetManager.loadModel("Models/Lbicep.j3o");
     spatial.setName("bicep");
     node.attachChild(spatial);
-    node.setLocalTranslation(new Vector3f(-10,-225,-30));
+    node.setLocalTranslation(new Vector3f(-14,-223,-28));
     rotationMask = Vector3f.UNIT_X.mult(-1);
     node.setUserData("rotationMask_x", rotationMask.x);
     node.setUserData("rotationMask_y", rotationMask.y);
@@ -343,6 +369,11 @@ public class InMoov3DApp extends SimpleApplication{
     nodes.put("jaw", node);
     maps.put("jaw", new Mapper(0,180,60,90));
 
+    if (service!=null) {
+      synchronized(service) {
+        service.notifyAll();
+      }
+    }
     
 }
 
@@ -399,4 +430,41 @@ public class InMoov3DApp extends SimpleApplication{
       Log.info(partName + " is not a valid part name for VinMoov");
     }
   }
+  
+  public void setService(Service service) {
+    this.service = service;
+  }
+  
+  private AnalogListener analogListener = new AnalogListener() {
+    public void onAnalog(String name, float keyPressed, float tpf) {
+      if (name.equals("MouseClickL")) {
+        //rotate+= keyPressed;
+        rootNode.rotate(0, -keyPressed, 0);
+        //Log.info(rotate);
+      }
+      else if (name.equals("MouseClickR")) {
+        //rotate+= keyPressed;
+        rootNode.rotate(0, keyPressed, 0);
+        //Log.info(rotate);
+      }
+      else if (name.equals("MMouseUp")){
+        rootNode.setLocalScale(rootNode.getLocalScale().mult(1.05f));
+      }
+      else if (name.equals("MMouseDown")){
+        rootNode.setLocalScale(rootNode.getLocalScale().mult(0.95f));
+      }
+      else if (name.equals("Up")){
+        rootNode.move(0, keyPressed*100, 0);
+      }
+      else if (name.equals("Down")){
+        rootNode.move(0, -keyPressed*100, 0);
+      }
+      else if (name.equals("Left")){
+        rootNode.move(-keyPressed*100, 0, 0);
+      }
+      else if (name.equals("Right")){
+        rootNode.move(keyPressed*100, 0, 0);
+      }
+    }
+  };
 }
