@@ -63,31 +63,29 @@ import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.PinDefinition;
+import org.myrobotlab.service.interfaces.PortListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.swing.widget.DigitalButton;
 import org.myrobotlab.swing.widget.FileChooser;
 import org.myrobotlab.swing.widget.PortGui;
 
-public class ArduinoGui extends ServiceGui implements ActionListener, TabControlEventHandler, ItemListener {
+public class ArduinoGui extends ServiceGui
+		implements ActionListener, TabControlEventHandler, ItemListener, PortListener {
 
 	static final long serialVersionUID = 1L;
 
-	String[] BOARD_TYPES = new String[] { "", "Arduino Uno", "Arduino Duemilanove w/ ATmega328",
-			"Arduino Diecimila or Duemilanove w/ ATmega168", "Arduino Nano w/ ATmega328", "Arduino Nano w/ ATmega168",
-			"Arduino Mega 2560 or Mega ADK", "Arduino Mega (ATmega1280)", "Arduino Leonardo", "Arduino Micro",
-			"Arduino Mini w/ ATmega328", "Arduino Mini w/ ATmega168", "Arduino Ethernet", "Arduino Fio",
-			"Arduino BT w/ ATmega328", "Arduino BT w/ ATmega168", "LilyPad Arduino w/ ATmega328",
-			"LilyPad Arduino w/ ATmega168", "Arduino Pro or Pro Mini (5V, 16 MHz) w/ ATmega328",
-			"Arduino Pro or Pro Mini (5V, 16 MHz) w/ ATmega168", "Arduino Pro or Pro Mini (3.3V, 8 MHz) w/ ATmega328",
-			"Arduino Pro or Pro Mini (3.3V, 8 MHz) w/ ATmega168", "Arduino NG or older w/ ATmega168",
-			"Arduino NG or older w/ ATmega8" };
+	static final String[] BOARD_TYPES = new String[] { "uno", "mega", "megaadk", "nano" };
+
+	// FIXME wigetize oscope
+	// separate sub-tabs
+
+	JLabel status = new JLabel("disconnected");
 
 	// FIXME - double buffer 2 JPanels
-	// FIXME - wigetize 
+	// FIXME - wigetize
 	class TraceData {
 		Color color = null;
 		String controllerName;
@@ -102,13 +100,11 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 		int total = 0;
 		int traceStart = 0;
 	}
-	
+
 	FileChooser chooser = null;
 
-	JLabel version = new JLabel();
-	
 	PortGui portGui;
-	
+
 	JComboBox<String> boardTypes = new JComboBox<String>(BOARD_TYPES);
 
 	int DATA_WIDTH = 400;
@@ -183,15 +179,18 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	public ArduinoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		self = this;
-		
-		// FIXME - this should be done in ServiceGui ! - it should auto-update onState in ServiceGui
-		// and ServiceGui should call overloaded method 
-		Arduino arduino = (Arduino)Runtime.getService(boundServiceName);
-	    SerialDevice serial = arduino.getSerial();		
+
+		// FIXME - this should be done in ServiceGui ! - it should auto-update
+		// onState in ServiceGui
+		// and ServiceGui should call overloaded method
+		Arduino arduino = (Arduino) Runtime.getService(boundServiceName);
+		SerialDevice serial = arduino.getSerial();
 		portGui = new PortGui(serial.getName(), myService, tabs);
-		
-		addTop(3, portGui.getDisplay(), " version:", version);
-		addTop(" board:", boardTypes);
+
+		addTop(3, portGui.getDisplay());
+
+		// addTop(" board:", boardTypes);
+		addTop(status);
 
 		localTabs.setTabPlacement(SwingConstants.RIGHT);
 		localTabs.setPreferredSize(new Dimension(300, 300));
@@ -319,9 +318,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	}
 
 	public void onDisconnect(String portName) {
-		version.setText("");
 		openMrlComm.setEnabled(true);
 		arduinoPath.setText(myArduino.arduinoPath);
+		status.setText("disconnected");
 	}
 
 	public void onConnect(String portName) {
@@ -330,25 +329,22 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
 	@Override
 	public void subscribeGui() {
+		subscribe("publishBoardInfo");
 		subscribe("publishPin", "publishPin");
-		subscribe("publishState");
-		subscribe("onConnect", "onConnect");
-		subscribe("onDisconnect", "onDisconnect");
-	}
-
-	@Deprecated
-	public void publishVersion(Integer xver) {
-		if (xver != null) {
-			version.setText(xver + "");
-		}
+		subscribe("publishConnect");
+		subscribe("publishDisconnect");
 	}
 
 	@Override
 	public void unsubscribeGui() {
+		unsubscribe("publishBoardInfo");
 		unsubscribe("publishPin", "publishPin");
-		unsubscribe("publishState");
-		unsubscribe("onConnect", "onConnect");
-		unsubscribe("onDisconnect", "onDisconnect");
+		unsubscribe("publishConnect");
+		unsubscribe("publishDisconnect");
+	}
+
+	public void onBoardInfo(BoardInfo boardInfo) {
+		status.setText(String.format("connected %s", boardInfo));
 	}
 
 	public void clearScreen() // TODO - static - put in oscope/image package
@@ -387,7 +383,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 
 				JLabel image = new JLabel();
 
-				ImageIcon dPic = Util.getImageIcon("Arduino/arduino.duemilanove.200.pins.png");
+				ImageIcon dPic = Util.getImageIcon("Arduino/uno.png");
 				image.setIcon(dPic);
 				Dimension s = image.getPreferredSize();
 				image.setBounds(0, 0, s.width, s.height);
@@ -456,8 +452,6 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 	public void addMrlCommPanel() {
 		SwingUtilities.invokeLater(new Runnable() {
 
-			
-
 			@Override
 			public void run() {
 				JPanel uploadPanel = new JPanel(new BorderLayout());
@@ -490,7 +484,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 				gc.gridx++;
 				top.add(arduinoPath, gc);
 				gc.gridx++;
-				if (chooser == null){
+				if (chooser == null) {
 					chooser = new FileChooser("browse", arduinoPath);
 					chooser.filterDirsOnly();
 				}
@@ -534,7 +528,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 				JLayeredPane imageMap = new JLayeredPane();
 				imageMap.setPreferredSize(size);
 				JLabel image = new JLabel();
-				ImageIcon dPic = Util.getImageIcon("Arduino/mega.200.pins.png");
+				ImageIcon dPic = Util.getImageIcon("Arduino/mega.png");
 				image.setIcon(dPic);
 				Dimension s = image.getPreferredSize();
 				image.setBounds(0, 0, s.width, s.height);
@@ -718,21 +712,12 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 					pinList = myArduino.getPinList();
 
 					if (arduino.isConnected()) {
-						onConnect(arduino.getPortName());
-						arduino.getBoardInfo();						
-					}
-
-					BoardInfo boardInfo = myArduino.getBoardInfo();
-					if (!boardInfo.isValid()) {
-						version.setText("unkown");
+						status.setText(String.format("connected %s", arduino.getBoardInfo()));
 					} else {
-						version.setText("" + boardInfo.getVersion());
+						status.setText("disconnected");						
 					}
 
 					arduinoPath.setText(myArduino.getArduinoPath());
-
-					Serial serial = myArduino.getSerial();
-					List<String> p = serial.getPortNames();
 
 					// update panels based on state change
 					// TODO - check what state the panels are to see if a
@@ -827,6 +812,12 @@ public class ArduinoGui extends ServiceGui implements ActionListener, TabControl
 				send("setBoard", type);
 			}
 		}
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

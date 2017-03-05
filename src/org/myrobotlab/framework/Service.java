@@ -370,7 +370,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         }
         Type t = f.getType();
 
-        log.info(String.format("setting %s", f.getName()));
+        // log.debug(String.format("setting %s", f.getName()));
         /*
          * if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
          * continue; }
@@ -398,7 +398,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         } else if (t.equals(java.lang.Double.TYPE)) {
           targetField.setDouble(target, f.getDouble(source));
         } else {
-          log.info(String.format("setting reference to remote object %s", f.getName()));
+          // log.debug(String.format("setting reference to remote object %s", f.getName()));
           targetField.set(target, f.get(source));
         }
       } catch (Exception e) {

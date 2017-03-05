@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -137,7 +138,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
 	transient Map<String, List<ServiceGui>> nameMethodCallbackMap;
 
-	transient JLabel status = new JLabel("status");
+	transient JLabel status = new JLabel("status:");
+	transient JButton statusClear = new JButton("clear");
+	
 	boolean active = false;
 
 	static public void attachJavaConsole() {
@@ -206,9 +209,15 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent ae) {
-		String cmd = ae.getActionCommand();
-		// Object source = ae.getSource();
+	public void actionPerformed(ActionEvent e) {
+		String cmd = e.getActionCommand();
+		Object o = e.getSource();
+		
+		if (statusClear == o){
+			status.setForeground(Color.black);
+			status.setOpaque(false);
+			status.setText("status:");
+		}
 
 		if ("unhide all".equals(cmd)) {
 			unhideAll();
@@ -620,9 +629,13 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
 			JPanel tabPanel = new JPanel(new BorderLayout());
 			tabPanel.add(tabs, BorderLayout.CENTER);
-			tabPanel.add(status, BorderLayout.SOUTH);
+			JPanel statusPanel = new JPanel(new BorderLayout());
+			statusPanel.add(status, BorderLayout.CENTER);
+			statusPanel.add(statusClear, BorderLayout.EAST);
+			tabPanel.add(statusPanel, BorderLayout.SOUTH);
+			
+			statusClear.addActionListener(this);
 			status.setOpaque(true);
-
 			frame.add(tabPanel);
 
 			URL url = getClass().getResource("/resource/mrl_logo_36_36.png");
