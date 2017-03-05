@@ -75,7 +75,9 @@ public class InMoov3DApp extends SimpleApplication{
         new KeyTrigger(KeyInput.KEY_UP)); // A and left arrow
     inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S),
         new KeyTrigger(KeyInput.KEY_DOWN)); // D and right arrow    
-    inputManager.addListener(analogListener, new String[]{"Left","Right","Up","Down"});
+    inputManager.addMapping("ZoomIn",  new KeyTrigger(KeyInput.KEY_E));
+    inputManager.addMapping("ZoomOut",  new KeyTrigger(KeyInput.KEY_Q));
+    inputManager.addListener(analogListener, new String[]{"Left","Right","Up","Down", "ZoomIn","ZoomOut"});
 
     
     viewPort.setBackgroundColor(ColorRGBA.Gray);
@@ -447,11 +449,11 @@ public class InMoov3DApp extends SimpleApplication{
         rootNode.rotate(0, keyPressed, 0);
         //Log.info(rotate);
       }
-      else if (name.equals("MMouseUp")){
-        rootNode.setLocalScale(rootNode.getLocalScale().mult(1.05f));
+      else if (name.equals("MMouseUp") || name.equals("ZoomIn")){
+        rootNode.setLocalScale(rootNode.getLocalScale().mult(1.01f));
       }
-      else if (name.equals("MMouseDown")){
-        rootNode.setLocalScale(rootNode.getLocalScale().mult(0.95f));
+      else if (name.equals("MMouseDown") || name.equals("ZoomOut")){
+        rootNode.setLocalScale(rootNode.getLocalScale().mult(0.99f));
       }
       else if (name.equals("Up")){
         rootNode.move(0, keyPressed*100, 0);
