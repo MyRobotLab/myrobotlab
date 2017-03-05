@@ -1566,19 +1566,22 @@ public class InMoov extends Service {
     return meta;
   }
   
-  public InMoov3DApp startVinMoov(){
+  public InMoov3DApp startVinMoov() throws InterruptedException{
     if (vinMoovApp == null) {
       vinMoovApp = new InMoov3DApp();
       AppSettings settings = new AppSettings(true);
       settings.setResolution(1024,960);
       //settings.setEmulateMouse(false);
       // settings.setUseJoysticks(false);
-      settings.setUseInput(false);
+      settings.setUseInput(true);
       vinMoovApp.setSettings(settings);
       vinMoovApp.setShowSettings(false);
       vinMoovApp.setPauseOnLostFocus(false);
+      vinMoovApp.setService(this);
       vinMoovApp.start();
-      sleep(3000);
+      synchronized(this){
+        wait(5000);
+      }
       if (torso != null) {
         vinMoovApp.addServo("mtorso", torso.midStom);
         torso.midStom.addIKServoEventListener(this);
