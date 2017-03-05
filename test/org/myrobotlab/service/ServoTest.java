@@ -65,7 +65,7 @@ public class ServoTest {
 
 		Serial serial = arduino.getSerial();
 		// really I have to call refresh first ? :P
-		serial.refresh();
+		serial.getPortNames();
 		List<String> ports = serial.getPortNames();
 		for (String port : ports) {
 			log.info(port);

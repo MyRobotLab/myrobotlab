@@ -129,8 +129,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		}
 		
 		if (o == clear) {
-			rx.setText("");
-			tx.setText("");
+			clear();
 		}
 		if (o == createVirtualPort) {
 			send("connectVirtualUart", "COM88");
@@ -153,6 +152,11 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 			send("write", data.getBytes());
 			myService.info("sent [%s]", data);
 		}
+	}
+	
+	public void clear(){
+		rx.setText("");
+		tx.setText("");
 	}
 
 	@Override
@@ -232,6 +236,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 			String newFormat = (String) reqFormat.getSelectedItem();
 			// changing our display and the Service's format
 			try {
+				clear();
 				rxFormatter = Codec.getDecoder(newFormat, myService);
 				txFormatter = Codec.getDecoder(newFormat, myService);
 				send("setFormat", newFormat);

@@ -1,126 +1,139 @@
 package org.myrobotlab.arduino;
 
+import java.io.Serializable;
+
 import org.myrobotlab.service.Arduino;
 
 /**
  * BoardInfo is all info which needs to be published only once after connection
  */
-public class BoardInfo {
+public class BoardInfo implements Serializable {
 
-  Integer boardId;
-  Integer version;
-  String boardName;
-  boolean valid = false;
+	private static final long serialVersionUID = 1L;
+	
+	Integer boardId;
+	Integer version;
+	String boardName;
+	boolean valid = false;
 
-  Integer sram;
-  Integer microsPerLoop;
-  Integer activePins;
-  DeviceSummary[] deviceSummary; // deviceList with types
-  
-  // if true it boardInfo will be published at a regular 1s interval
-  boolean enableBoardInfo = false;
-  public long heartbeatMs;
+	Integer sram;
+	Integer microsPerLoop;
+	Integer activePins;
+	DeviceSummary[] deviceSummary; // deviceList with types
 
-  public BoardInfo() {
-    setType(-1);
-  }
+	// if true it boardInfo will be published at a regular 1s interval
+	boolean enableBoardInfo = false;
+	public long heartbeatMs;
 
-  public BoardInfo(int version, int boardId) {
-    this.version = version;
-    this.boardId = boardId;
-  }
+	public BoardInfo() {
+		setType(-1);
+	}
 
-  public String getName() {
-    return boardName;
-  }
+	public BoardInfo(int version, int boardId) {
+		this.version = version;
+		this.boardId = boardId;
+	}
 
-  public boolean isUnknown() {
-    return (boardName == null) || boardName.equals("unknown");
-  }
+	public String getName() {
+		return boardName;
+	}
 
-  public void setType(int boardId) {
-    this.boardId = boardId;
-    switch (boardId) {
-      case Arduino.BOARD_TYPE_ID_MEGA:
-        boardName = Arduino.BOARD_TYPE_MEGA;
-        break;
-      case Arduino.BOARD_TYPE_ID_UNO:
-        boardName = Arduino.BOARD_TYPE_UNO;
-        break;
-      case Arduino.BOARD_TYPE_ID_ADK_MEGA:
-        boardName = Arduino.BOARD_TYPE_MEGA_ADK;
-        break;
-      case Arduino.BOARD_TYPE_ID_NANO:
-        boardName = Arduino.BOARD_TYPE_NANO;
-        break;
-      case Arduino.BOARD_TYPE_ID_PRO_MINI:
-        boardName = Arduino.BOARD_TYPE_PRO_MINI;
-        break;
-      default:
-        boardName = "unknown";
-        break;
-    }
-  }
+	public boolean isUnknown() {
+		return (boardName == null) || boardName.equals("unknown");
+	}
 
-  /**
-   * called on disconnect() so it can re-initalize if connected to a different
-   * arduino
-   */
-  public void reset() {
-    boardId = -1;
-    version = null;
-    boardName = null;
-    valid = false;
-  }
+	public void setType(int boardId) {
+		this.boardId = boardId;
+		switch (boardId) {
+		case Arduino.BOARD_TYPE_ID_MEGA:
+			boardName = Arduino.BOARD_TYPE_MEGA;
+			break;
+		case Arduino.BOARD_TYPE_ID_UNO:
+			boardName = Arduino.BOARD_TYPE_UNO;
+			break;
+		case Arduino.BOARD_TYPE_ID_ADK_MEGA:
+			boardName = Arduino.BOARD_TYPE_MEGA_ADK;
+			break;
+		case Arduino.BOARD_TYPE_ID_NANO:
+			boardName = Arduino.BOARD_TYPE_NANO;
+			break;
+		case Arduino.BOARD_TYPE_ID_PRO_MINI:
+			boardName = Arduino.BOARD_TYPE_PRO_MINI;
+			break;
+		default:
+			boardName = "unknown";
+			break;
+		}
+	}
 
-  public Integer getVersion() {
-    return version;
-  }
+	/**
+	 * called on disconnect() so it can re-initalize if connected to a different
+	 * arduino
+	 */
+	public void reset() {
+		boardId = -1;
+		version = null;
+		boardName = null;
+		valid = false;
+	}
 
-  public void setVersion(Integer version) {
-    valid = true;
-    this.version = version;
-  }
+	public Integer getVersion() {
+		return version;
+	}
 
-  public boolean isValid() {
-    return valid;
-  }
+	public void setVersion(Integer version) {
+		valid = true;
+		this.version = version;
+	}
 
-  public void setType(String board) {
-    boardName = board;
-    if (Arduino.BOARD_TYPE_MEGA.equals(board)) {
-      boardId = Arduino.BOARD_TYPE_ID_MEGA;
-    } else if (Arduino.BOARD_TYPE_MEGA_ADK.equals(board)) {
-      boardId = Arduino.BOARD_TYPE_ID_ADK_MEGA;
-    } else if (Arduino.BOARD_TYPE_UNO.equals(board)) {
-      boardId = Arduino.BOARD_TYPE_ID_UNO;
-    } else if (Arduino.BOARD_TYPE_NANO.equals(board)) {
-      boardId = Arduino.BOARD_TYPE_ID_NANO;
-    } else if (Arduino.BOARD_TYPE_PRO_MINI.equals(board)) {
-      boardId = Arduino.BOARD_TYPE_ID_PRO_MINI;
-    } else {
-      boardId = Arduino.BOARD_TYPE_ID_UNKNOWN;
-    }
-  }
+	public boolean isValid() {
+		return valid;
+	}
 
-  public int getBoardType() {
-    return boardId;
-  }
+	public void setType(String board) {
+		boardName = board;
+		if (Arduino.BOARD_TYPE_MEGA.equals(board)) {
+			boardId = Arduino.BOARD_TYPE_ID_MEGA;
+		} else if (Arduino.BOARD_TYPE_MEGA_ADK.equals(board)) {
+			boardId = Arduino.BOARD_TYPE_ID_ADK_MEGA;
+		} else if (Arduino.BOARD_TYPE_UNO.equals(board)) {
+			boardId = Arduino.BOARD_TYPE_ID_UNO;
+		} else if (Arduino.BOARD_TYPE_NANO.equals(board)) {
+			boardId = Arduino.BOARD_TYPE_ID_NANO;
+		} else if (Arduino.BOARD_TYPE_PRO_MINI.equals(board)) {
+			boardId = Arduino.BOARD_TYPE_ID_PRO_MINI;
+		} else {
+			boardId = Arduino.BOARD_TYPE_ID_UNKNOWN;
+		}
+	}
 
-  public void setMicrosPerLoop(int microsPerLoop){
-    this.microsPerLoop = microsPerLoop;
-  }
+	public int getBoardType() {
+		return boardId;
+	}
 
-  public void setSram(Integer sram) {
-    this.sram = sram;
-  }
-  
-  public void setDeviceSummary(DeviceSummary[] deviceSummary) {
-    this.deviceSummary = deviceSummary;
-  }
+	public void setMicrosPerLoop(int microsPerLoop) {
+		this.microsPerLoop = microsPerLoop;
+	}
 
-  public void setActivePins(Integer activePins) {
-    this.activePins = activePins;
-  }
-  
+	public void setSram(Integer sram) {
+		this.sram = sram;
+	}
+
+	public void setDeviceSummary(DeviceSummary[] deviceSummary) {
+		this.deviceSummary = deviceSummary;
+	}
+
+	public void setActivePins(Integer activePins) {
+		this.activePins = activePins;
+	}
+
+	public String toString() {
+		if (valid) {
+			return String.format("%s version %s load %d sram %d devices %d", boardName, version, microsPerLoop, sram,
+					(deviceSummary != null) ? deviceSummary.length : 0);
+		} else {
+			return "unknown";
+		}
+	}
+
 }

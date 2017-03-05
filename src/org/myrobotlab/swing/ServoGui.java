@@ -88,12 +88,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
   BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
   JComboBox<String> controller = new JComboBox<String>();
 
-  // JComboBox<Integer> pin = new JComboBox<Integer>();
   JComboBox<Integer> pinList = new JComboBox<Integer>();
-  // DefaultComboBoxModel<String> controllerModel = new
-  // DefaultComboBoxModel<String>();
 
-  DefaultComboBoxModel<Integer> pinModel = new DefaultComboBoxModel<Integer>();
   JTextField posMin = new JTextField("0");
 
   JTextField posMax = new JTextField("180");
@@ -106,9 +102,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
     super(boundServiceName, myService, tabs);
     myServo = (Servo) Runtime.getService(boundServiceName);
 
-    pinModel.addElement(null);
     for (int i = 0; i < 54; i++) {
-      pinModel.addElement(i);
+      pinList.addItem(i);
     }
 
     updateLimitsButton.addActionListener(this);
@@ -117,18 +112,12 @@ public class ServoGui extends ServiceGui implements ActionListener {
     controller.addActionListener(this);
     attachButton.addActionListener(this);
     pinList.addActionListener(this);
-    
-    pinList.setModel(pinModel);
-    
     boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
 
     JPanel s = new JPanel();
     s.add(left);
     s.add(slider);
     s.add(right);
-    // addTopLine(s, boundPos);
-    // addLine("controller", controller, "pin", pinList, "", attachButton);
-    // addLine("min", posMin, "max", posMax, updateLimitsButton);
     addLine(boundPos, s);
     // addLine(s);
     addBottomLine(" controller", controller, "  pin", pinList, attachButton);
