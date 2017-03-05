@@ -627,10 +627,9 @@ public class Test extends Service implements StatusListener {
 	 * 
 	 */
 	static public ServiceType getMetaData() {
-
 		ServiceType meta = new ServiceType(Test.class.getCanonicalName());
 		meta.addDescription("Testing service");
-		meta.addCategory("testing", "framework");
+		meta.addCategory("testing");
 		meta.addPeer("http", "HttpClient", "to interface with Service pages");
 		meta.addPeer("python", "Python", "python to excercise python scripts");
 		return meta;
