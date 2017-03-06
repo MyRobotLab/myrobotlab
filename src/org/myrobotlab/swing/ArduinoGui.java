@@ -186,7 +186,6 @@ public class ArduinoGui extends ServiceGui
 		Arduino arduino = (Arduino) Runtime.getService(boundServiceName);
 		SerialDevice serial = arduino.getSerial();
 		portGui = new PortGui(serial.getName(), myService, tabs);
-
 		addTop(3, portGui.getDisplay());
 
 		// addTop(" board:", boardTypes);

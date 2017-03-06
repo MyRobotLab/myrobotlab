@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.BoardInfo;
-// import org.myrobotlab.arduino.BoardStatus;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.Service;
@@ -63,7 +62,7 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 public class Arduino extends Service implements Microcontroller, PinArrayControl, I2CBusController, I2CController,
 		SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController,
 		DeviceController, RecordControl, SerialRelayListener, PortListener, PortPublisher {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	public static class I2CDeviceMap {
@@ -143,7 +142,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// this method vs mapping I think was a good idea.. :)
 		return (int) Math.round((degree * (2400 - 544) / 180) + 544);
 	}
-	
+
 	/**
 	 * path of the Arduino IDE must be set by user should not be static - since
 	 * gson will not serialize it, and it won't be 'saved()'
@@ -1471,11 +1470,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/*
-	public void refresh() {
-		serial.getPortNames();
-		broadcastState();
-	}
-	*/
+	 * public void refresh() { serial.getPortNames(); broadcastState(); }
+	 */
 
 	@Override
 	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
@@ -1566,7 +1562,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	// > servoEnablePwm/deviceId/pin
 	public void servoAttachPin(ServoControl servo, int pin) {
-		log.info("{}.attachPin({})",servo.getName(), servo.getPin());
+		log.info("{}.attachPin({})", servo.getName(), servo.getPin());
 		msg.servoAttachPin(getDeviceId(servo), pin);
 	}
 
@@ -1580,7 +1576,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	// > servoSetVelocity/deviceId/b16 velocity
 	public void servoSetVelocity(ServoControl servo) {
-		log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), (int) servo.getVelocity());
+		log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo),
+				(int) servo.getVelocity());
 		msg.servoSetVelocity(getDeviceId(servo), (int) servo.getVelocity());
 	}
 
@@ -1969,7 +1966,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		((Servo) getDevice(deviceId)).onServoEvent(eventType, currentPos, targetPos);
 		return currentPos;
 	}
-	
+
 	public static void main(String[] args) {
 		try {
 
@@ -2052,11 +2049,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	@Override
 	public List<String> getPortNames() {
-		if (serial != null){
+		if (serial != null) {
 			return serial.getPortNames();
 		}
 		return new ArrayList<String>();
 	}
-
 
 }
