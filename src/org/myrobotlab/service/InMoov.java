@@ -1562,6 +1562,9 @@ public class InMoov extends Service {
     meta.addPeer("opencv", "OpenCV", "InMoov OpenCV service");
     meta.addPeer("openni", "OpenNi", "Kinect service");
     meta.addPeer("pid", "Pid", "Pid service");
+    
+    // For VirtualInMoov
+	meta.addPeer("jmonkeyEngine", "JMonkeyEngine", "virtual inmoov");
 
     return meta;
   }
