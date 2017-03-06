@@ -129,7 +129,7 @@ public class BoardInfo implements Serializable {
 
 	public String toString() {
 		if (valid) {
-			return String.format("%s version %s load %d sram %d devices %d", boardName, version, microsPerLoop, sram,
+			return String.format("%s version %s load %d heartbeat %d sram %d devices %d", boardName, version, microsPerLoop, heartbeatMs, sram,
 					(deviceSummary != null) ? deviceSummary.length : 0);
 		} else {
 			return "unknown";
