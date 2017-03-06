@@ -1564,7 +1564,7 @@ public class InMoov extends Service {
     meta.addPeer("pid", "Pid", "Pid service");
     
     // For VirtualInMoov
-	meta.addPeer("jmonkeyEngine", "JMonkeyEngine", "virtual inmoov");
+	meta.addPeer("jmonkeyEngine", "JMonkeyEngine", "Virtual inmoov");
 
     return meta;
   }
