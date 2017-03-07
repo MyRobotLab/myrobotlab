@@ -118,7 +118,7 @@ public class CollisionDectection implements Cloneable {
           rad2=0;
         }
         item.haveDone(citem.getName());
-        if (d <= rad1 + rad2 + 5 /*&& ((tk[0] != 0 && tk[0] != 1.0) || (tk[1] != 0 && tk[1] != 1))*/) {
+        if (d <= rad1 + rad2  /*&& ((tk[0] != 0 && tk[0] != 1.0) || (tk[1] != 0 && tk[1] != 1))*/) {
           //we got a potential collision
           collision = true;
           collisionPoint[0] = point1;
@@ -178,7 +178,12 @@ public class CollisionDectection implements Cloneable {
     if (items.containsKey(object1)) {
       items.get(object1).addIgnore(object2);
     }
-    
+  }
+  
+  public void removeIgnore(String object1, String object2) {
+    if (items.containsKey(object1)){
+      items.get(object1).removeIgnore(object2);
+    }
   }
   
   public CollisionItem[] getCollisionItem() {
