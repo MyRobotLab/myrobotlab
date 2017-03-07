@@ -10,8 +10,9 @@ import org.myrobotlab.genetic.Genetic;
 import org.myrobotlab.genetic.GeneticAlgorithm;
 import org.myrobotlab.kinematics.CollisionDectection.CollisionResults;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.IntegratedMovement2;
-import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.IntegratedMovement2.ObjectPointLocation;
 import org.myrobotlab.service.Servo.IKData;
 import org.python.jline.internal.Log;
 
@@ -34,6 +35,16 @@ public class IMEngine extends Thread implements Genetic {
   private Point oldTarget = null;
   private double timeToWait;
   private long lastTimeUpdate;
+  
+  public class MoveInfo {    
+    Point offset = null;    
+    CollisionItem targetItem = null;    
+    ObjectPointLocation objectLocation = null;    
+    DHLink lastLink = null;
+    public String arm;   
+  }   
+
+  MoveInfo moveInfo = null;
 	
 	public IMEngine(String name, IntegratedMovement2 IM) {
 		super(name);
@@ -65,9 +76,9 @@ public class IMEngine extends Thread implements Genetic {
 	public void run() {
 		Point lastPosition = arm.getPalmPosition();
 		while(true){
-	    if (target != null && arm.getPalmPosition().distanceTo(target) < maxDistance && !holdTargetEnabled) {
-	      target = null;
-	    }
+//	    if (target != null && arm.getPalmPosition().distanceTo(target) < maxDistance && !holdTargetEnabled) {
+//	      target = null;
+//	    }
 			Point avoidPoint = checkCollision(arm, service.collisionItems);
       if (avoidPoint != null) {
         Point previousTarget = target;
@@ -79,8 +90,15 @@ public class IMEngine extends Thread implements Genetic {
 			if (target != null && arm.getPalmPosition().distanceTo(target) > maxDistance && System.currentTimeMillis() > lastTimeUpdate + timeToWait) {
 				Log.info("distance to target {}", arm.getPalmPosition().distanceTo(target));
 				Log.info(arm.getPalmPosition().toString());
+				if (moveInfo != null) {
+				  //target = moveToObject();
+				}
 				move();
 				lastPosition = arm.getPalmPosition();
+			}
+			if (target != null && arm.getPalmPosition().distanceTo(target) < maxDistance) {
+			  target = null;
+			  moveInfo = null;
 			}
 			try {
 				sleep(0);
@@ -111,9 +129,9 @@ public class IMEngine extends Thread implements Genetic {
 	private boolean moveToGoal(Point goal) {
     // we know where we are.. we know where we want to go.
     int numSteps = 0;
-    double iterStep = 0.001;
-    double errorThreshold = 0.05;
-    int maxIterations = 50;
+    double iterStep = 0.01;
+    double errorThreshold = 0.5;
+    int maxIterations = 10000;
     int geneticPoolSize=100;
     double geneticRecombinationRate = 0.7;
     double geneticMutationRate = 0.01;
@@ -132,18 +150,19 @@ public class IMEngine extends Thread implements Genetic {
       computeCD = service.collisionItems.clones();
       numSteps++;
       if (numSteps >= maxIterations) {
-        Log.info(computeArm.getPalmPosition().toString());
-        GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, arm.getNumLinks(), 11, geneticRecombinationRate, geneticMutationRate );
+        //if (numSteps >= maxIterations) return true;
+        Log.info(computeArm.getPalmPosition().toString() + "genetic");
+        GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, arm.getNumLinks(), 12, geneticRecombinationRate, geneticMutationRate );
         Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the number of time the chromosome pool will be recombined and mutate
         for (int i = 0; i < computeArm.getNumLinks(); i++) {
           if (bestFit.getDecodedGenome().get(i) != null) {
             DHLink link = computeArm.getLink(i);
             double degrees = link.getPositionValueDeg();
-            double deltaDegree = java.lang.Math.abs(degrees - (Double)bestFit.getDecodedGenome().get(i));
-            if (degrees > ((Double)bestFit.getDecodedGenome().get(i))) {
+            double deltaDegree = java.lang.Math.abs(degrees - (double)bestFit.getDecodedGenome().get(i));
+            if (degrees > ((double)bestFit.getDecodedGenome().get(i))) {
               degrees -= deltaDegree;
             }
-            else if (degrees < ((Double)bestFit.getDecodedGenome().get(i))) {
+            else if (degrees < ((double)bestFit.getDecodedGenome().get(i))) {
               degrees += deltaDegree;
             }
             link.addPositionValue( degrees);
@@ -215,7 +234,7 @@ public class IMEngine extends Thread implements Genetic {
         // log.debug("Final Position {} Number of Iterations {}" ,
         // getPalmPosition() , numSteps);
       	if (!holdTargetEnabled && goal == target) {
-      		target = null;
+      		//target = null;
       	}
         break;
       }
@@ -229,21 +248,43 @@ public class IMEngine extends Thread implements Genetic {
 	}
 
 	private Point checkCollision(DHRobotArm arm, CollisionDectection cd) {
-    double[][] jp = createJointPositionMap();
-    //send data to the collision detector class
-    for (int i = 0; i < arm.getNumLinks(); i++) {
-      CollisionItem ci = new CollisionItem(new Point(jp[i][0], jp[i][1], jp[i][2], 0 , 0, 0), new Point(jp[i+1][0], jp[i+1][1], jp[i+1][2], 0, 0, 0), arm.getLink(i).getName());
-      if (i != arm.getNumLinks()-1) {
-        ci.addIgnore(arm.getLink(i+1).getName());
-      }
-      cd.addItem(ci);
-    }
-    CollisionResults collisionResult = cd.runTest();
+	  DHRobotArm checkArm = arm.clones();
+	  double time = 0.0;
+	  double timePerLoop = 0.1;
+	  CollisionResults collisionResult = null;
+	  while (time <= 2.0) {
+	    //rotate the checkArm by timePerLoop
+	    for (DHLink link : checkArm.getLinks()){
+	      if (link.hasServo) {
+  	      double delta = link.getVelocity() * timePerLoop;
+  	      double maxDelta = Math.abs(link.getTargetPos() - link.getPositionValueDeg());
+  	      delta = Math.toRadians(Math.min(delta, maxDelta));
+  	      if (link.getTargetPos() < link.getCurrentPos()) {
+  	        delta *= -1;
+  	      }
+  	      link.incrRotate(delta);
+	      }
+	    }
+	    double[][] jp = checkArm.createJointPositionMap();
+	    //send data to the collision detector class
+	    for (int i = 0; i < checkArm.getNumLinks(); i++) {
+	      CollisionItem ci = new CollisionItem(new Point(jp[i][0], jp[i][1], jp[i][2], 0 , 0, 0), new Point(jp[i+1][0], jp[i+1][1], jp[i+1][2], 0, 0, 0), checkArm.getLink(i).getName());
+	      if (i != checkArm.getNumLinks()-1) {
+	        ci.addIgnore(checkArm.getLink(i+1).getName());
+	      }
+	      cd.addItem(ci);
+	    }
+	    collisionResult = cd.runTest();
+	    if (collisionResult.haveCollision) {
+	      break;
+	    }
+	    time += timePerLoop;
+	  }
     if (collisionResult.haveCollision) {
     	//Log.info("collision detected");
       CollisionItem ci = null;
       int itemIndex = 0;
-      for (DHLink l : arm.getLinks()) {
+      for (DHLink l : checkArm.getLinks()) {
     	boolean foundIt = false;
         for (itemIndex = 0; itemIndex < 2; itemIndex++) {
           if (l.getName().equals(collisionResult.collisionItems[itemIndex].getName())) {
@@ -258,8 +299,8 @@ public class IMEngine extends Thread implements Genetic {
         //Log.info("Collision between static item {} and {} detected", collisionResult.collisionItems[0].getName(), collisionResult.collisionItems[1].getName());
         return null;
       }
-      Point armPos = arm.getPalmPosition();
-      Point newPos = arm.getPalmPosition();
+      Point armPos = checkArm.getPalmPosition();
+      Point newPos = checkArm.getPalmPosition();
       Point vCollItem = collisionResult.collisionPoints[itemIndex].subtract(collisionResult.collisionPoints[1-itemIndex]);
       //if (vCollItem.magnitude() > 100){ // scale vector so the avoiding point is not too far
         vCollItem = vCollItem.unitVector(100);
@@ -388,23 +429,6 @@ public class IMEngine extends Thread implements Genetic {
 		
 	}
 
-  public double[][] createJointPositionMap() {
-
-    double[][] jointPositionMap = new double[arm.getNumLinks() + 1][3];
-
-    // first position is the origin... second is the end of the first link
-    jointPositionMap[0][0] = 0;
-    jointPositionMap[0][1] = 0;
-    jointPositionMap[0][2] = 0;
-
-    for (int i = 1; i <= arm.getNumLinks(); i++) {
-      Point jp = arm.getJointPosition(i - 1);
-      jointPositionMap[i][0] = jp.getX();
-      jointPositionMap[i][1] = jp.getY();
-      jointPositionMap[i][2] = jp.getZ();
-    }
-    return jointPositionMap;
-  }
 
 	public void holdTarget(boolean holdEnabled) {
 		this.holdTargetEnabled  = holdEnabled;
@@ -422,7 +446,7 @@ public class IMEngine extends Thread implements Genetic {
         DHLink newLink = new DHLink(computeArm.getLink(i));
         if (chromosome.getDecodedGenome().get(i) != null) {
           newLink.addPositionValue((double)chromosome.getDecodedGenome().get(i));
-          Double delta = computeArm.getLink(i).getPositionValueDeg() - (Double)chromosome.getDecodedGenome().get(i);
+          double delta = computeArm.getLink(i).getPositionValueDeg() - (double)chromosome.getDecodedGenome().get(i);
           double timeOfMove = Math.abs(delta / newLink.getVelocity());
           if (timeOfMove > fitnessTime) {
             fitnessTime = timeOfMove;
@@ -463,13 +487,13 @@ public class IMEngine extends Thread implements Genetic {
           continue;
         }
         else {
-          map = new Mapper(0,2047,link.servoMin,link.servoMax);
+          map = new Mapper(0,8191,link.servoMin,link.servoMax);
         }
         Double value=0.0;
-        for (int i= pos; i< chromosome.getGenome().length() && i < pos+11; i++){
+        for (int i= pos; i< chromosome.getGenome().length() && i < pos+13; i++){
           if(chromosome.getGenome().charAt(i) == '1') value += 1 << i-pos; 
         }
-        pos += 11;
+        pos += 13;
         value = map.calcOutput(value);
         if (value.isNaN()) {
           value = link.getPositionValueDeg();
@@ -480,6 +504,105 @@ public class IMEngine extends Thread implements Genetic {
       }
       chromosome.setDecodedGenome(decodedGenome);
     }
+  }
+
+  public double[][] createJointPositionMap() {
+    return arm.createJointPositionMap();
+  }
+
+  public void moveTo(CollisionItem item, ObjectPointLocation location) {
+    moveInfo = new MoveInfo();    
+    moveInfo.targetItem = item;   
+    moveInfo.objectLocation = location;   
+    if (moveInfo.targetItem == null){   
+      Log.info("no items named ", item.getName(), "found");   
+      moveInfo = null;    
+      return;   
+    }   
+    target = moveToObject();
+    service.getJmeApp().addPoint(target);
+  }
+
+  private Point moveToObject() {
+    double safety = 20.0;
+    Point[] point = new Point[2]; 
+    moveInfo.lastLink = arm.getLink(arm.getNumLinks()-1);   
+    CollisionItem lastLinkItem = service.collisionItems.getItem(moveInfo.lastLink.getName());   
+    service.collisionItems.addIgnore(moveInfo.targetItem.name, lastLinkItem.name);
+    Double[] vector = new Double[3];    
+    boolean addRadius=false;    
+    switch (moveInfo.objectLocation) {    
+      case ORIGIN_CENTER: {   
+        point[0] = moveInfo.targetItem.getOrigin();  
+        Point v = moveInfo.targetItem.getOrigin().subtract(moveInfo.targetItem.getEnd());
+        v = v.unitVector(safety);
+        point[0] = point[0].add(v);
+        break;    
+      }   
+      case END_CENTER: {    
+        point[0] = moveInfo.targetItem.getEnd();    
+        Point v = moveInfo.targetItem.getEnd().subtract(moveInfo.targetItem.getOrigin());
+        v = v.unitVector(safety);
+        point[0] = point[0].add(v);
+        break;    
+      }   
+      case CLOSEST_POINT: {   
+        point = service.collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[2], vector);   
+        addRadius = true;   
+        break;    
+      }   
+      case ORIGIN_SIDE: {   
+        point[0] = moveInfo.targetItem.getOrigin();   
+        Point v = moveInfo.targetItem.getOrigin().subtract(moveInfo.targetItem.getEnd());
+        v = v.unitVector(safety);
+        point[0] = point[0].add(v);
+        addRadius = true;   
+        break;    
+      }   
+      case END_SIDE: {    
+        point[0] = moveInfo.targetItem.getEnd();    
+        Point v = moveInfo.targetItem.getEnd().subtract(moveInfo.targetItem.getOrigin());
+        v = v.unitVector(safety);
+        point[0] = point[0].add(v);
+        addRadius = true;   
+        break;    
+      }   
+      case CENTER_SIDE: {   
+        point = service.collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[]{0.5, 0.5}, vector);    
+        addRadius = true;   
+      }   
+      case CENTER: {    
+        point = service.collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[]{0.5, 0.5}, vector);    
+      }   
+    }   
+    if(addRadius) {   
+      double[] vectori = moveInfo.targetItem.getVector();   
+      double[] vectorT = moveInfo.targetItem.getVectorT();    
+      Point side0 = new Point(point[0].getX()+vectorT[0], point[0].getY()+vectorT[1], point[0].getZ()+vectorT[2], 0, 0, 0);
+      Point v = new Point(vectorT[0], vectorT[1], vectorT[2], 0, 0, 0);
+      v = v.unitVector(safety);
+      side0 = side0.add(v);
+      Point pointF = side0;   
+      Point curPos = arm.getPalmPosition();   
+      double d = Math.pow((side0.getX() - curPos.getX()),2) + Math.pow((side0.getY() - curPos.getY()),2) + Math.pow((side0.getZ() - curPos.getZ()),2);    
+      for (int i = 0; i < 360; i+=10) {   
+        double L = vectori[0]*vectori[0] + vectori[1]*vectori[1] + vectori[2]*vectori[2];   
+        double x = ((moveInfo.targetItem.getOrigin().getX()*(Math.pow(vectori[1],2)+Math.pow(vectori[2], 2)) - vectori[0] * (moveInfo.targetItem.getOrigin().getY()*vectori[1] + moveInfo.targetItem.getOrigin().getZ()*vectori[2] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getX() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * (-moveInfo.targetItem.getOrigin().getZ()*vectori[1] + moveInfo.targetItem.getOrigin().getY()*vectori[2] - vectori[2]*side0.getY() + vectori[1]*side0.getZ()) * Math.sin(MathUtils.degToRad(i))) / L;   
+        double y = ((moveInfo.targetItem.getOrigin().getY()*(Math.pow(vectori[0],2)+Math.pow(vectori[2], 2)) - vectori[1] * (moveInfo.targetItem.getOrigin().getX()*vectori[0] + moveInfo.targetItem.getOrigin().getZ()*vectori[2] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getY() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * ( moveInfo.targetItem.getOrigin().getZ()*vectori[0] - moveInfo.targetItem.getOrigin().getX()*vectori[2] + vectori[2]*side0.getX() - vectori[0]*side0.getZ()) * Math.sin(MathUtils.degToRad(i))) / L;   
+        double z = ((moveInfo.targetItem.getOrigin().getZ()*(Math.pow(vectori[0],2)+Math.pow(vectori[1], 2)) - vectori[2] * (moveInfo.targetItem.getOrigin().getX()*vectori[0] + moveInfo.targetItem.getOrigin().getY()*vectori[1] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getZ() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * (-moveInfo.targetItem.getOrigin().getY()*vectori[0] + moveInfo.targetItem.getOrigin().getX()*vectori[1] - vectori[1]*side0.getX() + vectori[0]*side0.getY()) * Math.sin(MathUtils.degToRad(i))) / L;   
+        Point check = new Point(x,y,z,0,0,0);   
+        double dt = Math.pow((check.getX() - curPos.getX()),2) + Math.pow((check.getY() - curPos.getY()),2) + Math.pow((check.getZ() - curPos.getZ()),2);   
+        if (dt < d) {   
+          pointF = check;   
+          d = dt;   
+        }   
+      }   
+      point[0] = pointF;    
+    }
+    
+    Point moveToPoint = point[0];    
+    Log.info("Moving to point ", moveToPoint);    
+    return moveToPoint;   
   }
 
 }

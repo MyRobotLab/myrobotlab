@@ -1980,7 +1980,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
-		// TODO Auto-generated method stub
 		((Servo) getDevice(deviceId)).onServoEvent(eventType, currentPos, targetPos);
 		return currentPos;
 	}
