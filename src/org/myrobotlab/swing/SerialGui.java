@@ -259,6 +259,10 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	 */
 	public final void onRX(final Integer data) throws BadLocationException {
 		++rxCount;
+    if(this.myService.getInbox().size() > 500) {
+      rx.append("... ");
+      return;
+    }
 		String formatted = rxFormatter.decode(data);
 		rx.append(formatted);
 		if (formatted != null && rx.getLineCount() > 50) {
