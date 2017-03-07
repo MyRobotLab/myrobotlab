@@ -22,6 +22,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 	JComboBox<String> ports = new JComboBox<String>();
 	JButton connect = new JButton("connect");
 	JButton refresh = new JButton("refresh");
+	String lastPortName;
 
 	public PortGui(String boundServiceName, SwingGui myService, JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
@@ -30,8 +31,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		onState((PortPublisher) Runtime.getService(boundServiceName));
 		subscribeGui();
 		connect.addActionListener(this);
-		refresh.addActionListener(this);
-		
+		refresh.addActionListener(this);		
 		myService.subscribeToServiceMethod(boundServiceName, this);
 	}
 
@@ -46,7 +46,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		subscribe("getPortNames");
 		subscribe("publishConnect");
 		subscribe("publishDisconnect");
-		send("refresh");
+		send("getPortNames");
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				onPortNames(portPublisher.getPortNames());				
+// 				onPortNames(portPublisher.getPortNames());// 	bad idea			
 				// set light if connected
 				if (portPublisher.isConnected()) {
 					connectLight.setIcon(Util.getImageIcon("green.png"));
@@ -101,11 +101,13 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 	@Override
 	public void onConnect(String portName) {
 		log.info("onConnect - {}", portName);
+		lastPortName = portName;
 	}
 
 	@Override
 	public void onDisconnect(String portName) {
 		log.info("onDisconnect - {}", portName);
+		ports.setSelectedItem(lastPortName);
 	}
 
 	public void onPortNames(final List<String> inPorts) {
@@ -118,5 +120,4 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 	public String getSelected() {
 		return (String)ports.getSelectedItem();
 	}
-
 }

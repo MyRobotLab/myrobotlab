@@ -169,17 +169,17 @@ public class Serial extends Service
 	/**
 	 * default bps
 	 */
-	int baudrate = 115200;
+	int rate = 115200;
 
 	/**
-	 * default databits
+	 * default dataBits
 	 */
-	int databits = 8;
+	int dataBits = 8;
 
 	/**
-	 * default stopbits
+	 * default stopBits
 	 */
-	int stopbits = 1;
+	int stopBits = 1;
 
 	/**
 	 * default parity
@@ -254,10 +254,10 @@ public class Serial extends Service
 			formats.add("hex");
 			formats.add("dec");
 		}
-		refresh();
+		// refresh();
 		// outbox.setBlocking(true);
 		// outbox.maxQueue = 1;
-
+		getPortNames();
 	}
 
 	public void addByteListener(SerialDataListener listener) {
@@ -329,7 +329,7 @@ public class Serial extends Service
 	 */
 	@Override
 	public void open(String name) throws IOException {
-		open(name, baudrate, databits, stopbits, parity);
+		open(name, rate, dataBits, stopBits, parity);
 	}
 
 	public boolean setParams(int baudRate, int dataBits, int stopBits, int parity) throws IOException {
@@ -369,12 +369,12 @@ public class Serial extends Service
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	public void open(String inPortName, int baudrate, int databits, int stopbits, int parity) throws IOException {
+	public void open(String inPortName, int rate, int dataBits, int stopBits, int parity) throws IOException {
 
-		info("connect to port %s %d|%d|%d|%d", inPortName, baudrate, databits, stopbits, parity);
-		this.baudrate = baudrate;
-		this.databits = databits;
-		this.stopbits = stopbits;
+		info("connect to port %s %d|%d|%d|%d", inPortName, rate, dataBits, stopBits, parity);
+		this.rate = rate;
+		this.dataBits = dataBits;
+		this.stopBits = stopBits;
 		this.parity = parity;
 
 		lastPortName = portName;
@@ -416,7 +416,7 @@ public class Serial extends Service
 		// #3 we dont have an existing port - so we'll try a hardware port
 		// connect at default parameters - if you need custom parameters
 		// create the hardware port first
-		Port port = createHardwarePort(inPortName, baudrate, databits, stopbits, parity);
+		Port port = createHardwarePort(inPortName, rate, dataBits, stopBits, parity);
 		if (port == null) {
 			return;
 		}
@@ -449,7 +449,7 @@ public class Serial extends Service
 		// portName = port.getName();
 		ports.put(port.getName(), port);
 		portNames.add(port.getName());
-		invoke("getPortNames");
+		// invoke("getPortNames"); why ?
 
 		if (listener != null) {
 			listeners.put(listener.getName(), listener);
@@ -501,8 +501,8 @@ public class Serial extends Service
 	 * this from experience :)
 	 */
 
-	public Port createHardwarePort(String name, int rate, int databits, int stopbits, int parity) {
-		log.info(String.format("creating %s port %s %d|%d|%d|%d", hardwareLibrary, name, rate, databits, stopbits,
+	public Port createHardwarePort(String name, int rate, int dataBits, int stopBits, int parity) {
+		log.info(String.format("creating %s port %s %d|%d|%d|%d", hardwareLibrary, name, rate, dataBits, stopBits,
 				parity));
 		try {
 
@@ -511,9 +511,9 @@ public class Serial extends Service
 			Class<?> c = Class.forName(hardwareLibrary);
 			Constructor<?> constructor = c
 					.getConstructor(new Class<?>[] { String.class, int.class, int.class, int.class, int.class });
-			Port hardwarePort = (Port) constructor.newInstance(name, rate, databits, stopbits, parity);
+			Port hardwarePort = (Port) constructor.newInstance(name, rate, dataBits, stopBits, parity);
 
-			info("created  port %s %d|%d|%d|%d - goodtimes", name, rate, databits, stopbits, parity);
+			info("created  port %s %d|%d|%d|%d - goodtimes", name, rate, dataBits, stopBits, parity);
 			ports.put(name, hardwarePort);
 			return hardwarePort;
 
@@ -662,7 +662,24 @@ public class Serial extends Service
 	@Override
 	public List<String> getPortNames() {
 		// refresh(); - endless loop with webgui if placed here
-		return new ArrayList<String>(portNames);
+		// original -> return new ArrayList<String>(portNames);
+		
+		// all current ports
+		portNames.addAll(ports.keySet());
+
+		// plus hardware ports
+		SerialControl portSource = getPortSource();
+		if (portSource != null) {
+			List<String> osPortNames = portSource.getPortNames();
+			for (int i = 0; i < osPortNames.size(); ++i) {
+				portNames.add(osPortNames.get(i));
+			}
+		}
+		List<String> ports = new ArrayList<String>(portNames);
+		
+		invoke("publishPortNames", ports);
+		// broadcastState(); // FIXME - REMOVE !!! publishPortNames should be used !
+		return ports;
 	}
 
 	SerialControl getPortSource() {
@@ -942,6 +959,7 @@ public class Serial extends Service
 	 * 
 	 * @return
 	 */
+	/*
 	public List<String> refresh() {
 
 		// all current ports
@@ -955,10 +973,13 @@ public class Serial extends Service
 				portNames.add(osPortNames.get(i));
 			}
 		}
-
-		broadcastState();
-		return new ArrayList<String>(portNames);
+		List<String> ports = new ArrayList<String>(portNames);
+		
+		invoke("publishPortNames", ports);
+		broadcastState(); // FIXME - REMOVE !!! publishPortNames should be used !
+		return ports;
 	}
+	*/
 
 	public void removeByteListener(SerialDataListener listener) {
 		removeByteListener(listener.getName());
@@ -1377,6 +1398,22 @@ public class Serial extends Service
 	@Override
 	public void flush() {
 
+	}
+
+	public int getRate() {
+		return rate;
+	}
+	
+	public int getDataBits(){
+		return dataBits;
+	}
+	
+	public int getStopBits(){
+		return stopBits;
+	}
+	
+	public int parity(){
+		return parity;
 	}
 
 }

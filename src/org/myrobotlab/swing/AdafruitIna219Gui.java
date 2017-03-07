@@ -119,7 +119,8 @@ public class AdafruitIna219Gui extends ServiceGui implements ActionListener {
 		log.info("AdafruitINA219GUI actionPerformed");
 		Object o = e.getSource();
 		if (o == refresh) {
-			myService.send(boundServiceName, "refresh");
+			// FIXME !! replace with PortGui
+			myService.send(boundServiceName, "getPortNames");
 		}
 		if (o == attachButton) {
 			if (attachButton.getText().equals(attach)) {

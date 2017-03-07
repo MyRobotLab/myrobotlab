@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.BoardInfo;
-// import org.myrobotlab.arduino.BoardStatus;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.Service;
@@ -50,6 +49,8 @@ import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
+import org.myrobotlab.service.interfaces.PortListener;
+import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialRelayListener;
@@ -60,8 +61,8 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 
 public class Arduino extends Service implements Microcontroller, PinArrayControl, I2CBusController, I2CController,
 		SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController,
-		DeviceController, RecordControl, SerialRelayListener {
-	
+		DeviceController, RecordControl, SerialRelayListener, PortListener, PortPublisher {
+
 	private static final long serialVersionUID = 1L;
 
 	public static class I2CDeviceMap {
@@ -141,9 +142,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// this method vs mapping I think was a good idea.. :)
 		return (int) Math.round((degree * (2400 - 544) / 180) + 544);
 	}
-
-	// FIXME - not working correctly yet
-	// boolean ackEnabled = true;
 
 	/**
 	 * path of the Arduino IDE must be set by user should not be static - since
@@ -1180,8 +1178,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	public void onConnect(String portName) {
 		info("%s connected to %s", getName(), portName);
-		// Get version should already have been called. don't call it again!
-		// getVersion();
+		// chained...
+		invoke("publishConnect", portName);
 	}
 
 	public void onCustomMsg(Integer ax, Integer ay, Integer az) {
@@ -1192,6 +1190,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void onDisconnect(String portName) {
 		info("%s disconnected from %s", getName(), portName);
 		enableAck(false);
+		// chained...
+		invoke("publishDisconnect", portName);
 	}
 
 	public void pinMode(int pin, int mode) {
@@ -1317,19 +1317,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 		return ds;
 	}
-
-	// < publishBoardStatus/b16 microsPerLoop/b16 sram/[] deviceSummary
-	// public BoardStatus publishBoardStatus(Integer microsPerLoop/* b16 */,
-	// Integer sram/* b16 */, int[] deviceSummary/* byte */) {
-	/*
-	 * public BoardInfo publishBoardStatus(Integer version, Integer boardType2,
-	 * Integer microsPerLoop, Integer sram, int[] deviceSummary) { log.info(
-	 * "publishBoardStatus {} us, {} sram, {} devices", microsPerLoop, sram,
-	 * deviceSummary);
-	 * 
-	 * return new BoardStatus(microsPerLoop, sram,
-	 * arrayToDeviceSummary(deviceSummary)); }
-	 */
 
 	// < publishCustomMsg/[] msg
 	public int[] publishCustomMsg(int[] msg/* [] */) {
@@ -1466,11 +1453,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return echoTime;
 	}
 
-	public Integer publishVersion(Integer version) {
-		info("publishVersion %d", version);
-		return version;
-	}
-
 	@Override
 	public int read(int address) { // FIXME - block on real read ???
 		return pinIndex.get(address).getValue();
@@ -1487,10 +1469,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		msg.record();
 	}
 
-	public void refresh() {
-		serial.refresh();
-		broadcastState();
-	}
+	/*
+	 * public void refresh() { serial.getPortNames(); broadcastState(); }
+	 */
 
 	@Override
 	public void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress) {
@@ -1581,7 +1562,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	// > servoEnablePwm/deviceId/pin
 	public void servoAttachPin(ServoControl servo, int pin) {
-		log.info("{}.attachPin({})",servo.getName(), servo.getPin());
+		log.info("{}.attachPin({})", servo.getName(), servo.getPin());
 		msg.servoAttachPin(getDeviceId(servo), pin);
 	}
 
@@ -1595,7 +1576,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	// > servoSetVelocity/deviceId/b16 velocity
 	public void servoSetVelocity(ServoControl servo) {
-		log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), (int) servo.getVelocity());
+		log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo),
+				(int) servo.getVelocity());
 		msg.servoSetVelocity(getDeviceId(servo), (int) servo.getVelocity());
 	}
 
@@ -1983,7 +1965,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		((Servo) getDevice(deviceId)).onServoEvent(eventType, currentPos, targetPos);
 		return currentPos;
 	}
-	
+
 	public static void main(String[] args) {
 		try {
 
@@ -2054,5 +2036,22 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 	}
 
+	@Override
+	public String publishConnect(String portName) {
+		return portName;
+	}
+
+	@Override
+	public String publishDisconnect(String portName) {
+		return portName;
+	}
+
+	@Override
+	public List<String> getPortNames() {
+		if (serial != null) {
+			return serial.getPortNames();
+		}
+		return new ArrayList<String>();
+	}
 
 }
