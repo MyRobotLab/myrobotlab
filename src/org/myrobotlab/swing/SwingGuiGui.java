@@ -148,26 +148,8 @@ public class SwingGuiGui extends ServiceGui {
   public static String formatMethodString(String out, String in) {
     // test if outmethod = in
     String methodString = out;
-    // if (methodString != in) {
     methodString += "->" + in;
-    // }
-
-    // TODO FYI - depricate MRLListener use MethodEntry
-    // These parameter types could always be considered "inbound" ? or
-    // returnType
-    // TODO - view either full named paths or shortnames
-
     methodString += "(";
-
-    /*
-     * if (paramTypes != null) { for (int j = 0; j < paramTypes.length; ++j) {
-     * // methodString += paramTypes[j].getCanonicalName(); Class c =
-     * paramTypes[j]; String t[] = c.getCanonicalName().split("\\.");
-     * methodString += t[t.length - 1];
-     * 
-     * if (j < paramTypes.length - 1) { methodString += ","; } } }
-     */
-
     methodString += ")";
 
     return methodString;
@@ -257,7 +239,6 @@ public class SwingGuiGui extends ServiceGui {
 
       Object parent = graph.getDefaultParent();
       Object services[] = graph.getChildVertices(parent);
-      // log.debug("serviceCount " + services.length);
 
       for (int i = 0; i < services.length; ++i) {
         // serviceCells
@@ -287,7 +268,6 @@ public class SwingGuiGui extends ServiceGui {
     // creating JComponent
     if (graphComponent == null) {
       graphComponent = new mxGraphComponent(graph);
-      // graphPanel.add(graphComponent);
       display.add(graphComponent, BorderLayout.CENTER);
       // graphComponent.addKeyListener(this);
 
