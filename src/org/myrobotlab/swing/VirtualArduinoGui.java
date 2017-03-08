@@ -31,6 +31,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JTabbedPane;
 
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.VirtualArduino;
@@ -46,6 +47,7 @@ public class VirtualArduinoGui extends ServiceGui implements ActionListener {
   public VirtualArduinoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);  
     VirtualArduino virtual = (VirtualArduino)Runtime.getService(boundServiceName);
+    // Peers.getPeerKey(boundServiceName, reservedKey);
     SerialDevice serial = virtual.getSerial();
     portgui = new PortGui(serial.getName(), myService, tabs);
     addTop(portgui.getDisplay());

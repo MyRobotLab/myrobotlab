@@ -139,7 +139,13 @@ public class Sweety extends Service {
   }
 
   public Sweety(String n) {
-    super(n);
+    super(n);    
+    arduino = (Arduino) createPeer("arduino");
+    chatBot = (ProgramAB) createPeer("chatBot");
+    htmlFilter = (HtmlFilter) createPeer("htmlFilter");
+    mouth = (MarySpeech) createPeer("mouth");
+    ear = (WebkitSpeechRecognition) createPeer("ear");
+    webGui = (WebGui) createPeer("webGui");
   }
 
   /**
@@ -449,19 +455,19 @@ public class Sweety extends Service {
   @Override
   public Sweety publishState() {
     super.publishState();
-    arduino.publishState();
-    leftForearm.publishState();
-    rightForearm.publishState();
-    rightShoulder.publishState();
-    leftShoulder.publishState();
-    rightArm.publishState();
-    neckTilt.publishState();
-    neckPan.publishState();
-    leftArm.publishState();
-    rightHand.publishState();
-    rightWrist.publishState();
-    leftHand.publishState();
-    leftWrist.publishState();
+    if (arduino != null)arduino.publishState();    
+    if (leftForearm != null)leftForearm.publishState();
+    if (rightForearm != null) rightForearm.publishState();
+    if (rightShoulder != null)rightShoulder.publishState();
+    if (leftShoulder != null)leftShoulder.publishState();
+    if (rightArm != null)rightArm.publishState();
+    if (neckTilt != null)neckTilt.publishState();
+    if (neckPan != null)neckPan.publishState();
+    if (leftArm != null)leftArm.publishState();
+    if (rightHand != null)rightHand.publishState();
+    if (rightWrist != null)rightWrist.publishState();
+    if (leftHand != null)leftHand.publishState();
+    if (leftWrist != null)leftWrist.publishState();
     return this;
   }
 
