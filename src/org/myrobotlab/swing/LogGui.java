@@ -1,16 +1,23 @@
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.service.Joystick;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service.Joystick.Component;
+import org.myrobotlab.service.Log;
 import org.myrobotlab.swing.widget.ImageButton;
 
 public class LogGui extends ServiceGui implements ActionListener {
@@ -76,5 +83,17 @@ public class LogGui extends ServiceGui implements ActionListener {
     // the new Java
     // 1.6 way
   }
+  
+  
+	public void onState(final Log log) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// TODO - state update for the log service 
+			}
+		});
+
+	}
+
 
 }
