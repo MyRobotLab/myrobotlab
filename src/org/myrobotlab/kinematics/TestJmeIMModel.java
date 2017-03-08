@@ -23,9 +23,12 @@ import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Cylinder;
 
 /**
  * @author Christian
@@ -35,8 +38,10 @@ public class TestJmeIMModel extends SimpleApplication{
   private HashMap<String, Node> nodes = new HashMap<String, Node>();
   private Queue<IKData> eventQueue = new ConcurrentLinkedQueue<IKData>();
   private Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
+  private Queue<Point> pointQueue = new ConcurrentLinkedQueue<Point>();
   private boolean ready = false;
   private IntegratedMovement2 service;
+  private Node point;
 
    
   public static void main(String[] args) {
@@ -70,6 +75,12 @@ public class TestJmeIMModel extends SimpleApplication{
     cam.setLocation(new Vector3f(0f,0f,900f));
     rootNode.scale(.40f);
     rootNode.setLocalTranslation(0, -200, 0);
+    Cylinder c= new Cylinder(8,50,5,10,true,false);
+    Geometry geom = new Geometry("Cylinder",c);
+    geom.setMaterial(mat);
+    point = new Node("point");
+    point.attachChild(geom);
+    rootNode.attachChild(point);
     ready = true;
     synchronized (service) {
       if (service!= null){
@@ -165,6 +176,10 @@ public class TestJmeIMModel extends SimpleApplication{
       }
       
     }
+    while (pointQueue.size() > 0) {
+      Point p = pointQueue.remove();
+      point.setLocalTranslation((float)p.getX(), (float)p.getZ(), (float)p.getY());
+    }
   }
   
   public boolean isReady() {
@@ -223,5 +238,45 @@ public class TestJmeIMModel extends SimpleApplication{
       }
     }
   };
+  private HashMap<String, Geometry> shapes = new HashMap<String, Geometry>();
+
+
+  public void addObject(CollisionItem item) {
+    if (!item.isRender()) {
+      return;
+    }
+    Vector3f ori = new Vector3f((float)item.getOrigin().getX(), (float)item.getOrigin().getZ(), (float)item.getOrigin().getY());
+    Vector3f end = new Vector3f((float)item.getEnd().getX(), (float)item.getEnd().getZ(), (float)item.getEnd().getY());
+    Cylinder c= new Cylinder(8,50,(float)item.getRadius(),(float)item.getLength(),true,false);
+    Geometry geom = new Geometry("Cylinder",c);
+    shapes.put(item.name, geom);
+    geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, ori, end));
+    geom.lookAt(end, Vector3f.UNIT_Y);
+    //geom.scale(0.5f);
+    Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
+    if (item.fromKinect) {
+      mat.setColor("Color", ColorRGBA.Red);
+    }
+    else {
+      mat.setColor("Color", ColorRGBA.Blue);
+    }
+    geom.setMaterial(mat);
+    Node pivot = new Node("pivot");
+    //rootNode.attachChild(pivot);
+    pivot.attachChild(geom);
+    pivot.setUserData("HookTo", null);
+    nodeQueue.add(pivot);
+  }
+
+  public void addObject(HashMap<String, CollisionItem> items) {
+    for (CollisionItem item:items.values()) {
+      addObject(item);
+    }
+  }
+
+  public void addPoint(Point point) {
+    pointQueue.add(point);
+    
+  }
 
 }

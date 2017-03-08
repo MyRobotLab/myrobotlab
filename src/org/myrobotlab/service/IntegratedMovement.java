@@ -729,9 +729,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
 
   public String addObject(Point origin, Point end, String name, double radius) {
-    CollisionItem item = new CollisionItem(origin, end, name, radius);
-    collisionItems.addItem(item);
-    return item.getName();
+    //CollisionItem item = new CollisionItem(origin, end, name, radius);
+    //collisionItems.addItem(item);
+    //return item.getName();
+    return "";
   }
   public String addObject(String name, double radius) {
     return addObject(new Point(0, 0, 0, 0, 0, 0), new Point(0, 0, 0, 0, 0, 0), name, radius);
