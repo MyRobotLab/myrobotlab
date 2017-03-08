@@ -273,7 +273,10 @@ public class DHRobotArm implements Cloneable{
 			DHRobotArm retval = null;
 			try {
 				retval = (DHRobotArm) this.clone();
-				retval.links = (ArrayList<DHLink>) links.clone();
+				retval.links = new ArrayList<DHLink>();
+				for (DHLink link: links) {
+				  retval.links.add(new DHLink(link));
+				}
 			} catch (CloneNotSupportedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -288,4 +291,23 @@ public class DHRobotArm implements Cloneable{
   	}
   	return true;
   }
+  
+  public double[][] createJointPositionMap() {
+
+    double[][] jointPositionMap = new double[getNumLinks() + 1][3];
+
+    // first position is the origin... second is the end of the first link
+    jointPositionMap[0][0] = 0;
+    jointPositionMap[0][1] = 0;
+    jointPositionMap[0][2] = 0;
+
+    for (int i = 1; i <= getNumLinks(); i++) {
+      Point jp = getJointPosition(i - 1);
+      jointPositionMap[i][0] = jp.getX();
+      jointPositionMap[i][1] = jp.getY();
+      jointPositionMap[i][2] = jp.getZ();
+    }
+    return jointPositionMap;
+  }
+
 }

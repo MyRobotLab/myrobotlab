@@ -24,6 +24,7 @@ public class CollisionItem implements Cloneable{
   ArrayList<String> done = new ArrayList<String>();
   boolean fromKinect = false;
   HashMap<Integer[], Map3DPoint> cloudMap;
+  private boolean render = false;
   
   /**
    * @param origin
@@ -31,7 +32,7 @@ public class CollisionItem implements Cloneable{
    * @param name
    * @param radius
    */
-  public CollisionItem(Point origin, Point end, String name, double radius) {
+  public CollisionItem(Point origin, Point end, String name, double radius, boolean render) {
     this.origin = origin;
     this.end = end;
     if (name == null) {
@@ -39,6 +40,7 @@ public class CollisionItem implements Cloneable{
     }
     this.name = name;
     this.radius = radius;
+    this.render = render;
   }
   
   public CollisionItem(Point origin, Point end, String name) {
@@ -217,6 +219,15 @@ public class CollisionItem implements Cloneable{
   public void addIgnore(String ignore) {
     this.ignore.add(ignore);
   }
+  
+  public void removeIgnore(String ignore) {
+    for (String x : this.ignore) {
+      if (x.equals(ignore)){
+        this.ignore.remove(x);
+        break;
+      }
+    }
+  }
 
   public double getRadius() {
     return radius;
@@ -277,6 +288,20 @@ public class CollisionItem implements Cloneable{
   
   public boolean isFromKinect() {
   	return fromKinect;
+  }
+
+  /**
+   * @return the render
+   */
+  public boolean isRender() {
+    return render;
+  }
+
+  /**
+   * @param render the render to set
+   */
+  public void setRender(boolean render) {
+    this.render = render;
   }
   
 
