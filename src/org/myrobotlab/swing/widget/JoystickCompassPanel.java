@@ -16,17 +16,25 @@ import java.awt.GridBagLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 public class JoystickCompassPanel extends JPanel {
-  private static final long serialVersionUID = 1L;
-  private static final int PANEL_SIZE = 80;
-  // private static final int CIRCLE_RADIUS = 5;
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(JoystickCompassPanel.class);
+  
+  static final int PANEL_SIZE = 80;
 
-  private int x, y;
-  private JLabel XLabel = new JLabel();
-  private JLabel YLabel = new JLabel();
-  private JLabel screen = new JLabel();
+  int x, y;
+  String xId;
+  String yId;
+  JLabel xLabel = new JLabel();
+  JLabel yLabel = new JLabel();
+  JLabel xValueLabel = new JLabel();
+  JLabel yValueLabel = new JLabel();
+  JLabel screen = new JLabel();
 
-  public JoystickCompassPanel(String label) {
+  public JoystickCompassPanel() {
     setLayout(new BorderLayout());
     setBackground(Style.listHighlight);
     screen.setPreferredSize(new Dimension(PANEL_SIZE, PANEL_SIZE));
@@ -37,30 +45,26 @@ public class JoystickCompassPanel extends JPanel {
     gc.gridx = 0;
     gc.gridy = 0;
 
-    gc.gridwidth = 2;
-    info.add(new JLabel(label), gc);
-
     gc.gridwidth = 1;
     ++gc.gridy;
-    info.add(new JLabel("X:"), gc);
+    info.add(xLabel, gc);
     ++gc.gridx;
-    XLabel.setText((new Float(0.0)).toString());
-    info.add(XLabel, gc);
+    xValueLabel.setText((new Float(0.0)).toString());
+    info.add(xValueLabel, gc);
 
     gc.gridx = 0;
     ++gc.gridy;
-    info.add(new JLabel("Y:"), gc);
+    info.add(yLabel, gc);
     ++gc.gridx;
-    YLabel.setText((new Float(0.0)).toString());
-    info.add(YLabel, gc);
+    yValueLabel.setText((new Float(0.0)).toString());
+    info.add(yValueLabel, gc);
 
     add(info, BorderLayout.PAGE_END);
 
-  } // end of CompassPanel()
+  }
 
   @Override
   public void paintComponent(Graphics g)
-  // draw the current compass position as a black circle
   {
     super.paintComponent(g);
 
@@ -68,7 +72,7 @@ public class JoystickCompassPanel extends JPanel {
     g.drawLine(x - 6, y, x + 6, y);
     g.drawLine(x, y - 6, x, y + 6);
 
-  } // end of paintComponent()
+  }
 
   public void setDir(Float value) {
     int MARKER = 10;
@@ -104,15 +108,37 @@ public class JoystickCompassPanel extends JPanel {
       y = 0 + MARKER;
     }
   }
+  
+  public void setXid(String xId){
+	  this.xId = xId;
+	  xLabel.setText(xId + ":");
+  }
+  
+  public void setYid(String yId){
+	  this.yId = yId;
+	  yLabel.setText(yId + ":");
+  }
 
   public void setX(Float value) {
     x = (int) (PANEL_SIZE / 2 * value + PANEL_SIZE / 2);
-    XLabel.setText(String.format("%.3f", value));
+    xValueLabel.setText(String.format("%.3f", value));
+    repaint();
   }
 
   public void setY(Float value) {
     y = (int) (PANEL_SIZE / 2 * value + PANEL_SIZE / 2);
-    YLabel.setText(String.format("%.3f", value));
+    yValueLabel.setText(String.format("%.3f", value));
+    repaint();
   }
+
+public void set(String id, Float value) {
+	if (id.equals(yId)){
+		setY(value);
+	} else if (id.equals(xId)) {
+		setX(value);
+	} else {
+		log.error("{} is not found", id);
+	}
+}
 
 } // end of CompassPanel class

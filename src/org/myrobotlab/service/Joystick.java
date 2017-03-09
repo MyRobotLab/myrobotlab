@@ -54,7 +54,7 @@ import net.java.games.input.Rumbler;
  */
 public class Joystick extends Service implements Runnable {
 
-	public final static Logger log = LoggerFactory.getLogger(Joystick.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Joystick.class);
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -78,8 +78,11 @@ public class Joystick extends Service implements Runnable {
 	int rumblerIdx; // index for the rumbler being used
 	boolean rumblerOn = false; // whether rumbler is on or off
 
-	HashMap<String, Mapper> mappers = new HashMap<String, Mapper>();
-	HashMap<String, Component> components = null;
+	/**
+	 * non-transient serializable definition
+	 */
+	Map<String, Mapper> mappers = new HashMap<String, Mapper>();
+	Map<String, Component> components = null;
 	
 	String controller;
 
@@ -171,10 +174,10 @@ public class Joystick extends Service implements Runnable {
 		super(n);
 	}
 
-	public HashMap<String, Component> getComponents() {
+	public Map<String, Component> getComponents() {
 		components = new HashMap<String, Component>();
 		if (hardwareController == null) {
-			error("getComponents no controller set");
+			info("getComponents no controller set");
 			return components;
 		}
 
@@ -316,7 +319,7 @@ public class Joystick extends Service implements Runnable {
 			// Runtime.setRuntimeName("joyrun");
 			Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
 			// joy.mapId("x", "rx");
-			joy.map("y", -1, 1, 0, 180);
+			// joy.map("y", -1, 1, 0, 180);
 			Runtime.start("gui", "SwingGui");
 			
 			/*
