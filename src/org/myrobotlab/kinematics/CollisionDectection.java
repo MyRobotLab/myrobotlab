@@ -5,13 +5,14 @@ package org.myrobotlab.kinematics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Christian
  *
  */
 public class CollisionDectection implements Cloneable {
-  transient HashMap<String, CollisionItem> items= new HashMap<String,CollisionItem>();
+  transient ConcurrentHashMap<String, CollisionItem> items= new ConcurrentHashMap<String,CollisionItem>();
   private boolean collision;
   private Point[] collisionPoint = {new Point(0,0,0,0,0,0),new Point(0,0,0,0,0,0)};
   private CollisionItem[] collisionItems = new CollisionItem[2];
@@ -253,7 +254,7 @@ public class CollisionDectection implements Cloneable {
 		
 	}
 
-	public HashMap<String, CollisionItem> getItems() {
+	public ConcurrentHashMap<String, CollisionItem> getItems() {
 		return items;
 	}
 	
@@ -261,7 +262,8 @@ public class CollisionDectection implements Cloneable {
 		CollisionDectection retval = null;
 		try {
 			retval = (CollisionDectection) this.clone();
-			retval.items = (HashMap<String, CollisionItem>) items.clone();
+			//retval.items = (ConcurrentHashMap<String, CollisionItem>) items.clone();
+			retval.items.clear();
 			for (CollisionItem ci:items.values()){
 				retval.items.put(ci.name, new CollisionItem(ci));
 			}

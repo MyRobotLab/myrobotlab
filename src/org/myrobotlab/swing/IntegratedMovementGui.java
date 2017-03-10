@@ -30,6 +30,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -59,7 +60,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
   JLabel[] objectOrigin = new JLabel[25];
   JLabel[] objectEnd = new JLabel[25];
   
-  HashMap<String, CollisionItem> objects;
+  ConcurrentHashMap<String, CollisionItem> objects;
 	JLabel[] objectRadius = new JLabel[25];
 	JComboBox<ObjectPointLocation>[] moveLocation = new JComboBox[25];
 	JButton[] move = new JButton[25];
