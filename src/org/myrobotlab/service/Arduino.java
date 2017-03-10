@@ -577,10 +577,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	public void disconnect() {
-		enableBoardInfo(false);
+		// FIXED - all don in 'onDisconnect()'
+		// enableBoardInfo(false);
 		// boardInfo is not valid after disconnect
 		// because we might be connecting to a different Arduino
-		boardInfo.reset();
+		// boardInfo.reset();
 		for (Arduino controller : attachedController.values()) {
 			controller.disconnect();
 		}
@@ -1178,6 +1179,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	public void onConnect(String portName) {
 		info("%s connected to %s", getName(), portName);
+		enableBoardInfo(true);
 		// chained...
 		invoke("publishConnect", portName);
 	}
@@ -1190,6 +1192,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void onDisconnect(String portName) {
 		info("%s disconnected from %s", getName(), portName);
 		enableAck(false);
+		enableBoardInfo(false);
+		boardInfo.reset();
 		// chained...
 		invoke("publishDisconnect", portName);
 	}
@@ -1962,6 +1966,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
+		// TODO Auto-generated method stub
 		((Servo) getDevice(deviceId)).onServoEvent(eventType, currentPos, targetPos);
 		return currentPos;
 	}
