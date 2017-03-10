@@ -64,7 +64,7 @@ angular.module('mrlapp.service').directive('port', ['$compile', 'mrl', '$log', f
             }
             ;
             scope.refresh = function() {
-                mrl.sendTo(scope.service.name, 'refresh');
+                mrl.sendTo(scope.service.name, 'getPortNames');
             };
            
             // subscribes

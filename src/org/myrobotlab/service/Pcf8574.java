@@ -113,7 +113,8 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	 * two IC circuits is the address range
 	 */
 	public List<String>												deviceAddressList	= Arrays.asList("0x20", "0x21", "0x22", "0x23", "0x24", "0x25", "0x26", "0x27", "0x38", "0x39", "0x3A", "0x3B",
-																																	"0x3C", "0x3D", "0x3E", "0x3F");
+																																	"0x3C", "0x3D", "0x3E", "0x3F",
+																																	"0x49","0x4A","0x4B"); // Max9744 Addresses
 
 	public String															deviceAddress			= "0x38";
 
@@ -309,7 +310,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		this.deviceAddress = DeviceAddress;
 	}
 
-	void writeRegister(int data) {
+	public void writeRegister(int data) {
 		byte[] writebuffer = { (byte) data };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
 	}
