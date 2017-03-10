@@ -448,15 +448,14 @@ public class RemoteAdapter extends Service implements Gateway {
 	}
 
 	public static void main(String[] args) {
-		LoggingFactory.init(Level.INFO);
-
 		try {
+			LoggingFactory.init(Level.WARN);
 
 			RemoteAdapter remote = (RemoteAdapter) Runtime.start("remote", "RemoteAdapter");
 			// remote.connect("tcp://demo.myrobotlab.org:6767");
 			// remote.websocket("http://demo.myrobotlab.org:8888/api/messages");
 			Runtime.start("gui", "SwingGui");
-			remote.startListening();
+			// remote.startListening();
 
 		} catch (Exception e) {
 			Logging.logError(e);

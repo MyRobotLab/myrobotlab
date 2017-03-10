@@ -28,7 +28,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		super(boundServiceName, myService, tabs);
 		ports.setEditable(true);
 		add(connectLight, ports, connect, refresh);
-		onState((PortPublisher) Runtime.getService(boundServiceName));
+// 		onState((PortPublisher) Runtime.getService(boundServiceName));
 		subscribeGui();
 		connect.addActionListener(this);
 		refresh.addActionListener(this);		
@@ -58,12 +58,18 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 	}
 
 	public void onState(final PortPublisher portPublisher) {
+		if (portPublisher == null){
+			log.info("here");
+		}
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 // 				onPortNames(portPublisher.getPortNames());// 	bad idea			
 				// set light if connected
-				if (portPublisher.isConnected()) {
+				if (portPublisher == null){
+					log.info("here");
+				}
+				if (portPublisher != null && portPublisher.isConnected()) {
 					connectLight.setIcon(Util.getImageIcon("green.png"));
 					ports.setEnabled(false);
 					connect.setText("disconnect");

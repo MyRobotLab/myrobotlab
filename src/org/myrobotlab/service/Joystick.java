@@ -320,7 +320,8 @@ public class Joystick extends Service implements Runnable {
 			Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
 			// joy.mapId("x", "rx");
 			// joy.map("y", -1, 1, 0, 180);
-			Runtime.start("gui", "SwingGui");
+			Runtime.start("j", "SwingGui");
+			Runtime.start("remote", "RemoteAdapter");
 			
 			/*
 			 * RemoteAdapter remote = (RemoteAdapter) Runtime.create("remote",
