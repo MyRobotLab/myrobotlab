@@ -1971,75 +1971,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return currentPos;
 	}
 
-	public static void main(String[] args) {
-		try {
-
-			LoggingFactory.init(Level.INFO);
-
-			// Runtime.start("webgui", "WebGui");
-			Runtime.start("gui", "SwingGui");
-			// Runtime.start("python", "Python");
-			VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-			virtual.connect("COM78");
-			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			Runtime.start("cli", "Cli");
-			// Runtime.start("webgui", "WebGui");
-
-			boolean done = true;
-			if (done) {
-				return;
-			}
-
-			Serial serial = arduino.getSerial();
-			// Runtime.start("gui", "SwingGui");
-			// List<String> ports = serial.getPortNames();
-			// log.info(Arrays.toString(ports.toArray()));
-			// arduino.setBoardMega();
-			// log.info(arduino.getBoardType());
-			// if connect - possibly you can set the board type correctly
-			// arduino.getBoardInfo();
-			// arduino.setBoardMega();
-			arduino.connect("COM5");
-			// arduino.enablePin(54);
-
-			// arduino.uploadSketch("C:\\tools\\arduino-1.6.9");
-
-			Servo servo = (Servo) Runtime.start("servo", "Servo");
-			// Runtime.start("gui", "SwingGui");
-			servo.attach(arduino, 7);
-			// servo.detach(arduino);
-			servo.attach(9);
-
-			// servo.detach(arduino);
-			// arduino.servoDetach(servo); Arduino power save - "detach()"
-
-			servo.moveTo(0);
-			servo.moveTo(180);
-			servo.setInverted(true);
-			servo.moveTo(0);
-			servo.moveTo(180);
-			servo.setInverted(true);
-			servo.moveTo(0);
-			servo.moveTo(180);
-			// arduino.attachDevice(servo, null);
-			// servo.attach();
-			int angle = 0;
-			int max = 5000;
-			while (true) {
-				// System.out.println(angle);
-				angle++;
-				servo.moveTo(angle % 180);
-				if (angle > max) {
-					break;
-				}
-			}
-			System.out.println("done with loop..");
-			log.info("here");
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
 
 	@Override
 	public String publishConnect(String portName) {
@@ -2058,5 +1989,28 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 		return new ArrayList<String>();
 	}
+	
+	public static void main(String[] args) {
+		try {
+
+			LoggingFactory.init(Level.WARN);
+
+			// Runtime.start("webgui", "WebGui");
+			Runtime.start("a", "SwingGui");
+			Runtime.start("remotei", "RemoteAdapter");
+			// Runtime.start("python", "Python");
+			VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+			virtual.connect("COM78");
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			
+			// Runtime.start("cli", "Cli");
+			// Runtime.start("webgui", "WebGui");
+
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 
 }
