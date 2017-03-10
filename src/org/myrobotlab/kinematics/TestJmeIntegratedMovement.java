@@ -4,6 +4,7 @@
 package org.myrobotlab.kinematics;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.python.jline.internal.Log;
 
@@ -22,7 +23,7 @@ import com.jme3.scene.shape.Cylinder;
  *
  */
 public class TestJmeIntegratedMovement extends SimpleApplication {
-	private HashMap<String, CollisionItem> objects;
+	private ConcurrentHashMap<String, CollisionItem> objects;
 	private Vector3f camLocation;
 	private int camXDir = 1;
 	private int camZDir = -1;
@@ -94,7 +95,7 @@ public class TestJmeIntegratedMovement extends SimpleApplication {
 		app.start();
 	}
 
-	public void setObjects(HashMap<String, CollisionItem> collisionObject) {
+	public void setObjects(ConcurrentHashMap<String, CollisionItem> collisionObject) {
 		objects = collisionObject;
 		
 	}
@@ -135,8 +136,8 @@ public class TestJmeIntegratedMovement extends SimpleApplication {
 		}
 	}
 
-	public void updateObjects(HashMap<String, CollisionItem> items) {
-		objects = items;
+	public void updateObjects(ConcurrentHashMap<String, CollisionItem> concurrentHashMap) {
+		objects = concurrentHashMap;
 		updateShape = true;
 		//Log.info("data updated",System.currentTimeMillis());
 	}

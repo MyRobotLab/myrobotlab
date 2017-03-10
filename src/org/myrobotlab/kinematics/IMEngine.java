@@ -27,10 +27,10 @@ public class IMEngine extends Thread implements Genetic {
 	public Point target = null;
 	private double maxDistance = 5.0;
 	private Matrix inputMatrix = null;
-	private IntegratedMovement2 service = null;
+	private transient IntegratedMovement2 service = null;
 	private boolean noUpdatePosition = false;
 	private boolean holdTargetEnabled = false;
-	private CollisionDectection computeCD;
+	private transient CollisionDectection computeCD;
   private int tryCount = 0;;
   private Point oldTarget = null;
   private double timeToWait;

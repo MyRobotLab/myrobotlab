@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.genetic.GeneticAlgorithm;
@@ -46,7 +48,7 @@ import org.slf4j.Logger;
 public class IntegratedMovement extends Service implements IKJointAnglePublisher, PointsListener, Genetic {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(InverseKinematics3D.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(IntegratedMovement.class.getCanonicalName());
 
   private DHRobotArm currentArm = null;
   
@@ -921,7 +923,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
 
 
-	public HashMap<String, CollisionItem> getCollisionObject() {
+	public ConcurrentHashMap<String, CollisionItem> getCollisionObject() {
 		return collisionItems.getItems();
 	}
 

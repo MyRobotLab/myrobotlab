@@ -25,6 +25,7 @@ public class CollisionItem implements Cloneable{
   boolean fromKinect = false;
   HashMap<Integer[], Map3DPoint> cloudMap;
   private boolean render = false;
+  private Mesh mesh;
   
   /**
    * @param origin
@@ -52,7 +53,81 @@ public class CollisionItem implements Cloneable{
   public CollisionItem(HashMap<Integer[],Map3DPoint> cloudMap) {
   	name = UUID.randomUUID().toString();
   	this.cloudMap = cloudMap;
+  	setRender(true);
   	buildCollisionItem(cloudMap);
+  	//buildMesh(cloudMap);
+  }
+
+  private void buildMesh(HashMap<Integer[], Map3DPoint> cloudMap2) {
+    mesh = new Mesh();
+    Vector3f[] vertices = new Vector3f[cloudMap2.size()];
+    int i=0;
+    for (Map3DPoint point : cloudMap2.values()) {
+      vertices[i++] = new Vector3f((float)point.point.getX(), (float)point.point.getZ(), (float)point.point.getY());
+    }
+    ArrayList<Integer> index = new ArrayList<Integer>();
+    for (int j = 0; j < vertices.length; j++){
+      //find the two closest vertices
+      int[] closest = new int[]{0,0,0,0};
+      float[] distances = new float[]{9999,9999,9999,9999}; 
+      for (int jj = 0; jj < vertices.length; jj++){
+        if (jj == j) {
+          continue;
+        }
+        if (vertices[j].distance(vertices[jj]) < distances[2]){
+          closest[2] = jj;
+          distances[2] = vertices[j].distance(vertices[jj]);
+          if (distances[2] < distances[1]) {
+            distances[3] = distances[1];
+            closest[3] = closest[1];
+            distances[1] = distances[2];
+            closest[1] = closest[2];
+            distances[2] = distances[3];
+            closest[2] = closest[3];
+          }
+          if (distances[1] < distances[0]) {
+            distances[3] = distances[0];
+            closest[3] = closest[0];
+            distances[0] = distances[1];
+            closest[0] = closest[1];
+            distances[1] = distances[3];
+            closest[1] = closest[3];
+          }
+        }
+      }
+      index.add(j);
+      index.add(closest[0]);
+      index.add(closest[1]);
+      index.add(j);
+      index.add(closest[1]);
+      index.add(closest[0]);
+      index.add(j);
+      index.add(closest[1]);
+      index.add(closest[2]);
+      index.add(j);
+      index.add(closest[2]);
+      index.add(closest[1]);
+      index.add(j);
+      index.add(closest[0]);
+      index.add(closest[2]);
+      index.add(j);
+      index.add(closest[2]);
+      index.add(closest[0]);
+    }
+    mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
+    int[] indexes = new int[index.size()];
+    int kk = 0;
+    for(Integer k:index) {
+      indexes[kk++] = k.intValue();
+    }
+    mesh.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(indexes));
+  }
+
+  /**
+   * @return the mesh
+   */
+  public Mesh getMesh() {
+    return mesh;
   }
 
   public CollisionItem(CollisionItem ci) {
@@ -160,19 +235,64 @@ public class CollisionItem implements Cloneable{
   		end = end.add(delta);
   	}
   	else {
+  	  //build 3 cylinders and find the one that contains more point
+  	  PVector[] vector = new PVector[]{new PVector(max[0]-min[0],0,0), new PVector(0,max[1]-min[1], 0), new PVector(0, 0, max[2]-min[2])};
+  	  PVector[] origin = new PVector[]{new PVector(min[0], vector[1].y/2+min[1], vector[2].z/2+min[2]), new PVector(vector[0].x/2+min[0], min[1], vector[2].z/2+min[2]), new PVector(vector[0].x/2+min[0], vector[1].y/2+min[1], min[2])};
+      double[] radius = new double[]{(max[0]-min[0])/2, (max[1]-min[1])/2, (max[2]-min[2])/2};
+      int count[] = new int[]{0,0,0};
+      for (Map3DPoint map : cloudMap.values()) {
+        PVector point = new PVector((float)map.point.getX(), (float)map.point.getY(), (float)map.point.getZ());
+        PVector d = PVector.div(vector[0], vector[0].x);
+        PVector v = PVector.sub(origin[0], point);
+        float t = v.dot(d);
+        PVector P = PVector.add(origin[0], PVector.mult(d, t));
+        float distance = P.dist(point);
+        if (distance <= radius[0]) count[0]++;
+        d = PVector.div(vector[1], vector[1].y);
+        v = PVector.sub(origin[1], point);
+        t = v.dot(d);
+        P = PVector.add(origin[1], PVector.mult(d, t));
+        distance = P.dist(point);
+        if (distance <= radius[1]) count[1]++;
+        d = PVector.div(vector[2], vector[2].z);
+        v = PVector.sub(origin[2], point);
+        t = v.dot(d);
+        P = PVector.add(origin[2], PVector.mult(d, t));
+        distance = P.dist(point);
+        if (distance <= radius[2]) count[2]++;
+      }
+      if (count[0] >= count[1] && count[0] >= count[2]){
+        this.origin = new Point(origin[0].x, origin[0].y, origin[0].z, 0, 0, 0);
+        PVector e = PVector.add(origin[0], vector[0]);
+        end = new Point(e.x, e.y, e.z, 0, 0, 0);
+        this.radius = radius[0];
+      }
+      else if (count[1] >= count[0] && count[1] >= count[2]) {
+        this.origin = new Point(origin[1].x, origin[1].y, origin[1].z, 0, 0, 0);
+        PVector e = PVector.add(origin[1], vector[1]);
+        end = new Point(e.x, e.y, e.z, 0, 0, 0);
+        this.radius = radius[1];
+      }
+      else {
+        this.origin = new Point(origin[2].x, origin[2].y, origin[2].z, 0, 0, 0);
+        PVector e = PVector.add(origin[2], vector[2]);
+        end = new Point(e.x, e.y, e.z, 0, 0, 0);
+        this.radius = radius[2];
+
+      }
   	//else if (backpoint.contains(closestPointToCornerType[0]) && backpoint.contains(closestPointToCornerType[1]) && backpoint.contains(closestPointToCornerType[2])){
   		//cylinder seen from the side (both end and origin at similar distance from the kinect
   		//can be horizontal or vertical need to test wich fit the best
-  		if (distanceToCorner[8] < distanceToCorner[9]) {
-  			origin = pointCloserToCorner[8].point;
-  			end = pointCloserToCorner[10].point;
-    		radius = Math.max(((max[2]-min[2])/2), max[1]-min[1]);
-  		}
-  		else {
-  			origin = pointCloserToCorner[9].point;
-  			end = pointCloserToCorner[11].point;
-    		radius = Math.max(((max[0]-min[0])/2), max[1]-min[1]);
-  		}
+//  		if (distanceToCorner[8] < distanceToCorner[9]) {
+//  			origin = pointCloserToCorner[8].point;
+//  			end = pointCloserToCorner[10].point;
+//    		radius = Math.max(((max[2]-min[2])/2), max[1]-min[1]);
+//  		}
+//  		else {
+//  			origin = pointCloserToCorner[9].point;
+//  			end = pointCloserToCorner[11].point;
+//    		radius = Math.max(((max[0]-min[0])/2), max[1]-min[1]);
+//  		}
   	}
 //  	else { //other shape... for now doing cylinder seen from end side
 //  		//origin is in the front (minY), radius = max(maxX-minX, maxZ-minZ), end = maxY

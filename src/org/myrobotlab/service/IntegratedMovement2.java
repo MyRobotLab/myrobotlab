@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.genetic.GeneticParameters;
@@ -45,7 +47,7 @@ import com.jme3.system.AppSettings;
 public class IntegratedMovement2 extends Service implements IKJointAnglePublisher {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(InverseKinematics3D.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(IntegratedMovement2.class.getCanonicalName());
 
   //private HashMap<String, DHRobotArm> arms = new HashMap<String, DHRobotArm>();
   private HashMap<String, IMEngine> engines = new HashMap<String, IMEngine>();
@@ -53,7 +55,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   private Matrix inputMatrix = null;
 
   private Point goTo;
-  public CollisionDectection collisionItems = new CollisionDectection();
+  public transient CollisionDectection collisionItems = new CollisionDectection();
   
   
   GeneticParameters geneticParameters = new GeneticParameters();
@@ -294,23 +296,23 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     ik.setDHLink("rightArm",ttorso,0,180,292,90);
     //ik.setDHLink("leftArm",ttorso,0,180,297.5,90);
     ik.setDHLink("rightArm", "leftS", -143, 180, 0, -90);
-    ik.setDHLink("rightArm",Romoplate,0,-5.6,40,90);
-    ik.setDHLink("rightArm",Rshoulder,-77,-20+90,0,-90);
+    ik.setDHLink("rightArm",Romoplate,0,-5.6,45,90);
+    ik.setDHLink("rightArm",Rshoulder,-77,-30+90,0,-90);
     ik.setDHLink("rightArm",Rrotate,-284,90,40,-90);
     ik.setDHLink("rightArm",Rbicep,0,-7+24.4+90,300,90);
 ////////////    //#ik.setDHLink(wrist,00,-90,200,0)
-    ik.setDHLink("rightArm",Rwrist,00,-90,100,0);
+    ik.setDHLink("rightArm",Rwrist,00,-90,100,-90);
 //////////    //print ik.currentPosition();
 //////////
-    ik.setDHLink("rightArm",Rfinger,00,00,200,0);
+    ik.setDHLink("rightArm",Rfinger,20,-90,120,0);
     ik.startEngine("rightArm");
     
-//    ik.setNewDHRobotArm("kinect");
-//    ik.setDHLink("kinect",mtorso,113,90,0,-90);
-//    ik.setDHLink("kinect",ttorso,0,90+90,110,-90);
-//    ik.setDHLink("kinect","camera",0,90,10,90);
+    ik.setNewDHRobotArm("kinect");
+    ik.setDHLink("kinect",mtorso,113,90,0,-90);
+    ik.setDHLink("kinect",ttorso,0,90+90,110,-90);
+    ik.setDHLink("kinect","camera",0,90,10,90);
 //
-//    ik.startEngine("kinect");
+    ik.startEngine("kinect");
     
     //#define object, each dh link are set as an object, but the
     //#start point and end point will be update by the ik service, but still need
@@ -342,7 +344,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     //ik.addObject(-1000.0,400, 0, 1000, 425, 00, "obstacle",40, true);
     //#ik.addObject(360,540,117,360, 550,107,"cymbal",200)
     //#ik.addObject(90,530,-180,300,545,-181,"bell", 25)
-    ik.addObject(170,640,-70,170,720,-250,"tom",150,true);
+    //ik.addObject(170,640,-70,170,720,-250,"tom",150,true);
 
 
     //print ik.currentPosition();
@@ -364,19 +366,18 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
 
     //print "kinect Position" + str(ik.currentPosition("kinect"));
 
-    //ik.startOpenNI();
     
-    //ik.processKinectData();
+    
     //ik.holdTarget("leftArm", true);
     ik.visualize();
     ik.jmeApp.addPart("ltorso", "Models/ltorso.j3o", 1, null, new Vector3f(0,0,0), Vector3f.UNIT_X.mult(1), (float)Math.toRadians(0));
     ik.jmeApp.addPart("mtorso", "Models/mtorso.j3o", 1f, null, new Vector3f(0,0,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
     ik.jmeApp.addPart("ttorso", "Models/ttorso1.j3o", 1f, "mtorso", new Vector3f(0,105f,10), Vector3f.UNIT_Z, (float)Math.toRadians(-90));
     ik.jmeApp.addPart("rightS", null, 1f, "ttorso", new Vector3f(0,300f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
-    ik.jmeApp.addPart("Romoplate", "Models/Romoplate1.j3o", 1f, "rightS", new Vector3f(-143f,0,-17), Vector3f.UNIT_Z.mult(-1), (float)Math.toRadians(-10));
-    ik.jmeApp.addPart("Rshoulder", "Models/Rshoulder1.j3o", 1f, "Romoplate", new Vector3f(-23,-45f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
+    ik.jmeApp.addPart("Romoplate", "Models/Romoplate1.j3o", 1f, "rightS", new Vector3f(-143f,0,-17), Vector3f.UNIT_Z.mult(-1), (float)Math.toRadians(-4));
+    ik.jmeApp.addPart("Rshoulder", "Models/Rshoulder1.j3o", 1f, "Romoplate", new Vector3f(-23,-45f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-32));
     ik.jmeApp.addPart("Rrotate", "Models/rotate1.j3o", 1f, "Rshoulder", new Vector3f(-57,-55,8), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
-    ik.jmeApp.addPart("Rbicep", "Models/Rbicep1.j3o", 1f, "Rrotate", new Vector3f(5,-225,-32), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17.4));
+    ik.jmeApp.addPart("Rbicep", "Models/Rbicep1.j3o", 1f, "Rrotate", new Vector3f(5,-225,-32), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(20));
     ik.jmeApp.addPart("leftS", null, 1f, "ttorso", new Vector3f(0,300f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
     ik.jmeApp.addPart("omoplate", "Models/Lomoplate1.j3o", 1f, "leftS", new Vector3f(143f,0,-11), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(-6));
     ik.jmeApp.addPart("shoulder", "Models/Lshoulder.j3o", 1f, "omoplate", new Vector3f(17,-45f,5), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
@@ -418,6 +419,9 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
     bicep.moveTo(5);
     wrist.moveTo(90);
     Rwrist.moveTo(90);
+
+    ik.startOpenNI();
+    ik.processKinectData();
   }
 
   private void startEngine(String arm) {
@@ -595,6 +599,9 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
       for (int i = 0; i < object.size(); i++) {
         addObject(object.get(i));
       }
+      if (jmeApp != null) {
+        jmeApp.addObject(getCollisionObject());
+      }
       long b = System.currentTimeMillis();
       log.info("end {} - {} - {}",b, b-a, this.inbox.size());
       broadcastState();
@@ -617,7 +624,7 @@ public class IntegratedMovement2 extends Service implements IKJointAnglePublishe
   }
 
 
-  public HashMap<String, CollisionItem> getCollisionObject() {
+  public ConcurrentHashMap<String, CollisionItem> getCollisionObject() {
     return collisionItems.getItems();
   }
 
