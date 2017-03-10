@@ -605,7 +605,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 			public void run() {
 				// FIXME - change to "all" or "" - null is sloppy - system has
 				// to upcast
-
+				myService.pack();
 			}
 		});
 	}
