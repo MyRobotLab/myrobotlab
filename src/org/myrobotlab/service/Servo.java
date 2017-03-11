@@ -68,908 +68,916 @@ import org.slf4j.Logger;
 
 public class Servo extends Service implements ServoControl {
 
-  /**
-   * Sweeper - TODO - should be implemented in the arduino code for smoother
-   * function
-   * 
-   */
-  public class Sweeper extends Thread {
-
-    public Sweeper(String name) {
-      super(String.format("%s.sweeper", name));
-    }
-    
-    /**
-     * Sweeping works on input, a thread is used as the "controller" (this is input)
-     * and input sweeps back and forth - the servo parameters know what
-     * to do for output
-     */
-    
-    @Override
-    public void run() {
-
-      double sweepMin = 0.0;
-      double sweepMax = 0.0;
-      // start in the middle
-      double sweepPos = mapper.getMinX() + (mapper.getMaxX() - mapper.getMinX())/2;
-      isSweeping = true;
-
-      try {
-        while (isSweeping) {
-
-          // set our range to be inside 'real' min & max input
-          sweepMin = mapper.getMinX() + 1;
-          sweepMax = mapper.getMaxX() - 1;
-      
-          // if pos is too small or too big flip direction
-          if (sweepPos >= sweepMax || sweepPos <= sweepMin){
-            sweepStep = sweepStep * -1;
-          }
-          
-          sweepPos += sweepStep;
-          moveTo(sweepPos);
-          Thread.sleep(sweepDelay);
-        }
-      } catch (Exception e) {
-        isSweeping = false; 
-      }
-    }
-
-  }
-
-  private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(Servo.class);
-
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Servo.class.getCanonicalName());
-    meta.addDescription("Controls a servo");
-    meta.addCategory("motor", "control");
-
-    return meta;
-  }
-
-  transient ServoController controller;
-
-  String controllerName = null;
-
-  Mapper mapper = new Mapper(0, 180, 0, 180);
-
-  /**
-   * default rest is 90 default target position will be 90 if not specified
-   */
-  double rest = 90;
-
-  /**
-   * last time the servo has moved
-   */
-  long lastActivityTime = 0;
-
-  /**
-   * the 'pin' for this Servo - it is Integer because it can be in a state of
-   * 'not set' or null.
-   * 
-   * pin is the ONLY value which cannot and will not be 'defaulted'
-   */
-  Integer pin;
-
-  /**
-   * the requested INPUT position of the servo
-   */
-  Double targetPos;
-
-  /**
-   * the calculated output for the servo
-   */
-  Double targetOutput;
-
-  /**
-   * list of names of possible controllers
-   */
-  public List<String> controllers;
-
-  boolean isSweeping = false;
-  // double sweepMin = 0;
-  // double sweepMax = 180;
-  int sweepDelay = 100;
-
-  double sweepStep = 1;
-  boolean sweepOneWay = false;
-
-  // sweep types
-  // TODO - computer implemented speed control (non-sweep)
-  boolean speedControlOnUC = false;
-
-  transient Thread sweeper = null;
-
-  /**
-   * feedback of both incremental position and stops. would allow blocking
-   * moveTo if desired
-   */
-  boolean isEventsEnabled = false;
-  boolean isIKEventEnabled = false;
-
-  double maxVelocity = -1;
-
-  // GroG says,
-  // FIXME - do "final" refactor with attachPin/detachPin and
-  // only use controllerName to determine service to service attach !!!
-  // to determine if a service is attached is -> controllerName != null
-  // to determine if a pin is attached is isPinAttached
-  boolean isPinAttached = false;
-
-  double velocity = -1;
-
-  double acceleration = -1;
-
-  double lastPos;
-
-  boolean autoAttach = false;
-
-  public int defaultDetachDelay = 10000;
-  private boolean moving;
-  private double currentPosInput;
-  private boolean autoDetach = false;
-  private transient Timer detachTimer;
-
-  public transient static final int SERVO_EVENT_STOPPED = 1;
-  public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
-  
-  
-  
-  public class IKData {
-    public String name;
-    public Double pos;
-    public Integer state;
-    public double velocity;
-    public Double targetPos;
-  }
-
-  public Servo(String n) {
-    super(n);
-    refreshControllers();
-    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
-    lastActivityTime = System.currentTimeMillis();
-  }
-
-  public void onRegistered(ServiceInterface s) {
-    refreshControllers();
-    broadcastState();
-
-  }
-
-  public void addServoEventListener(NameProvider service) {
-    isEventsEnabled = true;
-    addListener("publishServoEvent", service.getName(), "onServoEvent");
-  }
-
-  public void addIKServoEventListener(NameProvider service) {
-    isIKEventEnabled = true;
-    addListener("publishIKServoEvent", service.getName(), "onIKServoEvent");
-  }
-
-  /**
-   * Re-attach to servo's current pin. The pin must have be set previously.
-   * Equivalent to Arduino's Servo.attach(currentPin)
-   * 
-   * TODO ? should have been named attachPin()
-   * 
-   */
-  @Override
-  public void attach() {
-    attach(pin);
-  }
-
-  /**
-   * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
-   * pulses to maintain its current position.
-   */
-  @Override
-  public void attach(int pin) {
-    lastActivityTime = System.currentTimeMillis();
-    controller.servoAttachPin(this, pin);
-    this.pin = pin;
-    isPinAttached = true;
-    broadcastState();
-    invoke("publishServoAttach", getName());
-  }
-
-  /**
-   * Equivalent to Arduino's Servo.detach() it de-energizes the servo IT DOES
-   * NOT DETACH THE SERVO CONTROLLER !!!
-   */
-  @Override
-  public void detach() {
-    isPinAttached = false;
-    if (controller != null) {
-      controller.servoDetachPin(this);
-    }
-    broadcastState();
-    invoke("publishServoDetach", getName());
-  }
-
-  public boolean eventsEnabled(boolean b) {
-    isEventsEnabled = b;
-    broadcastState();
-    return b;
-  }
-
-  @Override
-  public ServoController getController() {
-    return controller;
-  }
-
-  public long getLastActivityTime() {
-    return lastActivityTime;
-  }
-
-  @Override
-  public double getMax() {
-    return mapper.getMaxX();
-  }
-
-  @Override
-  public double getMin() {
-    return mapper.getMinX();
-  }
-
-  
-  public double getMaxInput() {
-    return mapper.getMaxInput();
-  }
-  public double getMinInput() {
-    return mapper.getMinInput();
-  }
-  
-
-  @Override
-  public double getRest() {
-    return rest;
-  }
-
-  // FIXME - change name to isPinAttached()
-  // python scripts might use this ? :(
-  public boolean isAttached() {
-    // this is not pin attach
-    return controller != null;
-  }
-
-  public boolean isPinAttached() {
-    return isPinAttached;
-  }
-
-  @Override
-  public boolean isInverted() {
-    return mapper.isInverted();
-  }
-
-  public void map(double minX, double maxX, double minY, double maxY) {
-    mapper = new Mapper(minX, maxX, minY, maxY);
-    broadcastState();
-  }
-
-  public void moveTo(double pos) {
-
-    if (controller == null) {
-      error(String.format("%s's controller is not set", getName()));
-      return;
-    }
-    if (autoAttach && !isPinAttached()) {
-      attach();
-    }
-    lastPos = targetPos;
-    if (pos < mapper.getMinX()) {
-      pos = mapper.getMinX();
-    }
-    if (pos > mapper.getMaxX()) {
-      pos = mapper.getMaxX();
-    }
-    targetPos = pos;
-    targetOutput = getTargetOutput();// mapper.calcOutput(targetPos); // calculated degrees
-
-    // calculated degrees
-    controller.servoMoveTo(this);
-    lastActivityTime = System.currentTimeMillis();
-
-
-  }
-
-  /**
-   * basic move command of the servo - usually is 0 - 180 valid range but can be
-   * adjusted and / or re-mapped with min / max and map commands
-   * 
-   * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION"
-   * response
-   */
-
-  public Double publishServoEvent(Double position) {
-
-    return position;
-  }
-
-  public List<String> refreshControllers() {
-    controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
-    return controllers;
-  }
-
-  @Override
-  public void releaseService() {
-    detach();
-    detach(controller);
-    super.releaseService();
-  }
-
-  public void rest() {
-    moveTo(rest);
-  }
-
-  public void setInverted(boolean invert) {
-    mapper.setInverted(invert);
-  }
-
-  @Override
-  public void setMinMax(double min, double max) {
-    // THIS IS A BUG - BUT CORRECTING IT BURNS OLD SCRIPT'S SERVOS !!
-    mapper.setMinMaxOutput(min, max);
-    /* THIS IS A BUG default setMinMax setMin & setMax IS INPUT NOT OUTPUT !!!!
-    mapper.setMin(min);
-    mapper.setMax(max);
-    */
-    broadcastState();
-  }
-
-  @Override
-  public void setRest(int rest) {
-    this.rest = rest;
-  }
-
-  /**
-   * setSpeed is deprecated, new function for speed control is setVelocity()
-   */
-  @Deprecated
-  public void setSpeed(double speed) {
-
-    // KWATTERS: The realtionship between the old set speed value and actual
-    // angular velocity was exponential.
-    // To create a model to map these, I took the natural log of the speed
-    // values, computed a linear regression line
-    // y=mx+b
-    // And then convert it back to exponential space with the e^y
-    // approximating this with the equation
-    // val = e ^ (slope * x + intercept)
-    // slope & intercept were fitted by taking a linear regression of the
-    // log values
-    // of the mapping.
-
-    // Speed,NewFunction,OldMeasured
-    // 0.1,3,6
-    // 0.2,5,7
-    // 0.3,7,9
-    // 0.4,9,9
-    // 0.5,13,11
-    // 0.6,19,13
-    // 0.7,26,18
-    // 0.8,36,27
-    // 0.9,50,54
-
-    // These 2 values can be tweaked for a slightly different curve that
-    // fits the observed data.
-    double slope = 3.25;
-    double intercept = 1;
-
-    double vel = Math.exp(slope * speed + intercept);
-    // set velocity to 0.0 if the speed = 1.0.. This skips the velocity
-    // calculation logic.
-    if (speed >= 1.0) {
-      vel = maxVelocity;
-    }
-    setVelocity((int) vel);
-    // Method from build 1670
-    // if(speed <= 0.1d) setVelocity(6);
-    // else if (speed <= 0.2d) setVelocity(7);
-    // else if (speed <= 0.3d) setVelocity(8);
-    // else if (speed <= 0.4d) setVelocity(9);
-    // else if (speed <= 0.5d) setVelocity(11);
-    // else if (speed <= 0.6d) setVelocity(13);
-    // else if (speed <= 0.7d) setVelocity(18);
-    // else if (speed <= 0.8d) setVelocity(27);
-    // else if (speed <= 0.9d) setVelocity(54);
-    // else setVelocity(0);
-  }
-
-  // choose to handle sweep on arduino or in MRL on host computer thread.
-  public void setSpeedControlOnUC(boolean b) {
-    speedControlOnUC = b;
-  }
-
-  public void setSweepDelay(int delay) {
-    sweepDelay = delay;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.myrobotlab.service.interfaces.ServoControl#stopServo()
-   */
-  @Override
-  public void stop() {
-    isSweeping = false;
-    sweeper = null;
-    controller.servoSweepStop(this);
-    broadcastState();
-  }
-
-  public void sweep() {
-    double min = mapper.getMinX();
-    double max = mapper.getMaxX();
-    sweep(min, max, 50, 1);
-  }
-
-  public void sweep(double min, double max) {
-    sweep(min, max, 1, 1);
-  }
-
-  // FIXME - is it really speed control - you don't currently thread for
-  // factional speed values
-  public void sweep(double min, double max, int delay, double step) {
-    sweep(min, max, delay, step, false);
-  }
-
-  public void sweep(double min, double max, int delay, double step, boolean oneWay) {
-    mapper.setMinMaxInput(min, max);
-    /* THIS IS A BUGG !!!
-    mapper.setMin(min);
-    mapper.setMax(max);
-    */
-
-    this.sweepDelay = delay;
-    this.sweepStep = step;
-    this.sweepOneWay = oneWay;
-
-    // FIXME - CONTROLLER TYPE SWITCH
-    if (speedControlOnUC) {
-      controller.servoSweepStart(this); // delay &
-      // step
-      // implemented
-    } else {
-      if (isSweeping) {
-        stop();
-      }
-
-      sweeper = new Sweeper(getName());
-      sweeper.start();
-    }
-
-    isSweeping = true;
-    broadcastState();
-  }
-
-  /**
-   * Writes a value in microseconds (uS) to the servo, controlling the shaft
-   * accordingly. On a standard servo, this will set the angle of the shaft. On
-   * standard servos a parameter value of 1000 is fully counter-clockwise, 2000
-   * is fully clockwise, and 1500 is in the middle.
-   * 
-   * Note that some manufactures do not follow this standard very closely so
-   * that servos often respond to values between 700 and 2300. Feel free to
-   * increase these endpoints until the servo no longer continues to increase
-   * its range. Note however that attempting to drive a servo past its endpoints
-   * (often indicated by a growling sound) is a high-current state, and should
-   * be avoided.
-   * 
-   * Continuous-rotation servos will respond to the writeMicrosecond function in
-   * an analogous manner to the write function.
-   * 
-   * @param pos
-   */
-  public void writeMicroseconds(Integer uS) {
-    log.info("writeMicroseconds({})", uS);
-    controller.servoWriteMicroseconds(this, uS);
-    lastActivityTime = System.currentTimeMillis();
-    broadcastState();
-  }
-
-  /*
-   * @Override public void setPin(int pin) { this.pin = pin; }
-   */
-
-  @Override
-  public Integer getPin() {
-    return pin;
-  }
-
-  @Override
-  public double getPos() {
-    if (targetPos == null){
-      return rest;
-    }
-    else {
-      return targetPos;
-    }
-  }
-
-  // This was originally named setController
-  // and Tracking service depended on it to set
-  // the servos to a controller where pins could
-  // be assigned later...
-  public void attach(ServoController controller) throws Exception {
-    if (isAttached(controller)) {
-      log.info("{} servo attached to controller {}", getName(), this.controller.getName());
-      return;
-    } else if (this.controller != null && this.controller != controller) {
-      log.warn("already attached to controller %s - please detach before attaching to controller %s", this.controller.getName(), controller.getName());
-      return;
-    }
-
-    targetOutput = getTargetOutput();//mapper.calcOutput(targetPos);
-
-    // set the controller
-    this.controller = controller;
-    this.controllerName = controller.getName();
-
-    // now attach the controller
-    // the controller better have
-    // isAttach(ServoControl) to prevent infinit loop
-    controller.attach(this);
-    sleep(300);
-    // the controller is attached now
-    // its time to attach the pin
-    attach(pin);
-
-    broadcastState();
-  }
-
-  public void attach(String controllerName, int pin) throws Exception {
-    this.pin = pin;
-    attach((ServoController) Runtime.getService(controllerName));
-  }
-
-  public void attach(String controllerName, int pin, double pos) throws Exception {
-    this.pin = pin;
-    this.targetPos = pos;
-    attach((ServoController) Runtime.getService(controllerName));
-  }
-
-  public void attach(String controllerName, int pin, Integer pos, Integer velocity) throws Exception {
-    attach((ServoController) Runtime.getService(controllerName), pin, pos, velocity);
-  }
-
-  /**
-   * attach will default the position to a default reset position since its not
-   * specified
-   */
-  @Override
-  public void attach(ServoController controller, int pin) throws Exception {
-    this.pin = pin;
-    attach(controller);
-  }
-
-  public void attach(ServoController controller, int pin, double pos) throws Exception {
-    this.pin = pin;
-    this.targetPos = pos;
-    attach(controller);
-  }
-
-  // FIXME - setController is very deficit in its abilities - compared to the
-  // complexity of this
-  @Override
-  public void attach(ServoController controller, int pin, double pos, double velocity) throws Exception {
-    this.pin = pin;
-    this.targetPos = pos;
-    this.velocity = velocity;
-    attach(controller);
-  }
-
-  public boolean isAttached(ServoController controller) {
-    return this.controller == controller;
-  }
-
-  @Override
-  public void detach(String controllerName) {
-    detach((ServoController) Runtime.getService(controllerName));
-  }
-
-  @Override
-  public void detach(ServoController controller) {
-    if (this.controller == controller) {
-      // detach the this device from the controller
-      controller.detach(this);
-      // remove the this controller's reference
-      this.controller = null;
-      this.controllerName = null;
-      isPinAttached = false;
-      broadcastState();
-    }
-  }
-
-  public void setMaxVelocity(int velocity) {
-    this.maxVelocity = velocity;
-  }
-
-  public void setVelocity(double velocity) {
-    if (maxVelocity != -1 && velocity > maxVelocity) {
-      velocity = maxVelocity;
-      log.info("Trying to set velocity to a value greater than max velocity");
-    }
-    this.velocity = velocity;
-    if (controller != null) {
-      controller.servoSetVelocity(this);
-    }
-  }
-
-  public void setAcceleration(double acceleration) {
-    this.acceleration = acceleration;
-    if (controller != null) {
-      controller.servoSetAcceleration(this);
-    }
-  }
-
-  @Override
-  public double getMaxVelocity() {
-    return maxVelocity;
-  }
-
-  /*
-   * public void moveToOutput(Integer moveTo) { if (controller == null) {
-   * error(String.format("%s's controller is not set", getName())); return; }
-   * 
-   * // targetPos = pos; targetOutput = moveTo;
-   * 
-   * controller.servoWrite(this); lastActivityTime = System.currentTimeMillis();
-   * 
-   * if (isEventsEnabled) { // update others of our position change
-   * invoke("publishServoEvent", targetOutput); }
-   * 
-   * }
-   */
-
-  @Override
-  public double getVelocity() {
-    return velocity;
-  }
-
-  public IKData publishIKServoEvent(IKData data) {
-    return data;
-  }
-
-  public static void main(String[] args) throws InterruptedException {
-    try {
-      LoggingFactory.init(Level.INFO);
-
-      // Runtime.start("webgui", "WebGui");
-      // Runtime.start("gui", "SwingGui");
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      arduino.record();
-      // arduino.getSerial().record();
-
-      log.info("ports {}", Arrays.toString(arduino.getSerial().getPortNames().toArray()));
-      arduino.connect("COM10");
-
-      log.info("ready here");
-      // arduino.ackEnabled = true;
-      Servo servo = (Servo) Runtime.start("servo", "Servo");
-
-      servo.attach(arduino, 7);
-      servo.moveTo(90);
-      servo.setRest(30);
-
-      servo.attach(8);
-      servo.moveTo(90);
-      servo.moveTo(30);
-
-      servo.attach(9);
-      servo.moveTo(90);
-      servo.setRest(30);
-
-      // FIXME - JUNIT - test attach - detach - re-attach
-      // servo.detach(arduino);
-
-      log.info("servo attach {}", servo.isAttached());
-
-      arduino.disconnect();
-      arduino.connect("COM4");
-
-      arduino.reset();
-
-      log.info("ready here 2");
-      // servo.attach(arduino, 8);
-      // servo.attach(
-      servo.attach(arduino, 7);
-      servo.moveTo(90);
-      servo.moveTo(30);
-
-      servo.attach(9);
-      servo.moveTo(90);
-      servo.setRest(30);
-
-      servo.moveTo(90);
-      servo.setRest(30);
-      servo.moveTo(10);
-      servo.moveTo(90);
-      servo.moveTo(180);
-      servo.rest();
-
-      servo.setMinMax(30, 160);
-
-      servo.moveTo(40);
-      servo.moveTo(140);
-
-      servo.moveTo(180);
-
-      servo.setSpeed(0.5);
-      servo.moveTo(31);
-      servo.setSpeed(0.2);
-      servo.moveTo(90);
-      servo.moveTo(180);
-      servo.setSpeed(1.0);
-
-      // servo.test();
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-
-  }
-
-  @Override
-  public void setPin(int pin) {
-    this.pin = pin;
-  }
-
-  @Override
-  public boolean isAttached(String name) {
-    return (controller != null && controller.getName().equals(name));
-  }
-
-  @Override
-  public Set<String> getAttached() {
-    HashSet<String> ret = new HashSet<String>();
-    if (controller != null) {
-      ret.add(controller.getName());
-    }
-    return ret;
-  }
-
-  @Override
-  public double getAcceleration() {
-    return acceleration;
-  }
-
-  /**
-   * getCurrentPos() - return the calculated position of the servo use
-   * lastActivityTime and velocity for the computation
-   * 
-   * @return the current position of the servo
-   */
-  public Double getCurrentPos() {
-    return currentPosInput;
-  }
-  
-  /**
-   * return time to move the servo to the target position, in ms
-   * @return
-   */
-  int timeToMove() {
-    if (velocity <= 0.0) {
-      return 1;
-    }
-    double delta = Math.abs(mapper.calcOutput(targetPos) - mapper.calcOutput(lastPos));
-    double time = delta / velocity * 1000;
-    return (int)time;
-  }
-
-  /**
-   * enableAutoAttach will attach a servo when ask to move and detach it when
-   * the move is complete
-   * 
-   * @param autoAttach
-   */
-  public void enableAutoAttach(boolean autoAttach) {
-    this.autoAttach = autoAttach;
-  }
-
-  public void enableAutoDetach(boolean autoDetach) {
-    this.autoDetach = autoDetach;
-    this.addServoEventListener(this);
-  }
-
-  public double microsecondsToDegree(int microseconds) {
-    if (microseconds <= 180)
-      return microseconds;
-    return (double)(microseconds - 544) * 180 / (2400 - 544);
-  }
-
-  public String publishServoAttach(String name) {
-    return name;
-  }
-
-  public String publishServoDetach(String name) {
-    return name;
-  }
-
-  /**
-   * this output is 'always' in degrees !
-   */
-  @Override
-  public double getTargetOutput() {
-    if (targetPos == null){
-      targetPos = rest;      
-    }
-    targetOutput = mapper.calcOutput(targetPos); 
-    return targetOutput;
-  }
-
-  public void autoDetach(){
-    if (getTasks().containsKey("EndMoving")){
-      purgeTask("EndMoving");
-    }
-    if (!isMoving() && autoAttach && isPinAttached()){
-      detach();
-    }
-    //moving = false;
-  }
-
-  public boolean isMoving() {
-    return moving;
-  }
-
-  public void onServoEvent(Integer eventType, Integer currentPosUs, Integer targetPos) {
-    double currentPos = microsecondsToDegree(currentPosUs);
-    currentPosInput = mapper.calcInput(currentPos);
-    if (isEventsEnabled) {
-      invoke("publishServoEvent", currentPosInput);
-    }
-    if (isIKEventEnabled) {
-      IKData data = new IKData();
-      data.name = getName();
-      data.pos = currentPosInput;
-      data.state = eventType;
-      data.velocity = velocity;
-      data.targetPos = this.targetPos;
-      invoke("publishIKServoEvent", data);
-    }
-    if (eventType == SERVO_EVENT_STOPPED) {
-      moving = false;
-    }
-    else {
-      moving = true;
-    }
-  }
-  
-  public void onIMAngles(Object[] data) {
-    String name = (String)data[0];
-    if (name.equals(this.getName())) {
-      moveTo((double)data[1]);
-    }
-  }
-  
-  public void onServoEvent(Double position) {
-	//log.info("{}.ServoEvent {}", getName(), position);
-	    if (!isMoving() && autoDetach  && isPinAttached()) {
-	        if (velocity > -1) {
-	          detach();
-	        }
-	        else {
-	          if (detachTimer != null){
-	            detachTimer.cancel();
-	            detachTimer = null;
-	          }
-	          detachTimer = new Timer();
-	          detachTimer.schedule(new TimerTask(){
-	            @Override
-	            public void run() {
-	              detach();
-	              }
-	          }, (long)defaultDetachDelay);
-	            }
-	          //addTask("EndMoving",defaultDetachDelay, "autoDetach");
-	        }
-	      }
+	/**
+	 * Sweeper - TODO - should be implemented in the arduino code for smoother
+	 * function
+	 * 
+	 */
+	public class Sweeper extends Thread {
+
+		public Sweeper(String name) {
+			super(String.format("%s.sweeper", name));
+		}
+
+		/**
+		 * Sweeping works on input, a thread is used as the "controller" (this
+		 * is input) and input sweeps back and forth - the servo parameters know
+		 * what to do for output
+		 */
+
+		@Override
+		public void run() {
+
+			double sweepMin = 0.0;
+			double sweepMax = 0.0;
+			// start in the middle
+			double sweepPos = mapper.getMinX() + (mapper.getMaxX() - mapper.getMinX()) / 2;
+			isSweeping = true;
+
+			try {
+				while (isSweeping) {
+
+					// set our range to be inside 'real' min & max input
+					sweepMin = mapper.getMinX() + 1;
+					sweepMax = mapper.getMaxX() - 1;
+
+					// if pos is too small or too big flip direction
+					if (sweepPos >= sweepMax || sweepPos <= sweepMin) {
+						sweepStep = sweepStep * -1;
+					}
+
+					sweepPos += sweepStep;
+					moveTo(sweepPos);
+					Thread.sleep(sweepDelay);
+				}
+			} catch (Exception e) {
+				isSweeping = false;
+			}
+		}
+
+	}
+
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(Servo.class);
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Servo.class.getCanonicalName());
+		meta.addDescription("Controls a servo");
+		meta.addCategory("motor", "control");
+
+		return meta;
+	}
+
+	transient ServoController controller;
+
+	String controllerName = null;
+
+	Mapper mapper = new Mapper(0, 180, 0, 180);
+
+	/**
+	 * default rest is 90 default target position will be 90 if not specified
+	 */
+	double rest = 90;
+
+	/**
+	 * last time the servo has moved
+	 */
+	long lastActivityTime = 0;
+
+	/**
+	 * the 'pin' for this Servo - it is Integer because it can be in a state of
+	 * 'not set' or null.
+	 * 
+	 * pin is the ONLY value which cannot and will not be 'defaulted'
+	 */
+	Integer pin;
+
+	/**
+	 * the requested INPUT position of the servo
+	 */
+	Double targetPos;
+
+	/**
+	 * the calculated output for the servo
+	 */
+	Double targetOutput;
+
+	/**
+	 * list of names of possible controllers
+	 */
+	public List<String> controllers;
+
+	boolean isSweeping = false;
+	// double sweepMin = 0;
+	// double sweepMax = 180;
+	int sweepDelay = 100;
+
+	double sweepStep = 1;
+	boolean sweepOneWay = false;
+
+	// sweep types
+	// TODO - computer implemented speed control (non-sweep)
+	boolean speedControlOnUC = false;
+
+	transient Thread sweeper = null;
+
+	/**
+	 * feedback of both incremental position and stops. would allow blocking
+	 * moveTo if desired
+	 */
+	boolean isEventsEnabled = false;
+	boolean isIKEventEnabled = false;
+
+	double maxVelocity = -1;
+
+	// GroG says,
+	// FIXME - do "final" refactor with attachPin/detachPin and
+	// only use controllerName to determine service to service attach !!!
+	// to determine if a service is attached is -> controllerName != null
+	// to determine if a pin is attached is isPinAttached
+	boolean isPinAttached = false;
+
+	double velocity = -1;
+
+	double acceleration = -1;
+
+	double lastPos;
+
+	boolean autoAttach = false;
+
+	public int defaultDetachDelay = 10000;
+	private boolean moving;
+	private double currentPosInput;
+	private boolean autoDetach = false;
+	private transient Timer detachTimer;
+
+	public transient static final int SERVO_EVENT_STOPPED = 1;
+	public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
+
+	public class IKData {
+		public String name;
+		public Double pos;
+		public Integer state;
+		public double velocity;
+		public Double targetPos;
+	}
+
+	public Servo(String n) {
+		super(n);
+		refreshControllers();
+		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+		lastActivityTime = System.currentTimeMillis();
+	}
+
+	public void onRegistered(ServiceInterface s) {
+		refreshControllers();
+		broadcastState();
+
+	}
+
+	public void addServoEventListener(NameProvider service) {
+		isEventsEnabled = true;
+		addListener("publishServoEvent", service.getName(), "onServoEvent");
+	}
+
+	public void addIKServoEventListener(NameProvider service) {
+		isIKEventEnabled = true;
+		addListener("publishIKServoEvent", service.getName(), "onIKServoEvent");
+	}
+
+	/**
+	 * Re-attach to servo's current pin. The pin must have be set previously.
+	 * Equivalent to Arduino's Servo.attach(currentPin)
+	 * 
+	 * TODO ? should have been named attachPin()
+	 * 
+	 */
+	@Override
+	public void attach() {
+		attach(pin);
+	}
+
+	/**
+	 * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
+	 * pulses to maintain its current position.
+	 */
+	@Override
+	public void attach(int pin) {
+		lastActivityTime = System.currentTimeMillis();
+		controller.servoAttachPin(this, pin);
+		this.pin = pin;
+		isPinAttached = true;
+		broadcastState();
+		invoke("publishServoAttach", getName());
+	}
+
+	/**
+	 * Equivalent to Arduino's Servo.detach() it de-energizes the servo IT DOES
+	 * NOT DETACH THE SERVO CONTROLLER !!!
+	 */
+	@Override
+	public void detach() {
+		isPinAttached = false;
+		if (controller != null) {
+			controller.servoDetachPin(this);
+		}
+		broadcastState();
+		invoke("publishServoDetach", getName());
+	}
+
+	public boolean eventsEnabled(boolean b) {
+		isEventsEnabled = b;
+		broadcastState();
+		return b;
+	}
+
+	@Override
+	public ServoController getController() {
+		return controller;
+	}
+
+	public long getLastActivityTime() {
+		return lastActivityTime;
+	}
+
+	@Override
+	public double getMax() {
+		return mapper.getMaxX();
+	}
+
+	@Override
+	public double getMin() {
+		return mapper.getMinX();
+	}
+
+	public double getMaxInput() {
+		return mapper.getMaxInput();
+	}
+
+	public double getMinInput() {
+		return mapper.getMinInput();
+	}
+
+	@Override
+	public double getRest() {
+		return rest;
+	}
+
+	// FIXME - change name to isPinAttached()
+	// python scripts might use this ? :(
+	public boolean isAttached() {
+		// this is not pin attach
+		return controller != null;
+	}
+
+	public boolean isPinAttached() {
+		return isPinAttached;
+	}
+
+	@Override
+	public boolean isInverted() {
+		return mapper.isInverted();
+	}
+
+	public void map(double minX, double maxX, double minY, double maxY) {
+		mapper = new Mapper(minX, maxX, minY, maxY);
+		broadcastState();
+	}
+
+	public void moveTo(double pos) {
+
+		if (controller == null) {
+			error(String.format("%s's controller is not set", getName()));
+			return;
+		}
+		if (autoAttach && !isPinAttached()) {
+			attach();
+		}
+		lastPos = targetPos;
+		if (pos < mapper.getMinX()) {
+			pos = mapper.getMinX();
+		}
+		if (pos > mapper.getMaxX()) {
+			pos = mapper.getMaxX();
+		}
+		targetPos = pos;
+		targetOutput = getTargetOutput();// mapper.calcOutput(targetPos); //
+											// calculated degrees
+
+		// calculated degrees
+		controller.servoMoveTo(this);
+		lastActivityTime = System.currentTimeMillis();
+
+	}
+
+	/**
+	 * basic move command of the servo - usually is 0 - 180 valid range but can
+	 * be adjusted and / or re-mapped with min / max and map commands
+	 * 
+	 * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION"
+	 * response
+	 */
+
+	public Double publishServoEvent(Double position) {
+
+		return position;
+	}
+
+	public List<String> refreshControllers() {
+		controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
+		return controllers;
+	}
+
+	@Override
+	public void releaseService() {
+		detach();
+		detach(controller);
+		super.releaseService();
+	}
+
+	public void rest() {
+		moveTo(rest);
+	}
+
+	public void setInverted(boolean invert) {
+		mapper.setInverted(invert);
+	}
+
+	@Override
+	public void setMinMax(double min, double max) {
+		// THIS IS A BUG - BUT CORRECTING IT BURNS OLD SCRIPT'S SERVOS !!
+		mapper.setMinMaxOutput(min, max);
+		/*
+		 * THIS IS A BUG default setMinMax setMin & setMax IS INPUT NOT OUTPUT
+		 * !!!! mapper.setMin(min); mapper.setMax(max);
+		 */
+		broadcastState();
+	}
+
+	@Override
+	public void setRest(int rest) {
+		this.rest = rest;
+	}
+
+	/**
+	 * setSpeed is deprecated, new function for speed control is setVelocity()
+	 */
+	@Deprecated
+	public void setSpeed(double speed) {
+
+		// KWATTERS: The realtionship between the old set speed value and actual
+		// angular velocity was exponential.
+		// To create a model to map these, I took the natural log of the speed
+		// values, computed a linear regression line
+		// y=mx+b
+		// And then convert it back to exponential space with the e^y
+		// approximating this with the equation
+		// val = e ^ (slope * x + intercept)
+		// slope & intercept were fitted by taking a linear regression of the
+		// log values
+		// of the mapping.
+
+		// Speed,NewFunction,OldMeasured
+		// 0.1,3,6
+		// 0.2,5,7
+		// 0.3,7,9
+		// 0.4,9,9
+		// 0.5,13,11
+		// 0.6,19,13
+		// 0.7,26,18
+		// 0.8,36,27
+		// 0.9,50,54
+
+		// These 2 values can be tweaked for a slightly different curve that
+		// fits the observed data.
+		double slope = 3.25;
+		double intercept = 1;
+
+		double vel = Math.exp(slope * speed + intercept);
+		// set velocity to 0.0 if the speed = 1.0.. This skips the velocity
+		// calculation logic.
+		if (speed >= 1.0) {
+			vel = maxVelocity;
+		}
+		setVelocity((int) vel);
+		// Method from build 1670
+		// if(speed <= 0.1d) setVelocity(6);
+		// else if (speed <= 0.2d) setVelocity(7);
+		// else if (speed <= 0.3d) setVelocity(8);
+		// else if (speed <= 0.4d) setVelocity(9);
+		// else if (speed <= 0.5d) setVelocity(11);
+		// else if (speed <= 0.6d) setVelocity(13);
+		// else if (speed <= 0.7d) setVelocity(18);
+		// else if (speed <= 0.8d) setVelocity(27);
+		// else if (speed <= 0.9d) setVelocity(54);
+		// else setVelocity(0);
+	}
+
+	// choose to handle sweep on arduino or in MRL on host computer thread.
+	public void setSpeedControlOnUC(boolean b) {
+		speedControlOnUC = b;
+	}
+
+	public void setSweepDelay(int delay) {
+		sweepDelay = delay;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.myrobotlab.service.interfaces.ServoControl#stopServo()
+	 */
+	@Override
+	public void stop() {
+		isSweeping = false;
+		sweeper = null;
+		controller.servoSweepStop(this);
+		broadcastState();
+	}
+
+	public void sweep() {
+		double min = mapper.getMinX();
+		double max = mapper.getMaxX();
+		sweep(min, max, 50, 1);
+	}
+
+	public void sweep(double min, double max) {
+		sweep(min, max, 1, 1);
+	}
+
+	// FIXME - is it really speed control - you don't currently thread for
+	// factional speed values
+	public void sweep(double min, double max, int delay, double step) {
+		sweep(min, max, delay, step, false);
+	}
+
+	public void sweep(double min, double max, int delay, double step, boolean oneWay) {
+		mapper.setMinMaxInput(min, max);
+		/*
+		 * THIS IS A BUGG !!! mapper.setMin(min); mapper.setMax(max);
+		 */
+
+		this.sweepDelay = delay;
+		this.sweepStep = step;
+		this.sweepOneWay = oneWay;
+
+		// FIXME - CONTROLLER TYPE SWITCH
+		if (speedControlOnUC) {
+			controller.servoSweepStart(this); // delay &
+			// step
+			// implemented
+		} else {
+			if (isSweeping) {
+				stop();
+			}
+
+			sweeper = new Sweeper(getName());
+			sweeper.start();
+		}
+
+		isSweeping = true;
+		broadcastState();
+	}
+
+	/**
+	 * Writes a value in microseconds (uS) to the servo, controlling the shaft
+	 * accordingly. On a standard servo, this will set the angle of the shaft.
+	 * On standard servos a parameter value of 1000 is fully counter-clockwise,
+	 * 2000 is fully clockwise, and 1500 is in the middle.
+	 * 
+	 * Note that some manufactures do not follow this standard very closely so
+	 * that servos often respond to values between 700 and 2300. Feel free to
+	 * increase these endpoints until the servo no longer continues to increase
+	 * its range. Note however that attempting to drive a servo past its
+	 * endpoints (often indicated by a growling sound) is a high-current state,
+	 * and should be avoided.
+	 * 
+	 * Continuous-rotation servos will respond to the writeMicrosecond function
+	 * in an analogous manner to the write function.
+	 * 
+	 * @param pos
+	 */
+	public void writeMicroseconds(Integer uS) {
+		log.info("writeMicroseconds({})", uS);
+		controller.servoWriteMicroseconds(this, uS);
+		lastActivityTime = System.currentTimeMillis();
+		broadcastState();
+	}
+
+	/*
+	 * @Override public void setPin(int pin) { this.pin = pin; }
+	 */
+
+	@Override
+	public Integer getPin() {
+		return pin;
+	}
+
+	@Override
+	public double getPos() {
+		if (targetPos == null) {
+			return rest;
+		} else {
+			return targetPos;
+		}
+	}
+
+	// This was originally named setController
+	// and Tracking service depended on it to set
+	// the servos to a controller where pins could
+	// be assigned later...
+	public void attach(ServoController controller) throws Exception {
+		if (isAttached(controller)) {
+			log.info("{} servo attached to controller {}", getName(), this.controller.getName());
+			return;
+		} else if (this.controller != null && this.controller != controller) {
+			log.warn("already attached to controller %s - please detach before attaching to controller %s",
+					this.controller.getName(), controller.getName());
+			return;
+		}
+
+		targetOutput = getTargetOutput();// mapper.calcOutput(targetPos);
+
+		// set the controller
+		this.controller = controller;
+		this.controllerName = controller.getName();
+
+		// now attach the controller
+		// the controller better have
+		// isAttach(ServoControl) to prevent infinit loop
+		controller.attach(this);
+		sleep(300);
+		// the controller is attached now
+		// its time to attach the pin
+		attach(pin);
+
+		broadcastState();
+	}
+
+	public void attach(String controllerName, int pin) throws Exception {
+		this.pin = pin;
+		attach((ServoController) Runtime.getService(controllerName));
+	}
+
+	public void attach(String controllerName, Integer pin, Double pos) throws Exception {
+		this.pin = pin;
+		this.targetPos = pos;
+		attach((ServoController) Runtime.getService(controllerName));
+	}
+
+	/* GroG REMOVED THIS METHOD - because the way method caching works it potentially conflicted and 
+	 * prevents the above method from working ..  attach(String controllerName, Integer pin, Double pos)
+	 *
+	public void attach(String controllerName, int pin, Integer pos, Integer velocity) throws Exception {
+		attach((ServoController) Runtime.getService(controllerName), pin, pos, velocity);
+	}
+	*/
+
+	/**
+	 * attach will default the position to a default reset position since its
+	 * not specified
+	 */
+	@Override
+	public void attach(ServoController controller, int pin) throws Exception {
+		this.pin = pin;
+		attach(controller);
+	}
+
+	public void attach(ServoController controller, int pin, double pos) throws Exception {
+		this.pin = pin;
+		this.targetPos = pos;
+		attach(controller);
+	}
+
+	// FIXME - setController is very deficit in its abilities - compared to the
+	// complexity of this
+	@Override
+	public void attach(ServoController controller, int pin, double pos, double velocity) throws Exception {
+		this.pin = pin;
+		this.targetPos = pos;
+		this.velocity = velocity;
+		attach(controller);
+	}
+
+	public boolean isAttached(ServoController controller) {
+		return this.controller == controller;
+	}
+
+	@Override
+	public void detach(String controllerName) {
+		detach((ServoController) Runtime.getService(controllerName));
+	}
+
+	@Override
+	public void detach(ServoController controller) {
+		if (this.controller == controller) {
+			// detach the this device from the controller
+			controller.detach(this);
+			// remove the this controller's reference
+			this.controller = null;
+			this.controllerName = null;
+			isPinAttached = false;
+			broadcastState();
+		}
+	}
+
+	public void setMaxVelocity(int velocity) {
+		this.maxVelocity = velocity;
+	}
+
+	public void setVelocity(double velocity) {
+		if (maxVelocity != -1 && velocity > maxVelocity) {
+			velocity = maxVelocity;
+			log.info("Trying to set velocity to a value greater than max velocity");
+		}
+		this.velocity = velocity;
+		if (controller != null) {
+			controller.servoSetVelocity(this);
+		}
+	}
+
+	public void setAcceleration(double acceleration) {
+		this.acceleration = acceleration;
+		if (controller != null) {
+			controller.servoSetAcceleration(this);
+		}
+	}
+
+	@Override
+	public double getMaxVelocity() {
+		return maxVelocity;
+	}
+
+	/*
+	 * public void moveToOutput(Integer moveTo) { if (controller == null) {
+	 * error(String.format("%s's controller is not set", getName())); return; }
+	 * 
+	 * // targetPos = pos; targetOutput = moveTo;
+	 * 
+	 * controller.servoWrite(this); lastActivityTime =
+	 * System.currentTimeMillis();
+	 * 
+	 * if (isEventsEnabled) { // update others of our position change
+	 * invoke("publishServoEvent", targetOutput); }
+	 * 
+	 * }
+	 */
+
+	@Override
+	public double getVelocity() {
+		return velocity;
+	}
+
+	public IKData publishIKServoEvent(IKData data) {
+		return data;
+	}
+
+	@Override
+	public void setPin(int pin) {
+		this.pin = pin;
+	}
+
+	@Override
+	public boolean isAttached(String name) {
+		return (controller != null && controller.getName().equals(name));
+	}
+
+	@Override
+	public Set<String> getAttached() {
+		HashSet<String> ret = new HashSet<String>();
+		if (controller != null) {
+			ret.add(controller.getName());
+		}
+		return ret;
+	}
+
+	@Override
+	public double getAcceleration() {
+		return acceleration;
+	}
+
+	/**
+	 * getCurrentPos() - return the calculated position of the servo use
+	 * lastActivityTime and velocity for the computation
+	 * 
+	 * @return the current position of the servo
+	 */
+	public Double getCurrentPos() {
+		return currentPosInput;
+	}
+
+	/**
+	 * return time to move the servo to the target position, in ms
+	 * 
+	 * @return
+	 */
+	int timeToMove() {
+		if (velocity <= 0.0) {
+			return 1;
+		}
+		double delta = Math.abs(mapper.calcOutput(targetPos) - mapper.calcOutput(lastPos));
+		double time = delta / velocity * 1000;
+		return (int) time;
+	}
+
+	/**
+	 * enableAutoAttach will attach a servo when ask to move and detach it when
+	 * the move is complete
+	 * 
+	 * @param autoAttach
+	 */
+	public void enableAutoAttach(boolean autoAttach) {
+		this.autoAttach = autoAttach;
+	}
+
+	public void enableAutoDetach(boolean autoDetach) {
+		this.autoDetach = autoDetach;
+		this.addServoEventListener(this);
+	}
+
+	public double microsecondsToDegree(int microseconds) {
+		if (microseconds <= 180)
+			return microseconds;
+		return (double) (microseconds - 544) * 180 / (2400 - 544);
+	}
+
+	public String publishServoAttach(String name) {
+		return name;
+	}
+
+	public String publishServoDetach(String name) {
+		return name;
+	}
+
+	/**
+	 * this output is 'always' in degrees !
+	 */
+	@Override
+	public double getTargetOutput() {
+		if (targetPos == null) {
+			targetPos = rest;
+		}
+		targetOutput = mapper.calcOutput(targetPos);
+		return targetOutput;
+	}
+
+	public void autoDetach() {
+		if (getTasks().containsKey("EndMoving")) {
+			purgeTask("EndMoving");
+		}
+		if (!isMoving() && autoAttach && isPinAttached()) {
+			detach();
+		}
+		// moving = false;
+	}
+
+	public boolean isMoving() {
+		return moving;
+	}
+
+	public void onServoEvent(Integer eventType, Integer currentPosUs, Integer targetPos) {
+		double currentPos = microsecondsToDegree(currentPosUs);
+		currentPosInput = mapper.calcInput(currentPos);
+		if (isEventsEnabled) {
+			invoke("publishServoEvent", currentPosInput);
+		}
+		if (isIKEventEnabled) {
+			IKData data = new IKData();
+			data.name = getName();
+			data.pos = currentPosInput;
+			data.state = eventType;
+			data.velocity = velocity;
+			data.targetPos = this.targetPos;
+			invoke("publishIKServoEvent", data);
+		}
+		if (eventType == SERVO_EVENT_STOPPED) {
+			moving = false;
+		} else {
+			moving = true;
+		}
+	}
+
+	public void onIMAngles(Object[] data) {
+		String name = (String) data[0];
+		if (name.equals(this.getName())) {
+			moveTo((double) data[1]);
+		}
+	}
+
+	public void onServoEvent(Double position) {
+		// log.info("{}.ServoEvent {}", getName(), position);
+		if (!isMoving() && autoDetach && isPinAttached()) {
+			if (velocity > -1) {
+				detach();
+			} else {
+				if (detachTimer != null) {
+					detachTimer.cancel();
+					detachTimer = null;
+				}
+				detachTimer = new Timer();
+				detachTimer.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						detach();
+					}
+				}, (long) defaultDetachDelay);
+			}
+			// addTask("EndMoving",defaultDetachDelay, "autoDetach");
+		}
+	}
+
+	public static void main(String[] args) throws InterruptedException {
+		try {
+			LoggingFactory.init(Level.INFO);
+
+			VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+			virtual.connect("COM10");
+			// Runtime.start("webgui", "WebGui");
+			Runtime.start("gui", "SwingGui");
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			arduino.record();
+			// arduino.getSerial().record();
+
+			log.info("ports {}", Arrays.toString(arduino.getSerial().getPortNames().toArray()));
+			arduino.connect("COM10");
+
+			log.info("ready here");
+			// arduino.ackEnabled = true;
+			Servo servo = (Servo) Runtime.start("servo", "Servo");
+
+			servo.attach(arduino, 7);
+			servo.moveTo(90);
+			servo.setRest(30);
+			
+			boolean done = true;
+			if (done){
+				return;
+			}
+
+			servo.attach(8);
+			servo.moveTo(90);
+			servo.moveTo(30);
+
+			servo.attach(9);
+			servo.moveTo(90);
+			servo.setRest(30);
+
+			// FIXME - JUNIT - test attach - detach - re-attach
+			// servo.detach(arduino);
+
+			log.info("servo attach {}", servo.isAttached());
+
+			arduino.disconnect();
+			arduino.connect("COM4");
+
+			arduino.reset();
+
+			log.info("ready here 2");
+			// servo.attach(arduino, 8);
+			// servo.attach(
+			servo.attach(arduino, 7);
+			servo.moveTo(90);
+			servo.moveTo(30);
+
+			servo.attach(9);
+			servo.moveTo(90);
+			servo.setRest(30);
+
+			servo.moveTo(90);
+			servo.setRest(30);
+			servo.moveTo(10);
+			servo.moveTo(90);
+			servo.moveTo(180);
+			servo.rest();
+
+			servo.setMinMax(30, 160);
+
+			servo.moveTo(40);
+			servo.moveTo(140);
+
+			servo.moveTo(180);
+
+			servo.setSpeed(0.5);
+			servo.moveTo(31);
+			servo.setSpeed(0.2);
+			servo.moveTo(90);
+			servo.moveTo(180);
+			servo.setSpeed(1.0);
+
+			// servo.test();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
 }
