@@ -156,7 +156,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * say's it is - if there is a difference the "user" should be notified -
 	 * but not forced to use the mrlBoardInfo.
 	 */
-	transient final BoardInfo boardInfo = new BoardInfo();
+	final BoardInfo boardInfo = new BoardInfo();
 
 	/**
 	 * board type - UNO Mega etc..
