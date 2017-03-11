@@ -1997,11 +1997,20 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 			// Runtime.start("webgui", "WebGui");
 			Runtime.start("a", "SwingGui");
-			Runtime.start("remotei", "RemoteAdapter");
+			RemoteAdapter remote = (RemoteAdapter)Runtime.start("ra", "RemoteAdapter");
+			
 			// Runtime.start("python", "Python");
 			VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
 			virtual.connect("COM78");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			arduino.connect("COM78");
+			
+			Servo servo = (Servo) Runtime.start("servo", "Servo");
+			servo.attach(arduino, 8, 90);
+			
+			Service.sleep(3000);
+			
+			remote.startListening();
 			
 			// Runtime.start("cli", "Cli");
 			// Runtime.start("webgui", "WebGui");
