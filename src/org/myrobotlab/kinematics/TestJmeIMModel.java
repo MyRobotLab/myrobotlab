@@ -8,7 +8,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.myrobotlab.service.IntegratedMovement2;
+import org.myrobotlab.service.IntegratedMovement;
 import org.myrobotlab.service.Servo.IKData;
 import org.python.jline.internal.Log;
 
@@ -44,7 +44,7 @@ public class TestJmeIMModel extends SimpleApplication{
   private Queue<Point> pointQueue = new ConcurrentLinkedQueue<Point>();
   private transient ArrayList<Node> collisionItems = new ArrayList<Node>();
   private boolean ready = false;
-  private transient IntegratedMovement2 service;
+  private transient IntegratedMovement service;
   private transient Node point;
 
    
@@ -57,7 +57,7 @@ public class TestJmeIMModel extends SimpleApplication{
   public void simpleInitApp() {
     assetManager.registerLocator("inmoov/jm3/assets", FileLocator.class);
     Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
-    mat.setColor("Color", ColorRGBA.Red);
+    mat.setColor("Color", ColorRGBA.Green);
     viewPort.setBackgroundColor(ColorRGBA.Gray);
     inputManager.setCursorVisible(true);
     flyCam.setEnabled(false);
@@ -200,8 +200,8 @@ public class TestJmeIMModel extends SimpleApplication{
     return ready;
   }
 
-  public void setService(IntegratedMovement2 integratedMovement2) {
-    service = integratedMovement2;
+  public void setService(IntegratedMovement integratedMovement) {
+    service = integratedMovement;
     
   }
   private ActionListener actionListener = new ActionListener() {

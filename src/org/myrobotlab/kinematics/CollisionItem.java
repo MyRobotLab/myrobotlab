@@ -139,7 +139,7 @@ public class CollisionItem implements Cloneable{
   	this.done = ci.done;
   	this.fromKinect = ci.fromKinect;
   	this.cloudMap = ci.cloudMap;
-		
+		this.render = ci.render;
 	}
 
 	private void buildCollisionItem(HashMap<Integer[], Map3DPoint> cloudMap) {

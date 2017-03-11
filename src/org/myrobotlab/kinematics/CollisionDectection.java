@@ -263,7 +263,7 @@ public class CollisionDectection implements Cloneable {
 		try {
 			retval = (CollisionDectection) this.clone();
 			//retval.items = (ConcurrentHashMap<String, CollisionItem>) items.clone();
-			retval.items.clear();
+			//retval.items.clear();
 			for (CollisionItem ci:items.values()){
 				retval.items.put(ci.name, new CollisionItem(ci));
 			}

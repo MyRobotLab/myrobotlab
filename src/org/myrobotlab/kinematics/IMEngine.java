@@ -11,8 +11,8 @@ import org.myrobotlab.genetic.GeneticAlgorithm;
 import org.myrobotlab.kinematics.CollisionDectection.CollisionResults;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.IntegratedMovement2;
-import org.myrobotlab.service.IntegratedMovement2.ObjectPointLocation;
+import org.myrobotlab.service.IntegratedMovement;
+import org.myrobotlab.service.IntegratedMovement.ObjectPointLocation;
 import org.myrobotlab.service.Servo.IKData;
 import org.python.jline.internal.Log;
 
@@ -27,7 +27,7 @@ public class IMEngine extends Thread implements Genetic {
 	public Point target = null;
 	private double maxDistance = 5.0;
 	private Matrix inputMatrix = null;
-	private transient IntegratedMovement2 service = null;
+	private transient IntegratedMovement service = null;
 	private boolean noUpdatePosition = false;
 	private boolean holdTargetEnabled = false;
 	private transient CollisionDectection computeCD;
@@ -46,7 +46,7 @@ public class IMEngine extends Thread implements Genetic {
 
   MoveInfo moveInfo = null;
 	
-	public IMEngine(String name, IntegratedMovement2 IM) {
+	public IMEngine(String name, IntegratedMovement IM) {
 		super(name);
 		this.name = name;
 		arm = new DHRobotArm();
@@ -56,11 +56,11 @@ public class IMEngine extends Thread implements Genetic {
 		//this.start();
 	}
 	
-	public IMEngine(String name, DHRobotArm arm, IntegratedMovement2 IM) {
+	public IMEngine(String name, DHRobotArm arm, IntegratedMovement integratedMovement) {
 		super(name);
 		this.arm = arm;
 		this.name = name;
-		service  = IM;
+		service  = integratedMovement;
 		computeCD = service.collisionItems.clones();
 		//this.start();
 	}
@@ -76,9 +76,7 @@ public class IMEngine extends Thread implements Genetic {
 	public void run() {
 		Point lastPosition = arm.getPalmPosition();
 		while(true){
-//	    if (target != null && arm.getPalmPosition().distanceTo(target) < maxDistance && !holdTargetEnabled) {
-//	      target = null;
-//	    }
+      Point currentPosition = arm.getPalmPosition();
 			Point avoidPoint = checkCollision(arm, service.collisionItems);
       if (avoidPoint != null) {
         Point previousTarget = target;
@@ -87,24 +85,17 @@ public class IMEngine extends Thread implements Genetic {
         target = previousTarget;
         lastPosition = arm.getPalmPosition();
       }
-			if (target != null && arm.getPalmPosition().distanceTo(target) > maxDistance && System.currentTimeMillis() > lastTimeUpdate + timeToWait) {
-				Log.info("distance to target {}", arm.getPalmPosition().distanceTo(target));
-				Log.info(arm.getPalmPosition().toString());
+			if (target != null && currentPosition.distanceTo(target) > maxDistance && System.currentTimeMillis() > lastTimeUpdate + timeToWait) {
+				Log.info("distance to target {}", currentPosition.distanceTo(target));
+				Log.info(currentPosition.toString());
 				if (moveInfo != null) {
-				  //target = moveToObject();
 				}
 				move();
 				lastPosition = arm.getPalmPosition();
 			}
-			if (target != null && arm.getPalmPosition().distanceTo(target) < maxDistance) {
+			if (target != null && currentPosition.distanceTo(target) < maxDistance) {
 			  target = null;
 			  moveInfo = null;
-			}
-			try {
-				sleep(0);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}
@@ -510,7 +501,7 @@ public class IMEngine extends Thread implements Genetic {
     return arm.createJointPositionMap();
   }
 
-  public void moveTo(CollisionItem item, ObjectPointLocation location) {
+  public void moveTo(CollisionItem item,ObjectPointLocation location) {
     moveInfo = new MoveInfo();    
     moveInfo.targetItem = item;   
     moveInfo.objectLocation = location;   
