@@ -45,7 +45,7 @@ public class VirtualArduino extends Service {
   /**
    * our emulated electronic UART
    */
-  transient Serial uart;
+  Serial uart;
   String portName = "COM42";
 
   transient VirtualMsg msg;

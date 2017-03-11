@@ -1,6 +1,10 @@
 package org.myrobotlab.arduino;
 
-public class DeviceSummary {
+import java.io.Serializable;
+
+public class DeviceSummary implements Serializable {	
+	private static final long serialVersionUID = 1L;
+	
 	String name;
 	Integer id;
 	String type;
