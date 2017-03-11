@@ -217,7 +217,7 @@ public class MouthControl extends Service {
 
     meta.addPeer("jaw", "Servo", "shared Jaw servo instance");
     meta.addPeer("arduino", "Arduino", "shared Arduino instance");
-    meta.addPeer("mouth", "AcapelaSpeech", "shared Speech instance");
+    meta.addPeer("mouth", "MarySpeech", "shared Speech instance");
 
     return meta;
   }
