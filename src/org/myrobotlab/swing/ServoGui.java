@@ -29,7 +29,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -42,9 +41,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.SwingGui;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -59,221 +57,234 @@ import org.slf4j.Logger;
  */
 public class ServoGui extends ServiceGui implements ActionListener {
 
-  private class SliderListener implements ChangeListener {
-    @Override
-    public void stateChanged(javax.swing.event.ChangeEvent e) {
+	private class SliderListener implements ChangeListener {
+		@Override
+		public void stateChanged(javax.swing.event.ChangeEvent e) {
 
-      boundPos.setText(String.format("%d", slider.getValue()));
+			boundPos.setText(String.format("%d", slider.getValue()));
 
-      if (myService != null) {
-        myService.send(boundServiceName, "moveTo", Integer.valueOf(slider.getValue()));
-      } else {
-        log.error("can not send message myService is null");
-      }
-    }
-  }
+			if (myService != null) {
+				myService.send(boundServiceName, "moveTo", Integer.valueOf(slider.getValue()));
+			} else {
+				log.error("can not send message myService is null");
+			}
+		}
+	}
 
-  public final static Logger log = LoggerFactory.getLogger(ServoGui.class);
+	public final static Logger log = LoggerFactory.getLogger(ServoGui.class);
 
-  static final long serialVersionUID = 1L;
+	static final long serialVersionUID = 1L;
 
-  JLabel boundPos = new JLabel("90");
-  JButton attachButton = new JButton("attach");
+	JLabel boundPos = new JLabel("90");
+	JButton attachButton = new JButton("attach");
+	JButton updateLimitsButton = new JButton("update");
 
-  JButton updateLimitsButton = new JButton("update");
+	JSlider slider = new JSlider(0, 180, 90);
+	BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
+	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
+	
+	JComboBox<String> controller = new JComboBox<String>();
+	JComboBox<Integer> pinList = new JComboBox<Integer>();
 
-  JSlider slider = new JSlider(0, 180, 90);
-  BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
+	JTextField posMin = new JTextField("0");
+	JTextField posMax = new JTextField("180");
 
-  BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
-  JComboBox<String> controller = new JComboBox<String>();
+	//Servo myServox = null;
 
-  JComboBox<Integer> pinList = new JComboBox<Integer>();
+	SliderListener sliderListener = new SliderListener();
 
-  JTextField posMin = new JTextField("0");
+	public ServoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
+		super(boundServiceName, myService, tabs);
+		// myServo = (Servo) Runtime.getService(boundServiceName);
 
-  JTextField posMax = new JTextField("180");
+		for (int i = 0; i < 54; i++) {
+			pinList.addItem(i);
+		}
 
-  Servo myServo = null;
+		updateLimitsButton.addActionListener(this);
+		left.addActionListener(this);
+		right.addActionListener(this);
+		controller.addActionListener(this);
+		attachButton.addActionListener(this);
+		pinList.addActionListener(this);
+		boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
 
-  SliderListener sliderListener = new SliderListener();
+		JPanel s = new JPanel();
+		s.add(left);
+		s.add(slider);
+		s.add(right);
+		addTop(2, boundPos, 3, s);
+		// addLine(s);
+		addTop("controller:", controller, "   pin:", pinList, attachButton);
+		addTop("min:", posMin, "   max:", posMax, updateLimitsButton);
 
-  public ServoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
-    myServo = (Servo) Runtime.getService(boundServiceName);
+		refreshControllers();
+	}
 
-    for (int i = 0; i < 54; i++) {
-      pinList.addItem(i);
-    }
+	// SwingGui's action processing section - data from user
+	@Override
+	public void actionPerformed(final ActionEvent event) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				Object o = event.getSource();
+				if (o == controller) {
+					String controllerName = (String) controller.getSelectedItem();
+					log.debug(String.format("controller event %s", controllerName));
+					if (controllerName != null && controllerName.length() > 0) {
 
-    updateLimitsButton.addActionListener(this);
-    left.addActionListener(this);
-    right.addActionListener(this);
-    controller.addActionListener(this);
-    attachButton.addActionListener(this);
-    pinList.addActionListener(this);
-    boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
+						// NOT WORTH IT - JUST BUILD 48 PINS !!!
+						// ServoController sc = (ServoController)
+						// Runtime.getService(controllerName);
 
-    JPanel s = new JPanel();
-    s.add(left);
-    s.add(slider);
-    s.add(right);
-    addLine(boundPos, s);
-    // addLine(s);
-    addBottomLine(" controller", controller, "  pin", pinList, attachButton);
-    addBottomLine(" min", posMin, "  max", posMax, updateLimitsButton);
-    
-    refreshControllers();
-  }
+						// NOT WORTH THE TROUBLE !!!!
+						// @SuppressWarnings("unchecked")
+						// ArrayList<Pin> pinList = (ArrayList<Pin>)
+						// myService.sendBlocking(controllerName, "getPinList");
+						// log.info("{}", pinList.size());
 
-  // SwingGui's action processing section - data from user
-  @Override
-  public void actionPerformed(final ActionEvent event) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        Object o = event.getSource();
-        if (o == controller) {
-          String controllerName = (String) controller.getSelectedItem();
-          log.debug(String.format("controller event %s", controllerName));
-          if (controllerName != null && controllerName.length() > 0) {
+						// FIXME - get Local services relative to the servo
+						// pinModel.removeAllElements();
+						// pinModel.addElement(null);
 
-            // NOT WORTH IT - JUST BUILD 48 PINS !!!
-            // ServoController sc = (ServoController)
-            // Runtime.getService(controllerName);
+						// for (int i = 0; i < pinList.size(); ++i) {
+						// pinModel.addElement(pinList.get(i).pin);
+						// }
 
-            // NOT WORTH THE TROUBLE !!!!
-            // @SuppressWarnings("unchecked")
-            // ArrayList<Pin> pinList = (ArrayList<Pin>)
-            // myService.sendBlocking(controllerName, "getPinList");
-            // log.info("{}", pinList.size());
+						// pin.invalidate();
 
-            // FIXME - get Local services relative to the servo
-            // pinModel.removeAllElements();
-            // pinModel.addElement(null);
+					}
+				}
 
-            // for (int i = 0; i < pinList.size(); ++i) {
-            // pinModel.addElement(pinList.get(i).pin);
-            // }
+				if (o == attachButton) {
+					if (attachButton.getText().equals("attach")) {
+						send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem(),
+								new Double(slider.getValue()));
+					} else {
+						send("detach", controller.getSelectedItem());
+					}
+					return;
+				}
 
-            // pin.invalidate();
+				if (o == updateLimitsButton) {
+					send("setMinMax", Integer.parseInt(posMin.getText()), Integer.parseInt(posMax.getText()));
+					return;
+				}
 
-          }
-        }
+				if (o == right) {
+					slider.setValue(slider.getValue() + 1);
+					return;
+				}
 
-        if (o == attachButton) {
-          if (attachButton.getText().equals("attach")) {
-            send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem(), (Integer) slider.getValue());
-          } else {
-            send("detach", controller.getSelectedItem());
-          }
-          return;
-        }
+				if (o == left) {
+					slider.setValue(slider.getValue() - 1);
+					return;
+				}
 
-        if (o == updateLimitsButton) {
-          send("setMinMax", Integer.parseInt(posMin.getText()), Integer.parseInt(posMax.getText()));
-          return;
-        }
+			}
+		});
+	}
 
-        if (o == right) {
-          slider.setValue(slider.getValue() + 1);
-          return;
-        }
+	@Override
+	public void subscribeGui() {
+		subscribe("refreshControllers");
+		subscribe("getController");
+	}
 
-        if (o == left) {
-          slider.setValue(slider.getValue() - 1);
-          return;
-        }
+	// FIXME - runtime should handle all unsubscribes of teardown
+	@Override
+	public void unsubscribeGui() {
+		unsubscribe("refreshControllers");
+		unsubscribe("getController");
+	}
 
-      }
-    });
-  }
+	synchronized public void onState(final Servo servo) {
 
-  @Override
-  public void subscribeGui() {
-  }
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
-  @Override
-  public void unsubscribeGui() {
-  }
+				removeListeners();
+				refreshControllers();
 
-  synchronized public void onState(final Servo servo) {
+				ServoController sc = servo.getController();
 
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+				if (sc != null) {
+					controller.setSelectedItem(sc.getName());
 
-        removeListeners();
-        refreshControllers();
+					Integer servoPin = servo.getPin();
 
-        ServoController sc = servo.getController();
+					if (servoPin != null)
+						pinList.setSelectedItem(servoPin);
+				}
 
-        if (sc != null) {
-          controller.setSelectedItem(sc.getName());
+				if (servo.isAttached()) {
+					attachButton.setText("detach");
+					controller.setEnabled(false);
+					pinList.setEnabled(false);
+				} else {
+					attachButton.setText("attach");
+					controller.setEnabled(true);
+					pinList.setEnabled(true);
+				}
 
-          Integer servoPin = servo.getPin();
+				Double pos = servo.getPos();
+				if (pos != null) {
+					boundPos.setText(Double.toString(pos));
+					slider.setValue(pos.intValue());
+				}
 
-          if (servoPin != null)
-            pinList.setSelectedItem(servoPin);
-        }
+				// In the inverted case, these are reversed
+				slider.setMinimum((int) servo.getMin());
+				slider.setMaximum((int) servo.getMax());
 
-        if (servo.isAttached()) {
-          attachButton.setText("detach");
-          controller.setEnabled(false);
-          pinList.setEnabled(false);
-        } else {
-          attachButton.setText("attach");
-          controller.setEnabled(true);
-          pinList.setEnabled(true);
-        }
+				posMin.setText(servo.getMin() + "");
+				posMax.setText(servo.getMax() + "");
 
-        Double pos = servo.getPos();
-        if (pos != null) {
-          boundPos.setText(Double.toString(pos));
-          slider.setValue(pos.intValue());
-        }
+				restoreListeners();
+			}
+		});
 
-        // In the inverted case, these are reversed
-        slider.setMinimum((int) servo.getMin());
-        slider.setMaximum((int) servo.getMax());
+	}
 
-        posMin.setText(servo.getMin() + "");
-        posMax.setText(servo.getMax() + "");
+	public void onRefreshControllers(final List<String> c) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				controller.removeAllItems();
+				for (int i = 0; i < c.size(); ++i) {
+					controller.addItem(c.get(i));
+				}
+			}
+		});
+	}
 
-        restoreListeners();
-      }
-    });
+	public void onController(final ServoController c) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				if (c != null) {
+					controller.setSelectedItem(c.getName());
+				}
+			}
+		});
+	}
 
-  }
+	public void refreshControllers() {
+		send("refreshControllers");
+		send("getController");
+	}
 
-  public void refreshControllers() {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+	public void removeListeners() {
+		controller.removeActionListener(this);
+		pinList.removeActionListener(this);
+		slider.removeChangeListener(sliderListener);
+	}
 
-        myServo.refreshControllers();
-        controller.removeAllItems();
-        List<String> c = myServo.controllers;
-        for (int i = 0; i < c.size(); ++i) {
-          controller.addItem(c.get(i));
-        }
-        if (myServo.getController() != null) {
-          controller.setSelectedItem(myServo.getController().getName());
-        }
-      }
-    });
-  }
-
-  public void removeListeners() {
-    controller.removeActionListener(this);
-    pinList.removeActionListener(this);
-    slider.removeChangeListener(sliderListener);
-  }
-
-  public void restoreListeners() {
-    controller.addActionListener(this);
-    pinList.addActionListener(this);
-    slider.addChangeListener(sliderListener);
-  }
+	public void restoreListeners() {
+		controller.addActionListener(this);
+		pinList.addActionListener(this);
+		slider.addChangeListener(sliderListener);
+	}
 
 }

@@ -132,7 +132,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 	 * The same mechanism is employed in mrl.js to handle all call-backs to
 	 * ServiceGui.js derived panels.
 	 * 
-	 * FIXME / TODO ? - "Probably" should be Map<{name}, Map<{method}, List<ServiceGui>>>
+	 * FIXME / TODO ? - "Probably" should be Map<{name}, Map<{method}, List
+	 * <ServiceGui>>>
 	 *
 	 */
 
@@ -140,7 +141,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
 	transient JLabel status = new JLabel("status:");
 	transient JButton statusClear = new JButton("clear");
-	
+
 	boolean active = false;
 
 	static public void attachJavaConsole() {
@@ -212,8 +213,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 	public void actionPerformed(ActionEvent e) {
 		String cmd = e.getActionCommand();
 		Object o = e.getSource();
-		
-		if (statusClear == o){
+
+		if (statusClear == o) {
 			status.setForeground(Color.black);
 			status.setOpaque(false);
 			status.setText("status:");
@@ -252,7 +253,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-
 				String name = sw.getName();
 				String guiClass = String.format("org.myrobotlab.swing.%sGui", sw.getClass().getSimpleName());
 
@@ -268,20 +268,20 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
 				// woot - got index !
 				int index = tabs.indexOfTab(name) - 1;
-
-				if (newGui != null) {
-					return;
-				} else {
-					++index;
-				}
-
+				
 				Component c = tabs.getTabComponentAt(index);
 				if (c instanceof TabControl2) {
 					// TabControl2 tc = (TabControl2) c;
 					if (!sw.isLocal()) {
 						Color hsv = SwingGui.getColorFromURI(sw.getInstanceId());
-						tabs.setBackgroundAt(index, hsv);
+						tabs.setBackgroundAt(index + 1, hsv);
 					}
+				}
+
+				if (newGui != null) {
+					return;
+				} else {
+					++index;
 				}
 
 				frame.pack();
@@ -633,7 +633,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 			statusPanel.add(status, BorderLayout.CENTER);
 			statusPanel.add(statusClear, BorderLayout.EAST);
 			tabPanel.add(statusPanel, BorderLayout.SOUTH);
-			
+
 			statusClear.addActionListener(this);
 			status.setOpaque(true);
 			frame.add(tabPanel);
