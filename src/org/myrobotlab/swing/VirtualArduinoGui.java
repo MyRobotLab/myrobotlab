@@ -31,11 +31,9 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JTabbedPane;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.VirtualArduino;
-import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.swing.widget.PortGui;
 
 // FIXME - add stop watch capabilities
@@ -48,8 +46,10 @@ public class VirtualArduinoGui extends ServiceGui implements ActionListener {
     super(boundServiceName, myService, tabs);  
     VirtualArduino virtual = (VirtualArduino)Runtime.getService(boundServiceName);
     // Peers.getPeerKey(boundServiceName, reservedKey);
-    SerialDevice serial = virtual.getSerial();
-    portgui = new PortGui(serial.getName(), myService, tabs);
+    // getPeerName - needs to get from immutable local copy of config & know about context & gateway :(
+    // String uartName = virtual.getPeerName("uart"); // getPeerName - needs to know if local or not
+    // SerialDevice serial = virtual.getSerial();
+    portgui = new PortGui(virtual.getPeerName("uart"), myService, tabs);
     addTop(portgui.getDisplay());
   }
 

@@ -166,7 +166,7 @@ public class Shoutbox extends Service {
       }
 
       if (fw == null) {
-        String filename = String.format("%s/shouts.%s.js", getName(), TSFormatter.format(new Date()));
+        String filename = String.format("%s/shouts.%s.js", getName(), tsFormatter.format(new Date()));
         File archive = new File(filename);
 
         fw = new FileWriter(archive.getAbsoluteFile());

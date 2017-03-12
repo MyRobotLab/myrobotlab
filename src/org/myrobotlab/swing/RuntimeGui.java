@@ -25,11 +25,14 @@
 
 package org.myrobotlab.swing;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -55,6 +58,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JToolTip;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -84,7 +88,7 @@ import org.myrobotlab.swing.widget.PossibleServicesRenderer;
 import org.myrobotlab.swing.widget.ProgressDialog;
 import org.slf4j.Logger;
 
-public class RuntimeGui extends ServiceGui implements ActionListener, ListSelectionListener {
+public class RuntimeGui extends ServiceGui implements ActionListener, ListSelectionListener, KeyListener {
 
 	class FilterListener implements ActionListener {
 		@Override
@@ -93,7 +97,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 			if ("all".equals(cmd.getActionCommand())) {
 				getPossibleServices();
 			} else {
-				getPossibleServices(cmd.getActionCommand());
+				getPossibleServicesFromCategory(cmd.getActionCommand());
 			}
 		}
 	}
@@ -115,10 +119,12 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 	String possibleServiceFilter = null;
 	ProgressDialog progressDialog = null;
 
-	public Runtime myRuntime = null;
-	public Repo myRepo = null;
+	JTextField search = new JTextField();
+	
+	Runtime myRuntime = null;
+	Repo myRepo = null;
 
-	public ServiceData serviceData = null;
+	ServiceData serviceData = null;
 
 	DefaultListModel<Category> categoriesModel = new DefaultListModel<Category>();
 	// below should be String NOT ServiceInterface !!!
@@ -313,7 +319,11 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
 		JPanel flow = new JPanel();
 		flow.add(createCategories());
-		flow.add(possible);
+		JPanel border = new JPanel(new BorderLayout());
+		search.addKeyListener(this);
+		border.add(search, BorderLayout.NORTH);
+		border.add(possible, BorderLayout.CENTER);
+		flow.add(border);
 		flow.add(createRunningServices());
 		addLine(flow);
 
@@ -552,8 +562,35 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 	}
 
 	public void getPossibleServices() {
-		getPossibleServices(null);
+		getPossibleServicesFromCategory(null);
 	}
+	
+	
+	public void getPossibleServicesFromName(final String filter) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				String filtered = (filter == null)?"":filter.trim();
+				// clear data
+				for (int i = possibleServicesModel.getRowCount(); i > 0; --i) {
+					possibleServicesModel.removeRow(i - 1);
+				}
+				// populate with serviceData
+				ArrayList<ServiceType> possibleService = serviceData.getServiceTypes();
+				for (int i = 0; i < possibleService.size(); ++i) {
+					ServiceType serviceType = possibleService.get(i);
+					if (filtered == "" || serviceType.getSimpleName().toLowerCase().indexOf(filtered.toLowerCase()) != -1){
+						if (serviceType.isAvailable()) {
+							possibleServicesModel.addRow(new Object[] { serviceType, "" });
+						}
+					}
+				}
+				possibleServicesModel.fireTableDataChanged();
+				possibleServices.invalidate();
+			}
+		});
+	}
+
 
 	/**
 	 * lame - deprecate - refactor - or better yet make webgui FIXME this should
@@ -561,7 +598,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 	 * 
 	 * @param serviceTypeNames
 	 */
-	public void getPossibleServices(final String filter) {
+	public void getPossibleServicesFromCategory(final String filter) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -671,8 +708,25 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 			} else {
 				log.info("valueChanged null");
 			}
-			getPossibleServices(categoryFilter);
+			getPossibleServicesFromCategory(categoryFilter);
 		}
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		getPossibleServicesFromName(search.getText() + e.getKeyChar());
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
