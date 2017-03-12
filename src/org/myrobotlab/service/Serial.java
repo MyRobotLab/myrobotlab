@@ -228,16 +228,6 @@ public class Serial extends Service
 		return retVal;
 	}
 
-	/*
-	 * DEPRECATED BECAUSE SIGNED BYTE ARRAYS ARE SILLY public static byte[]
-	 * intArrayToByteArray(int[] src) {
-	 * 
-	 * if (src == null) { return null; }
-	 * 
-	 * byte[] ret = new byte[src.length]; for (int i = 0; i < src.length; ++i) {
-	 * ret[i] = (byte) src[i]; } return ret; }
-	 */
-
 	/**
 	 * Static list of third party dependencies for this service. The list will
 	 * be consumed by Ivy to download and manage the appropriate resources

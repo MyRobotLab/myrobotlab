@@ -135,9 +135,22 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * a radix-tree of data -"DNA" Description of Neighboring Automata ;)
+   * this is a 'master build plan' for the service
+   * 
+   * TODO - when a service is created - a copy of this (RNA) is made and the 
+   * instance of the service creates and starts its peers according to its definition
+   * 
+   * For mutations - the master build plan is changed - then a copy is made
+   * 
+   * Each Service instance contains its own (possibly mutated) version
+   * 
+   * Peer references should probably always be transient - as the cross-reference
+   * of names from remotes will get the wrong name
+   * 
+   * You call this peer "Bob" .. but in Chicago there is more than one Bob - and your "Bob" needs
+   * to be referenced as "Cincinnati  Bob" - if your remote instance is in Chicago and you just say "Bob"
+   * I will think your talking about "Chicago Bob" :)
    */
-  // transient static public final Index<ServiceReservation> dna = new
-  // Index<ServiceReservation>();
   transient static public final TreeMap<String, ServiceReservation> dna = new TreeMap<String, ServiceReservation>();
 
   private static final long serialVersionUID = 1L;
@@ -181,7 +194,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   // So we need to make it a HashMap in order for gson to convert to an object
   protected Map<String, String> interfaceSet;
 
-  transient protected SimpleDateFormat TSFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+  transient protected SimpleDateFormat tsFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
   transient protected Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
 
@@ -202,11 +215,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
   // index
   /**
    * This method is used to add new dna to dna which is passed in. Typically
-   * this method is called by mergePeerDNA - which sends the global static dna
+   * this method is called by mergePeerDna - which sends the global static dna
    * reference in plus a class name of a class which is currently being
    * constructed
    * 
-   * @param myDNA
+   * @param myDna
    *          - dna which information will be added to
    * @param myKey
    *          - key (name) instance of the class currently under construction
@@ -215,7 +228,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * @param comment
    *          - added comment
    */
-  static public void buildDNA(String myKey, String serviceClass, String comment) {
+  static public void buildDna(String myKey, String serviceClass, String comment) {
 
     String fullClassName = CodecUtils.getServiceType(serviceClass);
 
@@ -240,8 +253,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // ServiceType st = (ServiceType) method.invoke(null, new Object[] {
       // myKey });
       ServiceType st = (ServiceType) method.invoke(null);
-      // Index<ServiceReservation> peerDNA = peers.getDNA();
-      // Index<ServiceReservation> peerDNA =
+      // Index<ServiceReservation> peerDna = peers.getDNA();
+      // Index<ServiceReservation> peerDna =
       // st.getPeers();//peers.getDNA();
 
       TreeMap<String, ServiceReservation> peers = st.getPeers();
@@ -297,7 +310,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
           log.info(sb.toString());
 
-          buildDNA(Peers.getPeerKey(myKey, sr.key), sr.fullTypeName, sr.comment);
+          buildDna(Peers.getPeerKey(myKey, sr.key), sr.fullTypeName, sr.comment);
         }
 
       }
@@ -323,12 +336,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * @param serviceClass
    * @return
    */
-  static public TreeMap<String, ServiceReservation> buildDNA(String serviceClass) {
-    return buildDNA("", serviceClass);
+  static public TreeMap<String, ServiceReservation> buildDna(String serviceClass) {
+    return buildDna("", serviceClass);
   }
 
-  static public TreeMap<String, ServiceReservation> buildDNA(String myKey, String serviceClass) {
-    buildDNA(myKey, serviceClass, null);
+  static public TreeMap<String, ServiceReservation> buildDna(String myKey, String serviceClass) {
+    buildDna(myKey, serviceClass, null);
     log.info("{}", dna);
     return dna;
   }
@@ -435,7 +448,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return cfgDir;
   }
 
-  static public TreeMap<String, ServiceReservation> getDNA() {
+  static public TreeMap<String, ServiceReservation> getDna() {
     return dna;
   }
 
@@ -497,11 +510,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * @param myKey
    * @param className
    */
-  public void mergePeerDNA(String myKey, String className) {
-    if (myKey.equals("c01")) {
-      log.info("blah");
-    }
-
+  public void mergePeerDna(String myKey, String className) {
     if (serviceType != null) {
       TreeMap<String, ServiceReservation> peers = serviceType.getPeers();
       for (Entry<String, ServiceReservation> entry : peers.entrySet()) {
@@ -528,7 +537,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
           // if actualName != key then there is a re-map
 
           // create new service reservation with fullkey to put into
-          // dna
+          // dna9
           // do we prefix the actual name !?!?!?!?!?
           ServiceReservation sr = null;
 
@@ -548,13 +557,18 @@ public abstract class Service extends MessageService implements Runnable, Serial
             sr = new ServiceReservation(fullKey, actualName, template.fullTypeName, template.comment, template.isRoot);
 
             // we have to recursively move things if we moved a root
-            // of some complex peer
-            movePeerDNA(fullKey, actualName, template.fullTypeName, sr.comment);
+            // of some complex peer (the root and all its branches)
+            movePeerDna(fullKey, actualName, template.fullTypeName, sr.comment);
           }
 
           dna.put(fullKey, sr);
         } else {
-          log.info("found reservation {} {}", fullKey, entry.getValue());
+          log.info("found reservation name [{}] is replaced with {}", fullKey, entry.getValue());
+          ServiceReservation reservation = dna.get(fullKey);
+          if (reservation.fullTypeName == null){
+        	  log.info("no type name in reservation, replacing with standard type - {}", template.fullTypeName);
+        	  reservation.fullTypeName = template.fullTypeName;
+          }
         }
       }
     }
@@ -570,7 +584,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * @param className
    * @param comment
    */
-  public void movePeerDNA(String myKey, String actualName, String fullTypeName, String comment) {
+  public void movePeerDna(String myKey, String actualName, String fullTypeName, String comment) {
     ServiceType meta = getMetaData(fullTypeName);
     if (meta != null) {
       TreeMap<String, ServiceReservation> peers = meta.getPeers();
@@ -585,7 +599,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         ServiceReservation sr = new ServiceReservation(movedActual, movedActual, templateSr.fullTypeName, templateSr.comment);
         dna.put(movedActual, sr);
         // recurse to process children
-        movePeerDNA(fullKey, movedActual, templateSr.fullTypeName, templateSr.comment);
+        movePeerDna(fullKey, movedActual, templateSr.fullTypeName, templateSr.comment);
       }
 
     }
@@ -725,7 +739,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // merge all our peer keys into the dna
     // so that reservations are set with actual names if
     // necessary
-    mergePeerDNA(reservedKey, serviceClass);
+    mergePeerDna(reservedKey, serviceClass);
 
     // see if incoming key is my "actual" name
     ServiceReservation sr = dna.get(reservedKey);
@@ -744,7 +758,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     cm = new CommunicationManager(name);
     this.outbox.setCommunicationManager(cm);
 
-    TSFormatter.setCalendar(cal);
+    tsFormatter.setCalendar(cal);
     load();
     Runtime.register(this, null);
   }
@@ -791,9 +805,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
       outbox.notifyList.put(listener.topicMethod.toString(), notifyList);
     }
   }
-
-  // -------------------------------- new createPeer end
-  // -----------------------------------
 
   public void addTask(int interval, String method, Object... params) {
     addTask(method, interval, method, params);
@@ -893,9 +904,18 @@ public abstract class Service extends MessageService implements Runnable, Serial
         // don't really care
       }
     }
-
   }
 
+  public String getPeerName(String key){
+	if (!serviceType.peers.containsKey(key)){
+		return null;
+	} else {
+		ServiceReservation sr = serviceType.peers.get(key);
+		// TODO !isLocal(){ return gw.getPrefix() + actualName
+		return sr.actualName;
+	}
+  }
+  
   public synchronized ServiceInterface createPeer(String reservedKey) {
     String fullkey = Peers.getPeerKey(getName(), reservedKey);
 
@@ -910,14 +930,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return Runtime.create(sr.actualName, sr.fullTypeName);
   }
 
-  // -------------------------------- new createPeer begin
-  // -----------------------------------
   public synchronized ServiceInterface createPeer(String reservedKey, String defaultType) {
     return Runtime.create(Peers.getPeerKey(getName(), reservedKey), defaultType);
   }
 
   /**
-   * ` called typically from a remote system When 2 MRL instances are connected
+   * called typically from a remote system When 2 MRL instances are connected
    * they contain serialized non running Service in a registry, which is
    * maintained by the Runtime. The data can be stale.
    * 
@@ -1517,6 +1535,15 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return this;
   }
 
+  /**
+   * FIXME - implement
+   * This SHOULD NOT be called by the framework - since - the framework does not
+   * know about dna mutation - or customizations which have been applied such that
+   * Arduinos are shared between services or peers of services
+   * 
+   * It SHOULD shutdown all the peers of a service - but it SHOULD NOT be automatically called
+   * by the framework.  If the 'user' wants to release all peers - it should fufill the request
+   */
   @Override
   public void releasePeers() {
     log.info(String.format("dna - %s", dna.toString()));
@@ -1528,30 +1555,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
       Method method = theClass.getMethod("getMetaData");
       ServiceType serviceType = (ServiceType) method.invoke(null);
       TreeMap<String, ServiceReservation> peers = serviceType.getPeers();
-      /*
-       * DEPRECATED ? If a service shutdown - should it shut down its children ?
-       * maybe its children are shared with others - that might be bad ..
-       * 
-       * IndexNode<ServiceReservation> myNode = peers.getDNA().getNode(myKey);
-       * // LOAD CLASS BY NAME - and do a getReservations on it !
-       * HashMap<String, IndexNode<ServiceReservation>> peerRequests =
-       * myNode.getBranches(); for (Entry<String, IndexNode<ServiceReservation>>
-       * o : peerRequests.entrySet()) { String peerKey = o.getKey();
-       * IndexNode<ServiceReservation> p = o.getValue();
-       * 
-       * String fullKey = Peers.getPeerKey(myKey, peerKey); ServiceReservation
-       * peersr = p.getValue(); ServiceReservation globalSr = dna.get(fullKey);
-       * 
-       * // TODO - if (globalSr != null) {
-       * 
-       * log.info(String.format("*releasing** key %s -> %s %s %s", fullKey,
-       * globalSr.actualName, globalSr.fullTypeName, globalSr.comment));
-       * ServiceInterface si = Runtime.getService(fullKey); if (si == null) {
-       * log.info(String.format("%s is not registered - skipping", fullKey)); }
-       * else { si.releasePeers(); si.releaseService(); }
-       * 
-       * } }
-       */
+      // FIXME - recursively release peers
+     
     } catch (Exception e) {
       log.debug(String.format("%s does not have a getPeers", serviceClass));
     }
