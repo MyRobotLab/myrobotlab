@@ -1,15 +1,12 @@
 package org.myrobotlab.kinematics;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 import org.myrobotlab.openni.PVector;
 import org.python.jline.internal.Log;
 
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer.Type;
@@ -23,7 +20,7 @@ public class CollisionItem implements Cloneable{
   ArrayList<String> ignore = new ArrayList<String>();
   ArrayList<String> done = new ArrayList<String>();
   boolean fromKinect = false;
-  HashMap<Integer[], Map3DPoint> cloudMap;
+  public HashMap<Integer[], Map3DPoint> cloudMap;
   private boolean render = false;
   private Mesh mesh;
   
@@ -58,7 +55,7 @@ public class CollisionItem implements Cloneable{
   	//buildMesh(cloudMap);
   }
 
-  private void buildMesh(HashMap<Integer[], Map3DPoint> cloudMap2) {
+  public void buildMesh(HashMap<Integer[], Map3DPoint> cloudMap2) {
     mesh = new Mesh();
     Vector3f[] vertices = new Vector3f[cloudMap2.size()];
     int i=0;
@@ -195,7 +192,7 @@ public class CollisionItem implements Cloneable{
   			}
   		}
 		}
-  	List<Integer> backpoint = Arrays.asList(0,3,4,7);
+  	//List<Integer> backpoint = Arrays.asList(0,3,4,7);
   	if (closestPointToCornerType[0] == (closestPointToCornerType[1] + 6) % 8) { //cylinder seen at angle
   		//make a vector from the opposite point
   		origin = pointCloserToCorner[closestPointToCornerType[0]].point;

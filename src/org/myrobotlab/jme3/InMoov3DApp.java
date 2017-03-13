@@ -1,10 +1,16 @@
 package org.myrobotlab.jme3;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.jme3.interfaces.IntegratedMovementInterface;
+import org.myrobotlab.kinematics.CollisionItem;
+import org.myrobotlab.kinematics.Map3DPoint;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.Servo.IKData;
@@ -19,10 +25,15 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.DirectionalLight;
+import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Cylinder;
 import com.jme3.system.AppSettings;
 
 
@@ -30,12 +41,19 @@ import com.jme3.system.AppSettings;
  * @author Christian
  *
  */
-public class InMoov3DApp extends SimpleApplication{
-  private HashMap<String, Node> nodes = new HashMap<String, Node>();
+public class InMoov3DApp extends SimpleApplication implements IntegratedMovementInterface{
+  private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
   private Queue<IKData> eventQueue = new ConcurrentLinkedQueue<IKData>();
-  private HashMap<String, Node> servoToNode = new HashMap<String, Node>();
+  private transient HashMap<String, Node> servoToNode = new HashMap<String, Node>();
   private HashMap<String, Mapper> maps = new HashMap<String, Mapper>();
-  private Service service = null;
+  private transient Service service = null;
+  private transient Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
+  private HashMap<String, Geometry> shapes = new HashMap<String, Geometry>();
+  private boolean updateCollisionItem;
+  private Queue<Point> pointQueue = new ConcurrentLinkedQueue<Point>();
+  private transient Node point;
+  private transient ArrayList<Node> collisionItems = new ArrayList<Node>();
+
 
    
   public static void main(String[] args) {
@@ -122,7 +140,7 @@ public class InMoov3DApp extends SimpleApplication{
     spatial = assetManager.loadModel("Models/ttorso1.j3o");
     spatial.setName("mtorso");
     node.attachChild(spatial);
-    node.setLocalTranslation(new Vector3f(0,113,0));
+    node.setLocalTranslation(new Vector3f(0,105,10));
     rotationMask = Vector3f.UNIT_Z.mult(1);
     node.setUserData("rotationMask_x", rotationMask.x);
     node.setUserData("rotationMask_y", rotationMask.y);
@@ -148,12 +166,14 @@ public class InMoov3DApp extends SimpleApplication{
     spatial = assetManager.loadModel("Models/Romoplate1.j3o");
     spatial.setName("Romoplate");
     node.attachChild(spatial);
-    node.setLocalTranslation(new Vector3f(-143,0,-20));
+    node.setLocalTranslation(new Vector3f(-143,0,-17));
     rotationMask = Vector3f.UNIT_Z.mult(-1);
     node.setUserData("rotationMask_x", rotationMask.x);
     node.setUserData("rotationMask_y", rotationMask.y);
     node.setUserData("rotationMask_z", rotationMask.z);
     node.setUserData("currentAngle",  0);
+    Vector3f angle = rotationMask.mult((float)Math.toRadians(6));
+    node.rotate(angle.x, angle.y, angle.z);
     nodes.put("Romoplate", node);
     maps.put("Romoplate", new Mapper(0,180,10,70));
 
@@ -169,6 +189,8 @@ public class InMoov3DApp extends SimpleApplication{
     node.setUserData("rotationMask_y", rotationMask.y);
     node.setUserData("rotationMask_z", rotationMask.z);
     node.setUserData("currentAngle",  0);
+    angle = rotationMask.mult((float)Math.toRadians(-2));
+    node.rotate(angle.x, angle.y, angle.z);
     nodes.put("Rshoulder", node);
     maps.put("Rshoulder", new Mapper(0,180,0,180));
 
@@ -193,13 +215,13 @@ public class InMoov3DApp extends SimpleApplication{
     spatial = assetManager.loadModel("Models/Rbicep1.j3o");
     spatial.setName("Rbicep");
     node.attachChild(spatial);
-    node.setLocalTranslation(new Vector3f(-5,-225,-32));
+    node.setLocalTranslation(new Vector3f(5,-225,-32));
     rotationMask = Vector3f.UNIT_X.mult(-1);
     node.setUserData("rotationMask_x", rotationMask.x);
     node.setUserData("rotationMask_y", rotationMask.y);
     node.setUserData("rotationMask_z", rotationMask.z);
     node.setUserData("currentAngle",  0);
-    Vector3f angle = rotationMask.mult((float)Math.toRadians(22.4));
+    angle = rotationMask.mult((float)Math.toRadians(30));
     node.rotate(angle.x, angle.y, angle.z);
     //node.rotateUpTo(angle);
     nodes.put("Rbicep", node);
@@ -228,6 +250,8 @@ public class InMoov3DApp extends SimpleApplication{
     node.setUserData("rotationMask_y", rotationMask.y);
     node.setUserData("rotationMask_z", rotationMask.z);
     node.setUserData("currentAngle",  0);
+    angle = rotationMask.mult((float)Math.toRadians(4));
+    node.rotate(angle.x, angle.y, angle.z);
     nodes.put("omoplate", node);
     maps.put("omoplate", new Mapper(0,180,10,70));
 
@@ -237,7 +261,7 @@ public class InMoov3DApp extends SimpleApplication{
     spatial = assetManager.loadModel("Models/Lshoulder.j3o");
     spatial.setName("shoulder");
     node.attachChild(spatial);
-    node.setLocalTranslation(new Vector3f(10,-45,5));
+    node.setLocalTranslation(new Vector3f(17,-45,5));
     rotationMask = Vector3f.UNIT_X.mult(-1);
     node.setUserData("rotationMask_x", rotationMask.x);
     node.setUserData("rotationMask_y", rotationMask.y);
@@ -273,7 +297,7 @@ public class InMoov3DApp extends SimpleApplication{
     node.setUserData("rotationMask_y", rotationMask.y);
     node.setUserData("rotationMask_z", rotationMask.z);
     node.setUserData("currentAngle",  0);
-    angle = rotationMask.mult((float)Math.toRadians(22.4));
+    angle = rotationMask.mult((float)Math.toRadians(27));
     node.rotate(angle.x, angle.y, angle.z);
     nodes.put("bicep", node);
     maps.put("bicep", new Mapper(0,180,5,60));
@@ -336,6 +360,8 @@ public class InMoov3DApp extends SimpleApplication{
     node.setUserData("rotationMask_y", rotationMask.y);
     node.setUserData("rotationMask_z", rotationMask.z);
     node.setUserData("currentAngle",  0);
+    angle = rotationMask.mult((float)Math.toRadians(2));
+    node.rotate(angle.x, angle.y, angle.z);
     nodes.put("neckroll", node);
     maps.put("neckroll", new Mapper(0,180,60,120));
     
@@ -371,6 +397,15 @@ public class InMoov3DApp extends SimpleApplication{
     nodes.put("jaw", node);
     maps.put("jaw", new Mapper(0,180,60,90));
 
+    Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
+    mat.setColor("Color", ColorRGBA.Green);
+    Cylinder c= new Cylinder(4,10,5,10,true,false);
+    Geometry geom = new Geometry("Cylinder",c);
+    geom.setMaterial(mat);
+    point = new Node("point");
+    point.attachChild(geom);
+    rootNode.attachChild(point);
+
     if (service!=null) {
       synchronized(service) {
         service.notifyAll();
@@ -395,6 +430,30 @@ public class InMoov3DApp extends SimpleApplication{
   }
 
   public void simpleUpdate(float tpf) {
+    if (updateCollisionItem) {
+      for (Node node : collisionItems) {
+        if (node.getUserData("collisionItem") !=null){
+          node.removeFromParent();
+          node.updateGeometricState();
+        }
+      }
+      collisionItems.clear();
+    }
+    while (nodeQueue.size() > 0) {
+      Node node = nodeQueue.remove();
+      Node hookNode = nodes.get(node.getUserData("hookTo"));
+      if (hookNode == null) {
+        hookNode = rootNode;
+      }
+      Spatial x = hookNode.getChild(node.getName());
+      if (x != null) {
+        rootNode.updateGeometricState();
+      }
+      hookNode.attachChild(node);
+      if (node.getUserData("collisionItem") != null) {
+        collisionItems.add(node);
+      }
+    }
     while (eventQueue.size() > 0) {
       IKData event = eventQueue.remove();
       if (servoToNode.containsKey(event.name)){
@@ -409,7 +468,10 @@ public class InMoov3DApp extends SimpleApplication{
         servoToNode.put(event.name, node);
         nodes.put(node.getName(), node);
       }
-      
+    }
+    while (pointQueue.size() > 0) {
+      Point p = pointQueue.remove();
+      point.setLocalTranslation((float)p.getX(), (float)p.getZ(), (float)p.getY());
     }
   }
   
@@ -469,4 +531,64 @@ public class InMoov3DApp extends SimpleApplication{
       }
     }
   };
+
+  @Override
+  public void addObject(CollisionItem item) {
+    if (!item.isRender()) {
+      return;
+    }
+    if (item.isFromKinect()){
+      Node pivot = new Node(item.getName());
+      for(Map3DPoint p : item.cloudMap.values()) {
+        Box b = new Box(4f, 4f, 4f);
+        Geometry geo = new Geometry("Box",b);
+        Vector3f pos = new Vector3f((float)p.point.getX(), (float)p.point.getZ(), (float)p.point.getY());
+        geo.setLocalTranslation(pos);
+        Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.Red);
+        geo.setMaterial(mat);
+        pivot.attachChild(geo);
+      }
+      pivot.setUserData("HookTo", null);
+      pivot.setUserData("collisionItem", "1");
+      nodeQueue.add(pivot);
+    }
+    else {
+      Vector3f ori = new Vector3f((float)item.getOrigin().getX(), (float)item.getOrigin().getZ(), (float)item.getOrigin().getY());
+      Vector3f end = new Vector3f((float)item.getEnd().getX(), (float)item.getEnd().getZ(), (float)item.getEnd().getY());
+      Cylinder c= new Cylinder(8,50,(float)item.getRadius(),(float)item.getLength(),true,false);
+      Geometry geom = new Geometry("Cylinder",c);
+      shapes.put(item.getName(), geom);
+      geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, ori, end));
+      geom.lookAt(end, Vector3f.UNIT_Y);
+      //geom.scale(0.5f);
+      Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
+      if (item.isFromKinect()) {
+        mat.setColor("Color", ColorRGBA.Red);
+      }
+      else {
+        mat.setColor("Color", ColorRGBA.Blue);
+      }
+      geom.setMaterial(mat);
+      Node pivot = new Node(item.getName());
+      pivot.attachChild(geom);
+      pivot.setUserData("HookTo", null);
+      pivot.setUserData("collisionItem", "1");
+      nodeQueue.add(pivot);
+    }
+  }
+
+  @Override
+  public void addObject(ConcurrentHashMap<String, CollisionItem> items) {
+    updateCollisionItem  = true;
+    for (CollisionItem item:items.values()) {
+      addObject(item);
+    }
+    updateCollisionItem = false;
+  }
+
+  @Override
+  public void addPoint(Point point) {
+    pointQueue.add(point);
+  }
 }

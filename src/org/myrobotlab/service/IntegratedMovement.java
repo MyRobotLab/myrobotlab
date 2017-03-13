@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.genetic.GeneticParameters;
+import org.myrobotlab.jme3.interfaces.IntegratedMovementInterface;
 import org.myrobotlab.kinematics.CollisionDectection;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.DHLink;
@@ -23,6 +24,7 @@ import org.myrobotlab.kinematics.TestJmeIMModel;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.Servo.IKData;
@@ -79,17 +81,32 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       
   private transient OpenNi openni = null;
   
+  /**
+   * @return the openni
+   */
+  public OpenNi getOpenni() {
+    return openni;
+  }
+
+  /**
+   * @param openni the openni to set
+   */
+  public void setOpenni(OpenNi openni) {
+    this.openni = openni;
+  }
+
   private transient Map3D map3d = new Map3D();
   private String kinectName = "kinect";
   private boolean ProcessKinectData = false;
   
-  private transient TestJmeIMModel jmeApp = null;
+  private transient IntegratedMovementInterface jmeApp = null;
   
+  private HashMap<String, Mapper> maps = new HashMap<String, Mapper>();
   
   /**
    * @return the jmeApp
    */
-  public TestJmeIMModel getJmeApp() {
+  public IntegratedMovementInterface getJmeApp() {
     return jmeApp;
   }
 
@@ -371,25 +388,25 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     
     //ik.holdTarget("leftArm", true);
     ik.visualize();
-    ik.jmeApp.addPart("ltorso", "Models/ltorso.j3o", 1, null, new Vector3f(0,0,0), Vector3f.UNIT_X.mult(1), (float)Math.toRadians(0));
-    ik.jmeApp.addPart("mtorso", "Models/mtorso.j3o", 1f, null, new Vector3f(0,0,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
-    ik.jmeApp.addPart("ttorso", "Models/ttorso1.j3o", 1f, "mtorso", new Vector3f(0,105f,10), Vector3f.UNIT_Z, (float)Math.toRadians(-90));
-    ik.jmeApp.addPart("rightS", null, 1f, "ttorso", new Vector3f(0,300f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
-    ik.jmeApp.addPart("Romoplate", "Models/Romoplate1.j3o", 1f, "rightS", new Vector3f(-143f,0,-17), Vector3f.UNIT_Z.mult(-1), (float)Math.toRadians(-4));
-    ik.jmeApp.addPart("Rshoulder", "Models/Rshoulder1.j3o", 1f, "Romoplate", new Vector3f(-23,-45f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-32));
-    ik.jmeApp.addPart("Rrotate", "Models/rotate1.j3o", 1f, "Rshoulder", new Vector3f(-57,-55,8), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
-    ik.jmeApp.addPart("Rbicep", "Models/Rbicep1.j3o", 1f, "Rrotate", new Vector3f(5,-225,-32), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(20));
-    ik.jmeApp.addPart("leftS", null, 1f, "ttorso", new Vector3f(0,300f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
-    ik.jmeApp.addPart("omoplate", "Models/Lomoplate1.j3o", 1f, "leftS", new Vector3f(143f,0,-11), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(-6));
-    ik.jmeApp.addPart("shoulder", "Models/Lshoulder.j3o", 1f, "omoplate", new Vector3f(17,-45f,5), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
-    ik.jmeApp.addPart("rotate", "Models/rotate1.j3o", 1f, "shoulder", new Vector3f(65,-58,-3), Vector3f.UNIT_Y.mult(1), (float)Math.toRadians(-90));
-    ik.jmeApp.addPart("bicep", "Models/Lbicep.j3o", 1f, "rotate", new Vector3f(-14,-223,-28), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17));
-    ik.jmeApp.addPart("Rwrist", "Models/RWristFinger.j3o", 1f, "Rbicep", new Vector3f(15,-290,-10), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(180));
-    ik.jmeApp.addPart("wrist", "Models/LWristFinger.j3o", 1f, "bicep", new Vector3f(0,-290,-20), Vector3f.UNIT_Y.mult(1), (float)Math.toRadians(180));
-    ik.jmeApp.addPart("neck", "Models/neck.j3o", 1f, "ttorso", new Vector3f(0,452.5f,-45), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(0));
-    ik.jmeApp.addPart("neckroll", null, 1f, "neck", new Vector3f(0,0,0), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(2));
-    ik.jmeApp.addPart("head", "Models/head.j3o", 1f, "neckroll", new Vector3f(0,10,20), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(0));
-    ik.jmeApp.addPart("jaw", "Models/jaw.j3o", 1f, "head", new Vector3f(-5,63,-50), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(0));
+    ((TestJmeIMModel) ik.jmeApp).addPart("ltorso", "Models/ltorso.j3o", 1, null, new Vector3f(0,0,0), Vector3f.UNIT_X.mult(1), (float)Math.toRadians(0));
+    ((TestJmeIMModel) ik.jmeApp).addPart("mtorso", "Models/mtorso.j3o", 1f, null, new Vector3f(0,0,0), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
+    ((TestJmeIMModel) ik.jmeApp).addPart("ttorso", "Models/ttorso1.j3o", 1f, "mtorso", new Vector3f(0,105f,10), Vector3f.UNIT_Z, (float)Math.toRadians(-90));
+    ((TestJmeIMModel) ik.jmeApp).addPart("rightS", null, 1f, "ttorso", new Vector3f(0,300f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
+    ((TestJmeIMModel) ik.jmeApp).addPart("Romoplate", "Models/Romoplate1.j3o", 1f, "rightS", new Vector3f(-143f,0,-17), Vector3f.UNIT_Z.mult(-1), (float)Math.toRadians(-4));
+    ((TestJmeIMModel) ik.jmeApp).addPart("Rshoulder", "Models/Rshoulder1.j3o", 1f, "Romoplate", new Vector3f(-23,-45f,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-32));
+    ((TestJmeIMModel) ik.jmeApp).addPart("Rrotate", "Models/rotate1.j3o", 1f, "Rshoulder", new Vector3f(-57,-55,8), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
+    ((TestJmeIMModel) ik.jmeApp).addPart("Rbicep", "Models/Rbicep1.j3o", 1f, "Rrotate", new Vector3f(5,-225,-32), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(20));
+    ((TestJmeIMModel) ik.jmeApp).addPart("leftS", null, 1f, "ttorso", new Vector3f(0,300f,0), Vector3f.UNIT_Z, (float)Math.toRadians(0));
+    ((TestJmeIMModel) ik.jmeApp).addPart("omoplate", "Models/Lomoplate1.j3o", 1f, "leftS", new Vector3f(143f,0,-15), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(-6));
+    ((TestJmeIMModel) ik.jmeApp).addPart("shoulder", "Models/Lshoulder.j3o", 1f, "omoplate", new Vector3f(17,-45f,5), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(-30));
+    ((TestJmeIMModel) ik.jmeApp).addPart("rotate", "Models/rotate1.j3o", 1f, "shoulder", new Vector3f(65,-58,-3), Vector3f.UNIT_Y.mult(1), (float)Math.toRadians(-90));
+    ((TestJmeIMModel) ik.jmeApp).addPart("bicep", "Models/Lbicep.j3o", 1f, "rotate", new Vector3f(-14,-223,-28), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17));
+    ((TestJmeIMModel) ik.jmeApp).addPart("Rwrist", "Models/RWristFinger.j3o", 1f, "Rbicep", new Vector3f(15,-290,-10), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(180));
+    ((TestJmeIMModel) ik.jmeApp).addPart("wrist", "Models/LWristFinger.j3o", 1f, "bicep", new Vector3f(0,-290,-20), Vector3f.UNIT_Y.mult(1), (float)Math.toRadians(180));
+    ((TestJmeIMModel) ik.jmeApp).addPart("neck", "Models/neck.j3o", 1f, "ttorso", new Vector3f(0,452.5f,-45), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(0));
+    ((TestJmeIMModel) ik.jmeApp).addPart("neckroll", null, 1f, "neck", new Vector3f(0,0,0), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(2));
+    ((TestJmeIMModel) ik.jmeApp).addPart("head", "Models/head.j3o", 1f, "neckroll", new Vector3f(0,10,20), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(0));
+    ((TestJmeIMModel) ik.jmeApp).addPart("jaw", "Models/jaw.j3o", 1f, "head", new Vector3f(-5,63,-50), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(0));
 
     //TODO add the object that can collide with the model
     //ik.jmeApp.addObject();
@@ -484,6 +501,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
   
   public void setDHLink (String arm, Servo servo, double d, double theta, double r, double alpha) {
+    setDHLink(arm, servo, d, theta, r, alpha, servo.getMinInput(), servo.getMaxInput());
+  }
+  
+  public void setDHLink (String arm, Servo servo, double d, double theta, double r, double alpha, double minAngle, double maxAngle) {
     if (engines.containsKey(arm)) {
       IMEngine engine = engines.get(arm);
       DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
@@ -494,14 +515,16 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       dhLink.setState(Servo.SERVO_EVENT_STOPPED);
       dhLink.setVelocity(servo.getVelocity());
       dhLink.setTargetPos(servo.targetPos);
-      dhLink.servoMin = servo.getMinInput();
-      dhLink.servoMax = servo.getMaxInput();
+      dhLink.servoMin = minAngle;//servo.getMinInput();
+      dhLink.servoMax = maxAngle;//servo.getMaxInput();
       dhLink.hasServo = true;
       DHRobotArm dhArm = engine.getDHRobotArm();
       dhArm.addLink(dhLink);
       engine.setDHRobotArm(dhArm);
       engines.put(arm, engine);
       servo.subscribe(getName(), "publishAngles", servo.getName(), "onIMAngles");
+      Mapper map = new Mapper(servo.getMinInput(), servo.getMaxInput(), minAngle, maxAngle);
+      maps.put(servo.getName(), map);
     }
     else {
       log.error("Unknow DH arm {}", arm);
@@ -557,6 +580,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
   
   public void onIKServoEvent(IKData data) {
+    Mapper map = maps.get(data.name);
+    data.pos = map.calcOutput(data.pos);
+    data.targetPos = map.calcOutput(data.targetPos);
     for (IMEngine e : engines.values()) {
       e.updateLinksPosition(data);
     }
@@ -663,7 +689,11 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
 
   public synchronized void sendAngles(String name, double positionValueDeg) {
-    invoke("publishAngles", name, positionValueDeg);
+    double pos = 0;
+    if (maps.containsKey(name)) {
+      pos = maps.get(name).calcInput(positionValueDeg);
+    }
+    invoke("publishAngles", name, pos);
   }
   
   public Object[] publishAngles(String name, double positionValueDeg) {
@@ -681,6 +711,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   
   public void publishPosition(String armName) {
     invoke("publishPosition", new PositionData(armName, currentPosition(armName)));
+  }
+  
+  public void setJmeApp(IntegratedMovementInterface jmeApp){
+    this.jmeApp = jmeApp;
   }
 }
 

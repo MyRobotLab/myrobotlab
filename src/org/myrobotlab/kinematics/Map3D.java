@@ -168,7 +168,7 @@ public class Map3D {
 		//need to rotate and translate the location depending on the position of the kinect
 		//rotate
 		//must change the x axis so the coordinate are in the right orientation
-		xpos *= -1;
+		//xpos *= -1;
     double roll = MathUtils.degToRad(kinectPosition.getRoll());
     double pitch = MathUtils.degToRad(kinectPosition.getPitch());
     double yaw = MathUtils.degToRad(kinectPosition.getYaw());
