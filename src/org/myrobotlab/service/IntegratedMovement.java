@@ -716,5 +716,27 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public void setJmeApp(IntegratedMovementInterface jmeApp){
     this.jmeApp = jmeApp;
   }
+  
+  public void setMinMaxAngles(String partName, double min, double max){
+    if (maps.containsKey(partName)){
+      Mapper map = maps.get(partName);
+      map = new Mapper(map.getMinX(), map.getMaxX(), min, max);
+      maps.put(partName, map);
+      for (IMEngine engine:engines.values()){
+        for (DHLink link: engine.getDHRobotArm().getLinks()) {
+          if (link.getName().equals(partName)) {
+            link.servoMin = min;
+            link.servoMax = max;
+            link.setMin(link.getInitialTheta()+ Math.toRadians(min));
+            link.setMax(link.getInitialTheta()+ Math.toRadians(max));
+          }
+        }
+      }
+    }
+    else {
+      log.info("No part named {} found",partName);
+    }
+  }
+  
 }
 
