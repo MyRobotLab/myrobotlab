@@ -239,7 +239,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	public Arduino(String n) {
 		super(n);
-		serial = (Serial) createPeer("serial");
+		// serial = (Serial) createPeer("serial"); // Trying to make not necessary
 		createPinList();
 		String mrlcomm = FileIO.resourceToString("Arduino/MrlComm/MrlComm.ino");
 		setSketch(new Sketch("MrlComm", mrlcomm));
@@ -1997,9 +1997,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 			// Runtime.start("webgui", "WebGui");
 			Runtime.start("a", "SwingGui");
+			Runtime.start("cli", "Cli");
 			RemoteAdapter remote = (RemoteAdapter)Runtime.start("ra", "RemoteAdapter");
 			
 			// Runtime.start("python", "Python");
+			Service.reserveRootAs("virtual.uart", "uart");
 			VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
 			virtual.connect("COM78");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");

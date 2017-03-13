@@ -11,7 +11,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.image.Util;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.PortListener;
 import org.myrobotlab.service.interfaces.PortPublisher;
@@ -95,7 +94,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		}
 		
 		if (refresh == o){
-			send("refresh");
+			send("getPortNames");
 		}
 	}
 

@@ -54,7 +54,7 @@ public class Peers {
 
     // log.info(tdna.toString());
 
-    TreeMap<String, ServiceReservation> dna = Service.buildDNA("InMoov");
+    TreeMap<String, ServiceReservation> dna = Service.buildDna("InMoov");
     log.info(dna.toString());
   }
 
