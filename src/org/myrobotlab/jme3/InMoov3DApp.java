@@ -591,4 +591,16 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   public void addPoint(Point point) {
     pointQueue.add(point);
   }
+  
+  public void setMinMaxAngles(String partName, double min, double max){
+    if (maps.containsKey(partName)){
+      Mapper map = maps.get(partName);
+      map = new Mapper(map.getMinX(), map.getMaxX(), min, max);
+      maps.put(partName, map);
+    }
+    else {
+      Log.info("No part named "+ partName + " found");
+    }
+  }
+
 }
