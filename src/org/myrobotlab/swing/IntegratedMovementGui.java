@@ -26,8 +26,6 @@
 package org.myrobotlab.swing;
 
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -61,19 +59,11 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
 
   IntegratedMovement boundService = null;
   
-  JTextField[] objectName = new JTextField[25];
-  JLabel[] objectOrigin = new JLabel[25];
-  JLabel[] objectEnd = new JLabel[25];
-  
-  ConcurrentHashMap<String, CollisionItem> objects;
-	JLabel[] objectRadius = new JLabel[25];
-	JComboBox<ObjectPointLocation>[] moveLocation = new JComboBox[25];
-	JButton[] move = new JButton[25];
 	JButton stop = new JButton("Stop");
 	JButton process = new JButton("Process Kinect Data");
-	JComboBox<String> arm = new JComboBox<String>();
-	JButton visualize = new JButton("Visualize");
-  private JPanel armsCoordPane = new JPanel();
+	JButton startKinect = new JButton("Start OpenNi");
+	
+	private JPanel armsCoordPane = new JPanel();
   private JPanel itemPane = new JPanel();
   ButtonGroup armRadio = new ButtonGroup();
 
@@ -81,103 +71,15 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
   private HashMap<String, JTextField> armText = new HashMap<String, JTextField>();
   private HashMap<String, JButton> buttons = new HashMap<String, JButton>();
   private HashMap<String, Component> components = new HashMap<String, Component>();
+  private ConcurrentHashMap<String, CollisionItem> objects;
   
   public IntegratedMovementGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
     boundService = (IntegratedMovement) Runtime.getService(boundServiceName);
-
-    // Container BACKGROUND = getContentPane();
-    //display.setLayout(new BoxLayout());
-     
-    JPanel north = new JPanel();
-    //armsCoordPane.setLayout(new FlowLayout(FlowLayout.LEFT));
-    //north.setMaximumSize(new Dimension(500,100));
-    //armsCoordPane.setPreferredSize(new Dimension(200,100));
-    
-    //itemPane.setPreferredSize(new Dimension(200,200));
     addTop(buildControl());
     addTopLine(armsCoordPane);
     itemPane.setLayout(new GridLayout(0,1));
     addTopLine(itemPane);
-    //north.add(armsCoordPane);
-    //itemPane.setLayout(new GridLayout(0,1));
-    //north.add(itemPane);
-    
-//    north.setLayout(new GridLayout(0,6));
-//    JPanel line = new JPanel();
-//    stop.addActionListener(this);
-//    line.add(stop);
-//    process.addActionListener(this);
-//    line.add(process);
-//    north.add(line);
-//    line = new JPanel();
-//    for (IMEngine dhra: boundService.getArms()) {
-//      arm.addItem(dhra.getName());
-//    }
-//    line.add(arm);
-//    north.add(line);
-//    line = new JPanel();
-//    visualize.addActionListener(this);
-//    line.add(visualize);
-//    north.add(line);
-//    line = new JPanel();
-//    north.add(line);
-//    line = new JPanel();
-//    north.add(line);
-//    line = new JPanel();
-//    north.add(line);
-//    
-//    line = new JPanel();
-//    line.add(new JLabel("Name"));
-//    north.add(line);
-//    line = new JPanel();
-//    line.add(new JLabel("Origin"));
-//    north.add(line);
-//    line = new JPanel();
-//    line.add(new JLabel("End"));
-//    north.add(line);
-//    line = new JPanel();
-//    line.add(new JLabel("Radius"));
-//    north.add(line);
-//    line = new JPanel();
-//    north.add(line);
-//    line = new JPanel();
-//    north.add(line);
-//    for (int i=0; i<25; i++){
-//      JPanel line1 = new JPanel();
-//      objectName[i] = new JTextField(15);
-//      line1.add(objectName[i]);
-//      north.add(line1);
-//      line1 = new JPanel();
-//      objectOrigin[i] = new JLabel("origin");
-//      line1.add(objectOrigin[i]);
-//      north.add(line1);
-//      line1 = new JPanel();
-//      objectEnd[i] = new JLabel("end");
-//      line1.add(objectEnd[i]);
-//      north.add(line1);
-//      line1 = new JPanel();
-//      objectRadius[i] = new JLabel("radius");
-//      line1.add(objectRadius[i]);
-//      north.add(line1);
-//      line1 = new JPanel();
-//      moveLocation[i] = new JComboBox<ObjectPointLocation>();
-//      for (ObjectPointLocation loc : boundService.getEnumLocationValue()) {
-//        moveLocation[i].addItem(loc);
-//      }
-//      moveLocation[i].setSelectedItem(ObjectPointLocation.CLOSEST_POINT);
-//      line1.add(moveLocation[i]);
-//      north.add(line1);
-//      line1 = new JPanel();
-//      move[i] = new JButton("Move");
-//      move[i].addActionListener(this);
-//      line1.add(move[i]);
-//      north.add(line1);
-//    }
-    //display.add(north, BorderLayout.NORTH);
-    display.add(north);
-
-  
   }
 
 
@@ -185,8 +87,10 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     JPanel controlPane = new JPanel();
     stop.addActionListener(this);
     process.addActionListener(this);
+    startKinect.addActionListener(this);
     controlPane.add(stop);
     controlPane.add(process);
+    controlPane.add(startKinect);
     return controlPane;
   }
 
@@ -241,23 +145,17 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
       String armName = armRadio.getSelection().getActionCommand().substring(6);
       myService.send(boundServiceName, "moveTo", armName, but.getName(), opl);
     }
-    for (int i = 0; i < 25; i++) {
-    	if (o == move[i]) {
-    		myService.send(boundServiceName, "setCurrentArm", arm.getSelectedItem());
-    		myService.send(boundServiceName, "moveTo", objectName[i].getText(),moveLocation[i].getSelectedItem(),0,0,0);
-    	}
-    }
+
     if (o == stop) {
       myService.send(boundServiceName, "stopMoving");
     }
     if (o== process) {
     	myService.send(boundServiceName, "processKinectData");
     }
-    if (o == arm) {
-    	myService.send(boundServiceName, "setCurrentArm", arm.getSelectedItem());
-    }
-    if (o == visualize) {
-    	myService.send(boundServiceName, "visualize");
+    if (o == startKinect) {
+      myService.send(boundServiceName, "startOpenNI");
+      startKinect.setVisible(false);
+      process.setVisible(true);
     }
   }
 
@@ -282,7 +180,6 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     }
   	objects =  im.getCollisionObject();
   	if (objects == null) return;
-  	int i=0;
   	itemPane.removeAll();
   	itemPane.add(createItemPanelHeader());
   	for (CollisionItem ci : objects.values()) {
@@ -296,40 +193,15 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
         comp.setEnabled(false);
       }
     }
+    if (im.getOpenni() == null) {
+      startKinect.setVisible(true);
+      process.setVisible(false);
+    }
+    else {
+      startKinect.setVisible(false);
+      process.setVisible(true);
+    }
     myService.pack();
-//  		if (i < 25){
-//  			if(ci == null) continue;
-//	  		objectName[i].setVisible(true);
-//	  		objectName[i].setText(ci.getName());
-//	  		objectOrigin[i].setVisible(true);
-//	  		objectOrigin[i].setText(String.format("x: %d y: %d z: %d", (int)ci.getOrigin().getX(),(int)ci.getOrigin().getY(),(int)ci.getOrigin().getZ()));
-//	  		objectEnd[i].setVisible(true);
-//	  		objectEnd[i].setText(String.format("x: %d y: %d z: %d", (int)ci.getEnd().getX(),(int)ci.getEnd().getY(),(int)ci.getEnd().getZ()));
-//	  		objectRadius[i].setVisible(true);
-//	  		objectRadius[i].setText(String.format("%d", (int)ci.getRadius()));
-//	  		if (ci.isFromKinect()){
-//	  			moveLocation[i].setVisible(true);
-//	  			move[i].setVisible(true);
-//	  		}
-//	  		else {
-//	  			moveLocation[i].setVisible(false);
-//	  			move[i].setVisible(false);
-//	  		}
-//	  		i++;
-//  		}
-//  	}
-//  	for (int j = i; j < 25; j++) {
-//  		objectName[j].setVisible(false);
-//  		objectOrigin[j].setVisible(false);
-//  		objectEnd[j].setVisible(false);
-//  		objectRadius[j].setVisible(false);
-//  		moveLocation[j].setVisible(false);
-//  		move[j].setVisible(false);
-//  	}
-//  	arm.removeAllItems();
-//  	for (IMEngine a : im.getArms()) {
-//  		arm.addItem(a.getName());
-//  	}
   }
 
 

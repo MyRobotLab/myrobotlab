@@ -2,19 +2,15 @@ package org.myrobotlab.kinematics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.myrobotlab.service.IntegratedMovement;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.jme3.interfaces.IntegratedMovementInterface;
 import org.myrobotlab.service.Servo.IKData;
-import org.python.jline.internal.Log;
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
-import com.jme3.input.ChaseCamera;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -37,14 +33,14 @@ import com.jme3.scene.shape.Cylinder;
  * @author Christian
  *
  */
-public class TestJmeIMModel extends SimpleApplication{
+public class TestJmeIMModel extends SimpleApplication implements IntegratedMovementInterface{
   private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
   private Queue<IKData> eventQueue = new ConcurrentLinkedQueue<IKData>();
   private transient Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
   private Queue<Point> pointQueue = new ConcurrentLinkedQueue<Point>();
   private transient ArrayList<Node> collisionItems = new ArrayList<Node>();
   private boolean ready = false;
-  private transient IntegratedMovement service;
+  private transient Service service;
   private transient Node point;
 
    
@@ -84,9 +80,8 @@ public class TestJmeIMModel extends SimpleApplication{
     ready = true;
     synchronized (service) {
       if (service!= null){
-        
+        service.notifyAll();
       }
-      service.notifyAll();
     }
     inputManager.addMapping("MouseClickL", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
     inputManager.addListener(analogListener, "MouseClickL");
@@ -200,11 +195,12 @@ public class TestJmeIMModel extends SimpleApplication{
     return ready;
   }
 
-  public void setService(IntegratedMovement integratedMovement) {
+  @Override
+  public void setService(Service integratedMovement) {
     service = integratedMovement;
     
   }
-  private ActionListener actionListener = new ActionListener() {
+  public ActionListener actionListener = new ActionListener() {
     public void onAction(String name, boolean keyPressed, float tpf) {
       if (name.equals("MouseClickL")) {
         //rotate+= keyPressed;
@@ -262,12 +258,6 @@ public class TestJmeIMModel extends SimpleApplication{
     }
     if (item.isFromKinect()){
       Node pivot = new Node(item.getName());
-//      Geometry geo = new Geometry(item.getName(), item.getMesh());
-//      Material mat = new Material(assetManager,
-//          "Common/MatDefs/Misc/Unshaded.j3md");
-//      mat.setColor("Color", ColorRGBA.Red);
-//      geo.setMaterial(mat);
-//      pivot.attachChild(geo);
       for(Map3DPoint p : item.cloudMap.values()) {
         Box b = new Box(4f, 4f, 4f);
         Geometry geo = new Geometry("Box",b);
@@ -300,7 +290,6 @@ public class TestJmeIMModel extends SimpleApplication{
       }
       geom.setMaterial(mat);
       Node pivot = new Node(item.getName());
-      //rootNode.attachChild(pivot);
       pivot.attachChild(geom);
       pivot.setUserData("HookTo", null);
       pivot.setUserData("collisionItem", "1");
@@ -320,6 +309,7 @@ public class TestJmeIMModel extends SimpleApplication{
     pointQueue.add(point);
     
   }
+
 
  
 }

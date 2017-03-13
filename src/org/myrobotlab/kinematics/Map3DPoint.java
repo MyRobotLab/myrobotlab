@@ -12,5 +12,5 @@ import org.myrobotlab.kinematics.Map3D.CoordStateValue;
 public class Map3DPoint {
 	CoordStateValue value = CoordStateValue.UNDEFINED;
 	boolean usedForObject = false;
-	Point point;
+	public Point point;
 }

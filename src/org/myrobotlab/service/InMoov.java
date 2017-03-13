@@ -140,6 +140,8 @@ public class InMoov extends Service {
 
   transient InMoov3DApp vinMoovApp;
 
+  private IntegratedMovement integratedMovement;
+
   // static String speechService = "MarySpeech";
   // static String speechService = "AcapelaSpeech";
   static String speechService = "NaturalReaderSpeech";
@@ -1564,7 +1566,10 @@ public class InMoov extends Service {
     meta.addPeer("pid", "Pid", "Pid service");
     
     // For VirtualInMoov
-	meta.addPeer("jmonkeyEngine", "JMonkeyEngine", "Virtual inmoov");
+	  meta.addPeer("jmonkeyEngine", "JMonkeyEngine", "Virtual inmoov");
+	  
+	  // For IntegratedMovement
+	  meta.addPeer("integratedMovement", "IntegratedMovement", "Inverse kinematic type movement");
 
     return meta;
   }
@@ -1573,7 +1578,7 @@ public class InMoov extends Service {
     if (vinMoovApp == null) {
       vinMoovApp = new InMoov3DApp();
       AppSettings settings = new AppSettings(true);
-      settings.setResolution(1024,960);
+      settings.setResolution(800,600);
       //settings.setEmulateMouse(false);
       // settings.setUseJoysticks(false);
       settings.setUseInput(true);
@@ -1641,6 +1646,7 @@ public class InMoov extends Service {
       vinMoovApp.updatePosition(data);
     }
   }
+  
   public void stopVinMoov() {
     try{
       vinMoovApp.stop();
@@ -1649,5 +1655,112 @@ public class InMoov extends Service {
       
     }
     vinMoovApp = null;
+  }
+  
+  public void startIntegratedMovement() {
+    integratedMovement = (IntegratedMovement) startPeer("integratedMovement");
+    IntegratedMovement im = integratedMovement; 
+    //set the DH Links or each arms
+    im.setNewDHRobotArm("leftArm");
+    im.setNewDHRobotArm("rightArm");
+    im.setNewDHRobotArm("kinect");
+    if (torso != null) {
+      im.setDHLink("leftArm",torso.midStom,113,90,0,-90);
+      im.setDHLink("rightArm",torso.midStom,113,90,0,-90);
+      im.setDHLink("kinect",torso.midStom,113,90,0,-90);
+      im.setDHLink("leftArm",torso.topStom,0,180,292,90);
+      im.setDHLink("rightArm",torso.topStom,0,180,292,90);
+      im.setDHLink("kinect",torso.topStom,0,180,110,-90);
+    }
+    else {
+      im.setDHLink("leftArm","i01.torso.midStom",113,90,0,-90);
+      im.setDHLink("rightArm","i01.torso.midStom",113,90,0,-90);
+      im.setDHLink("kinect","i01.torso.midStom",113,90,0,-90);
+      im.setDHLink("leftArm","i01.torso.topStom",0,180,292,90);
+      im.setDHLink("rightArm","i01.torso.topStom",0,180,292,90);
+      im.setDHLink("kinect","i01.torso.topStom",0,180,110,-90);
+    }
+    im.setDHLink("leftArm", "leftS", 143, 180, 0, 90);
+    im.setDHLink("rightArm", "rightS", -143, 180, 0, -90);
+    if (arms.containsKey(LEFT)) {
+      InMoovArm arm = arms.get(LEFT);
+      im.setDHLink("leftArm",arm.omoplate,0,-5.6,45,-90);
+      im.setDHLink("leftArm",arm.shoulder,77,-30+90,0,90);
+      im.setDHLink("leftArm",arm.rotate,284,90,40,90);
+      im.setDHLink("leftArm",arm.bicep,0,-7+24.4+90,300,90);
+    }
+    else {
+      im.setDHLink("leftArm","i01.leftArm.omoplate",0,-5.6,45,-90);
+      im.setDHLink("leftArm","i01.leftArm.shoulder",77,-30+90,0,90);
+      im.setDHLink("leftArm","i01.leftArm.rotate",284,90,40,90);
+      im.setDHLink("leftArm","i01.leftArm.bicep",0,-7+24.4+90,300,90);
+    }
+    if (arms.containsKey(RIGHT)) {
+      InMoovArm arm = arms.get(RIGHT);
+      im.setDHLink("rightArm",arm.omoplate,0,-5.6,45,90);
+      im.setDHLink("rightArm",arm.shoulder,-77,-30+90,0,-90);
+      im.setDHLink("rightArm",arm.rotate,-284,90,40,-90);
+      im.setDHLink("rightArm",arm.bicep,0,-7+24.4+90,300,90);
+    }
+    else {
+      im.setDHLink("rightArm","i01.rightArm.omoplate",0,-5.6,45,90);
+      im.setDHLink("rightArm","i01.rightArm.shoulder",-77,-30+90,0,-90);
+      im.setDHLink("rightArm","i01.rightArm.rotate",-284,90,40,-90);
+      im.setDHLink("rightArm","i01.rightArm.bicep",0,-7+24.4+90,300,90);
+    }
+    if (hands.containsKey(LEFT)){
+      InMoovHand hand = hands.get(LEFT);
+      im.setDHLink("leftArm",hand.wrist,00,-90,100,-90);
+    }
+    else {
+      im.setDHLink("leftArm","i01.leftHand.wrist",00,-90,100,-90);
+    }
+    if (hands.containsKey(RIGHT)){
+      InMoovHand hand = hands.get(RIGHT);
+      im.setDHLink("rightArm",hand.wrist,00,-90,100,90);
+    }
+    else {
+      im.setDHLink("rightArm","i01.rightArm.wrist",00,-90,100,-90);
+    }
+    im.setDHLink("leftArm","lfinger",-20,0,120,0);
+    im.setDHLink("rightArm","rfinger",-20,0,120,0);
+    im.setDHLink("kinect","camera",0,90,10,90);
+    
+    log.info("{}",im.createJointPositionMap("leftArm").toString());
+    //start the kinematics engines
+    im.startEngine("leftArm");
+    im.startEngine("rightArm");
+    im.startEngine("kinect");
+    
+    //define object, each dh link are set as an object, but the
+    //start point and end point will be update by the ik service, but still need
+    //a name and a radius
+    im.clearObject();
+    im.addObject(0.0, 0.0, 0.0, 0.0, 0.0, -150.0, "base", 150.0, false);
+    im.addObject("i01.torso.midStom", 150.0);
+    im.addObject("i01.torso.topStom", 10.0);
+    im.addObject("i01.leftArm.omoplate", 10.0);
+    im.addObject("i01.rightArm.omoplate", 10.0);
+    im.addObject("i01.leftArm.shoulder", 50.0);
+    im.addObject("i01.rightArm.shoulder", 50.0);
+    im.addObject("i01.leftArm.rotate", 50.0);
+    im.addObject("i01.rightArm.rotate", 50.0);
+    im.addObject("i01.leftArm.bicep", 60.0);
+    im.addObject("i01.rightArm.bicep", 60.0);
+    im.addObject("i01.leftHand.wrist", 70.0);
+    im.addObject("i01.rightHand.wrist", 70.0);
+    im.objectAddIgnore("i01.rightArm.omoplate", "i01.leftArm.rotate");
+    im.objectAddIgnore("i01.rightArm.omoplate", "i01.rightArm.rotate");
+    im.addObject("lfinger",10.0);
+    im.addObject("rfinger",10.0);
+    im.addObject("leftS", 10);
+    im.addObject("rightS", 10);
+    im.objectAddIgnore("leftS", "rightS");
+    im.objectAddIgnore("rightS", "i01.leftArm.shoulder");
+    im.objectAddIgnore("leftS", "i01.rightArm.shoulder");
+
+    im.setJmeApp(vinMoovApp);
+    im.setOpenni(openni);
+    
   }
 }

@@ -23,14 +23,12 @@ import org.python.jline.internal.Log;
 public class IMEngine extends Thread implements Genetic {
 	
 	DHRobotArm arm, computeArm;
-	private String name;
 	public Point target = null;
 	private double maxDistance = 5.0;
 	private Matrix inputMatrix = null;
 	private transient IntegratedMovement service = null;
 	private boolean noUpdatePosition = false;
 	private boolean holdTargetEnabled = false;
-	private transient CollisionDectection computeCD;
   private int tryCount = 0;;
   private Point oldTarget = null;
   private double timeToWait;
@@ -48,21 +46,15 @@ public class IMEngine extends Thread implements Genetic {
 	
 	public IMEngine(String name, IntegratedMovement IM) {
 		super(name);
-		this.name = name;
 		arm = new DHRobotArm();
 		arm.name = name;
 		service  = IM;
-		computeCD = service.collisionItems.clones();
-		//this.start();
 	}
 	
 	public IMEngine(String name, DHRobotArm arm, IntegratedMovement integratedMovement) {
 		super(name);
 		this.arm = arm;
-		this.name = name;
 		service  = integratedMovement;
-		computeCD = service.collisionItems.clones();
-		//this.start();
 	}
 	
 	public DHRobotArm getDHRobotArm() {
@@ -73,8 +65,11 @@ public class IMEngine extends Thread implements Genetic {
 		arm = dhArm;
 	}
 	
-	public void run() {
-		Point lastPosition = arm.getPalmPosition();
+	/**
+   * @return the name
+   */
+
+  public void run() {
 		while(true){
       Point currentPosition = arm.getPalmPosition();
 			Point avoidPoint = checkCollision(arm, service.collisionItems);
@@ -83,7 +78,6 @@ public class IMEngine extends Thread implements Genetic {
         target = avoidPoint;
         move();
         target = previousTarget;
-        lastPosition = arm.getPalmPosition();
       }
 			if (target != null && currentPosition.distanceTo(target) > maxDistance && System.currentTimeMillis() > lastTimeUpdate + timeToWait) {
 				Log.info("distance to target {}", currentPosition.distanceTo(target));
@@ -91,7 +85,6 @@ public class IMEngine extends Thread implements Genetic {
 				if (moveInfo != null) {
 				}
 				move();
-				lastPosition = arm.getPalmPosition();
 			}
 			if (target != null && currentPosition.distanceTo(target) < maxDistance) {
 			  target = null;
@@ -138,7 +131,6 @@ public class IMEngine extends Thread implements Genetic {
     // what's the current point
     while (true) {
     	//checkCollision(arm,service.collisionItems);
-      computeCD = service.collisionItems.clones();
       numSteps++;
       if (numSteps >= maxIterations) {
         //if (numSteps >= maxIterations) return true;
@@ -446,20 +438,18 @@ public class IMEngine extends Thread implements Genetic {
         newArm.addLink(newLink);
       }
       Point potLocation = newArm.getPalmPosition();
+      if (target == null) return;
       Double distance = potLocation.distanceTo(target);
       if (fitnessTime < 0.1) {
         fitnessTime = 0.1;
       }
       //fitness is the score showing how close the results is to the target position
       Double fitness = (fitnessMult/distance*1000);// + (1/fitnessTime*.01);
-      if (fitness.isNaN()){
-        int i=0;
-        i = i;
-      }
       if (fitness < 0) fitness *=-1;
       chromosome.setFitness(fitness);
     }
-    return;  }
+    return;
+  }
 
   @Override
   public void decode(ArrayList<Chromosome> chromosomes) {
