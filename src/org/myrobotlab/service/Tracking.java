@@ -35,7 +35,6 @@ import static org.myrobotlab.service.OpenCV.FILTER_LK_OPTICAL_TRACK;
 import static org.myrobotlab.service.OpenCV.FOREGROUND;
 import static org.myrobotlab.service.OpenCV.PART;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +50,7 @@ import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterDetector;
 import org.myrobotlab.opencv.OpenCVFilterGray;
 import org.myrobotlab.opencv.OpenCVFilterPyramidDown;
+import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.service.data.Point2Df;
 import org.myrobotlab.service.data.Rectangle;
 import org.myrobotlab.service.interfaces.Microcontroller;
@@ -93,7 +93,7 @@ public class Tracking extends Service {
   public static final String STATE_STABILIZED = "state stabilized";
 
   public static final String STATE_FACE_DETECT = "state face detect";
-  
+
   // memory constants
   private String state = STATE_IDLE;
 
@@ -169,22 +169,23 @@ public class Tracking extends Service {
 
     setDefaultPreFilters();
 
-    pid.setPID("x", 5.0, 5.0, 0.1);
+    pid.setPID("x", 20.0, 5.0, 0.1);
     pid.setControllerDirection("x", Pid.DIRECTION_DIRECT);
     pid.setMode("x", Pid.MODE_AUTOMATIC);
-    pid.setOutputRange("x", -10, 10); // <- not correct - based on maximum
+    pid.setOutputRange("x", -20, 20); // <- not correct - based on maximum
     pid.setSampleTime("x", 30);
     pid.setSetpoint("x", 0.5); // set center
 
-    pid.setPID("y", 5.0, 5.0, 0.1);
+    pid.setPID("y", 20.0, 5.0, 0.1);
     pid.setControllerDirection("y", Pid.DIRECTION_DIRECT);
     pid.setMode("y", Pid.MODE_AUTOMATIC);
-    pid.setOutputRange("y", -10, 10); // <- not correct - based on maximum
+    pid.setOutputRange("y", -20, 20); // <- not correct - based on maximum
     pid.setSampleTime("y", 30);
     pid.setSetpoint("y", 0.5); // set center
 
     x.attach(controller);
     y.attach(controller);
+    
   }
 
   public void addPreFilter(OpenCVFilter filter) {
@@ -342,6 +343,11 @@ public class Tracking extends Service {
       preFilters.add(gray);
     }
   }
+  
+  public void addTransposeFilter() {
+      OpenCVFilterTranspose transpose = new OpenCVFilterTranspose("Transpose");
+      preFilters.add(transpose);
+  }
 
   public void setForegroundBackgroundFilter() {
     opencv.removeFilters();
@@ -417,7 +423,7 @@ public class Tracking extends Service {
         // find average point ?
         break;
 
-      // FIXME - remove not used
+        // FIXME - remove not used
         /*
       case STATE_FACE_DETECT_LOST_TRACK:
         int xpos = x.getPos();
@@ -433,7 +439,7 @@ public class Tracking extends Service {
         x.moveTo(xpos + scanXStep);
 
         break;
-      */
+         */
       case STATE_IDLE:
         // setForegroundBackgroundFilter(); FIXME - setFGBGFilters for
         // different detection
@@ -564,7 +570,7 @@ public class Tracking extends Service {
     // if I'm at my min & and the target is further min - don't compute
     // pid
     if ((currentXServoPos <= Math.min(x.getMin(), x.getMax()) && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= Math.max(x.getMin(), x.getMax()) && xSetpoint - targetPoint.x > 0)) {
-      error(String.format("%d x limit out of range", currentXServoPos));
+      error(String.format("%f x limit out of range", currentXServoPos));
     } else {
 
       if (pid.compute("x")) {
@@ -575,7 +581,8 @@ public class Tracking extends Service {
           currentXServoPos += pid.getOutput("x");
         }
         if (currentXServoPos != lastXServoPos) {
-// calamity- fix          x.moveTo(currentXServoPos);
+          // calamity- fix          
+          x.moveTo(currentXServoPos);
           currentXServoPos = x.getPos();
           lastXServoPos = currentXServoPos;
         }
@@ -587,7 +594,7 @@ public class Tracking extends Service {
     }
 
     if ((currentYServoPos <= Math.min(y.getMin(), y.getMax()) && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= Math.max(y.getMin(), y.getMax()) && ySetpoint - targetPoint.y > 0)) {
-      error(String.format("%d y limit out of range", currentYServoPos));
+      error(String.format("%f y limit out of range", currentYServoPos));
     } else {
       if (pid.compute("y")) {
         if (y.isInverted()) {
@@ -674,6 +681,10 @@ public class Tracking extends Service {
   }
 
   public void connect(String port, int xPin, int yPin, int cameraIndex) throws Exception {
+
+    x.setPin(xPin);
+    y.setPin(yPin);
+
     ((Microcontroller)controller).connect(port);
 
     controller.servoAttachPin(x, xPin);
@@ -688,37 +699,6 @@ public class Tracking extends Service {
     y.moveTo(y.getRest() + 2);
     sleep(300);
     rest();
-  }
-
-  public static void main(String[] args) {
-
-    try {
-      LoggingFactory.init(Level.INFO);
-      int xPin = 7;
-      int yPin = 10;
-      int cameraIndex = 0;
-
-      Tracking tracker = new Tracking("tracker");
-
-      // tracker.getY().setMinMax(79, 127);
-      /*
-       * tracker.getX().setPin(7); tracker.getY().setPin(8);
-       * tracker.getOpenCV().setCameraIndex(1);
-       */
-      tracker.connect("COM3", xPin, yPin, cameraIndex);
-      // tracker.connect("COM4");
-      tracker.startService();
-      tracker.faceDetect();
-
-      Runtime.start("gui", "SwingGui");
-      // OpenCV opencv = tracker.getOpenCV();
-      // opencv.setFrameGrabberType(OpenCV.GR)
-      // .capture()
-      // tracker.getGoodFeatures();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
   }
 
   /**
@@ -740,6 +720,51 @@ public class Tracking extends Service {
     meta.addPeer("opencv", "OpenCV", "Tracking OpenCV instance");
     meta.addPeer("controller", "Arduino", "Tracking Arduino instance");
     return meta;
+  }
+
+  public static void main(String[] args) {
+
+    try {
+      LoggingFactory.init(Level.INFO);
+      int xPin = 13;
+      int yPin = 12;
+      String arduinoPort = "COM12";
+      int cameraIndex = 0;
+
+      // These all need to be created ahead of time o/w we get null pointer exceptions.
+      // create the servos that will control our x and our y tracking.
+      Servo x = (Servo)Runtime.createAndStart("tracker.x", "Servo");
+      Servo y = (Servo)Runtime.createAndStart("tracker.y", "Servo");
+      x.setPin(xPin);
+      x.setVelocity(-1);
+      y.setPin(yPin);
+      y.setVelocity(-1);
+      Arduino controller = (Arduino)Runtime.createAndStart("tracker.controller", "Arduino");
+      controller.connect(arduinoPort);
+      // now create the tracker service.
+      Tracking tracker = (Tracking)Runtime.createAndStart("tracker", "Tracking");
+      tracker.addTransposeFilter();
+      
+      //tracker.getY().setMinMax(79, 127);
+      /*
+       * tracker.getX().setPin(7); tracker.getY().setPin(8);
+       * tracker.getOpenCV().setCameraIndex(1);
+       */
+      tracker.connect(arduinoPort, xPin, yPin, cameraIndex);
+      // tracker.connect("COM4");
+      tracker.startService();
+      //tracker.faceDetect();
+      tracker.startLKTracking();
+
+      Runtime.start("gui", "SwingGui");
+      // OpenCV opencv = tracker.getOpenCV();
+      // opencv.setFrameGrabberType(OpenCV.GR)
+      // .capture()
+      // tracker.getGoodFeatures();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
   }
 
 }
