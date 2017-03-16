@@ -131,27 +131,6 @@ public class Esp8266_01 extends Service implements I2CController {
 
 	}
 
-	/*
-	 * @Override public void i2cWrite(I2CControl control, int busAddress, int
-	 * deviceAddress, byte[] buffer, int size) {
-	 * 
-	 * String response = null; String method = "i2cWrite"; String url =
-	 * "http://" + host + "/" + method;
-	 * 
-	 * String stringBuffer =
-	 * javax.xml.bind.DatatypeConverter.printHexBinary(buffer);
-	 * 
-	 * client.clearForm(); client.addFormField("bus",
-	 * Integer.toString(busAddress)); client.addFormField("device",
-	 * Integer.toString(deviceAddress)); client.addFormField("size",
-	 * Integer.toString(size)); client.addFormField("buffer", stringBuffer);
-	 * 
-	 * try { response = client.post(url); } catch (ClientProtocolException e) {
-	 * Logging.logError(e); } catch (IOException e) { Logging.logError(e); }
-	 * log.info("i2cWrite response: " + response);
-	 * 
-	 * }
-	 */
 	@Override
 	public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 
@@ -168,7 +147,7 @@ public class Esp8266_01 extends Service implements I2CController {
 		String method = "i2cWrite";
 		String url = "http://" + host + "/" + method;
 
-		log.info(url);
+		// log.info(url);
 
 		HttpPost post = new HttpPost(url);
 		StringEntity postingString = null;
@@ -178,7 +157,7 @@ public class Esp8266_01 extends Service implements I2CController {
 			Logging.logError(e);
 		}
 
-		log.info(String.format("postingString: %s", postingString));
+		// log.info(String.format("postingString: %s", postingString));
 		post.setEntity(postingString);
 		post.setHeader("Content-type", "application/json");
 		HttpResponse response = null;
@@ -192,7 +171,7 @@ public class Esp8266_01 extends Service implements I2CController {
 		}
 
 		int code = response.getStatusLine().getStatusCode();
-		log.info(response.toString());
+		// log.info(response.toString());
 
 		if (code == 200) {
 			BufferedReader rd = null;
@@ -214,7 +193,7 @@ public class Esp8266_01 extends Service implements I2CController {
 				Logging.logError(e);
 			}
 
-			log.info(result.toString());
+			// log.info(result.toString());
 			// JSONObject o = new JSONObject(result.toString());
 		}
 
@@ -255,7 +234,7 @@ public class Esp8266_01 extends Service implements I2CController {
 		}
 
 		int code = response.getStatusLine().getStatusCode();
-		log.info(response.toString());
+		// log.info(response.toString());
 
 		i2cParms returndata = null;
 		if (code == 200) {
@@ -278,14 +257,14 @@ public class Esp8266_01 extends Service implements I2CController {
 				Logging.logError(e);
 			}
 			
-			log.info(result.toString());
+			// log.info(result.toString());
 			
 			Gson resultGson = new Gson();
 			
 			returndata = resultGson.fromJson(result.toString(), i2cParms.class);
-			log.info(resultGson.fromJson(result.toString(), i2cParms.class).toString());
+			// log.info(resultGson.fromJson(result.toString(), i2cParms.class).toString());
 			
-			log.info(String.format("bus %s, device %s, size %s, buffer %s",returndata.bus, returndata.device, returndata.size, returndata.buffer));
+			// log.info(String.format("bus %s, device %s, size %s, buffer %s",returndata.bus, returndata.device, returndata.size, returndata.buffer));
 		}
 
 		hexStringToArray(returndata.buffer, buffer);
@@ -295,35 +274,13 @@ public class Esp8266_01 extends Service implements I2CController {
 
 	void hexStringToArray(String inBuffer, byte[] outArray){
 		
-		log.info(String.format("inBuffer %s",inBuffer));
+		// log.info(String.format("inBuffer %s",inBuffer));
 		for (int i=0; i < outArray.length; i++){
 			outArray[i] = (byte)(int)Integer.decode("0x"+ inBuffer.substring(i*2, (i*2)+1));
 		}
 		
 	}
 	
-	/*
-	 * @Override public int i2cRead(I2CControl control, int busAddress, int
-	 * deviceAddress, byte[] buffer, int size) {
-	 * 
-	 * String response = null; String method = "i2cRead"; String url = "http://"
-	 * + host + "/" + method;
-	 * 
-	 * String stringBuffer =
-	 * javax.xml.bind.DatatypeConverter.printHexBinary(buffer);
-	 * 
-	 * client.clearForm(); client.addFormField("bus",
-	 * Integer.toString(busAddress)); client.addFormField("device",
-	 * Integer.toString(deviceAddress)); client.addFormField("size",
-	 * Integer.toString(size));
-	 * 
-	 * try { response = client.post(url); } catch (ClientProtocolException e) {
-	 * Logging.logError(e); } catch (IOException e) { Logging.logError(e); }
-	 * log.info("i2cRead response: " + response);
-	 * 
-	 * return size; }
-	 * 
-	 */
 	@Override
 	public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
 
@@ -331,6 +288,10 @@ public class Esp8266_01 extends Service implements I2CController {
 		return i2cRead(control, busAddress, deviceAddress, readBuffer, readSize);
 	}
 
+	public void setHost(String host){
+		this.host = host;
+	}
+	
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
