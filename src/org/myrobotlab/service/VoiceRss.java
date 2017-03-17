@@ -74,6 +74,7 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 	public String voice = "fr-fr";
 	public HashSet<String> voices = new HashSet<String>();
 	public String key = "0000";
+	public Integer rate = 0;
 	// this is a peer service.
 	transient AudioFile audioFile = null;
 	// TODO: fix the volume control
@@ -153,9 +154,19 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 	public String getKey() {
 		return key;
 	}
+	
+	public Integer getRate() {
+		return rate;
+	}
 
 	public void setKey(String key) {
 		this.key = key;
+	}
+	
+	public void setRate(Integer rate) {
+		if (rate<-10){rate=-10;}
+		if (rate>10){rate=10;}
+		this.rate = rate;
 	}
 
 	@Override
@@ -235,7 +246,7 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 			voice = "fr-fr";
 		}
 
-		String filename = this.getLocalFileName(this, toSpeak, "mp3");
+		String filename = this.getLocalFileName(this, toSpeak + rate.toString() , "mp3");
 		String filenametts = "audioFile" + File.separator + filename;
 		VoiceProvider tts = new VoiceProvider(getKey());
 
@@ -244,7 +255,7 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 		params.setFormat(AudioFormat.Format_44KHZ.AF_44khz_16bit_stereo);
 		params.setBase64(false);
 		params.setSSML(false);
-		params.setRate(0);
+		params.setRate(rate);
 
 		if (audioFile.cacheContains(filename)) {
 			invoke("publishStartSpeaking", toSpeak);
@@ -331,7 +342,7 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 		params.setFormat(AudioFormat.Format_44KHZ.AF_44khz_16bit_stereo);
 		params.setBase64(false);
 		params.setSSML(false);
-		params.setRate(0);
+		params.setRate(rate);
 
 		if (audioFile.cacheContains(filename)) {
 			ret = audioFile.playCachedFile(filename);
@@ -454,6 +465,7 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 			VoiceRss speech = (VoiceRss) Runtime.start("speech", "VoiceRss");
 			speech.setKey("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 			speech.setLanguage("en-gb");
+			speech.setRate(0);
 
 			// TODO: fix the volume control
 			// speech.setVolume(0);
