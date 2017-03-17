@@ -88,6 +88,8 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 		// TODO: be country/language aware when asking for voices?
 		// maybe have a get voices by language/locale
 		// Arabic
+		
+		
 		voices.add("ca-es");// Catalan
 		voices.add("zh-cn");// Chinese (China)
 		voices.add("zh-hk");// Chinese (Hong Kong)
@@ -114,7 +116,6 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 		voices.add("es-mx");// Spanish (Mexico)
 		voices.add("es-es");// Spanish (Spain)
 		voices.add("sv-se");// Swedish (Sweden)
-
 	}
 
 	public void startService() {
@@ -147,7 +148,8 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 
 	@Override
 	public boolean setVoice(String voice) {
-		this.voice = voice;
+		// backward compatibility because voicerss doesnt support setvoice
+		//return true;
 		return voices.contains(voice);
 	}
 
@@ -171,6 +173,10 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 
 	@Override
 	public void setLanguage(String l) {
+		// backward compatibility about simple language syntaxe
+		if (l.toLowerCase()=="fr"){l="fr-fr";}
+		if (l.toLowerCase()=="en"){l="en-us";}
+		if (l.toLowerCase()=="es"){l="es-es";}
 		voice = l;
 		// FIXME ! "MyLanguages", "sonid8" ???
 		// FIXME - implement !!!
