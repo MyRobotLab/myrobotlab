@@ -387,7 +387,7 @@
 		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-testdata.jar"/>
 		<!-- jmonkey end -->
 		
-		<pathelement location="${repo}/com.voicerss/1.0/voicerss_tts.jar"/>
+		<pathelement location="${repo}/com.voicerss.tts/1.0/tts.jar"/>
 		
 		<pathelement location="build-lib/tools.jar"/>
 	</path>

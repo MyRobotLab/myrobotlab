@@ -241,6 +241,6 @@
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-jbullet.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-desktop.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-testdata.jar"/>
-	<classpathentry kind="lib" path="/repo/com.voicerss/1.0/voicerss_tts.jar"/>
+	<classpathentry kind="lib" path="/repo/com.voicerss.tts/1.0/tts.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
