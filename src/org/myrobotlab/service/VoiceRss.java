@@ -510,7 +510,7 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 		meta.addPeer("audioFile", "AudioFile", "audioFile");
 		meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
 		meta.addDependency("org.apache.commons.httpclient", "4.5.2");
-		meta.addDependency("com.voicerss", "1.0");
+		meta.addDependency("com.voicerss.tts", "1.0");
 		return meta;
 	}
 
