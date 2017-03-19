@@ -62,12 +62,10 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
-import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PortListener;
-import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.swing.widget.DigitalButton;
 import org.myrobotlab.swing.widget.FileChooser;
 import org.myrobotlab.swing.widget.PortGui;
@@ -183,9 +181,9 @@ public class ArduinoGui extends ServiceGui
 		// FIXME - this should be done in ServiceGui ! - it should auto-update
 		// onState in ServiceGui
 		// and ServiceGui should call overloaded method
-		Arduino arduino = (Arduino) Runtime.getService(boundServiceName);
-		SerialDevice serial = arduino.getSerial();
-		portGui = new PortGui(serial.getName(), myService, tabs);
+		// Arduino arduino = (Arduino) Runtime.getService(boundServiceName);
+		// SerialDevice serial = arduino.getSerial();
+		portGui = new PortGui(boundServiceName, myService, tabs);
 		addTop(3, portGui.getDisplay());
 
 		// addTop(" board:", boardTypes);
@@ -265,7 +263,7 @@ public class ArduinoGui extends ServiceGui
 						pin.inOut.setOn(); // in
 						b.setOn();
 					} else {
-						myService.send(boundServiceName, "diablePin", address);
+						myService.send(boundServiceName, "disablePin", address);
 						pin.inOut.setOff();// out
 						b.setOff();
 					}
@@ -329,7 +327,7 @@ public class ArduinoGui extends ServiceGui
 	@Override
 	public void subscribeGui() {
 		subscribe("publishBoardInfo");
-		subscribe("publishPin", "publishPin");
+		subscribe("publishPinArray");
 		subscribe("publishConnect");
 		subscribe("publishDisconnect");
 	}
@@ -337,7 +335,7 @@ public class ArduinoGui extends ServiceGui
 	@Override
 	public void unsubscribeGui() {
 		unsubscribe("publishBoardInfo");
-		unsubscribe("publishPin", "publishPin");
+		unsubscribe("publishPinArray");
 		unsubscribe("publishConnect");
 		unsubscribe("publishDisconnect");
 	}
@@ -713,7 +711,7 @@ public class ArduinoGui extends ServiceGui
 					if (arduino.isConnected()) {
 						status.setText(String.format("connected %s", arduino.getBoardInfo()));
 					} else {
-						status.setText("disconnected");						
+						status.setText("disconnected");
 					}
 
 					arduinoPath.setText(myArduino.getArduinoPath());
@@ -728,70 +726,69 @@ public class ArduinoGui extends ServiceGui
 
 	}
 
-	public void publishPin(final Pin pin) {
+	public void onPinArray(final PinData[] pins) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 
-				log.info("PinData:{}", pin);
+				for (PinData pin : pins) {
 
-				if (!traceData.containsKey(pin.pin)) {
-					TraceData td = new TraceData();
-					float gradient = 1.0f / pinComponentList.size();
-					Color color = new Color(Color.HSBtoRGB((pin.pin * (gradient)), 0.8f, 0.7f));
-					td.color = color;
-					traceData.put(pin.pin, td);
-					td.index = lastTraceXPos;
-				}
+					log.info("PinData:{}", pin);
 
-				int value = pin.value / 2;
+					if (!traceData.containsKey(pin.address)) {
+						TraceData td = new TraceData();
+						float gradient = 1.0f / pinComponentList.size();
+						Color color = new Color(Color.HSBtoRGB((pin.address * (gradient)), 0.8f, 0.7f));
+						td.color = color;
+						traceData.put(pin.address, td);
+						td.index = lastTraceXPos;
+					}
 
-				TraceData t = traceData.get(pin.pin);
-				t.index++;
-				lastTraceXPos = t.index;
-				t.data[t.index] = value;
-				++t.total;
-				t.sum += value;
-				t.mean = t.sum / t.total;
+					int value = pin.value / 2;
 
-				g.setColor(t.color);
-				if (pin.type == Pin.DIGITAL_VALUE || pin.type == Pin.PWM_VALUE) {
-					int yoffset = pin.pin * 15 + 35;
-					int quantum = -10;
-					g.drawLine(t.index, t.data[t.index - 1] * quantum + yoffset, t.index, value * quantum + yoffset);
-				} else if (pin.type == Pin.ANALOG_VALUE) {
-					g.drawLine(t.index, DATA_HEIGHT - t.data[t.index - 1], t.index, DATA_HEIGHT - value);
-					// log.info("" + (value / 2));
-				} else {
-					log.error("dont know how to display pin data method");
-				}
+					TraceData t = traceData.get(pin.address);
+					t.index++;
+					lastTraceXPos = t.index;
+					t.data[t.index] = value;
+					++t.total;
+					t.sum += value;
+					t.mean = t.sum / t.total;
 
-				// computer min max and mean
-				// if different then blank & post to screen
-				if (value > t.max)
-					t.max = value;
-				if (value < t.min)
-					t.min = value;
-
-				if (t.index < DATA_WIDTH - 1) {
-				} else {
-					// TODO - when hit marks all startTracePos - cause the
-					// screen is
-					// blank - must iterate through all
-					t.index = 0;
-
-					clearScreen();
-					drawGrid();
-
-					g.setColor(Color.BLACK);
-					g.fillRect(20, t.pin * 15 + 5, 200, 15);
 					g.setColor(t.color);
 
-					g.drawString(String.format("min %d max %d mean %d ", t.min, t.max, t.mean), 20, t.pin * 15 + 20);
+					int yoffset = pin.address * 15 + 35;
+					int quantum = -10;
 
-					t.total = 0;
-					t.sum = 0;
+					g.drawLine(t.index, t.data[t.index - 1] * quantum + yoffset, t.index, value * quantum + yoffset);
 
+					// computer min max and mean
+					// if different then blank & post to screen
+					if (value > t.max)
+						t.max = value;
+					if (value < t.min)
+						t.min = value;
+
+					if (t.index < DATA_WIDTH - 1) {
+					} else {
+						// TODO - when hit marks all startTracePos - cause the
+						// screen is
+						// blank - must iterate through all
+						t.index = 0;
+
+						clearScreen();
+						drawGrid();
+
+						g.setColor(Color.BLACK);
+						g.fillRect(20, t.pin * 15 + 5, 200, 15);
+						g.setColor(t.color);
+
+						g.drawString(String.format("min %d max %d mean %d ", t.min, t.max, t.mean), 20,
+								t.pin * 15 + 20);
+
+						t.total = 0;
+						t.sum = 0;
+
+					}
 				}
 
 				oscope.displayFrame(sensorImage);

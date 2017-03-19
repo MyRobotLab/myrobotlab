@@ -224,13 +224,10 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", NeoPixel.class);
-    send("publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", NeoPixel.class);
   }
 
   public void onState(NeoPixel neopixel) {

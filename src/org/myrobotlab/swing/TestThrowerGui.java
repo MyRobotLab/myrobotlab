@@ -122,7 +122,7 @@ public class TestThrowerGui extends ServiceGui {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        subscribe("throwInteger", "throwInteger", Integer.class);
+        subscribe("throwInteger", "throwInteger");
       }
 
     });

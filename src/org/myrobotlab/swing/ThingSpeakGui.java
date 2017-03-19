@@ -80,13 +80,10 @@ public class ThingSpeakGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", ThingSpeak.class);
-    myService.send(boundServiceName, "broadcastState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", ThingSpeak.class);
   }
 
   public void onState(final ThingSpeak thing) {

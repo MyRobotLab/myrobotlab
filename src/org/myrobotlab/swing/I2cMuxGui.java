@@ -107,14 +107,11 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
 	}
 
 	@Override
-	public void subscribeGui() {
-		subscribe("publishState", "onState", I2cMux.class);
-		send("publishState");
+	public void subscribeGui() {		
 	}
 
 	@Override
-	public void unsubscribeGui() {
-		unsubscribe("publishState", "onState", I2cMux.class);
+	public void unsubscribeGui() {	
 	}
 
 	public void onState(I2cMux i2cMux) {

@@ -124,15 +124,10 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    //
-    subscribe("publishState", "onState", ProgramAB.class);
-    myService.send(boundServiceName, "publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    //
-    unsubscribe("publishState", "onState", ProgramAB.class);
   }
 
   public void onState(final ProgramAB programab) {

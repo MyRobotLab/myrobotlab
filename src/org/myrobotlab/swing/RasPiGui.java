@@ -54,15 +54,14 @@ public class RasPiGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", RasPi.class);
-    subscribe("publishNode", "publishNode", String.class, Node.class);
-    subscribe("putNode", "putNode", Node.NodeContext.class);
-    myService.send(boundServiceName, "publishState");
+	// FIXME - spec callback would be onNode
+    subscribe("publishNode", "publishNode");
+    // FIXME - spec callback would be onPutNode
+    subscribe("putNode", "putNode");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", RasPi.class);
   }
 
   public void onState(RasPi raspi) {

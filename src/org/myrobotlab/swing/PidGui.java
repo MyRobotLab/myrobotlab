@@ -95,13 +95,10 @@ public class PidGui extends ServiceGui implements ActionListener {
 
 	@Override
 	public void subscribeGui() {
-		subscribe("publishState", "onState", Pid.class);
-		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
-	public void unsubscribeGui() {
-		unsubscribe("publishState", "onState", Pid.class);
+	public void unsubscribeGui() {		
 	}
 
 	public void onState(final Pid pid) {

@@ -66,17 +66,12 @@ public class OculusRiftGui extends ServiceGui implements VideoGUISource, ActionL
 
   @Override
   public void subscribeGui() {
-    // gui msg routes created
-    subscribe("publishState", "onState", OculusRift.class);
-    myService.send(boundServiceName, "publishState");
-    subscribe("publishRiftFrame", "onRiftFrame", RiftFrame.class);
+    subscribe("publishRiftFrame");
   }
 
   @Override
   public void unsubscribeGui() {
-    // gui msg routes removed
-    unsubscribe("publishState", "onState", OculusRift.class);
-    unsubscribe("publishRiftFrame", "onRiftFrame", RiftFrame.class);
+	  unsubscribe("publishRiftFrame");
   }
 
 }

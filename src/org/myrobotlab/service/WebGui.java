@@ -1163,11 +1163,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       Double level = Runtime.getBatteryLevel();
       log.info("" + level);
 
+      /*
       VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
       virtual.connect("COM5");
+      
       Runtime.start("python", "Python");
+      */
       // Runtime.start("arduino", "Arduino");
       //Runtime.start("srf05", "UltrasonicSensor");
+      // Runtime.setRuntimeName("george");
       Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {

@@ -89,14 +89,12 @@ public class PingdarGui extends ServiceGui implements ListSelectionListener, Vid
 
   @Override
   public void subscribeGui() {
-    subscribe("publishPingdar", "onPingdar", Point.class);
-    // subscribe("publishSweepData", "publishSweepData", ArrayList.class);
+    subscribe("publishPingdar");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishPingdar", "onPingdar", Point.class);
-    // unsubscribe("publishSweepData", "publishSweepData", ArrayList.class);
+    unsubscribe("publishPingdar");
   }
 
   public void displayFrame(SerializableImage camImage) {

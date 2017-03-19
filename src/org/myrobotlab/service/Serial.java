@@ -30,6 +30,7 @@ import org.myrobotlab.serial.Port;
 import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.serial.PortStream;
 import org.myrobotlab.serial.SerialControl;
+import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.QueueSource;
 import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
@@ -43,7 +44,7 @@ import org.slf4j.Logger;
  *
  */
 public class Serial extends Service
-		implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice {
+		implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice, PortPublisher {
 
 	/**
 	 * general read timeout - 0 is infinite > 0 is number of milliseconds to
@@ -269,9 +270,8 @@ public class Serial extends Service
 	public void addByteListener(String name) {
 		ServiceInterface si = Runtime.getService(name);
 
-		// if (si instanceof SerialDataListener && si.isLocal()){
 		if (SerialDataListener.class.isAssignableFrom(si.getClass()) && si.isLocal()) {
-			// direct callback
+			// local optimization
 			listeners.put(si.getName(), (SerialDataListener) si);
 		} else {
 			// pub sub
@@ -279,6 +279,12 @@ public class Serial extends Service
 			addListener("publishConnect", si.getName(), "onConnect");
 			addListener("publishDisconnect", si.getName(), "onDisconnect");
 		}
+	}
+	
+	
+	public void addPortListener(String name){
+		addListener("publishConnect", name, "onConnect");
+		addListener("publishDisconnect", name, "onDisconnect");
 	}
 
 	/**

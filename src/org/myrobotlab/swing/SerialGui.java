@@ -58,12 +58,14 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(SerialGui.class);
-	
+
 	// menu
 	JComboBox<String> reqFormat = new JComboBox<String>(new String[] { "decimal", "hex", "ascii", "arduino" });
 
 	// FIXME !!!
 	JButton createVirtualPort = new JButton("create virtual uart");
+	JButton monitor = new JButton("stop monitor");
+	boolean monitoring = true;
 	JButton clear = new JButton("clear");
 	JButton record = new JButton();
 
@@ -87,7 +89,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	// gui's formatters
 	Codec rxFormatter = new DecimalCodec(myService);
 	Codec txFormatter = new DecimalCodec(myService);
-	
+
 	PortGui portGui;
 
 	public SerialGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
@@ -97,9 +99,9 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		rx.setEditable(false);
 		tx.setEditable(false);
 		autoScroll(true);
-		
+
 		portGui = new PortGui(boundServiceName, myService, tabs);
-		addTop(portGui.getDisplay(), " ", reqFormat, clear, record);
+		addTop(portGui.getDisplay(), " ", reqFormat, clear, monitor, record, createVirtualPort);
 
 		add(new JScrollPane(rx));
 		add(new JScrollPane(tx));
@@ -113,6 +115,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		record.addActionListener(this);
 		reqFormat.addItemListener(this);
 		clear.addActionListener(this);
+		monitor.addActionListener(this);
 	}
 
 	@Override
@@ -127,7 +130,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 				send("broadcastState");
 			}
 		}
-		
+
 		if (o == clear) {
 			clear();
 		}
@@ -135,6 +138,19 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 			send("connectVirtualUart", "COM88");
 		}
 		
+		if (o == monitor){
+			JButton m = (JButton)o;
+			if (m.getText().equals("monitor")){				
+				m.setText("stop monitor");
+				monitoring = true;
+				subscribe("publishRX");
+			} else {
+				m.setText("monitor");
+				monitoring = false;
+				unsubscribe("publishRX");
+			}
+		}
+
 		if (o == sendFile) {
 			JFileChooser fileChooser = new JFileChooser();
 			// set current directory
@@ -153,8 +169,8 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 			myService.info("sent [%s]", data);
 		}
 	}
-	
-	public void clear(){
+
+	public void clear() {
 		rx.setText("");
 		tx.setText("");
 	}
@@ -164,7 +180,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		subscribe("publishRX");
 		subscribe("publishTX");
 		subscribe("publishState");
-		// forces scan of ports		
+		// forces scan of ports
 	}
 
 	@Override
@@ -203,12 +219,12 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 			@Override
 			public void run() {
 				try {
-					mySerial = serial;					
+					mySerial = serial;
 					if (!serial.isRecording()) {
 						record.setText("record");
 					} else {
 						record.setText("stop recording");
-					}					
+					}
 				} catch (Exception e) {
 					log.error("onState threw", e);
 				}
@@ -220,17 +236,6 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	@Override
 	public void itemStateChanged(ItemEvent event) {
 		Object o = event.getSource();
-		/*
-		if (o == ports && event.getStateChange() == ItemEvent.SELECTED) {
-			String port = (String) ports.getSelectedItem();
-			if (port.length() == 0) {
-				// send("disconnect");
-			} else if (!port.equals(mySerial.getPortName()) && port.length() > 0) {
-				// send("disconnect");
-				send("connect", port);
-			}
-		}
-		*/
 
 		if (o == reqFormat) {
 			String newFormat = (String) reqFormat.getSelectedItem();
@@ -259,10 +264,10 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	 */
 	public final void onRX(final Integer data) throws BadLocationException {
 		++rxCount;
-    if(this.myService.getInbox().size() > 500) {
-      rx.append("... ");
-      return;
-    }
+		if (this.myService.getInbox().size() > 500) {
+			rx.append("...\n");
+			return;
+		}
 		String formatted = rxFormatter.decode(data);
 		rx.append(formatted);
 		if (formatted != null && rx.getLineCount() > 50) {

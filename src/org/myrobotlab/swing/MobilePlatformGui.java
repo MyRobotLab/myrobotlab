@@ -96,12 +96,10 @@ public class MobilePlatformGui extends ServiceGui {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", MobilePlatform.class);
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", MobilePlatform.class);
   }
 
   /**
