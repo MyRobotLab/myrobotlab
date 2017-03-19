@@ -107,7 +107,7 @@ public class WiiGui extends ServiceGui implements ListSelectionListener, VideoGU
   @Override
   public void subscribeGui() {
     video0.subscribeGui();
-    subscribe("publishIR", "publishIR", IRData.class);
+    subscribe("publishIR");
     video0.displayFrame(new SerializableImage(camImage, boundServiceName));
   }
 
@@ -124,7 +124,7 @@ public class WiiGui extends ServiceGui implements ListSelectionListener, VideoGU
   @Override
   public void unsubscribeGui() {
     video0.unsubscribeGui();
-    unsubscribe("publishIR", "publishIR", IRData.class);
+    unsubscribe("publishIR");
   }
 
   public void display(IRData ire, Color color) {
@@ -154,7 +154,7 @@ public class WiiGui extends ServiceGui implements ListSelectionListener, VideoGU
     return video0;
   }
 
-  public void publishIR(IRData ire) {
+  public void onIR(IRData ire) {
     ++cnt;
 
     if (lastIRData != null) {

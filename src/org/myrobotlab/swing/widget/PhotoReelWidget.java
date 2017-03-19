@@ -124,24 +124,22 @@ public class PhotoReelWidget extends ServiceGui {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishTemplate", "publishTemplate", SerializableImage.class);
+    subscribe("publishTemplate");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishTemplate", "publishTemplate", SerializableImage.class);
+    unsubscribe("publishTemplate");
   }
 
-  public JComboBox getServices(JComboBox cb) {
+  public JComboBox<String> getServices(JComboBox<String> cb) {
     if (cb == null) {
-      cb = new JComboBox();
+      cb = new JComboBox<String>();
     }
-
-
     return cb;
   }
 
-  public void publishTemplate(BufferedImage img) {
+  public void onTemplate(BufferedImage img) {
     if (lastImage != null) {
       screen.setIcon(lastIcon);
     }

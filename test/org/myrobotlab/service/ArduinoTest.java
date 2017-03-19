@@ -1007,7 +1007,7 @@ public class ArduinoTest implements PinArrayListener {
 	public void onPinArray(PinData[] pindata) {
 		log.info("onPinArray size {}", pindata.length);
 		for (int i = 0; i < pindata.length; ++i){
-			pinData.put(pindata[i].getAddress(),pindata[i]);
+			pinData.put(pindata[i].address,pindata[i]);
 		}
 	}
 

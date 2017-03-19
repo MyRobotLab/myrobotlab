@@ -1376,7 +1376,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 */
 	public PinData publishPin(PinData pinData) {
 		// caching last value
-		pinIndex.get(pinData.getAddress()).setValue(pinData.getValue());
+		pinIndex.get(pinData.address).setValue(pinData.value);
 		return pinData;
 	}
 
@@ -1400,7 +1400,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		for (int i = 0; i < pinArray.length; ++i) {
 			PinData pinData = new PinData(data[3 * i], Serial.bytesToInt(data, (3 * i) + 1, 2));
 			pinArray[i] = pinData;
-			int address = pinData.getAddress();
+			int address = pinData.address;
 
 			// handle individual pins
 			if (pinListeners.containsKey(address)) {
@@ -2001,15 +2001,16 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			RemoteAdapter remote = (RemoteAdapter)Runtime.start("ra", "RemoteAdapter");
 			
 			// Runtime.start("python", "Python");
-			Service.reserveRootAs("virtual.uart", "uart");
+
 			VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
 			virtual.connect("COM78");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.connect("COM78");
-			
+						
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
 			servo.attach(arduino, 8, 90);
 			
+			Runtime.start("webgui", "WebGui");
 			Service.sleep(3000);
 			
 			remote.startListening();

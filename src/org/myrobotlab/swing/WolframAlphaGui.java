@@ -87,13 +87,13 @@ public class WolframAlphaGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", _TemplateService.class);
+    subscribe("publishState", "onState");
     myService.send(boundServiceName, "publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", _TemplateService.class);
+    unsubscribe("publishState", "onState");
   }
 
   public void onState(WolframAlpha template) {

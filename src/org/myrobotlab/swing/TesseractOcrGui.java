@@ -53,13 +53,11 @@ public class TesseractOcrGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", TesseractOcr.class);
     myService.send(boundServiceName, "publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", TesseractOcr.class);
   }
 
   public void onState(TesseractOcr template) {

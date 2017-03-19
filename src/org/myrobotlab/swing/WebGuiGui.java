@@ -53,13 +53,10 @@ public class WebGuiGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", WebGui.class);
-    myService.send(boundServiceName, "publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", WebGui.class);
   }
 
   public void onState(WebGui template) {

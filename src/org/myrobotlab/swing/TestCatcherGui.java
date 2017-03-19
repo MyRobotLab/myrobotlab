@@ -53,7 +53,6 @@ public class TestCatcherGui extends ServiceGui {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", TestCatcher.class);
   }
 
   // TODO - reflect and auto-bind (or pull info from the Service/Method
@@ -70,7 +69,6 @@ public class TestCatcherGui extends ServiceGui {
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", TestCatcher.class);
   }
 
   // TODO - generalize this and use it in reflection
