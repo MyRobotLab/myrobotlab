@@ -53,13 +53,10 @@ public class XmppGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", Xmpp.class);
-    myService.send(boundServiceName, "publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", Xmpp.class);
   }
 
   public void onState(Xmpp template) {

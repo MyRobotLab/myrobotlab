@@ -25,49 +25,26 @@
 
 package org.myrobotlab.swing;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.JButton;
 import javax.swing.JTabbedPane;
 
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.VirtualArduino;
 import org.myrobotlab.swing.widget.PortGui;
 
 // FIXME - add stop watch capabilities
-public class VirtualArduinoGui extends ServiceGui implements ActionListener {
+public class VirtualArduinoGui extends ServiceGui {
   static final long serialVersionUID = 1L;
   PortGui portgui;
   JButton button = new JButton("button");
  
   public VirtualArduinoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);  
-    VirtualArduino virtual = (VirtualArduino)Runtime.getService(boundServiceName);
-    // Peers.getPeerKey(boundServiceName, reservedKey);
-    // getPeerName - needs to get from immutable local copy of config & know about context & gateway :(
-    // String uartName = virtual.getPeerName("uart"); // getPeerName - needs to know if local or not
-    // SerialDevice serial = virtual.getSerial();
-    portgui = new PortGui(virtual.getPeerName("uart"), myService, tabs);
-    addTop(portgui.getDisplay());
-  }
-
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    Object o = e.getSource();
-  }
-
-  @Override
-  public void subscribeGui() {
-  }
-
-  @Override
-  public void unsubscribeGui() {
+       portgui = new PortGui(boundServiceName, myService, tabs);
+       addTop(portgui.getDisplay());
   }
 
   public void onState(final VirtualArduino c) {
   }
-
 
 }

@@ -207,15 +207,13 @@ public class MotorGui extends ServiceGui implements ActionListener, ChangeListen
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", Motor.class);
-    subscribe("publishChangePos", "onChangePos", Double.class);
+    subscribe("publishChangePos");
     myService.send(boundServiceName, "publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", Arduino.class);
-    unsubscribe("publishChangePos", "onChangePos", Double.class);
+    unsubscribe("publishChangePos", "onChangePos");
   }
 
   public void onState(Motor motor) {

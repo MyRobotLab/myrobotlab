@@ -164,7 +164,7 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
                 });
             }, function(e) {
                 // http template failure
-                type = "NoGui";
+                type = "No"; // becomes NoGui
                 $log.warn('lazy-loading wasnt successful:', type);
                 addPanel(name).templatestatus = 'notfound';
                 notifyAllOfUpdate();

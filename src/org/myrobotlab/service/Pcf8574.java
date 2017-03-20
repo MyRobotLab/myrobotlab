@@ -76,7 +76,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 			for (int i = 0; i < pinArray.length; ++i) {
 				PinData pinData = new PinData(i, read(i));
 				pinArray[i] = pinData;
-				int address = pinData.getAddress();
+				int address = pinData.address;
 
 				// handle individual pins
 				if (pinListeners.containsKey(address)) {
@@ -393,7 +393,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	@Override
 	public PinData publishPin(PinData pinData) {
 		// caching last value
-		pinIndex.get(pinData.getAddress()).setValue(pinData.getValue());
+		pinIndex.get(pinData.address).setValue(pinData.value);
 		return pinData;
 	}
 

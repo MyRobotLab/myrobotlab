@@ -53,13 +53,10 @@ public class SecurityGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", Security.class);
-    myService.send(boundServiceName, "publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", Security.class);
   }
 
   public void onState(org.myrobotlab.service.Security security) {

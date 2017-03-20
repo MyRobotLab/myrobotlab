@@ -108,13 +108,10 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
 
 	@Override
 	public void subscribeGui() {
-		subscribe("publishState", "onState", Pcf8574.class);
-		send("publishState");
 	}
 
 	@Override
 	public void unsubscribeGui() {
-		unsubscribe("publishState", "onState", Pcf8574.class);
 	}
 
 	public void onState(Pcf8574 ads1115) {

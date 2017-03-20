@@ -67,11 +67,7 @@ public class BlenderGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
-
-    subscribe("publishState", "onState", Blender.class);
-    subscribe("isConnected", "onConnected", Boolean.class);
+    subscribe("isConnected", "onConnected");
     send("publishState");
   }
 
@@ -80,7 +76,7 @@ public class BlenderGui extends ServiceGui implements ActionListener {
     // commented out subscription due to this class being used for
     // un-defined gui's
 
-    unsubscribe("publishState", "onState", Blender.class);
+    unsubscribe("publishState", "onState");
   }
 
   public void onState(Blender template) {

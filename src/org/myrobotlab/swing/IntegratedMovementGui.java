@@ -161,14 +161,11 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", IntegratedMovement.class);
-    send("publishState");
     subscribe("publishPosition");
   }
 
   @Override
-  public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", IntegratedMovement.class);
+  public void unsubscribeGui() {    
     unsubscribe("publishPosition");
   }
 

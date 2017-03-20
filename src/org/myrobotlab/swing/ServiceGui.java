@@ -312,10 +312,10 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 	}
 
 	public void subscribe(String method) {
-		subscribe(method, CodecUtils.getCallBackName(method), (Class<?>[]) null);
+		subscribe(method, CodecUtils.getCallBackName(method));
 	}
 
-	public void subscribe(String method, String callback, Class<?>... parameterType) {
+	public void subscribe(String method, String callback) {
 		
 		// send a message to the service - to subscribe to a method 
 		MRLListener listener = new MRLListener(method, myService.getName(), callback);
@@ -414,24 +414,14 @@ public abstract class ServiceGui extends WindowAdapter implements TabControlEven
 	// TODO - more closely model java event system with addNotification or
 	// addListener
 	public void unsubscribe(String inOutMethod) {
-		unsubscribe(inOutMethod, inOutMethod, (Class<?>[]) null);
+		unsubscribe(inOutMethod, CodecUtils.getCallBackName(inOutMethod));
 	}
 
 	public void unsubscribe(String inMethod, String outMethod) {
-		unsubscribe(inMethod, outMethod, (Class<?>[]) null);
-	}
-
-	public void unsubscribe(String outMethod, String inMethod, Class<?>... parameterType) {
-
-		MRLListener listener = null;
-		if (parameterType != null) {
-			listener = new MRLListener(outMethod, myService.getName(), inMethod);
-		} else {
-			listener = new MRLListener(outMethod, myService.getName(), inMethod);
-		}
-		myService.send(boundServiceName, "removeListener", listener);
+		myService.unsubscribe(boundServiceName, inMethod, myService.getName(), outMethod);
 
 	}
+
 
 	// -- TabControlEventHandler -- end
 

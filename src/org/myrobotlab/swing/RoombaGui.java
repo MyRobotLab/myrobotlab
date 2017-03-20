@@ -197,8 +197,6 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", Roomba.class);
-    myService.send(boundServiceName, "publishState");
   }
 
   /** */
@@ -240,7 +238,6 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", Roomba.class);
   }
 
   /** */

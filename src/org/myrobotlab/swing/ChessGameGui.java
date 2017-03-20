@@ -213,8 +213,8 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
 
   @Override
   public void subscribeGui() {
-    subscribe("inputMove", "inputMove", String.class);
-    subscribe("inputHMove", "inputHMove", HMove.class);
+    subscribe("inputMove", "inputMove"); // FIXME - out of spec - should be onMove
+    subscribe("inputHMove", "inputHMove");
   }
 
   private void computerMove() {
@@ -234,8 +234,8 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("inputMove", "inputMove", String.class);
-    unsubscribe("inputHMove", "inputHMove", HMove.class);
+    unsubscribe("inputMove", "inputMove");
+    unsubscribe("inputHMove", "inputHMove");
   }
 
   private int getPos(String s) {

@@ -100,14 +100,10 @@ public class OledSsd1306Gui extends ServiceGui implements ActionListener {
 
 	@Override
 	public void subscribeGui() {
-		log.info("AttachGUI subscribing to Adafruit16CServoDriver.class");
-		subscribe("publishState", "onState", OledSsd1306.class);
-		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
 	public void unsubscribeGui() {
-		unsubscribe("publishState", "onState", OledSsd1306.class);
 	}
 
 	public void onState(final OledSsd1306 driver) {
