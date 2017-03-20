@@ -53,13 +53,10 @@ public class InverseKinematicsGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", InverseKinematics.class);
-    myService.send(boundServiceName, "publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", InverseKinematics.class);
   }
 
   public void onState(final InverseKinematics ik) {

@@ -86,16 +86,17 @@ public class VideoWidget extends ServiceGui {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishDisplay", "displayFrame", SerializableImage.class);
+	// FIXME - should be to spec .. onDisplay no displayFrame
+    subscribe("publishDisplay", "displayFrame");
   }
 
-  public void attachGUI(String srcMethod, String dstMethod, Class<?> c) {
-    subscribe(srcMethod, dstMethod, c);
+  public void attachGui(String srcMethod, String dstMethod) {
+    subscribe(srcMethod, dstMethod);
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishDisplay", "displayFrame", SerializableImage.class);
+    unsubscribe("publishDisplay", "displayFrame");
   }
 
   // multiplex images if desired

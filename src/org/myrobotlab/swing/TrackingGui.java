@@ -91,17 +91,16 @@ public class TrackingGui extends ServiceGui {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", Tracking.class);
-    subscribe("publishStatus", "setStatus", String.class);
-    subscribe("publishFrame", "displayFrame", SerializableImage.class);
+    subscribe("publishStatus");
+    subscribe("publishFrame", "displayFrame"); // FIXME should be onDisplayFrame
     video0.subscribeGui(); // default attachment
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", Tracking.class);
-    unsubscribe("publishStatus", "setStatus", String.class);
-    unsubscribe("publishFrame", "displayFrame", SerializableImage.class);
+    unsubscribe("publishState");
+    unsubscribe("publishStatus");
+    unsubscribe("publishFrame", "displayFrame");
     video0.unsubscribeGui(); // default attachment
 
   }
@@ -126,7 +125,7 @@ public class TrackingGui extends ServiceGui {
     });
   }
 
-  public void setStatus(final Status newStatus) {
+  public void onStatus(final Status newStatus) {
     // SwingUtilities.invokeLater(new Runnable() {
     // public void run() {
     status.setText(String.format("%s %s", newStatus.level, newStatus.detail)); // JTextArea

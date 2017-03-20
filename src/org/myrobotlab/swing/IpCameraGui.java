@@ -199,22 +199,16 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
   @Override
   public void subscribeGui() {
     video0.subscribeGui();
-    subscribe("setEnableControls", "setEnableControls", Boolean.class);
-    subscribe("publishDisplay", "publishDisplay");
+    subscribe("setEnableControls");
+    subscribe("publishDisplay");
   };
 
-  /*
-   * public void isConnected(Boolean b) { if (b) { connected.setVisible(true);
-   * notConnected.setVisible(false); } else { connected.setVisible(false);
-   * notConnected.setVisible(true); }
-   * 
-   * }
-   */
 
   @Override
   public void unsubscribeGui() {
     video0.unsubscribeGui();
-    unsubscribe("setEnableControls", "setEnableControls", Boolean.class);
+    unsubscribe("setEnableControls");
+    unsubscribe("publishDisplay");
   }
 
 
@@ -229,12 +223,11 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
    * JLabel(s)); }
    */
 
-  public void publishDisplay(SerializableImage img) {
-
+  public void onDisplay(SerializableImage img) {
     video0.displayFrame(img);
   }
 
-  public void setEnableControls(Boolean v) {
+  public void onEnableControls(Boolean v) {
     // from service -> prevents control on the service level
     // event comes back and updates gui
     direction.btnN.setEnabled(v);

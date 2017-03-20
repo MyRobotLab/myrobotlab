@@ -51,17 +51,12 @@ public class SlamBadGui extends ServiceGui implements ActionListener {
 
   }
 
-  // FIXME sendNotifyStateRequest("publishState", "onState", String type); <-
-  // Class.forName(type)
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", SlamBad.class);
-    myService.send(boundServiceName, "publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", SlamBad.class);
   }
 
   // FIXME - is get/set state interact with Runtime registry ???

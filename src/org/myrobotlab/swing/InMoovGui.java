@@ -142,15 +142,12 @@ public class InMoovGui extends ServiceGui implements ActionListener {
   // Class.forName(type)
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", InMoovGui.class);
-    myService.send(boundServiceName, "publishState");
-    opencv.subscribeGui(); // default attachment
+    opencv.subscribeGui();
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", InMoovGui.class);
-    opencv.unsubscribeGui(); // default attachment
+    opencv.unsubscribeGui();
   }
 
   public String getPort(String side) {

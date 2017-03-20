@@ -41,67 +41,58 @@ import org.slf4j.Logger;
 
 public class UltrasonicSensorGui extends ServiceGui implements ActionListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(UltrasonicSensorGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(UltrasonicSensorGui.class);
 
-  JProgressBar range;
+	JProgressBar range;
 
-  public UltrasonicSensorGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
-    display.setLayout(new BorderLayout());
+	public UltrasonicSensorGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
+		super(boundServiceName, myService, tabs);
+		display.setLayout(new BorderLayout());
 
-    range = new JProgressBar(0, 300);
-    range.setValue(0);
-    range.setStringPainted(true);
-    range.setPreferredSize(new Dimension(380, 25));
+		range = new JProgressBar(0, 300);
+		range.setValue(0);
+		range.setStringPainted(true);
+		range.setPreferredSize(new Dimension(380, 25));
 
-    display.add(range, BorderLayout.NORTH);
-    // JPanel center = new JPanel();
+		display.add(range, BorderLayout.NORTH);
+		// JPanel center = new JPanel();
 
-  }
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent arg0) {
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
 
-  }
+	}
 
-  @Override
-  public void subscribeGui() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
+	@Override
+	public void subscribeGui() {
+		subscribe("publishRange");
+	}
 
-    subscribe("publishRange", "onRange", Double.class);
-    subscribe("publishState", "onState", UltrasonicSensor.class);
+	@Override
+	public void unsubscribeGui() {
+		unsubscribe("publishRange");
+	}
 
-    // send("publishState");
-  }
+	public void onState(UltrasonicSensor template) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
-  @Override
-  public void unsubscribeGui() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
+			}
+		});
+	}
 
-    // unsubscribe("publishState", "onState", _TemplateService.class);
-  }
+	public void onRange(final Double r) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				range.setValue(r.intValue());
+				range.setString(String.format("%d cm", r.intValue()));
+			}
+		});
 
-  public void onState(UltrasonicSensor template) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-
-      }
-    });
-  }
-
-  public void onRange(final Double r) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        range.setValue(r.intValue());
-        range.setString(String.format("%d cm", r.intValue()));
-      }
-    });
-
-  }
+	}
 
 }

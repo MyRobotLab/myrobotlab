@@ -215,15 +215,10 @@ public class Mpu6050Gui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-
-    subscribe("publishState", "onState", Mpu6050.class);
-    send("publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-
-    unsubscribe("publishState", "onState", Mpu6050.class);
   }
 
   public void onState(Mpu6050 mpu6050) {

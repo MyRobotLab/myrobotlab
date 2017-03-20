@@ -31,7 +31,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		subscribeGui();
 		connect.addActionListener(this);
 		refresh.addActionListener(this);		
-		myService.subscribeToServiceMethod(boundServiceName, this);
+// 		myService.subscribeToServiceMethod(boundServiceName, this);
 	}
 
 	/**
@@ -45,7 +45,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		subscribe("getPortNames");
 		subscribe("publishConnect");
 		subscribe("publishDisconnect");
-		send("getPortNames");
+ 		send("getPortNames");
 	}
 
 	@Override
@@ -56,6 +56,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		unsubscribe("publishDisconnect");
 	}
 
+	// deprecate - use onConnect & onDisconnect
 	public void onState(final PortPublisher portPublisher) {
 		if (portPublisher == null){
 			log.info("here");
@@ -107,12 +108,20 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 	public void onConnect(String portName) {
 		log.info("onConnect - {}", portName);
 		lastPortName = portName;
+		// ports.removeActionListener(this); dont have to Yay !
+		ports.setSelectedItem(portName);
+		ports.setEnabled(false);
+		connectLight.setIcon(Util.getImageIcon("green.png"));
+		connect.setText("disconnect");
 	}
 
 	@Override
 	public void onDisconnect(String portName) {
 		log.info("onDisconnect - {}", portName);
 		ports.setSelectedItem(lastPortName);
+		ports.setEnabled(true);
+		connectLight.setIcon(Util.getImageIcon("red.png"));
+		connect.setText("connect");
 	}
 
 	public void onPortNames(final List<String> inPorts) {

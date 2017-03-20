@@ -53,13 +53,10 @@ public class InMoovHeadGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", InMoovHead.class);
-    myService.send(boundServiceName, "publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", InMoovHead.class);
   }
 
   public void onState(InMoovHead template) {

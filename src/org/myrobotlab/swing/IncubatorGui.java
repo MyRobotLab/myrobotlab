@@ -53,13 +53,10 @@ public class IncubatorGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("publishState", "onState", Test.class);
-    send("publishState");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", Test.class);
   }
 
   public void onState(Test template) {

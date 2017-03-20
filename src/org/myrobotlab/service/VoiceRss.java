@@ -88,8 +88,11 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 		// TODO: be country/language aware when asking for voices?
 		// maybe have a get voices by language/locale
 		// Arabic
+		
+		
 		voices.add("ca-es");// Catalan
 		voices.add("zh-cn");// Chinese (China)
+		voices.add("cn");// Chinese (China)
 		voices.add("zh-hk");// Chinese (Hong Kong)
 		voices.add("zh-tw");// Chinese (Taiwan)
 		voices.add("da-dk");// Danish
@@ -99,12 +102,17 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 		voices.add("en-gb");// English (Great Britain)
 		voices.add("en-in");// English (India)
 		voices.add("en-us");// English (United States)
+		voices.add("en");// English (United States)
 		voices.add("fi-fi");// Finnish
 		voices.add("fr-ca");// French (Canada)
 		voices.add("fr-fr");// French (France)
+		voices.add("fr");// French (France)
 		voices.add("de-de");// German
+		voices.add("de");// German
 		voices.add("it-it");// Italian
 		voices.add("ja-jp");// Japanese
+		voices.add("ja");// Japanese
+		voices.add("jp");// Japanese
 		voices.add("ko-kr");// Korean
 		voices.add("nb-no");// Norwegian
 		voices.add("pl-pl");// Polish
@@ -113,8 +121,8 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 		voices.add("ru-ru");// Russian
 		voices.add("es-mx");// Spanish (Mexico)
 		voices.add("es-es");// Spanish (Spain)
+		voices.add("es");// Spanish (Spain)
 		voices.add("sv-se");// Swedish (Sweden)
-
 	}
 
 	public void startService() {
@@ -147,7 +155,8 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 
 	@Override
 	public boolean setVoice(String voice) {
-		this.voice = voice;
+		// backward compatibility because voicerss doesnt support setvoice
+		//return true;
 		return voices.contains(voice);
 	}
 
@@ -171,6 +180,13 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 
 	@Override
 	public void setLanguage(String l) {
+		// backward compatibility about simple language syntaxe
+		if (l.toLowerCase()=="fr"){l="fr-fr";}
+		if (l.toLowerCase()=="en"){l="en-us";}
+		if (l.toLowerCase()=="es"){l="es-es";}
+		if (l.toLowerCase()=="cn"){l="zh-cn";}
+		if (l.toLowerCase()=="de"){l="de-de";}
+		if (l.toLowerCase()=="jp"){l="ja-jp";}
 		voice = l;
 		// FIXME ! "MyLanguages", "sonid8" ???
 		// FIXME - implement !!!
@@ -471,8 +487,7 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 			// speech.setVolume(0);
 			speech.speakBlocking("it works, yes I believe it does");
 			speech.speakBlocking("yes yes. oh good. excellent!");
-			speech.speakBlocking(
-					"to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
+			speech.speakBlocking("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
 			speech.speakBlocking("I'm afraid I can't do that.");
 
 			// speech.speak("this is a test");
@@ -510,7 +525,7 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 		meta.addPeer("audioFile", "AudioFile", "audioFile");
 		meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
 		meta.addDependency("org.apache.commons.httpclient", "4.5.2");
-		meta.addDependency("com.voicerss", "1.0");
+		meta.addDependency("com.voicerss.tts", "1.0");
 		return meta;
 	}
 

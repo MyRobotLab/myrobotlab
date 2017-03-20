@@ -113,15 +113,38 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	}
 
 	public void addPeer(String name, String peerType, String comment) {
-		peers.put(name, new ServiceReservation(name, peerType, comment));
+		// peers.put(name, new ServiceReservation(name, peerType, comment));
+		mergePeer(new ServiceReservation(name, peerType, comment));
 	}
 
+	/**
+	 * sharing means sharePeer is forced - while addPeer will check before adding
+	 * @param key
+	 * @param actualName
+	 * @param peerType
+	 * @param comment
+	 */
 	public void sharePeer(String key, String actualName, String peerType, String comment) {
 		peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
 	}
 
 	public void addRootPeer(String actualName, String peerType, String comment) {
 		peers.put(actualName, new ServiceReservation(actualName, actualName, peerType, comment, true));
+	}
+	
+	/**
+	 * checks if already exists - if it does - merges only unset values into peers
+	 * @param sr
+	 */
+	public void mergePeer(ServiceReservation sr){
+		if (peers.containsKey(sr.key)){
+			ServiceReservation existing = peers.get(sr.key);
+			existing.actualName = (existing.actualName != null)?existing.actualName:sr.actualName;
+			existing.fullTypeName = (existing.fullTypeName != null)?existing.fullTypeName:sr.fullTypeName;
+			existing.comment = (existing.comment != null)?existing.comment:sr.comment;
+		} else {
+			peers.put(sr.key, sr);
+		}
 	}
 
 	public void setAvailable(boolean b) {

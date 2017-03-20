@@ -55,12 +55,12 @@ public class LogGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("log", "log", Message.class);
+    subscribe("log", "log"); // FIXME - not per spec onLog
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("log", "log", Message.class);
+    unsubscribe("log", "log");
   }
 
   public void log(Message m) {

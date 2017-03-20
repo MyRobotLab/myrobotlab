@@ -118,16 +118,12 @@ public class OpenNiGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    // subscribe & ask for the initial state of the service
-    subscribe("publishState", "onState", OpenNi.class);
-    subscribe("publishOpenNIData", "publishOpenNIData");
-    myService.send(boundServiceName, "publishState");
+    subscribe("publishOpenNIData");
   }
 
   @Override
   public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", OpenNi.class);
-    unsubscribe("publishOpenNIData", "publishOpenNIData");
+    unsubscribe("publishOpenNIData");
   }
 
   public void onState(OpenNi openni) {
@@ -138,7 +134,7 @@ public class OpenNiGui extends ServiceGui implements ActionListener {
     video.displayFrame(si);
   }
 
-  public void publishOpenNIData(OpenNiData data) {
+  public void onOpenNIData(OpenNiData data) {
     // TODO - display type based on config
     if ("display".equals(displayType)) {
       source.setImage(data.depth);

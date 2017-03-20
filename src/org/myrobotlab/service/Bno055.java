@@ -1621,7 +1621,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   @Override
   public void onPin(PinData pindata) {
   	
-		 boolean sense = (pindata.getValue() != 0);
+		 boolean sense = (pindata.value != 0);
 		 
 		 if (!isActive && sense){
 			 // state change

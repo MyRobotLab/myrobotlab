@@ -93,9 +93,6 @@ public final class MRLListener implements Serializable {
     return _hashCode;
   }
 
-  /*
-   * Default format was xml is now JSON TODO - make toStringStyler like spring
-   */
   @Override
   public String toString() {
     return String.format("%s -will activate-> %s.%s", topicMethod, callbackName, callbackMethod);

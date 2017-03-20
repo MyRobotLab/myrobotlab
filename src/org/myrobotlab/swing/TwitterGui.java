@@ -98,17 +98,6 @@ public class TwitterGui extends ServiceGui implements ActionListener {
 
   }
 
-  @Override
-  public void subscribeGui() {
-    subscribe("publishState", "onState", _TemplateService.class);
-    myService.send(boundServiceName, "publishState");
-  }
-
-  @Override
-  public void unsubscribeGui() {
-    unsubscribe("publishState", "onState", _TemplateService.class);
-  }
-
   public void onState(final Twitter twitter) {
     this.twitter = twitter;
     SwingUtilities.invokeLater(new Runnable() {

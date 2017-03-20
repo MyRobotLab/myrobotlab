@@ -62,13 +62,12 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Python.Script;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.Console;
 import org.myrobotlab.swing.widget.FileUtil;
 import org.myrobotlab.swing.widget.ImageButton;
-import org.myrobotlab.ui.autocomplete.MRLCompletionProvider;
 
 /**
  * Python SwingGui
@@ -314,7 +313,16 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
     subscribe("startRecording");
     subscribe("publishLoadedScript", "addNewEditorPanel");
     myService.send(boundServiceName, "attachPythonConsole");
-    // myService.send(boundServiceName, "broadcastState");
+  }
+  @Override
+  public void unsubscribeGui() {
+    javaConsole.stopLogging();
+    unsubscribe("publishState");
+    unsubscribe("finishedExecutingScript");
+    unsubscribe("publishStdOut");
+    unsubscribe("appendScript");
+    unsubscribe("startRecording");
+    unsubscribe("publishLoadedScript", "addNewEditorPanel");
   }
 
   public void closeFile() {
@@ -514,16 +522,6 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
     return menuBar;
   }
 
-  @Override
-  public void unsubscribeGui() {
-    javaConsole.stopLogging();
-    unsubscribe("publishState", "onState", Python.class);
-    unsubscribe("finishedExecutingScript");
-    /** REMOVE IF FLAKEY BUGS APPEAR !! */
-    unsubscribe("publishStdOut", "onStdOut", String.class);
-    unsubscribe("appendScript", "appendScript", String.class);
-    unsubscribe("startRecording", "startRecording", String.class);
-  }
 
   /**
    * 
