@@ -49,7 +49,6 @@ public class Clock extends Service {
 
 	public class ClockThread implements Runnable {
 		public Thread thread = null;
-
 		ClockThread() {
 			thread = new Thread(this, getName() + "_ticking_thread");
 			thread.start();
@@ -57,7 +56,9 @@ public class Clock extends Service {
 
 		@Override
 		public void run() {
+			
 			try {
+				
 				while (isClockRunning == true) {
 					Date now = new Date();
 					Iterator<ClockEvent> i = events.iterator();
@@ -67,11 +68,14 @@ public class Clock extends Service {
 							// TODO repeat - don't delete set time forward
 							// interval
 							send(event.name, event.method, event.data);
+							
 							i.remove();
 						}
 					}
-					invoke("pulse", new Date());
-					Thread.sleep(interval);
+					
+				if (!NoExecutionAtFirstClockStarted){invoke("pulse", new Date());}
+				Thread.sleep(interval);
+				NoExecutionAtFirstClockStarted=false;
 				}
 			} catch (InterruptedException e) {
 				log.info("ClockThread interrupt");
@@ -91,6 +95,8 @@ public class Clock extends Service {
 
 	// FIXME
 	ArrayList<ClockEvent> events = new ArrayList<ClockEvent>();
+
+	private boolean NoExecutionAtFirstClockStarted=false;
 
 	public Clock(String n) {
 		super(n);
@@ -117,8 +123,9 @@ public class Clock extends Service {
 		broadcastState();
 	}
 
-	public void startClock() {
+	public void startClock(boolean NoExecutionAtFirstClockStarted) {
 		if (myClock == null) {
+			this.NoExecutionAtFirstClockStarted=NoExecutionAtFirstClockStarted;
 			// info("starting clock");
 			isClockRunning = true;
 			myClock = new ClockThread();
@@ -129,7 +136,10 @@ public class Clock extends Service {
 
 		broadcastState();
 	}
-
+	
+	public void startClock() {
+		startClock(false);
+	}
 	public void stopClock() {
 
 		if (myClock != null) {
