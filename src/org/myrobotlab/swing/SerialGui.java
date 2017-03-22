@@ -64,8 +64,8 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 	// FIXME !!!
 	JButton createVirtualPort = new JButton("create virtual uart");
-	JButton monitor = new JButton("stop monitor");
-	boolean monitoring = true;
+	JButton monitor = new JButton("monitor");
+	boolean monitoring = false;
 	JButton clear = new JButton("clear");
 	JButton record = new JButton();
 
