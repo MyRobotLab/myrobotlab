@@ -64,8 +64,8 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 	// FIXME !!!
 	JButton createVirtualPort = new JButton("create virtual uart");
-	JButton monitor = new JButton("stop monitor");
-	boolean monitoring = true;
+	JButton monitor = new JButton("monitor");
+	boolean monitoring = false;
 	JButton clear = new JButton("clear");
 	JButton record = new JButton();
 
@@ -135,7 +135,12 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 			clear();
 		}
 		if (o == createVirtualPort) {
-			send("connectVirtualUart", "COM88");
+			String portName = portGui.getSelected();
+			if (portName == null || portName.length() == 0){
+				info("port name must be specified");
+				return;
+			}
+			send("connectVirtualUart", portName);
 		}
 		
 		if (o == monitor){
@@ -144,10 +149,12 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 				m.setText("stop monitor");
 				monitoring = true;
 				subscribe("publishRX");
+				subscribe("publishTX");
 			} else {
 				m.setText("monitor");
 				monitoring = false;
 				unsubscribe("publishRX");
+				unsubscribe("publishTX");
 			}
 		}
 
@@ -166,7 +173,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		if (o == send) {
 			String data = toSend.getText();
 			send("write", data.getBytes());
-			myService.info("sent [%s]", data);
+			info("sent [%s]", data);
 		}
 	}
 
