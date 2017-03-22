@@ -188,11 +188,11 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 
   public void go(float left, float right) throws Exception {
     log.info(String.format("go %f %f", left, right));
-    int l = mapper.calcInt(left);
+    int l = mapper.calcOutputInt(left);
     if (l > 127) {
       l = 128 - l;
     }
-    int r = mapper.calcInt(right);
+    int r = mapper.calcOutputInt(right);
     if (r > 127) {
       r = 128 - r;
     }
@@ -421,7 +421,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     keyboard = (Keyboard) startPeer("keyboard");
     keyboard.addKeyListener(this);
     python = (Python) Runtime.start("python", "Python");
-    mouth = (SpeechSynthesis) Runtime.start("mouth", "AcapelaSpeech");
+    mouth = (SpeechSynthesis) Runtime.start("mouth", "NaturalReaderSpeech");
   }
 
   public void startWebGUI() throws Exception {
@@ -448,15 +448,13 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   }
 
   @Override
-  public String onConnect(String portName) {
+  public void onConnect(String portName) {
     info("%s connected to %s", getName(), portName);
-    return portName;
   }
 
   @Override
-  public String onDisconnect(String portName) {
+  public void onDisconnect(String portName) {
     info("%s disconnected from %s", getName(), portName);
-    return portName;
   }
 
   /**

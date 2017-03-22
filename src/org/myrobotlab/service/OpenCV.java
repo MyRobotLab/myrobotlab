@@ -65,7 +65,6 @@ import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect2;
 import org.myrobotlab.opencv.OpenCVFilterPyramidDown;
@@ -106,7 +105,7 @@ import static org.bytedeco.javacpp.opencv_videostab.*;
  * Audet : https://github.com/bytedeco/javacv
  * 
  */
-public class OpenCV extends VideoSource {
+public class OpenCV extends Service implements VideoSource {
 
   // FIXME - don't return BufferedImage return SerializableImage always !
 
@@ -147,10 +146,10 @@ public class OpenCV extends VideoSource {
   transient public final static String SOURCE_KINECT_DEPTH = "SOURCE_KINECT_DEPTH";
 
   static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddAlpha", "AddMask", "Affine", "And", "AverageColor", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector",
-      "Dilate", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "FFMEG", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2",
-      "HSV", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "Output",
-      "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageROI", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split",
-      "State", "SURF", "Threshold", "Transpose" };
+      "Dilate", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2",
+      "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "Output",
+      "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split",
+      "State", "Surf", "Threshold", "Transpose" };
 
   // yep its public - cause a whole lotta data
   // will get set on it before a setState
@@ -163,6 +162,8 @@ public class OpenCV extends VideoSource {
   public boolean undockDisplay = false;
 
   // track the state of opencv. capturing true/false?
+  // FIXME - there should be a bool isCapturing() - part of VideoCapture interface !
+  // additionally this should not be public but package scope protected (ie no declaration)
   public boolean capturing = false;
 
   // TODO: a peer, but in the future , we should use WebGui and it's http
@@ -474,7 +475,7 @@ public class OpenCV extends VideoSource {
   }
 
   /**
-   * Callback from the GUIService to the appropriate filter funnel through here
+   * Callback from the SwingGui to the appropriate filter funnel through here
    */
   public void invokeFilterMethod(String filterName, String method, Object... params) {
     OpenCVFilter filter = getFilter(filterName);
@@ -742,7 +743,7 @@ public class OpenCV extends VideoSource {
     // https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
     //
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
-    Runtime.start("gui", "GUIService");
+    Runtime.start("gui", "SwingGui");
 
     org.apache.log4j.BasicConfigurator.configure();
     LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -783,7 +784,7 @@ public class OpenCV extends VideoSource {
 
     // VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
     // vs.attach(opencv);
-    opencv.capture();
+    // opencv.capture();
     // opencvLeft.capture();
     // opencvRight.capture();
 
@@ -837,10 +838,10 @@ public class OpenCV extends VideoSource {
     // opencv.capture();
     // opencv.captureFromImageFile("C:\\mrl\\myrobotlab\\image0.png");
 
-    // Runtime.createAndStart("gui", "GUIService");
+    // Runtime.createAndStart("gui", "SwingGui");
     // opencv.test();
     /*
-     * Runtime.createAndStart("gui", "GUIService"); RemoteAdapter remote =
+     * Runtime.createAndStart("gui", "SwingGui"); RemoteAdapter remote =
      * (RemoteAdapter) Runtime.start("ocvremote", "RemoteAdapter");
      * remote.connect("tcp://localhost:6767");
      * 

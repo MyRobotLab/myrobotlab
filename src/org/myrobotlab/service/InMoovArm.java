@@ -55,7 +55,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     shoulder.setRest(30);
     omoplate.setRest(10);
     
-    setVelocity(5, 5, 5, 5);
+    setVelocity(5.0, 5.0, 5.0, 5.0);
   }
 
   /**
@@ -424,7 +424,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return meta;
   }
 
-  public void setVelocity(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+  public void setVelocity(Double bicep, Double rotate, Double shoulder, Double omoplate) {
     this.bicep.setVelocity(bicep);
     this.rotate.setVelocity(rotate);
     this.shoulder.setVelocity(shoulder);

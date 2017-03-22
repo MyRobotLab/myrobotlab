@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,7 +68,7 @@ import org.slf4j.Logger;
 
 public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	/**
-	 * Publisher - Publishes pin data at a regulat interval
+	 * Publisher - Publishes pin data at a regular interval
 	 * 
 	 */
 	public class Publisher extends Thread {
@@ -93,7 +94,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 					log.info("Shutting down Publisher");
 				} else {
 					isPublishing = false;
-					logException(e);
+					log.error("publisher threw", e);
 				}
 			}
 		}
@@ -105,7 +106,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 			for (int i = 0; i < pinArray.length; ++i) {
 				PinData pinData = new PinData(i, read(i));
 				pinArray[i] = pinData;
-				int address = pinData.getAddress();
+				int address = pinData.address;
 
 				// handle individual pins
 				if (pinListeners.containsKey(address)) {
@@ -128,7 +129,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 	// Publisher
 	boolean																		isPublishing										= false;
-	transient Thread													publisher												= null;
+	transient Publisher													publisher												= null;
 	int pinDataCnt = 4;
 	//
 
@@ -410,7 +411,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 		try {
 			Ads1115 ads1115 = (Ads1115) Runtime.start("Ads1115", "Ads1115");
-			Runtime.start("gui", "GUIService");
+			Runtime.start("gui", "SwingGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -453,10 +454,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
 
-	@Override
-	public void setController(DeviceController controller) {
-		setController(controller);
-	}
 
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
@@ -497,7 +494,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		if (controller != null) {
 			// controller.releaseI2cDevice(this, Integer.parseInt(deviceBus),
 			// Integer.decode(deviceAddress));
-			controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+			controller.i2cAttach(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 		}
 
 		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
@@ -533,7 +530,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		if (controller != null) {
 			if (deviceAddress != DeviceAddress) {
 				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.i2cAttach(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 			}
 		}
 
@@ -863,10 +860,24 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		return ((int) readbuffer[0]) << 8 | (int) (readbuffer[1] & 0xff);
 	}
 
-	@Override
-	public boolean isAttached() {
-		return isAttached;
-	}
+  /**
+   * GOOD DESIGN - this method is the same pretty much for all Services
+   * could be a Java 8 default implementation to the interface
+   */
+  @Override
+  public boolean isAttached(String name) {
+    return (controller != null && controller.getName().equals(name));
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null){
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
+
 
 	@Override
 	public List<PinDefinition> getPinList() {
@@ -903,7 +914,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	@Override
 	public PinData publishPin(PinData pinData) {
 		// caching last value
-		pinIndex.get(pinData.getAddress()).setValue(pinData.getValue());
+		pinIndex.get(pinData.address).setValue(pinData.value);
 		return pinData;
 	}
 
@@ -915,7 +926,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		return pinData;
 	}
 
-	@Override
 	public void attach(String listener, int pinAddress) {
 		attach((PinListener) Runtime.getService(listener), pinAddress);
 	}
@@ -1055,7 +1065,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 		ServiceType meta = new ServiceType(Ads1115.class.getCanonicalName());
 		meta.addDescription("Adafruit ADS1115 AD Converter");
-		meta.addCategory("shield", "sensor");
+		meta.addCategory("shield", "sensor", "i2c");
 		meta.setSponsor("Mats");
 		return meta;
 	}
@@ -1066,5 +1076,15 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		setSampleRate(rate);
 		enablePin(address);
 	}
+	
+	 // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
 
 }

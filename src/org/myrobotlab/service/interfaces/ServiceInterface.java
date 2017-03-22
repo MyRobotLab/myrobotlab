@@ -11,7 +11,7 @@ import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
-public interface ServiceInterface extends ServiceQueue, LoggingSink, NameProvider, MessageSubscriber, MessageSender {
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender {
 
   /**
    * this is a local method which adds a request from some foreign service with
@@ -47,8 +47,6 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameProvide
 
   // Deprecate ?? What is this??
   public String getType();
-
-  public boolean hasDisplay();
 
   public boolean hasPeers();
 
@@ -97,4 +95,16 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameProvide
   public String getDescription();
 
   public Map<String, MethodEntry> getMethodMap();
+  
+  /**
+   * the "routing" attach - routes to a specific strongly typed attach of the service
+   * if it exists
+   * @param name
+   */
+  /* HEH - this did not work - trying to generalize that which should not be generalized :P
+  public void attach(String name) throws Exception;
+  
+  public void attach(ServiceInterface instance) throws Exception;
+  */
+  
 }

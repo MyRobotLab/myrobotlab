@@ -235,7 +235,7 @@ public class MotorTest {
 			Result result = junit.run(MotorTest.class);
 			log.info("Result was: {}", result);
 			// WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
-			// ServiceInterface gui = Runtime.start("gui", "GUIService");
+			// ServiceInterface gui = Runtime.start("gui", "SwingGui");
 
 			Runtime.dump();
 

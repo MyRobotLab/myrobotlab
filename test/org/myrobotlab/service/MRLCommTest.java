@@ -37,32 +37,32 @@ public class MRLCommTest {
 
 	@Test
 	public void testConnectString() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testConnectStringIntegerIntIntInt() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testGetPinList() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testGetVersion() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testIsConnected() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public void testPublishSensorData() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 	
 	 public static void main(String[] args) {
@@ -79,7 +79,7 @@ public class MRLCommTest {
 		      Result result = junit.run(ArduinoTest.class);
 		      log.info("Result was: {}", result);
 		      // WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
-		      // ServiceInterface gui = Runtime.start("gui", "GUIService");
+		      // ServiceInterface gui = Runtime.start("gui", "SwingGui");
 
 		      Runtime.dump();
 

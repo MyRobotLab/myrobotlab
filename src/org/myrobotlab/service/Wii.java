@@ -154,7 +154,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
       Servo servo = new Servo("servo");
       servo.startService();
 
-      // GUIService gui = new GUIService("gui");
+      // SwingGui gui = new SwingGui("gui");
       // gui.startService();
 
       wii.getWiimotes();
@@ -217,8 +217,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
       try {
         Thread.sleep(500);
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        logException(e);
+        
       } // must slow down to initialize
 
       // force to correct state strobe state

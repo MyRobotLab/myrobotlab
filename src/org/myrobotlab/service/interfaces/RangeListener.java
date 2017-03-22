@@ -1,9 +1,5 @@
 package org.myrobotlab.service.interfaces;
 
-public interface RangeListener {
-
-  String getName();
-
-  void onRange(Long range);
-
+public interface RangeListener extends NameProvider {
+	public void onRange(Double range);
 }

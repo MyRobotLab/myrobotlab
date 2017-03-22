@@ -60,8 +60,8 @@ public class MouthControl extends Service {
       return false;
     }
 
-    // arduino.servoAttach(jaw);
-    arduino.servoAttach(jaw, 26);
+    jaw.attach(arduino, 26);
+    
     return true;
   }
 
@@ -103,7 +103,7 @@ public class MouthControl extends Service {
     log.info("move moving to :" + text);
     if (jaw != null) { // mouthServo.moveTo(Mouthopen);
       if (autoAttach) {
-        if (!jaw.isAttached()) {
+        if (!jaw.isPinAttached()) {
           // attach the jaw if it's not attached.
           jaw.attach();
         }
@@ -156,7 +156,7 @@ public class MouthControl extends Service {
 
     // We're done annimating, lets detach the jaw while not in use.
     if (autoAttach && jaw != null) {
-      if (jaw.isAttached()) {
+      if (jaw.isPinAttached()) {
         // attach the jaw if it's not attached.
         jaw.detach();
       }
@@ -166,6 +166,7 @@ public class MouthControl extends Service {
   public synchronized void onEndSpeaking(String utterance) {
     log.info("Mouth control recognized end speaking.");
     // TODO: consider a jaw move to closed position
+    //this will only work if the mouth animation ends before it end playing the voice.
     if (jaw != null && jaw.isAttached()) {
       jaw.moveTo(mouthClosedPos);
     }
@@ -216,7 +217,7 @@ public class MouthControl extends Service {
 
     meta.addPeer("jaw", "Servo", "shared Jaw servo instance");
     meta.addPeer("arduino", "Arduino", "shared Arduino instance");
-    meta.addPeer("mouth", "AcapelaSpeech", "shared Speech instance");
+    meta.addPeer("mouth", "MarySpeech", "shared Speech instance");
 
     return meta;
   }
@@ -228,7 +229,7 @@ public class MouthControl extends Service {
       MouthControl MouthControl = new MouthControl("MouthControl");
       MouthControl.startService();
 
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
 
       MouthControl.autoAttach = true;
       MouthControl.onStartSpeaking("test on");

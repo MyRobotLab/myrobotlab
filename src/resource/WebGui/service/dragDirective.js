@@ -1,5 +1,5 @@
 angular.module('mrlapp.service')
-        .directive('dragDirective', ['$document', 'serviceSvc', function ($document, serviceSvc) {
+        .directive('dragDirective', ['$document', 'panelSvc', function ($document, panelSvc) {
                 return {
                     link: function (scope, element, attr) {
 
@@ -8,15 +8,16 @@ angular.module('mrlapp.service')
                         var resizeX = 10;
 
                         element.on('mousedown', function (event) {
-                            startX = event.pageX - scope.panel.posx;
-                            startY = event.pageY - scope.panel.posy;
+                            startX = event.pageX - scope.panel.posX;
+                            startY = event.pageY - scope.panel.posY;
+                            // FIXME - remove 'free' stuff...
                             if (scope.panel.size != 'free' ||
                                     (scope.panel.size == 'free'
                                             && startX < element.width() - resizeX)) {
                                 // Prevent default dragging of selected content
                                 event.preventDefault();
 
-                                serviceSvc.putPanelZIndexOnTop(scope.panel.name, scope.panel.panelname);
+                                panelSvc.putPanelZIndexOnTop(scope.panel.name);
 
                                 element.css({
                                     cursor: 'move'
@@ -27,14 +28,17 @@ angular.module('mrlapp.service')
                         });
 
                         function mousemove(event) {
-                            scope.panel.posy = event.pageY - startY;
-                            scope.panel.posx = event.pageX - startX;
+                            // FIXME ! - should "only" be updating through panelSvc !!!
+                            // NOT modifying the panel data directly !
+                            scope.panel.posY = event.pageY - startY;
+                            scope.panel.posX = event.pageX - startX;
                             scope.panel.notifyPositionChanged();
                         }
 
-                        function mouseup() {
+                        function mouseup(event) {
                             $document.off('mousemove', mousemove);
                             $document.off('mouseup', mouseup);
+                            panelSvc.savePanel(scope.panel.name);
                             element.css({
                                 cursor: 'auto'
                             });

@@ -41,7 +41,7 @@ public class ImapEmailConnector extends AbstractConnector {
   private String username;
   private String password;
   private String folderName = "INBOX";
-  private String docIdPrefix = "email_";
+  private transient String docIdPrefix = "email_";
   private transient Store store;
 
   public ImapEmailConnector(String name) {
@@ -413,6 +413,7 @@ public class ImapEmailConnector extends AbstractConnector {
     ServiceType meta = new ServiceType(ImapEmailConnector.class.getCanonicalName());
     meta.addDescription("This connector will connect to an IMAP based email server and crawl the emails");
     meta.addCategory("data", "ingest");
+    meta.addDependency("com.sun.mail", "1.4.5");
 
     return meta;
   }

@@ -8,14 +8,12 @@ import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.sensor.AnalogPinSensor;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 
 import com.pi4j.jni.Serial;
-import com.sun.source.tree.AssertTree;
 
 @Ignore
 public class ArduinoChaosTest {
@@ -38,7 +36,8 @@ public class ArduinoChaosTest {
     Arduino arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
     //Serial serial = (Serial) arduino.getSerial();
 
-    arduino.boardType= board;
+    arduino.setBoardUno();
+    // arduino.boardType= board;
     arduino.connect("COM30");
    
 
@@ -89,7 +88,7 @@ public class ArduinoChaosTest {
     servo.moveTo(90);
     Thread.sleep(1000);
     int pos = 90;
-    arduino.publishServoEvent(pos);
+    // arduino.publishServoEvent(pos);
     Thread.sleep(1000);
     int uS = 1400;
     servo.writeMicroseconds(uS);
@@ -98,14 +97,14 @@ public class ArduinoChaosTest {
     Thread.sleep(1000);
     servo.setSpeed(0);
     Thread.sleep(1000);
-    arduino.servoDetach(servo);
+    arduino.servoDetachPin(servo);
     Thread.sleep(1000);
-    arduino.enableBoardStatus();
+    arduino.enableBoardInfo(true);
     Thread.sleep(1000);
-    arduino.enableBoardStatus();
+    arduino.enableBoardInfo(false);
     
     Thread.sleep(1000);
-    arduino.setPWMFrequency(1, 100);
+ 
     // int analogReadPin = 2;
     // arduino.analogReadPollingStart(analogReadPin);
     //  Thread.sleep(1000);
@@ -120,20 +119,20 @@ public class ArduinoChaosTest {
     Thread.sleep(1000);
 
     int pulsePin = 1;
-    arduino.pulse(pulsePin);
+    // // arduino.pulse(pulsePin);
     Thread.sleep(1000);
     // TODO: what is this?
-    arduino.pulseStop();
+    // // arduino.pulseStop();
     Thread.sleep(1000);
     arduino.setTrigger(3, 122);
     Thread.sleep(1000);
     // TODO: which pin are we debouncing?
-    arduino.setDebounce(10);
+    arduino.setDebounce(5, 10);
     // TODO: what is this for?
     Thread.sleep(1000);
-    arduino.setDigitalTriggerOnly(true);
+    // arduino.setDigitalTriggerOnly(true);
     Thread.sleep(1000);
-    arduino.setDigitalTriggerOnly(false);
+    // arduino.setDigitalTriggerOnly(false);
     
     Thread.sleep(1000);
     arduino.setSerialRate(Serial.BAUD_RATE_57600);
@@ -141,11 +140,11 @@ public class ArduinoChaosTest {
     arduino.setSerialRate(Serial.BAUD_RATE_115200);
     
     Thread.sleep(1000);
-    arduino.getVersion();
+    arduino.getBoardInfo();
     
     Thread.sleep(1000);
     // TODO: what does "12" mean?  12 hertz?!
-    arduino.setSampleRate(12);
+    // arduino.setSampleRate(12);
     
     
     Thread.sleep(1000);
@@ -153,13 +152,10 @@ public class ArduinoChaosTest {
     
     
     Thread.sleep(1000);
-    AnalogPinSensor s = new AnalogPinSensor(3, 2);
-    // arduino.sensorAttach(s);
-    Thread.sleep(1000);
     // ?!
     // arduino.sensorPollingStart("A0", 123);
     Thread.sleep(1000);
-    arduino.sensorPollingStop("A0");
+    // arduino.sensorPollingStop("A0");
     
     // TODO: add the
     // AF_BEGIN
@@ -197,7 +193,7 @@ public class ArduinoChaosTest {
     System.out.println("Press the any key to continue.");
     System.in.read();
     
-    arduino.enableBoardStatus();
+    arduino.enableBoardInfo(true);
     
     
     Motor motor = (Motor)Runtime.createAndStart("motor", "Motor");

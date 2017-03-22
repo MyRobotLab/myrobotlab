@@ -6,12 +6,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Arduino;
 import org.slf4j.Logger;
 
-import com.sun.jna.Platform;
 
 public class ArduinoUtils {
 
@@ -29,15 +28,21 @@ public class ArduinoUtils {
 	public static int exitValue;
 
 	static public String getExeName() {
-		if (Platform.isMac()) {
-			return "Arduino";
+	  Platform platform = Platform.getLocalInstance();
+		if (platform.isMac()) {
+			return "Arduino"; // really it's capitalized ?
 		}
+		/*
+		if (platform.isLinux()) {
+			return "arduino";
+		}
+		*/
 
-		return "arduino_debug";
+		return "arduino";
 	}
 
 	public static boolean uploadSketch(String port, String board) throws IOException, InterruptedException {
-		if (!(board.equalsIgnoreCase("uno") || board.equalsIgnoreCase("mega") || board.equalsIgnoreCase("megaADK"))) {
+		if (!(board.equalsIgnoreCase("uno") || board.equalsIgnoreCase("mega") || board.equalsIgnoreCase("megaADK") || board.equalsIgnoreCase("nano"))) {
 			// TODO: validate the proper set of values.
 			System.out.println(String.format("Invalid board type:%s", board));
 			exitValue = 1;
@@ -61,7 +66,12 @@ public class ArduinoUtils {
 		args.add("--port");
 		args.add(port);
 		args.add("--board");
-		args.add("arduino:avr:" + board);
+		if (board.equalsIgnoreCase("nano")) {
+			args.add("arduino:avr:" + board + ":cpu=atmega328");
+		}
+		else {
+			args.add("arduino:avr:" + board);
+		}
 		args.add(sketch.getAbsolutePath());
 		// args.add("--verbose-upload");
 		//args.add("--preserve-temp-files");
@@ -98,7 +108,7 @@ public class ArduinoUtils {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	protected static String runCommand(String program, ArrayList<String> args) throws InterruptedException {
+	public static String runCommand(String program, ArrayList<String> args) throws InterruptedException {
 
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(program);
@@ -119,6 +129,16 @@ public class ArduinoUtils {
 		}
 
 		environment.put("LD_LIBRARY_PATH", ldLibPath);
+		// on windows i need to append to the path
+		
+		// TODO: move run command into it's own util class
+		// TODO: allow people to pass in environment variables in the method sig 
+		String path = environment.get("Path");
+		if (path != null) {
+			path += ";.\\mimic";
+			environment.put("Path", path);
+		}
+		
 		try {
 			Process handle = builder.start();
 
@@ -177,7 +197,7 @@ public class ArduinoUtils {
 	 * @param args
 	 * @return
 	 */
-	protected String RunAndCatch(String cmd, ArrayList<String> args) {
+	public static String RunAndCatch(String cmd, ArrayList<String> args) {
 		String returnValue;
 		try {
 			returnValue = runCommand(cmd, args);

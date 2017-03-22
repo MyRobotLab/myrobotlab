@@ -1,29 +1,34 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.jme3.InMoov3DApp;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
+import org.myrobotlab.service.Servo.IKData;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
+import com.jme3.system.AppSettings;
+
 /**
  * InMoov - The InMoov Service.
  * 
  * The InMoov service allows control of the InMoov robot. This robot was created
- * by hairygael. It's an open source 3D printable robot. All of the parts and
+ * by Gael Langevin. It's an open source 3D printable robot. All of the parts and
  * instructions to build are on his blog (http://inmoov.blogspot.com/ and
  * http://www.inmoov.fr/). InMoov is a composite of servos, Arduinos,
  * microphone, camera, kinect and computer. The InMoov service is composed of
@@ -32,6 +37,8 @@ import org.slf4j.Logger;
  *
  */
 public class InMoov extends Service {
+
+  private static final String GESTURES_DIRECTORY = "gestures";
 
   private static final long serialVersionUID = 1L;
 
@@ -53,6 +60,7 @@ public class InMoov extends Service {
   // port index, local references
 
   // this is good, because arduino's ultimately are identified by port keys
+  // FIXME - should be controllers ServoControllers not Arduinos
   HashMap<String, Arduino> arduinos = new HashMap<String, Arduino>();
 
   // services which do not require a body part
@@ -130,8 +138,13 @@ public class InMoov extends Service {
 
   boolean useEyesForTracking = false;
 
+  transient InMoov3DApp vinMoovApp;
+
+  private IntegratedMovement integratedMovement;
+
   // static String speechService = "MarySpeech";
-  static String speechService = "AcapelaSpeech";
+  // static String speechService = "AcapelaSpeech";
+  static String speechService = "NaturalReaderSpeech";
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   public InMoov(String n) {
@@ -828,7 +841,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void setArmVelocity(String which, Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+  public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     if (!arms.containsKey(which)) {
       error("setArmVelocity %s does not exist", which);
     } else {
@@ -840,7 +853,7 @@ public class InMoov extends Service {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  public void setHandVelocity(String which, Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky) {
+  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
     setHandVelocity(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
@@ -852,7 +865,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void setHandVelocity(String which, Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     if (!hands.containsKey(which)) {
       error("setHandSpeed %s does not exist", which);
     } else {
@@ -864,7 +877,7 @@ public class InMoov extends Service {
     setHeadSpeed(rothead, neck, null, null, null);
   }
 
-  public void setHeadVelocity(Integer rothead, Integer neck) {
+  public void setHeadVelocity(Double rothead, Double neck) {
     setHeadVelocity(rothead, neck, null, null, null);
   }
 
@@ -876,7 +889,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void setHeadVelocity(Integer rothead, Integer neck, Integer eyeXSpeed, Integer eyeYSpeed, Integer jawSpeed) {
+  public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
     if (head != null) {
       head.setVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
     } else {
@@ -896,7 +909,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void setTorsoVelocity(Integer topStom, Integer midStom, Integer lowStom) {
+  public void setTorsoVelocity(Double topStom, Double midStom, Double lowStom) {
     if (torso != null) {
       torso.setVelocity(topStom, midStom, lowStom);
     } else {
@@ -985,7 +998,7 @@ public class InMoov extends Service {
     }
     eyesTracking = (Tracking) startPeer("eyesTracking");
     eyesTracking.connect(port, xPin, yPin);
-    arduinos.put(port, eyesTracking.arduino);
+    arduinos.put(port, (Arduino)eyesTracking.getArduino());
     return eyesTracking;
   }
 
@@ -1033,7 +1046,7 @@ public class InMoov extends Service {
     }
     headTracking = (Tracking) startPeer("headTracking");
     headTracking.connect(port, 5, 6);
-    arduinos.put(port, headTracking.arduino);
+    arduinos.put(port, (Arduino)headTracking.controller);
     return headTracking;
   }
 
@@ -1076,11 +1089,10 @@ public class InMoov extends Service {
       }
 
       mouthControl = (MouthControl) startPeer("mouthControl");
-      // OLD WAY
-     //  mouthControl.jaw.setPin(26);
+  
       mouthControl.arduino.connect(port);
-      // NEW WAY
-      mouthControl.arduino.servoAttach(mouthControl.jaw, 26);
+      mouthControl.jaw.attach(mouthControl.arduino,26);
+
       arduinos.put(port, mouthControl.arduino);
       String p = mouthControl.getArduino().getSerial().getPortName();
       if (p != null) {
@@ -1109,9 +1121,10 @@ public class InMoov extends Service {
       openni = (OpenNi) startPeer("openni");
       pid = (Pid) startPeer("pid");
 
+      pid.setPID("kinect", 10.0, 0.0, 1.0);
       pid.setMode("kinect", Pid.MODE_AUTOMATIC);
       pid.setOutputRange("kinect", -1, 1);
-      pid.setPID("kinect", 10.0, 0.0, 1.0);
+
       pid.setControllerDirection("kinect", 0);
 
       // re-mapping of skeleton !
@@ -1318,19 +1331,13 @@ public class InMoov extends Service {
   }
 
   public void loadGestures() {
-    loadGestures("gestures");
+    loadGestures(GESTURES_DIRECTORY);
   }
 
   public void loadGestures(String directory) {
     // TODO: iterate over each of the python files in the directory
     // and load them into the python interpreter.
-    File dir = new File(directory);
-    dir.mkdirs();
-    if (!dir.isDirectory()) {
-      // TODO: maybe create the directory ?
-      log.warn("Gestures directory {} doest not exist.", directory);
-      return;
-    }
+    File dir = makeGesturesDirectory(directory);
 
     for (File f : dir.listFiles()) {
       if (f.getName().toLowerCase().endsWith(".py")) {
@@ -1347,6 +1354,63 @@ public class InMoov extends Service {
     }
   }
 
+  private File makeGesturesDirectory(String directory) {
+    File dir = new File(directory);
+    dir.mkdirs();
+    if (!dir.isDirectory()) {
+      // TODO: maybe create the directory ?
+      log.warn("Gestures directory {} doest not exist.", directory);
+      return null;
+    }
+    return dir;
+  }
+
+  public void saveGesture(String gestureName, String directory) {
+    // TODO: consider the gestures directory as a property on the inmoov
+    String gestureMethod = mapGestureNameToPythonMethod(gestureName);   
+    String gestureFilename = directory + File.separator + gestureMethod + ".py";
+    File gestureFile = new File(gestureFilename);    
+    if (gestureFile.exists()) {
+      log.warn("Gesture file {} already exists.. not overwiting it.", gestureFilename);
+      return;
+    }
+    FileWriter gestureWriter = null;
+    try {
+      gestureWriter = new FileWriter(gestureFile);
+      // print the first line of the python file
+      gestureWriter.write("def " + gestureMethod + "():\n");
+      // now for each servo, we should write out the approperiate moveTo statement
+      // TODO: consider doing this only for the inmoov services.. but for now.. i think
+      // we want all servos that are currently in the system?  
+      for (ServiceInterface service : Runtime.getServices()) {
+        if (service instanceof Servo) {
+          double pos = ((Servo) service).getPos();
+          gestureWriter.write("  " + service.getName() + ".moveTo(" + pos + ")\n");
+        }
+      }
+      gestureWriter.write("\n");
+      gestureWriter.close();
+    } catch (IOException e) {
+      log.warn("Error writing gestures file {}", gestureFilename);
+      e.printStackTrace();
+      return;
+    }    
+    // TODO: consider writing out cooresponding AIML?    
+  }
+  
+  private String mapGestureNameToPythonMethod(String gestureName) {
+    // TODO: some fancier mapping?
+    String methodName = gestureName.replaceAll(" ", "");
+    return methodName;
+  }
+
+  public void saveGesture(String gestureName) {
+
+    // TODO: allow a user to save a gesture to the gestures directory
+    saveGesture(gestureName, GESTURES_DIRECTORY);
+
+  }
+
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
@@ -1355,7 +1419,7 @@ public class InMoov extends Service {
       VirtualDevice v2 = (VirtualDevice) Runtime.start("v2", "VirtualDevice");
 
       v1.createVirtualArduino("COM1"); // hmm can to virtual Arduinos be created
-                                       // with one VirtualDevice???
+      // with one VirtualDevice???
       v2.createVirtualArduino("COM2");
 
       // Runtime.start("webgui", "WebGui");
@@ -1375,7 +1439,7 @@ public class InMoov extends Service {
 
     /*
      * 
-     * Runtime.createAndStart("gui", "GUIService");
+     * Runtime.createAndStart("gui", "SwingGui");
      * Runtime.createAndStart("python", "Python");
      * 
      * InMoov i01 = (InMoov)Runtime.createAndStart("i01","InMoov");
@@ -1410,7 +1474,7 @@ public class InMoov extends Service {
      * Serial serial0 = new Serial("UART15"); serial0.startService();
      * serial0.connect("UART15");
      * 
-     * Runtime.createAndStart("gui", "GUIService");
+     * Runtime.createAndStart("gui", "SwingGui");
      * Runtime.createAndStart("python", "Python");
      * 
      * InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
@@ -1451,6 +1515,7 @@ public class InMoov extends Service {
     ServiceType meta = new ServiceType(InMoov.class.getCanonicalName());
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
+    meta.addDependency("inmoov.fr", "1.0.0");
 
     // SHARING !!! - modified key / actual name begin ------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
@@ -1464,12 +1529,12 @@ public class InMoov extends Service {
     meta.sharePeer("rightHand.arduino", "right", "Arduino", "shared right arduino");
 
     meta.sharePeer("eyesTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-    meta.sharePeer("eyesTracking.arduino", "left", "Arduino", "shared head Arduino");
+    meta.sharePeer("eyesTracking.controller", "left", "Arduino", "shared head Arduino");
     meta.sharePeer("eyesTracking.x", "head.eyeX", "Servo", "shared servo");
     meta.sharePeer("eyesTracking.y", "head.eyeY", "Servo", "shared servo");
 
     meta.sharePeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-    meta.sharePeer("headTracking.arduino", "left", "Arduino", "shared head Arduino");
+    meta.sharePeer("headTracking.controller", "left", "Arduino", "shared head Arduino");
     meta.sharePeer("headTracking.x", "head.rothead", "Servo", "shared servo");
     meta.sharePeer("headTracking.y", "head.neck", "Servo", "shared servo");
 
@@ -1499,8 +1564,203 @@ public class InMoov extends Service {
     meta.addPeer("opencv", "OpenCV", "InMoov OpenCV service");
     meta.addPeer("openni", "OpenNi", "Kinect service");
     meta.addPeer("pid", "Pid", "Pid service");
+    
+    // For VirtualInMoov
+	  meta.addPeer("jmonkeyEngine", "JMonkeyEngine", "Virtual inmoov");
+	  
+	  // For IntegratedMovement
+	  meta.addPeer("integratedMovement", "IntegratedMovement", "Inverse kinematic type movement");
 
     return meta;
   }
+  
+  public InMoov3DApp startVinMoov() throws InterruptedException{
+    if (vinMoovApp == null) {
+      vinMoovApp = new InMoov3DApp();
+      AppSettings settings = new AppSettings(true);
+      settings.setResolution(800,600);
+      //settings.setEmulateMouse(false);
+      // settings.setUseJoysticks(false);
+      settings.setUseInput(true);
+      vinMoovApp.setSettings(settings);
+      vinMoovApp.setShowSettings(false);
+      vinMoovApp.setPauseOnLostFocus(false);
+      vinMoovApp.setService(this);
+      vinMoovApp.start();
+      synchronized(this){
+        wait(5000);
+      }
+      if (torso != null) {
+        vinMoovApp.addServo("mtorso", torso.midStom);
+        torso.midStom.addIKServoEventListener(this);
+        vinMoovApp.addServo("ttorso", torso.topStom);
+        torso.topStom.addIKServoEventListener(this);
+      }
+      if (rightArm != null) {
+        vinMoovApp.addServo("Romoplate", rightArm.omoplate);
+        rightArm.omoplate.addIKServoEventListener(this);
+        vinMoovApp.addServo("Rshoulder", rightArm.shoulder);
+        rightArm.shoulder.addIKServoEventListener(this);
+        vinMoovApp.addServo("Rrotate", rightArm.rotate);
+        rightArm.rotate.addIKServoEventListener(this);
+        vinMoovApp.addServo("Rbicep", rightArm.bicep);
+        rightArm.bicep.addIKServoEventListener(this);
+      }
+      if (leftArm != null) {
+        vinMoovApp.addServo("omoplate", leftArm.omoplate);
+        leftArm.omoplate.addIKServoEventListener(this);
+        vinMoovApp.addServo("shoulder", leftArm.shoulder);
+        leftArm.shoulder.addIKServoEventListener(this);
+        vinMoovApp.addServo("rotate", leftArm.rotate);
+        leftArm.rotate.addIKServoEventListener(this);
+        vinMoovApp.addServo("bicep", leftArm.bicep);
+        leftArm.bicep.addIKServoEventListener(this);
+      }
+      if (rightHand != null) {
+        vinMoovApp.addServo("RWrist", rightHand.wrist);
+        rightHand.wrist.addIKServoEventListener(this);
+      }
+      if (leftHand != null) {
+        vinMoovApp.addServo("LWrist", leftHand.wrist);
+        leftHand.wrist.addIKServoEventListener(this);
+      }
+      if (head != null) {
+        vinMoovApp.addServo("neck", head.neck);
+        head.neck.addIKServoEventListener(this);
+        vinMoovApp.addServo("head", head.rothead);
+        head.rothead.addIKServoEventListener(this);
+        vinMoovApp.addServo("jaw", head.jaw);
+        head.jaw.addIKServoEventListener(this);
+      }
+    }
+    else {
+      log.info("VinMoov already started");
+      return vinMoovApp;
+    }
+    
+    return vinMoovApp;
+  }
 
+  public void onIKServoEvent(IKData data) {
+    if (vinMoovApp != null) {
+      vinMoovApp.updatePosition(data);
+    }
+  }
+  
+  public void stopVinMoov() {
+    try{
+      vinMoovApp.stop();
+    }
+    catch (NullPointerException e){
+      
+    }
+    vinMoovApp = null;
+  }
+  
+  public void startIntegratedMovement() {
+    integratedMovement = (IntegratedMovement) startPeer("integratedMovement");
+    IntegratedMovement im = integratedMovement; 
+    //set the DH Links or each arms
+    im.setNewDHRobotArm("leftArm");
+    im.setNewDHRobotArm("rightArm");
+    im.setNewDHRobotArm("kinect");
+    if (torso != null) {
+      im.setDHLink("leftArm",torso.midStom,113,90,0,-90);
+      im.setDHLink("rightArm",torso.midStom,113,90,0,-90);
+      im.setDHLink("kinect",torso.midStom,113,90,0,-90);
+      im.setDHLink("leftArm",torso.topStom,0,180,292,90);
+      im.setDHLink("rightArm",torso.topStom,0,180,292,90);
+      im.setDHLink("kinect",torso.topStom,0,180,110,-90);
+    }
+    else {
+      im.setDHLink("leftArm","i01.torso.midStom",113,90,0,-90);
+      im.setDHLink("rightArm","i01.torso.midStom",113,90,0,-90);
+      im.setDHLink("kinect","i01.torso.midStom",113,90,0,-90);
+      im.setDHLink("leftArm","i01.torso.topStom",0,180,292,90);
+      im.setDHLink("rightArm","i01.torso.topStom",0,180,292,90);
+      im.setDHLink("kinect","i01.torso.topStom",0,180,110,-90);
+    }
+    im.setDHLink("leftArm", "leftS", 143, 180, 0, 90);
+    im.setDHLink("rightArm", "rightS", -143, 180, 0, -90);
+    if (arms.containsKey(LEFT)) {
+      InMoovArm arm = arms.get(LEFT);
+      im.setDHLink("leftArm",arm.omoplate,0,-5.6,45,-90);
+      im.setDHLink("leftArm",arm.shoulder,77,-30+90,0,90);
+      im.setDHLink("leftArm",arm.rotate,284,90,40,90);
+      im.setDHLink("leftArm",arm.bicep,0,-7+24.4+90,300,90);
+    }
+    else {
+      im.setDHLink("leftArm","i01.leftArm.omoplate",0,-5.6,45,-90);
+      im.setDHLink("leftArm","i01.leftArm.shoulder",77,-30+90,0,90);
+      im.setDHLink("leftArm","i01.leftArm.rotate",284,90,40,90);
+      im.setDHLink("leftArm","i01.leftArm.bicep",0,-7+24.4+90,300,90);
+    }
+    if (arms.containsKey(RIGHT)) {
+      InMoovArm arm = arms.get(RIGHT);
+      im.setDHLink("rightArm",arm.omoplate,0,-5.6,45,90);
+      im.setDHLink("rightArm",arm.shoulder,-77,-30+90,0,-90);
+      im.setDHLink("rightArm",arm.rotate,-284,90,40,-90);
+      im.setDHLink("rightArm",arm.bicep,0,-7+24.4+90,300,90);
+    }
+    else {
+      im.setDHLink("rightArm","i01.rightArm.omoplate",0,-5.6,45,90);
+      im.setDHLink("rightArm","i01.rightArm.shoulder",-77,-30+90,0,-90);
+      im.setDHLink("rightArm","i01.rightArm.rotate",-284,90,40,-90);
+      im.setDHLink("rightArm","i01.rightArm.bicep",0,-7+24.4+90,300,90);
+    }
+    if (hands.containsKey(LEFT)){
+      InMoovHand hand = hands.get(LEFT);
+      im.setDHLink("leftArm",hand.wrist,00,-90,100,-90);
+    }
+    else {
+      im.setDHLink("leftArm","i01.leftHand.wrist",00,-90,100,-90);
+    }
+    if (hands.containsKey(RIGHT)){
+      InMoovHand hand = hands.get(RIGHT);
+      im.setDHLink("rightArm",hand.wrist,00,-90,100,90);
+    }
+    else {
+      im.setDHLink("rightArm","i01.rightArm.wrist",00,-90,100,-90);
+    }
+    im.setDHLink("leftArm","lfinger",-20,0,120,0);
+    im.setDHLink("rightArm","rfinger",-20,0,120,0);
+    im.setDHLink("kinect","camera",0,90,10,90);
+    
+    log.info("{}",im.createJointPositionMap("leftArm").toString());
+    //start the kinematics engines
+    im.startEngine("leftArm");
+    im.startEngine("rightArm");
+    im.startEngine("kinect");
+    
+    //define object, each dh link are set as an object, but the
+    //start point and end point will be update by the ik service, but still need
+    //a name and a radius
+    im.clearObject();
+    im.addObject(0.0, 0.0, 0.0, 0.0, 0.0, -150.0, "base", 150.0, false);
+    im.addObject("i01.torso.midStom", 150.0);
+    im.addObject("i01.torso.topStom", 10.0);
+    im.addObject("i01.leftArm.omoplate", 10.0);
+    im.addObject("i01.rightArm.omoplate", 10.0);
+    im.addObject("i01.leftArm.shoulder", 50.0);
+    im.addObject("i01.rightArm.shoulder", 50.0);
+    im.addObject("i01.leftArm.rotate", 50.0);
+    im.addObject("i01.rightArm.rotate", 50.0);
+    im.addObject("i01.leftArm.bicep", 60.0);
+    im.addObject("i01.rightArm.bicep", 60.0);
+    im.addObject("i01.leftHand.wrist", 70.0);
+    im.addObject("i01.rightHand.wrist", 70.0);
+    im.objectAddIgnore("i01.rightArm.omoplate", "i01.leftArm.rotate");
+    im.objectAddIgnore("i01.rightArm.omoplate", "i01.rightArm.rotate");
+    im.addObject("lfinger",10.0);
+    im.addObject("rfinger",10.0);
+    im.addObject("leftS", 10);
+    im.addObject("rightS", 10);
+    im.objectAddIgnore("leftS", "rightS");
+    im.objectAddIgnore("rightS", "i01.leftArm.shoulder");
+    im.objectAddIgnore("leftS", "i01.rightArm.shoulder");
+
+    im.setJmeApp(vinMoovApp);
+    im.setOpenni(openni);
+    
+  }
 }

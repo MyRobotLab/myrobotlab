@@ -1,5 +1,7 @@
 package org.myrobotlab.string;
 
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -171,11 +173,18 @@ public class StringUtil {
     chunks.add(line.toString().trim());
     return chunks; 
     
-    
-    
-    
-    
   }
+  
+
+  public static String removeAccents(String text) {
+    if (text == null) {
+      return null;
+    } else {
+      String clean =  Normalizer.normalize(text, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+      return clean;
+    }
+  }
+
   
   
 

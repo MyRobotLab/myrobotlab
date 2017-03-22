@@ -28,7 +28,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     LoggingFactory.init("INFO");
 
     try {
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
       Runtime.createAndStart("python", "Python");
       HtmlFilter htmlFilter = (HtmlFilter) Runtime.createAndStart("htmlFilter", "HtmlFilter");
       log.info(">>>>>>>>>>" + htmlFilter.stripHtml("This is <a>foo</a> bar."));

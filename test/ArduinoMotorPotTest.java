@@ -14,12 +14,11 @@ import org.myrobotlab.service.Pid;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.MotorController;
-import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.myrobotlab.test.TestUtils;
 import org.slf4j.Logger;
 
 @Ignore
-public class ArduinoMotorPotTest implements SensorDataListener {
+public class ArduinoMotorPotTest {
 
   //public boolean uploadSketch = false;
   public boolean uploadSketch = false;
@@ -97,7 +96,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
       uploadMRLComm(port, boardType);
     
     boolean enableLoadTiming = false;
-    // Runtime.create("gui", "GUIService");
+    // Runtime.create("gui", "SwingGui");
     // initialize the logger 
     TestUtils.initEnvirionment();
     // Create the pid controller 
@@ -121,7 +120,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     // Start the motor and attach it to the arduino.
     motor = (Motor)Runtime.createAndStart("motor", "Motor");
     motor.setPwmPins(leftPwm, rightPwm);
-    motor.setController((MotorController)arduino);
+    motor.attach((MotorController)arduino);
     // Sensor callback
     // arduino.analogReadPollingStart(potPin);
     // arduino.sensorAttach(this);
@@ -133,7 +132,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     // arduino.sensorAttach(feedbackPot);
     
     if (enableLoadTiming) {
-      arduino.enableBoardStatus();
+      arduino.enableBoardInfo(true);
     }
     // stop the motor initially
     motor.move(0);
@@ -142,7 +141,7 @@ public class ArduinoMotorPotTest implements SensorDataListener {
 
   }
 
-  @Override
+  
   public void onSensorData(SensorData event) {
     // about we downsample this call?
 	int[] data = (int[])event.getData();
@@ -286,7 +285,6 @@ public class ArduinoMotorPotTest implements SensorDataListener {
     return sb.toString();
   }
 
-@Override
 public boolean isLocal() {
 	// TODO Auto-generated method stub
 	return true;

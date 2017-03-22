@@ -1,25 +1,26 @@
 angular.module('mrlapp.main.mainCtrl')
-        .controller('loadingCtrl', ['$scope', '$log', 'mrl', 'serviceSvc', '$state', '$previousState',
-            function ($scope, $log, mrl, serviceSvc, $state, $previousState) {
-                $log.info('loadingCtrl');
-
+        .controller('loadingCtrl', ['$scope', '$log', 'mrl', 'panelSvc', '$state', '$previousState',
+            function ($scope, $log, mrl, panelSvc, $state, $previousState) {
+                $log.info('loadingCtrl.js');
+                // test();
                 var isUndefinedOrNull = function (val) {
                     return angular.isUndefined(val) || val === null;
                 };
 
                 $scope.mrlReady = false;
                 $scope.serviceSvcReady = false;
+                /*
                 mrl.init().then(function () {
-                    $log.info('mrl inited!');
+                    $log.info('mrl initialized!');
                     $scope.mrlReady = true;
-                    if (serviceSvc.isReady()) {
-                        $log.info('serviceSvc is already ready', serviceSvc);
+                    if (panelSvc.isReady()) {
+                        $log.info('panelSvc is already ready', panelSvc);
                         $scope.serviceSvcReady = true;
                         go();
                     } else {
-                        $log.info('wating for serviceSvc to become ready');
-                        serviceSvc.waitToBecomeReady().then(function () {
-                            $log.info('serviceSvc is now ready', serviceSvc);
+                        $log.info('wating for panelSvc to become ready');
+                        panelSvc.waitToBecomeReady().then(function () {
+                            $log.info('panelSvc is now ready', panelSvc);
                             $scope.serviceSvcReady = true;
                             go();
                         });
@@ -27,6 +28,7 @@ angular.module('mrlapp.main.mainCtrl')
                 }, function (msg_) {
                     $log.info('mrl.init()-meh!');
                 });
+                */
 
                 var go = function () {
                     var previousstate = $previousState.get();

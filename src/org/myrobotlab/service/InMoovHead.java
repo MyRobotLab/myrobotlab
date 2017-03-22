@@ -46,7 +46,7 @@ public class InMoovHead extends Service {
     eyeX.setRest(80);
     eyeY.setRest(90);
     
-    setVelocity(45,45,45,45,45);
+    setVelocity(45.0,45.0,45.0,45.0,45.0);
 
   }
 
@@ -235,11 +235,11 @@ public class InMoovHead extends Service {
     jaw.setPin(jawPin);
     */
 
-    arduino.servoAttach(rothead, headXPin);
-    arduino.servoAttach(neck, headYPin);
-    arduino.servoAttach(eyeX, eyeXPin);
-    arduino.servoAttach(eyeY, eyeYPin);
-    arduino.servoAttach(jaw, jawPin);
+    arduino.servoAttachPin(rothead, headXPin);
+    arduino.servoAttachPin(neck, headYPin);
+    arduino.servoAttachPin(eyeX, eyeXPin);
+    arduino.servoAttachPin(eyeY, eyeYPin);
+    arduino.servoAttachPin(jaw, jawPin);
 
   }
 
@@ -319,7 +319,7 @@ public class InMoovHead extends Service {
     return meta;
   }
 
-  public void setVelocity(Integer headXSpeed, Integer headYSpeed, Integer eyeXSpeed, Integer eyeYSpeed, Integer jawSpeed) {
+  public void setVelocity(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
     if (log.isDebugEnabled()) {
       log.debug(String.format("%s setVelocity %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed));
     }

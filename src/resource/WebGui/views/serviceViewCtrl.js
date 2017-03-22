@@ -1,6 +1,6 @@
 angular.module('mrlapp.views')
-        .controller('serviceViewCtrl', ['$scope', '$log', '$stateParams', '$filter', '$timeout', 'mrl', 'serviceSvc',
-            function ($scope, $log, $stateParams, $filter, $timeout, mrl, serviceSvc) {
+        .controller('serviceViewCtrl', ['$scope', '$log', '$stateParams', '$filter', '$timeout', 'mrl', 'panelSvc',
+            function ($scope, $log, $stateParams, $filter, $timeout, mrl, panelSvc) {
                 $log.info('serviceViewCtrl');
                 
                 $scope.servicename = $stateParams.servicename;
@@ -11,10 +11,10 @@ angular.module('mrlapp.views')
 
                 //service-panel(s) & update-routine
                 var panelsUpdated = function (panels) {
-                    $scope.allpanels = panels;
+                    $scope.panels = panels;
                     $timeout(function () {
                         var temp;
-                        angular.forEach($scope.allpanels, function (value, key) {
+                        angular.forEach($scope.panels, function (value, key) {
                             if (value.name == $scope.servicename) {
                                 temp = value;
                             }
@@ -28,6 +28,6 @@ angular.module('mrlapp.views')
                         $log.info('panel-serviceView', $scope.panel);
                     });
                 };
-                panelsUpdated(serviceSvc.getPanelsList());
-                serviceSvc.subscribeToUpdates(panelsUpdated);
+                panelsUpdated(panelSvc.getPanelsList());
+                panelSvc.subscribeToUpdates(panelsUpdated);
             }]);

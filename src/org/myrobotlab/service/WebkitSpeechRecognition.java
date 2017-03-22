@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Service;
@@ -11,6 +13,7 @@ import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.string.StringUtil;
 
 /**
  * 
@@ -49,6 +52,8 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   // track the state of the webgui, is it listening? maybe?
   public boolean listening = false;
   
+  public boolean stripAccents = false;
+  
   public WebkitSpeechRecognition(String reservedKey) {
     super(reservedKey);
   }
@@ -61,7 +66,12 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     // text.. only on recognized?!
     // not sure.
     String cleantext = text.toLowerCase().trim();
+    if (isStripAccents()) {
+      cleantext = StringUtil.removeAccents(cleantext);
+      log.info("Cleaned Text {}" ,cleantext);
+    }
     /*
+     * 
      * Double Speak FIX - I don't think a cmd should be sent from here because
      * it's not 'recognized' - recognized sends commands this method should be
      * subscribed too - GroG
@@ -70,10 +80,10 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
      * when we recognize... Command cmd = commands.get(cleantext);
      * send(cmd.name, cmd.method, cmd.params); }
      */
-
+    
     return cleantext;
   }
-
+  
   @Override
   public void listeningEvent() {
     // TODO Auto-generated method stub
@@ -90,13 +100,14 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public String recognized(String text) {
     log.info("Recognized : >{}<", text);
     String cleanedText = text.toLowerCase().trim();
-
+    if (isStripAccents()) {
+      cleanedText = StringUtil.removeAccents(cleanedText);
+    }
     if (commands.containsKey(cleanedText)) {
       // If we have a command. send it when we recognize...
       Command cmd = commands.get(cleanedText);
       send(cmd.name, cmd.method, cmd.params);
     }
-
     return cleanedText;
   }
 
@@ -164,7 +175,8 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
     try {
       Runtime.start("webgui", "WebGui");
-      Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
+      WebkitSpeechRecognition w = (WebkitSpeechRecognition)Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
+      w.setStripAccents(true);
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -219,5 +231,13 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public void startListening(String grammar) {
     log.warn("Webkit speech doesn't listen for a specific grammar.  use startListening() instead. ");
     startListening();
+  }
+
+  public boolean isStripAccents() {
+    return stripAccents;
+  }
+
+  public void setStripAccents(boolean stripAccents) {
+    this.stripAccents = stripAccents;
   }
 }

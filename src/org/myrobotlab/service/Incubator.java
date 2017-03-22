@@ -79,14 +79,14 @@ public class Incubator extends Service {
 
     Runtime.start("incubator", "Incubator");
 
-    // incubator.servoArduinoOpenCVGUIService();
+    // incubator.servoArduinoOpenCVSwing();
 
     /*
      * incubator.installAll(); // incubator.startTest();
      * 
      * incubator.testPythonScripts();
      * 
-     * // Runtime.createAndStart("gui", "GUIService");
+     * // Runtime.createAndStart("gui", "SwingGui");
      */
 
   }
@@ -187,7 +187,7 @@ public class Incubator extends Service {
         ret.add(Status.error("%s.py does not exist", shortName));
       } else {
         // uart99.connect("UART99");
-        uart99.recordRX(String.format("%s.rx", shortName)); // FIXME
+        uart99.record(); // FIXME
         // FILENAME
         // OVERLOAD
         python.exec(py);
@@ -418,7 +418,7 @@ public class Incubator extends Service {
       // String script;
       List<File> list = FileIO.listResourceContents("Python/examples");
 
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
       python = (Python) startPeer("python");
       // InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
 
@@ -448,7 +448,7 @@ public class Incubator extends Service {
       // String script;
       List<File> list = FileIO.listResourceContents("Python/examples");
 
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
       python = (Python) startPeer("python");
       // InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
 
@@ -488,13 +488,11 @@ public class Incubator extends Service {
    * 
    */
   static public ServiceType getMetaData() {
-
     ServiceType meta = new ServiceType(Incubator.class.getCanonicalName());
     meta.addDescription("This connector will connect to an IMAP based email server and crawl the emails");
-    meta.addCategory("testing", "framework");
+    meta.addCategory("testing");
     meta.addPeer("python", "Python", "shared python instance");
     meta.addPeer("xmpp", "Xmpp", "Xmpp service");
-
     return meta;
   }
 

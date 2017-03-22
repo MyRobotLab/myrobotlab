@@ -51,7 +51,7 @@ public class ThingSpeak extends Service {
       thingSpeak.startService();
 
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
     } catch (Exception e) {
       Logging.logError(e);
@@ -152,7 +152,7 @@ public class ThingSpeak extends Service {
 
     ServiceType meta = new ServiceType(ThingSpeak.class.getCanonicalName());
     meta.addDescription("Service which can relay data to a ThingSpeak account");
-    meta.addCategory("data", "cloud");
+    meta.addCategory("connectivity", "cloud");
     return meta;
   }
 

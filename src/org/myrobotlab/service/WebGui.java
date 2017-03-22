@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,36 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 	// FIXME might need to change to HashMap<String, HashMap<String,String>> to
 	// add client session
-	public HashMap<String, String> servicePanels = new HashMap<String, String>();
+	Map<String, Panel> panels;
+	Map<String, Map<String,Panel>> desktops;
+	
+  String currentDesktop = "default";
+	
+	public static class Panel {
+	  
+    String name;
+    String simpleName;
+    int posX = 40;
+    int posY = 20;
+    int zIndex = 1;
+    int width = 400;
+    int height = 400;
+    int preferredWidth = 800;
+    int preferredHeight = 600;
+    boolean hide = false;
+	  
+    public Panel(String name, int x, int y, int z) {
+      this.name = name;
+      this.posX = x;
+      this.posY = y;
+      this.zIndex = z;
+    }
+
+    public Panel(String panelName) {
+     this.name = panelName;
+    }
+	   
+	}
 
 	// SHOW INTERFACE
 	// FIXME - allowAPI1(true|false)
@@ -89,20 +119,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	// FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
 
 	transient LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
-
-	public static class PanelPos {
-		String name;
-		int x;
-		int y;
-		int z;
-
-		public PanelPos(String name, int x, int y, int z) {
-			this.name = name;
-			this.x = x;
-			this.y = y;
-			this.z = z;
-		}
-	}
 
 	/**
 	 * Static list of third party dependencies for this service. The list will
@@ -162,7 +178,21 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 	public WebGui(String n) {
 		super(n);
+		if (desktops == null){
+		  desktops = new HashMap<String, Map<String,Panel>>();
+		}
+		if (!desktops.containsKey(currentDesktop)){
+		  panels = new HashMap<String,Panel>();
+		  desktops.put(currentDesktop, panels);
+		} else {
+		  panels = desktops.get(currentDesktop);
+		}
+		String name = Runtime.getRuntimeName();
+		subscribe(name, "registered");
+		// FIXME - "unregistered" / "released"
+		
 	}
+	
 
 	// ================ Gateway begin ===========================
 
@@ -385,12 +415,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			broadcaster = broadcastFactory.get("/*");
 
 			log.info("WebGui {} started on port {}", getName(), port);
-
-			if (autoStartBrowser) {
-				log.info("auto starting default browser");
-				BareBonesBrowserLaunch.openURL(String.format(startURL, port));
-			}
-
 			// get all instances
 
 			// we want all onState & onStatus events from all services
@@ -407,6 +431,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			Runtime runtime = Runtime.getInstance();
 			subscribe(runtime.getName(), "registered");
 			subscribe(runtime.getName(), "released");
+			
+	     if (autoStartBrowser) {
+	        log.info("auto starting default browser");
+	        BareBonesBrowserLaunch.openURL(String.format(startURL, port));
+	      }
 
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -437,6 +466,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		if (si.isRuntime()) {
 			subscribe(si.getName(), "registered");
 		}
+
+		invoke("publishPanel", si.getName());
 
 		// broadcast it too
 		// repackage message
@@ -500,6 +531,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 			// good debug material
 			// log.info("sessionId {}", r);
+			// String sessionId = request.getSession(true).getId(); 
 			if (log.isDebugEnabled()) {
 				String sessionId = r.getAtmosphereResourceEvent().getResource().getRequest().getSession().getId();
 				log.debug("sessionId {}", sessionId);
@@ -720,7 +752,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// depend on codec being used
 			// FIXME - currently a keyword - "json" internally defines the codec
 			// - getMimeType !!
-
+			
 		} catch (Exception e) {
 			handleError(httpMethod, out, codec, e, apiTypeKey);
 		}
@@ -788,6 +820,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// before using the method cache - and the "hint" determins
 		// getBestCanidate !!!!
 
+		// log.info("{}.{}({})", msg.name, msg.method, Arrays.toString(paramTypes)); 
+		
 		Method method = clazz.getMethod(msg.method, paramTypes);
 
 		// NOTE --------------
@@ -805,7 +839,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// method and put its return on the the services out queue :P
 		if (si.isLocal()) {
 			log.debug("{} is local", si.getName());
-
+			
+			log.info("{}.{}({})", msg.name, msg.method, Arrays.toString(params)); 
 			Object retobj = method.invoke(si, params);
 
 			// FIXME - Is this how to support synchronous ?
@@ -829,8 +864,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	public void respond(OutputStream out, Codec codec, String method, Object ret, String apiTypeKey) throws Exception {
 		// getName() ? -> should it be AngularJS client name ?
 		Message msg = createMessage(getName(), CodecUtils.getCallBackName(method), ret);
-		if (CodecUtils.API_TYPE_SERVICES.equals(apiTypeKey)) {
-			codec.encode(out, msg.data[0]);
+		if (CodecUtils.API_TYPE_SERVICES.equals(apiTypeKey)||CodecUtils.API_TYPE_SERVICE.equals(apiTypeKey)) {
+			// for the purpose of only returning the data
+			// e.g. http://api/services/runtime/getUptime -> return the uptime only not the message
+			if (msg.data == null){
+				codec.encode(out, null);
+			} else {
+				// return the return type
+				codec.encode(out, msg.data[0]);
+			}
 		} else {
 			// API_TYPE_MESSAGES
 			codec.encode(out, msg);
@@ -917,15 +959,27 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		return false;
 	}
 
-	public void savePanel(String name, String panel) {
-		servicePanels.put(name, panel);
+	/**
+	 * From UI events --to--> MRL request to save panel data
+	 * typically done after user has changed or updated the UI in
+	 * position, height, width, zIndex etc.
+	 * 
+	 * If you need MRL changes of position or UI changes use publishPanel to 
+	 * remotely control UI
+	 * 
+	 * @param panel
+	 */
+	public void savePanel(Panel panel) {
+	  if (panel.name == null){
+	    log.error("panel name is null!");
+	    return;
+	  }
+		panels.put(panel.name, panel);
+		save();
 	}
-
-	public String loadPanel(String name) {
-		if (servicePanels.containsKey(name)) {
-			return servicePanels.get(name);
-		}
-		return null;
+	
+	public Map<String, Panel> loadPanels(){
+	  return panels;
 	}
 
 	public Integer getPort() {
@@ -999,9 +1053,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	}
 
 	public void set(String name, int x, int y, int z) {
-		invoke("publishSet", new PanelPos(name, x, y, z));
+	  Panel panel = null;
+	  if (panels.containsKey(name)){
+	    panel = panels.get(name);
+	  } else {
+	    panel = new Panel(name, x, y, z);
+	  }
+		invoke("publishPanel", panel);
 	}
 
+	// TODO - refactor next 6+ methods to only us publishPanel
 	public void showAll(boolean b) {
 		invoke("publishShowAll", b);
 	}
@@ -1025,9 +1086,23 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	public boolean publishShowAll(boolean b) {
 		return b;
 	}
-
-	public PanelPos publishSet(PanelPos pos) {
-		return pos;
+	
+	public void publishPanels(){
+	  for (String key:panels.keySet()){
+	    invoke("publishPanel", key);
+	  }
+	}
+	
+	public Panel publishPanel(String panelName) {
+	  
+	  Panel panel = null;
+    if (panels.containsKey(panelName)){
+      panel = panels.get(panelName);
+    } else {
+      panel = new Panel(panelName);
+      panels.put(panelName, panel);
+    }
+		return panel;
 	}
 	// === end positioning panels plumbing ===
 
@@ -1043,7 +1118,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 		ServiceType meta = new ServiceType(WebGui.class.getCanonicalName());
 		meta.addDescription("web display");
-		meta.addCategory("display");
+		meta.addCategory("connectivity", "display");
 
 		// MAKE NOTE !!! - we currently distribute myrobotlab.jar with a webgui
 		// hence these following dependencies are zipped with myrobotlab.jar !
@@ -1060,25 +1135,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		return meta;
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-			
-			Double level = Runtime.getBatteryLevel();
-			log.info("" + level);
-
-			Runtime.start("python", "Python");
-			// Runtime.start("arduino", "Arduino");
-			//Runtime.start("srf05", "UltrasonicSensor");
-			Runtime.start("webgui", "WebGui");
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-
+	
 	@Override
 	public String publishConnect() {
 		// TODO Auto-generated method stub
@@ -1096,4 +1153,30 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public static void main(String[] args) {
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.INFO);
+
+    try {
+      
+      Double level = Runtime.getBatteryLevel();
+      log.info("" + level);
+
+      /*
+      VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+      virtual.connect("COM5");
+      
+      Runtime.start("python", "Python");
+      */
+      // Runtime.start("arduino", "Arduino");
+      //Runtime.start("srf05", "UltrasonicSensor");
+      // Runtime.setRuntimeName("george");
+      Runtime.start("webgui", "WebGui");
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
 }

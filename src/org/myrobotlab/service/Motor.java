@@ -25,7 +25,9 @@
 
 package org.myrobotlab.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -39,12 +41,10 @@ import org.myrobotlab.motor.MotorConfigDualPwm;
 import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
-import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
-import org.myrobotlab.service.interfaces.SensorDataListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -58,7 +58,7 @@ import org.slf4j.Logger;
  *         H-bridges output
  * 
  */
-public class Motor extends Service implements MotorControl, SensorDataListener, EncoderListener {
+public class Motor extends Service implements MotorControl, EncoderListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -68,23 +68,25 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	/**
 	 * list of names of possible controllers
 	 */
-	public List<String>				controllers;
-	
-	String types [] = MotorConfig.getTypes();
+	public List<String> controllers;
+
+	String types[] = MotorConfig.getTypes();
 
 	boolean locked = false;
 
 	/**
 	 * the power level requested - varies between -1.0 <--> 1.0
 	 */
-	
+
 	double powerLevel = 0;
+	double maxPower = 1.0;
+	double minPower = -1.0;
 
 	Mapper powerMap = new Mapper(-1.0, 1.0, -255.0, 255.0);
 
 	// position
-	int currentPos = 0;
-	int targetPos = 0;
+	double currentPos = 0;
+	double targetPos = 0;
 
 	Mapper encoderMap = new Mapper(-800.0, 800.0, -800.0, 800.0);
 
@@ -108,12 +110,12 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 		refreshControllers();
 		broadcastState();
 	}
-	
+
 	public List<String> refreshControllers() {
 		controllers = Runtime.getServiceNamesFromInterface(MotorController.class);
 		return controllers;
 	}
-	
+
 	public DeviceController getController() {
 		return controller;
 	}
@@ -125,7 +127,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
 	@Override
 	public double getPowerOutput() {
-		return powerMap.calc(powerLevel);
+		return powerMap.calcOutput(powerLevel);
 	}
 
 	public Mapper getPowerMap() {
@@ -133,8 +135,8 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	}
 
 	@Override
-	public boolean isAttached() {
-		return controller != null;
+	public boolean isAttached(MotorController controller) {
+		return this.controller == controller;
 	}
 
 	@Override
@@ -161,8 +163,15 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	@Override
 	// not relative ! - see moveStep
 	public void move(double power) {
-		log.info("{}.move({})", getName(), power);
+		log.debug("{}.move({})", getName(), power);
+		if (power > maxPower) {
+			power = maxPower;
+		}
+		if (power < minPower) {
+			power = minPower;
+		}
 		powerLevel = power;
+
 		if (locked) {
 			log.warn("motor locked");
 			return;
@@ -172,7 +181,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	}
 
 	@Override
-	public void moveTo(int newPos, Double powerLevel) {
+	public void moveTo(double newPos, Double powerLevel) {
 		this.powerLevel = powerLevel;
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
@@ -186,13 +195,8 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	}
 
 	@Override
-	public void moveTo(int newPos) {
+	public void moveTo(double newPos) {
 		moveTo(newPos, null);
-	}
-
-	@Override
-	public void setController(DeviceController controller) {
-		this.controller = (MotorController) controller;
 	}
 
 	@Override
@@ -250,8 +254,81 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 	}
 
 	@Override
-	public int getTargetPos() {
+	public double getTargetPos() {
 		return targetPos;
+	}
+
+	@Override
+	public void pulse() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setEncoder(Encoder encoder) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void detach(MotorController controller) {
+		controller.detach(this);
+		controller = null;
+		controllerName = null;
+		broadcastState();
+	}
+
+	@Override
+	public void attach(MotorController controller) throws Exception {
+		this.controller = controller;
+		if (controller != null) {
+			controllerName = controller.getName();
+		}
+		broadcastState();
+	}
+
+	/////// config start ////////////////////////
+	public void setPwmPins(int leftPin, int rightPin) {
+		config = new MotorConfigDualPwm(leftPin, rightPin);
+		broadcastState();
+	}
+
+	public void setPwrDirPins(int pwrPin, int dirPin) {
+		config = new MotorConfigSimpleH(pwrPin, dirPin);
+		broadcastState();
+	}
+
+	@Override
+	public MotorConfig getConfig() {
+		return config;
+	}
+
+	@Override
+	public boolean isAttached() {
+		return controller != null;
+	}
+
+	// TODO - this could be Java 8 default interface implementation
+	@Override
+	public void detach(String controllerName) {
+		if (controller == null || !controllerName.equals(controller.getName())) {
+			return;
+		}
+		controller.detach(this);
+		controller = null;
+	}
+
+	@Override
+	public boolean isAttached(String name) {
+		return (controller != null && controller.getName().equals(name));
+	}
+
+	@Override
+	public Set<String> getAttached() {
+		HashSet<String> ret = new HashSet<String>();
+		if (controller != null) {
+			ret.add(controller.getName());
+		}
+		return ret;
 	}
 
 	public static void main(String[] args) {
@@ -261,13 +338,22 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 
 		try {
 
+			Runtime.start("gui", "SwingGui");
+			Runtime.start("webgui", "WebGui");
+			Runtime.start("motor", "Motor");
+			Runtime.start("arduino", "Arduino");
+			boolean done = true;
+			if (done) {
+				return;
+			}
+
 			// FIXME - all testing or replacing of main code should be new JUnit
 			// tests - with virtual arduino !!!)
 			String port = "COM15";
 
 			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			// Runtime.createAndStart("gui", "GUIService");
-			Runtime.createAndStart("webgui", "WebGui");
+			// Runtime.createAndStart("gui", "SwingGui");
+			// Runtime.createAndStart("webgui", "WebGui");
 			// arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
 			// arduino.connect(port);
 			// arduino.broadcastState();
@@ -311,7 +397,7 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 			// m1.attach(arduino, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);
 			// m1.attach(arduino, Motor.TYPE_2_PWM, pwmPin, dirPin);
 			// m1.attach(arduino, Motor.TYPE_SIMPLE, pwmPin, dirPin);
-			m1.setController((MotorController) arduino);
+			m1.attach((MotorController) arduino);
 
 			m1.move(1.0);
 			m1.move(-1.0);
@@ -322,8 +408,8 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 			m1.moveTo(250);
 			m1.moveTo(250);
 
-			arduino.enableBoardStatus();
-			arduino.disableBoardStatus();
+			arduino.enableBoardInfo(true);
+			arduino.enableBoardInfo(false);
 			m1.stop();
 			m1.move(0.5);
 			m1.moveTo(200);
@@ -354,70 +440,6 @@ public class Motor extends Service implements MotorControl, SensorDataListener, 
 			Logging.logError(e);
 		}
 
-	}
-
-	@Override
-	public void onSensorData(SensorData data) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void pulse() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setEncoder(Encoder encoder) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void detach(MotorController controller) {
-		controller.deviceDetach(this);
-		controller = null;
-		controllerName = null;
-		broadcastState();
-	}
-
-	@Override
-	public void attach(MotorController controller) throws Exception {
-		this.controller = controller;
-		if (controller != null){
-			controllerName = controller.getName();
-		}
-		broadcastState();
-	}
-	
-	///////   config start ////////////////////////
-	public void setPwmPins(int leftPin, int rightPin) {
-		config = new MotorConfigDualPwm(leftPin, rightPin);
-		broadcastState();
-	}
-	
-	public void setPwrDirPins(int pwrPin, int dirPin){
-		config = new MotorConfigSimpleH(pwrPin, dirPin);
-		broadcastState();
-	}
-
-	@Override
-	public MotorConfig getConfig() {
-		return config;
-	}
-
-	// GOOD CANIDATE FOR JAVA 8 - "DEFAULT" INTERFACE IMPLEMENTATION
-	// WHY REPEAT THIS IN ALL SERVICES ? :P
-	@Override
-	public void attach(String controllerName) throws Exception {
-		attach((MotorController)Runtime.getService(controllerName));
-	}
-
-	// GOOD CANIDATE FOR JAVA 8 - "DEFAULT" INTERFACE IMPLEMENTATION
-	// WHY REPEAT THIS IN ALL SERVICES ? :P
-	@Override
-	public void detach(String controllerName) {
-		detach((MotorController)Runtime.getService(controllerName));
 	}
 
 }

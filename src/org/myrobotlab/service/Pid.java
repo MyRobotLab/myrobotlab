@@ -100,7 +100,7 @@ public class Pid extends Service {
 
   static final public int DIRECTION_REVERSE = 1;
 
-  private Map<String, PidData> data = new HashMap<String, PidData>();
+  public Map<String, PidData> data = new HashMap<String, PidData>();
 
   public Pid(String n) {
     super(n);
@@ -141,7 +141,9 @@ public class Pid extends Service {
       else if (output < piddata.outMin)
         output = piddata.outMin;
       piddata.output = output;
-
+      
+      broadcastState();
+      
       /* Remember some variables for next time */
       piddata.lastInput = piddata.input;
       piddata.lastTime = now;
@@ -361,9 +363,7 @@ public class Pid extends Service {
   }
 
   public static void main(String[] args) throws ClassNotFoundException {
-    Logging logging = LoggingFactory.getInstance();
-    logging.configure();
-    logging.setLevel(Level.INFO);
+    LoggingFactory.init();
 
     try {
 
@@ -375,8 +375,8 @@ public class Pid extends Service {
       log.error("error");
       log.info("info");
 
-      Pid pid = new Pid("pid");
-      pid.startService();
+      Runtime.start("gui", "SwingGui");
+      Pid pid = (Pid)Runtime.start("pid", "Pid");
       String key = "test";
       pid.setPID(key, 2.0, 5.0, 1.0);
       pid.setControllerDirection(key, DIRECTION_DIRECT);
@@ -385,7 +385,7 @@ public class Pid extends Service {
       pid.setSetpoint(key, 100);
       pid.setSampleTime(key, 40);
 
-      // GUIService gui = new GUIService("gui");
+      // SwingGui gui = new SwingGui("gui");
       // gui.startService();
 
       for (int i = 0; i < 200; ++i) {

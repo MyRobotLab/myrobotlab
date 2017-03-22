@@ -47,7 +47,7 @@ public class Pir extends Service implements PinListener {
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			Runtime.start("pir", "Pir");
-			Runtime.start("gui", "GUIService");
+			Runtime.start("gui", "SwingGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -113,7 +113,7 @@ public class Pir extends Service implements PinListener {
 	@Override
 	public void onPin(PinData pindata) {
 		// log.info("onPin {}", pindata);
-		 boolean sense = (pindata.getValue() != 0);
+		 boolean sense = (pindata.value != 0);
 		 
 		 if (isActive != sense){
 			 // state change

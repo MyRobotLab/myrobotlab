@@ -74,7 +74,7 @@ public class ArduinoPinArrayControlTest {
 	@Test
 	public void testGetPinList() throws Exception {
 		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-		// Runtime.start("gui", "GUIService");
+		// Runtime.start("gui", "SwingGui");
 		Runtime.start("webgui", "WebGui");
 		Runtime.start("python", "Python");
 		
@@ -108,8 +108,8 @@ public class ArduinoPinArrayControlTest {
 		
 		arduino.connect("COM5");
 		
-		arduino.enableBoardStatus();
-		arduino.disableBoardStatus();
+		arduino.enableBoardInfo(true);
+		arduino.enableBoardInfo(false);
 				
 		/*
 		arduino.disconnect();

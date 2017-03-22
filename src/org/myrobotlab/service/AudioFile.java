@@ -343,17 +343,14 @@ public class AudioFile extends Service {
       // "AudioFile");
       // MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
 
-      log.info(AcapelaSpeech.getDNA().toString());
-      AcapelaSpeech robot1 = (AcapelaSpeech) Runtime.start("robot1", "AcapelaSpeech");
-      // AcapelaSpeech robot1 = (AcapelaSpeech) Runtime.createAndStart("robot1",
-      // "AcapelaSpeech");
+      NaturalReaderSpeech robot1 = (NaturalReaderSpeech) Runtime.start("robot1", "NaturalReaderSpeech");
       AudioFile audio = robot1.getAudioFile();
 
       log.info(audio.getTrack());
 
       // audio.track("sound effects");
       audio.track("explosion");
-      audio.play("explosion.mp3");
+      audio.play("alert.mp3");
 
       /*
        * mary.speak("warning warning. danger will robinson danger"); mary.speak(
@@ -452,7 +449,7 @@ public class AudioFile extends Service {
         AudioFile player = new AudioFile("player");
         // player.playFile(filename, true);
         player.startService();
-        Runtime.createAndStart("gui", "GUIService");
+        Runtime.createAndStart("gui", "SwingGui");
 
         joystick.setController(2);
         joystick.broadcastState();

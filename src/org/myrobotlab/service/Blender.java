@@ -84,8 +84,10 @@ public class Blender extends Service {
   public static final String SUCCESS = "SUCCESS";
   Socket control = null;
   transient ControlHandler controlHandler = null;
+  
   String host = "localhost";
   Integer controlPort = 8989;
+  
 
   Integer serialPort = 9191;
   String blenderVersion;
@@ -198,7 +200,7 @@ public class Blender extends Service {
           Serial serial = arduino.getSerial();
 
           // connecting over tcp ip
-          serial.connectTcp(host, serialPort);
+          serial.connectTcp(String.format("tcp://%s:%d", host, serialPort));
 
           // int vpn = virtualPorts.size();
 
@@ -283,7 +285,7 @@ public class Blender extends Service {
       // create masters
       Blender blender = (Blender) Runtime.start("blender", "Blender");
       // gui
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
 
       // connect blender service
       if (!blender.connect()) {
@@ -343,7 +345,7 @@ public class Blender extends Service {
        * blender.getVersion(); // blender.toJson(); // blender.toJson();
        */
 
-      // Runtime.start("gui", "GUIService");
+      // Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

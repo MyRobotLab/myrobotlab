@@ -1,21 +1,25 @@
 <!-- begin status and control for board to be viewed in above all tabs -->
 
 		<div class="col-lg-8">
-		<port service-name="{{service.serial.name}}" ng-model="formPort" ></port>		
-			     <select ng-model="boardType" ng-change="onBoardChange(boardType)" class="form-control">
-					<option>uno</option>
-					<option>mega</option>
-					<option>megaADK</option>
-				</select>    
+		<!-- FIXME - port is not working well in that the controller can not get the portname back from the port directive :(
+		<port id="{{service.name + 'port'}}" port-test="{{service.name}}" service-name="{{service.serial.name}}"></port>
+		-->		
+		 <select ng-model="boardType" ng-change="onBoardChange(boardType)" class="form-control">
+			<option>uno</option>
+			<option>mega</option>
+			<option>megaADK</option>
+			<option>nano</option>
+		</select>    
 		</div>	
 	  <div class="col-md-4">
 	  </div>			
 
 	<div class="col-lg-12"><!-- TODO reduce this with show -->
 			{{service.boardType}} {{connectedStatus}} {{versionStatus}} <br>		
-			 <span ng-show="mrlComm.us != null">load {{mrlComm.us}}</span> 
-			 <span ng-show="mrlComm.sram != null">sram {{mrlComm.sram}}</span> 			  
-			 <span ng-show="mrlComm.deviceCount != null">devices {{mrlComm.deviceCount}}</span> 			  
+			 <span ng-show="boardInfo != null">load {{boardInfo.microsPerLoop}}</span> 
+			 <span ng-show="boardInfo != null">heartbeat {{boardInfo.heartbeatMs}}</span>
+			 <span ng-show="boardInfo != null">sram {{boardInfo.sram}} - {{boardInfo.activePins}} active pins {{boardInfo.deviceSummary.length}} devices</span> <br/>			  			 
+    		 <span ng-repeat="device in boardInfo.deviceSummary"> <b>{{device.name}}</b> id:{{device.id}} </span>
 	</div>
 
 <!-- end status and control for board to be viewed in above all tabs -->
@@ -44,7 +48,7 @@
     	<!-- button class="btn btn-default pull-right" ng-click="msg.openMrlComm()">Open in IDE</button -->
     	<!-- FIXME - for an successful upload the "FIELDS!" portname, arduinoPath & boardType all need to be filled in -->
     	<button class="btn btn-default pull-right" ng-click="upload(service.arduinoPath, formPort, boardType)">Upload</button>
-    	<button class="btn btn-default pull-right" ng-model="mrlComm.enableBoardStatus" uib-btn-checkbox ng-change="(mrlComm.enableBoardStatus)?msg.enableBoardStatus():msg.disableBoardStatus()">Status</button>
+    	<button class="btn btn-default pull-right" ng-model="mrlComm.enableBoardInfo" uib-btn-checkbox ng-change="(mrlComm.enableBoardInfo)?msg.enableBoardInfo(true):msg.enableBoardInfo(false)">Status</button>
     
 		<pre>
 {{service.uploadSketchResult}}

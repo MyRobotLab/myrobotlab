@@ -1,6 +1,7 @@
 package org.myrobotlab.service.data;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.myrobotlab.codec.Exclude;
 import org.myrobotlab.service.interfaces.DeviceControl;
@@ -52,5 +53,9 @@ public class DeviceMapping implements Serializable{
 	
 	public Object[] getConfig(){
 		return config;
+	}
+	
+	public String toString(){
+		return String.format("id:%d name:%s config:%s", id, device.getName(), Arrays.toString(config));
 	}
 }

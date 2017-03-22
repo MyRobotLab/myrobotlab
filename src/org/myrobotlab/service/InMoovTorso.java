@@ -27,8 +27,12 @@ public class InMoovTorso extends Service {
   static public void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     try {
-      InMoovTorso torso = (InMoovTorso) Runtime.createAndStart("torso", "InMoovTorso");
+      VirtualArduino v = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+      
+      v.connect("COM4");
+      InMoovTorso torso = (InMoovTorso) Runtime.start("i01.torso", "InMoovTorso");
       torso.connect("COM4");
+      Runtime.start("webgui", "WebGui");
       torso.test();
     } catch (Exception e) {
       Logging.logError(e);
@@ -52,7 +56,7 @@ public class InMoovTorso extends Service {
     midStom.setRest(90);
     lowStom.setRest(90);
 
-    setVelocity(5,5,5);
+    setVelocity(5.0,5.0,5.0);
   
   }
 
@@ -201,9 +205,9 @@ public class InMoovTorso extends Service {
     */
 	  
 
-	    arduino.servoAttach(topStom, topStomPin);
-	    arduino.servoAttach(topStom, midStomPin);
-	    arduino.servoAttach(topStom, lowStomPin);
+	    arduino.servoAttachPin(topStom, topStomPin);
+	    arduino.servoAttachPin(topStom, midStomPin);
+	    arduino.servoAttachPin(topStom, lowStomPin);
   }
 
   public void setSpeed(Double topStom, Double midStom, Double lowStom) {
@@ -267,7 +271,7 @@ public class InMoovTorso extends Service {
     return meta;
   }
 
-  public void setVelocity(Integer topStom, Integer midStom, Integer lowStom) {
+  public void setVelocity(Double topStom, Double midStom, Double lowStom) {
     this.topStom.setVelocity(topStom);
     this.midStom.setVelocity(midStom);
     this.lowStom.setVelocity(lowStom);

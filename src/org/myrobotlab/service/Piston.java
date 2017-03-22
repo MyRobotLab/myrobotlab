@@ -44,7 +44,7 @@ public class Piston extends Service {
 
       Piston piston = (Piston)Runtime.start("piston", "Piston");
       Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
       
       // piston.attach()
 

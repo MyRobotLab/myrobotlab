@@ -1,6 +1,7 @@
 package org.myrobotlab.cache;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public class LRUMethodCache {
 
@@ -36,12 +37,22 @@ public class LRUMethodCache {
     return instance;
   }
 
-  public synchronized void addCacheEntry(String key, Method value) {
-    cacheMap.put(key, value);
+  
+  private String makeKey(Object obj, String method, Class<?>[] paramTypes){
+    String key = String.format("%s.%s.%s", obj.toString(), method, Arrays.toString(paramTypes));
+    return key;
   }
 
-  public synchronized Method getCacheEntry(String key) {
-    return cacheMap.get(key);
+  public Method getCacheEntry(Object obj, String method, Class<?>[] paramTypes) {
+    String key = makeKey(obj, method, paramTypes);
+    if (cacheMap.containsKey(key)){
+      return cacheMap.get(key);
+    }
+    return null;
+  }
+
+  public void addCacheEntry(Object obj, String method, Class<?>[] paramTypes, Method m) {
+    cacheMap.put(makeKey(obj, method, paramTypes), m);
   }
 
 }

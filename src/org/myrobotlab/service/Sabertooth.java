@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
+import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -16,7 +18,7 @@ import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
-import org.myrobotlab.service.interfaces.SerialDataListener;
+import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
@@ -216,7 +218,7 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 		// serial.addByteListener(this);
 	}
 
-	public Serial getSerial() {
+	public SerialDevice getSerial() {
 		return serial;
 	}
 
@@ -331,12 +333,12 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 		return meta;
 	}
 
-	public void motorAttach(MotorControl motor, int portNumber) {
+	public void motorAttach(MotorControl motor, int portNumber) throws Exception {
 		MotorData data = new MotorData();
 		data.motor = motor;
 		data.portNumber = portNumber;
 		motors.put(motor.getName(), data);
-		motor.setController(this);
+		motor.attach(this);
 	}
 
 	///////////// start new methods /////////////////
@@ -400,14 +402,14 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 
 			// Motor m2 = (Motor) Runtime.createAndStart("m2", "Motor");
 
-			// Runtime.start("gui", "GUIService");
+			// Runtime.start("gui", "SwingGui");
 			Runtime.start("webgui", "WebGui");
 			Runtime.start("motor", "Motor");
 
 			saber.driveForwardMotor1(100);
 
 			/*
-			 * GUIService gui = new GUIService("gui"); gui.startService();
+			 * SwingGui gui = new SwingGui("gui"); gui.startService();
 			 */
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -428,21 +430,24 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 	}
 
 	@Override
-	public Integer getVersion() {
-		// TODO Auto-generated method stub
+	public BoardInfo getBoardInfo() {
+		// sabertooth is not a microcontroller
 		return null;
 	}
 
 	@Override
-	public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
-		// TODO Auto-generated method stub
-		
+	public void detach(DeviceControl device) {
+		motors.remove(device);
 	}
 
 	@Override
-	public void deviceDetach(DeviceControl device) {
-		// TODO Auto-generated method stub
-		
+	public int getDeviceCount() {
+		return motors.size();
+	}
+
+	@Override
+	public Set<String> getDeviceNames() {
+		return motors.keySet();
 	}
 
 

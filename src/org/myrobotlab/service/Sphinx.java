@@ -216,12 +216,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
             }
 
           } else {
-            try {
-              Thread.sleep(250);
-            } catch (InterruptedException e) {
-              // TODO Auto-generated catch block
-              logException(e);
-            }
+            sleep(250);
             // invoke("unrecognizedSpeech");
             log.error("I can't hear what you said.\n");
           }

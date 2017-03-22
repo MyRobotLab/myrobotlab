@@ -17,27 +17,19 @@
  left:0;
  width:470px;   
 }
+
 .panel-default{
-/*
-    	border: 2px solid;
-    	padding: 20px; 
-    	min-width: 50px;
-    	min-height: 70px;
-*/
-    /*width: 600px;*/
-    /*resize: both;*/
-   	/*overflow: auto;*/
 }    
 
+.poptop{
+	overflow: visible;
+	/* position:relative;*/
+	background-color: orchid;
+    z-index: 99999999999999;
+}
+
 .panel-footer{
-/*	 position: absolute;
-	 height: 50px; 
-	 background: blue;
- 	 position: absolute; tells the browser to position #footer relative to #wrapper
-	 bottom: 3; sticks the footer 3px above the bottom edges of the #wrapper div
-	 width: 100%;
-	 text-align: center;*/
-   
+
 }
 
 body {

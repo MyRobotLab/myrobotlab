@@ -188,17 +188,15 @@ public class TestCatcher extends Service implements SerialDataListener {
   }
 
   @Override
-  public String onConnect(String portName) {
+  public void onConnect(String portName) {
     info("connected to %s", portName);
     addData("onConnect", portName);
-    return portName;
   }
 
   @Override
-  public String onDisconnect(String portName) {
+  public void onDisconnect(String portName) {
     info("disconnect to %s", portName);
     addData("onDisconnect", portName);
-    return portName;
   }
 
   public void checkMsg(String method) throws InterruptedException, IOException {
@@ -274,12 +272,9 @@ public class TestCatcher extends Service implements SerialDataListener {
    * @return ServiceType - returns all the data
    * 
    */
-
-  public void startService() {
-    super.startService();
-    startPeer("t01");
-    startPeer("t02");
-    startPeer("opencv");
+  
+  public double testDouble(double d){
+    return d;
   }
 
   public static void main(String[] args) {
@@ -288,7 +283,7 @@ public class TestCatcher extends Service implements SerialDataListener {
     try {
 
       Runtime.start("c01", "TestCatcher");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
 
       /*
        * TestThrower thrower = new TestThrower("thrower");

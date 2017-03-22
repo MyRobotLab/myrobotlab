@@ -9,12 +9,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
-import org.myrobotlab.service.data.OculusData;
-import org.myrobotlab.service.data.SensorData;
-import org.myrobotlab.service.interfaces.DeviceController;
-import org.myrobotlab.service.interfaces.OculusDataListener;
-import org.myrobotlab.service.interfaces.OculusDataPublisher;
-import org.myrobotlab.service.interfaces.SensorDataListener;
+import org.myrobotlab.service.data.Orientation;
+import org.myrobotlab.service.interfaces.OrientationListener;
 import org.slf4j.Logger;
 
 /**
@@ -23,7 +19,7 @@ import org.slf4j.Logger;
  * build of MRLComm to work. Check with \@Alessandruino for questions.
  *
  */
-public class OculusDIY extends Service implements SensorDataListener, OculusDataPublisher, OculusDataListener {
+public class OculusDIY extends Service implements OrientationListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -32,7 +28,7 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	transient public Arduino arduino;
 	transient public Mpu6050 mpu6050;
 
-	OculusData oculus = new OculusData();
+	Orientation oculus = new Orientation();
 	Mapper mapperPitch = new Mapper(-180, 0, 0, 180);
 	Mapper mapperYaw = new Mapper(-180, 180, 0, 360);
 
@@ -64,10 +60,11 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 		maxHead = centerValue + 300;
 	}
 
-	public void computeAngles(Integer mx, Integer headingint, Integer ay) {
+	public void computeAngles(Double roll, Double pitch, Double yaw) {
+	// public void computeAngles(Integer mx, Integer headingint, Integer ay) {
 
-		lastValue2 = mx;
-		double y = mx;
+		lastValue2 = roll.intValue();
+		double y = pitch;
 		double x = (20 + (((y - minHead) / (maxHead - minHead)) * (160 - 20)));
 		head = (int) x;
 
@@ -86,7 +83,7 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 			rothead = lastrotheadvalue;
 		}
 
-		y = ay;
+		y = yaw;
 		x = (85 + (((y - 20) / (-16000 - 20)) * (5 - 85)));
 		bicep = (int) x;
 
@@ -95,7 +92,7 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	public void computeAnglesAndroid(float yaw, float roll, float pitch) {
 
 		// head = (int) (180.0 +(((az - 9.82)/(-9.82 - 9.82))*(0.0 - 180.0)));
-		head = (int) mapperPitch.calc(pitch);
+		head = (int) mapperPitch.calcOutput(pitch);
 		// headingint = (int) mapperYaw.calc(yaw);
 		headingint = (int) yaw;
 
@@ -117,24 +114,21 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 		oculus.pitch = Double.valueOf(head);
 		oculus.yaw = Double.valueOf(rothead);
 		oculus.roll = Double.valueOf(roll);
-		invoke("publishOculusData", oculus);
+		invoke("publishOrientation", oculus);
 
 		System.out.println("pitch is " + head + "yaw is " + rothead);
 
 	}
 
-	public OculusData publishOculusData(OculusData oculus) {
+	public Orientation Orientation(Orientation oculus) {
 		return oculus;
 
 	}
 
-	public void addOculusDataListener(Service service) {
-		addListener("publishOculusData", service.getName(), "onOculusData");
+	public void addOrientationListener(Service service) {
+		addListener("publishOrientation", service.getName(), "onOrientation");
 	}
 
-	public OculusData onOculusData(OculusData oculus) {
-		return oculus;
-	}
 
 	@Override
 	public void startService() {
@@ -161,7 +155,7 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 			// OculusDIY oculus = (OculusDIY) Runtime.start("oculus",
 			// "OculusDIY");
 			Runtime.start("python", "Python");
-			Runtime.start("gui", "GUIService");
+			Runtime.start("gui", "SwingGui");
 			// oculus.connect("COM15");
 
 		} catch (Exception e) {
@@ -187,20 +181,20 @@ public class OculusDIY extends Service implements SensorDataListener, OculusData
 	}
 
 	@Override
-	public void onSensorData(SensorData event) {
-		int[] data = (int[])event.getData();
-		Integer ay = (Integer) data[0];
-		Integer mx = (Integer) data[1];
-		Integer headingint = (Integer) data[2];
-		this.computeAngles(mx, headingint, ay);
+	public Orientation onOrientation(Orientation orientation) {
+		// int[] data = (int[])event.getData();
+		// Integer ay = (Integer) data[0];
+		// Integer mx = (Integer) data[1];
+		// Integer headingint = (Integer) data[2];
+		this.computeAngles(orientation.roll, orientation.pitch, orientation.yaw);
 
 		oculus.yaw = Double.valueOf(rothead);
 		oculus.pitch = Double.valueOf(head);
 		oculus.roll = Double.valueOf(bicep);
-		invoke("publishOculusData", oculus);
+		invoke("publishOrientation", oculus);
 
 		System.out.println(head + "," + rothead);
+		return orientation;
 	}
-
 
 }

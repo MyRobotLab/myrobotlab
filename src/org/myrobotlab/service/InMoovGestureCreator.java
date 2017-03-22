@@ -92,7 +92,7 @@ public class InMoovGestureCreator extends Service {
     LoggingFactory.init(Level.INFO);
     try {
 
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
       Runtime.start("inmoovgesturecreator", "InMoovGestureCreator");
 
     } catch (Exception e) {
@@ -1150,7 +1150,7 @@ public class InMoovGestureCreator extends Service {
           }
 
           Double min = servo.getMin();
-          int res = servo.getRest();
+          double res = servo.getRest();
           Double max = servo.getMax();
 
           servoitemholder[i1][i2].min.setText(min + "");

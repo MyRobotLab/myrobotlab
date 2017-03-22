@@ -131,7 +131,7 @@ public class Plantoid extends Service {
 			// Runtime.createAndStart("python", "Python");
 			// Runtime.createAndStart("webgui", "WebGui");
 			/*
-			 * GUIService gui = new GUIService("gui"); gui.startService();
+			 * SwingGui gui = new SwingGui("gui"); gui.startService();
 			 */
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -174,12 +174,12 @@ public class Plantoid extends Service {
 		 * pan.setController(arduino); tilt.setController(arduino);
 		 * 
 		 */
-		arduino.servoAttach(leg1, 2);
-		arduino.servoAttach(leg2, 3);
-		arduino.servoAttach(leg3, 4);
-		arduino.servoAttach(leg4, 5);
-		arduino.servoAttach(pan, 6);
-		arduino.servoAttach(tilt, 7);
+		arduino.servoAttachPin(leg1, 2);
+		arduino.servoAttachPin(leg2, 3);
+		arduino.servoAttachPin(leg3, 4);
+		arduino.servoAttachPin(leg4, 5);
+		arduino.servoAttachPin(pan, 6);
+		arduino.servoAttachPin(tilt, 7);
 
 		pan.setRest(90);
 		tilt.setRest(90);
@@ -436,7 +436,7 @@ public class Plantoid extends Service {
 	 * polled
 	 */
 	public void startPolling() {
-		arduino.setSampleRate(sampleRate);
+		// arduino.setSampleRate(sampleRate);
 		arduino.enablePin(soildMoisture);
 		arduino.enablePin(tempHumidity);
 		arduino.enablePin(leftLight);

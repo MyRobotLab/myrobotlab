@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
@@ -28,7 +29,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class VideoStreamer extends VideoSink {
+public class VideoStreamer extends Service implements VideoSink {
 
   private static final long serialVersionUID = 1L;
 
@@ -51,7 +52,7 @@ public class VideoStreamer extends VideoSink {
       opencv.addFilter("pyramidDown", "PyramidDown");
       opencv.capture();
 
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);
@@ -62,10 +63,9 @@ public class VideoStreamer extends VideoSink {
     super(name);
   }
 
-  public boolean attach(String videoSource) {
+  public void attach(String videoSource) {
     VideoSource vs = (VideoSource) Runtime.getService(videoSource);
     attach(vs);
-    return true;
   }
 
   @Override

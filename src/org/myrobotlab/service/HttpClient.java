@@ -63,10 +63,12 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  *         TODO - asynchronous call back similar to AngularJS promise - or at
- *         least a callback method is call .. onHttpResponse
+ *         least a callback method is called .. onHttpResponse
  * 
- *         Synchronous or Asynchrounous - Synchronous by default, Asynchronous
+ *         Synchronous or Asynchronous - Synchronous by default, Asynchronous
  *         if a callback method is supplied or Non-Blocking method is called
+ *         
+ *         Check out - Fluent interface - https://hc.apache.org/httpcomponents-client-ga/tutorial/html/fluent.html
  */
 public class HttpClient extends Service implements HttpDataListener, HttpResponseListener {
 
@@ -193,7 +195,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
       fields = formFields;
     }
 
-    if (request.getClass().equals(HttpPost.class) && formFields.size() > 0) {
+    // Mats changed 2017-01-03. I think it was a bug 
+    // if (request.getClass().equals(HttpPost.class) && formFields.size() > 0)
+    if (request.getClass().equals(HttpPost.class) && fields.size() > 0) {
       List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(fields.size());
       for (String nvPairKey : fields.keySet()) {
         nameValuePairs.add(new BasicNameValuePair(nvPairKey, fields.get(nvPairKey)));
@@ -270,6 +274,12 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     try {
 
       HttpClient client = (HttpClient) Runtime.start("client", "HttpClient");
+      Runtime.start("gui", "SwingGui");
+      boolean done = true;
+      
+      if (done){
+        return;
+      }
       // this is how a listener might subscribe
       // TODO - put dynamically subscribing into framework
       // with interface inspection ??

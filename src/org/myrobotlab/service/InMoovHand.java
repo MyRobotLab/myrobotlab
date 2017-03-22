@@ -50,7 +50,7 @@ public class InMoovHand extends Service implements LeapDataListener {
       arduino.digitalWrite(13, 1);
 
       InMoovHand rightHand = new InMoovHand("r01");
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
       rightHand.connect("COM15");
       rightHand.startService();
       Runtime.createAndStart("webgui", "WebGui");
@@ -61,7 +61,7 @@ public class InMoovHand extends Service implements LeapDataListener {
       rightHand.closePinch();
       rightHand.rest();
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
 
     } catch (Exception e) {
@@ -89,7 +89,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     pinky.setRest(2);
     wrist.setRest(90);
     
-    setVelocity(45, 45, 45, 45, 45, 45);
+    setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
 
   }
 
@@ -423,12 +423,12 @@ public class InMoovHand extends Service implements LeapDataListener {
     */
     
     // NEW WAY
-    arduino.servoAttach(thumb, thumbPin);
-    arduino.servoAttach(index, indexPin);
-    arduino.servoAttach(majeure, majeurePin);
-    arduino.servoAttach(ringFinger, ringFingerPin);
-    arduino.servoAttach(pinky, pinkyPin);
-    arduino.servoAttach(wrist, wristPin);
+    arduino.servoAttachPin(thumb, thumbPin);
+    arduino.servoAttachPin(index, indexPin);
+    arduino.servoAttachPin(majeure, majeurePin);
+    arduino.servoAttachPin(ringFinger, ringFingerPin);
+    arduino.servoAttachPin(pinky, pinkyPin);
+    arduino.servoAttachPin(wrist, wristPin);
   }
 
   public void setRest(int thumb, int index, int majeure, int ringFinger, int pinky) {
@@ -559,7 +559,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     return meta;
   }
 
-  public void setVelocity(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+  public void setVelocity(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     this.thumb.setVelocity(thumb);
     this.index.setVelocity(index);
     this.majeure.setVelocity(majeure);

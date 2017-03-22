@@ -159,6 +159,7 @@ public abstract class Port implements Runnable, SerialControl {
       while (listening && ((newByte = read()) > -1)) { // "real" java byte
         // 255 / -1 will
         // kill this
+    	// log.info(String.format("%d",newByte));
         for (String key : listeners.keySet()) {
           listeners.get(key).onByte(newByte);
           // log.info(String.format("%d",newByte));
@@ -214,6 +215,7 @@ public abstract class Port implements Runnable, SerialControl {
    * non-active thread class.
    * 
    * needs to be buried in rxtxlib implementation
+ * @throws IOException TODO
    * 
    */
 

@@ -10,7 +10,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 /**
@@ -27,7 +26,7 @@ public class Sweety extends Service {
   transient public Arduino arduino;
   transient public WebkitSpeechRecognition ear;
   transient public WebGui webGui;
-  transient public SpeechSynthesis mouth;
+  transient public MarySpeech mouth;
   transient public Tracking leftTracker;
   transient public Tracking rightTracker;
   transient public ProgramAB chatBot;
@@ -140,7 +139,13 @@ public class Sweety extends Service {
   }
 
   public Sweety(String n) {
-    super(n);
+    super(n);    
+    arduino = (Arduino) createPeer("arduino");
+    chatBot = (ProgramAB) createPeer("chatBot");
+    htmlFilter = (HtmlFilter) createPeer("htmlFilter");
+    mouth = (MarySpeech) createPeer("mouth");
+    ear = (WebkitSpeechRecognition) createPeer("ear");
+    webGui = (WebGui) createPeer("webGui");
   }
 
   /**
@@ -199,7 +204,7 @@ public class Sweety extends Service {
    * Move the head . Use : head(neckTiltAngle, neckPanAngle -1 mean
    * "no change"
    */
-  public void setHeadPosition(Integer neckTiltAngle, Integer neckPanAngle) {
+  public void setHeadPosition(double neckTiltAngle, double neckPanAngle) {
 
     if (neckTiltAngle == -1) {
       neckTiltAngle = neckTilt.getPos();
@@ -216,7 +221,7 @@ public class Sweety extends Service {
    * Move the right arm . Use : leftArm(shoulder angle, arm angle, forearm
    * angle, wrist angle, hand angle) -1 mean "no change"
    */
-  public void setRightArmPosition(Integer shoulderAngle, Integer armAngle, Integer forearmAngle, Integer wristAngle, Integer handAngle) {
+  public void setRightArmPosition(double shoulderAngle, double armAngle, double forearmAngle, double wristAngle, double handAngle) {
 
     // TODO protect against self collision
     if (shoulderAngle == -1) {
@@ -246,7 +251,7 @@ public class Sweety extends Service {
    * Move the left arm . Use : leftArm(shoulder angle, arm angle, forearm angle,
    * wrist angle, hand angle) -1 mean "no change"
    */
-  public void setLeftArmPosition(Integer shoulderAngle, Integer armAngle, Integer forearmAngle, Integer wristAngle, Integer handAngle) {
+  public void setLeftArmPosition(double shoulderAngle, double armAngle, double forearmAngle, double wristAngle, double handAngle) {
     // TODO protect against self collision with -> servoName.getPos()
     if (shoulderAngle == -1) {
       shoulderAngle = leftShoulder.getPos();
@@ -450,19 +455,19 @@ public class Sweety extends Service {
   @Override
   public Sweety publishState() {
     super.publishState();
-    arduino.publishState();
-    leftForearm.publishState();
-    rightForearm.publishState();
-    rightShoulder.publishState();
-    leftShoulder.publishState();
-    rightArm.publishState();
-    neckTilt.publishState();
-    neckPan.publishState();
-    leftArm.publishState();
-    rightHand.publishState();
-    rightWrist.publishState();
-    leftHand.publishState();
-    leftWrist.publishState();
+    if (arduino != null)arduino.publishState();    
+    if (leftForearm != null)leftForearm.publishState();
+    if (rightForearm != null) rightForearm.publishState();
+    if (rightShoulder != null)rightShoulder.publishState();
+    if (leftShoulder != null)leftShoulder.publishState();
+    if (rightArm != null)rightArm.publishState();
+    if (neckTilt != null)neckTilt.publishState();
+    if (neckPan != null)neckPan.publishState();
+    if (leftArm != null)leftArm.publishState();
+    if (rightHand != null)rightHand.publishState();
+    if (rightWrist != null)rightWrist.publishState();
+    if (leftHand != null)leftHand.publishState();
+    if (leftWrist != null)leftWrist.publishState();
     return this;
   }
 
@@ -520,6 +525,13 @@ public class Sweety extends Service {
     delaytimestop = d2;
     delaytimeletter = d3;
   }
+  
+  public void setLanguage(String lang){
+	  mouth.setLanguage(lang);
+  }
+  public void setVoice(String voice){
+	  mouth.setVoice(voice);
+  }
 
   @Override
   public void startService() {
@@ -528,9 +540,7 @@ public class Sweety extends Service {
     arduino = (Arduino) startPeer("arduino");
     chatBot = (ProgramAB) startPeer("chatBot");
     htmlFilter = (HtmlFilter) startPeer("htmlFilter");
-    mouth = (SpeechSynthesis) startPeer("mouth");
-    mouth.setLanguage("FR");
-    mouth.setVoice("Antoine");
+    mouth = (MarySpeech) startPeer("mouth");
     ear = (WebkitSpeechRecognition) startPeer("ear");
     webGui = (WebGui) startPeer("webGui");
     subscribe(mouth.getName(), "publishStartSpeaking");
@@ -628,8 +638,8 @@ public class Sweety extends Service {
     rightTracker.opencv.stopCapture();
     leftTracker.releaseService();
     rightTracker.releaseService();
-    arduino.servoAttach(neckTilt, 39);
-    arduino.servoAttach(neckPan, 40);
+    arduino.servoAttachPin(neckTilt, 39);
+    arduino.servoAttachPin(neckPan, 40);
 
     saying("the tracking if stopped.");
   }
@@ -752,7 +762,7 @@ public class Sweety extends Service {
 
     // put peer definitions in
     meta.addPeer("arduino", "Arduino", "arduino");
-    meta.addPeer("mouth", "AcapelaSpeech", "sweetys mouth");
+    meta.addPeer("mouth", "MarySpeech", "sweetys mouth");
     meta.addPeer("ear", "WebkitSpeechRecognition", "ear");
     meta.addPeer("chatBot", "ProgramAB", "chatBot");
     meta.addPeer("leftTracker", "Tracking", "leftTracker");

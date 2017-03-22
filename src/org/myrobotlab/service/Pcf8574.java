@@ -64,7 +64,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 					log.info("Shutting down Publisher");
 				} else {
 					isPublishing = false;
-					logException(e);
+					log.error("publisher threw", e);
 				}
 			}
 		}
@@ -76,7 +76,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 			for (int i = 0; i < pinArray.length; ++i) {
 				PinData pinData = new PinData(i, read(i));
 				pinArray[i] = pinData;
-				int address = pinData.getAddress();
+				int address = pinData.address;
 
 				// handle individual pins
 				if (pinListeners.containsKey(address)) {
@@ -113,7 +113,8 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	 * two IC circuits is the address range
 	 */
 	public List<String>												deviceAddressList	= Arrays.asList("0x20", "0x21", "0x22", "0x23", "0x24", "0x25", "0x26", "0x27", "0x38", "0x39", "0x3A", "0x3B",
-																																	"0x3C", "0x3D", "0x3E", "0x3F");
+																																	"0x3C", "0x3D", "0x3E", "0x3F",
+																																	"0x49","0x4A","0x4B"); // Max9744 Addresses
 
 	public String															deviceAddress			= "0x38";
 
@@ -186,7 +187,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 
 		try {
 			Pcf8574 pcf8574t = (Pcf8574) Runtime.start("Pcf8574t", "Pcf8574t");
-			Runtime.start("gui", "GUIService");
+			Runtime.start("gui", "SwingGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -228,11 +229,6 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		return setController(controller, this.deviceBus, this.deviceAddress);
 	}
 
-	@Override
-	public void setController(DeviceController controller) {
-		setController(controller);
-	}
-
 	/**
 	 * This methods sets the i2c Controller that will be used to communicate with
 	 * the i2c device
@@ -270,7 +266,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	 */
 	boolean createDevice() {
 		if (controller != null) {
-			controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+			controller.i2cAttach(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 		}
 
 		log.info(String.format("Creating device on bus: %s address %s", deviceBus, deviceAddress));
@@ -306,7 +302,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		if (controller != null) {
 			if (deviceAddress != DeviceAddress) {
 				controller.releaseI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
-				controller.createI2cDevice(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
+				controller.i2cAttach(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress));
 			}
 		}
 
@@ -314,7 +310,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		this.deviceAddress = DeviceAddress;
 	}
 
-	void writeRegister(int data) {
+	public void writeRegister(int data) {
 		byte[] writebuffer = { (byte) data };
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
 	}
@@ -325,9 +321,8 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		return ((int) readbuffer[0]) & 0xff;
 	}
 
-	@Override
 	public boolean isAttached() {
-		return isAttached;
+		return controller != null;
 	}
 
 	@Override
@@ -398,7 +393,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	@Override
 	public PinData publishPin(PinData pinData) {
 		// caching last value
-		pinIndex.get(pinData.getAddress()).setValue(pinData.getValue());
+		pinIndex.get(pinData.address).setValue(pinData.value);
 		return pinData;
 	}
 
@@ -410,7 +405,6 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		return pinData;
 	}
 
-	@Override
 	public void attach(String listener, int pinAddress) {
 		attach((PinListener) Runtime.getService(listener), pinAddress);
 	}
@@ -563,5 +557,27 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	 // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
+
+  @Override
+  public boolean isAttached(String name) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

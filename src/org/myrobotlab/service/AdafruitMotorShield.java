@@ -10,8 +10,8 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Set;
 
-import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -45,7 +45,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   /*
    * TODO - make step calls NON BLOCKING 1. make step calls non-blocking - they
    * don't block MRL - but they block the processing of the Arduino which is not
-   * needed (or desired) 2. nice GUIService for steppers 3. release
+   * needed (or desired) 2. nice SwingGui for steppers 3. release
    * functionality 4. style set <-- easy
    */
 
@@ -134,7 +134,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
       // FIXME !!! - don't use Adafruit's library - do your own stepper control
       // through "pure" MRLComm.ino
       AdafruitMotorShield fruity = (AdafruitMotorShield) Runtime.createAndStart("fruity", "AdafruitMotorShield");
-      Runtime.createAndStart("gui01", "GUIService");
+      Runtime.createAndStart("gui01", "SwingGui");
 
       fruity.connect("COM3");
 
@@ -247,7 +247,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     m.startService();
     motors.put(motorName, m);
     m.broadcastState();
-    m.setController(this);
+    m.attach(this);
     return m;
   }
 
@@ -282,7 +282,8 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   // StepperController begin ----
 
   public void setSpeed(Integer motorPortNumber, Integer speed) {
-    arduino.sendMsg(AF_DCMOTOR_SET_SPEED, motorPortNumber - 1, speed);
+	// TODO - fix 
+    // arduino.sendMsg(new MrlMsg(AF_DCMOTOR_SET_SPEED).append(motorPortNumber - 1).append(speed));
   }
 
   // VENDOR SPECIFIC LIBRARY METHODS BEGIN /////
@@ -342,25 +343,26 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 
     ServiceType meta = new ServiceType(AdafruitMotorShield.class.getCanonicalName());
     meta.addDescription("Adafruit Motor Shield Service");
-    meta.addCategory("shield");
-    meta.addCategory("motor");
+    meta.addCategory("shield","motor");
     meta.addPeer("arduino", "Arduino", "our Arduino");
     return meta;
   }
 
-
 @Override
-public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
+public void detach(DeviceControl device) {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public void deviceDetach(DeviceControl device) {
-	// TODO Auto-generated method stub
-	
+public int getDeviceCount() {
+	return motors.size();
 }
 
+@Override
+public Set<String> getDeviceNames() {
+	return motors.keySet();
+}
 
 
 }
