@@ -1045,7 +1045,7 @@ public class InMoov extends Service {
       startHead(port);
     }
     headTracking = (Tracking) startPeer("headTracking");
-    headTracking.connect(port, neckPin, rotheadPin);
+    headTracking.connect(port, rotheadPin, neckPin);
     arduinos.put(port, (Arduino)headTracking.controller);
     return headTracking;
   }
