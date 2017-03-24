@@ -137,7 +137,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		if (o == createVirtualPort) {
 			String portName = portGui.getSelected();
 			if (portName == null || portName.length() == 0){
-				info("port name must be specified");
+				log.info("port name must be specified");
 				return;
 			}
 			send("connectVirtualUart", portName);
@@ -173,7 +173,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		if (o == send) {
 			String data = toSend.getText();
 			send("write", data.getBytes());
-			info("sent [%s]", data);
+			log.info("sent [%s]", data);
 		}
 	}
 
@@ -184,8 +184,8 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 	@Override
 	public void subscribeGui() {
-		subscribe("publishRX");
-		subscribe("publishTX");
+		//subscribe("publishRX");
+		//subscribe("publishTX");
 		subscribe("publishState");
 		// forces scan of ports
 	}
