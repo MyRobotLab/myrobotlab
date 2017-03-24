@@ -959,7 +959,7 @@ public class InMoov extends Service {
     startLeftArm(leftPort);
     startRightArm(rightPort);
 
-    startHeadTracking(leftPort);
+    startHeadTracking(leftPort, 12, 13);
     startEyesTracking(leftPort, 22, 24);
 
     speakBlocking("startup sequence completed");
@@ -1038,17 +1038,18 @@ public class InMoov extends Service {
 
   // NOTE - BEST Services are one which are reflective on startService
   // like xmpp which exposes a the reflective REST API are startService
-  public Tracking startHeadTracking(String port) throws Exception {
+  public Tracking startHeadTracking(String port, int neckPin, int rotheadPin) throws Exception {
     speakBlocking("starting head tracking");
 
     if (head == null) {
       startHead(port);
     }
     headTracking = (Tracking) startPeer("headTracking");
-    headTracking.connect(port, 5, 6);
+    headTracking.connect(port, neckPin, rotheadPin);
     arduinos.put(port, (Arduino)headTracking.controller);
     return headTracking;
   }
+  
 
   public InMoovArm startLeftArm(String port) throws Exception {
     return startLeftArm(port, null);
