@@ -34,7 +34,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
@@ -93,8 +92,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
 	SliderListener sliderListener = new SliderListener();
 
-	public ServoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public ServoGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 		// myServo = (Servo) Runtime.getService(boundServiceName);
 
 		for (int i = 0; i < 54; i++) {

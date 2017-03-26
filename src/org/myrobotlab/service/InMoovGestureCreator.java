@@ -19,7 +19,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Python.Script;
 import org.slf4j.Logger;
 
 /**
@@ -701,9 +700,9 @@ public class InMoovGestureCreator extends Service {
 
   public void control_loadscri(JList control_list) {
     // Load the Python-Script (out Python-Service) (button bottom-left)
-    Python python = (Python) Runtime.getService("python");
-    Script script = python.getScript();
-    pythonscript = script.getCode();
+   // Python python = (Python) Runtime.getService("python");
+   //  Script script = python.getScript();
+    pythonscript = "not supported";//script.getCode();
 
     parsescript(control_list);
   }

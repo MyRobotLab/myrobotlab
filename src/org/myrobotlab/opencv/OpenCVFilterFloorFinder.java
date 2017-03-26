@@ -28,7 +28,6 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.javacpp.helper.opencv_core.CV_RGB;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_core.cvScalar;
-import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFloodFill;
 
 import org.bytedeco.javacpp.opencv_core.CvPoint;

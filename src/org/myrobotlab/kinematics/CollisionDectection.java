@@ -4,7 +4,6 @@
 package org.myrobotlab.kinematics;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

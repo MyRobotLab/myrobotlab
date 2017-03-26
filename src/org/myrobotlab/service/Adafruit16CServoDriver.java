@@ -23,18 +23,18 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.motor.MotorConfigDualPwm;
-import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.motor.MotorConfigPulse;
+import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
+import org.myrobotlab.service.interfaces.MotorControl;
+import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.MotorControl;
-import org.myrobotlab.service.interfaces.MotorController;
 import org.slf4j.Logger;
 
 /**

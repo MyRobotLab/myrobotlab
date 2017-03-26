@@ -1879,6 +1879,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
+	 * this is what Arduino firmware 'should' have done
+	 * - a simplified write(address, value) which follows the convention
+	 * of 'all' device operations at the lowest level
+	 * http://codewiki.wikidot.com/c:system-calls:write
 	 * PinArrayControl method
 	 */
 	@Override

@@ -28,7 +28,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -47,8 +46,8 @@ public class GpsGui extends ServiceGui implements ActionListener {
   private JLabel speedTextField = new JLabel();
   private JLabel headingTextField = new JLabel();
 
-  public GpsGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public GpsGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     setTitle("gps");
     add("gps string type:", stringTypeTextField);
     add("latitude:", latitudeTextField);

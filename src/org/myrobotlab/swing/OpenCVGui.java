@@ -58,7 +58,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -79,12 +78,13 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.opencv.VideoSources;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.myrobotlab.swing.opencv.ComboBoxModel;
 import org.myrobotlab.swing.opencv.OpenCVFilterGui;
+import org.myrobotlab.swing.widget.OpenCVListAdapter;
 import org.slf4j.Logger;
 
 public class OpenCVGui extends ServiceGui implements ListSelectionListener, VideoGUISource, ActionListener {
@@ -344,12 +344,12 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
    */
   final static String prefix = "OpenCVFilter";
 
-  public OpenCVGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public OpenCVGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     self = this;
 
 
-    video0 = new VideoWidget(boundServiceName, myService, tabs, false);
+    video0 = new VideoWidget(boundServiceName, myService, false);
     video0.init(null);
 
     undock.addActionListener(this);

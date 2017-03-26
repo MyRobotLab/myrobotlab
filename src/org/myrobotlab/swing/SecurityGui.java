@@ -27,9 +27,7 @@ package org.myrobotlab.swing;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.security.Security;
 
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -41,8 +39,8 @@ public class SecurityGui extends ServiceGui implements ActionListener {
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(SecurityGui.class);
 
-  public SecurityGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public SecurityGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
   }
 
   @Override

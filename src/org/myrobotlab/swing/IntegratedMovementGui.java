@@ -31,6 +31,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
@@ -38,17 +39,17 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.IMEngine;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.kinematics.PositionData;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.IntegratedMovement;
 import org.myrobotlab.service.IntegratedMovement.ObjectPointLocation;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public class IntegratedMovementGui extends ServiceGui implements ActionListener {
@@ -73,8 +74,8 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
   private HashMap<String, Component> components = new HashMap<String, Component>();
   private ConcurrentHashMap<String, CollisionItem> objects;
   
-  public IntegratedMovementGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public IntegratedMovementGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     boundService = (IntegratedMovement) Runtime.getService(boundServiceName);
     addTop(buildControl());
     addTopLine(armsCoordPane);

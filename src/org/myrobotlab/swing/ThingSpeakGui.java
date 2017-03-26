@@ -34,7 +34,6 @@ import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
@@ -53,8 +52,8 @@ public class ThingSpeakGui extends ServiceGui implements ActionListener {
   JLabel lastUpdate = new JLabel("");
   JButton save = new JButton("save");
 
-  public ThingSpeakGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public ThingSpeakGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
     JPanel input = new JPanel(new GridLayout(0, 2));
     input.add(new JLabel("write key"));

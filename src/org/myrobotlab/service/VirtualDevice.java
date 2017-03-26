@@ -81,7 +81,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
     String newCode = FileIO.resourceToString("VirtualDevice/Arduino.py");
     log.info(newCode);
     logic.openScript("Arduino.py", newCode);
-    logic.execAndWait();
+    logic.exec(newCode);
   }
 
   /**

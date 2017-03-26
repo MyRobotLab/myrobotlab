@@ -54,7 +54,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.codec.CodecUtils;
@@ -72,10 +71,11 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.swing.ServiceGui;
 import org.myrobotlab.swing.SwingGuiGui;
-import org.myrobotlab.swing.TabControl2;
 import org.myrobotlab.swing.Welcome;
 import org.myrobotlab.swing.widget.AboutDialog;
 import org.myrobotlab.swing.widget.Console;
+import org.myrobotlab.swing.widget.DockableTab;
+import org.myrobotlab.swing.widget.DockableTabPane;
 import org.slf4j.Logger;
 
 import com.mxgraph.model.mxCell;
@@ -111,12 +111,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 	transient public final static Logger log = LoggerFactory.getLogger(SwingGui.class);
 
 	String graphXML = "";
-	String lastTabVisited;
+
 	// TODO - make MTOD !! from internet
 	// TODO - spawn thread callback / subscribe / promise - for new version
 
 	transient JFrame frame;
-	transient JTabbedPane tabs;
+	DockableTabPane tabs;// is loaded = new DockableTabPane(this);
 	transient SwingGuiGui guiServiceGui;
 	/**
 	 * the all important 2nd stage routing map after the message gets back to
@@ -143,6 +143,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 	transient JButton statusClear = new JButton("clear");
 
 	boolean active = false;
+	
+	/**
+	 * used for "this" reference in anonymous swing utilities
+	 * calls
+	 */
+	transient SwingGui self;
 
 	static public void attachJavaConsole() {
 		JFrame j = new JFrame("Java Console");
@@ -193,6 +199,18 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
 	public SwingGui(String n) {
 		super(n);
+		this.self = this;
+		if (tabs == null){ 
+			tabs = new DockableTabPane(this);
+		} else {
+			tabs.setStateSaver(this);
+		}
+		log.info("tabs size {}", tabs.size());
+		
+		for (String title: tabs.keySet()){
+			DockableTab tab = tabs.get(title);
+			log.info("{} ({},{}) w={} h={}", title, tab.getX(), tab.getY(), tab.getWidth(), tab.getHeight());
+		}
 		// subscribe to services being added and removed
 		// we want to know about new services registered or released
 		// we create explicit mappings vs just [
@@ -231,6 +249,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 			Logging logging = LoggingFactory.getInstance();
 			logging.addAppender(Appender.NONE);
 		} else if ("explode".equals(cmd)) {
+			explode();
+		} else if ("collapse".equals(cmd)) {
+			collapse();
 		} else if ("about".equals(cmd)) {
 			new AboutDialog(this);
 			// display();
@@ -256,33 +277,43 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 				String name = sw.getName();
 				String guiClass = String.format("org.myrobotlab.swing.%sGui", sw.getClass().getSimpleName());
 
-				ServiceGui newGui = createTab(name, guiClass);
+				log.info("createTab {} {}", name, guiClass);
+				ServiceGui newGui = null;
 
-				if (getName().equals(name)) {
-					guiServiceGui = (SwingGuiGui) newGui;
+				newGui = (ServiceGui) Instantiator.getNewInstance(guiClass, name, self);
+
+				if (newGui == null) {
+					log.info(String.format("could not construct a %s object - creating generic template", guiClass));
+					newGui = (ServiceGui) Instantiator.getNewInstance("org.myrobotlab.swing.NoGui", name, this);
 				}
 
-				if (guiServiceGui != null) {
+				// serviceGuiMap.put(name, newGui);
+				// subscribeToServiceMethod(name, newGui); - not needed as the key
+				// is "more" unique and called each time a subscribe
+				// is used by a ServiceGui
+				newGui.subscribeGui();
+
+				// state and status are both subscribed for the service here
+				// these are messages going to the services of interest
+				subscribe(name, "publishStatus");
+				subscribe(name, "publishState");
+
+				// this is preparing our routing map for callback
+				// so when we receive our callback message we know where to route it
+				subscribeToServiceMethod(String.format("%s.%s", name, CodecUtils.getCallBackName("publishStatus")), newGui);
+				subscribeToServiceMethod(String.format("%s.%s", name, CodecUtils.getCallBackName("publishState")), newGui);
+
+				// send a publishState to the service
+				// to initialize the ServiceGui - good for remote stuffs
+				send(name, "publishState");			
+				
+
+				if (getName().equals(name) && guiServiceGui != null) {
+					guiServiceGui = (SwingGuiGui) newGui;
 					guiServiceGui.rebuildGraph();
 				}
 
-				// woot - got index !
-				int index = tabs.indexOfTab(name) - 1;
-				
-				Component c = tabs.getTabComponentAt(index);
-				if (c instanceof TabControl2) {
-					// TabControl2 tc = (TabControl2) c;
-					if (!sw.isLocal()) {
-						Color hsv = SwingGui.getColorFromURI(sw.getInstanceId());
-						tabs.setBackgroundAt(index + 1, hsv);
-					}
-				}
-
-				if (newGui != null) {
-					return;
-				} else {
-					++index;
-				}
+				tabs.addTab(name, newGui.getDisplay());
 
 				frame.pack();
 				frame.repaint();
@@ -338,74 +369,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 		}
 	}
 
-	// return tabs;
-	// }
-
-	/**
-	 * attempts to create a new ServiceGui and add it to the map
-	 * 
-	 * @param serviceName
-	 * @param guiClass
-	 * @param sw
-	 * @return
-	 */
-
-	public ServiceGui createTab(String serviceName, String guiClass) {
-		ServiceGui gui = null;
-
-		gui = (ServiceGui) Instantiator.getNewInstance(guiClass, serviceName, this, tabs);
-
-		if (gui == null) {
-			log.info(String.format("could not construct a %s object - creating generic template", guiClass));
-			gui = (ServiceGui) Instantiator.getNewInstance("org.myrobotlab.swing.NoGui", serviceName, this, tabs);
-		}
-
-		// serviceGuiMap.put(serviceName, gui);
-		// subscribeToServiceMethod(serviceName, gui); - not needed as the key
-		// is "more" unique and called each time a subscribe
-		// is used by a ServiceGui
-		gui.subscribeGui();
-
-		// state and status are both subscribed for the service here
-		// these are messages going to the services of interest
-		subscribe(serviceName, "publishStatus");
-		subscribe(serviceName, "publishState");
-
-		// this is preparing our routing map for callback
-		// so when we receive our callback message we know where to route it
-		subscribeToServiceMethod(String.format("%s.%s", serviceName, CodecUtils.getCallBackName("publishStatus")), gui);
-		subscribeToServiceMethod(String.format("%s.%s", serviceName, CodecUtils.getCallBackName("publishState")), gui);
-
-		// send a publishState to the service
-		// to initialize the ServiceGui - good for remote stuffs
-		send(serviceName, "publishState");
-
-		// processing of all 'helper' component/layout parts
-		// gui.display();
-		return gui;
-	}
 
 	/**
 	 * closes window and puts the panel back into the tabbed pane
 	 */
-	public void dockPanel(final String label) {
-		// there is a bug here - there can be multiple ServiceGui's per
-		// 'boundServiceName' (widgets) some may be dockable - some not
-		// should probably fix with unique component names ...
-
-		if (nameMethodCallbackMap.containsKey(label)) {
-			List<ServiceGui> sgs = nameMethodCallbackMap.get(label);
-			for (int i = 0; i < sgs.size(); ++i) {
-				ServiceGui sg = sgs.get(i);
-				sg.dockPanel();
-			}
-		}
-
-		/*
-		 * if (serviceGuiMap.containsKey(label)) { ServiceGui sg =
-		 * serviceGuiMap.get(label); sg.dockPanel(); } else { log.error(
-		 * "dockPanel - {} not in serviceGuiMap", label); }
-		 */
+	public void dockTab(final String title) {
+		tabs.dockTab(title);
 	}
 
 	public HashMap<String, mxCell> getCells() {
@@ -460,22 +429,13 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
 	public void hideAll() {
 		log.info("hideAll");
-		for (String key : nameMethodCallbackMap.keySet()) {
-			hidePanel(key);
+		for (String key : tabs.keySet()) {
+			hideTab(key);
 		}
 	}
 
-	public void hidePanel(final String label) {
-		// potential bug - all ui components arent 'tabs' - but hide might be ok
-		// :)
-		if (nameMethodCallbackMap.containsKey(label)) {
-			List<ServiceGui> sgs = nameMethodCallbackMap.get(label);
-			for (int i = 0; i < sgs.size(); ++i) {
-				sgs.get(i).hidePanel();
-			}
-		} else {
-			log.error("hidePanel - {} not in serviceGuiMap", label);
-		}
+	public void hideTab(final String title) {
+		tabs.hideTab(title);
 	}
 
 	public void noWorky() {
@@ -550,9 +510,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				String name = si.getName();
-				log.info("removeTab");
-				tabs.remove(tabs.indexOfTab(name));
+				String name = si.getName();				
+				tabs.removeTab(name);
 				guiServiceGui.rebuildGraph();
 				frame.pack();
 				frame.repaint();
@@ -595,12 +554,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 	@Override
 	synchronized public void startService() {
 		super.startService();
-
+		// FIXME - silly - some of these should be initialized in the constructor or before !!
 		if (!active) {
 			active = true;
 			// create gui parts
 			frame = new JFrame();
-			tabs = new JTabbedPane();
 			nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
 
 			frame.addWindowListener(this);
@@ -612,7 +570,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 			// starts
 
 			// add welcome table - weird - this needs to be involved in display
-			subscribeToServiceMethod("Welcome", new Welcome("welcome", this, tabs));
+			tabs.addTab("Welcome", new Welcome("welcome", this).getDisplay());
+			// subscribeToServiceMethod("Welcome", new Welcome("welcome", this, tabs));
 			/**
 			 * pack() repaint() works on current selected (non-hidden) tab
 			 * welcome is the first panel when the UI starts - therefore this
@@ -628,7 +587,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 			Iterator<String> it = sortedMap.keySet().iterator();
 
 			JPanel tabPanel = new JPanel(new BorderLayout());
-			tabPanel.add(tabs, BorderLayout.CENTER);
+			tabPanel.add(tabs.getTabs(), BorderLayout.CENTER);
 			JPanel statusPanel = new JPanel(new BorderLayout());
 			statusPanel.add(status, BorderLayout.CENTER);
 			statusPanel.add(statusClear, BorderLayout.EAST);
@@ -674,31 +633,33 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 		active = false;
 		super.stopService();
 	}
-
-	public void undockPanel(final String label) {
-		if (nameMethodCallbackMap.containsKey(label)) {
-			List<ServiceGui> sgs = nameMethodCallbackMap.get(label);
-			for (int i = 0; i < sgs.size(); ++i) {
-				sgs.get(i).undockPanel();
-			}
+	
+	public void explode(){
+		for (String key : tabs.keySet()) {
+			undockTab(key);
 		}
+	}
+	
+	public void collapse(){
+		for (String key : tabs.keySet()) {
+			dockTab(key);
+		}
+	}
+
+	public void undockTab(final String title) {
+		tabs.undockTab(title);
 	}
 
 	public void unhideAll() {
 		log.info("unhideAll");
-		for (String key : nameMethodCallbackMap.keySet()) {
-			unhidePanel(key);
+		for (String key : tabs.keySet()) {
+			unhideTab(key);
 		}
 	}
 
 	// must handle docked or undocked & re-entrant for unhidden
-	public void unhidePanel(final String label) {
-		if (nameMethodCallbackMap.containsKey(label)) {
-			List<ServiceGui> sgs = nameMethodCallbackMap.get(label);
-			for (int i = 0; i < sgs.size(); ++i) {
-				sgs.get(i).unhidePanel();
-			}
-		}
+	public void unhideTab(final String title) {
+		tabs.unhideTab(title);
 	}
 
 	// @Override - only in Java 1.6
@@ -716,27 +677,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 	// @Override - only in Java 1.6
 	@Override
 	public void windowClosing(WindowEvent e) {
-		// check for all service guis and see if its
-		// ok to shutdown now
-
-		Iterator<Map.Entry<String, List<ServiceGui>>> it = nameMethodCallbackMap.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<String, List<ServiceGui>> pairs = it.next();
-			// String serviceName = pairs.getKey();
-			/*
-			 * if (undockedPanels.containsKey(serviceName)) { UndockedPanel up =
-			 * undockedPanels.get(serviceName); if (!up.isDocked()) {
-			 * up.savePosition(); } }
-			 */
-			List<ServiceGui> sgs = pairs.getValue();
-			for (int i = 0; i < sgs.size(); ++i) {
-				ServiceGui sg = sgs.get(i);
-				sg.savePosition();
-				sg.isReadyForRelease();
-				sg.makeReadyForRelease();
-			}
-		}
-
+		// save all necessary serializations
 		save();
 		Runtime.releaseAll();
 		System.exit(1); // the Big Hamm'r
@@ -805,13 +746,16 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 		return meta;
 	}
 
-	public JTabbedPane getTabs() {
-		return tabs;
+	public Component getDisplay() {
+		return (Component)tabs.getTabs();
 	}
-
-	public void setLastTabVisited(String tabName) {
-		lastTabVisited = tabName;
-
+	
+	public void setDesktop(String name){
+		tabs.setDesktop(name);
+	}
+	
+	public void resetDesktop(String name){
+		tabs.resetDesktop(name);
 	}
 
 }

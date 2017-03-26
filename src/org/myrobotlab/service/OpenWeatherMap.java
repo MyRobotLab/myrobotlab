@@ -6,7 +6,6 @@ import java.net.URLEncoder;
 import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;

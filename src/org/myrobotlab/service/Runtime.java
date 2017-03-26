@@ -59,6 +59,8 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
+import com.sun.management.OperatingSystemMXBean;
+
 /**
  * Runtime is responsible for the creation and removal of all Services and the
  * associated static registries It maintains state information regarding
@@ -1001,6 +1003,14 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       log.error("getTotalPhysicalMemory - threw");
     }
     return 0;
+  }
+  
+  
+  static public double getCpuLoad(){
+	  OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(
+              OperatingSystemMXBean.class);
+	  //What % CPU load this current JVM is taking, from 0.0-1.0
+	  return osBean.getProcessCpuLoad();
   }
 
   /**

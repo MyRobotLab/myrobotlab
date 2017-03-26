@@ -1,29 +1,34 @@
 package org.myrobotlab.boofcv;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
+
+import org.myrobotlab.service.BoofCv;
+import org.myrobotlab.service.data.Point2Df;
+
+import com.github.sarxos.webcam.Webcam;
+
 import boofcv.abst.tracker.TrackerObjectQuad;
 import boofcv.factory.tracker.FactoryTrackerObjectQuad;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.webcamcapture.UtilWebcamCapture;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.ImageBase;
-
-import com.github.sarxos.webcam.Webcam;
-
 import georegression.geometry.UtilPolygons2D_F64;
 import georegression.struct.point.Point2D_I32;
 import georegression.struct.shapes.Quadrilateral_F64;
 import georegression.struct.shapes.Rectangle2D_F64;
-
-import javax.swing.*;
-
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
-
-import org.myrobotlab.service.BoofCv;
-import org.myrobotlab.service.data.Point2Df;
 
 public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseListener, MouseMotionListener {
 

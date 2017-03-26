@@ -30,7 +30,6 @@ import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -48,10 +47,9 @@ import java.util.zip.ZipFile;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.maryspeech.util.MaryUtils;
 import org.myrobotlab.maryspeech.util.dom.DomUtils;
-
-import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

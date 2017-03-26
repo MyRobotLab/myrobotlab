@@ -29,7 +29,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -45,8 +44,8 @@ public class _TemplateServiceGui extends ServiceGui implements ActionListener {
   JLabel var1 = new JLabel("0.0");
   JLabel var2 = new JLabel("1.0");
 
-  public _TemplateServiceGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public _TemplateServiceGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     
     setTitle("status");
     addLine("name ", boundServiceName);

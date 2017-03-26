@@ -1,17 +1,10 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_face.createEigenFaceRecognizer;
-import static org.bytedeco.javacpp.opencv_face.createFisherFaceRecognizer;
-import static org.bytedeco.javacpp.opencv_face.createLBPHFaceRecognizer;
-import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
-import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
-import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
@@ -22,25 +15,18 @@ import static org.bytedeco.javacpp.opencv_imgproc.getAffineTransform;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_imgproc.warpAffine;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.UUID;
 
 import javax.swing.WindowConstants;
 
-import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_core.MatVector;
 import org.bytedeco.javacpp.opencv_core.Point2f;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import org.bytedeco.javacpp.opencv_core.RectVector;
 import org.bytedeco.javacpp.opencv_core.Size;
-import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 import org.bytedeco.javacv.CanvasFrame;

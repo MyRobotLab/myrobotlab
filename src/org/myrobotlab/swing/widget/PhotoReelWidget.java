@@ -30,12 +30,9 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
-import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.Util;
@@ -104,8 +101,8 @@ public class PhotoReelWidget extends ServiceGui {
 
   public int lastImageWidth = 0;
 
-  public PhotoReelWidget(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public PhotoReelWidget(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     
 
 

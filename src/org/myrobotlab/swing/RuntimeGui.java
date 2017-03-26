@@ -56,7 +56,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolTip;
@@ -67,6 +66,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
@@ -118,6 +118,10 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 	JMenuItem releaseMenuItem = null;
 	String possibleServiceFilter = null;
 	ProgressDialog progressDialog = null;
+	
+	JLabel freeMemory = new JLabel();
+	JLabel totalMemory = new JLabel();
+	JLabel totalPhysicalMemory = new JLabel();
 
 	JTextField search = new JTextField();
 	
@@ -173,8 +177,8 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 		}
 	};
 
-	public RuntimeGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public RuntimeGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 		// required - it "might" be a foreign Runtime...
 		myRuntime = (Runtime) Runtime.getService(boundServiceName);
 		myRepo = myRuntime.getRepo();
@@ -330,6 +334,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 		// add(categories, possible, runningServices);
 
 		addTopLine(createMenuBar());
+		addBottom("memory physical ", totalPhysicalMemory, " total ", totalMemory, " free ", freeMemory );
 		getPossibleServices();
 
 	}
@@ -640,6 +645,11 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				Platform platform = myRuntime.getPlatform();
+				totalMemory.setText(String.format("%d", platform.getTotalMemory()));
+				freeMemory.setText(String.format("%d", platform.getFreeMemory()));
+				totalPhysicalMemory.setText(String.format("%d", platform.getTotalPhysicalMemory()));
+				
 				// FIXME - change to "all" or "" - null is sloppy - system has
 				// to upcast
 				myService.pack();

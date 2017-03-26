@@ -28,13 +28,11 @@ package org.myrobotlab.swing;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.memory.Node;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.RasPi;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public class RasPiGui extends ServiceGui implements ActionListener {
@@ -42,8 +40,8 @@ public class RasPiGui extends ServiceGui implements ActionListener {
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(RasPiGui.class);
 
-  public RasPiGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public RasPiGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
   }
 
   @Override

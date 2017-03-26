@@ -215,33 +215,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 		return mrlComm;
 	}
 
-	public static void main(String[] args) {
-		try {
-
-			LoggingFactory.init("INFO");
-
-			// WOW GOOD TEST !!!
-			// Service.reserveRootAs("virtual.uart", "newName");
-			// Service.buildDna("Tracking");
-
-			// Runtime.start("webgui", "WebGui");
-
-			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-			Runtime.start("arduino", "Arduino");
-			
-			Runtime.start("gui", "SwingGui");
-			// String port = "COM5";
-			// connect the virtual uart
-			// varduino.setPortName(port);
-			// connect the arduino to the other end
-			// varduino.connect(port);
-			// arduino.enablePin(54);
-
-		} catch (Exception e) {
-			log.error("main threw", e);
-		}
-	}
 
 	@Override
 	public String publishConnect(String portName) {
@@ -279,5 +252,34 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 	public List<String> getPortNames() {
 		return uart.getPortNames();
 	}
+	
+	public static void main(String[] args) {
+		try {
+
+			LoggingFactory.init("INFO");
+
+			// WOW GOOD TEST !!!
+			// Service.reserveRootAs("virtual.uart", "newName");
+			// Service.buildDna("Tracking");
+
+			// Runtime.start("webgui", "WebGui");
+
+			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+			Runtime.start("arduino", "Arduino");
+			
+			Runtime.start("gui", "SwingGui");
+			// String port = "COM5";
+			// connect the virtual uart
+			// varduino.setPortName(port);
+			// connect the arduino to the other end
+			// varduino.connect(port);
+			// arduino.enablePin(54);
+
+		} catch (Exception e) {
+			log.error("main threw", e);
+		}
+	}
+
 
 }

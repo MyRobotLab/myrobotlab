@@ -31,14 +31,13 @@ import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Pid;
 import org.myrobotlab.service.Pid.PidData;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public class PidGui extends ServiceGui implements ActionListener {
@@ -58,8 +57,8 @@ public class PidGui extends ServiceGui implements ActionListener {
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(PidGui.class);
 
-	public PidGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public PidGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 
     direction.addActionListener(this);
     setPID.addActionListener(this);

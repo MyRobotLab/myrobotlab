@@ -35,13 +35,12 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.net.Connection;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.RemoteAdapter;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.ConnectionNodeList;
 
 public class RemoteAdapterGui extends ServiceGui implements ActionListener {
@@ -62,8 +61,8 @@ public class RemoteAdapterGui extends ServiceGui implements ActionListener {
 
   RemoteAdapter myRemote = null;
 
-  public RemoteAdapterGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public RemoteAdapterGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
     display.setLayout(new BorderLayout());
 

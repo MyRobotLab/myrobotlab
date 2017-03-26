@@ -19,7 +19,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.ServiceInterface;

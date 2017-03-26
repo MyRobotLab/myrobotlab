@@ -2,7 +2,6 @@ package org.myrobotlab.jme3.interfaces;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.renderer.Camera;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 
 public abstract class Jme3Object {

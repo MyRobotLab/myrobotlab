@@ -1,15 +1,15 @@
 package org.myrobotlab.document.transformer;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 import org.myrobotlab.document.Document;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 public class MathValues extends AbstractStage {
 

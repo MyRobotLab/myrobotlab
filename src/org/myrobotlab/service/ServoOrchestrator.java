@@ -24,7 +24,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.swing.ServoOrchestratorGUI_middlemiddle_panel;
+import org.myrobotlab.swing.widget.ServoOrchestratorGUI_middlemiddle_panel;
 import org.slf4j.Logger;
 
 /**

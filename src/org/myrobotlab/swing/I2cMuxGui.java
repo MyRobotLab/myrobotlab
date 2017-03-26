@@ -28,21 +28,18 @@ package org.myrobotlab.swing;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.AdafruitIna219;
 import org.myrobotlab.service.I2cMux;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public class I2cMuxGui extends ServiceGui implements ActionListener {
@@ -64,8 +61,8 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
 	
 	I2cMux boundService = null;
 
-	public I2cMuxGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public I2cMuxGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 		boundService = (I2cMux) Runtime.getService(boundServiceName);
 
 
