@@ -31,26 +31,26 @@ import java.util.Iterator;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JTabbedPane;
 import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.swing.widget.VideoDisplayPanel;
 
 public class VideoWidget extends ServiceGui {
 
   HashMap<String, VideoDisplayPanel> displays = new HashMap<String, VideoDisplayPanel>();
   boolean allowFork = false;
-  Dimension normalizedSize = null;
+  public Dimension normalizedSize = null;
   int videoDisplayXPos = 0;
   int videoDisplayYPos = 0;
 
-  public VideoWidget(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public VideoWidget(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
   }
 
-  public VideoWidget(final String boundFilterName, final SwingGui myService, final JTabbedPane tabs, boolean allowFork) {
-    this(boundFilterName, myService, tabs);
+  public VideoWidget(final String boundFilterName, final SwingGui myService, boolean allowFork) {
+    this(boundFilterName, myService);
     this.allowFork = allowFork;
   }
 

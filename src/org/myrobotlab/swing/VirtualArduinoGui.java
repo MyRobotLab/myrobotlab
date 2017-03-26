@@ -26,7 +26,6 @@
 package org.myrobotlab.swing;
 
 import javax.swing.JButton;
-import javax.swing.JTabbedPane;
 
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.VirtualArduino;
@@ -38,9 +37,9 @@ public class VirtualArduinoGui extends ServiceGui {
   PortGui portgui;
   JButton button = new JButton("button");
  
-  public VirtualArduinoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);  
-       portgui = new PortGui(boundServiceName, myService, tabs);
+  public VirtualArduinoGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);  
+       portgui = new PortGui(boundServiceName, myService);
        addTop(portgui.getDisplay());
   }
 

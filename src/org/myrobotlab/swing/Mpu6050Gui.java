@@ -25,23 +25,21 @@
 
 package org.myrobotlab.swing;
 
-import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Mpu6050;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public class Mpu6050Gui extends ServiceGui implements ActionListener {
@@ -73,8 +71,8 @@ public class Mpu6050Gui extends ServiceGui implements ActionListener {
 
   Mpu6050 boundService = null;
   
-  public Mpu6050Gui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public Mpu6050Gui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 		boundService = (Mpu6050) Runtime.getService(boundServiceName);
 
 

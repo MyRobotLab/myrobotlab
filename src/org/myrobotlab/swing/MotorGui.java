@@ -26,7 +26,6 @@
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -39,19 +38,19 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.reflection.Reflector;
-import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.swing.widget.ImageButton;
+import org.myrobotlab.swing.widget.MotorControllerPanel;
+import org.myrobotlab.swing.widget.Motor_UnknownGui;
 
 public class MotorGui extends ServiceGui implements ActionListener, ChangeListener {
 
@@ -112,8 +111,8 @@ public class MotorGui extends ServiceGui implements ActionListener, ChangeListen
   // FIXME put in sub gui
   ArrayList<Pin> pinList = null;
 
-  public MotorGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public MotorGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
     // controllerPanel begin ------------------
 

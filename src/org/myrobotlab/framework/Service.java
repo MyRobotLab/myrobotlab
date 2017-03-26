@@ -257,11 +257,12 @@ public abstract class Service extends MessageService
 	 * TreeSet<String> set = new TreeSet<String>(); return set; }
 	 */
 
-	public String getPeerName(String peerKey) {
+	public String getPeerName(String fullKey) {
+		// String fullKey = String.format("%s.%s", getName(), peerKey);
 		// below is correct - all 'reads' should be against the dnaPool (i think)
-		if (dnaPool.containsKey(peerKey)) {
+		if (dnaPool.containsKey(fullKey)) {
 			// easy case - info already exists ...
-			return dnaPool.get(peerKey).actualName;
+			return dnaPool.get(fullKey).actualName;
 		}
 		// --------- begin - is this necessary or correct ? -------------
 		// look at the build plan
@@ -271,7 +272,7 @@ public abstract class Service extends MessageService
 		}
 
 		if (srs != null) {
-			ServiceReservation sr = srs.get(peerKey);
+			ServiceReservation sr = srs.get(fullKey);
 			if (sr != null) {
 				return sr.actualName;
 			}
@@ -458,7 +459,7 @@ public abstract class Service extends MessageService
 				}
 				Type t = f.getType();
 
-				// log.debug(String.format("setting %s", f.getName()));
+				// log.info(String.format("setting %s", f.getName()));
 				/*
 				 * if (Modifier.isStatic(modifiers) ||
 				 * Modifier.isFinal(modifiers)) { continue; }
@@ -2102,6 +2103,10 @@ public abstract class Service extends MessageService
 		log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
 		MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
 		cm.send(createMessage(topicName, "addListener", listener));
+	}
+	
+	public void sendPeer(String peerKey, String method, Object... params){
+		cm.send(createMessage(getPeerName(peerKey), method, params));
 	}
 
 	public void unsubscribe(NameProvider topicName, String topicMethod) {

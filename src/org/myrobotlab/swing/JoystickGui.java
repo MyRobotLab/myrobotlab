@@ -41,7 +41,6 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.service.Joystick;
@@ -83,8 +82,8 @@ public class JoystickGui extends ServiceGui implements ActionListener {
 
 	JoystickCompassPanel lastJoystickCompassPanel = null;
 
-	public JoystickGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public JoystickGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 		self = this;
 		addTop(controllers, refresh);
 		add(buttonPanel);

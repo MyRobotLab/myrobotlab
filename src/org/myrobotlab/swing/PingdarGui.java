@@ -31,15 +31,14 @@ import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import javax.swing.JTabbedPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.SwingGui;
 //import org.myrobotlab.service.WiiDAR;
 import org.myrobotlab.service.Pingdar.Point;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.slf4j.Logger;
 
@@ -55,6 +54,8 @@ public class PingdarGui extends ServiceGui implements ListSelectionListener, Vid
   BufferedImage graphImage = null;
 
   int scale = 1;
+  int height = 600;
+  int width = 800;
   int vheight = height / scale;
   int vwidth = width / scale;
 
@@ -68,10 +69,10 @@ public class PingdarGui extends ServiceGui implements ListSelectionListener, Vid
 
   int cnt = 0;
 
-  public PingdarGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public PingdarGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
-    screen = new VideoWidget(boundServiceName, myService, tabs);
+    screen = new VideoWidget(boundServiceName, myService);
     screen.init(null);
 
     camImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_RGB);

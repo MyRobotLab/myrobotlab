@@ -26,12 +26,10 @@
 package org.myrobotlab.swing;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
@@ -50,8 +48,8 @@ public class CliGui extends ServiceGui implements KeyListener {
 	JScrollPane scrollPane = new JScrollPane(console);
 	StringBuilder input = new StringBuilder();
 
-	public CliGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public CliGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 
 		DefaultCaret caret = (DefaultCaret) console.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);

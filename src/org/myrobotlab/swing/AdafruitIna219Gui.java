@@ -34,7 +34,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -69,8 +68,8 @@ public class AdafruitIna219Gui extends ServiceGui implements ActionListener {
 
 	AdafruitIna219 boundService = null;
 
-	public AdafruitIna219Gui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public AdafruitIna219Gui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 		boundService = (AdafruitIna219) Runtime.getService(boundServiceName);
 
 

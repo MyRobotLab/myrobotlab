@@ -26,6 +26,7 @@
 package org.myrobotlab.mapper.sim;
 
 import java.util.ArrayList;
+
 import javax.media.j3d.BoundingSphere;
 
 /**

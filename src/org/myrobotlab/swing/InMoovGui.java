@@ -37,12 +37,11 @@ import javax.swing.JButton;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.InMoov;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public class InMoovGui extends ServiceGui implements ActionListener {
@@ -76,15 +75,15 @@ public class InMoovGui extends ServiceGui implements ActionListener {
 
   VideoWidget opencv;
 
-  public InMoovGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public InMoovGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     templates.put("hand", handTemplate);
     templates.put("arm", armTemplate);
     templates.put("head", headTemplate);
 
     display.setLayout(new BorderLayout());
 
-    opencv = new VideoWidget(String.format("%s.opencv", boundServiceName), myService, tabs);
+    opencv = new VideoWidget(String.format("%s.opencv", boundServiceName), myService);
     opencv.init(null);
     // opencv = new VideoWidget(boundServiceName, myService, tabs);
     // opencv.
@@ -196,14 +195,14 @@ public class InMoovGui extends ServiceGui implements ActionListener {
 
       HashSet<String> template = templates.get(part);
       for (String s : template) {
-        myService.hidePanel(String.format(s, boundServiceName, side));
+        myService.hideTab(String.format(s, boundServiceName, side));
       }
       button.setText(String.format("show %s %s", side, part));
 
     } else if (String.format("show %s %s", side, part).equals(button.getText())) {
       HashSet<String> template = templates.get(part);
       for (String s : template) {
-        myService.unhidePanel(String.format(s, boundServiceName, side));
+        myService.unhideTab(String.format(s, boundServiceName, side));
       }
       button.setText(String.format("hide %s %s", side, part));
     } else {
