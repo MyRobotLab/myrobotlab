@@ -7,7 +7,7 @@ import org.myrobotlab.service.InverseKinematics3D;
 import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
 
-public class DHRobotArm implements Cloneable{
+public class DHRobotArm{
 
   transient public final static Logger log = LoggerFactory.getLogger(DHRobotArm.class);
 
@@ -25,6 +25,14 @@ public class DHRobotArm implements Cloneable{
     links = new ArrayList<DHLink>();
   }
 
+  public DHRobotArm(DHRobotArm copy) {
+    super();
+    name = copy.name;
+    links = new ArrayList<DHLink>();
+    for (DHLink link:copy.links) {
+      links.add(new DHLink(link));
+    }
+  }
   public ArrayList<DHLink> addLink(DHLink link) {
     links.add(link);
     return links;
@@ -269,20 +277,6 @@ public class DHRobotArm implements Cloneable{
     ik3D = ik3d;
   }
 
-  public DHRobotArm clones() {
-			DHRobotArm retval = null;
-			try {
-				retval = (DHRobotArm) this.clone();
-				retval.links = new ArrayList<DHLink>();
-				for (DHLink link: links) {
-				  retval.links.add(new DHLink(link));
-				}
-			} catch (CloneNotSupportedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return retval;
-  }
   public boolean armMovementEnds() {
   	for (DHLink link: links) {
   		if (link.getState() != Servo.SERVO_EVENT_STOPPED) {

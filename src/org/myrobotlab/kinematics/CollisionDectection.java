@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Christian
  *
  */
-public class CollisionDectection implements Cloneable {
+public class CollisionDectection{
   transient ConcurrentHashMap<String, CollisionItem> items= new ConcurrentHashMap<String,CollisionItem>();
   private boolean collision;
   private Point[] collisionPoint = {new Point(0,0,0,0,0,0),new Point(0,0,0,0,0,0)};
@@ -28,6 +28,14 @@ public class CollisionDectection implements Cloneable {
   
   public CollisionDectection() {
     super();
+  }
+  
+  CollisionDectection(CollisionDectection copy) {
+    super();
+    for (CollisionItem ci:copy.items.values()){
+      items.put(ci.getName(), new CollisionItem(ci));
+    }
+    
   }
 
   public synchronized void addItem(CollisionItem item) {
@@ -258,20 +266,5 @@ public class CollisionDectection implements Cloneable {
 		return items;
 	}
 	
-	public CollisionDectection clones() {
-		CollisionDectection retval = null;
-		try {
-			retval = (CollisionDectection) this.clone();
-			//retval.items = (ConcurrentHashMap<String, CollisionItem>) items.clone();
-			//retval.items.clear();
-			for (CollisionItem ci:items.values()){
-				retval.items.put(ci.name, new CollisionItem(ci));
-			}
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return retval;
-	}
 }
 

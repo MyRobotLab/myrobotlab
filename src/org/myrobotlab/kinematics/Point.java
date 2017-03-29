@@ -47,6 +47,15 @@ public class Point {
     this.pitch = pitch;
     this.yaw = yaw;
   }
+  
+  public Point(Point copy) {
+    this.x = copy.x;
+    this.y = copy.y;
+    this.z = copy.z;
+    this.roll = copy.roll;
+    this.pitch = copy.pitch;
+    this.yaw = copy.yaw;
+  }
 
   @Override
   public boolean equals(Object obj) {

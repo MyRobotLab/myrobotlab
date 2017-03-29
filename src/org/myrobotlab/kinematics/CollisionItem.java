@@ -12,7 +12,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
-public class CollisionItem implements Cloneable{
+public class CollisionItem{
   Point origin = null;
   Point end = null;
   String name;
@@ -31,6 +31,7 @@ public class CollisionItem implements Cloneable{
    * @param radius
    */
   public CollisionItem(Point origin, Point end, String name, double radius, boolean render) {
+    super();
     this.origin = origin;
     this.end = end;
     if (name == null) {
@@ -42,12 +43,14 @@ public class CollisionItem implements Cloneable{
   }
   
   public CollisionItem(Point origin, Point end, String name) {
+    super();
     this.origin = origin;
     this.end = end;
     this.name = name;
   }
   
   public CollisionItem(HashMap<Integer[],Map3DPoint> cloudMap) {
+    super();
   	name = UUID.randomUUID().toString();
   	this.cloudMap = cloudMap;
   	setRender(true);
@@ -128,14 +131,12 @@ public class CollisionItem implements Cloneable{
   }
 
   public CollisionItem(CollisionItem ci) {
-  	this.origin = ci.origin;
-  	this.end = ci.end;
+    super();
+  	this.origin = new Point(ci.origin);
+  	this.end = new Point(ci.end);
   	this.name = ci.name;
   	this.radius = ci.radius;
-  	this.ignore = ci.ignore;
-  	this.done = ci.done;
   	this.fromKinect = ci.fromKinect;
-  	this.cloudMap = ci.cloudMap;
 		this.render = ci.render;
 	}
 

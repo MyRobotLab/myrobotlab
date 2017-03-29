@@ -14,6 +14,7 @@ import org.myrobotlab.kinematics.CollisionDectection;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
+import org.myrobotlab.kinematics.GravityCenter;
 import org.myrobotlab.kinematics.IMEngine;
 import org.myrobotlab.kinematics.Map3D;
 import org.myrobotlab.kinematics.Map3DPoint;
@@ -77,6 +78,18 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       this.location = location;
     }   
   }   
+  
+  public enum Ai {
+    HOLD_POSITION (0x01, "Hold Position"),
+    AVOID_COLLISION(0x02, "Avoid Collision"),
+    KEEP_BALANCE(0x04, "Keep Balance");
+    public int value;
+    public String text;
+    private Ai(int value, String text) {
+      this.value = value;
+      this.text = text;
+    }
+  }
       
       
   private transient OpenNi openni = null;
@@ -102,6 +115,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   private transient IntegratedMovementInterface jmeApp = null;
   
   private HashMap<String, Mapper> maps = new HashMap<String, Mapper>();
+  public transient GravityCenter cog = null;
   
   /**
    * @return the jmeApp
@@ -438,8 +452,26 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     wrist.moveTo(90);
     Rwrist.moveTo(90);
 
-    ik.startOpenNI();
-    ik.processKinectData();
+    //ik.startOpenNI();
+    //ik.processKinectData();
+    
+    ik.cog = new GravityCenter(ik);
+    ik.cog.setLinkMass("mtorso", 2.832, 0.5);
+    ik.cog.setLinkMass("ttorso", 5.774, 0.5);
+    ik.cog.setLinkMass("omoplate", 0.739, 0.5);
+    ik.cog.setLinkMass("Romoplate", 0.739, 0.5);
+    ik.cog.setLinkMass("rotate", 0.715, 0.5754);
+    ik.cog.setLinkMass("Rrotate", 0.715, 0.5754);
+    ik.cog.setLinkMass("shoulder", 0.513, 0.5);
+    ik.cog.setLinkMass("Rshoulder", 0.513, 0.5);
+    ik.cog.setLinkMass("bicep", 0.940, 0.4559);
+    ik.cog.setLinkMass("Rbicep", 0.940, 0.4559);
+    ik.cog.setLinkMass("wrist", 0.176, 0.7474);
+    ik.cog.setLinkMass("Rwrist", 0.176, 0.7474);
+    
+    ik.setAi("rightArm", Ai.KEEP_BALANCE);
+    ik.setAi("leftArm", Ai.KEEP_BALANCE);
+    ik.removeAi("kinect",Ai.AVOID_COLLISION);
   }
 
   public void startEngine(String arm) {
@@ -738,5 +770,38 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     }
   }
   
+  public void setAi(Ai ai) {
+    for (IMEngine engine:engines.values()) {
+      engine.setAi(ai);
+    }
+  }
+  
+  public void setAi(String ai) {
+    for (Ai a:Ai.values()) {
+      if (a.text.equals(ai)) {
+        setAi(a);
+        return;
+      }
+    }
+    log.info("Ai {} not found",ai);
+  }
+  
+  public void removeAi(Ai ai) {
+    for (IMEngine engine:engines.values()) {
+      engine.removeAi(ai);
+    }
+  }
+  
+  public void setAi(String armName, Ai ai) {
+    if (engines.containsKey(armName)) {
+      engines.get(armName).setAi(ai);
+    }
+  }
+  
+  public void removeAi(String armName, Ai ai) {
+    if (engines.containsKey(armName)) {
+      engines.get(armName).removeAi(ai);
+    }
+  }
 }
 
