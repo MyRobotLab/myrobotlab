@@ -38,12 +38,12 @@ public class DHLink {
   public transient final static Logger log = LoggerFactory.getLogger(DHLink.class);
   
   private double velocity;
-  private Integer state = Servo.SERVO_EVENT_STOPPED;
-  private Double targetPos;
+  private int state = Servo.SERVO_EVENT_STOPPED;
+  private double targetPos;
   public boolean hasServo = false;
   public double servoMin;
   public double servoMax;
-  private Double currentPos = 0.0;
+  private double currentPos = 0.0;
   // private Matrix m;
   // TODO: add max/min angle
   public DHLink(String name, double d, double r, double theta, double alpha) {
@@ -61,6 +61,7 @@ public class DHLink {
   }
   
   public DHLink(DHLink copy){
+    super();
     this.d = copy.d;
     this.theta = copy.theta;
     this.r = copy.r;
