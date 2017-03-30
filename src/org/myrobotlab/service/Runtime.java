@@ -1802,7 +1802,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     hideMethods.add("run");
     hideMethods.add("access$0");
 
-    addTask(1000, "getSystemResources");
+    // TODO - good idea for future use - but must have a way to 
+    // purge tasks on Junit test or it gets hung in Travis
+    // addTask(1000, "getSystemResources");
     // TODO - check for updates on startup ???
 
     // starting this
