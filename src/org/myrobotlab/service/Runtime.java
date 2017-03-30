@@ -45,6 +45,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.SystemResources;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -132,6 +133,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   private ServiceData serviceData = ServiceData.getLocalInstance();
 
   private Platform platform = Platform.getLocalInstance();
+  
+  SystemResources resources = new SystemResources();
 
   private static long uniqueID = new Random(System.currentTimeMillis()).nextLong();
 
@@ -1799,6 +1802,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     hideMethods.add("run");
     hideMethods.add("access$0");
 
+    addTask(1000, "getSystemResources");
     // TODO - check for updates on startup ???
 
     // starting this
@@ -2385,6 +2389,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   public ServiceData getServiceData() {
     return serviceData;
+  }
+
+  public SystemResources getSystemResources() {
+    return new SystemResources();
   }
 
 }

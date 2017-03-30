@@ -35,20 +35,24 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.interfaces.MessageSender;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.swing.interfaces.DisplayProvider;
 import org.slf4j.Logger;
 
 /**
- * graphical representation of a pin
- * with button capability
+ * graphical representation of a pin with button capability
  * 
  * it contains a PinDefintion and offers controls on how to display
  * 
@@ -59,138 +63,232 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class PinGui implements DisplayProvider, ActionListener {
-	public final static Logger log = LoggerFactory.getLogger(PinGui.class);
+public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
+  public final static Logger log = LoggerFactory.getLogger(PinGui.class);
 
-	PinDefinition pinDef;
-	String boundServiceName;
-	JSlider slider = null;
-	boolean isVertical = false;
-	JButton stateButton = new JButton();
-	
-	/**
-	 * for lack of better idea and need the ability to support
-	 * multiple states
-	 */
-	String state = "off"; 
-	
-	GridBagConstraints gc = new GridBagConstraints();
-	
-	JPanel display = new JPanel(new GridBagLayout());
-	
-	Color offFgColor = Color.WHITE;
-	Color offBgColor = Color.LIGHT_GRAY;
-	
-	Color onFgColor = Color.BLACK;
-	Color onBgColor = Color.GREEN;
-	
-	Rectangle size = new Rectangle(15, 15);
-	
-	ActionListener relay;	
+  PinDefinition pinDef;
+  String boundServiceName;
+  JSlider slider;
+  JLabel sliderOutput;
+  boolean isVertical = false;
+  JButton popupLauncher = new JButton();
 
-	public PinGui(final PinDefinition pinDef) {
-		this.pinDef = pinDef;
-		this.isVertical = isVertical;
+  // enable disable popup
+  JPopupMenu popup = new JPopupMenu();
+  JButton digitalWrite0 = new JButton("0");
+  JButton digitalWrite1 = new JButton("1");
+  JButton read = new JButton("  read  ");
 
-		//////////// button begin /////////////////
-		
-		stateButton.setBackground(offBgColor);
-		stateButton.setForeground(offFgColor);
-		stateButton.setBorder(null);
-		stateButton.setOpaque(true);
-		stateButton.setBorderPainted(false);
-		stateButton.setBounds(size);
-		// onOff.setText(pinDef.getName());
-		// stateButton.setText("ab");
-		stateButton.addActionListener(this);
-		
-		//////////// button end /////////////////		
-		
-		if (pinDef.isPwm()){
-			int orientation = (isVertical) ? SwingConstants.VERTICAL : SwingConstants.HORIZONTAL;
-			slider = new JSlider(orientation, 0, 255, 0);
-			slider.setOpaque(false);
-			slider.addChangeListener(new ChangeListener() {
-				@Override
-				public void stateChanged(javax.swing.event.ChangeEvent e) {
-					// data.setText("" + slider.getValue());
-					
-					// 	myService.send(boundServiceName, "analogWrite", pinNumber, slider.getValue());
-					
-				}
-			});
-		}
-		
-		gc.weightx = gc.weighty = 1.0;
-		gc.gridx = 0;
-		gc.gridy = 0;
-		stateButton.setPreferredSize(new Dimension(15,15));
-		display.add(stateButton, gc);
+  GridBagConstraints gc = new GridBagConstraints();
 
-	}
-	
-	public void update(PinData pinData){
-		if (pinData.value > 0){
-			// setOn();
-		}
-	}
+  JPanel display = new JPanel(new GridBagLayout());
 
-	@Override
-	public Component getDisplay() {
-		return display;
-	}
+  Color popupLauncherFg = Color.BLACK;
+  Color popupLauncherBg = Color.LIGHT_GRAY;
 
-	public void addActionListener(ActionListener relay) {
-		this.relay = relay;
-	}
-	
-	public void setLocation(int x, int y){
-		display.setLocation(x, y);
-	}
-	
-	public void setBounds(int x, int y, int width, int height){
-		display.setBounds(x, y, width, height);
-	}
+  Color digitalWrite0Fg = Color.BLACK;
+  Color digitalWrite0Bg = Color.LIGHT_GRAY;
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		log.info("actionPerformed");
-		Object o = e.getSource();
-		// FIXME - state update can happen from 'user' or from 'board'
-		/* 
-		if (pinDef.getValue() > 0){
-			
-		}
-		*/
-		// simple 2 state at the moment ...
-		if (o == stateButton){
-			if ("off".equals(state)){
-				setState("on");
-			} else if ("on".equals(state)) {
-				setState("off");
-			}
-		}
-		e.setSource(this);
-		relay.actionPerformed(e);
-	}
+  Color digitalWrite1Fg = Color.BLACK;
+  Color digitalWrite1Bg = Color.GREEN;// Color.decode("#80ed7d");
 
-	public void setState(String state) {
-		this.state = state;
-		if ("on".equals(state)){
-			stateButton.setBackground(onBgColor);
-			stateButton.setForeground(onFgColor);
-		} else if ("off".equals(state)) {
-			stateButton.setBackground(offBgColor);
-			stateButton.setForeground(offFgColor);
-		}
-	}
+  Color readFg = Color.BLACK;
+  Color readBg = Color.orange;
 
-	public PinDefinition getPinDef() {
-		return pinDef;
-	}
+  JPanel popupPanel;
 
-	public String getState() {
-		return state;
-	}
+  Rectangle size = new Rectangle(15, 15);
 
+  ActionListener relay;
+
+  boolean isReading = false;
+  
+  MessageSender sender;
+
+  public PinGui(MessageSender service, final PinDefinition pinDef) {
+    this.sender = service;
+    this.pinDef = pinDef;
+    this.boundServiceName = service.getName();
+    // this.isVertical = isVertical;
+    gc.gridx = gc.gridy = 0;
+    gc.fill = GridBagConstraints.BOTH; // ???
+    // gcCenter.fill = GridBagConstraints.HORIZONTAL;
+    gc.weightx = 1;
+    gc.weighty = 1;
+
+    popupPanel = new JPanel(new GridBagLayout());
+    popup.add(popupPanel);
+
+    if (pinDef.canWrite()) {
+      digitalWrite0.setBackground(digitalWrite0Bg);
+      digitalWrite0.setForeground(digitalWrite0Fg);
+      digitalWrite0.setBorder(null);
+      digitalWrite0.setOpaque(true);
+      digitalWrite0.setBorderPainted(false);
+      digitalWrite0.addActionListener(this);
+      popupPanel.add(digitalWrite0, gc);
+
+      gc.gridy++;
+      digitalWrite1.setBackground(digitalWrite1Bg);
+      digitalWrite1.setForeground(digitalWrite1Fg);
+      digitalWrite1.setBorder(null);
+      digitalWrite1.setOpaque(true);
+      digitalWrite1.setBorderPainted(false);
+      digitalWrite1.addActionListener(this);
+      popupPanel.add(digitalWrite1, gc);
+    }
+
+    if (pinDef.canRead()) {
+      gc.gridy++;
+      read.setBackground(readBg);
+      read.setForeground(readFg);
+      read.setBorder(null);
+      read.setOpaque(true);
+      read.setBorderPainted(false);
+      read.addActionListener(this);
+      popupPanel.add(read, gc);
+    }
+
+    //////////// button begin /////////////////
+
+    popupLauncher.setBackground(popupLauncherBg);
+    popupLauncher.setForeground(popupLauncherFg);
+    popupLauncher.setBorder(null);
+    popupLauncher.setOpaque(true);
+    popupLauncher.setBorderPainted(false);
+    popupLauncher.setBounds(size);
+    // onOff.setText(pinDef.getName());
+    // stateButton.setText("ab");
+    popupLauncher.addActionListener(this);
+
+    //////////// button end /////////////////
+
+    if (pinDef.isPwm()) {
+      int orientation = (isVertical) ? SwingConstants.VERTICAL : SwingConstants.HORIZONTAL;
+      slider = new JSlider(orientation, 0, 255, 0);
+      slider.setOpaque(false);
+      slider.addChangeListener(this);
+      
+      sliderOutput = new JLabel("0");
+      
+      // over one
+      gc.gridy++;
+      popupPanel.add(sliderOutput, gc);
+      // down one
+      gc.gridx++;
+      popupPanel.add(slider, gc);
+    }
+
+    gc.weightx = gc.weighty = 1.0;
+    gc.gridx = 0;
+    gc.gridy = 0;
+    popupLauncher.setPreferredSize(new Dimension(15, 15));
+    display.add(popupLauncher, gc);
+
+  }
+  
+  public void send(String method){
+    send(method, (Object[])null);
+  }
+  
+  public void send(String method, Object... params){
+    sender.send(boundServiceName, method, params);
+  }
+
+  // FIXME - display vs control ---> setDisplayOn
+  // in fact display is 'always' callbacks (mostly)
+  public void update(PinData pinData) {
+    if (pinData.value > 0) {
+      // setOn();
+    }
+  }
+
+  @Override
+  public Component getDisplay() {
+    return display;
+  }
+
+  public void addActionListener(ActionListener relay) {
+    this.relay = relay;
+  }
+
+  public void setBounds(int x, int y, int width, int height) {
+    display.setBounds(x, y, width, height);
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    log.info("actionPerformed");
+    Object o = e.getSource();
+    // FIXME - state update can happen from 'user' or from 'board'
+    /*
+     * if (pinDef.getValue() > 0){
+     * 
+     * }
+     */
+    // simple 2 state at the moment ...
+    if (o == popupLauncher) {
+      if (!pinDef.canRead()) {
+        popupPanel.remove(read);
+      }
+      if (!pinDef.canWrite()) {
+        popupPanel.remove(digitalWrite0);
+        popupPanel.remove(digitalWrite1);
+      }
+      popup.show(popupLauncher, popupLauncher.getBounds().x, popupLauncher.getBounds().y + popupLauncher.getBounds().height);
+      return;
+    }
+
+    if (o == digitalWrite0) {
+      send("pinMode", pinDef.getAddress(), Arduino.OUTPUT);
+      send("digitalWrite", pinDef.getAddress(), 0);
+      popupLauncher.setText("0");
+      popupLauncher.setBackground(Color.LIGHT_GRAY);      
+    }
+
+    if (o == digitalWrite1) {
+      send("pinMode", pinDef.getAddress(), Arduino.OUTPUT);
+      send("digitalWrite1", pinDef.getAddress(), 1);
+      popupLauncher.setText("1");
+      popupLauncher.setBackground(Color.GREEN);
+    }
+
+    if (o == read) {
+      if (!isReading) {
+        send("pinEnable", pinDef.getAddress());
+        popupLauncher.setBackground(readBg);
+        popupLauncher.setText("");
+        popup.setVisible(false);
+        isReading = true;
+      } else {
+        send("pinDisable", pinDef.getAddress());
+        popupLauncher.setBackground(popupLauncherBg);
+        popupLauncher.setText("");
+        isReading = false;
+      }
+    }
+
+    popup.setVisible(false);
+    // relaying the event upwards
+    e.setSource(this);
+    relay.actionPerformed(e);
+  }
+
+  public PinDefinition getPinDef() {
+    return pinDef;
+  }
+
+  public void showName() {
+    popupLauncher.setText(pinDef.getName());
+  }
+
+  public void showAddress() {
+    popupLauncher.setText(pinDef.getAddress() + "");
+  }
+
+  @Override
+  public void stateChanged(ChangeEvent e) {
+    sliderOutput.setText(slider.getValue() + "");
+    send("analogWrite", pinDef.getAddress(), slider.getValue());
+  }
 }

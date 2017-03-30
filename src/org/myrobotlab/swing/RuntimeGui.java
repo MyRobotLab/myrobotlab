@@ -70,6 +70,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.SystemResources;
 import org.myrobotlab.framework.repo.Category;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -119,7 +120,9 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 	String possibleServiceFilter = null;
 	ProgressDialog progressDialog = null;
 	
-	JLabel freeMemory = new JLabel();
+  JLabel freeMemory = new JLabel();
+  JLabel usedMemory = new JLabel();
+  JLabel maxMemory = new JLabel();
 	JLabel totalMemory = new JLabel();
 	JLabel totalPhysicalMemory = new JLabel();
 
@@ -334,7 +337,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 		// add(categories, possible, runningServices);
 
 		addTopLine(createMenuBar());
-		addBottom("memory physical ", totalPhysicalMemory, " total ", totalMemory, " free ", freeMemory );
+		addBottom("memory physical ", totalPhysicalMemory, "  max ", maxMemory, "  total ", totalMemory, "  free ", freeMemory, "  used ", usedMemory );
 		getPossibleServices();
 
 	}
@@ -475,11 +478,23 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
 		}
 	}
+	/**
+	 * scheduled event of reporting on system resources
+	 * @param resources
+	 */
+	public void onSystemResources(SystemResources resources){
+    totalPhysicalMemory.setText(String.format("%d", resources.getTotalPhysicalMemory()));
+    maxMemory.setText(String.format("%d", resources.getMaxMemory()));
+	  totalMemory.setText(String.format("%d", resources.getTotalMemory()));
+    freeMemory.setText(String.format("%d", resources.getFreeMemory()));
+    usedMemory.setText(String.format("%d", resources.getTotalMemory() - resources.getFreeMemory()));
+	}
 
 	@Override
 	public void subscribeGui() {
 		subscribe("registered");
 		subscribe("released");
+		subscribe("getSystemResources");
 		subscribe("publishInstallProgress");
 	}
 
@@ -487,6 +502,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 	public void unsubscribeGui() {
 		unsubscribe("registered");
 		unsubscribe("released");
+		subscribe("getSystemResources");
 		unsubscribe("publishInstallProgress");
 	}
 
@@ -646,9 +662,10 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 			@Override
 			public void run() {
 				Platform platform = myRuntime.getPlatform();
-				totalMemory.setText(String.format("%d", platform.getTotalMemory()));
-				freeMemory.setText(String.format("%d", platform.getFreeMemory()));
-				totalPhysicalMemory.setText(String.format("%d", platform.getTotalPhysicalMemory()));
+				SystemResources resources = myRuntime.getSystemResources();
+				totalMemory.setText(String.format("%d", resources.getTotalMemory()));
+				freeMemory.setText(String.format("%d", resources.getFreeMemory()));
+				totalPhysicalMemory.setText(String.format("%d", resources.getTotalPhysicalMemory()));
 				
 				// FIXME - change to "all" or "" - null is sloppy - system has
 				// to upcast

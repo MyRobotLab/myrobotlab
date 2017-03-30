@@ -192,4 +192,16 @@ public class DockableTabPane implements ActionListener {
 	public void remove(Container display) {
 		tabs.remove(display);
 	}
+
+	public void explode() {
+		for (String key : dockableTabs.keySet()) {
+			undockTab(key);
+		}
+	}
+	
+	public void collapse() {
+		for (String key : dockableTabs.keySet()) {
+			dockTab(key);
+		}
+	}
 }

@@ -13,7 +13,7 @@ public class PinDefinition implements Serializable{
 	// String color; ?? 
 
 	/**
-	 * on Arduino this means actively reading
+	 * means actively reading
 	 */
 	boolean enabled = false;
 	
@@ -34,11 +34,15 @@ public class PinDefinition implements Serializable{
 
 	boolean isPwm;
 
-	boolean isDigital;
+	boolean isDigital = true; // default
 	
 	boolean isRx;
 	
 	boolean isTx;
+	
+	boolean canRead = true; // default
+	
+	boolean canWrite = true; // default
 
 	Integer value;
 
@@ -156,6 +160,23 @@ public class PinDefinition implements Serializable{
 	public void setMode(String mode) {
 		this.mode = mode;
 	}
+	
+	public boolean canRead(){
+	  return canRead;
+	}
+	
+	public boolean canWrite(){
+    return canWrite;
+  }
+
+  public void canWrite(boolean canWrite) {
+    this.canWrite = canWrite;
+  }
+  
+  public void canRead(boolean canRead) {
+    this.canRead = canRead;
+  }
+
 
 }
 

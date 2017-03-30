@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.myrobotlab.arduino.BoardInfo;
+import org.myrobotlab.arduino.PinDefinitions;
 import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.arduino.virtual.Device;
 import org.myrobotlab.arduino.virtual.MrlComm;
@@ -13,6 +14,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PortListener;
 import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.SerialDevice;
@@ -29,257 +31,270 @@ import org.slf4j.Logger;
  */
 public class VirtualArduino extends Service implements PortPublisher, PortListener {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(VirtualArduino.class);
+  public final static Logger log = LoggerFactory.getLogger(VirtualArduino.class);
 
-	/**
-	 * The Java port of the MrlComm.ino script
-	 */
-	transient MrlCommIno ino;
+  /**
+   * The Java port of the MrlComm.ino script
+   */
+  transient MrlCommIno ino;
 
-	transient MrlComm mrlComm;
+  transient MrlComm mrlComm;
 
-	/**
-	 * Blender, JMonkey, other ...
-	 */
-	transient Simulator simulator;
+  /**
+   * Blender, JMonkey, other ...
+   */
+  transient Simulator simulator;
 
-	/**
-	 * our emulated electronic UART
-	 */
-	
-	transient Serial uart;
-	
-	
-	String portName = "COM42";
+  /**
+   * our emulated electronic UART
+   */
 
-	transient VirtualMsg msg;
-	BoardInfo boardInfo;
+  transient Serial uart;
 
-	/**
-	 * thread to run the script
-	 */
-	transient InoScriptRunner runner = null;
+  /**
+   * class which contains and manages all pin definitions indexed by address or
+   * pin name
+   */
+  PinDefinitions pinDefs = new PinDefinitions();
 
-	transient FileOutputStream record = null;
+  String portName = "COM42";
 
-	/**
-	 * This class is a thread which runs a (port) of MrlComm.ino. It does what
-	 * the Arduino "OS" does .. It runs the "loop()" method forever..
-	 * 
-	 * @author GroG
-	 *
-	 */
-	public static class InoScriptRunner extends Thread {
-		boolean isRunning = false;
-		VirtualArduino virtual;
-		MrlCommIno ino;
+  transient VirtualMsg msg;
 
-		InoScriptRunner(VirtualArduino virtual, MrlCommIno ino) {
-			super(String.format("%s.mrlcomm", virtual.getName()));
-			this.virtual = virtual;
-			this.ino = ino;
-		}
+  /**
+   * should be ui widgetized
+   */
+  BoardInfo boardInfo;
 
-		public void run() {
-			isRunning = true;
-			ino.setup();
-			while (isRunning) {
-				try {
+  /**
+   * thread to run the script
+   */
+  transient InoScriptRunner runner = null;
 
-					ino.loop();
+  transient FileOutputStream record = null;
 
-					Thread.sleep(10);
-				} catch (Exception e) {
-					log.error("mrlcomm threw", e);
-				}
-			}
-		}
-	}
+  /**
+   * This class is a thread which runs a (port) of MrlComm.ino. It does what the
+   * Arduino "OS" does .. It runs the "loop()" method forever..
+   * 
+   * @author GroG
+   *
+   */
+  public static class InoScriptRunner extends Thread {
+    boolean isRunning = false;
+    VirtualArduino virtual;
+    MrlCommIno ino;
 
-	public VirtualArduino(String n) {
-		super(n);
-		uart = (Serial) createPeer("uart");
-		ino = new MrlCommIno(this);
-		mrlComm = ino.getMrlComm();
-		msg = mrlComm.getMsg();
-		msg.setInvoke(false);
-		boardInfo = mrlComm.boardInfo;
-		boardInfo.setType(Arduino.BOARD_TYPE_ID_UNO);
-	}
+    InoScriptRunner(VirtualArduino virtual, MrlCommIno ino) {
+      super(String.format("%s.mrlcomm", virtual.getName()));
+      this.virtual = virtual;
+      this.ino = ino;
+    }
 
-	public void connect(String portName) throws IOException {
-		if (uart != null && uart.isConnected()) {
-			log.info("already connected");
-			return;
-		}
-		uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
-	}
+    public void run() {
+      isRunning = true;
+      ino.setup();
+      while (isRunning) {
+        try {
 
-	static public ServiceType getMetaData() {
-		ServiceType meta = new ServiceType(VirtualArduino.class.getCanonicalName());
-		meta.addDescription("virtual hardware of for the Arduino!");
-		meta.setAvailable(true);
-		meta.addPeer("uart", "Serial", "serial device for this Arduino");
-		meta.addCategory("simulator");
-		return meta;
-	}
+          ino.loop();
 
-	public String setBoard(String board) {
-		log.info("setting board to type {}", board);
+          Thread.sleep(10);
+        } catch (Exception e) {
+          log.error("mrlcomm threw", e);
+        }
+      }
+    }
+  }
 
-		ino.setBoardType(board);
+  public VirtualArduino(String n) {
+    super(n);
+    uart = (Serial) createPeer("uart");
+    ino = new MrlCommIno(this);
+    mrlComm = ino.getMrlComm();
+    msg = mrlComm.getMsg();
+    msg.setInvoke(false);
+    boardInfo = mrlComm.boardInfo;
+    // boardInfo.setType(Arduino.BOARD_TYPE_ID_UNO);
+    setBoard(Arduino.BOARD_TYPE_UNO);
+  }
 
-		// createPinList();
-		broadcastState();
-		return board;
-	}
+  public void connect(String portName) throws IOException {
+    if (uart != null && uart.isConnected()) {
+      log.info("already connected");
+      return;
+    }
+    uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
+  }
 
-	public void start() {
-		if (runner != null) {
-			log.warn("running ino script already");
-			return;
-		}
-		runner = new InoScriptRunner(this, ino);
-		runner.start();
-	}
+  static public ServiceType getMetaData() {
+    ServiceType meta = new ServiceType(VirtualArduino.class.getCanonicalName());
+    meta.addDescription("virtual hardware of for the Arduino!");
+    meta.setAvailable(true);
+    meta.addPeer("uart", "Serial", "serial device for this Arduino");
+    meta.addCategory("simulator");
+    return meta;
+  }
 
-	public void stop() {
-		if (runner != null) {
-			runner.isRunning = false;
-			runner.interrupt();
-			runner = null;
-		}
-	}
+  public String setBoard(String board) {
+    log.info("setting board to type {}", board);
 
-	/**
-	 * easy way to set to get a 54 pin arduino
-	 *
-	 * @return
-	 */
-	public String setBoardMega() {
-		return setBoard(Arduino.BOARD_TYPE_MEGA);
-	}
+    ino.setBoardType(board);
+    pinDefs = Arduino.createPinList(board);
 
-	public String setBoardMegaADK() {
-		return setBoard(Arduino.BOARD_TYPE_MEGA_ADK);
-	}
+    // createPinList();
+    broadcastState();
+    return board;
+  }
 
-	public String setBoardUno() {
-		return setBoard(Arduino.BOARD_TYPE_UNO);
-	}
+  public void start() {
+    if (runner != null) {
+      log.warn("running ino script already");
+      return;
+    }
+    runner = new InoScriptRunner(this, ino);
+    runner.start();
+  }
 
-	public void setPortName(String portName) {
-		this.portName = portName;
-	}
+  public void stop() {
+    if (runner != null) {
+      runner.isRunning = false;
+      runner.interrupt();
+      runner = null;
+    }
+  }
 
-	@Override
-	public void startService() {
-		super.startService();
-		uart = (Serial) startPeer("uart");
-		uart.addPortListener(getName());
-		start();
-	}
+  /**
+   * easy way to set to get a 54 pin arduino
+   *
+   * @return
+   */
+  public String setBoardMega() {
+    return setBoard(Arduino.BOARD_TYPE_MEGA);
+  }
 
-	public SerialDevice getSerial() {
-		return uart;
-	}
+  public String setBoardMegaADK() {
+    return setBoard(Arduino.BOARD_TYPE_MEGA_ADK);
+  }
 
-	public org.myrobotlab.arduino.virtual.MrlComm MrlComm() {
-		return ino.getMrlComm();
-	}
+  public String setBoardUno() {
+    return setBoard(Arduino.BOARD_TYPE_UNO);
+  }
 
-	public Device getDevice(int deviceId) {
-		return mrlComm.getDevice(deviceId);
-	}
+  public void setPortName(String portName) {
+    this.portName = portName;
+  }
 
-	public int readBlocking(int address, int i) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+  @Override
+  public void startService() {
+    super.startService();
+    uart = (Serial) startPeer("uart");
+    uart.addPortListener(getName());
+    start();
+  }
 
-	public void clearPinQueue(int address) {
-		mrlComm.pinList.clear();
-	}
+  public SerialDevice getSerial() {
+    return uart;
+  }
 
-	public Simulator getSimulator() {
-		return simulator;
-	}
+  public org.myrobotlab.arduino.virtual.MrlComm MrlComm() {
+    return ino.getMrlComm();
+  }
 
-	public void attach(Simulator simulator) {
-		this.simulator = simulator;
-	}
+  public Device getDevice(int deviceId) {
+    return mrlComm.getDevice(deviceId);
+  }
 
-	public MrlComm getMrlComm() {
-		return mrlComm;
-	}
+  public int readBlocking(int address, int i) {
+    // TODO Auto-generated method stub
+    return 0;
+  }
 
+  public void clearPinQueue(int address) {
+    mrlComm.pinList.clear();
+  }
 
-	@Override
-	public String publishConnect(String portName) {
-		return portName;
-	}
-	
-	// chaining Serial's connect event
-	@Override
-	public void onConnect(String portName){
-		invoke("publishConnect", portName);
-	}
+  public Simulator getSimulator() {
+    return simulator;
+  }
 
-	@Override
-	public String publishDisconnect(String portName) {
-		return portName;
-	}
-	
-	// chaining Serial's disconnect event ..
-	@Override
-	public void onDisconnect(String portName){
-		invoke("publishDisconnect", portName);
-	}
+  public void attach(Simulator simulator) {
+    this.simulator = simulator;
+  }
 
-	@Override
-	public boolean isConnected() {
-		return uart.isConnected();
-	}
+  public MrlComm getMrlComm() {
+    return mrlComm;
+  }
 
-	@Override
-	public String getPortName() {
-		return uart.getPortName();
-	}
+  @Override
+  public String publishConnect(String portName) {
+    return portName;
+  }
 
-	@Override
-	public List<String> getPortNames() {
-		return uart.getPortNames();
-	}
-	
-	public static void main(String[] args) {
-		try {
+  // chaining Serial's connect event
+  @Override
+  public void onConnect(String portName) {
+    invoke("publishConnect", portName);
+  }
 
-			LoggingFactory.init("INFO");
+  @Override
+  public String publishDisconnect(String portName) {
+    return portName;
+  }
 
-			// WOW GOOD TEST !!!
-			// Service.reserveRootAs("virtual.uart", "newName");
-			// Service.buildDna("Tracking");
+  // chaining Serial's disconnect event ..
+  @Override
+  public void onDisconnect(String portName) {
+    invoke("publishDisconnect", portName);
+  }
 
-			// Runtime.start("webgui", "WebGui");
+  @Override
+  public boolean isConnected() {
+    return uart.isConnected();
+  }
 
-			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-			Runtime.start("arduino", "Arduino");
-			
-			Runtime.start("gui", "SwingGui");
-			// String port = "COM5";
-			// connect the virtual uart
-			// varduino.setPortName(port);
-			// connect the arduino to the other end
-			// varduino.connect(port);
-			// arduino.enablePin(54);
+  @Override
+  public String getPortName() {
+    return uart.getPortName();
+  }
 
-		} catch (Exception e) {
-			log.error("main threw", e);
-		}
-	}
+  @Override
+  public List<String> getPortNames() {
+    return uart.getPortNames();
+  }
 
+  public static void main(String[] args) {
+    try {
+
+      LoggingFactory.init("INFO");
+
+      // WOW GOOD TEST !!!
+      // Service.reserveRootAs("virtual.uart", "newName");
+      // Service.buildDna("Tracking");
+
+      // Runtime.start("webgui", "WebGui");
+
+      // Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+      Runtime.start("arduino", "Arduino");
+
+      Runtime.start("gui", "SwingGui");
+      // String port = "COM5";
+      // connect the virtual uart
+      // varduino.setPortName(port);
+      // connect the arduino to the other end
+      // varduino.connect(port);
+      // arduino.enablePin(54);
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+  public List<PinDefinition> getPinList() {
+    return pinDefs.getList();
+  }
 
 }
