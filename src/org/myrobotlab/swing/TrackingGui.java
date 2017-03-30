@@ -56,9 +56,7 @@ public class TrackingGui extends ServiceGui {
   public TrackingGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
 
-    video0 = new VideoWidget(boundServiceName, myService, false);
-    video0.init(null);
-    // video0.allowFork = true;
+    video0 = new VideoWidget(boundServiceName, myService);
 
     status.setEditable(false);
 

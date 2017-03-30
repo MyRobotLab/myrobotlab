@@ -284,7 +284,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
 				if (newGui == null) {
 					log.info(String.format("could not construct a %s object - creating generic template", guiClass));
-					newGui = (ServiceGui) Instantiator.getNewInstance("org.myrobotlab.swing.NoGui", name, this);
+					newGui = (ServiceGui) Instantiator.getNewInstance("org.myrobotlab.swing.NoGui", name, self);
 				}
 
 				// serviceGuiMap.put(name, newGui);

@@ -73,7 +73,6 @@ public class PingdarGui extends ServiceGui implements ListSelectionListener, Vid
     super(boundServiceName, myService);
 
     screen = new VideoWidget(boundServiceName, myService);
-    screen.init(null);
 
     camImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_RGB);
     graphImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_RGB);

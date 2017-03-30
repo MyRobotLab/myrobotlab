@@ -158,8 +158,7 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
 
     display.setLayout(new BorderLayout());
 
-    video0 = new VideoWidget(boundServiceName, myService, false);
-    video0.init(null);
+    video0 = new VideoWidget(boundServiceName, myService);
 
     JPanel config = new JPanel(new GridLayout(0, 1));
     config.add(new JLabel("video url"));

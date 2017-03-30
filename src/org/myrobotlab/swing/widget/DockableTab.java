@@ -166,7 +166,7 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		log.info("e {}", e);
+		// log.info("e {}", e);
 		dispatchMouseEvent(e);
 	}
 

@@ -125,7 +125,7 @@ public abstract class ServiceGui {
 	 * stub for subscribing all service specific/gui events for desired
 	 * callbacks
 	 */
-	public void subscribeGui() {
+	public void subscribeGui() {	  
 	}
 
 	/**

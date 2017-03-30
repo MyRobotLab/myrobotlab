@@ -1419,7 +1419,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	// < publishPinArray/[] data
 	public PinData[] publishPinArray(int[] data) {
-		log.info("publishPinArray {}", data);
+		log.debug("publishPinArray {}", data);
 		// if subscribers -
 		// look for subscribed pins and publish them
 

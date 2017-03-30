@@ -348,9 +348,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     super(boundServiceName, myService);
     self = this;
 
-
-    video0 = new VideoWidget(boundServiceName, myService, false);
-    video0.init(null);
+    video0 = new VideoWidget(boundServiceName, myService);
 
     undock.addActionListener(this);
 
