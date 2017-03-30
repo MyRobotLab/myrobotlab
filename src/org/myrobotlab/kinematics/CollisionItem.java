@@ -138,6 +138,7 @@ public class CollisionItem{
   	this.radius = ci.radius;
   	this.fromKinect = ci.fromKinect;
 		this.render = ci.render;
+		this.ignore = new ArrayList<String>(ci.ignore);
 	}
 
 	private void buildCollisionItem(HashMap<Integer[], Map3DPoint> cloudMap) {

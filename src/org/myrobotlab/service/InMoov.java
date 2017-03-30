@@ -9,6 +9,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.jme3.InMoov3DApp;
+import org.myrobotlab.kinematics.GravityCenter;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -1758,6 +1759,20 @@ public class InMoov extends Service {
     im.objectAddIgnore("leftS", "rightS");
     im.objectAddIgnore("rightS", "i01.leftArm.shoulder");
     im.objectAddIgnore("leftS", "i01.rightArm.shoulder");
+
+    im.cog = new GravityCenter(im);
+    im.cog.setLinkMass("i01.torso.midStom", 2.832, 0.5);
+    im.cog.setLinkMass("i01.torso.topStom", 5.774, 0.5);
+    im.cog.setLinkMass("i01.leftArm.omoplate", 0.739, 0.5);
+    im.cog.setLinkMass("i01.rightArm.omoplate", 0.739, 0.5);
+    im.cog.setLinkMass("i01.leftArm.rotate", 0.715, 0.5754);
+    im.cog.setLinkMass("i01.rightArm.rotate", 0.715, 0.5754);
+    im.cog.setLinkMass("i01.leftArm.shoulder", 0.513, 0.5);
+    im.cog.setLinkMass("i01.rightArm.shoulder", 0.513, 0.5);
+    im.cog.setLinkMass("i01.leftArm.bicep", 0.940, 0.4559);
+    im.cog.setLinkMass("i01.rightArm.bicep", 0.940, 0.4559);
+    im.cog.setLinkMass("i01.leftHand.wrist", 0.176, 0.7474);
+    im.cog.setLinkMass("i01.rightHand.wrist", 0.176, 0.7474);
 
     im.setJmeApp(vinMoovApp);
     im.setOpenni(openni);

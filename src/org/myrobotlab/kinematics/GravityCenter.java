@@ -36,7 +36,7 @@ public class GravityCenter extends Thread {
     cogs.put(name, centerOfMass);
   }
   
-  public Point computeCoG(CollisionDectection cd) {
+  public synchronized Point computeCoG(CollisionDectection cd) {
     if (cd == null) {
       cd = service.collisionItems;
     }
@@ -51,7 +51,7 @@ public class GravityCenter extends Thread {
         double m = masses.get(ci.getName())/totalMass;
         Point ic = icog.multiplyXYZ(m);
         Point c = cog.add(ic);
-        cog = cog.add(icog.multiplyXYZ(masses.get(ci.getName())/totalMass));
+        cog = c;
       }
     }
     Log.info(cog.toString()+"gc");
@@ -73,5 +73,9 @@ public class GravityCenter extends Thread {
 
   public double getMaxDistanceToCog() {
     return maxDistanceToCog;
+  }
+  
+  public void setCoGTarget(double x, double y, double z) {
+    cogTarget = new Point(x, y, z, 0, 0, 0);
   }
 }
