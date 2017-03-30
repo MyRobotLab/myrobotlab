@@ -265,6 +265,13 @@ public class CollisionDectection{
 	public ConcurrentHashMap<String, CollisionItem> getItems() {
 		return items;
 	}
+
+  public void removeObject(String name) {
+    if (items.containsKey(name)) {
+      items.remove(name);
+    }
+    
+  }
 	
 }
 

@@ -115,7 +115,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   private transient IntegratedMovementInterface jmeApp = null;
   
   private HashMap<String, Mapper> maps = new HashMap<String, Mapper>();
-  public transient GravityCenter cog = null;
+  public transient GravityCenter cog = new GravityCenter(this);
   
   /**
    * @return the jmeApp
@@ -470,7 +470,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.cog.setLinkMass("Rwrist", 0.176, 0.7474);
     
     ik.setAi("rightArm", Ai.KEEP_BALANCE);
-    ik.setAi("leftArm", Ai.KEEP_BALANCE);
+    //ik.setAi("leftArm", Ai.KEEP_BALANCE);
     ik.removeAi("kinect",Ai.AVOID_COLLISION);
   }
 
@@ -606,6 +606,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     collisionItems.clearItem();
   }
   
+  public void removeObject(String name) {
+    collisionItems.removeObject(name);
+  }
   
   public void objectAddIgnore(String object1, String object2) {
     collisionItems.addIgnore(object1, object2);

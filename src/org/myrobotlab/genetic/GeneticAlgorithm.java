@@ -97,11 +97,11 @@ public class GeneticAlgorithm {
   
   private Chromosome RandomWheel(ArrayList<Chromosome> chromosomes, Double totalFitness) {
     Random rand = new Random();
-    double randomNumber = rand.nextInt(totalFitness.intValue());
+    double randomNumber = rand.nextDouble() * totalFitness;
     Double fitnessCount = 0.0;
     for (Chromosome chromosome : chromosomes) {
       fitnessCount += chromosome.fitness;
-      if (randomNumber < fitnessCount) {
+      if (randomNumber <= fitnessCount) {
         return chromosome;
       }
     }

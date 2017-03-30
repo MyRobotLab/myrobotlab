@@ -71,7 +71,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
   private HashMap<String, JTextField> armText = new HashMap<String, JTextField>();
   private HashMap<String, JButton> buttons = new HashMap<String, JButton>();
   private HashMap<String, Component> components = new HashMap<String, Component>();
-  private ConcurrentHashMap<String, CollisionItem> objects;
+  private transient ConcurrentHashMap<String, CollisionItem> objects;
   
   public IntegratedMovementGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
     super(boundServiceName, myService, tabs);
@@ -291,6 +291,9 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
   }
 
   public void onPosition(final PositionData position) {
+    if (this.myService.getInbox().size()>512) {
+      return;
+    }
     if (!armPanels.containsKey(position.armName)){
         createArmPanel((IMEngine) boundService.getEngine(position.armName));
     }
