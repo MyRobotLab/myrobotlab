@@ -63,9 +63,6 @@ public class OpenNiGui extends ServiceGui implements ActionListener {
     super(boundServiceName, myService);
     video = new VideoWidget(boundServiceName, myService);
 
-
-    video.init(null);
-
     display.setLayout(new BorderLayout());
     display.add(video.getDisplay(), BorderLayout.CENTER);
 

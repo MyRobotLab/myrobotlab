@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 public class VideoDisplayPanel {
   public class VideoMouseListener implements MouseListener {
 
+    // FIXME addListener - relay to 
     @Override
     public void mouseClicked(MouseEvent e) {
       mouseInfo.setText(String.format("clicked %d,%d", e.getX(), e.getY()));
@@ -26,6 +27,8 @@ public class VideoDisplayPanel {
       params[0] = e.getX();
       params[1] = e.getY();
 
+      // FIXME - to OpenCV specific ! - should just relay the event back - or send a more
+      // generalized message or message specific to the Panel not to OpenCv
       myService.send(boundServiceName, "invokeFilterMethod", sourceNameLabel.getText(), "samplePoint", params);
     }
 
@@ -76,7 +79,6 @@ public class VideoDisplayPanel {
 
   public int lastImageWidth = 0;
 
-  // long frameCount = 0;
   long displayModulus = 100;
 
   long delta = 0;

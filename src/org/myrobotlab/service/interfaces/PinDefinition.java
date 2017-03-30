@@ -30,19 +30,19 @@ public class PinDefinition implements Serializable{
 	int max;
 	int avg;
 
-	boolean isAnalog;
+	boolean isAnalog = false;
 
-	boolean isPwm;
+	boolean isPwm = false;
 
-	boolean isDigital = true; // default
+	boolean isDigital = true;
 	
-	boolean isRx;
+	boolean isRx = false;
 	
-	boolean isTx;
+	boolean isTx = false;
 	
-	boolean canRead = true; // default
+	boolean canRead = true;
 	
-	boolean canWrite = true; // default
+	boolean canWrite = true;
 
 	Integer value;
 

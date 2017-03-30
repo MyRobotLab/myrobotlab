@@ -90,7 +90,6 @@ public class WiiGui extends ServiceGui implements ListSelectionListener, VideoGU
     super(boundServiceName, myService);
 
     video0 = new VideoWidget(boundServiceName, myService);
-    video0.init(null);
 
     camImage = new BufferedImage(width / divisor, height / divisor, BufferedImage.TYPE_INT_RGB);
 

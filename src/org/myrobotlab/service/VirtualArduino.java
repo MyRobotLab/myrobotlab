@@ -278,8 +278,10 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
       // Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-      Runtime.start("arduino", "Arduino");
-
+      Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      virtual.connect("COM99");
+      arduino.connect("COM99");
+      
       Runtime.start("gui", "SwingGui");
       // String port = "COM5";
       // connect the virtual uart

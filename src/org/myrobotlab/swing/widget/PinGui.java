@@ -248,7 +248,7 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
 
     if (o == digitalWrite1) {
       send("pinMode", pinDef.getAddress(), Arduino.OUTPUT);
-      send("digitalWrite1", pinDef.getAddress(), 1);
+      send("digitalWrite", pinDef.getAddress(), 1);
       popupLauncher.setText("1");
       popupLauncher.setBackground(Color.GREEN);
     }
