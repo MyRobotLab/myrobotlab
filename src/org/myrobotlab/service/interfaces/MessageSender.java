@@ -1,6 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
-public interface MessageSender {
+public interface MessageSender extends NameProvider {
 
   public void send(String name, String method);
 

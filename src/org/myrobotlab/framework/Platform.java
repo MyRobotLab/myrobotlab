@@ -8,243 +8,215 @@ import java.util.Date;
 
 public class Platform implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	// VM Names
-	public final static String VM_DALVIK = "dalvik";
-	public final static String VM_HOTSPOT = "hotspot";
+  // VM Names
+  public final static String VM_DALVIK = "dalvik";
+  public final static String VM_HOTSPOT = "hotspot";
 
-	// OS Names
-	public final static String OS_LINUX = "linux";
-	public final static String OS_MAC = "mac";
-	public final static String OS_WINDOWS = "windows";
+  // OS Names
+  public final static String OS_LINUX = "linux";
+  public final static String OS_MAC = "mac";
+  public final static String OS_WINDOWS = "windows";
 
-	public final static String UNKNOWN = "unknown";
+  public final static String UNKNOWN = "unknown";
 
-	// arch names
-	public final static String ARCH_X86 = "x86";
-	public final static String ARCH_ARM = "arm";
+  // arch names
+  public final static String ARCH_X86 = "x86";
+  public final static String ARCH_ARM = "arm";
 
-	String os;
-	String arch;
-	int bitness;
-	String vmName;
-	String mrlVersion;
-	String instanceId;
-	String branch;
-	long totalPhysicalMemory;
-	long totalMemory;
-	long freeMemory;
+  // non-changing values
+  String os;
+  String arch;
+  int bitness;
+  String vmName;
+  String mrlVersion;
+  String instanceId;
+  String branch;
 
-	static Platform localInstance = getLocalInstance();
+  static Platform localInstance = getLocalInstance();
 
-	// -------------pass through begin -------------------
-	public static Platform getLocalInstance() {
-		if (localInstance == null) {
-			Platform platform = new Platform();
+  // -------------pass through begin -------------------
+  public static Platform getLocalInstance() {
+    if (localInstance == null) {
+      Platform platform = new Platform();
 
-			// os
-			platform.os = System.getProperty("os.name").toLowerCase();
-			if (platform.os.indexOf("win") >= 0) {
-				platform.os = OS_WINDOWS;
-			} else if (platform.os.indexOf("mac") >= 0) {
-				platform.os = OS_MAC;
-			} else if (platform.os.indexOf("linux") >= 0) {
-				platform.os = OS_LINUX;
-			}
+      // os
+      platform.os = System.getProperty("os.name").toLowerCase();
+      if (platform.os.indexOf("win") >= 0) {
+        platform.os = OS_WINDOWS;
+      } else if (platform.os.indexOf("mac") >= 0) {
+        platform.os = OS_MAC;
+      } else if (platform.os.indexOf("linux") >= 0) {
+        platform.os = OS_LINUX;
+      }
 
-			platform.vmName = System.getProperty("java.vm.name").toLowerCase();
+      platform.vmName = System.getProperty("java.vm.name").toLowerCase();
 
-			// bitness
-			String model = System.getProperty("sun.arch.data.model");
-			if ("64".equals(model)) {
-				platform.bitness = 64;
-			} else {
-				platform.bitness = 32;
-			}
+      // bitness
+      String model = System.getProperty("sun.arch.data.model");
+      if ("64".equals(model)) {
+        platform.bitness = 64;
+      } else {
+        platform.bitness = 32;
+      }
 
-			// arch
-			String arch = System.getProperty("os.arch").toLowerCase();
-			if ("i386".equals(arch) || "i686".equals(arch) || "i586".equals(arch) || "amd64".equals(arch)
-					|| arch.startsWith("x86")) {
-				platform.arch = "x86"; // don't care at the moment
-			}
+      // arch
+      String arch = System.getProperty("os.arch").toLowerCase();
+      if ("i386".equals(arch) || "i686".equals(arch) || "i586".equals(arch) || "amd64".equals(arch) || arch.startsWith("x86")) {
+        platform.arch = "x86"; // don't care at the moment
+      }
 
-			if ("arm".equals(arch)) {
+      if ("arm".equals(arch)) {
 
-				// FIXME - procparser is unsafe and borked !!
-				// Integer armv = ProcParser.getArmInstructionVersion();
-				// Current work around: trigger off the os.version to choose
-				// arm6 or arm7
+        // FIXME - procparser is unsafe and borked !!
+        // Integer armv = ProcParser.getArmInstructionVersion();
+        // Current work around: trigger off the os.version to choose
+        // arm6 or arm7
 
-				// assume ras pi 1 .
-				Integer armv = 6;
+        // assume ras pi 1 .
+        Integer armv = 6;
 
-				// if the os version has "v7" in it, it's a pi 2
-				// TODO: this is still pretty hacky..
-				String osVersion = System.getProperty("os.version").toLowerCase();
-				if (osVersion.contains("v7")) {
-					armv = 7;
-				}
-				// TODO: revisit how we determine the architecture version
-				platform.arch = "armv" + armv + ".hfp";
-			}
+        // if the os version has "v7" in it, it's a pi 2
+        // TODO: this is still pretty hacky..
+        String osVersion = System.getProperty("os.version").toLowerCase();
+        if (osVersion.contains("v7")) {
+          armv = 7;
+        }
+        // TODO: revisit how we determine the architecture version
+        platform.arch = "armv" + armv + ".hfp";
+      }
 
-			// for Ordroid 64 !
-			if ("aarch64".equals(arch)) {
-				platform.arch = "armv8";
-			}
+      // for Ordroid 64 !
+      if ("aarch64".equals(arch)) {
+        platform.arch = "armv8";
+      }
 
-			if (platform.arch == null) {
-				platform.arch = arch;
-			}
+      if (platform.arch == null) {
+        platform.arch = arch;
+      }
 
-			// REMOVED EVIL RECURSION - you can't call a file which has static
-			// logging !!
-			// logging calls -> platform calls a util class -> calls logging --
-			// infinite loop
-			// platform.mrlVersion = FileIO.getResourceFile("version.txt");
-			StringBuffer sb = new StringBuffer();
+      // REMOVED EVIL RECURSION - you can't call a file which has static
+      // logging !!
+      // logging calls -> platform calls a util class -> calls logging --
+      // infinite loop
+      // platform.mrlVersion = FileIO.getResourceFile("version.txt");
+      StringBuffer sb = new StringBuffer();
 
-			try {
-				BufferedReader br = new BufferedReader(
-						new InputStreamReader(Platform.class.getResourceAsStream("/resource/version.txt"), "UTF-8"));
-				for (int c = br.read(); c != -1; c = br.read()) {
-					sb.append((char) c);
-				}
-				if (sb.length() > 0) {
-					platform.mrlVersion = sb.toString();
-				}
-			} catch (Exception e) {
-				// no logging silently die
-			}
+      try {
+        BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/version.txt"), "UTF-8"));
+        for (int c = br.read(); c != -1; c = br.read()) {
+          sb.append((char) c);
+        }
+        if (sb.length() > 0) {
+          platform.mrlVersion = sb.toString();
+        }
+      } catch (Exception e) {
+        // no logging silently die
+      }
 
-			if (platform.mrlVersion == null) {
-				SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
-				platform.mrlVersion = format.format(new Date());
-			}
+      if (platform.mrlVersion == null) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
+        platform.mrlVersion = format.format(new Date());
+      }
 
-			try {
-				sb.setLength(0);
-				BufferedReader br = new BufferedReader(
-						new InputStreamReader(Platform.class.getResourceAsStream("/resource/branch.txt"), "UTF-8"));
-				for (int c = br.read(); c != -1; c = br.read()) {
-					sb.append((char) c);
-				}
-				if (sb.length() > 0) {
-					platform.branch = sb.toString();
-				}
-			} catch (Exception e) {
-				// no logging silently die
-			}
+      try {
+        sb.setLength(0);
+        BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/branch.txt"), "UTF-8"));
+        for (int c = br.read(); c != -1; c = br.read()) {
+          sb.append((char) c);
+        }
+        if (sb.length() > 0) {
+          platform.branch = sb.toString();
+        }
+      } catch (Exception e) {
+        // no logging silently die
+      }
 
-			if (platform.branch == null) {
-				platform.branch = "unknown";
-			}
+      if (platform.branch == null) {
+        platform.branch = "unknown";
+      }
 
-			try {
-				com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory
-						.getOperatingSystemMXBean();
-				platform.totalPhysicalMemory = os.getTotalPhysicalMemorySize() / 1048576;
+      localInstance = platform;
+    }
 
-			} catch (Exception e) {
-			}
+    return localInstance;
+  }
 
-			platform.freeMemory = Runtime.getRuntime().freeMemory() / 1048576;
-			platform.totalMemory = Runtime.getRuntime().totalMemory() / 1048576;
+  public Platform() {
+  }
 
-			localInstance = platform;
-		}
+  public String getBranch() {
+    return branch;
+  }
 
-		return localInstance;
-	}
+  public String getArch() {
+    return arch;
+  }
 
-	public Platform() {
-	}
+  public int getBitness() {
+    return bitness;
+  }
 
-	public String getBranch() {
-		return branch;
-	}
+  public String getClassPathSeperator() {
+    if (isWindows()) {
+      return ";";
+    } else {
+      return ":";
+    }
+  }
 
-	public String getArch() {
-		return arch;
-	}
+  public String getInstanceId() {
+    return instanceId;
+  }
 
-	public int getBitness() {
-		return bitness;
-	}
+  public void getInstanceId(String isntanceId) {
+    this.instanceId = isntanceId;
+  }
 
-	public String getClassPathSeperator() {
-		if (isWindows()) {
-			return ";";
-		} else {
-			return ":";
-		}
-	}
+  public String getOS() {
+    return os;
+  }
 
-	public String getInstanceId() {
-		return instanceId;
-	}
+  public String getPlatformId() {
+    return String.format("%s.%s.%s", getArch(), getBitness(), getOS());
+  }
 
-	public void getInstanceId(String isntanceId) {
-		this.instanceId = isntanceId;
-	}
+  public String getVersion() {
+    return mrlVersion;
+  }
 
-	public String getOS() {
-		return os;
-	}
+  public String getVMName() {
+    return vmName;
+  }
 
-	public String getPlatformId() {
-		return String.format("%s.%s.%s", getArch(), getBitness(), getOS());
-	}
+  public boolean isArm() {
+    return getArch().startsWith(ARCH_ARM);
+  }
 
-	public String getVersion() {
-		return mrlVersion;
-	}
+  public boolean isDalvik() {
+    return VM_DALVIK.equals(vmName);
+  }
 
-	public String getVMName() {
-		return vmName;
-	}
+  public boolean isLinux() {
+    return OS_LINUX.equals(os);
+  }
 
-	public boolean isArm() {
-		return getArch().startsWith(ARCH_ARM);
-	}
+  public boolean isMac() {
+    return OS_MAC.equals(os);
+  }
 
-	public boolean isDalvik() {
-		return VM_DALVIK.equals(vmName);
-	}
+  public boolean isWindows() {
+    return OS_WINDOWS.equals(os);
+  }
 
-	public boolean isLinux() {
-		return OS_LINUX.equals(os);
-	}
+  public boolean isX86() {
+    return getArch().equals(ARCH_X86);
+  }
 
-	public boolean isMac() {
-		return OS_MAC.equals(os);
-	}
-
-	public boolean isWindows() {
-		return OS_WINDOWS.equals(os);
-	}
-
-	public boolean isX86() {
-		return getArch().equals(ARCH_X86);
-	}
-	
-	public long getTotalPhysicalMemory(){
-		return totalPhysicalMemory;
-	}
-	
-	public long getTotalMemory(){
-		return totalMemory;
-	}
-	
-	public long getFreeMemory(){
-		return freeMemory;
-	}
-
-	@Override
-	public String toString() {
-		return String.format("%s.%d.%s", arch, bitness, os);
-	}
+  @Override
+  public String toString() {
+    return String.format("%s.%d.%s", arch, bitness, os);
+  }
 
 }

@@ -26,6 +26,7 @@
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -331,6 +332,17 @@ public abstract class ServiceGui {
 		send("publishStatus", Status.error(errorMsg));
 	}
 
+	public void addTopLeft(Object... components){
+		Container test = north.getParent();
+		if (test == display){
+			// add new left shift panel
+			JPanel left = new JPanel(new BorderLayout());
+			display.add(left, BorderLayout.NORTH);
+			left.add(north, BorderLayout.WEST);
+		}
+		addTop(components);
+	}
+	
 	public void addTop(Object... components) {
 		addLinex(north, gcNorth, components);
 	}

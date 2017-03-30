@@ -136,23 +136,11 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 			return;
 		}
 
-		if (o instanceof PinGui) {
-			PinGui p = (PinGui) o;
-			PinDefinition pinDef = p.getPinDef();
-			if (pinDef.isDigital()) {
-				if ("on".equals(p.getState())) {
-					send("digitalWrite", pinDef.getAddress(), 1);
-				} else if ("off".equals(p.getState())) {
-					send("digitalWrite", pinDef.getAddress(), 0);
-				}
-			} else if (pinDef.isAnalog()) {
-				if ("on".equals(p.getState())) {
-					send("enablePin", pinDef.getAddress());
-				} else if ("off".equals(p.getState())) {
-					send("disablePin", pinDef.getAddress());
-				}
-			}
-		}
+		// allow  hook ? - or just send directly !!
+		// if (o instanceof PinGui) {
+		//	PinGui p = (PinGui) o;
+		//	send(p.getMethod(), p.getParams());
+		//}
 
 		if (o == openMrlComm) {
 			send("setArduinoPath", arduinoPath.getText());
@@ -224,8 +212,10 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
 		for (int i = 0; i < pins.size(); ++i) {
 
-			PinGui p = new PinGui(pins.get(i));
+			PinGui p = new PinGui(myArduino, pins.get(i));
 
+			// p.showName();
+			
 			// set up the listeners
 			p.addActionListener(self);
 			pinGuiList.add(p);
@@ -236,7 +226,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 					yOffSet = 13; // gap between pins
 				}
 
-				p.setBounds(552 - 20 * i - yOffSet, 18, 15, 15);
+				p.setBounds(552 - 20 * i - yOffSet, 18, 15, 15);  
 				// p.onOff.getLabel().setUI(new VerticalLabelUI(true));
 				imageMap.add(p.getDisplay(), new Integer(2));
 
@@ -259,6 +249,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 				 * p.data.setBackground(Color.decode("0x0f7391"));
 				 * p.data.setOpaque(true); imageMap.add(p.data, new Integer(2));
 				 */
+			  p.setBounds(172 + 20 * i, 400, 15, 15);
+			  imageMap.add(p.getDisplay(), new Integer(2));
+			  
 			}
 		}
 		localTabs.addTab("pin", imageMap);
@@ -351,7 +344,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				log.info("onState Arduino");
+				log.debug("onState Arduino");
 				if (arduino != null) {
 					myArduino = arduino; // FIXME - super updates registry state
 					pinList = myArduino.getPinList();

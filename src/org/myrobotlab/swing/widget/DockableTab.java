@@ -102,6 +102,9 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 		addMenuItem("undock");
 		addMenuItem("release");
 		addMenuItem("hide");
+		addMenuItem("showAll");
+		addMenuItem("explode");
+		addMenuItem("collapse");
 
 		this.title.addMouseListener(this);
 		this.title.addMouseMotionListener(this);
@@ -135,6 +138,12 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 			} catch (Exception e2) {
 				log.error("info threw", e2);
 			}
+		} else if ("hide".equals(cmd)) {
+			hideTab();
+		} else if ("collapse".equals(cmd)) {
+			tabPane.collapse();
+		} else if ("explode".equals(cmd)) {
+			tabPane.explode();
 		}
 		// chain ?
 		tabPane.actionPerformed(e);

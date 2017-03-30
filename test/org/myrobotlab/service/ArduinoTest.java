@@ -289,7 +289,7 @@ public class ArduinoTest implements PinArrayListener {
 		arduino.enablePin(enablePin);
 		arduino.attach(this);
 		sleep(50);
-		assertTrue(pinData.containsKey(arduino.getAddress(enablePin)));
+		assertTrue(pinData.containsKey(arduino.pinNameToAddress(enablePin)));
 		arduino.disablePin(enablePin);
 	}
 

@@ -100,8 +100,9 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		autoScroll(true);
 
 		portGui = new PortGui(boundServiceName, myService);
-		addTop(portGui.getDisplay(), " ", reqFormat, clear, monitor, record, createVirtualPort);
-
+		addTopLeft(5, portGui.getDisplay());
+		addTopLeft(monitor, reqFormat, clear, record, createVirtualPort);
+		
 		add(new JScrollPane(rx));
 		add(new JScrollPane(tx));
 		add("send");

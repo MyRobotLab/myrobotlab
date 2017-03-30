@@ -635,15 +635,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 	}
 	
 	public void explode(){
-		for (String key : tabs.keySet()) {
-			undockTab(key);
-		}
+		tabs.explode();
 	}
 	
 	public void collapse(){
-		for (String key : tabs.keySet()) {
-			dockTab(key);
-		}
+		tabs.collapse();
 	}
 
 	public void undockTab(final String title) {
