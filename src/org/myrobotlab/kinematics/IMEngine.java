@@ -94,7 +94,7 @@ public class IMEngine extends Thread implements Genetic {
       if (target == null && !isWaitingForServo() && AiActive(IntegratedMovement.Ai.KEEP_BALANCE)) {
         target = checkCoG();
         if(target != null){
-          move();
+          //move();
           target = null;
         }
       }
@@ -120,6 +120,7 @@ public class IMEngine extends Thread implements Genetic {
   
   private Point checkCoG() {
     Point cog = service.cog.computeCoG(null);
+    double deltaDegree = 0.1;
     if (cogRetry > 10) {
       return null;
     }
@@ -128,106 +129,108 @@ public class IMEngine extends Thread implements Genetic {
     //if (cog.getZ()==0.0) return null;
     Point cogTarget = service.cog.getCoGTarget();
     if (cog.distanceTo(cogTarget) > service.cog.getMaxDistanceToCog()) {
-      int maxIter = 1;
+      int maxIter = 100;
       computeArm = new DHRobotArm(arm);
       CollisionDectection cd = new CollisionDectection(service.collisionItems);
       for (int i = 0; i < maxIter; i++) {
-//        for (DHLink link:computeArm.getLinks()){
-//          if (link.getState()!=Servo.SERVO_EVENT_STOPPED) {
-//            link.addPositionValue(link.getTargetPos());
-//            continue;
-//          }
-//        }
-//        for (int j = 0; j < computeArm.getNumLinks(); j++) {
-//          if (computeArm.getLink(j).getState()!=Servo.SERVO_EVENT_STOPPED) {
-//            continue;
-//          }
-//          
-//          Point cogIni = service.cog.computeCoG(cd);
-//          cogIni.setZ(0.0);
-//          //cogIni.setY(0.0);
-//          computeArm.getLink(j).incrRotate(MathUtils.degToRad(0.5));
-//          double[][] jp = computeArm.createJointPositionMap();
-//          for (int k = j; k < computeArm.getNumLinks(); k++) {
-//            CollisionItem ci = new CollisionItem(new Point(jp[k][0], jp[k][1], jp[k][2], 0 , 0, 0), new Point(jp[k+1][0], jp[k+1][1], jp[k+1][2], 0, 0, 0), computeArm.getLink(k).getName());
-//            if (k != computeArm.getNumLinks()-1) {
-//              ci.addIgnore(computeArm.getLink(k+1).getName());
-//            }
-//            cd.addItem(ci);
-//          }
-//          Point deltaCoG = service.cog.computeCoG(cd);
-//          deltaCoG.setZ(0.0);
-//          //deltaCoG.setY(0.0);
-//          if (cogTarget.distanceTo(cogIni) > cogTarget.distanceTo(deltaCoG)) {
-//            if (cogTarget.distanceTo(deltaCoG) < service.cog.getMaxDistanceToCog()) {
-//              publishAngles();
-//              cogRetry=0;
-//              return computeArm.getPalmPosition();
-//            }
-//            continue;
-//          }
-//          computeArm.getLink(j).incrRotate(MathUtils.degToRad(-1.0));
-//          jp = computeArm.createJointPositionMap();
-//          for (int k = j; k < computeArm.getNumLinks(); k++) {
-//            CollisionItem ci = new CollisionItem(new Point(jp[k][0], jp[k][1], jp[k][2], 0 , 0, 0), new Point(jp[k+1][0], jp[k+1][1], jp[k+1][2], 0, 0, 0), computeArm.getLink(k).getName());
-//            if (k != computeArm.getNumLinks()-1) {
-//              ci.addIgnore(computeArm.getLink(k+1).getName());
-//            }
-//            cd.addItem(ci);
-//          }
-//          deltaCoG = service.cog.computeCoG(cd);
-//          deltaCoG.setZ(0.0);
-//          //deltaCoG.setY(0.0);
-//          if (cogTarget.distanceTo(cogIni) > cogTarget.distanceTo(deltaCoG)) {
-//            if (cogTarget.distanceTo(deltaCoG) < service.cog.getMaxDistanceToCog()) {
-//              publishAngles();
-//              cogRetry=0;
-//              return computeArm.getPalmPosition();
-//            }
-//            continue;
-//          }
-//          computeArm.getLink(j).incrRotate(MathUtils.degToRad(0.5));
-//        }
-      }
-      int geneticPoolSize=100;
-      double geneticRecombinationRate = 0.7;
-      double geneticMutationRate = 0.01;
-      int geneticGeneration = 50;
-      calcFitnessType = CalcFitnessType.POSITION;
-      GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, arm.getNumLinks(), 12, geneticRecombinationRate, geneticMutationRate );
-      Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the number of time the chromosome pool will be recombined and mutate
-      for (int i = 0; i < computeArm.getNumLinks(); i++) {
-        if (bestFit.getDecodedGenome().get(i) != null) {
-          DHLink link = computeArm.getLink(i);
-          double degrees = link.getPositionValueDeg();
-          double deltaDegree = java.lang.Math.abs(degrees - (double)bestFit.getDecodedGenome().get(i));
-          if (degrees > ((double)bestFit.getDecodedGenome().get(i))) {
-            degrees -= deltaDegree;
+        for (DHLink link:computeArm.getLinks()){
+          if (link.getState()!=Servo.SERVO_EVENT_STOPPED) {
+            link.addPositionValue(link.getTargetPos());
+            continue;
           }
-          else if (degrees < ((double)bestFit.getDecodedGenome().get(i))) {
-            degrees += deltaDegree;
+        }
+        for (int j = computeArm.getNumLinks()-1; j >=0 ; j--) {
+        //for (int j = 0; j < computeArm.getNumLinks(); j++) {
+          if (computeArm.getLink(j).getState()!=Servo.SERVO_EVENT_STOPPED) {
+            continue;
           }
-          link.addPositionValue( degrees);
+          
+          Point cogIni = service.cog.computeCoG(cd);
+          cogIni.setZ(0.0);
+          //cogIni.setY(0.0);
+          computeArm.getLink(j).incrRotate(MathUtils.degToRad(deltaDegree));
+          double[][] jp = computeArm.createJointPositionMap();
+          for (int k = computeArm.getNumLinks()-1; k >= j; k--) {
+          //for (int k = j; k < computeArm.getNumLinks(); k++) {
+            CollisionItem ci = new CollisionItem(new Point(jp[k][0], jp[k][1], jp[k][2], 0 , 0, 0), new Point(jp[k+1][0], jp[k+1][1], jp[k+1][2], 0, 0, 0), computeArm.getLink(k).getName());
+            if (k != computeArm.getNumLinks()-1) {
+              ci.addIgnore(computeArm.getLink(k+1).getName());
+            }
+            cd.addItem(ci);
+          }
+          Point deltaCoG = service.cog.computeCoG(cd);
+          deltaCoG.setZ(0.0);
+          //deltaCoG.setY(0.0);
+          if (cogTarget.distanceTo(cogIni) > cogTarget.distanceTo(deltaCoG)) {
+            if (cogTarget.distanceTo(deltaCoG) < service.cog.getMaxDistanceToCog()*0.8) {
+              publishAngles();
+              cogRetry=0;
+              return computeArm.getPalmPosition();
+            }
+            continue;
+          }
+          computeArm.getLink(j).incrRotate(MathUtils.degToRad(-2*deltaDegree));
+          jp = computeArm.createJointPositionMap();
+          for (int k = computeArm.getNumLinks()-1; k >= j; k--) {
+            CollisionItem ci = new CollisionItem(new Point(jp[k][0], jp[k][1], jp[k][2], 0 , 0, 0), new Point(jp[k+1][0], jp[k+1][1], jp[k+1][2], 0, 0, 0), computeArm.getLink(k).getName());
+            if (k != computeArm.getNumLinks()-1) {
+              ci.addIgnore(computeArm.getLink(k+1).getName());
+            }
+            cd.addItem(ci);
+          }
+          deltaCoG = service.cog.computeCoG(cd);
+          deltaCoG.setZ(0.0);
+          //deltaCoG.setY(0.0);
+          if (cogTarget.distanceTo(cogIni) > cogTarget.distanceTo(deltaCoG)) {
+            if (cogTarget.distanceTo(deltaCoG) < service.cog.getMaxDistanceToCog()*0.8) {
+              publishAngles();
+              cogRetry=0;
+              return computeArm.getPalmPosition();
+            }
+            continue;
+          }
+          computeArm.getLink(j).incrRotate(MathUtils.degToRad(deltaDegree));
         }
       }
-      double[][] jp = computeArm.createJointPositionMap();
-      for (int k = 0; k < computeArm.getNumLinks(); k++) {
-        CollisionItem ci = new CollisionItem(new Point(jp[k][0], jp[k][1], jp[k][2], 0 , 0, 0), new Point(jp[k+1][0], jp[k+1][1], jp[k+1][2], 0, 0, 0), computeArm.getLink(k).getName());
-        if (k != computeArm.getNumLinks()-1) {
-          ci.addIgnore(computeArm.getLink(k+1).getName());
-        }
-        cd.addItem(ci);
-      }
-      Point deltaCoG = service.cog.computeCoG(cd);
-      deltaCoG.setZ(0.0);
-      deltaCoG.setY(0.0);
-      if (deltaCoG.distanceTo(service.cog.getCoGTarget()) < service.cog.getMaxDistanceToCog()) {
-        Point pos = computeArm.getPalmPosition();
-        Log.info("Moving to " + getName() + pos.toString());
-        //publishAngles();
-        return computeArm.getPalmPosition();
-      }
-      return null;
+//      int geneticPoolSize=100;
+//      double geneticRecombinationRate = 0.7;
+//      double geneticMutationRate = 0.01;
+//      int geneticGeneration = 50;
+//      calcFitnessType = CalcFitnessType.POSITION;
+//      GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, arm.getNumLinks(), 12, geneticRecombinationRate, geneticMutationRate );
+//      Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the number of time the chromosome pool will be recombined and mutate
+//      for (int i = 0; i < computeArm.getNumLinks(); i++) {
+//        if (bestFit.getDecodedGenome().get(i) != null) {
+//          DHLink link = computeArm.getLink(i);
+//          double degrees = link.getPositionValueDeg();
+//          double deltaDegree = java.lang.Math.abs(degrees - (double)bestFit.getDecodedGenome().get(i));
+//          if (degrees > ((double)bestFit.getDecodedGenome().get(i))) {
+//            degrees -= deltaDegree;
+//          }
+//          else if (degrees < ((double)bestFit.getDecodedGenome().get(i))) {
+//            degrees += deltaDegree;
+//          }
+//          link.addPositionValue( degrees);
+//        }
+//      }
+//      double[][] jp = computeArm.createJointPositionMap();
+//      for (int k = 0; k < computeArm.getNumLinks(); k++) {
+//        CollisionItem ci = new CollisionItem(new Point(jp[k][0], jp[k][1], jp[k][2], 0 , 0, 0), new Point(jp[k+1][0], jp[k+1][1], jp[k+1][2], 0, 0, 0), computeArm.getLink(k).getName());
+//        if (k != computeArm.getNumLinks()-1) {
+//          ci.addIgnore(computeArm.getLink(k+1).getName());
+//        }
+//        cd.addItem(ci);
+//      }
+//      Point deltaCoG = service.cog.computeCoG(cd);
+//      deltaCoG.setZ(0.0);
+//      //deltaCoG.setY(0.0);
+//      if (deltaCoG.distanceTo(service.cog.getCoGTarget()) < service.cog.getMaxDistanceToCog()) {
+//        Point pos = computeArm.getPalmPosition();
+//        Log.info("Moving to " + getName() + pos.toString());
+//        //publishAngles();
+//        return computeArm.getPalmPosition();
+//      }
+      return computeArm.getPalmPosition();
       //cogRetry++;
     }
     return null;
@@ -605,7 +608,7 @@ public class IMEngine extends Thread implements Genetic {
         Point cog = service.cog.computeCoG(cd);
         //project the COG point to the X/Y plane
         cog.setZ(0.0);
-        cog.setY(0.0);
+        //cog.setY(0.0);
         //find a value that put the COG into the target area while minimizing deltaCoG
         Double fitness = 0.0;
         double deltaCog = cog.distanceTo(service.cog.getCoGTarget());
