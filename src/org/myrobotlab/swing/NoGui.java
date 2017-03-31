@@ -28,7 +28,6 @@ package org.myrobotlab.swing;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.Service;
@@ -43,8 +42,8 @@ public class NoGui extends ServiceGui implements ActionListener {
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(NoGui.class);
 
-  public NoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public NoGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     ServiceInterface si = Runtime.getService(boundServiceName);
     addTopLine(String.format( "%s does not have a user interface", si.getSimpleName()));
   }

@@ -43,7 +43,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 import org.myrobotlab.chess.Board;
 import org.myrobotlab.chess.Constants;
@@ -131,8 +130,8 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
     return t;
   }
 
-  public ChessGameGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public ChessGameGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
 
     // showStatus ("Please Wait; Program Loading");

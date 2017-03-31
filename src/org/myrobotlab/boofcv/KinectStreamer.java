@@ -18,7 +18,7 @@ import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.gui.image.VisualizeImageData;
 import boofcv.io.image.ConvertBufferedImage;
-import boofcv.openkinect.*;
+import boofcv.openkinect.UtilOpenKinect;
 import boofcv.struct.image.GrayU16;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.Planar;

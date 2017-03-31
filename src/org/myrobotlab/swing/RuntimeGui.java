@@ -56,7 +56,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolTip;
@@ -67,9 +66,11 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.SystemResources;
 import org.myrobotlab.framework.repo.Category;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -118,6 +119,12 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 	JMenuItem releaseMenuItem = null;
 	String possibleServiceFilter = null;
 	ProgressDialog progressDialog = null;
+	
+  JLabel freeMemory = new JLabel();
+  JLabel usedMemory = new JLabel();
+  JLabel maxMemory = new JLabel();
+	JLabel totalMemory = new JLabel();
+	JLabel totalPhysicalMemory = new JLabel();
 
 	JTextField search = new JTextField();
 	
@@ -173,8 +180,8 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 		}
 	};
 
-	public RuntimeGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public RuntimeGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 		// required - it "might" be a foreign Runtime...
 		myRuntime = (Runtime) Runtime.getService(boundServiceName);
 		myRepo = myRuntime.getRepo();
@@ -330,6 +337,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 		// add(categories, possible, runningServices);
 
 		addTopLine(createMenuBar());
+		addBottom("memory physical ", totalPhysicalMemory, "  max ", maxMemory, "  total ", totalMemory, "  free ", freeMemory, "  used ", usedMemory );
 		getPossibleServices();
 
 	}
@@ -470,11 +478,23 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
 		}
 	}
+	/**
+	 * scheduled event of reporting on system resources
+	 * @param resources
+	 */
+	public void onSystemResources(SystemResources resources){
+    totalPhysicalMemory.setText(String.format("%d", resources.getTotalPhysicalMemory()));
+    maxMemory.setText(String.format("%d", resources.getMaxMemory()));
+	  totalMemory.setText(String.format("%d", resources.getTotalMemory()));
+    freeMemory.setText(String.format("%d", resources.getFreeMemory()));
+    usedMemory.setText(String.format("%d", resources.getTotalMemory() - resources.getFreeMemory()));
+	}
 
 	@Override
 	public void subscribeGui() {
 		subscribe("registered");
 		subscribe("released");
+		subscribe("getSystemResources");
 		subscribe("publishInstallProgress");
 	}
 
@@ -482,6 +502,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 	public void unsubscribeGui() {
 		unsubscribe("registered");
 		unsubscribe("released");
+		subscribe("getSystemResources");
 		unsubscribe("publishInstallProgress");
 	}
 
@@ -640,6 +661,12 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				Platform platform = myRuntime.getPlatform();
+				SystemResources resources = myRuntime.getSystemResources();
+				totalMemory.setText(String.format("%d", resources.getTotalMemory()));
+				freeMemory.setText(String.format("%d", resources.getFreeMemory()));
+				totalPhysicalMemory.setText(String.format("%d", resources.getTotalPhysicalMemory()));
+				
 				// FIXME - change to "all" or "" - null is sloppy - system has
 				// to upcast
 				myService.pack();

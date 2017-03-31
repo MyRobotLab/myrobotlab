@@ -45,6 +45,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.SystemResources;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -58,6 +59,8 @@ import org.myrobotlab.service.interfaces.RepoInstallListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
+
+import com.sun.management.OperatingSystemMXBean;
 
 /**
  * Runtime is responsible for the creation and removal of all Services and the
@@ -130,6 +133,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   private ServiceData serviceData = ServiceData.getLocalInstance();
 
   private Platform platform = Platform.getLocalInstance();
+  
+  SystemResources resources = new SystemResources();
 
   private static long uniqueID = new Random(System.currentTimeMillis()).nextLong();
 
@@ -1002,6 +1007,14 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
     return 0;
   }
+  
+  
+  static public double getCpuLoad(){
+	  OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(
+              OperatingSystemMXBean.class);
+	  //What % CPU load this current JVM is taking, from 0.0-1.0
+	  return osBean.getProcessCpuLoad();
+  }
 
   /**
    * unique id's are need for sendBlocking - to uniquely identify the message
@@ -1789,6 +1802,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     hideMethods.add("run");
     hideMethods.add("access$0");
 
+    // TODO - good idea for future use - but must have a way to 
+    // purge tasks on Junit test or it gets hung in Travis
+    // addTask(1000, "getSystemResources");
     // TODO - check for updates on startup ???
 
     // starting this
@@ -2375,6 +2391,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   public ServiceData getServiceData() {
     return serviceData;
+  }
+
+  public SystemResources getSystemResources() {
+    return new SystemResources();
   }
 
 }

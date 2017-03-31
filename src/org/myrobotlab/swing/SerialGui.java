@@ -36,7 +36,6 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
@@ -64,8 +63,8 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 	// FIXME !!!
 	JButton createVirtualPort = new JButton("create virtual uart");
-	JButton monitor = new JButton("stop monitor");
-	boolean monitoring = true;
+	JButton monitor = new JButton("monitor");
+	boolean monitoring = false;
 	JButton clear = new JButton("clear");
 	JButton record = new JButton();
 
@@ -92,17 +91,18 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 	PortGui portGui;
 
-	public SerialGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public SerialGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 		self = this;
 		mySerial = (Serial) Runtime.getService(boundServiceName);
 		rx.setEditable(false);
 		tx.setEditable(false);
 		autoScroll(true);
 
-		portGui = new PortGui(boundServiceName, myService, tabs);
-		addTop(portGui.getDisplay(), " ", reqFormat, clear, monitor, record, createVirtualPort);
-
+		portGui = new PortGui(boundServiceName, myService);
+		addTopLeft(5, portGui.getDisplay());
+		addTopLeft(monitor, reqFormat, clear, record, createVirtualPort);
+		
 		add(new JScrollPane(rx));
 		add(new JScrollPane(tx));
 		add("send");
@@ -135,7 +135,12 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 			clear();
 		}
 		if (o == createVirtualPort) {
-			send("connectVirtualUart", "COM88");
+			String portName = portGui.getSelected();
+			if (portName == null || portName.length() == 0){
+				log.info("port name must be specified");
+				return;
+			}
+			send("connectVirtualUart", portName);
 		}
 		
 		if (o == monitor){
@@ -144,10 +149,12 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 				m.setText("stop monitor");
 				monitoring = true;
 				subscribe("publishRX");
+				subscribe("publishTX");
 			} else {
 				m.setText("monitor");
 				monitoring = false;
 				unsubscribe("publishRX");
+				unsubscribe("publishTX");
 			}
 		}
 
@@ -166,7 +173,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		if (o == send) {
 			String data = toSend.getText();
 			send("write", data.getBytes());
-			myService.info("sent [%s]", data);
+			log.info("sent [%s]", data);
 		}
 	}
 
@@ -177,17 +184,10 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 
 	@Override
 	public void subscribeGui() {
-		subscribe("publishRX");
-		subscribe("publishTX");
-		subscribe("publishState");
-		// forces scan of ports
 	}
 
 	@Override
-	public void unsubscribeGui() {
-		unsubscribe("publishRX");
-		unsubscribe("publishTX");
-		unsubscribe("publishState");
+	public void unsubscribeGui() {		
 	}
 
 	public void autoScroll(boolean b) {

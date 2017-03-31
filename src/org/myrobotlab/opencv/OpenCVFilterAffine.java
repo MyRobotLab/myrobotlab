@@ -7,6 +7,7 @@ import static org.bytedeco.javacpp.opencv_core.cvSize2D32f;
 import static org.bytedeco.javacpp.opencv_imgproc.cv2DRotationMatrix;
 import static org.bytedeco.javacpp.opencv_imgproc.cvBoxPoints;
 import static org.bytedeco.javacpp.opencv_imgproc.cvWarpAffine;
+
 import org.bytedeco.javacpp.opencv_core.CvBox2D;
 import org.bytedeco.javacpp.opencv_core.CvMat;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;

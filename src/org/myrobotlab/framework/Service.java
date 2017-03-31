@@ -257,11 +257,12 @@ public abstract class Service extends MessageService
 	 * TreeSet<String> set = new TreeSet<String>(); return set; }
 	 */
 
-	public String getPeerName(String peerKey) {
+	public String getPeerName(String fullKey) {
+		// String fullKey = String.format("%s.%s", getName(), peerKey);
 		// below is correct - all 'reads' should be against the dnaPool (i think)
-		if (dnaPool.containsKey(peerKey)) {
+		if (dnaPool.containsKey(fullKey)) {
 			// easy case - info already exists ...
-			return dnaPool.get(peerKey).actualName;
+			return dnaPool.get(fullKey).actualName;
 		}
 		// --------- begin - is this necessary or correct ? -------------
 		// look at the build plan
@@ -271,7 +272,7 @@ public abstract class Service extends MessageService
 		}
 
 		if (srs != null) {
-			ServiceReservation sr = srs.get(peerKey);
+			ServiceReservation sr = srs.get(fullKey);
 			if (sr != null) {
 				return sr.actualName;
 			}
@@ -458,7 +459,7 @@ public abstract class Service extends MessageService
 				}
 				Type t = f.getType();
 
-				// log.debug(String.format("setting %s", f.getName()));
+				// log.info(String.format("setting %s", f.getName()));
 				/*
 				 * if (Modifier.isStatic(modifiers) ||
 				 * Modifier.isFinal(modifiers)) { continue; }
@@ -898,9 +899,13 @@ public abstract class Service extends MessageService
 			outbox.notifyList.put(listener.topicMethod.toString(), notifyList);
 		}
 	}
+	
+	public void addTask(int intervalMs, String method) {
+	  addTask(intervalMs, method, new Object[]{});
+	}
 
-	public void addTask(int interval, String method, Object... params) {
-		addTask(method, interval, method, params);
+	public void addTask(int intervalMs, String method, Object... params) {
+		addTask(method, intervalMs, method, params);
 	}
 
 	/**
@@ -908,13 +913,13 @@ public abstract class Service extends MessageService
 	 * 
 	 * @param name
 	 */
-	public void addTask(String name, int interval, String method, Object... params) {
+	public void addTask(String name, int intervalMs, String method, Object... params) {
 		if (tasks.containsKey(name)) {
 			log.warn(String.format("already have active task \"%s\"", name));
 			return;
 		}
 		Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), name)));
-		Task task = new Task(name, interval, getName(), method, params);
+		Task task = new Task(name, intervalMs, getName(), method, params);
 		timer.schedule(task, 0);
 		tasks.put(name, timer);
 	}
@@ -2102,6 +2107,10 @@ public abstract class Service extends MessageService
 		log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
 		MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
 		cm.send(createMessage(topicName, "addListener", listener));
+	}
+	
+	public void sendPeer(String peerKey, String method, Object... params){
+		cm.send(createMessage(getPeerName(peerKey), method, params));
 	}
 
 	public void unsubscribe(NameProvider topicName, String topicMethod) {

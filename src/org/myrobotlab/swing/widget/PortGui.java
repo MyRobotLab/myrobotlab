@@ -7,7 +7,6 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.image.Util;
@@ -23,15 +22,13 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 	JButton refresh = new JButton("refresh");
 	String lastPortName;
 
-	public PortGui(String boundServiceName, SwingGui myService, JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public PortGui(String boundServiceName, SwingGui myService) {
+		super(boundServiceName, myService);
 		ports.setEditable(true);
 		add(connectLight, ports, connect, refresh);
-// 		onState((PortPublisher) Runtime.getService(boundServiceName));
 		subscribeGui();
 		connect.addActionListener(this);
 		refresh.addActionListener(this);		
-// 		myService.subscribeToServiceMethod(boundServiceName, this);
 	}
 
 	/**
@@ -64,7 +61,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-// 				onPortNames(portPublisher.getPortNames());// 	bad idea			
+ 				// onPortNames(portPublisher.getPortNames());// 	bad idea			
 				// set light if connected
 				if (portPublisher == null){
 					log.info("here");

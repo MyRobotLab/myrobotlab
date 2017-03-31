@@ -30,7 +30,6 @@ import java.awt.GridLayout;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
@@ -54,12 +53,10 @@ public class TrackingGui extends ServiceGui {
 
   VideoWidget video0 = null;
 
-  public TrackingGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public TrackingGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
-    video0 = new VideoWidget(boundServiceName, myService, tabs, false);
-    video0.init(null);
-    // video0.allowFork = true;
+    video0 = new VideoWidget(boundServiceName, myService);
 
     status.setEditable(false);
 

@@ -13,8 +13,6 @@ import org.myrobotlab.oculus.OculusDisplay;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.service.data.Orientation;
-import org.myrobotlab.service.interfaces.OrientationListener;
-import org.myrobotlab.service.interfaces.OrientationPublisher;
 import org.myrobotlab.service.interfaces.PointPublisher;
 import org.slf4j.Logger;
 

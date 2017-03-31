@@ -36,14 +36,12 @@ import java.awt.event.ActionListener;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
-import javax.swing.JTabbedPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.AdafruitMotorShield;
-import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
@@ -67,8 +65,8 @@ public class AdafruitMotorShieldGui extends ServiceGui implements ListSelectionL
 
   JLayeredPane imageMap;
 
-  public AdafruitMotorShieldGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public AdafruitMotorShieldGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     getAFPanel();
     display.add(imageMap);
   }

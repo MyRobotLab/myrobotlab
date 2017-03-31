@@ -33,7 +33,6 @@ import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
 import org.myrobotlab.service.Clock;
@@ -44,17 +43,15 @@ public class ClockGui extends ServiceGui implements ActionListener {
   static final long serialVersionUID = 1L;
   JButton startClock = new JButton("start clock");
 
-  JLabel clockDisplay = new JLabel("<html><p style=\"font-size:30px;\">00:00:00.</p></html>");
-  String displayFormat = "<html><p style=\"font-size:30px\">%s</p></html>";
+  JLabel clockDisplay = new JLabel("<html><p style=\"font-size:15px;\">00:00:00.</p></html>");
+  String displayFormat = "<html><p style=\"font-size:15px\">%s</p></html>";
   DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+  JTextField interval = new JTextField("1000", 8);
  
-  JTextField interval = new JTextField("1000", 30);
-  JTextField data = new JTextField(10);
- 
-  public ClockGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);  
-    add(clockDisplay);
-    addBottomLine(startClock, interval, "ms");
+  public ClockGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);  
+    addTop(3, clockDisplay);
+    addTop(startClock, interval, "ms");
     clockDisplay.setText(String.format(displayFormat, dateFormat.format(new Date())));
     startClock.addActionListener(this);
   }
@@ -103,11 +100,9 @@ public class ClockGui extends ServiceGui implements ActionListener {
 
     if (c.isClockRunning) {
       startClock.setText("stop clock");
-      data.setEnabled(false);
       interval.setEnabled(false);
     } else {
       startClock.setText("start clock");
-      data.setEnabled(true);
       interval.setEnabled(true);
     }
   }

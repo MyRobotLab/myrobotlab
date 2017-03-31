@@ -1,7 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
 import java.io.IOException;
-import org.myrobotlab.service.interfaces.I2CControl;
 
 /*
  * This interface is based on the methods for i2c read and write in the Pi4J project

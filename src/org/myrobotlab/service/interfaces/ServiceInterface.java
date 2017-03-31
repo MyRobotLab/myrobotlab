@@ -11,100 +11,99 @@ import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
-public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender {
+public interface ServiceInterface
+		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver {
 
-  /**
-   * this is a local method which adds a request from some foreign service with
-   * address information (otherService/callback) for a topic callback Adds an
-   * entry on the notify list
-   * 
-   * @param localTopic
-   * @param otherService
-   * @param callback
-   */
-  public void addListener(String localTopic, String otherService, String callback);
+	/**
+	 * this is a local method which adds a request from some foreign service
+	 * with address information (otherService/callback) for a topic callback
+	 * Adds an entry on the notify list
+	 * 
+	 * @param localTopic
+	 * @param otherService
+	 * @param callback
+	 */
+	public void addListener(String localTopic, String otherService, String callback);
 
-  public void removeListener(String localTopic, String otherService, String callback);
+	public void removeListener(String localTopic, String otherService, String callback);
 
-  public String[] getDeclaredMethodNames();
+	public String[] getDeclaredMethodNames();
 
-  public Method[] getDeclaredMethods();
+	public Method[] getDeclaredMethods();
 
-  public URI getInstanceId();
+	public URI getInstanceId();
 
-  public String[] getMethodNames();
+	public String[] getMethodNames();
 
-  public Method[] getMethods();
+	public Method[] getMethods();
 
-  public ArrayList<MRLListener> getNotifyList(String key);
+	public ArrayList<MRLListener> getNotifyList(String key);
 
-  public ArrayList<String> getNotifyListKeySet();
+	public ArrayList<String> getNotifyListKeySet();
 
-  public Outbox getOutbox();
+	public Outbox getOutbox();
 
-  // Deprecate - just use class
-  public String getSimpleName();
+	// Deprecate - just use class
+	public String getSimpleName();
 
-  // Deprecate ?? What is this??
-  public String getType();
+	// Deprecate ?? What is this??
+	public String getType();
 
-  public boolean hasPeers();
+	public boolean hasPeers();
 
-  public boolean load();
+	/**
+	 * recursive release - releases all peers and their peers etc. then releases
+	 * this service
+	 */
+	public void releasePeers();
 
-  /**
-   * recursive release - releases all peers and their peers etc. then releases
-   * this service
-   */
-  public void releasePeers();
+	public void releaseService();
 
-  public void releaseService();
+	/**
+	 * asked by the framework - to determine if the service needs to be secure
+	 * 
+	 * @return
+	 */
+	public boolean requiresSecurity();
 
-  /**
-   * asked by the framework - to determine if the service needs to be secure
-   * 
-   * @return
-   */
-  public boolean requiresSecurity();
+	public void setInstanceId(URI uri);
 
-  public boolean save();
+	public void setName(String prefix);
 
-  public void setInstanceId(URI uri);
+	public void startService();
 
-  public void setName(String prefix);
+	public void stopService();
 
-  public void startService();
+	public String clearLastError();
 
-  public void stopService();
+	public boolean hasError();
 
-  public String clearLastError();
+	public Status getLastError();
 
-  public boolean hasError();
+	public void broadcastState();
 
-  public Status getLastError();
+	public Object invoke(Message msg);
 
-  public void broadcastState();
+	public void out(String method, Object retobj);
 
-  public Object invoke(Message msg);
+	public boolean isRuntime();
 
-  public void out(String method, Object retobj);
+	// FIXME - meta data needs to be infused into instance
+	public String getDescription();
 
-  public boolean isRuntime();
+	public Map<String, MethodEntry> getMethodMap();
 
-  // FIXME - meta data needs to be infused into instance
-  public String getDescription();
+	/**
+	 * the "routing" attach - routes to a specific strongly typed attach of the
+	 * service if it exists
+	 * 
+	 * @param name
+	 */
+	/*
+	 * HEH - this did not work - trying to generalize that which should not be
+	 * generalized :P public void attach(String name) throws Exception;
+	 * 
+	 * public void attach(ServiceInterface instance) throws Exception;
+	 */
 
-  public Map<String, MethodEntry> getMethodMap();
-  
-  /**
-   * the "routing" attach - routes to a specific strongly typed attach of the service
-   * if it exists
-   * @param name
-   */
-  /* HEH - this did not work - trying to generalize that which should not be generalized :P
-  public void attach(String name) throws Exception;
-  
-  public void attach(ServiceInterface instance) throws Exception;
-  */
-  
 }

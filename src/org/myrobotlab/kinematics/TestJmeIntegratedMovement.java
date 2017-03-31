@@ -6,8 +6,6 @@ package org.myrobotlab.kinematics;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.python.jline.internal.Log;
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;

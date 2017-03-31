@@ -34,13 +34,12 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Pcf8574;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public class Pcf8574Gui extends ServiceGui implements ActionListener {
@@ -62,8 +61,8 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
 
 	Pcf8574 boundService = null;
 
-	public Pcf8574Gui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public Pcf8574Gui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 		boundService = (Pcf8574) Runtime.getService(boundServiceName);
 
 
