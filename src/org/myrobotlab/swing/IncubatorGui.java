@@ -28,7 +28,6 @@ package org.myrobotlab.swing;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -41,8 +40,8 @@ public class IncubatorGui extends ServiceGui implements ActionListener {
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(IncubatorGui.class);
 
-  public IncubatorGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public IncubatorGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
   }
 
   @Override

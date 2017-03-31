@@ -26,7 +26,6 @@
 package org.myrobotlab.swing;
 
 import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.service.SwingGui;
@@ -35,8 +34,8 @@ public class Welcome extends ServiceGui {
 
   static final long serialVersionUID = 1L;
 
-  public Welcome(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public Welcome(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     JLabel image = new JLabel();
     image.setIcon(Util.getResourceIcon("mrl_logo.gif"));
     addTop(image);

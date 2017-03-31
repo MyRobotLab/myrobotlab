@@ -1,6 +1,7 @@
 package org.myrobotlab.document.transformer;
 
 import java.util.List;
+
 import org.myrobotlab.document.Document;
 
 public abstract class AbstractStage {

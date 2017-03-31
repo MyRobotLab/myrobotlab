@@ -18,7 +18,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.myrobotlab.codec.serial.DecimalCodec;
 import org.myrobotlab.codec.serial.HexCodec;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;

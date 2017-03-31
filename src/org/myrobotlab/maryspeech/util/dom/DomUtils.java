@@ -38,10 +38,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import org.apache.log4j.Logger;
 import org.myrobotlab.maryspeech.exceptions.MaryConfigurationException;
 import org.myrobotlab.maryspeech.util.MaryUtils;
-
-import org.apache.log4j.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.DOMException;

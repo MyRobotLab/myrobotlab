@@ -48,13 +48,10 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
-
-import org.myrobotlab.maryspeech.util.MaryUtils;
-import org.myrobotlab.maryspeech.util.string.StringUtils;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
+import org.myrobotlab.maryspeech.util.MaryUtils;
+import org.myrobotlab.maryspeech.util.string.StringUtils;
 
 /**
  * A collection of public static utility methods, doing file operations.

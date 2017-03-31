@@ -6,7 +6,6 @@ import java.util.Map;
 import org.myrobotlab.jme3.controller.Jme3Servo;
 import org.myrobotlab.jme3.interfaces.Jme3App;
 import org.myrobotlab.jme3.interfaces.Jme3Object;
-import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.virtual.VirtualServo;

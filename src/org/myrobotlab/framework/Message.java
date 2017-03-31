@@ -1,6 +1,6 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author grog (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 
+// FIXME - should 'only' have jvm imports - no other dependencies
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
@@ -73,39 +74,9 @@ public class Message implements Serializable {
    * http://www.javacodegeeks.com
    * /2010/08/java-best-practices-vector-arraylist.html
    */
-  // public ArrayList<RoutingEntry> historyList;
   public HashSet<String> historyList;
   public HashMap<String, String> security;
-  /*
-   * @Override public int hashCode() { final int prime = 31; int result = 1;
-   * result = prime * result + Arrays.hashCode(data); result = prime * result +
-   * ((method == null) ? 0 : method.hashCode()); result = prime * result +
-   * ((msgID == null) ? 0 : msgID.hashCode()); result = prime * result +
-   * ((msgType == null) ? 0 : msgType.hashCode()); result = prime * result +
-   * ((name == null) ? 0 : name.hashCode()); result = prime * result + ((sender
-   * == null) ? 0 : sender.hashCode()); result = prime * result +
-   * ((sendingMethod == null) ? 0 : sendingMethod.hashCode()); result = prime *
-   * result + ((status == null) ? 0 : status.hashCode()); result = prime *
-   * result + (int) (timeStamp ^ (timeStamp >>> 32)); return result; }
-   * 
-   * @Override public boolean equals(Object obj) { if (this == obj) return true;
-   * if (obj == null) return false; if (getClass() != obj.getClass()) return
-   * false; Message other = (Message) obj; if (!Arrays.equals(data, other.data))
-   * return false; if (method == null) { if (other.method != null) return false;
-   * } else if (!method.equals(other.method)) return false; if (msgID == null) {
-   * if (other.msgID != null) return false; } else if
-   * (!msgID.equals(other.msgID)) return false; if (msgType == null) { if
-   * (other.msgType != null) return false; } else if
-   * (!msgType.equals(other.msgType)) return false; if (name == null) { if
-   * (other.name != null) return false; } else if (!name.equals(other.name))
-   * return false; if (sender == null) { if (other.sender != null) return false;
-   * } else if (!sender.equals(other.sender)) return false; if (sendingMethod ==
-   * null) { if (other.sendingMethod != null) return false; } else if
-   * (!sendingMethod.equals(other.sendingMethod)) return false; if (status ==
-   * null) { if (other.status != null) return false; } else if
-   * (!status.equals(other.status)) return false; if (timeStamp !=
-   * other.timeStamp) return false; return true; }
-   */
+
   /**
    * status is currently used for BLOCKING message calls the current valid state
    * it can be in is null | BLOCKING | RETURN FIXME - this should be msgType not

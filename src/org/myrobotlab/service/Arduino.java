@@ -4,14 +4,17 @@ import static org.myrobotlab.arduino.Msg.MAGIC_NUMBER;
 import static org.myrobotlab.arduino.Msg.MAX_MSG_SIZE;
 import static org.myrobotlab.arduino.Msg.MRLCOMM_VERSION;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,6 +22,7 @@ import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.arduino.PinDefinitions;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.i2c.I2CBus;
@@ -214,17 +218,25 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	/**
 	 * the definitive sequence of pins - "true address"
 	 */
-	Map<Integer, PinDefinition> pinIndex = null;
+	// Map<Integer, PinDefinition> pinIndex = null;
+	
+
+  /**
+   * pin named map of all the pins on the board
+   */
+  // Map<String, PinDefinition> pinMap = null;
+  
+  /**
+   * class which contains and manages all pin definitions
+   * indexed by address or pin name
+   */
+  PinDefinitions pinDefs = new PinDefinitions();
 
 	/**
 	 * map of pin listeners
 	 */
 	transient Map<Integer, List<PinListener>> pinListeners = new ConcurrentHashMap<Integer, List<PinListener>>();
 
-	/**
-	 * pin named map of all the pins on the board
-	 */
-	Map<String, PinDefinition> pinMap = null;
 
 	/**
 	 * Serial service - the Arduino's serial connection
@@ -240,9 +252,30 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public Arduino(String n) {
 		super(n);
 		// serial = (Serial) createPeer("serial"); // Trying to make not necessary
-		createPinList();
+		// default to Uno unless told otherwise .. (should be loaded / serialized ???)
+		// FIXME work out the details of 'final' & loaded from json boardtypes
+		setBoard(BOARD_TYPE_UNO);
 		String mrlcomm = FileIO.resourceToString("Arduino/MrlComm/MrlComm.ino");
+		
+		try {
+		String boards = FileIO.resourceToString("Arduino/boards.txt");
+		Properties boardProps = new Properties();
+		boardProps.load(new ByteArrayInputStream(boards.getBytes()));
+		
+		Enumeration<?> e = boardProps.propertyNames();
+
+	    while (e.hasMoreElements()) {
+	      String key = (String) e.nextElement();
+	      System.out.println(key + " -- " + boardProps.getProperty(key));
+	    }
+	    
+		} catch (Exception e){
+			log.error("Arduino ctor threw", e);
+		}
+		
 		setSketch(new Sketch("MrlComm", mrlcomm));
+		
+		
 
 		// add self as an attached device
 		// to handle pin events and other base
@@ -465,13 +498,24 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// GAP broadcastState();
 	}
 
-	public Map<String, PinDefinition> createPinList() {
-		pinMap = new ConcurrentHashMap<String, PinDefinition>();
-		pinIndex = new ConcurrentHashMap<Integer, PinDefinition>();
-
+	/**
+	 * The beauty and importance of this being a static method 
+	 * It allows the VirtualArduino to use the same code to create it's PinDefintions !
+	 * 
+	 * This creates the pin defintions based on boardType
+	 * Not sure how many pin definition sets there are.  
+	 * Currently there are only 2 supported - Mega-Like 70 pins & Uno-Like 20 pins (14 digital 6 analog)
+	 * FIXME - sync with VirtualArduino
+	 * FIXME - String boardType
+	 * @return
+	 */
+	static public PinDefinitions createPinList(String boardType) {
+	  PinDefinitions pinDefs = new PinDefinitions();
 		if (boardType != null && boardType.toLowerCase().contains("mega")) {
 			for (int i = 0; i < 70; ++i) {
 				PinDefinition pindef = new PinDefinition();
+				
+				// begin wacky pin def logic
 				String pinName = null;
 				if (i == 0) {
 					pindef.setRx(true);
@@ -485,18 +529,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 				} else if (i > 53) {
 					pinName = String.format("A%d", i - 54);
 					pindef.setAnalog(true);
+					pindef.setDigital(false);
+					pindef.canWrite(false);
 				} else {
 					pinName = String.format("D%d", i);
 					pindef.setPwm(true);
 				}
 				pindef.setName(pinName);
 				pindef.setAddress(i);
-				// pinMap is a translation map
-				// we put both string address and 'name' and
-				// any other aliases we want the 'real' pin to be identified by
-				pinMap.put(pinName, pindef);
-				pinMap.put(String.format("%d", i), pindef);
-				pinIndex.put(i, pindef);
+				pinDefs.put(i, pinName, pindef);				
 			}
 		} else {
 			for (int i = 0; i < 20; ++i) {
@@ -513,6 +554,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 					pindef.setDigital(true);
 				} else {
 					pindef.setAnalog(true);
+					pindef.canWrite(false);
+					pindef.setDigital(false);
 					pinName = String.format("A%d", i - 14);
 				}
 				if (i == 3 || i == 5 || i == 6 || i == 9 || i == 10 || i == 11) {
@@ -521,12 +564,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 				}
 				pindef.setName(pinName);
 				pindef.setAddress(i);
-				pinMap.put(pinName, pindef);
-				pinMap.put(String.format("%d", i), pindef);
-				pinIndex.put(i, pindef);
+				
+				pinDefs.put(i, pinName, pindef);
 			}
 		}
-		return pinMap;
+		return pinDefs;
 	}
 
 	// > customMsg/[] msg
@@ -560,14 +602,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void digitalWrite(int pin, int value) {
 		log.info("digitalWrite {} {}", pin, value);
 		msg.digitalWrite(pin, value);
-		PinDefinition pinDef = pinIndex.get(pin); // why ?
+		PinDefinition pinDef = pinDefs.get(pin); // why ?
 		invoke("publishPinDefinition", pinDef);
 	}
 
 	// > disablePin/pin
 	public void disablePin(int address) {
 		msg.disablePin(address);
-		PinDefinition pinDef = pinIndex.get(address);
+		PinDefinition pinDef = pinDefs.get(address);
 		invoke("publishPinDefinition", pinDef);
 	}
 
@@ -620,12 +662,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	public void enablePin(String address) {
-		PinDefinition pd = pinMap.get(address);
+		PinDefinition pd = pinDefs.get(address);
 		enablePin(pd.getAddress());
 	}
 
 	public void disablePin(String address) {
-		PinDefinition pd = pinMap.get(address);
+		PinDefinition pd = pinDefs.get(address);
 		disablePin(pd.getAddress());
 	}
 
@@ -641,7 +683,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			error("must be connected to enable pins");
 			return;
 		}
-		PinDefinition pin = pinIndex.get(address);
+		PinDefinition pin = pinDefs.get(address);
 		msg.enablePin(address, getMrlPinType(pin), rate);
 		pin.setEnabled(true);
 		invoke("publishPinDefinition", pin); // broadcast pin change
@@ -716,8 +758,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	@Override
 	public List<PinDefinition> getPinList() {
-		List<PinDefinition> list = new ArrayList<PinDefinition>(pinIndex.values());
-		return list;
+		return pinDefs.getList();
 	}
 
 	public String getPortName() {
@@ -1200,7 +1241,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	public void pinMode(int pin, int mode) {
 		msg.pinMode(pin, mode);
-		PinDefinition pinDef = pinIndex.get(pin);
+		PinDefinition pinDef = pinDefs.get(pin);
 		invoke("publishPinDefinition", pinDef);
 	}
 
@@ -1232,11 +1273,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	public Integer pinNameToAddress(String pinName) {
-		if (!pinMap.containsKey(pinName)) {
-			error("no pin %s exists", pinName);
-			return null;
-		}
-		return pinMap.get(pinName).getAddress();
+	  return pinDefs.get(pinName).getAddress();
 	}
 
 	/**
@@ -1376,20 +1413,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 */
 	public PinData publishPin(PinData pinData) {
 		// caching last value
-		pinIndex.get(pinData.address).setValue(pinData.value);
+	  pinDefs.get(pinData.address).setValue(pinData.value);
 		return pinData;
-	}
-
-	public Integer getAddress(String pinName) {
-		if (pinMap.containsKey(pinName)) {
-			return pinMap.get(pinName).getAddress();
-		}
-		return null;
 	}
 
 	// < publishPinArray/[] data
 	public PinData[] publishPinArray(int[] data) {
-		log.info("publishPinArray {}", data);
+		log.debug("publishPinArray {}", data);
 		// if subscribers -
 		// look for subscribed pins and publish them
 
@@ -1459,7 +1489,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	@Override
 	public int read(int address) { // FIXME - block on real read ???
-		return pinIndex.get(address).getValue();
+		return pinDefs.get(address).getValue();
 	}
 
 	@Override
@@ -1635,44 +1665,27 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	public String setBoard(String board) {
-		log.debug("setting board to type {}", board);
+		log.debug("setting board to type {}", board);		
+		pinDefs = createPinList(board);
 		this.boardType = board;
-		createPinList();
-		// broadcastState();
+		broadcastState();
 		return board;
 	}
 
-	/**
-	 * easy way to set to a 54 pin arduino
-	 *
-	 * @return
-	 */
-	public String setBoardMega() {
-		boardType = BOARD_TYPE_MEGA;
-		createPinList();
-		broadcastState();
-		return boardType;
+	public void setBoardMega() {
+		createPinList(BOARD_TYPE_MEGA);
 	}
 
-	public String setBoardUno() {
-		boardType = BOARD_TYPE_UNO;
-		createPinList();
-		broadcastState();
-		return boardType;
+	public void setBoardUno() {
+		createPinList(BOARD_TYPE_UNO);
 	}
 
-	public String setBoardNano() {
-		boardType = BOARD_TYPE_NANO;
-		createPinList();
-		broadcastState();
-		return boardType;
+	public void setBoardNano() {
+		createPinList(BOARD_TYPE_NANO);
 	}
 
-	public String setBoardMegaADK() {
-		boardType = BOARD_TYPE_MEGA_ADK;
-		createPinList();
-		broadcastState();
-		return boardType;
+	public void setBoardMegaADK() {
+		createPinList(BOARD_TYPE_MEGA_ADK);
 	}
 
 	/**
@@ -1879,15 +1892,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
+	 * this is what Arduino firmware 'should' have done
+	 * - a simplified write(address, value) which follows the convention
+	 * of 'all' device operations at the lowest level
+	 * http://codewiki.wikidot.com/c:system-calls:write
 	 * PinArrayControl method
 	 */
 	@Override
 	public void write(int address, int value) {
 		info("write (%d,%d) to %s", address, value, serial.getName());
-
-		PinDefinition pinDef = pinIndex.get(address);
-
-		if (pinDef.isPwm()) {
+		PinDefinition pinDef = pinDefs.get(address);
+		pinMode(address, Arduino.OUTPUT);
+		if (pinDef.isPwm() && value > 1) { // CHEESEY HACK !!
 			analogWrite(address, value);
 		} else {
 			digitalWrite(address, value);

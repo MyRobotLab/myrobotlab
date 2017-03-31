@@ -3,8 +3,8 @@ package org.myrobotlab.framework;
 import static org.myrobotlab.framework.StatusLevel.DEBUG;
 import static org.myrobotlab.framework.StatusLevel.ERROR;
 import static org.myrobotlab.framework.StatusLevel.INFO;
-import static org.myrobotlab.framework.StatusLevel.WARN;
 import static org.myrobotlab.framework.StatusLevel.SUCCESS;
+import static org.myrobotlab.framework.StatusLevel.WARN;
 
 import java.io.IOException;
 import java.io.PrintWriter;

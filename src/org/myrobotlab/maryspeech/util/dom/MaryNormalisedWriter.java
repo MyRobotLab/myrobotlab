@@ -38,11 +38,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.log4j.Logger;
 import org.myrobotlab.maryspeech.exceptions.MaryConfigurationException;
 import org.myrobotlab.maryspeech.util.MaryUtils;
 import org.myrobotlab.maryspeech.util.io.ReaderSplitter;
-
-import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
 /**

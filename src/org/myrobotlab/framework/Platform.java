@@ -6,8 +6,6 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-//import org.myrobotlab.logging.Logging;
-
 public class Platform implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -27,15 +25,16 @@ public class Platform implements Serializable {
   public final static String ARCH_X86 = "x86";
   public final static String ARCH_ARM = "arm";
 
-  private String os;
-  private String arch;
-  private int bitness;
-  private String vmName;
-  private String mrlVersion;
-  private String instanceId;
-  private String branch;
+  // non-changing values
+  String os;
+  String arch;
+  int bitness;
+  String vmName;
+  String mrlVersion;
+  String instanceId;
+  String branch;
 
-  private static Platform localInstance = getLocalInstance();
+  static Platform localInstance = getLocalInstance();
 
   // -------------pass through begin -------------------
   public static Platform getLocalInstance() {
@@ -87,10 +86,10 @@ public class Platform implements Serializable {
         // TODO: revisit how we determine the architecture version
         platform.arch = "armv" + armv + ".hfp";
       }
-      
+
       // for Ordroid 64 !
-      if ("aarch64".equals(arch)){
-    	  platform.arch = "armv8";
+      if ("aarch64".equals(arch)) {
+        platform.arch = "armv8";
       }
 
       if (platform.arch == null) {
@@ -137,10 +136,6 @@ public class Platform implements Serializable {
       if (platform.branch == null) {
         platform.branch = "unknown";
       }
-
-      // TODO - ProcParser
-
-      // System.out.println(sb.toString());
 
       localInstance = platform;
     }

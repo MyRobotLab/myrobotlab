@@ -1,23 +1,17 @@
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Map;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.service.Joystick;
-import org.myrobotlab.service.SwingGui;
-import org.myrobotlab.service.Joystick.Component;
 import org.myrobotlab.service.Log;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.ImageButton;
 
 public class LogGui extends ServiceGui implements ActionListener {
@@ -27,8 +21,8 @@ public class LogGui extends ServiceGui implements ActionListener {
   JTextArea log = new JTextArea(20, 40);
   ImageButton clearButton;
 
-  public LogGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public LogGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
     display.setLayout(new BorderLayout());
 

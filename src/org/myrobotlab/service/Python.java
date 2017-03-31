@@ -1,9 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,6 +24,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.python.core.Py;
 import org.python.core.PyException;
@@ -188,47 +187,6 @@ public class Python extends Service {
 		}
 	}
 
-	public static class Script implements Serializable {
-		static final long serialVersionUID = 1L;
-		/**
-		 * unique location & key of the script
-		 * e.g. /mrl/scripts/myScript.py
-		 */
-		String location;
-		/**
-		 * actual code/contents of the script
-		 */
-		String code;
-
-		public Script(String name, String script) {
-			this.location = name;
-			// DOS2UNIX line endings.
-			// This seems to get triggered when people use editors that don't do
-			// the cr/lf thing very well..
-			// TODO:This will break python quoted text with the """ syntax in
-			// python.
-			if (script != null) {
-				script = script.replaceAll("(\r)+\n", "\n");
-			}
-			this.code = script;
-		}
-
-		public String getCode() {
-			return code;
-		}
-
-		public String getName() {
-			return location;
-		}
-
-		public void setCode(String code) {
-			this.code = code;
-		}
-
-		public void setName(String name) {
-			this.location = name;
-		}
-	}
 
 	public final static transient Logger log = LoggerFactory.getLogger(Python.class);
 	// TODO this needs to be moved into an actual cache if it is to be used
@@ -333,11 +291,6 @@ public class Python extends Service {
 	HashMap<String, Script> openedScripts = new HashMap<String, Script>();
 
 	/**
-	 * current script which will be executed / saved / etc..
-	 */
-	Script currentScript;
-
-	/**
 	 * 
 	 * @param instanceName
 	 */
@@ -384,16 +337,10 @@ public class Python extends Service {
 		}
 
 		localPythonFiles = getFileListing();
-		
-		// open a new untitled script
-		if (currentScript == null){
-			openScript(localScriptDir + File.separator + "untitledS.py", "");
-		}
 	}
 	
 	public void openScript(String scriptName, String code){
-		currentScript = new Script(scriptName, code);
-		openedScripts.put(scriptName, currentScript);
+		openedScripts.put(scriptName, new Script(scriptName, code));
 		broadcastState();
 	}
 
@@ -404,9 +351,8 @@ public class Python extends Service {
 	 *            the code to append
 	 * @return the resulting concatenation
 	 */
-	public Script appendScript(String data) {
-		currentScript.setCode(String.format("%s\n%s", currentScript.getCode(), data));
-		return currentScript;
+	public Script appendScript(String data) {		
+		return new Script("append", data);
 	}
 
 	/**
@@ -481,10 +427,6 @@ public class Python extends Service {
 		return ret;
 	}
 
-	public void exec() {
-		exec(currentScript.getCode(), false);
-	}
-
 	public void exec(PyObject code) {
 		log.info(String.format("exec \n%s\n", code));
 		if (interp == null) {
@@ -535,9 +477,7 @@ public class Python extends Service {
 		if (interp == null) {
 			createPythonInterpreter();
 		}
-		if (replace) {
-			currentScript.setCode(code);
-		}
+		
 		try {
 			if (!blocking) {
 				interpThread = new PIThread(String.format("%s.interpreter.%d", getName(), ++interpreterThreadCount), code);
@@ -555,10 +495,6 @@ public class Python extends Service {
 			// dump stack trace to log
 			Logging.logError(e);
 		}
-	}
-
-	public void execAndWait() {
-		exec(currentScript.code, true, true);
 	}
 
 	public void execAndWait(String code) {
@@ -643,15 +579,6 @@ public class Python extends Service {
 			Logging.logError(e);
 		}
 		return null;
-	}
-
-	/**
-	 * Get the current script.
-	 * 
-	 * @return
-	 */
-	public Script getScript() {
-		return currentScript;
 	}
 
 
@@ -741,24 +668,6 @@ public class Python extends Service {
 		return data;
 	}
 
-	public boolean saveAndReplaceCurrentScript(String name, String code) {
-		currentScript.location = name;
-		currentScript.code = code;
-		return saveCurrentScript();
-	}
-
-	public boolean saveCurrentScript() {
-		try {
-			FileOutputStream out = new FileOutputStream(localScriptDir + File.separator + currentScript.location);
-			out.write(currentScript.code.getBytes());
-			out.close();
-			return true;
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		return false;
-	}
-
 	public void setLocalScriptDir(String path) {
 		File dir = new File(path);
 		if (!dir.isDirectory()) {
@@ -816,11 +725,16 @@ public class Python extends Service {
 		stop();// release the interpeter
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+	public static void main(String[] args) {		
+		LoggingFactory.init(Level.INFO);
 
 		try {
+			
+			File test = new File("file:/D:/local");
+			File example = new File("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/develop/service/Clock.py");
+			
+			log.info("{}", test.toURI().toURL());
+			log.info("{}", example.toURI().toURL());
 
 			// Runtime.start("gui", "SwingGui");
 			// String f = "C:\\Program Files\\blah.1.py";

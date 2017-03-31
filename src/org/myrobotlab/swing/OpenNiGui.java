@@ -32,12 +32,11 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.openni.OpenNiData;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.OpenNi;
+import org.myrobotlab.service.SwingGui;
 
 public class OpenNiGui extends ServiceGui implements ActionListener {
 
@@ -60,12 +59,9 @@ public class OpenNiGui extends ServiceGui implements ActionListener {
   // anything OpenNI has written to "frame") |
   // depth | rgb
 
-  public OpenNiGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
-    video = new VideoWidget(boundServiceName, myService, tabs);
-
-
-    video.init(null);
+  public OpenNiGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    video = new VideoWidget(boundServiceName, myService);
 
     display.setLayout(new BorderLayout());
     display.add(video.getDisplay(), BorderLayout.CENTER);

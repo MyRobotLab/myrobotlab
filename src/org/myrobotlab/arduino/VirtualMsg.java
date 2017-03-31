@@ -2,14 +2,12 @@ package org.myrobotlab.arduino;
 
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-import org.myrobotlab.logging.Level;
-
 import org.myrobotlab.arduino.virtual.MrlComm;
+import org.myrobotlab.logging.Level;
 
 /**
  * <pre>
@@ -42,11 +40,6 @@ import org.myrobotlab.arduino.virtual.MrlComm;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.VirtualArduino;
-
-import java.io.FileOutputStream;
-import java.util.Arrays;
-import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;

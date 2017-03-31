@@ -25,18 +25,14 @@
 
 package org.myrobotlab.swing;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
@@ -44,8 +40,8 @@ import javax.swing.plaf.basic.BasicArrowButton;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.DiyServo;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -109,8 +105,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
 	SliderListener sliderListener = new SliderListener();
 
-	public DiyServoGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+	public DiyServoGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 		myServo = (DiyServo) Runtime.getService(boundServiceName);
 		slider.addChangeListener(sliderListener);
     

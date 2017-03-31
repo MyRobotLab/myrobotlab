@@ -31,28 +31,32 @@ import java.util.Iterator;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JTabbedPane;
 import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.swing.widget.VideoDisplayPanel;
 
 public class VideoWidget extends ServiceGui {
 
   HashMap<String, VideoDisplayPanel> displays = new HashMap<String, VideoDisplayPanel>();
   boolean allowFork = false;
-  Dimension normalizedSize = null;
+  public Dimension normalizedSize = null;
   int videoDisplayXPos = 0;
   int videoDisplayYPos = 0;
 
-  public VideoWidget(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public VideoWidget(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    // set initial default output
+    addVideoDisplayPanel("output");
   }
-
-  public VideoWidget(final String boundFilterName, final SwingGui myService, final JTabbedPane tabs, boolean allowFork) {
-    this(boundFilterName, myService, tabs);
-    this.allowFork = allowFork;
+  
+  public void setTitle(String t) {
+    TitledBorder title;
+    title = BorderFactory.createTitledBorder(t);
+    display.setBorder(title);
   }
+  
 
   public VideoDisplayPanel addVideoDisplayPanel(String source) {
     return addVideoDisplayPanel(source, null);
@@ -101,9 +105,6 @@ public class VideoWidget extends ServiceGui {
 
   // multiplex images if desired
   public void displayFrame(SerializableImage img) {
-
-    // FIXME not quite right
-
     String source = img.getSource();
     if (displays.containsKey(source)) {
       displays.get(source).displayFrame(img);
@@ -113,20 +114,6 @@ public class VideoWidget extends ServiceGui {
     } else {
       displays.get("output").displayFrame(img); // FIXME - kludgy !!!
     }
-    /*
-     * else if (displays.size() == 0) { VideoDisplayPanel vdp =
-     * addVideoDisplayPanel(img.getSource()); vdp.displayFrame(img); } else {
-     * displays.get("output").displayFrame(img); // catchall }
-     */
-
-  }
-
-  public void init(ImageIcon icon) {
-    TitledBorder title;
-    title = BorderFactory.createTitledBorder(boundServiceName + " " + " video widget");
-    display.setBorder(title);
-
-    addVideoDisplayPanel("output");
   }
 
   public void removeAllVideoDisplayPanels() {
@@ -143,11 +130,6 @@ public class VideoWidget extends ServiceGui {
     videoDisplayYPos = 0;
   }
 
-  /*
-   * public void displayFrame(OpenCVData data) { IplImage img = data.getImage();
-   * displayFrame(img); }
-   */
-
   public void removeVideoDisplayPanel(String source) {
     if (!displays.containsKey(source)) {
       log.error("cannot remove VideoDisplayPanel " + source);
@@ -160,7 +142,8 @@ public class VideoWidget extends ServiceGui {
     myService.pack();
   }
 
-  public void setNormalizedSize(int x, int y) {
-    normalizedSize = new Dimension(x, y);
+  public void allowFork(boolean b) {
+    this.allowFork = b;
   }
+
 }

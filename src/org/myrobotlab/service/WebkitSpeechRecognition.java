@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Service;

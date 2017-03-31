@@ -8,15 +8,14 @@ import java.io.File;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.ProgramAB.Response;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 /**
@@ -45,8 +44,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   private JButton saveAIML = new JButton("Save AIML");
   private JButton savePredicates = new JButton("Save Predicates");
 
-  public ProgramABGui(String boundServiceName, SwingGui myService, JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public ProgramABGui(String boundServiceName, SwingGui myService) {
+    super(boundServiceName, myService);
     this.boundServiceName = boundServiceName;
 
     //

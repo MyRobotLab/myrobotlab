@@ -4,12 +4,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.OculusRift;
 import org.myrobotlab.service.OculusRift.RiftFrame;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.slf4j.Logger;
 
@@ -22,15 +21,13 @@ public class OculusRiftGui extends ServiceGui implements VideoGUISource, ActionL
   VideoWidget leftEye = null;
   VideoWidget rightEye = null;
 
-  public OculusRiftGui(String boundServiceName, SwingGui myService, JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public OculusRiftGui(String boundServiceName, SwingGui myService) {
+    super(boundServiceName, myService);
 
     // Create the 2 video widgets
-    leftEye = new VideoWidget(String.format("%s." + OculusRift.LEFT_OPEN_CV, boundServiceName), myService, tabs, false);
-    leftEye.init(null);
+    leftEye = new VideoWidget(String.format("%s." + OculusRift.LEFT_OPEN_CV, boundServiceName), myService);
 
-    rightEye = new VideoWidget(String.format("%s." + OculusRift.RIGHT_OPEN_CV, boundServiceName), myService, tabs, false);
-    rightEye.init(null);
+    rightEye = new VideoWidget(String.format("%s." + OculusRift.RIGHT_OPEN_CV, boundServiceName), myService);
 
     JPanel leftVideoPanel = new JPanel();
     leftVideoPanel.add(leftEye.display);

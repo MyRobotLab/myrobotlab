@@ -36,16 +36,15 @@ import java.text.SimpleDateFormat;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.IpCamera;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.DirectionWidget;
 import org.slf4j.Logger;
 
@@ -151,16 +150,15 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
 
   DirectionEventListener dirEventListener = new DirectionEventListener();
 
-  public IpCameraGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public IpCameraGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     myIPCamera = (IpCamera) Runtime.getService(boundServiceName);
     direction.setDirectionListener(dirEventListener);
 
 
     display.setLayout(new BorderLayout());
 
-    video0 = new VideoWidget(boundServiceName, myService, tabs, false);
-    video0.init(null);
+    video0 = new VideoWidget(boundServiceName, myService);
 
     JPanel config = new JPanel(new GridLayout(0, 1));
     config.add(new JLabel("video url"));

@@ -28,7 +28,6 @@ import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JList;
-import javax.swing.JTabbedPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -87,11 +86,10 @@ public class WiiGui extends ServiceGui implements ListSelectionListener, VideoGU
   int sweepTimeDelta = 0;
   int deltaTime = 0;
 
-  public WiiGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public WiiGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
-    video0 = new VideoWidget(boundServiceName, myService, tabs);
-    video0.init(null);
+    video0 = new VideoWidget(boundServiceName, myService);
 
     camImage = new BufferedImage(width / divisor, height / divisor, BufferedImage.TYPE_INT_RGB);
 

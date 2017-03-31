@@ -43,7 +43,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
@@ -57,9 +56,9 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.roomba.RoombaComm;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.Roomba;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public class RoombaGui extends ServiceGui implements ListSelectionListener, ActionListener, ChangeListener, KeyListener {
@@ -89,8 +88,8 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
     return Util.getImageIcon("Roomba/" + path);
   }
 
-  public RoombaGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public RoombaGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     roombacomm = (Roomba) Runtime.getService(boundServiceName);
     display.setLayout(new BorderLayout());
 

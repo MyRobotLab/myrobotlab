@@ -29,8 +29,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.InMoovGestureCreator.ServoItemHolder;
+import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service._TemplateService;
 import org.slf4j.Logger;
 
@@ -82,8 +82,8 @@ public class InMoovGestureCreatorGui extends ServiceGui implements ActionListene
 
   JList framelist;
 
-  public InMoovGestureCreatorGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public InMoovGestureCreatorGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
 
     // display:

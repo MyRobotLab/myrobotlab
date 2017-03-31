@@ -28,11 +28,10 @@ package org.myrobotlab.swing;
 import java.awt.FlowLayout;
 
 import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
-import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.MobilePlatform;
+import org.myrobotlab.service.SwingGui;
 
 public class MobilePlatformGui extends ServiceGui {
 
@@ -70,8 +69,8 @@ public class MobilePlatformGui extends ServiceGui {
 
   JLabel inMotion = new JLabel("false");
 
-  public MobilePlatformGui(final String boundServiceName, final SwingGui myService, final JTabbedPane tabs) {
-    super(boundServiceName, myService, tabs);
+  public MobilePlatformGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
     display.setLayout(new FlowLayout());
 
     // position
