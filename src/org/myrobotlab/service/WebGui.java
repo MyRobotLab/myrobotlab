@@ -522,7 +522,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			String pathInfo = request.getPathInfo();
 			String[] parts = null;
 
-			log.info("{} {}", request.getMethod(), pathInfo);
+			log.debug("{} {}", request.getMethod(), pathInfo);
 
 			// Broadcaster bc = r.getBroadcaster();
 			// if (bc != null || r.getBroadcaster() != broadcaster){
@@ -662,7 +662,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			}
 
 			if (b != null) {
-				log.info(String.format("POST Body [%s]", b));
+				log.debug(String.format("POST Body [%s]", b));
 			}
 
 			// FIXED ME
@@ -843,7 +843,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		if (si.isLocal()) {
 			log.debug("{} is local", si.getName());
 
-			log.info("{}.{}({})", msg.name, msg.method, Arrays.toString(params));
+			log.debug("{}.{}({})", msg.name, msg.method, Arrays.toString(params));
 			Object retobj = method.invoke(si, params);
 
 			// FIXME - Is this how to support synchronous ?
