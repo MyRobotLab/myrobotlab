@@ -340,7 +340,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public int read(int address) {
+	public int read(Integer address) {
 		// When publishing the refresh is done in the publishing method otherwise refresh the pinarray
 		if (!isPublishing) read8();
 		return pinIndex.get(address).getValue();
@@ -352,7 +352,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public void pinMode(int address, String mode) {
+	public void pinMode(Integer address, String mode) {
 		if (mode != null && mode.equalsIgnoreCase("INPUT")) {
 			pinMode(address, INPUT);
 		} else {
@@ -373,7 +373,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public void write(int address, int value) {
+	public void write(Integer address, Integer value) {
 
 		PinDefinition pinDef = pinIndex.get(address);
 		if (pinDef.getMode() == "OUTPUT") {
@@ -409,7 +409,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public void attach(PinListener listener, int pinAddress) {
+	public void attach(PinListener listener, Integer pinAddress) {
 		String name = listener.getName();
 
 		if (listener.isLocal()) {
@@ -440,7 +440,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public void enablePin(int address) {
+	public void enablePin(Integer address) {
 		if (controller == null) {
 			error("must be connected to enable pins");
 			return;
@@ -459,7 +459,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public void disablePin(int address) {
+	public void disablePin(Integer address) {
 		if (controller == null) {
 			log.error("Must be connected to disable pins");
 			return;
@@ -552,7 +552,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public void enablePin(int address, int rate) {
+	public void enablePin(Integer address, Integer rate) {
 		// TODO Auto-generated method stub
 		
 	}

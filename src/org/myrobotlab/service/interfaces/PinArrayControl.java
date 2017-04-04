@@ -18,7 +18,7 @@ public interface PinArrayControl extends DeviceControl {
 	 * @param address
 	 * @return
 	 */
-	public int read(int address);
+	public int read(Integer address);
 	
 	/**
 	 * same as read(int address) except by name e.g. read("D5")
@@ -27,9 +27,10 @@ public interface PinArrayControl extends DeviceControl {
 	 */
 	public int read(String pinName);
 	
-	public void pinMode(int address, String mode);
+	// FIXME - DEPRECATE - this is "very" Arduino specific
+	public void pinMode(Integer address, String mode);
 	
-	public void write(int address, int value);
+	public void write(Integer address, Integer value);
 	
 	public PinData publishPin(PinData pinData);
 	
@@ -38,16 +39,16 @@ public interface PinArrayControl extends DeviceControl {
 	// FIXME attach(String listener, null) -> listens to all pins - pin array comes back ?
 	// public void attach(String listener, int pinAddress);
 	
-	public void attach(PinListener listener, int pinAddress);
+	public void attach(PinListener listener, Integer pinAddress);
 	
 	public void attach(PinArrayListener listener);
 	
-	public void enablePin(int address);
+	public void enablePin(Integer address);
 	
-	public void disablePin(int address);
+	public void disablePin(Integer address);
 	
 	public void disablePins();
 
-	public void enablePin(int address, int rate);
+	public void enablePin(Integer address, Integer rate);
 	
 }

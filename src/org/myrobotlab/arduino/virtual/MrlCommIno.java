@@ -102,9 +102,11 @@ public class MrlCommIno {
     // mrlComm.publishBoardStatus();
   } // end of big loop
 
+  /*
   public void setBoardType(String board) {
     mrlComm.setBoardType(board);
   }
+  */
 
   public MrlComm getMrlComm() {
     return mrlComm;
