@@ -1,37 +1,28 @@
 package org.myrobotlab.service.interfaces;
 
+import java.util.List;
+
 import org.myrobotlab.arduino.BoardInfo;
-import org.myrobotlab.arduino.PinDefinitions;
+import org.myrobotlab.arduino.BoardType;
 
 // FIXME add SensorController
-public interface Microcontroller extends DeviceController {
+public interface Microcontroller extends PinArrayControl {
 
-	/**
-	 * Connects the DeviceController to something 'real' so it can provide the
-	 * control it needs
-	 * 
-	 * @param port
-	 * @throws Exception
-	 */
-	public void connect(String port) throws Exception;
-
-	public void connect(String port, int rate, int databits, int stopbits, int parity) throws Exception;
-
-	public void disconnect();
-
-	public boolean isConnected();
-
-	public String getBoardType();
+	public String getBoard();
 
 	public BoardInfo getBoardInfo();
 	
 	/**
-	 * WOW - Java 8 static in Interface !!! GOODTIMES !!
-	 * @param boardType
+	 * a static request to return all possible "BoardTypes" which this service supports.
+	 * Arduino would return many, as there are many board types of arduino.
+	 * 
+	 * Not sure if Beagle would "need" to return different types, unless it has different
+	 * pin definitions for different variations.
+	 * 
+	 * Parallax/Prop I think has several boards
 	 * @return
 	 */
-	static public PinDefinitions createPinList(String boardType){
+	static public List<BoardType> getBoardTypes(){
 	  return null;
 	}
-
 }

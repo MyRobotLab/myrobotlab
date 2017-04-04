@@ -2,8 +2,12 @@ package org.myrobotlab.swing.widget;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -26,54 +30,130 @@ import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.swing.ServiceGui;
-import org.myrobotlab.swing.VideoWidget;
 
 public class Oscope extends ServiceGui implements ActionListener {
 
-  int PREFERRED_WIDTH = 400;
-  int PREFERRED_HEIGHT = 200;
+  int PREFERRED_WIDTH = 600;
+  int PREFERRED_HEIGHT = 100;
 
   // JPanel oscopePanel = new JPanel(new BorderLayout());
   // TODO - bit-blit 2 video panels
-  VideoWidget video;
-  GridBagConstraints gc = new GridBagConstraints();
+  // VideoWidget video;
+  GridBagConstraints bgc = new GridBagConstraints();
+  GridBagConstraints sgc = new GridBagConstraints();
   JPanel buttonPanel = new JPanel(new GridBagLayout());
+  JPanel screenPanel = new JPanel(new GridBagLayout());
 
-  Map<String, Button> buttons = new HashMap<String, Button>();
-  Map<Integer, Button> buttonIndex = new HashMap<Integer, Button>();
+  Map<String, Trace> traces = new HashMap<String, Trace>();
+  Map<Integer, Trace> traceIndex = new HashMap<Integer, Trace>();
   float gradient;
 
   // raster level access
   protected int[] data;
-  int w = 800;
+  int w = 600;
   int h = 100;
-  BufferedImage buffer;
-  SerializableImage sensorImage;
 
-  public class Button implements ActionListener {
+  /**
+   * this class extends JPanel so that we can control the painting
+   * @author GRPERRY
+   *
+   */
+  public class TraceScreen extends JPanel {
+    private static final long serialVersionUID = 1L;
+    Trace trace;
+
+    public TraceScreen(Trace trace) {
+      super();
+      this.trace = trace;
+      // on the top-level Canvas to prevent AWT from repainting it, as you'll
+      // typically be doing this yourself within the animation loop.
+      setIgnoreRepaint(true);      
+      setBackground(Color.GRAY);
+      setVisible(false);
+    }
+    
+    public void update(PinData pinData){
+      trace.pinData = pinData;
+      repaint();
+    }
+    
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(PREFERRED_WIDTH, PREFERRED_HEIGHT);        
+    }
+
+    // http://stackoverflow.com/questions/2063607/java-panel-double-buffering
+    // http://gamedev.stackexchange.com/questions/70711/how-do-i-double-buffer-renders-to-a-jpanel
+    // http://stackoverflow.com/questions/4430356/java-how-to-do-double-buffering-in-swing
+    @Override
+    public void paintComponent(Graphics g) {
+      super.paintComponent(g); // possible slow parent method to fill
+      g.setColor(trace.color);
+      ++trace.xpos;
+      // g.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, observer)
+      // g.drawImage(bufferImage, 0, 0, null); <-- FIXME - update buffer outside of this method
+      g.drawLine(trace.x, trace.y+100, trace.xpos, trace.pinData.value * 80 + 100);
+      // g.drawLine(trace.x, trace.y+20, trace.xpos, trace.pinData.value + 20);
+      if (trace.xpos%400 == 0){
+        trace.xpos = 0;
+      }
+      trace.x = trace.xpos;
+      trace.y = trace.pinData.value;
+    }
+  }
+
+  public class Trace implements ActionListener {
     JButton b;
     PinDefinition pinDef;
     Color color;
     Oscope oscope;
     ActionListener relay;
+    TraceScreen screenDisplay;
+    int width = 600;
+    int height = 100;
+    Graphics2D g2d;
+    
+    int xpos;
+    int x;
+    int y;
+    PinData pinData;
+    PinData lastPinData;
 
-    public Button(Oscope oscope, PinDefinition pinDef, Color hsv) {
+
+    public Trace(Oscope oscope, PinDefinition pinDef, Color hsv) {
+      this.oscope = oscope;
       this.pinDef = pinDef;
       b = new JButton(pinDef.getName());
+      b.setMargin(new Insets(0, 0, 0, 0));
+      b.setBorder(null);
+      b.setPreferredSize(new Dimension(30, 30));
       b.setBackground(hsv);
       color = hsv;
       b.addActionListener(this);
       // relay
       addActionListener(oscope);
-      this.oscope = oscope;
+
+      /*
+      screen = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+      g2d = screen.createGraphics();
+      g2d.setBackground(Color.BLACK);
+      g2d.fillRect(0, 0, width, height);
+      g2d.setColor(color);
+      BasicStroke bs = new BasicStroke(1);
+      g2d.setStroke(bs);
+      */
+
+      screenDisplay = new TraceScreen(this);
+
     }
 
-    public Component getDisplay() {
+    public Component getButtonDisplay() {
       return b;
     }
 
     /**
-     * events from button components are relayed to 
+     * events from button components are relayed to
      * 
      */
     @Override
@@ -81,81 +161,98 @@ public class Oscope extends ServiceGui implements ActionListener {
       e.setSource(this);
       relay.actionPerformed(e);
     }
-    
-    public void addActionListener(ActionListener relay){
+
+    public void addActionListener(ActionListener relay) {
       this.relay = relay;
     }
 
     public PinDefinition getPinDef() {
       return pinDef;
     }
- 
+
+    public Component getScreenDisplay() {
+      return screenDisplay;
+    }
+
+    public void update(PinData pinData) {
+      screenDisplay.setVisible(true);
+      screenDisplay.update(pinData);
+    }
+
   }
 
   public void onPinList(List<PinDefinition> pinList) {
-    buttons.clear();
+    traces.clear();
     addButtons(pinList);
   }
 
   public Oscope(String boundServiceName, SwingGui myService) {
     super(boundServiceName, myService);
-    video = new VideoWidget(boundServiceName, myService);
-    video.allowFork(true);
-
-    initialize();
-
-    addTop(new JButton("clear"), buttonPanel);
-    add(video.getDisplay());
+    addTop(new JButton("clear"));
+    JPanel flow = new JPanel();
+    flow.add(buttonPanel);
+    addLeftLine(flow);
+    flow = new JPanel();
+    flow.add(screenPanel);
+    add(flow);
 
     // since this is a widget - subscribeGui is not auto-magically called
     // by the framework
     subscribeGui();
     // video.displayFrame(sensorImage);
   }
-  
-  public void subscribeGui(){
+
+  public void subscribeGui() {
     subscribe("publishPinDefinition");
     subscribe("publishPinArray");
     subscribe("getPinList");
   }
-  
-  public void unsubscribeGui(){
+
+  public void unsubscribeGui() {
     unsubscribe("publishPinDefinition");
     unsubscribe("publishPinArray");
     unsubscribe("getPinList");
   }
-  
+
   // enabled -> true | false
-  public void onPinDefinition(PinDefinition pinDef){
+  public void onPinDefinition(PinDefinition pinDef) {
     updatePinDisplay(pinDef);
   }
 
   public void updatePinDisplay(PinDefinition pinDef) {
-    
+
   }
 
   public void addButtons(List<PinDefinition> pinList) {
 
     gradient = 1.0f / pinList.size();
 
-    gc.gridy = gc.gridx = 0;
+    bgc.gridy = bgc.gridx = 0;
+    sgc.gridy = sgc.gridx = 0;
+
     // gc.fill = GridBagConstraints.BOTH; // ???
-    gc.fill = GridBagConstraints.HORIZONTAL;
-    gc.weighty = gc.weightx = 1;
+    bgc.fill = GridBagConstraints.HORIZONTAL;
+    sgc.fill = GridBagConstraints.HORIZONTAL;
+    bgc.weighty = bgc.weightx = 1;
+    sgc.weighty = sgc.weighty = 1;
 
     // List<PinDefinition> pinList = pinDefs.getList();
     for (int i = 0; i < pinList.size(); ++i) {
       PinDefinition pinDef = pinList.get(i);
-      Color hsv = new Color(Color.HSBtoRGB((i * (gradient)), 0.8f, 0.7f));
-      Button button = new Button(this, pinDef, hsv);
-      buttons.put(pinDef.getName(), button);
-      buttonIndex.put(pinDef.getAddress(), button);
-      buttonPanel.add(button.getDisplay(), gc);
-      gc.gridx++;
-      if (gc.gridx > 9) {
-        gc.gridx = 0;
-        gc.gridy++;
+      Color hsv = new Color(Color.HSBtoRGB((i * (gradient)), 0.5f, 1.0f));
+      Trace trace = new Trace(this, pinDef, hsv);
+      traces.put(pinDef.getName(), trace);
+      traceIndex.put(pinDef.getAddress(), trace);
+      buttonPanel.add(trace.getButtonDisplay(), bgc);
+      screenPanel.add(trace.getScreenDisplay(), bgc);
+      bgc.gridx++;
+      sgc.gridy++;
+
+      if (bgc.gridx % 2 == 0) {
+        bgc.gridx = 0;
+        bgc.gridy++;
       }
+
     }
 
   }
@@ -171,24 +268,22 @@ public class Oscope extends ServiceGui implements ActionListener {
     ColorModel cm = ColorModel.getRGBdefault();
     SampleModel sm = cm.createCompatibleSampleModel(w, h);
     WritableRaster wr = Raster.createWritableRaster(sm, db, null);
-    buffer = new BufferedImage(cm, wr, false, null);
-    sensorImage = new SerializableImage(buffer, "oscope");
+    BufferedImage buffer = new BufferedImage(cm, wr, false, null);
+    SerializableImage sensorImage = new SerializableImage(buffer, "oscope");
   }
 
   // ??? - onPaint in extended JPanel or JLabel ???
-  public void onPinArray(final PinData[] pins) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+  public void onPinArray(final PinData[] data) {
+        for (PinData pinData : data) {
 
-        for (PinData pin : pins) {
+          Trace trace = traceIndex.get(pinData.address);
+          trace.update(pinData);
+          // PinDefinition pinDef = trace.getPinDef();
           
-          Button b = buttonIndex.get(pin.address);
-          PinDefinition pinDef = b.getPinDef();
-          
+
           // log.info("PinData:{}", pin);
-          sensorImage.setSource(pinDef.getName());
-          video.displayFrame(sensorImage);
+          // sensorImage.setSource(pinDef.getName());
+          // video.displayFrame(sensorImage);
 
           /*
            * if (!traceData.containsKey(pin.address)) { TraceData td = new
@@ -232,21 +327,17 @@ public class Oscope extends ServiceGui implements ActionListener {
            */
         }
 
-        video.displayFrame(sensorImage);
-
-      }
-    });
-
+        // video.displayFrame(sensorImage);
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
     // TODO Add relay ?
     Object o = e.getSource();
-    if (o instanceof Button){
-      Button b = (Button)o;
+    if (o instanceof Trace) {
+      Trace b = (Trace) o;
       PinDefinition pinDef = b.getPinDef();
-      if (pinDef.isEnabled()){
+      if (pinDef.isEnabled()) {
         send("disablePin", pinDef.getAddress());
       } else {
         send("enablePin", pinDef.getAddress());

@@ -4,20 +4,22 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.arduino.BoardInfo;
+import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.DeviceControl;
-import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
+import org.myrobotlab.service.interfaces.PinDefinition;
+import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
@@ -33,7 +35,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Sabertooth extends Service implements Microcontroller, MotorController {
+public class Sabertooth extends Service implements PortConnector, MotorController {
 
 	class MotorData implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -133,11 +135,6 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 
 	public Object[] getMotorData(String motorName) {
 		return new Object[] { motors.get(motorName).portNumber };
-	}
-
-	public ArrayList<Pin> getPinList() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	// ----------Sabertooth Packetized Serial Mode Interface End --------------
@@ -423,18 +420,7 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 
 
 
-	@Override
-	public String getBoardType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public BoardInfo getBoardInfo() {
-		// sabertooth is not a microcontroller
-		return null;
-	}
-
+	
 	@Override
 	public void detach(DeviceControl device) {
 		motors.remove(device);
@@ -449,6 +435,13 @@ public class Sabertooth extends Service implements Microcontroller, MotorControl
 	public Set<String> getDeviceNames() {
 		return motors.keySet();
 	}
+
+
+  // @Override - lame - should be override
+  static public List<BoardType> getBoardTypes() {
+    // currently only know of 1
+    return new ArrayList<BoardType>();
+  }
 
 
 }
