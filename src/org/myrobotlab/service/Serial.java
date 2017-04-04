@@ -30,6 +30,7 @@ import org.myrobotlab.serial.Port;
 import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.serial.PortStream;
 import org.myrobotlab.serial.SerialControl;
+import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.QueueSource;
 import org.myrobotlab.service.interfaces.RecordControl;
@@ -43,8 +44,8 @@ import org.slf4j.Logger;
  * Serial - a service that allows reading and writing to a serial port device.
  *
  */
-public class Serial extends Service
-		implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice, PortPublisher {
+public class Serial extends Service 
+		implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice, PortPublisher, PortConnector {
 
 	/**
 	 * general read timeout - 0 is infinite > 0 is number of milliseconds to

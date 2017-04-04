@@ -53,7 +53,7 @@ import org.myrobotlab.opencv.OpenCVFilterPyramidDown;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.service.data.Point2Df;
 import org.myrobotlab.service.data.Rectangle;
-import org.myrobotlab.service.interfaces.Microcontroller;
+import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
@@ -685,7 +685,7 @@ public class Tracking extends Service {
     x.setPin(xPin);
     y.setPin(yPin);
 
-    ((Microcontroller)controller).connect(port);
+    ((PortConnector)controller).connect(port);
 
     controller.servoAttachPin(x, xPin);
     controller.servoAttachPin(y, yPin);

@@ -885,7 +885,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public int read(int address) {
+	public int read(Integer address) {
 		pinIndex.get(address).setValue(readADC_SingleEnded(address));
 		return pinIndex.get(address).getValue();
 	}
@@ -896,7 +896,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public void pinMode(int address, String mode) {
+	public void pinMode(Integer address, String mode) {
 		if (mode != null && mode.equalsIgnoreCase("INPUT")) {
 		} else {
 			log.error("Ads1115 only supports INPUT mode");
@@ -905,7 +905,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public void write(int address, int value) {
+	public void write(Integer address, Integer value) {
 		log.error("Ads1115 only supports read, not write");
 
 	}
@@ -930,7 +930,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public void attach(PinListener listener, int pinAddress) {
+	public void attach(PinListener listener, Integer pinAddress) {
 		String name = listener.getName();
 
 		if (listener.isLocal()) {
@@ -961,7 +961,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public void enablePin(int address) {
+	public void enablePin(Integer address) {
 		if (controller == null) {
 			error("must be connected to enable pins");
 			return;
@@ -980,7 +980,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	}
 
 	@Override
-	public void disablePin(int address) {
+	public void disablePin(Integer address) {
 		if (controller == null) {
 			log.error("Must be connected to disable pins");
 			return;
@@ -1071,7 +1071,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
 	@Override
 	// TODO Implement individula sample rates per pin
-	public void enablePin(int address, int rate) {
+	public void enablePin(Integer address, Integer rate) {
 		setSampleRate(rate);
 		enablePin(address);
 	}
