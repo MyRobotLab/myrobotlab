@@ -195,6 +195,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   int error_mrl_to_arduino_rx_cnt = 0;
 
   boolean heartbeat = false;
+  
+  boolean boardInfoEnabled = true;
 
   I2CBus i2cBus = null;
 
@@ -375,7 +377,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.softReset(); // needed because there is no serial connect <- GroG
     // says -
     // this is heavy handed no?
-    enableBoardInfo(true); // start the heartbeat getBoardInfo
+    enableBoardInfo(boardInfoEnabled); // start the heartbeat getBoardInfo
     msg.getBoardInfo();
     log.info("waiting for boardInfo lock..........");
     synchronized (boardInfo) {
@@ -459,7 +461,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // and this msg along with the ack will be ignored
       // so we turn of ack'ing locally
       msg.enableAcks(false);
-      enableBoardInfo(true); // start the heartbeat getBoardInfo
+      enableBoardInfo(boardInfoEnabled); // start the heartbeat getBoardInfo
       msg.getBoardInfo();
 
       log.info("waiting for boardInfo lock..........");
@@ -1220,7 +1222,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   @Override
   public void onConnect(String portName) {
     info("%s connected to %s", getName(), portName);
-    enableBoardInfo(true);
+    enableBoardInfo(boardInfoEnabled & true);
     // chained...
     invoke("publishConnect", portName);
   }
