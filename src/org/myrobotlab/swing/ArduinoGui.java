@@ -122,8 +122,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     self = this;
 
     portGui = new PortGui(boundServiceName, myService);
-    addTop(3, portGui.getDisplay(), boardTypes);
-    addTop(status);
+    addTop(portGui.getDisplay(), boardTypes);
+    addTop(2, status);
 
     localTabs.setTabPlacementRight();
 
