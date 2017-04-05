@@ -1,8 +1,18 @@
 package org.myrobotlab.arduino;
 
+import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
+import org.myrobotlab.io.FileIO;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
+import org.slf4j.Logger;
 
 /**
  * BoardInfo is all info which needs to be published only once after connection
@@ -10,39 +20,50 @@ import org.myrobotlab.service.Arduino;
 public class BoardInfo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	transient public final static Logger log = LoggerFactory.getLogger(BoardInfo.class);
 	
-	
-	
-	Integer boardId;
+	 // requested by the user
+  // String boardName;
+  
+	// reported from the board
+	// Integer boardId;
 	Integer version;
-	String boardName;
-	boolean valid = false;
 
+	// FIXME - isUserSet isBoardSet isLoaded - BoardType as a class ?? - to String give {board}name ?
+	// boolean valid = false;
+
+	// dynamic changing values
 	Integer sram;
 	Integer microsPerLoop;
 	Integer activePins;
 	DeviceSummary[] deviceSummary; // deviceList with types
+	
 
-	// if true it boardInfo will be published at a regular 1s interval
+	// if true boardInfo will be published at a regular 1s interval
 	boolean enableBoardInfo = false;
 	public long heartbeatMs;
 
 	public BoardInfo() {
-		setType(-1);
+		// setType(-1);
 	}
 
-	public BoardInfo(int version, int boardId) {
+	public BoardInfo(int version) {
 		this.version = version;
-		this.boardId = boardId;
+		// this.boardId = boardId;
 	}
 
+	/*
 	public String getName() {
 		return boardName;
 	}
+	*/
+	/*
 
 	public boolean isUnknown() {
 		return (boardName == null) || boardName.equals("unknown");
 	}
+	*/
+	/*
 
 	public void setType(int boardId) {
 		this.boardId = boardId;
@@ -67,16 +88,17 @@ public class BoardInfo implements Serializable {
 			break;
 		}
 	}
+	*/
 
 	/**
 	 * called on disconnect() so it can re-initalize if connected to a different
 	 * arduino
 	 */
 	public void reset() {
-		boardId = -1;
+		// boardId = -1;
 		version = null;
-		boardName = null;
-		valid = false;
+		// boardName = null;
+		// valid = false;
 	}
 
 	public Integer getVersion() {
@@ -84,14 +106,17 @@ public class BoardInfo implements Serializable {
 	}
 
 	public void setVersion(Integer version) {
-		valid = true;
+		// valid = true;
 		this.version = version;
 	}
 
+	/*
 	public boolean isValid() {
 		return valid;
 	}
+	*/
 
+	/*
 	public void setType(String board) {
 		boardName = board;
 		if (Arduino.BOARD_TYPE_MEGA.equals(board)) {
@@ -108,10 +133,12 @@ public class BoardInfo implements Serializable {
 			boardId = Arduino.BOARD_TYPE_ID_UNKNOWN;
 		}
 	}
-
+  */
+	/*
 	public int getBoardType() {
 		return boardId;
 	}
+	*/
 
 	public void setMicrosPerLoop(int microsPerLoop) {
 		this.microsPerLoop = microsPerLoop;
@@ -130,12 +157,16 @@ public class BoardInfo implements Serializable {
 	}
 
 	public String toString() {
-		if (valid) {
+		if (version != null) {
+		  /*
 			return String.format("%s version %s load %d heartbeat %d sram %d devices %d", boardName, version, microsPerLoop, heartbeatMs, sram,
 					(deviceSummary != null) ? deviceSummary.length : 0);
+					*/
+		  return String.format("version %s load %d heartbeat %d sram %d devices %d", version, microsPerLoop, heartbeatMs, sram,
+          (deviceSummary != null) ? deviceSummary.length : 0);
 		} else {
 			return "unknown";
 		}
 	}
-
+	
 }

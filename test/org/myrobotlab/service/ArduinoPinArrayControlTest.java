@@ -124,7 +124,7 @@ public class ArduinoPinArrayControlTest {
 	
 		arduino.setBoardUno();
 		pins = arduino.getPinList();
-		log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
+		log.info("Arduino {} has {} pins", arduino.getBoard(), pins.size());
 		logPins(pins);
 		
 		// arduino.connect("COM5");

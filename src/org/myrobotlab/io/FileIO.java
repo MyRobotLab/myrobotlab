@@ -454,8 +454,8 @@ public class FileIO {
     // most file access even on 'windows' machine can interface correctly
     // with forward slash
     // network url order is always forward slash
-    path1 = path1.replace("\\", "/");
-    path2 = path2.replace("\\", "/");
+    path1 = path1.replace("\\", "/").trim();
+    path2 = path2.replace("\\", "/").trim();
     // only 1 slash between path1 & path2
     if (path1.endsWith("/")) {
       path1 = path1.substring(0, path1.length() - 1);

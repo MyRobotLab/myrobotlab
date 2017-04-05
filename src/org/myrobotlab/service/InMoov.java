@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Service;
@@ -40,6 +41,7 @@ import com.jme3.system.AppSettings;
 public class InMoov extends Service {
 
   private static final String GESTURES_DIRECTORY = "gestures";
+  public String CALIBRATION_FILE = "calibration.py";
 
   private static final long serialVersionUID = 1L;
 
@@ -960,7 +962,7 @@ public class InMoov extends Service {
     startLeftArm(leftPort);
     startRightArm(rightPort);
 
-    startHeadTracking(leftPort);
+    startHeadTracking(leftPort, 12, 13);
     startEyesTracking(leftPort, 22, 24);
 
     speakBlocking("startup sequence completed");
@@ -1039,14 +1041,14 @@ public class InMoov extends Service {
 
   // NOTE - BEST Services are one which are reflective on startService
   // like xmpp which exposes a the reflective REST API are startService
-  public Tracking startHeadTracking(String port) throws Exception {
+  public Tracking startHeadTracking(String port, int neckPin, int rotheadPin) throws Exception {
     speakBlocking("starting head tracking");
 
     if (head == null) {
       startHead(port);
     }
     headTracking = (Tracking) startPeer("headTracking");
-    headTracking.connect(port, 5, 6);
+    headTracking.connect(port, rotheadPin, neckPin);
     arduinos.put(port, (Arduino)headTracking.controller);
     return headTracking;
   }
@@ -1355,6 +1357,76 @@ public class InMoov extends Service {
     }
   }
 
+  public void loadCalibration() {
+    loadCalibration(CALIBRATION_FILE);
+  }
+  
+  public void loadCalibration(String calibrationFilename) {
+    File calibF = new File(calibrationFilename);
+    if (calibF.exists()) {
+      log.info("Loading Calibration Python file {}", calibF.getAbsolutePath());
+      Python p = (Python) Runtime.getService("python");
+      try {
+        p.execFile(calibF.getAbsolutePath());
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        log.warn("Error loading calibratoin file {}", calibF.getAbsolutePath());
+        e.printStackTrace();
+      }
+    }
+  }
+  
+  public void saveCalibration() {
+    saveCalibration(CALIBRATION_FILE);
+  }
+  
+  public void saveCalibration(String calibrationFilename) {
+    
+    File calibFile = new File(calibrationFilename);    
+    FileWriter calibrationWriter = null;
+    try {
+      calibrationWriter = new FileWriter(calibFile);
+      calibrationWriter.write("##################################\n");
+      calibrationWriter.write("# InMoov auto generated calibration \n");
+      calibrationWriter.write("# " + new Date() + "\n");
+      calibrationWriter.write("##################################\n");
+      //String inMoovName = this.getName();
+      // iterate all the services that are running.
+      // we want all servos that are currently in the system?  
+      for (ServiceInterface service : Runtime.getServices()) {
+        if (service instanceof Servo) {
+          Servo s = (Servo)service;
+          if (!s.getName().startsWith(this.getName())) {
+            continue;
+          }
+          calibrationWriter.write("\n");
+          // first detach the servo.
+          calibrationWriter.write("# Servo Config : " + s.getName() +"\n");
+          calibrationWriter.write(s.getName() + ".detach()\n");
+          calibrationWriter.write(s.getName() + ".setMinMax(" +s.getMin()+","+s.getMax()+")\n");
+          calibrationWriter.write(s.getName() + ".setVelocity(" +s.getVelocity() +")\n");
+          calibrationWriter.write(s.getName() + ".setRest(" +s.getRest() +")\n");
+          if (s.getPin() != null) {
+            calibrationWriter.write(s.getName() + ".setPin(" + s.getPin() + ")\n");
+          } else {
+            calibrationWriter.write("# " + s.getName() + ".setPin(" + s.getPin() + ")\n");
+          }
+          // if there's a controller reattach it at rest
+          if (s.getController() != null) {
+            String controller = s.getController().getName();
+            calibrationWriter.write(s.getName() + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() +")\n");
+          }
+        }
+      }
+      calibrationWriter.write("\n");
+      calibrationWriter.close();
+    } catch (IOException e) {
+      log.warn("Error writing calibration file {}", calibrationFilename);
+      e.printStackTrace();
+      return;
+    }    
+  }
+  
   private File makeGesturesDirectory(String directory) {
     File dir = new File(directory);
     dir.mkdirs();

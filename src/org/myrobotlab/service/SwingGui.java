@@ -182,6 +182,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
 	static public void restart() {
 		JFrame frame = new JFrame();
+		frame.setLocationByPlatform(true);
+		
 		int ret = JOptionPane.showConfirmDialog(frame,
 				"<html>New components have been added,<br>"
 						+ " it is necessary to restart in order to use them.</html>",
@@ -317,7 +319,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
 				frame.pack();
 				frame.repaint();
-
+				
 			}
 		});
 	}
