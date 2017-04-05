@@ -54,7 +54,7 @@ public class GravityCenter extends Thread {
         cog = c;
       }
     }
-    Log.info(cog.toString()+"gc");
+    //Log.info(cog.toString()+"gc");
     if (cog.getZ() <= 0.1){
       int x = 0;
       

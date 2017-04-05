@@ -1752,8 +1752,8 @@ public class InMoov extends Service {
     im.addObject("i01.rightHand.wrist", 70.0);
     im.objectAddIgnore("i01.rightArm.omoplate", "i01.leftArm.rotate");
     im.objectAddIgnore("i01.rightArm.omoplate", "i01.rightArm.rotate");
-    im.addObject("lfinger",10.0);
-    im.addObject("rfinger",10.0);
+    im.addObject("lfinger",50.0);
+    im.addObject("rfinger",50.0);
     im.addObject("leftS", 10);
     im.addObject("rightS", 10);
     im.objectAddIgnore("leftS", "rightS");

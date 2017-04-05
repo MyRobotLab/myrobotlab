@@ -316,10 +316,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.setDHLink("leftArm",rotate,284,90,40,90);
     ik.setDHLink("leftArm",bicep,0,-7+24.4+90,300,90);
 ////////////    //#ik.setDHLink(wrist,00,-90,200,0)
-    ik.setDHLink("leftArm",wrist,00,-90,100,-90);
+    ik.setDHLink("leftArm",wrist,00,-90,220,-90);
 //////////    //print ik.currentPosition();
 //////////
-    ik.setDHLink("leftArm",finger,-20,-90,120,0);
+    //ik.setDHLink("leftArm",finger,-20,-90,120,0);
 
     ik.startEngine("leftArm");
     
@@ -333,10 +333,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.setDHLink("rightArm",Rrotate,-284,90,40,-90);
     ik.setDHLink("rightArm",Rbicep,0,-7+24.4+90,300,90);
 ////////////    //#ik.setDHLink(wrist,00,-90,200,0)
-    ik.setDHLink("rightArm",Rwrist,00,-90,100,-90);
+    ik.setDHLink("rightArm",Rwrist,00,-90,220,-90);
 //////////    //print ik.currentPosition();
 //////////
-    ik.setDHLink("rightArm",Rfinger,20,-90,120,0);
+    //ik.setDHLink("rightArm",Rfinger,20,-90,120,0);
     ik.startEngine("rightArm");
     
     ik.setNewDHRobotArm("kinect");
@@ -469,7 +469,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.cog.setLinkMass("wrist", 0.176, 0.7474);
     ik.cog.setLinkMass("Rwrist", 0.176, 0.7474);
     
-    ik.setAi("rightArm", Ai.KEEP_BALANCE);
+    //ik.setAi("rightArm", Ai.KEEP_BALANCE);
     //ik.setAi("leftArm", Ai.KEEP_BALANCE);
     ik.removeAi("kinect",Ai.AVOID_COLLISION);
   }
