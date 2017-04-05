@@ -288,8 +288,8 @@ public class Servo extends Service implements ServoControl {
 	public void detach() {
 		isPinAttached = false;
 		if (controller != null) {
-			// controller.servoDetachPin(this);
-			detach(controller);
+			controller.servoDetachPin(this);
+			//detach(controller);
 		}
 		broadcastState();
 		// TODO: this doesn't seem to be consistent depending on how you invoke "detach()" ...
