@@ -448,7 +448,8 @@ public class MrlComm {
     }
 
     long now = micros();
-    msg.publishBoardInfo(MRLCOMM_VERSION, boardInfo.getBoardType(), (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary);
+    msg.publishBoardInfo(MRLCOMM_VERSION, Arduino.BOARD_TYPE_ID_UNO, (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary);
+    // msg.publishBoardInfo(MRLCOMM_VERSION, boardInfo.getBoardType(), (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary);
     lastBoardInfoUs = now;
     loopCount = 0;
   }
@@ -711,9 +712,11 @@ public class MrlComm {
     return retval;
   }
 
+  /*
   public void setBoardType(String board) {
     boardInfo.setType(board);
   }
+  */
 
   public void invoke(String method, Object... params) {
     virtual.invokeOn(this, method, params);

@@ -111,7 +111,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                 switch (inMsg.method) {
                 case 'onState':
                     // backend update 
-                    setTraceButtons(inMsg.data[0].pinIndex);
+                    setTraceButtons(inMsg.data[0].pinDefs.pinIndex);
                     scope.$apply();
                     break;
                 case 'onPinArray':
@@ -303,7 +303,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             mrl.subscribe(name, 'publishPinArray');
             mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray');
             // initializing display data      
-            setTraceButtons(service.pinIndex);
+            setTraceButtons(service.pinDefs.pinIndex);
         }
     };
 }

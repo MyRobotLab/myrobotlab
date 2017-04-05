@@ -2,10 +2,13 @@ package org.myrobotlab.service;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.myrobotlab.arduino.BoardInfo;
-import org.myrobotlab.arduino.PinDefinitions;
 import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.arduino.virtual.Device;
 import org.myrobotlab.arduino.virtual.MrlComm;
@@ -15,6 +18,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.PinDefinition;
+import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.PortListener;
 import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.SerialDevice;
@@ -29,7 +33,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class VirtualArduino extends Service implements PortPublisher, PortListener {
+public class VirtualArduino extends Service implements PortPublisher, PortListener, PortConnector {
 
   private static final long serialVersionUID = 1L;
 
@@ -52,12 +56,22 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
    */
 
   transient Serial uart;
+  
+  /**
+   * the unique board type key
+   */
+  String board;
 
   /**
-   * class which contains and manages all pin definitions indexed by address or
-   * pin name
+   * address index of pinList 
    */
-  PinDefinitions pinDefs = new PinDefinitions();
+  Map<Integer, PinDefinition> pinIndex = null;
+
+  /**
+   * name index of pinList
+   */
+  Map<String, PinDefinition> pinMap = null;
+
 
   String portName = "COM42";
 
@@ -111,6 +125,11 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   public VirtualArduino(String n) {
     super(n);
+    
+    if (board == null){
+      board = "uno";
+    }
+    
     uart = (Serial) createPeer("uart");
     ino = new MrlCommIno(this);
     mrlComm = ino.getMrlComm();
@@ -141,10 +160,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   public String setBoard(String board) {
     log.info("setting board to type {}", board);
 
-    ino.setBoardType(board);
-    pinDefs = Arduino.createPinList(board);
+    //  Zxcv npinDefs = Arduino.getPinList(board);
 
-    // createPinList();
     broadcastState();
     return board;
   }
@@ -265,6 +282,100 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     return uart.getPortNames();
   }
 
+  // implements PinArrayControl ?
+  // @Override
+  public List<PinDefinition> getPinList() {
+    // 2 board types have been identified (perhaps this is based on processor?)
+    // mega-like & uno like
+    
+    // if no change - just return the values
+    if ((pinMap != null && board.contains("mega") && pinMap.size() == 70) || (pinMap != null && pinMap.size() == 20)){
+      return pinMap.entrySet().stream()
+          .map(x -> x.getValue())
+          .collect(Collectors.toList());
+    }
+    
+    // create 2 indexes for fast retrieval
+    // based on "name" or "address"
+    pinMap = new HashMap<String, PinDefinition>();
+    pinIndex = new HashMap<Integer, PinDefinition>();
+    List<PinDefinition> pinList = new ArrayList<PinDefinition>();
+    
+    if (board.contains("mega")) {
+      for (int i = 0; i < 70; ++i) {
+        PinDefinition pindef = new PinDefinition();
+
+        // begin wacky pin def logic
+        String pinName = null;
+        if (i == 0) {
+          pindef.setRx(true);
+        }
+        if (i == 1) {
+          pindef.setTx(true);
+        }
+        if (i < 1 || (i > 13 && i < 54)) {
+          pinName = String.format("D%d", i);
+          pindef.setDigital(true);
+        } else if (i > 53) {
+          pinName = String.format("A%d", i - 54);
+          pindef.setAnalog(true);
+          pindef.setDigital(false);
+          pindef.canWrite(false);
+        } else {
+          pinName = String.format("D%d", i);
+          pindef.setPwm(true);
+        }
+        pindef.setName(pinName);
+        pindef.setAddress(i);
+        pinIndex.put(i, pindef);
+        pinMap.put(pinName, pindef); 
+        pinList.add(pindef);
+      }
+    } else {
+      for (int i = 0; i < 20; ++i) {
+        PinDefinition pindef = new PinDefinition();
+        String pinName = null;
+        if (i == 0) {
+          pindef.setRx(true);
+        }
+        if (i == 1) {
+          pindef.setTx(true);
+        }
+        if (i < 14) {
+          pinName = String.format("D%d", i);
+          pindef.setDigital(true);
+        } else {
+          pindef.setAnalog(true);
+          pindef.canWrite(false);
+          pindef.setDigital(false);
+          pinName = String.format("A%d", i - 14);
+        }
+        if (i == 3 || i == 5 || i == 6 || i == 9 || i == 10 || i == 11) {
+          pindef.setPwm(true);
+          pinName = String.format("D%d", i);
+        }
+        pindef.setName(pinName);
+        pindef.setAddress(i);
+        pinIndex.put(i, pindef);
+        pinMap.put(pinName, pindef);
+        pinList.add(pindef);
+      }
+    }
+    return pinList;
+  }
+
+  @Override
+  public void connect(String port, int rate, int databits, int stopbits, int parity) throws Exception {
+    uart.connect(port, rate, databits, stopbits, parity);
+  }
+
+  @Override
+  public void disconnect() {
+    uart.disconnect();
+  }
+  
+  
+
   public static void main(String[] args) {
     try {
 
@@ -282,7 +393,10 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       virtual.connect("COM99");
       arduino.connect("COM99");
       
+      
       Runtime.start("gui", "SwingGui");
+      
+      // arduino.enablePin("D7");
       // String port = "COM5";
       // connect the virtual uart
       // varduino.setPortName(port);
@@ -295,8 +409,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     }
   }
 
-  public List<PinDefinition> getPinList() {
-    return pinDefs.getList();
-  }
+
 
 }

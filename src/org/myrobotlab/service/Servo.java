@@ -288,9 +288,11 @@ public class Servo extends Service implements ServoControl {
 	public void detach() {
 		isPinAttached = false;
 		if (controller != null) {
-			controller.servoDetachPin(this);
+			// controller.servoDetachPin(this);
+			detach(controller);
 		}
 		broadcastState();
+		// TODO: this doesn't seem to be consistent depending on how you invoke "detach()" ...
 		invoke("publishServoDetach", getName());
 	}
 
@@ -425,9 +427,17 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void setRest(int rest) {
+	  // TODO:remove this interface
 		this.rest = rest;
 	}
 
+	public void setRest(Double rest) {
+	  // TODO: update the interface with the double version to make all servos implement 
+	  // a double for their positions.
+	  this.rest = rest;
+	}
+
+	
 	/**
 	 * setSpeed is deprecated, new function for speed control is setVelocity()
 	 */
