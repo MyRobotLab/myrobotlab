@@ -101,7 +101,20 @@ public class Tracking extends Service {
   transient public Pid pid;
   transient public OpenCV opencv;
   transient public ServoController controller;
-  transient public ServoControl x, y;
+  //transient public ServoControl x, y;
+  private class TrackingServoData {
+    transient ServoControl servoControl = null;
+    Double lastServoPos;
+    double setPoint = 0.5;
+    int scanStep = 2; 
+    Double currentServoPos;
+    String name;
+    TrackingServoData(String name) {
+      this.name = name;
+    }
+  }
+  
+  transient private HashMap<String, TrackingServoData> servoControls = new HashMap<String, TrackingServoData>();
 
   // ------ PEER SERVICES END------
   // statistics
@@ -111,18 +124,6 @@ public class Tracking extends Service {
 
   // MRL points
   public Point2Df lastPoint = new Point2Df();
-
-  private Double lastXServoPos;
-  private Double lastYServoPos;
-
-  // ----- INITIALIZATION DATA BEGIN -----
-  public double xSetpoint = 0.5;
-  public double ySetpoint = 0.5;
-
-  // ----- INITIALIZATION DATA END -----
-
-  int scanYStep = 2;
-  int scanXStep = 2;
 
   public String LKOpticalTrackFilterName;
 
@@ -156,9 +157,13 @@ public class Tracking extends Service {
   // crash the party ??
   public Tracking(String n) throws Exception {
     super(n);
-    // createPeer("X","Servo") <-- create peer of default type
-    x = (ServoControl) createPeer("x");
-    y = (ServoControl) createPeer("y");
+    TrackingServoData x = new TrackingServoData("x");
+    x.servoControl = (ServoControl) createPeer("x");
+    servoControls.put("x", x);
+    TrackingServoData y = new TrackingServoData("y");
+    y.servoControl = (ServoControl) createPeer("y");
+    servoControls.put("y", y);
+    
     pid = (Pid) createPeer("pid");
     opencv = (OpenCV) createPeer("opencv");
     controller = (Arduino) createPeer("controller");
@@ -183,8 +188,9 @@ public class Tracking extends Service {
     pid.setSampleTime("y", 30);
     pid.setSetpoint("y", 0.5); // set center
 
-    x.attach(controller);
-    y.attach(controller);
+    for (TrackingServoData sc:servoControls.values()){
+      sc.servoControl.attach(controller);
+    }
     
   }
 
@@ -260,7 +266,7 @@ public class Tracking extends Service {
   }
 
   public ServoControl getX() {
-    return x;
+    return servoControls.get("x").servoControl;
   }
 
   public Pid getPID() {
@@ -268,7 +274,7 @@ public class Tracking extends Service {
   }
 
   public ServoControl getY() {
-    return y;
+    return servoControls.get("y").servoControl;
   }
 
   // --------------- publish methods end ----------------------------
@@ -317,11 +323,10 @@ public class Tracking extends Service {
 
   public void rest() {
     log.info("rest");
-    x.rest();
-    y.rest();
-
-    lastXServoPos = x.getPos();
-    lastYServoPos = y.getPos();
+    for (TrackingServoData sc: servoControls.values()){
+      sc.servoControl.rest();
+      sc.lastServoPos = sc.servoControl.getPos();
+    }
   }
 
   public void scan() {
@@ -403,15 +408,17 @@ public class Tracking extends Service {
           faceFoundFrameCount = 0;
 
           if (scan) {
-            double xpos = x.getPos();
+            TrackingServoData x = servoControls.get("x");
+            TrackingServoData y = servoControls.get("y");
+            double xpos = x.servoControl.getPos();
 
-            if (xpos + scanXStep >= Math.max(x.getMax(), x.getMin()) && scanXStep > 0 || xpos + scanXStep <= Math.min(x.getMin(), x.getMax()) && scanXStep < 0) {
-              scanXStep = scanXStep * -1;
-              int newY = (int)(Math.min(y.getMin(), y.getMax()) + (Math.random() * (Math.max(y.getMax(), y.getMin()) - Math.min(y.getMin(), y.getMax()))));
-              y.moveTo(newY);
+            if (xpos + x.scanStep >= x.servoControl.getMaxInput() && x.scanStep > 0 || xpos + x.scanStep <= x.servoControl.getMinInput() && x.scanStep < 0) {
+              x.scanStep *= -1;
+              double newY = y.servoControl.getMinInput() + (Math.random() * (y.servoControl.getMaxInput() - y.servoControl.getMinInput()));
+              y.servoControl.moveTo(newY);
             }
 
-            x.moveTo(xpos + scanXStep);
+            x.servoControl.moveTo(xpos + x.scanStep);
           }
           // state = STATE_FACE_DETECT_LOST_TRACK;
         }
@@ -504,8 +511,12 @@ public class Tracking extends Service {
   @Override
   public void startService() {
     super.startService();
-    x = (Servo) startPeer("x");
-    y = (Servo) startPeer("y");
+    TrackingServoData x = new TrackingServoData("x");
+    x.servoControl = (ServoControl) createPeer("x");
+    servoControls.put("x", x);
+    TrackingServoData y = new TrackingServoData("y");
+    y.servoControl = (ServoControl) createPeer("y");
+    servoControls.put("y", y);
     pid = (Pid) startPeer("pid");
     controller = (Arduino) startPeer("controller");
     opencv = (OpenCV) startPeer("opencv");
@@ -562,57 +573,29 @@ public class Tracking extends Service {
 
     pid.setInput("x", targetPoint.x);
     pid.setInput("y", targetPoint.y);
-    double currentXServoPos = x.getPos();
-    double currentYServoPos = y.getPos();
 
     // TODO - work on removing currentX/YServoPos - and use the servo's
     // directly ???
     // if I'm at my min & and the target is further min - don't compute
     // pid
-    if ((currentXServoPos <= Math.min(x.getMin(), x.getMax()) && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= Math.max(x.getMin(), x.getMax()) && xSetpoint - targetPoint.x > 0)) {
-      error(String.format("%f x limit out of range", currentXServoPos));
-    } else {
-
-      if (pid.compute("x")) {
-        if(x.isInverted()) {
-          currentXServoPos -= pid.getOutput("x");
-        }
-        else{
-          currentXServoPos += pid.getOutput("x");
-        }
-        if (currentXServoPos != lastXServoPos) {
-          // calamity- fix          
-          x.moveTo(currentXServoPos);
-          currentXServoPos = x.getPos();
-          lastXServoPos = currentXServoPos;
-        }
-        // TODO - canidate for "move(int)" ?
-
-      } else {
-        log.warn("x data under-run");
+    for (TrackingServoData tsd:servoControls.values()){
+      if ((tsd.currentServoPos <= tsd.servoControl.getMinInput() && tsd.setPoint - targetPoint.get(tsd.name) < 0) || (tsd.currentServoPos >= tsd.servoControl.getMaxInput() && tsd.setPoint - targetPoint.get(tsd.name) >0)) {
+        error(String.format("%f %s limit out of range", tsd.currentServoPos, tsd.name));
       }
-    }
-
-    if ((currentYServoPos <= Math.min(y.getMin(), y.getMax()) && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= Math.max(y.getMin(), y.getMax()) && ySetpoint - targetPoint.y > 0)) {
-      error(String.format("%f y limit out of range", currentYServoPos));
-    } else {
-      if (pid.compute("y")) {
-        if (y.isInverted()) {
-          currentYServoPos -= (int) pid.getOutput("y");
+      else {
+        if (pid.compute(tsd.name)) {
+          tsd.currentServoPos += pid.getOutput(tsd.name);
+          if (tsd.currentServoPos != tsd.lastServoPos) {
+            tsd.servoControl.moveTo(tsd.currentServoPos);
+            tsd.lastServoPos = tsd.currentServoPos;
+          }
         }
         else {
-          currentYServoPos += (int) pid.getOutput("y");
-        }
-        if (currentYServoPos != lastYServoPos) {
-          y.moveTo(currentYServoPos);
-          currentYServoPos = y.getPos();
-          lastYServoPos = currentYServoPos;
-        }
-      } else {
-        log.warn("y data under-run");
+          log.warn("{} data under-run", tsd.name);
+        } 
       }
     }
-
+ 
     lastPoint = targetPoint;
 
     if (cnt % updateModulus == 0) {
@@ -682,21 +665,21 @@ public class Tracking extends Service {
 
   public void connect(String port, int xPin, int yPin, int cameraIndex) throws Exception {
 
-    x.setPin(xPin);
-    y.setPin(yPin);
+    servoControls.get("x").servoControl.setPin(xPin);
+    servoControls.get("y").servoControl.setPin(yPin);
 
     ((PortConnector)controller).connect(port);
 
-    controller.servoAttachPin(x, xPin);
-    controller.servoAttachPin(y, yPin);
+    controller.servoAttachPin(servoControls.get("x").servoControl, xPin);
+    controller.servoAttachPin(servoControls.get("y").servoControl, yPin);
     opencv.setCameraIndex(cameraIndex);
 
-    x.attach();
-    y.attach();
+    servoControls.get("x").servoControl.attach();
+    servoControls.get("y").servoControl.attach();
     // TODO - think of a "validate" method
-    x.moveTo(x.getRest() + 2);
+    servoControls.get("x").servoControl.moveTo(servoControls.get("x").servoControl.getRest() + 2);
     sleep(300);
-    y.moveTo(y.getRest() + 2);
+    servoControls.get("y").servoControl.moveTo(servoControls.get("y").servoControl.getRest() + 2);
     sleep(300);
     rest();
   }
