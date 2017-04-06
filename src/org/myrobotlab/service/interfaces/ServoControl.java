@@ -119,11 +119,14 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl, Se
    */
   public double getMin();
   
+  public double getMinInput();
   /**
    * max x
    * @return
    */
   public double getMax();
+  
+  public double getMaxInput();
 
   /**
    * fractional speed settings 0.0 to 1.0
