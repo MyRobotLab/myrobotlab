@@ -109,6 +109,7 @@ public class Tracking extends Service {
     int scanStep = 2; 
     Double currentServoPos;
     String name;
+    String axis;
     TrackingServoData(String name) {
       this.name = name;
     }
@@ -151,22 +152,16 @@ public class Tracking extends Service {
   // ------------------- tracking & detecting methods begin
   // ---------------------
 
+  String[] axis = new String[]{"x","y"};
   // FIXME !! question remains does the act of creating meta update the
   // reservatinos ?
   // e.g if I come to the party does the reservations get updated or do I
   // crash the party ??
   public Tracking(String n) throws Exception {
     super(n);
-    TrackingServoData x = new TrackingServoData("x");
-    x.servoControl = (ServoControl) createPeer("x");
-    servoControls.put("x", x);
-    TrackingServoData y = new TrackingServoData("y");
-    y.servoControl = (ServoControl) createPeer("y");
-    servoControls.put("y", y);
     
     pid = (Pid) createPeer("pid");
     opencv = (OpenCV) createPeer("opencv");
-    controller = (Arduino) createPeer("controller");
 
     // cache filter names
     LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
@@ -187,10 +182,6 @@ public class Tracking extends Service {
     pid.setOutputRange("y", -20, 20); // <- not correct - based on maximum
     pid.setSampleTime("y", 30);
     pid.setSetpoint("y", 0.5); // set center
-
-    for (TrackingServoData sc:servoControls.values()){
-      sc.servoControl.attach(controller);
-    }
     
   }
 
@@ -511,16 +502,16 @@ public class Tracking extends Service {
   @Override
   public void startService() {
     super.startService();
-    TrackingServoData x = new TrackingServoData("x");
-    x.servoControl = (ServoControl) createPeer("x");
-    servoControls.put("x", x);
-    TrackingServoData y = new TrackingServoData("y");
-    y.servoControl = (ServoControl) createPeer("y");
-    servoControls.put("y", y);
-    pid = (Pid) startPeer("pid");
-    controller = (Arduino) startPeer("controller");
-    opencv = (OpenCV) startPeer("opencv");
-    rest();
+//    TrackingServoData x = new TrackingServoData("x");
+//    x.servoControl = (ServoControl) createPeer("x");
+//    servoControls.put("x", x);
+//    TrackingServoData y = new TrackingServoData("y");
+//    y.servoControl = (ServoControl) createPeer("y");
+//    servoControls.put("y", y);
+//    pid = (Pid) startPeer("pid");
+//    controller = (Arduino) startPeer("controller");
+//    opencv = (OpenCV) startPeer("opencv");
+//    rest();
   }
 
   public void stopScan() {
@@ -579,21 +570,14 @@ public class Tracking extends Service {
     // if I'm at my min & and the target is further min - don't compute
     // pid
     for (TrackingServoData tsd:servoControls.values()){
-      if ((tsd.currentServoPos <= tsd.servoControl.getMinInput() && tsd.setPoint - targetPoint.get(tsd.name) < 0) || (tsd.currentServoPos >= tsd.servoControl.getMaxInput() && tsd.setPoint - targetPoint.get(tsd.name) >0)) {
-        error(String.format("%f %s limit out of range", tsd.currentServoPos, tsd.name));
+      if (pid.compute(tsd.name)) {
+        tsd.currentServoPos += pid.getOutput(tsd.name);
+        tsd.servoControl.moveTo(tsd.currentServoPos);
+        tsd.currentServoPos = tsd.servoControl.getPos();
       }
       else {
-        if (pid.compute(tsd.name)) {
-          tsd.currentServoPos += pid.getOutput(tsd.name);
-          if (tsd.currentServoPos != tsd.lastServoPos) {
-            tsd.servoControl.moveTo(tsd.currentServoPos);
-            tsd.lastServoPos = tsd.currentServoPos;
-          }
-        }
-        else {
-          log.warn("{} data under-run", tsd.name);
-        } 
-      }
+        log.warn("{} data under-run", tsd.servoControl.getName());
+      } 
     }
  
     lastPoint = targetPoint;
@@ -664,22 +648,21 @@ public class Tracking extends Service {
   }
 
   public void connect(String port, int xPin, int yPin, int cameraIndex) throws Exception {
-
-    servoControls.get("x").servoControl.setPin(xPin);
-    servoControls.get("y").servoControl.setPin(yPin);
-
+    int[] pins = new int[]{xPin,yPin};
+    controller = (Arduino) createPeer("controller");
     ((PortConnector)controller).connect(port);
-
-    controller.servoAttachPin(servoControls.get("x").servoControl, xPin);
-    controller.servoAttachPin(servoControls.get("y").servoControl, yPin);
+    
+    for (int i = 0; i<axis.length; i++){
+      TrackingServoData x = new TrackingServoData(axis[i]);
+      x.servoControl = (Servo) createPeer(axis[i]);
+      servoControls.put(axis[i], x);
+      servoControls.get(axis[i]).servoControl.setPin(pins[i]);
+      servoControls.get(axis[i]).servoControl.attach(controller, pins[i]);
+      pid.setOutputRange(axis[i], x.servoControl.getMaxInput(), x.servoControl.getMaxInput());
+      x.servoControl.moveTo(x.servoControl.getRest() + 2);
+    }
     opencv.setCameraIndex(cameraIndex);
-
-    servoControls.get("x").servoControl.attach();
-    servoControls.get("y").servoControl.attach();
     // TODO - think of a "validate" method
-    servoControls.get("x").servoControl.moveTo(servoControls.get("x").servoControl.getRest() + 2);
-    sleep(300);
-    servoControls.get("y").servoControl.moveTo(servoControls.get("y").servoControl.getRest() + 2);
     sleep(300);
     rest();
   }
@@ -711,7 +694,7 @@ public class Tracking extends Service {
       LoggingFactory.init(Level.INFO);
       int xPin = 13;
       int yPin = 12;
-      String arduinoPort = "COM12";
+      String arduinoPort = "COM22";
       int cameraIndex = 0;
 
       // These all need to be created ahead of time o/w we get null pointer exceptions.
@@ -750,4 +733,20 @@ public class Tracking extends Service {
 
   }
 
+  public void attach(ServoControl servo, String axis) {
+    if (!(axis.equals("x") || axis.equals("y"))){
+      log.info("Axis must be x or y");
+      return;
+    }
+    TrackingServoData x = new TrackingServoData(axis);
+    x.servoControl = servo;
+    x.axis = axis;
+    servoControls.put(axis, x);
+    pid.setOutputRange(axis, servo.getMaxInput(), servo.getMaxInput());
+  }
+  
+  public void attach(ServoControl x, ServoControl y) {
+    attach(x,"x");
+    attach(y,"y");
+  }
 }

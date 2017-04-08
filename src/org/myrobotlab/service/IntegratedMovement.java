@@ -30,6 +30,7 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.Servo.IKData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
 import com.jme3.math.Vector3f;
@@ -377,6 +378,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     //#ik.addObject(360,540,117,360, 550,107,"cymbal",200)
     //#ik.addObject(90,530,-180,300,545,-181,"bell", 25)
     //ik.addObject(170,640,-70,170,720,-250,"tom",150,true);
+    ik.addObject(0,500,300,0,500,150,"beer",30,true);
 
 
     //print ik.currentPosition();
@@ -472,6 +474,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     //ik.setAi("rightArm", Ai.KEEP_BALANCE);
     //ik.setAi("leftArm", Ai.KEEP_BALANCE);
     ik.removeAi("kinect",Ai.AVOID_COLLISION);
+    
   }
 
   public void startEngine(String arm) {
@@ -532,11 +535,11 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     }
   }
   
-  public void setDHLink (String arm, Servo servo, double d, double theta, double r, double alpha) {
+  public void setDHLink (String arm, ServoControl servo, double d, double theta, double r, double alpha) {
     setDHLink(arm, servo, d, theta, r, alpha, servo.getMinInput(), servo.getMaxInput());
   }
   
-  public void setDHLink (String arm, Servo servo, double d, double theta, double r, double alpha, double minAngle, double maxAngle) {
+  public void setDHLink (String arm, ServoControl servo, double d, double theta, double r, double alpha, double minAngle, double maxAngle) {
     if (engines.containsKey(arm)) {
       IMEngine engine = engines.get(arm);
       DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
@@ -546,7 +549,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       dhLink.setMax(MathUtils.degToRad(theta + servo.getMaxInput()));
       dhLink.setState(Servo.SERVO_EVENT_STOPPED);
       dhLink.setVelocity(servo.getVelocity());
-      dhLink.setTargetPos(servo.targetPos);
+      dhLink.setTargetPos(servo.getPos());
       dhLink.servoMin = minAngle;//servo.getMinInput();
       dhLink.servoMax = maxAngle;//servo.getMaxInput();
       dhLink.hasServo = true;
@@ -585,6 +588,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     if (jmeApp != null){
       jmeApp.addObject(item);
     }
+    broadcastState();
     return item.getName();
   }
 
@@ -805,6 +809,19 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     if (engines.containsKey(armName)) {
       engines.get(armName).removeAi(ai);
     }
+  }
+  
+  public Double getAngleWithObject(String armName, String objectName) {
+    CollisionItem ci = collisionItems.getItem(objectName);
+    Vector3f vo = new Vector3f((float)ci.getOrigin().getX(), (float)ci.getOrigin().getY(), (float)ci.getOrigin().getZ());
+    Vector3f ve = new Vector3f((float)ci.getEnd().getX(), (float)ci.getEnd().getY(), (float)ci.getEnd().getZ());
+    Vector3f vci = vo.subtract(ve);
+    Point armvector = engines.get(armName).getDHRobotArm().getVector();
+    Vector3f va = new Vector3f((float)armvector.getX(), (float)armvector.getY(), (float)armvector.getZ());
+    float angle = va.dot(vci);
+    double div = Math.sqrt(Math.pow(vci.x, 2)+Math.pow(vci.y, 2)+Math.pow(vci.z, 2)) * Math.sqrt(Math.pow(va.x, 2)+Math.pow(va.y, 2)+Math.pow(va.z, 2));
+    return MathUtils.radToDeg(Math.acos(angle/div));
+    //return (double) va.angleBetween(vci);
   }
 }
 

@@ -321,4 +321,11 @@ public class DHRobotArm{
     return jointPositionMap;
   }
 
+  public Point getVector() {
+    Point lastJoint = getJointPosition(links.size()-1);
+    Point previousJoint = getJointPosition(links.size()-2);
+    Point retval = lastJoint.subtract(previousJoint);
+    
+    return retval;
+  }
 }
