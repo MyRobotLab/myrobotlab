@@ -63,16 +63,31 @@ public class Oscope extends ServiceGui implements ActionListener {
 	public class TraceScreen extends JPanel {
 		private static final long serialVersionUID = 1L;
 		Trace trace;
-		// BufferedImage b0;
-		BufferedImage buffer;
-		Graphics2D g2d;
+		
+		BufferedImage b0;
+		BufferedImage b1;
+		
+		Graphics2D g0;
+		Graphics2D g1;
+		
 		int timeDivisor = 1;
 		
 		public TraceScreen(Trace trace) {
 			super();
-			this.trace = trace;
-			this.buffer = trace.buffer;
-			this.g2d = buffer.createGraphics();
+			this.trace = trace;			
+			b0 = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+			b1 = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+			
+			g0 = b0.createGraphics();
+			g0.setPaint ( Color.GREEN );
+			g0.fillRect ( 0, 0, b0.getWidth(), b0.getHeight() );
+			g0.setColor(trace.color);
+			
+			g1 = b1.createGraphics();
+			g1.setPaint ( Color.CYAN );
+			g1.fillRect ( 0, 0, b1.getWidth(), b1.getHeight() );
+			g1.setColor(trace.color);
+
 			// on the top-level Canvas to prevent AWT from repainting it, as
 			// you'll
 			// typically be doing this yourself within the animation loop.
@@ -80,20 +95,32 @@ public class Oscope extends ServiceGui implements ActionListener {
 			setDoubleBuffered(true); // weird no access
 			setBackground(Color.GRAY);
 			setVisible(false);
-			g2d.drawImage(buffer, trace.xpos, 0, buffer.getWidth(), buffer.getHeight(), this);
-			g2d.setColor(trace.color);
+
+			
 		}
 
+		// drawing should be done on this thread ! 
+		// 'displaying' should be done on the paint swing thread
 		public void update(PinData pinData) {
 			trace.pinData = pinData;
 			trace.xpos+=timeDivisor;
+			/*
 			g2d.drawLine(trace.x, trace.y + h / 2, trace.xpos,trace.pinData.value * 20 + h / 2);
 			log.info("{},{} - {},{}", trace.x, trace.y + h / 2, trace.xpos,trace.pinData.value * 20 + h / 2);
 			if (trace.xpos % (w*timeDivisor) == 0) {
 				trace.xpos = 0;
 			}
-			trace.x = trace.xpos;
-			trace.y = trace.pinData.value;
+			*/
+			// trace.x = trace.xpos;
+			// trace.y = trace.pinData.value;
+			Graphics2D g0 = trace.screenDisplay.g0;
+			Graphics2D g1 = trace.screenDisplay.g1;
+			
+			// draw on our active image (we swap between the two)
+			
+			// shift both images and re-draw them			
+			
+			// ok for ui to update now ..
 			repaint();
 		}
 
@@ -103,7 +130,9 @@ public class Oscope extends ServiceGui implements ActionListener {
 		}
 
 		// https://www.nutt.net/create-scrolling-background-java/
-		// http://stackoverflow.com/questions/15511282/how-can-i-make-a-java-swing-animation-smoother
+
+		// g1 = b1.createGraphics();
+			// http://stackoverflow.com/questions/15511282/how-can-i-make-a-java-swing-animation-smoother
 		// http://stackoverflow.com/questions/2063607/java-panel-double-buffering
 		// http://gamedev.stackexchange.com/questions/70711/how-do-i-double-buffer-renders-to-a-jpanel
 		// http://stackoverflow.com/questions/4430356/java-how-to-do-double-buffering-in-swing
@@ -143,7 +172,7 @@ public class Oscope extends ServiceGui implements ActionListener {
 		int y;
 		PinData pinData;
 		PinData lastPinData;
-		BufferedImage buffer;
+		// BufferedImage buffer;
 
 		/*
 		BufferedImage buffer0 = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
@@ -162,12 +191,7 @@ public class Oscope extends ServiceGui implements ActionListener {
 			b.addActionListener(this);
 			// relay
 			addActionListener(oscope);
-			try {
-				// buffer = ImageIO.read(new File("boat.jpg"));
-				buffer =  new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-			} catch (Exception e) {
-				log.error("loading file threw", e);
-			}
+			
 
 			/*
 			 * screen = new BufferedImage(width, height,
