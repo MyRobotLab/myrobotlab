@@ -938,6 +938,22 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       // TODO Auto-generated method stub
       
     }
+
+    @Override
+    public double getMinInput() {
+      return mapper.getMinInput();
+    }
+
+    @Override
+    public double getMaxInput() {
+      return mapper.getMaxInput();
+    }
+
+    @Override
+    public void addIKServoEventListener(NameProvider service) {
+      // TODO Auto-generated method stub
+      
+    }
   
 
 }

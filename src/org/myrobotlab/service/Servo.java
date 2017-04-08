@@ -212,12 +212,12 @@ public class Servo extends Service implements ServoControl {
 
 	double lastPos;
 
-	boolean autoAttach = false;
+	boolean autoEnable = false;
 
 	public int defaultDetachDelay = 10000;
 	private boolean moving;
 	private double currentPosInput;
-	private boolean autoDetach = false;
+	private boolean autoDisable = false;
 	private transient Timer detachTimer;
 
 	public transient static final int SERVO_EVENT_STOPPED = 1;
@@ -265,6 +265,10 @@ public class Servo extends Service implements ServoControl {
 	public void attach() {
 		attach(pin);
 	}
+	
+	public void enable(){
+	  enable(pin);
+	}
 
 	/**
 	 * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
@@ -278,6 +282,15 @@ public class Servo extends Service implements ServoControl {
 		isPinAttached = true;
 		broadcastState();
 		invoke("publishServoAttach", getName());
+	}
+	
+	public void enable(int pin) {
+    lastActivityTime = System.currentTimeMillis();
+    controller.servoAttachPin(this, pin);
+    this.pin = pin;
+    isPinAttached = true;
+    broadcastState();
+    invoke("publishServoEnable", getName());
 	}
 
 	/**
@@ -295,6 +308,18 @@ public class Servo extends Service implements ServoControl {
 		// TODO: this doesn't seem to be consistent depending on how you invoke "detach()" ...
 		invoke("publishServoDetach", getName());
 	}
+	
+  public void disable() {
+    isPinAttached = false;
+    if (controller != null) {
+      controller.servoDetachPin(this);
+      //detach(controller);
+    }
+    broadcastState();
+    // TODO: this doesn't seem to be consistent depending on how you invoke "detach()" ...
+    invoke("publishServoDisable", getName());
+  }
+	
 
 	public boolean eventsEnabled(boolean b) {
 		isEventsEnabled = b;
@@ -344,6 +369,10 @@ public class Servo extends Service implements ServoControl {
 	public boolean isPinAttached() {
 		return isPinAttached;
 	}
+	
+	public boolean isEnabled() {
+	  return isPinAttached;
+	}
 
 	@Override
 	public boolean isInverted() {
@@ -361,8 +390,8 @@ public class Servo extends Service implements ServoControl {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
-		if (autoAttach && !isPinAttached()) {
-			attach();
+		if (autoEnable && !isEnabled()) {
+			enable();
 		}
 		lastPos = targetPos;
 		if (pos < mapper.getMinX()) {
@@ -416,13 +445,14 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void setMinMax(double min, double max) {
+	  map(min,max,min,max);
 		// THIS IS A BUG - BUT CORRECTING IT BURNS OLD SCRIPT'S SERVOS !!
-		mapper.setMinMaxOutput(min, max);
+		//mapper.setMinMaxOutput(min, max);
 		/*
 		 * THIS IS A BUG default setMinMax setMin & setMax IS INPUT NOT OUTPUT
 		 * !!!! mapper.setMin(min); mapper.setMax(max);
 		 */
-		broadcastState();
+		//broadcastState();
 	}
 
 	@Override
@@ -628,7 +658,7 @@ public class Servo extends Service implements ServoControl {
 		sleep(300);
 		// the controller is attached now
 		// its time to attach the pin
-		attach(pin);
+		enable(pin);
 
 		broadcastState();
 	}
@@ -727,20 +757,6 @@ public class Servo extends Service implements ServoControl {
 		return maxVelocity;
 	}
 
-	/*
-	 * public void moveToOutput(Integer moveTo) { if (controller == null) {
-	 * error(String.format("%s's controller is not set", getName())); return; }
-	 * 
-	 * // targetPos = pos; targetOutput = moveTo;
-	 * 
-	 * controller.servoWrite(this); lastActivityTime =
-	 * System.currentTimeMillis();
-	 * 
-	 * if (isEventsEnabled) { // update others of our position change
-	 * invoke("publishServoEvent", targetOutput); }
-	 * 
-	 * }
-	 */
 
 	@Override
 	public double getVelocity() {
@@ -806,13 +822,20 @@ public class Servo extends Service implements ServoControl {
 	 * @param autoAttach
 	 */
 	public void enableAutoAttach(boolean autoAttach) {
-		this.autoAttach = autoAttach;
+		this.autoEnable = autoAttach;
 	}
+  public void enableAutoEnable(boolean autoEnable) {
+    this.autoEnable = autoEnable;
+  }
 
 	public void enableAutoDetach(boolean autoDetach) {
-		this.autoDetach = autoDetach;
+		this.autoDisable = autoDetach;
 		this.addServoEventListener(this);
 	}
+  public void enableAutoDisable(boolean autoDidable) {
+    this.autoDisable = autoDisable;
+    this.addServoEventListener(this);
+  }
 
 	public double microsecondsToDegree(int microseconds) {
 		if (microseconds <= 180)
@@ -840,12 +863,12 @@ public class Servo extends Service implements ServoControl {
 		return targetOutput;
 	}
 
-	public void autoDetach() {
+	public void autoDisable() {
 		if (getTasks().containsKey("EndMoving")) {
 			purgeTask("EndMoving");
 		}
-		if (!isMoving() && autoAttach && isPinAttached()) {
-			detach();
+		if (!isMoving() && autoEnable && isPinAttached()) {
+			disable();
 		}
 		// moving = false;
 	}
@@ -885,9 +908,9 @@ public class Servo extends Service implements ServoControl {
 
 	public void onServoEvent(Double position) {
 		// log.info("{}.ServoEvent {}", getName(), position);
-		if (!isMoving() && autoDetach && isPinAttached()) {
+		if (!isMoving() && autoDisable && isPinAttached()) {
 			if (velocity > -1) {
-				detach();
+				disable();
 			} else {
 				if (detachTimer != null) {
 					detachTimer.cancel();
@@ -897,11 +920,10 @@ public class Servo extends Service implements ServoControl {
 				detachTimer.schedule(new TimerTask() {
 					@Override
 					public void run() {
-						detach();
+						disable();
 					}
 				}, (long) defaultDetachDelay);
 			}
-			// addTask("EndMoving",defaultDetachDelay, "autoDetach");
 		}
 	}
 
@@ -989,5 +1011,4 @@ public class Servo extends Service implements ServoControl {
 		}
 
 	}
-
 }

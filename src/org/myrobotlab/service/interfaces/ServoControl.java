@@ -25,6 +25,8 @@
 
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.framework.Service;
+
 public interface ServoControl extends DeviceControl, AbsolutePositionControl, ServiceInterface {
 
   // FIXME - do we want to support this & what do we expect from
@@ -226,5 +228,7 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl, Se
   public double getRest();
 
   boolean isInverted();
+
+  void addIKServoEventListener(NameProvider service);
 
 }
