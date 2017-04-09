@@ -393,6 +393,9 @@ public class Servo extends Service implements ServoControl {
 		if (autoEnable && !isEnabled()) {
 			enable();
 		}
+		if (pos == lastPos) {
+		  return;
+		}
 		lastPos = targetPos;
 		if (pos < mapper.getMinX()) {
 			pos = mapper.getMinX();
