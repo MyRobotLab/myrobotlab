@@ -42,13 +42,16 @@ import java.lang.Runtime;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
+import org.slf4j.Logger;
 
 public class MicrosoftSpeech extends Service implements TextListener, SpeechSynthesis {
+  static final Logger log = LoggerFactory.getLogger(MicrosoftSpeech.class);
 
 	// For compabilities
 	private static final long serialVersionUID = 1L;

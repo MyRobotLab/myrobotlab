@@ -3,7 +3,9 @@ package org.myrobotlab.service.interfaces;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.AudioData;
+import org.slf4j.Logger;
 
 /**
  * SpeechSynthesis - This is the interface that services that provide text to
@@ -11,6 +13,8 @@ import org.myrobotlab.service.data.AudioData;
  * 
  */
 public interface SpeechSynthesis extends NameProvider {
+  
+  public final static Logger log = LoggerFactory.getLogger(SpeechSynthesis.class);
 
   public abstract List<String> getVoices();
 
@@ -62,7 +66,10 @@ public interface SpeechSynthesis extends NameProvider {
    * @param utterance
    * @return
    */
-  public abstract String publishStartSpeaking(String utterance);
+  public default String publishStartSpeaking(String utterance){
+    log.info("publishStartSpeaking - {}", utterance);
+    return utterance;
+  }
 
   /**
    * stop callback for speech synth. (Invoked when speaking stops.)
@@ -70,7 +77,10 @@ public interface SpeechSynthesis extends NameProvider {
    * @param utterance
    * @return
    */
-  public abstract String publishEndSpeaking(String utterance);
+  public default String publishEndSpeaking(String utterance){
+    log.info("publishEndSpeaking - {}", utterance);
+    return utterance;
+  }
 
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException;
 

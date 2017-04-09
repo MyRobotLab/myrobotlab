@@ -33,7 +33,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +65,7 @@ import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PortListener;
 import org.myrobotlab.swing.widget.DockableTabPane;
 import org.myrobotlab.swing.widget.FileChooser;
-import org.myrobotlab.swing.widget.Oscope;
+import org.myrobotlab.swing.widget.Oscope2;
 import org.myrobotlab.swing.widget.PinGui;
 import org.myrobotlab.swing.widget.PortGui;
 
@@ -131,7 +130,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     uploadResults.setEditable(false);
     addMrlCommPanel();
     updatePinTab(myArduino);
-    Oscope oscope = new Oscope(boundServiceName, myService);
+    Oscope2 oscope = new Oscope2(boundServiceName, myService);
     oscope.addButtons(myArduino.getPinList());
     localTabs.addTab("oscope", oscope.getDisplay());
 
