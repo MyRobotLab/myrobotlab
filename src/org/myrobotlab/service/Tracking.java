@@ -161,11 +161,11 @@ public class Tracking extends Service {
     super(n);
     
     pid = (Pid) createPeer("pid");
-    opencv = (OpenCV) createPeer("opencv");
+    //opencv = (OpenCV) createPeer("opencv");
 
     // cache filter names
-    LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
-    opencv.addListener("publishOpenCVData", getName(), "setOpenCVData");
+    //LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
+    //opencv.addListener("publishOpenCVData", getName(), "setOpenCVData");
 
     setDefaultPreFilters();
 
@@ -211,11 +211,11 @@ public class Tracking extends Service {
     for (int i = 0; i < preFilters.size(); ++i) {
       opencv.addFilter(preFilters.get(i));
     }
+    
 
     // TODO single string static
     opencv.addFilter(FILTER_FACE_DETECT);
     opencv.setDisplayFilter(FILTER_FACE_DETECT);
-
     opencv.capture();
     opencv.publishOpenCVData(true);
 
@@ -562,16 +562,17 @@ public class Tracking extends Service {
     latency = System.currentTimeMillis() - targetPoint.timestamp;
     log.info(String.format("pt %s", targetPoint));
 
-    pid.setInput("x", targetPoint.x);
-    pid.setInput("y", targetPoint.y);
+//    pid.setInput("x", targetPoint.x);
+//    pid.setInput("y", targetPoint.y);
 
     // TODO - work on removing currentX/YServoPos - and use the servo's
     // directly ???
     // if I'm at my min & and the target is further min - don't compute
     // pid
     for (TrackingServoData tsd:servoControls.values()){
+      pid.setInput(tsd.axis, targetPoint.get(tsd.axis));
       if (pid.compute(tsd.name)) {
-        tsd.currentServoPos += pid.getOutput(tsd.name);
+        tsd.currentServoPos += (pid.getOutput(tsd.name));
         tsd.servoControl.moveTo(tsd.currentServoPos);
         tsd.currentServoPos = tsd.servoControl.getPos();
       }
@@ -661,7 +662,10 @@ public class Tracking extends Service {
       pid.setOutputRange(axis[i], x.servoControl.getMaxInput(), x.servoControl.getMaxInput());
       x.servoControl.moveTo(x.servoControl.getRest() + 2);
     }
+    opencv = (OpenCV) createPeer("opencv");
     opencv.setCameraIndex(cameraIndex);
+    opencv.addListener("publishOpenCVData", getName(), "setOpenCVData");
+    LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
     // TODO - think of a "validate" method
     sleep(300);
     rest();
@@ -718,7 +722,7 @@ public class Tracking extends Service {
        */
       tracker.connect(arduinoPort, xPin, yPin, cameraIndex);
       // tracker.connect("COM4");
-      tracker.startService();
+      //tracker.startService();
       //tracker.faceDetect();
       tracker.startLKTracking();
 
@@ -742,11 +746,19 @@ public class Tracking extends Service {
     x.servoControl = servo;
     x.axis = axis;
     servoControls.put(axis, x);
-    pid.setOutputRange(axis, servo.getMaxInput(), servo.getMaxInput());
+    x.currentServoPos = servo.getPos();
+    //pid.setOutputRange(axis, servo.getMaxInput(), servo.getMaxInput());
   }
   
   public void attach(ServoControl x, ServoControl y) {
     attach(x,"x");
     attach(y,"y");
+  }
+  
+  public void attach(OpenCV opencv) {
+    this.opencv = opencv;
+    LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
+    opencv.addListener("publishOpenCVData", getName(), "setOpenCVData");
+    
   }
 }
