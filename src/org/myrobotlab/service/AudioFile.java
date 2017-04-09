@@ -50,7 +50,7 @@ import org.slf4j.Logger;
  */
 public class AudioFile extends Service {
   static final long serialVersionUID = 1L;
-  static Logger log = LoggerFactory.getLogger(AudioFile.class);
+  static final Logger log = LoggerFactory.getLogger(AudioFile.class);
 
   static public final String DEFAULT_TRACK = "default";
   // FIXME -
