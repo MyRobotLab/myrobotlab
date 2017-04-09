@@ -388,6 +388,7 @@
 		<!-- jmonkey end -->
 		
 		<pathelement location="${repo}/com.voicerss.tts/1.0/tts.jar"/>
+		<pathelement location="${repo}/com.amazonaws.services/1.11.118/aws-java-sdk-1.11.118.jar"/>
 		
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
