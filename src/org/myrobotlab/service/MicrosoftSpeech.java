@@ -331,7 +331,6 @@ public class MicrosoftSpeech extends Service implements TextListener, SpeechSynt
 		meta.addDescription("Speech synthesis based on Microsoft speech with Jampal.");
 		meta.addCategory("speech");
 		meta.setSponsor("Dom14");
-		meta.addDependency("Jampal for windows", "2.1.6");
 		return meta;
 	}
 }
