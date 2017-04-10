@@ -49,7 +49,7 @@ void MrlI2CBus::i2cRead(byte deviceAddress, byte size) {
 // I2CADDRESS = The address of the i2c device
 // DATA_SIZE = The number of bytes to read from the i2c device
 void MrlI2CBus::i2cWriteRead(byte deviceAddress, byte readSize, byte writeValue) {
-	Wire.beginTransmission(writeValue); // address to the i2c device
+	Wire.beginTransmission(deviceAddress); // address to the i2c device
 	Wire.write(writeValue);             // device memory address to read from
 	Wire.endTransmission();
 	int answer = Wire.requestFrom(deviceAddress, readSize); // reqest a number of bytes to read

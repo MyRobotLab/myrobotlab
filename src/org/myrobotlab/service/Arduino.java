@@ -895,7 +895,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     for (int i = 0; i < i2cDataSize; i++) {
       i2cData[i] = (byte) (rawData[i] & 0xff);
     }
-    log.debug(String.format("i2cReturnData invoked. i2cDataSize = %s %s %s", i2cDataSize, rawData[0], rawData[1]));
+    log.debug(String.format("i2cReturnData invoked. i2cDataSize = %s %s", i2cDataSize, rawData[0]));
     i2cDataReturned = true;
   }
 
