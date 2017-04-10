@@ -471,7 +471,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.cog.setLinkMass("wrist", 0.176, 0.7474);
     ik.cog.setLinkMass("Rwrist", 0.176, 0.7474);
     
-    //ik.setAi("rightArm", Ai.KEEP_BALANCE);
+    ik.setAi("rightArm", Ai.KEEP_BALANCE);
     //ik.setAi("leftArm", Ai.KEEP_BALANCE);
     ik.removeAi("kinect",Ai.AVOID_COLLISION);
     
