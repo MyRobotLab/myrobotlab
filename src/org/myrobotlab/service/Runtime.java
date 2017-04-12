@@ -2126,9 +2126,19 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     logging.setLevel(level);
     return level;
   }
+  
+  static public String setLogFile(String file){
+    log.info("setLogFile {}", file);
+    Logging logging = LoggingFactory.getInstance();
+    logging.removeAllAppenders();
+    LoggingFactory.setLogFile(file);
+    logging.addAppender(Appender.FILE);
+    return file;
+  }
 
   static public void disableLogging() {
-    setLogLevel("DISABLE");
+    Logging logging = LoggingFactory.getInstance();
+    logging.removeAllAppenders();
   }
 
   /**
