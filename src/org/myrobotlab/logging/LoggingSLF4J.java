@@ -25,6 +25,8 @@ public class LoggingSLF4J extends Logging {
   public void addAppender(String type) {
     addAppender(type, null);
   }
+  
+  // http://stackoverflow.com/questions/7824620/logback-set-log-file-name-programmatically
 
   @Override
   public void addAppender(String type, String filename) {
@@ -86,7 +88,8 @@ public class LoggingSLF4J extends Logging {
 
       FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
       fileAppender.setName(String.format("%s.%s", Appender.IS_AGENT, Appender.FILE));
-      fileAppender.setFile(String.format("%s%smyrobotlab.log", System.getProperty("user.dir"), File.separator));
+      // fileAppender.setFile(String.format("%s%smyrobotlabz.log", System.getProperty("user.dir"), File.separator));
+      fileAppender.setFile(LoggingFactory.getLogFileName());
       fileAppender.setEncoder(ple);
       fileAppender.setContext(lc);
       fileAppender.start();
