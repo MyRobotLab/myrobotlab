@@ -126,8 +126,23 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
     return new ArrayList<String>(langMap.keySet());
   }
 
-  public void cacheAmazonFile(String toSpeak, OutputFormat format) throws IOException {
+  /**
+   * Proxy works in 3 modes
+   *    client - consumer of mrl services
+   *    relay - proxy (running as cloud service)
+   *    direct - goes direct to service
+   * In Polly's case - 
+   *    client - would be an end user using a client key
+   *    relay - is the mrl proxy service
+   *    direct would be from a users, by-passing mrl and going directly to Amazon with amazon keys
+   * cache file - caches file locally (both client or relay)
+   * @param toSpeak
+   * @param format
+   * @throws IOException
+   */
+  public byte[] cacheFile(String toSpeak, OutputFormat format) throws IOException {
 
+    byte[] mp3File = null;
     // cache it begin -----
     String localFileName = getLocalFileName(this, toSpeak, "mp3");
     // String filename = AudioFile.globalFileCacheDir + File.separator +
@@ -138,22 +153,23 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
       SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(awsVoice.getId()).withOutputFormat(format);
       SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
       InputStream data = synthRes.getAudioStream();
-      byte[] b = FileIO.toByteArray(data);
-      audioFile.cache(localFileName, b, toSpeak);
+      mp3File = FileIO.toByteArray(data);
+      audioFile.cache(localFileName, mp3File, toSpeak);
     } else {
       log.info("using local cached file");
+      mp3File = FileIO.toByteArray(new File(getLocalFileName(this, toSpeak, "mp3")));
     }
 
     // invoke("publishStartSpeaking", toSpeak);
     // audioFile.playBlocking(filename);
     // invoke("publishEndSpeaking", toSpeak);
     // log.info("Finished waiting for completion.");
-
+    return mp3File; 
   }
 
   @Override
   public AudioData speak(String toSpeak) throws Exception {
-    cacheAmazonFile(toSpeak, OutputFormat.Mp3);
+    cacheFile(toSpeak, OutputFormat.Mp3);
     AudioData audioData = audioFile.playCachedFile(getLocalFileName(this, toSpeak, "mp3"));
     utterances.put(audioData, toSpeak);
     return audioData;
@@ -255,7 +271,7 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
 
   @Override
   public boolean speakBlocking(String toSpeak) throws Exception {
-    cacheAmazonFile(toSpeak, OutputFormat.Mp3);
+    cacheFile(toSpeak, OutputFormat.Mp3);
     audioFile.playBlocking(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, "mp3"));
     return false;
   }
