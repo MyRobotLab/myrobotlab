@@ -504,6 +504,9 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 
 	public void save() {
 		String oldName = getSelected();
+		EditorPanel p = scripts.get(oldName);
+		FileUtil.save(jframe, p.getText(), oldName);
+		/*
 		if (scripts.containsKey(oldName)) {
 			EditorPanel p = scripts.get(oldName);
 			if (FileUtil.save(jframe, p.getText(), oldName)) {
@@ -513,11 +516,13 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 				editorTabs.remove(p.getDisplay());
 				EditorPanel np = addNewEditorPanel(new Script(currentScriptName, p.getText()));
 				editorTabs.setSelectedComponent(np.getDisplay());
+				log.info("here");
 				
 			}
 		} else {
 			log.error(String.format("cant saveFile %s", oldName));
 		}
+		*/
 	}
 
 }
