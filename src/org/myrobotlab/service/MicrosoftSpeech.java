@@ -42,16 +42,14 @@ import java.lang.Runtime;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+//import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
-import org.slf4j.Logger;
 
 public class MicrosoftSpeech extends Service implements TextListener, SpeechSynthesis {
-  static final Logger log = LoggerFactory.getLogger(MicrosoftSpeech.class);
 
 	// For compabilities
 	private static final long serialVersionUID = 1L;
@@ -72,7 +70,7 @@ public class MicrosoftSpeech extends Service implements TextListener, SpeechSynt
 	// Use for specified text path file
 	@Override
 	public void setLanguage(String l) {
-		TextPath = voice;
+		TextPath = l;
 	}
 
 	// Use for read text path file
@@ -166,7 +164,7 @@ public class MicrosoftSpeech extends Service implements TextListener, SpeechSynt
 		{
 			PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter (f)));
 		 
-			pw.print("ptts -u text.txt");
+			pw.print("ptts -u " + TextPath + "text.txt");
 			pw.close();
 		}
 		catch (IOException exception)
@@ -192,8 +190,8 @@ public class MicrosoftSpeech extends Service implements TextListener, SpeechSynt
 		}
 		
 		// Text file created...
-		File f = new File ("text.txt");
-		 
+		File f = new File (TextPath + "text.txt");
+		
 		try
 		{
 			PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter (f)));
@@ -331,7 +329,17 @@ public class MicrosoftSpeech extends Service implements TextListener, SpeechSynt
 		meta.addDescription("Speech synthesis based on Microsoft speech with Jampal.");
 		meta.addCategory("speech");
 		meta.setSponsor("Dom14");
-		// meta.addDependency("Jampal for windows", "2.1.6");
 		return meta;
 	}
+	
+	/*public static void main(String[] args) {
+	    try {
+	      LoggingFactory.init();
+	      MicrosoftSpeech mspeech = (MicrosoftSpeech) Runtime.start("msspeech", "MicrosoftSpeech");
+	      mspeech.speak("Bonjour, aujourd'hui, je parlerai d'un nouveau service");
+	      mspeech.speakBlocking("Maintenant j'utilise une nouvelle méthode");
+	    } catch (Exception e) {
+	      log.error("main threw", e);
+	    }
+	  }*/
 }
