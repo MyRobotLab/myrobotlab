@@ -257,11 +257,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	public Arduino(String n) {
 		super(n);
+		/*
 		try {
 			FileIO.extractResource("Arduino", "resource/Arduino");
 		} catch (IOException e) {
 			log.error("could not extract resource/Arduino");
 		}
+		*/
 		// super calls load() - which will load any variables which were
 		// serialized
 		// and are not new'd and assigned in definition
