@@ -355,8 +355,9 @@ public class FileIO {
       return false;
     }
 
+    // FIXME - this should just copy sources if not a jar
     if (!isJar() && !overwrite) {
-      log.warn("mrl is not operating in a jar - not extracting");
+      log.warn("mrl is not operating in a jar - not extracting ");
       return false;
     }
 
