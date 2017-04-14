@@ -105,29 +105,26 @@ public class ImapEmailConnector extends AbstractConnector {
     IMAPFolder inbox = (IMAPFolder) store.getFolder("inbox");
     inbox.open(Folder.READ_ONLY);
 
+    // TODO: consider moving this into it's own class. 
     inbox.addMessageCountListener(new MessageCountListener() {
 
         @Override
         public void messagesRemoved(MessageCountEvent event) {
-
+            // NoOp.
         }
 
         @Override
         public void messagesAdded(MessageCountEvent event) {
             Message[] messages = event.getMessages();
-
             for (Message message : messages) {
-                try {
-                    // System.out.println("Mail Subject:- " + message.getSubject());
-                    invoke("publishEmail", message);
-                } catch (MessagingException e) {
-                    e.printStackTrace();
-                }
+              // a new message arrived, publish it
+              invoke("publishEmail", message);
             }
         }
     });
 
     // a thread to keep our inbox idle open i guess? a a heartbeat perhaps?
+    // TODO: rmove this elsewhere?
     new Thread(new Runnable() {
         private static final long KEEP_ALIVE_FREQ = 10000;
 
