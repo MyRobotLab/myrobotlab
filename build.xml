@@ -37,7 +37,7 @@
 			tests [multi platform]
 	
 	TODO - dependencies
-			build - java 1.7
+			build - java 1.8
 			dist - git token environment variable
 	
 	
@@ -117,7 +117,7 @@
 	<!-- directory for the build to go into -->
 	<property name="build" location="build" />
 	<!-- location for the unit test reports to go into -->
-    <property name="report" location="dist/current/${branch}/report" />
+        <property name="report" location="dist/current/${branch}/report" />
 
 	<!-- location for the jacoco reports -->
 	<property name="result.jacoco.file" location="${build}/jacoco.exec" />
@@ -390,6 +390,16 @@
 		<pathelement location="${repo}/com.voicerss.tts/1.0/tts.jar"/>
 		<pathelement location="${repo}/com.amazonaws.services/1.11.118/aws-java-sdk-1.11.118.jar"/>
 		
+	        <!-- KW slack bot dependencies start -->	
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/atlassian-util-concurrent-2.4.2.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/spring-beans-4.3.2.RELEASE.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/spring-context-4.3.2.RELEASE.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/spring-core-4.3.2.RELEASE.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/spring-web-4.3.2.RELEASE.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/spring-websocket-4.3.2.RELEASE.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/tomcat-embed-core-8.5.4.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/tomcat-embed-websocket-8.5.4.jar"/>
+		
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
 
@@ -595,7 +605,7 @@
 	</target>
 
 	<!-- Compile target, compile all myrobotlab src files -->
-	<target name="compile" depends="init,unzip" description="compile the source ">
+	<target name="compile" depends="init" description="compile the source ">
 
 		<echo>compile start</echo>
 		<!-- compile the java code from ${src} into ${build} -->
@@ -609,7 +619,7 @@
 	</target>
 
 	<!-- create myrobotlab.jar -->
-	<target name="jar" depends="compile" description="create the myrobotlab.jar file">
+	<target name="jar" depends="compile, unzip" description="create the myrobotlab.jar file">
 		<!-- FIXME - use Ivy to get the files there ! filebase or url resolver -->
 		<!-- copy resource.root -->
 		<java classname="org.myrobotlab.framework.repo.ServiceData">
@@ -750,7 +760,7 @@
 		</http>
 	</target>
 	<!-- TODO: make this depend on test , gotta figure out why travis ci is failing on this now. -->
-	<target name="dist" depends="report" description="generate the distribution">
+	<target name="dist" depends="jar, javadoc, report" description="generate the distribution">
 		<!-- copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${version}.jar" / -->
 		<!-- backwards compat .. TODO: review this.. -->
 		<mkdir dir="${dist}" />
@@ -783,14 +793,12 @@
 			</report>
 		</junitreport>
 		<!-- jacoco report stuff -->
-               <!-- echo message="JACOCO RESULTS FILE ${result.jacoco.file}" / -->
-		<!-- temporarily disabling jacoco
+               <!-- echo message="JACOCO RESULTS FILE ${result.jacoco.file}" -->
+	       <!-- temporarily disabling jacoco -->
 		<jacoco:report>
-			// This task needs the collected execution data and ...
 			<executiondata>
 				<file file="${result.jacoco.file}" />
 			</executiondata>
-			// the class files and optional source files ... 
 			<structure name="JaCoCo MyRobotLab Report">
 				<classfiles>
 					<fileset dir="${build}/classes/org/myrobotlab" />
@@ -799,12 +807,11 @@
 					<fileset dir="${src}" />
 				</sourcefiles>
 			</structure>
-			// to produce reports in different formats. 
 			<html destdir="${result.report.dir}" />
 			<csv destfile="${result.report.dir}/report.csv" />
 			<xml destfile="${result.report.dir}/report.xml" />
 		</jacoco:report>
-  -->
+		
                	 <!-- helper task to facilitate moving the jacoco report to s3 because
                       hidden directories aren't copied with the local_dir task in travis s3 task --> 
 		<!-- replace and rename the .resources directory to resources -->
@@ -849,7 +856,9 @@
 	</target>
 
 	<target name="javadoc" depends="compile" description="Create the javadocs from the source code" >
-		<javadoc access="public" packagenames="org.myrobotlab.*" author="true" destdir="javadoc" doctitle="myrobotlab" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.7" sourcepath="src" splitindex="true" use="true" version="true">
+		<javadoc access="public" packagenames="org.myrobotlab.*" author="true" destdir="javadoc" 
+			encoding="UTF-8" charset="UTF-8" docencoding="UTF-8" doctitle="myrobotlab" nodeprecated="false" nodeprecatedlist="false" 
+			noindex="false" nonavbar="false" notree="false" source="1.8" sourcepath="src" splitindex="true" use="true" version="true">
 			<arg value="-notimestamp" />
 			<classpath refid="compile.classpath" />
 		</javadoc>
@@ -857,15 +866,15 @@
 
 	<!-- TODO - upload/publish javadoc -->
 
-	<target name="test" depends="compiletests, jar" description="Run the unit tests">
+	<target name="test" depends="compile, compiletests" description="Run the unit tests">
 		<!-- junit options description="Main  Integration/Unit Tests"
 		               showoutput="true"
 		               printsummary="true"
 		               printsummary="withOutAndErr"
 		               outputtoformatters="true" -->
 		<!-- temporarily disabling jacoco -->
-		<!-- jacoco:coverage destfile="${result.jacoco.file}" -->
-		    <junit printsummary="on" fork="true" haltonfailure="false" showoutput="false">
+		<jacoco:coverage destfile="${result.jacoco.file}">
+		    <junit printsummary="on" fork="true" haltonfailure="true" showoutput="false">
 			<!--
 			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
 			<env key="LD_LIBRARY_PATH" path="${dist}/libraries/native"/>			
@@ -882,16 +891,17 @@
 
 			<batchtest fork="true" todir="${build}/report" >
 				<fileset dir="${test}">
+					<!-- FIXME !! 
 					<include name="**/*Test.java" />
 					<exclude name="**/JFugueTest.java" />
 					<exclude name="**/MessageTest.java" />
-					<!-- FIXME !!  there should be no excluded tests ! -->
+					  there should be no excluded tests ! -->
 					<!-- exclude name="**/ArduinoTest.java" / -->
 				</fileset>
 			</batchtest>
 
 		    </junit>
-		<!-- /jacoco:coverage -->
+		</jacoco:coverage>
 	</target>
 
 	<target name="quickTest" > <!-- not correct depends="compiletests" -->
