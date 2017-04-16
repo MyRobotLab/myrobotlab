@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -13,6 +14,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.slf4j.Logger;
 
+@Ignore
 public class ArduinoPinArrayControlTest {
 
 	public final static Logger log = LoggerFactory.getLogger(ArduinoPinArrayControlTest.class);
