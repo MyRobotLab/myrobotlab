@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -22,6 +23,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
+@Ignore
 public class ServiceInterfaceTest {
 
   public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
@@ -29,7 +31,6 @@ public class ServiceInterfaceTest {
   @Test
   public final void testInstallAllServices() throws ClassNotFoundException, ParseException, IOException {
     // TODO: this probably is going to take longer but it's worth while!
-
     ServiceData sd = ServiceData.getLocalInstance();// CodecUtils.fromJson(FileUtils.readFileToString(new
                                                     // File("../repo/serviceData.json")),
                                                     // ServiceData.class);
@@ -41,7 +42,6 @@ public class ServiceInterfaceTest {
         log.info("already installed.");
       }
     }
-
   }
 
   @Test
