@@ -177,7 +177,7 @@ public class DHRobotArm{
       m = m.multiply(s);
       // log.debug("-------------------------");
       // log.debug(m);
-      if (links.get(i).getName().equals(lastDHLink)) {
+      if (links.get(i).getName()!= null && links.get(i).getName().equals(lastDHLink)) {
         break;
       }
     }
