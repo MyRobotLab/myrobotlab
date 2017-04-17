@@ -768,6 +768,18 @@
 		<copy file="${build}/classes/resource/version.txt" tofile="${dist}/version.txt"/>
 		<!-- for convienence of debugging spawn -->
 		<copy file="${build}/lib/myrobotlab.jar" tofile="myrobotlab.jar" />
+
+
+                <!-- Lets zip up the javadocs and the jacoco reports so they can be part of the distribution! -->
+                <zip destfile="${dist}/myrobotlab-javadoc.zip">
+                  <zipfileset dir="${build}/javadoc" />
+                </zip>
+
+                <!-- Lets zip up the jacoco code coverage reports! people can see what is / isn't tested -->
+                <zip destfile="${dist}/myrobotlab-jacoco.zip">
+                  <zipfileset dir="${build}/javadoc" />
+                </zip>
+
 	</target>
 
 	<target name="clean" description="clean up">
@@ -856,7 +868,7 @@
 	</target>
 
 	<target name="javadoc" depends="compile" description="Create the javadocs from the source code" >
-		<javadoc access="public" packagenames="org.myrobotlab.*" author="true" destdir="javadoc" 
+		<javadoc access="public" packagenames="org.myrobotlab.*" author="true" destdir="${build}/javadoc" 
 			encoding="UTF-8" charset="UTF-8" docencoding="UTF-8" doctitle="myrobotlab" nodeprecated="false" nodeprecatedlist="false" 
 			noindex="false" nonavbar="false" notree="false" source="1.8" sourcepath="src" splitindex="true" use="true" version="true">
 			<arg value="-notimestamp" />
