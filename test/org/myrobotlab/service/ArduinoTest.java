@@ -14,6 +14,7 @@ import java.util.Map;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
@@ -40,6 +41,7 @@ import org.slf4j.Logger;
  *
  */
 
+@Ignore
 public class ArduinoTest implements PinArrayListener {
 
 	public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
