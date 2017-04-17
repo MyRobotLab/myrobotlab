@@ -41,12 +41,14 @@ public class IMEngine extends Thread implements Genetic {
     CollisionItem targetItem = null;    
     ObjectPointLocation objectLocation = null;    
     DHLink lastLink = null;
-    public String arm;   
+    public String arm;
+    public String lastLinkName;   
   }   
 
   MoveInfo moveInfo = null;
   private CalcFitnessType calcFitnessType;
   private int cogRetry;
+  private String lastDHLink;
   
   private enum CalcFitnessType {
     POSITION,
@@ -80,7 +82,7 @@ public class IMEngine extends Thread implements Genetic {
 
   public void run() {
 		while(true){
-      Point currentPosition = arm.getPalmPosition();
+      Point currentPosition = arm.getPalmPosition(lastDHLink);
       if (AiActive(IntegratedMovement.Ai.AVOID_COLLISION)) {
   			Point avoidPoint = checkCollision(arm, service.collisionItems);
         if (avoidPoint != null) {
@@ -101,7 +103,7 @@ public class IMEngine extends Thread implements Genetic {
 			if (target != null && currentPosition.distanceTo(target) > maxDistance /**&& !isWaitingForServo()**/) {
 				Log.info("distance to target {}", currentPosition.distanceTo(target));
 				Log.info(currentPosition.toString());
-				move();
+				move(lastDHLink);
 				cogRetry = 0;
 				continue;
 			}
@@ -250,8 +252,12 @@ public class IMEngine extends Thread implements Genetic {
     }
     return false;
   }
+  
+  private void move() {
+    move(null);
+  }
 
-	private void move() {
+	private void move(String lastDHLink) {
 		//noUpdatePosition = true;
     if (inputMatrix != null) {
       target = rotateAndTranslate(target);
@@ -259,7 +265,7 @@ public class IMEngine extends Thread implements Genetic {
     if (++tryCount > 500 && oldTarget != null) {
       target = oldTarget;
     }
-		boolean success = moveToGoal(target);
+		boolean success = moveToGoal(target, lastDHLink);
     //Log.info("Moving to {}", arm.getPalmPosition());
     //target = null;
     if (success) {
@@ -269,6 +275,10 @@ public class IMEngine extends Thread implements Genetic {
 	}
 
 	private boolean moveToGoal(Point goal) {
+	  return moveToGoal(goal, null);
+	}
+	
+	private boolean moveToGoal(Point goal, String lastDHLink) {
     // we know where we are.. we know where we want to go.
     int numSteps = 0;
     double iterStep = 0.01;
@@ -302,10 +312,13 @@ public class IMEngine extends Thread implements Genetic {
             }
             link.addPositionValue( degrees);
           }
+          if (computeArm.getLink(i).getName().equals(lastDHLink)) {
+            break;
+          }
         }
         return true;
       }
-      Point currentPos = computeArm.getPalmPosition();
+      Point currentPos = computeArm.getPalmPosition(lastDHLink);
       //Log.debug("Current Position " + currentPos);
       // vector to destination
       Point deltaPoint = goal.subtract(currentPos);
@@ -342,6 +355,9 @@ public class IMEngine extends Thread implements Genetic {
             	maxTimeToMove = timeToMove;
             }
       	}
+        if (computeArm.getLink(i).getName().equals(lastDHLink)) {
+          break;
+        }
       }
       // delta point represents the direction we need to move in order to
       // get there.
@@ -483,10 +499,14 @@ public class IMEngine extends Thread implements Genetic {
 		}
 	}
 
-
-	public void moveTo(Point point) {
+  public void moveTo(Point point) {
+    moveTo(point, null);
+  }
+  
+	public void moveTo(Point point, String lastDHLink) {
 		target  = point;
-		oldTarget = arm.getPalmPosition();
+		this.lastDHLink = lastDHLink;
+		oldTarget = arm.getPalmPosition(lastDHLink);
 		tryCount = 0;
 	}
 
@@ -675,10 +695,12 @@ public class IMEngine extends Thread implements Genetic {
     return arm.createJointPositionMap();
   }
 
-  public void moveTo(CollisionItem item,ObjectPointLocation location) {
+  public void moveTo(CollisionItem item,ObjectPointLocation location, String lastDHLink) {
     moveInfo = new MoveInfo();    
     moveInfo.targetItem = item;   
-    moveInfo.objectLocation = location;   
+    moveInfo.objectLocation = location; 
+    moveInfo.lastLinkName = lastDHLink;
+    this.lastDHLink = lastDHLink;
     if (moveInfo.targetItem == null){   
       Log.info("no items named ", item.getName(), "found");   
       moveInfo = null;    
@@ -689,9 +711,19 @@ public class IMEngine extends Thread implements Genetic {
   }
 
   private Point moveToObject() {
-    double safety = 20.0;
+    double safety = 10.0;
     Point[] point = new Point[2]; 
-    moveInfo.lastLink = arm.getLink(arm.getNumLinks()-1);   
+    if (moveInfo.lastLinkName == null) {
+      moveInfo.lastLink = arm.getLink(arm.getNumLinks()-1);
+    }
+    else {
+      for (DHLink link:arm.getLinks()) {
+        if (link.getName() == moveInfo.lastLinkName) {
+          moveInfo.lastLink = link;
+          break;
+        }
+      }
+    }
     CollisionItem lastLinkItem = service.collisionItems.getItem(moveInfo.lastLink.getName());   
     service.collisionItems.addIgnore(moveInfo.targetItem.name, lastLinkItem.name);
     Double[] vector = new Double[3];    
@@ -732,13 +764,15 @@ public class IMEngine extends Thread implements Genetic {
         addRadius = true;   
         break;    
       }   
-      case CENTER_SIDE: {   
+      case CENTER_SIDE:
+      case LEFT_SIDE:
+      case RIGHT_SIDE: {   
         point = service.collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[]{0.5, 0.5}, vector);    
         addRadius = true;   
       }   
       case CENTER: {    
         point = service.collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[]{0.5, 0.5}, vector);    
-      }   
+      }
     }   
     if(addRadius) {   
       double[] vectori = moveInfo.targetItem.getVector();   
@@ -748,16 +782,29 @@ public class IMEngine extends Thread implements Genetic {
       v = v.unitVector(safety);
       side0 = side0.add(v);
       Point pointF = side0;   
-      Point curPos = arm.getPalmPosition();   
-      double d = Math.pow((side0.getX() - curPos.getX()),2) + Math.pow((side0.getY() - curPos.getY()),2) + Math.pow((side0.getZ() - curPos.getZ()),2);    
+      Point curPos = arm.getPalmPosition(moveInfo.lastLinkName);   
+      double d = Math.pow((side0.getX() - curPos.getX()),2) + Math.pow((side0.getY() - curPos.getY()),2) + Math.pow((side0.getZ() - curPos.getZ()),2);
+      double currentx = side0.getX();
       for (int i = 0; i < 360; i+=10) {   
         double L = vectori[0]*vectori[0] + vectori[1]*vectori[1] + vectori[2]*vectori[2];   
         double x = ((moveInfo.targetItem.getOrigin().getX()*(Math.pow(vectori[1],2)+Math.pow(vectori[2], 2)) - vectori[0] * (moveInfo.targetItem.getOrigin().getY()*vectori[1] + moveInfo.targetItem.getOrigin().getZ()*vectori[2] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getX() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * (-moveInfo.targetItem.getOrigin().getZ()*vectori[1] + moveInfo.targetItem.getOrigin().getY()*vectori[2] - vectori[2]*side0.getY() + vectori[1]*side0.getZ()) * Math.sin(MathUtils.degToRad(i))) / L;   
         double y = ((moveInfo.targetItem.getOrigin().getY()*(Math.pow(vectori[0],2)+Math.pow(vectori[2], 2)) - vectori[1] * (moveInfo.targetItem.getOrigin().getX()*vectori[0] + moveInfo.targetItem.getOrigin().getZ()*vectori[2] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getY() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * ( moveInfo.targetItem.getOrigin().getZ()*vectori[0] - moveInfo.targetItem.getOrigin().getX()*vectori[2] + vectori[2]*side0.getX() - vectori[0]*side0.getZ()) * Math.sin(MathUtils.degToRad(i))) / L;   
         double z = ((moveInfo.targetItem.getOrigin().getZ()*(Math.pow(vectori[0],2)+Math.pow(vectori[1], 2)) - vectori[2] * (moveInfo.targetItem.getOrigin().getX()*vectori[0] + moveInfo.targetItem.getOrigin().getY()*vectori[1] - vectori[0]*side0.getX() - vectori[1]*side0.getY() - vectori[2]*side0.getZ())) * (1 - Math.cos(MathUtils.degToRad(i))) + L * side0.getZ() * Math.cos(MathUtils.degToRad(i)) + Math.sqrt(L) * (-moveInfo.targetItem.getOrigin().getY()*vectori[0] + moveInfo.targetItem.getOrigin().getX()*vectori[1] - vectori[1]*side0.getX() + vectori[0]*side0.getY()) * Math.sin(MathUtils.degToRad(i))) / L;   
         Point check = new Point(x,y,z,0,0,0);   
-        double dt = Math.pow((check.getX() - curPos.getX()),2) + Math.pow((check.getY() - curPos.getY()),2) + Math.pow((check.getZ() - curPos.getZ()),2);   
-        if (dt < d) {   
+        double dt = Math.pow((check.getX() - curPos.getX()),2) + Math.pow((check.getY() - curPos.getY()),2) + Math.pow((check.getZ() - curPos.getZ()),2);
+        if (moveInfo.objectLocation.equals(ObjectPointLocation.RIGHT_SIDE)) {
+          if (check.getX() < currentx){
+            pointF = check;
+            currentx = check.getX();
+          }
+        }
+        else if (moveInfo.objectLocation.equals(ObjectPointLocation.LEFT_SIDE)) {
+          if (check.getX() > currentx){
+            pointF = check;
+            currentx = check.getX();
+          }
+        }
+        else if (dt < d) {   
           pointF = check;   
           d = dt;   
         }   
