@@ -170,7 +170,16 @@ public class DHLink {
         // TODO: it's out of range!
         System.out.println("Rotation out of range for link " + angle);
       }
-    } else {
+    } 
+    if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
+      if (angle <= max && angle >= min) {
+        alpha = angle;
+      } else {
+        // TODO: it's out of range!
+        System.out.println("Rotation out of range for link " + angle);
+      }
+    }
+    else {
       // TODO: You can't rotate a prismatic joint!
       // TODO Throw something?
     }
@@ -224,14 +233,29 @@ public class DHLink {
   }
 
   public void incrRotate(double delta) {
-    // we shouldn't go beyond the max
-    double destAngle = this.theta + delta;
-    // I suppose this means min/max are in radians..
-    if (destAngle > max || destAngle < min) {
-      // we're out of range
-      // log.info("Link {} angle out of range {} ", name, destAngle);
-    } else {
-      this.theta = destAngle;
+    if (DHLinkType.REVOLUTE.equals(type)){
+      // we shouldn't go beyond the max
+      double destAngle = this.theta + delta;
+      // I suppose this means min/max are in radians..
+      if (destAngle > max || destAngle < min) {
+        // we're out of range
+        // log.info("Link {} angle out of range {} ", name, destAngle);
+      }
+      else {
+        this.theta = destAngle;
+      }
+    }
+    else if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
+      // we shouldn't go beyond the max
+      double destAngle = alpha + delta;
+      // I suppose this means min/max are in radians..
+      if (destAngle > max || destAngle < min) {
+        // we're out of range
+        // log.info("Link {} angle out of range {} ", name, destAngle);
+      }
+      else {
+        alpha = destAngle;
+      }
     }
   }
 
@@ -264,7 +288,12 @@ public class DHLink {
   }
 
   public void addPositionValue(double positionDeg) {
-    theta = initialTheta + MathUtils.degToRad(positionDeg);
+    if (DHLinkType.REVOLUTE.equals(type)) {
+      theta = initialTheta + MathUtils.degToRad(positionDeg);
+    }
+    else if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
+      alpha = initialTheta + MathUtils.degToRad(positionDeg);
+    }
   }
   
   public double getInitialTheta() {
@@ -272,8 +301,13 @@ public class DHLink {
   }
   
   public Double getPositionValueDeg() {
-    //return (theta - initialTheta) * 180 / Math.PI;
-    return (theta * 180/Math.PI) - (initialTheta*180/Math.PI); 
+    if (DHLinkType.REVOLUTE.equals(type)) {
+      return (theta * 180/Math.PI) - (initialTheta*180/Math.PI);
+    }
+    else if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
+      return (alpha * 180/Math.PI) - (initialTheta*180/Math.PI);
+    }
+    return 0.0;
   }
 
 	public double getVelocity() {
@@ -313,6 +347,17 @@ public class DHLink {
   
   public Double getCurrentPos(){
     return currentPos;
+  }
+
+  public DHLinkType getType() {
+  	return type;
+  }
+  
+  public void setType(DHLinkType type) {
+  	this.type = type;
+  	if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
+  	  initialTheta = alpha;
+  	}
   }
 }
 
