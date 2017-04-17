@@ -121,7 +121,7 @@
 
 	<!-- location for the jacoco reports -->
 	<property name="result.jacoco.file" location="${build}/jacoco.exec" />
-	<property name="result.report.dir" location="${report}/jacoco" />
+	<property name="result.report.dir" location="${build}/jacoco" />
 	<!-- directory for the distrbituion to go into -->
 	<property name="dist" location="dist/current/${branch}" />
 	
