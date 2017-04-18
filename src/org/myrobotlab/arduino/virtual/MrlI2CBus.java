@@ -56,7 +56,7 @@ void i2cRead(int deviceAddress, int size) {
 // I2CADDRESS = The address of the i2c device
 // DATA_SIZE = The number of bytes to read from the i2c device
 void i2cWriteRead(int deviceAddress, int readSize, int writeValue) {
-  Wire.beginTransmission(writeValue); // address to the i2c device
+  Wire.beginTransmission(deviceAddress); // address to the i2c device
   Wire.write(writeValue);             // device memory address to read from
   Wire.endTransmission();
   int answer = Wire.requestFrom(deviceAddress, readSize); // reqest a number of bytes to read
