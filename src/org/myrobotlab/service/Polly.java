@@ -241,6 +241,8 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
           processVoicesRequest();
         } catch (Exception e2) {
           error("could not get Polly client - did you setKeys ?");
+          error("Environment variables – AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY or");
+          error("check http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html");
           log.error("giving up", e2);
         }
       }
@@ -302,7 +304,9 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
     // TODO: make this a base class sort of thing.
     getPolly();
-    return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
+    // having - AudioFile.globalFileCacheDir exposed like this is a bad idea .. 
+    // AudioFile should just globallyCache - the details of that cache should not be exposed :(
+    return AudioFile.globalFileCacheDir + File.separator + provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
         + audioFileType;
   }
 
@@ -358,7 +362,7 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
       Polly polly = (Polly) Runtime.start("polly", "Polly");
 
       // add your amazon access key & secret
-      polly.setKey("{access-key-id}", "{secret-access-key}");
+      polly.setKey("{AWS_ACCESS_KEY_ID}", "{AWS_SECRET_ACCESS_KEY}");
 
       List<String> voices = polly.getVoices();
       for (String voice : voices) {
@@ -436,7 +440,7 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
       polly.speak("or to take arms against a see of troubles");
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("Polly main threw", e);
     }
   }
 
