@@ -306,7 +306,7 @@ public class Servo extends Service implements ServoControl {
 		}
 		broadcastState();
 		// TODO: this doesn't seem to be consistent depending on how you invoke "detach()" ...
-		invoke("publishServoDetach", getName());
+		//invoke("publishServoDetach", getName());
 	}
 	
   public void disable() {
@@ -846,11 +846,11 @@ public class Servo extends Service implements ServoControl {
 		return (double) (microseconds - 544) * 180 / (2400 - 544);
 	}
 
-	public String publishServoAttach(String name) {
+	public String publishServoEnable(String name) {
 		return name;
 	}
 
-	public String publishServoDetach(String name) {
+	public String publishServoDisable(String name) {
 		return name;
 	}
 

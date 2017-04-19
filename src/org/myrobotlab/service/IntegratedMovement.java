@@ -13,6 +13,7 @@ import org.myrobotlab.jme3.interfaces.IntegratedMovementInterface;
 import org.myrobotlab.kinematics.CollisionDectection;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.DHLink;
+import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.kinematics.GravityCenter;
 import org.myrobotlab.kinematics.IMEngine;
@@ -71,7 +72,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     END_CENTER(0x05, "Center End"),   
     CLOSEST_POINT(0x06, "Closest Point"),   
     CENTER(0x07, "Center"),   
-    CENTER_SIDE(0x08, "Side Center");   
+    CENTER_SIDE(0x08, "Side Center"),   
+    LEFT_SIDE(0x09, "Left Side"),
+    RIGHT_SIDE(0x0A, "Right Side");
     public int value;   
     public String location;
     private ObjectPointLocation(int value, String location) {   
@@ -138,12 +141,20 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
   
   public void moveTo(String arm, double x, double y, double z) {
-    moveTo(arm, new Point(x, y, z, 0, 0, 0));
+    moveTo(arm,x,y,z,null);
+  }
+  
+  public void moveTo(String arm, double x, double y, double z, String lastDHLink) {
+    moveTo(arm, new Point(x, y, z, 0, 0, 0), lastDHLink);
   }
 
   public void moveTo(String arm, Point point) {
+    moveTo(arm, point, null);
+  }
+  
+  public void moveTo(String arm, Point point, String lastDHLink) {
     if (engines.containsKey(arm)) {
-      engines.get(arm).moveTo(point);
+      engines.get(arm).moveTo(point, lastDHLink);
     }
     else {
       log.info("unknow arm {}", arm);
@@ -221,6 +232,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     Servo mtorso = (Servo)Runtime.start("mtorso","Servo");
     mtorso.attach(arduino,26,90);
     mtorso.map(15,165,148,38);
+    //mtorso.map(89.9,90.1,93.1,92.9);
+    mtorso.setRest(90);
     //#mtorso.setMinMax(35,150);
     mtorso.setVelocity(13);
     mtorso.moveTo(90);
@@ -293,18 +306,18 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     Rwrist.setVelocity(26);
     //#bicep.setMinMax(5,90)
     Rwrist.moveTo(90);
-    Servo finger = (Servo) Runtime.start("finger","Servo");
-    finger.attach(arduino,18,90);
-    finger.map(89.999,90.001,89.999,90.001);
-    finger.setVelocity(26);
-    //#bicep.setMinMax(5,90)
-    finger.moveTo(90);
-    Servo Rfinger = (Servo) Runtime.start("Rfinger","Servo");
-    Rfinger.attach(arduino,38,90);
-    Rfinger.map(89.999,90.001,89.999,90.001);
-    Rfinger.setVelocity(26);
-    //#bicep.setMinMax(5,90)
-    Rfinger.moveTo(90);
+//    Servo finger = (Servo) Runtime.start("finger","Servo");
+//    finger.attach(arduino,18,90);
+//    finger.map(89.999,90.001,89.999,90.001);
+//    finger.setVelocity(26);
+//    //#bicep.setMinMax(5,90)
+//    finger.moveTo(90);
+//    Servo Rfinger = (Servo) Runtime.start("Rfinger","Servo");
+//    Rfinger.attach(arduino,38,90);
+//    Rfinger.map(89.999,90.001,89.999,90.001);
+//    Rfinger.setVelocity(26);
+//    //#bicep.setMinMax(5,90)
+//    Rfinger.moveTo(90);
 
     //#define the DH parameters for the ik service
     ik.setNewDHRobotArm("leftArm");
@@ -315,12 +328,12 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.setDHLink("leftArm",omoplate,0,-5.6,45,-90);
     ik.setDHLink("leftArm",shoulder,77,-30+90,0,90);
     ik.setDHLink("leftArm",rotate,284,90,40,90);
-    ik.setDHLink("leftArm",bicep,0,-7+24.4+90,300,90);
-////////////    //#ik.setDHLink(wrist,00,-90,200,0)
-    ik.setDHLink("leftArm",wrist,00,-90,220,-90);
-//////////    //print ik.currentPosition();
-//////////
-    //ik.setDHLink("leftArm",finger,-20,-90,120,0);
+    ik.setDHLink("leftArm",bicep,0,-7+24.4+90,300,0);
+    ik.setDHLink("leftArm",wrist,0,-90,0,0);
+    ik.setDHLinkType("wrist", DHLinkType.REVOLUTE_ALPHA);
+    ik.setDHLink("leftArm","wristup",0,-5,110,0);
+    ik.setDHLink("leftArm","wristdown",0,0,105,45);
+    ik.setDHLink("leftArm","finger",5,-90,5,0);
 
     ik.startEngine("leftArm");
     
@@ -332,12 +345,13 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.setDHLink("rightArm",Romoplate,0,-5.6,45,90);
     ik.setDHLink("rightArm",Rshoulder,-77,-30+90,0,-90);
     ik.setDHLink("rightArm",Rrotate,-284,90,40,-90);
-    ik.setDHLink("rightArm",Rbicep,0,-7+24.4+90,300,90);
+    ik.setDHLink("rightArm",Rbicep,0,-7+24.4+90,300,0);
 ////////////    //#ik.setDHLink(wrist,00,-90,200,0)
-    ik.setDHLink("rightArm",Rwrist,00,-90,220,-90);
-//////////    //print ik.currentPosition();
-//////////
-    //ik.setDHLink("rightArm",Rfinger,20,-90,120,0);
+    ik.setDHLink("rightArm",Rwrist,00,-90,0,0);
+    ik.setDHLinkType("Rwrist", DHLinkType.REVOLUTE_ALPHA);
+    ik.setDHLink("rightArm","Rwristup",0,5,110,0);
+    ik.setDHLink("rightArm","Rwristdown",0,0,105,-45);
+    ik.setDHLink("rightArm","Rfinger",5,90,5,0);
     ik.startEngine("rightArm");
     
     ik.setNewDHRobotArm("kinect");
@@ -363,22 +377,28 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.addObject("Rrotate", 50.0);
     ik.addObject("bicep", 60.0);
     ik.addObject("Rbicep", 60.0);
-    ik.addObject("wrist", 70.0);
+    ik.addObject("wrist", 10.0);
     ik.addObject("Rwrist", 70.0);
     ik.addObject("leftS", 10);
     ik.addObject("rightS", 10);
+    ik.addObject("wristup",70);
+    ik.addObject("wristdown",70);
+    ik.objectAddIgnore("bicep", "wristup");
+    ik.addObject("Rwristup",70);
+    ik.addObject("Rwristdown",70);
+    ik.objectAddIgnore("Rbicep", "Rwristup");
     ik.objectAddIgnore("leftS", "rightS");
     ik.objectAddIgnore("omoplate", "rotate");
     ik.objectAddIgnore("Romoplate", "Rrotate");
     ik.objectAddIgnore("rightS", "shoulder");
     ik.objectAddIgnore("leftS", "Rshoulder");
-    ik.addObject("finger",10.0);
+    sleep(1000);
     //ik.addObject("Rfinger",10.0);
     //ik.addObject(-1000.0,400, 0, 1000, 425, 00, "obstacle",40, true);
     //#ik.addObject(360,540,117,360, 550,107,"cymbal",200)
     //#ik.addObject(90,530,-180,300,545,-181,"bell", 25)
     //ik.addObject(170,640,-70,170,720,-250,"tom",150,true);
-    ik.addObject(0,500,300,0,500,150,"beer",30,true);
+    ik.addObject(0,700,300,0,700,150,"beer",30,true);
 
 
     //print ik.currentPosition();
@@ -423,6 +443,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ((TestJmeIMModel) ik.jmeApp).addPart("neckroll", null, 1f, "neck", new Vector3f(0,0,0), Vector3f.UNIT_Z.mult(1), (float)Math.toRadians(2));
     ((TestJmeIMModel) ik.jmeApp).addPart("head", "Models/head.j3o", 1f, "neckroll", new Vector3f(0,10,20), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(0));
     ((TestJmeIMModel) ik.jmeApp).addPart("jaw", "Models/jaw.j3o", 1f, "head", new Vector3f(-5,63,-50), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(0));
+    //((TestJmeIMModel) ik.jmeApp).addPart("finger", null, 10f, "wrist", new Vector3f(0,205,0), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(0));
 
     //TODO add the object that can collide with the model
     //ik.jmeApp.addObject();
@@ -454,6 +475,12 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     wrist.moveTo(90);
     Rwrist.moveTo(90);
 
+//    sleep(3000);
+//    double[][] jp = ik.createJointPositionMap("leftArm");
+//    Point x = new Point(jp[jp.length-2][0],jp[jp.length-2][1],jp[jp.length-2][2],0,0,0);
+//    Point y = new Point(jp[jp.length-1][0],jp[jp.length-1][1],jp[jp.length-1][2],0,0,0);
+    //ik.addObject(x,y,"finger",100.0, false);
+
     //ik.startOpenNI();
     //ik.processKinectData();
     
@@ -471,7 +498,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.cog.setLinkMass("wrist", 0.176, 0.7474);
     ik.cog.setLinkMass("Rwrist", 0.176, 0.7474);
     
-    ik.setAi("rightArm", Ai.KEEP_BALANCE);
+    //ik.setAi("rightArm", Ai.KEEP_BALANCE);
     //ik.setAi("leftArm", Ai.KEEP_BALANCE);
     ik.removeAi("kinect",Ai.AVOID_COLLISION);
     
@@ -618,6 +645,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     collisionItems.addIgnore(object1, object2);
   }
   
+  public void objectRemoveIgnore(String object1, String object2) {
+    collisionItems.removeIgnore(object1, object2);
+  }
+  
   public void onIKServoEvent(IKData data) {
     Mapper map = maps.get(data.name);
     data.pos = map.calcOutput(data.pos);
@@ -634,10 +665,13 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     }
   }
   
-  public void moveTo(String armName, String objectName, ObjectPointLocation location) {
-    engines.get(armName).moveTo(collisionItems.getItem(objectName), location);
+  public void moveTo(String armName, String objectName, ObjectPointLocation location, String lastDHLink) {
+    engines.get(armName).moveTo(collisionItems.getItem(objectName), location, lastDHLink);
   }   
       
+  public void moveTo(String armName, String objectName, ObjectPointLocation location) {
+    moveTo(armName,objectName, location, null);
+  }   
   public void stopMoving() {
     for (IMEngine engine: engines.values()) {
       engine.target=null;
@@ -822,6 +856,34 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     double div = Math.sqrt(Math.pow(vci.x, 2)+Math.pow(vci.y, 2)+Math.pow(vci.z, 2)) * Math.sqrt(Math.pow(va.x, 2)+Math.pow(va.y, 2)+Math.pow(va.z, 2));
     return MathUtils.radToDeg(Math.acos(angle/div));
     //return (double) va.angleBetween(vci);
+  }
+  
+  public Double getAngleWithAxis(String objectName, String axis) {
+    CollisionItem ci = collisionItems.getItem(objectName);
+    Vector3f vo = new Vector3f((float)ci.getOrigin().getX(), (float)ci.getOrigin().getY(), (float)ci.getOrigin().getZ());
+    Vector3f ve = new Vector3f((float)ci.getEnd().getX(), (float)ci.getEnd().getY(), (float)ci.getEnd().getZ());
+    Vector3f vci = vo.subtract(ve);
+    Vector3f va = null;
+    if (axis.equals("x")) {
+      va = Vector3f.UNIT_X;
+    }
+    else if (axis.equals("y")) {
+      va = Vector3f.UNIT_Y;
+    }
+    else if (axis.equals("z")) {
+      va = Vector3f.UNIT_Z;
+    }
+    return MathUtils.radToDeg(va.angleBetween(vci));
+  }
+  
+  public void setDHLinkType(String name, DHLinkType type) {
+	  for (IMEngine engine:engines.values()) {
+		  for (DHLink link:engine.getDHRobotArm().getLinks()) {
+			  if (link.getName().equals(name)){
+				  link.setType(type);
+			  }
+		  }
+	  }
   }
 }
 

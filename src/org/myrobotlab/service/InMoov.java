@@ -10,6 +10,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.jme3.InMoov3DApp;
+import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.GravityCenter;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -1773,37 +1774,40 @@ public class InMoov extends Service {
       im.setDHLink("rightArm",arm.omoplate,0,-5.6,45,90);
       im.setDHLink("rightArm",arm.shoulder,-77,-30+90,0,-90);
       im.setDHLink("rightArm",arm.rotate,-284,90,40,-90);
-      im.setDHLink("rightArm",arm.bicep,0,-7+24.4+90,300,90);
+      im.setDHLink("rightArm",arm.bicep,0,-7+24.4+90,300,0);
     }
     else {
       im.setDHLink("rightArm","i01.rightArm.omoplate",0,-5.6,45,90);
       im.setDHLink("rightArm","i01.rightArm.shoulder",-77,-30+90,0,-90);
       im.setDHLink("rightArm","i01.rightArm.rotate",-284,90,40,-90);
-      im.setDHLink("rightArm","i01.rightArm.bicep",0,-7+24.4+90,300,90);
+      im.setDHLink("rightArm","i01.rightArm.bicep",0,-7+24.4+90,300,0);
     }
     if (hands.containsKey(LEFT)){
       InMoovHand hand = hands.get(LEFT);
-      im.setDHLink("leftArm",hand.wrist,00,-90,100,-90);
+      im.setDHLink("leftArm",hand.wrist,00,-90,0,0);
+      im.setDHLinkType("i01.leftHand.wrist", DHLinkType.REVOLUTE_ALPHA);
     }
     else {
-      im.setDHLink("leftArm","i01.leftHand.wrist",00,-90,100,-90);
+      im.setDHLink("leftArm","i01.leftHand.wrist",00,-90,0,0);
     }
     if (hands.containsKey(RIGHT)){
       InMoovHand hand = hands.get(RIGHT);
-      im.setDHLink("rightArm",hand.wrist,00,-90,100,90);
+      im.setDHLink("rightArm",hand.wrist,00,-90,0,0);
+      im.setDHLinkType("i01.rigtHand.wrist", DHLinkType.REVOLUTE_ALPHA);
     }
     else {
-      im.setDHLink("rightArm","i01.rightArm.wrist",00,-90,100,-90);
+      im.setDHLink("rightArm","i01.rightHand.wrist",00,-90,0,0);
     }
-    im.setDHLink("leftArm","lfinger",-20,0,120,0);
-    im.setDHLink("rightArm","rfinger",-20,0,120,0);
+    im.setDHLink("leftArm","wristup",0,-5,90,0);
+    im.setDHLink("leftArm","wristdown",0,0,125,45);
+    im.setDHLink("leftArm","finger",5,-90,5,0);
+    im.setDHLink("rightArm","Rwristup",0,5,90,0);
+    im.setDHLink("rightArm","Rwristdown",0,0,125,-45);
+    im.setDHLink("rightArm","Rfinger",5,90,5,0);
     im.setDHLink("kinect","camera",0,90,10,90);
     
-    log.info("{}",im.createJointPositionMap("leftArm").toString());
+    //log.info("{}",im.createJointPositionMap("leftArm").toString());
     //start the kinematics engines
-    im.startEngine("leftArm");
-    im.startEngine("rightArm");
-    im.startEngine("kinect");
     
     //define object, each dh link are set as an object, but the
     //start point and end point will be update by the ik service, but still need
@@ -1824,14 +1828,23 @@ public class InMoov extends Service {
     im.addObject("i01.rightHand.wrist", 70.0);
     im.objectAddIgnore("i01.rightArm.omoplate", "i01.leftArm.rotate");
     im.objectAddIgnore("i01.rightArm.omoplate", "i01.rightArm.rotate");
-    im.addObject("lfinger",50.0);
-    im.addObject("rfinger",50.0);
     im.addObject("leftS", 10);
     im.addObject("rightS", 10);
     im.objectAddIgnore("leftS", "rightS");
     im.objectAddIgnore("rightS", "i01.leftArm.shoulder");
     im.objectAddIgnore("leftS", "i01.rightArm.shoulder");
+    im.addObject("wristup",70);
+    im.addObject("wristdown",70);
+    im.objectAddIgnore("i01.leftArm.bicep", "wristup");
+    im.addObject("Rwristup",70);
+    im.addObject("Rwristdown",70);
+    im.objectAddIgnore("i01.rightArm.bicep", "Rwristup");
 
+    im.startEngine("leftArm");
+    im.startEngine("rightArm");
+    im.startEngine("kinect");
+
+    
     im.cog = new GravityCenter(im);
     im.cog.setLinkMass("i01.torso.midStom", 2.832, 0.5);
     im.cog.setLinkMass("i01.torso.topStom", 5.774, 0.5);

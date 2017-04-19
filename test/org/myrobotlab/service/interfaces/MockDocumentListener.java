@@ -2,10 +2,13 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.List;
 
+import org.junit.Ignore;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Service;
 
+// TODO: why is the build running this as a unit test?  need to remove things like this
+@Ignore
 public class MockDocumentListener extends Service implements DocumentListener {
 
   private static final long serialVersionUID = 1L;

@@ -6,12 +6,15 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+// TODO: this test takes too long to run!
+@Ignore
 public class ServoTest {
 
 	public final static Logger log = LoggerFactory.getLogger(ServoTest.class);
