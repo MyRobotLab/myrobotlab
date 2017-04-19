@@ -63,7 +63,7 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
     // http://www.neuroforge.co.uk/index.php/masking-colour-images
     if (sourceName != null) {
       // INFO - This filter has 2 keys !!!
-      IplImage src = vp.sources.get(String.format("%s.%s", vp.boundServiceName, sourceName));
+      IplImage src = data.get(sourceName);
       if (src != null) {
         if (dst == null) {
           dst = src.clone();

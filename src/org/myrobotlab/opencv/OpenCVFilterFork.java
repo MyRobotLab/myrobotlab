@@ -23,61 +23,49 @@
  * 
  * */
 
-// http://stackoverflow.com/questions/11515072/how-to-identify-optimal-parameters-for-cvcanny-for-polygon-approximation
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
+import static org.bytedeco.javacpp.opencv_core.cvSize;
+import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
-public class OpenCVFilterCopy extends OpenCVFilter {
+public class OpenCVFilterFork extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterCopy.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFork.class.getCanonicalName());
 
-	public OpenCVFilterCopy() {
-		super();
-	}
+  final static int CV_GAUSSIAN_5X5 = 7;
 
-	public OpenCVFilterCopy(String name) {
-		super(name);
-	}
+  transient IplImage forked = null;
 
-	/*
-	 * 
-	 * void getSubImg(IplImage* img, IplImage* subImg, CvRect roiRect) {
-	 * 
-	 * cvSetImageROI(img, roiRect); subImg = cvCreateImage(cvGetSize(img),
-	 * img->depth, img->nChannels); cvCopy(img, subImg, NULL);
-	 * cvResetImageROI(img); }
-	 */
+  public OpenCVFilterFork() {
+    super();
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
+  public OpenCVFilterFork(String name) {
+    super(name);
+  }
 
-	}
+  @Override
+  public void imageChanged(IplImage image) {
 
-	@Override
-	public IplImage process(IplImage img, OpenCVData data) {
-		IplImage copy = null;
+	  forked = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
+  }
 
-		// CvRect roiRect = new CvRect(0, 0, 30, 120);
-		// cvSetImageROI(img, roiRect);
-		copy = cvCreateImage(cvGetSize(img), img.depth(), img.nChannels());
+  @Override
+  public IplImage process(IplImage image, OpenCVData data) {
 
-		cvCopy(img, copy, null);
-		// vp.sources.put(vp.boundServiceName, String.format("%s.copy",
-		// vp.boundServiceName, name), img);
-		// cvResetImageROI(img);
-
-		return copy;
-	}
+	// TODO - duplicate of OpenCVFilterCopy :P
+	forked = cvCreateImage(cvGetSize(image), image.depth(), image.nChannels());
+	cvCopy(image, forked, null);	
+    return forked;
+  }
 
 }
