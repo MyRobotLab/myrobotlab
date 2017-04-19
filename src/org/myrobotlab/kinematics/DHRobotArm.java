@@ -7,8 +7,6 @@ import org.myrobotlab.service.InverseKinematics3D;
 import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
 
-import com.jme3.math.Vector3f;
-
 public class DHRobotArm{
 
   transient public final static Logger log = LoggerFactory.getLogger(DHRobotArm.class);
@@ -152,7 +150,7 @@ public class DHRobotArm{
    * 
    * @return
    */
-  public Point getPalmPosition() {
+  public Point getPalmPosition(String lastDHLink) {
     // TODO Auto-generated method stub
     // return the position of the end effector wrt the base frame
     Matrix m = new Matrix(4, 4);
@@ -179,6 +177,9 @@ public class DHRobotArm{
       m = m.multiply(s);
       // log.debug("-------------------------");
       // log.debug(m);
+      if (links.get(i).getName()!= null && links.get(i).getName().equals(lastDHLink)) {
+        break;
+      }
     }
     // now m should be the total translation for the arm
     // given the arms current position
@@ -327,5 +328,9 @@ public class DHRobotArm{
     Point retval = lastJoint.subtract(previousJoint);
     
     return retval;
+  }
+
+  public Point getPalmPosition() {
+    return getPalmPosition(null);
   }
 }

@@ -186,11 +186,11 @@ public class MouthControl extends Service {
     mouthClosedPos = closed;
     mouthOpenedPos = opened;
 
-    if (closed < opened) {
-      jaw.setMinMax(closed, opened);
-    } else {
-      jaw.setMinMax(opened, closed);
-    }
+//    if (closed < opened) {
+//      jaw.map(closed, opened, closed, opened);
+//    } else {
+//      jaw.map(opened, closed, opened, closed);
+//    }
   }
 
   @Override
