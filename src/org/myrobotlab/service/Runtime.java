@@ -1761,6 +1761,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     log.info("{} - GMT - {}", sdf.format(now), gmtf.format(now));
     log.info("Pid {}", getPid());
     log.info("ivy [runtime,{}.{}.{}]", platform.getArch(), platform.getBitness(), platform.getOS());
+    log.info("branch {} commit {} build {}", platform.getBranch(), platform.getCommit(), platform.getBuild());
     log.info("os.name [{}] getOS [{}]", System.getProperty("os.name"), platform.getOS());
     log.info("os.arch [{}] getArch [{}]", System.getProperty("os.arch"), platform.getArch());
     log.info("getBitness [{}]", platform.getBitness());

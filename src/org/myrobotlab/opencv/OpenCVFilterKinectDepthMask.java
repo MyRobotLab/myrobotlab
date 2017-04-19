@@ -152,7 +152,7 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
     // TODO - clean up - remove input parameters? only use storage?
     if (imageKey != null) {
       // TODO: validate what this is doing?
-      kinectDepth = vp.sources.get(String.format("%s.%s", vp.boundServiceName, OpenCV.SOURCE_KINECT_DEPTH));
+      kinectDepth = data.get(OpenCV.SOURCE_KINECT_DEPTH);
     } else {
       kinectDepth = image;
     }

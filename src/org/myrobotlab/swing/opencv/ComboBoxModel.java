@@ -14,7 +14,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class ComboBoxModel implements MutableComboBoxModel, ActionListener {
-  public final static Logger log = LoggerFactory.getLogger(ComboBoxModel.class.toString());
+  public final static Logger log = LoggerFactory.getLogger(ComboBoxModel.class);
 
   private static final DefaultComboBoxModel<Object> model = new DefaultComboBoxModel<Object>();
 

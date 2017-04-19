@@ -94,11 +94,24 @@
 	<property file="build.properties" />
 	<!-- backfill with the environment variables -->
 	<property environment="env" />
+	
+	<condition property="COMMIT" value="${env.TRAVIS_COMMIT}" else="devcommit">
+	  <isset property="env.RELEASE_VER" />
+	</condition>
+	
+	<condition property="BUILD" value="${env.TRAVIS_BUILD_NUMBER}" else="devbuild">
+	   <isset property="env.TRAVIS_BUILD_NUMBER" />
+	</condition>
+	
+	<condition property="BRANCH" value="${env.TRAVIS_BUILD_NUMBER}" else="develop">
+	  <isset property="env.TRAVIS_BUILD_NUMBER" />
+	</condition>
+	
 	<!-- set the tag, if not already set in a local properties file -->
 	<echo message="TRAVIS_TAG=${env.TRAVIS_TAG}" />
 	<echo message="TRAVIS_BUILD_NUMBER=${env.TRAVIS_BUILD_NUMBER}" />
 	
-    <property name="developVersion" value="1.0.${env.TRAVIS_BUILD_NUMBER}" />
+    <property name="developVersion" value="1.0.${BUILD}" />
 	<!-- property name="developVersion" value="1.0.9999" / -->
 	<property name="masterVersion" value="${env.TRAVIS_TAG}" />
 	<property name="version" value="${developVersion}" />
@@ -645,6 +658,7 @@
 					<attribute name="Implementation-Title" value="myrobotlab" />
 					<attribute name="Implementation-Version" value="${version}" />
 					<attribute name="Implementation-Vendor" value="myrobotlab.org" />
+					<attribute name="Commit" value="${COMMIT}" />					
 				</section>
 			</manifest>
 		</jar>

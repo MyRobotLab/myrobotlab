@@ -1773,8 +1773,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         // inbox.setBlocking(true);
         serial.addByteListener(this);
 
-        // FileIO.extractResources(false);
-        // FileIO.extractResource("Arduino","resource/Arduino");
+        FileIO.extractResource("Arduino","resource/Arduino", false); 
       }
     } catch (Exception e) {
       log.error("Arduino.startService threw", e);
