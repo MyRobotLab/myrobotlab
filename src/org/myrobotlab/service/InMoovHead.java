@@ -21,6 +21,7 @@ public class InMoovHead extends Service {
   transient public Servo eyeY;
   transient public Servo rothead;
   transient public Servo neck;
+  transient public Servo rollNeck;
   transient public Arduino arduino;
 
   public InMoovHead(String n) {
@@ -30,23 +31,25 @@ public class InMoovHead extends Service {
     eyeY = (Servo) createPeer("eyeY");
     rothead = (Servo) createPeer("rothead");
     neck = (Servo) createPeer("neck");
+    rollNeck = (Servo) createPeer("rollNeck");
     arduino = (Arduino) createPeer("arduino");
 
 
     neck.setMinMax(20, 160);
+    rollNeck.setMinMax(20, 160);
     rothead.setMinMax(30, 150);
     // reset by mouth control
     jaw.setMinMax(10, 25);
     eyeX.setMinMax(60, 100);
     eyeY.setMinMax(50, 100);
-
     neck.setRest(90);
+    rollNeck.setRest(90);
     rothead.setRest(90);
     jaw.setRest(10);
     eyeX.setRest(80);
     eyeY.setRest(90);
     
-    setVelocity(45.0,45.0,45.0,45.0,45.0);
+    setVelocity(45.0,45.0,45.0,45.0,45.0,45.0);
 
   }
 
@@ -67,7 +70,9 @@ public class InMoovHead extends Service {
     rothead.attach();
     sleep(InMoov.attachPauseMs);
     neck.attach();
-
+    sleep(InMoov.attachPauseMs);
+    rollNeck.attach();
+    sleep(InMoov.attachPauseMs);
     return true;
   }
 
@@ -76,6 +81,7 @@ public class InMoovHead extends Service {
   public void broadcastState() {
     // notify the gui
     rothead.broadcastState();
+    rollNeck.broadcastState();
     neck.broadcastState();
     eyeX.broadcastState();
     eyeY.broadcastState();
@@ -90,6 +96,7 @@ public class InMoovHead extends Service {
     jaw.attach(arduino, 26, jaw.getRest(), jaw.getVelocity());
     eyeX.attach(arduino, 22, eyeX.getRest(), eyeX.getVelocity());
     eyeY.attach(arduino, 24, eyeY.getRest(), eyeY.getVelocity());
+    rollNeck.attach(arduino, 30, rollNeck.getRest(), rollNeck.getVelocity());
     broadcastState();
     return true;
   }
@@ -115,6 +122,9 @@ public class InMoovHead extends Service {
     if (jaw != null) {
       jaw.detach();
     }
+    if (rollNeck != null) {
+    	rollNeck.detach();
+    }
   }
 
   public long getLastActivityTime() {
@@ -123,11 +133,12 @@ public class InMoovHead extends Service {
     lastActivityTime = Math.max(lastActivityTime, eyeX.getLastActivityTime());
     lastActivityTime = Math.max(lastActivityTime, eyeY.getLastActivityTime());
     lastActivityTime = Math.max(lastActivityTime, jaw.getLastActivityTime());
+    lastActivityTime = Math.max(lastActivityTime, rollNeck.getLastActivityTime());
     return lastActivityTime;
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format("%s.moveHead(%d,%d,%d,%d,%d)\n", inMoovServiceName, neck.getPos(), rothead.getPos(), eyeX.getPos(), eyeY.getPos(), jaw.getPos());
+    return String.format("%s.moveHead(%d,%d,%d,%d,%d,%d)\n", inMoovServiceName, neck.getPos(), rothead.getPos(), eyeX.getPos(), eyeY.getPos(), jaw.getPos(), rollNeck.getPos());
   }
 
   public boolean isAttached() {
@@ -138,6 +149,7 @@ public class InMoovHead extends Service {
     attached |= eyeX.isAttached();
     attached |= eyeY.isAttached();
     attached |= jaw.isAttached();
+    attached |= rollNeck.isAttached();
 
     return attached;
   }
@@ -148,6 +160,7 @@ public class InMoovHead extends Service {
     eyeX.moveTo(eyeX.getRest() + 2);
     eyeY.moveTo(eyeY.getRest() + 2);
     jaw.moveTo(jaw.getRest() + 2);
+    rollNeck.moveTo(rollNeck.getRest() + 2);
     return true;
   }
 
@@ -162,16 +175,25 @@ public class InMoovHead extends Service {
   }
 
   public void moveTo(Integer neck, Integer rothead) {
-    moveTo(neck, rothead, null, null, null);
+    moveTo(neck, rothead, null, null, null, null);
   }
-
+  
+//TODO IK head moveTo ( neck + rollneck + rothead ? )
+  public void moveTo(Integer neck, Integer rothead, Integer rollNeck) {
+	    moveTo(neck, rothead, null, null, null, rollNeck);
+	  }
+  
   public void moveTo(Integer neck, Integer rothead, Integer eyeX, Integer eyeY) {
-    moveTo(neck, rothead, eyeX, eyeY, null);
+    moveTo(neck, rothead, eyeX, eyeY, null, null);
   }
-
+  
   public void moveTo(Integer neck, Integer rothead, Integer eyeX, Integer eyeY, Integer jaw) {
+	    moveTo(neck, rothead, eyeX, eyeY, jaw, null);
+	  }
+
+  public void moveTo(Integer neck, Integer rothead, Integer eyeX, Integer eyeY, Integer jaw, Integer rollNeck) {
     if (log.isDebugEnabled()) {
-      log.debug(String.format("head.moveTo %d %d %d %d %d", neck, rothead, eyeX, eyeY, jaw));
+      log.debug(String.format("head.moveTo %d %d %d %d %d %d", neck, rothead, eyeX, eyeY, jaw, rollNeck));
     }
     this.rothead.moveTo(rothead);
     this.neck.moveTo(neck);
@@ -181,6 +203,8 @@ public class InMoovHead extends Service {
       this.eyeY.moveTo(eyeY);
     if (jaw != null)
       this.jaw.moveTo(jaw);
+    if (rollNeck != null)
+        this.rollNeck.moveTo(rollNeck);
   }
 
   public void release() {
@@ -190,16 +214,18 @@ public class InMoovHead extends Service {
     eyeX.releaseService();
     eyeY.releaseService();
     jaw.releaseService();
+    rollNeck.releaseService();
   }
 
   public void rest() {
     // initial positions
-    setSpeed(1.0, 1.0, 1.0, 1.0, 1.0);
+    setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
     rothead.rest();
     neck.rest();
     eyeX.rest();
     eyeY.rest();
     jaw.rest();
+    rollNeck.rest();
   }
 
   @Override
@@ -210,22 +236,24 @@ public class InMoovHead extends Service {
     eyeX.save();
     eyeY.save();
     jaw.save();
+    rollNeck.save();
     return true;
   }
 
-  public void setLimits(int headXMin, int headXMax, int headYMin, int headYMax, int eyeXMin, int eyeXMax, int eyeYMin, int eyeYMax, int jawMin, int jawMax) {
+  public void setLimits(int headXMin, int headXMax, int headYMin, int headYMax, int eyeXMin, int eyeXMax, int eyeYMin, int eyeYMax, int jawMin, int jawMax, int rollNeckMin, int rollNeckMax) {
     rothead.setMinMax(headXMin, headXMax);
     neck.setMinMax(headYMin, headYMax);
     eyeX.setMinMax(eyeXMin, eyeXMax);
     eyeY.setMinMax(eyeYMin, eyeYMax);
     jaw.setMinMax(jawMin, jawMax);
+    rollNeck.setMinMax(jawMin, jawMax);
   }
 
   // ----- initialization end --------
   // ----- movements begin -----------
 
-  public void setpins(int headXPin, int headYPin, int eyeXPin, int eyeYPin, int jawPin) {
-    log.info(String.format("setPins %d %d %d %d %d", headXPin, headYPin, eyeXPin, eyeYPin, jawPin));
+  public void setpins(int headXPin, int headYPin, int eyeXPin, int eyeYPin, int jawPin, int rollNeckPin) {
+    log.info(String.format("setPins %d %d %d %d %d %d", headXPin, headYPin, eyeXPin, eyeYPin, jawPin, rollNeckPin));
 
     /*
     rothead.setPin(headXPin);
@@ -233,6 +261,7 @@ public class InMoovHead extends Service {
     eyeX.setPin(eyeXPin);
     eyeY.setPin(eyeYPin);
     jaw.setPin(jawPin);
+    rollNeck.setPin(rollNeckPin);
     */
 
     arduino.servoAttachPin(rothead, headXPin);
@@ -240,12 +269,19 @@ public class InMoovHead extends Service {
     arduino.servoAttachPin(eyeX, eyeXPin);
     arduino.servoAttachPin(eyeY, eyeYPin);
     arduino.servoAttachPin(jaw, jawPin);
+    arduino.servoAttachPin(rollNeck, rollNeckPin);
 
   }
-
   public void setSpeed(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
+
+	  setSpeed(headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, null);
+
+	}
+  
+  
+  public void setSpeed(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
     if (log.isDebugEnabled()) {
-      log.debug(String.format("%s setSpeed %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed));
+      log.debug(String.format("%s setSpeed %.2f %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed));
     }
     rothead.setSpeed(headXSpeed);
     neck.setSpeed(headYSpeed);
@@ -259,6 +295,9 @@ public class InMoovHead extends Service {
     if (jawSpeed != null) {
       jaw.setSpeed(jawSpeed);
     }
+    if (rollNeckSpeed != null) {
+        jaw.setSpeed(rollNeckSpeed);
+      }
 
   }
 
@@ -271,6 +310,7 @@ public class InMoovHead extends Service {
     eyeY.startService();
     rothead.startService();
     neck.startService();
+    rollNeck.startService();
   }
 
   /*
@@ -293,6 +333,7 @@ public class InMoovHead extends Service {
     eyeX.moveTo(eyeX.getPos() + 2);
     eyeY.moveTo(eyeY.getPos() + 2);
     jaw.moveTo(jaw.getPos() + 2);
+    rollNeck.moveTo(neck.getPos() + 2);
   }
 
   /**
@@ -314,14 +355,21 @@ public class InMoovHead extends Service {
     meta.addPeer("eyeY", "Servo", "Eyes tilt servo");
     meta.addPeer("rothead", "Servo", "Head pan servo");
     meta.addPeer("neck", "Servo", "Head tilt servo");
+    meta.addPeer("rollNeck", "Servo", "rollNeck Mod servo");
     meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
 
     return meta;
   }
 
   public void setVelocity(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
+
+	  setVelocity(headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, null);
+
+	}
+  
+  public void setVelocity(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
     if (log.isDebugEnabled()) {
-      log.debug(String.format("%s setVelocity %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed));
+      log.debug(String.format("%s setVelocity %.2f %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed));
     }
     rothead.setVelocity(headXSpeed);
     neck.setVelocity(headYSpeed);
@@ -335,7 +383,9 @@ public class InMoovHead extends Service {
     if (jawSpeed != null) {
       jaw.setVelocity(jawSpeed);
     }
-
+    if (rollNeckSpeed != null) {
+    	rollNeck.setVelocity(rollNeckSpeed);
+      }
   }
 
 }
