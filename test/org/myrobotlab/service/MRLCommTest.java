@@ -63,33 +63,33 @@ public class MRLCommTest {
 		// fail("Not yet implemented");
 	}
 	
-	 public static void main(String[] args) {
-		    try {
-
-		      LoggingFactory.getInstance().configure();
-		      LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		      ArduinoTest.setUpBeforeClass();
-		      ArduinoTest test = new ArduinoTest();
-		      test.testConnect();
-
-		      JUnitCore junit = new JUnitCore();
-		      Result result = junit.run(ArduinoTest.class);
-		      log.info("Result was: {}", result);
-		      // WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
-		      // ServiceInterface gui = Runtime.start("gui", "SwingGui");
-
-		      Runtime.dump();
-
-		      log.info("here");
-		      // serial.removeByteListener(gui.getName());
-		      // uart.removeByteListener(gui.getName());
-
-		      Runtime.dump();
-
-		    } catch (Exception e) {
-		      Logging.logError(e);
-		    }
-		  }
-
-		}
+  //	 public static void main(String[] args) {
+  //		    try {
+  //
+  //		      LoggingFactory.getInstance().configure();
+  //		      LoggingFactory.getInstance().setLevel(Level.INFO);
+  //
+  //		      ArduinoTest.setUpBeforeClass();
+  //		      ArduinoTest test = new ArduinoTest();
+  //		      test.testConnect();
+  //
+  //		      JUnitCore junit = new JUnitCore();
+  //		      Result result = junit.run(ArduinoTest.class);
+  //		      log.info("Result was: {}", result);
+  //		      // WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
+  //		      // ServiceInterface gui = Runtime.start("gui", "SwingGui");
+  //
+  //		      Runtime.dump();
+  //
+  //		      log.info("here");
+  //		      // serial.removeByteListener(gui.getName());
+  //		      // uart.removeByteListener(gui.getName());
+  //
+  //		      Runtime.dump();
+  //
+  //		    } catch (Exception e) {
+  //		      Logging.logError(e);
+  //		    }
+  //		  }
+  //
+}
