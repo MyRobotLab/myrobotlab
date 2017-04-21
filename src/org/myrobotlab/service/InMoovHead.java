@@ -61,17 +61,17 @@ public class InMoovHead extends Service {
    */
   public boolean attach() {
     sleep(InMoov.attachPauseMs);
-    eyeX.attach();
+    eyeX.enable();
     sleep(InMoov.attachPauseMs);
-    eyeY.attach();
+    eyeY.enable();
     sleep(InMoov.attachPauseMs);
-    jaw.attach();
+    jaw.enable();
     sleep(InMoov.attachPauseMs);
-    rothead.attach();
+    rothead.enable();
     sleep(InMoov.attachPauseMs);
-    neck.attach();
+    neck.enable();
     sleep(InMoov.attachPauseMs);
-    rollNeck.attach();
+    rollNeck.enable();
     sleep(InMoov.attachPauseMs);
     return true;
   }
@@ -111,26 +111,26 @@ public class InMoovHead extends Service {
   public void detach() {
     sleep(InMoov.attachPauseMs);
     if (rothead != null) {
-      rothead.detach();
+      rothead.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (neck != null) {
-      neck.detach();
+      neck.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (eyeX != null) {
-      eyeX.detach();
+      eyeX.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (eyeY != null) {
-      eyeY.detach();
+      eyeY.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (jaw != null) {
-      jaw.detach();
+      jaw.disable();
     }
     if (rollNeck != null) {
-    	rollNeck.detach();
+    	rollNeck.disable();
     }
   }
 

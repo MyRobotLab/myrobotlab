@@ -105,7 +105,7 @@ public class MouthControl extends Service {
       if (autoAttach) {
         if (!jaw.isPinAttached()) {
           // attach the jaw if it's not attached.
-          jaw.attach();
+          jaw.enable();
         }
       }
 
@@ -158,7 +158,7 @@ public class MouthControl extends Service {
     if (autoAttach && jaw != null) {
       if (jaw.isPinAttached()) {
         // attach the jaw if it's not attached.
-        jaw.detach();
+        jaw.disable();
       }
     }
   }

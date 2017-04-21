@@ -458,25 +458,25 @@ public class InMoov extends Service {
 
   public void fullSpeed() {
     if (head != null) {
-      head.setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+      head.setVelocity(-1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
     }
     if (rightHand != null) {
-      rightHand.setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+      rightHand.setVelocity(-1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
     }
     if (leftHand != null) {
-      leftHand.setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+      leftHand.setVelocity(-1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
     }
     if (rightArm != null) {
-      rightArm.setSpeed(1.0, 1.0, 1.0, 1.0);
+      rightArm.setVelocity(-1.0, -1.0, -1.0, -1.0);
     }
     if (leftArm != null) {
-      leftArm.setSpeed(1.0, 1.0, 1.0, 1.0);
+      leftArm.setVelocity(-1.0, -1.0, -1.0, -1.0);
     }
     if (torso != null) {
-      torso.setSpeed(1.0, 1.0, 1.0);
+      torso.setVelocity(-1.0, -1.0, -1.0);
     }
     if (eyelids != null) {
-    	eyelids.setSpeed(1.0, 1.0);
+    	eyelids.setVelocity(-1.0, -1.0);
       }
   }
 
@@ -987,15 +987,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void setEyelidsSpeed(Double eyelidleft, Double eyelidright) {
-	    if (eyelids != null) {
-	      eyelids.setSpeed(eyelidleft, eyelidright);
-	    } else {
-	      log.warn("setEyelidsSpeed - I have no eyelids");
-	    }
-	  }
-
-	  public void setEyelidsVelocity(Double eyelidleft, Double eyelidright) {
+  public void setEyelidsVelocity(Double eyelidleft, Double eyelidright) {
 	    if (eyelids != null) {
 	    	eyelids.setVelocity(eyelidleft, eyelidright);
 	    } else {

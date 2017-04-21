@@ -65,9 +65,9 @@ public class InMoovEyelids extends Service {
   public boolean attach() {
  
     sleep(InMoov.attachPauseMs);
-    eyelidleft.attach();
+    eyelidleft.enable();
     sleep(InMoov.attachPauseMs);
-    eyelidright.attach();
+    eyelidright.enable();
     sleep(InMoov.attachPauseMs);
     return true;
   }
@@ -105,11 +105,11 @@ public class InMoovEyelids extends Service {
 
   public void detach() {
     if (eyelidleft != null) {
-      eyelidleft.detach();
+      eyelidleft.disable();
       sleep(InMoov.attachPauseMs);
     } 
     if (eyelidright != null) {
-      eyelidright.detach();
+      eyelidright.disable();
       sleep(InMoov.attachPauseMs);
     }
    
@@ -158,7 +158,7 @@ public class InMoovEyelids extends Service {
 
   public void rest() {
 
-    setSpeed(1.0, 1.0);
+    setVelocity(50.0, 50.0);
     eyelidleft.rest();
     eyelidright.rest();
   }
@@ -191,10 +191,7 @@ public class InMoovEyelids extends Service {
 	    arduino.servoAttachPin(eyelidright, eyelidrightPin);
   }
 
-  public void setSpeed(Double eyelidleft, Double eyelidright) {
-    this.eyelidleft.setSpeed(eyelidleft);
-    this.eyelidright.setSpeed(eyelidright);
-   }
+
 
   /*
    * public boolean load() { super.load(); eyelidleft.load(); eyelidright.load();
