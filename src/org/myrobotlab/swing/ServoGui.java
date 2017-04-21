@@ -71,7 +71,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
 	}
 
 	public final static Logger log = LoggerFactory.getLogger(ServoGui.class);
-
+	private Object lastControllerUsed;
 	static final long serialVersionUID = 1L;
 
 	JLabel boundPos = new JLabel("90");
@@ -160,6 +160,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
 						send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem(),
 								new Double(slider.getValue()));
 					} else {
+						lastControllerUsed=controller.getSelectedItem();
 						send("detach", controller.getSelectedItem());
 					}
 					return;
@@ -254,6 +255,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
 				for (int i = 0; i < c.size(); ++i) {
 					controller.addItem(c.get(i));
 				}
+				controller.setSelectedItem(lastControllerUsed);
 			}
 		});
 	}
