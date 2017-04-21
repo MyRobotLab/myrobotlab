@@ -188,7 +188,7 @@ public class InMoovEyelids extends Service {
 	  
 
 	    arduino.servoAttachPin(eyelidleft, eyelidleftPin);
-	    arduino.servoAttachPin(eyelidleft, eyelidrightPin);
+	    arduino.servoAttachPin(eyelidright, eyelidrightPin);
   }
 
   public void setSpeed(Double eyelidleft, Double eyelidright) {

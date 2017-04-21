@@ -458,7 +458,7 @@ public class InMoov extends Service {
 
   public void fullSpeed() {
     if (head != null) {
-      head.setSpeed(1.0, 1.0, 1.0, 1.0, 1.0);
+      head.setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
     }
     if (rightHand != null) {
       rightHand.setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
@@ -654,7 +654,7 @@ public class InMoov extends Service {
 
   public void moveEyes(Integer eyeX, Integer eyeY) {
     if (head != null) {
-      head.moveTo(null, null, eyeX, eyeY, null);
+      head.moveTo(null, null, eyeX, eyeY, null, null);
     } else {
       log.error("moveEyes - I have a null head");
     }
@@ -681,6 +681,14 @@ public class InMoov extends Service {
       log.error("moveHead - I have a null head");
     }
   }
+  
+  public void moveHead(Integer neck, Integer rothead, Integer rollNeck) {
+	    if (head != null) {
+	      head.moveTo(neck, rothead, rollNeck);
+	    } else {
+	      log.error("moveHead - I have a null head");
+	    }
+	  }
 
   public void moveHead(Integer neck, Integer rothead, Integer eyeX, Integer eyeY, Integer jaw) {
     if (head != null) {
@@ -689,6 +697,14 @@ public class InMoov extends Service {
       log.error("I have a null head");
     }
   }
+  
+  public void moveHead(Integer neck, Integer rothead, Integer eyeX, Integer eyeY, Integer jaw, Integer rollNeck) {
+	    if (head != null) {
+	      head.moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
+	    } else {
+	      log.error("I have a null head");
+	    }
+	  }
 
   // ---------- canned gestures end ---------
 
@@ -924,8 +940,16 @@ public class InMoov extends Service {
   }
 
   public void setHeadVelocity(Double rothead, Double neck) {
-    setHeadVelocity(rothead, neck, null, null, null);
+    setHeadVelocity(rothead, neck, null, null, null, null);
   }
+  
+  public void setHeadVelocity(Double rothead, Double neck, Double rollNeck) {
+	    setHeadVelocity(rothead, neck, null, null, null, rollNeck);
+	  }
+  
+  public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
+	    setHeadVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, null);
+	  }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
     if (head != null) {
@@ -935,9 +959,9 @@ public class InMoov extends Service {
     }
   }
 
-  public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
+  public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
     if (head != null) {
-      head.setVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
+      head.setVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
     } else {
       log.warn("setHeadVelocity - I have no head");
     }
