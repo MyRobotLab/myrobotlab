@@ -189,10 +189,10 @@ public class InMoovTorso extends Service {
     return true;
   }
 
-  public void setLimits(int bicepMin, int bicepMax, int rotateMin, int rotateMax, int shoulderMin, int shoulderMax) {
-    topStom.setMinMax(bicepMin, bicepMax);
-    midStom.setMinMax(rotateMin, rotateMax);
-    lowStom.setMinMax(shoulderMin, shoulderMax);
+  public void setLimits(int topStomMin, int topStomMax, int midStomMin, int midStomMax, int lowStomMin, int lowStomMax) {
+    topStom.setMinMax(topStomMin, topStomMax);
+    midStom.setMinMax(midStomMin, midStomMax);
+    lowStom.setMinMax(lowStomMin, lowStomMax);
   }
 
   // ------------- added set pins
@@ -266,7 +266,7 @@ public class InMoovTorso extends Service {
     meta.addPeer("topStom", "Servo", "Top Stomach servo");
     meta.addPeer("midStom", "Servo", "Mid Stomach servo");
     meta.addPeer("lowStom", "Servo", "Low Stomach servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+    meta.addPeer("arduino", "Arduino", "Arduino controller for torso");
 
     return meta;
   }
