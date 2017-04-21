@@ -87,6 +87,7 @@ public class InMoov extends Service {
   transient public InMoovHand leftHand;
   transient public InMoovArm rightArm;
   transient public InMoovHand rightHand;
+  transient public InMoovEyelids eyelids;
 
   transient private HashMap<String, InMoovArm> arms = new HashMap<String, InMoovArm>();
   transient private HashMap<String, InMoovHand> hands = new HashMap<String, InMoovHand>();
@@ -211,6 +212,10 @@ public class InMoov extends Service {
       torso.rest();
       torso.detach();
     }
+    if (eyelids != null) {
+    	eyelids.rest();
+    	eyelids.detach();
+      }
   }
 
   public void attach() {
@@ -235,6 +240,9 @@ public class InMoov extends Service {
     if (torso != null) {
       torso.attach();
     }
+    if (eyelids != null) {
+    	eyelids.attach();
+      }
   }
 
   public void beginCheckingOnInactivity() {
@@ -274,6 +282,10 @@ public class InMoov extends Service {
     if (torso != null) {
       torso.broadcastState();
     }
+    
+    if (eyelids != null) {
+    	eyelids.broadcastState();
+      }
 
     if (headTracking != null) {
       headTracking.broadcastState();
@@ -336,6 +348,11 @@ public class InMoov extends Service {
       script.append(indentSpace);
       script.append(torso.getScript(getName()));
     }
+    
+    if (eyelids != null) {
+        script.append(indentSpace);
+        script.append(eyelids.getScript(getName()));
+      }
 
     send("python", "appendScript", script.toString());
 
@@ -418,6 +435,9 @@ public class InMoov extends Service {
     if (torso != null) {
       torso.detach();
     }
+    if (eyelids != null) {
+    	eyelids.detach();
+      }
   }
 
   public void fighter() {
@@ -455,6 +475,9 @@ public class InMoov extends Service {
     if (torso != null) {
       torso.setSpeed(1.0, 1.0, 1.0);
     }
+    if (eyelids != null) {
+    	eyelids.setSpeed(1.0, 1.0);
+      }
   }
 
   String getBoardType(String side, String type) {
@@ -503,6 +526,10 @@ public class InMoov extends Service {
     if (torso != null) {
       lastActivityTime = Math.max(lastActivityTime, torso.getLastActivityTime());
     }
+    if (eyelids != null) {
+        lastActivityTime = Math.max(lastActivityTime, eyelids.getLastActivityTime());
+      }
+
 
     if (lastPIRActivityTime != null) {
       lastActivityTime = Math.max(lastActivityTime, lastPIRActivityTime);
@@ -598,6 +625,10 @@ public class InMoov extends Service {
     if (torso != null) {
       attached |= torso.isAttached();
     }
+    
+    if (eyelids != null) {
+        attached |= eyelids.isAttached();
+      }
     return attached;
   }
 
@@ -668,6 +699,14 @@ public class InMoov extends Service {
       log.error("moveTorso - I have a null torso");
     }
   }
+  
+  public void moveEyelids(Integer eyelidleft, Integer eyelidright) {
+	    if (eyelids != null) {
+	    	eyelids.moveTo(eyelidleft, eyelidright);
+	    } else {
+	      log.error("moveEyelids - I have a null Eyelids");
+	    }
+	  }
 
   public void onOpenNIData(OpenNiData data) {
 
@@ -805,6 +844,9 @@ public class InMoov extends Service {
     if (torso != null) {
       torso.rest();
     }
+    if (eyelids != null) {
+    	eyelids.rest();
+      }
   }
 
   @Override
@@ -921,6 +963,22 @@ public class InMoov extends Service {
     }
   }
 
+  public void setEyelidsSpeed(Double eyelidleft, Double eyelidright) {
+	    if (eyelids != null) {
+	      eyelids.setSpeed(eyelidleft, eyelidright);
+	    } else {
+	      log.warn("setEyelidsSpeed - I have no eyelids");
+	    }
+	  }
+
+	  public void setEyelidsVelocity(Double eyelidleft, Double eyelidright) {
+	    if (eyelids != null) {
+	    	eyelids.setVelocity(eyelidleft, eyelidright);
+	    } else {
+	      log.warn("setEyelidsVelocity - I have no eyelids");
+	    }
+	  }
+  
   public boolean speakBlocking(Status test) {
     if (test != null && !mute) {
       return speakBlocking(test.toString());
@@ -1192,7 +1250,8 @@ public class InMoov extends Service {
     super.startService();
     python = getPython();
   }
-
+  
+  
   public InMoovTorso startTorso(String port) throws Exception {
     return startTorso(port, null);
   }
@@ -1213,6 +1272,27 @@ public class InMoov extends Service {
 
     return torso;
   }
+  
+  public InMoovEyelids startEyelids(String port) throws Exception {
+	    return startEyelids(port, null);
+	  }
+
+  public InMoovEyelids startEyelids(String port, String type) throws Exception {
+	    // log.warn(InMoov.buildDNA(myKey, serviceClass))
+	    speakBlocking(String.format("starting eyelids on %s", port));
+
+	    eyelids = (InMoovEyelids) startPeer("eyelids");
+
+	    if (type == null) {
+	      type = Arduino.BOARD_TYPE_MEGA;
+	    }
+
+	    eyelids.arduino.setBoard(type);
+	    eyelids.connect(port);
+	    arduinos.put(port, eyelids.arduino);
+
+	    return eyelids;
+	  }
 
   public void stopPIR() {
     /*
@@ -1270,6 +1350,11 @@ public class InMoov extends Service {
     if (torso != null) {
       speakBlocking("testing torso");
       torso.test();
+    }
+    
+    if (eyelids != null) {
+      speakBlocking("testing eyelids");
+      eyelids.test();
     }
 
     sleep(500);
@@ -1594,6 +1679,9 @@ public class InMoov extends Service {
     // SHARING !!! - modified key / actual name begin ------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
     meta.sharePeer("torso.arduino", "left", "Arduino", "shared left arduino");
+    
+    meta.sharePeer("eyelids.arduino", "left", "Arduino", "shared left arduino");
+    
     meta.sharePeer("mouthControl.arduino", "left", "Arduino", "shared left arduino");
 
     meta.sharePeer("leftArm.arduino", "left", "Arduino", "shared left arduino");
@@ -1622,6 +1710,7 @@ public class InMoov extends Service {
 
     // put peer definitions in
     meta.addPeer("torso", "InMoovTorso", "torso");
+    meta.addPeer("eyelids", "InMoovEyelids", "eyelids");
     meta.addPeer("leftArm", "InMoovArm", "left arm");
     meta.addPeer("leftHand", "InMoovHand", "left hand");
     meta.addPeer("rightArm", "InMoovArm", "right arm");
