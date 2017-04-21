@@ -419,7 +419,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 
 		ServiceType meta = new ServiceType(Log.class.getCanonicalName());
 		meta.addDescription("Logging Service helpful in diagnostics");
-		meta.addCategory("famework");
+		meta.addCategory("framework");
 
 		return meta;
 	}
