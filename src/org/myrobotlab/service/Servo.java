@@ -199,11 +199,6 @@ public class Servo extends Service implements ServoControl {
 
 	double maxVelocity = -1;
 
-	// GroG says,
-	// FIXME - do "final" refactor with attachPin/detachPin and
-	// only use controllerName to determine service to service attach !!!
-	// to determine if a service is attached is -> controllerName != null
-	// to determine if a pin is attached is isPinAttached
 	boolean isPinAttached = false;
 
 	double velocity = -1;
@@ -214,11 +209,11 @@ public class Servo extends Service implements ServoControl {
 
 	boolean autoEnable = false;
 
-	public int defaultDetachDelay = 10000;
+	public int defaultDisableDelay = 10000;
 	private boolean moving;
 	private double currentPosInput;
 	private boolean autoDisable = false;
-	private transient Timer detachTimer;
+	private transient Timer autoDisableTimer;
 
 	public transient static final int SERVO_EVENT_STOPPED = 1;
 	public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
@@ -258,24 +253,35 @@ public class Servo extends Service implements ServoControl {
 	 * Re-attach to servo's current pin. The pin must have be set previously.
 	 * Equivalent to Arduino's Servo.attach(currentPin)
 	 * 
-	 * TODO ? should have been named attachPin()
+	 *  @deprecated use {@link #enable()} instead
 	 * 
 	 */
+	@Deprecated
 	@Override
 	public void attach() {
+		warn("attach() is deprecated please use enable()");
 		attach(pin);
 	}
-	
-	public void enable(){
-	  enable(pin);
+
+	/**
+	 * Equivalent to Arduino's Servo.attach(). It energizes the servo sending
+	 * pulses to maintain its current position.
+	 */
+	public void enable() {
+		enable(pin);
 	}
 
 	/**
 	 * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
 	 * pulses to maintain its current position.
+	 * 
+	 * @deprecated use {@link #enable(int pin)} instead
+	 * 
 	 */
+	@Deprecated
 	@Override
 	public void attach(int pin) {
+		warn("attach(int pin) is deprecated please use enable(int pin)");
 		lastActivityTime = System.currentTimeMillis();
 		controller.servoAttachPin(this, pin);
 		this.pin = pin;
@@ -283,43 +289,54 @@ public class Servo extends Service implements ServoControl {
 		broadcastState();
 		invoke("publishServoAttach", getName());
 	}
-	
+
+	/**
+	 * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
+	 * pulses to maintain its current position.
+	 */
 	public void enable(int pin) {
-    lastActivityTime = System.currentTimeMillis();
-    controller.servoAttachPin(this, pin);
-    this.pin = pin;
-    isPinAttached = true;
-    broadcastState();
-    invoke("publishServoEnable", getName());
+		lastActivityTime = System.currentTimeMillis();
+		controller.servoAttachPin(this, pin);
+		this.pin = pin;
+		isPinAttached = true;
+		broadcastState();
+		invoke("publishServoEnable", getName());
+	}
+
+	/**
+	 * Equivalent to Arduino's Servo.detach() it disables the pwm to the servo IT DOES
+	 * NOT DETACH THE SERVO CONTROLLER !!!
+	 */
+	@Deprecated
+	@Override
+	public void detach() {		
+		warn("detach() is deprecated please use disable()");
+		isPinAttached = false;
+		if (controller != null) {
+			controller.servoDetachPin(this);
+			// detach(controller);
+		}
+		broadcastState();
+		// TODO: this doesn't seem to be consistent depending on how you invoke
+		// "detach()" ...
+		// invoke("publishServoDetach", getName());
 	}
 
 	/**
 	 * Equivalent to Arduino's Servo.detach() it de-energizes the servo IT DOES
 	 * NOT DETACH THE SERVO CONTROLLER !!!
 	 */
-	@Override
-	public void detach() {
+	public void disable() {
 		isPinAttached = false;
 		if (controller != null) {
 			controller.servoDetachPin(this);
-			//detach(controller);
+			// detach(controller);
 		}
 		broadcastState();
-		// TODO: this doesn't seem to be consistent depending on how you invoke "detach()" ...
-		//invoke("publishServoDetach", getName());
+		// TODO: this doesn't seem to be consistent depending on how you invoke
+		// "detach()" ...
+		invoke("publishServoDisable", getName());
 	}
-	
-  public void disable() {
-    isPinAttached = false;
-    if (controller != null) {
-      controller.servoDetachPin(this);
-      //detach(controller);
-    }
-    broadcastState();
-    // TODO: this doesn't seem to be consistent depending on how you invoke "detach()" ...
-    invoke("publishServoDisable", getName());
-  }
-	
 
 	public boolean eventsEnabled(boolean b) {
 		isEventsEnabled = b;
@@ -369,9 +386,9 @@ public class Servo extends Service implements ServoControl {
 	public boolean isPinAttached() {
 		return isPinAttached;
 	}
-	
+
 	public boolean isEnabled() {
-	  return isPinAttached;
+		return isPinAttached;
 	}
 
 	@Override
@@ -394,7 +411,7 @@ public class Servo extends Service implements ServoControl {
 			enable();
 		}
 		if (pos == lastPos) {
-		  return;
+			return;
 		}
 		lastPos = targetPos;
 		if (pos < mapper.getMinX()) {
@@ -433,7 +450,7 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void releaseService() {
-		detach();
+		disable();
 		detach(controller);
 		super.releaseService();
 	}
@@ -448,29 +465,29 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void setMinMax(double min, double max) {
-	  map(min,max,min,max);
+		map(min, max, min, max);
 		// THIS IS A BUG - BUT CORRECTING IT BURNS OLD SCRIPT'S SERVOS !!
-		//mapper.setMinMaxOutput(min, max);
+		// mapper.setMinMaxOutput(min, max);
 		/*
 		 * THIS IS A BUG default setMinMax setMin & setMax IS INPUT NOT OUTPUT
 		 * !!!! mapper.setMin(min); mapper.setMax(max);
 		 */
-		//broadcastState();
+		// broadcastState();
 	}
 
 	@Override
 	public void setRest(int rest) {
-	  // TODO:remove this interface
+		// TODO:remove this interface
 		this.rest = rest;
 	}
 
 	public void setRest(Double rest) {
-	  // TODO: update the interface with the double version to make all servos implement 
-	  // a double for their positions.
-	  this.rest = rest;
+		// TODO: update the interface with the double version to make all servos
+		// implement
+		// a double for their positions.
+		this.rest = rest;
 	}
 
-	
 	/**
 	 * setSpeed is deprecated, new function for speed control is setVelocity()
 	 */
@@ -677,13 +694,15 @@ public class Servo extends Service implements ServoControl {
 		attach((ServoController) Runtime.getService(controllerName));
 	}
 
-	/* GroG REMOVED THIS METHOD - because the way method caching works it potentially conflicted and 
-	 * prevents the above method from working ..  attach(String controllerName, Integer pin, Double pos)
+	/*
+	 * GroG REMOVED THIS METHOD - because the way method caching works it
+	 * potentially conflicted and prevents the above method from working ..
+	 * attach(String controllerName, Integer pin, Double pos)
 	 *
-	public void attach(String controllerName, int pin, Integer pos, Integer velocity) throws Exception {
-		attach((ServoController) Runtime.getService(controllerName), pin, pos, velocity);
-	}
-	*/
+	 * public void attach(String controllerName, int pin, Integer pos, Integer
+	 * velocity) throws Exception { attach((ServoController)
+	 * Runtime.getService(controllerName), pin, pos, velocity); }
+	 */
 
 	/**
 	 * attach will default the position to a default reset position since its
@@ -760,7 +779,6 @@ public class Servo extends Service implements ServoControl {
 		return maxVelocity;
 	}
 
-
 	@Override
 	public double getVelocity() {
 		return velocity;
@@ -819,26 +837,32 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * enableAutoAttach will attach a servo when ask to move and detach it when
+	 * enableAutoAttach will attach a servo when ask to move and  it when
 	 * the move is complete
 	 * 
 	 * @param autoAttach
 	 */
+	@Deprecated
 	public void enableAutoAttach(boolean autoAttach) {
+		warn("enableAutoAttach is disabled please use enableAutoEnable");
 		this.autoEnable = autoAttach;
 	}
-  public void enableAutoEnable(boolean autoEnable) {
-    this.autoEnable = autoEnable;
-  }
 
+	public void enableAutoEnable(boolean autoEnable) {
+		this.autoEnable = autoEnable;
+	}
+
+	@Deprecated
 	public void enableAutoDetach(boolean autoDetach) {
+		warn("enableAutoDetach is disabled please use enableAutoDisable");
 		this.autoDisable = autoDetach;
 		this.addServoEventListener(this);
 	}
-  public void enableAutoDisable(boolean autoDidable) {
-    this.autoDisable = autoDisable;
-    this.addServoEventListener(this);
-  }
+
+	public void enableAutoDisable(boolean autoDisable) {
+		this.autoDisable = autoDisable;
+		this.addServoEventListener(this);
+	}
 
 	public double microsecondsToDegree(int microseconds) {
 		if (microseconds <= 180)
@@ -915,17 +939,17 @@ public class Servo extends Service implements ServoControl {
 			if (velocity > -1) {
 				disable();
 			} else {
-				if (detachTimer != null) {
-					detachTimer.cancel();
-					detachTimer = null;
+				if (autoDisableTimer != null) {
+					autoDisableTimer.cancel();
+					autoDisableTimer = null;
 				}
-				detachTimer = new Timer();
-				detachTimer.schedule(new TimerTask() {
+				autoDisableTimer = new Timer();
+				autoDisableTimer.schedule(new TimerTask() {
 					@Override
 					public void run() {
 						disable();
 					}
-				}, (long) defaultDetachDelay);
+				}, (long) defaultDisableDelay);
 			}
 		}
 	}
@@ -934,7 +958,7 @@ public class Servo extends Service implements ServoControl {
 		try {
 			LoggingFactory.init(Level.INFO);
 
-			VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+			VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
 			virtual.connect("COM10");
 			// Runtime.start("webgui", "WebGui");
 			Runtime.start("gui", "SwingGui");
@@ -952,9 +976,9 @@ public class Servo extends Service implements ServoControl {
 			servo.attach(arduino, 7);
 			servo.moveTo(90);
 			servo.setRest(30);
-			
+
 			boolean done = true;
-			if (done){
+			if (done) {
 				return;
 			}
 
