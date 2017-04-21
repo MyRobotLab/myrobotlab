@@ -87,16 +87,23 @@ public class InMoovHead extends Service {
     eyeY.broadcastState();
     jaw.broadcastState();
   }
+  
+
 
   // FIXME - make interface for Arduino / Servos !!!
   public boolean connect(String port) throws Exception {
+	  return connect(port,12,13,22,24,26,30);
+	  
+  }
+  
+  public boolean connect(String port,Integer headYPin,Integer headXPin,Integer eyeXPin,Integer eyeYPin,Integer jawPin,Integer rollNeckPin) throws Exception {
     arduino.connect(port);
-    neck.attach(arduino, 12, neck.getRest(), neck.getVelocity());
-    rothead.attach(arduino, 13, rothead.getRest(), rothead.getVelocity());
-    jaw.attach(arduino, 26, jaw.getRest(), jaw.getVelocity());
-    eyeX.attach(arduino, 22, eyeX.getRest(), eyeX.getVelocity());
-    eyeY.attach(arduino, 24, eyeY.getRest(), eyeY.getVelocity());
-    rollNeck.attach(arduino, 30, rollNeck.getRest(), rollNeck.getVelocity());
+    neck.attach(arduino, headYPin, neck.getRest(), neck.getVelocity());
+    rothead.attach(arduino, headXPin, rothead.getRest(), rothead.getVelocity());
+    jaw.attach(arduino, jawPin, jaw.getRest(), jaw.getVelocity());
+    eyeX.attach(arduino, eyeXPin, eyeX.getRest(), eyeX.getVelocity());
+    eyeY.attach(arduino, eyeYPin, eyeY.getRest(), eyeY.getVelocity());
+    rollNeck.attach(arduino, rollNeckPin, rollNeck.getRest(), rollNeck.getVelocity());
     broadcastState();
     return true;
   }

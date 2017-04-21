@@ -1100,11 +1100,21 @@ public class InMoov extends Service {
     return hand;
   }
 
+  
+  
   public InMoovHead startHead(String port) throws Exception {
-    return startHead(port, null);
+    return startHead(port, null,12,13,22,24,26,30);
   }
-
+  
   public InMoovHead startHead(String port, String type) throws Exception {
+	    return startHead(port, type, 12,13,22,24,26,30);
+	  }
+  
+  public InMoovHead startHead(String port, Integer headYPin,Integer headXPin,Integer eyeXPin,Integer eyeYPin,Integer jawPin,Integer rollNeckPin) throws Exception {
+	    return startHead(port, null, headYPin,headXPin,eyeXPin,eyeYPin,jawPin,rollNeckPin);
+	  }
+
+  public InMoovHead startHead(String port, String type, Integer headYPin,Integer headXPin,Integer eyeXPin,Integer eyeYPin,Integer jawPin,Integer rollNeckPin) throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     speakBlocking(String.format("starting head on %s", port));
 
@@ -1116,7 +1126,7 @@ public class InMoov extends Service {
     }
 
     head.arduino.setBoard(type);
-    head.connect(port);
+    head.connect(port, headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
     arduinos.put(port, head.arduino);
 
     return head;
