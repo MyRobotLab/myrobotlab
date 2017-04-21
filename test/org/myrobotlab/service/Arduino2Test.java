@@ -44,6 +44,8 @@ public class Arduino2Test {
     // re-connect to a different serial port
     ard.connect(V_PORT_2);
     assertTrue(ard.isConnected());
+    
+//    ard.enablePin(address);
     // assertNotNull(ard.getMetaData());
     //    
     //    // analog write test
@@ -56,6 +58,10 @@ public class Arduino2Test {
     //    ard.disablePin("1");
     //    ard.disablePins();
     //    
+    
+ //   int res = ard.read(1);
+ //   System.out.println("RES FROM READ:" + res);
+    
     // leave it disconnected.
     ard.disconnect();
     assertFalse(ard.isConnected());
@@ -72,14 +78,14 @@ public class Arduino2Test {
     assertEquals(ard.getBoard(), "mega");
   }
 
-  // TODO: this is broken!
-//  @Test
-//  public void testSketch() {
-//    Arduino ard = (Arduino) Runtime.createAndStart("ard", "Arduino");
-//    Sketch s = ard.getSketch();
-//    assertNotNull(s.name);
-//    assertNotNull(s.data);
-//  }
+  // TODO: this is broken! but not in eclipse!
+  //@Test
+  public void testSketch() {
+    Arduino ard = (Arduino) Runtime.createAndStart("ard", "Arduino");
+    Sketch s = ard.getSketch();
+    assertNotNull(s.name);
+    assertNotNull(s.data);
+  }
   
   // TODO: this seems broken.
 //  @Test
