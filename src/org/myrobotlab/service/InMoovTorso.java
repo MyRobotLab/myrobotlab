@@ -66,7 +66,7 @@ public class InMoovTorso extends Service {
    * 
    * @return
    */
-  public boolean attach() {
+  public boolean enable() {
  
     sleep(InMoov.attachPauseMs);
     topStom.enable();
@@ -76,6 +76,11 @@ public class InMoovTorso extends Service {
     lowStom.enable();
     sleep(InMoov.attachPauseMs);
     return true;
+  }
+  
+  public boolean attach() {
+	  log.warn("attach deprecated please use enable");
+	  return enable();
   }
   
   public void enableAutoDisable(Boolean param) {
@@ -121,7 +126,7 @@ public class InMoovTorso extends Service {
     return true;
   }
 
-  public void detach() {
+  public void disable() {
     if (topStom != null) {
       topStom.disable();
       sleep(InMoov.attachPauseMs);
@@ -134,6 +139,12 @@ public class InMoovTorso extends Service {
       lowStom.disable();
       sleep(InMoov.attachPauseMs);
     }
+  }
+  
+  public boolean detach() {
+	  log.warn("detach deprecated please use disable");
+	  detach();
+	  return true;
   }
 
   public long getLastActivityTime() {
@@ -168,7 +179,7 @@ public class InMoovTorso extends Service {
 
   // FIXME - releasePeers()
   public void release() {
-    detach();
+    disable();
     if (topStom != null) {
       topStom.releaseService();
       topStom = null;
@@ -185,7 +196,7 @@ public class InMoovTorso extends Service {
 
   public void rest() {
 
-    setSpeed(1.0, 1.0, 1.0);
+    //setSpeed(1.0, 1.0, 1.0);
 
     topStom.rest();
     midStom.rest();
