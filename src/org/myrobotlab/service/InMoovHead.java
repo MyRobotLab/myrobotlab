@@ -226,8 +226,8 @@ public class InMoovHead extends Service {
 
   public void rest() {
     // initial positions
-    setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
-    rothead.rest();
+    //setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+	rothead.rest();
     neck.rest();
     eyeX.rest();
     eyeY.rest();
@@ -247,14 +247,62 @@ public class InMoovHead extends Service {
     return true;
   }
 
-  public void setLimits(int headXMin, int headXMax, int headYMin, int headYMax, int eyeXMin, int eyeXMax, int eyeYMin, int eyeYMax, int jawMin, int jawMax, int rollNeckMin, int rollNeckMax) {
-    rothead.setMinMax(headXMin, headXMax);
-    neck.setMinMax(headYMin, headYMax);
-    eyeX.setMinMax(eyeXMin, eyeXMax);
-    eyeY.setMinMax(eyeYMin, eyeYMax);
-    jaw.setMinMax(jawMin, jawMax);
-    rollNeck.setMinMax(jawMin, jawMax);
+  public void enableAutoDisable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
+	rothead.enableAutoDisable(rotheadParam);
+	rollNeck.enableAutoDisable(neckParam);
+	neck.enableAutoDisable(rollNeckParam);
+	
   }
+  
+  public void enableAutoDisable(Boolean param) {
+	    rothead.enableAutoDisable(param);
+	    neck.enableAutoDisable(param);
+	    eyeX.enableAutoDisable(param);
+	    eyeY.enableAutoDisable(param);
+	    jaw.enableAutoDisable(param);
+	    rollNeck.enableAutoDisable(param);
+	  }
+  
+  public void enableAutoEnable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
+		rothead.enableAutoEnable(rotheadParam);
+		rollNeck.enableAutoEnable(neckParam);
+		neck.enableAutoEnable(rollNeckParam);
+		
+	  }
+	  
+	  public void enableAutoEnable(Boolean param) {
+		    rothead.enableAutoEnable(param);
+		    neck.enableAutoEnable(param);
+		    eyeX.enableAutoEnable(param);
+		    eyeY.enableAutoEnable(param);
+		    jaw.enableAutoEnable(param);
+		    rollNeck.enableAutoEnable(param);
+		  }
+	  
+
+  public void setAcceleration(Double headXSpeed, Double headYSpeed, Double rollNeckSpeed) {
+	rothead.setAcceleration(headXSpeed);
+	neck.setAcceleration(headYSpeed);
+	rollNeck.setAcceleration(rollNeckSpeed);
+  }
+  
+  public void setAcceleration(Double speed) {
+	    rothead.setAcceleration(speed);
+	    neck.setAcceleration(speed);
+	    eyeX.setAcceleration(speed);
+	    eyeY.setAcceleration(speed);
+	    jaw.setAcceleration(speed);
+	    rollNeck.setAcceleration(speed);
+	  }
+	  
+  public void setLimits(int headXMin, int headXMax, int headYMin, int headYMax, int eyeXMin, int eyeXMax, int eyeYMin, int eyeYMax, int jawMin, int jawMax, int rollNeckMin, int rollNeckMax) {
+	    rothead.setMinMax(headXMin, headXMax);
+	    neck.setMinMax(headYMin, headYMax);
+	    eyeX.setMinMax(eyeXMin, eyeXMax);
+	    eyeY.setMinMax(eyeYMin, eyeYMax);
+	    jaw.setMinMax(jawMin, jawMax);
+	    rollNeck.setMinMax(jawMin, jawMax);
+	  }
 
   // ----- initialization end --------
   // ----- movements begin -----------
