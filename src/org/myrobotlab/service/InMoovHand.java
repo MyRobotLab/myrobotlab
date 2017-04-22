@@ -99,7 +99,7 @@ public class InMoovHand extends Service implements LeapDataListener {
    * 
    * @return
    */
-  public boolean attach() {
+  public boolean enable() {
     sleep(InMoov.attachPauseMs);
     thumb.enable();
     sleep(InMoov.attachPauseMs);
@@ -114,6 +114,13 @@ public class InMoovHand extends Service implements LeapDataListener {
     wrist.enable();
     return true;
   }
+  
+  public boolean attach() {
+	  log.warn("attach deprecated please use enable");
+	  enable();
+	  return true;
+  }
+  
 
   public void bird() {
     moveTo(150, 180, 0, 180, 180, 90);
@@ -183,7 +190,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     five();
   }
 
-  public void detach() {
+  public void disable() {
 	if (thumb != null) {
       thumb.disable();
       sleep(InMoov.attachPauseMs);
@@ -209,6 +216,12 @@ public class InMoovHand extends Service implements LeapDataListener {
     }
    
     
+  }
+  
+  public boolean detach() {
+	  log.warn("detach deprecated please use disable");
+	  disable();
+	  return true;
   }
 
   public void enableAutoDisable(Boolean param) {
@@ -394,7 +407,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   // ----- movements begin -----------
 
   public void release() {
-    detach();
+	  disable();
     thumb.releaseService();
     index.releaseService();
     majeure.releaseService();
@@ -405,7 +418,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public void rest() {
     // initial positions
-    setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+    //setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 
     thumb.rest();
     index.rest();

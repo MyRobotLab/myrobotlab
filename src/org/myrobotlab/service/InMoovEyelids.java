@@ -62,7 +62,7 @@ public class InMoovEyelids extends Service {
    * 
    * @return
    */
-  public boolean attach() {
+  public boolean enable() {
  
     sleep(InMoov.attachPauseMs);
     eyelidleft.enable();
@@ -103,7 +103,7 @@ public class InMoovEyelids extends Service {
     return true;
   }
 
-  public void detach() {
+  public void disable() {
     if (eyelidleft != null) {
       eyelidleft.disable();
       sleep(InMoov.attachPauseMs);
@@ -144,7 +144,7 @@ public class InMoovEyelids extends Service {
 
   // FIXME - releasePeers()
   public void release() {
-    detach();
+    disable();
     if (eyelidleft != null) {
       eyelidleft.releaseService();
       eyelidleft = null;
@@ -158,7 +158,7 @@ public class InMoovEyelids extends Service {
 
   public void rest() {
 
-    setVelocity(50.0, 50.0);
+    //setVelocity(50.0, 50.0);
     eyelidleft.rest();
     eyelidright.rest();
   }

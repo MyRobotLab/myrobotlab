@@ -64,7 +64,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
    * 
    * @return
    */
-  public boolean attach() {
+  public boolean enable() {
     sleep(InMoov.attachPauseMs);
     bicep.enable();
     sleep(InMoov.attachPauseMs);
@@ -74,6 +74,12 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     sleep(InMoov.attachPauseMs);
     omoplate.enable();
     return true;
+  }
+  
+  public boolean attach() {
+	  log.warn("attach deprecated please use enable");
+	  enable();
+	  return true;
   }
 
   @Override
@@ -108,7 +114,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return true;
   }
 
-  public void detach() {
+  public void disable() {
     if (bicep != null) {
       bicep.disable();
       sleep(InMoov.attachPauseMs);
@@ -125,6 +131,13 @@ public class InMoovArm extends Service implements IKJointAngleListener {
       omoplate.disable();
     }
   }
+  
+  public boolean detach() {
+	  log.warn("attach deprecated please use disable");
+	  detach();
+	  return true;
+  }
+
 
   public void enableAutoDisable(Boolean param) {
 	  bicep.enableAutoDisable(param);
@@ -206,7 +219,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   // FIXME - releasePeers()
   public void release() {
-    detach();
+	  disable();
     if (bicep != null) {
       bicep.releaseService();
       bicep = null;
@@ -227,9 +240,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   public void rest() {
 
-    setSpeed(1.0, 1.0, 1.0, 1.0);
-
-    bicep.rest();
+    //setSpeed(1.0, 1.0, 1.0, 1.0);
+	bicep.rest();
     rotate.rest();
     shoulder.rest();
     omoplate.rest();

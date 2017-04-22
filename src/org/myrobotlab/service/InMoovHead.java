@@ -59,7 +59,7 @@ public class InMoovHead extends Service {
    * 
    * @return
    */
-  public boolean attach() {
+ public boolean enable() {
     sleep(InMoov.attachPauseMs);
     eyeX.enable();
     sleep(InMoov.attachPauseMs);
@@ -74,6 +74,12 @@ public class InMoovHead extends Service {
     rollNeck.enable();
     sleep(InMoov.attachPauseMs);
     return true;
+ }
+ 
+  public boolean attach() {
+	  log.warn("attach deprecated please use enable");
+	  enable();
+	  return true;
   }
 
   // FIXME - should be broadcastServoState
@@ -108,7 +114,7 @@ public class InMoovHead extends Service {
     return true;
   }
 
-  public void detach() {
+  public void disable() {
     sleep(InMoov.attachPauseMs);
     if (rothead != null) {
       rothead.disable();
@@ -132,6 +138,12 @@ public class InMoovHead extends Service {
     if (rollNeck != null) {
     	rollNeck.disable();
     }
+  }
+  
+  public boolean detach() {
+	  log.warn("detach deprecated please use disable");
+	  detach();
+	  return true;
   }
 
   public long getLastActivityTime() {
@@ -215,7 +227,7 @@ public class InMoovHead extends Service {
   }
 
   public void release() {
-    detach();
+    disable();
     rothead.releaseService();
     neck.releaseService();
     eyeX.releaseService();

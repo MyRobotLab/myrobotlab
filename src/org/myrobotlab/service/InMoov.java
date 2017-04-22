@@ -194,27 +194,27 @@ public class InMoov extends Service {
     }
     if (rightHand != null) {
       rightHand.rest();
-      rightHand.detach();
+      rightHand.disable();
     }
     if (leftHand != null) {
       leftHand.rest();
-      leftHand.detach();
+      leftHand.disable();
     }
     if (rightArm != null) {
       rightArm.rest();
-      rightArm.detach();
+      rightArm.disable();
     }
     if (leftArm != null) {
       leftArm.rest();
-      leftArm.detach();
+      leftArm.disable();
     }
     if (torso != null) {
       torso.rest();
-      torso.detach();
+      torso.disable();
     }
     if (eyelids != null) {
     	eyelids.rest();
-    	eyelids.detach();
+    	eyelids.disable();
       }
   }
 
@@ -225,31 +225,31 @@ public class InMoov extends Service {
   public void attach() {
     if (head != null) {
       sleep(attachPauseMs);
-      head.attach();
+      head.enable();
     }
     if (rightHand != null) {
       sleep(attachPauseMs);
-      rightHand.attach();
+      rightHand.enable();
     }
     if (leftHand != null) {
       sleep(attachPauseMs);
-      leftHand.attach();
+      leftHand.enable();
     }
     if (rightArm != null) {
       sleep(attachPauseMs);
-      rightArm.attach();
+      rightArm.enable();
     }
     if (leftArm != null) {
       sleep(attachPauseMs);
-      leftArm.attach();
+      leftArm.enable();
     }
     if (torso != null) {
       sleep(attachPauseMs);	
-      torso.attach();
+      torso.enable();
     }
     if (eyelids != null) {
       sleep(attachPauseMs);
-      eyelids.attach();
+      eyelids.enable();
       }
   }
 
@@ -430,25 +430,25 @@ public class InMoov extends Service {
   
   public void detach() {
     if (head != null) {
-      head.detach();
+      head.disable();
     }
     if (rightHand != null) {
-      rightHand.detach();
+      rightHand.disable();
     }
     if (leftHand != null) {
-      leftHand.detach();
+      leftHand.disable();
     }
     if (rightArm != null) {
-      rightArm.detach();
+      rightArm.disable();
     }
     if (leftArm != null) {
-      leftArm.detach();
+      leftArm.disable();
     }
     if (torso != null) {
-      torso.detach();
+      torso.disable();
     }
     if (eyelids != null) {
-    	eyelids.detach();
+    	eyelids.disable();
       }
   }
 
