@@ -66,13 +66,13 @@ public class InMoovArm extends Service implements IKJointAngleListener {
    */
   public boolean attach() {
     sleep(InMoov.attachPauseMs);
-    bicep.attach();
+    bicep.enable();
     sleep(InMoov.attachPauseMs);
-    rotate.attach();
+    rotate.enable();
     sleep(InMoov.attachPauseMs);
-    shoulder.attach();
+    shoulder.enable();
     sleep(InMoov.attachPauseMs);
-    omoplate.attach();
+    omoplate.enable();
     return true;
   }
 
@@ -110,22 +110,39 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   public void detach() {
     if (bicep != null) {
-      bicep.detach();
+      bicep.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (rotate != null) {
-      rotate.detach();
+      rotate.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (shoulder != null) {
-      shoulder.detach();
+      shoulder.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (omoplate != null) {
-      omoplate.detach();
+      omoplate.disable();
     }
   }
 
+  public void enableAutoDisable(Boolean param) {
+	  bicep.enableAutoDisable(param);
+	  rotate.enableAutoDisable(param);
+	  shoulder.enableAutoDisable(param);
+	  omoplate.enableAutoDisable(param);
+	  }
+
+
+	  
+	  public void enableAutoEnable(Boolean param) {
+		  bicep.enableAutoEnable(param);
+		  rotate.enableAutoEnable(param);
+		  shoulder.enableAutoEnable(param);
+		  omoplate.enableAutoEnable(param);
+		  }
+  
+  
   public Arduino getArduino() {
     return arduino;
   }
@@ -273,6 +290,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public void setSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
+	log.warn("setspeed deprecated please use setvelocity");
     this.bicep.setSpeed(bicep);
     this.rotate.setSpeed(rotate);
     this.shoulder.setSpeed(shoulder);

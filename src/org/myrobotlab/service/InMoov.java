@@ -218,11 +218,17 @@ public class InMoov extends Service {
       }
   }
 
+  public void enable() {
+  attach();  
+  }
+  
   public void attach() {
     if (head != null) {
+      sleep(attachPauseMs);
       head.attach();
     }
     if (rightHand != null) {
+      sleep(attachPauseMs);
       rightHand.attach();
     }
     if (leftHand != null) {
@@ -234,14 +240,16 @@ public class InMoov extends Service {
       rightArm.attach();
     }
     if (leftArm != null) {
-      sleep(100);
+      sleep(attachPauseMs);
       leftArm.attach();
     }
     if (torso != null) {
+      sleep(attachPauseMs);	
       torso.attach();
     }
     if (eyelids != null) {
-    	eyelids.attach();
+      sleep(attachPauseMs);
+      eyelids.attach();
       }
   }
 
@@ -416,6 +424,10 @@ public class InMoov extends Service {
     moveHand("right", 0, 24, 54, 50, 82, 180);
   }
 
+  public void disable() {
+	detach();  
+  }
+  
   public void detach() {
     if (head != null) {
       head.detach();

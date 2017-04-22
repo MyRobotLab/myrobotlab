@@ -69,14 +69,26 @@ public class InMoovTorso extends Service {
   public boolean attach() {
  
     sleep(InMoov.attachPauseMs);
-    topStom.attach();
+    topStom.enable();
     sleep(InMoov.attachPauseMs);
-    midStom.attach();
+    midStom.enable();
     sleep(InMoov.attachPauseMs);
-    lowStom.attach();
+    lowStom.enable();
     sleep(InMoov.attachPauseMs);
     return true;
   }
+  
+  public void enableAutoDisable(Boolean param) {
+	  topStom.enableAutoDisable(param);
+	  midStom.enableAutoDisable(param);
+	  lowStom.enableAutoDisable(param);
+	  }
+
+  public void enableAutoEnable(Boolean param) {
+	  topStom.enableAutoEnable(param);
+	  midStom.enableAutoEnable(param);
+	  lowStom.enableAutoEnable(param);
+	  }
 
   @Override
   public void broadcastState() {
@@ -111,15 +123,15 @@ public class InMoovTorso extends Service {
 
   public void detach() {
     if (topStom != null) {
-      topStom.detach();
+      topStom.disable();
       sleep(InMoov.attachPauseMs);
     } 
     if (midStom != null) {
-      midStom.detach();
+      midStom.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (lowStom != null) {
-      lowStom.detach();
+      lowStom.disable();
       sleep(InMoov.attachPauseMs);
     }
   }
@@ -211,6 +223,7 @@ public class InMoovTorso extends Service {
   }
 
   public void setSpeed(Double topStom, Double midStom, Double lowStom) {
+	log.warn("setspeed deprecated please use setvelocity");
     this.topStom.setSpeed(topStom);
     this.midStom.setSpeed(midStom);
     this.lowStom.setSpeed(lowStom);

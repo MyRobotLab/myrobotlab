@@ -101,17 +101,17 @@ public class InMoovHand extends Service implements LeapDataListener {
    */
   public boolean attach() {
     sleep(InMoov.attachPauseMs);
-    thumb.attach();
+    thumb.enable();
     sleep(InMoov.attachPauseMs);
-    index.attach();
+    index.enable();
     sleep(InMoov.attachPauseMs);
-    majeure.attach();
+    majeure.enable();
     sleep(InMoov.attachPauseMs);
-    ringFinger.attach();
+    ringFinger.enable();
     sleep(InMoov.attachPauseMs);
-    pinky.attach();
+    pinky.enable();
     sleep(InMoov.attachPauseMs);
-    wrist.attach();
+    wrist.enable();
     return true;
   }
 
@@ -185,32 +185,48 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public void detach() {
 	if (thumb != null) {
-      thumb.detach();
+      thumb.disable();
       sleep(InMoov.attachPauseMs);
 	}
     if (index != null) {
-      index.detach();
+      index.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (majeure != null) {
-      majeure.detach();
+      majeure.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (ringFinger != null) {
-      ringFinger.detach();
+      ringFinger.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (pinky != null) {
-      pinky.detach();
+      pinky.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (wrist != null) {
-      wrist.detach();
+      wrist.disable();
     }
    
     
   }
 
+  public void enableAutoDisable(Boolean param) {
+	  thumb.enableAutoDisable(param);
+	  index.enableAutoDisable(param);
+	  majeure.enableAutoDisable(param);
+	  ringFinger.enableAutoDisable(param);
+	  wrist.enableAutoDisable(param);
+	  }
+
+  public void enableAutoEnable(Boolean param) {
+	  thumb.enableAutoEnable(param);
+	  index.enableAutoEnable(param);
+	  majeure.enableAutoEnable(param);
+	  ringFinger.enableAutoEnable(param);
+	  wrist.enableAutoEnable(param);
+	  }
+  
   public void devilHorns() {
     moveTo(150, 0, 180, 180, 0, 90);
   }
@@ -452,7 +468,8 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public void setSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    this.thumb.setSpeed(thumb);
+	  log.warn("setspeed deprecated please use setvelocity");
+	this.thumb.setSpeed(thumb);
     this.index.setSpeed(index);
     this.majeure.setSpeed(majeure);
     this.ringFinger.setSpeed(ringFinger);
