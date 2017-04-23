@@ -239,7 +239,7 @@ public class InMoov extends Service {
       rightArm.enable();
     }
     if (leftArm != null) {
-      sleep(100);
+      sleep(attachPauseMs);
       leftArm.enable();
     }
     if (torso != null) {

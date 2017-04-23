@@ -102,8 +102,8 @@ public class InMoovEyelids extends Service {
       return false;
     }
 
-    eyelidleft.attach(arduino, 29, eyelidleft.getRest(), eyelidleft.getVelocity());
-    eyelidright.attach(arduino, 30, eyelidright.getRest(), eyelidright.getVelocity());
+    eyelidleft.attach(arduino, 22, eyelidleft.getRest(), eyelidleft.getVelocity());
+    eyelidright.attach(arduino, 24, eyelidright.getRest(), eyelidright.getVelocity());
   
 
     broadcastState();
@@ -178,7 +178,7 @@ public class InMoovEyelids extends Service {
 
   public void rest() {
 
-    setVelocity(50.0, 50.0);
+    //setVelocity(50.0, 50.0);
     eyelidleft.rest();
     eyelidright.rest();
   }

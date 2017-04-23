@@ -68,6 +68,7 @@ public class InMoovTorso extends Service {
    */
   @Deprecated
   public boolean attach() {
+  log.warn("attach deprecated please use enable");
     return enable();
   }
 
@@ -116,6 +117,7 @@ public class InMoovTorso extends Service {
 
   @Deprecated
   public void detach() {
+  log.warn("detach deprecated please use disable");
     if (topStom != null) {
       topStom.detach();
       sleep(InMoov.attachPauseMs);
@@ -194,7 +196,7 @@ public class InMoovTorso extends Service {
 
   public void rest() {
 
-    setSpeed(1.0, 1.0, 1.0);
+    //setSpeed(1.0, 1.0, 1.0);
 
     topStom.rest();
     midStom.rest();
@@ -233,6 +235,7 @@ public class InMoovTorso extends Service {
 
   @Deprecated
   public void setSpeed(Double topStom, Double midStom, Double lowStom) {
+	log.warn("setspeed deprecated please use setvelocity");
     this.topStom.setSpeed(topStom);
     this.midStom.setSpeed(midStom);
     this.lowStom.setSpeed(lowStom);

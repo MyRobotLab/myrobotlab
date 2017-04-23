@@ -234,7 +234,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   public void rest() {
 
-    setSpeed(1.0, 1.0, 1.0, 1.0);
+    //setSpeed(1.0, 1.0, 1.0, 1.0);
 
     bicep.rest();
     rotate.rest();
@@ -298,6 +298,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   @Deprecated
   public void setSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
+	log.warn("setspeed deprecated please use setvelocity");
     this.bicep.setSpeed(bicep);
     this.rotate.setSpeed(rotate);
     this.shoulder.setSpeed(shoulder);

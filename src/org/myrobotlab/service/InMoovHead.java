@@ -61,6 +61,7 @@ public class InMoovHead extends Service {
    */
   @Deprecated
   public boolean attach() {
+  log.warn("attach deprecated please use enable");
     sleep(InMoov.attachPauseMs);
     eyeX.enable();
     sleep(InMoov.attachPauseMs);
@@ -128,6 +129,7 @@ public class InMoovHead extends Service {
 
   @Deprecated
   public void detach() {
+  log.warn("detach deprecated please use disable");
     disable();
   }
 

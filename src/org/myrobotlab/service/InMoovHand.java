@@ -101,6 +101,7 @@ public class InMoovHand extends Service implements LeapDataListener {
    */
   @Deprecated
   public boolean attach() {
+  	log.warn("attach deprecated please use enable");
     return enable();
   }
 
@@ -190,6 +191,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   
   @Deprecated
   public void detach() {
+  	log.warn("detach deprecated please use disable");
     disable();
     
   }
@@ -221,6 +223,14 @@ public class InMoovHand extends Service implements LeapDataListener {
    
     
   }
+
+  public void enableAutoDisable(Boolean param) {
+	  thumb.enableAutoDisable(param);
+	  index.enableAutoDisable(param);
+	  majeure.enableAutoDisable(param);
+	  ringFinger.enableAutoDisable(param);
+	  wrist.enableAutoDisable(param);
+	  }
 
   public void devilHorns() {
     moveTo(150, 0, 180, 180, 0, 90);
@@ -400,7 +410,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public void rest() {
     // initial positions
-    setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+    //setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 
     thumb.rest();
     index.rest();
@@ -464,7 +474,8 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   @Deprecated
   public void setSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    this.thumb.setSpeed(thumb);
+	  log.warn("setspeed deprecated please use setvelocity");
+	this.thumb.setSpeed(thumb);
     this.index.setSpeed(index);
     this.majeure.setSpeed(majeure);
     this.ringFinger.setSpeed(ringFinger);
