@@ -142,7 +142,7 @@ public class InMoovHead extends Service {
   
   public boolean detach() {
 	  log.warn("detach deprecated please use disable");
-	  detach();
+	  disable();
 	  return true;
   }
 
