@@ -66,14 +66,19 @@ public class InMoovTorso extends Service {
    * 
    * @return
    */
+  @Deprecated
   public boolean attach() {
- 
+    return enable();
+  }
+
+  public boolean enable() {
+    
     sleep(InMoov.attachPauseMs);
-    topStom.attach();
+    topStom.enable();
     sleep(InMoov.attachPauseMs);
-    midStom.attach();
+    midStom.enable();
     sleep(InMoov.attachPauseMs);
-    lowStom.attach();
+    lowStom.enable();
     sleep(InMoov.attachPauseMs);
     return true;
   }
@@ -109,6 +114,7 @@ public class InMoovTorso extends Service {
     return true;
   }
 
+  @Deprecated
   public void detach() {
     if (topStom != null) {
       topStom.detach();
@@ -120,6 +126,21 @@ public class InMoovTorso extends Service {
     }
     if (lowStom != null) {
       lowStom.detach();
+      sleep(InMoov.attachPauseMs);
+    }
+  }
+
+  public void disable() {
+    if (topStom != null) {
+      topStom.disable();
+      sleep(InMoov.attachPauseMs);
+    } 
+    if (midStom != null) {
+      midStom.disable();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (lowStom != null) {
+      lowStom.disable();
       sleep(InMoov.attachPauseMs);
     }
   }
@@ -156,7 +177,7 @@ public class InMoovTorso extends Service {
 
   // FIXME - releasePeers()
   public void release() {
-    detach();
+    disable();
     if (topStom != null) {
       topStom.releaseService();
       topStom = null;
@@ -210,6 +231,7 @@ public class InMoovTorso extends Service {
 	    arduino.servoAttachPin(topStom, lowStomPin);
   }
 
+  @Deprecated
   public void setSpeed(Double topStom, Double midStom, Double lowStom) {
     this.topStom.setSpeed(topStom);
     this.midStom.setSpeed(midStom);

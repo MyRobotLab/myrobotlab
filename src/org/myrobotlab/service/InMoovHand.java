@@ -99,19 +99,24 @@ public class InMoovHand extends Service implements LeapDataListener {
    * 
    * @return
    */
+  @Deprecated
   public boolean attach() {
+    return enable();
+  }
+
+  public boolean enable() {
     sleep(InMoov.attachPauseMs);
-    thumb.attach();
+    thumb.enable();
     sleep(InMoov.attachPauseMs);
-    index.attach();
+    index.enable();
     sleep(InMoov.attachPauseMs);
-    majeure.attach();
+    majeure.enable();
     sleep(InMoov.attachPauseMs);
-    ringFinger.attach();
+    ringFinger.enable();
     sleep(InMoov.attachPauseMs);
-    pinky.attach();
+    pinky.enable();
     sleep(InMoov.attachPauseMs);
-    wrist.attach();
+    wrist.enable();
     return true;
   }
 
@@ -182,30 +187,36 @@ public class InMoovHand extends Service implements LeapDataListener {
     sleep(1);
     five();
   }
-
+  
+  @Deprecated
   public void detach() {
-	if (thumb != null) {
-      thumb.detach();
+    disable();
+    
+  }
+
+  public void disable() {
+  if (thumb != null) {
+      thumb.disable();
       sleep(InMoov.attachPauseMs);
-	}
+  }
     if (index != null) {
-      index.detach();
+      index.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (majeure != null) {
-      majeure.detach();
+      majeure.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (ringFinger != null) {
-      ringFinger.detach();
+      ringFinger.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (pinky != null) {
-      pinky.detach();
+      pinky.disable();
       sleep(InMoov.attachPauseMs);
     }
     if (wrist != null) {
-      wrist.detach();
+      wrist.disable();
     }
    
     
@@ -378,7 +389,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   // ----- movements begin -----------
 
   public void release() {
-    detach();
+    disable();
     thumb.releaseService();
     index.releaseService();
     majeure.releaseService();
@@ -451,6 +462,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     this.side = side;
   }
 
+  @Deprecated
   public void setSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     this.thumb.setSpeed(thumb);
     this.index.setSpeed(index);

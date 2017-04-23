@@ -59,7 +59,25 @@ public class InMoovHead extends Service {
    * 
    * @return
    */
+  @Deprecated
   public boolean attach() {
+    sleep(InMoov.attachPauseMs);
+    eyeX.enable();
+    sleep(InMoov.attachPauseMs);
+    eyeY.enable();
+    sleep(InMoov.attachPauseMs);
+    jaw.enable();
+    sleep(InMoov.attachPauseMs);
+    rothead.enable();
+    sleep(InMoov.attachPauseMs);
+    neck.enable();
+    sleep(InMoov.attachPauseMs);
+    rollNeck.enable();
+    sleep(InMoov.attachPauseMs);
+    return true;
+  }
+
+  public boolean enable() {
     sleep(InMoov.attachPauseMs);
     eyeX.enable();
     sleep(InMoov.attachPauseMs);
@@ -108,7 +126,12 @@ public class InMoovHead extends Service {
     return true;
   }
 
+  @Deprecated
   public void detach() {
+    disable();
+  }
+
+  public void disable() {
     sleep(InMoov.attachPauseMs);
     if (rothead != null) {
       rothead.disable();
@@ -130,7 +153,7 @@ public class InMoovHead extends Service {
       jaw.disable();
     }
     if (rollNeck != null) {
-    	rollNeck.disable();
+      rollNeck.disable();
     }
   }
 
@@ -215,7 +238,7 @@ public class InMoovHead extends Service {
   }
 
   public void release() {
-    detach();
+    disable();
     rothead.releaseService();
     neck.releaseService();
     eyeX.releaseService();
@@ -319,6 +342,7 @@ public class InMoovHead extends Service {
     rollNeck.setPin(rollNeckPin);
     */
 
+    //Calamity: not sure it should be called in the Arduino, should be on the Servo
     arduino.servoAttachPin(rothead, headXPin);
     arduino.servoAttachPin(neck, headYPin);
     arduino.servoAttachPin(eyeX, eyeXPin);
@@ -333,7 +357,7 @@ public class InMoovHead extends Service {
 
 	}
   
-  
+  @Deprecated
   public void setSpeed(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
     if (log.isDebugEnabled()) {
       log.debug(String.format("%s setSpeed %.2f %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed));

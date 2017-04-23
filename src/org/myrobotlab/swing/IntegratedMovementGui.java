@@ -40,6 +40,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.IMEngine;
@@ -171,35 +172,40 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
   }
 
   public void onState(IntegratedMovement im) {
-    for (IMEngine engine : im.getArms()) {
-      if (!armPanels.containsKey(engine.getName())){
-        createArmPanel(engine);
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        for (IMEngine engine : im.getArms()) {
+          if (!armPanels.containsKey(engine.getName())){
+            createArmPanel(engine);
+          }
+        }
+      	objects =  im.getCollisionObject();
+      	if (objects == null) return;
+      	itemPane.removeAll();
+      	itemPane.add(createItemPanelHeader());
+      	for (CollisionItem ci : objects.values()) {
+      	  if (ci.isRender()) {
+      	    itemPane.add(createItemPanel(ci));
+      	  }
+      	}
+        ButtonModel rad = armRadio.getSelection();
+        if(rad == null) {
+          for (Component comp : components.values()) {
+            comp.setEnabled(false);
+          }
+        }
+        if (im.getOpenni() == null) {
+          startKinect.setVisible(true);
+          process.setVisible(false);
+        }
+        else {
+          startKinect.setVisible(false);
+          process.setVisible(true);
+        }
+        myService.pack();
       }
-    }
-  	objects =  im.getCollisionObject();
-  	if (objects == null) return;
-  	itemPane.removeAll();
-  	itemPane.add(createItemPanelHeader());
-  	for (CollisionItem ci : objects.values()) {
-  	  if (ci.isRender()) {
-  	    itemPane.add(createItemPanel(ci));
-  	  }
-  	}
-    ButtonModel rad = armRadio.getSelection();
-    if(rad == null) {
-      for (Component comp : components.values()) {
-        comp.setEnabled(false);
-      }
-    }
-    if (im.getOpenni() == null) {
-      startKinect.setVisible(true);
-      process.setVisible(false);
-    }
-    else {
-      startKinect.setVisible(false);
-      process.setVisible(true);
-    }
-    myService.pack();
+    });
   }
 
 
