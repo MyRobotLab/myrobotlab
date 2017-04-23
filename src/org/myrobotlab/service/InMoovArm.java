@@ -134,7 +134,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   
   public boolean detach() {
 	  log.warn("attach deprecated please use disable");
-	  detach();
+	  disable();
 	  return true;
   }
 
