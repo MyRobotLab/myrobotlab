@@ -64,15 +64,20 @@ public class InMoovArm extends Service implements IKJointAngleListener {
    * 
    * @return
    */
+  @Deprecated
   public boolean attach() {
+    return enable();
+  }
+
+  public boolean enable() {
     sleep(InMoov.attachPauseMs);
-    bicep.attach();
+    bicep.enable();
     sleep(InMoov.attachPauseMs);
-    rotate.attach();
+    rotate.enable();
     sleep(InMoov.attachPauseMs);
-    shoulder.attach();
+    shoulder.enable();
     sleep(InMoov.attachPauseMs);
-    omoplate.attach();
+    omoplate.enable();
     return true;
   }
 
@@ -108,6 +113,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return true;
   }
 
+  @Deprecated
   public void detach() {
     if (bicep != null) {
       bicep.detach();
@@ -123,6 +129,24 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     }
     if (omoplate != null) {
       omoplate.detach();
+    }
+  }
+
+  public void disable() {
+    if (bicep != null) {
+      bicep.disable();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (rotate != null) {
+      rotate.disable();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (shoulder != null) {
+      shoulder.disable();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (omoplate != null) {
+      omoplate.disable();
     }
   }
 
@@ -189,7 +213,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   // FIXME - releasePeers()
   public void release() {
-    detach();
+    disable();
     if (bicep != null) {
       bicep.releaseService();
       bicep = null;
@@ -272,6 +296,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     this.side = side;
   }
 
+  @Deprecated
   public void setSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
     this.bicep.setSpeed(bicep);
     this.rotate.setSpeed(rotate);

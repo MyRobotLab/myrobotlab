@@ -48,11 +48,13 @@ public class InMoovEyelids extends Service {
 
     eyelidleft.setMinMax(60, 120);
     eyelidright.setMinMax(0, 180);
+    //Calamity: why default setting are not the same for right/left?
   
     eyelidleft.setRest(90);
     eyelidright.setRest(90);
  
     setVelocity(5.0,5.0);
+    //Calamity: velocity value seem very low for that kind of action and in the rest() method they are set to 50.0
   
   }
 
@@ -62,8 +64,13 @@ public class InMoovEyelids extends Service {
    * 
    * @return
    */
+  @Deprecated
   public boolean attach() {
- 
+    return enable();
+  }
+
+  public boolean enable() {
+    
     sleep(InMoov.attachPauseMs);
     eyelidleft.enable();
     sleep(InMoov.attachPauseMs);
@@ -103,7 +110,20 @@ public class InMoovEyelids extends Service {
     return true;
   }
 
+  @Deprecated
   public void detach() {
+    if (eyelidleft != null) {
+      eyelidleft.disable();
+      sleep(InMoov.attachPauseMs);
+    } 
+    if (eyelidright != null) {
+      eyelidright.disable();
+      sleep(InMoov.attachPauseMs);
+    }
+   
+  }
+
+  public void disable() {
     if (eyelidleft != null) {
       eyelidleft.disable();
       sleep(InMoov.attachPauseMs);
@@ -144,7 +164,7 @@ public class InMoovEyelids extends Service {
 
   // FIXME - releasePeers()
   public void release() {
-    detach();
+    disable();
     if (eyelidleft != null) {
       eyelidleft.releaseService();
       eyelidleft = null;
@@ -186,7 +206,7 @@ public class InMoovEyelids extends Service {
     this.eyelidright.setPin(eyelidright);
     */
 	  
-
+    //Calamity: this seem incorrect. I think the pin should be set on the Servo service, not on the arduino directly
 	    arduino.servoAttachPin(eyelidleft, eyelidleftPin);
 	    arduino.servoAttachPin(eyelidright, eyelidrightPin);
   }

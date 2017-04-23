@@ -146,6 +146,7 @@ public class InMoov extends Service {
   transient InMoov3DApp vinMoovApp;
 
   private IntegratedMovement integratedMovement;
+  private Arduino pirArduino;
 
   // static String speechService = "MarySpeech";
   // static String speechService = "AcapelaSpeech";
@@ -194,54 +195,58 @@ public class InMoov extends Service {
     }
     if (rightHand != null) {
       rightHand.rest();
-      rightHand.detach();
+      rightHand.disable();
     }
     if (leftHand != null) {
       leftHand.rest();
-      leftHand.detach();
+      leftHand.disable();
     }
     if (rightArm != null) {
       rightArm.rest();
-      rightArm.detach();
+      rightArm.disable();
     }
     if (leftArm != null) {
       leftArm.rest();
-      leftArm.detach();
+      leftArm.disable();
     }
     if (torso != null) {
       torso.rest();
-      torso.detach();
+      torso.disable();
     }
     if (eyelids != null) {
     	eyelids.rest();
-    	eyelids.detach();
+    	eyelids.disable();
       }
   }
-
+  @Deprecated
   public void attach() {
+    enable();
+  }
+
+  public void enable() {
     if (head != null) {
-      head.attach();
+      head.enable();
     }
     if (rightHand != null) {
-      rightHand.attach();
+      rightHand.enable();
     }
     if (leftHand != null) {
       sleep(attachPauseMs);
-      leftHand.attach();
+      leftHand.enable();
     }
     if (rightArm != null) {
       sleep(attachPauseMs);
-      rightArm.attach();
+      rightArm.enable();
     }
     if (leftArm != null) {
       sleep(100);
-      leftArm.attach();
+      leftArm.enable();
     }
     if (torso != null) {
-      torso.attach();
+      torso.enable();
     }
     if (eyelids != null) {
-    	eyelids.attach();
+      eyelids.enable();
       }
   }
 
@@ -416,27 +421,32 @@ public class InMoov extends Service {
     moveHand("right", 0, 24, 54, 50, 82, 180);
   }
 
+  @Deprecated
   public void detach() {
+    disable();
+  }
+
+  public void disable() {
     if (head != null) {
-      head.detach();
+      head.disable();
     }
     if (rightHand != null) {
-      rightHand.detach();
+      rightHand.disable();
     }
     if (leftHand != null) {
-      leftHand.detach();
+      leftHand.disable();
     }
     if (rightArm != null) {
-      rightArm.detach();
+      rightArm.disable();
     }
     if (leftArm != null) {
-      leftArm.detach();
+      leftArm.disable();
     }
     if (torso != null) {
-      torso.detach();
+      torso.disable();
     }
     if (eyelids != null) {
-    	eyelids.detach();
+      eyelids.disable();
       }
   }
 
@@ -770,7 +780,7 @@ public class InMoov extends Service {
 
     rest();
     purgeTasks();
-    detach();
+    disable();
 
     // TODO standard relay line ?
     // right
@@ -786,7 +796,7 @@ public class InMoov extends Service {
 
   public void powerUp() {
     startSleep = null;
-    attach();
+    enable();
     rest();
     if (ear != null) {
       ear.clearLock();
@@ -895,6 +905,7 @@ public class InMoov extends Service {
     return true;
   }
 
+  @Deprecated
   public void setArmSpeed(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     if (!arms.containsKey(which)) {
       error("setArmSpeed %s does not exist", which);
@@ -911,6 +922,7 @@ public class InMoov extends Service {
     }
   }
 
+  @Deprecated
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
   }
@@ -919,6 +931,7 @@ public class InMoov extends Service {
     setHandVelocity(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
+  @Deprecated
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     if (!hands.containsKey(which)) {
       error("setHandSpeed %s does not exist", which);
@@ -935,6 +948,7 @@ public class InMoov extends Service {
     }
   }
 
+  @Deprecated
   public void setHeadSpeed(Double rothead, Double neck) {
     setHeadSpeed(rothead, neck, null, null, null);
   }
@@ -951,6 +965,7 @@ public class InMoov extends Service {
 	    setHeadVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, null);
 	  }
 
+  @Deprecated
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
     if (head != null) {
       head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
@@ -959,6 +974,7 @@ public class InMoov extends Service {
     }
   }
 
+  @Deprecated
   public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
     if (head != null) {
       head.setVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
@@ -971,6 +987,7 @@ public class InMoov extends Service {
     this.mute = mute;
   }
 
+  @Deprecated
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
     if (torso != null) {
       torso.setSpeed(topStom, midStom, lowStom);
@@ -1237,7 +1254,8 @@ public class InMoov extends Service {
       Arduino arduino = arduinos.get(port);
       // arduino.connect(port);
       // arduino.setSampleRate(8000);
-      arduino.enablePin(pin);
+      arduino.enablePin(pin,10);
+      pirArduino = arduino;
       pirPin = pin;
       arduino.addListener("publishPin", this.getName(), "publishPin");
 
@@ -1321,6 +1339,11 @@ public class InMoov extends Service {
 	  }
 
   public void stopPIR() {
+    if (pirArduino != null && pirPin!= null) {
+      pirArduino.disablePin(pirPin);
+      pirPin = null;
+      pirArduino = null;
+    }
     /*
      * if (arduinos.containsKey(port)) { Arduino arduino = arduinos.get(port);
      * arduino.connect(port); arduino.setSampleRate(8000);
@@ -1820,6 +1843,8 @@ public class InMoov extends Service {
         head.rothead.addIKServoEventListener(this);
         vinMoovApp.addServo("jaw", head.jaw);
         head.jaw.addIKServoEventListener(this);
+        vinMoovApp.addServo("rollNeck", head.rollNeck);
+        head.rollNeck.addIKServoEventListener(this);
       }
     }
     else {

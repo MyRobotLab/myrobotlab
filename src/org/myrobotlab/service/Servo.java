@@ -287,7 +287,7 @@ public class Servo extends Service implements ServoControl {
 		this.pin = pin;
 		isPinAttached = true;
 		broadcastState();
-		invoke("publishServoAttach", getName());
+		invoke("publishServoEnable", getName());
 	}
 
 	/**

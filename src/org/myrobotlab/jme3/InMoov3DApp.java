@@ -351,7 +351,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     nodes.put("neck", node);
     maps.put("neck", new Mapper(0,180,-45,45));
 
-    node = new Node("neckroll");
+    node = new Node("rollNeck");
     parentNode = nodes.get("neck");
     parentNode.attachChild(node);
     node.setLocalTranslation(new Vector3f(0,0,0));
@@ -362,11 +362,11 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     node.setUserData("currentAngle",  0);
     angle = rotationMask.mult((float)Math.toRadians(2));
     node.rotate(angle.x, angle.y, angle.z);
-    nodes.put("neckroll", node);
-    maps.put("neckroll", new Mapper(0,180,60,120));
+    nodes.put("rollNeck", node);
+    maps.put("rollNeck", new Mapper(0,180,60,115));
     
     node = new Node("head");
-    parentNode = nodes.get("neckroll");
+    parentNode = nodes.get("rollNeck");
     parentNode.attachChild(node);
     spatial = assetManager.loadModel("Models/head.j3o");
     spatial.setName("head");
