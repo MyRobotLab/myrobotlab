@@ -49,15 +49,16 @@ jdk:
 
 addons:
   artifacts:
-    bucket: mrl-bucket-02
+    bucket: mrl-bucket-02    
+    # s3_region: us-west-1 | defaults to east us
     key:
       secure: "HPVRrxMM0NCjH3S8VI1eG0Wl9diyiGZu9n8NRnGpyxXyjplAM+7p9ezGf6i3a+sdTashtjeLb5dpRruk4Hd5+Hn6V6QQahVrI82Q8bkcy5LQsnea2IBAHEMxQZMjFJhh4STUrX7SvRABHCYGWn1sCupauB00EhDjvfqWMCrEQF8="
     secret:
-      secure: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="
-    acl: public_read
+      secure: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="    
     paths:
     # arbitrary shell commands are supported, but the output should be
     # converted to a ':'-delimited string.
     - $(ls build/report/*.xml | tr "\n" ":")
     # singular paths work fine, too
     - $HOME/build/lib/myrobotlab.jar  
+    acl: public_read
