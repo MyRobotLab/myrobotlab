@@ -83,6 +83,18 @@ public class InMoovTorso extends Service {
     sleep(InMoov.attachPauseMs);
     return true;
   }
+  
+  public void enableAutoEnable(Boolean param) {
+	  topStom.enableAutoEnable(param);
+	  midStom.enableAutoEnable(param);
+	  lowStom.enableAutoEnable(param);
+	  }
+  
+  public void enableAutoDisable(Boolean param) {
+	  topStom.enableAutoDisable(param);
+	  midStom.enableAutoDisable(param);
+	  lowStom.enableAutoDisable(param);
+	  }
 
   @Override
   public void broadcastState() {
