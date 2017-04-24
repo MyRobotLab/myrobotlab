@@ -11,7 +11,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.test.TestUtils;
 
 // Grr.. TODO: disable this until we can figure out why travis is dying on it.
-// @Ignore
+@Ignore
 public class InMoovScriptTest {
 
   private static final String V_PORT_1 = "test_port_1";
