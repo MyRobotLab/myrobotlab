@@ -1,7 +1,7 @@
 # use https://lint.travis-ci.org/ to check validity
 # use https://gist.github.com/tgrrtt/96b206c22b82f92ce563 to see examples
 env:
- global:
+  global:
    - "ARTIFACTS_AWS_REGION=us-east-1"
    - "ARTIFACTS_S3_BUCKET=mrl-bucket-02"
    - secure: "ZaIH9adJohSii+qyK9JL5FTiGUxttkzlAnxJxmGlR+xABntLD40gGryRJSvr/YqDfMQ9/eTQWqOsyxgr2eGpWV1/IhGzSo7regsT+TVZMYe3GRp5jJR/TlJGpzSaxYdMHPAa6EksSP6kxoGQElSSwqc8wOc5Piqml4/v2S4F7lg="
@@ -13,16 +13,16 @@ script: ant dist
 jdk:
 - oraclejdk8
 
-# whitelist
-# branches:
-#   only:
-#     - develop
-
- before_script:
+before_script:
    - "gem install travis-artifacts"
    
 after_script:
   - "travis-artifacts upload --path build/report --path report"   
+
+# whitelist
+# branches:
+#   only:
+#     - develop
 
 deploy:
   provider: s3
