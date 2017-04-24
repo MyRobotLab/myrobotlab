@@ -304,17 +304,16 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * Equivalent to Arduino's Servo.detach() it disables the pwm to the servo IT DOES
-	 * NOT DETACH THE SERVO CONTROLLER !!!
+	 * This method will disconnect the servo from it's controller.
+	 * see also enable() / disable()
 	 */
-	@Deprecated
 	@Override
-	public void detach() {		
+	public void detach() {
 		warn("detach() is deprecated please use disable()");
 		isPinAttached = false;
 		if (controller != null) {
 			controller.servoDetachPin(this);
-			// detach(controller);
+			detach(controller);
 		}
 		broadcastState();
 		// TODO: this doesn't seem to be consistent depending on how you invoke
@@ -323,8 +322,8 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * Equivalent to Arduino's Servo.detach() it de-energizes the servo IT DOES
-	 * NOT DETACH THE SERVO CONTROLLER !!!
+	 * This method will leave the servo connected to the controller, however it will stop
+	 * sending pwm messages to the servo.
 	 */
 	public void disable() {
 		isPinAttached = false;
@@ -439,7 +438,6 @@ public class Servo extends Service implements ServoControl {
 	 */
 
 	public Double publishServoEvent(Double position) {
-
 		return position;
 	}
 
@@ -657,13 +655,17 @@ public class Servo extends Service implements ServoControl {
 	// be assigned later...
 	public void attach(ServoController controller) throws Exception {
 		if (isAttached(controller)) {
-			log.info("{} servo attached to controller {}", getName(), this.controller.getName());
+			log.info("{} servo is already attached to controller {}", getName(), this.controller.getName());
 			return;
-		} else if (this.controller != null && this.controller != controller) {
-			log.warn("already attached to controller %s - please detach before attaching to controller %s",
-					this.controller.getName(), controller.getName());
-			return;
+		} else if (this.controller != controller) {
+		  //we're switching controllers
+		  detach();
 		}
+
+//			log.warn("already attached to controller {} - please detach before attaching to controller {}",
+//					this.controller.getName(), controller.getName());
+//			return;
+//		}
 
 		targetOutput = getTargetOutput();// mapper.calcOutput(targetPos);
 
