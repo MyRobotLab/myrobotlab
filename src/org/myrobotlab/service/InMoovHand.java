@@ -224,6 +224,14 @@ public class InMoovHand extends Service implements LeapDataListener {
     
   }
 
+  public void enableAutoEnable(Boolean param) {
+	  thumb.enableAutoEnable(param);
+	  index.enableAutoEnable(param);
+	  majeure.enableAutoEnable(param);
+	  ringFinger.enableAutoEnable(param);
+	  wrist.enableAutoEnable(param);
+	  }
+  
   public void enableAutoDisable(Boolean param) {
 	  thumb.enableAutoDisable(param);
 	  index.enableAutoDisable(param);
