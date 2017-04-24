@@ -28,6 +28,7 @@ jdk:
 #   only:
 #     - develop
 
+# deploy might be necessary again to selectively publish build
 # deploy:
 #  provider: s3
 #  deployment_group: s3 group
@@ -50,7 +51,8 @@ jdk:
 addons:
   artifacts:
     bucket: mrl-bucket-02    
-    # s3_region: us-west-1 | defaults to east us
+    debug: true
+    # s3_region: us-west-1 | defaults to us-east-1
     key:
       secure: "HPVRrxMM0NCjH3S8VI1eG0Wl9diyiGZu9n8NRnGpyxXyjplAM+7p9ezGf6i3a+sdTashtjeLb5dpRruk4Hd5+Hn6V6QQahVrI82Q8bkcy5LQsnea2IBAHEMxQZMjFJhh4STUrX7SvRABHCYGWn1sCupauB00EhDjvfqWMCrEQF8="
     secret:
