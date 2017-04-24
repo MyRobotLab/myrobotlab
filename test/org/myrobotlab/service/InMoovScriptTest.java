@@ -38,7 +38,7 @@ public class InMoovScriptTest {
   @Test
   public void testInMoovMinimal() throws IOException {
     // The script should reference V_PORT_1 or V_PORT_2 
-    String inmoovScript = "test/resources/InMoov/Inmoov3.minimal.py";
+    String inmoovScript = "test/resources/InMoov/InMoov3.minimal.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
     //InputStream is = this.getClass().getResourceAsStream(inmoovScript);
