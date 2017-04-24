@@ -3,50 +3,11 @@
 # use https://github.com/travis-ci/artifacts#installation for artifacts guide
 # make the s3 directory public in aws give access to the artifacts
 
-env:
-  global:
-   - "ARTIFACTS_AWS_REGION=us-east-1"
-   - "ARTIFACTS_S3_BUCKET=mrl-bucket-02"
-   - secure: "ZaIH9adJohSii+qyK9JL5FTiGUxttkzlAnxJxmGlR+xABntLD40gGryRJSvr/YqDfMQ9/eTQWqOsyxgr2eGpWV1/IhGzSo7regsT+TVZMYe3GRp5jJR/TlJGpzSaxYdMHPAa6EksSP6kxoGQElSSwqc8wOc5Piqml4/v2S4F7lg="
-   - secure: "OKfavTeCuiDfSWp7KnJQ/RvnLkzNdxc0MvWG5osUi0bGDG5dhpYTxlgBJLr8jU/uVWBVzElms4Mrcl2Jku3K45ugG3M5M4QoMZWFbpPVTd13uZwsz4BTaMhgQbcrLMAh0QYsf4DywQu7dwBPmOszuOrsnXoI1ui/suuSDsF5sac="
-
 language: java
 sudo: false
 script: ant dist
 jdk:
 - oraclejdk8
-
-#before_script:
-#  - gem install mime-types -v 2.6.2
-#  - "gem install travis-artifacts"
-   
-#after_script:
-#  - "travis-artifacts upload --path build/report --path report"   
-
-# whitelist
-# branches:
-#   only:
-#     - develop
-
-# deploy might be necessary again to selectively publish build
-# deploy:
-#  provider: s3
-#  deployment_group: s3 group
-#  on:
-    # experiment to 'always' deploy so the results of junit can always be seen
-    # even if they fail
-    # condition: true
-#    all_branches: true
-#  access_key_id: AKIAJGL6AEN37LDO3N7A
-#  secret_access_key:
-#    secure: W8HJgOUEt/d+C+1zeD+Znum0Yso8LLZ9eV8rUrYH2MIVl5dCcH+WaGwhLompNOAUbWYhjcr8Rn/SLqvCEcVWe651R4pwHiD0KNfDUwp907Ic/efluCd/T6RjCG7pjbE5bdPIeZjyupMcZMHU4aW7YN6QE1UlVPhDFKQlU84iGsc=
-#  bucket: mrl-bucket-01
-#  skip_cleanup: true
-  # upload-dir: current
-  # travis will only copy 1 dir
-#  local_dir: dist
-  # local_dir: build/report
-#  acl: 'public_read'
 
 addons:
   artifacts:
@@ -62,5 +23,4 @@ addons:
     # converted to a ':'-delimited string.
     - $(ls build/report/*.xml | tr "\n" ":")
     # singular paths work fine, too
-    - $HOME/build/lib/myrobotlab.jar  
-    acl: public_read
+    - build/lib/myrobotlab.jar  
