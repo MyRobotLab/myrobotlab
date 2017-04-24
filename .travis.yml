@@ -49,9 +49,9 @@ addons:
   artifacts:
     bucket: mrl-bucket-02
     key:
-      secure: "ZaIH9adJohSii+qyK9JL5FTiGUxttkzlAnxJxmGlR+xABntLD40gGryRJSvr/YqDfMQ9/eTQWqOsyxgr2eGpWV1/IhGzSo7regsT+TVZMYe3GRp5jJR/TlJGpzSaxYdMHPAa6EksSP6kxoGQElSSwqc8wOc5Piqml4/v2S4F7lg="
+      secure: "HPVRrxMM0NCjH3S8VI1eG0Wl9diyiGZu9n8NRnGpyxXyjplAM+7p9ezGf6i3a+sdTashtjeLb5dpRruk4Hd5+Hn6V6QQahVrI82Q8bkcy5LQsnea2IBAHEMxQZMjFJhh4STUrX7SvRABHCYGWn1sCupauB00EhDjvfqWMCrEQF8="
     secret:
-      secure: "OKfavTeCuiDfSWp7KnJQ/RvnLkzNdxc0MvWG5osUi0bGDG5dhpYTxlgBJLr8jU/uVWBVzElms4Mrcl2Jku3K45ugG3M5M4QoMZWFbpPVTd13uZwsz4BTaMhgQbcrLMAh0QYsf4DywQu7dwBPmOszuOrsnXoI1ui/suuSDsF5sac="
+      secure: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="
     paths:
     # arbitrary shell commands are supported, but the output should be
     # converted to a ':'-delimited string.
