@@ -25,23 +25,23 @@ after_script:
 #   only:
 #     - develop
 
-deploy:
-  provider: s3
-  deployment_group: s3 group
-  on:
+# deploy:
+#  provider: s3
+#  deployment_group: s3 group
+#  on:
     # experiment to 'always' deploy so the results of junit can always be seen
     # even if they fail
     # condition: true
-    all_branches: true
-  access_key_id: AKIAJGL6AEN37LDO3N7A
-  secret_access_key:
-    secure: W8HJgOUEt/d+C+1zeD+Znum0Yso8LLZ9eV8rUrYH2MIVl5dCcH+WaGwhLompNOAUbWYhjcr8Rn/SLqvCEcVWe651R4pwHiD0KNfDUwp907Ic/efluCd/T6RjCG7pjbE5bdPIeZjyupMcZMHU4aW7YN6QE1UlVPhDFKQlU84iGsc=
-  bucket: mrl-bucket-01
-  skip_cleanup: true
+#    all_branches: true
+#  access_key_id: AKIAJGL6AEN37LDO3N7A
+#  secret_access_key:
+#    secure: W8HJgOUEt/d+C+1zeD+Znum0Yso8LLZ9eV8rUrYH2MIVl5dCcH+WaGwhLompNOAUbWYhjcr8Rn/SLqvCEcVWe651R4pwHiD0KNfDUwp907Ic/efluCd/T6RjCG7pjbE5bdPIeZjyupMcZMHU4aW7YN6QE1UlVPhDFKQlU84iGsc=
+#  bucket: mrl-bucket-01
+#  skip_cleanup: true
   # upload-dir: current
   # travis will only copy 1 dir
-  local_dir: dist
+#  local_dir: dist
   # local_dir: build/report
-  acl: 'public_read'
+#  acl: 'public_read'
 
   
