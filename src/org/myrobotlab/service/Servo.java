@@ -250,21 +250,17 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * Re-attach to servo's current pin. The pin must have be set previously.
-	 * Equivalent to Arduino's Servo.attach(currentPin)
-	 * 
-	 *  @deprecated use {@link #enable()} instead
+	 * Re-attach to servo current conroller and pin. The pin must have be set previously.
+	 * And the controller must have been set prior to calling this.
 	 * 
 	 */
-	@Deprecated
 	@Override
 	public void attach() {
-		warn("attach() is deprecated please use enable()");
 		attach(pin);
 	}
 
 	/**
-	 * Equivalent to Arduino's Servo.attach(). It energizes the servo sending
+	 * Equivalent to the Arduino IDE Servo.attach(). It energizes the servo sending
 	 * pulses to maintain its current position.
 	 */
 	public void enable() {
@@ -272,16 +268,10 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
-	 * pulses to maintain its current position.
-	 * 
-	 * @deprecated use {@link #enable(int pin)} instead
-	 * 
+	 * This method will attach to the currently set controller with the specified pin.
 	 */
-	@Deprecated
 	@Override
 	public void attach(int pin) {
-		warn("attach(int pin) is deprecated please use enable(int pin)");
 		lastActivityTime = System.currentTimeMillis();
 		controller.servoAttachPin(this, pin);
 		this.pin = pin;
@@ -956,6 +946,15 @@ public class Servo extends Service implements ServoControl {
 		}
 	}
 
+	 /**
+   * Set the controller for this servo but does not attach it.
+   * see also attach()
+   */
+  public void setController(ServoController controller) {
+    this.controller = controller;
+  }
+
+	
 	public static void main(String[] args) throws InterruptedException {
 		try {
 			LoggingFactory.init(Level.INFO);
