@@ -14,7 +14,8 @@ jdk:
 - oraclejdk8
 
 before_script:
-   - "gem install travis-artifacts"
+  - gem install mime-types -v 2.6.2
+  - "gem install travis-artifacts"
    
 after_script:
   - "travis-artifacts upload --path build/report --path report"   
