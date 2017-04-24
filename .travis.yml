@@ -1,5 +1,6 @@
 # use https://lint.travis-ci.org/ to check validity
 # use https://gist.github.com/tgrrtt/96b206c22b82f92ce563 to see examples
+# use https://github.com/travis-ci/artifacts#installation for artifacts guide
 env:
   global:
    - "ARTIFACTS_AWS_REGION=us-east-1"
@@ -13,12 +14,12 @@ script: ant dist
 jdk:
 - oraclejdk8
 
-before_script:
-  - gem install mime-types -v 2.6.2
-  - "gem install travis-artifacts"
+#before_script:
+#  - gem install mime-types -v 2.6.2
+#  - "gem install travis-artifacts"
    
-after_script:
-  - "travis-artifacts upload --path build/report --path report"   
+#after_script:
+#  - "travis-artifacts upload --path build/report --path report"   
 
 # whitelist
 # branches:
@@ -44,4 +45,16 @@ after_script:
   # local_dir: build/report
 #  acl: 'public_read'
 
-  
+addons:
+  artifacts:
+    bucket: mrl-bucket-02
+    key:
+      secure: SyaIXy6OKDaYiew+...5vgAldy3jkmKA=
+    secret:
+      secure: X19eaiiFZobD3uCk...X8cY+ohT8WkQ0=
+    paths:
+    # arbitrary shell commands are supported, but the output should be
+    # converted to a ':'-delimited string.
+    - $(ls build/report/*.xml | tr "\n" ":")
+    # singular paths work fine, too
+    - $HOME/build/lib/myrobotlab.jar  
