@@ -48,10 +48,10 @@ jdk:
 addons:
   artifacts:
     bucket: mrl-bucket-02
-    # key:
-    #  secure: SyaIXy6OKDaYiew+...5vgAldy3jkmKA=
-    # secret:
-    #  secure: X19eaiiFZobD3uCk...X8cY+ohT8WkQ0=
+    key:
+      secure: "ZaIH9adJohSii+qyK9JL5FTiGUxttkzlAnxJxmGlR+xABntLD40gGryRJSvr/YqDfMQ9/eTQWqOsyxgr2eGpWV1/IhGzSo7regsT+TVZMYe3GRp5jJR/TlJGpzSaxYdMHPAa6EksSP6kxoGQElSSwqc8wOc5Piqml4/v2S4F7lg="
+    secret:
+      secure: "OKfavTeCuiDfSWp7KnJQ/RvnLkzNdxc0MvWG5osUi0bGDG5dhpYTxlgBJLr8jU/uVWBVzElms4Mrcl2Jku3K45ugG3M5M4QoMZWFbpPVTd13uZwsz4BTaMhgQbcrLMAh0QYsf4DywQu7dwBPmOszuOrsnXoI1ui/suuSDsF5sac="
     paths:
     # arbitrary shell commands are supported, but the output should be
     # converted to a ':'-delimited string.
