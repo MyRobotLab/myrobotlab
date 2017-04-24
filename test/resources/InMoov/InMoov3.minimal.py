@@ -30,6 +30,7 @@ mouth.setVoice(voiceType)
 ##############
 # starting parts
 i01 = Runtime.createAndStart("i01", "InMoov")
+i01.setMute(True)
 i01.startEar()
 i01.startMouth()
 ##############
