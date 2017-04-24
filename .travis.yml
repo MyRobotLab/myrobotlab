@@ -1,6 +1,12 @@
 # use https://lint.travis-ci.org/ to check validity
 # use https://gist.github.com/tgrrtt/96b206c22b82f92ce563 to see examples
-# env:
+env:
+ global:
+   - "ARTIFACTS_AWS_REGION=us-east-1"
+   - "ARTIFACTS_S3_BUCKET=mrl-bucket-02"
+   - secure: "ZaIH9adJohSii+qyK9JL5FTiGUxttkzlAnxJxmGlR+xABntLD40gGryRJSvr/YqDfMQ9/eTQWqOsyxgr2eGpWV1/IhGzSo7regsT+TVZMYe3GRp5jJR/TlJGpzSaxYdMHPAa6EksSP6kxoGQElSSwqc8wOc5Piqml4/v2S4F7lg="
+   - secure: "OKfavTeCuiDfSWp7KnJQ/RvnLkzNdxc0MvWG5osUi0bGDG5dhpYTxlgBJLr8jU/uVWBVzElms4Mrcl2Jku3K45ugG3M5M4QoMZWFbpPVTd13uZwsz4BTaMhgQbcrLMAh0QYsf4DywQu7dwBPmOszuOrsnXoI1ui/suuSDsF5sac="
+
 language: java
 sudo: false
 script: ant dist
@@ -11,6 +17,12 @@ jdk:
 # branches:
 #   only:
 #     - develop
+
+ before_script:
+   - "gem install travis-artifacts"
+   
+after_script:
+  - "travis-artifacts upload --path build/report --path report"   
 
 deploy:
   provider: s3
