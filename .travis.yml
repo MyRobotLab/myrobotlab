@@ -1,6 +1,8 @@
 # use https://lint.travis-ci.org/ to check validity
 # use https://gist.github.com/tgrrtt/96b206c22b82f92ce563 to see examples
 # use https://github.com/travis-ci/artifacts#installation for artifacts guide
+# make the s3 directory public in aws give access to the artifacts
+
 env:
   global:
    - "ARTIFACTS_AWS_REGION=us-east-1"
