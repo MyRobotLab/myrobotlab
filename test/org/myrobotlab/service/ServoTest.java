@@ -3,12 +3,9 @@ package org.myrobotlab.service;
 import static org.junit.Assert.*;
 
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.test.TestUtils;
-
-import junit.framework.Assert;
 
 public class ServoTest {
 
