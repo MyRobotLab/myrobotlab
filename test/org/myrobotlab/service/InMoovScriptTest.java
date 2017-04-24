@@ -2,7 +2,9 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -23,7 +25,7 @@ public class InMoovScriptTest {
   @Before
   public void setup() throws Exception {
     // setup the test environment , and create an arduino with a virtual backend for it.
-    TestUtils.initEnvirionment();
+//    TestUtils.initEnvirionment();
     // initialize 2 serial ports (virtual arduino)
     VirtualArduino va1 = (VirtualArduino)Runtime.createAndStart("va1", "VirtualArduino");
     VirtualArduino va2 = (VirtualArduino)Runtime.createAndStart("va2", "VirtualArduino");
@@ -37,7 +39,11 @@ public class InMoovScriptTest {
   public void testInMoovMinimal() throws IOException {
     // The script should reference V_PORT_1 or V_PORT_2 
     String inmoovScript = "test/resources/InMoov/Inmoov3.minimal.py";
+    File f = new File(inmoovScript);
+    System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
+    //InputStream is = this.getClass().getResourceAsStream(inmoovScript);
     String script = FileIO.toString(inmoovScript);
+    //String script = new String(FileIO.toByteArray(is));
     Python python = (Python)Runtime.createAndStart("python", "Python");
     python.createPythonInterpreter();
     // python.execAndWait(script);

@@ -900,7 +900,7 @@
 		               outputtoformatters="true" -->
 		<!-- temporarily disabling jacoco -->
 		<jacoco:coverage destfile="${result.jacoco.file}">
-		    <junit printsummary="on" fork="true" haltonfailure="true" showoutput="false">
+		    <junit printsummary="on" fork="true" haltonfailure="true" showoutput="true">
 			<!--
 			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
 			<env key="LD_LIBRARY_PATH" path="${dist}/libraries/native"/>			
