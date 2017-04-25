@@ -53,7 +53,8 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   private Queue<Point> pointQueue = new ConcurrentLinkedQueue<Point>();
   private transient Node point;
   private transient ArrayList<Node> collisionItems = new ArrayList<Node>();
-
+  public String BackGroundColor;
+  public ColorRGBA BackGroundColorRgba=ColorRGBA.Gray;
 
    
   public static void main(String[] args) {
@@ -98,7 +99,55 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     inputManager.addListener(analogListener, new String[]{"Left","Right","Up","Down", "ZoomIn","ZoomOut"});
 
     
-    viewPort.setBackgroundColor(ColorRGBA.Gray);
+    switch (BackGroundColor) {
+    case "Gray":
+    	BackGroundColorRgba=ColorRGBA.Gray;
+      break;
+    case "Black":
+    	BackGroundColorRgba=ColorRGBA.Black ;
+      break;       
+    case "White":
+    	BackGroundColorRgba=ColorRGBA.White ;
+      break;       
+    case "DarkGray":
+    	BackGroundColorRgba=ColorRGBA.DarkGray ;
+      break;       
+    case "LightGray":
+    	BackGroundColorRgba=ColorRGBA.LightGray ;
+      break;       
+    case "Red":
+    	BackGroundColorRgba=ColorRGBA.Red ;
+      break;       
+    case "Green":
+    	BackGroundColorRgba=ColorRGBA.Green ;
+      break;       
+    case "Blue":
+    	BackGroundColorRgba=ColorRGBA.Blue ;
+      break;       
+    case "Magenta":
+    	BackGroundColorRgba=ColorRGBA.Magenta  ;
+      break;   
+    case "Cyan":
+    	BackGroundColorRgba=ColorRGBA.Cyan  ;
+      break;  
+    case "Orange":
+    	BackGroundColorRgba=ColorRGBA.Orange  ;
+      break;  
+    case "Yellow":
+    	BackGroundColorRgba=ColorRGBA.Yellow ;
+      break;  
+    case "Brown":
+    	BackGroundColorRgba=ColorRGBA.Brown  ;
+      break; 
+    case "Pink":
+    	BackGroundColorRgba=ColorRGBA.Yellow ;
+      break; 
+    default:
+    	BackGroundColorRgba=ColorRGBA.Gray;           
+    }
+
+    
+    viewPort.setBackgroundColor(BackGroundColorRgba);
 
     DirectionalLight sun = new DirectionalLight();
     sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));

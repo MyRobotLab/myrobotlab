@@ -250,21 +250,17 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * Re-attach to servo's current pin. The pin must have be set previously.
-	 * Equivalent to Arduino's Servo.attach(currentPin)
-	 * 
-	 *  @deprecated use {@link #enable()} instead
+	 * Re-attach to servo current conroller and pin. The pin must have be set previously.
+	 * And the controller must have been set prior to calling this.
 	 * 
 	 */
-	@Deprecated
 	@Override
 	public void attach() {
-		warn("attach() is deprecated please use enable()");
 		attach(pin);
 	}
 
 	/**
-	 * Equivalent to Arduino's Servo.attach(). It energizes the servo sending
+	 * Equivalent to the Arduino IDE Servo.attach(). It energizes the servo sending
 	 * pulses to maintain its current position.
 	 */
 	public void enable() {
@@ -272,16 +268,10 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
-	 * pulses to maintain its current position.
-	 * 
-	 * @deprecated use {@link #enable(int pin)} instead
-	 * 
+	 * This method will attach to the currently set controller with the specified pin.
 	 */
-	@Deprecated
 	@Override
 	public void attach(int pin) {
-		warn("attach(int pin) is deprecated please use enable(int pin)");
 		lastActivityTime = System.currentTimeMillis();
 		controller.servoAttachPin(this, pin);
 		this.pin = pin;
@@ -304,17 +294,16 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * Equivalent to Arduino's Servo.detach() it disables the pwm to the servo IT DOES
-	 * NOT DETACH THE SERVO CONTROLLER !!!
+	 * This method will disconnect the servo from it's controller.
+	 * see also enable() / disable()
 	 */
-	@Deprecated
 	@Override
-	public void detach() {		
+	public void detach() {
 		warn("detach() is deprecated please use disable()");
 		isPinAttached = false;
 		if (controller != null) {
 			controller.servoDetachPin(this);
-			// detach(controller);
+			detach(controller);
 		}
 		broadcastState();
 		// TODO: this doesn't seem to be consistent depending on how you invoke
@@ -323,8 +312,8 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * Equivalent to Arduino's Servo.detach() it de-energizes the servo IT DOES
-	 * NOT DETACH THE SERVO CONTROLLER !!!
+	 * This method will leave the servo connected to the controller, however it will stop
+	 * sending pwm messages to the servo.
 	 */
 	public void disable() {
 		isPinAttached = false;
@@ -411,6 +400,9 @@ public class Servo extends Service implements ServoControl {
 			enable();
 		}
 		if (pos == lastPos) {
+			if (autoDisable && isPinAttached()) {
+				disable();
+			}
 			return;
 		}
 		lastPos = targetPos;
@@ -439,7 +431,6 @@ public class Servo extends Service implements ServoControl {
 	 */
 
 	public Double publishServoEvent(Double position) {
-
 		return position;
 	}
 
@@ -657,13 +648,17 @@ public class Servo extends Service implements ServoControl {
 	// be assigned later...
 	public void attach(ServoController controller) throws Exception {
 		if (isAttached(controller)) {
-			log.info("{} servo attached to controller {}", getName(), this.controller.getName());
+			log.info("{} servo is already attached to controller {}", getName(), this.controller.getName());
 			return;
-		} else if (this.controller != null && this.controller != controller) {
-			log.warn("already attached to controller %s - please detach before attaching to controller %s",
-					this.controller.getName(), controller.getName());
-			return;
+		} else if (this.controller != controller) {
+		  //we're switching controllers
+		  detach();
 		}
+
+//			log.warn("already attached to controller {} - please detach before attaching to controller {}",
+//					this.controller.getName(), controller.getName());
+//			return;
+//		}
 
 		targetOutput = getTargetOutput();// mapper.calcOutput(targetPos);
 
@@ -954,6 +949,15 @@ public class Servo extends Service implements ServoControl {
 		}
 	}
 
+	 /**
+   * Set the controller for this servo but does not attach it.
+   * see also attach()
+   */
+  public void setController(ServoController controller) {
+    this.controller = controller;
+  }
+
+	
 	public static void main(String[] args) throws InterruptedException {
 		try {
 			LoggingFactory.init(Level.INFO);
