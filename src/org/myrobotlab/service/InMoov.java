@@ -1807,6 +1807,8 @@ public class InMoov extends Service {
         torso.midStom.addIKServoEventListener(this);
         vinMoovApp.addServo("ttorso", torso.topStom);
         torso.topStom.addIKServoEventListener(this);
+        torso.midStom.moveTo(torso.midStom.targetPos+0.2);
+        torso.topStom.moveTo(torso.topStom.targetPos+0.2);
       }
       if (rightArm != null) {
         vinMoovApp.addServo("Romoplate", rightArm.omoplate);
@@ -1817,6 +1819,10 @@ public class InMoov extends Service {
         rightArm.rotate.addIKServoEventListener(this);
         vinMoovApp.addServo("Rbicep", rightArm.bicep);
         rightArm.bicep.addIKServoEventListener(this);
+        rightArm.omoplate.moveTo(rightArm.omoplate.targetPos+0.2);
+        rightArm.shoulder.moveTo(rightArm.shoulder.targetPos+0.2);
+        rightArm.rotate.moveTo(rightArm.rotate.targetPos+0.2);
+        rightArm.bicep.moveTo(rightArm.bicep.targetPos+0.2);
       }
       if (leftArm != null) {
         vinMoovApp.addServo("omoplate", leftArm.omoplate);
@@ -1827,14 +1833,20 @@ public class InMoov extends Service {
         leftArm.rotate.addIKServoEventListener(this);
         vinMoovApp.addServo("bicep", leftArm.bicep);
         leftArm.bicep.addIKServoEventListener(this);
+        leftArm.omoplate.moveTo(leftArm.omoplate.targetPos+0.2);
+        leftArm.shoulder.moveTo(leftArm.shoulder.targetPos+0.2);
+        leftArm.rotate.moveTo(leftArm.rotate.targetPos+0.2);
+        leftArm.bicep.moveTo(leftArm.bicep.targetPos+0.2);
       }
       if (rightHand != null) {
         vinMoovApp.addServo("RWrist", rightHand.wrist);
         rightHand.wrist.addIKServoEventListener(this);
+        rightHand.wrist.moveTo(rightHand.wrist.targetPos+0.2);
       }
       if (leftHand != null) {
         vinMoovApp.addServo("LWrist", leftHand.wrist);
         leftHand.wrist.addIKServoEventListener(this);
+        leftHand.wrist.moveTo(leftHand.wrist.targetPos+0.2);
       }
       if (head != null) {
         vinMoovApp.addServo("neck", head.neck);
@@ -1845,6 +1857,9 @@ public class InMoov extends Service {
         head.jaw.addIKServoEventListener(this);
         vinMoovApp.addServo("rollNeck", head.rollNeck);
         head.rollNeck.addIKServoEventListener(this);
+        head.neck.moveTo(head.neck.targetPos+0.2);
+        head.rothead.moveTo(head.rothead.targetPos+0.2);
+        head.rollNeck.moveTo(head.rollNeck.targetPos+0.2);
       }
     }
     else {
