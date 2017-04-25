@@ -1785,12 +1785,24 @@ public class InMoov extends Service {
 
     return meta;
   }
+
+  //vinmoov cosmetics
+  public Boolean VinmoovFullScreen=false;
+
+  public String VinmoovBackGroundColor="Grey";
+  public int VinmoovWidth=800;
+  public int VinmoovHeight=600;
+  
+
+
   
   public InMoov3DApp startVinMoov() throws InterruptedException{
     if (vinMoovApp == null) {
       vinMoovApp = new InMoov3DApp();
+      vinMoovApp.BackGroundColor=VinmoovBackGroundColor;
       AppSettings settings = new AppSettings(true);
-      settings.setResolution(800,600);
+      settings.setResolution(VinmoovWidth,VinmoovHeight);
+      settings.setFullscreen(VinmoovFullScreen);
       //settings.setEmulateMouse(false);
       // settings.setUseJoysticks(false);
       settings.setUseInput(true);
