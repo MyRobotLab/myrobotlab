@@ -47,7 +47,7 @@ public class MessageTest {
     log.warn(String.format("left balls %d ", catcher.msgs.size()));
   }
 
-  @Test
+  // @Test
   public void broadcastMessage() throws Exception {
     log.info("broadcastMessage");
 
