@@ -154,6 +154,11 @@
         	<classpath path="build-lib/jacocoant.jar"/>
 	</taskdef>
 
+	<path id="myrobotlab.jar.classpath">
+		<pathelement location="${build}/lib/myrobotlab.jar"/>
+		<pathelement location="${repo}/org.junit/4.11/hamcrest-core-1.3.jar"/>
+		<pathelement location="${repo}/org.junit/4.11/junit-4.11.jar"/>
+	</path>
 
 	<!-- FIXME - fixme with ivy -->
 	<path id="compile.classpath">
@@ -725,7 +730,7 @@
 	</target>	
 	
 	<!-- compile the unit tests prior to running them. -->
-	<target name="compiletests" depends="compile" description="compile the test source ">
+	<target name="compiletests" depends="jar" description="test myrobotlab.jar">
 		<echo>compile tests start</echo>
 		<javac srcdir="test" destdir="build/test" debug="true" includeantruntime="false" encoding="UTF-8">
 			<classpath>
@@ -892,7 +897,7 @@
 
 	<!-- TODO - upload/publish javadoc -->
 
-	<target name="test" depends="compile, compiletests" description="Run the unit tests">
+	<target name="test" depends="jar, compiletests" description="Run the unit tests">
 		<!-- junit options description="Main  Integration/Unit Tests"
 		               showoutput="true"
 		               printsummary="true"
@@ -909,9 +914,10 @@
 			<sysproperty key="java.awt.headless" value="true" />
 			<!-- any junit tests would fail running on jenkins with gui components -->
 			<classpath>
-				<pathelement location="${build}/classes" />
+				<!-- pathelement location="${build}/classes" /-->
 				<pathelement location="${build}/test" />
 				<path refid="test.classpath" />
+				<path refid="myrobotlab.jar.classpath" />
 				<path refid="compile.classpath" />
 			</classpath>
 			<formatter type="xml" />
