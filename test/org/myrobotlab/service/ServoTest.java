@@ -3,54 +3,88 @@ package org.myrobotlab.service;
 import static org.junit.Assert.*;
 
 import java.util.List;
-
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.test.TestUtils;
-import org.python.antlr.ast.Assert;
-import org.slf4j.Logger;
 
-// TODO: this test takes too long to run!
-// @Ignore
 public class ServoTest {
 
   private static final String V_PORT_1 = "test_port_1";
-	public Arduino ard;
+  private static final String V_PORT_2 = "test_port_2";
+
+  public Arduino ard1;
+  public Arduino ard2;
   
 	@Before
 	public void setup() throws Exception {
 	  // setup the test environment , and create an arduino with a virtual backend for it.
     TestUtils.initEnvirionment();
+    // initialize 2 serial ports (virtual arduino)
     VirtualArduino va1 = (VirtualArduino)Runtime.createAndStart("va1", "VirtualArduino");
+    VirtualArduino va2 = (VirtualArduino)Runtime.createAndStart("va2", "VirtualArduino");
     va1.connect(V_PORT_1);
-    ard = (Arduino) Runtime.createAndStart("ard", "Arduino");
-    ard.connect(V_PORT_1);
+    va2.connect(V_PORT_2);
+    // initialize an arduino
+    ard1 = (Arduino) Runtime.createAndStart("ard1", "Arduino");
+    ard1.connect(V_PORT_1);
+    ard2 = (Arduino) Runtime.createAndStart("ard2", "Arduino");
+    ard2.connect(V_PORT_2);	
 	}
 
 	
 	@Test
-	public void testServo() throws Exception {
-	  
+	public void testServo() throws Exception {	  
 	  // this basic test will create a servo and attach it to an arduino.
-	  // then detach
-	  
+	  // then detach	  
 	  Servo s = (Servo)Runtime.createAndStart("ser1", "Servo");
 	  int pin = 1;
+	  // the pin should always be set to something.
 	  s.setPin(pin);
-    s.attach(ard);
+	  // maybe remove this interface 
+    s.attach(ard1);
+    s.disable();
+    
+    s.attach(ard2, pin);
+    
+    // This is broken 
+    // assertTrue(s.controller  == ard2);
+    s.rest();
+    assertEquals(s.getRest(), 90.0, 0.0);
+    
+    s.setRest(12.2);
+    assertEquals(s.getRest(), 12.2, 0.0);
+
+    s.rest();
+    
+    // depricated. i feel like if you do 
+    s.attach();
+    s.enable();
+    s.moveTo(90);
+    // test moving to the same position
+    s.moveTo(90);
+    // new position
+    s.moveTo(91.0);
+    s.disable();
+    
+    assertFalse(s.isEnabled());    
+    s.enable();
+    assertTrue(s.isEnabled());
+    
+    // detach the servo.
+    //ard2.detach(s);
+    s.detach(ard2);
+	  assertFalse(s.isAttached());	  
+
+	  //
+	  s.attach(ard1, 10, 1);
+	  assertTrue(s.isEnabled());
+	  s.disable();
+	  assertFalse(s.isEnabled());
 	  
-	  assertTrue(s.isAttached());	  
-//	  assertTrue(s.getPos() == 90);
-//    s.moveTo(0);
-//	  assertTrue(s.getPos() == 0);
-//	  assertTrue(s.getPin() ==  pin);
+	  s.detach(ard1);
+	  assertFalse(s.isAttached());
+	  
+	  
 	  
 	}
 

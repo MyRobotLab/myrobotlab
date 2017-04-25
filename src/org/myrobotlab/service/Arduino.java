@@ -964,12 +964,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   @Override
   public boolean isConnected() {
-    // include that we must have gotten a valid MrlComm version number.
-    if (serial != null && serial.isConnected() && boardInfo.getVersion() != null) {
-      return true;
-    }
-    return false;
-  }
+	    // include that we must have gotten a valid MrlComm version number.
+	    if (serial != null && serial.isConnected() && boardInfo.getVersion() != null) {
+	      return true;
+	    }
+	    //just to force serial arduino conected if it is a serialX com
+	    //usefull to enable pin on the remote arduino
+	    if ((controllerAttachAs == MRL_IO_SERIAL_1 || controllerAttachAs == MRL_IO_SERIAL_2 || controllerAttachAs == MRL_IO_SERIAL_3) && boardInfo.getVersion() == MRLCOMM_VERSION)
+	    {
+	    	return true;	
+	    }
+	    return false;
+	  }
 
   // FIXME put recording in generated message structure !!!
   @Override
