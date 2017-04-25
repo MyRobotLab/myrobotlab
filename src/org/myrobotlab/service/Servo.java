@@ -396,7 +396,7 @@ public class Servo extends Service implements ServoControl {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
-		if (autoEnable && !isEnabled() && pos != lastPos) {
+		if (autoEnable && !isEnabled()) {
 			enable();
 		}
 		if (pos == lastPos) {
