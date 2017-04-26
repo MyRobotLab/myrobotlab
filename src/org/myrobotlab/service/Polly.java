@@ -40,6 +40,9 @@ import com.amazonaws.services.polly.model.OutputFormat;
 import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
 import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
 import com.amazonaws.services.polly.model.Voice;
+// hi grog if I compile the jar no problem, but from published jar it ask me joda
+// to test..
+import org.joda.time.format.DateTimeFormat;
 
 /**
  * Amazon's cloud speech service

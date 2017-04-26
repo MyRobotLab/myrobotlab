@@ -1785,29 +1785,51 @@ public class InMoov extends Service {
 
     return meta;
   }
-
-  //vinmoov cosmetics
+  
+ 
+  //vinmoov cosmetics and optional vinmoov monitor idea ( poc i know nothing about jme... )
+  //just want to use jme as main screen and show some informations
+  //like batterie / errors / onreconized text etc ...
+  //i01.VinmoovMonitor=1 before to start vinmoov
+  
+  public Boolean VinmoovMonitor=false;
   public Boolean VinmoovFullScreen=false;
-
   public String VinmoovBackGroundColor="Grey";
   public int VinmoovWidth=800;
   public int VinmoovHeight=600;
+  private Boolean debugVinmoov=true;  
+  //show some infos to jme screen 
+  public void  setLeftArduinoConnected(boolean param)
+  {
+	  vinMoovApp.setLeftArduinoConnected(param);  	  
+  }
+  public void setRightArduinoConnected(boolean param)
+  {
+	  vinMoovApp.setRightArduinoConnected(param);  	  
+  }
   
-
+  //end vinmoov cosmetics and optional vinmoov monitor
 
   
   public InMoov3DApp startVinMoov() throws InterruptedException{
     if (vinMoovApp == null) {
       vinMoovApp = new InMoov3DApp();
+      if (VinmoovMonitor) {
+    	   //vinmoovFullScreen=true 
+    	   VinmoovBackGroundColor="Black";
+    	   debugVinmoov=false;
+    	   vinMoovApp.VinmoovMonitorActivated=true;
+    	  }
       vinMoovApp.BackGroundColor=VinmoovBackGroundColor;
       AppSettings settings = new AppSettings(true);
       settings.setResolution(VinmoovWidth,VinmoovHeight);
       settings.setFullscreen(VinmoovFullScreen);
       //settings.setEmulateMouse(false);
-      // settings.setUseJoysticks(false);
+      //settings.setUseJoysticks(false);
       settings.setUseInput(true);
       vinMoovApp.setSettings(settings);
       vinMoovApp.setShowSettings(false);
+      vinMoovApp.setDisplayStatView(debugVinmoov);
       vinMoovApp.setPauseOnLostFocus(false);
       vinMoovApp.setService(this);
       vinMoovApp.start();
