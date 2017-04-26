@@ -35,11 +35,13 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.system.AppSettings;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapText;
 
 
 /**
  * @author Christian
- *
+ * version 1.0.1
  */
 public class InMoov3DApp extends SimpleApplication implements IntegratedMovementInterface{
   private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
@@ -48,6 +50,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   private HashMap<String, Mapper> maps = new HashMap<String, Mapper>();
   private transient Service service = null;
   private transient Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
+  private transient Queue<BitmapText> bitmapTextQueue = new ConcurrentLinkedQueue<BitmapText>();
   private HashMap<String, Geometry> shapes = new HashMap<String, Geometry>();
   private boolean updateCollisionItem;
   private Queue<Point> pointQueue = new ConcurrentLinkedQueue<Point>();
@@ -55,8 +58,26 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   private transient ArrayList<Node> collisionItems = new ArrayList<Node>();
   public String BackGroundColor;
   public ColorRGBA BackGroundColorRgba=ColorRGBA.Gray;
+    
+  //poc monitor update text fields
+  public boolean VinmoovMonitorActivated=false;
+  public boolean leftArduinoConnected=false;
+  public boolean rightArduinoConnected=false;
+  protected  BitmapText leftArduino;
+  protected  BitmapText rightArduino;
 
-   
+  public void setLeftArduinoConnected(boolean param)
+  {
+	  leftArduinoConnected=param;
+	  bitmapTextQueue.add(leftArduino);
+  }
+  public void setRightArduinoConnected(boolean param)
+  {
+	  rightArduinoConnected=param;
+	  bitmapTextQueue.add(rightArduino);
+  }
+  //end monitor
+     
   public static void main(String[] args) {
     InMoov3DApp app = new InMoov3DApp();
     AppSettings settings = new AppSettings(true);
@@ -97,7 +118,9 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     inputManager.addMapping("ZoomIn",  new KeyTrigger(KeyInput.KEY_E));
     inputManager.addMapping("ZoomOut",  new KeyTrigger(KeyInput.KEY_Q));
     inputManager.addListener(analogListener, new String[]{"Left","Right","Up","Down", "ZoomIn","ZoomOut"});
-
+    //no worky
+    inputManager.addMapping("FullScreen",  new KeyTrigger(KeyInput.KEY_F));
+    inputManager.addListener(analogListener, "FullScreen");
     
     switch (BackGroundColor) {
     case "Gray":
@@ -445,7 +468,22 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     node.rotate(angle.x, angle.y, angle.z);
     nodes.put("jaw", node);
     maps.put("jaw", new Mapper(0,180,60,90));
-
+    
+    //poc monitor txt declaration
+    BitmapFont font = assetManager.loadFont("Interface/Fonts/Default.fnt");
+    leftArduino = new BitmapText(font, false);
+    leftArduino.setLocalTranslation(0.0F, 100F, 0.0F);
+    leftArduino.setText("");
+    rightArduino = new BitmapText(font, false);
+    rightArduino.setLocalTranslation(0.0F, 140F, 0.0F);
+    rightArduino.setText("");
+    
+    guiNode.attachChild(leftArduino);
+    guiNode.attachChild(rightArduino);
+    bitmapTextQueue.add(leftArduino);
+    bitmapTextQueue.add(rightArduino);
+    //end monitor
+ 
     Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
     mat.setColor("Color", ColorRGBA.Green);
     Cylinder c= new Cylinder(4,10,5,10,true,false);
@@ -459,7 +497,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       synchronized(service) {
         service.notifyAll();
       }
-    }
+    };
     
 }
 
@@ -488,6 +526,28 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       }
       collisionItems.clear();
     }
+    
+  //  update text fields Queue
+    if (VinmoovMonitorActivated) {
+    while (bitmapTextQueue.size() > 0) {
+    	new java.util.Date();
+    	
+    	 Node  bitmap = bitmapTextQueue.remove();
+    	guiNode.attachChild(bitmap);
+    	String leftIndicator="NOK";
+    	String rightIndicator="NOK";
+      if (leftArduinoConnected){leftIndicator="OK";}
+      if (rightArduinoConnected){rightIndicator="OK";}
+    rootNode.updateGeometricState();
+    leftArduino.setText("Left Arduino : "+leftIndicator);
+    rightArduino.setText("Right Arduino : "+rightIndicator);
+    bitmap.updateGeometricState();
+    
+    }
+    }
+    //end
+    
+    
     while (nodeQueue.size() > 0) {
       Node node = nodeQueue.remove();
       Node hookNode = nodes.get(node.getUserData("hookTo"));
@@ -502,7 +562,12 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       if (node.getUserData("collisionItem") != null) {
         collisionItems.add(node);
       }
+      if (node.getUserData("leftArduinoConnected") != null) {
+    	  collisionItems.add(node);
+        }
+      
     }
+    
     while (eventQueue.size() > 0) {
       IKData event = eventQueue.remove();
       if (servoToNode.containsKey(event.name)){
@@ -522,6 +587,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       Point p = pointQueue.remove();
       point.setLocalTranslation((float)p.getX(), (float)p.getZ(), (float)p.getY());
     }
+
   }
   
   public void addServo(String partName, Servo servo) {
@@ -578,6 +644,16 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       else if (name.equals("Right")){
         rootNode.move(keyPressed*100, 0, 0);
       }
+      //seem no worky
+      else if (name.equals("FullScreen")){
+    	  if (settings.isFullscreen()){
+    	  settings.setFullscreen(false);
+    	  }
+    	  else
+    	  {
+    	  settings.setFullscreen(true);	  
+    	  }
+        }
     }
   };
 
