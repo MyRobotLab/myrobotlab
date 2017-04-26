@@ -562,10 +562,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       if (node.getUserData("collisionItem") != null) {
         collisionItems.add(node);
       }
-      if (node.getUserData("leftArduinoConnected") != null) {
-    	  collisionItems.add(node);
-        }
-      
+            
     }
     
     while (eventQueue.size() > 0) {
