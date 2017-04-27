@@ -81,17 +81,20 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     
     return cleantext;
   }
-  
+
   @Override
   public void listeningEvent() {
     // TODO Auto-generated method stub
-
+	  //log.warn("micIsListening");
+	  listening=false;
+	  return;
   }
 
   @Override
   public void pauseListening() {
     // TODO Auto-generated method stub
-
+	  //log.warn("micNotListening");
+	  listening=true;
   }
 
   @Override
@@ -150,6 +153,9 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   @Override
   public void addMouth(SpeechSynthesis mouth) {
     mouth.addEar(this);
+    subscribe(mouth.getName(),"publishStartSpeaking");
+    subscribe(mouth.getName(),"publishEndSpeaking");
+      
     // TODO : we can implement the "did you say x?"
     // logic like sphinx if we want here.
     // when we add the ear, we need to listen for request confirmation
@@ -160,14 +166,19 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public void onStartSpeaking(String utterance) {
     // at this point we should subscribe to this in the webgui
     // so we can pause listening.
+	  stopListening();
   }
 
   @Override
   public void onEndSpeaking(String utterance) {
     // need to subscribe to this in the webgui
     // so we can resume listening.
+	  startListening(); 
   }
+  
 
+
+  
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 

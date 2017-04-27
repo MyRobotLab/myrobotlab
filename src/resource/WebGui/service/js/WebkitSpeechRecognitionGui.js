@@ -358,6 +358,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         $scope.status = 'Speak now.';
         $scope.listenbuttonimg = 'service/img/mic-animate.gif';
         $scope.$apply();
+        mrl.sendTo($scope.service.name, "listeningEvent");
     }
     ;
     
@@ -365,9 +366,11 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     $scope.recognition.onerror = function(event) {
         if (event.error == 'no-speech') {
             $scope.listenbuttonimg = 'service/img/mic.png';
+            // force listen ? why not
             $scope.status = 'No speech was detected. You may need to adjust your <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone settings</a>.';
             ignore_onend = true;
             $scope.$apply();
+            mrl.sendTo($scope.service.name, "startListening");
         }
         ;
         if (event.error == 'audio-capture') {
@@ -394,6 +397,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     
     // called when $scope.recognition finishes.
     $scope.recognition.onend = function() {
+        mrl.sendTo($scope.service.name, "pauseListening");
         $scope.recognizing = false;
         $scope.$apply();
         if (ignore_onend) {
