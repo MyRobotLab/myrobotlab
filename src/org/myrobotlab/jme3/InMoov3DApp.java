@@ -53,6 +53,8 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   private transient Service service = null;
   private transient Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
   private transient Queue<BitmapText> bitmapTextQueue = new ConcurrentLinkedQueue<BitmapText>();
+  private transient Queue<Picture> pictureQueue = new ConcurrentLinkedQueue<Picture>();
+  
   private HashMap<String, Geometry> shapes = new HashMap<String, Geometry>();
   private boolean updateCollisionItem;
   private Queue<Point> pointQueue = new ConcurrentLinkedQueue<Point>();
@@ -67,6 +69,9 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   public boolean rightArduinoConnected=false;
   protected  BitmapText leftArduino;
   protected  BitmapText rightArduino;
+  protected Picture microOn;
+  protected Picture microOff;
+
 
   public void setLeftArduinoConnected(boolean param)
   {
@@ -77,6 +82,18 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   {
 	  rightArduinoConnected=param;
 	  bitmapTextQueue.add(rightArduino);
+  }
+  public void setMicro(boolean param)
+  {
+	  if (param)
+	  {
+		  pictureQueue.add(microOn);
+	  }
+	  else
+	  {
+		  pictureQueue.add(microOff);  
+	  }
+
   }
   //end monitor
      
@@ -485,14 +502,21 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     Texture2D texture = (Texture2D) assetManager.loadTexture("/resource/microOn.png");
     float width = texture.getImage().getWidth();
     float height = texture.getImage().getHeight();
-    // Picture
-    Picture picture = new Picture("/resource/microOn.png");
+    Picture microOn = new Picture("/resource/microOn.png");
     final boolean useAlpha = true;
-    picture.setTexture(assetManager, texture, useAlpha);
-    picture.setWidth(width);
-    picture.setHeight(height);
-    picture.setLocalTranslation(0.0F, settings.getHeight()-200, 0.0F);
-    //guiNode.attachChild(picture);
+    microOn.setTexture(assetManager, texture, useAlpha);
+    microOn.setWidth(width);
+    microOn.setHeight(height);
+    microOn.setLocalTranslation(0.0F, settings.getHeight()-200, 0.0F);
+
+    
+    Texture2D textureOff = (Texture2D) assetManager.loadTexture("/resource/microOff.png");
+    Picture microOff = new Picture("/resource/microOn.png");
+    microOff.setTexture(assetManager, textureOff, useAlpha);
+    microOff.setWidth(width);
+    microOff.setHeight(height);
+    microOff.setLocalTranslation(0.0F, settings.getHeight()-200, 0.0F);
+    //guiNode.attachChild(microOff);
     
 
     
@@ -558,6 +582,14 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     }
     }
     //end
+    
+    while (pictureQueue.size() > 0) {
+   	Picture picture = pictureQueue.remove();
+   	rootNode.updateGeometricState();
+    guiNode.attachChild(picture);
+    picture.updateGeometricState();
+   
+   }
     
     
     while (nodeQueue.size() > 0) {
