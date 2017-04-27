@@ -35,6 +35,8 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.system.AppSettings;
+import com.jme3.texture.Texture2D;
+import com.jme3.ui.Picture;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 
@@ -469,7 +471,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     nodes.put("jaw", node);
     maps.put("jaw", new Mapper(0,180,60,90));
     
-    //poc monitor txt declaration
+    //poc monitor declaration
     BitmapFont font = assetManager.loadFont("Interface/Fonts/Default.fnt");
     leftArduino = new BitmapText(font, false);
     leftArduino.setLocalTranslation(0.0F, 100F, 0.0F);
@@ -478,10 +480,22 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     rightArduino.setLocalTranslation(0.0F, 140F, 0.0F);
     rightArduino.setText("");
     
-    guiNode.attachChild(leftArduino);
-    guiNode.attachChild(rightArduino);
-    bitmapTextQueue.add(leftArduino);
-    bitmapTextQueue.add(rightArduino);
+
+    
+    Texture2D texture = (Texture2D) assetManager.loadTexture("/resource/microOn.png");
+    float width = texture.getImage().getWidth();
+    float height = texture.getImage().getHeight();
+    // Picture
+    Picture picture = new Picture("/resource/microOn.png");
+    final boolean useAlpha = true;
+    picture.setTexture(assetManager, texture, useAlpha);
+    picture.setWidth(width);
+    picture.setHeight(height);
+    picture.setLocalTranslation(0.0F, settings.getHeight()-200, 0.0F);
+    //guiNode.attachChild(picture);
+    
+
+    
     //end monitor
  
     Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
@@ -530,8 +544,6 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   //  update text fields Queue
     if (VinmoovMonitorActivated) {
     while (bitmapTextQueue.size() > 0) {
-    	new java.util.Date();
-    	
     	 Node  bitmap = bitmapTextQueue.remove();
     	guiNode.attachChild(bitmap);
     	String leftIndicator="NOK";
