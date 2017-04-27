@@ -46,16 +46,12 @@ public class InMoovEyelids extends Service {
     
     arduino = (Arduino) createPeer("arduino");
 
-    eyelidleft.setMinMax(60, 120);
-    eyelidright.setMinMax(0, 180);
-    //Calamity: why default setting are not the same for right/left?
-  
+
     eyelidleft.setRest(90);
     eyelidright.setRest(90);
  
-    setVelocity(5.0,5.0);
-    //Calamity: velocity value seem very low for that kind of action and in the rest() method they are set to 50.0
-  
+    setVelocity(50.0,50.0);
+
   }
 
   /**
@@ -88,6 +84,11 @@ public class InMoovEyelids extends Service {
   }
 
   public boolean connect(String port) throws Exception {
+	  return connect(port,22,24);
+	  
+  }
+  
+  public boolean connect(String port,Integer eyelidleftPin,Integer eyelidrightPin) throws Exception {
     startService(); // NEEDED? I DONT THINK SO....
 
     if (arduino == null) {
@@ -95,6 +96,7 @@ public class InMoovEyelids extends Service {
       return false;
     }
 
+   
     arduino.connect(port);
 
     if (!arduino.isConnected()) {
@@ -102,8 +104,8 @@ public class InMoovEyelids extends Service {
       return false;
     }
 
-    eyelidleft.attach(arduino, 22, eyelidleft.getRest(), eyelidleft.getVelocity());
-    eyelidright.attach(arduino, 24, eyelidright.getRest(), eyelidright.getVelocity());
+    eyelidleft.attach(arduino, eyelidleftPin, eyelidleft.getRest(), eyelidleft.getVelocity());
+    eyelidright.attach(arduino, eyelidrightPin, eyelidright.getRest(), eyelidright.getVelocity());
   
 
     broadcastState();
@@ -207,8 +209,8 @@ public class InMoovEyelids extends Service {
     */
 	  
     //Calamity: this seem incorrect. I think the pin should be set on the Servo service, not on the arduino directly
-	    arduino.servoAttachPin(eyelidleft, eyelidleftPin);
-	    arduino.servoAttachPin(eyelidright, eyelidrightPin);
+	    eyelidleft.enable(eyelidleftPin);
+	    eyelidright.enable(eyelidrightPin);
   }
 
 

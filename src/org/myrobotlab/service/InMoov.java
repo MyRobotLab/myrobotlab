@@ -1318,10 +1318,14 @@ public class InMoov extends Service {
   }
   
   public InMoovEyelids startEyelids(String port) throws Exception {
-	    return startEyelids(port, null);
+	    return startEyelids(port, null, 22, 24);
+	  }
+  
+  public InMoovEyelids startEyelids(String port, int eyelidleftPin,int eyelidrightPin) throws Exception {
+	    return startEyelids(port, null, eyelidleftPin, eyelidrightPin);
 	  }
 
-  public InMoovEyelids startEyelids(String port, String type) throws Exception {
+  public InMoovEyelids startEyelids(String port, String type, int eyelidleftPin,int eyelidrightPin) throws Exception {
 	    // log.warn(InMoov.buildDNA(myKey, serviceClass))
 	    speakBlocking(String.format("starting eyelids on %s", port));
 
@@ -1332,7 +1336,7 @@ public class InMoov extends Service {
 	    }
 
 	    eyelids.arduino.setBoard(type);
-	    eyelids.connect(port);
+	    eyelids.connect(port,eyelidleftPin,eyelidrightPin);
 	    arduinos.put(port, eyelids.arduino);
 
 	    return eyelids;
