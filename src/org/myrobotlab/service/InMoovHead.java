@@ -414,7 +414,7 @@ public class InMoovHead extends Service {
     eyeX.moveTo(eyeX.getPos() + 2);
     eyeY.moveTo(eyeY.getPos() + 2);
     jaw.moveTo(jaw.getPos() + 2);
-    rollNeck.moveTo(neck.getPos() + 2);
+    rollNeck.moveTo(rollNeck.getPos() + 2);
   }
 
   /**
