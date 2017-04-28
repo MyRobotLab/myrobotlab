@@ -22,9 +22,10 @@ addons:
     paths:
       target_paths: current
     # target_paths: current/$TRAVIS_BUILD_NUMBER
-      working_dir: dist 
+    # working_dir: dist 
     # arbitrary shell commands are supported, but the output should be   
     # converted to a ':'-delimited string.
     # - $(ls build/report/*.xml | tr "\n" ":")
+    - $(ls dist/current/* | tr "\n" ":")
     # singular paths work fine, too
     # - build/lib/myrobotlab.jar  
