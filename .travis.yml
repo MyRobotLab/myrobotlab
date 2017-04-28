@@ -21,11 +21,11 @@ addons:
       secure: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="    
     paths:
       target_paths: current
+    - $(ls dist/current/* | tr "\n" ":")
     # target_paths: current/$TRAVIS_BUILD_NUMBER
     # working_dir: dist 
     # arbitrary shell commands are supported, but the output should be   
     # converted to a ':'-delimited string.
     # - $(ls build/report/*.xml | tr "\n" ":")
-    - $(ls dist/current/* | tr "\n" ":")
     # singular paths work fine, too
     # - build/lib/myrobotlab.jar  
