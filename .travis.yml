@@ -9,24 +9,6 @@ script: ant dist
 jdk:
 - oraclejdk8
 
-deploy:
-  provider: s3
-  deployment_group: s3 group
-  on:
-    # experiment to 'always' deploy so the results of junit can always be seen
-    # even if they fail
-    # condition: true
-    all_branches: true
-  access_key_id: AKIAJGL6AEN37LDO3N7A
-  secret_access_key:
-    secure: W8HJgOUEt/d+C+1zeD+Znum0Yso8LLZ9eV8rUrYH2MIVl5dCcH+WaGwhLompNOAUbWYhjcr8Rn/SLqvCEcVWe651R4pwHiD0KNfDUwp907Ic/efluCd/T6RjCG7pjbE5bdPIeZjyupMcZMHU4aW7YN6QE1UlVPhDFKQlU84iGsc=
-  bucket: mrl-bucket-01
-  skip_cleanup: true
-  # upload-dir: current
-  # travis will only copy 1 dir
-  local_dir: dist
-  # local_dir: build/report
-  acl: 'public_read'
 
 addons:
   artifacts:
@@ -38,8 +20,11 @@ addons:
     secret:
       secure: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="    
     paths:
-    # arbitrary shell commands are supported, but the output should be
+      target_paths: current
+    # target_paths: current/$TRAVIS_BUILD_NUMBER
+      working_dir: dist 
+    # arbitrary shell commands are supported, but the output should be   
     # converted to a ':'-delimited string.
-    - $(ls build/report/*.xml | tr "\n" ":")
+    # - $(ls build/report/*.xml | tr "\n" ":")
     # singular paths work fine, too
-    - build/lib/myrobotlab.jar  
+    # - build/lib/myrobotlab.jar  
