@@ -49,6 +49,7 @@ import org.myrobotlab.framework.SystemResources;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -607,16 +608,32 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
            * , t.getName(), e.getMessage())); // MyWorker worker = new
            * MyWorker(); // worker.start(); } });
            */
-
+           
           if (runtimeName == null) {
             runtimeName = "runtime";
           }
           runtime = new Runtime(runtimeName);
           Repo.getLocalInstance().addStatusListener(runtime);
+          // extract(); - too overkill
         }
       }
     }
     return runtime;
+  }
+
+  static public boolean extract(){
+          // FIXME - check to see if this extract only once - it should !
+          // FIXME - make static function extract() and "force" it to overwrite
+          // FIXME - put in command line to -extract similar to -install
+          // FIXME - divide up resources so each service has its appropriate dependencies 
+          //         OR - bundle them as dependency resources into artifactory
+          try {
+        	  Zip.extractFromSelf("resource", "resource");
+        	  return true;
+          } catch(Exception e){
+        	  log.error("extraction threw", e);
+          }
+          return false;
   }
 
   static public List<String> getJVMArgs() {

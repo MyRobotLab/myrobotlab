@@ -923,13 +923,7 @@
 			<formatter type="xml" />
 
 			<batchtest fork="true" todir="${build}/report" >
-				<fileset dir="${test}">
-					<!-- FIXME !! 
-					<include name="**/*Test.java" />
-					<exclude name="**/JFugueTest.java" />
-					<exclude name="**/MessageTest.java" />
-					  there should be no excluded tests ! -->
-					<!-- exclude name="**/ArduinoTest.java" / -->
+				<fileset dir="${test}">					
 				</fileset>
 			</batchtest>
 

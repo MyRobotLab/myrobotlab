@@ -1193,6 +1193,10 @@ public class Serial extends Service
 		try {
 
 			Serial serial = (Serial) Runtime.start("serial", "Serial");
+			
+			List<String> ports = new ArrayList<String>(portNames);
+			serial.invoke("publishPortNames",ports);
+			
 			// Runtime.start("arduino", "Arduino");
 			Runtime.start("gui", "SwingGui");
 

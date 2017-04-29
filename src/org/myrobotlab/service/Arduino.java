@@ -1779,7 +1779,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         // inbox.setBlocking(true);
         serial.addByteListener(this);
 
-        FileIO.extractResource("Arduino","resource/Arduino", false); 
+        // FIXME - removing below .. it DOES NOT WORKY 
+        // FileIO.extractResource("Arduino","resource/Arduino", false); 
       }
     } catch (Exception e) {
       log.error("Arduino.startService threw", e);
@@ -1962,6 +1963,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       String mrlCommFiles = null;
       if (FileIO.isJar()) {
         mrlCommFiles = "resource/Arduino/MrlComm";
+        // FIXME - don't do this every time :P
         Zip.extractFromSelf("resource/Arduino/MrlComm", "resource/Arduino/MrlComm");
       } else {
         // running in IDE ?
