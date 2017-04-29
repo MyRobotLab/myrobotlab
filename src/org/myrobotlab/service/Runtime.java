@@ -614,7 +614,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
           }
           runtime = new Runtime(runtimeName);
           Repo.getLocalInstance().addStatusListener(runtime);
-          extract();
+          // extract(); - too overkill
         }
       }
     }
