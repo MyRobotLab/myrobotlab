@@ -20,7 +20,7 @@ addons:
     secret:
       secure: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="    
     paths:    
-    - $(find dist/. | tr "\n" ":")
+    - $(find dist/current. | tr "\n" ":")
     target_paths: current
     # target_paths: current/$TRAVIS_BRANCH
     # working_dir: dist 
