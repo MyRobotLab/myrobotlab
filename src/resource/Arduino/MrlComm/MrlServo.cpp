@@ -31,16 +31,15 @@ bool MrlServo::attach(byte pin, int initPosUs, int initVelocity){
   currentPosUs = initPosUs;
   targetPosUs = initPosUs;
   velocity = initVelocity;
+  this->pin = pin;
   servo->attach(pin);
-  publishServoEvent(SERVO_EVENT_STOPPED);
+  //publishServoEvent(SERVO_EVENT_STOPPED);
   return true;
 }
 
 // This method is equivalent to Arduino's Servo.attach(pin) - (no pos)
 void MrlServo::attachPin(int pin){
-  this->pin = pin;
-  servo->writeMicroseconds(currentPosUs); //return to it's last know state (may be 0 if currentPosUs is not set)
-  servo->attach(pin);
+  attach(pin, currentPosUs, velocity);
 }
 
 void MrlServo::detachPin(){
@@ -103,6 +102,7 @@ void MrlServo::update() {
       }
       else {
         isMoving = false;
+        publishServoEvent(SERVO_EVENT_STOPPED);
       }
     }
   }
@@ -116,7 +116,7 @@ void MrlServo::moveToMicroseconds(int position) {
   isMoving = true;
   lastUpdate = millis();
   moveStart = lastUpdate;
-  //publishServoEvent(SERVO_EVENT_STOPPED);
+  publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
 }
 
 void MrlServo::startSweep(int minUs, int maxUs, int step) {

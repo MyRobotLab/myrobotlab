@@ -390,20 +390,21 @@ public class Servo extends Service implements ServoControl {
 		broadcastState();
 	}
 
-	public void moveTo(double pos) {
+	public synchronized void moveTo(double pos) {
 
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
-		if (autoEnable && !isEnabled()) {
+		if (lastPos == pos) {
+		  //return;
+		}
+		if (autoEnable && !isEnabled() /**&& pos != lastPos**/) {
 			enable();
 		}
-		if (pos == lastPos) {
-			if (autoDisable && isPinAttached()) {
-				disable();
-			}
-			return;
+		else if (!isEnabled()) {
+		  log.info("{} is disable, discarting moveTo()", getName());
+		  return;
 		}
 		lastPos = targetPos;
 		if (pos < mapper.getMinX()) {
@@ -885,15 +886,15 @@ public class Servo extends Service implements ServoControl {
 		return targetOutput;
 	}
 
-	public void autoDisable() {
-		if (getTasks().containsKey("EndMoving")) {
-			purgeTask("EndMoving");
-		}
-		if (!isMoving() && autoEnable && isPinAttached()) {
-			disable();
-		}
-		// moving = false;
-	}
+//	public void autoDisable() {
+//		if (getTasks().containsKey("EndMoving")) {
+//			purgeTask("EndMoving");
+//		}
+//		if (!isMoving() && autoEnable && isPinAttached()) {
+//			disable();
+//		}
+//		// moving = false;
+//	}
 
 	public boolean isMoving() {
 		return moving;
