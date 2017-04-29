@@ -22,7 +22,7 @@ public interface Codec {
    * e.g. URI POST --to--> Message
    * 
    * @param data
-   * @return
+   * @return decoded object
    * @throws Exception
    */
   public Object[] decodeArray(Object data) throws Exception;
@@ -36,7 +36,7 @@ public interface Codec {
    *          - simple or low level input class - String, byte[]
    * @param type
    *          - the expected type we want to decode into
-   * @return
+   * @return decoded object
    * @throws Exception
    */
   public Object decode(Object data, Class<?> type) throws Exception;
@@ -44,7 +44,7 @@ public interface Codec {
   /**
    * get mime type of codec if it exists
    * 
-   * @return
+   * @return decoded object
    */
   public String getMimeType();
 
