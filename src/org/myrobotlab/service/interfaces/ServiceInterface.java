@@ -12,7 +12,7 @@ import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
 public interface ServiceInterface
-		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver {
+		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker {
 
 	/**
 	 * this is a local method which adds a request from some foreign service
@@ -82,7 +82,7 @@ public interface ServiceInterface
 
 	public void broadcastState();
 
-	public Object invoke(Message msg);
+	// public Object invoke(Message msg);
 
 	public void out(String method, Object retobj);
 
