@@ -38,7 +38,7 @@ public class InMoovScriptTest {
   // Test the inmoov minimal script.
   @Test
   public void testInMoovMinimal() throws IOException {
-    String inmoovScript = "src/resource/InMoov/InMoov4.minimal.py";
+    String inmoovScript = "src/resource/InMoov/InMoov.minimal.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
     //InputStream is = this.getClass().getResourceAsStream(inmoovScript);
@@ -57,7 +57,7 @@ public class InMoovScriptTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalArm() throws IOException {
-    String inmoovScript = "src/resource/InMoov/InMoov4.minimalArm.py";
+    String inmoovScript = "src/resource/InMoov/InMoov.minimalArm.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
     //InputStream is = this.getClass().getResourceAsStream(inmoovScript);
@@ -75,7 +75,7 @@ public class InMoovScriptTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalFingerStarter() throws IOException {
-    String inmoovScript = "src/resource/InMoov/InMoov4.minimalFingerStarter.py";
+    String inmoovScript = "src/resource/InMoov/InMoov.minimalFingerStarter.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
     //InputStream is = this.getClass().getResourceAsStream(inmoovScript);
@@ -93,7 +93,7 @@ public class InMoovScriptTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalHead() throws IOException {
-    String inmoovScript = "src/resource/InMoov/InMoov4.minimalHead.py";
+    String inmoovScript = "src/resource/InMoov/InMoov.minimalHead.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
     //InputStream is = this.getClass().getResourceAsStream(inmoovScript);
@@ -111,7 +111,7 @@ public class InMoovScriptTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalTorso() throws IOException {
-    String inmoovScript = "src/resource/InMoov/InMoov4.minimalTorso.py";
+    String inmoovScript = "src/resource/InMoov/InMoov.minimalTorso.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
     //InputStream is = this.getClass().getResourceAsStream(inmoovScript);
