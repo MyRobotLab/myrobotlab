@@ -173,22 +173,6 @@ public class InMoov extends Service {
     subscribe(getName(), "publishError");
   }
 
-  public void armsFront() {
-    moveHead(99, 82);
-    moveArm("left", 9, 115, 96, 51);
-    moveArm("right", 13, 104, 101, 49);
-    moveHand("left", 61, 0, 14, 38, 15, 0);
-    moveHand("right", 0, 24, 54, 50, 82, 180);
-  }
-
-  public void armsUp() {
-    moveHead(160, 97);
-    moveArm("left", 9, 85, 168, 18);
-    moveArm("right", 0, 68, 180, 10);
-    moveHand("left", 61, 38, 14, 38, 15, 64);
-    moveHand("right", 0, 0, 0, 50, 82, 180);
-  }
-
   public void atEase() {
     if (head != null) {
       head.rest();
@@ -413,14 +397,6 @@ public class InMoov extends Service {
     return b;
   }
 
-  public void daVinci() {
-    moveHead(75, 79);
-    moveArm("left", 9, 115, 28, 80);
-    moveArm("right", 13, 118, 26, 80);
-    moveHand("left", 61, 49, 14, 38, 15, 64);
-    moveHand("right", 0, 24, 54, 50, 82, 180);
-  }
-
   @Deprecated
   public void detach() {
     disable();
@@ -448,22 +424,6 @@ public class InMoov extends Service {
     if (eyelids != null) {
       eyelids.disable();
       }
-  }
-
-  public void fighter() {
-    moveHead(160, 87);
-    moveArm("left", 31, 75, 152, 10);
-    moveArm("right", 3, 94, 33, 16);
-    moveHand("left", 161, 151, 133, 127, 107, 83);
-    moveHand("right", 99, 130, 152, 154, 145, 180);
-  }
-
-  public void fistHips() {
-    moveHead(138, 80);
-    moveArm("left", 71, 41, 20, 39);
-    moveArm("right", 71, 40, 14, 39);
-    moveHand("left", 161, 151, 133, 127, 107, 83);
-    moveHand("right", 99, 130, 152, 154, 145, 180);
   }
 
   public void fullSpeed() {
@@ -565,14 +525,6 @@ public class InMoov extends Service {
     return python;
   }
 
-  public void giving() {
-    moveHead(44, 82);
-    moveArm("left", 15, 55, 68, 10);
-    moveArm("right", 13, 40, 74, 13);
-    moveHand("left", 61, 0, 14, 0, 0, 180);
-    moveHand("right", 0, 24, 24, 19, 21, 25);
-  }
-
   public void handClose(String which) {
     moveHand(which, 130, 180, 180, 180, 180);
   }
@@ -597,18 +549,7 @@ public class InMoov extends Service {
 
   // ------ composites servos begin -----------
 
-  public void hello() {
-    setHeadSpeed(1.0, 1.0);
-    setArmSpeed("left", 1.0, 1.0, 1.0, 1.0);
-    setArmSpeed("right", 1.0, 1.0, 1.0, 1.0);
-    setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
-    setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
-    moveHead(105, 78);
-    moveArm("left", 78, 48, 37, 10);
-    moveArm("right", 90, 144, 60, 75);
-    moveHand("left", 112, 111, 105, 102, 81, 10);
-    moveHand("right", 0, 0, 0, 50, 82, 180);
-  }
+
 
   public boolean isAttached() {
     boolean attached = false;
@@ -644,14 +585,6 @@ public class InMoov extends Service {
 
   public boolean isMute() {
     return mute;
-  }
-
-  public void lookAtThis() {
-    moveHead(66, 79);
-    moveArm("left", 89, 75, 78, 19);
-    moveArm("right", 90, 91, 72, 26);
-    moveHand("left", 92, 106, 133, 127, 107, 29);
-    moveHand("right", 86, 51, 133, 162, 153, 180);
   }
 
   public void moveArm(String which, Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
@@ -1462,14 +1395,6 @@ public class InMoov extends Service {
       headTracking.startLKTracking();
       headTracking.trackPoint(0.5, 0.5);
     }
-  }
-
-  public void victory() {
-    moveHead(114, 90);
-    moveArm("left", 90, 91, 106, 10);
-    moveArm("right", 0, 73, 30, 17);
-    moveHand("left", 170, 0, 0, 168, 167, 0);
-    moveHand("right", 98, 37, 34, 67, 118, 166);
   }
 
   public void loadGestures() {
