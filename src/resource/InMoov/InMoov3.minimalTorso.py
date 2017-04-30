@@ -10,13 +10,12 @@
 webgui = Runtime.create("WebGui","WebGui")
 webgui.autoStartBrowser(False)
 webgui.startService()
-# Then start the browsers and show the WebkitSpeechRecognition service named i01.ear
-webgui.startBrowser("http://localhost:8888/#/service/i01.ear")
 
 # As an alternative you can use the line below to show all services in the browser. In that case you should comment out all lines above that starts with webgui. 
 # webgui = Runtime.createAndStart("webgui","WebGui")
 
 leftPort = "COM99"  #modify port according to your board
+torsoPort = "COM100"
 
 #to tweak the default voice
 Voice="cmu-slt-hsmm" # Default female for MarySpeech 
@@ -33,9 +32,14 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 i01.setMute(True)
 
 i01.startEar()
+
+# Then start the browsers and show the WebkitSpeechRecognition service named i01.ear
+# webgui.startBrowser("http://localhost:8888/#/service/i01.ear")
+
+
 i01.startMouth()
 ##############
-torso = i01.startTorso("COM20")  #modify port according to your board
+torso = i01.startTorso(torsoPort)  #modify port according to your board
 # tweaking default torso settings
 torso.topStom.setMinMax(0,180)
 torso.topStom.map(0,180,67,110)

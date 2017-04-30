@@ -16,9 +16,9 @@ import org.myrobotlab.test.TestUtils;
 // @Ignore
 public class InMoovScriptTest {
 
-  private static final String V_PORT_1 = "test_port_1";
-  private static final String V_PORT_2 = "test_port_2";
-  private static final String V_PORT_99 = "COM99";
+  private static final String V_PORT_1 = "COM99";
+  private static final String V_PORT_2 = "COM100";
+  
 
   public Arduino ard1;
   public Arduino ard2;
@@ -30,13 +30,10 @@ public class InMoovScriptTest {
     // initialize 2 serial ports (virtual arduino)
     VirtualArduino va1 = (VirtualArduino)Runtime.createAndStart("va1", "VirtualArduino");
     VirtualArduino va2 = (VirtualArduino)Runtime.createAndStart("va2", "VirtualArduino");
-    VirtualArduino va3 = (VirtualArduino)Runtime.createAndStart("va3", "VirtualArduino");
     // one for the left port
     va1.connect(V_PORT_1);
     // one for the right port.
     va2.connect(V_PORT_2);
-    // this one maps to COM99
-    va3.connect(V_PORT_99);
   }
 
   // Test the inmoov minimal script.
