@@ -10,14 +10,13 @@
 webgui = Runtime.create("WebGui","WebGui")
 webgui.autoStartBrowser(False)
 webgui.startService()
-# Then start the browsers and show the WebkitSpeechRecognition service named i01.ear
-webgui.startBrowser("http://localhost:8888/#/service/i01.ear")
 
 # As an alternative you can use the line below to show all services in the browser. In that case you should comment out all lines above that starts with webgui. 
 # webgui = Runtime.createAndStart("webgui","WebGui")
 
 # Change to the port that you use
-rightPort = "COM99"
+leftPort  = "COM99"
+rightPort = "COM100"
 
 #to tweak the default voice
 Voice="cmu-slt-hsmm" # Default female for MarySpeech 
@@ -34,9 +33,13 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 i01.setMute(True)
 
 i01.startEar()
+# Then start the browsers and show the WebkitSpeechRecognition service named i01.ear
+# webgui.startBrowser("http://localhost:8888/#/service/i01.ear")
+
 i01.startMouth()
+
 ##############
-#i01.startHead(leftPort)
+i01.startHead(leftPort)
 ##############
 i01.head.jaw.setMinMax(42,101)
 i01.head.jaw.map(0,180,42,101)
@@ -55,9 +58,10 @@ i01.head.rothead.map(0,180,60,130)
 i01.head.rothead.setMinMax(0,180)
 i01.head.rothead.setRest(90)
 #################
+# start eye tracking with the eyex and the eyey pins
 i01.startEyesTracking(leftPort,22,24)
-i01.startHeadTracking(leftPort)
-# mrl > 1999 : i01.startHeadTracking(leftPort,12,13)
+# start head tracking with the neck and rothead pins
+i01.startHeadTracking(leftPort,12,13)
 ############################################################
 #to tweak the default PID values
 i01.eyesTracking.pid.setPID("eyeX",12.0,1.0,0.1)
