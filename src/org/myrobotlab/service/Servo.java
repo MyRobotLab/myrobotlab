@@ -299,7 +299,6 @@ public class Servo extends Service implements ServoControl {
 	 */
 	@Override
 	public void detach() {
-		warn("detach() is deprecated please use disable()");
 		isPinAttached = false;
 		if (controller != null) {
 			controller.servoDetachPin(this);
