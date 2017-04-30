@@ -10,8 +10,6 @@
 webgui = Runtime.create("WebGui","WebGui")
 webgui.autoStartBrowser(False)
 webgui.startService()
-# Then start the browsers and show the WebkitSpeechRecognition service named i01.ear
-webgui.startBrowser("http://localhost:8888/#/service/i01.ear")
 
 # As an alternative you can use the line below to show all services in the browser. In that case you should comment out all lines above that starts with webgui. 
 # webgui = Runtime.createAndStart("webgui","WebGui")
@@ -31,9 +29,10 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 # Turn off the spoken status updates from the inmoov starting. (you will want to comment this out when you use this script for real.)
 # The inmoov is set to be mute for the unit tests in MRL.
 i01.setMute(True)
-
-
 i01.startEar()
+# Then start the browsers and show the WebkitSpeechRecognition service named i01.ear
+# After the ear is started you can launch a browser to get to that service.
+# webgui.startBrowser("http://localhost:8888/#/service/i01.ear")
 i01.startMouth()
 ##############
 i01.startLeftArm(leftPort)
