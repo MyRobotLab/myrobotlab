@@ -1,8 +1,11 @@
 package org.myrobotlab.service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -129,11 +133,13 @@ public class Agent extends Service {
 	static transient SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd:HH:mm:ss");
 
 	static Platform platform = Platform.getLocalInstance();
-	
+
 	static CmdLine runtimeArgs;
 
 	static String currentBranch = platform.getBranch();
 	static String currentVersion = platform.getVersion();
+
+	static String MSGS_DIR = "msgs";
 
 	// FIXME - all update functionality will need to be moved to Runtime
 	// it should take parameters such that it will be possible at some point to
@@ -155,7 +161,7 @@ public class Agent extends Service {
 	static boolean checkRemoteVersions = false;
 
 	static String latestRemote;
-	
+
 	static Agent agent;
 
 	public Agent(String n) {
@@ -178,8 +184,77 @@ public class Agent extends Service {
 			getRemoteBranches();
 		}
 		setBranch(currentBranch);
-
 		agent = this;
+		File folder = new File(MSGS_DIR);
+		folder.mkdirs();
+		addTask(1000, "scanForMsgs");
+	}
+
+	/**
+	 * simple file to byte array
+	 * 
+	 * @param file
+	 *            - file to read
+	 * @return byte array of contents
+	 * @throws IOException
+	 */
+	static public final byte[] toByteArray(File file) throws IOException {
+
+		FileInputStream fis = null;
+		byte[] data = null;
+
+		fis = new FileInputStream(file);
+		data = toByteArray(fis);
+
+		fis.close();
+
+		return data;
+	}
+
+	/**
+	 * IntputStream to byte array
+	 * 
+	 * @param is
+	 * @return
+	 */
+	static public final byte[] toByteArray(InputStream is) {
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+
+			int nRead;
+			byte[] data = new byte[16384];
+
+			while ((nRead = is.read(data, 0, data.length)) != -1) {
+				baos.write(data, 0, nRead);
+			}
+
+			baos.flush();
+			baos.close();
+			return baos.toByteArray();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		return null;
+	}
+
+	public void scanForMsgs() {
+		File folder = new File(MSGS_DIR);
+		File[] listOfFiles = folder.listFiles();
+
+		for (int i = 0; i < listOfFiles.length; i++) {
+			File json = listOfFiles[i];
+			if (json.isFile() && json.getName().endsWith(".json")) {
+				try {
+					Message msg = CodecUtils.fromJson(new String(toByteArray(json)), Message.class);
+					json.delete();
+					in(msg);
+				} catch (Exception e) {
+					log.error("msgs/{} threw", json);
+				}
+			}
+		}
 	}
 
 	// revert ! only 1 global autoUpdate - all processes - not Agent (yet)
@@ -215,8 +290,8 @@ public class Agent extends Service {
 	 * checks the current branch looks if the verstion.txt has been changed
 	 * 
 	 * @throws IOException
-	 * @throws InterruptedException 
-	 * @throws URISyntaxException 
+	 * @throws InterruptedException
+	 * @throws URISyntaxException
 	 */
 	static synchronized public void processUpdates() throws IOException, URISyntaxException, InterruptedException {
 
@@ -239,7 +314,8 @@ public class Agent extends Service {
 				}
 
 				if (remoteVersion.equals(process.version)) {
-					log.info("skipping update of {} {} because its already version {}", process.id, process.name, process.version);
+					log.info("skipping update of {} {} because its already version {}", process.id, process.name,
+							process.version);
 					continue;
 				}
 
@@ -258,12 +334,12 @@ public class Agent extends Service {
 	 * 
 	 * @param id
 	 * @throws IOException
-	 * @throws InterruptedException 
-	 * @throws URISyntaxException 
+	 * @throws InterruptedException
+	 * @throws URISyntaxException
 	 */
 	static public synchronized void restart(Integer id) throws IOException, URISyntaxException, InterruptedException {
 		// if null or processes.size == 0 then self
-		if (id == null || processes.size() == 0){
+		if (id == null || processes.size() == 0) {
 			log.info("restarting self");
 			spawn(Runtime.getGlobalArgs());
 			terminateSelfOnly();
@@ -405,7 +481,7 @@ public class Agent extends Service {
 				Object[] array = decoder.decodeArray(branches);
 				for (int i = 0; i < array.length; ++i) {
 					@SuppressWarnings("unchecked")
-					LinkedTreeMap<String,String> m = (LinkedTreeMap<String,String>) array[i];
+					LinkedTreeMap<String, String> m = (LinkedTreeMap<String, String>) array[i];
 					if (m.containsKey("name")) {
 						possibleBranches.add(m.get("name").toString());
 					}
@@ -418,7 +494,7 @@ public class Agent extends Service {
 	}
 
 	static synchronized public HashSet<String> getPossibleVersions() {
-		
+
 		// clear versions
 		possibleVersions.clear();
 
@@ -563,30 +639,30 @@ public class Agent extends Service {
 
 	static public Integer publishTerminated(Integer id) {
 		log.info("terminated %d %s", id, getName(id));
-		
-		if (!processes.containsKey(id)){
+
+		if (!processes.containsKey(id)) {
 			log.error("processes {} not found");
 			return id;
 		}
 
-		// if you don't fork with Agent allowed to 
+		// if you don't fork with Agent allowed to
 		// exist without instances - then
-		if (!runtimeArgs.containsKey("-fork")){
+		if (!runtimeArgs.containsKey("-fork")) {
 			// spin through instances - if I'm the only
 			// thing left - terminate
 			boolean processesStillRunning = false;
-			for (ProcessData pd : processes.values()){
-				if (pd.isRunning()){
+			for (ProcessData pd : processes.values()) {
+				if (pd.isRunning()) {
 					processesStillRunning = true;
 					break;
 				}
 			}
-			
-			if (!processesStillRunning){
+
+			if (!processesStillRunning) {
 				shutdown();
 			}
 		}
-		
+
 		if (agent != null) {
 			agent.broadcastState();
 		}
@@ -677,8 +753,8 @@ public class Agent extends Service {
 
 				// spawn a test - attach to cli - test 1 service end to end
 				// ,"-invoke", "test","test","org.myrobotlab.service.Clock"
-				Process process = spawn(
-						new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-logLevel", "WARN", "-noEnv", "-invoke", "test", "test", serviceType.getName() });
+				Process process = spawn(new String[] { "-runtimeName", "testEnv", "-service", "test", "Test",
+						"-logLevel", "WARN", "-noEnv", "-invoke", "test", "test", serviceType.getName() });
 
 				process.waitFor();
 
@@ -709,7 +785,8 @@ public class Agent extends Service {
 
 		ret.add(Status.info("installTime %d", installTime));
 		ret.add(Status.info("testTimeMs %d", System.currentTimeMillis() - startTime));
-		ret.add(Status.info("testTimeMinutes %d", TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - startTime)));
+		ret.add(Status.info("testTimeMinutes %d",
+				TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - startTime)));
 		ret.add(Status.info("endTime %d", System.currentTimeMillis()));
 
 		try {
@@ -723,7 +800,7 @@ public class Agent extends Service {
 
 	static public String setBranch(String branch) {
 		currentBranch = branch;
-		if (checkRemoteVersions){
+		if (checkRemoteVersions) {
 			getPossibleVersions();
 		}
 		return currentBranch;
@@ -733,15 +810,20 @@ public class Agent extends Service {
 		Platform platform = Platform.getLocalInstance();
 		String platformId = platform.getPlatformId();
 		if (platform.isLinux()) {
-			String ldPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}", platformId);
+			String ldPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}",
+					platformId);
 			env.put("LD_LIBRARY_PATH", ldPath);
 		} else if (platform.isMac()) {
-			String dyPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}", platformId);
+			String dyPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}",
+					platformId);
 			env.put("DYLD_LIBRARY_PATH", dyPath);
 		} else if (platform.isWindows()) {
-			// this just borks the path in Windows - additionally (unlike Linux) - i don't think you need native code on the PATH
+			// this just borks the path in Windows - additionally (unlike Linux)
+			// - i don't think you need native code on the PATH
 			// and Windows does not have a LD_LIBRARY_PATH
-			// String path = String.format("PATH=%%CD%%\\libraries\\native;PATH=%%CD%%\\libraries\\native\\%s;%%PATH%%", platformId);
+			// String path =
+			// String.format("PATH=%%CD%%\\libraries\\native;PATH=%%CD%%\\libraries\\native\\%s;%%PATH%%",
+			// platformId);
 			// env.put("PATH", path);
 			// we need to sanitize against a non-ascii username
 			// work around for Jython bug in 2.7.0...
@@ -760,51 +842,55 @@ public class Agent extends Service {
 		Runtime.exit();
 	}
 
-
 	static public synchronized Process spawn(String[] in) throws IOException, URISyntaxException, InterruptedException {
-		
+
 		// runtime vs develop time
 		String jarPath = null;
-		if (FileIO.isJar()){
+		if (FileIO.isJar()) {
 			log.info("I am a jar - must be runtime");
 			// runtime
 			jarPath = FileIO.getRoot();
-		} else { 
+		} else {
 			// develop time (post build)
 			log.info("I am not a jar - must be develop time");
 			String test = "build/lib/myrobotlab.jar";
 			File recentlyBuilt = new File(test);
 			if (!recentlyBuilt.exists()) {
 				log.error("umm .. I need to start a jar - would you mind building one with build.xml");
-				log.error("perhaps in the future I can change all the classpaths etc to start an instances with the bin classes - but no time to do that now");
+				log.error(
+						"perhaps in the future I can change all the classpaths etc to start an instances with the bin classes - but no time to do that now");
 				log.error("adios... hope we meet again...");
 				System.exit(-1);
 			}
-			
+
 			jarPath = new File(test).getAbsolutePath();
 		}
-		
+
 		return spawn(jarPath, in);
 	}
-	
+
 	/**
 	 * Responsibility - This method will always call Runtime. To start Runtime
 	 * correctly environment must correctly be setup
 	 * 
-	 * @param jarPath - Absolute path to myrobotlab.jar
-	 * @param in - command line parameters
+	 * @param jarPath
+	 *            - Absolute path to myrobotlab.jar
+	 * @param in
+	 *            - command line parameters
 	 * @return
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 * @throws InterruptedException
 	 */
-	static public synchronized Process spawn(String jarPath, String[] in) throws IOException, URISyntaxException, InterruptedException {
+	static public synchronized Process spawn(String jarPath, String[] in)
+			throws IOException, URISyntaxException, InterruptedException {
 
-		// handle url to path utf-8 crazyness here 
+		// handle url to path utf-8 crazyness here
 		// getCodeSource().getLocation().toURI().getPath()
 		File jarPathDir = new File(jarPath);
-		
-		// jarPathDir.getAbsolutePath() is absolutely necessary - relative paths will not work
+
+		// jarPathDir.getAbsolutePath() is absolutely necessary - relative paths
+		// will not work
 		ProcessData pd = new ProcessData(agent, jarPathDir.getAbsolutePath(), in, currentBranch, currentVersion);
 
 		CmdLine cmdline = new CmdLine(in);
@@ -832,7 +918,7 @@ public class Agent extends Service {
 		log.info("============== spawn begin ==============");
 
 		String runtimeName = pd.name;
-	
+
 		// this needs cmdLine
 		String[] cmdLine = pd.buildCmdLine();
 		StringBuffer sb = new StringBuffer();
@@ -840,14 +926,17 @@ public class Agent extends Service {
 			sb.append(cmdLine[i]);
 			sb.append(" ");
 		}
-				
-		// log.info(String.format("in %s spawning -> [%s]", b.getAbsolutePath(), sb.toString()));
-		ProcessBuilder builder = new ProcessBuilder(cmdLine);
 		
+		// add process id
+
+		// log.info(String.format("in %s spawning -> [%s]", b.getAbsolutePath(),
+		// sb.toString()));
+		ProcessBuilder builder = new ProcessBuilder(cmdLine);
+
 		// setting working directory to wherever the jar is...
 		String spawnDir = new File(pd.jarPath).getParent();
 		builder.directory(new File(spawnDir));
-		
+
 		log.info(String.format("in %s spawning -> [%s]", spawnDir, sb.toString()));
 
 		// environment variables setup
@@ -927,7 +1016,8 @@ public class Agent extends Service {
 		log.info("update({})", branch);
 		// so we need to get the version of the jar contained in the {branch}
 		// directory ..
-		FileIO.extract(String.format("%s/myrobotlab.jar", branch), "resource/version.txt", String.format("%s/version.txt", branch));
+		FileIO.extract(String.format("%s/myrobotlab.jar", branch), "resource/version.txt",
+				String.format("%s/version.txt", branch));
 
 		String currentVersion = FileIO.toString(String.format("%s/version.txt", branch));
 		if (currentVersion == null) {
@@ -955,7 +1045,6 @@ public class Agent extends Service {
 
 	}
 
-
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
@@ -967,13 +1056,14 @@ public class Agent extends Service {
 	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(Agent.class.getCanonicalName());
-		meta.addDescription("Agent - responsible for creating the environment and maintaining, tracking and terminating all processes");
+		meta.addDescription(
+				"Agent - responsible for creating the environment and maintaining, tracking and terminating all processes");
 		meta.addCategory("framework");
 		meta.setSponsor("GroG");
 		// meta.addPeer("webadmin", "WebGui", "webgui for the Agent");
 		return meta;
 	}
-	
+
 	/**
 	 * First method JVM executes when myrobotlab.jar is in jar form.
 	 * 
@@ -988,7 +1078,8 @@ public class Agent extends Service {
 	// make it work if necessary prefix everything by -agent-<...>
 	public static void main(String[] args) {
 		try {
-			// System.out.println("Agent.main starting"); - with static args it doesnt really 'start'
+			// System.out.println("Agent.main starting"); - with static args it
+			// doesnt really 'start'
 
 			// FIXME - I think the basic idea is to have
 			// parameters route to Agent or to the target instance
@@ -997,7 +1088,6 @@ public class Agent extends Service {
 			// .. instance params
 			// but that didn't work due to the parsing of CmdLine ...
 			// need a good solution
-			
 
 			// split agent commands from runtime co\mmands
 			// String[] agentArgs = new String[0];
@@ -1005,16 +1095,18 @@ public class Agent extends Service {
 			// -agent \"-params -service ... \" string encoded
 			runtimeArgs = new CmdLine(args);
 
-            if (runtimeArgs.containsKey("-?") || runtimeArgs.containsKey("-h") || runtimeArgs.containsKey("-help") || runtimeArgs.containsKey("--help")) {
-		        Runtime.mainHelp();
-		        return;
-		    }
-			
-			if (runtimeArgs.containsKey("-version")){
-				System.out.println(String.format("%s branch %s version %s", platform.getBranch(), platform.getPlatformId(), platform.getVersion()));
+			if (runtimeArgs.containsKey("-?") || runtimeArgs.containsKey("-h") || runtimeArgs.containsKey("-help")
+					|| runtimeArgs.containsKey("--help")) {
+				Runtime.mainHelp();
 				return;
 			}
-			
+
+			if (runtimeArgs.containsKey("-version")) {
+				System.out.println(String.format("%s branch %s version %s", platform.getBranch(),
+						platform.getPlatformId(), platform.getVersion()));
+				return;
+			}
+
 			// -service for Runtime -process a b c d :)
 			if (runtimeArgs.containsKey("-agent")) {
 				// List<String> list = runtimeArgs.getArgumentList("-agent");
@@ -1049,10 +1141,10 @@ public class Agent extends Service {
 			if (runtimeArgs.containsKey("-test")) {
 				serviceTest();
 			} else {
-				if (!runtimeArgs.containsKey("-fork")){
+				if (!runtimeArgs.containsKey("-fork")) {
 					Runtime.start("agent", "Agent");
 				}
-				if (!runtimeArgs.containsKey("-client")){
+				if (!runtimeArgs.containsKey("-client")) {
 					p = spawn(args); // <-- agent's is now in charge of first
 				} else {
 					Runtime.start("cli", "Cli");
@@ -1070,10 +1162,10 @@ public class Agent extends Service {
 			log.error("unsuccessful spawn", e);
 		} finally {
 			// big hammer
-			// System.out.println("Agent.main leaving");- with static args it doesnt really 'start'
+			// System.out.println("Agent.main leaving");- with static args it
+			// doesnt really 'start'
 			// System.exit(0);
 		}
 	}
-
 
 }

@@ -2122,6 +2122,13 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   public void restart() {
     try {
       info("restarting");
+      
+      // FIXME - send original command line ..
+      // FIXME - SEND ***ID*** !!!!
+      // just send a restart msg to the Agent process
+      Message msg = createMessage("agent", "restart", null);
+      FileIO.toFile(String.format("msgs/agent.%d.json", msg.msgId), CodecUtils.toJson(msg));
+      
       // TODO - timeout release .releaseAll nice ? - check or re-implement
       Runtime.releaseAll();
       // Bootstrap.spawn(args.toArray(new String[args.size()]));
