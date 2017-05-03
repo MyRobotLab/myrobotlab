@@ -164,6 +164,8 @@ public class Agent extends Service {
 
 	static Agent agent;
 
+	static boolean restarting = false;
+
 	public Agent(String n) {
 		super(n);
 		log.info("Agent {} Pid {} is alive", n, Runtime.getInstance().getPid());
@@ -337,9 +339,10 @@ public class Agent extends Service {
 	 * @throws InterruptedException
 	 */
 	static public synchronized void restart() throws IOException, URISyntaxException, InterruptedException {
+		restarting = true;
 		for (Integer pid : processes.keySet()) {
 			restart(pid);
-		}
+		}		
 	}
 
 	/**
@@ -670,7 +673,7 @@ public class Agent extends Service {
 				}
 			}
 
-			if (!processesStillRunning) {
+			if (!processesStillRunning && !restarting) {
 				shutdown();
 			}
 		}
@@ -678,6 +681,10 @@ public class Agent extends Service {
 		if (agent != null) {
 			agent.broadcastState();
 		}
+		
+		// FIXME - restarting happens "per Id" - this needs to be in the ProcessData !!!
+		restarting = false;
+		
 		return id;
 	}
 
