@@ -1630,6 +1630,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * 
    *          will this work on a file lock update?
    */
+  /*
   static public void restart(Runnable runBeforeRestart) {
     final java.lang.Runtime r = java.lang.Runtime.getRuntime();
     log.info("restart - restart?");
@@ -1679,7 +1680,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
     System.exit(0);
 
-  }
+  } */
 
   /**
    * save all configuration from all local services

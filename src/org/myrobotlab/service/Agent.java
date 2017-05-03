@@ -164,8 +164,6 @@ public class Agent extends Service {
 
 	static Agent agent;
 
-	static boolean restarting = false;
-
 	public Agent(String n) {
 		super(n);
 		log.info("Agent {} Pid {} is alive", n, Runtime.getInstance().getPid());
@@ -339,7 +337,6 @@ public class Agent extends Service {
 	 * @throws InterruptedException
 	 */
 	static public synchronized void restart() throws IOException, URISyntaxException, InterruptedException {
-		restarting = true;
 		for (Integer pid : processes.keySet()) {
 			restart(pid);
 		}		
@@ -359,7 +356,9 @@ public class Agent extends Service {
 			spawn(Runtime.getGlobalArgs());
 			terminateSelfOnly();
 		} else {
+			ProcessData pd = processes.get(id);
 			log.info("restarting process {}", id);
+			pd.setRestarting();
 			kill(id);
 			spawn2(processes.get(id));
 		}
@@ -653,8 +652,9 @@ public class Agent extends Service {
 	}
 
 	static public Integer publishTerminated(Integer id) {
-		log.info("terminated %d %s", id, getName(id));
+		log.info("terminated %d %s - restarting", id, getName(id));
 
+		
 		if (!processes.containsKey(id)) {
 			log.error("processes {} not found");
 			return id;
@@ -667,13 +667,13 @@ public class Agent extends Service {
 			// thing left - terminate
 			boolean processesStillRunning = false;
 			for (ProcessData pd : processes.values()) {
-				if (pd.isRunning()) {
+				if (pd.isRunning() || pd.isRestarting()) {
 					processesStillRunning = true;
 					break;
 				}
 			}
 
-			if (!processesStillRunning && !restarting) {
+			if (!processesStillRunning) {
 				shutdown();
 			}
 		}
@@ -681,10 +681,7 @@ public class Agent extends Service {
 		if (agent != null) {
 			agent.broadcastState();
 		}
-		
-		// FIXME - restarting happens "per Id" - this needs to be in the ProcessData !!!
-		restarting = false;
-		
+	
 		return id;
 	}
 
