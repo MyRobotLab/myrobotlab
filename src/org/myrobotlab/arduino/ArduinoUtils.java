@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
@@ -16,7 +17,7 @@ public class ArduinoUtils {
   public transient final static Logger log = LoggerFactory.getLogger(ArduinoUtils.class);
 
   // TODO: auto-discover?
-  public static String arduinoPath = "c:\\dev\\arduino-1.6.8\\";
+  public static String arduinoPath = "C:\\Program Files (x86)\\Arduino\\";
   // TODO: fix this. a temp directory so we can upload the mrlcomm properly.
 
   public static StringBuilder outputBuilder;
@@ -38,7 +39,32 @@ public class ArduinoUtils {
     return "arduino";
   }
 
+  /**
+   * Upload the MrlComm.ino with an arduino ide (version 1.6.8) installed in the default windows location of 
+   * C:\Program Files (x86)\Arduino\
+   * 
+   * @param port - the com port for the arduino
+   * @param boardKey - the board type mega/uno
+   * @return
+   * @throws IOException
+   * @throws InterruptedException
+   */
   public static boolean uploadSketch(String port, String boardKey) throws IOException, InterruptedException {
+    return uploadSketch(port, boardKey, arduinoPath);
+  }
+  
+  
+  /**
+   * Upload the MrlComm.ino sketch to the using an arduino IDE  (only version 1.6.8 has been tested for this method.)
+   * 
+   * @param port the com port  (COM4,  /dev/ttyAMA0  ...)
+   * @param boardKey - the board type mega / uno
+   * @param arduinoPath - path to the arduino ide installation
+   * @return
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  public static boolean uploadSketch(String port, String boardKey, String arduinoPath) throws IOException, InterruptedException {
     FileIO.extractResources();
     String sketchFilename = "resource/Arduino/MRLComm/MRLComm.ino";
     File sketch = new File(sketchFilename);
@@ -109,7 +135,7 @@ public class ArduinoUtils {
         command.add(arg);
       }
     }
-    System.out.println("RUNNING COMMAND :" + join(command, " "));
+    System.out.println("RUNNING COMMAND :" + StringUtils.join(command, " "));
 
     ProcessBuilder builder = new ProcessBuilder(command);
     // we need to specify environment variables
@@ -204,21 +230,6 @@ public class ArduinoUtils {
       e.printStackTrace();
     }
     return returnValue;
-  }
-
-  // TODO: this should be on a string utils static class.
-  private static String join(ArrayList<String> list, String joinChar) {
-    StringBuilder sb = new StringBuilder();
-    int i = 0;
-    int size = list.size();
-    for (String part : list) {
-      i++;
-      sb.append(part);
-      if (i != size) {
-        sb.append(joinChar);
-      }
-    }
-    return sb.toString();
   }
 
   public static String getOutput() {
