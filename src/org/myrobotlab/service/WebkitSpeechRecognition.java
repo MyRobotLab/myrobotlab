@@ -85,7 +85,8 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   @Override
   public void listeningEvent() {
     // TODO Auto-generated method stub
-	  //log.warn("micIsListening");
+	// temporary debug to show real mic status
+	  log.info("micIsListening");
 	  listening=false;
 	  return;
   }
@@ -93,7 +94,8 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   @Override
   public void pauseListening() {
     // TODO Auto-generated method stub
-	  //log.warn("micNotListening");
+	// temporary debug to show real mic status
+	  log.info("micNotListening");
 	  listening=true;
   }
 

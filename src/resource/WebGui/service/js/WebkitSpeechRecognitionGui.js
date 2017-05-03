@@ -340,7 +340,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     $scope.utterance = '';
     $scope.current_text = '';
     // start info status
-    $scope.status = 'Click on the microphone icon and begin speaking.';
+    $scope.status = 'Click on the microphone icon and begin speaking.[init]';
     $scope.rows = [];
     // current state for the button i guess?
     $scope.recognizing = false;
@@ -351,7 +351,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     // config properties on the webkit speech stuff.
     $scope.recognition.continuous = true;
     $scope.recognition.interimResults = true;
-    
+    mrl.sendTo($scope.service.name, "startListening");
     // called when $scope.recognition starts.
     $scope.recognition.onstart = function() {
         $scope.recognizing = true;
@@ -407,7 +407,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         $scope.listenbuttonimg = 'service/img/mic.png';
         $scope.$apply();
         if (!final_transcript) {
-            $scope.status = 'Click on the microphone icon and begin speaking.';
+            $scope.status = 'Click on the microphone icon and begin speaking.[stop]';
             $scope.$apply();
             return;
         }
