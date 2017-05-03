@@ -2126,13 +2126,17 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       // FIXME - send original command line ..
       // FIXME - SEND ***ID*** !!!!
       // just send a restart msg to the Agent process
+      // FIXME - perhaps a "rename" is more safe .. since the file is complete ...
       Message msg = createMessage("agent", "restart", null);
-      FileIO.toFile(String.format("msgs/agent.%d.json", msg.msgId), CodecUtils.toJson(msg));
+      FileIO.toFile(String.format("msgs/agent.%d.part", msg.msgId), CodecUtils.toJson(msg));
+      File partFile = new File(String.format("msgs/agent.%d.part", msg.msgId));
+      File json = new File(String.format("msgs/agent.%d.json", msg.msgId));
+      partFile.renameTo(json);
       
       // TODO - timeout release .releaseAll nice ? - check or re-implement
-      Runtime.releaseAll();
+      // Runtime.releaseAll();
       // Bootstrap.spawn(args.toArray(new String[args.size()]));
-      System.exit(0);
+      // System.exit(0);
 
       // shutdown / exit
     } catch (Exception e) {

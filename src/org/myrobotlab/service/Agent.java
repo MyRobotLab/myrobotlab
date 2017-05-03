@@ -186,8 +186,7 @@ public class Agent extends Service {
 		setBranch(currentBranch);
 		agent = this;
 		File folder = new File(MSGS_DIR);
-		folder.mkdirs();
-		addTask(1000, "scanForMsgs");
+		folder.mkdirs();		
 	}
 
 	/**
@@ -327,6 +326,19 @@ public class Agent extends Service {
 					restart(process.id);
 				}
 			}
+		}
+	}
+
+	/**
+	 * if there is a single instance - just restart it ...
+	 * 
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws InterruptedException
+	 */
+	static public synchronized void restart() throws IOException, URISyntaxException, InterruptedException {
+		for (Integer pid : processes.keySet()) {
+			restart(pid);
 		}
 	}
 
@@ -926,7 +938,7 @@ public class Agent extends Service {
 			sb.append(cmdLine[i]);
 			sb.append(" ");
 		}
-		
+
 		// add process id
 
 		// log.info(String.format("in %s spawning -> [%s]", b.getAbsolutePath(),
@@ -1062,6 +1074,11 @@ public class Agent extends Service {
 		meta.setSponsor("GroG");
 		// meta.addPeer("webadmin", "WebGui", "webgui for the Agent");
 		return meta;
+	}
+	
+	public void startService(){
+		super.startService();
+		addTask(1000, "scanForMsgs");
 	}
 
 	/**

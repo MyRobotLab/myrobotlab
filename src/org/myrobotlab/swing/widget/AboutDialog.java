@@ -2,8 +2,7 @@ package org.myrobotlab.swing.widget;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,6 +17,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.myrobotlab.framework.Platform;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -35,17 +36,8 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
   JButton noWorky = null;
   JButton ok = null;
   JFrame parent = null;
-  JLabel versionLabel = new JLabel(org.myrobotlab.service.Runtime.getVersion());
+  JLabel versionLabel = new JLabel(Runtime.getVersion());
   SwingGui gui;
-
-  public static void main(String[] args) throws Exception {
-    LoggingFactory.init();
-
-    log.info("[{}]", "1060M.20130227.0733".compareTo("1059M.20130227.0722"));
-    log.info("[{}]", "1059M.20130227.0722".compareTo("1060M.20130227.0733"));
-
-    HttpRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File(LoggingFactory.getLogFileName()));
-  }
 
   public AboutDialog(SwingGui gui) {
     super(gui.getFrame(), "about", true);
@@ -56,6 +48,8 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
       Point p = parent.getLocation();
       setLocation(p.x + parentSize.width / 4, p.y + parentSize.height / 4);
     }
+    
+    Platform platform = Platform.getLocalInstance();
 
     JPanel content = new JPanel(new BorderLayout());
     content.setPreferredSize(new Dimension(350, 150));
@@ -63,29 +57,32 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 
     // picture
     JLabel pic = new JLabel();
-    ImageIcon icon = Util.getResourceIcon("mrl_logo_about_128.png");
-    if (icon != null) {
-      pic.setIcon(icon);
-    }
+    pic.setIcon(Util.getResourceIcon("mrl_logo_about_128.png"));
     content.add(pic, BorderLayout.WEST);
 
-    JPanel center = new JPanel(new GridBagLayout());
-    GridBagConstraints gc = new GridBagConstraints();
-
+    JPanel center = new JPanel(new GridLayout(0, 1));
     JLabel link = new JLabel("<html><p align=center><a href=\"http://myrobotlab.org\">http://myrobotlab.org</a><html>");
     link.addMouseListener(this);
     content.add(center, BorderLayout.CENTER);
-    content.add(versionLabel, BorderLayout.SOUTH);
-    gc.gridx = 0;
-    gc.gridy = 0;
-    gc.gridwidth = 2;
-    center.add(link, gc);
-    gc.gridwidth = 1;
-    ++gc.gridy;
-    center.add(new JLabel("version "), gc);
-    ++gc.gridx;
-    center.add(versionLabel, gc);
+    
+    center.add(link);
+    JPanel flow = new JPanel();
+    flow.add(new JLabel("platform "));
+    flow.add(new JLabel(platform.toString()));
+    center.add(flow);
+    
+    flow = new JPanel();
+    flow.add(new JLabel("version "));
+    flow.add(new JLabel(platform.getVersion()));
+    center.add(flow);
 
+    flow = new JPanel();
+    flow.add(new JLabel("branch "));
+    flow.add(new JLabel(platform.getBranch()));
+    flow.setAlignmentX(LEFT_ALIGNMENT);
+    center.add(flow);
+
+    
     JPanel buttonPane = new JPanel();
 
     ok = new JButton("OK");
