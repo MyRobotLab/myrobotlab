@@ -2106,6 +2106,16 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     }
     return boardTypes;
   }
+  
+	/**
+	 * event to return list of ports of all ports this serial service can see
+	 * 
+	 * @param portNames
+	 * @return
+	 */
+	public List<String> publishPortNames(List<String> portNames) {
+		return portNames;
+	}
 
   public static void main(String[] args) {
     try {
@@ -2138,7 +2148,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       // Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 

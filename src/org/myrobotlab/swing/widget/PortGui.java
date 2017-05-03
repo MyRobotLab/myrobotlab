@@ -28,13 +28,13 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		add(connectLight, ports, connect, refresh);
 		subscribeGui();
 		connect.addActionListener(this);
-		refresh.addActionListener(this);		
+		refresh.addActionListener(this);
 	}
 
 	/**
 	 * make note !!! - this can 'conflict' with other UI subscribed to the same
-	 * boundServiceName !! - if one UI makes mapping which who's callback does not
-	 * match the other UI
+	 * boundServiceName !! - if one UI makes mapping which who's callback does
+	 * not match the other UI
 	 */
 	@Override
 	public void subscribeGui() {
@@ -42,7 +42,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 		subscribe("getPortNames");
 		subscribe("publishConnect");
 		subscribe("publishDisconnect");
- 		send("getPortNames");
+		send("getPortNames");
 	}
 
 	@Override
@@ -55,22 +55,19 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 
 	// deprecate - use onConnect & onDisconnect
 	public void onState(final PortPublisher portPublisher) {
-		if (portPublisher == null){
-			log.info("here");
-		}
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
- 				// onPortNames(portPublisher.getPortNames());// 	bad idea			
+				// onPortNames(portPublisher.getPortNames());// bad idea
 				// set light if connected
-				if (portPublisher == null){
+				if (portPublisher == null) {
 					log.info("here");
 				}
 				if (portPublisher != null && portPublisher.isConnected()) {
 					connectLight.setIcon(Util.getImageIcon("green.png"));
 					ports.setEnabled(false);
 					connect.setText("disconnect");
-					ports.setSelectedItem(portPublisher.getPortName());	
+					ports.setSelectedItem(portPublisher.getPortName());
 				} else {
 					connectLight.setIcon(Util.getImageIcon("red.png"));
 					ports.setEnabled(true);
@@ -82,18 +79,23 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		if (connect == o){
-			if (connect.getText().equals("connect")){
-				send("connect", ports.getSelectedItem());
-			} else {
-				send("disconnect");
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				Object o = e.getSource();
+				if (connect == o) {
+					if (connect.getText().equals("connect")) {
+						send("connect", ports.getSelectedItem());
+					} else {
+						send("disconnect");
+					}
+				}
+
+				if (refresh == o) {
+					send("getPortNames");
+				}
 			}
-		}
-		
-		if (refresh == o){
-			send("getPortNames");
-		}
+		});
 	}
 
 	@Override
@@ -103,32 +105,47 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 
 	@Override
 	public void onConnect(String portName) {
-		log.info("onConnect - {}", portName);
-		lastPortName = portName;
-		// ports.removeActionListener(this); dont have to Yay !
-		ports.setSelectedItem(portName);
-		ports.setEnabled(false);
-		connectLight.setIcon(Util.getImageIcon("green.png"));
-		connect.setText("disconnect");
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				log.info("onConnect - {}", portName);
+				lastPortName = portName;
+				// ports.removeActionListener(this); dont have to Yay !
+				ports.setSelectedItem(portName);
+				ports.setEnabled(false);
+				connectLight.setIcon(Util.getImageIcon("green.png"));
+				connect.setText("disconnect");
+			}
+		});
 	}
 
 	@Override
 	public void onDisconnect(String portName) {
-		log.info("onDisconnect - {}", portName);
-		ports.setSelectedItem(lastPortName);
-		ports.setEnabled(true);
-		connectLight.setIcon(Util.getImageIcon("red.png"));
-		connect.setText("connect");
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				log.info("onDisconnect - {}", portName);
+				ports.setSelectedItem(lastPortName);
+				ports.setEnabled(true);
+				connectLight.setIcon(Util.getImageIcon("red.png"));
+				connect.setText("connect");
+			}
+		});
 	}
 
 	public void onPortNames(final List<String> inPorts) {
-		ports.removeAllItems();
-		for (int i = 0; i < inPorts.size(); ++i) {
-			ports.addItem(inPorts.get(i));
-		}
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				ports.removeAllItems();
+				for (int i = 0; i < inPorts.size(); ++i) {
+					ports.addItem(inPorts.get(i));
+				}
+			}
+		});
 	}
 
 	public String getSelected() {
-		return (String)ports.getSelectedItem();
+		return (String) ports.getSelectedItem();
 	}
 }
