@@ -72,7 +72,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   protected Picture microOn;
   protected Picture microOff;
 
-
+  
   public void setLeftArduinoConnected(boolean param)
   {
 	  leftArduinoConnected=param;
@@ -489,6 +489,16 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     maps.put("jaw", new Mapper(0,180,60,90));
     
     //poc monitor declaration
+  
+    Texture2D textureBackGround = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/monitor_back.png");
+    Picture BackGround = new Picture("/resource/InMoov/monitor/monitor_back.png");
+    BackGround.setTexture(assetManager, textureBackGround, true);
+    BackGround.setWidth(settings.getWidth());
+    BackGround.setHeight(settings.getHeight());
+    BackGround.setLocalTranslation(0.0F, 0.0F, 0.0F);
+   
+
+    
     BitmapFont font = assetManager.loadFont("Interface/Fonts/Default.fnt");
     leftArduino = new BitmapText(font, false);
     leftArduino.setLocalTranslation(0.0F, 100F, 0.0F);
@@ -497,28 +507,26 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     rightArduino.setLocalTranslation(0.0F, 140F, 0.0F);
     rightArduino.setText("");
     
-
-    
-    Texture2D texture = (Texture2D) assetManager.loadTexture("/resource/microOn.png");
-    float width = texture.getImage().getWidth();
-    float height = texture.getImage().getHeight();
-    Picture microOn = new Picture("/resource/microOn.png");
-    final boolean useAlpha = true;
-    microOn.setTexture(assetManager, texture, useAlpha);
-    microOn.setWidth(width);
-    microOn.setHeight(height);
+    Texture2D texture = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/microOn.png");
+    Picture microOn = new Picture("/resource/InMoov/monitor/microOn.png");
+    microOn.setTexture(assetManager, texture, true);
+    microOn.setWidth(texture.getImage().getWidth());
+    microOn.setHeight(texture.getImage().getHeight());
     microOn.setLocalTranslation(0.0F, settings.getHeight()-200, 0.0F);
-
     
-    Texture2D textureOff = (Texture2D) assetManager.loadTexture("/resource/microOff.png");
-    Picture microOff = new Picture("/resource/microOn.png");
-    microOff.setTexture(assetManager, textureOff, useAlpha);
-    microOff.setWidth(width);
-    microOff.setHeight(height);
+    Texture2D textureOff = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/microOff.png");
+    Picture microOff = new Picture("/resource/InMoov/monitor/microOff.png");
+    microOff.setTexture(assetManager, textureOff, true);
+    microOff.setWidth(texture.getImage().getWidth());
+    microOff.setHeight(texture.getImage().getHeight());
     microOff.setLocalTranslation(0.0F, settings.getHeight()-200, 0.0F);
-    //guiNode.attachChild(microOff);
     
-
+    
+    if (VinmoovMonitorActivated){
+    guiNode.attachChild(BackGround);
+    guiNode.attachChild(microOff);
+    guiNode.attachChild(microOn);
+    }
     
     //end monitor
  
@@ -566,21 +574,21 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     }
     
   //  update text fields Queue
-    if (VinmoovMonitorActivated) {
-    while (bitmapTextQueue.size() > 0) {
-    	 Node  bitmap = bitmapTextQueue.remove();
-    	guiNode.attachChild(bitmap);
-    	String leftIndicator="NOK";
-    	String rightIndicator="NOK";
-      if (leftArduinoConnected){leftIndicator="OK";}
-      if (rightArduinoConnected){rightIndicator="OK";}
-    rootNode.updateGeometricState();
-    leftArduino.setText("Left Arduino : "+leftIndicator);
-    rightArduino.setText("Right Arduino : "+rightIndicator);
-    bitmap.updateGeometricState();
+  //   if (VinmoovMonitorActivated) {
+  //   while (bitmapTextQueue.size() > 0) {
+  //    	 Node  bitmap = bitmapTextQueue.remove();
+  //  	guiNode.attachChild(bitmap);
+  //  	String leftIndicator="NOK";
+   // 	String rightIndicator="NOK";
+   //   if (leftArduinoConnected){leftIndicator="OK";}
+   //   if (rightArduinoConnected){rightIndicator="OK";}
+   // rootNode.updateGeometricState();
+  //  leftArduino.setText("Left Arduino : "+leftIndicator);
+   // rightArduino.setText("Right Arduino : "+rightIndicator);
+   // bitmap.updateGeometricState();
     
-    }
-    }
+   // }
+   // }
     //end
     
     while (pictureQueue.size() > 0) {

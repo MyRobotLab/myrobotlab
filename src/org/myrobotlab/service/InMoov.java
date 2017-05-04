@@ -1715,9 +1715,10 @@ public class InMoov extends Service {
   //like batterie / errors / onreconized text etc ...
   //i01.VinmoovMonitor=1 before to start vinmoov
   
-  public Boolean VinmoovMonitor=false;
+  public Boolean VinmoovMonitorActivated=false;
   public Boolean VinmoovFullScreen=false;
   public String VinmoovBackGroundColor="Grey";
+
   public int VinmoovWidth=800;
   public int VinmoovHeight=600;
   private Boolean debugVinmoov=true;  
@@ -1730,6 +1731,7 @@ public class InMoov extends Service {
   {
 	  vinMoovApp.setRightArduinoConnected(param);  	  
   }
+ 
   
   //end vinmoov cosmetics and optional vinmoov monitor
 
@@ -1737,11 +1739,12 @@ public class InMoov extends Service {
   public InMoov3DApp startVinMoov() throws InterruptedException{
     if (vinMoovApp == null) {
       vinMoovApp = new InMoov3DApp();
-      if (VinmoovMonitor) {
+      if (VinmoovMonitorActivated) {
     	   //vinmoovFullScreen=true 
     	   VinmoovBackGroundColor="Black";
     	   debugVinmoov=false;
     	   vinMoovApp.VinmoovMonitorActivated=true;
+    	   VinmoovWidth=1067;
     	  }
       vinMoovApp.BackGroundColor=VinmoovBackGroundColor;
       AppSettings settings = new AppSettings(true);
