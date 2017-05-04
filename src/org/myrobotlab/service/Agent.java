@@ -652,7 +652,7 @@ public class Agent extends Service {
 	}
 
 	static public Integer publishTerminated(Integer id) {
-		log.info("terminated %d %s - restarting", id, getName(id));
+		log.info("publishTerminated - terminated %d %s - restarting", id, getName(id));
 
 		
 		if (!processes.containsKey(id)) {
@@ -1082,7 +1082,7 @@ public class Agent extends Service {
 	
 	public void startService(){
 		super.startService();
-		addTask(1000, "scanForMsgs");
+		// addTask(1000, "scanForMsgs");
 	}
 
 	/**
