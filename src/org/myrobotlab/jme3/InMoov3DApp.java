@@ -43,7 +43,7 @@ import com.jme3.font.BitmapText;
 
 /**
  * @author Christian
- * version 1.0.1
+ * version 1.0.2
  */
 public class InMoov3DApp extends SimpleApplication implements IntegratedMovementInterface{
   private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
@@ -69,10 +69,10 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   public boolean rightArduinoConnected=false;
   protected  BitmapText leftArduino;
   protected  BitmapText rightArduino;
+  protected  BitmapText onRecognized;
   protected Picture microOn;
   protected Picture microOff;
-
-  
+    
   public void setLeftArduinoConnected(boolean param)
   {
 	  leftArduinoConnected=param;
@@ -85,6 +85,9 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   }
   public void setMicro(boolean param)
   {
+	  if (VinmoovMonitorActivated)
+	  {
+	
 	  if (param)
 	  {
 		  pictureQueue.add(microOn);
@@ -93,7 +96,8 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 	  {
 		  pictureQueue.add(microOff);  
 	  }
-
+	  }
+	
   }
   //end monitor
      
@@ -506,26 +510,30 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     rightArduino = new BitmapText(font, false);
     rightArduino.setLocalTranslation(0.0F, 140F, 0.0F);
     rightArduino.setText("");
+    onRecognized = new BitmapText(font, false);
+    onRecognized.setLocalTranslation((settings.getWidth()/2)-180, settings.getHeight()-20, 0.0F);
+    onRecognized.setText("onRecognized : WAITING");
+    
     
     Texture2D texture = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/microOn.png");
-    Picture microOn = new Picture("/resource/InMoov/monitor/microOn.png");
+    microOn = new Picture("/resource/InMoov/monitor/microOn.png");
     microOn.setTexture(assetManager, texture, true);
     microOn.setWidth(texture.getImage().getWidth());
     microOn.setHeight(texture.getImage().getHeight());
-    microOn.setLocalTranslation(0.0F, settings.getHeight()-200, 0.0F);
+    microOn.setLocalTranslation(0.0F, settings.getHeight()-100, 0.0F);
     
     Texture2D textureOff = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/microOff.png");
-    Picture microOff = new Picture("/resource/InMoov/monitor/microOff.png");
+    microOff = new Picture("/resource/InMoov/monitor/microOff.png");
     microOff.setTexture(assetManager, textureOff, true);
     microOff.setWidth(texture.getImage().getWidth());
     microOff.setHeight(texture.getImage().getHeight());
-    microOff.setLocalTranslation(0.0F, settings.getHeight()-200, 0.0F);
+    microOff.setLocalTranslation(0.0F, settings.getHeight()-100, 0.0F);
     
     
     if (VinmoovMonitorActivated){
     guiNode.attachChild(BackGround);
-    guiNode.attachChild(microOff);
-    guiNode.attachChild(microOn);
+    guiNode.attachChild(onRecognized);
+    //guiNode.attachChild(microOn);
     }
     
     //end monitor
@@ -591,32 +599,23 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
    // }
     //end
     
-    while (pictureQueue.size() > 0) {
-   	Picture picture = pictureQueue.remove();
-   	rootNode.updateGeometricState();
-    guiNode.attachChild(picture);
-    picture.updateGeometricState();
-   
-   }
-    
-    
     while (nodeQueue.size() > 0) {
-      Node node = nodeQueue.remove();
-      Node hookNode = nodes.get(node.getUserData("hookTo"));
-      if (hookNode == null) {
-        hookNode = rootNode;
+        Node node = nodeQueue.remove();
+        Node hookNode = nodes.get(node.getUserData("hookTo"));
+        if (hookNode == null) {
+          hookNode = rootNode;
+        }
+        Spatial x = hookNode.getChild(node.getName());
+        if (x != null) {
+          rootNode.updateGeometricState();
+        }
+        hookNode.attachChild(node);
+        if (node.getUserData("collisionItem") != null) {
+          collisionItems.add(node);
+        }
+              
       }
-      Spatial x = hookNode.getChild(node.getName());
-      if (x != null) {
-        rootNode.updateGeometricState();
-      }
-      hookNode.attachChild(node);
-      if (node.getUserData("collisionItem") != null) {
-        collisionItems.add(node);
-      }
-            
-    }
-    
+      
     while (eventQueue.size() > 0) {
       IKData event = eventQueue.remove();
       if (servoToNode.containsKey(event.name)){
@@ -636,6 +635,22 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       Point p = pointQueue.remove();
       point.setLocalTranslation((float)p.getX(), (float)p.getZ(), (float)p.getY());
     }
+    
+    if (VinmoovMonitorActivated){
+    while (pictureQueue.size() > 0) {
+   	Picture picture = pictureQueue.remove();
+   	//rootNode.updateGeometricState();
+   	guiNode.detachChild(microOff);
+   	guiNode.detachChild(microOn);
+   	guiNode.attachChild(picture);
+    microOff.updateGeometricState();
+    microOn.updateGeometricState();
+   
+    }
+    }
+    
+
+
 
   }
   
