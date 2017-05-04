@@ -1014,6 +1014,7 @@ public class InMoov extends Service {
     ear = (SpeechRecognizer) startPeer("ear");
     subscribe(ear.getName(), "listeningEvent");
     subscribe(ear.getName(), "pauseListening");
+    subscribe(ear.getName(), "recognized");
     
     if (mouth != null) {
       ear.addMouth(mouth);
@@ -1716,22 +1717,30 @@ public class InMoov extends Service {
   //vinmoov cosmetics and optional vinmoov monitor idea ( poc i know nothing about jme... )
   //just want to use jme as main screen and show some informations
   //like batterie / errors / onreconized text etc ...
-  //i01.VinmoovMonitor=1 before to start vinmoov
+  //i01.VinmoovMonitorActivated=1 before to start vinmoov
+  
+  public Boolean VinmoovMonitorActivated=false;
   
   	public void onListeningEvent() {
-  		if (vinMoovApp != null){
+  		if (vinMoovApp != null && VinmoovMonitorActivated){
   		  vinMoovApp.setMicro(true);
   		  }
 	  }
   	
   	public void onPauseListening() {
-  		if (vinMoovApp != null){
+  		if (vinMoovApp != null && VinmoovMonitorActivated){
   		  vinMoovApp.setMicro(false);
+  		  }
+	  }
+  	
+  	public void onRecognized(String text) {
+  		if (vinMoovApp != null && VinmoovMonitorActivated){
+  		  vinMoovApp.onRecognized(text);
   		  }
 	  }
   
   
-  public Boolean VinmoovMonitorActivated=false;
+
   public Boolean VinmoovFullScreen=false;
   public String VinmoovBackGroundColor="Grey";
 

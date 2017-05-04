@@ -43,7 +43,7 @@ import com.jme3.font.BitmapText;
 
 /**
  * @author Christian
- * version 1.0.2
+ * version 1.0.3
  */
 public class InMoov3DApp extends SimpleApplication implements IntegratedMovementInterface{
   private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
@@ -67,6 +67,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   public boolean VinmoovMonitorActivated=false;
   public boolean leftArduinoConnected=false;
   public boolean rightArduinoConnected=false;
+  protected String onRecognizedText="";
   protected  BitmapText leftArduino;
   protected  BitmapText rightArduino;
   protected  BitmapText onRecognized;
@@ -85,9 +86,6 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   }
   public void setMicro(boolean param)
   {
-	  if (VinmoovMonitorActivated)
-	  {
-	
 	  if (param)
 	  {
 		  pictureQueue.add(microOn);
@@ -96,8 +94,12 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 	  {
 		  pictureQueue.add(microOff);  
 	  }
-	  }
-	
+  }
+  
+  public void onRecognized(String text)
+  {
+	  onRecognizedText=text;
+	  bitmapTextQueue.add(onRecognized);
   }
   //end monitor
      
@@ -581,24 +583,6 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       collisionItems.clear();
     }
     
-  //  update text fields Queue
-  //   if (VinmoovMonitorActivated) {
-  //   while (bitmapTextQueue.size() > 0) {
-  //    	 Node  bitmap = bitmapTextQueue.remove();
-  //  	guiNode.attachChild(bitmap);
-  //  	String leftIndicator="NOK";
-   // 	String rightIndicator="NOK";
-   //   if (leftArduinoConnected){leftIndicator="OK";}
-   //   if (rightArduinoConnected){rightIndicator="OK";}
-   // rootNode.updateGeometricState();
-  //  leftArduino.setText("Left Arduino : "+leftIndicator);
-   // rightArduino.setText("Right Arduino : "+rightIndicator);
-   // bitmap.updateGeometricState();
-    
-   // }
-   // }
-    //end
-    
     while (nodeQueue.size() > 0) {
         Node node = nodeQueue.remove();
         Node hookNode = nodes.get(node.getUserData("hookTo"));
@@ -637,7 +621,8 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     }
     
     if (VinmoovMonitorActivated){
-    while (pictureQueue.size() > 0) {
+    	
+     while (pictureQueue.size() > 0) {
    	Picture picture = pictureQueue.remove();
    	//rootNode.updateGeometricState();
    	guiNode.detachChild(microOff);
@@ -647,6 +632,23 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     microOn.updateGeometricState();
    
     }
+    
+    while (bitmapTextQueue.size() > 0) {
+    	   Node  bitmap = bitmapTextQueue.remove();
+    	   String leftIndicator="NOK";
+    	   String rightIndicator="NOK";
+    	   if (leftArduinoConnected){leftIndicator="OK";}
+    	   if (rightArduinoConnected){rightIndicator="OK";}
+    	   //rootNode.updateGeometricState();
+    	   //leftArduino.setText("Left Arduino : "+leftIndicator);
+    	   //rightArduino.setText("Right Arduino : "+rightIndicator);
+    	   onRecognized.setText(onRecognizedText);
+    	   guiNode.detachChild(bitmap);
+    	   guiNode.attachChild(bitmap);
+    	   bitmap.updateGeometricState();
+    	    
+    	    }
+    
     }
     
 
