@@ -1012,6 +1012,9 @@ public class InMoov extends Service {
   public SpeechRecognizer startEar() throws Exception {
     speakBlocking("starting ear");
     ear = (SpeechRecognizer) startPeer("ear");
+    subscribe(ear.getName(), "listeningEvent");
+    subscribe(ear.getName(), "pauseListening");
+    
     if (mouth != null) {
       ear.addMouth(mouth);
     }
@@ -1715,6 +1718,19 @@ public class InMoov extends Service {
   //like batterie / errors / onreconized text etc ...
   //i01.VinmoovMonitor=1 before to start vinmoov
   
+  	public void onListeningEvent() {
+  		if (vinMoovApp != null){
+  		  vinMoovApp.setMicro(true);
+  		  }
+	  }
+  	
+  	public void onPauseListening() {
+  		if (vinMoovApp != null){
+  		  vinMoovApp.setMicro(false);
+  		  }
+	  }
+  
+  
   public Boolean VinmoovMonitorActivated=false;
   public Boolean VinmoovFullScreen=false;
   public String VinmoovBackGroundColor="Grey";
@@ -1731,7 +1747,9 @@ public class InMoov extends Service {
   {
 	  vinMoovApp.setRightArduinoConnected(param);  	  
   }
+  
  
+  
   
   //end vinmoov cosmetics and optional vinmoov monitor
 
