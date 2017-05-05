@@ -54,6 +54,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   private transient Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
   private transient Queue<BitmapText> bitmapTextQueue = new ConcurrentLinkedQueue<BitmapText>();
   private transient Queue<Picture> pictureQueue = new ConcurrentLinkedQueue<Picture>();
+  private transient Queue<Picture> batteryQueue = new ConcurrentLinkedQueue<Picture>();
   
   private HashMap<String, Geometry> shapes = new HashMap<String, Geometry>();
   private boolean updateCollisionItem;
@@ -68,11 +69,13 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   public boolean leftArduinoConnected=false;
   public boolean rightArduinoConnected=false;
   protected String onRecognizedText="";
+  protected Integer batteryLevel=100;
   protected  BitmapText leftArduino;
   protected  BitmapText rightArduino;
   protected  BitmapText onRecognized;
   protected Picture microOn;
   protected Picture microOff;
+  protected Picture battery;
     
   public void setLeftArduinoConnected(boolean param)
   {
@@ -100,6 +103,12 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   {
 	  onRecognizedText=text;
 	  bitmapTextQueue.add(onRecognized);
+  }
+  
+  public void setBatteryLevel(Integer level)
+  {
+	  batteryLevel=level;
+	  batteryQueue.add(battery); 
   }
   //end monitor
      
@@ -503,7 +512,8 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     BackGround.setHeight(settings.getHeight());
     BackGround.setLocalTranslation(0.0F, 0.0F, 0.0F);
    
-
+    double widthCoef=1920F/settings.getWidth();
+    double heightCoef=1080F/settings.getHeight();
     
     BitmapFont font = assetManager.loadFont("Interface/Fonts/Default.fnt");
     leftArduino = new BitmapText(font, false);
@@ -514,28 +524,36 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     rightArduino.setText("");
     onRecognized = new BitmapText(font, false);
     onRecognized.setLocalTranslation((settings.getWidth()/2)-180, settings.getHeight()-20, 0.0F);
-    onRecognized.setText("onRecognized : WAITING");
-    
+    onRecognized.setText("Listening...");
     
     Texture2D texture = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/microOn.png");
     microOn = new Picture("/resource/InMoov/monitor/microOn.png");
     microOn.setTexture(assetManager, texture, true);
-    microOn.setWidth(texture.getImage().getWidth());
-    microOn.setHeight(texture.getImage().getHeight());
-    microOn.setLocalTranslation(0.0F, settings.getHeight()-100, 0.0F);
+    microOn.setWidth(Math.round(texture.getImage().getWidth()/widthCoef));
+    microOn.setHeight(Math.round(texture.getImage().getHeight()/heightCoef));
+    microOn.setLocalTranslation(10F, settings.getHeight()-50, 0.0F);
     
     Texture2D textureOff = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/microOff.png");
     microOff = new Picture("/resource/InMoov/monitor/microOff.png");
     microOff.setTexture(assetManager, textureOff, true);
-    microOff.setWidth(texture.getImage().getWidth());
-    microOff.setHeight(texture.getImage().getHeight());
-    microOff.setLocalTranslation(0.0F, settings.getHeight()-100, 0.0F);
+    microOff.setWidth(Math.round(textureOff.getImage().getWidth()/widthCoef));
+    microOff.setHeight(Math.round(textureOff.getImage().getHeight()/heightCoef));
+    microOff.setLocalTranslation(10F, settings.getHeight()-50, 0.0F);
+    
+    Texture2D textureBat = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/bat_100.png");
+    battery = new Picture("/resource/InMoov/monitor/bat_100.png");
+    battery.setTexture(assetManager, textureBat, true);
+    battery.setWidth(Math.round(textureBat.getImage().getWidth()/widthCoef));
+    battery.setHeight(Math.round(textureBat.getImage().getHeight()/heightCoef));
+    battery.setLocalTranslation(Math.round(settings.getWidth()-(textureBat.getImage().getWidth()/widthCoef)), Math.round(settings.getHeight()-(textureBat.getImage().getHeight()/heightCoef)), 0.0F);
+    
     
     
     if (VinmoovMonitorActivated){
     guiNode.attachChild(BackGround);
     guiNode.attachChild(onRecognized);
-    //guiNode.attachChild(microOn);
+    guiNode.attachChild(battery);
+    guiNode.attachChild(microOn);
     }
     
     //end monitor
@@ -583,22 +601,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       collisionItems.clear();
     }
     
-    while (nodeQueue.size() > 0) {
-        Node node = nodeQueue.remove();
-        Node hookNode = nodes.get(node.getUserData("hookTo"));
-        if (hookNode == null) {
-          hookNode = rootNode;
-        }
-        Spatial x = hookNode.getChild(node.getName());
-        if (x != null) {
-          rootNode.updateGeometricState();
-        }
-        hookNode.attachChild(node);
-        if (node.getUserData("collisionItem") != null) {
-          collisionItems.add(node);
-        }
-              
-      }
+    
       
     while (eventQueue.size() > 0) {
       IKData event = eventQueue.remove();
@@ -623,8 +626,10 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     if (VinmoovMonitorActivated){
     	
      while (pictureQueue.size() > 0) {
+    	
    	Picture picture = pictureQueue.remove();
    	//rootNode.updateGeometricState();
+   	
    	guiNode.detachChild(microOff);
    	guiNode.detachChild(microOn);
    	guiNode.attachChild(picture);
@@ -632,6 +637,18 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     microOn.updateGeometricState();
    
     }
+     
+     while (batteryQueue.size() > 0) {
+     	
+    	   	Picture picture = batteryQueue.remove();
+    	   	//rootNode.updateGeometricState();
+    	   	
+    	   	guiNode.detachChild(battery);
+    	   	//picture = new Picture("/resource/InMoov/monitor/bat_80.png");
+    	   	guiNode.attachChild(picture);
+    	   	picture.updateGeometricState();
+    	   
+    	    }
     
     while (bitmapTextQueue.size() > 0) {
     	   Node  bitmap = bitmapTextQueue.remove();
@@ -651,7 +668,22 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     
     }
     
-
+    while (nodeQueue.size() > 0) {
+        Node node = nodeQueue.remove();
+        Node hookNode = nodes.get(node.getUserData("hookTo"));
+        if (hookNode == null) {
+          hookNode = rootNode;
+        }
+        Spatial x = hookNode.getChild(node.getName());
+        if (x != null) {
+          rootNode.updateGeometricState();
+        }
+        hookNode.attachChild(node);
+        if (node.getUserData("collisionItem") != null) {
+          collisionItems.add(node);
+        }
+              
+      }
 
 
   }
