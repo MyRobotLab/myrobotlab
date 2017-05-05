@@ -1756,7 +1756,10 @@ public class InMoov extends Service {
   {
 	  vinMoovApp.setRightArduinoConnected(param);  	  
   }
-  
+  public void setBatteryLevel(Integer level)
+  {
+	  vinMoovApp.setBatteryLevel(level);
+  }
  
   
   
