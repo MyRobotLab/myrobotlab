@@ -407,6 +407,7 @@
 		
 		<pathelement location="${repo}/com.voicerss.tts/1.0/tts.jar"/>
 		<pathelement location="${repo}/com.amazonaws.services/1.11.118/aws-java-sdk-1.11.118.jar"/>
+        <pathelement location="${repo}/org.joda/2.9.4/joda-time.jar"/>
 		
 	        <!-- KW slack bot dependencies start -->	
 		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/atlassian-util-concurrent-2.4.2.jar"/>
