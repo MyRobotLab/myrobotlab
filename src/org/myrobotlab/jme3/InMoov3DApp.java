@@ -69,13 +69,15 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   public boolean leftArduinoConnected=false;
   public boolean rightArduinoConnected=false;
   protected String onRecognizedText="";
-  protected Integer batteryLevel=100;
   protected  BitmapText leftArduino;
   protected  BitmapText rightArduino;
   protected  BitmapText onRecognized;
   protected Picture microOn;
   protected Picture microOff;
-  protected Picture battery;
+  protected Picture battery[] = new Picture[101];
+  protected Texture2D textureBat[] = new Texture2D[101];
+  
+
     
   public void setLeftArduinoConnected(boolean param)
   {
@@ -107,8 +109,18 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   
   public void setBatteryLevel(Integer level)
   {
-	  batteryLevel=level;
-	  batteryQueue.add(battery); 
+	  
+	    if (level>=80 && level<=100){level=100;}
+	    if (level>=60 && level<80){level=80;}
+	    if (level>=40 && level<60){level=60;}
+	    if (level>=20 && level<40){level=40;}
+	    if (level>=10 && level<20){level=20;}
+	    if (level>=0 && level<10){level=0;}
+	    
+	    if  (!(level>=0) && !(level<=100)){level=100;}
+	    
+	  batteryQueue.add(battery[level]); 
+	 
   }
   //end monitor
      
@@ -540,19 +552,24 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     microOff.setHeight(Math.round(textureOff.getImage().getHeight()/heightCoef));
     microOff.setLocalTranslation(10F, settings.getHeight()-50, 0.0F);
     
-    Texture2D textureBat = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/bat_100.png");
-    battery = new Picture("/resource/InMoov/monitor/bat_100.png");
-    battery.setTexture(assetManager, textureBat, true);
-    battery.setWidth(Math.round(textureBat.getImage().getWidth()/widthCoef));
-    battery.setHeight(Math.round(textureBat.getImage().getHeight()/heightCoef));
-    battery.setLocalTranslation(Math.round(settings.getWidth()-(textureBat.getImage().getWidth()/widthCoef)), Math.round(settings.getHeight()-(textureBat.getImage().getHeight()/heightCoef)), 0.0F);
     
+    
+    
+    for(int i = 0; i <= 100; i+=20)
+    {
+    	textureBat[i] = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/bat_"+i+".png");
+    	battery[i] = new Picture("/resource/InMoov/monitor/bat_"+i+".png");
+	    battery[i].setTexture(assetManager, textureBat[i], true);
+	    battery[i].setWidth(Math.round(textureBat[i].getImage().getWidth()/widthCoef));
+	    battery[i].setHeight(Math.round(textureBat[i].getImage().getHeight()/heightCoef));
+	    battery[i].setLocalTranslation(Math.round(settings.getWidth()-(textureBat[i].getImage().getWidth()/widthCoef)), Math.round(settings.getHeight()-(textureBat[i].getImage().getHeight()/heightCoef)), 0.0F);
+    }   
     
     
     if (VinmoovMonitorActivated){
     guiNode.attachChild(BackGround);
     guiNode.attachChild(onRecognized);
-    guiNode.attachChild(battery);
+    guiNode.attachChild(battery[100]);
     guiNode.attachChild(microOn);
     }
     
@@ -642,13 +659,20 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
      	
     	   	Picture picture = batteryQueue.remove();
     	   	//rootNode.updateGeometricState();
-    	   	
-    	   	guiNode.detachChild(battery);
-    	   	//picture = new Picture("/resource/InMoov/monitor/bat_80.png");
-    	   	guiNode.attachChild(picture);
-    	   	picture.updateGeometricState();
-    	   
+    	    for(int i = 0; i <= 100; i+=20)
+    	    {
+    	   	guiNode.detachChild(battery[i]);
     	    }
+    	   
+    	   	//picture = new Picture("/resource/InMoov/monitor/bat_80.png");
+    	  
+    	   	guiNode.attachChild(picture);
+    	    for(int i = 0; i <= 100; i+=20)
+    	    {
+    	   	battery[i].updateGeometricState();
+     	    }
+    	    
+     }
     
     while (bitmapTextQueue.size() > 0) {
     	   Node  bitmap = bitmapTextQueue.remove();
@@ -674,13 +698,13 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
         if (hookNode == null) {
           hookNode = rootNode;
         }
-        Spatial x = hookNode.getChild(node.getName());
-        if (x != null) {
-          rootNode.updateGeometricState();
-        }
         hookNode.attachChild(node);
         if (node.getUserData("collisionItem") != null) {
           collisionItems.add(node);
+        }
+        Spatial x = hookNode.getChild(node.getName());
+        if (x != null) {
+          rootNode.updateGeometricState();
         }
               
       }

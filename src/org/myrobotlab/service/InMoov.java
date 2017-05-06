@@ -1738,6 +1738,15 @@ public class InMoov extends Service {
   		  vinMoovApp.onRecognized(text);
   		  }
 	  }
+  	
+  	 public void setBatteryLevel(Integer level)
+  	  {
+  		  if (vinMoovApp != null && VinmoovMonitorActivated){
+  		 		  vinMoovApp.setBatteryLevel(level);
+  		  
+  		  }
+  	  }
+  	 
   
   
 
@@ -1755,10 +1764,6 @@ public class InMoov extends Service {
   public void setRightArduinoConnected(boolean param)
   {
 	  vinMoovApp.setRightArduinoConnected(param);  	  
-  }
-  public void setBatteryLevel(Integer level)
-  {
-	  vinMoovApp.setBatteryLevel(level);
   }
  
   
