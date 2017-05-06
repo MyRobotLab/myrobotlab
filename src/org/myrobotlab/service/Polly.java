@@ -342,6 +342,7 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
     // gui
     // add dependency if necessary
     meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addDependency("com.joda", "2.9.4");
     meta.addDependency("com.amazonaws.services", "1.11.118");
     meta.addCategory("speech");
     return meta;
