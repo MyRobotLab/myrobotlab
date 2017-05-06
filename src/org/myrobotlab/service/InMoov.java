@@ -31,8 +31,8 @@ import com.jme3.system.AppSettings;
  * InMoov - The InMoov Service.
  * 
  * The InMoov service allows control of the InMoov robot. This robot was created
- * by Gael Langevin. It's an open source 3D printable robot. All of the parts and
- * instructions to build are on his blog (http://inmoov.blogspot.com/ and
+ * by Gael Langevin. It's an open source 3D printable robot. All of the parts
+ * and instructions to build are on his blog (http://inmoov.blogspot.com/ and
  * http://www.inmoov.fr/). InMoov is a composite of servos, Arduinos,
  * microphone, camera, kinect and computer. The InMoov service is composed of
  * many other peer services, and allows easy initialization and control of these
@@ -198,10 +198,11 @@ public class InMoov extends Service {
       torso.disable();
     }
     if (eyelids != null) {
-    	eyelids.rest();
-    	eyelids.disable();
-      }
+      eyelids.rest();
+      eyelids.disable();
+    }
   }
+
   @Deprecated
   public void attach() {
     enable();
@@ -231,7 +232,7 @@ public class InMoov extends Service {
     }
     if (eyelids != null) {
       eyelids.enable();
-      }
+    }
   }
 
   public void beginCheckingOnInactivity() {
@@ -271,10 +272,10 @@ public class InMoov extends Service {
     if (torso != null) {
       torso.broadcastState();
     }
-    
+
     if (eyelids != null) {
-    	eyelids.broadcastState();
-      }
+      eyelids.broadcastState();
+    }
 
     if (headTracking != null) {
       headTracking.broadcastState();
@@ -337,11 +338,11 @@ public class InMoov extends Service {
       script.append(indentSpace);
       script.append(torso.getScript(getName()));
     }
-    
+
     if (eyelids != null) {
-        script.append(indentSpace);
-        script.append(eyelids.getScript(getName()));
-      }
+      script.append(indentSpace);
+      script.append(eyelids.getScript(getName()));
+    }
 
     send("python", "appendScript", script.toString());
 
@@ -423,7 +424,7 @@ public class InMoov extends Service {
     }
     if (eyelids != null) {
       eyelids.disable();
-      }
+    }
   }
 
   public void fullSpeed() {
@@ -446,8 +447,8 @@ public class InMoov extends Service {
       torso.setVelocity(-1.0, -1.0, -1.0);
     }
     if (eyelids != null) {
-    	eyelids.setVelocity(-1.0, -1.0);
-      }
+      eyelids.setVelocity(-1.0, -1.0);
+    }
   }
 
   String getBoardType(String side, String type) {
@@ -497,9 +498,8 @@ public class InMoov extends Service {
       lastActivityTime = Math.max(lastActivityTime, torso.getLastActivityTime());
     }
     if (eyelids != null) {
-        lastActivityTime = Math.max(lastActivityTime, eyelids.getLastActivityTime());
-      }
-
+      lastActivityTime = Math.max(lastActivityTime, eyelids.getLastActivityTime());
+    }
 
     if (lastPIRActivityTime != null) {
       lastActivityTime = Math.max(lastActivityTime, lastPIRActivityTime);
@@ -549,8 +549,6 @@ public class InMoov extends Service {
 
   // ------ composites servos begin -----------
 
-
-
   public boolean isAttached() {
     boolean attached = false;
     if (leftHand != null) {
@@ -576,10 +574,10 @@ public class InMoov extends Service {
     if (torso != null) {
       attached |= torso.isAttached();
     }
-    
+
     if (eyelids != null) {
-        attached |= eyelids.isAttached();
-      }
+      attached |= eyelids.isAttached();
+    }
     return attached;
   }
 
@@ -624,14 +622,14 @@ public class InMoov extends Service {
       log.error("moveHead - I have a null head");
     }
   }
-  
+
   public void moveHead(Integer neck, Integer rothead, Integer rollNeck) {
-	    if (head != null) {
-	      head.moveTo(neck, rothead, rollNeck);
-	    } else {
-	      log.error("moveHead - I have a null head");
-	    }
-	  }
+    if (head != null) {
+      head.moveTo(neck, rothead, rollNeck);
+    } else {
+      log.error("moveHead - I have a null head");
+    }
+  }
 
   public void moveHead(Integer neck, Integer rothead, Integer eyeX, Integer eyeY, Integer jaw) {
     if (head != null) {
@@ -640,14 +638,14 @@ public class InMoov extends Service {
       log.error("I have a null head");
     }
   }
-  
+
   public void moveHead(Integer neck, Integer rothead, Integer eyeX, Integer eyeY, Integer jaw, Integer rollNeck) {
-	    if (head != null) {
-	      head.moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
-	    } else {
-	      log.error("I have a null head");
-	    }
-	  }
+    if (head != null) {
+      head.moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
+    } else {
+      log.error("I have a null head");
+    }
+  }
 
   // ---------- canned gestures end ---------
 
@@ -658,14 +656,14 @@ public class InMoov extends Service {
       log.error("moveTorso - I have a null torso");
     }
   }
-  
+
   public void moveEyelids(Integer eyelidleft, Integer eyelidright) {
-	    if (eyelids != null) {
-	    	eyelids.moveTo(eyelidleft, eyelidright);
-	    } else {
-	      log.error("moveEyelids - I have a null Eyelids");
-	    }
-	  }
+    if (eyelids != null) {
+      eyelids.moveTo(eyelidleft, eyelidright);
+    } else {
+      log.error("moveEyelids - I have a null Eyelids");
+    }
+  }
 
   public void onOpenNIData(OpenNiData data) {
 
@@ -804,8 +802,8 @@ public class InMoov extends Service {
       torso.rest();
     }
     if (eyelids != null) {
-    	eyelids.rest();
-      }
+      eyelids.rest();
+    }
   }
 
   @Override
@@ -889,14 +887,14 @@ public class InMoov extends Service {
   public void setHeadVelocity(Double rothead, Double neck) {
     setHeadVelocity(rothead, neck, null, null, null, null);
   }
-  
+
   public void setHeadVelocity(Double rothead, Double neck, Double rollNeck) {
-	    setHeadVelocity(rothead, neck, null, null, null, rollNeck);
-	  }
-  
+    setHeadVelocity(rothead, neck, null, null, null, rollNeck);
+  }
+
   public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
-	    setHeadVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, null);
-	  }
+    setHeadVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, null);
+  }
 
   @Deprecated
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
@@ -938,13 +936,13 @@ public class InMoov extends Service {
   }
 
   public void setEyelidsVelocity(Double eyelidleft, Double eyelidright) {
-	    if (eyelids != null) {
-	    	eyelids.setVelocity(eyelidleft, eyelidright);
-	    } else {
-	      log.warn("setEyelidsVelocity - I have no eyelids");
-	    }
-	  }
-  
+    if (eyelids != null) {
+      eyelids.setVelocity(eyelidleft, eyelidright);
+    } else {
+      log.warn("setEyelidsVelocity - I have no eyelids");
+    }
+  }
+
   public boolean speakBlocking(Status test) {
     if (test != null && !mute) {
       return speakBlocking(test.toString());
@@ -1015,7 +1013,7 @@ public class InMoov extends Service {
     subscribe(ear.getName(), "listeningEvent");
     subscribe(ear.getName(), "pauseListening");
     subscribe(ear.getName(), "recognized");
-    
+
     if (mouth != null) {
       ear.addMouth(mouth);
     }
@@ -1030,7 +1028,7 @@ public class InMoov extends Service {
     }
     eyesTracking = (Tracking) startPeer("eyesTracking");
     eyesTracking.connect(port, xPin, yPin);
-    arduinos.put(port, (Arduino)eyesTracking.getArduino());
+    arduinos.put(port, (Arduino) eyesTracking.getArduino());
     return eyesTracking;
   }
 
@@ -1046,21 +1044,20 @@ public class InMoov extends Service {
     return hand;
   }
 
-  
-  
   public InMoovHead startHead(String port) throws Exception {
-    return startHead(port, null,12,13,22,24,26,30);
+    return startHead(port, null, 12, 13, 22, 24, 26, 30);
   }
-  
-  public InMoovHead startHead(String port, String type) throws Exception {
-	    return startHead(port, type, 12,13,22,24,26,30);
-	  }
-  
-  public InMoovHead startHead(String port, Integer headYPin,Integer headXPin,Integer eyeXPin,Integer eyeYPin,Integer jawPin,Integer rollNeckPin) throws Exception {
-	    return startHead(port, null, headYPin,headXPin,eyeXPin,eyeYPin,jawPin,rollNeckPin);
-	  }
 
-  public InMoovHead startHead(String port, String type, Integer headYPin,Integer headXPin,Integer eyeXPin,Integer eyeYPin,Integer jawPin,Integer rollNeckPin) throws Exception {
+  public InMoovHead startHead(String port, String type) throws Exception {
+    return startHead(port, type, 12, 13, 22, 24, 26, 30);
+  }
+
+  public InMoovHead startHead(String port, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) throws Exception {
+    return startHead(port, null, headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
+  }
+
+  public InMoovHead startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin)
+      throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     speakBlocking(String.format("starting head on %s", port));
 
@@ -1088,7 +1085,7 @@ public class InMoov extends Service {
     }
     headTracking = (Tracking) startPeer("headTracking");
     headTracking.connect(port, rotheadPin, neckPin);
-    arduinos.put(port, (Arduino)headTracking.controller);
+    arduinos.put(port, (Arduino) headTracking.controller);
     return headTracking;
   }
 
@@ -1131,9 +1128,9 @@ public class InMoov extends Service {
       }
 
       mouthControl = (MouthControl) startPeer("mouthControl");
-  
+
       mouthControl.arduino.connect(port);
-      mouthControl.jaw.attach(mouthControl.arduino,26);
+      mouthControl.jaw.attach(mouthControl.arduino, 26);
 
       arduinos.put(port, mouthControl.arduino);
       String p = mouthControl.getArduino().getSerial().getPortName();
@@ -1191,7 +1188,7 @@ public class InMoov extends Service {
       Arduino arduino = arduinos.get(port);
       // arduino.connect(port);
       // arduino.setSampleRate(8000);
-      arduino.enablePin(pin,10);
+      arduino.enablePin(pin, 10);
       pirArduino = arduino;
       pirPin = pin;
       arduino.addListener("publishPin", this.getName(), "publishPin");
@@ -1231,8 +1228,7 @@ public class InMoov extends Service {
     super.startService();
     python = getPython();
   }
-  
-  
+
   public InMoovTorso startTorso(String port) throws Exception {
     return startTorso(port, null);
   }
@@ -1253,34 +1249,34 @@ public class InMoov extends Service {
 
     return torso;
   }
-  
+
   public InMoovEyelids startEyelids(String port) throws Exception {
-	    return startEyelids(port, null, 22, 24);
-	  }
-  
-  public InMoovEyelids startEyelids(String port, int eyelidleftPin,int eyelidrightPin) throws Exception {
-	    return startEyelids(port, null, eyelidleftPin, eyelidrightPin);
-	  }
+    return startEyelids(port, null, 22, 24);
+  }
 
-  public InMoovEyelids startEyelids(String port, String type, int eyelidleftPin,int eyelidrightPin) throws Exception {
-	    // log.warn(InMoov.buildDNA(myKey, serviceClass))
-	    speakBlocking(String.format("starting eyelids on %s", port));
+  public InMoovEyelids startEyelids(String port, int eyelidleftPin, int eyelidrightPin) throws Exception {
+    return startEyelids(port, null, eyelidleftPin, eyelidrightPin);
+  }
 
-	    eyelids = (InMoovEyelids) startPeer("eyelids");
+  public InMoovEyelids startEyelids(String port, String type, int eyelidleftPin, int eyelidrightPin) throws Exception {
+    // log.warn(InMoov.buildDNA(myKey, serviceClass))
+    speakBlocking(String.format("starting eyelids on %s", port));
 
-	    if (type == null) {
-	      type = Arduino.BOARD_TYPE_MEGA;
-	    }
+    eyelids = (InMoovEyelids) startPeer("eyelids");
 
-	    eyelids.arduino.setBoard(type);
-	    eyelids.connect(port,eyelidleftPin,eyelidrightPin);
-	    arduinos.put(port, eyelids.arduino);
+    if (type == null) {
+      type = Arduino.BOARD_TYPE_MEGA;
+    }
 
-	    return eyelids;
-	  }
+    eyelids.arduino.setBoard(type);
+    eyelids.connect(port, eyelidleftPin, eyelidrightPin);
+    arduinos.put(port, eyelids.arduino);
+
+    return eyelids;
+  }
 
   public void stopPIR() {
-    if (pirArduino != null && pirPin!= null) {
+    if (pirArduino != null && pirPin != null) {
       pirArduino.disablePin(pirPin);
       pirPin = null;
       pirArduino = null;
@@ -1341,7 +1337,7 @@ public class InMoov extends Service {
       speakBlocking("testing torso");
       torso.test();
     }
-    
+
     if (eyelids != null) {
       speakBlocking("testing eyelids");
       eyelids.test();
@@ -1428,7 +1424,7 @@ public class InMoov extends Service {
   public void loadCalibration() {
     loadCalibration(CALIBRATION_FILE);
   }
-  
+
   public void loadCalibration(String calibrationFilename) {
     File calibF = new File(calibrationFilename);
     if (calibF.exists()) {
@@ -1443,14 +1439,14 @@ public class InMoov extends Service {
       }
     }
   }
-  
+
   public void saveCalibration() {
     saveCalibration(CALIBRATION_FILE);
   }
-  
+
   public void saveCalibration(String calibrationFilename) {
-    
-    File calibFile = new File(calibrationFilename);    
+
+    File calibFile = new File(calibrationFilename);
     FileWriter calibrationWriter = null;
     try {
       calibrationWriter = new FileWriter(calibFile);
@@ -1458,22 +1454,22 @@ public class InMoov extends Service {
       calibrationWriter.write("# InMoov auto generated calibration \n");
       calibrationWriter.write("# " + new Date() + "\n");
       calibrationWriter.write("##################################\n");
-      //String inMoovName = this.getName();
+      // String inMoovName = this.getName();
       // iterate all the services that are running.
-      // we want all servos that are currently in the system?  
+      // we want all servos that are currently in the system?
       for (ServiceInterface service : Runtime.getServices()) {
         if (service instanceof Servo) {
-          Servo s = (Servo)service;
+          Servo s = (Servo) service;
           if (!s.getName().startsWith(this.getName())) {
             continue;
           }
           calibrationWriter.write("\n");
           // first detach the servo.
-          calibrationWriter.write("# Servo Config : " + s.getName() +"\n");
+          calibrationWriter.write("# Servo Config : " + s.getName() + "\n");
           calibrationWriter.write(s.getName() + ".detach()\n");
-          calibrationWriter.write(s.getName() + ".setMinMax(" +s.getMin()+","+s.getMax()+")\n");
-          calibrationWriter.write(s.getName() + ".setVelocity(" +s.getVelocity() +")\n");
-          calibrationWriter.write(s.getName() + ".setRest(" +s.getRest() +")\n");
+          calibrationWriter.write(s.getName() + ".setMinMax(" + s.getMin() + "," + s.getMax() + ")\n");
+          calibrationWriter.write(s.getName() + ".setVelocity(" + s.getVelocity() + ")\n");
+          calibrationWriter.write(s.getName() + ".setRest(" + s.getRest() + ")\n");
           if (s.getPin() != null) {
             calibrationWriter.write(s.getName() + ".setPin(" + s.getPin() + ")\n");
           } else {
@@ -1482,7 +1478,7 @@ public class InMoov extends Service {
           // if there's a controller reattach it at rest
           if (s.getController() != null) {
             String controller = s.getController().getName();
-            calibrationWriter.write(s.getName() + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() +")\n");
+            calibrationWriter.write(s.getName() + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
           }
         }
       }
@@ -1492,9 +1488,9 @@ public class InMoov extends Service {
       log.warn("Error writing calibration file {}", calibrationFilename);
       e.printStackTrace();
       return;
-    }    
+    }
   }
-  
+
   private File makeGesturesDirectory(String directory) {
     File dir = new File(directory);
     dir.mkdirs();
@@ -1508,9 +1504,9 @@ public class InMoov extends Service {
 
   public void saveGesture(String gestureName, String directory) {
     // TODO: consider the gestures directory as a property on the inmoov
-    String gestureMethod = mapGestureNameToPythonMethod(gestureName);   
+    String gestureMethod = mapGestureNameToPythonMethod(gestureName);
     String gestureFilename = directory + File.separator + gestureMethod + ".py";
-    File gestureFile = new File(gestureFilename);    
+    File gestureFile = new File(gestureFilename);
     if (gestureFile.exists()) {
       log.warn("Gesture file {} already exists.. not overwiting it.", gestureFilename);
       return;
@@ -1520,9 +1516,11 @@ public class InMoov extends Service {
       gestureWriter = new FileWriter(gestureFile);
       // print the first line of the python file
       gestureWriter.write("def " + gestureMethod + "():\n");
-      // now for each servo, we should write out the approperiate moveTo statement
-      // TODO: consider doing this only for the inmoov services.. but for now.. i think
-      // we want all servos that are currently in the system?  
+      // now for each servo, we should write out the approperiate moveTo
+      // statement
+      // TODO: consider doing this only for the inmoov services.. but for now..
+      // i think
+      // we want all servos that are currently in the system?
       for (ServiceInterface service : Runtime.getServices()) {
         if (service instanceof Servo) {
           double pos = ((Servo) service).getPos();
@@ -1535,10 +1533,10 @@ public class InMoov extends Service {
       log.warn("Error writing gestures file {}", gestureFilename);
       e.printStackTrace();
       return;
-    }    
-    // TODO: consider writing out cooresponding AIML?    
+    }
+    // TODO: consider writing out cooresponding AIML?
   }
-  
+
   private String mapGestureNameToPythonMethod(String gestureName) {
     // TODO: some fancier mapping?
     String methodName = gestureName.replaceAll(" ", "");
@@ -1555,8 +1553,6 @@ public class InMoov extends Service {
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
-
-      
 
       InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
       // i01.startHead("COM1");
@@ -1655,9 +1651,9 @@ public class InMoov extends Service {
     // SHARING !!! - modified key / actual name begin ------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
     meta.sharePeer("torso.arduino", "left", "Arduino", "shared left arduino");
-    
+
     meta.sharePeer("eyelids.arduino", "left", "Arduino", "shared left arduino");
-    
+
     meta.sharePeer("mouthControl.arduino", "left", "Arduino", "shared left arduino");
 
     meta.sharePeer("leftArm.arduino", "left", "Arduino", "shared left arduino");
@@ -1703,90 +1699,83 @@ public class InMoov extends Service {
     meta.addPeer("opencv", "OpenCV", "InMoov OpenCV service");
     meta.addPeer("openni", "OpenNi", "Kinect service");
     meta.addPeer("pid", "Pid", "Pid service");
-    
+
     // For VirtualInMoov
-	  meta.addPeer("jmonkeyEngine", "JMonkeyEngine", "Virtual inmoov");
-	  
-	  // For IntegratedMovement
-	  meta.addPeer("integratedMovement", "IntegratedMovement", "Inverse kinematic type movement");
+    meta.addPeer("jmonkeyEngine", "JMonkeyEngine", "Virtual inmoov");
+
+    // For IntegratedMovement
+    meta.addPeer("integratedMovement", "IntegratedMovement", "Inverse kinematic type movement");
 
     return meta;
   }
-  
- 
-  //vinmoov cosmetics and optional vinmoov monitor idea ( poc i know nothing about jme... )
-  //just want to use jme as main screen and show some informations
-  //like batterie / errors / onreconized text etc ...
-  //i01.VinmoovMonitorActivated=1 before to start vinmoov
-  
-  public Boolean VinmoovMonitorActivated=false;
-  
-  	public void onListeningEvent() {
-  		if (vinMoovApp != null && VinmoovMonitorActivated){
-  		  vinMoovApp.setMicro(true);
-  		  }
-	  }
-  	
-  	public void onPauseListening() {
-  		if (vinMoovApp != null && VinmoovMonitorActivated){
-  		  vinMoovApp.setMicro(false);
-  		  }
-	  }
-  	
-  	public void onRecognized(String text) {
-  		if (vinMoovApp != null && VinmoovMonitorActivated){
-  		  vinMoovApp.onRecognized(text);
-  		  }
-	  }
-  	
-  	 public void setBatteryLevel(Integer level)
-  	  {
-  		  if (vinMoovApp != null && VinmoovMonitorActivated){
-  		 		  vinMoovApp.setBatteryLevel(level);
-  		  
-  		  }
-  	  }
-  	 
-  
-  
 
-  public Boolean VinmoovFullScreen=false;
-  public String VinmoovBackGroundColor="Grey";
+  // vinmoov cosmetics and optional vinmoov monitor idea ( poc i know nothing
+  // about jme... )
+  // just want to use jme as main screen and show some informations
+  // like batterie / errors / onreconized text etc ...
+  // i01.VinmoovMonitorActivated=1 before to start vinmoov
 
-  public int VinmoovWidth=800;
-  public int VinmoovHeight=600;
-  private Boolean debugVinmoov=true;  
-  //show some infos to jme screen 
-  public void  setLeftArduinoConnected(boolean param)
-  {
-	  vinMoovApp.setLeftArduinoConnected(param);  	  
+  public Boolean VinmoovMonitorActivated = false;
+
+  public void onListeningEvent() {
+    if (vinMoovApp != null && VinmoovMonitorActivated) {
+      vinMoovApp.setMicro(true);
+    }
   }
-  public void setRightArduinoConnected(boolean param)
-  {
-	  vinMoovApp.setRightArduinoConnected(param);  	  
-  }
- 
-  
-  
-  //end vinmoov cosmetics and optional vinmoov monitor
 
-  
-  public InMoov3DApp startVinMoov() throws InterruptedException{
+  public void onPauseListening() {
+    if (vinMoovApp != null && VinmoovMonitorActivated) {
+      vinMoovApp.setMicro(false);
+    }
+  }
+
+  public void onRecognized(String text) {
+    if (vinMoovApp != null && VinmoovMonitorActivated) {
+      vinMoovApp.onRecognized(text);
+    }
+  }
+
+  public void setBatteryLevel(Integer level) {
+    if (vinMoovApp != null && VinmoovMonitorActivated) {
+      vinMoovApp.setBatteryLevel(level);
+
+    }
+  }
+
+  public Boolean VinmoovFullScreen = false;
+  public String VinmoovBackGroundColor = "Grey";
+
+  public int VinmoovWidth = 800;
+  public int VinmoovHeight = 600;
+  private Boolean debugVinmoov = true;
+
+  // show some infos to jme screen
+  public void setLeftArduinoConnected(boolean param) {
+    vinMoovApp.setLeftArduinoConnected(param);
+  }
+
+  public void setRightArduinoConnected(boolean param) {
+    vinMoovApp.setRightArduinoConnected(param);
+  }
+
+  // end vinmoov cosmetics and optional vinmoov monitor
+
+  public InMoov3DApp startVinMoov() throws InterruptedException {
     if (vinMoovApp == null) {
       vinMoovApp = new InMoov3DApp();
       if (VinmoovMonitorActivated) {
-    	   //vinmoovFullScreen=true 
-    	   VinmoovBackGroundColor="Black";
-    	   debugVinmoov=false;
-    	   vinMoovApp.VinmoovMonitorActivated=true;
-    	   VinmoovWidth=1067;
-    	  }
-      vinMoovApp.BackGroundColor=VinmoovBackGroundColor;
+        // vinmoovFullScreen=true
+        VinmoovBackGroundColor = "Black";
+        debugVinmoov = false;
+        vinMoovApp.VinmoovMonitorActivated = true;
+        VinmoovWidth = 1067;
+      }
+      vinMoovApp.BackGroundColor = VinmoovBackGroundColor;
       AppSettings settings = new AppSettings(true);
-      settings.setResolution(VinmoovWidth,VinmoovHeight);
+      settings.setResolution(VinmoovWidth, VinmoovHeight);
       settings.setFullscreen(VinmoovFullScreen);
-      //settings.setEmulateMouse(false);
-      //settings.setUseJoysticks(false);
+      // settings.setEmulateMouse(false);
+      // settings.setUseJoysticks(false);
       settings.setUseInput(true);
       vinMoovApp.setSettings(settings);
       vinMoovApp.setShowSettings(false);
@@ -1794,7 +1783,7 @@ public class InMoov extends Service {
       vinMoovApp.setPauseOnLostFocus(false);
       vinMoovApp.setService(this);
       vinMoovApp.start();
-      synchronized(this){
+      synchronized (this) {
         wait(5000);
       }
       if (torso != null) {
@@ -1802,8 +1791,8 @@ public class InMoov extends Service {
         torso.midStom.addIKServoEventListener(this);
         vinMoovApp.addServo("ttorso", torso.topStom);
         torso.topStom.addIKServoEventListener(this);
-        torso.midStom.moveTo(torso.midStom.targetPos+0.2);
-        torso.topStom.moveTo(torso.topStom.targetPos+0.2);
+        torso.midStom.moveTo(torso.midStom.targetPos + 0.2);
+        torso.topStom.moveTo(torso.topStom.targetPos + 0.2);
       }
       if (rightArm != null) {
         vinMoovApp.addServo("Romoplate", rightArm.omoplate);
@@ -1814,10 +1803,10 @@ public class InMoov extends Service {
         rightArm.rotate.addIKServoEventListener(this);
         vinMoovApp.addServo("Rbicep", rightArm.bicep);
         rightArm.bicep.addIKServoEventListener(this);
-        rightArm.omoplate.moveTo(rightArm.omoplate.targetPos+0.2);
-        rightArm.shoulder.moveTo(rightArm.shoulder.targetPos+0.2);
-        rightArm.rotate.moveTo(rightArm.rotate.targetPos+0.2);
-        rightArm.bicep.moveTo(rightArm.bicep.targetPos+0.2);
+        rightArm.omoplate.moveTo(rightArm.omoplate.targetPos + 0.2);
+        rightArm.shoulder.moveTo(rightArm.shoulder.targetPos + 0.2);
+        rightArm.rotate.moveTo(rightArm.rotate.targetPos + 0.2);
+        rightArm.bicep.moveTo(rightArm.bicep.targetPos + 0.2);
       }
       if (leftArm != null) {
         vinMoovApp.addServo("omoplate", leftArm.omoplate);
@@ -1828,20 +1817,20 @@ public class InMoov extends Service {
         leftArm.rotate.addIKServoEventListener(this);
         vinMoovApp.addServo("bicep", leftArm.bicep);
         leftArm.bicep.addIKServoEventListener(this);
-        leftArm.omoplate.moveTo(leftArm.omoplate.targetPos+0.2);
-        leftArm.shoulder.moveTo(leftArm.shoulder.targetPos+0.2);
-        leftArm.rotate.moveTo(leftArm.rotate.targetPos+0.2);
-        leftArm.bicep.moveTo(leftArm.bicep.targetPos+0.2);
+        leftArm.omoplate.moveTo(leftArm.omoplate.targetPos + 0.2);
+        leftArm.shoulder.moveTo(leftArm.shoulder.targetPos + 0.2);
+        leftArm.rotate.moveTo(leftArm.rotate.targetPos + 0.2);
+        leftArm.bicep.moveTo(leftArm.bicep.targetPos + 0.2);
       }
       if (rightHand != null) {
         vinMoovApp.addServo("RWrist", rightHand.wrist);
         rightHand.wrist.addIKServoEventListener(this);
-        rightHand.wrist.moveTo(rightHand.wrist.targetPos+0.2);
+        rightHand.wrist.moveTo(rightHand.wrist.targetPos + 0.2);
       }
       if (leftHand != null) {
         vinMoovApp.addServo("LWrist", leftHand.wrist);
         leftHand.wrist.addIKServoEventListener(this);
-        leftHand.wrist.moveTo(leftHand.wrist.targetPos+0.2);
+        leftHand.wrist.moveTo(leftHand.wrist.targetPos + 0.2);
       }
       if (head != null) {
         vinMoovApp.addServo("neck", head.neck);
@@ -1852,16 +1841,15 @@ public class InMoov extends Service {
         head.jaw.addIKServoEventListener(this);
         vinMoovApp.addServo("rollNeck", head.rollNeck);
         head.rollNeck.addIKServoEventListener(this);
-        head.neck.moveTo(head.neck.targetPos+0.2);
-        head.rothead.moveTo(head.rothead.targetPos+0.2);
-        head.rollNeck.moveTo(head.rollNeck.targetPos+0.2);
+        head.neck.moveTo(head.neck.targetPos + 0.2);
+        head.rothead.moveTo(head.rothead.targetPos + 0.2);
+        head.rollNeck.moveTo(head.rollNeck.targetPos + 0.2);
       }
-    }
-    else {
+    } else {
       log.info("VinMoov already started");
       return vinMoovApp;
     }
-    
+
     return vinMoovApp;
   }
 
@@ -1870,98 +1858,93 @@ public class InMoov extends Service {
       vinMoovApp.updatePosition(data);
     }
   }
-  
+
   public void stopVinMoov() {
-    try{
+    try {
       vinMoovApp.stop();
-    }
-    catch (NullPointerException e){
-      
+    } catch (NullPointerException e) {
+
     }
     vinMoovApp = null;
   }
-  
+
   public void startIntegratedMovement() {
     integratedMovement = (IntegratedMovement) startPeer("integratedMovement");
-    IntegratedMovement im = integratedMovement; 
-    //set the DH Links or each arms
+    IntegratedMovement im = integratedMovement;
+    // set the DH Links or each arms
     im.setNewDHRobotArm("leftArm");
     im.setNewDHRobotArm("rightArm");
     im.setNewDHRobotArm("kinect");
     if (torso != null) {
-      im.setDHLink("leftArm",torso.midStom,113,90,0,-90);
-      im.setDHLink("rightArm",torso.midStom,113,90,0,-90);
-      im.setDHLink("kinect",torso.midStom,113,90,0,-90);
-      im.setDHLink("leftArm",torso.topStom,0,180,292,90);
-      im.setDHLink("rightArm",torso.topStom,0,180,292,90);
-      im.setDHLink("kinect",torso.topStom,0,180,110,-90);
-    }
-    else {
-      im.setDHLink("leftArm","i01.torso.midStom",113,90,0,-90);
-      im.setDHLink("rightArm","i01.torso.midStom",113,90,0,-90);
-      im.setDHLink("kinect","i01.torso.midStom",113,90,0,-90);
-      im.setDHLink("leftArm","i01.torso.topStom",0,180,292,90);
-      im.setDHLink("rightArm","i01.torso.topStom",0,180,292,90);
-      im.setDHLink("kinect","i01.torso.topStom",0,180,110,-90);
+      im.setDHLink("leftArm", torso.midStom, 113, 90, 0, -90);
+      im.setDHLink("rightArm", torso.midStom, 113, 90, 0, -90);
+      im.setDHLink("kinect", torso.midStom, 113, 90, 0, -90);
+      im.setDHLink("leftArm", torso.topStom, 0, 180, 292, 90);
+      im.setDHLink("rightArm", torso.topStom, 0, 180, 292, 90);
+      im.setDHLink("kinect", torso.topStom, 0, 180, 110, -90);
+    } else {
+      im.setDHLink("leftArm", "i01.torso.midStom", 113, 90, 0, -90);
+      im.setDHLink("rightArm", "i01.torso.midStom", 113, 90, 0, -90);
+      im.setDHLink("kinect", "i01.torso.midStom", 113, 90, 0, -90);
+      im.setDHLink("leftArm", "i01.torso.topStom", 0, 180, 292, 90);
+      im.setDHLink("rightArm", "i01.torso.topStom", 0, 180, 292, 90);
+      im.setDHLink("kinect", "i01.torso.topStom", 0, 180, 110, -90);
     }
     im.setDHLink("leftArm", "leftS", 143, 180, 0, 90);
     im.setDHLink("rightArm", "rightS", -143, 180, 0, -90);
     if (arms.containsKey(LEFT)) {
       InMoovArm arm = arms.get(LEFT);
-      im.setDHLink("leftArm",arm.omoplate,0,-5.6,45,-90);
-      im.setDHLink("leftArm",arm.shoulder,77,-30+90,0,90);
-      im.setDHLink("leftArm",arm.rotate,284,90,40,90);
-      im.setDHLink("leftArm",arm.bicep,0,-7+24.4+90,300,90);
-    }
-    else {
-      im.setDHLink("leftArm","i01.leftArm.omoplate",0,-5.6,45,-90);
-      im.setDHLink("leftArm","i01.leftArm.shoulder",77,-30+90,0,90);
-      im.setDHLink("leftArm","i01.leftArm.rotate",284,90,40,90);
-      im.setDHLink("leftArm","i01.leftArm.bicep",0,-7+24.4+90,300,90);
+      im.setDHLink("leftArm", arm.omoplate, 0, -5.6, 45, -90);
+      im.setDHLink("leftArm", arm.shoulder, 77, -30 + 90, 0, 90);
+      im.setDHLink("leftArm", arm.rotate, 284, 90, 40, 90);
+      im.setDHLink("leftArm", arm.bicep, 0, -7 + 24.4 + 90, 300, 90);
+    } else {
+      im.setDHLink("leftArm", "i01.leftArm.omoplate", 0, -5.6, 45, -90);
+      im.setDHLink("leftArm", "i01.leftArm.shoulder", 77, -30 + 90, 0, 90);
+      im.setDHLink("leftArm", "i01.leftArm.rotate", 284, 90, 40, 90);
+      im.setDHLink("leftArm", "i01.leftArm.bicep", 0, -7 + 24.4 + 90, 300, 90);
     }
     if (arms.containsKey(RIGHT)) {
       InMoovArm arm = arms.get(RIGHT);
-      im.setDHLink("rightArm",arm.omoplate,0,-5.6,45,90);
-      im.setDHLink("rightArm",arm.shoulder,-77,-30+90,0,-90);
-      im.setDHLink("rightArm",arm.rotate,-284,90,40,-90);
-      im.setDHLink("rightArm",arm.bicep,0,-7+24.4+90,300,0);
+      im.setDHLink("rightArm", arm.omoplate, 0, -5.6, 45, 90);
+      im.setDHLink("rightArm", arm.shoulder, -77, -30 + 90, 0, -90);
+      im.setDHLink("rightArm", arm.rotate, -284, 90, 40, -90);
+      im.setDHLink("rightArm", arm.bicep, 0, -7 + 24.4 + 90, 300, 0);
+    } else {
+      im.setDHLink("rightArm", "i01.rightArm.omoplate", 0, -5.6, 45, 90);
+      im.setDHLink("rightArm", "i01.rightArm.shoulder", -77, -30 + 90, 0, -90);
+      im.setDHLink("rightArm", "i01.rightArm.rotate", -284, 90, 40, -90);
+      im.setDHLink("rightArm", "i01.rightArm.bicep", 0, -7 + 24.4 + 90, 300, 0);
     }
-    else {
-      im.setDHLink("rightArm","i01.rightArm.omoplate",0,-5.6,45,90);
-      im.setDHLink("rightArm","i01.rightArm.shoulder",-77,-30+90,0,-90);
-      im.setDHLink("rightArm","i01.rightArm.rotate",-284,90,40,-90);
-      im.setDHLink("rightArm","i01.rightArm.bicep",0,-7+24.4+90,300,0);
-    }
-    if (hands.containsKey(LEFT)){
+    if (hands.containsKey(LEFT)) {
       InMoovHand hand = hands.get(LEFT);
-      im.setDHLink("leftArm",hand.wrist,00,-90,0,0);
+      im.setDHLink("leftArm", hand.wrist, 00, -90, 0, 0);
       im.setDHLinkType("i01.leftHand.wrist", DHLinkType.REVOLUTE_ALPHA);
+    } else {
+      im.setDHLink("leftArm", "i01.leftHand.wrist", 00, -90, 0, 0);
     }
-    else {
-      im.setDHLink("leftArm","i01.leftHand.wrist",00,-90,0,0);
-    }
-    if (hands.containsKey(RIGHT)){
+    if (hands.containsKey(RIGHT)) {
       InMoovHand hand = hands.get(RIGHT);
-      im.setDHLink("rightArm",hand.wrist,00,-90,0,0);
+      im.setDHLink("rightArm", hand.wrist, 00, -90, 0, 0);
       im.setDHLinkType("i01.rigtHand.wrist", DHLinkType.REVOLUTE_ALPHA);
+    } else {
+      im.setDHLink("rightArm", "i01.rightHand.wrist", 00, -90, 0, 0);
     }
-    else {
-      im.setDHLink("rightArm","i01.rightHand.wrist",00,-90,0,0);
-    }
-    im.setDHLink("leftArm","wristup",0,-5,90,0);
-    im.setDHLink("leftArm","wristdown",0,0,125,45);
-    im.setDHLink("leftArm","finger",5,-90,5,0);
-    im.setDHLink("rightArm","Rwristup",0,5,90,0);
-    im.setDHLink("rightArm","Rwristdown",0,0,125,-45);
-    im.setDHLink("rightArm","Rfinger",5,90,5,0);
-    im.setDHLink("kinect","camera",0,90,10,90);
-    
-    //log.info("{}",im.createJointPositionMap("leftArm").toString());
-    //start the kinematics engines
-    
-    //define object, each dh link are set as an object, but the
-    //start point and end point will be update by the ik service, but still need
-    //a name and a radius
+    im.setDHLink("leftArm", "wristup", 0, -5, 90, 0);
+    im.setDHLink("leftArm", "wristdown", 0, 0, 125, 45);
+    im.setDHLink("leftArm", "finger", 5, -90, 5, 0);
+    im.setDHLink("rightArm", "Rwristup", 0, 5, 90, 0);
+    im.setDHLink("rightArm", "Rwristdown", 0, 0, 125, -45);
+    im.setDHLink("rightArm", "Rfinger", 5, 90, 5, 0);
+    im.setDHLink("kinect", "camera", 0, 90, 10, 90);
+
+    // log.info("{}",im.createJointPositionMap("leftArm").toString());
+    // start the kinematics engines
+
+    // define object, each dh link are set as an object, but the
+    // start point and end point will be update by the ik service, but still
+    // need
+    // a name and a radius
     im.clearObject();
     im.addObject(0.0, 0.0, 0.0, 0.0, 0.0, -150.0, "base", 150.0, false);
     im.addObject("i01.torso.midStom", 150.0);
@@ -1983,18 +1966,17 @@ public class InMoov extends Service {
     im.objectAddIgnore("leftS", "rightS");
     im.objectAddIgnore("rightS", "i01.leftArm.shoulder");
     im.objectAddIgnore("leftS", "i01.rightArm.shoulder");
-    im.addObject("wristup",70);
-    im.addObject("wristdown",70);
+    im.addObject("wristup", 70);
+    im.addObject("wristdown", 70);
     im.objectAddIgnore("i01.leftArm.bicep", "wristup");
-    im.addObject("Rwristup",70);
-    im.addObject("Rwristdown",70);
+    im.addObject("Rwristup", 70);
+    im.addObject("Rwristdown", 70);
     im.objectAddIgnore("i01.rightArm.bicep", "Rwristup");
 
     im.startEngine("leftArm");
     im.startEngine("rightArm");
     im.startEngine("kinect");
 
-    
     im.cog = new GravityCenter(im);
     im.cog.setLinkMass("i01.torso.midStom", 2.832, 0.5);
     im.cog.setLinkMass("i01.torso.topStom", 5.774, 0.5);
@@ -2011,6 +1993,6 @@ public class InMoov extends Service {
 
     im.setJmeApp(vinMoovApp);
     im.setOpenni(openni);
-    
+
   }
 }
