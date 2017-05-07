@@ -35,7 +35,7 @@ public class Connection implements Serializable {
   public final static String DISCONNECTED = "DISCONNECTED";
   public final static String CONNECTING = "CONNECTING";
 
-  // typs - connection / connection-less
+  // types - connection / connection-less
 
   /**
    * proto key - mrlkey is mrl://gatewayName/protocolKey

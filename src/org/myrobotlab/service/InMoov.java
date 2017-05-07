@@ -244,7 +244,7 @@ public class InMoov extends Service {
     // speakBlocking("power down after %s seconds inactivity is on",
     // this.maxInactivityTimeSeconds);
     log.info("power down after %s seconds inactivity is on", this.maxInactivityTimeSeconds);
-    addTask("checkInactivity", 5 * 1000, "checkInactivity");
+    addTask("checkInactivity", 5 * 1000, 0, "checkInactivity");
   }
 
   @Override

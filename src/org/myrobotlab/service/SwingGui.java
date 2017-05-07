@@ -693,9 +693,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   @Override
   public void windowClosing(WindowEvent e) {
     // save all necessary serializations
+	  /** WRONG - USE ONLY RUNTIME TO SHUTDOWN !!!
     save();
     Runtime.releaseAll();
     System.exit(1); // the Big Hamm'r
+    */
+	  Runtime.shutdown();
   }
 
   // @Override - only in Java 1.6

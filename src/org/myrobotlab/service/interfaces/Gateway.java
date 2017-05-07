@@ -85,7 +85,7 @@ public interface Gateway {
   public void sendRemote(final URI key, final Message msg);
 
   // begin new interface methods -----------------------
-  
+  // FIXME ? - should publishConnection return a Connection object as with publishDisconnect ?
   public String publishConnect();
   public String publishDisconnect();
   public Status publishError();

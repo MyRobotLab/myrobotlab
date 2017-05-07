@@ -664,7 +664,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void enableBoardInfo(Boolean enabled) {
     // msg.enableBoardInfo(enabled);
     if (enabled) {
-      addTask("getBoardInfo", 1000, "sendBoardInfoRequest");
+      addTask("getBoardInfo", 1000, 0, "sendBoardInfoRequest");
     } else {
       purgeTask("getBoardInfo");
     }

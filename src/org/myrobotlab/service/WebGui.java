@@ -407,7 +407,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			try {
 				nettosphere.start();
 			} catch (Exception e) {
-				Logging.logError(e);
+				log.error("starting nettosphere failed",e);
 			}
 
 			broadcastFactory = nettosphere.framework().getBroadcasterFactory();
@@ -1159,13 +1159,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	}
 
 	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+		LoggingFactory.init(Level.DEBUG);
 
 		try {
 
-			Double level = Runtime.getBatteryLevel();
-			log.info("" + level);
+			// Double level = Runtime.getBatteryLevel();
+			// log.info("" + level);
 
 			/*
 			 * VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual",
