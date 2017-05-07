@@ -40,10 +40,6 @@ import com.amazonaws.services.polly.model.OutputFormat;
 import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
 import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
 import com.amazonaws.services.polly.model.Voice;
-// hi grog if I compile the jar no problem, but from published jar it ask me joda
-// to test..
-import org.joda.time.format.DateTimeFormat;
-
 /**
  * Amazon's cloud speech service
  * 
@@ -160,7 +156,7 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
       audioFile.cache(localFileName, mp3File, toSpeak);
     } else {
       log.info("using local cached file");
-      mp3File = FileIO.toByteArray(new File(getLocalFileName(this, toSpeak, "mp3")));
+      mp3File = FileIO.toByteArray(new File(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, "mp3")));
     }
 
     // invoke("publishStartSpeaking", toSpeak);
@@ -309,8 +305,10 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
     getPolly();
     // having - AudioFile.globalFileCacheDir exposed like this is a bad idea .. 
     // AudioFile should just globallyCache - the details of that cache should not be exposed :(
-    return AudioFile.globalFileCacheDir + File.separator + provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
+    
+    return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
         + audioFileType;
+   
   }
 
   // can this be defaulted ?
@@ -343,6 +341,7 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
     // add dependency if necessary
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addDependency("org.joda", "2.9.4");
+    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
     meta.addDependency("com.amazonaws.services", "1.11.118");
     meta.addCategory("speech");
     return meta;
