@@ -546,7 +546,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   @Override
   public void connectionClosed() {
     log.info("connectionClosed");
-    addTask("reconnect", 5000, "connect", hostname, port, username, password);
+    addTask("reconnect", 5000, 0, "connect", hostname, port, username, password);
     isConnected = false;
     broadcastState();
   }

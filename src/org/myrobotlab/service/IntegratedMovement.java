@@ -506,7 +506,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
   public void startEngine(String arm) {
     getEngine(arm).start();
-    addTask("publishPosition-"+arm, 1000, "publishPosition", arm);
+    addTask("publishPosition-"+arm, 1000, 0, "publishPosition", arm);
   }
 
   public Thread getEngine(String arm) {

@@ -149,7 +149,7 @@ public class Agent extends Service {
 	static HashSet<String> possibleVersions = new HashSet<String>();
 
 	// String lastBranch = null;
-	// WebGui webAdmin = null; can't have a peer untile nettosphere is part of
+	// WebGui webmin = null; can't have a peer untile nettosphere is part of
 	// base build
 	// boolean updateRestartProcesses = false;
 
@@ -263,7 +263,7 @@ public class Agent extends Service {
 			String name = String.format("%s.timer.processUpdates", agent.getName());
 
 			if (b) {
-				agent.addTask(name, 1000 * 60, "processUpdates");
+				agent.addTask(name, 1000 * 60, 0, "processUpdates");
 			} else {
 				agent.purgeTask(name);
 			}
@@ -274,10 +274,10 @@ public class Agent extends Service {
 		try {
 			// no reference at all to WebGui
 			// look ma no reference !
-			WebGui webgui = (WebGui) Runtime.create("webAdmin", "WebGui");
-			// send("webAdmin", "setPort", 8887);
+			WebGui webgui = (WebGui) Runtime.create("webmin", "WebGui");
+			// send("webmin", "setPort", 8887);
 			webgui.setPort(8887);
-			Runtime.start("webAdmin", "WebGui");
+			Runtime.start("webmin", "WebGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);

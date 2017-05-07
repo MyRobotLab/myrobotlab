@@ -650,7 +650,7 @@ public class Tracking extends Service {
 
   public void connect(String port, int xPin, int yPin, int cameraIndex) throws Exception {
     int[] pins = new int[]{xPin,yPin};
-    controller = (Arduino) createPeer("controller");
+    controller = (Arduino) startPeer("controller");
     ((PortConnector)controller).connect(port);
     
     for (int i = 0; i<axis.length; i++){

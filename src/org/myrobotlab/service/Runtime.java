@@ -1588,9 +1588,23 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     // exit () ?
   }
 
+  public static void shutdown(int seconds) {
+	  log.info("shutting down in {} seconds", seconds);
+	  if (seconds > 0){
+		  runtime.addTaskOneShot(seconds * 1000, "shutdown", (Object[])null);
+		  runtime.invoke("publishShutdown", seconds);
+	  }
+  }
+  
   public static void shutdown() {
+	  // - saveAll(); not needed as release at some point calls save()
+	log.info("halt");
     releaseAll();
     System.exit(-1);
+  }
+  
+  public Integer publishShutdown(Integer seconds){
+	  return seconds;
   }
 
   // ---------------- callback events end -------------

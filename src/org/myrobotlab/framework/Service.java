@@ -905,7 +905,11 @@ public abstract class Service extends MessageService
 	}
 
 	public void addTask(int intervalMs, String method, Object... params) {
-		addTask(method, intervalMs, method, params);
+		addTask(method, intervalMs, 0, method, params);
+	}
+	
+	public void addTaskOneShot(int delay, String method, Object... params) {
+		addTask(method, 0, delay, method, params);
 	}
 
 	/**
@@ -913,16 +917,17 @@ public abstract class Service extends MessageService
 	 * 
 	 * @param name
 	 */
-	public void addTask(String name, int intervalMs, String method, Object... params) {
+	public void addTask(String name, int intervalMs, int delay, String method, Object... params) {
 		if (tasks.containsKey(name)) {
 			log.warn(String.format("already have active task \"%s\"", name));
 			return;
 		}
 		Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), name)));
 		Task task = new Task(name, intervalMs, getName(), method, params);
-		timer.schedule(task, 0);
+		timer.schedule(task, delay);
 		tasks.put(name, timer);
 	}
+		
 
 	public HashMap<String, Timer> getTasks() {
 		return tasks;

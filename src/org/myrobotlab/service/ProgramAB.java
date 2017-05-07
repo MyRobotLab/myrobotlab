@@ -93,7 +93,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     super(name);
     // Tell programAB to persist it's learned predicates about people
     // every 30 seconds.
-    addTask("savePredicates", savePredicatesInterval, "savePredicates");
+    addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
     // TODO: Lazy load this!
     // look for local bots defined
     File programAbDir = new File(String.format("%s/bots", path));
@@ -247,7 +247,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // int numExecutions = 1;
       // TODO: we need a way for the task to just execute one time
       // it'd be good to have access to the timer here, but it's transient
-      addTask("getResponse", chatData.maxConversationDelay, "getResponse", username, text);
+      addTask("getResponse", chatData.maxConversationDelay, 0, "getResponse", username, text);
     }
 
     // EEK! clean up the API!
