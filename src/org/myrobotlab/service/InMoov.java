@@ -526,7 +526,7 @@ public class InMoov extends Service {
   }
 
   public void handClose(String which) {
-    moveHand(which, 130, 180, 180, 180, 180);
+    moveHand(which, 180, 180, 180, 180, 180);
   }
 
   public void onError(String msg) {
@@ -542,7 +542,7 @@ public class InMoov extends Service {
   }
 
   public void handRest(String which) {
-    moveHand(which, 60, 40, 30, 40, 40);
+    moveHand(which, 60, 40, 40, 40, 40);
   }
 
   // ------ composites end
@@ -984,6 +984,7 @@ public class InMoov extends Service {
     startRightHand(rightPort);
     startLeftArm(leftPort);
     startRightArm(rightPort);
+    startTorso(leftPort);
 
     startHeadTracking(leftPort, 12, 13);
     startEyesTracking(leftPort, 22, 24);
