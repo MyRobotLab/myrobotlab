@@ -13,11 +13,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.atmosphere.cpr.ApplicationConfig;
 import org.atmosphere.cpr.AtmosphereRequest;
@@ -35,6 +37,7 @@ import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.MethodCache;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
@@ -78,11 +81,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	boolean autoStartBrowser = true;
 
 	public String startURL = "http://localhost:%d";
+	
+	
+	transient final ConcurrentHashMap<String, HttpSession> sessions = new ConcurrentHashMap<String, HttpSession>(); 
 
 	// FIXME might need to change to HashMap<String, HashMap<String,String>> to
 	// add client session
-	Map<String, Panel> panels;
-	Map<String, Map<String, Panel>> desktops;
+	// TODO - probably should have getters - to publish - currently
+	// just marking as transient to remove some of the data load 10240 max frame
+	transient Map<String, Panel> panels;
+	transient Map<String, Map<String, Panel>> desktops;
 
 	String currentDesktop = "default";
 
@@ -524,28 +532,21 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 			log.debug("{} {}", request.getMethod(), pathInfo);
 
+			// FIXME - maintain single broadcaster for each session ?
 			// Broadcaster bc = r.getBroadcaster();
 			// if (bc != null || r.getBroadcaster() != broadcaster){
 			r.setBroadcaster(broadcaster);
 			// }
+			
+			 HttpSession s = request.getSession(true);
+             if (s != null) {
+            	 log.debug("put session uuid {}", r.uuid());
+                 sessions.put(r.uuid(), request.getSession(true));
+             }
 
-			// good debug material
-			// log.info("sessionId {}", r);
-			// String sessionId = request.getSession(true).getId();
-			if (log.isDebugEnabled()) {
-				String sessionId = r.getAtmosphereResourceEvent().getResource().getRequest().getSession().getId();
-				log.debug("sessionId {}", sessionId);
-			}
-
-			Map<String, String> headers = getHeadersInfo(request);
-
-			if (headers.containsKey("content-type")) {
-				log.debug(String.format(String.format("in encoding : content-type %s", headers.get("content-type"))));
-			}
-			if (headers.containsKey("accept")) {
-				log.debug(String.format(String.format("out encoding : accept %s", headers.get("accept"))));
-			}
-
+            // FIXME - header SAS token for authentication ???  
+			// Map<String, String> headers = getHeadersInfo(request);
+           
 			// GET vs POST - post assumes low-level messaging
 			// GET is high level synchronous
 			// String httpMethod = request.getMethod();
@@ -612,6 +613,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 				// FIXME - getEnvironments()
 				// FIXME - relfect with javdoc info log.info("inspecting");
 				respond(out, codec, "getLocalServices", env, apiTypeKey);
+				
+/* HERE !!!
+				Platform platform = Platform.getLocalInstance();
+				respond(out, codec, "getLocalServices", platform, apiTypeKey);
+*/				
+				
 				return;
 			} else if (parts.length == 4) {
 				// *** /api/messages/runtime/ ***
