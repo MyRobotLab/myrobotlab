@@ -360,6 +360,7 @@
 		<pathelement location="${repo}/marytts/5.2/marytts-signalproc-5.2.jar"/>
 		<pathelement location="${repo}/marytts/5.2/marytts-transcription-5.2.jar"/>
 		<pathelement location="${repo}/marytts/5.2/voice-cmu-slt-hsmm-5.2.jar"/>
+        <pathelement location="${repo}/marytts/5.2/voice-cmu-bdl-hsmm-5.2.jar"/>
 		<!--MaryTTS-dependencies-->
 		<pathelement location="${repo}/marytts/5.2/emotionml-checker-java-1.1.jar"/>
 		<pathelement location="${repo}/marytts/5.2/commons-collections-3.2.2.jar"/>
