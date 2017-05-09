@@ -250,6 +250,18 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
   }
 
   @Override
+  public String publishStartSpeaking(String utterance) {
+    log.info("publishStartSpeaking {}", utterance);
+    return utterance;
+  }
+
+  @Override
+  public String publishEndSpeaking(String utterance) {
+    log.info("publishEndSpeaking {}", utterance);
+    return utterance;
+  }
+  
+  @Override
   public void onAudioStart(AudioData data) {
     log.info("onAudioStart {} {}", getName(), data.toString());
     // filters on only our speech
@@ -273,7 +285,9 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
   @Override
   public boolean speakBlocking(String toSpeak) throws Exception {
     cacheFile(toSpeak, OutputFormat.Mp3);
+    invoke("publishStartSpeaking", toSpeak);
     audioFile.playBlocking(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, "mp3"));
+    invoke("publishEndSpeaking", toSpeak);
     return false;
   }
 
