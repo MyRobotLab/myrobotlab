@@ -49,7 +49,7 @@ public class InMoovHead extends Service {
     eyeX.setRest(80);
     eyeY.setRest(90);
     
-    setVelocity(45.0,45.0,45.0,45.0,45.0,45.0);
+    setVelocity(45.0,45.0,-1.0,-1.0,-1.0,45.0);
 
   }
 
