@@ -244,5 +244,6 @@
 	<classpathentry kind="lib" path="/repo/com.voicerss.tts/1.0/tts.jar"/>
 	<classpathentry kind="lib" path="/repo/com.amazonaws.services/1.11.118/aws-java-sdk-1.11.118.jar"/>
 	<classpathentry kind="lib" path="/repo/org.joda/2.9.4/joda-time.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/voice-cmu-bdl-hsmm-5.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
