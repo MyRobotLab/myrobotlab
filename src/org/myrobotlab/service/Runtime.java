@@ -1779,11 +1779,24 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     log.info("============== args end ==============");
     if (cmdline != null && !cmdline.containsKey("-noEnv")) {
       log.info("============== env begin ==============");
+      
       Map<String, String> env = System.getenv();
+      /* - remove for security
       for (Map.Entry<String, String> entry : env.entrySet()) {
         String key = entry.getKey();
         String value = entry.getValue();
         log.info(String.format("%s=%s", key, value));
+      }
+      */
+      if (env.containsKey("PATH")){
+    	  log.info(String.format("PATH=%s", env.get("PATH")));
+      } else {
+    	  log.info("PATH not defined");
+      }
+      if (env.containsKey("JAVA_HOME")){
+    	  log.info(String.format("JAVA_HOME=%s", env.get("JAVA_HOME")));
+      } else {
+    	  log.info("JAVA_HOME not defined");
       }
       log.info("============== env end ==============");
     }
