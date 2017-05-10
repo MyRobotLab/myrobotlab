@@ -121,7 +121,6 @@
 	<classpathentry kind="lib" path="/repo/opennlp/1.6/opennlp-tools-1.6.0.jar"/>
 	<classpathentry kind="lib" path="/repo/opennlp/1.6/opennlp-uima-1.6.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.sun.speech.freetts/1.2/freetts.jar"/>
-	<classpathentry kind="lib" path="/repo/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-core.jar"/>
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
 	<classpathentry kind="lib" path="/repo/org.node/0.1.1/nodyn-0.1.1-20141121.193443-283.jar"/>
@@ -245,5 +244,6 @@
 	<classpathentry kind="lib" path="/repo/com.amazonaws.services/1.11.118/aws-java-sdk-1.11.118.jar"/>
 	<classpathentry kind="lib" path="/repo/org.joda/2.9.4/joda-time.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.2/voice-cmu-bdl-hsmm-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/com.azure.translator/0.8.3/microsoft-translator-java-api-with-dependencies-0.8.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
