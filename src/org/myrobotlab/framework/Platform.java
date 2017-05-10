@@ -265,8 +265,8 @@ public class Platform implements Serializable {
 		File f = new File(getRoot());
 		TreeMap<String, String> ret = new TreeMap<String, String>();
 
-		if (!f.canRead()) {
-			System.out.println(f.getAbsolutePath() + ": no such file");
+		if (!f.canRead() || f.isDirectory()) {
+			System.out.println(f.getAbsolutePath() + ": could not get manifest - running in IDE ?");
 			return ret;
 		}
 		try {
