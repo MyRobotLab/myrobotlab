@@ -72,6 +72,7 @@ public class Servo extends Service implements ServoControl {
 	 * Sweeper - TODO - should be implemented in the arduino code for smoother
 	 * function
 	 * 
+	 * 
 	 */
 	public class Sweeper extends Thread {
 
@@ -177,8 +178,6 @@ public class Servo extends Service implements ServoControl {
 	public List<String> controllers;
 
 	boolean isSweeping = false;
-	// double sweepMin = 0;
-	// double sweepMax = 180;
 	int sweepDelay = 100;
 
 	double sweepStep = 1;
@@ -301,7 +300,7 @@ public class Servo extends Service implements ServoControl {
 	public void detach() {
 		isPinAttached = false;
 		if (controller != null) {
-			controller.servoDetachPin(this);
+			//controller.servoDetachPin(this);
 			detach(controller);
 		}
 		broadcastState();
@@ -376,7 +375,7 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public boolean isEnabled() {
-		return isPinAttached;
+		return isPinAttached();
 	}
 
 	@Override
@@ -441,7 +440,7 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public void releaseService() {
-		disable();
+		//disable();
 		detach(controller);
 		super.releaseService();
 	}
@@ -457,13 +456,6 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public void setMinMax(double min, double max) {
 		map(min, max, min, max);
-		// THIS IS A BUG - BUT CORRECTING IT BURNS OLD SCRIPT'S SERVOS !!
-		// mapper.setMinMaxOutput(min, max);
-		/*
-		 * THIS IS A BUG default setMinMax setMin & setMax IS INPUT NOT OUTPUT
-		 * !!!! mapper.setMin(min); mapper.setMax(max);
-		 */
-		// broadcastState();
 	}
 
 	@Override
@@ -520,17 +512,6 @@ public class Servo extends Service implements ServoControl {
 			vel = maxVelocity;
 		}
 		setVelocity((int) vel);
-		// Method from build 1670
-		// if(speed <= 0.1d) setVelocity(6);
-		// else if (speed <= 0.2d) setVelocity(7);
-		// else if (speed <= 0.3d) setVelocity(8);
-		// else if (speed <= 0.4d) setVelocity(9);
-		// else if (speed <= 0.5d) setVelocity(11);
-		// else if (speed <= 0.6d) setVelocity(13);
-		// else if (speed <= 0.7d) setVelocity(18);
-		// else if (speed <= 0.8d) setVelocity(27);
-		// else if (speed <= 0.9d) setVelocity(54);
-		// else setVelocity(0);
 	}
 
 	// choose to handle sweep on arduino or in MRL on host computer thread.
@@ -689,16 +670,6 @@ public class Servo extends Service implements ServoControl {
 		attach((ServoController) Runtime.getService(controllerName));
 	}
 
-	/*
-	 * GroG REMOVED THIS METHOD - because the way method caching works it
-	 * potentially conflicted and prevents the above method from working ..
-	 * attach(String controllerName, Integer pin, Double pos)
-	 *
-	 * public void attach(String controllerName, int pin, Integer pos, Integer
-	 * velocity) throws Exception { attach((ServoController)
-	 * Runtime.getService(controllerName), pin, pos, velocity); }
-	 */
-
 	/**
 	 * attach will default the position to a default reset position since its
 	 * not specified
@@ -762,6 +733,7 @@ public class Servo extends Service implements ServoControl {
 		}
 	}
 
+	/** setAcceleration is not fully implemented **/
 	public void setAcceleration(double acceleration) {
 		this.acceleration = acceleration;
 		if (controller != null) {
@@ -874,7 +846,7 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	/**
-	 * this output is 'always' in degrees !
+	 * this output is 'always' be between 0-180
 	 */
 	@Override
 	public double getTargetOutput() {
@@ -884,16 +856,6 @@ public class Servo extends Service implements ServoControl {
 		targetOutput = mapper.calcOutput(targetPos);
 		return targetOutput;
 	}
-
-//	public void autoDisable() {
-//		if (getTasks().containsKey("EndMoving")) {
-//			purgeTask("EndMoving");
-//		}
-//		if (!isMoving() && autoEnable && isPinAttached()) {
-//			disable();
-//		}
-//		// moving = false;
-//	}
 
 	public boolean isMoving() {
 		return moving;
@@ -931,20 +893,25 @@ public class Servo extends Service implements ServoControl {
 	public void onServoEvent(Double position) {
 		// log.info("{}.ServoEvent {}", getName(), position);
 		if (!isMoving() && autoDisable && isPinAttached()) {
+      if (autoDisableTimer != null) {
+        autoDisableTimer.cancel();
+        autoDisableTimer = null;
+      }
+      autoDisableTimer = new Timer();
 			if (velocity > -1) {
-				disable();
+        autoDisableTimer.schedule(new TimerTask() {
+          @Override
+          public void run() {
+            disable();
+          }
+        }, (long) 1000);
 			} else {
-				if (autoDisableTimer != null) {
-					autoDisableTimer.cancel();
-					autoDisableTimer = null;
-				}
-				autoDisableTimer = new Timer();
-				autoDisableTimer.schedule(new TimerTask() {
-					@Override
-					public void run() {
-						disable();
-					}
-				}, (long) defaultDisableDelay);
+        autoDisableTimer.schedule(new TimerTask() {
+          @Override
+          public void run() {
+            disable();
+          }
+        }, (long) defaultDisableDelay);
 			}
 		}
 	}
