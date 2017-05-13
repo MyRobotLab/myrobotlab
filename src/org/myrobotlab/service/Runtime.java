@@ -382,6 +382,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   /**
+   * DEPRECATE - use JSON ... XML is sooo 1990s
+   * 
    * a method which returns a xml representation of all the listeners and routes
    * in the runtime system
    * 
@@ -1819,10 +1821,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     log.info("============== non-normalized ==============");
     log.info("java.vm.name [{}]", vmName);
-    log.info("java.vm.version [{}]", System.getProperty("java.vm.version"));
     log.info("java.vm.vendor [{}]", System.getProperty("java.vm.vendor"));
     log.info("java.vm.version [{}]", System.getProperty("java.vm.version"));
-    log.info("java.vm.vendor [{}]", System.getProperty("java.runtime.version"));
 
     // System.getProperty("pi4j.armhf")
     log.info("os.version [{}]", System.getProperty("os.version"));
