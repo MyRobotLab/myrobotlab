@@ -64,6 +64,7 @@ public class LoggingSLF4J extends Logging {
       fileAppender.setFile(LoggingFactory.getLogFileName());
       fileAppender.setEncoder(ple);
       fileAppender.setContext(lc);
+      fileAppender.setAppend(false);
       fileAppender.start();
       logger.addAppender(fileAppender);
     } else if (Appender.IS_AGENT.equalsIgnoreCase(type)) {
@@ -91,6 +92,7 @@ public class LoggingSLF4J extends Logging {
       // fileAppender.setFile(String.format("%s%smyrobotlabz.log", System.getProperty("user.dir"), File.separator));
       fileAppender.setFile(LoggingFactory.getLogFileName());
       fileAppender.setEncoder(ple);
+      fileAppender.setAppend(false);
       fileAppender.setContext(lc);
       fileAppender.start();
 
