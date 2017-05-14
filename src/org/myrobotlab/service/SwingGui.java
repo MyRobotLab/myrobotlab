@@ -113,6 +113,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   String graphXML = "";
 
   boolean fullscreen;
+  public int closeTimeout=0;
 
   // TODO - make MTOD !! from internet
   // TODO - spawn thread callback / subscribe / promise - for new version
@@ -698,7 +699,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     Runtime.releaseAll();
     System.exit(1); // the Big Hamm'r
     */
-	  Runtime.shutdown();
+	  Runtime.shutdown(closeTimeout);
   }
 
   // @Override - only in Java 1.6
