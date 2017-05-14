@@ -1596,6 +1596,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		  runtime.addTaskOneShot(seconds * 1000, "shutdown", (Object[])null);
 		  runtime.invoke("publishShutdown", seconds);
 	  }
+	  else
+	  {
+	  shutdown();
+	  }
   }
   
   public static void shutdown() {
