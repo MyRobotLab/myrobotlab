@@ -450,6 +450,30 @@ public class InMoov extends Service {
       eyelids.setVelocity(-1.0, -1.0);
     }
   }
+  
+  public void halfSpeed() {
+    if (head != null) {
+      head.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
+    }
+    if (rightHand != null) {
+      rightHand.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
+    }
+    if (leftHand != null) {
+      leftHand.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
+    }
+    if (rightArm != null) {
+      rightArm.setVelocity(30.0, 30.0, 30.0, 30.0);
+    }
+    if (leftArm != null) {
+      leftArm.setVelocity(30.0, 30.0, 30.0, 30.0);
+    }
+    if (torso != null) {
+      torso.setVelocity(30.0, 30.0, 30.0);
+    }
+    if (eyelids != null) {
+      eyelids.setVelocity(30.0, 30.0);
+    }
+  }
 
   String getBoardType(String side, String type) {
     if (type != null) {
