@@ -21,6 +21,7 @@ public class OpenWeatherMap extends HttpClient {
   private static final long serialVersionUID = 1L;
   private String apiBase = "http://api.openweathermap.org/data/2.5/weather?q=";
   private String units = "imperial";
+  private String lang = "en";
   private String apiKey = "GET_API_KEY_FROM_OPEN_WEATHER_MAP";
   public final static Logger log = LoggerFactory.getLogger(OpenWeatherMap.class);
   
@@ -29,13 +30,31 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   // Return a sentence describing the weather 
+  
+  private JSONObject fetch(String location) throws ClientProtocolException, IOException, JSONException {
+	  String apiUrl = apiBase + URLEncoder.encode(location,"utf-8") +  "&appid=" + apiKey + "&units=" + units + "&lang=" + lang; 
+	  String response = this.get(apiUrl);
+	  log.debug("Respnse: {}" , response);
+	  JSONObject obj = new JSONObject(response); 
+	  return obj;
+	  
+  }
+  
+
+  public String[] fetchRaw(String location) throws ClientProtocolException, IOException, JSONException {
+	  String[] result = new String[3];
+	  JSONObject obj = fetch(location);
+	  result[0] = obj.getJSONArray("weather").getJSONObject(0).get("description").toString();
+	  result[1] = obj.getJSONObject("main").get("temp").toString();
+	  result[2] = location;
+	  return result;
+  	}
+  
   public String fetchWeather(String location) throws ClientProtocolException, IOException, JSONException {
-    String apiUrl = apiBase + URLEncoder.encode(location,"utf-8") +  "&appid=" + apiKey + "&units=" + units; 
-    String response = this.get(apiUrl);
-    log.debug("Respnse: {}" , response);
-    JSONObject obj = new JSONObject(response);
-    Object description = obj.getJSONArray("weather").getJSONObject(0).get("description");
-    Object degrees = obj.getJSONObject("main").get("temp");
+    String[] result=fetchRaw(location);
+    String description=result[0];
+    String degrees=result[1];
+    
     // if we're imperial it's fahrenheit
     String localUnits = "fahrenheit";
     if (units.equals("metric")) {
@@ -81,6 +100,11 @@ public class OpenWeatherMap extends HttpClient {
   public void setApiKey(String apiKey) {
     this.apiKey = apiKey;
   }
+  
+  public void setLang(String lang) {
+	    this.lang = lang;
+	  }
+	  
   
   /**
    * This static method returns all the details of the class without it having
