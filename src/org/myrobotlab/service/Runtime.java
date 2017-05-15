@@ -113,6 +113,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   static private boolean needsRestart = false;
 
   static private String runtimeName;
+  public boolean is64bit = System.getProperty("sun.arch.data.model").contains("64");
 
   static private Date startDate = new Date();
 
@@ -382,8 +383,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   /**
-   * DEPRECATE - use JSON ... XML is sooo 1990s
-   * 
    * a method which returns a xml representation of all the listeners and routes
    * in the runtime system
    * 
@@ -1596,10 +1595,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 		  runtime.addTaskOneShot(seconds * 1000, "shutdown", (Object[])null);
 		  runtime.invoke("publishShutdown", seconds);
 	  }
-	  else
-	  {
-	  shutdown();
-	  }
   }
   
   public static void shutdown() {
@@ -1825,8 +1820,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     log.info("============== non-normalized ==============");
     log.info("java.vm.name [{}]", vmName);
+    log.info("java.vm.version [{}]", System.getProperty("java.vm.version"));
     log.info("java.vm.vendor [{}]", System.getProperty("java.vm.vendor"));
     log.info("java.vm.version [{}]", System.getProperty("java.vm.version"));
+    log.info("java.vm.vendor [{}]", System.getProperty("java.runtime.version"));
 
     // System.getProperty("pi4j.armhf")
     log.info("os.version [{}]", System.getProperty("os.version"));
