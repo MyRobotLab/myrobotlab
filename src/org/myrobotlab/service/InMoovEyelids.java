@@ -1,5 +1,9 @@
 package org.myrobotlab.service;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -18,9 +22,34 @@ public class InMoovEyelids extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovEyelids.class);
 
-  transient public Servo eyelidleft;
-  transient public Servo eyelidright;
+  transient public static Servo eyelidleft;
+  transient public static Servo eyelidright;
   transient public Arduino arduino;
+
+  static Timer blinkEyesTimer = new Timer();
+
+  static class blinkEyesTimertask extends TimerTask {
+    @Override
+    public void run() {
+        int delay = ThreadLocalRandom.current().nextInt(10, 60 + 1);
+        blinkEyesTimer.schedule(new blinkEyesTimertask(), delay*1000);
+        if (eyelidleft != null) {
+          eyelidleft.moveTo(180);
+         }
+        if (eyelidright != null) {
+          eyelidright.moveTo(180);
+         }
+        sleep(ThreadLocalRandom.current().nextInt(500, 1000 + 1));
+        if (eyelidleft != null) {
+          eyelidleft.moveTo(0);
+         }
+        if (eyelidright != null) {
+          eyelidright.moveTo(0);
+         }
+    }
+  }
+
+ 
 
   static public void main(String[] args) {
     LoggingFactory.init(Level.INFO);
@@ -35,6 +64,7 @@ public class InMoovEyelids extends Service {
     } catch (Exception e) {
       Logging.logError(e);
     }
+    
   }
 
   public InMoovEyelids(String n) {
@@ -46,12 +76,22 @@ public class InMoovEyelids extends Service {
     
     arduino = (Arduino) createPeer("arduino");
 
-
     eyelidleft.setRest(90);
     eyelidright.setRest(90);
  
     setVelocity(50.0,50.0);
-
+    
+  }
+  
+ public void  blink(boolean param ) {
+   if (blinkEyesTimer != null) {
+     blinkEyesTimer.cancel();
+     blinkEyesTimer = null;
+   }
+   if (param){
+     blinkEyesTimer = new Timer();
+     new blinkEyesTimertask().run();
+   }
   }
 
   /**
@@ -74,6 +114,8 @@ public class InMoovEyelids extends Service {
     sleep(InMoov.attachPauseMs);
     return true;
   }
+  
+  
 
   @Override
   public void broadcastState() {
@@ -82,7 +124,7 @@ public class InMoovEyelids extends Service {
     eyelidright.broadcastState();
    
   }
-
+  
   public boolean connect(String port) throws Exception {
 	  return connect(port,22,24);
 	  
@@ -160,8 +202,8 @@ public class InMoovEyelids extends Service {
     if (log.isDebugEnabled()) {
       log.debug(String.format("%s moveTo %d %d", getName(), eyelidleft, eyelidright));
     }
-    this.eyelidleft.moveTo(eyelidleft);
-    this.eyelidright.moveTo(eyelidright);
+    InMoovEyelids.eyelidleft.moveTo(eyelidleft);
+    InMoovEyelids.eyelidright.moveTo(eyelidright);
   }
 
   // FIXME - releasePeers()
@@ -228,6 +270,9 @@ public class InMoovEyelids extends Service {
     arduino.startService();
   }
 
+  
+ 
+  
   public void test() {
 
     if (arduino == null) {
@@ -255,6 +300,9 @@ public class InMoovEyelids extends Service {
    * @return ServiceType - returns all the data
    * 
    */
+  
+
+  
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(InMoovEyelids.class.getCanonicalName());
@@ -269,7 +317,7 @@ public class InMoovEyelids extends Service {
   }
 
   public void setVelocity(Double eyelidleft, Double eyelidright) {
-    this.eyelidleft.setVelocity(eyelidleft);
-    this.eyelidright.setVelocity(eyelidright);
+    InMoovEyelids.eyelidleft.setVelocity(eyelidleft);
+    InMoovEyelids.eyelidright.setVelocity(eyelidright);
    }
 }
