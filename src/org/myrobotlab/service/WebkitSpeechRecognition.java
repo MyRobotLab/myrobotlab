@@ -44,11 +44,13 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   private static final long serialVersionUID = 1L;
 
   private String language = "en-US";
+  private boolean autoListen = false;
 
   HashMap<String, Command> commands = new HashMap<String, Command>();
 
   // track the state of the webgui, is it listening? maybe?
   public boolean listening = false;
+  private boolean speaking = false;
   
   public boolean stripAccents = false;
   
@@ -87,7 +89,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     // TODO Auto-generated method stub
 	// temporary debug to show real mic status
 	  log.info("micIsListening");
-	  listening=false;
+	  listening=true;
 	  return;
   }
 
@@ -95,8 +97,15 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public void pauseListening() {
     // TODO Auto-generated method stub
 	// temporary debug to show real mic status
+    if (this.autoListen && !this.speaking)
+    {
+    startListening();
+    }
+    else
+    {
 	  log.info("micNotListening");
-	  listening=true;
+	  listening=false;
+    }
   }
 
   @Override
@@ -141,7 +150,18 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     this.language = language;
     broadcastState();
   }
-
+  
+  public void setAutoListen(boolean autoListen) {
+    // Here we want to set the language string and broadcast the update to the
+    // web gui so that it knows to update the language on webkit speech
+    this.autoListen = autoListen;
+    
+  }
+  
+  public boolean getautoListen() {
+    return this.autoListen;
+  }
+  
   public String getLanguage() {
     // a getter for it .. just in case.
     return this.language;
@@ -168,13 +188,15 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public void onStartSpeaking(String utterance) {
     // at this point we should subscribe to this in the webgui
     // so we can pause listening.
-	  stopListening();
+	  this.speaking=true;
+    stopListening();
   }
 
   @Override
   public void onEndSpeaking(String utterance) {
     // need to subscribe to this in the webgui
     // so we can resume listening.
+    this.speaking=false;
 	  startListening(); 
   }
   
