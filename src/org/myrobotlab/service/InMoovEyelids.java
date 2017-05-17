@@ -27,13 +27,27 @@ public class InMoovEyelids extends Service {
   transient public Arduino arduino;
 
   static Timer blinkEyesTimer = new Timer();
-
+  static boolean inmoovIsTrackingSomething=false;
+  
   static class blinkEyesTimertask extends TimerTask {
     @Override
     public void run() {
         int delay = ThreadLocalRandom.current().nextInt(10, 60 + 1);
         blinkEyesTimer.schedule(new blinkEyesTimertask(), delay*1000);
-        if (eyelidleft != null) {
+              
+        if (InMoov.eyesTracking != null)
+        {
+        	if (InMoov.eyesTracking.isIdle() && InMoov.headTracking.isIdle()){
+        		inmoovIsTrackingSomething=false;
+        	}
+        	else
+        	{
+        		inmoovIsTrackingSomething=true;
+        	}
+        }
+        
+        if (!inmoovIsTrackingSomething){
+         if (eyelidleft != null) {
           eyelidleft.moveTo(180);
          }
         if (eyelidright != null) {
@@ -46,6 +60,7 @@ public class InMoovEyelids extends Service {
         if (eyelidright != null) {
           eyelidright.moveTo(0);
          }
+        }
     }
   }
 
@@ -76,14 +91,14 @@ public class InMoovEyelids extends Service {
     
     arduino = (Arduino) createPeer("arduino");
 
-    eyelidleft.setRest(90);
-    eyelidright.setRest(90);
+    eyelidleft.setRest(0);
+    eyelidright.setRest(0);
  
     setVelocity(50.0,50.0);
     
   }
   
- public void  blink(boolean param ) {
+ public void autoBlink(boolean param ) {
    if (blinkEyesTimer != null) {
      blinkEyesTimer.cancel();
      blinkEyesTimer = null;

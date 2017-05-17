@@ -95,8 +95,8 @@ public class InMoov extends Service {
   // metas
   transient public SpeechRecognizer ear;
   transient public SpeechSynthesis mouth;
-  transient public Tracking eyesTracking;
-  transient public Tracking headTracking;
+  transient public static Tracking eyesTracking;
+  transient public static Tracking headTracking;
   transient public OpenCV opencv;
   transient public MouthControl mouthControl;
   transient public Python python;
