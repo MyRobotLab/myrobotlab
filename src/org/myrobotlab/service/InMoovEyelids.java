@@ -36,7 +36,7 @@ public class InMoovEyelids extends Service {
         blinkEyesTimer.schedule(new blinkEyesTimertask(), delay*1000);
               
 
-        if (!InMoov.RobotIsTrackingSomething){
+        if (!InMoov.RobotIsTrackingSomething()){
          if (eyelidleft != null) {
           eyelidleft.moveTo(180);
          }
