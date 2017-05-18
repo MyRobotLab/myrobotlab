@@ -18,7 +18,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.Servo.IKData;
@@ -132,7 +131,24 @@ public class InMoov extends Service {
 
   public static int attachPauseMs = 100;
   
-  public static boolean RobotIsTrackingSomething=false;
+   public static boolean RobotIsTrackingSomething() {
+     
+    if (eyesTracking!=null && headTracking!=null)
+    {
+      if (eyesTracking.isIdle() && headTracking.isIdle()){
+        return false;
+      }
+      else
+      {
+        return true;
+      } 
+    }
+    else
+    {
+      return false;
+    }
+  }
+   
   public static boolean RobotCanMoveHeadRandom = true;
   public static boolean RobotCanMoveEyesRandom = true;
   private transient Timer DisableTimerRobotCanMoveHeadRandom;
@@ -1099,8 +1115,7 @@ public class InMoov extends Service {
 
     opencv = (OpenCV) startPeer("opencv");
     head = (InMoovHead) startPeer("head");
-    subscribe(opencv.getName(),"publishOpenCVData");
-
+    
     if (type == null) {
       type = Arduino.BOARD_TYPE_MEGA;
     }
@@ -1113,22 +1128,7 @@ public class InMoov extends Service {
     return head;
   }
   
-  public synchronized void onOpenCVData(OpenCVData data)
-  {
-	 if (data != null)
-	 {
-	  if (eyesTracking != null && headTracking!= null)
-      {
-      	if (RobotIsTrackingSomething && eyesTracking.isIdle() && headTracking.isIdle()){
-      		RobotIsTrackingSomething=false;
-      	}
-      	else
-      	{
-      		RobotIsTrackingSomething=true;
-      	}
-      }	
-	 }
-  }
+ 
 
 
   // NOTE - BEST Services are one which are reflective on startService
