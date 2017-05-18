@@ -86,6 +86,8 @@ public class InMoovEyelids extends Service {
  
     setVelocity(50.0,50.0);
     
+    enableAutoEnable(true);
+    
   }
   
  public void autoBlink(boolean param ) {
@@ -306,7 +308,15 @@ public class InMoovEyelids extends Service {
    * 
    */
   
-
+  public void enableAutoEnable(Boolean param) {
+    eyelidleft.enableAutoEnable(param);
+    eyelidright.enableAutoEnable(param);
+  }
+  
+  public void enableAutoDisable(Boolean param) {
+    eyelidleft.enableAutoDisable(param);
+    eyelidright.enableAutoDisable(param);
+  }
   
   static public ServiceType getMetaData() {
 

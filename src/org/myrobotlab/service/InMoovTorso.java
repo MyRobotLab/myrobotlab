@@ -57,6 +57,8 @@ public class InMoovTorso extends Service {
     lowStom.setRest(90);
 
     setVelocity(5.0,5.0,5.0);
+    
+    enableAutoEnable(true);
   
   }
 
