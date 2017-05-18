@@ -50,6 +50,8 @@ public class InMoovHead extends Service {
     eyeY.setRest(90);
     
     setVelocity(45.0,45.0,-1.0,-1.0,-1.0,45.0);
+    
+    enableAutoEnable(true);
 
   }
 
