@@ -631,7 +631,7 @@ public class Servo extends Service implements ServoControl {
 		if (isAttached(controller)) {
 			log.info("{} servo is already attached to controller {}", getName(), this.controller.getName());
 			return;
-		} else if (this.controller != controller) {
+		} else if (this.controller != null && this.controller != controller) {
 		  //we're switching controllers
 		  detach();
 		}
@@ -650,6 +650,7 @@ public class Servo extends Service implements ServoControl {
 		// now attach the controller
 		// the controller better have
 		// isAttach(ServoControl) to prevent infinit loop
+		// FIXME ! - this should not set the controller or controllerName if controller.attach(this) is not successful
 		controller.attach(this);
 		sleep(300);
 		// the controller is attached now
@@ -934,7 +935,7 @@ public class Servo extends Service implements ServoControl {
 			// Runtime.start("webgui", "WebGui");
 			Runtime.start("gui", "SwingGui");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			arduino.record();
+			// arduino.record();
 			// arduino.getSerial().record();
 
 			log.info("ports {}", Arrays.toString(arduino.getSerial().getPortNames().toArray()));
