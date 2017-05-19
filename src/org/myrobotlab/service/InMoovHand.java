@@ -91,9 +91,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     
     setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
     
-    enableAutoEnable(true);
-
-  }
+   }
 
   /**
    * attach all the servos - this must be re-entrant and accomplish the
@@ -175,6 +173,9 @@ public class InMoovHand extends Service implements LeapDataListener {
     ringFinger.attach(arduino, 5, ringFinger.getRest(), ringFinger.getVelocity());
     pinky.attach(arduino, 6, pinky.getRest(), pinky.getVelocity());
     wrist.attach(arduino, 7, wrist.getRest(), wrist.getVelocity());
+    
+    enableAutoEnable(true);
+    
     broadcastState();
     return true;
   }

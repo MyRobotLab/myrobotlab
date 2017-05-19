@@ -51,8 +51,6 @@ public class InMoovHead extends Service {
     
     setVelocity(45.0,45.0,-1.0,-1.0,-1.0,45.0);
     
-    enableAutoEnable(true);
-
   }
 
   /**
@@ -126,6 +124,9 @@ public class InMoovHead extends Service {
     eyeY.attach(arduino, eyeYPin, eyeY.getRest(), eyeY.getVelocity());
     rollNeck.attach(arduino, rollNeckPin, rollNeck.getRest(), rollNeck.getVelocity());
     broadcastState();
+    
+    enableAutoEnable(true);
+    
     return true;
   }
 

@@ -58,9 +58,7 @@ public class InMoovTorso extends Service {
 
     setVelocity(5.0,5.0,5.0);
     
-    enableAutoEnable(true);
-  
-  }
+   }
 
   /**
    * attach all the servos - this must be re-entrant and accomplish the
@@ -124,6 +122,8 @@ public class InMoovTorso extends Service {
     topStom.attach(arduino, 27, topStom.getRest(), topStom.getVelocity());
     midStom.attach(arduino, 28, midStom.getRest(), midStom.getVelocity());
     lowStom.attach(arduino, 29, lowStom.getRest(), lowStom.getVelocity());
+    
+    enableAutoEnable(true);
 
     broadcastState();
     return true;

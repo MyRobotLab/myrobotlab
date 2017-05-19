@@ -506,7 +506,7 @@ public class InMoov extends Service {
     }
 
     if (RIGHT.equals(side)) {
-      return Arduino.BOARD_TYPE_UNO;
+      return Arduino.BOARD_TYPE_MEGA;
     }
 
     return Arduino.BOARD_TYPE_MEGA;
@@ -1041,13 +1041,17 @@ public class InMoov extends Service {
     speakBlocking("startup sequence completed");
   }
 
-  public InMoovArm startArm(String side, String port, String boardType) throws Exception {
+  public InMoovArm startArm(String side, String port, String type) throws Exception {
     speakBlocking(String.format("starting %s arm", side));
 
     InMoovArm arm = (InMoovArm) startPeer(String.format("%sArm", side));
     arms.put(side, arm);
     arm.setSide(side);// FIXME WHO USES SIDE - THIS SHOULD BE NAME !!!
-    arm.arduino.setBoard(getBoardType(side, boardType));
+    if (type == null) {
+      type = Arduino.BOARD_TYPE_MEGA;
+    }
+    
+    arm.arduino.setBoard(type);
     arm.connect(port);
     arduinos.put(port, arm.arduino);
 
@@ -1082,13 +1086,17 @@ public class InMoov extends Service {
     return eyesTracking;
   }
 
-  public InMoovHand startHand(String side, String port, String boardType) throws Exception {
+  public InMoovHand startHand(String side, String port, String type) throws Exception {
     speakBlocking(String.format("starting %s hand", side));
 
     InMoovHand hand = (InMoovHand) startPeer(String.format("%sHand", side));
     hand.setSide(side);
     hands.put(side, hand);
-    hand.arduino.setBoard(getBoardType(side, boardType));
+    if (type == null) {
+      type = Arduino.BOARD_TYPE_MEGA;
+    }
+    
+    hand.arduino.setBoard(type);
     hand.connect(port);
     arduinos.put(port, hand.arduino);
     return hand;
