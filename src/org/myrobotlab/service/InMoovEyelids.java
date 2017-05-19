@@ -27,7 +27,7 @@ public class InMoovEyelids extends Service {
   transient public Arduino arduino;
 
   static Timer blinkEyesTimer = new Timer();
-  static boolean inmoovIsTrackingSomething=false;
+
   
   static class blinkEyesTimertask extends TimerTask {
     @Override
@@ -35,18 +35,8 @@ public class InMoovEyelids extends Service {
         int delay = ThreadLocalRandom.current().nextInt(10, 60 + 1);
         blinkEyesTimer.schedule(new blinkEyesTimertask(), delay*1000);
               
-        if (InMoov.eyesTracking != null)
-        {
-        	if (InMoov.eyesTracking.isIdle() && InMoov.headTracking.isIdle()){
-        		inmoovIsTrackingSomething=false;
-        	}
-        	else
-        	{
-        		inmoovIsTrackingSomething=true;
-        	}
-        }
-        
-        if (!inmoovIsTrackingSomething){
+
+        if (!InMoov.RobotIsTrackingSomething()){
          if (eyelidleft != null) {
           eyelidleft.moveTo(180);
          }
@@ -95,6 +85,8 @@ public class InMoovEyelids extends Service {
     eyelidright.setRest(0);
  
     setVelocity(50.0,50.0);
+    
+    enableAutoEnable(true);
     
   }
   
@@ -316,7 +308,15 @@ public class InMoovEyelids extends Service {
    * 
    */
   
-
+  public void enableAutoEnable(Boolean param) {
+    eyelidleft.enableAutoEnable(param);
+    eyelidright.enableAutoEnable(param);
+  }
+  
+  public void enableAutoDisable(Boolean param) {
+    eyelidleft.enableAutoDisable(param);
+    eyelidright.enableAutoDisable(param);
+  }
   
   static public ServiceType getMetaData() {
 

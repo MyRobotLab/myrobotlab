@@ -5,6 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -128,7 +130,30 @@ public class InMoov extends Service {
   private boolean mute = false;
 
   public static int attachPauseMs = 100;
-
+  
+   public static boolean RobotIsTrackingSomething() {
+     
+    if (eyesTracking!=null && headTracking!=null)
+    {
+      if (eyesTracking.isIdle() && headTracking.isIdle()){
+        return false;
+      }
+      else
+      {
+        return true;
+      } 
+    }
+    else
+    {
+      return false;
+    }
+  }
+   
+  public static boolean RobotCanMoveHeadRandom = true;
+  public static boolean RobotCanMoveEyesRandom = true;
+  private transient Timer DisableTimerRobotCanMoveHeadRandom;
+  private transient Timer DisableTimerRobotCanMoveEyesRandom;
+  
   public Integer pirPin = null;
 
   // ---------- new getter interface begin ---------------------------
@@ -1080,6 +1105,8 @@ public class InMoov extends Service {
   public InMoovHead startHead(String port, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) throws Exception {
     return startHead(port, null, headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
   }
+  
+
 
   public InMoovHead startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin)
       throws Exception {
@@ -1088,10 +1115,11 @@ public class InMoov extends Service {
 
     opencv = (OpenCV) startPeer("opencv");
     head = (InMoovHead) startPeer("head");
-
+    
     if (type == null) {
       type = Arduino.BOARD_TYPE_MEGA;
     }
+    
 
     head.arduino.setBoard(type);
     head.connect(port, headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
@@ -1099,6 +1127,9 @@ public class InMoov extends Service {
 
     return head;
   }
+  
+ 
+
 
   // NOTE - BEST Services are one which are reflective on startService
   // like xmpp which exposes a the reflective REST API are startService
@@ -1573,6 +1604,49 @@ public class InMoov extends Service {
     // TODO: allow a user to save a gesture to the gestures directory
     saveGesture(gestureName, GESTURES_DIRECTORY);
 
+  }
+  
+  public void disableRobotCanMoveHeadRandom(int seconds) {
+	  log.info("Disable RobotCanMoveHeadRandom for "+seconds+" seconds");
+	  RobotCanMoveHeadRandom=false;
+	  if (DisableTimerRobotCanMoveHeadRandom != null) {
+		  DisableTimerRobotCanMoveHeadRandom.cancel();
+		  DisableTimerRobotCanMoveHeadRandom = null;
+	      }
+	  DisableTimerRobotCanMoveHeadRandom = new Timer();
+				
+	  DisableTimerRobotCanMoveHeadRandom.schedule(new TimerTask() {
+	          @Override
+	          public void run() {
+	        	  log.info("Reactivate RobotCanMoveHeadRandom");
+	        	  DisableTimerRobotCanMoveHeadRandom.cancel();
+	          }
+	        }, (int) seconds * 1000);
+		       
+	  }
+  
+  public void disableRobotCanMoveEyesRandom(int seconds) {
+	  log.info("Disable RobotCanMoveEyesRandom for "+seconds+" seconds");
+	  RobotCanMoveEyesRandom=false;
+	  if (DisableTimerRobotCanMoveEyesRandom != null) {
+		  DisableTimerRobotCanMoveEyesRandom.cancel();
+		  DisableTimerRobotCanMoveEyesRandom = null;
+	      }
+	  DisableTimerRobotCanMoveEyesRandom = new Timer();
+				
+	  DisableTimerRobotCanMoveEyesRandom.schedule(new TimerTask() {
+	          @Override
+	          public void run() {
+	        	  log.info("Reactivate RobotCanMoveEyesRandom");
+	        	  DisableTimerRobotCanMoveEyesRandom.cancel();
+	          }
+	        }, (int) seconds * 1000);
+		       
+	  }
+  
+  public void disableRobotRandom(int seconds) {
+	  disableRobotCanMoveHeadRandom(seconds);
+	  disableRobotCanMoveEyesRandom(seconds);	  
   }
 
   public static void main(String[] args) {
