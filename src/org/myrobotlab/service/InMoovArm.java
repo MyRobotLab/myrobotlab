@@ -57,8 +57,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     
     setVelocity(20.0, 20.0, 20.0, 20.0);
     
-    enableAutoEnable(true);
-  }
+    }
 
   /**
    * attach all the servos - this must be re-entrant and accomplish the
@@ -126,6 +125,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     rotate.attach(arduino, 9, rotate.getRest(), rotate.getVelocity());
     shoulder.attach(arduino, 10, shoulder.getRest(), shoulder.getVelocity());
     omoplate.attach(arduino, 11, omoplate.getRest(), omoplate.getVelocity());
+    
+    enableAutoEnable(true);
 
     broadcastState();
     return true;
