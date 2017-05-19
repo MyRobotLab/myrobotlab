@@ -90,6 +90,8 @@ public class InMoovHand extends Service implements LeapDataListener {
     wrist.setRest(90);
     
     setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
+    
+    enableAutoEnable(true);
 
   }
 
