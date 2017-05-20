@@ -13,6 +13,7 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -72,10 +73,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
   }
 
   // FIXME - catch throw - set field to isConnected = false;
-  public void connect(String url) {
+  public boolean connect(String url) throws MqttSecurityException, MqttException {
 
-    try {
-
+      
       if (client == null) {
         // FIXME - should be member ? what is this for ?
         MemoryPersistence persistence = new MemoryPersistence();
@@ -87,17 +87,28 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
         // Set this wrapper as the callback handler
         client.setCallback(this);
-      }
-
-      if (!client.isConnected()) {
+        
         client.connect(conOpt, "Connect sample context", this);
-        isConnected = true;
-      }
+        int i =0;
+        while (!client.isConnected() || i < 10)
 
-    } catch (MqttException e) {
-      isConnected = false;
-    }
+        {
+          sleep(1);
+          i+=1;
+
+        }
+        
+        if (!client.isConnected()) {
+          client.connect(conOpt, "Connect sample context", this);
+          isConnected = true;
+        }
+        else
+        {
+          isConnected = false;
+        }
+      }
     broadcastState();
+    return isConnected;
   }
 
   /**
@@ -161,6 +172,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     String messageStr = "onMqttMsg Time: " + time + "\tTopic: " + topic + "\tMessage: " + new String(message.getPayload()) + "\tQoS: " + message.getQos();
     log.info(messageStr);
     invoke("publishMqttMsg", topic, message.getPayload());
+    invoke("publishMqttMsgByte", message.getPayload());
+    invoke("publishMqttMsgString", new String(message.getPayload()));
   }
 
   @Override
@@ -205,12 +218,24 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     return new MqttMsg(topic, msg);
   }
 
+  public String publishMqttMsgString(String msg) {
+    return msg;
+  }
+  
+  public byte[] publishMqttMsgByte(byte[] msg) {
+    return msg;
+  }
+    
   public void setBroker(String broker) {
     url = broker;
   }
 
   public void setClientId(String cId) {
     clientId = cId;
+  }
+  
+  public void setPubTopic(String Topic) {
+    topic = Topic;  
   }
 
   public void setQos(int q) {
