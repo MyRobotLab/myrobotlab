@@ -99,7 +99,7 @@ public class InMoov extends Service {
   transient public SpeechSynthesis mouth;
   transient public static Tracking eyesTracking;
   transient public static Tracking headTracking;
-  transient public OpenCV opencv;
+  transient public static OpenCV opencv;
   transient public MouthControl mouthControl;
   transient public Python python;
 
@@ -148,6 +148,17 @@ public class InMoov extends Service {
       return false;
     }
   }
+   
+   public static boolean RobotIsOpenCvCapturing() {
+	   if (opencv!=null)
+	   {
+		if (opencv.capturing)
+		{
+			return true;
+		}
+	   }
+	   return false;
+   }
    
   public static boolean RobotCanMoveHeadRandom = true;
   public static boolean RobotCanMoveEyesRandom = true;
