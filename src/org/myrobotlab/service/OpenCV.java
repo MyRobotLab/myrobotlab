@@ -252,6 +252,14 @@ public class OpenCV extends Service implements VideoSource {
 	 * @return
 	 */
 	public final OpenCVData publishOpenCVData(OpenCVData data) {
+		if (data!=null)
+			{
+			capturing = true;
+			}
+		else
+		{
+			capturing = false;	
+		}
 		return data;
 	}
 
@@ -376,9 +384,11 @@ public class OpenCV extends Service implements VideoSource {
 	// publish functions end ---------------------------
 
 	public void stopCapture() {
+		log.info("opencv - stop capture");
 		videoProcessor.stop();
-		capturing = false;
 		broadcastState(); // let everyone know
+		sleep(500);
+		capturing = false;
 	}
 
 	public void capture() {
@@ -394,7 +404,6 @@ public class OpenCV extends Service implements VideoSource {
 		// so we sleep here for 500 milliseconds to make sure
 		// the video stream is up and running before we publish our state.
 		sleep(500);
-		capturing = true;
 		broadcastState(); // let everyone know
 	}
 
