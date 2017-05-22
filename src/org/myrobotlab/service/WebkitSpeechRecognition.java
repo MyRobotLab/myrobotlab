@@ -42,7 +42,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
    * 
    */
   private static final long serialVersionUID = 1L;
-
+  public String lastThingRecognized = "";
   private String language = "en-US";
   private boolean autoListen = false;
 
@@ -120,6 +120,8 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
       Command cmd = commands.get(cleanedText);
       send(cmd.name, cmd.method, cmd.params);
     }
+    lastThingRecognized=cleanedText;
+    broadcastState();
     return cleanedText;
   }
 
