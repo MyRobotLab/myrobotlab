@@ -51,8 +51,8 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   // track the state of the webgui, is it listening? maybe?
   public boolean listening = false;
   private boolean speaking = false;
-  public boolean forceControlFromMrl = false;
-  
+  public boolean continuous = true;
+  private long lastAutoListenEvent = System.currentTimeMillis();
   public boolean stripAccents = false;
   
   public WebkitSpeechRecognition(String reservedKey) {
@@ -97,11 +97,21 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
   @Override
   public void pauseListening() {
-    // TODO Auto-generated method stub
-	// temporary debug to show real mic status
+	  
     if (this.autoListen && !this.speaking)
     {
+    //bug if there is multiple tabs	
+    
+    if (System.currentTimeMillis()-lastAutoListenEvent > 50)
+    {
     startListening();
+    }
+    else
+    {
+    error("WebkitSpeech : TOO MANY EVENTS, please close zombie tabs !");
+    sleep(500);
+    }
+    lastAutoListenEvent = System.currentTimeMillis();
     }
     else
     {
@@ -167,6 +177,17 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     return this.autoListen;
   }
   
+  public void setContinuous(boolean continuous) {
+	    // Here we want to set the language string and broadcast the update to the
+	    // web gui so that it knows to update the language on webkit speech
+	    this.continuous = continuous;
+	    broadcastState();
+	  }
+	  
+	  public boolean getContinuous() {
+	    return this.continuous;
+	  }
+
   public String getLanguage() {
     // a getter for it .. just in case.
     return this.language;

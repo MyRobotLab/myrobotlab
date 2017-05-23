@@ -309,7 +309,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
             name: "English - United States"
         }
     };
-    
+    continuous = true;
     this.updateState = function(service) {
         $scope.service = service;
         // we should check for the language here.. and update that on the webkit instance.
@@ -318,6 +318,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         // TODO: update the selected value in the gui.
         $scope.lang.selectedOption.id = service.language;
         $scope.current_language = service.language;
+        continuous = service.continuous;
+        
         if ($scope.service.listening != $scope.recognizing) {
         	$log.info("Change listening state!");
         	// huh!? not initialized  yet?!
@@ -484,7 +486,10 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     
     
     this.onMsg = function(msg) {
+        
+        $scope.recognition.continuous = continuous;
         $log.info("Webkit Speech Msg !");
+        $log.info("continuous1",$scope.recognition.continuous);
         $log.info(msg.method);
         switch (msg.method) {
         case 'onState':
