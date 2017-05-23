@@ -433,6 +433,9 @@ public class OpenCV extends Service implements VideoSource {
 	public OpenCVFilter addFilter(String name, String filterType) {
 
 		OpenCVFilter filter = videoProcessor.addFilter(name, filterType);
+		// we need to pass a handle to our video processor down so filters can invoke things on opencv i guess. 
+		// TODO: KW: maybe we want to change it so that filters invoke on themselves.. (but, filters aren't services, so that's a bit odd.)
+		filter.setVideoProcessor(videoProcessor);
 		// broadcastState(); // let everyone know
 		// not needed as broadcast 
 		return filter;
@@ -768,16 +771,16 @@ public class OpenCV extends Service implements VideoSource {
 		// opencv.setInputFileName("http://192.168.4.112:8080/?action=stream");
 		// opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
-		// opencv.addFilter("facerec", "FaceRecognizer");
+		opencv.addFilter("facerec", "FaceRecognizer");
 
-		OpenCVFilterPyramidDown pyramid = new OpenCVFilterPyramidDown("pyramid");
-		opencv.addFilter(pyramid);
+		// OpenCVFilterPyramidDown pyramid = new OpenCVFilterPyramidDown("pyramid");
+	// opencv.addFilter(pyramid);
 		
-		OpenCVFilterDilate dilate = new OpenCVFilterDilate();
-		opencv.addFilter(dilate);
+	// 	OpenCVFilterDilate dilate = new OpenCVFilterDilate();
+	// 	opencv.addFilter(dilate);
 		
-		OpenCVFilterFaceDetect2 facedetect2 = new OpenCVFilterFaceDetect2("facedetect2");
-		opencv.addFilter(facedetect2);
+	// 	OpenCVFilterFaceDetect2 facedetect2 = new OpenCVFilterFaceDetect2("facedetect2");
+	// 	opencv.addFilter(facedetect2);
 		// OpenCVFilterFaceRecognizer("facerec");
 
 		// String trainingDir = "C:\\training";
