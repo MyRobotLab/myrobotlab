@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -163,9 +164,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	transient public I2CController controller;
 
 	// Constant for default PWM freqency
-	private static int pwmFreq = 60;
+	private static int defaultPwmFreq = 60;
 	final static int minPwmFreq = 24;
 	final static int maxPwmFreq = 1526;
+  
+	int pwmFreq;
+	boolean pwmFreqSet = false;
 
 	// List of possible addresses. Used by the GUI.
 	public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E",
@@ -249,10 +253,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * @GroG - I only need servoNameToPin yet. To be able to move at a set speed
 	 *       a few extra values are needed
 	 */
+  
 	class ServoData {
 		int pin;
-		boolean pwmFreqSet = false;
-		int pwmFreq;
 		SpeedControl speedcontrol;
 		double velocity = -1;
 		double acceleration = -1;
@@ -261,8 +264,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		double currentOutput;
 		boolean isEnergized = false;
 	}
-
-	transient HashMap<String, ServoData> servoMap = new HashMap<String, ServoData>();
+	
+  transient HashMap<String, ServoData> servoMap = new HashMap<String, ServoData>();
 
 	// Motor related constants
 	public static final int MOTOR_FORWARD = 1;
@@ -466,6 +469,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			if (Thread.interrupted()) { // Clears interrupted status!
 			}
 		}
+		pwmFreq = hz;
+    pwmFreqSet = true;
 	}
 
 	public void setServo(Integer pin, Integer pulseWidthOff) {
@@ -504,9 +509,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	@Override
 	public void servoMoveTo(ServoControl servo) {
 		ServoData servoData = servoMap.get(servo.getName());
-		if (!servoData.pwmFreqSet) {
-			setPWMFreq(servoData.pin, servoData.pwmFreq);
-			servoData.pwmFreqSet = true;
+		if (!pwmFreqSet) {
+			setPWMFreq(servoData.pin, defaultPwmFreq);
 		}
 
 		if (servoData.isEnergized) {
@@ -533,9 +537,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	@Override
 	public void servoWriteMicroseconds(ServoControl servo, int uS) {
 		ServoData servoData = servoMap.get(servo.getName());
-		if (!servoData.pwmFreqSet) {
-			setPWMFreq(servoData.pin, servoData.pwmFreq);
-			servoData.pwmFreqSet = true;
+		if (!pwmFreqSet) {
+			setPWMFreq(servoData.pin, defaultPwmFreq);
 		}
 
 		int pin = servo.getPin();
@@ -616,8 +619,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		String servoName = servo.getName();
 		ServoData servoData = new ServoData();
 		servoData.pin = (int) conf[0];
-		servoData.pwmFreqSet = false;
-		servoData.pwmFreq = pwmFreq;
 		servoMap.put(servoName, servoData);
 		invoke("publishAttachedDevice", servoName);
 	}
@@ -631,8 +632,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		servoData.pin = servo.getPin();
 		servoData.targetOutput = servo.getTargetOutput();
 		servoData.velocity = servo.getVelocity();
-		servoData.pwmFreqSet = false;
-		servoData.pwmFreq = pwmFreq;
 		servoData.isEnergized = true;
 		servoMap.put(servo.getName(), servoData);
 	    servo.attach(this);
@@ -795,7 +794,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		} else if (MotorConfigSimpleH.class == type) {
 			MotorConfigSimpleH config = (MotorConfigSimpleH) mc.getConfig();
 			if (config.getPwmFreq() == null) {
-				config.setPwmFreq(500);
+				config.setPwmFreq(defaultMotorPwmFreq);
 				setPWMFreq(config.getPwrPin(), config.getPwmFreq());
 			}
 			setPinValue(config.getPwrPin(), 0);
@@ -841,11 +840,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		}
 		log.info(String.format("powerOutput = %s, powerOn = %s, powerOff = %s", powerOutput, powerOn, powerOff));
 		setPWM(pin, powerOn, powerOff);
-	}
-
-	public List<PinDefinition> getPinList() {
-		List<PinDefinition> list = new ArrayList<PinDefinition>(pinIndex.values());
-		return list;
 	}
 
 	public Map<String, PinDefinition> createPinList() {
@@ -949,5 +943,33 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		servoData.acceleration = servo.getAcceleration();
 
 	}
+
+	public List<PinDefinition> getPinList() {
+		List<PinDefinition> list = new ArrayList<PinDefinition>(pinIndex.values());
+		pinMap = new TreeMap<String, PinDefinition>();
+	    pinIndex = new TreeMap<Integer, PinDefinition>();
+	    List<PinDefinition> pinList = new ArrayList<PinDefinition>();
+
+        for (int i = 0; i < 15; ++i) {
+	      PinDefinition pindef = new PinDefinition();
+
+	        // begin wacky pin def logic
+	        String pinName = String.format("D%d", i);
+	        pindef.setName(pinName);
+	        pindef.setRx(false);
+            pindef.setDigital(true);
+            pindef.setAnalog(true);
+	        pindef.setDigital(true);
+	        pindef.canWrite(true);
+            pindef.setPwm(true);
+	        pindef.setAddress(i);
+	        pinIndex.put(i, pindef);
+	        pinMap.put(pinName, pindef);
+	        pinList.add(pindef);
+	      }
+
+		return list;
+	}
+
 
 }
