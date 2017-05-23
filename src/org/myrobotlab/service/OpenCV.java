@@ -426,6 +426,7 @@ public class OpenCV extends Service implements VideoSource {
 
 		OpenCVFilter filter = videoProcessor.addFilter(filterName, filterName);
 		// broadcastState(); // let everyone know - not needed as videoProcessor will
+		//filter.setVideoProcessor(videoProcessor);
 		// send the broadcast state
 		return filter;
 	}
@@ -435,7 +436,7 @@ public class OpenCV extends Service implements VideoSource {
 		OpenCVFilter filter = videoProcessor.addFilter(name, filterType);
 		// we need to pass a handle to our video processor down so filters can invoke things on opencv i guess. 
 		// TODO: KW: maybe we want to change it so that filters invoke on themselves.. (but, filters aren't services, so that's a bit odd.)
-		filter.setVideoProcessor(videoProcessor);
+		//filter.setVideoProcessor(videoProcessor);
 		// broadcastState(); // let everyone know
 		// not needed as broadcast 
 		return filter;

@@ -184,6 +184,7 @@ public class VideoProcessor implements Runnable, Serializable {
 	 * @return
 	 */
 	public OpenCVFilter addFilter(OpenCVFilter filter) {
+	  filter.setVideoProcessor(this);
 		addFilterQueue.add(filter);
 		return filter;
 	}
@@ -199,6 +200,7 @@ public class VideoProcessor implements Runnable, Serializable {
 			String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", filterType);
 			OpenCVFilter filter = (OpenCVFilter) Instantiator.getNewInstance(type, name);
 			addFilterQueue.add(filter);
+			filter.setVideoProcessor(this);
 			return filter;
 		} else {
 			return filters.get(name);
