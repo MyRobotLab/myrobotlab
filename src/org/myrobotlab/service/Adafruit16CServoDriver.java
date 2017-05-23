@@ -425,7 +425,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	public void setPWMFreq(int pin, Integer hz) { // Analog servos run at ~60 Hz
 
 		float prescale_value;
-
+		
 		if (hz < minPwmFreq) {
 			log.error(String.format("Minimum PWMFreq is %s Hz, requested freqency is %s Hz, clamping to minimum", minPwmFreq, hz));
 			hz = minPwmFreq;
@@ -435,7 +435,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			hz = maxPwmFreq;
 			prescale_value = 3;
 		} else {
-			prescale_value = Math.round(osc_clock / precision / hz) - 1;
+		  // Multiplying with factor 0.9 to correct the frequency 
+		  // See https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library/issues/11
+			prescale_value = Math.round(0.9 * osc_clock / precision / hz) - 1;
 		}
 
 		log.info(String.format("PWMFreq %s hz, prescale_value calculated to %s", hz, prescale_value));
