@@ -463,6 +463,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 		start();
 	}
+	
+	public boolean isStarted() {
+		if (nettosphere != null && nettosphere.isStarted()) {
+			// is running
+			info("WebGui is started");
+			return true;
+		}
+		return false;
+		
+	}
 
 	public void onRegistered(ServiceInterface si) {
 		// new service

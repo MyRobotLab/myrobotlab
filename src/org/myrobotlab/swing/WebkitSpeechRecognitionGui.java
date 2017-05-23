@@ -7,6 +7,7 @@ WebkitSpeechRecognition GUI - WIP
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,8 +42,9 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
   
   private JButton micro = new JButton(new ImageIcon(microOn));
   
-  private JButton startWebGui = new JButton("startWebGui");
+  private JButton startWebGui = new JButton("Start WebGui");
   private JButton autoListen = new JButton("Auto Listening ON");
+  private JButton continuous = new JButton("Speedup recognition OFF");
   private boolean listeningStatus=false;
 
   public WebkitSpeechRecognitionGui(final String boundServiceName, final SwingGui myService) throws IOException {
@@ -56,13 +58,18 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
     pan1.add(micro);
     pan1.add("onRecognized : ", onRecognized);
     autoListen.addActionListener(this);
+    autoListen.setBackground(Color.RED);
+    continuous.addActionListener(this);
+    continuous.setBackground(Color.RED);
     startWebGui.addActionListener(this);
     micro.addActionListener(this);
+    
     
     
     JPanel pan2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     pan2.add(startWebGui);
     pan2.add(autoListen);
+    pan2.add(continuous);
     
     display.add(pan1, BorderLayout.PAGE_START);
     display.add(pan2, BorderLayout.CENTER);
@@ -87,18 +94,30 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
           return;
         }
         
+        if (o == continuous) {
+            if (continuous.getText().equals("Speedup recognition OFF")) {
+              send("setContinuous",false);
+            } else {
+              send("setContinuous",true);
+            }
+            return;
+          }
+        
         if (o == startWebGui) {
           WebGui webgui = (WebGui) Runtime.create("WebGui", "WebGui");
+          if (!webgui.isStarted())
+          {
           webgui.autoStartBrowser(false);
           webgui.startService();
           webgui.startBrowser("http://localhost:8888/#/service/"+boundServiceName);
-       
+          }
+          startWebGui.setText("WebGui is started");
           return;
         }
         
         if (o == micro) {
           if (listeningStatus) {
-            send("stopListening");
+            send("onStartSpeaking","");
           } else {
             send("startListening");
           }
@@ -141,9 +160,19 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
     	  onRecognized.setText(WebkitSpeechRecognition.lastThingRecognized);
     	  if (WebkitSpeechRecognition.getautoListen()) {
     	    autoListen.setText("Auto Listening ON");
+    	    autoListen.setBackground(Color.green);
         } else {
           autoListen.setText("Auto Listening OFF");
+          autoListen.setBackground(Color.RED);
         }
+    	  
+    	  if (WebkitSpeechRecognition.getContinuous()) {
+    		continuous.setText("Speedup recognition OFF");
+    		continuous.setBackground(Color.RED);
+          } else {
+        	  continuous.setText("Speedup recognition ON");
+            continuous.setBackground(Color.GREEN);
+          }
     	  
     	  if (WebkitSpeechRecognition.listening) {
     	    micro.setIcon(new ImageIcon(microOn));
