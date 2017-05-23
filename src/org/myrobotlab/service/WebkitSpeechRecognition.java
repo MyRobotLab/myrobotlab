@@ -51,6 +51,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   // track the state of the webgui, is it listening? maybe?
   public boolean listening = false;
   private boolean speaking = false;
+  public boolean forceControlFromMrl = false;
   
   public boolean stripAccents = false;
   
@@ -90,6 +91,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 	// temporary debug to show real mic status
 	  log.info("micIsListening");
 	  listening=true;
+	  broadcastState();
 	  return;
   }
 
@@ -106,6 +108,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 	  log.info("micNotListening");
 	  listening=false;
     }
+    broadcastState();
   }
 
   @Override
@@ -157,7 +160,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     // Here we want to set the language string and broadcast the update to the
     // web gui so that it knows to update the language on webkit speech
     this.autoListen = autoListen;
-    
+    broadcastState();
   }
   
   public boolean getautoListen() {
