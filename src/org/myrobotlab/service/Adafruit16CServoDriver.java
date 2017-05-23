@@ -469,8 +469,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 			if (Thread.interrupted()) { // Clears interrupted status!
 			}
 		}
+		
 		pwmFreq = hz;
     pwmFreqSet = true;
+    
 	}
 
 	public void setServo(Integer pin, Integer pulseWidthOff) {
