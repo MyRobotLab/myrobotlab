@@ -1,5 +1,6 @@
 package org.myrobotlab.swing.widget;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.Point;
@@ -75,6 +76,7 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 	 * dimensions for undocked frame panel
 	 */
 	DockableTabData tabData = new DockableTabData();
+  public Color transitDockedColor;
 
 	public JMenuItem addMenuItem(String action) {
 		return addMenuItem(action, action);
@@ -218,8 +220,8 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-
-				tabs.remove(display);
+			  
+			  tabs.remove(display);
 
 				String label = self.title.getText();
 
@@ -246,6 +248,7 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 
 				undocked.addWindowListener(self);
 				undocked.addMouseMotionListener(self);
+				
 				undocked.setVisible(true);
 
 				undocked.pack();
@@ -267,7 +270,8 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 				tabs.add(display);
 				log.debug("here tabs count {}", tabs.getTabCount());
 				tabs.setTabComponentAt(tabs.getTabCount() - 1, self.getTitleLabel());
-
+				tabs.setBackgroundAt(tabs.getTabCount() - 1,transitDockedColor);
+						
 				// FIXME - callback
 				savePosition();
 
@@ -374,6 +378,9 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 	public Component getTitleLabel() {
 		return title;
 	}
+	
+
+
 
 	public int getX() {
 		return tabData.x;
