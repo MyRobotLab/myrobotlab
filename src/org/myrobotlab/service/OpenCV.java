@@ -25,6 +25,7 @@
 
 package org.myrobotlab.service;
 
+import java.awt.Color;
 /*
  TODO : 
  new filters - http://idouglasamoore-javacv.googlecode.com/git-history/02385ce192fb82f1668386e55ff71ed8d6f88ae3/src/main/java/com/googlecode/javacv/ObjectFinder.java
@@ -112,6 +113,7 @@ public class OpenCV extends Service implements VideoSource {
 	// FIXME - don't return BufferedImage return SerializableImage always !
 
 	private static final long serialVersionUID = 1L;
+	 public Color tabColor = new Color(133,174,221);
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCV.class);
 
@@ -676,6 +678,11 @@ public class OpenCV extends Service implements VideoSource {
 	public int getCameraIndex() {
 		return videoProcessor.cameraIndex;
 	}
+	
+  @Override
+  public Color getTabColor() {
+    return tabColor;
+  }
 
 	public void setPipeline(String pipeline) {
 		videoProcessor.pipelineSelected = pipeline;

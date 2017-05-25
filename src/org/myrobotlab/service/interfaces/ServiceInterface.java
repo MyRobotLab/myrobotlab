@@ -1,5 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
+import java.awt.Color;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.ArrayList;
@@ -14,7 +15,9 @@ import org.myrobotlab.framework.Status;
 public interface ServiceInterface
 		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker {
 
-	/**
+	
+
+  /**
 	 * this is a local method which adds a request from some foreign service
 	 * with address information (otherService/callback) for a topic callback
 	 * Adds an entry on the notify list
@@ -45,11 +48,13 @@ public interface ServiceInterface
 
 	// Deprecate - just use class
 	public String getSimpleName();
-
+	
 	// Deprecate ?? What is this??
 	public String getType();
 
 	public boolean hasPeers();
+	
+	public Color getTabColor();
 
 	/**
 	 * recursive release - releases all peers and their peers etc. then releases

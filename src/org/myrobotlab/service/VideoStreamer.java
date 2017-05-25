@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -34,7 +35,7 @@ public class VideoStreamer extends Service implements VideoSink {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(VideoStreamer.class.getCanonicalName());
-
+  public Color tabColor = new Color(160,192,228);
   public int listeningPort = 9090;
   transient private MjpegServer server;
   public boolean mergeSteams = true;
@@ -124,6 +125,11 @@ public class VideoStreamer extends Service implements VideoSink {
   public void startService() {
     super.startService();
     start();
+  }
+  
+  @Override
+  public Color getTabColor() {
+    return tabColor;
   }
 
   /**
