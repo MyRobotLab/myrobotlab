@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.awt.Color;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Service;
@@ -45,6 +46,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public String lastThingRecognized = "";
   private String language = "en-US";
   private boolean autoListen = false;
+  public Color tabColor = new Color(253,235,187);
 
   HashMap<String, Command> commands = new HashMap<String, Command>();
 
@@ -191,6 +193,11 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public String getLanguage() {
     // a getter for it .. just in case.
     return this.language;
+  }
+  
+  @Override
+  public Color getTabColor() {
+    return tabColor;
   }
 
   @Override
