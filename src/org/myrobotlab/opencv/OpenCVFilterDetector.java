@@ -27,6 +27,7 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 
+import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_video.BackgroundSubtractor;
@@ -68,8 +69,12 @@ public class OpenCVFilterDetector extends OpenCVFilter {
   public void imageChanged(IplImage image) {
     foreground = IplImage.create(image.width(), image.height(), IPL_DEPTH_8U, 1);
 
-    // mog = new BackgroundSubtractorMOG2(history, threshold, shadowDetection);
-    mog = new BackgroundSubtractorMOG2();
+    Pointer pointer = new Pointer();
+    
+    //mog = new BackgroundSubtractorMOG2(history, threshold, shadowDetection);
+    // TODO: test this..
+    mog = new BackgroundSubtractorMOG2(pointer);
+    
   }
 
   public void learn() {

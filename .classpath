@@ -74,8 +74,6 @@
 	<classpathentry kind="lib" path="/repo/org.atmosphere.nettosphere/2.3.0/geronimo-servlet_3.0_spec-1.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.atmosphere.nettosphere/2.3.0/nettosphere-assembly-2.3.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.atmosphere.nettosphere/2.3.0/wasync-2.1.3-20150917-all.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-1.0-20150502.231737-1-windows-x86_64.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-0.11.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-server-7.6.13.v20130916.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-servlet-7.6.13.v20130916.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-util-7.6.13.v20130916.jar"/>
@@ -97,13 +95,6 @@
 	<classpathentry kind="lib" path="/repo/org.slf4j.logback/1.1.3/logback-core-1.1.3.jar"/>
 	<classpathentry kind="lib" path="/repo/org.slf4j.logback/1.1.3/slf4j-api-1.7.12.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/math-1.0.4.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/javacpp.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/javacv.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/opencv.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/opencv-windows-x86_64.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/opencv-macosx-x86_64.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/ffmpeg.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/ffmpeg-windows-x86_64.jar"/>
 	<classpathentry kind="lib" path="/repo/pl.sarxos.webcam/0.3.10/webcam-capture-0.3.10.jar"/>
 	<classpathentry kind="lib" path="/repo/pl.sarxos.webcam/0.3.10/bridj-0.6.2.jar"/>
 	<classpathentry kind="lib" path="/repo/com.xuggle.xuggler/5.4/xuggle-xuggler-arch-x86_64-w64-mingw32.jar"/>
@@ -245,5 +236,93 @@
 	<classpathentry kind="lib" path="/repo/org.joda/2.9.4/joda-time.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.2/voice-cmu-bdl-hsmm-5.2.jar"/>
 	<classpathentry kind="lib" path="/repo/com.azure.translator/0.8.3/microsoft-translator-java-api-with-dependencies-0.8.3.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/atlassian-util-concurrent-2.4.2.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/spring-beans-4.3.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/spring-context-4.3.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/spring-core-4.3.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/spring-web-4.3.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/spring-websocket-4.3.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/tomcat-embed-core-8.5.4.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/tomcat-embed-websocket-8.5.4.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-android-arm.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-android-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-android-arm.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-android-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-android-arm.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-android-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacpp.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacv-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacv.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/librealsense-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/librealsense-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/librealsense-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/librealsense.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-android-arm.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-android-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/videoinput-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/videoinput-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/videoinput-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/videoinput.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
