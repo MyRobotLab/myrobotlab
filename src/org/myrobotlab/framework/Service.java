@@ -25,6 +25,7 @@
 
 package org.myrobotlab.framework;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -803,6 +804,7 @@ public abstract class Service extends MessageService
 
 		serviceClass = this.getClass().getCanonicalName();
 		simpleName = this.getClass().getSimpleName();
+		
 
 		// xxx
 		try {// FIXME !!! AFTER MERGE !!!
@@ -1246,6 +1248,12 @@ public abstract class Service extends MessageService
 	public String getSimpleName() {
 		return simpleName;
 	}
+	
+  @Override
+  public Color getTabColor() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 	/**
 	 * 
@@ -2264,6 +2272,7 @@ public abstract class Service extends MessageService
 	public void updateStats(QueueStats stats) {
 		invoke("publishStats", stats);
 	}
+	
 
 	@Override
 	public QueueStats publishStats(QueueStats stats) {
