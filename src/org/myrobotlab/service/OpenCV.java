@@ -893,7 +893,7 @@ public class OpenCV extends Service implements VideoSource {
 
 		meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 		// meta.addDependency("org.bytedeco.javacpp","1.1");
-		meta.addDependency("org.bytedeco.javacv", "1.1");
+		meta.addDependency("org.bytedeco.javacv", "1.3");
 		meta.addDependency("pl.sarxos.webcam", "0.3.10");
 		return meta;
 	}
