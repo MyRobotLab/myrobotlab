@@ -211,11 +211,16 @@ public class Servo extends Service implements ServoControl {
 
 	boolean autoEnable = false;
 
-	public int defaultDisableDelay = 10000;
+	public int defaultDisableDelayNoVelocity = 10000;
+	private int defaultDisableDelayIfVelocity = 1000;
+	private int disableDelayIfVelocity = 1000;
 	private boolean moving;
 	private double currentPosInput;
 	private boolean autoDisable = false;
+
+	private transient Timer forceElectrizeTimer;
 	private transient Timer autoDisableTimer;
+  
 
 	public transient static final int SERVO_EVENT_STOPPED = 1;
 	public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
@@ -908,18 +913,37 @@ public class Servo extends Service implements ServoControl {
           public void run() {
             disable();
           }
-        }, (long) 1000);
+        }, (long) disableDelayIfVelocity);
 			} else {
         autoDisableTimer.schedule(new TimerTask() {
           @Override
           public void run() {
             disable();
           }
-        }, (long) defaultDisableDelay);
+        }, (long) defaultDisableDelayNoVelocity);
 			}
 		}
 	}
 
+	 public void forceElectrize(int delay) {
+	   delay=delay*1000;
+	   log.info("forceElectrize ON ",getName()," : ",delay);
+	   disableDelayIfVelocity=delay;
+	   
+	   if (forceElectrizeTimer != null) {
+	     forceElectrizeTimer.cancel();
+	     forceElectrizeTimer = null;
+     }
+	   forceElectrizeTimer = new Timer();
+     forceElectrizeTimer.schedule(new TimerTask() {
+         @Override
+         public void run() {
+           disableDelayIfVelocity=defaultDisableDelayIfVelocity;
+           log.info("forceElectrize OFF ",getName());
+         }
+       }, (long) delay); 
+	  }
+	
 	 /**
    * Set the controller for this servo but does not attach it.
    * see also attach()
