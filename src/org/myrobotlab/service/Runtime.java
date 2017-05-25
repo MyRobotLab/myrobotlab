@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -87,6 +88,8 @@ import com.sun.management.OperatingSystemMXBean;
  */
 public class Runtime extends Service implements MessageListener, RepoInstallListener {
   final static private long serialVersionUID = 1L;
+  
+  public Color tabColor = new Color(254,198,211);
 
   /**
    * instances of MRL - keyed with an instance key URI format is
@@ -2021,6 +2024,11 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     error("can't get local version in service environment");
 
     return null;
+  }
+  
+  @Override
+  public Color getTabColor() {
+    return tabColor;
   }
 
   /**
