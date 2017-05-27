@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.MouseEvent;
@@ -171,13 +172,16 @@ public class ImageDisplay extends Service {
       public void mouseExited(MouseEvent e) {
       }
     });
-    gd.setFullScreenWindow(f);
+    f.setBackground(Color.BLACK);
+    f.getContentPane().setBackground(Color.BLACK);
     f.add(image);
     // It sets the size of the Frame to the size of the picture, if not it will
     // be build a boarder to the right end of the screen.
     f.setSize(image.getWidth() + wOffset, image.getHeight() + hOffset);
     getResolution();
     f.setLocation(image.getwOffset(), image.gethOffset());
+    f.toFront();
+    gd.setFullScreenWindow(f);
     f.setVisible(true);
     frames.add(f);
   }
