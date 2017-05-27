@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.awt.Color;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,8 +35,6 @@ import org.slf4j.Logger;
  */
 public class VirtualArduino extends Service implements PortPublisher, PortListener, PortConnector {
 
-  public Color tabColor = new Color(204,222,200);
-  
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(VirtualArduino.class);
@@ -285,10 +282,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     return uart.getPortNames();
   }
   
-  @Override
-  public Color getTabColor() {
-    return tabColor;
-  }
 
   // implements PinArrayControl ?
   // @Override

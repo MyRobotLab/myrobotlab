@@ -1,6 +1,5 @@
 package org.myrobotlab.service.interfaces;
 
-import java.awt.Color;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.ArrayList;
@@ -54,8 +53,6 @@ public interface ServiceInterface
 
 	public boolean hasPeers();
 	
-	public Color getTabColor();
-
 	/**
 	 * recursive release - releases all peers and their peers etc. then releases
 	 * this service

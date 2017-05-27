@@ -25,7 +25,6 @@
 
 package org.myrobotlab.service;
 
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -142,8 +141,6 @@ public class Servo extends Service implements ServoControl {
 	transient ServoController controller;
 
 	String controllerName = null;
-	
-	public Color tabColor = new Color(227,203,195);
 	
 	Mapper mapper = new Mapper(0, 180, 0, 180);
 
@@ -952,11 +949,7 @@ public class Servo extends Service implements ServoControl {
     this.controller = controller;
   }
 
-  @Override
-  public Color getTabColor() {
-    return tabColor;
-  }
-	
+ 	
 	public static void main(String[] args) throws InterruptedException {
 		try {
 			LoggingFactory.init(Level.INFO);
