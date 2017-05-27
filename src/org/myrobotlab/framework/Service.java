@@ -25,7 +25,6 @@
 
 package org.myrobotlab.framework;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -1249,13 +1248,7 @@ public abstract class Service extends MessageService
 		return simpleName;
 	}
 	
-  @Override
-  public Color getTabColor() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-	/**
+ 	/**
 	 * 
 	 * @return
 	 */

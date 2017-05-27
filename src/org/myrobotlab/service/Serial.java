@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -54,7 +53,6 @@ public class Serial extends Service
 	 * 0: non-blocking mode (return immediately on read) timeout = x: set
 	 * timeout to x milliseconds
 	 */
-  public Color tabColor = new Color(223,234,220);
   
 	private Integer timeoutMS = null;
 
@@ -1419,10 +1417,5 @@ public class Serial extends Service
 	public int parity(){
 		return parity;
 	}
-	
-  @Override
-  public Color getTabColor() {
-    return tabColor;
-  }
 
 }

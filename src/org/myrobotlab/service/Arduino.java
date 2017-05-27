@@ -4,7 +4,6 @@ import static org.myrobotlab.arduino.Msg.MAGIC_NUMBER;
 import static org.myrobotlab.arduino.Msg.MAX_MSG_SIZE;
 import static org.myrobotlab.arduino.Msg.MRLCOMM_VERSION;
 
-import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -74,9 +73,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	private static final long serialVersionUID = 1L;
 	
-  public Color tabColor = new Color(169,200,164);
-	  
-	public static class I2CDeviceMap {
+ 	public static class I2CDeviceMap {
 		public int busAddress;
 		public transient I2CControl control;
 		public int deviceAddress;
@@ -1973,11 +1970,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return deviceList.keySet();
 	}
 	
-  @Override
-  public Color getTabColor() {
-    return tabColor;
-  }
-
 	public void openMrlComm(String path) {
 		try {
 

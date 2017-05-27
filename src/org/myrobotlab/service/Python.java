@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,8 +52,6 @@ public class Python extends Service {
 	 * msg handles
 	 * 
 	 */
-  public Color tabColor = new Color(151,153,179);
-  
 	public class InputQueueThread extends Thread {
 		private Python python;
 
@@ -258,10 +255,6 @@ public class Python extends Service {
 		return name.replaceAll("[/ .-]", "_");
 	}
 
-  @Override
-  public Color getTabColor() {
-    return tabColor;
-  }
 	/**
 	 * pyrobotlab python service urls - created for referencing script
 	 */

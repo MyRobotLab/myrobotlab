@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -43,7 +42,6 @@ import org.slf4j.Logger;
 public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
-  public Color tabColor = new Color(214,174,201);
   
   public static class Response {
     public String session;
@@ -194,11 +192,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return getResponse(currentUserName, text);
   }
 
-  @Override
-  public Color getTabColor() {
-    // TODO Auto-generated method stub
-    return tabColor;
-  }
   /**
    * 
    * @param text

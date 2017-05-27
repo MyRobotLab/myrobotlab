@@ -111,7 +111,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   transient public final static Logger log = LoggerFactory.getLogger(SwingGui.class);
 
   String graphXML = "";
-  public Color tabColor = new Color(255,255,255);
+
   boolean fullscreen;
   public int closeTimeout=0;
   public boolean isTabColored=true;
@@ -325,14 +325,29 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         
         if (isTabColored)
         {
-          
-          if (sw.getTabColor()!=null)
-          {
-            tabs.getTabs().setBackgroundAt(tabs.size() - 1,sw.getTabColor());
-          }
-          
+        if (name.contains("i01")) {
+          tabs.getTabs().setBackgroundAt(tabs.size() - 1,Color.white); 
+        }
+        
+        switch (sw.getClass().getSimpleName()) {
+          case "Servo":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(227,203,195));
+          break;
+          case "VirtualArduino":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(169,200,164));
+          break;
+          case "Arduino":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(204,222,200));
+          break;
+          case "Serial":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(223,234,220));
+          break;
+          case "Runtime":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(254,198,211));
+          break;
+          case "Python":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(151,153,179));
+          break;
+          case "WebkitSpeechRecognition":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(253,235,187));
+          break;
+          case "OpenCV":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(133,174,221));
+          break;
      
-
+         }
         }
         tabs.get(name).transitDockedColor=tabs.getTabs().getBackgroundAt(tabs.size() - 1);
         pack();
@@ -795,12 +810,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   public void resetDesktop(String name) {
     tabs.resetDesktop(name);
-  }
-
-  @Override
-  public Color getTabColor() {
-    // TODO Auto-generated method stub
-    return tabColor;
   }
 
 }
