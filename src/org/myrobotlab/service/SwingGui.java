@@ -122,6 +122,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   DockableTabPane tabs;// is loaded = new DockableTabPane(this);
   transient SwingGuiGui guiServiceGui;
   transient JPanel tabPanel;
+  Map<String,String> userDefinedServiceTypeColors = new HashMap<String,String>();
   /**
    * the all important 2nd stage routing map after the message gets back to the
    * gui service the 'rest' of the callback is handled with this data structure
@@ -175,6 +176,10 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     }
     return compList;
   }
+  
+  public void setColor(String serviceType, String hexColor){
+    userDefinedServiceTypeColors.put(serviceType, hexColor);
+  }
 
   public static Color getColorFromURI(Object uri) {
     StringBuffer sb = new StringBuffer(String.format("%d", Math.abs(uri.hashCode())));
@@ -182,7 +187,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     return c;
   }
   
-  public static Color getColorHash(String uri) {
+  public Color getColorHash(String uri) {
+    if (userDefinedServiceTypeColors.containsKey(uri)){
+      // e.g. "#FFCCEE"
+      return Color.decode(userDefinedServiceTypeColors.get(uri));
+    }
     StringBuffer sb = new StringBuffer(String.format("%d", Math.abs(uri.hashCode())));
     Color c = new Color(Color.HSBtoRGB(Float.parseFloat("0." + sb.reverse().toString()), 0.4f, 0.95f));
     return c;
