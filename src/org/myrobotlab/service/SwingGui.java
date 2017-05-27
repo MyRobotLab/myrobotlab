@@ -113,8 +113,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   String graphXML = "";
 
   boolean fullscreen;
-  public int closeTimeout=0;
-  public boolean isTabColored=true;
+  public int closeTimeout = 0;
 
   // TODO - make MTOD !! from internet
   // TODO - spawn thread callback / subscribe / promise - for new version
@@ -180,6 +179,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   public static Color getColorFromURI(Object uri) {
     StringBuffer sb = new StringBuffer(String.format("%d", Math.abs(uri.hashCode())));
     Color c = new Color(Color.HSBtoRGB(Float.parseFloat("0." + sb.reverse().toString()), 0.8f, 0.7f));
+    return c;
+  }
+  
+  public static Color getColorHash(String uri) {
+    StringBuffer sb = new StringBuffer(String.format("%d", Math.abs(uri.hashCode())));
+    Color c = new Color(Color.HSBtoRGB(Float.parseFloat("0." + sb.reverse().toString()), 0.4f, 0.95f));
     return c;
   }
 
@@ -277,12 +282,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        
+
         String name = sw.getName();
-       
-        //change tab color based on name
-        //it is better to add a new interfaced method I think ?
-       
+
+        // change tab color based on name
+        // it is better to add a new interfaced method I think ?
+
         String guiClass = String.format("org.myrobotlab.swing.%sGui", sw.getClass().getSimpleName());
 
         log.info("createTab {} {}", name, guiClass);
@@ -319,37 +324,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
           guiServiceGui = (SwingGuiGui) newGui;
           guiServiceGui.rebuildGraph();
         }
-        //newGui.getDisplay().setBackground(Color.CYAN);
+        // newGui.getDisplay().setBackground(Color.CYAN);
 
-        tabs.addTab(name, newGui.getDisplay());
-        
-        if (isTabColored)
-        {
-        if (name.contains("i01")) {
-          tabs.getTabs().setBackgroundAt(tabs.size() - 1,Color.white); 
-        }
-        
-        switch (sw.getClass().getSimpleName()) {
-          case "Servo":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(227,203,195));
-          break;
-          case "VirtualArduino":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(169,200,164));
-          break;
-          case "Arduino":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(204,222,200));
-          break;
-          case "Serial":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(223,234,220));
-          break;
-          case "Runtime":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(254,198,211));
-          break;
-          case "Python":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(151,153,179));
-          break;
-          case "WebkitSpeechRecognition":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(253,235,187));
-          break;
-          case "OpenCV":  tabs.getTabs().setBackgroundAt(tabs.size() - 1,new Color(133,174,221));
-          break;
-     
-         }
-        }
-        tabs.get(name).transitDockedColor=tabs.getTabs().getBackgroundAt(tabs.size() - 1);
+        tabs.addTab(name, newGui.getDisplay());   
+        tabs.getTabs().setBackgroundAt(tabs.size() - 1, getColorHash(sw.getClass().getSimpleName()));
+        tabs.get(name).transitDockedColor = tabs.getTabs().getBackgroundAt(tabs.size() - 1);
         pack();
       }
     });
@@ -729,12 +708,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   @Override
   public void windowClosing(WindowEvent e) {
     // save all necessary serializations
-	  /** WRONG - USE ONLY RUNTIME TO SHUTDOWN !!!
-    save();
-    Runtime.releaseAll();
-    System.exit(1); // the Big Hamm'r
-    */
-	  Runtime.shutdown(closeTimeout);
+    /**
+     * WRONG - USE ONLY RUNTIME TO SHUTDOWN !!! save(); Runtime.releaseAll();
+     * System.exit(1); // the Big Hamm'r
+     */
+    Runtime.shutdown(closeTimeout);
   }
 
   // @Override - only in Java 1.6
