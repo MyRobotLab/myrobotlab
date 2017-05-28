@@ -173,7 +173,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     log.info(messageStr);
     invoke("publishMqttMsg", topic, message.getPayload());
     invoke("publishMqttMsgByte", message.getPayload());
-    invoke("publishMqttMsgString", new String(message.getPayload()));
+    invoke("publishMqttMsgString", new String(message.getPayload()),topic);
   }
 
   @Override
@@ -218,8 +218,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     return new MqttMsg(topic, msg);
   }
 
-  public String publishMqttMsgString(String msg) {
-    return msg;
+  public String[] publishMqttMsgString(String msg,String topic) {
+    String[] result={msg, topic};
+    return result;
   }
   
   public byte[] publishMqttMsgByte(byte[] msg) {
