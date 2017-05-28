@@ -1770,7 +1770,7 @@ public class InMoov extends Service {
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
     meta.sharePeer("torso.arduino", "left", "Arduino", "shared left arduino");
 
-    meta.sharePeer("eyelids.arduino", "left", "Arduino", "shared left arduino");
+    meta.sharePeer("eyelids.arduino", "right", "Arduino", "shared right arduino");
 
     meta.sharePeer("mouthControl.arduino", "left", "Arduino", "shared left arduino");
 
