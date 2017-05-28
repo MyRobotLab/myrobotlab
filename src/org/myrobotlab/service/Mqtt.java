@@ -66,14 +66,18 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
   String url = "tcp://iot.eclipse.org:1883";
 
-  String userName = null;
+
 
   public Mqtt(String n) {
     super(n);
   }
 
-  // FIXME - catch throw - set field to isConnected = false;
   public boolean connect(String url) throws MqttSecurityException, MqttException {
+    
+    return connect(url,null,null);
+  }
+  
+  public boolean connect(String url,String userName,char[] password) throws MqttSecurityException, MqttException {
 
       
       if (client == null) {
@@ -82,6 +86,11 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
         this.url = url;
         conOpt = new MqttConnectOptions();
         conOpt.setCleanSession(true);
+        if (userName!=null)
+        {
+          conOpt.setUserName(userName); 
+          conOpt.setPassword(password);
+        }
         clientId = String.format("%s@%s", getName(), Runtime.getInstance().getId());
         client = new MqttAsyncClient(url, clientId, persistence);
 
