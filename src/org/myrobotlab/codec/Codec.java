@@ -1,6 +1,11 @@
 package org.myrobotlab.codec;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.interfaces.NameProvider;
 
 /**
  * Allows a common encoding/decoding interface for dynamic switching between
@@ -11,6 +16,13 @@ import java.io.OutputStream;
  *
  */
 public interface Codec {
+  
+  default public byte[] encode(NameProvider sender, String name, String method, Object...data) throws Exception{
+    Message msg = Runtime.getInstance().createMessage(sender, name, method, data);
+    ByteArrayOutputStream encoded = new ByteArrayOutputStream();
+    encode(encoded, msg);
+    return encoded.toByteArray();
+  }
 
   public void encode(OutputStream out, Object obj) throws Exception;
 

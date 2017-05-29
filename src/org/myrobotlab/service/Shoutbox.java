@@ -350,7 +350,7 @@ public class Shoutbox extends Service {
     // Message out = createMessage("shoutclient", "publishShout",
     // CodecUtils.toJson(shout));
     // TODO: what do we do with the result of this method?
-    createMessage("shoutclient", "publishShout", CodecUtils.toJson(shout));
+    createMessage(this, "shoutclient", "publishShout", CodecUtils.toJson(shout));
     // webgui.sendToAll(out);
 
     if (xmpp != null && !TYPE_SYSTEM.equals(shout.type)) {
@@ -429,7 +429,7 @@ public class Shoutbox extends Service {
     String msgString = CodecUtils.toJson(shout);
     // TODO: do something with the "sendTo" message?
     // Message sendTo = createMessage("shoutclient", "publishShout", msgString);
-    createMessage("shoutclient", "publishShout", msgString);
+    createMessage(this, "shoutclient", "publishShout", msgString);
 
   }
 

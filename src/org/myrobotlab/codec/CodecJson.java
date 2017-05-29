@@ -29,7 +29,7 @@ public class CodecJson implements Codec {
   }
 
   // probably should be Object too instead of byte[] :)
-  @Override // FIXME - this is stoopid
+  @Override
   public Object[] decodeArray(Object data) throws Exception {
     // ITS GOT TO BE STRING - it just has to be !!! :)
     String instr = (String) data;

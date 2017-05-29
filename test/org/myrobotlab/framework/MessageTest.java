@@ -16,9 +16,10 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.TestThrower;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
+import org.myrobotlab.service.interfaces.NameProvider;
 import org.slf4j.Logger;
 
-public class MessageTest {
+public class MessageTest implements NameProvider {
   public final static Logger log = LoggerFactory.getLogger(MessageTest.class);
 
   static TestCatcher catcher;
@@ -55,7 +56,7 @@ public class MessageTest {
     catcher.subscribe("thrower", "pitch");
     Service.sleep(100);
 
-    Message msg = thrower.createMessage(null, "getServiceNames", null);
+    Message msg = thrower.createMessage(this, null, "getServiceNames", null);
     CommunicationInterface comm = thrower.getComm();
     comm.send(msg);
 
@@ -90,7 +91,7 @@ public class MessageTest {
 
     Runtime.removeAllSubscriptions();
 
-    Message msg = thrower.createMessage(null, "getServiceNames", null);
+    Message msg = thrower.createMessage(this, null, "getServiceNames", null);
     CommunicationInterface comm = thrower.getComm();
     comm.send(msg);
 
@@ -171,6 +172,11 @@ public class MessageTest {
     String[] ret = (String[]) thrower.sendBlocking(runtimeName, "getServiceNames");
     log.info(String.format("got %s", Arrays.toString(ret)));
     assertNotNull(ret);
+  }
+
+  @Override
+  public String getName() {
+    return "tester";
   }
 
   /*

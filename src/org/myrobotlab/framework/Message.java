@@ -33,6 +33,7 @@ import java.util.HashSet;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.NameProvider;
 
 /**
  * @author GroG
@@ -99,27 +100,6 @@ public class Message implements Serializable {
    */
   public Object[] data;
 
-  /**
-   * TODO - this needs to be a POJO - remove main to a JUnit Test !!
-   * 
-   * @param args
-   * @throws InterruptedException
-   */
-  public static void main(String[] args) throws InterruptedException {
-    LoggingFactory.init(Level.DEBUG);
-
-    Message msg = new Message();
-    msg.method = "myMethod";
-    msg.sendingMethod = "publishImage";
-    msg.msgId = System.currentTimeMillis();
-    msg.data = new Object[] { "hello" };
-
-    /*
-     * try { CodecUtils.toJsonFile(msg, "msg.xml"); } catch (Exception e) {
-     * Logging.logError(e); }
-     */
-  }
-
   public Message() {
     msgId = System.currentTimeMillis();
     name = new String(); // FIXME - allow NULL !
@@ -169,4 +149,42 @@ public class Message implements Serializable {
   public String toString() {
     return CodecUtils.getMsgKey(this);
   }
+  
+
+  public static Message createMessage(NameProvider sender, String to, String method, Object data) {
+    if (data == null) {
+      return createMessage(sender, to, method, null);
+    }
+    Object[] d = new Object[1];
+    d[0] = data;
+    return createMessage(sender, to, method, d);
+  }
+
+  public static Message createMessage(NameProvider sender, String to, String method, Object[] data) {
+    Message msg = new Message();
+    msg.name = to; // destination instance name
+    msg.sender = sender.getName();
+    msg.data = data;
+    msg.method = method;
+
+    return msg;
+  }
+
+
+
+  public static void main(String[] args) throws InterruptedException {
+    LoggingFactory.init(Level.DEBUG);
+
+    Message msg = new Message();
+    msg.method = "myMethod";
+    msg.sendingMethod = "publishImage";
+    msg.msgId = System.currentTimeMillis();
+    msg.data = new Object[] { "hello" };
+
+    /*
+     * try { CodecUtils.toJsonFile(msg, "msg.xml"); } catch (Exception e) {
+     * Logging.logError(e); }
+     */
+  }
+
 }
