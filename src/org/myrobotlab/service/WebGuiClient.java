@@ -290,7 +290,7 @@ public class WebGuiClient extends Service {
 			LoggingFactory.init(Level.DEBUG);
 
 			WebGuiClient client = (WebGuiClient) Runtime.start("webguiclient", "WebGuiClient");
-			client.connect("http://localhost:8888/api/messages2");
+			client.connect("http://localhost:8888/api/messages");
 			
 			// returns - the fact its a ws &
 			// returns - Platform or "Hello" of server
