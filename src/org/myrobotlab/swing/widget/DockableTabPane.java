@@ -79,14 +79,18 @@ public class DockableTabPane implements ActionListener {
 	public DockableTabPane() {
 		this(null);
 	}
-
+	
+	public void addTab(String title, Component display){
+		addTab(title, display, null);	
+	}
+	
 	// FIXME - set preffered size ??
-	public void addTab(String title, Component display) {
+	public void addTab(String title, Component display, String tip) {
 		if (dockableTabs.containsKey(title)) {
 			log.info("addTab - {} already contains tab", title);
 			return;
 		}
-		tabs.addTab(title, display);
+		tabs.addTab(title, null, display, tip);
 		DockableTab newTab = new DockableTab(this, title, display);
 		tabs.setTabComponentAt(tabs.getTabCount() - 1, newTab.getTitleLabel());
 		dockableTabs.put(title, newTab);
