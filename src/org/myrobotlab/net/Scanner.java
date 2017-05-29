@@ -41,7 +41,7 @@ public class Scanner extends Thread {
           // byte[] sendData =
           // "DISCOVER_FUIFSERVER_REQUEST".getBytes();
           //
-          Message msg = myService.createMessage(myService, null, "getConnections", null);
+          Message msg = Message.createMessage(myService, null, "getConnections", null);
           byte[] msgBuf = org.myrobotlab.codec.CodecUtils.getBytes(msg);
 
           DatagramPacket sendPacket;

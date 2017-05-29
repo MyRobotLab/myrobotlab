@@ -276,7 +276,7 @@ public class WebGuiClient extends Service {
 	// FIXME - gateway interface should be final and should allow throw...
 	public void sendRemote(final String urlKey, final String name, final String method, final Object... data)
 			throws IOException {
-		Message msg = createMessage(this, name, method, data);
+		Message msg = Message.createMessage(this, name, method, data);
 		socket.fire(CodecUtils.toJson(msg));
 	}
 
@@ -310,8 +310,8 @@ public class WebGuiClient extends Service {
 				client.sendRemote("http://localhost:8888/api/messages", "runtime", "register", client);
 			}
 
-			client.socket.fire(client.createMessage(client, "onRegister", "getUptime", null));
-			Message msg = client.createMessage(client, "runtime", "getUptime", null);
+			client.socket.fire(Message.createMessage(client, "onRegister", "getUptime", null));
+			Message msg = Message.createMessage(client, "runtime", "getUptime", null);
 			// client.socket.fire(msg);
 			// client.connect("http://localhost:8888/api/messages");
 			// client.sendRemote("http://localhost:8888/api/messages",

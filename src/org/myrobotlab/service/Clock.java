@@ -227,7 +227,7 @@ public class Clock extends Service {
 
 			Message msg = null;
 
-			msg = xmpp1.createMessage(clock, null, "register", clock);
+			msg = Message.createMessage(clock, null, "register", clock);
 			String base64 = CodecUtils.msgToBase64(msg);
 			xmpp1.sendMessage(base64, "incubator incubator");
 

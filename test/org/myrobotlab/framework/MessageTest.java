@@ -56,7 +56,7 @@ public class MessageTest implements NameProvider {
     catcher.subscribe("thrower", "pitch");
     Service.sleep(100);
 
-    Message msg = thrower.createMessage(this, null, "getServiceNames", null);
+    Message msg = Message.createMessage(this, null, "getServiceNames", null);
     CommunicationInterface comm = thrower.getComm();
     comm.send(msg);
 
@@ -91,7 +91,7 @@ public class MessageTest implements NameProvider {
 
     Runtime.removeAllSubscriptions();
 
-    Message msg = thrower.createMessage(this, null, "getServiceNames", null);
+    Message msg = Message.createMessage(this, null, "getServiceNames", null);
     CommunicationInterface comm = thrower.getComm();
     comm.send(msg);
 

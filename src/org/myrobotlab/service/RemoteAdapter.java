@@ -133,7 +133,7 @@ public class RemoteAdapter extends Service implements Gateway {
 	 */
 	public void connect(String uri) throws URISyntaxException {
 		log.info("{}.connecting {}", getName(), uri);
-		Message msg = createMessage(this, null, "register", null);
+		Message msg = Message.createMessage(this, null, "register", null);
 		sendRemote(uri, msg);
 	}
 

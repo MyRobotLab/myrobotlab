@@ -927,7 +927,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
     OutputStream out = r.getResponse().getOutputStream();
     // getName() ? -> should it be AngularJS client name ?
-    Message msg = createMessage(this, getName(), CodecUtils.getCallBackName(method), data);
+    Message msg = Message.createMessage(this, getName(), CodecUtils.getCallBackName(method), data);
     if (CodecUtils.API_TYPE_SERVICES.equals(apiKey) || CodecUtils.API_TYPE_SERVICE.equals(apiKey)) {
       // for the purpose of only returning the data
       // e.g. http://api/services/runtime/getUptime -> return the uptime
