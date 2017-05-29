@@ -29,27 +29,41 @@ public class InMoovEyelids extends Service {
   static Timer blinkEyesTimer = new Timer();
 
   
+  public static void blink()
+  {
+    
+    if (!InMoov.RobotIsTrackingSomething()){
+      int tmpVelo = ThreadLocalRandom.current().nextInt(40, 100 + 1);
+      eyelidleft.setVelocity(tmpVelo);
+      eyelidright.setVelocity(tmpVelo);
+      if (eyelidleft != null) {
+       eyelidleft.moveTo(180);
+      }
+     if (eyelidright != null) {
+       eyelidright.moveTo(180);
+      }
+     sleep(ThreadLocalRandom.current().nextInt(500, 1000 + 1));
+     if (eyelidleft != null) {
+       eyelidleft.moveTo(0);
+      }
+     if (eyelidright != null) {
+       eyelidright.moveTo(0);
+      }
+     }
+  }
+  
   static class blinkEyesTimertask extends TimerTask {
     @Override
     public void run() {
         int delay = ThreadLocalRandom.current().nextInt(10, 60 + 1);
         blinkEyesTimer.schedule(new blinkEyesTimertask(), delay*1000);
-              
-
-        if (!InMoov.RobotIsTrackingSomething()){
-         if (eyelidleft != null) {
-          eyelidleft.moveTo(180);
-         }
-        if (eyelidright != null) {
-          eyelidright.moveTo(180);
-         }
-        sleep(ThreadLocalRandom.current().nextInt(500, 1000 + 1));
-        if (eyelidleft != null) {
-          eyelidleft.moveTo(0);
-         }
-        if (eyelidright != null) {
-          eyelidright.moveTo(0);
-         }
+           
+        blink();
+        //random double blink
+        if (ThreadLocalRandom.current().nextInt(0, 1 + 1)==1)
+        {
+          sleep(ThreadLocalRandom.current().nextInt(1000, 2000 + 1));
+        blink(); 
         }
     }
   }
