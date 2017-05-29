@@ -263,7 +263,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 	@Override
 	public void doAppend(ILoggingEvent event) throws LogbackException {
 		// event.getFormattedMessage();
-		Message msg = createMessage(this, null, "onLogEvent", new Object[] { String.format("[%s] %s", event.getThreadName(), event.toString()) });
+		Message msg = Message.createMessage(this, null, "onLogEvent", new Object[] { String.format("[%s] %s", event.getThreadName(), event.toString()) });
 		msg.sendingMethod = "publishLogEvent";
 		msg.sender = getName();
 		Object[] param = new Object[] { msg };

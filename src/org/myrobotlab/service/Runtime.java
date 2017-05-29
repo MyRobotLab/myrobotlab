@@ -1421,7 +1421,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         if (uri != null && gateway.getName().equals(uri.getHost()) && !uri.equals(s.getInstanceId())) {
           log.info(String.format("gateway %s sending registration of %s remote to %s", gateway.getName(), name, uri));
           // FIXME - Security determines what to export
-          Message msg = runtime.createMessage(runtime, null, "register", s);
+          Message msg = Message.createMessage(runtime, null, "register", s);
           // ((Communicator) gateway).sendRemote(uri, msg);
           // //mrl://remote2/tcp://127.0.0.1:50488 <-- wrong
           // sendingRemote is wrong
@@ -2170,7 +2170,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       // FIXME - SEND ***ID*** !!!!
       // just send a restart msg to the Agent process
       // FIXME - perhaps a "rename" is more safe .. since the file is complete ...
-      Message msg = createMessage(this, "agent", "restart", null);
+      Message msg = Message.createMessage(this, "agent", "restart", null);
       FileIO.toFile(String.format("msgs/agent.%d.part", msg.msgId), CodecUtils.toJson(msg));
       File partFile = new File(String.format("msgs/agent.%d.part", msg.msgId));
       File json = new File(String.format("msgs/agent.%d.json", msg.msgId));

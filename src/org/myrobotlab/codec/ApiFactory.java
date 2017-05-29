@@ -157,7 +157,7 @@ public class ApiFactory /* implements ApiProcessor */ {
    // FIXME change to CodecUtils.MIME_TYPE_JSON
       Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
       
-      Message msg = Runtime.getInstance().createMessage(runtime, "runtime", "getUptime", null);
+      Message msg = Message.createMessage(runtime, "runtime", "getUptime", null);
       ByteArrayOutputStream encoded = new ByteArrayOutputStream();
       codec.encode(encoded, msg);
 

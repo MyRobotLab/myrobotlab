@@ -923,7 +923,7 @@ public abstract class Service extends MessageService
 			return;
 		}
 		Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), name)));
-		Message msg = createMessage(this, name, method, params);
+		Message msg = Message.createMessage(this, name, method, params);
 		Task task = new Task(this, name, intervalMs, msg);
 		timer.schedule(task, delay);
 		tasks.put(name, timer);
@@ -1609,7 +1609,7 @@ public abstract class Service extends MessageService
 	 * @param o
 	 */
 	public void out(String method, Object o) {
-		Message m = createMessage(this, null, method, o); // create a un-named message
+		Message m = Message.createMessage(this, null, method, o); // create a un-named message
 		// as output
 
 		if (m.sender.length() == 0) {
@@ -1802,7 +1802,7 @@ public abstract class Service extends MessageService
 					// TODO should this declaration be outside the while loop?
 					// create new message reverse sender and name set to same
 					// msg id
-					Message msg = createMessage(this, m.sender, m.method, ret);
+					Message msg = Message.createMessage(this, m.sender, m.method, ret);
 					msg.sender = this.getName();
 					msg.msgId = m.msgId;
 					// msg.status = Message.BLOCKING;
@@ -1902,7 +1902,7 @@ public abstract class Service extends MessageService
 	 * @param data
 	 */
 	public void send(String name, String method, Object... data) {
-		Message msg = createMessage(this, name, method, data);
+		Message msg = Message.createMessage(this, name, method, data);
 		msg.sender = this.getName();
 		// All methods which are invoked will
 		// get the correct sendingMethod
@@ -1929,7 +1929,7 @@ public abstract class Service extends MessageService
 	public void send(URI url, String method, Object param1) {
 		Object[] params = new Object[1];
 		params[0] = param1;
-		Message msg = createMessage(this, name, method, params);
+		Message msg = Message.createMessage(this, name, method, params);
 		outbox.getCommunicationManager().send(url, msg);
 	}
 
@@ -1941,7 +1941,7 @@ public abstract class Service extends MessageService
 	 * @return
 	 */
 	public Object sendBlocking(String name, Integer timeout, String method, Object... data) {
-		Message msg = createMessage(this, name, method, data);
+		Message msg = Message.createMessage(this, name, method, data);
 		msg.sender = this.getName();
 		msg.status = Message.BLOCKING;
 		msg.msgId = Runtime.getUniqueID();
@@ -2112,11 +2112,11 @@ public abstract class Service extends MessageService
 	public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
 		log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
 		MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-		cm.send(createMessage(this, topicName, "addListener", listener));
+		cm.send(Message.createMessage(this, topicName, "addListener", listener));
 	}
 	
 	public void sendPeer(String peerKey, String method, Object... params){
-		cm.send(createMessage(this, getPeerName(peerKey), method, params));
+		cm.send(Message.createMessage(this, getPeerName(peerKey), method, params));
 	}
 
 	public void unsubscribe(NameProvider topicName, String topicMethod) {
@@ -2131,27 +2131,10 @@ public abstract class Service extends MessageService
 
 	public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
 		log.info(String.format("unsubscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
-		cm.send(createMessage(this, topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
+		cm.send(Message.createMessage(this, topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
 	}
 
-	public Message createMessage(NameProvider sender, String name, String method, Object data) {
-		if (data == null) {
-			return createMessage(sender, name, method, null);
-		}
-		Object[] d = new Object[1];
-		d[0] = data;
-		return createMessage(sender, name, method, d);
-	}
 
-	public Message createMessage(NameProvider sender, String name, String method, Object[] data) {
-		Message msg = new Message();
-		msg.name = name; // destination instance name
-		msg.sender = sender.getName();//this.getName();
-		msg.data = data;
-		msg.method = method;
-
-		return msg;
-	}
 
 	// -------------- Messaging Ends -----------------------
 	// ---------------- Status processing begin ------------------

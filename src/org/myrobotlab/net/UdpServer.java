@@ -164,8 +164,8 @@ public class UdpServer implements Runnable {
 								// causing deadlock
 								// putting it on the inbox will move it to a
 								// different thread
-								Message sendService = myService.createMessage(myService, null, "register", toRegister);
-								Message outbound = myService.createMessage(myService, myService.getName(), "sendRemote", new Object[] { protocolKey, sendService });
+								Message sendService = Message.createMessage(myService, null, "register", toRegister);
+								Message outbound = Message.createMessage(myService, myService.getName(), "sendRemote", new Object[] { protocolKey, sendService });
 								myService.getInbox().add(outbound);
 
 							}
