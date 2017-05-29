@@ -131,6 +131,8 @@ public class InMoov extends Service {
 
   public static int attachPauseMs = 100;
   
+  // TODO InMoovLife service
+  
    public static boolean RobotIsTrackingSomething() {
      
     if (eyesTracking!=null && headTracking!=null)
@@ -162,8 +164,12 @@ public class InMoov extends Service {
    
   public static boolean RobotCanMoveHeadRandom = true;
   public static boolean RobotCanMoveEyesRandom = true;
+  public static boolean RobotIsSleeping = false;
+  public static boolean RobotIsStarted = false;
   private transient Timer DisableTimerRobotCanMoveHeadRandom;
   private transient Timer DisableTimerRobotCanMoveEyesRandom;
+  
+  // END TODO InMoovLife service
   
   public Integer pirPin = null;
 

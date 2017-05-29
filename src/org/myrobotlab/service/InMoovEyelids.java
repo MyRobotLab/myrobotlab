@@ -32,7 +32,7 @@ public class InMoovEyelids extends Service {
   public static void blink()
   {
     
-    if (!InMoov.RobotIsTrackingSomething()){
+    if (!InMoov.RobotIsTrackingSomething() && !InMoov.RobotIsSleeping){
       int tmpVelo = ThreadLocalRandom.current().nextInt(40, 100 + 1);
       eyelidleft.setVelocity(tmpVelo);
       eyelidright.setVelocity(tmpVelo);
@@ -55,7 +55,7 @@ public class InMoovEyelids extends Service {
   static class blinkEyesTimertask extends TimerTask {
     @Override
     public void run() {
-        int delay = ThreadLocalRandom.current().nextInt(10, 60 + 1);
+        int delay = ThreadLocalRandom.current().nextInt(10, 40 + 1);
         blinkEyesTimer.schedule(new blinkEyesTimertask(), delay*1000);
            
         blink();
