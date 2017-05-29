@@ -19,24 +19,12 @@ public class Task extends TimerTask {
     this.interval = interval;
     this.msg = msg;
   }
-  
-
-  /*
-  public Task(int interval, String name, String method, Object... data) {
-    this.msg = myService.createMessage(name, method, data);
-    this.interval = interval;
-  }
-
-  public Task(Service myService, String toService, String method, Object... params) {
-    this.myService = myService;
-    msg = myService.createMessage(toService, method, params);
-  }
-  */
-  
+ 
   public Task(Task s) {
     this.msg = s.msg;
     this.interval = s.interval;
     this.taskName = s.taskName;
+    this.myService = s.myService;
   }
 
   @Override

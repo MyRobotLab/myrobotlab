@@ -915,18 +915,18 @@ public abstract class Service extends MessageService
 	/**
 	 * a stronger bigger better task handler !
 	 * 
-	 * @param name
+	 * @param taskName
 	 */
-	public void addTask(String name, int intervalMs, int delay, String method, Object... params) {
-		if (tasks.containsKey(name)) {
-			log.warn(String.format("already have active task \"%s\"", name));
+	public void addTask(String taskName, int intervalMs, int delay, String method, Object... params) {
+		if (tasks.containsKey(taskName)) {
+			log.warn(String.format("already have active task \"%s\"", taskName));
 			return;
 		}
-		Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), name)));
-		Message msg = Message.createMessage(this, name, method, params);
-		Task task = new Task(this, name, intervalMs, msg);
+		Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), taskName)));
+		Message msg = Message.createMessage(this, getName(), method, params);
+		Task task = new Task(this, taskName, intervalMs, msg);
 		timer.schedule(task, delay);
-		tasks.put(name, timer);
+		tasks.put(taskName, timer);
 	}
 		
 
