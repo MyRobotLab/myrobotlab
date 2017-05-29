@@ -27,6 +27,10 @@ public interface SerialDevice extends PortPublisher {
 	void write(byte[] data) throws Exception;
 
 	void write(int data) throws Exception;
+	
+	default void write(String data) throws Exception{
+	  write(data.getBytes());
+	}
 
 	void clear();
 

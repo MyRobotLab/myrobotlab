@@ -524,7 +524,7 @@ public class Python extends Service {
 	}
 
 	public void execMethod(String method, Object...parms) {
-		Message msg = createMessage(getName(), method, parms);
+		Message msg = createMessage(this, getName(), method, parms);
 		inputQueue.add(msg);
 	}
 

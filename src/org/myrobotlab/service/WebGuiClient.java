@@ -106,6 +106,7 @@ public class WebGuiClient extends Service {
 		// like below..
 		// Client client =
 		// ClientFactory.getDefault().newClient(AtmosphereClient.class);
+	  // TODO - security needs to be done here .. 
 
 		URI uri = new URI(url);
 		client = ClientFactory.getDefault().newClient(AtmosphereClient.class);
@@ -115,6 +116,7 @@ public class WebGuiClient extends Service {
 			// 	.method(Request.METHOD.GET) // get is required initially for websockets ?
 				.uri(url) 					// the url
 				.trackMessageLength(false)	// Atmosphere feature of max frame size ?
+				.header("id", Runtime.getId())  // should be MRL.id static field value
 				.encoder(new Encoder<Message, String>() {
 
 					@Override
@@ -274,7 +276,7 @@ public class WebGuiClient extends Service {
 	// FIXME - gateway interface should be final and should allow throw...
 	public void sendRemote(final String urlKey, final String name, final String method, final Object... data)
 			throws IOException {
-		Message msg = createMessage(name, method, data);
+		Message msg = createMessage(this, name, method, data);
 		socket.fire(CodecUtils.toJson(msg));
 	}
 
@@ -288,14 +290,28 @@ public class WebGuiClient extends Service {
 			LoggingFactory.init(Level.DEBUG);
 
 			WebGuiClient client = (WebGuiClient) Runtime.start("webguiclient", "WebGuiClient");
-			client.connect("http://localhost:8888/api/messages");
+			client.connect("http://localhost:8888/api/messages2");
+			
+			// returns - the fact its a ws &
+			// returns - Platform or "Hello" of server
 
 			for (int i = 0; i < 10000; ++i) {
+			  // send -> say hello
+			  
+			  // block <- on return hello
+			  
+			  // send -> list services
+			  
+			  // block <- list services (not block - but event handled)
+			  
+			  // should get a hello back ... 
+				client.sendRemote("http://localhost:8888/api/messages", "runtime", "register", client);
+				// subscribe ... 
 				client.sendRemote("http://localhost:8888/api/messages", "runtime", "register", client);
 			}
 
-			client.socket.fire(client.createMessage("onRegister", "getUptime", null));
-			Message msg = client.createMessage("runtime", "getUptime", null);
+			client.socket.fire(client.createMessage(client, "onRegister", "getUptime", null));
+			Message msg = client.createMessage(client, "runtime", "getUptime", null);
 			// client.socket.fire(msg);
 			// client.connect("http://localhost:8888/api/messages");
 			// client.sendRemote("http://localhost:8888/api/messages",

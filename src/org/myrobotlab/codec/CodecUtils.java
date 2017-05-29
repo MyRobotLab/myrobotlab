@@ -49,10 +49,10 @@ public class CodecUtils {
   public final static String SCHEME_BASE64 = "base64";
 
   public final static String API_TYPE_MESSAGES = "messages";
+  public final static String API_TYPE_MESSAGES2 = "messages2";
   /**
    * use API_TYPE_SERVICE
    */
-  @Deprecated
   public final static String API_TYPE_SERVICES = "services";
   public static final String API_TYPE_SERVICE = "service";
 
@@ -63,7 +63,7 @@ public class CodecUtils {
 
   // mime-types
   public final static String MIME_TYPE_JSON = "application/json";
-  public final static String MIME_TYPE_MESSAGES = "application/mrl-json";
+  public final static String MIME_TYPE_MRL_JSON = "application/mrl-json";// FIXME - MIME_TYPE_MRL_JSON
 
   // disableHtmlEscaping to prevent encoding or "=" -
   // private transient static Gson gson = new
@@ -444,7 +444,7 @@ public class CodecUtils {
       init();
     }
 
-    String ret = MIME_TYPE_MESSAGES;
+    String ret = MIME_TYPE_MRL_JSON;
     if (keyToMimeType.containsKey(apiTypeKey)) {
       ret = keyToMimeType.get(apiTypeKey);
     }
@@ -454,7 +454,7 @@ public class CodecUtils {
 
   // API KEY to MIME TYPES (request or response?)
   private static synchronized void init() {
-    keyToMimeType.put("messages", MIME_TYPE_MESSAGES);
+    keyToMimeType.put("messages", MIME_TYPE_MRL_JSON);
     keyToMimeType.put("services", MIME_TYPE_JSON);
     initialized = true;
   }

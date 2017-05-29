@@ -50,7 +50,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SimpleTimeZone;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -87,16 +86,17 @@ public abstract class Service extends MessageService
 
 	// FIXME upgrade to ScheduledExecutorService
 	// http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
+  /*
 	protected class Task extends TimerTask {
 		String taskName;
 		Message msg;
 		long interval = 0;
-
-		public Task(String taskName, long interval, String name, String method, Object... data) {
-			this.msg = createMessage(name, method, data);
-			this.interval = interval;
-			this.taskName = taskName;
-		}
+		
+		public Task(String taskName, long interval, Message msg) {
+      this.msg = msg;
+      this.interval = interval;
+      this.taskName = taskName;
+    }
 
 		public Task(Task s) {
 			this.msg = s.msg;
@@ -126,7 +126,7 @@ public abstract class Service extends MessageService
 		}
 
 	}
-
+*/
 	/**
 	 * contains all the meta data about the service - pulled from the static
 	 * method getMetaData() each instance will call the method and populate the
@@ -803,7 +803,6 @@ public abstract class Service extends MessageService
 
 		serviceClass = this.getClass().getCanonicalName();
 		simpleName = this.getClass().getSimpleName();
-		
 
 		// xxx
 		try {// FIXME !!! AFTER MERGE !!!
@@ -924,7 +923,8 @@ public abstract class Service extends MessageService
 			return;
 		}
 		Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), name)));
-		Task task = new Task(name, intervalMs, getName(), method, params);
+		Message msg = createMessage(this, name, method, params);
+		Task task = new Task(this, name, intervalMs, msg);
 		timer.schedule(task, delay);
 		tasks.put(name, timer);
 	}
@@ -1247,8 +1247,8 @@ public abstract class Service extends MessageService
 	public String getSimpleName() {
 		return simpleName;
 	}
-	
- 	/**
+
+	/**
 	 * 
 	 * @return
 	 */
@@ -1609,7 +1609,7 @@ public abstract class Service extends MessageService
 	 * @param o
 	 */
 	public void out(String method, Object o) {
-		Message m = createMessage(null, method, o); // create a un-named message
+		Message m = createMessage(this, null, method, o); // create a un-named message
 		// as output
 
 		if (m.sender.length() == 0) {
@@ -1802,7 +1802,7 @@ public abstract class Service extends MessageService
 					// TODO should this declaration be outside the while loop?
 					// create new message reverse sender and name set to same
 					// msg id
-					Message msg = createMessage(m.sender, m.method, ret);
+					Message msg = createMessage(this, m.sender, m.method, ret);
 					msg.sender = this.getName();
 					msg.msgId = m.msgId;
 					// msg.status = Message.BLOCKING;
@@ -1902,7 +1902,7 @@ public abstract class Service extends MessageService
 	 * @param data
 	 */
 	public void send(String name, String method, Object... data) {
-		Message msg = createMessage(name, method, data);
+		Message msg = createMessage(this, name, method, data);
 		msg.sender = this.getName();
 		// All methods which are invoked will
 		// get the correct sendingMethod
@@ -1929,7 +1929,7 @@ public abstract class Service extends MessageService
 	public void send(URI url, String method, Object param1) {
 		Object[] params = new Object[1];
 		params[0] = param1;
-		Message msg = createMessage(name, method, params);
+		Message msg = createMessage(this, name, method, params);
 		outbox.getCommunicationManager().send(url, msg);
 	}
 
@@ -1941,7 +1941,7 @@ public abstract class Service extends MessageService
 	 * @return
 	 */
 	public Object sendBlocking(String name, Integer timeout, String method, Object... data) {
-		Message msg = createMessage(name, method, data);
+		Message msg = createMessage(this, name, method, data);
 		msg.sender = this.getName();
 		msg.status = Message.BLOCKING;
 		msg.msgId = Runtime.getUniqueID();
@@ -2112,11 +2112,11 @@ public abstract class Service extends MessageService
 	public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
 		log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
 		MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-		cm.send(createMessage(topicName, "addListener", listener));
+		cm.send(createMessage(this, topicName, "addListener", listener));
 	}
 	
 	public void sendPeer(String peerKey, String method, Object... params){
-		cm.send(createMessage(getPeerName(peerKey), method, params));
+		cm.send(createMessage(this, getPeerName(peerKey), method, params));
 	}
 
 	public void unsubscribe(NameProvider topicName, String topicMethod) {
@@ -2131,40 +2131,22 @@ public abstract class Service extends MessageService
 
 	public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
 		log.info(String.format("unsubscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
-		cm.send(createMessage(topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
+		cm.send(createMessage(this, topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
 	}
 
-	// TODO - remove or reconcile - RemoteAdapter and Service are the only ones
-	// using this
-	/**
-	 * 
-	 * @param name
-	 * @param method
-	 * @param data
-	 * @return
-	 */
-	public Message createMessage(String name, String method, Object data) {
+	public Message createMessage(NameProvider sender, String name, String method, Object data) {
 		if (data == null) {
-			return createMessage(name, method, null);
+			return createMessage(sender, name, method, null);
 		}
 		Object[] d = new Object[1];
 		d[0] = data;
-		return createMessage(name, method, d);
+		return createMessage(sender, name, method, d);
 	}
 
-	// FIXME All parameter constructor
-	// TODO - Probably simplyfy to take array of object
-	/**
-	 * 
-	 * @param name
-	 * @param method
-	 * @param data
-	 * @return
-	 */
-	public Message createMessage(String name, String method, Object[] data) {
+	public Message createMessage(NameProvider sender, String name, String method, Object[] data) {
 		Message msg = new Message();
 		msg.name = name; // destination instance name
-		msg.sender = this.getName();
+		msg.sender = sender.getName();//this.getName();
 		msg.data = data;
 		msg.method = method;
 
@@ -2265,7 +2247,6 @@ public abstract class Service extends MessageService
 	public void updateStats(QueueStats stats) {
 		invoke("publishStats", stats);
 	}
-	
 
 	@Override
 	public QueueStats publishStats(QueueStats stats) {
