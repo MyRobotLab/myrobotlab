@@ -519,7 +519,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 		// if no change - just return the values
 		if ((pinIndex != null && board.contains("mega") && pinIndex.size() == 70)
-				|| (pinIndex != null && pinIndex.size() == 20)) {
+				|| (pinIndex != null && !board.contains("mega") && pinIndex.size() == 20)) {
 			return pinIndex.entrySet().stream().map(x -> x.getValue()).collect(Collectors.toList());
 		}
 
