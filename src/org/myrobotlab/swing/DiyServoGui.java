@@ -32,19 +32,23 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
+import org.myrobotlab.motor.MotorConfig;
+import org.myrobotlab.motor.MotorConfigDualPwm;
+import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.DiyServo;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
-import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
 /**
@@ -97,6 +101,9 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 	JComboBox<String> pinArrayControlList = new JComboBox<String>();
 	JComboBox<Integer> pinList = new JComboBox<Integer>();
 
+	JComboBox<Integer> pwmPinList = new JComboBox<Integer>();
+	JComboBox<Integer> dirPinList = new JComboBox<Integer>();
+	
 	JTextField posMin = new JTextField("0");
 
 	JTextField posMax = new JTextField("180");
@@ -109,10 +116,20 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 		super(boundServiceName, myService);
 		myServo = (DiyServo) Runtime.getService(boundServiceName);
 		slider.addChangeListener(sliderListener);
-    
-    addLine(left, slider, right, boundPos);
-    addLine(attachButton, controllerList, attachListenerButton, pinArrayControlList, "pin", pinList);
-    addLine(updateLimitsButton, "min", posMin, "max", posMax);
+		boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
+		
+		JPanel s = new JPanel();
+		s.add(left);
+		s.add(slider);
+		s.add(right);
+		addTop(2, boundPos, 3, s);
+		
+    // addLine(left, slider, right, boundPos);
+    // addLine(attachButton, controllerList, attachListenerButton, pinArrayControlList, "pin", pinList);
+    // addLine(updateLimitsButton, "min", posMin, "max", posMax);
+		addTop("Motor       :", controllerList,  " Pwm pin:", pwmPinList, " Dir pin:", dirPinList, attachButton);
+		addTop("Analog input:", pinArrayControlList, " Analog input pin:", pinList, attachListenerButton);
+		addTop("min:", posMin, "   max:", posMax, updateLimitsButton);
 
     updateLimitsButton.addActionListener(this);
     left.addActionListener(this);
@@ -133,6 +150,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 					String controllerName = (String) controllerList.getSelectedItem();
 					myServo.controllerName = controllerName;
 					log.debug(String.format("controllerList event %s", controllerName));
+					refreshMotorPins();
 				}
 
 				if (o == pinArrayControlList) {
@@ -193,24 +211,15 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-			  
+			  /* TODO GroG, Why this ? I removed it because it seems to always cause this to exit /Mats
 			  boolean done = true;
 			  if (done){
 			    return;
 			  }
+			  */
 				removeListeners();
 				refreshControllers();
-				ServoControl sc = (ServoControl) myServo;
-
-				if (sc != null) {
-					controllerList.setSelectedItem(sc.getName());
-
-					Integer servoPin = servo.getPin();
-
-					if (servoPin != null)
-						pinList.setSelectedItem(servoPin);
-				}
-
+						
 				if (servo.isControllerSet()) {
 					attachButton.setText(detachMotorController);
 					controllerList.setEnabled(false);
@@ -229,11 +238,12 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 					pinList.setEnabled(true);
 				}
 
-				
+				/* TODO servo.getPos returns null in it's initial state causing Null pointer excepition, but I can't test for it since double is a primitive
 					double pos = servo.getPos();
 					boundPos.setText(Double.toString(pos));
 					slider.setValue((int)pos);
-				
+				}
+				*/
 
 				slider.setMinimum((int)servo.getMin());
 				slider.setMaximum((int)servo.getMax());
@@ -257,7 +267,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 			controllerList.addItem(c.get(i));
 		}
 		controllerList.setSelectedItem(myServo.controllerName);
-
+		refreshMotorPins();
+		
 		// Refresh the list of Analog inputs
 		pinArrayControlList.removeAllItems();
 		List<String> a = myServo.pinArrayControls;
@@ -279,9 +290,42 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 			}
 			pinList.setSelectedItem(myServo.pin);
 		}
+		
+		
 		restoreListeners();
 	}
-
+    
+	void refreshMotorPins(){
+		// Refresh the list of pwmPins and dirPins
+		pwmPinList.removeAllItems();
+		dirPinList.removeAllItems();
+		if (myServo.controllerName != null) {
+			MotorController tmpControl = (MotorController) Runtime.getService(myServo.controllerName);
+			if (tmpControl != null) {
+			  // Temporary removed. Need to add the getPinList method to the MotorController interface
+				/*
+			  List<PinDefinition> mbl = tmpControl.getPinList();
+				for (int i = 0; i < mbl.size(); i++) {
+					PinDefinition pinData = mbl.get(i);
+					if (pinData.isPwm()){
+					   pwmPinList.addItem(pinData.getAddress());
+					}
+					if (pinData.isDigital()){
+					   dirPinList.addItem(pinData.getAddress());
+					}
+				}
+				*/
+			}
+			MotorConfigSimpleH mCfg = (MotorConfigSimpleH)myServo.getConfig();
+			if (mCfg != null){
+			  if (mCfg.getType() == MotorConfigSimpleH.class.getSimpleName()){
+			    pwmPinList.setSelectedItem(mCfg.getPwrPin());
+			    dirPinList.setSelectedItem(mCfg.getDirPin());
+			  }
+			}
+		}		
+	}
+	
 	public void removeListeners() {
 
 		attachButton.removeActionListener(this);
