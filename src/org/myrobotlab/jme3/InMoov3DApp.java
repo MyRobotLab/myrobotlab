@@ -438,7 +438,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     spatial.setName("RWrist");
     node.attachChild(spatial);
     node.setLocalTranslation(new Vector3f(15, -290, -10));
-    rotationMask = Vector3f.UNIT_Y.mult(1);
+    rotationMask = Vector3f.UNIT_Y.mult(-1);
     node.setUserData("rotationMask_x", rotationMask.x);
     node.setUserData("rotationMask_y", rotationMask.y);
     node.setUserData("rotationMask_z", rotationMask.z);
