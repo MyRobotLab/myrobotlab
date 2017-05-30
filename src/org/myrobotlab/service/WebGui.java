@@ -755,18 +755,22 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       switch (apiKey) {
         case CodecUtils.API_TYPE_MESSAGES: {
           handleMessagesApi(r);
+          break;
         }
-          ;
+          
         case CodecUtils.API_TYPE_MESSAGES2: {
           handleMessages2Api(r);
+          break;
         }
-          ;
+          
         case CodecUtils.API_TYPE_SERVICES: {
           handleServicesApi(r);
+          break;
         }
-          ;
+          
         default: {
           handleInvalidApi(r); // TODO - swagger list of apis ?
+          break;
         }
       }
 
@@ -833,6 +837,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       error("could not get service %s for msg %s", msg.name, msg);
       return;
     }
+    
+    // FIXME !!!  important bug .. invoking needs to be a service invoke in that it has to 
+    // process the notifyList .. otherwise the event is not raised correctly  !!!
+    
+    // FIXME if target service isLocal()
+    // Invoker.invoke 
+    
+    // FIXME FIXME FIXME !!! -
+    
     Class<?> clazz = si.getClass();
 
     Class<?>[] paramTypes = null;
@@ -1198,6 +1211,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // TODO Auto-generated method stub
     return null;
   }
+  
+  // FIXME
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.DEBUG);
