@@ -1,16 +1,19 @@
 package org.myrobotlab.framework;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.util.concurrent.BlockingQueue;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.TestCatcher;
 import org.slf4j.Logger;
 
 public class TaskTest {
@@ -20,6 +23,7 @@ public class TaskTest {
   
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
+    LoggingFactory.init("INFO");
   }
 
   @AfterClass
@@ -35,18 +39,38 @@ public class TaskTest {
   }
 
   @Test
-  public void addTask() {
+  public void addTask() throws InterruptedException, IOException {
+    TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
+    catcher.clear();
+    catcher.subscribe("runtime", "getUptime");
     Runtime runtime = Runtime.getInstance();
-    runtime.addTask(1000, "getUptime");
+    runtime.addTask(500, "getUptime");
     
-    log.info("here");
+    BlockingQueue<Message> msgs = catcher.waitForMsgs(2, 1100);
+    
+    log.info("responded task events - expecting 2 got {}", msgs.size());
+    assertTrue(msgs.size() == 2);
+    
+    runtime.purgeTask("getUptime");
+    catcher.clear();
+    
+    Service.sleep(1000);
+    
+    log.info("responded task events - expecting 0 got {}", msgs.size());
+    assertTrue(msgs.size() == 0);
+    
+    catcher.clear();
+  }
+  
+  public void onUptime(String data){
+    log.info("uptime {}", data);
   }
 
 
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init();
+      LoggingFactory.init("INFO");
 
       TaskTest.setUpBeforeClass();
       TaskTest test = new TaskTest();

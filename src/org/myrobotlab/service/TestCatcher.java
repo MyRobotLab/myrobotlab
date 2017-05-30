@@ -59,7 +59,6 @@ public class TestCatcher extends Service implements SerialDataListener {
    * data to hold the incoming messages
    */
   transient public BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
-  transient public BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
   ArrayList<Status> errorList = new ArrayList<Status>();
 
@@ -117,7 +116,6 @@ public class TestCatcher extends Service implements SerialDataListener {
   }
 
   public void clear() {
-    data.clear();
     msgs.clear();
   }
 
@@ -131,8 +129,8 @@ public class TestCatcher extends Service implements SerialDataListener {
   }
 
   public Object getData(long timeout) throws InterruptedException {
-    Object obj = data.poll(timeout, TimeUnit.MILLISECONDS);
-    return obj;
+    Message msg = msgs.poll(timeout, TimeUnit.MILLISECONDS);
+    return msg.data[0];
   }
 
   public BlockingQueue<Message> waitForMsgs(int count) throws InterruptedException, IOException {
@@ -169,7 +167,7 @@ public class TestCatcher extends Service implements SerialDataListener {
     long now = start;
 
     while (msgCount < count) {
-      Object msg = data.poll(pollInterval, TimeUnit.MILLISECONDS);
+      Object msg = msgs.poll(pollInterval, TimeUnit.MILLISECONDS);
       if (msg != null) {
         ret.add(msg);
       }
