@@ -183,7 +183,7 @@ public class SwingGuiGui extends ServiceGui implements ActionListener {
       // de-serialize it
 
       // register
-      mxCodecRegistry.addPackage("org.myrobotlab.control");
+      mxCodecRegistry.addPackage("org.myrobotlab.swing.widget");
       mxCodecRegistry.register(new mxCellCodec(new org.myrobotlab.swing.widget.SwingGraphVertex()));
       mxCodecRegistry.register(new mxCellCodec(Type.INPORT));
 
