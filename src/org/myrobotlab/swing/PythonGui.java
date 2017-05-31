@@ -399,7 +399,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.myrobotlab.control.ServiceGUI#makeReadyForRelease() Shutting
+	 * @see org.myrobotlab.swing.widget.ServiceGUI#makeReadyForRelease() Shutting
 	 * down - check for dirty script and offer to save
 	 */
 	@Override
