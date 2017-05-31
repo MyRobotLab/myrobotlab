@@ -1645,7 +1645,8 @@ public class InMoov extends Service {
 	          public void run() {
 	        	  log.info("Reactivate RobotCanMoveHeadRandom");
 	        	  DisableTimerRobotCanMoveHeadRandom.cancel();
-	          }
+	        	  RobotCanMoveHeadRandom=true;
+	           }
 	        }, (int) seconds * 1000);
 		       
 	  }
@@ -1663,6 +1664,7 @@ public class InMoov extends Service {
 	          @Override
 	          public void run() {
 	        	  log.info("Reactivate RobotCanMoveEyesRandom");
+	        	  RobotCanMoveEyesRandom=true;
 	        	  DisableTimerRobotCanMoveEyesRandom.cancel();
 	          }
 	        }, (int) seconds * 1000);
@@ -1770,7 +1772,7 @@ public class InMoov extends Service {
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
     meta.addDependency("inmoov.fr", "1.0.0");
-    meta.addDependency("org.myrobotlab.inmoov", "0.0.3");
+    meta.addDependency("org.myrobotlab.inmoov", "0.3.5");
 
     // SHARING !!! - modified key / actual name begin ------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
