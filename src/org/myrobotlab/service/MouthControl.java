@@ -132,7 +132,8 @@ public class MouthControl extends Service {
 
         for (int x = 0; x < c.length; x++) {
           char s = c[x];
-          if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y') && !ison) {
+          // russian а ... <> a
+          if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y' || s == 'é' || s == 'è' || s == 'û' || s == 'и' || s == 'й' || s == 'У' || s == 'я' || s == 'э' || s == 'Ы' || s == 'ё' || s == 'ю' || s == 'е' || s == 'а' || s == 'о') && !ison) {
             jaw.moveTo(mouthOpenedPos); // # move the servo to the
             // open spot
             ison = true;
