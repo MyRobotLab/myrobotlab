@@ -182,7 +182,7 @@ public class MotorGui extends ServiceGui implements ActionListener, ChangeListen
         // build gui for appropriate motor controller type -
         // the gui needs to be able to do a Motor.attach(name, data)
         // with appropriate data
-        String attachGUIName = String.format("org.myrobotlab.control.Motor_%sGUI", type);
+        String attachGUIName = String.format("org.myrobotlab.swing.widget.Motor_%sGui", type);
 
         controllerPanel.remove(controllerTypePanel);
         controllerTypePanel = Reflector.getNewInstance(attachGUIName, new Object[] { myService, boundServiceName, newController });
