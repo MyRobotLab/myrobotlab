@@ -35,6 +35,45 @@ public class Osc extends Service implements OSCListener {
   Integer port;
 
   public final static Logger log = LoggerFactory.getLogger(Osc.class);
+  
+  public static class OscMessage {
+	Date date;
+	String address;
+	List <Object> arguments;
+
+	  public OscMessage(Date date, OSCMessage message) {
+		this.date = date;
+		this.arguments = message.getArguments();
+		this.address = message.getAddress();
+	  }
+	  
+	  public String toString() {
+				return String.format("oscmsg %s ", address);
+	  }
+	  
+	  public Date getDate(){
+		  return date;
+	  }
+				
+	  public List<Object> getArguments(){
+		  return arguments;
+	  }
+	  
+	  public String getAddress(){
+		  return address;
+	  }
+	  /*
+		public String toString() {
+			if (arguments != null) {
+				return String.format("oscmsg %d %s argument size %d", date.getTime(), address, arguments.size());
+			} else {
+				return String.format("oscmsg %d %s argument size %d", date.getTime(), address, 0);
+			}
+
+		}
+	 */
+
+  }
 
   public Osc(String n) {
     super(n);
@@ -112,13 +151,22 @@ public class Osc extends Service implements OSCListener {
     return receiver;
   }
 
-  public OSCMessage publishOSCMessage(OSCMessage message){
-    return message;
+  /**
+   * convert and publish to an Mrl Osc Message
+   * adding date to messsage as well.
+   * 
+   * @param date
+   * @param message
+   * @return
+   */
+  public OscMessage publishOscMessage(Date date, OSCMessage message){
+	OscMessage msg = new OscMessage(date, message);
+    return msg;
   }
 
   @Override
   public void acceptMessage(Date date, OSCMessage message) {
-    invoke("publishOSCMessage", message);
+    invoke("publishOscMessage", date, message);
   }
   
   public void stopService(){
