@@ -502,7 +502,9 @@
 		<pathelement location="${repo}/org.deeplearning4j/0.8/stream-2.7.0.jar"/>
 		<pathelement location="${repo}/org.deeplearning4j/0.8/xz-1.5.jar"/>
 		<!-- holy crapola, that's a lot of jar files... ok..  let's move on... -->
-
+		
+		<pathelement location="${repo}/com.illposed.osc/0.4/javaosc-core-0.4.jar"/>
+		
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
 
