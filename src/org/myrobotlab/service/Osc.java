@@ -7,9 +7,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -90,18 +88,12 @@ public class Osc extends Service implements OSCListener {
     }
   }
   
-  /* incoming osc message are forwarded to the oscEvent method. */
-  void oscEvent(OSCMessage msg) {
-    /* print the address pattern and the typetag of the received OscMessage */
-    log.info("addrpattern {} typetag {}", msg.getAddress(), msg.getArguments());
-    invoke("publishOscMessage", msg);
-  }
-  
   public OSCPortOut connect(String host, Integer port) throws SocketException, UnknownHostException{
     if (!host.equals(senderHost) || port.equals(senderPort)){
       senderHost = host;
       senderPort = port;
       sender = new OSCPortOut(InetAddress.getByName(host), port);
+      broadcastState();
     }
     return sender;
   }
@@ -120,14 +112,7 @@ public class Osc extends Service implements OSCListener {
     return receiver;
   }
 
-  /* new callback signature...
-  @Override
-  public void acceptMessage(OSCTimeTag64 time, OSCMessage message) {
-    invoke("publishOSCMessage", message);
-  }
-  */
-  
-  OSCMessage publishOSCMessage(OSCMessage message){
+  public OSCMessage publishOSCMessage(OSCMessage message){
     return message;
   }
 
