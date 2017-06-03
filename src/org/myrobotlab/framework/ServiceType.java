@@ -22,8 +22,17 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	private static final long serialVersionUID = 1L;
 
 	String name;
+	String link;
 
-	String state = null;
+	public String getLink() {
+    return link;
+  }
+
+  public void setLink(String link) {
+    this.link = link;
+  }
+
+  String state = null;
 	Integer workingLevel = null;
 	/**
 	 * description of what the service does
