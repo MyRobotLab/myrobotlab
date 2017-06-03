@@ -399,5 +399,6 @@
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacpp.jar"/>
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacv-platform.jar"/>
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacv.jar"/>
+	<classpathentry kind="lib" path="/repo/com.illposed.osc/0.4/javaosc-core-0.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
