@@ -37,22 +37,18 @@ public class Osc extends Service implements OSCListener {
   public final static Logger log = LoggerFactory.getLogger(Osc.class);
   
   public static class OscMessage {
-	Date date;
+	long ts;
 	String address;
 	List <Object> arguments;
 
-	  public OscMessage(Date date, OSCMessage message) {
-		this.date = date;
-		this.arguments = message.getArguments();
+	  public OscMessage(long ts, OSCMessage message) {
+		this.ts = ts;
 		this.address = message.getAddress();
+		this.arguments = message.getArguments();
 	  }
 	  
-	  public String toString() {
-				return String.format("oscmsg %s ", address);
-	  }
-	  
-	  public Date getDate(){
-		  return date;
+	  public long getDate(){
+		  return ts;
 	  }
 				
 	  public List<Object> getArguments(){
@@ -62,17 +58,25 @@ public class Osc extends Service implements OSCListener {
 	  public String getAddress(){
 		  return address;
 	  }
-	  /*
-		public String toString() {
-			if (arguments != null) {
-				return String.format("oscmsg %d %s argument size %d", date.getTime(), address, arguments.size());
-			} else {
-				return String.format("oscmsg %d %s argument size %d", date.getTime(), address, 0);
-			}
-
-		}
-	 */
-
+	  
+	  public String toString(){
+		  StringBuilder sb = new StringBuilder();
+		  sb.append("osc ");
+		  sb.append(ts);
+		  sb.append(" ");
+		  sb.append(address);
+		  if (arguments != null){
+			  sb.append(" [");
+			  for (int i = 0; i < arguments.size(); ++i){
+				  sb.append(arguments.get(i));
+				  if (i != arguments.size() -1){
+					  sb.append(", ");
+				  }
+			  }
+			  sb.append("]");
+		  }
+		  return sb.toString();
+	  }
   }
 
   public Osc(String n) {
@@ -100,7 +104,7 @@ public class Osc extends Service implements OSCListener {
   }
   
   public void listen(Integer newPort) throws IOException{
-    listen(null, newPort);
+    listen("/*", newPort);
   }
 
   public void listen(String filter, Integer newPort) throws IOException {
@@ -153,20 +157,22 @@ public class Osc extends Service implements OSCListener {
 
   /**
    * convert and publish to an Mrl Osc Message
-   * adding date to messsage as well.
+   * adding ts to messsage as well.
    * 
-   * @param date
+   * @param ts
    * @param message
    * @return
    */
-  public OscMessage publishOscMessage(Date date, OSCMessage message){
-	OscMessage msg = new OscMessage(date, message);
+  public OscMessage publishOscMessage(long ts, OSCMessage message){
+	OscMessage msg = new OscMessage(ts, message);
+	log.info("{}", msg);
     return msg;
   }
 
   @Override
   public void acceptMessage(Date date, OSCMessage message) {
-    invoke("publishOscMessage", date, message);
+	  // JavaOSC bug - date always comes in as null
+    invoke("publishOscMessage", new Date().getTime(), message);
   }
   
   public void stopService(){
@@ -183,16 +189,14 @@ public class Osc extends Service implements OSCListener {
       Python python = (Python)Runtime.start("python", "Python"); 
       python.subscribe("osc", "publishOSCMessage");
       */
+      osc.listen(6000);
+      // osc.listen("/filter1", 6000);      
+      // osc.stopListening();
       
-      osc.connect("127.0.0.1", 12000);
+      osc.connect("127.0.0.1", 6000);
       osc.sendMsg("/test", "to be or not to be that is the question");
       osc.sendMsg("/newTopic", 18, "hello", 4.5);
       osc.sendMsg("/somewhere/else", "this", "is", 7, 3.3, "variable arguments");
-      
-      
-      osc.listen(6000);
-      // osc.listen("/filter1", 6000);      
-      osc.stopListening();
 
     } catch (Exception e) {
       Logging.logError(e);
