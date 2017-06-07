@@ -171,6 +171,7 @@ public class InMoov extends Service {
   private transient Timer DisableTimerRobotCanMoveHeadRandom;
   private transient Timer DisableTimerRobotCanMoveEyesRandom;
   private transient Timer DisableTimerRobotCanMoveBodyRandom;
+  private transient Timer DisableTimerRobotCanMoveRandom;
 
   
   // END TODO InMoovLife service
@@ -501,6 +502,7 @@ public class InMoov extends Service {
     if (head != null) {
       head.setVelocity(25.0, 25.0, 25.0, 25.0, 25.0, 25.0);
     }
+    
     if (rightHand != null) {
       rightHand.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
     }
@@ -1695,15 +1697,27 @@ public class InMoov extends Service {
 		       
 	  }
   
-  
-  
-  
   public void disableRobotRandom(int seconds) {
-	  disableRobotCanMoveHeadRandom(seconds);
-	  disableRobotCanMoveEyesRandom(seconds);
-	  disableRobotCanMoveBodyRandom(seconds);	  
-  }
-
+	  log.info("Disable RobotCanMoveRandom for "+seconds+" seconds");
+	  RobotCanMoveRandom=false;
+	  if (DisableTimerRobotCanMoveRandom != null) {
+		  DisableTimerRobotCanMoveRandom.cancel();
+		  DisableTimerRobotCanMoveRandom = null;
+	      }
+	  DisableTimerRobotCanMoveRandom = new Timer();
+				
+	  DisableTimerRobotCanMoveRandom.schedule(new TimerTask() {
+	          @Override
+	          public void run() {
+	        	  log.info("Reactivate RobotCanMoveRandom");
+	        	  RobotCanMoveRandom=true;
+	        	  DisableTimerRobotCanMoveRandom.cancel();
+	          }
+	        }, (int) seconds * 1000);
+		       
+	  }
+  
+  
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
