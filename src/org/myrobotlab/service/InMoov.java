@@ -164,10 +164,14 @@ public class InMoov extends Service {
    
   public static boolean RobotCanMoveHeadRandom = true;
   public static boolean RobotCanMoveEyesRandom = true;
+  public static boolean RobotCanMoveBodyRandom = true;
+  public static boolean RobotCanMoveRandom = true;
   public static boolean RobotIsSleeping = false;
   public static boolean RobotIsStarted = false;
   private transient Timer DisableTimerRobotCanMoveHeadRandom;
   private transient Timer DisableTimerRobotCanMoveEyesRandom;
+  private transient Timer DisableTimerRobotCanMoveBodyRandom;
+
   
   // END TODO InMoovLife service
   
@@ -495,7 +499,7 @@ public class InMoov extends Service {
   
   public void halfSpeed() {
     if (head != null) {
-      head.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
+      head.setVelocity(25.0, 25.0, 25.0, 25.0, 25.0, 25.0);
     }
     if (rightHand != null) {
       rightHand.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
@@ -504,13 +508,13 @@ public class InMoov extends Service {
       leftHand.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
     }
     if (rightArm != null) {
-      rightArm.setVelocity(30.0, 30.0, 30.0, 30.0);
+      rightArm.setVelocity(25.0, 25.0, 25.0, 25.0);
     }
     if (leftArm != null) {
-      leftArm.setVelocity(30.0, 30.0, 30.0, 30.0);
+      leftArm.setVelocity(25.0, 25.0, 25.0, 25.0);
     }
     if (torso != null) {
-      torso.setVelocity(30.0, 30.0, 30.0);
+      torso.setVelocity(20.0, 20.0, 20.0);
     }
     if (eyelids != null) {
       eyelids.setVelocity(30.0, 30.0);
@@ -1671,9 +1675,33 @@ public class InMoov extends Service {
 		       
 	  }
   
+  public void disableRobotCanMoveBodyRandom(int seconds) {
+	  log.info("Disable RobotCanMoveBodyRandom for "+seconds+" seconds");
+	  RobotCanMoveBodyRandom=false;
+	  if (DisableTimerRobotCanMoveBodyRandom != null) {
+		  DisableTimerRobotCanMoveBodyRandom.cancel();
+		  DisableTimerRobotCanMoveBodyRandom = null;
+	      }
+	  DisableTimerRobotCanMoveBodyRandom = new Timer();
+				
+	  DisableTimerRobotCanMoveBodyRandom.schedule(new TimerTask() {
+	          @Override
+	          public void run() {
+	        	  log.info("Reactivate RobotCanMoveBodyRandom");
+	        	  RobotCanMoveBodyRandom=true;
+	        	  DisableTimerRobotCanMoveBodyRandom.cancel();
+	          }
+	        }, (int) seconds * 1000);
+		       
+	  }
+  
+  
+  
+  
   public void disableRobotRandom(int seconds) {
 	  disableRobotCanMoveHeadRandom(seconds);
-	  disableRobotCanMoveEyesRandom(seconds);	  
+	  disableRobotCanMoveEyesRandom(seconds);
+	  disableRobotCanMoveBodyRandom(seconds);	  
   }
 
   public static void main(String[] args) {
