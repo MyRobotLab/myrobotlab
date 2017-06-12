@@ -273,6 +273,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public String resolveSessionKey(String username, String botname) {
     return username + "-" + botname;
   }
+  
+  public void repetition_count(int val)
+  {
+	org.alicebot.ab.MagicNumbers.repetition_count=val;
+  }
+  
 
   public Chat getChat(String userName, String botName) {
     String sessionKey = resolveSessionKey(userName, botName);
