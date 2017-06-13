@@ -749,6 +749,8 @@ public class InMoov extends Service {
 
   public void onOpenNIData(OpenNiData data) {
 
+    if (data!=null)
+    {
     Skeleton skeleton = data.skeleton;
 
     if (firstSkeleton) {
@@ -758,21 +760,21 @@ public class InMoov extends Service {
 
     if (copyGesture) {
       if (leftArm != null) {
-        leftArm.bicep.moveTo(Math.round(skeleton.leftElbow.getAngleXY()));
-        leftArm.omoplate.moveTo(Math.round(skeleton.leftShoulder.getAngleXY()));
-        leftArm.shoulder.moveTo(Math.round(skeleton.leftShoulder.getAngleYZ()));
+        leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
+        leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
+        leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ()-50);
       }
       if (rightArm != null) {
-        rightArm.bicep.moveTo(Math.round(skeleton.rightElbow.getAngleXY()));
-        rightArm.omoplate.moveTo(Math.round(skeleton.rightShoulder.getAngleXY()));
-        rightArm.shoulder.moveTo(Math.round(skeleton.rightShoulder.getAngleYZ()));
+        rightArm.bicep.moveTo(skeleton.rightElbow.getAngleXY());
+        rightArm.omoplate.moveTo(skeleton.rightShoulder.getAngleXY());
+        rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ()-50);
       }
     }
 
     // TODO - route data appropriately
     // rgb & depth image to OpenCV
     // servos & depth image to gui (entire InMoov + references to servos)
-
+    }
   }
 
   // ---------- movement commands begin ---------
@@ -1268,13 +1270,14 @@ public class InMoov extends Service {
       openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
 
       openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
-      openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
+      //openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
 
       // openni.skeleton.leftShoulder
 
       // openni.addListener("publishOpenNIData", this.getName(),
       // "getSkeleton");
       // openni.addOpenNIData(this);
+      subscribe(openni.getName(),"publishOpenNIData");
     }
     return openni;
   }
