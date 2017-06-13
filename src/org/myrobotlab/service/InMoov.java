@@ -100,13 +100,12 @@ public class InMoov extends Service {
   transient public static Tracking eyesTracking;
   transient public static Tracking headTracking;
   transient public static OpenCV opencv;
+  transient public static OpenNi openni;
   transient public MouthControl mouthControl;
   transient public Python python;
 
   transient public final static String LEFT = "left";
   transient public final static String RIGHT = "right";
-
-  transient public OpenNi openni;
 
   transient public Pid pid;
 
@@ -155,6 +154,17 @@ public class InMoov extends Service {
 	   if (opencv!=null)
 	   {
 		if (opencv.capturing)
+		{
+			return true;
+		}
+	   }
+	   return false;
+   }
+   
+   public static boolean RobotIsOpenNiCapturing() {
+	   if (openni!=null)
+	   {
+		if (openni.capturing)
 		{
 			return true;
 		}
