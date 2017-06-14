@@ -1827,8 +1827,7 @@ public class InMoov extends Service {
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
     meta.addDependency("inmoov.fr", "1.0.0");
-    // update
-    meta.addDependency("org.myrobotlab.inmoov", "0.3.6");
+    meta.addDependency("org.myrobotlab.inmoov", "0.3.7");
 
     // SHARING !!! - modified key / actual name begin ------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
