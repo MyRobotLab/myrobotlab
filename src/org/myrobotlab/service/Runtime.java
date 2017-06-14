@@ -114,6 +114,11 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   static private String runtimeName;
   public boolean is64bit = System.getProperty("sun.arch.data.model").contains("64");
+  public boolean isLinux()
+  {
+	  return Platform.getLocalInstance().isLinux();
+  }
+
 
   static private Date startDate = new Date();
 
