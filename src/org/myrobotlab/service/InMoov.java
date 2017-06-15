@@ -760,15 +760,18 @@ public class InMoov extends Service {
 
     if (copyGesture) {
       if (leftArm != null) {
-        leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
-        leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
-        leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ()-50);
-      }
-      if (rightArm != null) {
-        rightArm.bicep.moveTo(skeleton.rightElbow.getAngleXY());
-        rightArm.omoplate.moveTo(skeleton.rightShoulder.getAngleXY());
-        rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ()-50);
-      }
+        // todo if (!Double.isNaN(skeleton.leftElbow.getAngleXY())){leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());}
+        if (leftArm != null) {
+          leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
+          leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
+          leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ()-50);
+        }
+        if (rightArm != null) {
+          rightArm.bicep.moveTo(skeleton.rightElbow.getAngleXY());
+          rightArm.omoplate.moveTo(skeleton.rightShoulder.getAngleXY());
+          rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ()-50);
+        }
+    }
     }
 
     // TODO - route data appropriately
@@ -1827,7 +1830,7 @@ public class InMoov extends Service {
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
     meta.addDependency("inmoov.fr", "1.0.0");
-    meta.addDependency("org.myrobotlab.inmoov", "0.3.7");
+    meta.addDependency("org.myrobotlab.inmoov", "0.3.8");
 
     // SHARING !!! - modified key / actual name begin ------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");

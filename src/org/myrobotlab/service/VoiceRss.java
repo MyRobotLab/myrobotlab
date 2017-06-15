@@ -192,66 +192,7 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 		// FIXME - implement !!!
 	}
 
-	public String getMp3Url(String toSpeak) {
-		HttpPost post = null;
-		try {
-			String url = "";
-			post = new HttpPost(url);
-			HttpResponse response = client.execute(post);
-			log.info(response.getStatusLine().toString());
-			HttpEntity entity = response.getEntity();
-			byte[] b = FileIO.toByteArray(entity.getContent());
-			// parse out mp3 file url
-			String mp3Url = null;
-			String data = new String(b);
-			String startTag = "var myPhpVar = '";
-			int startPos = data.indexOf(startTag);
-			if (startPos != -1) {
-				int endPos = data.indexOf("';", startPos);
-				if (endPos != -1) {
-					mp3Url = data.substring(startPos + startTag.length(), endPos);
-				}
-			}
-			if (mp3Url == null) {
-				error("could not get mp3 back from voicerss server !");
-			}
-			return mp3Url;
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		return null;
-
-	}
-
-	public byte[] getRemoteFile(String toSpeak) {
-
-		String mp3Url = getMp3Url(toSpeak);
-		HttpGet get = null;
-		byte[] b = null;
-		try {
-			HttpResponse response = null;
-			// fetch file
-			get = new HttpGet(mp3Url);
-			log.info("mp3Url {}", mp3Url);
-			// get mp3 file & save to cache
-			response = client.execute(get);
-			log.info("got {}", response.getStatusLine());
-			HttpEntity entity = response.getEntity();
-			// cache the mp3 content
-			b = FileIO.toByteArray(entity.getContent());
-			EntityUtils.consume(entity);
-		} catch (Exception e) {
-			Logging.logError(e);
-		} finally {
-			if (get != null) {
-				get.releaseConnection();
-			}
-		}
-
-		return b;
-	}
 
 	@Override
 	public boolean speakBlocking(String toSpeak) throws Exception {
@@ -266,7 +207,7 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 		String filenametts = "audioFile" + File.separator + filename;
 		VoiceProvider tts = new VoiceProvider(getKey());
 
-		VoiceParameters params = new VoiceParameters(toSpeak, getVoice()); // Languages.English_UnitedStates
+		VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"), getVoice()); // Languages.English_UnitedStates
 		params.setCodec(AudioCodec.WAV);
 		params.setFormat(AudioFormat.Format_44KHZ.AF_44khz_16bit_stereo);
 		params.setBase64(false);
@@ -353,7 +294,7 @@ public class VoiceRss extends Service implements TextListener, SpeechSynthesis, 
 
 		VoiceProvider tts = new VoiceProvider(getKey());
 
-		VoiceParameters params = new VoiceParameters(toSpeak, getVoice()); // Languages.English_UnitedStates
+		VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"), getVoice()); // Languages.English_UnitedStates
 		params.setCodec(AudioCodec.WAV);
 		params.setFormat(AudioFormat.Format_44KHZ.AF_44khz_16bit_stereo);
 		params.setBase64(false);
