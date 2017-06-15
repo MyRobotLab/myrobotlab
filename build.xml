@@ -263,6 +263,7 @@
 		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-windows-x86_64.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-linux-x86_64.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-macosx-x86_64.jar"/>
+  		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-linux-armhf.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.3/ffmpeg.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.3/ffmpeg-windows-x86_64.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/webcam-capture-0.3.10.jar"/>
