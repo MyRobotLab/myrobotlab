@@ -110,6 +110,9 @@ public class InMoov extends Service {
   transient public Pid pid;
 
   boolean copyGesture = false;
+  public double openNiShouldersOffset = -50.0;
+  public boolean openNiLeftShoulderInverted = true;
+  public boolean openNiRightShoulderInverted = true;
   boolean firstSkeleton = true;
   boolean saveSkeletonFrame = false;
 
@@ -759,25 +762,50 @@ public class InMoov extends Service {
     }
 
     if (copyGesture) {
-      if (leftArm != null) {
-        // todo if (!Double.isNaN(skeleton.leftElbow.getAngleXY())){leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());}
+   
         if (leftArm != null) {
-          leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
-          leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
-          leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ()-50);
+         
+          if (!Double.isNaN(skeleton.leftElbow.getAngleXY())){
+            if (skeleton.leftElbow.getAngleXY()>=0){
+            leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
+            } 
+          }
+          if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())){
+            if (skeleton.leftShoulder.getAngleXY()>=0){
+            leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
+            } 
+          }
+          if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())){
+            if (skeleton.leftShoulder.getAngleYZ()+openNiShouldersOffset>=0){
+            leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ()-50);
+            } 
+          }
         }
         if (rightArm != null) {
-          rightArm.bicep.moveTo(skeleton.rightElbow.getAngleXY());
-          rightArm.omoplate.moveTo(skeleton.rightShoulder.getAngleXY());
-          rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ()-50);
+          
+          if (!Double.isNaN(skeleton.rightElbow.getAngleXY())){
+            if (skeleton.rightElbow.getAngleXY()>=0){
+              rightArm.bicep.moveTo(skeleton.rightElbow.getAngleXY());
+            } 
+          }
+          if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())){
+            if (skeleton.rightShoulder.getAngleXY()>=0){
+              rightArm.omoplate.moveTo(skeleton.rightShoulder.getAngleXY());
+            } 
+          }
+          if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())){
+            if (skeleton.rightShoulder.getAngleYZ()+openNiShouldersOffset>=0){
+              rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ()-50);
+            } 
+          }
         }
-    }
+    
+      }
     }
 
     // TODO - route data appropriately
     // rgb & depth image to OpenCV
     // servos & depth image to gui (entire InMoov + references to servos)
-    }
   }
 
   // ---------- movement commands begin ---------
@@ -1271,9 +1299,12 @@ public class InMoov extends Service {
       // re-mapping of skeleton !
       openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
       openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
-
-      openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
-      //openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
+      if (openNiLeftShoulderInverted){
+        openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
+        }
+      if (openNiRightShoulderInverted){     
+        openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
+        }
 
       // openni.skeleton.leftShoulder
 
