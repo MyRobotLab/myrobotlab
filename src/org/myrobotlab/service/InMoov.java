@@ -1202,8 +1202,26 @@ public class InMoov extends Service {
     return head;
   }
   
- 
-
+  public void enableAutoDisable(Boolean param) {
+    if (head != null){
+      head.enableAutoDisable(param);
+    }
+    if (rightArm != null){
+      rightArm.enableAutoDisable(param);
+    }
+    if (leftArm != null){
+      leftArm.enableAutoDisable(param);
+    }
+    if (torso != null){
+      torso.enableAutoDisable(param);
+    }
+    if (torso != null){
+      torso.enableAutoDisable(param);
+    }
+    if (eyelids != null) {
+      eyelids.enableAutoDisable(param);
+    }
+  }
 
   // NOTE - BEST Services are one which are reflective on startService
   // like xmpp which exposes a the reflective REST API are startService
@@ -1743,6 +1761,24 @@ public class InMoov extends Service {
 	        }, (int) seconds * 1000);
 		       
 	  }
+  
+  public void startedGesture(){
+    startedGesture("unknown");
+  }
+  
+  public void startedGesture(String nameOfGesture){
+    RobotCanMoveRandom = false;
+    enableAutoDisable(false);
+  }
+  
+  public void finishedGesture(){
+    startedGesture("unknown");    
+  }
+  
+  public void finishedGesture(String nameOfGesture){
+    RobotCanMoveRandom = true;
+    enableAutoDisable(true);
+  }
   
   public void disableRobotRandom(int seconds) {
 	  log.info("Disable RobotCanMoveRandom for "+seconds+" seconds");
