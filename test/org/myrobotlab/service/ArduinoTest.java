@@ -313,24 +313,24 @@ public class ArduinoTest implements PinArrayListener {
 
     // verify its attached
     assertTrue(servo.isAttached());
-    assertTrue(servo.isAttached(arduino));
-    assertTrue(arduino.getDeviceNames().contains(servo.getName()));
+    assertTrue(servo.isAttachedServoController(arduino));
+    assertTrue(arduino.getAttachedNames().contains(servo.getName()));
 
     // detach it
     arduino.detach(servo);
 
     // verify its detached
-    assertFalse(arduino.getDeviceNames().contains(servo.getName()));
+    assertFalse(arduino.getAttachedNames().contains(servo.getName()));
     assertFalse(servo.isPinAttached());
-    assertFalse(servo.isAttached(arduino));
+    assertFalse(servo.isAttachedServoController(arduino));
 
     // attach it the other way
     arduino.attach(servo, servoPin);
 
     // verify its attached
     assertTrue(servo.isAttached());
-    assertTrue(servo.isAttached(arduino));
-    assertTrue(arduino.getDeviceNames().contains(servo.getName()));
+    assertTrue(servo.isAttachedServoController(arduino));
+    assertTrue(arduino.getAttachedNames().contains(servo.getName()));
 
     // servo should have the correct pin
     assertTrue(servoPin == servo.getPin());
@@ -412,9 +412,9 @@ public class ArduinoTest implements PinArrayListener {
     // notify and process releasing itself from attached 
     // services
     servo.releaseService();
-    assertFalse(arduino.getDeviceNames().contains(servo.getName()));
+    assertFalse(arduino.getAttachedNames().contains(servo.getName()));
     assertFalse(servo.isAttached());
-    assertFalse(servo.isAttached(arduino));
+    assertFalse(servo.isAttachedServoController(arduino));
 
   }
 
