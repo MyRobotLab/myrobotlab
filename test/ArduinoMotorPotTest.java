@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Motor;
+import org.myrobotlab.service.MotorDualPwm;
 import org.myrobotlab.service.Pid;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.SensorData;
@@ -38,7 +39,7 @@ public class ArduinoMotorPotTest {
 
   private Pid pid;
   private String key = "test";
-  private Motor motor;
+  private MotorDualPwm motor;
 
   private int count = 0;
   private int rate = 5;
@@ -118,9 +119,9 @@ public class ArduinoMotorPotTest {
     arduino.connect(port);
     // wait for the arduino to actually connect!
     // Start the motor and attach it to the arduino.
-    motor = (Motor)Runtime.createAndStart("motor", "Motor");
+    motor = (MotorDualPwm)Runtime.createAndStart("motor", "Motor");
     motor.setPwmPins(leftPwm, rightPwm);
-    motor.attach((MotorController)arduino);
+    motor.attachMotorController(arduino);
     // Sensor callback
     // arduino.analogReadPollingStart(potPin);
     // arduino.sensorAttach(this);
