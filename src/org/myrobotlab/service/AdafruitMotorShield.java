@@ -247,7 +247,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     m.startService();
     motors.put(motorName, m);
     m.broadcastState();
-    m.attach(this);
+    m.attachMotorController(this);
     return m;
   }
 
@@ -355,12 +355,12 @@ public void detach(DeviceControl device) {
 }
 
 @Override
-public int getDeviceCount() {
+public int getAttachedCount() {
 	return motors.size();
 }
 
 @Override
-public Set<String> getDeviceNames() {
+public Set<String> getAttachedNames() {
 	return motors.keySet();
 }
 

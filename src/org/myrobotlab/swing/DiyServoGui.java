@@ -39,13 +39,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
-import org.myrobotlab.motor.MotorConfig;
-import org.myrobotlab.motor.MotorConfigDualPwm;
-import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.DiyServo;
+import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
@@ -316,13 +315,15 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 				}
 				*/
 			}
-			MotorConfigSimpleH mCfg = (MotorConfigSimpleH)myServo.getConfig();
+			/*  Perhaps DiyServo should have 'helper' views to support connecting motor & motorController
+			MotorControl mCfg = (MotorControl)myServo;
 			if (mCfg != null){
-			  if (mCfg.getType() == MotorConfigSimpleH.class.getSimpleName()){
+			  if (mCfg.getType() == Motor.class.getSimpleName()){
 			    pwmPinList.setSelectedItem(mCfg.getPwrPin());
 			    dirPinList.setSelectedItem(mCfg.getDirPin());
 			  }
 			}
+			*/
 		}		
 	}
 	

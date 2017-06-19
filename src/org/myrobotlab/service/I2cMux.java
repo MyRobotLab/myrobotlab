@@ -267,12 +267,12 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 	}
 
 	@Override
-	public int getDeviceCount() {
+	public int getAttachedCount() {
 		return i2cDevices.size();
 	}
 
 	@Override
-	public Set<String> getDeviceNames() {
+	public Set<String> getAttachedNames() {
 		return i2cDevices.keySet();
 	}
 	

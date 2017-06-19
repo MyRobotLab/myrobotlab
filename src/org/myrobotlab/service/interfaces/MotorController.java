@@ -66,7 +66,7 @@ public interface MotorController extends DeviceController {
 	 * @param motor
 	 */
 	public void motorReset(MotorControl motor);
-
-
+	
+	// public boolean isAttached(MotorController controller);
 
 }

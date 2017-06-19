@@ -37,9 +37,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
-import org.myrobotlab.motor.MotorConfig;
-import org.myrobotlab.motor.MotorConfigDualPwm;
-import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -80,16 +77,10 @@ import org.slf4j.Logger;
 public class DiyServo extends Service implements ServoControl, PinListener {
 
 	/**
-	 * Sweeper
+	 * Sweeper - thread used to sweep motor back and forth
 	 * 
 	 */
 	public class Sweeper extends Thread {
-
-		/*
-		 * int min; int max; int delay; // depending on type - this is 2
-		 * different things COMPUTER // its ms delay - CONTROLLER its modulus
-		 * loop count int step; boolean sweepOneWay;
-		 */
 
 		public Sweeper(String name) {
 			super(String.format("%s.sweeper", name));
@@ -186,13 +177,14 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
 	public final static Logger log = LoggerFactory.getLogger(DiyServo.class);
 
-	// MotorController
+	/**
+	 * controls low level methods of the motor
+	 */
 	transient MotorController controller;
 	public String controllerName = null;
-	MotorConfig config;
 
 	/**
-	 * // Reference to the Analog input service
+	 * Reference to the Analog input service
 	 */
 	public List<String> pinArrayControls;
 	/**
@@ -287,33 +279,18 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 									// value
 									// from
 									// the
-	int resolution = 1024; // AD
-							// converter
-							// needs
-							// to
-							// be
-							// remapped
-							// to
-							// 0
-							// -
-							// 180.
-							// D1024
-							// is
-							// the
-							// default
-							// for
-							// the
-							// Arduino
-	int sampleTime = 20; // Sample
-							// time
-							// 20
-							// ms
-							// =
-							// 50
-							// Hz
-	public double processVariable = 0; // Initial
-										// process
-	// variable
+	/**
+	 *  AD converter needs to be remapped to 0 - 180. D1024 is the default for the Arduino
+	 */
+	int resolution = 1024; 
+	/**
+	 *  Sample time 20 ms = 50 Hz
+	 */
+	int sampleTime = 20; 
+	/**
+	 * Initial process variable
+	 */
+	public double processVariable = 0;
 	transient MotorUpdater motorUpdater;
 
 	double powerLevel = 0;
@@ -407,21 +384,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		}
 		isAttached = false;
 		broadcastState();
-	}
-
-	/////// config start ////////////////////////
-	public void setPwmPins(int leftPin, int rightPin) {
-		config = new MotorConfigDualPwm(leftPin, rightPin);
-		broadcastState();
-	}
-
-	public void setPwrDirPins(int pwrPin, int dirPin) {
-		config = new MotorConfigSimpleH(pwrPin, dirPin);
-		broadcastState();
-	}
-
-	public MotorConfig getConfig() {
-		return config;
 	}
 
 	/**
@@ -545,35 +507,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		moveTo(rest);
 	}
 
-	/*
-	@Override
-	public void setController(DeviceController controller) {
-		if (controller == null) {
-			info("setting controller to null");
-			this.controllerName = null;
-			this.controller = null;
-			return;
-		}
-
-		log.info(String.format("%s setController %s", getName(), controller.getName()));
-		this.controller = (MotorController) controller;
-		this.controllerName = controller.getName();
-		broadcastState();
-	}
-	*/
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.myrobotlab.service.interfaces.ServoControl#setPin(int)
-	 */
-	/*
-	 * @Override public boolean setPin(int pin) { log.info(String.format(
-	 * "setting %s pin to %d", getName(), pin)); if (isAttached()) { warn(
-	 * "%s can not set pin %d when servo is attached", getName(), pin); return
-	 * false; } this.pin = pin; broadcastState(); return true; }
-	 */
-
 	public void setInverted(boolean invert) {
 		mapper.setInverted(invert);
 	}
@@ -691,13 +624,14 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 			if (done){
 			  return;
 			}
-			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			// arduino.connect("COM3");
 
 			// Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
 			// ads.setController(arduino, "1", "0x48");
 
 			DiyServo dyiServo = (DiyServo) Runtime.start("DiyServo", "DiyServo");
+			dyiServo.attachServoController((ServoController)arduino);
 			// dyiServo.attach((ServoController)arduino);
 			// dyiServo.attach((PinArrayControl) ads, 0); // PIN 14 = A0
 
@@ -848,7 +782,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	}
 
 	@Override
-	public void detach(ServoController controller) {
+	public void detachServoController(ServoController controller) {
 		// TODO Auto-generated method stub
 
 	}
@@ -897,7 +831,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	}
 
 	@Override // FIXME - could be in ServoBase
-	public boolean isAttached(ServoController controller) {
+	public boolean isAttachedServoController(ServoController controller) {
 		return this.controller == controller;
 	}
 
@@ -934,8 +868,9 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     }
 
     @Override
-    public void attach(ServoController controller) throws Exception {
+    public void attachServoController(ServoController controller) throws Exception {
       // TODO Auto-generated method stub
+      log.info("here");
       
     }
 

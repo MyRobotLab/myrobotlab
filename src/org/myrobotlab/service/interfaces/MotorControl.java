@@ -25,14 +25,13 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.motor.MotorConfig;
 import org.myrobotlab.sensor.Encoder;
 
 public interface MotorControl extends DeviceControl, RelativePositionControl {
+  
+	public void attachMotorController(MotorController controller) throws Exception;
 
-	public void attach(MotorController controller) throws Exception;
-
-	public void detach(MotorController controller);
+	public void detachMotorController(MotorController controller);
 
 	double getPowerLevel();
 
@@ -95,7 +94,7 @@ public interface MotorControl extends DeviceControl, RelativePositionControl {
 	 */
 	void unlock();
 
-	public MotorConfig getConfig();
+	// public Config getConfig();
 
 	/**
 	 * testing if a 'specific' motor controller is attached

@@ -25,8 +25,6 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.framework.Service;
-
 public interface ServoControl extends DeviceControl, AbsolutePositionControl, ServiceInterface {
 
   // FIXME - do we want to support this & what do we expect from
@@ -53,8 +51,14 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl, Se
    * @throws Exception
    */
 
-  // preferred - sets control
-  void attach(ServoController controller) throws Exception;
+  /**
+   * The one and only one attach which does the work we expect attaching a
+   * ServoControl to a ServoController
+   * 
+   * @param controller
+   * @throws Exception
+   */
+  void attachServoController(ServoController controller) throws Exception;
   
   void attach(ServoController controller, int pin) throws Exception;
 
@@ -68,14 +72,15 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl, Se
    * @param controller
    * @return
    */
-  public boolean isAttached(ServoController controller);
+  public boolean isAttachedServoController(ServoController controller);
 
   /**
-   * detaches a 'specific' controller
+   * the one and only one which 
+   * detaches a 'specific' ServoControl from ServoController
    * 
    * @param controller
    */
-  void detach(ServoController controller);
+  void detachServoController(ServoController controller);
 
   /**
    * attach "Pin" - simple command to energize the pin. Equivalent to Arduino
@@ -96,8 +101,11 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl, Se
    * Re-attaches (re-energizes) the servo on its current pin NOT RELATED TO
    * CONTROLLER ATTACH/DETACH !
    * 
+   * Deprecated - use enable(pin)
+   * 
    * @return
    */
+  @Deprecated
   public void attach(int pin);
 
   /**
@@ -229,6 +237,24 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl, Se
 
   boolean isInverted();
 
+  // WTF ?
   void addIKServoEventListener(NameProvider service);
+  
+  default public double toUs(double degrees) {
+    // arduino docs 
+    // https://www.arduino.cc/en/Reference/ServoWriteMicroseconds
+    // (degrees * 5.5) + 1000;
+    // although arduino code does it differently
+    // 
+    // http://www.robotshop.com/forum/converting-servo-pulses-to-degrees-t4856
+    // (degrees * 10) + 590; // for  (2390 - 590)
+    
+    // return (degrees * 5.5) + 1000;
+    return (int) Math.round((degrees * (2400 - 544) / 180) + 544);
+  };
+  
+  default public double toDegrees(double us) {
+    return (us - 544) / 10;
+  };
 
 }

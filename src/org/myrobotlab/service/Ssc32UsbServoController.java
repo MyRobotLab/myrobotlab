@@ -1,211 +1,96 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 
-import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.DeviceControl;
-import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.SerialDevice;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
+import javafx.scene.shape.MoveTo;
+
 /**
+ *
  * 
- * SaberTooth - SaberTooth service for the sabertooth motor controller command
+ * <pre>
+ *   
+ *   # <ch> P <pw> ​S​​<spd>​​T​<time> <cr>
  * 
- * More Info: http://www.dimensionengineering.com/datasheets/Sabertooth2x25.pdf
+ *  <ch>: pin / channel to which the servo is connected (0 to 31) in decimal
+ *  <pw>: desired pulse width (normally 500 to 2500) in microseconds
+ *  <spd>: servo movement speed in microseconds per second*
+ *  <time>: time in microseconds to travel from the current position to the desired position. This affects all servos (65535 max) *
+ *  <cr>: carriage return (ASCII 13)**
  * 
- * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 +
- * speed) & 0b01111111);
- * 
+ * </pre>
+ *
  * @author GroG
  * 
  */
 public class Ssc32UsbServoController extends Service implements PortConnector, ServoController {
 
-  class MotorData implements Serializable {
-    private static final long serialVersionUID = 1L;
-    transient MotorControl motor = null;
-    /*
-     * int PWMPin = -1; int dirPin0 = -1; int dirPin1 = -1; int motorPort = -1;
-     * String port = null;
-     */
-    int portNumber;
-  }
-
   private static final long serialVersionUID = 1L;
-
-  public final static int PACKETIZED_SERIAL_MODE = 4;
-
-  int mode = PACKETIZED_SERIAL_MODE;
-
-  public static final int PINMODE = 4;
 
   public final static Logger log = LoggerFactory.getLogger(Ssc32UsbServoController.class);
 
   transient Serial serial;
 
-  // range mapping
-
-  private Integer address = 128;
-
-  public static final int INPUT = 0x0;
-
-  public static final int OUTPUT = 0x1;
-
-  boolean setSaberToothBaud = false;
-
-  // Motor name to its Data
-  HashMap<String, MotorData> motors = new HashMap<String, MotorData>();
-
-  public final static int MOTOR1_FORWARD = 0;
-
-  public final static int MOTOR1_BACKWARD = 1;
-
-  public final static int SET_MIN_VOLTAGE = 2;
-
-  public final static int SET_MAX_VOLTAGE = 3;
-
-  public final static int MOTOR2_FORWARD = 4;
-
-  public final static int MOTOR2_BACKWARD = 5;
-
-  // ----------Sabertooth Packetized Serial Mode Interface Begin
-  // --------------
+  transient HashMap<String, ServoControl> servos = new HashMap<String, ServoControl>();
 
   public Ssc32UsbServoController(String n) {
     super(n);
   }
 
+  /**
+   * connect - default connection speed is 9600
+   * 
+   * Press and hold the button. 
+   * At first the LEDs will glow to indicate the current Baud rate.
+   * 9600 (green)
+   * 38400 (red)
+   * 115200 (both green and red)
+   * Press the button to cycle through baud rates
+   */
   public void connect(String port) throws IOException {
-    connect(port, 115200, 8, 1, 0);
+    connect(port, 9600, 8, 1, 0);
   }
 
+  /**
+   * disconnect serial
+   */
   public void disconnect() {
-    if (serial != null) {
+    if (serial != null && serial.isConnected()) {
       serial.disconnect();
     }
-  }
-
-  public Object[] getMotorData(String motorName) {
-    return new Object[] { motors.get(motorName).portNumber };
-  }
-
-  // ----------Sabertooth Packetized Serial Mode Interface End --------------
-
-  // ----------MotorController Interface Begin --------------
-
-  // FIXME - this seems very Arduino specific?
-
-  public void sendPacket(int command, int data) {
-    try {
-      if (serial == null || !serial.isConnected()) {
-        error("serial device not connected");
-        return;
-      }
-
-      // 9600
-
-      if (!setSaberToothBaud) {
-        serial.write(170);
-        sleep(500);
-        setSaberToothBaud = true;
-      }
-
-      serial.write(address);
-      serial.write(command);
-      serial.write(data);
-      serial.write((address + command + data) & 0x7F);
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
-
-  public void setAddress(Integer address) {
-    this.address = address;
-  }
-
-  public void setMaxVoltage(int maxVolts) {
-    int actualValue = (int) Math.round(maxVolts / 5.12);
-    info("setting max voltage to %d volts - actual value %f", actualValue);
-    sendPacket(SET_MAX_VOLTAGE, actualValue);
-  }
-
-  // ----------MotorController Interface End --------------
-
-  public void setMinVoltage(int min) {
-    int actualValue = (min - 6) * 5;
-    info("setting max voltage to %d volts - actual value %d", actualValue);
-    if (actualValue < 0 || actualValue > 120) {
-      error("invalid value must be between 0 and 120 %d", actualValue);
-      return;
-    }
-    sendPacket(SET_MIN_VOLTAGE, actualValue);
   }
 
   @Override
   public void startService() {
     super.startService();
     serial = (Serial) startPeer("serial");
-    // serial.addByteListener(this);
+    // serial.addByteListener(this); TODO - listen on input pins?
   }
 
   public SerialDevice getSerial() {
     return serial;
   }
 
-  void setBaudRate(int baudRate) {
-
-    int value;
-    switch (baudRate) {
-      case 2400:
-        value = 1;
-        break;
-      case 9600:
-      default:
-        value = 2;
-        break;
-      case 19200:
-        value = 3;
-        break;
-      case 38400:
-        value = 4;
-        break;
-      case 115200: // not valid ???
-        value = 5;
-        break;
-    }
-
-    sendPacket(15, value);
-
-    // (1) flush() does not seem to wait until transmission is complete.
-    // As a result, a Serial.end() directly after this appears to
-    // not always transmit completely. So, we manually add a delay.
-    // (2) Sabertooth takes about 200 ms after setting the baud rate to
-    // respond to commands again (it restarts).
-    // So, this 500 ms delay should deal with this.
-    sleep(500);
-  }
-
-  // --- MotorController interface end ----
-
   @Override
   public boolean isConnected() {
-    // TODO Auto-generated method stub
-    return false;
+    if (serial == null || !serial.isConnected()) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -219,8 +104,8 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Ssc32UsbServoController.class.getCanonicalName());
-    meta.addDescription("Interface for the powerful Sabertooth motor controller");
-    meta.addCategory("motor", "control");
+    meta.addDescription("Lynxmotion usb 32 servo controller");
+    meta.addCategory("servo", "control");
     meta.addPeer("serial", "Serial", "Serial Port");
 
     return meta;
@@ -231,43 +116,80 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     serial.open(port, rate, databits, stopbits, parity);
   }
 
+  // FIXME - this is the "old" way....
   @Override
   public void detach(DeviceControl device) {
-    motors.remove(device);
+    servos.remove(device);
   }
 
   @Override
-  public int getDeviceCount() {
-    return motors.size();
+  public int getAttachedCount() {
+    return servos.size();
   }
 
   @Override
-  public Set<String> getDeviceNames() {
-    return motors.keySet();
+  public Set<String> getAttachedNames() {
+    return servos.keySet();
   }
 
-  // @Override - lame - should be override
-  static public List<BoardType> getBoardTypes() {
-    // currently only know of 1
-    return new ArrayList<BoardType>();
-  }
-
+  /**
+   * Routing Attach - routes ServiceInterface.attach(service) to appropriate methods
+   * for this class
+   */
   @Override
-  public void attach(ServoControl servo) throws Exception {
-    // TODO Auto-generated method stub
+  public void attach(ServiceInterface service) throws Exception {
+    if (ServoControl.class.isAssignableFrom(service.getClass())) {
+      attachServoControl((ServoControl) service);
+      return;
+    }
 
+    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
 
+  /**
+   * Single parameter attach{type}({type}) - this is where the "real" attach logic is
+   * for this service.
+   */
+  @Override
+  public void attachServoControl(ServoControl servo) throws Exception {
+    if (isAttachedServoControl(servo)) {
+      // log.info(String.format("%s is already attached to %s", servo.getName(), getName()));
+      return;
+    }
+    servos.put(servo.getName(), servo);
+    servo.attach(this);
+  }
+
+  // FIXME - promote to interface !!!
+  public boolean isAttachedServoControl(ServoControl servo) {
+    return servos.containsKey(servo.getName());
+  }
+
+  
   @Override
   public void attach(ServoControl servo, int pin) throws Exception {
-    // TODO Auto-generated method stub
-
+    servo.setPin(pin);
+    attachServoControl(servo);
   }
 
   @Override
   public void servoAttachPin(ServoControl servo, int pin) {
-    // TODO Auto-generated method stub
+    // DUNNO HOW TO RE-ENABLE unless its just a write to current position
+    servoMoveTo(servo);
+  }
 
+  public void write(String cmd, Object... params) {
+    if (serial == null || !serial.isConnected()) {
+      error("must be connected to serial port - connect(port)");
+      return;
+    }
+    try {
+      String c = String.format("%s\r", String.format(cmd, params));
+      log.info(String.format("cmd [%s]", c));
+      serial.write(c.getBytes());
+    } catch (Exception e) {
+      log.error("serial threw", e);
+    }
   }
 
   @Override
@@ -284,20 +206,45 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
 
   @Override
   public void servoMoveTo(ServoControl servo) {
-    // TODO Auto-generated method stub
-
+    // # <ch> P <pw> ​S​​<spd>​​T​<time> <cr>
+    log.info(String.format("servoMove %f", servo.getTargetOutput()));
+    StringBuilder sb = new StringBuilder();
+    sb.append("#").append(servo.getPin());
+    sb.append("P").append((int)servo.toUs(servo.getTargetOutput()));
+    
+    // T is 'over-calculated' - it represents 'travel time' - the time from "any" position to destination distance
+    // covered in that specified time :P
+    // Velocity on this controller is specified in "Time for Travel" ,
+    // The total number of milliseconds from where it currently is to a new position
+    
+    double velocity = servo.getVelocity();
+    if (velocity > 0){
+      // sb.append("T").append(velocity * 10); // T is us per second
+      sb.append("T").append(velocity * 100);
+    }
+    
+    // String cmd = "#%dP%d";
+    // write("#%dP%d", servo.getPin(), (int)servo.toUs(servo.getTargetOutput()));
+    write(sb.toString());
   }
 
   @Override
   public void servoWriteMicroseconds(ServoControl servo, int uS) {
-    // TODO Auto-generated method stub
-
+    StringBuilder sb = new StringBuilder();
+    sb.append("#").append(servo.getPin());
+    sb.append("P").append(uS);
+    double velocity = servo.getVelocity();
+    if (velocity > 0){
+      // sb.append("T").append(velocity * 10); // T is us per second
+      sb.append("T").append(velocity * 100);
+    }
+    write(sb.toString());
   }
 
   @Override
   public void servoDetachPin(ServoControl servo) {
-    // TODO Auto-generated method stub
-
+    int pin = servo.getPin();
+    write("STOP %d #%dP0 #%dL #%dH", pin, pin, pin, pin);
   }
 
   @Override
@@ -308,15 +255,14 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
 
   @Override
   public void servoSetAcceleration(ServoControl servo) {
-    // TODO Auto-generated method stub
-
+    // probably a noop - as it can be pulled from the
+    // servo controller when the servo is moved.
   }
 
   ///////////// start new methods /////////////////
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.WARN);
+    LoggingFactory.init("INFO");
 
     try {
 
@@ -329,23 +275,59 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
       // virtual.getUART(); uart.setTimeout(300);
       // ---- Virtual End -----
 
-      Runtime.start("gui", "SwingGui");
-      Runtime.start("python", "Python");
+      // Runtime.start("gui", "SwingGui");
+      // Runtime.start("python", "Python");
       // Joystick joystick = (Joystick)Runtime.start("joystick",
       // "Joystick");
       // Runtime.start("joystick", "Joystick");
 
       Ssc32UsbServoController ssc = (Ssc32UsbServoController) Runtime.start("ssc", "Ssc32UsbServoController");
-      ssc.connect(port);
+      ssc.connect(port, Serial.BAUD_115200);
       SerialDevice serial = ssc.getSerial();
+
+      // Servo little = (Servo) Runtime.start("little", "Servo");
+      Servo blue = (Servo) Runtime.start("blue", "Servo");
+      Servo big = (Servo) Runtime.start("big", "Servo");
+
+      blue.setPin(16);
+      big.setPin(27);      
+      
+      // ssc.attach(little);
+      ssc.attach(blue);
+      ssc.attach(big);
+      
+      for (int i = 400; i < 3000; ++i){
+        blue.writeMicroseconds(i);
+      }
+      
+      blue.setVelocity(10);
+      blue.moveTo(0);
+      blue.moveTo(90);
+      blue.moveTo(180);
+      blue.moveTo(10);
+      blue.disable();
+      
+      ssc.detach(blue);
+      
+      boolean b = true;
+      if (b){
+        return;
+      }
+     
+
       // 500 2500
+      // serial.write("#17P0 #16P0 @ \r");
+      serial.write("STOP 16 STOP 17 \r");
       serial.write("#16P800 #17P1500 #27P1100 \r");
+      serial.write("#16P1000 #17P500 #27P2100 \r");
       serial.write("#16P500\r");
       serial.write("#16P2500\r");
       serial.write("#16P1500\r");// pos 0
       serial.write("#16P500S10\r");
-      
+
       serial.write("#16P2000\r");
+
+      serial.write("#16P0 #17P1500 #27P1100 \r");
 
       // Runtime.start("webgui", "WebGui");
       // Runtime.start("motor", "Motor");

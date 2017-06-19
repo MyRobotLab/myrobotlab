@@ -120,6 +120,21 @@ public class Servo extends Service implements ServoControl {
 
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Servo.class);
+	
+	/**
+	 * Routing Attach - routes ServiceInterface.attach(service) to appropriate methods
+	 * for this class
+	 */
+  @Override
+  public void attach(ServiceInterface service) throws Exception {
+    if (ServoController.class.isAssignableFrom(service.getClass())) {
+      attachServoController((ServoController) service);
+      return;
+    }
+
+    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+  }
+
 
 	/**
 	 * This static method returns all the details of the class without it having
@@ -273,15 +288,12 @@ public class Servo extends Service implements ServoControl {
 
 	/**
 	 * This method will attach to the currently set controller with the specified pin.
+	 * attach(pin) is deprecated use enable(pin)
 	 */
+	@Deprecated 
 	@Override
 	public void attach(int pin) {
-		lastActivityTime = System.currentTimeMillis();
-		controller.servoAttachPin(this, pin);
-		this.pin = pin;
-		isPinAttached = true;
-		broadcastState();
-		invoke("publishServoEnable", getName());
+		enable(pin);
 	}
 
 	/**
@@ -306,7 +318,7 @@ public class Servo extends Service implements ServoControl {
 		isPinAttached = false;
 		if (controller != null) {
 			//controller.servoDetachPin(this);
-			detach(controller);
+			detachServoController(controller);
 		}
 		broadcastState();
 		// TODO: this doesn't seem to be consistent depending on how you invoke
@@ -446,7 +458,7 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public void releaseService() {
 		//disable();
-		detach(controller);
+		detachServoController(controller);
 		super.releaseService();
 	}
 
@@ -610,10 +622,6 @@ public class Servo extends Service implements ServoControl {
 		broadcastState();
 	}
 
-	/*
-	 * @Override public void setPin(int pin) { this.pin = pin; }
-	 */
-
 	@Override
 	public Integer getPin() {
 		return pin;
@@ -632,19 +640,14 @@ public class Servo extends Service implements ServoControl {
 	// and Tracking service depended on it to set
 	// the servos to a controller where pins could
 	// be assigned later...
-	public void attach(ServoController controller) throws Exception {
-		if (isAttached(controller)) {
+	public void attachServoController(ServoController controller) throws Exception {
+		if (isAttachedServoController(controller)) {
 			log.info("{} servo is already attached to controller {}", getName(), this.controller.getName());
 			return;
 		} else if (this.controller != null && this.controller != controller) {
 		  //we're switching controllers
 		  detach();
 		}
-
-//			log.warn("already attached to controller {} - please detach before attaching to controller {}",
-//					this.controller.getName(), controller.getName());
-//			return;
-//		}
 
 		targetOutput = getTargetOutput();// mapper.calcOutput(targetPos);
 
@@ -656,7 +659,7 @@ public class Servo extends Service implements ServoControl {
 		// the controller better have
 		// isAttach(ServoControl) to prevent infinit loop
 		// FIXME ! - this should not set the controller or controllerName if controller.attach(this) is not successful
-		controller.attach(this);
+		controller.attachServoControl(this);
 		sleep(300);
 		// the controller is attached now
 		// its time to attach the pin
@@ -667,13 +670,13 @@ public class Servo extends Service implements ServoControl {
 
 	public void attach(String controllerName, int pin) throws Exception {
 		this.pin = pin;
-		attach((ServoController) Runtime.getService(controllerName));
+		attachServoController((ServoController) Runtime.getService(controllerName));
 	}
 
 	public void attach(String controllerName, Integer pin, Double pos) throws Exception {
 		this.pin = pin;
 		this.targetPos = pos;
-		attach((ServoController) Runtime.getService(controllerName));
+		attachServoController((ServoController) Runtime.getService(controllerName));
 	}
 
 	/**
@@ -683,13 +686,13 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public void attach(ServoController controller, int pin) throws Exception {
 		this.pin = pin;
-		attach(controller);
+		attachServoController(controller);
 	}
 
 	public void attach(ServoController controller, int pin, double pos) throws Exception {
 		this.pin = pin;
 		this.targetPos = pos;
-		attach(controller);
+		attachServoController(controller);
 	}
 
 	// FIXME - setController is very deficit in its abilities - compared to the
@@ -699,20 +702,20 @@ public class Servo extends Service implements ServoControl {
 		this.pin = pin;
 		this.targetPos = pos;
 		this.velocity = velocity;
-		attach(controller);
+		attachServoController(controller);
 	}
 
-	public boolean isAttached(ServoController controller) {
+	public boolean isAttachedServoController(ServoController controller) {
 		return this.controller == controller;
 	}
 
 	@Override
 	public void detach(String controllerName) {
-		detach((ServoController) Runtime.getService(controllerName));
+		detachServoController((ServoController) Runtime.getService(controllerName));
 	}
 
 	@Override
-	public void detach(ServoController controller) {
+	public void detachServoController(ServoController controller) {
 		if (this.controller == controller) {
 			// detach the this device from the controller
 			controller.detach(this);

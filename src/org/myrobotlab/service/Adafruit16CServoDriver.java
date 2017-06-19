@@ -22,10 +22,6 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.motor.MotorConfig;
-import org.myrobotlab.motor.MotorConfigDualPwm;
-import org.myrobotlab.motor.MotorConfigPulse;
-import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -593,7 +589,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	 * if your device controller can provided several {Type}Controller
 	 * interfaces, there might be commonality between all of them. e.g.
 	 * initialization of data structures, preparing communication, sending
-	 * control and config messages, etc.. - if there is commonality, it could be
+	 * control and motor messages, etc.. - if there is commonality, it could be
 	 * handled here - where Type specific methods call this method
 	 * 
 	 * This is a software representation of a board that uses the i2c protocol.
@@ -627,8 +623,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		invoke("publishAttachedDevice", servoName);
 	}
 
-	public void attach(ServoControl servo) throws Exception  {
-	    if (isAttached(servo)) {
+	public void attachServoControl(ServoControl servo) throws Exception  {
+	    if (isAttachedServoControl(servo)) {
 	        log.info("servo {} already attached", servo.getName());
 	        return;
 	      }
@@ -638,17 +634,17 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		servoData.velocity = servo.getVelocity();
 		servoData.isEnergized = true;
 		servoMap.put(servo.getName(), servoData);
-	    servo.attach(this);
+	    servo.attachServoController(this);
 	}
 	
-	public boolean isAttached(DeviceControl device) {
+	public boolean isAttachedServoControl(DeviceControl device) {
 		    return servoMap.containsKey(device.getName());
     }
 	
-	void motorAttach(MotorControl device, Object... conf) {
+	public void motorAttach(MotorControl device) {
 		/*
 		 * This is where motor data could be initialized. So far all motor data
-		 * this service needs can be requested from the motors config
+		 * this service needs can be requested from the motors motor
 		 */
 		MotorControl motor = (MotorControl) device;
 		invoke("publishAttachedDevice", motor.getName());
@@ -697,51 +693,36 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	@Override
 	public void motorMove(MotorControl mc) {
 
-		MotorConfig c = mc.getConfig();
-
-		if (c == null) {
-			error("motor config not set");
-			return;
-		}
-
-		Class<?> type = mc.getConfig().getClass();
+		Class<?> type = mc.getClass();
 
 		double powerOutput = mc.getPowerOutput();
 
-		if (MotorConfigSimpleH.class == type) {
-			MotorConfigSimpleH config = (MotorConfigSimpleH) c;
-			if (config.getPwmFreq() == null) {
-				config.setPwmFreq(defaultMotorPwmFreq);
-				setPWMFreq(config.getPwrPin(), config.getPwmFreq());
+		if (Motor.class == type) {
+		  Motor motor = (Motor) mc;
+			if (motor.getPwmFreq() == null) {
+			  motor.setPwmFreq(defaultMotorPwmFreq);
+				setPWMFreq(motor.getPwrPin(), motor.getPwmFreq());
 			}
-			setPinValue(config.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
-			setPinValue(config.getPwrPin(), powerOutput);
-		} else if (MotorConfigDualPwm.class == type) {
-			MotorConfigDualPwm config = (MotorConfigDualPwm) c;
+			setPinValue(motor.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
+			setPinValue(motor.getPwrPin(), powerOutput);
+		} else if (MotorDualPwm.class == type) {
+			MotorDualPwm motor = (MotorDualPwm) mc;
 			log.info(String.format("Adafrutit16C Motor DualPwm motorMove, powerOutput = %s", powerOutput));
-			if (config.getPwmFreq() == null) {
-				config.setPwmFreq(defaultMotorPwmFreq);
-				setPWMFreq(config.getLeftPin(), config.getPwmFreq());
-				setPWMFreq(config.getRightPin(), config.getPwmFreq());
+			if (motor.getPwmFreq() == null) {
+				motor.setPwmFreq(defaultMotorPwmFreq);
+				setPWMFreq(motor.getLeftPwmPin(), motor.getPwmFreq());
+				setPWMFreq(motor.getRightPwmPin(), motor.getPwmFreq());
 			}
 			if (powerOutput < 0) {
-				setPinValue(config.getLeftPin(), 0);
-				setPinValue(config.getRightPin(), Math.abs(powerOutput / 255));
+				setPinValue(motor.getLeftPwmPin(), 0);
+				setPinValue(motor.getRightPwmPin(), Math.abs(powerOutput / 255));
 			} else if (powerOutput > 0) {
-				setPinValue(config.getRightPin(), 0);
-				setPinValue(config.getLeftPin(), Math.abs(powerOutput / 255));
+				setPinValue(motor.getRightPwmPin(), 0);
+				setPinValue(motor.getLeftPwmPin(), Math.abs(powerOutput / 255));
 			} else {
-				setPinValue(config.getRightPin(), 0);
-				setPinValue(config.getLeftPin(), 0);
+				setPinValue(motor.getRightPwmPin(), 0);
+				setPinValue(motor.getLeftPwmPin(), 0);
 			}
-		} else if (MotorPulse.class == type) {
-			MotorPulse motor = (MotorPulse) mc;
-			// sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT),
-			// 0);
-			// TODO implement with a -1 for "endless" pulses or a different
-			// command parameter :P
-			// TODO Change to setPwmFreq I guess
-			// setPwmFreq(motor.getPulsePin(), (int) Math.abs(powerOutput));
 		} else {
 			error("motorMove for motor type %s not supported", type);
 		}
@@ -759,8 +740,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		// if pulser (with or without fake encoder
 		// send a series of pulses !
 		// with current direction
-		if (MotorPulse.class == type) {
-			MotorPulse motor = (MotorPulse) mc;
+		if (Motor.class == type) {
+			Motor motor = (Motor) mc;
 			// check motor direction
 			// send motor direction
 			// TODO powerLevel = 100 * powerlevel
@@ -783,29 +764,20 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
 	@Override
 	public void motorStop(MotorControl mc) {
-		MotorConfig c = mc.getConfig();
+	
+		Class<?> type = mc.getClass();
 
-		if (c == null) {
-			error("motor config not set");
-			return;
-		}
-
-		Class<?> type = mc.getConfig().getClass();
-
-		if (MotorConfigPulse.class == type) {
-			MotorConfigPulse config = (MotorConfigPulse) mc.getConfig();
-			setPinValue(config.getPulsePin(), 0);
-		} else if (MotorConfigSimpleH.class == type) {
-			MotorConfigSimpleH config = (MotorConfigSimpleH) mc.getConfig();
-			if (config.getPwmFreq() == null) {
-				config.setPwmFreq(defaultMotorPwmFreq);
-				setPWMFreq(config.getPwrPin(), config.getPwmFreq());
+		if (Motor.class == type) {
+			Motor motor = (Motor) mc;
+			if (motor.getPwmFreq() == null) {
+				motor.setPwmFreq(defaultMotorPwmFreq);
+				setPWMFreq(motor.getPwrPin(), motor.getPwmFreq());
 			}
-			setPinValue(config.getPwrPin(), 0);
-		} else if (MotorConfigDualPwm.class == type) {
-			MotorConfigDualPwm config = (MotorConfigDualPwm) mc.getConfig();
-			setPinValue(config.getLeftPin(), 0);
-			setPinValue(config.getRightPin(), 0);
+			setPinValue(motor.getPwrPin(), 0);
+		} else if (MotorDualPwm.class == type) {
+			MotorDualPwm motor = (MotorDualPwm) mc;
+			setPinValue(motor.getLeftPwmPin(), 0);
+			setPinValue(motor.getRightPwmPin(), 0);
 		}
 
 	}
@@ -891,16 +863,16 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	@Override
 	public void attach(ServoControl servo, int pin)  throws Exception {
 		servo.setPin(pin);
-		attach(servo);
+		attachServoControl(servo);
 	}
 
 	@Override
-	public int getDeviceCount() {
+	public int getAttachedCount() {
 		return servoMap.size();
 	}
 
 	@Override
-	public Set<String> getDeviceNames() {
+	public Set<String> getAttachedNames() {
 		return servoMap.keySet();
 	}
 

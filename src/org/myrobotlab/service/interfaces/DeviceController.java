@@ -2,23 +2,20 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.Set;
 
+// FIXME - promote into ServiceInterface
 public interface DeviceController extends NameProvider {
-
-	// FIXED - attaching is to complex to generalize - each controller provides a specific
-	// and 'typed' attach
-	// void deviceAttach(DeviceControl device, Object... conf) throws Exception;
 
 	void detach(DeviceControl device);
 	
 	/**
 	 * @return - the current count of devices its controlling
 	 */
-	public int getDeviceCount();
+	public int getAttachedCount();
 	
 	/**
 	 * get the current set of connected 'control' devices attached to this controller
 	 * @return
 	 */
-	public Set<String> getDeviceNames();
+	public Set<String> getAttachedNames();
 	
 }

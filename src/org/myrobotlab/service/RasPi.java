@@ -317,12 +317,12 @@ public class RasPi extends Service implements I2CController {
 	}
 
 	@Override
-	public int getDeviceCount() {
+	public int getAttachedCount() {
 		return i2cDevices.size();
 	}
 
 	@Override
-	public Set<String> getDeviceNames() {
+	public Set<String> getAttachedNames() {
 		return i2cDevices.keySet();
 	}
 
