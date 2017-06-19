@@ -34,10 +34,6 @@ import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.motor.MotorConfig;
-import org.myrobotlab.motor.MotorConfigDualPwm;
-import org.myrobotlab.motor.MotorConfigPulse;
-import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.PinData;
@@ -69,7 +65,7 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 
 public class Arduino extends Service implements Microcontroller, PinArrayControl, I2CBusController, I2CController,
 		SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController,
-		DeviceController, PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher {
+		PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -996,42 +992,26 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	public void motorMove(MotorControl mc) {
 
-		MotorConfig c = mc.getConfig();
-
-		if (c == null) {
-			error("motor config not set");
-			return;
-		}
-
-		Class<?> type = mc.getConfig().getClass();
+		Class<?> type = mc.getClass();
 
 		double powerOutput = mc.getPowerOutput();
 
-		if (MotorConfigSimpleH.class == type) {
-			MotorConfigSimpleH config = (MotorConfigSimpleH) c;
+		if (Motor.class == type) {
+			Motor config = (Motor) mc;
 			msg.digitalWrite(config.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
 			msg.analogWrite(config.getPwrPin(), (int) Math.abs(powerOutput));
-		} else if (MotorConfigDualPwm.class == type) {
-			MotorConfigDualPwm config = (MotorConfigDualPwm) c;
+		} else if (MotorDualPwm.class == type) {
+			MotorDualPwm config = (MotorDualPwm) mc;
 			if (powerOutput < 0) {
-				msg.analogWrite(config.getLeftPin(), 0);
-				msg.analogWrite(config.getRightPin(), (int) Math.abs(powerOutput));
+				msg.analogWrite(config.getLeftPwmPin(), 0);
+				msg.analogWrite(config.getRightPwmPin(), (int) Math.abs(powerOutput));
 			} else if (powerOutput > 0) {
-				msg.analogWrite(config.getRightPin(), 0);
-				msg.analogWrite(config.getLeftPin(), (int) Math.abs(powerOutput));
+				msg.analogWrite(config.getRightPwmPin(), 0);
+				msg.analogWrite(config.getLeftPwmPin(), (int) Math.abs(powerOutput));
 			} else {
-				msg.analogWrite(config.getLeftPin(), 0);
-				msg.analogWrite(config.getRightPin(), 0);
-			}
-		} else if (MotorPulse.class == type) {
-			MotorPulse motor = (MotorPulse) mc;
-			// sdsendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT),
-			// 0);
-			// TODO implement with a -1 for "endless" pulses or a different
-			// command parameter :P
-			// sendMsg(new
-			// MrlMsg(PULSE).append(motor.getPulsePin()).append((int)
-			// Math.abs(powerOutput)));
+				msg.analogWrite(config.getLeftPwmPin(), 0);
+				msg.analogWrite(config.getRightPwmPin(), 0);
+			}		
 		} else {
 			error("motorMove for motor type %s not supported", type);
 		}
@@ -1053,8 +1033,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// if pulser (with or without fake encoder
 		// send a series of pulses !
 		// with current direction
-		if (MotorPulse.class == type) {
-			MotorPulse motor = (MotorPulse) mc;
+		if (Motor.class == type) {
+			Motor motor = (Motor) mc;
 			// check motor direction
 			// send motor direction
 			// TODO powerLevel = 100 * powerlevel
@@ -1085,25 +1065,16 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	@Override
 	public void motorStop(MotorControl mc) {
-		MotorConfig c = mc.getConfig();
+		
+		Class<?> type = mc.getClass();
 
-		if (c == null) {
-			error("motor config not set");
-			return;
-		}
-
-		Class<?> type = mc.getConfig().getClass();
-
-		if (MotorConfigPulse.class == type) {
-			MotorConfigPulse config = (MotorConfigPulse) mc.getConfig();
-			// sendMsg(new MrlMsg(PULSE_STOP).append(config.getPulsePin()));
-		} else if (MotorConfigSimpleH.class == type) {
-			MotorConfigSimpleH config = (MotorConfigSimpleH) mc.getConfig();
+		if (Motor.class == type) {
+			Motor config = (Motor) mc;
 			msg.analogWrite(config.getPwrPin(), 0);
-		} else if (MotorConfigDualPwm.class == type) {
-			MotorConfigDualPwm config = (MotorConfigDualPwm) mc.getConfig();
-			msg.analogWrite(config.getLeftPin(), 0);
-			msg.analogWrite(config.getRightPin(), 0);
+		} else if (MotorDualPwm.class == type) {
+			MotorDualPwm config = (MotorDualPwm) mc;
+			msg.analogWrite(config.getLeftPwmPin(), 0);
+			msg.analogWrite(config.getRightPwmPin(), 0);
 		}
 	}
 
@@ -1578,14 +1549,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	@Override
-	public void attach(ServoControl servo) throws Exception {
-		if (isAttached(servo)) {
+	public void attachServoControl(ServoControl servo) throws Exception {
+		if (isAttachedServoControl(servo)) {
 			log.info("servo {} already attached", servo.getName());
 			return;
 		}
 		// query configuration out
 		int pin = servo.getPin();
-		// targetOutput is ALWAYS ALWAYS degreeees
+		// targetOutput is ALWAYS ALWAYS degrees
 		double targetOutput = servo.getTargetOutput();
 		double velocity = servo.getVelocity();
 
@@ -1602,17 +1573,17 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// the callback - servo better have a check
 		// isAttached(ServoControl) to prevent infinite loop
 		// servo.attach(this, pin, targetOutput, velocity);
-		servo.attach(this);
+		servo.attachServoController(this);
 	}
 
-	public boolean isAttached(DeviceControl device) {
+	public boolean isAttachedServoControl(DeviceControl device) {
 		return deviceList.containsKey(device.getName());
 	}
 
 	@Override
 	public void attach(ServoControl servo, int pin) throws Exception {
 		servo.setPin(pin);
-		attach(servo);
+		attachServoControl(servo);
 	}
 
 	/**
@@ -1838,7 +1809,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void attach(UltrasonicSensorControl sensor, Integer triggerPin, Integer echoPin) throws Exception {
 		// refer to
 		// http://myrobotlab.org/content/control-controller-manifesto
-		if (isAttached(sensor)) {
+		if (isAttachedServoControl(sensor)) {
 			log.info("{} already attached", sensor.getName());
 			return;
 		}
@@ -1943,12 +1914,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		pinDef.setValue(value);
 	}
 
-	public int getDeviceCount() {
+	public int getAttachedCount() {
 		return deviceList.size();
 	}
 
 	@Override
-	public Set<String> getDeviceNames() {
+	public Set<String> getAttachedNames() {
 		return deviceList.keySet();
 	}
 

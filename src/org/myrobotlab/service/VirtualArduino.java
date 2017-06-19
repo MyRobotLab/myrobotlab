@@ -237,7 +237,11 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     return simulator;
   }
 
-  public void attach(Simulator simulator) {
+  /**
+   * TODO - promote to interface
+   * @param simulator
+   */
+  public void attachSimulator(Simulator simulator) {
     this.simulator = simulator;
   }
 

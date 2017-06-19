@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.myrobotlab.framework.MRLListener;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
@@ -107,5 +106,24 @@ public interface ServiceInterface
 	 * 
 	 * public void attach(ServiceInterface instance) throws Exception;
 	 */
-
+	
+	default public void attach(ServiceInterface service) throws Exception {
+	  /*
+	  if (isAttached(service)){
+	    return;
+	  }
+	  service.attach(this);
+	  */
+	  error("don't know how to attach a %s", service.getClass().getSimpleName());
+	}
+	/*
+	default public boolean isAttached(ServiceInterface instance){
+	  return true;
+	}
+	*/
+	
+	default public void attach(String instance) throws Exception {
+    return;
+  }  
+  
 }

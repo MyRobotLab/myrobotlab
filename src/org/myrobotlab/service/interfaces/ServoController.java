@@ -27,8 +27,23 @@ package org.myrobotlab.service.interfaces;
 
 public interface ServoController extends DeviceController {
 
-	void attach(ServoControl servo) throws Exception;
+  /**
+   * The one and only attach which is type specific and does all the work
+   * which we expect
+   *  
+   * @param servo
+   * @throws Exception
+   */
+	void attachServoControl(ServoControl servo) throws Exception;
 	
+	/**
+	 * attach with parameters which will set attributes on ServoControl
+	 * ??? rules on which attributes in which service can be changed ???
+	 * 
+	 * @param servo
+	 * @param pin
+	 * @throws Exception
+	 */
 	void attach(ServoControl servo, int pin) throws Exception;
 	
 	// this is Arduino's servo.attach

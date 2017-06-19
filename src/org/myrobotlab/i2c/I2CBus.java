@@ -62,18 +62,18 @@ public class I2CBus implements DeviceController, I2CBusControl {
   }
 
   @Override
-  public int getDeviceCount() {
+  public int getAttachedCount() {
     if (controller != null) {
-      return controller.getDeviceCount();
+      return controller.getAttachedCount();
     } else {
       return 0;
     }
   }
 
   @Override
-  public Set<String> getDeviceNames() {
+  public Set<String> getAttachedNames() {
     if (controller != null) {
-      return controller.getDeviceNames();
+      return controller.getAttachedNames();
     }
     return new HashSet<String>();
   }

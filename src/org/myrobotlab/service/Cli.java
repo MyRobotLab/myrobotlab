@@ -384,8 +384,9 @@ public class Cli extends Service {
 		pipes.put(name, new Pipe(name, out, in));
 	}
 
-	public boolean attach() {
-		return attach(null);
+	public void attach() {
+		// return attach(null);
+	  return;
 	}
 
 	/**
@@ -394,7 +395,7 @@ public class Cli extends Service {
 	 * @param name
 	 * @return
 	 */
-	public boolean attach(String name) {
+	public void attach(String name) {
 
 		if (pipes.size() == 1) {
 			// only 1 choice
@@ -405,7 +406,7 @@ public class Cli extends Service {
 
 		if (!pipes.containsKey(name)) {
 			error("%s not found", name);
-			return false;
+			return;
 		}
 
 		Pipe pipe = pipes.get(name);
@@ -434,7 +435,7 @@ public class Cli extends Service {
 		// timer - because if a Cli is not there
 		// we cant attach to it
 
-		return true;
+		// return true;
 	}
 
 	public void attachStdIO() {
