@@ -41,7 +41,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -148,7 +148,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     return controllers;
   }
 
-  @Override
+  // @Override
   public NeoPixelController getController() {
     return controller;
   }
@@ -163,7 +163,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   public boolean isAttached() {
     if (controller != null) {
-      if (((Arduino) controller).getDeviceId((DeviceControl) this) != null) {
+      if (((Arduino) controller).getDeviceId((Attachable) this) != null) {
         isAttached = true;
         return true;
       }

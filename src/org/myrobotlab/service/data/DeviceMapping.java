@@ -3,7 +3,7 @@ package org.myrobotlab.service.data;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.Attachable;
 
 public class DeviceMapping implements Serializable{	
 	/**
@@ -18,7 +18,7 @@ public class DeviceMapping implements Serializable{
 	// Changed by Mats to use an AnnotationExclusionStrategy
 	// See http://stackoverflow.com/questions/4802887/gson-how-to-exclude-specific-fields-from-serialization-without-annotations?rq=1
 	// for reference
-	transient DeviceControl device;
+	transient Attachable device;
 	
 	/**
 	 * the unique integer id for this device
@@ -29,7 +29,7 @@ public class DeviceMapping implements Serializable{
 	 */
 	Object[] config;
 	
-	public DeviceMapping(DeviceControl device, Object... config) {
+	public DeviceMapping(Attachable device, Object... config) {
 		this.device = device;
 		this.config = config;
 	}
@@ -46,7 +46,7 @@ public class DeviceMapping implements Serializable{
 		return id;
 	}
 	
-	public DeviceControl getDevice(){
+	public Attachable getDevice(){
 		return device;
 	}
 	

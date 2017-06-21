@@ -12,7 +12,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PortConnector;
@@ -332,8 +332,7 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
     serial.open(port, rate, databits, stopbits, parity);
   }
 
-  @Override
-  public void detach(DeviceControl device) {
+  public void detach(MotorControl device) {
     motors.remove(device);
   }
 

@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface ServoController extends DeviceController {
+public interface ServoController extends Attachable {
 
   /**
    * The one and only attach which is type specific and does all the work

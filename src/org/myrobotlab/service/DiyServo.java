@@ -38,7 +38,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.data.PinData;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NameProvider;
@@ -733,9 +732,9 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		pid.setInput(pidKey, processVariable);
 	}
 
-	@Override
-	public DeviceController getController() {
-		return (DeviceController) controller;
+	// @Override
+	public MotorController getController() {
+		return  controller;
 	}
 
 	public void attach(String pinArrayControlName, Integer pin) throws Exception {

@@ -25,7 +25,9 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface I2CBusController extends DeviceController {
+public interface I2CBusController extends Attachable {
 
 	public void i2cReturnData(int[] data);
+	
+	// public void detach(I2CBusControl service);
 }

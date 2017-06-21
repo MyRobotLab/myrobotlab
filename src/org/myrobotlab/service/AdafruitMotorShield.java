@@ -20,7 +20,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.interfaces.ArduinoShield;
-import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.slf4j.Logger;
@@ -348,11 +348,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     return meta;
   }
 
-@Override
-public void detach(DeviceControl device) {
-	// TODO Auto-generated method stub
-	
-}
 
 @Override
 public int getAttachedCount() {

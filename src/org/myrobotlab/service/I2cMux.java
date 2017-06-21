@@ -14,7 +14,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.I2CDeviceMap;
-import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -259,11 +259,6 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 		meta.setAvailable(true);
 		meta.setSponsor("Mats");
 		return meta;
-	}
-
-	@Override
-	public void detach(DeviceControl device) {
-		// clean up if necessary
 	}
 
 	@Override

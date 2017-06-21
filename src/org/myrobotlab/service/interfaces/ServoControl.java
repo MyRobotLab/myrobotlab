@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface ServoControl extends DeviceControl, AbsolutePositionControl, ServiceInterface {
+public interface ServoControl extends Attachable, AbsolutePositionControl, ServiceInterface {
 
   // FIXME - do we want to support this & what do we expect from
   // 1. should it be energsetAbsoluteSpeedized when initially attached?

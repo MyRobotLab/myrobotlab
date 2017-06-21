@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface Ads1115Control extends DeviceControl {
+public interface Ads1115Control extends Attachable {
 	public void refresh();
 	
   public int readADC_SingleEnded(int channel);

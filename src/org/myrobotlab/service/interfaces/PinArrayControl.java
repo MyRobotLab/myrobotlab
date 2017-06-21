@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.myrobotlab.service.data.PinData;
 
-public interface PinArrayControl extends DeviceControl {
+public interface PinArrayControl extends Attachable {
 
 	public List<PinDefinition> getPinList();
 	

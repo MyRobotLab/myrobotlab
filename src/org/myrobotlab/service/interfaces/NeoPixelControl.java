@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface NeoPixelControl extends DeviceControl {
+public interface NeoPixelControl extends Attachable {
 
 	/**
 	 * high level "attach" which internally will call attachDevice(Device

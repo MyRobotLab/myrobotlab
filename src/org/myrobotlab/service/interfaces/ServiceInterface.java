@@ -11,7 +11,7 @@ import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
 public interface ServiceInterface
-		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker {
+		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, Attachable {
 
 	
 
@@ -93,37 +93,5 @@ public interface ServiceInterface
 	public String getDescription();
 
 	public Map<String, MethodEntry> getMethodMap();
-
-	/**
-	 * the "routing" attach - routes to a specific strongly typed attach of the
-	 * service if it exists
-	 * 
-	 * @param name
-	 */
-	/*
-	 * HEH - this did not work - trying to generalize that which should not be
-	 * generalized :P public void attach(String name) throws Exception;
-	 * 
-	 * public void attach(ServiceInterface instance) throws Exception;
-	 */
-	
-	default public void attach(ServiceInterface service) throws Exception {
-	  /*
-	  if (isAttached(service)){
-	    return;
-	  }
-	  service.attach(this);
-	  */
-	  error("don't know how to attach a %s", service.getClass().getSimpleName());
-	}
-	/*
-	default public boolean isAttached(ServiceInterface instance){
-	  return true;
-	}
-	*/
-	
-	default public void attach(String instance) throws Exception {
-    return;
-  }  
   
 }

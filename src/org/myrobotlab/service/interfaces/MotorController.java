@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface MotorController extends DeviceController {
+public interface MotorController extends Attachable {
 
 		
 	/**
@@ -67,6 +67,6 @@ public interface MotorController extends DeviceController {
 	 */
 	public void motorReset(MotorControl motor);
 	
-	// public boolean isAttached(MotorController controller);
+	
 
 }

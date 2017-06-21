@@ -8,7 +8,7 @@ import java.io.IOException;
  * device drivers either connected directly to the GPIO pins of a Raspberry PI or
  * to the ic2 bus on an Arduino. 
  */
-public interface I2CController extends DeviceController {
+public interface I2CController extends Attachable {
 	/**
 	 * This method creates a I2CDevice
 	 * 
