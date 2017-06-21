@@ -38,8 +38,7 @@ import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
-import org.myrobotlab.service.interfaces.DeviceControl;
-import org.myrobotlab.service.interfaces.DeviceController;
+import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -327,7 +326,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		attach((PinListener) Runtime.getService(listener), address);
 	}
 
-	synchronized private Integer attachDevice(DeviceControl device, Object[] attachConfig) {
+	synchronized private Integer attachDevice(Attachable device, Object[] attachConfig) {
 		DeviceMapping map = new DeviceMapping(device, attachConfig);
 		map.setId(nextDeviceId);
 		deviceList.put(device.getName(), map);
@@ -593,9 +592,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		msg.customMsg(params);
 	}
 
-	@Override
+	// @Override
 	// > deviceDetach/deviceId
-	public void detach(DeviceControl device) {
+	public void detach(Attachable device) {
 		// TODO check / detach - must be careful of infinit loop
 		// if (device.isAttached()){
 		//
@@ -725,16 +724,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return board;
 	}
 
-	@Override
+	// @Override
+	/*
 	public DeviceController getController() {
 		return this;
 	}
+	*/
 
-	public DeviceControl getDevice(Integer deviceId) {
+	public Attachable getDevice(Integer deviceId) {
 		return deviceIndex.get(deviceId).getDevice();
 	}
 
-	Integer getDeviceId(DeviceControl device) {
+	Integer getDeviceId(Attachable device) {
 		return getDeviceId(device.getName());
 	}
 
@@ -1531,7 +1532,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 		for (String name : deviceList.keySet()) {
 			DeviceMapping dmap = deviceList.get(name);
-			DeviceControl device = dmap.getDevice();
+			Attachable device = dmap.getDevice();
 			log.info("unsetting device {}", name);
 			device.detach(name);
 		}
@@ -1576,7 +1577,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		servo.attachServoController(this);
 	}
 
-	public boolean isAttachedServoControl(DeviceControl device) {
+	public boolean isAttachedServoControl(Attachable device) {
 		return deviceList.containsKey(device.getName());
 	}
 

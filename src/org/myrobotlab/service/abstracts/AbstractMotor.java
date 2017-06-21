@@ -37,7 +37,6 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
@@ -111,7 +110,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     return controllers;
   }
 
-  public DeviceController getController() {
+  public MotorController getController() {
     return controller;
   }
 

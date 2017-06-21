@@ -22,8 +22,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.DeviceControl;
-import org.myrobotlab.service.interfaces.DeviceController;
+import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -552,10 +551,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
 	}
 
+	/*
 	@Override
 	public DeviceController getController() {
 		return controller;
 	}
+	*/
 
 	/**
 	 * Device attach - this should be creating the I2C bus on MRLComm for the
@@ -637,7 +638,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 	    servo.attachServoController(this);
 	}
 	
-	public boolean isAttachedServoControl(DeviceControl device) {
+	public boolean isAttachedServoControl(Attachable device) {
 		    return servoMap.containsKey(device.getName());
     }
 	
@@ -650,7 +651,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		invoke("publishAttachedDevice", motor.getName());
 	}
 
-	public void detach(DeviceControl servo) {
+	public void detach(Attachable servo) {
 		servoDetachPin((ServoControl) servo);
 		servoMap.remove(servo.getName());
 	}

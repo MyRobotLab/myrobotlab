@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface I2CControl extends DeviceControl {
+public interface I2CControl extends Attachable {
 
 	public boolean setController(String controllerName, String deviceBus, String deviceAddress);
 	public boolean setController(String controllerName);

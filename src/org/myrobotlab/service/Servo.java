@@ -39,6 +39,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -126,7 +127,7 @@ public class Servo extends Service implements ServoControl {
 	 * for this class
 	 */
   @Override
-  public void attach(ServiceInterface service) throws Exception {
+  public void attach(Attachable service) throws Exception {
     if (ServoController.class.isAssignableFrom(service.getClass())) {
       attachServoController((ServoController) service);
       return;
@@ -348,7 +349,7 @@ public class Servo extends Service implements ServoControl {
 		return b;
 	}
 
-	@Override
+	// @Override
 	public ServoController getController() {
 		return controller;
 	}

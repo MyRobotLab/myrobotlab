@@ -9,7 +9,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -116,9 +116,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     serial.open(port, rate, databits, stopbits, parity);
   }
 
-  // FIXME - this is the "old" way....
-  @Override
-  public void detach(DeviceControl device) {
+  public void detach(ServoControl device) {
     servos.remove(device);
   }
 
@@ -137,7 +135,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * for this class
    */
   @Override
-  public void attach(ServiceInterface service) throws Exception {
+  public void attach(Attachable service) throws Exception {
     if (ServoControl.class.isAssignableFrom(service.getClass())) {
       attachServoControl((ServoControl) service);
       return;

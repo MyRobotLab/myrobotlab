@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface I2CBusControl extends DeviceControl {
+public interface I2CBusControl extends Attachable {
 
 	/** Mats:
 	 * Not sure what methods to put here yet

@@ -13,7 +13,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.DeviceControl;
+import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -309,11 +309,6 @@ public class RasPi extends Service implements I2CController {
     meta.setSponsor("Mats");
 		meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
 		return meta;
-	}
-
-	@Override
-	public void detach(DeviceControl device) {
-		// clean up if necessary
 	}
 
 	@Override
