@@ -84,7 +84,7 @@
 -->
 
 <!-- The MyRobotLab ant build.xml  -->
-<project name="myrobotlab" default="jar" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
+<project name="myrobotlab" default="dist" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
