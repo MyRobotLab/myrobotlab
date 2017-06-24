@@ -128,10 +128,6 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 
 	/**
 	 * sharing means sharePeer is forced - while addPeer will check before adding
-	 * @param key
-	 * @param actualName
-	 * @param peerType
-	 * @param comment
 	 */
 	public void sharePeer(String key, String actualName, String peerType, String comment) {
 		peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
@@ -143,7 +139,6 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	
 	/**
 	 * checks if already exists - if it does - merges only unset values into peers
-	 * @param sr
 	 */
 	public void mergePeer(ServiceReservation sr){
 		if (peers.containsKey(sr.key)){

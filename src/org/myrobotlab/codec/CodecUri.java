@@ -30,7 +30,7 @@ public class CodecUri {
 
   /**
    * FIXME - this method requires the class to be loaded for type conversions
-   * !!! Decoding a URI or path can depend on Context & Environment part of
+   * !!! Decoding a URI or path can depend on Context &amp; Environment part of
    * decoding relies on the method signature of an object - therefore it has to
    * be loaded in memory, but if the ability to send messages from outside this
    * system is desired - then the Message must be able to SPECIFY THE DECODING
@@ -43,8 +43,6 @@ public class CodecUri {
    *          - input path in the format -
    *          /{api-type}(/encoding=json/decoding=json/)/{method}/{param0}/{
    *          param1}/...
-   * @return
-   * @throws IOException
    */
 
   // FIXME - reconcile with WebGUIServlet

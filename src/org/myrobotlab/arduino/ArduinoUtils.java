@@ -45,9 +45,9 @@ public class ArduinoUtils {
    * 
    * @param port - the com port for the arduino
    * @param boardKey - the board type mega/uno
-   * @return
-   * @throws IOException
-   * @throws InterruptedException
+   * @return true if the upload was successful, otherwise false.
+   * @throws IOException - if there is an error talking to the com port
+   * @throws InterruptedException - if interrupted by a thread
    */
   public static boolean uploadSketch(String port, String boardKey) throws IOException, InterruptedException {
     return uploadSketch(port, boardKey, arduinoPath);
@@ -60,9 +60,9 @@ public class ArduinoUtils {
    * @param port the com port  (COM4,  /dev/ttyAMA0  ...)
    * @param boardKey - the board type mega / uno
    * @param arduinoPath - path to the arduino ide installation
-   * @return
-   * @throws IOException
-   * @throws InterruptedException
+   * @return true if successful, false otherwise
+   * @throws IOException - if there's a problem reading the source ino sketch or talking to the com port
+   * @throws InterruptedException - if interrupted.
    */
   public static boolean uploadSketch(String port, String boardKey, String arduinoPath) throws IOException, InterruptedException {
     FileIO.extractResources();
@@ -120,11 +120,10 @@ public class ArduinoUtils {
    * Helper function to run a system command and return the stdout / stderr as a
    * string
    * 
-   * @param program
-   * @param args
-   * @return
-   * @throws IOException
-   * @throws InterruptedException
+   * @param program - the path to the executible to run
+   * @param args - the list of arguments to be passed to the program
+   * @return - returns the stdout and stderr as a string
+   * @throws InterruptedException - if interrupted
    */
   public static String runCommand(String program, ArrayList<String> args) throws InterruptedException {
 
@@ -135,7 +134,8 @@ public class ArduinoUtils {
         command.add(arg);
       }
     }
-    System.out.println("RUNNING COMMAND :" + StringUtils.join(command, " "));
+    log.info("RUNNING COMMAND : {}" , StringUtils.join(command, " "));
+    System.out.println();
 
     ProcessBuilder builder = new ProcessBuilder(command);
     // we need to specify environment variables
@@ -211,9 +211,9 @@ public class ArduinoUtils {
    * Helper function to run a program , return the stderr / stdout as a string
    * and to catch any exceptions that occur
    * 
-   * @param cmd
-   * @param args
-   * @return
+   * @param cmd - the path to the program to run
+   * @param args - a list of args to pass in
+   * @return - the stdout/stderr from the underlying process
    */
   public static String RunAndCatch(String cmd, ArrayList<String> args) {
     String returnValue;

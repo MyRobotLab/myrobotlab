@@ -155,7 +155,6 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 	 * Create voicetest batch if doesn't exist
 	 * 
 	 * @param nothing
-	 * @return nothing
 	 */
 	private void createBatchFile() {
 		
@@ -225,7 +224,6 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 	 * 
 	 * @param toSpeak
 	 *          - the string of text to speak.
-	 * @return
 	 */
 	@Override
 	public boolean speakBlocking(String toSpeak) throws Exception {

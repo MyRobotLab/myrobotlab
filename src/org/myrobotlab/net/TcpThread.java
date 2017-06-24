@@ -119,7 +119,7 @@ public class TcpThread extends Thread {
 				 * re-writes names in order to provide an abstraction to a
 				 * remote system. This can prevent name collision and add
 				 * clarity to remote system names - msg sender / name re-write
-				 * are trivial - the danger & difficulty comes when names are
+				 * are trivial - the danger &amp; difficulty comes when names are
 				 * embedded in the data payload - such as register, addListener
 				 * and other(?) methods - for example - service names as
 				 * parameters ! - which "should" only happen with incorrect user scripts..

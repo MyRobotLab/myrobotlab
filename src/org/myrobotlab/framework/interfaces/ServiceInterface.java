@@ -20,9 +20,6 @@ public interface ServiceInterface
 	 * with address information (otherService/callback) for a topic callback
 	 * Adds an entry on the notify list
 	 * 
-	 * @param localTopic
-	 * @param otherService
-	 * @param callback
 	 */
 	public void addListener(String localTopic, String otherService, String callback);
 
@@ -62,8 +59,6 @@ public interface ServiceInterface
 
 	/**
 	 * asked by the framework - to determine if the service needs to be secure
-	 * 
-	 * @return
 	 */
 	public boolean requiresSecurity();
 

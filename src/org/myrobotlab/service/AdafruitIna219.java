@@ -333,7 +333,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 	 * valid for a control or controller which can only have a single other
 	 * service attached
 	 * 
-	 * @return
+	 * @return true if the controller is attached. false otherwise
 	 */
 	public boolean isAttached() {
 		return (controller != null);

@@ -20,7 +20,6 @@ public interface Microcontroller extends PinArrayControl {
 	 * pin definitions for different variations.
 	 * 
 	 * Parallax/Prop I think has several boards
-	 * @return
 	 */
 	public List<BoardType> getBoardTypes();
 }

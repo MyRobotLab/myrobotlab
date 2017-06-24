@@ -158,10 +158,6 @@ public class Osc extends Service implements OSCListener {
   /**
    * convert and publish to an Mrl Osc Message
    * adding ts to messsage as well.
-   * 
-   * @param ts
-   * @param message
-   * @return
    */
   public OscMessage publishOscMessage(long ts, OSCMessage message){
 	OscMessage msg = new OscMessage(ts, message);

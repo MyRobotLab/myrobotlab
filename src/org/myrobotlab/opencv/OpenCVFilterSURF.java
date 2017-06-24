@@ -207,8 +207,6 @@ public class OpenCVFilterSURF extends OpenCVFilter {
 
   /**
    * Set the reference object to find with the surf filter.
-   * 
-   * @param image
    */
   public void setObjectImage(IplImage image) {
     this.object = image;

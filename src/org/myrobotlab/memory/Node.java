@@ -87,10 +87,9 @@ public class Node implements Serializable {
    * 
    * other examples /background /background/position/x /background/position/y
    * /foreground /known/ball/red /known/ball/yellow /known/cup /unknown/object1
-   * /positions/x/ <map> /positions/y/ <map> /positions/time/ <map> /tracking
+   * /positions/x/ &lt;map&gt; /positions/y/ &lt;map&gt; /positions/time/ &lt;map&gt; /tracking
    * 
-   * @param path
-   * @return
+   * @return - an object found at the given path
    */
   public Object get(String path) {
     if (path == "") {
@@ -140,9 +139,6 @@ public class Node implements Serializable {
 
   /**
    * a convienent cast method to get a node
-   * 
-   * @param path
-   * @return
    */
   public Node getNode(String path) {
     return (Node) get(path);

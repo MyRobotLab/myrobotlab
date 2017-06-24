@@ -207,12 +207,10 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	}
 
 	/**
-	 * the gui is no simplified - a single broadcastState() -> onState(Serial)
+	 * the gui is no simplified - a single broadcastState() -&gt; onState(Serial)
 	 * is used to propegate all data which needs updating. Since that is the
 	 * case a single invokeLater is used. It is unadvised to have more
 	 * invokeLater in other methods as race conditions are possible
-	 * 
-	 * @param serial
 	 */
 	public void onState(final Serial serial) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -258,9 +256,6 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	 * FORMAT_DECIMEL is a 3 digit decimal in ascii FORMAT_RAW is interpreted as
 	 * 1 byte = 1 ascii char FORMAT_HEX is 2 digit asci hex
 	 * 
-	 * @param data
-	 * @throws BadLocationException
-	 * @throws CodecException
 	 */
 	public final void onRX(final Integer data) throws BadLocationException {
 		++rxCount;

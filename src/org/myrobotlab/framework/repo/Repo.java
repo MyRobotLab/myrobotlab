@@ -62,7 +62,7 @@ import org.slf4j.Logger;
  * appropriate depenencies for the service. This would include some version of
  * jssc.
  * 
- * The attempt resolves & retrieves or doesn't - the requested dependency and
+ * The attempt resolves &amp; retrieves or doesn't - the requested dependency and
  * its resultant state is written to the .myrobotlab repo.json file
  * 
  * @author GroG
@@ -134,10 +134,8 @@ public class Repo implements Serializable {
 
   /**
    * info call back
-   * 
-   * @param key
-   * @param format
-   * @param args
+   * @param format format
+   * @param args args
    */
   public void info(String format, Object... args) {
     Status status = Status.info(format, args);
@@ -147,11 +145,9 @@ public class Repo implements Serializable {
   }
 
   /**
-   * error call back
-   * 
-   * @param key
-   * @param format
-   * @param args
+   * error callback
+   * @param format format
+   * @param args args
    */
   public void error(String format, Object... args) {
     Status status = Status.error(format, args);
@@ -164,10 +160,8 @@ public class Repo implements Serializable {
   /**
    * creates a installation start status this is primarily for calling services
    * which want a status of repo starting an install
-   * 
-   * @param format
-   * @param args
-   * @return
+   * @param format format
+   * @param args args
    */
   static public Status createStartStatus(String format, Object... args) {
     Status status = Status.info(format, args);
@@ -178,10 +172,8 @@ public class Repo implements Serializable {
   /**
    * creates a installation finished status this is primarily for calling
    * services which want a status of repo starting finishing an install
-   * 
-   * @param format
-   * @param args
-   * @return
+   * @param format format
+   * @param args args
    */
   static public Status createFinishedStatus(String format, Object... args) {
     Status status = Status.info(format, args);
@@ -191,8 +183,7 @@ public class Repo implements Serializable {
 
   /**
    * call back for listeners
-   * 
-   * @param status
+   * @param status the status object?
    */
   public void installProgress(Status status) {
     if (listener != null) {
@@ -202,9 +193,6 @@ public class Repo implements Serializable {
 
   /**
    * installs all currently defined service types and their dependencies
-   * 
-   * @throws ParseException
-   * @throws IOException
    */
   public void install() throws ParseException, IOException {
     clearErrors();
@@ -231,10 +219,6 @@ public class Repo implements Serializable {
    * dependecies from service type (this comes from the serviceData.json /
    * classMeta) these are what need to be resolved 3. retrieve - and update
    * state in memory and repo.json
-   * 
-   * @param fullTypeName
-   * @throws ParseException
-   * @throws IOException
    */
   public void install(String fullTypeName) throws ParseException, IOException {
     log.info("installing {}", fullTypeName);
@@ -255,9 +239,6 @@ public class Repo implements Serializable {
    * searches through dependencies directly defined by the service and all Peers
    * - recursively searches for their dependencies if any are not found -
    * returns false
-   * 
-   * @param fullTypeName
-   * @return
    */
   public boolean isServiceTypeInstalled(String fullTypeName) {
     ServiceData sd = ServiceData.getLocalInstance();
@@ -281,13 +262,6 @@ public class Repo implements Serializable {
    * resolveArtifact does an Ivy resolve with a URLResolver to MRL's repo at
    * github. The equivalent command line is -settings ivychain.xml -dependency
    * "gnu.io.rxtx" "rxtx" "2.1-7r2" -confs "runtime,x86.64.windows"
-   * 
-   * @param org
-   * @param version
-   * @return
-   * @throws IOException
-   * @throws ParseException
-   * @throws Exception
    */
 
   synchronized public ResolveReport resolveArtifacts(String org, String version, boolean retrieve) throws ParseException, IOException {
@@ -450,9 +424,8 @@ public class Repo implements Serializable {
    * adds a library initially as unresolved to the local repo information if the
    * library becomes resolved - the state changes, and will be used to prevent
    * fetch or resolving the library again
-   * 
-   * @param org
-   * @param version
+   * @param org the org 
+   * @param version the version of that lib
    */
   public void addLibrary(String org, String version) {
     Library dep = new Library(org, version);
@@ -464,8 +437,7 @@ public class Repo implements Serializable {
    * generates instance of all dependencies from a repo directory would be
    * useful for checking validity - not used during runtime libraries
    * 
-   * @param repoDir
-   * @return
+   * @param repoDir the directory to load from
    */
   static public Map<String, Library> generateLibrariesFromRepo(String repoDir) {
     try {

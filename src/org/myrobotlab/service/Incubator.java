@@ -148,8 +148,6 @@ public class Incubator extends Service {
   /**
    * install all service
    * 
-   * @throws IOException
-   * @throws ParseException
    */
   public void installAll() throws ParseException, IOException {
     // Runtime.getInstance();

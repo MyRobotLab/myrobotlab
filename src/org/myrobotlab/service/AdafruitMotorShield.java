@@ -2,7 +2,7 @@
  * 
  *   AdafruitMotorShield
  *   
- *   TODO - test with Steppers & Motors - switches on board - interface accepts motor control
+ *   TODO - test with Steppers &amp; Motors - switches on board - interface accepts motor control
  *
  */
 
@@ -14,7 +14,6 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -164,7 +163,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
    * support Shields are specific - but plug into a generalized Arduino Arduino
    * shields can not be plugged into other uCs
    * 
-   * TODO - Program Version & Type injection - with feedback + query to load
+   * TODO - Program Version &amp; Type injection - with feedback + query to load
    */
   @Override
   public boolean attach(Arduino inArduino) {
@@ -233,8 +232,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   /**
    * creates a DC Motor on port 1,2,3, or 4
    * 
-   * @param motorNum
-   * @throws Exception
    */
   public Motor createDCMotor(Integer motorNum) throws Exception {
     if (motorNum == null || motorNum < 1 || motorNum > 4) {
@@ -253,8 +250,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 
   /**
    * creates a stepper on stepper port 1 or 2
-   * 
-   * @param stepperPort
    */
   public Motor createStepper(Integer steps, Integer stepperPort) {
     if (stepperPort == null || stepperPort < 1 || stepperPort > 2) {

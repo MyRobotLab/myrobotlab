@@ -133,8 +133,6 @@ public class Tracking extends Service {
   /**
    * call back of all video data video calls this whenever a frame is processed
    * 
-   * @param temp
-   * @return
    */
 
   int faceFoundFrameCount = 0;

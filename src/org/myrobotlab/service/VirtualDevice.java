@@ -92,9 +92,6 @@ public class VirtualDevice extends Service implements SerialDataListener {
    * A virtual port is half a virtual pipe, and if unconnected - typically is
    * not very interesting...
    * 
-   * @param listener
-   * @return
-   * @throws IOException
    */
 
   public SerialDevice connectVirtualUart(String myPort, String uartPort) throws IOException {
@@ -152,7 +149,6 @@ public class VirtualDevice extends Service implements SerialDataListener {
    * preProcessHook is used to intercept messages and process or route them
    * before being processed/invoked in the Service.
    * 
-   * @throws
    * 
    *           @see
    *           org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.

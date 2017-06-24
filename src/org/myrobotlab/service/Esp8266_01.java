@@ -15,7 +15,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;

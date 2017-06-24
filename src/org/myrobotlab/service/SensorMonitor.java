@@ -179,7 +179,6 @@ public class SensorMonitor extends Service {
    * Additionally, the source can be attached so that trace lines can be
    * identified
    * 
-   * @param pinData
    */
   public void sensorInput(Pin pinData) {
     String key = makeKey(pinData);

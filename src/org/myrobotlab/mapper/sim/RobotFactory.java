@@ -39,7 +39,6 @@ public class RobotFactory extends Factory {
   /**
    * Adds a prebuild belt of bumpers sensor to the agent.
    * 
-   * @param agent
    * @return the sensor object
    */
   static public RangeSensorBelt addBumperBeltSensor(Agent agent) {
@@ -57,8 +56,6 @@ public class RobotFactory extends Factory {
    * Adds a prebuild belt of bumpers sensor to the agent. Specify the number of
    * sensors.
    * 
-   * @param agent
-   * @param nbSensors
    * @return the sensor object
    */
   static public RangeSensorBelt addBumperBeltSensor(Agent agent, int nbSensors) {
@@ -76,7 +73,6 @@ public class RobotFactory extends Factory {
    * Adds a prebuild camera sensor to the agent. Image resolution is 100x100
    * pixels. Camera is situated on the top of the agent.
    * 
-   * @param agent
    * @return the sensor object
    */
   static public CameraSensor addCameraSensor(Agent agent) {
@@ -93,7 +89,6 @@ public class RobotFactory extends Factory {
   /**
    * Adds a prebuild key input to the agent.
    * 
-   * @param agent
    * @return the sensor object
    */
   static public KeyInputSensor addKeyInputSensor(Agent agent) {
@@ -109,8 +104,6 @@ public class RobotFactory extends Factory {
 
   /**
    * Adds a prebuild lamp actuator on the top of the agent .
-   * 
-   * @param agent
    * @return the actuator object
    */
   static public LampActuator addLamp(Agent agent) {
@@ -125,7 +118,6 @@ public class RobotFactory extends Factory {
   /**
    * Adds a prebuild light sensor to the agent.
    * 
-   * @param agent
    * @return the sensor object
    */
   static public LightSensor addLightSensor(Agent agent) {
@@ -141,7 +133,6 @@ public class RobotFactory extends Factory {
   /**
    * Adds a prebuild light sensor to the agent at a given position.
    * 
-   * @param agent
    * @return the sensor object
    */
   static public LightSensor addLightSensor(Agent agent, Vector3d pos, float angle, String label) {
@@ -155,7 +146,6 @@ public class RobotFactory extends Factory {
   /**
    * Adds a prebuild light sensor on the left of the agent .
    * 
-   * @param agent
    * @return the sensor object
    */
   static public LightSensor addLightSensorLeft(Agent agent) {
@@ -170,7 +160,6 @@ public class RobotFactory extends Factory {
   /**
    * Adds a prebuild light sensor on the right of the agent .
    * 
-   * @param agent
    * @return the sensor object
    */
   static public LightSensor addLightSensorRight(Agent agent) {
@@ -185,7 +174,6 @@ public class RobotFactory extends Factory {
   /**
    * Adds a prebuild belt of sonar sensor to the agent.
    * 
-   * @param agent
    * @return the sensor object
    */
   static public RangeSensorBelt addSonarBeltSensor(Agent agent) {
@@ -205,7 +193,6 @@ public class RobotFactory extends Factory {
   /**
    * Adds a prebuild belt of sonar sensor to the agent.
    * 
-   * @param agent
    * @param nbSonars
    *          the number of sonars.
    * @return the sensor object
@@ -228,7 +215,6 @@ public class RobotFactory extends Factory {
    * Sets the kinematic model to be DifferentialDrive (instead of
    * DefaultKinematic)
    * 
-   * @param agent
    */
   static public DifferentialKinematic setDifferentialDriveKinematicModel(Agent agent) {
     agent.setKinematicModel(new DifferentialKinematic(agent.getRadius()));

@@ -178,7 +178,6 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
    *          - rotation about x (in degrees)
    * @param yaw
    *          - rotation about y (in degrees)
-   * @return
    */
   public Matrix createInputMatrix(double dx, double dy, double dz, double roll, double pitch, double yaw) {
     roll = MathUtils.degToRad(roll);

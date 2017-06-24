@@ -134,8 +134,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * degreeToMicroseconds - convert a value to send to servo from degree
 	 * (0-180) to microseconds (544-2400)
 	 * 
-	 * @param degree
-	 * @return
 	 */
 	public Integer degreeToMicroseconds(double degree) {
 		// if (degree >= 544) return (int)degree; - G-> I don't think
@@ -425,11 +423,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
-	 * default params to connect to Arduino & MrlComm.ino
+	 * default params to connect to Arduino &amp; MrlComm.ino
 	 *
-	 * @param port
-	 * @return
-	 * @throws IOException
 	 */
 	@Override
 	public void connect(String port, int rate, int databits, int stopbits, int parity) {
@@ -501,10 +496,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	/**
 	 * This creates the pin definitions based on boardType Not sure how many pin
 	 * definition sets there are. Currently there are only 2 supported -
-	 * Mega-Like 70 pins & Uno-Like 20 pins (14 digital 6 analog) FIXME - sync
+	 * Mega-Like 70 pins &amp; Uno-Like 20 pins (14 digital 6 analog) FIXME - sync
 	 * with VirtualArduino FIXME - String boardType
-	 * 
-	 * @return
 	 */
 	@Override
 	public List<PinDefinition> getPinList() {
@@ -611,8 +604,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	/**
 	 * silly Arduino implementation - but keeping it since its familiar
 	 * 
-	 * @param address
-	 * @param value
 	 */
 	// > digitalWrite/pin/value
 	public void digitalWrite(int pin, int value) {
@@ -690,8 +681,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	/**
 	 * start polling reads of selected pin
 	 *
-	 * @param pin
-	 * @throws Exception
 	 */
 	// > enablePin/address/type/b16 rate
 	public void enablePin(Integer address, Integer rate) {
@@ -759,8 +748,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	/**
 	 * int type to describe the pin defintion to Pin.h 0 digital 1 analog
 	 * 
-	 * @param pin
-	 * @return
 	 */
 	public Integer getMrlPinType(PinDefinition pin) {
 		if (board == null) {
@@ -782,8 +769,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	/**
 	 * Use the serial service for serial activities ! No reason to replicate
 	 * methods
-	 *
-	 * @return
 	 */
 	public Serial getSerial() {
 		return serial;
@@ -1255,8 +1240,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * comes down to it .. a pin MUST ALWAYS have an address regardless what you
 	 * label or name it...
 	 * 
-	 * @param pinName
-	 * @param mode
 	 */
 	public void pinMode(String pinName, String mode) {
 		if (mode != null && mode.equalsIgnoreCase("INPUT")) {
@@ -1270,10 +1253,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return pinMap.get(pinName).getAddress();
 	}
 
-	/**
-	 * 
-	 * @param function
-	 */
 	// < publishAck/function
 	public void publishAck(Integer function/* byte */) {
 		log.debug("Message Ack received: =={}==", Msg.methodToString(function));
@@ -1386,11 +1365,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		heartbeat = true;
 	}
 
-	/**
-	 * 
-	 * @param deviceId
-	 * @param data
-	 */
 	// < publishI2cData/deviceId/[] data
 	public void publishI2cData(Integer deviceId, int[] data) {
 		log.info("publishI2cData");
@@ -1459,8 +1433,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	/**
 	 * method to communicate changes in pinmode or state changes
 	 * 
-	 * @param pinDef
-	 * @return
 	 */
 	public PinDefinition publishPinDefinition(PinDefinition pinDef) {
 		return pinDef;
@@ -1522,7 +1494,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
-	 * resets both MrlComm-land & Java-land
+	 * resets both MrlComm-land &amp; Java-land
 	 */
 	public void reset() {
 		log.info("reset - resetting all devices");
@@ -1709,7 +1681,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 *
 	 * TODO - implement on MrlComm side ...
 	 * 
-	 * @param delay
 	 */
 	// > setDebounce/pin/delay
 	public void setDebounce(int pin, int delay) {
@@ -1725,7 +1696,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 * dynamically change the serial rate TODO - shouldn't this change Arduino
 	 * service serial rate too to match?
 	 * 
-	 * @param rate
 	 */
 	// > setSerialRate/b32 rate
 	public void setSerialRate(int rate) {
@@ -2098,9 +2068,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	/**
 	 * event to return list of ports of all ports this serial service can see
-	 * 
-	 * @param portNames
-	 * @return
 	 */
 	public List<String> publishPortNames(List<String> portNames) {
 		return portNames;

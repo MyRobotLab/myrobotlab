@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 
 /**
  * 
- * @author SwedaKonsult & GroG
+ * @author SwedaKonsult &amp; GroG
  *
  */
 public class Reflector {
@@ -48,7 +48,6 @@ public class Reflector {
    * 
    * @param c
    *          any class that extends the expected return type T
-   * @param params
    * @return null if anything fails
    */
   @SuppressWarnings("unchecked")
@@ -68,9 +67,6 @@ public class Reflector {
 
   /**
    * Create an instance of the classname.
-   * 
-   * @param classname
-   * @param params
    * @return null if anything fails
    */
   public static <T> T getNewInstance(String classname, Object... params) {
@@ -114,9 +110,6 @@ public class Reflector {
   /**
    * Return an empty/default boxed primitive. This is somewhat heavy since it
    * creates a boxed instance of the primitive.
-   * 
-   * @param cls
-   * @return
    */
   public static Object getPrimitive(Class<?> cls) {
     if (cls.isAssignableFrom(Integer.class)) {
@@ -152,8 +145,6 @@ public class Reflector {
    * more overhead (2) if something fails a NULL is returned which results in an
    * exception on the calling end
    * 
-   * @param method
-   * @param params
    * @return null if anything fails
    * @throws NullPointerException
    *           if the expected return type is a primitive
@@ -177,7 +168,6 @@ public class Reflector {
   /**
    * Test if the item is a boxed primitive.
    * 
-   * @param item
    * @return true if it is a boxed primitive
    */
   public static boolean isPrimitive(Object item) {

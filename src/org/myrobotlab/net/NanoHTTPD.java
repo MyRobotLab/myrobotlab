@@ -130,7 +130,7 @@ public class NanoHTTPD {
 
     /**
      * Decodes the percent encoding scheme. <br/>
-     * For example: "an+example%20string" -> "an example string"
+     * For example: "an+example%20string" -&gt; "an example string"
      */
     private String decodePercent(String str, boolean decodeForwardSlash) throws InterruptedException {
       try {
@@ -418,7 +418,7 @@ public class NanoHTTPD {
   File myFileDir;
 
   /**
-   * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
+   * Hashtable mapping (String)FILENAME_EXTENSION -&gt; (String)MIME_TYPE
    */
   public static Hashtable theMimeTypes = new Hashtable();
 
@@ -539,11 +539,11 @@ public class NanoHTTPD {
    * 
    * (By default, this delegates to serveFile() and allows directory listing.)
    * 
-   * @parm uri Percent-decoded URI without parameters, for example "/index.cgi"
-   * @parm method "GET", "POST" etc.
-   * @parm parms Parsed, percent decoded parameters from URI and, in case of
+   * @param uri Percent-decoded URI without parameters, for example "/index.cgi"
+   * @param method "GET", "POST" etc.
+   * @param parms Parsed, percent decoded parameters from URI and, in case of
    *       POST, data.
-   * @parm header Header entries, percent decoded
+   * @param header Header entries, percent decoded
    * @return HTTP response, see class Response for details
    */
   public Response serve(String uri, String method, Properties header, Properties parms, Socket socket) {

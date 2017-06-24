@@ -33,7 +33,6 @@ public interface NeoPixelControl extends NameProvider {
 	 * high level "attach" which internally will call attachDevice(Device
 	 * device, int[] config)
 	 * 
-	 * @param neopixel
 	 * @param numPixel
 	 *            - All of the config needed for the device -numPixel=number of
 	 *            pixel of the neopixel hardware
@@ -44,9 +43,6 @@ public interface NeoPixelControl extends NameProvider {
 
 	/**
 	 * high level "detach" with internally will call detachDevice(Device device)
-	 * *
-	 * 
-	 * @param neopixel
 	 */
 	public void detach(NeoPixelController controller);
 

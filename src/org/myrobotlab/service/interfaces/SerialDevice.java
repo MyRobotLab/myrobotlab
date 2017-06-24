@@ -8,7 +8,7 @@ public interface SerialDevice extends PortPublisher {
 
 	/**
 	 * FIXME - make like http://pyserial.sourceforge.net/pyserial_api.html with
-	 * blocking & timeout InputStream like interface - but regrettably
+	 * blocking &amp; timeout InputStream like interface - but regrettably
 	 * InputStream IS NOT A F#(@!! INTERFACE !!!!
 	 * 
 	 * WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer is
@@ -17,9 +17,7 @@ public interface SerialDevice extends PortPublisher {
 	 * 
 	 * pass through to the serial device
 	 * 
-	 * @param temp
-	 * @return
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	int read() throws Exception;
 

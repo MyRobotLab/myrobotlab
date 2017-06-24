@@ -420,8 +420,6 @@ public class Gps extends Service implements SerialDataListener {
    * Minimum Specific GNSS Data VTG Course Over Ground and Ground Speed GSA GNSS
    * DOP and Active Satellites MSS MSK Receiver Signal kmc - so the data you
    * have doesn't have two (GLL and MSK)
-   * 
-   * @return
    */
   public String[] publishGGAData() {
 

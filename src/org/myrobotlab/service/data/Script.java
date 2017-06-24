@@ -6,7 +6,7 @@ import java.io.Serializable;
 public class Script implements Serializable {
 	static final long serialVersionUID = 1L;
 	/**
-	 * unique location & key of the script
+	 * unique location &amp; key of the script
 	 * e.g. /mrl/scripts/myScript.py
 	 */
 	File file;

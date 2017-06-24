@@ -199,8 +199,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * Recursively builds Peer type information - which is not instance specific.
    * Which means it will not prefix any of the branches with a instance name
    * 
-   * @param serviceClass
-   * @return
    */
   static public TreeMap<String, ServiceReservation> buildDna(String myKey, String serviceClass) {
     TreeMap<String, ServiceReservation> ret = new TreeMap<String, ServiceReservation>();
@@ -223,11 +221,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return set;
   }
 
-  /**
-   * 
-   * @param myKey
-   * @return
-   */
   /*
    * public static Set<String> getPeerNames (String myKey){ // goes to dnaPool
    * TreeSet<String> set = new TreeSet<String>(); return set; }
@@ -286,11 +279,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * this method returns the current build strucutre for which name & type is
+   * this method returns the current build strucutre for which name &amp; type is
    * specified
    * 
-   * @param myDna
-   *          - dna which information will be added to
+   * @param dna - a.k.a myDna which information will be added to
    * @param myKey
    *          - key (name) instance of the class currently under construction
    * @param serviceClass
@@ -490,10 +482,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return null;
   }
 
-  /**
-   * 
-   * @return
-   */
   public static String getCfgDir() {
     return cfgDir;
   }
@@ -502,11 +490,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return dnaPool;
   }
 
-  /**
-   * 
-   * @param inHost
-   * @return
-   */
   public static String getHostName(final String inHost) {
     if (inHost != null)
       return inHost;
@@ -520,13 +503,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return "localhost"; // no network - still can't be null // chumby
   }
 
-  /**
-   * 
-   * @param className
-   * @param methodName
-   * @param params
-   * @return
-   */
   public static String getMethodToolTip(String className, String methodName, Class<?>[] params) {
     Class<?> c;
     Method m;
@@ -556,9 +532,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * - from which it will be accessible for create methods
    * 
    * template merge with existing dna
-   * 
-   * @param myKey
-   * @param className
    */
   public void mergePeerDna(String myKey, String className) {
     if (serviceType != null) {
@@ -635,11 +608,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * a method to recursively move all peer children of this server
-   * 
-   * @param myKey
-   * @param actualName
-   * @param className
-   * @param comment
    */
   public void movePeerDna(String myKey, String actualName, String fullTypeName, String comment) {
     ServiceType meta = getMetaData(fullTypeName);
@@ -665,10 +633,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * Reserves a name for a root level Service. allows modifications to the
    * reservation map at the highest level
-   * 
-   * @param key
-   * @param simpleTypeName
-   * @param comment
    */
   static public void reserveRoot(String key, String simpleTypeName, String comment) {
     // strip delimeter out if put in by key
@@ -683,9 +647,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * basic useful reset of a peer before service is created
-   * 
-   * @param string
-   * @param string2
    */
   public void setPeer(String peerName, String peerType) {
     String fullKey = String.format("%s.%s", getName(), peerName);
@@ -732,7 +693,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * sleep without the throw
    * 
-   * @param millis
    */
   public static void sleep(int millis) {
     try {
@@ -741,11 +701,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     }
   }
 
-  /**
-   * 
-   * @param e
-   * @return
-   */
   public final static String stackToString(final Throwable e) {
     StringWriter sw;
     try {
@@ -760,12 +715,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   // FIXME - make a static initialization part !!!
 
-  /**
-   * 
-   * @param reservedKey
-   * @param serviceClass
-   * @param inHost
-   */
   public Service(String reservedKey) {
     super(reservedKey);
 
@@ -879,8 +828,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * a stronger bigger better task handler !
-   * 
-   * @param taskName
    */
   public void addTask(String taskName, int intervalMs, int delay, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
@@ -1018,18 +965,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    * This method will update the registry, additionally it will block until the
    * refresh response comes back
-   * 
-   * @return
    */
 
   public Heartbeat echoHeartbeat(Heartbeat pulse) {
     return pulse;
   }
 
-  /**
-   * 
-   * @return
-   */
   public CommunicationInterface getComm() {
     return cm;
   }
@@ -1052,10 +993,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return this.getClass().getDeclaredMethods();
   }
 
-  /**
-   * 
-   * @return
-   */
   public Inbox getInbox() {
     return inbox;
   }
@@ -1065,10 +1002,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return instanceId;
   }
 
-  /**
-   * 
-   * @return
-   */
   public String getIntanceName() {
     return name;
   }
@@ -1124,11 +1057,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return ret;
   }
 
-  /**
-   * 
-   * @return
-   * @throws InterruptedException
-   */
   public Message getMsg() throws InterruptedException {
     return inbox.getMsg();
   }
@@ -1153,9 +1081,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     }
   }
 
-  /**
-   * 
-   */
   @Override
   public ArrayList<String> getNotifyListKeySet() {
     ArrayList<String> ret = new ArrayList<String>();
@@ -1173,10 +1098,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return ret;
   }
 
-  /**
-   * 
-   * @return
-   */
   public Outbox getOutbox() {
     return outbox;
   }
@@ -1189,13 +1110,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * a default way to attach Services to other Services An example would be
    * attaching a Motor to a MotorControl or a Speaking service (TTS) to a
    * Listening service (STT) such that when the system is speaking it does not
-   * try to listen & act on its own speech (feedback loop)
+   * try to listen &amp; act on its own speech (feedback loop)
    * 
    * FIXME - the SwingGui currently has attachGUI() and detachGUI() - these are
    * to bind Services with their swing views/tab panels. It should be
    * generalized to this attach method
    * 
-   * @param serviceName
    * @return if successful
    * 
    */
@@ -1209,10 +1129,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return simpleName;
   }
 
-  /**
-   * 
-   * @return
-   */
   public Thread getThisThread() {
     return thisThread;
   }
@@ -1238,7 +1154,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    * // check this type <-- not sure i want to support this
    * 
-   * // check this name & method // if any access limitations exist which might
+   * // check this name &amp; method // if any access limitations exist which might
    * be applicable if (accessRules.containsKey(msg.name) ||
    * accessRules.containsKey(String.format("%s.%s", msg.name, msg.method))) { //
    * restricted service - check for authorization // Security service only
@@ -1292,10 +1208,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return sb.toString();
   }
 
-  /**
-   * 
-   * @param msg
-   */
   @Override
   public void in(Message msg) {
     inbox.add(msg);
@@ -1305,9 +1217,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * This is where all messages are routed to and processed
-   * 
-   * @param msg
-   * @return
    */
   @Override
   final public Object invoke(Message msg) {
@@ -1367,9 +1276,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * the core working invoke method
    * 
-   * @param object
-   * @param method
-   * @param params
+   * @param obj - the object
+   * @param method - the method to invoke on that object
+   * @param params - the list of args to pass to the method
    * @return return object
    */
   @Override
@@ -1492,18 +1401,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return Runtime.class == this.getClass();
   }
 
-  /**
-   * 
-   * @return
-   */
   public boolean isReady() {
     return true;
   }
 
-  /**
-   * 
-   * @return
-   */
   public boolean isRunning() {
     return isRunning;
   }
@@ -1516,12 +1417,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return load(null, null);
   }
 
-  /**
-   * 
-   * @param o
-   * @param inCfgFileName
-   * @return
-   */
   public boolean load(Object o, String inCfgFileName) {
     String filename = null;
     if (inCfgFileName == null) {
@@ -1549,10 +1444,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return false;
   }
 
-  /**
-   * 
-   * @param msg
-   */
   public void out(Message msg) {
     outbox.add(msg);
   }
@@ -1562,9 +1453,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * static routes will be applied this is good for Motor drivers - you can swap
    * motor drivers by creating a different static route The motor is not "Aware"
    * of the driver - only that it wants to method="write" data to the driver
-   * 
-   * @param method
-   * @param o
    */
   public void out(String method, Object o) {
     Message m = Message.createMessage(this, null, method, o); // create a
@@ -1593,10 +1481,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * framework diagnostic publishing method for examining load, capacity, and
-   * throughput of Inbox & Outbox queues
-   * 
-   * @param stats
-   * @return
+   * throughput of Inbox &amp; Outbox queues
    */
   public QueueStats publishQueueStats(QueueStats stats) {
     return stats;
@@ -1604,8 +1489,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * publishing point for the whole service the entire Service is published
-   * 
-   * @return
    */
   public Service publishState() {
     return this;
@@ -1663,13 +1546,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     outbox.notifyList.clear();
   }
 
-  /**
-   * 
-   * @param outMethod
-   * @param serviceName
-   * @param inMethod
-   * @param paramTypes
-   */
   @Override
   public void removeListener(String outMethod, String serviceName, String inMethod) {
     if (outbox.notifyList.containsKey(outMethod)) {
@@ -1803,12 +1679,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return true;
   }
 
-  /**
-   * 
-   * @param o
-   * @param cfgFileName
-   * @return
-   */
   public boolean save(Object o, String cfgFileName) {
 
     try {
@@ -1824,12 +1694,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return true;
   }
 
-  /**
-   * 
-   * @param cfgFileName
-   * @param data
-   * @return
-   */
   public boolean save(String cfgFileName, String data) {
     // saves user data in the .myrobotlab directory
     // with the file naming convention of name.<cfgFileName>
@@ -1844,9 +1708,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * 0?
-   * 
-   * @param name
-   * @param method
    */
   public void send(String name, String method) {
     send(name, method, (Object[]) null);
@@ -1854,10 +1715,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * boxing - the right way - thank you Java 5
-   * 
-   * @param name
-   * @param method
-   * @param data
    */
   public void send(String name, String method, Object... data) {
     Message msg = Message.createMessage(this, name, method, data);
@@ -1879,10 +1736,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * this send forces remote connect - for registering services
-   * 
-   * @param url
-   * @param method
-   * @param param1
    */
   public void send(URI url, String method, Object param1) {
     Object[] params = new Object[1];
@@ -1891,13 +1744,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     outbox.getCommunicationManager().send(url, msg);
   }
 
-  /**
-   * 
-   * @param name
-   * @param method
-   * @param data
-   * @return
-   */
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) {
     Message msg = Message.createMessage(this, name, method, data);
     msg.sender = this.getName();
@@ -1942,8 +1788,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * rarely should this be used. Gateways use it to provide x-route natting
    * services by re-writing names with prefixes
-   * 
-   * @param name
    */
 
   @Override
@@ -1957,19 +1801,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return name;
   }
 
-  /**
-   * 
-   * @param s
-   * @return
-   */
   public Service setState(Service s) {
     return (Service) copyShallowFrom(this, s);
   }
 
-  /**
-   * 
-   * @param thisThread
-   */
   public void setThisThread(Thread thisThread) {
     this.thisThread = thisThread;
   }
@@ -2128,8 +1963,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * set status broadcasts an info string to any subscribers
-   * 
-   * @param msg
    */
   public String info(String msg) {
     Status status = Status.info(msg);
@@ -2139,8 +1972,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * set status broadcasts an formatted info string to any subscribers
-   * 
-   * @param msg
    */
   @Override
   public Status info(String format, Object... args) {
@@ -2149,10 +1980,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * error only channel publishing point versus publishStatus which handles
-   * info, warn & error
-   * 
-   * @param msg
-   * @return
+   * info, warn &amp; error
    */
   public Status publishError(Status status) {
     return status;
@@ -2216,10 +2044,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * Calls the static method getMetaData on the appropriate class. The class
    * static data is passed back as a template to be merged in with the global
    * static dna
-   * 
-   * @param serviceClass
-   * @return
-   * @throws ClassNotFoundException
    */
   static public ServiceType getMetaData(String serviceClass) {
     String serviceType;

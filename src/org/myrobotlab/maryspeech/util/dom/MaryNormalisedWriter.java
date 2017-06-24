@@ -60,11 +60,10 @@ public class MaryNormalisedWriter {
 	private Transformer transformer;
 
 	/**
-	 * Default constructor. Calls <code>startup()</code> if it has not been called before.
+	 * Default constructor. Calls &lt;code&gt;startup()&lt;/code&gt; if it has not been called before. 
 	 * 
 	 * @throws MaryConfigurationException
-	 *             MaryConfigurationException
-	 * @see #startup()
+	 *         MaryConfigurationException
 	 */
 	public MaryNormalisedWriter() throws MaryConfigurationException {
 		try {

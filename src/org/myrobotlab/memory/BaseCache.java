@@ -47,8 +47,6 @@ public abstract class BaseCache implements ManagedCache {
 
   /**
    * Expire an item in the cache.
-   * 
-   * @param name
    */
   @Override
   public void expire(String name) {
@@ -110,8 +108,6 @@ public abstract class BaseCache implements ManagedCache {
   /**
    * Get a boolean primitive value from the cache. Tests for: Boolean, Integer,
    * Byte, Short, String (parseBoolean)
-   * 
-   * @param name
    * @return false if nothing is found or the cached value is not a boolean
    *         value
    */
@@ -149,7 +145,6 @@ public abstract class BaseCache implements ManagedCache {
    * Get an byte primitive value from the cache. Tests for: Byte, Short, String
    * (parseByte)
    * 
-   * @param name
    * @return 0 if nothing is found or the cached value was not an byte value
    */
   public byte getByte(String name) {
@@ -178,7 +173,6 @@ public abstract class BaseCache implements ManagedCache {
    * Get an double primitive value from the cache. Tests for: Double, Float,
    * Integer, Byte, Short, String (parseDouble)
    * 
-   * @param name
    * @return 0.0d if nothing is found or the cached value was not an double
    *         value
    */
@@ -220,7 +214,6 @@ public abstract class BaseCache implements ManagedCache {
    * Get an float primitive value from the cache. Tests for: Float, Integer,
    * Byte, Short, String (parseDouble)
    * 
-   * @param name
    * @return 0.0f if nothing is found or the cached value was not an float value
    */
   public float getFloat(String name) {
@@ -265,7 +258,6 @@ public abstract class BaseCache implements ManagedCache {
    * Get an int primitive value from the cache. Tests for: Integer, Byte, Short,
    * String (parseInt)
    * 
-   * @param name
    * @return 0 if nothing is found or the cached value was not an integer value
    */
   public int getInt(String name) {
@@ -298,7 +290,6 @@ public abstract class BaseCache implements ManagedCache {
    * Get an short primitive value from the cache. Tests for: Short, Byte, String
    * (parseShort)
    * 
-   * @param name
    * @return 0 if nothing is found or the cached value was not an integer value
    */
   public short getShort(String name) {
@@ -420,7 +411,6 @@ public abstract class BaseCache implements ManagedCache {
    * 
    * @param name
    *          cannot be null or empty
-   * @param value
    */
   @Override
   public void put(String name, Object value) {

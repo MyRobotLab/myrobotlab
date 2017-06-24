@@ -102,13 +102,6 @@ public class Client extends MessageService implements NameProvider {
 
   // TODO - remove or reconcile - RemoteAdapter and Service are the only ones
   // using this
-  /**
-   * 
-   * @param name
-   * @param method
-   * @param data
-   * @return
-   */
   public Message createMessage(String name, String method, Object data) {
     if (data == null) {
       return createMessage(name, method, null);
@@ -119,14 +112,7 @@ public class Client extends MessageService implements NameProvider {
   }
 
   // FIXME All parameter constructor
-  // TODO - Probably simplyfy to take array of object
-  /**
-   * 
-   * @param name
-   * @param method
-   * @param data
-   * @return
-   */
+  // TODO - Probably simplify to take array of object
   public Message createMessage(String name, String method, Object[] data) {
     Message msg = new Message();
     msg.name = name; // destination instance name

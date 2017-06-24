@@ -381,7 +381,7 @@ final public class Board implements Constants {
       r += evalLkp(2);
       r += evalLkp(3)
           / 2; /*
-                * problems with pawns on the c & f files are not as severe
+                * problems with pawns on the c &amp; f files are not as severe
                 */
     } else if (COL(sq) > 4) {
       r += evalLkp(8);

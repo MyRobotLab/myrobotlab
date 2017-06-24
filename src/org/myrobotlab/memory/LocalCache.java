@@ -48,7 +48,7 @@ public class LocalCache extends BaseCache {
   /**
    * Constructor.
    * 
-   * @param initialCapacity
+   * @param initialSize
    *          the initial capacity. The implementation performs internal sizing
    *          to accommodate this many elements.
    * @param loadFactor
@@ -59,7 +59,7 @@ public class LocalCache extends BaseCache {
    *          the estimated number of concurrently updating threads. The
    *          implementation performs internal sizing to try to accommodate this
    *          many threads.
-   * @param the
+   * @param timeout
    *          amount of time in ms after which an item should time out.
    * @throws IllegalArgumentException
    *           if the initial capacity is negative or the load factor or

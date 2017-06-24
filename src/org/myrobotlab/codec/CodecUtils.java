@@ -34,7 +34,7 @@ import com.google.gson.GsonBuilder;
  * xmpp for example assumes (/api/string/gson)/service/method/param1/param2/ ...
  * 
  * scheme = alpha *( alpha | digit | "+" | "-" | "." ) Components of all URIs: [
- * <scheme>:]<scheme-specific-part>[#<fragment>]
+ * &lt;scheme&gt;:]&lt;scheme-specific-part&gt;[#&lt;fragment&gt;]
  * http://stackoverflow.com/questions/3641722/valid-characters-for-uri-schemes
  * 
  * branch API test 5
@@ -241,8 +241,6 @@ public class CodecUtils {
    * most lossy protocols need conversion of parameters into correctly typed
    * elements this method is used to query a candidate method to see if a simple
    * conversion is possible
-   * 
-   * @return
    */
   public static boolean isSimpleType(Class<?> clazz) {
     return WRAPPER_TYPES.contains(clazz) || clazz == String.class;
@@ -304,7 +302,7 @@ public class CodecUtils {
     return String.format("%s/%s/%d", fullObjectName, methodName, paramCount);
   }
 
-  // LOSSY Encoding (e.g. xml & gson - which do not encode type information)
+  // LOSSY Encoding (e.g. xml &amp; gson - which do not encode type information)
   // can possibly
   // give us the parameter count - from the parameter count we can grab method
   // candidates

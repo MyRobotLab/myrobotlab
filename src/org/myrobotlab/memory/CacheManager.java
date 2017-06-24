@@ -34,8 +34,6 @@ public class CacheManager {
 
   /**
    * Get a handle to this singleton.
-   * 
-   * @return
    */
   public static CacheManager getInstance() {
     return me;
@@ -68,9 +66,6 @@ public class CacheManager {
 
   /**
    * Get a handle to one of the caches.
-   * 
-   * @param name
-   * @return
    */
   public Cache getCache(String name) {
     if (!caches.containsKey(name)) {

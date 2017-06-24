@@ -2,7 +2,7 @@
  * 
  *   Adafruit16CServoDriver
  *   
- *   TODO - test with Steppers & Motors - switches on board - interface accepts motor control
+ *   TODO - test with Steppers &amp; Motors - switches on board - interface accepts motor control
  *
  */
 
@@ -320,7 +320,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    *            I2CMux
    * @param deviceAddress
    *            = The i2c address of the PCA9685 ( "0x40" - "0x5F")
-   * @return
    */
   // @Override
   public boolean setController(String controllerName, String deviceBus, String deviceAddress) {
@@ -400,9 +399,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   /**
    * Set the PWM pulsewidth
    * 
-   * @param pin
-   * @param pulseWidthOn
-   * @param pulseWidthOff
    */
   public void setPWM(Integer pin, Integer pulseWidthOn, Integer pulseWidthOff) {
 
@@ -415,7 +411,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   /**
    * Set the PWM frequency i.e. the frequency between positive pulses.
    * 
-   * @param hz
    */
   public void setPWMFreq(int pin, Integer hz) { // Analog servos run at ~60 Hz
 
@@ -564,13 +559,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    * Arduino <Servo.h> servos - it DOES NOT need to create "Servo" devices in
    * MRLComm. It will need to keep track of the "pin" to I2C address, and
    * whenever a ServoControl.moveTo(pos) - the Servo will tell this controller
-   * its name & location to move. Mats says. The board has a single i2c
+   * its name &amp; location to move. Mats says. The board has a single i2c
    * address that doesn't change. The Arduino only needs to keep track of the
    * i2c bus, not all devices that can communicate thru it. I.e. This service
    * should keep track of servos, not the Arduino or the Raspi.
    * 
    * 
-   * This service will translate the name & location to an I2C address & value
+   * This service will translate the name &amp; location to an I2C address &amp; value
    * write request to the MRLComm device.
    * 
    * Mats comments on the above. MRLComm should not know anything about the

@@ -1032,8 +1032,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	/**
 	 * Set the sample rate in Hz, I.e the number of polls per second
 	 * 
-	 * @param rate
-	 * @return
+	 * @return the rate that was set.
 	 */
 	public double setSampleRate(double rate) {
 		if (rate < 0) {
@@ -1045,8 +1044,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	}
 	/**
 	 * method to communicate changes in pinmode or state changes
-	 * @param pinDef
-	 * @return
+	 * @return the pin definition passed in. (used by invoke.)
 	 */
 	public PinDefinition publishPinDefinition(PinDefinition pinDef){
 		return pinDef;

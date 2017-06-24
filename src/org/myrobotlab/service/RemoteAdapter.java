@@ -142,7 +142,7 @@ public class RemoteAdapter extends Service implements Gateway {
 		return connections;
 	}
 
-	/**
+	/*
 	 * important initial communication function related to discovery a broadcast
 	 * goes out and replies must include details of communication so that a
 	 * viable connection can be created
@@ -241,9 +241,6 @@ public class RemoteAdapter extends Service implements Gateway {
 	/**
 	 * NOT USED - just left as an example of a consumer asynchronous return of
 	 * access key request
-	 * 
-	 * @param keys
-	 * @return
 	 */
 	public Connection onNewConnection(Connection conn) {
 		return conn;

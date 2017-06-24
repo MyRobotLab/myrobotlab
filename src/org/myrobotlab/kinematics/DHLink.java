@@ -82,9 +82,7 @@ public class DHLink {
   
 
   /**
-   * return a 4x4 homogenous transformation matrix for the given D-H parameters
-   * 
-   * @return
+   * @return a 4x4 homogenous transformation matrix for the given D-H parameters
    */
   public Matrix resolveMatrix() {
     Matrix m = new Matrix(4, 4);

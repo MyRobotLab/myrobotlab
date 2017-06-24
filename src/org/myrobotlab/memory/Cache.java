@@ -20,9 +20,6 @@ public interface Cache {
 
   /**
    * Get a value.
-   * 
-   * @param name
-   * @return
    */
   <T> T get(String name, Class<? extends T> c);
 

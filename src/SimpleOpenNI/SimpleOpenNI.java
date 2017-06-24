@@ -465,7 +465,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
     proj.set(_tempVec);
   }
 
-  /**
+  /*
    * Enable the depthMap data collection
    * 
    * @param width

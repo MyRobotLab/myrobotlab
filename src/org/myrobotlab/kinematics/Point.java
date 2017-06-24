@@ -171,9 +171,6 @@ public class Point {
   /**
    * add the x,y,z,roll,pitch,yaw of the point passed in, to the current point.
    * return a new point with the individual components summed.
-   * 
-   * @param p
-   * @return
    */
   public Point add(Point p) {
     // add the linear and angular parts and return the resulting sum.
@@ -184,9 +181,6 @@ public class Point {
 
   /**
    * return a new point with the x,y,z values multipled by the xyzScale
-   * 
-   * @param xyzScale
-   * @return
    */
   public Point multiplyXYZ(double xyzScale) {
     // add the linear and angular parts and return the resulting sum.

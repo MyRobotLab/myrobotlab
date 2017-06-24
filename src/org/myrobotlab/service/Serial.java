@@ -48,7 +48,7 @@ public class Serial extends Service
 		implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice, PortPublisher, PortConnector {
 
 	/**
-	 * general read timeout - 0 is infinite > 0 is number of milliseconds to
+	 * general read timeout - 0 is infinite &gt; 0 is number of milliseconds to
 	 * wait up to, until data is returned timeout = null: wait forever timeout =
 	 * 0: non-blocking mode (return immediately on read) timeout = x: set
 	 * timeout to x milliseconds
@@ -200,10 +200,6 @@ public class Serial extends Service
 	/**
 	 * conversion utility TODO - support endianess
 	 * 
-	 * @param bytes
-	 * @param offset
-	 * @param length
-	 * @return
 	 */
 	public static int bytesToInt(int[] bytes, int offset, int length) {
 		return (int) bytesToLong(bytes, offset, length);
@@ -212,10 +208,6 @@ public class Serial extends Service
 	/**
 	 * conversion utility TODO - support endianess
 	 * 
-	 * @param bytes
-	 * @param offset
-	 * @param length
-	 * @return
 	 */
 	public static long bytesToLong(int[] bytes, int offset, int length) {
 
@@ -234,8 +226,6 @@ public class Serial extends Service
 	/**
 	 * Static list of third party dependencies for this service. The list will
 	 * be consumed by Ivy to download and manage the appropriate resources
-	 * 
-	 * @return
 	 */
 
 	public Serial(String n) {
@@ -267,7 +257,6 @@ public class Serial extends Service
 	 * 
 	 * FIXME - DO THIS STUFF (AND THE PUBLISHING/TESTING) IN THE FRAMEWORK
 	 * 
-	 * @param name
 	 */
 	public void addByteListener(String name) {
 		ServiceInterface si = Runtime.getService(name);
@@ -291,8 +280,6 @@ public class Serial extends Service
 
 	/**
 	 * method similar to InputStream's
-	 * 
-	 * @return
 	 */
 	public int available() {
 		return blockingRX.size();
@@ -308,8 +295,6 @@ public class Serial extends Service
 	/**
 	 * for backwards compatibility
 	 * 
-	 * @param name
-	 * @throws IOException
 	 */
 	public void connect(String name) throws IOException {
 		open(name);
@@ -361,11 +346,6 @@ public class Serial extends Service
 	 * 
 	 * connect = open + listen
 	 * 
-	 * @param inPortName
-	 * @param listener
-	 * @return
-	 * @throws IOException
-	 * @throws Exception
 	 */
 	public void open(String inPortName, int rate, int dataBits, int stopBits, int parity) throws IOException {
 
@@ -434,7 +414,6 @@ public class Serial extends Service
 	 * Serial service and connects to it FIXME - no need for null/modem cable
 	 * virtual port ?
 	 * 
-	 * @param name
 	 */
 	public boolean connectLoopback(String name) {
 		// TODO - implement
@@ -644,8 +623,6 @@ public class Serial extends Service
 
 	/**
 	 * get the port name this serial service is currently attached to
-	 * 
-	 * @return
 	 */
 	public String getPortName() {
 		return portName;
@@ -654,8 +631,6 @@ public class Serial extends Service
 	/**
 	 * "all" currently known ports - if something is missing refresh ports
 	 * should be called to force hardware search
-	 * 
-	 * @throws ClassNotFoundException
 	 */
 	@Override
 	public List<String> getPortNames() {
@@ -719,7 +694,6 @@ public class Serial extends Service
 	 * 
 	 * readFromPublishedByte is a catch mechanism to verify tests
 	 * 
-	 * @throws IOException
 	 */
 	@Override
 	public final Integer onByte(Integer newByte) throws IOException {
@@ -754,8 +728,6 @@ public class Serial extends Service
 	/**
 	 * successful connection event
 	 * 
-	 * @param portName
-	 * @return
 	 */
 	public String publishConnect(String portName) {
 		info("%s publishConnect %s", getName(), portName);
@@ -765,8 +737,6 @@ public class Serial extends Service
 	/**
 	 * disconnect event
 	 * 
-	 * @param portName
-	 * @return
 	 */
 	public String publishDisconnect(String portName) {
 		return portName;
@@ -775,8 +745,6 @@ public class Serial extends Service
 	/**
 	 * event to return list of ports of all ports this serial service can see
 	 * 
-	 * @param portNames
-	 * @return
 	 */
 	public List<String> publishPortNames(List<String> portNames) {
 		return portNames;
@@ -785,8 +753,6 @@ public class Serial extends Service
 	/**
 	 * main line RX publishing point
 	 * 
-	 * @param data
-	 * @return
 	 */
 	public int publishRX(Integer data) {
 		return data;
@@ -794,9 +760,6 @@ public class Serial extends Service
 
 	/**
 	 * main line TX publishing point
-	 * 
-	 * @param display
-	 * @return
 	 */
 	public Integer publishTX(Integer data) {
 		return data;
@@ -836,9 +799,6 @@ public class Serial extends Service
 	 * less characters as requested. With no timeout it will block until the
 	 * requested number of bytes is read.
 	 * 
-	 * @param size
-	 * @return
-	 * @throws InterruptedException
 	 */
 	public byte[] read(int length) throws InterruptedException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -921,11 +881,9 @@ public class Serial extends Service
 	 * 
 	 * @param length
 	 *            - the number of bytes to read back
-	 * @param timeoutMS
 	 *            - the amount of time to wait blocking until we return. 0 ms
 	 *            means the reading thread will potentially block forever.
 	 * @return String form of the bytes read
-	 * @throws InterruptedException
 	 */
 	public String readString(int length) throws InterruptedException {
 		byte[] bytes = read(length);
@@ -952,7 +910,7 @@ public class Serial extends Service
 		return formats;
 	}
 
-	/**
+	/*
 	 * force refreshing ports
 	 * 
 	 * @return
@@ -1019,12 +977,9 @@ public class Serial extends Service
 	}
 
 	/**
-	 * default timeout for all reads 0 = infinity > 0 - will wait for the number
+	 * default timeout for all reads 0 = infinity &gt; 0 - will wait for the number
 	 * in milliseconds if the data has not arrived then an IOError will be
 	 * thrown
-	 * 
-	 * @param timeout
-	 * @return
 	 */
 	@Override
 	public void setTimeout(int timeout) {

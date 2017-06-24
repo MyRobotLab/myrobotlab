@@ -46,10 +46,6 @@ public class BallAgent extends SimpleAgent {
 
   Color3f color;
 
-  /**
-   * @param pos
-   * @param name
-   */
   public BallAgent(Vector3d pos, String name, Color3f color, float radius, float mass) {
     super(pos, name);
     this.radius = radius;

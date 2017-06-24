@@ -40,10 +40,6 @@ public class TypeConverter {
    * specific method It "converts" parameters of strings into typed parameters
    * which can then be used to reflectively invoke the appropriate method
    * 
-   * @param clazz
-   * @param method
-   * @param stringParams
-   * @return
    */
   static public Object[] getTypedParamsFromJson(Class<?> clazz, String method, String[] stringParams) throws IOException {
 

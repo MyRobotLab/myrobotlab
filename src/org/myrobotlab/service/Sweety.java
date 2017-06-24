@@ -150,7 +150,6 @@ public class Sweety extends Service {
 
   /**
    * Attach the servos to arduino pins
- * @throws Exception 
    */
   public void attach() throws Exception {
 	
@@ -171,7 +170,6 @@ public class Sweety extends Service {
 
   /**
    * Connect the arduino to a COM port . Exemple : connect("COM8")
- * @throws IOException 
    */
   public void connect(String port) throws IOException {
     arduino.connect(port);
@@ -293,8 +291,8 @@ public class Sweety extends Service {
   }
 
   /**
-   * drive the motors . Speed > 0 go forward . Speed < 0 go backward . Direction
-   * > 0 go right . Direction < 0 go left
+   * drive the motors . Speed &gt; 0 go forward . Speed &lt; 0 go backward . Direction
+   * &gt; 0 go right . Direction &lt; 0 go left
    */
   public void moveMotors(int speed, int direction) {
     int speedMin = 50; // min PWM needed for the motors
@@ -631,7 +629,6 @@ public class Sweety extends Service {
 
   /**
    * Stop the tracking services
- * @throws Exception 
    */
   public void stopTrack() throws Exception {
     leftTracker.opencv.stopCapture();

@@ -355,11 +355,6 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   /**
    * sending a command when expecting a string response in the context of
    * blocking for response
-   * 
-   * @param cmd
-   * @return
-   * @throws InterruptedException
-   * @throws IOException
    */
   public String sendCommand(String cmd) throws Exception {
     log.info(String.format("sendCommand %s", cmd));

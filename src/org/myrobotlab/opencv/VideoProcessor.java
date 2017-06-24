@@ -156,7 +156,6 @@ public class VideoProcessor implements Runnable, Serializable {
 	/**
 	 * to reply to the request of getting all
 	 * source keys - pending or current
-	 * @return
 	 */
 	public Set<String> getKeys(){
 		Set<String> ret = new LinkedHashSet<String>();
@@ -179,9 +178,6 @@ public class VideoProcessor implements Runnable, Serializable {
 	/**
 	 * add filter to the addFilterQueue so the video processor thread will pick
 	 * it up - this is always doen by an 'external' thread
-	 * 
-	 * @param filter
-	 * @return
 	 */
 	public OpenCVFilter addFilter(OpenCVFilter filter) {
 	  filter.setVideoProcessor(this);
@@ -191,9 +187,6 @@ public class VideoProcessor implements Runnable, Serializable {
 
 	/**
 	 * add filter with a string interface
-	 * @param name
-	 * @param filterType
-	 * @return
 	 */
 	public OpenCVFilter addFilter(String name, String filterType) {
 		if (!filters.containsKey(name)) {
@@ -229,9 +222,7 @@ public class VideoProcessor implements Runnable, Serializable {
 	/**
 	 * thread safe recording of avi
 	 * 
-	 * @param key
-	 *            - input, filter, or display
-	 * @param data
+	 * key- input, filter, or display
 	 */
 	public void record(OpenCVData data) {
 		try {
@@ -240,7 +231,6 @@ public class VideoProcessor implements Runnable, Serializable {
 				// FFmpegFrameRecorder recorder = new FFmpegFrameRecorder
 				// (String.format("%s.avi",filename), frame.width(),
 				// frame.height());
-
 				FrameRecorder recorder = new OpenCVFrameRecorder(String.format("%s.avi", recordingSource),
 						frame.imageWidth, frame.imageHeight);
 				// recorder.setCodecID(CV_FOURCC('M','J','P','G'));
@@ -250,7 +240,6 @@ public class VideoProcessor implements Runnable, Serializable {
 				recorder.start();
 				outputFileStreams.put(recordingSource, recorder);
 			}
-
 			// TODO - add input, filter & display
 			outputFileStreams.get(recordingSource).record(converter.convert(data.getImage(recordingSource)));
 

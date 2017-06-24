@@ -76,10 +76,8 @@ import org.myrobotlab.framework.repo.Category;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.image.Util;
-import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.Runtime;
@@ -477,8 +475,6 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
   /**
    * scheduled event of reporting on system resources
-   * 
-   * @param resources
    */
   public void onSystemResources(SystemResources resources) {
     totalPhysicalMemory.setText(String.format("%d", resources.getTotalPhysicalMemory()));
@@ -611,8 +607,6 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
   /**
    * lame - deprecate - refactor - or better yet make webgui FIXME this should
    * rarely change .... remove getServiceTypeNames
-   * 
-   * @param serviceTypeNames
    */
   public void getPossibleServicesFromCategory(final String filter) {
     SwingUtilities.invokeLater(new Runnable() {
@@ -671,9 +665,6 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
   /**
    * new Service has been created list it..
-   * 
-   * @param sw
-   * @return
    */
   public ServiceInterface onRegistered(Service sw) {
     currentServicesModel.addElement(sw);
@@ -682,9 +673,6 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
   /**
    * a Service of this Runtime has been released
-   * 
-   * @param sw
-   * @return
    */
   public ServiceInterface onReleased(Service sw) {
     currentServicesModel.removeElement(sw);
@@ -711,8 +699,6 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
   /**
    * this is the beginning of the applyUpdates process
-   * 
-   * @return
    */
   public void updatesBegin() {
     progressDialog.beginUpdates();

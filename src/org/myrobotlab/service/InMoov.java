@@ -552,8 +552,6 @@ public class InMoov extends Service {
 
   /**
    * finds most recent activity
-   * 
-   * @return
    */
   public long getLastActivityTime() {
 
@@ -890,7 +888,6 @@ public class InMoov extends Service {
    * Routing of errors back to the InMoov service. This will allow the mouth to
    * announce errors
    * 
-   * @param sw
    */
   public void onRegistered(ServiceInterface sw) {
     subscribe(sw.getName(), "publishError");
@@ -1084,7 +1081,6 @@ public class InMoov extends Service {
   /*************
    * STARTS BEGIN
    * 
-   * @throws Exception
    ************************/
 
   public void startAll(String leftPort, String rightPort) throws Exception {

@@ -1,6 +1,6 @@
 /**
  *                    
- * @author GroG & Mats (at) myrobotlab.org
+ * @author GroG &amp; Mats (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -49,7 +49,7 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
- * @author Grog & Mats
+ * @author Grog &amp; Mats
  * 
  *         Servos have both input and output. Input is usually of the range of
  *         integers between 0 - 180, and output can relay those values directly
@@ -315,8 +315,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
 	/**
 	 * Update the list of MotorControllers and PinArrayControls
-	 * 
-	 * @param s
 	 */
 	public void onRegistered(ServiceInterface s) {
 		refreshControllers();
@@ -342,9 +340,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		pid.startService();
 	}
 
-	/**
-	 * @param service
-	 */
 	public void addServoEventListener(NameProvider service) {
 		addListener("publishServoEvent", service.getName(), "onServoEvent");
 	}
@@ -387,9 +382,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
 	/**
 	 * Method to check if events are enabled or not
-	 * 
-	 * @param b
-	 * @return
 	 */
 
 	public boolean eventsEnabled(boolean b) {
@@ -478,12 +470,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		return position;
 	}
 
-	/**
-	 * FIXME - Hmmm good canidate for Microcontroller Peripheral
-	 * 
-	 * @return
-	 */
 	public List<String> refreshControllers() {
+	  // FIXME - Hmmm good canidate for Microcontroller Peripheral
 		controllers = Runtime.getServiceNamesFromInterface(MotorController.class);
 		return controllers;
 	}
@@ -590,7 +578,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	 * Continuous-rotation servos will respond to the writeMicrosecond function
 	 * in an analogous manner to the write function.
 	 * 
-	 * @param pos
+	 * @param uS - the microseconds value
 	 */
 	public void writeMicroseconds(Integer uS) {
 		log.info("writeMicroseconds({})", uS);

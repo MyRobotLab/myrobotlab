@@ -1,7 +1,5 @@
 package org.myrobotlab.logging;
 
-import java.io.File;
-
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;

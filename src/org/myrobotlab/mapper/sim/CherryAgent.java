@@ -42,9 +42,6 @@ public class CherryAgent extends SimpleAgent {
 
   /**
    * Construct an AppleAgent.
-   * 
-   * @param pos
-   * @param name
    */
   public CherryAgent(Vector3d pos, String name, float radius) {
     super(pos, name);

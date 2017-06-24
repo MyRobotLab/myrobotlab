@@ -1,6 +1,5 @@
 package org.myrobotlab.swing.widget;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;

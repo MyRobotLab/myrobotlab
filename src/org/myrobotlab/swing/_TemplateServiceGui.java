@@ -93,7 +93,6 @@ public class _TemplateServiceGui extends ServiceGui implements ActionListener {
    * method is called which triggers a publishState.  This event handler is typically
    * used when data or state information in the service has changed, and the UI should
    * update to reflect this changed state.
-   * @param template
    */
   public void onState(_TemplateService template) {
     SwingUtilities.invokeLater(new Runnable() {

@@ -501,8 +501,8 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
    * 32-127: notenum == corresponding note played thru beeper velocity ==
    * duration in number of 1/64s of a second (e.g. 64==1second) notenum 24:
    * notenum == main vacuum velocity == non-zero turns on, zero turns off
-   * notenum 25: blink LEDs, velcoity is color of Power LED notenum 28 & 29:
-   * spin left & spin right, velocity is speed
+   * notenum 25: blink LEDs, velcoity is color of Power LED notenum 28 &amp; 29:
+   * spin left &amp; spin right, velocity is speed
    * 
    */
   public void playMidiNote(int notenum, int velocity) {

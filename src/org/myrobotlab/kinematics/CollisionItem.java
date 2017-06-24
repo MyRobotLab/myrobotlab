@@ -24,12 +24,6 @@ public class CollisionItem{
   private boolean render = false;
   private Mesh mesh;
   
-  /**
-   * @param origin
-   * @param end
-   * @param name
-   * @param radius
-   */
   public CollisionItem(Point origin, Point end, String name, double radius, boolean render) {
     super();
     this.origin = origin;

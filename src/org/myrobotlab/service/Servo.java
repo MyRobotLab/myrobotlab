@@ -625,7 +625,6 @@ public class Servo extends Service implements ServoControl {
    * Continuous-rotation servos will respond to the writeMicrosecond function in
    * an analogous manner to the write function.
    * 
-   * @param pos
    */
   public void writeMicroseconds(Integer uS) {
     log.info("writeMicroseconds({})", uS);
@@ -829,7 +828,6 @@ public class Servo extends Service implements ServoControl {
    * enableAutoAttach will attach a servo when ask to move and it when the move
    * is complete
    * 
-   * @param autoAttach
    */
   @Deprecated
   public void enableAutoAttach(boolean autoAttach) {

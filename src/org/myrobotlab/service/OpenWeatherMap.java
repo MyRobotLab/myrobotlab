@@ -84,7 +84,6 @@ public class OpenWeatherMap extends HttpClient {
 
   /**
    * The units, can be either imperial or metric.
-   * @param units
    */
   public void setUnits(String units) {
     this.units = units;
@@ -96,7 +95,6 @@ public class OpenWeatherMap extends HttpClient {
 
   /**
    * REQUIRED: specify your API key with this method.
-   * @param apiKey
    */
   public void setApiKey(String apiKey) {
     this.apiKey = apiKey;

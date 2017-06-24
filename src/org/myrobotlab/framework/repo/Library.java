@@ -21,8 +21,6 @@ public class Library implements Serializable, Comparator<Library> {
 
   /**
    * constructor with key - of form [org/version]
-   * 
-   * @param key
    */
   public Library(String key) {
     String[] split = key.split("/");

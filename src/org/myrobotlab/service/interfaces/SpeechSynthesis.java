@@ -27,8 +27,6 @@ public interface SpeechSynthesis extends NameProvider {
 
   /**
    * returns a list of current possible languages
-   * 
-   * @return
    */
   public abstract List<String> getLanguages();
 
@@ -46,7 +44,6 @@ public interface SpeechSynthesis extends NameProvider {
    * 
    * @param toSpeak
    *          - the string of text to speak.
-   * @return
    */
   public abstract boolean speakBlocking(String toSpeak) throws Exception;
 
@@ -63,17 +60,11 @@ public interface SpeechSynthesis extends NameProvider {
 
   /**
    * start callback for speech synth. (Invoked when speaking starts)
-   * 
-   * @param utterance
-   * @return
    */
   public String publishStartSpeaking(String utterance);
 
   /**
    * stop callback for speech synth. (Invoked when speaking stops.)
-   * 
-   * @param utterance
-   * @return
    */
   public String publishEndSpeaking(String utterance);
 

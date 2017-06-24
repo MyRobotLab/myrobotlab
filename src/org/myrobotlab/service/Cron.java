@@ -21,7 +21,7 @@ import it.sauronsoftware.cron4j.Scheduler;
  * FIXME - the common cron notation is kind of nice - but this thing doesn't do
  * more than Service.addTask
  * 
- * FIXME - make a purge & delete DUH !
+ * FIXME - make a purge &amp; delete DUH !
  *
  */
 public class Cron extends Service {
@@ -125,7 +125,6 @@ public class Cron extends Service {
    *          - The name of the service to invoke
    * @param method
    *          - the method on the service to invoke when the task starts.
-   * @return
    */
   public String addTask(String cron, String serviceName, String method) {
     return addTask(cron, serviceName, method, (Object[]) null);
@@ -143,7 +142,6 @@ public class Cron extends Service {
    *          - the method on the service to invoke when the task starts.
    * @param data
    *          - additional objects/varags to pass to the method
-   * @return
    */
   public String addTask(String cron, String serviceName, String method, Object... data) {
     Task task = new Task(this, cron, serviceName, method, data);

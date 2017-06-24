@@ -266,7 +266,6 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
    * @param qos
    *          the maximum quality of service to receive messages at for this
    *          subscription
-   * @throws MqttException
    */
   public void subscribe(String topic, int qos) throws Throwable {
     if (client == null || !client.isConnected()) {

@@ -185,7 +185,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   /**
    * easy way to set to get a 54 pin arduino
    *
-   * @return
    */
   public String setBoardMega() {
     return setBoard(Arduino.BOARD_TYPE_MEGA);
@@ -238,7 +237,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   /**
    * TODO - promote to interface
-   * @param simulator
    */
   public void attachSimulator(Simulator simulator) {
     this.simulator = simulator;

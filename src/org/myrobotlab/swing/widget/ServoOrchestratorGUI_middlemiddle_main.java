@@ -61,7 +61,6 @@ public class ServoOrchestratorGUI_middlemiddle_main {
    * ServoOrchestratorGUI_middlemiddle_panel
    * </p>
    *
-   * @return
    */
   public static DataFlavor getDragAndDropPanelDataFlavor() throws Exception {
     // the commented (first one) is original and first it wotrked, then not

@@ -600,7 +600,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 
   }
 
-  /**
+  /*
    * 
    * @param name
    *          : name of the part

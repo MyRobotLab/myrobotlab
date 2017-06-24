@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -123,9 +122,6 @@ public class Security extends Service implements AuthorizationProvider {
 
   /**
    * decrypt a value
-   * 
-   * @throws GeneralSecurityException
-   * @throws IOException
    */
   public static String decrypt(String message, File keyFile) throws GeneralSecurityException, IOException {
     SecretKeySpec sks = getSecretKeySpec(keyFile);
@@ -139,8 +135,6 @@ public class Security extends Service implements AuthorizationProvider {
    * encrypt a value and generate a keyfile if the keyfile is not found then a
    * new one is created
    * 
-   * @throws GeneralSecurityException
-   * @throws IOException
    */
   public static String encrypt(String passphrase, File keyFile) throws GeneralSecurityException, IOException {
     if (!keyFile.exists()) {

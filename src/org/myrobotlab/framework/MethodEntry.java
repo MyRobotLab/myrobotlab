@@ -66,8 +66,6 @@ public class MethodEntry implements Serializable {
 
   /**
    * transfer the non serializable java.reflect.Method to a serializable object
-   * 
-   * @param m
    */
   public MethodEntry(Method m) {
     this.name = m.getName();

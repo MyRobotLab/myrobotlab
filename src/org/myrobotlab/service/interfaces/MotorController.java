@@ -35,8 +35,6 @@ public interface MotorController extends Attachable {
 	 * request for motor to move the motor can be queried for the new powerlevel
 	 * and the controller shall appropriately change power level and direction
 	 * if necessary
-	 * 
-	 * @param name
 	 */
 	public void motorMove(MotorControl motor);
 
@@ -44,19 +42,17 @@ public interface MotorController extends Attachable {
 	 * moveTo - move the MotorControl a relative amount the amount can be
 	 * negative or positive an integer value is expected
 	 * 
-	 * @param name
+	 * param name
 	 *            - name of the MotorControl
-	 * @param position
+	 * param position
 	 *            - positive or negative absolute amount to move the
 	 *            MotorControl
-	 * @return void
 	 */
 	public void motorMoveTo(MotorControl motor);
 
 	/**
 	 * stops the motor
 	 * 
-	 * @param motor
 	 */
 	public void motorStop(MotorControl motor);
 
@@ -65,7 +61,6 @@ public interface MotorController extends Attachable {
 	 * counters if the motor is a stepper and / or other variables for other
 	 * sorts of motors
 	 * 
-	 * @param motor
 	 */
 	public void motorReset(MotorControl motor);
 	

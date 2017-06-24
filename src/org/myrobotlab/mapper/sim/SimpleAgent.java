@@ -314,9 +314,9 @@ public class SimpleAgent extends BaseObject {
   }
 
   /**
-   * Return agents coordinates.
-   * 
-   * @return agent point3d .
+   * does not return agents coordinates.
+   *  
+   * agent point3d 
    */
   public void getCoords(Point3d coord) {
     Vector3d t = v1;
@@ -445,9 +445,7 @@ public class SimpleAgent extends BaseObject {
 
   /**
    * Go to given XZ position. Y coords is left unchanged.
-   * 
-   * @param position
-   *          - the new position.
+   * the new position.
    */
   public void moveToPosition(double x, double z) {
 

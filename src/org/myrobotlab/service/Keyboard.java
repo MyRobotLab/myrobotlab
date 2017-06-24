@@ -140,8 +140,6 @@ public class Keyboard extends Service {
   /**
    * this method is what other services would use to subscribe to keyboard
    * events
-   * 
-   * @param service
    */
   public void addKeyListener(Service service) {
     addListener("publishKey", service.getName(), "onKey");
@@ -154,9 +152,6 @@ public class Keyboard extends Service {
 
   /**
    * a onKey event handler for testing purposes only
-   * 
-   * @param key
-   * @return
    */
   public String onKey(String key) {
     log.info("onKey {}", key);
@@ -166,7 +161,6 @@ public class Keyboard extends Service {
   /**
    * internal publishing point - private ?
    * 
-   * @param key
    */
   public String publishKey(String key) {
     log.info("publishKey {}", key);
