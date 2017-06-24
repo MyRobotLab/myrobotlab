@@ -9,12 +9,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.MotorDualPwm;
 import org.myrobotlab.service.Pid;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.SensorData;
-import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.test.TestUtils;
 import org.slf4j.Logger;
 
