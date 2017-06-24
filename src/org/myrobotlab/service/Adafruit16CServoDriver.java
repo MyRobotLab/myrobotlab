@@ -484,7 +484,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 		 * Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer,
 		 * buffer.length);
 		 */
-		setPWM(pin, 4095, pulseWidthOff);
+		setPWM(pin, 0, pulseWidthOff);
 	}
 
 	/**
