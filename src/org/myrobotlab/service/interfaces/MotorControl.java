@@ -57,7 +57,7 @@ public interface MotorControl extends NameProvider, RelativePositionControl {
 	 * moveTo moves the motor to a specific location. Typically, an encoder is
 	 * needed in order to provide feedback data
 	 * 
-	 * @param newPos
+	 * @param newPos the new position to move to
 	 */
 	void moveTo(double newPos);
 
@@ -77,7 +77,7 @@ public interface MotorControl extends NameProvider, RelativePositionControl {
 	 * clockwise if previous levels were counter clockwise and positive power
 	 * levels would become counter clockwise
 	 * 
-	 * @param invert
+	 * @param invert true or false
 	 */
 	void setInverted(boolean invert);
 
@@ -98,7 +98,7 @@ public interface MotorControl extends NameProvider, RelativePositionControl {
 
 	/**
 	 * testing if a 'specific' motor controller is attached
-	 * @param controller
+	 * @param controller c
 	 * @return true if the contorller is attached to this control.
 	 */
 	boolean isAttached(MotorController controller);

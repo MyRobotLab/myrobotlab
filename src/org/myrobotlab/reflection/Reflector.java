@@ -43,7 +43,7 @@ public class Reflector {
     primitiveTypes.add(Double.class);
   }
 
-  /**
+  /*
    * Create an instance of Class.
    * 
    * @param c
@@ -66,7 +66,7 @@ public class Reflector {
     return null;
   }
 
-  /**
+  /*
    * Create an instance of the classname.
    * @param classname class name
    * @param params params to pass to constructor
@@ -142,7 +142,7 @@ public class Reflector {
     return '\u0000';
   }
 
-  /**
+  /*
    * Invoke in the context of this Service. It is suggested to use one of the
    * primitive overload methods when the expected result is a primitive. This is
    * for 2 reasons: (1) the primitive will be boxed in this case which means

@@ -50,17 +50,17 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * speed/velocity shall be defaulted to 'max' ie - no speed control
    * 
    * 
-   * @param controller
-   * @param pin
-   * @throws Exception
+   * @param controller c
+   * @param pin p 
+   * @throws Exception e
    */
 
   /**
    * The one and only one attach which does the work we expect attaching a
    * ServoControl to a ServoController
    * 
-   * @param controller
-   * @throws Exception
+   * @param controller c
+   * @throws Exception e
    */
   void attachServoController(ServoController controller) throws Exception;
   
@@ -68,7 +68,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * the one and only one which 
    * detaches a 'specific' ServoControl from ServoController
    * 
-   * @param controller
+   * @param controller e
    * @throws Exception e
    */
   void detachServoController(ServoController controller) throws Exception;
@@ -85,9 +85,9 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * attach with different parameters - it should set fields then call the "one and only" 
    * single parameter attachServoController(controller)
    * 
-   * @param controller
-   * @param pin
-   * @throws Exception
+   * @param controller the controller
+   * @param pin the pin
+   * @throws Exception e
    */
   
   void attach(ServoController controller, int pin) throws Exception;
@@ -206,7 +206,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * set the pin of the servo this does not 'attach' energize the pin only set
    * the pin value
    * 
-   * @param pin
+   * @param pin the pin number for the servo
    */
   void setPin(int pin);
 
