@@ -224,6 +224,7 @@ public class PeerDiscovery {
     /**
      * Called whenever an exception is thrown from the listen thread. The listen
      * thread should now be dead
+     * @param e e
      */
     public void handle(Exception e) {
       e.printStackTrace();

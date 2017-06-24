@@ -198,6 +198,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * Recursively builds Peer type information - which is not instance specific.
    * Which means it will not prefix any of the branches with a instance name
+   * @param myKey m
+   * @param serviceClass class 
+   * @return a map of string to service reservation
    * 
    */
   static public TreeMap<String, ServiceReservation> buildDna(String myKey, String serviceClass) {
@@ -289,6 +292,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    *          - type of class being constructed
    * @param comment
    *          - added comment
+   * @return a map
    */
   static public TreeMap<String, ServiceReservation> buildDna(TreeMap<String, ServiceReservation> dna, String myKey, String serviceClass, String comment) {
 
@@ -388,6 +392,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * copyShallowFrom is used to help maintain state information with
+   * @param target t
+   * @param source s
+   * @return o
    */
   public static Object copyShallowFrom(Object target, Object source) {
     if (target == source) { // data is myself - operating on local copy
@@ -532,6 +539,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * - from which it will be accessible for create methods
    * 
    * template merge with existing dna
+   * @param myKey the key
+   * @param className the class name
    */
   public void mergePeerDna(String myKey, String className) {
     if (serviceType != null) {
@@ -608,6 +617,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * a method to recursively move all peer children of this server
+   * @param myKey key
+   * @param actualName name 
+   * @param fullTypeName  full 
+   * @param comment a comment
    */
   public void movePeerDna(String myKey, String actualName, String fullTypeName, String comment) {
     ServiceType meta = getMetaData(fullTypeName);
@@ -633,6 +646,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * Reserves a name for a root level Service. allows modifications to the
    * reservation map at the highest level
+   * @param key the key
+   * @param simpleTypeName the type 
+   * @param comment a comment
    */
   static public void reserveRoot(String key, String simpleTypeName, String comment) {
     // strip delimeter out if put in by key
@@ -647,6 +663,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * basic useful reset of a peer before service is created
+   * @param peerName name
+   * @param peerType type
    */
   public void setPeer(String peerName, String peerType) {
     String fullKey = String.format("%s.%s", getName(), peerName);
@@ -692,6 +710,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * sleep without the throw
+   * @param millis the time in milliseconds
    * 
    */
   public static void sleep(int millis) {
@@ -828,6 +847,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * a stronger bigger better task handler !
+   * @param taskName task name
+   * @param intervalMs how frequent in milliseconds
+   * @param delay the delay 
+   * @param method the method
+   * @param params the params to pass
    */
   public void addTask(String taskName, int intervalMs, int delay, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
@@ -928,6 +952,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    * FIXME - if not local - it needs to be prefixed by the gateway e.g.
    * {remote}.arduino.serial
+   * @param reservedKey r
+   * @return service interface
    */
   /*
    * public String getPeerName(String key){ if
@@ -965,6 +991,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    * This method will update the registry, additionally it will block until the
    * refresh response comes back
+   * @param pulse p
+   * @return a heartbeat
    */
 
   public Heartbeat echoHeartbeat(Heartbeat pulse) {
@@ -1115,6 +1143,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * FIXME - the SwingGui currently has attachGUI() and detachGUI() - these are
    * to bind Services with their swing views/tab panels. It should be
    * generalized to this attach method
+   * @param subpath s
    * 
    * @return if successful
    * 
@@ -1482,6 +1511,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * framework diagnostic publishing method for examining load, capacity, and
    * throughput of Inbox &amp; Outbox queues
+   * @param stats s
+   * @return the stats
    */
   public QueueStats publishQueueStats(QueueStats stats) {
     return stats;
@@ -1489,6 +1520,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * publishing point for the whole service the entire Service is published
+   * @return the service
    */
   public Service publishState() {
     return this;
@@ -1736,6 +1768,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * this send forces remote connect - for registering services
+   * @param url u
+   * @param method m 
+   * @param param1 the param
    */
   public void send(URI url, String method, Object param1) {
     Object[] params = new Object[1];
@@ -1963,6 +1998,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * set status broadcasts an info string to any subscribers
+   * @param msg m
+   * @return string
    */
   public String info(String msg) {
     Status status = Status.info(msg);
@@ -1981,6 +2018,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * error only channel publishing point versus publishStatus which handles
    * info, warn &amp; error
+   * @param status status
+   * @return the status
    */
   public Status publishError(Status status) {
     return status;
@@ -2044,6 +2083,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * Calls the static method getMetaData on the appropriate class. The class
    * static data is passed back as a template to be merged in with the global
    * static dna
+   * @param serviceClass sc
+   * @return the service type info
    */
   static public ServiceType getMetaData(String serviceClass) {
     String serviceType;

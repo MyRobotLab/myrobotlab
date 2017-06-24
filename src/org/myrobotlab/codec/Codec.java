@@ -60,7 +60,7 @@ public interface Codec {
   public String getMimeType();
 
   /**
-   * different strategies of encoding may in the end have the same mime type so
+   * @return different strategies of encoding may in the end have the same mime type so
    * a key is needed to identify the exact type
    */
 

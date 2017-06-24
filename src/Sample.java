@@ -56,6 +56,7 @@ public class Sample implements MqttCallback {
    *
    * This method handles parsing of the arguments specified on the command-line
    * before performing the specified action.
+   * @param args a
    */
   public static void main(String[] args) {
 

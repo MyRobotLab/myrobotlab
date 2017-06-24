@@ -257,6 +257,7 @@ public class VirtualMsg {
 
 	/**
 	 * want to grab it when SerialDevice is created
+	 * @param b true/false
 	 */
 	/*
 	static public synchronized Msg getInstance(MrlComm arduino, SerialDevice serial) {
@@ -1475,6 +1476,7 @@ public class VirtualMsg {
   /**
    * enable acks on both sides Arduino/Java-Land
    * and MrlComm-land
+   * @param b true/false
    */
   public void enableAcks(boolean b){
     // disable local blocking

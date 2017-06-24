@@ -103,6 +103,8 @@ public class Util {
 
   /**
    * Creates an image compatible with the current display
+   * @param width int
+   * @param height int
    * 
    * @return A BufferedImage with the appropriate color model
    */

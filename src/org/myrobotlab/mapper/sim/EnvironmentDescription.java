@@ -84,7 +84,7 @@ public class EnvironmentDescription {
     defaultSettings();
   }
 
-  /** Add a object (Agent or BlockWorldObject). */
+  /* Add a object (Agent or BlockWorldObject). */
   public void add(Object object) {
 
     objects.add(object);
@@ -132,7 +132,7 @@ public class EnvironmentDescription {
     light2Position.set(x, y, z);
   }
 
-  /** Use physics in simulation. */
+  /* Use physics in simulation. */
   public void setUsePhysics(boolean use) {
     usePhysics = use;
   }
@@ -147,7 +147,7 @@ public class EnvironmentDescription {
     worldSize = size;
   }
 
-  /** Shows or hide the X,Y and Z axis. */
+  /* Shows or hide the X,Y and Z axis. */
   public void showAxis(boolean show) {
     hasAxis = show;
   }

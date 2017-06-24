@@ -94,6 +94,7 @@ public class ProcessData implements Serializable {
 
 	/**
 	 * copy of a ProcessData - threaded data will not be copied
+	 * @param pd the process data
 	 */
 	public ProcessData(ProcessData pd) {
 		this.id = pd.id;

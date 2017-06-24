@@ -124,6 +124,7 @@ public class Status implements Serializable {// extends Exception {
   /**
    * for minimal amount of information error is assumed, and info is detail of
    * an ERROR
+   * @param detail d
    */
   public Status(String detail) {
     this.level = ERROR;
