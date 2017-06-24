@@ -46,13 +46,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -67,7 +67,7 @@ import org.slf4j.Logger;
  * 
  */
 @Deprecated // close source, closed service, no fun
-public class AcapelaSpeech extends Service implements TextListener, SpeechSynthesis, AudioListener {
+public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListener, AudioListener {
 
   transient public final static Logger log = LoggerFactory.getLogger(AcapelaSpeech.class);
   private static final long serialVersionUID = 1L;

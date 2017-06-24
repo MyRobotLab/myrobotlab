@@ -1,5 +1,7 @@
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.framework.interfaces.Attachable;
+
 public interface UltrasonicSensorController extends Attachable {
 	
 	// > ultrasonicSensorAttach/deviceId/triggerPin/echoPin

@@ -25,7 +25,11 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface ServoControl extends Attachable, AbsolutePositionControl, ServiceInterface {
+import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.MessageSubscriber;
+import org.myrobotlab.framework.interfaces.NameProvider;
+
+public interface ServoControl extends AbsolutePositionControl, Attachable, MessageSubscriber {
 
   // FIXME - do we want to support this & what do we expect from
   // 1. should it be energsetAbsoluteSpeedized when initially attached?
@@ -60,11 +64,13 @@ public interface ServoControl extends Attachable, AbsolutePositionControl, Servi
    */
   void attachServoController(ServoController controller) throws Exception;
   
-  void attach(ServoController controller, int pin) throws Exception;
-
-  void attach(ServoController controller, int pin, double pos) throws Exception;
-
-  void attach(ServoController controller, int pin, double pos, double speed) throws Exception;
+  /**
+   * the one and only one which 
+   * detaches a 'specific' ServoControl from ServoController
+   * 
+   * @param controller
+   */
+  void detachServoController(ServoController controller) throws Exception;
 
   /**
    * determines if a 'specific' controller is currently attached
@@ -73,14 +79,22 @@ public interface ServoControl extends Attachable, AbsolutePositionControl, Servi
    * @return
    */
   public boolean isAttachedServoController(ServoController controller);
-
+  
   /**
-   * the one and only one which 
-   * detaches a 'specific' ServoControl from ServoController
+   * attach with different parameters - it should set fields then call the "one and only" 
+   * single parameter attachServoController(controller)
    * 
    * @param controller
+   * @param pin
+   * @throws Exception
    */
-  void detachServoController(ServoController controller);
+  
+  void attach(ServoController controller, int pin) throws Exception;
+
+  void attach(ServoController controller, int pin, double pos) throws Exception;
+
+  void attach(ServoController controller, int pin, double pos, double speed) throws Exception;
+  
 
   /**
    * attach "Pin" - simple command to energize the pin. Equivalent to Arduino
@@ -216,9 +230,7 @@ public interface ServoControl extends Attachable, AbsolutePositionControl, Servi
    * e.g.  leftEye.sync(rightEye)
    * @param sc
    */
-  default public void sync(ServoControl sc) {
-    subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
-  }
+  public void sync(ServoControl sc);
   
   /**
    * A default position for the servo.
@@ -240,21 +252,4 @@ public interface ServoControl extends Attachable, AbsolutePositionControl, Servi
   // WTF ?
   void addIKServoEventListener(NameProvider service);
   
-  default public double toUs(double degrees) {
-    // arduino docs 
-    // https://www.arduino.cc/en/Reference/ServoWriteMicroseconds
-    // (degrees * 5.5) + 1000;
-    // although arduino code does it differently
-    // 
-    // http://www.robotshop.com/forum/converting-servo-pulses-to-degrees-t4856
-    // (degrees * 10) + 590; // for  (2390 - 590)
-    
-    // return (degrees * 5.5) + 1000;
-    return (int) Math.round((degrees * (2400 - 544) / 180) + 544);
-  };
-  
-  default public double toDegrees(double us) {
-    return (us - 544) / 10;
-  };
-
 }

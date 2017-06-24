@@ -228,7 +228,7 @@ public class JoystickGui extends ServiceGui implements ActionListener, ItemListe
   }
 
   @Override
-  public void itemStateChanged(ItemEvent e) {
+  public void itemStateChanged(final ItemEvent e) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {

@@ -46,6 +46,7 @@ import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.SystemResources;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -57,7 +58,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.RepoInstallListener;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 

@@ -10,12 +10,12 @@ import java.util.Map;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.MessageSender;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.MessageSender;
-import org.myrobotlab.service.interfaces.NameProvider;
 import org.slf4j.Logger;
 
 /**

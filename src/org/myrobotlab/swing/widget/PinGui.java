@@ -43,10 +43,10 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.myrobotlab.framework.interfaces.MessageSender;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.data.PinData;
-import org.myrobotlab.service.interfaces.MessageSender;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.swing.interfaces.DisplayProvider;
 import org.slf4j.Logger;

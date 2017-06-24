@@ -31,10 +31,10 @@ import java.awt.event.ActionListener;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 public class NoGui extends ServiceGui implements ActionListener {

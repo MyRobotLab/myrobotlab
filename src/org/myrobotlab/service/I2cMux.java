@@ -9,15 +9,15 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.I2CDeviceMap;
-import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -259,16 +259,6 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 		meta.setAvailable(true);
 		meta.setSponsor("Mats");
 		return meta;
-	}
-
-	@Override
-	public int getAttachedCount() {
-		return i2cDevices.size();
-	}
-
-	@Override
-	public Set<String> getAttachedNames() {
-		return i2cDevices.keySet();
 	}
 	
 	 // TODO - this could be Java 8 default interface implementation

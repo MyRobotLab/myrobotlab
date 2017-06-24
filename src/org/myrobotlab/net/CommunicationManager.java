@@ -6,14 +6,14 @@ import java.util.HashMap;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.interfaces.NameProvider;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.interfaces.NameProvider;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**

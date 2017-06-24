@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.BoardInfo;
@@ -28,6 +27,8 @@ import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.i2c.I2CBus;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
@@ -38,7 +39,6 @@ import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
-import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -515,7 +515,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// if no change - just return the values
 		if ((pinIndex != null && board.contains("mega") && pinIndex.size() == 70)
 				|| (pinIndex != null && !board.contains("mega") && pinIndex.size() == 20)) {
-			return pinIndex.entrySet().stream().map(x -> x.getValue()).collect(Collectors.toList());
+		  return new ArrayList<PinDefinition>(pinIndex.values());
 		}
 
 		// create 2 indexes for fast retrieval
@@ -735,7 +735,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return deviceIndex.get(deviceId).getDevice();
 	}
 
-	Integer getDeviceId(Attachable device) {
+	Integer getDeviceId(NameProvider device) {
 		return getDeviceId(device.getName());
 	}
 
@@ -1534,7 +1534,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			DeviceMapping dmap = deviceList.get(name);
 			Attachable device = dmap.getDevice();
 			log.info("unsetting device {}", name);
-			device.detach(name);
+			try {
+			  device.detach(name);
+			} catch(Exception e){
+			  log.error("detaching threw", e);
+			}
 		}
 
 		// reset Java-land
@@ -1919,10 +1923,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return deviceList.size();
 	}
 
-	@Override
-	public Set<String> getAttachedNames() {
-		return deviceList.keySet();
-	}
 
 	@Override
 	public void detach(String controllerName) {
@@ -2140,5 +2140,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			log.error("main threw", e);
 		}
 	}
+	
+  @Override
+  public void connect(String port, int rate) throws Exception {
+     connect(port, rate, 8, 1, 0);
+  }
 
 }

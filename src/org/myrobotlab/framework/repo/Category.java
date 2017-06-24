@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-import org.myrobotlab.service.interfaces.NameTypeProvider;
+import org.myrobotlab.framework.interfaces.NameTypeProvider;
 
 public class Category implements Comparator<Category>, Serializable, NameTypeProvider {
   private static final long serialVersionUID = 1L;

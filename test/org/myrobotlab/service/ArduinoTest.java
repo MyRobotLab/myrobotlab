@@ -20,10 +20,10 @@ import org.junit.runner.notification.RunListener;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.arduino.virtual.MrlServo;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.PinData;
-import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.SerialDevice;
@@ -302,13 +302,13 @@ public class ArduinoTest implements PinArrayListener {
     // verify its attached
     assertTrue(servo.isAttached());
     assertTrue(servo.isAttachedServoController(arduino));
-    assertTrue(arduino.getAttachedNames().contains(servo.getName()));
+    assertTrue(arduino.getAttached().contains(servo.getName()));
 
     // detach it
     arduino.detach(servo);
 
     // verify its detached
-    assertFalse(arduino.getAttachedNames().contains(servo.getName()));
+    assertFalse(arduino.getAttached().contains(servo.getName()));
     assertFalse(servo.isPinAttached());
     assertFalse(servo.isAttachedServoController(arduino));
 
@@ -318,7 +318,7 @@ public class ArduinoTest implements PinArrayListener {
     // verify its attached
     assertTrue(servo.isAttached());
     assertTrue(servo.isAttachedServoController(arduino));
-    assertTrue(arduino.getAttachedNames().contains(servo.getName()));
+    assertTrue(arduino.getAttached().contains(servo.getName()));
 
     // servo should have the correct pin
     assertTrue(servoPin == servo.getPin());
@@ -400,7 +400,7 @@ public class ArduinoTest implements PinArrayListener {
     // notify and process releasing itself from attached 
     // services
     servo.releaseService();
-    assertFalse(arduino.getAttachedNames().contains(servo.getName()));
+    assertFalse(arduino.getAttached().contains(servo.getName()));
     assertFalse(servo.isAttached());
     assertFalse(servo.isAttachedServoController(arduino));
 

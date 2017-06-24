@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -20,7 +21,6 @@ import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**

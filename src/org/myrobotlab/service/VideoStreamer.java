@@ -12,6 +12,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.MjpegServer;
+import org.myrobotlab.service.abstracts.AbstractVideoSink;
 import org.myrobotlab.service.interfaces.VideoSink;
 import org.myrobotlab.service.interfaces.VideoSource;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class VideoStreamer extends Service implements VideoSink {
+public class VideoStreamer extends AbstractVideoSink /*extends Service implements VideoSink*/ {
 
   private static final long serialVersionUID = 1L;
 
@@ -63,8 +64,12 @@ public class VideoStreamer extends Service implements VideoSink {
   }
 
   public void attach(String videoSource) {
-    VideoSource vs = (VideoSource) Runtime.getService(videoSource);
-    attach(vs);
+    try {
+      VideoSource vs = (VideoSource) Runtime.getService(videoSource);
+      attach(vs);
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   @Override
@@ -124,7 +129,6 @@ public class VideoStreamer extends Service implements VideoSink {
     super.startService();
     start();
   }
-  
 
   /**
    * Stops the video streamer

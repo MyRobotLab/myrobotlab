@@ -47,9 +47,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.swing.widget.Style;
 import org.myrobotlab.swing.widget.SwingGraphVertex;
 import org.myrobotlab.swing.widget.SwingGraphVertex.Type;

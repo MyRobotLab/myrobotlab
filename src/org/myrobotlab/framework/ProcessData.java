@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.interfaces.Invoker;
 import org.slf4j.Logger;
 
 /**

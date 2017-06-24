@@ -6,18 +6,15 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.SerialDevice;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
-
-import javafx.scene.shape.MoveTo;
 
 /**
  *
@@ -47,6 +44,26 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
 
   transient HashMap<String, ServoControl> servos = new HashMap<String, ServoControl>();
 
+  Integer defaultBaud = 9600;
+  
+  static public double toUs(double degrees) {
+    // arduino docs 
+    // https://www.arduino.cc/en/Reference/ServoWriteMicroseconds
+    // (degrees * 5.5) + 1000;
+    // although arduino code does it differently
+    // 
+    // http://www.robotshop.com/forum/converting-servo-pulses-to-degrees-t4856
+    // (degrees * 10) + 590; // for  (2390 - 590)
+    
+    // return (degrees * 5.5) + 1000;
+    return (int) Math.round((degrees * (2400 - 544) / 180) + 544);
+  };
+  
+  static public double toDegrees(double us) {
+    return (us - 544) / 10;
+  };
+
+  
   public Ssc32UsbServoController(String n) {
     super(n);
   }
@@ -62,7 +79,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * Press the button to cycle through baud rates
    */
   public void connect(String port) throws IOException {
-    connect(port, 9600, 8, 1, 0);
+    connect(port, defaultBaud, 8, 1, 0);
   }
 
   /**
@@ -116,17 +133,19 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     serial.open(port, rate, databits, stopbits, parity);
   }
 
-  public void detach(ServoControl device) {
-    servos.remove(device);
+  public void detach(ServoControl servo) throws Exception {
+    if (isAttached(servo.getName())){
+      servos.remove(servo.getName());
+      servo.detach(this);
+    }
   }
-
-  @Override
-  public int getAttachedCount() {
-    return servos.size();
+  
+  public boolean isAttached(String name){
+    return servos.containsKey(name);
   }
-
+ 
   @Override
-  public Set<String> getAttachedNames() {
+  public Set<String> getAttached() {
     return servos.keySet();
   }
 
@@ -208,7 +227,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     log.info(String.format("servoMove %f", servo.getTargetOutput()));
     StringBuilder sb = new StringBuilder();
     sb.append("#").append(servo.getPin());
-    sb.append("P").append((int)servo.toUs(servo.getTargetOutput()));
+    sb.append("P").append((int)toUs(servo.getTargetOutput()));
     
     // T is 'over-calculated' - it represents 'travel time' - the time from "any" position to destination distance
     // covered in that specified time :P
@@ -294,18 +313,26 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
       ssc.attach(blue);
       ssc.attach(big);
       
+      /*
       for (int i = 400; i < 3000; ++i){
-        blue.writeMicroseconds(i);
+        big.writeMicroseconds(i);
       }
+      */
       
-      blue.setVelocity(10);
-      blue.moveTo(0);
-      blue.moveTo(90);
-      blue.moveTo(180);
-      blue.moveTo(10);
-      blue.disable();
+      /// big.setVelocity(10);
+      big.moveTo(0);
+      big.moveTo(90);
+      big.moveTo(180);
+      big.moveTo(10);
+      big.disable();
+      big.moveTo(180);
+      big.enable();
+      big.moveTo(10);
+      big.moveTo(160);
       
-      ssc.detach(blue);
+      big.detach(ssc);
+      
+      ssc.detach(big);
       
       boolean b = true;
       if (b){
@@ -336,6 +363,11 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     } catch (Exception e) {
       Logging.logError(e);
     }
+  }
+
+  @Override
+  public void connect(String port, int rate) throws Exception {
+     connect(port, rate, 8, 1, 0);
   }
 
 }

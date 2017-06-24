@@ -9,6 +9,7 @@ import java.util.concurrent.BlockingQueue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -16,7 +17,6 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.TestThrower;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
-import org.myrobotlab.service.interfaces.NameProvider;
 import org.slf4j.Logger;
 
 public class MessageTest implements NameProvider {

@@ -2,6 +2,8 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.List;
 
+import org.myrobotlab.framework.interfaces.NameProvider;
+
 public interface PortPublisher extends NameProvider {
 	
 	public String publishConnect(String portName);

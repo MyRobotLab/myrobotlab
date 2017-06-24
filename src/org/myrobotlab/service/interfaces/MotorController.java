@@ -25,6 +25,8 @@
 
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.framework.interfaces.Attachable;
+
 public interface MotorController extends Attachable {
 
 		

@@ -27,6 +27,7 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.List;
 
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.NeoPixel;
 
 public interface NeoPixelController extends Attachable {

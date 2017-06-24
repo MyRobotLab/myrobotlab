@@ -6,17 +6,17 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.myrobotlab.arduino.ArduinoUtils;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
-public class MimicSpeech extends Service implements TextListener, SpeechSynthesis {
+public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener {
   public final static Logger log = LoggerFactory.getLogger(MimicSpeech.class);
 	private static final long serialVersionUID = 1L;
 	private String currentVoice = "slt";

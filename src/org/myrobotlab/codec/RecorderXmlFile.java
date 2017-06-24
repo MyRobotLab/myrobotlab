@@ -3,7 +3,7 @@ package org.myrobotlab.codec;
 import java.io.IOException;
 
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.service.interfaces.NameProvider;
+import org.myrobotlab.framework.interfaces.NameProvider;
 
 public class RecorderXmlFile implements Recorder {
 

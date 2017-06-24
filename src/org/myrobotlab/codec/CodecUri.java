@@ -6,8 +6,8 @@ import java.net.URLDecoder;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.TypeConverter;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 public class CodecUri {

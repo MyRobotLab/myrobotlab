@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -166,5 +167,15 @@ public class Motor extends AbstractMotor {
     }
 
   }
+  
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(AbstractMotor.class.getCanonicalName());
+    meta.addDescription("General Motor Service dual pwm");
+    meta.addCategory("motor");
+
+    return meta;
+  }
+
 
 }

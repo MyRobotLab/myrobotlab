@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -36,7 +37,6 @@ import org.myrobotlab.service.interfaces.QueueSource;
 import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -1417,5 +1417,10 @@ public class Serial extends Service
 	public int parity(){
 		return parity;
 	}
+
+  @Override
+  public void connect(String port, int rate) throws Exception {
+    connect(port, rate, 8, 1, 0);
+  }
 
 }

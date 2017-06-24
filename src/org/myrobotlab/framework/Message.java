@@ -31,9 +31,9 @@ import java.util.HashSet;
 
 // FIXME - should 'only' have jvm imports - no other dependencies
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.NameProvider;
 
 /**
  * @author GroG

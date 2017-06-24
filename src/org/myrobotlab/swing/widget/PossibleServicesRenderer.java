@@ -7,11 +7,11 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 // FIXME - checkingForUpdates needs to process ? versus display current

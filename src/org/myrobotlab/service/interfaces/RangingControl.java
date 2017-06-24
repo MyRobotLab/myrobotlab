@@ -1,6 +1,8 @@
 package org.myrobotlab.service.interfaces;
 
-public interface RangingControl extends Attachable {
+import org.myrobotlab.framework.interfaces.NameProvider;
+
+public interface RangingControl extends NameProvider {
 
   public void startRanging();
   public void stopRanging();

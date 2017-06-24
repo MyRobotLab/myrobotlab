@@ -18,9 +18,9 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 @Ignore

@@ -1,4 +1,4 @@
-package org.myrobotlab.service.interfaces;
+package org.myrobotlab.framework.interfaces;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -20,35 +20,37 @@ import org.myrobotlab.service.Runtime;
 public interface Attachable extends NameProvider {
 
 	/**
-	 * detach the controller with this name from the control service
+	 * detach the attachable with this name from the service by name
 	 * 
 	 * @param service
 	 */
-	default public void detach(String service){
-	  detach(Runtime.getService(service));
-	}
+	public void detach(String service);
 	
-	
-	default public void detach(Attachable service){
-	  
-	}
+	/**
+	 * detach the attachable with this name from the service by reference
+	 * 
+	 * @param service
+	 */
+	public void detach(Attachable service);
 
 	/**
-	 * returns if the DeviceController has been set or not
+	 * returns if the Attachable has been set or not - name interface
 	 * @return
 	 */
-	default public boolean isAttached(String name){
-	  return false;
-	}
+	public boolean isAttached(String name);
+	
+	 /**
+   * returns if the Attachable has been set or not - name interface
+   * @return
+   */
+  public boolean isAttached(Attachable instance);
+
 	
 	/**
-	 * returns the set of attached services to this service
+	 * returns the set of attached service names to this service
 	 * @return
 	 */
-	default public Set<String> getAttached() {
-	  Set<String> ret = new TreeSet<String>();
-	  return ret;
-	}
+	public Set<String> getAttached();
 	
 	 /**
    * the "routing" attach - routes to a specific strongly typed attach of the
@@ -56,45 +58,29 @@ public interface Attachable extends NameProvider {
    * 
    * @param name
    */
-  /*
-   * HEH - this did not work - trying to generalize that which should not be
-   * generalized :P public void attach(String name) throws Exception;
-   * 
-   * public void attach(Attachable instance) throws Exception;
-   */
+  public void attach(Attachable service) throws Exception;
   
-  default public void attach(Attachable service) throws Exception {
-    /*
-    if (isAttached(service)){
-      return;
-    }
-    service.attach(this);
-    */
-    // error("don't know how to attach a %s", service.getClass().getSimpleName());
-  }
-  /*
-   * default public boolean isAttached(Attachable instance){ return true; }
-   */
   
-  default public void attach(String service) throws Exception {
-    attach(Runtime.getService(service));
-  }  
+  public void attach(String service) throws Exception;
   
   
   /**
    * @return - the current count of devices its controlling
    */
+  /*
   default public int getAttachedCount(){
     return 0;
   }
-  
+  */
   /**
    * get the current set of connected 'control' devices attached to this controller
    * @return
    */
+  /*
   default public Set<String> getAttachedNames(){
     Set<String> ret = new TreeSet<String>();
     return ret;
   }
+  */
 
 }

@@ -22,7 +22,5 @@ public interface Microcontroller extends PinArrayControl {
 	 * Parallax/Prop I think has several boards
 	 * @return
 	 */
-	static public List<BoardType> getBoardTypes(){
-	  return null;
-	}
+	public List<BoardType> getBoardTypes();
 }

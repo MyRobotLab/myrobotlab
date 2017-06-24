@@ -53,6 +53,7 @@ import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.StatusLevel;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -63,7 +64,6 @@ import org.myrobotlab.net.Connection;
 //import org.myrobotlab.service.WebGUI3.Error;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 //import org.myrobotlab.webgui.WebGUIServlet;
 import org.slf4j.Logger;
 
