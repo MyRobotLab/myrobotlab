@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
 
-import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 
 /**
  * ServiceEnvironment represents a instance of MRL with a null URI it will be

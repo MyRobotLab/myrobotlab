@@ -102,7 +102,7 @@ public class ImapEmailConnector extends AbstractConnector {
     // TODO: Implement me and have a publishEmail method.
     Store store = connect();
     
-    IMAPFolder inbox = (IMAPFolder) store.getFolder("inbox");
+    final IMAPFolder inbox = (IMAPFolder) store.getFolder("inbox");
     inbox.open(Folder.READ_ONLY);
 
     // TODO: consider moving this into it's own class. 

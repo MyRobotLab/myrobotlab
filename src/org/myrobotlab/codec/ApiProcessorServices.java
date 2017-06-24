@@ -7,10 +7,10 @@ import java.net.URI;
 import java.net.URLDecoder;
 
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.MessageSender;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.MessageSender;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**

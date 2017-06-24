@@ -32,6 +32,8 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.NameProvider;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -40,10 +42,8 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
-import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
@@ -885,6 +885,12 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
     @Override
     public void addIKServoEventListener(NameProvider service) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public void sync(ServoControl sc) {
       // TODO Auto-generated method stub
       
     }

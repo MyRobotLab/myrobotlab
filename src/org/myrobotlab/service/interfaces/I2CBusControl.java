@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface I2CBusControl extends Attachable {
+public interface I2CBusControl {
 
 	/** Mats:
 	 * Not sure what methods to put here yet
@@ -36,8 +36,8 @@ public interface I2CBusControl extends Attachable {
 	public boolean setController(I2CController controller);
 	public boolean setController(I2CController controller, String deviceBus, String deviceAddress);
 	public void unsetController();
-	
+	*/
 	public void setDeviceBus(String deviceBus);
 	public void setDeviceAddress(String deviceAddress);
-	*/
+	
 }

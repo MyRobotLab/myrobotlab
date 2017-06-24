@@ -8,12 +8,12 @@ import java.util.Set;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.i2c.I2CFactory;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -311,13 +311,9 @@ public class RasPi extends Service implements I2CController {
 		return meta;
 	}
 
-	@Override
-	public int getAttachedCount() {
-		return i2cDevices.size();
-	}
 
 	@Override
-	public Set<String> getAttachedNames() {
+	public Set<String> getAttached() {
 		return i2cDevices.keySet();
 	}
 

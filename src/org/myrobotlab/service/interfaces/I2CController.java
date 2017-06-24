@@ -2,6 +2,8 @@ package org.myrobotlab.service.interfaces;
 
 import java.io.IOException;
 
+import org.myrobotlab.framework.interfaces.Attachable;
+
 /*
  * This interface is based on the methods for i2c read and write in the Pi4J project
  * It's used by RasPi and Arduino services to be able to use the same

@@ -153,7 +153,7 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
   
   
   
-  public void onState(WebkitSpeechRecognition WebkitSpeechRecognition) {
+  public void onState(final WebkitSpeechRecognition WebkitSpeechRecognition) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {

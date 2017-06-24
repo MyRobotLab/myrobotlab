@@ -12,13 +12,12 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -52,7 +51,7 @@ import com.amazonaws.services.polly.model.Voice;
  * @author gperry
  *
  */
-public class Polly extends Service implements SpeechSynthesis, AudioListener {
+public class Polly extends AbstractSpeechSynthesis implements AudioListener {
 
   private static final long serialVersionUID = 1L;
 

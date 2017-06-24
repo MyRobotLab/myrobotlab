@@ -13,8 +13,8 @@ import java.util.TreeMap;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
+import org.myrobotlab.framework.interfaces.StateSaver;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.interfaces.StateSaver;
 import org.slf4j.Logger;
 
 /**

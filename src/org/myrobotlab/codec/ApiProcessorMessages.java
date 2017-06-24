@@ -4,8 +4,8 @@ import java.io.OutputStream;
 import java.net.URI;
 
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.interfaces.MessageSender;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.interfaces.MessageSender;
 import org.slf4j.Logger;
 
 public class ApiProcessorMessages implements ApiProcessor {

@@ -61,7 +61,7 @@ public class CliGui extends ServiceGui implements KeyListener {
 
 	public void keyPressed(KeyEvent e) {
 		log.info("keyPressed {} {} {}", e.getKeyCode(), e.getKeyChar(), input.length());
-		if (e.getKeyChar() == com.sun.glass.events.KeyEvent.VK_ALT) {
+		if (e.getKeyChar() == KeyEvent.VK_ALT) {
 			// e.consume();
 			return;
 		}

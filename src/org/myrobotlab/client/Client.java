@@ -11,9 +11,9 @@ import java.net.UnknownHostException;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MessageService;
 import org.myrobotlab.framework.Outbox;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.interfaces.NameProvider;
 import org.slf4j.Logger;
 
 public class Client extends MessageService implements NameProvider {

@@ -38,19 +38,18 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.lang.Runtime;
 
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
-public class MicrosoftSpeech extends Service implements TextListener, SpeechSynthesis {
+public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextListener {
   static final Logger log = LoggerFactory.getLogger(MicrosoftSpeech.class);
 
 	// For compabilities
@@ -117,7 +116,7 @@ public class MicrosoftSpeech extends Service implements TextListener, SpeechSynt
 		Process p;
 	
 		try {
-			p = Runtime.getRuntime().exec(command);
+			p = java.lang.Runtime.getRuntime().exec(command);
 			p.waitFor();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 	
@@ -212,7 +211,7 @@ public class MicrosoftSpeech extends Service implements TextListener, SpeechSynt
 
 		// Send command
 		//executeCommand("voicetest.bat");
-		Runtime rt = Runtime.getRuntime();
+		java.lang.Runtime rt = java.lang.Runtime.getRuntime();
 		Process pr = rt.exec("voicetest.bat");
 
 		// End speak event

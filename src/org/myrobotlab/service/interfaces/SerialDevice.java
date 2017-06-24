@@ -28,9 +28,7 @@ public interface SerialDevice extends PortPublisher {
 
 	void write(int data) throws Exception;
 	
-	default void write(String data) throws Exception{
-	  write(data.getBytes());
-	}
+	void write(String data) throws Exception;
 
 	void clear();
 
@@ -39,8 +37,5 @@ public interface SerialDevice extends PortPublisher {
 	void flush();
 
 	int available();
-
-	/// void flush() throws Exception; JSSC doesn't have flush .. what the heck
-	/// ?
 
 }

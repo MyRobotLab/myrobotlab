@@ -10,11 +10,11 @@ import java.util.Iterator;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.ServiceEnvironment;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.RemoteAdapter;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**

@@ -711,7 +711,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 		});
 	}
 
-	public void removeFilterFromGui(String name) {
+	public void removeFilterFromGui(final String name) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				currentFilterListModel.removeElement(name);

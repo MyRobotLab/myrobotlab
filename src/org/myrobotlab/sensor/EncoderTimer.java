@@ -6,7 +6,7 @@ import org.myrobotlab.logging.Logging;
  * and encoding sensor which senses "time" and delivers the necessary pulses to
  * a future Encoder interface (TODO)
  * 
- * @author grperry
+ * @author GroG
  *
  */
 

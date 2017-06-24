@@ -3,10 +3,9 @@ package org.myrobotlab.i2c;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.myrobotlab.service.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 
 public class I2CBus implements Attachable, I2CBusControl {
 
@@ -18,10 +17,6 @@ public class I2CBus implements Attachable, I2CBusControl {
     this.name = Name;
   }
 
-  // @Override
-  public I2CBusController getController() {
-    return controller;
-  }
 
   @Override
   public String getName() {
@@ -36,48 +31,74 @@ public class I2CBus implements Attachable, I2CBusControl {
 
   }
 
+  @Override
+  public void detach(Attachable service) {
+    // detach / cleanup if necessary
+    // @Mats what to do here ?
+    // if (controller != null) { controller.detachDevice(device);} @Grog ?
+  }
+
   /**
-   * GOOD DESIGN - this method is the same pretty much for all Services could be
-   * a Java 8 default implementation to the interface
+   * GOOD DESIGN - this method is the same pretty much for all Services
+   * could be a Java 8 default implementation to the interface
    */
   @Override
-  public boolean isAttached(String name) {
-    return (controller != null && controller.getName().equals(name));
+  public boolean isAttached(Attachable service) {
+    return (controller != null && controller == service);
   }
 
   @Override
   public Set<String> getAttached() {
     HashSet<String> ret = new HashSet<String>();
-    if (controller != null) {
+    if (controller != null){
       ret.add(controller.getName());
     }
     return ret;
   }
 
-  @Override
-  public int getAttachedCount() {
-    if (controller != null) {
-      return controller.getAttachedCount();
-    } else {
-      return 0;
-    }
-  }
-
-  @Override
-  public Set<String> getAttachedNames() {
-    if (controller != null) {
-      return controller.getAttachedNames();
-    }
-    return new HashSet<String>();
-  }
 
   @Override
   public void detach(String controllerName) {
     if (controller == null || !controllerName.equals(controller.getName())) {
       return;
     }
-    controller.detach(getName());
+    controller.detach(this);
     controller = null;
+  }
+
+
+  @Override
+  public void setDeviceBus(String deviceBus) {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  @Override
+  public void setDeviceAddress(String deviceAddress) {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  @Override
+  public boolean isAttached(String name) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+
+  @Override
+  public void attach(Attachable service) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  @Override
+  public void attach(String service) throws Exception {
+    // TODO Auto-generated method stub
+    
   }
 
 }

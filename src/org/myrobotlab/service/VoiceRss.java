@@ -35,20 +35,14 @@ import java.util.List;
 import java.util.Stack;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -66,7 +60,7 @@ import com.voicerss.tts.AudioFormat;
 import com.voicerss.tts.VoiceParameters;
 import com.voicerss.tts.VoiceProvider;
 
-public class VoiceRss extends Service implements TextListener, SpeechSynthesis, AudioListener {
+public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, AudioListener {
 
 	transient public final static Logger log = LoggerFactory.getLogger(VoiceRss.class);
 	private static final long serialVersionUID = 1L;

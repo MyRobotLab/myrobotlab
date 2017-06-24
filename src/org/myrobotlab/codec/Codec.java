@@ -4,8 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.NameProvider;
 
 /**
  * Allows a common encoding/decoding interface for dynamic switching between

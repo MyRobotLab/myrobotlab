@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.Encoder;
@@ -40,7 +40,6 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -236,15 +235,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public Integer updatePosition(Integer position) {
     currentPos = position;
     return position;
-  }
-
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(AbstractMotor.class.getCanonicalName());
-    meta.addDescription("General Motor Service");
-    meta.addCategory("motor");
-
-    return meta;
   }
 
   @Override

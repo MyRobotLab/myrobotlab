@@ -3,7 +3,7 @@ package org.myrobotlab.service.data;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import org.myrobotlab.service.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.Attachable;
 
 public class DeviceMapping implements Serializable{	
 	/**

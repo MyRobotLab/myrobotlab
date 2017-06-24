@@ -3,7 +3,7 @@ package org.myrobotlab.codec;
 import java.io.OutputStream;
 import java.net.URI;
 
-import org.myrobotlab.service.interfaces.MessageSender;
+import org.myrobotlab.framework.interfaces.MessageSender;
 
 public interface ApiProcessor {
 

@@ -16,13 +16,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -34,7 +34,7 @@ import org.slf4j.Logger;
  * Natural Reader speech to text service based on naturalreaders.com
  * This code is basically all the same as AcapelaSpeech...
  */
-public class NaturalReaderSpeech extends Service implements TextListener, SpeechSynthesis, AudioListener {
+public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements TextListener, AudioListener {
 
   private static final long serialVersionUID = 1L;
 

@@ -9,10 +9,10 @@ import java.util.Set;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PortConnector;
@@ -337,12 +337,7 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
   }
 
   @Override
-  public int getAttachedCount() {
-    return motors.size();
-  }
-
-  @Override
-  public Set<String> getAttachedNames() {
+  public Set<String> getAttached() {
     return motors.keySet();
   }
 
@@ -430,6 +425,11 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
     } catch (Exception e) {
       Logging.logError(e);
     }
+  }
+
+  @Override
+  public void connect(String port, int rate) throws Exception {
+    connect(port, rate, 8, 1, 0);
   }
 
 }
