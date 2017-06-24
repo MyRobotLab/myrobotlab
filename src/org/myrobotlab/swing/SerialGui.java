@@ -206,7 +206,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		}
 	}
 
-	/**
+	/*
 	 * the gui is no simplified - a single broadcastState() -&gt; onState(Serial)
 	 * is used to propegate all data which needs updating. Since that is the
 	 * case a single invokeLater is used. It is unadvised to have more

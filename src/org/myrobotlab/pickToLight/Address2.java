@@ -46,7 +46,7 @@ public class Address2 {
   }
 
   /**
-   * Gets the value of the i2CAddress property.
+   * @return the value of the i2CAddress property.
    * 
    */
   public int getI2CAddress() {
@@ -54,7 +54,7 @@ public class Address2 {
   }
 
   /**
-   * Gets the value of the i2CBus property.
+   * @return  the value of the i2CBus property.
    * 
    */
   public int getI2CBus() {
@@ -72,7 +72,7 @@ public class Address2 {
     this.controller = value;
   }
 
-  /**
+  /*
    * Sets the value of the i2CAddress property.
    * 
    */
@@ -80,7 +80,7 @@ public class Address2 {
     this.i2CAddress = value;
   }
 
-  /**
+  /*
    * Sets the value of the i2CBus property.
    * 
    */

@@ -106,7 +106,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 
 	int untitledCount = 1;
 
-	/**
+	/*
 	 * Constructor
 	 * 
 	 */
@@ -300,7 +300,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 		return mi;
 	}
 
-	/**
+	/*
 	 * Build the top menu panel.
 	 * 
 	 */

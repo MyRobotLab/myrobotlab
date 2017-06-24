@@ -171,7 +171,7 @@ public class OpenCVData implements Serializable {
 		return getBufferedImage(selectedFilter);
 	}
 
-	/**
+	/*
 	 * FIXME (FIX OTHERS) NEEDS TO BE ONE AND ONLY ONE TYPE PROCESSOR LIKE THIS
 	 * ONE !!!! WITH SAME SUBKEY SIGNATURE lowest level - full key path always
 	 * required
@@ -280,7 +280,7 @@ public class OpenCVData implements Serializable {
 
 	}
 
-	/**
+	/*
 	 * FIXME implement
 	 * 
 	 * @return null
@@ -315,7 +315,7 @@ public class OpenCVData implements Serializable {
 
 	/**
 	 * OpenCV VideoProcessor will set this data collection to the last
-	 * filtername - when asked for an "image" it will give the last filter's
+	 * @param filtername - when asked for an "image" it will give the last filter's
 	 * 
 	 * @return the filter's IplImage
 	 */
@@ -437,7 +437,7 @@ public class OpenCVData implements Serializable {
 		list.add(boundingBox);
 	}
 
-	/**
+	/*
 	 * the main and typically first image data put into the OpenCVData object
 	 * 
 	 */
@@ -490,7 +490,7 @@ public class OpenCVData implements Serializable {
 		this.displayFilterName = displayFilterName;
 	}
 
-	/**
+	/*
 	 * sets the selected filter name in the OpenCVData structure provisioned
 	 * later to save entire filter? or parts ?
 	 * 
@@ -503,7 +503,7 @@ public class OpenCVData implements Serializable {
 		this.inputFilterName = inputFilterName;
 	}
 
-	/**
+	/*
 	 * sets the key - used to access the various data of a particular filter -
 	 * first set the filter name the access images, points, etc
 	 */

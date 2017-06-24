@@ -79,7 +79,7 @@ public class Node implements Serializable {
     this.name = name;
   }
 
-  /**
+  /*
    * the most important method get is the effective "search" method of memory.
    * It has an XPath like syntax the "/" means "data of" a node, so when the
    * path is /k1/k2/ - would mean get the hashmap of k2 /k1/k2 - means get the
@@ -137,7 +137,7 @@ public class Node implements Serializable {
     return name;
   }
 
-  /**
+  /*
    * a convienent cast method to get a node
    */
   public Node getNode(String path) {

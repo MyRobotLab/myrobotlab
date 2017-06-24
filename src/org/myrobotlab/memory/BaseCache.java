@@ -105,7 +105,7 @@ public abstract class BaseCache implements ManagedCache {
     return (T) new Character('\u0000');
   }
 
-  /**
+  /*
    * Get a boolean primitive value from the cache. Tests for: Boolean, Integer,
    * Byte, Short, String (parseBoolean)
    * @return false if nothing is found or the cached value is not a boolean
@@ -141,7 +141,7 @@ public abstract class BaseCache implements ManagedCache {
     return parseWithDefault((String) value, DEFAULT_BOOL);
   }
 
-  /**
+  /*
    * Get an byte primitive value from the cache. Tests for: Byte, Short, String
    * (parseByte)
    * 
@@ -169,7 +169,7 @@ public abstract class BaseCache implements ManagedCache {
     return parseWithDefault((String) value, DEFAULT_BYTE);
   }
 
-  /**
+  /*
    * Get an double primitive value from the cache. Tests for: Double, Float,
    * Integer, Byte, Short, String (parseDouble)
    * 
@@ -209,8 +209,8 @@ public abstract class BaseCache implements ManagedCache {
     }
     return parseWithDefault((String) value, DEFAULT_DOUBLE);
   }
-
-  /**
+  
+  /*
    * Get an float primitive value from the cache. Tests for: Float, Integer,
    * Byte, Short, String (parseDouble)
    * 
@@ -254,7 +254,7 @@ public abstract class BaseCache implements ManagedCache {
    */
   protected abstract Object getFromCache(String name);
 
-  /**
+  /*
    * Get an int primitive value from the cache. Tests for: Integer, Byte, Short,
    * String (parseInt)
    * 
@@ -286,7 +286,7 @@ public abstract class BaseCache implements ManagedCache {
     return parseWithDefault((String) value, DEFAULT_INT);
   }
 
-  /**
+  /*
    * Get an short primitive value from the cache. Tests for: Short, Byte, String
    * (parseShort)
    * 

@@ -31,7 +31,7 @@ public class CacheFactory {
    */
   private final ConcurrentMap<String, Cache> caches;
 
-  /**
+  /*
    * Get a handle to this factory.
    */
   public static CacheFactory getFactory() {
@@ -46,7 +46,7 @@ public class CacheFactory {
     caches = new ConcurrentHashMap<String, Cache>();
   }
 
-  /**
+  /*
    * Create a cache using a specific class. This assumes that the constructor
    * does not take any parameters.
    * 
