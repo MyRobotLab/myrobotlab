@@ -13,7 +13,7 @@ public interface I2CController extends Attachable {
 	 * This method creates a I2CDevice
 	 * @param control c
 	 * 
-	 * @param busAddress
+	 * @param busAddress bus address
 	 * @param deviceAddress local address in the i2c device
 	 */
 	void i2cAttach(I2CControl control, int busAddress, int deviceAddress);
@@ -22,7 +22,7 @@ public interface I2CController extends Attachable {
 	 * This method returns and already existing I2CDevice
 	 * 
    * @param control c
-	 * @param busAddress
+	 * @param busAddress bus address
 	 * @param deviceAddress
 	 *          local address in the i2c device
 	 * 
@@ -33,7 +33,7 @@ public interface I2CController extends Attachable {
 	 * This method writes several bytes to the i2c device from given buffer.
 	 * 
    * @param control c
-	 * @param busAddress
+	 * @param busAddress bus address
 	 * @param deviceAddress
 	 *          local address in the i2c device
 	 * @param buffer
@@ -48,8 +48,8 @@ public interface I2CController extends Attachable {
 	/**
 	 * This method reads bytes from the i2c device to given buffer.
    * @param control c
-	 * @param busAddress
-	 * @param deviceAddress
+	 * @param busAddress bus address
+	 * @param deviceAddress device address
 	 * @param buffer
 	 *          buffer of data to be read from the i2c device in one go
 	 * @param size
@@ -68,7 +68,7 @@ public interface I2CController extends Attachable {
 	 * method call
 	 * 
    * @param control c
-	 * @param busAddress
+	 * @param busAddress bus address
 	 * @param deviceAddress
 	 *          local address in the i2c device
 	 * @param writeBuffer

@@ -145,7 +145,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
     log.info("{}.onDisconnect {}", getName(), portName);
   }
 
-  /**
+  /*
    * preProcessHook is used to intercept messages and process or route them
    * before being processed/invoked in the Service.
    * 

@@ -92,7 +92,7 @@ public class TestCatcher extends Service implements SerialDataListener {
     return b;
   }
 
-  /**
+  /*
    * preProcessHook is used to intercept messages and process or route them
    * before being processed/invoked in the Service.
    * 

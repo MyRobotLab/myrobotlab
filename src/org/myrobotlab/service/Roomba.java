@@ -559,7 +559,6 @@ public class Roomba extends Service {
 
   /**
    * Spy on the Roomba as it goes about its normal business
-   * <p>
    */
 
   public void spy() {
