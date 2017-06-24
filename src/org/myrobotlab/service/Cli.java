@@ -359,7 +359,7 @@ public class Cli extends Service {
 		}
 	}
 
-	/**
+	/*
 	 * Command Line Interpreter - used for processing encoded (default RESTful)
 	 * commands from std in and returning results in (default JSON) encoded
 	 * return messages.
@@ -372,7 +372,7 @@ public class Cli extends Service {
 		super(n);
 	}
 
-	/**
+	/*
 	 * add an i/o pair to this cli for the possible purpose attaching
 	 */
 	public void add(String name, InputStream out, OutputStream in) {

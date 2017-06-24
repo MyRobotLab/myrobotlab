@@ -229,6 +229,8 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
    * 
    * contains more data than just the text, can be used for any content type
    * too, since the payload is in a byte[]
+   * @param data the http data
+   * @return the http data
    * 
    */
   public HttpData publishHttpData(HttpData data) {
@@ -238,6 +240,8 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   /**
    * publishing point for any http request this is the asynchronous callback
    * which will arrive typically at onHttpRespone(data)
+   * @param data the data
+   * @return the data
    * 
    */
   public String publishHttpResponse(String data) {

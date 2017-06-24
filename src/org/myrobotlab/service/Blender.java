@@ -108,7 +108,7 @@ public class Blender extends Service {
     super(n);
   }
 
-  /**
+  /*
    * important "attach" method for Blender - this way MRL World notifies Blender
    * to dynamically create "virtual" counterpart for device.
    * 
@@ -174,7 +174,7 @@ public class Blender extends Service {
   }
 
   // call back from blender
-  /**
+  /*
    * call back from Blender when python script does an attach to a virtual
    * device - returns name of the service attached
    */

@@ -882,7 +882,7 @@ public class InMoov extends Service {
     super.purgeTasks();
   }
 
-  /**
+  /*
    * Service registration event. On newly registered service the InMoov service
    * will set up various routing.
    * 

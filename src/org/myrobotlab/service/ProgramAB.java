@@ -359,6 +359,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * @param delay
    *          - min amount of time that must have transpired since the last
    *          response.
+   * @return the response
    */
   public Response getResponse(String session, String text, Long delay) {
     ChatData chatData = sessions.get(session);
@@ -383,6 +384,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * Return a list of all patterns that the AIML Bot knows to match against.
    * 
    * @param botName the bots name from which to return it's patterns.
+   * @return a list of all patterns loaded into the aiml brain
    */
   public ArrayList<String> listPatterns(String botName) {
     ArrayList<String> patterns = new ArrayList<String>();
@@ -395,6 +397,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Return the number of milliseconds since the last response was given -1 if a
    * response has never been given.
+   * @return milliseconds
    */
   public long millisecondsSinceLastResponse() {
     ChatData chatData = sessions.get(resolveSessionKey(currentUserName, currentBotName));
@@ -505,14 +508,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
   }
 
-  /**
+  /*
    * If a response comes back that has an OOB Message, publish that separately
    */
   public String publishOOBText(String oobText) {
     return oobText;
   }
 
-  /**
+  /*
    * publishing method of the pub sub pair - with addResponseListener allowing
    * subscriptions pub/sub routines have the following pattern
    * 
@@ -527,7 +530,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return response;
   }
 
-  /**
+  /*
    * Test only publishing point - for simple consumers
    */
   public String publishResponseText(Response response) {
@@ -557,7 +560,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     startSession(path, username, currentBotName);
   }
 
-  /**
+  /*
    * Persist the predicates for all known sessions in the robot.
    * 
    */

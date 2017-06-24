@@ -863,7 +863,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     return properties;
   }
 
-  /**
+  /*
    * single location for key generation - in case other parts are add in a
    * composite key
    */

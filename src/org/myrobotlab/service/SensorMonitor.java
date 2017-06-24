@@ -173,7 +173,7 @@ public class SensorMonitor extends Service {
 
   }
 
-  /**
+  /*
    * sensorInput is the destination of sensor data all types will funnel into a
    * pinData type - this is used to standardize and simplify the display.
    * Additionally, the source can be attached so that trace lines can be

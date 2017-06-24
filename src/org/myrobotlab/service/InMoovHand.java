@@ -93,7 +93,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     
    }
 
-  /**
+  /*
    * attach all the servos - this must be re-entrant and accomplish the
    * re-attachment when servos are detached
    */

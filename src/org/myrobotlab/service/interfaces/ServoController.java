@@ -51,7 +51,7 @@ public interface ServoController extends Attachable {
 	// this is Arduino's servo.attach
 	// void servoAttach(ServoControl servo, int pin, Integer targetOutput, Integer velocity);
 	
-	/**
+	/*
 	 * Arduino's servo.attach(pin) which is just energizing on a pin
 	 */
 	// FIXME should be servoEnable - consistent with ServoControl

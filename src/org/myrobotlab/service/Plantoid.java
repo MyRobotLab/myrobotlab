@@ -142,6 +142,7 @@ public class Plantoid extends Service {
 	 * 
 	 * Its mission is to go forth explore and be one with nature in alien
 	 * environments while reporting telemetry back to BEPSL control
+	 * @param n the name of the service
 	 * 
 	 */
 	public Plantoid(String n) {
@@ -228,8 +229,10 @@ public class Plantoid extends Service {
 	 * Connects the plantoid server's Arduino service to the appropriate serial
 	 * port. This is automatically called when the Plantoid service starts.
 	 * Default is /dev/ttyACM0
+	 * @param port com port ( ex.  com2 com4 or /dev/ttyAMA0 .. etc..)
 	 * 
 	 * @return true if connected false otherwise
+	 * @throws IOException e
 	 */
 	public boolean connect(String port) throws IOException {
 		this.port = port;

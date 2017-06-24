@@ -255,7 +255,7 @@ public class Sweety extends Service {
     rightHand.moveTo(handAngle);
   }
 
-  /**
+  /*
    * Move the left arm . Use : leftArm(shoulder angle, arm angle, forearm angle,
    * wrist angle, hand angle) -1 mean "no change"
    */
@@ -284,7 +284,7 @@ public class Sweety extends Service {
     leftHand.moveTo(handAngle);
   }
 
-  /**
+  /*
    * Set the mouth attitude . choose : smile, notHappy, speechLess, empty.
    */
   public void mouthState(String value) {
@@ -300,7 +300,7 @@ public class Sweety extends Service {
 
   }
 
-  /**
+  /*
    * drive the motors . Speed &gt; 0 go forward . Speed &lt; 0 go backward . Direction
    * &gt; 0 go right . Direction &lt; 0 go left
    */

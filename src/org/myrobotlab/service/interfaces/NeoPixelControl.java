@@ -43,7 +43,7 @@ public interface NeoPixelControl extends NameProvider {
 	 */
 	public void attach(NeoPixelController controller, int pin, int numPixel) throws Exception;
 
-	/**
+	/*
 	 * high level "detach" with internally will call detachDevice(Device device)
 	 */
 	public void detach(NeoPixelController controller);
@@ -77,7 +77,7 @@ public interface NeoPixelControl extends NameProvider {
 
 	public void turnOn();
 
-	/**
+	/*
 	 * <pre>
 	 * setAnimation
 	 * &#64;param animation - preprogramed animation

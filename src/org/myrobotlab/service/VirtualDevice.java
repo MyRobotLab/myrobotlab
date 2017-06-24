@@ -84,7 +84,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
     logic.exec(newCode);
   }
 
-  /**
+  /*
    * connecting to a virtual UART allows a Serial service to interface with a
    * mocked hardware. To do this a Serial service creates 2 stream ports and
    * twists the virtual cable between them.

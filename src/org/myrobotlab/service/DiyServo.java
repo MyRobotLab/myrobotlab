@@ -313,7 +313,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		lastActivityTime = System.currentTimeMillis();
 	}
 
-	/**
+	/*
 	 * Update the list of MotorControllers and PinArrayControls
 	 */
 	public void onRegistered(ServiceInterface s) {
@@ -380,7 +380,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		broadcastState();
 	}
 
-	/**
+	/*
 	 * Method to check if events are enabled or not
 	 */
 
@@ -457,7 +457,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		}
 	}
 
-	/**
+	/*
 	 * basic move command of the servo - usually is 0 - 180 valid range but can
 	 * be adjusted and / or re-mapped with min / max and map commands
 	 * 

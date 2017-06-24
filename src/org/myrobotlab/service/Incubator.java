@@ -146,7 +146,9 @@ public class Incubator extends Service {
   }
 
   /**
-   * install all service
+   * install all services
+   * @throws ParseException e
+   * @throws IOException e
    * 
    */
   public void installAll() throws ParseException, IOException {

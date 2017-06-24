@@ -40,7 +40,7 @@ public class YahooFinanceStockQuote extends HttpClient {
     return apiBase;
   }
 
-  /**
+  /*
    * The base url that is assocaited with the yahoo yql api.
    */
   public void setApiBase(String apiBase) {

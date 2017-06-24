@@ -6,7 +6,7 @@ public interface SerialDevice extends PortPublisher {
 
 	void open(String name) throws Exception;
 
-	/**
+	/*
 	 * FIXME - make like http://pyserial.sourceforge.net/pyserial_api.html with
 	 * blocking &amp; timeout InputStream like interface - but regrettably
 	 * InputStream IS NOT A F#(@!! INTERFACE !!!!
@@ -16,7 +16,6 @@ public interface SerialDevice extends PortPublisher {
 	 * forever :P
 	 * 
 	 * pass through to the serial device
-	 * 
 	 * @throws Exception
 	 */
 	int read() throws Exception;
