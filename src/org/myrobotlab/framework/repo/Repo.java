@@ -162,6 +162,7 @@ public class Repo implements Serializable {
    * which want a status of repo starting an install
    * @param format format
    * @param args args
+   * @return status
    */
   static public Status createStartStatus(String format, Object... args) {
     Status status = Status.info(format, args);
@@ -174,6 +175,7 @@ public class Repo implements Serializable {
    * services which want a status of repo starting finishing an install
    * @param format format
    * @param args args
+   * @return status
    */
   static public Status createFinishedStatus(String format, Object... args) {
     Status status = Status.info(format, args);
@@ -451,6 +453,7 @@ public class Repo implements Serializable {
    * useful for checking validity - not used during runtime libraries
    * 
    * @param repoDir the directory to load from
+   * @return map 
    */
   static public Map<String, Library> generateLibrariesFromRepo(String repoDir) {
     try {

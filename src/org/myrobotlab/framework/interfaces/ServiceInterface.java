@@ -19,6 +19,9 @@ public interface ServiceInterface
 	 * this is a local method which adds a request from some foreign service
 	 * with address information (otherService/callback) for a topic callback
 	 * Adds an entry on the notify list
+   * @param localTopic l
+   * @param otherService o 
+   * @param callback c
 	 * 
 	 */
 	public void addListener(String localTopic, String otherService, String callback);
@@ -59,6 +62,7 @@ public interface ServiceInterface
 
 	/**
 	 * asked by the framework - to determine if the service needs to be secure
+	 * @return true/false
 	 */
 	public boolean requiresSecurity();
 

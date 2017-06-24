@@ -59,6 +59,7 @@ public class KheperaRobot extends Agent {
    * 
    * @param pos
    *          start position.
+   * @param name name
    */
   public KheperaRobot(Vector3d pos, String name) {
     super(pos, name);

@@ -131,6 +131,7 @@ public class SampleAsyncCallback implements MqttCallback {
    *          the quality of service to delivery the message at (0,1,2)
    * @param payload
    *          the set of bytes to send to the MQTT server
+   * @throws Throwable t
    */
   public void publish(String topicName, int qos, byte[] payload) throws Throwable {
     // Use a state machine to decide which step to do next. State change occurs
@@ -202,6 +203,7 @@ public class SampleAsyncCallback implements MqttCallback {
    * @param qos
    *          the maximum quality of service to receive messages at for this
    *          subscription
+   * @throws Throwable t
    */
   public void subscribe(String topicName, int qos) throws Throwable {
     // Use a state machine to decide which step to do next. State change occurs
