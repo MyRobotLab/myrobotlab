@@ -552,6 +552,7 @@ public class InMoov extends Service {
 
   /**
    * finds most recent activity
+   * @return the timestamp of the last activity time.
    */
   public long getLastActivityTime() {
 
@@ -1080,6 +1081,9 @@ public class InMoov extends Service {
 
   /*************
    * STARTS BEGIN
+   * @param leftPort com port
+   * @param rightPort  com port
+   * @throws Exception e
    * 
    ************************/
 

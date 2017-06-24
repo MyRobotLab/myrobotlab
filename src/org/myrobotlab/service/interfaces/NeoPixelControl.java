@@ -32,12 +32,14 @@ public interface NeoPixelControl extends NameProvider {
 	/**
 	 * high level "attach" which internally will call attachDevice(Device
 	 * device, int[] config)
+	 * @param controller c 
 	 * 
 	 * @param numPixel
 	 *            - All of the config needed for the device -numPixel=number of
 	 *            pixel of the neopixel hardware
-	 * @param pin
+	 * @param pin p
 	 *            -
+	 * @throws Exception e 
 	 */
 	public void attach(NeoPixelController controller, int pin, int numPixel) throws Exception;
 

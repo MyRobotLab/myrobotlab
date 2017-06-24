@@ -251,6 +251,10 @@ public class ProcParser {
 
   /**
    * DEPRECATE - why do this? Java can do this?
+   * @return int
+   * @throws FileNotFoundException e 
+   * @throws IOException e
+   * @throws NumberFormatException e 
    */
   public static int getNumberofCores() throws FileNotFoundException, IOException, NumberFormatException {
     String[] tempData = null;

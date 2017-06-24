@@ -150,6 +150,7 @@ public class Sweety extends Service {
 
   /**
    * Attach the servos to arduino pins
+   * @throws Exception e
    */
   public void attach() throws Exception {
 	
@@ -170,6 +171,8 @@ public class Sweety extends Service {
 
   /**
    * Connect the arduino to a COM port . Exemple : connect("COM8")
+   * @param port port
+   * @throws IOException e 
    */
   public void connect(String port) throws IOException {
     arduino.connect(port);
@@ -201,6 +204,8 @@ public class Sweety extends Service {
   /**
    * Move the head . Use : head(neckTiltAngle, neckPanAngle -1 mean
    * "no change"
+   * @param neckTiltAngle tilt
+   * @param neckPanAngle pan
    */
   public void setHeadPosition(double neckTiltAngle, double neckPanAngle) {
 
@@ -218,6 +223,11 @@ public class Sweety extends Service {
   /**
    * Move the right arm . Use : leftArm(shoulder angle, arm angle, forearm
    * angle, wrist angle, hand angle) -1 mean "no change"
+   * @param shoulderAngle s
+   * @param armAngle a
+   * @param forearmAngle f 
+   * @param wristAngle w
+   * @param handAngle h
    */
   public void setRightArmPosition(double shoulderAngle, double armAngle, double forearmAngle, double wristAngle, double handAngle) {
 
@@ -410,6 +420,7 @@ public class Sweety extends Service {
 
   /**
    * Move the servos to show asked posture
+   * @param pos pos
    */
   public void posture(String pos) {
     if (pos == "neutral") {
@@ -471,6 +482,7 @@ public class Sweety extends Service {
 
   /**
    * Say text and move mouth leds
+   * @param text text being said
    */
   public synchronized void saying(String text) { // Adapt mouth leds to words
     log.info("Saying :" + text);
@@ -575,9 +587,6 @@ public class Sweety extends Service {
 
   }
 
-  /**
-   * Start the tracking services
-   */
   // TODO modify this function too fit new sweety head
   /*public void startTrack(String port, int leftCameraIndex, int rightCameraIndex) throws Exception {
     neckTilt.detach();
@@ -610,7 +619,11 @@ public class Sweety extends Service {
 
   /**
    * Start the ultrasonic sensors services
+   * Start the tracking services
+   * @param port port
+   * @throws Exception e 
    */
+
   public void startUltraSonic(String port) throws Exception {
     USfront = (UltrasonicSensor) startPeer("USfront");
     USfrontRight = (UltrasonicSensor) startPeer("USfrontRight");
@@ -629,6 +642,7 @@ public class Sweety extends Service {
 
   /**
    * Stop the tracking services
+   * @throws Exception e
    */
   public void stopTrack() throws Exception {
     leftTracker.opencv.stopCapture();

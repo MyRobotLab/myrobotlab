@@ -115,6 +115,7 @@ public class PeerDiscovery {
    *          The identifier shared by the peers that will be discovered.
    * @param port
    *          a valid port, i.e.: in the range 1025 to 65535 inclusive
+   * @throws IOException e
    */
   public PeerDiscovery(int group, int port) throws IOException {
     this.group = group;

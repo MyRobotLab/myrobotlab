@@ -38,6 +38,7 @@ public class RobotFactory extends Factory {
 
   /**
    * Adds a prebuild belt of bumpers sensor to the agent.
+   * @param agent a
    * 
    * @return the sensor object
    */
@@ -55,6 +56,8 @@ public class RobotFactory extends Factory {
   /**
    * Adds a prebuild belt of bumpers sensor to the agent. Specify the number of
    * sensors.
+   * @param agent a
+   * @param nbSensors n 
    * 
    * @return the sensor object
    */
@@ -72,6 +75,7 @@ public class RobotFactory extends Factory {
   /**
    * Adds a prebuild camera sensor to the agent. Image resolution is 100x100
    * pixels. Camera is situated on the top of the agent.
+   * @param agent a
    * 
    * @return the sensor object
    */
@@ -88,6 +92,7 @@ public class RobotFactory extends Factory {
 
   /**
    * Adds a prebuild key input to the agent.
+   * @param agent a
    * 
    * @return the sensor object
    */
@@ -104,6 +109,7 @@ public class RobotFactory extends Factory {
 
   /**
    * Adds a prebuild lamp actuator on the top of the agent .
+   * @param agent a
    * @return the actuator object
    */
   static public LampActuator addLamp(Agent agent) {
@@ -117,6 +123,7 @@ public class RobotFactory extends Factory {
 
   /**
    * Adds a prebuild light sensor to the agent.
+   * @param agent a
    * 
    * @return the sensor object
    */
@@ -132,6 +139,10 @@ public class RobotFactory extends Factory {
 
   /**
    * Adds a prebuild light sensor to the agent at a given position.
+   * @param agent a
+   * @param pos p
+   * @param angle a 
+   * @param label l
    * 
    * @return the sensor object
    */
@@ -145,6 +156,7 @@ public class RobotFactory extends Factory {
 
   /**
    * Adds a prebuild light sensor on the left of the agent .
+   * @param agent a
    * 
    * @return the sensor object
    */
@@ -159,6 +171,7 @@ public class RobotFactory extends Factory {
 
   /**
    * Adds a prebuild light sensor on the right of the agent .
+   * @param agent a
    * 
    * @return the sensor object
    */
@@ -173,6 +186,7 @@ public class RobotFactory extends Factory {
 
   /**
    * Adds a prebuild belt of sonar sensor to the agent.
+   * @param agent a
    * 
    * @return the sensor object
    */
@@ -192,6 +206,7 @@ public class RobotFactory extends Factory {
 
   /**
    * Adds a prebuild belt of sonar sensor to the agent.
+   * @param agent a
    * 
    * @param nbSonars
    *          the number of sonars.
@@ -214,6 +229,8 @@ public class RobotFactory extends Factory {
   /**
    * Sets the kinematic model to be DifferentialDrive (instead of
    * DefaultKinematic)
+   * @param agent a
+   * @return a differential kinematic
    * 
    */
   static public DifferentialKinematic setDifferentialDriveKinematicModel(Agent agent) {

@@ -31,8 +31,10 @@ public interface Codec {
    * so this method exists to handle that detail.
    * 
    * e.g. URI POST --to--&gt; Message
+   * @param data the data to decode 
    * 
    * @return decoded object
+   * @throws Exception e
    */
   public Object[] decodeArray(Object data) throws Exception;
 
@@ -46,6 +48,7 @@ public interface Codec {
    * @param type
    *          - the expected type we want to decode into
    * @return decoded object
+   * @throws Exception e
    */
   public Object decode(Object data, Class<?> type) throws Exception;
 

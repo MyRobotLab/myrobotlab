@@ -231,6 +231,9 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 
   /**
    * creates a DC Motor on port 1,2,3, or 4
+   * @param motorNum num
+   * @return a motor
+   * @throws Exception e
    * 
    */
   public Motor createDCMotor(Integer motorNum) throws Exception {
@@ -250,6 +253,9 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 
   /**
    * creates a stepper on stepper port 1 or 2
+   * @param steps s
+   * @param stepperPort port 
+   * @return a motor or null
    */
   public Motor createStepper(Integer steps, Integer stepperPort) {
     if (stepperPort == null || stepperPort < 1 || stepperPort > 2) {
