@@ -35,7 +35,7 @@ public class Loader {
   // list of all textures that have been loaded
   private List<Integer> textures = new ArrayList<Integer>();
 
-  /**
+  /*
    * create a VAO and store the values, return the raw model that represents it.
    * 
    */
@@ -48,7 +48,7 @@ public class Loader {
     return new RawModel(vaoID, indicies.length);
   };
 
-  /**
+  /*
    * Load a texture from a buffered image and return the texture id
    * 
    */
@@ -64,7 +64,7 @@ public class Loader {
     return textureID;
   };
 
-  /**
+  /*
    * load a texture from a filename and return the texture id
    */
   public int loadTexture(String fileName) {

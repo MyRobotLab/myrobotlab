@@ -18,7 +18,7 @@ public interface Cache {
    */
   void expire(String name);
 
-  /**
+  /*
    * Get a value.
    */
   <T> T get(String name, Class<? extends T> c);

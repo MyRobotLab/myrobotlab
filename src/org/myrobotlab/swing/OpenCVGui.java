@@ -608,7 +608,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 		return video0; // else return video1
 	}
 
-	/**
+	/*
 	 * onState is an interface function which allow the interface of the
 	 * SwingGui Bound service to update graphical portions of the SwingGui based
 	 * on data changes.

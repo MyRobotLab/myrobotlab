@@ -160,7 +160,7 @@ public class Memory {
     }
   }
 
-  /**
+  /*
    * put gets the last node in path - and adds a key to the node's data with a
    * node with Node named with the second parameter
    * 

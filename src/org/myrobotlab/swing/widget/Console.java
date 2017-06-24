@@ -34,7 +34,7 @@ public class Console implements Appender<ILoggingEvent> {
     caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
   }
 
-  /**
+  /*
    * Format and then append the loggingEvent to the stored JTextArea.
    */
   public void append(final String msg) {

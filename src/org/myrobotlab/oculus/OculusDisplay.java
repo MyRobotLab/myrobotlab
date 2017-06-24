@@ -485,7 +485,7 @@ public class OculusDisplay implements Runnable {
     VertexArray.unbind();
   }
 
-  /**
+  /*
    * helper function to render an image on the current bound texture.
    */
   public void renderScreen(SerializableImage img, Orientation orientation) {

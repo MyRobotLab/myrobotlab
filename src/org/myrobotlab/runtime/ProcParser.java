@@ -195,7 +195,8 @@ public class ProcParser {
   }
 
   /**
-   * Get memory usage information. Files: /proc/[pid]/statm /proc/[pid]/stat
+   * @param _processPid the process id
+   * @return memory usage information. Files: /proc/[pid]/statm /proc/[pid]/stat
    * 
    */
   public static ArrayList<String> getMemoryUsage(int _processPid) {
@@ -324,7 +325,7 @@ public class ProcParser {
     return br;
   }
 
-  /**
+  /*
    * Gathers the usage statistic from the /proc file system for CPU, Memory,
    * Disk and Network
    */

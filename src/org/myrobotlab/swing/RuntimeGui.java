@@ -473,7 +473,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     }
   }
 
-  /**
+  /*
    * scheduled event of reporting on system resources
    */
   public void onSystemResources(SystemResources resources) {
@@ -604,7 +604,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     });
   }
 
-  /**
+  /*
    * lame - deprecate - refactor - or better yet make webgui FIXME this should
    * rarely change .... remove getServiceTypeNames
    */
@@ -663,7 +663,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     });
   }
 
-  /**
+  /*
    * new Service has been created list it..
    */
   public ServiceInterface onRegistered(Service sw) {
@@ -671,7 +671,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     return sw;
   }
 
-  /**
+  /*
    * a Service of this Runtime has been released
    */
   public ServiceInterface onReleased(Service sw) {

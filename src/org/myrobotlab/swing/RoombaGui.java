@@ -198,7 +198,6 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
   public void subscribeGui() {
   }
 
-  /** */
   public boolean connect() {
     String portname = (String) portChoices.getSelectedItem();
     // roombacomm.debug=true;
@@ -496,7 +495,7 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
     protocolChoices.addActionListener(this);
   }
 
-  /**
+  /*
    * Play a (MIDI) note, that is, make the Roomba a musical instrument notenums
    * 32-127: notenum == corresponding note played thru beeper velocity ==
    * duration in number of 1/64s of a second (e.g. 64==1second) notenum 24:
@@ -558,7 +557,7 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
 
   }
 
-  /**
+  /*
    * Set to 'false' to hide the "h/w handshake" button, which seems to be only
    * needed on Windows
    */
