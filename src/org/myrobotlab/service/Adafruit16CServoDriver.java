@@ -939,21 +939,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   
   @Override
   public boolean isAttached(Attachable instance) {
-
-    for (int i = 0; i < controllers.size(); ++i){
-      Attachable attached = Runtime.getService(controllers.get(i));
-      if (instance == attached){
-        return true;
-      }
-    }
-    
-    for (String name: servoMap.keySet()){
-      Attachable attached = Runtime.getService(name);
-      if (instance == attached){
-        return true;
-      }
-    }
-    return false;
+    return (controller != null && controller.getName().equals(instance.getName()));
   }
 
   @Override
