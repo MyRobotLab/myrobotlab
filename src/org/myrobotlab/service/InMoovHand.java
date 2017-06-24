@@ -146,6 +146,9 @@ public class InMoovHand extends Service implements LeapDataListener {
   // user data needed
   /**
    * connect - user data needed
+   * @param port com port
+   * @return  true or false
+   * @throws Exception e
    * 
    */
   public boolean connect(String port) throws Exception {

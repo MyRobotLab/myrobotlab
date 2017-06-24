@@ -223,6 +223,7 @@ public class HttpRequest {
    * 
    * @param urlString
    *          the string representation of the URL to send request to
+   * @throws IOException e
    */
   public HttpRequest(String urlString) throws IOException {
     this(new URL(urlString));
@@ -233,6 +234,7 @@ public class HttpRequest {
    * 
    * @param url
    *          the URL to send request to
+   * @throws IOException e
    */
   public HttpRequest(URL url) throws IOException {
     this(url.openConnection());
@@ -243,6 +245,7 @@ public class HttpRequest {
    * 
    * @param connection
    *          an already open URL connection
+   * @throws IOException e
    */
   public HttpRequest(URLConnection connection) throws IOException {
     log.info("http request for " + connection.getURL());
@@ -392,6 +395,7 @@ public class HttpRequest {
    * 
    * @param parameters
    *          request parameters
+   * @throws IOException e
    * @return input stream with the server response
    * @see #setParameters
    */
@@ -410,6 +414,7 @@ public class HttpRequest {
    * @param parameters
    *          request parameters
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameters
    */
   public InputStream post(Map<String, String> cookies, Map<String, String> parameters) throws IOException {
@@ -426,6 +431,7 @@ public class HttpRequest {
    * @param parameters
    *          request parameters
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameters
    */
   public InputStream post(Object[] parameters) throws IOException {
@@ -441,6 +447,7 @@ public class HttpRequest {
    * @param value
    *          parameter value
    * @return input stream with the server response
+   * @throws IOException io exception
    * @see #setParameter
    */
   public InputStream post(String name, Object value) throws IOException {
@@ -460,6 +467,7 @@ public class HttpRequest {
    * @param value2
    *          second parameter value
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameter
    */
   public InputStream post(String name1, Object value1, String name2, Object value2) throws IOException {
@@ -483,6 +491,7 @@ public class HttpRequest {
    * @param value3
    *          third parameter value
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameter
    */
   public InputStream post(String name1, Object value1, String name2, Object value2, String name3, Object value3) throws IOException {
@@ -510,6 +519,7 @@ public class HttpRequest {
    * @param value4
    *          fourth parameter value
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameter
    */
   public InputStream post(String name1, Object value1, String name2, Object value2, String name3, Object value3, String name4, Object value4) throws IOException {
@@ -527,6 +537,7 @@ public class HttpRequest {
    * @param parameters
    *          request parameters
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameters
    * see setCookies
    */
@@ -539,11 +550,13 @@ public class HttpRequest {
   /**
    * posts a new request to specified URL, with parameters that are passed in
    * the argument
-   * 
+   * @param url u
    * @param parameters
    *          request parameters
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameters
+   * 
    */
   public InputStream post(URL url, Map<String, String> parameters) throws IOException {
     return new HttpRequest(url).post(parameters);
@@ -553,11 +566,13 @@ public class HttpRequest {
    * posts a new request to specified URL, with cookies and parameters that are
    * passed in the argument
    * 
+   * @param url u
    * @param cookies
    *          request cookies
    * @param parameters
    *          request parameters
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setCookies
    * @see #setParameters
    */
@@ -569,9 +584,11 @@ public class HttpRequest {
    * posts a new request to specified URL, with parameters that are passed in
    * the argument
    * 
+   * @param url u
    * @param parameters
    *          request parameters
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameters
    */
   public InputStream post(URL url, Object[] parameters) throws IOException {
@@ -580,12 +597,14 @@ public class HttpRequest {
 
   /**
    * post the POST request specified URL, with the specified parameter
+   * @param url u
    * 
    * @param name1 
    *          parameter name
    * @param value1
    *          parameter value
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1) throws IOException {
@@ -594,6 +613,7 @@ public class HttpRequest {
 
   /**
    * post the POST request to specified URL, with the specified parameters
+   * @param url u
    * 
    * @param name1
    *          first parameter name
@@ -604,6 +624,7 @@ public class HttpRequest {
    * @param value2
    *          second parameter value
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1, String name2, Object value2) throws IOException {
@@ -612,6 +633,7 @@ public class HttpRequest {
 
   /**
    * post the POST request to specified URL, with the specified parameters
+   * @param url u
    * 
    * @param name1
    *          first parameter name
@@ -626,6 +648,7 @@ public class HttpRequest {
    * @param value3
    *          third parameter value
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1, String name2, Object value2, String name3, Object value3) throws IOException {
@@ -634,6 +657,7 @@ public class HttpRequest {
 
   /**
    * post the POST request to specified URL, with the specified parameters
+   * @param url u
    * 
    * @param name1
    *          first parameter name
@@ -652,6 +676,7 @@ public class HttpRequest {
    * @param value4
    *          fourth parameter value
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1, String name2, Object value2, String name3, Object value3, String name4, Object value4) throws IOException {
@@ -661,12 +686,14 @@ public class HttpRequest {
   /**
    * posts a new request to specified URL, with cookies and parameters that are
    * passed in the argument
+   * @param url u
    * 
    * @param cookies
    *          request cookies
    * @param parameters
    *          request parameters
    * @return input stream with the server response
+   * @throws IOException e
    * @see #setCookies
    * @see #setParameters
    */
@@ -697,6 +724,7 @@ public class HttpRequest {
    *          cookie name
    * @param value
    *          cookie value
+   * @throws IOException e
    */
   public void setCookie(String name, String value) throws IOException {
     cookies.put(name, value);
@@ -707,6 +735,7 @@ public class HttpRequest {
    * 
    * @param cookies
    *          the cookie "name-to-value" map
+   * @throws IOException e
    */
   public void setCookies(Map<String, String> cookies) throws IOException {
     if (cookies == null)
@@ -720,6 +749,7 @@ public class HttpRequest {
    * @param cookies
    *          array of cookie names and values (cookies[2*i] is a name,
    *          cookies[2*i + 1] is a value)
+   * @throws IOException e
    */
   public void setCookies(String[] cookies) throws IOException {
     if (cookies == null)
@@ -736,6 +766,7 @@ public class HttpRequest {
    *          parameter name
    * @param file
    *          the file to upload
+   * @throws IOException e
    */
   public void setParameter(String name, File file) throws IOException {
     Logging.logTime("pre set file");
@@ -752,6 +783,7 @@ public class HttpRequest {
    *          parameter name
    * @param object
    *          parameter value, a File or anything else that can be stringified
+   * @throws IOException e
    */
   public void setParameter(String name, Object object) throws IOException {
     if (object instanceof File) {
@@ -768,6 +800,7 @@ public class HttpRequest {
    *          parameter name
    * @param value
    *          parameter value
+   * @throws IOException e
    */
   public void setParameter(String name, String value) throws IOException {
     boundary();
@@ -786,6 +819,7 @@ public class HttpRequest {
    *          the name of the file
    * @param is
    *          input stream to read the contents of the file from
+   * @throws IOException e
    */
   public void setParameter(String name, String filename, InputStream is) throws IOException {
     Logging.logTime("setParameter begin (after new fileinput)");
@@ -813,6 +847,7 @@ public class HttpRequest {
    * @param parameters
    *          "name-to-value" map of parameters; if a value is a file, the file
    *          is uploaded, otherwise it is stringified and sent in the request
+   * @throws IOException e
    */
   public void setParameters(Map<String, String> parameters) throws IOException {
     if (parameters == null)
@@ -830,6 +865,7 @@ public class HttpRequest {
    *          array of parameter names and values (parameters[2*i] is a name,
    *          parameters[2*i + 1] is a value); if a value is a file, the file is
    *          uploaded, otherwise it is stringified and sent in the request
+   * @throws IOException e
    */
   public void setParameters(Object[] parameters) throws IOException {
     if (parameters == null)

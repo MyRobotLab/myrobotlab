@@ -496,6 +496,8 @@ public class Cli extends Service {
 	 * for return
 	 * 
 	 * path is always absolute never relative
+	 * @param path p
+	 * @throws IOException e 
 	 * 
 	 */
 	public void ls(String path) throws IOException {

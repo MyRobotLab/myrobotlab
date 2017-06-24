@@ -617,6 +617,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * This is a middle level method to handle the details of Atmosphere and http/ws level of 
    * processing request.  It will eventually call ApiFactory.process which handles the "pure"
    * Jvm Java only processing
+   * @param r r
+   * @throws Exception e 
    * 
    */
   public void handleServicesApi(AtmosphereResource r) throws Exception {

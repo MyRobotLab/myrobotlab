@@ -545,6 +545,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * find the external ip address of NAT'd systems
    *
    * @return external or routers ip
+   * @throws Exception e
    */
   public static String getExternalIp() throws Exception {
     URL whatismyip = new URL("http://checkip.amazonaws.com");

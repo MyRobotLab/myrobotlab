@@ -11,8 +11,10 @@ public class I2CFactory {
 
   /**
    * Create new I2CBus instance
+   * @param busNumber b
    * 
    * @return Return a new I2CBus impl instance.
+   * @throws IOException e 
    */
   public static I2CBus getInstance(int busNumber) throws IOException {
 

@@ -116,6 +116,7 @@ public class Inbox implements Serializable {
    * message they invoke it.
    * 
    * @return the Message on the queue
+   * @throws InterruptedException e
    * @see Message
    */
   public Message getMsg() throws InterruptedException {

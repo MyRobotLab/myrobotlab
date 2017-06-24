@@ -798,6 +798,9 @@ public class Serial extends Service
 	 * Read size bytes from the serial port. If a timeout is set it may return
 	 * less characters as requested. With no timeout it will block until the
 	 * requested number of bytes is read.
+	 * @param length l
+	 * @return bytes
+	 * @throws InterruptedException e 
 	 * 
 	 */
 	public byte[] read(int length) throws InterruptedException {
@@ -884,6 +887,7 @@ public class Serial extends Service
 	 *            - the amount of time to wait blocking until we return. 0 ms
 	 *            means the reading thread will potentially block forever.
 	 * @return String form of the bytes read
+	 * @throws InterruptedException e
 	 */
 	public String readString(int length) throws InterruptedException {
 		byte[] bytes = read(length);

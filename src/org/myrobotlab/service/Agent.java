@@ -195,6 +195,7 @@ public class Agent extends Service {
 	 * @param file
 	 *            - file to read
 	 * @return byte array of contents
+	 * @throws IOException e
 	 */
 	static public final byte[] toByteArray(File file) throws IOException {
 
@@ -211,6 +212,8 @@ public class Agent extends Service {
 
 	/**
 	 * IntputStream to byte array
+	 * @param is i
+	 * @return bytes
 	 * 
 	 */
 	static public final byte[] toByteArray(InputStream is) {
@@ -284,6 +287,9 @@ public class Agent extends Service {
 
 	/**
 	 * checks the current branch looks if the verstion.txt has been changed
+	 * @throws IOException e
+	 * @throws URISyntaxException e 
+	 * @throws InterruptedException e
 	 * 
 	 */
 	static synchronized public void processUpdates() throws IOException, URISyntaxException, InterruptedException {
@@ -325,6 +331,9 @@ public class Agent extends Service {
 
 	/**
 	 * if there is a single instance - just restart it ...
+	 * @throws IOException e
+	 * @throws URISyntaxException e 
+	 * @throws InterruptedException e
 	 * 
 	 */
 	static public synchronized void restart() throws IOException, URISyntaxException, InterruptedException {
@@ -334,6 +343,10 @@ public class Agent extends Service {
 	}
 
 	/**
+	 * @param id id
+	 * @throws IOException e 
+	 * @throws URISyntaxException e 
+	 * @throws InterruptedException e 
 	 * 
 	 */
 	static public synchronized void restart(Integer id) throws IOException, URISyntaxException, InterruptedException {
@@ -353,6 +366,8 @@ public class Agent extends Service {
 
 	/**
 	 * return a non-running process structure from an existing one with a new id
+	 * @param id id
+	 * @return process data
 	 * 
 	 */
 	static public ProcessData copy(Integer id) {
@@ -412,6 +427,8 @@ public class Agent extends Service {
 
 	/**
 	 * gets id from name
+	 * @param name name
+	 * @return integer
 	 * 
 	 */
 	static public Integer getId(String name) {
@@ -439,7 +456,8 @@ public class Agent extends Service {
 
 	/**
 	 * gets name from id
-	 * 
+	 * @param id e
+	 * @return string
 	 */
 	static public String getName(Integer id) {
 		for (Integer pid : processes.keySet()) {
@@ -547,6 +565,7 @@ public class Agent extends Service {
 
 	/**
 	 * get a list of all the processes currently governed by this Agent
+	 * @return hash map, int to process data
 	 */
 	static public HashMap<Integer, ProcessData> getProcesses() {
 		return processes;
@@ -618,6 +637,7 @@ public class Agent extends Service {
 
 	/**
 	 * list processes
+	 * @return lp ?
 	 */
 	static public String[] lp() {
 		Object[] objs = processes.keySet().toArray();
@@ -669,6 +689,7 @@ public class Agent extends Service {
 	 * environment and dependencies - the ability to purge completely - and
 	 * start from the beginning - but it should be in another service and not
 	 * part of the Agent. The 'Test' service could use Agent as a peer
+	 * @return list of status
 	 * 
 	 */
 	static public List<Status> serviceTest() {
@@ -869,6 +890,10 @@ public class Agent extends Service {
 	 * 
 	 * @param jarPath - Absolute path to myrobotlab.jar
 	 * @param in - command line parameters
+	 * @return process
+	 * @throws IOException e 
+	 * @throws URISyntaxException e 
+	 * @throws InterruptedException e 
 	 */
 	static public synchronized Process spawn(String jarPath, String[] in)
 			throws IOException, URISyntaxException, InterruptedException {
@@ -970,6 +995,10 @@ public class Agent extends Service {
 
 	/**
 	 * DEPRECATE ? spawn2 should do this checking ?
+	 * @param id i
+	 * @throws IOException e 
+	 * @throws URISyntaxException e 
+	 * @throws InterruptedException e 
 	 * 
 	 */
 	static public void start(Integer id) throws IOException, URISyntaxException, InterruptedException {
@@ -1057,6 +1086,7 @@ public class Agent extends Service {
 	 * First method JVM executes when myrobotlab.jar is in jar form.
 	 * 
 	 * -agent "-logLevel DEBUG -service webgui WebGui"
+	 * @param args args
 	 */
 	// FIXME - add -help
 	// TODO - add jvm memory other runtime info

@@ -69,11 +69,14 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * detaches a 'specific' ServoControl from ServoController
    * 
    * @param controller
+   * @throws Exception e
    */
   void detachServoController(ServoController controller) throws Exception;
 
   /**
    * determines if a 'specific' controller is currently attached
+   * @param controller c
+   * @return true/false
    * 
    */
   public boolean isAttachedServoController(ServoController controller);
@@ -128,20 +131,20 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   public void setMinMax(double min, double max);
   
   /**
-   * min x 
+   * @return min x 
    */
   public double getMin();
   
   public double getMinInput();
   /**
-   * max x
+   * @return max x
    */
   public double getMax();
   
   public double getMaxInput();
 
   /**
-   * fractional speed settings 0.0 to 1.0
+   * @param speed fractional speed settings 0.0 to 1.0 
    * 
    */
   public void setSpeed(double speed);
