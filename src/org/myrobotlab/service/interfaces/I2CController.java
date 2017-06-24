@@ -1,7 +1,5 @@
 package org.myrobotlab.service.interfaces;
 
-import java.io.IOException;
-
 import org.myrobotlab.framework.interfaces.Attachable;
 
 /*
@@ -14,19 +12,16 @@ public interface I2CController extends Attachable {
 	/**
 	 * This method creates a I2CDevice
 	 * 
-	 * @param busaddress
-	 * @param address
-	 *          local address in the i2c device
-	 * @param serviceName
-	 *          name of the service that invokes the createI2cDevice 
+	 * @param busAddress
+	 * @param deviceAddress local address in the i2c device
 	 */
 	void i2cAttach(I2CControl control, int busAddress, int deviceAddress);
 
 	/**
 	 * This method returns and already existing I2CDevice
 	 * 
-	 * @param busaddress
-	 * @param address
+	 * @param busAddress
+	 * @param deviceAddress
 	 *          local address in the i2c device
 	 * 
 	 */
@@ -35,8 +30,8 @@ public interface I2CController extends Attachable {
 	/**
 	 * This method writes several bytes to the i2c device from given buffer.
 	 * 
-	 * @param busaddress
-	 * @param address
+	 * @param busAddress
+	 * @param deviceAddress
 	 *          local address in the i2c device
 	 * @param buffer
 	 *          buffer of data to be written to the i2c device in one go
@@ -50,7 +45,7 @@ public interface I2CController extends Attachable {
 	/**
 	 * This method reads bytes from the i2c device to given buffer.
 	 * 
-	 * @param busaddress
+	 * @param busAddress
 	 * @param buffer
 	 *          buffer of data to be read from the i2c device in one go
 	 * @param size
@@ -68,8 +63,8 @@ public interface I2CController extends Attachable {
 	 * /** This method writes and reads bytes to/from the i2c device in a single
 	 * method call
 	 *
-	 * @param busaddress
-	 * @param address
+	 * @param busAddress
+	 * @param deviceAddress
 	 *          local address in the i2c device
 	 * @param writeBuffer
 	 *          buffer of data to be written to the i2c device in one go
@@ -82,7 +77,7 @@ public interface I2CController extends Attachable {
 	 *
 	 * @return number of bytes read
 	 *
-	 * @throws IOException
+	 * IOException
 	 *           thrown in case byte cannot be read from the i2c device or i2c bus
 	 */
 	int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize);

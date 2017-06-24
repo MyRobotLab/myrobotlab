@@ -360,8 +360,6 @@ public class Agent extends SimpleAgent {
    * Add a UI panel to the agent. Typically used for displaying behavior
    * outputs. A call to this method will have for consequence the creation of a
    * dedicated window.
-   * 
-   * @param panel
    */
   public void setUIPanel(JPanel panel) {
     this.panel = panel;

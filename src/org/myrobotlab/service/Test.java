@@ -40,11 +40,11 @@ import org.slf4j.Logger;
  * 
  * @author GroG
  * 
- *         TODO - grab and report all missing Service Pages & all missing Python
+ *         TODO - grab and report all missing Service Pages &amp; all missing Python
  *         scripts !
  * 
  *         TODO - install create start stop release test TODO - serialization
- *         json + native test TODO - run Python & JavaScript tests - last method
+ *         json + native test TODO - run Python &amp; JavaScript tests - last method
  *         appended is a callback
  *
  */
@@ -428,9 +428,8 @@ public class Test extends Service implements StatusListener {
 
 	/**
 	 * need to do a type conversion here... in JS land there is no HashSet
-	 * <String> only List & HashMap types
+	 * &lt;String&gt; only List &amp; HashMap types
 	 * 
-	 * @param servicesToTest
 	 */
 	public void test(List<String> servicesToTest, List<String> testsToRun) {
 		// clear results ???
@@ -534,8 +533,6 @@ public class Test extends Service implements StatusListener {
 	 * expected to be prepared correctly by an Agent. This method will test the
 	 * heck out of a single service and save the results in a partFile
 	 * 
-	 * @param serviceType
-	 * @return
 	 */
 	public List<Status> test(String serviceType) {
 
@@ -822,7 +819,6 @@ public class Test extends Service implements StatusListener {
 	 * the help of the Test service) has created an environment where the
 	 * service to be tested has all its depedencies
 	 * 
-	 * @throws InterruptedException
 	 * 
 	 * @throws Exception
 	 * 

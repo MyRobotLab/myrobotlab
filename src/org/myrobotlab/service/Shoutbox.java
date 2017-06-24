@@ -79,8 +79,6 @@ public class Shoutbox extends Service {
    * A Connection's UserId is a "user friendly" identification of the user using
    * that connection
    * 
-   * @param ws
-   * @return
    */
 
   static public String makeKey(String ws) {
@@ -261,10 +259,6 @@ public class Shoutbox extends Service {
     }
   }
 
-  /**
-   * 
-   * @param myName
-   */
   public void setNickName(String nickname) {
     // WebGui web
     log.info("setNickName {}", nickname);
@@ -313,7 +307,6 @@ public class Shoutbox extends Service {
   /**
    * shout of minimal complexity
    * 
-   * @param msg
    */
   public void shout(String msg) {
     // an optimized shout - there is client id & auth stuff which should be
@@ -326,8 +319,6 @@ public class Shoutbox extends Service {
   /**
    * max complexity shout
    * 
-   * @param msg
-   * @param clientId
    */
   public void shout(String clientId, String msg) {
     Shout shout = createShout(TYPE_USER, msg);
@@ -479,9 +470,9 @@ public class Shoutbox extends Service {
    * CONCEPTS systemBroadcast - system needs to send to all system message list
    * - system sends to a list of users system message channel -
    * 
-   * channel - a group of recievers & senders
+   * channel - a group of recievers &amp; senders
    * 
-   * Authenticaiton & Authorization - OATH query to Drupal?
+   * Authenticaiton &amp; Authorization - OATH query to Drupal?
    * 
    * DATA timezone - set time zode - use UTC for all server data
    * 

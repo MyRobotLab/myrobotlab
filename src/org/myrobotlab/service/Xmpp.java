@@ -403,10 +403,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   /**
    * Sends the specified text as a message to the other chat participant.
    * 
-   * @param message
-   * @param to
-   * @throws XMPPException
-   * @throws NotConnectedException
+   * @param text - the message
    */
   public void sendMessage(String text, String to) throws XMPPException, NotConnectedException {
     if (chat == null) {

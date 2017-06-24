@@ -112,7 +112,6 @@ public class Blender extends Service {
    * important "attach" method for Blender - this way MRL World notifies Blender
    * to dynamically create "virtual" counterpart for device.
    * 
-   * @param service
    */
   public synchronized void attach(Arduino service) {
     // let Blender know we are going
@@ -178,9 +177,6 @@ public class Blender extends Service {
   /**
    * call back from Blender when python script does an attach to a virtual
    * device - returns name of the service attached
-   * 
-   * @param name
-   * @return
    */
   public synchronized String onAttach(String name) {
     try {

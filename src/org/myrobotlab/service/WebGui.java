@@ -46,7 +46,6 @@ import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.MethodCache;
-import org.myrobotlab.framework.Hello;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
@@ -69,7 +68,7 @@ import org.slf4j.Logger;
 
 /**
  * 
- * WebGui - This service is the AngularJS based GUI TODO - messages & services
+ * WebGui - This service is the AngularJS based GUI TODO - messages &amp; services
  * are already APIs - perhaps a data API - same as service without the message
  * wrapper
  */
@@ -142,8 +141,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   /**
    * Static list of third party dependencies for this service. The list will be
    * consumed by Ivy to download and manage the appropriate resources
-   * 
-   * @return
    */
 
   public static class LiveVideoStreamHandler implements Handler {
@@ -301,7 +298,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * etc !!!! or there will be an infinite loop and you will be at the gates of
    * hell !
    * 
-   * @param logEntry
    */
   public void onLogEvent(Message msg) {
     try {
@@ -333,9 +329,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   /**
    * redirects browser to new url
-   * 
-   * @param url
-   * @return
    */
   public String redirect(String url) {
     return url;
@@ -625,8 +618,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * processing request.  It will eventually call ApiFactory.process which handles the "pure"
    * Jvm Java only processing
    * 
-   * @param r
-   * @throws Exception
    */
   public void handleServicesApi(AtmosphereResource r) throws Exception {
     AtmosphereRequest request = r.getRequest();
@@ -660,7 +651,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   /**
    * With a single method Atmosphere does so much !!! It sets up the connection,
    * possibly gets a session, turns the request into something like a
-   * HTTPServletRequest, provides us with input & output streams - and manages
+   * HTTPServletRequest, provides us with input &amp; output streams - and manages
    * all the "long polling" or websocket upgrades on its own !
    * 
    * Atmosphere Rocks !
@@ -945,7 +936,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * library is linked to using content delivery network. Default (false) is to
    * use the CDN
    * 
-   * @param b
    */
   public void useLocalResources(boolean useLocalResources) {
     this.useLocalResources = useLocalResources;
@@ -980,13 +970,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   /**
-   * From UI events --to--> MRL request to save panel data typically done after
+   * From UI events --to--&gt; MRL request to save panel data typically done after
    * user has changed or updated the UI in position, height, width, zIndex etc.
    * 
    * If you need MRL changes of position or UI changes use publishPanel to
    * remotely control UI
    * 
-   * @param panel
    */
   public void savePanel(Panel panel) {
     if (panel.name == null) {

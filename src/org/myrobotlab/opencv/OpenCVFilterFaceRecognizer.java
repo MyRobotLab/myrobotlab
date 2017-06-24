@@ -149,8 +149,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
    * will be parsed for the label to apply to the image. At least 2 different
    * labels must exist in the training set.
    * 
-   * @return
-   */
+   * @return true if the training was successful.
+   */ 
   public boolean train() {
     //
     // The first time we train, find the image mask, if present, scale it to the

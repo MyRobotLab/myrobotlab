@@ -57,12 +57,12 @@ import com.google.gson.internal.LinkedTreeMap;
  *         Manage testing
  * 
  *         Several modes exist - normal = set env and keep process in map, with
- *         re-directed stdin stdout & stderr streams envOnly = set the correct
+ *         re-directed stdin stdout &amp; stderr streams envOnly = set the correct
  *         environment then terminate
  * 
  * 
  *         default is start a new process with relayed cmdline and redirect
- *         stdin stout & stderr streams, terminate if no subprocesses exist
+ *         stdin stout &amp; stderr streams, terminate if no subprocesses exist
  * 
  *         =================================================================== *
  *         References :
@@ -98,7 +98,7 @@ import com.google.gson.internal.LinkedTreeMap;
  *         TODO classpath order - for quick bleeding edge updates? rsync
  *         exploded classpath
  *
- *         TODO - check for Java 1.7 or > addShutdownHook check for network
+ *         TODO - check for Java 1.7 or &gt; addShutdownHook check for network
  *         connectivity TODO - proxy -Dhttp.proxyHost=webproxy
  *         -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
  *         -Dhttp.proxyUserName="myusername" -Dhttp.proxyPassword="mypassword"
@@ -110,7 +110,7 @@ import com.google.gson.internal.LinkedTreeMap;
  *         stackoverflow.com
  *         /questions/9911686/getresource-some-jar-returns-null-although
  *         -some-jar-exists-in-geturls RuntimeMXBean runtimeMxBean =
- *         ManagementFactory.getRuntimeMXBean(); List<String> arguments =
+ *         ManagementFactory.getRuntimeMXBean(); List&lt;String&gt; arguments =
  *         runtimeMxBean.getInputArguments();
  * 
  *         TODO - on java -jar myrobotlab.jar | make a copy if agent.jar does
@@ -195,7 +195,6 @@ public class Agent extends Service {
 	 * @param file
 	 *            - file to read
 	 * @return byte array of contents
-	 * @throws IOException
 	 */
 	static public final byte[] toByteArray(File file) throws IOException {
 
@@ -213,8 +212,6 @@ public class Agent extends Service {
 	/**
 	 * IntputStream to byte array
 	 * 
-	 * @param is
-	 * @return
 	 */
 	static public final byte[] toByteArray(InputStream is) {
 
@@ -288,9 +285,6 @@ public class Agent extends Service {
 	/**
 	 * checks the current branch looks if the verstion.txt has been changed
 	 * 
-	 * @throws IOException
-	 * @throws InterruptedException
-	 * @throws URISyntaxException
 	 */
 	static synchronized public void processUpdates() throws IOException, URISyntaxException, InterruptedException {
 
@@ -332,9 +326,6 @@ public class Agent extends Service {
 	/**
 	 * if there is a single instance - just restart it ...
 	 * 
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws InterruptedException
 	 */
 	static public synchronized void restart() throws IOException, URISyntaxException, InterruptedException {
 		for (Integer pid : processes.keySet()) {
@@ -344,10 +335,6 @@ public class Agent extends Service {
 
 	/**
 	 * 
-	 * @param id
-	 * @throws IOException
-	 * @throws InterruptedException
-	 * @throws URISyntaxException
 	 */
 	static public synchronized void restart(Integer id) throws IOException, URISyntaxException, InterruptedException {
 		// if null or processes.size == 0 then self
@@ -367,8 +354,6 @@ public class Agent extends Service {
 	/**
 	 * return a non-running process structure from an existing one with a new id
 	 * 
-	 * @param id
-	 * @return
 	 */
 	static public ProcessData copy(Integer id) {
 		if (!processes.containsKey(id)) {
@@ -428,8 +413,6 @@ public class Agent extends Service {
 	/**
 	 * gets id from name
 	 * 
-	 * @param name
-	 * @return
 	 */
 	static public Integer getId(String name) {
 		for (Integer pid : processes.keySet()) {
@@ -457,8 +440,6 @@ public class Agent extends Service {
 	/**
 	 * gets name from id
 	 * 
-	 * @param id
-	 * @return
 	 */
 	static public String getName(Integer id) {
 		for (Integer pid : processes.keySet()) {
@@ -566,8 +547,6 @@ public class Agent extends Service {
 
 	/**
 	 * get a list of all the processes currently governed by this Agent
-	 * 
-	 * @return
 	 */
 	static public HashMap<Integer, ProcessData> getProcesses() {
 		return processes;
@@ -686,12 +665,11 @@ public class Agent extends Service {
 	}
 
 	/**
-	 * This is a great idea & test - because we want complete control over
+	 * This is a great idea &amp; test - because we want complete control over
 	 * environment and dependencies - the ability to purge completely - and
 	 * start from the beginning - but it should be in another service and not
 	 * part of the Agent. The 'Test' service could use Agent as a peer
 	 * 
-	 * @return
 	 */
 	static public List<Status> serviceTest() {
 
@@ -889,14 +867,8 @@ public class Agent extends Service {
 	 * Responsibility - This method will always call Runtime. To start Runtime
 	 * correctly environment must correctly be setup
 	 * 
-	 * @param jarPath
-	 *            - Absolute path to myrobotlab.jar
-	 * @param in
-	 *            - command line parameters
-	 * @return
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws InterruptedException
+	 * @param jarPath - Absolute path to myrobotlab.jar
+	 * @param in - command line parameters
 	 */
 	static public synchronized Process spawn(String jarPath, String[] in)
 			throws IOException, URISyntaxException, InterruptedException {
@@ -999,10 +971,6 @@ public class Agent extends Service {
 	/**
 	 * DEPRECATE ? spawn2 should do this checking ?
 	 * 
-	 * @param id
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws InterruptedException
 	 */
 	static public void start(Integer id) throws IOException, URISyntaxException, InterruptedException {
 		if (!processes.containsKey(id)) {
@@ -1089,8 +1057,6 @@ public class Agent extends Service {
 	 * First method JVM executes when myrobotlab.jar is in jar form.
 	 * 
 	 * -agent "-logLevel DEBUG -service webgui WebGui"
-	 * 
-	 * @param args
 	 */
 	// FIXME - add -help
 	// TODO - add jvm memory other runtime info

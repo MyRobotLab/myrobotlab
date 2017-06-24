@@ -396,7 +396,7 @@ public class WiiDar extends Service {
    * 
    * // send the data from the wii to wiidar // wii.addListener("publishIR",
    * this.getName(), "computeDepth", IRData.class.getCanonicalName()); // send
-   * the computed depth & data to the gui // addListener("computeDepth",
+   * the computed depth &amp; data to the gui // addListener("computeDepth",
    * gui.getName(),"publishSinglePoint", Point.class.getCanonicalName());
    * addListener("publishSinglePoint", gui.getName(),"publishSinglePoint",
    * Point.class.getCanonicalName()); // gui.addListener("processImage",

@@ -38,10 +38,6 @@ public class Loader {
   /**
    * create a VAO and store the values, return the raw model that represents it.
    * 
-   * @param positions
-   * @param textureCoords
-   * @param indicies
-   * @return
    */
   public RawModel loadToVAO(float[] positions, float[] textureCoords, int[] indicies) {
     int vaoID = createVAO();
@@ -55,8 +51,6 @@ public class Loader {
   /**
    * Load a texture from a buffered image and return the texture id
    * 
-   * @param bi
-   * @return
    */
   public int loadTexture(BufferedImage bi) {
     Texture texture = null;
@@ -72,9 +66,6 @@ public class Loader {
 
   /**
    * load a texture from a filename and return the texture id
-   * 
-   * @param fileName
-   * @return
    */
   public int loadTexture(String fileName) {
     Texture texture = null;

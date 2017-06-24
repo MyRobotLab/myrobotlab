@@ -185,9 +185,8 @@ public class Roomba extends Service {
    * Connect to a serial port specified by portid doesn't guarantee connection
    * to Roomba, just to serial port
    * 
-   * @param portid
+   * @param portName
    *          name of port, e.g. "/dev/cu.KeySerial1" or "COM3"
-   * @return true if connect was successful, false otherwise
    */
   public void connect(String portName) {
     roombacomm.connect(portName);
@@ -494,7 +493,7 @@ public class Roomba extends Service {
    * <pre>
    *    java roombacomm.Spiro1 /dev/cu.KeySerial1 velocity radius waittime<br>
    *   Usage: \n"+
-   *     roombacomm.Spiro1 <serialportname> [protocol] <velocity> <radius> <waittime> [options]<br>
+   *     roombacomm.Spiro1 &lt;serialportname&gt; [protocol] &lt;velocity&gt; &lt;radius&gt; &lt;waittime&gt; [options]<br>
    *   where: 
    *   protocol (optional) is SCI or OI
    *   velocity and radius in mm, waittime in milliseconds

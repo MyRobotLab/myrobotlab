@@ -852,7 +852,7 @@ public abstract class RoombaComm {
 
   /**
    * Play a musical note Does it via the hacky method of defining a one-note
-   * song & playing it Uses up song slot 15. If another note is played before
+   * song &amp; playing it Uses up song slot 15. If another note is played before
    * one is finished, the new note cuts off the old one.
    * 
    * @param note

@@ -75,8 +75,6 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   /**
    * determines if a 'specific' controller is currently attached
    * 
-   * @param controller
-   * @return
    */
   public boolean isAttachedServoController(ServoController controller);
   
@@ -99,15 +97,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   /**
    * attach "Pin" - simple command to energize the pin. Equivalent to Arduino
    * library's servo.attach(pin) with pin number coming from the servo
-   * 
-   * @return
    */
   public void attach();
 
   /**
    * degrees per second rotational velocity cm per second linear velocity ?
    * 
-   * @param degreesPerSecond
    */
   public void setVelocity(double degreesPerSecond);
 
@@ -116,16 +111,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * CONTROLLER ATTACH/DETACH !
    * 
    * Deprecated - use enable(pin)
-   * 
-   * @return
    */
   @Deprecated
   public void attach(int pin);
 
   /**
    * detaching a pin (NOT RELATED TO DETACHING A SERVICE !)
-   * 
-   * @return
    */
   public void detach();
 
@@ -133,20 +124,17 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * limits input of servo - to prevent damage or problems if servos should not
    * move thier full range
    * 
-   * @param max
    */
   public void setMinMax(double min, double max);
   
   /**
    * min x 
-   * @return
    */
   public double getMin();
   
   public double getMinInput();
   /**
    * max x
-   * @return
    */
   public double getMax();
   
@@ -155,13 +143,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   /**
    * fractional speed settings 0.0 to 1.0
    * 
-   * @param speed
    */
   public void setSpeed(double speed);
 
   /**
    * stops the servo if currently in motion servo must be moving at incremental
-   * speed for a stop to work (setSpeed < 1.0)
+   * speed for a stop to work (setSpeed &lt; 1.0)
    */
   public void stop();
 
@@ -174,8 +161,6 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * controller has - updates the Servo's pin and returns the refreshed data.
    * Not worth it. What will happen is the pin which was set on the servo will
    * simply be returned
-   * 
-   * @return
    */
   public Integer getPin();
 
@@ -201,7 +186,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * the calculated mapper output for the servo - this is
    * <b> ALWAYS ALWAYS in DEGREES !</b>
    * because this method is used by the controller - and the controller needs
-   * a stable method & a stable unit
+   * a stable method &amp; a stable unit
    * FIXME - not sure if this is a good thing to expose
    */
   public double getTargetOutput();
@@ -220,15 +205,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
 
   /**
    * get the current acceleration value
-   * 
-   * @return
    */
   public double getAcceleration();
 
   /**
    * synchronizing servos together
    * e.g.  leftEye.sync(rightEye)
-   * @param sc
    */
   public void sync(ServoControl sc);
   
@@ -236,14 +218,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * A default position for the servo.
    * Defaulted to 90 unless explicitly set.
    * Position the servo will move to when method servo.rest() is called
-   * @param rest
    */
   public void setRest(int rest);
 
   
   /**
    * Gets the current rest position value
-   * @return
    */
   public double getRest();
 

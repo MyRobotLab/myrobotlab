@@ -233,9 +233,6 @@ public class Msg {
 
 	/**
 	 * want to grab it when SerialDevice is created
-	 *
-	 * @param serial
-	 * @return
 	 */
 	/*
 	static public synchronized Msg getInstance(Arduino arduino, SerialDevice serial) {

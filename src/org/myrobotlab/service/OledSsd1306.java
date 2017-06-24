@@ -284,7 +284,6 @@ public class OledSsd1306 extends Service implements I2CControl {
 	/**
 	 * Initiate the buffer with data for the size of the OLED screen
 	 * 
-	 * @param displayType
 	 */
 	public void setDisplayType(int displayType) {
 		if (displayType == SSD1306_128_64) {
@@ -396,14 +395,11 @@ public class OledSsd1306 extends Service implements I2CControl {
 	/**
 	 * draws the given image over the current image buffer. The image is
 	 * automatically converted to a binary image (if it not already is).
-	 * <p/>
+	 * 
 	 * Note that the current buffer is not cleared before, so if you want the
 	 * image to completely overwrite the current display content you need to call
 	 * clear() before.
 	 *
-	 * @param image
-	 * @param x
-	 * @param y
 	 */
 	public synchronized void drawImage(BufferedImage image, int x, int y) {
 		BufferedImage tmpImage = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_BYTE_BINARY);

@@ -55,7 +55,7 @@ import java.io.OutputStream;
  * [toxi 030930]
  * - target pixel buffer doesn't loose alpha channel anymore
  *   with every blitting operation alpha values are increased now
- * - resizing by large factors (>250%) doesn't yield any rounding errors
+ * - resizing by large factors (&gt;250%) doesn't yield any rounding errors
  *   anymore, changed to 16bit precision (=65536% max or 0.000015% min)
  * - replicate() is now only using REPLACE mode to avoid semantic problems
  * - added blend() methods to use replicate()'s functionality,

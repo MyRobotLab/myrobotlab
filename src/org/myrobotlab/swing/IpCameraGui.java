@@ -210,7 +210,7 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
   }
 
 
-  /**
+  /*
    * JUST STREAM THE #*%(%(*# VIDEO ! The return of IPCamera.getStatus which is
    * used to test connectivity
    * 

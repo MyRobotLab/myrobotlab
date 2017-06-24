@@ -193,9 +193,6 @@ public class OpenCV extends AbstractVideoSource {
 
   /**
    * new way of converting IplImages to BufferedImages
-   * 
-   * @param src
-   * @return
    */
   public static BufferedImage IplImageToBufferedImage(IplImage src) {
     OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
@@ -206,9 +203,6 @@ public class OpenCV extends AbstractVideoSource {
 
   /**
    * new way of converting BufferedImages to IplImages
-   * 
-   * @param src
-   * @return
    */
   public static IplImage BufferedImageToIplImage(BufferedImage src) {
     OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
@@ -218,9 +212,6 @@ public class OpenCV extends AbstractVideoSource {
 
   /**
    * new way of converting BufferedImages to IplImages
-   * 
-   * @param src
-   * @return
    */
   public static Frame BufferedImageToFrame(BufferedImage src) {
     Java2DFrameConverter jconverter = new Java2DFrameConverter();
@@ -241,8 +232,6 @@ public class OpenCV extends AbstractVideoSource {
    * the publishing point of all OpenCV goodies ! type conversion is held off
    * until asked for - then its cached SMART ! :)
    * 
-   * @param data
-   * @return
    */
   public final OpenCVData publishOpenCVData(OpenCVData data) {
     if (data != null) {
@@ -296,7 +285,6 @@ public class OpenCV extends AbstractVideoSource {
    * blocking safe exchange of data between different threads external thread
    * adds image data which can be retrieved from the blockingData queue
    * 
-   * @param image
    */
   public OpenCVData add(Frame image) {
     FrameGrabber grabber = videoProcessor.getGrabber();
@@ -319,9 +307,6 @@ public class OpenCV extends AbstractVideoSource {
   /**
    * when the video image changes size this function will be called with the new
    * dimension
-   * 
-   * @param d
-   * @return
    */
   public Dimension sizeChange(Dimension d) {
     return d;
@@ -682,7 +667,6 @@ public class OpenCV extends AbstractVideoSource {
   /**
    * minimum time between processing frames - time unit is in milliseconds
    * 
-   * @param time
    */
   public void setMinDelay(int time) {
     videoProcessor.setMinDelay(time);

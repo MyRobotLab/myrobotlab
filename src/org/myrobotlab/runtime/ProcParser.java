@@ -140,12 +140,6 @@ public class ProcParser {
     return contents.toString();
   }
 
-  /**
-   * 
-   * @param _processPid
-   * @param _memberValues
-   * @throws IOException
-   */
   public static ArrayList<String> getCpuUsage() {
     BufferedReader br = null;
     ArrayList<String> data = new ArrayList<String>();
@@ -175,10 +169,6 @@ public class ProcParser {
     return data;
   }
 
-  /**
-   * 
-   * @param _memberValues
-   */
   public static ArrayList<String> getDiskUsage() {
     ArrayList<String> partitionData = getPartitionUsage();
     ArrayList<String> data = new ArrayList<String>();
@@ -207,8 +197,6 @@ public class ProcParser {
   /**
    * Get memory usage information. Files: /proc/[pid]/statm /proc/[pid]/stat
    * 
-   * @param _processPid
-   * @param _memberValues
    */
   public static ArrayList<String> getMemoryUsage(int _processPid) {
     BufferedReader br = null;
@@ -243,10 +231,6 @@ public class ProcParser {
     return data;
   }
 
-  /**
-   * 
-   * @param _memberValues
-   */
   public static ArrayList<String> getNetworkUsage() {
     ArrayList<String> data = new ArrayList<String>();
     String[] tempData = null;
@@ -298,10 +282,6 @@ public class ProcParser {
     return partitionsName;
   }
 
-  /**
-   * 
-   * @param _memberValues
-   */
   public static ArrayList<String> getPartitionUsage() {
     ArrayList<String> data = new ArrayList<String>();
     String[] tempData = null;

@@ -9,7 +9,6 @@ import java.util.Set;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -26,7 +25,7 @@ import org.slf4j.Logger;
  * More Info: http://www.dimensionengineering.com/datasheets/Sabertooth2x25.pdf
  * 
  * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 +
- * speed) & 0b01111111);
+ * speed) &amp; 0b01111111);
  * 
  * @author GroG
  * 
@@ -299,9 +298,6 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
    * Sabertooth uses numeric identifiers for ports. This just does a type
    * conversion of the portNumber for attaching with the MotorConfigPort data
    * 
-   * @param motor
-   * @param portNumber
-   * @throws Exception
    */
   public void attach(MotorControl motor, Integer portNumber) throws Exception {
     attach(motor, String.format("%d", portNumber));
@@ -311,9 +307,6 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
    * Because many motor controllers have String labeled ports .e.g. "PortA,
    * PortB, etc" the universal attach for MotorConfigPort uses a String.
    * 
-   * @param motor
-   * @param portNumber
-   * @throws Exception
    */
   public void attach(MotorControl motor, String portNumber) throws Exception {
     if (isAttached(motor)) {

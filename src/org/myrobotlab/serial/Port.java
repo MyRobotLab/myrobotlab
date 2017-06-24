@@ -199,8 +199,6 @@ public abstract class Port implements Runnable, SerialControl {
    * "real" serial function stubbed out in the abstract class in case the serial
    * implementation does not actually implement this method e.g. (bluetooth,
    * iostream, tcp/ip)
-   * 
-   * @param state
    */
   public void setDTR(boolean state) {
   }

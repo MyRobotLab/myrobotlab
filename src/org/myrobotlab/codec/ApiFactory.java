@@ -29,8 +29,8 @@ import org.slf4j.Logger;
  * ApiProcessor.process method
  * 
  * FIXME - directory services - list methods/interfaces/data
- * FIXME - add configuration Map<String, Object> in the factory for any ApiProcessor
- * FIXME - add directory services for api/ , api/{apiKey} & api/{apiKey}/
+ * FIXME - add configuration Map&lt;String, Object &gt; in the factory for any ApiProcessor
+ * FIXME - add directory services for api/ , api/{apiKey} &amp; api/{apiKey}/
  * FIXME - you don't need a NameProvider - you just need the sender's name ! refactor
  * 
  * @author GroG

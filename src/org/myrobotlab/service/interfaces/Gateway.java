@@ -43,7 +43,6 @@ public interface Gateway {
   /**
    * retrieves endpoint data for which this gateway is responsible
    * 
-   * @return
    */
   // DEPRECATE?
   public HashMap<URI, Connection> getClients();
@@ -59,9 +58,6 @@ public interface Gateway {
 
   /**
    * the publishing point
-   * 
-   * @param keys
-   * @return
    */
   public Connection publishConnect(Connection keys);
 
@@ -79,9 +75,9 @@ public interface Gateway {
    * 
    * mrl://remote/tcp://somehost:6767
    * 
-   * @param uri
-   * @param msg
+   * @param key - the url for the message
    */
+  
   public void sendRemote(final URI key, final Message msg);
 
   // begin new interface methods -----------------------

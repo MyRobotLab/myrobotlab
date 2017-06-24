@@ -8,7 +8,6 @@ import java.util.Set;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.i2c.I2CFactory;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;

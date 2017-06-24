@@ -801,9 +801,6 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   /**
    * AxisRemap : The device mounting position should not limit the data output of the BNO055 device. The
    * axis of the device can be re-configured to the new reference axis.
-   * @param xAxis
-   * @param yAxis
-   * @param zAxis
    */
   
   public void axisRemap(AxisMapConfig xAxis, AxisMapConfig yAxis, AxisMapConfig zAxis) {
@@ -820,7 +817,6 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   
   /**
    * Change the direction of an Axis
-   * @param axis
    * @param positive : true = positive, false = reversed
    */
   public void axisMapSign(AxisMapConfig axis, boolean positive) {

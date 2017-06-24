@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 
 /**
  * goal of this class is to provide the interface for non-blocking communication
- * (local & remote) a good test of this goal is for this class to be used
+ * (local &amp; remote) a good test of this goal is for this class to be used
  * outside of MRL process.
  * 
  * e.g. - the goal is the design of a very small library - using only native

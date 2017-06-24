@@ -512,8 +512,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	/**
 	 * Set the sample rate in Hz, I.e the number of polls per second
 	 * 
-	 * @param rate
-	 * @return
+	 * @return - returns the rate that was set
 	 */
 	public double setSampleRate(double rate) {
 		if (rate < 0) {
@@ -527,8 +526,6 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 	/**
 	 * method to communicate changes in pinmode or state changes
 	 * 
-	 * @param pinDef
-	 * @return
 	 */
 	public PinDefinition publishPinDefinition(PinDefinition pinDef) {
 		return pinDef;

@@ -88,17 +88,17 @@ import com.mxgraph.view.mxGraph;
  * other services. With its own tab it provides a map of message routes and
  * icons of currently running services.
  * 
- * SwingGui -> Look at service registry SwingGui -> attempt to create a panel
- * for each registered service SwingGui -> create panel SwingGui ->
+ * SwingGui -&gt; Look at service registry SwingGui -&gt; attempt to create a panel
+ * for each registered service SwingGui -&gt; create panel SwingGui -&gt;
  * panel.init(this, serviceName); panel.send(Notify, someoutputfn, GUIName,
  * panel.inputfn, data);
  *
- * serviceName (source) --> SwingGui-> msg Arduino arduino01 -> post message ->
- * outbox -> outbound -> notifyList -> reference of sender? (NO) will not
+ * serviceName (source) --&gt; SwingGui-&gt; msg Arduino arduino01 -&gt; post message -&gt;
+ * outbox -&gt; outbound -&gt; notifyList -&gt; reference of sender? (NO) will not
  * transport across process boundry
  * 
- * serviceGUI needs a Runtime Arduino arduin-> post back (data) --> SwingGui -
- * look up serviceGUI by senders name ServiceGUI->invoke(data)
+ * serviceGUI needs a Runtime Arduino arduin-&gt; post back (data) --&gt; SwingGui -
+ * look up serviceGUI by senders name ServiceGUI-&gt;invoke(data)
  * 
  * References :
  * http://www.scribd.com/doc/13122112/Java6-Rules-Adding-Components-To-The-
@@ -128,7 +128,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    * gui service the 'rest' of the callback is handled with this data structure
    * 
    * <pre>
-   *     "serviceName.method" --> List<ServiceGui>
+   *     "serviceName.method" --&gt; List<ServiceGui>
    *     Map<{name}.{method}, List<ServiceGui>>> nameMethodCallbackMap
    * 
    * </pre>
@@ -280,7 +280,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   /**
    * add a service tab to the SwingGui
    * 
-   * @param serviceName
+   * @param sw 
    *          - name of service to add
    * 
    *          FIXME - full parameter of addTab(final String serviceName, final
@@ -377,8 +377,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   /**
    * Build the menu for display.
-   * 
-   * @return
    */
   public JMenuBar createMenu() {
     JMenuBar menuBar = new JMenuBar();
@@ -398,8 +396,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    * 
    * the format of the key needs to be {name}.method
    * 
-   * @param key
-   * @param sg
    */
   public void subscribeToServiceMethod(String key, ServiceGui sg) {
     List<ServiceGui> list = null;

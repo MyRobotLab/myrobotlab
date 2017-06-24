@@ -18,8 +18,8 @@ import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.slf4j.Logger;
 
 /**
- * FIXME - make abstract class Server with abstract connection info &
- * serializers stop & start are all the same (between UdpServer & TcpServer)
+ * FIXME - make abstract class Server with abstract connection info &amp;
+ * serializers stop &amp; start are all the same (between UdpServer &amp; TcpServer)
  * 
  * @author grperry
  *

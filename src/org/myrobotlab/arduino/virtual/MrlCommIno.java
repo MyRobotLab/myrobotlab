@@ -54,7 +54,7 @@ public class MrlCommIno {
    * -----------------
    * pingdar, non-blocking pulsin
    *
-   * Requirements: MyRobotLab running on a computer & a serial connection
+   * Requirements: MyRobotLab running on a computer &amp; a serial connection
    *
    *  TODO - need a method to identify type of board http://forum.arduino.cc/index.php?topic=100557.0
    *  TODO - getBoardInfo() - returns board info !
@@ -87,7 +87,7 @@ public class MrlCommIno {
    * STANDARD ARDUINO LOOP BEGIN
    * This method will be called over and over again by the arduino, it is the
    * main loop any arduino sketch runs
-   * @throws Exception 
+   * @throws Exception - error if processing of a command blows up for some reason. 
    */
   public void loop() throws Exception {
     // get a command and process it from

@@ -12,7 +12,7 @@ public interface SpeechRecognizer extends NameProvider {
 
   /**
    * method to suppress recognition listening events This is important when a
-   * Speech Recognizer is listening --> then Speaking, typically you don't want
+   * Speech Recognizer is listening --&gt; then Speaking, typically you don't want
    * the STT to listen to its own speech, it causes a feedback loop and with STT
    * not really very accurate, it leads to weirdness -- additionally it does not
    * recreate the speech processor - so its not as heavy handed

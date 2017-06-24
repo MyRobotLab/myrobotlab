@@ -29,9 +29,6 @@ public class ServoOrchestratorGUI_middlemiddle_transferhandler extends TransferH
    * ServoOrchestratorGUI_middlemiddle_panel implements Transferable, so this
    * requires only a type cast.
    * </p>
-   *
-   * @param c
-   * @return
    */
   @Override()
   public Transferable createTransferable(JComponent c) {
@@ -54,9 +51,6 @@ public class ServoOrchestratorGUI_middlemiddle_transferhandler extends TransferH
    * This is queried to see whether the component can be copied, moved, both or
    * neither. We are only concerned with copying.
    * </p>
-   *
-   * @param c
-   * @return
    */
   @Override()
   public int getSourceActions(JComponent c) {

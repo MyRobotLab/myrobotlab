@@ -58,7 +58,6 @@ public class SensorMatrix extends SensorData {
    *          x coord in range 0..1
    * @param yf
    *          y coord in range 0..1
-   * @return
    */
   public float get(float xf, float yf) {
     return array[(int) (xf * width) + (int) (yf * height) * width];

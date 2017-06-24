@@ -16,15 +16,11 @@ public interface PinArrayControl extends NameProvider {
 	 *  If no byte is available because the end of the stream has been reached, the value -1 is returned. 
 	 *  This method blocks until input data is available, the end of the stream is detected, or an exception is thrown.
 	 *  
-	 * @param address
-	 * @return
 	 */
 	public int read(Integer address);
 	
 	/**
 	 * same as read(int address) except by name e.g. read("D5")
-	 * @param pinName
-	 * @return
 	 */
 	public int read(String pinName);
 	

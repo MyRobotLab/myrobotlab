@@ -39,7 +39,6 @@ public class ArduinoMsgGenerator {
    * supresses building of MrlComm::{Name} method if method already exists in
    * Arduino
    * 
-   * @return
    */
 
   ArduinoMsgGenerator() {

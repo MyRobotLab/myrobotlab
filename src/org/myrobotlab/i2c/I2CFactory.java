@@ -13,8 +13,6 @@ public class I2CFactory {
    * Create new I2CBus instance
    * 
    * @return Return a new I2CBus impl instance.
-   * 
-   * @throws IOException
    */
   public static I2CBus getInstance(int busNumber) throws IOException {
 
@@ -48,9 +46,6 @@ public class I2CFactory {
     // return I2CBusImpl.getBus(busNumber);
   }
 
-  /**
-   * @param args
-   */
   public static void main(String[] args) {
     // TODO Auto-generated method stub
 

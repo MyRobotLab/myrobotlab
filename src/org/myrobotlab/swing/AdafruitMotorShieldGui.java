@@ -23,7 +23,7 @@
  * 
  * References :
  * 		http://learn.adafruit.com/adafruit-motor-shield/af-dcmotor-class
- * 		http://forums.adafruit.com/viewtopic.php?f=31&t=26873 - Servos & cut traces
+ * 		http://forums.adafruit.com/viewtopic.php?f=31&t=26873 - Servos &amp; cut traces
  * 
  * */
 

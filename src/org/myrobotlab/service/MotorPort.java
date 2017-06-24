@@ -6,7 +6,7 @@ import org.myrobotlab.service.abstracts.AbstractMotor;
  * Motor - MotorController which uses a "Port".  
  * Examples are Adafruit Motor Controller which uses ports
  * M1 M2 M3 M4
- * Sabertooth has M1 & M2 ports.
+ * Sabertooth has M1 &amp; M2 ports.
  * @author GroG
  * 
  * Some ports are labeled by numbers some by string values,

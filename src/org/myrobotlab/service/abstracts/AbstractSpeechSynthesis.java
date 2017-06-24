@@ -16,9 +16,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   /**
    * start callback for speech synth. (Invoked when speaking starts)
-   * 
-   * @param utterance
-   * @return
    */
   public String publishStartSpeaking(String utterance){
     log.info("publishStartSpeaking - {}", utterance);
@@ -27,9 +24,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   /**
    * stop callback for speech synth. (Invoked when speaking stops.)
-   * 
-   * @param utterance
-   * @return
    */
   public String publishEndSpeaking(String utterance){
     log.info("publishEndSpeaking - {}", utterance);

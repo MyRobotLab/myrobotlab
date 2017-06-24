@@ -3,11 +3,9 @@ package org.myrobotlab.jme3;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.jme3.controller.Jme3Servo;
 import org.myrobotlab.jme3.interfaces.Jme3App;
 import org.myrobotlab.jme3.interfaces.Jme3Object;
-import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.virtual.VirtualServo;
 
 /*

@@ -18,7 +18,7 @@ public class Matrix {
   /**
    * @param sx
    *          sy sz translations in the x,y, and z directions
-   * @returns the associated scaling transformation matrix
+   * @return the associated scaling transformation matrix
    */
   public static Matrix scaling(double sx, double sy, double sz) {
     Matrix S = new Matrix();
@@ -32,7 +32,7 @@ public class Matrix {
   /**
    * @param tx
    *          ty tz translations in the x,y, and z directions
-   * @returns the associated translation transformation matrix
+   * @return the associated translation transformation matrix
    */
   public static Matrix translation(double tx, double ty, double tz) {
     Matrix T = new Matrix();
@@ -160,7 +160,7 @@ public class Matrix {
    * 
    * @param m
    *          A Matrix with the same dimensions
-   * @returns the dot product (scalar product)
+   * @return the dot product (scalar product)
    */
   public Double dot(Matrix m) {
     if (numRows != m.numRows || numCols != m.numCols) {
@@ -179,7 +179,7 @@ public class Matrix {
   /**
    * @param val
    *          a scalar
-   * @returns true if and only if all elements of the matrix equal val
+   * @return true if and only if all elements of the matrix equal val
    */
   public boolean equals(double val) {
     for (int r = 0; r < numRows; r++)

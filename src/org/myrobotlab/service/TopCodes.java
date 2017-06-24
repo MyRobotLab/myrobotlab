@@ -66,7 +66,6 @@ public class TopCodes extends Service {
    * Static list of third party dependencies for this service. The list will be
    * consumed by Ivy to download and manage the appropriate resources
    * 
-   * @return
    */
 
   public TopCodes(String n) {

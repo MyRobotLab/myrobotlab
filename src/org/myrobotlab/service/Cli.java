@@ -331,7 +331,7 @@ public class Cli extends Service {
 				 * 
 				 * // want message ? or just data ? // configurable ... // if
 				 * you data with tags - you might as well do // message ! // -
-				 * return only callbacks this way -> // si.in(msg); if (ret !=
+				 * return only callbacks this way -&gt; // si.in(msg); if (ret !=
 				 * null && ret instanceof Serializable) { // configurable use
 				 * log or system.out ? // FIXME - make getInstance configurable
 				 * // Encoder // reference !!!
@@ -367,7 +367,6 @@ public class Cli extends Service {
 	 * Has the ability to pipe to another process - if attached to another
 	 * process handle, and the ability to switch between many processes
 	 * 
-	 * @param n
 	 */
 	public Cli(String n) {
 		super(n);
@@ -375,10 +374,6 @@ public class Cli extends Service {
 
 	/**
 	 * add an i/o pair to this cli for the possible purpose attaching
-	 * 
-	 * @param name
-	 * @param process
-	 * @return
 	 */
 	public void add(String name, InputStream out, OutputStream in) {
 		pipes.put(name, new Pipe(name, out, in));
@@ -392,8 +387,6 @@ public class Cli extends Service {
 	/**
 	 * attach to another processes' Cli
 	 * 
-	 * @param name
-	 * @return
 	 */
 	public void attach(String name) {
 
@@ -504,8 +497,6 @@ public class Cli extends Service {
 	 * 
 	 * path is always absolute never relative
 	 * 
-	 * @param path
-	 * @throws IOException
 	 */
 	public void ls(String path) throws IOException {
 		String[] parts = path.split("/");

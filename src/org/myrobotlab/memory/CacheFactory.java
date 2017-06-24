@@ -33,8 +33,6 @@ public class CacheFactory {
 
   /**
    * Get a handle to this factory.
-   * 
-   * @return
    */
   public static CacheFactory getFactory() {
     return me;
@@ -52,9 +50,7 @@ public class CacheFactory {
    * Create a cache using a specific class. This assumes that the constructor
    * does not take any parameters.
    * 
-   * @param forClass
-   *          the cache class that should be used
-   * @return
+   * @param forClass the cache class that should be used
    */
   public Cache createCache(Class<? extends Cache> forClass) {
     if (forClass == null) {

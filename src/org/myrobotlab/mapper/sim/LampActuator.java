@@ -135,7 +135,7 @@ public class LampActuator extends ActuatorDevice {
   /**
    * Sets the lamp blink state on or off.
    * 
-   * @param on
+   * @param blink 
    *          true is on.
    */
   public void setBlink(boolean blink) {

@@ -19,17 +19,17 @@ import org.slf4j.Logger;
 /**
  *
  * 
- * <pre>
+ * &lt;pre&gt;
  *   
- *   # <ch> P <pw> ​S​​<spd>​​T​<time> <cr>
+ *   # &lt;ch&gt; P &lt;pw&gt; ​S&lt;spd&gt;​​T&lt;time&gt; &lt;cr&gt;
  * 
- *  <ch>: pin / channel to which the servo is connected (0 to 31) in decimal
- *  <pw>: desired pulse width (normally 500 to 2500) in microseconds
- *  <spd>: servo movement speed in microseconds per second*
- *  <time>: time in microseconds to travel from the current position to the desired position. This affects all servos (65535 max) *
- *  <cr>: carriage return (ASCII 13)**
+ *  &lt;ch&gt;: pin / channel to which the servo is connected (0 to 31) in decimal
+ *  &lt;pw&gt;: desired pulse width (normally 500 to 2500) in microseconds
+ *  &lt;spd&gt;: servo movement speed in microseconds per second*
+ *  &lt;time&gt;: time in microseconds to travel from the current position to the desired position. This affects all servos (65535 max) *
+ *  &lt;cr&gt;: carriage return (ASCII 13)**
  * 
- * </pre>
+ * &lt;/pre&gt;
  *
  * @author GroG
  * 

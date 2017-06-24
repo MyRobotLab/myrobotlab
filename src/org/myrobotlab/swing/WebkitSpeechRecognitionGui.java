@@ -18,7 +18,6 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -148,11 +147,7 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
    * method is called which triggers a publishState.  This event handler is typically
    * used when data or state information in the service has changed, and the UI should
    * update to reflect this changed state.
-   * @param template
    */
-  
-  
-  
   public void onState(final WebkitSpeechRecognition WebkitSpeechRecognition) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override

@@ -152,7 +152,7 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 	}
 
 	/**
-	 * important relay to keep JTabbedPane & TabControl working together
+	 * important relay to keep JTabbedPane &amp; TabControl working together
 	 * 
 	 * @param e
 	 */

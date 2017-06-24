@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
@@ -13,7 +12,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.MjpegServer;
 import org.myrobotlab.service.abstracts.AbstractVideoSink;
-import org.myrobotlab.service.interfaces.VideoSink;
 import org.myrobotlab.service.interfaces.VideoSource;
 import org.slf4j.Logger;
 
@@ -97,7 +95,6 @@ public class VideoStreamer extends AbstractVideoSink /*extends Service implement
   /**
    * sets port for mjpeg feed - default is 9090
    * 
-   * @param port
    */
   public void setPort(int port) {
     listeningPort = port;

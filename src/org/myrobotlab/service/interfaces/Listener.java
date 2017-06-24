@@ -9,7 +9,6 @@ public interface Listener extends NameProvider {
 	 * if we can optimize direct callback 
 	 * or must use pub/sub queues
 	 * 
-	 * @return
 	 */
 	public boolean isLocal();
 }

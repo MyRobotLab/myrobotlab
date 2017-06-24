@@ -69,7 +69,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   boolean locked = false;
 
   /**
-   * the power level requested - varies between -1.0 <--> 1.0
+   * the power level requested - varies between -1.0 &lt;--&gt; 1.0
    */
 
   double powerLevel = 0;

@@ -94,8 +94,6 @@ public class ProcessData implements Serializable {
 
 	/**
 	 * copy of a ProcessData - threaded data will not be copied
-	 * 
-	 * @param pd
 	 */
 	public ProcessData(ProcessData pd) {
 		this.id = pd.id;
@@ -123,7 +121,7 @@ public class ProcessData implements Serializable {
 		// monitor.start();
 	}
 
-	/**
+	/*
 	 * FIXME - is too much catering to mrl execution ...
 	 * 
 	 * convert an String[] into a valid ProcessData

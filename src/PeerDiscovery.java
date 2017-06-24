@@ -115,7 +115,6 @@ public class PeerDiscovery {
    *          The identifier shared by the peers that will be discovered.
    * @param port
    *          a valid port, i.e.: in the range 1025 to 65535 inclusive
-   * @throws IOException
    */
   public PeerDiscovery(int group, int port) throws IOException {
     this.group = group;
@@ -224,17 +223,12 @@ public class PeerDiscovery {
     /**
      * Called whenever an exception is thrown from the listen thread. The listen
      * thread should now be dead
-     * 
-     * @param e
      */
     public void handle(Exception e) {
       e.printStackTrace();
     }
   }
 
-  /**
-   * @param args
-   */
   public static void main(String[] args) {
     try {
       int group = 6969;

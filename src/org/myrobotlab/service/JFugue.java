@@ -25,13 +25,10 @@
 
 package org.myrobotlab.service;
 
-import java.util.Set;
-
 import org.jfugue.player.Player;
 import org.jfugue.rhythm.Rhythm;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;

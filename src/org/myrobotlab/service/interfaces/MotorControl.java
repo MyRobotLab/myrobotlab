@@ -44,8 +44,6 @@ public interface MotorControl extends NameProvider, RelativePositionControl {
 
 	/**
 	 * query the motor as to its inverted status
-	 * 
-	 * @return
 	 */
 	boolean isInverted();
 
@@ -100,14 +98,13 @@ public interface MotorControl extends NameProvider, RelativePositionControl {
 	/**
 	 * testing if a 'specific' motor controller is attached
 	 * @param controller
-	 * @return
+	 * @return true if the contorller is attached to this control.
 	 */
 	boolean isAttached(MotorController controller);
 
 	/**
 	 * general test if the motor is ready without having to supply
 	 * the specific motor controller
-	 * @return
 	 */
 	boolean isAttached();
 }

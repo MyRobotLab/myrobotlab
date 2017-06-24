@@ -21,42 +21,33 @@ public interface Attachable extends NameProvider {
 
 	/**
 	 * detach the attachable with this name from the service by name
-	 * 
-	 * @param service
 	 */
 	public void detach(String service);
 	
 	/**
 	 * detach the attachable with this name from the service by reference
-	 * 
-	 * @param service
 	 */
 	public void detach(Attachable service);
 
 	/**
 	 * returns if the Attachable has been set or not - name interface
-	 * @return
 	 */
 	public boolean isAttached(String name);
 	
 	 /**
    * returns if the Attachable has been set or not - name interface
-   * @return
    */
   public boolean isAttached(Attachable instance);
 
 	
 	/**
 	 * returns the set of attached service names to this service
-	 * @return
 	 */
 	public Set<String> getAttached();
 	
 	 /**
    * the "routing" attach - routes to a specific strongly typed attach of the
    * service if it exists
-   * 
-   * @param name
    */
   public void attach(Attachable service) throws Exception;
   
