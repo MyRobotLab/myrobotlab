@@ -124,7 +124,7 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
     return new ArrayList<String>(langMap.keySet());
   }
 
-  /**
+  /*
    * Proxy works in 3 modes
    *    client - consumer of mrl services
    *    relay - proxy (running as cloud service)
@@ -133,7 +133,7 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
    *    client - would be an end user using a client key
    *    relay - is the mrl proxy service
    *    direct would be from a users, by-passing mrl and going directly to Amazon with amazon keys
-   * cache file - caches file locally (both client or relay)
+   * cache file - caches file locally (both client or relay) 
    */
   public byte[] cacheFile(String toSpeak, OutputFormat format) throws IOException {
 

@@ -72,7 +72,7 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   /**
-   * The base url that is assocaited with the open weather map api.
+   * @param apiBase The base url that is assocaited with the open weather map api.
    */
   public void setApiBase(String apiBase) {
     this.apiBase = apiBase;
@@ -83,7 +83,7 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   /**
-   * The units, can be either imperial or metric.
+   * @param units The units, can be either imperial or metric.
    */
   public void setUnits(String units) {
     this.units = units;
@@ -94,7 +94,7 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   /**
-   * REQUIRED: specify your API key with this method.
+   * @param apiKey REQUIRED: specify your API key with this method.
    */
   public void setApiKey(String apiKey) {
     this.apiKey = apiKey;

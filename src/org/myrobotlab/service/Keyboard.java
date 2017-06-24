@@ -137,7 +137,7 @@ public class Keyboard extends Service {
     }
   }
 
-  /**
+  /*
    * this method is what other services would use to subscribe to keyboard
    * events
    */
@@ -150,7 +150,7 @@ public class Keyboard extends Service {
     addKeyListener((Service) s);
   }
 
-  /**
+  /*
    * a onKey event handler for testing purposes only
    */
   public String onKey(String key) {
@@ -158,7 +158,7 @@ public class Keyboard extends Service {
     return key;
   }
 
-  /**
+  /*
    * internal publishing point - private ?
    * 
    */

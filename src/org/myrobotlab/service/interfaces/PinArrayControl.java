@@ -9,7 +9,7 @@ public interface PinArrayControl extends NameProvider {
 
 	public List<PinDefinition> getPinList();
 	
-	/**
+	/*
 	 * read pin based on index or address of the pin - this is always numeric
 	 * follows InputStream spec
 	 * Reads the next byte of data from the input stream. The value byte is returned as an int in the range 0 to 255.
@@ -19,7 +19,7 @@ public interface PinArrayControl extends NameProvider {
 	 */
 	public int read(Integer address);
 	
-	/**
+	/*
 	 * same as read(int address) except by name e.g. read("D5")
 	 */
 	public int read(String pinName);

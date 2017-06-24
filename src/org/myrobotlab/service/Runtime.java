@@ -192,7 +192,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   static private CmdLine cmdline = null;
 
-  /**
+  /*
    * Returns the number of processors available to the Java virtual machine.
    *
    */
@@ -374,7 +374,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return null;
   }
 
-  /**
+  /*
    * DEPRECATE - use JSON ... XML is sooo 1990s
    *
    * a method which returns a xml representation of all the listeners and routes
@@ -487,7 +487,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     exit(-1);
   }
 
-  /**
+  /*
    * Terminates the currently running Java virtual machine by initiating its
    * shutdown sequence. This method never returns normally. The argument serves
    * as a status code; by convention, a nonzero status code indicates abnormal
@@ -531,7 +531,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return cli;
   }
 
-  /**
+  /*
    * tricky way of getting static data "static" assumes you talking about "this"
    * Runtime and no other transported/networked/serialized Runtime .. and this
    * way Runtime == this instance's runtime !
@@ -565,7 +565,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /**
+  /*
    * Returns the amount of free memory in the Java Virtual Machine. Calling the
    * gc method may result in increasing the value returned by freeMemory.
    */
@@ -713,7 +713,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return environments.get(null);
   }
 
-  /**
+  /*
    * getLocalServicesForExport returns a filtered map of Service references to
    * export to another instance of MRL. The objective of filtering may help
    * resolve functionality, security, or technical issues. For example, the
@@ -761,7 +761,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return export;
   }
 
-  /**
+  /*
    * FIXME - DEPRECATE - THIS IS NOT "instance" specific info - its Class
    * definition info - Runtime should return based on ClassName
    */
@@ -856,7 +856,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return registry;// FIXME should return copy
   }
 
-  /**
+  /*
    * Return the named service - - if name is not null, but service is not found
    * - return null (for re-entrant Service creation) - if the name IS null,
    * return Runtime - to support api/getServiceNames - if the is not null, and
@@ -881,7 +881,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return null;
   }
 
-  /**
+  /*
    * get all environments
    */
   public static HashMap<URI, ServiceEnvironment> getEnvironments() {
@@ -891,7 +891,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   // Reference - cpu utilization
   // http://www.javaworld.com/javaworld/javaqa/2002-11/01-qa-1108-cpu.html
 
-  /**
+  /*
    * list of currently created services
    */
   static public String[] getServiceNames() {
@@ -907,7 +907,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return getServiceNamesFromInterface(Class.forName(interfaze));
   }
 
-  /**
+  /*
    * param interfaceName
    * @return service names which match
    */
@@ -925,7 +925,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return list;
   }
 
-  /**
+  /*
    * @return services which match
    */
   public static synchronized ArrayList<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
@@ -958,7 +958,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return Thread.getAllStackTraces().keySet();
   }
 
-  /**
+  /*
    * dorky pass-throughs to the real JVM Runtime
    */
   public static final long getTotalMemory() {
@@ -966,7 +966,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return java.lang.Runtime.getRuntime().totalMemory();
   }
 
-  /**
+  /*
    * attempt to get physical memory from the jvm not supported in all jvms..
    */
   static public long getTotalPhysicalMemory() {
@@ -1039,7 +1039,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /**
+  /*
    * Installs a single Service type. This "should" work even if there is no
    * Runtime. It can be invoked on the command line without starting a MRL
    * instance. If a runtime exits it will broadcast events of installation
@@ -1061,7 +1061,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /**
+  /*
    * broadcast of Service install progress
    */
   public Status publishInstallProgress(Status status) {
@@ -1131,7 +1131,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return sw.isLocal();
   }
 
-  /**
+  /*
    * check if class is a Runtime class
    *
    * @return true if class == Runtime.class
@@ -1142,6 +1142,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   /**
    * load all configuration from all local services
+   * @return true / false
    */
   static public boolean loadAll() {
     boolean ret = true;
@@ -1161,7 +1162,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     java.lang.Runtime.getRuntime().loadLibrary(filename);
   }
 
-  /**
+  /*
    * Main starting method of MyRobotLab Parses command line options
    *
    * -h help -v version -list jvm args -Dhttp.proxyHost=webproxy
@@ -1307,8 +1308,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /**
-   *
+  /*
    * register - this method enters the service into the registery of services
    *
    */
@@ -1567,7 +1567,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   }
 
-  /**
+  /*
    * @param name
    *          - name of Service to be removed and whos resources will be
    *          released
@@ -1577,12 +1577,11 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   // ============== update events begin ==============
-  /**
+  /*
    *
    * should probably be deprecated - currently not used
    *
-   * @param runBeforeRestart
-   *
+   * runBeforeRestart
    *          will this work on a file lock update?
    */
   /*
@@ -1637,7 +1636,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   } */
 
-  /**
+  /*
    * save all configuration from all local services
    */
   static public boolean saveAll() {
@@ -1818,7 +1817,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   // ---------- Java Runtime wrapper functions begin --------
-  /**
+  /*
    * Executes the specified command and arguments in a separate process. Returns
    * the exit value for the subprocess.
    */
@@ -1826,7 +1825,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return execute(program, null, null, null, null);
   }
 
-  /**
+  /*
    * publishing point of Ivy sub system - sends event failedDependency when the
    * retrieve report for a Service fails
    */
@@ -1834,7 +1833,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return dep;
   }
 
-  /**
+  /*
    * returns version string of MyRobotLab
    */
   public String getLocalVersion() {
@@ -1899,7 +1898,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return environments.size();
   }
 
-  /**
+  /*
    * Returns an array of all the simple type names of all the possible services.
    * The data originates from the repo's serviceData.xml file https:/
    * /code.google.com/p/myrobotlab/source/browse/trunk/myrobotlab/thirdParty
@@ -1917,7 +1916,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   // ============== configuration end ==============
 
-  /**
+  /*
    * publishing event to get the possible services currently available
    *
    */
@@ -1944,7 +1943,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return null;
   }
 
-  /**
+  /*
    * event fired when a new artifact is download
    */
   public String newArtifactsDownloaded(String module) {
@@ -1973,7 +1972,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return status;
   }
 
-  /**
+  /*
    * published results of sending a noWorky
    */
   static public Status publishNoWorky(Status status) {
@@ -1982,7 +1981,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   // -------- network begin ------------------------
 
-  /**
+  /*
    * this method is an event notifier that there were updates found
    */
   public ServiceData proposedUpdates(ServiceData si) {
@@ -2005,7 +2004,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   // ---------------- callback events begin -------------
-  /**
+  /*
    * registration event
    *
    * @param sw 
@@ -2015,7 +2014,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return sw;
   }
 
-  /**
+  /*
    * release event
    *
    * @param sw
@@ -2025,7 +2024,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return sw;
   }
 
-  /**
+  /*
    * published events
    *
    */
@@ -2078,7 +2077,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /**
+  /*
    * Runtime's setLogLevel will set the root log level if its called from a
    * service - it will only set that Service type's log level
    *
@@ -2196,7 +2195,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return execute(program, list, null, null, null);
   }
 
-  /**
+  /*
    * FIXME - return a POJO - because there are lots of downstream which would
    * want different parts of the results FIXME - stream gobbler reconciled -
    * threaded stream consumption FIXME - watchdog - a good idea FIXME - most

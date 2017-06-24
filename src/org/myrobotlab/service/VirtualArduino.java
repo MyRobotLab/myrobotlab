@@ -182,7 +182,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     }
   }
 
-  /**
+  /*
    * easy way to set to get a 54 pin arduino
    *
    */
@@ -235,7 +235,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     return simulator;
   }
 
-  /**
+  /*
    * TODO - promote to interface
    */
   public void attachSimulator(Simulator simulator) {

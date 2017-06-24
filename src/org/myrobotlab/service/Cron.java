@@ -115,7 +115,7 @@ public class Cron extends Service {
     super(n);
   }
 
-  /**
+  /*
    * addTask - Add a task to the cron service to invoke a method on a service on
    * some schedule.
    * 
@@ -130,7 +130,7 @@ public class Cron extends Service {
     return addTask(cron, serviceName, method, (Object[]) null);
   }
 
-  /**
+  /*
    * addTask - Add a task to the cron service to invoke a method on a service on
    * some schedule.
    * 

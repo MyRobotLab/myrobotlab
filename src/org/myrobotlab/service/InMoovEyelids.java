@@ -115,7 +115,7 @@ public class InMoovEyelids extends Service {
    }
   }
 
-  /**
+  /*
    * attach all the servos - this must be re-entrant and accomplish the
    * re-attachment when servos are detached
    */
@@ -311,7 +311,7 @@ public class InMoovEyelids extends Service {
     log.info(move);
   }
 
-  /**
+  /*
    * TODO: move this java doc, it's lost
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer

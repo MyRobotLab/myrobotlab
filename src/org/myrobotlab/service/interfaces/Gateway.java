@@ -40,14 +40,14 @@ public interface Gateway {
 
   public void connect(String uri) throws URISyntaxException;
 
-  /**
+  /*
    * retrieves endpoint data for which this gateway is responsible
    * 
    */
   // DEPRECATE?
   public HashMap<URI, Connection> getClients();
 
-  /**
+  /*
    * important initial communication function related to discovery a broadcast
    * goes out and replies must include details of communication so that a viable
    * connection can be created
@@ -56,14 +56,14 @@ public interface Gateway {
 
   public String getPrefix(URI protocolKey);
 
-  /**
+  /*
    * the publishing point
    */
   public Connection publishConnect(Connection keys);
 
   public void sendRemote(final String key, final Message msg) throws URISyntaxException;
 
-  /**
+  /*
    * will send a message to the mrl key'ed uri the expectation is the uri is
    * directly from the hosts registry in runtime therefore it has the following
    * format

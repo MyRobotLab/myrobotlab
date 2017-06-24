@@ -92,7 +92,7 @@ public class VideoStreamer extends AbstractVideoSink /*extends Service implement
     super.releaseService();
   }
 
-  /**
+  /*
    * sets port for mjpeg feed - default is 9090
    * 
    */

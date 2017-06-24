@@ -281,7 +281,7 @@ public class OledSsd1306 extends Service implements I2CControl {
 	/*
 	 * public boolean isAttached() { return isAttached; }
 	 */
-	/**
+	/*
 	 * Initiate the buffer with data for the size of the OLED screen
 	 * 
 	 */
@@ -392,7 +392,7 @@ public class OledSsd1306 extends Service implements I2CControl {
 		}
 	}
 
-	/**
+	/*
 	 * draws the given image over the current image buffer. The image is
 	 * automatically converted to a binary image (if it not already is).
 	 * 

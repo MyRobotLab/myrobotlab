@@ -212,7 +212,7 @@ public class Roomba extends Service {
     roombacomm.createSong(5, song);
   }
 
-  /**
+  /*
    * Disconnect from serial portb
    */
 
@@ -246,7 +246,7 @@ public class Roomba extends Service {
     return roombacomm.getProtocol();
   }
 
-  /** Get speed for movement commands */
+  /** @return speed for movement commands */
   public int getSpeed() {
     return roombacomm.speed;
   }
@@ -268,7 +268,7 @@ public class Roomba extends Service {
     roombacomm.goBackward(distance);
   }
 
-  /**
+  /*
    * Go backward at a specified speed
    */
   public void goBackwardAt(int aspeed) {
@@ -298,7 +298,7 @@ public class Roomba extends Service {
   // higher-level functions
   //
 
-  /**
+  /*
    * Go forward at a specified speed
    */
   public void goForwardAt(int aspeed) {
@@ -377,7 +377,7 @@ public class Roomba extends Service {
     return roombacomm.send(cmd);
   }
 
-  /**
+  /*
    * This will handle both ints, bytes and chars transparently.
    */
   public boolean send(int b) {
@@ -392,7 +392,7 @@ public class Roomba extends Service {
     setWaitForDSR(hardwareHandshake);
   }
 
-  /**
+  /*
    * Turns on/off the various LEDs. Low-level command. FIXME: this is too
    * complex
    */
@@ -412,7 +412,7 @@ public class Roomba extends Service {
     roombacomm.setProtocol(protocol);
   }
 
-  /** Set speed for movement commands */
+  /* Set speed for movement commands */
   public void setSpeed(int s) {
     roombacomm.speed = Math.abs(s);
   }
@@ -485,7 +485,7 @@ public class Roomba extends Service {
     roombacomm.spinRightAt(aspeed);
   }
 
-  /**
+  /*
    * A Spirograph-like example
    * <p>
    * Run it with something like:
@@ -697,7 +697,7 @@ public class Roomba extends Service {
     return roombacomm.updateSensors();
   }
 
-  /**
+  /*
    * Update sensors. Block for up to 1000 ms waiting for update To use
    * non-blocking, call sensors() and then poll sensorsValid()
    */

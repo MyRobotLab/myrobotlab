@@ -131,7 +131,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
-	 * degreeToMicroseconds - convert a value to send to servo from degree
+	 * @param degree degrees
+	 * @return degreeToMicroseconds - convert a value to send to servo from degree
 	 * (0-180) to microseconds (544-2400)
 	 * 
 	 */
@@ -316,7 +317,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 	}
 
-	/**
+	/*
 	 * String interface - this allows you to easily use url api requests like
 	 * /attach/nameOfListener/3
 	 */
@@ -601,7 +602,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 	}
 
-	/**
+	/*
 	 * silly Arduino implementation - but keeping it since its familiar
 	 * 
 	 */
@@ -745,7 +746,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return getDevice(deviceId).getName();
 	}
 
-	/**
+	/*
 	 * int type to describe the pin defintion to Pin.h 0 digital 1 analog
 	 * 
 	 */
@@ -766,7 +767,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return serial.getPortName();
 	}
 
-	/**
+	/*
 	 * Use the serial service for serial activities ! No reason to replicate
 	 * methods
 	 */
@@ -1234,7 +1235,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 	}
 
-	/**
+	/*
 	 * With Arduino we want to be able to do pinMode("D7", "INPUT"), but it
 	 * should not be part of the PinArrayControl interface - because when it
 	 * comes down to it .. a pin MUST ALWAYS have an address regardless what you
@@ -1263,7 +1264,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		heartbeat = true;
 	}
 
-	/**
+	/*
 	 * No longer needed .. Arduino service controls device list - MrlComm does
 	 * not public String publishAttachedDevice(int deviceId, String deviceName)
 	 * {
@@ -1430,7 +1431,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return pinData;
 	}
 
-	/**
+	/*
 	 * method to communicate changes in pinmode or state changes
 	 * 
 	 */
@@ -1665,14 +1666,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		setBoard(BOARD_TYPE_MEGA_ADK);
 	}
 
-	/**
+	/*
 	 * DeviceControl methods. In this case they represents the I2CBusControl Not
 	 * sure if this is good to use the Arduino as an I2CBusControl Exploring
 	 * different alternatives. I may have to rethink. Alternate solutions are
 	 * welcome. /Mats.
 	 */
 
-	/**
+	/*
 	 * Debounce ensures that only a single signal will be acted upon for a
 	 * single opening or closing of a contact. the delay is the min number of pc
 	 * cycles must occur before a reading is taken
@@ -1692,7 +1693,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		msg.setDebug(b);
 	}
 
-	/**
+	/*
 	 * dynamically change the serial rate TODO - shouldn't this change Arduino
 	 * service serial rate too to match?
 	 * 
@@ -1707,7 +1708,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		broadcastState();
 	}
 
-	/**
+	/*
 	 * set a pin trigger where a value will be sampled and an event will be
 	 * signal when the pin turns into a different state.
 	 * 
@@ -2066,7 +2067,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return boardTypes;
 	}
 
-	/**
+	/*
 	 * event to return list of ports of all ports this serial service can see
 	 */
 	public List<String> publishPortNames(List<String> portNames) {

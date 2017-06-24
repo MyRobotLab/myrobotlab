@@ -11,6 +11,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 public interface I2CController extends Attachable {
 	/**
 	 * This method creates a I2CDevice
+	 * @param control c
 	 * 
 	 * @param busAddress
 	 * @param deviceAddress local address in the i2c device
@@ -20,6 +21,7 @@ public interface I2CController extends Attachable {
 	/**
 	 * This method returns and already existing I2CDevice
 	 * 
+   * @param control c
 	 * @param busAddress
 	 * @param deviceAddress
 	 *          local address in the i2c device
@@ -30,6 +32,7 @@ public interface I2CController extends Attachable {
 	/**
 	 * This method writes several bytes to the i2c device from given buffer.
 	 * 
+   * @param control c
 	 * @param busAddress
 	 * @param deviceAddress
 	 *          local address in the i2c device
@@ -44,8 +47,9 @@ public interface I2CController extends Attachable {
   	
 	/**
 	 * This method reads bytes from the i2c device to given buffer.
-	 * 
+   * @param control c
 	 * @param busAddress
+	 * @param deviceAddress
 	 * @param buffer
 	 *          buffer of data to be read from the i2c device in one go
 	 * @param size
@@ -62,7 +66,8 @@ public interface I2CController extends Attachable {
 	 * 
 	 * /** This method writes and reads bytes to/from the i2c device in a single
 	 * method call
-	 *
+	 * 
+   * @param control c
 	 * @param busAddress
 	 * @param deviceAddress
 	 *          local address in the i2c device

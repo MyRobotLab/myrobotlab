@@ -155,7 +155,7 @@ public class Osc extends Service implements OSCListener {
     return receiver;
   }
 
-  /**
+  /*
    * convert and publish to an Mrl Osc Message
    * adding ts to messsage as well.
    */
