@@ -438,14 +438,14 @@ public class Python extends Service {
 		}
 	}
 
-	/**
+	/*
 	 * replaces and executes current Python script
 	 */
 	public void exec(String code) {
 		exec(code, true);
 	}
 
-	/**
+	/*
 	 * non blocking exec
 	 * 
 	 */
@@ -453,7 +453,7 @@ public class Python extends Service {
 		exec(code, replace, false);
 	}
 
-	/**
+	/*
 	 * replaces and executes current Python script if replace = false - will not
 	 * replace "script" variable can be useful if ancillary scripts are needed
 	 * e.g. monitors &amp; consoles
@@ -493,7 +493,7 @@ public class Python extends Service {
 		exec(code, true, true);
 	}
 
-	/**
+	/*
 	 * executes an external Python file
 	 * 
 	 * @param filename
@@ -573,7 +573,7 @@ public class Python extends Service {
 	}
 
 
-	/**
+	/*
 	 * load a script from the myrobotlab.jar - location of example scripts are
 	 * /resource/Python/examples
 	 *            name of file to load
@@ -583,7 +583,7 @@ public class Python extends Service {
 		openScript(String.format("%s.py", serviceType), serviceScript);
 	}
 
-	/**
+	/*
 	 * this method can be used to load a Python script from the Python's local
 	 * file system, which may not be the SwingGui's local system. Because it
 	 * can be done programatically on a different machine we want to broadcast

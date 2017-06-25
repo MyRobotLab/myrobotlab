@@ -68,8 +68,7 @@ public class MessageTest implements NameProvider {
 
   /**
    * test to verify we can remove all message routes
-   * 
-   * @throws Exception
+   * @throws Exception e
    */
   // Ignoring this for now, some reason we're getting a stack overflow
   // when running this test from the ant build.
@@ -149,8 +148,8 @@ public class MessageTest implements NameProvider {
 
   /**
    * test to excercise
+   * @throws Exception e
    * 
-   * @throws Exception
    */
   @Test
   final public void RuntimeTests() throws Exception {

@@ -195,7 +195,8 @@ public class ProcParser {
   }
 
   /**
-   * Get memory usage information. Files: /proc/[pid]/statm /proc/[pid]/stat
+   * @param _processPid the process id
+   * @return memory usage information. Files: /proc/[pid]/statm /proc/[pid]/stat
    * 
    */
   public static ArrayList<String> getMemoryUsage(int _processPid) {
@@ -251,6 +252,10 @@ public class ProcParser {
 
   /**
    * DEPRECATE - why do this? Java can do this?
+   * @return int
+   * @throws FileNotFoundException e 
+   * @throws IOException e
+   * @throws NumberFormatException e 
    */
   public static int getNumberofCores() throws FileNotFoundException, IOException, NumberFormatException {
     String[] tempData = null;
@@ -320,7 +325,7 @@ public class ProcParser {
     return br;
   }
 
-  /**
+  /*
    * Gathers the usage statistic from the /proc file system for CPU, Memory,
    * Disk and Network
    */

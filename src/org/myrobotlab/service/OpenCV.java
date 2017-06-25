@@ -191,7 +191,7 @@ public class OpenCV extends AbstractVideoSource {
     return b;
   }
 
-  /**
+  /*
    * new way of converting IplImages to BufferedImages
    */
   public static BufferedImage IplImageToBufferedImage(IplImage src) {
@@ -201,7 +201,7 @@ public class OpenCV extends AbstractVideoSource {
     return converter.getBufferedImage(frame, 1);
   }
 
-  /**
+  /*
    * new way of converting BufferedImages to IplImages
    */
   public static IplImage BufferedImageToIplImage(BufferedImage src) {
@@ -210,7 +210,7 @@ public class OpenCV extends AbstractVideoSource {
     return grabberConverter.convert(jconverter.convert(src));
   }
 
-  /**
+  /*
    * new way of converting BufferedImages to IplImages
    */
   public static Frame BufferedImageToFrame(BufferedImage src) {
@@ -228,7 +228,7 @@ public class OpenCV extends AbstractVideoSource {
     return img;
   }
 
-  /**
+  /*
    * the publishing point of all OpenCV goodies ! type conversion is held off
    * until asked for - then its cached SMART ! :)
    * 
@@ -281,7 +281,7 @@ public class OpenCV extends AbstractVideoSource {
     return add(src);
   }
 
-  /**
+  /*
    * blocking safe exchange of data between different threads external thread
    * adds image data which can be retrieved from the blockingData queue
    * 
@@ -304,7 +304,7 @@ public class OpenCV extends AbstractVideoSource {
     }
   }
 
-  /**
+  /*
    * when the video image changes size this function will be called with the new
    * dimension
    */
@@ -463,7 +463,7 @@ public class OpenCV extends AbstractVideoSource {
 
   }
 
-  /**
+  /*
    * Callback from the SwingGui to the appropriate filter funnel through here
    */
   public void invokeFilterMethod(String filterName, String method, Object... params) {
@@ -475,7 +475,7 @@ public class OpenCV extends AbstractVideoSource {
     }
   }
 
-  /**
+  /*
    * publishing method for filters - used internally
    * 
    * @return FilterWrapper solves the problem of multiple types being resolved
@@ -485,7 +485,7 @@ public class OpenCV extends AbstractVideoSource {
     return filterWrapper;
   }
 
-  /**
+  /*
    * publishing method for filters - uses string parameter for remote invocation
    * 
    * @return FilterWrapper solves the problem of multiple types being resolved
@@ -664,7 +664,7 @@ public class OpenCV extends AbstractVideoSource {
     videoProcessor.grabberType = "org.myrobotlab.opencv.PipelineFrameGrabber";
   }
 
-  /**
+  /*
    * minimum time between processing frames - time unit is in milliseconds
    * 
    */

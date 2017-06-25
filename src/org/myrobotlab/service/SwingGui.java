@@ -375,7 +375,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     return frame;
   }
 
-  /**
+  /*
    * Build the menu for display.
    */
   public JMenuBar createMenu() {
@@ -391,7 +391,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     return menuBar;
   }
 
-  /**
+  /*
    * puts unique service.method and ServiceGui into map also in mrl.js
    * 
    * the format of the key needs to be {name}.method
@@ -418,7 +418,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     }
   }
 
-  /**
+  /*
    * closes window and puts the panel back into the tabbed pane
    */
   public void dockTab(final String title) {

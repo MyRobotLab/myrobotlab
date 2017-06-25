@@ -197,7 +197,7 @@ public class Serial extends Service
 	 */
 	transient HashMap<String, SerialDataListener> listeners = new HashMap<String, SerialDataListener>();
 
-	/**
+	/*
 	 * conversion utility TODO - support endianess
 	 * 
 	 */
@@ -205,7 +205,7 @@ public class Serial extends Service
 		return (int) bytesToLong(bytes, offset, length);
 	}
 
-	/**
+	/*
 	 * conversion utility TODO - support endianess
 	 * 
 	 */
@@ -223,7 +223,7 @@ public class Serial extends Service
 		return retVal;
 	}
 
-	/**
+	/*
 	 * Static list of third party dependencies for this service. The list will
 	 * be consumed by Ivy to download and manage the appropriate resources
 	 */
@@ -247,7 +247,7 @@ public class Serial extends Service
 		addByteListener(listener.getName());
 	}
 
-	/**
+	/*
 	 * awesome method - which either sets up the pub/sub remote or assigns a
 	 * local reference from the publishing thread
 	 * 
@@ -333,7 +333,7 @@ public class Serial extends Service
 		}
 	}
 
-	/**
+	/*
 	 * The main simple connect - it attempts to connect to one of the known
 	 * ports in memory if that fails it will try to connect to a hardware port
 	 * 
@@ -409,7 +409,7 @@ public class Serial extends Service
 	}
 
 
-	/**
+	/*
 	 * FIXME - implement Baddass loopback null/modem cable - auto creates a new
 	 * Serial service and connects to it FIXME - no need for null/modem cable
 	 * virtual port ?
@@ -466,7 +466,7 @@ public class Serial extends Service
 		return true;
 	}
 
-	/**
+	/*
 	 * Dynamically create a hardware port - this method is needed to abtract
 	 * away the specific hardware library. Its advantageous to have abstraction
 	 * when interfacing with a specific implementation (JNI/JNA - other?). The
@@ -742,7 +742,7 @@ public class Serial extends Service
 		return portName;
 	}
 
-	/**
+	/*
 	 * event to return list of ports of all ports this serial service can see
 	 * 
 	 */
@@ -750,7 +750,7 @@ public class Serial extends Service
 		return portNames;
 	}
 
-	/**
+	/*
 	 * main line RX publishing point
 	 * 
 	 */
@@ -758,7 +758,7 @@ public class Serial extends Service
 		return data;
 	}
 
-	/**
+	/*
 	 * main line TX publishing point
 	 */
 	public Integer publishTX(Integer data) {
@@ -798,6 +798,9 @@ public class Serial extends Service
 	 * Read size bytes from the serial port. If a timeout is set it may return
 	 * less characters as requested. With no timeout it will block until the
 	 * requested number of bytes is read.
+	 * @param length l
+	 * @return bytes
+	 * @throws InterruptedException e 
 	 * 
 	 */
 	public byte[] read(int length) throws InterruptedException {
@@ -884,6 +887,7 @@ public class Serial extends Service
 	 *            - the amount of time to wait blocking until we return. 0 ms
 	 *            means the reading thread will potentially block forever.
 	 * @return String form of the bytes read
+	 * @throws InterruptedException e
 	 */
 	public String readString(int length) throws InterruptedException {
 		byte[] bytes = read(length);

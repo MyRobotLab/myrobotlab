@@ -206,7 +206,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		}
 	}
 
-	/**
+	/*
 	 * the gui is no simplified - a single broadcastState() -&gt; onState(Serial)
 	 * is used to propegate all data which needs updating. Since that is the
 	 * case a single invokeLater is used. It is unadvised to have more
@@ -255,6 +255,8 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	 * 
 	 * FORMAT_DECIMEL is a 3 digit decimal in ascii FORMAT_RAW is interpreted as
 	 * 1 byte = 1 ascii char FORMAT_HEX is 2 digit asci hex
+	 * @param data the data received
+	 * @throws BadLocationException an exception
 	 * 
 	 */
 	public final void onRX(final Integer data) throws BadLocationException {

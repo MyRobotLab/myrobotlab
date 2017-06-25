@@ -122,6 +122,11 @@ public class Security extends Service implements AuthorizationProvider {
 
   /**
    * decrypt a value
+   * @param message m
+   * @param keyFile k
+   * @return string
+   * @throws GeneralSecurityException e 
+   * @throws IOException e
    */
   public static String decrypt(String message, File keyFile) throws GeneralSecurityException, IOException {
     SecretKeySpec sks = getSecretKeySpec(keyFile);
@@ -134,6 +139,11 @@ public class Security extends Service implements AuthorizationProvider {
   /**
    * encrypt a value and generate a keyfile if the keyfile is not found then a
    * new one is created
+   * @param passphrase p
+   * @param keyFile k
+   * @return string
+   * @throws GeneralSecurityException e 
+   * @throws IOException e
    * 
    */
   public static String encrypt(String passphrase, File keyFile) throws GeneralSecurityException, IOException {

@@ -153,7 +153,7 @@ public class VideoProcessor implements Runnable, Serializable {
 		data.put(INPUT_KEY);
 	}
 	
-	/**
+	/*
 	 * to reply to the request of getting all
 	 * source keys - pending or current
 	 */
@@ -175,7 +175,7 @@ public class VideoProcessor implements Runnable, Serializable {
 		return ret;
 	}
 
-	/**
+	/*
 	 * add filter to the addFilterQueue so the video processor thread will pick
 	 * it up - this is always doen by an 'external' thread
 	 */
@@ -185,7 +185,7 @@ public class VideoProcessor implements Runnable, Serializable {
 		return filter;
 	}
 
-	/**
+	/*
 	 * add filter with a string interface
 	 */
 	public OpenCVFilter addFilter(String name, String filterType) {
@@ -219,7 +219,7 @@ public class VideoProcessor implements Runnable, Serializable {
 		return opencv;
 	}
 
-	/**
+	/*
 	 * thread safe recording of avi
 	 * 
 	 * key- input, filter, or display

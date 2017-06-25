@@ -24,7 +24,7 @@ public class Simbatch {
   Canvas3D canvas3d;
   Panel panel;
 
-  /** Construct a batch version of Simbad simulator */
+  /* Construct a batch version of Simbad simulator */
   public Simbatch(EnvironmentDescription ed, boolean do3DRendering) {
     counter = 0;
     world = new World(ed);

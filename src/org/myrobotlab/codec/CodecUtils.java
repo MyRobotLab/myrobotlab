@@ -241,6 +241,8 @@ public class CodecUtils {
    * most lossy protocols need conversion of parameters into correctly typed
    * elements this method is used to query a candidate method to see if a simple
    * conversion is possible
+   * @param clazz the class
+   * @return true/false
    */
   public static boolean isSimpleType(Class<?> clazz) {
     return WRAPPER_TYPES.contains(clazz) || clazz == String.class;

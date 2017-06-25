@@ -297,6 +297,9 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
   /**
    * Sabertooth uses numeric identifiers for ports. This just does a type
    * conversion of the portNumber for attaching with the MotorConfigPort data
+   * @param motor motor control
+   * @param portNumber the port
+   * @throws Exception e
    * 
    */
   public void attach(MotorControl motor, Integer portNumber) throws Exception {
@@ -306,6 +309,9 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
   /**
    * Because many motor controllers have String labeled ports .e.g. "PortA,
    * PortB, etc" the universal attach for MotorConfigPort uses a String.
+   * @param motor motor
+   * @param portNumber portnum
+   * @throws Exception e
    * 
    */
   public void attach(MotorControl motor, String portNumber) throws Exception {
