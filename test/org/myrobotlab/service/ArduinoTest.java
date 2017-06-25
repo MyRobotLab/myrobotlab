@@ -11,13 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.Description;
-import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
@@ -25,11 +21,8 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.arduino.virtual.MrlServo;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.PinData;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.SerialDevice;
@@ -237,12 +230,6 @@ public class ArduinoTest implements PinArrayListener {
     assertTrue(boardInfo.getVersion().intValue() == Msg.MRLCOMM_VERSION);
   }
 
-  @Test
-  public void testGetController() {
-    arduino.connect(port);
-    DeviceController d = arduino.getController();
-    assertNotNull(d);
-  }
 
   @Test
   public final void testConnect() throws IOException {
@@ -313,24 +300,24 @@ public class ArduinoTest implements PinArrayListener {
 
     // verify its attached
     assertTrue(servo.isAttached());
-    assertTrue(servo.isAttached(arduino));
-    assertTrue(arduino.getDeviceNames().contains(servo.getName()));
+    assertTrue(servo.isAttachedServoController(arduino));
+    assertTrue(arduino.getAttached().contains(servo.getName()));
 
     // detach it
     arduino.detach(servo);
 
     // verify its detached
-    assertFalse(arduino.getDeviceNames().contains(servo.getName()));
+    assertFalse(arduino.getAttached().contains(servo.getName()));
     assertFalse(servo.isPinAttached());
-    assertFalse(servo.isAttached(arduino));
+    assertFalse(servo.isAttachedServoController(arduino));
 
     // attach it the other way
     arduino.attach(servo, servoPin);
 
     // verify its attached
     assertTrue(servo.isAttached());
-    assertTrue(servo.isAttached(arduino));
-    assertTrue(arduino.getDeviceNames().contains(servo.getName()));
+    assertTrue(servo.isAttachedServoController(arduino));
+    assertTrue(arduino.getAttached().contains(servo.getName()));
 
     // servo should have the correct pin
     assertTrue(servoPin == servo.getPin());
@@ -412,9 +399,9 @@ public class ArduinoTest implements PinArrayListener {
     // notify and process releasing itself from attached 
     // services
     servo.releaseService();
-    assertFalse(arduino.getDeviceNames().contains(servo.getName()));
+    assertFalse(arduino.getAttached().contains(servo.getName()));
     assertFalse(servo.isAttached());
-    assertFalse(servo.isAttached(arduino));
+    assertFalse(servo.isAttachedServoController(arduino));
 
   }
 

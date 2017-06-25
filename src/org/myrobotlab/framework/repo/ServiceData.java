@@ -135,10 +135,8 @@ public class ServiceData implements Serializable {
    * Run-Time must extract itself and scan/filter zip entries which is
    * potentially a lengthy process, and should only have to be done once for the
    * lifetime of the version or mrl
-   * 
-   * 
-   * @return
-   * @throws IOException
+   * @return the service data description
+   * @throws IOException e
    */
   static public ServiceData generate() throws IOException {
     log.info("================ generating serviceData.json begin ================");

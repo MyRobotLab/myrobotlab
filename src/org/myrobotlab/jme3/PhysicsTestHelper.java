@@ -61,9 +61,9 @@ public class PhysicsTestHelper {
 
     /**
      * creates a simple physics test world with a floor, an obstacle and some test boxes
-     * @param rootNode
-     * @param assetManager
-     * @param space
+     * @param rootNode root
+     * @param assetManager mgr 
+     * @param space space
      */
     public static void createPhysicsTestWorld(Node rootNode, AssetManager assetManager, PhysicsSpace space) {
         AmbientLight light = new AmbientLight();
@@ -162,8 +162,8 @@ public class PhysicsTestHelper {
 
     /**
      * creates a box geometry with a RigidBodyControl
-     * @param assetManager
-     * @return
+     * @param assetManager am
+     * @return geometry 
      */
     public static Geometry createPhysicsTestBox(AssetManager assetManager) {
         Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -178,8 +178,8 @@ public class PhysicsTestHelper {
 
     /**
      * creates a sphere geometry with a RigidBodyControl
-     * @param assetManager
-     * @return
+     * @param assetManager am
+     * @return geometry 
      */
     public static Geometry createPhysicsTestSphere(AssetManager assetManager) {
         Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -194,10 +194,10 @@ public class PhysicsTestHelper {
 
     /**
      * creates an empty node with a RigidBodyControl
-     * @param manager
-     * @param shape
-     * @param mass
-     * @return
+     * @param manager m
+     * @param shape s
+     * @param mass m
+     * @return the node
      */
     public static Node createPhysicsTestNode(AssetManager manager, CollisionShape shape, float mass) {
         Node node = new Node("PhysicsNode");
@@ -208,9 +208,9 @@ public class PhysicsTestHelper {
 
     /**
      * creates the necessary inputlistener and action to shoot balls from teh camera
-     * @param app
-     * @param rootNode
-     * @param space
+     * @param app a
+     * @param rootNode r 
+     * @param space s
      */
     public static void createBallShooter(final Application app, final Node rootNode, final PhysicsSpace space) {
         ActionListener actionListener = new ActionListener() {

@@ -256,7 +256,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     subscribe(topic, 2);
   }
 
-  /**
+  /*
    * Subscribe to a topic on an Mqtt server Once subscribed this method waits
    * for the messages to arrive from the server that match the subscription. It
    * continues listening for messages until the enter key is pressed. {
@@ -266,7 +266,6 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
    * @param qos
    *          the maximum quality of service to receive messages at for this
    *          subscription
-   * @throws MqttException
    */
   public void subscribe(String topic, int qos) throws Throwable {
     if (client == null || !client.isConnected()) {

@@ -91,13 +91,13 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
    * I think this may be a good pattern ?
    * attach usually is between services, in this case its being used as minimal
    * input config and its Peers are being used as the services...
+   * @param port com port
+   * @param trigPin pin connected to trigger
+   * @param echoPin pin connected to echo
+   * @param servoPin the servo pin 
    * 
-   * @param port
-   * @param trigPin
-   * @param echoPin
-   * @param servoPin
-   * @return
-   * @throws Exception
+   * @return true or false
+   * @throws Exception e
    */
   public boolean attach(String port, int trigPin, int echoPin, int servoPin) throws Exception {
     return attach(controller, port, sensor, trigPin, echoPin, servo, servoPin);

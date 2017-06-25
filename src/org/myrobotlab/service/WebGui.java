@@ -10,6 +10,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,13 +24,6 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -46,17 +41,18 @@ import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
 import org.jboss.netty.handler.ssl.SslContext;
 import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
+import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.MethodCache;
-import org.myrobotlab.framework.Hello;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.StatusLevel;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -67,13 +63,12 @@ import org.myrobotlab.net.Connection;
 //import org.myrobotlab.service.WebGUI3.Error;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 //import org.myrobotlab.webgui.WebGUIServlet;
 import org.slf4j.Logger;
 
 /**
  * 
- * WebGui - This service is the AngularJS based GUI TODO - messages & services
+ * WebGui - This service is the AngularJS based GUI TODO - messages &amp; services
  * are already APIs - perhaps a data API - same as service without the message
  * wrapper
  */
@@ -104,6 +99,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // just marking as transient to remove some of the data load 10240 max frame
   transient Map<String, Panel> panels;
   transient Map<String, Map<String, Panel>> desktops;
+
+  ApiFactory api = null;
 
   String currentDesktop = "default";
 
@@ -144,8 +141,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   /**
    * Static list of third party dependencies for this service. The list will be
    * consumed by Ivy to download and manage the appropriate resources
-   * 
-   * @return
    */
 
   public static class LiveVideoStreamHandler implements Handler {
@@ -199,6 +194,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public WebGui(String n) {
     super(n);
+    api = ApiFactory.getInstance(this);
     if (desktops == null) {
       desktops = new HashMap<String, Map<String, Panel>>();
     }
@@ -290,7 +286,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   // ================ Broadcaster begin ===========================
 
-  /**
+  /*
    * FIXME - needs to be LogListener interface with
    * LogListener.onLogEvent(String logEntry) !!!! THIS SHALL LOG NO ENTRIES OR
    * ABANDON ALL HOPE !!!
@@ -302,7 +298,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * etc !!!! or there will be an infinite loop and you will be at the gates of
    * hell !
    * 
-   * @param logEntry
    */
   public void onLogEvent(Message msg) {
     try {
@@ -332,11 +327,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-  /**
+  /*
    * redirects browser to new url
-   * 
-   * @param url
-   * @return
    */
   public String redirect(String url) {
     return url;
@@ -588,6 +580,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     try {
       AtmosphereResponse response = r.getResponse();
       AtmosphereRequest request = r.getRequest();
+      OutputStream out = response.getOutputStream();
+      byte[] data = null;
+      if (request.body() != null) {
+        data = request.body().asBytes();
+      }
 
       String httpMethod = request.getMethod();
       String pathInfo = request.getPathInfo();
@@ -601,87 +598,38 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       }
       response.addHeader("Content-Type", codec.getMimeType());
 
+      // FIXME - GET or POST should work - so this "should" be unnecessary ..
       if ("GET".equals(httpMethod)) { // if post and parts.length < 3 ??
         // respond(r, apiKey, "getPlatform", new Hello(Runtime.getId()));
-        HashMap<URI, ServiceEnvironment> env = Runtime.getEnvironments(); 
+        HashMap<URI, ServiceEnvironment> env = Runtime.getEnvironments();
         respond(r, apiKey, "getLocalServices", env);
       } else {
-        processMessageAPI(codec, request.body());
+        doNotUseThisProcessMessageAPI(codec, request.body()); 
+        // api.process(out, r.getRequest().getRequestURI(), data);
       }
 
     } catch (Exception e) {
-      log.error("handleMessages2Api -", e);
+      log.error("handleMessagesApi -", e);
     }
   }
 
-  public void handleMessages2Api(AtmosphereResource r) {
-    try {
-      AtmosphereResponse response = r.getResponse();
-      AtmosphereRequest request = r.getRequest();
-
-      String httpMethod = request.getMethod();
-      String pathInfo = request.getPathInfo();
-      String[] parts = pathInfo.split("/");
-      // FIXME - handle part.length < 3 error
-      String apiKey = parts[2];
-
-      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
-      if (!r.isSuspended()) {
-        r.suspend();
-      }
-      response.addHeader("Content-Type", codec.getMimeType());
-
-      if ("GET".equals(httpMethod)) {
-        respond(r, apiKey, "getPlatform", new Hello(Runtime.getId()));
-      } else {
-        processMessageAPI(codec, request.body());
-      }
-
-    } catch (Exception e) {
-      log.error("handleMessages2Api -", e);
+  /**
+   * This is a middle level method to handle the details of Atmosphere and http/ws level of 
+   * processing request.  It will eventually call ApiFactory.process which handles the "pure"
+   * Jvm Java only processing
+   * @param r r
+   * @throws Exception e 
+   * 
+   */
+  public void handleServicesApi(AtmosphereResource r) throws Exception {
+    AtmosphereRequest request = r.getRequest();
+    AtmosphereResponse response = r.getResponse();
+    OutputStream out = response.getOutputStream();
+    byte[] data = null;
+    if (request.body() != null) {
+      data = request.body().asBytes();
     }
-  }
-
-  public void handleServicesApi(AtmosphereResource r) {
-    try {
-      AtmosphereResponse response = r.getResponse();
-      AtmosphereRequest request = r.getRequest();
-
-      String httpMethod = request.getMethod();
-      String pathInfo = request.getPathInfo();
-      String[] parts = pathInfo.split("/");
-      // FIXME - handle part.length < 3 error
-      String apiKey = parts[2];
-
-      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
-      if (!r.isSuspended()) {
-        r.suspend();
-      }
-      response.addHeader("Content-Type", codec.getMimeType());
-
-      if ("GET".equals(httpMethod)) {
-        respond(r, apiKey, "getPlatform", new Hello(Runtime.getId()));
-      } else {
-        processMessageAPI(codec, request.body());
-        return;
-      }
-
-      if (parts.length == 4) {
-        ServiceInterface si = Runtime.getService(parts[3]);
-        if (pathInfo.endsWith("/")) {
-          respond(r, apiKey, "getDeclaredMethods", si.getMethodMap());
-        } else {
-          respond(r, apiKey, "onService", si);
-        }
-        return;
-      } else {
-        // THIS NEEDS BLOCKING VS SEND MSG PARAMETER !!!!
-        processMessageAPI(codec, request.body());
-      }
-
-    } catch (Exception e) {
-      log.error("handleMessages2Api -", e);
-    }
+    api.process(out, r.getRequest().getRequestURI(), data);
   }
 
   public void handleSession(AtmosphereResource r) {
@@ -705,7 +653,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   /**
    * With a single method Atmosphere does so much !!! It sets up the connection,
    * possibly gets a session, turns the request into something like a
-   * HTTPServletRequest, provides us with input & output streams - and manages
+   * HTTPServletRequest, provides us with input &amp; output streams - and manages
    * all the "long polling" or websocket upgrades on its own !
    * 
    * Atmosphere Rocks !
@@ -753,21 +701,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       // TODO - add handleSwaggerApi
       switch (apiKey) {
+
         case CodecUtils.API_TYPE_MESSAGES: {
           handleMessagesApi(r);
           break;
         }
-          
-        case CodecUtils.API_TYPE_MESSAGES2: {
-          handleMessages2Api(r);
-          break;
-        }
-          
+
         case CodecUtils.API_TYPE_SERVICES: {
           handleServicesApi(r);
           break;
         }
-          
+
         default: {
           handleInvalidApi(r); // TODO - swagger list of apis ?
           break;
@@ -816,7 +760,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return parts[2];
   }
 
-  public void processMessageAPI(Codec codec, Body body) throws Exception {
+  public void doNotUseThisProcessMessageAPI(Codec codec, Body body) throws Exception {
 
     // first decoding will give you an array of types in msg.data[]
     // but they are un-coerced - we need the method signature candidate
@@ -837,15 +781,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       error("could not get service %s for msg %s", msg.name, msg);
       return;
     }
-    
-    // FIXME !!!  important bug .. invoking needs to be a service invoke in that it has to 
-    // process the notifyList .. otherwise the event is not raised correctly  !!!
-    
+
+    // FIXME !!! important bug .. invoking needs to be a service invoke in that
+    // it has to
+    // process the notifyList .. otherwise the event is not raised correctly !!!
+
     // FIXME if target service isLocal()
-    // Invoker.invoke 
-    
+    // Invoker.invoke
+
     // FIXME FIXME FIXME !!! -
-    
+
     Class<?> clazz = si.getClass();
 
     Class<?>[] paramTypes = null;
@@ -982,18 +927,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
      */
   }
 
-  /**
+  /*
    * - use the service's error() pub sub return public void handleError(){
    * 
    * }
    */
 
-  /**
+  /*
    * determines if references to JQuery JavaScript library are local or if the
    * library is linked to using content delivery network. Default (false) is to
    * use the CDN
    * 
-   * @param b
    */
   public void useLocalResources(boolean useLocalResources) {
     this.useLocalResources = useLocalResources;
@@ -1027,14 +971,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return false;
   }
 
-  /**
-   * From UI events --to--> MRL request to save panel data typically done after
+  /*
+   * From UI events --to--&gt; MRL request to save panel data typically done after
    * user has changed or updated the UI in position, height, width, zIndex etc.
    * 
    * If you need MRL changes of position or UI changes use publishPanel to
    * remotely control UI
    * 
-   * @param panel
    */
   public void savePanel(Panel panel) {
     if (panel.name == null) {
@@ -1087,7 +1030,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-  /**
+  /*
    * https://github.com/Atmosphere/nettosphere/issues/17 A callback used to
    * configure {@link javax.net.ssl.SSLEngine} before they get injected in
    * Netty.
@@ -1211,7 +1154,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // TODO Auto-generated method stub
     return null;
   }
-  
+
   // FIXME
 
   public static void main(String[] args) {

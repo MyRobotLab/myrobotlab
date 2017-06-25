@@ -4,8 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.NameProvider;
+import org.myrobotlab.framework.interfaces.NameProvider;
 
 /**
  * Allows a common encoding/decoding interface for dynamic switching between
@@ -31,11 +30,11 @@ public interface Codec {
    * system needs to be able to decode an "Array" of parameters - not just one
    * so this method exists to handle that detail.
    * 
-   * e.g. URI POST --to--> Message
+   * e.g. URI POST --to--&gt; Message
+   * @param data the data to decode 
    * 
-   * @param data
    * @return decoded object
-   * @throws Exception
+   * @throws Exception e
    */
   public Object[] decodeArray(Object data) throws Exception;
 
@@ -49,7 +48,7 @@ public interface Codec {
    * @param type
    *          - the expected type we want to decode into
    * @return decoded object
-   * @throws Exception
+   * @throws Exception e
    */
   public Object decode(Object data, Class<?> type) throws Exception;
 
@@ -61,10 +60,8 @@ public interface Codec {
   public String getMimeType();
 
   /**
-   * different strategies of encoding may in the end have the same mime type so
+   * @return different strategies of encoding may in the end have the same mime type so
    * a key is needed to identify the exact type
-   * 
-   * @return
    */
 
   public String getKey();

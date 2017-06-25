@@ -20,10 +20,6 @@ public abstract class Logging {
     return ret;
   }
 
-  /**
-   * 
-   * @param tag
-   */
   static public void logTime(String tag) {
     if (!performanceTiming) {
       return;

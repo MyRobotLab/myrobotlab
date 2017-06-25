@@ -1,6 +1,8 @@
 package org.myrobotlab.service.interfaces;
 
-public interface UltrasonicSensorController extends DeviceController {
+import org.myrobotlab.framework.interfaces.Attachable;
+
+public interface UltrasonicSensorController extends Attachable {
 	
 	// > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
 	public void attach(UltrasonicSensorControl control, Integer triggerPin, Integer echoPin) throws Exception;

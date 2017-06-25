@@ -26,12 +26,12 @@ public class DifferentialKinematic extends KinematicModel {
     reset();
   }
 
-  /** Gets the velocity of the left wheel in meter/s. */
+  /* Gets the velocity of the left wheel in meter/s. */
   public double getLeftVelocity() {
     return leftWheelVelocity;
   }
 
-  /** Gets the velocity of the right wheel in meter/s. */
+  /* Gets the velocity of the right wheel in meter/s. */
   public double getRightVelocity() {
     return rightWheelVelocity;
   }
@@ -43,17 +43,17 @@ public class DifferentialKinematic extends KinematicModel {
     rightWheelVelocity = 0;
   }
 
-  /** Sets the velocity of the left wheel in meter/s. */
+  /* Sets the velocity of the left wheel in meter/s. */
   public void setLeftVelocity(double vel) {
     leftWheelVelocity = vel;
   }
 
-  /** Sets the velocity of the right wheel in meter/s. */
+  /* Sets the velocity of the right wheel in meter/s. */
   public void setRightVelocity(double vel) {
     rightWheelVelocity = vel;
   }
 
-  /** Sets the velocity of both wheels in meter/s. */
+  /* Sets the velocity of both wheels in meter/s. */
   public void setWheelsVelocity(double vl, double vr) {
     leftWheelVelocity = vl;
     rightWheelVelocity = vr;

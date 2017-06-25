@@ -15,13 +15,13 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -281,10 +281,9 @@ public class OledSsd1306 extends Service implements I2CControl {
 	/*
 	 * public boolean isAttached() { return isAttached; }
 	 */
-	/**
+	/*
 	 * Initiate the buffer with data for the size of the OLED screen
 	 * 
-	 * @param displayType
 	 */
 	public void setDisplayType(int displayType) {
 		if (displayType == SSD1306_128_64) {
@@ -393,17 +392,14 @@ public class OledSsd1306 extends Service implements I2CControl {
 		}
 	}
 
-	/**
+	/*
 	 * draws the given image over the current image buffer. The image is
 	 * automatically converted to a binary image (if it not already is).
-	 * <p/>
+	 * 
 	 * Note that the current buffer is not cleared before, so if you want the
 	 * image to completely overwrite the current display content you need to call
 	 * clear() before.
 	 *
-	 * @param image
-	 * @param x
-	 * @param y
 	 */
 	public synchronized void drawImage(BufferedImage image, int x, int y) {
 		BufferedImage tmpImage = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_BYTE_BINARY);

@@ -12,13 +12,12 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -52,7 +51,7 @@ import com.amazonaws.services.polly.model.Voice;
  * @author gperry
  *
  */
-public class Polly extends Service implements SpeechSynthesis, AudioListener {
+public class Polly extends AbstractSpeechSynthesis implements AudioListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -125,7 +124,7 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
     return new ArrayList<String>(langMap.keySet());
   }
 
-  /**
+  /*
    * Proxy works in 3 modes
    *    client - consumer of mrl services
    *    relay - proxy (running as cloud service)
@@ -134,10 +133,7 @@ public class Polly extends Service implements SpeechSynthesis, AudioListener {
    *    client - would be an end user using a client key
    *    relay - is the mrl proxy service
    *    direct would be from a users, by-passing mrl and going directly to Amazon with amazon keys
-   * cache file - caches file locally (both client or relay)
-   * @param toSpeak
-   * @param format
-   * @throws IOException
+   * cache file - caches file locally (both client or relay) 
    */
   public byte[] cacheFile(String toSpeak, OutputFormat format) throws IOException {
 

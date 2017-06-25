@@ -1,4 +1,4 @@
-package org.myrobotlab.service.interfaces;
+package org.myrobotlab.framework.interfaces;
 
 public interface NameTypeProvider extends NameProvider, TypeProvider {
 

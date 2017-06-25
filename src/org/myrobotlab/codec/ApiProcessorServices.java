@@ -6,11 +6,11 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URLDecoder;
 
-import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.MessageSender;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.MessageSender;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -49,13 +49,15 @@ public class ApiProcessorServices implements ApiProcessor {
 
   public Object process(MessageSender sender, OutputStream out, URI uri, byte[] data) throws Exception {
 
-    // FIXME - API
-
     // FIXME change to CodecUtils.MIME_TYPE_JSON
     Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
     String path = uri.getPath();
     String[] parts = path.split("/");
     Object ret = null;
+    
+    if (parts.length < 4){
+      return Status.error("api http://{host}:{port}/api/services/{serviceName}/{method}/{param1}/{param2}/... - actual [%s]", uri);
+    }
 
     // post data is expected to be an array of parameters
     // POST vs GET parameters... who has precedence ?

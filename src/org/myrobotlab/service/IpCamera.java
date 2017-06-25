@@ -113,8 +113,8 @@ public class IpCamera extends Service {
     super(n);
   }
 
-  /**
-   * method to determine connectivity of a valid host, user & password to a
+  /*
+   * method to determine connectivity of a valid host, user &amp; password to a
    * foscam camera.
    * 
    * @return

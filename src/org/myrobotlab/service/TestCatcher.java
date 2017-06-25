@@ -92,11 +92,10 @@ public class TestCatcher extends Service implements SerialDataListener {
     return b;
   }
 
-  /**
+  /*
    * preProcessHook is used to intercept messages and process or route them
    * before being processed/invoked in the Service.
    * 
-   * @throws
    * 
    *           @see
    *           org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.
@@ -241,13 +240,10 @@ public class TestCatcher extends Service implements SerialDataListener {
 
   }
 
-  /**
+  /*
    * "unified"? way of testing direct callbacks. reconstruct the message that
    * "would have" been created to make this direct callback
    * 
-   * @param method
-   * @param parms
-   * @throws InterruptedException
    */
   public void addData(String method, Object... parms) {
     try {
@@ -262,7 +258,7 @@ public class TestCatcher extends Service implements SerialDataListener {
 
   static public ServiceType meta = null;
 
-  /**
+  /*
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.

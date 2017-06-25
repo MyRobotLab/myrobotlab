@@ -190,9 +190,6 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements T
    * and drops to a JTextField, could return the label's text or any arbitrary
    * text.
    * </p>
-   *
-   * @param flavor
-   * @return
    */
   @Override
   public Object getTransferData(DataFlavor flavor) {
@@ -226,7 +223,6 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements T
    * For more information, see the JavaDoc for DataFlavor.
    * </p>
    *
-   * @return
    */
   @Override
   public DataFlavor[] getTransferDataFlavors() {
@@ -270,7 +266,6 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements T
    * one is supported: for this object itself.
    * </p>
    *
-   * @param flavor
    * @return True if DataFlavor is supported, otherwise false.
    */
   @Override

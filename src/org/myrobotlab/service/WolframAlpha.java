@@ -107,11 +107,8 @@ public class WolframAlpha extends Service {
     AppID = id;
   }
 
-  /**
+  /*
    * Query Wolfram Alpha for an answer
-   * 
-   * @param query
-   * @return
    */
   public String wolframAlpha(String query) {
     return wolframAlpha(query, false);

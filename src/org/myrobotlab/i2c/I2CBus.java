@@ -3,12 +3,11 @@ package org.myrobotlab.i2c;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.myrobotlab.service.interfaces.DeviceControl;
-import org.myrobotlab.service.interfaces.DeviceController;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
 
-public class I2CBus implements DeviceController, I2CBusControl {
+public class I2CBus implements Attachable, I2CBusControl {
 
   String name;
   // transient too help prevent infinite recursion in gson
@@ -18,10 +17,6 @@ public class I2CBus implements DeviceController, I2CBusControl {
     this.name = Name;
   }
 
-  @Override
-  public DeviceController getController() {
-    return controller;
-  }
 
   @Override
   public String getName() {
@@ -37,7 +32,7 @@ public class I2CBus implements DeviceController, I2CBusControl {
   }
 
   @Override
-  public void detach(DeviceControl device) {
+  public void detach(Attachable service) {
     // detach / cleanup if necessary
     // @Mats what to do here ?
     // if (controller != null) { controller.detachDevice(device);} @Grog ?
@@ -48,8 +43,8 @@ public class I2CBus implements DeviceController, I2CBusControl {
    * could be a Java 8 default implementation to the interface
    */
   @Override
-  public boolean isAttached(String name) {
-    return (controller != null && controller.getName().equals(name));
+  public boolean isAttached(Attachable service) {
+    return (controller != null && controller == service);
   }
 
   @Override
@@ -61,22 +56,6 @@ public class I2CBus implements DeviceController, I2CBusControl {
     return ret;
   }
 
-  @Override
-  public int getDeviceCount() {
-    if (controller != null) {
-      return controller.getDeviceCount();
-    } else {
-      return 0;
-    }
-  }
-
-  @Override
-  public Set<String> getDeviceNames() {
-    if (controller != null) {
-      return controller.getDeviceNames();
-    }
-    return new HashSet<String>();
-  }
 
   @Override
   public void detach(String controllerName) {
@@ -85,6 +64,41 @@ public class I2CBus implements DeviceController, I2CBusControl {
     }
     controller.detach(this);
     controller = null;
+  }
+
+
+  @Override
+  public void setDeviceBus(String deviceBus) {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  @Override
+  public void setDeviceAddress(String deviceAddress) {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  @Override
+  public boolean isAttached(String name) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+
+  @Override
+  public void attach(Attachable service) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  @Override
+  public void attach(String service) throws Exception {
+    // TODO Auto-generated method stub
+    
   }
 
 }

@@ -84,7 +84,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
     logic.exec(newCode);
   }
 
-  /**
+  /*
    * connecting to a virtual UART allows a Serial service to interface with a
    * mocked hardware. To do this a Serial service creates 2 stream ports and
    * twists the virtual cable between them.
@@ -92,9 +92,6 @@ public class VirtualDevice extends Service implements SerialDataListener {
    * A virtual port is half a virtual pipe, and if unconnected - typically is
    * not very interesting...
    * 
-   * @param listener
-   * @return
-   * @throws IOException
    */
 
   public SerialDevice connectVirtualUart(String myPort, String uartPort) throws IOException {
@@ -148,11 +145,10 @@ public class VirtualDevice extends Service implements SerialDataListener {
     log.info("{}.onDisconnect {}", getName(), portName);
   }
 
-  /**
+  /*
    * preProcessHook is used to intercept messages and process or route them
    * before being processed/invoked in the Service.
    * 
-   * @throws
    * 
    *           @see
    *           org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.

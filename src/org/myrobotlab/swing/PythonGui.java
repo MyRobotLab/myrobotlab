@@ -106,11 +106,9 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 
 	int untitledCount = 1;
 
-	/**
+	/*
 	 * Constructor
 	 * 
-	 * @param boundServiceName
-	 * @param myService
 	 */
 	public PythonGui(final String boundServiceName, final SwingGui myService) {
 		super(boundServiceName, myService);
@@ -302,10 +300,9 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 		return mi;
 	}
 
-	/**
+	/*
 	 * Build the top menu panel.
 	 * 
-	 * @return
 	 */
 	public JPanel createMenuPanel() {
 		JMenuBar menuBar = createTopMenuBar();
@@ -362,10 +359,6 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 		stop.deactivate();
 	}
 
-	/**
-	 * 
-	 * @param j
-	 */
 	public void onState(final Python python) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -382,10 +375,6 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 
 	}
 
-	/**
-	 * 
-	 * @param data
-	 */
 	public void onStdOut(final String data) {
 		/** REMOVE IF FLAKEY BUGS APPEAR !! */
 		SwingUtilities.invokeLater(new Runnable() {

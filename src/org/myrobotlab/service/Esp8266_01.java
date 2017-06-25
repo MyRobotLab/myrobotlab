@@ -19,7 +19,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -312,17 +311,7 @@ public class Esp8266_01 extends Service implements I2CController {
 	}
 
 	@Override
-	public void detach(DeviceControl device) {
-		// clean up if necessary
-	}
-
-	@Override
-	public int getDeviceCount() {
-		return i2cDevices.size();
-	}
-
-	@Override
-	public Set<String> getDeviceNames() {
+	public Set<String> getAttached() {
 		return i2cDevices.keySet();
 	}
 

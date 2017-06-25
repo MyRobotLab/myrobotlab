@@ -78,7 +78,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(final ActionEvent e) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -104,7 +104,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 	}
 
 	@Override
-	public void onConnect(String portName) {
+	public void onConnect(final String portName) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -120,7 +120,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
 	}
 
 	@Override
-	public void onDisconnect(String portName) {
+	public void onDisconnect(final String portName) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {

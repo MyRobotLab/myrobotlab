@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -20,7 +21,6 @@ import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -509,11 +509,10 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		return pinMap.get(pinName).getAddress();
 	}
 
-	/**
+	/*
 	 * Set the sample rate in Hz, I.e the number of polls per second
 	 * 
-	 * @param rate
-	 * @return
+	 * @return - returns the rate that was set
 	 */
 	public double setSampleRate(double rate) {
 		if (rate < 0) {
@@ -524,11 +523,9 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 		return rate;
 	}
 
-	/**
+	/*
 	 * method to communicate changes in pinmode or state changes
 	 * 
-	 * @param pinDef
-	 * @return
 	 */
 	public PinDefinition publishPinDefinition(PinDefinition pinDef) {
 		return pinDef;

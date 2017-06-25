@@ -121,7 +121,7 @@ public class MqttGui extends ServiceGui implements ActionListener {
     unsubscribe("publishMqttMsg");
   }
  
-  public void onState(Mqtt mqtt) {
+  public void onState(final Mqtt mqtt) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {

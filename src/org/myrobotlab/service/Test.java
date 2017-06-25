@@ -23,6 +23,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -31,7 +32,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.StatusListener;
 import org.slf4j.Logger;
 
@@ -40,11 +40,11 @@ import org.slf4j.Logger;
  * 
  * @author GroG
  * 
- *         TODO - grab and report all missing Service Pages & all missing Python
+ *         TODO - grab and report all missing Service Pages &amp; all missing Python
  *         scripts !
  * 
  *         TODO - install create start stop release test TODO - serialization
- *         json + native test TODO - run Python & JavaScript tests - last method
+ *         json + native test TODO - run Python &amp; JavaScript tests - last method
  *         appended is a callback
  *
  */
@@ -356,7 +356,7 @@ public class Test extends Service implements StatusListener {
 		}
 	}
 
-	/**
+	/*
 	 * call-back from service under testing to route errors to this service...
 	 */
 	public void onError(String errorMsg) {
@@ -426,11 +426,10 @@ public class Test extends Service implements StatusListener {
 	// failures need to be collected & options (like junit) to halt on error
 	// or continue and report
 
-	/**
+	/*
 	 * need to do a type conversion here... in JS land there is no HashSet
-	 * <String> only List & HashMap types
+	 * &lt;String&gt; only List &amp; HashMap types
 	 * 
-	 * @param servicesToTest
 	 */
 	public void test(List<String> servicesToTest, List<String> testsToRun) {
 		// clear results ???
@@ -529,13 +528,11 @@ public class Test extends Service implements StatusListener {
 		return sd.getServiceTypeNames();
 	}
 
-	/**
+	/*
 	 * The outer level of all tests on a per Service basis Environment is
 	 * expected to be prepared correctly by an Agent. This method will test the
 	 * heck out of a single service and save the results in a partFile
 	 * 
-	 * @param serviceType
-	 * @return
 	 */
 	public List<Status> test(String serviceType) {
 
@@ -814,7 +811,7 @@ public class Test extends Service implements StatusListener {
 		return ret;
 	}
 
-	/**
+	/*
 	 * Gets all the pyrobotlab/service/scripts and does some basic testing. This
 	 * method also finds all script not associated with active services (to be
 	 * removed). And all services which do not have scripts (to be added) It
@@ -822,7 +819,6 @@ public class Test extends Service implements StatusListener {
 	 * the help of the Test service) has created an environment where the
 	 * service to be tested has all its depedencies
 	 * 
-	 * @throws InterruptedException
 	 * 
 	 * @throws Exception
 	 * 

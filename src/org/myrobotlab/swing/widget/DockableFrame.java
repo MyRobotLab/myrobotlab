@@ -18,7 +18,7 @@ public final class DockableFrame extends JFrame {
 	DockableTabPane tabPane;
 	DockableFrame self;
 
-	public DockableFrame(DockableTabPane tabPane, String label, DockableTabData tabData) {
+	public DockableFrame(DockableTabPane tabPane, String label, final DockableTabData tabData) {
 		super(label);
 		self = this;
 		this.tabData = tabData;

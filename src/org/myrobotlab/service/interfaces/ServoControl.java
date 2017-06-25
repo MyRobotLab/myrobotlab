@@ -25,9 +25,11 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.MessageSubscriber;
+import org.myrobotlab.framework.interfaces.NameProvider;
 
-public interface ServoControl extends DeviceControl, AbsolutePositionControl, ServiceInterface {
+public interface ServoControl extends AbsolutePositionControl, Attachable, MessageSubscriber {
 
   // FIXME - do we want to support this & what do we expect from
   // 1. should it be energsetAbsoluteSpeedized when initially attached?
@@ -48,98 +50,110 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl, Se
    * speed/velocity shall be defaulted to 'max' ie - no speed control
    * 
    * 
-   * @param controller
-   * @param pin
-   * @throws Exception
+   * @param controller c
+   * @param pin p 
+   * @throws Exception e
    */
 
-  // preferred - sets control
-  void attach(ServoController controller) throws Exception;
+  /**
+   * The one and only one attach which does the work we expect attaching a
+   * ServoControl to a ServoController
+   * 
+   * @param controller c
+   * @throws Exception e
+   */
+  void attachServoController(ServoController controller) throws Exception;
+  
+  /**
+   * the one and only one which 
+   * detaches a 'specific' ServoControl from ServoController
+   * 
+   * @param controller e
+   * @throws Exception e
+   */
+  void detachServoController(ServoController controller) throws Exception;
+
+  /**
+   * determines if a 'specific' controller is currently attached
+   * @param controller c
+   * @return true/false
+   * 
+   */
+  public boolean isAttachedServoController(ServoController controller);
+  
+  /**
+   * attach with different parameters - it should set fields then call the "one and only" 
+   * single parameter attachServoController(controller)
+   * 
+   * @param controller the controller
+   * @param pin the pin
+   * @throws Exception e
+   */
   
   void attach(ServoController controller, int pin) throws Exception;
 
   void attach(ServoController controller, int pin, double pos) throws Exception;
 
   void attach(ServoController controller, int pin, double pos, double speed) throws Exception;
-
-  /**
-   * determines if a 'specific' controller is currently attached
-   * 
-   * @param controller
-   * @return
-   */
-  public boolean isAttached(ServoController controller);
-
-  /**
-   * detaches a 'specific' controller
-   * 
-   * @param controller
-   */
-  void detach(ServoController controller);
+  
 
   /**
    * attach "Pin" - simple command to energize the pin. Equivalent to Arduino
    * library's servo.attach(pin) with pin number coming from the servo
-   * 
-   * @return
    */
   public void attach();
 
   /**
-   * degrees per second rotational velocity cm per second linear velocity ?
+   * @param degreesPerSecond degrees per second rotational velocity cm per second linear velocity ?
    * 
-   * @param degreesPerSecond
    */
   public void setVelocity(double degreesPerSecond);
 
-  /**
+  /*
    * Re-attaches (re-energizes) the servo on its current pin NOT RELATED TO
    * CONTROLLER ATTACH/DETACH !
    * 
-   * @return
+   * Deprecated - use enable(pin)
    */
+  @Deprecated
   public void attach(int pin);
 
   /**
    * detaching a pin (NOT RELATED TO DETACHING A SERVICE !)
-   * 
-   * @return
    */
   public void detach();
 
   /**
    * limits input of servo - to prevent damage or problems if servos should not
-   * move thier full range
+   * move their full range
+   * @param min min value
+   * @param max max value
    * 
-   * @param max
    */
   public void setMinMax(double min, double max);
   
   /**
-   * min x 
-   * @return
+   * @return min x 
    */
   public double getMin();
   
   public double getMinInput();
   /**
-   * max x
-   * @return
+   * @return max x
    */
   public double getMax();
   
   public double getMaxInput();
 
   /**
-   * fractional speed settings 0.0 to 1.0
+   * @param speed fractional speed settings 0.0 to 1.0 
    * 
-   * @param speed
    */
   public void setSpeed(double speed);
 
   /**
    * stops the servo if currently in motion servo must be moving at incremental
-   * speed for a stop to work (setSpeed < 1.0)
+   * speed for a stop to work (setSpeed &lt; 1.0)
    */
   public void stop();
 
@@ -152,8 +166,7 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl, Se
    * controller has - updates the Servo's pin and returns the refreshed data.
    * Not worth it. What will happen is the pin which was set on the servo will
    * simply be returned
-   * 
-   * @return
+   * @return the pin as an integer
    */
   public Integer getPin();
 
@@ -171,7 +184,7 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl, Se
    * speed control can provide, so as the servo is told incrementally 
    * where to go - it sends that command back as an event which sets
    * the "current" position.
-   * 
+   * @return the current position as a double
    */
   public double getPos();
   
@@ -179,8 +192,9 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl, Se
    * the calculated mapper output for the servo - this is
    * <b> ALWAYS ALWAYS in DEGREES !</b>
    * because this method is used by the controller - and the controller needs
-   * a stable method & a stable unit
+   * a stable method &amp; a stable unit
    * FIXME - not sure if this is a good thing to expose
+   * @return the target output position
    */
   public double getTargetOutput();
  
@@ -192,43 +206,37 @@ public interface ServoControl extends DeviceControl, AbsolutePositionControl, Se
    * set the pin of the servo this does not 'attach' energize the pin only set
    * the pin value
    * 
-   * @param pin
+   * @param pin the pin number for the servo
    */
   void setPin(int pin);
 
   /**
-   * get the current acceleration value
-   * 
-   * @return
+   * @return the current acceleration value
    */
   public double getAcceleration();
 
-  /**
+  /*
    * synchronizing servos together
    * e.g.  leftEye.sync(rightEye)
-   * @param sc
    */
-  default public void sync(ServoControl sc) {
-    subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
-  }
+  public void sync(ServoControl sc);
   
   /**
-   * A default position for the servo.
+   * @param rest A default position for the servo.
    * Defaulted to 90 unless explicitly set.
    * Position the servo will move to when method servo.rest() is called
-   * @param rest
    */
   public void setRest(int rest);
 
   
   /**
-   * Gets the current rest position value
-   * @return
+   * @return the current rest position value
    */
   public double getRest();
 
   boolean isInverted();
 
+  // WTF ?
   void addIKServoEventListener(NameProvider service);
-
+  
 }

@@ -368,6 +368,11 @@ public class Gps extends Service implements SerialDataListener {
 
   // NMEA Lat/Lon values are ddmm.mmmm or dddmm.mmmm respectively and need to
   // be converted
+  /**
+   * 
+   * @param nmea huh?
+   * @return no idea
+   */
   public double convertNMEAToDegrees(String nmea) {
     String degrees;
     String minutes;
@@ -420,8 +425,7 @@ public class Gps extends Service implements SerialDataListener {
    * Minimum Specific GNSS Data VTG Course Over Ground and Ground Speed GSA GNSS
    * DOP and Active Satellites MSS MSK Receiver Signal kmc - so the data you
    * have doesn't have two (GLL and MSK)
-   * 
-   * @return
+   * @return string array of data
    */
   public String[] publishGGAData() {
 
@@ -793,6 +797,12 @@ public class Gps extends Service implements SerialDataListener {
    * Here's all the GeoFence methods you might want to call from outside.
    *********************************************************/
   // This is how you create a Point
+  /**
+   * 
+   * @param lat latitude
+   * @param lon longitude
+   * @return the point
+   */
   public Point setPoint(double lat, double lon) {
     Point point = new Point(lat, lon);
     return point;

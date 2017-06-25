@@ -84,7 +84,7 @@
 -->
 
 <!-- The MyRobotLab ant build.xml  -->
-<project name="myrobotlab" default="dist" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
+<project name="myrobotlab" default="jar" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
@@ -263,6 +263,7 @@
 		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-windows-x86_64.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-linux-x86_64.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-macosx-x86_64.jar"/>
+  		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-linux-armhf.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.3/ffmpeg.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.3/ffmpeg-windows-x86_64.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/webcam-capture-0.3.10.jar"/>
@@ -502,7 +503,9 @@
 		<pathelement location="${repo}/org.deeplearning4j/0.8/stream-2.7.0.jar"/>
 		<pathelement location="${repo}/org.deeplearning4j/0.8/xz-1.5.jar"/>
 		<!-- holy crapola, that's a lot of jar files... ok..  let's move on... -->
-
+		
+		<pathelement location="${repo}/com.illposed.osc/0.4/javaosc-core-0.4.jar"/>
+		
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
 

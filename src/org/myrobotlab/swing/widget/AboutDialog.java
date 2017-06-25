@@ -8,9 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.File;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -18,12 +16,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
-import org.myrobotlab.net.HttpRequest;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 

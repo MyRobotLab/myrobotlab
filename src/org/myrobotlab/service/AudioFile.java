@@ -203,11 +203,10 @@ public class AudioFile extends Service {
     }
   }
 
-  /**
+  /*
    * Specify the volume for playback on the audio file value 0.0 = off 1.0 =
    * normal volume. (values greater than 1.0 may distort the original signal)
    * 
-   * @param volume
    */
   public void setVolume(float volume) {
     processors.get(currentTrack).setVolume(volume);

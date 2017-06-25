@@ -22,8 +22,17 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	private static final long serialVersionUID = 1L;
 
 	String name;
+	String link;
 
-	String state = null;
+	public String getLink() {
+    return link;
+  }
+
+  public void setLink(String link) {
+    this.link = link;
+  }
+
+  String state = null;
 	Integer workingLevel = null;
 	/**
 	 * description of what the service does
@@ -119,10 +128,10 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 
 	/**
 	 * sharing means sharePeer is forced - while addPeer will check before adding
-	 * @param key
-	 * @param actualName
-	 * @param peerType
-	 * @param comment
+	 * @param key k
+	 * @param actualName n 
+	 * @param peerType n
+	 * @param comment comment
 	 */
 	public void sharePeer(String key, String actualName, String peerType, String comment) {
 		peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
@@ -134,7 +143,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	
 	/**
 	 * checks if already exists - if it does - merges only unset values into peers
-	 * @param sr
+	 * @param sr the service reservation
 	 */
 	public void mergePeer(ServiceReservation sr){
 		if (peers.containsKey(sr.key)){

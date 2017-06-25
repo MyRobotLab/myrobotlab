@@ -1,4 +1,4 @@
-package org.myrobotlab.service.interfaces;
+package org.myrobotlab.framework.interfaces;
 
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -6,13 +6,12 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.myrobotlab.framework.MRLListener;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
 public interface ServiceInterface
-		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker {
+		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, Attachable {
 
 	
 
@@ -20,10 +19,10 @@ public interface ServiceInterface
 	 * this is a local method which adds a request from some foreign service
 	 * with address information (otherService/callback) for a topic callback
 	 * Adds an entry on the notify list
+   * @param localTopic l
+   * @param otherService o 
+   * @param callback c
 	 * 
-	 * @param localTopic
-	 * @param otherService
-	 * @param callback
 	 */
 	public void addListener(String localTopic, String otherService, String callback);
 
@@ -63,8 +62,7 @@ public interface ServiceInterface
 
 	/**
 	 * asked by the framework - to determine if the service needs to be secure
-	 * 
-	 * @return
+	 * @return true/false
 	 */
 	public boolean requiresSecurity();
 
@@ -94,18 +92,5 @@ public interface ServiceInterface
 	public String getDescription();
 
 	public Map<String, MethodEntry> getMethodMap();
-
-	/**
-	 * the "routing" attach - routes to a specific strongly typed attach of the
-	 * service if it exists
-	 * 
-	 * @param name
-	 */
-	/*
-	 * HEH - this did not work - trying to generalize that which should not be
-	 * generalized :P public void attach(String name) throws Exception;
-	 * 
-	 * public void attach(ServiceInterface instance) throws Exception;
-	 */
-
+  
 }

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -16,7 +17,6 @@ import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -798,12 +798,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     i2cWrite(register.ACC_AM_THRES, acc_am_thre);
     setMode(modeback);
   }
-  /**
+  /*
    * AxisRemap : The device mounting position should not limit the data output of the BNO055 device. The
    * axis of the device can be re-configured to the new reference axis.
-   * @param xAxis
-   * @param yAxis
-   * @param zAxis
    */
   
   public void axisRemap(AxisMapConfig xAxis, AxisMapConfig yAxis, AxisMapConfig zAxis) {
@@ -818,9 +815,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     setMode(modeback);
   }
   
-  /**
+  /*
    * Change the direction of an Axis
-   * @param axis
    * @param positive : true = positive, false = reversed
    */
   public void axisMapSign(AxisMapConfig axis, boolean positive) {

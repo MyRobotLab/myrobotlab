@@ -20,7 +20,7 @@ public interface ManagedCache extends Cache {
    * Update the timeout for name so that it is cleaned up the next time
    * timeout() is called.
    * 
-   * @param name
+   * @param name the name
    */
   @Override
   void expire(String name);

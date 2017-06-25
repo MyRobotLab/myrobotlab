@@ -190,7 +190,7 @@ public class PVector implements Serializable {
     return target;
   }
 
-  /**
+  /*
    * Multiply each element of one vector by the individual elements of another
    * vector, and return the result as a new PVector.
    */
@@ -198,7 +198,7 @@ public class PVector implements Serializable {
     return div(v1, v2, null);
   }
 
-  /**
+  /*
    * Divide each element of one vector by the individual elements of another
    * vector, and write the result into a target vector.
    * 
@@ -255,7 +255,7 @@ public class PVector implements Serializable {
     return target;
   }
 
-  /**
+  /*
    * Multiply each element of one vector by the individual elements of another
    * vector, and return the result as a new PVector.
    */
@@ -263,7 +263,7 @@ public class PVector implements Serializable {
     return mult(v1, v2, null);
   }
 
-  /**
+  /*
    * Multiply each element of one vector by the individual elements of another
    * vector, and write the result into a target vector.
    * 
@@ -360,7 +360,7 @@ public class PVector implements Serializable {
   }
 
   /**
-   * Return a representation of this vector as a float array. This is only for
+   * @return a representation of this vector as a float array. This is only for
    * temporary use. If used in any other fashion, the contents should be copied
    * by using the get() command to copy into your own array.
    */
@@ -375,13 +375,14 @@ public class PVector implements Serializable {
   }
 
   /**
-   * Return a vector composed of the cross product between this and another.
+   * @param v vector
+   * @return a vector composed of the cross product between this and another.
    */
   public PVector cross(PVector v) {
     return cross(v, null);
   }
 
-  /**
+  /*
    * Perform cross product between this and another vector, and store the result
    * in 'target'. If target is null, a new vector is created.
    */
@@ -425,7 +426,7 @@ public class PVector implements Serializable {
     z /= n;
   }
 
-  /**
+  /*
    * Divide each element of one vector by the elements of another vector.
    */
   public void div(PVector v) {
@@ -438,7 +439,7 @@ public class PVector implements Serializable {
     return this.x * x + this.y * y + this.z * z;
   }
 
-  /**
+  /*
    * Calculate the dot product with another vector
    * 
    * @return the dot product
@@ -447,7 +448,7 @@ public class PVector implements Serializable {
     return x * v.x + y * v.y + z * v.z;
   }
 
-  /**
+  /*
    * Get a copy of this vector.
    */
   public PVector get() {

@@ -1,5 +1,6 @@
 package org.myrobotlab.arduino;
 
+// FIXME FIXME FIXME !!! - this should not be in the Arduino package
 public class BoardType {
 
   /**

@@ -133,8 +133,6 @@ public class Tracking extends Service {
   /**
    * call back of all video data video calls this whenever a frame is processed
    * 
-   * @param temp
-   * @return
    */
 
   int faceFoundFrameCount = 0;
@@ -655,12 +653,14 @@ public class Tracking extends Service {
     
     for (int i = 0; i<axis.length; i++){
       TrackingServoData x = new TrackingServoData(axis[i]);
+      x.axis = axis[i];
       x.servoControl = (Servo) createPeer(axis[i]);
       servoControls.put(axis[i], x);
       servoControls.get(axis[i]).servoControl.setPin(pins[i]);
       servoControls.get(axis[i]).servoControl.attach(controller, pins[i]);
       pid.setOutputRange(axis[i], x.servoControl.getMaxInput(), x.servoControl.getMaxInput());
       x.servoControl.moveTo(x.servoControl.getRest() + 2);
+      x.currentServoPos = x.servoControl.getPos();
     }
     opencv = (OpenCV) createPeer("opencv");
     opencv.setCameraIndex(cameraIndex);

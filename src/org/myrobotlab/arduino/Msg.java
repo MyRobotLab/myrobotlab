@@ -233,10 +233,8 @@ public class Msg {
 
 	/**
 	 * want to grab it when SerialDevice is created
-	 *
-	 * @param serial
-	 * @return
-	 */
+	 * @param b True or False 
+	 */ 
 	/*
 	static public synchronized Msg getInstance(Arduino arduino, SerialDevice serial) {
 		if (instance == null) {
@@ -2100,6 +2098,7 @@ public class Msg {
   /**
    * enable acks on both sides Arduino/Java-Land
    * and MrlComm-land
+   * @param b True or False
    */
   public void enableAcks(boolean b){
     // disable local blocking

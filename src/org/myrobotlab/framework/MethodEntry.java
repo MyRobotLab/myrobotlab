@@ -66,8 +66,7 @@ public class MethodEntry implements Serializable {
 
   /**
    * transfer the non serializable java.reflect.Method to a serializable object
-   * 
-   * @param m
+   * @param m method
    */
   public MethodEntry(Method m) {
     this.name = m.getName();
@@ -112,6 +111,7 @@ public class MethodEntry implements Serializable {
    * getSignature provides a way to create a stringified method signature the
    * simplest way is to get the results from Class.getName() - this is a bit
    * different/arbitrary from the JNA format of method signatures
+   * @return string
    */
   final public String getSignature() {
 

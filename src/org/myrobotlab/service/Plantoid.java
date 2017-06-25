@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimerTask;
-import java.util.TooManyListenersException;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -144,8 +142,8 @@ public class Plantoid extends Service {
 	 * 
 	 * Its mission is to go forth explore and be one with nature in alien
 	 * environments while reporting telemetry back to BEPSL control
+	 * @param n the name of the service
 	 * 
-	 * @param n
 	 */
 	public Plantoid(String n) {
 		super(n);
@@ -231,11 +229,10 @@ public class Plantoid extends Service {
 	 * Connects the plantoid server's Arduino service to the appropriate serial
 	 * port. This is automatically called when the Plantoid service starts.
 	 * Default is /dev/ttyACM0
+	 * @param port com port ( ex.  com2 com4 or /dev/ttyAMA0 .. etc..)
 	 * 
-	 * @param port
 	 * @return true if connected false otherwise
-	 * @throws TooManyListenersException
-	 * @throws IOException
+	 * @throws IOException e
 	 */
 	public boolean connect(String port) throws IOException {
 		this.port = port;

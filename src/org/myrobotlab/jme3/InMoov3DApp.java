@@ -143,7 +143,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 
   @Override
   public void simpleInitApp() {
-    assetManager.registerLocator("inmoov/jm3/assets", FileLocator.class);
+    assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
 
     inputManager.setCursorVisible(true);
     flyCam.setEnabled(false);
@@ -600,7 +600,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 
   }
 
-  /**
+  /*
    * 
    * @param name
    *          : name of the part

@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -21,7 +22,6 @@ import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -579,7 +579,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		m_fs = 6.144;
 	}
 
-	/**
+	/*
 	 * ************************************************************************
 	 *
 	 * Sets the gain and input voltage range
@@ -610,7 +610,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		}
 	}
 
-	/**
+	/*
 	 * ************************************************************************
 	 * 
 	 * Gets a gain and input voltage range
@@ -621,7 +621,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		return m_gain;
 	}
 
-	/**
+	/*
 	 * This method reads and returns the Voltage in milliVolts
 	 */
 	public int readADC_SingleEnded(int channel) {
@@ -671,7 +671,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		return readRegister(ADS1015_REG_POINTER_CONVERT) >> m_bitShift;
 	}
 
-	/**************************************************************************/
+	/*
 	/*
 	 * !
 	 * 
@@ -679,7 +679,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	 * between the P (AIN0) and N (AIN1) input. Generates a signed value since the
 	 * difference can be either positive or negative.
 	 */
-	/**************************************************************************/
+	/* */
 	public int readADC_Differential_0_1() {
 		// Start with default values
 		int config = ADS1015_REG_CONFIG_CQUE_NONE | // Disable the comparator
@@ -719,7 +719,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		}
 	}
 
-	/**************************************************************************/
 	/*
 	 * !
 	 * 
@@ -727,7 +726,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	 * between the P (AIN2) and N (AIN3) input. Generates a signed value since the
 	 * difference can be either positive or negative.
 	 */
-	/**************************************************************************/
 	public int readADC_Differential_2_3() {
 		// Start with default values
 		int config = ADS1015_REG_CONFIG_CQUE_NONE | // Disable the comparator
@@ -767,7 +765,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		}
 	}
 
-	/**************************************************************************/
 	/*
 	 * !
 	 * 
@@ -776,7 +773,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	 * the specified threshold. This will also set the ADC in continuous
 	 * conversion mode.
 	 */
-	/**************************************************************************/
 	public void startComparator_SingleEnded(int channel, int threshold) {
 		// Start with default values
 		int config = ADS1015_REG_CONFIG_CQUE_1CONV | // Comparator enabled and
@@ -818,7 +814,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		writeRegister(ADS1015_REG_POINTER_CONFIG, config);
 	}
 
-	/**************************************************************************/
 	/*
 	 * !
 	 * 
@@ -826,7 +821,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 	 * results. This function reads the last conversion results without changing
 	 * the config value.
 	 */
-	/**************************************************************************/
 	public int getLastConversionResults() {
 		// Wait for the conversion to complete
 		sleep(ADS1115_CONVERSIONDELAY);
@@ -1029,11 +1023,10 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		return pinMap.get(pinName).getAddress();
 	}
 
-	/**
+	/*
 	 * Set the sample rate in Hz, I.e the number of polls per second
 	 * 
-	 * @param rate
-	 * @return
+	 * @return the rate that was set.
 	 */
 	public double setSampleRate(double rate) {
 		if (rate < 0) {
@@ -1043,10 +1036,9 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 		this.sampleFreq = rate;
 		return rate;
 	}
-	/**
+	/*
 	 * method to communicate changes in pinmode or state changes
-	 * @param pinDef
-	 * @return
+	 * @return the pin definition passed in. (used by invoke.)
 	 */
 	public PinDefinition publishPinDefinition(PinDefinition pinDef){
 		return pinDef;

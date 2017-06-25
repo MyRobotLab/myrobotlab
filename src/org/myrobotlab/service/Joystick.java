@@ -274,10 +274,11 @@ public class Joystick extends Service implements Runnable {
 		}
 	} // end of setRumbler()
 
-	public void startPolling() {
+	synchronized public void startPolling() {
 		log.info(String.format("startPolling - starting new polling thread %s_polling", getName()));
 		if (pollingThread != null) {
-			stopPolling();
+			log.warn("already polling, stop polling first");
+			return;
 		}
 		pollingThread = new InputPollingThread(String.format("%s_polling", getName()));
 		pollingThread.start();

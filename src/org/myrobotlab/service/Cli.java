@@ -15,10 +15,10 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.StreamGobbler;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -331,7 +331,7 @@ public class Cli extends Service {
 				 * 
 				 * // want message ? or just data ? // configurable ... // if
 				 * you data with tags - you might as well do // message ! // -
-				 * return only callbacks this way -> // si.in(msg); if (ret !=
+				 * return only callbacks this way -&gt; // si.in(msg); if (ret !=
 				 * null && ret instanceof Serializable) { // configurable use
 				 * log or system.out ? // FIXME - make getInstance configurable
 				 * // Encoder // reference !!!
@@ -359,7 +359,7 @@ public class Cli extends Service {
 		}
 	}
 
-	/**
+	/*
 	 * Command Line Interpreter - used for processing encoded (default RESTful)
 	 * commands from std in and returning results in (default JSON) encoded
 	 * return messages.
@@ -367,34 +367,28 @@ public class Cli extends Service {
 	 * Has the ability to pipe to another process - if attached to another
 	 * process handle, and the ability to switch between many processes
 	 * 
-	 * @param n
 	 */
 	public Cli(String n) {
 		super(n);
 	}
 
-	/**
+	/*
 	 * add an i/o pair to this cli for the possible purpose attaching
-	 * 
-	 * @param name
-	 * @param process
-	 * @return
 	 */
 	public void add(String name, InputStream out, OutputStream in) {
 		pipes.put(name, new Pipe(name, out, in));
 	}
 
-	public boolean attach() {
-		return attach(null);
+	public void attach() {
+		// return attach(null);
+	  return;
 	}
 
 	/**
 	 * attach to another processes' Cli
 	 * 
-	 * @param name
-	 * @return
 	 */
-	public boolean attach(String name) {
+	public void attach(String name) {
 
 		if (pipes.size() == 1) {
 			// only 1 choice
@@ -405,7 +399,7 @@ public class Cli extends Service {
 
 		if (!pipes.containsKey(name)) {
 			error("%s not found", name);
-			return false;
+			return;
 		}
 
 		Pipe pipe = pipes.get(name);
@@ -434,7 +428,7 @@ public class Cli extends Service {
 		// timer - because if a Cli is not there
 		// we cant attach to it
 
-		return true;
+		// return true;
 	}
 
 	public void attachStdIO() {
@@ -502,9 +496,9 @@ public class Cli extends Service {
 	 * for return
 	 * 
 	 * path is always absolute never relative
+	 * @param path p
+	 * @throws IOException e 
 	 * 
-	 * @param path
-	 * @throws IOException
 	 */
 	public void ls(String path) throws IOException {
 		String[] parts = path.split("/");

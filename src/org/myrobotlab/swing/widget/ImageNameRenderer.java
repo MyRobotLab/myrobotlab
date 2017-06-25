@@ -7,8 +7,8 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
+import org.myrobotlab.framework.interfaces.NameTypeProvider;
 import org.myrobotlab.image.Util;
-import org.myrobotlab.service.interfaces.NameTypeProvider;
 
 public class ImageNameRenderer extends JLabel implements ListCellRenderer {
 

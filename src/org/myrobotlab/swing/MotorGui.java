@@ -41,13 +41,13 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.MotorController;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.swing.widget.ImageButton;
 import org.myrobotlab.swing.widget.MotorControllerPanel;
 import org.myrobotlab.swing.widget.Motor_UnknownGui;

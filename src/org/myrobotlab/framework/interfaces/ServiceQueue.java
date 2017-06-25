@@ -1,4 +1,4 @@
-package org.myrobotlab.service.interfaces;
+package org.myrobotlab.framework.interfaces;
 
 import org.myrobotlab.framework.Message;
 
@@ -9,8 +9,7 @@ public interface ServiceQueue {
 
   /**
    * put message in inbox, so it will be processed by this service
-   * 
-   * @param msg
+   * @param msg m
    */
 
   public void in(Message msg);

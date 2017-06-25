@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface VoltageSensorControl extends DeviceControl {
+public interface VoltageSensorControl {
 
 	double getPower();
 	double getCurrent();

@@ -121,7 +121,7 @@ public class JMonkeyEngine extends Service implements Simulator {
       virtual.connect("COM5");
       
       JMonkeyEngine jmonkey = (JMonkeyEngine)Runtime.start("jmonkey", "JMonkeyEngine");
-      virtual.attach(jmonkey);
+      virtual.attachSimulator(jmonkey);
       
       // connect the service to the port
       arduino.connect("COM5");

@@ -6,19 +6,18 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.SerialRelayData;
-import org.myrobotlab.service.interfaces.DeviceControl;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.service.interfaces.SerialRelayListener;
 import org.slf4j.Logger;
 
 
-public class SerialRelay extends Service implements SerialDevice, DeviceControl {
+public class SerialRelay extends Service implements SerialDevice, Attachable {
 
 
   private static final long serialVersionUID = 1L;
@@ -110,8 +109,8 @@ public class SerialRelay extends Service implements SerialDevice, DeviceControl 
   }
 
 
-  @Override
-  public DeviceController getController() {
+  // @Override
+  public Attachable getController() {
     return controller;
   }
 
@@ -199,6 +198,11 @@ public String getPortName() {
 @Override
 public List<String> getPortNames() {
 	return controller.getSerial().getPortNames();
+}
+
+@Override
+public void write(String data) throws Exception {
+  write(data.getBytes());
 }
 
 }

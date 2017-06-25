@@ -63,8 +63,6 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements Dro
    * The user drops the item. Performs the drag and drop calculations and
    * layout.
    * </p>
-   *
-   * @param dtde
    */
   @Override
   public void drop(DropTargetDropEvent dtde) {

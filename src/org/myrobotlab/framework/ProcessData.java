@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.interfaces.Invoker;
 import org.slf4j.Logger;
 
 /**
@@ -94,8 +94,7 @@ public class ProcessData implements Serializable {
 
 	/**
 	 * copy of a ProcessData - threaded data will not be copied
-	 * 
-	 * @param pd
+	 * @param pd the process data
 	 */
 	public ProcessData(ProcessData pd) {
 		this.id = pd.id;
@@ -123,7 +122,7 @@ public class ProcessData implements Serializable {
 		// monitor.start();
 	}
 
-	/**
+	/*
 	 * FIXME - is too much catering to mrl execution ...
 	 * 
 	 * convert an String[] into a valid ProcessData

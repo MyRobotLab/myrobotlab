@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 
 /**
- * @author GroG &
+ * @author GroG &amp;
  * 
  *         References : http://community.thingspeak.com/documentation/api/
  * 

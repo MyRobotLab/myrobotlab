@@ -6,9 +6,9 @@ public interface SerialDevice extends PortPublisher {
 
 	void open(String name) throws Exception;
 
-	/**
+	/*
 	 * FIXME - make like http://pyserial.sourceforge.net/pyserial_api.html with
-	 * blocking & timeout InputStream like interface - but regrettably
+	 * blocking &amp; timeout InputStream like interface - but regrettably
 	 * InputStream IS NOT A F#(@!! INTERFACE !!!!
 	 * 
 	 * WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer is
@@ -16,10 +16,7 @@ public interface SerialDevice extends PortPublisher {
 	 * forever :P
 	 * 
 	 * pass through to the serial device
-	 * 
-	 * @param temp
-	 * @return
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	int read() throws Exception;
 
@@ -28,9 +25,7 @@ public interface SerialDevice extends PortPublisher {
 
 	void write(int data) throws Exception;
 	
-	default void write(String data) throws Exception{
-	  write(data.getBytes());
-	}
+	void write(String data) throws Exception;
 
 	void clear();
 
@@ -39,8 +34,5 @@ public interface SerialDevice extends PortPublisher {
 	void flush();
 
 	int available();
-
-	/// void flush() throws Exception; JSSC doesn't have flush .. what the heck
-	/// ?
 
 }

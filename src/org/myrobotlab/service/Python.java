@@ -16,6 +16,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -25,7 +26,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Script;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.python.core.Py;
 import org.python.core.PyException;
 import org.python.core.PyObject;
@@ -290,10 +290,6 @@ public class Python extends Service {
 	 */
 	HashMap<String, Script> openedScripts = new HashMap<String, Script>();
 
-	/**
-	 * 
-	 * @param instanceName
-	 */
 	public Python(String n) {
 		super(n);
 
@@ -357,7 +353,7 @@ public class Python extends Service {
 
 	/**
 	 * runs the pythonConsole.py script which creates a Python Console object
-	 * and redirect stdout & stderr to published data - these are hooked by the
+	 * and redirect stdout &amp; stderr to published data - these are hooked by the
 	 * SwingGui
 	 */
 	public void attachPythonConsole() {
@@ -442,29 +438,25 @@ public class Python extends Service {
 		}
 	}
 
-	/**
+	/*
 	 * replaces and executes current Python script
-	 * 
-	 * @param code
 	 */
 	public void exec(String code) {
 		exec(code, true);
 	}
 
-	/**
+	/*
 	 * non blocking exec
 	 * 
-	 * @param code
-	 * @param replace
 	 */
 	public void exec(String code, boolean replace) {
 		exec(code, replace, false);
 	}
 
-	/**
+	/*
 	 * replaces and executes current Python script if replace = false - will not
 	 * replace "script" variable can be useful if ancillary scripts are needed
-	 * e.g. monitors & consoles
+	 * e.g. monitors &amp; consoles
 	 * 
 	 * @param code
 	 *            the code to execute
@@ -501,12 +493,11 @@ public class Python extends Service {
 		exec(code, true, true);
 	}
 
-	/**
+	/*
 	 * executes an external Python file
 	 * 
 	 * @param filename
 	 *            the full path name of the python file to execute
-	 * @throws IOException
 	 */
 	public void execFile(String filename) throws IOException {
 		String script = FileIO.toString(filename);
@@ -516,7 +507,7 @@ public class Python extends Service {
 	/**
 	 * execute an "already" defined python method directly
 	 * 
-	 * @param methodName
+	 * @param method - the name of the method
 	 */
 	public void execMethod(String method) {
 		// execMethod(getName(), method, (Object[])null);
@@ -540,7 +531,7 @@ public class Python extends Service {
 	}
 
 	/**
-	 * DEPRECATE - use online examples only ... (possibly you can package &
+	 * DEPRECATE - use online examples only ... (possibly you can package &amp;
 	 * include filename listing during build process)
 	 * 
 	 * gets the listing of current example python scripts in the myrobotlab.jar
@@ -582,20 +573,17 @@ public class Python extends Service {
 	}
 
 
-	/**
+	/*
 	 * load a script from the myrobotlab.jar - location of example scripts are
 	 * /resource/Python/examples
-	 * 
-	 * @param filename
 	 *            name of file to load
-	 * @return true if successfully loaded
 	 */
 	public void loadPyRobotLabServiceScript(String serviceType) {
 		String serviceScript = GitHub.getPyRobotLabScript(serviceType);
 		openScript(String.format("%s.py", serviceType), serviceScript);
 	}
 
-	/**
+	/*
 	 * this method can be used to load a Python script from the Python's local
 	 * file system, which may not be the SwingGui's local system. Because it
 	 * can be done programatically on a different machine we want to broadcast
@@ -603,8 +591,6 @@ public class Python extends Service {
 	 * 
 	 * @param filename
 	 *            - name of file to load
-	 * @return - success if loaded
-	 * @throws IOException
 	 */
 	public void openScriptFromFile(String filename) throws IOException {
 		log.info("loadScriptFromFile {}", filename);
@@ -659,11 +645,6 @@ public class Python extends Service {
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param data
-	 * @return
-	 */
 	public String publishStdOut(String data) {
 		return data;
 	}

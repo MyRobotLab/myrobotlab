@@ -95,7 +95,7 @@ public class OpenCVData implements Serializable {
 	public static final String KEY_BUFFERED_IMAGE = "bufferedImage";
 
 	/**
-	 * return type - an ArrayList<Rectangles>
+	 * return type - an ArrayList&lt;Rectangles&gt;
 	 */
 	public static final String KEY_BOUNDING_BOXES = "boundingBoxes";
 
@@ -129,8 +129,6 @@ public class OpenCVData implements Serializable {
 
 	/**
 	 * constructed by the 'name'd service
-	 * 
-	 * @param name
 	 */
 	public OpenCVData() {
 		this(null, 0);
@@ -173,13 +171,12 @@ public class OpenCVData implements Serializable {
 		return getBufferedImage(selectedFilter);
 	}
 
-	/**
+	/*
 	 * FIXME (FIX OTHERS) NEEDS TO BE ONE AND ONLY ONE TYPE PROCESSOR LIKE THIS
 	 * ONE !!!! WITH SAME SUBKEY SIGNATURE lowest level - full key path always
 	 * required
 	 * 
-	 * @param filterName
-	 * @return
+	 * @return the image stored in the cv data
 	 */
 	public BufferedImage getBufferedImage(String filterName) {
 		String bufferedImageKey;
@@ -283,11 +280,10 @@ public class OpenCVData implements Serializable {
 
 	}
 
-	/**
+	/*
 	 * FIXME implement
 	 * 
-	 * @param name
-	 * @return
+	 * @return null
 	 */
 	public OpenCVFilter getFilter(String name) {
 		return null;
@@ -311,7 +307,7 @@ public class OpenCVData implements Serializable {
 	/**
 	 * parameterless tries to retrieve image based on current filtername
 	 * 
-	 * @return
+	 * @return - the image as represented by the currently selected filter.
 	 */
 	public IplImage getImage() {
 		return getImage(selectedFilter);
@@ -319,7 +315,7 @@ public class OpenCVData implements Serializable {
 
 	/**
 	 * OpenCV VideoProcessor will set this data collection to the last
-	 * filtername - when asked for an "image" it will give the last filter's
+	 * @param filtername - when asked for an "image" it will give the last filter's
 	 * 
 	 * @return the filter's IplImage
 	 */
@@ -336,7 +332,7 @@ public class OpenCVData implements Serializable {
 	/**
 	 * get the original "camera" image - or the image which started the pipeline
 	 * 
-	 * @return
+	 * @return the original image at the beginning of the video pipeline
 	 */
 	public IplImage getInputImage() {
 		return getImage(inputFilterName);
@@ -441,11 +437,9 @@ public class OpenCVData implements Serializable {
 		list.add(boundingBox);
 	}
 
-	/**
+	/*
 	 * the main and typically first image data put into the OpenCVData object
 	 * 
-	 * @param key
-	 * @param image
 	 */
 	public void put(String key, IplImage image) {
 		sources.put(String.format("%s.%s", name, key), image);
@@ -496,11 +490,10 @@ public class OpenCVData implements Serializable {
 		this.displayFilterName = displayFilterName;
 	}
 
-	/**
+	/*
 	 * sets the selected filter name in the OpenCVData structure provisioned
 	 * later to save entire filter? or parts ?
 	 * 
-	 * @param inFilter
 	 */
 	public void setFilter(OpenCVFilter inFilter) {
 		this.selectedFilter = inFilter.name;
@@ -510,11 +503,9 @@ public class OpenCVData implements Serializable {
 		this.inputFilterName = inputFilterName;
 	}
 
-	/**
+	/*
 	 * sets the key - used to access the various data of a particular filter -
 	 * first set the filter name the access images, points, etc
-	 * 
-	 * @param name
 	 */
 	public void setSelectedFilterName(String name) {
 		this.selectedFilter = name;

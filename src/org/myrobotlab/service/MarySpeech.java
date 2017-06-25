@@ -14,13 +14,13 @@ import javax.sound.sampled.AudioInputStream;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.maryspeech.tools.install.MaryInstaller;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -32,7 +32,7 @@ import marytts.MaryInterface;
 import marytts.exceptions.SynthesisException;
 import marytts.util.data.audio.AudioPlayer;
 
-public class MarySpeech extends Service implements TextListener, SpeechSynthesis {
+public class MarySpeech extends AbstractSpeechSynthesis implements TextListener {
 
 	public final static Logger log = LoggerFactory.getLogger(MarySpeech.class);
 	private static final long serialVersionUID = 1L;

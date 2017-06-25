@@ -46,6 +46,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -53,7 +54,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.HttpData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.HttpResponseListener;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -159,8 +159,6 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   /**
    * for testing purposes
    * 
-   * @param data
-   * @return
    */
   @Override
   public void onHttpResponse(String data) {
@@ -231,9 +229,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
    * 
    * contains more data than just the text, can be used for any content type
    * too, since the payload is in a byte[]
+   * @param data the http data
+   * @return the http data
    * 
-   * @param data
-   * @return
    */
   public HttpData publishHttpData(HttpData data) {
     return data;
@@ -242,9 +240,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   /**
    * publishing point for any http request this is the asynchronous callback
    * which will arrive typically at onHttpRespone(data)
+   * @param data the data
+   * @return the data
    * 
-   * @param data
-   * @return
    */
   public String publishHttpResponse(String data) {
     return data;

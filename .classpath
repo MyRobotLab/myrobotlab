@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="org/myrobotlab/opencv/OpenCVFilterMotionTemplate.java|resource/Arduino/generate/*" kind="src" path="src">
+	<classpathentry excluding="org/myrobotlab/opencv/OpenCVFilterMotionTemplate.java|resource/Arduino/generate/*|org/myrobotlab/javafx/Gui.java|org/myrobotlab/service/JavaFxGui.java" kind="src" path="src">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="myrobotlab/libraries/native"/>
 		</attributes>
@@ -399,5 +399,6 @@
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacpp.jar"/>
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacv-platform.jar"/>
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacv.jar"/>
+	<classpathentry kind="lib" path="/repo/com.illposed.osc/0.4/javaosc-core-0.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

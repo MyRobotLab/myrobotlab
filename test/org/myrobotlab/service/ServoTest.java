@@ -40,8 +40,9 @@ public class ServoTest {
 	  int pin = 1;
 	  // the pin should always be set to something.
 	  s.setPin(pin);
-	  // maybe remove this interface 
-    s.attach(ard1);
+	  // maybe remove this interface
+	  s.attachServoController(ard1);
+    // s.attachServoController(ard1);
     s.disable();
     
     s.attach(ard2, pin);
@@ -72,7 +73,7 @@ public class ServoTest {
     
     // detach the servo.
     //ard2.detach(s);
-    s.detach(ard2);
+    s.detachServoController(ard2);
 	  assertFalse(s.isAttached());	  
 
 	  //
@@ -81,7 +82,7 @@ public class ServoTest {
 	  s.disable();
 	  assertFalse(s.isEnabled());
 	  
-	  s.detach(ard1);
+	  s.detachServoController(ard1);
 	  assertFalse(s.isAttached());
 	  
 	  
@@ -154,9 +155,9 @@ public class ServoTest {
 		arduino.setDebug(true);
 		
 		// detaching the device
-		servo01.detach(arduino); // test servo02.detach(arduino); error ?
+		servo01.detachServoController(arduino); // test servo02.detach(arduino); error ?
 		// servo02.detach(afdriver); // TEST CASE - THIS FAILED - THEN RE-ATTACHED DID SPLIT BRAIN FIXME
-		servo02.detach(arduino);
+		servo02.detachServoController(arduino);
 
 		// errors / boundary cases
 		// servo01.attach(arduino, 8, 40);
