@@ -286,7 +286,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   // ================ Broadcaster begin ===========================
 
-  /**
+  /*
    * FIXME - needs to be LogListener interface with
    * LogListener.onLogEvent(String logEntry) !!!! THIS SHALL LOG NO ENTRIES OR
    * ABANDON ALL HOPE !!!
@@ -327,7 +327,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-  /**
+  /*
    * redirects browser to new url
    */
   public String redirect(String url) {
@@ -617,6 +617,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * This is a middle level method to handle the details of Atmosphere and http/ws level of 
    * processing request.  It will eventually call ApiFactory.process which handles the "pure"
    * Jvm Java only processing
+   * @param r r
+   * @throws Exception e 
    * 
    */
   public void handleServicesApi(AtmosphereResource r) throws Exception {
@@ -925,13 +927,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
      */
   }
 
-  /**
+  /*
    * - use the service's error() pub sub return public void handleError(){
    * 
    * }
    */
 
-  /**
+  /*
    * determines if references to JQuery JavaScript library are local or if the
    * library is linked to using content delivery network. Default (false) is to
    * use the CDN
@@ -969,7 +971,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return false;
   }
 
-  /**
+  /*
    * From UI events --to--&gt; MRL request to save panel data typically done after
    * user has changed or updated the UI in position, height, width, zIndex etc.
    * 
@@ -1028,7 +1030,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-  /**
+  /*
    * https://github.com/Atmosphere/nettosphere/issues/17 A callback used to
    * configure {@link javax.net.ssl.SSLEngine} before they get injected in
    * Netty.
