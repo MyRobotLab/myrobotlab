@@ -604,8 +604,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         HashMap<URI, ServiceEnvironment> env = Runtime.getEnvironments();
         respond(r, apiKey, "getLocalServices", env);
       } else {
-        // doNotUseThisProcessMessageAPI(codec, request.body()); 
-        api.process(out, r.getRequest().getRequestURI(), data);
+        doNotUseThisProcessMessageAPI(codec, request.body()); 
+        // api.process(out, r.getRequest().getRequestURI(), data);
       }
 
     } catch (Exception e) {
