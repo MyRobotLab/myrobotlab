@@ -63,6 +63,7 @@ public class HttpPost {
    * 
    * @param url
    *          the URL to send request to
+   * @throws IOException e
    */
   public HttpPost(URL url) throws IOException {
     this(url.openConnection());
@@ -96,6 +97,7 @@ public class HttpPost {
    * were added
    * 
    * @return input stream with the server response
+   * @throws IOException e
    */
   public HttpURLConnection post() throws IOException {
     if (mOutput == null)
@@ -222,6 +224,7 @@ public class HttpPost {
    *          the name of the file
    * @param is
    *          input stream to read the contents of the file from
+   * @throws IOException e
    */
   public void writeParameter(String name, String filename, InputStream is) throws IOException {
     boundary();

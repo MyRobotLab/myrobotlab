@@ -20,7 +20,6 @@ import org.junit.runner.notification.RunListener;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.arduino.virtual.MrlServo;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.PinData;

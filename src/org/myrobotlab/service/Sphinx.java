@@ -402,6 +402,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
    *          - name of the Service which will be utilizing this grammar
    * @param grammar
    *          - grammar content
+   * @return true/false
    */
   public boolean createGrammar(String grammar) {
     log.info("creating grammar [{}]", grammar);
@@ -444,10 +445,11 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
     return microphone.isRecording();
   }
 
-  /**
+  /*
    * an inbound port for Speaking Services (TTS) - which suppress listening such
    * that a system will not listen when its talking, otherwise a feedback loop
    * can occur
+   * 
    * 
    */
   public synchronized boolean onIsSpeaking(Boolean talking) {

@@ -32,7 +32,7 @@ public class CacheManager {
     me = new CacheManager();
   }
 
-  /**
+  /*
    * Get a handle to this singleton.
    */
   public static CacheManager getInstance() {
@@ -64,7 +64,7 @@ public class CacheManager {
     cacheTimeouts.put(name, timeoutInterval);
   }
 
-  /**
+  /*
    * Get a handle to one of the caches.
    */
   public Cache getCache(String name) {

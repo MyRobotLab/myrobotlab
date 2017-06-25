@@ -49,7 +49,7 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
     mrlToProtocolKey.put(mrlHost, protocolKey);
   }
 
-  /**
+  /*
    * mrl:/ get a gateway for remote communication
    */
   public Gateway getComm(URI uri) {

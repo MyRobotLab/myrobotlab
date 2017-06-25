@@ -288,7 +288,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     return contact;
   }
 
-  /**
+  /*
    * Displays users (entries) in the roster
    */
   public Map<String, Contact> getContactList() {
@@ -386,7 +386,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     return contact;
   }
 
-  /**
+  /*
    * MRL Interface to gateways .. onMsg(GatewayData d) addMsgListener(Service s)
    * publishMsg(Object..) returns gateway specific data
    */
@@ -400,7 +400,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     return msg;
   }
 
-  /**
+  /*
    * Sends the specified text as a message to the other chat participant.
    * 
    * @param text - the message

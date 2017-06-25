@@ -93,7 +93,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     
    }
 
-  /**
+  /*
    * attach all the servos - this must be re-entrant and accomplish the
    * re-attachment when servos are detached
    */
@@ -146,6 +146,9 @@ public class InMoovHand extends Service implements LeapDataListener {
   // user data needed
   /**
    * connect - user data needed
+   * @param port com port
+   * @return  true or false
+   * @throws Exception e
    * 
    */
   public boolean connect(String port) throws Exception {

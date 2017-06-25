@@ -16,8 +16,9 @@ public class Matrix {
   public double[][] elements;
 
   /**
-   * @param sx
-   *          sy sz translations in the x,y, and z directions
+   * @param sx scaling in the x direction
+   * @param sy scaling in the y direction
+   * @param sz scaling in the z direction
    * @return the associated scaling transformation matrix
    */
   public static Matrix scaling(double sx, double sy, double sz) {
@@ -30,8 +31,9 @@ public class Matrix {
   }
 
   /**
-   * @param tx
-   *          ty tz translations in the x,y, and z directions
+   * @param tx translations in the x direction
+   * @param ty translations in the y direction         
+   * @param tz translations in the z direction
    * @return the associated translation transformation matrix
    */
   public static Matrix translation(double tx, double ty, double tz) {

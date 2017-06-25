@@ -54,7 +54,7 @@ public class RepoTest implements RepoInstallListener {
     assertTrue(repo != null);
   }
 
-  /**
+  /*
    * public constructor only because serialization might require it - otherwise
    * this should be private.
    * 

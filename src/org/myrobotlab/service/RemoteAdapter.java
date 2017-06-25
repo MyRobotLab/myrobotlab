@@ -238,7 +238,7 @@ public class RemoteAdapter extends Service implements Gateway {
 		return data;
 	}
 
-	/**
+	/*
 	 * NOT USED - just left as an example of a consumer asynchronous return of
 	 * access key request
 	 */

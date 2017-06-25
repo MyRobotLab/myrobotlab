@@ -490,6 +490,7 @@ public class MrlComm {
   /**
    * deviceDetach - get the device if it exists delete it and remove it from the
    * deviceList
+   * @param deviceId int for the device id
    */
   // > deviceDetach/deviceId
   public void deviceDetach(Integer deviceId) {

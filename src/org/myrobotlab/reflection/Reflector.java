@@ -43,11 +43,12 @@ public class Reflector {
     primitiveTypes.add(Double.class);
   }
 
-  /**
+  /*
    * Create an instance of Class.
    * 
    * @param c
    *          any class that extends the expected return type T
+   * @param params params for constructor i guess?
    * @return null if anything fails
    */
   @SuppressWarnings("unchecked")
@@ -65,8 +66,10 @@ public class Reflector {
     return null;
   }
 
-  /**
+  /*
    * Create an instance of the classname.
+   * @param classname class name
+   * @param params params to pass to constructor
    * @return null if anything fails
    */
   public static <T> T getNewInstance(String classname, Object... params) {
@@ -108,7 +111,8 @@ public class Reflector {
   }
 
   /**
-   * Return an empty/default boxed primitive. This is somewhat heavy since it
+   * @param cls class
+   * @return an empty/default boxed primitive. This is somewhat heavy since it
    * creates a boxed instance of the primitive.
    */
   public static Object getPrimitive(Class<?> cls) {
@@ -138,12 +142,15 @@ public class Reflector {
     return '\u0000';
   }
 
-  /**
+  /*
    * Invoke in the context of this Service. It is suggested to use one of the
    * primitive overload methods when the expected result is a primitive. This is
    * for 2 reasons: (1) the primitive will be boxed in this case which means
    * more overhead (2) if something fails a NULL is returned which results in an
    * exception on the calling end
+   * @param object object
+   * @param method method
+   * @param params list of params to pass
    * 
    * @return null if anything fails
    * @throws NullPointerException
@@ -167,6 +174,7 @@ public class Reflector {
 
   /**
    * Test if the item is a boxed primitive.
+   * @param item the item to test
    * 
    * @return true if it is a boxed primitive
    */

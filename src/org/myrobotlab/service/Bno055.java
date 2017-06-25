@@ -798,7 +798,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     i2cWrite(register.ACC_AM_THRES, acc_am_thre);
     setMode(modeback);
   }
-  /**
+  /*
    * AxisRemap : The device mounting position should not limit the data output of the BNO055 device. The
    * axis of the device can be re-configured to the new reference axis.
    */
@@ -815,7 +815,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     setMode(modeback);
   }
   
-  /**
+  /*
    * Change the direction of an Axis
    * @param positive : true = positive, false = reversed
    */

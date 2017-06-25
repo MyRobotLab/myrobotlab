@@ -162,6 +162,7 @@ public class Repo implements Serializable {
    * which want a status of repo starting an install
    * @param format format
    * @param args args
+   * @return status
    */
   static public Status createStartStatus(String format, Object... args) {
     Status status = Status.info(format, args);
@@ -174,6 +175,7 @@ public class Repo implements Serializable {
    * services which want a status of repo starting finishing an install
    * @param format format
    * @param args args
+   * @return status
    */
   static public Status createFinishedStatus(String format, Object... args) {
     Status status = Status.info(format, args);
@@ -193,6 +195,8 @@ public class Repo implements Serializable {
 
   /**
    * installs all currently defined service types and their dependencies
+   * @throws ParseException e
+   * @throws IOException e
    */
   public void install() throws ParseException, IOException {
     clearErrors();
@@ -219,6 +223,9 @@ public class Repo implements Serializable {
    * dependecies from service type (this comes from the serviceData.json /
    * classMeta) these are what need to be resolved 3. retrieve - and update
    * state in memory and repo.json
+   * @param fullTypeName f
+   * @throws ParseException e 
+   * @throws IOException e
    */
   public void install(String fullTypeName) throws ParseException, IOException {
     log.info("installing {}", fullTypeName);
@@ -239,6 +246,8 @@ public class Repo implements Serializable {
    * searches through dependencies directly defined by the service and all Peers
    * - recursively searches for their dependencies if any are not found -
    * returns false
+   * @param fullTypeName f
+   * @return true/false
    */
   public boolean isServiceTypeInstalled(String fullTypeName) {
     ServiceData sd = ServiceData.getLocalInstance();
@@ -262,6 +271,12 @@ public class Repo implements Serializable {
    * resolveArtifact does an Ivy resolve with a URLResolver to MRL's repo at
    * github. The equivalent command line is -settings ivychain.xml -dependency
    * "gnu.io.rxtx" "rxtx" "2.1-7r2" -confs "runtime,x86.64.windows"
+   * @param org org
+   * @param version version 
+   * @param retrieve boolean
+   * @return  the resolution report
+   * @throws ParseException e
+   * @throws IOException e
    */
 
   synchronized public ResolveReport resolveArtifacts(String org, String version, boolean retrieve) throws ParseException, IOException {
@@ -438,6 +453,7 @@ public class Repo implements Serializable {
    * useful for checking validity - not used during runtime libraries
    * 
    * @param repoDir the directory to load from
+   * @return map 
    */
   static public Map<String, Library> generateLibrariesFromRepo(String repoDir) {
     try {

@@ -396,7 +396,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return controller != null;
   }
     
-  /**
+  /*
    * Set the PWM pulsewidth
    * 
    */
@@ -408,7 +408,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
   }
 
-  /**
+  /*
    * Set the PWM frequency i.e. the frequency between positive pulses.
    * 
    */

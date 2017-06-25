@@ -310,7 +310,7 @@ public class Servo extends Service implements ServoControl {
     enable(pin);
   }
 
-  /**
+  /*
    * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
    * pulses to maintain its current position.
    */
@@ -450,7 +450,7 @@ public class Servo extends Service implements ServoControl {
 
   }
 
-  /**
+  /*
    * basic move command of the servo - usually is 0 - 180 valid range but can be
    * adjusted and / or re-mapped with min / max and map commands
    * 
@@ -609,7 +609,7 @@ public class Servo extends Service implements ServoControl {
     broadcastState();
   }
 
-  /**
+  /*
    * Writes a value in microseconds (uS) to the servo, controlling the shaft
    * accordingly. On a standard servo, this will set the angle of the shaft. On
    * standard servos a parameter value of 1000 is fully counter-clockwise, 2000
@@ -754,7 +754,7 @@ public class Servo extends Service implements ServoControl {
     }
   }
 
-  /** setAcceleration is not fully implemented **/
+  /* setAcceleration is not fully implemented **/
   public void setAcceleration(double acceleration) {
     this.acceleration = acceleration;
     if (controller != null) {
@@ -824,7 +824,7 @@ public class Servo extends Service implements ServoControl {
     return (int) time;
   }
 
-  /**
+  /*
    * enableAutoAttach will attach a servo when ask to move and it when the move
    * is complete
    * 
@@ -955,7 +955,7 @@ public class Servo extends Service implements ServoControl {
     }, (long) delay);
   }
 
-  /**
+  /*
    * Set the controller for this servo but does not attach it. see also attach()
    */
   public void setController(ServoController controller) {

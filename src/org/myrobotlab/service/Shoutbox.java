@@ -70,7 +70,7 @@ public class Shoutbox extends Service {
 
   transient static NameProvider nameProvider = new DefaultNameProvider();
 
-  /**
+  /*
    * Core to managing the connections are the keys The keys for websockets are
    * defined as remoteIp:remotePort - unfortunately these are null on disconnect
    * so a seperate lookup needs to be utilized The keys for xmpp "buddies" are
@@ -304,7 +304,7 @@ public class Shoutbox extends Service {
     invoke("publishShout", shout);
   }
 
-  /**
+  /*
    * shout of minimal complexity
    * 
    */
@@ -316,7 +316,7 @@ public class Shoutbox extends Service {
     shout("test", msg);
   }
 
-  /**
+  /*
    * max complexity shout
    * 
    */

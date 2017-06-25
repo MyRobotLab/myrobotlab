@@ -19,9 +19,7 @@ public class NeoPixelTest {
   public Arduino ard;
   private NeoPixel neopixel;
 
-  /**
-   * @throws java.lang.Exception
-   */
+
   @Before
   public void setUp() throws Exception {
     // setup the test environment , and create an arduino with a virtual backend for it.

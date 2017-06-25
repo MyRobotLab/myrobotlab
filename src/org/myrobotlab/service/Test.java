@@ -356,7 +356,7 @@ public class Test extends Service implements StatusListener {
 		}
 	}
 
-	/**
+	/*
 	 * call-back from service under testing to route errors to this service...
 	 */
 	public void onError(String errorMsg) {
@@ -426,7 +426,7 @@ public class Test extends Service implements StatusListener {
 	// failures need to be collected & options (like junit) to halt on error
 	// or continue and report
 
-	/**
+	/*
 	 * need to do a type conversion here... in JS land there is no HashSet
 	 * &lt;String&gt; only List &amp; HashMap types
 	 * 
@@ -528,7 +528,7 @@ public class Test extends Service implements StatusListener {
 		return sd.getServiceTypeNames();
 	}
 
-	/**
+	/*
 	 * The outer level of all tests on a per Service basis Environment is
 	 * expected to be prepared correctly by an Agent. This method will test the
 	 * heck out of a single service and save the results in a partFile
@@ -811,7 +811,7 @@ public class Test extends Service implements StatusListener {
 		return ret;
 	}
 
-	/**
+	/*
 	 * Gets all the pyrobotlab/service/scripts and does some basic testing. This
 	 * method also finds all script not associated with active services (to be
 	 * removed). And all services which do not have scripts (to be added) It

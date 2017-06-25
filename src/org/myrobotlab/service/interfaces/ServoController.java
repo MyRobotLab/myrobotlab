@@ -33,8 +33,8 @@ public interface ServoController extends Attachable {
    * The one and only attach which is type specific and does all the work
    * which we expect
    *  
-   * @param servo
-   * @throws Exception
+   * @param servo the servo
+   * @throws Exception e
    */
 	void attachServoControl(ServoControl servo) throws Exception;
 	
@@ -42,16 +42,16 @@ public interface ServoController extends Attachable {
 	 * attach with parameters which will set attributes on ServoControl
 	 * ??? rules on which attributes in which service can be changed ???
 	 * 
-	 * @param servo
-	 * @param pin
-	 * @throws Exception
+	 * @param servo the servo
+	 * @param pin the pin number 
+	 * @throws Exception e
 	 */
 	void attach(ServoControl servo, int pin) throws Exception;
 	
 	// this is Arduino's servo.attach
 	// void servoAttach(ServoControl servo, int pin, Integer targetOutput, Integer velocity);
 	
-	/**
+	/*
 	 * Arduino's servo.attach(pin) which is just energizing on a pin
 	 */
 	// FIXME should be servoEnable - consistent with ServoControl

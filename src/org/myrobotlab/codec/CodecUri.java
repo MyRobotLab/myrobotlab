@@ -43,6 +43,8 @@ public class CodecUri {
    *          - input path in the format -
    *          /{api-type}(/encoding=json/decoding=json/)/{method}/{param0}/{
    *          param1}/...
+   * @return message
+   * @throws IOException e 
    */
 
   // FIXME - reconcile with WebGUIServlet

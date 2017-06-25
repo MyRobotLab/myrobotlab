@@ -203,6 +203,7 @@ public class RangeSensorBelt extends PickSensor {
    *          - the number of sensors in the belt (typically 4,6,12,24 or 36).
    * @param type
    *          - to specify the sensor behavior
+   * @param flags additional flags
    */
   public RangeSensorBelt(float radius, float minRange, float maxRange, int nbsensors, int type, int flags) {
     // compute angles ,positions , directions
@@ -236,6 +237,8 @@ public class RangeSensorBelt extends PickSensor {
    *          : the sensing ray direction of each sensor relative to sensor
    *          positions. the magnitude of the vector corresponds to the max
    *          range.
+   * @param type type
+   * @param flags flags
    */
   public RangeSensorBelt(Vector3d[] positions, Vector3d[] directions, int type, int flags) {
 
