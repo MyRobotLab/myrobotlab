@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -39,7 +40,6 @@ import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.OrientationListener;
 import org.myrobotlab.service.interfaces.OrientationPublisher;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -1058,7 +1058,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param rate
 	 *            New sample rate divider
-	 * @see getRate()
+	 * see getRate()
 	 * @see MPU6050_RA_SMPLRT_DIV
 	 */
 	void setRate(int rate) {
@@ -1102,7 +1102,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	/**
 	 * Set external FSYNC configuration.
 	 * 
-	 * @see getExternalFrameSync()
+	 * see getExternalFrameSync()
 	 * @see MPU6050_RA_CONFIG
 	 * @param sync
 	 *            New FSYNC configuration value
@@ -1148,7 +1148,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param mode
 	 *            New DLFP configuration setting
-	 * @see getDLPFBandwidth()
+	 * see getDLPFBandwidth()
 	 * @see MPU6050_DLPF_BW_256
 	 * @see MPU6050_RA_CONFIG
 	 * @see MPU6050_CFG_DLPF_CFG_BIT
@@ -1186,7 +1186,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param range
 	 *            New full-scale gyroscope range value
-	 * @see getFullScaleRange()
+	 * see getFullScaleRange()
 	 * @see MPU6050_GYRO_FS_250
 	 * @see MPU6050_RA_GYRO_CONFIG
 	 * @see MPU6050_GCONFIG_FS_SEL_BIT
@@ -1356,7 +1356,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param range
 	 *            New full-scale accelerometer range setting
-	 * @see getFullScaleAccelRange()
+	 * see getFullScaleAccelRange()
 	 */
 	void setFullScaleAccelRange(int range) {
 		I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
@@ -1407,7 +1407,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param bandwidth
 	 *            New high-pass filter configuration
-	 * @see setDHPFMode()
+	 * see setDHPFMode()
 	 * @see MPU6050_DHPF_RESET
 	 * @see MPU6050_RA_ACCEL_CONFIG
 	 */
@@ -1442,7 +1442,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param threshold
 	 *            New free-fall acceleration threshold value (LSB = 2mg)
-	 * @see getFreefallDetectionThreshold()
+	 * see getFreefallDetectionThreshold()
 	 * @see MPU6050_RA_FF_THR
 	 */
 	void setFreefallDetectionThreshold(int threshold) {
@@ -1477,7 +1477,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param duration
 	 *            New free-fall duration threshold value (LSB = 1ms)
-	 * @see getFreefallDetectionDuration()
+	 * see getFreefallDetectionDuration()
 	 * @see MPU6050_RA_FF_DUR
 	 */
 	void setFreefallDetectionDuration(int duration) {
@@ -1515,7 +1515,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param threshold
 	 *            New motion detection acceleration threshold value (LSB = 2mg)
-	 * @see getMotionDetectionThreshold()
+	 * see getMotionDetectionThreshold()
 	 * @see MPU6050_RA_MOT_THR
 	 */
 	void setMotionDetectionThreshold(int threshold) {
@@ -1549,7 +1549,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param duration
 	 *            New motion detection duration threshold value (LSB = 1ms)
-	 * @see getMotionDetectionDuration()
+	 * see getMotionDetectionDuration()
 	 * @see MPU6050_RA_MOT_DUR
 	 */
 	void setMotionDetectionDuration(int duration) {
@@ -1596,7 +1596,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * @param threshold
 	 *            New zero motion detection acceleration threshold value (LSB =
 	 *            2mg)
-	 * @see getZeroMotionDetectionThreshold()
+	 * see getZeroMotionDetectionThreshold()
 	 * @see MPU6050_RA_ZRMOT_THR
 	 */
 	void setZeroMotionDetectionThreshold(int threshold) {
@@ -1632,7 +1632,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param duration
 	 *            New zero motion detection duration threshold value (LSB = 1ms)
-	 * @see getZeroMotionDetectionDuration()
+	 * see getZeroMotionDetectionDuration()
 	 * @see MPU6050_RA_ZRMOT_DUR
 	 */
 	void setZeroMotionDetectionDuration(int duration) {
@@ -1658,7 +1658,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New temperature FIFO enabled value
-	 * @see getTempFIFOEnabled()
+	 * see getTempFIFOEnabled()
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	void setTempFIFOEnabled(boolean enabled) {
@@ -1682,7 +1682,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New gyroscope X-axis FIFO enabled value
-	 * @see getXGyroFIFOEnabled()
+	 * see getXGyroFIFOEnabled()
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	void setXGyroFIFOEnabled(boolean enabled) {
@@ -1706,7 +1706,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New gyroscope Y-axis FIFO enabled value
-	 * @see getYGyroFIFOEnabled()
+	 * see getYGyroFIFOEnabled()
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	void setYGyroFIFOEnabled(boolean enabled) {
@@ -1730,7 +1730,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New gyroscope Z-axis FIFO enabled value
-	 * @see getZGyroFIFOEnabled()
+	 * see getZGyroFIFOEnabled()
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	void setZGyroFIFOEnabled(boolean enabled) {
@@ -1754,7 +1754,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New accelerometer FIFO enabled value
-	 * @see getAccelFIFOEnabled()
+	 * see getAccelFIFOEnabled()
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	void setAccelFIFOEnabled(boolean enabled) {
@@ -1778,7 +1778,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New Slave 2 FIFO enabled value
-	 * @see getSlave2FIFOEnabled()
+	 * see getSlave2FIFOEnabled()
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	void setSlave2FIFOEnabled(boolean enabled) {
@@ -1802,7 +1802,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New Slave 1 FIFO enabled value
-	 * @see getSlave1FIFOEnabled()
+	 * see getSlave1FIFOEnabled()
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	void setSlave1FIFOEnabled(boolean enabled) {
@@ -1826,7 +1826,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New Slave 0 FIFO enabled value
-	 * @see getSlave0FIFOEnabled()
+	 * see getSlave0FIFOEnabled()
 	 * @see MPU6050_RA_FIFO_EN
 	 */
 	void setSlave0FIFOEnabled(boolean enabled) {
@@ -1860,7 +1860,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New multi-master enabled value
-	 * @see getMultiMasterEnabled()
+	 * see getMultiMasterEnabled()
 	 * @see MPU6050_RA_I2C_MST_CTRL
 	 */
 	void setMultiMasterEnabled(boolean enabled) {
@@ -1888,7 +1888,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New wait-for-external-sensor-data enabled value
-	 * @see getWaitForExternalSensorEnabled()
+	 * see getWaitForExternalSensorEnabled()
 	 * @see MPU6050_RA_I2C_MST_CTRL
 	 */
 	void setWaitForExternalSensorEnabled(boolean enabled) {
@@ -1912,7 +1912,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New Slave 3 FIFO enabled value
-	 * @see getSlave3FIFOEnabled()
+	 * see getSlave3FIFOEnabled()
 	 * @see MPU6050_RA_MST_CTRL
 	 */
 	void setSlave3FIFOEnabled(boolean enabled) {
@@ -1939,7 +1939,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New slave read/write transition enabled value
-	 * @see getSlaveReadWriteTransitionEnabled()
+	 * see getSlaveReadWriteTransitionEnabled()
 	 * @see MPU6050_RA_I2C_MST_CTRL
 	 */
 	void setSlaveReadWriteTransitionEnabled(boolean enabled) {
@@ -2048,7 +2048,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 *            Slave number (0-3)
 	 * @param address
 	 *            New address for specified slave
-	 * @see getSlaveAddress()
+	 * see getSlaveAddress()
 	 * @see MPU6050_RA_I2C_SLV0_ADDR
 	 */
 	void setSlaveAddress(int num, int address) {
@@ -2083,7 +2083,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 *            Slave number (0-3)
 	 * @param reg
 	 *            New active register for specified slave
-	 * @see getSlaveRegister()
+	 * see getSlaveRegister()
 	 * @see MPU6050_RA_I2C_SLV0_REG
 	 */
 	void setSlaveRegister(int num, int reg) {
@@ -2115,7 +2115,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 *            Slave number (0-3)
 	 * @param enabled
 	 *            New enabled value for specified slave
-	 * @see getSlaveEnabled()
+	 * see getSlaveEnabled()
 	 * @see MPU6050_RA_I2C_SLV0_CTRL
 	 */
 	void setSlaveEnabled(int num, boolean enabled) {
@@ -2150,7 +2150,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 *            Slave number (0-3)
 	 * @param enabled
 	 *            New word pair byte-swapping enabled value for specified slave
-	 * @see getSlaveWordByteSwap()
+	 * see getSlaveWordByteSwap()
 	 * @see MPU6050_RA_I2C_SLV0_CTRL
 	 */
 	void setSlaveWordByteSwap(int num, boolean enabled) {
@@ -2186,7 +2186,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * @param mode
 	 *            New write mode for specified slave (0 = register address +
 	 *            data, 1 = data only)
-	 * @see getSlaveWriteMode()
+	 * see getSlaveWriteMode()
 	 * @see MPU6050_RA_I2C_SLV0_CTRL
 	 */
 	void setSlaveWriteMode(int num, boolean mode) {
@@ -2221,7 +2221,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 *            Slave number (0-3)
 	 * @param enabled
 	 *            New word pair grouping order offset for specified slave
-	 * @see getSlaveWordGroupOffset()
+	 * see getSlaveWordGroupOffset()
 	 * @see MPU6050_RA_I2C_SLV0_CTRL
 	 */
 	void setSlaveWordGroupOffset(int num, boolean enabled) {
@@ -2253,7 +2253,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 *            Slave number (0-3)
 	 * @param length
 	 *            Number of bytes to read for specified slave
-	 * @see getSlaveDataLength()
+	 * see getSlaveDataLength()
 	 * @see MPU6050_RA_I2C_SLV0_CTRL
 	 */
 	void setSlaveDataLength(int num, int length) {
@@ -2271,7 +2271,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * address of the slave device.
 	 *
 	 * @return Current address for Slave 4
-	 * @see getSlaveAddress()
+	 * see getSlaveAddress()
 	 * @see MPU6050_RA_I2C_SLV4_ADDR
 	 */
 	int getSlave4Address() {
@@ -2283,7 +2283,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param address
 	 *            New address for Slave 4
-	 * @see getSlave4Address()
+	 * see getSlave4Address()
 	 * @see MPU6050_RA_I2C_SLV4_ADDR
 	 */
 	void setSlave4Address(int address) {
@@ -2307,7 +2307,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param reg
 	 *            New active register for Slave 4
-	 * @see getSlave4Register()
+	 * see getSlave4Register()
 	 * @see MPU6050_RA_I2C_SLV4_REG
 	 */
 	void setSlave4Register(int reg) {
@@ -2344,7 +2344,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New enabled value for Slave 4
-	 * @see getSlave4Enabled()
+	 * see getSlave4Enabled()
 	 * @see MPU6050_RA_I2C_SLV4_CTRL
 	 */
 	void setSlave4Enabled(boolean enabled) {
@@ -2370,7 +2370,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New enabled value for Slave 4 transaction interrupts.
-	 * @see getSlave4InterruptEnabled()
+	 * see getSlave4InterruptEnabled()
 	 * @see MPU6050_RA_I2C_SLV4_CTRL
 	 */
 	void setSlave4InterruptEnabled(boolean enabled) {
@@ -2398,7 +2398,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * @param mode
 	 *            New write mode for Slave 4 (0 = register address + data, 1 =
 	 *            data only)
-	 * @see getSlave4WriteMode()
+	 * see getSlave4WriteMode()
 	 * @see MPU6050_RA_I2C_SLV4_CTRL
 	 */
 	void setSlave4WriteMode(boolean mode) {
@@ -2430,7 +2430,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param delay
 	 *            New Slave 4 master delay value
-	 * @see getSlave4MasterDelay()
+	 * see getSlave4MasterDelay()
 	 * @see MPU6050_RA_I2C_SLV4_CTRL
 	 */
 	void setSlave4MasterDelay(int delay) {
@@ -2575,7 +2575,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param mode
 	 *            New interrupt mode (0=active-high, 1=active-low)
-	 * @see getInterruptMode()
+	 * see getInterruptMode()
 	 * @see MPU6050_RA_INT_PIN_CFG
 	 * @see MPU6050_INTCFG_INT_LEVEL_BIT
 	 */
@@ -2599,7 +2599,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param drive
 	 *            New interrupt drive mode (0=push-pull, 1=open-drain)
-	 * @see getInterruptDrive()
+	 * see getInterruptDrive()
 	 * @see MPU6050_RA_INT_PIN_CFG
 	 * @see MPU6050_INTCFG_INT_OPEN_BIT
 	 */
@@ -2624,7 +2624,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param latch
 	 *            New latch mode (0=50us-pulse, 1=latch-until-int-cleared)
-	 * @see getInterruptLatch()
+	 * see getInterruptLatch()
 	 * @see MPU6050_RA_INT_PIN_CFG
 	 * @see MPU6050_INTCFG_LATCH_INT_EN_BIT
 	 */
@@ -2650,7 +2650,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param clear
 	 *            New latch clear mode (0=status-read-only, 1=any-register-read)
-	 * @see getInterruptLatchClear()
+	 * see getInterruptLatchClear()
 	 * @see MPU6050_RA_INT_PIN_CFG
 	 * @see MPU6050_INTCFG_INT_RD_CLEAR_BIT
 	 */
@@ -2662,7 +2662,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * Get FSYNC interrupt logic level mode.
 	 * 
 	 * @return Current FSYNC interrupt mode (0=active-high, 1=active-low)
-	 * @see getFSyncInterruptMode()
+	 * see getFSyncInterruptMode()
 	 * @see MPU6050_RA_INT_PIN_CFG
 	 * @see MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
 	 */
@@ -2675,7 +2675,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param mode
 	 *            New FSYNC interrupt mode (0=active-high, 1=active-low)
-	 * @see getFSyncInterruptMode()
+	 * see getFSyncInterruptMode()
 	 * @see MPU6050_RA_INT_PIN_CFG
 	 * @see MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
 	 */
@@ -2700,7 +2700,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New FSYNC pin interrupt enabled setting
-	 * @see getFSyncInterruptEnabled()
+	 * see getFSyncInterruptEnabled()
 	 * @see MPU6050_RA_INT_PIN_CFG
 	 * @see MPU6050_INTCFG_FSYNC_INT_EN_BIT
 	 */
@@ -2792,7 +2792,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New interrupt enabled status
-	 * @see getIntFreefallEnabled()
+	 * see getIntFreefallEnabled()
 	 * @see MPU6050_RA_INT_ENABLE
 	 * @see MPU6050_INTERRUPT_FF_BIT
 	 **/
@@ -2817,7 +2817,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New interrupt enabled status
-	 * @see getIntFreefallEnabled()
+	 * see getIntFreefallEnabled()
 	 * @see MPU6050_RA_INT_ENABLE
 	 * @see MPU6050_INTERRUPT_FF_BIT
 	 **/
@@ -2842,7 +2842,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New interrupt enabled status
-	 * @see getIntMotionEnabled()
+	 * see getIntMotionEnabled()
 	 * @see MPU6050_RA_INT_ENABLE
 	 * @see MPU6050_INTERRUPT_MOT_BIT
 	 **/
@@ -2867,7 +2867,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New interrupt enabled status
-	 * @see getIntZeroMotionEnabled()
+	 * see getIntZeroMotionEnabled()
 	 * @see MPU6050_RA_INT_ENABLE
 	 * @see MPU6050_INTERRUPT_ZMOT_BIT
 	 **/
@@ -2892,7 +2892,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New interrupt enabled status
-	 * @see getIntFIFOBufferOverflowEnabled()
+	 * see getIntFIFOBufferOverflowEnabled()
 	 * @see MPU6050_RA_INT_ENABLE
 	 * @see MPU6050_INTERRUPT_FIFO_OFLOW_BIT
 	 **/
@@ -2918,7 +2918,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New interrupt enabled status
-	 * @see getIntI2CMasterEnabled()
+	 * see getIntI2CMasterEnabled()
 	 * @see MPU6050_RA_INT_ENABLE
 	 * @see MPU6050_INTERRUPT_I2C_MST_INT_BIT
 	 **/
@@ -2944,7 +2944,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New interrupt enabled status
-	 * @see getIntDataReadyEnabled()
+	 * see getIntDataReadyEnabled()
 	 * @see MPU6050_RA_INT_CFG
 	 * @see MPU6050_INTERRUPT_DATA_RDY_BIT
 	 */
@@ -3098,7 +3098,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * Get X-axis accelerometer reading.
 	 * 
 	 * @return X-axis acceleration measurement in 16-bit 2's complement format
-	 * @see getMotion6()
+	 * see getMotion6()
 	 * @see MPU6050_RA_ACCEL_XOUT_H
 	 */
 	int getAccelerationX() {
@@ -3111,7 +3111,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * Get Y-axis accelerometer reading.
 	 * 
 	 * @return Y-axis acceleration measurement in 16-bit 2's complement format
-	 * @see getMotion6()
+	 * see getMotion6()
 	 * @see MPU6050_RA_ACCEL_YOUT_H
 	 */
 	int getAccelerationY() {
@@ -3124,7 +3124,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * Get Z-axis accelerometer reading.
 	 * 
 	 * @return Z-axis acceleration measurement in 16-bit 2's complement format
-	 * @see getMotion6()
+	 * see getMotion6()
 	 * @see MPU6050_RA_ACCEL_ZOUT_H
 	 */
 	int getAccelerationZ() {
@@ -3194,7 +3194,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 *            16-bit signed integer container for Y-axis rotation
 	 * @param z
 	 *            16-bit signed integer container for Z-axis rotation
-	 * @see getMotion6()
+	 * see getMotion6()
 	 * @see MPU6050_RA_GYRO_XOUT_H
 	 */
 	void getRotation(int x[], int y[], int z[]) {
@@ -3209,7 +3209,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * Get X-axis gyroscope reading.
 	 * 
 	 * @return X-axis rotation measurement in 16-bit 2's complement format
-	 * @see getMotion6()
+	 * see getMotion6()
 	 * @see MPU6050_RA_GYRO_XOUT_H
 	 */
 	int getRotationX() {
@@ -3222,7 +3222,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * Get Y-axis gyroscope reading.
 	 * 
 	 * @return Y-axis rotation measurement in 16-bit 2's complement format
-	 * @see getMotion6()
+	 * see getMotion6()
 	 * @see MPU6050_RA_GYRO_YOUT_H
 	 */
 	int getRotationY() {
@@ -3235,7 +3235,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * Get Z-axis gyroscope reading.
 	 * 
 	 * @return Z-axis rotation measurement in 16-bit 2's complement format
-	 * @see getMotion6()
+	 * see getMotion6()
 	 * @see MPU6050_RA_GYRO_ZOUT_H
 	 */
 	int getRotationZ() {
@@ -3336,7 +3336,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * @param position
 	 *            Starting position (0-21)
 	 * @return Word read from register
-	 * @see getExternalSensorByte()
+	 * see getExternalSensorByte()
 	 */
 	int getExternalSensorWord(int position) {
 		int readBuffer[] = new int[2];
@@ -3350,7 +3350,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * @param position
 	 *            Starting position (0-20)
 	 * @return Double word read from registers
-	 * @see getExternalSensorByte()
+	 * see getExternalSensorByte()
 	 */
 	int getExternalSensorDWord(int position) {
 		int readBuffer[] = new int[4];
@@ -3488,7 +3488,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New external data shadow delay enabled status.
-	 * @see getExternalShadowDelayEnabled()
+	 * see getExternalShadowDelayEnabled()
 	 * @see MPU6050_RA_I2C_MST_DELAY_CTRL
 	 * @see MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
 	 */
@@ -3602,7 +3602,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param delay
 	 *            New accelerometer power-on delay (0-3)
-	 * @see getAccelerometerPowerOnDelay()
+	 * see getAccelerometerPowerOnDelay()
 	 * @see MPU6050_RA_MOT_DETECT_CTRL
 	 * @see MPU6050_DETECT_ACCEL_ON_DELAY_BIT
 	 */
@@ -3646,7 +3646,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param decrement
 	 *            New decrement configuration value
-	 * @see getFreefallDetectionCounterDecrement()
+	 * see getFreefallDetectionCounterDecrement()
 	 * @see MPU6050_RA_MOT_DETECT_CTRL
 	 * @see MPU6050_DETECT_FF_COUNT_BIT
 	 */
@@ -3687,7 +3687,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param decrement
 	 *            New decrement configuration value
-	 * @see getMotionDetectionCounterDecrement()
+	 * see getMotionDetectionCounterDecrement()
 	 * @see MPU6050_RA_MOT_DETECT_CTRL
 	 * @see MPU6050_DETECT_MOT_COUNT_BIT
 	 */
@@ -3716,7 +3716,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New FIFO enabled status
-	 * @see getFIFOEnabled()
+	 * see getFIFOEnabled()
 	 * @see MPU6050_RA_USER_CTRL
 	 * @see MPU6050_USERCTRL_FIFO_EN_BIT
 	 */
@@ -3745,7 +3745,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New I2C Master Mode enabled status
-	 * @see getI2CMasterModeEnabled()
+	 * see getI2CMasterModeEnabled()
 	 * @see MPU6050_RA_USER_CTRL
 	 * @see MPU6050_USERCTRL_I2C_MST_EN_BIT
 	 */
@@ -3836,7 +3836,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New sleep mode enabled status
-	 * @see getSleepEnabled()
+	 * see getSleepEnabled()
 	 * @see MPU6050_RA_PWR_MGMT_1
 	 * @see MPU6050_PWR1_SLEEP_BIT
 	 */
@@ -3863,7 +3863,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param enabled
 	 *            New sleep mode enabled status
-	 * @see getWakeCycleEnabled()
+	 * see getWakeCycleEnabled()
 	 * @see MPU6050_RA_PWR_MGMT_1
 	 * @see MPU6050_PWR1_CYCLE_BIT
 	 */
@@ -3897,7 +3897,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 *
 	 * @param enabled
 	 *            New temperature sensor enabled status
-	 * @see getTempSensorEnabled()
+	 * see getTempSensorEnabled()
 	 * @see MPU6050_RA_PWR_MGMT_1
 	 * @see MPU6050_PWR1_TEMP_DIS_BIT
 	 */
@@ -3946,7 +3946,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 *
 	 * @param source
 	 *            New clock source setting
-	 * @see getClockSource()
+	 * see getClockSource()
 	 * @see MPU6050_RA_PWR_MGMT_1
 	 * @see MPU6050_PWR1_CLKSEL_BIT
 	 * @see MPU6050_PWR1_CLKSEL_LENGTH
@@ -4012,7 +4012,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param New
 	 *            X-axis standby enabled status
-	 * @see getStandbyXAccelEnabled()
+	 * see getStandbyXAccelEnabled()
 	 * @see MPU6050_RA_PWR_MGMT_2
 	 * @see MPU6050_PWR2_STBY_XA_BIT
 	 */
@@ -4037,7 +4037,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param New
 	 *            Y-axis standby enabled status
-	 * @see getStandbyYAccelEnabled()
+	 * see getStandbyYAccelEnabled()
 	 * @see MPU6050_RA_PWR_MGMT_2
 	 * @see MPU6050_PWR2_STBY_YA_BIT
 	 */
@@ -4062,7 +4062,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param New
 	 *            Z-axis standby enabled status
-	 * @see getStandbyZAccelEnabled()
+	 * see getStandbyZAccelEnabled()
 	 * @see MPU6050_RA_PWR_MGMT_2
 	 * @see MPU6050_PWR2_STBY_ZA_BIT
 	 */
@@ -4087,7 +4087,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param New
 	 *            X-axis standby enabled status
-	 * @see getStandbyXGyroEnabled()
+	 * see getStandbyXGyroEnabled()
 	 * @see MPU6050_RA_PWR_MGMT_2
 	 * @see MPU6050_PWR2_STBY_XG_BIT
 	 */
@@ -4112,7 +4112,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param New
 	 *            Y-axis standby enabled status
-	 * @see getStandbyYGyroEnabled()
+	 * see getStandbyYGyroEnabled()
 	 * @see MPU6050_RA_PWR_MGMT_2
 	 * @see MPU6050_PWR2_STBY_YG_BIT
 	 */
@@ -4137,7 +4137,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param New
 	 *            Z-axis standby enabled status
-	 * @see getStandbyZGyroEnabled()
+	 * see getStandbyZGyroEnabled()
 	 * @see MPU6050_RA_PWR_MGMT_2
 	 * @see MPU6050_PWR2_STBY_ZG_BIT
 	 */
@@ -4205,7 +4205,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	/**
 	 * Write byte to FIFO buffer.
 	 * 
-	 * @see getFIFOByte()
+	 * see getFIFOByte()
 	 * @see MPU6050_RA_FIFO_R_W
 	 */
 	void setFIFOByte(int data) {
@@ -4233,7 +4233,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 	 * 
 	 * @param id
 	 *            New device ID to set.
-	 * @see getDeviceID()
+	 * see getDeviceID()
 	 * @see MPU6050_RA_WHO_AM_I
 	 * @see MPU6050_WHO_AM_I_BIT
 	 * @see MPU6050_WHO_AM_I_LENGTH

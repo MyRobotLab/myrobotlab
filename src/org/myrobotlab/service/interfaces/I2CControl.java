@@ -25,7 +25,9 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface I2CControl extends DeviceControl {
+import org.myrobotlab.framework.interfaces.NameProvider;
+
+public interface I2CControl extends NameProvider {
 
 	public boolean setController(String controllerName, String deviceBus, String deviceAddress);
 	public boolean setController(String controllerName);

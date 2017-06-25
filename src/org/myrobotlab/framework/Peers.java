@@ -124,12 +124,11 @@ public class Peers {
 
   // suggestAs will insert only (no update) - but top level inserts bottom
   // won't override !!!
-  /**
+  /*
    * @param key
    * @param actualName
    * @param type
    * @param comment
-   * @return
    */
   public boolean suggestAs(String key, String actualName, String type, String comment) {
 

@@ -147,11 +147,9 @@ public abstract class ServiceGui {
 		return isHidden;
 	}
 
-	/**
+	/*
 	 * hook for SwingGui framework to query each panel before release checking
 	 * if any panel needs user input before shutdown
-	 * 
-	 * @return
 	 */
 	public boolean isReadyForRelease() {
 		return true;
@@ -286,11 +284,8 @@ public abstract class ServiceGui {
 		return c;
 	}
 
-	/**
+	/*
 	 * add a line to a panel
-	 * 
-	 * @param components
-	 * @return
 	 */
 	public JComponent addLine(Object... components) {
 		JComponent c = addComponents(center, components);

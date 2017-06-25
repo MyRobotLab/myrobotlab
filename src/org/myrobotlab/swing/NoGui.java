@@ -31,10 +31,10 @@ import java.awt.event.ActionListener;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 public class NoGui extends ServiceGui implements ActionListener {
@@ -61,12 +61,11 @@ public class NoGui extends ServiceGui implements ActionListener {
   public void unsubscribeGui() {
   }
 
-  /**
+  /*
    * Service State change - this method will be called when a "broadcastState"
    * method is called which triggers a publishState.  This event handler is typically
    * used when data or state information in the service has changed, and the UI should
    * update to reflect this changed state.
-   * @param template
    */
   public void onState(Service template) {
     SwingUtilities.invokeLater(new Runnable() {

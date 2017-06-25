@@ -81,11 +81,11 @@ public class FileIO {
 	/**
 	 * compares two files - throws if they are not identical, good to use in
 	 * testing
-	 * 
-	 * @param filename1
-	 * @param filename2
-	 * @throws FileComparisonException
-	 * @throws IOException
+	 * @param filename1 f
+	 * @param filename2 f
+	 * @return true/false
+	 * @throws FileComparisonException e 
+	 * @throws IOException e
 	 */
 	static public final boolean compareFiles(String filename1, String filename2)
 			throws FileComparisonException, IOException {
@@ -110,10 +110,10 @@ public class FileIO {
 
 	/**
 	 * a simple copy method which works like a 'regular' operating system copy
+	 * @param src s
+	 * @param dst d
+	 * @throws IOException e 
 	 * 
-	 * @param src
-	 * @param dst
-	 * @throws IOException
 	 */
 	// TODO - test dst exists or not
 	// TODO - test slashes on end of dirs
@@ -144,10 +144,9 @@ public class FileIO {
 
 	/**
 	 * copy file or folder from one place to another with string interface
-	 * 
-	 * @param src
-	 * @param dst
-	 * @throws IOException
+	 * @param src s
+	 * @param dst d
+	 * @throws IOException e 
 	 */
 	static public final void copy(String src, String dst) throws IOException {
 		copy(new File(src), new File(dst));
@@ -185,8 +184,9 @@ public class FileIO {
 	 *            - the folder or file to extract from the root
 	 * @param dst
 	 *            - target location
-	 * @return
-	 * @throws IOException
+	 * @param overwrite o
+	 * @return true/false
+	 * @throws IOException e 
 	 */
 	static public final boolean extract(String root, String src, String dst, boolean overwrite) throws IOException {
 		log.info("extract([{}], [{}], [{}])", root, src, dst);
@@ -341,11 +341,9 @@ public class FileIO {
 	 * copies a resource file or directory from the myrobotlab.jar and extracts
 	 * it onto the file system at a destination supplied. This method works
 	 * during dev, build, and runtime
-	 * 
-	 * @param src
-	 * @param dst
-	 * @return
-	 * @throws IOException
+	 * @param src s
+	 * @param dst d
+	 * @throws IOException e 
 	 */
 	static public final void extractResource(String src, String dst) throws IOException {
 		extractResource(src, dst, true);
@@ -357,8 +355,7 @@ public class FileIO {
 	 * 
 	 * this process is important to the webgui, as it accesses the AngularJS
 	 * files from the file system and not within the jar
-	 * 
-	 * @return
+	 * @return true/false
 	 */
 	static public final boolean extractResources() {
 		try {
@@ -372,10 +369,9 @@ public class FileIO {
 	/**
 	 * same as extractResources except with an ability to force overwriting an
 	 * already existing directory
-	 * 
-	 * @param overwrite
-	 * @return
-	 * @throws IOException
+	 * @param overwrite true/false
+	 * @return true/false
+	 * @throws IOException e 
 	 */
 	static public final boolean extractResources(boolean overwrite) throws IOException {
 		String resourceName = "resource";
@@ -396,8 +392,7 @@ public class FileIO {
 
 	/**
 	 * get configuration directory
-	 * 
-	 * @return
+	 * @return string
 	 */
 	static public final String getCfgDir() {
 		try {
@@ -448,8 +443,7 @@ public class FileIO {
 	 * including-package
 	 * https://community.oracle.com/blogs/kohsuke/2007/04/25/how-convert-
 	 * javaneturl-javaiofile
-	 * 
-	 * @return
+	 * @return string
 	 */
 	static public final String getRoot() {
 		try {
@@ -573,10 +567,9 @@ public class FileIO {
 
 	/**
 	 * list the contents of 'self' at directory 'src'
-	 * 
-	 * @param src
-	 * @return
-	 * @throws IOException
+	 * @param src s
+	 * @return list of urls
+	 * @throws IOException e 
 	 */
 	static public final List<URL> listContents(String src) throws IOException {
 		return listContents(getRoot(), src, true, null, null);
@@ -589,15 +582,13 @@ public class FileIO {
 	/**
 	 * list the contents of a file system directory or list the contents of a
 	 * jar file directory
-	 * 
-	 * 
-	 * @param root
-	 * @param src
-	 * @param recurse
-	 * @param include
-	 * @param exclude
-	 * @return
-	 * @throws IOException
+	 * @param root r
+	 * @param src s
+	 * @param recurse true/false 
+	 * @param include string array
+	 * @param exclude string array
+	 * @return list of urls
+	 * @throws IOException e
 	 */
 	static public final List<URL> listContents(String root, String src, boolean recurse, String[] include,
 			String[] exclude) throws IOException {
@@ -722,9 +713,9 @@ public class FileIO {
 	 * a file in the next second - it comes from savePartFile - then the writing
 	 * of the file from a different process should be an atomic move regardless
 	 * of file size
-	 * 
-	 * @param filename
-	 * @throws IOException
+	 * @param filename f
+	 * @return byte array
+	 * @throws IOException e 
 	 */
 	static public final byte[] loadPartFile(String filename) throws IOException {
 		return loadPartFile(filename, 1000);
@@ -1011,7 +1002,7 @@ public class FileIO {
 	 * @param src
 	 *            - location - (root is /resource) - e.g. src =
 	 *            Python/examples/someFile.py
-	 * @return
+	 * @return byte array
 	 */
 	static public final byte[] resourceToByteArray(String src) {
 
@@ -1054,7 +1045,7 @@ public class FileIO {
 	 * @param src
 	 *            - location - (root is /resource) - e.g. src =
 	 *            Python/examples/someFile.py
-	 * @return
+	 * @return string
 	 */
 	static public final String resourceToString(String src) {
 		byte[] bytes = resourceToByteArray(src);
@@ -1066,9 +1057,8 @@ public class FileIO {
 
 	/**
 	 * removes a file or recursively removes directory
-	 * 
-	 * @param file
-	 * @return
+	 * @param file f
+	 * @return true/false
 	 */
 	static public final boolean rm(File file) {
 		if (file.isDirectory())
@@ -1081,9 +1071,8 @@ public class FileIO {
 
 	/**
 	 * removes a file or recursively removes directory
-	 * 
-	 * @param filename
-	 * @return
+	 * @param filename f
+	 * @return true/false
 	 */
 	static public final boolean rm(String filename) {
 		return rm(new File(filename));
@@ -1096,7 +1085,7 @@ public class FileIO {
 	 *            - the directory to remove
 	 * @param exclude
 	 *            - the exceptions to save
-	 * @return
+	 * @return true/false
 	 */
 	static public final boolean rmDir(File directory, Set<File> exclude) {
 		if (directory.exists()) {
@@ -1122,11 +1111,10 @@ public class FileIO {
 	}
 
 	/**
-	 * for intra-process file writing & locking ..
-	 * 
-	 * @param filename
-	 * @param data
-	 * @throws IOException
+	 * for intra-process file writing &amp; locking ..
+	 * @param file f 
+	 * @param data d
+	 * @throws IOException e 
 	 */
 	static public final void savePartFile(File file, byte[] data) throws IOException {
 		// first delete any part or filename file currently there
@@ -1161,7 +1149,7 @@ public class FileIO {
 	 * @param file
 	 *            - file to read
 	 * @return byte array of contents
-	 * @throws IOException
+	 * @throws IOException e
 	 */
 	static public final byte[] toByteArray(File file) throws IOException {
 
@@ -1177,10 +1165,8 @@ public class FileIO {
 	}
 
 	/**
-	 * IntputStream to byte array
-	 * 
-	 * @param is
-	 * @return
+	 * @param is IntputStream to byte array 
+	 * @return byte array
 	 */
 	static public final byte[] toByteArray(InputStream is) {
 
@@ -1222,7 +1208,7 @@ public class FileIO {
 	 *            - new file name
 	 * @param data
 	 *            - string data to save
-	 * @throws IOException
+	 * @throws IOException e
 	 */
 	static public final void toFile(String filename, String data) throws IOException {
 		toFile(new File(filename), data.getBytes());

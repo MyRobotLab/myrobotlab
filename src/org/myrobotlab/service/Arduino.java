@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.BoardInfo;
@@ -28,22 +27,18 @@ import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.i2c.I2CBus;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.motor.MotorConfig;
-import org.myrobotlab.motor.MotorConfigDualPwm;
-import org.myrobotlab.motor.MotorConfigPulse;
-import org.myrobotlab.motor.MotorConfigSimpleH;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
-import org.myrobotlab.service.interfaces.DeviceControl;
-import org.myrobotlab.service.interfaces.DeviceController;
 import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -69,7 +64,7 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 
 public class Arduino extends Service implements Microcontroller, PinArrayControl, I2CBusController, I2CController,
 		SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController,
-		DeviceController, PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher {
+		PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -136,11 +131,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
-	 * degreeToMicroseconds - convert a value to send to servo from degree
+	 * @param degree degrees
+	 * @return degreeToMicroseconds - convert a value to send to servo from degree
 	 * (0-180) to microseconds (544-2400)
 	 * 
-	 * @param degree
-	 * @return
 	 */
 	public Integer degreeToMicroseconds(double degree) {
 		// if (degree >= 544) return (int)degree; - G-> I don't think
@@ -323,7 +317,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 	}
 
-	/**
+	/*
 	 * String interface - this allows you to easily use url api requests like
 	 * /attach/nameOfListener/3
 	 */
@@ -331,7 +325,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		attach((PinListener) Runtime.getService(listener), address);
 	}
 
-	synchronized private Integer attachDevice(DeviceControl device, Object[] attachConfig) {
+	synchronized private Integer attachDevice(Attachable device, Object[] attachConfig) {
 		DeviceMapping map = new DeviceMapping(device, attachConfig);
 		map.setId(nextDeviceId);
 		deviceList.put(device.getName(), map);
@@ -430,11 +424,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
-	 * default params to connect to Arduino & MrlComm.ino
+	 * default params to connect to Arduino &amp; MrlComm.ino
 	 *
-	 * @param port
-	 * @return
-	 * @throws IOException
 	 */
 	@Override
 	public void connect(String port, int rate, int databits, int stopbits, int parity) {
@@ -506,10 +497,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	/**
 	 * This creates the pin definitions based on boardType Not sure how many pin
 	 * definition sets there are. Currently there are only 2 supported -
-	 * Mega-Like 70 pins & Uno-Like 20 pins (14 digital 6 analog) FIXME - sync
+	 * Mega-Like 70 pins &amp; Uno-Like 20 pins (14 digital 6 analog) FIXME - sync
 	 * with VirtualArduino FIXME - String boardType
-	 * 
-	 * @return
 	 */
 	@Override
 	public List<PinDefinition> getPinList() {
@@ -520,7 +509,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// if no change - just return the values
 		if ((pinIndex != null && board.contains("mega") && pinIndex.size() == 70)
 				|| (pinIndex != null && !board.contains("mega") && pinIndex.size() == 20)) {
-			return pinIndex.entrySet().stream().map(x -> x.getValue()).collect(Collectors.toList());
+		  return new ArrayList<PinDefinition>(pinIndex.values());
 		}
 
 		// create 2 indexes for fast retrieval
@@ -597,9 +586,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		msg.customMsg(params);
 	}
 
-	@Override
+	// @Override
 	// > deviceDetach/deviceId
-	public void detach(DeviceControl device) {
+	public void detach(Attachable device) {
 		// TODO check / detach - must be careful of infinit loop
 		// if (device.isAttached()){
 		//
@@ -613,11 +602,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 	}
 
-	/**
+	/*
 	 * silly Arduino implementation - but keeping it since its familiar
 	 * 
-	 * @param address
-	 * @param value
 	 */
 	// > digitalWrite/pin/value
 	public void digitalWrite(int pin, int value) {
@@ -695,8 +682,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	/**
 	 * start polling reads of selected pin
 	 *
-	 * @param pin
-	 * @throws Exception
 	 */
 	// > enablePin/address/type/b16 rate
 	public void enablePin(Integer address, Integer rate) {
@@ -729,16 +714,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return board;
 	}
 
-	@Override
+	// @Override
+	/*
 	public DeviceController getController() {
 		return this;
 	}
+	*/
 
-	public DeviceControl getDevice(Integer deviceId) {
+	public Attachable getDevice(Integer deviceId) {
 		return deviceIndex.get(deviceId).getDevice();
 	}
 
-	Integer getDeviceId(DeviceControl device) {
+	Integer getDeviceId(NameProvider device) {
 		return getDeviceId(device.getName());
 	}
 
@@ -759,11 +746,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return getDevice(deviceId).getName();
 	}
 
-	/**
+	/*
 	 * int type to describe the pin defintion to Pin.h 0 digital 1 analog
 	 * 
-	 * @param pin
-	 * @return
 	 */
 	public Integer getMrlPinType(PinDefinition pin) {
 		if (board == null) {
@@ -782,11 +767,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return serial.getPortName();
 	}
 
-	/**
+	/*
 	 * Use the serial service for serial activities ! No reason to replicate
 	 * methods
-	 *
-	 * @return
 	 */
 	public Serial getSerial() {
 		return serial;
@@ -996,42 +979,26 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	@Override
 	public void motorMove(MotorControl mc) {
 
-		MotorConfig c = mc.getConfig();
-
-		if (c == null) {
-			error("motor config not set");
-			return;
-		}
-
-		Class<?> type = mc.getConfig().getClass();
+		Class<?> type = mc.getClass();
 
 		double powerOutput = mc.getPowerOutput();
 
-		if (MotorConfigSimpleH.class == type) {
-			MotorConfigSimpleH config = (MotorConfigSimpleH) c;
+		if (Motor.class == type) {
+			Motor config = (Motor) mc;
 			msg.digitalWrite(config.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
 			msg.analogWrite(config.getPwrPin(), (int) Math.abs(powerOutput));
-		} else if (MotorConfigDualPwm.class == type) {
-			MotorConfigDualPwm config = (MotorConfigDualPwm) c;
+		} else if (MotorDualPwm.class == type) {
+			MotorDualPwm config = (MotorDualPwm) mc;
 			if (powerOutput < 0) {
-				msg.analogWrite(config.getLeftPin(), 0);
-				msg.analogWrite(config.getRightPin(), (int) Math.abs(powerOutput));
+				msg.analogWrite(config.getLeftPwmPin(), 0);
+				msg.analogWrite(config.getRightPwmPin(), (int) Math.abs(powerOutput));
 			} else if (powerOutput > 0) {
-				msg.analogWrite(config.getRightPin(), 0);
-				msg.analogWrite(config.getLeftPin(), (int) Math.abs(powerOutput));
+				msg.analogWrite(config.getRightPwmPin(), 0);
+				msg.analogWrite(config.getLeftPwmPin(), (int) Math.abs(powerOutput));
 			} else {
-				msg.analogWrite(config.getLeftPin(), 0);
-				msg.analogWrite(config.getRightPin(), 0);
-			}
-		} else if (MotorPulse.class == type) {
-			MotorPulse motor = (MotorPulse) mc;
-			// sdsendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT),
-			// 0);
-			// TODO implement with a -1 for "endless" pulses or a different
-			// command parameter :P
-			// sendMsg(new
-			// MrlMsg(PULSE).append(motor.getPulsePin()).append((int)
-			// Math.abs(powerOutput)));
+				msg.analogWrite(config.getLeftPwmPin(), 0);
+				msg.analogWrite(config.getRightPwmPin(), 0);
+			}		
 		} else {
 			error("motorMove for motor type %s not supported", type);
 		}
@@ -1053,8 +1020,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// if pulser (with or without fake encoder
 		// send a series of pulses !
 		// with current direction
-		if (MotorPulse.class == type) {
-			MotorPulse motor = (MotorPulse) mc;
+		if (Motor.class == type) {
+			Motor motor = (Motor) mc;
 			// check motor direction
 			// send motor direction
 			// TODO powerLevel = 100 * powerlevel
@@ -1085,25 +1052,16 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 	@Override
 	public void motorStop(MotorControl mc) {
-		MotorConfig c = mc.getConfig();
+		
+		Class<?> type = mc.getClass();
 
-		if (c == null) {
-			error("motor config not set");
-			return;
-		}
-
-		Class<?> type = mc.getConfig().getClass();
-
-		if (MotorConfigPulse.class == type) {
-			MotorConfigPulse config = (MotorConfigPulse) mc.getConfig();
-			// sendMsg(new MrlMsg(PULSE_STOP).append(config.getPulsePin()));
-		} else if (MotorConfigSimpleH.class == type) {
-			MotorConfigSimpleH config = (MotorConfigSimpleH) mc.getConfig();
+		if (Motor.class == type) {
+			Motor config = (Motor) mc;
 			msg.analogWrite(config.getPwrPin(), 0);
-		} else if (MotorConfigDualPwm.class == type) {
-			MotorConfigDualPwm config = (MotorConfigDualPwm) mc.getConfig();
-			msg.analogWrite(config.getLeftPin(), 0);
-			msg.analogWrite(config.getRightPin(), 0);
+		} else if (MotorDualPwm.class == type) {
+			MotorDualPwm config = (MotorDualPwm) mc;
+			msg.analogWrite(config.getLeftPwmPin(), 0);
+			msg.analogWrite(config.getRightPwmPin(), 0);
 		}
 	}
 
@@ -1277,14 +1235,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		}
 	}
 
-	/**
+	/*
 	 * With Arduino we want to be able to do pinMode("D7", "INPUT"), but it
 	 * should not be part of the PinArrayControl interface - because when it
 	 * comes down to it .. a pin MUST ALWAYS have an address regardless what you
 	 * label or name it...
 	 * 
-	 * @param pinName
-	 * @param mode
 	 */
 	public void pinMode(String pinName, String mode) {
 		if (mode != null && mode.equalsIgnoreCase("INPUT")) {
@@ -1298,10 +1254,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return pinMap.get(pinName).getAddress();
 	}
 
-	/**
-	 * 
-	 * @param function
-	 */
 	// < publishAck/function
 	public void publishAck(Integer function/* byte */) {
 		log.debug("Message Ack received: =={}==", Msg.methodToString(function));
@@ -1312,7 +1264,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		heartbeat = true;
 	}
 
-	/**
+	/*
 	 * No longer needed .. Arduino service controls device list - MrlComm does
 	 * not public String publishAttachedDevice(int deviceId, String deviceName)
 	 * {
@@ -1414,11 +1366,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		heartbeat = true;
 	}
 
-	/**
-	 * 
-	 * @param deviceId
-	 * @param data
-	 */
 	// < publishI2cData/deviceId/[] data
 	public void publishI2cData(Integer deviceId, int[] data) {
 		log.info("publishI2cData");
@@ -1484,11 +1431,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return pinData;
 	}
 
-	/**
+	/*
 	 * method to communicate changes in pinmode or state changes
 	 * 
-	 * @param pinDef
-	 * @return
 	 */
 	public PinDefinition publishPinDefinition(PinDefinition pinDef) {
 		return pinDef;
@@ -1550,7 +1495,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	/**
-	 * resets both MrlComm-land & Java-land
+	 * resets both MrlComm-land &amp; Java-land
 	 */
 	public void reset() {
 		log.info("reset - resetting all devices");
@@ -1560,9 +1505,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
 		for (String name : deviceList.keySet()) {
 			DeviceMapping dmap = deviceList.get(name);
-			DeviceControl device = dmap.getDevice();
+			Attachable device = dmap.getDevice();
 			log.info("unsetting device {}", name);
-			device.detach(name);
+			try {
+			  device.detach(name);
+			} catch(Exception e){
+			  log.error("detaching threw", e);
+			}
 		}
 
 		// reset Java-land
@@ -1578,14 +1527,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	}
 
 	@Override
-	public void attach(ServoControl servo) throws Exception {
-		if (isAttached(servo)) {
+	public void attachServoControl(ServoControl servo) throws Exception {
+		if (isAttachedServoControl(servo)) {
 			log.info("servo {} already attached", servo.getName());
 			return;
 		}
 		// query configuration out
 		int pin = servo.getPin();
-		// targetOutput is ALWAYS ALWAYS degreeees
+		// targetOutput is ALWAYS ALWAYS degrees
 		double targetOutput = servo.getTargetOutput();
 		double velocity = servo.getVelocity();
 
@@ -1602,17 +1551,17 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		// the callback - servo better have a check
 		// isAttached(ServoControl) to prevent infinite loop
 		// servo.attach(this, pin, targetOutput, velocity);
-		servo.attach(this);
+		servo.attachServoController(this);
 	}
 
-	public boolean isAttached(DeviceControl device) {
+	public boolean isAttachedServoControl(Attachable device) {
 		return deviceList.containsKey(device.getName());
 	}
 
 	@Override
 	public void attach(ServoControl servo, int pin) throws Exception {
 		servo.setPin(pin);
-		attach(servo);
+		attachServoControl(servo);
 	}
 
 	/**
@@ -1717,14 +1666,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		setBoard(BOARD_TYPE_MEGA_ADK);
 	}
 
-	/**
+	/*
 	 * DeviceControl methods. In this case they represents the I2CBusControl Not
 	 * sure if this is good to use the Arduino as an I2CBusControl Exploring
 	 * different alternatives. I may have to rethink. Alternate solutions are
 	 * welcome. /Mats.
 	 */
 
-	/**
+	/*
 	 * Debounce ensures that only a single signal will be acted upon for a
 	 * single opening or closing of a contact. the delay is the min number of pc
 	 * cycles must occur before a reading is taken
@@ -1733,7 +1682,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	 *
 	 * TODO - implement on MrlComm side ...
 	 * 
-	 * @param delay
 	 */
 	// > setDebounce/pin/delay
 	public void setDebounce(int pin, int delay) {
@@ -1745,11 +1693,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		msg.setDebug(b);
 	}
 
-	/**
+	/*
 	 * dynamically change the serial rate TODO - shouldn't this change Arduino
 	 * service serial rate too to match?
 	 * 
-	 * @param rate
 	 */
 	// > setSerialRate/b32 rate
 	public void setSerialRate(int rate) {
@@ -1761,7 +1708,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		broadcastState();
 	}
 
-	/**
+	/*
 	 * set a pin trigger where a value will be sampled and an event will be
 	 * signal when the pin turns into a different state.
 	 * 
@@ -1838,7 +1785,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 	public void attach(UltrasonicSensorControl sensor, Integer triggerPin, Integer echoPin) throws Exception {
 		// refer to
 		// http://myrobotlab.org/content/control-controller-manifesto
-		if (isAttached(sensor)) {
+		if (isAttachedServoControl(sensor)) {
 			log.info("{} already attached", sensor.getName());
 			return;
 		}
@@ -1943,14 +1890,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		pinDef.setValue(value);
 	}
 
-	public int getDeviceCount() {
+	public int getAttachedCount() {
 		return deviceList.size();
 	}
 
-	@Override
-	public Set<String> getDeviceNames() {
-		return deviceList.keySet();
-	}
 
 	@Override
 	public void detach(String controllerName) {
@@ -2124,11 +2067,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 		return boardTypes;
 	}
 
-	/**
+	/*
 	 * event to return list of ports of all ports this serial service can see
-	 * 
-	 * @param portNames
-	 * @return
 	 */
 	public List<String> publishPortNames(List<String> portNames) {
 		return portNames;
@@ -2168,5 +2108,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			log.error("main threw", e);
 		}
 	}
+	
+  @Override
+  public void connect(String port, int rate) throws Exception {
+     connect(port, rate, 8, 1, 0);
+  }
 
 }

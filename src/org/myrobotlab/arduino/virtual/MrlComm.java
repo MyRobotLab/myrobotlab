@@ -267,8 +267,10 @@ public class MrlComm {
   }
 
   /**
-   * getDevice - this method will look up a device by it's id in the device
-   * list. it returns null if the device isn't found.
+   * Get a device given it's id.
+   * 
+   * @param id - the device id to fetch.  (I think this is the internal device id as it is the index into the mrl device list.
+   * @return - a device
    */
   public Device getDevice(int id) {
     // ListNode<Device>node = deviceList.getRoot();
@@ -488,6 +490,7 @@ public class MrlComm {
   /**
    * deviceDetach - get the device if it exists delete it and remove it from the
    * deviceList
+   * @param deviceId int for the device id
    */
   // > deviceDetach/deviceId
   public void deviceDetach(Integer deviceId) {

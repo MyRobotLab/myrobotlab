@@ -20,7 +20,7 @@ public class MotorTest {
 
 	public final static Logger log = LoggerFactory.getLogger(MotorTest.class);
 
-	static Motor motor01 = null;
+	static MotorDualPwm motor01 = null;
 	static Arduino arduino = null;
 
 	@BeforeClass
@@ -93,9 +93,9 @@ public class MotorTest {
 	public void testMove() throws Exception {
 		Runtime.start("webgui", "WebGui");
 		arduino = (Arduino)Runtime.start("arduino", "Arduino");
-		motor01 = (Motor)Runtime.start("motor01", "Motor");
+		motor01 = (MotorDualPwm)Runtime.start("motor01", "MotorDualPwm");
 		motor01.setPwmPins(3, 4);
-		motor01.attach(arduino);
+		motor01.attachMotorController(arduino);
 		
 		arduino.connect("COM5"); 
 
@@ -114,7 +114,7 @@ public class MotorTest {
 		motor01.save();
 		motor01.load();
 		
-		motor01.detach(arduino);
+		motor01.detachMotorController(arduino);
 	}
 
 	@Test

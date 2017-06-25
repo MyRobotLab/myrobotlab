@@ -46,14 +46,14 @@ public class DefaultKinematic extends KinematicModel {
   }
 
   /**
-   * Gets rotational velocity in radians per second
+   * @return Gets rotational velocity in radians per second
    */
   public final double getRotationalVelocity() {
     return rotationalVelocity;
   }
 
   /**
-   * Gets translational velocity in meter per second.
+   * @return Gets translational velocity in meter per second.
    */
   public final double getTranslationalVelocity() {
     return translationalVelocity;
@@ -67,14 +67,14 @@ public class DefaultKinematic extends KinematicModel {
   }
 
   /**
-   * Sets rotational velocity in radians per second.
+   * @param rv Sets rotational velocity in radians per second.
    */
   public final void setRotationalVelocity(double rv) {
     rotationalVelocity = rv;
   }
 
   /**
-   * Sets translational velocity in meter per second.
+   * @param tv Sets translational velocity in meter per second.
    */
   public final void setTranslationalVelocity(double tv) {
     translationalVelocity = tv;

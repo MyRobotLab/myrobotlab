@@ -1,6 +1,6 @@
 package org.myrobotlab.codec.serial;
 
-import org.myrobotlab.service.interfaces.LoggingSink;
+import org.myrobotlab.framework.interfaces.LoggingSink;
 
 public class AsciiCodec extends Codec {
 

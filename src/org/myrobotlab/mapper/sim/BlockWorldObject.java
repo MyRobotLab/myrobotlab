@@ -32,7 +32,7 @@ import javax.vecmath.Color3f;
  */
 public class BlockWorldObject extends StaticObject {
 
-  /** Rotates the object counter clockwise. */
+  /* Rotates the object counter clockwise. */
   public void rotate90(int ntimes) {
     this.rotateY(ntimes * Math.PI / 2.0);
   }

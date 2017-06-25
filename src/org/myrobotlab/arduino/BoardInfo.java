@@ -1,17 +1,7 @@
 package org.myrobotlab.arduino;
 
-import java.io.ByteArrayInputStream;
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Arduino;
 import org.slf4j.Logger;
 
 /**

@@ -16,6 +16,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Appender;
@@ -23,7 +24,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -146,10 +146,10 @@ public class Incubator extends Service {
   }
 
   /**
-   * install all service
+   * install all services
+   * @throws ParseException e
+   * @throws IOException e
    * 
-   * @throws IOException
-   * @throws ParseException
    */
   public void installAll() throws ParseException, IOException {
     // Runtime.getInstance();

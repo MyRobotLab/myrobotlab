@@ -21,11 +21,11 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 //FYI - isShowing is a element on the ui - but you probably need to replicated this for json
@@ -152,7 +152,7 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 	}
 
 	/**
-	 * important relay to keep JTabbedPane & TabControl working together
+	 * important relay to keep JTabbedPane &amp; TabControl working together
 	 * 
 	 * @param e
 	 */

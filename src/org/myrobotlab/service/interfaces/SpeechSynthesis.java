@@ -3,6 +3,7 @@ package org.myrobotlab.service.interfaces;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
@@ -25,9 +26,7 @@ public interface SpeechSynthesis extends NameProvider {
   public abstract String getLanguage();
 
   /**
-   * returns a list of current possible languages
-   * 
-   * @return
+   * @return a list of current possible languages
    */
   public abstract List<String> getLanguages();
 
@@ -37,6 +36,7 @@ public interface SpeechSynthesis extends NameProvider {
    * @param toSpeak
    *          - the string of text to speak.
    * @return TODO
+   * @throws Exception e
    */
   public abstract AudioData speak(String toSpeak) throws Exception;
 
@@ -45,7 +45,8 @@ public interface SpeechSynthesis extends NameProvider {
    * 
    * @param toSpeak
    *          - the string of text to speak.
-   * @return
+   * @throws Exception e
+   * @return true/false
    */
   public abstract boolean speakBlocking(String toSpeak) throws Exception;
 
@@ -62,25 +63,17 @@ public interface SpeechSynthesis extends NameProvider {
 
   /**
    * start callback for speech synth. (Invoked when speaking starts)
-   * 
-   * @param utterance
-   * @return
+   * @param utterance text
+   * @return the same text
    */
-  public default String publishStartSpeaking(String utterance){
-    log.info("publishStartSpeaking - {}", utterance);
-    return utterance;
-  }
+  public String publishStartSpeaking(String utterance);
 
   /**
    * stop callback for speech synth. (Invoked when speaking stops.)
-   * 
-   * @param utterance
-   * @return
+   * @param utterance text
+   * @return text
    */
-  public default String publishEndSpeaking(String utterance){
-    log.info("publishEndSpeaking - {}", utterance);
-    return utterance;
-  }
+  public String publishEndSpeaking(String utterance);
 
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException;
 

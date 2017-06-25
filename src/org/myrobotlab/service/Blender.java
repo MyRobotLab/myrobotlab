@@ -9,11 +9,11 @@ import java.net.Socket;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
@@ -108,11 +108,10 @@ public class Blender extends Service {
     super(n);
   }
 
-  /**
+  /*
    * important "attach" method for Blender - this way MRL World notifies Blender
    * to dynamically create "virtual" counterpart for device.
    * 
-   * @param service
    */
   public synchronized void attach(Arduino service) {
     // let Blender know we are going
@@ -175,12 +174,9 @@ public class Blender extends Service {
   }
 
   // call back from blender
-  /**
+  /*
    * call back from Blender when python script does an attach to a virtual
    * device - returns name of the service attached
-   * 
-   * @param name
-   * @return
    */
   public synchronized String onAttach(String name) {
     try {

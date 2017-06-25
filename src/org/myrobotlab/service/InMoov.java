@@ -11,6 +11,7 @@ import java.util.TimerTask;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.jme3.InMoov3DApp;
 import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.GravityCenter;
@@ -22,7 +23,6 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.Servo.IKData;
 import org.myrobotlab.service.data.Pin;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
@@ -100,17 +100,19 @@ public class InMoov extends Service {
   transient public static Tracking eyesTracking;
   transient public static Tracking headTracking;
   transient public static OpenCV opencv;
+  transient public static OpenNi openni;
   transient public MouthControl mouthControl;
   transient public Python python;
 
   transient public final static String LEFT = "left";
   transient public final static String RIGHT = "right";
 
-  transient public OpenNi openni;
-
   transient public Pid pid;
 
   boolean copyGesture = false;
+  public double openNiShouldersOffset = -50.0;
+  public boolean openNiLeftShoulderInverted = true;
+  public boolean openNiRightShoulderInverted = true;
   boolean firstSkeleton = true;
   boolean saveSkeletonFrame = false;
 
@@ -162,12 +164,28 @@ public class InMoov extends Service {
 	   return false;
    }
    
+   public static boolean RobotIsOpenNiCapturing() {
+	   if (openni!=null)
+	   {
+		if (openni.capturing)
+		{
+			return true;
+		}
+	   }
+	   return false;
+   }
+   
   public static boolean RobotCanMoveHeadRandom = true;
   public static boolean RobotCanMoveEyesRandom = true;
+  public static boolean RobotCanMoveBodyRandom = true;
+  public static boolean RobotCanMoveRandom = true;
   public static boolean RobotIsSleeping = false;
   public static boolean RobotIsStarted = false;
   private transient Timer DisableTimerRobotCanMoveHeadRandom;
   private transient Timer DisableTimerRobotCanMoveEyesRandom;
+  private transient Timer DisableTimerRobotCanMoveBodyRandom;
+  private transient Timer DisableTimerRobotCanMoveRandom;
+
   
   // END TODO InMoovLife service
   
@@ -495,8 +513,9 @@ public class InMoov extends Service {
   
   public void halfSpeed() {
     if (head != null) {
-      head.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
+      head.setVelocity(25.0, 25.0, 25.0, 25.0, 25.0, 25.0);
     }
+    
     if (rightHand != null) {
       rightHand.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
     }
@@ -504,13 +523,13 @@ public class InMoov extends Service {
       leftHand.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
     }
     if (rightArm != null) {
-      rightArm.setVelocity(30.0, 30.0, 30.0, 30.0);
+      rightArm.setVelocity(25.0, 25.0, 25.0, 25.0);
     }
     if (leftArm != null) {
-      leftArm.setVelocity(30.0, 30.0, 30.0, 30.0);
+      leftArm.setVelocity(25.0, 25.0, 25.0, 25.0);
     }
     if (torso != null) {
-      torso.setVelocity(30.0, 30.0, 30.0);
+      torso.setVelocity(20.0, 20.0, 20.0);
     }
     if (eyelids != null) {
       eyelids.setVelocity(30.0, 30.0);
@@ -533,8 +552,7 @@ public class InMoov extends Service {
 
   /**
    * finds most recent activity
-   * 
-   * @return
+   * @return the timestamp of the last activity time.
    */
   public long getLastActivityTime() {
 
@@ -733,6 +751,8 @@ public class InMoov extends Service {
 
   public void onOpenNIData(OpenNiData data) {
 
+    if (data!=null)
+    {
     Skeleton skeleton = data.skeleton;
 
     if (firstSkeleton) {
@@ -741,22 +761,50 @@ public class InMoov extends Service {
     }
 
     if (copyGesture) {
-      if (leftArm != null) {
-        leftArm.bicep.moveTo(Math.round(skeleton.leftElbow.getAngleXY()));
-        leftArm.omoplate.moveTo(Math.round(skeleton.leftShoulder.getAngleXY()));
-        leftArm.shoulder.moveTo(Math.round(skeleton.leftShoulder.getAngleYZ()));
-      }
-      if (rightArm != null) {
-        rightArm.bicep.moveTo(Math.round(skeleton.rightElbow.getAngleXY()));
-        rightArm.omoplate.moveTo(Math.round(skeleton.rightShoulder.getAngleXY()));
-        rightArm.shoulder.moveTo(Math.round(skeleton.rightShoulder.getAngleYZ()));
+   
+        if (leftArm != null) {
+         
+          if (!Double.isNaN(skeleton.leftElbow.getAngleXY())){
+            if (skeleton.leftElbow.getAngleXY()>=0){
+            leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
+            } 
+          }
+          if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())){
+            if (skeleton.leftShoulder.getAngleXY()>=0){
+            leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
+            } 
+          }
+          if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())){
+            if (skeleton.leftShoulder.getAngleYZ()+openNiShouldersOffset>=0){
+            leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ()-50);
+            } 
+          }
+        }
+        if (rightArm != null) {
+          
+          if (!Double.isNaN(skeleton.rightElbow.getAngleXY())){
+            if (skeleton.rightElbow.getAngleXY()>=0){
+              rightArm.bicep.moveTo(skeleton.rightElbow.getAngleXY());
+            } 
+          }
+          if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())){
+            if (skeleton.rightShoulder.getAngleXY()>=0){
+              rightArm.omoplate.moveTo(skeleton.rightShoulder.getAngleXY());
+            } 
+          }
+          if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())){
+            if (skeleton.rightShoulder.getAngleYZ()+openNiShouldersOffset>=0){
+              rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ()-50);
+            } 
+          }
+        }
+    
       }
     }
 
     // TODO - route data appropriately
     // rgb & depth image to OpenCV
     // servos & depth image to gui (entire InMoov + references to servos)
-
   }
 
   // ---------- movement commands begin ---------
@@ -834,14 +882,13 @@ public class InMoov extends Service {
     super.purgeTasks();
   }
 
-  /**
+  /*
    * Service registration event. On newly registered service the InMoov service
    * will set up various routing.
    * 
    * Routing of errors back to the InMoov service. This will allow the mouth to
    * announce errors
    * 
-   * @param sw
    */
   public void onRegistered(ServiceInterface sw) {
     subscribe(sw.getName(), "publishError");
@@ -1034,8 +1081,10 @@ public class InMoov extends Service {
 
   /*************
    * STARTS BEGIN
+   * @param leftPort com port
+   * @param rightPort  com port
+   * @throws Exception e
    * 
-   * @throws Exception
    ************************/
 
   public void startAll(String leftPort, String rightPort) throws Exception {
@@ -1153,8 +1202,26 @@ public class InMoov extends Service {
     return head;
   }
   
- 
-
+  public void enableAutoDisable(Boolean param) {
+    if (head != null){
+      head.enableAutoDisable(param);
+    }
+    if (rightArm != null){
+      rightArm.enableAutoDisable(param);
+    }
+    if (leftArm != null){
+      leftArm.enableAutoDisable(param);
+    }
+    if (torso != null){
+      torso.enableAutoDisable(param);
+    }
+    if (torso != null){
+      torso.enableAutoDisable(param);
+    }
+    if (eyelids != null) {
+      eyelids.enableAutoDisable(param);
+    }
+  }
 
   // NOTE - BEST Services are one which are reflective on startService
   // like xmpp which exposes a the reflective REST API are startService
@@ -1250,15 +1317,19 @@ public class InMoov extends Service {
       // re-mapping of skeleton !
       openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
       openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
-
-      openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
-      openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
+      if (openNiLeftShoulderInverted){
+        openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
+        }
+      if (openNiRightShoulderInverted){     
+        openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
+        }
 
       // openni.skeleton.leftShoulder
 
       // openni.addListener("publishOpenNIData", this.getName(),
       // "getSkeleton");
       // openni.addOpenNIData(this);
+      subscribe(openni.getName(),"publishOpenNIData");
     }
     return openni;
   }
@@ -1671,11 +1742,65 @@ public class InMoov extends Service {
 		       
 	  }
   
-  public void disableRobotRandom(int seconds) {
-	  disableRobotCanMoveHeadRandom(seconds);
-	  disableRobotCanMoveEyesRandom(seconds);	  
+  public void disableRobotCanMoveBodyRandom(int seconds) {
+	  log.info("Disable RobotCanMoveBodyRandom for "+seconds+" seconds");
+	  RobotCanMoveBodyRandom=false;
+	  if (DisableTimerRobotCanMoveBodyRandom != null) {
+		  DisableTimerRobotCanMoveBodyRandom.cancel();
+		  DisableTimerRobotCanMoveBodyRandom = null;
+	      }
+	  DisableTimerRobotCanMoveBodyRandom = new Timer();
+				
+	  DisableTimerRobotCanMoveBodyRandom.schedule(new TimerTask() {
+	          @Override
+	          public void run() {
+	        	  log.info("Reactivate RobotCanMoveBodyRandom");
+	        	  RobotCanMoveBodyRandom=true;
+	        	  DisableTimerRobotCanMoveBodyRandom.cancel();
+	          }
+	        }, (int) seconds * 1000);
+		       
+	  }
+  
+  public void startedGesture(){
+    startedGesture("unknown");
   }
-
+  
+  public void startedGesture(String nameOfGesture){
+    RobotCanMoveRandom = false;
+    enableAutoDisable(false);
+  }
+  
+  public void finishedGesture(){
+    startedGesture("unknown");    
+  }
+  
+  public void finishedGesture(String nameOfGesture){
+    RobotCanMoveRandom = true;
+    enableAutoDisable(true);
+  }
+  
+  public void disableRobotRandom(int seconds) {
+	  log.info("Disable RobotCanMoveRandom for "+seconds+" seconds");
+	  RobotCanMoveRandom=false;
+	  if (DisableTimerRobotCanMoveRandom != null) {
+		  DisableTimerRobotCanMoveRandom.cancel();
+		  DisableTimerRobotCanMoveRandom = null;
+	      }
+	  DisableTimerRobotCanMoveRandom = new Timer();
+				
+	  DisableTimerRobotCanMoveRandom.schedule(new TimerTask() {
+	          @Override
+	          public void run() {
+	        	  log.info("Reactivate RobotCanMoveRandom");
+	        	  RobotCanMoveRandom=true;
+	        	  DisableTimerRobotCanMoveRandom.cancel();
+	          }
+	        }, (int) seconds * 1000);
+		       
+	  }
+  
+  
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
@@ -1772,7 +1897,7 @@ public class InMoov extends Service {
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
     meta.addDependency("inmoov.fr", "1.0.0");
-    meta.addDependency("org.myrobotlab.inmoov", "0.3.5");
+    meta.addDependency("org.myrobotlab.inmoov", "0.3.9");
 
     // SHARING !!! - modified key / actual name begin ------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");

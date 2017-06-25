@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -22,13 +21,13 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 //import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 // SINGLETON ???  similar to Runtime ???
@@ -123,9 +122,11 @@ public class Security extends Service implements AuthorizationProvider {
 
   /**
    * decrypt a value
-   * 
-   * @throws GeneralSecurityException
-   * @throws IOException
+   * @param message m
+   * @param keyFile k
+   * @return string
+   * @throws GeneralSecurityException e 
+   * @throws IOException e
    */
   public static String decrypt(String message, File keyFile) throws GeneralSecurityException, IOException {
     SecretKeySpec sks = getSecretKeySpec(keyFile);
@@ -138,9 +139,12 @@ public class Security extends Service implements AuthorizationProvider {
   /**
    * encrypt a value and generate a keyfile if the keyfile is not found then a
    * new one is created
+   * @param passphrase p
+   * @param keyFile k
+   * @return string
+   * @throws GeneralSecurityException e 
+   * @throws IOException e
    * 
-   * @throws GeneralSecurityException
-   * @throws IOException
    */
   public static String encrypt(String passphrase, File keyFile) throws GeneralSecurityException, IOException {
     if (!keyFile.exists()) {

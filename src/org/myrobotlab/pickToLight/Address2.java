@@ -16,15 +16,15 @@ package org.myrobotlab.pickToLight;
  * this class.
  * 
  * <pre>
- * &lt;complexType name="AddressType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="controller" use="required" type="{http://www.w3.org/2001/XMLSchema}anySimpleType" />
- *       &lt;attribute name="I2CBus" use="required" type="{http://www.w3.org/2001/XMLSchema}int" />
- *       &lt;attribute name="I2CAddress" use="required" type="{http://www.w3.org/2001/XMLSchema}int" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="AddressType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;attribute name="controller" use="required" type="{http://www.w3.org/2001/XMLSchema}anySimpleType" /&gt;
+ *       &lt;attribute name="I2CBus" use="required" type="{http://www.w3.org/2001/XMLSchema}int" /&gt;
+ *       &lt;attribute name="I2CAddress" use="required" type="{http://www.w3.org/2001/XMLSchema}int" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -46,7 +46,7 @@ public class Address2 {
   }
 
   /**
-   * Gets the value of the i2CAddress property.
+   * @return the value of the i2CAddress property.
    * 
    */
   public int getI2CAddress() {
@@ -54,7 +54,7 @@ public class Address2 {
   }
 
   /**
-   * Gets the value of the i2CBus property.
+   * @return  the value of the i2CBus property.
    * 
    */
   public int getI2CBus() {
@@ -72,7 +72,7 @@ public class Address2 {
     this.controller = value;
   }
 
-  /**
+  /*
    * Sets the value of the i2CAddress property.
    * 
    */
@@ -80,7 +80,7 @@ public class Address2 {
     this.i2CAddress = value;
   }
 
-  /**
+  /*
    * Sets the value of the i2CBus property.
    * 
    */

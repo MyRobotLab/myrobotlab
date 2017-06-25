@@ -86,7 +86,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   // boolean bufferUntil;
   // int bufferUntilByte;
 
-  /**
+  /*
    * Let you check to see if a port is in use by another Rooomba before trying
    * to use it.
    */

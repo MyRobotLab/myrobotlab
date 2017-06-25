@@ -9,11 +9,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.MessageSender;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.MessageSender;
 import org.slf4j.Logger;
 
 /**
@@ -26,12 +28,15 @@ import org.slf4j.Logger;
  * it configures, 'simplifies', and maintains state for the long many parameter (stateless) 
  * ApiProcessor.process method
  * 
- * FIXME - add configuration Map<String, Object> in the factory for any ApiProcessor
+ * FIXME - directory services - list methods/interfaces/data
+ * FIXME - add configuration Map&lt;String, Object &gt; in the factory for any ApiProcessor
+ * FIXME - add directory services for api/ , api/{apiKey} &amp; api/{apiKey}/
+ * FIXME - you don't need a NameProvider - you just need the sender's name ! refactor
  * 
  * @author GroG
  *
  */
-public class ApiFactory /* implements ApiProcessor */ {
+public class ApiFactory implements NameProvider/* implements ApiProcessor */ {
 
   public final static Logger log = LoggerFactory.getLogger(ApiFactory.class);
 
@@ -43,6 +48,8 @@ public class ApiFactory /* implements ApiProcessor */ {
   // FIXME - probably don't want this as static
   static MessageSender sender = null;
 
+  String name;
+
   public Object process(MessageSender sender, OutputStream out, URI uri, byte[] data) throws Exception {
     log.info("{}", uri);
     String[] parts = null;
@@ -52,12 +59,24 @@ public class ApiFactory /* implements ApiProcessor */ {
     }
 
     if (parts == null || parts.length < 3) {
-      // return error in default (SWAGGER) API
-      // return default (SWAGGER API) handle error ? THROW ???
+      // FIXME - return error in default (SWAGGER) API
+      // FIXME - return default (SWAGGER API) handle error ? THROW ???
+      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
+      NameProvider np = (sender == null)?this:sender;
+      Message msg = Message.createMessage(np, "anonymous", "onError", Status.error("api http://{host}:{port}/api/{apiKey} - actual [%s]", uri));
+      if (out != null){
+        codec.encode(out, msg);
+        return null;
+      }
+      return msg;
     }
 
     /**
      * 0 / 1 / 2 ""/"api"/{apiKey}
+     * 
+     * variations :
+     *     /api/messages
+     *  0 / 1 / 2
      * 
      * String apiLitteral = parts[1]; if (!apiLitteral.equals("api")){
      * DEFAULT_API ERROR }
@@ -67,7 +86,7 @@ public class ApiFactory /* implements ApiProcessor */ {
 
     String apiKey = parts[2];
 
-    if (!processors.containsKey(apiKey)) {
+    if (!processors.containsKey(apiKey)) { 
       String className = null;
 
       className = String.format("org.myrobotlab.codec.ApiProcessor%s", apiKey.substring(0, 1).toUpperCase() + apiKey.substring(1));
@@ -127,7 +146,7 @@ public class ApiFactory /* implements ApiProcessor */ {
   }
 
   public Object process(OutputStream out, String uri, byte[] data) throws Exception {
-    // FIXME - manage statics differently
+    // FIXME - manage statics differently - 
     return process(sender, out, new URI(uri), data);
   }
 
@@ -148,7 +167,6 @@ public class ApiFactory /* implements ApiProcessor */ {
       LoggingFactory.init(Level.INFO);
 
       Runtime runtime = (Runtime)Runtime.getInstance();
-      byte[] data = null;
       ApiFactory api = ApiFactory.getInstance(runtime);
       Object o = null;
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -178,40 +196,41 @@ public class ApiFactory /* implements ApiProcessor */ {
       bos.reset();
       o = api.process(bos, "http://localhost:8888/api/messages/servo/");
       log.info("ret - {}", new String(bos.toByteArray()));
+      bos.reset();
       // =============== api messages end =========================
 
       // =============== api services begin =========================
       // FIXME - try both cases in each api
       // FIXME - try encoded json on the param lines
-      o = api.process("mrl://localhost");
-      log.info("ret - {}", o);
+      o = api.process(bos, "mrl://localhost");
+      log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
-      o = api.process("mrl://localhost:8888");
-      log.info("ret - {}", o);
+      o = api.process(bos, "mrl://localhost:8888");
+      log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
-      o = api.process("http://localhost:8888");
-      log.info("ret - {}", o);
+      o = api.process(bos, "http://localhost:8888");
+      log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
-      o = api.process("http://localhost:8888/");
-      log.info("ret - {}", o);
+      o = api.process(bos, "http://localhost:8888/");
+      log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
-      o = api.process("http://localhost:8888/api");
-      log.info("ret - {}", o);
+      o = api.process(bos, "http://localhost:8888/api");
+      log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
-      o = api.process("http://localhost:8888/api/");
-      log.info("ret - {}", o);
+      o = api.process(bos, "http://localhost:8888/api/");
+      log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
-      o = api.process("http://localhost:8888/api/services");
-      log.info("ret - {}", o);
+      o = api.process(bos, "http://localhost:8888/api/services");
+      log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
-      o = api.process("http://localhost:8888/api/services/"); // FIXME - list service names/types
-      log.info("ret - {}", o);
+      o = api.process(bos, "http://localhost:8888/api/services/"); // FIXME - list service names/types
+      log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
-      o = api.process("http://localhost:8888/api/services/runtime/getUptime");
-      log.info("ret - {}", o);
+      o = api.process(bos, "http://localhost:8888/api/services/runtime/getUptime");
+      log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
-      o = api.process("http://localhost:8888/api/services/runtime/getService/runtime");
-      log.info("ret - {}", o);
+      o = api.process(bos, "http://localhost:8888/api/services/runtime/getService/runtime");
+      log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "http://localhost:8888/api/services/runtime/getService/runtime");
       log.info("ret - {}", new String(bos.toByteArray()));
@@ -224,6 +243,10 @@ public class ApiFactory /* implements ApiProcessor */ {
       bos.reset();
       o = api.process(bos, "http://localhost:8888/api/services/servo/");
       log.info("ret - {}", new String(bos.toByteArray()));
+      bos.reset();
+      // o = api.process(bos, "http://localhost:8888/api/services/runtime/noWorky/GroG");
+      // log.info("ret - {}", new String(bos.toByteArray()));
+      // bos.reset();
       // =============== api services end =========================
 
     } catch (Exception e) {
@@ -231,5 +254,12 @@ public class ApiFactory /* implements ApiProcessor */ {
     }
   }
 
- 
+  @Override
+  public String getName() {
+    if (name == null){
+      return "anonymous";
+    }
+    return name;
+  }
+
 }

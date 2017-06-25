@@ -199,8 +199,7 @@ public abstract class Port implements Runnable, SerialControl {
    * "real" serial function stubbed out in the abstract class in case the serial
    * implementation does not actually implement this method e.g. (bluetooth,
    * iostream, tcp/ip)
-   * 
-   * @param state
+   * @param state s
    */
   public void setDTR(boolean state) {
   }
@@ -215,10 +214,10 @@ public abstract class Port implements Runnable, SerialControl {
    * non-active thread class.
    * 
    * needs to be buried in rxtxlib implementation
- * @throws IOException TODO
+   * @param b the byte
+   * @throws Exception TODO
    * 
    */
-
   abstract public void write(int b) throws Exception;
   
   abstract public void write(int[] data) throws Exception;

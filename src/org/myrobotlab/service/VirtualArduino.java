@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.VirtualMsg;
@@ -183,10 +182,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     }
   }
 
-  /**
+  /*
    * easy way to set to get a 54 pin arduino
    *
-   * @return
    */
   public String setBoardMega() {
     return setBoard(Arduino.BOARD_TYPE_MEGA);
@@ -237,7 +235,10 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     return simulator;
   }
 
-  public void attach(Simulator simulator) {
+  /*
+   * TODO - promote to interface
+   */
+  public void attachSimulator(Simulator simulator) {
     this.simulator = simulator;
   }
 
@@ -291,9 +292,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     
     // if no change - just return the values
     if ((pinMap != null && board.contains("mega") && pinMap.size() == 70) || (pinMap != null && pinMap.size() == 20)){
-      return pinMap.entrySet().stream()
-          .map(x -> x.getValue())
-          .collect(Collectors.toList());
+      return new ArrayList<PinDefinition>(pinIndex.values());
     }
     
     // create 2 indexes for fast retrieval
@@ -410,6 +409,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     }
   }
 
-
+  @Override
+  public void connect(String port, int rate) throws Exception {
+    connect(port);
+  }
 
 }

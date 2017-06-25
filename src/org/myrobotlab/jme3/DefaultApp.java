@@ -6,8 +6,6 @@ import java.util.Map;
 import org.myrobotlab.jme3.controller.Jme3Servo;
 import org.myrobotlab.jme3.interfaces.Jme3App;
 import org.myrobotlab.jme3.interfaces.Jme3Object;
-import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.virtual.VirtualServo;
 
 /*
@@ -90,15 +88,6 @@ public class DefaultApp extends SimpleApplication implements Jme3App {
 
     return teaGeo;
     // rootNode.attachChild(player);
-  }
-
-  public Jme3Object create(ServiceInterface service) {
-    if (ServoControl.class.isAssignableFrom(service.getClass())) {
-      return create((ServoControl) service);
-    }
-
-    // error
-    return null;
   }
 
   /*

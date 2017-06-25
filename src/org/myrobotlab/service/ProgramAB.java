@@ -20,12 +20,12 @@ import org.alicebot.ab.Chat;
 import org.alicebot.ab.Predicates;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.OOBPayload;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
@@ -196,11 +196,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * 
    * @param text
    *          - the query string to the bot brain
-   * @param userId
+   * @param username
    *          - the user that is sending the query
-   * @param robotName
+   * @param botName
    *          - the name of the bot you which to get the response from
-   * @return
+   * @return the response for a user from a bot given the input text.
    */
   public Response getResponse(String username, String botName, String text) {
     this.currentBotName = botName;
@@ -273,6 +273,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public String resolveSessionKey(String username, String botname) {
     return username + "-" + botname;
   }
+  
+  public void repetition_count(int val)
+  {
+	org.alicebot.ab.MagicNumbers.repetition_count=val;
+  }
+  
 
   public Chat getChat(String userName, String botName) {
     String sessionKey = resolveSessionKey(userName, botName);
@@ -353,7 +359,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * @param delay
    *          - min amount of time that must have transpired since the last
    *          response.
-   * @return
+   * @return the response
    */
   public Response getResponse(String session, String text, Long delay) {
     ChatData chatData = sessions.get(session);
@@ -377,8 +383,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Return a list of all patterns that the AIML Bot knows to match against.
    * 
-   * @param botName
-   * @return
+   * @param botName the bots name from which to return it's patterns.
+   * @return a list of all patterns loaded into the aiml brain
    */
   public ArrayList<String> listPatterns(String botName) {
     ArrayList<String> patterns = new ArrayList<String>();
@@ -391,8 +397,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Return the number of milliseconds since the last response was given -1 if a
    * response has never been given.
-   * 
-   * @return
+   * @return milliseconds
    */
   public long millisecondsSinceLastResponse() {
     ChatData chatData = sessions.get(resolveSessionKey(currentUserName, currentBotName));
@@ -503,38 +508,30 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
   }
 
-  /**
+  /*
    * If a response comes back that has an OOB Message, publish that separately
-   * 
-   * @param response
-   * @return
    */
   public String publishOOBText(String oobText) {
     return oobText;
   }
 
-  /**
+  /*
    * publishing method of the pub sub pair - with addResponseListener allowing
    * subscriptions pub/sub routines have the following pattern
    * 
-   * publishing routine -> publishX - must be invoked to provide data to
-   * subscribers subscription routine -> addXListener - simply adds a Service
+   * publishing routine -&gt; publishX - must be invoked to provide data to
+   * subscribers subscription routine -&gt; addXListener - simply adds a Service
    * listener to the notify framework any service which subscribes must
-   * implement -> onX(data) - this is where the data will be sent (the
+   * implement -&gt; onX(data) - this is where the data will be sent (the
    * call-back)
    * 
-   * @param response
-   * @return
    */
   public Response publishResponse(Response response) {
     return response;
   }
 
-  /**
+  /*
    * Test only publishing point - for simple consumers
-   * 
-   * @param response
-   * @return
    */
   public String publishResponseText(Response response) {
     return response.msg;
@@ -563,10 +560,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     startSession(path, username, currentBotName);
   }
 
-  /**
+  /*
    * Persist the predicates for all known sessions in the robot.
-   * 
-   * @throws IOException
    * 
    */
   public void savePredicates() throws IOException {

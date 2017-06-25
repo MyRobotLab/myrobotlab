@@ -171,7 +171,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     unsubscribe("publishPosition");
   }
 
-  public void onState(IntegratedMovement im) {
+  public void onState(final IntegratedMovement im) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {

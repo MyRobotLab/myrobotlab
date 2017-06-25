@@ -50,7 +50,8 @@ public class OpenNi extends Service // implements
 // HandTracker.NewFrameListener
 {
 
-  public class Worker extends Thread {
+	public boolean capturing = false;
+	public class Worker extends Thread {
     public boolean isRunning = false;
     public String type = null;
 
@@ -814,6 +815,14 @@ public class OpenNi extends Service // implements
 
   // publishing the big kahuna <output>
   public final OpenNiData publishOpenNIData(OpenNiData data) {
+	if (data!=null)
+		{
+		capturing = true;
+		}
+	else
+		{
+			capturing = false;	
+		}
     return data;
   }
 

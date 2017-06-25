@@ -24,7 +24,7 @@ import org.slf4j.Logger;
  *         Dependencies : Java3D simbad-1.4.jar
  * 
  *         Reference : http://simbad.sourceforge.net/guide.php#robotapi
- *         http://www.ibm.com/developerworks/java/library/j-robots/ - simbad &
+ *         http://www.ibm.com/developerworks/java/library/j-robots/ - simbad &amp;
  *         subsumption JMonkey
  */
 public class SlamBad extends Service {

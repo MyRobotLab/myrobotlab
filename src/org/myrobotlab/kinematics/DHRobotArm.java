@@ -145,10 +145,9 @@ public class DHRobotArm{
   }
 
   /**
-   * Return the x,y,z of the palm. roll,pitc, and yaw are not returned/computed
+   * @param lastDHLink the index of the link that you want the global position at.
+   * @return the x,y,z of the palm. roll,pitc, and yaw are not returned/computed
    * with this function
-   * 
-   * @return
    */
   public Point getPalmPosition(String lastDHLink) {
     // TODO Auto-generated method stub

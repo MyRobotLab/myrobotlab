@@ -190,12 +190,12 @@ public class Eye extends SensorDevice {
     }
   }
 
-  /** for allocating a working copy of the vision image */
+  /* for allocating a working copy of the vision image */
   final public BufferedImage createCompatibleImage() {
     return new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB);
   }
 
-  /** for allocating a SensorMatrix compabtible with device dimensions */
+  /* for allocating a SensorMatrix compabtible with device dimensions */
   final public SensorMatrix createCompatibleSensorMatrix() {
     return new SensorMatrix(imageWidth, imageHeight);
 

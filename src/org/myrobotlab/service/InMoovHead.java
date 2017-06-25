@@ -53,11 +53,9 @@ public class InMoovHead extends Service {
     
   }
 
-  /**
+  /*
    * attach all the servos - this must be re-entrant and accomplish the
    * re-attachment when servos are detached
-   * 
-   * @return
    */
   @Deprecated
   public boolean attach() {

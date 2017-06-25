@@ -3,7 +3,6 @@ package org.myrobotlab.kinematics;
 import java.util.HashMap;
 
 import org.myrobotlab.service.IntegratedMovement;
-import org.python.jline.internal.Log;
 
 /**
  * This class will compute the center of gravity of the links composing a robot
@@ -27,8 +26,8 @@ public class GravityCenter extends Thread {
   
   /**
    * Set the mass and center of mass of a link
-   * @param name
-   * @param mass 
+   * @param name name
+   * @param mass mass
    * @param centerOfMass  (0.0 - 1.0) representing where the center of mass is located, from the origin point. If you don't know, it's safe to put 0.5
    */
   public void setLinkMass(String name, double mass, double centerOfMass) {

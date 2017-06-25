@@ -465,7 +465,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
     proj.set(_tempVec);
   }
 
-  /**
+  /*
    * Enable the depthMap data collection
    * 
    * @param width
@@ -614,6 +614,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
   /**
    * Enable hands
+   * @param cbObject c
+   * @return true/false
    */
   public boolean enableHand(Object cbObject) {
     _handCbObject = cbObject;
@@ -781,6 +783,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
   /**
    * Enable user
+   * @param cbObject c
+   * @return true/false
    */
   public boolean enableUser(Object cbObject) {
     String curPath = ContextWrapper.getcwd();

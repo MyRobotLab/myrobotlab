@@ -3,8 +3,8 @@ package org.myrobotlab.framework;
 import java.io.IOException;
 
 import org.myrobotlab.codec.CodecUri;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 
 public class InvokerUtils {
 

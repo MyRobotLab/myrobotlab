@@ -1,6 +1,5 @@
 package org.myrobotlab.swing.widget;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -13,8 +12,8 @@ import java.util.TreeMap;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
+import org.myrobotlab.framework.interfaces.StateSaver;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.interfaces.StateSaver;
 import org.slf4j.Logger;
 
 /**

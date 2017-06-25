@@ -47,11 +47,9 @@ public class Solr extends Service implements DocumentListener {
 
   public boolean commitOnFlush = true;
 
-  /**
+  /*
    * Static list of third party dependencies for this service. The list will be
    * consumed by Ivy to download and manage the appropriate resources
-   * 
-   * @return
    */
 
   public static void main(String[] args) {
@@ -115,8 +113,7 @@ public class Solr extends Service implements DocumentListener {
 
   /**
    * Add a solr document to the index
-   * 
-   * @param docs
+   * @param docs a collection of solr input docs to add to solr.
    */
   public void addDocuments(Collection<SolrInputDocument> docs) {
     try {
@@ -152,10 +149,8 @@ public class Solr extends Service implements DocumentListener {
   }
 
   /**
-   * The url for the solr instance you wish to query. Defaults to
+   * @return The url for the solr instance you wish to query. Defaults to
    * http://localhost:8983/solr
-   * 
-   * @return
    */
 
   public String getSolrUrl() {
@@ -184,8 +179,8 @@ public class Solr extends Service implements DocumentListener {
   /**
    * Pass in custom solr query parameters and execute that query.
    * 
-   * @param query
-   * @return
+   * @param query the query to execute
+   * @return a query response from solr
    */
   public QueryResponse search(SolrQuery query) {
     QueryResponse resp = null;
@@ -198,22 +193,18 @@ public class Solr extends Service implements DocumentListener {
     return resp;
   }
 
-  /**
+  /*
    * Default query to fetch the top 10 documents that match the query request.
    * 
-   * @param queryString
-   * @return
    */
   public QueryResponse search(String queryString) {
     // default to 10 hits returned.
     return search(queryString, 10, 0);
   }
 
-  /**
+  /*
    * Default query to fetch the top 10 documents that match the query request.
    * 
-   * @param queryString
-   * @return
    */
   public QueryResponse search(String queryString, int rows, int start) {
     SolrQuery query = new SolrQuery();
@@ -238,10 +229,9 @@ public class Solr extends Service implements DocumentListener {
     return resp;
   };
 
-  /**
+  /*
    * Set the url for the solr instance to communicate with.
    * 
-   * @param solrUrl
    */
   public void setSolrUrl(String solrUrl) {
     this.solrUrl = solrUrl;

@@ -12,10 +12,8 @@ import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,6 +44,7 @@ import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.SystemResources;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -57,7 +56,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.RepoInstallListener;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
@@ -66,23 +64,23 @@ import com.sun.management.OperatingSystemMXBean;
 /**
  * Runtime is responsible for the creation and removal of all Services and the
  * associated static registries It maintains state information regarding
- * possible & running local Services It maintains state information regarding
+ * possible &amp; running local Services It maintains state information regarding
  * foreign Runtimes It is a singleton and should be the only service of Runtime
  * running in a process The host and registry maps are used in routing
  * communication to the appropriate service (be it local or remote) It will be
  * the first Service created It also wraps the real JVM Runtime object.
  *
- * TODO - get last args & better restart (with Agent possibly?)
+ * TODO - get last args &amp; better restart (with Agent possibly?)
  *
  * RuntimeMXBean - scares me - but the stackTrace is clever RuntimeMXBean
- * runtimeMxBean = ManagementFactory.getRuntimeMXBean(); List<String> arguments
+ * runtimeMxBean = ManagementFactory.getRuntimeMXBean(); List&lt;String&gt; arguments
  * = runtimeMxBean.getInputArguments()
  *
  * final StackTraceElement[] stackTrace =
  * Thread.currentThread().getStackTrace(); final String mainClassName =
  * stackTrace[stackTrace.length - 1].getClassName();
  *
- * TODO - add check for 64 bit OS & 32 bit JVM :(
+ * TODO - add check for 64 bit OS &amp; 32 bit JVM :(
  *
  */
 public class Runtime extends Service implements MessageListener, RepoInstallListener {
@@ -114,6 +112,11 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   static private String runtimeName;
   public boolean is64bit = System.getProperty("sun.arch.data.model").contains("64");
+  public boolean isLinux()
+  {
+	  return Platform.getLocalInstance().isLinux();
+  }
+
 
   static private Date startDate = new Date();
 
@@ -163,7 +166,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * "theoretically" be done with ivy to get/download the appropriate dependent
    * jars from the repo. Then use a custom ClassLoader to load the new service.
    *
-   * Ivy works for downloading the appropriate jars & artifacts However, the
+   * Ivy works for downloading the appropriate jars &amp; artifacts However, the
    * ClassLoader became very problematic
    *
    * There is much mis-information around ClassLoaders. The most knowledgeable
@@ -175,7 +178,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * consequence is all Services' dependencies and categories are defined here
    * rather than the appropriate Service class.
    *
-   * @return
    */
 
   // private boolean shutdownAfterUpdate = false;
@@ -190,10 +192,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   static private CmdLine cmdline = null;
 
-  /**
+  /*
    * Returns the number of processors available to the Java virtual machine.
    *
-   * @return
    */
   public static final int availableProcessors() {
     return java.lang.Runtime.getRuntime().availableProcessors();
@@ -245,12 +246,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return ret;
   }
 
-  /**
-   *
-   * @param name
-   * @param type
-   * @return
-   */
   static public synchronized ServiceInterface create(String name, String type) {
     String fullTypeName;
     if (name.indexOf("/") != -1) {
@@ -332,11 +327,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     mainHelp();
   }
 
-  /**
-   * @param name
-   * @param cls
-   * @return
-   */
   static public synchronized ServiceInterface createService(String name, String fullTypeName) {
     log.info(String.format("Runtime.createService %s", name));
     if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
@@ -384,13 +374,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return null;
   }
 
-  /**
+  /*
    * DEPRECATE - use JSON ... XML is sooo 1990s
    *
    * a method which returns a xml representation of all the listeners and routes
    * in the runtime system
    *
-   * @return
    */
   public static String dumpNotifyEntries() {
     ServiceEnvironment se = getLocalServices();
@@ -498,13 +487,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     exit(-1);
   }
 
-  /**
+  /*
    * Terminates the currently running Java virtual machine by initiating its
    * shutdown sequence. This method never returns normally. The argument serves
    * as a status code; by convention, a nonzero status code indicates abnormal
    * termination
    *
-   * @param status
    */
   public static final void exit(int status) {
     try {
@@ -543,12 +531,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return cli;
   }
 
-  /**
+  /*
    * tricky way of getting static data "static" assumes you talking about "this"
    * Runtime and no other transported/networked/serialized Runtime .. and this
    * way Runtime == this instance's runtime !
-   *
-   * @return
    */
   static public CmdLine getCMDLine() {
     return cmdline;
@@ -559,7 +545,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * find the external ip address of NAT'd systems
    *
    * @return external or routers ip
-   * @throws Exception
+   * @throws Exception e
    */
   public static String getExternalIp() throws Exception {
     URL whatismyip = new URL("http://checkip.amazonaws.com");
@@ -579,11 +565,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /**
+  /*
    * Returns the amount of free memory in the Java Virtual Machine. Calling the
    * gc method may result in increasing the value returned by freeMemory.
-   *
-   * @return
    */
   public static final long getFreeMemory() {
     return java.lang.Runtime.getRuntime().freeMemory();
@@ -649,8 +633,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * gets all non-loopback, active, non-virtual ip addresses
    *
    * @return list of local ipv4 IP addresses
-   * @throws SocketException
-   * @throws UnknownHostException
    */
   static public List<String> getLocalAddresses() {
     log.info("getLocalAddresses");
@@ -722,10 +704,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return ret;
   }
 
-  /**
-   *
-   * @return
-   */
   public static ServiceEnvironment getLocalServices() {
     if (!environments.containsKey(null)) {
       runtime.error("local (null) ServiceEnvironment does not exist");
@@ -735,7 +713,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return environments.get(null);
   }
 
-  /**
+  /*
    * getLocalServicesForExport returns a filtered map of Service references to
    * export to another instance of MRL. The objective of filtering may help
    * resolve functionality, security, or technical issues. For example, the
@@ -747,8 +725,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    *
    * The filtering is done by Service Type.. although in the future it could be
    * extended to Service.getName()
-   *
-   * @return
    *
    */
   public static ServiceEnvironment getLocalServicesForExport() {
@@ -785,12 +761,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return export;
   }
 
-  /**
+  /*
    * FIXME - DEPRECATE - THIS IS NOT "instance" specific info - its Class
    * definition info - Runtime should return based on ClassName
-   *
-   * @param serviceName
-   * @return
    */
   public static Map<String, MethodEntry> getMethodMap(String serviceName) {
     if (!registry.containsKey(serviceName)) {
@@ -879,22 +852,15 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return pid;
   }
 
-  /**
-   *
-   * @return
-   */
   public static Map<String, ServiceInterface> getRegistry() {
     return registry;// FIXME should return copy
   }
 
-  /**
+  /*
    * Return the named service - - if name is not null, but service is not found
    * - return null (for re-entrant Service creation) - if the name IS null,
    * return Runtime - to support api/getServiceNames - if the is not null, and
    * service is found - return the Service
-   *
-   * @param name
-   * @return
    */
   public static ServiceInterface getService(String name) {
 
@@ -908,11 +874,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /**
-   *
-   * @param url
-   * @return
-   */
   public static ServiceEnvironment getEnvironment(URI url) {
     if (environments.containsKey(url)) {
       return environments.get(url); // FIXME should return copy
@@ -920,10 +881,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return null;
   }
 
-  /**
+  /*
    * get all environments
-   *
-   * @return
    */
   public static HashMap<URI, ServiceEnvironment> getEnvironments() {
     return new HashMap<URI, ServiceEnvironment>(environments);
@@ -932,10 +891,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   // Reference - cpu utilization
   // http://www.javaworld.com/javaworld/javaqa/2002-11/01-qa-1108-cpu.html
 
-  /**
+  /*
    * list of currently created services
-   *
-   * @return
    */
   static public String[] getServiceNames() {
     List<ServiceInterface> si = getServices();
@@ -950,8 +907,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return getServiceNamesFromInterface(Class.forName(interfaze));
   }
 
-  /**
-   * @param interfaceName
+  /*
+   * param interfaceName
    * @return service names which match
    */
   public static List<String> getServiceNamesFromInterface(Class<?> interfaze) {
@@ -968,8 +925,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return list;
   }
 
-  /**
-   * @param interfaze
+  /*
    * @return services which match
    */
   public static synchronized ArrayList<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
@@ -1002,20 +958,16 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return Thread.getAllStackTraces().keySet();
   }
 
-  /**
+  /*
    * dorky pass-throughs to the real JVM Runtime
-   *
-   * @return
    */
   public static final long getTotalMemory() {
 
     return java.lang.Runtime.getRuntime().totalMemory();
   }
 
-  /**
+  /*
    * attempt to get physical memory from the jvm not supported in all jvms..
-   *
-   * @return
    */
   static public long getTotalPhysicalMemory() {
     try {
@@ -1087,15 +1039,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /**
+  /*
    * Installs a single Service type. This "should" work even if there is no
    * Runtime. It can be invoked on the command line without starting a MRL
    * instance. If a runtime exits it will broadcast events of installation
    * progress
    *
-   * @param serviceType
-   * @throws ParseException
-   * @throws IOException
    */
   static public void install(String serviceType) throws ParseException, IOException {
 
@@ -1112,11 +1061,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /**
+  /*
    * broadcast of Service install progress
-   *
-   * @param status
-   * @return
    */
   public Status publishInstallProgress(Status status) {
     return status;
@@ -1185,10 +1131,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return sw.isLocal();
   }
 
-  /**
+  /*
    * check if class is a Runtime class
    *
-   * @param newService
    * @return true if class == Runtime.class
    */
   public static boolean isRuntime(Service newService) {
@@ -1197,8 +1142,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   /**
    * load all configuration from all local services
-   *
-   * @return
+   * @return true / false
    */
   static public boolean loadAll() {
     boolean ret = true;
@@ -1214,21 +1158,16 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return ret;
   }
 
-  /**
-   *
-   * @param filename
-   */
   public static final void loadLibrary(String filename) {
     java.lang.Runtime.getRuntime().loadLibrary(filename);
   }
 
-  /**
+  /*
    * Main starting method of MyRobotLab Parses command line options
    *
    * -h help -v version -list jvm args -Dhttp.proxyHost=webproxy
    * -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
    *
-   * @param args
    */
   public static void main(String[] args) {
     System.out.println(Arrays.toString(args));
@@ -1369,14 +1308,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /**
-   *
+  /*
    * register - this method enters the service into the registery of services
    *
-   *
-   * @param url
-   * @param s
-   * @return
    */
   public final static synchronized ServiceInterface register(ServiceInterface s, URI url) {
     ServiceEnvironment se = null;
@@ -1494,11 +1428,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return true;
   }
 
-  /**
-   *
-   * @param url
-   * @return
-   */
   public static boolean release(URI url) /* release process environment */
   {
     boolean ret = true;
@@ -1638,7 +1567,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   }
 
-  /**
+  /*
    * @param name
    *          - name of Service to be removed and whos resources will be
    *          released
@@ -1648,12 +1577,11 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   // ============== update events begin ==============
-  /**
+  /*
    *
    * should probably be deprecated - currently not used
    *
-   * @param runBeforeRestart
-   *
+   * runBeforeRestart
    *          will this work on a file lock update?
    */
   /*
@@ -1708,10 +1636,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   } */
 
-  /**
+  /*
    * save all configuration from all local services
-   *
-   * @return
    */
   static public boolean saveAll() {
     boolean ret = true;
@@ -1891,32 +1817,24 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   // ---------- Java Runtime wrapper functions begin --------
-  /**
+  /*
    * Executes the specified command and arguments in a separate process. Returns
    * the exit value for the subprocess.
-   *
-   * @param params
-   * @return
    */
   static public String exec(String program) {
     return execute(program, null, null, null, null);
   }
 
-  /**
+  /*
    * publishing point of Ivy sub system - sends event failedDependency when the
    * retrieve report for a Service fails
-   *
-   * @param dep
-   * @return
    */
   public String failedDependency(String dep) {
     return dep;
   }
 
-  /**
+  /*
    * returns version string of MyRobotLab
-   *
-   * @return
    */
   public String getLocalVersion() {
     return getVersion(null);
@@ -1976,15 +1894,11 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   // ============== configuration begin ==============
 
-  /**
-   *
-   * @return
-   */
   public int getEnvironmentCount() {
     return environments.size();
   }
 
-  /**
+  /*
    * Returns an array of all the simple type names of all the possible services.
    * The data originates from the repo's serviceData.xml file https:/
    * /code.google.com/p/myrobotlab/source/browse/trunk/myrobotlab/thirdParty
@@ -1995,8 +1909,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    *
    * The serviceData.xml lists all service types, dependencies, categories and
    * other relevant information regarding service creation
-   *
-   * @return
    */
   public String[] getServiceTypeNames() {
     return getServiceTypeNames("all");
@@ -2004,11 +1916,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   // ============== configuration end ==============
 
-  /**
+  /*
    * publishing event to get the possible services currently available
    *
-   * @param filter
-   * @return
    */
   public String[] getServiceTypeNames(String filter) {
     return serviceData.getServiceTypeNames(filter);
@@ -2033,11 +1943,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return null;
   }
 
-  /**
+  /*
    * event fired when a new artifact is download
-   *
-   * @param module
-   * @return
    */
   public String newArtifactsDownloaded(String module) {
     return module;
@@ -2065,11 +1972,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return status;
   }
 
-  /**
+  /*
    * published results of sending a noWorky
-   *
-   * @param status
-   * @return
    */
   static public Status publishNoWorky(Status status) {
     return status;
@@ -2077,7 +1981,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   // -------- network begin ------------------------
 
-  /**
+  /*
    * this method is an event notifier that there were updates found
    */
   public ServiceData proposedUpdates(ServiceData si) {
@@ -2100,33 +2004,29 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   // ---------------- callback events begin -------------
-  /**
+  /*
    * registration event
    *
-   * @param path
+   * @param sw 
    *          - the name of the Service which was successfully registered
-   * @return
    */
   public ServiceInterface registered(ServiceInterface sw) {
     return sw;
   }
 
-  /**
+  /*
    * release event
    *
-   * @param path
+   * @param sw
    *          - the name of the Service which was successfully released
-   * @return
    */
   public ServiceInterface released(ServiceInterface sw) {
     return sw;
   }
 
-  /**
+  /*
    * published events
    *
-   * @param className
-   * @return
    */
   public String resolveBegin(String className) {
     return className;
@@ -2135,20 +2035,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   public void resolveEnd() {
   }
 
-  /**
-   *
-   * @param errors
-   * @return
-   */
   public List<String> resolveError(List<String> errors) {
     return errors;
   }
 
-  /**
-   *
-   * @param className
-   * @return
-   */
   public String resolveSuccess(String className) {
     return className;
   }
@@ -2187,7 +2077,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /**
+  /*
    * Runtime's setLogLevel will set the root log level if its called from a
    * service - it will only set that Service type's log level
    *
@@ -2305,18 +2195,13 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return execute(program, list, null, null, null);
   }
 
-  /**
+  /*
    * FIXME - return a POJO - because there are lots of downstream which would
    * want different parts of the results FIXME - stream gobbler reconciled -
    * threaded stream consumption FIXME - watchdog - a good idea FIXME - most
    * common use case would be returning a string i would think FIXME -
-   * ProcessData & ProcessData2 reconciled
+   * ProcessData &amp; ProcessData2 reconciled
    *
-   * @param program
-   * @param args
-   * @param workingDir
-   * @param additionalEnv
-   * @return
    */
   static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, Boolean block) {
 

@@ -149,7 +149,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
    *          - rotation about x (in degrees)
    * @param yaw
    *          - rotation about y (in degrees)
-   * @return
+   * @return a matric that represents the rotation/translation matrix
    */
   public Matrix createInputMatrix(double dx, double dy, double dz, double roll, double pitch, double yaw) {
     roll = MathUtils.degToRad(roll);

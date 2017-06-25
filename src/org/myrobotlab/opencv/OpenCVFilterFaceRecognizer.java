@@ -149,8 +149,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
    * will be parsed for the label to apply to the image. At least 2 different
    * labels must exist in the training set.
    * 
-   * @return
-   */
+   * @return true if the training was successful.
+   */ 
   public boolean train() {
     //
     // The first time we train, find the image mask, if present, scale it to the
@@ -185,15 +185,15 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       root.mkdirs();
     }
     log.info("Using {} for training data.", root.getAbsolutePath());
-    File[] imageFiles = listImageFiles(root);
-    if (imageFiles.length < 1) {
+    ArrayList<File> imageFiles = listImageFiles(root);
+    if (imageFiles.size() < 1) {
       log.info("No images found for training.");
       return false;
     }
     // Storage for the files that we load.
-    MatVector images = new MatVector(imageFiles.length);
+    MatVector images = new MatVector(imageFiles.size());
     // storage for the labels for the images
-    Mat labels = new Mat(imageFiles.length, 1, CV_32SC1);
+    Mat labels = new Mat(imageFiles.size(), 1, CV_32SC1);
     IntBuffer labelsBuf = labels.getIntBuffer();
     int counter = 0;
     for (File image : imageFiles) {
@@ -201,7 +201,9 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       Mat img = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
       // Parse the filename label-foo.jpg everything up to the first - is the
       // label.
-      String personName = image.getName().split("\\-")[0];
+      // String personName = image.getName().split("\\-")[0];
+      String personName = image.getParentFile().getName();
+      
       // TODO: we need an integer to represent this string .. for now we're
       // using a hashcode here.
       // this can definitely have a collision!
@@ -256,15 +258,29 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     return true;
   }
 
-  private File[] listImageFiles(File root) {
+  private  ArrayList<File> listImageFiles(File root) {
+    
+    // 
+    ArrayList<File> trainingFiles = new ArrayList<File>();
+    
+    // only jpg , png , pgm files.  TODO: other formats? bmp/tiff/etc?
     FilenameFilter imgFilter = new FilenameFilter() {
       public boolean accept(File dir, String name) {
         name = name.toLowerCase();
         return name.endsWith(".jpg") || name.endsWith(".pgm") || name.endsWith(".png");
       }
     };
-    File[] imageFiles = root.listFiles(imgFilter);
-    return imageFiles;
+    
+    String[] contents = root.list();
+    for (String fn : contents) {
+      File f = new File(root.getAbsolutePath() + File.separator + fn);
+      if (f.isDirectory()) {
+        for (File x : f.listFiles(imgFilter)) {
+          trainingFiles.add(x);
+        }
+      }
+    }
+    return trainingFiles;
   }
 
   private Mat resizeImage(Mat img, int width, int height) {
@@ -382,13 +398,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
           // we're in training mode.. so we should save the image
           log.info("Training Mode for {}.", trainName);
           if (!StringUtils.isEmpty(trainName)) {
-            // create some sort of a unique value so the file names don't
-            // conflict
-            // TODO: use something more random like a
-            UUID randValue = UUID.randomUUID();
-            String filename = trainingDir + "/" + trainName + "-" + randValue + ".png";
-            // TODO: I think this is a png file ? not sure.
-            imwrite(filename, dFaceMat);
+            saveTrainingImage(trainName, dFaceMat);
             cvPutText(image, "Snapshot Saved: " + trainName, cvPoint(20, 60), font, CvScalar.CYAN);
           }
         } else if (Mode.RECOGNIZE.equals(mode)) {
@@ -439,6 +449,22 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     }
     // pass through/return the original image marked up.
     return image;
+  }
+
+  private void saveTrainingImage(String label, Mat dFaceMat) {
+    // create some sort of a unique value so the file names don't
+    // conflict
+    // TODO: use something more random like a
+    // OK now we need to make a subdirectory for the label if it doesn't exist.
+    File labelDir = new File(trainingDir + File.separator + label);
+    if (!labelDir.exists()) {
+      labelDir.mkdirs();
+    }
+    // TODO: should we give it something other than a random uuid ?
+    UUID randValue = UUID.randomUUID();
+    String filename = trainingDir + File.separator + label + File.separator + randValue + ".png";
+    // TODO: I think this is a png file ? not sure.
+    imwrite(filename, dFaceMat);
   }
 
   private Frame makeGrayScale(IplImage image) {

@@ -51,6 +51,7 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -60,7 +61,6 @@ import org.myrobotlab.net.Scanner;
 import org.myrobotlab.net.TcpServer;
 import org.myrobotlab.net.UdpServer;
 import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -142,7 +142,7 @@ public class RemoteAdapter extends Service implements Gateway {
 		return connections;
 	}
 
-	/**
+	/*
 	 * important initial communication function related to discovery a broadcast
 	 * goes out and replies must include details of communication so that a
 	 * viable connection can be created
@@ -238,12 +238,9 @@ public class RemoteAdapter extends Service implements Gateway {
 		return data;
 	}
 
-	/**
+	/*
 	 * NOT USED - just left as an example of a consumer asynchronous return of
 	 * access key request
-	 * 
-	 * @param keys
-	 * @return
 	 */
 	public Connection onNewConnection(Connection conn) {
 		return conn;

@@ -7,6 +7,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.test.TestUtils;
 
 /**
@@ -18,9 +19,7 @@ public class NeoPixelTest {
   public Arduino ard;
   private NeoPixel neopixel;
 
-  /**
-   * @throws java.lang.Exception
-   */
+
   @Before
   public void setUp() throws Exception {
     // setup the test environment , and create an arduino with a virtual backend for it.
@@ -84,7 +83,7 @@ public class NeoPixelTest {
    */
   @Test
   public void testDetachNeoPixelController() {
-    neopixel.detach(ard);
+    neopixel.detach((NeoPixelController)ard);
     assertFalse(neopixel.isAttached);
     neopixel.attach(ard, 28, 16);
 

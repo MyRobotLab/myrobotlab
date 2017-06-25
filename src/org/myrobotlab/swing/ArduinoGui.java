@@ -335,10 +335,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
   }
 
-  /**
-   * updates ui - called from both initialization & onState
+  /*
+   * updates ui - called from both initialization &amp; onState
    * 
-   * @param arduino
    */
   public void update(final Arduino arduino) { // TODO - all onState data
     // should be final
@@ -387,12 +386,11 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
   }
 
-  /**
+  /*
    * onState is called when the Arduino service changes state information FIXME
    * - this method is often called by other threads so gui - updates must be
    * done in the swing post method way
    * 
-   * @param arduino
    */
   public void onState(final Arduino arduino) {
     myArduino = arduino;
