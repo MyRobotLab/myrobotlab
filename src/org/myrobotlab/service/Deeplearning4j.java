@@ -78,7 +78,6 @@ import marytts.util.io.FileUtils;
 public class Deeplearning4j extends Service {
 
   private static final long serialVersionUID = 1L;
-
   // TODO: update these based on the input sample data...
   protected static int height = 100;
   protected static int width = 100;
@@ -92,7 +91,7 @@ public class Deeplearning4j extends Service {
   protected static int listenerFreq = 1;
   protected static int iterations = 1;
   // protected static int epochs = 50;
-  protected static int epochs = 2;
+  public static int epochs = 2;
   protected static int nCores = 8;
   protected static String modelType = "AlexNet"; // LeNet, AlexNet or Custom but you need to fill it out
   public String modelDir = "models";
@@ -105,10 +104,6 @@ public class Deeplearning4j extends Service {
   // constructor.
   public Deeplearning4j(String reservedKey) {
     super(reservedKey);
-  }
-
-  public void trainModel() throws IOException {
-    trainModel("./training");
   }
 
   /**
@@ -188,12 +183,17 @@ public class Deeplearning4j extends Service {
     log.info("Done training model..");
   }
 
+  public void trainModel() throws IOException {
+    trainModel("./training");
+  }
+
   /*
    * This provides a list of various transforms to attempt on the image as part of the training process
    * this synthetically generates a larger training set.  I think it's typically used to train in
    * rotational and scale invariance in the matching of the network.  But, that's just a guess :)
    */
   private List<ImageTransform> createImageTransformList() {
+    // TODO: consider a bunch of opencv filter based transforms here!
     ImageTransform flipTransform1 = new FlipImageTransform(rng);
     ImageTransform flipTransform2 = new FlipImageTransform(new Random(123));
     ImageTransform warpTransform = new WarpImageTransform(rng, 42);
@@ -221,10 +221,7 @@ public class Deeplearning4j extends Service {
     return network;
   }
 
-  public void saveModel() throws IOException {
-    saveModel(modelDir + File.separator + modelFilename);
-  }
-
+  // save the current model and it's set of labels
   public void saveModel(String filename) throws IOException {
     File dir = new File(modelDir);
     if (!dir.exists()) {
@@ -242,11 +239,17 @@ public class Deeplearning4j extends Service {
     fw.close();
     log.info("Model saved.");
   }
+  
+  public void saveModel() throws IOException {
+    saveModel(modelDir + File.separator + modelFilename);
+  }
 
+  // load the default model
   public void loadModel() throws IOException {
     loadModel(modelDir + File.separator + modelFilename);
   }
 
+  // load a model based on its filename and the labels from an associated filename.labels file..
   public void loadModel(String filename) throws IOException {
     File f = new File(filename);
     log.info("Loading network from : {}", f.getAbsolutePath());
@@ -273,9 +276,7 @@ public class Deeplearning4j extends Service {
     // this map could be large
   }
 
-  /*
-   * From the animals classification example
-   */
+  /* From the animals classification example */
   public MultiLayerNetwork lenetModel(int numLabels) {
     /**
      * Revisde Lenet Model approach developed by ramgo2 achieves slightly above random
@@ -307,9 +308,7 @@ public class Deeplearning4j extends Service {
     return new MultiLayerNetwork(conf);
   }
 
-  /*
-   * From the animals classification example
-   */
+  /* From the animals classification example */
   public MultiLayerNetwork alexnetModel(int numLabels) {
     /**
      * AlexNet model interpretation based on the original paper ImageNet Classification with Deep Convolutional Neural Networks
@@ -361,9 +360,7 @@ public class Deeplearning4j extends Service {
     return new MultiLayerNetwork(conf);
   }
 
-  /*
-   * From the animals classification example
-   */
+  /* From the animals classification example */
   public static MultiLayerNetwork customModel(int numLabels) {
     /**
      * Use this method to build your own custom model.
@@ -404,30 +401,24 @@ public class Deeplearning4j extends Service {
     return meta;
   }
 
-
-
   public static void main(String[] args) throws IOException {
-
     Deeplearning4j dl4j = (Deeplearning4j)Runtime.createAndStart("dl4j", "Deeplearning4j");
+    // this is how many generations to iterate on training the dataset. larger number means longer training time.
+    dl4j.epochs = 50;
     dl4j.trainModel("test/resources/animals");
     //dl4j.trainModel("training");
-
     // save the model out
     dl4j.saveModel();
-
     dl4j.loadModel();
     //File testIm = new File("test/resources/animals/turtle/Baby_sea_turtle.jpg");
-    File testIm = new File("test/resources/animals/deer/BlackTailed_Deer_Doe.jpg");
-    // File testIm = new File("test/resources/animals/turtle/Western_Painted_Turtle.jpg");
+    // File testIm = new File("test/resources/animals/deer/BlackTailed_Deer_Doe.jpg");
+    File testIm = new File("test/resources/animals/turtle/Western_Painted_Turtle.jpg");
     // BufferedImage img = ImageIO.read(testIm);
     // Frame frame = grabberConverter.convert(img);
     dl4j.evaluateModel(testIm);
     // dl4j.evaluateModel(img);
-
     System.out.println("Done evaluating the model.");
-
     System.exit(0);
-
   }
 
 }
