@@ -43,7 +43,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.DiyServo;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
-import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.slf4j.Logger;
@@ -76,15 +75,17 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 	public final static Logger log = LoggerFactory.getLogger(DiyServoGui.class);
 
 	static final long serialVersionUID = 1L;
-
+    
+	/*
 	final String attachMotorController = "attach motor controller";
 	final String detachMotorController = "detach motor controller";
-
+    */
+	
 	final String attachAnalog = "attach analog input";
 	final String detachAnalog = "detach analog input";
 
 	JLabel boundPos = new JLabel("90");
-	JButton attachButton = new JButton(attachMotorController);
+	// JButton attachButton = new JButton(attachMotorController);
 	JButton attachListenerButton = new JButton(attachAnalog);
 
 	JButton updateLimitsButton = new JButton("update limits");
@@ -94,11 +95,11 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
 	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 
-	JComboBox<String> controllerList = new JComboBox<String>();
+	// JComboBox<String> controllerList = new JComboBox<String>();
 	JComboBox<String> pinArrayControlList = new JComboBox<String>();
 	JComboBox<Integer> pinList = new JComboBox<Integer>();
 
-	JComboBox<Integer> pwmPinList = new JComboBox<Integer>();
+	// JComboBox<Integer> pwmPinList = new JComboBox<Integer>();
 	JComboBox<Integer> dirPinList = new JComboBox<Integer>();
 	
 	JTextField posMin = new JTextField("0");
@@ -124,7 +125,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     // addLine(left, slider, right, boundPos);
     // addLine(attachButton, controllerList, attachListenerButton, pinArrayControlList, "pin", pinList);
     // addLine(updateLimitsButton, "min", posMin, "max", posMax);
-		addTop("Motor       :", controllerList,  " Pwm pin:", pwmPinList, " Dir pin:", dirPinList, attachButton);
+	//	addTop("Motor       :", controllerList,  " Pwm pin:", pwmPinList, " Dir pin:", dirPinList, attachButton);
 		addTop("Analog input:", pinArrayControlList, " Analog input pin:", pinList, attachListenerButton);
 		addTop("min:", posMin, "   max:", posMax, updateLimitsButton);
 
@@ -143,27 +144,11 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 			@Override
 			public void run() {
 				Object o = event.getSource();
-				if (o == controllerList) {
-					String controllerName = (String) controllerList.getSelectedItem();
-					myServo.controllerName = controllerName;
-					log.debug(String.format("controllerList event %s", controllerName));
-					refreshMotorPins();
-				}
 
 				if (o == pinArrayControlList) {
 					String pinControlName = (String) pinArrayControlList.getSelectedItem();
 					myServo.pinControlName = pinControlName;
 					log.debug(String.format("pinArrayControList event %s", pinControlName));
-				}
-
-				if (o == attachButton) {
-					log.info("attachButton pressed");
-					if (attachButton.getText().equals(attachMotorController)) {
-						send("attach", controllerList.getSelectedItem());
-					} else {
-						send("detach", controllerList.getSelectedItem());
-					}
-					return;
 				}
 
 				if (o == attachListenerButton) {
@@ -216,7 +201,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 			  */
 				removeListeners();
 				refreshControllers();
-						
+					
+				/*
 				if (servo.isControllerSet()) {
 					attachButton.setText(detachMotorController);
 					controllerList.setEnabled(false);
@@ -224,6 +210,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 					attachButton.setText(attachMotorController);
 					controllerList.setEnabled(true);
 				}
+				*/
 
 				if (servo.isPinArrayControlSet()) {
 					attachListenerButton.setText(detachAnalog);
@@ -258,13 +245,14 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 	public void refreshControllers() {
 
 		// Refresh the list of Motors
+        /*
 		controllerList.removeAllItems();
 		List<String> c = myServo.controllers;
 		for (int i = 0; i < c.size(); ++i) {
 			controllerList.addItem(c.get(i));
 		}
-		controllerList.setSelectedItem(myServo.controllerName);
-		refreshMotorPins();
+		controllerList.setSelectedItem(myServo.motorControlName);
+		*/
 		
 		// Refresh the list of Analog inputs
 		pinArrayControlList.removeAllItems();
@@ -292,43 +280,10 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 		restoreListeners();
 	}
     
-	void refreshMotorPins(){
-		// Refresh the list of pwmPins and dirPins
-		pwmPinList.removeAllItems();
-		dirPinList.removeAllItems();
-		if (myServo.controllerName != null) {
-			MotorController tmpControl = (MotorController) Runtime.getService(myServo.controllerName);
-			if (tmpControl != null) {
-			  // Temporary removed. Need to add the getPinList method to the MotorController interface
-				/*
-			  List<PinDefinition> mbl = tmpControl.getPinList();
-				for (int i = 0; i < mbl.size(); i++) {
-					PinDefinition pinData = mbl.get(i);
-					if (pinData.isPwm()){
-					   pwmPinList.addItem(pinData.getAddress());
-					}
-					if (pinData.isDigital()){
-					   dirPinList.addItem(pinData.getAddress());
-					}
-				}
-				*/
-			}
-			/*  Perhaps DiyServo should have 'helper' views to support connecting motor &amp; motorController
-			MotorControl mCfg = (MotorControl)myServo;
-			if (mCfg != null){
-			  if (mCfg.getType() == Motor.class.getSimpleName()){
-			    pwmPinList.setSelectedItem(mCfg.getPwrPin());
-			    dirPinList.setSelectedItem(mCfg.getDirPin());
-			  }
-			}
-			*/
-		}		
-	}
-	
 	public void removeListeners() {
 
-		attachButton.removeActionListener(this);
-		controllerList.removeActionListener(this);
+		// attachButton.removeActionListener(this);
+		// controllerList.removeActionListener(this);
 
 		attachListenerButton.removeActionListener(this);
 		pinArrayControlList.removeActionListener(this);
@@ -339,8 +294,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
 	public void restoreListeners() {
 
-		attachButton.addActionListener(this);
-		controllerList.addActionListener(this);
+		// attachButton.addActionListener(this);
+		// controllerList.addActionListener(this);
 
 		attachListenerButton.addActionListener(this);
 		pinArrayControlList.addActionListener(this);

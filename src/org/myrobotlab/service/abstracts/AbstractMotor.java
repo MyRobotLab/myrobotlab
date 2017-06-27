@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
@@ -261,6 +262,16 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     broadcastState();
   }
 
+  @Override
+  public void attach(Attachable service) throws Exception {
+    if (MotorController.class.isAssignableFrom(service.getClass())) {
+      attachMotorController((MotorController) service);
+      return;
+    }
+
+    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+  }
+  
   @Override
   public void attachMotorController(MotorController controller) throws Exception {
     if (controller == null) {
