@@ -78,7 +78,7 @@ import marytts.util.io.FileUtils;
 public class Deeplearning4j extends Service {
 
   private static final long serialVersionUID = 1L;
-  
+
   // TODO: update these based on the input sample data...
   protected static int height = 100;
   protected static int width = 100;
@@ -91,7 +91,8 @@ public class Deeplearning4j extends Service {
   protected static Random rng = new Random(seed);
   protected static int listenerFreq = 1;
   protected static int iterations = 1;
-  protected static int epochs = 50;
+  // protected static int epochs = 50;
+  protected static int epochs = 2;
   protected static int nCores = 8;
   protected static String modelType = "AlexNet"; // LeNet, AlexNet or Custom but you need to fill it out
   public String modelDir = "models";
@@ -119,7 +120,7 @@ public class Deeplearning4j extends Service {
    * @throws IOException e 
    */
   public void trainModel(String trainingDataDir) throws IOException {
-  log.info("Load data....");
+    log.info("Load data....");
     /**
      * Data Setup -&gt; organize and limit data file paths:
      *  - mainPath = path to image files
@@ -154,35 +155,37 @@ public class Deeplearning4j extends Service {
     recordReader.initialize(fileSplit, null);
 
     log.info("Create network....{}", networkLabels);
-    
-    dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels);
-    DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
-    scaler.fit(dataIter);
 
+    // training set metadata , the labels and how many there are
     networkLabels = recordReader.getLabels();
     int numLabels = networkLabels.size();
     log.info("Network Labels: {}", networkLabels);
 
+    // an interator for that dataset.
+    dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels);
+    DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
+    // pre process / fit the data with the scaler.
+    scaler.fit(dataIter);
+    // build the neural network (specify structure, etc..)
     network = createNetwork(numLabels);
-    
+    // our preprocessor ... TODO: is this necessary here?
     dataIter.setPreProcessor(scaler);
+    // TODO: learn more about what this does.
     trainIter = new MultipleEpochsIterator(epochs, dataIter, nCores);
-
+    // The magic.. train the model!
     network.fit(trainIter);
-
     // Train with transformations
     for (ImageTransform transform : transforms) {
-      System.out.print("\nTraining on transformation: " + transform.getClass().toString() + "\n\n");
+      log.info("Training on transformation: {}" , transform.getClass().toString());
       recordReader.initialize(fileSplit, transform);
       dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels);
       scaler.fit(dataIter);
       dataIter.setPreProcessor(scaler);
       trainIter = new MultipleEpochsIterator(epochs, dataIter, nCores);
+      // train the model even more with some transpositions of the original image.
       network.fit(trainIter);
     }
-
     log.info("Done training model..");
-
   }
 
   /*
@@ -213,11 +216,8 @@ public class Deeplearning4j extends Service {
       default:
         throw new InvalidInputTypeException("Incorrect model provided.");
     }
-    
     network.init();
     network.setListeners(new ScoreIterationListener(listenerFreq));
-
-    
     return network;
   }
 
@@ -226,17 +226,14 @@ public class Deeplearning4j extends Service {
   }
 
   public void saveModel(String filename) throws IOException {
-
     File dir = new File(modelDir);
     if (!dir.exists()) {
       dir.mkdirs();
       log.info("Creating models directory {}" , dir);
     }
-
     File f = new File(filename);
     log.info("Saving DL4J model to {}", f.getAbsolutePath());
     ModelSerializer.writeModel(network, filename, true);
-
     // also need to save the labels!
     String labelFilename = filename + ".labels";
     FileWriter fw = new FileWriter(new File(labelFilename));
@@ -264,114 +261,21 @@ public class Deeplearning4j extends Service {
   public void evaluateModel(File file) throws IOException {
     log.info("Evaluate model....");
     NativeImageLoader nativeImageLoader = new NativeImageLoader(height, width, channels);
-    //OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
-    // Java2DFrameConverter paintConverter = new Java2DFrameConverter();
-    // Frame frame = grabberConverter.convert(img);
-    // BufferedImage buffImg =  paintConverter.getBufferedImage(frame,1);
-    // we can eval this img
-    //INDArray image = nativeImageLoader.asMatrix(buffImg);   // testImage is of Mat format
     INDArray image = nativeImageLoader.asMatrix(file);   // testImage is of Mat format
     // 0-255 to 0-1
-    
     DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
     scaler.transform(image);
     // Pass through to neural Net
     INDArray output = network.output(image);
-    //    INDArray labels = network.getLabels();
-    //    log.info("Labels {}", labels);
-
-
     System.out.println(output);
-
-
     System.out.println(networkLabels);
-
-    //    
-    //    // no labels!!
-    //    int[] vals = network.predict(image);
-    //    
-    ////    
-    ////    
-    ////   // INDArray output =  network.output(image);
-    ////    
-    ////   // TrainedModels.VGG16.decodePredictions(output[0]);
-    ////    System.out.println(output);
-    ////    
-    //    ImageRecordReader recordReader = new ImageRecordReader(height, width, channels, new MRLLabelGenerator());
-    //
-    //    // TODO: figure out how i make a file split for this
-    //    
-    //    // DataNormalization scalerA = new VGG16ImagePreProcessor();
-    //    
-    //    
-    //    File mainPath = new File("test/resources/animals");
-    //    FileSplit fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, rng);
-    //    recordReader.initialize(fileSplit);
-    //    DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 1, 1, numLabels);
-    //    // from the animals example
-    //    dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels);
-    //    scaler.fit(dataIter);
-    //    dataIter.setPreProcessor(scaler);
-    //
-    //    dataIter.reset();
-    //    DataSet testDataSet = dataIter.next();
-    //    
-    //    List<String> predict = network.predict(testDataSet);
-    //    String modelResult = predict.get(0);
-    //    
-    //    System.out.println("Model Result : " + modelResult);
-    //    
-    //    System.out.println("Expected Result: " + testDataSet.getLabelNamesList());
-
-
-
-
-    //  log.info("Prediction was : {} " , vals[0]);
-    //    for (int i = 0 ; i < vals.length; i++) {
-    //      System.out.println("Label : " + labels.getColumn(i) + " " + vals[i]);
-    //      
-    //    }
-    // TODO: how do i pass just 1 image into the model?
-    // String expectedResult = testDataSet.getLabelName(0);
-    //List<String> predict = network.predict(testDataSet);
-    // String modelResult = predict.get(0);
-    //  System.out.print("\nFor a single example that is labeled " + expectedResult + " the model predicted " + modelResult + "\n\n");
-
-    log.info("****************Example finished********************");
+    // TODO: I suppose we could create a map of probabilities and return that ...
+    // this map could be large
   }
 
-  //  
-  //  public void eval() {
-  //    
-  //    
-  //    
-  //    
-  //    List<String> predict = network.predict(testDataSet);
-  //    String modelResult = predict.get(0);
-  //    log.info("The model predicted {}" , modelResult );
-  //
-  //    
-  //    
-  //    
-  //    recordReader.initialize(testData);
-  //    dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels);
-  //    scaler.fit(dataIter);
-  //    dataIter.setPreProcessor(scaler);
-  //    Evaluation eval = network.evaluate(dataIter);
-  //    log.info(eval.stats(true));
-  //
-  //    // Example on how to get predict results with trained model
-  //    dataIter.reset();
-  //    DataSet testDataSet = dataIter.next();
-  //    String expectedResult = testDataSet.getLabelName(0);
-  //    List<String> predict = network.predict(testDataSet);
-  //    String modelResult = predict.get(0);
-  //    System.out.print("\nFor a single example that is labeled " + expectedResult + " the model predicted " + modelResult + "\n\n");
-  //    
-  //    
-  //  }
-
-
+  /*
+   * From the animals classification example
+   */
   public MultiLayerNetwork lenetModel(int numLabels) {
     /**
      * Revisde Lenet Model approach developed by ramgo2 achieves slightly above random
@@ -401,19 +305,19 @@ public class Deeplearning4j extends Service {
         .build();
 
     return new MultiLayerNetwork(conf);
-
   }
 
+  /*
+   * From the animals classification example
+   */
   public MultiLayerNetwork alexnetModel(int numLabels) {
     /**
      * AlexNet model interpretation based on the original paper ImageNet Classification with Deep Convolutional Neural Networks
      * and the imagenetExample code referenced.
      * http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf
      **/
-
     double nonZeroBias = 1;
     double dropOut = 0.5;
-
     MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
         .seed(seed)
         .weightInit(WeightInit.DISTRIBUTION)
@@ -454,15 +358,17 @@ public class Deeplearning4j extends Service {
         .pretrain(false)
         .setInputType(InputType.convolutional(height, width, channels))
         .build();
-
     return new MultiLayerNetwork(conf);
-
   }
 
+  /*
+   * From the animals classification example
+   */
   public static MultiLayerNetwork customModel(int numLabels) {
     /**
      * Use this method to build your own custom model.
      **/
+    log.error("Not implemented!!!");
     return null;
   }
 
@@ -503,15 +409,15 @@ public class Deeplearning4j extends Service {
   public static void main(String[] args) throws IOException {
 
     Deeplearning4j dl4j = (Deeplearning4j)Runtime.createAndStart("dl4j", "Deeplearning4j");
-    // dl4j.trainModel("test/resources/animals");
+    dl4j.trainModel("test/resources/animals");
     //dl4j.trainModel("training");
 
     // save the model out
-   // dl4j.saveModel();
+    dl4j.saveModel();
 
     dl4j.loadModel();
     //File testIm = new File("test/resources/animals/turtle/Baby_sea_turtle.jpg");
-     File testIm = new File("test/resources/animals/deer/BlackTailed_Deer_Doe.jpg");
+    File testIm = new File("test/resources/animals/deer/BlackTailed_Deer_Doe.jpg");
     // File testIm = new File("test/resources/animals/turtle/Western_Painted_Turtle.jpg");
     // BufferedImage img = ImageIO.read(testIm);
     // Frame frame = grabberConverter.convert(img);
