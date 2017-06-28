@@ -687,7 +687,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	}
 
 	public void attach(String pinArrayControlName, Integer pin) throws Exception {
-		attach(pinArrayControlName, (int) pin);
+		// myServo = (DiyServo) Runtime.getService(boundServiceName);
+		attach((PinArrayControl)Runtime.getService(pinArrayControlName), (int) pin);
 	}
 
 	public void attach(PinArrayControl pinArrayControl, int pin) throws Exception {
@@ -706,7 +707,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		if (pinArrayControl instanceof Ads1115) {
 			resolution = 65536;
 		}
-		log.info(String.format("Detected %s %s. Setting AD resolution to %s",pinArrayControl.getClass(), pinArrayControl.getName(),resolution));
+		log.debug(String.format("Detected %s %s. Setting AD resolution to %s",pinArrayControl.getClass(), pinArrayControl.getName(),resolution));
 
 		int rate = 1000 / sampleTime;
 		pinArrayControl.attach(this, pin);
