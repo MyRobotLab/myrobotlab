@@ -9,7 +9,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.framework.Message;
-
 /**
 *This class exists as a proxy to control native MRL services connected through the web API. 
 *Methods of that native service are called through this class's {@link #exec(String, Object[])} method.
@@ -36,7 +35,7 @@ public class PythonProxy extends Service {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(NativePython.class.getCanonicalName());
+    ServiceType meta = new ServiceType(PythonProxy.class.getCanonicalName());
     meta.addDescription("Provides an API hook point to services written in native Python.");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
@@ -48,8 +47,11 @@ public class PythonProxy extends Service {
 
   public void startService() {
 	super.startService();
-	webgui = (WebGui) createPeer("webgui");
-	webgui.startService();
+	webgui = (WebGui) Runtime.getService("webgui");
+	if (webgui == null) {
+		webgui = (WebGui) createPeer("webgui");
+		webgui.startService();
+	}
   }
 
   /**
@@ -57,7 +59,10 @@ public class PythonProxy extends Service {
   **/
   public void exec(String method, Object[] dat) {
 	//Create message
-	Message msg = createMessage(getName(), method, (Object[]) dat);
+	Message msg = new Message();
+	msg.name = getName();
+	msg.method = method;
+	msg.data = dat;
 	exec(msg);
   }
 
