@@ -100,7 +100,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 
   public void setBatteryLevel(Integer level) {
 
-    if (level >= 80 && level <= 100) {
+    if (level >= 80) {
       level = 100;
     }
     if (level >= 60 && level < 80) {
