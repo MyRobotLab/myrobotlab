@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -166,6 +167,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
           // properly.
           log.info("Deleteing AIMLIF file because the original AIML file was modified. {}", aimlIF);
           f.delete();
+       // edit moz4r : we need to change the last modification date to aiml folder for recompilation
+          try{
+        	    PrintWriter writer = new PrintWriter(aimlPath+File.separator+"folder_updated", "UTF-8");
+        	    writer.println(lastMod.toString());
+        	    writer.close();
+        	} catch (IOException e) {
+        	   // do something
+        	}
         }
       }
     }
@@ -690,6 +699,22 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public void writeAndQuit() {
     bot.writeQuit();
+    // edit moz4r : we need to change the last modification date to aimlif folder because at this time all is compilated.
+    // so programAb don't need to load AIML at startup
+    File folder = new File(bot.aimlif_path);
+
+    for (File f : folder.listFiles()) {
+        log.info(f.getAbsolutePath());
+		f.setLastModified(System.currentTimeMillis());
+      }
+    
+    try{
+  	    PrintWriter writer = new PrintWriter(bot.aimlif_path+File.separator+"folder_updated", "UTF-8");
+  	    writer.println("");
+  	    writer.close();
+  	} catch (IOException e) {
+  	   // do something
+  	}
   }
 
   /**
