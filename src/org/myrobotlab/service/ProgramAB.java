@@ -167,9 +167,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
           // properly.
           log.info("Deleteing AIMLIF file because the original AIML file was modified. {}", aimlIF);
           f.delete();
-       // edit moz4r : we need to change the last modification date to aiml folder for recompilation
+          // edit moz4r : we need to change the last modification date to aiml folder for recompilation
+          sleep(1000);
+          String fil=aimlPath+File.separator+"folder_updated";
+          File file = new File(fil);  
+          file.delete(); 
           try{
-        	    PrintWriter writer = new PrintWriter(aimlPath+File.separator+"folder_updated", "UTF-8");
+              PrintWriter writer = new PrintWriter(fil, "UTF-8");
         	    writer.println(lastMod.toString());
         	    writer.close();
         	} catch (IOException e) {
@@ -701,19 +705,21 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     bot.writeQuit();
     // edit moz4r : we need to change the last modification date to aimlif folder because at this time all is compilated.
     // so programAb don't need to load AIML at startup
+    sleep(1000);
     File folder = new File(bot.aimlif_path);
 
     for (File f : folder.listFiles()) {
-        log.info(f.getAbsolutePath());
-		f.setLastModified(System.currentTimeMillis());
+ 		f.setLastModified(System.currentTimeMillis());
       }
-    
+    String fil=bot.aimlif_path+File.separator+"folder_updated";
+    File file = new File(fil);  
+    file.delete();
     try{
-  	    PrintWriter writer = new PrintWriter(bot.aimlif_path+File.separator+"folder_updated", "UTF-8");
+      PrintWriter writer = new PrintWriter(fil, "UTF-8");
   	    writer.println("");
   	    writer.close();
   	} catch (IOException e) {
-  	   // do something
+  	  log.error("PrintWriter error");
   	}
   }
 
@@ -731,7 +737,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
     // meta.addDependency("org.alicebot.ab", "0.0.6.26");
-    meta.addDependency("org.alicebot.ab", "0.0.1-kw");
+    meta.addDependency("org.alicebot.ab", "0.0.2-kw");
     meta.addDependency("org.json", "20090211");
     return meta;
   }
