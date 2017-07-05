@@ -209,7 +209,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   public static final byte PCA9685_PRESCALE = (byte) 0xFE; // PreScale
                                 // register
-
+  
   // Pin PWM addresses 4 bytes repeats for each pin so I only define pin 0
   // The rest of the addresses are calculated based on pin numbers
   public static final int PCA9685_LED0_ON_L = 0x06; // First
@@ -228,6 +228,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
                             // LED
                             // addressHigh
 
+  public static final int PCA9685_ALL_LED_OFF_H = 0xFD; // All call i2c address ( Used for shutdown of all pwm )
+  public static final int PCA9685_TURN_ALL_LED_OFF = 0x10; // Command to turn all LED off ( stop pwm )
+  
   // public static final int PWM_FREQ = 60; // default frequency for servos
   public static final float osc_clock = 25000000; // clock
                           // frequency
@@ -465,6 +468,16 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     pwmFreq = hz;
     pwmFreqSet = true;
     
+  }
+  /*
+   * Orderly shutdown. Send a message to stop all pwm generation
+   * 
+   */
+  public void stopPwm() {
+
+    byte[] buffer = { (byte) (PCA9685_ALL_LED_OFF_H), (byte) PCA9685_TURN_ALL_LED_OFF};
+    log.info(String.format("Writing shutdown command to %s", this.getName()));
+    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
   }
 
   public void setServo(Integer pin, Integer pulseWidthOff) {
@@ -913,10 +926,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
           pindef.setName(pinName);
           pindef.setRx(false);
             pindef.setDigital(true);
-            pindef.setAnalog(true);
+          pindef.setAnalog(true);
           pindef.setDigital(true);
           pindef.canWrite(true);
-            pindef.setPwm(true);
+          pindef.setPwm(true);
           pindef.setAddress(i);
           pinIndex.put(i, pindef);
           pinMap.put(pinName, pindef);
@@ -944,5 +957,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       return;
     }
   }
+  @Override
+  public
+  void stopService() {
+      super.stopService(); // stop inbox and outbox
+      stopPwm(); // stop pwm
+}
 
 }
