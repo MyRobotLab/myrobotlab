@@ -5,14 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
-import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -25,41 +19,7 @@ public class ApiFactoryTest {
   
   public final static Logger log = LoggerFactory.getLogger(ApiFactoryTest.class);
 
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
 
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
-
-  @Test
-  public void testGetApiKey() {
-    //fail("Not yet implemented");
-  }
-
-  @Test
-  public void testProcessMessageSenderOutputStreamStringString() {
-    //fail("Not yet implemented");
-  }
-
-  @Test
-  public void testGetInstance() {
-    //fail("Not yet implemented");
-  }
-
-  @Test
-  public void testGetInstanceMessageSender() {
-    //fail("Not yet implemented");
-  }
 
   @Test
   public void testProcessString() {
@@ -236,22 +196,7 @@ public class ApiFactoryTest {
       log.error("main threw", e);
     }
 
-    Runtime.exit();
-  }
-
-  @Test
-  public void testProcessOutputStreamString() {
-    //fail("Not yet implemented");
-  }
-
-  @Test
-  public void testProcessOutputStreamStringInputStream() {
-    //fail("Not yet implemented");
-  }
-
-  @Test
-  public void testProcessOutputStreamStringByteArray() {
-    //fail("Not yet implemented");
+   //  Runtime.exit();
   }
 
 }
