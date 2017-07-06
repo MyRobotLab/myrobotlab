@@ -222,29 +222,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // geronimo-servlet_3.0_spec-1.0.jar
     return meta;
   }
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.WARN);
 
-    try {
-
-      // Double level = Runtime.getBatteryLevel();
-      // log.info("" + level);
-
-      /*
-       * VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual",
-       * "VirtualArduino"); virtual.connect("COM5");
-       * 
-       * Runtime.start("python", "Python");
-       */
-      // Runtime.start("arduino", "Arduino");
-      // Runtime.start("srf05", "UltrasonicSensor");
-      // Runtime.setRuntimeName("george");
-      Runtime.start("webgui", "WebGui");
-
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
   public Integer port;
 
   public Integer sslPort;
@@ -1006,6 +984,32 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    */
   public void useLocalResources(boolean useLocalResources) {
     this.useLocalResources = useLocalResources;
+  }
+  
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.WARN);
+
+    try {
+
+      // Double level = Runtime.getBatteryLevel();
+      // log.info("" + level);
+
+      /*
+       * VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual",
+       * "VirtualArduino"); virtual.connect("COM5");
+       * 
+       * Runtime.start("python", "Python");
+       */
+      // Runtime.start("arduino", "Arduino");
+      // Runtime.start("srf05", "UltrasonicSensor");
+      // Runtime.setRuntimeName("george");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      Runtime.start("webgui", "WebGui");
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
   }
 
 }
