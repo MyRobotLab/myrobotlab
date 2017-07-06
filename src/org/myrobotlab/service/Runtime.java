@@ -2397,4 +2397,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return new SystemResources();
   }
 
+  public static boolean isDaemon() {
+    return cmdline.containsKey("-daemon");
+  }
+
 }
