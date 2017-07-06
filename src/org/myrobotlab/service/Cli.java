@@ -80,7 +80,16 @@ public class Cli extends Service {
 
     @Override
     public void write(byte[] data) throws IOException {
-      System.out.write(data);
+      
+      // writing to stdout - daemon
+      // we don't write if its a daemon, because
+      // it will block forever if forked with &
+      // because System.out is borked when forked ?
+      if (!Runtime.isDaemon()){
+        System.out.write(data);
+      }
+      
+      // publishing stdout
       invoke("stdout", data);
     }
 
