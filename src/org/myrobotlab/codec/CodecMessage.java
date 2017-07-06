@@ -3,13 +3,14 @@ package org.myrobotlab.codec;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class CodecMessage implements Codec {
+public class CodecMessage extends Codec {
 
   public final static Logger log = LoggerFactory.getLogger(CodecMessage.class);
 
@@ -19,15 +20,24 @@ public class CodecMessage implements Codec {
   private transient static Gson mapper = new GsonBuilder().create();// .setDateFormat("yyyy-MM-dd
                                                                     // HH:mm:ss.SSS").disableHtmlEscaping().create();
 
-  public static final byte[] FQ_D = "d".getBytes();
+  static public String encode(Object obj) {
+    return mapper.toJson(obj);
+  }
 
   @Override
   public void encode(OutputStream out, Object obj) throws IOException {
-    byte[] json = null;
-   
-    json = mapper.toJson(obj).getBytes();
 
-    out.write(json);
+    String json = mapper.toJson(obj);
+
+    // if (log.isDebugEnabled()){
+    // log.warn("<< {}", json);
+    // }
+
+    // if (recorder != null){
+    // recorder.write(String.format("message << %s\n", json).getBytes());
+    // }
+
+    out.write(json.getBytes());
   }
 
   @Override

@@ -34,7 +34,7 @@ import org.jivesoftware.smack.roster.packet.RosterPacket.ItemStatus;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration.Builder;
-import org.myrobotlab.codec.CodecCli;
+import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.CodecUri;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
@@ -109,8 +109,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     meta.addDependency("org.jivesoftware.smack", "4.1.6");
     return meta;
   }
-
-  transient CodecCli cli = new CodecCli();
 
   transient CodecUri uri = new CodecUri();
 
@@ -338,7 +336,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
       if (body.startsWith("/")) {
         // String pathInfo = String.format("/%s/service%s",
         // CodecUtils.PREFIX_API, body); FIXME - wow that was horrific
-        String pathInfo = String.format("/%s%s", CodecUtils.PREFIX_API, body);
+        String pathInfo = String.format("/%s%s", Api.PREFIX_API, body);
         try {
           org.myrobotlab.framework.Message msg = CodecUri.decodePathInfo(pathInfo);
           Object ret = null;

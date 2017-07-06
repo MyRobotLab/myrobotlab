@@ -48,14 +48,6 @@ public class CodecUtils {
 
   public final static String SCHEME_BASE64 = "base64";
 
-  public final static String API_TYPE_MESSAGES = "messages";
-  public final static String API_TYPE_MESSAGES2 = "messages2";
-  /**
-   * use API_TYPE_SERVICE
-   */
-  public final static String API_TYPE_SERVICES = "services";
-  public static final String API_TYPE_SERVICE = "service";
-
   // TODO change to mime-type
   public final static String TYPE_MESSAGES = "messages";
   public final static String TYPE_JSON = "json";
@@ -73,8 +65,6 @@ public class CodecUtils {
   // FIXME - switch to Jackson
 
   private static boolean initialized = false;
-
-  public final static String PREFIX_API = "api";
 
   public final static String makeFullTypeName(String type) {
     if (type == null) {
