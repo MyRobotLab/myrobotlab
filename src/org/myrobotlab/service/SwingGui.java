@@ -88,17 +88,17 @@ import com.mxgraph.view.mxGraph;
  * other services. With its own tab it provides a map of message routes and
  * icons of currently running services.
  * 
- * SwingGui -&gt; Look at service registry SwingGui -&gt; attempt to create a panel
- * for each registered service SwingGui -&gt; create panel SwingGui -&gt;
+ * SwingGui -&gt; Look at service registry SwingGui -&gt; attempt to create a
+ * panel for each registered service SwingGui -&gt; create panel SwingGui -&gt;
  * panel.init(this, serviceName); panel.send(Notify, someoutputfn, GUIName,
  * panel.inputfn, data);
  *
- * serviceName (source) --&gt; SwingGui-&gt; msg Arduino arduino01 -&gt; post message -&gt;
- * outbox -&gt; outbound -&gt; notifyList -&gt; reference of sender? (NO) will not
- * transport across process boundry
+ * serviceName (source) --&gt; SwingGui-&gt; msg Arduino arduino01 -&gt; post
+ * message -&gt; outbox -&gt; outbound -&gt; notifyList -&gt; reference of
+ * sender? (NO) will not transport across process boundry
  * 
- * serviceGUI needs a Runtime Arduino arduin-&gt; post back (data) --&gt; SwingGui -
- * look up serviceGUI by senders name ServiceGUI-&gt;invoke(data)
+ * serviceGUI needs a Runtime Arduino arduin-&gt; post back (data) --&gt;
+ * SwingGui - look up serviceGUI by senders name ServiceGUI-&gt;invoke(data)
  * 
  * References :
  * http://www.scribd.com/doc/13122112/Java6-Rules-Adding-Components-To-The-
@@ -122,7 +122,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   DockableTabPane tabs;// is loaded = new DockableTabPane(this);
   transient SwingGuiGui guiServiceGui;
   transient JPanel tabPanel;
-  Map<String,String> userDefinedServiceTypeColors = new HashMap<String,String>();
+  Map<String, String> userDefinedServiceTypeColors = new HashMap<String, String>();
   /**
    * the all important 2nd stage routing map after the message gets back to the
    * gui service the 'rest' of the callback is handled with this data structure
@@ -176,8 +176,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     }
     return compList;
   }
-  
-  public void setColor(String serviceType, String hexColor){
+
+  public void setColor(String serviceType, String hexColor) {
     userDefinedServiceTypeColors.put(serviceType, hexColor);
   }
 
@@ -186,9 +186,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     Color c = new Color(Color.HSBtoRGB(Float.parseFloat("0." + sb.reverse().toString()), 0.8f, 0.7f));
     return c;
   }
-  
+
   public Color getColorHash(String uri) {
-    if (userDefinedServiceTypeColors.containsKey(uri)){
+    if (userDefinedServiceTypeColors.containsKey(uri)) {
       // e.g. "#FFCCEE"
       return Color.decode(userDefinedServiceTypeColors.get(uri));
     }
@@ -280,7 +280,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   /**
    * add a service tab to the SwingGui
    * 
-   * @param sw 
+   * @param sw
    *          - name of service to add
    * 
    *          FIXME - full parameter of addTab(final String serviceName, final
@@ -335,7 +335,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         }
         // newGui.getDisplay().setBackground(Color.CYAN);
 
-        tabs.addTab(name, newGui.getDisplay());   
+        tabs.addTab(name, newGui.getDisplay());
         tabs.getTabs().setBackgroundAt(tabs.size() - 1, getColorHash(sw.getClass().getSimpleName()));
         tabs.get(name).transitDockedColor = tabs.getTabs().getBackgroundAt(tabs.size() - 1);
         pack();
@@ -554,7 +554,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       public void run() {
         String name = si.getName();
         tabs.removeTab(name);
-        guiServiceGui.rebuildGraph();
+        if (guiServiceGui != null) {
+          guiServiceGui.rebuildGraph();
+        }
         frame.pack();
         frame.repaint();
       }

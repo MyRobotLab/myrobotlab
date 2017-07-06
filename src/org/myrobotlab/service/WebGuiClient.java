@@ -70,7 +70,10 @@ public class WebGuiClient extends Service {
 		nettyConfig.addProperty("child.keepAlive", "true");
 		nettyConfig.addProperty("child.reuseAddress", true);
 		nettyConfig.addProperty("child.connectTimeoutMillis", 60000);
-		nettyConfig.setWebSocketMaxFrameSize(65536);
+	  // framesize - initial communication is a bit ridiculous
+		// it should be minimal client Hello + authentication 
+		// what should come back is platform + list of services & types
+		nettyConfig.setWebSocketMaxFrameSize(65536); 
 		
 		AsyncHttpClientConfig config = new AsyncHttpClientConfig.Builder()
 		        .setAsyncHttpClientProviderConfig(nettyConfig)

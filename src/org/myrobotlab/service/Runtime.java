@@ -32,6 +32,8 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.myrobotlab.cmdline.CmdLine;
+import org.myrobotlab.codec.ApiFactory;
+import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
@@ -57,6 +59,10 @@ import org.myrobotlab.net.HttpRequest;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.RepoInstallListener;
 import org.myrobotlab.string.StringUtil;
+import org.myrobotlab.swagger.Get;
+import org.myrobotlab.swagger.Parameter;
+import org.myrobotlab.swagger.Path;
+import org.myrobotlab.swagger.Swagger;
 import org.slf4j.Logger;
 
 import com.sun.management.OperatingSystemMXBean;
@@ -64,17 +70,17 @@ import com.sun.management.OperatingSystemMXBean;
 /**
  * Runtime is responsible for the creation and removal of all Services and the
  * associated static registries It maintains state information regarding
- * possible &amp; running local Services It maintains state information regarding
- * foreign Runtimes It is a singleton and should be the only service of Runtime
- * running in a process The host and registry maps are used in routing
- * communication to the appropriate service (be it local or remote) It will be
- * the first Service created It also wraps the real JVM Runtime object.
+ * possible &amp; running local Services It maintains state information
+ * regarding foreign Runtimes It is a singleton and should be the only service
+ * of Runtime running in a process The host and registry maps are used in
+ * routing communication to the appropriate service (be it local or remote) It
+ * will be the first Service created It also wraps the real JVM Runtime object.
  *
  * TODO - get last args &amp; better restart (with Agent possibly?)
  *
  * RuntimeMXBean - scares me - but the stackTrace is clever RuntimeMXBean
- * runtimeMxBean = ManagementFactory.getRuntimeMXBean(); List&lt;String&gt; arguments
- * = runtimeMxBean.getInputArguments()
+ * runtimeMxBean = ManagementFactory.getRuntimeMXBean(); List&lt;String&gt;
+ * arguments = runtimeMxBean.getInputArguments()
  *
  * final StackTraceElement[] stackTrace =
  * Thread.currentThread().getStackTrace(); final String mainClassName =
@@ -112,11 +118,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   static private String runtimeName;
   public boolean is64bit = System.getProperty("sun.arch.data.model").contains("64");
-  public boolean isLinux()
-  {
-	  return Platform.getLocalInstance().isLinux();
-  }
 
+  public boolean isLinux() {
+    return Platform.getLocalInstance().isLinux();
+  }
 
   static private Date startDate = new Date();
 
@@ -232,11 +237,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     // runtime name
     /*
-    if (runtimeName != null) {
-      ret.add("-runtimeName");
-      ret.add(runtimeName);
-    }
-    */
+     * if (runtimeName != null) { ret.add("-runtimeName"); ret.add(runtimeName);
+     * }
+     */
 
     // logLevel
 
@@ -545,7 +548,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * find the external ip address of NAT'd systems
    *
    * @return external or routers ip
-   * @throws Exception e
+   * @throws Exception
+   *           e
    */
   public static String getExternalIp() throws Exception {
     URL whatismyip = new URL("http://checkip.amazonaws.com");
@@ -609,19 +613,20 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return runtime;
   }
 
-  static public boolean extract(){
-          // FIXME - check to see if this extract only once - it should !
-          // FIXME - make static function extract() and "force" it to overwrite
-          // FIXME - put in command line to -extract similar to -install
-          // FIXME - divide up resources so each service has its appropriate dependencies
-          //         OR - bundle them as dependency resources into artifactory
-          try {
-            Zip.extractFromSelf("resource", "resource");
-            return true;
-          } catch(Exception e){
-            log.error("extraction threw", e);
-          }
-          return false;
+  static public boolean extract() {
+    // FIXME - check to see if this extract only once - it should !
+    // FIXME - make static function extract() and "force" it to overwrite
+    // FIXME - put in command line to -extract similar to -install
+    // FIXME - divide up resources so each service has its appropriate
+    // dependencies
+    // OR - bundle them as dependency resources into artifactory
+    try {
+      Zip.extractFromSelf("resource", "resource");
+      return true;
+    } catch (Exception e) {
+      log.error("extraction threw", e);
+    }
+    return false;
   }
 
   static public List<String> getJVMArgs() {
@@ -668,6 +673,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       Logging.logError(e);
     }
     return ret;
+  }
+
+  public static List<ApiDescription> getApis() {
+    return ApiFactory.getApis();
   }
 
   // @TargetApi(9)
@@ -796,6 +805,56 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return ret;
   }
 
+  static public Swagger getSwagger(String serviceTypeName) {
+    Swagger swagger = new Swagger();
+    try {
+      Class<?> c = Class.forName(String.format("org.myrobotlab.service.%s", serviceTypeName));
+
+      // TODO - make examples and other info in MetaData !
+      Method method = c.getMethod("getMetaData");
+      ServiceType serviceType = (ServiceType) method.invoke(null); // Tags ?
+                                                                   // Examples ?
+
+      Method[] methods = c.getDeclaredMethods();
+
+      Method m;
+      // MethodEntry me;
+      String s;
+      for (int i = 0; i < methods.length; ++i) {
+        m = methods[i];
+
+        if (hideMethods.contains(m.getName())) {
+          continue;
+        }
+        String name = m.getName();
+        Path path = new Path();
+        path.get = new Get();// /get
+        path.get.operationId = name;
+        swagger.paths.put(String.format("/service/{name}/%s",name), path);
+
+        java.lang.reflect.Parameter[] parameters = m.getParameters();
+        for (java.lang.reflect.Parameter parameter : parameters) {
+          Parameter p = new Parameter();
+          if (parameter.isNamePresent()) {
+            p.name = parameter.getName();
+          }
+          p.in = "path";
+          p.format = "string"; // :P FIXME - type conversions
+          
+          path.get.parameters.add(p);
+          // FIXME p.description from JavaDoc
+          parameter.getType();
+          // String parameterName = parameter.getName();
+        }
+      }
+
+    } catch (Exception e) {
+      log.error("getSwagger threw", e);
+    }
+
+    return swagger;
+  }
+
   static public String getId() {
     return id;
   }
@@ -807,7 +866,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     try {
       hostname = InetAddress.getLocalHost().getHostName();
-      if (hostname != null){
+      if (hostname != null) {
         hostname = hostname.toLowerCase();
         return hostname;
       }
@@ -909,6 +968,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   /*
    * param interfaceName
+   * 
    * @return service names which match
    */
   public static List<String> getServiceNamesFromInterface(Class<?> interfaze) {
@@ -981,11 +1041,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return 0;
   }
 
-
-  static public double getCpuLoad(){
-    OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(
-              OperatingSystemMXBean.class);
-    //What % CPU load this current JVM is taking, from 0.0-1.0
+  static public double getCpuLoad() {
+    OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
+    // What % CPU load this current JVM is taking, from 0.0-1.0
     return osBean.getProcessCpuLoad();
   }
 
@@ -1142,6 +1200,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   /**
    * load all configuration from all local services
+   * 
    * @return true / false
    */
   static public boolean loadAll() {
@@ -1184,7 +1243,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
       logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
 
-      if (cmdline.containsKey("-id")){
+      if (cmdline.containsKey("-id")) {
         id = cmdline.getArgument("-id", 0);
       }
 
@@ -1527,24 +1586,22 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   public static void shutdown(int seconds) {
     log.info("shutting down in {} seconds", seconds);
-    if (seconds > 0){
-      runtime.addTaskOneShot(seconds * 1000, "shutdown", (Object[])null);
+    if (seconds > 0) {
+      runtime.addTaskOneShot(seconds * 1000, "shutdown", (Object[]) null);
       runtime.invoke("publishShutdown", seconds);
-    }
-    else
-      {
+    } else {
       shutdown();
-      }
+    }
   }
 
   public static void shutdown() {
     // - saveAll(); not needed as release at some point calls save()
-  log.info("halt");
+    log.info("halt");
     releaseAll();
     System.exit(-1);
   }
 
-  public Integer publishShutdown(Integer seconds){
+  public Integer publishShutdown(Integer seconds) {
     return seconds;
   }
 
@@ -1568,9 +1625,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   /*
-   * @param name
-   *          - name of Service to be removed and whos resources will be
-   *          released
+   * @param name - name of Service to be removed and whos resources will be
+   * released
    */
   static public void releaseService(String name) {
     Runtime.release(name);
@@ -1581,60 +1637,37 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    *
    * should probably be deprecated - currently not used
    *
-   * runBeforeRestart
-   *          will this work on a file lock update?
+   * runBeforeRestart will this work on a file lock update?
    */
   /*
-  static public void restart(Runnable runBeforeRestart) {
-    final java.lang.Runtime r = java.lang.Runtime.getRuntime();
-    log.info("restart - restart?");
-    Runtime.releaseAll();
-    try {
-      // java binary
-      String java = System.getProperty("java.home") + "/bin/java";
-
-      // init the command to execute, add the vm args
-      final StringBuffer cmd = new StringBuffer("\"" + java + "\" ");
-
-      // program main and program arguments
-      String[] mainCommand = globalArgs;
-      // program main is a jar
-      if (mainCommand[0].endsWith(".jar")) {
-        // if it's a jar, add -jar mainJar
-        cmd.append("-jar " + new File(mainCommand[0]).getPath());
-      } else {
-        // else it's a .class, add the classpath and mainClass
-        cmd.append("-cp \"" + System.getProperty("java.class.path") + "\" " + mainCommand[0]);
-      }
-      // finally add program arguments
-      for (int i = 1; i < mainCommand.length; i++) {
-        cmd.append(" ");
-        cmd.append(mainCommand[i]);
-      }
-      // execute the command in a shutdown hook, to be sure that all the
-      // resources have been disposed before restarting the application
-
-      r.addShutdownHook(new Thread() {
-        @Override
-        public void run() {
-          try {
-            r.exec(cmd.toString());
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-        }
-      });
-      // execute some custom code before restarting
-      if (runBeforeRestart != null) {
-        runBeforeRestart.run();
-      }
-      // exit
-    } catch (Exception ex) {
-      Logging.logError(ex);
-    }
-    System.exit(0);
-
-  } */
+   * static public void restart(Runnable runBeforeRestart) { final
+   * java.lang.Runtime r = java.lang.Runtime.getRuntime();
+   * log.info("restart - restart?"); Runtime.releaseAll(); try { // java binary
+   * String java = System.getProperty("java.home") + "/bin/java";
+   * 
+   * // init the command to execute, add the vm args final StringBuffer cmd =
+   * new StringBuffer("\"" + java + "\" ");
+   * 
+   * // program main and program arguments String[] mainCommand = globalArgs; //
+   * program main is a jar if (mainCommand[0].endsWith(".jar")) { // if it's a
+   * jar, add -jar mainJar cmd.append("-jar " + new
+   * File(mainCommand[0]).getPath()); } else { // else it's a .class, add the
+   * classpath and mainClass cmd.append("-cp \"" +
+   * System.getProperty("java.class.path") + "\" " + mainCommand[0]); } //
+   * finally add program arguments for (int i = 1; i < mainCommand.length; i++)
+   * { cmd.append(" "); cmd.append(mainCommand[i]); } // execute the command in
+   * a shutdown hook, to be sure that all the // resources have been disposed
+   * before restarting the application
+   * 
+   * r.addShutdownHook(new Thread() {
+   * 
+   * @Override public void run() { try { r.exec(cmd.toString()); } catch
+   * (IOException e) { e.printStackTrace(); } } }); // execute some custom code
+   * before restarting if (runBeforeRestart != null) { runBeforeRestart.run(); }
+   * // exit } catch (Exception ex) { Logging.logError(ex); } System.exit(0);
+   * 
+   * }
+   */
 
   /*
    * save all configuration from all local services
@@ -1651,10 +1684,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
 
     return ret;
-  }
-
-  public static boolean setJSONPrettyPrinting(boolean b) {
-    return CodecUtils.setJSONPrettyPrinting(b);
   }
 
   public static void setRuntimeName(String inName) {
@@ -1725,19 +1754,17 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       log.info("============== env begin ==============");
 
       Map<String, String> env = System.getenv();
-      /* - remove for security
-      for (Map.Entry<String, String> entry : env.entrySet()) {
-        String key = entry.getKey();
-        String value = entry.getValue();
-        log.info(String.format("%s=%s", key, value));
-      }
-      */
-      if (env.containsKey("PATH")){
+      /*
+       * - remove for security for (Map.Entry<String, String> entry :
+       * env.entrySet()) { String key = entry.getKey(); String value =
+       * entry.getValue(); log.info(String.format("%s=%s", key, value)); }
+       */
+      if (env.containsKey("PATH")) {
         log.info(String.format("PATH=%s", env.get("PATH")));
       } else {
         log.info("PATH not defined");
       }
-      if (env.containsKey("JAVA_HOME")){
+      if (env.containsKey("JAVA_HOME")) {
         log.info(String.format("JAVA_HOME=%s", env.get("JAVA_HOME")));
       } else {
         log.info("JAVA_HOME not defined");
@@ -2007,8 +2034,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   /*
    * registration event
    *
-   * @param sw 
-   *          - the name of the Service which was successfully registered
+   * @param sw - the name of the Service which was successfully registered
    */
   public ServiceInterface registered(ServiceInterface sw) {
     return sw;
@@ -2017,8 +2043,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   /*
    * release event
    *
-   * @param sw
-   *          - the name of the Service which was successfully released
+   * @param sw - the name of the Service which was successfully released
    */
   public ServiceInterface released(ServiceInterface sw) {
     return sw;
@@ -2059,7 +2084,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       // FIXME - send original command line ..
       // FIXME - SEND ***ID*** !!!!
       // just send a restart msg to the Agent process
-      // FIXME - perhaps a "rename" is more safe .. since the file is complete ...
+      // FIXME - perhaps a "rename" is more safe .. since the file is complete
+      // ...
       Message msg = Message.createMessage(this, "agent", "restart", null);
       FileIO.toFile(String.format("msgs/agent.%d.part", msg.msgId), CodecUtils.toJson(msg));
       File partFile = new File(String.format("msgs/agent.%d.part", msg.msgId));
@@ -2077,7 +2103,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
   }
 
-  /*
+  /**
    * Runtime's setLogLevel will set the root log level if its called from a
    * service - it will only set that Service type's log level
    *
@@ -2089,7 +2115,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return level;
   }
 
-  static public String setLogFile(String file){
+  static public String getLogLevel() {
+    Logging logging = LoggingFactory.getInstance();
+    return logging.getLevel();
+  }
+
+  static public String setLogFile(String file) {
     log.info("setLogFile {}", file);
     Logging logging = LoggingFactory.getInstance();
     logging.removeAllAppenders();
@@ -2355,7 +2386,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     return meta;
   }
-
 
   public ServiceData getServiceData() {
     return serviceData;

@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class CodecJson implements Codec {
+public class CodecJson extends Codec {
   /**
    * Result set to JSON - this is a fluid definition, except for the family
    * qualifier will always be 'd'

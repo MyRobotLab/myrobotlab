@@ -6,15 +6,16 @@ import java.util.HashMap;
 
 public class CodecFactory {
 
-  // static public encodeMethodSignature()
-
   static final private HashMap<String, String> mimeTypeMap = new HashMap<String, String>();
+  static final private HashMap<String, Codec> codecMap = new HashMap<String, Codec>();
   static private boolean initialized = false;
 
   static public synchronized void init() {
     if (!initialized) {
+      // I guess application/json == service ???
       mimeTypeMap.put("application/json", "org.myrobotlab.codec.CodecJson");
       mimeTypeMap.put("application/mrl-json", "org.myrobotlab.codec.CodecMessage");
+      initialized = true;
     }
 
   }
@@ -31,11 +32,15 @@ public class CodecFactory {
       clazz = CodecUtils.MIME_TYPE_MRL_JSON;
     }
 
-    Class<?> o = Class.forName(clazz);
-    Constructor<?> constructor = o.getConstructor();
-    Codec codec = (Codec) constructor.newInstance();
-    // return new CodecJson();
-    return codec;
+    if (codecMap.containsKey(mimeType)) {
+      return codecMap.get(mimeType);
+    } else {
+      Class<?> o = Class.forName(clazz);
+      Constructor<?> constructor = o.getConstructor();
+      Codec codec = (Codec) constructor.newInstance();
+      codecMap.put(mimeType, codec);
+      return codec;
+    }
   }
 
   /*

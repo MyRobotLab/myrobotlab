@@ -21,18 +21,17 @@ import java.util.concurrent.TimeUnit;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.Http;
 import org.slf4j.Logger;
 
@@ -125,9 +124,9 @@ public class Agent extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Agent.class);
 
-	static HashSet<String> dependencies = new HashSet<String>();
+	static Set<String> dependencies = new HashSet<String>();
 
-	static HashMap<Integer, ProcessData> processes = new HashMap<Integer, ProcessData>();
+	static Map<Integer, ProcessData> processes = new HashMap<Integer, ProcessData>();
 
 	static List<String> agentJVMArgs = new ArrayList<String>();
 	static transient SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd:HH:mm:ss");
@@ -232,7 +231,7 @@ public class Agent extends Service {
 			baos.close();
 			return baos.toByteArray();
 		} catch (Exception e) {
-			Logging.logError(e);
+			log.error("toByteArray threw", e);
 		}
 
 		return null;
@@ -280,7 +279,7 @@ public class Agent extends Service {
 			Runtime.start("webmin", "WebGui");
 
 		} catch (Exception e) {
-			Logging.logError(e);
+		  log.error("startWebGui threw", e);
 		}
 
 	}
@@ -501,7 +500,7 @@ public class Agent extends Service {
 				}
 			}
 		} catch (Exception e) {
-			Logging.logError(e);
+		  log.error("getRemoteBranches threw", e);
 		}
 		return possibleBranches;
 	}
@@ -567,7 +566,7 @@ public class Agent extends Service {
 	 * get a list of all the processes currently governed by this Agent
 	 * @return hash map, int to process data
 	 */
-	static public HashMap<Integer, ProcessData> getProcesses() {
+	static public Map<Integer, ProcessData> getProcesses() {
 		return processes;
 	}
 
@@ -807,7 +806,7 @@ public class Agent extends Service {
 		try {
 			FileIO.savePartFile(new File("fullTest.json"), CodecUtils.toJson(ret).getBytes());
 		} catch (Exception e) {
-			Logging.logError(e);
+		  log.error("serviceTest threw", e);
 		}
 
 		return ret;
@@ -1159,6 +1158,7 @@ public class Agent extends Service {
 				serviceTest();
 			} else {
 				if (!runtimeArgs.containsKey("-fork")) {
+				  Runtime.setLogLevel("WARN");
 					Runtime.start("agent", "Agent");
 				}
 				if (!runtimeArgs.containsKey("-client")) {

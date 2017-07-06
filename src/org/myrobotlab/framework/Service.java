@@ -1343,6 +1343,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // on parameter types - the thing is we may have a typed signature
       // which will allow execution - but
       // if so we need to search
+      
+      // FIXME - WHY ISN'T METHOD CACHING USED HERE !!!
 
       // SECURITY - ??? can't be implemented here - need a full message
       meth = c.getMethod(method, paramTypes); // getDeclaredMethod zod !!!
@@ -1745,9 +1747,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     send(name, method, (Object[]) null);
   }
 
-  /**
-   * boxing - the right way - thank you Java 5
-   */
   public void send(String name, String method, Object... data) {
     Message msg = Message.createMessage(this, name, method, data);
     msg.sender = this.getName();
@@ -1755,7 +1754,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // get the correct sendingMethod
     // here its hardcoded
     msg.sendingMethod = "send";
-
+    send(msg);
+  }
+  
+  public void send(Message msg){
     if (recorder != null) {
       try {
         recorder.write(msg);
@@ -1784,7 +1786,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
     msg.sender = this.getName();
     msg.status = Message.BLOCKING;
     msg.msgId = Runtime.getUniqueID();
-
+    
+    return sendBlocking(msg, timeout);
+  }
+  
+  public Object sendBlocking(Message msg, Integer timeout) {
     Object[] returnContainer = new Object[1];
     /*
      * if (inbox.blockingList.contains(msg.msgID)) { log.error("DUPLICATE"); }
@@ -1803,6 +1809,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
     return returnContainer[0];
   }
+  
 
   // BOXING - End --------------------------------------
   public Object sendBlocking(String name, String method) {
@@ -1810,9 +1817,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public Object sendBlocking(String name, String method, Object... data) {
-    return sendBlocking(name, 1000, method, data); // default 1 sec timeout
-    // - TODO - make
-    // configurable
+    // default 1 second timeout - FIXME CONFIGURABLE
+    return sendBlocking(name, 1000, method, data); 
   }
 
   @Override

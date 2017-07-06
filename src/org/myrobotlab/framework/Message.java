@@ -53,10 +53,20 @@ public class Message implements Serializable {
    */
 
   public long msgId;
+  
+  /**
+   * the originating uri
+   */
+  public String uri;
+  
+  /**
+   * apiKey related to data encoding
+   */
+  public String apiKey;
+  
   /**
    * destination name of the message
    */
-
   public String name;
   /**
    * name of the sending Service which sent this Message
@@ -66,8 +76,8 @@ public class Message implements Serializable {
   /**
    * originating source method which generated this Message
    */
-
   public String sendingMethod;
+
   /**
    * history of the message, its routing stops and Services it passed through.
    * This is important to prevent endless looping of messages. Turns out
@@ -98,7 +108,7 @@ public class Message implements Serializable {
    * invoking a service request this would be the parameter (list) - this would
    * the return type data if the message is outbound
    */
-  public Object[] data;
+  public Object[] data;  
 
   public Message() {
     msgId = System.currentTimeMillis();
@@ -170,6 +180,7 @@ public class Message implements Serializable {
     d[0] = data;
     return createMessage(sender, name, method, d);
   }
+
 
 
 
