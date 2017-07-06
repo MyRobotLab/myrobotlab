@@ -176,7 +176,7 @@ public class Cli extends Service {
   /**
    * processes input from incoming streams
    * 
-   * @throws IOException
+   * @throws IOException - can throw from damaged io stream
    */
   public void process(String line) throws IOException {
 
@@ -285,8 +285,8 @@ public class Cli extends Service {
    * 
    * <pre>
    * Our Process ---------- Pipe -----------  Remote Process
-   * InputStream  ----- input/output ---->     OutputStream (stdin)
-   * OutputStream <---- output/input -----     InputStream  (stdout)
+   * InputStream  ----- input/output ----&gt;     OutputStream (stdin)
+   * OutputStream &lt;---- output/input -----     InputStream  (stdout)
    * 
    * MAKE NOTE : - you cannot interrupt a thread doing a blocking read on a processes
    * output stream !  The ONLY way to stop the thread from reading is to close the
@@ -377,7 +377,7 @@ public class Cli extends Service {
      * attaches myOutputstream to the remote output stream relaying/piping the
      * data back
      * 
-     * @param b
+     * @param b - if true we will send to output stream
      */
     public void attach(boolean b) {
       this.attached = b;
@@ -426,7 +426,14 @@ public class Cli extends Service {
   }
 
   /**
-   * add an i/o pair to this cli for the possible purpose attaching
+   *  add an i/o pair to this cli for the possible purpose attaching
+   *  this is a remote process's input and output stream, hence from
+   *  this side they are inverted - ie out is an inputstream and in
+   *  is an output stream
+   *
+   * @param name - name of pipe
+   * @param out - out stream to the remote process
+   * @param in - in stream from the remote process
    */
   public void add(String name, InputStream out, OutputStream in) {
     pipes.put(name, new Pipe(name, out, in));
@@ -438,9 +445,7 @@ public class Cli extends Service {
 
   /**
    * Pipe or Attach to another processes' Cli
-   * 
    * different level cli.attach(process id)
-   * 
    */
   public void attach(String id) {
 
@@ -513,11 +518,6 @@ public class Cli extends Service {
   public String echo(String msg) {
     return msg;
   }
-
-  /*
-   * public ArrayList<ProcessData> lp(){ return
-   * Runtime.getAgent().getProcesses(); }
-   */
 
   /**
    * FIXME !!! return Object[] and let Cli command processor handle encoding for

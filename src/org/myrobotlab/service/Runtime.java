@@ -2106,7 +2106,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   /**
    * Runtime's setLogLevel will set the root log level if its called from a
    * service - it will only set that Service type's log level
-   *
+   * 
+   * @param level - DEBUG | INFO | WARN | ERROR 
+   * @return the level which was set
    */
   static public String setLogLevel(String level) {
     log.info("setLogLevel {}", level);
