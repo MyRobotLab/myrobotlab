@@ -2092,7 +2092,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 			virtual.connect("COM78");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.connect("COM78");
-
+			Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver)Runtime.start("adafruit", "Adafruit16CServoDriver");
+			adafruit.attach(arduino);
+			arduino.attach(adafruit);
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
 			// servo.attach(arduino, 8, 90);
 
