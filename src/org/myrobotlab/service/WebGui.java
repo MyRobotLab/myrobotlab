@@ -597,7 +597,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * to setup some protocol details here for websockets and session management
    * which the ApiFactory should not be concerned with.
    * 
-   * @param r
+   * @param r - request and response objects from Atmosphere server
    */
   public void handleMessagesApi(AtmosphereResource r) {
     try {
@@ -1001,7 +1001,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * UseLocalResources determines if references to JQuery JavaScript library are
    * local or if the library is linked to using content delivery network.
    * Default (false) is to use the CDN
-   * 
+   *
+   * @param useLocalResources - true uses local resources fals uses cdn
    */
   public void useLocalResources(boolean useLocalResources) {
     this.useLocalResources = useLocalResources;

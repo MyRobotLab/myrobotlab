@@ -95,12 +95,10 @@ public class ApiFactory {
    * @param out
    *          - an OutputStream from the requestor, results (if any) will be
    *          sent back to this OutputStream
-   * @param requestUri
-   *          - request Uri - the original requestUri of the request
-   * @param data
-   *          - request Payload data - inbound data
-   * @return
-   * @throws Exception
+   * @param requestUri - request Uri - the original requestUri of the request
+   * @param data - request Payload data - inbound data
+   * @return - return data from the invoked method
+   * @throws Exception - can throw from invalid or broken streams
    */
   // TODO public Object process(MessageSender sender, OutputStream out, String
   // requestUri, byte data) throws Exception {
@@ -176,12 +174,6 @@ public class ApiFactory {
     }
     return process(sender, out, requestUri, data);
   }
-
-  /*
-   * public Object process(OutputStream out, String requestUri, Object...
-   * params) throws Exception { return process(sender, out, requestUri, null); }
-   */
-  /////////////////////////////////////////////////////////
 
   public static void main(String[] args) throws InterruptedException {
     try {
