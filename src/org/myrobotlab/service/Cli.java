@@ -176,6 +176,7 @@ public class Cli extends Service {
   /**
    * processes input from incoming streams
    * 
+   * @param line - line of data from the stream
    * @throws IOException - can throw from damaged io stream
    */
   public void process(String line) throws IOException {
@@ -321,9 +322,9 @@ public class Cli extends Service {
 
     /**
      * 
-     * @param id
-     * @param out
-     * @param in
+     * @param id - id of the pipe
+     * @param out - output stream of the remote process
+     * @param in - input stream of the remote process
      */
     // process output - process input !!
     public Pipe(String id, InputStream out, OutputStream in) {
@@ -568,8 +569,8 @@ public class Cli extends Service {
   /**
    * this method publishes returning data
    * 
-   * @param data
-   * @return
+   * @param data - byte array to be published from stdout stream
+   * @return - the byte array in string form
    */
   public String stdout(byte[] data) {
     if (data != null)
