@@ -329,7 +329,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         // to initialize the ServiceGui - good for remote stuffs
         send(name, "publishState");
 
-        if (getName().equals(name) && guiServiceGui != null) {
+        if (getName().equals(name) && guiServiceGui == null) {
           guiServiceGui = (SwingGuiGui) newGui;
           guiServiceGui.rebuildGraph();
         }
