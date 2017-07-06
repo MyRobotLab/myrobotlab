@@ -844,6 +844,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * If you need MRL changes of position or UI changes use publishPanel to
    * remotely control UI
    * 
+   * @param panel - the panel which has been moved or resized
    */
   public void savePanel(Panel panel) {
     if (panel.name == null) {

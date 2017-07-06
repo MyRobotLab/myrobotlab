@@ -53,7 +53,7 @@ public class ApiService extends Api {
    * The precedence is to decode addressing and all data associated with the
    * requestUri over the data.
    * 
-   * FIXME - beyond ApiFactory -> a 'initial' message would be formed - which is
+   * FIXME - beyond ApiFactory -&gt; a 'initial' message would be formed - which is
    * the results of the request URI being parsed
    * 
    */

@@ -64,11 +64,10 @@ public abstract class Api {
    * 
    * {scheme}://{host}:{port}/api/{apiKey}/{p0}/{p1}/{p(n)}/...
    * 
-   * @param requestUri
-   * @return
-   * @throws Exception
+   * @param uri - inbound uri
+   * @return - returns message constructed from the uri
    */
-  static public Message uriToMsg(String uri) throws Exception {
+  static public Message uriToMsg(String uri) {
     Message msg = new Message();
     msg.uri = uri;
     msg.name = "runtime"; // default
