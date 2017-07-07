@@ -830,7 +830,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         Path path = new Path();
         path.get = new Get();// /get
         path.get.operationId = name;
-        swagger.paths.put(String.format("/service/{name}/%s",name), path);
+        swagger.paths.put(String.format("/service/{name}/%s", name), path);
 
         java.lang.reflect.Parameter[] parameters = m.getParameters();
         for (java.lang.reflect.Parameter parameter : parameters) {
@@ -840,7 +840,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
           }
           p.in = "path";
           p.format = "string"; // :P FIXME - type conversions
-          
+
           path.get.parameters.add(p);
           // FIXME p.description from JavaDoc
           parameter.getType();
@@ -2107,7 +2107,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * Runtime's setLogLevel will set the root log level if its called from a
    * service - it will only set that Service type's log level
    * 
-   * @param level - DEBUG | INFO | WARN | ERROR 
+   * @param level
+   *          - DEBUG | INFO | WARN | ERROR
    * @return the level which was set
    */
   static public String setLogLevel(String level) {
@@ -2397,8 +2398,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return new SystemResources();
   }
 
+  /* FIXME - did not work ...
   public static boolean isDaemon() {
     return cmdline.containsKey("-daemon");
   }
+  */
 
 }

@@ -85,9 +85,9 @@ public class Cli extends Service {
       // we don't write if its a daemon, because
       // it will block forever if forked with &
       // because System.out is borked when forked ?
-      if (!Runtime.isDaemon()){
+      // if (!Runtime.isDaemon()){
         System.out.write(data);
-      }
+      // }
       
       // publishing stdout
       invoke("stdout", data);
