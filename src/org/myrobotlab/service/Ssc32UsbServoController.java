@@ -244,7 +244,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   }
 
   /**
-   * Routing Attach - routes ServiceInterface.attach(service) to appropriate
+   * Routing attach - routes ServiceInterface.attach(service) to appropriate
    * methods for this class
    */
   @Override
@@ -263,16 +263,23 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    */
   @Override
   public void attachServoControl(ServoControl servo) throws Exception {
-    if (isAttachedServoControl(servo)) {
+    if (isAttached(servo)) {
       return;
     }
     servos.put(servo.getName(), servo);
     servo.attach(this);
   }
 
-  // FIXME - promote to interface !!!
-  public boolean isAttachedServoControl(ServoControl servo) {
-    return servos.containsKey(servo.getName());
+  /**
+   * Routing detach - routes ServiceInterface.detach(service) to appropriate
+   * methods for this class
+   */
+  public void detach(Attachable service){
+    if (ServoControl.class.isAssignableFrom(service.getClass())) {
+      detachServoControl((ServoControl) service);
+      return;
+    }
+    error("%s doesn't know how to detach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
 
   /**
@@ -281,7 +288,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * @param servo - servo control service
    * @throws Exception
    */
-  public void detach(ServoControl servo) {
+  public void detachServoControl(ServoControl servo) {
     if (isAttached(servo.getName())) {
       servos.remove(servo.getName());
       servo.detach(this);
