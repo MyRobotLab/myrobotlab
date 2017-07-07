@@ -1,9 +1,6 @@
 package org.myrobotlab.framework.interfaces;
 
 import java.util.Set;
-import java.util.TreeSet;
-
-import org.myrobotlab.service.Runtime;
 
 /**
  * A device which can be attached to a microcontroller implementers are Sensor
@@ -19,66 +16,131 @@ import org.myrobotlab.service.Runtime;
  */
 public interface Attachable extends NameProvider {
 
-	/**
-	 * detach the attachable with this name from the service by name
-	 * @param service s
-	 */
-	public void detach(String service);
-	
-	/**
-	 * detach the attachable with this name from the service by reference
-	 * @param service s
-	 */
-	public void detach(Attachable service);
+  /**
+   * This attach when overriden "routes" to the appropriately typed parameterized
+   * attach within a service.
+   * 
+   * When overriden, the first thing it should do is check to see if the
+   * referenced service is already attached. If it is already attached it should
+   * simply return.
+   * 
+   * If its attached to this service, it should first attach itself, modifying
+   * its own data if necessary. The last thing it should do is call the
+   * parameterized service's attach. This gives the other service an opportunity
+   * to attach. e.g.
+   * 
+   * <pre>
+   * 
+   * public void attach(Attachable service) {
+   *    if (ServoControl.class.isAssignableFrom(service.getClass())) {
+   *        attachServoControl((ServoControl) service);
+   *        return;
+   *    }
+   *    
+   *    ...  route to more attach functions   ....
+   *    
+   *    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+   *  }
+   *  
+   *  And within attachServoControl :
+   *  
+   *  public void attachServoControl(ServoControl service) {
+   *       // guard
+   *       if (!isAttached(service)){
+   *           return;
+   *       }
+   *       
+   *       ... attach logic ....
+   * 
+   *       // call to attaching service
+   *       service.attach(this);  
+   * }  
+   * </pre>
+   * 
+   * @param service
+   *          - the service to attach from this service
+   */
+  public void attach(Attachable service) throws Exception;
 
-	/**
-	 * returns if the Attachable has been set or not - name interface
-	 * @param name n
-	 * @return True or False
-	 */
-	public boolean isAttached(String name);
-	
-	 /**
-	 * @param instance i
-	 * @return if the Attachable has been set or not - name interface
+  /**
+   * calls attach(Attachable)
+   * 
+   * @param serviceName - service name
+   * @throws Exception - thrown if error
+   */
+  public void attach(String serviceName) throws Exception;
+
+  /**
+   * This detach when overriden "routes" to the appropriately typed parameterized
+   * detach within a service.
+   * 
+   * When overriden, the first thing it should do is check to see if the
+   * referenced service is already detached. If it is already detached it should
+   * simply return.
+   * 
+   * If its detached to this service, it should first detach itself, modifying
+   * its own data if necessary. The last thing it should do is call the
+   * parameterized service's detach. This gives the other service an opportunity
+   * to detach. e.g.
+   * 
+   * <pre>
+   * 
+   * public void detach(Attachable service) {
+   *    if (ServoControl.class.isAssignableFrom(service.getClass())) {
+   *        detachServoControl((ServoControl) service);
+   *        return;
+   *    }
+   *    
+   *    ...  route to more detach functions   ....
+   *    
+   *    error("%s doesn't know how to detach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+   *  }
+   *  
+   *  And within detachServoControl :
+   *  
+   *  public void detachServoControl(ServoControl service) {
+   *       // guard
+   *       if (!isAttached(service)){
+   *           return;
+   *       }
+   *       
+   *       ... detach logic ....
+   * 
+   *       // call to detaching service
+   *       service.detach(this);  
+   * }  
+   * </pre>
+   * 
+   * @param service
+   *          - the service to detach from this service
+   */
+  public void detach(Attachable service);
+
+  /**
+   * This detach calls detach(Attachable) method for a reference
+   * 
+   * @param serviceName
+   *          - name of service
+   */
+  public void detach(String serviceName);
+
+  /**
+   * @return the set of attached service names to this service
+   */
+  public Set<String> getAttached();
+
+  /**
+   * @param instance - referenced service to test
+   * @return true if service is already attached false otherwise
    */
   public boolean isAttached(Attachable instance);
 
-	
-	/**
-	 * @return the set of attached service names to this service
-	 */
-	public Set<String> getAttached();
-	
-	 /**
-   * the "routing" attach - routes to a specific strongly typed attach of the
-   * service if it exists
-   * @param service s
-   * @throws Exception e
-   */
-  public void attach(Attachable service) throws Exception;
-  
-  
-  public void attach(String service) throws Exception;
-  
-  
   /**
-   * @return - the current count of devices its controlling
+   * returns if the Attachable has been set or not - name interface
+   * 
+   * @param name - name of service
+   * @return True or False depending if service is attached
    */
-  /*
-  default public int getAttachedCount(){
-    return 0;
-  }
-  */
-  /**
-   * get the current set of connected 'control' devices attached to this controller
-   * @return
-   */
-  /*
-  default public Set<String> getAttachedNames(){
-    Set<String> ret = new TreeSet<String>();
-    return ret;
-  }
-  */
+  public boolean isAttached(String name);
 
 }
