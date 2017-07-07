@@ -62,7 +62,7 @@ public class ApiService extends Api {
   public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) throws Exception {
 
     // FIXME change to CodecUtils.MIME_TYPE_JSON
-    Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
+    Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
     // FIXME - MUST DECIDE IF BOTH msgFromUri data is preset and input String
     // data - what should happen ???

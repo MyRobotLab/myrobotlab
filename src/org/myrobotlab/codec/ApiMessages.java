@@ -26,7 +26,7 @@ public class ApiMessages extends Api {
     // ws always starts with a GET (no data)
     if (json != null) {
       // json message has precedence
-      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
+      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
       
       if (log.isDebugEnabled() && json != null) {
         log.debug("data - [{}]",json);

@@ -1305,6 +1305,24 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         shutdown();
         return;
       }
+      
+      if (cmdline.containsKey("-extract")) {
+        // force all updates
+        /* FIXME - do  " -extract {serviceType} in future 
+        ArrayList<String> services = cmdline.getArgumentList("-extract");
+        Repo repo = Repo.getLocalInstance();
+        if (services.size() == 0) {
+          repo.install();
+        } else {
+          for (int i = 0; i < services.size(); ++i) {
+            repo.install(services.get(i));
+          }
+        }
+        */
+        extract();
+        shutdown();
+        return;
+      }
 
       if (cmdline.containsKey("-service")) {
         createAndStartServices(cmdline);

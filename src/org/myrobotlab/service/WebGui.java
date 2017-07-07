@@ -42,7 +42,7 @@ import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecFactory;
-import org.myrobotlab.codec.CodecMessage;
+import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
@@ -305,7 +305,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void broadcast(Message msg) {
     try {
       if (broadcaster != null) {
-        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
+        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         codec.encode(bos, msg);
         bos.close();
@@ -546,17 +546,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           // e.g. http://api/services/runtime/getUptime -> return the uptime
           // only not the message
           if (msg.data == null) {
-            log.warn("<< {}", CodecMessage.encode(null));
+            log.warn("<< {}", CodecJson.encode(null));
             codec.encode(out, null);
           } else {
             // return the return type
-            log.warn("<< {}", CodecMessage.encode(msg.data[0]));
+            log.warn("<< {}", CodecJson.encode(msg.data[0]));
             codec.encode(out, msg.data[0]);
           }
         } else {
           // API_TYPE_MESSAGES
           // DEPRECATE - FOR LOGGING ONLY REMOVE
-          log.warn("<< {}", CodecMessage.encode(msg)); // FIXME if logTraffic
+          log.warn("<< {}", CodecJson.encode(msg)); // FIXME if logTraffic
           codec.encode(out, msg);
         }
 
@@ -690,7 +690,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void onLogEvent(Message msg) {
     try {
       if (broadcaster != null) {
-        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
+        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         codec.encode(bos, msg);
         bos.close();
@@ -1004,7 +1004,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.start("srf05", "UltrasonicSensor");
       // Runtime.setRuntimeName("george");
       WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
+      webgui.autoStartBrowser(true);
       Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {

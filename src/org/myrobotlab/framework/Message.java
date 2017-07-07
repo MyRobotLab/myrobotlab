@@ -29,7 +29,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 
-// FIXME - should 'only' have jvm imports - no other dependencies
+// FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.Level;
