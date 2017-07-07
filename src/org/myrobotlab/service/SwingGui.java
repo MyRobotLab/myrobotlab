@@ -338,7 +338,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         tabs.addTab(name, newGui.getDisplay());
         tabs.getTabs().setBackgroundAt(tabs.size() - 1, getColorHash(sw.getClass().getSimpleName()));
         tabs.get(name).transitDockedColor = tabs.getTabs().getBackgroundAt(tabs.size() - 1);
-        pack();
+//        pack(); DID I FIXED THE EVIL BLACK FROZEN GUI ISSUE !!!!
       }
     });
   }
@@ -755,14 +755,17 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
       // Runtime.start("i01", "InMoov");
       // Runtime.start("mac", "Runtime");
-      Runtime.start("python", "Python");
+      // Runtime.start("python", "Python");
       // RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote",
       // "RemoteAdapter");
       // remote.setDefaultPrefix("raspi");
       // remote.connect("tcp://127.0.0.1:6767");
+
       SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
-      Runtime.start("python", "Python");
-      gui.startService();
+      // Runtime.start("python", "Python");
+      for(int i = 0; i < 40; ++i){
+        Runtime.start(String.format("servo%d", i), "Servo");
+      }
 
     } catch (Exception e) {
       Logging.logError(e);
