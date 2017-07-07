@@ -20,14 +20,15 @@ import org.slf4j.Logger;
  *
  * 
  * &lt;pre&gt;
- *   
- *   # &lt;ch&gt; P &lt;pw&gt; ​S&lt;spd&gt;​​T&lt;time&gt; &lt;cr&gt;
  * 
- *  &lt;ch&gt;: pin / channel to which the servo is connected (0 to 31) in decimal
- *  &lt;pw&gt;: desired pulse width (normally 500 to 2500) in microseconds
- *  &lt;spd&gt;: servo movement speed in microseconds per second*
- *  &lt;time&gt;: time in microseconds to travel from the current position to the desired position. This affects all servos (65535 max) *
- *  &lt;cr&gt;: carriage return (ASCII 13)**
+ * # &lt;ch&gt; P &lt;pw&gt; ​S&lt;spd&gt;​​T&lt;time&gt; &lt;cr&gt;
+ * 
+ * &lt;ch&gt;: pin / channel to which the servo is connected (0 to 31) in
+ * decimal &lt;pw&gt;: desired pulse width (normally 500 to 2500) in
+ * microseconds &lt;spd&gt;: servo movement speed in microseconds per second*
+ * &lt;time&gt;: time in microseconds to travel from the current position to the
+ * desired position. This affects all servos (65535 max) * &lt;cr&gt;: carriage
+ * return (ASCII 13)**
  * 
  * &lt;/pre&gt;
  *
@@ -45,25 +46,24 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   transient HashMap<String, ServoControl> servos = new HashMap<String, ServoControl>();
 
   Integer defaultBaud = 9600;
-  
+
   static public double toUs(double degrees) {
-    // arduino docs 
+    // arduino docs
     // https://www.arduino.cc/en/Reference/ServoWriteMicroseconds
     // (degrees * 5.5) + 1000;
     // although arduino code does it differently
-    // 
+    //
     // http://www.robotshop.com/forum/converting-servo-pulses-to-degrees-t4856
-    // (degrees * 10) + 590; // for  (2390 - 590)
-    
+    // (degrees * 10) + 590; // for (2390 - 590)
+
     // return (degrees * 5.5) + 1000;
     return (int) Math.round((degrees * (2400 - 544) / 180) + 544);
   };
-  
+
   static public double toDegrees(double us) {
     return (us - 544) / 10;
   };
 
-  
   public Ssc32UsbServoController(String n) {
     super(n);
   }
@@ -71,11 +71,8 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   /**
    * connect - default connection speed is 9600
    * 
-   * Press and hold the button. 
-   * At first the LEDs will glow to indicate the current Baud rate.
-   * 9600 (green)
-   * 38400 (red)
-   * 115200 (both green and red)
+   * Press and hold the button. At first the LEDs will glow to indicate the
+   * current Baud rate. 9600 (green) 38400 (red) 115200 (both green and red)
    * Press the button to cycle through baud rates
    */
   public void connect(String port) throws IOException {
@@ -133,62 +130,6 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     serial.open(port, rate, databits, stopbits, parity);
   }
 
-  public void detach(ServoControl servo) throws Exception {
-    if (isAttached(servo.getName())){
-      servos.remove(servo.getName());
-      servo.detach(this);
-    }
-  }
-  
-  public boolean isAttached(String name){
-    return servos.containsKey(name);
-  }
- 
-  @Override
-  public Set<String> getAttached() {
-    return servos.keySet();
-  }
-
-  /**
-   * Routing Attach - routes ServiceInterface.attach(service) to appropriate methods
-   * for this class
-   */
-  @Override
-  public void attach(Attachable service) throws Exception {
-    if (ServoControl.class.isAssignableFrom(service.getClass())) {
-      attachServoControl((ServoControl) service);
-      return;
-    }
-
-    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
-  }
-
-  /**
-   * Single parameter attach{type}({type}) - this is where the "real" attach logic is
-   * for this service.
-   */
-  @Override
-  public void attachServoControl(ServoControl servo) throws Exception {
-    if (isAttachedServoControl(servo)) {
-      // log.info(String.format("%s is already attached to %s", servo.getName(), getName()));
-      return;
-    }
-    servos.put(servo.getName(), servo);
-    servo.attach(this);
-  }
-
-  // FIXME - promote to interface !!!
-  public boolean isAttachedServoControl(ServoControl servo) {
-    return servos.containsKey(servo.getName());
-  }
-
-  
-  @Override
-  public void attach(ServoControl servo, int pin) throws Exception {
-    servo.setPin(pin);
-    attachServoControl(servo);
-  }
-
   @Override
   public void servoAttachPin(ServoControl servo, int pin) {
     // DUNNO HOW TO RE-ENABLE unless its just a write to current position
@@ -227,21 +168,24 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     log.info(String.format("servoMove %f", servo.getTargetOutput()));
     StringBuilder sb = new StringBuilder();
     sb.append("#").append(servo.getPin());
-    sb.append("P").append((int)toUs(servo.getTargetOutput()));
-    
-    // T is 'over-calculated' - it represents 'travel time' - the time from "any" position to destination distance
+    sb.append("P").append((int) toUs(servo.getTargetOutput()));
+
+    // T is 'over-calculated' - it represents 'travel time' - the time from
+    // "any" position to destination distance
     // covered in that specified time :P
     // Velocity on this controller is specified in "Time for Travel" ,
-    // The total number of milliseconds from where it currently is to a new position
-    
+    // The total number of milliseconds from where it currently is to a new
+    // position
+
     double velocity = servo.getVelocity();
-    if (velocity > 0){
+    if (velocity > 0) {
       // sb.append("T").append(velocity * 10); // T is us per second
       sb.append("T").append(velocity * 100);
     }
-    
+
     // String cmd = "#%dP%d";
-    // write("#%dP%d", servo.getPin(), (int)servo.toUs(servo.getTargetOutput()));
+    // write("#%dP%d", servo.getPin(),
+    // (int)servo.toUs(servo.getTargetOutput()));
     write(sb.toString());
   }
 
@@ -251,7 +195,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     sb.append("#").append(servo.getPin());
     sb.append("P").append(uS);
     double velocity = servo.getVelocity();
-    if (velocity > 0){
+    if (velocity > 0) {
       // sb.append("T").append(velocity * 10); // T is us per second
       sb.append("T").append(velocity * 100);
     }
@@ -275,8 +219,78 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     // probably a noop - as it can be pulled from the
     // servo controller when the servo is moved.
   }
+  
+  
+  /**
+   * attach with parameters which will set all necessary attributes on ServoControl
+   * before calling the single parameter typed attach
+   * 
+   * @param servo the servo
+   * @param pin the pin number 
+   * @throws Exception e
+   */
+  @Override
+  public void attach(ServoControl servo, int pin) throws Exception {
+    servo.setPin(pin);
+    attachServoControl(servo);
+  }
 
-  ///////////// start new methods /////////////////
+  /**
+   * returns all currently attached services
+   */
+  @Override
+  public Set<String> getAttached() {
+    return servos.keySet();
+  }
+
+  /**
+   * Routing Attach - routes ServiceInterface.attach(service) to appropriate
+   * methods for this class
+   */
+  @Override
+  public void attach(Attachable service) throws Exception {
+    if (ServoControl.class.isAssignableFrom(service.getClass())) {
+      attachServoControl((ServoControl) service);
+      return;
+    }
+
+    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+  }
+
+  /**
+   * Single parameter attach{type}({type}) - this is where the "real" attach
+   * logic is for this service.
+   */
+  @Override
+  public void attachServoControl(ServoControl servo) throws Exception {
+    if (isAttachedServoControl(servo)) {
+      return;
+    }
+    servos.put(servo.getName(), servo);
+    servo.attach(this);
+  }
+
+  // FIXME - promote to interface !!!
+  public boolean isAttachedServoControl(ServoControl servo) {
+    return servos.containsKey(servo.getName());
+  }
+
+  /**
+   * This is a typed detach for the one interface it knows how to attach to
+   * 
+   * @param servo - servo control service
+   * @throws Exception
+   */
+  public void detach(ServoControl servo) {
+    if (isAttached(servo.getName())) {
+      servos.remove(servo.getName());
+      servo.detach(this);
+    }
+  }
+
+  public boolean isAttached(String name) {
+    return servos.containsKey(name);
+  }
 
   public static void main(String[] args) {
     LoggingFactory.init("INFO");
@@ -307,18 +321,16 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
       Servo big = (Servo) Runtime.start("big", "Servo");
 
       blue.setPin(16);
-      big.setPin(27);      
-      
+      big.setPin(27);
+
       // ssc.attach(little);
       ssc.attach(blue);
       ssc.attach(big);
-      
+
       /*
-      for (int i = 400; i < 3000; ++i){
-        big.writeMicroseconds(i);
-      }
-      */
-      
+       * for (int i = 400; i < 3000; ++i){ big.writeMicroseconds(i); }
+       */
+
       /// big.setVelocity(10);
       big.moveTo(0);
       big.moveTo(90);
@@ -329,16 +341,15 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
       big.enable();
       big.moveTo(10);
       big.moveTo(160);
-      
+
       big.detach(ssc);
-      
+
       ssc.detach(big);
-      
+
       boolean b = true;
-      if (b){
+      if (b) {
         return;
       }
-     
 
       // 500 2500
       // serial.write("#17P0 #16P0 @ \r");
@@ -367,7 +378,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
 
   @Override
   public void connect(String port, int rate) throws Exception {
-     connect(port, rate, 8, 1, 0);
+    connect(port, rate, 8, 1, 0);
   }
 
 }
