@@ -35,7 +35,7 @@ public class ApiFactoryTest {
       
       // =============== api messages begin =========================
       // FIXME change to CodecUtils.MIME_TYPE_JSON
-      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
+      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
       String retJson = null;
       
       // FIXME !!! - double encoded data for messages api

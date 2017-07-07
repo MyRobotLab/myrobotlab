@@ -112,6 +112,8 @@ public class ApiFactory {
     Message msg = Api.uriToMsg(requestUri);
     String apiKey = msg.apiKey;
 
+    log.warn("{}", msg);
+    
     if (!processors.containsKey(apiKey)) {
       String className = null;
       Object p = null;
@@ -150,8 +152,6 @@ public class ApiFactory {
     return process(sender, out, requestUri, null);
   }
 
-  ///////////////////////////////////////////////////////////
-
   public Object process(OutputStream out, String requestUri, InputStream is) throws Exception {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
@@ -186,7 +186,7 @@ public class ApiFactory {
 
       // =============== api messages begin =========================
       // FIXME change to CodecUtils.MIME_TYPE_JSON
-      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
+      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
       // FIXME !!! - double encoded data for messages api
       Message msg = Message.createMessage(runtime, "runtime", "getUptime", null);
