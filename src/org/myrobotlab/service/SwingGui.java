@@ -338,7 +338,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         tabs.addTab(name, newGui.getDisplay());
         tabs.getTabs().setBackgroundAt(tabs.size() - 1, getColorHash(sw.getClass().getSimpleName()));
         tabs.get(name).transitDockedColor = tabs.getTabs().getBackgroundAt(tabs.size() - 1);
-//        pack(); DID I FIXED THE EVIL BLACK FROZEN GUI ISSUE !!!!
+//        pack();  FIXED THE EVIL BLACK FROZEN GUI ISSUE !!!!
       }
     });
   }
