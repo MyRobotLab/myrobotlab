@@ -288,7 +288,7 @@
 		<pathelement location="${repo}/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
 		<pathelement location="${repo}/org.node/0.1.1/nodyn-0.1.1-20141121.193443-283.jar"/>
 		<pathelement location="${repo}/org.json/20090211/json-20090211.jar"/>
-		<pathelement location="${repo}/org.alicebot.ab/0.0.2-kw/program-ab-kw-0.0.2.jar"/>
+		<pathelement location="${repo}/org.alicebot.ab/0.0.3-kw/program-ab-kw-0.0.3.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/sosia.jar"/>
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-android-0.23.jar"/>
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-calibration-0.23.jar"/>

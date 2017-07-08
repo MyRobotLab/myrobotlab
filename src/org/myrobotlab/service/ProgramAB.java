@@ -737,7 +737,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
     // meta.addDependency("org.alicebot.ab", "0.0.6.26");
-    meta.addDependency("org.alicebot.ab", "0.0.2-kw");
+    meta.addDependency("org.alicebot.ab", "0.0.3-kw");
     meta.addDependency("org.json", "20090211");
     return meta;
   }
