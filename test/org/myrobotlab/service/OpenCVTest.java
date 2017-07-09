@@ -25,7 +25,7 @@ public class OpenCVTest {
   public static void setUpBeforeClass() throws Exception {
     opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     if (!Runtime.isHeadless()) {
-      swing = (SwingGui) Runtime.start("swing", "SwingGui");
+      // swing = (SwingGui) Runtime.start("swing", "SwingGui");
     }
   }
 
