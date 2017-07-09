@@ -1,11 +1,13 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -14,6 +16,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.slf4j.Logger;
 
+@Ignore
 public class OpenCVTest {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
