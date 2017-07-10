@@ -26,7 +26,7 @@ public class CodecJson extends Codec {
     String json = mapper.toJson(obj);
 
     // if (log.isDebugEnabled()){
-     log.warn("<< {}", json);
+    //  log.warn("<< {}", json); - great for debugging !
     // }
 
     // if (recorder != null){

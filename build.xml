@@ -87,40 +87,39 @@
 <project name="myrobotlab" default="jar" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
-
+    <!-- below has been commented out because its better NOT to add complexity 
+         with more configuration & exceptions, anyway they were not used -->
 	<!-- First thing is load the local properties -->
-	<property file="local.properties" />
+	<!-- property file="local.properties" / -->
 	<!-- load default build properties  -->
-	<property file="build.properties" />
+	<!-- property file="build.properties" / -->
 	<!-- backfill with the environment variables -->
 	<property environment="env" />
 	
-	<condition property="COMMIT" value="${env.TRAVIS_COMMIT}" else="devcommit">
-	  <isset property="env.RELEASE_VER" />
+	<!-- default local build will be "develop" branch -->
+	<condition property="branch" value="${env.TRAVIS_BRANCH}" else="develop">
+	  <isset property="env.TRAVIS_BRANCH" />
 	</condition>
 	
-	<condition property="BUILD" value="${env.TRAVIS_BUILD_NUMBER}" else="devbuild">
+	<condition property="commit" value="${env.TRAVIS_COMMIT}" else="localCommit">
+	  <isset property="env.TRAVIS_COMMIT" />
+	</condition>
+	
+	<condition property="build.number" value="${env.TRAVIS_BUILD_NUMBER}" else="localBuild">
 	   <isset property="env.TRAVIS_BUILD_NUMBER" />
 	</condition>
 	
-	<condition property="BRANCH" value="${env.TRAVIS_BUILD_NUMBER}" else="develop">
-	  <isset property="env.TRAVIS_BUILD_NUMBER" />
-	</condition>
+    <property name="version" value="1.0.${build.number}" />
 	
-	<!-- set the tag, if not already set in a local properties file -->
+	<!-- echo critical vars -->
+	<echo message="TRAVIS_COMMIT=${env.TRAVIS_COMMIT}" />
 	<echo message="TRAVIS_TAG=${env.TRAVIS_TAG}" />
 	<echo message="TRAVIS_BUILD_NUMBER=${env.TRAVIS_BUILD_NUMBER}" />
-	
-    <property name="developVersion" value="1.0.${BUILD}" />
-	<!-- property name="developVersion" value="1.0.9999" / -->
-	<property name="masterVersion" value="${env.TRAVIS_TAG}" />
-	<property name="version" value="${developVersion}" />
+	<echo message="branch=${branch}" />
+	<echo message="build.number=${build.number}" />
 	<echo message="version=${version}" />
 
 	<!-- set global properties for this build -->
-
-	<!-- the all powerful branch property if copied to master - will need to be updated -->
-	<property name="branch" value="${env.TRAVIS_BRANCH}"/>
 
 	<property name="fs" location="${file.separator}" />
 	<!-- the source code for release -->
@@ -552,31 +551,14 @@
 
 	<!-- ================ init begin ================= -->
 	<target name="init" depends="clean,repoClone" description="initialize things for the build">
-		<echo message="compiling with ${ant.java.version}" />
-		<!-- good for debugging -->
+		<echo message="compiling with java ${ant.java.version}" />
+		<echo message="ant version ${ant.version}" />
+		
+		<!-- echoproperties is good for debugging -->
 		<!-- echoproperties / -->
 		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
-		<!-- mail task properties -->
-		<property name="mail.host" value="smtp.gmail.com" />
-		<property name="mail.port" value="464" />
-		<property name="mail.subjectalert" value="Test build" />
-		<property name="mail.ssl" value="yes" />
-		<property name="mail.username" value="" />
-
-		<!-- get from local properties file -->
-		<property name="mail.password" value="" />
-		<!-- get from local properties file -->
-		<property name="mail.from" value="build@myrobotlab.org" />
-		<property name="mail.tolist" value="" />
-
-		<!-- nice for debugging -->
-		<!-- echoproperties / -->
-
-		<!-- TODO - get repo's comment -->
-
 		<echo message="date time ${DSTAMP}.${TSTAMP}" />
-		<property name="build.number" value="${env.BUILD_NUMBER}" />
 
 		<!-- git log -1 - -pretty=%B -->
 		<!-- FIXME - OOPS forgot about mrl pull ! only have repo !!! -->
@@ -994,7 +976,7 @@
 		               outputtoformatters="true" -->
 		<!-- temporarily disabling jacoco -->
 		<jacoco:coverage destfile="${result.jacoco.file}">
-		    <junit printsummary="on" fork="true" haltonfailure="true" showoutput="false" maxmemory="1g">
+		    <junit printsummary="on" fork="true" haltonfailure="false" showoutput="false" maxmemory="1g">
 			<!--
 			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
 			<env key="LD_LIBRARY_PATH" path="${dist}/libraries/native"/>			

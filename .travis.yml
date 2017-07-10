@@ -9,23 +9,22 @@ script: ant dist
 jdk:
 - oraclejdk8
 
+deploy:
+  provider: s3
+  access_key_id: "AKIAJ6CQ5PPESWGSKNXA"
+#  secret_access_key: "F+1ZgdpsglJR2LLWmldJxFLJVXgW2OSlAD6qJ972Wnq2e7DoGbdAY9thmhbeGwjK0aSB0ghzrrERbIQEujbrH+76b7rq1yAf6XxFHcl4svQWslfC8HJIMjyQZgUoW8+e+p9cm17Hlcv0p3LtgO/o1agJK32k0A1SApmIDa9DzG0="
+  secret_access_key: $AWS_SECRET_KEY
 
-addons:
-  artifacts:
-    bucket: mrl-bucket-02    
-    debug: true
-    # s3_region: us-west-1 | defaults to us-east-1
-    key:
-      secure: "HPVRrxMM0NCjH3S8VI1eG0Wl9diyiGZu9n8NRnGpyxXyjplAM+7p9ezGf6i3a+sdTashtjeLb5dpRruk4Hd5+Hn6V6QQahVrI82Q8bkcy5LQsnea2IBAHEMxQZMjFJhh4STUrX7SvRABHCYGWn1sCupauB00EhDjvfqWMCrEQF8="
-    secret:
-      secure: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="    
-    paths:    
-    - $(find dist/current/. | tr "\n" ":")
-    target_paths: current
-    # target_paths: current/$TRAVIS_BRANCH
-    # working_dir: dist 
-    # arbitrary shell commands are supported, but the output should be   
-    # converted to a ':'-delimited string.
-    # - $(ls build/report/*.xml | tr "\n" ":")
-    # singular paths work fine, too
-    # - build/lib/myrobotlab.jar  
+
+  bucket: "mrl-bucket-02"
+  skip_cleanup: true
+  upload-dir: "dist/current"
+  region: "us-east-1"
+  on:
+    all_branches: true  
+    
+env:
+  global:
+  - secure: CPq2oomYvrYnhzd+H4HU2T0NfjGO48MvlJ/UWqvrD4j6IXIe2ybrwRWSJfcfbFgZA5csHBEF2VNDgZlGhDV5aSVyBVkqBM4LfhvGVZo31Z2QhFVm5pTV45LRaiqSLCi74RgJEsFJ9viW+MROoKtMbFzvP3kVqWm4VaAWJK5c4cA=
+
+    

@@ -286,7 +286,6 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * This is a typed detach for the one interface it knows how to attach to
    * 
    * @param servo - servo control service
-   * @throws Exception
    */
   public void detachServoControl(ServoControl servo) {
     if (isAttached(servo.getName())) {
