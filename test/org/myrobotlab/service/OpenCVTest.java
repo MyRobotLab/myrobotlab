@@ -16,7 +16,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.slf4j.Logger;
 
-@Ignore
 public class OpenCVTest {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
