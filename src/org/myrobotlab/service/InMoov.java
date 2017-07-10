@@ -1969,25 +1969,25 @@ public class InMoov extends Service {
   public Boolean VinmoovMonitorActivated = false;
 
   public void onListeningEvent() {
-    if (vinMoovApp != null && VinmoovMonitorActivated) {
+    if (vinMoovApp != null && VinmoovMonitorActivated && RobotIsStarted) {
       vinMoovApp.setMicro(true);
     }
   }
 
   public void onPauseListening() {
-    if (vinMoovApp != null && VinmoovMonitorActivated) {
+    if (vinMoovApp != null && VinmoovMonitorActivated && RobotIsStarted) {
       vinMoovApp.setMicro(false);
     }
   }
 
   public void onRecognized(String text) {
-    if (vinMoovApp != null && VinmoovMonitorActivated) {
+    if (vinMoovApp != null && VinmoovMonitorActivated && RobotIsStarted) {
       vinMoovApp.onRecognized(text);
     }
   }
 
   public void setBatteryLevel(Integer level) {
-    if (vinMoovApp != null && VinmoovMonitorActivated) {
+    if (vinMoovApp != null && VinmoovMonitorActivated && RobotIsStarted) {
       vinMoovApp.setBatteryLevel(level);
 
     }
@@ -2035,7 +2035,7 @@ public class InMoov extends Service {
       vinMoovApp.setService(this);
       vinMoovApp.start();
       synchronized (this) {
-        wait(5000);
+        wait(6000);
       }
       if (torso != null) {
         vinMoovApp.addServo("mtorso", torso.midStom);
