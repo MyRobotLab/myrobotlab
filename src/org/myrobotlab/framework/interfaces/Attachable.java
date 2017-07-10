@@ -59,6 +59,7 @@ public interface Attachable extends NameProvider {
    * 
    * @param service
    *          - the service to attach from this service
+   * @throws Exception - throws on error and cannot attach
    */
   public void attach(Attachable service) throws Exception;
 
