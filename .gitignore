@@ -49,3 +49,6 @@ Thumbs.db
 /mimic/
 /inmoov/
 /msgs/
+/localBuild/
+/serial.rx.hex
+/serial.tx.hex
