@@ -17,3 +17,5 @@ deploy:
   skip_cleanup: true
   upload-dir: "dist/current"
   region: "us-east-1"
+  on:
+    all_branches: true  
