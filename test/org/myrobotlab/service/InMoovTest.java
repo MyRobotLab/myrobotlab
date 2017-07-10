@@ -6,7 +6,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -23,7 +22,6 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-@Ignore
 public class InMoovTest implements PinArrayListener {
 
 	public final static Logger log = LoggerFactory.getLogger(InMoovTest.class);

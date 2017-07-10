@@ -7,7 +7,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -60,8 +59,10 @@ public class OpenCVTest {
     // data = opencv.getOpenCVData();
     data = opencv.getFaceDetect();
     
+    int expected = 3;
+    int actual = 7;
    
-    
+    assertEquals(expected, actual);
     // data.get
     
     
