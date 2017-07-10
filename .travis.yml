@@ -9,36 +9,23 @@ script: ant dist
 jdk:
 - oraclejdk8
 
-deploy:
-  # Control deployment by setting a value for `on`. Setting the `branch`
-  # option to `master` means Travis will only attempt a deployment on
-  # builds of your repo's master branch (e.g., after you merge a PR).
-  on:
-    branch: develop
-  provider: s3
-  # You can refer to environment variables from Travis repo settings!
-  access_key_id: "HPVRrxMM0NCjH3S8VI1eG0Wl9diyiGZu9n8NRnGpyxXyjplAM+7p9ezGf6i3a+sdTashtjeLb5dpRruk4Hd5+Hn6V6QQahVrI82Q8bkcy5LQsnea2IBAHEMxQZMjFJhh4STUrX7SvRABHCYGWn1sCupauB00EhDjvfqWMCrEQF8="
-  secret_access_key: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="
-  # Name of the S3 bucket to which your site should be uploaded.
-  bucket: "mrl-bucket-02"
-  # Prevent Travis from deleting your built site so it can be uploaded.
-  skip_cleanup: true
-  # Path to a directory containing your built site.
-  local_dir: "dist/current"
-  # Set the Cache-Control header.
-  cache_control: "max-age=21600"
 
-# deploy:
-#  provider: s3
-#  access_key_id: "HPVRrxMM0NCjH3S8VI1eG0Wl9diyiGZu9n8NRnGpyxXyjplAM+7p9ezGf6i3a+sdTashtjeLb5dpRruk4Hd5+Hn6V6QQahVrI82Q8bkcy5LQsnea2IBAHEMxQZMjFJhh4STUrX7SvRABHCYGWn1sCupauB00EhDjvfqWMCrEQF8="
-#  secret_access_key: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="
-#  bucket: "mrl-bucket-02"
-#  skip_cleanup: true
-#  local_dir: "dist/current"
-#  region: "us-east-1"
-#  on:
-#    all_branches: true
-    
-#  on:
-#    branch: release
-#    condition: $MY_ENV = super_awesome
+addons:
+  artifacts:
+    bucket: mrl-bucket-02    
+    debug: true
+    # s3_region: us-west-1 | defaults to us-east-1
+    key:
+      secure: "HPVRrxMM0NCjH3S8VI1eG0Wl9diyiGZu9n8NRnGpyxXyjplAM+7p9ezGf6i3a+sdTashtjeLb5dpRruk4Hd5+Hn6V6QQahVrI82Q8bkcy5LQsnea2IBAHEMxQZMjFJhh4STUrX7SvRABHCYGWn1sCupauB00EhDjvfqWMCrEQF8="
+    secret:
+      secure: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="    
+    paths:    
+    - $(find dist/current/. | tr "\n" ":")
+    target_paths: current
+    # target_paths: current/$TRAVIS_BRANCH
+    # working_dir: dist 
+    # arbitrary shell commands are supported, but the output should be   
+    # converted to a ':'-delimited string.
+    # - $(ls build/report/*.xml | tr "\n" ":")
+    # singular paths work fine, too
+    # - build/lib/myrobotlab.jar  
