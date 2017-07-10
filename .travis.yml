@@ -17,7 +17,9 @@ deploy:
   bucket: "mrl-bucket-02"
   skip_cleanup: true
   local_dir: dist/current
-  all_branches: true
+  on:
+    all_branches: true
+    
 #  on:
 #    branch: release
 #    condition: $MY_ENV = super_awesome
