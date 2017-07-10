@@ -9,17 +9,35 @@ script: ant dist
 jdk:
 - oraclejdk8
 
-
 deploy:
-  provider: s3
-  access_key_id: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="
-  secret_access_key: "HPVRrxMM0NCjH3S8VI1eG0Wl9diyiGZu9n8NRnGpyxXyjplAM+7p9ezGf6i3a+sdTashtjeLb5dpRruk4Hd5+Hn6V6QQahVrI82Q8bkcy5LQsnea2IBAHEMxQZMjFJhh4STUrX7SvRABHCYGWn1sCupauB00EhDjvfqWMCrEQF8="
-  bucket: "mrl-bucket-02"
-  skip_cleanup: true
-  local_dir: "dist/current"
-  region: "us-east-1"
+  # Control deployment by setting a value for `on`. Setting the `branch`
+  # option to `master` means Travis will only attempt a deployment on
+  # builds of your repo's master branch (e.g., after you merge a PR).
   on:
-    all_branches: true
+    branch: develop
+  provider: s3
+  # You can refer to environment variables from Travis repo settings!
+  access_key_id: "HPVRrxMM0NCjH3S8VI1eG0Wl9diyiGZu9n8NRnGpyxXyjplAM+7p9ezGf6i3a+sdTashtjeLb5dpRruk4Hd5+Hn6V6QQahVrI82Q8bkcy5LQsnea2IBAHEMxQZMjFJhh4STUrX7SvRABHCYGWn1sCupauB00EhDjvfqWMCrEQF8="
+  secret_access_key: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="
+  # Name of the S3 bucket to which your site should be uploaded.
+  bucket: "mrl-bucket-02"
+  # Prevent Travis from deleting your built site so it can be uploaded.
+  skip_cleanup: true
+  # Path to a directory containing your built site.
+  local_dir: "dist/current"
+  # Set the Cache-Control header.
+  cache_control: "max-age=21600"
+
+# deploy:
+#  provider: s3
+#  access_key_id: "HPVRrxMM0NCjH3S8VI1eG0Wl9diyiGZu9n8NRnGpyxXyjplAM+7p9ezGf6i3a+sdTashtjeLb5dpRruk4Hd5+Hn6V6QQahVrI82Q8bkcy5LQsnea2IBAHEMxQZMjFJhh4STUrX7SvRABHCYGWn1sCupauB00EhDjvfqWMCrEQF8="
+#  secret_access_key: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="
+#  bucket: "mrl-bucket-02"
+#  skip_cleanup: true
+#  local_dir: "dist/current"
+#  region: "us-east-1"
+#  on:
+#    all_branches: true
     
 #  on:
 #    branch: release
