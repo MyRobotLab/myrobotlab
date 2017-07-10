@@ -16,7 +16,8 @@ deploy:
   secret_access_key: "Qs0Hh0yLdrqRn4PdkX+Agz3AVuaYANDuhYzwqHux/aJEp0WAu2cf4B/WECtf8AHAJMP9MpXGsRD3PnKNwQOqO93yjydLcFUhAhUJW9h9SfOsXmeLYO1ZO4dGHV4ODQtQdE92S8Amin/znK9PEl1tO8RYaTcxFfe71YbYHftPPVQ="
   bucket: "mrl-bucket-02"
   skip_cleanup: true
-  local_dir: dist/current
+  local_dir: "dist/current"
+  region: "us-east-1"
   on:
     all_branches: true
     
