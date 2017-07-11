@@ -14,11 +14,9 @@ deploy:
   access_key_id: "AKIAJ6CQ5PPESWGSKNXA"
 #  secret_access_key: "F+1ZgdpsglJR2LLWmldJxFLJVXgW2OSlAD6qJ972Wnq2e7DoGbdAY9thmhbeGwjK0aSB0ghzrrERbIQEujbrH+76b7rq1yAf6XxFHcl4svQWslfC8HJIMjyQZgUoW8+e+p9cm17Hlcv0p3LtgO/o1agJK32k0A1SApmIDa9DzG0="
   secret_access_key: $AWS_SECRET_KEY
-
-
   bucket: "mrl-bucket-02"
   skip_cleanup: true
-  upload-dir: "dist/current"
+  local_dir: "dist/current"
   region: "us-east-1"
   on:
     all_branches: true  
