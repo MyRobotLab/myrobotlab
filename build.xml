@@ -97,16 +97,16 @@
 	<property environment="env" />
 	
 	<!-- default local build will be "develop" branch -->
-	<condition property="branch" value="${env.TRAVIS_BRANCH}" else="develop">
-	  <isset property="env.TRAVIS_BRANCH" />
+	<condition property="branch" value="${branch}" else="develop">
+	  <isset property="branch" />
 	</condition>
 	
 	<condition property="commit" value="${env.TRAVIS_COMMIT}" else="localCommit">
 	  <isset property="env.TRAVIS_COMMIT" />
 	</condition>
 	
-	<condition property="build.number" value="${env.TRAVIS_BUILD_NUMBER}" else="localBuild">
-	   <isset property="env.TRAVIS_BUILD_NUMBER" />
+	<condition property="build.number" value="${env.BUILD_NUMBER}" else="localBuild">
+	   <isset property="env.BUILD_NUMBER" />
 	</condition>
 	
     <property name="version" value="1.0.${build.number}" />
