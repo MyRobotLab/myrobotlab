@@ -15,47 +15,36 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
-import org.myrobotlab.service.interfaces.VoltageSensorControl;
 import org.slf4j.Logger;
 
-//import com.pi4j.io.i2c.I2CBus;
 /**
- * AdaFruit Ina219 Shield Controller Service
+ * Lm75a Digital temperature sensor and thermal watchdog
  * 
  * @author Mats
  * 
- *         References : https://www.adafruit.com/products/904
+ *         References : https://www.nxp.com/documents/data_sheet/LM75A.pdf
  */
-public class AdafruitIna219 extends Service implements I2CControl, VoltageSensorControl {
+public class Lm75a extends Service implements I2CControl {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(AdafruitIna219.class);
-  transient public I2CController controller;
+  public final static Logger log = LoggerFactory.getLogger(Lm75a.class);
+  public transient I2CController controller;
 
-  public static final byte INA219_SHUNTVOLTAGE = 0x01;
-  public static final byte INA219_BUSVOLTAGE = 0x02;
+  // Register list
+  public static final byte LM75A_CONF = 0x01; //
+  public static final byte LM75A_TEMP = 0x00;
+  public static final byte LM75A_TOS = 0x03;
+  public static final byte LM75A_THYST = 0x02;
 
-  public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E",
-      "0x4F");
+  public List<String> deviceAddressList = Arrays.asList("0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E", "0x4F");
 
-  public String deviceAddress = "0x40";
+  public String deviceAddress = "0x48";
 
   public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
   public String deviceBus = "1";
 
-  public int busVoltage = 0;
-  public double shuntVoltage = 0;
-  public double current = 0.0;
-  public double power = 0.0;
-
-  // TODO Add methods to calibrate
-  // Currently only supports setting the shunt resistance to a different
-  // value than the default, in case it has been exchanged to measure
-  // a different range of current
-  public double shuntResistance = 0.1; // expressed in Ohms
-  public int scaleRange = 32; // 32V = bus full-scale range
-  public int pga = 8; // 320 mV = shunt full-scale range
+  public double temperature = 0;
 
   public List<String> controllers;
   public String controllerName;
@@ -66,22 +55,21 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
     LoggingFactory.init(Level.INFO);
 
     try {
-      AdafruitIna219 adafruitINA219 = (AdafruitIna219) Runtime.start("AdafruitIna219", "AdafruitIna219");
+      Lm75a lm75a = (Lm75a) Runtime.start("tempsensor", "Lm75a");
       Runtime.start("gui", "SwingGui");
       Runtime.start("webgui", "WebGui");
-
-      byte msb = (byte) 0x83;
-      byte lsb = (byte) 0x00;
-      double test = (double) ((((int) msb) << 8 | (int) lsb & 0xff)) * .01;
-      log.info(String.format("msb = %s, lsb = %s, test = %s", msb, lsb, test));
-      // (((int)(readbuffer[0] & 0xff) << 5)) | ((int)(readbuffer[1] >>
-      // 3));
+      /*
+       * byte msb = (byte) 0x83; byte lsb = (byte) 0x00; double test = (double)
+       * ((((int) msb) << 8 | (int) lsb & 0xff)) * .01;
+       * log.info(String.format("msb = %s, lsb = %s, test = %s", msb, lsb,
+       * test));
+       */
     } catch (Exception e) {
       Logging.logError(e);
     }
   }
 
-  public AdafruitIna219(String n) {
+  public Lm75a(String n) {
     super(n);
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
@@ -93,9 +81,6 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
 
   }
 
-  /*
-   * Refresh the list of running services that can be selected in the GUI
-   */
   public List<String> refreshControllers() {
     controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
     return controllers;
@@ -121,79 +106,78 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
     broadcastState();
   }
 
-  /**
-   * This method sets the shunt resistance in ohms Default value is .1 Ohms (
-   * R100 )
-   */
-  // @Override
-  public void setShuntResistance(double shuntResistance) {
-    this.shuntResistance = shuntResistance;
-  }
-
-  // @Override
-  public double getShuntResistance() {
-    return shuntResistance;
-  }
-
-  /**
-   * This method reads and returns the power in milliWatts
-   */
   public void refresh() {
-
-    power = getPower();
-    broadcastState();
-  }
-
-  // @Override
-  public double getPower() {
-    power = getBusVoltage() * getCurrent() / 1000;
-    return power;
+    getTemperature();
   }
 
   /**
-   * This method reads and returns the shunt current in milliAmperes
+   * This method reads and returns the raw temperature as two bytes where the
+   * MSB is the integer part of the temperature ( + sign ) and the LSB is the
+   * decimals. Used in two complement form.
    */
-  // @Override
-  public double getCurrent() {
-    current = getShuntVoltage() / shuntResistance;
-    return current;
-  }
-
-  /**
-   * This method reads and returns the shunt Voltage in milliVolts
-   */
-  // @Override
-  public double getShuntVoltage() {
-    byte[] writebuffer = { INA219_SHUNTVOLTAGE };
+  public double getTemperature() {
+    byte[] writebuffer = { LM75A_TEMP };
     byte[] readbuffer = { 0x0, 0x0 };
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
     controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
-    // log.info(String.format("getShuntVoltage x%02X x%02X", readbuffer[0],
+    // log.info(String.format("getTemperature 0x%02X 0x%02X", readbuffer[0],
     // readbuffer[1]));
-    // The shuntVoltage is signed so the MSB can have sign bits, that needs
+    // The temperature is signed so the MSB can have sign bits, that needs
     // to remain
-    shuntVoltage = (double) ((((int) readbuffer[0]) << 8 | (int) readbuffer[1] & 0xff)) * .01;
-    return shuntVoltage;
+    int rawTemp = (int) (readbuffer[0]) << 8 | (int) (readbuffer[1] & 0xff);
+    temperature = (double) rawTemp / 256;
+    broadcastState();
+    return temperature;
   }
 
-  /**
-   * This method reads and returns the bus Voltage in milliVolts
-   */
-  // @Override
-  public double getBusVoltage() {
-    byte[] writebuffer = { INA219_BUSVOLTAGE };
+  public int getConfig() {
+    byte[] writebuffer = { LM75A_CONF };
+    byte[] readbuffer = { 0x0 };
+    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+    controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
+    // log.info(String.format("getConf 0x%02X", readbuffer[0]));
+    // The temperature is signed so the MSB can have sign bits, that needs
+    // to remain
+    int config = (int) (readbuffer[0] & 0xff);
+    return config;
+  }
+
+  public double getTos() {
+    byte[] writebuffer = { LM75A_TOS };
     byte[] readbuffer = { 0x0, 0x0 };
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
     controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
-    // A bit tricky conversion. The LSB needs to be right shifted 3 bits, so
-    // the MSB needs to be left shifted (8-3) = 5 bits
-    // And bytes are signed in Java so first a mask of 0xff needs to be
-    // applied to the MSB to remove the sign
-    int rawBusVoltage = (((int) readbuffer[0] & 0xff) << 8 | (int) readbuffer[1] & 0xff) >> 3;
-    log.debug(String.format("Busvoltage high byte = %s, low byte = %s, rawBusVoltagee = %s", readbuffer[0], readbuffer[1], rawBusVoltage));
-    // LSB = 4mV, so multiply wit 4 to get the volatage in mV
-    busVoltage = rawBusVoltage * 4;
-    return busVoltage;
+    // log.info(String.format("getTos 0x%02X 0x%02X", readbuffer[0],
+    // readbuffer[1]));
+    // The temperature is signed so the MSB can have sign bits, that needs
+    // to remain
+    int rawTos = (int) (readbuffer[0]) << 8 | (int) (readbuffer[1] & 0xff);
+    double tos = rawTos / 256;
+    return tos;
+  }
+
+  public void setTos(int tos) {
+    byte[] writebuffer = { LM75A_TOS, (byte) tos, 0 };
+    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+  }
+
+  public double getThyst() {
+    byte[] writebuffer = { LM75A_THYST };
+    byte[] readbuffer = { 0x0, 0x0 };
+    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+    controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
+    // log.info(String.format("getThyst 0x%02X 0x%02X", readbuffer[0],
+    // readbuffer[1]));
+    // The temperature is signed so the MSB can have sign bits, that needs
+    // to remain
+    int rawThyst = (int) (readbuffer[0]) << 8 | (int) (readbuffer[1] & 0xff);
+    double thyst = rawThyst / 256;
+    return thyst;
+  }
+
+  public void setThyst(int thyst) {
+    byte[] writebuffer = { LM75A_THYST, (byte) thyst, 0 };
+    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
   }
 
   /**
@@ -206,11 +190,21 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(AdafruitIna219.class.getCanonicalName());
-    meta.addDescription("Adafruit INA219 Voltage and Current sensor Service");
+    ServiceType meta = new ServiceType(Lm75a.class.getCanonicalName());
+    meta.addDescription("LM75A Digital temperature sensor");
     meta.addCategory("shield", "sensor", "i2c");
     meta.setSponsor("Mats");
     return meta;
+  }
+
+  /**
+   * valid for a control or controller which can only have a single other
+   * service attached
+   * 
+   * @return true if the controller is attached. false otherwise
+   */
+  public boolean isAttached() {
+    return isAttached;
   }
 
   // This section contains all the new attach logic

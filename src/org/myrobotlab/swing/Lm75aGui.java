@@ -1,6 +1,5 @@
 /**
  *                    
- * @author Mats (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -25,6 +24,7 @@
 
 package org.myrobotlab.swing;
 
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -32,17 +32,18 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Pcf8574;
+import org.myrobotlab.service.Lm75a;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
-public class Pcf8574Gui extends ServiceGui implements ActionListener {
+public class Lm75aGui extends ServiceGui implements ActionListener {
 
   static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(Pcf8574Gui.class);
+  public final static Logger log = LoggerFactory.getLogger(Lm75aGui.class);
 
   String attach = "attach";
   String detach = "detach";
@@ -56,30 +57,28 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
   JLabel deviceBusLabel = new JLabel("Bus");
   JLabel deviceAddressLabel = new JLabel("Address");
 
-  Pcf8574 boundService = null;
+  JButton refresh = new JButton("refresh");
 
-  public Pcf8574Gui(final String boundServiceName, final SwingGui myService) {
+  JLabel temperature = new JLabel();
+
+  Lm75a boundService = null;
+
+  public Lm75aGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
-    boundService = (Pcf8574) Runtime.getService(boundServiceName);
+    boundService = (Lm75a) Runtime.getService(boundServiceName);
 
-    // Container BACKGROUND = getContentPane();
+    addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList, attachButton, refresh);
 
-    addLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
+    JPanel center = new JPanel();
+    center.add(new JLabel("Temperature: "));
+    center.add(temperature);
 
-    /*
-     * display.setLayout(new BorderLayout()); JPanel north = new JPanel();
-     * north.add(controllerLabel); north.add(controller);
-     * north.add(deviceBusLabel); north.add(deviceBusList);
-     * north.add(deviceAddressLabel); north.add(deviceAddressList);
-     * north.add(attachButton);
-     * 
-     */
-    attachButton.addActionListener(this);
+    display.add(center, BorderLayout.CENTER);
 
-    // display.add(north, BorderLayout.NORTH);
-
+    refreshControllers();
     getDeviceBusList();
     getDeviceAddressList();
+    restoreListeners();
 
   }
 
@@ -97,6 +96,9 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
         myService.send(boundServiceName, detach, controllerList.getSelectedItem());
       }
     }
+    if (o == refresh) {
+      myService.send(boundServiceName, "refresh");
+    }
   }
 
   @Override
@@ -107,7 +109,7 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
   public void unsubscribeGui() {
   }
 
-  public void onState(Pcf8574 service) {
+  public void onState(Lm75a service) {
 
     removeListeners();
     refreshControllers();
@@ -128,6 +130,8 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
       deviceAddressList.setEnabled(true);
     }
     restoreListeners();
+
+    temperature.setText(String.format("%s", service.temperature));
   }
 
   public void getDeviceBusList() {
@@ -158,9 +162,11 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
 
   public void removeListeners() {
     attachButton.removeActionListener(this);
+    refresh.removeActionListener(this);
   }
 
   public void restoreListeners() {
     attachButton.addActionListener(this);
+    refresh.addActionListener(this);
   }
 }
