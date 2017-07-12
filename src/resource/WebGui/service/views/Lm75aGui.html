@@ -6,10 +6,10 @@
   <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
       <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">Controller<span class="caret"></span></a>
       <ul uib-dropdown-menu>
-        <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)"><a href>{{possibleController}}</a></li>
+        <li ng-repeat="possibleController in controllers" ng-click="setController(possibleController)"><a href>{{possibleController}}</a></li>
       </ul>
   </span>
-   <input type="text" ng-readonly="true" class="form-control" ng-model="controllerName"><!-- FIXME - type-ahead -->  
+  <input type="text" ng-readonly="true" class="form-control" ng-model="controllerName"><!-- FIXME - type-ahead -->  
 
   <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
       <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">Bus<span class="caret"></span></a>
@@ -28,9 +28,15 @@
    <input type="text" ng-readonly="true" class="form-control" ng-model="deviceAddress"><!-- FIXME - type-ahead -->  
    
    <span class="input-group-btn">
-         <button class="btn btn-default" ng-show="!isAttached" ng-click="msg.attach(controllerName,deviceBus,deviceAddress)">attach</button>  
+         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName,deviceBus,deviceAddress)">attach</button>  
          <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach</button>
          
+         <button class="btn btn-default" ng-disabled="!isAttached"  ng-click="msg.refresh()">refresh</button>
      </span>
-     
+
   </div>
+
+<div class="input-group">
+  <span class="input-group-addon">Temperature: </span>
+  <input type="text" class="form-control" ng-readonly="true" ng-model="temperature" uib-tooltip="Temperatre in degrees Celcius">
+</div>

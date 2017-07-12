@@ -1,10 +1,11 @@
-angular.module('mrlapp.service.AdafruitIna219Gui', [])
-.controller('AdafruitIna219GuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
-    $log.info('AdafruitIna219GuiCtrl');
+angular.module('mrlapp.service.Lm75aGui', [])
+.controller('Lm75aGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
+    $log.info('Lm75aGuiCtrl');
     var _self = this;
     var msg = this.msg;
     
     // init
+    //$scope.controller = '';
     $scope.controllerName = '';
     $scope.controllers = [];    
     
@@ -18,10 +19,11 @@ angular.module('mrlapp.service.AdafruitIna219Gui', [])
         $scope.deviceAddressList = service.deviceAddressList;
         $scope.deviceAddress = service.deviceAddress;
         $scope.isAttached = service.isAttached;
-        $scope.busVoltage = service.busVoltage;
-        $scope.shuntVoltage = service.shuntVoltage;
-        $scope.current = service.current;
-        $scope.power = service.power;
+        $scope.adc0 = service.adc0;
+        $scope.adc1 = service.adc1;
+        $scope.adc2 = service.adc2;
+        $scope.adc3 = service.adc3;
+        $scope.temperature = service.temperature;
     }
     ;
     
@@ -34,6 +36,9 @@ angular.module('mrlapp.service.AdafruitIna219Gui', [])
             _self.updateState(data);
             $scope.$apply();
             break;
+        case 'onPinArray':
+            // a NOOP - but necessary 
+           break;
         default:
             $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method);
             break;

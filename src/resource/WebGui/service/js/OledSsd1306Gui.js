@@ -18,7 +18,7 @@ angular.module('mrlapp.service.OledSsd1306Gui', [])
         $scope.deviceBus = service.deviceBus;
         $scope.deviceAddressList = service.deviceAddressList;
         $scope.deviceAddress = service.deviceAddress;
-        $scope.isControllerSet = service.isControllerSet;
+        $scope.isAttached = service.isAttached;
 
     }
     ;
