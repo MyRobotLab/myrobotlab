@@ -553,9 +553,7 @@
 	<target name="init" depends="clean,repoClone" description="initialize things for the build">
 		<echo message="compiling with java ${ant.java.version}" />
 		<echo message="ant version ${ant.version}" />
-		
-		<!-- echoproperties is good for debugging -->
-		<!-- echoproperties / -->
+				
 		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
 		<echo message="date time ${DSTAMP}.${TSTAMP}" />
@@ -597,6 +595,8 @@
 		<mkdir dir="${build}/test" />
 		<mkdir dir="${build}/report" />
 
+		<!-- echoproperties is good for debugging -->
+		<echoproperties />
 	</target>
 	<!-- ================ init end ================= -->
 
@@ -976,7 +976,7 @@
 		               outputtoformatters="true" -->
 		<!-- temporarily disabling jacoco -->
 		<jacoco:coverage destfile="${result.jacoco.file}">
-		    <junit printsummary="on" fork="true" haltonfailure="false" showoutput="false" maxmemory="1g">
+		    <junit printsummary="on" fork="true" haltonfailure="true" showoutput="false" maxmemory="1g">
 			<!--
 			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
 			<env key="LD_LIBRARY_PATH" path="${dist}/libraries/native"/>			
