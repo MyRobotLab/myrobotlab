@@ -101,8 +101,8 @@
 	  <isset property="branch" />
 	</condition>
 	
-	<condition property="commit" value="${env.TRAVIS_COMMIT}" else="localCommit">
-	  <isset property="env.TRAVIS_COMMIT" />
+	<condition property="commit" value="${env.GIT_COMMIT}" else="localCommit">
+	  <isset property="env.GIT_COMMIT" />
 	</condition>
 	
 	<condition property="build.number" value="${env.BUILD_NUMBER}" else="localBuild">
