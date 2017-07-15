@@ -30,6 +30,8 @@ import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -52,7 +54,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public abstract class ServiceGui {
+public abstract class ServiceGui implements WindowListener {
 
 	public final static Logger log = LoggerFactory.getLogger(ServiceGui.class);
 	public final String boundServiceName;
@@ -382,5 +384,48 @@ public abstract class ServiceGui {
 		}
 		gc.gridy += 1;
 	}
+	
+
+  @Override
+  public void windowOpened(WindowEvent e) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void windowClosing(WindowEvent e) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void windowClosed(WindowEvent e) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void windowIconified(WindowEvent e) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void windowDeiconified(WindowEvent e) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void windowActivated(WindowEvent e) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void windowDeactivated(WindowEvent e) {
+    // TODO Auto-generated method stub
+    
+  }
 
 }
