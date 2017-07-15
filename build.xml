@@ -97,16 +97,16 @@
 	<property environment="env" />
 	
 	<!-- default local build will be "develop" branch -->
-	<condition property="branch" value="${env.TRAVIS_BRANCH}" else="develop">
-	  <isset property="env.TRAVIS_BRANCH" />
+	<condition property="branch" value="${branch}" else="develop">
+	  <isset property="branch" />
 	</condition>
 	
-	<condition property="commit" value="${env.TRAVIS_COMMIT}" else="localCommit">
-	  <isset property="env.TRAVIS_COMMIT" />
+	<condition property="commit" value="${env.GIT_COMMIT}" else="localCommit">
+	  <isset property="env.GIT_COMMIT" />
 	</condition>
 	
-	<condition property="build.number" value="${env.TRAVIS_BUILD_NUMBER}" else="localBuild">
-	   <isset property="env.TRAVIS_BUILD_NUMBER" />
+	<condition property="build.number" value="${env.BUILD_NUMBER}" else="localBuild">
+	   <isset property="env.BUILD_NUMBER" />
 	</condition>
 	
     <property name="version" value="1.0.${build.number}" />
@@ -129,13 +129,14 @@
 	<!-- directory for the build to go into -->
 	<property name="build" location="build" />
 	<!-- location for the unit test reports to go into -->
-        <property name="report" location="dist/current/${branch}/report" />
+    <property name="report" location="dist/current/${branch}/report" />
 
 	<!-- location for the jacoco reports -->
 	<property name="result.jacoco.file" location="${build}/jacoco.exec" />
 	<property name="result.report.dir" location="${build}/jacoco" />
 	<!-- directory for the distrbituion to go into -->
 	<property name="dist" location="dist/current/${branch}" />
+	<property name="deploy" location="/var/www/html/deploy/${branch}" />
 	
 	<available file="${build}/classes/resource/license" property="license.present" />
 	<property name="repo" location="../repo" />
@@ -553,9 +554,7 @@
 	<target name="init" depends="clean,repoClone" description="initialize things for the build">
 		<echo message="compiling with java ${ant.java.version}" />
 		<echo message="ant version ${ant.version}" />
-		
-		<!-- echoproperties is good for debugging -->
-		<!-- echoproperties / -->
+				
 		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
 		<echo message="date time ${DSTAMP}.${TSTAMP}" />
@@ -597,6 +596,8 @@
 		<mkdir dir="${build}/test" />
 		<mkdir dir="${build}/report" />
 
+		<!-- echoproperties is good for debugging -->
+		<echoproperties />
 	</target>
 	<!-- ================ init end ================= -->
 
@@ -854,7 +855,10 @@
 		<!-- copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${version}.jar" / -->
 		<!-- backwards compat .. TODO: review this.. -->
 		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/archive" />
+			
 		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/myrobotlab.jar" />
+		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab-${version}.jar" />		
 		<copy file="${build}/classes/resource/version.txt" tofile="${dist}/version.txt"/>
 		<!-- for convienence of debugging spawn -->
 		<copy file="${build}/lib/myrobotlab.jar" tofile="myrobotlab.jar" />
@@ -869,7 +873,11 @@
                 <zip destfile="${dist}/myrobotlab-jacoco.zip">
                   <zipfileset dir="${build}/javadoc" />
                 </zip>
-
+		
+		<mkdir dir="${deploy}" />
+		<copy todir="${deploy}">
+			<fileset dir="${dist}"/>
+		</copy>
 	</target>
 
 	<target name="clean" description="clean up">
@@ -976,7 +984,7 @@
 		               outputtoformatters="true" -->
 		<!-- temporarily disabling jacoco -->
 		<jacoco:coverage destfile="${result.jacoco.file}">
-		    <junit printsummary="on" fork="true" haltonfailure="false" showoutput="false" maxmemory="1g">
+		    <junit printsummary="on" fork="true" haltonfailure="true" showoutput="false" maxmemory="1g">
 			<!--
 			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
 			<env key="LD_LIBRARY_PATH" path="${dist}/libraries/native"/>			

@@ -44,49 +44,35 @@ import org.slf4j.Logger;
 
 public class AdafruitIna219Gui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(AdafruitIna219Gui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(AdafruitIna219Gui.class);
 
-	String attach = "setController";
-	String detach = "unsetController";
-	JButton attachButton = new JButton(attach);
+  String attach = "attach";
+  String detach = "detach";
+  JButton attachButton = new JButton(attach);
 
-	JComboBox<String> controller = new JComboBox<String>();
-	JComboBox<String> deviceAddressList = new JComboBox<String>();
-	JComboBox<String> deviceBusList = new JComboBox<String>();
+  JComboBox<String> controllerList = new JComboBox<String>();
+  JComboBox<String> deviceAddressList = new JComboBox<String>();
+  JComboBox<String> deviceBusList = new JComboBox<String>();
 
-	JLabel controllerLabel     = new JLabel("Controller");
-	JLabel deviceBusLabel     = new JLabel("Bus");
-	JLabel deviceAddressLabel = new JLabel("Address");
-	
-	JButton refresh = new JButton("refresh");
+  JLabel controllerLabel = new JLabel("Controller");
+  JLabel deviceBusLabel = new JLabel("Bus");
+  JLabel deviceAddressLabel = new JLabel("Address");
 
-	JLabel busVoltage = new JLabel();
-	JLabel shuntVoltage = new JLabel();
-	JLabel current = new JLabel();
-	JLabel power = new JLabel();
+  JButton refresh = new JButton("refresh");
 
-	AdafruitIna219 boundService = null;
+  JLabel busVoltage = new JLabel();
+  JLabel shuntVoltage = new JLabel();
+  JLabel current = new JLabel();
+  JLabel power = new JLabel();
 
-	public AdafruitIna219Gui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		boundService = (AdafruitIna219) Runtime.getService(boundServiceName);
+  AdafruitIna219 boundService = null;
 
+  public AdafruitIna219Gui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    boundService = (AdafruitIna219) Runtime.getService(boundServiceName);
 
-    // Container BACKGROUND = getContentPane();
-
-    display.setLayout(new BorderLayout());
-    JPanel north = new JPanel();
-    north.add(controllerLabel);
-    north.add(controller);
-    north.add(deviceBusLabel);    
-    north.add(deviceBusList);
-    north.add(deviceAddressLabel);
-    north.add(deviceAddressList);
-    north.add(attachButton);
-    north.add(refresh);
-    attachButton.addActionListener(this); 
-    refresh.addActionListener(this);
+    addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
 
     JPanel center = new JPanel();
     center.add(new JLabel("Bus Voltage   :"));
@@ -107,96 +93,119 @@ public class AdafruitIna219Gui extends ServiceGui implements ActionListener {
 
     display.add(north, BorderLayout.NORTH);
     display.add(center, BorderLayout.CENTER);
-    
+
+    refreshControllers();
     getDeviceBusList();
     getDeviceAddressList();
-  
-	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		log.info("AdafruitINA219GUI actionPerformed");
-		Object o = e.getSource();
-		if (o == refresh) {
-			// FIXME !! replace with PortGui
-			myService.send(boundServiceName, "getPortNames");
-		}
-		if (o == attachButton) {
-			if (attachButton.getText().equals(attach)) {
-				int index = controller.getSelectedIndex();
-				if (index != -1) {
-					myService.send(boundServiceName, attach, 
-							controller.getSelectedItem(),
-							deviceBusList.getSelectedItem(),
-							deviceAddressList.getSelectedItem());
-				}
-			} else {
-				myService.send(boundServiceName, detach);
-			}
-		}
-	}
+    restoreListeners();
+  }
 
-	@Override
-	public void subscribeGui() {
-	}
+  @Override
+  public void actionPerformed(final ActionEvent event) {
+    // TODO Auto-generated method stub
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        Object o = event.getSource();
+        if (o == attachButton) {
+          if (attachButton.getText().equals(attach)) {
+            int index = controllerList.getSelectedIndex();
+            if (index != -1) {
+              myService.send(boundServiceName, attach, controllerList.getSelectedItem(), deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
+            }
+          } else {
+            log.info(String.format("detach %s", controllerList.getSelectedItem()));
+            myService.send(boundServiceName, detach, controllerList.getSelectedItem());
+          }
+        }
+        if (o == refresh) {
+          // FIXME !! replace with PortGui
+          myService.send(boundServiceName, "refresh");
+        }
+      }
+    });
+  }
 
-	@Override
-	public void unsubscribeGui() {
-	}
+  @Override
+  public void subscribeGui() {
+  }
 
-	public void onState(AdafruitIna219 ina219) {
+  @Override
+  public void unsubscribeGui() {
+  }
 
-		refreshControllers();
-		controller.setSelectedItem(ina219.getControllerName());
-		deviceBusList.setSelectedItem(ina219.deviceBus);
-		deviceAddressList.setSelectedItem(ina219.deviceAddress);
-		if (ina219.isAttached()) {
-			attachButton.setText(detach);
-			controller.setEnabled(false);
-			deviceBusList.setEnabled(false);
-			deviceAddressList.setEnabled(false);
-			refresh.setEnabled(true);
-		} else {
-			attachButton.setText(attach);
-			controller.setEnabled(true);
-			deviceBusList.setEnabled(true);
-			deviceAddressList.setEnabled(true);
-			refresh.setEnabled(false);
-		}
-		busVoltage.setText(String.format("%s", ina219.busVoltage));
-		shuntVoltage.setText(String.format("%s", ina219.shuntVoltage));
-		current.setText(String.format("%s", ina219.current));
-		power.setText(String.format("%s", ina219.power));
-	}
-	
-	public void getDeviceBusList() {
-		List<String> mbl = boundService.deviceBusList;
-		for (int i = 0; i < mbl.size(); i++) {
-			deviceBusList.addItem(mbl.get(i));
-		}
-	}
-	
-	public void getDeviceAddressList() {
+  public void onState(final AdafruitIna219 service) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        removeListeners();
+        refreshControllers();
+        if (service.controller != null) {
+          controllerList.setSelectedItem(service.controllerName);
+          deviceBusList.setSelectedItem(service.deviceBus);
+          deviceAddressList.setSelectedItem(service.deviceAddress);
+        }
+        if (service.isAttached) {
+          attachButton.setText(detach);
+          controllerList.setEnabled(false);
+          deviceBusList.setEnabled(false);
+          deviceAddressList.setEnabled(false);
+        } else {
+          attachButton.setText(attach);
+          controllerList.setEnabled(true);
+          deviceBusList.setEnabled(true);
+          deviceAddressList.setEnabled(true);
+        }
+        restoreListeners();
 
-		List<String> mal = boundService.deviceAddressList;
-		for (int i = 0; i < mal.size(); i++) {
-			deviceAddressList.addItem(mal.get(i));
-		}
-	}
-	
-	public void refreshControllers() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+        busVoltage.setText(String.format("%s", service.busVoltage));
+        shuntVoltage.setText(String.format("%s", service.shuntVoltage));
+        current.setText(String.format("%s", service.current));
+        power.setText(String.format("%s", service.power));
+      }
+    });
+  }
 
-				boundService.refreshControllers();
-				controller.removeAllItems();
-				List<String> c = boundService.controllers;	
-				for (int i = 0; i < c.size(); ++i) {
-					controller.addItem(c.get(i));
-				}
-				controller.setSelectedItem(boundService.getControllerName());
-			}
-		});
-	}
+  public void getDeviceBusList() {
+    List<String> mbl = boundService.deviceBusList;
+    for (int i = 0; i < mbl.size(); i++) {
+      deviceBusList.addItem(mbl.get(i));
+    }
+  }
+
+  public void getDeviceAddressList() {
+
+    List<String> mal = boundService.deviceAddressList;
+    for (int i = 0; i < mal.size(); i++) {
+      deviceAddressList.addItem(mal.get(i));
+    }
+  }
+
+  public void refreshControllers() {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+
+        List<String> v = boundService.refreshControllers();
+        controllerList.removeAllItems();
+        for (int i = 0; i < v.size(); ++i) {
+          controllerList.addItem(v.get(i));
+        }
+        if (boundService.controller != null) {
+          controllerList.setSelectedItem(boundService.controller.getName());
+        }
+      }
+    });
+  }
+
+  public void removeListeners() {
+    attachButton.removeActionListener(this);
+    refresh.removeActionListener(this);
+  }
+
+  public void restoreListeners() {
+    attachButton.addActionListener(this);
+    refresh.addActionListener(this);
+  }
 }

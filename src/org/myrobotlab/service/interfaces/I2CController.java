@@ -9,40 +9,11 @@ import org.myrobotlab.framework.interfaces.Attachable;
  * to the ic2 bus on an Arduino. 
  */
 public interface I2CController extends Attachable {
-	/**
-	 * This method creates a I2CDevice
-	 * @param control c
-	 * 
-	 * @param busAddress bus address
-	 * @param deviceAddress local address in the i2c device
-	 */
-	void i2cAttach(I2CControl control, int busAddress, int deviceAddress);
-
-	/**
-	 * This method returns and already existing I2CDevice
-	 * 
-   * @param control c
-	 * @param busAddress bus address
-	 * @param deviceAddress
-	 *          local address in the i2c device
-	 * 
-	 */
-	void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress);
-
-	/**
-	 * This method writes several bytes to the i2c device from given buffer.
-	 * 
-   * @param control c
-	 * @param busAddress bus address
-	 * @param deviceAddress
-	 *          local address in the i2c device
-	 * @param buffer
-	 *          buffer of data to be written to the i2c device in one go
-	 * @param size
-	 *          number of bytes to be written
-	 * 
-	 */
-
+	
+	void attachI2CControl(I2CControl control);	
+	
+	void detachI2CControl(I2CControl control);
+	
 	void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size);
   	
 	/**
@@ -86,5 +57,4 @@ public interface I2CController extends Attachable {
 	 *           thrown in case byte cannot be read from the i2c device or i2c bus
 	 */
 	int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize);
-  
 }

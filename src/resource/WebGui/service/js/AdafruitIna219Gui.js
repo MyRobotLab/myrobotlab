@@ -5,7 +5,6 @@ angular.module('mrlapp.service.AdafruitIna219Gui', [])
     var msg = this.msg;
     
     // init
-    //$scope.controller = '';
     $scope.controllerName = '';
     $scope.controllers = [];    
     
