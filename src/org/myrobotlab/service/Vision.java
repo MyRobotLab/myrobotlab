@@ -481,12 +481,11 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
    */
   String selectedName = null;
   String selectedInputName = null;
-  
+
   /*
-  String selectedInputName = null;
-  String selectedDisplayName = null;
-  String selectedRecordingName = null;
-  */
+   * String selectedInputName = null; String selectedDisplayName = null; String
+   * selectedRecordingName = null;
+   */
 
   boolean showFrameNumbers = false;
 
@@ -527,10 +526,9 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
     selectedName = defaultName;
     selectedInputName = defaultName;
     /*
-    selectedInputName = defaultName;
-    selectedDisplayName = defaultName;
-    selectedRecordingName = defaultName;
-    */
+     * selectedInputName = defaultName; selectedDisplayName = defaultName;
+     * selectedRecordingName = defaultName;
+     */
 
     addFilter(selectedInputFilter);
   }
@@ -538,7 +536,9 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
   /**
    * blocking safe exchange of data between different threads external thread
    * adds image data which can be retrieved from the blockingData queue
-   * @param image - image to be processed through pipeline
+   * 
+   * @param image
+   *          - image to be processed through pipeline
    * @return - OpenCVData
    */
   public VisionData add(Frame image) {
@@ -574,10 +574,11 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
    * other thread. This should make the system thread-safe
    * 
    * @param filter
-   * @return
+   *          - filter to add to the pipeline
+   * @return - returns filter added
    */
   public OpenCVFilter addFilter(OpenCVFilter filter) {
-    filter.sourceKey = lastSourceKey;    
+    filter.sourceKey = lastSourceKey;
     lastSourceKey = makeKey(filter.name);
     filter.setVideoProcessor(this);
     filters.add(filter);
@@ -587,7 +588,9 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
 
   /**
    * make a key for this service and some filter's name
-   * @param filterName - name of the filter
+   * 
+   * @param filterName
+   *          - name of the filter
    * @return - key {serviceName}.{filterName}
    */
   public String makeKey(String filterName) {
@@ -595,9 +598,11 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
   }
 
   /**
-   * add filter by name
+   * add filter by name - in this case the name "must be" the same as its type
+   * .. eg. "FaceDetect" for the FaceDetect Filter
    * 
    * @param filterName
+   *          - name of filter to be added
    * @return
    */
   public OpenCVFilter addFilter(String filterName) {
@@ -608,13 +613,15 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
    * add filter by name and type
    * 
    * @param name
+   *          - name of filter
    * @param filterType
-   * @return
+   *          - type of filters
+   * @return - the filter added
    */
   public OpenCVFilter addFilter(String name, String filterType) {
     String type = FILTER_PKG_PREFIX + filterType;
     info("adding {} filter {}", type, name);
-    OpenCVFilter filter = (OpenCVFilter) Instantiator.getNewInstance(type, name);    
+    OpenCVFilter filter = (OpenCVFilter) Instantiator.getNewInstance(type, name);
     return addFilter(filter);
   }
 
@@ -669,7 +676,6 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
     return ret;
   }
 
-
   public VisionData getFaceDetect() {
     OpenCVFilterFaceDetect fd = new OpenCVFilterFaceDetect();
     addFilter(fd);
@@ -679,13 +685,15 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
   }
 
   /**
-   * getFilter returns a filter by "name" - this should be the ubiquitous getFilter
-   * as the implementation of the actual concrete filter will be CV (OpenCV || BoofCV)
-   * dependent 
+   * getFilter returns a filter by "name" - this should be the ubiquitous
+   * getFilter as the implementation of the actual concrete filter will be CV
+   * (OpenCV || BoofCV) dependent
    * 
-   * It hides the implementation details and allows for remote control (a good thing)
+   * It hides the implementation details and allows for remote control (a good
+   * thing)
    * 
-   * @param name - name of filter
+   * @param name
+   *          - name of filter
    * @return - the filter named or null if not found
    */
   public OpenCVFilter getFilter(String name) {
@@ -786,6 +794,10 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
 
   /**
    * Callback from the SwingGui to the appropriate filter funnel through here
+   * 
+   * @param filterName - the name of the filter to invoke our function
+   * @param method - the method on the filter to be invoked 
+   * @param params - the params of the method
    */
   public void invokeFilterMethod(String filterName, String method, Object... params) {
     OpenCVFilter filter = getFilter(filterName);
@@ -822,7 +834,6 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
     while (capturing) {
       try {
 
-
         /**
          * This is the creation of a new OpenCVData. References for serializable
          * data will be created new and added to in the pipeline. Internally
@@ -836,7 +847,7 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
         ++frameIndex;
 
         // process each filter
-        for (Iterator<OpenCVFilter> it = filters.iterator(); it.hasNext(); ) {
+        for (Iterator<OpenCVFilter> it = filters.iterator(); it.hasNext();) {
           OpenCVFilter filter = it.next();
 
           if (Logging.performanceTiming)
@@ -880,7 +891,8 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
           // state if desired
           // if (publishDisplay && displayFilterName != null &&
           // displayFilterName.equals(filter.name)) {
-          // if (publishDisplay && selectedName != null && selectedFilter.name.equals(filter.name)) {
+          // if (publishDisplay && selectedName != null &&
+          // selectedFilter.name.equals(filter.name)) {
           if (selectedName != null && selectedName.equals(filter.name)) {
 
             // data.setDisplayFilterName(displayFilterName);
@@ -1085,9 +1097,9 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
     log.info("removing filter {} ", name);
     removeFilter(name);
   }
-  
+
   public void removeFilter(OpenCVFilter filter) {
-    if (!filter.isLocked()){
+    if (!filter.isLocked()) {
       filters.remove(filter);
     }
     warn("could not remove %s", filter.name);
@@ -1102,7 +1114,7 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
     log.info("removeFilters");
     for (Iterator<OpenCVFilter> it = filters.iterator(); it.hasNext();) {
       OpenCVFilter filter = it.next();
-        removeFilter(filter);
+      removeFilter(filter);
     }
   }
 
@@ -1117,9 +1129,9 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
   public void setFilterName(String name) {
     selectedName = name;
   }
-  
+
   public String getFilterName() {
-    return selectedName; 
+    return selectedName;
   }
 
   /**
