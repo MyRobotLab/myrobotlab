@@ -129,13 +129,14 @@
 	<!-- directory for the build to go into -->
 	<property name="build" location="build" />
 	<!-- location for the unit test reports to go into -->
-        <property name="report" location="dist/current/${branch}/report" />
+    <property name="report" location="dist/current/${branch}/report" />
 
 	<!-- location for the jacoco reports -->
 	<property name="result.jacoco.file" location="${build}/jacoco.exec" />
 	<property name="result.report.dir" location="${build}/jacoco" />
 	<!-- directory for the distrbituion to go into -->
 	<property name="dist" location="dist/current/${branch}" />
+	<property name="deploy" location="/var/www/html/deploy" />
 	
 	<available file="${build}/classes/resource/license" property="license.present" />
 	<property name="repo" location="../repo" />
@@ -869,7 +870,11 @@
                 <zip destfile="${dist}/myrobotlab-jacoco.zip">
                   <zipfileset dir="${build}/javadoc" />
                 </zip>
-
+		
+		<mkdir dir="${deploy}" />
+		<copy todir="${deploy}" >  
+		        <fileset dir="${dist}" includes="**"/>  
+		</copy> 
 	</target>
 
 	<target name="clean" description="clean up">
