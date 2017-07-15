@@ -114,6 +114,8 @@ public class Lm75a extends Service implements I2CControl {
    * This method reads and returns the raw temperature as two bytes where the
    * MSB is the integer part of the temperature ( + sign ) and the LSB is the
    * decimals. Used in two complement form.
+   * 
+   * @return - temperature in celsius .. i think .
    */
   public double getTemperature() {
     byte[] writebuffer = { LM75A_TEMP };
