@@ -875,9 +875,7 @@
                 </zip>
 		
 		<mkdir dir="${deploy}" />
-		<copy todir="${deploy}" >  
-		        <fileset dir="${dist}" includes="**"/>  
-		</copy> 
+		<copy file="${dist}" tofile="${deploy}"/>		
 	</target>
 
 	<target name="clean" description="clean up">
