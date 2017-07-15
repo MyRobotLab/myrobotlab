@@ -42,132 +42,130 @@ import org.slf4j.Logger;
 
 public class Adafruit16CServoDriverGui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriverGui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriverGui.class);
 
-	String attach = "setController";
-	String detach = "unsetController";
-	JButton attachButton = new JButton(attach);
+  String attach = "attach";
+  String detach = "detach";
+  JButton attachButton = new JButton(attach);
 
-	JComboBox<String> controllerList = new JComboBox<String>();
-	JComboBox<String> deviceAddressList = new JComboBox<String>();
-	JComboBox<String> deviceBusList = new JComboBox<String>();
+  JComboBox<String> controllerList = new JComboBox<String>();
+  JComboBox<String> deviceAddressList = new JComboBox<String>();
+  JComboBox<String> deviceBusList = new JComboBox<String>();
 
-	JLabel controllerLabel = new JLabel("Controller");
-	JLabel deviceBusLabel = new JLabel("Bus");
-	JLabel deviceAddressLabel = new JLabel("Address");
+  JLabel controllerLabel = new JLabel("Controller");
+  JLabel deviceBusLabel = new JLabel("Bus");
+  JLabel deviceAddressLabel = new JLabel("Address");
 
-	Adafruit16CServoDriver boundService = null;
+  Adafruit16CServoDriver boundService = null;
 
-	public Adafruit16CServoDriverGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		boundService = (Adafruit16CServoDriver) Runtime.getService(boundServiceName);
-    
-    addTopLine(attachButton, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList);
+  public Adafruit16CServoDriverGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    boundService = (Adafruit16CServoDriver) Runtime.getService(boundServiceName);
+
+    addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
 
     refreshControllers();
     getDeviceBusList();
     getDeviceAddressList();
 
     restoreListeners();
-  
-	}
 
-	@Override
-	public void actionPerformed(final ActionEvent event) {
-		// TODO Auto-generated method stub
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				Object o = event.getSource();
-				if (o == attachButton) {
-					if (attachButton.getText().equals(attach)) {
-						int index = controllerList.getSelectedIndex();
-						if (index != -1) {
-							myService.send(boundServiceName, attach, controllerList.getSelectedItem(), deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
-						}
-					} else {
-						myService.send(boundServiceName, detach);
-					}
-				}
-				return;
-			}
-		});
-	}
+  }
 
-	@Override
-	public void subscribeGui() {
-	}
+  @Override
+  public void actionPerformed(final ActionEvent event) {
+    // TODO Auto-generated method stub
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        Object o = event.getSource();
+        if (o == attachButton) {
+          if (attachButton.getText().equals(attach)) {
+            int index = controllerList.getSelectedIndex();
+            if (index != -1) {
+              myService.send(boundServiceName, attach, controllerList.getSelectedItem(), deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
+            }
+          } else {
+            myService.send(boundServiceName, detach, controllerList.getSelectedItem());
+          }
+        }
+      }
+    });
+  }
 
-	@Override
-	public void unsubscribeGui() {
-	}
+  @Override
+  public void subscribeGui() {
+  }
 
-	public void onState(final Adafruit16CServoDriver driver) {
-		log.info("onState invoked");
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				removeListeners();
-				refreshControllers();
-				if (driver.controller != null) {
-					controllerList.setSelectedItem(driver.controller.getName());
-					deviceBusList.setSelectedItem(boundService.deviceBus);
-					deviceAddressList.setSelectedItem(boundService.deviceAddress);
-				}
-				if (driver.isControllerSet) {
-					attachButton.setText(detach);
-					controllerList.setEnabled(false);
-					deviceBusList.setEnabled(false);
-					deviceAddressList.setEnabled(false);
-				} else {
-					attachButton.setText(attach);
-					controllerList.setEnabled(true);
-					deviceBusList.setEnabled(true);
-					deviceAddressList.setEnabled(true);
-				}
-				restoreListeners();
-			}
-		});
-	}
+  @Override
+  public void unsubscribeGui() {
+  }
 
-	public void getDeviceBusList() {
-		List<String> mbl = boundService.deviceBusList;
-		for (int i = 0; i < mbl.size(); i++) {
-			deviceBusList.addItem(mbl.get(i));
-		}
-	}
+  public void onState(final Adafruit16CServoDriver service) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        removeListeners();
+        refreshControllers();
+        if (service.controller != null) {
+          controllerList.setSelectedItem(service.controllerName);
+          deviceBusList.setSelectedItem(service.deviceBus);
+          deviceAddressList.setSelectedItem(service.deviceAddress);
+        }
+        if (service.isAttached) {
+          attachButton.setText(detach);
+          controllerList.setEnabled(false);
+          deviceBusList.setEnabled(false);
+          deviceAddressList.setEnabled(false);
+        } else {
+          attachButton.setText(attach);
+          controllerList.setEnabled(true);
+          deviceBusList.setEnabled(true);
+          deviceAddressList.setEnabled(true);
+        }
+        restoreListeners();
+      }
+    });
+  }
 
-	public void getDeviceAddressList() {
+  public void getDeviceBusList() {
+    List<String> mbl = boundService.deviceBusList;
+    for (int i = 0; i < mbl.size(); i++) {
+      deviceBusList.addItem(mbl.get(i));
+    }
+  }
 
-		List<String> mal = boundService.deviceAddressList;
-		for (int i = 0; i < mal.size(); i++) {
-			deviceAddressList.addItem(mal.get(i));
-		}
-	}
+  public void getDeviceAddressList() {
 
-	public void refreshControllers() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+    List<String> mal = boundService.deviceAddressList;
+    for (int i = 0; i < mal.size(); i++) {
+      deviceAddressList.addItem(mal.get(i));
+    }
+  }
 
-				List<String> v = boundService.refreshControllers();
-				controllerList.removeAllItems();
-				for (int i = 0; i < v.size(); ++i) {
-					controllerList.addItem(v.get(i));
-				}
-				if (boundService.controller != null) {
-					controllerList.setSelectedItem(boundService.controller.getName());
-				}
-			}
-		});
-	}
+  public void refreshControllers() {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-	public void removeListeners() {
-		attachButton.removeActionListener(this);
-	}
+        List<String> v = boundService.refreshControllers();
+        controllerList.removeAllItems();
+        for (int i = 0; i < v.size(); ++i) {
+          controllerList.addItem(v.get(i));
+        }
+        if (boundService.controller != null) {
+          controllerList.setSelectedItem(boundService.controller.getName());
+        }
+      }
+    });
+  }
 
-	public void restoreListeners() {
-		attachButton.addActionListener(this);
-	}
+  public void removeListeners() {
+    attachButton.removeActionListener(this);
+  }
+
+  public void restoreListeners() {
+    attachButton.addActionListener(this);
+  }
 }

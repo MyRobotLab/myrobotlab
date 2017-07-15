@@ -46,7 +46,7 @@ public class VideoProcessor implements Runnable, Serializable {
 	public final static Logger log = LoggerFactory.getLogger(VideoProcessor.class);
 
 	int frameIndex = 0;
-	public boolean capturing = false;
+	//public boolean capturing = false;
 
 	// GRABBER BEGIN --------------------------
 
@@ -303,7 +303,7 @@ public class VideoProcessor implements Runnable, Serializable {
 	@Override
 	public void run() {
 
-		capturing = true;
+		opencv.capturing = true;
 
 		/*
 		 * TODO - check out opengl stuff if (useCanvasFrame) { cf = new
@@ -385,7 +385,7 @@ public class VideoProcessor implements Runnable, Serializable {
 
 		// String inputFilterName = INPUT_KEY;
 
-		while (capturing) {
+		while (opencv.capturing) {
 			try {
 
 				++frameIndex;
@@ -426,7 +426,7 @@ public class VideoProcessor implements Runnable, Serializable {
 				if (Logging.performanceTiming)
 					Logging.logTime("pre-synchronized-filter");
 
-				if (capturing) {
+				if (opencv.capturing) {
 
 					/**
 					 * add or remove filters depending on the requests of the
@@ -647,7 +647,7 @@ public class VideoProcessor implements Runnable, Serializable {
 
 	public void stop() {
 		log.debug("stopping capture");
-		capturing = false;
+		opencv.capturing = false;
 		videoThread = null;
 	}
 }
