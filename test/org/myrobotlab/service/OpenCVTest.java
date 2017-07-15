@@ -12,19 +12,19 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.vision.VisionData;
+import org.myrobotlab.opencv.OpenCVData;
 import org.slf4j.Logger;
 
 public class OpenCVTest {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
 
-  static Vision opencv = null;
+  static OpenCV opencv = null;
   static SwingGui swing = null;
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    opencv = (Vision) Runtime.start("opencv", "OpenCV");
+    opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     if (!Runtime.isHeadless()) {
       // swing = (SwingGui) Runtime.start("swing", "SwingGui");
     }
@@ -49,7 +49,7 @@ public class OpenCVTest {
     opencv.setCameraIndex(3);
     assertEquals(3, opencv.getCameraIndex());
     
-    VisionData data = opencv.getOpenCVData();
+    OpenCVData data = opencv.getOpenCVData();
     assertNotNull(data);
 
     // adding filter when running - TODO - test addFilter when not running
