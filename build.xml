@@ -136,7 +136,7 @@
 	<property name="result.report.dir" location="${build}/jacoco" />
 	<!-- directory for the distrbituion to go into -->
 	<property name="dist" location="dist/current/${branch}" />
-	<property name="deploy" location="/var/www/html/deploy" />
+	<property name="deploy" location="/var/www/html/deploy/${branch}" />
 	
 	<available file="${build}/classes/resource/license" property="license.present" />
 	<property name="repo" location="../repo" />
