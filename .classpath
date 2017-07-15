@@ -115,7 +115,6 @@
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
 	<classpathentry kind="lib" path="/repo/org.node/0.1.1/nodyn-0.1.1-20141121.193443-283.jar"/>
 	<classpathentry kind="lib" path="/repo/org.json/20090211/json-20090211.jar"/>
-	<classpathentry kind="lib" path="/repo/org.alicebot.ab/0.0.1-kw/program-ab-kw-0.0.1.jar"/>
 	<classpathentry kind="lib" path="/repo/pl.sarxos.webcam/0.3.10/sosia.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.23/BoofCV-android-0.23.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.23/BoofCV-calibration-0.23.jar"/>
@@ -400,5 +399,6 @@
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacv-platform.jar"/>
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacv.jar"/>
 	<classpathentry kind="lib" path="/repo/com.illposed.osc/0.4/javaosc-core-0.4.jar"/>
+	<classpathentry kind="lib" path="/repo/org.alicebot.ab/0.0.4-kw/program-ab-kw-0.0.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
