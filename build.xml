@@ -855,7 +855,10 @@
 		<!-- copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${version}.jar" / -->
 		<!-- backwards compat .. TODO: review this.. -->
 		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/archive" />
+			
 		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/myrobotlab.jar" />
+		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab-${version}.jar" />		
 		<copy file="${build}/classes/resource/version.txt" tofile="${dist}/version.txt"/>
 		<!-- for convienence of debugging spawn -->
 		<copy file="${build}/lib/myrobotlab.jar" tofile="myrobotlab.jar" />
