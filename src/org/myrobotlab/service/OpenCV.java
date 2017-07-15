@@ -234,11 +234,6 @@ public class OpenCV extends AbstractVideoSource {
    * 
    */
   public final OpenCVData publishOpenCVData(OpenCVData data) {
-    if (data != null) {
-      capturing = true;
-    } else {
-      capturing = false;
-    }
     return data;
   }
 
@@ -878,6 +873,10 @@ public class OpenCV extends AbstractVideoSource {
 
   public void setStreamerEnabled(boolean streamerEnabled) {
     this.streamerEnabled = streamerEnabled;
+  }
+  
+  public boolean isCapturing(){
+    return capturing;
   }
 
 }
