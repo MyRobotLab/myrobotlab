@@ -404,11 +404,15 @@ public class Agent extends Service {
       terminateSelfOnly();
     } else {
     */
-      ProcessData pd = processes.get(id);
+      // ProcessData pd = processes.get(id);
+      
       log.info("restarting process {}", id);
-      pd.setRestarting();
+      ProcessData pd2 = copy(id);
+      spawn2(pd2);
+      
+      // pd.setRestarting();
       kill(id);
-      spawn2(pd);
+      
     //}
   }
 
@@ -625,19 +629,6 @@ public class Agent extends Service {
   static public Map<Integer, ProcessData> getProcesses() {
     return processes;
   }
-
-  /*
-   * - REMOVE only Runtime should install public List<Status> install(String
-   * fullType) { List<Status> ret = new ArrayList<Status>();
-   * ret.add(Status.info("install %s", fullType)); try { Repo repo =
-   * Repo.getLocalInstance();
-   * 
-   * if (!repo.isServiceTypeInstalled(fullType)) { repo.install(fullType); if
-   * (repo.hasErrors()) { ret.addAll(repo.getErrors()); }
-   * 
-   * } else { log.info("installed {}", fullType); } } catch (Exception e) {
-   * ret.add(Status.error(e)); } return ret; }
-   */
 
   static public Integer kill(Integer id) {
     if (processes.containsKey(id)) {
