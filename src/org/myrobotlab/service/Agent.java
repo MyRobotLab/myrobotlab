@@ -11,11 +11,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.cmdline.CmdLine;
@@ -126,7 +126,7 @@ public class Agent extends Service {
 
   static Set<String> dependencies = new HashSet<String>();
 
-  static Map<Integer, ProcessData> processes = new HashMap<Integer, ProcessData>();
+  static Map<Integer, ProcessData> processes = new ConcurrentHashMap<Integer, ProcessData>();
 
   static List<String> agentJVMArgs = new ArrayList<String>();
   static transient SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd:HH:mm:ss");
@@ -407,11 +407,12 @@ public class Agent extends Service {
       // ProcessData pd = processes.get(id);
       
       log.info("restarting process {}", id);
-      ProcessData pd2 = copy(id);
-      spawn2(pd2);
+      ProcessData pd2 = copy(id);      
       
       // pd.setRestarting();
       kill(id);
+      
+      spawn2(pd2);
       
     //}
   }
