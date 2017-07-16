@@ -2104,6 +2104,14 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       // just send a restart msg to the Agent process
       // FIXME - perhaps a "rename" is more safe .. since the file is complete
       // ...
+      // FIXME - perhaps an idea worth investigating - inter-process file-system queues
+      // each process must have its own directory or file name type
+      // id.ts.{serviceName}.json
+      // 14604@ctnal0043108539.agent.1500211865673.json
+      // ctnal0043108539.14604.agent.1500211865673.json
+      // in this case however - the spawned process does not know the agents id
+      // agent.1500211865673.json
+      
       Message msg = Message.createMessage(this, "agent", "restart", null);
       FileIO.toFile(String.format("msgs/agent.%d.part", msg.msgId), CodecUtils.toJson(msg));
       File partFile = new File(String.format("msgs/agent.%d.part", msg.msgId));
