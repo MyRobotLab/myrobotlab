@@ -397,18 +397,19 @@ public class Agent extends Service {
    * 
    */
   static public synchronized void restart(Integer id) throws IOException, URISyntaxException, InterruptedException {
-    // if null or processes.size == 0 then self
+    /*
     if (id == null || processes.size() == 0) {
       log.info("restarting self");
       spawn(Runtime.getGlobalArgs());
       terminateSelfOnly();
     } else {
+    */
       ProcessData pd = processes.get(id);
       log.info("restarting process {}", id);
       pd.setRestarting();
       kill(id);
-      spawn2(processes.get(id));
-    }
+      spawn2(pd);
+    //}
   }
 
   /**
