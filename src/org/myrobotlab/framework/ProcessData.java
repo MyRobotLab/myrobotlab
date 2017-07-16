@@ -106,6 +106,10 @@ public class ProcessData implements Serializable {
 		this.jniLibraryPath = pd.jniLibraryPath;
 		this.version = pd.version;
 		this.jnaLibraryPath = pd.jnaLibraryPath;
+		
+		this.jarPath = pd.jarPath;
+		
+		this.Xmx = pd.Xmx;
 
 		this.userDefinedServices = pd.userDefinedServices;
 
