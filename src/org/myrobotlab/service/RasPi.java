@@ -272,7 +272,7 @@ public class RasPi extends Service implements I2CController {
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
-    String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
+    String key = String.format("%d.%d", Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()));
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (i2cDevices.containsKey(key)) {
       log.error(String.format("Device %s %s %s already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName()));
@@ -299,8 +299,9 @@ public class RasPi extends Service implements I2CController {
     // The order of the detach is important because the higher level service may
     // want to execute something that
     // needs this service to still be availabe
-    if (i2cDevices.containsKey(control.getName())) {
-      i2cDevices.remove(control.getName());
+    String key = String.format("%d.%d", Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()));
+    if (i2cDevices.containsKey(key)) {
+      i2cDevices.remove(key);
       control.detachI2CController(this);
     }
 
