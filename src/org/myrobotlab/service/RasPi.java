@@ -276,7 +276,7 @@ public class RasPi extends Service implements I2CController {
     } else {
       try {
         I2CBus bus = I2CFactory.getInstance(Integer.parseInt(control.getDeviceBus()));
-        I2CDevice device = i2c.getDevice(Integer.parseInt(control.getDeviceAddress()));
+        I2CDevice device = i2c.getDevice(Integer.decode(control.getDeviceAddress()));
         devicedata.serviceName = control.getName();
         devicedata.bus = bus;
         devicedata.device = device;
