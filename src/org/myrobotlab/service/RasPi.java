@@ -203,8 +203,11 @@ public class RasPi extends Service implements I2CController {
   public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     String key = String.format("%d.%d", busAddress, deviceAddress);
     I2CDeviceMap devicedata = i2cDevices.get(key);
+    if (devicedata == null){
+      log.error(String.format("No device data found for key %s", key));
+      log.error(String.format("Available devices: %s",i2cDevices.toString()));
+    }
     try {
-
       devicedata.device.write(buffer, 0, size);
     } catch (IOException e) {
       // TODO Auto-generated catch block
