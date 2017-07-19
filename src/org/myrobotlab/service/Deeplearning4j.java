@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.util.Random;
 
 import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
 import org.myrobotlab.framework.Service;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.datavec.api.berkeley.StringUtils;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
 import org.datavec.api.split.FileSplit;
@@ -390,6 +392,22 @@ public class Deeplearning4j extends Service {
     ZooModel zooModel = new VGG16();
     vgg16 = (ComputationGraph) zooModel.initPretrained(PretrainedType.IMAGENET);
     // TODO: return true/false if the model was loaded properly/successfully.
+  }
+
+  
+  public String classifyImageVGG16(IplImage iplImage) throws IOException {
+    NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
+    BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
+    INDArray image = loader.asMatrix(buffImg);
+    // TODO: we should consider the model as not only the model, but also the input transforms
+    // for that model.
+    DataNormalization scaler = new VGG16ImagePreProcessor();
+    scaler.transform(image);
+    INDArray[] output = vgg16.output(false,image);
+    // TODO: return a more native datastructure!
+    String predictions = TrainedModels.VGG16.decodePredictions(output[0]);
+    log.info("Image Predictions: {}", predictions);
+    return predictions;
   }
   
   public String classifyImageFileVGG16(String filename) throws IOException {
