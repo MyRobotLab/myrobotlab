@@ -1,24 +1,17 @@
 package org.myrobotlab.service;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;import java.nio.IntBuffer;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import javax.imageio.ImageIO;
-
 import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
 import org.myrobotlab.framework.Service;
 import org.datavec.api.berkeley.StringUtils;
-import org.datavec.api.io.filters.BalancedPathFilter;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
 import org.datavec.api.split.FileSplit;
-import org.datavec.api.split.InputSplit;
 import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.recordreader.ImageRecordReader;
 import org.datavec.image.transform.FlipImageTransform;
@@ -42,29 +35,24 @@ import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.LocalResponseNormalization;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
+import org.deeplearning4j.nn.graph.ComputationGraph;
+import org.deeplearning4j.nn.modelimport.keras.trainedmodels.TrainedModels;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
+import org.deeplearning4j.zoo.PretrainedType;
+import org.deeplearning4j.zoo.ZooModel;
+import org.deeplearning4j.zoo.model.VGG16;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.nd4j.linalg.activations.Activation;
-import org.nd4j.linalg.api.buffer.DataBuffer;
-import org.nd4j.linalg.api.complex.IComplexNDArray;
-import org.nd4j.linalg.api.complex.IComplexNumber;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.dataset.api.preprocessor.VGG16ImagePreProcessor;
-import org.nd4j.linalg.indexing.INDArrayIndex;
-import org.nd4j.linalg.indexing.ShapeOffsetResolution;
-import org.nd4j.linalg.indexing.conditions.Condition;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-
-import ch.qos.logback.core.util.FileUtil;
-import marytts.util.io.FileUtils;
 
 /**
  * Deeplearning4j wrapper service to expose the deep learning.  This is basically derived from the AnimialClassifier example in the dl4j examples.
@@ -101,6 +89,13 @@ public class Deeplearning4j extends Service {
   // these are the labels that relate to the output of the model.
   private List<String> networkLabels; 
 
+  // TODO: clean all of this up!  for now
+  // we're just going to hack in the deeplearning4j zoo , in particular vgg16 model
+  // pretrained from imagenet.
+  
+  private ComputationGraph vgg16 = null;
+  
+  
   // constructor.
   public Deeplearning4j(String reservedKey) {
     super(reservedKey);
@@ -388,7 +383,30 @@ public class Deeplearning4j extends Service {
   private DenseLayer fullyConnected(String name, int out, double bias, double dropOut, Distribution dist) {
     return new DenseLayer.Builder().name(name).nOut(out).biasInit(bias).dropOut(dropOut).dist(dist).build();
   }
-
+  
+  // This is for the Model Zoo support to load in the VGG16 model.  
+  public void loadVGG16() throws IOException {
+    log.info("Loading the VGG16 Model.  Download is large 500+ MB.. this will be cached after it downloads");
+    ZooModel zooModel = new VGG16();
+    vgg16 = (ComputationGraph) zooModel.initPretrained(PretrainedType.IMAGENET);
+    // TODO: return true/false if the model was loaded properly/successfully.
+  }
+  
+  public String classifyImageFileVGG16(String filename) throws IOException {
+    File file = new File(filename);
+    NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
+    INDArray image = loader.asMatrix(file);
+    // TODO: we should consider the model as not only the model, but also the input transforms
+    // for that model.
+    DataNormalization scaler = new VGG16ImagePreProcessor();
+    scaler.transform(image);
+    INDArray[] output = vgg16.output(false,image);
+    // TODO: return a more native datastructure!
+    String predictions = TrainedModels.VGG16.decodePredictions(output[0]);
+    log.info("Image Predictions: {}", predictions);
+    return predictions;
+  }
+  
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(Deeplearning4j.class.getCanonicalName());
     meta.addDescription("A wrapper service for the Deeplearning4j framework.");
