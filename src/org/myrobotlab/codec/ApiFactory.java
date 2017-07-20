@@ -282,7 +282,7 @@ public class ApiFactory {
       log.error("main threw", e);
     }
 
-    Runtime.exit();
+    Runtime.shutdown();
   }
 
   /*
