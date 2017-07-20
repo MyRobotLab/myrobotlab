@@ -134,7 +134,7 @@ public class OpenCVFilterInput extends OpenCVFilter {
 	 * blocking safe exchange of data between different threads external thread
 	 * adds image data which can be retrieved from the blockingData queue
 	 * 
-	 * @param image
+	 * @param image - a null value, but could support adding an image
 	 */
 	public VisionData add(Frame image) {
 		FrameGrabber grabber = getGrabber();
