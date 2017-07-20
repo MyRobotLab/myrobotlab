@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
@@ -126,19 +125,25 @@ public class Agent extends Service {
 
   static Set<String> dependencies = new HashSet<String>();
 
-  static Map<Integer, ProcessData> processes = new ConcurrentHashMap<Integer, ProcessData>();
+  static Map<String, ProcessData> processes = new ConcurrentHashMap<String, ProcessData>();
 
   static List<String> agentJVMArgs = new ArrayList<String>();
-  static transient SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd:HH:mm:ss");
+  static transient SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmssSSS");
 
   static Platform platform = Platform.getLocalInstance();
 
-  static CmdLine runtimeArgs;
+  /**
+   * command line to be relayed to the the first process the Agent spawns
+   */
+  static CmdLine cmdline;
+
+  /**
+   * command line for the Agent process
+   */
+  static CmdLine agentCmdline;
 
   static String currentBranch = platform.getBranch();
   static String currentVersion = platform.getVersion();
-
-  static String MSGS_DIR = "msgs";
 
   // FIXME - all update functionality will need to be moved to Runtime
   // it should take parameters such that it will be possible at some point to
@@ -184,10 +189,6 @@ public class Agent extends Service {
     }
     setBranch(currentBranch);
     agent = this;
-    File folder = new File(MSGS_DIR);
-    folder.mkdirs();
-    log.info("enabling file msgs in {}", MSGS_DIR);
-    enableFileMsgs(true);
   }
 
   /**
@@ -240,56 +241,6 @@ public class Agent extends Service {
     }
 
     return null;
-  }
-
-  public class FileMsgScanner extends Thread {
-    public boolean scanning = false;
-    public void run() {
-      scanning = true;
-      try {
-        while (scanning) {
-          if (!scanForMsgs()) {
-            sleep(500);
-          }
-        }
-      } catch (Exception e) {
-      }
-    }
-  }
-  
-  transient FileMsgScanner fileMsgScanner = null;
-
-  public void enableFileMsgs(Boolean b) {
-    if (b) {
-      fileMsgScanner = new FileMsgScanner();
-      fileMsgScanner.start();
-    } else {
-      fileMsgScanner.scanning = false;
-      fileMsgScanner.interrupt();
-      fileMsgScanner = null;
-    }
-  }
-
-  public boolean scanForMsgs() {
-    File folder = new File(MSGS_DIR);
-    File[] listOfFiles = folder.listFiles();
-    boolean filesExist = false;
-    for (int i = 0; i < listOfFiles.length; i++) {
-      File json = listOfFiles[i];
-      if (json.isFile() && json.getName().endsWith(".json")) {
-        try {
-          String data = new String(toByteArray(json));
-          log.info("%s - %s", json, data);
-          Message msg = CodecUtils.fromJson(data, Message.class);
-          json.delete();
-          in(msg);
-          filesExist = true;
-        } catch (Exception e) {
-          log.error("msgs/{} threw", json);
-        }
-      }
-    }
-    return filesExist;
   }
 
   // revert ! only 1 global autoUpdate - all processes - not Agent (yet)
@@ -345,7 +296,7 @@ public class Agent extends Service {
         downloadLatest(currentBranch);
       }
 
-      for (Integer key : processes.keySet()) {
+      for (String key : processes.keySet()) {
         ProcessData process = processes.get(key);
         if (!currentBranch.equals(process.branch)) {
           log.info("skipping update of {} because its on branch {}", process.id, process.branch);
@@ -379,42 +330,25 @@ public class Agent extends Service {
    *           e
    * 
    */
-  static public synchronized void restart() throws IOException, URISyntaxException, InterruptedException {
-    for (Integer pid : processes.keySet()) {
-      restart(pid);
-    }
+  static public synchronized void restart(String id) throws IOException, URISyntaxException, InterruptedException {
+    log.info("restarting process {}", id);
+    // ProcessData pd2 = copy(id);
+    // pd.setRestarting();
+    kill(id);
+    sleep(2000);
+    spawn2(id);
   }
 
-  /**
-   * @param id
-   *          id
-   * @throws IOException
-   *           e
-   * @throws URISyntaxException
-   *           e
-   * @throws InterruptedException
-   *           e
-   * 
-   */
-  static public synchronized void restart(Integer id) throws IOException, URISyntaxException, InterruptedException {
-    /*
-    if (id == null || processes.size() == 0) {
-      log.info("restarting self");
-      spawn(Runtime.getGlobalArgs());
-      terminateSelfOnly();
-    } else {
-    */
-      // ProcessData pd = processes.get(id);
-      
-      log.info("restarting process {}", id);
-      ProcessData pd2 = copy(id);      
-      
-      // pd.setRestarting();
-      kill(id);
-      
-      spawn2(pd2);
-      
-    //}
+  private static void spawn2(String id) {
+    try {
+      if (processes.containsKey(id)) {
+        spawn2(processes.get(id));
+      } else {
+        log.error("agent does not know about process id {}", id);
+      }
+    } catch (Exception e) {
+      log.error("spawn2({}) threw ", id, e);
+    }
   }
 
   /**
@@ -427,14 +361,15 @@ public class Agent extends Service {
    */
   static public ProcessData copy(Integer id) {
     if (!processes.containsKey(id)) {
-      log.error("cannot copy %d does not exist", id);
+      log.error("cannot copy %s does not exist", id);
       return null;
     }
     ProcessData pd = processes.get(id);
     ProcessData pd2 = new ProcessData(pd);
     pd2.startTs = null;
     pd2.stopTs = null;
-    pd2.id = getNextProcessId();
+    // pd2.id = getNextProcessId();
+    pd2.id = null;
     processes.put(pd2.id, pd2);
     if (agent != null) {
       agent.broadcastState();
@@ -488,8 +423,8 @@ public class Agent extends Service {
    * @return integer
    * 
    */
-  static public Integer getId(String name) {
-    for (Integer pid : processes.keySet()) {
+  static public String getId(String name) {
+    for (String pid : processes.keySet()) {
       if (pid.equals(name)) {
         return processes.get(pid).id;
       }
@@ -518,8 +453,8 @@ public class Agent extends Service {
    *          e
    * @return string
    */
-  static public String getName(Integer id) {
-    for (Integer pid : processes.keySet()) {
+  static public String getName(String id) {
+    for (String pid : processes.keySet()) {
       if (pid.equals(id)) {
         return processes.get(pid).name;
       }
@@ -627,11 +562,12 @@ public class Agent extends Service {
    * 
    * @return hash map, int to process data
    */
-  static public Map<Integer, ProcessData> getProcesses() {
+  static public Map<String, ProcessData> getProcesses() {
     return processes;
   }
 
-  static public Integer kill(Integer id) {
+  // by id (or by pid?)
+  static public String kill(String id) {
     if (processes.containsKey(id)) {
       if (agent != null) {
         agent.info("terminating %s", id);
@@ -650,6 +586,14 @@ public class Agent extends Service {
         agent.broadcastState();
       }
       return id;
+    } else {
+      try {
+        // FIXME make operating system independent
+        String cmd = "taskkill /F /PID " + id;
+        java.lang.Runtime.getRuntime().exec(cmd);
+      } catch (Exception e) {
+        log.error("kill threw", e);
+      }
     }
 
     log.warn("%s? no sir, I don't know that punk...", id);
@@ -663,7 +607,7 @@ public class Agent extends Service {
    */
 
   static public void killAll() {
-    for (Integer id : processes.keySet()) {
+    for (String id : processes.keySet()) {
       kill(id);
     }
     log.info("no survivors sir...");
@@ -672,7 +616,7 @@ public class Agent extends Service {
     }
   }
 
-  static public void killAndRemove(Integer id) {
+  static public void killAndRemove(String id) {
     if (processes.containsKey(id)) {
       kill(id);
       processes.remove(id);
@@ -693,13 +637,13 @@ public class Agent extends Service {
     for (int i = 0; i < objs.length; ++i) {
       Integer id = (Integer) objs[i];
       ProcessData p = processes.get(id);
-      pd[i] = String.format("%d - %s [%s - %s]", id, p.name, p.branch, p.version);
+      pd[i] = String.format("%s - %s [%s - %s]", id, p.name, p.branch, p.version);
     }
     return pd;
   }
 
-  static public Integer publishTerminated(Integer id) {
-    log.info("publishTerminated - terminated %d %s - restarting", id, getName(id));
+  static public String publishTerminated(String id) {
+    log.info("publishTerminated - terminated %s %s - restarting", id, getName(id));
 
     if (!processes.containsKey(id)) {
       log.error("processes {} not found");
@@ -708,7 +652,7 @@ public class Agent extends Service {
 
     // if you don't fork with Agent allowed to
     // exist without instances - then
-    if (!runtimeArgs.containsKey("-fork")) {
+    if (!cmdline.containsKey("-fork")) {
       // spin through instances - if I'm the only
       // thing left - terminate
       boolean processesStillRunning = false;
@@ -900,6 +844,10 @@ public class Agent extends Service {
     log.info("terminating self ... goodbye...");
     Runtime.exit();
   }
+  
+  static public synchronized Process spawn() throws IOException, URISyntaxException, InterruptedException {
+    return spawn(new String[]{});
+  }
 
   static public synchronized Process spawn(String[] in) throws IOException, URISyntaxException, InterruptedException {
 
@@ -1010,15 +958,15 @@ public class Agent extends Service {
 
     pd.state = ProcessData.STATE_RUNNING;
     if (pd.id == null) {
-      pd.id = getNextProcessId();
+      log.error("id should not be null!");
     }
     if (processes.containsKey(pd.id)) {
       if (agent != null) {
-        agent.info("restarting %d %s", pd.id, pd.name);
+        agent.info("restarting %s %s", pd.id, pd.name);
       }
     } else {
       if (agent != null) {
-        agent.info("starting new %d %s", pd.id, pd.name);
+        agent.info("starting new %s %s", pd.id, pd.name);
       }
       processes.put(pd.id, pd);
     }
@@ -1150,49 +1098,36 @@ public class Agent extends Service {
       // System.out.println("Agent.main starting"); - with static args it
       // doesnt really 'start'
 
-      // FIXME - I think the basic idea is to have
-      // parameters route to Agent or to the target instance
-      // initially I was thinking of having all agent parameters
-      // in a -agent \"-param1 value1 -param2 value2\" -services gui GUI
-      // .. instance params
-      // but that didn't work due to the parsing of CmdLine ...
-      // need a good solution
-
-      // split agent commands from runtime co\mmands
-      // String[] agentArgs = new String[0];
-      ArrayList<String> inArgs = new ArrayList<String>();
       // -agent \"-params -service ... \" string encoded
-      runtimeArgs = new CmdLine(args);
+      cmdline = new CmdLine(args);
+      log.info("cmdline [{}] will be relayed ", cmdline);
 
-      if (runtimeArgs.containsKey("-?") || runtimeArgs.containsKey("-h") || runtimeArgs.containsKey("-help") || runtimeArgs.containsKey("--help")) {
-        Runtime.mainHelp();
-        return;
-      }
-
-      if (runtimeArgs.containsKey("-version")) {
+      // FIXME - this could just be relayed to Runtime, right ?
+      // its not even correct as these are queries to the Agent, but what
+      // probably is desired is
+      // version of the spawned runtime
+      if (cmdline.containsKey("-version")) {
         System.out.println(String.format("%s branch %s version %s", platform.getBranch(), platform.getPlatformId(), platform.getVersion()));
         return;
       }
 
-      // -service for Runtime -process a b c d :)
-      if (runtimeArgs.containsKey("-agent")) {
-        // List<String> list = runtimeArgs.getArgumentList("-agent");
-
-        String tmp = runtimeArgs.getArgument("-agent", 0);
-        String[] agentPassedArgs = tmp.split(" ");
-        if (agentPassedArgs.length > 1) {
-          for (int i = 0; i < agentPassedArgs.length; ++i) {
-            inArgs.add(agentPassedArgs[i]);
-          }
-        } else {
-          if (tmp != null) {
-            inArgs.add(tmp);
-          }
+      // "agent" command line - must be in quotes since the rest of the command
+      // line
+      // is relayed to the service
+      // Start with the default cmdline for the agent
+      String[] agentArgs = new String[] { "-isAgent", "-id", String.format("agent.%s.%s", formatter.format(new Date()), Runtime.getPid())};
+      if (cmdline.containsKey("-agent")) {
+        String str = cmdline.getArgument("-agent", 0);
+        String[] tmp = str.split(" ");
+        agentArgs = new String[tmp.length + 1];
+        for (int i = 0; i < agentArgs.length - 1; ++i) {
+          agentArgs[i] = tmp[i];
         }
-      }
+        // -isAgent parameter is REQUIRED for Agent
+        agentArgs[agentArgs.length - 1] = "-isAgent";
 
-      // default args passed to runtime from Agent
-      inArgs.add("-isAgent");
+      }
+      agentCmdline = new CmdLine(agentArgs);
 
       // String[] agentArgs = inArgs.toArray(new String[inArgs.size()]);
       // CmdLine agentCmd = new CmdLine(agentArgs);
@@ -1205,14 +1140,19 @@ public class Agent extends Service {
 
       Process p = null;
 
-      if (runtimeArgs.containsKey("-test")) {
+      if (cmdline.containsKey("-test")) {
         serviceTest();
       } else {
-        if (!runtimeArgs.containsKey("-fork")) {
+        // if we aren't forking then we create an agent
+        // to maintain control of all spawned processes
+        if (!cmdline.containsKey("-fork")) {
+          log.info("agent args [{}]", agentCmdline);
           Runtime.setLogLevel("WARN");
+          // agents runtime          
+          Runtime.main(agentArgs);
           Runtime.start("agent", "Agent");
         }
-        if (!runtimeArgs.containsKey("-client")) {
+        if (!cmdline.containsKey("-client")) {
           p = spawn(args); // <-- agent's is now in charge of first
         } else {
           Runtime.start("cli", "Cli");
@@ -1221,7 +1161,7 @@ public class Agent extends Service {
 
       // change of design - agent will try to shutdown
       // as soon as the mrl processes starts
-      if (runtimeArgs.containsKey("-install")) {
+      if (cmdline.containsKey("-install")) {
         p.waitFor();
         shutdown();
       }

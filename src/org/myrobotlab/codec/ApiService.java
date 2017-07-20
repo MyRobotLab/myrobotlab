@@ -2,6 +2,7 @@ package org.myrobotlab.codec;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 
@@ -140,7 +141,13 @@ public class ApiService extends Api {
     }
 
     if (out != null) {
-      codec.encode(out, ret);
+      if (ret == null){
+        codec.encode(out, ret);
+      } else if (Serializable.class.isAssignableFrom(ret.getClass())){
+        codec.encode(out, ret);
+      } else {
+        log.error("could not serialize return from {} class {}", method, ret.getClass());
+      }
     }
 
     MethodCache.cache(clazz, method);

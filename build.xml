@@ -732,22 +732,23 @@
 		<!-- copy file="${repo}/serviceData.json" todir="${build}/classes/resource/framework" / -->
 		
 		
-
 		<jar jarfile="${build}/lib/myrobotlab.jar" basedir="${build}/classes">
 			<!-- excludes="org/myrobotlab/boot/" -->
 			<manifest>
 				<attribute name="Main-Class" value="org.myrobotlab.service.Agent" />
 				<attribute name="Built-By" value="${user.name}" />
+				<!--attribute name="Implementation-Version" value="${version}" /-->
 				<!-- section name="myrobotlab" -->
-				<section name="compile">
-					<attribute name="Specification-Title" value="myrobotlab" />
-					<attribute name="Specification-Version" value="${version}" />
+				<!-- section name="org/myrobotlab"-->
+					<attribute name="Specification-Title" value="You Know, for Creative Machine Control !" />
+					<attribute name="Specification-Version" value="1.0" />
 					<attribute name="Specification-Vendor" value="myrobotlab" />
 					<attribute name="Implementation-Title" value="myrobotlab" />
 					<attribute name="Implementation-Version" value="${version}" />
-					<attribute name="Implementation-Vendor" value="myrobotlab.org" />
-					<attribute name="Commit" value="${COMMIT}" />					
-				</section>
+					<attribute name="Implementation-Vendor" value="http://myrobotlab.org" />
+					<attribute name="Branch" value="${branch}" />					
+					<attribute name="Commit" value="${commit}" />					
+				<!-- /section -->
 			</manifest>
 		</jar>
 	</target>

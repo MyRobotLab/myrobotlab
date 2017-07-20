@@ -2,10 +2,15 @@ package org.myrobotlab.framework;
 
 import java.io.File;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
+import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Agent;
+import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 /**
@@ -25,7 +30,8 @@ public class ProcessData implements Serializable {
 	public static final String STATE_UNKNOWN = "unknown";
 
 	// TODO - need to start using id
-	public Integer id;
+	// public Integer id;
+	public String id;
 	public String branch;
 	public String name;
 	public String version;
@@ -46,6 +52,10 @@ public class ProcessData implements Serializable {
 	transient public Process process;
 	transient public Monitor monitor;
 	static transient public Invoker service;
+	CmdLine inCmdLine = null;
+	static long nextPid = 0;
+	
+	String fromAgent = null;
 
 	ArrayList<String> in = null;
 
@@ -83,13 +93,14 @@ public class ProcessData implements Serializable {
 
 	}
 
-	public ProcessData(Invoker service, Integer id, String branch, String version, String name, Process process) {
+	public ProcessData(Agent service, String id, String branch, String version, String name, Process process) {
 		this.id = id;
 		ProcessData.service = service;
 		this.name = name;
 		this.branch = branch;
 		this.version = version;
 		this.process = process;
+		this.fromAgent = Runtime.getId();
 	}
 
 	/**
@@ -135,8 +146,9 @@ public class ProcessData implements Serializable {
 	 * @param defaultBranch
 	 * @param defaultVersion
 	 */
-	public ProcessData(Invoker service, String jarPath, String[] inCmdLine, String defaultBranch,
+	public ProcessData(Agent service, String jarPath, String[] inArgs, String defaultBranch,
 			String defaultVersion) {
+	  inCmdLine = new CmdLine(inArgs);
 		ProcessData.service = service;
 		this.jarPath = jarPath;
 
@@ -148,15 +160,15 @@ public class ProcessData implements Serializable {
 		// convert to ArrayList to process
 		in = new ArrayList<String>();
 
-		for (int i = 0; i < inCmdLine.length; ++i) {
-			String cmd = inCmdLine[i];
+		for (int i = 0; i < inArgs.length; ++i) {
+			String cmd = inArgs[i];
 			if (cmd.equals("-runtimeName")) {
-				name = inCmdLine[i + 1];
+				name = inArgs[i + 1];
 				continue;
 			}
 
 			if (cmd.equals("-branch")) {
-				branch = inCmdLine[i + 1];
+				branch = inArgs[i + 1];
 				continue;
 			}
 
@@ -165,7 +177,7 @@ public class ProcessData implements Serializable {
 			}
 
 			// additional parameters
-			in.add(inCmdLine[i]);
+			in.add(inArgs[i]);
 		}
 
 		name = (name == null) ? "runtime" : name;
@@ -226,6 +238,20 @@ public class ProcessData implements Serializable {
 		}
 
 		cmd.add("-fromAgent");
+		cmd.add(Runtime.getId());
+		
+		// if an id is not supplied for this process
+		// create a new "Unique" one
+		if (inCmdLine != null || !inCmdLine.hasSwitch("-id")){
+		  cmd.add("-id");
+		  SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmssSSS");
+		  this.id = String.format("runtime.%s.%s", formatter.format(new Date()), nextPid);
+		  // this.id = String.format("%s.%d", org.myrobotlab.service.Runtime.getId(), nextPid);
+		  ++nextPid;
+		  cmd.add(this.id);
+		} else {
+		  this.id = inCmdLine.getArgument("-id", 0);
+		}
 
 		if (in != null) {
 			for (int i = 0; i < in.size(); ++i) {
