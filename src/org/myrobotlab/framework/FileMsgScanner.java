@@ -18,7 +18,7 @@ public class FileMsgScanner extends Thread {
   transient static MessageSender sender = null;
 
   public boolean scanning = false;
-
+xxx
   static String id;
   static FileMsgScanner fileMsgScanner = null;
 
