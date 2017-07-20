@@ -502,12 +502,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return null;
   }
 
-  /**
-   * big hammer - exits no ifs ands or butts
-   */
-  public static final void exit() {
-    exit(-1);
-  }
 
   /*
    * Terminates the currently running Java virtual machine by initiating its

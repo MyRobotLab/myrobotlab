@@ -568,6 +568,7 @@ public class Agent extends Service {
 
   // by id (or by pid?)
   static public String kill(String id) {
+    // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs !!
     if (processes.containsKey(id)) {
       if (agent != null) {
         agent.info("terminating %s", id);
@@ -607,6 +608,7 @@ public class Agent extends Service {
    */
 
   static public void killAll() {
+    // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs !!
     for (String id : processes.keySet()) {
       kill(id);
     }
@@ -839,10 +841,12 @@ public class Agent extends Service {
   }
 
   static public void shutdown() {
+    // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs !!
     log.info("terminating others");
     killAll();
     log.info("terminating self ... goodbye...");
-    Runtime.exit();
+    //Runtime.exit();
+    Runtime.shutdown();
   }
   
   static public synchronized Process spawn() throws IOException, URISyntaxException, InterruptedException {
