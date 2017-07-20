@@ -27,18 +27,28 @@ package org.myrobotlab.swing;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
+import org.myrobotlab.image.Util;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.SwingGui;
@@ -77,7 +87,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
   JLabel boundPos = new JLabel("90");
   JButton attachButton = new JButton("attach");
   JButton updateLimitsButton = new JButton("update");
-
+  JButton enableButton = new JButton("enable");
+  JCheckBox autoDisable = new JCheckBox("autoDisable");
   JSlider slider = new JSlider(0, 180, 90);
   BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
   BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
@@ -87,12 +98,15 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
   JTextField posMin = new JTextField("0");
   JTextField posMax = new JTextField("180");
+  
+  JLabel imageenabled = new JLabel();
+  ImageIcon enabled = Util.getImageIcon("enabled.png");
 
   // Servo myServox = null;
 
   SliderListener sliderListener = new SliderListener();
 
-  public ServoGui(final String boundServiceName, final SwingGui myService) {
+  public ServoGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
     // myServo = (Servo) Runtime.getService(boundServiceName);
 
@@ -105,6 +119,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
     right.addActionListener(this);
     controller.addActionListener(this);
     attachButton.addActionListener(this);
+    enableButton.addActionListener(this);
+    autoDisable.addActionListener(this);
     pinList.addActionListener(this);
     boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
 
@@ -116,6 +132,20 @@ public class ServoGui extends ServiceGui implements ActionListener {
     // addLine(s);
     addTop("controller:", controller, "   pin:", pinList, attachButton);
     addTop("min:", posMin, "   max:", posMax, updateLimitsButton);
+    
+    JPanel extra = new JPanel();
+    String title = "Extra";
+    Border border = BorderFactory.createTitledBorder(title);
+    extra.setBorder(border);
+    
+    imageenabled.setIcon(enabled);
+
+    extra.add(enableButton);
+    extra.add(imageenabled);
+    
+    autoDisable.setSelected(false);
+    extra.add(autoDisable);
+    addBottom(extra);
 
     refreshControllers();
   }
@@ -127,6 +157,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
       @Override
       public void run() {
         Object o = event.getSource();
+        log.error(o.toString());
         if (o == controller) {
           String controllerName = (String) controller.getSelectedItem();
           log.debug(String.format("controller event %s", controllerName));
@@ -164,6 +195,32 @@ public class ServoGui extends ServiceGui implements ActionListener {
           }
           return;
         }
+        
+        if (o == enableButton) {
+            if (enableButton.getText().equals("enable")) {
+            	if (!attachButton.getText().equals("attach")) {
+              send("enable");
+              imageenabled.setVisible(true);
+            	}
+            	else
+            	{
+            	log.error("Servo is not attached");	
+            	}
+            } else {
+              send("disable");
+              imageenabled.setVisible(false);
+            }
+            return;
+          }
+        
+        if (o == autoDisable) {
+            if (autoDisable.isSelected()) {
+              send("enableAutoDisable",true);
+            } else {
+            	send("enableAutoDisable",false);
+            }
+            return;
+          }
 
         if (o == updateLimitsButton) {
           send("setMinMax", Integer.parseInt(posMin.getText()), Integer.parseInt(posMax.getText()));
@@ -224,6 +281,20 @@ public class ServoGui extends ServiceGui implements ActionListener {
           controller.setEnabled(true);
           pinList.setEnabled(true);
         }
+        
+        if (servo.isEnabled()) {
+            enableButton.setText("disable");
+            imageenabled.setVisible(true);
+        } else {
+        	 enableButton.setText("enable");
+        	 imageenabled.setVisible(false);
+          }
+        
+        if (servo.isAutoDisabled()) {
+        	autoDisable.setSelected(true);    
+        } else {
+        	autoDisable.setSelected(false);   
+          }
 
         Double pos = servo.getPos();
         if (pos != null) {

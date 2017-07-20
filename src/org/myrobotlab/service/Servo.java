@@ -243,7 +243,7 @@ public class Servo extends Service implements ServoControl {
   private int disableDelayIfVelocity = 1000;
   private boolean moving;
   private double currentPosInput;
-  private boolean autoDisable = false;
+  public boolean autoDisable = false;
 
   private transient Timer forceElectrizeTimer;
   private transient Timer autoDisableTimer;
@@ -406,6 +406,10 @@ public class Servo extends Service implements ServoControl {
   public boolean isEnabled() {
     return isPinAttached();
   }
+  
+  public boolean isAutoDisabled() {
+	 return autoDisable;
+ 	  }
 
   @Override
   public boolean isInverted() {
@@ -849,6 +853,8 @@ public class Servo extends Service implements ServoControl {
   public void enableAutoDisable(boolean autoDisable) {
     this.autoDisable = autoDisable;
     this.addServoEventListener(this);
+    log.info("enableAutoDisable : "+autoDisable);
+    broadcastState();
   }
 
   public double microsecondsToDegree(int microseconds) {
