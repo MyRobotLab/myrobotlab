@@ -34,7 +34,9 @@ import java.util.TreeMap;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
+import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.FileMsgScanner;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -123,7 +125,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return Platform.getLocalInstance().isLinux();
   }
 
-  static private Date startDate = new Date();
+  static Date startDate = new Date();
 
   static String pid;
   static String hostname;
@@ -132,6 +134,23 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * network ip of a device and used in a similar way
    */
   static String id;
+
+  /**
+   * the id of the agent which spawned us
+   */
+  static String fromAgent = null;
+
+  /**
+   * Pid file of this process
+   */
+  File pidFile = null;
+
+  /**
+   * user specified data which prefixes built id
+   */
+  static String customId;
+
+  final static String PID_DIR = "pids";
 
   static private boolean autoAcceptLicense = true; // at the moment
 
@@ -517,7 +536,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   static public boolean fromAgent() {
-    return cmdline.containsKey("-fromAgent");
+    return fromAgent != null;
   }
 
   /**
@@ -885,7 +904,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
 
     SimpleDateFormat TSFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-    pid = TSFormatter.format(new Date());
+    pid = TSFormatter.format(startDate);
 
     try {
 
@@ -1074,12 +1093,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   public static String getVersion() {
-    return Platform.getLocalInstance().getVersion();// FileIO.resourceToString("version.txt");
+    return Platform.getLocalInstance().getVersion();
   }
 
   // FIXME - shouldn't this be in platform ???
   public static String getBranch() {
-    return Platform.getLocalInstance().getBranch();// FileIO.resourceToString("branch.txt");
+    return Platform.getLocalInstance().getBranch();
   }
 
   static public void install() throws ParseException, IOException {
@@ -1238,30 +1257,29 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     cmdline = new CmdLine(args);
 
     Logging logging = LoggingFactory.getInstance();
+    log.info("args [{}]", cmdline.toString());
 
     try {
 
       logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
 
       if (cmdline.containsKey("-id")) {
-        id = cmdline.getArgument("-id", 0);
+        customId = cmdline.getArgument("-id", 0);
+      }
+      
+      if (cmdline.containsKey("-fromAgent")) {
+        if (cmdline.getArgumentCount("-fromAgent") != 1){
+          log.error("if process is -fromAgent a id is required - no id found");
+          return;
+        }
+        // assigning agent's id
+        fromAgent = cmdline.getArgument("-fromAgent", 0);
       }
 
       if (cmdline.containsKey("-v") || cmdline.containsKey("--version")) {
         System.out.print(Runtime.getVersion());
         return;
       }
-      if (cmdline.containsKey("-runtimeName")) {
-        runtimeName = cmdline.getSafeArgument("-runtimeName", 0, "MRL");
-      }
-
-      /*
-       * Previously the Agent remained running - and would siphon std:in &
-       * std:out if (cmdline.containsKey("-isAgent")) {
-       * logging.addAppender(Appender.IS_AGENT); } else if
-       * (cmdline.containsKey("-fromAgent")) {
-       * logging.addAppender(Appender.FROM_AGENT); } else
-       */
 
       if (cmdline.containsKey("-logToConsole")) {
         logging.addAppender(Appender.CONSOLE);
@@ -1269,27 +1287,15 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         logging.addAppender(Appender.FILE, String.format("%s.log", runtimeName));
       }
 
-      log.info(cmdline.toString());
-
-      if (cmdline.containsKey("-h") || cmdline.containsKey("--help")) {
+      if (cmdline.containsKey("-h") || cmdline.containsKey("-?") || cmdline.containsKey("--help")) {
         mainHelp();
         return;
       }
-
-      // logging.addAppender(Appender.CONSOLE); hopefully it still worky
-      // after removing this ! :)
 
       if (!cmdline.containsKey("-noCLI")) {
         Runtime.getInstance();
         startCli();
       }
-
-      // LINUX LD_LIBRARY_PATH MUST BE EXPORTED - NO OTHER SOLUTION FOUND
-      // hack to reconcile the different ways os handle and expect
-      // "PATH & LD_LIBRARY_PATH" to be handled
-      // found here -
-      // http://blog.cedarsoft.com/2010/11/setting-java-library-path-programmatically/
-      // but does not work
 
       if (cmdline.containsKey("-install")) {
         // force all updates
@@ -1305,20 +1311,22 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         shutdown();
         return;
       }
-      
+
+      if (cmdline.containsKey("-manifest")) {
+        CodecJson.encode(Runtime.getManifest());
+        shutdown();
+        return;
+      }
+
       if (cmdline.containsKey("-extract")) {
         // force all updates
-        /* FIXME - do  " -extract {serviceType} in future 
-        ArrayList<String> services = cmdline.getArgumentList("-extract");
-        Repo repo = Repo.getLocalInstance();
-        if (services.size() == 0) {
-          repo.install();
-        } else {
-          for (int i = 0; i < services.size(); ++i) {
-            repo.install(services.get(i));
-          }
-        }
-        */
+        /*
+         * FIXME - do " -extract {serviceType} in future ArrayList<String>
+         * services = cmdline.getArgumentList("-extract"); Repo repo =
+         * Repo.getLocalInstance(); if (services.size() == 0) { repo.install();
+         * } else { for (int i = 0; i < services.size(); ++i) {
+         * repo.install(services.get(i)); } }
+         */
         extract();
         shutdown();
         return;
@@ -1344,18 +1352,21 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    */
   static void mainHelp() {
     System.out.println(String.format("Runtime %s", Runtime.getVersion()));
-    System.out.println("-h --help                            # help ");
-    System.out.println("-v --version                           # print version");
-    System.out.println("-update                                # update myrobotlab");
+    System.out.println("-h --help                                  # help ");
+    System.out.println("-v --version                               # print version");
+    System.out.println("-update                                    # update myrobotlab");
     System.out.println("-invoke name method [param1 param2 ...]    # invoke a method of a service");
     System.out.println("-install [ServiceType1 ServiceType2 ...]   # install services - if no ServiceTypes are specified install all");
-    System.out.println("-runtimeName <runtime name>                # rename the Runtime service - prevents multiple instance name collisions");
+    System.out.println("-id <instance id>                          # the identifier for this process");
     System.out.println("-logToConsole                              # redirects logging to console");
     System.out.println("-logLevel <DEBUG | INFO | WARNING | ERROR> # log level");
     System.out.println("-service <name1 Type1 name2 Type2 ...>     # create and start list of services, e.g. -service gui SwingGui");
-    System.out.println("example:");
-    String helpString = "java -Djava.library.path=./libraries/native/x86.32.windows org.myrobotlab.service.Runtime -service webgui WebGui gui SwingGui -logLevel INFO -logToConsole";
-    System.out.println(helpString);
+    // System.out.println("example:");
+    // String helpString = "java
+    // -Djava.library.path=./libraries/native/x86.32.windows
+    // org.myrobotlab.service.Runtime -service webgui WebGui gui SwingGui
+    // -logLevel INFO -logToConsole";
+    // System.out.println(helpString);
   }
 
   public static String message(String msg) {
@@ -1602,7 +1613,11 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     // exit () ?
   }
 
-  public static void shutdown(int seconds) {
+  /**
+   * sets task to shutdown in (n) seconds
+   * @param seconds
+   */
+  public static void shutdown(Integer seconds) {
     log.info("shutting down in {} seconds", seconds);
     if (seconds > 0) {
       runtime.addTaskOneShot(seconds * 1000, "shutdown", (Object[]) null);
@@ -1616,6 +1631,22 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     // - saveAll(); not needed as release at some point calls save()
     log.info("halt");
     releaseAll();
+    try {
+      String pidFileName = null;
+      if (fromAgent != null){
+         // from agent
+         pidFileName = String.format("%s/%s/%s.pid", PID_DIR, fromAgent, id);         
+      } else {
+        // "not" from agent
+        pidFileName = String.format("%s/%s.pid", PID_DIR, id);
+      }
+      
+      log.info("removing pid file {}", pidFileName);
+      File f = new File(pidFileName);      
+      f.delete();
+    } catch (Exception e) {
+      log.error("removing pid file failed", e);
+    }
     System.exit(-1);
   }
 
@@ -1726,9 +1757,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   public Runtime(String n) {
     super(n);
 
-    // setting the id and the platform
-    platform = Platform.getLocalInstance(id);
-
     synchronized (instanceLockObject) {
       if (runtime == null) {
         runtime = this;
@@ -1737,7 +1765,62 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     hostname = getHostname();
     pid = getPid();
-    id = String.format("%s@%s", pid, hostname);
+
+    if (customId != null) {
+      // custom id
+      id = customId;
+    } else {
+      // not supplied by user - make it unique
+      SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmssSSS");
+      // USUALLY YOU CANNOT HAVE A PID IN ID - BECAUSE IF ITS FROM AGENT - THE
+      // AGENT DOESN'T KNOW YOUR PID - BUT PASSES IN A PID FOR YOUR ID
+      // THE ONLY TIME THE BELOW ID WOULD BE USED IF ITS NEITHER isAgent NOR
+      // fromAgent
+      // WHICH SHOULD BE EXTREMELY RARE (OR RUNNING IN IDE)
+      id = String.format("runtime.%s.%s", formatter.format(startDate), pid);
+    }
+
+    // 3 states
+    // isAgent == make default directory (with pid) if custom not supplied
+    // fromAgent == needs agentId
+    // neither ... == normal pid file !isAgent & !fromAgent
+
+    // write pid file
+    try {
+
+      // regular (neither)
+      String pidFileName = String.format("%s/%s.pid", PID_DIR, id);
+
+      // fromAgent
+      if (fromAgent != null) {
+        // if I'm being created from an Agent - it sends me its agentId
+        // so I can communicated with it
+        pidFileName = String.format("%s/%s/%s.pid", PID_DIR, fromAgent, id);
+      }
+
+      pidFile = new File(pidFileName);
+      new File(pidFile.getParent()).mkdirs();
+
+      if (isAgent()) {
+        // isAgent make directory
+        pidFile.mkdirs();
+      } else {
+        // create file for (neither) or fromAgent
+        FileOutputStream fos = new FileOutputStream(pidFile);
+        fos.write(pid.getBytes());
+        fos.close();
+      }
+    } catch (Exception e) {
+      log.error("pid file creation failed", e);
+    }
+
+    // setting the id and the platform
+    platform = Platform.getLocalInstance(id);
+
+    // FIXME - command line option to disable
+    if (cmdline == null || !cmdline.containsKey("-disableFileMsgs")) {
+      enableFileMsgs(true);
+    }
 
     String libararyPath = System.getProperty("java.library.path");
     String userDir = System.getProperty("user.dir");
@@ -1746,7 +1829,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     // TODO this should be a single log statement
     // http://developer.android.com/reference/java/lang/System.html
 
-    Date now = new Date();
     String format = "yyyy/MM/dd HH:mm:ss";
     SimpleDateFormat sdf = new SimpleDateFormat(format);
     SimpleDateFormat gmtf = new SimpleDateFormat(format);
@@ -1792,7 +1874,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     // Platform platform = Platform.getLocalInstance();
     log.info("============== normalized ==============");
-    log.info("{} - GMT - {}", sdf.format(now), gmtf.format(now));
+    log.info("{} - GMT - {}", sdf.format(startDate), gmtf.format(startDate));
     log.info("pid {}", pid);
     log.info("hostname {}", hostname);
     log.info("ivy [runtime,{}.{}.{}]", platform.getArch(), platform.getBitness(), platform.getOS());
@@ -2104,15 +2186,16 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       // just send a restart msg to the Agent process
       // FIXME - perhaps a "rename" is more safe .. since the file is complete
       // ...
-      // FIXME - perhaps an idea worth investigating - inter-process file-system queues
+      // FIXME - perhaps an idea worth investigating - inter-process file-system
+      // queues
       // each process must have its own directory or file name type
       // id.ts.{serviceName}.json
       // 14604@ctnal0043108539.agent.1500211865673.json
       // ctnal0043108539.14604.agent.1500211865673.json
       // in this case however - the spawned process does not know the agents id
       // agent.1500211865673.json
-      
-      Message msg = Message.createMessage(this, "agent", "restart", null);
+
+      Message msg = Message.createMessage(this, "agent", "restart", Runtime.getId());
       FileIO.toFile(String.format("msgs/agent.%d.part", msg.msgId), CodecUtils.toJson(msg));
       File partFile = new File(String.format("msgs/agent.%d.part", msg.msgId));
       File json = new File(String.format("msgs/agent.%d.json", msg.msgId));
@@ -2123,10 +2206,20 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       // Bootstrap.spawn(args.toArray(new String[args.size()]));
       // System.exit(0);
 
+      // i've sent a message to the agent which controls me to kill me
+      // and start again.. if the agent does not kill me i can only assume
+      // the agent is lost, so i will commit suicide in 3 seconds
+      sleep(3000);
+      log.error("the agent did not kill me ! .. but I will take my cyanide pill .. goodbye ...");
+      shutdown();
       // shutdown / exit
     } catch (Exception e) {
       Logging.logError(e);
     }
+  }
+
+  static public Map<String, String> getManifest() {
+    return Platform.getManifest();
   }
 
   /**
@@ -2424,10 +2517,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return new SystemResources();
   }
 
-  /* FIXME - did not work ...
-  public static boolean isDaemon() {
-    return cmdline.containsKey("-daemon");
+  public static void enableFileMsgs(Boolean b) {
+    FileMsgScanner.enableFileMsgs(b, id);
   }
-  */
+  /*
+   * FIXME - did not work ... public static boolean isDaemon() { return
+   * cmdline.containsKey("-daemon"); }
+   */
 
 }
