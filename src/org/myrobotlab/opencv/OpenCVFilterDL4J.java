@@ -26,11 +26,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   private transient Deeplearning4j dl4j;
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   
-  // only sample one in every 5 frames!
-  private int downSample = 15;
-  
-  Map<String, Double> lastResult = null; 
-  
+  public Map<String, Double> lastResult = null; 
   private IplImage lastImage = null;
   
   public OpenCVFilterDL4J() {
@@ -62,16 +58,19 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
     Thread classifier = new Thread(this, "DL4JClassifierThread");
     classifier.start();
     
+    
   }
   
   @Override
   public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
-    // ok now we just need to update the image that the current thread is processing (if the current thread is idle i guess?)
-    lastImage = image;
+    
     if (lastResult != null) {
       // the thread running will be updating lastResult for it as fast as it can.
+      // log.info("Display result " );
       displayResult(image, lastResult);
     }
+    // ok now we just need to update the image that the current thread is processing (if the current thread is idle i guess?)
+    lastImage = image;
     return image;
   }
 
@@ -108,6 +107,8 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
 
   @Override
   public void run() {
+    
+    log.info("Starting the DL4J classifier thread...");
     // in a loop, grab the current image and classify it and update the result.
     while (true) {
       // log.info("Running!!!");
@@ -123,6 +124,16 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
           log.warn("Exception classifying image!");
           e.printStackTrace();
         }
+      } else {
+        // log.info("No Image to classify...");
+      }
+      // TODO: see why there's a race condition. i seem to need a little delay here o/w the recognition never seems to start.
+      // maybe lastImage needs to be marked as volitite?
+      try {
+        Thread.sleep(1);
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
       }
     }
   }
