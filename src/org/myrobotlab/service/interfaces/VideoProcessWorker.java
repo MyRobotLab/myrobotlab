@@ -1,7 +1,7 @@
 package org.myrobotlab.service.interfaces;
 
 /**
- * Class for managing the thread & callback to do processing of video.
+ * Class for managing the thread &amp; callback to do processing of video.
  * Although this is not formally an interface, it 'could' be an abtract class.
  * Since Service's are Runnable, and the run function within them manages the messaging framework,
  * this class is needed to implement 'another' Runnable run, which calls back to the appropriate method

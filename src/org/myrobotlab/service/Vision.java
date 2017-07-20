@@ -603,7 +603,7 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
    * 
    * @param filterName
    *          - name of filter to be added
-   * @return
+   * @return - returns the filter which was added
    */
   public OpenCVFilter addFilter(String filterName) {
     return addFilter(filterName, filterName);
@@ -795,9 +795,12 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
   /**
    * Callback from the SwingGui to the appropriate filter funnel through here
    * 
-   * @param filterName - the name of the filter to invoke our function
-   * @param method - the method on the filter to be invoked 
-   * @param params - the params of the method
+   * @param filterName
+   *          - the name of the filter to invoke our function
+   * @param method
+   *          - the method on the filter to be invoked
+   * @param params
+   *          - the params of the method
    */
   public void invokeFilterMethod(String filterName, String method, Object... params) {
     OpenCVFilter filter = getFilter(filterName);
@@ -998,7 +1001,9 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
   /**
    * publishing method for filters - used internally
    * 
-   * @return FilterWrapper solves the problem of multiple types being resolved
+   * @param filterWrapper
+   *          - filter wrapped for single method common type
+   * @return - FilterWrapper solves the problem of multiple types being resolved
    *         in the setFilterState(FilterWrapper data) method
    */
   public FilterWrapper publishFilterState(FilterWrapper filterWrapper) {
@@ -1091,7 +1096,7 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
    * processor thread's filters if the video thread is capturing - must remove
    * it by adding it to a removeFilterQueue to be processed later
    * 
-   * @param name
+   * @param name - name of the filter to return
    */
   public void removeFilter(String name) {
     log.info("removing filter {} ", name);
@@ -1184,7 +1189,7 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
   /**
    * minimum time between processing frames - time unit is in milliseconds
    * 
-   * @param time
+   * @param time - minimum amount of time in millis
    */
   public void setMinDelay(int time) {
     OpenCVFilterInput inputFilter = (OpenCVFilterInput) getFilter(selectedName);
