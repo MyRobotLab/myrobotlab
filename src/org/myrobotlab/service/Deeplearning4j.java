@@ -4,9 +4,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.LinkedHashMap;
 
 import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
 import org.myrobotlab.framework.Service;
@@ -39,6 +43,7 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.modelimport.keras.trainedmodels.TrainedModels;
+import org.deeplearning4j.nn.modelimport.keras.trainedmodels.Utils.ImageNetLabels;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
@@ -54,6 +59,7 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.dataset.api.preprocessor.VGG16ImagePreProcessor;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -395,7 +401,7 @@ public class Deeplearning4j extends Service {
   }
 
   
-  public String classifyImageVGG16(IplImage iplImage) throws IOException {
+  public Map<String, Double> classifyImageVGG16(IplImage iplImage) throws IOException {
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
     BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
     INDArray image = loader.asMatrix(buffImg);
@@ -405,12 +411,12 @@ public class Deeplearning4j extends Service {
     scaler.transform(image);
     INDArray[] output = vgg16.output(false,image);
     // TODO: return a more native datastructure!
-    String predictions = TrainedModels.VGG16.decodePredictions(output[0]);
-    log.info("Image Predictions: {}", predictions);
-    return predictions;
+    //String predictions = TrainedModels.VGG16.decodePredictions(output[0]);
+    // log.info("Image Predictions: {}", predictions);
+    return decodeVGG16Predictions(output[0]);
   }
   
-  public String classifyImageFileVGG16(String filename) throws IOException {
+  public Map<String, Double> classifyImageFileVGG16(String filename) throws IOException {
     File file = new File(filename);
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
     INDArray image = loader.asMatrix(file);
@@ -420,9 +426,40 @@ public class Deeplearning4j extends Service {
     scaler.transform(image);
     INDArray[] output = vgg16.output(false,image);
     // TODO: return a more native datastructure!
-    String predictions = TrainedModels.VGG16.decodePredictions(output[0]);
-    log.info("Image Predictions: {}", predictions);
-    return predictions;
+    //String predictions = TrainedModels.VGG16.decodePredictions(output[0]);
+    //log.info("Image Predictions: {}", predictions);
+    return decodeVGG16Predictions(output[0]);
+  }
+  
+  
+  // adapted from dl4j TrainedModels.VGG16 class.
+  public Map<String, Double> decodeVGG16Predictions(INDArray predictions) {
+    
+    LinkedHashMap<String, Double> recognizedObjects = new LinkedHashMap<String, Double>(); 
+    ArrayList<String> labels;
+    String predictionDescription = "";
+    int[] top5 = new int[5];
+    float[] top5Prob = new float[5];
+    labels = ImageNetLabels.getLabels();
+    //brute force collect top 5
+    int i = 0;
+    for (int batch = 0; batch < predictions.size(0); batch++) {
+        if (predictions.size(0) > 1) {
+            predictionDescription += String.valueOf(batch);
+        }
+        predictionDescription += " :";
+        INDArray currentBatch = predictions.getRow(batch).dup();
+        while (i < 5) {
+            top5[i] = Nd4j.argMax(currentBatch, 1).getInt(0, 0);
+            top5Prob[i] = currentBatch.getFloat(batch, top5[i]);
+            // interesting, this cast looses precision.. float to double.
+            recognizedObjects.put(labels.get(top5[i]), (double)top5Prob[i]);
+            currentBatch.putScalar(0, top5[i], 0);
+            predictionDescription += "\n\t" + String.format("%3f", top5Prob[i] * 100) + "%, " + labels.get(top5[i]);
+            i++;
+        }
+    }
+    return recognizedObjects;
   }
   
   static public ServiceType getMetaData() {
