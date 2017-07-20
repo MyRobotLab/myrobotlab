@@ -1647,7 +1647,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     } catch (Exception e) {
       log.error("removing pid file failed", e);
     }
-    System.exit(-1);
+    System.exit(-1); // really returned ?  or jvm bug ?
   }
 
   public Integer publishShutdown(Integer seconds) {
