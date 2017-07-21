@@ -388,6 +388,14 @@ public class Servo extends Service implements ServoControl {
   public double getMinInput() {
     return mapper.getMinInput();
   }
+  
+  public double getMaxOutput() {
+	return mapper.getMaxOutput();
+  }
+  public double getMinOutput() {
+    return mapper.getMinOutput();
+  }
+
 
   @Override
   public double getRest() {
@@ -755,6 +763,7 @@ public class Servo extends Service implements ServoControl {
     this.velocity = velocity;
     if (controller != null) {
       controller.servoSetVelocity(this);
+      broadcastState();
     }
   }
 
