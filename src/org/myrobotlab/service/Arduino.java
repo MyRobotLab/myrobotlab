@@ -2108,4 +2108,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     connect(port, rate, 8, 1, 0);
   }
 
+  @Override
+  public boolean setI2cCombined(boolean status) {
+    // TODO Auto-generated method stub
+    log.error("setI2cCombined not yet implemented on Arduino");
+    return false;
+  }
+
+  @Override
+  public boolean isI2cCombined() {
+    // TODO Auto-generated method stub
+    log.error("setI2cCombined not yet implemented on Arduino");
+    return false;
+  }
+
 }
