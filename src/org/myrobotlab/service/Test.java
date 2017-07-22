@@ -934,9 +934,11 @@ public class Test extends Service implements StatusListener {
 		  log.info("agentId = {}", agentCmdLine.getArgument("-id", 0));
 
 			Test test = (Test) Runtime.start("test", "Test");
-			
+
 
 			Runtime.start("webgui", "WebGui");
+			
+			test.test("InMoov");
 
 			boolean done = true;
 			if (done) {

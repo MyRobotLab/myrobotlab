@@ -43,7 +43,7 @@ public class ProcessData implements Serializable {
 
 	public String jniLibraryPath = null;
 	public String jnaLibraryPath = null;
-	public String Xmx = null;
+	public String jvm[] = null;
 
 	boolean userDefinedServices = false;
 
@@ -120,7 +120,7 @@ public class ProcessData implements Serializable {
 		
 		this.jarPath = pd.jarPath;
 		
-		this.Xmx = pd.Xmx;
+		this.jvm = pd.jvm;
 
 		this.userDefinedServices = pd.userDefinedServices;
 
@@ -159,13 +159,21 @@ public class ProcessData implements Serializable {
 
 		// convert to ArrayList to process
 		in = new ArrayList<String>();
-
+    
 		for (int i = 0; i < inArgs.length; ++i) {
 			String cmd = inArgs[i];
+			
 			if (cmd.equals("-runtimeName")) {
 				name = inArgs[i + 1];
 				continue;
 			}
+			
+	    // if (inCmdLine.containsKey("-jvm") && inCmdLine.getArgumentCount("-jvm") > 0) {
+			if (cmd.equals("-jvm")) {
+	      String tmp = inCmdLine.getArgument("-jvm", 0);
+	      jvm = tmp.split(" ");
+	      continue;
+	    }
 
 			if (cmd.equals("-branch")) {
 				branch = inArgs[i + 1];
@@ -206,6 +214,12 @@ public class ProcessData implements Serializable {
 		ArrayList<String> cmd = new ArrayList<String>();
 
 		cmd.add(javaExe);
+		
+		if (jvm != null){
+		  for (int i = 0; i < jvm.length; ++i){
+		    cmd.add(jvm[i]);
+		  }
+		}
 
 		cmd.add(jniLibraryPath);
 		cmd.add(jnaLibraryPath);

@@ -31,6 +31,8 @@ import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
 import org.slf4j.Logger;
 
@@ -127,7 +129,6 @@ public class Agent extends Service {
 
   static Map<String, ProcessData> processes = new ConcurrentHashMap<String, ProcessData>();
 
-  static List<String> agentJVMArgs = new ArrayList<String>();
   static transient SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmssSSS");
 
   static Platform platform = Platform.getLocalInstance();
@@ -170,8 +171,8 @@ public class Agent extends Service {
 
   public Agent(String n) {
     super(n);
-    log.info("Agent {} Pid {} is alive", n, Runtime.getInstance().getPid());
-    agentJVMArgs = Runtime.getJVMArgs();
+    log.info("Agent {} Pid {} is alive", n, Runtime.getPid());
+
     if (currentBranch == null) {
       currentBranch = platform.getBranch();
     }
@@ -1099,12 +1100,14 @@ public class Agent extends Service {
   // make it work if necessary prefix everything by -agent-<...>
   public static void main(String[] args) {
     try {
-      // System.out.println("Agent.main starting"); - with static args it
-      // doesnt really 'start'
-
+      
+      Logging logging = LoggingFactory.getInstance();
+      
       // -agent \"-params -service ... \" string encoded
       cmdline = new CmdLine(args);
-      log.info("cmdline [{}] will be relayed ", cmdline);
+      logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
+      
+      log.info("agent cmdline [{}] will be relayed ", cmdline);
 
       // FIXME - this could just be relayed to Runtime, right ?
       // its not even correct as these are queries to the Agent, but what
