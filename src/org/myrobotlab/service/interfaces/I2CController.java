@@ -57,4 +57,10 @@ public interface I2CController extends Attachable {
 	 *           thrown in case byte cannot be read from the i2c device or i2c bus
 	 */
 	int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize);
+	
+	public boolean setI2cCombined(boolean status);
+	
+	public boolean isI2cCombined();
+	
+	
 }

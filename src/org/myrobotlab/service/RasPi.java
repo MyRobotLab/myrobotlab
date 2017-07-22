@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,7 +143,7 @@ public class RasPi extends Service implements I2CController {
        * 16 reserved addresses.
        */
       I2CBus bus = I2CFactory.getInstance(busAddress);
-
+      
       for (int i = 0; i < 128; ++i) {
         I2CDevice device = bus.getDevice(i);
         if (device != null) {
@@ -306,4 +308,34 @@ public class RasPi extends Service implements I2CController {
     }
 
   }
+  /** 
+   * A set of methods that may be implemented in Pi4j at some later stage:
+   * See https://github.com/Pi4J/pi4j/issues/225
+   */
+  @Override
+  public boolean isI2cCombined()
+  {
+      boolean ret = false;
+      try (FileInputStream in = new FileInputStream("/sys/module/i2c_bcm2708/parameters/combined")) {
+          ret = in.read() == 'Y';
+      } catch (IOException ignore) {
+          System.err.println("Cannot read combined");
+      }
+      return ret;
+  }
+  
+  @Override
+  public boolean setI2cCombined(boolean status)
+  {
+          boolean ret = false;
+          try (FileOutputStream out = new FileOutputStream("/sys/module/i2c_bcm2708/parameters/combined")) {
+              out.write(status?'Y':'N');
+              ret = true;
+          }
+          catch(IOException ignore) {
+              System.err.println("Can not set combined");
+          }
+          return ret;
+  }
+  
 }

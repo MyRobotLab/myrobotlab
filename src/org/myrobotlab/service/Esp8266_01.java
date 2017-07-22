@@ -238,9 +238,7 @@ public class Esp8266_01 extends Service implements I2CController {
       // log.info(resultGson.fromJson(result.toString(),
       // i2cParms.class).toString());
 
-      // log.info(String.format("bus %s, device %s, size %s, buffer
-      // %s",returndata.bus, returndata.device, returndata.size,
-      // returndata.buffer));
+      log.info(String.format("bus %s, device %s, size %s, buffer %s",returndata.bus, returndata.device, returndata.size, returndata.buffer));
     }
 
     hexStringToArray(returndata.buffer, buffer);
@@ -323,6 +321,20 @@ public class Esp8266_01 extends Service implements I2CController {
   @Override
   public Set<String> getAttached() {
     return i2cDevices.keySet();
+  }
+
+  @Override
+  public boolean setI2cCombined(boolean status) {
+    // TODO Auto-generated method stub
+    log.error("setI2cCombined not yet implemented on Esp8266_01");
+    return false;
+  }
+
+  @Override
+  public boolean isI2cCombined() {
+    // TODO Auto-generated method stub
+    log.error("setI2cCombined not yet implemented on Esp8266_01");
+    return false;
   }
 
 }
