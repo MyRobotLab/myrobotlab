@@ -503,32 +503,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
 
-  /*
-   * Terminates the currently running Java virtual machine by initiating its
-   * shutdown sequence. This method never returns normally. The argument serves
-   * as a status code; by convention, a nonzero status code indicates abnormal
-   * termination
-   *
-   */
-  public static final void exit(int status) {
-    try {
-      releaseAll();
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-
-    try {
-      java.lang.Runtime.getRuntime().exit(status);
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-    //
-    // In unusual situations, System.exit(int) might not actually stop the
-    // program.
-    // Runtime.getRuntime().halt(int) on the other hand, always does.
-    java.lang.Runtime.getRuntime().halt(status);
-  }
-
   static public boolean fromAgent() {
     return fromAgent != null;
   }
@@ -540,6 +514,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     java.lang.Runtime.getRuntime().gc();
   }
 
+  /**
+   * get the one and only Cli
+   * @return - command line interpreter
+   */
   public static Cli getCli() {
     if (cli == null) {
       cli = startCli();
@@ -547,11 +525,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return cli;
   }
 
-  /*
-   * tricky way of getting static data "static" assumes you talking about "this"
-   * Runtime and no other transported/networked/serialized Runtime .. and this
-   * way Runtime == this instance's runtime !
-   */
   static public CmdLine getCMDLine() {
     return cmdline;
   }
@@ -1620,11 +1593,24 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       shutdown();
     }
   }
-
+  
+  /**
+   * shutdown terminates the currently running Java virtual machine by initiating its
+   * shutdown sequence. This method never returns normally. The argument serves
+   * as a status code; by convention, a nonzero status code indicates abnormal
+   * termination
+   *
+   */
   public static void shutdown() {
     // - saveAll(); not needed as release at some point calls save()
-    log.info("halt");
+    log.info("mrl shutdown");
+    try {
     releaseAll();
+    } catch(Exception e){
+      log.error("releaseAll threw - continuing to shutdown", e);
+    }
+    
+    // removing appropriate pid file
     try {
       String pidFileName = null;
       if (fromAgent != null){
@@ -1641,7 +1627,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     } catch (Exception e) {
       log.error("removing pid file failed", e);
     }
+    
+    // In unusual situations, System.exit(int) might not actually stop the
+    // program.
+    // Runtime.getRuntime().halt(int) on the other hand, always does.
     System.exit(-1); // really returned ?  or jvm bug ?
+    java.lang.Runtime.getRuntime().halt(-1);
   }
 
   public Integer publishShutdown(Integer seconds) {
