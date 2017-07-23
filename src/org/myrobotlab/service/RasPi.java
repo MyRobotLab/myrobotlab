@@ -308,34 +308,5 @@ public class RasPi extends Service implements I2CController {
     }
 
   }
-  /** 
-   * A set of methods that may be implemented in Pi4j at some later stage:
-   * See https://github.com/Pi4J/pi4j/issues/225
-   */
-  @Override
-  public boolean isI2cCombined()
-  {
-      boolean ret = false;
-      try (FileInputStream in = new FileInputStream("/sys/module/i2c_bcm2708/parameters/combined")) {
-          ret = in.read() == 'Y';
-      } catch (IOException ignore) {
-          System.err.println("Cannot read combined");
-      }
-      return ret;
-  }
-  
-  @Override
-  public boolean setI2cCombined(boolean status)
-  {
-          boolean ret = false;
-          try (FileOutputStream out = new FileOutputStream("/sys/module/i2c_bcm2708/parameters/combined")) {
-              out.write(status?'Y':'N');
-              ret = true;
-          }
-          catch(IOException ignore) {
-              System.err.println("Can not set combined");
-          }
-          return ret;
-  }
   
 }

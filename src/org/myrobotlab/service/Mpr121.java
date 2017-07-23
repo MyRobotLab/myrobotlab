@@ -386,9 +386,6 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
       return false;
     }
     
-    // Set i2c to use REPEATED START 
-    controller.setI2cCombined(true);
-    
     writeRegister(SOFT_RESET_REGISTER, SOFT_RESET);
     sleep(1);
     setStopMode();

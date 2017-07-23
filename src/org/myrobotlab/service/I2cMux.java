@@ -316,16 +316,5 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     ;
     return false;
   }
-
-
-  @Override
-  public boolean setI2cCombined(boolean status) {
-    return controller.setI2cCombined(status);
-  }
-
-  @Override
-  public boolean isI2cCombined() {
-    return controller.isI2cCombined();
-  }
   
 }
