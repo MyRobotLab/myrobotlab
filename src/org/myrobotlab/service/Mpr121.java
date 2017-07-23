@@ -502,9 +502,9 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
       log.error("Must be attached to an i2c controller before reading");
       return 0;
     }
-    i2cWrite(reg);
+    byte[] writebuffer =  {(byte) reg};
     byte[] readbuffer = new byte[1];
-    controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
+    controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length, readbuffer, readbuffer.length);
     return ((int) (readbuffer[0] & 0xff));
   }
 
@@ -513,9 +513,9 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
       log.error("Must be attached to an i2c controller before reading");
       return 0;
     }
-    i2cWrite(reg);
+    byte[] writebuffer =  {(byte) reg};
     byte[] readbuffer = new byte[2];
-    controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
+    controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length, readbuffer, readbuffer.length);
     return ((int) readbuffer[0]) << 8 | (int) (readbuffer[1] & 0xff);
   }
   
