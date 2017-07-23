@@ -323,18 +323,4 @@ public class Esp8266_01 extends Service implements I2CController {
     return i2cDevices.keySet();
   }
 
-  @Override
-  public boolean setI2cCombined(boolean status) {
-    // TODO Auto-generated method stub
-    log.error("setI2cCombined not yet implemented on Esp8266_01");
-    return false;
-  }
-
-  @Override
-  public boolean isI2cCombined() {
-    // TODO Auto-generated method stub
-    log.error("setI2cCombined not yet implemented on Esp8266_01");
-    return false;
-  }
-
 }
