@@ -220,7 +220,7 @@ public class RasPi extends Service implements I2CController {
     }
 
     if (wiringPi) {
-      for (int i = 0; i < size; i++) {
+      for (int i = 0; i < size-1; i++) {
         log.info(String.format("Writing to register %03X value %03X", ((buffer[0] & 0xFF) + i), buffer[i + 1] & 0xFF));
         I2C.wiringPiI2CWriteReg8(devicedata.deviceHandle, ((buffer[0] & 0xFF) + i), buffer[i + 1] & 0xFF);
       }
