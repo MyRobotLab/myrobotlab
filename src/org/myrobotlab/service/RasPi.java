@@ -220,9 +220,12 @@ public class RasPi extends Service implements I2CController {
     }
 
     if (wiringPi) {
-      for (int i = 0; i < size-1; i++) {
-        log.info(String.format("Writing to register %03X value %03X", ((buffer[0] & 0xFF) + i), buffer[i + 1] & 0xFF));
-        I2C.wiringPiI2CWriteReg8(devicedata.deviceHandle, ((buffer[0] & 0xFF) + i), buffer[i + 1] & 0xFF);
+      int reg = buffer[0] & 0xFF;
+      for (int i = 1; i < size; i++) {
+        int value = buffer[i] & 0xFF;
+        log.info(String.format("Writing to register %03X value %03X", reg, value));
+        I2C.wiringPiI2CWriteReg8(devicedata.deviceHandle, reg, value);
+        reg++;
       }
     } else {
       try {
@@ -255,16 +258,16 @@ public class RasPi extends Service implements I2CController {
 
   @Override
   public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
-    
-    if (writeSize != 1){
+
+    if (writeSize != 1) {
       log.error("writeSize other than 1 is not yet supported in i2cWriteRead");
     }
     String key = String.format("%d.%d", busAddress, deviceAddress);
     I2CDeviceMap devicedata = i2cDevices.get(key);
     if (wiringPi) {
       for (int i = 0; i < readSize; i++) {
-        readBuffer[i] = (byte) (I2C.wiringPiI2CReadReg8(devicedata.deviceHandle, (writeBuffer[0]+i) & 0xFF));
-        log.info(String.format("Read register %03X value %03X", (writeBuffer[0]+i) & 0xFF, readBuffer[i]));
+        readBuffer[i] = (byte) (I2C.wiringPiI2CReadReg8(devicedata.deviceHandle, (writeBuffer[0] + i) & 0xFF));
+        log.info(String.format("Read register %03X value %03X", (writeBuffer[0] + i) & 0xFF, readBuffer[i]));
       }
     } else {
       try {
