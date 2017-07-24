@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +25,7 @@ import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
+import com.pi4j.wiringpi.I2C;
 import com.pi4j.wiringpi.SoftPwm;
 
 /**
@@ -44,7 +43,16 @@ public class RasPi extends Service implements I2CController {
     public I2CBus bus;
     public I2CDevice device;
     public String serviceName;
+    public int deviceHandle;
   }
+
+  private boolean wiringPi = false; // Defined to be able to switch between
+                                    // the original pi4j
+                                    // implementation and the wiringpi
+                                    // implemenation that supports repeated
+                                    // start.
+                                    // Repeated start is used by Mpr121 and
+                                    // may be needed by other devices
 
   private static final long serialVersionUID = 1L;
 
@@ -106,27 +114,28 @@ public class RasPi extends Service implements I2CController {
       /*
        * log.info("Initiating GPIO"); gpio = GpioFactory.getInstance();
        * log.info("GPIO Initiated");
-       */
-      // init i2c
-      try {
-        log.info("Initiating i2c");
-        i2c = I2CFactory.getInstance(I2CBus.BUS_1);
-        log.info("i2c initiated");
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        log.error("i2c initiation failed");
-        Logging.logError(e);
-      }
-
-      // TODO Check if the is correct. I don't think it is /Mats
-      // GPIO pins should be provisioned in the CreateDevice
-      /*
-       * gpio01 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01); gpio03 =
+       *
+       * 
+       * // TODO Check if the is correct. I don't think it is /Mats // GPIO pins
+       * should be provisioned in the CreateDevice /* gpio01 =
+       * gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01); gpio03 =
        * gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03);
        */
     } else {
       // we should be running on a Raspberry Pi
       log.error("architecture is not arm");
+    }
+  }
+
+  public void startservice() {
+    try {
+      log.info("Initiating i2c");
+      i2c = I2CFactory.getInstance(I2CBus.BUS_1);
+      log.info("i2c initiated");
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      log.error("i2c initiation failed");
+      Logging.logError(e);
     }
   }
 
@@ -143,7 +152,7 @@ public class RasPi extends Service implements I2CController {
        * 16 reserved addresses.
        */
       I2CBus bus = I2CFactory.getInstance(busAddress);
-      
+
       for (int i = 0; i < 128; ++i) {
         I2CDevice device = bus.getDevice(i);
         if (device != null) {
@@ -205,15 +214,22 @@ public class RasPi extends Service implements I2CController {
   public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     String key = String.format("%d.%d", busAddress, deviceAddress);
     I2CDeviceMap devicedata = i2cDevices.get(key);
-    if (devicedata == null){
+    if (devicedata == null) {
       log.error(String.format("No device data found for key %s", key));
-      log.error(String.format("Available devices: %s",i2cDevices.toString()));
+      log.error(String.format("Available devices: %s", i2cDevices.toString()));
     }
-    try {
-      devicedata.device.write(buffer, 0, size);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      Logging.logError(e);
+
+    if (wiringPi) {
+      for (int i = 0; i < size; i++) {
+        log.info(String.format("Writing to register %03X value %03X", ((buffer[0] & 0xFF) + i), buffer[i + 1] & 0xFF));
+        I2C.wiringPiI2CWriteReg8(devicedata.deviceHandle, ((buffer[0] & 0xFF) + i), buffer[i + 1] & 0xFF);
+      }
+    } else {
+      try {
+        devicedata.device.write(buffer, 0, size);
+      } catch (IOException e) {
+        Logging.logError(e);
+      }
     }
   }
 
@@ -222,26 +238,41 @@ public class RasPi extends Service implements I2CController {
     int bytesRead = 0;
     String key = String.format("%d.%d", busAddress, deviceAddress);
     I2CDeviceMap devicedata = i2cDevices.get(key);
-    try {
-      bytesRead = devicedata.device.read(buffer, 0, buffer.length);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      Logging.logError(e);
+    if (wiringPi) {
+      for (int i = 0; i < size; i++) {
+        buffer[i] = (byte) (I2C.wiringPiI2CRead(devicedata.deviceHandle) & 0xFF);
+        log.info(String.format("Read value %03X", buffer[i]));
+      }
+    } else {
+      try {
+        bytesRead = devicedata.device.read(buffer, 0, buffer.length);
+      } catch (IOException e) {
+        Logging.logError(e);
+      }
     }
-
     return bytesRead;
   }
 
   @Override
   public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+    
+    if (writeSize != 1){
+      log.error("writeSize other than 1 is not yet supported in i2cWriteRead");
+    }
     String key = String.format("%d.%d", busAddress, deviceAddress);
     I2CDeviceMap devicedata = i2cDevices.get(key);
-    try {
-      devicedata.device.read(writeBuffer, 0, writeBuffer.length, readBuffer, 0, readBuffer.length);
-    } catch (IOException e) {
-      Logging.logError(e);
+    if (wiringPi) {
+      for (int i = 0; i < readSize; i++) {
+        readBuffer[i] = (byte) (I2C.wiringPiI2CReadReg8(devicedata.deviceHandle, (writeBuffer[0]+i) & 0xFF));
+        log.info(String.format("Read register %03X value %03X", (writeBuffer[0]+i) & 0xFF, readBuffer[i]));
+      }
+    } else {
+      try {
+        devicedata.device.read(writeBuffer, 0, writeBuffer.length, readBuffer, 0, readBuffer.length);
+      } catch (IOException e) {
+        Logging.logError(e);
+      }
     }
-
     return readBuffer.length;
   }
 
@@ -280,15 +311,25 @@ public class RasPi extends Service implements I2CController {
       log.error(String.format("Device %s %s %s already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName()));
     } else {
       try {
-        I2CBus bus = I2CFactory.getInstance(Integer.parseInt(control.getDeviceBus()));
-        I2CDevice device = i2c.getDevice(Integer.decode(control.getDeviceAddress()));
-        devicedata.serviceName = control.getName();
-        devicedata.bus = bus;
-        devicedata.device = device;
+        if (wiringPi) {
+          int deviceHandle = I2C.wiringPiI2CSetup(Integer.decode(control.getDeviceAddress()));
+          devicedata.serviceName = control.getName();
+          devicedata.bus = null;
+          devicedata.device = null;
+          devicedata.deviceHandle = deviceHandle;
+        } else {
+          I2CBus bus = I2CFactory.getInstance(Integer.parseInt(control.getDeviceBus()));
+          I2CDevice device = i2c.getDevice(Integer.decode(control.getDeviceAddress()));
+          devicedata.serviceName = control.getName();
+          devicedata.bus = bus;
+          devicedata.device = device;
+          devicedata.deviceHandle = -1;
+        }
         log.info(String.format("Created device for %s key %s", control.getName(), key));
       } catch (NumberFormatException | IOException e) {
         Logging.logError(e);
       }
+
       i2cDevices.put(key, devicedata);
       control.attachI2CController(this);
     }
@@ -308,5 +349,24 @@ public class RasPi extends Service implements I2CController {
     }
 
   }
-  
+
+  /**
+   * Forces usage of wiringPi library (
+   * http://wiringpi.com/reference/i2c-library/ )
+   * 
+   * @param status
+   */
+  public void setWiringPi(boolean status) {
+    this.wiringPi = status;
+  }
+
+  /**
+   * Check if wiringPi library is used. Returns true when wiringPi library is
+   * used
+   * 
+   * @return
+   */
+  public boolean getWiringPi() {
+    return wiringPi;
+  }
 }
