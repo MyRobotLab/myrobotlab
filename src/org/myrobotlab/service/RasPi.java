@@ -287,7 +287,7 @@ public class RasPi extends Service implements I2CController {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(RasPi.class.getCanonicalName());
-    meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware such as I2C");
+    meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware like th GPIO pins and i2c");
     meta.addCategory("i2c", "control");
     meta.setSponsor("Mats");
     meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
