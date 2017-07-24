@@ -493,7 +493,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
       log.error("Must be attached to an i2c controller before writing");
       return;
     }
-    byte[] writebuffer = { (byte) reg, (byte) (value >> 8), (byte) (value & 0xff) };
+    byte[] writebuffer = { (byte) reg, (byte) (value & 0xff) };
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
   }
 
