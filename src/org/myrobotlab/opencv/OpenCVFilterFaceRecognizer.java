@@ -109,11 +109,13 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private boolean face = false;
 
   private String lastRecognizedName = null;
+  
+  public String faceModelFilename = "faceModel.bin";
 
+  
   public OpenCVFilterFaceRecognizer() {
     super();
     initHaarCas();
-
   }
 
   public OpenCVFilterFaceRecognizer(String name) {
@@ -255,9 +257,41 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       log.info("No labeled images loaded. training skipped.");
       trained = false;
     }
+    
     return true;
   }
 
+ 
+  /**
+   * Save the current model to the faceModelFilename
+   */
+  public void save() {
+    save(faceModelFilename);
+  }
+  
+  /**
+   * @param filename the filename to save the current model to.
+   */
+  public void save(String filename) {
+    faceRecognizer.save(filename);
+  }
+  
+  /**
+   * load the model from the default filename specified by faceModelFilename.
+   */
+  public void load() {
+    load(faceModelFilename);
+  }
+  /**
+   * Load a face recognizer model from the provided saved filename.
+   * @param filename the filename that represents the saved model.
+   */
+  public void load(String filename) {
+    faceRecognizer.load(filename);
+    //assume we're trained now..
+    trained = true;
+  }
+  
   private  ArrayList<File> listImageFiles(File root) {
     
     // 
