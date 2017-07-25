@@ -57,7 +57,7 @@ public class Msg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 55;
+	public static final int MRLCOMM_VERSION = 56;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -193,6 +193,8 @@ public class Msg {
 	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 46;
 	// < publishUltrasonicSensorData/deviceId/b16 echoTime
 	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 47;
+	// > setAref/b16 aref
+	public final static int SET_AREF = 48;	
 
 
 /**
@@ -1704,6 +1706,35 @@ public class Msg {
 	  			log.error("ultrasonicSensorStopRanging threw",e);
 	  }
 	}
+	
+	public synchronized void setAref(Integer aref/*b16*/) {
+		try {
+		  if (ackEnabled){
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 2); // size
+			write(SET_AREF); // msgType = 48
+			writeb16(aref);
+ 
+     if (ackEnabled){
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
+     }
+			if(record != null){
+				txBuffer.append("> setAref");
+				txBuffer.append("/");
+				txBuffer.append(aref);
+				txBuffer.append("\n");
+				record.write(txBuffer.toString().getBytes());
+				txBuffer.setLength(0);
+			}
+
+	  } catch (Exception e) {
+	  			log.error("setAref threw",e);
+	  }
+	}
 
 
 	public static String methodToString(int method) {
@@ -1848,6 +1879,9 @@ public class Msg {
 		}
 		case PUBLISH_ULTRASONIC_SENSOR_DATA:{
 			return "publishUltrasonicSensorData";
+		}
+		case SET_AREF:{
+			return "setAref";
 		}
 
 		default: {

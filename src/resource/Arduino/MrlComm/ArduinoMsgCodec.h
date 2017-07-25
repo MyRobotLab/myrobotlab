@@ -9,7 +9,7 @@
  * 							src\resource\Arduino\generate\ArduinoMsgCodec.template.h
  */
 
-#define MRLCOMM_VERSION			55
+#define MRLCOMM_VERSION			56
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
@@ -118,7 +118,8 @@
 #define ULTRASONIC_SENSOR_STOP_RANGING 46
 // < publishUltrasonicSensorData/deviceId/b16 echoTime
 #define PUBLISH_ULTRASONIC_SENSOR_DATA 47
-
+// > setAref/b16 aref
+#define SET_AREF 48
 
 
 /*******************************************************************
