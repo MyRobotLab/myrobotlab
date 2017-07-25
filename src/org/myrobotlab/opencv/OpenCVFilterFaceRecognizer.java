@@ -22,11 +22,19 @@ import static org.bytedeco.javacpp.opencv_imgproc.getAffineTransform;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_imgproc.warpAffine;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.nio.IntBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.UUID;
 
 import javax.swing.WindowConstants;
@@ -116,16 +124,19 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   public OpenCVFilterFaceRecognizer() {
     super();
     initHaarCas();
+    initRecognizer();
   }
 
   public OpenCVFilterFaceRecognizer(String name) {
     super(name);
     initHaarCas();
+    initRecognizer();
   }
 
   public OpenCVFilterFaceRecognizer(String filterName, String sourceKey) {
     super(filterName, sourceKey);
     initHaarCas();
+    initRecognizer();
   }
 
   public enum Mode {
@@ -241,14 +252,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       idToLabelMap.put(label, personName);
       counter++;
     }
-    // Configure which type of recognizer to use
-    if (RecognizerType.FISHER.equals(recognizerType)) {
-      faceRecognizer = createFisherFaceRecognizer();
-    } else if (RecognizerType.EIGEN.equals(recognizerType)) {
-      faceRecognizer = createEigenFaceRecognizer();
-    } else {
-      faceRecognizer = createLBPHFaceRecognizer();
-    }
+    initRecognizer();
     // must be at least 2 things to classify, is it A or B ?
     if (idToLabelMap.keySet().size() > 1) {
       faceRecognizer.train(images, labels);
@@ -261,33 +265,72 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     return true;
   }
 
+  private void initRecognizer() {
+    // Configure which type of recognizer to use
+    if (RecognizerType.FISHER.equals(recognizerType)) {
+      faceRecognizer = createFisherFaceRecognizer();
+    } else if (RecognizerType.EIGEN.equals(recognizerType)) {
+      faceRecognizer = createEigenFaceRecognizer();
+    } else {
+      faceRecognizer = createLBPHFaceRecognizer();
+    }
+  }
+
  
   /**
    * Save the current model to the faceModelFilename
+   * @throws IOException 
    */
-  public void save() {
+  public void save() throws IOException {
     save(faceModelFilename);
   }
   
   /**
    * @param filename the filename to save the current model to.
+   * @throws IOException 
    */
-  public void save(String filename) {
+  public void save(String filename) throws IOException {
+    
+    String labelFilename = filename + ".labels";
     faceRecognizer.save(filename);
+    // TODO: we also need to save the labels for the model so we can load them back in.
+    FileWriter fw = new FileWriter(new File(labelFilename));
+    for (Integer key : idToLabelMap.keySet()) {
+      fw.write(key + ":" + idToLabelMap.get(key) + "\n");
+    }
+    fw.close();
   }
+  
   
   /**
    * load the model from the default filename specified by faceModelFilename.
+   * @throws IOException 
    */
-  public void load() {
+  public void load() throws IOException {
     load(faceModelFilename);
   }
   /**
    * Load a face recognizer model from the provided saved filename.
    * @param filename the filename that represents the saved model.
+   * @throws IOException 
    */
-  public void load(String filename) {
+  public void load(String filename) throws IOException {
+    String labelFilename = filename + ".labels";
     faceRecognizer.load(filename);
+    
+    // load the labels.
+    BufferedReader fr = new BufferedReader(new FileReader(new File(labelFilename)));
+    String line = null;
+    
+    // re-initialize the id to label map.
+    idToLabelMap = new HashMap<Integer,String>();
+    while ((line = fr.readLine()) != null) {
+      int delimOffset = line.indexOf(":");
+      String key = line.substring(0, delimOffset);
+      String value = line.substring(delimOffset);
+      idToLabelMap.put(Integer.valueOf(key), value);
+    }
+    fr.close();
     //assume we're trained now..
     trained = true;
   }
