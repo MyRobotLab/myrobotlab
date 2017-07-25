@@ -146,6 +146,8 @@ public class MrlComm {
 	//void ultrasonicSensorStartRanging( byte deviceId);
 	// > ultrasonicSensorStopRanging/deviceId
 	//void ultrasonicSensorStopRanging( byte deviceId);
+  //> setAref/b16 aref
+  //void setAref( int aref);
     // </generatedCallBacks>
     // end
 /*
@@ -745,6 +747,12 @@ public class MrlComm {
 
   public void begin(org.myrobotlab.service.Serial serial) {
     
+  }
+  
+  // > enablePin/address/type/b16 rate
+  public void setAref(int aref) {
+    // TODO
+	 // msg.setAref(aref);
   }
 
 }

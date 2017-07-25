@@ -192,6 +192,8 @@ public class VirtualMsg {
 	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 46;
 	// < publishUltrasonicSensorData/deviceId/b16 echoTime
 	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 47;
+	// > setAref/b16 aref
+	public final static int SET_AREF = 48;	
 
 
 /**
@@ -718,6 +720,16 @@ public class VirtualMsg {
 			}
 			break;
 		}
+		case SET_AREF: {
+			Integer aref = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			if(invoke){
+				arduino.invoke("setAref",  aref);
+			} else { 
+ 				arduino.setAref(aref);
+			}
+			break;
+		}
 		
 		}
 	}
@@ -1082,6 +1094,35 @@ public class VirtualMsg {
 	  			log.error("publishUltrasonicSensorData threw",e);
 	  }
 	}
+	
+	public synchronized void setAref(Integer aref/*b16*/) {
+		try {
+		  if (ackEnabled){
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+			write(SET_AREF); // msgType = 48
+			writeb16(aref);
+ 
+     if (ackEnabled){
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
+     }
+			if(record != null){
+				txBuffer.append("> setAref");
+				txBuffer.append("/");
+				txBuffer.append(aref);
+				txBuffer.append("\n");
+				record.write(txBuffer.toString().getBytes());
+				txBuffer.setLength(0);
+			}
+
+	  } catch (Exception e) {
+	  			log.error("setAref threw",e);
+	  }
+	}
 
 
 	public static String methodToString(int method) {
@@ -1226,6 +1267,9 @@ public class VirtualMsg {
 		}
 		case PUBLISH_ULTRASONIC_SENSOR_DATA:{
 			return "publishUltrasonicSensorData";
+		}
+		case SET_AREF:{
+			return "setAref";
 		}
 
 		default: {

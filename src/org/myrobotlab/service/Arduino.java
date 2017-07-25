@@ -702,6 +702,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     boardInfoRequestTs = System.currentTimeMillis();
     msg.getBoardInfo();
   }
+  
+  public void setAref(Integer aref) {
+    //WIP STORE INFO
+	    msg.setAref(aref);
+  }
 
   // FIXME - refactored and renamed to "getBoard()"
   @Override

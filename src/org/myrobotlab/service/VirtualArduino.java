@@ -374,6 +374,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     uart.disconnect();
   }
   
+  public void setAref(Integer aref) {
+	    msg.setAref(aref);
+	  }
   
 
   public static void main(String[] args) {
