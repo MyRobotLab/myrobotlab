@@ -170,8 +170,8 @@ public class Motor extends AbstractMotor {
   
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(AbstractMotor.class.getCanonicalName());
-    meta.addDescription("General Motor Service dual pwm");
+    ServiceType meta = new ServiceType(Motor.class.getCanonicalName());
+    meta.addDescription("Motor service which supports 1 pwr pwm pin and 1 direction pin");
     meta.addCategory("motor");
 
     return meta;
