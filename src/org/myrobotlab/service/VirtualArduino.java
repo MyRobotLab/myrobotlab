@@ -60,6 +60,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
    * the unique board type key
    */
   String board;
+  String aref;
 
   /**
    * address index of pinList 
@@ -374,11 +375,35 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     uart.disconnect();
   }
   
-  public void setAref(Integer aref) {
-	    msg.setAref(aref);
+  public void setAref(String aref) {
+    int arefInt=1;
+    switch (aref) {
+      case "EXTERNAL":
+        arefInt=0;
+        break;
+      case "DEFAULT":
+        arefInt=1;
+        break;
+      case "INTERNAL1V1":
+        arefInt=2;
+        break;
+      case "INTERNAL":
+        arefInt=3;
+        break;
+      case "INTERNAL2V56":
+        arefInt=3;
+        break;
+      default:
+        error("Aref "+aref.toUpperCase()+" is unknown");
+        }
+    log.info("set aref to "+aref); 
+    this.aref=aref;
+    msg.setAref(arefInt);
 	  }
   
-
+  public String getAref() {
+    return aref;
+  }
   public static void main(String[] args) {
     try {
 

@@ -170,6 +170,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    * here to Uno
    */
   String board;
+  String aref;
 
   int byteCount;
 
@@ -703,9 +704,52 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.getBoardInfo();
   }
   
-  public void setAref(Integer aref) {
-    //WIP STORE INFO
-	    msg.setAref(aref);
+  public void setAref(String aref) {
+
+    if (this.getBoard().contains("mega"))
+    {
+      if (aref.toUpperCase()=="INTERNAL")
+      {
+     error("Aref "+aref.toUpperCase()+" is not compatible with your board "+this.getBoard());
+     aref="DEFAULT";
+      }
+    }
+    else    
+    {
+      if (aref.toUpperCase()=="INTERNAL1V1" || aref.toUpperCase()=="INTERNAL2V56")
+      {
+     error("Aref INTERNALxV is not compatible with your board "+this.getBoard());
+     aref="DEFAULT";
+      }
+    }
+
+    int arefInt=1;
+    switch (aref) {
+      case "EXTERNAL":
+        arefInt=0;
+        break;
+      case "DEFAULT":
+        arefInt=1;
+        break;
+      case "INTERNAL1V1":
+        arefInt=2;
+        break;
+      case "INTERNAL":
+        arefInt=3;
+        break;
+      case "INTERNAL2V56":
+        arefInt=3;
+        break;
+      default:
+        error("Aref "+aref.toUpperCase()+" is unknown");
+        }
+	  log.info("set aref to "+aref); 
+	  this.aref=aref;
+    msg.setAref(arefInt);
+  }
+  
+  public String getAref() {
+    return aref;
   }
 
   // FIXME - refactored and renamed to "getBoard()"
