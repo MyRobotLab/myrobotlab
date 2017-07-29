@@ -695,8 +695,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   @Override
   public void stopService() {
+    if (!isAttached(controller)){
+      detachI2CController(controller);
+    }
     super.stopService(); // stop inbox and outbox
-    stopPwm(); // stop pwm
   }
 
   @Override
@@ -865,6 +867,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     if (!isAttached(controller))
       return;
 
+    stopPwm(); // stop pwm generation
     controller.detachI2CControl(this);
     isAttached = false;
     broadcastState();
