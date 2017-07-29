@@ -127,7 +127,9 @@ public class RasPi extends Service implements I2CController {
     }
   }
 
-  public void startservice() {
+  @Override
+  public void startService() {
+    super.startService();
     try {
       log.info("Initiating i2c");
       i2c = I2CFactory.getInstance(I2CBus.BUS_1);
@@ -223,7 +225,7 @@ public class RasPi extends Service implements I2CController {
       int reg = buffer[0] & 0xFF;
       for (int i = 1; i < size; i++) {
         int value = buffer[i] & 0xFF;
-        log.info(String.format("Writing to register %03X value %03X", reg, value));
+        log.info(String.format("Writing to register x%03X value x%03X", reg, value));
         I2C.wiringPiI2CWriteReg8(devicedata.deviceHandle, reg, value);
         reg++;
       }
