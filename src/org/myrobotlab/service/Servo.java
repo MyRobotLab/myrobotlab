@@ -237,14 +237,16 @@ public class Servo extends Service implements ServoControl {
   double lastPos;
 
   boolean autoEnable = false;
-
+  
   public int defaultDisableDelayNoVelocity = 10000;
   private int defaultDisableDelayIfVelocity = 1000;
   private int disableDelayIfVelocity = 1000;
   private boolean moving;
   private double currentPosInput;
   public boolean autoDisable = false;
-
+  boolean autoDisableOriginalStatus = autoDisable;
+  boolean temporaryStopAutoDisableFinished = true;
+  
   private transient Timer forceElectrizeTimer;
   private transient Timer autoDisableTimer;
 
@@ -859,10 +861,33 @@ public class Servo extends Service implements ServoControl {
     this.addServoEventListener(this);
   }
 
+  // save previous enableAutoDisable status and restore original user value when needed
+  public void temporaryStopAutoDisable(boolean status) {
+    if (status)
+    {
+    if (temporaryStopAutoDisableFinished)
+    {
+      autoDisableOriginalStatus=this.autoDisable;
+    }
+    temporaryStopAutoDisableFinished = false;
+    enableAutoDisable(false);
+    }
+    else
+    {
+    enableAutoDisable(autoDisableOriginalStatus);
+    temporaryStopAutoDisableFinished = true;
+    }
+    
+  }
+  
   public void enableAutoDisable(boolean autoDisable) {
     this.autoDisable = autoDisable;
     this.addServoEventListener(this);
     log.info("enableAutoDisable : "+autoDisable);
+    if (autoDisable && !this.isMoving() && this.isEnabled())
+    {
+      this.disable(); 
+    }
     broadcastState();
   }
 
@@ -951,6 +976,7 @@ public class Servo extends Service implements ServoControl {
     }
   }
 
+  @Deprecated
   public void forceElectrize(int delay) {
     delay = delay * 1000;
     log.info("forceElectrize ON ", getName(), " : ", delay);

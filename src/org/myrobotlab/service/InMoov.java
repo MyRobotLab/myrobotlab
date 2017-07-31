@@ -1222,6 +1222,27 @@ public class InMoov extends Service {
       eyelids.enableAutoDisable(param);
     }
   }
+  
+  public void temporaryStopAutoDisable(Boolean param) {
+    if (head != null){
+      head.temporaryStopAutoDisable(param);
+    }
+    if (rightArm != null){
+      rightArm.temporaryStopAutoDisable(param);
+    }
+    if (leftArm != null){
+      leftArm.temporaryStopAutoDisable(param);
+    }
+    if (torso != null){
+      torso.temporaryStopAutoDisable(param);
+    }
+    if (torso != null){
+      torso.temporaryStopAutoDisable(param);
+    }
+    if (eyelids != null) {
+      eyelids.temporaryStopAutoDisable(param);
+    }
+  }
 
   // NOTE - BEST Services are one which are reflective on startService
   // like xmpp which exposes a the reflective REST API are startService
@@ -1761,23 +1782,31 @@ public class InMoov extends Service {
 	        }, (int) seconds * 1000);
 		       
 	  }
+  //waiting controable threaded gestures we warn user
+  boolean gestureAlreadyStarted=false;
   
   public void startedGesture(){
     startedGesture("unknown");
   }
   
   public void startedGesture(String nameOfGesture){
+    if (gestureAlreadyStarted)
+    {
+    warn("Warning 1 gesture already running, this can break spacetime and lot of things");  
+    }
+    gestureAlreadyStarted=true;
     RobotCanMoveRandom = false;
-    enableAutoDisable(false);
+    temporaryStopAutoDisable(true);
   }
   
   public void finishedGesture(){
-    startedGesture("unknown");    
+    finishedGesture("unknown");    
   }
   
   public void finishedGesture(String nameOfGesture){
     RobotCanMoveRandom = true;
-    enableAutoDisable(true);
+    temporaryStopAutoDisable(false);
+    gestureAlreadyStarted=false;
   }
   
   public void disableRobotRandom(int seconds) {
@@ -1897,7 +1926,7 @@ public class InMoov extends Service {
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
     meta.addDependency("inmoov.fr", "1.0.0");
-    meta.addDependency("org.myrobotlab.inmoov", "0.4.1");
+    meta.addDependency("org.myrobotlab.inmoov", "0.4.3");
 
     // SHARING !!! - modified key / actual name begin ------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
