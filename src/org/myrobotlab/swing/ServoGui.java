@@ -28,7 +28,8 @@ package org.myrobotlab.swing;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -62,7 +63,8 @@ import org.slf4j.Logger;
  */
 public class ServoGui extends ServiceGui implements ActionListener {
 
-  private class SliderListener implements ChangeListener {
+  private class SliderListener implements ChangeListener,MouseListener {
+
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
 
@@ -74,10 +76,45 @@ public class ServoGui extends ServiceGui implements ActionListener {
         log.error("can not send message myService is null");
       }
     }
+
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+      autoDisableOriginStatus=autoDisableTempStatus;
+      send("enableAutoDisable",false);
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+     send("enableAutoDisable",autoDisableOriginStatus);
+     }
+
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
   }
 
   public final static Logger log = LoggerFactory.getLogger(ServoGui.class);
   private String lastControllerUsed;
+  private boolean autoDisableOriginStatus;
+  private boolean autoDisableTempStatus;
   static final long serialVersionUID = 1L;
 
   JLabel boundPos = new JLabel("90");
@@ -348,6 +385,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
         } else {
         	autoDisable.setSelected(false);   
           }
+        autoDisableTempStatus=autoDisable.isSelected();
 
         Double pos = servo.getPos();
         if (pos != null) {
@@ -399,12 +437,18 @@ public class ServoGui extends ServiceGui implements ActionListener {
     controller.removeActionListener(this);
     pinList.removeActionListener(this);
     slider.removeChangeListener(sliderListener);
+    slider.removeMouseListener(sliderListener);
   }
 
   public void restoreListeners() {
     controller.addActionListener(this);
     pinList.addActionListener(this);
     slider.addChangeListener(sliderListener);
+    slider.addMouseListener(sliderListener);
   }
+
+
+
+
 
 }
