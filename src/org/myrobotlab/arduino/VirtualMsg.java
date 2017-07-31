@@ -56,7 +56,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 55;
+	public static final int MRLCOMM_VERSION = 56;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -1101,7 +1101,7 @@ public class VirtualMsg {
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
-			write(1 + 1); // size
+			write(1 + 2); // size
 			write(SET_AREF); // msgType = 48
 			writeb16(aref);
  
