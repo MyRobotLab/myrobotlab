@@ -852,6 +852,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
     if (ServoControl.class.isAssignableFrom(service.getClass())) {
       try {
+        servoDetachPin((ServoControl) service);
         detachServoControl((ServoControl) service);
       } catch (Exception e) {
         // TODO Auto-generated catch block);
