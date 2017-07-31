@@ -85,7 +85,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 	  rotate.enableAutoEnable(param);
 	  shoulder.enableAutoEnable(param);
 	  omoplate.enableAutoEnable(param);
-	 
 	  }
   
   public void enableAutoDisable(Boolean param) {
@@ -93,8 +92,14 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 	  rotate.enableAutoDisable(param);
 	  shoulder.enableAutoDisable(param);
 	  omoplate.enableAutoDisable(param);
-	  
 	  }
+  
+  public void temporaryStopAutoDisable(Boolean param) {
+    bicep.temporaryStopAutoDisable(param);
+    rotate.temporaryStopAutoDisable(param);
+    shoulder.temporaryStopAutoDisable(param);
+    omoplate.temporaryStopAutoDisable(param);
+    }
 
   @Override
   public void broadcastState() {

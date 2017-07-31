@@ -93,7 +93,14 @@ public class InMoovTorso extends Service {
 	  midStom.enableAutoDisable(param);
 	  lowStom.enableAutoDisable(param);
 	  }
-
+  
+  public void temporaryStopAutoDisable(Boolean param) {
+    topStom.temporaryStopAutoDisable(param);
+    midStom.temporaryStopAutoDisable(param);
+    lowStom.temporaryStopAutoDisable(param);
+    }
+  
+  
   @Override
   public void broadcastState() {
     // notify the gui
