@@ -124,6 +124,8 @@ Msg* Msg::getInstance() {
 	void ultrasonicSensorStartRanging( byte deviceId);
 	// > ultrasonicSensorStopRanging/deviceId
 	void ultrasonicSensorStopRanging( byte deviceId);
+	// > setAref/b16 type
+	void setAref( int type);
 
  */
 
@@ -540,6 +542,12 @@ void Msg::processCommand() {
 			byte deviceId = ioCmd[startPos+1]; // bu8
 			startPos += 1;
 			mrlComm->ultrasonicSensorStopRanging( deviceId);
+			break;
+	}
+	case SET_AREF: { // setAref
+			int type = b16(ioCmd, startPos+1);
+			startPos += 2; //b16
+			mrlComm->setAref( type);
 			break;
 	}
 

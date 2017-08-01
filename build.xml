@@ -87,40 +87,39 @@
 <project name="myrobotlab" default="jar" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
-
+    <!-- below has been commented out because its better NOT to add complexity 
+         with more configuration & exceptions, anyway they were not used -->
 	<!-- First thing is load the local properties -->
-	<property file="local.properties" />
+	<!-- property file="local.properties" / -->
 	<!-- load default build properties  -->
-	<property file="build.properties" />
+	<!-- property file="build.properties" / -->
 	<!-- backfill with the environment variables -->
 	<property environment="env" />
 	
-	<condition property="COMMIT" value="${env.TRAVIS_COMMIT}" else="devcommit">
-	  <isset property="env.RELEASE_VER" />
+	<!-- default local build will be "develop" branch -->
+	<condition property="branch" value="${branch}" else="develop">
+	  <isset property="branch" />
 	</condition>
 	
-	<condition property="BUILD" value="${env.TRAVIS_BUILD_NUMBER}" else="devbuild">
-	   <isset property="env.TRAVIS_BUILD_NUMBER" />
+	<condition property="commit" value="${env.GIT_COMMIT}" else="localCommit">
+	  <isset property="env.GIT_COMMIT" />
 	</condition>
 	
-	<condition property="BRANCH" value="${env.TRAVIS_BUILD_NUMBER}" else="develop">
-	  <isset property="env.TRAVIS_BUILD_NUMBER" />
+	<condition property="build.number" value="${env.BUILD_NUMBER}" else="localBuild">
+	   <isset property="env.BUILD_NUMBER" />
 	</condition>
 	
-	<!-- set the tag, if not already set in a local properties file -->
+    <property name="version" value="1.0.${build.number}" />
+	
+	<!-- echo critical vars -->
+	<echo message="TRAVIS_COMMIT=${env.TRAVIS_COMMIT}" />
 	<echo message="TRAVIS_TAG=${env.TRAVIS_TAG}" />
 	<echo message="TRAVIS_BUILD_NUMBER=${env.TRAVIS_BUILD_NUMBER}" />
-	
-    <property name="developVersion" value="1.0.${BUILD}" />
-	<!-- property name="developVersion" value="1.0.9999" / -->
-	<property name="masterVersion" value="${env.TRAVIS_TAG}" />
-	<property name="version" value="${developVersion}" />
+	<echo message="branch=${branch}" />
+	<echo message="build.number=${build.number}" />
 	<echo message="version=${version}" />
 
 	<!-- set global properties for this build -->
-
-	<!-- the all powerful branch property if copied to master - will need to be updated -->
-	<property name="branch" value="${env.TRAVIS_BRANCH}"/>
 
 	<property name="fs" location="${file.separator}" />
 	<!-- the source code for release -->
@@ -130,13 +129,14 @@
 	<!-- directory for the build to go into -->
 	<property name="build" location="build" />
 	<!-- location for the unit test reports to go into -->
-        <property name="report" location="dist/current/${branch}/report" />
+    <property name="report" location="dist/current/${branch}/report" />
 
 	<!-- location for the jacoco reports -->
 	<property name="result.jacoco.file" location="${build}/jacoco.exec" />
 	<property name="result.report.dir" location="${build}/jacoco" />
 	<!-- directory for the distrbituion to go into -->
 	<property name="dist" location="dist/current/${branch}" />
+	<property name="deploy" location="/var/www/html/deploy/${branch}" />
 	
 	<available file="${build}/classes/resource/license" property="license.present" />
 	<property name="repo" location="../repo" />
@@ -288,7 +288,7 @@
 		<pathelement location="${repo}/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
 		<pathelement location="${repo}/org.node/0.1.1/nodyn-0.1.1-20141121.193443-283.jar"/>
 		<pathelement location="${repo}/org.json/20090211/json-20090211.jar"/>
-		<pathelement location="${repo}/org.alicebot.ab/0.0.1-kw/program-ab-kw-0.0.1.jar"/>
+		<pathelement location="${repo}/org.alicebot.ab/0.0.4-kw/program-ab-kw-0.0.4.jar"/>
 		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/sosia.jar"/>
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-android-0.23.jar"/>
 		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-calibration-0.23.jar"/>
@@ -502,6 +502,7 @@
 		<pathelement location="${repo}/org.deeplearning4j/0.8/stax2-api-3.1.4.jar"/>
 		<pathelement location="${repo}/org.deeplearning4j/0.8/stream-2.7.0.jar"/>
 		<pathelement location="${repo}/org.deeplearning4j/0.8/xz-1.5.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/deeplearning4j-zoo-0.8.1-SNAPSHOT.jar"/>
 		<!-- holy crapola, that's a lot of jar files... ok..  let's move on... -->
 		
 		<pathelement location="${repo}/com.illposed.osc/0.4/javaosc-core-0.4.jar"/>
@@ -552,31 +553,12 @@
 
 	<!-- ================ init begin ================= -->
 	<target name="init" depends="clean,repoClone" description="initialize things for the build">
-		<echo message="compiling with ${ant.java.version}" />
-		<!-- good for debugging -->
-		<!-- echoproperties / -->
+		<echo message="compiling with java ${ant.java.version}" />
+		<echo message="ant version ${ant.version}" />
+				
 		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
-		<!-- mail task properties -->
-		<property name="mail.host" value="smtp.gmail.com" />
-		<property name="mail.port" value="464" />
-		<property name="mail.subjectalert" value="Test build" />
-		<property name="mail.ssl" value="yes" />
-		<property name="mail.username" value="" />
-
-		<!-- get from local properties file -->
-		<property name="mail.password" value="" />
-		<!-- get from local properties file -->
-		<property name="mail.from" value="build@myrobotlab.org" />
-		<property name="mail.tolist" value="" />
-
-		<!-- nice for debugging -->
-		<!-- echoproperties / -->
-
-		<!-- TODO - get repo's comment -->
-
 		<echo message="date time ${DSTAMP}.${TSTAMP}" />
-		<property name="build.number" value="${env.BUILD_NUMBER}" />
 
 		<!-- git log -1 - -pretty=%B -->
 		<!-- FIXME - OOPS forgot about mrl pull ! only have repo !!! -->
@@ -615,6 +597,8 @@
 		<mkdir dir="${build}/test" />
 		<mkdir dir="${build}/report" />
 
+		<!-- echoproperties is good for debugging -->
+		<echoproperties />
 	</target>
 	<!-- ================ init end ================= -->
 
@@ -717,6 +701,7 @@
 		<!-- compile the java code from ${src} into ${build} -->
 		<javac srcdir="${src}" destdir="${build}/classes" debug="true" includeantruntime="false" encoding="UTF-8">
 			<!-- exclude name="org/myrobotlab/service/ExcludeBrokenFile.java" / --> 
+			<compilerarg value="-parameters" />
 			<exclude name="org/myrobotlab/opencv/OpenCVFilterMotionTemplate.java"/> 	
 			<exclude name="resource/**"/> 
 			<classpath refid="compile.classpath" />
@@ -747,22 +732,23 @@
 		<!-- copy file="${repo}/serviceData.json" todir="${build}/classes/resource/framework" / -->
 		
 		
-
 		<jar jarfile="${build}/lib/myrobotlab.jar" basedir="${build}/classes">
 			<!-- excludes="org/myrobotlab/boot/" -->
 			<manifest>
 				<attribute name="Main-Class" value="org.myrobotlab.service.Agent" />
 				<attribute name="Built-By" value="${user.name}" />
+				<!--attribute name="Implementation-Version" value="${version}" /-->
 				<!-- section name="myrobotlab" -->
-				<section name="compile">
-					<attribute name="Specification-Title" value="myrobotlab" />
-					<attribute name="Specification-Version" value="${version}" />
+				<!-- section name="org/myrobotlab"-->
+					<attribute name="Specification-Title" value="You Know, for Creative Machine Control !" />
+					<attribute name="Specification-Version" value="1.0" />
 					<attribute name="Specification-Vendor" value="myrobotlab" />
 					<attribute name="Implementation-Title" value="myrobotlab" />
 					<attribute name="Implementation-Version" value="${version}" />
-					<attribute name="Implementation-Vendor" value="myrobotlab.org" />
-					<attribute name="Commit" value="${COMMIT}" />					
-				</section>
+					<attribute name="Implementation-Vendor" value="http://myrobotlab.org" />
+					<attribute name="Branch" value="${branch}" />					
+					<attribute name="Commit" value="${commit}" />					
+				<!-- /section -->
 			</manifest>
 		</jar>
 	</target>
@@ -871,7 +857,10 @@
 		<!-- copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${version}.jar" / -->
 		<!-- backwards compat .. TODO: review this.. -->
 		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/archive" />
+			
 		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/myrobotlab.jar" />
+		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab-${version}.jar" />		
 		<copy file="${build}/classes/resource/version.txt" tofile="${dist}/version.txt"/>
 		<!-- for convienence of debugging spawn -->
 		<copy file="${build}/lib/myrobotlab.jar" tofile="myrobotlab.jar" />
@@ -886,7 +875,11 @@
                 <zip destfile="${dist}/myrobotlab-jacoco.zip">
                   <zipfileset dir="${build}/javadoc" />
                 </zip>
-
+		
+		<mkdir dir="${deploy}" />
+		<copy todir="${deploy}">
+			<fileset dir="${dist}"/>
+		</copy>
 	</target>
 
 	<target name="clean" description="clean up">

@@ -646,7 +646,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 					}
 				}
 
-				if (vp.capturing) {
+				if (opencv.capturing) {
 					capture.setText("stop");
 				} else {
 					capture.setText("capture");

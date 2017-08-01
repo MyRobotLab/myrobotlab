@@ -141,34 +141,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 
 	public void startService() {
 		super.startService();
-
-		// ch.qos.logback.classic.Logger logger =
-		// (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(this.getClass());
-		// logger.addAppender(this);
-
 		startLogging();
-
-		// LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-		// lc.addListener(listener);
-
-		/*
-		 * FileAppender<LoggingEvent> fileAppender =
-		 * (FileAppender<LoggingEvent>) logger..getAppender("file");
-		 * if(fileAppender != null) { fileAppender.stop();
-		 * fileAppender.setFile("new.log"); PatternLayout pl = new
-		 * PatternLayout(); pl.setPattern("%d %5p %t [%c:%L] %m%n)");
-		 * pl.setContext(lc); pl.start(); fileAppender.setLayout(pl);
-		 * fileAppender.setContext(lc); fileAppender.start(); }
-		 */
-
-		/*
-		 * LoggerContext loggerContext = (LoggerContext)
-		 * LogManager.getContext(); Configuration configuration =
-		 * loggerContext.getConfiguration();
-		 * 
-		 * ((Log4jLoggerAdapter)log)..addAppender(this);
-		 * ((LoggingLog4J)log).addAppender(this);
-		 */
 	}
 
 	@Override

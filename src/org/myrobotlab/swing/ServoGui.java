@@ -25,20 +25,27 @@
 
 package org.myrobotlab.swing;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
-
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.SwingGui;
@@ -56,7 +63,8 @@ import org.slf4j.Logger;
  */
 public class ServoGui extends ServiceGui implements ActionListener {
 
-  private class SliderListener implements ChangeListener {
+  private class SliderListener implements ChangeListener,MouseListener {
+
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
 
@@ -68,16 +76,56 @@ public class ServoGui extends ServiceGui implements ActionListener {
         log.error("can not send message myService is null");
       }
     }
+
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+      autoDisableOriginStatus=autoDisableTempStatus;
+      send("enableAutoDisable",false);
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+     send("enableAutoDisable",autoDisableOriginStatus);
+     }
+
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
   }
 
   public final static Logger log = LoggerFactory.getLogger(ServoGui.class);
   private String lastControllerUsed;
+  private boolean autoDisableOriginStatus;
+  private boolean autoDisableTempStatus;
   static final long serialVersionUID = 1L;
 
   JLabel boundPos = new JLabel("90");
   JButton attachButton = new JButton("attach");
-  JButton updateLimitsButton = new JButton("update");
-
+  JButton updateMinMaxButton = new JButton("set");
+  JTextField velocity = new JTextField("-1");
+  JButton setVelocity = new JButton("Velocity");
+  
+  JButton updateMapButton = new JButton("set");
+  JButton enableButton = new JButton("enable");
+  JCheckBox autoDisable = new JCheckBox("autoDisable");
   JSlider slider = new JSlider(0, 180, 90);
   BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
   BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
@@ -87,6 +135,14 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
   JTextField posMin = new JTextField("0");
   JTextField posMax = new JTextField("180");
+  JTextField minInput = new JTextField("0");
+  JTextField maxInput = new JTextField("180");
+  JTextField minOutput = new JTextField("0");
+  JTextField maxOutput = new JTextField("180");
+  
+  
+  JLabel imageenabled = new JLabel();
+  ImageIcon enabled = Util.getImageIcon("enabled.png");
 
   // Servo myServox = null;
 
@@ -96,15 +152,27 @@ public class ServoGui extends ServiceGui implements ActionListener {
     super(boundServiceName, myService);
     // myServo = (Servo) Runtime.getService(boundServiceName);
 
+   
+    
     for (int i = 0; i < 54; i++) {
       pinList.addItem(i);
     }
-
-    updateLimitsButton.addActionListener(this);
+    setVelocity.addActionListener(this);
+    posMin.setPreferredSize(new Dimension( 50, 24 ));
+    posMax.setPreferredSize(new Dimension( 50, 24 ));
+    minInput.setPreferredSize(new Dimension( 50, 24 ));
+    maxInput.setPreferredSize(new Dimension( 50, 24 ));
+    minOutput.setPreferredSize(new Dimension( 50, 24 ));
+    maxOutput.setPreferredSize(new Dimension( 50, 24 ));
+    velocity.setPreferredSize(new Dimension( 50, 24 ));
+    updateMinMaxButton.addActionListener(this);
+    updateMapButton.addActionListener(this);
     left.addActionListener(this);
     right.addActionListener(this);
     controller.addActionListener(this);
     attachButton.addActionListener(this);
+    enableButton.addActionListener(this);
+    autoDisable.addActionListener(this);
     pinList.addActionListener(this);
     boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
 
@@ -112,10 +180,53 @@ public class ServoGui extends ServiceGui implements ActionListener {
     s.add(left);
     s.add(slider);
     s.add(right);
-    addTop(2, boundPos, 3, s);
+    addTopLeft(2, boundPos, 3, s,velocity,setVelocity );
     // addLine(s);
-    addTop("controller:", controller, "   pin:", pinList, attachButton);
-    addTop("min:", posMin, "   max:", posMax, updateLimitsButton);
+   
+    
+    JPanel controllerP = new JPanel();
+    Border borderController = BorderFactory.createTitledBorder("Controller");
+    controllerP.setBorder(borderController);
+    JLabel controllerlabel = new JLabel("controller : ");
+    JLabel pinlabel = new JLabel("pin : ");
+    controllerP.add(controllerlabel);
+    controllerP.add(controller);
+    controllerP.add(pinlabel);
+    controllerP.add(pinList);
+    controllerP.add(attachButton);
+    
+    JPanel minMax = new JPanel();
+    Border borderminMax = BorderFactory.createTitledBorder("minMax(min, max)");
+    minMax.setBorder(borderminMax);
+    minMax.add(posMin);
+    minMax.add(posMax);
+    minMax.add(updateMinMaxButton);
+    
+    JPanel map = new JPanel();
+    Border bordermap = BorderFactory.createTitledBorder("map(minInput, maxInput, minOutput, maxOutput)");
+    map.setBorder(bordermap);
+    map.add(minInput);
+    map.add(maxInput);
+    map.add(minOutput);
+    map.add(maxOutput);
+    map.add(updateMapButton);
+    
+    JPanel power = new JPanel();
+    Border extraborder = BorderFactory.createTitledBorder("Power");
+    power.setBorder(extraborder);
+    imageenabled.setIcon(enabled);
+    power.add(enableButton);
+    power.add(imageenabled);
+    autoDisable.setSelected(false);
+    power.add(autoDisable);
+    
+    addTopLeft(" ");
+    addTopLeft(controllerP);
+    addTopLeft(power);
+    addTopLeft(" ");
+    addTopLeft(map);
+    addTopLeft(minMax);
+  
 
     refreshControllers();
   }
@@ -127,6 +238,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
       @Override
       public void run() {
         Object o = event.getSource();
+        //log.error(o.toString());
         if (o == controller) {
           String controllerName = (String) controller.getSelectedItem();
           log.debug(String.format("controller event %s", controllerName));
@@ -154,7 +266,11 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
           }
         }
-
+        if (o == setVelocity) {
+            send("setVelocity", Double.parseDouble(velocity.getText()));
+            return;
+          }
+        
         if (o == attachButton) {
           if (attachButton.getText().equals("attach")) {
             send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem(), new Double(slider.getValue()));
@@ -164,12 +280,43 @@ public class ServoGui extends ServiceGui implements ActionListener {
           }
           return;
         }
+        
+        if (o == enableButton) {
+            if (enableButton.getText().equals("enable")) {
+            	if (!attachButton.getText().equals("attach")) {
+              send("enable");
+              imageenabled.setVisible(true);
+            	}
+            	else
+            	{
+            	log.error("Servo is not attached");	
+            	}
+            } else {
+              send("disable");
+              imageenabled.setVisible(false);
+            }
+            return;
+          }
+        
+        if (o == autoDisable) {
+            if (autoDisable.isSelected()) {
+              send("enableAutoDisable",true);
+            } else {
+            	send("enableAutoDisable",false);
+            }
+            return;
+          }
 
-        if (o == updateLimitsButton) {
-          send("setMinMax", Integer.parseInt(posMin.getText()), Integer.parseInt(posMax.getText()));
+        if (o == updateMinMaxButton) {
+          send("setMinMax", Double.parseDouble(posMin.getText()), Double.parseDouble(posMax.getText()));
           return;
         }
 
+        if (o == updateMapButton) {
+            send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()),Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
+            return;
+          }
+        
         if (o == right) {
           slider.setValue(slider.getValue() + 1);
           return;
@@ -224,6 +371,21 @@ public class ServoGui extends ServiceGui implements ActionListener {
           controller.setEnabled(true);
           pinList.setEnabled(true);
         }
+        
+        if (servo.isEnabled()) {
+            enableButton.setText("disable");
+            imageenabled.setVisible(true);
+        } else {
+        	 enableButton.setText("enable");
+        	 imageenabled.setVisible(false);
+          }
+        
+        if (servo.isAutoDisabled()) {
+        	autoDisable.setSelected(true);    
+        } else {
+        	autoDisable.setSelected(false);   
+          }
+        autoDisableTempStatus=autoDisable.isSelected();
 
         Double pos = servo.getPos();
         if (pos != null) {
@@ -237,6 +399,12 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
         posMin.setText(servo.getMin() + "");
         posMax.setText(servo.getMax() + "");
+        velocity.setText(servo.getVelocity() + "");
+        
+        minInput.setText(servo.getMinInput() + "");
+        maxInput.setText(servo.getMaxInput() + "");
+        minOutput.setText(servo.getMinOutput() + "");
+        maxOutput.setText(servo.getMaxOutput() + "");
 
         restoreListeners();
       }
@@ -269,12 +437,18 @@ public class ServoGui extends ServiceGui implements ActionListener {
     controller.removeActionListener(this);
     pinList.removeActionListener(this);
     slider.removeChangeListener(sliderListener);
+    slider.removeMouseListener(sliderListener);
   }
 
   public void restoreListeners() {
     controller.addActionListener(this);
     pinList.addActionListener(this);
     slider.addChangeListener(sliderListener);
+    slider.addMouseListener(sliderListener);
   }
+
+
+
+
 
 }

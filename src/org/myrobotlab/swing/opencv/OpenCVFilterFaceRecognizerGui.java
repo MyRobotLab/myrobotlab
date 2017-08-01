@@ -28,8 +28,10 @@ package org.myrobotlab.swing.opencv;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -45,6 +47,9 @@ public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements Ac
   private JTextField trainName = new JTextField("trainName", 10);
   private JCheckBox trainMode = new JCheckBox();
 
+  private JButton saveButton = new JButton("Save");
+  private JButton loadButton = new JButton("Load");
+  
   public OpenCVFilterFaceRecognizerGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     // build the config for this filter.
@@ -67,6 +72,14 @@ public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements Ac
     jp.add(new JLabel("Name:"));
     jp.add(trainName);
     display.add(jp, gc);
+    
+    saveButton.addActionListener(this);
+    loadButton.addActionListener(this);
+    JPanel jp2 = new JPanel(new GridBagLayout());
+    jp2.add(saveButton);
+    jp2.add(loadButton);
+    
+    display.add(jp2, gc);
   }
 
   @Override
@@ -94,6 +107,20 @@ public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements Ac
       // the opencv set the current name
       // that the cv filter is accumulating images for.
       bf.setTrainName(((JTextField) o).getText());
+    } else if (o == saveButton) {
+      try {
+        bf.save();
+      } catch (IOException e1) {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
+    } else if (o == loadButton) {
+      try {
+        bf.load();
+      } catch (IOException e1) {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
     }
   }
 

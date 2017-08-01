@@ -129,3 +129,7 @@
 > ultrasonicSensorStartRanging/deviceId
 > ultrasonicSensorStopRanging/deviceId
 < publishUltrasonicSensorData/deviceId/b16 echoTime
+
+# set ARef
+> setAref/b16 type
+

@@ -18,6 +18,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
+import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -920,10 +921,24 @@ public class Test extends Service implements StatusListener {
 	public static void main(String[] args) {
 		LoggingFactory.init(Level.INFO);
 		try {
+		  
+		  // String[] a = new String[]{"-blah", ""};
+		  CmdLine cmdline2 = new CmdLine(args);
+		  log.info("{}", cmdline2.keySet());
+		  log.info("{}", cmdline2.getArgument("-agent", 0));
+		  
+		  String str = cmdline2.getArgument("-agent", 0);
+		  String [] agentCmd = str.split(" ");
+		  log.info("{} size", agentCmd.length);
+		  CmdLine agentCmdLine = new CmdLine(agentCmd); 
+		  log.info("agentId = {}", agentCmdLine.getArgument("-id", 0));
 
 			Test test = (Test) Runtime.start("test", "Test");
 
+
 			Runtime.start("webgui", "WebGui");
+			
+			test.test("InMoov");
 
 			boolean done = true;
 			if (done) {

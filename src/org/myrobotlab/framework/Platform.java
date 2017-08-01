@@ -2,14 +2,16 @@ package org.myrobotlab.framework;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.jar.Attributes;
-import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 public class Platform implements Serializable {
@@ -51,7 +53,7 @@ public class Platform implements Serializable {
 
   // -------------pass through begin -------------------
   public static Platform getLocalInstance(String id) {
-    
+
     if (localInstance == null) {
       Platform platform = new Platform();
       platform.id = id;
@@ -116,9 +118,9 @@ public class Platform implements Serializable {
       // logging !!
       // logging calls -> platform calls a util class -> calls logging --
       // infinite loop
-      // platform.mrlVersion = FileIO.getResourceFile("version.txt");
-      StringBuffer sb = new StringBuffer();
 
+      StringBuffer sb = new StringBuffer();
+      
       try {
         BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/version.txt"), "UTF-8"));
         for (int c = br.read(); c != -1; c = br.read()) {
@@ -137,6 +139,7 @@ public class Platform implements Serializable {
       }
 
       // FIXME deprecate
+      /*
       try {
         sb.setLength(0);
         BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/branch.txt"), "UTF-8"));
@@ -149,20 +152,25 @@ public class Platform implements Serializable {
       } catch (Exception e) {
         // no logging silently die
       }
+      */
 
       Map<String, String> manifest = getManifest();
       if (manifest.containsKey("Branch")) {
         platform.branch = manifest.get("Branch");
+      } else {
+        platform.branch = "unknown";
       }
+      
       if (manifest.containsKey("Commit")) {
         platform.commit = manifest.get("Commit");
+      } else {
+        platform.commit = "unknown";
       }
-      if (manifest.containsKey("Build")) {
-        platform.build = manifest.get("Build");
-      }
-
-      if (platform.branch == null) {
-        platform.branch = "unknown";
+      
+      if (manifest.containsKey("Implementation-Version")) {
+        platform.mrlVersion = manifest.get("Implementation-Version");
+      } else {
+        platform.mrlVersion = "unknown";
       }
 
       platform.motd = "You Know, for Creative Machine Control !";
@@ -261,45 +269,64 @@ public class Platform implements Serializable {
   }
 
   static public Map<String, String> getManifest() {
-    File f = new File(getRoot());
-    TreeMap<String, String> ret = new TreeMap<String, String>();
-
-    if (!f.canRead() || f.isDirectory()) {
-      System.out.println(f.getAbsolutePath() + ": could not get manifest - running in IDE ?");
-      return ret;
-    }
+    Map<String, String> ret = new TreeMap<String, String>();
     try {
-      JarFile jar = new JarFile(f);
-      final Manifest manifest = jar.getManifest();
-      final Attributes mattr = manifest.getMainAttributes();
-      System.out.println(f.getAbsolutePath());
-      System.out.println("Main attrs: ");
-      for (Object a : mattr.keySet()) {
-        String key = (String) a;
-        String value = mattr.getValue(key);
-        ret.put(key, value);
-        System.out.println("\\t " + key + ": " + value);
-      }
-      System.out.println("\\nReading other attrs:\\n");
+      File f = new File(getRoot());
+      Class<?> clazz = Platform.class;
+      String className = clazz.getSimpleName() + ".class";
+      String classPath = clazz.getResource(className).toString();
+      InputStream in = null;
 
+      if (!classPath.startsWith("jar")) {
+        System.out.println(String.format("manifest is \"not\" in jar - using file %s/META-INF/MANIFEST.MF", f.getAbsolutePath()));
+        // File file = new
+        // File(classLoader.getResource("file/test.xml").getFile());
+        in = clazz.getResource("/META-INF/MANIFEST.MF").openStream();
+
+      } else {
+        String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+        URL url = new URL(manifestPath);
+        System.out.println("jar url " + url);
+        in = url.openStream();
+      }
+
+      Manifest manifest = new Manifest(in);
+      ret.putAll(getAttributes(null , manifest.getMainAttributes()));
       final Map<String, Attributes> attrs = manifest.getEntries();
-      for (String name : attrs.keySet()) {
-        final Attributes attr = attrs.get(name);
-        System.out.println(name + ": \\n");
-        for (Object a : attr.keySet()) {
-          String key = (String) a;
-          String value = mattr.getValue(key);
-          ret.put(key, value);
-          System.out.println("\\t " + key + ": " + value);
-        }
+      Iterator<String> it = attrs.keySet().iterator();
+      while (it.hasNext()) {
+        String key = it.next();
+        Attributes attributes = attrs.get(key);
+        ret.putAll(getAttributes(key, attributes));
       }
-      jar.close();
-    } catch (Exception x) {
-      System.out.println("Failed to read manifest for " + f.getAbsolutePath() + ": " + x);
-    }
 
+      in.close();
+    } catch (Exception e) {
+      System.out.println(String.format("getManifest threw %s", e));
+    }
     return ret;
   }
+  
+  private static Map<String,String> getAttributes(String part, Attributes attributes){
+    Map<String,String> data = new TreeMap<String,String>();
+    Iterator<Object> it = attributes.keySet().iterator();
+    while (it.hasNext()){
+        java.util.jar.Attributes.Name key = (java.util.jar.Attributes.Name) it.next();
+        Object value = attributes.get(key);
+        String partKey = null;
+        if (part == null){
+          partKey = key.toString();
+        } else {
+          partKey = String.format("%s.%s", part, key);
+        }
+         
+        System.out.println(partKey + ":  " + value);
+        if (value != null){
+          data.put(partKey, value.toString());
+        }
+    }
+    return data;
+}
 
   @Override
   public String toString() {

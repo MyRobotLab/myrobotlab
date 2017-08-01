@@ -25,8 +25,6 @@
 
 package org.myrobotlab.swing;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -34,7 +32,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
+import javax.swing.JPanel;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Mpu6050;
@@ -47,18 +45,18 @@ public class Mpu6050Gui extends ServiceGui implements ActionListener {
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(Mpu6050Gui.class);
 
-  String attach = "setController";
-	String detach = "unsetController";
-	JButton attachButton = new JButton(attach);
+  String attach = "attach";
+  String detach = "detach";
+  JButton attachButton = new JButton(attach);
 
-	JComboBox<String> controller = new JComboBox<String>();
-	JComboBox<String> deviceAddressList = new JComboBox<String>();
-	JComboBox<String> deviceBusList = new JComboBox<String>();
+  JComboBox<String> controllerList = new JComboBox<String>();
+  JComboBox<String> deviceAddressList = new JComboBox<String>();
+  JComboBox<String> deviceBusList = new JComboBox<String>();
 
-	JLabel controllerLabel     = new JLabel("Controller");
-	JLabel deviceBusLabel     = new JLabel("Bus");
-	JLabel deviceAddressLabel = new JLabel("Address");
-	
+  JLabel controllerLabel = new JLabel("Controller");
+  JLabel deviceBusLabel = new JLabel("Bus");
+  JLabel deviceAddressLabel = new JLabel("Address");
+
   JButton refresh = new JButton("refresh");
 
   JLabel accelX = new JLabel();
@@ -70,145 +68,50 @@ public class Mpu6050Gui extends ServiceGui implements ActionListener {
   JLabel gyroZ = new JLabel();
 
   Mpu6050 boundService = null;
-  
+
   public Mpu6050Gui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
-		boundService = (Mpu6050) Runtime.getService(boundServiceName);
+    boundService = (Mpu6050) Runtime.getService(boundServiceName);
 
+    addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
 
-    // Container BACKGROUND = getContentPane();
+    JPanel measures = new JPanel();
+    measures.add(accelX);
+    measures.add(accelY);
+    measures.add(accelZ);
 
-    // display.setLayout(new BorderLayout());
-    // JPanel display
-    display.setLayout(new GridBagLayout());
-    GridBagConstraints c = new GridBagConstraints();
-    c.ipadx = 0;
-    
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 1;
-    c.gridy = 0;
-    display.add(controllerLabel);
+    measures.add(temperature);
 
-    c.gridx++;
-    display.add(controller);
-    
-    c.gridx++;
-    display.add(deviceBusLabel);
+    measures.add(gyroX);
+    measures.add(gyroY);
+    measures.add(gyroZ);
 
-    c.gridx++;
-    display.add(deviceBusList);
-    
-    c.gridx++;
-    display.add(deviceAddressLabel);
+    center.add(measures);
 
-    c.gridx++;
-    display.add(deviceAddressList);
-    
-    c.gridx++;
-    display.add(attachButton);
-    attachButton.addActionListener(this);
-    
-    c.gridx++;
-    display.add(refresh, c);
-    refresh.addActionListener(this);
-
-    c.gridx = 1;
-    c.gridy++;
-    c.gridy++;
-    display.add(new JLabel("AccelX  :"), c);
-
-    c.gridx++;
-    display.add(accelX, c);
-
-    c.gridx++;
-    display.add(new JLabel(" G "), c);
-
-    c.gridx = 1;
-    c.gridy++;
-    display.add(new JLabel("AccelY  :"), c);
-
-    c.gridx++;
-    display.add(accelY, c);
-
-    c.gridx++;
-    display.add(new JLabel(" G "), c);
-
-    c.gridx = 1;
-    c.gridy++;
-    display.add(new JLabel("AccelZ  :"), c);
-
-    c.gridx++;
-    display.add(accelZ, c);
-
-    c.gridx++;
-    display.add(new JLabel(" G "), c);
-
-    c.gridx = 1;
-    c.gridy++;
-    c.gridy++;
-    display.add(new JLabel("Temperature : "), c);
-
-    c.gridx++;
-    display.add(temperature, c);
-
-    c.gridx++;
-    display.add(new JLabel(" degrees Celcius"), c);
-
-    c.gridx = 1;
-    c.gridy++;
-    display.add(new JLabel("GyroX  :"), c);
-
-    c.gridx++;
-    display.add(gyroX, c);
-
-    c.gridx++;
-    display.add(new JLabel(" degrees/s"), c);
-
-    c.gridx = 1;
-    c.gridy++;
-    display.add(new JLabel("GyroY  :"), c);
-
-    c.gridx++;
-    display.add(gyroY, c);
-
-    c.gridx++;
-    display.add(new JLabel(" degrees/s"), c);
-
-    c.gridx = 1;
-    c.gridy++;
-    display.add(new JLabel("GyroZ  :"), c);
-
-    c.gridx++;
-    display.add(gyroZ, c);
-
-    c.gridx++;
-    display.add(new JLabel(" degrees/s"), c);
-    
     refreshControllers();
     getDeviceBusList();
     getDeviceAddressList();
-  
+    restoreListeners();
+
   }
 
   @Override
-  public void actionPerformed(ActionEvent e) {
-    Object o = e.getSource();
+  public void actionPerformed(ActionEvent event) {
+    Object o = event.getSource();
+    if (o == attachButton) {
+      if (attachButton.getText().equals(attach)) {
+        int index = controllerList.getSelectedIndex();
+        if (index != -1) {
+          myService.send(boundServiceName, attach, controllerList.getSelectedItem(), deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
+        }
+      } else {
+        log.info(String.format("detach %s", controllerList.getSelectedItem()));
+        myService.send(boundServiceName, detach, controllerList.getSelectedItem());
+      }
+    }
     if (o == refresh) {
       myService.send(boundServiceName, "refresh");
     }
-		if (o == attachButton) {
-			if (attachButton.getText().equals(attach)) {
-				int index = controller.getSelectedIndex();
-				if (index != -1) {
-					myService.send(boundServiceName, attach, 
-							controller.getSelectedItem(),
-							deviceBusList.getSelectedItem(),
-							deviceAddressList.getSelectedItem());
-				}
-			} else {
-				myService.send(boundServiceName, detach);
-			}
-		}
   }
 
   @Override
@@ -219,63 +122,70 @@ public class Mpu6050Gui extends ServiceGui implements ActionListener {
   public void unsubscribeGui() {
   }
 
-  public void onState(Mpu6050 mpu6050) {
-  	
-		refreshControllers();
-		controller.setSelectedItem(mpu6050.getControllerName());
-		deviceBusList.setSelectedItem(mpu6050.deviceBus);
-		deviceAddressList.setSelectedItem(mpu6050.deviceAddress);
-		if (mpu6050.isAttached()) {
-			attachButton.setText(detach);
-			controller.setEnabled(false);
-			deviceBusList.setEnabled(false);
-			deviceAddressList.setEnabled(false);
-			refresh.setEnabled(true);
-		} else {
-			attachButton.setText(attach);
-			controller.setEnabled(true);
-			deviceBusList.setEnabled(true);
-			deviceAddressList.setEnabled(true);
-			refresh.setEnabled(false);
-		}
-		
-    accelX.setText(String.format("%.3f", mpu6050.accelGX));
-    accelY.setText(String.format("%.3f", mpu6050.accelGY));
-    accelZ.setText(String.format("%.3f", mpu6050.accelGZ));
-    temperature.setText(String.format("%.3f", mpu6050.temperatureC));
-    gyroX.setText(String.format("%.3f", mpu6050.gyroDegreeX));
-    gyroY.setText(String.format("%.3f", mpu6050.gyroDegreeY));
-    gyroZ.setText(String.format("%.3f", mpu6050.gyroDegreeZ));
+  public void onState(Mpu6050 service) {
+
+    removeListeners();
+    refreshControllers();
+    if (service.controller != null) {
+      controllerList.setSelectedItem(service.controllerName);
+      deviceBusList.setSelectedItem(service.deviceBus);
+      deviceAddressList.setSelectedItem(service.deviceAddress);
+    }
+    if (service.isAttached) {
+      attachButton.setText(detach);
+      controllerList.setEnabled(false);
+      deviceBusList.setEnabled(false);
+      deviceAddressList.setEnabled(false);
+    } else {
+      attachButton.setText(attach);
+      controllerList.setEnabled(true);
+      deviceBusList.setEnabled(true);
+      deviceAddressList.setEnabled(true);
+    }
+    restoreListeners();
+
+    accelX.setText(String.format("AccelX: %.3f G", service.accelGX));
+    accelY.setText(String.format("AccelY: %.3f G", service.accelGY));
+    accelZ.setText(String.format("AccelZ: %.3f G", service.accelGZ));
+    temperature.setText(String.format("Temperature: %.3f degrees Celicus", service.temperatureC));
+    gyroX.setText(String.format("GyroX : %.3f degrees/s", service.gyroDegreeX));
+    gyroY.setText(String.format("GyroY : %.3f degrees/s", service.gyroDegreeY));
+    gyroZ.setText(String.format("GyroZ : %.3f degrees/s", service.gyroDegreeZ));
 
   }
-  
-	public void getDeviceBusList() {
-		List<String> mbl = boundService.deviceBusList;
-		for (int i = 0; i < mbl.size(); i++) {
-			deviceBusList.addItem(mbl.get(i));
-		}
-	}
-	
-	public void getDeviceAddressList() {
 
-		List<String> mal = boundService.deviceAddressList;
-		for (int i = 0; i < mal.size(); i++) {
-			deviceAddressList.addItem(mal.get(i));
-		}
-	}
-	
-	public void refreshControllers() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  public void getDeviceBusList() {
+    List<String> mbl = boundService.deviceBusList;
+    for (int i = 0; i < mbl.size(); i++) {
+      deviceBusList.addItem(mbl.get(i));
+    }
+  }
 
-				List<String> v = boundService.refreshControllers();
-				controller.removeAllItems();
-				for (int i = 0; i < v.size(); ++i) {
-					controller.addItem(v.get(i));
-				}
-				controller.setSelectedItem(boundService.getControllerName());
-			}
-		});
-	}
+  public void getDeviceAddressList() {
+
+    List<String> mal = boundService.deviceAddressList;
+    for (int i = 0; i < mal.size(); i++) {
+      deviceAddressList.addItem(mal.get(i));
+    }
+  }
+
+  public void refreshControllers() {
+    List<String> v = boundService.refreshControllers();
+    controllerList.removeAllItems();
+    for (int i = 0; i < v.size(); ++i) {
+      controllerList.addItem(v.get(i));
+    }
+    controllerList.setSelectedItem(boundService.controllerName);
+  }
+
+  public void removeListeners() {
+    attachButton.removeActionListener(this);
+    refresh.removeActionListener(this);
+  }
+
+  public void restoreListeners() {
+    attachButton.addActionListener(this);
+    refresh.addActionListener(this);
+  }
+
 }
