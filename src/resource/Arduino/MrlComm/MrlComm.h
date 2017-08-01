@@ -140,8 +140,8 @@ public:
 	void ultrasonicSensorStartRanging( byte deviceId);
 	// > ultrasonicSensorStopRanging/deviceId
 	void ultrasonicSensorStopRanging( byte deviceId);
-	// > setAref/b16 aref
-	void setAref( int aref);
+	// > setAref/b16 type
+	void setAref( int type);
     // </generatedCallBacks>
     // end
 
