@@ -118,8 +118,9 @@
 #define ULTRASONIC_SENSOR_STOP_RANGING 46
 // < publishUltrasonicSensorData/deviceId/b16 echoTime
 #define PUBLISH_ULTRASONIC_SENSOR_DATA 47
-// > setAref/b16 aref
+// > setAref/b16 type
 #define SET_AREF 48
+
 
 
 /*******************************************************************

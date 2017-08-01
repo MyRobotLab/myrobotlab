@@ -55,7 +55,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
    */
 
   transient Serial uart;
-  
+
   /**
    * the unique board type key
    */
@@ -63,7 +63,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   String aref;
 
   /**
-   * address index of pinList 
+   * address index of pinList
    */
   Map<Integer, PinDefinition> pinIndex = null;
 
@@ -71,7 +71,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
    * name index of pinList
    */
   Map<String, PinDefinition> pinMap = null;
-
 
   String portName = "COM42";
 
@@ -125,11 +124,11 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   public VirtualArduino(String n) {
     super(n);
-    
-    if (board == null){
+
+    if (board == null) {
       board = "uno";
     }
-    
+
     uart = (Serial) createPeer("uart");
     ino = new MrlCommIno(this);
     mrlComm = ino.getMrlComm();
@@ -160,7 +159,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   public String setBoard(String board) {
     log.info("setting board to type {}", board);
 
-    //  Zxcv npinDefs = Arduino.getPinList(board);
+    // Zxcv npinDefs = Arduino.getPinList(board);
 
     broadcastState();
     return board;
@@ -283,25 +282,24 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   public List<String> getPortNames() {
     return uart.getPortNames();
   }
-  
 
   // implements PinArrayControl ?
   // @Override
   public List<PinDefinition> getPinList() {
     // 2 board types have been identified (perhaps this is based on processor?)
     // mega-like & uno like
-    
+
     // if no change - just return the values
-    if ((pinMap != null && board.contains("mega") && pinMap.size() == 70) || (pinMap != null && pinMap.size() == 20)){
+    if ((pinMap != null && board.contains("mega") && pinMap.size() == 70) || (pinMap != null && pinMap.size() == 20)) {
       return new ArrayList<PinDefinition>(pinIndex.values());
     }
-    
+
     // create 2 indexes for fast retrieval
     // based on "name" or "address"
     pinMap = new HashMap<String, PinDefinition>();
     pinIndex = new HashMap<Integer, PinDefinition>();
     List<PinDefinition> pinList = new ArrayList<PinDefinition>();
-    
+
     if (board.contains("mega")) {
       for (int i = 0; i < 70; ++i) {
         PinDefinition pindef = new PinDefinition();
@@ -329,7 +327,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
         pindef.setName(pinName);
         pindef.setAddress(i);
         pinIndex.put(i, pindef);
-        pinMap.put(pinName, pindef); 
+        pinMap.put(pinName, pindef);
         pinList.add(pindef);
       }
     } else {
@@ -374,36 +372,39 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   public void disconnect() {
     uart.disconnect();
   }
-  
+
+  /*
   public void setAref(String aref) {
-    int arefInt=1;
+    int arefInt = 1;
     switch (aref) {
       case "EXTERNAL":
-        arefInt=0;
+        arefInt = 0;
         break;
       case "DEFAULT":
-        arefInt=1;
+        arefInt = 1;
         break;
       case "INTERNAL1V1":
-        arefInt=2;
+        arefInt = 2;
         break;
       case "INTERNAL":
-        arefInt=3;
+        arefInt = 3;
         break;
       case "INTERNAL2V56":
-        arefInt=3;
+        arefInt = 3;
         break;
       default:
-        error("Aref "+aref.toUpperCase()+" is unknown");
-        }
-    log.info("set aref to "+aref); 
-    this.aref=aref;
+        error("Aref " + aref.toUpperCase() + " is unknown");
+    }
+    log.info("set aref to " + aref);
+    this.aref = aref;
     msg.setAref(arefInt);
-	  }
+  }
+*/
   
   public String getAref() {
     return aref;
   }
+
   public static void main(String[] args) {
     try {
 
@@ -417,13 +418,12 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
       // Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-      Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       virtual.connect("COM99");
       arduino.connect("COM99");
-      
-      
+
       Runtime.start("gui", "SwingGui");
-      
+
       // arduino.enablePin("D7");
       // String port = "COM5";
       // connect the virtual uart

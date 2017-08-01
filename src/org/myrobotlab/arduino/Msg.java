@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import org.myrobotlab.logging.Level;
 
+import org.myrobotlab.arduino.virtual.MrlComm;
+
 /**
  * <pre>
  * 
@@ -40,6 +42,10 @@ import org.myrobotlab.logging.Level;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.VirtualArduino;
+
+import java.io.FileOutputStream;
+import java.util.Arrays;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
@@ -193,8 +199,8 @@ public class Msg {
 	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 46;
 	// < publishUltrasonicSensorData/deviceId/b16 echoTime
 	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 47;
-	// > setAref/b16 aref
-	public final static int SET_AREF = 48;	
+	// > setAref/b16 type
+	public final static int SET_AREF = 48;
 
 
 /**
@@ -235,8 +241,10 @@ public class Msg {
 
 	/**
 	 * want to grab it when SerialDevice is created
-	 * @param b True or False 
-	 */ 
+	 *
+	 * @param serial
+	 * @return
+	 */
 	/*
 	static public synchronized Msg getInstance(Arduino arduino, SerialDevice serial) {
 		if (instance == null) {
@@ -1706,8 +1714,8 @@ public class Msg {
 	  			log.error("ultrasonicSensorStopRanging threw",e);
 	  }
 	}
-	
-	public synchronized void setAref(Integer aref/*b16*/) {
+
+	public synchronized void setAref(Integer type/*b16*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -1715,7 +1723,7 @@ public class Msg {
 			write(MAGIC_NUMBER);
 			write(1 + 2); // size
 			write(SET_AREF); // msgType = 48
-			writeb16(aref);
+			writeb16(type);
  
      if (ackEnabled){
        // we just wrote - block threads sending
@@ -1725,7 +1733,7 @@ public class Msg {
 			if(record != null){
 				txBuffer.append("> setAref");
 				txBuffer.append("/");
-				txBuffer.append(aref);
+				txBuffer.append(type);
 				txBuffer.append("\n");
 				record.write(txBuffer.toString().getBytes());
 				txBuffer.setLength(0);
@@ -2132,7 +2140,6 @@ public class Msg {
   /**
    * enable acks on both sides Arduino/Java-Land
    * and MrlComm-land
-   * @param b True or False
    */
   public void enableAcks(boolean b){
     // disable local blocking
