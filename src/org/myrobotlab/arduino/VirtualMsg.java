@@ -2,12 +2,14 @@ package org.myrobotlab.arduino;
 
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-import org.myrobotlab.arduino.virtual.MrlComm;
 import org.myrobotlab.logging.Level;
+
+import org.myrobotlab.arduino.virtual.MrlComm;
 
 /**
  * <pre>
@@ -40,6 +42,11 @@ import org.myrobotlab.logging.Level;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.VirtualArduino;
+
+import java.io.FileOutputStream;
+import java.util.Arrays;
+import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
@@ -56,7 +63,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 55;
+	public static final int MRLCOMM_VERSION = 56;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -192,6 +199,8 @@ public class VirtualMsg {
 	public final static int ULTRASONIC_SENSOR_STOP_RANGING = 46;
 	// < publishUltrasonicSensorData/deviceId/b16 echoTime
 	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 47;
+	// > setAref/b16 type
+	public final static int SET_AREF = 48;
 
 
 /**
@@ -234,6 +243,7 @@ public class VirtualMsg {
 	// public void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/){}
 	// public void ultrasonicSensorStartRanging(Integer deviceId/*byte*/){}
 	// public void ultrasonicSensorStopRanging(Integer deviceId/*byte*/){}
+	// public void setAref(Integer type/*b16*/){}
 	
 
 	
@@ -257,7 +267,9 @@ public class VirtualMsg {
 
 	/**
 	 * want to grab it when SerialDevice is created
-	 * @param b true/false
+	 *
+	 * @param serial
+	 * @return
 	 */
 	/*
 	static public synchronized Msg getInstance(MrlComm arduino, SerialDevice serial) {
@@ -715,6 +727,16 @@ public class VirtualMsg {
 				arduino.invoke("ultrasonicSensorStopRanging",  deviceId);
 			} else { 
  				arduino.ultrasonicSensorStopRanging( deviceId);
+			}
+			break;
+		}
+		case SET_AREF: {
+			Integer type = b16(ioCmd, startPos+1);
+			startPos += 2; //b16
+			if(invoke){
+				arduino.invoke("setAref",  type);
+			} else { 
+ 				arduino.setAref( type);
 			}
 			break;
 		}
@@ -1227,6 +1249,9 @@ public class VirtualMsg {
 		case PUBLISH_ULTRASONIC_SENSOR_DATA:{
 			return "publishUltrasonicSensorData";
 		}
+		case SET_AREF:{
+			return "setAref";
+		}
 
 		default: {
 			return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
@@ -1476,7 +1501,6 @@ public class VirtualMsg {
   /**
    * enable acks on both sides Arduino/Java-Land
    * and MrlComm-land
-   * @param b true/false
    */
   public void enableAcks(boolean b){
     // disable local blocking

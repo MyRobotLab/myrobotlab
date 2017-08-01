@@ -1343,6 +1343,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // on parameter types - the thing is we may have a typed signature
       // which will allow execution - but
       // if so we need to search
+      
+      // FIXME - WHY ISN'T METHOD CACHING USED HERE !!!
 
       // SECURITY - ??? can't be implemented here - need a full message
       meth = c.getMethod(method, paramTypes); // getDeclaredMethod zod !!!
@@ -1745,9 +1747,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     send(name, method, (Object[]) null);
   }
 
-  /**
-   * boxing - the right way - thank you Java 5
-   */
   public void send(String name, String method, Object... data) {
     Message msg = Message.createMessage(this, name, method, data);
     msg.sender = this.getName();
@@ -1755,7 +1754,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // get the correct sendingMethod
     // here its hardcoded
     msg.sendingMethod = "send";
-
+    send(msg);
+  }
+  
+  public void send(Message msg){
     if (recorder != null) {
       try {
         recorder.write(msg);
@@ -1784,7 +1786,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
     msg.sender = this.getName();
     msg.status = Message.BLOCKING;
     msg.msgId = Runtime.getUniqueID();
-
+    
+    return sendBlocking(msg, timeout);
+  }
+  
+  public Object sendBlocking(Message msg, Integer timeout) {
     Object[] returnContainer = new Object[1];
     /*
      * if (inbox.blockingList.contains(msg.msgID)) { log.error("DUPLICATE"); }
@@ -1803,6 +1809,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
     return returnContainer[0];
   }
+  
 
   // BOXING - End --------------------------------------
   public Object sendBlocking(String name, String method) {
@@ -1810,9 +1817,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public Object sendBlocking(String name, String method, Object... data) {
-    return sendBlocking(name, 1000, method, data); // default 1 sec timeout
-    // - TODO - make
-    // configurable
+    // default 1 second timeout - FIXME CONFIGURABLE
+    return sendBlocking(name, 1000, method, data); 
   }
 
   @Override
@@ -2117,13 +2123,17 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * Attachable.detach(serviceName) - routes to 
+   * Attachable.detach(serviceName) - routes to reference parameter
    * Attachable.detach(Attachable)
    */
   public void detach(String serviceName) {
     detach(Runtime.getService(serviceName));
   }
 
+  /**
+   * Attachable.attach(serviceName) - routes to reference parameter
+   * Attachable.attach(Attachable)
+   */
   public void attach(String serviceName) throws Exception {
     attach(Runtime.getService(serviceName));
   }
@@ -2132,22 +2142,115 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return isAttached(Runtime.getService(serviceName));
   }
 
+  /**
+   * This detach when overriden "routes" to the appropriately typed parameterized
+   * detach within a service.
+   * 
+   * When overriden, the first thing it should do is check to see if the
+   * referenced service is already detached. If it is already detached it should
+   * simply return.
+   * 
+   * If its detached to this service, it should first detach itself, modifying
+   * its own data if necessary. The last thing it should do is call the
+   * parameterized service's detach. This gives the other service an opportunity
+   * to detach. e.g.
+   * 
+   * <pre>
+   * 
+   * public void detach(Attachable service) {
+   *    if (ServoControl.class.isAssignableFrom(service.getClass())) {
+   *        detachServoControl((ServoControl) service);
+   *        return;
+   *    }
+   *    
+   *    ...  route to more detach functions   ....
+   *    
+   *    error("%s doesn't know how to detach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+   *  }
+   *  
+   *  And within detachServoControl :
+   *  
+   *  public void detachServoControl(ServoControl service) {
+   *       // guard
+   *       if (!isAttached(service)){
+   *           return;
+   *       }
+   *       
+   *       ... detach logic ....
+   * 
+   *       // call to detaching service
+   *       service.detach(this);  
+   * }  
+   * </pre>
+   * 
+   * @param service
+   *          - the service to detach from this service
+   */
   @Override
   public void detach(Attachable service) {
-    // TODO Auto-generated method stub
-    
   }
 
+  /**
+   * the "routing" isAttached - when overridden by a service this
+   * "routes" to the appropriate typed isAttached
+   */
   @Override
   public boolean isAttached(Attachable instance) {
     return false;
   }
 
+  /**
+   * returns all currently attached services
+   */
   @Override
   public Set<String> getAttached() {
     return new HashSet<String>();
   }
 
+  /**
+   * This attach when overriden "routes" to the appropriately typed parameterized
+   * attach within a service.
+   * 
+   * When overriden, the first thing it should do is check to see if the
+   * referenced service is already attached. If it is already attached it should
+   * simply return.
+   * 
+   * If its attached to this service, it should first attach itself, modifying
+   * its own data if necessary. The last thing it should do is call the
+   * parameterized service's attach. This gives the other service an opportunity
+   * to attach. e.g.
+   * 
+   * <pre>
+   * 
+   * public void attach(Attachable service) {
+   *    if (ServoControl.class.isAssignableFrom(service.getClass())) {
+   *        attachServoControl((ServoControl) service);
+   *        return;
+   *    }
+   *    
+   *    ...  route to more attach functions   ....
+   *    
+   *    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+   *  }
+   *  
+   *  And within attachServoControl :
+   *  
+   *  public void attachServoControl(ServoControl service) {
+   *       // guard
+   *       if (!isAttached(service)){
+   *           return;
+   *       }
+   *       
+   *       ... attach logic ....
+   * 
+   *       // call to attaching service
+   *       service.attach(this);  
+   * }  
+   * </pre>
+   * 
+   * @param service
+   *          - the service to attach from this service
+   */
   @Override
   public void attach(Attachable service) throws Exception { 
   }

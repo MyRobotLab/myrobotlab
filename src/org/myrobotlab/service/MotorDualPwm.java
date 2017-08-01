@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 
 public class MotorDualPwm extends AbstractMotor {
@@ -43,6 +44,15 @@ public class MotorDualPwm extends AbstractMotor {
 
   public void setPwmFreq(Integer pwmfreq) {
     this.pwmFreq = pwmfreq;
+  }
+  
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(MotorDualPwm.class.getCanonicalName());
+    meta.addDescription("Motor service which support 2 pwr pwm pins clockwise and counterclockwise");
+    meta.addCategory("motor");
+
+    return meta;
   }
 
 }

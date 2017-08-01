@@ -5,14 +5,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +29,6 @@ import javax.servlet.http.HttpSession;
 
 import org.atmosphere.cpr.ApplicationConfig;
 import org.atmosphere.cpr.AtmosphereRequest;
-// import org.atmosphere.cpr.AtmosphereRequestImpl.Body;
-import org.atmosphere.cpr.AtmosphereRequest.Body;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
@@ -41,17 +38,17 @@ import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
 import org.jboss.netty.handler.ssl.SslContext;
 import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
+import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecFactory;
+import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.codec.MethodCache;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.StatusLevel;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -68,75 +65,11 @@ import org.slf4j.Logger;
 
 /**
  * 
- * WebGui - This service is the AngularJS based GUI TODO - messages &amp; services
- * are already APIs - perhaps a data API - same as service without the message
- * wrapper
+ * WebGui - This service is the AngularJS based GUI TODO - messages &amp;
+ * services are already APIs - perhaps a data API - same as service without the
+ * message wrapper
  */
 public class WebGui extends Service implements AuthorizationProvider, Gateway, Handler {
-
-  private static final long serialVersionUID = 1L;
-
-  public final static Logger log = LoggerFactory.getLogger(WebGui.class);
-
-  public Integer port;
-  public Integer sslPort;
-
-  transient Nettosphere nettosphere;
-  transient Broadcaster broadcaster;
-  transient BroadcasterFactory broadcastFactory;
-
-  public String root = "root";
-  boolean useLocalResources = false;
-  boolean autoStartBrowser = true;
-
-  public String startURL = "http://localhost:%d";
-
-  transient final ConcurrentHashMap<String, HttpSession> sessions = new ConcurrentHashMap<String, HttpSession>();
-
-  // FIXME might need to change to HashMap<String, HashMap<String,String>> to
-  // add client session
-  // TODO - probably should have getters - to publish - currently
-  // just marking as transient to remove some of the data load 10240 max frame
-  transient Map<String, Panel> panels;
-  transient Map<String, Map<String, Panel>> desktops;
-
-  ApiFactory api = null;
-
-  String currentDesktop = "default";
-
-  public static class Panel {
-
-    String name;
-    String simpleName;
-    int posX = 40;
-    int posY = 20;
-    int zIndex = 1;
-    int width = 400;
-    int height = 400;
-    int preferredWidth = 800;
-    int preferredHeight = 600;
-    boolean hide = false;
-
-    public Panel(String name, int x, int y, int z) {
-      this.name = name;
-      this.posX = x;
-      this.posY = y;
-      this.zIndex = z;
-    }
-
-    public Panel(String panelName) {
-      this.name = panelName;
-    }
-
-  }
-
-  // SHOW INTERFACE
-  // FIXME - allowAPI1(true|false)
-  // FIXME - allowAPI2(true|false)
-  // FIXME - allow Protobuf/Thrift/Avro
-  // FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
-
-  transient LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
 
   /**
    * Static list of third party dependencies for this service. The list will be
@@ -192,6 +125,145 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   }
 
+  public static class Panel {
+
+    String name;
+    String simpleName;
+    int posX = 40;
+    int posY = 20;
+    int zIndex = 1;
+    int width = 400;
+    int height = 400;
+    int preferredWidth = 800;
+    int preferredHeight = 600;
+    boolean hide = false;
+
+    public Panel(String panelName) {
+      this.name = panelName;
+    }
+
+    public Panel(String name, int x, int y, int z) {
+      this.name = name;
+      this.posX = x;
+      this.posY = y;
+      this.zIndex = z;
+    }
+
+  }
+
+  private static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(WebGui.class);
+
+  private static final AtomicBoolean TRUST_SERVER_CERT = new AtomicBoolean(true);
+  private static final TrustManager DUMMY_TRUST_MANAGER = new X509TrustManager() {
+    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+    }
+
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+      if (!TRUST_SERVER_CERT.get()) {
+        throw new CertificateException("Server certificate not trusted.");
+      }
+    }
+
+    public X509Certificate[] getAcceptedIssuers() {
+      return new X509Certificate[0];
+    }
+  };
+  private static SSLContext createSSLContext2() {
+    try {
+      InputStream keyStoreStream = Security.class.getResourceAsStream("resource/keys/selfsigned.jks");
+      char[] keyStorePassword = "changeit".toCharArray();
+      KeyStore ks = KeyStore.getInstance("JKS");
+      ks.load(keyStoreStream, keyStorePassword);
+
+      // Set up key manager factory to use our key store
+      char[] certificatePassword = "changeit".toCharArray();
+      KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+      kmf.init(ks, certificatePassword);
+
+      // Initialize the SSLContext to work with our key managers.
+      KeyManager[] keyManagers = kmf.getKeyManagers();
+      TrustManager[] trustManagers = new TrustManager[] { DUMMY_TRUST_MANAGER };
+      SecureRandom secureRandom = new SecureRandom();
+
+      SSLContext sslContext = SSLContext.getInstance("TLS");
+      sslContext.init(keyManagers, trustManagers, secureRandom);
+      return sslContext;
+    } catch (Exception e) {
+      throw new Error("Failed to initialize SSLContext", e);
+    }
+  }
+
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(WebGui.class.getCanonicalName());
+    meta.addDescription("web display");
+    meta.addCategory("connectivity", "display");
+
+    // MAKE NOTE !!! - we currently distribute myrobotlab.jar with a webgui
+    // hence these following dependencies are zipped with myrobotlab.jar !
+    // and are NOT listed as dependencies, because they are already included
+
+    // Its now part of myrobotlab.jar - unzipped in
+    // build.xml (part of myrobotlab.jar now)
+
+    // meta.addDependency("io.netty", "3.10.0"); // netty-3.10.0.Final.jar
+    // meta.addDependency("org.atmosphere.nettosphere", "2.3.0"); //
+    // nettosphere-assembly-2.3.0.jar
+    // meta.addDependency("org.atmosphere.nettosphere", "2.3.0");//
+    // geronimo-servlet_3.0_spec-1.0.jar
+    return meta;
+  }
+
+  public Integer port;
+
+  public Integer sslPort;
+
+  transient Nettosphere nettosphere;
+
+  transient Broadcaster broadcaster;
+  transient BroadcasterFactory broadcastFactory;
+
+  public String root = "root";
+
+  boolean useLocalResources = false;
+
+  boolean autoStartBrowser = true;
+
+  // SHOW INTERFACE
+  // FIXME - allowAPI1(true|false)
+  // FIXME - allowAPI2(true|false)
+  // FIXME - allow Protobuf/Thrift/Avro
+  // FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
+
+  public String startURL = "http://localhost:%d";
+
+  transient final ConcurrentHashMap<String, HttpSession> sessions = new ConcurrentHashMap<String, HttpSession>();
+
+  // FIXME might need to change to HashMap<String, HashMap<String,String>> to
+  // add client session
+  // TODO - probably should have getters - to publish - currently
+  // just marking as transient to remove some of the data load 10240 max frame
+  transient Map<String, Panel> panels;
+
+  // ================ Gateway begin ===========================
+
+  transient Map<String, Map<String, Panel>> desktops;
+
+  transient ApiFactory api = null;
+
+  String currentDesktop = "default";
+
+  transient LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
+
   public WebGui(String n) {
     super(n);
     api = ApiFactory.getInstance(this);
@@ -210,8 +282,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   }
 
-  // ================ Gateway begin ===========================
-
   @Override
   public void addConnectionListener(String name) {
     // TODO Auto-generated method stub
@@ -219,104 +289,23 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   @Override
-  public void connect(String uri) throws URISyntaxException {
+  public boolean allowExport(String serviceName) {
     // TODO Auto-generated method stub
-
+    return false;
   }
 
-  @Override
-  public HashMap<URI, Connection> getClients() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public List<Connection> getConnections(URI clientKey) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String getPrefix(URI protocolKey) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Connection publishConnect(Connection keys) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void sendRemote(String key, Message msg) throws URISyntaxException {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void sendRemote(URI key, Message msg) {
-    // TODO Auto-generated method stub
-
+  public void autoStartBrowser(boolean autoStartBrowser) {
+    this.autoStartBrowser = autoStartBrowser;
   }
 
   // ================ Gateway end ===========================
 
   // ================ AuthorizationProvider begin ===========================
 
-  @Override
-  public boolean allowExport(String serviceName) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public boolean isAuthorized(HashMap<String, String> security, String serviceName, String method) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public boolean isAuthorized(Message msg) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  // ================ AuthorizationProvider end ===========================
-
-  // ================ Broadcaster begin ===========================
-
-  /*
-   * FIXME - needs to be LogListener interface with
-   * LogListener.onLogEvent(String logEntry) !!!! THIS SHALL LOG NO ENTRIES OR
-   * ABANDON ALL HOPE !!!
-   * 
-   * This is completely out of band - it does not use the regular queues inbox
-   * or outbox
-   * 
-   * We want to broadcast this - but THERE CAN NOT BE ANY log.info/warn/error
-   * etc !!!! or there will be an infinite loop and you will be at the gates of
-   * hell !
-   * 
-   */
-  public void onLogEvent(Message msg) {
-    try {
-      if (broadcaster != null) {
-        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        codec.encode(bos, msg);
-        bos.close();
-        broadcaster.broadcast(new String(bos.toByteArray())); // wtf
-      }
-    } catch (Exception e) {
-      System.out.print(e.getMessage());
-    }
-  }
-
   public void broadcast(Message msg) {
     try {
       if (broadcaster != null) {
-        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
+        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         codec.encode(bos, msg);
         bos.close();
@@ -327,11 +316,43 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-  /*
-   * redirects browser to new url
-   */
-  public String redirect(String url) {
-    return url;
+  @Override
+  public void connect(String uri) throws URISyntaxException {
+    // TODO Auto-generated method stub
+
+  }
+
+  SSLContext createSSLContext() {
+    try {
+      if (sslPort != null) {
+        return SSLContext.getInstance("TLS");
+      }
+    } catch (Exception e) {
+      log.warn("can not make ssl context", e);
+    }
+    return null;
+  }
+
+  // ================ AuthorizationProvider end ===========================
+
+  // ================ Broadcaster begin ===========================
+
+  public void extract() throws IOException {
+    extract(false);
+  }
+
+  public void extract(boolean overwrite) throws IOException {
+
+    // TODO - check resource version vs self version
+    // overwrite if different ?
+
+    FileIO.extractResources(overwrite);
+  }
+
+  @Override
+  public HashMap<URI, Connection> getClients() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   // ================ Broadcaster end ===========================
@@ -391,68 +412,466 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return configBuilder;
   }
 
-  public boolean save() {
-    return super.save();
-  }
-
-  SSLContext createSSLContext() {
-    try {
-      if (sslPort != null) {
-        return SSLContext.getInstance("TLS");
-      }
-    } catch (Exception e) {
-      log.warn("can not make ssl context", e);
-    }
+  @Override
+  public List<Connection> getConnections(URI clientKey) {
+    // TODO Auto-generated method stub
     return null;
   }
 
-  private static SSLContext createSSLContext2() {
-    try {
-      InputStream keyStoreStream = Security.class.getResourceAsStream("resource/keys/selfsigned.jks");
-      char[] keyStorePassword = "changeit".toCharArray();
-      KeyStore ks = KeyStore.getInstance("JKS");
-      ks.load(keyStoreStream, keyStorePassword);
+  public Map<String, String> getHeadersInfo(HttpServletRequest request) {
 
-      // Set up key manager factory to use our key store
-      char[] certificatePassword = "changeit".toCharArray();
-      KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-      kmf.init(ks, certificatePassword);
+    Map<String, String> map = new HashMap<String, String>();
 
-      // Initialize the SSLContext to work with our key managers.
-      KeyManager[] keyManagers = kmf.getKeyManagers();
-      TrustManager[] trustManagers = new TrustManager[] { DUMMY_TRUST_MANAGER };
-      SecureRandom secureRandom = new SecureRandom();
-
-      SSLContext sslContext = SSLContext.getInstance("TLS");
-      sslContext.init(keyManagers, trustManagers, secureRandom);
-      return sslContext;
-    } catch (Exception e) {
-      throw new Error("Failed to initialize SSLContext", e);
+    /**
+     * Atmosphere (nearly) always gives a ConcurrentModificationException its
+     * supposed to be fixed in later versions - but later version have proven
+     * very unstable
+     */
+    Enumeration<String> headerNames = request.getHeaderNames();
+    while (headerNames.hasMoreElements()) {
+      String key = (String) headerNames.nextElement();
+      String value = request.getHeader(key);
+      map.put(key.toLowerCase(), value);
     }
+
+    return map;
   }
 
-  private static final AtomicBoolean TRUST_SERVER_CERT = new AtomicBoolean(true);
+  public String getId(AtmosphereResource r) {
+    String id = r.getRequest().getHeader("id");
 
-  private static final TrustManager DUMMY_TRUST_MANAGER = new X509TrustManager() {
-    public X509Certificate[] getAcceptedIssuers() {
-      return new X509Certificate[0];
+    if (id == null) {
+      id = "anonymous";
     }
+    return id;
+  }
 
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-    }
+  public Integer getPort() {
+    return port;
+  }
 
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-      if (!TRUST_SERVER_CERT.get()) {
-        throw new CertificateException("Server certificate not trusted.");
-      }
-    }
-  };
+  @Override
+  public String getPrefix(URI protocolKey) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
   /*
    * SSLContext createSSLContext() { try { if (sslPort != null) { return
    * SSLContext.getInstance("TLS"); } } catch (Exception e) {
    * log.warn("can not make ssl context", e); } return null; }
    */
+
+  /**
+   * With a single method Atmosphere does so much !!! It sets up the connection,
+   * possibly gets a session, turns the request into something like a
+   * HTTPServletRequest, provides us with input &amp; output streams - and
+   * manages all the "long polling" or websocket upgrades on its own !
+   * 
+   * Atmosphere Rocks !
+   * 
+   * common to all apis is handled here - then delegated to the appropriate api
+   * handler
+   */
+  @Override
+  public void handle(AtmosphereResource r) {
+
+    String apiKey = Api.getApiKey(r.getRequest().getRequestURI());
+
+    AtmosphereRequest request = r.getRequest();
+    
+    
+    log.warn(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
+    
+
+    try {
+
+      // FIXME - maintain single broadcaster for each session ?
+      // Broadcaster bc = r.getBroadcaster();
+      // if (bc != null || r.getBroadcaster() != broadcaster){
+      r.setBroadcaster(broadcaster);
+      // }
+
+      String id = getId(r);
+
+      handleSession(r);
+      // FIXME - header SAS token for authentication ???
+      // Map<String, String> headers = getHeadersInfo(request);
+
+      // GET vs POST - post assumes low-level messaging
+      // GET is high level synchronous
+      // String httpMethod = request.getMethod();
+
+      // get default encoder
+      // FIXME FIXME FIXME - this IS A CODEC !!! NOT AN API-TYPE !!! -
+      // CHANGE to MIME_TYPE_APPLICATION_JSON !!!
+
+      // ========================================
+      // POST || GET http://{host}:{port}/api/messages
+      // POST || GET http://{host}:{port}/api/services
+      // ========================================
+
+      // TODO - add handleSwaggerApi
+      switch (apiKey) {
+
+        case ApiFactory.API_TYPE_MESSAGES: {
+          handleMessagesApi(r);
+          break;
+        }
+
+        case ApiFactory.API_TYPE_SERVICE: {
+          handleServiceApi(r);
+          break;
+        }
+
+        default: {
+          // handleInvalidApi(r); // TODO - swagger list of apis ?
+          throw new IOException("invalid api");
+        }
+      }
+
+    } catch (Exception e) {
+      try {
+
+        AtmosphereResponse response = r.getResponse();
+        OutputStream out = response.getOutputStream();
+
+        response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
+        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
+
+        Status error = Status.error(e);
+        Message msg = Message.createMessage(this, getName(), CodecUtils.getCallBackName("getStatus"), error);
+        if (ApiFactory.API_TYPE_SERVICE.equals(apiKey)) {
+          // for the purpose of only returning the data
+          // e.g. http://api/services/runtime/getUptime -> return the uptime
+          // only not the message
+          if (msg.data == null) {
+            log.warn("<< {}", CodecJson.encode(null));
+            codec.encode(out, null);
+          } else {
+            // return the return type
+            log.warn("<< {}", CodecJson.encode(msg.data[0]));
+            codec.encode(out, msg.data[0]);
+          }
+        } else {
+          // API_TYPE_MESSAGES
+          // DEPRECATE - FOR LOGGING ONLY REMOVE
+          log.warn("<< {}", CodecJson.encode(msg)); // FIXME if logTraffic
+          codec.encode(out, msg);
+        }
+
+      } catch (Exception e2) {
+        log.error("respond threw", e);
+      }
+    }
+  }
+
+  /**
+   * handleMessagesApi handles all requests sent to /api/messages It
+   * suspends/upgrades the connection to a websocket It is a asynchronous
+   * protocol - and all messages are wrapped in a message wrapper.
+   * 
+   * The ApiFactory will handle the details of de-serializing but its necessary
+   * to setup some protocol details here for websockets and session management
+   * which the ApiFactory should not be concerned with.
+   * 
+   * @param r - request and response objects from Atmosphere server
+   */
+  public void handleMessagesApi(AtmosphereResource r) {
+    try {
+      AtmosphereResponse response = r.getResponse();
+      AtmosphereRequest request = r.getRequest();
+      OutputStream out = response.getOutputStream();
+
+      if (!r.isSuspended()) {
+        r.suspend();
+      }
+      response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
+
+      api.process(this, out, r.getRequest().getRequestURI(), request.body().asString());
+
+      /*
+       * // FIXME - GET or POST should work - so this "should" be unnecessary ..
+       * if ("GET".equals(httpMethod)) { // if post and parts.length < 3 ?? //
+       * respond(r, apiKey, "getPlatform", new Hello(Runtime.getId()));
+       * HashMap<URI, ServiceEnvironment> env = Runtime.getEnvironments();
+       * respond(r, apiKey, "getLocalServices", env); } else {
+       * doNotUseThisProcessMessageAPI(codec, request.body()); // FIXME data is
+       * double encoded .. can't put '1st' encoded json // api.process(this,
+       * out, r.getRequest().getRequestURI(), request.body().asString()); }
+       */
+
+    } catch (Exception e) {
+      log.error("handleMessagesApi -", e);
+    }
+  }
+
+  /**
+   * This is a middle level method to handle the details of Atmosphere and
+   * http/ws level of processing request. It will eventually call
+   * ApiFactory.process which handles the "pure" Jvm Java only processing
+   * 
+   * @param r
+   *          r
+   * @throws Exception
+   *           e
+   * 
+   */
+  public void handleServiceApi(AtmosphereResource r) throws Exception {
+    AtmosphereRequest request = r.getRequest();
+    AtmosphereResponse response = r.getResponse();
+    OutputStream out = response.getOutputStream();
+    response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
+    
+    String hack = null;
+    byte[] data = null;
+    if (request.body() != null) {
+      hack = request.body().asString();
+      // data = request.body().asBytes();
+      if (hack != null){ // FIXME - hack because request.body().asBytes() ALWAYS returns null !!
+        data = hack.getBytes();
+      }
+    }
+    api.process(out, r.getRequest().getRequestURI(), data);
+  }
+
+  public void handleSession(AtmosphereResource r) {
+    AtmosphereRequest request = r.getRequest();
+    HttpSession s = request.getSession(true);
+    if (s != null) {
+      log.debug("put session uuid {}", r.uuid());
+      sessions.put(r.uuid(), request.getSession(true));
+    }
+  }
+
+  public void hide(String name) {
+    invoke("publishHide", name);
+  }
+
+  @Override
+  public boolean isAuthorized(HashMap<String, String> security, String serviceName, String method) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean isAuthorized(Message msg) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  public boolean isStarted() {
+    if (nettosphere != null && nettosphere.isStarted()) {
+      // is running
+      info("WebGui is started");
+      return true;
+    }
+    return false;
+
+  }
+
+  public Map<String, Panel> loadPanels() {
+    return panels;
+  }
+
+  /*
+   * FIXME - needs to be LogListener interface with
+   * LogListener.onLogEvent(String logEntry) !!!! THIS SHALL LOG NO ENTRIES OR
+   * ABANDON ALL HOPE !!!
+   * 
+   * This is completely out of band - it does not use the regular queues inbox
+   * or outbox
+   * 
+   * We want to broadcast this - but THERE CAN NOT BE ANY log.info/warn/error
+   * etc !!!! or there will be an infinite loop and you will be at the gates of
+   * hell !
+   * 
+   */
+  public void onLogEvent(Message msg) {
+    try {
+      if (broadcaster != null) {
+        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        codec.encode(bos, msg);
+        bos.close();
+        broadcaster.broadcast(new String(bos.toByteArray())); // wtf
+      }
+    } catch (Exception e) {
+      System.out.print(e.getMessage());
+    }
+  }
+
+  public void onRegistered(ServiceInterface si) {
+    // new service
+    // subscribe to the status events
+    subscribe(si.getName(), "publishStatus");
+    subscribe(si.getName(), "publishState");
+
+    // for distributed Runtimes
+    if (si.isRuntime()) {
+      subscribe(si.getName(), "registered");
+    }
+
+    invoke("publishPanel", si.getName());
+
+    // broadcast it too
+    // repackage message
+    /*
+     * don't need to do this :) Message m = createMessage(getName(),
+     * "onRegistered", si); m.sender = Runtime.getInstance().getName();
+     * broadcast(m);
+     */
+  }
+
+  @Override
+  public boolean preProcessHook(Message m) {
+    // FIXME - problem with collisions of this service's methods
+    // and dialog methods ?!?!?
+
+    // broadcast
+    broadcast(m);
+
+    // if the method name is == to a method in the WebGui
+    // process it
+    if (methodSet.contains(m.method)) {
+      // process the message like a regular service
+      return true;
+    }
+
+    // otherwise send the message to the dialog with the senders name
+    // broadcast(m);
+    return false;
+  }
+
+  @Override
+  public String publishConnect() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Connection publishConnect(Connection keys) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public String publishDisconnect() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Status publishError() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public String publishHide(String name) {
+    return name;
+  }
+
+  public Panel publishPanel(String panelName) {
+
+    Panel panel = null;
+    if (panels.containsKey(panelName)) {
+      panel = panels.get(panelName);
+    } else {
+      panel = new Panel(panelName);
+      panels.put(panelName, panel);
+    }
+    return panel;
+  }
+  // === end positioning panels plumbing ===
+
+  public void publishPanels() {
+    for (String key : panels.keySet()) {
+      invoke("publishPanel", key);
+    }
+  }
+
+  public String publishShow(String name) {
+    return name;
+  }
+
+  public boolean publishShowAll(boolean b) {
+    return b;
+  }
+
+  /*
+   * redirects browser to new url
+   */
+  public String redirect(String url) {
+    return url;
+  }
+
+  public void restart() {
+    stop();
+    start();
+  }
+
+  public boolean save() {
+    return super.save();
+  }
+
+  /**
+   * From UI events --to--&gt; MRL request to save panel data typically done
+   * after user has changed or updated the UI in position, height, width, zIndex
+   * etc.
+   * 
+   * If you need MRL changes of position or UI changes use publishPanel to
+   * remotely control UI
+   * 
+   * @param panel - the panel which has been moved or resized
+   */
+  public void savePanel(Panel panel) {
+    if (panel.name == null) {
+      log.error("panel name is null!");
+      return;
+    }
+    panels.put(panel.name, panel);
+    save();
+  }
+
+  @Override
+  public void sendRemote(String key, Message msg) throws URISyntaxException {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void sendRemote(URI key, Message msg) {
+    // TODO Auto-generated method stub
+
+  }
+
+  // === begin positioning panels plumbing ===
+  public void set(String name, int x, int y) {
+    set(name, x, y, 0); // or is z -1 ?
+  }
+
+  public void set(String name, int x, int y, int z) {
+    Panel panel = null;
+    if (panels.containsKey(name)) {
+      panel = panels.get(name);
+    } else {
+      panel = new Panel(name, x, y, z);
+    }
+    invoke("publishPanel", panel);
+  }
+
+  public void setPort(Integer port) {
+    this.port = port; // restart service ?
+  }
+
+  public void show(String name) {
+    invoke("publishShow", name);
+  }
+
+  // TODO - refactor next 6+ methods to only us publishPanel
+  public void showAll(boolean b) {
+    invoke("publishShowAll", b);
+  }
 
   public void start() {
     try {
@@ -512,6 +931,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
+  public void startBrowser(String URL) {
+    BareBonesBrowserLaunch.openURL(String.format(URL, port));
+  }
+
   public void startService() {
     super.startService();
     // extract all resources
@@ -523,491 +946,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       Logging.logError(e);
     }
 
-    start();
-  }
-
-  public boolean isStarted() {
-    if (nettosphere != null && nettosphere.isStarted()) {
-      // is running
-      info("WebGui is started");
-      return true;
-    }
-    return false;
-
-  }
-
-  public void onRegistered(ServiceInterface si) {
-    // new service
-    // subscribe to the status events
-    subscribe(si.getName(), "publishStatus");
-    subscribe(si.getName(), "publishState");
-
-    // for distributed Runtimes
-    if (si.isRuntime()) {
-      subscribe(si.getName(), "registered");
-    }
-
-    invoke("publishPanel", si.getName());
-
-    // broadcast it too
-    // repackage message
-    /*
-     * don't need to do this :) Message m = createMessage(getName(),
-     * "onRegistered", si); m.sender = Runtime.getInstance().getName();
-     * broadcast(m);
-     */
-  }
-
-  public Map<String, String> getHeadersInfo(HttpServletRequest request) {
-
-    Map<String, String> map = new HashMap<String, String>();
-
-    /*
-     * Atmosphere (nearly) always gives a ConcurrentModificationException its
-     * supposed to be fixed in later versions - but later version have proven
-     * very unstable
-     * 
-     * Enumeration<String> headerNames = request.getHeaderNames(); while
-     * (headerNames.hasMoreElements()) { String key = (String)
-     * headerNames.nextElement(); String value = request.getHeader(key);
-     * map.put(key.toLowerCase(), value); }
-     */
-
-    return map;
-  }
-
-  public void handleMessagesApi(AtmosphereResource r) {
-    try {
-      AtmosphereResponse response = r.getResponse();
-      AtmosphereRequest request = r.getRequest();
-      OutputStream out = response.getOutputStream();
-      byte[] data = null;
-      if (request.body() != null) {
-        data = request.body().asBytes();
-      }
-
-      String httpMethod = request.getMethod();
-      String pathInfo = request.getPathInfo();
-      String[] parts = pathInfo.split("/");
-      // FIXME - handle part.length < 3 error
-      String apiKey = parts[2];
-
-      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
-      if (!r.isSuspended()) {
-        r.suspend();
-      }
-      response.addHeader("Content-Type", codec.getMimeType());
-
-      // FIXME - GET or POST should work - so this "should" be unnecessary ..
-      if ("GET".equals(httpMethod)) { // if post and parts.length < 3 ??
-        // respond(r, apiKey, "getPlatform", new Hello(Runtime.getId()));
-        HashMap<URI, ServiceEnvironment> env = Runtime.getEnvironments();
-        respond(r, apiKey, "getLocalServices", env);
-      } else {
-        doNotUseThisProcessMessageAPI(codec, request.body()); 
-        // api.process(out, r.getRequest().getRequestURI(), data);
-      }
-
-    } catch (Exception e) {
-      log.error("handleMessagesApi -", e);
-    }
-  }
-
-  /**
-   * This is a middle level method to handle the details of Atmosphere and http/ws level of 
-   * processing request.  It will eventually call ApiFactory.process which handles the "pure"
-   * Jvm Java only processing
-   * @param r r
-   * @throws Exception e 
-   * 
-   */
-  public void handleServicesApi(AtmosphereResource r) throws Exception {
-    AtmosphereRequest request = r.getRequest();
-    AtmosphereResponse response = r.getResponse();
-    OutputStream out = response.getOutputStream();
-    byte[] data = null;
-    if (request.body() != null) {
-      data = request.body().asBytes();
-    }
-    api.process(out, r.getRequest().getRequestURI(), data);
-  }
-
-  public void handleSession(AtmosphereResource r) {
-    AtmosphereRequest request = r.getRequest();
-    HttpSession s = request.getSession(true);
-    if (s != null) {
-      log.debug("put session uuid {}", r.uuid());
-      sessions.put(r.uuid(), request.getSession(true));
-    }
-  }
-
-  public String getId(AtmosphereResource r) {
-    String id = r.getRequest().getHeader("id");
-
-    if (id == null) {
-      id = "anonymous";
-    }
-    return id;
-  }
-
-  /**
-   * With a single method Atmosphere does so much !!! It sets up the connection,
-   * possibly gets a session, turns the request into something like a
-   * HTTPServletRequest, provides us with input &amp; output streams - and manages
-   * all the "long polling" or websocket upgrades on its own !
-   * 
-   * Atmosphere Rocks !
-   * 
-   * common to all apis is handled here - then delegated to the appropriate api
-   * handler
-   */
-  @Override
-  public void handle(AtmosphereResource r) {
-
-    /**
-     * http(s)://host:port/api/{apiKey}/... specifying the api in endpoint
-     * {apiKey} greatly simplifies accessibility vs many other systems where api
-     * selection is done through http headers :(
-     */
-
-    String apiKey = getApiKey(r);
-
-    try {
-
-      // FIXME - maintain single broadcaster for each session ?
-      // Broadcaster bc = r.getBroadcaster();
-      // if (bc != null || r.getBroadcaster() != broadcaster){
-      r.setBroadcaster(broadcaster);
-      // }
-
-      String id = getId(r);
-
-      handleSession(r);
-      // FIXME - header SAS token for authentication ???
-      // Map<String, String> headers = getHeadersInfo(request);
-
-      // GET vs POST - post assumes low-level messaging
-      // GET is high level synchronous
-      // String httpMethod = request.getMethod();
-
-      // get default encoder
-      // FIXME FIXME FIXME - this IS A CODEC !!! NOT AN API-TYPE !!! -
-      // CHANGE to MIME_TYPE_APPLICATION_JSON !!!
-
-      // ========================================
-      // POST || GET http://{host}:{port}/api/messages
-      // POST || GET http://{host}:{port}/api/services
-      // ========================================
-
-      // TODO - add handleSwaggerApi
-      switch (apiKey) {
-
-        case CodecUtils.API_TYPE_MESSAGES: {
-          handleMessagesApi(r);
-          break;
-        }
-
-        case CodecUtils.API_TYPE_SERVICES: {
-          handleServicesApi(r);
-          break;
-        }
-
-        default: {
-          handleInvalidApi(r); // TODO - swagger list of apis ?
-          break;
-        }
-      }
-
-    } catch (
-
-    Exception e) {
-      try {
-        handleError(r, apiKey, e);
-      } catch (Exception e2) {
-        log.error("respond threw", e);
-      }
-    }
-
-  }
-
-  public void handleInvalidApi(AtmosphereResource r) {
-    // TODO Auto-generated method stub
-
-  }
-
-  private String getApiKey(AtmosphereResource r) {
-    String[] parts = null;
-    AtmosphereRequest request = r.getRequest();
-    String pathInfo = request.getPathInfo();
-    log.info("{} {}", request.getMethod(), pathInfo);
-    if (pathInfo != null) {
-      parts = pathInfo.split("/");
-    }
-
-    if (parts == null || parts.length < 3) {
-      // FIXME - add SWAGGER INTERFACE
-      // http://host:port/api FIXME SWAGGER ???? FIXME ???
-      // DEFAULT MIME CODEC ETC IS BASED ON KEY
-      // response.addHeader("Content-Type", codec.getMimeType());
-      // handleError(r, apiKey, "API",
-      // "http(s)://{host}:{port}/api/{api-type}");
-      // FIXME if not contains - API_INVALID ! - and handle error
-      return CodecUtils.API_TYPE_MESSAGES;
-    }
-
-    // TODO - default to something valid, if parts[2] is not valid ...
-
-    return parts[2];
-  }
-
-  public void doNotUseThisProcessMessageAPI(Codec codec, Body body) throws Exception {
-
-    // first decoding will give you an array of types in msg.data[]
-    // but they are un-coerced - we need the method signature candidate
-    // to determine what we should coerce them into
-    Message msg = CodecUtils.fromJson(body.asString(), Message.class);
-    if (msg == null) {
-      log.error(String.format("msg is null %s", body.asString()));
-      return;
-    }
-    msg.sender = getName();
-    log.debug("got msg {}", msg.toString());
-
-    // out(msg);
-
-    // get the service
-    ServiceInterface si = Runtime.getService(msg.name);
-    if (si == null) {
-      error("could not get service %s for msg %s", msg.name, msg);
-      return;
-    }
-
-    // FIXME !!! important bug .. invoking needs to be a service invoke in that
-    // it has to
-    // process the notifyList .. otherwise the event is not raised correctly !!!
-
-    // FIXME if target service isLocal()
-    // Invoker.invoke
-
-    // FIXME FIXME FIXME !!! -
-
-    Class<?> clazz = si.getClass();
-
-    Class<?>[] paramTypes = null;
-    Object[] params = new Object[msg.data.length];
-    // decoded array of encoded parameters
-    // FIXME - not "really" correct !
-    Object[] encodedArray = msg.data;// new Object[msg.data.length];
-
-    // encodedArray = codec.decodeArray(b);
-
-    paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), msg.method, encodedArray.length);
-
-    if (log.isDebugEnabled()) {
-      StringBuffer sb = new StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.name, msg.method));
-      for (int i = 0; i < paramTypes.length; ++i) {
-        if (i != 0) {
-          sb.append(",");
-        }
-        sb.append(paramTypes[i].getSimpleName());
-      }
-      sb.append(")");
-      log.debug(sb.toString());
-    }
-
-    // WE NOW HAVE ORDINAL AND TYPES
-    params = new Object[encodedArray.length];
-
-    // DECODE AND FILL THE PARAMS
-    for (int i = 0; i < params.length; ++i) {
-      params[i] = codec.decode(encodedArray[i], paramTypes[i]);
-    }
-
-    // FIXME FIXME FIXME !!!!
-    // Service.invoke needs to use method cach BUT - internal queues HAVE
-    // type information
-    // AND decoded json DOES NOT - needs to be optimized such that it knows
-    // the encoding
-    // before using the method cache - and the "hint" determins
-    // getBestCanidate !!!!
-
-    // log.info("{}.{}({})", msg.name, msg.method,
-    // Arrays.toString(paramTypes));
-
-    Method method = clazz.getMethod(msg.method, paramTypes);
-
-    // NOTE --------------
-    // strategy of find correct method with correct parameter types
-    // "name" is the strongest binder - but without a method cache we
-    // are condemned to scan through all methods
-    // also without a method cache - we have to figure out if the
-    // signature would fit with instanceof for each object
-    // and "boxed" types as well
-
-    // best to fail - then attempt to resolve through scanning through
-    // methods and trying types - then cache the result
-
-    // FIXME - not good - using my thread to execute another services
-    // method and put its return on the the services out queue :P
-    if (si.isLocal()) {
-      log.debug("{} is local", si.getName());
-
-      log.debug("{}.{}({})", msg.name, msg.method, Arrays.toString(params));
-      Object retobj = method.invoke(si, params);
-
-      // FIXME - Is this how to support synchronous ?
-      // What does this mean ?
-      // respond(out, codec, method.getName(), ret);
-
-      si.out(msg.method, retobj);
-    } else {
-      log.debug("{} is remote", si.getName());
-      // send(msg.name, msg.method, msg.data);
-      send(msg.name, msg.method, params);
-      // out(msg); LETHAL !
-    }
-
-    MethodCache.cache(clazz, method);
-  }
-
-  /*
-   * public void handleResponse(AtmosphereResource r, String apiKey, Object...
-   * params){ // TODO - if Message return directly... anything else becomes
-   * Message.data if (CodecUtils.API_TYPE_MESSAGES.equals(apiKey)) {
-   * broadcast(createMessage(getName(), "onStatus", params)); } else {
-   * respond(out, codec, "handleError", error, apiTypeKey); } }
-   */
-
-  // FIXME !!! - ALL CODECS SHOULD HANDLE MSG INSTEAD OF OBJECT !!!
-  // THEN YOU COULD ALSO HAVE urlToMsg(URL url)
-  // "lower layer encoders can strip down to the data" !!!
-  public void respond(AtmosphereResource r, String apiKey, String method, Object... data) throws Exception {
-    Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MRL_JSON);
-    OutputStream out = r.getResponse().getOutputStream();
-    // getName() ? -> should it be AngularJS client name ?
-    Message msg = Message.createMessage(this, getName(), CodecUtils.getCallBackName(method), data);
-    if (CodecUtils.API_TYPE_SERVICES.equals(apiKey) || CodecUtils.API_TYPE_SERVICE.equals(apiKey)) {
-      // for the purpose of only returning the data
-      // e.g. http://api/services/runtime/getUptime -> return the uptime
-      // only not the message
-      if (msg.data == null) {
-        codec.encode(out, null);
-      } else {
-        // return the return type
-        codec.encode(out, msg.data[0]);
-      }
-    } else {
-      // API_TYPE_MESSAGES
-      codec.encode(out, msg);
-    }
-  }
-
-  public void handleError(AtmosphereResource r, String apiKey, Throwable e) throws Exception {
-    handleError(r, apiKey, e.getMessage(), Logging.logError(e));
-  }
-
-  public void handleError(AtmosphereResource r, String apiKey, String key, String detail) throws Exception {
-    Status error = new Status(getName(), StatusLevel.ERROR, key, detail);
-    respond(r, apiKey, "getStatus", error);
-  }
-
-  public void extract() throws IOException {
-    extract(false);
-  }
-
-  public void extract(boolean overwrite) throws IOException {
-
-    // FIXME - check resource version vs self version
-    // overwrite if different ?
-
-    FileIO.extractResources(overwrite);
-    /*
-     * try { Zip.extractFromFile("./myrobotlab.jar", "root", "resource/WebGui");
-     * } catch (IOException e) { error(e); }
-     */
-  }
-
-  /*
-   * - use the service's error() pub sub return public void handleError(){
-   * 
-   * }
-   */
-
-  /*
-   * determines if references to JQuery JavaScript library are local or if the
-   * library is linked to using content delivery network. Default (false) is to
-   * use the CDN
-   * 
-   */
-  public void useLocalResources(boolean useLocalResources) {
-    this.useLocalResources = useLocalResources;
-  }
-
-  public void startBrowser(String URL) {
-    BareBonesBrowserLaunch.openURL(String.format(URL, port));
-  }
-
-  public void autoStartBrowser(boolean autoStartBrowser) {
-    this.autoStartBrowser = autoStartBrowser;
-  }
-
-  @Override
-  public boolean preProcessHook(Message m) {
-    // FIXME - problem with collisions of this service's methods
-    // and dialog methods ?!?!?
-
-    // broadcast
-    broadcast(m);
-
-    // if the method name is == to a method in the WebGui
-    // process it
-    if (methodSet.contains(m.method)) {
-      // process the message like a regular service
-      return true;
-    }
-
-    // otherwise send the message to the dialog with the senders name
-    // broadcast(m);
-    return false;
-  }
-
-  /*
-   * From UI events --to--&gt; MRL request to save panel data typically done after
-   * user has changed or updated the UI in position, height, width, zIndex etc.
-   * 
-   * If you need MRL changes of position or UI changes use publishPanel to
-   * remotely control UI
-   * 
-   */
-  public void savePanel(Panel panel) {
-    if (panel.name == null) {
-      log.error("panel name is null!");
-      return;
-    }
-    panels.put(panel.name, panel);
-    save();
-  }
-
-  public Map<String, Panel> loadPanels() {
-    return panels;
-  }
-
-  public Integer getPort() {
-    return port;
-  }
-
-  public void setPort(Integer port) {
-    this.port = port;
-    // startNettosphere();
-  }
-
-  public void stopService() {
-    super.stopService();
-    stop();
-  }
-
-  public void restart() {
-    stop();
     start();
   }
 
@@ -1030,135 +968,26 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-  /*
-   * https://github.com/Atmosphere/nettosphere/issues/17 A callback used to
-   * configure {@link javax.net.ssl.SSLEngine} before they get injected in
-   * Netty.
-   */
-  /*
-   * public interface SSLContextListener {
-   * 
-   * SSLContextListener DEFAULT = new SSLContextListener() {
-   * 
-   * @Override public void onPostCreate(SSLEngine e) {
-   * e.setEnabledCipherSuites(new String[] { "SSL_DH_anon_WITH_RC4_128_MD5" });
-   * e.setUseClientMode(false); } };
-   * 
-   * public void onPostCreate(SSLEngine e);
-   * 
-   * }
-   */
-
-  // === begin positioning panels plumbing ===
-  public void set(String name, int x, int y) {
-    set(name, x, y, 0); // or is z -1 ?
-  }
-
-  public void set(String name, int x, int y, int z) {
-    Panel panel = null;
-    if (panels.containsKey(name)) {
-      panel = panels.get(name);
-    } else {
-      panel = new Panel(name, x, y, z);
-    }
-    invoke("publishPanel", panel);
-  }
-
-  // TODO - refactor next 6+ methods to only us publishPanel
-  public void showAll(boolean b) {
-    invoke("publishShowAll", b);
-  }
-
-  public void show(String name) {
-    invoke("publishShow", name);
-  }
-
-  public void hide(String name) {
-    invoke("publishHide", name);
-  }
-
-  public String publishShow(String name) {
-    return name;
-  }
-
-  public String publishHide(String name) {
-    return name;
-  }
-
-  public boolean publishShowAll(boolean b) {
-    return b;
-  }
-
-  public void publishPanels() {
-    for (String key : panels.keySet()) {
-      invoke("publishPanel", key);
-    }
-  }
-
-  public Panel publishPanel(String panelName) {
-
-    Panel panel = null;
-    if (panels.containsKey(panelName)) {
-      panel = panels.get(panelName);
-    } else {
-      panel = new Panel(panelName);
-      panels.put(panelName, panel);
-    }
-    return panel;
-  }
-  // === end positioning panels plumbing ===
-
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(WebGui.class.getCanonicalName());
-    meta.addDescription("web display");
-    meta.addCategory("connectivity", "display");
-
-    // MAKE NOTE !!! - we currently distribute myrobotlab.jar with a webgui
-    // hence these following dependencies are zipped with myrobotlab.jar !
-    // and are NOT listed as dependencies, because they are already included
-
-    // Its now part of myrobotlab.jar - unzipped in
-    // build.xml (part of myrobotlab.jar now)
-
-    // meta.addDependency("io.netty", "3.10.0"); // netty-3.10.0.Final.jar
-    // meta.addDependency("org.atmosphere.nettosphere", "2.3.0"); //
-    // nettosphere-assembly-2.3.0.jar
-    // meta.addDependency("org.atmosphere.nettosphere", "2.3.0");//
-    // geronimo-servlet_3.0_spec-1.0.jar
-    return meta;
-  }
-
-  @Override
-  public String publishConnect() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String publishDisconnect() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Status publishError() {
-    // TODO Auto-generated method stub
-    return null;
+  public void stopService() {
+    super.stopService();
+    stop();
   }
 
   // FIXME
 
+  /**
+   * UseLocalResources determines if references to JQuery JavaScript library are
+   * local or if the library is linked to using content delivery network.
+   * Default (false) is to use the CDN
+   *
+   * @param useLocalResources - true uses local resources fals uses cdn
+   */
+  public void useLocalResources(boolean useLocalResources) {
+    this.useLocalResources = useLocalResources;
+  }
+  
   public static void main(String[] args) {
-    LoggingFactory.init(Level.DEBUG);
+    LoggingFactory.init(Level.WARN);
 
     try {
 
@@ -1174,6 +1003,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.start("arduino", "Arduino");
       // Runtime.start("srf05", "UltrasonicSensor");
       // Runtime.setRuntimeName("george");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(true);
       Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {

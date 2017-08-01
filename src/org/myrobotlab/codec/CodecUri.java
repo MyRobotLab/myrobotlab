@@ -66,7 +66,7 @@ public class CodecUri {
     // it delivers the next "set" of access points - which is the services
     // this allows the calling interface to query
 
-    if (!CodecUtils.PREFIX_API.equals(parts[1])) {
+    if (!Api.PREFIX_API.equals(parts[1])) {
       throw new IOException(String.format("/api expected received %s", pathInfo));
     }
 

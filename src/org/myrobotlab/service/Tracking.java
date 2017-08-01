@@ -41,6 +41,7 @@ import java.util.Map;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -101,20 +102,22 @@ public class Tracking extends Service {
   transient public Pid pid;
   transient public OpenCV opencv;
   transient public ServoController controller;
-  //transient public ServoControl x, y;
+
+  // transient public ServoControl x, y;
   private class TrackingServoData {
     transient ServoControl servoControl = null;
     Double lastServoPos;
     double setPoint = 0.5;
-    int scanStep = 2; 
+    int scanStep = 2;
     Double currentServoPos;
     String name;
     String axis;
+
     TrackingServoData(String name) {
       this.name = name;
     }
   }
-  
+
   transient private HashMap<String, TrackingServoData> servoControls = new HashMap<String, TrackingServoData>();
 
   // ------ PEER SERVICES END------
@@ -150,21 +153,16 @@ public class Tracking extends Service {
   // ------------------- tracking & detecting methods begin
   // ---------------------
 
-  String[] axis = new String[]{"x","y"};
+  String[] axis = new String[] { "x", "y" };
+
   // FIXME !! question remains does the act of creating meta update the
   // reservatinos ?
   // e.g if I come to the party does the reservations get updated or do I
   // crash the party ??
   public Tracking(String n) throws Exception {
     super(n);
-    
+
     pid = (Pid) createPeer("pid");
-    //opencv = (OpenCV) createPeer("opencv");
-
-    // cache filter names
-    //LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
-    //opencv.addListener("publishOpenCVData", getName(), "setOpenCVData");
-
     setDefaultPreFilters();
 
     pid.setPID("x", 20.0, 5.0, 0.1);
@@ -180,7 +178,7 @@ public class Tracking extends Service {
     pid.setOutputRange("y", -20, 20); // <- not correct - based on maximum
     pid.setSampleTime("y", 30);
     pid.setSetpoint("y", 0.5); // set center
-    
+
   }
 
   public void addPreFilter(OpenCVFilter filter) {
@@ -209,7 +207,6 @@ public class Tracking extends Service {
     for (int i = 0; i < preFilters.size(); ++i) {
       opencv.addFilter(preFilters.get(i));
     }
-    
 
     // TODO single string static
     opencv.addFilter(FILTER_FACE_DETECT);
@@ -312,9 +309,8 @@ public class Tracking extends Service {
 
   public void rest() {
     log.info("rest");
-    for (TrackingServoData sc: servoControls.values()){
+    for (TrackingServoData sc : servoControls.values()) {
       sc.servoControl.rest();
-      sc.lastServoPos = sc.servoControl.getPos();
     }
   }
 
@@ -337,10 +333,10 @@ public class Tracking extends Service {
       preFilters.add(gray);
     }
   }
-  
+
   public void addTransposeFilter() {
-      OpenCVFilterTranspose transpose = new OpenCVFilterTranspose("Transpose");
-      preFilters.add(transpose);
+    OpenCVFilterTranspose transpose = new OpenCVFilterTranspose("Transpose");
+    preFilters.add(transpose);
   }
 
   public void setForegroundBackgroundFilter() {
@@ -419,23 +415,6 @@ public class Tracking extends Service {
         // find average point ?
         break;
 
-        // FIXME - remove not used
-        /*
-      case STATE_FACE_DETECT_LOST_TRACK:
-        int xpos = x.getPos();
-
-        if (xpos >= Math.max(x.getMax(), x.getMin()) && scanXStep > 0) {
-          scanXStep = scanXStep * -1;
-        }
-
-        if (xpos <= Math.min(x.getMin(), x.getMax()) && scanXStep < 0) {
-          scanXStep = scanXStep * -1;
-        }
-
-        x.moveTo(xpos + scanXStep);
-
-        break;
-         */
       case STATE_IDLE:
         // setForegroundBackgroundFilter(); FIXME - setFGBGFilters for
         // different detection
@@ -500,16 +479,19 @@ public class Tracking extends Service {
   @Override
   public void startService() {
     super.startService();
-//    TrackingServoData x = new TrackingServoData("x");
-//    x.servoControl = (ServoControl) createPeer("x");
-//    servoControls.put("x", x);
-//    TrackingServoData y = new TrackingServoData("y");
-//    y.servoControl = (ServoControl) createPeer("y");
-//    servoControls.put("y", y);
-//    pid = (Pid) startPeer("pid");
-//    controller = (Arduino) startPeer("controller");
-//    opencv = (OpenCV) startPeer("opencv");
-//    rest();
+
+    TrackingServoData x = new TrackingServoData("x");
+    x.servoControl = (ServoControl) startPeer("x");
+    servoControls.put("x", x);
+
+    TrackingServoData y = new TrackingServoData("y");
+    y.servoControl = (ServoControl) createPeer("y");
+    servoControls.put("y", y);
+
+    controller = (Arduino) startPeer("controller");
+    pid = (Pid) startPeer("pid");
+    opencv = (OpenCV) startPeer("opencv");
+    rest();
   }
 
   public void stopScan() {
@@ -560,25 +542,24 @@ public class Tracking extends Service {
     latency = System.currentTimeMillis() - targetPoint.timestamp;
     log.info(String.format("pt %s", targetPoint));
 
-//    pid.setInput("x", targetPoint.x);
-//    pid.setInput("y", targetPoint.y);
+    // pid.setInput("x", targetPoint.x);
+    // pid.setInput("y", targetPoint.y);
 
     // TODO - work on removing currentX/YServoPos - and use the servo's
     // directly ???
     // if I'm at my min & and the target is further min - don't compute
     // pid
-    for (TrackingServoData tsd:servoControls.values()){
+    for (TrackingServoData tsd : servoControls.values()) {
       pid.setInput(tsd.axis, targetPoint.get(tsd.axis));
       if (pid.compute(tsd.name)) {
         tsd.currentServoPos += (pid.getOutput(tsd.name));
         tsd.servoControl.moveTo(tsd.currentServoPos);
         tsd.currentServoPos = tsd.servoControl.getPos();
-      }
-      else {
+      } else {
         log.warn("{} data under-run", tsd.servoControl.getName());
-      } 
+      }
     }
- 
+
     lastPoint = targetPoint;
 
     if (cnt % updateModulus == 0) {
@@ -647,11 +628,11 @@ public class Tracking extends Service {
   }
 
   public void connect(String port, int xPin, int yPin, int cameraIndex) throws Exception {
-    int[] pins = new int[]{xPin,yPin};
+    int[] pins = new int[] { xPin, yPin };
     controller = (Arduino) startPeer("controller");
-    ((PortConnector)controller).connect(port);
-    
-    for (int i = 0; i<axis.length; i++){
+    ((PortConnector) controller).connect(port);
+
+    for (int i = 0; i < axis.length; i++) {
       TrackingServoData x = new TrackingServoData(axis[i]);
       x.axis = axis[i];
       x.servoControl = (Servo) createPeer(axis[i]);
@@ -692,53 +673,8 @@ public class Tracking extends Service {
     return meta;
   }
 
-  public static void main(String[] args) {
-
-    try {
-      LoggingFactory.init(Level.INFO);
-      int xPin = 13;
-      int yPin = 12;
-      String arduinoPort = "COM22";
-      int cameraIndex = 0;
-
-      // These all need to be created ahead of time o/w we get null pointer exceptions.
-      // create the servos that will control our x and our y tracking.
-      Servo x = (Servo)Runtime.createAndStart("tracker.x", "Servo");
-      Servo y = (Servo)Runtime.createAndStart("tracker.y", "Servo");
-      x.setPin(xPin);
-      x.setVelocity(-1);
-      y.setPin(yPin);
-      y.setVelocity(-1);
-      Arduino controller = (Arduino)Runtime.createAndStart("tracker.controller", "Arduino");
-      controller.connect(arduinoPort);
-      // now create the tracker service.
-      Tracking tracker = (Tracking)Runtime.createAndStart("tracker", "Tracking");
-      tracker.addTransposeFilter();
-      
-      //tracker.getY().setMinMax(79, 127);
-      /*
-       * tracker.getX().setPin(7); tracker.getY().setPin(8);
-       * tracker.getOpenCV().setCameraIndex(1);
-       */
-      tracker.connect(arduinoPort, xPin, yPin, cameraIndex);
-      // tracker.connect("COM4");
-      //tracker.startService();
-      //tracker.faceDetect();
-      tracker.startLKTracking();
-
-      Runtime.start("gui", "SwingGui");
-      // OpenCV opencv = tracker.getOpenCV();
-      // opencv.setFrameGrabberType(OpenCV.GR)
-      // .capture()
-      // tracker.getGoodFeatures();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-  }
-
   public void attach(ServoControl servo, String axis) {
-    if (!(axis.equals("x") || axis.equals("y"))){
+    if (!(axis.equals("x") || axis.equals("y"))) {
       log.info("Axis must be x or y");
       return;
     }
@@ -747,18 +683,74 @@ public class Tracking extends Service {
     x.axis = axis;
     servoControls.put(axis, x);
     x.currentServoPos = servo.getPos();
-    //pid.setOutputRange(axis, servo.getMaxInput(), servo.getMaxInput());
+    // pid.setOutputRange(axis, servo.getMaxInput(), servo.getMaxInput());
   }
-  
+
   public void attach(ServoControl x, ServoControl y) {
-    attach(x,"x");
-    attach(y,"y");
+    attach(x, "x");
+    attach(y, "y");
   }
-  
+
   public void attach(OpenCV opencv) {
     this.opencv = opencv;
     LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
     opencv.addListener("publishOpenCVData", getName(), "setOpenCVData");
-    
+  }
+  
+  /**
+   * Routing attach - routes ServiceInterface.attach(service) to appropriate
+   * methods for this class
+   */
+  @Override
+  public void attach(Attachable service) throws Exception {
+    if (OpenCV.class.isAssignableFrom(service.getClass())) {
+      attach((OpenCV) service);
+      return;
+    }
+
+    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+  }
+  
+
+  public static void main(String[] args) {
+
+    try {
+      LoggingFactory.init(Level.INFO);
+      int xPin = 6;
+      int yPin = 7;
+      String arduinoPort = "COM9";
+      int cameraIndex = 0;
+
+      Pid pid = (Pid)Runtime.start("pid", "Pid");
+      Servo pan = (Servo)Runtime.start("x", "Servo");
+      Servo tilt = (Servo)Runtime.start("y", "Servo");
+      OpenCV video = (OpenCV)Runtime.start("opencv", "OpenCV");
+      Ssc32UsbServoController controller = (Ssc32UsbServoController)Runtime.start("controller", "Ssc32UsbServoController");
+      Tracking tracker = (Tracking) Runtime.start("tracker", "Tracking");
+      
+      pan.setPin(6);
+      tilt.setPin(7);
+      
+      controller.attach(pan);
+      controller.attach(tilt);
+      
+      tracker.attach(video);
+      tracker.attach(pan, tilt);
+      tracker.attach(pid);
+      
+      pid.attach(pan);
+      pid.attach(tilt);
+      pid.setPID("tracker.pid", 2.0, 5.0, 1.0);
+      
+      Runtime.start("gui", "SwingGui");
+
+      tracker.connect(arduinoPort, xPin, yPin, cameraIndex);
+      // tracker.startLKTracking();
+
+      // tracker.getGoodFeatures();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
   }
 }

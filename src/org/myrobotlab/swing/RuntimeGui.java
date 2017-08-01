@@ -384,10 +384,19 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     item = new JMenuItem("install all");
     item.addActionListener(this);
     system.add(item);
-
+    
     item = new JMenuItem("record");
     item.addActionListener(this);
     system.add(item);
+    
+    item = new JMenuItem("restart");
+    item.addActionListener(this);
+    system.add(item);
+    
+    item = new JMenuItem("exit");
+    item.addActionListener(this);
+    system.add(item);
+
 
     JMenu m1 = new JMenu("level");
     logging.add(m1);
@@ -438,6 +447,10 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
     } else if ("install all".equals(cmd)) {
       send("install");
+    } else if ("restart".equals(cmd)) {
+      Runtime.getInstance().restart();      
+    } else if ("exit".equals(cmd)) {
+      Runtime.shutdown();
     } else if ("check for updates".equals(cmd)) {
       send("checkForUpdates");
     } else if (cmd.equals(Level.DEBUG) || cmd.equals(Level.INFO) || cmd.equals(Level.WARN) || cmd.equals(Level.ERROR) || cmd.equals(Level.FATAL)) {

@@ -117,7 +117,7 @@ public class ServiceData implements Serializable {
         }
         localInstance.save();
       } catch (Exception e) {
-        Logging.logError(e);
+        log.error("retrieving service data failed", e);
       }
 
     }

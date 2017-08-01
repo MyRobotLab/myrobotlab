@@ -459,6 +459,18 @@ void MrlComm::serialRelay(byte deviceId, byte dataSize, const byte* data) {
 	relay->write(data, dataSize);
 }
 
+// aref wip
+void MrlComm::setAref(int aref) {
+  msg->publishDebug("setAref " + String(aref));
+// TODO check here if aref compatible with board
+// EXTERNAL 0
+// DEFAULT 1
+// INTERNAL1V1 2
+// INTERNAL 3
+// INTERNAL2V56 3
+  analogReference(aref);
+  }
+
 // > softReset
 void MrlComm::softReset() {
 	// removing devices & pins

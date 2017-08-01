@@ -305,6 +305,15 @@ public class InMoovHead extends Service {
 		    rollNeck.enableAutoEnable(param);
 		  }
 	  
+	  public void temporaryStopAutoDisable(Boolean param) {
+       rothead.temporaryStopAutoDisable(param);
+       neck.temporaryStopAutoDisable(param);
+       eyeX.temporaryStopAutoDisable(param);
+       eyeY.temporaryStopAutoDisable(param);
+       jaw.temporaryStopAutoDisable(param);
+       rollNeck.temporaryStopAutoDisable(param);
+     }
+	  
 
   public void setAcceleration(Double headXSpeed, Double headYSpeed, Double rollNeckSpeed) {
 	rothead.setAcceleration(headXSpeed);

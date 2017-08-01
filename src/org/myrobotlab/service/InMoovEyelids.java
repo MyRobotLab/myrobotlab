@@ -331,6 +331,12 @@ public class InMoovEyelids extends Service {
     eyelidright.enableAutoDisable(param);
   }
   
+  public void temporaryStopAutoDisable(Boolean param) {
+    eyelidleft.temporaryStopAutoDisable(param);
+    eyelidright.temporaryStopAutoDisable(param);
+  }
+  
+   
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(InMoovEyelids.class.getCanonicalName());

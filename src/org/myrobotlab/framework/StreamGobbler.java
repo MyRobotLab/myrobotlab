@@ -1,6 +1,5 @@
 package org.myrobotlab.framework;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ public class StreamGobbler extends Thread {
   String type;
 
   public StreamGobbler(InputStream is, ArrayList<OutputStream> os, String type) {
-    super(String.format("streamgobbler_%s_%s", type, Runtime.getInstance().getPid()));
+    super(String.format("streamgobbler_%s_%s", type, Runtime.getPid()));
     this.is = is;
     this.os = os;
   }
@@ -26,7 +25,7 @@ public class StreamGobbler extends Thread {
   @Override
   public void run() {
     try {
-      
+
       String line = null;
       int c = -1;
       char ch = '\0';
@@ -56,13 +55,16 @@ public class StreamGobbler extends Thread {
           out.flush(); // remember always to flush !!! :)
         }
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.error("StreamGobbler threw", e);
+    }/* finally {
+      try {
+        if (is != null) {
+          is.close();
+        }
+      } catch (Exception ex) {
+      }
+      */
     }
-    /*
-     * NO CLOSING !?!?!?!?
-     * 
-     * finally { try{ if (is != null){ is.close(); } } catch(Exception ex){ } }
-     */
+
   }
-}

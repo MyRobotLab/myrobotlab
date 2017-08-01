@@ -25,7 +25,6 @@
 
 package org.myrobotlab.swing;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -33,8 +32,6 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Pcf8574;
@@ -44,122 +41,126 @@ import org.slf4j.Logger;
 
 public class Pcf8574Gui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(Pcf8574Gui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(Pcf8574Gui.class);
 
-	String attach = "setController";
-	String detach = "unsetController";
-	JButton attachButton = new JButton(attach);
+  String attach = "attach";
+  String detach = "detach";
+  JButton attachButton = new JButton(attach);
 
-	JComboBox<String> controller = new JComboBox<String>();
-	JComboBox<String> deviceAddressList = new JComboBox<String>();
-	JComboBox<String> deviceBusList = new JComboBox<String>();
+  JComboBox<String> controllerList = new JComboBox<String>();
+  JComboBox<String> deviceAddressList = new JComboBox<String>();
+  JComboBox<String> deviceBusList = new JComboBox<String>();
 
-	JLabel controllerLabel     = new JLabel("Controller");
-	JLabel deviceBusLabel     = new JLabel("Bus");
-	JLabel deviceAddressLabel = new JLabel("Address");
+  JLabel controllerLabel = new JLabel("Controller");
+  JLabel deviceBusLabel = new JLabel("Bus");
+  JLabel deviceAddressLabel = new JLabel("Address");
 
-	Pcf8574 boundService = null;
+  Pcf8574 boundService = null;
 
-	public Pcf8574Gui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		boundService = (Pcf8574) Runtime.getService(boundServiceName);
-
+  public Pcf8574Gui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    boundService = (Pcf8574) Runtime.getService(boundServiceName);
 
     // Container BACKGROUND = getContentPane();
 
-    display.setLayout(new BorderLayout());
-    JPanel north = new JPanel();
-    north.add(controllerLabel);
-    north.add(controller);
-    north.add(deviceBusLabel);    
-    north.add(deviceBusList);
-    north.add(deviceAddressLabel);
-    north.add(deviceAddressList);
-    north.add(attachButton);
-    attachButton.addActionListener(this); 
+    addLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
 
-    display.add(north, BorderLayout.NORTH);
-    
+    /*
+     * display.setLayout(new BorderLayout()); JPanel north = new JPanel();
+     * north.add(controllerLabel); north.add(controller);
+     * north.add(deviceBusLabel); north.add(deviceBusList);
+     * north.add(deviceAddressLabel); north.add(deviceAddressList);
+     * north.add(attachButton);
+     * 
+     */
+    attachButton.addActionListener(this);
+
+    // display.add(north, BorderLayout.NORTH);
+
     getDeviceBusList();
     getDeviceAddressList();
-  
-	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		log.info("pcf8574GUI actionPerformed");
-		Object o = e.getSource();
-		if (o == attachButton) {
-			if (attachButton.getText().equals(attach)) {
-				int index = controller.getSelectedIndex();
-				if (index != -1) {
-					myService.send(boundServiceName, attach, 
-							controller.getSelectedItem(),
-							deviceBusList.getSelectedItem(),
-							deviceAddressList.getSelectedItem());
-				}
-			} else {
-				myService.send(boundServiceName, detach);
-			}
-		}
-	}
+  }
 
-	@Override
-	public void subscribeGui() {
-	}
+  @Override
+  public void actionPerformed(ActionEvent event) {
+    Object o = event.getSource();
+    if (o == attachButton) {
+      if (attachButton.getText().equals(attach)) {
+        int index = controllerList.getSelectedIndex();
+        if (index != -1) {
+          myService.send(boundServiceName, attach, controllerList.getSelectedItem(), deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
+        }
+      } else {
+        log.info(String.format("detach %s", controllerList.getSelectedItem()));
+        myService.send(boundServiceName, detach, controllerList.getSelectedItem());
+      }
+    }
+  }
 
-	@Override
-	public void unsubscribeGui() {
-	}
+  @Override
+  public void subscribeGui() {
+  }
 
-	public void onState(Pcf8574 ads1115) {
+  @Override
+  public void unsubscribeGui() {
+  }
 
-		refreshControllers();
-		controller.setSelectedItem(ads1115.getControllerName());
-		deviceBusList.setSelectedItem(ads1115.deviceBus);
-		deviceAddressList.setSelectedItem(ads1115.deviceAddress);
-		if (ads1115.isAttached()) {
-			attachButton.setText(detach);
-			controller.setEnabled(false);
-			deviceBusList.setEnabled(false);
-			deviceAddressList.setEnabled(false);
-		} else {
-			attachButton.setText(attach);
-			controller.setEnabled(true);
-			deviceBusList.setEnabled(true);
-			deviceAddressList.setEnabled(true);
-		}
-	}
+  public void onState(Pcf8574 service) {
 
-	public void getDeviceBusList() {
-		List<String> mbl = boundService.deviceBusList;
-		for (int i = 0; i < mbl.size(); i++) {
-			deviceBusList.addItem(mbl.get(i));
-		}
-	}
-	
-	public void getDeviceAddressList() {
+    removeListeners();
+    refreshControllers();
+    if (service.controller != null) {
+      controllerList.setSelectedItem(service.controllerName);
+      deviceBusList.setSelectedItem(service.deviceBus);
+      deviceAddressList.setSelectedItem(service.deviceAddress);
+    }
+    if (service.isAttached) {
+      attachButton.setText(detach);
+      controllerList.setEnabled(false);
+      deviceBusList.setEnabled(false);
+      deviceAddressList.setEnabled(false);
+    } else {
+      attachButton.setText(attach);
+      controllerList.setEnabled(true);
+      deviceBusList.setEnabled(true);
+      deviceAddressList.setEnabled(true);
+    }
+    restoreListeners();
+  }
 
-		List<String> mal = boundService.deviceAddressList;
-		for (int i = 0; i < mal.size(); i++) {
-			deviceAddressList.addItem(mal.get(i));
-		}
-	}
-	
-	public void refreshControllers() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  public void getDeviceBusList() {
+    List<String> mbl = boundService.deviceBusList;
+    for (int i = 0; i < mbl.size(); i++) {
+      deviceBusList.addItem(mbl.get(i));
+    }
+  }
 
-				boundService.refreshControllers();
-				controller.removeAllItems();
-				List<String> c = boundService.controllers;	
-				for (int i = 0; i < c.size(); ++i) {
-					controller.addItem(c.get(i));
-				}
-				controller.setSelectedItem(boundService.getControllerName());
-			}
-		});
-	}
+  public void getDeviceAddressList() {
+
+    List<String> mal = boundService.deviceAddressList;
+    for (int i = 0; i < mal.size(); i++) {
+      deviceAddressList.addItem(mal.get(i));
+    }
+  }
+
+  public void refreshControllers() {
+    List<String> v = boundService.refreshControllers();
+    controllerList.removeAllItems();
+    for (int i = 0; i < v.size(); ++i) {
+      controllerList.addItem(v.get(i));
+    }
+    if (boundService.controller != null) {
+      controllerList.setSelectedItem(boundService.controller.getName());
+    }
+  }
+
+  public void removeListeners() {
+    attachButton.removeActionListener(this);
+  }
+
+  public void restoreListeners() {
+    attachButton.addActionListener(this);
+  }
 }
