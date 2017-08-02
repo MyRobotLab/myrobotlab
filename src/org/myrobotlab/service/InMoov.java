@@ -128,7 +128,7 @@ public class InMoov extends Service {
 
   int maxInactivityTimeSeconds = 120;
 
-  public String lang_shutDown = "Extinguish my system, please wait";
+  public String lang_shutDown = "Extinguish my system, please wait 10 seconds";
 
   //
   private boolean mute = false;
@@ -1943,7 +1943,7 @@ public class InMoov extends Service {
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
     meta.addDependency("inmoov.fr", "1.0.0");
-    meta.addDependency("org.myrobotlab.inmoov", "0.4.3b");
+    meta.addDependency("org.myrobotlab.inmoov", "0.4.4");
 
     // SHARING !!! - modified key / actual name begin ------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
@@ -2292,20 +2292,43 @@ public class InMoov extends Service {
     im.setOpenni(openni);
 
   }
+  
+  public Relay LeftRelay1;
+  public Relay RightRelay1;
+  
   @Override
   public void stopService() {
     super.stopService();
 
-   
-
     RobotCanMoveRandom=false;
     stopTracking();
     halfSpeed();
+    
+    //if relay used, we switch on power
+    if (LeftRelay1!=null)
+    {
+      LeftRelay1.on(); 
+    }
+    if (RightRelay1!=null)
+    {
+      RightRelay1.on(); 
+    }
     rest();
+    setMute(false);
     speakBlocking(lang_shutDown);
     stopVinMoov();
-    sleep(8000);
+    sleep(5);
+    speakBlocking("5 second");
+    sleep(3);
     disable();
+    if (LeftRelay1!=null)
+    {
+      LeftRelay1.off(); 
+    }
+    if (RightRelay1!=null)
+    {
+      RightRelay1.off(); 
+    }
     //TODO better thing to detect connected arduinos
     //we cant use arduino.stopService()
     if (rightHand != null){
