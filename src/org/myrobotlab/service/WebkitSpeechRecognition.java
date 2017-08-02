@@ -299,4 +299,12 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public void setStripAccents(boolean stripAccents) {
     this.stripAccents = stripAccents;
   }
+  
+
+  @Override
+  public void stopService() {
+    super.stopService();
+    autoListen=false;
+    stopListening();
+}
 }

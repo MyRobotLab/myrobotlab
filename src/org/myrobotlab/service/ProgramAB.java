@@ -722,7 +722,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   	  log.error("PrintWriter error");
   	}
   }
-
+  @Override
+  public void stopService() {
+    super.stopService();
+    try {
+      savePredicates();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    writeAndQuit();
+}
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
