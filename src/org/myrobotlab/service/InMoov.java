@@ -128,6 +128,8 @@ public class InMoov extends Service {
 
   int maxInactivityTimeSeconds = 120;
 
+  public String lang_shutDown = "Extinguish my system, please wait";
+
   //
   private boolean mute = false;
 
@@ -1118,6 +1120,8 @@ public class InMoov extends Service {
     }
     
     arm.arduino.setBoard(type);
+    arm.arduino.usedByInmoov=true;
+    arm.arduino.serial.usedByInmoov=true;
     arm.connect(port);
     arduinos.put(port, arm.arduino);
 
@@ -1163,6 +1167,8 @@ public class InMoov extends Service {
     }
     
     hand.arduino.setBoard(type);
+    hand.arduino.serial.usedByInmoov=true;
+    hand.arduino.usedByInmoov=true;
     hand.connect(port);
     arduinos.put(port, hand.arduino);
     return hand;
@@ -1196,9 +1202,10 @@ public class InMoov extends Service {
     
 
     head.arduino.setBoard(type);
+    head.arduino.usedByInmoov=true;
+    head.arduino.serial.usedByInmoov=true;
     head.connect(port, headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
     arduinos.put(port, head.arduino);
-
     return head;
   }
   
@@ -1212,8 +1219,11 @@ public class InMoov extends Service {
     if (leftArm != null){
       leftArm.enableAutoDisable(param);
     }
-    if (torso != null){
-      torso.enableAutoDisable(param);
+    if (leftHand != null){
+      leftHand.enableAutoDisable(param);
+    }
+    if (rightHand != null){
+      leftHand.enableAutoDisable(param);
     }
     if (torso != null){
       torso.enableAutoDisable(param);
@@ -1233,8 +1243,11 @@ public class InMoov extends Service {
     if (leftArm != null){
       leftArm.temporaryStopAutoDisable(param);
     }
-    if (torso != null){
-      torso.temporaryStopAutoDisable(param);
+    if (leftHand != null){
+      leftHand.temporaryStopAutoDisable(param);
+    }
+    if (rightHand != null){
+      rightHand.temporaryStopAutoDisable(param);
     }
     if (torso != null){
       torso.temporaryStopAutoDisable(param);
@@ -1417,6 +1430,8 @@ public class InMoov extends Service {
     }
 
     torso.arduino.setBoard(type);
+    torso.arduino.usedByInmoov=true;
+    torso.arduino.serial.usedByInmoov=true;
     torso.connect(port);
     arduinos.put(port, torso.arduino);
 
@@ -1442,6 +1457,8 @@ public class InMoov extends Service {
     }
 
     eyelids.arduino.setBoard(type);
+    eyelids.arduino.usedByInmoov=true;
+    eyelids.arduino.serial.usedByInmoov=true;
     eyelids.connect(port, eyelidleftPin, eyelidrightPin);
     arduinos.put(port, eyelids.arduino);
 
@@ -2275,4 +2292,31 @@ public class InMoov extends Service {
     im.setOpenni(openni);
 
   }
+  @Override
+  public void stopService() {
+    super.stopService();
+
+   
+
+    RobotCanMoveRandom=false;
+    stopTracking();
+    halfSpeed();
+    rest();
+    speakBlocking(lang_shutDown);
+    stopVinMoov();
+    sleep(8000);
+    disable();
+    //TODO better thing to detect connected arduinos
+    //we cant use arduino.stopService()
+    if (rightHand != null){
+      rightHand.arduino.serial.disconnect();
+      rightHand.arduino.serial.stopRecording();
+      rightHand.arduino.disconnect();
+    }
+    if (leftHand != null){
+      leftHand.arduino.serial.disconnect();
+      leftHand.arduino.serial.stopRecording();
+      leftHand.arduino.disconnect();
+    }    
+}
 }
