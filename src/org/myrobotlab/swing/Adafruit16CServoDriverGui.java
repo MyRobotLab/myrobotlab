@@ -145,20 +145,16 @@ public class Adafruit16CServoDriverGui extends ServiceGui implements ActionListe
   }
 
   public void refreshControllers() {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
 
-        List<String> v = boundService.refreshControllers();
-        controllerList.removeAllItems();
-        for (int i = 0; i < v.size(); ++i) {
-          controllerList.addItem(v.get(i));
-        }
-        if (boundService.controller != null) {
-          controllerList.setSelectedItem(boundService.controller.getName());
-        }
-      }
-    });
+    List<String> v = boundService.refreshControllers();
+    controllerList.removeAllItems();
+    for (int i = 0; i < v.size(); ++i) {
+      controllerList.addItem(v.get(i));
+    }
+    if (boundService.controller != null) {
+      controllerList.setSelectedItem(boundService.controller.getName());
+    }
+
   }
 
   public void removeListeners() {
