@@ -58,14 +58,22 @@ public class Esp8266_01 extends Service implements I2CController {
       this.device = device;
     }
 
-    public String getSize() {
-      return size;
+    public String getWriteSize() {
+      return writeSize;
     }
 
-    public void setSize(String size) {
-      this.size = size;
+    public void setWriteSize(String writeSize) {
+      this.writeSize = writeSize;
     }
 
+    public String getReadSize() {
+      return readSize;
+    }
+
+    public void setReadSize(String readSize) {
+      this.readSize = readSize;
+    }
+    
     public String getBuffer() {
       return buffer;
     }
@@ -76,7 +84,8 @@ public class Esp8266_01 extends Service implements I2CController {
 
     String bus;
     String device;
-    String size;
+    String writeSize;
+    String readSize;
     String buffer;
   }
 
@@ -114,7 +123,8 @@ public class Esp8266_01 extends Service implements I2CController {
     i2cParms senddata = new i2cParms();
     senddata.setBus(Integer.toString(busAddress));
     senddata.setDevice(Integer.toString(deviceAddress));
-    senddata.setSize(Integer.toString(size));
+    senddata.setWriteSize(Integer.toString(size));
+    senddata.setReadSize("0");
     senddata.setBuffer(stringBuffer);
 
     String method = "i2cWrite";
@@ -180,7 +190,8 @@ public class Esp8266_01 extends Service implements I2CController {
     i2cParms senddata = new i2cParms();
     senddata.setBus(Integer.toString(busAddress));
     senddata.setDevice(Integer.toString(deviceAddress));
-    senddata.setSize(Integer.toString(size));
+    senddata.setWriteSize("0");
+    senddata.setReadSize(Integer.toString(size));
 
     String method = "i2cRead";
     String url = "http://" + host + "/" + method;
@@ -238,7 +249,7 @@ public class Esp8266_01 extends Service implements I2CController {
       // log.info(resultGson.fromJson(result.toString(),
       // i2cParms.class).toString());
 
-      log.info(String.format("bus %s, device %s, size %s, buffer %s",returndata.bus, returndata.device, returndata.size, returndata.buffer));
+      log.info(String.format("bus %s, device %s, size %s, buffer %s",returndata.bus, returndata.device, returndata.readSize, returndata.buffer));
     }
 
     hexStringToArray(returndata.buffer, buffer);
@@ -257,11 +268,93 @@ public class Esp8266_01 extends Service implements I2CController {
 
   }
 
+  /*
   @Override
   public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
 
     i2cWrite(control, busAddress, deviceAddress, writeBuffer, writeSize);
     return i2cRead(control, busAddress, deviceAddress, readBuffer, readSize);
+  }
+  */
+  
+  @Override
+  public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+
+    Gson gson = new Gson();
+
+    String stringBuffer = javax.xml.bind.DatatypeConverter.printHexBinary(writeBuffer);
+
+    i2cParms senddata = new i2cParms();
+    senddata.setBus(Integer.toString(busAddress));
+    senddata.setDevice(Integer.toString(deviceAddress));
+    senddata.setWriteSize(Integer.toString(writeSize));
+    senddata.setReadSize(Integer.toString(readSize));
+    senddata.setBuffer(stringBuffer);
+
+    String method = "i2cWriteRead";
+    String url = "http://" + host + "/" + method;
+
+    // log.info(url);
+
+    HttpPost post = new HttpPost(url);
+    StringEntity postingString = null;
+    try {
+      postingString = new StringEntity(gson.toJson(senddata));
+    } catch (UnsupportedEncodingException e) {
+      Logging.logError(e);
+    }
+
+    // log.info(String.format("postingString: %s", postingString));
+    post.setEntity(postingString);
+    post.setHeader("Content-type", "application/json");
+    HttpResponse response = null;
+
+    try {
+      response = httpclient.execute(post);
+    } catch (ClientProtocolException e) {
+      Logging.logError(e);
+    } catch (IOException e) {
+      Logging.logError(e);
+    }
+
+    int code = response.getStatusLine().getStatusCode();
+    // log.info(response.toString());
+
+    i2cParms returndata = null;
+    if (code == 200) {
+      BufferedReader rd = null;
+      try {
+        rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+      } catch (UnsupportedOperationException e) {
+        Logging.logError(e);
+      } catch (IOException e) {
+        Logging.logError(e);
+      }
+
+      StringBuffer result = new StringBuffer();
+      String line = "";
+      try {
+        while ((line = rd.readLine()) != null) {
+          result.append(line);
+        }
+      } catch (IOException e) {
+        Logging.logError(e);
+      }
+
+      // log.info(result.toString());
+
+      Gson resultGson = new Gson();
+
+      returndata = resultGson.fromJson(result.toString(), i2cParms.class);
+      // log.info(resultGson.fromJson(result.toString(),
+      // i2cParms.class).toString());
+
+      log.info(String.format("bus %s, device %s, readSize %s, buffer %s",returndata.bus, returndata.device, returndata.readSize, returndata.buffer));
+    }
+    
+    hexStringToArray(returndata.buffer, readBuffer);
+
+    return  Integer.decode(returndata.readSize);
   }
 
   public void setHost(String host) {
