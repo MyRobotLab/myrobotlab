@@ -65,12 +65,14 @@ public class Adafruit16CServoDriverGui extends ServiceGui implements ActionListe
 
     addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
 
+    // GUI Simplification. The commented code already exists ( worky ) in onState
+    onState(boundService);
+    /*
     refreshControllers();
     getDeviceBusList();
     getDeviceAddressList();
-
     restoreListeners();
-
+    */
   }
 
   @Override
@@ -151,9 +153,12 @@ public class Adafruit16CServoDriverGui extends ServiceGui implements ActionListe
     for (int i = 0; i < v.size(); ++i) {
       controllerList.addItem(v.get(i));
     }
+    
+    /* GUI simplification. This is done in onState
     if (boundService.controller != null) {
       controllerList.setSelectedItem(boundService.controller.getName());
     }
+    */
 
   }
 
