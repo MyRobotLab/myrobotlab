@@ -876,21 +876,21 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   public void detachServoControl(ServoControl servo) throws Exception {
 
-    if (servoMap.containsKey(servo)) {
+    if (servoMap.containsKey(servo.getName())) {
       servoMap.remove(servo.getName());
       servo.detachServoController(this);
     }
   }
 
   // This section contains all the methods used to query / show all attached
-  // methods
+  // services
   public boolean isAttachedServoControl(ServoControl servo) {
     return servoMap.containsKey(servo.getName());
   }
 
   /**
-   * Returns all the currently attached services TODO Add the list of attached
-   * motors
+   * Returns all the currently attached services 
+   * TODO Add the list of attached motors
    */
   @Override
   public Set<String> getAttached() {
