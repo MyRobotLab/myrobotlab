@@ -146,11 +146,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
     if (wasCleanyShutdowned.equals("nok"))
     {
+      if (folderaimlIF.exists()) {
     warn("Bad previous shutdown, ProgramAB need to recompile AimlIf files. Don't worry.");  
     for (File f : folderaimlIF.listFiles()) {
           f.delete();
     }
+      }
     }
+    
     
     log.info(folder.getAbsolutePath());
     HashMap<String, Long> modifiedDates = new HashMap<String, Long>();

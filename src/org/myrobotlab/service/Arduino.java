@@ -705,18 +705,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
   
   public void setAref(String aref) {
-
+    aref=aref.toUpperCase();
     if (this.getBoard().contains("mega"))
     {
-      if (aref.toUpperCase()=="INTERNAL")
+      if (aref=="INTERNAL")
       {
-     error("Aref "+aref.toUpperCase()+" is not compatible with your board "+this.getBoard());
+     error("Aref "+aref+" is not compatible with your board "+this.getBoard());
      aref="DEFAULT";
       }
     }
     else    
     {
-      if (aref.toUpperCase()=="INTERNAL1V1" || aref.toUpperCase()=="INTERNAL2V56")
+      if (aref=="INTERNAL1V1" || aref=="INTERNAL2V56")
       {
      error("Aref INTERNALxV is not compatible with your board "+this.getBoard());
      aref="DEFAULT";
@@ -741,7 +741,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         arefInt=3;
         break;
       default:
-        error("Aref "+aref.toUpperCase()+" is unknown");
+        log.error("Aref "+aref+" is unknown");
         }
 	  log.info("set aref to "+aref); 
 	  this.aref=aref;
