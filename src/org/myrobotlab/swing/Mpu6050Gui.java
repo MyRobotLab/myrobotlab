@@ -73,7 +73,8 @@ public class Mpu6050Gui extends ServiceGui implements ActionListener {
     super(boundServiceName, myService);
     boundService = (Mpu6050) Runtime.getService(boundServiceName);
 
-    addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
+    // addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
+    addTopLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList, refresh));
 
     JPanel measures = new JPanel();
     measures.add(accelX);
@@ -136,11 +137,13 @@ public class Mpu6050Gui extends ServiceGui implements ActionListener {
       controllerList.setEnabled(false);
       deviceBusList.setEnabled(false);
       deviceAddressList.setEnabled(false);
+      refresh.setEnabled(true);
     } else {
       attachButton.setText(attach);
       controllerList.setEnabled(true);
       deviceBusList.setEnabled(true);
       deviceAddressList.setEnabled(true);
+      refresh.setEnabled(false);
     }
     restoreListeners();
 
@@ -175,7 +178,9 @@ public class Mpu6050Gui extends ServiceGui implements ActionListener {
     for (int i = 0; i < v.size(); ++i) {
       controllerList.addItem(v.get(i));
     }
-    controllerList.setSelectedItem(boundService.controllerName);
+    if (boundService.controller != null) {
+      controllerList.setSelectedItem(boundService.controller.getName());
+    }
   }
 
   public void removeListeners() {
