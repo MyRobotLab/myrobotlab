@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -65,7 +64,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
   public List<String> getVoices() {
     ArrayList<String> args = new ArrayList<String>();
     args.add("-V");
-    String cmd = ArduinoUtils.RunAndCatch(ttsExecutable,args);
+    String cmd = Runtime.execute(System.getProperty("user.dir")+"\\"+ttsExecutable,"-V");
     String[] lines = cmd.split(System.getProperty("line.separator"));
     List <String> voiceList =  (List<String>) Arrays.asList(lines);
 
@@ -254,6 +253,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
     // add dependency if necessary
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech");
+    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
     meta.addDependency("tts.microsoftspeech", "1.0");
     return meta;
   }
