@@ -6,7 +6,10 @@ angular.module('mrlapp.service.I2cMuxGui', [])
     
     // init
     $scope.controllerName = '';
-    $scope.controllers = [];    
+    $scope.controllers = [];
+    $scope.controllerLabel = 'Controller :';
+    $scope.deviceBusLabel = 'Bus :';
+    $scope.deviceAddressLabel = 'Address :';    
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
