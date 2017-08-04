@@ -59,7 +59,9 @@ public class OledSsd1306Gui extends ServiceGui implements ActionListener {
     boundService = (OledSsd1306) Runtime.getService(boundServiceName);
 
     // build input begin ------------------
-    addLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
+    // addLine(createFlowPanel("input", attachButton, "Controller",
+    // controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
+    addTopLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
 
     refreshControllers();
     getDeviceBusList();
@@ -142,20 +144,16 @@ public class OledSsd1306Gui extends ServiceGui implements ActionListener {
   }
 
   public void refreshControllers() {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
 
-        List<String> v = boundService.controllers;
-        controllerList.removeAllItems();
-        for (int i = 0; i < v.size(); ++i) {
-          controllerList.addItem(v.get(i));
-        }
-        if (boundService.controller != null) {
-          controllerList.setSelectedItem(boundService.controller.getName());
-        }
-      }
-    });
+    List<String> v = boundService.controllers;
+    controllerList.removeAllItems();
+    for (int i = 0; i < v.size(); ++i) {
+      controllerList.addItem(v.get(i));
+    }
+    if (boundService.controller != null) {
+      controllerList.setSelectedItem(boundService.controller.getName());
+    }
+    
   }
 
   public void removeListeners() {
