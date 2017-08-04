@@ -869,8 +869,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       return;
 
     stopPwm(); // stop pwm generation
-    controller.detachI2CControl(this);
     isAttached = false;
+    controller.detachI2CControl(this);
     broadcastState();
   }
 

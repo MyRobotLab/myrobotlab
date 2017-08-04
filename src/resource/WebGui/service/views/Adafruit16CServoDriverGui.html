@@ -9,7 +9,7 @@
          <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach</button>
    </span>
    
-  <input type="text" ng-readonly="true" class="form-control" ng-model="controllerLable"><!-- FIXME - type-ahead -->          
+  <input type="text" ng-readonly="true" class="form-control" ng-model="controllerLabel"><!-- FIXME - type-ahead -->          
   <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
       <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{controllerName}}<span class="caret"></span></a>
       <ul uib-dropdown-menu>
@@ -17,7 +17,7 @@
       </ul>
   </span>
 
-  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceBusLable"><!-- FIXME - type-ahead -->        
+  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceBusLabel"><!-- FIXME - type-ahead -->        
   <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
       <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceBus}}<span class="caret"></span></a>
       <ul uib-dropdown-menu>
@@ -25,7 +25,7 @@
       </ul>
   </span>
   
-  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceAddressLable"><!-- FIXME - type-ahead -->     
+  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceAddressLabel"><!-- FIXME - type-ahead -->     
   <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
     <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceAddress}}<span class="caret"></span></a>
     <ul uib-dropdown-menu>
