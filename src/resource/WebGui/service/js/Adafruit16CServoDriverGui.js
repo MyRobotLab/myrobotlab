@@ -8,6 +8,9 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', [])
     //$scope.controller = '';
     $scope.controllerName = '';
     $scope.controllers = [];    
+    $scope.controllerLable = 'Controller :';
+    $scope.deviceBusLable = 'Bus :';
+    $scope.deviceAddressLable = 'Address :';
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
