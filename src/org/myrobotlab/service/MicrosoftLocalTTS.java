@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.UUID;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.myrobotlab.framework.ServiceType;
@@ -105,7 +106,6 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
   }
 
   public byte[] cacheFile(String toSpeak) throws IOException {
-
     byte[] mp3File = null;
     String localFileName = getLocalFileName(this, toSpeak, "mp3");
     if (voiceName==null)
@@ -113,14 +113,14 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
     setVoice(voice.toString());  
     }
   
-
+    String uuid = UUID.randomUUID().toString();
     if (!audioFile.cacheContains(localFileName)) {
       log.info("retrieving speech from locals - {}", localFileName, voiceName);
-      String command = System.getProperty("user.dir")+"\\"+ttsExecutable+" -f 9 -v "+voice+" -t -o tts//output \""+toSpeak+"\"";
-      File f = new File(System.getProperty("user.dir")+"\\"+ttsFolder+"\\output0.mp3");
+      String command = System.getProperty("user.dir")+"\\"+ttsExecutable+" -f 9 -v "+voice+" -t -o tts//"+uuid+" \""+toSpeak+"\"";
+      File f = new File(System.getProperty("user.dir")+"\\"+ttsFolder+"\\"+uuid+"0.mp3");
       f.delete();
       String cmd = Runtime.execute("cmd.exe", "/c", command);
-  
+      log.debug(command);
       if (!f.exists()) 
       {
         log.error(ttsExecutable+" caused an error : "+cmd);
@@ -143,6 +143,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
 
   @Override
   public AudioData speak(String toSpeak) throws Exception {
+	toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
     cacheFile(toSpeak);
     AudioData audioData = audioFile.playCachedFile(getLocalFileName(this, toSpeak, "mp3"));
     utterances.put(audioData, toSpeak);
@@ -184,6 +185,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
 
   @Override
   public boolean speakBlocking(String toSpeak) throws Exception {
+	toSpeak = toSpeak.replaceAll("\\s{2,}", " ");  
     cacheFile(toSpeak);
     invoke("publishStartSpeaking", toSpeak);
     audioFile.playBlocking(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, "mp3"));
