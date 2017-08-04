@@ -64,7 +64,7 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
 
     // Container BACKGROUND = getContentPane();
 
-    addLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
+    addTopLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
 
     /*
      * display.setLayout(new BorderLayout()); JPanel north = new JPanel();

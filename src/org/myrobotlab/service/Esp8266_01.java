@@ -37,6 +37,7 @@ public class Esp8266_01 extends Service implements I2CController {
 
   public static class I2CDeviceMap {
     public transient I2CControl control;
+    public String serviceName;
     public String busAddress;
     public String deviceAddress;
   }
@@ -369,8 +370,12 @@ public class Esp8266_01 extends Service implements I2CController {
     String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (i2cDevices.containsKey(key)) {
-      log.error(String.format("Device %s %s %s already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName()));
+      devicedata = i2cDevices.get(key);
+      if (control.getName() != devicedata.serviceName){
+        log.error(String.format("Attach of %s failed: %s already exists on bus %s address %s", control.getName(), devicedata.serviceName, control.getDeviceBus(), control.getDeviceAddress()));
+      }
     } else {
+      devicedata.serviceName = control.getName();
       devicedata.busAddress = control.getDeviceBus();
       devicedata.deviceAddress = control.getDeviceAddress();
       devicedata.control = control;
