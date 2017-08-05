@@ -173,7 +173,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     runner = new InoScriptRunner(this, ino);
     runner.start();
   }
-
+  
+  public boolean usedByInmoov=false;
+  
   public void stop() {
     if (runner != null) {
       runner.isRunning = false;

@@ -1007,11 +1007,15 @@ public class Serial extends Service
 		}
 	}
 
+	public boolean usedByInmoov=false;
 	@Override
 	public void stopService() {
 		super.stopService();
+		if (!usedByInmoov)
+		{
 		disconnect();
 		stopRecording();
+		}
 	}
 
 	@Override

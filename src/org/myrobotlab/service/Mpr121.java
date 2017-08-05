@@ -31,12 +31,12 @@ import org.slf4j.Logger;
  * @author Mats
  * 
  *         https://www.sparkfun.com/datasheets/Components/MPR121.pdf
- *         
-*/
+ * 
+ */
 public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   /**
    * Publisher - Publishes pin data at a regular interval
-   */ 
+   */
   public class Publisher extends Thread {
 
     public Publisher(String name) {
@@ -60,7 +60,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
           log.info("Shutting down Publisher");
         } else {
           isPublishing = false;
-          log.error("publisher threw", e);
+          log.error(String.format("publisher threw %s",e));
         }
       }
     }
@@ -69,7 +69,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
       PinData[] pinArray = new PinData[pinDataCnt];
       getTouched(); // Refresh the pinData
-      
+
       for (int i = 0; i < pinArray.length; ++i) {
         PinData pinData = new PinData(i, read(i));
         pinArray[i] = pinData;
@@ -123,9 +123,9 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
    */
   static final int TOUCH_STATUS0 = 0x00;
   static final int TOUCH_STATUS1 = 0x01;
-  static final int OOR_STATUS0   = 0x02;
-  static final int OOR_STATUS1   = 0x03;
-  
+  static final int OOR_STATUS0 = 0x02;
+  static final int OOR_STATUS1 = 0x03;
+
   static final int ELE0_FILTERED_DATA_LSB = 0x04;
   static final int ELE0_FILTERED_DATA_MSB = 0x05;
   static final int ELE1_FILTERED_DATA_LSB = 0x06;
@@ -152,7 +152,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   static final int ELE11_FILTERED_DATA_MSB = 0x1B;
   static final int ELEPROX_FILTERED_DATA_LSB = 0x1C;
   static final int ELEPROX_FILTERED_DATA_MSB = 0x1D;
-  
+
   static final int ELE0_BASELINE_VALUE = 0x1E;
   static final int ELE1_BASELINE_VALUE = 0x1F;
   static final int ELE2_BASELINE_VALUE = 0x20;
@@ -167,107 +167,108 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   static final int ELE11_BASELINE_VALUE = 0x29;
   static final int ELEPROX_BASELINE_VALUE = 0x2A;
 
-  static final int MHD_RISING = 0x2B; 
-  static final int NHD_RISING = 0x2C; 
-  static final int NCL_RISING = 0x2D; 
-  static final int FDL_RISING = 0x2E; 
-  
-  static final int MHD_FALLING = 0x2F; 
-  static final int NHD_FALLING = 0x30; 
-  static final int NCL_FALLING = 0x31; 
+  static final int MHD_RISING = 0x2B;
+  static final int NHD_RISING = 0x2C;
+  static final int NCL_RISING = 0x2D;
+  static final int FDL_RISING = 0x2E;
+
+  static final int MHD_FALLING = 0x2F;
+  static final int NHD_FALLING = 0x30;
+  static final int NCL_FALLING = 0x31;
   static final int FDL_FALLING = 0x32;
-  
-  static final int NHD_TOUCHED = 0x33; 
-  static final int NCL_TOUCHED = 0x34; 
+
+  static final int NHD_TOUCHED = 0x33;
+  static final int NCL_TOUCHED = 0x34;
   static final int FDL_TOUCHED = 0x35;
-  
-  static final int ELEPROX_MHD_RISING = 0x36; 
-  static final int ELEPROX_NHD_RISING = 0x37; 
-  static final int ELEPROX_NCL_RISING = 0x38; 
-  static final int ELEPROX_FDL_RISING = 0x39; 
 
-  static final int ELEPROX_MHD_FALLING = 0x3A; 
-  static final int ELEPROX_NHD_FALLING = 0x3B; 
-  static final int ELEPROX_NCL_FALLING = 0x3C; 
+  static final int ELEPROX_MHD_RISING = 0x36;
+  static final int ELEPROX_NHD_RISING = 0x37;
+  static final int ELEPROX_NCL_RISING = 0x38;
+  static final int ELEPROX_FDL_RISING = 0x39;
+
+  static final int ELEPROX_MHD_FALLING = 0x3A;
+  static final int ELEPROX_NHD_FALLING = 0x3B;
+  static final int ELEPROX_NCL_FALLING = 0x3C;
   static final int ELEPROX_FDL_FALLING = 0x3D;
-  
-  static final int ELEPROX_NHD_TOUCHED = 0x3E; 
-  static final int ELEPROX_NCL_TOUCHED = 0x3F; 
+
+  static final int ELEPROX_NHD_TOUCHED = 0x3E;
+  static final int ELEPROX_NCL_TOUCHED = 0x3F;
   static final int ELEPROX_FDL_TOUCHED = 0x40;
-  
-  static final int ELE0_TOUCH_THRESHOLD = 0x41; 
+
+  static final int ELE0_TOUCH_THRESHOLD = 0x41;
   static final int ELE0_RELEASE_THRESHOLD = 0x42;
-  static final int ELE1_TOUCH_THRESHOLD = 0x43; 
-  static final int ELE1_RELEASE_THRESHOLD = 0x44; 
-  static final int ELE2_TOUCH_THRESHOLD = 0x45; 
-  static final int ELE2_RELEASE_THRESHOLD = 0x46; 
-  static final int ELE3_TOUCH_THRESHOLD = 0x47; 
-  static final int ELE3_RELEASE_THRESHOLD = 0x48; 
-  static final int ELE4_TOUCH_THRESHOLD = 0x49; 
-  static final int ELE4_RELEASE_THRESHOLD = 0x4A; 
-  static final int ELE5_TOUCH_THRESHOLD = 0x4B; 
-  static final int ELE5_RELEASE_THRESHOLD = 0x4C; 
-  static final int ELE6_TOUCH_THRESHOLD = 0x4D; 
-  static final int ELE6_RELEASE_THRESHOLD = 0x4E; 
-  static final int ELE7_TOUCH_THRESHOLD = 0x4F; 
-  static final int ELE7_RELEASE_THRESHOLD = 0x50; 
-  static final int ELE8_TOUCH_THRESHOLD = 0x51; 
-  static final int ELE8_RELEASE_THRESHOLD = 0x52; 
-  static final int ELE9_TOUCH_THRESHOLD = 0x53; 
-  static final int ELE9_RELEASE_THRESHOLD = 0x54; 
-  static final int ELE10_TOUCH_THRESHOLD = 0x55; 
-  static final int ELE10_RELEASE_THRESHOLD = 0x56; 
-  static final int ELE11_TOUCH_THRESHOLD = 0x57; 
-  static final int ELE11_RELEASE_THRESHOLD = 0x58; 
-  static final int ELEPROX_TOUCH_THRESHOLD = 0x59; 
-  static final int ELEPROX_RELEASE_THRESHOLD = 0x5A; 
+  static final int ELE1_TOUCH_THRESHOLD = 0x43;
+  static final int ELE1_RELEASE_THRESHOLD = 0x44;
+  static final int ELE2_TOUCH_THRESHOLD = 0x45;
+  static final int ELE2_RELEASE_THRESHOLD = 0x46;
+  static final int ELE3_TOUCH_THRESHOLD = 0x47;
+  static final int ELE3_RELEASE_THRESHOLD = 0x48;
+  static final int ELE4_TOUCH_THRESHOLD = 0x49;
+  static final int ELE4_RELEASE_THRESHOLD = 0x4A;
+  static final int ELE5_TOUCH_THRESHOLD = 0x4B;
+  static final int ELE5_RELEASE_THRESHOLD = 0x4C;
+  static final int ELE6_TOUCH_THRESHOLD = 0x4D;
+  static final int ELE6_RELEASE_THRESHOLD = 0x4E;
+  static final int ELE7_TOUCH_THRESHOLD = 0x4F;
+  static final int ELE7_RELEASE_THRESHOLD = 0x50;
+  static final int ELE8_TOUCH_THRESHOLD = 0x51;
+  static final int ELE8_RELEASE_THRESHOLD = 0x52;
+  static final int ELE9_TOUCH_THRESHOLD = 0x53;
+  static final int ELE9_RELEASE_THRESHOLD = 0x54;
+  static final int ELE10_TOUCH_THRESHOLD = 0x55;
+  static final int ELE10_RELEASE_THRESHOLD = 0x56;
+  static final int ELE11_TOUCH_THRESHOLD = 0x57;
+  static final int ELE11_RELEASE_THRESHOLD = 0x58;
+  static final int ELEPROX_TOUCH_THRESHOLD = 0x59;
+  static final int ELEPROX_RELEASE_THRESHOLD = 0x5A;
 
-  static final int DEBOUNCE_TOUCH_RELEASE = 0x5B; 
-  static final int AFE_CONFIGURATION_1 = 0x5C; 
-  static final int AFE_CONFIGURATION_2 = 0x5D; 
-  static final int ELECTRODE_CONFIGURAION_REGISTER = 0x5E; 
-  
-  static final int ELE0_ELECTRODE_CURRENT = 0x5F; 
-  static final int ELE1_ELECTRODE_CURRENT = 0x60; 
-  static final int ELE2_ELECTRODE_CURRENT = 0x61; 
-  static final int ELE3_ELECTRODE_CURRENT = 0x62; 
-  static final int ELE4_ELECTRODE_CURRENT = 0x63; 
-  static final int ELE5_ELECTRODE_CURRENT = 0x64; 
-  static final int ELE6_ELECTRODE_CURRENT = 0x65; 
-  static final int ELE7_ELECTRODE_CURRENT = 0x66; 
-  static final int ELE8_ELECTRODE_CURRENT = 0x67; 
-  static final int ELE9_ELECTRODE_CURRENT = 0x68; 
-  static final int ELE10_ELECTRODE_CURRENT = 0x69; 
-  static final int ELE11_ELECTRODE_CURRENT = 0x6A; 
-  static final int ELEPROX_ELECTRODE_CURRENT = 0x6B; 
+  static final int DEBOUNCE_TOUCH_RELEASE = 0x5B;
+  static final int AFE_CONFIGURATION_1 = 0x5C;
+  static final int AFE_CONFIGURATION_2 = 0x5D;
+  static final int ELECTRODE_CONFIGURAION_REGISTER = 0x5E;
 
-  static final int ELE0_1_CHARGE_TIME = 0x6C; 
-  static final int ELE2_3_CHARGE_TIME = 0x6D; 
-  static final int ELE4_5_CHARGE_TIME = 0x6E; 
-  static final int ELE6_7_CHARGE_TIME = 0x6F; 
-  static final int ELE8_9_CHARGE_TIME = 0x70; 
-  static final int ELE10_11_CHARGE_TIME = 0x71; 
-  static final int ELEPROX_CHARGE_TIME = 0x72; 
-  
-  static final int GPIO_CONTROL_REG_0 = 0x73; 
-  static final int GPIO_CONTROL_REG_1 = 0x74; 
+  static final int ELE0_ELECTRODE_CURRENT = 0x5F;
+  static final int ELE1_ELECTRODE_CURRENT = 0x60;
+  static final int ELE2_ELECTRODE_CURRENT = 0x61;
+  static final int ELE3_ELECTRODE_CURRENT = 0x62;
+  static final int ELE4_ELECTRODE_CURRENT = 0x63;
+  static final int ELE5_ELECTRODE_CURRENT = 0x64;
+  static final int ELE6_ELECTRODE_CURRENT = 0x65;
+  static final int ELE7_ELECTRODE_CURRENT = 0x66;
+  static final int ELE8_ELECTRODE_CURRENT = 0x67;
+  static final int ELE9_ELECTRODE_CURRENT = 0x68;
+  static final int ELE10_ELECTRODE_CURRENT = 0x69;
+  static final int ELE11_ELECTRODE_CURRENT = 0x6A;
+  static final int ELEPROX_ELECTRODE_CURRENT = 0x6B;
+
+  static final int ELE0_1_CHARGE_TIME = 0x6C;
+  static final int ELE2_3_CHARGE_TIME = 0x6D;
+  static final int ELE4_5_CHARGE_TIME = 0x6E;
+  static final int ELE6_7_CHARGE_TIME = 0x6F;
+  static final int ELE8_9_CHARGE_TIME = 0x70;
+  static final int ELE10_11_CHARGE_TIME = 0x71;
+  static final int ELEPROX_CHARGE_TIME = 0x72;
+
+  static final int GPIO_CONTROL_REG_0 = 0x73;
+  static final int GPIO_CONTROL_REG_1 = 0x74;
   static final int GPIO_DATA_REGISTER = 0x75;
   static final int GPIO_DIRECTION_REGISTER = 0x76;
-  static final int GPIO_ENABLEREGISTER = 0x77; 
-  static final int GPIO_SET_REGISTER = 0x78; 
-  static final int GPIO_CLEAR_REGISTER = 0x79; 
-  static final int GPIO_TOGGLE_REGISTER = 0x7A; 
-  
-  static final int AUTO_CONFIG_CONTROL_REG0 = 0x7B; 
-  static final int AUTO_CONFIG_CONTROL_REG1 = 0x7C; 
-  static final int AUTO_CONFIG_USL_REG = 0x7D; 
-  static final int AUTO_CONFIG_LSL_REG = 0x7E; 
-  static final int AUTO_CONFIG_TARGET_LEVEL_REG = 0x7F; 
-  
-  static final int SOFT_RESET_REGISTER = 0x80; 
-  static final int SOFT_RESET          = 0x63; 
-  
-  int touchsensors = 12; // Number of pins used for touch sensing. The rest can be used as GPIO pins
+  static final int GPIO_ENABLEREGISTER = 0x77;
+  static final int GPIO_SET_REGISTER = 0x78;
+  static final int GPIO_CLEAR_REGISTER = 0x79;
+  static final int GPIO_TOGGLE_REGISTER = 0x7A;
+
+  static final int AUTO_CONFIG_CONTROL_REG0 = 0x7B;
+  static final int AUTO_CONFIG_CONTROL_REG1 = 0x7C;
+  static final int AUTO_CONFIG_USL_REG = 0x7D;
+  static final int AUTO_CONFIG_LSL_REG = 0x7E;
+  static final int AUTO_CONFIG_TARGET_LEVEL_REG = 0x7F;
+
+  static final int SOFT_RESET_REGISTER = 0x80;
+  static final int SOFT_RESET = 0x63;
+
+  int touchsensors = 12; // Number of pins used for touch sensing. The rest can
+                         // be used as GPIO pins
   /**
    * pin named map of all the pins on the board
    */
@@ -300,13 +301,14 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     try {
       Mpr121 mpr121 = (Mpr121) Runtime.start("mpr121", "Mpr121");
       Runtime.start("gui", "SwingGui");
-      Runtime.start("esp", "Esp8266_01");  
-      
-      mpr121.attach("esp","0","0x5A");
-      
+      Esp8266_01 esp = (Esp8266_01) Runtime.start("esp", "Esp8266_01");
+
+      esp.setHost("esp8266-02.local");
+      mpr121.attach("esp", "0", "0x5A");
+
       mpr121.begin();
-      log.info("Reading touch sensor, %d", mpr121.touched());
-      
+      log.info(String.format("Reading touch sensor, %d", mpr121.touched()));
+
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -373,33 +375,38 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     broadcastState();
   }
 
-
-
-  /** 
+  /**
    * Initiate the MPR121 to use all inputs for sensing
+   * 
    * @return
    */
-  public boolean begin(){
-    
-    if (!isAttached){
+  public boolean begin() {
+
+    if (!isAttached) {
       log.error("Must be attached to an i2c controller before using the begin method");
       return false;
     }
-    
-    writeRegister(SOFT_RESET_REGISTER, SOFT_RESET);
-    sleep(1);
-    setStopMode();
-    
-    int config = readRegister8(AFE_CONFIGURATION_2);
-    log.info(String.format("AFE Configuraion register %d", config));
-    
-    if (readRegister8(AFE_CONFIGURATION_2) != 0x24){
+
+    int config = 0;
+    int retries = 0;
+    while (config != 0x24) {
+      writeRegister(SOFT_RESET_REGISTER, SOFT_RESET);
+      sleep(1);
+      config = readRegister8(AFE_CONFIGURATION_2);
+      log.info(String.format("AFE Configuraiton register 0x%02X", config));
+      retries ++;
+      if (retries > 10) break;
+    }
+
+    if (config != 0x24) {
       log.error("Unable to initiate the MPR121 i2c device");
       return false;
     }
-    
+
+    setStopMode();
+
     setThresholds(12, 6);
-   
+
     writeRegister(MHD_RISING, 0x01);
     writeRegister(NHD_RISING, 0x01);
     writeRegister(NCL_RISING, 0x0E);
@@ -417,35 +424,36 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     writeRegister(DEBOUNCE_TOUCH_RELEASE, 0);
     writeRegister(AFE_CONFIGURATION_1, 0x10); // default, 16uA charge current
     writeRegister(AFE_CONFIGURATION_2, 0x20); // 0.5uS encoding, 1ms period
-    
+
     writeRegister(ELECTRODE_CONFIGURAION_REGISTER, 0x8F);
-    
-    return  true;
+
+    return true;
   }
-  
+
   void setThresholds(int touch, int release) {
-    for (int i=0; i < touchsensors; i++) {
-      writeRegister(ELE0_TOUCH_THRESHOLD + 2*i, touch);
-      writeRegister(ELE0_RELEASE_THRESHOLD + 2*i, release);
-      
-      
+    for (int i = 0; i < touchsensors; i++) {
+      writeRegister(ELE0_TOUCH_THRESHOLD + 2 * i, touch);
+      writeRegister(ELE0_RELEASE_THRESHOLD + 2 * i, release);
+
     }
   }
-  
+
   int filteredData(int t) {
-    if (t > touchsensors) return 0;
-    return readRegister16(ELE0_FILTERED_DATA_LSB + t*2);
+    if (t > touchsensors)
+      return 0;
+    return readRegister16(ELE0_FILTERED_DATA_LSB + t * 2);
   }
 
   int baselineData(int t) {
-    if (t > touchsensors) return 0;
+    if (t > touchsensors)
+      return 0;
     int bl = readRegister8(ELE0_BASELINE_VALUE + t);
     return (bl << 2);
   }
 
   int touched() {
     int t = readRegister16(TOUCH_STATUS0);
-    if ((t & 0x8000) == 0x8000){
+    if ((t & 0x8000) == 0x8000) {
       log.error("Over current detected, resetting");
       writeRegister(TOUCH_STATUS1, 0x80);
       begin();
@@ -453,43 +461,44 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     }
     return t & 0x0FFF;
   }
-  
-  void getTouched(){
+
+  void getTouched() {
     int t = touched();
-    for (int i=0; i < touchsensors; i++){
-      pinIndex.get(i).setValue((t>>i) & 0x01);
+    for (int i = 0; i < touchsensors; i++) {
+      pinIndex.get(i).setValue((t >> i) & 0x01);
     }
   }
+
   /**
-   * This method starts the MPR121 measuring
-   * pins = Number of pins to use for measuring starting with ELE0 as number 1
-   * Setting pins = 0 will stop measuring
+   * This method starts the MPR121 measuring pins = Number of pins to use for
+   * measuring starting with ELE0 as number 1 Setting pins = 0 will stop
+   * measuring
    */
   public void setRunMode(int pins) {
-    writeRegister(ELECTRODE_CONFIGURAION_REGISTER,pins + 1);
+    writeRegister(ELECTRODE_CONFIGURAION_REGISTER, pins + 1);
     touchsensors = pins;
   }
-  
+
   /**
-   * This method starts the MPR121 measuring
-   * pins = Number of pins to use for measuring starting with ELE0 as number 1
-   * Setting pins = 0 will stop measuring
+   * This method starts the MPR121 measuring pins = Number of pins to use for
+   * measuring starting with ELE0 as number 1 Setting pins = 0 will stop
+   * measuring
    */
   public void setStopMode() {
     setRunMode(0);
   }
-  
-   void i2cWrite(int reg) {
-     if (!isAttached){
-       log.error("Must be attached to an i2c controller before writing");
-       return;
-     }
+
+  void i2cWrite(int reg) {
+    if (!isAttached) {
+      log.error("Must be attached to an i2c controller before writing");
+      return;
+    }
     byte[] writebuffer = { (byte) reg };
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
   }
 
   void writeRegister(int reg, int value) {
-    if (!isAttached){
+    if (!isAttached) {
       log.error("Must be attached to an i2c controller before writing");
       return;
     }
@@ -498,27 +507,27 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   int readRegister8(int reg) {
-    if (!isAttached){
+    if (!isAttached) {
       log.error("Must be attached to an i2c controller before reading");
       return 0;
     }
-    byte[] writebuffer =  {(byte) reg};
+    byte[] writebuffer = { (byte) reg };
     byte[] readbuffer = new byte[1];
     controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length, readbuffer, readbuffer.length);
     return ((int) (readbuffer[0] & 0xff));
   }
 
   int readRegister16(int reg) {
-    if (!isAttached){
+    if (!isAttached) {
       log.error("Must be attached to an i2c controller before reading");
       return 0;
     }
-    byte[] writebuffer =  {(byte) reg};
+    byte[] writebuffer = { (byte) reg };
     byte[] readbuffer = new byte[2];
     controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length, readbuffer, readbuffer.length);
     return ((int) readbuffer[0]) << 8 | (int) (readbuffer[1] & 0xff);
   }
-  
+
   /**
    * GOOD DESIGN - this method is the same pretty much for all Services could be
    * a Java 8 default implementation to the interface
@@ -535,7 +544,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public int read(Integer address){ 
+  public int read(Integer address) {
     return pinIndex.get(address).getValue();
   }
 
@@ -663,12 +672,10 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
       pindef.setName(name);
       pindef.setAddress(i);
       pindef.setMode("INPUT");
-      if (i > 3){
-        name = String.format("ELE%d/LED%d", i, i-3);
+      if (i > 3) {
+        name = String.format("ELE%d/LED%d", i, i - 3);
         pindef.canWrite(true);
-      }
-      else
-      {
+      } else {
         pindef.canWrite(false);
       }
       pinMap.put(name, pindef);
