@@ -90,6 +90,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   static final long serialVersionUID = 1L;
   static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
+  public String wasCleanyShutdowned;
 
   public ProgramAB(String name) {
     super(name);
@@ -134,11 +135,26 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     String aimlIFPath = path + File.separator + "bots" + File.separator + botName + File.separator + "aimlif";
     log.info("AIML FILES:");
     File folder = new File(aimlPath);
+    File folderaimlIF = new File(aimlIFPath);
     if (!folder.exists()) {
       log.info("{} does not exist", aimlPath);
       return;
     }
-
+    if (wasCleanyShutdowned == null || wasCleanyShutdowned.isEmpty())
+    {
+      wasCleanyShutdowned="firstStart";  
+    }
+    if (wasCleanyShutdowned.equals("nok"))
+    {
+      if (folderaimlIF.exists()) {
+    warn("Bad previous shutdown, ProgramAB need to recompile AimlIf files. Don't worry.");  
+    for (File f : folderaimlIF.listFiles()) {
+          f.delete();
+    }
+      }
+    }
+    
+    
     log.info(folder.getAbsolutePath());
     HashMap<String, Long> modifiedDates = new HashMap<String, Long>();
     for (File f : folder.listFiles()) {
@@ -148,14 +164,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       modifiedDates.put(aiml, f.lastModified());
     }
     log.info("AIMLIF FILES:");
-    folder = new File(aimlIFPath);
-    if (!folder.exists()) {
+    folderaimlIF = new File(aimlIFPath);
+    if (!folderaimlIF.exists()) {
       // TODO: throw an exception warn / log ?
-      log.info("aimlif directory missing,creating it. " + folder.getAbsolutePath());
-      folder.mkdirs();
+      log.info("aimlif directory missing,creating it. " + folderaimlIF.getAbsolutePath());
+      folderaimlIF.mkdirs();
       return;
     }
-    for (File f : folder.listFiles()) {
+    for (File f : folderaimlIF.listFiles()) {
       log.info(f.getAbsolutePath());
       // TODO: better stripping of the file extension
       String aimlIF = f.getName().replace(".aiml.csv", "");
@@ -650,6 +666,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
 
     cleanOutOfDateAimlIFFiles(botName);
+    wasCleanyShutdowned="nok";
     // TODO: manage the bots in a collective pool/hash map.
     if (bot == null) {
       bot = new Bot(botName, path);
@@ -686,6 +703,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     log.info("Started session for bot name:{} , username:{}", botName, userName);
     // TODO: to make sure if the start session is updated, that the button
     // updates in the gui ?
+    this.save();
     broadcastState();
   }
 
@@ -722,7 +740,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   	  log.error("PrintWriter error");
   	}
   }
-
+  
+  @Override
+  public void stopService() {
+    try {
+      savePredicates();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    writeAndQuit();
+    wasCleanyShutdowned="ok";
+    super.stopService();
+}
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer

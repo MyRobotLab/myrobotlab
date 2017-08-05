@@ -190,13 +190,20 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
 				if (servo.isPinArrayControlSet()) {
 					attachListenerButton.setText(detachAnalog);
+	        attachListenerButton.setEnabled(true);
 					pinArrayControlList.setEnabled(false);
 					analogInputPinList.setEnabled(false);
 				} else {
 					attachListenerButton.setText(attachAnalog);
 					pinArrayControlList.setEnabled(true);
 					analogInputPinList.setEnabled(true);
+					if ((pinArrayControlList.getSelectedItem() != null) && (analogInputPinList.getSelectedItem()) != null){
+	          attachListenerButton.setEnabled(true);					  
+					}
+					else
+	           attachListenerButton.setEnabled(false);      
 				}
+				
 
 				/* TODO servo.getPos returns null in it's initial state causing Null pointer excepition, but I can't test for it since double is a primitive
 					double pos = servo.getPos();
