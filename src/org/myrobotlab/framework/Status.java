@@ -23,6 +23,7 @@ import org.slf4j.Logger;
  * the gson serializer would stack overflow with self reference issue
  * 
  * TODO - allow radix tree searches for "keys" ???
+ * 
  */
 public class Status implements Serializable {// extends Exception {
 
