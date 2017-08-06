@@ -21,6 +21,7 @@ table tr:nth-child(even) {
     <table>
       <tr>
         <th>Key</th>
+        <th>sampletime (ms)</th>
         <th>kp</th>
         <th>ki</th>
         <th>kd</th>
@@ -31,12 +32,13 @@ table tr:nth-child(even) {
       </tr>
       <tr ng-repeat='(key, value) in piddata'>
         <span><td><b>{{key}}</b> 
-              <td>{{value.kp}} 
-              <td>{{value.ki}} 
-              <td>{{value.kd}} 
+              <td>{{value.sampleTime || 0 | number:3}} 
+              <td>{{value.dispKp || 0 | number:3}} 
+              <td>{{value.dispKi || 0 | number:3}} 
+              <td>{{value.dispKd || 0 | number:3}} 
               <td>{{value.controllerDirection}}
               <td>{{value.setpoint}}
-              <td>{{value.input}}
+              <td>{{value.input || 0 | number:3}}
               <td>{{value.output || 0 | number:3}}
          </span>
         </td>
