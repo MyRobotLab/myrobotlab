@@ -42,8 +42,11 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
   // default voice
   // TODO: natural reader has this voice.. there are others
   // but for now.. only Ryan is wired in.. it maps to voice id "33"
-  public String voice = "Ryan";
-  public HashMap<String, Integer> voiceMap = new HashMap<String,Integer>();
+  String voice = "Ryan";
+  HashMap<String, Integer> voiceMap = new HashMap<String,Integer>();
+  ArrayList<String> voices = new ArrayList<String>();
+  
+  
   transient AudioFile audioFile = null;
   // private float volume = 1.0f;
   transient CloseableHttpClient client;
@@ -111,8 +114,8 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
     voiceMap.put("Lulu",38);
     voiceMap.put("Sakura",39);
     voiceMap.put("Mehdi",40);
-
     
+    voices.addAll(voiceMap.keySet());
   }
 
   public AudioFile getAudioFile() {
@@ -121,45 +124,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
   
   @Override
   public ArrayList<String> getVoices() {
-    // TODO:return the list of voices names for this.
-   
-    ArrayList<String> voices = new ArrayList<String>();
-    voices.addAll(voices);
-    
-
-     
-//    Mike
-//    Crystal
-//    Ray
-//    Lauren
-//    Rich
-//    Julia
-//    Mel
-//    Claire
-//    Ryan
-//    Heather
-//    Laura
-//    Charles
-//    Audrey
-//    Peter
-//    Rachel
-//    Graham
-//    Lucy
-//    Anjali
-//    Alain
-//    Juliette
-//    Bruno
-//    Alice
-//    Reiner
-//    Klara
-//    Rosa
-//    Alberto
-//    Giovanni
-//    Francesca
-//    Salma
-//    Mehdi
-
-    return null;
+    return voices;
   }
 
   @Override
