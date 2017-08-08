@@ -348,22 +348,32 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     $scope.recognizing = false;
     // always grab the right service!
     $scope.service = mrl.getService($scope.service.name);
-    // webkit $scope.recognition google speech 
-    $scope.recognition = new webkitSpeechRecognition();
-    // config properties on the webkit speech stuff.
-    $scope.recognition.continuous = true;
-    $scope.recognition.interimResults = true;
-    mrl.sendTo($scope.service.name, "startListening");
-    // called when $scope.recognition starts.
-    $scope.recognition.onstart = function() {
+    // webkit $scope.recognition google speech
+    // Check if webkitSpeechRecognition exists
+    if (!('webkitSpeechRecognition' in window)){
+    	$scope.wkavailable = false;
+        $log.info('WebkitSpeechRecognition', 'not available');
+        $scope.status = 'WebkitSpeechRecognition not available. Need to use Chrome on a supported platform.';
+    }
+    else
+    {
+    	$scope.wkavailable = false;
+    	$scope.recognition = new webkitSpeechRecognition();
+        // config properties on the webkit speech stuff.
+        $scope.recognition.continuous = true;
+        $scope.recognition.interimResults = true;
+        mrl.sendTo($scope.service.name, "startListening");
+        // called when $scope.recognition starts.
+        $scope.recognition.onstart = function() {
         $scope.recognizing = true;
         $scope.status = 'Speak now.';
         $scope.listenbuttonimg = 'service/img/mic-animate.gif';
         $scope.$apply();
         mrl.sendTo($scope.service.name, "listeningEvent");
     }
-    ;
+    };
     
+    if ($scope.wkavailable){
     // called when there's an error (handles a few cases)
     $scope.recognition.onerror = function(event) {
         if (event.error == 'no-speech') {
@@ -396,7 +406,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         ;
     }
     ;
-    
+   
     // called when $scope.recognition finishes.
     $scope.recognition.onend = function() {
         mrl.sendTo($scope.service.name, "pauseListening");
@@ -453,6 +463,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         ;
     }
     ;
+    } // End of ($scope.wkavailable)
+    
     
     $scope.updateLanguage = function() {
         $log.info('WEBKIT Update Language');
