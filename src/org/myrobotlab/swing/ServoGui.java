@@ -140,6 +140,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
   JTextField minOutput = new JTextField("0");
   JTextField maxOutput = new JTextField("180");
   
+  JButton sweepButton = new JButton("sweep");
+  JButton eventsButton = new JButton("events");
   
   JLabel imageenabled = new JLabel();
   ImageIcon enabled = Util.getImageIcon("enabled.png");
@@ -148,6 +150,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
   SliderListener sliderListener = new SliderListener();
 
+  boolean eventsEnabled;
+  
   public ServoGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
     // myServo = (Servo) Runtime.getService(boundServiceName);
@@ -173,6 +177,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
     attachButton.addActionListener(this);
     enableButton.addActionListener(this);
     autoDisable.addActionListener(this);
+    sweepButton.addActionListener(this);
+    eventsButton.addActionListener(this);
     pinList.addActionListener(this);
     boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
 
@@ -220,14 +226,20 @@ public class ServoGui extends ServiceGui implements ActionListener {
     autoDisable.setSelected(false);
     power.add(autoDisable);
     
+    JPanel sweep = new JPanel();
+    Border sweepborder = BorderFactory.createTitledBorder("Sweep and Events");
+    sweep.setBorder(sweepborder);
+    sweep.add(sweepButton);
+    sweep.add(eventsButton);
+    
     addTopLeft(" ");
     addTopLeft(controllerP);
     addTopLeft(power);
     addTopLeft(" ");
     addTopLeft(map);
     addTopLeft(minMax);
+    addTopLeft(sweep);
   
-
     refreshControllers();
   }
 
@@ -327,6 +339,20 @@ public class ServoGui extends ServiceGui implements ActionListener {
           return;
         }
 
+        if (o == sweepButton) {
+          if (sweepButton.getText().equals("sweep")) {
+            send("sweep");
+          }
+          else {
+            send("stop");        
+          }
+          return;
+        }
+  
+        if (o == eventsButton) {
+            send("eventsEnabled",!eventsEnabled);
+          return;
+        }
       }
     });
   }
@@ -405,7 +431,16 @@ public class ServoGui extends ServiceGui implements ActionListener {
         maxInput.setText(servo.getMaxInput() + "");
         minOutput.setText(servo.getMinOutput() + "");
         maxOutput.setText(servo.getMaxOutput() + "");
-
+        
+        if (servo.isSweeping()){
+          sweepButton.setText("stop");        
+        }
+        else {
+          sweepButton.setText("sweep");              
+        }
+        
+        eventsEnabled = servo.isEventsEnabled();
+        
         restoreListeners();
       }
     });
@@ -446,9 +481,4 @@ public class ServoGui extends ServiceGui implements ActionListener {
     slider.addChangeListener(sliderListener);
     slider.addMouseListener(sliderListener);
   }
-
-
-
-
-
 }

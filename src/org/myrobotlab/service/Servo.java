@@ -284,6 +284,9 @@ public class Servo extends Service implements ServoControl {
     addListener("publishIKServoEvent", service.getName(), "onIKServoEvent");
   }
 
+  public boolean isSweeping(){
+    return isSweeping;
+  }
   /**
    * Re-attach to servo current conroller and pin. The pin must have be set
    * previously. And the controller must have been set prior to calling this.
@@ -363,7 +366,11 @@ public class Servo extends Service implements ServoControl {
     broadcastState();
     return b;
   }
-
+  
+  public boolean isEventsEnabled() {
+    return isEventsEnabled;
+  }
+  
   // @Override
   public ServoController getController() {
     return controller;
