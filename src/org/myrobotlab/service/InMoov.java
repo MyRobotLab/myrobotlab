@@ -2317,9 +2317,7 @@ public class InMoov extends Service {
     setMute(false);
     speakBlocking(lang_shutDown);
     stopVinMoov();
-    sleep(5);
-    speakBlocking("5 second");
-    sleep(3);
+    sleep(5000);
     disable();
     if (LeftRelay1!=null)
     {

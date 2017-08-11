@@ -71,6 +71,17 @@ public interface ServoController extends Attachable {
 	void servoSetVelocity(ServoControl servo);
 
 	void servoSetAcceleration(ServoControl servo);
+
+	/**
+	 * @param sensorPin
+	 * @param i
+	 */
+	void enablePin(Integer sensorPin, Integer i);
+
+	/**
+	 * @param i
+	 */
+	void disablePin(Integer i);
 	
 
 }
