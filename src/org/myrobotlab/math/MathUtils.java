@@ -1,4 +1,6 @@
 package org.myrobotlab.math;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * A place to have some handy math functions.
@@ -12,6 +14,27 @@ public class MathUtils {
 	static public double degToRad(double degrees) {
 		return degrees * Math.PI / 180.0;
 	};
+	
+	public static Integer averageMaxFromArray(int howMany, ArrayList<Integer> list) {
+		Collections.sort( list );
+		
+		int sumMaxAvg=0;
+		//Log.debug("size:"+list.size()+"");
+		if (list.size()-1<howMany)
+		{
+		howMany=list.size()-1;	
+		}
+		if (list.size()-1>0)
+		{
+			
+			for(int i = list.size(); i > list.size()-howMany; i--) {
+				sumMaxAvg+=list.get(i-1);
+				//Log.debug(i-1+" "+list.get(i-1));
+			}
+		return sumMaxAvg / howMany;
+		}
+		return 0;
+	  }
 
 	static public double radToDeg(double radians) {
 		return radians * 57.2957795;

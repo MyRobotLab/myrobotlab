@@ -912,4 +912,22 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return this.deviceAddress;
   }
 
+/* (non-Javadoc)
+ * @see org.myrobotlab.service.interfaces.ServoController#enablePin(java.lang.Integer, java.lang.Integer)
+ */
+@Override
+public void enablePin(Integer sensorPin, Integer i) {
+	// TODO Auto-generated method stub
+	
+}
+
+/* (non-Javadoc)
+ * @see org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang.Integer)
+ */
+@Override
+public void disablePin(Integer i) {
+	// TODO Auto-generated method stub
+	
+}
+
 }
