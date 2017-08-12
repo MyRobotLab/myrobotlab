@@ -357,7 +357,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     }
     else
     {
-    	$scope.wkavailable = false;
+    	$scope.wkavailable = true;
     	$scope.recognition = new webkitSpeechRecognition();
         // config properties on the webkit speech stuff.
         $scope.recognition.continuous = true;
