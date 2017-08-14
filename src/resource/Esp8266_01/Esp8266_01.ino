@@ -54,14 +54,16 @@ IPAddress ipaddress;
 
 const String BusLabel = "bus:";
 const String DeviceLabel = "device:";
-const String SizeLabel = "size:";
+const String WriteSizeLabel = "writeSize:";
+const String ReadSizeLabel = "readSize:";
 const String BufferLabel = "buffer:"; 
 
 bool i2cInitiated = false;
   
 int16_t bus = 0;
 int16_t device;
-int16_t size; 
+int16_t writeSize; 
+int16_t readSize; 
 String i2cBuffer;  
 String readbuffer;
 
@@ -100,6 +102,7 @@ void setup() {
   server.on("/",rootResponse);
   server.on("/i2cWrite",i2cWrite);
   server.on("/i2cRead",i2cRead);
+  server.on("/i2cWriteRead",i2cWriteRead);
   
   // Start the server
   server.begin();
@@ -134,7 +137,7 @@ void rootResponse(){
   if (!i2cInitiated) i2cBegin(bus);
   nDevices = 0;
   for(int address = 0; address < 127; address++ ){
-    Serial.println(address);
+    // Serial.println(address);
     // The i2c_scanner uses the return value of
     // the Write.endTransmisstion to see if
     // a device did acknowledge to the address.
@@ -191,8 +194,9 @@ void i2cRead(){
   if (!i2cInitiated) i2cBegin(bus);
 
   // Serial.println("Reading start");
-   
-  int answer = Wire.requestFrom(device,size);  
+
+  readbuffer = "";
+  int answer = Wire.requestFrom(device,readSize);  
   for (int i=0; i<answer ; i++){
     int byte = Wire.read();
     if (byte < 15) {
@@ -215,7 +219,7 @@ void i2cRead(){
   String message = "{" +
                    BusLabel + String(bus) + "," +
                    DeviceLabel +String(device) + "," +
-                   SizeLabel + String(answer) + "," +
+                   ReadSizeLabel + String(answer) + "," +
                    BufferLabel + readbuffer + 
                    "}";
                                  
@@ -256,10 +260,10 @@ void i2cWrite(){
   */
   
   char writeBuffer[200];
-  i2cBuffer.toCharArray(writeBuffer,(size*2)+1);
+  i2cBuffer.toCharArray(writeBuffer,(writeSize*2)+1);
       
   Wire.beginTransmission(device); 
-  for (int i=0; i<size; i++){
+  for (int i=0; i<writeSize; i++){
     char high_nibble = h2d(writeBuffer[i*2]);
     char low_nibble  = h2d(writeBuffer[(i*2)+1]);
     int w = (high_nibble << 4) | low_nibble;
@@ -269,6 +273,54 @@ void i2cWrite(){
   Wire.endTransmission();  
   
   server.send(204, "");   
+}
+
+void i2cWriteRead(){
+
+  Serial.println("");
+  Serial.println("i2cWriteRead");
+  Serial.println("");
+  
+  parseParameters();
+  if (!i2cInitiated) i2cBegin(bus);
+  
+  char writeBuffer[200];
+  i2cBuffer.toCharArray(writeBuffer,(writeSize*2)+1);
+      
+  Wire.beginTransmission(device); 
+  for (int i=0; i<writeSize; i++){
+    char high_nibble = h2d(writeBuffer[i*2]);
+    char low_nibble  = h2d(writeBuffer[(i*2)+1]);
+    int w = (high_nibble << 4) | low_nibble;
+    Wire.write(w);
+    Serial.println("write " + String(writeBuffer[i*2]) + String(writeBuffer[(i*2)+1]) + " " + String(w));
+  }
+  Wire.endTransmission(false); // Don't release the bus until the data has been read
+
+  Serial.println("Reading start");
+
+  readbuffer = "";
+  int answer = Wire.requestFrom(device,readSize,false);  
+  for (int i=0; i<answer ; i++){
+    int byte = Wire.read();
+    if (byte < 15) {
+      readbuffer = readbuffer  + "0" + String(byte, HEX);
+    }
+    else {
+      readbuffer = readbuffer  + String(byte,HEX);
+    }
+  }
+  Serial.println("--");
+  Serial.println(readbuffer); 
+           
+  String message = "{" +
+                 BusLabel + String(bus) + "," +
+                 DeviceLabel + String(device) + "," +
+                 ReadSizeLabel + String(answer) + "," +
+                 BufferLabel + readbuffer + 
+                 "}";
+                                 
+  server.send(200, "application/json", message); 
 }
 
 /*
@@ -287,7 +339,8 @@ void parseParameters()
 {
    bus = 0;
    device = 0;
-   size = 0;
+   readSize = 0;
+   writeSize = 0;
    
    String data = server.arg("plain");
    StaticJsonBuffer<200> jBuffer;    
@@ -295,19 +348,21 @@ void parseParameters()
 
    String busString  = jObject["bus"];  
    String deviceString  = jObject["device"];  
-   String sizeString   = jObject["size"];  
+   String writeSizeString   = jObject["writeSize"];  
+   String readSizeString   = jObject["readSize"];  
    String i2cBufferString = jObject["buffer"];  
 
-   /*
    Serial.println("Parameters ");
    Serial.println(busString);
    Serial.println(deviceString);
-   Serial.println(sizeString);
+   Serial.println(writeSizeString);
+   Serial.println(readSizeString);
    Serial.println(i2cBufferString);
-   */ 
+
    bus = busString.toInt();
    device = deviceString.toInt();
-   size = sizeString.toInt();
+   writeSize = writeSizeString.toInt();
+   readSize = readSizeString.toInt();
    i2cBuffer = i2cBufferString;
 }
 

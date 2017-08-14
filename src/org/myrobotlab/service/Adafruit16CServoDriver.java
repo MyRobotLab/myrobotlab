@@ -869,28 +869,28 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       return;
 
     stopPwm(); // stop pwm generation
-    controller.detachI2CControl(this);
     isAttached = false;
+    controller.detachI2CControl(this);
     broadcastState();
   }
 
   public void detachServoControl(ServoControl servo) throws Exception {
 
-    if (servoMap.containsKey(servo)) {
+    if (servoMap.containsKey(servo.getName())) {
       servoMap.remove(servo.getName());
       servo.detachServoController(this);
     }
   }
 
   // This section contains all the methods used to query / show all attached
-  // methods
+  // services
   public boolean isAttachedServoControl(ServoControl servo) {
     return servoMap.containsKey(servo.getName());
   }
 
   /**
-   * Returns all the currently attached services TODO Add the list of attached
-   * motors
+   * Returns all the currently attached services 
+   * TODO Add the list of attached motors
    */
   @Override
   public Set<String> getAttached() {
@@ -911,5 +911,23 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public String getDeviceAddress() {
     return this.deviceAddress;
   }
+
+/* (non-Javadoc)
+ * @see org.myrobotlab.service.interfaces.ServoController#enablePin(java.lang.Integer, java.lang.Integer)
+ */
+@Override
+public void enablePin(Integer sensorPin, Integer i) {
+	// TODO Auto-generated method stub
+	
+}
+
+/* (non-Javadoc)
+ * @see org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang.Integer)
+ */
+@Override
+public void disablePin(Integer i) {
+	// TODO Auto-generated method stub
+	
+}
 
 }
