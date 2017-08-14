@@ -819,13 +819,6 @@ private int servoTorque;
     }
   }
   
-  public void setSensorPin(int pin) {
-	  this.SensorPin=pin;
-	  }
-  
-  public int getSensorPin() {
-	  return this.SensorPin;
-	  }
   
   /* setAcceleration is not fully implemented **/
   public void setAcceleration(double acceleration) {
@@ -913,7 +906,8 @@ private int servoTorque;
   }
   
   // [experimental} generic analog sensor feedback to servo
-  // any analog sensor can be used
+  // any analog sensor can be used ( finger tip / sensor on servo bed ... )
+  // of course you need a good signal, time to play with aref and resistors
   // sensor need to be calibrated, but you can skip the calibration step by setting :
   // autoCalibrateMin + autoCalibrateMax ( range values returned by arduino )
 
@@ -952,7 +946,7 @@ private int servoTorque;
 	  //We need a little error correction, some stats will do the job
 	  autoCalibrateMin=MathUtils.averageMaxFromArray(10,sensorValues);
 	  log.info("autoCalibrateMin : "+autoCalibrateMin);
-	  unsubscribe(this.getController().getName(),"publishedSensorEventCalibration");
+	  unsubscribe(this.getController().getName(),"publishPinArray");
 	return autoCalibrateMin;
   }
   
@@ -962,7 +956,8 @@ private int servoTorque;
 		    error("Please select sensor source");	
 		    return 0;
 		  }
-	    log.info("MoveTo MAX, and wait sensor max");
+	  	temporaryStopAutoDisable(true);
+	  	log.info("MoveTo MAX, and wait sensor max");
 	    subscribe(this.getController().getName(),"publishPinArray", getName(), "publishedSensorEventCalibration");
 	    this.setVelocity(30);
 	    sensorValues.clear();
@@ -973,6 +968,8 @@ private int servoTorque;
 	    log.info(this.currentPosInput+"");
 	    this.getController().disablePin(SensorPin);
 		autoCalibrateMax=MathUtils.averageMaxFromArray(10,sensorValues);
+		temporaryStopAutoDisable(false);
+		this.moveTo(0);
 		if (autoCalibrateMax-autoCalibrateMin>100)
 		{
 			log.info("autoCalibrateMax : "+autoCalibrateMax);
@@ -983,7 +980,7 @@ private int servoTorque;
 			error("Calibration error : sensor timeout caused by maxvalues-minvalues<100" );
 		}
 		getController().disablePin(SensorPin);
-        unsubscribe(getController().getName(),"publishedSensorEventCalibration");
+        unsubscribe(getController().getName(),"publishPinArray");
 	    return 0;
   }
   
@@ -992,6 +989,7 @@ private int servoTorque;
 	  // 100%=force servo to max
 	  // 50%=half torque
 	  // ...
+	  temporaryStopAutoDisable(true);
 	  this.servoTorque=torqueInPercent;
 	  if (autoCalibrateMax<=autoCalibrateMin)
 	  {
@@ -1000,14 +998,17 @@ private int servoTorque;
 	  }
 	  if (torqueInPercent<100 && torqueInPercent>0)
 	  {
+	  unsubscribe(getController().getName(),"publishPinArray");
 	  subscribe(this.getController().getName(),"publishPinArray", getName(), "publishedSensorEventFeedback");
+	  this.getController().disablePin(SensorPin);
 	  this.getController().enablePin(SensorPin, 10);
 	  }
 	  else
 	  {
 		  this.getController().disablePin(SensorPin);
+		  temporaryStopAutoDisable(false);
 		  log.info("set servo torque to "+torqueInPercent+" % > feedback disabled");
-		  unsubscribe(getController().getName(),"publishedSensorEventFeedback");
+		  unsubscribe(getController().getName(),"publishPinArray");
 	  }
 	  log.info("set servo torque to "+torqueInPercent+" % > feedback activated");
 	  return true;
@@ -1016,7 +1017,7 @@ private int servoTorque;
  
   public void publishedSensorEventCalibration(PinData[] data) {
 	  for(int i = 0; i < data.length; i++) {
-		  log.info("Current "+this.getName()+" sensor value:"+data[i].value);
+		  log.info("Current "+this.getName()+" calibration sensor value:"+data[i].value);
 		  sensorValues.add(data[i].value);
 		}
   }
@@ -1028,15 +1029,15 @@ private int servoTorque;
 		  sensorValues.add(data[i].value);
 		  //error correction and smooth signal ( average 10 values by second )
 		  feedBackCounter[i]+=1;
-		  if (feedBackCounter[i]>=10)
+		  if (feedBackCounter[i]>=5)
 		  {
-			  int lastAverageValue=MathUtils.averageMaxFromArray(10,sensorValues);
+			  int lastAverageValue=MathUtils.averageMaxFromArray(5,sensorValues);
 			  sensorValues.clear();
 			  sensorValues.add(lastAverageValue);
 			  feedBackCounter[i]=0;
 		  }		  
 		}
-	  if (MathUtils.averageMaxFromArray(10,sensorValues)>MathUtils.getPercentFromRange(autoCalibrateMin, autoCalibrateMax, this.servoTorque))
+	  if (targetPosBeforeSensorFeebBackCorrection>0&&MathUtils.averageMaxFromArray(5,sensorValues)>MathUtils.getPercentFromRange(autoCalibrateMin, autoCalibrateMax, this.servoTorque))
 	  {
 		  
 		  this.stop();
@@ -1045,13 +1046,13 @@ private int servoTorque;
 		    log.info("correction -1");
 		    intialTargetPosChange=true;
 	  }
-	  if (MathUtils.averageMaxFromArray(10,sensorValues)<MathUtils.getPercentFromRange(autoCalibrateMin, autoCalibrateMax, this.servoTorque))
+	  if (targetPosBeforeSensorFeebBackCorrection<180&&MathUtils.averageMaxFromArray(5,sensorValues)<MathUtils.getPercentFromRange(autoCalibrateMin, autoCalibrateMax, this.servoTorque))
 	  {
 		  
-		  if (this.currentPosInput<targetPosBeforeSensorFeebBackCorrection)
-		  {
-			  this.moveTo(targetPosBeforeSensorFeebBackCorrection);
+		  if (Math.round(this.currentPosInput)<Math.round(targetPosBeforeSensorFeebBackCorrection))
+		  {			  
 			  log.info("correction +X");
+			  this.moveTo(targetPosBeforeSensorFeebBackCorrection);
 		  }
 	  }
   }

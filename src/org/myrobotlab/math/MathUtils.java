@@ -2,6 +2,8 @@ package org.myrobotlab.math;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.python.jline.internal.Log;
+
 /**
  * A place to have some handy math functions.
  * 
@@ -19,20 +21,22 @@ public class MathUtils {
 		Collections.sort( list );
 		
 		int sumMaxAvg=0;
-		//Log.debug("size:"+list.size()+"");
-		if (list.size()-1<howMany)
+		//Log.info("size:"+list.size()+" howmany: "+howMany);
+		if (list.size()<howMany)
 		{
-		howMany=list.size()-1;	
+		howMany=list.size();	
 		}
-		if (list.size()-1>0)
+		if (list.size()>0)
 		{
 			
 			for(int i = list.size(); i > list.size()-howMany; i--) {
 				sumMaxAvg+=list.get(i-1);
 				//Log.debug(i-1+" "+list.get(i-1));
 			}
+			//Log.debug("math returned "+ sumMaxAvg / howMany);
 		return sumMaxAvg / howMany;
 		}
+		Log.warn("averageMaxFromArray error");
 		return 0;
 	  }
 
