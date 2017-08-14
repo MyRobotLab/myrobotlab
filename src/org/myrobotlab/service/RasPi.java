@@ -349,8 +349,8 @@ public class RasPi extends Service implements I2CController {
     // needs this service to still be availabe
     String key = String.format("%d.%d", Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()));
     if (i2cDevices.containsKey(key)) {
-      i2cDevices.remove(key);
       control.detachI2CController(this);
+      i2cDevices.remove(key);
     }
 
   }

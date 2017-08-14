@@ -31,22 +31,20 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 /**
- * Natural Reader speech to text service based on naturalreaders.com
- * This code is basically all the same as AcapelaSpeech...
+ * Indian TTS speech to text service based on http://indiantts.com
+ * This code is basically all the same as NaturalReaderSpeech by Kwatters...
  */
-public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements TextListener, AudioListener {
+public class IndianTts extends AbstractSpeechSynthesis implements TextListener, AudioListener {
 
   private static final long serialVersionUID = 1L;
 
-  transient public final static Logger log = LoggerFactory.getLogger(NaturalReaderSpeech.class);
+  transient public final static Logger log = LoggerFactory.getLogger(IndianTts.class);
   // default voice
-  // TODO: natural reader has this voice.. there are others
-  // but for now.. only Ryan is wired in.. it maps to voice id "33"
-  String voice = "Ryan";
-  HashMap<String, Integer> voiceMap = new HashMap<String,Integer>();
-  ArrayList<String> voices = new ArrayList<String>();
-  
-  
+
+  public String voice = "Default";
+  public String api = "";
+  public String userid = "";
+  public HashMap<String, Integer> voiceMap = new HashMap<String,Integer>();
   transient AudioFile audioFile = null;
   // private float volume = 1.0f;
   transient CloseableHttpClient client;
@@ -54,7 +52,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
   // audioData to utterance map TODO: revisit the design of this
   transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
   
-  public NaturalReaderSpeech(String reservedKey) {
+  public IndianTts(String reservedKey) {
     super(reservedKey);
   }
 
@@ -70,52 +68,9 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
     subscribe(audioFile.getName(), "publishAudioEnd");
     // attach a listener when the audio file ends playing.
     audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
-    // needed because of an ssl error on the natural reader site
-    System.setProperty("jsse.enableSNIExtension", "false");
     
-    voiceMap.put("Mike",1);
-    voiceMap.put("Crystal",11);
-    voiceMap.put("Rich",13);
-    voiceMap.put("Ray",14);
-    voiceMap.put("Heather",26); 
-    voiceMap.put("Laura",17);
-    voiceMap.put("Lauren",17);
-    voiceMap.put("Ryan",33);
-    voiceMap.put("Peter",31);
-    voiceMap.put("Rachel",32);
-    voiceMap.put("Charles",2);
-    voiceMap.put("Audrey",3);
-    voiceMap.put("Graham",25);
-    voiceMap.put("Bruno",22);
-    voiceMap.put("Alice",21);
-    voiceMap.put("Alain",7);
-    voiceMap.put("Juliette",8); 
-    voiceMap.put("Klaus",28);
-    voiceMap.put("Sarah",35);
-    voiceMap.put("Reiner",5);
-    voiceMap.put("Klara",6);
-    voiceMap.put("Rose",20);
-    voiceMap.put("Alberto",19); 
-    voiceMap.put("Vittorio",36);
-    voiceMap.put("Chiara",23);
-    voiceMap.put("Anjali",4);
-    voiceMap.put("Arnaud",9);
-    voiceMap.put("Giovanni",10); 
-    voiceMap.put("Crystal",11);
-    voiceMap.put("Francesca",12);
-    voiceMap.put("Claire",15);
-    voiceMap.put("Julia",16);
-    voiceMap.put("Mel",18);
-    voiceMap.put("Juli",27);
-    voiceMap.put("Laura",29);
-    voiceMap.put("Lucy",30);
-    voiceMap.put("Salma",34);
-    voiceMap.put("Tracy",37);
-    voiceMap.put("Lulu",38);
-    voiceMap.put("Sakura",39);
-    voiceMap.put("Mehdi",40);
-    
-    voices.addAll(voiceMap.keySet());
+    voiceMap.put("Default",1);
+      
   }
 
   public AudioFile getAudioFile() {
@@ -124,7 +79,12 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
   
   @Override
   public ArrayList<String> getVoices() {
-    return voices;
+    // TODO:return the list of voices names for this.
+   
+    ArrayList<String> voices = new ArrayList<String>();
+    voices.addAll(voices);
+    
+    return null;
   }
 
   @Override
@@ -145,10 +105,10 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
     }    
     
     int voiceId = voiceMap.get(voice);
-    
-    // TODO: expose thge "r=33" as the selection for Ryans voice.
+
     // TOOD: also the speed setting is passed in as s= 
-    String url = "https://api.naturalreaders.com/v2/tts/?t=" + encoded + "&r="+voiceId+"&s=0";
+
+    String url = "http://ivrapi.indiantts.co.in/tts?type=indiantts&text=" + encoded + "&api_key=" + api + "&user_id=" + userid + "&action=play"; 
     log.info("URL FOR AUDIO:{}",url);
     return url;
   }
@@ -170,9 +130,10 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
       HttpEntity entity = response.getEntity();
       // cache the mp3 content
       b = FileIO.toByteArray(entity.getContent());
-      if (b == null || b.length == 0){
-        error("%s returned 0 byte file !!! - it may block you", getName());
-      }
+
+      if (b == null || b.length == 0 || b.length == 81 || b.length == 47){
+        error("%s returned 0 byte file or API error !!! - it may block you", getName());
+       }
       EntityUtils.consume(entity);
     } catch (Exception e) {
       Logging.logError(e);
@@ -188,10 +149,15 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
   @Override
   public boolean speakBlocking(String toSpeak) throws IOException {
     log.info("speak blocking {}", toSpeak);
+    
+    if (api == "" || userid == "") {
+      error("Api or userid not set");
+      return false;
+    }
 
     if (voice == null) {
-      log.warn("voice is null! setting to default: Ryan");
-      voice = "Ryan";
+      log.warn("voice is null! setting to default: Default");
+      voice = "Default";
     }
     String localFileName = getLocalFileName(this, toSpeak, "mp3");
     String filename = AudioFile.globalFileCacheDir + File.separator + localFileName;
@@ -209,7 +175,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
   @Override
   public void setVolume(float volume) {
     // TODO: fix the volume control
-    log.warn("Volume control not implemented in Natural Reader Speech yet.");
+    log.warn("Volume control not implemented in Indian Tts yet.");
   }
   
 
@@ -242,9 +208,13 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
     // this will flip to true on the audio file end playing.
     AudioData ret = null;
     log.info("speak {}", toSpeak);
+    if (api == "" || userid == "") {
+      error("Api or userid not set");
+      return ret;
+    }
     if (voice == null) {
-      log.warn("voice is null! setting to default: Ryan");
-      voice = "Ryan";
+      log.warn("voice is null! setting to default: Defaut");
+      voice = "Defaut";
     }
     String filename = this.getLocalFileName(this, toSpeak, "mp3");
     if (audioFile.cacheContains(filename)) {
@@ -347,10 +317,10 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
   }
   
   static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(NaturalReaderSpeech.class.getCanonicalName());
-    meta.addDescription("Natural Reader based speech service.");
+    ServiceType meta = new ServiceType(IndianTts.class.getCanonicalName());
+    meta.addDescription("Hindi tts support");
     meta.addCategory("speech");
-    meta.setSponsor("kwatters");
+    meta.setSponsor("moz4r");
     meta.addPeer("audioFile", "AudioFile", "audioFile");
 //    meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
@@ -362,18 +332,11 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
     LoggingFactory.init(Level.INFO);
     //try {
       // Runtime.start("webgui", "WebGui");
-      NaturalReaderSpeech speech = (NaturalReaderSpeech) Runtime.start("speech", "NaturalReaderSpeech");
-      // speech.setVoice("Ryan");
-      // TODO: fix the volume control
-      // speech.setVolume(0);
-     // speech.speakBlocking("does this work");
-//       speech.getMP3ForSpeech("hello world");
-      
-      speech.speakBlocking("does this work");
-      
-      speech.setVoice("Lauren");
+      IndianTts speech = (IndianTts) Runtime.start("speech", "IndianTts");
+   
+      speech.speakBlocking("नमस्ते भारत मित्र");
 
-      speech.speakBlocking("horray for worky!");
+      speech.speak("नमस्ते भारत मित्र");
   
     //}
   }

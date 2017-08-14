@@ -52,12 +52,12 @@ import org.slf4j.Logger;
 public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextListener {
   static final Logger log = LoggerFactory.getLogger(MicrosoftSpeech.class);
 
-	// For compabilities
 	private static final long serialVersionUID = 1L;
-	private HashSet<String> voices = new HashSet<String>();
-
 	private String TextPath = "";
 	private String voice = "";
+
+	// For compabilities
+	private HashSet<String> voices = new HashSet<String>();
 
 	public MicrosoftSpeech(String reservedKey) {
 		super(reservedKey);
@@ -71,7 +71,7 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 	// Use for specified text path file
 	@Override
 	public void setLanguage(String l) {
-		TextPath = voice;
+		TextPath = l;
 	}
 
 	// Use for read text path file
@@ -92,12 +92,14 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 		return new ArrayList<String>(voices);
 	}
 
+	// For compabilities
 	@Override
 	public boolean setVoice(String voice) {
 		this.voice = voice;
 		return true;
 	}
 
+	// For compabilities
 	@Override
 	public String getVoice() {
 		return voice;
@@ -155,6 +157,7 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 	 * Create voicetest batch if doesn't exist
 	 * 
 	 * @param nothing
+	 * @return nothing
 	 */
 	private void createBatchFile() {
 		
@@ -164,7 +167,7 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 		{
 			PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter (f)));
 		 
-			pw.print("ptts -u text.txt");
+			pw.print("ptts -u " + TextPath + "text.txt");
 			pw.close();
 		}
 		catch (IOException exception)
@@ -172,7 +175,32 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 			System.out.println("Write error : " + exception.getMessage());
 		}		
 	}
-	
+
+	/**
+	 */
+	private class WaitThread extends Thread {
+		String ts;
+		
+		WaitThread(String toSpeak) {
+			super();
+			ts=toSpeak;
+    }
+
+    public void run() {
+			// Send command
+			try {
+				java.lang.Runtime rt = java.lang.Runtime.getRuntime();
+				Process pr = rt.exec("voicetest.bat");
+				pr.waitFor();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			// End speak event
+			invoke("publishEndSpeaking", ts);
+    }
+  }
+
 	/**
 	 * Begin speaking something and return immediately
 	 * 
@@ -184,37 +212,28 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 	public AudioData speak(String toSpeak) throws Exception {
 		
 		// Check batch file
-		if (!batchFileIsOK())
-		{
+		if (!batchFileIsOK())	{
 			createBatchFile();
 		}
 		
 		// Text file created...
-		File f = new File ("text.txt");
-		 
-		try
-		{
+		File f = new File (TextPath + "text.txt");
+		
+		try	{
 			PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter (f)));
 		 
 			pw.print(toSpeak);
 			pw.close();
 		}
-		catch (IOException exception)
-		{
+		catch (IOException exception)	{
 			System.out.println("Write error : " + exception.getMessage());
 		}		
-
 
 		// Start speak event
 		invoke("publishStartSpeaking", toSpeak);
 
-		// Send command
-		//executeCommand("voicetest.bat");
-		java.lang.Runtime rt = java.lang.Runtime.getRuntime();
-		Process pr = rt.exec("voicetest.bat");
-
-		// End speak event
-		invoke("publishEndSpeaking", toSpeak);
+		WaitThread proc = new WaitThread(toSpeak);
+		proc.start();
 	
 		return null;
 	}
@@ -224,37 +243,33 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 	 * 
 	 * @param toSpeak
 	 *          - the string of text to speak.
+	 * @return
 	 */
 	@Override
 	public boolean speakBlocking(String toSpeak) throws Exception {
 
 		// Check batch file
-		if (!batchFileIsOK())
-		{
+		if (!batchFileIsOK())	{
 			createBatchFile();
 		}
 		
 		// Text file created...
-		File f = new File ("text.txt");
+		File f = new File (TextPath + "text.txt");
 		 
-		try
-		{
+		try	{
 			PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter (f)));
 		 
 			pw.print(toSpeak);
 			pw.close();
 		}
-		catch (IOException exception)
-		{
+		catch (IOException exception)	{
 			System.out.println("Write error : " + exception.getMessage());
 		}		
 
 		// Start speak event
 		invoke("publishStartSpeaking", toSpeak);
-
 		// Send command
 		executeCommand("voicetest.bat");
-
 		// End speak event
 		invoke("publishEndSpeaking", toSpeak);
 	
@@ -328,7 +343,17 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 		meta.addDescription("Speech synthesis based on Microsoft speech with Jampal.");
 		meta.addCategory("speech");
 		meta.setSponsor("Dom14");
-		// meta.addDependency("Jampal for windows", "2.1.6");
 		return meta;
 	}
+	
+	/*public static void main(String[] args) {
+	  try {
+	    LoggingFactory.init();
+			MicrosoftSpeech mspeech = (MicrosoftSpeech) Runtime.start("msspeech", "MicrosoftSpeech");
+	    mspeech.speak("Bonjour, aujourd'hui, je parlerai d'un nouveau service");
+	    mspeech.speakBlocking("Maintenant j'utilise une nouvelle methode");
+	  } catch (Exception e) {
+	    log.error("main threw", e);
+	  }
+	}*/
 }
