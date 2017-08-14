@@ -36,6 +36,10 @@ public class MathUtils {
 		return 0;
 	  }
 
+	public static Integer getPercentFromRange(int min, int max, int percent) {
+		return (((max-min)*percent)/100 + min);
+	  }
+	
 	static public double radToDeg(double radians) {
 		return radians * 57.2957795;
 	}

@@ -199,6 +199,8 @@ public class Servo extends Service implements ServoControl {
    * the requested INPUT position of the servo
    */
   Double targetPos;
+  Double targetPosBeforeSensorFeebBackCorrection;
+  Boolean intialTargetPosChange=true;
 
   /**
    * the calculated output for the servo
@@ -242,15 +244,12 @@ public class Servo extends Service implements ServoControl {
   boolean autoEnable = false;
   
   public int defaultDisableDelayNoVelocity = 10000;
-  private int defaultDisableDelayIfVelocity = 1000;
   private int disableDelayIfVelocity = 1000;
   private boolean moving;
   private double currentPosInput;
   public boolean autoDisable = false;
   boolean autoDisableOriginalStatus = autoDisable;
   boolean temporaryStopAutoDisableFinished = true;
-  
-  private transient Timer forceElectrizeTimer;
   private transient Timer autoDisableTimer;
   private int SensorPin=-1;
   private ArrayList<Integer> sensorValues=new ArrayList<Integer>();
@@ -260,6 +259,7 @@ public class Servo extends Service implements ServoControl {
   int autoCalibrateMax=0;
   // this var will break a current moveToBlocking to avoid potential conflicts
   boolean breakMoveToBlocking=true;
+private int servoTorque;
 	
 
   public transient static final int SERVO_EVENT_STOPPED = 1;
@@ -474,6 +474,11 @@ public class Servo extends Service implements ServoControl {
       pos = mapper.getMaxX();
     }
     targetPos = pos;
+    if (intialTargetPosChange)
+    {
+    	targetPosBeforeSensorFeebBackCorrection=targetPos;
+    }
+    
     targetOutput = getTargetOutput();// mapper.calcOutput(targetPos); //
     // calculated degrees
 
@@ -496,7 +501,7 @@ public class Servo extends Service implements ServoControl {
   {
 	  this.moveTo(pos);
 	  breakMoveToBlocking=false;
-	  while (this.currentPosInput<pos)
+	  while (Math.round(this.currentPosInput)<pos)
 	  {
 		  if (breakMoveToBlocking)
 		  {
@@ -504,6 +509,7 @@ public class Servo extends Service implements ServoControl {
 		  }
 		  //todo synchronized things ?
 		  sleep(1);
+		  //log.info(this.currentPosInput+"");
 	  }
 	  
 	  return true;
@@ -906,9 +912,18 @@ public class Servo extends Service implements ServoControl {
     this.autoEnable = autoEnable;
   }
   
-  //WIP analog sensor feedback to servo
+  // [experimental} generic analog sensor feedback to servo
+  // any analog sensor can be used
+  // sensor need to be calibrated, but you can skip the calibration step by setting :
+  // autoCalibrateMin + autoCalibrateMax ( range values returned by arduino )
+
   public boolean autoCalibrateSensor()
   {
+	  if (SensorPin==-1)
+	  {
+	    error("Please select sensor source");	
+	    return false;
+	  }
 	  int min=autoCalibrateSensorMin();
 	  int max=autoCalibrateSensorMax();
 	  if (max!=min && max>min)
@@ -929,7 +944,7 @@ public class Servo extends Service implements ServoControl {
 	  log.info("Starting "+this.getName()+" calibration");
 	  this.setVelocity(50);
 	  log.info("MoveTo MIN, and wait average sensor rest infos");
-	  this.moveTo(0);
+	  this.moveToBlocking(0);
 	  sensorValues.clear();
 	  this.getController().enablePin(SensorPin, 10);
 	  sleep(3000);
@@ -937,7 +952,7 @@ public class Servo extends Service implements ServoControl {
 	  //We need a little error correction, some stats will do the job
 	  autoCalibrateMin=MathUtils.averageMaxFromArray(10,sensorValues);
 	  log.info("autoCalibrateMin : "+autoCalibrateMin);
-	  unsubscribe(this.getController().getName(),"publishPinArray");
+	  unsubscribe(this.getController().getName(),"publishedSensorEventCalibration");
 	return autoCalibrateMin;
   }
   
@@ -953,6 +968,7 @@ public class Servo extends Service implements ServoControl {
 	    sensorValues.clear();
 	    this.getController().enablePin(SensorPin, 10);
 	    this.moveToBlocking(180);
+	    sleep(2000);
 	    //we need to know the maximum force the servo can do
 	    log.info(this.currentPosInput+"");
 	    this.getController().disablePin(SensorPin);
@@ -967,10 +983,36 @@ public class Servo extends Service implements ServoControl {
 			error("Calibration error : sensor timeout caused by maxvalues-minvalues<100" );
 		}
 		getController().disablePin(SensorPin);
-        unsubscribe(getController().getName(),"publishPinArray");
+        unsubscribe(getController().getName(),"publishedSensorEventCalibration");
 	    return 0;
   }
   
+  public boolean enableSensorFeedback(int torqueInPercent)
+  {
+	  // 100%=force servo to max
+	  // 50%=half torque
+	  // ...
+	  this.servoTorque=torqueInPercent;
+	  if (autoCalibrateMax<=autoCalibrateMin)
+	  {
+		 error("Problem with magic, sensor attached to "+this.getName()+" is not calibrated");
+		 return false;
+	  }
+	  if (torqueInPercent<100 && torqueInPercent>0)
+	  {
+	  subscribe(this.getController().getName(),"publishPinArray", getName(), "publishedSensorEventFeedback");
+	  this.getController().enablePin(SensorPin, 10);
+	  }
+	  else
+	  {
+		  this.getController().disablePin(SensorPin);
+		  log.info("set servo torque to "+torqueInPercent+" % > feedback disabled");
+		  unsubscribe(getController().getName(),"publishedSensorEventFeedback");
+	  }
+	  log.info("set servo torque to "+torqueInPercent+" % > feedback activated");
+	  return true;
+	  
+  }
  
   public void publishedSensorEventCalibration(PinData[] data) {
 	  for(int i = 0; i < data.length; i++) {
@@ -978,7 +1020,41 @@ public class Servo extends Service implements ServoControl {
 		  sensorValues.add(data[i].value);
 		}
   }
-
+  
+  private int[] feedBackCounter= {0};
+  public void publishedSensorEventFeedback(PinData[] data) {
+	  for(int i = 0; i < data.length; i++) {
+		  //log.info("Current "+this.getName()+" sensor value:"+data[i].value);
+		  sensorValues.add(data[i].value);
+		  //error correction and smooth signal ( average 10 values by second )
+		  feedBackCounter[i]+=1;
+		  if (feedBackCounter[i]>=10)
+		  {
+			  int lastAverageValue=MathUtils.averageMaxFromArray(10,sensorValues);
+			  sensorValues.clear();
+			  sensorValues.add(lastAverageValue);
+			  feedBackCounter[i]=0;
+		  }		  
+		}
+	  if (MathUtils.averageMaxFromArray(10,sensorValues)>MathUtils.getPercentFromRange(autoCalibrateMin, autoCalibrateMax, this.servoTorque))
+	  {
+		  
+		  this.stop();
+		    intialTargetPosChange=false;
+		    this.moveTo(this.currentPosInput-1);
+		    log.info("correction -1");
+		    intialTargetPosChange=true;
+	  }
+	  if (MathUtils.averageMaxFromArray(10,sensorValues)<MathUtils.getPercentFromRange(autoCalibrateMin, autoCalibrateMax, this.servoTorque))
+	  {
+		  
+		  if (this.currentPosInput<targetPosBeforeSensorFeebBackCorrection)
+		  {
+			  this.moveTo(targetPosBeforeSensorFeebBackCorrection);
+			  log.info("correction +X");
+		  }
+	  }
+  }
 
   @Deprecated
   public void enableAutoDetach(boolean autoDetach) {
@@ -1100,26 +1176,6 @@ public class Servo extends Service implements ServoControl {
         }, (long) defaultDisableDelayNoVelocity);
       }
     }
-  }
-
-  @Deprecated
-  public void forceElectrize(int delay) {
-    delay = delay * 1000;
-    log.info("forceElectrize ON ", getName(), " : ", delay);
-    disableDelayIfVelocity = delay;
-
-    if (forceElectrizeTimer != null) {
-      forceElectrizeTimer.cancel();
-      forceElectrizeTimer = null;
-    }
-    forceElectrizeTimer = new Timer();
-    forceElectrizeTimer.schedule(new TimerTask() {
-      @Override
-      public void run() {
-        disableDelayIfVelocity = defaultDisableDelayIfVelocity;
-        log.info("forceElectrize OFF ", getName());
-      }
-    }, (long) delay);
   }
 
   /*
