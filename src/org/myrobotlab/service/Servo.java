@@ -258,8 +258,8 @@ public class Servo extends Service implements ServoControl {
   int autoCalibrateMin=0;
   int autoCalibrateMax=0;
   // this var will break a current moveToBlocking to avoid potential conflicts
-  boolean breakMoveToBlocking=true;
-private int servoTorque;
+  Object MoveToBlocked = new Object();
+  private int servoTorque;
 	
 
   public transient static final int SERVO_EVENT_STOPPED = 1;
@@ -451,13 +451,16 @@ private int servoTorque;
   }
 
   public synchronized void moveTo(double pos) {
-	breakMoveToBlocking=true;
+	//breakMoveToBlocking=true;
+	synchronized (MoveToBlocked) {
+	   	MoveToBlocked.notifyAll(); // Will wake up MoveToBlocked.wait()
+	}	  
     if (controller == null) {
       error(String.format("%s's controller is not set", getName()));
       return;
     }
     if (lastPos == pos) {
-      // return;
+    	delayDisable(defaultDisableDelayNoVelocity);
     }
     if (autoEnable && !isEnabled() /** && pos != lastPos **/
     ) {
@@ -483,8 +486,11 @@ private int servoTorque;
     // calculated degrees
 
     // calculated degrees
+    if (lastPos!=pos)
+    {
     controller.servoMoveTo(this);
     lastActivityTime = System.currentTimeMillis();
+    }
 
   }
 
@@ -500,19 +506,43 @@ private int servoTorque;
   public boolean moveToBlocking(double pos)
   {
 	  this.moveTo(pos);
-	  breakMoveToBlocking=false;
-	  while (Math.round(this.currentPosInput)<pos)
+	  //breakMoveToBlocking=false;
+	  while (Math.round(this.currentPosInput)!=pos&&velocity>0&&isPinAttached&&lastPos != pos)
 	  {
-		  if (breakMoveToBlocking)
-		  {
-			  return false;
-		  }
-		  //todo synchronized things ?
-		  sleep(1);
-		  //log.info(this.currentPosInput+"");
+		  
+		  synchronized (MoveToBlocked) {
+			  try {
+				MoveToBlocked.wait(30000);//30s timeout security delay
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} // Will block until lock.notify() is called on another thread.
+			}
 	  }
-	  
+	  if (Math.round(this.currentPosInput)!=pos&&velocity==-1&&lastPos != pos)
+	  {
+		  sleep(5000);
+	  }
+	  lastPos = targetPos;
 	  return true;
+  }
+  
+  private void delayDisable(double delay)
+  {
+	  if (autoDisableTimer != null) {
+          autoDisableTimer.cancel();
+          autoDisableTimer = null;
+        }
+        autoDisableTimer = new Timer();
+        autoDisableTimer.schedule(new TimerTask() {
+        @Override
+        public void run() {
+            	disable();
+            	synchronized (MoveToBlocked) {
+          	MoveToBlocked.notifyAll(); // Will wake up MoveToBlocked.wait()
+              }
+            }
+          }, (long) delay);
   }
 
   public Double publishServoEvent(Double position) {
@@ -740,6 +770,13 @@ private int servoTorque;
     // the controller is attached now
     // its time to attach the pin
     enable(pin);
+    int i=0;
+    while (!isPinAttached && i<5)
+    {
+    	sleep(500);
+    	i+=5;
+    }
+    sleep(100);
 
     broadcastState();
   }
@@ -1155,26 +1192,16 @@ private int servoTorque;
 
   public void onServoEvent(Double position) {
     // log.info("{}.ServoEvent {}", getName(), position);
-    if (!isMoving() && autoDisable && isPinAttached()) {
-      if (autoDisableTimer != null) {
-        autoDisableTimer.cancel();
-        autoDisableTimer = null;
-      }
-      autoDisableTimer = new Timer();
+	  if (!isMoving() && !autoDisable && isPinAttached()) {
+          synchronized (MoveToBlocked) {
+          MoveToBlocked.notifyAll(); // Will wake up MoveToBlocked.wait()
+          }
+	      }
+	  if (!isMoving() && autoDisable && isPinAttached()) {
       if (velocity > -1) {
-        autoDisableTimer.schedule(new TimerTask() {
-          @Override
-          public void run() {
-            disable();
-          }
-        }, (long) disableDelayIfVelocity);
+    	  delayDisable(disableDelayIfVelocity);
       } else {
-        autoDisableTimer.schedule(new TimerTask() {
-          @Override
-          public void run() {
-            disable();
-          }
-        }, (long) defaultDisableDelayNoVelocity);
+    	  delayDisable(defaultDisableDelayNoVelocity);
       }
     }
   }
