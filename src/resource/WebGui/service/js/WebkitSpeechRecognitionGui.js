@@ -174,7 +174,11 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         {
             name: 'Galego',
             id: 'gl-ES'
-        }, 
+        },
+        {
+            name: 'Hindi - हिंदी',
+            id: 'hi-IN'
+        },         
         {
             name: 'Hrvatski',
             id: 'hr_HR'
