@@ -132,6 +132,7 @@ public class InMoov extends Service {
 
   //
   private boolean mute = false;
+  public String language;
 
   public static int attachPauseMs = 100;
   
@@ -1413,6 +1414,10 @@ public class InMoov extends Service {
   public void startService() {
     super.startService();
     python = getPython();
+    if (language==null)
+    {
+    	language="en";
+    }
   }
 
   public InMoovTorso startTorso(String port) throws Exception {
