@@ -52,3 +52,5 @@ Thumbs.db
 /localBuild/
 /serial.rx.hex
 /serial.tx.hex
+/pids/
+/voicetest.bat
