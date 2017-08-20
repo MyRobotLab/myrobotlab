@@ -460,7 +460,10 @@ public class Servo extends Service implements ServoControl {
       return;
     }
     if (lastPos == pos) {
-    	delayDisable(defaultDisableDelayNoVelocity);
+    	if (autoDisable)
+    	{
+    		delayDisable(defaultDisableDelayNoVelocity);
+    	}
     }
     if (autoEnable && !isEnabled() /** && pos != lastPos **/
     ) {
