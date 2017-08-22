@@ -461,17 +461,10 @@ public class Servo extends Service implements ServoControl {
       return;
     }
     if (lastPos == pos) {
-<<<<<<< HEAD
       if (autoDisable)
       {
       delayDisable(defaultDisableDelayNoVelocity);
     }
-=======
-    	if (autoDisable)
-    	{
-    		delayDisable(defaultDisableDelayNoVelocity);
-    	}
->>>>>>> branch 'develop' of https://github.com/MyRobotLab/myrobotlab.git
     }
     if (autoEnable && !isEnabled() /** && pos != lastPos **/
     ) {
