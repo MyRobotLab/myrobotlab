@@ -25,25 +25,26 @@
 
 package org.myrobotlab.service;
 
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -263,12 +264,13 @@ public class Servo extends Service implements ServoControl {
   public transient static final int SERVO_EVENT_STOPPED = 1;
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
-  public class IKData {
+  public static class IKData {
     public String name;
     public Double pos;
     public Integer state;
     public double velocity;
     public Double targetPos;
+    // public int type;
   }
 
   public Servo(String n) {
@@ -281,7 +283,6 @@ public class Servo extends Service implements ServoControl {
   public void onRegistered(ServiceInterface s) {
     refreshControllers();
     broadcastState();
-
   }
 
   public void addServoEventListener(NameProvider service) {
@@ -301,6 +302,7 @@ public class Servo extends Service implements ServoControl {
   /**
    * Re-attach to servo current conroller and pin. The pin must have be set
    * previously. And the controller must have been set prior to calling this.
+   * Use enable()
    * 
    */
   @Override
@@ -459,13 +461,16 @@ public class Servo extends Service implements ServoControl {
       return;
     }
     if (lastPos == pos) {
+      if (autoDisable)
+      {
       delayDisable(defaultDisableDelayNoVelocity);
+    }
     }
     if (autoEnable && !isEnabled() /** && pos != lastPos **/
     ) {
       enable();
     } else if (!isEnabled()) {
-      log.info("{} is disable, discarting moveTo()", getName());
+      log.info("{} is disable, discarding moveTo()", getName());
       return;
     }
     lastPos = targetPos;
@@ -1189,11 +1194,67 @@ public class Servo extends Service implements ServoControl {
     this.controller = controller;
   }
 
+  /**
+   * used to synchronize 2 servos e.g. servo1.sync(servo2) - now they move as
+   * one
+   */
+  public void sync(ServoControl sc) {
+    subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
+  }
+
   public static void main(String[] args) throws InterruptedException {
     try {
-      LoggingFactory.init(Level.INFO);
 
-      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+      String arduinoPort = "COM10";
+
+      VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+      virtual.connect(arduinoPort);
+      Runtime.start("servo01", "Servo");
+      Runtime.start("servo02", "Servo");
+      Runtime.start("gui", "SwingGui");
+      Runtime.start("arduino", "Arduino");
+
+      boolean done = true;
+      if (done) {
+        return;
+      }      
+      
+      Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+      Map<String, MethodEntry> methods = servo01.getMethodMap();
+      
+      // String out = CodecUtils.toJson();
+      StringBuilder sb = new StringBuilder();
+      sb.append("<table border=1 cellpadding=5 cellspacing=0>");
+      sb.append("<tr><td>name</td><td>parameters</td><td>return type</td><td>comments</td></tr>");
+      for (MethodEntry m : methods.values()) {
+        sb.append("<tr>");
+        sb.append("<td>");
+        sb.append(m.getName());
+        sb.append("</td>");
+        sb.append("<td>");
+        sb.append(m.getSimpleParameterTypesAndNames());
+        // sb.append(m.getReturnType());
+        sb.append("</td>");
+        sb.append("<td>");
+        sb.append(m.getSimpleReturnTypeName());
+        // sb.append(m.getReturnType());
+        sb.append("</td>");
+
+        sb.append("<td>&nbsp;</td>");
+        sb.append("</tr>");
+        sb.append("\n");
+      }
+
+      sb.append("</table>");
+
+      FileOutputStream fos = new FileOutputStream("servo01.methods.html");
+      fos.write(sb.toString().getBytes());
+      fos.close();
+
+
+      // LoggingFactory.init(Level.INFO);
+
+      // VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
       virtual.connect("COM10");
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
@@ -1212,11 +1273,6 @@ public class Servo extends Service implements ServoControl {
       servo.attach(arduino, 7);
       servo.moveTo(90);
       servo.setRest(30);
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       servo.attach(8);
       servo.moveTo(90);
@@ -1275,7 +1331,4 @@ public class Servo extends Service implements ServoControl {
 
   }
 
-  public void sync(ServoControl sc) {
-    subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
-  }
 }
