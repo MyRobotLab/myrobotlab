@@ -59,6 +59,8 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 	// For compabilities
 	private HashSet<String> voices = new HashSet<String>();
 
+	private String language;
+
 	public MicrosoftSpeech(String reservedKey) {
 		super(reservedKey);
 	}
@@ -72,6 +74,7 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 	@Override
 	public void setLanguage(String l) {
 		TextPath = l;
+		this.language=l;
 	}
 
 	// Use for read text path file
@@ -344,6 +347,24 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 		meta.addCategory("speech");
 		meta.setSponsor("Dom14");
 		return meta;
+	}
+
+	@Override
+	public AudioData speak(String Language, String toSpeak) throws Exception {
+		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
+		{
+		return speak(toSpeak);
+		}
+		return null;
+	}
+
+	@Override
+	public boolean speakBlocking(String Language, String toSpeak) throws Exception {
+		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
+		{
+		return speakBlocking(toSpeak);
+		}
+		return false;
 	}
 	
 	/*public static void main(String[] args) {

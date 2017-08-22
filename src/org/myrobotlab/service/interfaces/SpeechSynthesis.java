@@ -39,6 +39,8 @@ public interface SpeechSynthesis extends NameProvider {
    * @throws Exception e
    */
   public abstract AudioData speak(String toSpeak) throws Exception;
+  
+  public abstract AudioData speak(String Language,String toSpeak) throws Exception;
 
   /**
    * Begin speaking and wait until all speech has been played back/
@@ -49,6 +51,8 @@ public interface SpeechSynthesis extends NameProvider {
    * @return true/false
    */
   public abstract boolean speakBlocking(String toSpeak) throws Exception;
+  
+  public abstract boolean speakBlocking(String Language,String toSpeak) throws Exception;
 
   public abstract void setVolume(float volume);
 
