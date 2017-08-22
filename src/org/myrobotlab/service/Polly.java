@@ -78,6 +78,8 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
 
   String lang;
 
+private String language;
+
   public Polly(String n) {
     super(n);
   }
@@ -112,6 +114,7 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
     if (langMap.containsKey(l)) {
       setVoice(langMap.get(l).getName());
     }
+    this.language=l;
   }
 
   @Override
@@ -236,7 +239,7 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
           processVoicesRequest();
         } catch (Exception e2) {
           error("could not get Polly client - did you setKeys ?");
-          error("Environment variables – AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY or");
+          error("Environment variables â€“ AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY or");
           error("check http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html");
           log.error("giving up", e2);
         }
@@ -387,19 +390,19 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
         } else if (lang.startsWith("en")) {
           polly.speak(String.format("Hi my name is %s and I think myrobotlab is great!", voice));
         } else if (lang.startsWith("fr")) {
-          polly.speak(String.format("Bonjour, mon nom est %s et je pense que myrobotlab est génial!!", voice));
+          polly.speak(String.format("Bonjour, mon nom est %s et je pense que myrobotlab est gÃ©nial!!", voice));
         } else if (lang.startsWith("nl")) {
           polly.speak(String.format("Hallo, mijn naam is %s en ik denk dat myrobotlab is geweldig!", voice));
         } else if (lang.startsWith("ru")) {
-          polly.speak(String.format("Привет, меня зовут %s, и я думаю, что myrobotlab - это здорово!", voice));
+          polly.speak(String.format("ÐŸÑ€Ð¸Ð²ÐµÑ‚, Ð¼ÐµÐ½Ñ� Ð·Ð¾Ð²ÑƒÑ‚ %s, Ð¸ Ñ� Ð´ÑƒÐ¼Ð°ÑŽ, Ñ‡Ñ‚Ð¾ myrobotlab - Ñ�Ñ‚Ð¾ Ð·Ð´Ð¾Ñ€Ð¾Ð²Ð¾!", voice));
         } else if (lang.startsWith("ro")){
-          polly.speak(String.format("Buna ziua, numele meu este %s și cred că myrobotlab este mare!", voice));
+          polly.speak(String.format("Buna ziua, numele meu este %s È™i cred cÄƒ myrobotlab este mare!", voice));
         } else if (lang.startsWith("ro")){
-          polly.speak(String.format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!", voice));
+          polly.speak(String.format("Witam, nazywam siÄ™ %s i myÅ›lÄ™, Å¼e myrobotlab jest Å›wietny!", voice));
         } else if (lang.startsWith("it")){
-          polly.speak(String.format("Ciao, il mio nome è %s e penso myrobotlab è grande!", voice));
+          polly.speak(String.format("Ciao, il mio nome Ã¨ %s e penso myrobotlab Ã¨ grande!", voice));
         } else if (lang.startsWith("is")){
-          polly.speak(String.format("Halló, Nafn mitt er %s og ég held myrobotlab er frábært!", voice));
+          polly.speak(String.format("HallÃ³, Nafn mitt er %s og Ã©g held myrobotlab er frÃ¡bÃ¦rt!", voice));
         } else if (lang.startsWith("cy")){
           polly.speak(String.format("Helo, fy enw i yw %s a fi yn meddwl myrobotlab yn wych!", voice));
         } else if (lang.startsWith("de")){
@@ -407,15 +410,15 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
         } else if (lang.startsWith("da")){
           polly.speak(String.format("Hej, mit navn er %s og jeg tror myrobotlab er fantastisk!", voice));
         } else if (lang.startsWith("sv")){
-          polly.speak(String.format("Hej, mitt namn %s och jag tror ElektronikWikin är stor!", voice));
+          polly.speak(String.format("Hej, mitt namn %s och jag tror ElektronikWikin Ã¤r stor!", voice));
         } else if (lang.startsWith("pl")){
-          polly.speak(String.format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!", voice));
+          polly.speak(String.format("Witam, nazywam siÄ™ %s i myÅ›lÄ™, Å¼e myrobotlab jest Å›wietny!", voice));
         } else if (lang.startsWith("tr")){
-          polly.speak(String.format("Merhaba, adım adım %s ve myrobotlab'ın harika olduğunu düşünüyorum!", voice));        
+          polly.speak(String.format("Merhaba, adÄ±m adÄ±m %s ve myrobotlab'Ä±n harika olduÄŸunu dÃ¼ÅŸÃ¼nÃ¼yorum!", voice));        
         } else if (lang.startsWith("pt")){
-          polly.speak(String.format("Olá, meu nome é %s e eu acho que myrobotlab é ótimo!！", voice));
+          polly.speak(String.format("OlÃ¡, meu nome Ã© %s e eu acho que myrobotlab Ã© Ã³timo!ï¼�", voice));
         } else if (lang.startsWith("ja")){
-          polly.speak(String.format("こんにちは、私の名前は%sで、私はmyrobotlabが素晴らしいと思います！", voice));
+          polly.speak(String.format("ã�“ã‚“ã�«ã�¡ã�¯ã€�ç§�ã�®å��å‰�ã�¯%sã�§ã€�ç§�ã�¯myrobotlabã�Œç´ æ™´ã‚‰ã�—ã�„ã�¨æ€�ã�„ã�¾ã�™ï¼�", voice));
         } else {
           log.info("dunno");
         }
@@ -456,5 +459,23 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
       log.error("Polly main threw", e);
     }
   }
+
+	@Override
+	public AudioData speak(String Language, String toSpeak) throws Exception {
+		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
+		{
+		return speak(toSpeak);
+		}
+		return null;
+	}
+
+	@Override
+	public boolean speakBlocking(String Language, String toSpeak) throws Exception {
+		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
+		{
+		return speakBlocking(toSpeak);
+		}
+		return false;
+	}
 
 }

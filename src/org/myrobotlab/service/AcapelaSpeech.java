@@ -429,11 +429,6 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
 
   }
 
-  public AudioData speak(String voice, String toSpeak) throws IOException {
-    setVoice(voice);
-    return speak(toSpeak);
-  }
-
   @Override
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
     // TODO: make this a base class sort of thing.
@@ -469,6 +464,7 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
 
   // audioData to utterance map TODO: revisit the design of this
   HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
+private Object language;
 
   @Override
   public String publishStartSpeaking(String utterance) {
@@ -553,4 +549,14 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
     return meta;
   }
+
+	@Override
+	public AudioData speak(String Language, String toSpeak) throws Exception {
+		return null;
+	}
+
+	@Override
+	public boolean speakBlocking(String Language, String toSpeak) throws Exception {
+		return false;
+	}
 }

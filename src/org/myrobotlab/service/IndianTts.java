@@ -51,6 +51,8 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
   transient Stack<String> audioFiles = new Stack<String>();
   // audioData to utterance map TODO: revisit the design of this
   transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
+
+  private String language;
   
   public IndianTts(String reservedKey) {
     super(reservedKey);
@@ -228,11 +230,6 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
     ret = audioFile.playCachedFile(filename);
     utterances.put(ret, toSpeak);
     return ret;
-  }  
-
-  public AudioData speak(String voice, String toSpeak) throws IOException {
-    setVoice(voice);
-    return speak(toSpeak);
   }
   
   @Override
@@ -313,7 +310,7 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
 
   @Override
   public void setLanguage(String l) {
-    // TODO this is ignored.. only Ryan voice currently enabled.    
+	  this.language=l;   
   }
   
   static public ServiceType getMetaData() {
@@ -341,5 +338,21 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
     //}
   }
 
+	@Override
+	public AudioData speak(String Language, String toSpeak) throws Exception {
+		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
+		{
+		return speak(toSpeak);
+		}
+		return null;
+	}
 
+	@Override
+	public boolean speakBlocking(String Language, String toSpeak) throws Exception {
+		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
+		{
+		return speakBlocking(toSpeak);
+		}
+		return false;
+	}
 }

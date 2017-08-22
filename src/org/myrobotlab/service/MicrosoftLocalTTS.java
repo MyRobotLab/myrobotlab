@@ -53,7 +53,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
 
   transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
 
-  String lang="en";
+  String language="en";
 
   public MicrosoftLocalTTS(String n) {
     super(n);
@@ -97,12 +97,12 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
 
   @Override
   public void setLanguage(String l) {
-    log.info("not used");
+    this.language=l;
   }
 
   @Override
   public String getLanguage() {
-    return lang;
+    return language;
   }
 
   public byte[] cacheFile(String toSpeak) throws IOException {
@@ -295,5 +295,23 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
     // TODO Auto-generated method stub
     return null;
   }
+
+	@Override
+	public AudioData speak(String Language, String toSpeak) throws Exception {
+		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
+		{
+		return speak(toSpeak);
+		}
+		return null;
+	}
+
+	@Override
+	public boolean speakBlocking(String Language, String toSpeak) throws Exception {
+		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
+		{
+		return speakBlocking(toSpeak);
+		}
+		return false;
+	}
 
 }

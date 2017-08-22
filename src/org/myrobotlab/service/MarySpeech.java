@@ -38,6 +38,7 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 	private static final long serialVersionUID = 1L;
 
 	private transient MaryInterface marytts = null;
+	private String language;
 
 	// we need to subclass the audio player class here, so we know when the run
 	// method exits and we can invoke
@@ -183,6 +184,7 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 	@Override
 	public void setLanguage(String l) {
 		marytts.setLocale(Locale.forLanguageTag(l));
+		this.language=l;
 	}
 
 	@Override
@@ -358,5 +360,23 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 		meta.addDependency("com.sun.speech.freetts", "1.2");
 		meta.addDependency("opennlp", "1.6");
 		return meta;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.myrobotlab.service.interfaces.SpeechSynthesis#speak(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public AudioData speak(String Language, String toSpeak) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.myrobotlab.service.interfaces.SpeechSynthesis#speakBlocking(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean speakBlocking(String Language, String toSpeak) throws Exception {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

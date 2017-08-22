@@ -23,6 +23,7 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener
 	// TODO: make this cross platform..
 	private String mimicExecutable = "mimic\\mimic.exe";
 	private HashSet<String> voices = new HashSet<String>();
+	private String language;
 
 	public MimicSpeech(String reservedKey) {
 		super(reservedKey);
@@ -56,7 +57,7 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener
 
 	@Override
 	public void setLanguage(String l) {
-		// TODO:remove this from the interface?  dunno.. maybe it's useful.
+		this.language=l;
 	}
 
 	@Override
@@ -190,6 +191,24 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener
 		mimic.speakBlocking("Hello world");
 		mimic.speakBlocking("i am mimic");
 		mimic.speakBlocking("to be or not to be that is the question weather tis nobler in the mind to suffer the slings and arrows of outrageous fortune or to take arms against a sea of troubles");
+	}
+
+	@Override
+	public AudioData speak(String Language, String toSpeak) throws Exception {
+		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
+		{
+		return speak(toSpeak);
+		}
+		return null;
+	}
+
+	@Override
+	public boolean speakBlocking(String Language, String toSpeak) throws Exception {
+		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
+		{
+		return speakBlocking(toSpeak);
+		}
+		return false;
 	}
 
 }
