@@ -721,15 +721,26 @@ public class Tracking extends Service {
       String arduinoPort = "COM9";
       int cameraIndex = 0;
 
+      /*
       Pid pid = (Pid)Runtime.start("pid", "Pid");
       Servo pan = (Servo)Runtime.start("x", "Servo");
       Servo tilt = (Servo)Runtime.start("y", "Servo");
       OpenCV video = (OpenCV)Runtime.start("opencv", "OpenCV");
-      Ssc32UsbServoController controller = (Ssc32UsbServoController)Runtime.start("controller", "Ssc32UsbServoController");
-      Tracking tracker = (Tracking) Runtime.start("tracker", "Tracking");
+      Ssc32UsbServoController controller = (Ssc32UsbServoController)Runtime.start("controller", "Ssc32UsbServoController");      
+      */
+      VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+      virtual.connect(arduinoPort);
       
+      Tracking tracker = (Tracking) Runtime.start("t01", "Tracking");
+      tracker.connect(arduinoPort, xPin, yPin);
+      
+      Runtime.start("python", "Python");
+      Runtime.start("gui", "SwingGui");
+      
+      /*
       pan.setPin(6);
       tilt.setPin(7);
+      
       
       controller.attach(pan);
       controller.attach(tilt);
@@ -745,6 +756,7 @@ public class Tracking extends Service {
       Runtime.start("gui", "SwingGui");
 
       tracker.connect(arduinoPort, xPin, yPin, cameraIndex);
+      */
       // tracker.startLKTracking();
 
       // tracker.getGoodFeatures();

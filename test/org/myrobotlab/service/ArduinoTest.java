@@ -308,7 +308,7 @@ public class ArduinoTest implements PinArrayListener {
 
     // verify its detached
     assertFalse(arduino.getAttached().contains(servo.getName()));
-    assertFalse(servo.isPinAttached());
+    assertFalse(servo.enabled());
     assertFalse(servo.isAttachedServoController(arduino));
 
     // attach it the other way

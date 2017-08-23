@@ -121,6 +121,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   /**
    * detaching a pin (NOT RELATED TO DETACHING A SERVICE !)
    */
+  @Deprecated // should be explicit from which service is being detached - by name or reference - this is "too" general
   public void detach();
 
   /**
@@ -226,7 +227,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * Defaulted to 90 unless explicitly set.
    * Position the servo will move to when method servo.rest() is called
    */
-  public void setRest(int rest);
+  public void setRest(double rest);
 
   
   /**

@@ -80,15 +80,15 @@ public class Cli extends Service {
 
     @Override
     public void write(byte[] data) throws IOException {
-      
+
       // writing to stdout - daemon
       // we don't write if its a daemon, because
       // it will block forever if forked with &
       // because System.out is borked when forked ?
       // if (!Runtime.isDaemon()){
-        System.out.write(data);
+      System.out.write(data);
       // }
-      
+
       // publishing stdout
       invoke("stdout", data);
     }
@@ -185,8 +185,10 @@ public class Cli extends Service {
   /**
    * processes input from incoming streams
    * 
-   * @param line - line of data from the stream
-   * @throws IOException - can throw from damaged io stream
+   * @param line
+   *          - line of data from the stream
+   * @throws IOException
+   *           - can throw from damaged io stream
    */
   public void process(String line) throws IOException {
 
@@ -331,9 +333,12 @@ public class Cli extends Service {
 
     /**
      * 
-     * @param id - id of the pipe
-     * @param out - output stream of the remote process
-     * @param in - input stream of the remote process
+     * @param id
+     *          - id of the pipe
+     * @param out
+     *          - output stream of the remote process
+     * @param in
+     *          - input stream of the remote process
      */
     // process output - process input !!
     public Pipe(String id, InputStream out, OutputStream in) {
@@ -387,7 +392,8 @@ public class Cli extends Service {
      * attaches myOutputstream to the remote output stream relaying/piping the
      * data back
      * 
-     * @param b - if true we will send to output stream
+     * @param b
+     *          - if true we will send to output stream
      */
     public void attach(boolean b) {
       this.attached = b;
@@ -436,14 +442,16 @@ public class Cli extends Service {
   }
 
   /**
-   *  add an i/o pair to this cli for the possible purpose attaching
-   *  this is a remote process's input and output stream, hence from
-   *  this side they are inverted - ie out is an inputstream and in
-   *  is an output stream
+   * add an i/o pair to this cli for the possible purpose attaching this is a
+   * remote process's input and output stream, hence from this side they are
+   * inverted - ie out is an inputstream and in is an output stream
    *
-   * @param name - name of pipe
-   * @param out - out stream to the remote process
-   * @param in - in stream from the remote process
+   * @param name
+   *          - name of pipe
+   * @param out
+   *          - out stream to the remote process
+   * @param in
+   *          - in stream from the remote process
    */
   public void add(String name, InputStream out, OutputStream in) {
     pipes.put(name, new Pipe(name, out, in));
@@ -454,8 +462,8 @@ public class Cli extends Service {
   }
 
   /**
-   * Pipe or Attach to another processes' Cli
-   * different level cli.attach(process id)
+   * Pipe or Attach to another processes' Cli different level cli.attach(process
+   * id)
    */
   public void attach(String id) {
 
@@ -507,16 +515,25 @@ public class Cli extends Service {
     return path;
   }
 
-  public void detach() throws IOException {
-    write(String.format("detaching from %s\n", attachedProcessName).getBytes());
-    attachedProcessName = null;
-    attachedIn = null;
-    if (attachedPipe != null) {
-      // attachedOut.close();
-      attachedPipe.attach(false);
-      // attachedPipe.stop(); NO CANNOT STOP THREAD !!!
+  /**
+   * unfortunate collision of names :(
+   * this detach() does not detach from services - but detaches from the 
+   * std i/o of another process
+   */
+  public void detach() {
+    try {
+      write(String.format("detaching from %s\n", attachedProcessName).getBytes());
+      attachedProcessName = null;
+      attachedIn = null;
+      if (attachedPipe != null) {
+        // attachedOut.close();
+        attachedPipe.attach(false);
+        // attachedPipe.stop(); NO CANNOT STOP THREAD !!!
+      }
+      attachedPipe = null;
+    } catch (Exception e) {
+      log.error("cli detach threw", e);
     }
-    attachedPipe = null;
   }
 
   public void detachStdIO() {
@@ -578,7 +595,8 @@ public class Cli extends Service {
   /**
    * this method publishes returning data
    * 
-   * @param data - byte array to be published from stdout stream
+   * @param data
+   *          - byte array to be published from stdout stream
    * @return - the byte array in string form
    */
   public String stdout(byte[] data) {

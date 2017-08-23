@@ -22,8 +22,8 @@
         </span>
         <input type="text" class="form-control" placeholder="pin" ng-model="pin">
         <span class="input-group-btn">
-            <button class="btn btn-default" ng-show="service.isPinAttached" ng-click="msg.detach()">detach pin</button>
-            <button class="btn btn-default" ng-show="!service.isPinAttached" ng-click="msg.attach(pin)">attach pin</button>
+            <button class="btn btn-default" ng-show="service.enabled" ng-click="msg.detach()">detach pin</button>
+            <button class="btn btn-default" ng-show="!service.enabled" ng-click="msg.attach(pin)">attach pin</button>
         </span>
     </div>
     <div class="input-group">

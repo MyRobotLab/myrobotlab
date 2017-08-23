@@ -2129,6 +2129,13 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void detach(String serviceName) {
     detach(Runtime.getService(serviceName));
   }
+  
+  /**
+   * detaches ALL other services from this service
+   */
+  public void detach(){
+    log.error("detach was called but I'm a NOOP in Service.java - probably not what you wanted - override me !");
+  }
 
   /**
    * Attachable.attach(serviceName) - routes to reference parameter
