@@ -1603,15 +1603,22 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   /**
    * Arduino's servo.attach(pin) which is just energizing on a pin
+   * To be consistent & transparent - method should be servoEnable
    */
   @Override
+  @Deprecated 
   // > servoEnablePwm/deviceId/pin
   public void servoAttachPin(ServoControl servo, int pin) {
-    log.info("{}.attachPin({})", servo.getName(), servo.getPin());
+    log.info("{}.attachPin({})", servo.getName(), servo.getPin());    
     msg.servoAttachPin(getDeviceId(servo), pin);
   }
 
+  /**
+   * Stops the pwm on the pin. To be consistent & transparent - method should be
+   * servoDisable
+   */
   @Override
+  @Deprecated
   // > servoDisablePwm/deviceId
   public void servoDetachPin(ServoControl servo) {
     log.info("{}.detachPin({})", servo.getName(), servo.getPin());

@@ -20,14 +20,14 @@ public class ServoTest {
 	  // setup the test environment , and create an arduino with a virtual backend for it.
     TestUtils.initEnvirionment();
     // initialize 2 serial ports (virtual arduino)
-    VirtualArduino va1 = (VirtualArduino)Runtime.createAndStart("va1", "VirtualArduino");
-    VirtualArduino va2 = (VirtualArduino)Runtime.createAndStart("va2", "VirtualArduino");
+    VirtualArduino va1 = (VirtualArduino)Runtime.start("va1", "VirtualArduino");
+    VirtualArduino va2 = (VirtualArduino)Runtime.start("va2", "VirtualArduino");
     va1.connect(V_PORT_1);
     va2.connect(V_PORT_2);
     // initialize an arduino
-    ard1 = (Arduino) Runtime.createAndStart("ard1", "Arduino");
+    ard1 = (Arduino) Runtime.start("ard1", "Arduino");
     ard1.connect(V_PORT_1);
-    ard2 = (Arduino) Runtime.createAndStart("ard2", "Arduino");
+    ard2 = (Arduino) Runtime.start("ard2", "Arduino");
     ard2.connect(V_PORT_2);	
 	}
 
@@ -36,10 +36,14 @@ public class ServoTest {
 	public void testServo() throws Exception {	  
 	  // this basic test will create a servo and attach it to an arduino.
 	  // then detach	  
-	  Servo s = (Servo)Runtime.createAndStart("ser1", "Servo");
-	  int pin = 1;
+	  Servo s = (Servo)Runtime.start("ser1", "Servo");
+	  Integer pin = 1;
 	  // the pin should always be set to something.
 	  s.setPin(pin);
+	  assertEquals(pin, s.getPin());
+	  
+	  s.attach(ard1);
+	  
 	  // maybe remove this interface
 	  s.attachServoController(ard1);
     // s.attachServoController(ard1);
@@ -84,8 +88,6 @@ public class ServoTest {
 	  
 	  s.detachServoController(ard1);
 	  assertFalse(s.isAttached());
-	  
-	  
 	  
 	}
 

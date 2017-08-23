@@ -124,6 +124,11 @@ public interface Attachable extends NameProvider {
    *          - name of service
    */
   public void detach(String serviceName);
+  
+  /**
+   * detach which detaches ALL other services from this service.
+   */
+  public void detach();
 
   /**
    * @return the set of attached service names to this service

@@ -197,7 +197,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	 */
 	Mapper mapper = new Mapper(0, 180, 0, 180);
 
-	Integer rest = 90;
+	Double rest = 90.0;
 
 	long lastActivityTime = 0;
 
@@ -400,7 +400,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		return rest;
 	}
 
-	// FIXME - change to isPinAttached()
+	// FIXME - change to enabled()
 	public boolean isAttached() {
 		return isAttached;
 	}
@@ -491,7 +491,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		broadcastState();
 	}
 
-	public void setRest(int rest) {
+	public void setRest(double rest) {
 		this.rest = rest;
 	}
 

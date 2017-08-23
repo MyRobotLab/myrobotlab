@@ -1,6 +1,6 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author GroG (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -233,7 +233,7 @@ public class Servo extends Service implements ServoControl {
 
   double maxVelocity = -1;
 
-  boolean isPinAttached = false;
+  boolean enabled = false;
 
   double velocity = -1;
 
@@ -306,8 +306,9 @@ public class Servo extends Service implements ServoControl {
    * 
    */
   @Override
+  @Deprecated
   public void attach() {
-    attach(pin);
+    enable();
   }
 
   /**
@@ -328,28 +329,26 @@ public class Servo extends Service implements ServoControl {
     enable(pin);
   }
 
-  /*
-   * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
-   * pulses to maintain its current position.
+  /**
+   * Enabling PWM for the Servo. Equivalent to Arduino's Servo.attach(pin). It
+   * energizes the servo sending pulses to maintain its current position.
    */
   public void enable(int pin) {
     lastActivityTime = System.currentTimeMillis();
     controller.servoAttachPin(this, pin);
     this.pin = pin;
-    isPinAttached = true;
+    enabled = true;
     broadcastState();
     invoke("publishServoEnable", getName());
   }
 
   /**
-   * This method will disconnect the servo from it's controller. see also
-   * enable() / disable()
+   * This method will disable and disconnect the servo from it's controller.
    */
   @Override
   public void detach() {
-    isPinAttached = false;
+    enabled = false;
     if (controller != null) {
-      // controller.servoDetachPin(this);
       detachServoController(controller);
     }
     broadcastState();
@@ -363,7 +362,7 @@ public class Servo extends Service implements ServoControl {
    * will stop sending pwm messages to the servo.
    */
   public void disable() {
-    isPinAttached = false;
+    enabled = false;
     if (controller != null) {
       controller.servoDetachPin(this);
       // detach(controller);
@@ -429,12 +428,12 @@ public class Servo extends Service implements ServoControl {
     return controller != null;
   }
 
-  public boolean isPinAttached() {
-    return isPinAttached;
+  public boolean enabled() {
+    return enabled;
   }
 
   public boolean isEnabled() {
-    return isPinAttached();
+    return enabled();
   }
 
   public boolean isAutoDisabled() {
@@ -461,10 +460,9 @@ public class Servo extends Service implements ServoControl {
       return;
     }
     if (lastPos == pos) {
-      if (autoDisable)
-      {
-      delayDisable(defaultDisableDelayNoVelocity);
-    }
+      if (autoDisable) {
+        delayDisable(defaultDisableDelayNoVelocity);
+      }
     }
     if (autoEnable && !isEnabled() /** && pos != lastPos **/
     ) {
@@ -511,7 +509,7 @@ public class Servo extends Service implements ServoControl {
   public boolean moveToBlocking(double pos) {
     this.moveTo(pos);
     // breakMoveToBlocking=false;
-    while (Math.round(this.currentPosInput) != pos && velocity > 0 && isPinAttached && lastPos != pos) {
+    while (Math.round(this.currentPosInput) != pos && velocity > 0 && enabled && lastPos != pos) {
 
       synchronized (moveToBlocked) {
         try {
@@ -576,15 +574,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void setRest(int rest) {
-    // TODO:remove this interface
-    this.rest = rest;
-  }
-
-  public void setRest(Double rest) {
-    // TODO: update the interface with the double version to make all servos
-    // implement
-    // a double for their positions.
+  public void setRest(double rest) {
     this.rest = rest;
   }
 
@@ -742,50 +732,62 @@ public class Servo extends Service implements ServoControl {
     }
   }
 
-  // This was originally named setController
-  // and Tracking service depended on it to set
-  // the servos to a controller where pins could
-  // be assigned later...
+  /**
+   * The attachServoController method is used to "attach" 2 services together,
+   * the ServoControl & the ServoController. All the necessary data needed to
+   * attach this Servo to the servo controller should be available. First we
+   * check to see if this controller is already attached. If it is we are done.
+   * If not we proceed to attach the controller and at the end of the function
+   * we call the controller.attach(this) to give the controller an opportunity
+   * to do its attach logic.
+   * 
+   * https://www.google.com/search?q=attach+myrobotlab&oq=attach+myrobotlab
+   */
   public void attachServoController(ServoController controller) throws Exception {
     if (isAttachedServoController(controller)) {
       log.info("{} servo is already attached to controller {}", getName(), this.controller.getName());
       return;
     } else if (this.controller != null && this.controller != controller) {
-      // we're switching controllers
+      // we're switching controllers - need to detach first
       detach();
     }
 
     targetOutput = getTargetOutput();// mapper.calcOutput(targetPos);
 
+    // now attach the controller the controller better have
+    // isAttach(ServoControl) to prevent an infinite loop
+    // if controller.attach(this) is not successful, this should throw
+    controller.attachServoControl(this);
+
     // set the controller
     this.controller = controller;
     this.controllerName = controller.getName();
 
-    // now attach the controller
-    // the controller better have
-    // isAttach(ServoControl) to prevent infinit loop
-    // FIXME ! - this should not set the controller or controllerName if
-    // controller.attach(this) is not successful
-    controller.attachServoControl(this);
-    sleep(300);
     // the controller is attached now
     // its time to attach the pin
     enable(pin);
-    int i = 0;
-    while (!isPinAttached && i < 5) {
-      sleep(500);
-      i += 5;
-    }
-    sleep(100);
-
     broadcastState();
   }
 
+  /**
+   * "Helper" methods - allows remote attaching of services by using name value
+   * @param controllerName - controllers name
+   * @param pin - pin to enable pwm
+   * @throws Exception - if attach fails
+   */
   public void attach(String controllerName, int pin) throws Exception {
     this.pin = pin;
     attachServoController((ServoController) Runtime.getService(controllerName));
   }
-
+  
+  /**
+   * 
+   * "Helper" methods - allows remote attaching of services by using name value
+   * @param controllerName - controllers name
+   * @param pin - pin to enable pwm
+   * @param pos - position to set servo
+   * @throws Exception
+   */
   public void attach(String controllerName, Integer pin, Double pos) throws Exception {
     this.pin = pin;
     this.targetPos = pos;
@@ -830,12 +832,14 @@ public class Servo extends Service implements ServoControl {
   @Override
   public void detachServoController(ServoController controller) {
     if (this.controller == controller) {
+      // disable pwm
+      controller.servoDetachPin(this);
       // detach the this device from the controller
       controller.detach(this);
       // remove the this controller's reference
       this.controller = null;
       this.controllerName = null;
-      isPinAttached = false;
+      this.enabled = false;
       broadcastState();
     }
   }
@@ -1173,12 +1177,12 @@ public class Servo extends Service implements ServoControl {
 
   public void onServoEvent(Double position) {
     // log.info("{}.ServoEvent {}", getName(), position);
-    if (!isMoving() && !autoDisable && isPinAttached()) {
+    if (!isMoving() && !autoDisable && enabled()) {
       synchronized (moveToBlocked) {
         moveToBlocked.notifyAll(); // Will wake up MoveToBlocked.wait()
       }
     }
-    if (!isMoving() && autoDisable && isPinAttached()) {
+    if (!isMoving() && autoDisable && enabled()) {
       if (velocity > -1) {
         delayDisable(disableDelayIfVelocity);
       } else {
@@ -1207,7 +1211,7 @@ public class Servo extends Service implements ServoControl {
 
       String arduinoPort = "COM10";
 
-      VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
       virtual.connect(arduinoPort);
       Runtime.start("servo01", "Servo");
       Runtime.start("servo02", "Servo");
@@ -1217,11 +1221,11 @@ public class Servo extends Service implements ServoControl {
       boolean done = true;
       if (done) {
         return;
-      }      
-      
+      }
+
       Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
       Map<String, MethodEntry> methods = servo01.getMethodMap();
-      
+
       // String out = CodecUtils.toJson();
       StringBuilder sb = new StringBuilder();
       sb.append("<table border=1 cellpadding=5 cellspacing=0>");
@@ -1251,10 +1255,10 @@ public class Servo extends Service implements ServoControl {
       fos.write(sb.toString().getBytes());
       fos.close();
 
-
       // LoggingFactory.init(Level.INFO);
 
-      // VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+      // VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual",
+      // "VirtualArduino");
       virtual.connect("COM10");
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
