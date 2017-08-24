@@ -134,49 +134,40 @@ public class InMoov extends Service {
   private boolean mute = false;
 
   public static int attachPauseMs = 100;
-  
+
   // TODO InMoovLife service
-  
-   public static boolean RobotIsTrackingSomething() {
-     
-    if (eyesTracking!=null && headTracking!=null)
-    {
-      if (eyesTracking.isIdle() && headTracking.isIdle()){
+
+  public static boolean RobotIsTrackingSomething() {
+
+    if (eyesTracking != null && headTracking != null) {
+      if (eyesTracking.isIdle() && headTracking.isIdle()) {
         return false;
-      }
-      else
-      {
+      } else {
         return true;
-      } 
-    }
-    else
-    {
+      }
+    } else {
       return false;
     }
   }
-   
-   public static boolean RobotIsOpenCvCapturing() {
-	   if (opencv!=null)
-	   {
-		if (opencv.capturing)
-		{
-			return true;
-		}
-	   }
-	   return false;
-   }
-   
-   public static boolean RobotIsOpenNiCapturing() {
-	   if (openni!=null)
-	   {
-		if (openni.capturing)
-		{
-			return true;
-		}
-	   }
-	   return false;
-   }
-   
+
+  public static boolean RobotIsOpenCvCapturing() {
+    if (opencv != null) {
+      if (opencv.capturing) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public static boolean RobotIsOpenNiCapturing() {
+    if (openni != null) {
+      if (openni.capturing) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public static boolean RobotCanMoveHeadRandom = true;
   public static boolean RobotCanMoveEyesRandom = true;
   public static boolean RobotCanMoveBodyRandom = true;
@@ -188,9 +179,8 @@ public class InMoov extends Service {
   private transient Timer DisableTimerRobotCanMoveBodyRandom;
   private transient Timer DisableTimerRobotCanMoveRandom;
 
-  
   // END TODO InMoovLife service
-  
+
   public Integer pirPin = null;
 
   // ---------- new getter interface begin ---------------------------
@@ -512,12 +502,12 @@ public class InMoov extends Service {
       eyelids.setVelocity(-1.0, -1.0);
     }
   }
-  
+
   public void halfSpeed() {
     if (head != null) {
       head.setVelocity(25.0, 25.0, 25.0, 25.0, 25.0, 25.0);
     }
-    
+
     if (rightHand != null) {
       rightHand.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
     }
@@ -554,6 +544,7 @@ public class InMoov extends Service {
 
   /**
    * finds most recent activity
+   * 
    * @return the timestamp of the last activity time.
    */
   public long getLastActivityTime() {
@@ -753,54 +744,53 @@ public class InMoov extends Service {
 
   public void onOpenNIData(OpenNiData data) {
 
-    if (data!=null)
-    {
-    Skeleton skeleton = data.skeleton;
+    if (data != null) {
+      Skeleton skeleton = data.skeleton;
 
-    if (firstSkeleton) {
-      speakBlocking("i see you");
-      firstSkeleton = false;
-    }
+      if (firstSkeleton) {
+        speakBlocking("i see you");
+        firstSkeleton = false;
+      }
 
-    if (copyGesture) {
-   
+      if (copyGesture) {
+
         if (leftArm != null) {
-         
-          if (!Double.isNaN(skeleton.leftElbow.getAngleXY())){
-            if (skeleton.leftElbow.getAngleXY()>=0){
-            leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
-            } 
+
+          if (!Double.isNaN(skeleton.leftElbow.getAngleXY())) {
+            if (skeleton.leftElbow.getAngleXY() >= 0) {
+              leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
+            }
           }
-          if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())){
-            if (skeleton.leftShoulder.getAngleXY()>=0){
-            leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
-            } 
+          if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())) {
+            if (skeleton.leftShoulder.getAngleXY() >= 0) {
+              leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
+            }
           }
-          if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())){
-            if (skeleton.leftShoulder.getAngleYZ()+openNiShouldersOffset>=0){
-            leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ()-50);
-            } 
+          if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())) {
+            if (skeleton.leftShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
+              leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ() - 50);
+            }
           }
         }
         if (rightArm != null) {
-          
-          if (!Double.isNaN(skeleton.rightElbow.getAngleXY())){
-            if (skeleton.rightElbow.getAngleXY()>=0){
+
+          if (!Double.isNaN(skeleton.rightElbow.getAngleXY())) {
+            if (skeleton.rightElbow.getAngleXY() >= 0) {
               rightArm.bicep.moveTo(skeleton.rightElbow.getAngleXY());
-            } 
+            }
           }
-          if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())){
-            if (skeleton.rightShoulder.getAngleXY()>=0){
+          if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())) {
+            if (skeleton.rightShoulder.getAngleXY() >= 0) {
               rightArm.omoplate.moveTo(skeleton.rightShoulder.getAngleXY());
-            } 
+            }
           }
-          if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())){
-            if (skeleton.rightShoulder.getAngleYZ()+openNiShouldersOffset>=0){
-              rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ()-50);
-            } 
+          if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())) {
+            if (skeleton.rightShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
+              rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ() - 50);
+            }
           }
         }
-    
+
       }
     }
 
@@ -1083,9 +1073,13 @@ public class InMoov extends Service {
 
   /*************
    * STARTS BEGIN
-   * @param leftPort com port
-   * @param rightPort  com port
-   * @throws Exception e
+   * 
+   * @param leftPort
+   *          com port
+   * @param rightPort
+   *          com port
+   * @throws Exception
+   *           e
    * 
    ************************/
 
@@ -1118,10 +1112,10 @@ public class InMoov extends Service {
     if (type == null) {
       type = Arduino.BOARD_TYPE_MEGA;
     }
-    
+
     arm.arduino.setBoard(type);
-    arm.arduino.usedByInmoov=true;
-    arm.arduino.serial.usedByInmoov=true;
+    arm.arduino.usedByInmoov = true;
+    arm.arduino.serial.usedByInmoov = true;
     arm.connect(port);
     arduinos.put(port, arm.arduino);
 
@@ -1165,10 +1159,10 @@ public class InMoov extends Service {
     if (type == null) {
       type = Arduino.BOARD_TYPE_MEGA;
     }
-    
+
     hand.arduino.setBoard(type);
-    hand.arduino.serial.usedByInmoov=true;
-    hand.arduino.usedByInmoov=true;
+    hand.arduino.serial.usedByInmoov = true;
+    hand.arduino.usedByInmoov = true;
     hand.connect(port);
     arduinos.put(port, hand.arduino);
     return hand;
@@ -1185,8 +1179,6 @@ public class InMoov extends Service {
   public InMoovHead startHead(String port, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) throws Exception {
     return startHead(port, null, headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
   }
-  
-
 
   public InMoovHead startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin)
       throws Exception {
@@ -1195,61 +1187,60 @@ public class InMoov extends Service {
 
     opencv = (OpenCV) startPeer("opencv");
     head = (InMoovHead) startPeer("head");
-    
+
     if (type == null) {
       type = Arduino.BOARD_TYPE_MEGA;
     }
-    
 
     head.arduino.setBoard(type);
-    head.arduino.usedByInmoov=true;
-    head.arduino.serial.usedByInmoov=true;
+    head.arduino.usedByInmoov = true;
+    head.arduino.serial.usedByInmoov = true;
     head.connect(port, headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
     arduinos.put(port, head.arduino);
     return head;
   }
-  
+
   public void enableAutoDisable(Boolean param) {
-    if (head != null){
+    if (head != null) {
       head.enableAutoDisable(param);
     }
-    if (rightArm != null){
+    if (rightArm != null) {
       rightArm.enableAutoDisable(param);
     }
-    if (leftArm != null){
+    if (leftArm != null) {
       leftArm.enableAutoDisable(param);
     }
-    if (leftHand != null){
+    if (leftHand != null) {
       leftHand.enableAutoDisable(param);
     }
-    if (rightHand != null){
+    if (rightHand != null) {
       leftHand.enableAutoDisable(param);
     }
-    if (torso != null){
+    if (torso != null) {
       torso.enableAutoDisable(param);
     }
     if (eyelids != null) {
       eyelids.enableAutoDisable(param);
     }
   }
-  
+
   public void temporaryStopAutoDisable(Boolean param) {
-    if (head != null){
+    if (head != null) {
       head.temporaryStopAutoDisable(param);
     }
-    if (rightArm != null){
+    if (rightArm != null) {
       rightArm.temporaryStopAutoDisable(param);
     }
-    if (leftArm != null){
+    if (leftArm != null) {
       leftArm.temporaryStopAutoDisable(param);
     }
-    if (leftHand != null){
+    if (leftHand != null) {
       leftHand.temporaryStopAutoDisable(param);
     }
-    if (rightHand != null){
+    if (rightHand != null) {
       rightHand.temporaryStopAutoDisable(param);
     }
-    if (torso != null){
+    if (torso != null) {
       torso.temporaryStopAutoDisable(param);
     }
     if (eyelids != null) {
@@ -1351,19 +1342,19 @@ public class InMoov extends Service {
       // re-mapping of skeleton !
       openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
       openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
-      if (openNiLeftShoulderInverted){
+      if (openNiLeftShoulderInverted) {
         openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
-        }
-      if (openNiRightShoulderInverted){     
+      }
+      if (openNiRightShoulderInverted) {
         openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
-        }
+      }
 
       // openni.skeleton.leftShoulder
 
       // openni.addListener("publishOpenNIData", this.getName(),
       // "getSkeleton");
       // openni.addOpenNIData(this);
-      subscribe(openni.getName(),"publishOpenNIData");
+      subscribe(openni.getName(), "publishOpenNIData");
     }
     return openni;
   }
@@ -1430,8 +1421,8 @@ public class InMoov extends Service {
     }
 
     torso.arduino.setBoard(type);
-    torso.arduino.usedByInmoov=true;
-    torso.arduino.serial.usedByInmoov=true;
+    torso.arduino.usedByInmoov = true;
+    torso.arduino.serial.usedByInmoov = true;
     torso.connect(port);
     arduinos.put(port, torso.arduino);
 
@@ -1457,8 +1448,8 @@ public class InMoov extends Service {
     }
 
     eyelids.arduino.setBoard(type);
-    eyelids.arduino.usedByInmoov=true;
-    eyelids.arduino.serial.usedByInmoov=true;
+    eyelids.arduino.usedByInmoov = true;
+    eyelids.arduino.serial.usedByInmoov = true;
     eyelids.connect(port, eyelidleftPin, eyelidrightPin);
     arduinos.put(port, eyelids.arduino);
 
@@ -1739,194 +1730,132 @@ public class InMoov extends Service {
     saveGesture(gestureName, GESTURES_DIRECTORY);
 
   }
-  
+
   public void disableRobotCanMoveHeadRandom(int seconds) {
-	  log.info("Disable RobotCanMoveHeadRandom for "+seconds+" seconds");
-	  RobotCanMoveHeadRandom=false;
-	  if (DisableTimerRobotCanMoveHeadRandom != null) {
-		  DisableTimerRobotCanMoveHeadRandom.cancel();
-		  DisableTimerRobotCanMoveHeadRandom = null;
-	      }
-	  DisableTimerRobotCanMoveHeadRandom = new Timer();
-				
-	  DisableTimerRobotCanMoveHeadRandom.schedule(new TimerTask() {
-	          @Override
-	          public void run() {
-	        	  log.info("Reactivate RobotCanMoveHeadRandom");
-	        	  DisableTimerRobotCanMoveHeadRandom.cancel();
-	        	  RobotCanMoveHeadRandom=true;
-	           }
-	        }, (int) seconds * 1000);
-		       
-	  }
-  
+    log.info("Disable RobotCanMoveHeadRandom for " + seconds + " seconds");
+    RobotCanMoveHeadRandom = false;
+    if (DisableTimerRobotCanMoveHeadRandom != null) {
+      DisableTimerRobotCanMoveHeadRandom.cancel();
+      DisableTimerRobotCanMoveHeadRandom = null;
+    }
+    DisableTimerRobotCanMoveHeadRandom = new Timer();
+
+    DisableTimerRobotCanMoveHeadRandom.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        log.info("Reactivate RobotCanMoveHeadRandom");
+        DisableTimerRobotCanMoveHeadRandom.cancel();
+        RobotCanMoveHeadRandom = true;
+      }
+    }, (int) seconds * 1000);
+
+  }
+
   public void disableRobotCanMoveEyesRandom(int seconds) {
-	  log.info("Disable RobotCanMoveEyesRandom for "+seconds+" seconds");
-	  RobotCanMoveEyesRandom=false;
-	  if (DisableTimerRobotCanMoveEyesRandom != null) {
-		  DisableTimerRobotCanMoveEyesRandom.cancel();
-		  DisableTimerRobotCanMoveEyesRandom = null;
-	      }
-	  DisableTimerRobotCanMoveEyesRandom = new Timer();
-				
-	  DisableTimerRobotCanMoveEyesRandom.schedule(new TimerTask() {
-	          @Override
-	          public void run() {
-	        	  log.info("Reactivate RobotCanMoveEyesRandom");
-	        	  RobotCanMoveEyesRandom=true;
-	        	  DisableTimerRobotCanMoveEyesRandom.cancel();
-	          }
-	        }, (int) seconds * 1000);
-		       
-	  }
-  
+    log.info("Disable RobotCanMoveEyesRandom for " + seconds + " seconds");
+    RobotCanMoveEyesRandom = false;
+    if (DisableTimerRobotCanMoveEyesRandom != null) {
+      DisableTimerRobotCanMoveEyesRandom.cancel();
+      DisableTimerRobotCanMoveEyesRandom = null;
+    }
+    DisableTimerRobotCanMoveEyesRandom = new Timer();
+
+    DisableTimerRobotCanMoveEyesRandom.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        log.info("Reactivate RobotCanMoveEyesRandom");
+        RobotCanMoveEyesRandom = true;
+        DisableTimerRobotCanMoveEyesRandom.cancel();
+      }
+    }, (int) seconds * 1000);
+
+  }
+
   public void disableRobotCanMoveBodyRandom(int seconds) {
-	  log.info("Disable RobotCanMoveBodyRandom for "+seconds+" seconds");
-	  RobotCanMoveBodyRandom=false;
-	  if (DisableTimerRobotCanMoveBodyRandom != null) {
-		  DisableTimerRobotCanMoveBodyRandom.cancel();
-		  DisableTimerRobotCanMoveBodyRandom = null;
-	      }
-	  DisableTimerRobotCanMoveBodyRandom = new Timer();
-				
-	  DisableTimerRobotCanMoveBodyRandom.schedule(new TimerTask() {
-	          @Override
-	          public void run() {
-	        	  log.info("Reactivate RobotCanMoveBodyRandom");
-	        	  RobotCanMoveBodyRandom=true;
-	        	  DisableTimerRobotCanMoveBodyRandom.cancel();
-	          }
-	        }, (int) seconds * 1000);
-		       
-	  }
-  //waiting controable threaded gestures we warn user
-  boolean gestureAlreadyStarted=false;
-  
-  public void startedGesture(){
+    log.info("Disable RobotCanMoveBodyRandom for " + seconds + " seconds");
+    RobotCanMoveBodyRandom = false;
+    if (DisableTimerRobotCanMoveBodyRandom != null) {
+      DisableTimerRobotCanMoveBodyRandom.cancel();
+      DisableTimerRobotCanMoveBodyRandom = null;
+    }
+    DisableTimerRobotCanMoveBodyRandom = new Timer();
+
+    DisableTimerRobotCanMoveBodyRandom.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        log.info("Reactivate RobotCanMoveBodyRandom");
+        RobotCanMoveBodyRandom = true;
+        DisableTimerRobotCanMoveBodyRandom.cancel();
+      }
+    }, (int) seconds * 1000);
+
+  }
+
+  // waiting controable threaded gestures we warn user
+  boolean gestureAlreadyStarted = false;
+
+  public void startedGesture() {
     startedGesture("unknown");
   }
-  
-  public void startedGesture(String nameOfGesture){
-    if (gestureAlreadyStarted)
-    {
-    warn("Warning 1 gesture already running, this can break spacetime and lot of things");  
+
+  public void startedGesture(String nameOfGesture) {
+    if (gestureAlreadyStarted) {
+      warn("Warning 1 gesture already running, this can break spacetime and lot of things");
     }
-    gestureAlreadyStarted=true;
+    gestureAlreadyStarted = true;
     RobotCanMoveRandom = false;
     temporaryStopAutoDisable(true);
   }
-  
-  public void finishedGesture(){
-    finishedGesture("unknown");    
+
+  public void finishedGesture() {
+    finishedGesture("unknown");
   }
-  
-  public void finishedGesture(String nameOfGesture){
+
+  public void finishedGesture(String nameOfGesture) {
     RobotCanMoveRandom = true;
     temporaryStopAutoDisable(false);
-    gestureAlreadyStarted=false;
+    gestureAlreadyStarted = false;
   }
-  
+
   public void disableRobotRandom(int seconds) {
-	  log.info("Disable RobotCanMoveRandom for "+seconds+" seconds");
-	  RobotCanMoveRandom=false;
-	  if (DisableTimerRobotCanMoveRandom != null) {
-		  DisableTimerRobotCanMoveRandom.cancel();
-		  DisableTimerRobotCanMoveRandom = null;
-	      }
-	  DisableTimerRobotCanMoveRandom = new Timer();
-				
-	  DisableTimerRobotCanMoveRandom.schedule(new TimerTask() {
-	          @Override
-	          public void run() {
-	        	  log.info("Reactivate RobotCanMoveRandom");
-	        	  RobotCanMoveRandom=true;
-	        	  DisableTimerRobotCanMoveRandom.cancel();
-	          }
-	        }, (int) seconds * 1000);
-		       
-	  }
-  
-  
+    log.info("Disable RobotCanMoveRandom for " + seconds + " seconds");
+    RobotCanMoveRandom = false;
+    if (DisableTimerRobotCanMoveRandom != null) {
+      DisableTimerRobotCanMoveRandom.cancel();
+      DisableTimerRobotCanMoveRandom = null;
+    }
+    DisableTimerRobotCanMoveRandom = new Timer();
+
+    DisableTimerRobotCanMoveRandom.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        log.info("Reactivate RobotCanMoveRandom");
+        RobotCanMoveRandom = true;
+        DisableTimerRobotCanMoveRandom.cancel();
+      }
+    }, (int) seconds * 1000);
+
+  }
+
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
 
-      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-      // i01.startHead("COM1");
-      // i01.speakErrors(true);
+      String leftPort = "COM3";
+      String rightPort = "COM4";
 
-      // Blender blender = (Blender) Runtime.start("blender", "Blender");
+      VirtualArduino vleft = (VirtualArduino) Runtime.start("vleft", "VirtualArduino");
+      VirtualArduino vright = (VirtualArduino) Runtime.start("vright", "VirtualArduino");
+      vleft.connect("COM3");
+      vright.connect("COM4");
+      Runtime.start("gui", "SwingGui");
+
+      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+      i01.startAll(leftPort, rightPort);
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
-    // i01.copyGesture(true);
-
-    // i01.test();
-
-    /*
-     * 
-     * Runtime.createAndStart("gui", "SwingGui");
-     * Runtime.createAndStart("python", "Python");
-     * 
-     * InMoov i01 = (InMoov)Runtime.createAndStart("i01","InMoov");
-     * 
-     * i01.startOpenNI();
-     */
-
-    // InMoovTorso torso = (InMoovTorso)i01.startTorso("COM4");
-
-    // i01.startMouth();
-    // i01.startLeftArm("COM4");
-    // i01.copyGesture(true);
-
-    // Create two virtual ports for UART and user and null them together:
-    // create 2 virtual ports
-    /*
-     * VirtualSerialPort vp0 = new VirtualSerialPort("UART15");
-     * VirtualSerialPort vp1 = new VirtualSerialPort("COM15");
-     * 
-     * // make null modem cable ;) VirtualSerialPort.makeNullModem(vp0, vp1);
-     * 
-     * 
-     * // add virtual ports to the serial device factory
-     * SerialDeviceFactory.add(vp0); SerialDeviceFactory.add(vp1);
-     */
-
-    // create the UART serial service
-    // log.info("Creating a Lidar UART Serial service named: " + getName() +
-    // "SerialService");
-    // String serialName = getName() + "SerialService";
-    /*
-     * Serial serial0 = new Serial("UART15"); serial0.startService();
-     * serial0.connect("UART15");
-     * 
-     * Runtime.createAndStart("gui", "SwingGui");
-     * Runtime.createAndStart("python", "Python");
-     * 
-     * InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
-     * i01.startMouth(); // i01.power(120); InMoovHand lefthand =
-     * i01.startLeftHand("COM15"); i01.leftHand.setRest(10, 10, 10, 10, 10);
-     * i01.beginCheckingOnInactivity(10);
-     */
-
-    /*
-     * log.info("inactivity {}", i01.checkInactivity());
-     * 
-     * lefthand.moveTo(5, 10, 30, 40, 50);
-     * 
-     * log.info("inactivity {}", i01.checkInactivity());
-     * 
-     * lefthand.rest();
-     * 
-     * log.info("inactivity {}", i01.checkInactivity());
-     */
-
-    /*
-     * 
-     * Tracking neck = i01.startHeadTracking(leftPort); i01.detach();
-     */
-
   }
 
   /**
@@ -2292,26 +2221,24 @@ public class InMoov extends Service {
     im.setOpenni(openni);
 
   }
-  
+
   public Relay LeftRelay1;
   public Relay RightRelay1;
-  
+
   @Override
   public void stopService() {
     super.stopService();
 
-    RobotCanMoveRandom=false;
+    RobotCanMoveRandom = false;
     stopTracking();
     halfSpeed();
-    
-    //if relay used, we switch on power
-    if (LeftRelay1!=null)
-    {
-      LeftRelay1.on(); 
+
+    // if relay used, we switch on power
+    if (LeftRelay1 != null) {
+      LeftRelay1.on();
     }
-    if (RightRelay1!=null)
-    {
-      RightRelay1.on(); 
+    if (RightRelay1 != null) {
+      RightRelay1.on();
     }
     rest();
     setMute(false);
@@ -2319,25 +2246,23 @@ public class InMoov extends Service {
     stopVinMoov();
     sleep(5000);
     disable();
-    if (LeftRelay1!=null)
-    {
-      LeftRelay1.off(); 
+    if (LeftRelay1 != null) {
+      LeftRelay1.off();
     }
-    if (RightRelay1!=null)
-    {
-      RightRelay1.off(); 
+    if (RightRelay1 != null) {
+      RightRelay1.off();
     }
-    //TODO better thing to detect connected arduinos
-    //we cant use arduino.stopService()
-    if (rightHand != null){
+    // TODO better thing to detect connected arduinos
+    // we cant use arduino.stopService()
+    if (rightHand != null) {
       rightHand.arduino.serial.disconnect();
       rightHand.arduino.serial.stopRecording();
       rightHand.arduino.disconnect();
     }
-    if (leftHand != null){
+    if (leftHand != null) {
       leftHand.arduino.serial.disconnect();
       leftHand.arduino.serial.stopRecording();
       leftHand.arduino.disconnect();
-    }    
-}
+    }
+  }
 }
