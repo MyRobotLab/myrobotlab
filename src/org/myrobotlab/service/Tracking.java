@@ -106,8 +106,6 @@ public class Tracking extends Service {
   // transient public ServoControl x, y;
   private class TrackingServoData {
     transient ServoControl servoControl = null;
-    Double lastServoPos;
-    double setPoint = 0.5;
     int scanStep = 2;
     Double currentServoPos;
     String name;
@@ -309,8 +307,14 @@ public class Tracking extends Service {
 
   public void rest() {
     log.info("rest");
+    if (controller == null){
+      return;
+    }
+    String controllerName = controller.getName();
     for (TrackingServoData sc : servoControls.values()) {
-      sc.servoControl.rest();
+      if (sc.servoControl.isAttached(controllerName)){
+        sc.servoControl.rest();
+      }
     }
   }
 
@@ -485,7 +489,7 @@ public class Tracking extends Service {
     servoControls.put("x", x);
 
     TrackingServoData y = new TrackingServoData("y");
-    y.servoControl = (ServoControl) createPeer("y");
+    y.servoControl = (ServoControl) startPeer("y");
     servoControls.put("y", y);
 
     controller = (Arduino) startPeer("controller");
@@ -631,11 +635,13 @@ public class Tracking extends Service {
     int[] pins = new int[] { xPin, yPin };
     controller = (Arduino) startPeer("controller");
     ((PortConnector) controller).connect(port);
+    
+    
 
     for (int i = 0; i < axis.length; i++) {
       TrackingServoData x = new TrackingServoData(axis[i]);
       x.axis = axis[i];
-      x.servoControl = (Servo) createPeer(axis[i]);
+      x.servoControl = (Servo) createPeer(axis[i]);      
       servoControls.put(axis[i], x);
       servoControls.get(axis[i]).servoControl.setPin(pins[i]);
       servoControls.get(axis[i]).servoControl.attach(controller, pins[i]);
@@ -728,6 +734,9 @@ public class Tracking extends Service {
       OpenCV video = (OpenCV)Runtime.start("opencv", "OpenCV");
       Ssc32UsbServoController controller = (Ssc32UsbServoController)Runtime.start("controller", "Ssc32UsbServoController");      
       */
+      Runtime.start("gui", "SwingGui");
+      Runtime.start("webgui", "WebGui");
+      
       VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
       virtual.connect(arduinoPort);
       
@@ -735,7 +744,7 @@ public class Tracking extends Service {
       tracker.connect(arduinoPort, xPin, yPin);
       
       Runtime.start("python", "Python");
-      Runtime.start("gui", "SwingGui");
+      
       
       /*
       pan.setPin(6);
