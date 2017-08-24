@@ -951,14 +951,20 @@ public class Servo extends Service implements ServoControl {
   // sensor need to be calibrated, but you can skip the calibration step by
   // setting :
   // autoCalibrateMin + autoCalibrateMax ( range values returned by arduino )
+  // TODO javadoc, talk about methods right place
 
   public boolean autoCalibrateSensor() {
     if (SensorPin == -1) {
       error("Please select sensor source");
       return false;
     }
+    temporaryStopAutoDisable(true);
     int min = autoCalibrateSensorMin();
     int max = autoCalibrateSensorMax();
+    // extra min calibration because foam is unstable
+    int min2 = autoCalibrateSensorMin();
+    min=MathUtils.getPercentFromRange(min, min2,50);
+    temporaryStopAutoDisable(false);
     if (max != min && max > min) {
       return true;
     }
@@ -991,7 +997,6 @@ public class Servo extends Service implements ServoControl {
       error("Please select sensor source");
       return 0;
     }
-    temporaryStopAutoDisable(true);
     log.info("MoveTo MAX, and wait sensor max");
     subscribe(this.getController().getName(), "publishPinArray", getName(), "publishedSensorEventCalibration");
     this.setVelocity(30);
@@ -1003,8 +1008,7 @@ public class Servo extends Service implements ServoControl {
     log.info(this.currentPosInput + "");
     this.getController().disablePin(SensorPin);
     autoCalibrateMax = MathUtils.averageMaxFromArray(10, sensorValues);
-    temporaryStopAutoDisable(false);
-    this.moveTo(0);
+    this.moveToBlocking(0);
     if (autoCalibrateMax - autoCalibrateMin > 100) {
       log.info("autoCalibrateMax : " + autoCalibrateMax);
       return autoCalibrateMax;
