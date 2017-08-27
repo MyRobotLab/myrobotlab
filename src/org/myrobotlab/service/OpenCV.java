@@ -747,7 +747,7 @@ public class OpenCV extends AbstractVideoSource {
     // opencv.setInputFileName("http://192.168.4.112:8080/?action=stream");
     // opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
-    opencv.addFilter("facerec", "FaceRecognizer");
+   //  opencv.addFilter("facerec", "FaceRecognizer");
 
     // OpenCVFilterPyramidDown pyramid = new OpenCVFilterPyramidDown("pyramid");
     // opencv.addFilter(pyramid);

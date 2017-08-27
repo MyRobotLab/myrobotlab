@@ -307,12 +307,12 @@ public class Tracking extends Service {
 
   public void rest() {
     log.info("rest");
-    if (controller == null){
+    if (controller == null) {
       return;
     }
     String controllerName = controller.getName();
     for (TrackingServoData sc : servoControls.values()) {
-      if (sc.servoControl.isAttached(controllerName)){
+      if (sc.servoControl.isAttached(controllerName)) {
         sc.servoControl.rest();
       }
     }
@@ -635,13 +635,11 @@ public class Tracking extends Service {
     int[] pins = new int[] { xPin, yPin };
     controller = (Arduino) startPeer("controller");
     ((PortConnector) controller).connect(port);
-    
-    
 
     for (int i = 0; i < axis.length; i++) {
       TrackingServoData x = new TrackingServoData(axis[i]);
       x.axis = axis[i];
-      x.servoControl = (Servo) createPeer(axis[i]);      
+      x.servoControl = (Servo) createPeer(axis[i]);
       servoControls.put(axis[i], x);
       servoControls.get(axis[i]).servoControl.setPin(pins[i]);
       servoControls.get(axis[i]).servoControl.attach(controller, pins[i]);
@@ -702,7 +700,7 @@ public class Tracking extends Service {
     LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
     opencv.addListener("publishOpenCVData", getName(), "setOpenCVData");
   }
-  
+
   /**
    * Routing attach - routes ServiceInterface.attach(service) to appropriate
    * methods for this class
@@ -716,56 +714,77 @@ public class Tracking extends Service {
 
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
-  
 
   public static void main(String[] args) {
 
     try {
       LoggingFactory.init(Level.INFO);
-      int xPin = 6;
-      int yPin = 7;
-      String arduinoPort = "COM9";
+      boolean useVirtualArduino = false;
+      int xPin = 9;
+      int yPin = 6;
+      String arduinoPort = "COM5";
       int cameraIndex = 0;
+      String frameGrabberType = "org.myrobotlab.opencv.SarxosFrameGrabber";
 
       /*
-      Pid pid = (Pid)Runtime.start("pid", "Pid");
-      Servo pan = (Servo)Runtime.start("x", "Servo");
-      Servo tilt = (Servo)Runtime.start("y", "Servo");
-      OpenCV video = (OpenCV)Runtime.start("opencv", "OpenCV");
-      Ssc32UsbServoController controller = (Ssc32UsbServoController)Runtime.start("controller", "Ssc32UsbServoController");      
-      */
-      Runtime.start("gui", "SwingGui");
-      Runtime.start("webgui", "WebGui");
-      
-      VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
-      virtual.connect(arduinoPort);
-      
-      Tracking tracker = (Tracking) Runtime.start("t01", "Tracking");
-      tracker.connect(arduinoPort, xPin, yPin);
-      
-      Runtime.start("python", "Python");
-      
-      
-      /*
-      pan.setPin(6);
-      tilt.setPin(7);
-      
-      
-      controller.attach(pan);
-      controller.attach(tilt);
-      
-      tracker.attach(video);
-      tracker.attach(pan, tilt);
-      tracker.attach(pid);
-      
-      pid.attach(pan);
-      pid.attach(tilt);
-      pid.setPID("tracker.pid", 2.0, 5.0, 1.0);
-      
-      Runtime.start("gui", "SwingGui");
+       * <pre> 1. setting frame grabber type does not update gui correctly
+       * Sarxos => OpenCV :P </pre>
+       */
 
-      tracker.connect(arduinoPort, xPin, yPin, cameraIndex);
-      */
+      /*
+       * Pid pid = (Pid)Runtime.start("pid", "Pid"); Servo pan =
+       * (Servo)Runtime.start("x", "Servo"); Servo tilt =
+       * (Servo)Runtime.start("y", "Servo"); OpenCV video =
+       * (OpenCV)Runtime.start("opencv", "OpenCV"); Ssc32UsbServoController
+       * controller = (Ssc32UsbServoController)Runtime.start("controller",
+       * "Ssc32UsbServoController");
+       */
+      Runtime.start("gui", "SwingGui");
+      // Runtime.start("webgui", "WebGui");
+
+      if (useVirtualArduino) {
+        VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+        virtual.connect(arduinoPort);
+      }
+
+      Tracking t01 = (Tracking) Runtime.start("t01", "Tracking");
+      ServoControl x = t01.getX();
+      // x.setInverted(true);
+
+      ServoControl y = t01.getY();
+      // y.setInverted(true);
+
+      t01.connect(arduinoPort, xPin, yPin, cameraIndex);
+      OpenCV opencv = t01.getOpenCV();
+      opencv.setFrameGrabberType(frameGrabberType);
+      opencv.broadcastState();
+      
+      sleep(3000);
+     // t01.startLKTracking();
+      t01.faceDetect();
+
+      // Runtime.start("python", "Python");
+
+      // tracker.startLKTracking();
+      /*
+       * tracker.trackPoint(); tracker.faceDetect(); tracker.findFace();
+       */
+
+      /*
+       * pan.setPin(6); tilt.setPin(7);
+       * 
+       * 
+       * controller.attach(pan); controller.attach(tilt);
+       * 
+       * tracker.attach(video); tracker.attach(pan, tilt); tracker.attach(pid);
+       * 
+       * pid.attach(pan); pid.attach(tilt); pid.setPID("tracker.pid", 2.0, 5.0,
+       * 1.0);
+       * 
+       * Runtime.start("gui", "SwingGui");
+       * 
+       * tracker.connect(arduinoPort, xPin, yPin, cameraIndex);
+       */
       // tracker.startLKTracking();
 
       // tracker.getGoodFeatures();

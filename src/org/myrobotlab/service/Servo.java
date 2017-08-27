@@ -1213,7 +1213,7 @@ public class Servo extends Service implements ServoControl {
   public static void main(String[] args) throws InterruptedException {
     try {
 
-      String arduinoPort = "COM10";
+      String arduinoPort = "COM5";
 
       VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
       virtual.connect(arduinoPort);

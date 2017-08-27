@@ -50,52 +50,63 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * speed/velocity shall be defaulted to 'max' ie - no speed control
    * 
    * 
-   * @param controller c
-   * @param pin p 
-   * @throws Exception e
+   * @param controller
+   *          c
+   * @param pin
+   *          p
+   * @throws Exception
+   *           e
    */
 
   /**
    * The one and only one attach which does the work we expect attaching a
    * ServoControl to a ServoController
    * 
-   * @param controller c
-   * @throws Exception e
+   * @param controller
+   *          c
+   * @throws Exception
+   *           e
    */
   void attachServoController(ServoController controller) throws Exception;
-  
+
   /**
-   * the one and only one which 
-   * detaches a 'specific' ServoControl from ServoController
+   * the one and only one which detaches a 'specific' ServoControl from
+   * ServoController
    * 
-   * @param controller e
-   * @throws Exception e
+   * @param controller
+   *          e
+   * @throws Exception
+   *           e
    */
   void detachServoController(ServoController controller) throws Exception;
 
   /**
    * determines if a 'specific' controller is currently attached
-   * @param controller c
+   * 
+   * @param controller
+   *          c
    * @return true/false
    * 
    */
   public boolean isAttachedServoController(ServoController controller);
-  
+
   /**
-   * attach with different parameters - it should set fields then call the "one and only" 
-   * single parameter attachServoController(controller)
+   * attach with different parameters - it should set fields then call the "one
+   * and only" single parameter attachServoController(controller)
    * 
-   * @param controller the controller
-   * @param pin the pin
-   * @throws Exception e
+   * @param controller
+   *          the controller
+   * @param pin
+   *          the pin
+   * @throws Exception
+   *           e
    */
-  
+
   void attach(ServoController controller, int pin) throws Exception;
 
   void attach(ServoController controller, int pin, double pos) throws Exception;
 
   void attach(ServoController controller, int pin, double pos, double speed) throws Exception;
-  
 
   /**
    * attach "Pin" - simple command to energize the pin. Equivalent to Arduino
@@ -104,7 +115,9 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   public void attach();
 
   /**
-   * @param degreesPerSecond degrees per second rotational velocity cm per second linear velocity ?
+   * @param degreesPerSecond
+   *          degrees per second rotational velocity cm per second linear
+   *          velocity ?
    * 
    */
   public void setVelocity(double degreesPerSecond);
@@ -121,33 +134,39 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   /**
    * detaching a pin (NOT RELATED TO DETACHING A SERVICE !)
    */
-  @Deprecated // should be explicit from which service is being detached - by name or reference - this is "too" general
+  @Deprecated // should be explicit from which service is being detached - by
+              // name or reference - this is "too" general
   public void detach();
 
   /**
    * limits input of servo - to prevent damage or problems if servos should not
    * move their full range
-   * @param min min value
-   * @param max max value
+   * 
+   * @param min
+   *          min value
+   * @param max
+   *          max value
    * 
    */
   public void setMinMax(double min, double max);
-  
+
   /**
-   * @return min x 
+   * @return min x
    */
   public double getMin();
-  
+
   public double getMinInput();
+
   /**
    * @return max x
    */
   public double getMax();
-  
+
   public double getMaxInput();
 
   /**
-   * @param speed fractional speed settings 0.0 to 1.0 
+   * @param speed
+   *          fractional speed settings 0.0 to 1.0
    * 
    */
   public void setSpeed(double speed);
@@ -167,6 +186,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * controller has - updates the Servo's pin and returns the refreshed data.
    * Not worth it. What will happen is the pin which was set on the servo will
    * simply be returned
+   * 
    * @return the pin as an integer
    */
   public Integer getPin();
@@ -175,30 +195,30 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * command to move to the rest position
    */
   public void rest();
-  
+
   /**
-   * Unmapped current position of last input.
-   * ie. equivalent to the last position from moveTo(pos) 
+   * Unmapped current position of last input. ie. equivalent to the last
+   * position from moveTo(pos)
    * 
-   * A possible better solution might be to use ServoEvent(s)
-   * to get the position through time which a controller with
-   * speed control can provide, so as the servo is told incrementally 
-   * where to go - it sends that command back as an event which sets
-   * the "current" position.
+   * A possible better solution might be to use ServoEvent(s) to get the
+   * position through time which a controller with speed control can provide, so
+   * as the servo is told incrementally where to go - it sends that command back
+   * as an event which sets the "current" position.
+   * 
    * @return the current position as a double
    */
   public double getPos();
-  
+
   /**
-   * the calculated mapper output for the servo - this is
-   * <b> ALWAYS ALWAYS in DEGREES !</b>
-   * because this method is used by the controller - and the controller needs
-   * a stable method &amp; a stable unit
-   * FIXME - not sure if this is a good thing to expose
+   * the calculated mapper output for the servo - this is <b> ALWAYS ALWAYS in
+   * DEGREES !</b> because this method is used by the controller - and the
+   * controller needs a stable method &amp; a stable unit FIXME - not sure if
+   * this is a good thing to expose
+   * 
    * @return the target output position
    */
   public double getTargetOutput();
- 
+
   public double getMaxVelocity();
 
   double getVelocity();
@@ -207,7 +227,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * set the pin of the servo this does not 'attach' energize the pin only set
    * the pin value
    * 
-   * @param pin the pin number for the servo
+   * @param pin
+   *          the pin number for the servo
    */
   void setPin(int pin);
 
@@ -217,19 +238,18 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   public double getAcceleration();
 
   /*
-   * synchronizing servos together
-   * e.g.  leftEye.sync(rightEye)
+   * synchronizing servos together e.g. leftEye.sync(rightEye)
    */
   public void sync(ServoControl sc);
-  
+
   /**
-   * @param rest A default position for the servo.
-   * Defaulted to 90 unless explicitly set.
-   * Position the servo will move to when method servo.rest() is called
+   * @param rest
+   *          A default position for the servo. Defaulted to 90 unless
+   *          explicitly set. Position the servo will move to when method
+   *          servo.rest() is called
    */
   public void setRest(double rest);
 
-  
   /**
    * @return the current rest position value
    */
@@ -237,7 +257,13 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
 
   boolean isInverted();
 
+  /**
+   * invert the map so a servo will go in reverse direction 0 == 180, 90 == 90, 180 == 0
+   * @param invert - true is to invert
+   */
+  public void setInverted(boolean invert);
+
   // WTF ?
   void addIKServoEventListener(NameProvider service);
-  
+
 }
