@@ -330,7 +330,9 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
     //try {
       // Runtime.start("webgui", "WebGui");
       IndianTts speech = (IndianTts) Runtime.start("speech", "IndianTts");
-   
+      //demo api key
+      speech.api="2d108780-0b86-11e6-b056-07d516fb06e1";
+      speech.userid="80";
       speech.speakBlocking("नमस्ते भारत मित्र");
 
       speech.speak("नमस्ते भारत मित्र");
