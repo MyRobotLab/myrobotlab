@@ -193,22 +193,4 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener
 		mimic.speakBlocking("to be or not to be that is the question weather tis nobler in the mind to suffer the slings and arrows of outrageous fortune or to take arms against a sea of troubles");
 	}
 
-	@Override
-	public AudioData speak(String Language, String toSpeak) throws Exception {
-		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
-		{
-		return speak(toSpeak);
-		}
-		return null;
-	}
-
-	@Override
-	public boolean speakBlocking(String Language, String toSpeak) throws Exception {
-		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
-		{
-		return speakBlocking(toSpeak);
-		}
-		return false;
-	}
-
 }

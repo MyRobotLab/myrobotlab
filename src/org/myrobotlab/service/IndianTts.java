@@ -338,21 +338,4 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
     //}
   }
 
-	@Override
-	public AudioData speak(String Language, String toSpeak) throws Exception {
-		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
-		{
-		return speak(toSpeak);
-		}
-		return null;
-	}
-
-	@Override
-	public boolean speakBlocking(String Language, String toSpeak) throws Exception {
-		if (Language.equalsIgnoreCase(this.language.substring(0,2)))
-		{
-		return speakBlocking(toSpeak);
-		}
-		return false;
-	}
 }
