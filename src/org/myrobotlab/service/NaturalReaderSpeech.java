@@ -262,6 +262,11 @@ private String language;
     return ret;
   }
   
+  public AudioData speak(String voice, String toSpeak) throws IOException {
+    setVoice(voice);
+    return speak(toSpeak);
+  }
+  
   @Override
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
     // TODO: make this a base class sort of thing.
