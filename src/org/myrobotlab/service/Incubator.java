@@ -38,7 +38,7 @@ public class Incubator extends Service {
 
   Date now = new Date();
 
-  // transient public XMPP xmpp;
+  // transient public Xmpp xmpp;
 
   // transient public WebGui webgui;
   // transient public Python python;

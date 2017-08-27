@@ -1275,7 +1275,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // Level
     // 2. authentication & authorization
     // 3. transport mechanism (needs implementation on each type of remote
-    // Communicator e.g. XMPP RemoteAdapter WebGui etc...)
+    // Communicator e.g. Xmpp RemoteAdapter WebGui etc...)
 
     // check for access
     // if access FAILS ! - check for authenticated access

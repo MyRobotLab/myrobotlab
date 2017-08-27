@@ -291,7 +291,7 @@ public class Shoutbox extends Service {
   // FIXME FIXME FIXME - not normalized with publishShout(WebSocket) :PPPP
   // FIXME - must fill in your name - "Greg Perry" somewhere..
   public void onXMPPMsg(XmppMsg xmppMsg) {
-    log.info(String.format("XMPP - %s %s", xmppMsg.from, xmppMsg.msg));
+    log.info(String.format("Xmpp - %s %s", xmppMsg.from, xmppMsg.msg));
 
     // not exactly the same model as onConnect - so we try to add each time
     String user = "me";// FIXME
@@ -412,7 +412,7 @@ public class Shoutbox extends Service {
     }
   }
 
-  // --------- XMPP END ------------
+  // --------- Xmpp END ------------
 
   // String lastShoutMsg = null;
 
@@ -482,10 +482,10 @@ public class Shoutbox extends Service {
    * getVersion
    */
 
-  // --------- XMPP BEGIN ------------
+  // --------- Xmpp BEGIN ------------
   public void startXMPP(String user, String password) throws Exception {
     if (xmpp == null) {
-      xmpp = (Xmpp) Runtime.start("xmpp", "XMPP");
+      xmpp = (Xmpp) Runtime.start("xmpp", "Xmpp");
     }
 
     xmpp.connect("myrobotlab.org", 5222, user, password);
