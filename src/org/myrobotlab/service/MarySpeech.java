@@ -362,21 +362,4 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 		return meta;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.myrobotlab.service.interfaces.SpeechSynthesis#speak(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public AudioData speak(String Language, String toSpeak) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.myrobotlab.service.interfaces.SpeechSynthesis#speakBlocking(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public boolean speakBlocking(String Language, String toSpeak) throws Exception {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

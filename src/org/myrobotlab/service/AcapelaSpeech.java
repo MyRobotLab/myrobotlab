@@ -550,13 +550,4 @@ private Object language;
     return meta;
   }
 
-	@Override
-	public AudioData speak(String Language, String toSpeak) throws Exception {
-		return null;
-	}
-
-	@Override
-	public boolean speakBlocking(String Language, String toSpeak) throws Exception {
-		return false;
-	}
 }
