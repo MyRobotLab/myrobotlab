@@ -592,7 +592,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
           runtimeName = "runtime";
           runtime = new Runtime(runtimeName);
           Repo.getLocalInstance().addStatusListener(runtime);
-          // extract(); - too overkill
+          extract(); // FIXME - too overkill - do by checking version of re
         }
       }
     }
@@ -607,7 +607,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     // dependencies
     // OR - bundle them as dependency resources into artifactory
     try {
-      Zip.extractFromSelf("resource", "resource");
+      // Zip.extractFromSelf("resource", "resource");
+      FileIO.extractResources(false);
       return true;
     } catch (Exception e) {
       log.error("extraction threw", e);
