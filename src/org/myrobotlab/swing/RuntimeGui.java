@@ -696,7 +696,8 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
    * a restart command will be sent to the appropriate runtime
    */
   public void restart() {
-    send("restart");
+    // send("restart"); TODO - change back to restart - when it works
+    send("shutdown");
   }
 
   public void onInstallProgress(Status status) {

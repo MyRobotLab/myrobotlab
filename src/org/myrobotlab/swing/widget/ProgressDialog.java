@@ -45,7 +45,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
   JButton okToUpdates = new JButton("ok");
   // JButton ok_update = new JButton("ok");
   JButton cancel = new JButton("cancel");
-  JButton restart = new JButton("restart");
+  JButton restart = new JButton("exit"); // FIXME - should be restart
   JButton noWorky = new JButton("noWorky!");
 
   ArrayList<Status> errors = new ArrayList<Status>();
