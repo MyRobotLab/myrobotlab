@@ -1936,7 +1936,7 @@ public class InMoov extends Service {
   }
 
   // vinmoov cosmetics and optional vinmoov monitor idea ( poc i know nothing
-  // about jme... )
+  // about jme...)
   // just want to use jme as main screen and show some informations
   // like batterie / errors / onreconized text etc ...
   // i01.VinmoovMonitorActivated=1 before to start vinmoov
