@@ -836,8 +836,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
       properties.load(input);
 
       if ("true".equalsIgnoreCase(properties.getProperty("xmpp.enabled"))) {
-        // Xmpp xmpp = (Xmpp) Runtime.createAndStart("xmpp", "XMPP");
-        Runtime.createAndStart("xmpp", "XMPP");
+        // Xmpp xmpp = (Xmpp) Runtime.createAndStart("xmpp", "Xmpp");
+        Runtime.createAndStart("xmpp", "Xmpp");
         // xmpp.connect(properties.getProperty("xmpp.user"),
         // properties.getProperty("xmpp.password"));
         // FIXME - xmpp.addAuditor("Greg Perry");

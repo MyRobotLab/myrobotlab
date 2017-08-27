@@ -188,7 +188,7 @@ public class TcpThread extends Thread {
 				}
 
 				// FIXME - THIS NEEDS TO BE NORMALIZED - WILL BE THE SAME IN
-				// XMPP & WEBGUI & REMOTEADAPTER
+				// Xmpp & WEBGUI & REMOTEADAPTER
 				// FIXME - normalize to single method - check for data
 				// type too ? !!!
 				if (msg.method.equals("onRegistered")) {

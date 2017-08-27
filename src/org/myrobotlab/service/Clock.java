@@ -209,17 +209,17 @@ public class Clock extends Service {
 
 		} else if ("xmpp".equals(test)) {
 
-			// XMPP CONNECT WORKS BEGIN ---------------------------------
+			// Xmpp CONNECT WORKS BEGIN ---------------------------------
 			int i = 2;
 
 			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
 			Security security = (Security) Runtime.createAndStart("security", "Security");
 			security.addUser("incubator incubator");
 			security.setGroup("incubator incubator", "authenticated");
-			security.allowExportByType("XMPP", false);
+			security.allowExportByType("Xmpp", false);
 			security.allowExportByType("Security", false);
 			security.allowExportByType("Runtime", false);
-			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
+			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart(String.format("xmpp%d", i), "Xmpp");
 			Clock clock = (Clock) Runtime.createAndStart(String.format("clock%d", i), "Clock");
 			Runtime.createAndStart(String.format("gui%d", i), "SwingGui");
 
@@ -231,7 +231,7 @@ public class Clock extends Service {
 			String base64 = CodecUtils.msgToBase64(msg);
 			xmpp1.sendMessage(base64, "incubator incubator");
 
-			// XMPP CONNECT WORKS END ---------------------------------
+			// Xmpp CONNECT WORKS END ---------------------------------
 		}
 	}
 

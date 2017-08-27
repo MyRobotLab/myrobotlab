@@ -72,7 +72,7 @@ public class InMoov extends Service {
   // services which do not require a body part
   // or can influence multiple body parts
 
-  // Dynamic reflective services such as WebGui & XMPP are to be left out of
+  // Dynamic reflective services such as WebGui & Xmpp are to be left out of
   // Peer definitions
 
   String defaultLeftPort; // FIXME - THIS IS A BUG GET RID OF IT - ALL ACCESS
@@ -118,7 +118,7 @@ public class InMoov extends Service {
 
   // reflective or non-interactive meta
   // transient public WebGui webgui;
-  // transient public XMPP xmpp;
+  // transient public Xmpp xmpp;
   // transient public Security security;
 
   boolean speakErrors = false;

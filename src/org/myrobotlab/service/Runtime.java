@@ -743,7 +743,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         // log.info(String.format("exporting service: %s of type %s",
         // name, sw.getServiceType()));
         export.serviceDirectory.put(name, sw); // FIXME !! make note
-        // when XMPP or Remote
+        // when Xmpp or Remote
         // Adapter pull it -
         // they have to reset
         // this !!
