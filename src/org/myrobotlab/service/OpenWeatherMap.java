@@ -42,12 +42,18 @@ public class OpenWeatherMap extends HttpClient {
   
 
   public String[] fetchRaw(String location) throws ClientProtocolException, IOException, JSONException {
-	  String[] result = new String[4];
+	  String[] result = new String[10];
 	  JSONObject obj = fetch(location);
 	  result[0] = obj.getJSONArray("weather").getJSONObject(0).get("description").toString();
 	  result[1] = obj.getJSONObject("main").get("temp").toString();
 	  result[2] = location;
 	  result[3] = obj.getJSONArray("weather").getJSONObject(0).get("id").toString();
+	  result[4] = obj.getJSONObject("main").get("pressure").toString();
+	  result[5] = obj.getJSONObject("main").get("humidity").toString();
+	  result[6] = obj.getJSONObject("main").get("temp_min").toString();
+	  result[7] = obj.getJSONObject("main").get("temp_max").toString();
+	  result[8] = obj.getJSONObject("wind").get("speed").toString();
+	  result[9] = obj.getJSONObject("wind").get("deg").toString();
 	  return result;
   	}
   
