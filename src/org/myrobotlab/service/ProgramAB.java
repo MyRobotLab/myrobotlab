@@ -767,7 +767,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
     // meta.addDependency("org.alicebot.ab", "0.0.6.26");
-    meta.addDependency("org.alicebot.ab", "0.0.4-kw");
+    meta.addDependency("org.alicebot.ab", "0.0.4.1-kw");
     meta.addDependency("org.json", "20090211");
     return meta;
   }
@@ -778,10 +778,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // Runtime.createAndStart("gui", "SwingGui");
     Runtime.createAndStart("webgui", "WebGui");
 
-    ProgramAB ai = (ProgramAB) Runtime.createAndStart("simple", "ProgramAB");
-    // ai.startSession("C:\\mrl\\develop\\ProgramAB","default", "simple");
+    ProgramAB ai = (ProgramAB) Runtime.createAndStart("ai", "ProgramAB");
+    //ai.setPath(System.getProperty("user.dir")+File.separator+"ProgramAB"+File.separator);
+    ai.startSession("default", "alice2");
 
     log.info(ai.getResponse("hi there").toString());
+    log.info(ai.getResponse("こんにちは").toString());    
 
     // ai.savePredicates();
 
