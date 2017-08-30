@@ -105,7 +105,7 @@ public class ApiFactory {
   // TODO public Object process(MessageSender sender, OutputStream out, String
   // requestUri, InputStream data) throws Exception {
   public Object process(MessageSender sender, OutputStream out, String requestUri, String data) throws Exception {
-    log.warn("{} - data[{}]", requestUri, data);
+    log.debug("{} - data[{}]", requestUri, data);
 
     // FIXME - handle errors by returning structured errors - or allow
     // Exceptions to be thrown ?

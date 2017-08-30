@@ -776,7 +776,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     LoggingFactory.init("INFO");
 
     // Runtime.createAndStart("gui", "SwingGui");
-    Runtime.createAndStart("webgui", "WebGui");
+    Runtime.start("webgui", "WebGui");
 
     ProgramAB ai = (ProgramAB) Runtime.createAndStart("ai", "ProgramAB");
     //ai.setPath(System.getProperty("user.dir")+File.separator+"ProgramAB"+File.separator);

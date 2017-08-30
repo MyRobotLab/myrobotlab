@@ -54,3 +54,10 @@ Thumbs.db
 /serial.tx.hex
 /pids/
 /voicetest.bat
+/generatedPython/
+/InMoov/
+/tts/
+/tools/
+/START_INMOOV.bat
+/start_inmoov.sh
+/.pydevproject

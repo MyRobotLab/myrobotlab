@@ -158,7 +158,7 @@ public class Platform implements Serializable {
       if (manifest.containsKey("Branch")) {
         platform.branch = manifest.get("Branch");
       } else {
-        platform.branch = "unknown";
+        platform.branch = "develop";
       }
       
       if (manifest.containsKey("Commit")) {

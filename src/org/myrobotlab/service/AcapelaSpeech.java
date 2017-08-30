@@ -504,9 +504,10 @@ private Object language;
     try {
       // Runtime.start("webgui", "WebGui");
       AcapelaSpeech speech = (AcapelaSpeech) Runtime.start("speech", "AcapelaSpeech");
-      // speech.setVoice("Ryan");
+      speech.setVoice("Rod");
       // TODO: fix the volume control
       // speech.setVolume(0);
+      speech.speakBlocking("this is another test");
       speech.speakBlocking("does this work");
       speech.speakBlocking("uh oh");
       speech.speakBlocking("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");

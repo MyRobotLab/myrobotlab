@@ -579,7 +579,8 @@ public class Python extends Service {
 	 *            name of file to load
 	 */
 	public void loadPyRobotLabServiceScript(String serviceType) {
-		String serviceScript = GitHub.getPyRobotLabScript(serviceType);
+	  Platform p = Platform.getLocalInstance();
+		String serviceScript = GitHub.getPyRobotLabScript(p.getBranch(), serviceType);
 		openScript(String.format("%s.py", serviceType), serviceScript);
 	}
 
