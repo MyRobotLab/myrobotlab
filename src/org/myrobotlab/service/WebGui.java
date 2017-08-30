@@ -481,7 +481,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     AtmosphereRequest request = r.getRequest();
     
     
-    log.warn(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
+    log.debug(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
     
 
     try {

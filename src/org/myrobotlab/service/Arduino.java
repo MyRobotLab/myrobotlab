@@ -2134,7 +2134,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       log.info("{}", "nano".hashCode());
 
       // Runtime.start("webgui", "WebGui");
-      Runtime.start("a", "SwingGui");
+      Runtime.start("gui", "SwingGui");
       // Runtime.start("cli", "Cli");
       // RemoteAdapter remote = (RemoteAdapter) Runtime.start("ra",
       // "RemoteAdapter");

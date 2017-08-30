@@ -74,6 +74,7 @@ public class AudioProcessor extends Thread {
   }
 
   // FIXME play with this thread - but block incoming thread
+  // FIXME - AudioData should have InputStream not File !
   public AudioData play(AudioData data) {
 
     log.info(String.format("playing %s", data.toString()));

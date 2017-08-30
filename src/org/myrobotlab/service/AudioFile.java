@@ -43,6 +43,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
+import com.amazonaws.services.config.model.GetResourceConfigHistoryRequest;
+
 /**
  * 
  * AudioFile - This service can be used to play an audio file such as an mp3.
@@ -186,10 +188,14 @@ public class AudioFile extends Service {
     playResource(filename, false);
   };
 
-  public void playResource(String filename, Boolean isBlocking) {
+  public void playResource(String filename, Boolean isBlocking) {    
+    log.warn("Audio File playResource not implemented yet.");
+    // FIXME AudioData needs to have an InputStream !!! 
+    // cheesy - should play resource from the classpath
+    playFile(filename, isBlocking);
     // TODO: what/who uses this? should we use the class loader to
     // playFile(filename, isBlocking, true);
-    log.warn("Audio File playResource not implemented yet.");
+    
   }
 
   public void silence() {
