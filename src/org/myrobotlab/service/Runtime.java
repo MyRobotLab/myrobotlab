@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1879,8 +1880,11 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     log.info("java.vm.name [{}]", System.getProperty("java.vm.name"));
     log.info("java.vm.vendor [{}]", System.getProperty("java.vm.vendor"));
     log.info("java.specification.version [{}]", System.getProperty("java.specification.version"));
-    log.info("file.encoding ( test french : é / test hindi ए ) [{}]", System.getProperty("file.encoding"));
-
+    //test ( force encoding )
+    //System.setProperty("file.encoding","UTF-8" );
+    log.info("file.encoding [{}]", System.getProperty("file.encoding"));
+    log.info("Charset.defaultCharset() [{}]", Charset.defaultCharset());
+    
     // System.getProperty("pi4j.armhf")
 
     log.info("java.home [{}]", System.getProperty("java.home"));
