@@ -1879,6 +1879,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     log.info("java.vm.name [{}]", System.getProperty("java.vm.name"));
     log.info("java.vm.vendor [{}]", System.getProperty("java.vm.vendor"));
     log.info("java.specification.version [{}]", System.getProperty("java.specification.version"));
+    log.info("file.encoding ( test french : é / test hindi ए ) [{}]", System.getProperty("file.encoding"));
 
     // System.getProperty("pi4j.armhf")
 
