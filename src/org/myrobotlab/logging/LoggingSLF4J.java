@@ -1,5 +1,7 @@
 package org.myrobotlab.logging;
 
+import java.nio.charset.StandardCharsets;
+
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
@@ -38,6 +40,7 @@ public class LoggingSLF4J extends Logging {
     PatternLayoutEncoder ple = new PatternLayoutEncoder();
 
     // %date
+    ple.setCharset(StandardCharsets.UTF_8);
     ple.setPattern("%date{HH:mm:ss.SSS} [%thread] %level %logger{10} [%file:%line] %msg%n");
     ple.setContext(lc);
     ple.start();
