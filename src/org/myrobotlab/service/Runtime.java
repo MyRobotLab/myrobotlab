@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -89,7 +90,7 @@ import com.sun.management.OperatingSystemMXBean;
  * Thread.currentThread().getStackTrace(); final String mainClassName =
  * stackTrace[stackTrace.length - 1].getClassName();
  *
- * TODO - add check for 64 bit OS &amp; 32 bit JVM :(
+ * check for 64 bit OS & 32 bit JVM -> is64bit()
  *
  */
 public class Runtime extends Service implements MessageListener, RepoInstallListener {
@@ -1752,6 +1753,36 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     hostname = getHostname();
     pid = getPid();
+    
+    // utf8 trick
+    // we need UTF8 : runtime don't take command line parameters -Dfile.encoding=UTF-8
+    // and command line parameters is batch launcher dependent...
+    // this trick force the runtime the set default charset to UTF8
+    // because launch System.setProperty("file.encoding","UTF-8") here is not enough
+    
+    System.setProperty("file.encoding","UTF-8");
+    Field charset = null;
+	try {
+		charset = Charset.class.getDeclaredField("defaultCharset");
+	} catch (NoSuchFieldException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	} catch (SecurityException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+    charset.setAccessible(true);
+    try {
+		charset.set(null,null);
+	} catch (IllegalArgumentException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	} catch (IllegalAccessException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+    
+    // end utf8 trick
 
     if (customId != null) {
       // custom id
