@@ -183,7 +183,10 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 
 	@Override
 	public void setLanguage(String l) {
+	  if (!l.equalsIgnoreCase("en"))
+	  {
 		marytts.setLocale(Locale.forLanguageTag(l));
+	  }
 		this.language=l;
 	}
 
