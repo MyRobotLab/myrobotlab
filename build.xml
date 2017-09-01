@@ -881,7 +881,7 @@
 			<fileset dir="${dist}"/>
 		</copy>
 		<!-- copy 1 directory of unzipped javadocs to deploy location -->
-		<copy todir="${deploy}">
+		<copy todir="${deploy}/javadoc">
 			<fileset dir="${build}/javadoc"/>
 		</copy>
 	</target>
