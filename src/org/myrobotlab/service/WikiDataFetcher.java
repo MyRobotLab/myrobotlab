@@ -31,18 +31,27 @@ public class WikiDataFetcher extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(WikiDataFetcher.class);
 
-	String language = "en";
-	String website = "enwiki";
+	static String language = "en";
+	static String website = "enwiki";
 
 	public static void main(String[] args) {
 		LoggingFactory.init(Level.INFO);
 
 		try {
 
-			WikiDataFetcher wiki = (WikiDataFetcher) Runtime.start("wikiDataFetcher", "WikiDataFetcher");
-			EntityDocument doc = wiki.getWiki("Halloween");
+			@SuppressWarnings("unused")
+      WikiDataFetcher wiki = (WikiDataFetcher) Runtime.start("wikiDataFetcher", "WikiDataFetcher");
+			sleep(2000);
+			EntityDocument doc = WikiDataFetcher.getWiki("Halloween");
+			
+			// capital of united states WORKY
+			log.info(getData("united states","P36"));
+			
+			// what is Halloween WORKY
 			log.info(doc.toString());
-			Runtime.start("gui", "SwingGui");
+			
+	    // height of eiffel tower NOWORKY ANYMORE !!! ( quantity broken )
+      log.info(getData("eiffel tower","P2048"));
 
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -70,7 +79,7 @@ public class WikiDataFetcher extends Service {
 		website = site;
 	}
 
-	private EntityDocument getWiki(String query) throws MediaWikiApiErrorException {
+	private static EntityDocument getWiki(String query) throws MediaWikiApiErrorException {
 		WikibaseDataFetcher wbdf = WikibaseDataFetcher.getWikidataDataFetcher();
 		query = upperCaseAllFirst(query);
 		EntityDocument wiki = wbdf.getEntityDocumentByTitle(website, query);
@@ -80,7 +89,7 @@ public class WikiDataFetcher extends Service {
 		return wiki;
 	}
 
-	private EntityDocument getWikiById(String query) throws MediaWikiApiErrorException {
+	private static EntityDocument getWikiById(String query) throws MediaWikiApiErrorException {
 		WikibaseDataFetcher wbdf = WikibaseDataFetcher.getWikidataDataFetcher();
 		EntityDocument wiki = wbdf.getEntityDocument(upperCaseAllFirst(query));
 		// System.out.println( (String) wiki.getEntityId().getId());
@@ -136,7 +145,7 @@ public class WikiDataFetcher extends Service {
 		}
 	}
 
-	public String getLabelById(String query) throws MediaWikiApiErrorException {
+	public static String getLabelById(String query) throws MediaWikiApiErrorException {
 		EntityDocument document = getWikiById(query);
 		try {
 			String answer = ((ItemDocument) document).getLabels().get(language).getText();
@@ -214,12 +223,12 @@ public class WikiDataFetcher extends Service {
 		return new String(array);
 	}
 
-	private List<StatementGroup> getStatementGroup(String query) throws MediaWikiApiErrorException {
+	private static List<StatementGroup> getStatementGroup(String query) throws MediaWikiApiErrorException {
 		EntityDocument document = getWiki(query);
 		return ((ItemDocument) document).getStatementGroups();
 	}
 
-	private ArrayList<Object> getSnak(String query, String ID) throws MediaWikiApiErrorException {
+	private static ArrayList<Object> getSnak(String query, String ID) throws MediaWikiApiErrorException {
 		// TODO: parameterize these data / al objects and parameterize the
 		// return
 		// value of this function.
@@ -249,8 +258,9 @@ public class WikiDataFetcher extends Service {
 		return al;
 	}
 
-	public String getData(String query, String ID) throws MediaWikiApiErrorException {
-		try {
+	public static String getData(String query, String ID) throws MediaWikiApiErrorException {
+		//remove the try for dubug : https://github.com/MyRobotLab/myrobotlab/issues/94
+	  //try {
 			ArrayList<Object> al = getSnak(query, ID);
 			// TODO manage all snaks and qualifiers
 			Value data = ((JacksonValueSnak) al.get(1)).getDatavalue();
@@ -306,9 +316,9 @@ public class WikiDataFetcher extends Service {
 				break;
 			}
 			return answer;
-		} catch (Exception e) {
-			return "Not Found !";
-		}
+		//} catch (Exception e) {
+		//	return "Not Found !";
+		//}
 	}
 
 	public String getProperty(String query, String ID) throws MediaWikiApiErrorException {
@@ -415,6 +425,7 @@ public class WikiDataFetcher extends Service {
 		ServiceType meta = new ServiceType(WikiDataFetcher.class.getCanonicalName());
 		meta.addDescription("service interface for Wikipedia");
 		meta.addCategory("intelligence");
+		meta.setSponsor("beetlejuice");
 		meta.addDependency("org.wikidata.wdtk", "0.7.0");
 		meta.addDependency("org.apache.commons.httpclient", "4.5.2");
 		meta.addDependency("org.apache.commons.commons-lang3", "3.3.2");
