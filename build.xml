@@ -866,19 +866,23 @@
 		<copy file="${build}/lib/myrobotlab.jar" tofile="myrobotlab.jar" />
 
 
-                <!-- Lets zip up the javadocs and the jacoco reports so they can be part of the distribution! -->
-                <zip destfile="${dist}/myrobotlab-javadoc.zip">
-                  <zipfileset dir="${build}/javadoc" />
-                </zip>
+        <!-- Lets zip up the javadocs and the jacoco reports so they can be part of the distribution! -->
+        <zip destfile="${dist}/myrobotlab-javadoc.zip">
+          <zipfileset dir="${build}/javadoc" />
+        </zip>
 
-                <!-- Lets zip up the jacoco code coverage reports! people can see what is / isn't tested -->
-                <zip destfile="${dist}/myrobotlab-jacoco.zip">
-                  <zipfileset dir="${build}/javadoc" />
-                </zip>
+        <!-- Lets zip up the jacoco code coverage reports! people can see what is / isn't tested -->
+        <zip destfile="${dist}/myrobotlab-jacoco.zip">
+          <zipfileset dir="${build}/javadoc" />
+        </zip>
 		
 		<mkdir dir="${deploy}" />
 		<copy todir="${deploy}">
 			<fileset dir="${dist}"/>
+		</copy>
+		<!-- copy 1 directory of unzipped javadocs to deploy location -->
+		<copy todir="${deploy}">
+			<fileset dir="${build}/javadoc"/>
 		</copy>
 	</target>
 
