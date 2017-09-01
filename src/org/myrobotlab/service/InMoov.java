@@ -60,7 +60,7 @@ public class InMoov extends Service {
   // else should be done directly to targeted services !!!
   // OBJECTIVE - always return a service !!!
 
-  // port map NOT SURE ????
+  // port map NOT SURE ???
   // will no right & left and com ports
   // 3 definitions at the top left right and head
   // port index, local references
