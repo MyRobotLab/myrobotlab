@@ -504,7 +504,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     return null;
   }
 
-
   static public boolean fromAgent() {
     return fromAgent != null;
   }
@@ -518,6 +517,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   /**
    * get the one and only Cli
+   * 
    * @return - command line interpreter
    */
   public static Cli getCli() {
@@ -1236,9 +1236,9 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       if (cmdline.containsKey("-id")) {
         customId = cmdline.getArgument("-id", 0);
       }
-      
+
       if (cmdline.containsKey("-fromAgent")) {
-        if (cmdline.getArgumentCount("-fromAgent") != 1){
+        if (cmdline.getArgumentCount("-fromAgent") != 1) {
           log.error("if process is -fromAgent a id is required - no id found");
           return;
         }
@@ -1585,6 +1585,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   /**
    * sets task to shutdown in (n) seconds
+   * 
    * @param seconds
    */
   public static void shutdown(Integer seconds) {
@@ -1596,45 +1597,45 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       shutdown();
     }
   }
-  
+
   /**
-   * shutdown terminates the currently running Java virtual machine by initiating its
-   * shutdown sequence. This method never returns normally. The argument serves
-   * as a status code; by convention, a nonzero status code indicates abnormal
-   * termination
+   * shutdown terminates the currently running Java virtual machine by
+   * initiating its shutdown sequence. This method never returns normally. The
+   * argument serves as a status code; by convention, a nonzero status code
+   * indicates abnormal termination
    *
    */
   public static void shutdown() {
     // - saveAll(); not needed as release at some point calls save()
     log.info("mrl shutdown");
     try {
-    releaseAll();
-    } catch(Exception e){
+      releaseAll();
+    } catch (Exception e) {
       log.error("releaseAll threw - continuing to shutdown", e);
     }
-    
+
     // removing appropriate pid file
     try {
       String pidFileName = null;
-      if (fromAgent != null){
-         // from agent
-         pidFileName = String.format("%s/%s/%s.pid", PID_DIR, fromAgent, id);         
+      if (fromAgent != null) {
+        // from agent
+        pidFileName = String.format("%s/%s/%s.pid", PID_DIR, fromAgent, id);
       } else {
         // "not" from agent
         pidFileName = String.format("%s/%s.pid", PID_DIR, id);
       }
-      
+
       log.info("removing pid file {}", pidFileName);
-      File f = new File(pidFileName);      
+      File f = new File(pidFileName);
       f.delete();
     } catch (Exception e) {
       log.error("removing pid file failed", e);
     }
-    
+
     // In unusual situations, System.exit(int) might not actually stop the
     // program.
     // Runtime.getRuntime().halt(int) on the other hand, always does.
-    System.exit(-1); // really returned ?  or jvm bug ?
+    System.exit(-1); // really returned ? or jvm bug ?
     java.lang.Runtime.getRuntime().halt(-1);
   }
 
@@ -1753,36 +1754,6 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     hostname = getHostname();
     pid = getPid();
-    
-    // utf8 trick
-    // we need UTF8 : runtime don't take command line parameters -Dfile.encoding=UTF-8
-    // and command line parameters is batch launcher dependent...
-    // this trick force the runtime the set default charset to UTF8
-    // because launch System.setProperty("file.encoding","UTF-8") here is not enough
-    
-    System.setProperty("file.encoding","UTF-8");
-    Field charset = null;
-	try {
-		charset = Charset.class.getDeclaredField("defaultCharset");
-	} catch (NoSuchFieldException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	} catch (SecurityException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	}
-    charset.setAccessible(true);
-    try {
-		charset.set(null,null);
-	} catch (IllegalArgumentException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	} catch (IllegalAccessException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	}
-    
-    // end utf8 trick
 
     if (customId != null) {
       // custom id
@@ -1865,6 +1836,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     if (jvmArgs != null) {
       log.info(String.format("jvmArgs %s", Arrays.toString(jvmArgs.toArray())));
     }
+    log.info("file.encoding {}", System.getProperty("file.encoding"));
     log.info(String.format("args %s", Arrays.toString(args.toArray())));
 
     log.info("============== args end ==============");
@@ -1911,11 +1883,11 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     log.info("java.vm.name [{}]", System.getProperty("java.vm.name"));
     log.info("java.vm.vendor [{}]", System.getProperty("java.vm.vendor"));
     log.info("java.specification.version [{}]", System.getProperty("java.specification.version"));
-    //test ( force encoding )
-    //System.setProperty("file.encoding","UTF-8" );
+    // test ( force encoding )
+    // System.setProperty("file.encoding","UTF-8" );
     log.info("file.encoding [{}]", System.getProperty("file.encoding"));
     log.info("Charset.defaultCharset() [{}]", Charset.defaultCharset());
-    
+
     // System.getProperty("pi4j.armhf")
 
     log.info("java.home [{}]", System.getProperty("java.home"));
