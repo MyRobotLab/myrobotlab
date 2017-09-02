@@ -41,9 +41,8 @@ public class ProcessData implements Serializable {
 
 	public String javaExe = null;
 
-	public String jniLibraryPath = null;
-	public String jnaLibraryPath = null;
-	public String jvm[] = null;
+	// TODO - default more memory ? also mebbe have a jvmAppend flag vs replace ?
+	public String jvm[] = new String[]{"-Djava.library.path=libraries/native","-Djna.library.path=libraries/native","-Dfile.encoding=UTF-8"};
 
 	boolean userDefinedServices = false;
 
@@ -114,9 +113,7 @@ public class ProcessData implements Serializable {
 		this.version = pd.version;
 
 		this.javaExe = pd.javaExe;
-		this.jniLibraryPath = pd.jniLibraryPath;
 		this.version = pd.version;
-		this.jnaLibraryPath = pd.jnaLibraryPath;
 		
 		this.jarPath = pd.jarPath;
 		
@@ -201,9 +198,6 @@ public class ProcessData implements Serializable {
 
 		javaExe = String.format("%s%sbin%s%s", System.getProperty("java.home"), fs, fs, exeName);
 
-		jniLibraryPath = "-Djava.library.path=libraries/native";
-		jnaLibraryPath = "-Djna.library.path=libraries/native";
-
 	}
 
 	public boolean isRunning() {
@@ -220,9 +214,7 @@ public class ProcessData implements Serializable {
 		    cmd.add(jvm[i]);
 		  }
 		}
-
-		cmd.add(jniLibraryPath);
-		cmd.add(jnaLibraryPath);
+		
 		cmd.add("-cp");
 
 		// step 1 - get current env data
