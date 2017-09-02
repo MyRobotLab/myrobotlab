@@ -940,10 +940,9 @@ public class Agent extends Service {
       sb.append(" ");
     }
 
-    // add process id
 
-    // log.info(String.format("in %s spawning -> [%s]", b.getAbsolutePath(),
-    // sb.toString()));
+    log.info(String.format("spawning -> [%s]", sb.toString()));
+    
     ProcessBuilder builder = new ProcessBuilder(cmdLine);
 
     // setting working directory to wherever the jar is...
