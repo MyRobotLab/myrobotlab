@@ -27,11 +27,12 @@ package org.myrobotlab.service;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -123,7 +124,7 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 		try {
 			p = java.lang.Runtime.getRuntime().exec(command);
 			p.waitFor();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
 	
 			String line = "";
 			while ((line = reader.readLine())!= null) {
@@ -161,22 +162,16 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 	 * 
 	 * @param nothing
 	 * @return nothing
+	 * @throws IOException 
 	 */
-	private void createBatchFile() {
+	private void createBatchFile() throws IOException {
 		
 		File f = new File ("voicetest.bat");
-		 
-		try
-		{
-			PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter (f)));
-		 
-			pw.print("ptts -u " + TextPath + "text.txt");
-			pw.close();
-		}
-		catch (IOException exception)
-		{
-			System.out.println("Write error : " + exception.getMessage());
-		}		
+		BufferedWriter bw = null;
+		bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8));
+    bw.write("ptts -u " + TextPath + "text.txt");
+    bw.close();
+
 	}
 
 	/**
@@ -221,16 +216,13 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 		
 		// Text file created...
 		File f = new File (TextPath + "text.txt");
+    BufferedWriter bw = null;
+    bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8));
 		
-		try	{
-			PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter (f)));
-		 
-			pw.print(toSpeak);
-			pw.close();
-		}
-		catch (IOException exception)	{
-			System.out.println("Write error : " + exception.getMessage());
-		}		
+
+    bw.write(toSpeak);
+    bw.close();
+		
 
 		// Start speak event
 		invoke("publishStartSpeaking", toSpeak);
@@ -259,15 +251,12 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 		// Text file created...
 		File f = new File (TextPath + "text.txt");
 		 
-		try	{
-			PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter (f)));
-		 
-			pw.print(toSpeak);
-			pw.close();
-		}
-		catch (IOException exception)	{
-			System.out.println("Write error : " + exception.getMessage());
-		}		
+	  BufferedWriter bw = null;
+    bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8));
+	 
+    bw.write(toSpeak);
+    bw.close();
+
 
 		// Start speak event
 		invoke("publishStartSpeaking", toSpeak);
