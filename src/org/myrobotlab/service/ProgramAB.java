@@ -140,20 +140,18 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       log.info("{} does not exist", aimlPath);
       return;
     }
-    if (wasCleanyShutdowned == null || wasCleanyShutdowned.isEmpty())
-    {
+    if (wasCleanyShutdowned == null || wasCleanyShutdowned.isEmpty()) {
       wasCleanyShutdowned="firstStart";  
     }
-    if (wasCleanyShutdowned.equals("nok"))
-    {
+    if (wasCleanyShutdowned.equals("nok")) {
       if (folderaimlIF.exists()) {
-    warn("Bad previous shutdown, ProgramAB need to recompile AimlIf files. Don't worry.");  
-    for (File f : folderaimlIF.listFiles()) {
+        // warn("Bad previous shutdown, ProgramAB need to recompile AimlIf files. Don't worry.");  
+        log.info("Bad previous shutdown, ProgramAB need to recompile AimlIf files. Don't worry.");
+        for (File f : folderaimlIF.listFiles()) {
           f.delete();
-    }
+        }
       }
     }
-    
     
     log.info(folder.getAbsolutePath());
     HashMap<String, Long> modifiedDates = new HashMap<String, Long>();
@@ -237,7 +235,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public Response getResponse(String username, String text) {
-    log.info(String.format("Get Response for : user %s bot %s : %s", username, currentBotName, text));
+    log.info("Get Response for : user {} bot {} : {}", username, currentBotName, text);
 
     if (bot == null) {
       String error = "ERROR: Core not loaded, please load core before chatting.";
