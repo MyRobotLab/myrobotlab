@@ -161,7 +161,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 			String selected = (String) grabberTypeSelect.getSelectedItem();
 
 			if ("IPCamera".equals(selected) || "Pipeline".equals(selected) || "ImageFile".equals(selected)
-					|| "SlideShow".equals(selected) || "Sarxos".equals(selected)) {
+					|| "SlideShow".equals(selected) || "Sarxos".equals(selected) || "MJpeg".equals(selected)) {
 				prefixPath = "org.myrobotlab.opencv.";
 			} else {
 				prefixPath = "org.bytedeco.javacv.";
@@ -205,7 +205,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 				log.error("input source is " + vp.inputSource);
 			}
 
-			if ("IPCamera".equals(selected)) {
+			if ("IPCamera".equals(selected) || "MJpeg".equals(selected)) {
 				vp.inputSource = OpenCV.INPUT_SOURCE_NETWORK;
 			}
 
@@ -358,7 +358,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 		frameGrabberList.add("ImageFile");
 		frameGrabberList.add("SlideShowFile");
 		frameGrabberList.add("Sarxos");
-		
+		frameGrabberList.add("MJpeg");
 		
 		ComboBoxModel2.add(INPUT_KEY);
 
