@@ -739,14 +739,15 @@ public class OpenCV extends AbstractVideoSource {
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     // Runtime.start("right", "OpenCV");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
-    // opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
+    opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
 
-    // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
+   // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
     // opencv.setInputSource(INPUT_SOURCE_CAMERA);
-    // opencv.setInputSource(INPUT_SOURCE_NETWORK);
-    // opencv.setInputFileName("http://192.168.4.112:8080/?action=stream");
-    // opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
+   opencv.setInputSource(INPUT_SOURCE_NETWORK);
+   opencv.setInputFileName("http://192.168.4.117:8080/?action=stream");
+    //opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
+   opencv.setStreamerEnabled(false);
    //  opencv.addFilter("facerec", "FaceRecognizer");
 
     // OpenCVFilterPyramidDown pyramid = new OpenCVFilterPyramidDown("pyramid");
@@ -769,7 +770,7 @@ public class OpenCV extends AbstractVideoSource {
     // VideoStreamer vs = (VideoStreamer)Runtime.start("vs",
     // "VideoStreamer");
     // vs.attach(opencv);
-    // opencv.capture();
+    opencv.capture();
     // opencvLeft.capture();
     // opencvRight.capture();
 
@@ -864,6 +865,8 @@ public class OpenCV extends AbstractVideoSource {
     // meta.addDependency("org.bytedeco.javacpp","1.1");
     meta.addDependency("org.bytedeco.javacv", "1.3");
     meta.addDependency("pl.sarxos.webcam", "0.3.10");
+    // for the mjpeg streamer support
+    meta.addDependency("net.sf.jipcam","0.9.1");
     return meta;
   }
 
