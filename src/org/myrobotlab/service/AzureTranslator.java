@@ -98,6 +98,7 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     meta.addDescription("interface to Azure translation services");
     meta.addCategory("translation", "cloud", "ai");
     meta.addDependency("com.azure.translator", "0.8.3");
+    meta.setCloudService(true);
     return meta;
   }
 
