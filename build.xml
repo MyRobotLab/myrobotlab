@@ -884,6 +884,10 @@
 		<copy todir="${deploy}/javadoc">
 			<fileset dir="${build}/javadoc"/>
 		</copy>
+		<!-- copy 1 directory of unzipped javadocs to deploy location -->
+		<copy todir="${deploy}">
+			<fileset dir="${build}/classes/resource/framework/serviceData.json"/>
+		</copy>
 	</target>
 
 	<target name="clean" description="clean up">
