@@ -123,9 +123,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Arduino.class.getCanonicalName());
-    meta.addDescription("This service interfaces with an Arduino micro-controller");
+    meta.addDescription("controls an Arduino microcontroller as a slave, which allows control of all the devices the Arduino is attached to, such as servos, motors and sensors");
     meta.addCategory("microcontroller");
     meta.addPeer("serial", "Serial", "serial device for this Arduino");
+
+    meta.setLicenseGplV3(); // via jssc
+
     return meta;
   }
 
@@ -703,51 +706,46 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     boardInfoRequestTs = System.currentTimeMillis();
     msg.getBoardInfo();
   }
-  
+
   public void setAref(String aref) {
-    aref=aref.toUpperCase();
-    if (this.getBoard().contains("mega"))
-    {
-      if (aref=="INTERNAL")
-      {
-     error("Aref "+aref+" is not compatible with your board "+this.getBoard());
-     aref="DEFAULT";
+    aref = aref.toUpperCase();
+    if (this.getBoard().contains("mega")) {
+      if (aref == "INTERNAL") {
+        error("Aref " + aref + " is not compatible with your board " + this.getBoard());
+        aref = "DEFAULT";
       }
-    }
-    else    
-    {
-      if (aref=="INTERNAL1V1" || aref=="INTERNAL2V56")
-      {
-     error("Aref INTERNALxV is not compatible with your board "+this.getBoard());
-     aref="DEFAULT";
+    } else {
+      if (aref == "INTERNAL1V1" || aref == "INTERNAL2V56") {
+        error("Aref INTERNALxV is not compatible with your board " + this.getBoard());
+        aref = "DEFAULT";
       }
     }
 
-    int arefInt=1;
+    int arefInt = 1;
     switch (aref) {
       case "EXTERNAL":
-        arefInt=0;
+        arefInt = 0;
         break;
       case "DEFAULT":
-        arefInt=1;
+        arefInt = 1;
         break;
       case "INTERNAL1V1":
-        arefInt=2;
+        arefInt = 2;
         break;
       case "INTERNAL":
-        arefInt=3;
+        arefInt = 3;
         break;
       case "INTERNAL2V56":
-        arefInt=3;
+        arefInt = 3;
         break;
       default:
-        log.error("Aref "+aref+" is unknown");
-        }
-	  log.info("set aref to "+aref); 
-	  this.aref=aref;
+        log.error("Aref " + aref + " is unknown");
+    }
+    log.info("set aref to " + aref);
+    this.aref = aref;
     msg.setAref(arefInt);
   }
-  
+
   public String getAref() {
     return aref;
   }
@@ -1602,14 +1600,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   /**
-   * Arduino's servo.attach(pin) which is just energizing on a pin
-   * To be consistent & transparent - method should be servoEnable
+   * Arduino's servo.attach(pin) which is just energizing on a pin To be
+   * consistent & transparent - method should be servoEnable
    */
   @Override
-  @Deprecated 
+  @Deprecated
   // > servoEnablePwm/deviceId/pin
   public void servoAttachPin(ServoControl servo, int pin) {
-    log.info("{}.attachPin({})", servo.getName(), servo.getPin());    
+    log.info("{}.attachPin({})", servo.getName(), servo.getPin());
     msg.servoAttachPin(getDeviceId(servo), pin);
   }
 
@@ -1797,15 +1795,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.stopRecording();
   }
 
-  public boolean usedByInmoov=false;
+  public boolean usedByInmoov = false;
+
   @Override
   public void stopService() {
     detachI2CControls();
     super.stopService();
-    //we give some time to inmoov service
-    if (!usedByInmoov)
-    {
-    disconnect();
+    // we give some time to inmoov service
+    if (!usedByInmoov) {
+      disconnect();
     }
   }
 

@@ -1072,9 +1072,11 @@ public class Agent extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Agent.class.getCanonicalName());
-    meta.addDescription("Agent - responsible for creating the environment and maintaining, tracking and terminating all processes");
+    meta.addDescription("responsible for spawning a MRL process. Agent can also terminate, respawn and control the spawned process");
     meta.addCategory("framework");
     meta.setSponsor("GroG");
+    meta.setLicenseApache();
+    
     // meta.addPeer("webadmin", "WebGui", "webgui for the Agent");
     return meta;
   }
