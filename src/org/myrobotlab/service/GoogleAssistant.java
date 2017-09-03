@@ -16,6 +16,11 @@ import java.io.File;
 **/
 public class GoogleAssistant extends PythonProxy {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public GoogleAssistant(String n) {
     super(n);
   }
