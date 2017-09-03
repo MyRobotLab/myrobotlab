@@ -516,7 +516,7 @@ public class AudioFile extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(AudioFile.class.getCanonicalName());
-    meta.addDescription("Plays back audio file. Can block or multi-thread play");
+    meta.addDescription("can play audio files on multiple tracks");
     meta.addCategory("sound");
     meta.addDependency("javazoom.spi", "1.9.5");
     meta.addDependency("javazoom.jl.player", "1.0.1");

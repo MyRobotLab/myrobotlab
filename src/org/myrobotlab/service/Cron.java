@@ -185,7 +185,7 @@ public class Cron extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Cron.class.getCanonicalName());
-    meta.addDescription("A Cron like service capable of scheduling future actions");
+    meta.addDescription("is a cron like service capable of scheduling future actions using cron syntax");
     meta.addCategory("scheduling");
     meta.addDependency("it.sauronsoftware.cron4j", "2.2.5");
     return meta;

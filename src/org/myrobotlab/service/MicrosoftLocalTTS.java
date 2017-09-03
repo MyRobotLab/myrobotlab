@@ -249,13 +249,12 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(MicrosoftLocalTTS.class.getCanonicalName());
-    meta.addDescription("used as a general template");
+    meta.addDescription("implements speech using Microsoft's tts.exe");
     meta.setAvailable(true); // false if you do not want it viewable in a
     // gui
     // add dependency if necessary
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech");
-    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
     meta.addDependency("tts.microsoftspeech", "1.0");
     return meta;
   }

@@ -962,7 +962,7 @@ public class OpenNi extends Service // implements
 
     ServiceType meta = new ServiceType(OpenNi.class.getCanonicalName());
     meta.addDescription("OpenNI Service - 3D sensor");
-    meta.addCategory("video", "vision", "sensor");
+    meta.addCategory("video", "vision", "sensor", "telerobotics");
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "video streaming service for webgui.");
     meta.addDependency("com.googlecode.simpleopenni", "1.96");
     return meta;

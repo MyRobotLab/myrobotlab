@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -54,7 +53,6 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -2496,7 +2494,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Runtime.class.getCanonicalName());
-    meta.addDescription("Runtime singleton service responsible for the creation and registry of all other services");
+    meta.addDescription("is a singleton service responsible for the creation, starting, stopping, releasing and registration of all other services");
     meta.addCategory("framework");
     meta.addPeer("cli", "Cli", "command line interpreter for the runtime");
 

@@ -93,7 +93,7 @@ public class JMonkeyEngine extends Service implements Simulator {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(JMonkeyEngine.class.getCanonicalName());
-    meta.addDescription("used as a general template");
+    meta.addDescription("is a 3d game engine, used for simulators");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
     meta.addDependency("org.jme3.sdk", "3.0.0");

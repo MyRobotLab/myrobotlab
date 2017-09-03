@@ -124,6 +124,7 @@ public class OpenWeatherMap extends HttpClient {
     ServiceType meta = new ServiceType(OpenWeatherMap.class.getCanonicalName());
     meta.addDescription("This service will query OpenWeatherMap for the current weather.  Get an API key at http://openweathermap.org/");
     meta.addCategory("data","weather");
+    meta.setCloudService(true);
     return meta;
   }
   
