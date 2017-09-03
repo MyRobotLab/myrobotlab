@@ -526,7 +526,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
         default: {
           // handleInvalidApi(r); // TODO - swagger list of apis ?
-          throw new IOException("invalid api");
+          throw new IOException("invalid api: " + apiKey);
         }
       }
 
