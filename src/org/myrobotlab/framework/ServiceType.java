@@ -23,6 +23,8 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 
 	String name;
 	String link;
+	String license;// = "Apache";
+	boolean isCloudService = false;
 
 	public String getLink() {
     return link;
@@ -183,5 +185,29 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	public String getDescription() {
 		return description;
 	}
+
+  public void addLicense(String license) {
+    this.license = license;
+  }
+  
+  public String getLicense(){
+    return license;
+  }
+
+  public void setLicenseProprietary() {
+    addLicense("proprietary");
+  }
+  
+  public void setLicenseApache() {
+    addLicense("apache");
+  }
+  
+  public void setLicenseGplV3() {
+    addLicense("gplv3");
+  }
+
+  public void setCloudService(boolean b) {
+    isCloudService = b;
+  }
 
 }

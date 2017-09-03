@@ -543,8 +543,13 @@ private Object language;
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(AcapelaSpeech.class.getCanonicalName());
     meta.setAvailable(false);
-    meta.addDescription("Acapela - no longer supported");
+    
+    meta.addDescription("is a proprietary cloud service, currently returns speech and background music");
     meta.addCategory("speech");
+    
+    meta.setLicenseProprietary();
+    meta.setCloudService(true);
+    
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");

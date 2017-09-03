@@ -343,7 +343,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(AdafruitMotorShield.class.getCanonicalName());
-    meta.addDescription("Adafruit Motor Shield Service");
+    meta.addDescription("arduino shield controls 4 dc motors or 2 steppers");
     meta.addCategory("shield", "motor");
     meta.addPeer("arduino", "Arduino", "our Arduino");
     return meta;

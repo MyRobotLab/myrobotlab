@@ -630,8 +630,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Adafruit16CServoDriver.class.getCanonicalName());
-    meta.addDescription("Adafruit 16-Channel PWM/Servo Driver");
-    meta.addCategory("shield", "servo & pwm");
+    meta.addDescription("controls 16 servos or pwm pins");
+    meta.addCategory("shield", "servo", "pwm");
     meta.setSponsor("Mats");
     /*
      * meta.addPeer("arduino", "Arduino", "our Arduino"); meta.addPeer("raspi",
