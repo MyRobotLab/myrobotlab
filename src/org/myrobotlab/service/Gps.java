@@ -883,10 +883,10 @@ public class Gps extends Service implements SerialDataListener {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Gps.class.getCanonicalName());
-    meta.addDescription("The Global Positioning Sensor");
-    meta.addCategory("location");
-    meta.addCategory("sensor");
+    meta.addDescription("parses NMEA sentences coming in over a Serial service");
+    meta.addCategory("location", "sensor");
     meta.addPeer("serial", "Serial", "serial port for GPS");
+    meta.setLicenseApache();
 
     return meta;
   }

@@ -654,7 +654,7 @@ public class Cli extends Service {
    */
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(Cli.class.getCanonicalName());
-    meta.addDescription("command line interpreter interface");
+    meta.addDescription("command line interpreter interface for myrobotlab");
     meta.addCategory("framework");
     return meta;
   }
