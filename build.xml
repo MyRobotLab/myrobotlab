@@ -884,6 +884,8 @@
 		<copy todir="${deploy}/javadoc">
 			<fileset dir="${build}/javadoc"/>
 		</copy>
+		<!-- copy serviceData for matrix data -->
+		<copy file="${build}/classes/resource/framework/serviceData.json" tofile="${deploy}/serviceData.json" />			
 	</target>
 
 	<target name="clean" description="clean up">

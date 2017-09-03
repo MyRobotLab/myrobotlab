@@ -453,23 +453,21 @@ public class Python extends Service {
 		exec(code, replace, false);
 	}
 
-	/*
-	 * replaces and executes current Python script if replace = false - will not
-	 * replace "script" variable can be useful if ancillary scripts are needed
-	 * e.g. monitors &amp; consoles
+	/**
+	 * This method will execute a string that represents a python script.  When called with blocking=false, the return code
+	 * will likely return true even if there is a syntax error because it doesn't wait for the response.
 	 * 
-	 * @param code
-	 *            the code to execute
-	 * @param replace
-	 *            replace the current script with code
+	 * @param code - the script to execute
+	 * @param replace - not used!  (should be removed.)
+	 * @param blocking - if true, this method will wait until all of the code has been evaluated.  
+	 * @return - returns true if execution of the code was successful.  returns false if there was an exception.
 	 */
-	public void exec(String code, boolean replace, boolean blocking) {
-		log.info(String.format("exec(String) \n%s\n", code));
-
+	public boolean exec(String code, boolean replace, boolean blocking) {
+	  log.info("exec(String) \n{}", code);
+		boolean success = true;
 		if (interp == null) {
 			createPythonInterpreter();
 		}
-		
 		try {
 			if (!blocking) {
 				interpThread = new PIThread(String.format("%s.interpreter.%d", getName(), ++interpreterThreadCount), code);
@@ -478,15 +476,18 @@ public class Python extends Service {
 				interp.exec(code);
 			}
 		} catch (PyException pe) {
+		  // something specific with a python error
+		  success = false;
 			error(pe.toString());
+			Logging.logError(pe);
 		} catch (Exception e) {
-			// PyException - very nice - but we'll handle it all
-			// the same way at the moment
-			// broadcast msg only
+		  success = false;
+			// more general error handling.
 			error(e.getMessage());
 			// dump stack trace to log
 			Logging.logError(e);
 		}
+		return success;
 	}
 
 	public void execAndWait(String code) {
@@ -500,7 +501,7 @@ public class Python extends Service {
 	 *            the full path name of the python file to execute
 	 */
 	public void execFile(String filename) throws IOException {
-		String script = FileIO.toString(filename);
+	  String script = FileIO.toString(filename);
 		exec(script);
 	}
 
