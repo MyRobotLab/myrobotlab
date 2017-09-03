@@ -261,7 +261,7 @@ public class AndroidSpeechRecognition extends Service implements TextPublisher {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(AndroidSpeechRecognition.class.getCanonicalName());
-    meta.addDescription("utilizing Android's Speech Recognition");
+    meta.addDescription("service which opens a listening port on 5684 and re-publishes incoming Android recognized speech");
     meta.addCategory("speech recognition");
     return meta;
   }

@@ -1,15 +1,13 @@
 package org.myrobotlab.service;
 
+import java.util.concurrent.LinkedBlockingQueue;
+
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.framework.Message;
-import java.io.File;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
 *This class exists as a proxy to control native MRL services connected through the web API. 
@@ -133,7 +131,7 @@ public class PythonProxy extends Service {
 
   public static ServiceType addMetaData(ServiceType meta) {
 	meta.addPeer("webgui", "WebGui", "This is used as the API entrance point");
-	meta.addDependency("com.nativeServices", "0.0.1");
+	// meta.addDependency("com.nativeServices", "0.0.1"); what's this ?
 	return meta;
   }
 
