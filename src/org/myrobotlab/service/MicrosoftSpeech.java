@@ -53,300 +53,290 @@ import org.slf4j.Logger;
 public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextListener {
   static final Logger log = LoggerFactory.getLogger(MicrosoftSpeech.class);
 
-	private static final long serialVersionUID = 1L;
-	private String TextPath = "";
-	private String voice = "";
+  private static final long serialVersionUID = 1L;
+  private String TextPath = "";
+  private String voice = "";
 
-	// For compabilities
-	private HashSet<String> voices = new HashSet<String>();
+  // For compabilities
+  private HashSet<String> voices = new HashSet<String>();
 
-	private String language;
+  private String language;
 
-	public MicrosoftSpeech(String reservedKey) {
-		super(reservedKey);
-	}
-	
-	// For compabilities
-	public void startService() {
-		super.startService();
-	}
+  public MicrosoftSpeech(String reservedKey) {
+    super(reservedKey);
+  }
 
-	// Use for specified text path file
-	@Override
-	public void setLanguage(String l) {
-		TextPath = l;
-		this.language=l;
-	}
+  // For compabilities
+  public void startService() {
+    super.startService();
+  }
 
-	// Use for read text path file
-	@Override
-	public String getLanguage() {
-		return TextPath;
-	}
+  // Use for specified text path file
+  @Override
+  public void setLanguage(String l) {
+    TextPath = l;
+    this.language = l;
+  }
 
-	// For compabilities
-	@Override
-	public List<String> getLanguages() {
-		return null;
-	}
+  // Use for read text path file
+  @Override
+  public String getLanguage() {
+    return TextPath;
+  }
 
-	// For compabilities
-	@Override
-	public ArrayList<String> getVoices() {
-		return new ArrayList<String>(voices);
-	}
+  // For compabilities
+  @Override
+  public List<String> getLanguages() {
+    return null;
+  }
 
-	// For compabilities
-	@Override
-	public boolean setVoice(String voice) {
-		this.voice = voice;
-		return true;
-	}
+  // For compabilities
+  @Override
+  public ArrayList<String> getVoices() {
+    return new ArrayList<String>(voices);
+  }
 
-	// For compabilities
-	@Override
-	public String getVoice() {
-		return voice;
-	}
-	
-	/**
-	 * Execute command shell
-	 * 
-	 * @param command
-	 *          - the command line to execute.
-	 * @return TODO
-	 */
-	private String executeCommand(String command) {
-	
-		StringBuffer output = new StringBuffer();
-		Process p;
-	
-		try {
-			p = java.lang.Runtime.getRuntime().exec(command);
-			p.waitFor();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
-	
-			String line = "";
-			while ((line = reader.readLine())!= null) {
-				output.append(line + "\n");
-			}
-	
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	
-		return output.toString();
-	}
-	
-	/**
-	 * Check voicetest batch if exist
-	 * 
-	 * @param nothing
-	 * @return true or false
-	 */
-	private boolean batchFileIsOK() {
-		
-		Path p = Paths.get("voicetest.bat");
-		if (Files.exists(p))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
+  // For compabilities
+  @Override
+  public boolean setVoice(String voice) {
+    this.voice = voice;
+    return true;
+  }
 
-	/**
-	 * Create voicetest batch if doesn't exist
-	 * 
-	 * @param nothing
-	 * @return nothing
-	 * @throws IOException 
-	 */
-	private void createBatchFile() throws IOException {
-		
-		File f = new File ("voicetest.bat");
-		BufferedWriter bw = null;
-		bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8));
-    bw.write("ptts -u " + TextPath + "text.txt");
-    bw.close();
+  // For compabilities
+  @Override
+  public String getVoice() {
+    return voice;
+  }
 
-	}
+  /**
+   * Execute command shell
+   * 
+   * @param command
+   *          - the command line to execute.
+   * @return TODO
+   */
+  private String executeCommand(String command) {
 
-	/**
-	 */
-	private class WaitThread extends Thread {
-		String ts;
-		
-		WaitThread(String toSpeak) {
-			super();
-			ts=toSpeak;
+    StringBuffer output = new StringBuffer();
+    Process p;
+
+    try {
+      p = java.lang.Runtime.getRuntime().exec(command);
+      p.waitFor();
+      BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
+
+      String line = "";
+      while ((line = reader.readLine()) != null) {
+        output.append(line + "\n");
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
-    public void run() {
-			// Send command
-			try {
-				java.lang.Runtime rt = java.lang.Runtime.getRuntime();
-				Process pr = rt.exec("voicetest.bat");
-				pr.waitFor();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+    return output.toString();
+  }
 
-			// End speak event
-			invoke("publishEndSpeaking", ts);
+  /**
+   * Check voicetest batch if exist
+   * 
+   * @param nothing
+   * @return true or false
+   */
+  private boolean batchFileIsOK() {
+
+    Path p = Paths.get("voicetest.bat");
+    if (Files.exists(p)) {
+      return true;
+    } else {
+      return false;
     }
   }
 
-	/**
-	 * Begin speaking something and return immediately
-	 * 
-	 * @param toSpeak
-	 *          - the string of text to speak.
-	 * @return TODO
-	 */
-	@Override
-	public AudioData speak(String toSpeak) throws Exception {
-		
-		// Check batch file
-		if (!batchFileIsOK())	{
-			createBatchFile();
-		}
-		
-		// Text file created...
-		File f = new File (TextPath + "text.txt");
+  /**
+   * Create voicetest batch if doesn't exist
+   * 
+   * @param nothing
+   * @return nothing
+   * @throws IOException
+   */
+  private void createBatchFile() throws IOException {
+
+    File f = new File("voicetest.bat");
     BufferedWriter bw = null;
     bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8));
-		
-
-    bw.write(toSpeak);
+    bw.write("ptts -u " + TextPath + "text.txt");
     bw.close();
-		
 
-		// Start speak event
-		invoke("publishStartSpeaking", toSpeak);
+  }
 
-		WaitThread proc = new WaitThread(toSpeak);
-		proc.start();
-	
-		return null;
-	}
+  /**
+   */
+  private class WaitThread extends Thread {
+    String ts;
 
-	/**
-	 * Begin speaking and wait until all speech has been played back/
-	 * 
-	 * @param toSpeak
-	 *          - the string of text to speak.
-	 * @return
-	 */
-	@Override
-	public boolean speakBlocking(String toSpeak) throws Exception {
+    WaitThread(String toSpeak) {
+      super();
+      ts = toSpeak;
+    }
 
-		// Check batch file
-		if (!batchFileIsOK())	{
-			createBatchFile();
-		}
-		
-		// Text file created...
-		File f = new File (TextPath + "text.txt");
-		 
-	  BufferedWriter bw = null;
+    public void run() {
+      // Send command
+      try {
+        java.lang.Runtime rt = java.lang.Runtime.getRuntime();
+        Process pr = rt.exec("voicetest.bat");
+        pr.waitFor();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
+      // End speak event
+      invoke("publishEndSpeaking", ts);
+    }
+  }
+
+  /**
+   * Begin speaking something and return immediately
+   * 
+   * @param toSpeak
+   *          - the string of text to speak.
+   * @return TODO
+   */
+  @Override
+  public AudioData speak(String toSpeak) throws Exception {
+
+    // Check batch file
+    if (!batchFileIsOK()) {
+      createBatchFile();
+    }
+
+    // Text file created...
+    File f = new File(TextPath + "text.txt");
+    BufferedWriter bw = null;
     bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8));
-	 
+
     bw.write(toSpeak);
     bw.close();
 
+    // Start speak event
+    invoke("publishStartSpeaking", toSpeak);
 
-		// Start speak event
-		invoke("publishStartSpeaking", toSpeak);
-		// Send command
-		executeCommand("voicetest.bat");
-		// End speak event
-		invoke("publishEndSpeaking", toSpeak);
-	
-		return false;
-	}
+    WaitThread proc = new WaitThread(toSpeak);
+    proc.start();
 
-	@Override
-	public void setVolume(float volume) {
-		// TODO Auto-generated method stub		
-	}
+    return null;
+  }
 
-	@Override
-	public float getVolume() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+  /**
+   * Begin speaking and wait until all speech has been played back/
+   * 
+   * @param toSpeak
+   *          - the string of text to speak.
+   * @return
+   */
+  @Override
+  public boolean speakBlocking(String toSpeak) throws Exception {
 
-	@Override
-	public void interrupt() {
-		// TODO Auto-generated method stub
-	}
+    // Check batch file
+    if (!batchFileIsOK()) {
+      createBatchFile();
+    }
 
-	@Override
-	public String publishStartSpeaking(String utterance) {
-		log.info("publishStartSpeaking {}", utterance);
-		return utterance;
-	}
+    // Text file created...
+    File f = new File(TextPath + "text.txt");
 
-	@Override
-	public String publishEndSpeaking(String utterance) {
-		log.info("publishEndSpeaking {}", utterance);
-		return utterance;
-	}
+    BufferedWriter bw = null;
+    bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8));
 
-	@Override
-	public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType)
-		throws UnsupportedEncodingException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    bw.write(toSpeak);
+    bw.close();
 
-	@Override
-	public void addEar(SpeechRecognizer ear) {
-		// TODO Auto-generated method stub
-		addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
-		addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
-	}
+    // Start speak event
+    invoke("publishStartSpeaking", toSpeak);
+    // Send command
+    executeCommand("voicetest.bat");
+    // End speak event
+    invoke("publishEndSpeaking", toSpeak);
 
-	@Override
-	public void onRequestConfirmation(String text) {
-		try {
-			speakBlocking(String.format("did you say. %s", text));
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+    return false;
+  }
 
-	@Override
-	public void onText(String text) {
-		log.info("Microsoft speech On Text Called: {}", text);
-		try {
-			speak(text);
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+  @Override
+  public void setVolume(float volume) {
+    // TODO Auto-generated method stub
+  }
 
-	static public ServiceType getMetaData() {
-		ServiceType meta = new ServiceType(MicrosoftSpeech.class.getCanonicalName());
-		
-		meta.addDescription("Speech synthesis based on Microsoft speech with Jampal.");
-		meta.addCategory("speech");
-		meta.setSponsor("Dom14");
-		return meta;
-	}
+  @Override
+  public float getVolume() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
 
+  @Override
+  public void interrupt() {
+    // TODO Auto-generated method stub
+  }
 
-	/*public static void main(String[] args) {
-	  try {
-	    LoggingFactory.init();
-			MicrosoftSpeech mspeech = (MicrosoftSpeech) Runtime.start("msspeech", "MicrosoftSpeech");
-	    mspeech.speak("Bonjour, aujourd'hui, je parlerai d'un nouveau service");
-	    mspeech.speakBlocking("Maintenant j'utilise une nouvelle methode");
-	  } catch (Exception e) {
-	    log.error("main threw", e);
-	  }
-	}*/
+  @Override
+  public String publishStartSpeaking(String utterance) {
+    log.info("publishStartSpeaking {}", utterance);
+    return utterance;
+  }
+
+  @Override
+  public String publishEndSpeaking(String utterance) {
+    log.info("publishEndSpeaking {}", utterance);
+    return utterance;
+  }
+
+  @Override
+  public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void addEar(SpeechRecognizer ear) {
+    // TODO Auto-generated method stub
+    addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
+    addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
+  }
+
+  @Override
+  public void onRequestConfirmation(String text) {
+    try {
+      speakBlocking(String.format("did you say. %s", text));
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
+  @Override
+  public void onText(String text) {
+    log.info("Microsoft speech On Text Called: {}", text);
+    try {
+      speak(text);
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
+  static public ServiceType getMetaData() {
+    ServiceType meta = new ServiceType(MicrosoftSpeech.class.getCanonicalName());
+
+    meta.addDescription("Speech synthesis based on Microsoft speech with Jampal.");
+    meta.addCategory("speech");
+    meta.setSponsor("Dom14");
+    return meta;
+  }
+
+  /*
+   * public static void main(String[] args) { try { LoggingFactory.init();
+   * MicrosoftSpeech mspeech = (MicrosoftSpeech) Runtime.start("msspeech",
+   * "MicrosoftSpeech");
+   * mspeech.speak("Bonjour, aujourd'hui, je parlerai d'un nouveau service");
+   * mspeech.speakBlocking("Maintenant j'utilise une nouvelle methode"); } catch
+   * (Exception e) { log.error("main threw", e); } }
+   */
 }
