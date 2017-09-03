@@ -220,7 +220,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(VirtualDevice.class.getCanonicalName());
-    meta.addDescription("A service which can create virtual serial ports and behaviors for them");
+    meta.addDescription("a service which can create virtual serial ports and behaviors implemented in python for them");
     meta.addCategory("testing");
     // put peer definitions in
     meta.addPeer("uart", "Serial", "uart");

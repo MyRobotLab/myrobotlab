@@ -1,15 +1,9 @@
 package org.myrobotlab.service;
 
-import org.myrobotlab.service.PythonProxy;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.slf4j.Logger;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.framework.Message;
-import java.io.File;
 /**
 *This class exists as a proxy to control native MRL services connected through the web API. 
 *Methods of that native service are called through this class's {@link #exec(String, Object[])} method.
@@ -43,6 +37,7 @@ public class GoogleAssistant extends PythonProxy {
     meta.addDescription("Access Google Assistant through voice interaction");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     meta.addCategory("Assistant");
+    meta.setCloudService(true);
     return PythonProxy.addMetaData(meta);
   }
 

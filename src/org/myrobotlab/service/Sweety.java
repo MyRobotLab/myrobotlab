@@ -768,7 +768,7 @@ public class Sweety extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Sweety.class.getCanonicalName());
-    meta.addDescription("Service for the Sweety robot");
+    meta.addDescription("service for the Sweety robot");
     meta.addCategory("robot");
 
     // put peer definitions in

@@ -241,7 +241,7 @@ public class Python extends Service {
 	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(Python.class.getCanonicalName());
-		meta.addDescription("Python ID");
+		meta.addDescription("the Jython script engine compatible with pure Python 2.7 scripts");
 		meta.addCategory("programming", "control");
 
 		// Its now part of myrobotlab.jar - unzipped in

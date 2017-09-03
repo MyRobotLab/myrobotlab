@@ -667,7 +667,7 @@ public class Tracking extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Tracking.class.getCanonicalName());
-    meta.addDescription("proportional control, tracking, and translation");
+    meta.addDescription("uses a video input and vision library to visually track objects");
     meta.addCategory("vision", "video", "sensor", "control");
     meta.addPeer("x", "Servo", "pan servo");
     meta.addPeer("y", "Servo", "tilt servo");
