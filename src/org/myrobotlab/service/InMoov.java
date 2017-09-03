@@ -12,6 +12,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.jme3.InMoov3DApp;
 import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.GravityCenter;
@@ -1582,21 +1583,33 @@ public class InMoov extends Service {
     loadGestures(GESTURES_DIRECTORY);
   }
 
+  /**
+   * This method will look at all of the .py files in a directory.  One by one it will load the files into the 
+   * python interpreter.  A gesture python file should contain 1 method definition that is the same as the filename.
+   * 
+   * @param directory - the directory that contains the gesture python files.
+   */
   public void loadGestures(String directory) {
     // TODO: iterate over each of the python files in the directory
     // and load them into the python interpreter.
     File dir = makeGesturesDirectory(directory);
-
     for (File f : dir.listFiles()) {
       if (f.getName().toLowerCase().endsWith(".py")) {
         log.info("Loading Gesture Python file {}", f.getAbsolutePath());
         Python p = (Python) Runtime.getService("python");
+        String script = null;
         try {
-          p.execFile(f.getAbsolutePath());
+          script = FileIO.toString(f.getAbsolutePath());
         } catch (IOException e) {
-          // TODO Auto-generated catch block
-          log.warn("Error loading gesture file {}", f.getAbsolutePath());
-          e.printStackTrace();
+          log.warn("IO Error loading gesture file {} -- {}", f.getAbsolutePath(), e);
+          continue;
+        }
+        // evaluate the gestures scripts in a blocking way.
+        boolean result = p.exec(script, true, true);
+        if (!result) {
+          log.warn("Error while loading gesture file: {}", f.getAbsolutePath());
+        } else {
+          log.info("Successfully loaded gesture {}", f.getAbsolutePath());
         }
       }
     }
@@ -1661,7 +1674,14 @@ public class InMoov extends Service {
             String controller = s.getController().getName();
             calibrationWriter.write(s.getName() + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
           }
+          if (s.autoDisable) {
+            calibrationWriter.write(s.getName() + ".enableAutoDisable(True)\n");
+          }
+          if (s.autoEnable) {
+            calibrationWriter.write(s.getName() + ".enableAutoEnable(True)\n");
+          } 
         }
+        
       }
       calibrationWriter.write("\n");
       calibrationWriter.close();
