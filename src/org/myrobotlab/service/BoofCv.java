@@ -37,7 +37,7 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(BoofCv.class.getCanonicalName());
-    meta.addDescription("used as a general template");
+    meta.addDescription("a very portable vision library using pure Java");
     meta.setAvailable(false);
     // add dependency if necessary
     meta.addDependency("net.sourceforge.boofcv", "0.23");

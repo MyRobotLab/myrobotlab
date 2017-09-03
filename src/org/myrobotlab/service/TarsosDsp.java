@@ -29,7 +29,7 @@ public class TarsosDsp extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(TarsosDsp.class.getCanonicalName());
-    meta.addDescription("used as a general template");
+    meta.addDescription("digital signal processing - used for audio effects, although it could have many other uses");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");

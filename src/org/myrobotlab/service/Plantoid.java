@@ -563,7 +563,7 @@ public class Plantoid extends Service {
 	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(Plantoid.class.getCanonicalName());
-		meta.addDescription("The Plantoid Service");
+		meta.addDescription("service for the Plantoid robots");
 		meta.addCategory("robot");
 		// put peer definitions in
 		meta.addPeer("arduino", "Arduino", "arduino service");
