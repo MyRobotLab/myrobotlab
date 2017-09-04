@@ -275,16 +275,16 @@ public class Pid extends Service {
    * here.
    * ************************************************************************
    */
-  public void setOutputRange(String key, double Min, double Max) {
+  public void setOutputRange(String key, double min, double max) {
     PidData piddata = data.get(key);
-    if (Min >= Max) {
-      error("min >= max");
+    if (min >= max) {
+      error("min {} >= max {}", min, max);
       return;
     }
 
-    piddata.outCenter = (Min + Max) / 2;
-    piddata.outMin = Min - piddata.outCenter;
-    piddata.outMax = Max - piddata.outCenter;
+    piddata.outCenter = (min + max) / 2;
+    piddata.outMin = min - piddata.outCenter;
+    piddata.outMax = max - piddata.outCenter;
 
     if (piddata.inAuto) {
       if (piddata.output > piddata.outMax)
