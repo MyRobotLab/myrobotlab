@@ -160,9 +160,13 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     broadcastState();
   }
 
+  /**
+   * If setAutoListen is True, webkitspeech red microphone will auto rearm.
+   * microphone will shutdown too if mouth is activated. Careful if this is set
+   * to True : You cannot control anymore red microphone from webgui You need to
+   * control it from SwinGui, or usually from code
+   */
   public void setAutoListen(boolean autoListen) {
-    // Here we want to set the language string and broadcast the update to the
-    // web gui so that it knows to update the language on webkit speech
     this.autoListen = autoListen;
     broadcastState();
   }
@@ -171,9 +175,11 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     return this.autoListen;
   }
 
+  /**
+   * If setContinuous is False, this speedup recognition processing If
+   * setContinuous is True, you have some time to speak again, in case of error
+   */
   public void setContinuous(boolean continuous) {
-    // Here we want to set the language string and broadcast the update to the
-    // web gui so that it knows to update the language on webkit speech
     this.continuous = continuous;
     broadcastState();
   }
