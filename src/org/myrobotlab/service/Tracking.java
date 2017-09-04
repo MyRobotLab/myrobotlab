@@ -719,7 +719,7 @@ public class Tracking extends Service {
 
     try {
       LoggingFactory.init(Level.INFO);
-      boolean useVirtualArduino = true;
+      boolean useVirtualArduino = false;
       int xPin = 9;
       int yPin = 6;
       String arduinoPort = "COM5";

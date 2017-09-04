@@ -746,7 +746,7 @@ public class Serial extends Service
 	 * event to return list of ports of all ports this serial service can see
 	 * 
 	 */
-	public List<String> publishPortNames(List<String> portNames) {
+	public List<String> publishPortNames(ArrayList<String> portNames) {
 		return portNames;
 	}
 
