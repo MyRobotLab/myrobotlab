@@ -741,7 +741,7 @@ public class Roomba extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Roomba.class.getCanonicalName());
-    meta.addDescription("Roomba control");
+    meta.addDescription("controls a Roomba robot through a blue-tooth serial port");
     meta.addCategory("robot", "control");
     meta.addPeer("serial", "Serial", "serial");
 

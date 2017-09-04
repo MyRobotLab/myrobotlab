@@ -172,6 +172,7 @@ public class Twitter extends Service {
     meta.addDescription("Service which can relay tweets");
     meta.addCategory("cloud", "connectivity");
     meta.addDependency("org.twitter4j.twitter", "3.0.5");
+    meta.setCloudService(true);
     return meta;
   }
 

@@ -466,7 +466,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(EddieControlBoard.class.getCanonicalName());
-    meta.addDescription("Special controller board for robotics");
+    meta.addDescription("microcontroller designed for robotics");
     meta.addCategory("microcontroller");
 
     // put peer definitions in

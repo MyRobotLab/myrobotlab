@@ -1497,6 +1497,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
     if (m.sendingMethod.length() == 0) {
       m.sendingMethod = method;
     }
+    if (outbox == null){
+      log.info("here");
+    }
     outbox.add(m);
   }
 

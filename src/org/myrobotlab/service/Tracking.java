@@ -643,7 +643,7 @@ public class Tracking extends Service {
       servoControls.put(axis[i], x);
       servoControls.get(axis[i]).servoControl.setPin(pins[i]);
       servoControls.get(axis[i]).servoControl.attach(controller, pins[i]);
-      pid.setOutputRange(axis[i], x.servoControl.getMaxInput(), x.servoControl.getMaxInput());
+      pid.setOutputRange(axis[i], x.servoControl.getMinInput(), x.servoControl.getMaxInput());
       x.servoControl.moveTo(x.servoControl.getRest() + 2);
       x.currentServoPos = x.servoControl.getPos();
     }

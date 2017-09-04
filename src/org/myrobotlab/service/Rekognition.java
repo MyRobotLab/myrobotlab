@@ -51,6 +51,7 @@ public class Rekognition extends Service {
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
+    meta.setCloudService(true);
     meta.addCategory("general");
     return meta;
   }

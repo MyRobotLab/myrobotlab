@@ -204,6 +204,7 @@ public class WolframAlpha extends Service {
     // TODO http should be removed as a dependency and added as a Peer
     meta.addDependency("com.wolfram.alpha", "1.1");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    meta.setCloudService(true);
     return meta;
   }
 
