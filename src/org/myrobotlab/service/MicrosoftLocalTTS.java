@@ -26,65 +26,57 @@ import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
-
-
 public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioListener {
 
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(MicrosoftLocalTTS.class);
 
-  transient Integer voice=0;
+  transient Integer voice = 0;
   transient String voiceName;
   transient List<Integer> voices;
   private String ttsFolder = "tts";
-  private String ttsExecutable = ttsFolder+"/tts.exe";
+  private String ttsExecutable = ttsFolder + "/tts.exe";
+  public String ttsExeOutputFiePath = System.getProperty("user.dir") + "\\";
   boolean ttsExecutableExist;
 
   // this is a peer service.
   transient AudioFile audioFile = null;
 
-  transient Map<Integer,String> voiceMap = new HashMap<Integer,String>();
-
-
+  transient Map<Integer, String> voiceMap = new HashMap<Integer, String>();
 
   Stack<String> audioFiles = new Stack<String>();
 
-
   transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
 
-  String language="en";
+  String language = "en";
 
   public MicrosoftLocalTTS(String n) {
     super(n);
   }
 
-
-
   @Override
   public List<String> getVoices() {
     ArrayList<String> args = new ArrayList<String>();
     args.add("-V");
-    String cmd = Runtime.execute(System.getProperty("user.dir")+"\\"+ttsExecutable,"-V");
+    String cmd = Runtime.execute(System.getProperty("user.dir") + "\\" + ttsExecutable, "-V");
     String[] lines = cmd.split(System.getProperty("line.separator"));
-    List <String> voiceList =  (List<String>) Arrays.asList(lines);
+    List<String> voiceList = (List<String>) Arrays.asList(lines);
 
-    for (int i = 0; i < voiceList.size() && i<10; i++) {
-     // error(voiceList.get(i).substring(0,2));
-      if (voiceList.get(i).substring(0,1).matches("\\d+"))
-       {
-        voiceMap.put(i,voiceList.get(i).substring(2,voiceList.get(i).length()));
-        log.info("voice : "+voiceMap.get(i)+" index : "+i);
-       }
-        }
-     return voiceList;
-   }
-  
+    for (int i = 0; i < voiceList.size() && i < 10; i++) {
+      // error(voiceList.get(i).substring(0,2));
+      if (voiceList.get(i).substring(0, 1).matches("\\d+")) {
+        voiceMap.put(i, voiceList.get(i).substring(2, voiceList.get(i).length()));
+        log.info("voice : " + voiceMap.get(i) + " index : " + i);
+      }
+    }
+    return voiceList;
+  }
 
   @Override
   public boolean setVoice(String voice) {
     getVoices();
-    Integer voiceId=Integer.parseInt(voice);
+    Integer voiceId = Integer.parseInt(voice);
     if (voiceMap.containsKey(voiceId)) {
       this.voiceName = voiceMap.get(voiceId);
       this.voice = voiceId;
@@ -97,7 +89,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
 
   @Override
   public void setLanguage(String l) {
-    this.language=l;
+    this.language = l;
   }
 
   @Override
@@ -108,48 +100,43 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
   public byte[] cacheFile(String toSpeak) throws IOException {
     byte[] mp3File = null;
     String localFileName = getLocalFileName(this, toSpeak, "mp3");
-    if (voiceName==null)
-    {
-    setVoice(voice.toString());  
+    if (voiceName == null) {
+      setVoice(voice.toString());
     }
-  
+
     String uuid = UUID.randomUUID().toString();
     if (!audioFile.cacheContains(localFileName)) {
       log.info("retrieving speech from locals - {}", localFileName, voiceName);
-      String command = System.getProperty("user.dir")+"\\"+ttsExecutable+" -f 9 -v "+voice+" -t -o tts//"+uuid+" \""+toSpeak+"\"";
-      File f = new File(System.getProperty("user.dir")+"\\"+ttsFolder+"\\"+uuid+"0.mp3");
+      String command = ttsExeOutputFiePath + ttsExecutable + " -f 9 -v " + voice + " -t -o tts//" + uuid + " \"" + toSpeak + "\"";
+      File f = new File(ttsExeOutputFiePath);
       f.delete();
       String cmd = Runtime.execute("cmd.exe", "/c", command);
       log.debug(command);
-      if (!f.exists()) 
-      {
-        log.error(ttsExecutable+" caused an error : "+cmd);
+      if (!f.exists()) {
+        log.error(ttsExecutable + " caused an error : " + cmd);
+      } else {
+        mp3File = FileIO.toByteArray(f);
+        audioFile.cache(localFileName, mp3File, toSpeak);
+        f.delete();
       }
-      else
-      {
-      mp3File = FileIO.toByteArray(f);
-      audioFile.cache(localFileName, mp3File, toSpeak);
-      f.delete();
-      }
-    
 
     } else {
       log.info("using local cached file");
       mp3File = FileIO.toByteArray(new File(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, "mp3")));
     }
 
-    return mp3File; 
+    return mp3File;
   }
 
   @Override
   public AudioData speak(String toSpeak) throws Exception {
-	toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
+    toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
     cacheFile(toSpeak);
     AudioData audioData = audioFile.playCachedFile(getLocalFileName(this, toSpeak, "mp3"));
     utterances.put(audioData, toSpeak);
     return audioData;
   }
-  
+
   @Override
   public String publishStartSpeaking(String utterance) {
     log.info("publishStartSpeaking {}", utterance);
@@ -161,7 +148,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
     log.info("publishEndSpeaking {}", utterance);
     return utterance;
   }
-  
+
   @Override
   public void onAudioStart(AudioData data) {
     log.info("onAudioStart {} {}", getName(), data.toString());
@@ -185,7 +172,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
 
   @Override
   public boolean speakBlocking(String toSpeak) throws Exception {
-	toSpeak = toSpeak.replaceAll("\\s{2,}", " ");  
+    toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
     cacheFile(toSpeak);
     invoke("publishStartSpeaking", toSpeak);
     audioFile.playBlocking(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, "mp3"));
@@ -217,12 +204,13 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
   @Override
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
     // TODO: make this a base class sort of thing.
-    // having - AudioFile.globalFileCacheDir exposed like this is a bad idea .. 
-    // AudioFile should just globallyCache - the details of that cache should not be exposed :(
-    
+    // having - AudioFile.globalFileCacheDir exposed like this is a bad idea ..
+    // AudioFile should just globallyCache - the details of that cache should
+    // not be exposed :(
+
     return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
         + audioFileType;
-   
+
   }
 
   // can this be defaulted ?
@@ -268,25 +256,25 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
     subscribe(audioFile.getName(), "publishAudioEnd");
     // attach a listener when the audio file ends playing.
     audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
-    File f = new File(System.getProperty("user.dir")+"\\"+ttsExecutable);
-    ttsExecutableExist=true;
-    if(!f.exists()) { 
-      error("Missing : "+System.getProperty("user.dir")+"\\"+ttsExecutable); 
-      ttsExecutableExist=false;
+    File f = new File(System.getProperty("user.dir") + "\\" + ttsExecutable);
+    ttsExecutableExist = true;
+    if (!f.exists()) {
+      error("Missing : " + System.getProperty("user.dir") + "\\" + ttsExecutable);
+      ttsExecutableExist = false;
     }
-    
-   }
+
+  }
 
   public static void main(String[] args) throws Exception {
-  
-      LoggingFactory.init(Level.INFO);
 
-      MicrosoftLocalTTS microsoftLocalTTS = (MicrosoftLocalTTS) Runtime.start("microsoftLocalTTS", "MicrosoftLocalTTS");
-      microsoftLocalTTS.getVoices();
-      microsoftLocalTTS.setVoice("1");
-      microsoftLocalTTS.speakBlocking("local tts");
-      microsoftLocalTTS.speak("test");
-      
+    LoggingFactory.init(Level.INFO);
+
+    MicrosoftLocalTTS microsoftLocalTTS = (MicrosoftLocalTTS) Runtime.start("microsoftLocalTTS", "MicrosoftLocalTTS");
+    microsoftLocalTTS.getVoices();
+    microsoftLocalTTS.setVoice("1");
+    microsoftLocalTTS.speakBlocking("local tts");
+    microsoftLocalTTS.speak("test");
+
   }
 
   @Override
