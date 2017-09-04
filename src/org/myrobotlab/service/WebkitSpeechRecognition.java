@@ -45,7 +45,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public String lastThingRecognized = "";
   private String language = "en-US";
   private boolean autoListen = false;
- 
+
   HashMap<String, Command> commands = new HashMap<String, Command>();
 
   // track the state of the webgui, is it listening? maybe?
@@ -54,7 +54,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public boolean continuous = true;
   private long lastAutoListenEvent = System.currentTimeMillis();
   public boolean stripAccents = false;
-  
+
   public WebkitSpeechRecognition(String reservedKey) {
     super(reservedKey);
   }
@@ -69,7 +69,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     String cleantext = text.toLowerCase().trim();
     if (isStripAccents()) {
       cleantext = StringUtil.removeAccents(cleantext);
-      log.info("Cleaned Text {}" ,cleantext);
+      log.info("Cleaned Text {}", cleantext);
     }
     /*
      * 
@@ -81,42 +81,36 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
      * when we recognize... Command cmd = commands.get(cleantext);
      * send(cmd.name, cmd.method, cmd.params); }
      */
-    
+
     return cleantext;
   }
 
   @Override
   public void listeningEvent() {
     // TODO Auto-generated method stub
-	// temporary debug to show real mic status
-	  log.info("micIsListening");
-	  listening=true;
-	  broadcastState();
-	  return;
+    // temporary debug to show real mic status
+    log.info("micIsListening");
+    listening = true;
+    broadcastState();
+    return;
   }
 
   @Override
   public void pauseListening() {
-	  
-    if (this.autoListen && !this.speaking)
-    {
-    //bug if there is multiple tabs	
-    
-    if (System.currentTimeMillis()-lastAutoListenEvent > 50)
-    {
-    startListening();
-    }
-    else
-    {
-    error("WebkitSpeech : TOO MANY EVENTS, please close zombie tabs !");
-    sleep(500);
-    }
-    lastAutoListenEvent = System.currentTimeMillis();
-    }
-    else
-    {
-	  log.info("micNotListening");
-	  listening=false;
+
+    if (this.autoListen && !this.speaking) {
+      // bug if there is multiple tabs
+
+      if (System.currentTimeMillis() - lastAutoListenEvent > 50) {
+        startListening();
+      } else {
+        error("WebkitSpeech : TOO MANY EVENTS, please close zombie tabs !");
+        sleep(500);
+      }
+      lastAutoListenEvent = System.currentTimeMillis();
+    } else {
+      log.info("micNotListening");
+      listening = false;
     }
     broadcastState();
   }
@@ -133,7 +127,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
       Command cmd = commands.get(cleanedText);
       send(cmd.name, cmd.method, cmd.params);
     }
-    lastThingRecognized=cleanedText;
+    lastThingRecognized = cleanedText;
     broadcastState();
     return cleanedText;
   }
@@ -165,34 +159,34 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     this.language = language;
     broadcastState();
   }
-  
+
   public void setAutoListen(boolean autoListen) {
     // Here we want to set the language string and broadcast the update to the
     // web gui so that it knows to update the language on webkit speech
     this.autoListen = autoListen;
     broadcastState();
   }
-  
+
   public boolean getautoListen() {
     return this.autoListen;
   }
-  
+
   public void setContinuous(boolean continuous) {
-	    // Here we want to set the language string and broadcast the update to the
-	    // web gui so that it knows to update the language on webkit speech
-	    this.continuous = continuous;
-	    broadcastState();
-	  }
-	  
-	  public boolean getContinuous() {
-	    return this.continuous;
-	  }
+    // Here we want to set the language string and broadcast the update to the
+    // web gui so that it knows to update the language on webkit speech
+    this.continuous = continuous;
+    broadcastState();
+  }
+
+  public boolean getContinuous() {
+    return this.continuous;
+  }
 
   public String getLanguage() {
     // a getter for it .. just in case.
     return this.language;
   }
-  
+
   @Override
   public void addTextListener(TextListener service) {
     addListener("publishText", service.getName(), "onText");
@@ -201,9 +195,9 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   @Override
   public void addMouth(SpeechSynthesis mouth) {
     mouth.addEar(this);
-    subscribe(mouth.getName(),"publishStartSpeaking");
-    subscribe(mouth.getName(),"publishEndSpeaking");
-      
+    subscribe(mouth.getName(), "publishStartSpeaking");
+    subscribe(mouth.getName(), "publishEndSpeaking");
+
     // TODO : we can implement the "did you say x?"
     // logic like sphinx if we want here.
     // when we add the ear, we need to listen for request confirmation
@@ -214,7 +208,7 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public void onStartSpeaking(String utterance) {
     // at this point we should subscribe to this in the webgui
     // so we can pause listening.
-	  this.speaking=true;
+    this.speaking = true;
     stopListening();
   }
 
@@ -222,19 +216,16 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public void onEndSpeaking(String utterance) {
     // need to subscribe to this in the webgui
     // so we can resume listening.
-    this.speaking=false;
-	  startListening(); 
+    this.speaking = false;
+    startListening();
   }
-  
 
-
-  
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
     try {
       Runtime.start("webgui", "WebGui");
-      WebkitSpeechRecognition w = (WebkitSpeechRecognition)Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
+      WebkitSpeechRecognition w = (WebkitSpeechRecognition) Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
       w.setStripAccents(true);
     } catch (Exception e) {
       Logging.logError(e);
@@ -299,12 +290,11 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public void setStripAccents(boolean stripAccents) {
     this.stripAccents = stripAccents;
   }
-  
 
   @Override
   public void stopService() {
     super.stopService();
-    autoListen=false;
+    autoListen = false;
     stopListening();
-}
+  }
 }
