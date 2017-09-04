@@ -457,6 +457,7 @@ public class ImapEmailConnector extends AbstractConnector {
     meta.addDescription("This connector will connect to an IMAP based email server and crawl the emails");
     meta.addCategory("data", "ingest");
     meta.addDependency("com.sun.mail", "1.4.5");
+    meta.setCloudService(true);
 
     return meta;
   }

@@ -357,6 +357,7 @@ private String language;
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
     meta.addDependency("com.amazonaws.services", "1.11.118");
     meta.addCategory("speech");
+    meta.setCloudService(true);
     return meta;
   }
 

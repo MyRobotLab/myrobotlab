@@ -287,7 +287,7 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Sabertooth.class.getCanonicalName());
-    meta.addDescription("Interface for the powerful Sabertooth motor controller");
+    meta.addDescription("interface for the powerful Sabertooth motor controller");
     meta.addCategory("motor", "control");
     meta.addPeer("serial", "Serial", "Serial Port");
 
