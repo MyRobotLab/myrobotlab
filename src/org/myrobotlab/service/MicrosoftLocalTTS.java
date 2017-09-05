@@ -36,8 +36,8 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
   transient String voiceName;
   transient List<Integer> voices;
   private String ttsFolder = "tts";
-  private String ttsExecutable = ttsFolder + "/tts.exe";
-  public String ttsExeOutputFilePath = System.getProperty("user.dir") + "\\" + ttsFolder + "\\";
+  private String ttsExecutable = ttsFolder + File.separator+"tts.exe";
+  public String ttsExeOutputFilePath = System.getProperty("user.dir") + File.separator + ttsFolder + File.separator;
   boolean ttsExecutableExist;
 
   // this is a peer service.
@@ -59,7 +59,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
   public List<String> getVoices() {
     ArrayList<String> args = new ArrayList<String>();
     args.add("-V");
-    String cmd = Runtime.execute(System.getProperty("user.dir") + "\\" + ttsExecutable, "-V");
+    String cmd = Runtime.execute(System.getProperty("user.dir") + File.separator + ttsExecutable, "-V");
     String[] lines = cmd.split(System.getProperty("line.separator"));
     List<String> voiceList = (List<String>) Arrays.asList(lines);
 
@@ -107,7 +107,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
     String uuid = UUID.randomUUID().toString();
     if (!audioFile.cacheContains(localFileName)) {
       log.info("retrieving speech from locals - {}", localFileName, voiceName);
-      String command = System.getProperty("user.dir") + "\\" + ttsExecutable + " -f 9 -v " + voice + " -t -o " + ttsExeOutputFilePath + "//" + uuid + " \"" + toSpeak + "\"";
+      String command = System.getProperty("user.dir") + File.separator + ttsExecutable + " -f 9 -v " + voice + " -t -o " + ttsExeOutputFilePath  + uuid + " \""+toSpeak+" \"";
       File f = new File(ttsExeOutputFilePath + uuid + "0.mp3");
       f.delete();
       String cmd = Runtime.execute("cmd.exe", "/c", command);
@@ -256,10 +256,10 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
     subscribe(audioFile.getName(), "publishAudioEnd");
     // attach a listener when the audio file ends playing.
     audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
-    File f = new File(System.getProperty("user.dir") + "\\" + ttsExecutable);
+    File f = new File(System.getProperty("user.dir") + File.separator + ttsExecutable);
     ttsExecutableExist = true;
     if (!f.exists()) {
-      error("Missing : " + System.getProperty("user.dir") + "\\" + ttsExecutable);
+      error("Missing : " + System.getProperty("user.dir") + File.separator + ttsExecutable);
       ttsExecutableExist = false;
     }
 
