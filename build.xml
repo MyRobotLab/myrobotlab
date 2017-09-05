@@ -198,7 +198,7 @@
 		<pathelement location="${repo}/org.drjava.java/20120818/asm-3.1.jar"/>
 		<pathelement location="${repo}/org.drjava.java/20120818/dynamicjava-base.jar"/>
 		<pathelement location="${repo}/org.drjava.java/20120818/plt.jar"/>
-		<pathelement location="${repo}/net.sourceforge.tess4j/3.4.0/tess4j.jar"/>
+		<pathelement location="${repo}/net.sourceforge.tess4j/1.1/tess4j.jar"/>
 		<pathelement location="${repo}/com.wolfram.alpha/1.1/WolframAlpha-1.1.jar"/>
 		<pathelement location="${repo}/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
 		<pathelement location="${repo}/edu.northwestern.topcodes/1.0/topcodes.jar"/>
