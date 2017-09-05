@@ -552,7 +552,7 @@
 	</target>
 
 	<!-- ================ init begin ================= -->
-	<target name="init" depends="clean,repoClone" description="initialize things for the build">
+	<target name="init" depends="clean,repoExists" description="initialize things for the build">
 		<echo message="compiling with java ${ant.java.version}" />
 		<echo message="ant version ${ant.version}" />
 				
@@ -627,7 +627,7 @@
 		</condition>
 
 	</target>
-	<target name="repoExists" depends="repoCheck" if="git.pull">
+	<target name="repoExists">
 		<echo message="git pull ${repo}" />
 		<echo message="${git.pull}" />
 		<exec executable="git" dir="${repo}">
