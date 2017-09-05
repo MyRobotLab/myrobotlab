@@ -39,18 +39,20 @@ public class TesseractOcr extends Service {
       TesseractOcr tesseract = new TesseractOcr("tesseract");
       tesseract.startService();
 
-      Runtime.createAndStart("gui", "SwingGui");
+      Runtime.createAndStart("gui", "GUIService");
       /*
-       * SwingGui gui = new SwingGui("gui"); gui.startService();
+       * GUIService gui = new GUIService("gui"); gui.startService();
        */
     } catch (Exception e) {
       Logging.logError(e);
     }
   }
 
-  /*
+  /**
    * Static list of third party dependencies for this service. The list will be
    * consumed by Ivy to download and manage the appropriate resources
+   * 
+   * @return
    */
 
   public TesseractOcr(String n) {
@@ -102,7 +104,7 @@ public class TesseractOcr extends Service {
     ServiceType meta = new ServiceType(TesseractOcr.class.getCanonicalName());
     meta.addDescription("Optical character recognition - the ability to read");
     meta.addCategory("intelligence");
-    meta.addDependency("net.sourceforge.tess4j", "1.1");
+    meta.addDependency("net.sourceforge.tess4j", "3.4.0");
     meta.addDependency("com.sun.jna", "3.2.2");
     return meta;
   }
