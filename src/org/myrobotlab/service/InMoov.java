@@ -1751,66 +1751,6 @@ public class InMoov extends Service {
 
   }
 
-  public void disableRobotCanMoveHeadRandom(int seconds) {
-    log.info("Disable RobotCanMoveHeadRandom for " + seconds + " seconds");
-    RobotCanMoveHeadRandom = false;
-    if (DisableTimerRobotCanMoveHeadRandom != null) {
-      DisableTimerRobotCanMoveHeadRandom.cancel();
-      DisableTimerRobotCanMoveHeadRandom = null;
-    }
-    DisableTimerRobotCanMoveHeadRandom = new Timer();
-
-    DisableTimerRobotCanMoveHeadRandom.schedule(new TimerTask() {
-      @Override
-      public void run() {
-        log.info("Reactivate RobotCanMoveHeadRandom");
-        DisableTimerRobotCanMoveHeadRandom.cancel();
-        RobotCanMoveHeadRandom = true;
-      }
-    }, (int) seconds * 1000);
-
-  }
-
-  public void disableRobotCanMoveEyesRandom(int seconds) {
-    log.info("Disable RobotCanMoveEyesRandom for " + seconds + " seconds");
-    RobotCanMoveEyesRandom = false;
-    if (DisableTimerRobotCanMoveEyesRandom != null) {
-      DisableTimerRobotCanMoveEyesRandom.cancel();
-      DisableTimerRobotCanMoveEyesRandom = null;
-    }
-    DisableTimerRobotCanMoveEyesRandom = new Timer();
-
-    DisableTimerRobotCanMoveEyesRandom.schedule(new TimerTask() {
-      @Override
-      public void run() {
-        log.info("Reactivate RobotCanMoveEyesRandom");
-        RobotCanMoveEyesRandom = true;
-        DisableTimerRobotCanMoveEyesRandom.cancel();
-      }
-    }, (int) seconds * 1000);
-
-  }
-
-  public void disableRobotCanMoveBodyRandom(int seconds) {
-    log.info("Disable RobotCanMoveBodyRandom for " + seconds + " seconds");
-    RobotCanMoveBodyRandom = false;
-    if (DisableTimerRobotCanMoveBodyRandom != null) {
-      DisableTimerRobotCanMoveBodyRandom.cancel();
-      DisableTimerRobotCanMoveBodyRandom = null;
-    }
-    DisableTimerRobotCanMoveBodyRandom = new Timer();
-
-    DisableTimerRobotCanMoveBodyRandom.schedule(new TimerTask() {
-      @Override
-      public void run() {
-        log.info("Reactivate RobotCanMoveBodyRandom");
-        RobotCanMoveBodyRandom = true;
-        DisableTimerRobotCanMoveBodyRandom.cancel();
-      }
-    }, (int) seconds * 1000);
-
-  }
-
   // waiting controable threaded gestures we warn user
   boolean gestureAlreadyStarted = false;
 
@@ -1835,26 +1775,6 @@ public class InMoov extends Service {
     RobotCanMoveRandom = true;
     temporaryStopAutoDisable(false);
     gestureAlreadyStarted = false;
-  }
-
-  public void disableRobotRandom(int seconds) {
-    log.info("Disable RobotCanMoveRandom for " + seconds + " seconds");
-    RobotCanMoveRandom = false;
-    if (DisableTimerRobotCanMoveRandom != null) {
-      DisableTimerRobotCanMoveRandom.cancel();
-      DisableTimerRobotCanMoveRandom = null;
-    }
-    DisableTimerRobotCanMoveRandom = new Timer();
-
-    DisableTimerRobotCanMoveRandom.schedule(new TimerTask() {
-      @Override
-      public void run() {
-        log.info("Reactivate RobotCanMoveRandom");
-        RobotCanMoveRandom = true;
-        DisableTimerRobotCanMoveRandom.cancel();
-      }
-    }, (int) seconds * 1000);
-
   }
 
   public static void main(String[] args) {
