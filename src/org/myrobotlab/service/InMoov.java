@@ -1584,10 +1584,12 @@ public class InMoov extends Service {
   }
 
   /**
-   * This method will look at all of the .py files in a directory.  One by one it will load the files into the 
-   * python interpreter.  A gesture python file should contain 1 method definition that is the same as the filename.
+   * This method will look at all of the .py files in a directory. One by one it
+   * will load the files into the python interpreter. A gesture python file
+   * should contain 1 method definition that is the same as the filename.
    * 
-   * @param directory - the directory that contains the gesture python files.
+   * @param directory
+   *          - the directory that contains the gesture python files.
    */
   public void loadGestures(String directory) {
     // TODO: iterate over each of the python files in the directory
@@ -1679,9 +1681,9 @@ public class InMoov extends Service {
           }
           if (s.autoEnable) {
             calibrationWriter.write(s.getName() + ".enableAutoEnable(True)\n");
-          } 
+          }
         }
-        
+
       }
       calibrationWriter.write("\n");
       calibrationWriter.close();
