@@ -1,4 +1,3 @@
-//WIP WIP WIP
 package org.myrobotlab.service;
 
 import java.io.File;
