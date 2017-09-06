@@ -628,7 +628,7 @@
 		</condition>
 
 	</target>
-	<target name="repoExists" depends="repoCheck" if="git.pull">
+	<target name="repoExists">
     <!-- repo wontupdate temp test <target name="repoExists" depends="repoCheck" if="git.pull"> -->
 		<echo message="git pull ${repo}" />
 		<echo message="${git.pull}" />
