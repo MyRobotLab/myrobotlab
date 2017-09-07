@@ -2185,6 +2185,9 @@ public class InMoov extends Service {
     if (RightRelay1 != null) {
       RightRelay1.on();
     }
+    if (eyelids != null) {
+      eyelids.autoBlink(false);
+    }
     rest();
     setMute(false);
     speakBlocking(lang_shutDown);
