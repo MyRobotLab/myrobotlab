@@ -163,18 +163,18 @@ public class Tracking2 extends Service {
 
     // cache filter names
     //LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
-    //opencv.addListener("publishOpenCVData", getName(), "setOpenCVData");
+    //opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
 
     setDefaultPreFilters();
 
-    pid.setPID("x", 20.0, 5.0, 0.1);
+    pid.setPID("x", 5.0, 0.1, 0.1);
     pid.setControllerDirection("x", Pid.DIRECTION_DIRECT);
     pid.setMode("x", Pid.MODE_AUTOMATIC);
     pid.setOutputRange("x", -20, 20); // <- not correct - based on maximum
     pid.setSampleTime("x", 30);
     pid.setSetpoint("x", 0.5); // set center
 
-    pid.setPID("y", 20.0, 5.0, 0.1);
+    pid.setPID("y", 5.0, 0.1, 0.1);
     pid.setControllerDirection("y", Pid.DIRECTION_DIRECT);
     pid.setMode("y", Pid.MODE_AUTOMATIC);
     pid.setOutputRange("y", -20, 20); // <- not correct - based on maximum
@@ -226,6 +226,7 @@ public class Tracking2 extends Service {
   }
 
   public VisionData foundFace(VisionData data) {
+    log.info("Found face");
     return data;
   }
 
@@ -361,8 +362,9 @@ public class Tracking2 extends Service {
     setState(STATE_IDLE);
   }
 
-  public VisionData setOpenCVData(VisionData data) {
+  public VisionData onOpenCVData(VisionData data) {
 
+    log.info("On OpenCVData called");
     switch (state) {
 
       case STATE_FACE_DETECT:
@@ -663,7 +665,7 @@ public class Tracking2 extends Service {
     }
     opencv = (Vision) createPeer("opencv");
     opencv.setCameraIndex(cameraIndex);
-    opencv.addListener("publishOpenCVData", getName(), "setOpenCVData");
+    opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
     LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
     // TODO - think of a "validate" method
     sleep(300);
@@ -757,7 +759,7 @@ public class Tracking2 extends Service {
   public void attach(Vision opencv) {
     this.opencv = opencv;
     LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
-    opencv.addListener("publishOpenCVData", getName(), "setOpenCVData");
+    opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
     
   }
 }
