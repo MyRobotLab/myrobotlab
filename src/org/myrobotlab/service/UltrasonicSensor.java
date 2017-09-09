@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -28,172 +29,200 @@ import org.slf4j.Logger;
  */
 public class UltrasonicSensor extends Service implements RangeListener, RangePublisher, UltrasonicSensorControl {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(UltrasonicSensor.class);
+  public final static Logger log = LoggerFactory.getLogger(UltrasonicSensor.class);
 
-	public final Set<String> types = new HashSet<String>(Arrays.asList("SR04", "SR05"));
-	private int pings;
+  public final Set<String> types = new HashSet<String>(Arrays.asList("SR04", "SR05"));
+  private int pings;
 
-	// currently not variable in NewPing.h
-	// Integer maxDistanceCm = 500;
+  // currently not variable in NewPing.h
+  // Integer maxDistanceCm = 500;
 
-	private Integer trigPin = null;
-	private Integer echoPin = null;
-	private String type = "SR04";
+  private Integer trigPin = null;
+  private Integer echoPin = null;
+  private String type = "SR04";
 
-	private Double lastRaw;
-	private Double lastRange;
+  private Double lastRaw;
+  private Double lastRange;
 
-	// for blocking asynchronous data
-	private boolean isBlocking = false;
+  // for blocking asynchronous data
+  private boolean isBlocking = false;
 
-	transient private BlockingQueue<Double> data = new LinkedBlockingQueue<Double>();
+  transient private BlockingQueue<Double> data = new LinkedBlockingQueue<Double>();
 
-	private transient UltrasonicSensorController controller;
+  private transient UltrasonicSensorController controller;
 
-	String controllerName;
+  String controllerName;
 
-	private double multiplier = 1;
+  double multiplier = 1;
 
-	public UltrasonicSensor(String n) {
-		super(n);
-	}
+  double offset = 0;
 
-	// ---- part of interfaces begin -----
+  long timeout = 500;
 
-	// Uber good - .. although this is "chained" versus star routing
-	// Star routing would be routing from the Arduino directly to the Listener
-	// The "chained" version takes 2 thread contexts :( .. but it has the
-	// benefit
-	// of the "publishRange" method being affected by the Sensor service e.g.
-	// change units, sample rate, etc
-	// FIXME - NOT SERVICE .. possibly name or interface but not service
-	public void addRangeListener(Service service) {
-		addListener("publishRange", service.getName(), "onRange");
-	}
+  public UltrasonicSensor(String n) {
+    super(n);
+  }
 
-	public void attach(String port, int trigPin, int echoPin) throws Exception {
-		UltrasonicSensorController peerController = null;
-		// prepare the peer
-		if (controller != null) {
-			peerController = controller;
-		} else {
-			peerController = (UltrasonicSensorController) startPeer("controller");
-		}
-		// connect it
-		peerController.connect(port);
-		// attach it
-		attach(peerController, trigPin, echoPin);
-		controller = peerController;
-	}
+  // ---- part of interfaces begin -----
 
-	public void attach(UltrasonicSensorController controller, Integer trigPin, Integer echoPin) throws Exception {
+  // Uber good - .. although this is "chained" versus star routing
+  // Star routing would be routing from the Arduino directly to the Listener
+  // The "chained" version takes 2 thread contexts :( .. but it has the
+  // benefit
+  // of the "publishRange" method being affected by the Sensor service e.g.
+  // change units, sample rate, etc
+  // FIXME - NOT SERVICE .. possibly name or interface but not service
+  public void addRangeListener(Service service) {
+    addListener("publishRange", service.getName(), "onRange");
+  }
 
-		// critical test
-		// refer to http://myrobotlab.org/content/control-controller-manifesto
-		if (isAttached(controller)) {
-			log.info("already attached to {} nothing to do", controller.getName());
-			return;
-		}
+  public void attach(String port, int trigPin, int echoPin) throws Exception {
+    UltrasonicSensorController peerController = null;
+    // prepare the peer
+    if (controller != null) {
+      peerController = controller;
+    } else {
+      peerController = (UltrasonicSensorController) startPeer("controller");
+    }
+    // connect it
+    peerController.connect(port);
+    // attach it
+    attach(peerController, trigPin, echoPin);
+    controller = peerController;
+  }
 
-		if (this.controller != null) {
-			log.info("controller already attached - detach {} before attaching {}", this.controller.getName(), controller.getName());
-		}
+  public void attach(UltrasonicSensorController controller, Integer trigPin, Integer echoPin) throws Exception {
 
-		// critical init code
+    // critical test
+    // refer to http://myrobotlab.org/content/control-controller-manifesto
+    if (isAttached(controller)) {
+      return;
+    }
 
-		this.trigPin = trigPin;
-		this.echoPin = echoPin;
+    if (this.controller != null) {
+      log.info("controller already attached - detach {} before attaching {}", this.controller.getName(), controller.getName());
+    }
 
-		// call other service's attach
-		controller.attach(this, trigPin, echoPin);
+    // critical init code
+    this.trigPin = trigPin;
+    this.echoPin = echoPin;
+    this.controller = controller;
+    this.controllerName = controller.getName();
 
-	}
+    // call other service's attach
+    controller.attach(this, trigPin, echoPin);
 
-	private boolean isAttached(UltrasonicSensorController controller) {
-		return this.controller == controller;
-	}
+  }
 
-	// FIXME - should be MicroController Interface ..
-	public UltrasonicSensorController getController() {
-		return controller;
-	}
+  private boolean isAttached(UltrasonicSensorController controller) {
+    return this.controller == controller;
+  }
 
-	public int getEchoPin() {
-		return echoPin;
-	}
+  // FIXME - should be MicroController Interface ..
+  public UltrasonicSensorController getController() {
+    return controller;
+  }
 
-	public int getTriggerPin() {
-		return trigPin;
-	}
+  public int getEchoPin() {
+    return echoPin;
+  }
 
-	@Override
-	public void onRange(Double range) {
-		log.info(String.format("RANGE: %d", range));
-	}
+  public int getTriggerPin() {
+    return trigPin;
+  }
 
-	/* FIXME !!! IMPORTANT PUT IN INTERFACE &amp; REMOVE SELF FROM ARDUINO !!! */
-	public Double publishRange(Double range) {
+  @Override
+  public void onRange(Double range) {
+    log.info(String.format("RANGE: %d", range));
+  }
 
-		++pings;
+  /* FIXME !!! IMPORTANT PUT IN INTERFACE &amp; REMOVE SELF FROM ARDUINO !!! */
+  public Double publishRange(Double range) {
 
-		lastRange = range; // * 0.393701 inches
+    ++pings;
 
-		log.info("publishRange {}", lastRange);
-		return lastRange;
-	}
+    lastRange = range; // * 0.393701 inches
 
-	public boolean setType(String type) {
-		if (types.contains(type)) {
-			this.type = type;
-			return true;
-		}
-		return false;
-	}
+    log.info("publishRange {}", lastRange);
+    return lastRange;
+  }
 
-	// ---- part of interfaces end -----
+  public boolean setType(String type) {
+    if (types.contains(type)) {
+      this.type = type;
+      return true;
+    }
+    return false;
+  }
 
-	@Override
-	public void startRanging() {
-		controller.ultrasonicSensorStartRanging(this);
-	}
+  // ---- part of interfaces end -----
 
+  @Override
+  public void startRanging() {
+    controller.ultrasonicSensorStartRanging(this);
+  }
 
-	@Override
-	public void stopRanging() {
-		controller.ultrasonicSensorStopRanging(this);
-	}
+  @Override
+  public void stopRanging() {
+    controller.ultrasonicSensorStopRanging(this);
+  }
 
-	// probably should do this in a util class
-	public static int byteArrayToInt(int[] b) {
-		return b[3] & 0xFF | (b[2] & 0xFF) << 8 | (b[1] & 0xFF) << 16 | (b[0] & 0xFF) << 24;
-	}
+  synchronized public Double range() {
+    Double rawMs = ping();
+    if (rawMs == null) {
+      return null;
+    }
+    return rawMs * multiplier + offset;
+  }
 
-	/**
-	 * This static method returns all the details of the class without it having
-	 * to be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+  synchronized public Double ping() {
+    data.clear();
+    startRanging();
+    isBlocking = true;
 
-		ServiceType meta = new ServiceType(UltrasonicSensor.class.getCanonicalName());
-		meta.addDescription("Ranging sensor");
-		meta.addCategory("sensor");
-		meta.addPeer("controller", "Arduino", "default sensor controller will be an Arduino");
-		return meta;
-	}
+    try {
+      return data.poll(timeout, TimeUnit.MILLISECONDS);
+    } catch (InterruptedException e) {
+    } finally {
+      isBlocking = false;
+      stopRanging();
+    }
 
-	public int getPings() {
-		return pings;
-	}
+    error("timeout of %d reached", timeout);
+    return null;
+  }
 
-	public String getType() {
-		return type;
-	}
+  // probably should do this in a util class
+  public static int byteArrayToInt(int[] b) {
+    return b[3] & 0xFF | (b[2] & 0xFF) << 8 | (b[1] & 0xFF) << 16 | (b[0] & 0xFF) << 24;
+  }
+
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(UltrasonicSensor.class.getCanonicalName());
+    meta.addDescription("ranging sensor");
+    meta.addCategory("sensor");
+    meta.addPeer("controller", "Arduino", "default sensor controller will be an Arduino");
+    return meta;
+  }
+
+  public int getPings() {
+    return pings;
+  }
+
+  public String getType() {
+    return type;
+  }
 
   // TODO - this could be Java 8 default interface implementation
   @Override
@@ -204,64 +233,63 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     controller.detach(this);
     controller = null;
   }
-  
+
   @Override
-	public Double onUltrasonicSensorData(Double rawData) {
-		// data comes in 'raw' and leaves as Range
-		// TODO implement changes based on type of sensor SRF04 vs SRF05
-		// TODO implement units preferred
-		// direct callback vs pub/sub (this needs to be handled by the
-		// framework)
+  public Double onUltrasonicSensorData(Double rawMs) {
+    // data comes in 'raw' and leaves as Range
+    // TODO implement changes based on type of sensor SRF04 vs SRF05
+    // TODO implement units preferred
+    // direct callback vs pub/sub (this needs to be handled by the
+    // framework)
 
-		// FIXME - convert to appropriate range
-		// inches/meters/other kubits?
+    // FIXME - convert to appropriate range
+    // inches/meters/other kubits?
 
-		++pings;
-		lastRaw = rawData;
-		Double range = (rawData * multiplier);
-		if (isBlocking) {
-			try {
-				data.put(lastRaw);
-			} catch (InterruptedException e) {
-				Logging.logError(e);
-			}
-		}
+    ++pings;
+    lastRaw = rawMs;
+    Double range = (rawMs * multiplier + offset);
+    if (isBlocking) {
+      try {
+        data.put(lastRaw);
+      } catch (InterruptedException e) {
+        Logging.logError(e);
+      }
+    }
 
-		invoke("publishRange", range);
-		return range;
-	}
+    invoke("publishRange", range);
+    return range;
+  }
 
-	@Override
-	public void setUnitCm() {
-		multiplier = 1;
-	}
+  @Override
+  public void setUnitCm() {
+    multiplier = 1;
+  }
 
-	@Override
-	public void setUnitInches() {
-		multiplier = 0.393701;
-	}
+  @Override
+  public void setUnitInches() {
+    multiplier = 0.393701;
+  }
 
-
-	@Override
-	public boolean isAttached(String name) {
-		return controller != null;
-	}
+  @Override
+  public boolean isAttached(String name) {
+    return controller != null;
+  }
 
   @Override
   public Set<String> getAttached() {
     HashSet<String> ret = new HashSet<String>();
-    if (controller != null){
+    if (controller != null) {
       ret.add(controller.getName());
     }
     return ret;
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init("INFO");
 
     try {
 
-      VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
       UltrasonicSensor srf04 = (UltrasonicSensor) Runtime.start("srf04", "UltrasonicSensor");
       // Runtime.start("python", "Python");
       Runtime.start("gui", "SwingGui");
@@ -285,7 +313,6 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
       servo.moveTo(30);
 
       srf04.startRanging();
-      
 
       for (int i = 0; i < 100; ++i) {
         servo.moveTo(30);
@@ -304,6 +331,5 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
       Logging.logError(e);
     }
   }
-
 
 }
