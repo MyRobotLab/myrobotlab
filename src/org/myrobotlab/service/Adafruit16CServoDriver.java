@@ -784,7 +784,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName, controller.getName()));
     }
 
     controllerName = controller.getName();
