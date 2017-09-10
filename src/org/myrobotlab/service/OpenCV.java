@@ -67,6 +67,7 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterTesseract;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractVideoSource;
@@ -147,7 +148,7 @@ public class OpenCV extends AbstractVideoSource {
       "Dilate", "DL4J","Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2",
       "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "Output",
       "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split",
-      "State", "Surf", "Threshold", "Transpose" };
+      "State", "Surf", "Tesseract", "Threshold", "Transpose" };
 
   // yep its public - cause a whole lotta data
   // will get set on it before a setState
@@ -739,12 +740,12 @@ public class OpenCV extends AbstractVideoSource {
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     // Runtime.start("right", "OpenCV");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
-    opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
+//    opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
 
    // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
     // opencv.setInputSource(INPUT_SOURCE_CAMERA);
-   opencv.setInputSource(INPUT_SOURCE_NETWORK);
-   opencv.setInputFileName("http://192.168.4.117:8080/?action=stream");
+//   opencv.setInputSource(INPUT_SOURCE_NETWORK);
+//   opencv.setInputFileName("http://192.168.4.117:8080/?action=stream");
     //opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
    opencv.setStreamerEnabled(false);
@@ -755,7 +756,8 @@ public class OpenCV extends AbstractVideoSource {
 
     // OpenCVFilterDilate dilate = new OpenCVFilterDilate();
     // opencv.addFilter(dilate);
-
+   OpenCVFilterTesseract tess = new OpenCVFilterTesseract("tess");
+   opencv.addFilter(tess);
     // OpenCVFilterFaceDetect2 facedetect2 = new
     // OpenCVFilterFaceDetect2("facedetect2");
     // opencv.addFilter(facedetect2);
