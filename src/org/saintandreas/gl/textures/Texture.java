@@ -120,6 +120,8 @@ public class Texture {
 
   /**
    * Convert the buffered image to a texture
+   * @param bufferedImage b
+   * @return byte buffer
    */
   public static ByteBuffer convertImageData(BufferedImage bufferedImage) {
     ByteBuffer imageBuffer;

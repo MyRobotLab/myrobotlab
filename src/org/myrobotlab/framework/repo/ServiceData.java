@@ -117,7 +117,7 @@ public class ServiceData implements Serializable {
         }
         localInstance.save();
       } catch (Exception e) {
-        Logging.logError(e);
+        log.error("retrieving service data failed", e);
       }
 
     }
@@ -135,10 +135,8 @@ public class ServiceData implements Serializable {
    * Run-Time must extract itself and scan/filter zip entries which is
    * potentially a lengthy process, and should only have to be done once for the
    * lifetime of the version or mrl
-   * 
-   * 
-   * @return
-   * @throws IOException
+   * @return the service data description
+   * @throws IOException e
    */
   static public ServiceData generate() throws IOException {
     log.info("================ generating serviceData.json begin ================");
@@ -171,7 +169,7 @@ public class ServiceData implements Serializable {
             category = sd.categoryTypes.get(cat);
           } else {
             category = new Category();
-            category.name = category.name;
+            category.name = cat;
           }
           category.serviceTypes.add(serviceType.getName());
           sd.categoryTypes.put(cat, category);

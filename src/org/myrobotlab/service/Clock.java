@@ -49,7 +49,6 @@ public class Clock extends Service {
 
 	public class ClockThread implements Runnable {
 		public Thread thread = null;
-
 		ClockThread() {
 			thread = new Thread(this, getName() + "_ticking_thread");
 			thread.start();
@@ -57,7 +56,9 @@ public class Clock extends Service {
 
 		@Override
 		public void run() {
+			
 			try {
+				
 				while (isClockRunning == true) {
 					Date now = new Date();
 					Iterator<ClockEvent> i = events.iterator();
@@ -67,11 +68,14 @@ public class Clock extends Service {
 							// TODO repeat - don't delete set time forward
 							// interval
 							send(event.name, event.method, event.data);
+							
 							i.remove();
 						}
 					}
-					invoke("pulse", new Date());
-					Thread.sleep(interval);
+					
+				if (!NoExecutionAtFirstClockStarted){invoke("pulse", new Date());}
+				Thread.sleep(interval);
+				NoExecutionAtFirstClockStarted=false;
 				}
 			} catch (InterruptedException e) {
 				log.info("ClockThread interrupt");
@@ -91,6 +95,8 @@ public class Clock extends Service {
 
 	// FIXME
 	ArrayList<ClockEvent> events = new ArrayList<ClockEvent>();
+
+	private boolean NoExecutionAtFirstClockStarted=false;
 
 	public Clock(String n) {
 		super(n);
@@ -117,9 +123,10 @@ public class Clock extends Service {
 		broadcastState();
 	}
 
-	public void startClock() {
+	public void startClock(boolean NoExecutionAtFirstClockStarted) {
 		if (myClock == null) {
-			info("starting clock");
+			this.NoExecutionAtFirstClockStarted=NoExecutionAtFirstClockStarted;
+			// info("starting clock");
 			isClockRunning = true;
 			myClock = new ClockThread();
 			invoke("clockStarted");
@@ -129,11 +136,14 @@ public class Clock extends Service {
 
 		broadcastState();
 	}
-
+	
+	public void startClock() {
+		startClock(false);
+	}
 	public void stopClock() {
 
 		if (myClock != null) {
-			info("stopping clock");
+			// info("stopping clock");
 			log.info("stopping " + getName() + " myClock");
 			isClockRunning = false;
 			myClock.thread.interrupt();
@@ -177,7 +187,7 @@ public class Clock extends Service {
 				// remote.scan();
 				// remote.setDefaultPrefix("raspi");
 				Runtime.start(String.format("clock%d", i), "Clock");
-				Runtime.start(String.format("gui", i), "GUIService");
+				Runtime.start(String.format("gui", i), "SwingGui");
 				// Runtime.start(String.format("python", i), "Python");
 
 				remote.connect("tcp://127.0.0.1:6767");
@@ -199,29 +209,29 @@ public class Clock extends Service {
 
 		} else if ("xmpp".equals(test)) {
 
-			// XMPP CONNECT WORKS BEGIN ---------------------------------
+			// Xmpp CONNECT WORKS BEGIN ---------------------------------
 			int i = 2;
 
 			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
 			Security security = (Security) Runtime.createAndStart("security", "Security");
 			security.addUser("incubator incubator");
 			security.setGroup("incubator incubator", "authenticated");
-			security.allowExportByType("XMPP", false);
+			security.allowExportByType("Xmpp", false);
 			security.allowExportByType("Security", false);
 			security.allowExportByType("Runtime", false);
-			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
+			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart(String.format("xmpp%d", i), "Xmpp");
 			Clock clock = (Clock) Runtime.createAndStart(String.format("clock%d", i), "Clock");
-			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
+			Runtime.createAndStart(String.format("gui%d", i), "SwingGui");
 
 			xmpp1.connect("talk.google.com", 5222, "robot02@myrobotlab.org", "mrlRocks!");
 
 			Message msg = null;
 
-			msg = xmpp1.createMessage(null, "register", clock);
+			msg = Message.createMessage(clock, null, "register", clock);
 			String base64 = CodecUtils.msgToBase64(msg);
 			xmpp1.sendMessage(base64, "incubator incubator");
 
-			// XMPP CONNECT WORKS END ---------------------------------
+			// Xmpp CONNECT WORKS END ---------------------------------
 		}
 	}
 

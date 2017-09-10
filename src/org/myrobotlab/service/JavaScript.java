@@ -77,7 +77,7 @@ public class JavaScript extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(JavaScript.class.getCanonicalName());
-    meta.addDescription("javascript");
+    meta.addDescription("native jvm javascript engine, which allows execution of javascript through exec method");
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
     meta.addCategory("programming");
@@ -91,7 +91,8 @@ public class JavaScript extends Service {
 
       JavaScript javascript = (JavaScript) Runtime.start("javascript", "JavaScript");
       javascript.exec("java.lang.System.out.println(\"hello world\");");
-      // Runtime.start("gui", "GUIService");
+      javascript.exec("var x = 3; ++x; java.lang.System.out.println(x);");
+      // Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

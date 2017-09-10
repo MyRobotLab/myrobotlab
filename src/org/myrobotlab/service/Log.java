@@ -36,13 +36,13 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.NameProvider;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
-import org.myrobotlab.service.interfaces.NameProvider;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -141,34 +141,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 
 	public void startService() {
 		super.startService();
-
-		// ch.qos.logback.classic.Logger logger =
-		// (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(this.getClass());
-		// logger.addAppender(this);
-
 		startLogging();
-
-		// LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-		// lc.addListener(listener);
-
-		/*
-		 * FileAppender<LoggingEvent> fileAppender =
-		 * (FileAppender<LoggingEvent>) logger..getAppender("file");
-		 * if(fileAppender != null) { fileAppender.stop();
-		 * fileAppender.setFile("new.log"); PatternLayout pl = new
-		 * PatternLayout(); pl.setPattern("%d %5p %t [%c:%L] %m%n)");
-		 * pl.setContext(lc); pl.start(); fileAppender.setLayout(pl);
-		 * fileAppender.setContext(lc); fileAppender.start(); }
-		 */
-
-		/*
-		 * LoggerContext loggerContext = (LoggerContext)
-		 * LogManager.getContext(); Configuration configuration =
-		 * loggerContext.getConfiguration();
-		 * 
-		 * ((Log4jLoggerAdapter)log)..addAppender(this);
-		 * ((LoggingLog4J)log).addAppender(this);
-		 */
 	}
 
 	@Override
@@ -263,7 +236,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 	@Override
 	public void doAppend(ILoggingEvent event) throws LogbackException {
 		// event.getFormattedMessage();
-		Message msg = createMessage(null, "onLogEvent", new Object[] { String.format("[%s] %s", event.getThreadName(), event.toString()) });
+		Message msg = Message.createMessage(this, null, "onLogEvent", new Object[] { String.format("[%s] %s", event.getThreadName(), event.toString()) });
 		msg.sendingMethod = "publishLogEvent";
 		msg.sender = getName();
 		Object[] param = new Object[] { msg };
@@ -368,7 +341,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 			log.info("this is an info test");
 			log.warn("this is an warn test");
 			log.error("this is an error test");
-			// Runtime.start("gui", "GUIService");
+			// Runtime.start("gui", "SwingGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -419,7 +392,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 
 		ServiceType meta = new ServiceType(Log.class.getCanonicalName());
 		meta.addDescription("Logging Service helpful in diagnostics");
-		meta.addCategory("famework");
+		meta.addCategory("framework");
 
 		return meta;
 	}

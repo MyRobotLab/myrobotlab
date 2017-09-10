@@ -2,7 +2,6 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -27,7 +26,7 @@ public class CleverBot extends Service {
   boolean continueToTalkToSelf = true;
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
+    LoggingFactory.init();
     try {
       CleverBot cleverbot = new CleverBot("cleverbot");
       cleverbot.startService();
@@ -37,7 +36,7 @@ public class CleverBot extends Service {
 
       log.info("here");
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
     } catch (Exception e) {
       Logging.logError(e);
@@ -112,7 +111,7 @@ public class CleverBot extends Service {
 
     ServiceType meta = new ServiceType(CleverBot.class.getCanonicalName());
     meta.addDescription("chatbot service");
-    meta.addCategory("intellegence");
+    meta.addCategory("intelligence");
     meta.addDependency("com.googlecode.chatterbot", "1.2.1");
     return meta;
   }

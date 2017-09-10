@@ -17,6 +17,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.service.interfaces.SerialDataListener;
+import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
@@ -33,24 +34,27 @@ public class VirtualDevice extends Service implements SerialDataListener {
 
   public final static Logger log = LoggerFactory.getLogger(VirtualDevice.class);
 
-  // transient Serial uart;
+  /**
+   * uarts - the serial endpoints for thing which need testing over
+   * serial connections
+   */
   transient HashMap<String, Serial> uarts = new HashMap<String, Serial>();
+  
+  /**
+   * the logic to control all virtual devices
+   */
   transient Python logic;
-
+  
   transient BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
 
   public VirtualDevice(String n) {
     super(n);
-    // uart = (Serial)createPeer("uart");
     logic = (Python) createPeer("logic");
   }
 
   public void startService() {
     super.startService();
-    // uart = (Serial)startPeer("uart");
     logic = (Python) startPeer("logic");
-
-    // uart.addByteListener(this);
   }
 
   public Python getLogic() {
@@ -77,37 +81,10 @@ public class VirtualDevice extends Service implements SerialDataListener {
     String newCode = FileIO.resourceToString("VirtualDevice/Arduino.py");
     log.info(newCode);
     logic.openScript("Arduino.py", newCode);
-    logic.execAndWait();
+    logic.exec(newCode);
   }
 
-  /**
-   * for a virtual UART to create a unopened port available for connection. it
-   * will connect itself to one end of the twisted buffer pair
-   * 
-   * @param portName
-   * @param myPort
-   * @throws IOException
-   */
   /*
-   * public String connectVirtualNullModem(String newPortName) throws
-   * IOException {
-   * 
-   * BlockingQueue<Integer> left = new LinkedBlockingQueue<Integer>();
-   * BlockingQueue<Integer> right = new LinkedBlockingQueue<Integer>();
-   * 
-   * // create other end of null modem cable // which MRL Services can connect
-   * to Port newPort = new PortQueue(newPortName, right, left);
-   * ports.put(newPortName, newPort);
-   * 
-   * // add our virtual port String uartPortName = String.format("%s_uart",
-   * newPortName); PortQueue vPort = new PortQueue(uartPortName, left, right);
-   * connectPort(vPort, this);
-   * 
-   * info(String.format("created virtual null modem cable %s <--> %s",
-   * newPortName, uartPortName)); return newPortName; }
-   */
-
-  /**
    * connecting to a virtual UART allows a Serial service to interface with a
    * mocked hardware. To do this a Serial service creates 2 stream ports and
    * twists the virtual cable between them.
@@ -115,12 +92,9 @@ public class VirtualDevice extends Service implements SerialDataListener {
    * A virtual port is half a virtual pipe, and if unconnected - typically is
    * not very interesting...
    * 
-   * @param listener
-   * @return
-   * @throws IOException
    */
 
-  public Serial connectVirtualUart(String myPort, String uartPort) throws IOException {
+  public SerialDevice connectVirtualUart(String myPort, String uartPort) throws IOException {
 
     // get port names
     if (myPort == null) {
@@ -133,13 +107,6 @@ public class VirtualDevice extends Service implements SerialDataListener {
 
     BlockingQueue<Integer> left = new LinkedBlockingQueue<Integer>();
     BlockingQueue<Integer> right = new LinkedBlockingQueue<Integer>();
-
-    /*
-     * if (listener != null) { listeners.put(listener.getName(), listener); }
-     */
-
-    ;
-    // connectPort(vPort, this);
 
     // create & connect virtual uart
     Serial uart = (Serial) Runtime.start(uartPort, "Serial");
@@ -158,7 +125,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
     return uart;
   }
 
-  public Serial createVirtualUart() throws IOException {
+  public SerialDevice createVirtualUart() throws IOException {
     return connectVirtualUart(null, null);
   }
 
@@ -169,22 +136,19 @@ public class VirtualDevice extends Service implements SerialDataListener {
   }
 
   @Override
-  public String onConnect(String portName) {
+  public void onConnect(String portName) {
     log.info("{}.onConnect {}", getName(), portName);
-    return portName;
   }
 
   @Override
-  public String onDisconnect(String portName) {
+  public void onDisconnect(String portName) {
     log.info("{}.onDisconnect {}", getName(), portName);
-    return portName;
   }
 
-  /**
+  /*
    * preProcessHook is used to intercept messages and process or route them
    * before being processed/invoked in the Service.
    * 
-   * @throws
    * 
    *           @see
    *           org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.
@@ -256,7 +220,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(VirtualDevice.class.getCanonicalName());
-    meta.addDescription("A service which can create virtual devices, like the virtual Arduino");
+    meta.addDescription("a service which can create virtual serial ports and behaviors implemented in python for them");
     meta.addCategory("testing");
     // put peer definitions in
     meta.addPeer("uart", "Serial", "uart");
@@ -277,24 +241,10 @@ public class VirtualDevice extends Service implements SerialDataListener {
       VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
       virtual.createVirtualArduino(portName);
 
-      // Runtime.start("webgui", "WebGui");
-      /*
-       * boolean done = true; if (done){ return; }
-       */
-      // Python logic = virtual.getLogic();
-
-      /*
-       * Serial uart = virtual.getUART(); uart.setCodec("arduino"); Codec codec
-       * = uart.getRXCodec(); codec.setTimeout(1000); uart.setTimeout(100); //
-       * don't want to hang when decoding results...
-       */
-
       arduino.setBoardMega();
-
       arduino.connect(portName);
 
-      // Runtime.start("gui", "GUIService");
-
+      // Runtime.start("gui", "SwingGui");
       Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {

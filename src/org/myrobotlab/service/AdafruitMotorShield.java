@@ -2,7 +2,7 @@
  * 
  *   AdafruitMotorShield
  *   
- *   TODO - test with Steppers & Motors - switches on board - interface accepts motor control
+ *   TODO - test with Steppers &amp; Motors - switches on board - interface accepts motor control
  *
  */
 
@@ -10,8 +10,8 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Set;
 
-import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -20,7 +20,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.interfaces.ArduinoShield;
-import org.myrobotlab.service.interfaces.DeviceControl;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.slf4j.Logger;
@@ -31,8 +30,8 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  *         References : http://www.ladyada.net/make/mshield/use.html
- *         
- *         FIXME - re-write with new MRLComm device - DO NOT USE ANCILLARY 
+ * 
+ *         FIXME - re-write with new MRLComm device - DO NOT USE ANCILLARY
  *         LIBRARIES LIKE AF_MOTOR !!!
  */
 
@@ -45,8 +44,8 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   /*
    * TODO - make step calls NON BLOCKING 1. make step calls non-blocking - they
    * don't block MRL - but they block the processing of the Arduino which is not
-   * needed (or desired) 2. nice GUIService for steppers 3. release
-   * functionality 4. style set <-- easy
+   * needed (or desired) 2. nice SwingGui for steppers 3. release functionality
+   * 4. style set <-- easy
    */
 
   // AF Shield controls these 2 servos
@@ -86,11 +85,11 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
 
   public static final String ADAFRUIT_DEFINES =
 
-  "\n\n" + "#include <AFMotor.h>\n\n" + " #define AF_DCMOTOR_ATTACH 51\n" + " #define AF_DCMOTOR_DETACH 52\n" + " #define AF_DCMOTOR_RELEASE 53\n"
-      + " #define AF_DCMOTOR_SET_SPEED 54\n" + " #define AF_DCMOTOR_RUN_COMMAND 55\n" + "\n" + " #define AF_STEPPER_ATTACH 56\n" + " #define AF_STEPPER_DETACH 57\n"
-      + " #define AF_STEPPER_RELEASE 58\n" + " #define AF_STEPPER_STEP 59\n" + " #define AF_STEPPER_SET_SPEED 60\n" +
+      "\n\n" + "#include <AFMotor.h>\n\n" + " #define AF_DCMOTOR_ATTACH 51\n" + " #define AF_DCMOTOR_DETACH 52\n" + " #define AF_DCMOTOR_RELEASE 53\n"
+          + " #define AF_DCMOTOR_SET_SPEED 54\n" + " #define AF_DCMOTOR_RUN_COMMAND 55\n" + "\n" + " #define AF_STEPPER_ATTACH 56\n" + " #define AF_STEPPER_DETACH 57\n"
+          + " #define AF_STEPPER_RELEASE 58\n" + " #define AF_STEPPER_STEP 59\n" + " #define AF_STEPPER_SET_SPEED 60\n" +
 
-  " AF_DCMotor* motorMap[4];\n" + " AF_Stepper* stepperMap[2];\n" + "\n\n";
+          " AF_DCMotor* motorMap[4];\n" + " AF_Stepper* stepperMap[2];\n" + "\n\n";
 
   public int direction = FORWARD;
 
@@ -104,27 +103,27 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   public static final String ADAFRUIT_CODE = "\n\n" + "            case AF_DCMOTOR_ATTACH:{ \n" + "              motorMap[ioCommand[1] - 1] =  new AF_DCMotor(ioCommand[1]);\n "
       + "            }\n" + "            break; \n" +
 
-  "            case AF_DCMOTOR_DETACH:{ \n" + "             motorMap[ioCommand[2]]->run(RELEASE); \n" + "             delete motorMap[ioCommand[2]];\n" + "            }\n"
+      "            case AF_DCMOTOR_DETACH:{ \n" + "             motorMap[ioCommand[2]]->run(RELEASE); \n" + "             delete motorMap[ioCommand[2]];\n" + "            }\n"
       + "            break; \n" +
 
-  "            case AF_DCMOTOR_RELEASE:{ \n" + "             motorMap[ioCommand[2]]->run(RELEASE); \n" + "            }\n" + "            break; \n" +
+      "            case AF_DCMOTOR_RELEASE:{ \n" + "             motorMap[ioCommand[2]]->run(RELEASE); \n" + "            }\n" + "            break; \n" +
 
-  "            case AF_DCMOTOR_RUN_COMMAND:{ \n" + "             motorMap[ioCommand[1]]->run(ioCommand[2]); \n" + "            }\n" + "            break; \n" +
+      "            case AF_DCMOTOR_RUN_COMMAND:{ \n" + "             motorMap[ioCommand[1]]->run(ioCommand[2]); \n" + "            }\n" + "            break; \n" +
 
-  "            case AF_DCMOTOR_SET_SPEED:{ \n" + "             motorMap[ioCommand[1]]->setSpeed(ioCommand[2]); \n" + "            }\n" + "            break; \n" +
+      "            case AF_DCMOTOR_SET_SPEED:{ \n" + "             motorMap[ioCommand[1]]->setSpeed(ioCommand[2]); \n" + "            }\n" + "            break; \n" +
 
-  "\n\n" + "            case AF_STEPPER_ATTACH:{ \n" + "              stepperMap[ioCommand[2] - 1] = new AF_Stepper (ioCommand[1], ioCommand[2]);\n " + "            }\n"
+      "\n\n" + "            case AF_STEPPER_ATTACH:{ \n" + "              stepperMap[ioCommand[2] - 1] = new AF_Stepper (ioCommand[1], ioCommand[2]);\n " + "            }\n"
       + "            break; \n" +
 
-  "            case AF_STEPPER_DETACH:{ \n" + "             stepperMap[ioCommand[1]-1]->release(); \n" + "             delete stepperMap[ioCommand[1]-1]; \n" + "            }\n"
-      + "            break; \n" +
-
-  "            case AF_STEPPER_RELEASE:{ \n" + "             stepperMap[ioCommand[1]-1]->release(); \n" + "            }\n" + "            break; \n" +
-
-  "            case AF_STEPPER_STEP:{ \n" + "             stepperMap[ioCommand[1]-1]->step(((ioCommand[2] << 8) + ioCommand[3]), ioCommand[4], ioCommand[5]); \n"
+      "            case AF_STEPPER_DETACH:{ \n" + "             stepperMap[ioCommand[1]-1]->release(); \n" + "             delete stepperMap[ioCommand[1]-1]; \n"
       + "            }\n" + "            break; \n" +
 
-  "            case AF_STEPPER_SET_SPEED:{ \n" + "             stepperMap[ioCommand[1]-1]->setSpeed(ioCommand[2]); \n" + "            }\n" + "            break; \n";
+      "            case AF_STEPPER_RELEASE:{ \n" + "             stepperMap[ioCommand[1]-1]->release(); \n" + "            }\n" + "            break; \n" +
+
+      "            case AF_STEPPER_STEP:{ \n" + "             stepperMap[ioCommand[1]-1]->step(((ioCommand[2] << 8) + ioCommand[3]), ioCommand[4], ioCommand[5]); \n"
+      + "            }\n" + "            break; \n" +
+
+      "            case AF_STEPPER_SET_SPEED:{ \n" + "             stepperMap[ioCommand[1]-1]->setSpeed(ioCommand[2]); \n" + "            }\n" + "            break; \n";
 
   public static void main(String[] args) {
 
@@ -134,7 +133,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
       // FIXME !!! - don't use Adafruit's library - do your own stepper control
       // through "pure" MRLComm.ino
       AdafruitMotorShield fruity = (AdafruitMotorShield) Runtime.createAndStart("fruity", "AdafruitMotorShield");
-      Runtime.createAndStart("gui01", "GUIService");
+      Runtime.createAndStart("gui01", "SwingGui");
 
       fruity.connect("COM3");
 
@@ -164,7 +163,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
    * support Shields are specific - but plug into a generalized Arduino Arduino
    * shields can not be plugged into other uCs
    * 
-   * TODO - Program Version & Type injection - with feedback + query to load
+   * TODO - Program Version &amp; Type injection - with feedback + query to load
    */
   @Override
   public boolean attach(Arduino inArduino) {
@@ -223,18 +222,19 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   }
 
   public void connect(String port) throws IOException {
-	  arduino.connect(port);
+    arduino.connect(port);
   }
-  
+
   public void connect(String port, Integer rate, int databits, int stopbit, int parity) throws IOException {
     arduino.connect(port, rate, databits, stopbit, parity);
   }
 
   /**
    * creates a DC Motor on port 1,2,3, or 4
+   * @param motorNum num
+   * @return a motor
+   * @throws Exception e
    * 
-   * @param motorNum
-   * @throws Exception
    */
   public Motor createDCMotor(Integer motorNum) throws Exception {
     if (motorNum == null || motorNum < 1 || motorNum > 4) {
@@ -247,14 +247,15 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     m.startService();
     motors.put(motorName, m);
     m.broadcastState();
-    m.setController(this);
+    m.attachMotorController(this);
     return m;
   }
 
   /**
    * creates a stepper on stepper port 1 or 2
-   * 
-   * @param stepperPort
+   * @param steps s
+   * @param stepperPort port 
+   * @return a motor or null
    */
   public Motor createStepper(Integer steps, Integer stepperPort) {
     if (stepperPort == null || stepperPort < 1 || stepperPort > 2) {
@@ -272,7 +273,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
     return null;
   }
 
-
   @Override
   public boolean isAttached() {
     return arduino != null;
@@ -282,7 +282,9 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   // StepperController begin ----
 
   public void setSpeed(Integer motorPortNumber, Integer speed) {
-    arduino.sendMsg(AF_DCMOTOR_SET_SPEED, motorPortNumber - 1, speed);
+    // TODO - fix
+    // arduino.sendMsg(new MrlMsg(AF_DCMOTOR_SET_SPEED).append(motorPortNumber -
+    // 1).append(speed));
   }
 
   // VENDOR SPECIFIC LIBRARY METHODS BEGIN /////
@@ -341,26 +343,16 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(AdafruitMotorShield.class.getCanonicalName());
-    meta.addDescription("Adafruit Motor Shield Service");
-    meta.addCategory("shield");
-    meta.addCategory("motor");
+    meta.addDescription("arduino shield which controls 4 dc motors or 2 steppers");
+    meta.setLicenseApache();
+    
+    meta.addCategory("shield", "motor");
     meta.addPeer("arduino", "Arduino", "our Arduino");
     return meta;
   }
 
-
-@Override
-public void deviceAttach(DeviceControl device, Object... conf) throws Exception {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void deviceDetach(DeviceControl device) {
-	// TODO Auto-generated method stub
-	
-}
-
-
-
+  @Override
+  public Set<String> getAttached() {
+    return motors.keySet();
+  }
 }

@@ -40,9 +40,7 @@ public class IpCamera extends Service {
             invoke("publishDisplay", new Object[] { getName(), bi });
           }
         }
-      } catch (Exception e) {
-
-        logException(e);
+      } catch (Exception e) {        
       }
     }
   }
@@ -97,7 +95,7 @@ public class IpCamera extends Service {
 
       foscam.startService();
 
-      GUIService gui = new GUIService("gui");
+      SwingGui gui = new SwingGui("gui");
       gui.startService();
 
     } catch (Exception e) {
@@ -115,8 +113,8 @@ public class IpCamera extends Service {
     super(n);
   }
 
-  /**
-   * method to determine connectivity of a valid host, user & password to a
+  /*
+   * method to determine connectivity of a valid host, user &amp; password to a
    * foscam camera.
    * 
    * @return
@@ -196,8 +194,7 @@ public class IpCamera extends Service {
       }
       in.close();
     } catch (Exception e) {
-      logException(e);
-      // connectVideoStream(host, user, password);
+    	log.error("move threw", e);
     }
     return ret.toString();
   }
@@ -238,7 +235,7 @@ public class IpCamera extends Service {
     meta.addCategory("video");
     // FIXME - should be webcam dependency not opencv !
     // meta.addDependency("org.bytedeco.javacpp","1.1");
-    meta.addDependency("org.bytedeco.javacv", "1.1");
+    meta.addDependency("org.bytedeco.javacv", "1.3");
     return meta;
   }
 

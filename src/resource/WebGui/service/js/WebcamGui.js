@@ -1,5 +1,5 @@
 angular.module('mrlapp.service.WebcamGui', [])
-        .controller('WebcamGuiCtrl', ['$scope', '$log', 'mrl', 'serviceSvc', function ($scope, $log, mrl, serviceSvc) {
+        .controller('WebcamGuiCtrl', ['$scope', '$log', 'mrl', 'panelSvc', function ($scope, $log, mrl, panelSvc) {
                 $log.info('WebcamGuiCtrl');
                 var _self = this;
                 var msg = this.msg;
@@ -22,16 +22,16 @@ angular.module('mrlapp.service.WebcamGui', [])
                             $scope.$apply();
                             break;service
                         case 'onShowAll':
-                            serviceSvc.showAll(inMsg.data[0]);
+                            panelSvc.showAll(inMsg.data[0]);
                             break;                     
                         case 'onShow':
-                            serviceSvc.show(inMsg.data[0]);
+                            panelSvc.show(inMsg.data[0]);
                             break;
                         case 'onHide':
-                            serviceSvc.hide(inMsg.data[0]);
+                            panelSvc.hide(inMsg.data[0]);
                             break;
                         case 'onSet':
-                            serviceSvc.set(inMsg.data[0]);
+                            panelSvc.set(inMsg.data[0]);
                             break;
                         default:
                             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);

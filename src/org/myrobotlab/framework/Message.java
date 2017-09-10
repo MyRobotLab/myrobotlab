@@ -1,6 +1,6 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author grog (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -29,7 +29,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 
+// FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 
@@ -51,10 +53,20 @@ public class Message implements Serializable {
    */
 
   public long msgId;
+  
+  /**
+   * the originating uri
+   */
+  public String uri;
+  
+  /**
+   * apiKey related to data encoding
+   */
+  public String apiKey;
+  
   /**
    * destination name of the message
    */
-
   public String name;
   /**
    * name of the sending Service which sent this Message
@@ -64,8 +76,8 @@ public class Message implements Serializable {
   /**
    * originating source method which generated this Message
    */
-
   public String sendingMethod;
+
   /**
    * history of the message, its routing stops and Services it passed through.
    * This is important to prevent endless looping of messages. Turns out
@@ -73,39 +85,9 @@ public class Message implements Serializable {
    * http://www.javacodegeeks.com
    * /2010/08/java-best-practices-vector-arraylist.html
    */
-  // public ArrayList<RoutingEntry> historyList;
   public HashSet<String> historyList;
   public HashMap<String, String> security;
-  /*
-   * @Override public int hashCode() { final int prime = 31; int result = 1;
-   * result = prime * result + Arrays.hashCode(data); result = prime * result +
-   * ((method == null) ? 0 : method.hashCode()); result = prime * result +
-   * ((msgID == null) ? 0 : msgID.hashCode()); result = prime * result +
-   * ((msgType == null) ? 0 : msgType.hashCode()); result = prime * result +
-   * ((name == null) ? 0 : name.hashCode()); result = prime * result + ((sender
-   * == null) ? 0 : sender.hashCode()); result = prime * result +
-   * ((sendingMethod == null) ? 0 : sendingMethod.hashCode()); result = prime *
-   * result + ((status == null) ? 0 : status.hashCode()); result = prime *
-   * result + (int) (timeStamp ^ (timeStamp >>> 32)); return result; }
-   * 
-   * @Override public boolean equals(Object obj) { if (this == obj) return true;
-   * if (obj == null) return false; if (getClass() != obj.getClass()) return
-   * false; Message other = (Message) obj; if (!Arrays.equals(data, other.data))
-   * return false; if (method == null) { if (other.method != null) return false;
-   * } else if (!method.equals(other.method)) return false; if (msgID == null) {
-   * if (other.msgID != null) return false; } else if
-   * (!msgID.equals(other.msgID)) return false; if (msgType == null) { if
-   * (other.msgType != null) return false; } else if
-   * (!msgType.equals(other.msgType)) return false; if (name == null) { if
-   * (other.name != null) return false; } else if (!name.equals(other.name))
-   * return false; if (sender == null) { if (other.sender != null) return false;
-   * } else if (!sender.equals(other.sender)) return false; if (sendingMethod ==
-   * null) { if (other.sendingMethod != null) return false; } else if
-   * (!sendingMethod.equals(other.sendingMethod)) return false; if (status ==
-   * null) { if (other.status != null) return false; } else if
-   * (!status.equals(other.status)) return false; if (timeStamp !=
-   * other.timeStamp) return false; return true; }
-   */
+
   /**
    * status is currently used for BLOCKING message calls the current valid state
    * it can be in is null | BLOCKING | RETURN FIXME - this should be msgType not
@@ -126,28 +108,7 @@ public class Message implements Serializable {
    * invoking a service request this would be the parameter (list) - this would
    * the return type data if the message is outbound
    */
-  public Object[] data;
-
-  /**
-   * TODO - this needs to be a POJO - remove main to a JUnit Test !!
-   * 
-   * @param args
-   * @throws InterruptedException
-   */
-  public static void main(String[] args) throws InterruptedException {
-    LoggingFactory.init(Level.DEBUG);
-
-    Message msg = new Message();
-    msg.method = "myMethod";
-    msg.sendingMethod = "publishImage";
-    msg.msgId = System.currentTimeMillis();
-    msg.data = new Object[] { "hello" };
-
-    /*
-     * try { CodecUtils.toJsonFile(msg, "msg.xml"); } catch (Exception e) {
-     * Logging.logError(e); }
-     */
-  }
+  public Object[] data;  
 
   public Message() {
     msgId = System.currentTimeMillis();
@@ -198,4 +159,44 @@ public class Message implements Serializable {
   public String toString() {
     return CodecUtils.getMsgKey(this);
   }
+  
+
+  public static Message createMessage(NameProvider sender, String name, String method, Object[] data) {
+    Message msg = new Message();
+    msg.name = name; // destination instance name
+    msg.sender = sender.getName();//this.getName();
+    msg.data = data;
+    msg.method = method;
+
+    return msg;
+  }
+
+  
+  static public Message createMessage(NameProvider sender, String name, String method, Object data) {
+    if (data == null) {
+      return createMessage(sender, name, method, null);
+    }
+    Object[] d = new Object[1];
+    d[0] = data;
+    return createMessage(sender, name, method, d);
+  }
+
+
+
+
+  public static void main(String[] args) throws InterruptedException {
+    LoggingFactory.init(Level.DEBUG);
+
+    Message msg = new Message();
+    msg.method = "myMethod";
+    msg.sendingMethod = "publishImage";
+    msg.msgId = System.currentTimeMillis();
+    msg.data = new Object[] { "hello" };
+
+    /*
+     * try { CodecUtils.toJsonFile(msg, "msg.xml"); } catch (Exception e) {
+     * Logging.logError(e); }
+     */
+  }
+
 }

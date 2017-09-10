@@ -174,7 +174,11 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         {
             name: 'Galego',
             id: 'gl-ES'
-        }, 
+        },
+        {
+            name: 'Hindi - हिंदी',
+            id: 'hi-IN'
+        },         
         {
             name: 'Hrvatski',
             id: 'hr_HR'
@@ -309,7 +313,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
             name: "English - United States"
         }
     };
-    
+    continuous = true;
     this.updateState = function(service) {
         $scope.service = service;
         // we should check for the language here.. and update that on the webkit instance.
@@ -318,6 +322,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         // TODO: update the selected value in the gui.
         $scope.lang.selectedOption.id = service.language;
         $scope.current_language = service.language;
+        continuous = service.continuous;
+        
         if ($scope.service.listening != $scope.recognizing) {
         	$log.info("Change listening state!");
         	// huh!? not initialized  yet?!
@@ -340,34 +346,47 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     $scope.utterance = '';
     $scope.current_text = '';
     // start info status
-    $scope.status = 'Click on the microphone icon and begin speaking.';
+    $scope.status = 'Click on the microphone icon and begin speaking.[init]';
     $scope.rows = [];
     // current state for the button i guess?
     $scope.recognizing = false;
     // always grab the right service!
     $scope.service = mrl.getService($scope.service.name);
-    // webkit $scope.recognition google speech 
-    $scope.recognition = new webkitSpeechRecognition();
-    // config properties on the webkit speech stuff.
-    $scope.recognition.continuous = true;
-    $scope.recognition.interimResults = true;
-    
-    // called when $scope.recognition starts.
-    $scope.recognition.onstart = function() {
+    // webkit $scope.recognition google speech
+    // Check if webkitSpeechRecognition exists
+    if (!('webkitSpeechRecognition' in window)){
+    	$scope.wkavailable = false;
+        $log.info('WebkitSpeechRecognition', 'not available');
+        $scope.status = 'WebkitSpeechRecognition not available. Need to use Chrome on a supported platform.';
+    }
+    else
+    {
+    	$scope.wkavailable = true;
+    	$scope.recognition = new webkitSpeechRecognition();
+        // config properties on the webkit speech stuff.
+        $scope.recognition.continuous = true;
+        $scope.recognition.interimResults = true;
+        mrl.sendTo($scope.service.name, "startListening");
+        // called when $scope.recognition starts.
+        $scope.recognition.onstart = function() {
         $scope.recognizing = true;
         $scope.status = 'Speak now.';
         $scope.listenbuttonimg = 'service/img/mic-animate.gif';
         $scope.$apply();
+        mrl.sendTo($scope.service.name, "listeningEvent");
     }
-    ;
+    };
     
+    if ($scope.wkavailable){
     // called when there's an error (handles a few cases)
     $scope.recognition.onerror = function(event) {
         if (event.error == 'no-speech') {
             $scope.listenbuttonimg = 'service/img/mic.png';
+            // force listen ? why not
             $scope.status = 'No speech was detected. You may need to adjust your <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone settings</a>.';
             ignore_onend = true;
             $scope.$apply();
+            mrl.sendTo($scope.service.name, "startListening");
         }
         ;
         if (event.error == 'audio-capture') {
@@ -391,9 +410,10 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         ;
     }
     ;
-    
+   
     // called when $scope.recognition finishes.
     $scope.recognition.onend = function() {
+        mrl.sendTo($scope.service.name, "pauseListening");
         $scope.recognizing = false;
         $scope.$apply();
         if (ignore_onend) {
@@ -403,7 +423,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         $scope.listenbuttonimg = 'service/img/mic.png';
         $scope.$apply();
         if (!final_transcript) {
-            $scope.status = 'Click on the microphone icon and begin speaking.';
+            $scope.status = 'Click on the microphone icon and begin speaking.[stop]';
             $scope.$apply();
             return;
         }
@@ -447,6 +467,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         ;
     }
     ;
+    } // End of ($scope.wkavailable)
+    
     
     $scope.updateLanguage = function() {
         $log.info('WEBKIT Update Language');
@@ -480,7 +502,10 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     
     
     this.onMsg = function(msg) {
+        
+        $scope.recognition.continuous = continuous;
         $log.info("Webkit Speech Msg !");
+        $log.info("continuous1",$scope.recognition.continuous);
         $log.info(msg.method);
         switch (msg.method) {
         case 'onState':

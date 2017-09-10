@@ -130,7 +130,7 @@ public class NanoHTTPD {
 
     /**
      * Decodes the percent encoding scheme. <br/>
-     * For example: "an+example%20string" -> "an example string"
+     * For example: "an+example%20string" -&gt; "an example string"
      */
     private String decodePercent(String str, boolean decodeForwardSlash) throws InterruptedException {
       try {
@@ -351,7 +351,7 @@ public class NanoHTTPD {
       this.status = HTTP_OK;
     }
 
-    /**
+    /*
      * Basic constructor.
      */
     public Response(String status, String mimeType, InputStream data) {
@@ -360,7 +360,7 @@ public class NanoHTTPD {
       this.data = data;
     }
 
-    /**
+    /*
      * Convenience method that makes an InputStream out of given text.
      */
     public Response(String status, String mimeType, String txt) {
@@ -369,7 +369,7 @@ public class NanoHTTPD {
       this.data = new ByteArrayInputStream(txt.getBytes());
     }
 
-    /**
+    /*
      * Adds given line to the header.
      */
     public void addHeader(String name, String value) {
@@ -418,7 +418,7 @@ public class NanoHTTPD {
   File myFileDir;
 
   /**
-   * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
+   * Hashtable mapping (String)FILENAME_EXTENSION -&gt; (String)MIME_TYPE
    */
   public static Hashtable theMimeTypes = new Hashtable();
 
@@ -459,7 +459,7 @@ public class NanoHTTPD {
   // File server code
   //
 
-  /**
+  /*
    * URL-encodes everything between "/"-characters. Encodes spaces as '%20'
    * instead of '+'.
    */
@@ -482,7 +482,7 @@ public class NanoHTTPD {
     return newUri;
   }
 
-  /**
+  /*
    * Starts as a standalone file server and waits for Enter.
    */
   public static void main(String[] args) {
@@ -524,7 +524,7 @@ public class NanoHTTPD {
     ;
   }
 
-  /**
+  /*
    * Starts a HTTP server to given port.
    * <p>
    * Throws an IOException if the socket is already in use
@@ -539,11 +539,12 @@ public class NanoHTTPD {
    * 
    * (By default, this delegates to serveFile() and allows directory listing.)
    * 
-   * @parm uri Percent-decoded URI without parameters, for example "/index.cgi"
-   * @parm method "GET", "POST" etc.
-   * @parm parms Parsed, percent decoded parameters from URI and, in case of
+   * @param uri Percent-decoded URI without parameters, for example "/index.cgi"
+   * @param method "GET", "POST" etc.
+   * @param parms Parsed, percent decoded parameters from URI and, in case of
    *       POST, data.
-   * @parm header Header entries, percent decoded
+   * @param header Header entries, percent decoded
+   * @param socket the socket
    * @return HTTP response, see class Response for details
    */
   public Response serve(String uri, String method, Properties header, Properties parms, Socket socket) {
@@ -566,6 +567,11 @@ public class NanoHTTPD {
   /**
    * Serves file from homeDir and its' subdirectories (only). Uses only URI,
    * ignores all headers and HTTP parameters.
+   * @param uri u
+   * @param header h 
+   * @param homeDir h
+   * @param allowDirectoryListing a 
+   * @return response
    */
   public Response serveFile(String uri, Properties header, File homeDir, boolean allowDirectoryListing) {
     // Make sure we won't die of an exception later

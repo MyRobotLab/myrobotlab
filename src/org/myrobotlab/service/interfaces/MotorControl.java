@@ -25,31 +25,25 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.motor.MotorConfig;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.sensor.Encoder;
 
-public interface MotorControl extends DeviceControl { 
+public interface MotorControl extends NameProvider, RelativePositionControl {
+  
+	public void attachMotorController(MotorController controller) throws Exception;
 
-	// a good canidate for Java-8 'default' interface method
-	// implementation of all attach(String name) { attach(Runtime.getService(name)); } 
-	public void attach(String controllerName) throws Exception;
-	public void attach(MotorController controller) throws Exception;
-
-	public void detach(String controllerName);
-	public void detach(MotorController controller);
+	public void detachMotorController(MotorController controller);
 
 	double getPowerLevel();
-	
+
 	public void setPowerLevel(double power);
 
 	double getPowerOutput();
 
-	int getTargetPos();
+	double getTargetPos();
 
 	/**
-	 * query the motor as to its inverted status
-	 * 
-	 * @return
+	 * @return query the motor as to its inverted status
 	 */
 	boolean isInverted();
 
@@ -60,32 +54,21 @@ public interface MotorControl extends DeviceControl {
 	void lock();
 
 	/**
-	 * Move is the most common motor command. The command accepts a parameter of
-	 * power which can be of the range -1.0 to 1.0. Negative values are in one
-	 * direction and positive values are in the opposite value. For example -1.0
-	 * would be maximum power in a counter clock-wise direction and 0.9 would be
-	 * 90% power in a clockwise direction. 0.0 of course would be stop
+	 * moveTo moves the motor to a specific location. Typically, an encoder is
+	 * needed in order to provide feedback data
 	 * 
-	 * @param power
-	 *            - new power level
+	 * @param newPos the new position to move to
 	 */
-	void move(double power);
+	void moveTo(double newPos);
 
 	/**
 	 * moveTo moves the motor to a specific location. Typically, an encoder is
 	 * needed in order to provide feedback data
 	 * 
-	 * @param newPos
+	 * @param newPos new position
+	 * @param power 0-1
 	 */
-	void moveTo(int newPos);
-
-	/**
-	 * moveTo moves the motor to a specific location. Typically, an encoder is
-	 * needed in order to provide feedback data
-	 * 
-	 * @param newPos
-	 */
-	void moveTo(int newPos, Double power);
+	void moveTo(double newPos, Double power);
 
 	void setEncoder(Encoder encoder);
 
@@ -94,7 +77,7 @@ public interface MotorControl extends DeviceControl {
 	 * clockwise if previous levels were counter clockwise and positive power
 	 * levels would become counter clockwise
 	 * 
-	 * @param invert
+	 * @param invert true or false
 	 */
 	void setInverted(boolean invert);
 
@@ -111,6 +94,19 @@ public interface MotorControl extends DeviceControl {
 	 */
 	void unlock();
 
-	public MotorConfig getConfig();
+	// public Config getConfig();
 
+	/**
+	 * testing if a 'specific' motor controller is attached
+	 * @param controller c
+	 * @return true if the contorller is attached to this control.
+	 */
+	boolean isAttached(MotorController controller);
+
+	/**
+	 * general test if the motor is ready without having to supply
+	 * the specific motor controller
+	 * @return true/false
+	 */
+	boolean isAttached();
 }

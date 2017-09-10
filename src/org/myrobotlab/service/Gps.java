@@ -15,6 +15,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SerialDataListener;
+import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
@@ -174,9 +175,9 @@ public class Gps extends Service implements SerialDataListener {
       Python python = new Python("python");
       python.startService();
 
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
 
     } catch (Exception e) {
@@ -367,6 +368,11 @@ public class Gps extends Service implements SerialDataListener {
 
   // NMEA Lat/Lon values are ddmm.mmmm or dddmm.mmmm respectively and need to
   // be converted
+  /**
+   * 
+   * @param nmea huh?
+   * @return no idea
+   */
   public double convertNMEAToDegrees(String nmea) {
     String degrees;
     String minutes;
@@ -397,7 +403,7 @@ public class Gps extends Service implements SerialDataListener {
     return results;
   }
 
-  public Serial getSerial() throws Exception {
+  public SerialDevice getSerial() throws Exception {
     return serial;
   }
 
@@ -419,8 +425,7 @@ public class Gps extends Service implements SerialDataListener {
    * Minimum Specific GNSS Data VTG Course Over Ground and Ground Speed GSA GNSS
    * DOP and Active Satellites MSS MSK Receiver Signal kmc - so the data you
    * have doesn't have two (GLL and MSK)
-   * 
-   * @return
+   * @return string array of data
    */
   public String[] publishGGAData() {
 
@@ -792,6 +797,12 @@ public class Gps extends Service implements SerialDataListener {
    * Here's all the GeoFence methods you might want to call from outside.
    *********************************************************/
   // This is how you create a Point
+  /**
+   * 
+   * @param lat latitude
+   * @param lon longitude
+   * @return the point
+   */
   public Point setPoint(double lat, double lon) {
     Point point = new Point(lat, lon);
     return point;
@@ -852,15 +863,13 @@ public class Gps extends Service implements SerialDataListener {
   }
 
   @Override
-  public String onConnect(String portName) {
+  public void onConnect(String portName) {
     info("%s connected to %s", getName(), portName);
-    return portName;
   }
 
   @Override
-  public String onDisconnect(String portName) {
+  public void onDisconnect(String portName) {
     info("%s disconnected from %s", getName(), portName);
-    return portName;
   }
 
   /**
@@ -874,10 +883,10 @@ public class Gps extends Service implements SerialDataListener {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Gps.class.getCanonicalName());
-    meta.addDescription("The Global Positioning Sensor");
-    meta.addCategory("location");
-    meta.addCategory("sensor");
+    meta.addDescription("parses NMEA sentences coming in over a Serial service");
+    meta.addCategory("location", "sensor");
     meta.addPeer("serial", "Serial", "serial port for GPS");
+    meta.setLicenseApache();
 
     return meta;
   }

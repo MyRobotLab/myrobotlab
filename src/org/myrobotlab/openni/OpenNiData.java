@@ -11,4 +11,5 @@ public class OpenNiData {
   transient public BufferedImage rgb;
   public int[] depthMap;
   transient public BufferedImage display;
+  public PVector[] depthMapRW;
 }

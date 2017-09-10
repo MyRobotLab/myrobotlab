@@ -1,11 +1,11 @@
 package org.myrobotlab.document.transformer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.myrobotlab.document.Document;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SumValues extends AbstractStage {
 

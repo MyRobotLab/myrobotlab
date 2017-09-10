@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,14 +19,14 @@ import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
 import org.alicebot.ab.Chat;
 import org.alicebot.ab.Predicates;
-import org.apache.commons.io.IOUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.OOBPayload;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
@@ -42,13 +43,14 @@ import org.slf4j.Logger;
 public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
-
+  
   public static class Response {
     public String session;
     public String msg;
     public List<OOBPayload> payloads;
     // FIXME - timestamps are usually longs System.currentTimeMillis()
     public Date timestamp;
+    
 
     public Response(String session, String msg, List<OOBPayload> payloads, Date timestamp) {
       this.session = session;
@@ -88,12 +90,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   static final long serialVersionUID = 1L;
   static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
+  public String wasCleanyShutdowned;
 
   public ProgramAB(String name) {
     super(name);
     // Tell programAB to persist it's learned predicates about people
     // every 30 seconds.
-    addTask("savePredicates", savePredicatesInterval, "savePredicates");
+    addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
     // TODO: Lazy load this!
     // look for local bots defined
     File programAbDir = new File(String.format("%s/bots", path));
@@ -132,11 +135,24 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     String aimlIFPath = path + File.separator + "bots" + File.separator + botName + File.separator + "aimlif";
     log.info("AIML FILES:");
     File folder = new File(aimlPath);
+    File folderaimlIF = new File(aimlIFPath);
     if (!folder.exists()) {
       log.info("{} does not exist", aimlPath);
       return;
     }
-
+    if (wasCleanyShutdowned == null || wasCleanyShutdowned.isEmpty()) {
+      wasCleanyShutdowned="firstStart";  
+    }
+    if (wasCleanyShutdowned.equals("nok")) {
+      if (folderaimlIF.exists()) {
+        // warn("Bad previous shutdown, ProgramAB need to recompile AimlIf files. Don't worry.");  
+        log.info("Bad previous shutdown, ProgramAB need to recompile AimlIf files. Don't worry.");
+        for (File f : folderaimlIF.listFiles()) {
+          f.delete();
+        }
+      }
+    }
+    
     log.info(folder.getAbsolutePath());
     HashMap<String, Long> modifiedDates = new HashMap<String, Long>();
     for (File f : folder.listFiles()) {
@@ -146,14 +162,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       modifiedDates.put(aiml, f.lastModified());
     }
     log.info("AIMLIF FILES:");
-    folder = new File(aimlIFPath);
-    if (!folder.exists()) {
+    folderaimlIF = new File(aimlIFPath);
+    if (!folderaimlIF.exists()) {
       // TODO: throw an exception warn / log ?
-      log.info("aimlif directory missing,creating it. " + folder.getAbsolutePath());
-      folder.mkdirs();
+      log.info("aimlif directory missing,creating it. " + folderaimlIF.getAbsolutePath());
+      folderaimlIF.mkdirs();
       return;
     }
-    for (File f : folder.listFiles()) {
+    for (File f : folderaimlIF.listFiles()) {
       log.info(f.getAbsolutePath());
       // TODO: better stripping of the file extension
       String aimlIF = f.getName().replace(".aiml.csv", "");
@@ -165,6 +181,18 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
           // properly.
           log.info("Deleteing AIMLIF file because the original AIML file was modified. {}", aimlIF);
           f.delete();
+          // edit moz4r : we need to change the last modification date to aiml folder for recompilation
+          sleep(1000);
+          String fil=aimlPath+File.separator+"folder_updated";
+          File file = new File(fil);  
+          file.delete(); 
+          try{
+              PrintWriter writer = new PrintWriter(fil, "UTF-8");
+        	    writer.println(lastMod.toString());
+        	    writer.close();
+        	} catch (IOException e) {
+        	   // do something
+        	}
         }
       }
     }
@@ -195,11 +223,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * 
    * @param text
    *          - the query string to the bot brain
-   * @param userId
+   * @param username
    *          - the user that is sending the query
-   * @param robotName
+   * @param botName
    *          - the name of the bot you which to get the response from
-   * @return
+   * @return the response for a user from a bot given the input text.
    */
   public Response getResponse(String username, String botName, String text) {
     this.currentBotName = botName;
@@ -207,7 +235,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public Response getResponse(String username, String text) {
-    log.info(String.format("Get Response for : user %s bot %s : %s", username, currentBotName, text));
+    log.info("Get Response for : user {} bot {} : {}", username, currentBotName, text);
 
     if (bot == null) {
       String error = "ERROR: Core not loaded, please load core before chatting.";
@@ -247,7 +275,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // int numExecutions = 1;
       // TODO: we need a way for the task to just execute one time
       // it'd be good to have access to the timer here, but it's transient
-      addTask("getResponse", chatData.maxConversationDelay, "getResponse", username, text);
+      addTask("getResponse", chatData.maxConversationDelay, 0, "getResponse", username, text);
     }
 
     // EEK! clean up the API!
@@ -272,6 +300,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public String resolveSessionKey(String username, String botname) {
     return username + "-" + botname;
   }
+  
+  public void repetition_count(int val)
+  {
+	org.alicebot.ab.MagicNumbers.repetition_count=val;
+  }
+  
 
   public Chat getChat(String userName, String botName) {
     String sessionKey = resolveSessionKey(userName, botName);
@@ -352,7 +386,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * @param delay
    *          - min amount of time that must have transpired since the last
    *          response.
-   * @return
+   * @return the response
    */
   public Response getResponse(String session, String text, Long delay) {
     ChatData chatData = sessions.get(session);
@@ -376,8 +410,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Return a list of all patterns that the AIML Bot knows to match against.
    * 
-   * @param botName
-   * @return
+   * @param botName the bots name from which to return it's patterns.
+   * @return a list of all patterns loaded into the aiml brain
    */
   public ArrayList<String> listPatterns(String botName) {
     ArrayList<String> patterns = new ArrayList<String>();
@@ -390,8 +424,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Return the number of milliseconds since the last response was given -1 if a
    * response has never been given.
-   * 
-   * @return
+   * @return milliseconds
    */
   public long millisecondsSinceLastResponse() {
     ChatData chatData = sessions.get(resolveSessionKey(currentUserName, currentBotName));
@@ -502,38 +535,30 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
   }
 
-  /**
+  /*
    * If a response comes back that has an OOB Message, publish that separately
-   * 
-   * @param response
-   * @return
    */
   public String publishOOBText(String oobText) {
     return oobText;
   }
 
-  /**
+  /*
    * publishing method of the pub sub pair - with addResponseListener allowing
    * subscriptions pub/sub routines have the following pattern
    * 
-   * publishing routine -> publishX - must be invoked to provide data to
-   * subscribers subscription routine -> addXListener - simply adds a Service
+   * publishing routine -&gt; publishX - must be invoked to provide data to
+   * subscribers subscription routine -&gt; addXListener - simply adds a Service
    * listener to the notify framework any service which subscribes must
-   * implement -> onX(data) - this is where the data will be sent (the
+   * implement -&gt; onX(data) - this is where the data will be sent (the
    * call-back)
    * 
-   * @param response
-   * @return
    */
   public Response publishResponse(Response response) {
     return response;
   }
 
-  /**
+  /*
    * Test only publishing point - for simple consumers
-   * 
-   * @param response
-   * @return
    */
   public String publishResponseText(Response response) {
     return response.msg;
@@ -562,10 +587,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     startSession(path, username, currentBotName);
   }
 
-  /**
+  /*
    * Persist the predicates for all known sessions in the robot.
-   * 
-   * @throws IOException
    * 
    */
   public void savePredicates() throws IOException {
@@ -641,6 +664,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
 
     cleanOutOfDateAimlIFFiles(botName);
+    wasCleanyShutdowned="nok";
     // TODO: manage the bots in a collective pool/hash map.
     if (bot == null) {
       bot = new Bot(botName, path);
@@ -670,14 +694,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // create a string that represents the predicates file
       String inputPredicateStream = "name:" + userName;
       // load those predicates
-      chat.predicates.getPredicateDefaultsFromInputStream(IOUtils.toInputStream(inputPredicateStream));
-
+      chat.predicates.getPredicateDefaultsFromInputStream(FileIO.toInputStream(inputPredicateStream));
     }
     // this.currentBotName = botName;
     // String userName = chat.predicates.get("name");
     log.info("Started session for bot name:{} , username:{}", botName, userName);
     // TODO: to make sure if the start session is updated, that the button
     // updates in the gui ?
+    this.save();
     broadcastState();
   }
 
@@ -695,8 +719,38 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public void writeAndQuit() {
     bot.writeQuit();
-  }
+    // edit moz4r : we need to change the last modification date to aimlif folder because at this time all is compilated.
+    // so programAb don't need to load AIML at startup
+    sleep(1000);
+    File folder = new File(bot.aimlif_path);
 
+    for (File f : folder.listFiles()) {
+ 		f.setLastModified(System.currentTimeMillis());
+      }
+    String fil=bot.aimlif_path+File.separator+"folder_updated";
+    File file = new File(fil);  
+    file.delete();
+    try{
+      PrintWriter writer = new PrintWriter(fil, "UTF-8");
+  	    writer.println("");
+  	    writer.close();
+  	} catch (IOException e) {
+  	  log.error("PrintWriter error");
+  	}
+  }
+  
+  @Override
+  public void stopService() {
+    try {
+      savePredicates();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    writeAndQuit();
+    wasCleanyShutdowned="ok";
+    super.stopService();
+}
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -711,7 +765,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
     // meta.addDependency("org.alicebot.ab", "0.0.6.26");
-    meta.addDependency("org.alicebot.ab", "0.0.1-kw");
+    meta.addDependency("org.alicebot.ab", "0.0.4.1-kw");
     meta.addDependency("org.json", "20090211");
     return meta;
   }
@@ -719,13 +773,15 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public static void main(String s[]) throws IOException {
     LoggingFactory.init("INFO");
 
-    // Runtime.createAndStart("gui", "GUIService");
-    Runtime.createAndStart("webgui", "WebGui");
+    // Runtime.createAndStart("gui", "SwingGui");
+    Runtime.start("webgui", "WebGui");
 
-    ProgramAB ai = (ProgramAB) Runtime.createAndStart("simple", "ProgramAB");
-    // ai.startSession("C:\\mrl\\develop\\ProgramAB","default", "simple");
+    ProgramAB ai = (ProgramAB) Runtime.createAndStart("ai", "ProgramAB");
+    //ai.setPath(System.getProperty("user.dir")+File.separator+"ProgramAB"+File.separator);
+    ai.startSession("default", "alice2");
 
     log.info(ai.getResponse("hi there").toString());
+    log.info(ai.getResponse("こんにちは").toString());    
 
     // ai.savePredicates();
 

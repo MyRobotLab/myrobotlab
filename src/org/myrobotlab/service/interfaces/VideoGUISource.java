@@ -25,7 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.control.VideoWidget;
+import org.myrobotlab.swing.VideoWidget;
 
 public interface VideoGUISource {
   public VideoWidget getLocalDisplay();

@@ -37,12 +37,12 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(BoofCv.class.getCanonicalName());
-    meta.addDescription("used as a general template");
+    meta.addDescription("a very portable vision library using pure Java");
     meta.setAvailable(false);
     // add dependency if necessary
     meta.addDependency("net.sourceforge.boofcv", "0.23");
     meta.addDependency("pl.sarxos.webcam", "0.3.10");
-    meta.addCategory("general");
+    meta.addCategory("vision", "video");
     return meta;
   }
 
@@ -80,7 +80,7 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
       app.process();
 
       // BoofCV template = (BoofCV) Runtime.start("template", "BoofCV");
-      // Runtime.start("gui", "GUIService");
+      // Runtime.start("gui", "SwingGui");
     } catch (Exception e) {
       Logging.logError(e);
     }

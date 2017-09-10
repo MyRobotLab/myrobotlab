@@ -3,8 +3,8 @@ package org.myrobotlab.framework;
 import static org.myrobotlab.framework.StatusLevel.DEBUG;
 import static org.myrobotlab.framework.StatusLevel.ERROR;
 import static org.myrobotlab.framework.StatusLevel.INFO;
-import static org.myrobotlab.framework.StatusLevel.WARN;
 import static org.myrobotlab.framework.StatusLevel.SUCCESS;
+import static org.myrobotlab.framework.StatusLevel.WARN;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,6 +23,7 @@ import org.slf4j.Logger;
  * the gson serializer would stack overflow with self reference issue
  * 
  * TODO - allow radix tree searches for "keys" ???
+ * 
  */
 public class Status implements Serializable {// extends Exception {
 
@@ -124,8 +125,7 @@ public class Status implements Serializable {// extends Exception {
   /**
    * for minimal amount of information error is assumed, and info is detail of
    * an ERROR
-   * 
-   * @param detail
+   * @param detail d
    */
   public Status(String detail) {
     this.level = ERROR;

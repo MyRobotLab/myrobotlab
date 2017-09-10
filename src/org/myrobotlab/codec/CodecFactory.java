@@ -6,15 +6,14 @@ import java.util.HashMap;
 
 public class CodecFactory {
 
-  // static public encodeMethodSignature()
-
   static final private HashMap<String, String> mimeTypeMap = new HashMap<String, String>();
+  static final private HashMap<String, Codec> codecMap = new HashMap<String, Codec>();
   static private boolean initialized = false;
 
   static public synchronized void init() {
     if (!initialized) {
-      mimeTypeMap.put("application/json", "org.myrobotlab.codec.CodecJson");
-      mimeTypeMap.put("application/mrl-json", "org.myrobotlab.codec.CodecMessage");
+      mimeTypeMap.put("application/json", "org.myrobotlab.codec.CodecJson"); // vs application/mrl-json
+      initialized = true;
     }
 
   }
@@ -28,26 +27,18 @@ public class CodecFactory {
     if (mimeTypeMap.containsKey(mimeType)) {
       clazz = mimeTypeMap.get(mimeType);
     } else {
-      clazz = CodecUtils.MIME_TYPE_MESSAGES;
+      clazz = CodecUtils.MIME_TYPE_JSON;
     }
 
-    Class<?> o = Class.forName(clazz);
-    Constructor<?> constructor = o.getConstructor();
-    Codec codec = (Codec) constructor.newInstance();
-    // return new CodecJson();
-    return codec;
+    if (codecMap.containsKey(mimeType)) {
+      return codecMap.get(mimeType);
+    } else {
+      Class<?> o = Class.forName(clazz);
+      Constructor<?> constructor = o.getConstructor();
+      Codec codec = (Codec) constructor.newInstance();
+      codecMap.put(mimeType, codec);
+      return codec;
+    }
   }
 
-  /*
-   * static public Codec getCodec(String clazz, Object... params) throws
-   * ClassNotFoundException, NoSuchMethodException, SecurityException,
-   * InstantiationException, IllegalAccessException, IllegalArgumentException,
-   * InvocationTargetException{ Class<?>[] parameterTypes = null; if (params !=
-   * null){ parameterTypes = new Class<?>[params.length]; for (int i = 0; i <
-   * params.length; ++i){ parameterTypes[i] = params[i].getClass(); } } Class<?>
-   * o = Class.forName(clazz); Constructor<?> constructor =
-   * o.getConstructor(parameterTypes); Codec codec =
-   * (Codec)constructor.newInstance(params); //return new CodecJson(); return
-   * codec; }
-   */
 }

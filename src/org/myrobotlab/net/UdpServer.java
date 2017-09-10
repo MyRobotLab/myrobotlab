@@ -10,16 +10,16 @@ import java.util.Iterator;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.ServiceEnvironment;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.RemoteAdapter;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
- * FIXME - make abstract class Server with abstract connection info &
- * serializers stop & start are all the same (between UdpServer & TcpServer)
+ * FIXME - make abstract class Server with abstract connection info &amp;
+ * serializers stop &amp; start are all the same (between UdpServer &amp; TcpServer)
  * 
  * @author grperry
  *
@@ -164,8 +164,8 @@ public class UdpServer implements Runnable {
 								// causing deadlock
 								// putting it on the inbox will move it to a
 								// different thread
-								Message sendService = myService.createMessage(null, "register", toRegister);
-								Message outbound = myService.createMessage(myService.getName(), "sendRemote", new Object[] { protocolKey, sendService });
+								Message sendService = Message.createMessage(myService, null, "register", toRegister);
+								Message outbound = Message.createMessage(myService, myService.getName(), "sendRemote", new Object[] { protocolKey, sendService });
 								myService.getInbox().add(outbound);
 
 							}

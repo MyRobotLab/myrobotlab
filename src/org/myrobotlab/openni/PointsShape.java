@@ -352,7 +352,7 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
     // signal that update is finished; now updateDepthCoords() can return
   } // end of updateData()
 
-  /**
+  /*
    * Use new depth buffer data to update the PointsArray inside the Java 3D
    * scene. This method is repeatedly called by DepthReader as the depth buffer
    * changes. This method will not return until the 3D scene has been updated.

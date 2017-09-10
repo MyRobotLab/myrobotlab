@@ -43,6 +43,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
+import com.amazonaws.services.config.model.GetResourceConfigHistoryRequest;
+
 /**
  * 
  * AudioFile - This service can be used to play an audio file such as an mp3.
@@ -50,7 +52,7 @@ import org.slf4j.Logger;
  */
 public class AudioFile extends Service {
   static final long serialVersionUID = 1L;
-  static Logger log = LoggerFactory.getLogger(AudioFile.class);
+  static final Logger log = LoggerFactory.getLogger(AudioFile.class);
 
   static public final String DEFAULT_TRACK = "default";
   // FIXME -
@@ -186,10 +188,14 @@ public class AudioFile extends Service {
     playResource(filename, false);
   };
 
-  public void playResource(String filename, Boolean isBlocking) {
+  public void playResource(String filename, Boolean isBlocking) {    
+    log.warn("Audio File playResource not implemented yet.");
+    // FIXME AudioData needs to have an InputStream !!! 
+    // cheesy - should play resource from the classpath
+    playFile(filename, isBlocking);
     // TODO: what/who uses this? should we use the class loader to
     // playFile(filename, isBlocking, true);
-    log.warn("Audio File playResource not implemented yet.");
+    
   }
 
   public void silence() {
@@ -203,11 +209,10 @@ public class AudioFile extends Service {
     }
   }
 
-  /**
+  /*
    * Specify the volume for playback on the audio file value 0.0 = off 1.0 =
    * normal volume. (values greater than 1.0 may distort the original signal)
    * 
-   * @param volume
    */
   public void setVolume(float volume) {
     processors.get(currentTrack).setVolume(volume);
@@ -343,17 +348,14 @@ public class AudioFile extends Service {
       // "AudioFile");
       // MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
 
-      log.info(AcapelaSpeech.getDNA().toString());
-      AcapelaSpeech robot1 = (AcapelaSpeech) Runtime.start("robot1", "AcapelaSpeech");
-      // AcapelaSpeech robot1 = (AcapelaSpeech) Runtime.createAndStart("robot1",
-      // "AcapelaSpeech");
+      NaturalReaderSpeech robot1 = (NaturalReaderSpeech) Runtime.start("robot1", "NaturalReaderSpeech");
       AudioFile audio = robot1.getAudioFile();
 
       log.info(audio.getTrack());
 
       // audio.track("sound effects");
       audio.track("explosion");
-      audio.play("explosion.mp3");
+      audio.play("alert.mp3");
 
       /*
        * mary.speak("warning warning. danger will robinson danger"); mary.speak(
@@ -452,7 +454,7 @@ public class AudioFile extends Service {
         AudioFile player = new AudioFile("player");
         // player.playFile(filename, true);
         player.startService();
-        Runtime.createAndStart("gui", "GUIService");
+        Runtime.createAndStart("gui", "SwingGui");
 
         joystick.setController(2);
         joystick.broadcastState();
@@ -514,7 +516,7 @@ public class AudioFile extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(AudioFile.class.getCanonicalName());
-    meta.addDescription("Plays back audio file. Can block or multi-thread play");
+    meta.addDescription("can play audio files on multiple tracks");
     meta.addCategory("sound");
     meta.addDependency("javazoom.spi", "1.9.5");
     meta.addDependency("javazoom.jl.player", "1.0.1");

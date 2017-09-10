@@ -182,7 +182,7 @@ public class CmdLine extends HashMap<String, CcmdParam> {
   public String toString() {
     StringBuffer ret = new StringBuffer();
     for (int i = 0; i < args.length; ++i) {
-      ret.append(args[i]).append(" ");
+      ret.append("\"" + args[i] + "\"").append(" ");
     }
 
     return ret.toString();

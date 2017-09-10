@@ -1,10 +1,10 @@
-<div id="{{::panel.name}}_{{::panel.panelname}}" ng-show="!panel.hide">
+<div id="{{::panel.name}}" ng-show="!panel.hide">
     <div class="panel panel-default">
         <div class="panel-heading" drag-directive>
             <!--header-->
             <h3 class="panel-title">
                 <img ng-src="{{::panel.simpleName}}.png" alt="" width="16">
-                <b>{{::panel.name}}</b><div style="display:inline;" ng-if="panel.showpanelname">&nbsp;&nbsp;{{panel.panelname}}</div>
+                <b>{{::panel.name}}</b>
                 <div class="pull-right" uib-dropdown dropdown-append-to-body auto-close="outsideClick" is-open="servicemenuDropdownOpen">
                     {{::panel.simpleName}}&nbsp;&nbsp;
                     <span style="cursor: pointer;" tooltip-placement="right" uib-tooltip="Menu"><i uib-dropdown-toggle class="glyphicon glyphicon-list"></i></span>
@@ -17,7 +17,7 @@
                         </li>
                         <li ng-show="panel.size != 'free'">
                             <a href="" ng-click="changesize('free')">
-                                <i class="glyphicon glyphicon-resize-horizontal"></i>
+                                <i class="glyphicon glyphicon-th"></i>
                                 &nbsp;&nbsp;free
                             </a>
                         </li>
@@ -32,15 +32,9 @@
                                 <i class="glyphicon glyphicon-minus"></i>
                                 &nbsp;&nbsp;tiny
                             </a>
-                        </li>
-                        <!--<li ng-show="panel.panelsize.sizes[panel.panelsize.aktsize].forcesize">
-                            <a href="" ng-click="changesize('unmin')">
-                                <i class="glyphicon glyphicon-eye-open"></i>
-                                &nbsp;&nbsp;expand
-                            </a>
-                        </li>-->
+                        </li>                      
                         <li>
-                            <a href="" ng-click="servicemenuDropdownOpen = false;panel.hide = !panel.hide">
+                            <a href="" ng-click="servicemenuDropdownOpen = false;panel.svc.hide(panel.name)">
                                 <span ng-show="!panel.hide">
                                     <i class="glyphicon glyphicon-eye-close"></i>
                                     &nbsp;&nbsp;hide
@@ -120,7 +114,7 @@
             <div>
                 &nbsp;
                 <div class="pull-right" ng-show="panel.size == 'free'">
-                    <span style="position: relative; cursor: nw-resize;" resize-directive><i class="glyphicon glyphicon-resize-horizontal"></i></span>
+                    <span style="position: relative; cursor: nw-resize;" resize-directive><i class="glyphicon glyphicon-th"></i></span>
                 </div>
             </div>
         </div>

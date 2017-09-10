@@ -150,7 +150,7 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
   }
 
   /**
-   * Returns a copy of this PMatrix3D.
+   * @return a copy of this PMatrix3D.
    */
   public PMatrix3D get() {
     PMatrix3D outgoing = new PMatrix3D();
@@ -158,7 +158,7 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
     return outgoing;
   }
 
-  /**
+  /*
    * Copies the matrix contents into a 16 entry float array. If target is null
    * (or not the correct size), a new array will be created.
    */
@@ -298,7 +298,7 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
     preApply(1, 0, 0, -tx, 0, 1, 0, -ty, 0, 0, 1, -tz, 0, 0, 0, 1);
   }
 
-  /**
+  /*
    * Multiply a three or four element vector against this matrix. If out is null
    * or not length 3 or 4, a new float array (length 3) will be returned.
    */
@@ -435,7 +435,7 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
     m33 = r33;
   }
 
-  /**
+  /*
    * Apply another matrix to the left of this one.
    */
   public void preApply(PMatrix3D left) {

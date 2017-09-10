@@ -139,7 +139,7 @@ public class AudioCapture extends Service {
     try {
 
       AudioCapture audioIn = (AudioCapture) Runtime.start("audioIn", "AudioCapture");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
 
       audioIn.captureAudio();
       Thread.sleep(3000);
