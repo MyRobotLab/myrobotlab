@@ -408,7 +408,7 @@ public class Esp8266_01 extends Service implements I2CController {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Esp8266_01.class.getCanonicalName());
-    meta.addDescription("ESP8266-01 service to communicate using i2c");
+    meta.addDescription("ESP8266-01 service to communicate using WiFi and i2c");
     meta.addCategory("i2c", "control");
     meta.setSponsor("Mats");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
