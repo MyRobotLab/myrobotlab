@@ -19,7 +19,7 @@ public class Wire {
 
   public static int requestFrom(int deviceAddress, int readSize) {
     // TODO Auto-generated method stub
-    return 0;
+    return readSize;
   }
 
   public static void begin() {
