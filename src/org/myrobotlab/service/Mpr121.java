@@ -730,6 +730,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     meta.addDescription("MPR121 Touch sensor & LED Driver");
     meta.addCategory("shield", "sensor", "i2c");
     meta.setSponsor("Mats");
+    meta.setAvailable(false);
     return meta;
   }
 
