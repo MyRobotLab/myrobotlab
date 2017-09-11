@@ -132,7 +132,7 @@ public class ImageDisplay extends Service {
   // @param alpha = Value how much the image is faded float from 0.0 to 1.0.
   // @param scaling = scale factor to resize the image.
   public void displayScaled(String source, float alpha, float scaling) {
-    DisplayedImage image = new DisplayedImage(source, 1, scaling);
+    DisplayedImage image = new DisplayedImage(source, alpha, scaling);
     log.info("Loading image done");
     buildFrame(image);
   }
@@ -160,17 +160,29 @@ public class ImageDisplay extends Service {
         ;
       }
 
-      public void mousePressed(MouseEvent e) {
-      }
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 
-      public void mouseReleased(MouseEvent e) {
-      }
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 
-      public void mouseEntered(MouseEvent e) {
-      }
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 
-      public void mouseExited(MouseEvent e) {
-      }
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
     });
     f.setBackground(Color.BLACK);
     f.getContentPane().setBackground(Color.BLACK);
@@ -182,6 +194,7 @@ public class ImageDisplay extends Service {
     f.setLocation(image.getwOffset(), image.gethOffset());
     f.toFront();
     gd.setFullScreenWindow(f);
+    f.setLocation(image.getwOffset(), image.gethOffset());
     f.setVisible(true);
     frames.add(f);
   }
