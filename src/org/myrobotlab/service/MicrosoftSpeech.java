@@ -124,7 +124,7 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
     try {
       p = java.lang.Runtime.getRuntime().exec(command);
       p.waitFor();
-      BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
+      BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_16LE));
 
       String line = "";
       while ((line = reader.readLine()) != null) {
@@ -214,7 +214,7 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
     // Text file created...
     File f = new File(TextPath + "text.txt");
     BufferedWriter bw = null;
-    bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8));
+    bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_16LE));
 
     bw.write(toSpeak);
     bw.close();
@@ -247,7 +247,7 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
     File f = new File(TextPath + "text.txt");
 
     BufferedWriter bw = null;
-    bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8));
+    bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_16LE));
 
     bw.write(toSpeak);
     bw.close();
