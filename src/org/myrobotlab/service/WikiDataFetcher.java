@@ -38,9 +38,8 @@ public class WikiDataFetcher extends Service {
     LoggingFactory.init(Level.INFO);
 
     try {
-
-      @SuppressWarnings("unused")
       WikiDataFetcher wiki = (WikiDataFetcher) Runtime.start("wikiDataFetcher", "WikiDataFetcher");
+      
       sleep(2000);
       EntityDocument doc = WikiDataFetcher.getWiki("Halloween");
 
@@ -291,7 +290,8 @@ public class WikiDataFetcher extends Service {
       case "quantity"://
         data = (QuantityValue) data;
         String quantity = String.valueOf(((QuantityValue) data).getNumericValue());
-        String unit = data.toString();
+        String unit = String.valueOf(((QuantityValue) data).getUnit());
+        // String unit = data.toString();
         int beginIndex2 = unit.indexOf('Q');
         if (beginIndex2 != -1) {
           unit = unit.substring(beginIndex2);
