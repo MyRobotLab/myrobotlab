@@ -314,6 +314,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         }
     };
     continuous = true;
+    clickedFromWebGui = false;
     this.updateState = function(service) {
         $scope.service = service;
         // we should check for the language here.. and update that on the webkit instance.
@@ -330,7 +331,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         	if (!angular.isUndefined($scope.recognizing)) {
         		// update the recognizing state of the gui.
         		// TODO: fix me. it doesn't handle the stop listening case (likely)
-        		if (!$scope.recognizing && $scope.service.listening) {
+        		if ((!$scope.recognizing && $scope.service.listening)||!clickedFromWebGui) {
         			// TODO: start Recognition is actually a toggle.. not start.
         			$scope.startRecognition();
         		}
@@ -479,6 +480,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     
     // toggle type of button for starting/stopping speech $scope.recognition.
     $scope.startRecognition = function() {
+        clickedFromWebGui = true;
         $log.info("Start Recognition clicked.");
         if ($scope.recognizing) {
             $log.info("Stoppping recognition");
@@ -504,8 +506,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
     this.onMsg = function(msg) {
         
         $scope.recognition.continuous = continuous;
+        clickedFromWebGui = false;
         $log.info("Webkit Speech Msg !");
-        $log.info("continuous1",$scope.recognition.continuous);
         $log.info(msg.method);
         switch (msg.method) {
         case 'onState':
