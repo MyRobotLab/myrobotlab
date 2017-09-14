@@ -2110,7 +2110,7 @@ public class InMoov extends Service {
     im.setDHLink("kinect", "camera", 0, 90, 10, 90);
 
     // log.info("{}",im.createJointPositionMap("leftArm").toString());
-    // start the kinematics engines
+    // start the kinematics engines 
 
     // define object, each dh link are set as an object, but the
     // start point and end point will be update by the ik service, but still
