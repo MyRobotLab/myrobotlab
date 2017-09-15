@@ -307,7 +307,7 @@ public class Joystick extends Service implements Runnable {
 	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(Joystick.class.getCanonicalName());
-		meta.addDescription("used for interfacing with a Joystick");
+		meta.addDescription("service allows interfacing with a keyboard, joystick or gamepad");
 		meta.addCategory("control");
 		meta.addDependency("net.java.games.jinput", "20120914");
 		return meta;

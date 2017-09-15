@@ -351,6 +351,7 @@ private String language;
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(NaturalReaderSpeech.class.getCanonicalName());
     meta.addDescription("Natural Reader based speech service.");
+    meta.setCloudService(true);
     meta.addCategory("speech");
     meta.setSponsor("kwatters");
     meta.addPeer("audioFile", "AudioFile", "audioFile");

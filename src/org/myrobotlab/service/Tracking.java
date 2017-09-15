@@ -159,14 +159,14 @@ public class Tracking extends Service {
     pid = (Pid) createPeer("pid");
     setDefaultPreFilters();
     // the kp should be propotional to the input min/max of the servo.. for now we'll go with 45 for now.
-    pid.setPID("x", 25.0, 1.0, 0.1);
+    pid.setPID("x", 3.0, 1.0, 0.1);
     pid.setControllerDirection("x", Pid.DIRECTION_DIRECT);
     pid.setMode("x", Pid.MODE_AUTOMATIC);
     pid.setOutputRange("x", -5, 5); // <- not correct - based on maximum
     pid.setSampleTime("x", 30);
     pid.setSetpoint("x", 0.5); // set center
 
-    pid.setPID("y", 25.0, 1.0, 0.1);
+    pid.setPID("y", 3.0, 1.0, 0.1);
     pid.setControllerDirection("y", Pid.DIRECTION_DIRECT);
     pid.setMode("y", Pid.MODE_AUTOMATIC);
     pid.setOutputRange("y", 5, -5); // <- not correct - based on maximum
@@ -660,7 +660,8 @@ public class Tracking extends Service {
     }
     opencv = (OpenCV) createPeer("opencv");
     opencv.setCameraIndex(cameraIndex);
-    opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
+    // opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
+    subscribe(opencv.getName(), "publishOpenCVData");
     LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
     // TODO - think of a "validate" method
     sleep(300);
@@ -772,8 +773,8 @@ public class Tracking extends Service {
 
       sleep(3000);
 
-      // t01.startLKTracking();
-      t01.faceDetect();
+      t01.startLKTracking();
+      // t01.faceDetect();
 
       // Runtime.start("python", "Python");
 
