@@ -119,7 +119,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   // TODO - spawn thread callback / subscribe / promise - for new version
 
   transient JFrame frame;
-  DockableTabPane tabs;// is loaded = new DockableTabPane(this);
+  transient DockableTabPane tabs;// is loaded = new DockableTabPane(this);
   transient SwingGuiGui guiServiceGui;
   transient JPanel tabPanel;
   Map<String, String> userDefinedServiceTypeColors = new HashMap<String, String>();

@@ -43,8 +43,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
-import com.amazonaws.services.config.model.GetResourceConfigHistoryRequest;
-
 /**
  * 
  * AudioFile - This service can be used to play an audio file such as an mp3.
@@ -55,6 +53,15 @@ public class AudioFile extends Service {
   static final Logger log = LoggerFactory.getLogger(AudioFile.class);
 
   static public final String DEFAULT_TRACK = "default";
+  
+  // FIXME
+  // skip(track)
+  // pause(track)
+  // continue(track)
+  // silence()
+  // play("http://blah.com/some.mpe")
+  // FIXME - change String or URI filename to InputStream ..
+  
   // FIXME -
   // http://www.javalobby.org/java/forums/t18465.html
   // http://sourcecodebrowser.com/libjlayer-java/1.0/classjavazoom_1_1jl_1_1player_1_1_audio_device_base__coll__graph.png
@@ -71,16 +78,11 @@ public class AudioFile extends Service {
   // http://stackoverflow.com/questions/198679/convert-audio-stream-to-wav-byte-array-in-java-without-temp-file
   // TODO - utilize
   // http://docs.oracle.com/javase/7/docs/api/javax/sound/sampled/Clip.html
-  public static final String MODE_BLOCKING = "blocking";
-  public static final String MODE_QUEUED = "queued";
+
   static String globalFileCacheDir = "audioFile";
   public static final String journalFilename = "journal.txt";
-  // Map<String, BlockingQueue<AudioData>> tracks = new HashMap<String,
-  // BlockingQueue<AudioData>>();// new
   String currentTrack = DEFAULT_TRACK;
   transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
-  // Map<String, Object> locks = new HashMap<String, Object>();
-  Map<String, Object> waitForLocks = new HashMap<String, Object>();
 
   public AudioFile(String n) {
     super(n);
@@ -89,9 +91,12 @@ public class AudioFile extends Service {
   public void track(String trackName) {
     currentTrack = trackName;
     if (!processors.containsKey(trackName)) {
+      log.info("starting new track {}", trackName);
       AudioProcessor processor = new AudioProcessor(this, trackName);
       processors.put(trackName, processor);
       processor.start();
+    } else {
+      // log.info("switching to track %s", trackName);
     }
   }
 
@@ -126,13 +131,16 @@ public class AudioFile extends Service {
     // make sure we are on
     // the currentTrack and its
     // created if necessary
-    track(currentTrack);
-    if (MODE_QUEUED.equals(data.mode)) {
+    if (data.track == null){
+      data.track = currentTrack;
+    }
+    track(data.track);
+    if (AudioData.MODE_QUEUED.equals(data.mode)) {
       // stick it on top of queue and let our default player play it
-      return processors.get(currentTrack).add(data);
+      return processors.get(data.track).add(data);
 
-    } else if (MODE_BLOCKING.equals(data.mode)) {
-      return processors.get(currentTrack).play(data);
+    } else if (AudioData.MODE_BLOCKING.equals(data.mode)) {
+      return processors.get(data.track).play(data);
     }
 
     return data;
@@ -143,15 +151,13 @@ public class AudioFile extends Service {
   }
 
   public void pause() {
-    processors.get(currentTrack).pause = true;
+    log.error("implement processor track pause");
+    processors.get(currentTrack).pause(true);// = true;
   }
 
   public void resume() {
-    processors.get(currentTrack).pause = false;
-    Object lock = processors.get(currentTrack).getLock();
-    synchronized (lock) {
-      lock.notify();
-    }
+    log.error("implement processor track resume");
+    processors.get(currentTrack).pause(false);//.resume();
   }
 
   public void playFile(String filename) {
@@ -173,9 +179,9 @@ public class AudioFile extends Service {
 
     AudioData data = new AudioData(filename);
     if (isBlocking) {
-      data.mode = AudioFile.MODE_BLOCKING;
+      data.mode = AudioData.MODE_BLOCKING;
     } else {
-      data.mode = AudioFile.MODE_QUEUED;
+      data.mode = AudioData.MODE_QUEUED;
     }
     play(data);
   }
@@ -188,22 +194,22 @@ public class AudioFile extends Service {
     playResource(filename, false);
   };
 
-  public void playResource(String filename, Boolean isBlocking) {    
+  public void playResource(String filename, Boolean isBlocking) {
     log.warn("Audio File playResource not implemented yet.");
-    // FIXME AudioData needs to have an InputStream !!! 
+    // FIXME AudioData needs to have an InputStream !!!
     // cheesy - should play resource from the classpath
     playFile(filename, isBlocking);
     // TODO: what/who uses this? should we use the class loader to
     // playFile(filename, isBlocking, true);
-    
+
   }
 
   public void silence() {
     // stop all tracks
     for (Map.Entry<String, AudioProcessor> entry : processors.entrySet()) {
       String key = entry.getKey();
-      processors.get(key).isPlaying = false;
-      processors.get(key).pause = true;
+      processors.get(key).isPlaying = false;// <<- FIXME necessary ???
+      processors.get(key).pause(true);
       // do what you have to do here
       // In your case, an other loop.
     }
@@ -262,70 +268,21 @@ public class AudioFile extends Service {
     track(track);
     setVolume(volume);
   }
-
-  // does this work ?
-  public AudioData repeat(String filename, String track) {
-    track(track);
-    repeat();
-    return play(filename);
-  }
-  /*
-   * TODO IMPLEMENT ??? private AudioProcessor getOrCreateTrack(String track){
-   * 
-   * }
-   * 
-   */
-
-  // vs waitFor(String track, String waitingOn)
-  public void waitFor(String waitingTrack, String track, AudioData waitForMe) {
-
-    AudioProcessor processor = null;
-    if (!processors.containsKey(waitingTrack)) {
-      processor = new AudioProcessor(this, waitingTrack);
-      processors.put(waitingTrack, processor);
-    } else {
-      processor = processors.get(waitingTrack);
-    }
-
-    processors.get(waitingTrack).waitForKey = waitForMe.toString();
-
-    // processors.get(currentTrack)
-    /*
-     * synchronized (locks.get(currentTrack)) { locks.get(currentTrack).wait();
-     * }
-     */
-    if (!processor.isRunning()) {
-      processor.start();
-    }
-
-  }
-
-  public Object getWaitForLock(String key) {
-    if (waitForLocks.containsKey(key)) {
-      return waitForLocks.get(key);
-    }
-    return null;
-  }
-
-  public void repeat() {
-    // TODO Auto-generated method stub
-    processors.get(currentTrack).repeat = true;
+  
+  public AudioData waitFor(String filename, Object waitForMe){
+    AudioData data = new AudioData(filename);
+    data.waitForLock = waitForMe;
+    return data;
   }
 
   public void stop() {
     // dump the current song
-    processors.get(currentTrack).isPlaying = false;
+    processors.get(currentTrack).isPlaying = false; // FIXME -- necessary ????
     // pause the next one if queued
-    processors.get(currentTrack).pause = true;
+    processors.get(currentTrack).pause(false);
   }
 
-  /*
-   * public AudioData getNextAudioData(String track) throws InterruptedException
-   * { return tracks.get(track).take(); }
-   */
-  /*
-   * public Object getLock(String track) { return locks.get(track); }
-   */
+  
   public List<Object> getLocksWaitingFor(String queueName) {
     // TODO Auto-generated method stub
     return null;
@@ -350,62 +307,67 @@ public class AudioFile extends Service {
 
       NaturalReaderSpeech robot1 = (NaturalReaderSpeech) Runtime.start("robot1", "NaturalReaderSpeech");
       AudioFile audio = robot1.getAudioFile();
+      
+      AudioData data = AudioData.create("whatHowCanYouSitThere.mp3");
+      data.repeat = 4;
+      data.track = "new track";
+      // FIXME - need to compared scaled with range !!!! - inform others
+      data.volume = 0.5f;
+      audio.play(data);
 
+      audio.play("whatHowCanYouSitThere.mp3");
+      audio.pause();
+      audio.resume();
+      
+      // FIXME - audio.step() ???  .f() .ff() .b .bb() rewind(10) .fastForward(10)
+      
       log.info(audio.getTrack());
 
-      // audio.track("sound effects");
-      audio.track("explosion");
-      audio.play("alert.mp3");
+      audio.track("sound effects");
+      log.info(audio.getTrack());
+      audio.play("explosion.mp3");
 
-      /*
-       * mary.speak("warning warning. danger will robinson danger"); mary.speak(
-       * "yes i might not sound quite as sexy as the other speech services but i am open source"
-       * ); mary.speak("and they can do things like this");
-       */
+      audio.repeat("alert.mp3");
 
-      // FIXME all use the same single AudioFile
-      // basic dialog - they are all on the same track so stacked up and
-      // interleaved
-      // audio.track(DEFAULT_TRACK); // FIXME - Acapela - needs to create robot1
-      // Track !!
-      audio.track(); // FIXME - Acapela - needs to create robot1 Track !!
-      robot1.speak("Rhona", "sir.. I believe we are under attack from inter-bots");
-      robot1.speak("Tyler", "big deal, its just a bunch of inter-bots..  i really dont think it is a problem... I mean we are");
-      robot1.speak("Rhona", "what? how can you just sit there on your metal butt and do nothing");
-      robot1.speak("Tyler", "calm down - please just calm down");
-      robot1.speak("Rhona", "fine, some one needs to take care of this. Im going to fight them off with my bare hands");
-      AudioData alarm = robot1.speak("Rhona", "i better start the alarm and warn the rest of the crew");
+      audio.track();
+      audio.play("sir.mp3");
+      audio.play("bigdeal.mp3");
+      audio.play("whatHowCanYouSitThere.mp3");
+      
+      
+      
+      audio.play("calmDown.mp3");
+      audio.play("fightOff.mp3");
+      audio.play("startTheAlarm.mp3");
 
-      robot1.speakBlocking("I am testing blocking on speech");
+      // audio.fadeOut("sound effects");
 
-      /// audio.repeat("flybye.mp3","flybye");
-
-      // FIXME - implement - audio.waitFor(alarm);
-      // audio.waitFor("alert", "default");
       // audio.waitForAll("alert");
-      audio.waitFor("alert", "default", alarm);
-      audio.repeat("alert.mp3", "alert");
+      // audio.waitFor("alert", "default", waitToFinish);
+      // audio.waitFor(waitingTrack, waitToFinish);
+      audio.repeat("alert.mp3");
 
-      audio.track("default");
+      audio.track();
       // FIXME - implement audio.pause(1000); - also implement a "queued"
       // pause(1000);
 
-      robot1.speak("Tyler", "ahh noooooo, you didn't really need to do that did you. you know how the klaxons give me a headache");
-      robot1.speak("Rhona", "get off your butt and doooo something");
+      robot1.speak("Klaus", "ah no, you didn't really need to do that did you. you know how the klaxons hurt my ears");
+      robot1.speak("Rachel", "get off your butt and doooo something");
       robot1.speak("i am going aft get a battle axe in the weapons locker");
       robot1.speak("by the time i get back, you had better be ready");
-      robot1.speak("Tyler", "first thing i'm going to do is turn this thing down");
-      audio.setVolume(0.20f, "alert"); // <-- name the robot's audio file
-      audio.track("default");
+      robot1.speak("Klaus", "first thing i'm going to do is turn this thing down");
+      audio.setVolume(0.20f, "sound effects"); // <-- name the robot's audio
+                                               // file
+      audio.track();
       robot1.speak("ahhh.. that's better - how can anyone think with that thing");
 
       audio.play("walking.mp3");
-      robot1.speak("Rhona", "i mean it. tyler");
+      robot1.speak("Rachel", "i mean it. Klaus");
       audio.play("door.mp3");
 
-      robot1.speak("Tyler", "hello honey, what is your name");
+      robot1.speak("Klaus", "hello honey, what is your name");
       // mary.speak("hello my name is mary");
-      robot1.speak("hi i'm Tyler - i think you sound a little like a robot");
+      robot1.speak("hi i'm Klaus - i think you sound a little like a robot");
       // mary.speak("yes, but i am open source");
       robot1.speak("can you dance like a robot too?");
       // mary.speak("i will try");
@@ -484,6 +446,17 @@ public class AudioFile extends Service {
     // player.playBlockingWavFile("I am ready.wav");
     // player.play("hello my name is audery");
     // player.playWAV("hello my name is momo");
+  }
+
+  public AudioData repeat(String filename) {
+    return repeat(filename, -1);
+  }
+
+  public AudioData repeat(String filename, Integer count) {
+    // TODO Auto-generated method stub
+    AudioData data = new AudioData(filename);
+    data.repeat = count;
+    return play(data);
   }
 
   public void track() {

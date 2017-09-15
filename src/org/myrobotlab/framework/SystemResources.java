@@ -1,7 +1,10 @@
 package org.myrobotlab.framework;
 
-public class SystemResources {
+import java.io.Serializable;
 
+public class SystemResources implements Serializable {
+
+  private static final long serialVersionUID = 1L;
   // changing values
   long totalPhysicalMemory;
   long totalMemory;

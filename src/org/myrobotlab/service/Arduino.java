@@ -1180,7 +1180,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         if (newByte != MAGIC_NUMBER) {
           byteCount = 0;
           msgSize = 0;
-          Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
+          Arrays.fill(ioCmd, 0); // FIXME - optimize - remove          
           warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++error_arduino_to_mrl_rx_cnt));
           // dump.setLength(0);
         }
