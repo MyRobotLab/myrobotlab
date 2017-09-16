@@ -137,20 +137,20 @@ public class InMoov extends Service {
   public static int attachPauseMs = 100;
 
   // TODO InMoovLife service
-
   public static boolean RobotIsTrackingSomething() {
-
-    if (eyesTracking != null && headTracking != null) {
-      if (eyesTracking.isIdle() && headTracking.isIdle()) {
-        return false;
-      } else {
+    if (eyesTracking != null ) {      
+      if (!eyesTracking.isIdle()) {
         return true;
       }
-    } else {
-      return false;
-    }
+    } 
+    if (headTracking != null ) {      
+      if (!headTracking.isIdle()) {
+        return true;
+      }
+    } 
+    return false;
   }
-
+  
   public static boolean RobotIsOpenCvCapturing() {
     if (opencv != null) {
       if (opencv.capturing) {
@@ -175,10 +175,7 @@ public class InMoov extends Service {
   public static boolean RobotCanMoveRandom = true;
   public static boolean RobotIsSleeping = false;
   public static boolean RobotIsStarted = false;
-  private transient Timer DisableTimerRobotCanMoveHeadRandom;
-  private transient Timer DisableTimerRobotCanMoveEyesRandom;
-  private transient Timer DisableTimerRobotCanMoveBodyRandom;
-  private transient Timer DisableTimerRobotCanMoveRandom;
+
 
   // END TODO InMoovLife service
 
@@ -1767,9 +1764,12 @@ public class InMoov extends Service {
     if (gestureAlreadyStarted) {
       warn("Warning 1 gesture already running, this can break spacetime and lot of things");
     }
+    else
+    {
     gestureAlreadyStarted = true;
     RobotCanMoveRandom = false;
     temporaryStopAutoDisable(true);
+    }
   }
 
   public void finishedGesture() {
@@ -1777,9 +1777,11 @@ public class InMoov extends Service {
   }
 
   public void finishedGesture(String nameOfGesture) {
+    if (gestureAlreadyStarted) {
     RobotCanMoveRandom = true;
     temporaryStopAutoDisable(false);
     gestureAlreadyStarted = false;
+    }
   }
 
   public static void main(String[] args) {
@@ -1817,7 +1819,7 @@ public class InMoov extends Service {
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
     meta.addDependency("inmoov.fr", "1.0.0");
-    meta.addDependency("org.myrobotlab.inmoov", "0.4.9");
+    meta.addDependency("org.myrobotlab.inmoov", "0.5.0");
 
     // SHARING !!! - modified key / actual name begin -------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
@@ -2185,10 +2187,11 @@ public class InMoov extends Service {
     if (RightRelay1 != null) {
       RightRelay1.on();
     }
+    rest();
     if (eyelids != null) {
       eyelids.autoBlink(false);
+      eyelids.moveTo(180, 180);
     }
-    rest();
     setMute(false);
     speakBlocking(lang_shutDown);
     stopVinMoov();
