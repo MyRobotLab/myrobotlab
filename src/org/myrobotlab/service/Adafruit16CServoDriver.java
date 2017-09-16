@@ -6,6 +6,7 @@
 
 package org.myrobotlab.service;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -230,7 +231,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    *       few extra values are needed
    */
 
-  class ServoData {
+  class ServoData implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     int pin;
     SpeedControl speedcontrol;
     double velocity = -1;

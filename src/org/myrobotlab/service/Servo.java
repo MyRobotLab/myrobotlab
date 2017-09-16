@@ -258,7 +258,7 @@ public class Servo extends Service implements ServoControl {
   int autoCalibrateMin = 0;
   int autoCalibrateMax = 0;
   // this var will break a current moveToBlocking to avoid potential conflicts
-  Object moveToBlocked = new Object();
+  transient Object moveToBlocked = new Object();
   private int servoTorque;
 
   public transient static final int SERVO_EVENT_STOPPED = 1;

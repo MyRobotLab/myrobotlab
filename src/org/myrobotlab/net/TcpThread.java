@@ -305,6 +305,17 @@ public class TcpThread extends Thread {
 				msgLog.write(String.format("%s --> %s - %s\n", myService.getName(), uri, CodecUtils.toJson(msg)).getBytes());
 			}
 
+			/* also nice for debugging
+			boolean debug = true;
+			if (debug){
+			  if (msg.data != null){
+			    for (Object o : msg.data){
+			      log.info(String.format("sending %s", o.getClass().getSimpleName()));
+			    }
+			  }
+			}
+			*/
+			
 			out.writeObject(msg);
 			out.flush();
 			// MAKE NOTE !!! :
