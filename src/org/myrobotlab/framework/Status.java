@@ -201,4 +201,11 @@ public class Status implements Serializable {// extends Exception {
     return SUCCESS.equals(level);
   }
 
+  public static Status success(String detail) {
+    Status s = new Status(SUCCESS);
+    s.level = SUCCESS;
+    s.detail = detail;
+    return null;
+  }
+
 }
