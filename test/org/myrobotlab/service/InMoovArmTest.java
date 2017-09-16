@@ -21,7 +21,7 @@ public class InMoovArmTest {
   @Test
   public void testInMoovArm() throws Exception {
     // Runtime.createAndStart("webgui", "WebGui");
-    Runtime.start("gui", "GUIService");
+    Runtime.start("gui", "SwingGui");
     // testArm = (InMoovArm)Runtime.createAndStart("left", "InMoovArm");
     Python python = (Python) Runtime.start("python", "Python");
     String script = "leftArm = Runtime.start(\"leftArm\", \"InMoovArm\")\n" + "leftArm.connect(\"" + port + "\")";

@@ -172,7 +172,7 @@ public abstract class BaseObject {
     // return group.getBounds();
   }
 
-  /** Gets the canBeTraversed Flag. */
+  /* Gets the canBeTraversed Flag. */
   public boolean getCanBeTraversed() {
     return canBeTraversed;
   }
@@ -185,7 +185,7 @@ public abstract class BaseObject {
     return branchGroup;
   }
 
-  /**
+  /*
    * Obtain rotation transform.
    */
   public void getRotationTransform(Transform3D t) {
@@ -206,7 +206,7 @@ public abstract class BaseObject {
     return translationGroup;
   }
 
-  /**
+  /*
    * Obtain translation transform.
    */
   public void getTranslationTransform(Transform3D t) {
@@ -221,7 +221,7 @@ public abstract class BaseObject {
     rotationGroup.setTransform(rotation);
   }
 
-  /** Rotates (relative to current rotation) the object about Y axis. */
+  /* Rotates (relative to current rotation) the object about Y axis. */
   public void rotateY(double angle) {
     Transform3D t3d = new Transform3D();
     t3d.rotY(angle);
@@ -235,12 +235,12 @@ public abstract class BaseObject {
     group.setBounds(bounds);
   }
 
-  /** Sets the canBeTraversed Flag. */
+  /* Sets the canBeTraversed Flag. */
   public void setCanBeTraversed(boolean canbetraversed) {
     this.canBeTraversed = canbetraversed;
   }
 
-  /** Change the color while the simulation is running. */
+  /* Change the color while the simulation is running. */
   public void setColor(Color3f color) {
     material.setDiffuseColor(color);
     material.setAmbientColor(color);
@@ -251,7 +251,7 @@ public abstract class BaseObject {
     this.world = world;
   }
 
-  /** Translates (relative to current pos) the object to given position. */
+  /* Translates (relative to current pos) the object to given position. */
   public void translateTo(Vector3d t) {
     Transform3D t3d = new Transform3D();
     t3d.setTranslation(t);

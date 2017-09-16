@@ -2,9 +2,11 @@
  * Azure Translator by Microsoft - Service
  * 
  * @author Giovanni Mirulla (Papaouitai), thanks GroG and kwatters
+ * moz4r updated 10/5/17
  * 
  *         References : https://github.com/boatmeme/microsoft-translator-java-api 
  */
+
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
@@ -17,12 +19,17 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-import com.memetix.mst.detect.Detect;
-import com.memetix.mst.language.Language;
-import com.memetix.mst.translate.Translate;
+import io.github.firemaples.language.Language;
+import io.github.firemaples.translate.Translate;
+import io.github.firemaples.detect.*;
+
+
 
 public class AzureTranslator extends Service implements TextListener, TextPublisher {
 
+	
+
+	
   private static final long serialVersionUID = 1L;
 
   String toLanguage = "it";
@@ -34,7 +41,7 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     try {
 
       AzureTranslator translator = (AzureTranslator) Runtime.start("translator", "AzureTranslator");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
       log.info("Translator service instance: {}", translator);
 
     } catch (Exception e) {
@@ -61,11 +68,12 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     return detectedLanguage;
   }
 
-  public void setCredentials(String clientID, String clientSecret) {
-    Translate.setClientId(clientID);
-    Translate.setClientSecret(clientSecret);
-    Detect.setClientId(clientID);
-    Detect.setClientSecret(clientSecret);
+  public void setCredentials(String clientSecret) {
+	
+    //Translate.setKey(clientID);
+    Translate.setSubscriptionKey(clientSecret);
+    //Detect.setKey(clientID);
+    Detect.setSubscriptionKey(clientSecret);
   }
 
   public void fromLanguage(String from) {
@@ -89,7 +97,8 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     ServiceType meta = new ServiceType(AzureTranslator.class.getCanonicalName());
     meta.addDescription("interface to Azure translation services");
     meta.addCategory("translation", "cloud", "ai");
-    meta.addDependency("com.azure.translator", "0.6.2");
+    meta.addDependency("com.azure.translator", "0.8.3");
+    meta.setCloudService(true);
     return meta;
   }
 

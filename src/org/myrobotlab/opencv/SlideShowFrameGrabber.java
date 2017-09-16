@@ -10,7 +10,7 @@ public class SlideShowFrameGrabber extends ImageFileFrameGrabber {
   // delay in ms between grabs.
   public int delay = 1000;
 
-  public String directory = "c:\\training";
+  public String directory = "training";
 
   private ArrayList<File> imageFiles = new ArrayList<File>();
   private int grabCount = 0;

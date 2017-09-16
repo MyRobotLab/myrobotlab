@@ -3,7 +3,7 @@ package org.myrobotlab.service.data;
 import java.io.Serializable;
 
 /**
- * The value & id of a component. It is sent when the value changes.
+ * The value &amp; id of a component. It is sent when the value changes.
  *
  */
 public class JoystickData implements Serializable {

@@ -17,7 +17,7 @@ import org.slf4j.Logger;
  */
 public class CastValuesToDouble extends AbstractStage {
 
-  public final static Logger log = LoggerFactory.getLogger(CastValuesToDouble.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(CastValuesToDouble.class);
   private String inputField = null;
   private String outputField = null;
 

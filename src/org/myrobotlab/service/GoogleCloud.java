@@ -79,7 +79,8 @@ public class GoogleCloud extends Service {
     // add dependency if necessary
     meta.addDependency("com.google.client", "1.22.0");
     meta.addDependency("com.google.vision", "1.22.0");
-    meta.addCategory("cloud", "vision", "google");
+    meta.addCategory("cloud", "vision");
+    meta.setCloudService(true);
     return meta;
   }
 
@@ -93,6 +94,10 @@ public class GoogleCloud extends Service {
   // [START get_vision_service]
   /**
    * Connects to the Vision API using Application Default Credentials.
+   * @param credJsonFile c
+   * @return v
+   * @throws IOException e 
+   * @throws GeneralSecurityException e 
    */
   public Vision getVisionService(String credJsonFile) throws IOException, GeneralSecurityException {
 
@@ -150,6 +155,10 @@ public class GoogleCloud extends Service {
 
   /**
    * Gets up to {@code maxResults} faces for an image stored at {@code path}.
+   * @param path p
+   * @param maxResults m 
+   * @return list of face annotations
+   * @throws IOException e
    */
   public List<FaceAnnotation> detectFaces(Path path, int maxResults) throws IOException {
     byte[] data = Files.readAllBytes(path);
@@ -180,6 +189,10 @@ public class GoogleCloud extends Service {
   /**
    * Reads image {@code inputPath} and writes {@code outputPath} with
    * {@code faces} outlined.
+   * @param inputPath i
+   * @param outputPath o
+   * @param faces f
+   * @throws IOException e 
    */
   public void writeWithFaces(Path inputPath, Path outputPath, List<FaceAnnotation> faces) throws IOException {
     BufferedImage img = ImageIO.read(inputPath.toFile());
@@ -190,6 +203,8 @@ public class GoogleCloud extends Service {
   /**
    * Annotates an image {@code img} with a polygon around each face in
    * {@code faces}.
+   * @param img i 
+   * @param faces f
    */
   public void annotateWithFaces(BufferedImage img, List<FaceAnnotation> faces) {
     for (FaceAnnotation face : faces) {
@@ -214,6 +229,9 @@ public class GoogleCloud extends Service {
 
   /**
    * Prints the labels received from the Vision API.
+   * @param out o
+   * @param imagePath i 
+   * @param labels l
    */
   public void printLabels(PrintStream out, Path imagePath, List<EntityAnnotation> labels) {
     out.printf("Labels for image %s:\n", imagePath);
@@ -231,6 +249,10 @@ public class GoogleCloud extends Service {
 
   /**
    * Gets up to {@code maxResults} labels for an image stored at {@code path}.
+   * @param path p
+   * @param maxResults m 
+   * @return list of entity annotations
+   * @throws IOException e
    */
   public List<EntityAnnotation> labelImage(Path path, int maxResults) throws IOException {
     // [START construct_request]
@@ -299,7 +321,7 @@ public class GoogleCloud extends Service {
       // LoggingFactory.getInstance().setLevel(Level.INFO);
 
       GoogleCloud google = (GoogleCloud) Runtime.start("google", "GoogleCloud");
-      // Runtime.start("gui", "GUIService");
+      // Runtime.start("gui", "SwingGui");
 
       if (args.length != 2) {
         System.err.println("Usage:");

@@ -93,12 +93,12 @@ public abstract class Device extends BaseObject {
     this.owner = agent;
   }
 
-  /** Sets if update happens on each frame . */
+  /* Sets if update happens on each frame . */
   public void setUpdateOnEachFrame(boolean on) {
     updateOnEachFrame = on;
   }
 
-  /** Sets the number of update per seconds for this sensor. */
+  /* Sets the number of update per seconds for this sensor. */
   public void setUpdatePerSecond(double ups) {
     updatePerSecond = ups;
   }

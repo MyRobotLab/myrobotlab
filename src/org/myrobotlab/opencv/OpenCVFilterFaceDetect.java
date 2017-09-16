@@ -25,6 +25,7 @@
 
 package org.myrobotlab.opencv;
 
+
 /*
  import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2HSV;
  import static org.bytedeco.javacpp.opencv_imgproc.CV_HAAR_DO_CANNY_PRUNING;
@@ -51,8 +52,9 @@ import static org.bytedeco.javacpp.opencv_core.cvGetSeqElem;
 import static org.bytedeco.javacpp.opencv_core.cvLoad;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
-import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_CANNY_PRUNING;
+//import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_CANNY_PRUNING;
 import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_FIND_BIGGEST_OBJECT;
+import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_ROUGH_SEARCH;
 
 import java.util.ArrayList;
 
@@ -151,6 +153,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
       // Preload the opencv_objdetect module to work around a known bug.
       Loader.load(opencv_objdetect.class);
 
+      log.info("Starting new classifier {}", cascadeFile);
       cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
       // cascade = new
       // CvHaarClassifierCascade(cvLoad("haarcascades/haarcascade_eye.xml"));
@@ -182,8 +185,9 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
       // 3, CV_HAAR_DO_ROUGH_SEARCH | CV_HAAR_FIND_BIGGEST_OBJECT);
       // faces = cvHaarDetectObjects(grayImage, classifier_eyes, storage,
       // 1.1, 3, CV_HAAR_DO_CANNY_PRUNING);
-      CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1, CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT);
-
+      // performance change from here: https://github.com/bytedeco/javacv/issues/272
+      CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1, CV_HAAR_DO_ROUGH_SEARCH | CV_HAAR_FIND_BIGGEST_OBJECT);
+      // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1, CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT);
       if (faces != null) {
         ArrayList<Rectangle> bb = new ArrayList<Rectangle>();
         faceCnt = faces.total();
@@ -212,6 +216,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
         data.put(bb);
       }
     } else {
+      log.info("Creating and loading new classifier instance {}", cascadeFile);
       cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
     }
 
@@ -221,33 +226,33 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
     switch (state) {
       case STATE_LOST_TRACKING:
         if (faceCnt > 0) {
-          firstFaceFrame = frameIndex;
+          firstFaceFrame = vp.frameIndex;
           state = STATE_DETECTING_FACE;
           broadcastFilterState();
         }
         break;
       case STATE_DETECTING_FACE:
-        if (faceCnt > 0 && frameIndex - firstFaceFrame > minFaceFrames) {
+        if (faceCnt > 0 && vp.frameIndex - firstFaceFrame > minFaceFrames) {
           state = STATE_DETECTED_FACE;
           // broadcastFilterState();
         } else if (faceCnt == 0) {
-          firstFaceFrame = frameIndex;
+          firstFaceFrame = vp.frameIndex;
         }
         break;
       case STATE_DETECTED_FACE:
         if (faceCnt == 0) {
           state = STATE_LOSING_TRACKING;
-          firstFaceFrame = frameIndex;
+          firstFaceFrame = vp.frameIndex;
           broadcastFilterState();
         }
         break;
 
       case STATE_LOSING_TRACKING:
-        if (faceCnt == 0 && frameIndex - firstEmptyFrame > minEmptyFrames) {
+        if (faceCnt == 0 && vp.frameIndex - firstEmptyFrame > minEmptyFrames) {
           state = STATE_LOST_TRACKING;
           // broadcastFilterState();
         } else if (faceCnt > 0) {
-          firstEmptyFrame = frameIndex;
+          firstEmptyFrame = vp.frameIndex;
         }
         break;
       default:
@@ -255,7 +260,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
         break;
     }
     // face detection events
-    if (faceCnt > 0 && frameIndex - firstFaceFrame > minFaceFrames) {
+    if (faceCnt > 0 && vp.frameIndex - firstFaceFrame > minFaceFrames) {
 
     } else {
 

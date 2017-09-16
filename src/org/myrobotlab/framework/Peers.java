@@ -54,7 +54,7 @@ public class Peers {
 
     // log.info(tdna.toString());
 
-    TreeMap<String, ServiceReservation> dna = Service.buildDNA("InMoov");
+    TreeMap<String, ServiceReservation> dna = Service.buildDna("i01", "InMoov");
     log.info(dna.toString());
   }
 
@@ -124,12 +124,11 @@ public class Peers {
 
   // suggestAs will insert only (no update) - but top level inserts bottom
   // won't override !!!
-  /**
+  /*
    * @param key
    * @param actualName
    * @param type
    * @param comment
-   * @return
    */
   public boolean suggestAs(String key, String actualName, String type, String comment) {
 

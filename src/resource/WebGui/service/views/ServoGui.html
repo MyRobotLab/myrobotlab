@@ -1,46 +1,43 @@
-  <div class="col-lg-12">
+<div class="col-lg-12">
+<!--
+    <time-duration ng-model="testTime"></time-duration>
+    <input ng-model="testTime" />
 
-  <rzslider rz-slider-model="pos.value" rz-slider-options="pos.options"/>
-  <rzslider rz-slider-model="posStatus.value" style="rz-pointer-disabled" ng-show="service.isEventsEnabled" rz-slider-options="posStatus.options"/>
+-->
+    <rzslider rz-slider-model="pos.value" rz-slider-options="pos.options"/>
+    <rzslider rz-slider-model="posStatus.value" style="rz-pointer-disabled" ng-show="service.isEventsEnabled" rz-slider-options="posStatus.options"/>
+    <!-- simple dropdown -->
+    <div class="input-group">
+        
+        <!-- TODO rename to 'attach' -->
+        <!--
+        <attach ng-model="possibleController" interface="org.myrobotlab.service.interfaces.ServoController" select="setSelectedController(name)" >
+        </attach>
+        -->
+                    <attach ng-model="possibleController" ng-disabled="controllerName != null" interface="org.myrobotlab.service.interfaces.ServoController"/>
+        <span class="input-group-btn">
 
-   <!-- simple dropdown -->
-  <div class="input-group">
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-      <a href id="simple-dropdown" uib-dropdown-toggle>controller<span class="caret"></span></a>
-      <ul uib-dropdown-menu>
-        <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)"><a href>{{possibleController}}</a></li>
-      </ul>
-  </span>
-   
-   <input type="text" class="form-control" ng-model="controllerName" ng-disabled="isControllerSet"><!-- FIXME - type-ahead -->  
-
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-      <a href id="simple-dropdown" uib-dropdown-toggle>pin<span class="caret"></span></a>
-      <ul uib-dropdown-menu>
-        <li ng-repeat="newPin in pinList"><a href ng-click="setPin(newPin)">{{newPin}}</a></li>
-      </ul>
-  </span>
-
-   <input type="text" class="form-control" ng-model="pin" ng-disabled="isControllerSet"><!-- FIXME - type-ahead -->  
-     
-   <span class="input-group-btn">
-         <button class="btn btn-default" ng-show="isControllerSet"  ng-click="msg.detach(controllerName)">detach</button>
-         <button class="btn btn-default" ng-show="!isControllerSet"  ng-click="msg.attach(controllerName, pin, pos.value)">attach</button>
-   </span>
-  </div>
-
-<div class="input-group">
-  <span class="input-group-addon">speed</span>
-  <input type="text" class="form-control" ng-model="speed" uib-tooltip="fractional speed 0.0 to 1.0">
-  <span class="input-group-addon">rest</span>
-  <input type="text" class="form-control" ng-model="rest" uib-tooltip="resting position of servo">
-  <span class="input-group-addon">min</span>
-  <input type="text" class="form-control" ng-model="min" uib-tooltip="minimum allowed position of servo">
-  <span class="input-group-addon">max</span>
-  <input type="text" class="form-control" ng-model="max" uib-tooltip="maximum allowed position of servo">
-  <span class="input-group-btn">
-        <button class="btn btn-default" type="button" ng-click="update(speed, rest, min, max)">update</button>
-        <button class="btn btn-default" type="button" ng-click="sweep()" ng-show="!service.isSweeping">sweep</button>
-        <button class="btn btn-default" type="button" ng-click="msg.stop()" ng-show="service.isSweeping">stop</button>
-        <button class="btn btn-default" type="button" ng-click="msg.eventsEnabled(eventsEnabled)" ng-model="eventsEnabled" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">events</button>
-  </span>
+            <button class="btn btn-default" ng-show="!isAttached()" ng-click="attachController()">attach</button>
+            <button class="btn btn-default" ng-show="isAttached()" ng-click="msg.detach(controllerName)">detach</button>
+        </span>
+        <input type="text" class="form-control" placeholder="pin" ng-model="pin">
+        <span class="input-group-btn">
+            <button class="btn btn-default" ng-show="service.enabled" ng-click="msg.detach()">detach pin</button>
+            <button class="btn btn-default" ng-show="!service.enabled" ng-click="msg.attach(pin)">attach pin</button>
+        </span>
+    </div>
+    <div class="input-group">
+        <span class="input-group-addon">speed</span>
+        <input type="text" class="form-control" ng-model="velocity" uib-tooltip="fractional speed 0.0 to 1.0">
+        <span class="input-group-addon">rest</span>
+        <input type="text" class="form-control" ng-model="rest" uib-tooltip="resting position of servo">
+        <span class="input-group-addon">min</span>
+        <input type="text" class="form-control" ng-model="min" uib-tooltip="minimum allowed position of servo">
+        <span class="input-group-addon">max</span>
+        <input type="text" class="form-control" ng-model="max" uib-tooltip="maximum allowed position of servo">
+        <span class="input-group-btn">
+            <button class="btn btn-default" type="button" ng-click="update(velocity, rest, min, max)">update</button>
+            <button class="btn btn-default" type="button" ng-click="sweep()" ng-show="!service.isSweeping">sweep</button>
+            <button class="btn btn-default" type="button" ng-click="msg.stop()" ng-show="service.isSweeping">stop</button>
+            <button class="btn btn-default" type="button" ng-click="msg.eventsEnabled(eventsEnabled)" ng-model="eventsEnabled" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">events</button>
+        </span>

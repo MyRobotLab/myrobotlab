@@ -7,8 +7,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.myrobotlab.framework.interfaces.LoggingSink;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.interfaces.LoggingSink;
 import org.slf4j.Logger;
 
 public abstract class Codec {

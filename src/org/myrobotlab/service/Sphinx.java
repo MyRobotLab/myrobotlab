@@ -37,7 +37,6 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -59,7 +58,6 @@ import edu.cmu.sphinx.frontend.util.Microphone;
 import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
-import edu.cmu.sphinx.util.props.PropertyException;
 
 /**
  * 
@@ -216,12 +214,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
             }
 
           } else {
-            try {
-              Thread.sleep(250);
-            } catch (InterruptedException e) {
-              // TODO Auto-generated catch block
-              logException(e);
-            }
+            sleep(250);
             // invoke("unrecognizedSpeech");
             log.error("I can't hear what you said.\n");
           }
@@ -405,11 +398,11 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
    * example: Sphinx.createGrammar ("ear", "stop | go | left | right | back");
    * ear = Runtime.create("ear", "Sphinx")
    * 
-   * @param filename
+   * param filename
    *          - name of the Service which will be utilizing this grammar
    * @param grammar
    *          - grammar content
-   * @return
+   * @return true/false
    */
   public boolean createGrammar(String grammar) {
     log.info("creating grammar [{}]", grammar);
@@ -452,13 +445,12 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
     return microphone.isRecording();
   }
 
-  /**
+  /*
    * an inbound port for Speaking Services (TTS) - which suppress listening such
    * that a system will not listen when its talking, otherwise a feedback loop
    * can occur
    * 
-   * @param b
-   * @return
+   * 
    */
   public synchronized boolean onIsSpeaking(Boolean talking) {
     if (talking) {
@@ -481,7 +473,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
     return;
   }
 
-  /**
+  /*
    * FIXME - the trunk is broke - the configuration is horrible find a way to
    * make this work, despite Sphinx's chaos !
    * 
@@ -490,10 +482,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
    * 
    * check http://cmusphinx.sourceforge.net/wiki/sphinx4:swappinggrammars
    * 
-   * @param newGrammarName
    * @throws PropertyException
-   * @throws InstantiationException
-   * @throws IOException
    */
   /*
    * FIXME SPHINX IS A MESS IT CAN"T DO THIS ALTHOUGH DOCUMENTATION SAYS IT CAN
@@ -520,7 +509,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
   /**
    * method to suppress recognition listening events This is important when
-   * Sphinx is listening --> then Speaking, typically you don't want Sphinx to
+   * Sphinx is listening --&gt; then Speaking, typically you don't want Sphinx to
    * listen to its own speech, it causes a feedback loop and with Sphinx not
    * really very accurate, it leads to weirdness -- additionally it does not
    * recreate the speech processor - so its not as heavy handed
@@ -546,7 +535,6 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
   /**
    * The main output for this service.
    * 
-   * @param word
    * @return the word
    */
   @Override

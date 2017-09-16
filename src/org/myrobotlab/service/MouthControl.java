@@ -21,9 +21,9 @@ public class MouthControl extends Service {
   public final static Logger log = LoggerFactory.getLogger(MouthControl.class.getCanonicalName());
   public int mouthClosedPos = 20;
   public int mouthOpenedPos = 4;
-  public int delaytime = 100;
-  public int delaytimestop = 200;
-  public int delaytimeletter = 60;
+  public int delaytime = 75;
+  public int delaytimestop = 150;
+  public int delaytimeletter = 45;
   transient Servo jaw;
   transient Arduino arduino;
   transient SpeechSynthesis mouth;
@@ -35,7 +35,8 @@ public class MouthControl extends Service {
     arduino = (Arduino) createPeer("arduino");
     mouth = (SpeechSynthesis) createPeer("mouth");
     
-    
+    jaw.enableAutoEnable(autoAttach);
+    jaw.enableAutoDisable(autoAttach);
     // TODO: mouth should probably implement speech synthesis.
     // in a way of speaking, one day, people may be able to read the lips
     // of the inmoov.. so you're synthesising speech in a mechanical way.
@@ -60,8 +61,8 @@ public class MouthControl extends Service {
       return false;
     }
 
-    // arduino.servoAttach(jaw);
-    arduino.servoAttach(jaw, 26);
+    jaw.attach(arduino, 26);
+    
     return true;
   }
 
@@ -75,6 +76,8 @@ public class MouthControl extends Service {
 
   public void setJaw(Servo jaw) {
     this.jaw = jaw;
+    jaw.enableAutoEnable(autoAttach);
+    jaw.enableAutoDisable(autoAttach);
   }
 
   public SpeechSynthesis getMouth() {
@@ -101,14 +104,12 @@ public class MouthControl extends Service {
 
   public synchronized void onStartSpeaking(String text) {
     log.info("move moving to :" + text);
-    if (jaw != null) { // mouthServo.moveTo(Mouthopen);
-      if (autoAttach) {
-        if (!jaw.isAttached()) {
-          // attach the jaw if it's not attached.
-          jaw.attach();
-        }
+      if (jaw == null) {
+        return;
       }
-
+      if (!jaw.isEnabled() && !autoAttach) {
+        log.info("{} not enabled", jaw.getName());
+      }
       boolean ison = false;
       String testword;
       String[] a = text.split(" ");
@@ -131,7 +132,8 @@ public class MouthControl extends Service {
 
         for (int x = 0; x < c.length; x++) {
           char s = c[x];
-          if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y') && !ison) {
+          // russian а ... <> a
+          if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y' || s == 'é' || s == 'è' || s == 'û' || s == 'и' || s == 'й' || s == 'У' || s == 'я' || s == 'э' || s == 'Ы' || s == 'ё' || s == 'ю' || s == 'е' || s == 'а' || s == 'о') && !ison) {
             jaw.moveTo(mouthOpenedPos); // # move the servo to the
             // open spot
             ison = true;
@@ -150,28 +152,14 @@ public class MouthControl extends Service {
         sleep(80);
       }
 
-    } else {
-      log.info("need to attach first");
-    }
 
-    // We're done annimating, lets detach the jaw while not in use.
-    if (autoAttach && jaw != null) {
-      if (jaw.isAttached()) {
-        // attach the jaw if it's not attached.
-        jaw.detach();
-      }
-    }
   }
 
   public synchronized void onEndSpeaking(String utterance) {
     log.info("Mouth control recognized end speaking.");
     // TODO: consider a jaw move to closed position
-    if (jaw != null && jaw.isAttached()) {
-      jaw.moveTo(mouthClosedPos);
-    }
-    // else {
-    // log.info("Not closing my mouth?");
-    // }
+    //this will only work if the mouth animation ends before it end playing the voice.
+    jaw.moveTo(mouthClosedPos);
   }
 
   public void setdelays(Integer d1, Integer d2, Integer d3) {
@@ -185,11 +173,12 @@ public class MouthControl extends Service {
     mouthClosedPos = closed;
     mouthOpenedPos = opened;
 
-    if (closed < opened) {
-      jaw.setMinMax(closed, opened);
-    } else {
-      jaw.setMinMax(opened, closed);
-    }
+   // jaw.setMinMax(closed, opened);
+//    if (closed < opened) {
+//      jaw.map(closed, opened, closed, opened);
+//    } else {
+//      jaw.map(opened, closed, opened, closed);
+//    }
   }
 
   @Override
@@ -216,7 +205,7 @@ public class MouthControl extends Service {
 
     meta.addPeer("jaw", "Servo", "shared Jaw servo instance");
     meta.addPeer("arduino", "Arduino", "shared Arduino instance");
-    meta.addPeer("mouth", "AcapelaSpeech", "shared Speech instance");
+    meta.addPeer("mouth", "MarySpeech", "shared Speech instance");
 
     return meta;
   }
@@ -228,7 +217,7 @@ public class MouthControl extends Service {
       MouthControl MouthControl = new MouthControl("MouthControl");
       MouthControl.startService();
 
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
 
       MouthControl.autoAttach = true;
       MouthControl.onStartSpeaking("test on");
@@ -237,4 +226,10 @@ public class MouthControl extends Service {
     }
   }
 
+  public void enableAutoAttach(boolean enable) {
+    autoAttach = enable;
+    jaw.enableAutoEnable(enable);
+    jaw.enableAutoDisable(enable);
+
+  }
 }

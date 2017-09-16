@@ -1,39 +1,31 @@
-angular.module('mrlapp.service.ServoGui', [])
-.controller('ServoGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
+angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
     $log.info('ServoGuiCtrl');
     var _self = this;
     var msg = this.msg;
-    
     // init
-    //$scope.controller = '';
-    $scope.controllerName = '';
-    $scope.controllers = [];
-    $scope.isControllerSet = '';
+    $scope.controllerName = null ;
     $scope.pinsList = [];
-    $scope.pin = '';
+    $scope.pin = null ;
     $scope.min = 0;
     $scope.max = 180;
-    $scope.angle = 0;
-    
+    $scope.possibleController = null;
+    $scope.testTime = 300;
+    // TODO - should be able to build this based on
+    // current selection of controller
     $scope.pinList = [];
-    
-    //control 
-    //Slider config with callbacks
+    //slider config with callbacks
     $scope.pos = {
         value: 0,
         options: {
             floor: 0,
             ceil: 180,
-            onStart: function() {
-            },
+            onStart: function() {},
             onChange: function() {
                 msg.send('moveTo', $scope.pos.value);
             },
-            onEnd: function() {
-            }
+            onEnd: function() {}
         }
     };
-
     //status 
     //Slider config with callbacks
     $scope.posStatus = {
@@ -41,35 +33,27 @@ angular.module('mrlapp.service.ServoGui', [])
         options: {
             floor: 0,
             ceil: 180,
-            getSelectionBarColor: "black",
+            // getSelectionBarColor: "black",
             readOnly: true,
-            onStart: function() {
+            onStart: function() {},
+            onChange: function() {// msg.send('moveTo', $scope.pos.value);
             },
-            onChange: function() {
-                // msg.send('moveTo', $scope.pos.value);
-            },
-            onEnd: function() {
-            }
+            onEnd: function() {}
         }
     };
-    
-    
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service;
-        if (service.targetPos == null){
+        if (service.targetPos == null ) {
             $scope.pos.value = service.rest;
             $scope.posStatus.value = service.rest;
         } else {
             $scope.pos.value = service.targetPos;
             $scope.posStatus.value = service.targetPos;
-        }     
-        
-        
+        }
+        $scope.possibleController = service.controllerName;
         $scope.controllerName = service.controllerName;
-        $scope.speed = service.speed;
-        $scope.isAttached = service.isAttached;
-        $scope.isControllerSet = service.isControllerSet;
+        $scope.velocity = service.velocity;
         $scope.pin = service.pin;
         $scope.rest = service.rest;
         $scope.min = service.mapper.minOutput;
@@ -77,9 +61,8 @@ angular.module('mrlapp.service.ServoGui', [])
         $scope.pinList = service.pinList;
     }
     ;
-    
+    // initialize our state
     _self.updateState($scope.service);
-    
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0];
         switch (inMsg.method) {
@@ -87,12 +70,11 @@ angular.module('mrlapp.service.ServoGui', [])
             _self.updateState(data);
             $scope.$apply();
             break;
-        // servo event in the past 
-        // meant feedback from MRLComm.c
-        // but perhaps its come to mean
-        // feedback from the service.moveTo
+            // servo event in the past 
+            // meant feedback from MRLComm.c
+            // but perhaps its come to mean
+            // feedback from the service.moveTo
         case 'onServoEvent':
-            //$scope.pin.value = data;
             $scope.posStatus.value = data;
             $scope.$apply();
             break;
@@ -106,34 +88,30 @@ angular.module('mrlapp.service.ServoGui', [])
             $scope.status = data;
             $scope.$apply();
             break;
-        case 'onServiceNamesFromInterface':
-            $scope.controllers = data;
-            $scope.$apply();
-            break;
         default:
             $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method);
             break;
         }
         ;
-    
     }
     ;
-    
-    $scope.update = function(speed, rest, min, max) {
-        msg.send("setSpeed", speed);
+    $scope.getSelectionBarColor = function(){
+        return "black";
+    };
+    $scope.isAttached = function() {
+        return $scope.service.controllerName != null ;
+    }
+    ;
+    $scope.update = function(velocity, rest, min, max) {
+        msg.send("setVelocity", velocity);
         msg.send("setRest", rest);
         msg.send("setMinMax", min, max);
     }
     ;
-    
-    $scope.setControllerName = function(name) {
-        $scope.controllerName = name;
-    }
-    
     $scope.setPin = function(inPin) {
         $scope.pin = inPin;
     }
-
+    ;
     // regrettably the onMethodMap dynamic
     // generation of methods failed on this overloaded
     // sweep method - there are several overloads in the
@@ -142,13 +120,22 @@ angular.module('mrlapp.service.ServoGui', [])
     $scope.sweep = function() {
         msg.send('sweep');
     }
-
+    $scope.setSelectedController = function(name) {
+        $log.info('setSelectedController - ' + name);
+        $scope.selectedController = name;
+        $scope.controllerName = name;
+    }
+    $scope.attachController = function() {
+        $log.info("attachController");
+        msg.send('attach', $scope.possibleController, $scope.pin, $scope.rest);
+        // msg.attach($scope.controllerName, $scope.pin, 90);
+    }
     msg.subscribe("publishServoEvent");
     msg.subscribe(this);
-    
-    var runtimeName = mrl.getRuntime().name;
-    mrl.subscribe(runtimeName, 'getServiceNamesFromInterface');
-    mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface');
-    mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.ServoController');
+    // no longer needed - interfaces now travel with a service
+    // var runtimeName = mrl.getRuntime().name;
+    // mrl.subscribe(runtimeName, 'getServiceNamesFromInterface');
+    // mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface');
+    // mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.ServoController');
 }
 ]);

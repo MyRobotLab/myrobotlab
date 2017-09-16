@@ -55,7 +55,7 @@ import java.io.OutputStream;
  * [toxi 030930]
  * - target pixel buffer doesn't loose alpha channel anymore
  *   with every blitting operation alpha values are increased now
- * - resizing by large factors (>250%) doesn't yield any rounding errors
+ * - resizing by large factors (&gt;250%) doesn't yield any rounding errors
  *   anymore, changed to 16bit precision (=65536% max or 0.000015% min)
  * - replicate() is now only using REPLACE mode to avoid semantic problems
  * - added blend() methods to use replicate()'s functionality,
@@ -175,7 +175,7 @@ public class PImage implements PConstants, Cloneable {
       0, 3, 0, 0, 0, 3, 0, 0, 0, 122, 1, 6, 0, 3, 0, 0, 0, 1, 0, 2, 0, 0, 1, 17, 0, 4, 0, 0, 0, 1, 0, 0, 3, 0, 1, 21, 0, 3, 0, 0, 0, 1, 0, 3, 0, 0, 1, 22, 0, 3, 0, 0, 0, 1, 0, 0,
       0, 0, 1, 23, 0, 4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 8, 0, 8 };
 
-  /**
+  /*
    * Blend a two colors based on a particular mode.
    */
   static public int blend(int c1, int c2, int mode) {
@@ -285,7 +285,7 @@ public class PImage implements PConstants, Cloneable {
 
   // GET/SET PIXELS
 
-  /**
+  /*
    * [toxi 030902] Creates a Targa32 formatted byte sequence of specified pixel
    * buffer
    *
@@ -421,7 +421,7 @@ public class PImage implements PConstants, Cloneable {
 
   // ALPHA CHANNEL
 
-  /**
+  /*
    * Create a new RGB (alpha ignored) image of a specific size. All pixels are
    * set to zero, meaning black, but since the alpha is zero, it will be
    * transparent.
@@ -447,7 +447,7 @@ public class PImage implements PConstants, Cloneable {
     this.cache = null;
   }
 
-  /**
+  /*
    * Construct a new PImage from a java.awt.Image
    *
    * this constructor assumes that you've done the work of making sure a
@@ -469,7 +469,7 @@ public class PImage implements PConstants, Cloneable {
     cache = null;
   }
 
-  /**
+  /*
    * Copies and blends 1 pixel with MODE to pixel in this image.
    */
   public void blend(int sx, int sy, int dx, int dy, int mode) {
@@ -478,7 +478,7 @@ public class PImage implements PConstants, Cloneable {
     }
   }
 
-  /**
+  /*
    * Blends one area of this image to another area
    */
   public void blend(int sx1, int sy1, int sx2, int sy2, int dx1, int dy1, int dx2, int dy2, int mode) {
@@ -489,7 +489,7 @@ public class PImage implements PConstants, Cloneable {
 
   // REPLICATING & BLENDING (AREAS) OF PIXELS
 
-  /**
+  /*
    * Copies and blends 1 pixel with MODE to pixel in another image
    */
   public void blend(PImage src, int sx, int sy, int dx, int dy, int mode) {
@@ -498,7 +498,7 @@ public class PImage implements PConstants, Cloneable {
     }
   }
 
-  /**
+  /*
    * Copies area of one image into another PImage object
    */
   public void blend(PImage src, int sx1, int sy1, int sx2, int sy2, int dx1, int dy1, int dx2, int dy2, int mode) {
@@ -864,14 +864,14 @@ public class PImage implements PConstants, Cloneable {
     return c;
   }
 
-  /**
+  /*
    * Copy things from one area of this image to another area in the same image.
    */
   public void copy(int sx1, int sy1, int sx2, int sy2, int dx1, int dy1, int dx2, int dy2) {
     copy(this, sx1, sy1, sx2, sy2, dx1, dy1, dx2, dy2);
   }
 
-  /**
+  /*
    * Copies area of one image into another PImage object.
    */
   public void copy(PImage src, int sx1, int sy1, int sx2, int sy2, int dx1, int dy1, int dx2, int dy2) {
@@ -894,7 +894,7 @@ public class PImage implements PConstants, Cloneable {
     }
   }
 
-  /**
+  /*
    * Method to apply a variety of basic filters to this image.
    * <P>
    * <UL>
@@ -958,7 +958,7 @@ public class PImage implements PConstants, Cloneable {
 
   // COPYING IMAGE DATA
 
-  /**
+  /*
    * Method to apply a variety of basic filters to this image. These filters all
    * take a parameter.
    * <P>
@@ -1057,7 +1057,7 @@ public class PImage implements PConstants, Cloneable {
     v2 = low((srcYOffset >> PRECISIONB) + 1, ih1) * iw;
   }
 
-  /**
+  /*
    * Returns a copy of this PImage. Equivalent to get(0, 0, width, height).
    */
   public PImage get() {
@@ -1072,7 +1072,7 @@ public class PImage implements PConstants, Cloneable {
 
   // internal blending methods
 
-  /**
+  /*
    * Returns an ARGB "color" type (a packed 32 bit int with the color. If the
    * coordinate is outside the image, zero is returned (black, but completely
    * transparent).
@@ -1105,7 +1105,7 @@ public class PImage implements PConstants, Cloneable {
     return 0;
   }
 
-  /**
+  /*
    * Grab a subsection of a PImage, and copy it into a fresh PImage. This honors
    * imageMode() for the coordinates.
    */
@@ -1152,7 +1152,7 @@ public class PImage implements PConstants, Cloneable {
     return image;
   }
 
-  /**
+  /*
    * mode is one of CORNERS or CORNER, because the others are just too weird for
    * the other functions
    */
@@ -1168,7 +1168,7 @@ public class PImage implements PConstants, Cloneable {
 
   // BLEND MODE IMPLEMENTIONS
 
-  /**
+  /*
    * Function to be used by subclasses to setup their own bidness.
    */
   public void init(int width, int height, int format) { // ignore
@@ -1220,7 +1220,7 @@ public class PImage implements PConstants, Cloneable {
   public void loadPixels() { // ignore
   }
 
-  /**
+  /*
    * Set alpha channel for an image. Black colors in the source image will make
    * the destination image completely transparent, and white will make things
    * fully opaque. Gray values will be in-between steps.
@@ -1242,7 +1242,7 @@ public class PImage implements PConstants, Cloneable {
     format = ARGB;
   }
 
-  /**
+  /*
    * Set alpha channel for an image using another image as the source.
    */
   public void mask(PImage alpha) {
@@ -1284,7 +1284,7 @@ public class PImage implements PConstants, Cloneable {
     }
   }
 
-  /**
+  /*
    * Silently ignores if the coordinate is outside the image.
    */
   public void set(int x, int y, int c) {
@@ -1350,7 +1350,7 @@ public class PImage implements PConstants, Cloneable {
     updatePixels(0, 0, width, height);
   }
 
-  /**
+  /*
    * Note that when using imageMode(CORNERS), the x2 and y2 positions are
    * non-inclusive.
    */

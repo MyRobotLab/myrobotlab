@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 
 import org.myrobotlab.framework.Service;
@@ -67,9 +68,9 @@ public class TesseractOcr extends Service {
     // }
   }
 
-  public String OCR(SerializableImage image) {
+  public String OCR(BufferedImage image) {
     try {
-      String hh = Tesseract.getInstance().doOCR(image.getImage());
+      String hh = Tesseract.getInstance().doOCR(image);
       // System.out.println(hh);
       log.info("Read: " + hh);
       return hh;
@@ -77,7 +78,10 @@ public class TesseractOcr extends Service {
       e.printStackTrace();
     }
     return null;
+  }
 
+  public String OCR(SerializableImage image) {
+    return OCR(image.getImage());
   }
 
   @Override
@@ -104,7 +108,7 @@ public class TesseractOcr extends Service {
     ServiceType meta = new ServiceType(TesseractOcr.class.getCanonicalName());
     meta.addDescription("Optical character recognition - the ability to read");
     meta.addCategory("intelligence");
-    meta.addDependency("net.sourceforge.tess4j", "1.1");
+    meta.addDependency("net.sourceforge.tess4j", "3.4.0");
     meta.addDependency("com.sun.jna", "3.2.2");
     return meta;
   }

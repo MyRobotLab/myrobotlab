@@ -40,7 +40,7 @@ public class MRLSoundAudioDevice extends JavaSoundAudioDevice {
    * A value typically between 0.0 to 1.0. (Values larger than 1.0 may clip the
    * original signal)
    * 
-   * @param gain
+   * @param gain - the gain to apply.  This is multiplied by the underlying audio signal.
    */
   public void setGain(float gain) {
     this.gain = gain;

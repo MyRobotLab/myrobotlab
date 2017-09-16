@@ -1,45 +1,17 @@
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.SerializableImage;
 
-public abstract class VideoSink extends Service {
+public interface VideoSink extends ServiceInterface {
+  
+  public boolean attach(VideoSource vs);
+  
+  public boolean attachVideoSource(String videoSource);
 
-  private static final long serialVersionUID = 1L;
+  public boolean detach(VideoSource vs);
 
-  public VideoSink(String n) {
-    super(n);
-  }
-
-  public boolean attach(VideoSource vs) {
-    subscribe(vs.getName(), "publishDisplay");
-    return true;
-  }
-
-  public boolean attachVideoSource(String videoSource) {
-    ServiceInterface si = org.myrobotlab.service.Runtime.getService(videoSource);
-    if (si instanceof VideoSource) {
-      return attach((VideoSource) si);
-    }
-
-    error("%s is not a VideoSource", videoSource);
-    return false;
-  }
-
-  public boolean detach(VideoSource vs) {
-    unsubscribe(vs.getName(), "publishDisplay");
-    return true;
-  }
-
-  public boolean detachVideoSource(String videoSource) {
-    ServiceInterface si = org.myrobotlab.service.Runtime.getService(videoSource);
-    if (si instanceof VideoSource) {
-      return detach((VideoSource) si);
-    }
-
-    error("%s is not a VideoSource", videoSource);
-    return false;
-  }
+  public boolean detachVideoSource(String videoSource);
 
   public abstract void onDisplay(SerializableImage img);
 }

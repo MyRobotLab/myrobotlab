@@ -42,7 +42,7 @@ public class FindAndReplaceDemo extends JFrame implements ActionListener {
   private JCheckBox matchCaseCB;
 
   public static void main(String[] args) {
-    // Start all Swing applications on the EDT.
+    // Start all SwingGui applications on the EDT.
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {

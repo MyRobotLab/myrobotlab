@@ -1,42 +1,50 @@
 package org.myrobotlab.framework;
 
+import java.util.Timer;
 import java.util.TimerTask;
 
 public class Task extends TimerTask {
 
+  String taskName;
   Message msg;
   int interval = 0;
   Service myService;
 
-  public Task(int interval, String name, String method) {
-    this(interval, name, method, (Object[]) null);
-  }
-
-  public Task(int interval, String name, String method, Object... data) {
-    this.msg = myService.createMessage(name, method, data);
-    this.interval = interval;
-  }
-
-  public Task(Service myService, String toService, String method, Object... params) {
+  // FIXME upgrade to ScheduledExecutorService
+  // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
+  
+  public Task(Service myService, String taskName, int interval, Message msg) {
     this.myService = myService;
-    msg = myService.createMessage(toService, method, params);
+    this.taskName = taskName;
+    this.interval = interval;
+    this.msg = msg;
   }
-
+ 
   public Task(Task s) {
     this.msg = s.msg;
     this.interval = s.interval;
+    this.taskName = s.taskName;
+    this.myService = s.myService;
   }
 
   @Override
   public void run() {
-
+    // info("task %s running - next run %s", taskName,
+    // MathUtils.msToString(interval));
     myService.getInbox().add(msg);
 
     if (interval > 0) {
       Task t = new Task(this);
       // clear history list - becomes "new" message
       t.msg.historyList.clear();
-      myService.timer.schedule(t, interval);
+      Timer timer = myService.tasks.get(taskName);
+      if (timer != null) {
+        // timer = new Timer(String.format("%s.timer", getName()));
+        try {
+          timer.schedule(t, interval);
+        } catch (IllegalStateException e) {
+        }
+      }
     }
   }
 

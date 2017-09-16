@@ -27,10 +27,12 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.List;
 
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.NeoPixel;
 
-public interface NeoPixelController extends DeviceController {
-    
+public interface NeoPixelController extends Attachable {
+  
+  public void neoPixelAttach(NeoPixel neopixel, int pin, int numberOfPixels);
   public void neoPixelWriteMatrix(NeoPixel neopixel, List<Integer> msg);
   public void neoPixelSetAnimation(NeoPixel neopixel, int animation, int red, int green, int blue, int speed);
   

@@ -58,13 +58,13 @@ public class SensorMatrix extends SensorData {
    *          x coord in range 0..1
    * @param yf
    *          y coord in range 0..1
-   * @return
+   * @return float
    */
   public float get(float xf, float yf) {
     return array[(int) (xf * width) + (int) (yf * height) * width];
   }
 
-  /** Access matrix element. */
+  /* Access matrix element. */
   public float get(int x, int y) {
     return array[x + y * width];
   }
@@ -73,12 +73,12 @@ public class SensorMatrix extends SensorData {
     return array;
   }
 
-  /** Return the matrix height in pixels. */
+  /* Return the matrix height in pixels. */
   public int getHeight() {
     return height;
   }
 
-  /** Return the matrix width in pixels. */
+  /* Return the matrix width in pixels. */
   public int getWidth() {
     return width;
   }

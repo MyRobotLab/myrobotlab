@@ -83,7 +83,7 @@ public class Document {
   /**
    * Return a set of all fields on a given document. This is unordered.
    * 
-   * @return
+   * @return a list of all field names that have been set of the document.
    */
   public Set<String> getFields() {
     // TODO Auto-generated method stub

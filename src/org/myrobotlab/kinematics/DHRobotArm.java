@@ -4,15 +4,18 @@ import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.InverseKinematics3D;
+import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
 
-public class DHRobotArm {
+public class DHRobotArm{
 
   transient public final static Logger log = LoggerFactory.getLogger(DHRobotArm.class);
 
   private int maxIterations = 1000;
 
   private ArrayList<DHLink> links;
+  
+  public String name;
 
   // for debugging ..
   public transient InverseKinematics3D ik3D = null;
@@ -22,6 +25,14 @@ public class DHRobotArm {
     links = new ArrayList<DHLink>();
   }
 
+  public DHRobotArm(DHRobotArm copy) {
+    super();
+    name = copy.name;
+    links = new ArrayList<DHLink>();
+    for (DHLink link:copy.links) {
+      links.add(new DHLink(link));
+    }
+  }
   public ArrayList<DHLink> addLink(DHLink link) {
     links.add(link);
     return links;
@@ -30,7 +41,7 @@ public class DHRobotArm {
   public Matrix getJInverse() {
     // something small.
     // double delta = 0.000001;
-    double delta = 0.001;
+    double delta = 0.0001;
     int numLinks = this.getNumLinks();
     // we need a jacobian matrix that is 6 x numLinks
     // for now we'll only deal with x,y,z we can add rotation later. so only 3
@@ -66,6 +77,9 @@ public class DHRobotArm {
     // deltaTheta[i] to delta[x,y,z]
     Matrix jInverse = jacobian.pseudoInverse();
     // log.debug("Pseudo inverse Jacobian(p)approx\n" + jInverse);
+    if (jInverse == null){
+      jInverse = new Matrix(3, numLinks);
+    }
     return jInverse;
   }
 
@@ -86,7 +100,7 @@ public class DHRobotArm {
     return links.size();
   }
 
-  public Point getJointPosition(int index) {
+  public synchronized Point getJointPosition(int index) {
     if (index > this.links.size() || index < 0) {
       // TODO: bound check
       return null;
@@ -131,12 +145,11 @@ public class DHRobotArm {
   }
 
   /**
-   * Return the x,y,z of the palm. roll,pitc, and yaw are not returned/computed
+   * @param lastDHLink the index of the link that you want the global position at.
+   * @return the x,y,z of the palm. roll,pitc, and yaw are not returned/computed
    * with this function
-   * 
-   * @return
    */
-  public Point getPalmPosition() {
+  public Point getPalmPosition(String lastDHLink) {
     // TODO Auto-generated method stub
     // return the position of the end effector wrt the base frame
     Matrix m = new Matrix(4, 4);
@@ -157,12 +170,15 @@ public class DHRobotArm {
     // log.debug("-------------------------");
     // log.debug(m);
     // TODO: validate this approach..
-    for (DHLink link : links) {
-      Matrix s = link.resolveMatrix();
+    for (int i = 0; i < links.size(); i++){
+      Matrix s = links.get(i).resolveMatrix();
       // log.debug(s);
       m = m.multiply(s);
       // log.debug("-------------------------");
       // log.debug(m);
+      if (links.get(i).getName()!= null && links.get(i).getName().equals(lastDHLink)) {
+        break;
+      }
     }
     // now m should be the total translation for the arm
     // given the arms current position
@@ -172,21 +188,36 @@ public class DHRobotArm {
     // double ws = m.elements[3][3];
     // log.debug("World Scale : " + ws);
     // TODO: pass /compute the roll pitch and yaw ..
-    
     double pitch = Math.atan2(-1.0*(m.elements[2][0]), Math.sqrt(m.elements[0][0]*m.elements[0][0] + m.elements[1][0]*m.elements[1][0]));
     double roll = 0;
     double yaw = 0;
     if (pitch == Math.PI/2) {
-      yaw = Math.atan2(m.elements[0][1], m.elements[1][1]);
+      roll =  Math.atan2(m.elements[0][1], m.elements[1][1]);
     }
     else if (pitch == -1 * Math.PI/2) {
-      yaw = Math.atan2(m.elements[0][1], m.elements[1][1]) *-1;
+      roll = Math.atan2(m.elements[0][1], m.elements[1][1]) *-1;
     }
     else {
-      roll = Math.atan2(m.elements[0][1], m.elements[2][2]);
-      yaw = Math.atan2(m.elements[1][0], m.elements[0][0]);
+      roll = Math.atan2(m.elements[2][1]/Math.cos(pitch), m.elements[2][2])/Math.cos(pitch);
+      yaw = Math.atan2(m.elements[1][0]/Math.cos(pitch), m.elements[0][0]/Math.cos(pitch)) - Math.PI/2;
     }
+//    double pitch=0, roll=0, yaw=0; //attitude, bank, heading
+//    if (m.elements[1][0] > 0.998) {
+//      yaw = Math.atan2(m.elements[0][2], m.elements[2][2]);
+//      pitch = Math.PI/2;
+//    }
+//    else if (m.elements[1][0] < -0.998) {
+//      yaw = Math.atan2(m.elements[0][2], m.elements[2][2]);
+//      pitch = -Math.PI/2;
+//    }
+//    else {
+//      yaw = Math.atan2(-m.elements[2][0], m.elements[0][0]);
+//      roll = Math.atan2(-m.elements[1][2], m.elements[1][1]);
+//      pitch = Math.asin(m.elements[1][0]);
+//    }
     Point palm = new Point(x, y, z, pitch * 180 / Math.PI, roll * 180 / Math.PI, yaw * 180 / Math.PI);
+    
+
     return palm;
   }
 
@@ -202,7 +233,7 @@ public class DHRobotArm {
     // we know where we are.. we know where we want to go.
     int numSteps = 0;
     double iterStep = 0.25;
-    double errorThreshold = 0.5;
+    double errorThreshold = 0.05;
     // what's the current point
     while (true) {
       numSteps++;
@@ -263,4 +294,42 @@ public class DHRobotArm {
     ik3D = ik3d;
   }
 
+  public boolean armMovementEnds() {
+  	for (DHLink link: links) {
+  		if (link.getState() != Servo.SERVO_EVENT_STOPPED) {
+  			return false;
+  		}
+  	}
+  	return true;
+  }
+  
+  public double[][] createJointPositionMap() {
+
+    double[][] jointPositionMap = new double[getNumLinks() + 1][3];
+
+    // first position is the origin... second is the end of the first link
+    jointPositionMap[0][0] = 0;
+    jointPositionMap[0][1] = 0;
+    jointPositionMap[0][2] = 0;
+
+    for (int i = 1; i <= getNumLinks(); i++) {
+      Point jp = getJointPosition(i - 1);
+      jointPositionMap[i][0] = jp.getX();
+      jointPositionMap[i][1] = jp.getY();
+      jointPositionMap[i][2] = jp.getZ();
+    }
+    return jointPositionMap;
+  }
+
+  public Point getVector() {
+    Point lastJoint = getJointPosition(links.size()-1);
+    Point previousJoint = getJointPosition(links.size()-2);
+    Point retval = lastJoint.subtract(previousJoint);
+    
+    return retval;
+  }
+
+  public Point getPalmPosition() {
+    return getPalmPosition(null);
+  }
 }

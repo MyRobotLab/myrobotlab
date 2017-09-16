@@ -77,7 +77,7 @@ public class Simbad extends JFrame implements ActionListener {
     return simbadInstance;
   }
 
-  /** The simbad main. Process command line arguments and launch simbad. */
+  /* The simbad main. Process command line arguments and launch simbad. */
   public static void main(String[] args) {
     // process options
     boolean backgroundMode = false;
@@ -99,7 +99,7 @@ public class Simbad extends JFrame implements ActionListener {
     new Simbad(new org.myrobotlab.mapper.demo.BaseDemo(), backgroundMode);
   }
 
-  /** Construct Simbad application with the given environement description */
+  /* Construct Simbad application with the given environement description */
   public Simbad(EnvironmentDescription ed, boolean backgroundMode) {
     super("Simbad  - version " + version);
     simbadInstance = this;
@@ -141,7 +141,7 @@ public class Simbad extends JFrame implements ActionListener {
       return null;
   }
 
-  /** Create the main GUIService. Only called once. */
+  /** Create the main SwingGui. Only called once. */
   private void createGUI() {
     desktop.setFocusable(true);
     getContentPane().add(desktop);
@@ -151,7 +151,7 @@ public class Simbad extends JFrame implements ActionListener {
   }
 
   /**
-   * Creates the windows as Swing InternalFrames
+   * Creates the windows as SwingGui InternalFrames
    */
   private void createInternalFrames() {
     worldWindow = new WorldWindow(world);

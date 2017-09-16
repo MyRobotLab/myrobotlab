@@ -6,8 +6,10 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class EddieControlBoardTest {
 
   EddieControlBoard ecb = (EddieControlBoard) Runtime.start("ecb", "EddieControlBoard");
@@ -211,7 +213,7 @@ public class EddieControlBoardTest {
   @Test
   public final void test() throws IOException {
 
-    // Runtime.start("gui", "GUIService");
+    // Runtime.start("gui", "SwingGui");
     /*
      * need virtual Arduino Serial uart = ecb.serial.createVirtualUART();
      * uart.write("011 011 011 004 004 004 004 CBB\r"); uart.write(

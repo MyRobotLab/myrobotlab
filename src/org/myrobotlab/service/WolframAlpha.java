@@ -37,12 +37,12 @@ public class WolframAlpha extends Service {
       WolframAlpha template = new WolframAlpha("wolfram");
       template.startService();
 
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
     } catch (Exception e) {
       Logging.logError(e);
     }
     /*
-     * GUIService gui = new GUIService("gui"); gui.startService();
+     * SwingGui gui = new SwingGui("gui"); gui.startService();
      */
   }
 
@@ -107,11 +107,8 @@ public class WolframAlpha extends Service {
     AppID = id;
   }
 
-  /**
+  /*
    * Query Wolfram Alpha for an answer
-   * 
-   * @param query
-   * @return
    */
   public String wolframAlpha(String query) {
     return wolframAlpha(query, false);
@@ -207,6 +204,7 @@ public class WolframAlpha extends Service {
     // TODO http should be removed as a dependency and added as a Peer
     meta.addDependency("com.wolfram.alpha", "1.1");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    meta.setCloudService(true);
     return meta;
   }
 

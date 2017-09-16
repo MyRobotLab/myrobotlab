@@ -1,5 +1,14 @@
 package org.myrobotlab.boofcv;
 
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
+import org.openkinect.freenect.Context;
+import org.openkinect.freenect.Device;
+import org.openkinect.freenect.Freenect;
+import org.openkinect.freenect.Resolution;
+
 /*
  * Copyright (c) 2011-2014, Peter Abeles. All Rights Reserved.
  *
@@ -27,13 +36,6 @@ import boofcv.openkinect.UtilOpenKinect;
 import boofcv.struct.image.GrayU16;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.Planar;
-import org.openkinect.freenect.Context;
-import org.openkinect.freenect.Device;
-import org.openkinect.freenect.Freenect;
-import org.openkinect.freenect.Resolution;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
 
 /**
  * @author Peter Abeles

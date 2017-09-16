@@ -9,6 +9,7 @@ import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
+
 import com.github.sarxos.webcam.Webcam;
 
 public class SarxosFrameGrabber extends FrameGrabber {

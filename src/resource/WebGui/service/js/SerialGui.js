@@ -102,16 +102,12 @@ angular.module('mrlapp.service.SerialGui', [])
     }
     ;
     
-    
-    // FIXME - need a button for actively "monitoring" which adds or removes subscriptions !!!!
-    // mrl.subscribe($scope.service.name, 'publishRX'); testing ...
-    // mrl.subscribe($scope.service.name, 'publishTX');
     mrl.subscribe($scope.service.name, 'publishState');
-    mrl.subscribe($scope.service.name, 'refresh');
+    mrl.subscribe($scope.service.name, 'getPortNames');
     mrl.subscribe($scope.service.name, 'publishStats');
     
     mrl.sendTo($scope.service.name, 'broadcastState');
-    mrl.sendTo($scope.service.name, 'refresh');
+    mrl.sendTo($scope.service.name, 'getPortNames');
     
     $scope.monitor = function() {
         // mrl.sendTo($scope.service.name, 'refresh');
@@ -126,7 +122,7 @@ angular.module('mrlapp.service.SerialGui', [])
     }
     
     $scope.refresh = function() {
-        mrl.sendTo($scope.service.name, 'refresh');
+        mrl.sendTo($scope.service.name, 'getPortNames');
     }
     
     $scope.disconnect = function() {

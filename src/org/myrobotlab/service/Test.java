@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -23,6 +24,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -31,7 +33,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.StatusListener;
 import org.slf4j.Logger;
 
@@ -40,12 +41,12 @@ import org.slf4j.Logger;
  * 
  * @author GroG
  * 
- *         TODO - grab and report all missing Service Pages & all missing Python
- *         scripts !
+ *         TODO - grab and report all missing Service Pages &amp; all missing
+ *         Python scripts !
  * 
  *         TODO - install create start stop release test TODO - serialization
- *         json + native test TODO - run Python & JavaScript tests - last method
- *         appended is a callback
+ *         json + native test TODO - run Python &amp; JavaScript tests - last
+ *         method appended is a callback
  *
  */
 public class Test extends Service implements StatusListener {
@@ -54,21 +55,21 @@ public class Test extends Service implements StatusListener {
 
   public final static Logger log = LoggerFactory.getLogger(Test.class);
 
+  static final transient ServiceData serviceData = ServiceData.getLocalInstance();
+
   // state information
   Date now = new Date();
   transient Set<Thread> threads = null;
   transient Set<File> files = new HashSet<File>();
 
   // python
-
-  ArrayList<String> neededPythonScripts = new ArrayList<String>();
-  ArrayList<String> pythonScriptsWithNoServiceType = new ArrayList<String>();
-  ArrayList<String> failedPythonScripts = new ArrayList<String>();
-  ArrayList<String> passedPythonScripts = new ArrayList<String>();
-  HashSet<String> skippedPythonScript = new HashSet<String>();
+  List<String> servicesNeedingPythonScripts = new ArrayList<String>();
+  List<String> pythonScriptsWithNoServiceType = new ArrayList<String>();
+  List<String> failedPythonScripts = new ArrayList<String>();
+  List<String> passedPythonScripts = new ArrayList<String>();
+  Set<String> skippedPythonScript = new HashSet<String>();
 
   // thread blocking
-  // transient Object lock = new Object();
   transient StatusLock lock = new StatusLock();
 
   List<Status> status = new ArrayList<Status>();
@@ -120,17 +121,31 @@ public class Test extends Service implements StatusListener {
 
     HashSet<String> testsToRun = new HashSet<String>();
     HashSet<String> servicesToTest = new HashSet<String>();
-    HashSet<String> services = new HashSet<String>();
     Map<String, TestResults> results = new TreeMap<String, TestResults>();
 
   }
 
   public static class TestResults implements Serializable {
+
     private static final long serialVersionUID = 1L;
     String fullTypeName;
     String simpleName;
     ServiceType type;
     TreeMap<String, TestResult> results = new TreeMap<String, TestResult>();
+
+    public TestResults(String name) {
+      if (!name.contains(".")) {
+        fullTypeName = String.format("org.myrobotlab.service.%s", name);
+      } else {
+        fullTypeName = name;
+      }
+
+      type = serviceData.getServiceType(fullTypeName);
+      simpleName = type.getSimpleName();
+    }
+
+    public TestResults() {
+    }
   }
 
   public static class TestResult implements Serializable {
@@ -165,10 +180,6 @@ public class Test extends Service implements StatusListener {
     }
 
     Arrays.sort(tn);
-    // log.warn(CodecUtils.toJson(tn));
-    /*
-     * for (int i = 0; i < t.length; ++i){ log.warn(t[i]); }
-     */
   }
 
   public Progress publishProgress(Progress progress) {
@@ -180,21 +191,29 @@ public class Test extends Service implements StatusListener {
     createTestPlan();
   }
 
+  // FIXME - TestMatrix should have 0 to many TestPlans
   TestMatrix createTestPlan() {
 
-    ServiceData serviceData = ServiceData.getLocalInstance();
     ArrayList<ServiceType> types = serviceData.getServiceTypes();
     for (int i = 0; i < types.size(); ++i) {
       ServiceType type = types.get(i);
-      TestResults results = new TestResults();
-      String n = type.getName();
-      results.fullTypeName = type.getName();
 
-      results.simpleName = n.substring(n.lastIndexOf(".") + 1);
-      results.type = type;
-      matrix.results.put(results.simpleName, results);
-      matrix.servicesToTest.add(results.simpleName);
-      matrix.services.add(results.simpleName);
+      if (!type.isAvailable()) {
+        continue;
+      }
+
+      /*
+       * TestResults results = new TestResults(); results.fullTypeName =
+       * type.getName();
+       * 
+       * results.simpleName = type.getSimpleName();
+       * 
+       * results.type = type;
+       */
+
+      matrix.results.put(type.getSimpleName(), getTestResults(type.getName()));
+      matrix.servicesToTest.add(type.getSimpleName());
+
     }
 
     broadcastState();
@@ -250,7 +269,7 @@ public class Test extends Service implements StatusListener {
    * script; ArrayList<File> list =
    * FileIO.listInternalContents("/resource/Python/examples");
    * 
-   * Runtime.createAndStart("gui", "GUIService"); python = (Python)
+   * Runtime.createAndStart("gui", "SwingGui"); python = (Python)
    * startPeer("python"); // InMoov i01 = (InMoov) Runtime.createAndStart("i01",
    * "InMoov");
    * 
@@ -271,7 +290,7 @@ public class Test extends Service implements StatusListener {
    * script; ArrayList<File> list =
    * FileIO.listInternalContents("/resource/Python/examples");
    * 
-   * Runtime.createAndStart("gui", "GUIService"); python = (Python)
+   * Runtime.createAndStart("gui", "SwingGui"); python = (Python)
    * startPeer("python"); // InMoov i01 = (InMoov) Runtime.createAndStart("i01",
    * "InMoov");
    * 
@@ -351,7 +370,7 @@ public class Test extends Service implements StatusListener {
     }
   }
 
-  /**
+  /*
    * call-back from service under testing to route errors to this service...
    */
   public void onError(String errorMsg) {
@@ -366,6 +385,8 @@ public class Test extends Service implements StatusListener {
   }
 
   ArrayList<String> serializationTestFailures = new ArrayList<String>();
+
+  String pythonServiceScriptDir;
 
   // TODO - do all forms of serialization - binary json xml
   public Status serializeTest(ServiceInterface s) {
@@ -421,11 +442,10 @@ public class Test extends Service implements StatusListener {
   // failures need to be collected & options (like junit) to halt on error
   // or continue and report
 
-  /**
+  /*
    * need to do a type conversion here... in JS land there is no HashSet
-   * <String> only List & HashMap types
+   * &lt;String&gt; only List &amp; HashMap types
    * 
-   * @param servicesToTest
    */
   public void test(List<String> servicesToTest, List<String> testsToRun) {
     // clear results ???
@@ -458,26 +478,18 @@ public class Test extends Service implements StatusListener {
     }
   }
 
+  /**
+   * FIXME - add TestSuite
+   * test the matrix - the test matrix consists of all services to be tested by all selected services
+   * FIXME - a TestSuite is a complete run of the matrix with all results saved to a test suite - which
+   * includes the all the tests and services at that time tested and their results
+   */
   synchronized public void test() {
     matrix.isRunning = true;
-    // we are started so .. we'll use the big hammer at the end
-    /*
-     * Status status = Status.info("========TESTING============="); log.info(
-     * "===========INFO TESTING========"); log.info(String.format(
-     * "TEST Pid = %s", Runtime.getPid())); // big hammer System.exit(0); return
-     * status;
-     */
 
-    // do the cross product of
-    // tests to run over services selected
-    // update the matrix accordingly broadcast after every service x test
-
-    // single method test(getMethod(String name))
-
-    // small but powerfull test engine
+    // broadcasting starting progress of testing
     Progress progress = new Progress();
     matrix.currentProgress = progress;
-
     invoke("publishProgress", progress);
 
     int total = matrix.testsToRun.size() * matrix.servicesToTest.size();
@@ -488,7 +500,7 @@ public class Test extends Service implements StatusListener {
 
     for (String testName : matrix.testsToRun) {
       for (String name : matrix.servicesToTest) {
-        TestResults results = matrix.results.get(name);
+        TestResults results = getTestResults(name);//
 
         String activity = String.format("test %s %s", testName, results.simpleName);
         log.info(activity);
@@ -505,6 +517,7 @@ public class Test extends Service implements StatusListener {
 
         result.endTime = System.currentTimeMillis();
 
+        // broadcast incremental progress
         progress.process(results.results.get(testName).status);
 
         broadcastState(); // admittedly a bit heavy handed
@@ -519,18 +532,35 @@ public class Test extends Service implements StatusListener {
     log.info("here");
   }
 
-  public String[] getAllServiceNames() {
-    ServiceData sd = ServiceData.getLocalInstance();
-    return sd.getServiceTypeNames();
+  public TestResults getTestResults(String name) {
+    String fullName = null;
+    if (!name.contains(".")) {
+      fullName = String.format("org.myrobotlab.service.%s", name);
+    } else {
+      fullName = name;
+    }
+    if (matrix.results.containsKey(fullName)) {
+      return matrix.results.get(fullName);
+    } else {
+      TestResults results = new TestResults();
+      ServiceType st = serviceData.getServiceType(fullName);
+      results.fullTypeName = st.getName();
+      results.type = st;
+      results.simpleName = st.getSimpleName();
+      matrix.results.put(st.getSimpleName(), results);
+      return results;
+    }
   }
 
-  /**
+  public String[] getAllServiceNames() {
+    return serviceData.getServiceTypeNames();
+  }
+
+  /*
    * The outer level of all tests on a per Service basis Environment is expected
    * to be prepared correctly by an Agent. This method will test the heck out of
    * a single service and save the results in a partFile
    * 
-   * @param serviceType
-   * @return
    */
   public List<Status> test(String serviceType) {
 
@@ -622,12 +652,11 @@ public class Test extends Service implements StatusListener {
    * 
    */
   static public ServiceType getMetaData() {
-
     ServiceType meta = new ServiceType(Test.class.getCanonicalName());
     meta.addDescription("Testing service");
-    meta.addCategory("testing", "framework");
+    meta.addCategory("testing");
     meta.addPeer("http", "HttpClient", "to interface with Service pages");
-    meta.addPeer("python", "Python", "python to excercise python scripts");
+    // meta.addPeer("python", "Python", "python to excercise python scripts");
     return meta;
   }
 
@@ -638,40 +667,51 @@ public class Test extends Service implements StatusListener {
   public void onFinishedPythonScript(String result) {
     log.info("DONE !");
     log.info("onFinishedPythonScript - {}", result);
+    // we finished !
+    lock.status = Status.success();
     synchronized (lock) {
       lock.notifyAll();
     }
   }
 
-  // TODO - load python
   public TestResults PythonScriptExists(String testName, TestResults test) {
+    Platform p = Platform.getLocalInstance();
+    return PythonScriptExists(p.getBranch(), testName, test);
+  }
+
+  // TODO - load python
+  public TestResults PythonScriptExists(String branch, String testName, TestResults test) {
 
     TestResult result = test.results.get(testName);
     try {
       String name = test.simpleName;
-      String script = GitHub.getPyRobotLabScript(name);
+      String script = GitHub.getPyRobotLabScript(branch, name);
 
-      String branch = Platform.getLocalInstance().getBranch();
+      // String branch = Platform.getLocalInstance().getBranch();
       // https://github.com/MyRobotLab/pyrobotlab/edit/develop/service/AcapelaSpeech.py
       String url = String.format("https://github.com/MyRobotLab/pyrobotlab/edit/%s/service/%s.py", branch, name);
       result.link = String.format("<a href=\"%s\">%s</a>", url, result.test);
 
       if (script == null) {
         result.status = Status.error("script not found");
-
-        ServiceData sd = ServiceData.getLocalInstance();
-        ServiceType st = sd.getServiceType(test.fullTypeName);
-        StringBuffer t = new StringBuffer();
-        t.append("#########################################\n");
-        t.append(String.format("# %s.py\n", name));
-        t.append(String.format("# description: %s\n", st.getDescription()));
-        t.append(String.format("# categories: %s\n", Arrays.toString(st.categories.toArray(new String[st.categories.size()]))));
-        t.append(String.format("# possibly more info @: http://myrobotlab.org/service/%s\n", name));
-        t.append("#########################################\n");
-        t.append("# start the service\n");
-        String lowercase = name.toLowerCase();
-        t.append(String.format("%s = Runtime.start(\"%s\",\"%s\")", lowercase, lowercase, name));
-        FileIO.toFile(new File(String.format("%s.py", name)), t.toString().getBytes());
+        /*
+         * ServiceData sd = ServiceData.getLocalInstance(); ServiceType st =
+         * sd.getServiceType(test.fullTypeName); StringBuffer t = new
+         * StringBuffer();
+         * t.append("#########################################\n");
+         * t.append(String.format("# %s.py\n", name));
+         * t.append(String.format("# description: %s\n", st.getDescription()));
+         * t.append(String.format("# categories: %s\n",
+         * Arrays.toString(st.categories.toArray(new
+         * String[st.categories.size()])))); t.append(String.
+         * format("# possibly more info @: http://myrobotlab.org/service/%s\n",
+         * name)); t.append("#########################################\n");
+         * t.append("# start the service\n"); String lowercase =
+         * name.toLowerCase();
+         * t.append(String.format("%s = Runtime.start(\"%s\",\"%s\")",
+         * lowercase, lowercase, name)); FileIO.toFile(new
+         * File(String.format("%s.py", name)), t.toString().getBytes());
+         */
       } else {
         result.status = Status.success();
       }
@@ -698,9 +738,10 @@ public class Test extends Service implements StatusListener {
       Result junitResult = junit.run(junitTest);
       log.info("JUnit Result : {}", junitResult);
 
-      // result.link = String.format("<a href=\"%s\">%s</a>", url, testName);
+      // result.link = String.format("<a href=\"%s\">%s</a>", url,
+      // testName);
       /*
-       * if (servicePage == null || servicePage.contains("Page not found")) {
+       * if (servicePage == null || servicePage.contains("Page not found" )) {
        * result.status = Status.error("script not found"); } else {
        * result.status = Status.success(); }
        */
@@ -738,31 +779,26 @@ public class Test extends Service implements StatusListener {
     return test;
   }
 
-  public Map<String, String> getPyRobotLabServiceScripts() throws Exception {
+  public Map<String, String> getPyRobotLabServiceScripts(String branch) throws Exception {
 
     if (pythonScripts == null) {
-      neededPythonScripts.clear();
+
       pythonScriptsWithNoServiceType.clear();
 
       HashSet<String> serviceTypes = new HashSet<String>();
 
       pythonScripts = new TreeMap<String, String>();
-      ServiceData sd = ServiceData.getLocalInstance();
-      List<ServiceType> sts = sd.getServiceTypes();
+      List<ServiceType> sts = serviceData.getServiceTypes();
       for (int i = 0; i < sts.size(); ++i) {
         ServiceType st = sts.get(i);
         serviceTypes.add(st.getSimpleName());
-        String script = GitHub.getPyRobotLabScript(st.getSimpleName());
+        String script = GitHub.getPyRobotLabScript(branch, st.getSimpleName());
         if (script != null) {
           pythonScripts.put(st.getSimpleName(), script);
 
         } else {
           log.info("{}<br>", st.getSimpleName());
-          neededPythonScripts.add(String.format("%s<br>", st.getSimpleName()));
-          StringBuffer t = new StringBuffer("# start the service\n");
-          String lowercase = st.getSimpleName().toLowerCase();
-          t.append(String.format("%s = Runtime.start(\"%s\",\"%s\")", lowercase, lowercase, st.getSimpleName()));
-          FileIO.toFile(new File(String.format("%s.py", st.getSimpleName())), t.toString().getBytes());
+          servicesNeedingPythonScripts.add(st.getSimpleName());
         }
       }
       Set<String> gitHubServiceScripts = GitHub.getServiceScriptNames();
@@ -772,9 +808,7 @@ public class Test extends Service implements StatusListener {
           pythonScriptsWithNoServiceType.add(key);
         }
       }
-
-      log.info("needed scripts - service type found but no script {}", neededPythonScripts);
-      log.info("remove scripts - script found by no service type {}", pythonScriptsWithNoServiceType);
+      log.info("remove scripts - script found but no service type {}", pythonScriptsWithNoServiceType);
 
     }
     return pythonScripts;
@@ -782,8 +816,7 @@ public class Test extends Service implements StatusListener {
 
   public List<String> getServicesWithOutServicePages() throws ClientProtocolException, IOException {
     ArrayList<String> ret = new ArrayList<String>();
-    ServiceData sd = ServiceData.getLocalInstance();
-    ArrayList<ServiceType> serviceTypes = sd.getServiceTypes();
+    ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
     HttpClient http = (HttpClient) startPeer("http");
     for (int i = 0; i < serviceTypes.size(); ++i) {
       ServiceType serviceType = serviceTypes.get(i);
@@ -803,13 +836,61 @@ public class Test extends Service implements StatusListener {
     return ret;
   }
 
-  public List<String> getServicesWithOutScripts() {
-    ArrayList<String> ret = new ArrayList<String>();
+  public List<String> getServicesWithOutScripts(String branch) {
+    try {
 
-    return ret;
+      getPyRobotLabServiceScripts(branch);
+      return servicesNeedingPythonScripts;
+    } catch (Exception e) {
+      log.error("getServicesWithOutScripts threw", e);
+    }
+    return null;
   }
 
-  /**
+  public void generatePythonScripts(String branch) {
+    try {
+      List<String> services = getServicesWithOutScripts(branch);
+      File dir = new File(String.format("generatedPython/%s", branch));
+      dir.mkdirs();
+
+      for (String service : services) {
+        FileOutputStream fos = new FileOutputStream(String.format("generatedPython/%s/%s.py", branch, service));
+        StringBuilder t = new StringBuilder("");
+        /*
+         * t.append("###########################################");
+         * t.append("# " + service + ".py service python script\n");
+         * t.append("# more information @\n");
+         * t.append("# http://myrobotlab.org/service/" + service +
+         * " service page\n");
+         * t.append("###########################################\n");
+         * t.append("\n"); t.append("# start the service\n");
+         */
+
+        ServiceType st = serviceData.getServiceType(String.format("org.myrobotlab.service.%s", service));
+
+        t.append("#########################################\n");
+        t.append(String.format("# %s.py\n", service));
+        t.append(String.format("# description: %s\n", st.getDescription()));
+        t.append(String.format("# categories: %s\n", Arrays.toString(st.categories.toArray(new String[st.categories.size()])).replace("[", "").replaceAll("]", "")));
+        t.append(String.format("# more info @: http://myrobotlab.org/service/%s\n", service));
+        t.append("#########################################\n\n");
+        t.append("# start the service\n");
+        String lowercase = service.toLowerCase();
+        t.append(String.format("%s = Runtime.start('%s','%s')\n", lowercase, lowercase, service));
+        // FileIO.toFile(new File(String.format("%s.py", service)),
+        // t.toString().getBytes());
+
+        // t.append(String.format("%s = Runtime.start('%s','%s')\n", lower,
+        // lower, service));
+        fos.write(t.toString().getBytes());
+        fos.close();
+      }
+    } catch (Exception e) {
+      log.error("generatePythonScripts threw", e);
+    }
+  }
+
+  /*
    * Gets all the pyrobotlab/service/scripts and does some basic testing. This
    * method also finds all script not associated with active services (to be
    * removed). And all services which do not have scripts (to be added) It runs
@@ -817,17 +898,30 @@ public class Test extends Service implements StatusListener {
    * help of the Test service) has created an environment where the service to
    * be tested has all its depedencies
    * 
-   * @throws InterruptedException
    * 
    * @throws Exception
    * 
-   *           FIXME - need to change to testPythonScript(serviceName) ..
-   *           because only 1 will be run in a 'clean' environment ...
+   * FIXME - need to change to testPythonScript(serviceName) .. because only 1
+   * will be run in a 'clean' environment ...
    * 
-   *           FIXME - structured logging back to self to generate report
+   * FIXME - structured logging back to self to generate report
    */
 
-  public TestResults PythonScriptTest(String testName, TestResults test) throws Exception {
+  public TestResults PythonScriptTest(String testName, TestResults results) throws Exception {
+    Platform p = Platform.getLocalInstance();
+
+    return PythonScriptTest(p.getBranch(), testName, results);
+  }
+
+  public TestResults PythonScriptTest(String branch, String testName, TestResults test) throws Exception {
+
+    // String testName = new Object(){}.getClass().getEnclosingMethod().getName(
+    // identify the original services before the test
+    String[] sn = Runtime.getServiceNames();
+    HashSet<String> preServices = new HashSet<String>();
+    for (String s : sn) {
+      preServices.add(s);
+    }
 
     // a test will resolve in 3 possible states
     // 1. complete & success - with onFinish callback called
@@ -836,21 +930,62 @@ public class Test extends Service implements StatusListener {
 
     // all three need to be handled
 
-    Python python = (Python) startPeer("python", "Python");
+    TestResult result = test.results.get(testName);
+
+    // FIXME - change location (option to test locally)
+    String script = null;
+    if (pythonServiceScriptDir != null){
+      String scriptFilename = pythonServiceScriptDir + test.simpleName + ".py";
+      script = FileIO.toString(new File(scriptFilename));
+    } else {
+      script = GitHub.getPyRobotLabScript(branch, test.simpleName);
+    }
+    // String script = FileIO.toString(new File(String.format("../pyrobotlab/service/%s.py", st.getSimpleName())));
+
+    if (script == null) {
+      result.status = Status.error("script does not exist");
+      return test;
+    }
+
+    result.status = Status.success();
+        
+    PythonTestScript(script, testName, test);
+
+    // find the current services now registered
+    sn = Runtime.getServiceNames();
+    HashSet<String> currentServices = new HashSet<String>();
+    for (String s : sn) {
+      currentServices.add(s);
+    }
+
+    for (String cs : currentServices) {
+      if (!preServices.contains(cs)) {
+        log.info(String.format("service %s created for testing %s - test finished attempting to release", cs, test.simpleName));
+        ServiceInterface si = Runtime.getService(cs);
+        si.releaseService();
+      }
+    }
+
+    log.info("TESTING COMPLETED");
+
+    return test;
+
+  }
+
+  public TestResult PythonTestScript(String script, String testName, TestResults test) {
+
+    String serviceName = test.simpleName;
+    log.info("TESTING SCRIPT {} - quiet on the set please...", serviceName);
+
+    Python python = (Python) Runtime.start("python", "Python");
     subscribe(python.getName(), "publishStatus");
 
-    TestResult result = test.results.get(testName);
+    TestResult result = new TestResult(testName);//// test.results.get(testName);
+
     try {
 
-      String script = GitHub.getPyRobotLabScript(test.simpleName);
-
-      if (script == null) {
-        result.status = Status.error("script does not exist");
-        return test;
-      }
-
-      String serviceName = test.simpleName;
-      log.info("TESTING SCRIPT {} - quiet on the set please...", serviceName);
+      StringBuilder prePendScript = new StringBuilder();
+      prePendScript.append("virtual = True\n");
 
       /*
        * if (skippedPythonScript.contains(serviceName)) { log.info(
@@ -859,7 +994,7 @@ public class Test extends Service implements StatusListener {
 
       // challenge #1
       // I would prefer to be in the same
-      // process as python when things are exectuted
+      // process as python when things are executed
       // therefore "something else" or Test in a different
       // process needs to execute Test with 'installed' components
 
@@ -878,7 +1013,8 @@ public class Test extends Service implements StatusListener {
 
       // by default - python will create a new thread
       // to execute the script
-      python.exec(script + callback);// , true, true);
+      python.exec(prePendScript.toString() + script + callback);// , true,
+                                                                // true);
 
       // script has at maximum 1 minute to return
       synchronized (lock) {
@@ -904,13 +1040,20 @@ public class Test extends Service implements StatusListener {
       log.info("inspect python errors (syntax) + java errors");
 
     } catch (Exception e) {
+      log.error("python script failed", e);
       result.status = Status.error(e);
     }
+    return result;
+  }
 
-    log.info("TESTING COMPLETED");
-
-    return test;
-
+  @Override
+  public void onStatus(Status status) {
+    synchronized (lock) {
+      // Make sure Python syntax errors or exceptions fail test quickly
+      lock.status = status;
+      log.info("onStatus {}", status);
+      lock.notifyAll();
+    }
   }
 
   // TODO - subscribe to registered --> generates subscription to
@@ -919,15 +1062,52 @@ public class Test extends Service implements StatusListener {
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     try {
-
       Test test = (Test) Runtime.start("test", "Test");
+      test.pythonServiceScriptDir = "../pyrobotlab/service/";
+      // Runtime.start("webgui","WebGui");
+      // Runtime.start("gui","SwingGui");
+      // Runtime.start("python", "Python");
+      
 
-      Runtime.start("webgui", "WebGui");
+      List<String> servicesToTest = new ArrayList<String>();
+      List<String> testsToRun = new ArrayList<String>();
+
+      // FIXME - must add branch !!
+      servicesToTest.add("ImageDisplay");
+      // testsToRun.add("PythonScriptTest");
+      testsToRun.add("serializeTest");
+
+      test.test(servicesToTest, testsToRun);
 
       boolean done = true;
       if (done) {
         return;
       }
+
+      ArrayList<ServiceType> sts = serviceData.getServiceTypes();
+
+      for (ServiceType st : sts) {
+        // FIXME - script folder location as seperate input
+        log.info("testing {}", st.getSimpleName());
+        String script = FileIO.toString(new File(String.format("../pyrobotlab/service/%s.py", st.getSimpleName())));
+        TestResults results = new TestResults(st.getSimpleName());
+        test.PythonTestScript(script, "PythonTestScript", results);
+
+        log.info("results {}", results);
+      }
+
+      // Runtime.start("webgui", "WebGui");
+
+      // List<Status> results = test.test("UltrasonicSensor");
+      // log.info(arg0);
+      // TestResults results = new TestResults();
+      // test.PythonScriptTest("develop",
+
+      // Runtime.start("webgui", "WebGui");
+
+      // test.generatePythonScripts("develop");
+      // test.test();
+      // test.test("InMoov");
 
       String[] all = test.getAllServiceNames();
       StringBuffer sb = new StringBuffer();
@@ -944,7 +1124,7 @@ public class Test extends Service implements StatusListener {
 
       // Runtime.start("cli", "Cli");
       Agent agent = (Agent) Runtime.start("agent", "Agent");
-      String[] cmdline = new String[] { "-fromAgent", "-service", "guiservice", "GUIService" };
+      String[] cmdline = new String[] { "-fromAgent", "-service", "guiservice", "SwingGui" };
       agent.spawn(cmdline);
 
       // requirements:
@@ -976,14 +1156,6 @@ public class Test extends Service implements StatusListener {
       Logging.logError(e);
     }
 
-  }
-
-  @Override
-  public void onStatus(Status status) {
-    synchronized (lock) {
-      lock.status = status;
-      lock.notifyAll();
-    }
   }
 
 }

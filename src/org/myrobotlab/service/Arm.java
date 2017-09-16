@@ -80,9 +80,11 @@ public class Arm extends Service {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Arm.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Arm.class);
     meta.addDescription("robot arm service");
     meta.addCategory("robot");
+    meta.setLicenseApache();
+    meta.addTodo("add IK interfacing points");
     return meta;
   }
 }

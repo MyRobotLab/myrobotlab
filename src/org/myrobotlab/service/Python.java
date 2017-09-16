@@ -1,9 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,6 +16,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -26,7 +25,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.myrobotlab.service.data.Script;
 import org.python.core.Py;
 import org.python.core.PyException;
 import org.python.core.PyObject;
@@ -188,47 +187,6 @@ public class Python extends Service {
 		}
 	}
 
-	public static class Script implements Serializable {
-		static final long serialVersionUID = 1L;
-		/**
-		 * unique location & key of the script
-		 * e.g. /mrl/scripts/myScript.py
-		 */
-		String location;
-		/**
-		 * actual code/contents of the script
-		 */
-		String code;
-
-		public Script(String name, String script) {
-			this.location = name;
-			// DOS2UNIX line endings.
-			// This seems to get triggered when people use editors that don't do
-			// the cr/lf thing very well..
-			// TODO:This will break python quoted text with the """ syntax in
-			// python.
-			if (script != null) {
-				script = script.replaceAll("(\r)+\n", "\n");
-			}
-			this.code = script;
-		}
-
-		public String getCode() {
-			return code;
-		}
-
-		public String getName() {
-			return location;
-		}
-
-		public void setCode(String code) {
-			this.code = code;
-		}
-
-		public void setName(String name) {
-			this.location = name;
-		}
-	}
 
 	public final static transient Logger log = LoggerFactory.getLogger(Python.class);
 	// TODO this needs to be moved into an actual cache if it is to be used
@@ -283,7 +241,7 @@ public class Python extends Service {
 	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(Python.class.getCanonicalName());
-		meta.addDescription("Python ID");
+		meta.addDescription("the Jython script engine compatible with pure Python 2.7 scripts");
 		meta.addCategory("programming", "control");
 
 		// Its now part of myrobotlab.jar - unzipped in
@@ -332,15 +290,6 @@ public class Python extends Service {
 	 */
 	HashMap<String, Script> openedScripts = new HashMap<String, Script>();
 
-	/**
-	 * current script which will be executed / saved / etc..
-	 */
-	Script currentScript;
-
-	/**
-	 * 
-	 * @param instanceName
-	 */
 	public Python(String n) {
 		super(n);
 
@@ -384,16 +333,10 @@ public class Python extends Service {
 		}
 
 		localPythonFiles = getFileListing();
-		
-		// open a new untitled script
-		if (currentScript == null){
-			openScript(localScriptDir + File.separator + "untitledS.py", "");
-		}
 	}
 	
 	public void openScript(String scriptName, String code){
-		currentScript = new Script(scriptName, code);
-		openedScripts.put(scriptName, currentScript);
+		openedScripts.put(scriptName, new Script(scriptName, code));
 		broadcastState();
 	}
 
@@ -404,15 +347,14 @@ public class Python extends Service {
 	 *            the code to append
 	 * @return the resulting concatenation
 	 */
-	public Script appendScript(String data) {
-		currentScript.setCode(String.format("%s\n%s", currentScript.getCode(), data));
-		return currentScript;
+	public Script appendScript(String data) {		
+		return new Script("append", data);
 	}
 
 	/**
 	 * runs the pythonConsole.py script which creates a Python Console object
-	 * and redirect stdout & stderr to published data - these are hooked by the
-	 * GUIService
+	 * and redirect stdout &amp; stderr to published data - these are hooked by the
+	 * SwingGui
 	 */
 	public void attachPythonConsole() {
 		if (!pythonConsoleInitialized) {
@@ -481,10 +423,6 @@ public class Python extends Service {
 		return ret;
 	}
 
-	public void exec() {
-		exec(currentScript.getCode(), false);
-	}
-
 	public void exec(PyObject code) {
 		log.info(String.format("exec \n%s\n", code));
 		if (interp == null) {
@@ -500,43 +438,35 @@ public class Python extends Service {
 		}
 	}
 
-	/**
+	/*
 	 * replaces and executes current Python script
-	 * 
-	 * @param code
 	 */
 	public void exec(String code) {
 		exec(code, true);
 	}
 
-	/**
+	/*
 	 * non blocking exec
 	 * 
-	 * @param code
-	 * @param replace
 	 */
 	public void exec(String code, boolean replace) {
 		exec(code, replace, false);
 	}
 
 	/**
-	 * replaces and executes current Python script if replace = false - will not
-	 * replace "script" variable can be useful if ancillary scripts are needed
-	 * e.g. monitors & consoles
+	 * This method will execute a string that represents a python script.  When called with blocking=false, the return code
+	 * will likely return true even if there is a syntax error because it doesn't wait for the response.
 	 * 
-	 * @param code
-	 *            the code to execute
-	 * @param replace
-	 *            replace the current script with code
+	 * @param code - the script to execute
+	 * @param replace - not used!  (should be removed.)
+	 * @param blocking - if true, this method will wait until all of the code has been evaluated.  
+	 * @return - returns true if execution of the code was successful.  returns false if there was an exception.
 	 */
-	public void exec(String code, boolean replace, boolean blocking) {
-		log.info(String.format("exec(String) \n%s\n", code));
-
+	public boolean exec(String code, boolean replace, boolean blocking) {
+	  log.info("exec(String) \n{}", code);
+		boolean success = true;
 		if (interp == null) {
 			createPythonInterpreter();
-		}
-		if (replace) {
-			currentScript.setCode(code);
 		}
 		try {
 			if (!blocking) {
@@ -546,48 +476,47 @@ public class Python extends Service {
 				interp.exec(code);
 			}
 		} catch (PyException pe) {
+		  // something specific with a python error
+		  success = false;
 			error(pe.toString());
+			Logging.logError(pe);
 		} catch (Exception e) {
-			// PyException - very nice - but we'll handle it all
-			// the same way at the moment
-			// broadcast msg only
+		  success = false;
+			// more general error handling.
 			error(e.getMessage());
 			// dump stack trace to log
 			Logging.logError(e);
 		}
-	}
-
-	public void execAndWait() {
-		exec(currentScript.code, true, true);
+		return success;
 	}
 
 	public void execAndWait(String code) {
 		exec(code, true, true);
 	}
 
-	/**
+	/*
 	 * executes an external Python file
 	 * 
 	 * @param filename
 	 *            the full path name of the python file to execute
-	 * @throws IOException
 	 */
 	public void execFile(String filename) throws IOException {
-		String script = FileIO.toString(filename);
+	  String script = FileIO.toString(filename);
 		exec(script);
 	}
 
 	/**
 	 * execute an "already" defined python method directly
 	 * 
-	 * @param methodName
+	 * @param method - the name of the method
 	 */
 	public void execMethod(String method) {
-		execMethod(getName(), method, (Object[])null);
+		// execMethod(getName(), method, (Object[])null);
+		execMethod(method, (Object[])null);
 	}
 
 	public void execMethod(String method, Object...parms) {
-		Message msg = createMessage(getName(), method, parms);
+		Message msg = Message.createMessage(this, getName(), method, parms);
 		inputQueue.add(msg);
 	}
 
@@ -596,11 +525,14 @@ public class Python extends Service {
 		exec(script);
 	}
 
+	/**
+	 * publishing method when a script is finished
+	 */
 	public void finishedExecutingScript() {
 	}
 
 	/**
-	 * DEPRECATE - use online examples only ... (possibly you can package &
+	 * DEPRECATE - use online examples only ... (possibly you can package &amp;
 	 * include filename listing during build process)
 	 * 
 	 * gets the listing of current example python scripts in the myrobotlab.jar
@@ -641,39 +573,26 @@ public class Python extends Service {
 		return null;
 	}
 
-	/**
-	 * Get the current script.
-	 * 
-	 * @return
-	 */
-	public Script getScript() {
-		return currentScript;
-	}
 
-
-	/**
+	/*
 	 * load a script from the myrobotlab.jar - location of example scripts are
 	 * /resource/Python/examples
-	 * 
-	 * @param filename
 	 *            name of file to load
-	 * @return true if successfully loaded
 	 */
 	public void loadPyRobotLabServiceScript(String serviceType) {
-		String serviceScript = GitHub.getPyRobotLabScript(serviceType);
+	  Platform p = Platform.getLocalInstance();
+		String serviceScript = GitHub.getPyRobotLabScript(p.getBranch(), serviceType);
 		openScript(String.format("%s.py", serviceType), serviceScript);
 	}
 
-	/**
+	/*
 	 * this method can be used to load a Python script from the Python's local
-	 * file system, which may not be the GUIService's local system. Because it
+	 * file system, which may not be the SwingGui's local system. Because it
 	 * can be done programatically on a different machine we want to broadcast
-	 * our changed state to other listeners (possibly the GUIService)
+	 * our changed state to other listeners (possibly the SwingGui)
 	 * 
 	 * @param filename
 	 *            - name of file to load
-	 * @return - success if loaded
-	 * @throws IOException
 	 */
 	public void openScriptFromFile(String filename) throws IOException {
 		log.info("loadScriptFromFile {}", filename);
@@ -728,31 +647,8 @@ public class Python extends Service {
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param data
-	 * @return
-	 */
 	public String publishStdOut(String data) {
 		return data;
-	}
-
-	public boolean saveAndReplaceCurrentScript(String name, String code) {
-		currentScript.location = name;
-		currentScript.code = code;
-		return saveCurrentScript();
-	}
-
-	public boolean saveCurrentScript() {
-		try {
-			FileOutputStream out = new FileOutputStream(localScriptDir + File.separator + currentScript.location);
-			out.write(currentScript.code.getBytes());
-			out.close();
-			return true;
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		return false;
 	}
 
 	public void setLocalScriptDir(String path) {
@@ -812,17 +708,23 @@ public class Python extends Service {
 		stop();// release the interpeter
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+	public static void main(String[] args) {		
+		LoggingFactory.init(Level.INFO);
 
 		try {
+			
+			File test = new File("file:/D:/local");
+			File example = new File("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/develop/service/Clock.py");
+			
+			log.info("{}", test.toURI().toURL());
+			log.info("{}", example.toURI().toURL());
 
-			// Runtime.start("gui", "GUIService");
+			// Runtime.start("gui", "SwingGui");
 			// String f = "C:\\Program Files\\blah.1.py";
 			// log.info(getName(f));
 			Runtime.start("python", "Python");
-			Runtime.start("webgui", "WebGui");
+			// Runtime.start("webgui", "WebGui");
+			Runtime.start("gui", "SwingGui");
 
 			// python.error("this is an error");
 			// python.loadScriptFromResource("VirtualDevice/Arduino.py");
@@ -840,7 +742,7 @@ public class Python extends Service {
 			 * ObjectInputStream in = new ObjectInputStream(fis); Object x =
 			 * in.readObject(); in.close();
 			 * 
-			 * Runtime.createAndStart("gui", "GUIService");
+			 * Runtime.createAndStart("gui", "SwingGui");
 			 */
 
 		} catch (Exception e) {
