@@ -87,7 +87,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   transient MotorEncoder encoder = null;
 
-
   // FIXME - implements an Encoder interface
   // get a named instance - stopping and tarting should not be creating &
   // destroying
@@ -213,7 +212,9 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public void stop() {
     log.info("{}.stop()", getName());
     powerLevel = 0.0;
-    controller.motorStop(this);
+    if (controller != null) {
+      controller.motorStop(this);
+    }
     broadcastState();
   }
 
@@ -271,23 +272,23 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
-  
+
   @Override
   public void attachMotorController(MotorController controller) throws Exception {
     if (controller == null) {
       log.error("motor.attach(controller) - controller cannot be null");
       return;
     }
-    if (isAttached(controller)){
+    if (isAttached(controller)) {
       log.info("motor {} already attached to motor controller {}", getName(), controller.getName());
       return;
     }
-    
+
     this.controller = controller;
     this.controllerName = controller.getName();
-    
+
     broadcastState();
-//     controller.attach(this);
+    // controller.attach(this);
   }
 
   /////// config start ////////////////////////

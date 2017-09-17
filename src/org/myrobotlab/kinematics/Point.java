@@ -1,5 +1,6 @@
 package org.myrobotlab.kinematics;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
@@ -10,7 +11,9 @@ import java.text.NumberFormat;
  * @author kwatters
  *
  */
-public class Point {
+public class Point implements Serializable {
+  
+  private static final long serialVersionUID = 1L;
   private double x;
   private double y;
   private double z;

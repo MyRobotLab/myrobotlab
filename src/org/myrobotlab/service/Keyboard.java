@@ -32,7 +32,7 @@ public class Keyboard extends Service {
   String lastKeyPressed;
 
   transient final NativeKeyboard keyboard = new NativeKeyboard();
-  MouseEvent mouseEvent = new MouseEvent();
+  transient MouseEvent mouseEvent = new MouseEvent();
   
   static public class MouseEvent {
     public Point2Df pos = new Point2Df();

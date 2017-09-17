@@ -21,7 +21,7 @@ public class Lidar extends Service implements SerialDataListener {
   public static final String MODEL_SICK_LMS200 = "SICK LMS200";
   public String serialName;
   public transient Serial serial;
-  public ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+  public transient ByteArrayOutputStream buffer = new ByteArrayOutputStream();
   String model;
   // states
   public static final String STATE_PRE_INITIALIZATION = "state pre initialization";

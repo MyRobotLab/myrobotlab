@@ -771,21 +771,29 @@ public class Servo extends Service implements ServoControl {
 
   /**
    * "Helper" methods - allows remote attaching of services by using name value
-   * @param controllerName - controllers name
-   * @param pin - pin to enable pwm
-   * @throws Exception - if attach fails
+   * 
+   * @param controllerName
+   *          - controllers name
+   * @param pin
+   *          - pin to enable pwm
+   * @throws Exception
+   *           - if attach fails
    */
   public void attach(String controllerName, int pin) throws Exception {
     this.pin = pin;
     attachServoController((ServoController) Runtime.getService(controllerName));
   }
-  
+
   /**
    * 
    * "Helper" methods - allows remote attaching of services by using name value
-   * @param controllerName - controllers name
-   * @param pin - pin to enable pwm
-   * @param pos - position to set servo
+   * 
+   * @param controllerName
+   *          - controllers name
+   * @param pin
+   *          - pin to enable pwm
+   * @param pos
+   *          - position to set servo
    * @throws Exception
    */
   public void attach(String controllerName, Integer pin, Double pos) throws Exception {
@@ -833,10 +841,12 @@ public class Servo extends Service implements ServoControl {
   public void detachServoController(ServoController controller) {
     if (this.controller == controller) {
       // disable pwm
-      controller.servoDetachPin(this);
-      // detach the this device from the controller
-      controller.detach(this);
-      // remove the this controller's reference
+      if (this.controller != null) {
+        controller.servoDetachPin(this);
+        // detach the this device from the controller
+        controller.detach(this);
+        // remove the this controller's reference
+      }
       this.controller = null;
       this.controllerName = null;
       this.enabled = false;
@@ -963,7 +973,7 @@ public class Servo extends Service implements ServoControl {
     int max = autoCalibrateSensorMax();
     // extra min calibration because foam is unstable
     int min2 = autoCalibrateSensorMin();
-    min=MathUtils.getPercentFromRange(min, min2,50);
+    min = MathUtils.getPercentFromRange(min, min2, 50);
     temporaryStopAutoDisable(false);
     if (max != min && max > min) {
       return true;

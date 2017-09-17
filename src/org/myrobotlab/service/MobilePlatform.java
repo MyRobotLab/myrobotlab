@@ -146,7 +146,7 @@ public class MobilePlatform extends Service {
 
   transient Motor right = null;
   transient PIDThread pid = null;
-  Object pidLock = new Object();
+  transient Object pidLock = new Object();
 
   String directionTarget = null;
   public static String DIRECTION_STOPPED = "DIRECTION_STOPPED";
@@ -157,7 +157,7 @@ public class MobilePlatform extends Service {
   // TODO - determine if control needs to be serialized
   // Lock for "syncing" time vs read write contention - don't want a turning
   // thread spinning too tightly
-  private final Object lock = new Object();
+  transient private final Object lock = new Object();
 
   boolean isTurning = false;
   // calibration / tuning

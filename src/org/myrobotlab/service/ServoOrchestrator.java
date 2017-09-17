@@ -75,7 +75,7 @@ public class ServoOrchestrator extends Service {
 
   int sizey = 5;
 
-  SettingsItemHolder[] settingsitemholder;
+  transient SettingsItemHolder[] settingsitemholder;
   Servo[] servos;
 
   public boolean isClockRunning;

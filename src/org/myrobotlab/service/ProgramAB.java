@@ -43,14 +43,13 @@ import org.slf4j.Logger;
 public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
-  
+
   public static class Response {
     public String session;
     public String msg;
-    public List<OOBPayload> payloads;
+    transient public List<OOBPayload> payloads;
     // FIXME - timestamps are usually longs System.currentTimeMillis()
     public Date timestamp;
-    
 
     public Response(String session, String msg, List<OOBPayload> payloads, Date timestamp) {
       this.session = session;
@@ -78,7 +77,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   // String currentSession = "default";
   // Session is a user and a bot. so the key to the session should be the
   // username, and the bot name.
-  HashMap<String, ChatData> sessions = new HashMap<String, ChatData>();
+  transient HashMap<String, ChatData> sessions = new HashMap<String, ChatData>();
   // TODO: better parsing than a regex...
   transient Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
   transient Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
@@ -141,18 +140,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       return;
     }
     if (wasCleanyShutdowned == null || wasCleanyShutdowned.isEmpty()) {
-      wasCleanyShutdowned="firstStart";  
+      wasCleanyShutdowned = "firstStart";
     }
     if (wasCleanyShutdowned.equals("nok")) {
       if (folderaimlIF.exists()) {
-        // warn("Bad previous shutdown, ProgramAB need to recompile AimlIf files. Don't worry.");  
+        // warn("Bad previous shutdown, ProgramAB need to recompile AimlIf
+        // files. Don't worry.");
         log.info("Bad previous shutdown, ProgramAB need to recompile AimlIf files. Don't worry.");
         for (File f : folderaimlIF.listFiles()) {
           f.delete();
         }
       }
     }
-    
+
     log.info(folder.getAbsolutePath());
     HashMap<String, Long> modifiedDates = new HashMap<String, Long>();
     for (File f : folder.listFiles()) {
@@ -181,18 +181,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
           // properly.
           log.info("Deleteing AIMLIF file because the original AIML file was modified. {}", aimlIF);
           f.delete();
-          // edit moz4r : we need to change the last modification date to aiml folder for recompilation
+          // edit moz4r : we need to change the last modification date to aiml
+          // folder for recompilation
           sleep(1000);
-          String fil=aimlPath+File.separator+"folder_updated";
-          File file = new File(fil);  
-          file.delete(); 
-          try{
-              PrintWriter writer = new PrintWriter(fil, "UTF-8");
-        	    writer.println(lastMod.toString());
-        	    writer.close();
-        	} catch (IOException e) {
-        	   // do something
-        	}
+          String fil = aimlPath + File.separator + "folder_updated";
+          File file = new File(fil);
+          file.delete();
+          try {
+            PrintWriter writer = new PrintWriter(fil, "UTF-8");
+            writer.println(lastMod.toString());
+            writer.close();
+          } catch (IOException e) {
+            // do something
+          }
         }
       }
     }
@@ -300,12 +301,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public String resolveSessionKey(String username, String botname) {
     return username + "-" + botname;
   }
-  
-  public void repetition_count(int val)
-  {
-	org.alicebot.ab.MagicNumbers.repetition_count=val;
+
+  public void repetition_count(int val) {
+    org.alicebot.ab.MagicNumbers.repetition_count = val;
   }
-  
 
   public Chat getChat(String userName, String botName) {
     String sessionKey = resolveSessionKey(userName, botName);
@@ -410,7 +409,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Return a list of all patterns that the AIML Bot knows to match against.
    * 
-   * @param botName the bots name from which to return it's patterns.
+   * @param botName
+   *          the bots name from which to return it's patterns.
    * @return a list of all patterns loaded into the aiml brain
    */
   public ArrayList<String> listPatterns(String botName) {
@@ -424,6 +424,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Return the number of milliseconds since the last response was given -1 if a
    * response has never been given.
+   * 
    * @return milliseconds
    */
   public long millisecondsSinceLastResponse() {
@@ -664,7 +665,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
 
     cleanOutOfDateAimlIFFiles(botName);
-    wasCleanyShutdowned="nok";
+    wasCleanyShutdowned = "nok";
     // TODO: manage the bots in a collective pool/hash map.
     if (bot == null) {
       bot = new Bot(botName, path);
@@ -718,27 +719,33 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void writeAndQuit() {
+    if (bot == null) {
+      log.info("no bot - don't need to write and quit");
+      return;
+    }
     bot.writeQuit();
-    // edit moz4r : we need to change the last modification date to aimlif folder because at this time all is compilated.
+
+    // edit moz4r : we need to change the last modification date to aimlif
+    // folder because at this time all is compilated.
     // so programAb don't need to load AIML at startup
     sleep(1000);
     File folder = new File(bot.aimlif_path);
 
     for (File f : folder.listFiles()) {
- 		f.setLastModified(System.currentTimeMillis());
-      }
-    String fil=bot.aimlif_path+File.separator+"folder_updated";
-    File file = new File(fil);  
+      f.setLastModified(System.currentTimeMillis());
+    }
+    String fil = bot.aimlif_path + File.separator + "folder_updated";
+    File file = new File(fil);
     file.delete();
-    try{
+    try {
       PrintWriter writer = new PrintWriter(fil, "UTF-8");
-  	    writer.println("");
-  	    writer.close();
-  	} catch (IOException e) {
-  	  log.error("PrintWriter error");
-  	}
+      writer.println("");
+      writer.close();
+    } catch (IOException e) {
+      log.error("PrintWriter error");
+    }
   }
-  
+
   @Override
   public void stopService() {
     try {
@@ -748,9 +755,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       e.printStackTrace();
     }
     writeAndQuit();
-    wasCleanyShutdowned="ok";
+    wasCleanyShutdowned = "ok";
     super.stopService();
-}
+  }
+
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -777,11 +785,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     Runtime.start("webgui", "WebGui");
 
     ProgramAB ai = (ProgramAB) Runtime.createAndStart("ai", "ProgramAB");
-    //ai.setPath(System.getProperty("user.dir")+File.separator+"ProgramAB"+File.separator);
+    // ai.setPath(System.getProperty("user.dir")+File.separator+"ProgramAB"+File.separator);
     ai.startSession("default", "alice2");
 
     log.info(ai.getResponse("hi there").toString());
-    log.info(ai.getResponse("こんにちは").toString());    
+    log.info(ai.getResponse("こんにちは").toString());
 
     // ai.savePredicates();
 

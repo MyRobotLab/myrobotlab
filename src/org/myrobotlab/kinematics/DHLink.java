@@ -1,5 +1,7 @@
 package org.myrobotlab.kinematics;
 
+import java.io.Serializable;
+
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.Servo;
@@ -20,7 +22,9 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class DHLink {
+public class DHLink implements Serializable {
+ 
+  private static final long serialVersionUID = 1L;
   private double d;
   private double theta;
   // rename this to a ?)
