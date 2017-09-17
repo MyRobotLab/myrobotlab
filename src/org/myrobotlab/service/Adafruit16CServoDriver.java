@@ -833,7 +833,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     }
     ServoData servoData = new ServoData();
     servoData.pin = servo.getPin();
-    servoData.targetOutput = servo.getTargetOutput();
+    servoData.targetOutput  = servo.getTargetOutput();
+    servoData.currentOutput = servo.getTargetOutput();
     servoData.velocity = servo.getVelocity();
     servoData.isEnergized = true;
     servoMap.put(servo.getName(), servoData);
