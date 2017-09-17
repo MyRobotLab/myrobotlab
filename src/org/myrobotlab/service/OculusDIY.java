@@ -28,7 +28,7 @@ public class OculusDIY extends Service implements OrientationListener {
 	transient public Arduino arduino;
 	transient public Mpu6050 mpu6050;
 
-	Orientation oculus = new Orientation();
+	transient Orientation oculus = new Orientation();
 	Mapper mapperPitch = new Mapper(-180, 0, 0, 180);
 	Mapper mapperYaw = new Mapper(-180, 180, 0, 360);
 

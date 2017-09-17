@@ -27,11 +27,11 @@ public class Osc extends Service implements OSCListener {
   private static final long serialVersionUID = 1L;
 
   // Map<String, OSCPortOut> senders = new HashMap<String, OSCPortOut>(); 
-  OSCPortOut sender;
+  transient OSCPortOut sender;
   String senderHost;
   Integer senderPort;
   
-  OSCPortIn receiver;
+  transient OSCPortIn receiver;
   Integer port;
 
   public final static Logger log = LoggerFactory.getLogger(Osc.class);

@@ -63,7 +63,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public transient CollisionDectection collisionItems = new CollisionDectection();
   
   
-  GeneticParameters geneticParameters = new GeneticParameters();
+  transient GeneticParameters geneticParameters = new GeneticParameters();
 
   public enum ObjectPointLocation {   
     ORIGIN_CENTER (0x01,"Center Origin"),   

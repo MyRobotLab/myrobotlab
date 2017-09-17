@@ -36,6 +36,7 @@
 
 package org.myrobotlab.service;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,7 +57,10 @@ import org.slf4j.Logger;
  */
 public class Pid extends Service {
 
-  public static class PidData {
+  public static class PidData implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
+
     /**
      * original user entered data for Kp value
      */

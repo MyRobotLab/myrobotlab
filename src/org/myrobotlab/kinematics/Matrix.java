@@ -1,5 +1,6 @@
 package org.myrobotlab.kinematics;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
@@ -8,7 +9,10 @@ import java.text.NumberFormat;
  *
  *
  */
-public class Matrix {
+public class Matrix implements Serializable {
+
+  private static final long serialVersionUID = 1L;
+
   protected int numRows;
 
   protected int numCols;

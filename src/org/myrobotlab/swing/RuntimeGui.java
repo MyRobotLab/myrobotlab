@@ -377,11 +377,13 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     JMenu logging = new JMenu("logging");
     menuBar.add(logging);
 
+    /*
     JMenuItem item = new JMenuItem("check for updates");
     item.addActionListener(this);
     system.add(item);
+    */
 
-    item = new JMenuItem("install all");
+    JMenuItem item = new JMenuItem("install all");
     item.addActionListener(this);
     system.add(item);
     

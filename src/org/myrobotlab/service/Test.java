@@ -66,6 +66,11 @@ public class Test extends Service implements StatusListener {
   transient Set<File> files = new HashSet<File>();
 
   /**
+   * tests which have returned error
+   */
+  List<TestData> errors = new ArrayList<TestData>();
+
+  /**
    * the flattened queue of tests (in the form of test results) on a wonderful
    * blocking queue which "potentially" could allow multi-threaded testing -
    * although Tests themselves are certainly not guaranteed to be "thread safe"
@@ -76,7 +81,7 @@ public class Test extends Service implements StatusListener {
    * the tester - always looking for tests on the testQueu
    */
   transient Tester tester;
-  
+
   /**
    * ts - tested results - serializable history keyed on timestamp
    */
@@ -107,7 +112,7 @@ public class Test extends Service implements StatusListener {
     String currentActivity;
     int percentDone;
     public int testsDone;
-    public int errors;
+    public int errorCount;
     public int errorPercentage;
     public int successes;
     public int successPercentage;
@@ -118,8 +123,8 @@ public class Test extends Service implements StatusListener {
       percentDone = testsDone * 100 / totalTests;
 
       if (status.isError()) {
-        errors++;
-        errorPercentage = errors * 100 / testsDone;
+        errorCount++;
+        errorPercentage = errorCount * 100 / testsDone;
       } else {
         successes++;
         successPercentage = successes * 100 / testsDone;
@@ -191,8 +196,8 @@ public class Test extends Service implements StatusListener {
       this.link = testName;
       this.startTime = System.currentTimeMillis();
     }
-    
-    public String toString(){
+
+    public String toString() {
       return String.format("testName: %s service: %s/%s status: %s", testName, branch, serviceName, status);
     }
   }
@@ -224,9 +229,9 @@ public class Test extends Service implements StatusListener {
     loadDefaultTests();
   }
 
-  public void stopService(){
+  public void stopService() {
     super.stopService();
-    if (tester != null){
+    if (tester != null) {
       tester.interrupt();
     }
   }
@@ -409,7 +414,15 @@ public class Test extends Service implements StatusListener {
     // Status status = Status.info("serializeTest for %s", name);
 
     try {
+      if (name.equals("org.myrobotlab.service.Plantoid")){
+        log.info("her name is my name too");
+      }
       ServiceInterface s = Runtime.start(name, name);
+      
+      if (s == null){
+        test.status = Status.error("could not create %s", name);
+        return test;
+      }
 
       // native serialization
       ByteArrayOutputStream fos = null;
@@ -424,12 +437,12 @@ public class Test extends Service implements StatusListener {
       CodecUtils.toJson(s);
 
       s.releaseService();
-      
+
     } catch (Exception e) {
       // serializationTestFailures
       test.status = Status.error(e);
     }
-    
+
     return test;
   }
 
@@ -471,17 +484,17 @@ public class Test extends Service implements StatusListener {
     }
     matrix.currentProgress.totalTests = matrix.servicesToTest.size() * matrix.testsToRun.size();
   }
-  
+
   /**
-   * moves the prepared tests to the test queue so the "tester"
-   * can run them all
+   * moves the prepared tests to the test queue so the "tester" can run them all
    */
-  public void test(){
-    for (String serviceName :matrix.servicesToTest) {
+  public void test() {
+    for (String serviceName : matrix.servicesToTest) {
       for (String testName : matrix.testsToRun) {
         try {
           testQueue.put(new TestData(serviceName, testName));
-        } catch (InterruptedException e) {}
+        } catch (InterruptedException e) {
+        }
       }
     }
 
@@ -545,6 +558,10 @@ public class Test extends Service implements StatusListener {
       // broadcast incremental progress
       progress.process(test.status);
 
+      if (test.status.isError()) {
+        errors.add(test);
+      }
+
       broadcastState(); // admittedly a bit heavy handed
 
       activity = String.format("tested %s(%s)", testName, test.serviceName);
@@ -553,6 +570,7 @@ public class Test extends Service implements StatusListener {
       if (testQueue.size() == 0) {
         log.info("test queue size is 0 - finished testing");
         done = true;
+        log.info("error count {} errors {}", errors.size(), errors);
       }
     }
 
@@ -560,7 +578,8 @@ public class Test extends Service implements StatusListener {
 
   /**
    * creates the default set of tests which include all "available" services
-   * tested by all tests, call test() would then move all tests over to the test queue
+   * tested by all tests, call test() would then move all tests over to the test
+   * queue
    */
   public void loadDefaultTests() {
 
@@ -585,14 +604,14 @@ public class Test extends Service implements StatusListener {
         matrix.testsToRun.add(methods[i]);
       }
     }
-    
+
     matrix.currentProgress.totalTests = matrix.servicesToTest.size() * matrix.testsToRun.size();
   }
 
   public List<String> getAllServiceNames() {
     String[] x = serviceData.getServiceTypeNames();
     List<String> serviceNames = new ArrayList<String>();
-    for (int i = 0; i < x.length; ++i){
+    for (int i = 0; i < x.length; ++i) {
       serviceNames.add(x[i]);
     }
     return serviceNames;
@@ -644,7 +663,7 @@ public class Test extends Service implements StatusListener {
         status.add(Status.error(e));
         exit(status);
       }
-      
+
       try {
         status.add(Status.info("releasePeers"));
         if (s.hasPeers()) {
@@ -1089,12 +1108,14 @@ public class Test extends Service implements StatusListener {
       List<String> testsToRun = new ArrayList<String>();
 
       // FIXME - must add branch !!
-      servicesToTest.add("ImageDisplay");
+      // servicesToTest.add("ImageDisplay");
+      servicesToTest.add("Plantoid");
       // testsToRun.add("PythonScriptTest");
       testsToRun.add("testSerialization");
 
       // setting up new tests to run in matrix
       test.loadTests(test.getAllServiceNames(), testsToRun);
+      // test.loadTests(servicesToTest, testsToRun);
       test.test();
 
       boolean done = true;
@@ -1129,7 +1150,7 @@ public class Test extends Service implements StatusListener {
 
       List<String> all = test.getAllServiceNames();
       StringBuffer sb = new StringBuffer();
-      for (String name: all) {
+      for (String name : all) {
         sb.append(String.format("%s\n", name));
       }
 

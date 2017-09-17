@@ -27,7 +27,7 @@ public class Node extends Service {
   }
 
   private static final String SCRIPT = "" + "var main = require('./project/main.js');" + "main.run();";
-  final ScriptEngineManager manager = new ScriptEngineManager();
+  transient final ScriptEngineManager manager = new ScriptEngineManager();
 
   public void runMain(String... args) throws InterruptedException {
 

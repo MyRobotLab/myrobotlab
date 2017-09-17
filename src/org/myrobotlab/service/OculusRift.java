@@ -43,20 +43,20 @@ public class OculusRift extends Service implements PointPublisher {
 	private static final float RAD_TO_DEGREES = 57.2957795F;
 	public final static Logger log = LoggerFactory.getLogger(OculusRift.class);
 
-	// Rift stuff.
-	protected Hmd hmd;
+	// the Rift stuff.
+	transient protected Hmd hmd;
 
 	private boolean initialized = false;
-	private RiftFrame lastRiftFrame = new RiftFrame();
+	transient private RiftFrame lastRiftFrame = new RiftFrame();
 
-	private OpenCVFilterAffine leftAffine = new OpenCVFilterAffine("left");
-	private OpenCVFilterAffine rightAffine = new OpenCVFilterAffine("right");
+	transient private OpenCVFilterAffine leftAffine = new OpenCVFilterAffine("left");
+	transient private OpenCVFilterAffine rightAffine = new OpenCVFilterAffine("right");
 
 	private boolean calibrated = false;
 	// Two OpenCV services, one for the left eye, one for the right eye.
 	transient public OpenCV leftOpenCV;
 	transient public OpenCV rightOpenCV;
-	private OculusDisplay display;
+	transient private OculusDisplay display;
 
 	// TODO: make these configurable...
 	private int leftCameraIndex = 0;

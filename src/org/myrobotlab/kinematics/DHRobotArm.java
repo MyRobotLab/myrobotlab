@@ -1,5 +1,6 @@
 package org.myrobotlab.kinematics;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -7,7 +8,9 @@ import org.myrobotlab.service.InverseKinematics3D;
 import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
 
-public class DHRobotArm{
+public class DHRobotArm implements Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(DHRobotArm.class);
 
