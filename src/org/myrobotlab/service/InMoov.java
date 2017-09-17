@@ -688,7 +688,7 @@ public class InMoov extends Service {
     }
   }
 
-  // ------ composites servos end -----------
+  // ------ composites servos end ----------- 
 
   public void moveHead(Integer neck, Integer rothead) {
     if (head != null) {
