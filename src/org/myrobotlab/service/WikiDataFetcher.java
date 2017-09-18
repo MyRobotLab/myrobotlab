@@ -39,18 +39,18 @@ public class WikiDataFetcher extends Service {
 
     try {
       WikiDataFetcher wiki = (WikiDataFetcher) Runtime.start("wikiDataFetcher", "WikiDataFetcher");
-      
-      sleep(2000);
+      wiki.setWebSite("enwiki");
+      wiki.setLanguage("en");
+
       EntityDocument doc = WikiDataFetcher.getWiki("Halloween");
 
-      // capital of united states WORKY
       log.info(getData("united states", "P36"));
 
-      // what is Halloween WORKY
       log.info(doc.toString());
 
-      // height of eiffel tower NOWORKY ANYMORE !!! ( quantity broken )
       log.info(getData("eiffel tower", "P2048"));
+      
+      log.info(getData("nothing to test", "P2048"));
 
     } catch (Exception e) {
       Logging.logError(e);
@@ -260,7 +260,7 @@ public class WikiDataFetcher extends Service {
   public static String getData(String query, String ID) throws MediaWikiApiErrorException {
     // remove the try for dubug :
     // https://github.com/MyRobotLab/myrobotlab/issues/94
-    // try {
+    try {
     ArrayList<Object> al = getSnak(query, ID);
     // TODO manage all snaks and qualifiers
     Value data = ((JacksonValueSnak) al.get(1)).getDatavalue();
@@ -317,9 +317,9 @@ public class WikiDataFetcher extends Service {
         break;
     }
     return answer;
-    // } catch (Exception e) {
-    // return "Not Found !";
-    // }
+    } catch (Exception e) {
+    return "Not Found !";
+    }
   }
 
   public String getProperty(String query, String ID) throws MediaWikiApiErrorException {
