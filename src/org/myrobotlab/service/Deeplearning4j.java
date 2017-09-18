@@ -471,6 +471,7 @@ public class Deeplearning4j extends Service {
     meta.addDependency("org.bytedeco.javacv", "1.3");
     // and this is just a good frame grabber.. might as well pull it in.
     meta.addDependency("pl.sarxos.webcam", "0.3.10");
+    meta.addDependency("org.apache.commons.io", "2.3.0");
     return meta;
   }
 
