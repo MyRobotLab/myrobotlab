@@ -198,7 +198,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 			log.warn("voice is null! setting to default: fr-fr");
 			voice = "fr-fr";
 		}
-
+		try {
 		String filename = this.getLocalFileName(this, toSpeak + rate.toString() , "mp3");
 		String filenametts = "audioFile" + File.separator + filename;
 		VoiceProvider tts = new VoiceProvider(getKey());
@@ -239,8 +239,11 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 		audioFile.playBlocking(filenametts2);
 		invoke("publishEndSpeaking", toSpeak);
 		log.info("Finished waiting for completion.");
-		return false;
 
+		} catch (Exception e) {
+      error("VoiceRss error ( api key ? ) :");
+    }
+    return false;
 	}
 
 	@Override
@@ -285,7 +288,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 			log.warn("voice is null! setting to default: fr-fr");
 			voice = "fr-fr";
 		}
-
+		try {
 		String filename = this.getLocalFileName(this, toSpeak, "mp3");
 
 		VoiceProvider tts = new VoiceProvider(getKey());
@@ -324,7 +327,10 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 		ret = audioFile.playCachedFile(filename);
 		utterances.put(ret, toSpeak);
 
-		return ret;
+    } catch (Exception e) {
+      error("VoiceRss error ( api key ? ) :");
+    }
+    return ret;
 
 	}
 
@@ -425,7 +431,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 			speech.speakBlocking("it works, yes I believe it does");
 			speech.speakBlocking("yes yes. oh good. excellent!");
 			speech.speakBlocking("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
-			speech.speakBlocking("I'm afraid I can't do that.");
+			speech.speak("I'm afraid I can't do that.");
 
 			// speech.speak("this is a test");
 			//
