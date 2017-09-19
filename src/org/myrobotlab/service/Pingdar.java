@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import java.util.Set;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -39,9 +37,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
   public int sweepMax = 180;
 
   public int step = 1;
-  transient private Arduino controller;
   transient private Servo servo;
-
   transient private UltrasonicSensor sensor;
   
   // TODO - changed to XDar - make RangeSensor interface -> publishRange
@@ -61,50 +57,14 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
 
   // ----------- interface begin ----------------
 
-  public boolean attach(Arduino arduino, String port, UltrasonicSensor sensor, int trigPin, int echoPin, Servo servo, int servoPin) throws Exception {
-    this.controller = arduino;
+  public boolean attach(UltrasonicSensor sensor, Servo servo) throws Exception {
     this.sensor = sensor;
     this.servo = servo;
 
-    arduino.connect(port);
-
-    // TODO - FIX ME
-    /*
-     * if (!sensor.attach(port, trigPin, echoPin)) { error(
-     * "could not attach sensor"); return false; }
-     */
-
-    // FIXME sensor.addRangeListener
-    // publishRange --> onRange
     sensor.addRangeListener(this);
-    // FIXME - servo events NoWorky !
-    // FIXME - optimization would be take the pos & range and send it at the same time 
     servo.addServoEventListener(this);
     // from the Arduino and send it back in on packet ..
-    arduino.attach(servo, servoPin);
-    sensor.attach(port, trigPin, echoPin);
-
     return true;
-  }
-
-  /**
-   * I think this may be a good pattern ?
-   * attach usually is between services, in this case its being used as minimal
-   * input config and its Peers are being used as the services...
-   * @param port com port
-   * @param trigPin pin connected to trigger
-   * @param echoPin pin connected to echo
-   * @param servoPin the servo pin 
-   * 
-   * @return true or false
-   * @throws Exception e
-   */
-  public boolean attach(String port, int trigPin, int echoPin, int servoPin) throws Exception {
-    return attach(controller, port, sensor, trigPin, echoPin, servo, servoPin);
-  }
-
-  public Arduino getController() {
-    return controller;
   }
 
   // ----------- interface end ----------------
@@ -150,9 +110,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
   @Override
   public void startService() {
     super.startService();
-    controller = (Arduino) startPeer("controller");
-    sensor = (UltrasonicSensor) startPeer("sensor");
-    servo = (Servo) startPeer("servo");
+    broadcastState();
   }
 
   public void stop() {
@@ -210,24 +168,6 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
     return meta;
   }
 
-  // INVESTIGATE - should this be here ?
-  @Override
-  public void detach(String controllerName) {
-    
-  }
-
-  @Override
-  public boolean isAttached(String name) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public Set<String> getAttached() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
   @Override
   public void startRanging() {
     if (sensor != null){
@@ -251,19 +191,24 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
     try {
       LoggingFactory.init(Level.INFO);
 
-      int trigPin = 8;
-      int echoPin = 7;
-      int servoPin = 9;
-
       Runtime.start("gui", "SwingGui");
       
       VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual","VirtualArduino");
-      // virtual.connect("COM5");
+      Servo servo = (Servo)Runtime.start("servo","Servo");
+      UltrasonicSensor sr04 = (UltrasonicSensor)Runtime.start("sr04", "UltrasonicSensor");
+      sleep(1000);
+      virtual.connect("COM5");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      arduino.connect("COM5");
+      sr04.attach(arduino, 12, 11);
+      servo.attach(arduino, 2);
 
       Pingdar pingdar = (Pingdar) Runtime.start("pingdar", "Pingdar");
-      pingdar.attach("COM5", trigPin, echoPin, servoPin);
+      sleep(1000);
+      pingdar.attach(sr04, servo);
       pingdar.sweep(70, 100);
-      // pingdar.stopRanging();
+      sleep(5000);
+      pingdar.stop();
 
     } catch (Exception e) {
       log.error("main threw", e);
