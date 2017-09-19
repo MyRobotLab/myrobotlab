@@ -14,7 +14,8 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'ui.bootstrap', //BootstrapUI (in Angular style)
 'oc.lazyLoad', //lazyload
 'sticky', //sticky elements
-'checklist-model', 'angular-intro', // intro
+'checklist-model', // checklists
+'angular-intro', // intro
 //'ngclipboard',
 'angular-clipboard', 'rzModule', 'ngFlash', //'charts',
 'nvd3ChartDirectives', 'ui.ace', //funky editor
