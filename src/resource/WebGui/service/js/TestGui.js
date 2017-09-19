@@ -3,6 +3,7 @@ angular.module('mrlapp.service.TestGui', [])
     $log.info('TestGuiCtrl');
     var _self = this;
     var msg = this.msg;
+    var services = [];
 
     $scope.selectedAll = true;
     
@@ -15,23 +16,42 @@ angular.module('mrlapp.service.TestGui', [])
     // two service arrays - one is model of "all"
     // the other is current model to test
     $scope.services = [];
-    $scope.testPlan = {
-        servicesToTest : []
-    };
     
     // FIXME - do the same thing for Services - default state is selected
     // FIXME - get this from the service
-    $scope.tests = ['PythonScriptTest', 'JunitService', 'PythonScriptExists', 'ServicePageExists'];
-    $scope.testsToRun =  angular.copy($scope.tests);
+    $scope.tests = [];
+
+    // "if your not using a dot - your doing it wrong" - Sooooooo true
+    // fought with $scope.servicesToTest = x for such a long time !!!!
+    $scope.testPlan = {
+        servicesToTest : []
+    }
+    
+    // $scope.testsToRun =  angular.copy($scope.tests);
+    // $scope.servicesToTest = [];// angular.copy($scope.tests);
+
     $scope.trustAsHtml = $sce.trustAsHtml;
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
-        $scope.service = service;
-        $scope.matrix = service.matrix;
-        $scope.services = service.matrix.services;
-        $scope.currentProgress = service.matrix.currentProgress;
-        $scope.testPlan.servicesToTest = service.matrix.servicesToTest;
+
+        _self.services = service.services;
+
+        // globals
+        $scope.service  = service;
+        $scope.matrix   = service.matrix;
+        var matrix      = service.matrix;
+
+        // all possible tests
+        $scope.tests = service.tests;
+        // all possible services
+        $scope.services = service.services;
+        
+        $scope.currentProgress = matrix.currentProgress;
+
+        // test plan
+        $scope.testPlan.servicesToTest = matrix.servicesToTest;
+        $scope.testsToRun     = matrix.testsToRun;
     }
     ;
     
@@ -56,7 +76,10 @@ angular.module('mrlapp.service.TestGui', [])
     $scope.checkAll = function() {
         if ($scope.selectedAll) {
             $scope.selectedAll = true;
-            $scope.testPlan.servicesToTest = angular.copy($scope.services);
+            // $scope.servicesToTest = angular.copy($scope.services);
+            // $scope.services = _self.services;
+            $scope.testPlan.servicesToTest = $scope.services.map(function(item) { return item.simpleName; });
+            // $scope.
             $scope.$apply();
         } else {
             $scope.selectedAll = false;

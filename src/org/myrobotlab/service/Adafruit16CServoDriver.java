@@ -923,8 +923,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
  */
 @Override
 public void enablePin(Integer sensorPin, Integer i) {
-	// TODO Auto-generated method stub
-	
+  // TODO Auto-generated method stub
+  
 }
 
 /* (non-Javadoc)
@@ -932,8 +932,8 @@ public void enablePin(Integer sensorPin, Integer i) {
  */
 @Override
 public void disablePin(Integer i) {
-	// TODO Auto-generated method stub
-	
+  // TODO Auto-generated method stub
+  
 }
 
 }

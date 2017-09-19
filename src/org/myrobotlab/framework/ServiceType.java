@@ -22,6 +22,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	private static final long serialVersionUID = 1L;
 
 	String name;
+	String simpleName;
 	String link;
 	String license;// = "Apache";
 	boolean isCloudService = false;
@@ -71,10 +72,12 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 
 	public ServiceType(Class<?> clazz) {
 		this.name = clazz.getCanonicalName();
+		this.simpleName = clazz.getSimpleName();
 	}
 
 	public ServiceType(String name) {
 		this.name = name;
+		this.simpleName = name.substring(name.lastIndexOf(".")+1);
 	}
 
 	public void addDependency(String org, String version) {
@@ -91,13 +94,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	}
 
 	public String getSimpleName() {
-		if (name == null) {
-			return null;
-		}
-		if (name.indexOf(".") == -1) {
-			return name;
-		}
-		return name.substring(name.lastIndexOf('.') + 1);
+		return simpleName;
 	}
 
 	public boolean isAvailable() {
@@ -209,5 +206,6 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   public void setCloudService(boolean b) {
     isCloudService = b;
   }
+  
 
 }

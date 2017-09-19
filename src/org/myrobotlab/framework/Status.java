@@ -205,7 +205,7 @@ public class Status implements Serializable {// extends Exception {
     Status s = new Status(SUCCESS);
     s.level = SUCCESS;
     s.detail = detail;
-    return null;
+    return s;
   }
 
 }
