@@ -262,7 +262,7 @@ public class Test extends Service implements StatusListener {
   /**
    * tests which have returned error
    */
-  List<TestData> errors = new ArrayList<TestData>();
+  List<TestData> errors;
   /**
    * the flattened queue of tests (in the form of test results) on a wonderful
    * blocking queue which "potentially" could allow multi-threaded testing -
@@ -303,8 +303,13 @@ public class Test extends Service implements StatusListener {
   public Test(String n) {
     super(n);
 
+    // protecting previously serialized data
     if (matrix == null){
       matrix = new TestMatrix();
+    }
+    
+    if (errors == null){
+      errors = new ArrayList<TestData>();
     }
     
     // get all possible tests
