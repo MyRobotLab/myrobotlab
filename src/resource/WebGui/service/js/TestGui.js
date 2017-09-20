@@ -42,6 +42,8 @@ angular.module('mrlapp.service.TestGui', [])
         $scope.matrix   = service.matrix;
         var matrix      = service.matrix;
 
+        $scope.errors   = service.errors;
+
         // all possible tests
         $scope.tests = service.tests;
         // all possible services

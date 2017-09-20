@@ -124,7 +124,7 @@ public class HttpRequest {
     connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
     PrintWriter writer = null;
     try {
-      String charset = "ISO-8859-1";
+      String charset = "ISO-8859-1"; // was ISO-8859-1
       OutputStream output = connection.getOutputStream();
       writer = new PrintWriter(new OutputStreamWriter(output, charset), true); // true
       // =
