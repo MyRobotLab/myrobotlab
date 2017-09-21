@@ -247,7 +247,7 @@ public class Servo extends Service implements ServoControl {
   private int disableDelayIfVelocity = 1000;
   private boolean moving;
   private double currentPosInput;
-  public boolean autoDisable = false;
+  public boolean autoDisable = true;
   boolean autoDisableOriginalStatus = autoDisable;
   boolean temporaryStopAutoDisableFinished = true;
   private transient Timer autoDisableTimer;
@@ -945,14 +945,29 @@ public class Servo extends Service implements ServoControl {
    * is complete
    * 
    */
-  @Deprecated
+  @Deprecated // use setAutoDisable(boolean)
   public void enableAutoAttach(boolean autoAttach) {
-    warn("enableAutoAttach is disabled please use enableAutoEnable");
+    warn("enableAutoAttach is disabled please use setAutoDisable");
     this.autoEnable = autoAttach;
   }
 
+  @Deprecated // use setAutoDisable(boolean)
   public void enableAutoEnable(boolean autoEnable) {
+    warn("enableAutoEnable is disabled please use setAutoDisable");
     this.autoEnable = autoEnable;
+  }
+  
+  public void setAutoDisable(boolean autoDisable){
+    this.autoEnable = autoDisable;
+    
+    this.autoDisable = autoDisable;
+    this.addServoEventListener(this);
+    log.info("enableAutoDisable : " + autoDisable);
+    if (autoDisable && !this.isMoving() && this.isEnabled()) {
+      this.disable();
+    }
+    broadcastState();
+    
   }
 
   // [experimental} generic analog sensor feedback to servo
@@ -1099,7 +1114,7 @@ public class Servo extends Service implements ServoControl {
 
   @Deprecated
   public void enableAutoDetach(boolean autoDetach) {
-    warn("enableAutoDetach is disabled please use enableAutoDisable");
+    warn("enableAutoDetach is disabled please use setAutoDisable");
     this.autoDisable = autoDetach;
     this.addServoEventListener(this);
   }
@@ -1120,7 +1135,9 @@ public class Servo extends Service implements ServoControl {
 
   }
 
+  @Deprecated
   public void enableAutoDisable(boolean autoDisable) {
+    warn("enableAutoDetach is disabled please use setAutoDisable");
     this.autoDisable = autoDisable;
     this.addServoEventListener(this);
     log.info("enableAutoDisable : " + autoDisable);
@@ -1208,6 +1225,7 @@ public class Servo extends Service implements ServoControl {
   /*
    * Set the controller for this servo but does not attach it. see also attach()
    */
+  @Deprecated // use attach(Attachable service) - and route to the appropriate method
   public void setController(ServoController controller) {
     this.controller = controller;
   }
