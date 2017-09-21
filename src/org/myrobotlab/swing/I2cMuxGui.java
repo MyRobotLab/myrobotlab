@@ -62,8 +62,7 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
     super(boundServiceName, myService);
     boundService = (I2cMux) Runtime.getService(boundServiceName);
 
-    // addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
-    addTopLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
+    addTopLine(createFlowPanel("Controller", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
 
     refreshControllers();
     getDeviceBusList();
