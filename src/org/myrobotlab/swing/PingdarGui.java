@@ -26,11 +26,12 @@
 package org.myrobotlab.swing;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -48,7 +49,7 @@ public class PingdarGui extends ServiceGui implements ListSelectionListener, Vid
   public final static Logger log = LoggerFactory.getLogger(PingdarGui.class.toString());
 
   VideoWidget screen = null;
-  Graphics graph = null;
+  Graphics2D g = null;
 
   BufferedImage camImage = null;
   BufferedImage graphImage = null;
@@ -72,18 +73,25 @@ public class PingdarGui extends ServiceGui implements ListSelectionListener, Vid
   public PingdarGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
 
-    screen = new VideoWidget(boundServiceName, myService);
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-    camImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_RGB);
-    graphImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_RGB);
+        screen = new VideoWidget(boundServiceName, myService);
 
-    graph = graphImage.getGraphics();
+        camImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_RGB);
+        graphImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_RGB);
 
-    graph.setColor(Color.green);
+        g = (Graphics2D)graphImage.getGraphics();
 
-    screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
+        g.setColor(Color.green);
 
-    display.add(screen.display);
+       // DON'T DO THIS - IT WILL BORK THE UI !!!
+       // screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
+
+       display.add(screen.display);
+      }
+    });
 
   }
 
@@ -98,21 +106,33 @@ public class PingdarGui extends ServiceGui implements ListSelectionListener, Vid
   }
 
   public void displayFrame(SerializableImage camImage) {
-    screen.displayFrame(camImage);
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        screen.displayFrame(camImage);
+      }
+    });
   }
 
   public void drawStaticInfo() {
-    graph.setColor(Color.gray);
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-    int inches = 0;
+        g.setColor(Color.gray);
 
-    int r = 160;
+        int inches = 0;
 
-    for (r = 160; r < vheight * 2; r += 160) {
-      inches += 10;
-      graph.drawArc(vwidth / 2 - r / 2, vheight - r / 2, r, r, 0, 180);
-      graph.drawString("" + inches, vwidth / 2 + r / 2, vheight - 10);
-    }
+        int r = 160;
+
+        for (r = 160; r < vheight * 2; r += 160) {
+          inches += 10;
+          g.drawArc(vwidth / 2 - r / 2, vheight - r / 2, r, r, 0, 180);
+          g.drawString("" + inches, vwidth / 2 + r / 2, vheight - 10);
+        }
+
+      }
+    });
 
   }
 
@@ -122,101 +142,110 @@ public class PingdarGui extends ServiceGui implements ListSelectionListener, Vid
   }
 
   public Point onPingdar(Point p) {
-    int x;
-    int y;
-    int x0;
-    int y0;
-    int zScale = 8; // 11
-    int xOffset = vwidth / 2; // set origin of polar in middle
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-    ++cnt;
-    if (cnt % 180 == 0) {
-      drawStaticInfo();
-    }
+        int x;
+        int y;
+        int x0;
+        int y0;
+        int zScale = 8; // 11
+        int xOffset = vwidth / 2; // set origin of polar in middle
 
-    if (p.r < 8) {
-      return p;
-    }
+        ++cnt;
+        if (cnt % 180 == 0) {
+          drawStaticInfo();
+        }
 
-    // calculate xy for p
-    x = ((int) (p.r * Math.cos(Math.toRadians(p.theta)) * zScale) + xOffset);
-    y = vheight - ((int) (p.r * Math.sin(Math.toRadians(p.theta)) * zScale));
-    // log.info(String.format(" x y %d %d", x, y));
+        if (p.r < 8) {
+          // return p;
+          return;
+        }
 
-    // take care of history
+        // calculate xy for p
+        x = ((int) (p.r * Math.cos(Math.toRadians(p.theta)) * zScale) + xOffset);
+        y = vheight - ((int) (p.r * Math.sin(Math.toRadians(p.theta)) * zScale));
+        // log.info(String.format(" x y %d %d", x, y));
 
-    if (hist.size() > 0) {
-      // get historical coordinates
-      Point h = hist.get(hist.size() - 1);
-      x0 = ((int) (h.r * Math.cos(Math.toRadians(h.theta)) * zScale) + xOffset);
-      y0 = vheight - ((int) (h.r * Math.sin(Math.toRadians(h.theta)) * zScale));
-      double distance = Math.sqrt((x0 - x) * (x0 - x) + (y0 - y) * (y0 - y));
+        // take care of history
 
-      // black out previous info
-      graph.setColor(Color.black);
-      graph.drawString(h.theta + " " + df.format(h.r), x0, y0 - 40);
-      graph.drawLine(x0, y0, x0, y0 - 40);
+        if (hist.size() > 0) {
+          // get historical coordinates
+          Point h = hist.get(hist.size() - 1);
+          x0 = ((int) (h.r * Math.cos(Math.toRadians(h.theta)) * zScale) + xOffset);
+          y0 = vheight - ((int) (h.r * Math.sin(Math.toRadians(h.theta)) * zScale));
+          double distance = Math.sqrt((x0 - x) * (x0 - x) + (y0 - y) * (y0 - y));
 
-      // gray out previous point
-      graph.setColor(Color.green);
-      // draw line if under min distance from previous point
-      if (distance < 40) {
-        graph.drawLine(x, y, x0, y0);
+          // black out previous info
+          g.setColor(Color.black);
+          g.drawString(h.theta + " " + df.format(h.r), x0, y0 - 40);
+          g.drawLine(x0, y0, x0, y0 - 40);
+
+          // gray out previous point
+          g.setColor(Color.green);
+          // draw line if under min distance from previous point
+          if (distance < 40) {
+            g.drawLine(x, y, x0, y0);
+          }
+
+          // black historical lidar vector
+          g.setColor(Color.black);
+          x0 = ((int) (5 * Math.cos(Math.toRadians(h.theta)) * zScale) + xOffset);
+          y0 = vheight - ((int) (5 * Math.sin(Math.toRadians(h.theta)) * zScale));
+          g.drawLine(vwidth / 2, vheight, x0, y0);
+
+        }
+
+        int maxHistory = 800;
+        if (hist.size() > maxHistory) {
+          // aggressive removal - doesnt check on distance
+          g.setColor(Color.black);
+          Point h = hist.remove(0);
+          x0 = ((int) (h.r * Math.cos(Math.toRadians(h.theta)) * zScale) + xOffset);
+          y0 = vheight - ((int) (h.r * Math.sin(Math.toRadians(h.theta)) * zScale));
+
+          Point h1 = hist.get(0);
+          int x1 = ((int) (h1.r * Math.cos(Math.toRadians(h1.theta)) * zScale) + xOffset);
+          int y1 = vheight - ((int) (h1.r * Math.sin(Math.toRadians(h1.theta)) * zScale));
+          g.drawLine(x1, y1, x0, y0);
+
+          // remove line segment
+        }
+
+        // draw the point & info
+
+        if (p.r > 0) {
+          // draw point
+          g.setColor(Color.green);
+          // x = vwidth - ((int)(p.z * Math.cos(Math.toRadians(p.servoPos)) *
+          // zScale) + xOffset);
+          // y = vheight - ((int) (p.z * Math.sin(Math.toRadians(p.servoPos))
+          // * zScale));
+
+          g.drawLine(x, y, x, y);
+          g.drawLine(x, y, x, y - 40);
+          g.drawString(p.theta + " " + df.format(p.r), x, y - 40);
+        } else {
+          // out of range - dump the point
+          // return p; - need point to refresh lidar vector
+        }
+
+        // draw lidar vector
+        x = ((int) (5 * Math.cos(Math.toRadians(p.theta)) * zScale) + xOffset);
+        y = vheight - ((int) (5 * Math.sin(Math.toRadians(p.theta)) * zScale));
+        g.setColor(Color.gray);
+        g.drawLine(vwidth / 2, vheight, x, y);
+
+        hist.add(p);
+
+        // screen image
+        screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
       }
+    });
 
-      // black historical lidar vector
-      graph.setColor(Color.black);
-      x0 = ((int) (5 * Math.cos(Math.toRadians(h.theta)) * zScale) + xOffset);
-      y0 = vheight - ((int) (5 * Math.sin(Math.toRadians(h.theta)) * zScale));
-      graph.drawLine(vwidth / 2, vheight, x0, y0);
-
-    }
-
-    int maxHistory = 800;
-    if (hist.size() > maxHistory) {
-      // aggressive removal - doesnt check on distance
-      graph.setColor(Color.black);
-      Point h = hist.remove(0);
-      x0 = ((int) (h.r * Math.cos(Math.toRadians(h.theta)) * zScale) + xOffset);
-      y0 = vheight - ((int) (h.r * Math.sin(Math.toRadians(h.theta)) * zScale));
-
-      Point h1 = hist.get(0);
-      int x1 = ((int) (h1.r * Math.cos(Math.toRadians(h1.theta)) * zScale) + xOffset);
-      int y1 = vheight - ((int) (h1.r * Math.sin(Math.toRadians(h1.theta)) * zScale));
-      graph.drawLine(x1, y1, x0, y0);
-
-      // remove line segment
-    }
-
-    // draw the point & info
-
-    if (p.r > 0) {
-      // draw point
-      graph.setColor(Color.green);
-      // x = vwidth - ((int)(p.z * Math.cos(Math.toRadians(p.servoPos)) *
-      // zScale) + xOffset);
-      // y = vheight - ((int) (p.z * Math.sin(Math.toRadians(p.servoPos))
-      // * zScale));
-
-      graph.drawLine(x, y, x, y);
-      graph.drawLine(x, y, x, y - 40);
-      graph.drawString(p.theta + " " + df.format(p.r), x, y - 40);
-    } else {
-      // out of range - dump the point
-      // return p; - need point to refresh lidar vector
-    }
-
-    // draw lidar vector
-    x = ((int) (5 * Math.cos(Math.toRadians(p.theta)) * zScale) + xOffset);
-    y = vheight - ((int) (5 * Math.sin(Math.toRadians(p.theta)) * zScale));
-    graph.setColor(Color.gray);
-    graph.drawLine(vwidth / 2, vheight, x, y);
-
-    hist.add(p);
-
-    // screen image
-    screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
     return p;
+
   }
 
   @Override
