@@ -246,7 +246,7 @@ public class Servo extends Service implements ServoControl {
   private boolean autoEnable = true;
   
   /**
-   * defaultDisableDelayNoVelocity
+   * defaultDisableDelayNoVelocity 
    * this make sense if velocity == -1
    * a timer is launched to delay disable
    * @param defaultDisableDelayNoVelocity
