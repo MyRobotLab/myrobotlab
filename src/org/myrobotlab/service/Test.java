@@ -689,6 +689,10 @@ public class Test extends Service implements StatusListener {
       }
       String testName = test.testName;
       String serviceName = test.serviceName;
+      
+      if (test.branch == null){
+        test.branch = Platform.getLocalInstance().getBranch();
+      }
 
       String activity = String.format("test %s on %s", testName, serviceName);
       log.info(activity);
