@@ -461,7 +461,7 @@ public class FileIO {
 	static public final List<String> getServiceList() throws IOException {
 
 		List<URL> urls = listContents(getRoot(), "org/myrobotlab/service", false, new String[] { ".*\\.class" },
-				new String[] { ".*Test\\.class", ".*\\$.*" });
+				new String[] {} /* { ".*Test\\.class", ".*\\$.*" } */); // allowing all services
 		ArrayList<String> classes = new ArrayList<String>();
 		log.info("found {} service files in {}", urls.size(), getRoot());
 		// String path = packageName.replace('.', '/');
