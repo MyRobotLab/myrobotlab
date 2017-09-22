@@ -169,7 +169,8 @@ public class CsvConnector extends AbstractConnector {
 
   @Override
   public void stopCrawling() {
-    // TODO Auto-generated method stub
+    flush();
+    state = ConnectorState.STOPPED;
   }
 
   public String getFilename() {
@@ -184,7 +185,7 @@ public class CsvConnector extends AbstractConnector {
     return columns;
   }
 
-  public void setColumns(String[] columns) {
+  public void setColumns(String... columns) {
     this.columns = columns;
   }
 
@@ -233,6 +234,7 @@ public class CsvConnector extends AbstractConnector {
     ServiceType meta = new ServiceType(CsvConnector.class.getCanonicalName());
     meta.addDescription("This service crawls a csv file and publishes each row as a document");
     meta.addCategory("ingest");
+    meta.addDependency("net.sf.opencsv", "2.3");
     return meta;
   }
 

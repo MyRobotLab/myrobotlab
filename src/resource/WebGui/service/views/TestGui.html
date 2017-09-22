@@ -13,7 +13,7 @@
 <table class="table table-striped">
   <tr><th>error list</th></tr>
   <tr ng-repeat="error in errors"> 
-    <td> 
+    <td> <input type="checkbox" checklist-model="testPlan.servicesToTest" checklist-value="error.serviceName">
       <img ng-src="/{{error.serviceName}}.png" width="16">&nbsp;&nbsp;{{error.serviceName}}
     </td>
   </tr>
