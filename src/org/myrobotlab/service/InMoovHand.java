@@ -225,31 +225,31 @@ public class InMoovHand extends Service implements LeapDataListener {
     
   }
 
+  @Deprecated
   public void enableAutoEnable(Boolean param) {
-	  thumb.enableAutoEnable(param);
-	  index.enableAutoEnable(param);
-	  majeure.enableAutoEnable(param);
-	  ringFinger.enableAutoEnable(param);
-	  pinky.enableAutoEnable(param);
-	  wrist.enableAutoEnable(param);
 	  }
   
+  @Deprecated
   public void enableAutoDisable(Boolean param) {
-	  thumb.enableAutoDisable(param);
-	  index.enableAutoDisable(param);
-	  majeure.enableAutoDisable(param);
-	  ringFinger.enableAutoDisable(param);
-	  pinky.enableAutoDisable(param);
-	  wrist.enableAutoDisable(param);
+    setAutoDisable(param);
 	  }
   
-  public void temporaryStopAutoDisable(Boolean param) {
-    thumb.temporaryStopAutoDisable(param);
-    index.temporaryStopAutoDisable(param);
-    majeure.temporaryStopAutoDisable(param);
-    ringFinger.temporaryStopAutoDisable(param);
-    pinky.temporaryStopAutoDisable(param);
-    wrist.temporaryStopAutoDisable(param);
+  public void setAutoDisable(Boolean param) {
+    thumb.setAutoDisable(param);
+    index.setAutoDisable(param);
+    majeure.setAutoDisable(param);
+    ringFinger.setAutoDisable(param);
+    pinky.setAutoDisable(param);
+    wrist.setAutoDisable(param);
+    }
+  
+  public void setOverrideAutoDisable(Boolean param) {
+    thumb.setOverrideAutoDisable(param);
+    index.setOverrideAutoDisable(param);
+    majeure.setOverrideAutoDisable(param);
+    ringFinger.setOverrideAutoDisable(param);
+    pinky.setOverrideAutoDisable(param);
+    wrist.setOverrideAutoDisable(param);
     }
   
   public void devilHorns() {

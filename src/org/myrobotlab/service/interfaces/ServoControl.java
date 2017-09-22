@@ -266,4 +266,42 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   // WTF ?
   void addIKServoEventListener(NameProvider service);
 
+  /**
+   * setAutoDisable tell the servo to disable when position reached
+   * this make sense only if velocity > 0
+   * if velocity == -1 : a timer is launched to delay disable
+   * @param autoDisable
+   *          - boolean
+   */
+  void setAutoDisable(boolean autoDisable);
+
+  /**
+   * getAutoDisable return value set by setAutoDisable
+   * 
+   * @return boolean
+   */
+  boolean getAutoDisable();
+
+  /**
+   * moveToBlocking is a basic move command of the servo - usually is 0 - 180
+   * valid range but can be adjusted and / or re-mapped with min / max and map
+   * commands
+   * 
+   * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION"
+   * response
+   * 
+   * @param pos
+   *          - position to move to
+   * @return true (why?)
+   */
+  boolean moveToBlocking(double pos);
+
+  /**
+   * Sometime we need to override autoDisable :
+   * servoGui slider / tracking / gestures  that leave your arms in the air ...
+   * so if overrideautoDisable(true) servo will never autoDisable
+   * until overrideautoDisable(false)
+   * ( we need to keep original autoDisable status, that is the reason ) 
+   */
+  void setOverrideAutoDisable(boolean overrideAutoDisable);
 }
