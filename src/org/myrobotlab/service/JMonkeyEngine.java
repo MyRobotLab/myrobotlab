@@ -9,7 +9,6 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.jme3.interfaces.Jme3App;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.virtual.VirtualServo;
 import org.slf4j.Logger;
@@ -60,6 +59,7 @@ public class JMonkeyEngine extends Service implements Simulator {
       app.setShowSettings(false);
       app.start();
       
+      apps.put(appName, jme3);
       currentApp = jme3;
       return currentApp;
     }
@@ -77,9 +77,14 @@ public class JMonkeyEngine extends Service implements Simulator {
   public void stopService(){
     super.stopService();
     for(String name : apps.keySet()){
+      try {
       Jme3App jme3 = apps.get(name);
       SimpleApplication app = jme3.getApp();
+      app.stop();
       app.destroy();
+      } catch(Exception e){
+        log.error("releasing jme3 app threw", e);
+      }
     }
   }
   /**
@@ -108,11 +113,7 @@ public class JMonkeyEngine extends Service implements Simulator {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init();
-
       Runtime.start("gui", "SwingGui");
-
-      
       Servo servo = (Servo)Runtime.start("servo", "Servo");
       VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
       Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
@@ -129,6 +130,8 @@ public class JMonkeyEngine extends Service implements Simulator {
       arduino.attach(servo, 7);
       
       servo.moveTo(30);
+      
+      jmonkey.releaseService();
       
       // NO NO NO - listen to Runtime , startup create all that can be created
       // listen to Runtime - create new for anything which appears to be new and can be created
