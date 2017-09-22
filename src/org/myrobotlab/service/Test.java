@@ -89,11 +89,11 @@ public class Test extends Service implements StatusListener {
 
       if (status.isError()) {
         errorCount++;
-        errorPercentage = errorCount * 100 / testsDone;
       } else {
-        successes++;
-        successPercentage = successes * 100 / testsDone;
+        successes++;       
       }
+      errorPercentage = errorCount * 100 / testsDone;
+      successPercentage = successes * 100 / testsDone;
 
       Set<TestData> testSet = null;
       if (results.containsKey(test.serviceName)) {
@@ -170,6 +170,7 @@ public class Test extends Service implements StatusListener {
 
     private static final long serialVersionUID = 1L;
     Progress currentProgress = new Progress();
+
     Date lastTestDt;
     long lastTestDurationMs;
     long totalDuration;
