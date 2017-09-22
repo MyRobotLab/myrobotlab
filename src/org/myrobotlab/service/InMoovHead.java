@@ -273,47 +273,49 @@ public class InMoovHead extends Service {
     return true;
   }
 
+  @Deprecated
   public void enableAutoDisable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
-	rothead.enableAutoDisable(rotheadParam);
-	rollNeck.enableAutoDisable(rollNeckParam);
-	neck.enableAutoDisable(neckParam);
-	
+    setAutoDisable(rotheadParam, neckParam, rollNeckParam);	
   }
   
+  @Deprecated
   public void enableAutoDisable(Boolean param) {
-	    rothead.enableAutoDisable(param);
-	    neck.enableAutoDisable(param);
-	    eyeX.enableAutoDisable(param);
-	    eyeY.enableAutoDisable(param);
-	    jaw.enableAutoDisable(param);
-	    rollNeck.enableAutoDisable(param);
+    setAutoDisable(param);
 	  }
   
+  public void setAutoDisable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
+  rothead.setAutoDisable(rotheadParam);
+  rollNeck.setAutoDisable(rollNeckParam);
+  neck.setAutoDisable(neckParam);
+  
+  }
+  
+  public void setAutoDisable(Boolean param) {
+      rothead.setAutoDisable(param);
+      neck.setAutoDisable(param);
+      eyeX.setAutoDisable(param);
+      eyeY.setAutoDisable(param);
+      jaw.setAutoDisable(param);
+      rollNeck.setAutoDisable(param);
+    }
+  
+  @Deprecated
   public void enableAutoEnable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
-		rothead.enableAutoEnable(rotheadParam);
-		rollNeck.enableAutoEnable(rollNeckParam);
-		neck.enableAutoEnable(neckParam);
-		
+    enableAutoEnable(true);
 	  }
 	  
-	  public void enableAutoEnable(Boolean param) {
-		    rothead.enableAutoEnable(param);
-		    neck.enableAutoEnable(param);
-		    eyeX.enableAutoEnable(param);
-		    eyeY.enableAutoEnable(param);
-		    jaw.enableAutoEnable(param);
-		    rollNeck.enableAutoEnable(param);
+  @Deprecated  
+  public void enableAutoEnable(Boolean param) {
 		  }
 	  
-	  public void temporaryStopAutoDisable(Boolean param) {
-       rothead.temporaryStopAutoDisable(param);
-       neck.temporaryStopAutoDisable(param);
-       eyeX.temporaryStopAutoDisable(param);
-       eyeY.temporaryStopAutoDisable(param);
-       jaw.temporaryStopAutoDisable(param);
-       rollNeck.temporaryStopAutoDisable(param);
-     }
-	  
+  public void setOverrideAutoDisable(Boolean param) {
+       rothead.setOverrideAutoDisable(param);
+       neck.setOverrideAutoDisable(param);
+       eyeX.setOverrideAutoDisable(param);
+       eyeY.setOverrideAutoDisable(param);
+       jaw.setOverrideAutoDisable(param);
+       rollNeck.setOverrideAutoDisable(param);
+     }	  
 
   public void setAcceleration(Double headXSpeed, Double headYSpeed, Double rollNeckSpeed) {
 	rothead.setAcceleration(headXSpeed);

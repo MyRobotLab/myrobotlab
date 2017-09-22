@@ -1199,51 +1199,56 @@ public class InMoov extends Service {
     return head;
   }
 
+  @Deprecated
   public void enableAutoDisable(Boolean param) {
+    setAutoDisable(param);
+  }
+  
+  public void setAutoDisable(Boolean param) {
     if (head != null) {
-      head.enableAutoDisable(param);
+      head.setAutoDisable(param);
     }
     if (rightArm != null) {
-      rightArm.enableAutoDisable(param);
+      rightArm.setAutoDisable(param);
     }
     if (leftArm != null) {
-      leftArm.enableAutoDisable(param);
+      leftArm.setAutoDisable(param);
     }
     if (leftHand != null) {
-      leftHand.enableAutoDisable(param);
+      leftHand.setAutoDisable(param);
     }
     if (rightHand != null) {
-      leftHand.enableAutoDisable(param);
+      leftHand.setAutoDisable(param);
     }
     if (torso != null) {
-      torso.enableAutoDisable(param);
+      torso.setAutoDisable(param);
     }
     if (eyelids != null) {
-      eyelids.enableAutoDisable(param);
+      eyelids.setAutoDisable(param);
     }
   }
 
-  public void temporaryStopAutoDisable(Boolean param) {
+  private void setOverrideAutoDisable(Boolean param) {
     if (head != null) {
-      head.temporaryStopAutoDisable(param);
+      head.setOverrideAutoDisable(param);
     }
     if (rightArm != null) {
-      rightArm.temporaryStopAutoDisable(param);
+      rightArm.setOverrideAutoDisable(param);
     }
     if (leftArm != null) {
-      leftArm.temporaryStopAutoDisable(param);
+      leftArm.setOverrideAutoDisable(param);
     }
     if (leftHand != null) {
-      leftHand.temporaryStopAutoDisable(param);
+      leftHand.setOverrideAutoDisable(param);
     }
     if (rightHand != null) {
-      rightHand.temporaryStopAutoDisable(param);
+      rightHand.setOverrideAutoDisable(param);
     }
     if (torso != null) {
-      torso.temporaryStopAutoDisable(param);
+      torso.setOverrideAutoDisable(param);
     }
     if (eyelids != null) {
-      eyelids.temporaryStopAutoDisable(param);
+      eyelids.setOverrideAutoDisable(param);
     }
   }
 
@@ -1676,11 +1681,8 @@ public class InMoov extends Service {
             String controller = s.getController().getName();
             calibrationWriter.write(s.getName() + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
           }
-          if (s.autoDisable) {
+          if (s.getAutoDisable()) {
             calibrationWriter.write(s.getName() + ".enableAutoDisable(True)\n");
-          }
-          if (s.autoEnable) {
-            calibrationWriter.write(s.getName() + ".enableAutoEnable(True)\n");
           }
         }
 
@@ -1768,7 +1770,7 @@ public class InMoov extends Service {
     {
     gestureAlreadyStarted = true;
     RobotCanMoveRandom = false;
-    temporaryStopAutoDisable(true);
+    setOverrideAutoDisable(true);
     }
   }
 
@@ -1779,7 +1781,7 @@ public class InMoov extends Service {
   public void finishedGesture(String nameOfGesture) {
     if (gestureAlreadyStarted) {
     RobotCanMoveRandom = true;
-    temporaryStopAutoDisable(false);
+    setOverrideAutoDisable(false);
     gestureAlreadyStarted = false;
     }
   }
