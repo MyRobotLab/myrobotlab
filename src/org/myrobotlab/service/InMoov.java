@@ -1682,7 +1682,7 @@ public class InMoov extends Service {
             calibrationWriter.write(s.getName() + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
           }
           if (s.getAutoDisable()) {
-            calibrationWriter.write(s.getName() + ".enableAutoDisable(True)\n");
+            calibrationWriter.write(s.getName() + ".setAutoDisable(True)\n");
           }
         }
 
@@ -1821,7 +1821,7 @@ public class InMoov extends Service {
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
     meta.addDependency("inmoov.fr", "1.0.0");
-    meta.addDependency("org.myrobotlab.inmoov", "0.5.0");
+    meta.addDependency("org.myrobotlab.inmoov", "0.5.1");
 
     // SHARING !!! - modified key / actual name begin -------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
