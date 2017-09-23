@@ -200,15 +200,18 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
 
   public void onState(MotorDualPwm motor) {
 
-    log.info("onState event invoked");
+    // log.info("onState event invoked");
     
     removeListeners();
     refreshControllers();
 
     setEnabled(motor.isAttached());
-
+    
+    leftPwmPinList.setSelectedIndex(motor.leftPwmPin);
+    rightPwmPinList.setSelectedIndex(motor.rightPwmPin);
+    
     if (motor.isAttached()) {
-      log.info("motor is attached");
+      // log.info("motor is attached");
       MotorController mc = (MotorController) motor.getController();
       controllerList.setSelectedItem(mc.getName());
       attachButton.setText(detach);
@@ -216,7 +219,7 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
       leftPwmPinList.setEnabled(false);
       rightPwmPinList.setEnabled(false);
     } else {
-      log.info("motor is not attached");
+      // log.info("motor is not attached");
       attachButton.setText(attach);
       controllerList.setEnabled(true);
       leftPwmPinList.setEnabled(true);

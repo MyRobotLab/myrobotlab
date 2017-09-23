@@ -10,8 +10,8 @@ public class MotorDualPwm extends AbstractMotor {
   private static final long serialVersionUID = 1L;
   
 
-  Integer leftPwmPin;
-  Integer rightPwmPin;
+  public Integer leftPwmPin;
+  public Integer rightPwmPin;
   Integer pwmFreq;
 
   public List<String> pwmPinList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8","9","10","11","12","13","14","15");
@@ -23,6 +23,7 @@ public class MotorDualPwm extends AbstractMotor {
   public void setLeftPwmPin(Integer leftPwmPin) {
     log.info("leftPwmPin set");
     this.leftPwmPin = leftPwmPin;
+    broadcastState();
   }
 
   public Integer getRightPwmPin() {
@@ -32,6 +33,7 @@ public class MotorDualPwm extends AbstractMotor {
   public void setRightPwmPin(Integer rightPwmPin) {
     log.info("rightPwmPin set");
     this.rightPwmPin = rightPwmPin;
+    broadcastState();
   }
 
   public MotorDualPwm(String n) {
@@ -39,9 +41,8 @@ public class MotorDualPwm extends AbstractMotor {
   }
   
   public void setPwmPins(int leftPwmPin, int rightPwmPin) {
-    this.leftPwmPin = leftPwmPin;
-    this.rightPwmPin = rightPwmPin;
-    broadcastState();
+    setLeftPwmPin(leftPwmPin);
+    setRightPwmPin(rightPwmPin);
   }
   
   public Integer getPwmFreq() {
