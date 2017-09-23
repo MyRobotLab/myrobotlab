@@ -257,7 +257,7 @@ public class Servo extends Service implements ServoControl {
   public int defaultDisableDelayNoVelocity = 10000;
   
   /**
-   * defaultDisableDelayNoVelocity
+   * disableDelayIfVelocity
    * this make sense if velocity > 0
    * a timer is launched for an extra delay to disable
    * @param disableDelayIfVelocity
