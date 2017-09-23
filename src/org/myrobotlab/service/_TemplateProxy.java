@@ -36,6 +36,7 @@ public class _TemplateProxy extends PythonProxy {
 
     ServiceType meta = new ServiceType(_TemplateProxy.class.getCanonicalName());
     meta.addDescription("Template proxy service");
+    meta.setAvailable(false);
     return PythonProxy.addMetaData(meta); //This is used so that the dependencies and peers are automatically added
   }
 
