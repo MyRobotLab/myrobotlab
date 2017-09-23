@@ -19,11 +19,11 @@ import org.slf4j.Logger;
  * build of MRLComm to work. Check with \@Alessandruino for questions.
  *
  */
-public class OculusDIY extends Service implements OrientationListener {
+public class OculusDiy extends Service implements OrientationListener {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OculusDIY.class);
+	public final static Logger log = LoggerFactory.getLogger(OculusDiy.class);
 
 	transient public Arduino arduino;
 	transient public Mpu6050 mpu6050;
@@ -45,7 +45,7 @@ public class OculusDIY extends Service implements OrientationListener {
 	Integer bicep = 5;
 	Integer headingint = 90;
 
-	public OculusDIY(String n) {
+	public OculusDiy(String n) {
 		super(n);
 		arduino = (Arduino) createPeer("arduino");
 		mpu6050 = (Mpu6050) createPeer("mpu6050");
@@ -173,7 +173,7 @@ public class OculusDIY extends Service implements OrientationListener {
 	 */
 	static public ServiceType getMetaData() {
 
-		ServiceType meta = new ServiceType(OculusDIY.class.getCanonicalName());
+		ServiceType meta = new ServiceType(OculusDiy.class.getCanonicalName());
 		meta.addDescription("Service to receive and compute data from a DIY Oculus");
 		meta.addCategory("video", "control", "sensor");
 		meta.addPeer("arduino", "Arduino", "Arduino for DIYOculus and Myo");
