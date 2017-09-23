@@ -726,7 +726,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Mpr121.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Mpr121.class);
     meta.addDescription("MPR121 Touch sensor & LED Driver");
     meta.addCategory("shield", "sensor", "i2c");
     meta.setSponsor("Mats");
