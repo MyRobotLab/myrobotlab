@@ -243,6 +243,7 @@ public class Test extends Service implements StatusListener {
       test.pythonServiceScriptDir = "../pyrobotlab/service/";
       Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
+      Runtime.start("python", "Python");
       // Runtime.start("python", "Python");
 
       // setting up new tests to run in matrix
