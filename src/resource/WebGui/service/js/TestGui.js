@@ -12,6 +12,8 @@ angular.module('mrlapp.service.TestGui', [])
     $scope.currentProgress = {};
     $scope.currentProgress.percentDone = 0;
     $scope.currentProgress.currentActivity = "ready";
+    $scope.currentTest = {};
+    $scope.lastTest = {};
     
     // two service arrays - one is model of "all"
     // the other is current model to test
@@ -52,7 +54,15 @@ angular.module('mrlapp.service.TestGui', [])
         $scope.currentProgress = matrix.currentProgress;
 
         // test plan
-        $scope.testPlan.servicesToTest = matrix.servicesToTest;
+        $scope.testPlan.servicesToTest = [];// matrix.servicesToTest;
+
+        for (var i = 0; i < service.services.length; ++i){
+            var serviceType = service.services[i];
+            if (serviceType.available){
+                $scope.testPlan.servicesToTest.push(serviceType.simpleName);
+            }
+        }
+
         $scope.testsToRun     = matrix.testsToRun;
     }
     ;

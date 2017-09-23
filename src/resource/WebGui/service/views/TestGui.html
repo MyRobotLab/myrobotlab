@@ -22,7 +22,7 @@
 
 
 <table class="table table-striped">
-  <tr><th><input type="checkbox" ng-model="selectedAll" ng-click="checkAll()" />service</th><th>description</th><th>available</th><th>tests</th><th>ready</th><th>sponsor</th><th>todo</th></tr>
+  <tr><th><input type="checkbox" ng-model="selectedAll" ng-click="checkAll()" />{{services.length}} services</th><th>description</th><th>available</th><th>tests</th><th>sponsor</th><th>todo</th></tr>
   <tr ng-repeat="serviceType in services"> 
     <td>
       <input type="checkbox" checklist-model="testPlan.servicesToTest" checklist-value="serviceType.simpleName">  
@@ -38,7 +38,6 @@
                </tr>
            </table>
     </td>    
-    <td>{{ serviceType.ready }}</td>
     <td>{{ serviceType.sponsor }}</td>
     <td width="40%">{{ serviceType.todo }}</td>
   </tr>
