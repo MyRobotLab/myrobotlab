@@ -1,7 +1,7 @@
 <button class="btn btn-default" ng-click="msg.loadAndRunTests(testPlan.servicesToTest, testsToRun)">test</button> {{currentProgress.currentActivity}} <b> {{currentProgress.testsDone}} <span class="text-danger">errors: {{currentProgress.errorCount}}</span><span class="text-success"> worky: {{currentProgress.testsDone - currentProgress.errorCount}}</span></b>
-<uib-progress>
-<uib-bar class="progress-striped active" value="currentProgress.errorPercentage" type="danger">{{currentProgress.errorCount}}/{{currentProgress.totalTests}} {{currentProgress.errorPercentage}}%</uib-bar>
-<uib-bar class="progress-striped active" value="currentProgress.successPercentage" type="success">{{currentProgress.successes}}/{{currentProgress.totalTests}} {{currentProgress.successPercentage}}%</uib-bar>
+<uib-progress max=currentProgress.totalTests>
+<uib-bar class="progress-striped active" value="currentProgress.errorCount" type="danger">{{currentProgress.errorCount}}/{{currentProgress.testsDone}} {{currentProgress.errorPercentage}}%</uib-bar>
+<uib-bar class="progress-striped active" value="currentProgress.successes" type="success">{{currentProgress.successes}}/{{currentProgress.testsDone}} {{currentProgress.successPercentage}}%</uib-bar>
 </uib-progress> 
  <!-- servicesToTest={{testPlan.servicesToTest}}<br> -->
  <!-- testsToRun={{testsToRun}}<br> -->
