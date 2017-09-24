@@ -195,6 +195,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   @Override
   public void setInverted(boolean invert) {
     powerMap.setInverted(invert);
+    controller.motorMove(this);
+    broadcastState();
   }
 
   // ---- Servo begin ---------
@@ -233,6 +235,12 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     broadcastState();
   }
 
+  @Override
+  public void stopService(){
+    super.stopService();
+    stopAndLock();
+  }
+  
   // FIXME - related to update(SensorData) no ?
   public Integer updatePosition(Integer position) {
     currentPos = position;
