@@ -539,3 +539,18 @@ unsigned int MrlComm::getCustomMsg() {
   msg->publishCustomMsg(customMsg, size);
  }
 
+ // > motorAttach/deviceId/type/[] pins
+ void MrlComm::motorAttach(byte deviceId, byte type, byte pinsSize, const byte*pins) {
+	 // FIXME - implement
+ }
+
+ // > motorMove/deviceId/pwr
+ void MrlComm::motorMove(byte deviceId, byte pwr) {
+	 // FIXME - implement
+ }
+
+ // > motorMoveTo/deviceId/pos
+ void MrlComm::motorMoveTo(byte deviceId, byte pos) {
+	 // FIXME - implement
+ }
+
