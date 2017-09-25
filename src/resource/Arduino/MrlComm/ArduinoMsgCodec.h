@@ -9,7 +9,7 @@
  * 							src\resource\Arduino\generate\ArduinoMsgCodec.template.h
  */
 
-#define MRLCOMM_VERSION			56
+#define MRLCOMM_VERSION			57
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
@@ -120,6 +120,12 @@
 #define PUBLISH_ULTRASONIC_SENSOR_DATA 47
 // > setAref/b16 type
 #define SET_AREF 48
+// > motorAttach/deviceId/type/[] pins
+#define MOTOR_ATTACH 49
+// > motorMove/deviceId/pwr
+#define MOTOR_MOVE 50
+// > motorMoveTo/deviceId/pos
+#define MOTOR_MOVE_TO 51
 
 
 

@@ -42,10 +42,14 @@ import org.slf4j.Logger;
  * 
  * @author GroG
  * 
- *         TODO - grab and report all missing Service Pages &amp; all missing
- *         Python scripts !
+ * TODO - Agent "spawned" testing for dependency and process isolation
  * 
- *         TODO - install create start stop release test TODO - serialization
+ * TODO - Test for checking if all dependencies download "install all" test
+ * 
+ * TODO - grab and report all missing Service Pages &amp; all missing
+ * Python scripts !
+ * 
+ * TODO - install create start stop release test TODO - serialization
  *         json + native test TODO - run Python &amp; JavaScript tests - last
  *         method appended is a callback
  *

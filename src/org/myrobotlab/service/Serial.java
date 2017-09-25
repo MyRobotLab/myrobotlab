@@ -324,6 +324,10 @@ public class Serial extends Service
 			}
 
 			if (port.setParams(baudRate, dataBits, stopBits, parity)) {
+			  this.rate = baudRate;
+			  this.dataBits = dataBits;
+			  this.stopBits = stopBits;
+			  this.parity = parity;
 				return true;
 			} else {
 				return false;
@@ -1384,6 +1388,24 @@ public class Serial extends Service
   @Override
   public void connect(String port, int rate) throws Exception {
     connect(port, rate, 8, 1, 0);
+  }
+
+  @Override
+  public void close() throws IOException {
+    info("disconnecting all ports");
+    // forked ports
+    for (String portName : connectedPorts.keySet()) {
+      Port port = connectedPorts.get(portName);
+      port.close();
+    }
+  }
+  
+  public void logRecv(Boolean b){
+    if (b){
+      recordRx = System.out;
+    } else {
+      recordRx = null;
+    }
   }
 
 }

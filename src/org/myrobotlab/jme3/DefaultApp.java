@@ -6,6 +6,7 @@ import java.util.Map;
 import org.myrobotlab.jme3.controller.Jme3Servo;
 import org.myrobotlab.jme3.interfaces.Jme3App;
 import org.myrobotlab.jme3.interfaces.Jme3Object;
+import org.myrobotlab.virtual.VirtualMotor;
 import org.myrobotlab.virtual.VirtualServo;
 
 /*
@@ -134,6 +135,12 @@ public class DefaultApp extends SimpleApplication implements Jme3App {
 
   @Override
   public String getName() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public VirtualMotor createVirtualMotor(String name) {
     // TODO Auto-generated method stub
     return null;
   }

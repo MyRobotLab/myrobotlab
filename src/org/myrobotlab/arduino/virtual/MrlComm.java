@@ -9,6 +9,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.VirtualArduino;
+import org.python.jline.internal.Log;
 
   ///////////// MrlComm.h ///////////////
   // forward defines to break circular dependency
@@ -753,6 +754,23 @@ public class MrlComm {
   public void setAref(int aref) {
     // TODO
 	 // msg.setAref(aref);
+  }
+
+  public void motorAttach(Integer deviceId, Integer type, int[] pins) {
+    MrlMotor servo = new MrlMotor(deviceId, virtual);
+    addDevice(servo);
+    // not your mama's attach - this is attaching/initializing the MrlDevice
+    // servo.attach(type, initialPosUs, velocity, name);
+  }
+
+  public void motorMove(Integer deviceId, Integer pwr) {
+    MrlMotor motor = (MrlMotor) getDevice(deviceId);
+    motor.move(pwr);
+  }
+
+  public void motorMoveTo(Integer deviceId, Integer pos) {
+    MrlMotor motor = (MrlMotor) getDevice(deviceId);
+    motor.moveTo(pos);
   }
 
 }

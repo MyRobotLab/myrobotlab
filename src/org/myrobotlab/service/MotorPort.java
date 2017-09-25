@@ -26,17 +26,9 @@ public class MotorPort extends AbstractMotor {
     this.port = port;
   }
   
-  public void setPortNumber(Integer portNumber){
-    port = String.format("%d", portNumber);
+  public String getPort() {
+    return port;
   }
-
-  public Integer getPortNumber(){
-    try {
-    return Integer.parseInt(port);
-    } catch(Exception e){
-      error("port %s is not a valid number", port);
-    }
-    return null;
-  }
+ 
   
 }

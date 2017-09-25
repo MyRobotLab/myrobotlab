@@ -2,9 +2,13 @@ package org.myrobotlab.service.interfaces;
 
 import java.io.IOException;
 
-public interface SerialDevice extends PortPublisher {
+import org.myrobotlab.framework.interfaces.Attachable;
 
-	void open(String name) throws Exception;
+public interface SerialDevice extends PortPublisher, Attachable {
+
+	void open(String portname) throws IOException;
+	
+	void open(String portname, int rate, int dataBits, int stopBits, int parity)  throws IOException;
 
 	/*
 	 * FIXME - make like http://pyserial.sourceforge.net/pyserial_api.html with
@@ -34,5 +38,15 @@ public interface SerialDevice extends PortPublisher {
 	void flush();
 
 	int available();
+	
+	void close() throws IOException;
+
+  public int getRate();
+  
+  public int getDataBits();
+  
+  public int getStopBits();
+  
+  public int parity();
 
 }

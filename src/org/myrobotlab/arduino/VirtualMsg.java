@@ -63,7 +63,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 56;
+	public static final int MRLCOMM_VERSION = 57;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -201,6 +201,12 @@ public class VirtualMsg {
 	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 47;
 	// > setAref/b16 type
 	public final static int SET_AREF = 48;
+	// > motorAttach/deviceId/type/[] pins
+	public final static int MOTOR_ATTACH = 49;
+	// > motorMove/deviceId/pwr
+	public final static int MOTOR_MOVE = 50;
+	// > motorMoveTo/deviceId/pos
+	public final static int MOTOR_MOVE_TO = 51;
 
 
 /**
@@ -244,6 +250,9 @@ public class VirtualMsg {
 	// public void ultrasonicSensorStartRanging(Integer deviceId/*byte*/){}
 	// public void ultrasonicSensorStopRanging(Integer deviceId/*byte*/){}
 	// public void setAref(Integer type/*b16*/){}
+	// public void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/){}
+	// public void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/){}
+	// public void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/){}
 	
 
 	
@@ -737,6 +746,44 @@ public class VirtualMsg {
 				arduino.invoke("setAref",  type);
 			} else { 
  				arduino.setAref( type);
+			}
+			break;
+		}
+		case MOTOR_ATTACH: {
+			Integer deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			Integer type = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			int[] pins = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
+			startPos += 1 + ioCmd[startPos+1];
+			if(invoke){
+				arduino.invoke("motorAttach",  deviceId,  type,  pins);
+			} else { 
+ 				arduino.motorAttach( deviceId,  type,  pins);
+			}
+			break;
+		}
+		case MOTOR_MOVE: {
+			Integer deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			Integer pwr = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			if(invoke){
+				arduino.invoke("motorMove",  deviceId,  pwr);
+			} else { 
+ 				arduino.motorMove( deviceId,  pwr);
+			}
+			break;
+		}
+		case MOTOR_MOVE_TO: {
+			Integer deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			Integer pos = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			if(invoke){
+				arduino.invoke("motorMoveTo",  deviceId,  pos);
+			} else { 
+ 				arduino.motorMoveTo( deviceId,  pos);
 			}
 			break;
 		}
@@ -1251,6 +1298,15 @@ public class VirtualMsg {
 		}
 		case SET_AREF:{
 			return "setAref";
+		}
+		case MOTOR_ATTACH:{
+			return "motorAttach";
+		}
+		case MOTOR_MOVE:{
+			return "motorMove";
+		}
+		case MOTOR_MOVE_TO:{
+			return "motorMoveTo";
 		}
 
 		default: {
