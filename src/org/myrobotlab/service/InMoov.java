@@ -2171,8 +2171,43 @@ public class InMoov extends Service {
 
   }
 
+  //extra services used inside gestures, todo inmoov refactor attach things...
   public Relay LeftRelay1;
   public Relay RightRelay1;
+  public NeoPixel neopixel;
+  public Arduino neopixelArduino;
+  public UltrasonicSensor ultrasonicSensor;
+  
+  public Double getUltrasonicSensorDistance() {
+    if (ultrasonicSensor != null) {
+      return ultrasonicSensor.range();
+    }
+    else
+    {
+      warn("No UltrasonicSensor attached");
+      return 0.0;
+    }
+  }
+  
+  public void setNeopixelAnimation(String animation, Integer red, Integer green, Integer blue, Integer speed) {
+    if (neopixel != null && neopixelArduino != null) {
+      neopixel.setAnimation(animation, red, green, blue, speed);
+    }
+    else
+    {
+      warn("No Neopixel attached");
+    }
+  }
+  
+  public void stopNeopixelAnimation() {
+    if (neopixel != null && neopixelArduino != null) {
+      neopixel.animationStop();
+    }
+    else
+    {
+      warn("No Neopixel attached");
+    }
+  }  
 
   @Override
   public void stopService() {
@@ -2197,7 +2232,14 @@ public class InMoov extends Service {
     setMute(false);
     speakBlocking(lang_shutDown);
     stopVinMoov();
-    sleep(5000);
+    if (neopixel != null && neopixelArduino != null) {
+      neopixel.animationStop();
+      sleep(500);
+      neopixelArduino.serial.disconnect();
+      neopixelArduino.serial.stopRecording();
+      neopixelArduino.disconnect();
+    }
+    sleep(4500);
     disable();
     if (LeftRelay1 != null) {
       LeftRelay1.off();
