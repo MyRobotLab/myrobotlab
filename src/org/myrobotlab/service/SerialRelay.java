@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -72,7 +73,7 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
   }
 
   @Override
-  public void open(String name) throws Exception {
+  public void open(String name) throws IOException {
   	// TODO Auto-generated method stub
   	
   }
@@ -203,6 +204,42 @@ public List<String> getPortNames() {
 @Override
 public void write(String data) throws Exception {
   write(data.getBytes());
+}
+
+@Override
+public void open(String portname, int rate, int dataBits, int stopBits, int parity) throws IOException {
+  // TODO Auto-generated method stub
+  
+}
+
+@Override
+public void close() throws IOException {
+  // TODO Auto-generated method stub
+  
+}
+
+@Override
+public int getRate() {
+  // TODO Auto-generated method stub
+  return 0;
+}
+
+@Override
+public int getDataBits() {
+  // TODO Auto-generated method stub
+  return 0;
+}
+
+@Override
+public int getStopBits() {
+  // TODO Auto-generated method stub
+  return 0;
+}
+
+@Override
+public int parity() {
+  // TODO Auto-generated method stub
+  return 0;
 }
 
 }

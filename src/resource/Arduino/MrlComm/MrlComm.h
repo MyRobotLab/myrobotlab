@@ -142,6 +142,12 @@ public:
 	void ultrasonicSensorStopRanging( byte deviceId);
 	// > setAref/b16 type
 	void setAref( int type);
+	// > motorAttach/deviceId/type/[] pins
+	void motorAttach( byte deviceId,  byte type,  byte pinsSize, const byte*pins);
+	// > motorMove/deviceId/pwr
+	void motorMove( byte deviceId,  byte pwr);
+	// > motorMoveTo/deviceId/pos
+	void motorMoveTo( byte deviceId,  byte pos);
     // </generatedCallBacks>
     // end
 

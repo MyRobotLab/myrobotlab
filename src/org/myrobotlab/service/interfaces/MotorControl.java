@@ -25,10 +25,11 @@
 
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.sensor.Encoder;
 
-public interface MotorControl extends NameProvider, RelativePositionControl {
+public interface MotorControl extends NameProvider, RelativePositionControl, Attachable {
   
 	public void attachMotorController(MotorController controller) throws Exception;
 
@@ -36,11 +37,23 @@ public interface MotorControl extends NameProvider, RelativePositionControl {
 
 	double getPowerLevel();
 
-	public void setPowerLevel(double power);
-
 	double getPowerOutput();
 
 	double getTargetPos();
+
+	/**
+	 * general test if the motor is ready without having to supply
+	 * the specific motor controller
+	 * @return true/false
+	 */
+	boolean isAttached();
+
+	/**
+	 * testing if a 'specific' motor controller is attached
+	 * @param controller c
+	 * @return true if the contorller is attached to this control.
+	 */
+	boolean isAttached(MotorController controller);
 
 	/**
 	 * @return query the motor as to its inverted status
@@ -56,6 +69,8 @@ public interface MotorControl extends NameProvider, RelativePositionControl {
 	/**
 	 * moveTo moves the motor to a specific location. Typically, an encoder is
 	 * needed in order to provide feedback data
+	 * 
+	 * FIXME - part of AbsolutePosition interface
 	 * 
 	 * @param newPos the new position to move to
 	 */
@@ -81,6 +96,8 @@ public interface MotorControl extends NameProvider, RelativePositionControl {
 	 */
 	void setInverted(boolean invert);
 
+	public void setPowerLevel(double power);
+
 	void stop();
 
 	/**
@@ -93,20 +110,4 @@ public interface MotorControl extends NameProvider, RelativePositionControl {
 	 * unlocks the motor, so other commands can affect it
 	 */
 	void unlock();
-
-	// public Config getConfig();
-
-	/**
-	 * testing if a 'specific' motor controller is attached
-	 * @param controller c
-	 * @return true if the contorller is attached to this control.
-	 */
-	boolean isAttached(MotorController controller);
-
-	/**
-	 * general test if the motor is ready without having to supply
-	 * the specific motor controller
-	 * @return true/false
-	 */
-	boolean isAttached();
 }

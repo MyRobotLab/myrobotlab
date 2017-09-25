@@ -321,6 +321,22 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     }
   }
 
+  /**
+   * Routing Attach - routes ServiceInterface.attach(service) to appropriate
+   * methods for this class
+   */
+  @Override
+  public void attach(Attachable service) throws Exception {
+    if (ServoControl.class.isAssignableFrom(service.getClass())) {
+      attachServoControl((ServoControl) service);
+      return;
+    } else if (MotorControl.class.isAssignableFrom(service.getClass())) {
+      attachMotorControl((Motor) service);
+    }
+
+    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+  }
+
   /*
    * String interface - this allows you to easily use url api requests like
    * /attach/nameOfListener/3
@@ -1180,7 +1196,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         if (newByte != MAGIC_NUMBER) {
           byteCount = 0;
           msgSize = 0;
-          Arrays.fill(ioCmd, 0); // FIXME - optimize - remove          
+          Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
           warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++error_arduino_to_mrl_rx_cnt));
           // dump.setLength(0);
         }
@@ -1563,7 +1579,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   @Override
   public void attachServoControl(ServoControl servo) throws Exception {
-    if (isAttachedServoControl(servo)) {
+    if (isAttached(servo)) {
       log.info("servo {} already attached", servo.getName());
       return;
     }
@@ -1589,7 +1605,49 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     servo.attachServoController(this);
   }
 
-  public boolean isAttachedServoControl(Attachable device) {
+  public static final int MOTOR_TYPE_SIMPLE = 1;
+  public static final int MOTOR_TYPE_DUAL_PWM = 2;
+
+  // @Override
+  public void attachMotorControl(MotorControl motor) throws Exception {
+    if (isAttached(motor)) {
+      log.info("motor {} already attached", motor.getName());
+      return;
+    }
+
+    Integer motorType = null;
+    int[] pins = null;
+
+    if (motor.getClass().equals(Motor.class)) {
+      motorType = MOTOR_TYPE_SIMPLE;
+      Motor m = (Motor)motor;
+      pins = new int[]{m.getPwrPin(), m.getDirPin()};
+    } else if (motor.getClass().equals(Motor.class)) {
+      motorType = MOTOR_TYPE_DUAL_PWM;
+    // } else if (motor.getClass().equals(MotorStepper)){ // FIXME implement
+      
+    } else {
+      throw new IOException(String.format("do not know how to attach Motor type %s", motor.getClass().getSimpleName()));
+    }
+
+    // this saves original "attach" configuration - and maintains internal
+    // data
+    // structures
+    // and does DeviceControl.attach(this)
+    Integer deviceId = attachDevice(motor, new Object[] { motorType, pins });
+
+    // send data to micro-controller - convert degrees to microseconds
+    // int uS = degreeToMicroseconds(targetOutput);
+    msg.motorAttach(deviceId, motorType, pins);
+
+    // the callback - motor better have a check
+    // isAttached(MotorControl) to prevent infinite loop
+    // motor.attach(this, pin, targetOutput, velocity);
+    motor.attachMotorController(this);
+  }
+
+  @Override
+  public boolean isAttached(Attachable device) {
     return deviceList.containsKey(device.getName());
   }
 
@@ -1838,7 +1896,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void attach(UltrasonicSensorControl sensor, Integer triggerPin, Integer echoPin) throws Exception {
     // refer to
     // http://myrobotlab.org/content/control-controller-manifesto
-    if (isAttachedServoControl(sensor)) {
+    if (isAttached(sensor)) {
       log.info("{} already attached", sensor.getName());
       return;
     }
