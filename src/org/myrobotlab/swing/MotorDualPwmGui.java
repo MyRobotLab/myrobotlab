@@ -257,6 +257,8 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
   public void removeListeners() {
     attachButton.removeActionListener(this);
     controllerList.removeActionListener(this);
+    leftPwmPinList.removeActionListener(this);
+    rightPwmPinList.removeActionListener(this);
     power.removeChangeListener(this);
     invert.removeActionListener(this);
   }
@@ -264,6 +266,8 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
   public void restoreListeners() {
     attachButton.addActionListener(this);
     controllerList.addActionListener(this);
+    leftPwmPinList.addActionListener(this);
+    rightPwmPinList.addActionListener(this);
     power.addChangeListener(this);
     invert.addActionListener(this);
   }

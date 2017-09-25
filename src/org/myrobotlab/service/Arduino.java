@@ -331,9 +331,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       attachServoControl((ServoControl) service);
       return;
     } else if (MotorControl.class.isAssignableFrom(service.getClass())) {
-      attachMotorControl((Motor) service);
+      attachMotorControl((MotorControl) service);
+      return;
     }
-
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
 
@@ -1622,8 +1622,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       motorType = MOTOR_TYPE_SIMPLE;
       Motor m = (Motor)motor;
       pins = new int[]{m.getPwrPin(), m.getDirPin()};
-    } else if (motor.getClass().equals(Motor.class)) {
+    } else if (motor.getClass().equals(MotorDualPwm.class)) {
       motorType = MOTOR_TYPE_DUAL_PWM;
+      MotorDualPwm m = (MotorDualPwm)motor;
+      pins = new int[]{m.getLeftPwmPin(), m.getRightPwmPin()};
     // } else if (motor.getClass().equals(MotorStepper)){ // FIXME implement
       
     } else {
