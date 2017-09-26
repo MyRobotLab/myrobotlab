@@ -713,6 +713,55 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public void setPath(String path) {
     this.path = path;
   }
+  
+  /**
+   * setUsername will check if username correspond to current session
+   * If no, a new session is started
+   * 
+   * @param username
+   *          - The new username
+   * @throws IOException 
+   */
+  public void setUsername(String username)  {
+    if (username.isEmpty())
+    {
+      log.error("chatbot username is empty");
+      return;
+    }
+    if (getSessionNames().isEmpty())
+    {
+      log.info(username+" first session started");
+      startSession(username);
+      return;
+    }
+    if (username.equalsIgnoreCase(this.currentUserName))
+    {
+      log.info(username+" already connected");
+      return;
+    }
+    if (!username.equalsIgnoreCase(this.currentUserName))
+    {
+      try {
+        savePredicates();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      startSession(this.path,username,this.currentBotName);
+      setPredicate(username,"name",username);
+      setPredicate("default","lastUsername",username);
+      // robot name is stored inside default.predicates, not inside system.prop 
+      setPredicate(username,"botname",getPredicate("default","botname"));
+      try {
+        savePredicates();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      log.info(username+" session started");
+      return;
+    }
+  }
 
   public void writeAIML() {
     bot.writeAIMLFiles();
@@ -794,6 +843,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
     log.info(ai.getResponse("hi there").toString());
     log.info(ai.getResponse("こんにちは").toString());
+    ai.setUsername("test");
 
     // ai.savePredicates();
 
