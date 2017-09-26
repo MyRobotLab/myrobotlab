@@ -1,6 +1,7 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.NameProvider;
+import org.myrobotlab.virtual.VirtualMotor;
 import org.myrobotlab.virtual.VirtualServo;
 
 /**
@@ -17,6 +18,8 @@ public interface Simulator extends NameProvider {
   //public Object create(ServiceInterface service);
 
   public VirtualServo createVirtualServo(String name);
+
+  public VirtualMotor createVirtualMotor(String name);
   
 
 }

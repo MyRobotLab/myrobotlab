@@ -80,13 +80,12 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-      autoDisableOriginStatus=autoDisableTempStatus;
-      send("enableAutoDisable",false);
+     send("setOverrideAutoDisable",true);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-     send("enableAutoDisable",autoDisableOriginStatus);
+     send("setOverrideAutoDisable",false);
      }
 
 
@@ -113,8 +112,6 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
   public final static Logger log = LoggerFactory.getLogger(ServoGui.class);
   private String lastControllerUsed;
-  private boolean autoDisableOriginStatus;
-  private boolean autoDisableTempStatus;
   static final long serialVersionUID = 1L;
 
   JLabel boundPos = new JLabel("90");
@@ -406,12 +403,11 @@ public class ServoGui extends ServiceGui implements ActionListener {
         	 imageenabled.setVisible(false);
           }
         
-        if (servo.isAutoDisabled()) {
+        if (servo.getAutoDisable()) {
         	autoDisable.setSelected(true);    
         } else {
         	autoDisable.setSelected(false);   
           }
-        autoDisableTempStatus=autoDisable.isSelected();
 
         Double pos = servo.getPos();
         if (pos != null) {

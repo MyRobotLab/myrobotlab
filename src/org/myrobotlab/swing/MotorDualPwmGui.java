@@ -84,7 +84,6 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
   private JLabel powerValue = new JLabel("0.00");
   ImageButton stopButton;
   ImageButton clockwiseButton;
-
   ImageButton counterclockwiseButton;
 
   // TODO - make MotorPanel - for 1 motor - for shared embedded widget
@@ -147,12 +146,11 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
     } else if (source == stopButton) {
       power.setValue(0);
 
+    } else if (source == invert){
+      myMotor.setInverted(invert.isSelected());
+      
     } else if (source == attachButton) {
-      log.info("attachButton pressed");
       if (attachButton.getText().equals(attach)) {
-        log.info("attaching");
-        log.info(String.format("boundServiceName: %s", boundServiceName));
-        log.info(String.format("Value from dropdownlist: %s", leftPwmPinList.getSelectedItem().toString()));
         // myService.sendBlocking(boundServiceName, setLeftPwmPin, Integer.decode(leftPwmPinList.getSelectedItem().toString()));
         // myService.sendBlocking(boundServiceName, setRightPwmPin, Integer.decode(rightPwmPinList.getSelectedItem().toString()));
         // myService.send(boundServiceName, attach, controllerList.getSelectedItem());
@@ -164,9 +162,7 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
           // TODO Auto-generated catch block
           e1.printStackTrace();
         }
-        log.info("three messages sent");
       } else {
-        log.info("detaching");
         myService.send(boundServiceName, detach, controllerList.getSelectedItem());
       }
     }
@@ -199,16 +195,16 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
   }
 
   public void onState(MotorDualPwm motor) {
-
-    log.info("onState event invoked");
     
     removeListeners();
     refreshControllers();
 
     setEnabled(motor.isAttached());
-
+    
+    leftPwmPinList.setSelectedIndex(motor.leftPwmPin);
+    rightPwmPinList.setSelectedIndex(motor.rightPwmPin);
+    
     if (motor.isAttached()) {
-      log.info("motor is attached");
       MotorController mc = (MotorController) motor.getController();
       controllerList.setSelectedItem(mc.getName());
       attachButton.setText(detach);
@@ -216,18 +212,12 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
       leftPwmPinList.setEnabled(false);
       rightPwmPinList.setEnabled(false);
     } else {
-      log.info("motor is not attached");
       attachButton.setText(attach);
       controllerList.setEnabled(true);
       leftPwmPinList.setEnabled(true);
       rightPwmPinList.setEnabled(true);
     }
-    // controllerTypePanel.setAttached(motor.isAttached());
-    if (motor.isInverted()) {
-      invert.setSelected(true);
-    } else {
-      invert.setSelected(false);
-    }
+    invert.setSelected(motor.isInverted());
 
     restoreListeners();
   }
@@ -267,13 +257,19 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
   public void removeListeners() {
     attachButton.removeActionListener(this);
     controllerList.removeActionListener(this);
+    leftPwmPinList.removeActionListener(this);
+    rightPwmPinList.removeActionListener(this);
     power.removeChangeListener(this);
+    invert.removeActionListener(this);
   }
 
   public void restoreListeners() {
     attachButton.addActionListener(this);
     controllerList.addActionListener(this);
+    leftPwmPinList.addActionListener(this);
+    rightPwmPinList.addActionListener(this);
     power.addChangeListener(this);
+    invert.addActionListener(this);
   }
 
 }

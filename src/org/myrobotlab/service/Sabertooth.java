@@ -1,14 +1,13 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
-import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -42,9 +41,7 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
 
   public final static Logger log = LoggerFactory.getLogger(Sabertooth.class);
 
-  transient Serial serial;
-
-  // range mapping
+  transient SerialDevice serial;
 
   private Integer address = 128;
 
@@ -54,7 +51,12 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
 
   boolean setSaberToothBaud = false;
 
-  HashMap<String, MotorPort> motors = new HashMap<String, MotorPort>();
+  /**
+   * attached motors <names, port>
+   */
+  transient HashMap<String, MotorPort> motors = new HashMap<String, MotorPort>();
+
+  Set<String> ports = new HashSet<String>();
 
   public final static int MOTOR1_FORWARD = 0;
 
@@ -70,15 +72,18 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
 
   public Sabertooth(String n) {
     super(n);
+    // add motor ports the sabertooth supports
+    ports.add("m1");
+    ports.add("m2");
   }
 
   public void connect(String port) throws IOException {
     connect(port, 9600, 8, 1, 0);
   }
 
-  public void disconnect() {
+  public void disconnect() throws IOException {
     if (serial != null) {
-      serial.disconnect();
+      serial.close();
     }
   }
 
@@ -231,24 +236,24 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
     }
 
     MotorPort motor = motors.get(mc.getName());
-    int portNumber = motor.getPortNumber();
+    String port = motor.getPort();
     double pwr = motor.getPowerLevel();
     int power = (int) (pwr * 127);
 
-    if (portNumber == 1) {
+    if (port.equals("m1")) {
       if (pwr >= 0) {
         driveForwardMotor1(power);
       } else {
         driveBackwardsMotor1(Math.abs(power));
       }
-    } else if (portNumber == 2) {
+    } else if (port.equals("m2")) {
       if (pwr >= 0) {
         driveForwardMotor2(power);
       } else {
         driveBackwardsMotor2(Math.abs(power));
       }
     } else {
-      error("invalid port number %d", portNumber);
+      error("invalid port number %d", port);
     }
 
   }
@@ -295,35 +300,6 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
   }
 
   /**
-   * Sabertooth uses numeric identifiers for ports. This just does a type
-   * conversion of the portNumber for attaching with the MotorConfigPort data
-   * @param motor motor control
-   * @param portNumber the port
-   * @throws Exception e
-   * 
-   */
-  public void attach(MotorControl motor, Integer portNumber) throws Exception {
-    attach(motor, String.format("%d", portNumber));
-  }
-
-  /**
-   * Because many motor controllers have String labeled ports .e.g. "PortA,
-   * PortB, etc" the universal attach for MotorConfigPort uses a String.
-   * @param motor motor
-   * @param portNumber portnum
-   * @throws Exception e
-   * 
-   */
-  public void attach(MotorControl motor, String portNumber) throws Exception {
-    if (isAttached(motor)) {
-      log.info("{}.attach({}) already attached", getName(), motor.getName());
-      return;
-    }
-    motors.put(motor.getName(), new MotorPort(portNumber));
-    motor.attachMotorController(this);
-  }
-
-  /**
    * Sabertooth is a serial device, so it has a PortConnector interface.
    */
   @Override
@@ -334,21 +310,73 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
   public void detach(MotorControl device) {
     motors.remove(device);
   }
+  
+  // FIXME - become interface for motor port shields & controllers
+  public Set<String> getPorts(){
+    return ports ;
+  }
 
   @Override
   public Set<String> getAttached() {
     return motors.keySet();
   }
 
-  // @Override - lame - should be override
-  static public List<BoardType> getBoardTypes() {
-    // currently only know of 1
-    return new ArrayList<BoardType>();
+
+  /**
+   * Routing Attach - routes ServiceInterface.attach(service) to appropriate
+   * methods for this class
+   */
+  @Override
+  public void attach(Attachable service) throws Exception {
+    // check if service already attached
+    if (isAttached(service)) {
+      log.info("{} is attached to {}", service.getName(), getName());
+      return;
+    }
+
+    if (MotorPort.class.isAssignableFrom(service.getClass())) {
+      MotorPort motor = (MotorPort) service;
+      String port = motor.getPort();
+      
+      if (port == null || (!ports.contains(port))){
+        throw new IOException("port number in motor must be set to m1 or m2");
+      }
+
+      motors.put(motor.getName(), motor);
+      
+      // give opportunity for motor to attach
+      motor.attach(this);  
+
+      // made changes broadcast it
+      broadcastState();
+      return;
+      
+    } else if (SerialDevice.class.isAssignableFrom(service.getClass())) {
+
+      serial = (SerialDevice)service; 
+      
+      // here we check and warn regarding config - but
+      // it "might" be right if the user has customized it
+      // this works well - the user controls all config
+      // but the attach can check and report on it
+      if (serial.getRate() != 9600){
+        warn("default rate for Sabertooth is 9600");
+      }
+      
+      // give serial an opportunity to attach to this service
+      serial.attach(this);
+      
+      // made changes broadcast it
+      broadcastState();
+      return;
+    }
+
+    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
 
-  // @Override
-  public boolean isAttached(MotorControl control) {
-    return motors.containsKey(control.getName());
+  @Override
+  public boolean isAttached(Attachable service) {
+    return motors.containsKey(service.getName()) || (serial != null && serial.getName().equals(service.getName()));
   }
 
   public static void main(String[] args) {
@@ -356,17 +384,49 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
 
     try {
 
-      String port = "COM19";
+      boolean virtual = false;
+      String port = "COM14";
 
-      // ---- Virtual Begin -----
-      VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-      virtual.createVirtualSerial(port);
-      // virtual.getUART(); uart.setTimeout(300);
-      // ---- Virtual End -----
+      // start optional virtual serial service, used for test
+      if (virtual) {
+        Serial uart = Serial.connectVirtualUart(port);
+        uart.logRecv(true);
+      }
 
-      // Runtime.start("webgui", "WebGui");
-      // Runtime.start("python", "Python");
-      // Joystick joystick = (Joystick)Runtime.start("joystick",
+      // start the services
+      Serial serial = (Serial) Runtime.start("serial", "Serial");
+      log.info("ports {}", serial.getPortNames());
+      Sabertooth sabertooth = (Sabertooth) Runtime.start("sabertooth", "Sabertooth");      
+      MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
+      MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
+
+      // configure services
+      m1.setPort("m1");
+      m2.setPort("m2");
+      serial.connect(port, 9600);
+
+      // attach services
+      sabertooth.attach(serial);
+      sabertooth.attach(m1);
+      sabertooth.attach(m2);
+
+      // FIXME - motor1.attach(joystick) !
+
+
+      for (int i = 0; i < 120; ++i) {
+        log.info("drive 1 power {}", i);
+        sabertooth.driveForwardMotor1(i);
+        sleep(100);
+      }
+
+      sleep(1000);
+
+      for (int i = 0; i < 120; ++i) {
+        log.info("drive 2 power {}", i);
+        sabertooth.driveForwardMotor2(i);
+        sleep(100);
+      }
+
       // "Joystick");
       Runtime.start("joystick", "Joystick");
 
@@ -375,14 +435,19 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
 
       // be "true" to the interface
       MotorController mc = (MotorController) saber;
-      
+
       MotorPort motor01 = (MotorPort) Runtime.start("motor01", "MotorPort");
       MotorPort motor02 = (MotorPort) Runtime.start("motor02", "MotorPort");
-      motor01.setPortNumber(1);
-      motor01.setPortNumber(2);
 
+      motor01.setPort("m1");
+      motor01.setPort("m2");
+
+      /* FIXME -- CHECK THIS !!!!
       motor01.attachMotorController(mc);
       motor02.attachMotorController(mc);
+      */
+      motor01.attach(mc);
+      motor02.attach(mc);
 
       motor01.move(0);
       motor01.move(0.15);
@@ -429,6 +494,20 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
   @Override
   public void connect(String port, int rate) throws Exception {
     connect(port, rate, 8, 1, 0);
+  }
+
+  @Override
+  public void detach() {
+    for (String name : motors.keySet()) {
+      Motor m = (Motor) Runtime.getService(name);
+      if (m != null) {
+        m.detach(this);
+      }
+    }
+
+    if (serial != null) {
+      serial.detach(this);
+    }
   }
 
 }

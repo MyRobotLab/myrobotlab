@@ -321,19 +321,23 @@ public class InMoovEyelids extends Service {
    * 
    */
   
+  @Deprecated
   public void enableAutoEnable(Boolean param) {
-    eyelidleft.enableAutoEnable(param);
-    eyelidright.enableAutoEnable(param);
   }
   
+  @Deprecated
   public void enableAutoDisable(Boolean param) {
-    eyelidleft.enableAutoDisable(param);
-    eyelidright.enableAutoDisable(param);
+    setAutoDisable(param);
   }
   
-  public void temporaryStopAutoDisable(Boolean param) {
-    eyelidleft.temporaryStopAutoDisable(param);
-    eyelidright.temporaryStopAutoDisable(param);
+  public void setAutoDisable(Boolean param) {
+    eyelidleft.setAutoDisable(param);
+    eyelidright.setAutoDisable(param);
+  }
+  
+  public void setOverrideAutoDisable(Boolean param) {
+    eyelidleft.setOverrideAutoDisable(param);
+    eyelidright.setOverrideAutoDisable(param);
   }
   
    

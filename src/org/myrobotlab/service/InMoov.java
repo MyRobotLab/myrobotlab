@@ -1199,51 +1199,56 @@ public class InMoov extends Service {
     return head;
   }
 
+  @Deprecated
   public void enableAutoDisable(Boolean param) {
+    setAutoDisable(param);
+  }
+  
+  public void setAutoDisable(Boolean param) {
     if (head != null) {
-      head.enableAutoDisable(param);
+      head.setAutoDisable(param);
     }
     if (rightArm != null) {
-      rightArm.enableAutoDisable(param);
+      rightArm.setAutoDisable(param);
     }
     if (leftArm != null) {
-      leftArm.enableAutoDisable(param);
+      leftArm.setAutoDisable(param);
     }
     if (leftHand != null) {
-      leftHand.enableAutoDisable(param);
+      leftHand.setAutoDisable(param);
     }
     if (rightHand != null) {
-      leftHand.enableAutoDisable(param);
+      leftHand.setAutoDisable(param);
     }
     if (torso != null) {
-      torso.enableAutoDisable(param);
+      torso.setAutoDisable(param);
     }
     if (eyelids != null) {
-      eyelids.enableAutoDisable(param);
+      eyelids.setAutoDisable(param);
     }
   }
 
-  public void temporaryStopAutoDisable(Boolean param) {
+  private void setOverrideAutoDisable(Boolean param) {
     if (head != null) {
-      head.temporaryStopAutoDisable(param);
+      head.setOverrideAutoDisable(param);
     }
     if (rightArm != null) {
-      rightArm.temporaryStopAutoDisable(param);
+      rightArm.setOverrideAutoDisable(param);
     }
     if (leftArm != null) {
-      leftArm.temporaryStopAutoDisable(param);
+      leftArm.setOverrideAutoDisable(param);
     }
     if (leftHand != null) {
-      leftHand.temporaryStopAutoDisable(param);
+      leftHand.setOverrideAutoDisable(param);
     }
     if (rightHand != null) {
-      rightHand.temporaryStopAutoDisable(param);
+      rightHand.setOverrideAutoDisable(param);
     }
     if (torso != null) {
-      torso.temporaryStopAutoDisable(param);
+      torso.setOverrideAutoDisable(param);
     }
     if (eyelids != null) {
-      eyelids.temporaryStopAutoDisable(param);
+      eyelids.setOverrideAutoDisable(param);
     }
   }
 
@@ -1676,11 +1681,8 @@ public class InMoov extends Service {
             String controller = s.getController().getName();
             calibrationWriter.write(s.getName() + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
           }
-          if (s.autoDisable) {
-            calibrationWriter.write(s.getName() + ".enableAutoDisable(True)\n");
-          }
-          if (s.autoEnable) {
-            calibrationWriter.write(s.getName() + ".enableAutoEnable(True)\n");
+          if (s.getAutoDisable()) {
+            calibrationWriter.write(s.getName() + ".setAutoDisable(True)\n");
           }
         }
 
@@ -1768,7 +1770,7 @@ public class InMoov extends Service {
     {
     gestureAlreadyStarted = true;
     RobotCanMoveRandom = false;
-    temporaryStopAutoDisable(true);
+    setOverrideAutoDisable(true);
     }
   }
 
@@ -1779,7 +1781,7 @@ public class InMoov extends Service {
   public void finishedGesture(String nameOfGesture) {
     if (gestureAlreadyStarted) {
     RobotCanMoveRandom = true;
-    temporaryStopAutoDisable(false);
+    setOverrideAutoDisable(false);
     gestureAlreadyStarted = false;
     }
   }
@@ -1819,7 +1821,7 @@ public class InMoov extends Service {
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
     meta.addDependency("inmoov.fr", "1.0.0");
-    meta.addDependency("org.myrobotlab.inmoov", "0.5.0");
+    meta.addDependency("org.myrobotlab.inmoov", "0.5.2");
 
     // SHARING !!! - modified key / actual name begin -------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
@@ -2169,8 +2171,43 @@ public class InMoov extends Service {
 
   }
 
+  //extra services used inside gestures, todo inmoov refactor attach things...
   public Relay LeftRelay1;
   public Relay RightRelay1;
+  public NeoPixel neopixel;
+  public Arduino neopixelArduino;
+  public UltrasonicSensor ultrasonicSensor;
+  
+  public Double getUltrasonicSensorDistance() {
+    if (ultrasonicSensor != null) {
+      return ultrasonicSensor.range();
+    }
+    else
+    {
+      warn("No UltrasonicSensor attached");
+      return 0.0;
+    }
+  }
+  
+  public void setNeopixelAnimation(String animation, Integer red, Integer green, Integer blue, Integer speed) {
+    if (neopixel != null && neopixelArduino != null) {
+      neopixel.setAnimation(animation, red, green, blue, speed);
+    }
+    else
+    {
+      warn("No Neopixel attached");
+    }
+  }
+  
+  public void stopNeopixelAnimation() {
+    if (neopixel != null && neopixelArduino != null) {
+      neopixel.animationStop();
+    }
+    else
+    {
+      warn("No Neopixel attached");
+    }
+  }  
 
   @Override
   public void stopService() {
@@ -2195,7 +2232,14 @@ public class InMoov extends Service {
     setMute(false);
     speakBlocking(lang_shutDown);
     stopVinMoov();
-    sleep(5000);
+    if (neopixel != null && neopixelArduino != null) {
+      neopixel.animationStop();
+      sleep(500);
+      neopixelArduino.serial.disconnect();
+      neopixelArduino.serial.stopRecording();
+      neopixelArduino.disconnect();
+    }
+    sleep(4500);
     disable();
     if (LeftRelay1 != null) {
       LeftRelay1.off();

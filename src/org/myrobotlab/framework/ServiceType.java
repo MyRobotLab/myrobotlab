@@ -48,7 +48,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	/**
 	 * ready for release
 	 */
-	Boolean ready = false;
+	// Boolean ready = false;
 
 	/**
 	 * available in the UI(s)
@@ -171,9 +171,11 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 		this.sponsor = sponsor;
 	}
 
+	/*
 	public void setReady(boolean b) {
 		this.ready = b;
 	}
+	*/
 
 	public void addTodo(String todo) {
 		this.todo = todo;

@@ -1568,6 +1568,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // note - if stopService is overwritten with extra
     // threads - releaseService will need to be overwritten too
     stopService();
+    
+    // detach all other services currently attached
+    detach();
 
     // recently added
     releasePeers();
@@ -2264,6 +2267,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   @Override
   public void attach(Attachable service) throws Exception { 
+    log.info("Service.attach does not know how to attach {} to a {}", service.getClass().getSimpleName(), this.getClass().getSimpleName());
   }
   
 }

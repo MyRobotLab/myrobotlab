@@ -82,24 +82,26 @@ public class InMoovTorso extends Service {
     return true;
   }
   
+  @Deprecated
   public void enableAutoEnable(Boolean param) {
-	  topStom.enableAutoEnable(param);
-	  midStom.enableAutoEnable(param);
-	  lowStom.enableAutoEnable(param);
 	  }
   
+  @Deprecated
   public void enableAutoDisable(Boolean param) {
-	  topStom.enableAutoDisable(param);
-	  midStom.enableAutoDisable(param);
-	  lowStom.enableAutoDisable(param);
+    setAutoDisable(param);
 	  }
   
-  public void temporaryStopAutoDisable(Boolean param) {
-    topStom.temporaryStopAutoDisable(param);
-    midStom.temporaryStopAutoDisable(param);
-    lowStom.temporaryStopAutoDisable(param);
+  public void setAutoDisable(Boolean param) {
+    topStom.setAutoDisable(param);
+    midStom.setAutoDisable(param);
+    lowStom.setAutoDisable(param);
     }
   
+  public void setOverrideAutoDisable(Boolean param) {
+    topStom.setOverrideAutoDisable(param);
+    midStom.setOverrideAutoDisable(param);
+    lowStom.setOverrideAutoDisable(param);
+    }  
   
   @Override
   public void broadcastState() {
