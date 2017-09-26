@@ -663,9 +663,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       warn("session %s already created", sessionKey);
       return;
     }
-
+    if (!getSessionNames().isEmpty())
+    {
+      wasCleanyShutdowned = "ok";
+    }
     cleanOutOfDateAimlIFFiles(botName);
     wasCleanyShutdowned = "nok";
+  
     // TODO: manage the bots in a collective pool/hash map.
     if (bot == null) {
       bot = new Bot(botName, path);
