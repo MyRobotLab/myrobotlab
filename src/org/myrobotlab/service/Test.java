@@ -30,7 +30,6 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.io.FindFile;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -43,10 +42,14 @@ import org.slf4j.Logger;
  * 
  * @author GroG
  * 
- *         TODO - grab and report all missing Service Pages &amp; all missing
- *         Python scripts !
+ * TODO - Agent "spawned" testing for dependency and process isolation
  * 
- *         TODO - install create start stop release test TODO - serialization
+ * TODO - Test for checking if all dependencies download "install all" test
+ * 
+ * TODO - grab and report all missing Service Pages &amp; all missing
+ * Python scripts !
+ * 
+ * TODO - install create start stop release test TODO - serialization
  *         json + native test TODO - run Python &amp; JavaScript tests - last
  *         method appended is a callback
  *
@@ -76,8 +79,6 @@ public class Test extends Service implements StatusListener {
     List<String> passedPythonScripts = new ArrayList<String>();
 
     Set<String> skippedPythonScript = new TreeSet<String>();
-
-    Set<String> nonAvailableServices = new TreeSet<String>();
 
     // service indexed list of tests which were processed
     Map<String, Set<TestData>> results = new TreeMap<String, Set<TestData>>();
@@ -170,6 +171,8 @@ public class Test extends Service implements StatusListener {
 
     private static final long serialVersionUID = 1L;
     Progress currentProgress = new Progress();
+    TestData currentTest = null;
+    TestData lastTest = null;
 
     Date lastTestDt;
     long lastTestDurationMs;
@@ -215,6 +218,7 @@ public class Test extends Service implements StatusListener {
     meta.addDescription("Testing service");
     meta.addCategory("testing");
     meta.addPeer("http", "HttpClient", "to interface with Service pages");
+    meta.setAvailable(false);
     // meta.addPeer("python", "Python", "python to excercise python scripts");
     return meta;
   }
@@ -243,6 +247,7 @@ public class Test extends Service implements StatusListener {
       test.pythonServiceScriptDir = "../pyrobotlab/service/";
       Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
+      Runtime.start("python", "Python");
       // Runtime.start("python", "Python");
 
       // setting up new tests to run in matrix
@@ -259,7 +264,7 @@ public class Test extends Service implements StatusListener {
 
   // state information
   transient Set<Thread> threads = null;
-  transient Set<File> files = new HashSet<File>();
+  
   /**
    * tests which have returned error
    */
@@ -279,7 +284,6 @@ public class Test extends Service implements StatusListener {
   // thread blocking
   transient StatusLock lock = new StatusLock();
 
-  List<Status> status = new ArrayList<Status>();
 
   transient TreeMap<String, String> pythonScripts = null;
 
@@ -287,7 +291,8 @@ public class Test extends Service implements StatusListener {
   transient LinkedBlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
   TestMatrix matrix;
-
+  
+  
   /**
    * list of possible test methods - all begin with "test"{Method}(TestData
    * test)
@@ -467,10 +472,6 @@ public class Test extends Service implements StatusListener {
   public void getState() {
     try {
       threads = Thread.getAllStackTraces().keySet();
-      List<File> f = FindFile.find("libraries", ".*");
-      for (int i = 0; i < f.size(); ++i) {
-        files.add(f.get(i));
-      }
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -482,7 +483,7 @@ public class Test extends Service implements StatusListener {
   }
 
   /**
-   * creates the default set of tests which include all "available" services
+   * creates the default set of tests which include all services
    * tested by all tests, call test() would then move all tests over to the test
    * queue
    */
@@ -492,17 +493,9 @@ public class Test extends Service implements StatusListener {
     for (int i = 0; i < types.size(); ++i) {
       ServiceType type = types.get(i);
 
-      // FIXME - switch to include nonAvailable ??? global field in service
-      /*
-       * if (!type.isAvailable()) {
-       * matrix.currentProgress.nonAvailableServices.add(type.getSimpleName());
-       * continue; }
-       */
       log.info("adding {}", type.getSimpleName());
       matrix.servicesToTest.add(type.getSimpleName());
     }
-    log.info("non available services {} {}", matrix.currentProgress.nonAvailableServices.size(), matrix.currentProgress.nonAvailableServices);
-    log.info("testing {} available services out of {}", matrix.servicesToTest.size(), types.size());
 
     for (String test : tests) {
       matrix.testsToRun.add(test);
@@ -550,12 +543,13 @@ public class Test extends Service implements StatusListener {
     loadTests(servicesToTest, testsToRun);
   }
 
-  /*
-   * call-back from service under testing to route errors to this service...
-   */
+ /**
+  * call-back from service under testing to route errors to this service...
+  * @param errorMsg error message
+  */
   public void onError(String errorMsg) {
-    if (status != null) {
-      status.add(Status.error(errorMsg));
+    if (matrix.currentTest != null){
+      matrix.currentTest.status = Status.error(errorMsg);
     }
   }
 
@@ -675,12 +669,10 @@ public class Test extends Service implements StatusListener {
     matrix.currentProgress = progress;
     invoke("publishProgress", progress);
 
-    int total = matrix.testsToRun.size() * matrix.servicesToTest.size();
+    progress.totalTests = matrix.testsToRun.size() * matrix.servicesToTest.size();
 
-    progress.totalTests = total;
     progress.percentDone = 0;
-    progress.currentActivity = String.format("starting %d tests", total);
-    boolean done = false;
+    progress.currentActivity = String.format("starting %d tests", progress.totalTests);
 
     while (matrix.isRunning) {
       TestData test = null;
@@ -688,6 +680,8 @@ public class Test extends Service implements StatusListener {
         test = testQueue.take();
       } catch (InterruptedException e) {
       }
+      
+      matrix.currentTest = test;
       String testName = test.testName;
       String serviceName = test.serviceName;
       
@@ -712,6 +706,9 @@ public class Test extends Service implements StatusListener {
 
       test.endTime = System.currentTimeMillis();
       
+      matrix.lastTest = matrix.currentTest;
+      matrix.currentTest = null;
+      
       // broadcast incremental progress
       progress.process(test);
 
@@ -719,8 +716,6 @@ public class Test extends Service implements StatusListener {
         errors.add(test);
       }
       
-     
-
       // broadcastState(); // admittedly a bit heavy handed
 
       activity = String.format("tested %s(%s)", testName, test.serviceName);
@@ -728,7 +723,6 @@ public class Test extends Service implements StatusListener {
 
       if (testQueue.size() == 0) {
         log.info("test queue size is 0 - finished testing");
-        done = true;
         log.info("error count {} errors {}", errors.size(), errors);
       }
     }

@@ -834,4 +834,28 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		
 	}
 
+  @Override
+  public void setAutoDisable(boolean autoDisable) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public boolean getAutoDisable() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean moveToBlocking(double pos) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public void setOverrideAutoDisable(boolean overrideAutoDisable) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

@@ -49,6 +49,8 @@ import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggingFactory;
 
 /**
  * @author GroG
@@ -241,15 +243,35 @@ public class Servo extends Service implements ServoControl {
 
   double lastPos;
 
-  boolean autoEnable = false;
-
+  private boolean autoEnable = true;
+  
+  /**
+   * defaultDisableDelayNoVelocity 
+   * this make sense if velocity == -1
+   * a timer is launched to delay disable
+   * @param defaultDisableDelayNoVelocity
+   *          - milliSeconds
+   * @default
+   *          - 10000 
+   */
   public int defaultDisableDelayNoVelocity = 10000;
-  private int disableDelayIfVelocity = 1000;
+  
+  /**
+   * disableDelayIfVelocity
+   * this make sense if velocity > 0
+   * a timer is launched for an extra delay to disable
+   * @param disableDelayIfVelocity
+   *          - milliSeconds
+   * @default
+   *          - 1000 
+   */
+  public int disableDelayIfVelocity = 1000;
   private boolean moving;
   private double currentPosInput;
-  public boolean autoDisable = false;
-  boolean autoDisableOriginalStatus = autoDisable;
-  boolean temporaryStopAutoDisableFinished = true;
+  private boolean autoDisable = false;
+  
+  private boolean overrideAutoDisable = false;
+  
   private transient Timer autoDisableTimer;
   private int SensorPin = -1;
   private ArrayList<Integer> sensorValues = new ArrayList<Integer>();
@@ -436,6 +458,7 @@ public class Servo extends Service implements ServoControl {
     return enabled();
   }
 
+  @Deprecated
   public boolean isAutoDisabled() {
     return autoDisable;
   }
@@ -461,7 +484,7 @@ public class Servo extends Service implements ServoControl {
     }
     if (lastPos == pos) {
       if (autoDisable) {
-        delayDisable(defaultDisableDelayNoVelocity);
+        delayDisable();
       }
     }
     if (autoEnable && !isEnabled() /** && pos != lastPos **/
@@ -494,18 +517,7 @@ public class Servo extends Service implements ServoControl {
 
   }
 
-  /**
-   * moveToBlocking is a basic move command of the servo - usually is 0 - 180
-   * valid range but can be adjusted and / or re-mapped with min / max and map
-   * commands
-   * 
-   * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION"
-   * response
-   * 
-   * @param pos
-   *          - position to move to
-   * @return true (why?)
-   */
+  @Override
   public boolean moveToBlocking(double pos) {
     this.moveTo(pos);
     // breakMoveToBlocking=false;
@@ -521,13 +533,21 @@ public class Servo extends Service implements ServoControl {
       }
     }
     if (Math.round(this.currentPosInput) != pos && velocity == -1 && lastPos != pos) {
-      sleep(5000);
+      sleep(disableDelayIfVelocity);
     }
     lastPos = targetPos;
     return true;
   }
 
-  private void delayDisable(double delay) {
+  private void delayDisable() {
+    if (!overrideAutoDisable && autoDisable)
+    {
+    int disableDelay=10000;
+    if (velocity > -1) {
+      disableDelay = disableDelayIfVelocity;
+    } else {
+      disableDelay = defaultDisableDelayNoVelocity;
+    }
     if (autoDisableTimer != null) {
       autoDisableTimer.cancel();
       autoDisableTimer = null;
@@ -541,7 +561,14 @@ public class Servo extends Service implements ServoControl {
           moveToBlocked.notifyAll(); // Will wake up MoveToBlocked.wait()
         }
       }
-    }, (long) delay);
+    }, (long) disableDelay);
+    }
+    else
+    {
+      synchronized (moveToBlocked) {
+        moveToBlocked.notifyAll(); // Will wake up MoveToBlocked.wait()
+      }
+    }
   }
 
   public Double publishServoEvent(Double position) {
@@ -941,7 +968,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   /*
-   * enableAutoAttach will attach a servo when ask to move and it when the move
+   * Deprecated enableAutoAttach will attach a servo when ask to move and it when the move
    * is complete
    * 
    */
@@ -950,7 +977,8 @@ public class Servo extends Service implements ServoControl {
     warn("enableAutoAttach is disabled please use enableAutoEnable");
     this.autoEnable = autoAttach;
   }
-
+  
+  @Deprecated
   public void enableAutoEnable(boolean autoEnable) {
     this.autoEnable = autoEnable;
   }
@@ -968,13 +996,13 @@ public class Servo extends Service implements ServoControl {
       error("Please select sensor source");
       return false;
     }
-    temporaryStopAutoDisable(true);
+    overrideAutoDisable=true;
     int min = autoCalibrateSensorMin();
     int max = autoCalibrateSensorMax();
     // extra min calibration because foam is unstable
     int min2 = autoCalibrateSensorMin();
     min = MathUtils.getPercentFromRange(min, min2, 50);
-    temporaryStopAutoDisable(false);
+    overrideAutoDisable=false;
     if (max != min && max > min) {
       return true;
     }
@@ -1034,7 +1062,7 @@ public class Servo extends Service implements ServoControl {
     // 100%=force servo to max
     // 50%=half torque
     // ...
-    temporaryStopAutoDisable(true);
+    overrideAutoDisable=true;
     this.servoTorque = torqueInPercent;
     if (autoCalibrateMax <= autoCalibrateMin) {
       error("Problem with magic, sensor attached to " + this.getName() + " is not calibrated");
@@ -1047,7 +1075,7 @@ public class Servo extends Service implements ServoControl {
       this.getController().enablePin(SensorPin, 10);
     } else {
       this.getController().disablePin(SensorPin);
-      temporaryStopAutoDisable(false);
+      overrideAutoDisable=false;
       log.info("set servo torque to " + torqueInPercent + " % > feedback disabled");
       unsubscribe(getController().getName(), "publishPinArray");
     }
@@ -1104,30 +1132,23 @@ public class Servo extends Service implements ServoControl {
     this.addServoEventListener(this);
   }
 
-  // save previous enableAutoDisable status and restore original user value when
-  // needed
-  public void temporaryStopAutoDisable(boolean status) {
-    if (status) {
-      if (temporaryStopAutoDisableFinished) {
-        autoDisableOriginalStatus = this.autoDisable;
-      }
-      temporaryStopAutoDisableFinished = false;
-      enableAutoDisable(false);
-    } else {
-      enableAutoDisable(autoDisableOriginalStatus);
-      temporaryStopAutoDisableFinished = true;
-    }
-
-  }
-
+  @Deprecated
   public void enableAutoDisable(boolean autoDisable) {
+    setAutoDisable(autoDisable);
+  }
+  
+  @Override
+  public void setAutoDisable(boolean autoDisable) {
     this.autoDisable = autoDisable;
     this.addServoEventListener(this);
-    log.info("enableAutoDisable : " + autoDisable);
-    if (autoDisable && !this.isMoving() && this.isEnabled()) {
-      this.disable();
-    }
+    log.info("setAutoDisable : " + autoDisable);
+    delayDisable();
     broadcastState();
+  }
+  
+  @Override
+  public boolean getAutoDisable() {
+    return this.autoDisable;
   }
 
   public double microsecondsToDegree(int microseconds) {
@@ -1191,17 +1212,8 @@ public class Servo extends Service implements ServoControl {
 
   public void onServoEvent(Double position) {
     // log.info("{}.ServoEvent {}", getName(), position);
-    if (!isMoving() && !autoDisable && enabled()) {
-      synchronized (moveToBlocked) {
-        moveToBlocked.notifyAll(); // Will wake up MoveToBlocked.wait()
-      }
-    }
-    if (!isMoving() && autoDisable && enabled()) {
-      if (velocity > -1) {
-        delayDisable(disableDelayIfVelocity);
-      } else {
-        delayDisable(defaultDisableDelayNoVelocity);
-      }
+    if (!isMoving() && enabled()) {
+      delayDisable();
     }
   }
 
@@ -1222,23 +1234,20 @@ public class Servo extends Service implements ServoControl {
 
   public static void main(String[] args) throws InterruptedException {
     try {
-
+      LoggingFactory.init(Level.INFO);
       String arduinoPort = "COM5";
 
       VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
       virtual.connect(arduinoPort);
-      Runtime.start("servo01", "Servo");
-      Runtime.start("servo02", "Servo");
       Runtime.start("gui", "SwingGui");
-      Runtime.start("arduino", "Arduino");
 
-      boolean done = true;
+      boolean done = false;
       if (done) {
         return;
       }
-
-      Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
-      Map<String, MethodEntry> methods = servo01.getMethodMap();
+      
+      Servo servo = (Servo) Runtime.start("servo", "Servo");
+      Map<String, MethodEntry> methods = servo.getMethodMap();
 
       // String out = CodecUtils.toJson();
       StringBuilder sb = new StringBuilder();
@@ -1269,34 +1278,26 @@ public class Servo extends Service implements ServoControl {
       fos.write(sb.toString().getBytes());
       fos.close();
 
-      // LoggingFactory.init(Level.INFO);
 
-      // VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual",
-      // "VirtualArduino");
-      virtual.connect("COM10");
       // Runtime.start("webgui", "WebGui");
-      Runtime.start("gui", "SwingGui");
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       // arduino.record();
       // arduino.getSerial().record();
 
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      arduino.connect(arduinoPort);
       log.info("ports {}", Arrays.toString(arduino.getSerial().getPortNames().toArray()));
-      arduino.connect("COM10");
-
       log.info("ready here");
       // arduino.ackEnabled = true;
-      Servo servo = (Servo) Runtime.start("servo", "Servo");
-      Python python = (Python) Runtime.start("python", "Python");
-
+      
       servo.attach(arduino, 7);
       servo.moveTo(90);
       servo.setRest(30);
 
-      servo.attach(8);
+      servo.enable(8);
       servo.moveTo(90);
       servo.moveTo(30);
 
-      servo.attach(9);
+      servo.enable(9);
       servo.moveTo(90);
       servo.setRest(30);
 
@@ -1306,9 +1307,9 @@ public class Servo extends Service implements ServoControl {
       log.info("servo attach {}", servo.isAttached());
 
       arduino.disconnect();
-      arduino.connect("COM4");
+      arduino.connect(arduinoPort);
 
-      arduino.reset();
+      //arduino.reset();
 
       log.info("ready here 2");
       // servo.attach(arduino, 8);
@@ -1317,36 +1318,24 @@ public class Servo extends Service implements ServoControl {
       servo.moveTo(90);
       servo.moveTo(30);
 
-      servo.attach(9);
+      servo.enable(9);
       servo.moveTo(90);
       servo.setRest(30);
 
       servo.moveTo(90);
       servo.setRest(30);
       servo.moveTo(10);
-      servo.moveTo(90);
-      servo.moveTo(180);
-      servo.rest();
-
-      servo.setMinMax(30, 160);
-
-      servo.moveTo(40);
-      servo.moveTo(140);
-
-      servo.moveTo(180);
-
-      servo.setSpeed(0.5);
-      servo.moveTo(31);
-      servo.setSpeed(0.2);
-      servo.moveTo(90);
-      servo.moveTo(180);
-      servo.setSpeed(1.0);
-
+     
       // servo.test();
     } catch (Exception e) {
       Logging.logError(e);
     }
 
+  }
+
+  @Override
+  public void setOverrideAutoDisable(boolean overrideAutoDisable) {
+    this.overrideAutoDisable=overrideAutoDisable;
   }
 
 }

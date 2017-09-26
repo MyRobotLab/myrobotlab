@@ -10,6 +10,7 @@ import org.myrobotlab.jme3.interfaces.Jme3App;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.interfaces.Simulator;
+import org.myrobotlab.virtual.VirtualMotor;
 import org.myrobotlab.virtual.VirtualServo;
 import org.slf4j.Logger;
 
@@ -162,5 +163,11 @@ public class JMonkeyEngine extends Service implements Simulator {
     return null;
   }
 */
+
+  @Override
+  public VirtualMotor createVirtualMotor(String name) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

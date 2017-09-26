@@ -63,7 +63,7 @@ public class Msg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 56;
+	public static final int MRLCOMM_VERSION = 57;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -201,6 +201,12 @@ public class Msg {
 	public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 47;
 	// > setAref/b16 type
 	public final static int SET_AREF = 48;
+	// > motorAttach/deviceId/type/[] pins
+	public final static int MOTOR_ATTACH = 49;
+	// > motorMove/deviceId/pwr
+	public final static int MOTOR_MOVE = 50;
+	// > motorMoveTo/deviceId/pos
+	public final static int MOTOR_MOVE_TO = 51;
 
 
 /**
@@ -1744,6 +1750,105 @@ public class Msg {
 	  }
 	}
 
+	public synchronized void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/) {
+		try {
+		  if (ackEnabled){
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + (1 + pins.length)); // size
+			write(MOTOR_ATTACH); // msgType = 49
+			write(deviceId);
+			write(type);
+			write(pins);
+ 
+     if (ackEnabled){
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
+     }
+			if(record != null){
+				txBuffer.append("> motorAttach");
+				txBuffer.append("/");
+				txBuffer.append(deviceId);
+				txBuffer.append("/");
+				txBuffer.append(type);
+				txBuffer.append("/");
+				txBuffer.append(Arrays.toString(pins));
+				txBuffer.append("\n");
+				record.write(txBuffer.toString().getBytes());
+				txBuffer.setLength(0);
+			}
+
+	  } catch (Exception e) {
+	  			log.error("motorAttach threw",e);
+	  }
+	}
+
+	public synchronized void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/) {
+		try {
+		  if (ackEnabled){
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+			write(MOTOR_MOVE); // msgType = 50
+			write(deviceId);
+			write(pwr);
+ 
+     if (ackEnabled){
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
+     }
+			if(record != null){
+				txBuffer.append("> motorMove");
+				txBuffer.append("/");
+				txBuffer.append(deviceId);
+				txBuffer.append("/");
+				txBuffer.append(pwr);
+				txBuffer.append("\n");
+				record.write(txBuffer.toString().getBytes());
+				txBuffer.setLength(0);
+			}
+
+	  } catch (Exception e) {
+	  			log.error("motorMove threw",e);
+	  }
+	}
+
+	public synchronized void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/) {
+		try {
+		  if (ackEnabled){
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+			write(MOTOR_MOVE_TO); // msgType = 51
+			write(deviceId);
+			write(pos);
+ 
+     if (ackEnabled){
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
+     }
+			if(record != null){
+				txBuffer.append("> motorMoveTo");
+				txBuffer.append("/");
+				txBuffer.append(deviceId);
+				txBuffer.append("/");
+				txBuffer.append(pos);
+				txBuffer.append("\n");
+				record.write(txBuffer.toString().getBytes());
+				txBuffer.setLength(0);
+			}
+
+	  } catch (Exception e) {
+	  			log.error("motorMoveTo threw",e);
+	  }
+	}
+
 
 	public static String methodToString(int method) {
 		switch (method) {
@@ -1890,6 +1995,15 @@ public class Msg {
 		}
 		case SET_AREF:{
 			return "setAref";
+		}
+		case MOTOR_ATTACH:{
+			return "motorAttach";
+		}
+		case MOTOR_MOVE:{
+			return "motorMove";
+		}
+		case MOTOR_MOVE_TO:{
+			return "motorMoveTo";
 		}
 
 		default: {

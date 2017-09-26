@@ -33,6 +33,7 @@ public class _TemplateService extends Service {
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
+    meta.setAvailable(false);
     meta.addCategory("general");
     return meta;
   }

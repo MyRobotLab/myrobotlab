@@ -133,3 +133,9 @@
 # set ARef
 > setAref/b16 type
 
+# motor
+> motorAttach/deviceId/type/[] pins
+> motorMove/deviceId/pwr
+> motorMoveTo/deviceId/pos
+
+

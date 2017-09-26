@@ -48,6 +48,10 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
       this.topic = topic;
       this.payload = payload;
     }
+    
+    public String toString(){
+      return String.format("/%s-%s", topic, payload);
+    }
   }
 
   public final static Logger log = LoggerFactory.getLogger(Mqtt.class);

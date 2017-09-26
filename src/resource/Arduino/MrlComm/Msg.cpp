@@ -126,6 +126,12 @@ Msg* Msg::getInstance() {
 	void ultrasonicSensorStopRanging( byte deviceId);
 	// > setAref/b16 type
 	void setAref( int type);
+	// > motorAttach/deviceId/type/[] pins
+	void motorAttach( byte deviceId,  byte type,  byte pinsSize, const byte*pins);
+	// > motorMove/deviceId/pwr
+	void motorMove( byte deviceId,  byte pwr);
+	// > motorMoveTo/deviceId/pos
+	void motorMoveTo( byte deviceId,  byte pos);
 
  */
 
@@ -548,6 +554,33 @@ void Msg::processCommand() {
 			int type = b16(ioCmd, startPos+1);
 			startPos += 2; //b16
 			mrlComm->setAref( type);
+			break;
+	}
+	case MOTOR_ATTACH: { // motorAttach
+			byte deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			byte type = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			const byte* pins = ioCmd+startPos+2;
+			byte pinsSize = ioCmd[startPos+1];
+			startPos += 1 + ioCmd[startPos+1];
+			mrlComm->motorAttach( deviceId,  type,  pinsSize, pins);
+			break;
+	}
+	case MOTOR_MOVE: { // motorMove
+			byte deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			byte pwr = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			mrlComm->motorMove( deviceId,  pwr);
+			break;
+	}
+	case MOTOR_MOVE_TO: { // motorMoveTo
+			byte deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			byte pos = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			mrlComm->motorMoveTo( deviceId,  pos);
 			break;
 	}
 
