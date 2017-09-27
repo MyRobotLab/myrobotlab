@@ -59,6 +59,17 @@ import org.slf4j.Logger;
  */
 public class AudioCapture extends Service {
 
+  float sampleRate = 16000.0F;
+  // 8000,11025,16000,22050,44100
+  int sampleSizeInBits = 16;
+  // 8,16
+  int channels = 1;
+  // 1,2
+  boolean signed = true;
+  // true,false
+  boolean bigEndian = false;
+  // true,false
+  
   class CaptureThread extends Thread {
     // An arbitrary-size temporary holding
     // buffer
@@ -215,19 +226,17 @@ public class AudioCapture extends Service {
   // are shown in comments following
   // the declarations.
   private AudioFormat getAudioFormat() {
-    float sampleRate = 16000.0F;
-    // 8000,11025,16000,22050,44100
-    int sampleSizeInBits = 16;
-    // 8,16
-    int channels = 1;
-    // 1,2
-    boolean signed = true;
-    // true,false
-    boolean bigEndian = false;
-    // true,false
     return new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
   }// end getAudioFormat
 
+  public void setAudioFormat(float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian){
+    this.sampleRate = sampleRate;
+    this.sampleSizeInBits = sampleSizeInBits;
+    this.channels = channels;
+    this.signed = signed;
+    this.bigEndian = bigEndian;
+  }
+  
   // This method plays back the audio
   // data that has been saved in the
   // ByteArrayOutputStream
