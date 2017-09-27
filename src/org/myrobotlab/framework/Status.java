@@ -69,7 +69,7 @@ public class Status implements Serializable {// extends Exception {
 
   public static Status warn(String format, Object... args) {
     Status status = new Status(String.format(format, args));
-    status.level = ERROR;
+    status.level = WARN;
     return status;
   }
 
@@ -81,7 +81,6 @@ public class Status implements Serializable {// extends Exception {
 
   public static Status info(String format, Object... args) {
     String formattedInfo = String.format(format, args);
-    log.info(formattedInfo);
     Status status = new Status(formattedInfo);
     status.level = INFO;
     return status;

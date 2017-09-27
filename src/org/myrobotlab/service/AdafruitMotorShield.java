@@ -9,7 +9,9 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
@@ -354,5 +356,12 @@ public class AdafruitMotorShield extends Service implements MotorController, Ard
   @Override
   public Set<String> getAttached() {
     return motors.keySet();
+  }
+  
+  @Override
+  public List<String> getPorts() {
+    // we use pins not ports
+    List<String> ret = new ArrayList<String>();
+    return ret;
   }
 }

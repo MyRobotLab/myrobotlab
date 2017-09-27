@@ -156,17 +156,16 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   @Override
   // not relative ! - see moveStep
   public void move(double power) {
-    log.debug("{}.move({})", getName(), power);
-    if (power > maxPower) {
-      power = maxPower;
+    info("%s.move(%.3f)", getName(), power);
+    if (Math.abs(power) > maxPower) {
+      warn("motor %s.move(%.3f) out of range - must be between -1.0 and 1.0", getName(), power);
+      return;
     }
-    if (power < minPower) {
-      power = minPower;
-    }
+
     powerLevel = power;
 
     if (locked) {
-      log.warn("motor locked");
+      warn("motor locked");
       return;
     }
     controller.motorMove(this);
@@ -236,11 +235,13 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   @Override
-  public void stopService(){
+  public void stopService() {
     super.stopService();
-    stopAndLock();
+    if (controller != null) {
+      stopAndLock();
+    }
   }
-  
+
   // FIXME - related to update(SensorData) no ?
   public Integer updatePosition(Integer position) {
     currentPos = position;

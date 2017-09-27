@@ -395,55 +395,26 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     }
     return null;
   }
-
-  /*
-   * DEPRECATE - use JSON ... XML is sooo 1990s
-   *
-   * a method which returns a xml representation of all the listeners and routes
-   * in the runtime system
-   *
-   */
-  public static String dumpNotifyEntries() {
+  
+  public Map<String, Map<String, List<MRLListener>>> getNotifyEntries(){
+    Map<String, Map<String, List<MRLListener>>> ret = new TreeMap<String, Map<String, List<MRLListener>>>();
     ServiceEnvironment se = getLocalServices();
-
     Map<String, ServiceInterface> sorted = new TreeMap<String, ServiceInterface>(se.serviceDirectory);
-
-    Iterator<String> it = sorted.keySet().iterator();
-    String serviceName;
-    ServiceInterface sw;
-    String n;
-    ArrayList<MRLListener> nes;
-    MRLListener listener;
-
-    StringBuffer sb = new StringBuffer().append("<NotifyEntries>");
-    while (it.hasNext()) {
-      serviceName = it.next();
-      sw = sorted.get(serviceName);
-      sb.append("<service name=\"").append(sw.getName()).append("\" serviceEnironment=\"").append(sw.getInstanceId()).append("\">");
-      ArrayList<String> nlks = sw.getNotifyListKeySet();
-      if (nlks != null) {
-        Iterator<String> nit = nlks.iterator();
-
-        while (nit.hasNext()) {
-          n = nit.next();
-          sb.append("<addListener map=\"").append(n).append("\">");
-          nes = sw.getNotifyList(n);
-          for (int i = 0; i < nes.size(); ++i) {
-            listener = nes.get(i);
-            sb.append("<MRLListener outMethod=\"").append(listener.topicMethod).append("\" name=\"").append(listener.callbackName).append("\" inMethod=\"")
-                .append(listener.callbackMethod).append("\" />");
-          }
-          sb.append("</addListener>");
+    for (Map.Entry<String, ServiceInterface> entry : sorted.entrySet())
+    {
+        System.out.println(entry.getKey() + "/" + entry.getValue());
+        ArrayList<String> flks = entry.getValue().getNotifyListKeySet();
+        Map<String, List<MRLListener>> subret = new TreeMap<String, List<MRLListener>>();
+        for (String sn : flks){
+          List<MRLListener> mrllistners = entry.getValue().getNotifyList(sn);          
+          subret.put(sn, mrllistners);                   
         }
-      }
-      sb.append("</service>");
-
-    }
-    sb.append("</NotifyEntries>");
-
-    return sb.toString();
+        ret.put(entry.getKey(), subret);
+    }    
+    return ret;
   }
 
+ 
   public static String dump() {
     try {
 
@@ -492,8 +463,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       sb.toString();
 
       FileIO.toFile(String.format("serviceRegistry.%s.txt", runtime.getName()), sb.toString());
-      FileIO.toFile(String.format("notifyEntries.%s.xml", runtime.getName()), Runtime.dumpNotifyEntries());
-
+      
       return sb.toString();
     } catch (Exception e) {
       Logging.logError(e);

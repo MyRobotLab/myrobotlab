@@ -1991,22 +1991,19 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return ret;
   }
 
-  public Status error(String msg) {
-    Status ret = Status.error(msg);
-    ret.name = getName();
-    invoke("publishStatus", ret);
-    return ret;
+  public Status error(String msg) {    
+    return error(msg, (Object[])null);
   }
 
-  public Status warn(String msg) {
-    Status ret = Status.warn(msg);
-    invoke("publishStatus", ret);
-    return ret;
+  public Status warn(String msg) {        
+    return warn(msg, (Object[])null);
   }
 
   @Override
   public Status warn(String format, Object... args) {
-    return Status.warn(format, args);
+    Status status =  Status.warn(format, args);
+    invoke("publishStatus", status);
+    return status;
   }
 
   /**
@@ -2014,10 +2011,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * @param msg m
    * @return string
    */
-  public String info(String msg) {
-    Status status = Status.info(msg);
-    invoke("publishStatus", status);
-    return msg;
+  public Status info(String msg) {
+    return info(msg, (Object[]) null);
   }
 
   /**
@@ -2025,7 +2020,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   @Override
   public Status info(String format, Object... args) {
-    return Status.info(format, args);
+    Status status = Status.info(format, args);
+    invoke("publishStatus", status);
+    return status;
   }
 
   /**
