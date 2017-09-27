@@ -31,6 +31,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
+import org.myrobotlab.service.AudioCapture;
 import org.myrobotlab.service.SwingGui;
 
 public class AudioCaptureGui extends ServiceGui {
@@ -90,6 +91,10 @@ public class AudioCaptureGui extends ServiceGui {
     display.setLayout(new FlowLayout());
 
   
+  }
+  
+  public void onState(AudioCapture audiocapture){
+    
   }
 
   @Override
