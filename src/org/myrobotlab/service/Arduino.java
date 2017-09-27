@@ -2226,5 +2226,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void connect(String port, int rate) throws Exception {
     connect(port, rate, 8, 1, 0);
   }
+  
+  @Override
+  public List<String> getPorts() {
+    // we use pins not ports
+    List<String> ret = new ArrayList<String>();
+    return ret;
+  }
 
 }

@@ -25,6 +25,8 @@
 
 package org.myrobotlab.service.interfaces;
 
+import java.util.List;
+
 import org.myrobotlab.framework.interfaces.Attachable;
 
 public interface MotorController extends Attachable {
@@ -68,6 +70,10 @@ public interface MotorController extends Attachable {
 	 */
 	public void motorReset(MotorControl motor);
 	
-	
+	/**
+	 * if the motor controller uses ports - this method will return a list of ports
+	 * @return
+	 */
+	List<String> getPorts();
 
 }

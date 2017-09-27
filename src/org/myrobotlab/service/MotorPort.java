@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 
 /**
@@ -30,5 +31,13 @@ public class MotorPort extends AbstractMotor {
     return port;
   }
  
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(Motor.class.getCanonicalName());
+    meta.addDescription("supports port related motor controllers such as the Sabertooth and AdaFruitMotorShield");
+    meta.addCategory("motor");
+
+    return meta;
+  }
   
 }

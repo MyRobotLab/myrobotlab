@@ -936,4 +936,11 @@ public void disablePin(Integer i) {
   
 }
 
+@Override
+public List<String> getPorts() {
+  // we use pins not ports
+  List<String> ret = new ArrayList<String>();
+  return ret;
+}
+
 }
