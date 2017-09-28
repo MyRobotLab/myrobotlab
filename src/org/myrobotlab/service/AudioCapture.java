@@ -53,6 +53,8 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+import com.sun.glass.ui.Pixels.Format;
+
 /**
  * AudioCapture - a service that can record and playback from a microphone.
  * 
@@ -228,6 +230,7 @@ public class AudioCapture extends Service {
   // are shown in comments following
   // the declarations.
   private AudioFormat getAudioFormat() {
+    // new AudioFormat(Format PCM ULAW UNSIGNED etc ..)
     return new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
   }// end getAudioFormat
 

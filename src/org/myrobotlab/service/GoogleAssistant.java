@@ -36,7 +36,7 @@ public class GoogleAssistant extends PythonProxy {
     ServiceType meta = new ServiceType(GoogleAssistant.class.getCanonicalName());
     meta.addDescription("Access Google Assistant through voice interaction");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
-    meta.addCategory("Assistant");
+    meta.addCategory("ai");
     meta.setCloudService(true);
     return PythonProxy.addMetaData(meta);
   }
