@@ -356,7 +356,7 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
       // this works well - the user controls all config
       // but the attach can check and report on it
       if (serial.getRate() != 9600) {
-        warn("default rate for Sabertooth is 9600");
+        warn("default rate for Sabertooth is 9600 serial is currently at %s", serial.getRate());
       }
 
       // give serial an opportunity to attach to this service
@@ -435,7 +435,7 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
       sabertooth.attach(serial);
       sabertooth.attach(m1);
       sabertooth.attach(m2);
-      joy.
+      // joy.
 
       // FIXME - motor1.attach(joystick) !
       
