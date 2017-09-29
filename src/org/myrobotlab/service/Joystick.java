@@ -239,7 +239,7 @@ public class Joystick extends Service implements Runnable {
 
 		if (index > -1 && index < hardwareControllers.length) {
 			hardwareController = hardwareControllers[index];
-			controller = hardwareController.getName();
+			controller = String.format("%d - %s", index, hardwareController.getName());
 			// invoke("getComponents");
 			getComponents();
 			startPolling();
@@ -294,6 +294,10 @@ public class Joystick extends Service implements Runnable {
 	public void startService() {
 		super.startService();
 		invoke("getControllers");
+	}
+	
+	public String getController(){
+	  return controller;
 	}
 
 	/**
