@@ -140,6 +140,11 @@ public class JoystickGui extends ServiceGui implements ActionListener, ItemListe
           String name = it.next();
           controllers.addItem(name);
         }
+        
+        String controller = myJoy.getController();
+        if (controller != null){
+          controllers.setSelectedItem(controller);
+        }
         // controllers.addActionListener(self);
         controllers.addItemListener(self);
 
@@ -191,7 +196,7 @@ public class JoystickGui extends ServiceGui implements ActionListener, ItemListe
           }
           componentUi.put(name, b);
         }
-        myService.pack();
+        // myService.pack();
       }
     });
 
