@@ -250,9 +250,10 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 				List<PinDefinition> mbl = tmpControl.getPinList();
 				for (int i = 0; i < mbl.size(); i++) {
 					PinDefinition pinData = mbl.get(i);
-					if (pinData.isAnalog()){
+					// Removed the filtering on pins, because the Arduino logic for the different is not complete
+					// if (pinData.isAnalog()){
 					    analogInputPinList.addItem(pinData.getAddress());
-					}
+					// }
 				}
 			}
 			analogInputPinList.setSelectedItem(myServo.pin);
