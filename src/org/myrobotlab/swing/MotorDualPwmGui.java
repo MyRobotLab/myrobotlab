@@ -98,7 +98,7 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
   JButton attachButton = new JButton(attach);
   
   String setLeftPwmPin = "setLeftPwmPin";
-  String setRightPwmPin = "setLeftPwmPin";
+  String setRightPwmPin = "setRightPwmPin";
 
   JComboBox<String> leftPwmPinList = new JComboBox<String>();
   JComboBox<String> rightPwmPinList = new JComboBox<String>();
@@ -151,9 +151,10 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
       
     } else if (source == attachButton) {
       if (attachButton.getText().equals(attach)) {
-        // myService.sendBlocking(boundServiceName, setLeftPwmPin, Integer.decode(leftPwmPinList.getSelectedItem().toString()));
-        // myService.sendBlocking(boundServiceName, setRightPwmPin, Integer.decode(rightPwmPinList.getSelectedItem().toString()));
-        // myService.send(boundServiceName, attach, controllerList.getSelectedItem());
+        myService.sendBlocking(boundServiceName, setLeftPwmPin, Integer.decode(leftPwmPinList.getSelectedItem().toString()));
+        myService.sendBlocking(boundServiceName, setRightPwmPin, Integer.decode(rightPwmPinList.getSelectedItem().toString()));
+        myService.send(boundServiceName, attach, controllerList.getSelectedItem());
+        /*
         myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.getSelectedItem().toString()));
         myMotor.setRightPwmPin((int)Integer.decode(rightPwmPinList.getSelectedItem().toString()));
         try {
@@ -162,6 +163,7 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
           // TODO Auto-generated catch block
           e1.printStackTrace();
         }
+        */
       } else {
         myService.send(boundServiceName, detach, controllerList.getSelectedItem());
       }
