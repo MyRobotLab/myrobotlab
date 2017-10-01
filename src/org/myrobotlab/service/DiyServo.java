@@ -486,8 +486,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
 	@Override
 	public void setMinMax(double min, double max) {
-		mapper.setMin(min);
-		mapper.setMax(max);
+    map(min, max, min, max);
 		broadcastState();
 	}
 
