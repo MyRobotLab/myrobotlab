@@ -113,7 +113,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 			} catch (Exception e) {
 				isSweeping = false;
 				if (e instanceof InterruptedException) {
-					info("shutting down sweeper");
+					// info("shutting down sweeper");
 				} else {
 					log.error("sweeper threw", e);
 				}
@@ -146,7 +146,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 							double setPoint = pid.getSetpoint(pidKey);
 							double output = pid.getOutput(pidKey);
 							motorControl.setPowerLevel(output);
-							log.debug(String.format("setPoint(%s), processVariable(%s), output(%s)", setPoint, processVariable, output));
+							// log.debug(String.format("setPoint(%s), processVariable(%s), output(%s)", setPoint, processVariable, output));
 							if (output != lastOutput) {
 								motorControl.move(output);
 								lastOutput = output;
@@ -158,7 +158,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
 			} catch (Exception e) {
 				if (e instanceof InterruptedException) {
-					info("Shutting down MotorUpdater");
+					// info("Shutting down MotorUpdater");
 				} else {
 					log.error("motor updater threw", e);
 				}
@@ -434,10 +434,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		}
 
 		if (motorUpdater == null) {
-			log.info("Starting MotorUpdater");
+			// log.info("Starting MotorUpdater");
 			motorUpdater = new MotorUpdater(getName());
 			motorUpdater.start();
-			log.info("MotorUpdater started");
+			// log.info("MotorUpdater started");
 		}
 
 		targetPos = pos;
@@ -566,7 +566,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	 * @param uS - the microseconds value
 	 */
 	public void writeMicroseconds(Integer uS) {
-		log.info("writeMicroseconds({})", uS);
+		// log.info("writeMicroseconds({})", uS);
 		// TODO. This need to be remapped to Motor and PID internal to this
 		// Service
 		// getController().servoWriteMicroseconds(this, uS);
@@ -681,7 +681,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 	public void onPin(PinData pindata) {
 		int inputValue = pindata.value;
 		processVariable = 180 * inputValue / resolution;
-		log.debug(String.format("onPin received value %s converted to %s",inputValue, processVariable));
+		// log.debug(String.format("onPin received value %s converted to %s",inputValue, processVariable));
 		pid.setInput(pidKey, processVariable);
 	}
 
@@ -706,7 +706,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		if (pinArrayControl instanceof Ads1115) {
 			resolution = 65536;
 		}
-		log.debug(String.format("Detected %s %s. Setting AD resolution to %s",pinArrayControl.getClass(), pinArrayControl.getName(),resolution));
+		// log.debug(String.format("Detected %s %s. Setting AD resolution to %s",pinArrayControl.getClass(), pinArrayControl.getName(),resolution));
 
 		int rate = 1000 / sampleTime;
 		pinArrayControl.attach(this, pin);

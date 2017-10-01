@@ -156,7 +156,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   @Override
   // not relative ! - see moveStep
   public void move(double power) {
-    info("%s.move(%.3f)", getName(), power);
+    // info("%s.move(%.3f)", getName(), power);
     if (Math.abs(power) > maxPower) {
       warn("motor %s.move(%.3f) out of range - must be between -1.0 and 1.0", getName(), power);
       return;
