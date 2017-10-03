@@ -122,4 +122,11 @@ public class I2CBus implements Attachable, I2CBusControl {
 
   }
 
+  @Override
+  public boolean isLocal() {
+    // assuming a bus to connect is always
+    // "in" process and not remote ?
+    return true;
+  }
+
 }

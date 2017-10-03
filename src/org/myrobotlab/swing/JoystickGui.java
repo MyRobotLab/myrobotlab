@@ -45,6 +45,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Joystick;
 import org.myrobotlab.service.Joystick.Component;
 import org.myrobotlab.service.SwingGui;
@@ -87,6 +88,7 @@ public class JoystickGui extends ServiceGui implements ActionListener, ItemListe
   public JoystickGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
     self = this;
+    myJoy = (Joystick)Runtime.getService(boundServiceName);
     addTop(controllers, refresh);
     add(buttonPanel);
     add(axisPanel);

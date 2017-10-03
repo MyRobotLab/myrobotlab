@@ -410,119 +410,90 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
       LoggingFactory.init("INFO");
       
       boolean virtual = false;
+      //////////////////////////////////////////////////////////////////////////////////
+      // Sabertooth.py
+      // categories: motor
+      // more info @: http://myrobotlab.org/service/Sabertooth
+      //////////////////////////////////////////////////////////////////////////////////
+      // uncomment for virtual hardware
+      // virtual = True
+
       String port = "COM14";
 
       // start optional virtual serial service, used for test
-      if (virtual) {
-        Serial uart = Serial.connectVirtualUart(port);
-        // uart.logRecv(true); dump bytes sent from sabertooth
+      if (virtual){
+          // use static method Serial.connectVirtualUart to create
+          // a virtual hardware uart for the serial service to
+          // connect to
+          Serial uart = Serial.connectVirtualUart(port);
+          uart.logRecv(true); // dump bytes sent from sabertooth
       }
-
       // start the services
-      Runtime.start("gui", "SwingGui");
-      // Runtime.start("webgui", "WebGui");
-      Serial serial = (Serial) Runtime.start("serial", "Serial");
-      Sabertooth sabertooth = (Sabertooth) Runtime.start("sabertooth", "Sabertooth");
-      MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");      
-      MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");   
-      Joystick joy = (Joystick) Runtime.start("joy", "Joystick");  
+      Runtime.start("gui","SwingGui");
+      Sabertooth sabertooth = (Sabertooth)Runtime.start("sabertooth","Sabertooth");
+      MotorPort m1 = (MotorPort)Runtime.start("m1","MotorPort");
+      MotorPort m2 = (MotorPort)Runtime.start("m2","MotorPort");
+      Joystick joy = (Joystick)Runtime.start("joy","Joystick");
+      // Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
 
       // configure services
       m1.setPort("m1");
       m2.setPort("m2");
-      
+      joy.setController(5);
+
       // attach services
-      sabertooth.attach(serial);
       sabertooth.attach(m1);
       sabertooth.attach(m2);
-      // joy.
+      m1.attach(joy.getAxis("y"));
+      // m2.attach(arduino.getPin("A4"));      
 
+
+      // FIXME - sabertooth.attach(motor1) & sabertooth.attach(motor2)
       // FIXME - motor1.attach(joystick) !
-      
-      // connect
-      log.info("available ports {}", serial.getPortNames());
-      sabertooth.connect(port);      
+      sabertooth.connect(port);
 
       m1.stop();
       m2.stop();
-
-      boolean done = false;
-      while (!done) {
-
-        for (double power = 0; power < 1.2; power += 0.01) {
-          m1.move(power);
-          sleep(100);
-        }
-
-        for (double power = 1.0; power > -0.3; power -= 0.01) {
-          m1.move(power);
-          sleep(100);
-        }
-
+      
+      boolean done = true;
+      if (done){
+        return;
       }
 
-      // "Joystick");
-      Runtime.start("joystick", "Joystick");
+      // speed up the motor
+      for (int i = 0; i < 100; ++i){
+        double pwr = i * .01;
+        log.info("power {}", pwr);
+        m1.move(pwr);
+        sleep(100);
+      }
+      
+      sleep(1000);
 
-      Sabertooth saber = (Sabertooth) Runtime.start("saber", "Sabertooth");
-      saber.connect(port);
+      // slow down the motor
+      for (int i = 100; i > 0; --i){
+        double pwr = i * .01;
+        log.info("power {}", pwr);
+        m1.move(pwr);
+        sleep(100);
+      }
+      
 
-      // be "true" to the interface
-      MotorController mc = (MotorController) saber;
+      // move motor clockwise
+      m1.move(0.3);
+      sleep(1000);
+      m1.stop();
 
-      MotorPort motor01 = (MotorPort) Runtime.start("motor01", "MotorPort");
-      MotorPort motor02 = (MotorPort) Runtime.start("motor02", "MotorPort");
+      // move motor counter-clockwise
+      m1.move(-0.3);
+      sleep(1);
+      m1.stop();
+      
+      // TODO - stopAndLock
 
-      motor01.setPort("m1");
-      motor01.setPort("m2");
-
-      /*
-       * FIXME -- CHECK THIS !!!! motor01.attachMotorController(mc);
-       * motor02.attachMotorController(mc);
-       */
-      motor01.attach(mc);
-      motor02.attach(mc);
-
-      motor01.move(0);
-      motor01.move(0.15);
-      motor01.move(0.30);
-      motor01.move(0.40);
-
-      motor01.stop();
-
-      motor01.move(0.15);
-      motor01.stopAndLock();
-      motor01.move(0.40);
-      motor01.unlock();
-
-      saber.driveForwardMotor1(20);
-      saber.driveForwardMotor1(30);
-      saber.driveForwardMotor1(60);
-      saber.driveForwardMotor1(110);
-      saber.driveForwardMotor1(0);
-
-      saber.driveForwardMotor2(20);
-      saber.driveForwardMotor2(30);
-      saber.driveForwardMotor2(60);
-      saber.driveForwardMotor2(110);
-      saber.driveForwardMotor2(0);
-
-      // Motor m1 = (Motor) Runtime.start("m1", "Motor");
-
-      // Motor m2 = (Motor) Runtime.createAndStart("m2", "Motor");
-
-      // Runtime.start("gui", "SwingGui");
-      Runtime.start("webgui", "WebGui");
-      Runtime.start("motor", "Motor");
-
-      saber.driveForwardMotor1(100);
-
-      /*
-       * SwingGui gui = new SwingGui("gui"); gui.startService();
-       */
     } catch (Exception e) {
       Logging.logError(e);
     }
   }
-
+  
 }

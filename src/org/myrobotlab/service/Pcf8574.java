@@ -410,14 +410,14 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     pinIndex = new HashMap<Integer, PinDefinition>();
 
     for (int i = 0; i < pinDataCnt; ++i) {
-      PinDefinition pindef = new PinDefinition();
+      PinDefinition pindef = new PinDefinition(getName(), i);
       String name = String.format("D%d", i);
       pindef.setRx(false);
       pindef.setTx(false);
       pindef.setAnalog(false);
       pindef.setDigital(true);
       pindef.setPwm(false);
-      pindef.setName(name);
+      pindef.setPinName(name);
       pindef.setAddress(i);
       pindef.setMode("INPUT");
       pinMap.put(name, pindef);
@@ -597,6 +597,20 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     }
     ;
     return false;
+  }
+  
+  public PinDefinition getPin(String pinName) {
+    if (pinMap.containsKey(pinName)){
+      return pinMap.get(pinName);
+    }
+    return null;
+  }
+  
+  public PinDefinition getPin(Integer address) {
+    if (pinIndex.containsKey(address)){
+      return pinIndex.get(address);
+    }
+    return null;
   }
 
 }

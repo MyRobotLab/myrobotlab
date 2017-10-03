@@ -224,7 +224,7 @@ public class Oscope extends ServiceGui implements ActionListener {
 		public Trace(Oscope oscope, PinDefinition pinDef, Color hsv) {
 			this.oscope = oscope;
 			this.pinDef = pinDef;
-			b = new JButton(pinDef.getName());
+			b = new JButton(pinDef.getPinName());
 			b.setMargin(new Insets(0, 0, 0, 0));
 			b.setBorder(null);
 			b.setPreferredSize(new Dimension(30, 30));
@@ -239,7 +239,7 @@ public class Oscope extends ServiceGui implements ActionListener {
 			screenDisplay.add(pinDisplay, BorderLayout.CENTER);
 			
 			JPanel flow = new JPanel();
-			flow.add(new JLabel(pinDef.getName()));
+			flow.add(new JLabel(pinDef.getPinName()));
 			flow.add(pinInfo);
 			screenDisplay.add(flow, BorderLayout.WEST);
 			screenDisplay.setVisible(false);
@@ -342,7 +342,7 @@ public class Oscope extends ServiceGui implements ActionListener {
 			PinDefinition pinDef = pinList.get(i);
 			Color hsv = new Color(Color.HSBtoRGB((i * (gradient)), 0.5f, 1.0f));
 			Trace trace = new Trace(this, pinDef, hsv);
-			traces.put(pinDef.getName(), trace);
+			traces.put(pinDef.getPinName(), trace);
 			traceIndex.put(pinDef.getAddress(), trace);
 			buttonPanel.add(trace.getButtonDisplay(), bgc);
 			screenPanel.add(trace.getScreenDisplay(), bgc);
