@@ -138,7 +138,6 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     log.info(String.format("RANGE: %d", range));
   }
 
-  /* FIXME !!! IMPORTANT PUT IN INTERFACE &amp; REMOVE SELF FROM ARDUINO !!! */
   public Double publishRange(Double range) {
 
     ++pings;

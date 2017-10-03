@@ -919,16 +919,14 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     pinIndex = new HashMap<Integer, PinDefinition>();
 
     for (int i = 0; i < pinDataCnt; ++i) {
-      PinDefinition pindef = new PinDefinition();
-      String name = String.format("A%d", i);
+      PinDefinition pindef = new PinDefinition(getName(), i, String.format("A%d", i));  
       pindef.setRx(false);
       pindef.setTx(false);
       pindef.setAnalog(true);
       pindef.setPwm(false);
-      pindef.setName(name);
       pindef.setAddress(i);
       pindef.setMode("INPUT");
-      pinMap.put(name, pindef);
+      pinMap.put(pindef.getPinName(), pindef);
       pinIndex.put(i, pindef);
     }
 
@@ -1102,5 +1100,19 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     }
     ;
     return false;
+  }
+  
+  public PinDefinition getPin(String pinName) {
+    if (pinMap.containsKey(pinName)){
+      return pinMap.get(pinName);
+    }
+    return null;
+  }
+  
+  public PinDefinition getPin(Integer address) {
+    if (pinIndex.containsKey(address)){
+      return pinIndex.get(address);
+    }
+    return null;
   }
 }

@@ -535,8 +535,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     if (board.contains("mega")) {
       for (int i = 0; i < 70; ++i) {
-        PinDefinition pindef = new PinDefinition();
-
+        PinDefinition pindef = new PinDefinition(getName(), i);  
         // begin wacky pin def logic
         String pinName = null;
         if (i == 0) {
@@ -557,7 +556,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
           pinName = String.format("D%d", i);
           pindef.setPwm(true);
         }
-        pindef.setName(pinName);
+        pindef.setPinName(pinName);
         pindef.setAddress(i);
         pinIndex.put(i, pindef);
         pinMap.put(pinName, pindef);
@@ -565,7 +564,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       }
     } else {
       for (int i = 0; i < 20; ++i) {
-        PinDefinition pindef = new PinDefinition();
+        PinDefinition pindef = new PinDefinition(getName(), i);  
         String pinName = null;
         if (i == 0) {
           pindef.setRx(true);
@@ -586,7 +585,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
           pindef.setPwm(true);
           pinName = String.format("D%d", i);
         }
-        pindef.setName(pinName);
+        pindef.setPinName(pinName);
         pindef.setAddress(i);
         pinIndex.put(i, pindef);
         pinMap.put(pinName, pindef);
@@ -2201,11 +2200,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
       VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
       virtual.connect("COM78");
+      virtual.setBoardUno();
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect("COM78");
+      arduino.setBoardMega();
       Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver) Runtime.start("adafruit", "Adafruit16CServoDriver");
       adafruit.attach(arduino);
       arduino.attach(adafruit);
+      
       Servo servo = (Servo) Runtime.start("servo", "Servo");
       // servo.attach(arduino, 8, 90);
 
@@ -2232,6 +2234,20 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // we use pins not ports
     List<String> ret = new ArrayList<String>();
     return ret;
+  }
+
+  public PinDefinition getPin(String pinName) {
+    if (pinMap.containsKey(pinName)){
+      return pinMap.get(pinName);
+    }
+    return null;
+  }
+  
+  public PinDefinition getPin(Integer address) {
+    if (pinIndex.containsKey(address)){
+      return pinIndex.get(address);
+    }
+    return null;
   }
 
 }

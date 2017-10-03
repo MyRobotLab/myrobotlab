@@ -613,12 +613,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     pinIndex = new HashMap<Integer, PinDefinition>();
 
     for (int i = 0; i < 16; ++i) {
-      PinDefinition pindef = new PinDefinition();
-      String name = null;
-      name = String.format("D%d", i);
-      pindef.setDigital(true);
-      pindef.setName(name);
-      pindef.setAddress(i);
+      PinDefinition pindef = new PinDefinition(getName(), i, String.format("D%d", i));      
+      pindef.setDigital(true);    
       pinIndex.put(i, pindef);
     }
     return pinMap;
@@ -665,11 +661,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     List<PinDefinition> pinList = new ArrayList<PinDefinition>();
 
     for (int i = 0; i < 15; ++i) {
-      PinDefinition pindef = new PinDefinition();
-
-      // begin wacky pin def logic
-      String pinName = String.format("D%d", i);
-      pindef.setName(pinName);
+     
+      PinDefinition pindef = new PinDefinition(getName(), i, String.format("D%d", i));  
       pindef.setRx(false);
       pindef.setDigital(true);
       pindef.setAnalog(true);
@@ -678,7 +671,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       pindef.setPwm(true);
       pindef.setAddress(i);
       pinIndex.put(i, pindef);
-      pinMap.put(pinName, pindef);
+      pinMap.put(pindef.getPinName(), pindef);
       pinList.add(pindef);
     }
 

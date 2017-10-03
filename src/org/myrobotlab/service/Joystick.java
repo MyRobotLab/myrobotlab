@@ -25,11 +25,15 @@ package org.myrobotlab.service;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
+import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -68,6 +72,10 @@ public class Joystick extends Service implements Runnable {
 	/**
 	 * array of "real" non-serializable hardware hwComponents
 	 */
+	
+	
+	Map<String, Set<MRLListener>> idAndServiceSubscription = new HashMap<String,Set<MRLListener>>();
+	
 	transient net.java.games.input.Component[] hardwareComponents; // holds the
 	transient Rumbler[] hardwareRumblers;
 	transient InputPollingThread pollingThread = null;
@@ -86,7 +94,7 @@ public class Joystick extends Service implements Runnable {
 	
 	String controller;
 
-	static public class Component implements Serializable {
+	static public class Component implements Serializable, NameProvider {
 		private static final long serialVersionUID = 1L;
 		public String id;
 		public boolean isRelative = false;
@@ -94,10 +102,12 @@ public class Joystick extends Service implements Runnable {
 		public String type;
 		public int index;
 		public float value = 0;
+		String serviceName;
 
-		public Component(int index, net.java.games.input.Component c) {
+		public Component(String serviceName, int index, net.java.games.input.Component c) {
 
-			this.index = index;
+			this.serviceName = serviceName;
+		  this.index = index;
 			this.isRelative = c.isRelative();
 			this.isAnalog = c.isAnalog();
 			this.type = c.getIdentifier().getClass().getSimpleName();
@@ -108,10 +118,16 @@ public class Joystick extends Service implements Runnable {
 		public String toString() {
 			return String.format("%d %s [%s] relative %b analog %b", index, type, id, isRelative, isAnalog);
 		}
+
+    @Override
+    public String getName() {
+      return serviceName;
+    }
 	}
 
 	public class InputPollingThread extends Thread {
 		public boolean isPolling = false;
+    
 
 		public InputPollingThread(String name) {
 			super(name);
@@ -153,8 +169,18 @@ public class Joystick extends Service implements Runnable {
 						if (mappers.containsKey(id)) {
 							input = (float) mappers.get(id).calcOutput(input);
 						}
-
-						invoke("publishJoystickInput", new JoystickData(id, input));
+						
+						JoystickData data = new JoystickData(id, input);
+						invoke("publishJoystickInput", data);
+						
+						// filtered by subscribed components
+						if (idAndServiceSubscription.containsKey(id)){	
+						  Set<MRLListener> listeners = idAndServiceSubscription.get(id);
+						  for (MRLListener listener : listeners){
+						    // "publishJoystickData" -> onJoystickData
+						    send(listener.callbackName, listener.callbackMethod, data);
+						  }
+						}
 
 					} // if (lastValue == null || Math.abs(input - lastValue) >
 						// 0.0001)
@@ -191,7 +217,7 @@ public class Joystick extends Service implements Runnable {
 		for (int i = 0; i < hardwareComponents.length; i++) {
 			net.java.games.input.Component c = hardwareComponents[i];
 			String id = c.getIdentifier().toString();
-			Component component = new Component(i, c);
+			Component component = new Component(getName(), i, c);
 			log.info("found {}", component);
 			components.put(id, component);
 		}
@@ -227,8 +253,24 @@ public class Joystick extends Service implements Runnable {
 		service.subscribe(this.getName(), "publishJoystickInput");
 	}
 
+	 public void addListener(String serviceName, String id) {
+	   if (!components.containsKey(id)){
+	     error("%s requests subscription to component %s - but %d does not exist", serviceName, id, id);
+	   }	   
+	   Set<MRLListener> listeners = null;
+	   if (idAndServiceSubscription.containsKey(id)){
+	     listeners = idAndServiceSubscription.get(id);
+	   } else {
+	     listeners = new HashSet<MRLListener>();
+	   }
+	   idAndServiceSubscription.put(id, listeners);
+	   MRLListener listener = new MRLListener("publishJoystickData", serviceName, "onJoystickData");
+	   listeners.add(listener);
+	   // addListener("publishJoystickData", serviceName, CodecUtils.getCallBackName("publishJoystickData"));
+	  }
+	 
 	public JoystickData publishJoystickInput(final JoystickData input) {
-		log.info(String.format("publishJoystickInput %s", input));
+		log.debug(String.format("publishJoystickInput %s", input));
 		return input;
 	}
 
@@ -316,38 +358,56 @@ public class Joystick extends Service implements Runnable {
 		meta.addDependency("net.java.games.jinput", "20120914");
 		return meta;
 	}
+/*
+	Map<String, Set<RelativePositionControl>> axisConsumers = new HashMap<String, Set<RelativePositionControl>>();
 
-	public static void main(String args[]) {
-		LoggingFactory.init();
-		try {
+  @Override
+  public void subscribeToAxis(RelativePositionControl serviceToControl, String axisName) throws Exception {
+    
+    if (serviceToControl.isLocal()){
+      Set<RelativePositionControl> callbacks = null;
+      if (axisConsumers.containsKey(axisName)){
+        callbacks = axisConsumers.get(axisName);
+      } else {
+        callbacks = new HashSet<RelativePositionControl>();
+      }
+      callbacks.add(serviceToControl);
+      axisConsumers.put(axisName, callbacks);
+    } else {
+      // FIXME - FINISH !!
+      // i want motor to subscribe to my filtered x axis
+      // subscribe()
+    }
+  }
+*/
+  public Component getAxis(String name) {
+    if (components.containsKey(name)){
+      Component c = components.get(name);
+      if (!c.isAnalog){
+        warn("getAxis asking for component %s but that component is not analog");
+      }
+      return c;
+    }
+    error("getAxis(%s) not found");
+    return null;
+  }
+  
+  public static void main(String args[]) {
+    LoggingFactory.init();
+    try {
 
-			// Runtime.setRuntimeName("joyrun");
-			Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
-			// joy.mapId("x", "rx");
-			// joy.map("y", -1, 1, 0, 180);
-			Runtime.start("cli", "Cli");
-			Runtime.start("j", "SwingGui");
-			RemoteAdapter remote = (RemoteAdapter)Runtime.start("rj", "RemoteAdapter");
-			Service.sleep(3000);
-			remote.connect("tcp://127.0.0.1:6767");
-			
-			/*
-			 * RemoteAdapter remote = (RemoteAdapter) Runtime.create("remote",
-			 * "RemoteAdapter"); remote.listenOnStartup(false);
-			 * remote.connect("tcp://127.0.0.1:6767");
-			 */
+      Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
+      // joy.mapId("x", "rx");
+      // joy.map("y", -1, 1, 0, 180);
+      Runtime.start("cli", "Cli");
+      Runtime.start("j", "SwingGui");
+      
 
-			// Runtime.start("webgui", "WebGui");
-			// Runtime.start("python", "Python");
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
 
-			// joy.setController(7);
-			// joy.setController(5);
-			// joy.startPolling();
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-	}
+  }
+  
 
 }
