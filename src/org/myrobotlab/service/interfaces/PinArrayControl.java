@@ -9,6 +9,10 @@ public interface PinArrayControl extends NameProvider {
 
 	public List<PinDefinition> getPinList();
 	
+  public PinDefinition getPin(String pinName);
+  
+  public PinDefinition getPin(Integer address);
+  
 	/*
 	 * read pin based on index or address of the pin - this is always numeric
 	 * follows InputStream spec

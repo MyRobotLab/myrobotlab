@@ -65,7 +65,7 @@ import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PortListener;
 import org.myrobotlab.swing.widget.DockableTabPane;
 import org.myrobotlab.swing.widget.FileChooser;
-import org.myrobotlab.swing.widget.Oscope2;
+import org.myrobotlab.swing.widget.Oscope;
 import org.myrobotlab.swing.widget.PinGui;
 import org.myrobotlab.swing.widget.PortGui;
 
@@ -130,7 +130,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     uploadResults.setEditable(false);
     addMrlCommPanel();
     updatePinTab(myArduino);
-    Oscope2 oscope = new Oscope2(boundServiceName, myService);
+    // Oscope2 oscope = new Oscope2(boundServiceName, myService);
+    Oscope oscope = new Oscope(boundServiceName, myService);
     oscope.addButtons(myArduino.getPinList());
     localTabs.addTab("oscope", oscope.getDisplay());
 

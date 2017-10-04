@@ -37,10 +37,17 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
+import org.myrobotlab.service.Joystick.Component;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.data.JoystickData;
+import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.interfaces.ButtonDefinition;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
+import org.myrobotlab.service.interfaces.PinArrayControl;
+import org.myrobotlab.service.interfaces.PinDefinition;
+import org.myrobotlab.service.interfaces.PinListener;
 import org.slf4j.Logger;
 
 /**
@@ -55,7 +62,7 @@ import org.slf4j.Logger;
  */
 
 // extends Service implements MotorControl, EncoderListener
-abstract public class AbstractMotor extends Service implements MotorControl, EncoderListener {
+abstract public class AbstractMotor extends Service implements MotorControl, EncoderListener, PinListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -68,6 +75,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public List<String> controllers;
 
   boolean locked = false;
+  
+  Mapper inputMapper;
 
   /**
    * the power level requested - varies between -1.0 &lt;--&gt; 1.0
@@ -156,7 +165,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   @Override
   // not relative ! - see moveStep
   public void move(double power) {
-    // info("%s.move(%.3f)", getName(), power);
+    info("%s.move(%.3f)", getName(), power);
     if (Math.abs(power) > maxPower) {
       warn("motor %s.move(%.3f) out of range - must be between -1.0 and 1.0", getName(), power);
       return;
@@ -277,11 +286,55 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     if (MotorController.class.isAssignableFrom(service.getClass())) {
       attachMotorController((MotorController) service);
       return;
-    }
+    } 
 
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
+  
+  public void onPin(PinData data){
+    Double pwr = null;
+    if (inputMapper != null){
+      pwr = inputMapper.calcOutput(data.value);
+    } else{
+      pwr = data.value.doubleValue();
+    }
+    move(pwr);
+  }
+  
+  public void onJoystickData(JoystickData data){
+    Double pwr = null;
+    if (inputMapper != null){
+      pwr = inputMapper.calcOutput(data.value);
+    } else{
+      pwr = data.value.doubleValue();
+    }
+    move(pwr);
+  }
+  
+  //////////////// begin new stuff ///////////////////////
 
+  public void attach(PinDefinition pindef){
+    // SINGLE PIN MAN !! not ALL PINS !
+    // must be local now :P 
+    // FIXME this "should" be cable of adding vi
+    // e.g send(pindef.getName(), "attach", getName(), pindef.getAddress());
+    // attach(pindef.getName(), pindef.getAddress)
+    PinArrayControl pac = (PinArrayControl)Runtime.getService(pindef.getName());
+    pac.attach(this, pindef.getAddress());
+    // subscribe(pindef.getName(), "publishPin", getName(), "move");
+  }
+  
+  public void attach(Component joystickComponent){
+    send(joystickComponent.getName(), "addListener", getName(), joystickComponent.id);
+  }
+  
+  public void attach(ButtonDefinition buttondef){
+    subscribe(buttondef.getName(), "publishButton", getName(), "move");
+  }
+
+  
+  //////////////// end new stuff ///////////////////////
+  
   @Override
   public void attachMotorController(MotorController controller) throws Exception {
     if (controller == null) {

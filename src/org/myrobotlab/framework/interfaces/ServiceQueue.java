@@ -21,6 +21,6 @@ public interface ServiceQueue {
 
   public Object invoke(String method, Object... params);
 
-  public boolean isLocal();
+  // public boolean isLocal();
 
 }

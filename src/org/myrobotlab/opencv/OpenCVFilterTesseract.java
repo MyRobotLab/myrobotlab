@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTesseract.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTesseract.class);
 
   private transient TesseractOcr tesseract;
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
@@ -95,7 +95,7 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
       // be updating it while it's being classified maybe?!
       if (lastImage != null) {
         BufferedImage buffImg = OpenCV.IplImageToBufferedImage(lastImage);
-        lastResult = tesseract.OCR(buffImg);
+        lastResult = tesseract.ocr(buffImg);
         log.info(lastResult);
       } else {
         // log.info("No Image to classify...");

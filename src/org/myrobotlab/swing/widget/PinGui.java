@@ -279,7 +279,7 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
   }
 
   public void showName() {
-    popupLauncher.setText(pinDef.getName());
+    popupLauncher.setText(pinDef.getPinName());
   }
 
   public void showAddress() {

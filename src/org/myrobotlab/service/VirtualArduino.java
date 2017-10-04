@@ -304,7 +304,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
     if (board.contains("mega")) {
       for (int i = 0; i < 70; ++i) {
-        PinDefinition pindef = new PinDefinition();
+        PinDefinition pindef = new PinDefinition(getName(), i);
 
         // begin wacky pin def logic
         String pinName = null;
@@ -326,7 +326,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
           pinName = String.format("D%d", i);
           pindef.setPwm(true);
         }
-        pindef.setName(pinName);
+        pindef.setPinName(pinName);
         pindef.setAddress(i);
         pinIndex.put(i, pindef);
         pinMap.put(pinName, pindef);
@@ -334,7 +334,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       }
     } else {
       for (int i = 0; i < 20; ++i) {
-        PinDefinition pindef = new PinDefinition();
+        PinDefinition pindef = new PinDefinition(getName(), i);
         String pinName = null;
         if (i == 0) {
           pindef.setRx(true);
@@ -355,7 +355,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
           pindef.setPwm(true);
           pinName = String.format("D%d", i);
         }
-        pindef.setName(pinName);
+        pindef.setPinName(pinName);
         pindef.setAddress(i);
         pinIndex.put(i, pindef);
         pinMap.put(pinName, pindef);
