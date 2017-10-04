@@ -35,6 +35,10 @@ public class PossibleServicesRenderer extends DefaultTableCellRenderer {
     boolean upgradeAvailable = false;
 
     String upgradeString = "<html><h6>upgrade<br>";
+    
+    if (value == null) {
+      return this;
+    }
 
     // select by class being published by JTable on how to display
     if (value.getClass().equals(ServiceType.class)) {
