@@ -148,5 +148,7 @@ public interface Attachable extends NameProvider {
    * @return True or False depending if service is attached
    */
   public boolean isAttached(String name);
+  
+  public boolean isLocal();
 
 }

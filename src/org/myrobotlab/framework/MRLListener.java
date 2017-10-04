@@ -52,6 +52,8 @@ public final class MRLListener implements Serializable {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(MRLListener.class);
+  
+  int _hashCode;
 
   /**
    * the keyed topic Method - when this method is invoked listeners are sent
@@ -82,7 +84,7 @@ public final class MRLListener implements Serializable {
     return false;
   }
 
-  /*
+  
   @Override
   final public int hashCode() {
     if (_hashCode == 0) {
@@ -91,7 +93,7 @@ public final class MRLListener implements Serializable {
 
     return _hashCode;
   }
-  */
+  
 
   @Override
   public String toString() {
