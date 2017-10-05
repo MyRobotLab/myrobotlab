@@ -10,6 +10,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
@@ -24,7 +25,8 @@ public class InMoovEyelids extends Service {
 
   transient public static Servo eyelidleft;
   transient public static Servo eyelidright;
-  transient public Arduino arduino;
+  private transient ServoController controller;
+  // todo : make this deprecated
 
   static Timer blinkEyesTimer = new Timer();
 
@@ -68,18 +70,27 @@ public class InMoovEyelids extends Service {
     }
   }
 
- 
+  public void test() {
+    if (controller == null) {
+      error("servo controller is null");
+    }
+    eyelidleft.moveTo(179);
+    eyelidright.moveTo(1);
+    sleep(300);
+  }
 
   static public void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     try {
       VirtualArduino v = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
-      
       v.connect("COM4");
+      Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      arduino.connect("COM4");
       InMoovEyelids eyelids = (InMoovEyelids) Runtime.start("i01.eyelids", "InMoovEyelids");
-      eyelids.connect("COM4");
-      Runtime.start("webgui", "WebGui");
-      eyelids.test();
+      eyelids.attach(arduino, 2, 3);
+      eyelids.autoBlink(true);
+      sleep(10000);
+      eyelids.autoBlink(false);
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -93,14 +104,10 @@ public class InMoovEyelids extends Service {
     eyelidleft = (Servo) createPeer("eyelidleft");
     eyelidright = (Servo) createPeer("eyelidright");
     
-    arduino = (Arduino) createPeer("arduino");
-
     eyelidleft.setRest(0);
     eyelidright.setRest(0);
  
     setVelocity(50.0,50.0);
-    
-    enableAutoEnable(true);
     
   }
   
@@ -114,15 +121,30 @@ public class InMoovEyelids extends Service {
      new blinkEyesTimertask().run();
    }
   }
+ 
 
-  /*
-   * attach all the servos - this must be re-entrant and accomplish the
-   * re-attachment when servos are detached
-   */
-  @Deprecated
-  public boolean attach() {
-    return enable();
-  }
+ public void attach(ServoController controller, Integer eyeLidLeftPin, Integer eyeLidRightPin) throws Exception {
+   
+   if (this.controller != null) {
+     log.info("controller already attached - detaching {} before attaching {}", this.controller.getName(), controller.getName());
+     eyelidleft.detach();
+     eyelidright.detach();
+   }
+   this.controller = controller;
+   
+   eyelidleft.attach(controller, eyeLidLeftPin);
+   eyelidright.attach(controller, eyeLidRightPin);   
+ }
+ 
+ public void detach(ServoController controller) throws Exception {
+   
+   if (this.controller == null) {
+     log.info("controller not attached - ", this.controller.getName(), controller.getName());
+     return;
+   } 
+   eyelidleft.detach();
+   eyelidright.detach();   
+ }
 
   public boolean enable() {
     
@@ -144,47 +166,6 @@ public class InMoovEyelids extends Service {
    
   }
   
-  public boolean connect(String port) throws Exception {
-	  return connect(port,22,24);
-	  
-  }
-  
-  public boolean connect(String port,Integer eyelidleftPin,Integer eyelidrightPin) throws Exception {
-    startService(); // NEEDED? I DONT THINK SO....
-
-    if (arduino == null) {
-      error("arduino is invalid");
-      return false;
-    }
-
-   
-    arduino.connect(port);
-
-    if (!arduino.isConnected()) {
-      error("arduino %s not connected", arduino.getName());
-      return false;
-    }
-
-    eyelidleft.attach(arduino, eyelidleftPin, eyelidleft.getRest(), eyelidleft.getVelocity());
-    eyelidright.attach(arduino, eyelidrightPin, eyelidright.getRest(), eyelidright.getVelocity());
-  
-
-    broadcastState();
-    return true;
-  }
-
-  @Deprecated
-  public void detach() {
-    if (eyelidleft != null) {
-      eyelidleft.disable();
-      sleep(InMoov.attachPauseMs);
-    } 
-    if (eyelidright != null) {
-      eyelidright.disable();
-      sleep(InMoov.attachPauseMs);
-    }
-   
-  }
 
   public void disable() {
     if (eyelidleft != null) {
@@ -240,8 +221,6 @@ public class InMoovEyelids extends Service {
   }
 
   public void rest() {
-
-    //setVelocity(50.0, 50.0);
     eyelidleft.rest();
     eyelidright.rest();
   }
@@ -250,8 +229,7 @@ public class InMoovEyelids extends Service {
   public boolean save() {
     super.save();
     eyelidleft.save();
-    eyelidright.save();
-   
+    eyelidright.save();   
     return true;
   }
 
@@ -275,60 +253,14 @@ public class InMoovEyelids extends Service {
   }
 
 
-
-  /*
-   * public boolean load() { super.load(); eyelidleft.load(); eyelidright.load();
-   * lowStom.load(); return true; }
-   */
-
   @Override
   public void startService() {
     super.startService();
     eyelidleft.startService();
     eyelidright.startService();
-    arduino.startService();
   }
 
   
- 
-  
-  public void test() {
-
-    if (arduino == null) {
-      error("arduino is null");
-    }
-
-    if (!arduino.isConnected()) {
-      error("arduino not connected");
-    }
-
-    eyelidleft.moveTo(eyelidleft.getPos() + 2);
-    eyelidright.moveTo(eyelidright.getPos() + 2);
-    
-
-    moveTo(35, 45);
-    String move = getScript("i01");
-    log.info(move);
-  }
-
-  /*
-   * TODO: move this java doc, it's lost
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * return ServiceType - returns all the data
-   * 
-   */
-  
-  @Deprecated
-  public void enableAutoEnable(Boolean param) {
-  }
-  
-  @Deprecated
-  public void enableAutoDisable(Boolean param) {
-    setAutoDisable(param);
-  }
   
   public void setAutoDisable(Boolean param) {
     eyelidleft.setAutoDisable(param);
@@ -349,7 +281,6 @@ public class InMoovEyelids extends Service {
 
     meta.addPeer("eyelidleft", "Servo", "eyelidleft or both servo");
     meta.addPeer("eyelidright", "Servo", "Eyelid right servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for eyelids");
 
     return meta;
   }
