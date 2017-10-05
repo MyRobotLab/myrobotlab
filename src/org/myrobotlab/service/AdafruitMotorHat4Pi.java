@@ -377,6 +377,7 @@ public class AdafruitMotorHat4Pi extends Service implements I2CControl, MotorCon
     meta.addCategory("shield", "servo & pwm");
     meta.setSponsor("Mats");
     meta.addPeer("raspi", "RasPi", "Raspberry PI");
+    meta.setAvailable(true);
     return meta;
   }
 
