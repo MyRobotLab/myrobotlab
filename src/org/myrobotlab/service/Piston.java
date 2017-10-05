@@ -30,7 +30,7 @@ public class Piston extends Service {
 
     ServiceType meta = new ServiceType(Piston.class.getCanonicalName());
     meta.addDescription("used as a general template");
-    meta.setAvailable(true); // false if you do not want it viewable in a gui
+    meta.setAvailable(false); // false if you do not want it viewable in a gui
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
     meta.addCategory("general");
