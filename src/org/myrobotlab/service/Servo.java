@@ -243,6 +243,7 @@ public class Servo extends Service implements ServoControl {
 
   double lastPos;
 
+  @Deprecated
   private boolean autoEnable = true;
   
   /**
@@ -482,19 +483,9 @@ public class Servo extends Service implements ServoControl {
       error(String.format("%s's controller is not set", getName()));
       return;
     }
-    if (lastPos == pos) {
-      if (autoDisable) {
-        delayDisable();
-      }
-    }
-    if (autoEnable && !isEnabled() /** && pos != lastPos **/
-    ) {
+    if (!isEnabled() && pos != lastPos) {
       enable();
-    } else if (!isEnabled()) {
-      log.info("{} is disable, discarding moveTo()", getName());
-      return;
-    }
-    lastPos = targetPos;
+    } 
     if (pos < mapper.getMinX()) {
       pos = mapper.getMinX();
     }
@@ -502,6 +493,7 @@ public class Servo extends Service implements ServoControl {
       pos = mapper.getMaxX();
     }
     targetPos = pos;
+    
     if (intialTargetPosChange) {
       targetPosBeforeSensorFeebBackCorrection = targetPos;
     }
@@ -514,6 +506,7 @@ public class Servo extends Service implements ServoControl {
       controller.servoMoveTo(this);
       lastActivityTime = System.currentTimeMillis();
     }
+    lastPos = targetPos;
 
   }
 
@@ -540,7 +533,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   private void delayDisable() {
-    if (!overrideAutoDisable && autoDisable)
+    if (autoDisable)
     {
     int disableDelay=10000;
     if (velocity > -1) {
@@ -556,7 +549,10 @@ public class Servo extends Service implements ServoControl {
     autoDisableTimer.schedule(new TimerTask() {
       @Override
       public void run() {
+        if (!overrideAutoDisable && !isMoving())
+        {
         disable();
+        }
         synchronized (moveToBlocked) {
           moveToBlocked.notifyAll(); // Will wake up MoveToBlocked.wait()
         }
@@ -1336,6 +1332,10 @@ public class Servo extends Service implements ServoControl {
   @Override
   public void setOverrideAutoDisable(boolean overrideAutoDisable) {
     this.overrideAutoDisable=overrideAutoDisable;
+    if (!overrideAutoDisable)
+    {
+      delayDisable();
+    }
   }
 
 }

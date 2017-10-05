@@ -503,7 +503,7 @@ public class InMoov extends Service {
 
   public void halfSpeed() {
     if (head != null) {
-      head.setVelocity(25.0, 25.0, 25.0, 25.0, 25.0, 25.0);
+      head.setVelocity(25.0, 25.0, 25.0, 25.0, -1.0, 25.0);
     }
 
     if (rightHand != null) {
@@ -1821,7 +1821,7 @@ public class InMoov extends Service {
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
     meta.addDependency("inmoov.fr", "1.0.0");
-    meta.addDependency("org.myrobotlab.inmoov", "0.5.4");
+    meta.addDependency("org.myrobotlab.inmoov", "0.5.5");
 
     // SHARING !!! - modified key / actual name begin -------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
@@ -2235,6 +2235,8 @@ public class InMoov extends Service {
     if (neopixel != null && neopixelArduino != null) {
       neopixel.animationStop();
       sleep(500);
+      neopixel.detach(neopixelArduino);
+      sleep(100);
       neopixelArduino.serial.disconnect();
       neopixelArduino.serial.stopRecording();
       neopixelArduino.disconnect();
