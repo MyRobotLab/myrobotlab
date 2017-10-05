@@ -24,6 +24,7 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.Servo.IKData;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
@@ -198,9 +199,9 @@ public class InMoov extends Service {
   private IntegratedMovement integratedMovement;
   private Arduino pirArduino;
 
-  // static String speechService = "MarySpeech";
+  static String speechService = "MarySpeech";
   // static String speechService = "AcapelaSpeech";
-  static String speechService = "NaturalReaderSpeech";
+  //static String speechService = "NaturalReaderSpeech";
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   public InMoov(String n) {
@@ -1091,6 +1092,7 @@ public class InMoov extends Service {
 
     startLeftHand(leftPort);
     startRightHand(rightPort);
+    //startEyelids(rightPort);
     startLeftArm(leftPort);
     startRightArm(rightPort);
     startTorso(leftPort);
@@ -1443,23 +1445,41 @@ public class InMoov extends Service {
     return startEyelids(port, null, eyelidleftPin, eyelidrightPin);
   }
 
-  public InMoovEyelids startEyelids(String port, String type, int eyelidleftPin, int eyelidrightPin) throws Exception {
+  /*
+   * Old startEyelids method for backward compatibility;
+   * Old because arduino controller dependent...
+   * So, here we create a default peer arduino controller
+   */
+  public InMoovEyelids startEyelids(String port, String type, int eyeLidLeftPin, int eyeLidRightPin) throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     speakBlocking(String.format("starting eyelids on %s", port));
-
-    eyelids = (InMoovEyelids) startPeer("eyelids");
+    
+    Arduino eyelidsArduino = (Arduino) createPeer("eyelidsArduino");
+    eyelidsArduino.startService();
 
     if (type == null) {
       type = Arduino.BOARD_TYPE_MEGA;
     }
 
-    eyelids.arduino.setBoard(type);
-    eyelids.arduino.usedByInmoov = true;
-    eyelids.arduino.serial.usedByInmoov = true;
-    eyelids.connect(port, eyelidleftPin, eyelidrightPin);
-    arduinos.put(port, eyelids.arduino);
-
-    return eyelids;
+    eyelidsArduino.setBoard(type);
+    eyelidsArduino.usedByInmoov = true;
+    eyelidsArduino.serial.usedByInmoov = true;
+    eyelidsArduino.connect(port);
+    if (!eyelidsArduino.isConnected()) {
+      error("arduino %s not connected", eyelidsArduino.getName());
+      return null;
+    }
+    arduinos.put(port, eyelidsArduino);
+    return startEyelids(eyelidsArduino, eyeLidLeftPin, eyeLidRightPin);    
+  }
+  
+  /*
+   * New startEyelids attach method ( for testing );
+   */
+  public InMoovEyelids startEyelids(ServoController controller, Integer eyeLidLeftPin, Integer eyeLidRightPin) throws Exception {
+    eyelids = (InMoovEyelids) startPeer("eyelids");
+    eyelids.attach(controller, eyeLidLeftPin, eyeLidRightPin);
+    return eyelids;    
   }
 
   public void stopPIR() {
@@ -1827,13 +1847,12 @@ public class InMoov extends Service {
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
     meta.sharePeer("torso.arduino", "left", "Arduino", "shared left arduino");
 
-    meta.sharePeer("eyelids.arduino", "right", "Arduino", "shared right arduino");
-
     meta.sharePeer("mouthControl.arduino", "left", "Arduino", "shared left arduino");
 
     meta.sharePeer("leftArm.arduino", "left", "Arduino", "shared left arduino");
     meta.sharePeer("leftHand.arduino", "left", "Arduino", "shared left arduino");
-
+    // eyelidsArduino peer for backward compatibility
+    meta.sharePeer("eyelidsArduino", "right", "Arduino", "shared right arduino");
     meta.sharePeer("rightArm.arduino", "right", "Arduino", "shared right arduino");
     meta.sharePeer("rightHand.arduino", "right", "Arduino", "shared right arduino");
 
