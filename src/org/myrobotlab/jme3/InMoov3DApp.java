@@ -446,7 +446,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     angle = rotationMask.mult((float) Math.toRadians(-90));
     node.rotate(angle.x, angle.y, angle.z);
     nodes.put("RWrist", node);
-    maps.put("RWrist", new Mapper(0, 180, 0, 180));
+    maps.put("RWrist", new Mapper(0, 180, 180, 0));
 
     node = new Node("LWrist");
     parentNode = nodes.get("bicep");
