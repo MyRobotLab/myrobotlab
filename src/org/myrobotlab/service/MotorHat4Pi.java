@@ -116,6 +116,7 @@ public class MotorHat4Pi extends AbstractMotor {
     meta.addDescription("Motor service for the Raspi Motor HAT");
     meta.addCategory("motor");
     meta.addPeer("hat","AdafruitMotorHat4Pi", "Motor HAT");
+    meta.setAvailable(true);
 
     return meta;
   }
