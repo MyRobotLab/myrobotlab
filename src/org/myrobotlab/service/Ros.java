@@ -50,6 +50,7 @@ public class Ros extends Service {
     meta.addDescription("interface to Ros");
     meta.addCategory("bridge");
     meta.addPeer("serial", "Serial", "serial");
+    meta.setAvailable(false);
 
     return meta;
   }
