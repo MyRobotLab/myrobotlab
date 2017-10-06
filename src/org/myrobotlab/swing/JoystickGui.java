@@ -249,7 +249,6 @@ public class JoystickGui extends ServiceGui implements ActionListener, ItemListe
             log.info(String.format("changed to %s ", selected));
             send("setController", selected); // setController sets controller
                                              // AND starts polling
-            // send("startPolling");
           }
         }
       }
