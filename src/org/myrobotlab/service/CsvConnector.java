@@ -83,7 +83,7 @@ public class CsvConnector extends AbstractConnector {
     File fileToCrawl = new File(filename);
     if (!fileToCrawl.exists()) {
       // error. file not found.
-      System.out.println("File not found..." + filename);
+      error("File not found..." + filename);
       return;
     }
 
