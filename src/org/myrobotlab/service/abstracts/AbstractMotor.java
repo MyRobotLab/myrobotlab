@@ -148,7 +148,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public void lock() {
-    log.info("lock");
+    // log.info("lock");
     locked = true;
   }
 
@@ -165,7 +165,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   @Override
   // not relative ! - see moveStep
   public void move(double power) {
-    info("%s.move(%.3f)", getName(), power);
+    // info("%s.move(%.3f)", getName(), power);
     if (Math.abs(power) > maxPower) {
       warn("motor %s.move(%.3f) out of range - must be between -1.0 and 1.0", getName(), power);
       return;
@@ -220,7 +220,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public void stop() {
-    log.info("{}.stop()", getName());
+    // log.info("{}.stop()", getName());
     powerLevel = 0.0;
     if (controller != null) {
       controller.motorStop(this);
@@ -230,7 +230,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public void stopAndLock() {
-    log.info("stopAndLock");
+    // log.info("stopAndLock");
     move(0.0);
     lock();
     broadcastState();
@@ -238,7 +238,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public void unlock() {
-    log.info("unLock");
+    // log.info("unLock");
     locked = false;
     broadcastState();
   }
