@@ -245,9 +245,12 @@ public class Test extends Service implements StatusListener {
 
       Test test = (Test) Runtime.start("test", "Test");
       test.pythonServiceScriptDir = "../pyrobotlab/service/";
-      Runtime.start("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser = false;
+      webgui.startService();
       Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
+      webgui.startBrowser("http://localhost:8888/#/service/test");
       // Runtime.start("python", "Python");
 
       // setting up new tests to run in matrix
@@ -687,6 +690,7 @@ public class Test extends Service implements StatusListener {
       
       if (test.branch == null){
         test.branch = Platform.getLocalInstance().getBranch();
+        log.info(String.format("Testing on branch ", test.branch));
       }
 
       String activity = String.format("test %s on %s", testName, serviceName);
