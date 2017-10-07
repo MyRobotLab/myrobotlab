@@ -2195,7 +2195,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   static public String setLogLevel(String level) {
     log.info("setLogLevel {}", level);
     Logging logging = LoggingFactory.getInstance();
-    logging.setLevel(level);
+    logging.setLevel(level);    
+    log.info("setLogLevel {}", level);
     return level;
   }
 

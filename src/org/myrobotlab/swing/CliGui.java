@@ -68,6 +68,9 @@ public class CliGui extends ServiceGui implements KeyListener {
 
 		if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_DELETE) {
 			try {
+			  if (input.length() - 2 < 0){
+			    return;
+			  }
 				input.delete(input.length() - 2, input.length() - 1);
 				/*
 				Document doc = console.getDocument();
