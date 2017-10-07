@@ -448,7 +448,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 		// TODO Auto-generated method stub
 		Object o = me.getSource();
 		if (o == examples) {
-			BareBonesBrowserLaunch.openURL("https://github.com/MyRobotLab/pyrobotlab");
+			BareBonesBrowserLaunch.openURL("https://github.com/MyRobotLab/pyrobotlab/tree/master/service");
 		}
 	}
 

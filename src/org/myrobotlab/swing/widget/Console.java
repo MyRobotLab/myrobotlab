@@ -67,7 +67,7 @@ public class Console implements Appender<ILoggingEvent> {
    */
   public void startLogging() {
     ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    root.setLevel(ch.qos.logback.classic.Level.INFO);
+    // root.setLevel(ch.qos.logback.classic.Level.INFO); GAH !!! DONT DO THIS runtime sets the root
     root.addAppender(this);
     // PatternLayout layout = new PatternLayout("%-4r [%t] %-5p %c %x -
     // %m%n");

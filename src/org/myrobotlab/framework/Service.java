@@ -1039,8 +1039,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   // FIXME - use the method cache
-  public HashSet<String> getMessageSet() {
-    HashSet<String> ret = new HashSet<String>();
+  public Set<String> getMessageSet() {
+    Set<String> ret = new TreeSet<String>();
     Method[] methods = getMethods();
     log.info(String.format("getMessageSet loading %d non-sub-routable methods", methods.length));
     for (int i = 0; i < methods.length; ++i) {
