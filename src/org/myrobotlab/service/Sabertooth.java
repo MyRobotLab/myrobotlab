@@ -418,7 +418,8 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
       // uncomment for virtual hardware
       // virtual = True
 
-      String port = "COM14";
+      // String port = "COM14";
+      String port = "/dev/ttyUSB0";
 
       // start optional virtual serial service, used for test
       if (virtual){
@@ -439,7 +440,7 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
       // configure services
       m1.setPort("m1");
       m2.setPort("m2");
-      joy.setController(5);
+      joy.setController(0);
 
       // attach services
       sabertooth.attach(m1);
