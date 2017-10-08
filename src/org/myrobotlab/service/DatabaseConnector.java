@@ -109,19 +109,23 @@ public class DatabaseConnector extends AbstractConnector {
       int idColumn = -1;
       for (int i = 0; i < columns.length; i++) {
         if (columns[i].equalsIgnoreCase(idField)) {
-          idColumn = i;
+          idColumn = i+1;
           break;
         }
       }
 
       try {
         while (rs.next()) {
+          log.info(String.format("IdColumn = %s",idColumn));
           // Need the ID column from the RS.
           String id = rs.getString(idColumn);
+          log.info(String.format("id = %s",id));
           Document doc = new Document(id);
+          log.info("New document created");
           // Add each column / field name to the doc
           for (int i = 0; i < columns.length; i++) {
-            doc.addToField(columns[i], rs.getString(i));
+            log.info(String.format("Looping thru resultcolumns: %s",i));
+            doc.addToField(columns[i], rs.getString(i+1));
           }
           // Process this row!
           feed(doc);
@@ -150,24 +154,28 @@ public class DatabaseConnector extends AbstractConnector {
   }
 
   private void runPreSql() {
-    try {
-      Statement state = connection.createStatement();
-      state.executeUpdate(preSql);
-      state.close();
-    } catch (SQLException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    if (preSql != null){
+      try {
+        Statement state = connection.createStatement();
+        state.executeUpdate(preSql);
+        state.close();
+      } catch (SQLException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
   }
 
   private void runPostSql() {
-    try {
-      Statement state = connection.createStatement();
-      state.executeUpdate(postSql);
-      state.close();
-    } catch (SQLException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    if (postSql != null){
+      try {
+        Statement state = connection.createStatement();
+        state.executeUpdate(postSql);
+        state.close();
+      } catch (SQLException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
   }
 
