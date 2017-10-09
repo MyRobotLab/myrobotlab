@@ -116,15 +116,11 @@ public class DatabaseConnector extends AbstractConnector {
 
       try {
         while (rs.next()) {
-          log.info(String.format("IdColumn = %s",idColumn));
           // Need the ID column from the RS.
           String id = rs.getString(idColumn);
-          log.info(String.format("id = %s",id));
           Document doc = new Document(id);
-          log.info("New document created");
           // Add each column / field name to the doc
           for (int i = 0; i < columns.length; i++) {
-            log.info(String.format("Looping thru resultcolumns: %s",i));
             doc.addToField(columns[i], rs.getString(i+1));
           }
           // Process this row!
