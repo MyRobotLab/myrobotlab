@@ -9,7 +9,6 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
-import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorController;
 
 public class MotorHat4Pi extends AbstractMotor {
@@ -25,7 +24,6 @@ public class MotorHat4Pi extends AbstractMotor {
   
   public MotorHat4Pi(String n) {
     super(n);
-    //mapPower(-1, 1, -1, 1);
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
   }
