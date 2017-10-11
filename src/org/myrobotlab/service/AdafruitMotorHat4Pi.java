@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -25,7 +24,6 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
-import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.RasPi;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.slf4j.Logger;
@@ -154,7 +152,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
     super(n);
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
-    powerMapper = new Mapper(-1.0, 1.0, -.98, 0.98);
+    powerMapper = new Mapper(-1.0, 1.0, -1.0, 1.0);
   }
 
   public void onRegistered(ServiceInterface s) {
