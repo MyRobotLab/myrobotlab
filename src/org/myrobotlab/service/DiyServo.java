@@ -857,4 +857,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     
   }
 
+  @Override
+  public void waitTargetPos(double pos) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

@@ -31,30 +31,18 @@ public class InMoovEyelids extends Service {
   static Timer blinkEyesTimer = new Timer();
 
   
-  public static void blink()
+  public void blink()
   {
     
     if (!InMoov.RobotIsTrackingSomething() && !InMoov.RobotIsSleeping){
-      int tmpVelo = ThreadLocalRandom.current().nextInt(40, 100 + 1);
-      eyelidleft.setVelocity(tmpVelo);
-      eyelidright.setVelocity(tmpVelo);
-      if (eyelidleft != null) {
-       eyelidleft.moveTo(180);
-      }
-     if (eyelidright != null) {
-       eyelidright.moveTo(180);
-      }
-     sleep(ThreadLocalRandom.current().nextInt(500, 1000 + 1));
-     if (eyelidleft != null) {
-       eyelidleft.moveTo(0);
-      }
-     if (eyelidright != null) {
-       eyelidright.moveTo(0);
-      }
-     }
+      double tmpVelo = ThreadLocalRandom.current().nextInt(40, 150 + 1);
+      setVelocity(tmpVelo,tmpVelo);     
+      moveToBlocking(180,180);
+      moveToBlocking(0,0);
+  }
   }
   
-  static class blinkEyesTimertask extends TimerTask {
+  class blinkEyesTimertask extends TimerTask {
     @Override
     public void run() {
         int delay = ThreadLocalRandom.current().nextInt(10, 40 + 1);
@@ -75,8 +63,8 @@ public class InMoovEyelids extends Service {
       error("servo controller is null");
     }
     eyelidleft.moveTo(179);
-    eyelidright.moveTo(1);
     sleep(300);
+    eyelidright.moveToBlocking(1);
   }
 
   static public void main(String[] args) {
@@ -88,6 +76,7 @@ public class InMoovEyelids extends Service {
       arduino.connect("COM4");
       InMoovEyelids eyelids = (InMoovEyelids) Runtime.start("i01.eyelids", "InMoovEyelids");
       eyelids.attach(arduino, 2, 3);
+      eyelids.setAutoDisable(true);
       eyelids.autoBlink(true);
       sleep(10000);
       eyelids.autoBlink(false);
@@ -108,6 +97,8 @@ public class InMoovEyelids extends Service {
     eyelidright.setRest(0);
  
     setVelocity(50.0,50.0);
+    eyelidleft.disableDelayIfVelocity=100;
+    eyelidright.disableDelayIfVelocity=100;
     
   }
   
@@ -154,8 +145,7 @@ public class InMoovEyelids extends Service {
     eyelidright.enable();
     sleep(InMoov.attachPauseMs);
     return true;
-  }
-  
+  } 
   
 
   @Override
@@ -164,8 +154,7 @@ public class InMoovEyelids extends Service {
     eyelidleft.broadcastState();
     eyelidright.broadcastState();
    
-  }
-  
+  }  
 
   public void disable() {
     if (eyelidleft != null) {
@@ -198,13 +187,30 @@ public class InMoovEyelids extends Service {
     return attached;
   }
 
-  public void moveTo(Integer eyelidleft, Integer eyelidright) {
+  public void moveTo(Integer eyelidleftPos, Integer eyelidrightPos) {
     if (log.isDebugEnabled()) {
-      log.debug(String.format("%s moveTo %d %d", getName(), eyelidleft, eyelidright));
+      log.debug(String.format("%s moveTo %d %d", getName(), eyelidleftPos, eyelidrightPos));
     }
-    InMoovEyelids.eyelidleft.moveTo(eyelidleft);
-    InMoovEyelids.eyelidright.moveTo(eyelidright);
+    if (eyelidleft != null) {
+    eyelidleft.moveTo(eyelidleftPos);
+    }
+    if (eyelidright != null) {
+    eyelidright.moveTo(eyelidrightPos);
+    }
   }
+  
+  public void moveToBlocking(Integer eyelidleftPos, Integer eyelidrightPos) {
+    log.info(String.format("init " + getName() + "moveToBlocking "));
+    eyelidleft.moveTo(eyelidleftPos);
+    eyelidright.moveTo(eyelidrightPos);
+
+    eyelidleft.waitTargetPos(eyelidleftPos);
+    if (eyelidright != null) {
+    eyelidright.waitTargetPos(eyelidrightPos);
+    }
+    log.info(String.format("end " + getName() + "moveToBlocking "));
+    }
+
 
   // FIXME - releasePeers()
   public void release() {
@@ -231,25 +237,6 @@ public class InMoovEyelids extends Service {
     eyelidleft.save();
     eyelidright.save();   
     return true;
-  }
-
-  public void setLimits(int eyelidleftMin, int eyelidleftMax, int eyelidrightMin, int eyelidrightMax) {
-    eyelidleft.setMinMax(eyelidleftMin, eyelidleftMax);
-    eyelidright.setMinMax(eyelidrightMin, eyelidrightMax);
-    
-  }
-
-  // ------------- added set pins
-  public void setpins(Integer eyelidleftPin, Integer eyelidrightPin) {
-    // createPeers();
-	  /*
-    this.eyelidleft.setPin(eyelidleft);
-    this.eyelidright.setPin(eyelidright);
-    */
-	  
-    //Calamity: this seem incorrect. I think the pin should be set on the Servo service, not on the arduino directly
-	    eyelidleft.enable(eyelidleftPin);
-	    eyelidright.enable(eyelidrightPin);
   }
 
 
@@ -285,8 +272,12 @@ public class InMoovEyelids extends Service {
     return meta;
   }
 
-  public void setVelocity(Double eyelidleft, Double eyelidright) {
-    InMoovEyelids.eyelidleft.setVelocity(eyelidleft);
-    InMoovEyelids.eyelidright.setVelocity(eyelidright);
+  public static void setVelocity(Double eyelidleftVelo, Double eyelidrightVelo) {
+    if (eyelidleft != null) {
+    eyelidleft.setVelocity(eyelidleftVelo);
+    }
+    if (eyelidleft != null) {
+    eyelidright.setVelocity(eyelidrightVelo);
+    }
    }
 }
