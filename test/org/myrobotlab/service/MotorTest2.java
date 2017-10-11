@@ -16,9 +16,9 @@ import org.slf4j.Logger;
 
 // TODO: This test takes too long to run, ignoring it from the build.
 @Ignore
-public class MotorTest {
+public class MotorTest2 {
 
-	public final static Logger log = LoggerFactory.getLogger(MotorTest.class);
+	public final static Logger log = LoggerFactory.getLogger(MotorTest2.class);
 
 	static MotorDualPwm motor01 = null;
 	static Arduino arduino = null;
@@ -99,7 +99,6 @@ public class MotorTest {
 		
 		arduino.connect("COM5"); 
 
-		
 		
 		motor01.move(0.3);
 		motor01.move(0.1);
@@ -228,12 +227,12 @@ public class MotorTest {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			MotorTest.setUpBeforeClass();
-			MotorTest test = new MotorTest();
+			MotorTest2.setUpBeforeClass();
+			MotorTest2 test = new MotorTest2();
 			test.testMove();
 
 			JUnitCore junit = new JUnitCore();
-			Result result = junit.run(MotorTest.class);
+			Result result = junit.run(MotorTest2.class);
 			log.info("Result was: {}", result);
 			// WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
 			// ServiceInterface gui = Runtime.start("gui", "SwingGui");

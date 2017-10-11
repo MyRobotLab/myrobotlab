@@ -86,7 +86,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   double maxPower = 1.0;
   double minPower = -1.0;
 
-  Mapper powerMap = new Mapper(-1.0, 1.0, -255.0, 255.0);
+  // grog: THIS SHOULD ONLY BE USED FOR INVERTED AND INPUT LIMITS !!!!
+  // SHOULD NOT BE USED FOR RANGE MAPPING - RANGE MAPPING SHOULD ONLY BE
+  // IN MOTORCONTROLLER !!!
+  Mapper powerMap = new Mapper(-1.0, 1.0, -1.0, 1.0);
 
   // position
   double currentPos = 0;
@@ -126,15 +129,30 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public double getPowerLevel() {
     return powerLevel;
   }
+  
+  
+  /*
 
+  // FIXME - remove !!! - no need or desire to map inside controller !
   @Override
   public double getPowerOutput() {
     return powerMap.calcOutput(powerLevel);
   }
 
+  
+  // FIXME - remove !!! - no need or desire to map inside controller !
   public Mapper getPowerMap() {
     return powerMap;
   }
+  
+  // FIXME - remove !!! - no need or desire to map inside controller !
+  public void mapPower(double minX, double maxX, double minY, double maxY) {
+    powerMap = new Mapper(minX, maxX, minY, maxY);
+    broadcastState();
+  }
+  
+  */
+  
 
   @Override
   public boolean isAttached(MotorController controller) {
@@ -157,11 +175,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     broadcastState();
   }
 
-  public void mapPower(double minX, double maxX, double minY, double maxY) {
-    powerMap = new Mapper(minX, maxX, minY, maxY);
-    broadcastState();
-  }
-
+  
   @Override
   // not relative ! - see moveStep
   public void move(double power) {
@@ -203,7 +217,9 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   @Override
   public void setInverted(boolean invert) {
     powerMap.setInverted(invert);
-    controller.motorMove(this);
+    // controller.motorMove(this); - motor should not be 
+    // told to move for setting
+    // inverted
     broadcastState();
   }
 

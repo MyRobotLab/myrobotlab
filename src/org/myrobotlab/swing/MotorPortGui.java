@@ -260,7 +260,7 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
   public void stateChanged(ChangeEvent ce) {
     Object source = ce.getSource();
     if (power == source) {
-      powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerMap().calcOutput(power.getScaledValue())));
+      powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
       myService.send(boundServiceName, "move", power.getScaledValue());
     }
   }

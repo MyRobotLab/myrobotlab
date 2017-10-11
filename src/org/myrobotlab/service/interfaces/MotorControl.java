@@ -31,13 +31,29 @@ import org.myrobotlab.sensor.Encoder;
 
 public interface MotorControl extends NameProvider, RelativePositionControl, Attachable {
   
-	public void attachMotorController(MotorController controller) throws Exception;
+	void attachMotorController(MotorController controller) throws Exception;
 
-	public void detachMotorController(MotorController controller);
+	void detachMotorController(MotorController controller);
 
+	/**
+	 * the raw non-computed input 
+	 * range is -1.0 <---> 1.0
+	 * @return input range
+	 */
 	double getPowerLevel();
 
-	double getPowerOutput();
+	/**
+	 * grog says, BAD METHOD - needs to be a solid
+	 * range interface between MotorControl & MotorControllers
+	 * where the range can be guaranteed -1.0 --to-- 1.0
+	 * it's MotorControllers job to change this if needed into
+	 * specific values (not MotorControl's job)
+	 * 
+	 * the 'computed' power output
+	 * range can be anything ?
+	 * @return computer power output
+	 */
+	// double getPowerOutput(); NO NO NO !!!
 
 	double getTargetPos();
 
@@ -96,8 +112,11 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
 	 */
 	void setInverted(boolean invert);
 
-	public void setPowerLevel(double power);
+	void setPowerLevel(double power);
 
+	/**
+	 * stop the motor
+	 */
 	void stop();
 
 	/**

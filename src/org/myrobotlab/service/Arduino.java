@@ -35,6 +35,7 @@ import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.PinData;
@@ -66,6 +67,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher {
 
   private static final long serialVersionUID = 1L;
+  
+  Mapper motorPowerMapper = new Mapper(-1.0, 1.0, -255.0, 255.0);
 
   public static class I2CDeviceMap {
     public transient I2CControl control;
@@ -1045,7 +1048,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     Class<?> type = mc.getClass();
 
-    double powerOutput = mc.getPowerOutput();
+    double powerOutput = motorPowerMapper.calcInput(mc.getPowerLevel());
 
     if (Motor.class == type) {
       Motor config = (Motor) mc;

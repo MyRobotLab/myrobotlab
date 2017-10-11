@@ -6,12 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PortConnector;
@@ -30,7 +31,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Sabertooth extends Service implements PortConnector, MotorController {
+public class Sabertooth extends AbstractMotorController implements PortConnector, MotorController {
 
   private static final long serialVersionUID = 1L;
 
@@ -76,6 +77,7 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
     // add motor ports the sabertooth supports
     ports.add("m1");
     ports.add("m2");
+    powerMapper = new Mapper(-1.0, 1.0, -127, 127);
   }
 
   public void connect(String port) throws Exception {
@@ -231,17 +233,19 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
 
     MotorPort motor = motors.get(mc.getName());
     String port = motor.getPort();
-    double pwr = motor.getPowerLevel();
-    int power = (int) (pwr * 127);
+    
+    /// double pwr = motor.getPowerLevel();
+    int power = (int)powerMapper.calcOutput(mc.getPowerLevel());
+    // int power = (int) (pwr * 127);
 
     if (port.equals("m1")) {
-      if (pwr >= 0) {
+      if (power >= 0) {
         driveForwardMotor1(power);
       } else {
         driveBackwardsMotor1(Math.abs(power));
       }
     } else if (port.equals("m2")) {
-      if (pwr >= 0) {
+      if (power >= 0) {
         driveForwardMotor2(power);
       } else {
         driveBackwardsMotor2(Math.abs(power));
@@ -298,10 +302,16 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
    */
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) throws Exception {
-    if (serial == null){
+    if (serial == null) {
       serial = (Serial) startPeer("serial");
     }
+    log.info("{} opening serial port {}|{}|{}|{}", port, rate, databits, stopbits, parity);
     serial.open(port, rate, databits, stopbits, parity);
+    // not much choice here :(
+    // sabertooth is not 'readable' and connecting serial is almost always
+    // an asynchronous process - since we have no way to verify the port is open
+    // we sadly must 
+    sleep(3000);
   }
 
   public void detach(MotorControl device) {
@@ -382,7 +392,6 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
   public boolean isAttached(Attachable service) {
     return motors.containsKey(service.getName()) || (serial != null && serial.getName().equals(service.getName()));
   }
-  
 
   @Override
   public void connect(String port, int rate) throws Exception {
@@ -403,12 +412,11 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
     }
   }
 
-
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init("INFO");
-      
+
       boolean virtual = false;
       //////////////////////////////////////////////////////////////////////////////////
       // Sabertooth.py
@@ -422,19 +430,19 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
       String port = "/dev/ttyUSB0";
 
       // start optional virtual serial service, used for test
-      if (virtual){
-          // use static method Serial.connectVirtualUart to create
-          // a virtual hardware uart for the serial service to
-          // connect to
-          Serial uart = Serial.connectVirtualUart(port);
-          uart.logRecv(true); // dump bytes sent from sabertooth
+      if (virtual) {
+        // use static method Serial.connectVirtualUart to create
+        // a virtual hardware uart for the serial service to
+        // connect to
+        Serial uart = Serial.connectVirtualUart(port);
+        uart.logRecv(true); // dump bytes sent from sabertooth
       }
       // start the services
-      Runtime.start("gui","SwingGui");
-      Sabertooth sabertooth = (Sabertooth)Runtime.start("sabertooth","Sabertooth");
-      MotorPort m1 = (MotorPort)Runtime.start("m1","MotorPort");
-      MotorPort m2 = (MotorPort)Runtime.start("m2","MotorPort");
-      Joystick joy = (Joystick)Runtime.start("joy","Joystick");
+      Runtime.start("gui", "SwingGui");
+      Sabertooth sabertooth = (Sabertooth) Runtime.start("sabertooth", "Sabertooth");
+      MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
+      MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
+      Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
       // Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
 
       // configure services
@@ -446,39 +454,38 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
       sabertooth.attach(m1);
       sabertooth.attach(m2);
       m1.attach(joy.getAxis("y"));
-      // m2.attach(arduino.getPin("A4"));      
-
+      m2.attach(joy.getAxis("rz"));
+      // m2.attach(arduino.getPin("A4"));
 
       // FIXME - sabertooth.attach(motor1) & sabertooth.attach(motor2)
       // FIXME - motor1.attach(joystick) !
       sabertooth.connect(port);
 
-      m1.stop();
-      m2.stop();
-      
+      // m1.stop();
+      // m2.stop();
+
       boolean done = true;
-      if (done){
+      if (done) {
         return;
       }
 
       // speed up the motor
-      for (int i = 0; i < 100; ++i){
+      for (int i = 0; i < 100; ++i) {
         double pwr = i * .01;
         log.info("power {}", pwr);
         m1.move(pwr);
         sleep(100);
       }
-      
+
       sleep(1000);
 
       // slow down the motor
-      for (int i = 100; i > 0; --i){
+      for (int i = 100; i > 0; --i) {
         double pwr = i * .01;
         log.info("power {}", pwr);
         m1.move(pwr);
         sleep(100);
       }
-      
 
       // move motor clockwise
       m1.move(0.3);
@@ -489,12 +496,12 @@ public class Sabertooth extends Service implements PortConnector, MotorControlle
       m1.move(-0.3);
       sleep(1);
       m1.stop();
-      
+
       // TODO - stopAndLock
 
     } catch (Exception e) {
       Logging.logError(e);
     }
   }
-  
+
 }

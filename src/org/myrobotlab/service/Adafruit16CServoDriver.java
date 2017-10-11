@@ -486,7 +486,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
     Class<?> type = mc.getClass();
 
-    double powerOutput = mc.getPowerOutput();
+    // FIXME - do not count on MotorControl's MotorControl's getPowerOutput
+    // to produce the correct values for MotorController
+    // double powerOutput = mc.getPowerOutput();
+    
+    // this is guaranteed to be between -1.0 and 1.0
+    double powerLevel = mc.getPowerLevel();
 
     if (Motor.class == type) {
       Motor motor = (Motor) mc;
@@ -494,22 +499,22 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
         motor.setPwmFreq(defaultMotorPwmFreq);
         setPWMFreq(motor.getPwrPin(), motor.getPwmFreq());
       }
-      setPinValue(motor.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
-      setPinValue(motor.getPwrPin(), powerOutput);
+      setPinValue(motor.getDirPin(), (powerLevel < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
+      setPinValue(motor.getPwrPin(), powerLevel);
     } else if (MotorDualPwm.class == type) {
       MotorDualPwm motor = (MotorDualPwm) mc;
-      log.info(String.format("Adafrutit16C Motor DualPwm motorMove, powerOutput = %s", powerOutput));
+      log.info(String.format("Adafrutit16C Motor DualPwm motorMove, powerOutput = %s", powerLevel));
       if (motor.getPwmFreq() == null) {
         motor.setPwmFreq(defaultMotorPwmFreq);
         setPWMFreq(motor.getLeftPwmPin(), motor.getPwmFreq());
         setPWMFreq(motor.getRightPwmPin(), motor.getPwmFreq());
       }
-      if (powerOutput < 0) {
+      if (powerLevel < 0) {
         setPinValue(motor.getLeftPwmPin(), 0);
-        setPinValue(motor.getRightPwmPin(), Math.abs(powerOutput / 255));
-      } else if (powerOutput > 0) {
+        setPinValue(motor.getRightPwmPin(), Math.abs(powerLevel / 255));
+      } else if (powerLevel > 0) {
         setPinValue(motor.getRightPwmPin(), 0);
-        setPinValue(motor.getLeftPwmPin(), Math.abs(powerOutput / 255));
+        setPinValue(motor.getLeftPwmPin(), Math.abs(powerLevel / 255));
       } else {
         setPinValue(motor.getRightPwmPin(), 0);
         setPinValue(motor.getLeftPwmPin(), 0);

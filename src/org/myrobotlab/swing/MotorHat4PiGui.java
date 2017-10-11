@@ -199,7 +199,7 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
       attachButton.setText(detach);
       controllerList.setEnabled(false);
       motorList.setEnabled(false);
-      powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerMap().calcOutput(power.getScaledValue())));
+      powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
     } else {
       attachButton.setText(attach);
       controllerList.setEnabled(true);
@@ -224,7 +224,7 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
   public void stateChanged(ChangeEvent ce) {
     Object source = ce.getSource();
     if (power == source) {
-      powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerMap().calcOutput(power.getScaledValue())));
+      powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
       myService.send(boundServiceName, "move", power.getScaledValue());
       // log.info(String.format("send %s, move, %s", boundServiceName, power.getScaledValue()));
     }
