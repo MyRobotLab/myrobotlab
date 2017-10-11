@@ -44,6 +44,8 @@ public class HtmlParser extends Service {
     meta.addDependency("org.jsoup", "1.8.3");
     meta.addDescription("html parser");
     meta.addCategory("document");
+    // Set to false since no JSoup service exists
+    meta.setAvailable(false);
     return meta;
   }
 
