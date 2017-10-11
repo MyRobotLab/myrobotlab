@@ -483,16 +483,19 @@ public class Servo extends Service implements ServoControl {
       error(String.format("%s's controller is not set", getName()));
       return;
     }
-    if (!isEnabled() && pos != lastPos) {
-      enable();
-    } 
+
     if (pos < mapper.getMinX()) {
       pos = mapper.getMinX();
     }
     if (pos > mapper.getMaxX()) {
       pos = mapper.getMaxX();
     }
+    
     targetPos = pos;
+    
+    if (!isEnabled() && pos != lastPos) {
+      enable();
+    } 
     
     if (intialTargetPosChange) {
       targetPosBeforeSensorFeebBackCorrection = targetPos;
@@ -506,33 +509,42 @@ public class Servo extends Service implements ServoControl {
       controller.servoMoveTo(this);
       lastActivityTime = System.currentTimeMillis();
     }
-    lastPos = targetPos;
-
+    else
+    {
+      lastPos = targetPos;
+    }
   }
 
   @Override
   public boolean moveToBlocking(double pos) {
     this.moveTo(pos);
     // breakMoveToBlocking=false;
-    while (Math.round(this.currentPosInput) != pos && velocity > 0 && enabled && lastPos != pos) {
-
-      synchronized (moveToBlocked) {
-        try {
-          // Will block until lock.notify() is called on another thread.
-          moveToBlocked.wait(30000);// 30s timeout security delay
-        } catch (InterruptedException e) {
-          log.info("servo {} moveToBlocked was interrupted", getName());
+    waitTargetPos(pos);
+    if (Math.round(this.currentPosInput) != Math.round(pos) && velocity == -1 && Math.round(lastPos) != Math.round(pos)) {
+      // if velocity == -1 we don't know current position
+      sleep(disableDelayIfVelocity);
+    }
+    return true;
+  }
+  
+  @Override
+  public void waitTargetPos(double pos) {
+    {
+      while (Math.round(this.currentPosInput) != Math.round(pos) && velocity > 0 && Math.round(lastPos) != Math.round(pos)) {
+        synchronized (moveToBlocked) {
+          try {
+            // Will block until moveToBlocked.notify() is called on another thread.
+            moveToBlocked.wait(30000);// 30s timeout security delay
+          } catch (InterruptedException e) {
+            log.info("servo {} moveToBlocked was interrupted", getName());
+          }
         }
       }
     }
-    if (Math.round(this.currentPosInput) != pos && velocity == -1 && lastPos != pos) {
-      sleep(disableDelayIfVelocity);
-    }
-    lastPos = targetPos;
-    return true;
   }
 
   private void delayDisable() {
+    lastPos = targetPos;
     if (autoDisable)
     {
     int disableDelay=10000;

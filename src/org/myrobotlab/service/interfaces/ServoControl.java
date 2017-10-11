@@ -283,6 +283,16 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   boolean getAutoDisable();
 
   /**
+   * waitTargetPos is used by a global moveToBlocking command - pos usually is 0 - 180
+   * a global moveToBlocking is a method that use multiple servo at same time
+   * and wait every servo for last position arrived
+   * 
+   * @param pos
+   *          - position to move to
+   */
+  void waitTargetPos(double pos);
+  
+  /**
    * moveToBlocking is a basic move command of the servo - usually is 0 - 180
    * valid range but can be adjusted and / or re-mapped with min / max and map
    * commands
