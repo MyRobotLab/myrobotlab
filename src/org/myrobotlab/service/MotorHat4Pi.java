@@ -25,7 +25,7 @@ public class MotorHat4Pi extends AbstractMotor {
   
   public MotorHat4Pi(String n) {
     super(n);
-    mapPower(-1, 1, -1, 1);
+    //mapPower(-1, 1, -1, 1);
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
   }

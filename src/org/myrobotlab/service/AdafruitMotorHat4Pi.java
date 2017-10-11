@@ -21,11 +21,13 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.RasPi;
+import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.slf4j.Logger;
 
 /**
@@ -37,7 +39,7 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/overview
  */
 
-public class AdafruitMotorHat4Pi extends Service implements I2CControl, MotorController {
+public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CControl {
 
   /** version of the library */
   static public final String VERSION = "0.9";
@@ -152,6 +154,7 @@ public class AdafruitMotorHat4Pi extends Service implements I2CControl, MotorCon
     super(n);
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    powerMapper = new Mapper(-1.0, 1.0, -.98, 0.98);
   }
 
   public void onRegistered(ServiceInterface s) {
@@ -266,7 +269,7 @@ public class AdafruitMotorHat4Pi extends Service implements I2CControl, MotorCon
 
     Class<?> type = mc.getClass();
 
-    double powerOutput = mc.getPowerOutput();
+    double powerOutput = powerMapper.calcOutput(mc.getPowerLevel ());
     // log.info(String.format("powerOutput = %.3f", powerOutput));
 
     // Clamp powerOutput between -1 and 1
