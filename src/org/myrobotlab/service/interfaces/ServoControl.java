@@ -290,7 +290,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * @param pos
    *          - position to move to
    */
-  void waitTargetPos(double pos);
+  void waitTargetPos();
   
   /**
    * moveToBlocking is a basic move command of the servo - usually is 0 - 180
