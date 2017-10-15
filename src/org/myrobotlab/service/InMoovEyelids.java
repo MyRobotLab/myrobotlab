@@ -203,14 +203,17 @@ public class InMoovEyelids extends Service {
     log.info(String.format("init " + getName() + "moveToBlocking "));
     eyelidleft.moveTo(eyelidleftPos);
     eyelidright.moveTo(eyelidrightPos);
-
-    eyelidleft.waitTargetPos(eyelidleftPos);
-    if (eyelidright != null) {
-    eyelidright.waitTargetPos(eyelidrightPos);
-    }
+    waitTargetPos();
     log.info(String.format("end " + getName() + "moveToBlocking "));
     }
 
+  public void waitTargetPos() {
+    eyelidleft.waitTargetPos();
+    if (eyelidright != null) {
+    eyelidright.waitTargetPos();
+    }
+    log.info(String.format("end " + getName() + "moveToBlocking "));
+    }
 
   // FIXME - releasePeers()
   public void release() {
@@ -223,7 +226,6 @@ public class InMoovEyelids extends Service {
       eyelidright.releaseService();
       eyelidright = null;
     }
-
   }
 
   public void rest() {
