@@ -519,18 +519,17 @@ public class Servo extends Service implements ServoControl {
   public boolean moveToBlocking(double pos) {
     this.moveTo(pos);
     // breakMoveToBlocking=false;
-    waitTargetPos(pos);
-    if (Math.round(this.currentPosInput) != Math.round(pos) && velocity == -1 && Math.round(lastPos) != Math.round(pos)) {
-      // if velocity == -1 we don't know current position
-      sleep(disableDelayIfVelocity);
+    if (velocity>0)
+    {
+      waitTargetPos();
     }
     return true;
   }
   
   @Override
-  public void waitTargetPos(double pos) {
+  public void waitTargetPos() {
     {
-      while (Math.round(this.currentPosInput) != Math.round(pos) && velocity > 0 && Math.round(lastPos) != Math.round(pos)) {
+      while (isMoving()) {
         synchronized (moveToBlocked) {
           try {
             // Will block until moveToBlocked.notify() is called on another thread.
