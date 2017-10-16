@@ -529,7 +529,7 @@ public class Servo extends Service implements ServoControl {
   @Override
   public void waitTargetPos() {
     {
-      while (isMoving()) {
+      if (isMoving()||lastPos != targetPos) {
         synchronized (moveToBlocked) {
           try {
             // Will block until moveToBlocked.notify() is called on another thread.

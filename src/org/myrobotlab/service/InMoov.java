@@ -661,7 +661,7 @@ public class InMoov extends Service {
     return mute;
   }
 
-  public void moveArm(String which, Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+  public void moveArm(String which, double bicep, double rotate, double shoulder, double omoplate) {
     if (!arms.containsKey(which)) {
       error("setArmSpeed %s does not exist", which);
     } else {
@@ -669,7 +669,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void moveEyes(Integer eyeX, Integer eyeY) {
+  public void moveEyes(double eyeX, double eyeY) {
     if (head != null) {
       head.moveTo(null, null, eyeX, eyeY, null, null);
     } else {
@@ -677,11 +677,11 @@ public class InMoov extends Service {
     }
   }
 
-  public void moveHand(String which, Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky) {
+  public void moveHand(String which, double thumb, double index, double majeure, double ringFinger, double pinky) {
     moveHand(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  public void moveHand(String which, Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+  public void moveHand(String which, double thumb, double index, double majeure, double ringFinger, double pinky, Double wrist) {
     if (!hands.containsKey(which)) {
       error("moveHand %s does not exist", which);
     } else {
@@ -691,7 +691,7 @@ public class InMoov extends Service {
 
   // ------ composites servos end ----------- 
 
-  public void moveHead(Integer neck, Integer rothead) {
+  public void moveHead(double neck, double rothead) {
     if (head != null) {
       head.moveTo(neck, rothead);
     } else {
@@ -699,7 +699,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void moveHead(Integer neck, Integer rothead, Integer rollNeck) {
+  public void moveHead(double neck, double rothead, double rollNeck) {
     if (head != null) {
       head.moveTo(neck, rothead, rollNeck);
     } else {
@@ -707,7 +707,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void moveHead(Integer neck, Integer rothead, Integer eyeX, Integer eyeY, Integer jaw) {
+  public void moveHead(double neck, double rothead, double eyeX, double eyeY, double jaw) {
     if (head != null) {
       head.moveTo(neck, rothead, eyeX, eyeY, jaw);
     } else {
@@ -715,7 +715,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void moveHead(Integer neck, Integer rothead, Integer eyeX, Integer eyeY, Integer jaw, Integer rollNeck) {
+  public void moveHead(double neck, double rothead, double eyeX, double eyeY, double jaw, double rollNeck) {
     if (head != null) {
       head.moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
     } else {
@@ -725,7 +725,7 @@ public class InMoov extends Service {
 
   // ---------- canned gestures end ---------
 
-  public void moveTorso(Integer topStom, Integer midStom, Integer lowStom) {
+  public void moveTorso(double topStom, double midStom, double lowStom) {
     if (torso != null) {
       torso.moveTo(topStom, midStom, lowStom);
     } else {
@@ -733,7 +733,7 @@ public class InMoov extends Service {
     }
   }
 
-  public void moveEyelids(Integer eyelidleft, Integer eyelidright) {
+  public void moveEyelids(double eyelidleft, double eyelidright) {
     if (eyelids != null) {
       eyelids.moveTo(eyelidleft, eyelidright);
     } else {
@@ -801,15 +801,15 @@ public class InMoov extends Service {
   // ---------- movement commands begin ---------
 
   public void openlefthand() {
-    moveHand("left", 0, 0, 0, 0, 0, 0);
+    moveHand("left", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   }
 
   public void openPinch(String which) {
-    moveHand(which, 0, 0, 180, 180, 180);
+    moveHand(which, 0.0, 0.0, 180.0, 180.0, 180.0);
   }
 
   public void openrighthand() {
-    moveHand("right", 0, 0, 0, 0, 0, 0);
+    moveHand("right", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   }
 
   public void powerDown() {

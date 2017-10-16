@@ -207,29 +207,31 @@ public class InMoovHead extends Service {
     log.info(String.format("object distance is %f,rothead servo %f,neck servo %f ", distance, rotation, colatitude));
   }
 
-  public void moveTo(Integer neck, Integer rothead) {
+  public void moveTo(double neck, double rothead) {
     moveTo(neck, rothead, null, null, null, null);
   }
   
 //TODO IK head moveTo ( neck + rollneck + rothead ? )
-  public void moveTo(Integer neck, Integer rothead, Integer rollNeck) {
+  public void moveTo(double neck, double rothead, double rollNeck) {
 	    moveTo(neck, rothead, null, null, null, rollNeck);
 	  }
   
-  public void moveTo(Integer neck, Integer rothead, Integer eyeX, Integer eyeY) {
+  public void moveTo(double neck, double rothead, double eyeX, double eyeY) {
     moveTo(neck, rothead, eyeX, eyeY, null, null);
   }
   
-  public void moveTo(Integer neck, Integer rothead, Integer eyeX, Integer eyeY, Integer jaw) {
+  public void moveTo(double neck, double rothead, double eyeX, double eyeY, double jaw) {
 	    moveTo(neck, rothead, eyeX, eyeY, jaw, null);
 	  }
 
-  public void moveTo(Integer neck, Integer rothead, Integer eyeX, Integer eyeY, Integer jaw, Integer rollNeck) {
+  public void moveTo(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
     if (log.isDebugEnabled()) {
       log.debug(String.format("head.moveTo %d %d %d %d %d %d", neck, rothead, eyeX, eyeY, jaw, rollNeck));
     }
+      if (rothead != null)
     this.rothead.moveTo(rothead);
-    this.neck.moveTo(neck);
+    if (neck != null)
+      this.neck.moveTo(neck);
     if (eyeX != null)
       this.eyeX.moveTo(eyeX);
     if (eyeY != null)

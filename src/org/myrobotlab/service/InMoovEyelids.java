@@ -187,7 +187,7 @@ public class InMoovEyelids extends Service {
     return attached;
   }
 
-  public void moveTo(Integer eyelidleftPos, Integer eyelidrightPos) {
+  public void moveTo(double eyelidleftPos, double eyelidrightPos) {
     if (log.isDebugEnabled()) {
       log.debug(String.format("%s moveTo %d %d", getName(), eyelidleftPos, eyelidrightPos));
     }
@@ -199,7 +199,7 @@ public class InMoovEyelids extends Service {
     }
   }
   
-  public void moveToBlocking(Integer eyelidleftPos, Integer eyelidrightPos) {
+  public void moveToBlocking(double eyelidleftPos, double eyelidrightPos) {
     log.info(String.format("init " + getName() + "moveToBlocking "));
     eyelidleft.moveTo(eyelidleftPos);
     eyelidright.moveTo(eyelidrightPos);
@@ -212,7 +212,6 @@ public class InMoovEyelids extends Service {
     if (eyelidright != null) {
     eyelidright.waitTargetPos();
     }
-    log.info(String.format("end " + getName() + "moveToBlocking "));
     }
 
   // FIXME - releasePeers()

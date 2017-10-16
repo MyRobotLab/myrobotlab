@@ -225,7 +225,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return attached;
   }
 
-  public void moveTo(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+  public void moveTo(double bicep, double rotate, double shoulder, double omoplate) {
     if (log.isDebugEnabled()) {
       log.debug(String.format("%s moveTo %d %d %d %d", getName(), bicep, rotate, shoulder, omoplate));
     }
