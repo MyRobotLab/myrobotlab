@@ -120,7 +120,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public void bird() {
-    moveTo(150, 180, 0, 180, 180, 90);
+    moveTo(150.0, 180.0, 0.0, 180.0, 180.0, 90.0);
   }
 
   @Override
@@ -253,7 +253,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     }
   
   public void devilHorns() {
-    moveTo(150, 0, 180, 180, 0, 90);
+    moveTo(150.0, 0.0, 180.0, 180.0, 0.0, 90.0);
   }
 
   public void five() {
@@ -261,7 +261,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public void four() {
-    moveTo(150, 0, 0, 0, 0, 90);
+    moveTo(150.0, 0.0, 0.0, 0.0, 0.0, 90.0);
   }
 
   public long getLastActivityTime() {
@@ -287,7 +287,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public void hangTen() {
-    moveTo(0, 180, 180, 180, 0, 90);
+    moveTo(0.0, 180.0, 180.0, 180.0, 0.0, 90.0);
   }
 
   public boolean isAttached() {
@@ -310,11 +310,11 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   // TODO - waving thread fun
-  public void moveTo(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky) {
+  public void moveTo(double thumb, double index, double majeure, double ringFinger, double pinky) {
     moveTo(thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  public void moveTo(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+  public void moveTo(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     if (log.isDebugEnabled()) {
       log.debug(String.format("%s.moveTo %d %d %d %d %d %d", getName(), thumb, index, majeure, ringFinger, pinky, wrist));
     }
@@ -328,11 +328,11 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public void ok() {
-    moveTo(150, 180, 0, 0, 0, 90);
+    moveTo(150.0, 180.0, 0.0, 0.0, 0.0, 90.0);
   }
 
   public void one() {
-    moveTo(150, 0, 180, 180, 180, 90);
+    moveTo(150.0, 0.0, 180.0, 180.0, 180.0, 90.0);
   }
 
   @Override
@@ -472,11 +472,11 @@ public class InMoovHand extends Service implements LeapDataListener {
     arduino.servoAttachPin(wrist, wristPin);
   }
 
-  public void setRest(int thumb, int index, int majeure, int ringFinger, int pinky) {
+  public void setRest(double thumb, double index, double majeure, double ringFinger, double pinky) {
     setRest(thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  public void setRest(int thumb, int index, int majeure, int ringFinger, int pinky, Integer wrist) {
+  public void setRest(double thumb, double index, double majeure, double ringFinger, double pinky, Double wrist) {
     log.info(String.format("setRest %d %d %d %d %d %d", thumb, index, majeure, ringFinger, pinky, wrist));
     this.thumb.setRest(thumb);
     this.index.setRest(index);
@@ -561,11 +561,11 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public void three() {
-    moveTo(150, 0, 0, 0, 180, 90);
+    moveTo(150.0, 0.0, 0.0, 0.0, 180.0, 90.0);
   }
 
   public void thumbsUp() {
-    moveTo(0, 180, 180, 180, 180, 90);
+    moveTo(0.0, 180.0, 180.0, 180.0, 180.0, 90.0);
   }
 
   public void two() {
@@ -573,7 +573,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public void victory() {
-    moveTo(150, 0, 0, 180, 180, 90);
+    moveTo(150.0, 0.0, 0.0, 180.0, 180.0, 90.0);
   }
 
   /**

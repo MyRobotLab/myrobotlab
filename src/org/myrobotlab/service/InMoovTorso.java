@@ -188,7 +188,7 @@ public class InMoovTorso extends Service {
     return attached;
   }
 
-  public void moveTo(Integer topStom, Integer midStom, Integer lowStom) {
+  public void moveTo(double topStom, double midStom, double lowStom) {
     if (log.isDebugEnabled()) {
       log.debug(String.format("%s moveTo %d %d %d", getName(), topStom, midStom, lowStom));
     }
@@ -197,7 +197,7 @@ public class InMoovTorso extends Service {
     this.lowStom.moveTo(lowStom);
 
   }
-
+  
   // FIXME - releasePeers()
   public void release() {
     disable();
@@ -290,7 +290,7 @@ public class InMoovTorso extends Service {
     midStom.moveTo(midStom.getPos() + 2);
     lowStom.moveTo(lowStom.getPos() + 2);
 
-    moveTo(35, 45, 55);
+    moveTo(35.0, 45.0, 55.0);
     String move = getScript("i01");
     log.info(move);
   }
