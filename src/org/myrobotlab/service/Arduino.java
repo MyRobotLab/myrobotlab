@@ -67,7 +67,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher {
 
   private static final long serialVersionUID = 1L;
-  
+
   Mapper motorPowerMapper = new Mapper(-1.0, 1.0, -255.0, 255.0);
 
   public static class I2CDeviceMap {
@@ -538,7 +538,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     if (board.contains("mega")) {
       for (int i = 0; i < 70; ++i) {
-        PinDefinition pindef = new PinDefinition(getName(), i);  
+        PinDefinition pindef = new PinDefinition(getName(), i);
         // begin wacky pin def logic
         String pinName = null;
         if (i == 0) {
@@ -567,7 +567,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       }
     } else {
       for (int i = 0; i < 20; ++i) {
-        PinDefinition pindef = new PinDefinition(getName(), i);  
+        PinDefinition pindef = new PinDefinition(getName(), i);
         String pinName = null;
         if (i == 0) {
           pindef.setRx(true);
@@ -593,6 +593,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         pinIndex.put(i, pindef);
         pinMap.put(pinName, pindef);
         pinList.add(pindef);
+      }
+
+      if (board.contains("nano")) {
+        /*
+         * int i = 20; pinName = String.format("A%d", i - 14); PinDefinition
+         * pindef = new PinDefinition(getName(), i); pindef.setDigital(false);
+         * pindef.setPwm(false); pindef.setAnalog(true); pindef.canWrite(false);
+         * pinIndex.put(i, pindef); pinMap.put(pinName, pindef);
+         */
       }
     }
     return pinList;
@@ -686,14 +695,22 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     enablePin(address, 0);
   }
 
-  public void enablePin(String address) {
-    PinDefinition pd = pinMap.get(address);
-    enablePin(pd.getAddress());
+  public void enablePin(String pinNameOrAddress) {
+    if (pinMap.containsKey(pinNameOrAddress)) {
+      PinDefinition pd = pinMap.get(pinNameOrAddress);
+      enablePin(pd.getAddress());
+    } else {
+      enablePin(Integer.parseInt(pinNameOrAddress));
+    }
   }
 
-  public void disablePin(String address) {
-    PinDefinition pd = pinMap.get(address);
-    disablePin(pd.getAddress());
+  public void disablePin(String pinNameOrAddress) {
+    if (pinMap.containsKey(pinNameOrAddress)) {
+      PinDefinition pd = pinMap.get(pinNameOrAddress);
+      disablePin(pd.getAddress());
+    } else {
+      disablePin(Integer.parseInt(pinNameOrAddress));
+    }
   }
 
   /**
@@ -810,6 +827,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public Integer getMrlPinType(PinDefinition pin) {
     if (board == null) {
       error("must have pin board type to determin pin definition");
+      return null;
+    }
+
+    if (pin == null) {
+      log.error("pin definition null");
       return null;
     }
 
@@ -1622,14 +1644,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     if (motor.getClass().equals(Motor.class)) {
       motorType = MOTOR_TYPE_SIMPLE;
-      Motor m = (Motor)motor;
-      pins = new int[]{m.getPwrPin(), m.getDirPin()};
+      Motor m = (Motor) motor;
+      pins = new int[] { m.getPwrPin(), m.getDirPin() };
     } else if (motor.getClass().equals(MotorDualPwm.class)) {
       motorType = MOTOR_TYPE_DUAL_PWM;
-      MotorDualPwm m = (MotorDualPwm)motor;
-      pins = new int[]{m.getLeftPwmPin(), m.getRightPwmPin()};
-    // } else if (motor.getClass().equals(MotorStepper)){ // FIXME implement
-      
+      MotorDualPwm m = (MotorDualPwm) motor;
+      pins = new int[] { m.getLeftPwmPin(), m.getRightPwmPin() };
+      // } else if (motor.getClass().equals(MotorStepper)){ // FIXME implement
+
     } else {
       throw new IOException(String.format("do not know how to attach Motor type %s", motor.getClass().getSimpleName()));
     }
@@ -2210,7 +2232,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver) Runtime.start("adafruit", "Adafruit16CServoDriver");
       adafruit.attach(arduino);
       arduino.attach(adafruit);
-      
+
       Servo servo = (Servo) Runtime.start("servo", "Servo");
       // servo.attach(arduino, 8, 90);
 
@@ -2231,7 +2253,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void connect(String port, int rate) throws Exception {
     connect(port, rate, 8, 1, 0);
   }
-  
+
   @Override
   public List<String> getPorts() {
     // we use pins not ports
@@ -2240,14 +2262,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   public PinDefinition getPin(String pinName) {
-    if (pinMap.containsKey(pinName)){
+    if (pinMap.containsKey(pinName)) {
       return pinMap.get(pinName);
     }
     return null;
   }
-  
+
   public PinDefinition getPin(Integer address) {
-    if (pinIndex.containsKey(address)){
+    if (pinIndex.containsKey(address)) {
       return pinIndex.get(address);
     }
     return null;

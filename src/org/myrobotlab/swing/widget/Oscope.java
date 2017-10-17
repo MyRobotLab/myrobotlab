@@ -349,7 +349,7 @@ public class Oscope extends ServiceGui implements ActionListener {
 			bgc.gridx++;
 			sgc.gridy++;
 
-			if (bgc.gridx % 2 == 0) {
+			if (bgc.gridx % 4 == 0) {
 				bgc.gridx = 0;
 				bgc.gridy++;
 			}

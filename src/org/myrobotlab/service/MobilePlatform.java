@@ -31,6 +31,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.MotorControl;
 import org.slf4j.Logger;
 
 /**
@@ -53,106 +54,25 @@ import org.slf4j.Logger;
  */
 
 public class MobilePlatform extends Service {
-  // FIXME - just use Pid - remove this
-  class PIDThread extends Thread {
-    boolean isRunning = true;
-    int feedback = 0;
-    float power = 0.13f;
-    long estimatedTime = 0;
-    int lagTime = 700;
-
-    PIDThread() {
-      super("pid");
-    }
-
-    @Override
-    public void run() {
-
-      while (isRunning) {
-
-        try {
-
-          if (headingCurrent == headingTarget) {
-            synchronized (lock) {
-              lock.wait(); // WAIT for a heading to change to
-            }
-          }
-
-          // save power command, target heading, and time into array
-          // (round-robin the array)
-
-          // compute Pid of (800ms target) with - current feedback
-          // Output = kp * error + ki * errSum + kd * dErr;
-
-          // speed at the moment is unsafe - browns out at 50% power
-          estimatedTime = Math.abs(headingDelta) * 40 + 200;
-
-          // if turn time > 800 ms - lag time - i can check and adjust
-          // while turning - if not i have to pause to correct
-          // send corrections - am I moving.. am I not moving ?
-          beginMotion = System.currentTimeMillis();
-          // TODO: support the "power setting"?
-          // float leftPower = 0.12f;
-          // float rightPower = 0.12f;
-          if (headingDelta > 0) {
-            // correct right - don't block
-
-          } else if (headingDelta < 0) {
-            // correct left - don't block
-
-          }
-
-          estimatedTime += 700; // add lag time
-
-          Thread.sleep((int) (estimatedTime / 1000)); // wait
-          // wait for estimated time + lag time
-          // check feedback for correction
-
-          // combine with current command
-          // feedback = waitForHeadingChange();
-
-        } catch (InterruptedException e) {
-          log.warn("duration thread interrupted");
-        }
-
-      }
-    }
-  }
-
+ 
+  private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MobilePlatform.class);
 
-  private static final long serialVersionUID = 1L;
   public int positionX = 0;
-
   public int positionY = 0;
   public int targetX = 0;
 
   public int targetY = 0;
-  public int headingCurrent = 0;
-  public int headingTarget = 0;
-  public int headingLast = 0;
-  public int headingDelta = 0;
-
-  public int headingSpeed = 0;
-  transient Motor left = null;
-
-  /*
-   * I HATE ENUMS ! public enum Directions { LEFT, STOPPED, RIGHT }
-   * 
-   * 
-   * public Directions directionCurrent = Directions.STOPPED; public Directions
-   * directionTarget = Directions.STOPPED;
-   */
-
-  transient Motor right = null;
-  transient PIDThread pid = null;
-  transient Object pidLock = new Object();
-
-  String directionTarget = null;
-  public static String DIRECTION_STOPPED = "DIRECTION_STOPPED";
-  public static String DIRECTION_RIGHT = "DIRECTION_RIGHT";
-
-  public static String DIRECTION_LEFT = "DIRECTION_LEFT";
+  
+  public Double headingCurrent = 0.0;
+  public Double headingTarget = 0.0;
+  public Double headingLast = 0.0;
+  public Double headingDelta = 0.0;
+  
+  transient MotorControl left = null;
+  transient MotorControl right = null;
+  
+  // String directionTarget = null;
 
   // TODO - determine if control needs to be serialized
   // Lock for "syncing" time vs read write contention - don't want a turning
@@ -290,63 +210,25 @@ public class MobilePlatform extends Service {
       log.info("shutting down");
     }
 
-    /*
-     * // ramp power up until change is seen in the feedback log.error(
-     * "headingCurrent " + headingCurrent); RampingThread ramping = new
-     * RampingThread(right, 10000, 0.0f, 0.5f, 0.02f); ramping.start();
-     * beginMotion = System.currentTimeMillis(); float heading =
-     * waitForHeadingChange(); // blocks on feedback system float power =
-     * ramping.power; endMotion = System.currentTimeMillis();
-     * ramping.interrupt(); right.stop(); log.error(
-     * "min start power in 10 second interval + lag " + power +
-     * " headingCurrent " + headingCurrent + " headingLast " + headingLast +
-     * " retrieved heading " + heading); ramping = null; // for gc
-     * log.error("here");
-     */
-
-    // take resulting power
-
-    // begin left turn
-    // wait for feedback
-    // compute LAG
-    // computer left ratio power (some set time) distance
-
-    // both motors turn
-
-    // forward
-    // drift drift & overshoot
-
-    // backward
-    // calculate drift & overshoot
-
-    // DISTANCE CALIBRATION BEGIN ----
-
   }
 
   // getters setters begin -------------------
-  public Motor getLeftMotor() {
+  public MotorControl getLeftMotor() {
     return left;
   }
 
   // creators - getters setters
-  public Motor getRightMotor() {
+  public MotorControl getRightMotor() {
     return right;
   }
 
-  public void incrementLeftPower(float power) {
-    // left.incrementPower(power);
-  }
-
-  // incrementMotor must be more descriptive
-  public void incrementRightPower(float power) {
-    // right.incrementPower(power);
-  }
-
+  // relative position control
   public void move(float power) {
     right.move(power);
     left.move(power);
   }
 
+  // absolute position control
   public void moveTo(float distance) {
 
   }
@@ -361,7 +243,7 @@ public class MobilePlatform extends Service {
    * setHeading is to be used by feedback mechanisms encoders, hall effect,
    * optical tracking It "invokes" to message the listeners of changed state.
    */
-  public final void setHeading(int value) {
+  public final void setHeading(double value) {
 
     synchronized (lock) {
       // set times of feedback
@@ -378,20 +260,20 @@ public class MobilePlatform extends Service {
     headingDelta = (headingDelta > 180) ? -(180 - (headingDelta - 180)) : headingDelta;
     headingDelta = (headingDelta < -180) ? (180 + (headingDelta + 180)) : headingDelta;
 
-    int at = (headingTarget < 0) ? headingTarget + 180 : headingTarget - 180;
+    double at = (headingTarget < 0) ? headingTarget + 180 : headingTarget - 180;
 
     // TODO - speed adjustment
     if (((headingCurrent < at) && (at < headingTarget)) || ((at < headingTarget) && (headingTarget < headingCurrent))
         || ((headingTarget < headingCurrent) && (headingCurrent < at))) {
       log.error("turn right");
-      directionTarget = DIRECTION_RIGHT;
+      // directionTarget = DIRECTION_RIGHT;
     } else {
       log.error("turn left");
-      directionTarget = DIRECTION_LEFT;
+      // directionTarget = DIRECTION_LEFT;
     }
 
     // TODO configurable publishing
-    invoke("publishState", this);
+    // invoke("publishState", this);
   }
 
   // control functions end -------------------
@@ -421,7 +303,7 @@ public class MobilePlatform extends Service {
   }
 
   // command to change heading and/or position
-  public void setTargetHeading(int value) // maintainHeading ?? if Pid is
+  public void setTargetHeading(double value) // maintainHeading ?? if Pid is
   // operating
   {
     headingTarget = value;
@@ -447,21 +329,9 @@ public class MobilePlatform extends Service {
     left.move(-power);
   }
 
-  public void startPID() {
-    if (pid == null) {
-      pid = new PIDThread();
-      pid.start();
-    }
-  }
 
   // from motor interface begin-------
   public void stop() {
-    if (pid != null) {
-      pid.isRunning = false;
-      pid.interrupt();
-      pid = null;
-    }
-
     right.stop();
     left.stop();
   }
@@ -473,7 +343,7 @@ public class MobilePlatform extends Service {
 
   
   // waitForHeadingChange will block and wait for heading change
-  public final int waitForHeadingChange() {
+  public final double waitForHeadingChange() {
     synchronized (lock) {
       try {
         lock.wait();
@@ -483,7 +353,6 @@ public class MobilePlatform extends Service {
     }
 
     return headingCurrent;
-
   }
 
   /**
@@ -496,7 +365,7 @@ public class MobilePlatform extends Service {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(MobilePlatform.class.getCanonicalName());
+    ServiceType meta = new ServiceType(MobilePlatform.class);
     meta.addDescription(
         "used to encapsulate many of the functions and formulas regarding 2 motor platforms encoders and other feedback mechanisms can be added to provide heading, location and other information");
     meta.addCategory("robot", "control");
