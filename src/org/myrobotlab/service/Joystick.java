@@ -160,7 +160,10 @@ public class Joystick extends Service {
         }        
 
         // get the data
-        pollingController.poll();
+        if (!pollingController.poll()){
+          error("failed to poll controller");
+          stopPolling();
+        }
         
 
         // iterate through each component and compare last values

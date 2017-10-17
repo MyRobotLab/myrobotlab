@@ -2,7 +2,7 @@
 
  dependencies - tinygradient, tinycolor
 
- FIXME - all data $scope.oscope
+ FIXME - all data $scope.{name}_oscope
 
  FIXME - all msgs / onMsg need to mirror the service gui this directive was put into
  - that should not be the case
@@ -82,8 +82,10 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                     }
                     scope.oscope.traces[key] = {};
                     var trace = scope.oscope.traces[key];
+                    var pinDef = pinIndex[key];
+
                     // adding style
-                    var color = colorsHsv[parseInt(key)];
+                    var color = colorsHsv[pinDef.address];
                     trace.readStyle = {
                         'background-color': color.toHexString()
                     };
@@ -232,15 +234,21 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             }
             ;
             scope.write = function(pinDef) {
-                if (pinDef.charAt(0) == 'A') {
-                    toggleWriteButton(trace);
+                scope.toggleWriteButton(trace);
+                mrl.sendTo(name, 'digitalWrite', pinDef.address);
+                trace.state = true;
+
+                /* 3 states READ/ENABLE | DIGITALWRITE | ANALOGWRITE
+                if (pinDef.pinName.charAt(0) == 'A') {
+                    _self.toggleWriteButton(trace);
                     mrl.sendTo(name, 'analogWrite', 1);
                     trace.state = false;
                 } else {
-                    toggleWriteButton(trace);
+                    _self.toggleWriteButton(trace);
                     mrl.sendTo(name, 'digitalWrite', pinDef.address);
                     trace.state = true;
                 }
+                */
             }
             ;
             scope.reset = function() {
@@ -276,7 +284,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                 }
             }
             ;
-            var toggleWriteButton = function(trace) {
+            scope.toggleWriteButton = function(trace) {
                 var highlight = trace.color.getOriginalInput();
                 if (trace.state) {
                     // scope.blah.display = false;
@@ -303,7 +311,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             mrl.subscribe(name, 'publishPinArray');
             mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray');
             // initializing display data      
-            setTraceButtons(service.pinDefs.pinIndex);
+            setTraceButtons(service.pinIndex);
         }
     };
 }

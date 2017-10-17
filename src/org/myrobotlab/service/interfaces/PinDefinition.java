@@ -2,8 +2,6 @@ package org.myrobotlab.service.interfaces;
 
 import java.io.Serializable;
 
-import org.myrobotlab.framework.interfaces.NameProvider;
-
 public class PinDefinition extends SensorDefinition implements Serializable {
 
 	private static final long	serialVersionUID	= 1L;
