@@ -242,7 +242,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
     // add dependency if necessary
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech");
-    meta.addDependency("tts.microsoftspeech", "1.0");
+    meta.addDependency("tts.microsoftspeech", "1.1");
     return meta;
   }
 
