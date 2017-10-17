@@ -235,6 +235,20 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     this.omoplate.moveTo(omoplate);
   }
 
+  public void moveToBlocking(double bicep, double rotate, double shoulder, double omoplate) {
+    log.info(String.format("init " + getName() + "moveToBlocking "));
+    moveTo(bicep, rotate, shoulder, omoplate);
+    waitTargetPos();
+    log.info(String.format("end " + getName() + "moveToBlocking "));
+    }
+
+  public void waitTargetPos() {
+    bicep.waitTargetPos();
+    rotate.waitTargetPos();
+    shoulder.waitTargetPos();
+    omoplate.waitTargetPos();
+    }
+  
   // FIXME - releasePeers()
   public void release() {
     disable();

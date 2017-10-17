@@ -326,6 +326,26 @@ public class InMoovHand extends Service implements LeapDataListener {
     if (wrist != null)
       this.wrist.moveTo(wrist);
   }
+  
+  public void moveToBlocking(double thumb, double index, double majeure, double ringFinger, double pinky) {
+    moveToBlocking(thumb, index, majeure, ringFinger, pinky, null);
+  }
+  
+  public void moveToBlocking(double thumb, double index, double majeure, double ringFinger, double pinky, Double wrist) {
+    log.info(String.format("init " + getName() + "moveToBlocking "));
+    moveTo(thumb, index, majeure, ringFinger, pinky, wrist);
+    waitTargetPos();
+    log.info(String.format("end " + getName() + "moveToBlocking "));
+    }
+
+  public void waitTargetPos() {
+    thumb.waitTargetPos();
+    index.waitTargetPos();
+    majeure.waitTargetPos();
+    ringFinger.waitTargetPos();
+    pinky.waitTargetPos();
+    wrist.waitTargetPos();
+    }
 
   public void ok() {
     moveTo(150.0, 180.0, 0.0, 0.0, 0.0, 90.0);
