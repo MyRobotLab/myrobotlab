@@ -477,7 +477,7 @@ public class Servo extends Service implements ServoControl {
   public synchronized void moveTo(double pos) {
     // breakMoveToBlocking=true;
     synchronized (moveToBlocked) {
-      moveToBlocked.notifyAll(); // Will wake up MoveToBlocked.wait()
+      moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
     if (controller == null) {
       error(String.format("%s's controller is not set", getName()));
@@ -519,17 +519,16 @@ public class Servo extends Service implements ServoControl {
   public boolean moveToBlocking(double pos) {
     this.moveTo(pos);
     // breakMoveToBlocking=false;
-    if (velocity>0)
-    {
       waitTargetPos();
-    }
     return true;
   }
   
   @Override
   public void waitTargetPos() {
     {
-      if (isMoving()||lastPos != targetPos) {
+      if (isMoving()||Math.round(lastPos) != Math.round(targetPos)) {
+        if (velocity>0)
+        {
         synchronized (moveToBlocked) {
           try {
             // Will block until moveToBlocked.notify() is called on another thread.
@@ -537,6 +536,7 @@ public class Servo extends Service implements ServoControl {
           } catch (InterruptedException e) {
             log.info("servo {} moveToBlocked was interrupted", getName());
           }
+        }
         }
       }
     }
@@ -565,7 +565,7 @@ public class Servo extends Service implements ServoControl {
         disable();
         }
         synchronized (moveToBlocked) {
-          moveToBlocked.notifyAll(); // Will wake up MoveToBlocked.wait()
+          moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
         }
       }
     }, (long) disableDelay);
@@ -573,7 +573,7 @@ public class Servo extends Service implements ServoControl {
     else
     {
       synchronized (moveToBlocked) {
-        moveToBlocked.notifyAll(); // Will wake up MoveToBlocked.wait()
+        moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
       }
     }
   }

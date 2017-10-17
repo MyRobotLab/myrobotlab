@@ -740,6 +740,55 @@ public class InMoov extends Service {
       log.error("moveEyelids - I have a null Eyelids");
     }
   }
+  
+  public void moveHeadBlocking(double neck, double rothead) {
+    if (head != null) {
+      head.moveToBlocking(neck, rothead);
+    } else {
+      log.error("moveHead - I have a null head");
+    }
+  }
+
+  public void moveHeadBlocking(double neck, double rothead, double rollNeck) {
+    if (head != null) {
+      head.moveToBlocking(neck, rothead, rollNeck);
+    } else {
+      log.error("moveHead - I have a null head");
+    }
+  }
+
+  public void moveHeadBlocking(double neck, double rothead, double eyeX, double eyeY, double jaw) {
+    if (head != null) {
+      head.moveToBlocking(neck, rothead, eyeX, eyeY, jaw);
+    } else {
+      log.error("I have a null head");
+    }
+  }
+  
+  public void moveHeadBlocking(double neck, double rothead, double eyeX, double eyeY, double jaw, double rollNeck) {
+    if (head != null) {
+      head.moveToBlocking(neck, rothead, eyeX, eyeY, jaw, rollNeck);
+    } else {
+      log.error("I have a null head");
+    }
+  }
+  
+  public void waitTargetPos() {
+    if (head != null)
+      head.waitTargetPos();
+    if (eyelids != null)
+      eyelids.waitTargetPos();   
+    if (leftArm != null)
+      leftArm.waitTargetPos();   
+    if (rightArm != null)
+      rightArm.waitTargetPos();   
+    if (leftHand != null)
+      leftHand.waitTargetPos();   
+    if (rightHand != null)
+      rightHand.waitTargetPos(); 
+    if (torso != null)
+      torso.waitTargetPos();   
+  }
 
   public void onOpenNIData(OpenNiData data) {
 
@@ -1800,6 +1849,7 @@ public class InMoov extends Service {
 
   public void finishedGesture(String nameOfGesture) {
     if (gestureAlreadyStarted) {
+    waitTargetPos();
     RobotCanMoveRandom = true;
     setOverrideAutoDisable(false);
     gestureAlreadyStarted = false;

@@ -201,8 +201,7 @@ public class InMoovEyelids extends Service {
   
   public void moveToBlocking(double eyelidleftPos, double eyelidrightPos) {
     log.info(String.format("init " + getName() + "moveToBlocking "));
-    eyelidleft.moveTo(eyelidleftPos);
-    eyelidright.moveTo(eyelidrightPos);
+    moveTo(eyelidleftPos,eyelidrightPos);
     waitTargetPos();
     log.info(String.format("end " + getName() + "moveToBlocking "));
     }

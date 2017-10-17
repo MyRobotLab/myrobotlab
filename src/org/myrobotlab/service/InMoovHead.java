@@ -241,6 +241,38 @@ public class InMoovHead extends Service {
     if (rollNeck != null)
         this.rollNeck.moveTo(rollNeck);
   }
+  
+  public void moveToBlocking(double neck, double rothead) {
+    moveToBlocking(neck, rothead, null, null, null, null);
+  }
+  
+  public void moveToBlocking(double neck, double rothead, double rollNeck) {
+    moveToBlocking(neck, rothead, null, null, null, rollNeck);
+    }
+  
+  public void moveToBlocking(double neck, double rothead, double eyeX, double eyeY) {
+    moveToBlocking(neck, rothead, eyeX, eyeY, null, null);
+  }
+  
+  public void moveToBlocking(double neck, double rothead, double eyeX, double eyeY, double jaw) {
+    moveToBlocking(neck, rothead, eyeX, eyeY, jaw, null);
+    }
+  
+  public void moveToBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
+    log.info(String.format("init " + getName() + "moveToBlocking "));
+    moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
+    waitTargetPos();
+    log.info(String.format("end " + getName() + "moveToBlocking "));
+    }
+
+  public void waitTargetPos() {
+    neck.waitTargetPos();
+    rothead.waitTargetPos();
+    eyeX.waitTargetPos();
+    eyeY.waitTargetPos();
+    jaw.waitTargetPos();
+    rollNeck.waitTargetPos();
+    }
 
   public void release() {
     disable();

@@ -198,6 +198,20 @@ public class InMoovTorso extends Service {
 
   }
   
+  public void moveToBlocking(Double topStom, Double midStom, Double lowStom) {
+    log.info(String.format("init " + getName() + "moveToBlocking "));
+    moveTo(topStom, midStom, lowStom);
+    waitTargetPos();
+    log.info(String.format("end " + getName() + "moveToBlocking "));
+    }
+
+  public void waitTargetPos() {
+    topStom.waitTargetPos();
+    midStom.waitTargetPos();
+    lowStom.waitTargetPos();
+    }
+
+  
   // FIXME - releasePeers()
   public void release() {
     disable();
