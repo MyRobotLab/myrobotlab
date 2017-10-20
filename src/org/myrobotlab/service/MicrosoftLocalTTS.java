@@ -13,6 +13,7 @@ import java.util.Stack;
 import java.util.UUID;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -32,10 +33,16 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
   public final static Logger log = LoggerFactory.getLogger(MicrosoftLocalTTS.class);
 
   transient Integer voice = 0;
-  transient String voiceName;
+  transient String voiceName = "0";
   transient List<Integer> voices;
+
   private String ttsFolder = "tts";
-  private String ttsExecutable = ttsFolder + File.separator+"tts.exe";
+  private String audioCacheExtension = "mp3";  
+
+  private String windowsTtsExecutable = ttsFolder + File.separator + "tts.exe";
+  private String macOsTtsExecutable = "say";
+  // TODO private String linuxTtsExecutable = "";
+
   public String ttsExeOutputFilePath = System.getProperty("user.dir") + File.separator + ttsFolder + File.separator;
   boolean ttsExecutableExist;
 
@@ -56,33 +63,41 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
 
   @Override
   public List<String> getVoices() {
-    ArrayList<String> args = new ArrayList<String>();
-    args.add("-V");
-    String cmd = Runtime.execute(System.getProperty("user.dir") + File.separator + ttsExecutable, "-V");
-    String[] lines = cmd.split(System.getProperty("line.separator"));
-    List<String> voiceList = (List<String>) Arrays.asList(lines);
+    if (Platform.getLocalInstance().isWindows()) {
+      ArrayList<String> args = new ArrayList<String>();
+      args.add("-V");
+      String cmd = Runtime.execute(System.getProperty("user.dir") + File.separator + windowsTtsExecutable, "-V");
+      String[] lines = cmd.split(System.getProperty("line.separator"));
+      List<String> voiceList = (List<String>) Arrays.asList(lines);
 
-    for (int i = 0; i < voiceList.size() && i < 10; i++) {
-      // error(voiceList.get(i).substring(0,2));
-      if (voiceList.get(i).substring(0, 1).matches("\\d+")) {
-        voiceMap.put(i, voiceList.get(i).substring(2, voiceList.get(i).length()));
-        log.info("voice : " + voiceMap.get(i) + " index : " + i);
+      for (int i = 0; i < voiceList.size() && i < 10; i++) {
+        // error(voiceList.get(i).substring(0,2));
+        if (voiceList.get(i).substring(0, 1).matches("\\d+")) {
+          voiceMap.put(i, voiceList.get(i).substring(2, voiceList.get(i).length()));
+          log.info("voice : " + voiceMap.get(i) + " index : " + i);
+        }
       }
+      return voiceList;
     }
-    return voiceList;
+    return null;
   }
 
   @Override
   public boolean setVoice(String voice) {
-    getVoices();
-    Integer voiceId = Integer.parseInt(voice);
-    if (voiceMap.containsKey(voiceId)) {
-      this.voiceName = voiceMap.get(voiceId);
-      this.voice = voiceId;
-      log.info("setting voice to {}", voice, "( ", voiceName, " ) ");
-      return true;
+    // macos get voices not necessaries
+    if (Platform.getLocalInstance().isWindows()) {
+      getVoices();
+      Integer voiceId = Integer.parseInt(voice);
+      if (voiceMap.containsKey(voiceId)) {
+        this.voiceName = voiceMap.get(voiceId);
+        this.voice = voiceId;
+        log.info("setting voice to {}", voice, "( ", voiceName, " ) ");
+        return true;
+      }
+      error("could not set voice to {}", voice);
+      return false;
     }
-    error("could not set voice to {}", voice);
+    info("could not set voice to {}", voice);
     return false;
   }
 
@@ -98,7 +113,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
 
   public byte[] cacheFile(String toSpeak) throws IOException {
     byte[] mp3File = null;
-    String localFileName = getLocalFileName(this, toSpeak, "mp3");
+    String localFileName = getLocalFileName(this, toSpeak, audioCacheExtension);
     if (voiceName == null) {
       setVoice(voice.toString());
     }
@@ -106,22 +121,39 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
     String uuid = UUID.randomUUID().toString();
     if (!audioFile.cacheContains(localFileName)) {
       log.info("retrieving speech from locals - {}", localFileName, voiceName);
-      String command = System.getProperty("user.dir") + File.separator + ttsExecutable + " -f 9 -v " + voice + " -t -o " + ttsExeOutputFilePath  + uuid + " \""+toSpeak+" \"";
-      File f = new File(ttsExeOutputFilePath + uuid + "0.mp3");
-      f.delete();
-      String cmd = Runtime.execute("cmd.exe", "/c", command);
-      log.debug(command);
+      String command = System.getProperty("user.dir") + File.separator + windowsTtsExecutable + " -f 9 -v " + voice + " -t -o " + ttsExeOutputFilePath + uuid + " \"" + toSpeak
+          + " \"";
+      String cmd = "null";
+      File f = new File(ttsExeOutputFilePath + uuid + "0."+audioCacheExtension);
+      // windows os local tts
+      if (Platform.getLocalInstance().isWindows()) {
+        f=new File(ttsExeOutputFilePath + uuid + "0."+audioCacheExtension);
+        f.delete();
+        cmd = Runtime.execute("cmd.exe", "/c", command);
+      }
+      // macos local tts ( it is WAVE not mp3, but worky... )
+      // TODO : Convert to mp3
+      if (Platform.getLocalInstance().isMac()) {
+        f=new File(ttsExeOutputFilePath + uuid + "0.AIFF");
+        f.delete();
+        cmd = Runtime.execute(macOsTtsExecutable, toSpeak, "-o", ttsExeOutputFilePath + uuid + "0.AIFF");
+      }
+      log.info(cmd);
       if (!f.exists()) {
-        log.error(ttsExecutable + " caused an error : " + cmd);
+        log.error("local tts caused an error : " + cmd);
       } else {
-        mp3File = FileIO.toByteArray(f);
-        audioFile.cache(localFileName, mp3File, toSpeak);
+        if (f.length() == 0) {
+          log.error("local tts caused an error : empty file " + cmd);
+        } else {
+          mp3File = FileIO.toByteArray(f);
+          audioFile.cache(localFileName, mp3File, toSpeak);
+        }
         f.delete();
       }
 
     } else {
       log.info("using local cached file");
-      mp3File = FileIO.toByteArray(new File(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, "mp3")));
+      mp3File = FileIO.toByteArray(new File(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, audioCacheExtension)));
     }
 
     return mp3File;
@@ -131,7 +163,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
   public AudioData speak(String toSpeak) throws Exception {
     toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
     cacheFile(toSpeak);
-    AudioData audioData = audioFile.playCachedFile(getLocalFileName(this, toSpeak, "mp3"));
+    AudioData audioData = audioFile.playCachedFile(getLocalFileName(this, toSpeak, audioCacheExtension));
     utterances.put(audioData, toSpeak);
     return audioData;
   }
@@ -174,7 +206,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
     toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
     cacheFile(toSpeak);
     invoke("publishStartSpeaking", toSpeak);
-    audioFile.playBlocking(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, "mp3"));
+    audioFile.playBlocking(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, audioCacheExtension));
     invoke("publishEndSpeaking", toSpeak);
     return false;
   }
@@ -255,12 +287,25 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
     subscribe(audioFile.getName(), "publishAudioEnd");
     // attach a listener when the audio file ends playing.
     audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
-    File f = new File(System.getProperty("user.dir") + File.separator + ttsExecutable);
+    File f = new File(System.getProperty("user.dir") + File.separator + windowsTtsExecutable);
     ttsExecutableExist = true;
-    if (!f.exists()) {
-      error("Missing : " + System.getProperty("user.dir") + File.separator + ttsExecutable);
+
+    if (!new File(System.getProperty("user.dir") + File.separator + ttsFolder).exists()) {
+      File dir = new File(ttsFolder);
+      dir.mkdir();
+    }
+    if (!f.exists() && Platform.getLocalInstance().isWindows()) {
+      error("Missing : " + System.getProperty("user.dir") + File.separator + windowsTtsExecutable);
       ttsExecutableExist = false;
     }
+    if (Platform.getLocalInstance().isLinux()) {
+      error("generic Linux local tts not yet implemented, want help ?");
+    }
+    if (Platform.getLocalInstance().isMac()) {
+      this.audioCacheExtension="AIFF";
+    }
+    
+    
 
   }
 
