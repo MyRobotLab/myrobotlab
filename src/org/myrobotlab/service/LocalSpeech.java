@@ -26,11 +26,11 @@ import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
-public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioListener {
+public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListener {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(MicrosoftLocalTTS.class);
+  public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
 
   transient Integer voice = 0;
   transient String voiceName = "0";
@@ -57,7 +57,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
 
   String language = "en";
 
-  public MicrosoftLocalTTS(String n) {
+  public LocalSpeech(String n) {
     super(n);
   }
 
@@ -267,7 +267,7 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(MicrosoftLocalTTS.class.getCanonicalName());
+    ServiceType meta = new ServiceType(LocalSpeech.class.getCanonicalName());
     meta.addDescription("implements speech using Microsoft's tts.exe");
     meta.setAvailable(true); // false if you do not want it viewable in a
     // gui
@@ -313,12 +313,12 @@ public class MicrosoftLocalTTS extends AbstractSpeechSynthesis implements AudioL
 
     LoggingFactory.init(Level.INFO);
 
-    MicrosoftLocalTTS microsoftLocalTTS = (MicrosoftLocalTTS) Runtime.start("microsoftLocalTTS", "MicrosoftLocalTTS");
+    LocalSpeech localSpeech = (LocalSpeech) Runtime.start("localSpeech", "LocalSpeech");
     // microsoftLocalTTS.ttsExeOutputFilePath="c:\\tmp\\";
-    microsoftLocalTTS.getVoices();
-    microsoftLocalTTS.setVoice("1");
-    microsoftLocalTTS.speakBlocking("local tts");
-    microsoftLocalTTS.speak("unicode éléphant");
+    localSpeech.getVoices();
+    localSpeech.setVoice("1");
+    localSpeech.speakBlocking("local tts");
+    localSpeech.speak("unicode éléphant");
 
   }
 
