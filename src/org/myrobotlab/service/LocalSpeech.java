@@ -268,7 +268,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(LocalSpeech.class.getCanonicalName());
-    meta.addDescription("implements speech using Microsoft's tts.exe");
+    meta.addDescription("Local OS text to speech ( tts.exe / say etc ... )");
     meta.setAvailable(true); // false if you do not want it viewable in a
     // gui
     // add dependency if necessary
