@@ -70,6 +70,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       log.info(String.format("Speed control started for %s", name));
       servoData = servoMap.get(name);
       log.debug(String.format("Moving from %s to %s at %s degrees/second", servoData.currentOutput, servoData.targetOutput, servoData.velocity));
+      publishServoEvent(servoData.servo,2, servoData.currentOutput);
       try {
         lastExecution = System.currentTimeMillis();
         double _velocity;
@@ -113,12 +114,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
           }
           int pulseWidthOff = SERVOMIN + (int) (servoData.currentOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
           setServo(servoData.pin, pulseWidthOff);
+          //publishServoEvent(servoData.servo,2, servoData.currentOutput);
           // Sleep 100ms before sending next position
           lastExecution = now;
           log.info(String.format("Sent %s using a %s tick at velocity %s", servoData.currentOutput, deltaTime, _velocity));
           Thread.sleep(50);
         }
-
+        publishServoEvent(servoData.servo,1,servoData.currentOutput);
+        log.info(String.format("publishServoEvent :  %s , event %s, currentOutput %s",servoData.servo.getName(),1,servoData.currentOutput));
         log.info("Shuting down SpeedControl");
 
       } catch (Exception e) {
@@ -131,6 +134,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       }
     }
 
+  }
+  
+  public double publishServoEvent(ServoControl servo, Integer eventType, double currentOutput) {
+    // TODO Auto-generated method stub
+    ((ServoControl) servo).onServoEvent(eventType, currentOutput);
+    return currentOutput;
   }
 
   /** version of the library */
@@ -244,6 +253,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     double targetOutput;
     double currentOutput;
     boolean isEnergized = false;
+    ServoControl servo;
   }
 
   transient HashMap<String, ServoData> servoMap = new HashMap<String, ServoData>();
@@ -416,7 +426,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       // Move at max speed
       if (servoData.velocity == -1) {
         log.debug("Ada move at max speed");
-        servoData.currentOutput = servo.getTargetOutput();
+        servoData.currentOutput = servo.getCurrentPosOutput();
         servoData.targetOutput = servo.getTargetOutput();
         log.debug(String.format("servoWrite %s deviceAddress %s targetOutput %f", servo.getName(), deviceAddress, servo.getTargetOutput()));
         int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
@@ -463,6 +473,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public void servoAttachPin(ServoControl servo, int pin) {
     ServoData servoData = servoMap.get(servo.getName());
     servoData.pin = pin;
+    servoData.isEnergized = true;
   }
 
   /**
@@ -832,9 +843,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     ServoData servoData = new ServoData();
     servoData.pin = servo.getPin();
     servoData.targetOutput  = servo.getTargetOutput();
-    servoData.currentOutput = servo.getTargetOutput();
+    servoData.currentOutput = servo.getCurrentPosOutput();
     servoData.velocity = servo.getVelocity();
     servoData.isEnergized = true;
+    servoData.servo=servo;
     servoMap.put(servo.getName(), servoData);
     servo.attachServoController(this);
   }

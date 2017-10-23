@@ -314,4 +314,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * ( we need to keep original autoDisable status, that is the reason ) 
    */
   void setOverrideAutoDisable(boolean overrideAutoDisable);
+
+  void onServoEvent(Integer eventType, double currentPosUs);
+
+  double getCurrentPosOutput();
 }

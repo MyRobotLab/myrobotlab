@@ -863,4 +863,16 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     
   }
 
+  @Override
+  public void onServoEvent(Integer eventType, double currentPosUs) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public double getCurrentPosOutput() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
 }

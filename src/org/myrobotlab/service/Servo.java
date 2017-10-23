@@ -268,7 +268,7 @@ public class Servo extends Service implements ServoControl {
    */
   public int disableDelayIfVelocity = 1000;
   private boolean moving;
-  private double currentPosInput;
+  double currentPosInput;
   private boolean autoDisable = false;
   
   private boolean overrideAutoDisable = false;
@@ -502,21 +502,31 @@ public class Servo extends Service implements ServoControl {
     }
 
     targetOutput = getTargetOutput();// mapper.calcOutput(targetPos); //
-    // calculated degrees
-
-    // calculated degrees
+    
+    lastActivityTime = System.currentTimeMillis();
+    
     if (lastPos != pos) {
+      //take care if servo will disable soon
+      if (autoDisableTimer != null) {
+        autoDisableTimer.cancel();
+        autoDisableTimer = null;
+      }
       controller.servoMoveTo(this);
-      lastActivityTime = System.currentTimeMillis();
     }
-    else
+    if (!isEventsEnabled || lastPos == pos)
     {
       lastPos = targetPos;
+      broadcastState();
     }
   }
 
   @Override
   public boolean moveToBlocking(double pos) {
+    if (!isEventsEnabled)
+    {
+      this.addServoEventListener(this);
+    }
+    targetPos = pos;
     this.moveTo(pos);
     // breakMoveToBlocking=false;
       waitTargetPos();
@@ -544,6 +554,9 @@ public class Servo extends Service implements ServoControl {
 
   private void delayDisable() {
     lastPos = targetPos;
+    broadcastState();
+    if (!isMoving())
+    {
     if (autoDisable)
     {
     int disableDelay=10000;
@@ -576,6 +589,8 @@ public class Servo extends Service implements ServoControl {
         moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
       }
     }
+    }
+    broadcastState();
   }
 
   public Double publishServoEvent(Double position) {
@@ -959,6 +974,10 @@ public class Servo extends Service implements ServoControl {
   public Double getCurrentPos() {
     return currentPosInput;
   }
+  
+  public double getCurrentPosOutput() {
+    return mapper.calcOutput(getCurrentPos());
+  }
 
   /**
    * return time to move the servo to the target position, in ms
@@ -1188,12 +1207,9 @@ public class Servo extends Service implements ServoControl {
     return moving;
   }
 
-  public void onServoEvent(Integer eventType, Integer currentPosUs, Integer targetPos) {
-    double currentPos = microsecondsToDegree(currentPosUs);
+  @Override
+  public void onServoEvent(Integer eventType, double currentPos) {
     currentPosInput = mapper.calcInput(currentPos);
-    if (isEventsEnabled) {
-      invoke("publishServoEvent", currentPosInput);
-    }
     if (isIKEventEnabled) {
       IKData data = new IKData();
       data.name = getName();
@@ -1208,6 +1224,14 @@ public class Servo extends Service implements ServoControl {
     } else {
       moving = true;
     }
+    if (isEventsEnabled) {
+      invoke("publishServoEvent", currentPosInput);
+    }
+  }
+  
+  public void onServoEvent(Integer eventType, Integer currentPosUs, double targetPos) {
+    double currentPos = microsecondsToDegree(currentPosUs);  
+    onServoEvent(eventType, currentPos);
   }
 
   public void onIMAngles(Object[] data) {
