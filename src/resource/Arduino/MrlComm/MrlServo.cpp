@@ -109,10 +109,11 @@ void MrlServo::update() {
 }
 
 
-void MrlServo::moveToMicroseconds(int position) {
-  if (servo == NULL) 
+void MrlServo::moveToMicroseconds(int posUs) {
+  if (servo == NULL){ 
     return;
-  targetPosUs = position;
+  }
+  targetPosUs = posUs;
   isMoving = true;
   lastUpdate = millis();
   moveStart = lastUpdate;

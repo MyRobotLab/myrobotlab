@@ -114,7 +114,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
           ino.loop();
 
-          Thread.sleep(10);
+         Thread.sleep(1);
         } catch (Exception e) {
           log.error("mrlcomm threw", e);
         }

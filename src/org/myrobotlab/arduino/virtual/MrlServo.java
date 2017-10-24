@@ -20,26 +20,25 @@ public class MrlServo extends Device {
 	public static final int SERVO_EVENT_POSITION_UPDATE = 2;
 	
   VirtualServo servo; // servo pointer - in case our device is a servo
-  public  int pin;
-  public  boolean isMoving;
-  public  boolean isSweeping;
-  public  int targetPosUs;
-  public  float currentPosUs;
-  public  int minUs;
-  public  int maxUs;
-  public  long lastUpdate;
-  public  int velocity; // in deg/sec  |  velocity < 0 == no speed control
-  public  int sweepStep;
-  public  int maxVelocity;
-  public  int acceleration;
-  public  long moveStart;
+  public int pin;
+  public boolean isMoving;
+  boolean isSweeping;
+  public int targetPosUs;
+  public float currentPosUs;
+  public int minUs;
+  public int maxUs;
+  public long lastUpdate;
+  public int velocity; // in deg/sec  |  velocity < 0 == no speed control
+  public int sweepStep;
+  public int acceleration;
+  public long moveStart;
 
   public MrlServo(int deviceId, VirtualArduino virtual) {
     super(deviceId, Msg.DEVICE_TYPE_SERVO, virtual);
   isMoving = false;
   isSweeping = false;
-  // create the servo (check attach)
-
+  // create the servo
+  servo = new HardwareServo();
   lastUpdate = 0;
   currentPosUs = 0.0f;
   targetPosUs = 0;
@@ -76,6 +75,19 @@ boolean attach(int pin, int initPosUs, int initVelocity, String name){
   return true;
   }
 
+// This method is equivalent to Arduino's Servo.attach(pin) - (no pos)
+public void attachPin(int pin) {
+  log.info("servo id {}->attachPin({})", id, pin);
+  this.pin = pin;
+  servo.attach(pin);
+}
+
+public void detachPin() {
+  log.info("servo id {}->detachPin()", id);
+  servo.detach();
+}
+
+// FIXME - what happened to events ?
   public void update() {
     //it may have an imprecision of +- 1 due to the conversion of currentPosUs to int
     if (isMoving) {
@@ -131,71 +143,59 @@ boolean attach(int pin, int initPosUs, int initVelocity, String name){
         }
         else {
           isMoving = false;
+          publishServoEvent(SERVO_EVENT_STOPPED);
         }
       }
     }
   }
 
-  public void detachPin() {
-    log.info("servo id {}->detachPin()", id);
-  }
-
-  public void attachPin(int pin) {
-    log.info("servo id {}->attachPin({})", id, pin);
-    this.pin = pin;
-  }
-
-  public void servoWrite(int position) {
-    targetPosUs = position;
+ 
+ public void moveToMicroseconds(int posUs) {
+    if (servo == null){ 
+      return;
+    }
+    targetPosUs = posUs;
     isMoving = true;
     lastUpdate = millis();
+    moveStart = lastUpdate;
+    publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
   }
+
+void startSweep(int minUs, int maxUs, int step) {
+  this.minUs = minUs;
+  this.maxUs = maxUs;
+  sweepStep = step;
+  targetPosUs = maxUs;
+  isMoving = true;
+  isSweeping = true;
+}
+
+void stopSweep() {
+  isMoving = false;
+  isSweeping = false;
+}
+
+void setVelocity(int velocity) {
+  this.velocity = velocity;
+}
+ 
+void setAcceleration(int acceleration) {
+  this.acceleration = acceleration;
+}
 
   private long millis() {
     return System.currentTimeMillis();
   }
 
+  private void publishServoEvent(int type) {
+    msg.publishServoEvent(id, type, (int)currentPosUs, targetPosUs);  
+  }
+
   public void servoWriteMicroseconds(int position) {
   }
 
-  public void startSweep(int min, int max, int step) {
-  }
-
-  public void stopSweep() {
-  }
-
-  public void setMaxVelocity(int velocity) {
-    this.maxVelocity = velocity;
-  }
-
-  public void setVelocity(int velocity) {
-    this.velocity = velocity;
-  }
-
-  public void setAcceleration(Integer acceleration) {
-    // TODO Auto-generated method stub
-
-  }
-
-  public void moveToMicroseconds(int posUs) {
-    if (servo != null){
-      servo.writeMicroseconds(posUs);
-    }
-    if (servo == null) 
-      return;
-    targetPosUs = posUs;
-    isMoving = true;
-    lastUpdate = millis();
-    moveStart = lastUpdate;
-  }
-  private void publishServoEvent(int type) {
-    msg.publishServoEvent(id, type, (int)currentPosUs, targetPosUs);
-	
-  }
-  
   private float map(float value, int inMin, int inMax, int outMin, int outMax) {
     return outMin + ((value - inMin) * (outMax - outMin)) / (inMax - outMax);
   }
 
 };
-

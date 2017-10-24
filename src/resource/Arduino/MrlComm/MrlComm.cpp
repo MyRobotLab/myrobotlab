@@ -69,12 +69,11 @@ Device* MrlComm::getDevice(int id) {
 /**
  * This adds a device to the current set of active devices in the deviceList.
  * 
- * FIXME - G: I think dynamic array would work better
- * at least for the deviceList
- * TODO: KW: i think it's pretty dynamic now.
- * G: the nextDeviceId & Id leaves something to be desired - and the "index" does
- * not spin through the deviceList to find it .. a dynamic array of pointers would only
- * expand if it could not accomidate the current number of devices, when a device was
+   * FIXME - G: I think dynamic array would work better at least for the
+   * deviceList TODO: KW: i think it's pretty dynamic now. G: the nextDeviceId &
+   * Id leaves something to be desired - and the "index" does not spin through
+   * the deviceList to find it .. a dynamic array of pointers would only expand
+   * if it could not accomidate the current number of devices, when a device was
  * removed - the slot could be re-used by the next device request
  */
 Device* MrlComm::addDevice(Device* device) {
@@ -83,13 +82,11 @@ Device* MrlComm::addDevice(Device* device) {
 }
 
 /***********************************************************************
- * UPDATE DEVICES BEGIN
- * updateDevices updates each type of device put on the device list
- * depending on their type.
- * This method processes each loop. Typically this "back-end"
- * processing will read data from pins, or change states of non-blocking
- * pulses, or possibly regulate a motor based on pid values read from
- * pins
+   * UPDATE DEVICES BEGIN updateDevices updates each type of device put on the
+   * device list depending on their type. This method processes each loop.
+   * Typically this "back-end" processing will read data from pins, or change
+   * states of non-blocking pulses, or possibly regulate a motor based on pid
+   * values read from pins
  */
 void MrlComm::updateDevices() {
 

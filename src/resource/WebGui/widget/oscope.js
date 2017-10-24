@@ -215,7 +215,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                 scaleY += 1;
                 _self.ctx.scale(scaleX, scaleY);
             }
-            ;
+            ;// RENAME eanbleTrace - FIXME read values vs write values | ALL values from service not from ui !! - ui only sends commands
             scope.activateTrace = function(pinDef) {
                 var trace = scope.oscope.traces[pinDef.address];
                 if (trace.state) {
@@ -235,8 +235,8 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             ;
             scope.write = function(pinDef) {
                 scope.toggleWriteButton(trace);
-                mrl.sendTo(name, 'digitalWrite', pinDef.address);
-                trace.state = true;
+                mrl.sendTo(name, 'digitalWrite', pinDef.address, 1);
+                // trace.state = true;
 
                 /* 3 states READ/ENABLE | DIGITALWRITE | ANALOGWRITE
                 if (pinDef.pinName.charAt(0) == 'A') {
@@ -284,7 +284,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                 }
             }
             ;
-            scope.toggleWriteButton = function(trace) {
+            scope.toggleWriteButton = function(pinDef) {
                 var highlight = trace.color.getOriginalInput();
                 if (trace.state) {
                     // scope.blah.display = false;

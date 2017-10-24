@@ -64,6 +64,8 @@ public class MrlComm {
   // handles all messages to and from pc
   transient VirtualMsg msg;
 
+  boolean heartbeatEnabled;
+
   public
   // utility methods
   // int getFreeRam();
@@ -266,7 +268,7 @@ public class MrlComm {
     // extern int __heap_start, *__brkval;
     // int v;
     // return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-    return 940 - (deviceList.size() * 20) - getRandom(0, 20);
+    return 940 - (deviceList.size() * 20) - getRandom(0, 20); // TODO add size of device list
   }
 
   /**
@@ -291,7 +293,6 @@ public class MrlComm {
     // you'll still get a runtime error if any field, member or method not
     // defined is accessed
   }
-
   /**
    * This adds a device to the current set of active devices in the deviceList.
    * 
@@ -336,9 +337,10 @@ public class MrlComm {
     // until it is reset after sending publishBoardInfo
     ++loopCount;
     long now = millis();
-    if ((now - lastHeartbeatUpdate > 1000)) {
-      // softReset(); - not ready yet to commit to resetting
+    if ((now - lastHeartbeatUpdate > 1000)&& heartbeatEnabled) {
+      onDisconnect();
       lastHeartbeatUpdate = now;
+      heartbeatEnabled = false;
       return;
     }
 
@@ -361,7 +363,6 @@ public class MrlComm {
         if (pin.rate == 0 || (now > pin.lastUpdate + (1000 / pin.rate))) {
           pin.lastUpdate = now;
           // TODO: move the analog read outside of this method and
-          // pass it in!
           if (pin.type == Arduino.ANALOG) {
             pin.value = analogRead(pin.address);
           } else {
@@ -453,8 +454,8 @@ public class MrlComm {
     }
 
     long now = micros();
-    msg.publishBoardInfo(MRLCOMM_VERSION, Arduino.BOARD_TYPE_ID_UNO, (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary);
-    // msg.publishBoardInfo(MRLCOMM_VERSION, boardInfo.getBoardType(), (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary);
+    int load = (int)((now - lastBoardInfoUs)/loopCount);
+    msg.publishBoardInfo(MRLCOMM_VERSION, Arduino.BOARD_TYPE_ID_UNO, load, getFreeRam(), pinList.size(), deviceSummary);
     lastBoardInfoUs = now;
     loopCount = 0;
   }
@@ -685,6 +686,7 @@ public class MrlComm {
       customMsgBuffer[i] = 0;
     }
     customMsgSize = 0;
+    heartbeatEnabled = true;
   }
 
   // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
@@ -717,6 +719,41 @@ public class MrlComm {
     customMsgSize--;
     return retval;
   }
+
+ void onDisconnect() {
+   Iterator<Device> i = deviceList.iterator();
+   while (i.hasNext()) {
+     Device node = i.next();
+     node.onDisconnect();
+     // node = node.next;
+   }
+  boardStatusEnabled = false;
+ }
+
+ void sendCustomMsg(int[] customMsg) {
+  msg.publishCustomMsg(customMsg);
+ }
+ 
+ // > motorAttach/deviceId/type/[] pins
+ public void motorAttach(Integer deviceId, Integer type, int[] pins) {
+   MrlMotor servo = new MrlMotor(deviceId, virtual);
+   addDevice(servo);
+   // not your mama's attach - this is attaching/initializing the MrlDevice
+   // servo.attach(type, initialPosUs, velocity, name);
+ }
+
+ // > motorMove/deviceId/pwr
+ public void motorMove(Integer deviceId, Integer pwr) {
+   MrlMotor motor = (MrlMotor) getDevice(deviceId);
+   motor.move(pwr);
+ }
+
+ // > motorMoveTo/deviceId/pos
+ public void motorMoveTo(Integer deviceId, Integer pos) {
+   MrlMotor motor = (MrlMotor) getDevice(deviceId);
+   motor.moveTo(pos);
+ }
+
 
   /*
   public void setBoardType(String board) {
@@ -756,21 +793,5 @@ public class MrlComm {
 	 // msg.setAref(aref);
   }
 
-  public void motorAttach(Integer deviceId, Integer type, int[] pins) {
-    MrlMotor servo = new MrlMotor(deviceId, virtual);
-    addDevice(servo);
-    // not your mama's attach - this is attaching/initializing the MrlDevice
-    // servo.attach(type, initialPosUs, velocity, name);
-  }
-
-  public void motorMove(Integer deviceId, Integer pwr) {
-    MrlMotor motor = (MrlMotor) getDevice(deviceId);
-    motor.move(pwr);
-  }
-
-  public void motorMoveTo(Integer deviceId, Integer pos) {
-    MrlMotor motor = (MrlMotor) getDevice(deviceId);
-    motor.moveTo(pos);
-  }
 
 }
