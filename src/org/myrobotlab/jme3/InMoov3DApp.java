@@ -727,6 +727,8 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 
   }
 
+  // FIXME - race condition, if this method is called before JME is fully initialized :(
+  // the result is no servos are successfully added
   public void addServo(String partName, Servo servo) {
     if (nodes.containsKey(partName)) {
       Node node = nodes.get(partName);

@@ -39,7 +39,7 @@
  * -----------------
  * pingdar, non-blocking pulsin
  *
- * Requirements: MyRobotLab running on a computer & a serial connection
+   * Requirements: MyRobotLab running on a computer &amp; a serial connection
  *
  *  TODO - need a method to identify type of board http://forum.arduino.cc/index.php?topic=100557.0
  *  TODO - getBoardInfo() - returns board info !

@@ -2215,20 +2215,33 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       LoggingFactory.init(Level.INFO);
       log.info("{}", "nano".hashCode());
 
+      boolean virtual = true;
+      boolean isDone = true;
+      String port = "COM10";
+      
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
+      Serial serial = (Serial)Runtime.start("serial", "Serial");
+      log.info("{}", serial.getPortNames());
       // Runtime.start("cli", "Cli");
       // RemoteAdapter remote = (RemoteAdapter) Runtime.start("ra",
       // "RemoteAdapter");
 
       // Runtime.start("python", "Python");
 
-      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-      virtual.connect("COM78");
-      virtual.setBoardUno();
+      if (virtual) {
+        VirtualArduino va = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+        va.connect(port);
+        va.setBoardUno();
+      }
+
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      arduino.connect("COM78");
+      arduino.connect(port);
       arduino.setBoardMega();
+      
+      if (isDone){
+        return;
+      }
       Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver) Runtime.start("adafruit", "Adafruit16CServoDriver");
       adafruit.attach(arduino);
       arduino.attach(adafruit);

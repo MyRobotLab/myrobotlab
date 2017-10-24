@@ -92,6 +92,7 @@ public class MrlCommIno {
   public void loop() throws Exception {
     // get a command and process it from
     // the serial port (if available.)
+//  wdt_disable();
     if (mrlComm.readMsg()) {
       mrlComm.processCommand();
     }
@@ -102,15 +103,8 @@ public class MrlCommIno {
     // mrlComm.publishBoardStatus();
   } // end of big loop
 
-  /*
-  public void setBoardType(String board) {
-    mrlComm.setBoardType(board);
-  }
-  */
 
   public MrlComm getMrlComm() {
     return mrlComm;
   }
-
-
 }
