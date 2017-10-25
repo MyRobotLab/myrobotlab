@@ -333,6 +333,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		pid.startService();
 	}
 
+	@Override
 	public void addServoEventListener(NameProvider service) {
 		addListener("publishServoEvent", service.getName(), "onServoEvent");
 	}
