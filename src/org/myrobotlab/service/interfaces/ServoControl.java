@@ -318,4 +318,6 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   void onServoEvent(Integer eventType, double currentPosUs);
 
   double getCurrentPosOutput();
+
+  void addServoEventListener(NameProvider service);
 }

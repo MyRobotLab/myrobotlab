@@ -308,6 +308,7 @@ public class Servo extends Service implements ServoControl {
     broadcastState();
   }
 
+  @Override
   public void addServoEventListener(NameProvider service) {
     isEventsEnabled = true;
     addListener("publishServoEvent", service.getName(), "onServoEvent");
@@ -522,6 +523,9 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public boolean moveToBlocking(double pos) {
+    if (velocity<0){
+      log.info("No effect on moveToBlocking if velocity == -1");
+    }
     if (!isEventsEnabled)
     {
       this.addServoEventListener(this);
@@ -1260,6 +1264,8 @@ public class Servo extends Service implements ServoControl {
    * one
    */
   public void sync(ServoControl sc) {
+    this.addServoEventListener(this);
+    sc.addServoEventListener(sc);
     subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 
@@ -1271,6 +1277,7 @@ public class Servo extends Service implements ServoControl {
       VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
       virtual.connect(arduinoPort);
       Runtime.start("gui", "SwingGui");
+      Runtime.start("python", "Python");
 
       boolean done = false;
       if (done) {
@@ -1278,6 +1285,7 @@ public class Servo extends Service implements ServoControl {
       }
       
       Servo servo = (Servo) Runtime.start("servo", "Servo");
+      Servo servo2 = (Servo) Runtime.start("servo2", "Servo");
       Map<String, MethodEntry> methods = servo.getMethodMap();
 
       // String out = CodecUtils.toJson();
@@ -1321,6 +1329,8 @@ public class Servo extends Service implements ServoControl {
       // arduino.ackEnabled = true;
       
       servo.attach(arduino, 7);
+      servo2.attach(arduino, 8);
+      servo.sync(servo2);
       servo.moveTo(90);
       servo.setRest(30);
 
