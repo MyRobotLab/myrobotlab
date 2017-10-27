@@ -261,7 +261,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     node.setUserData("rotationMask_z", rotationMask.z);
     node.setUserData("currentAngle", 0);
     nodes.put("mtorso", node);
-    maps.put("mtorso", new Mapper(0, 180, 15, 165));
+    maps.put("mtorso", new Mapper(0, 180, 60, 120));
 
     node = new Node("ttorso");
     parentNode = nodes.get("mtorso");
@@ -336,7 +336,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     node.setUserData("rotationMask_z", rotationMask.z);
     node.setUserData("currentAngle", 0);
     nodes.put("Rrotate", node);
-    maps.put("Rrotate", new Mapper(0, 180, 46, 160));
+    maps.put("Rrotate", new Mapper(0, 180, 40, 180));
 
     node = new Node("Rbicep");
     parentNode = nodes.get("Rrotate");
@@ -412,7 +412,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     node.setUserData("rotationMask_z", rotationMask.z);
     node.setUserData("currentAngle", 0);
     nodes.put("rotate", node);
-    maps.put("rotate", new Mapper(0, 180, 46, 180));
+    maps.put("rotate", new Mapper(0, 180, 40, 180));
 
     node = new Node("bicep");
     parentNode = nodes.get("rotate");
@@ -446,7 +446,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     angle = rotationMask.mult((float) Math.toRadians(-90));
     node.rotate(angle.x, angle.y, angle.z);
     nodes.put("RWrist", node);
-    maps.put("RWrist", new Mapper(0, 180, 180, 0));
+    maps.put("RWrist", new Mapper(0, 180, 120, 30));
 
     node = new Node("LWrist");
     parentNode = nodes.get("bicep");
@@ -463,7 +463,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     angle = rotationMask.mult((float) Math.toRadians(-90));
     node.rotate(angle.x, angle.y, angle.z);
     nodes.put("LWrist", node);
-    maps.put("LWrist", new Mapper(0, 180, 0, 180));
+    maps.put("LWrist", new Mapper(0, 180, 30, 120));
 
     node = new Node("neck");
     parentNode = nodes.get("ttorso");
@@ -478,7 +478,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     node.setUserData("rotationMask_z", rotationMask.z);
     node.setUserData("currentAngle", 0);
     nodes.put("neck", node);
-    maps.put("neck", new Mapper(0, 180, -45, 45));
+    maps.put("neck", new Mapper(0, 180, 20, 160));
 
     node = new Node("rollNeck");
     parentNode = nodes.get("neck");
@@ -524,7 +524,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     angle = rotationMask.mult((float) Math.toRadians(5));
     node.rotate(angle.x, angle.y, angle.z);
     nodes.put("jaw", node);
-    maps.put("jaw", new Mapper(0, 180, 60, 90));
+    maps.put("jaw", new Mapper(0, 180, 0, 90));
 
     // poc monitor declaration
 
