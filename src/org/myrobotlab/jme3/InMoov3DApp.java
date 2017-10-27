@@ -507,7 +507,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     node.setUserData("rotationMask_z", rotationMask.z);
     node.setUserData("currentAngle", 0);
     nodes.put("head", node);
-    maps.put("head", new Mapper(0, 180, 30, 150));
+    maps.put("head", new Mapper(0, 180, 150, 30));
 
     node = new Node("jaw");
     parentNode = nodes.get("head");
