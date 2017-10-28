@@ -49,11 +49,13 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   HashMap<String, Command> commands = new HashMap<String, Command>();
 
   // track the state of the webgui, is it listening? maybe?
-  public boolean listening = false;
+  private boolean listening = false;
   private boolean speaking = false;
   public boolean continuous = true;
   private long lastAutoListenEvent = System.currentTimeMillis();
   public boolean stripAccents = false;
+  private boolean lockOutAllGrammar = false;
+  private String lockPhrase = "";
 
   public WebkitSpeechRecognition(String reservedKey) {
     super(reservedKey);
@@ -104,8 +106,11 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
       if (System.currentTimeMillis() - lastAutoListenEvent > 50) {
         startListening();
       } else {
-        error("WebkitSpeech : TOO MANY EVENTS, please close zombie tabs !");
-        sleep(500);
+        if (listening)
+        {
+          error("WebkitSpeech : TOO MANY EVENTS, autoListen disabled now, please close zombie tabs !");
+          setAutoListen(false);
+        }
       }
       lastAutoListenEvent = System.currentTimeMillis();
     } else {
@@ -129,7 +134,15 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     }
     lastThingRecognized = cleanedText;
     broadcastState();
+    if (!lockOutAllGrammar)
+    {
     return cleanedText;
+    }
+    if (text.equalsIgnoreCase(lockPhrase))
+    {
+      clearLock();
+    }
+    return "";
   }
 
   @Override
@@ -257,12 +270,15 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
   @Override
   public void lockOutAllGrammarExcept(String lockPhrase) {
-    log.warn("Lock out grammar not supported on webkit, yet...");
+    log.info("Ear locked now, please use command "+lockPhrase+" to unlock");
+    lockOutAllGrammar=true;
+    this.lockPhrase=lockPhrase;
   }
 
   @Override
   public void clearLock() {
-    log.warn("clear lock out grammar not supported on webkit, yet...");
+    log.warn("Ear unlocked by "+lockPhrase);
+    lockOutAllGrammar=false;
   }
 
   // TODO - should this be in Service ?????
@@ -291,6 +307,10 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
   public boolean isStripAccents() {
     return stripAccents;
+  }
+  
+  public boolean isListening() {
+    return this.listening;
   }
 
   public void setStripAccents(boolean stripAccents) {

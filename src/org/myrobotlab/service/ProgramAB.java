@@ -243,6 +243,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       error(error);
       return new Response(username, error, null, new Date());
     }
+    
+    if (text.isEmpty())
+    {
+      return new Response(username, "", null, new Date());
+    }
 
     String sessionKey = resolveSessionKey(username, currentBotName);
     if (!sessions.containsKey(sessionKey)) {
@@ -719,25 +724,27 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * If no, a new session is started
    * 
    * @param username
-   *          - The new username
+   *          - The new username 
+   * @return boolean
+   *          - True if username changed
    * @throws IOException 
    */
-  public void setUsername(String username)  {
+  public boolean setUsername(String username)  {
     if (username.isEmpty())
     {
       log.error("chatbot username is empty");
-      return;
+      return false;
     }
     if (getSessionNames().isEmpty())
     {
       log.info(username+" first session started");
       startSession(username);
-      return;
+      return false;
     }
     if (username.equalsIgnoreCase(this.currentUserName))
     {
       log.info(username+" already connected");
-      return;
+      return false;
     }
     if (!username.equalsIgnoreCase(this.currentUserName))
     {
@@ -759,8 +766,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
         e.printStackTrace();
       }
       log.info(username+" session started");
-      return;
+      return true;
     }
+    return false;
   }
 
   public void writeAIML() {
@@ -843,6 +851,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
     log.info(ai.getResponse("hi there").toString());
     log.info(ai.getResponse("こんにちは").toString());
+    log.info(ai.getResponse("test").toString());
+    log.info(ai.getResponse("").toString());
     ai.setUsername("test");
 
     // ai.savePredicates();

@@ -34,9 +34,16 @@ public interface SpeechRecognizer extends NameProvider {
 
   public void onEndSpeaking(String utterance);
 
-  // TODO: rationalize these 2 interfaces maybe re-name them?
+  /**
+   * The ear service will not listen anymore
+   * until the magical keyword "lockPhrase" said
+   * or clearLock() method called
+   */
   public void lockOutAllGrammarExcept(String lockPhrase);
-
+  
+  /**
+   * This will unlock lockOutAllGrammarExcept(lockPhrase)
+   */
   public void clearLock();
 
 }

@@ -165,7 +165,7 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
           continuous.setBackground(Color.GREEN);
         }
 
-        if (WebkitSpeechRecognition.listening) {
+        if (WebkitSpeechRecognition.isListening()) {
           micro.setIcon(new ImageIcon(microOn));
           listeningStatus = true;
         } else {
