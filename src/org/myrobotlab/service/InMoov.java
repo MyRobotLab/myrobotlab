@@ -1311,12 +1311,26 @@ public class InMoov extends Service {
     if (head == null) {
       startHead(port);
     }
+    //rest before tracking at fullspeed
+    setHeadVelocity(80.0, 80.0, 80.0);
+    moveHeadBlocking(90,90,90);
+    setHeadVelocity(-1.0, -1.0, -1.0);
     headTracking = (Tracking) startPeer("headTracking");
     // We should pass the servos that control the head in here! 
     headTracking.connect(opencv, head.rothead, head.neck);
     // TODO: why is this needed?!
     arduinos.put(port, (Arduino) headTracking.controller);
+ 
     return headTracking;
+  }
+  
+  public void stopHeadTracking() {   
+    if (headTracking!=null)
+    {
+      headTracking.stopTracking();
+      setHeadVelocity(80.0, 80.0, 80.0);
+      moveHeadBlocking(90,90,90);
+    }
   }
 
   public InMoovArm startLeftArm(String port) throws Exception {
