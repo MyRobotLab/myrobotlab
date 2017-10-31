@@ -129,6 +129,8 @@ public class OpenCV extends AbstractVideoSource {
   transient public static final String FILTER_DILATE = "Dilate";
   transient public static final String FILTER_FIND_CONTOURS = "FindContours";
   transient public static final String FILTER_FACE_DETECT = "FaceDetect";
+  transient public static final String FILTER_FACE_RECOGNIZER = "FaceRecognizer";
+  transient public static final String FILTER_GRAY = "Gray";
 
   // directional constants
   transient final static public String DIRECTION_FARTHEST_FROM_CENTER = "DIRECTION_FARTHEST_FROM_CENTER";

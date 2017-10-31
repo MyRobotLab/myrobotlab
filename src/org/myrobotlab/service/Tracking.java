@@ -31,6 +31,9 @@ import static org.myrobotlab.service.OpenCV.FILTER_DILATE;
 import static org.myrobotlab.service.OpenCV.FILTER_ERODE;
 import static org.myrobotlab.service.OpenCV.FILTER_FACE_DETECT;
 import static org.myrobotlab.service.OpenCV.FILTER_FIND_CONTOURS;
+import static org.myrobotlab.service.OpenCV.FILTER_FACE_RECOGNIZER; 
+import static org.myrobotlab.service.OpenCV.FILTER_GRAY; 
+import static org.myrobotlab.service.OpenCV.FILTER_PYRAMID_DOWN;
 import static org.myrobotlab.service.OpenCV.FILTER_LK_OPTICAL_TRACK;
 import static org.myrobotlab.service.OpenCV.FOREGROUND;
 import static org.myrobotlab.service.OpenCV.PART;
@@ -49,6 +52,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterDetector;
+import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
 import org.myrobotlab.opencv.OpenCVFilterGray;
 import org.myrobotlab.opencv.OpenCVFilterPyramidDown;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
@@ -192,22 +196,35 @@ public class Tracking extends Service {
 
   // -------------- System Specific Initialization Begin --------------
 
-  public void faceDetect() {
+  public OpenCVFilter faceDetect(boolean PleaseRecognizeToo) {
     // opencv.addFilter("Gray"); needed ?
     opencv.removeFilters();
     log.info("starting faceDetect");
     for (int i = 0; i < preFilters.size(); ++i) {
+      //grayFilter+Facerecognition=crash
+      if (preFilters.get(i).name!=FILTER_GRAY)
+      {
       opencv.addFilter(preFilters.get(i));
+      }
     }
-    // TODO single string static
+    OpenCVFilter fr=null;
+    if (PleaseRecognizeToo)
+    {
+      fr=opencv.addFilter(FILTER_FACE_RECOGNIZER);
+    } 
     opencv.addFilter(FILTER_FACE_DETECT);
     opencv.setDisplayFilter(FILTER_FACE_DETECT);
     opencv.capture();
     opencv.publishOpenCVData(true);
     // wrong state
     setState(STATE_FACE_DETECT);
+    return fr;
   }
-
+  
+  public void faceDetect() {
+    faceDetect(false);
+  }
+  
   public void findFace() {
     scan = true;
   }
@@ -318,8 +335,8 @@ public class Tracking extends Service {
 
   public void setDefaultPreFilters() {
     if (preFilters.size() == 0) {
-      OpenCVFilterPyramidDown pd = new OpenCVFilterPyramidDown("PyramidDown");
-      OpenCVFilterGray gray = new OpenCVFilterGray("Gray");
+      OpenCVFilterPyramidDown pd = new OpenCVFilterPyramidDown(FILTER_PYRAMID_DOWN);
+      OpenCVFilterGray gray = new OpenCVFilterGray(FILTER_GRAY);
       preFilters.add(pd);
       preFilters.add(gray);
     }
@@ -492,8 +509,10 @@ public class Tracking extends Service {
   }
 
   public void stopTracking() {
+    log.info("stop tracking");
     opencv.removeFilters();
     setState(STATE_IDLE);
+    sleep(100);
   }
 
   // --------------- publish methods begin ----------------------------
@@ -768,14 +787,24 @@ public class Tracking extends Service {
 
       t01.connect(arduinoPort, xPin, yPin, cameraIndex);
       OpenCV opencv = t01.getOpenCV();
-      opencv.setFrameGrabberType(frameGrabberType);
+      opencv.captureFromImageFile("resource/OpenCV/testData/ryan.jpg");
       opencv.broadcastState();
 
+
+      //t01.startLKTracking();
+      OpenCVFilterFaceRecognizer fr=(OpenCVFilterFaceRecognizer)t01.faceDetect(true);
+      fr.train();
       sleep(3000);
-
-      t01.startLKTracking();
-      // t01.faceDetect();
-
+      //sleep(5000);
+      t01.stopTracking();
+      opencv.stopCapture();
+      opencv.captureFromImageFile("resource/OpenCV/testData/ryan.jpg");
+      opencv.broadcastState();
+      t01.faceDetect();
+      //opencv.stopCapture();
+      //opencv.captureFromImageFile("resource/OpenCV/testData/rachel.jpg");
+     // opencv.broadcastState();
+      //t01.faceDetect(true);
       // Runtime.start("python", "Python");
 
       // tracker.startLKTracking();
