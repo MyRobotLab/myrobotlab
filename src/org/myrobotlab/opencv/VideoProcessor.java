@@ -460,6 +460,7 @@ public class VideoProcessor implements Runnable, Serializable {
 							}
 							if (filters.containsKey(name)) {
 								filters.remove(name);
+								lastSourceKey=INPUT_KEY;
 							}
 						}
 						removeFilterQueue.clear();
