@@ -443,9 +443,9 @@ public class VideoProcessor implements Runnable, Serializable {
 							if (f.sourceKey == null) {
 								f.sourceKey = lastSourceKey;
 								data.put(f.name); 
-								lastSourceKey = f.name;
 							}
 							filters.put(f.name, f);
+							lastSourceKey = f.name;
 						}
 						addFilterQueue.clear();
 						opencv.broadcastState(); // filters have changed

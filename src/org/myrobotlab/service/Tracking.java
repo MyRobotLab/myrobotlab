@@ -197,12 +197,16 @@ public class Tracking extends Service {
   // -------------- System Specific Initialization Begin --------------
 
   public OpenCVFilter faceDetect(boolean PleaseRecognizeToo) {
-    // opencv.addFilter("Gray"); needed ?
-    opencv.removeFilters();
+    // opencv.addFilter("Gray"); needed ?    
+    stopTracking();
     log.info("starting faceDetect");
     for (int i = 0; i < preFilters.size(); ++i) {
       //grayFilter+Facerecognition=crash
-      if (preFilters.get(i).name!=FILTER_GRAY)
+      if (preFilters.get(i).name==FILTER_GRAY && PleaseRecognizeToo)
+      {
+        log.info("skip gray filter for faceRecognize");
+      }
+      else
       {
       opencv.addFilter(preFilters.get(i));
       }
@@ -212,6 +216,7 @@ public class Tracking extends Service {
     {
       fr=opencv.addFilter(FILTER_FACE_RECOGNIZER);
     } 
+    
     opencv.addFilter(FILTER_FACE_DETECT);
     opencv.setDisplayFilter(FILTER_FACE_DETECT);
     opencv.capture();
@@ -301,7 +306,8 @@ public class Tracking extends Service {
 
   public void removeFilters() {
     opencv.removeFilters();
-  }
+    sleep(1000);
+    }
 
   public void reset() {
     // TODO - reset pid values
@@ -510,9 +516,8 @@ public class Tracking extends Service {
 
   public void stopTracking() {
     log.info("stop tracking");
-    opencv.removeFilters();
     setState(STATE_IDLE);
-    sleep(100);
+    removeFilters();
   }
 
   // --------------- publish methods begin ----------------------------
@@ -797,8 +802,7 @@ public class Tracking extends Service {
       sleep(3000);
       //sleep(5000);
       t01.stopTracking();
-      opencv.stopCapture();
-      opencv.captureFromImageFile("resource/OpenCV/testData/ryan.jpg");
+
       opencv.broadcastState();
       t01.faceDetect();
       //opencv.stopCapture();
