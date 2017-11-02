@@ -1313,14 +1313,13 @@ public class InMoov extends Service {
     }
     //rest before tracking at fullspeed
     setHeadVelocity(80.0, 80.0, 80.0);
-    moveHeadBlocking(90,90,90);
+    moveHeadBlocking(head.neck.getRest(),head.rothead.getRest(),head.rollNeck.getRest());
     setHeadVelocity(-1.0, -1.0, -1.0);
     headTracking = (Tracking) startPeer("headTracking");
     // We should pass the servos that control the head in here! 
     headTracking.connect(opencv, head.rothead, head.neck);
     // TODO: why is this needed?!
     arduinos.put(port, (Arduino) headTracking.controller);
- 
     return headTracking;
   }
   
@@ -1329,7 +1328,7 @@ public class InMoov extends Service {
     {
       headTracking.stopTracking();
       setHeadVelocity(80.0, 80.0, 80.0);
-      moveHeadBlocking(90,90,90);
+      moveHeadBlocking(head.neck.getRest(),head.rothead.getRest(),head.rollNeck.getRest());
     }
   }
 
@@ -1905,7 +1904,7 @@ public class InMoov extends Service {
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
     meta.addDependency("inmoov.fr", "1.0.0");
-    meta.addDependency("org.myrobotlab.inmoov", "0.5.7");
+    meta.addDependency("org.myrobotlab.inmoov", "0.5.8");
 
     // SHARING !!! - modified key / actual name begin -------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");

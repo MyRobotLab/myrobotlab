@@ -741,6 +741,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       startSession(username);
       return false;
     }
+    try {
+      savePredicates();
+    } catch (IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
     if (username.equalsIgnoreCase(this.currentUserName))
     {
       log.info(username+" already connected");
@@ -748,12 +754,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
     if (!username.equalsIgnoreCase(this.currentUserName))
     {
-      try {
-        savePredicates();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
       startSession(this.path,username,this.currentBotName);
       setPredicate(username,"name",username);
       setPredicate("default","lastUsername",username);

@@ -633,6 +633,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 				currentFilterListModel.clear();
 				// add new filters from service into gui
 				for (OpenCVFilter f : opencv.getFiltersCopy()) {
+				  ComboBoxModel2.removeSource(boundServiceName+"."+f.name);
 					addFilterToGui(f);
 				}
 
