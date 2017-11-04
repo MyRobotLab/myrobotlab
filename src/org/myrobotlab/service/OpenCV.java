@@ -869,6 +869,8 @@ public class OpenCV extends AbstractVideoSource {
     // meta.addDependency("org.bytedeco.javacpp","1.1");
     meta.addDependency("org.bytedeco.javacv", "1.3");
     meta.addDependency("pl.sarxos.webcam", "0.3.10");
+    // FaceRecognizer no worky if missing it
+    meta.addDependency("org.apache.commons.commons-lang3", "3.3.2");
     // for the mjpeg streamer support
     meta.addDependency("net.sf.jipcam","0.9.1");
     return meta;
