@@ -13,10 +13,12 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_SIMPLEX;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
+import static org.bytedeco.javacpp.opencv_imgproc.cvInitFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 import static org.bytedeco.javacpp.opencv_imgproc.getAffineTransform;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
@@ -25,16 +27,15 @@ import static org.bytedeco.javacpp.opencv_imgproc.warpAffine;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.IntBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Properties;
+import java.util.Hashtable;
 import java.util.UUID;
 
 import javax.swing.WindowConstants;
@@ -54,6 +55,8 @@ import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+
+import com.google.common.base.CharMatcher;
 
 /**
  * This is the OpenCV Face Recognition. It must be trained with a set of images
@@ -103,8 +106,10 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
   private HashMap<Integer, String> idToLabelMap = new HashMap<Integer, String>();
 
+ 
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-
+  private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
+  
   private boolean debug = false;
   // KW: I made up this word, but I think it's fitting.
   private boolean dePicaso = true;
@@ -119,7 +124,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private String lastRecognizedName = null;
   
   public String faceModelFilename = "faceModel.bin";
-
+  
+  private static Hashtable<String, String> UnicodeFolder = new Hashtable<String, String>();
   
   public OpenCVFilterFaceRecognizer() {
     super();
@@ -215,7 +221,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       // Parse the filename label-foo.jpg everything up to the first - is the
       // label.
       // String personName = image.getName().split("\\-")[0];
-      String personName = image.getParentFile().getName();
+      String personName = UnicodeFolder.get(image.getParentFile().getName());
       
       // TODO: we need an integer to represent this string .. for now we're
       // using a hashcode here.
@@ -348,16 +354,75 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       }
     };
     
+    FilenameFilter labelFilter = new FilenameFilter() {
+      public boolean accept(File dir, String name) {
+        name = name.toLowerCase();
+        return name.endsWith(".label");
+      }
+    };
+    
     String[] contents = root.list();
     for (String fn : contents) {
       File f = new File(root.getAbsolutePath() + File.separator + fn);
+
       if (f.isDirectory()) {
+        
         for (File x : f.listFiles(imgFilter)) {
           trainingFiles.add(x);
+        }
+        
+        String labelUnicode = fn;
+
+        
+        // opencv cannot parse unicode folders, so we use an extra thing as unicode label ( file.label )
+        Boolean foundUnicodeLabel = false;
+        for (File l : f.listFiles(labelFilter)) {
+          int pos = l.getName().lastIndexOf(".");
+          labelUnicode = l.getName().substring(0, pos);
+          foundUnicodeLabel=true;
+          FeedUnicodeDictionary(labelUnicode, fn);
+          FeedUnicodeDictionary(fn, labelUnicode);
+          
+        }
+        if (!foundUnicodeLabel)
+        {
+          log.info("labelNotUnicode : "+labelUnicode);
+          FeedUnicodeDictionary(fn, labelUnicode);
         }
       }
     }
     return trainingFiles;
+  }
+  
+  /**
+   * Feed a collection to map unicode text to ascii one
+   * This take care about duplicates
+   * @return mapped text
+   */
+  private static String FeedUnicodeDictionary(String unicodeName)  {
+    
+    if (UnicodeFolder.get(unicodeName) != null)
+    {
+      return UnicodeFolder.get(unicodeName);
+    }
+    else
+    {
+    String randValue = UUID.randomUUID().toString();
+    UnicodeFolder.put(randValue, unicodeName);
+    UnicodeFolder.put(unicodeName, randValue);
+      return randValue;
+    }
+  }
+  
+  /**
+   * Feed a collection to map unicode text to ascii one
+   * This take care about duplicates
+   */
+  private static void FeedUnicodeDictionary(String key, String unicodeName)  {
+    if (UnicodeFolder.get(key) == null){
+    UnicodeFolder.put(key, unicodeName);
+    log.info("key : "+key+" label : "+unicodeName);
+    }
   }
 
   private Mat resizeImage(Mat img, int width, int height) {
@@ -412,6 +477,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+    cvInitFont(font,CV_FONT_HERSHEY_SIMPLEX,0.5,0.5,2,1,10);
+    cvInitFont(fontWarning,CV_FONT_HERSHEY_SIMPLEX,0.4,0.3);
     // convert to grayscale
     Frame grayFrame = makeGrayScale(image);
     // TODO: this seems super wonky! isn't there an easy way to go from IplImage
@@ -512,7 +579,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
               log.warn("Unknown predicted label returned! {}", predictedLabel);
             }
             log.info("Recognized a Face {} - {}", predictedLabel, name);
-            cvPutText(image, "Recognized:" + name, dF.resolveGlobalLowerLeftCorner(), font, CvScalar.CYAN);
+            if (!CharMatcher.ASCII.matchesAllOf(name))
+            {
+              cvPutText(image, "[unicode char detected !!! text not visible, but succesfully parsed !]", cvPoint(5, 60), fontWarning, CvScalar.RED);
+            }
+            cvPutText(image, name, dF.resolveGlobalLowerLeftCorner(), font, CvScalar.CYAN);
             // If it's a new name. invoke it an publish.
             if (lastRecognizedName != name) {
               invoke("publishRecognizedFace", name);
@@ -533,15 +604,36 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     // conflict
     // TODO: use something more random like a
     // OK now we need to make a subdirectory for the label if it doesn't exist.
-    File labelDir = new File(trainingDir + File.separator + label);
+    // imwrite dont like unicode, we map unicode name to ascii
+    String labelUnicode=label;
+    if (!CharMatcher.ASCII.matchesAllOf(label))
+    {
+      labelUnicode=FeedUnicodeDictionary(labelUnicode);
+    }
+    
+    File labelDir = new File(trainingDir + File.separator + labelUnicode);
     if (!labelDir.exists()) {
       labelDir.mkdirs();
     }
     // TODO: should we give it something other than a random uuid ?
     UUID randValue = UUID.randomUUID();
-    String filename = trainingDir + File.separator + label + File.separator + randValue + ".png";
+    String filename = trainingDir + File.separator + labelUnicode + File.separator + randValue + ".png";
     // TODO: I think this is a png file ? not sure.
     imwrite(filename, dFaceMat);
+    File labelIdentifier = new File(trainingDir + File.separator + labelUnicode + File.separator + label + ".label");
+    if (!CharMatcher.ASCII.matchesAllOf(label) && !labelIdentifier.exists())
+    {
+      try {
+        new FileOutputStream(labelIdentifier).close();
+      } catch (FileNotFoundException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    
   }
 
   private Frame makeGrayScale(IplImage image) {

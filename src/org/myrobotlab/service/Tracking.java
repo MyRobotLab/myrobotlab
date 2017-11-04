@@ -215,13 +215,11 @@ public class Tracking extends Service {
     if (PleaseRecognizeToo)
     {
       fr=opencv.addFilter(FILTER_FACE_RECOGNIZER);
-    } 
-    
+    }
     opencv.addFilter(FILTER_FACE_DETECT);
     opencv.setDisplayFilter(FILTER_FACE_DETECT);
     opencv.capture();
     opencv.publishOpenCVData(true);
-    // wrong state
     setState(STATE_FACE_DETECT);
     return fr;
   }
@@ -799,12 +797,7 @@ public class Tracking extends Service {
       //t01.startLKTracking();
       OpenCVFilterFaceRecognizer fr=(OpenCVFilterFaceRecognizer)t01.faceDetect(true);
       fr.train();
-      sleep(3000);
-      //sleep(5000);
-      t01.stopTracking();
-
-      opencv.broadcastState();
-      t01.faceDetect();
+     
       //opencv.stopCapture();
       //opencv.captureFromImageFile("resource/OpenCV/testData/rachel.jpg");
      // opencv.broadcastState();
