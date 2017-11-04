@@ -446,7 +446,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     angle = rotationMask.mult((float) Math.toRadians(-90));
     node.rotate(angle.x, angle.y, angle.z);
     nodes.put("RWrist", node);
-    maps.put("RWrist", new Mapper(0, 180, 110, 20));
+    maps.put("RWrist", new Mapper(0, 180, 130, 40));
 
     node = new Node("LWrist");
     parentNode = nodes.get("bicep");
@@ -463,7 +463,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     angle = rotationMask.mult((float) Math.toRadians(-90));
     node.rotate(angle.x, angle.y, angle.z);
     nodes.put("LWrist", node);
-    maps.put("LWrist", new Mapper(0, 180, 20, 110));
+    maps.put("LWrist", new Mapper(0, 180, 40, 130));
 
     node = new Node("neck");
     parentNode = nodes.get("ttorso");
@@ -513,7 +513,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     parentNode = nodes.get("head");
     parentNode.attachChild(node);
     spatial = assetManager.loadModel("Models/jaw.j3o");
-    spatial.setName("neck");
+    spatial.setName("jaw");
     node.attachChild(spatial);
     node.setLocalTranslation(new Vector3f(-5, 63f, -50));
     rotationMask = Vector3f.UNIT_X.mult(1);
