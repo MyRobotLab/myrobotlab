@@ -67,7 +67,9 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterFaceDetect2;
 import org.myrobotlab.opencv.OpenCVFilterTesseract;
+import org.myrobotlab.opencv.OpenCVFilterOverlay;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractVideoSource;
@@ -714,6 +716,46 @@ public class OpenCV extends AbstractVideoSource {
 
   }
 
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(OpenCV.class.getCanonicalName());
+    meta.addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
+    meta.addCategory("video", "vision", "sensor");
+    // meta.addPeer("streamer", "VideoStreamer", "video streaming service
+    // for
+    // webgui.");
+
+    meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
+    // meta.addDependency("org.bytedeco.javacpp","1.1");
+    meta.addDependency("org.bytedeco.javacv", "1.3");
+    meta.addDependency("pl.sarxos.webcam", "0.3.10");
+    // FaceRecognizer no worky if missing it
+    meta.addDependency("org.apache.commons.commons-lang3", "3.3.2");
+    // for the mjpeg streamer support
+    meta.addDependency("net.sf.jipcam","0.9.1");
+    return meta;
+  }
+
+  public boolean isStreamerEnabled() {
+    return streamerEnabled;
+  }
+
+  public void setStreamerEnabled(boolean streamerEnabled) {
+    this.streamerEnabled = streamerEnabled;
+  }
+  
+  public boolean isCapturing(){
+    return capturing;
+  }
+  
   public static void main(String[] args) throws Exception {
 
     // TODO - Avoidance / Navigation Service
@@ -758,8 +800,22 @@ public class OpenCV extends AbstractVideoSource {
 
     // OpenCVFilterDilate dilate = new OpenCVFilterDilate();
     // opencv.addFilter(dilate);
-   OpenCVFilterTesseract tess = new OpenCVFilterTesseract("tess");
-   opencv.addFilter(tess);
+   // OpenCVFilterTesseract tess = new OpenCVFilterTesseract("tess");
+   
+   OpenCVFilterFaceDetect facedetect2 = new
+   OpenCVFilterFaceDetect("facedetect");
+   opencv.addFilter(facedetect2);
+   
+   OpenCVFilterOverlay filter = new OpenCVFilterOverlay("overlay");
+   // filter.addImage("overlay1.png", 0.3);
+  //  filter.addImage("red.png", 0.4);
+   filter.addImage("overlay_640x480.png", 1.0);
+   
+   // filter.addText("scanmode", 20, 40, 0.6, "SCAN MODE NONE");
+   // filter.addText("assessment", 20, 50, 0.6, "ASSESSMENT COMPLETED");
+   
+   opencv.addFilter(filter);
+   
     // OpenCVFilterFaceDetect2 facedetect2 = new
     // OpenCVFilterFaceDetect2("facedetect2");
     // opencv.addFilter(facedetect2);
@@ -846,46 +902,6 @@ public class OpenCV extends AbstractVideoSource {
     //
     // System.out.println(point.toString());
 
-  }
-
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(OpenCV.class.getCanonicalName());
-    meta.addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
-    meta.addCategory("video", "vision", "sensor");
-    // meta.addPeer("streamer", "VideoStreamer", "video streaming service
-    // for
-    // webgui.");
-
-    meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
-    // meta.addDependency("org.bytedeco.javacpp","1.1");
-    meta.addDependency("org.bytedeco.javacv", "1.3");
-    meta.addDependency("pl.sarxos.webcam", "0.3.10");
-    // FaceRecognizer no worky if missing it
-    meta.addDependency("org.apache.commons.commons-lang3", "3.3.2");
-    // for the mjpeg streamer support
-    meta.addDependency("net.sf.jipcam","0.9.1");
-    return meta;
-  }
-
-  public boolean isStreamerEnabled() {
-    return streamerEnabled;
-  }
-
-  public void setStreamerEnabled(boolean streamerEnabled) {
-    this.streamerEnabled = streamerEnabled;
-  }
-  
-  public boolean isCapturing(){
-    return capturing;
   }
 
 }

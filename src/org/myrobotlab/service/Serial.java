@@ -554,8 +554,9 @@ public class Serial extends Service
 
 		PortQueue uPort = new PortQueue(uartPort, right, left);
 		if (uart == null) {
-			uart = (Serial) Runtime.start(String.format("%s.UART", myPort), "Serial");
+			uart = (Serial) Runtime.start(String.format("%s.UART", myPort.replace("/", "_")), "Serial");
 		}
+		
 		uart.connectPort(uPort, uart);
 
 		log.info(String.format("connectToVirtualUart - creating uart %s <--> %s", myPort, uartPort));
