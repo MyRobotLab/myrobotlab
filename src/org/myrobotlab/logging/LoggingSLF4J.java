@@ -2,6 +2,7 @@ package org.myrobotlab.logging;
 
 import java.nio.charset.StandardCharsets;
 
+import org.apache.log4j.DailyRollingFileAppender;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
@@ -85,8 +86,8 @@ public class LoggingSLF4J extends Logging {
       console.setEncoder(ple);
       console.setContext(lc);
       logger.addAppender(console);
-
-      // file
+      
+      // grr DailyRollingFileAppender f = new DailyRollingFileAppender();
 
       FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
       fileAppender.setName(String.format("%s.%s", Appender.IS_AGENT, Appender.FILE));
