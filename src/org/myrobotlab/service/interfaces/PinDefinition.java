@@ -1,6 +1,7 @@
 package org.myrobotlab.service.interfaces;
 
 import java.io.Serializable;
+import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
 
 public class PinDefinition extends SensorDefinition implements Serializable {
 
@@ -41,6 +42,8 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 	boolean canWrite = true;
 
 	Integer value;
+	
+  GpioPinDigitalMultipurpose gpioPin;
 	
 	public PinDefinition(String serviceName, int address, String pinName){
 	  super(serviceName);    
@@ -105,6 +108,15 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 		isPwm = b;
 	}
 
+
+public void setGpioPin(GpioPinDigitalMultipurpose b) {
+      gpioPin = b;
+    }
+   
+  public GpioPinDigitalMultipurpose getGpioPin() {
+    return gpioPin;
+  }
+  
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
 		sb.append("pin def ");
