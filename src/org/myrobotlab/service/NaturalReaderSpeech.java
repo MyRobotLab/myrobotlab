@@ -150,8 +150,13 @@ private String language;
     
     // TODO: expose thge "r=33" as the selection for Ryans voice.
     // TOOD: also the speed setting is passed in as s= 
-    String url = "https://api.naturalreaders.com/v2/tts/?t=" + encoded + "&r="+voiceId+"&s=0";
-    log.info("URL FOR AUDIO:{}",url);
+   
+    //String url = "https://api.naturalreaders.com/v2/tts/?t=" + encoded + "&r="+voiceId+"&s=0";
+    // seem api V2 borked
+    // a very very VERY bad and quick fix ( find this key public after asked god )
+    String url = "http://api.naturalreaders.com/v4/tts/macspeak?apikey=b98x9xlfs54ws4k0wc0o8g4gwc0w8ss&src=pw&t=" + encoded + "&r="+voiceId+"&s=0";
+                  
+      log.info("URL FOR AUDIO:{}",url);
     return url;
   }
 
@@ -372,11 +377,12 @@ private String language;
      // speech.speakBlocking("does this work");
 //       speech.getMP3ForSpeech("hello world");
       
-      speech.speakBlocking("does this work");
+      speech.setVoice("Lauren");
+      speech.speakBlocking("does it works?");
       
       speech.setVoice("Lauren");
 
-      speech.speakBlocking("horray for worky!");
+      speech.speakBlocking("horray");
   
     //}
   }
