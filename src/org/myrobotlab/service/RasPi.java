@@ -152,9 +152,13 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     if ("arm".equals(platform.getArch()) || "armv7.hfp".equals(platform.getArch())) {
       log.info("Executing on Raspberry PI");
       // init gpio
+      /*
+       * Removed since it seems to make MRL stop
+       * 
       log.info("Initiating GPIO");
       gpio = GpioFactory.getInstance();
       log.info("GPIO Initiated");
+      */
       // TODO Check if the is correct. I don't think it is /Mats // GPIO pins
       /*
        * should be provisioned in the CreateDevice /* gpio01
