@@ -12,6 +12,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.SpeechRecognizer;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
@@ -23,7 +25,7 @@ import org.slf4j.Logger;
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */
-public class AndroidSpeechRecognition extends Service implements TextPublisher {
+public class AndroidSpeechRecognition extends Service implements SpeechRecognizer, TextPublisher {
 
   private class ClientHandler extends Thread {
 
@@ -194,6 +196,7 @@ public class AndroidSpeechRecognition extends Service implements TextPublisher {
     addListener("publishText", service.getName(), "onText");
   }
 
+  @Override
   public String recognized(String text) {
     return text;
   }
@@ -217,8 +220,14 @@ public class AndroidSpeechRecognition extends Service implements TextPublisher {
 
   // Server-end
 
-  public void startRecognition() {
+  @Override
+  public void startListening() {
     send("startrecognition");
+  }
+  
+  @Deprecated
+  public void startRecognition() {
+    startListening();
   }
 
   // Server-start
@@ -264,6 +273,76 @@ public class AndroidSpeechRecognition extends Service implements TextPublisher {
     meta.addDescription("service which opens a listening port on 5684 and re-publishes incoming Android recognized speech");
     meta.addCategory("speech recognition");
     return meta;
+  }
+
+  @Override
+  public void listeningEvent() {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  @Override
+  public void resumeListening() {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  @Override
+  public void stopListening() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void addMouth(SpeechSynthesis mouth) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onStartSpeaking(String utterance) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onEndSpeaking(String utterance) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void lockOutAllGrammarExcept(String lockPhrase) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void clearLock() {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+
+  @Override
+  public void pauseListening() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void setAutoListen(boolean autoListen) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public boolean isListening() {
+    // TODO Auto-generated method stub
+    return false;
   }
 
 }

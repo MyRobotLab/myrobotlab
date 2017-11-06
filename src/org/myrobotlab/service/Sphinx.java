@@ -681,4 +681,16 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
     meta.addDependency("edu.cmu.sphinx", "4-1.0beta6");
     return meta;
   }
+
+  @Override
+  public void setAutoListen(boolean autoListen) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public boolean isListening() {
+    // TODO Auto-generated method stub
+    return false;
+  }
 }

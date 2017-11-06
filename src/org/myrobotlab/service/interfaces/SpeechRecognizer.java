@@ -27,7 +27,10 @@ public interface SpeechRecognizer extends NameProvider {
 
   public void stopListening();
 
-  // This method should listen for
+  /**
+   *  This method should listen for 
+   *  Mouth events
+   */
   public void addMouth(SpeechSynthesis mouth);
 
   public void onStartSpeaking(String utterance);
@@ -45,5 +48,18 @@ public interface SpeechRecognizer extends NameProvider {
    * This will unlock lockOutAllGrammarExcept(lockPhrase)
    */
   public void clearLock();
+  
+  /**
+   * If setAutoListen is True, webkitspeech red microphone will auto rearm.
+   * microphone will shutdown too if mouth is activated. Careful if this is set
+   * to True : You cannot control anymore red microphone from webgui You need to
+   * control it from SwinGui, or usually from code
+   */
+  public void setAutoListen(boolean autoListen);
+  
+  /**
+   * track the state of listening process
+   */
+  public boolean isListening();
 
 }
