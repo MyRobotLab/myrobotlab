@@ -414,7 +414,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
    
     // called when $scope.recognition finishes.
     $scope.recognition.onend = function() {
-        mrl.sendTo($scope.service.name, "pauseListening");
+        mrl.sendTo($scope.service.name, "stopListening");
         $scope.recognizing = false;
         $scope.$apply();
         if (ignore_onend) {
@@ -515,11 +515,11 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
             $scope.$apply();
             break;
         case 'onOnStartSpeaking':
-            $log.info("Started speaking, pausing listening.");
+            $log.info("Started speaking, stop listening.");
             $scope.startRecognition();
             break;
         case 'onOnEndSpeaking':
-            $log.info("Stopped speaking, resume listening.");
+            $log.info("Stopped speaking, start listening.");
             if (!$scope.recognizing) {
                 $scope.startRecognition();
             }

@@ -48,7 +48,6 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
   HashMap<String, Command> commands = new HashMap<String, Command>();
 
-  // track the state of the webgui, is it listening? maybe?
   private boolean listening = false;
   private boolean speaking = false;
   public boolean continuous = true;
@@ -63,63 +62,9 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
   @Override
   public String publishText(String text) {
-    log.info("Publish Text : {}", text);
-    // TODO: is there a better place to do this? maybe recognized?
-    // TODO: remove this! it probably should be invoking the command on publish
-    // text.. only on recognized?!
-    // not sure.
-    String cleantext = text.toLowerCase().trim();
-    if (isStripAccents()) {
-      cleantext = StringUtil.removeAccents(cleantext);
-      log.info("Cleaned Text {}", cleantext);
-    }
-    /*
-     * 
-     * Double Speak FIX - I don't think a cmd should be sent from here because
-     * it's not 'recognized' - recognized sends commands this method should be
-     * subscribed too - GroG
-     * 
-     * if (commands.containsKey(cleantext)) { // If we have a command. send it
-     * when we recognize... Command cmd = commands.get(cleantext);
-     * send(cmd.name, cmd.method, cmd.params); }
-     */
-
-    return cleantext;
+    return recognized(text);
   }
-
-  @Override
-  public void listeningEvent() {
-    // TODO Auto-generated method stub
-    // temporary debug to show real mic status
-    log.info("micIsListening");
-    listening = true;
-    broadcastState();
-    return;
-  }
-
-  @Override
-  public void pauseListening() {
-
-    if (this.autoListen && !this.speaking) {
-      // bug if there is multiple tabs
-
-      if (System.currentTimeMillis() - lastAutoListenEvent > 50) {
-        startListening();
-      } else {
-        if (listening)
-        {
-          error("WebkitSpeech : TOO MANY EVENTS, autoListen disabled now, please close zombie tabs !");
-          setAutoListen(false);
-        }
-      }
-      lastAutoListenEvent = System.currentTimeMillis();
-    } else {
-      log.info("micNotListening");
-      listening = false;
-    }
-    broadcastState();
-  }
-
+  
   @Override
   public String recognized(String text) {
     log.info("Recognized : >{}<", text);
@@ -146,10 +91,20 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   }
 
   @Override
-  public void resumeListening() {
-    log.info("Resume listening event seen.");
-    this.listening = true;
+  public void listeningEvent() {
+    listening = true;
     broadcastState();
+    return;
+  }
+
+  @Override
+  public void pauseListening() {
+    stopListening();
+  }
+
+  @Override
+  public void resumeListening() {
+    startListening();
   }
 
   @Override
@@ -162,23 +117,35 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   @Override
   public void stopListening() {
     log.info("Stop listening event seen.");
-    this.listening = false;
+    if (this.autoListen && !this.speaking) {
+      // bug if there is multiple chrome tabs, we disbale autolisten
+      if (System.currentTimeMillis() - lastAutoListenEvent > 50) {
+        startListening();
+      } else {
+        if (listening)
+        {
+          error("WebkitSpeech : TOO MANY EVENTS, autoListen disabled now, please close zombie tabs !");
+          setAutoListen(false);
+        }
+      }
+      lastAutoListenEvent = System.currentTimeMillis();
+    } else {
+      log.info("micNotListening");
+      listening = false;
+    }
     broadcastState();
   }
-
+  
+  /**
+   * Here we want to set the language string and broadcast the update to the
+   * web gui so that it knows to update the language on webkit speech
+   */
   public void setLanguage(String language) {
-    // Here we want to set the language string and broadcast the update to the
-    // web gui so that it knows to update the language on webkit speech
     this.language = language;
     broadcastState();
   }
 
-  /**
-   * If setAutoListen is True, webkitspeech red microphone will auto rearm.
-   * microphone will shutdown too if mouth is activated. Careful if this is set
-   * to True : You cannot control anymore red microphone from webgui You need to
-   * control it from SwinGui, or usually from code
-   */
+  @Override
   public void setAutoListen(boolean autoListen) {
     this.autoListen = autoListen;
     broadcastState();
@@ -189,8 +156,8 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   }
 
   /**
-   * If setContinuous is False, this speedup recognition processing If
-   * setContinuous is True, you have some time to speak again, in case of error
+   * If setContinuous is False, this speedup recognition processing
+   * If setContinuous is True, you have some time to speak again, in case of error
    */
   public void setContinuous(boolean continuous) {
     this.continuous = continuous;
@@ -264,7 +231,6 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     ServiceType meta = new ServiceType(WebkitSpeechRecognition.class.getCanonicalName());
     meta.addDescription("Speech recognition using Google Chrome webkit");
     meta.addCategory("speech recognition");
-    // meta.addPeer("tracker", "Tracking", "test tracking");
     return meta;
   }
 
@@ -309,6 +275,10 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     return stripAccents;
   }
   
+  /**
+   * track the state of listening process
+   */
+  @Override
   public boolean isListening() {
     return this.listening;
   }
