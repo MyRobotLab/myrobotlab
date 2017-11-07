@@ -650,6 +650,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     meta.addDescription("controls 16 pwm pins for 16 servos/LED or 8 motors");
     meta.addCategory("shield", "servo", "pwm");
     meta.setSponsor("Mats");
+    meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
     /*
      * meta.addPeer("arduino", "Arduino", "our Arduino"); meta.addPeer("raspi",
      * "RasPi", "our RasPi");
