@@ -469,7 +469,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
    * some delay when it initially loads.
    */
   @Override
-  public void listeningEvent() {
+  public void listeningEvent(Boolean event) {
     return;
   }
 

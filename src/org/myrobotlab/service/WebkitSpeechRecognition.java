@@ -91,8 +91,8 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   }
 
   @Override
-  public void listeningEvent() {
-    listening = true;
+  public void listeningEvent(Boolean event) {
+    listening = event;
     broadcastState();
     return;
   }

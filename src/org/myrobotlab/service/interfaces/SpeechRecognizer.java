@@ -5,10 +5,9 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 public interface SpeechRecognizer extends NameProvider {
 
   /**
-   * Event is sent when the listening Service is actually listening. There is
-   * some delay when it initially loads.
+   * Event is sent when the listening Service is actually listening or not.
    */
-  public void listeningEvent();
+  public void listeningEvent(Boolean event);
 
   /**
    * method to suppress recognition listening events This is important when a
