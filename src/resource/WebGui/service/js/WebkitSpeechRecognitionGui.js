@@ -374,7 +374,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         $scope.status = 'Speak now.';
         $scope.listenbuttonimg = 'service/img/mic-animate.gif';
         $scope.$apply();
-        mrl.sendTo($scope.service.name, "listeningEvent");
+        mrl.sendTo($scope.service.name, "listeningEvent", "true");
     }
     };
     
