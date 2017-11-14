@@ -44,13 +44,15 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
       this.params = params;
     }
   }
-  
+
   HashMap<String, Command> commands = new HashMap<String, Command>();
-  
+
   private ServerSocket serverSock;
   // heartBeat is wip
   private transient Timer heartBeat;
+  private transient boolean heartBeatFirstMessage = true;
   // is socked bind with success?
+
   public boolean runningserver;
   // is a client connected?
   boolean clientIsConnect = false;
@@ -174,7 +176,7 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
   transient private ClientHandler client;
 
   // TODO refactor version control
-  private final static String VERSION = "2017.11.12";
+  private final static String VERSION = "1.0b";
 
   public static void main(String[] args) throws InterruptedException {
 
@@ -202,47 +204,21 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
     if (mes.startsWith("version")) {
       String[] split = mes.split("=");
 
-      boolean versionneuer = false;
+      boolean versionOk = false;
 
-      String aktversion2 = VERSION.replace(".", "~");
-      String[] aktversionsplit = aktversion2.split("~");
-      int[] aktversionsplitint = new int[aktversionsplit.length];
-      for (int i = 0; i < aktversionsplit.length; i++) {
-        aktversionsplitint[i] = Integer.parseInt(aktversionsplit[i]);
+      // check client version
+      if (VERSION.equalsIgnoreCase(split[1])) {
+        versionOk = true;
       }
 
-      String runversion2 = split[1].replace(".", "~");
-      String[] runversionsplit = runversion2.split("~");
-      int[] runversionsplitint = new int[runversionsplit.length];
-      for (int i = 0; i < runversionsplit.length; i++) {
-        runversionsplitint[i] = Integer.parseInt(runversionsplit[i]);
-      }
-
-      // refactor
-      for (int i = 0; i < 3; i++) {
-        if (aktversionsplitint[i] < runversionsplitint[i]) {
-          // eigener Versions-Teil ist NEUER wie der aktuelleste
-          // Versions-Teil
-          break;
-        } else if (aktversionsplitint[i] > runversionsplitint[i]) {
-          // eigener Versions-Teil ist AELTER wie der aktuelleste
-          // Versions-Teil
-          versionneuer = true;
-          break;
-        } else if (aktversionsplitint[i] > runversionsplitint[i]) {
-          // eigener Versions-Teil ist GLEICH wie der aktuelleste
-          // Versions-Teil
-        }
-      }
-
-      if (versionneuer) {
+      if (!versionOk) {
         sendToClient("serverversion=" + VERSION);
-        log.info("Client has an old version");
+        warn("Client version %s is different from server version  %s", split[1], VERSION);
         client.finish();
         clientIsConnect = false;
       } else {
         sendToClient("accepted");
-        log.info("Client accepted");
+        log.info("Client accepted !");
       }
     } else if (mes.startsWith("recognized")) {
       String[] split = mes.split("=");
@@ -280,14 +256,13 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
   }
 
   private void sendToClient(String mes) {
-    if (clientSocket != null && clientSocket.isConnected())
-    {
-    try {
-      client.getOut().writeObject(mes);
-    } catch (IOException ex) {
-      log.error("send error");
-      Logging.logError(ex);
-    }
+    if (clientSocket != null && clientSocket.isConnected()) {
+      try {
+        client.getOut().writeObject(mes);
+      } catch (IOException ex) {
+        log.error("send error");
+        Logging.logError(ex);
+      }
     }
   }
 
@@ -332,6 +307,7 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
       heartBeat.cancel();
       heartBeat = null;
     }
+    heartBeatFirstMessage = true;
 
     // waiting real heartBeat
     heartBeat = new Timer();
@@ -341,6 +317,10 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
         if (clientSocket != null && clientSocket.isConnected()) {
           try {
             broadcastState();
+            if (heartBeatFirstMessage) {
+              heartBeatFirstMessage = false;
+              setAutoListen(autoListen);
+            }
             client.getOut().writeObject("heartBeat");
           } catch (IOException e) {
             log.info("timer error");
@@ -370,16 +350,21 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
       clientIsConnect = false;
     }
 
-    if (runningserver) {
-      runningserver = false;
-      try {
-        serverSock.close();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      serverSock = null;
+    runningserver = false;
+    try {
+      serverSock.close();
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      // e.printStackTrace();
     }
+    serverSock = null;
+    try {
+      Thread.sleep(100);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
     // log.info(serverSock.isBound()+"isBound");
     broadcastState();
   }
@@ -476,7 +461,7 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
     }
     broadcastState();
   }
-  
+
   public void setContinuous(boolean b) {
     // TODO Auto-generated method stub
   }
@@ -498,5 +483,5 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
     }
     commands.put(actionPhrase, new Command(name, method, params));
   }
-  
+
 }
