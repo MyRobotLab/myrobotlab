@@ -26,8 +26,9 @@ import org.slf4j.Logger;
 /**
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
- * @author Moz4r Client temporary build :
- *         https://github.com/moz4r/SpeechRecognitionMRL/blob/master/AndroidSpeechRecognition.apk?raw=true
+ * @author Moz4r 
+ *         Client temporary build :
+ *         https://github.com/moz4r/SpeechRecognitionMRL/blob/master/app/release/app-release.apk?raw=true
  *         Client temporary sources :
  *         https://github.com/moz4r/SpeechRecognitionMRL
  */
@@ -118,11 +119,15 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
           check = false;
           // clients will cause some unexpected events, sometime
           log.info("EOFException kill connection");
-          startServer();
+          if (runningserver) {
+            startServer();
+          }
         } catch (ClassNotFoundException e) {
           check = false;
           log.info("ClassNotFoundException kill connection");
-          startServer();
+          if (runningserver) {
+            startServer();
+          }
         } catch (IOException e) {
           check = false;
           log.info("IOException kill connection");
@@ -174,6 +179,8 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
 
   public final static Logger log = LoggerFactory.getLogger(AndroidSpeechRecognition.class);
   transient private ClientHandler client;
+
+  private boolean speaking;
 
   // TODO refactor version control
   private final static String VERSION = "1.0b";
@@ -359,7 +366,7 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
     }
     serverSock = null;
     try {
-      Thread.sleep(100);
+      Thread.sleep(1000);
     } catch (InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -406,8 +413,7 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
 
   @Override
   public void resumeListening() {
-    // TODO Auto-generated method stub
-
+    sendToClient("resumeListening");
   }
 
   @Override
@@ -417,20 +423,25 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
 
   @Override
   public void addMouth(SpeechSynthesis mouth) {
-    // TODO Auto-generated method stub
-
+    mouth.addEar(this);
+    subscribe(mouth.getName(), "publishStartSpeaking");
+    subscribe(mouth.getName(), "publishEndSpeaking");
   }
 
   @Override
   public void onStartSpeaking(String utterance) {
-    // TODO Auto-generated method stub
-
+    if (getAutoListen())
+    {
+    pauseListening();
+    }
   }
 
   @Override
   public void onEndSpeaking(String utterance) {
-    // TODO Auto-generated method stub
-
+    if (getAutoListen())
+    {
+      resumeListening();
+    }
   }
 
   @Override
@@ -447,8 +458,7 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
 
   @Override
   public void pauseListening() {
-    // TODO Auto-generated method stub
-
+    sendToClient("pauseListening");
   }
 
   @Override
