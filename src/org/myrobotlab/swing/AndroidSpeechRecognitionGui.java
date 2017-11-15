@@ -105,9 +105,9 @@ public class AndroidSpeechRecognitionGui extends ServiceGui implements ActionLis
 
         if (o == micro) {
           if (listeningStatus) {
-            send("onStartSpeaking", "");
+            send("pauseListening");
           } else {
-            send("startListening");
+            send("resumeListening");
           }
           return;
         }
