@@ -732,6 +732,14 @@ public class InMoov extends Service {
       log.error("moveTorso - I have a null torso");
     }
   }
+  
+  public void moveTorsoBlocking(double topStom, double midStom, double lowStom) {
+    if (torso != null) {
+      torso.moveToBlocking(topStom, midStom, lowStom);
+    } else {
+      log.error("moveTorsoBlocking - I have a null torso");
+    }
+  }
 
   public void moveEyelids(double eyelidleft, double eyelidright) {
     if (eyelids != null) {
