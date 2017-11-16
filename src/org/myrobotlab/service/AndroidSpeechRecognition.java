@@ -48,7 +48,7 @@ public class AndroidSpeechRecognition extends Service implements SpeechRecognize
 
   HashMap<String, Command> commands = new HashMap<String, Command>();
 
-  private ServerSocket serverSock;
+  private static ServerSocket serverSock;
   // heartBeat is wip
   private transient Timer heartBeat;
   private transient boolean heartBeatFirstMessage = true;
