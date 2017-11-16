@@ -2393,6 +2393,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
   public static Double getBatteryLevel() {
     Platform platform = Platform.getLocalInstance();
+    Double r = 100.0;
     try {
       if (platform.isWindows()) {
         // String ret = Runtime.execute("cmd.exe", "/C", "WMIC.exe", "PATH",
@@ -2403,7 +2404,14 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
           pos0 = pos0 + 1;
           int pos1 = ret.indexOf("\n", pos0);
           String dble = ret.substring(pos0, pos1).trim();
-          Double r = Double.parseDouble(dble);
+          try{
+            r = Double.parseDouble(dble);
+          }
+         catch (Exception e) {
+           log.error("no Battery detected by system");
+        }
+        
+          
           return r;
         }
 
@@ -2414,7 +2422,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
           pos0 = pos0 + 10;
           int pos1 = ret.indexOf("%", pos0);
           String dble = ret.substring(pos0, pos1).trim();
-          Double r = Double.parseDouble(dble);
+          try{
+            r = Double.parseDouble(dble);
+          }
+         catch (Exception e) {
+           log.error("no Battery detected by system");
+        }
           return r;
         }
         log.info(ret);
@@ -2425,7 +2438,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
           pos0 = pos0 + 10;
           int pos1 = ret.indexOf("%", pos0);
           String dble = ret.substring(pos0, pos1).trim();
-          Double r = Double.parseDouble(dble);
+          try{
+            r = Double.parseDouble(dble);
+          }
+         catch (Exception e) {
+           log.error("no Battery detected by system");
+        }
           return r;
         }
         log.info(ret);
@@ -2434,7 +2452,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     } catch (Exception e) {
       log.info("execToString threw", e);
     }
-    return null;
+    return r;
   }
 
   // TODO: a better way to code these variants?
