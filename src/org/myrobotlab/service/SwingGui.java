@@ -335,7 +335,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         }
         // newGui.getDisplay().setBackground(Color.CYAN);
 
-        tabs.addTab(name, newGui.getDisplay());
+        tabs.addTab(name, newGui.getDisplay(),Runtime.getService(name).getDescription());
         tabs.getTabs().setBackgroundAt(tabs.size() - 1, getColorHash(sw.getClass().getSimpleName()));
         tabs.get(name).transitDockedColor = tabs.getTabs().getBackgroundAt(tabs.size() - 1);
 //        pack();  FIXED THE EVIL BLACK FROZEN GUI ISSUE !!!!

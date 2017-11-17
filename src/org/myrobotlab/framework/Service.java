@@ -2123,9 +2123,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return null;
   }
 
-  // FIXME - meta data needs to be re-infused into instance
   public String getDescription() {
-    return "FIXME - meta data needs to be re-infused into instance";
+    String description = getMetaData(getClass().getSimpleName()).getDescription();
+    //return getMetaData("Arduino").getDescription();
+    return description;
   }
 
   /**
