@@ -1569,8 +1569,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // threads - releaseService will need to be overwritten too
     stopService();
     
-    // detach all other services currently attached
-    detach();
+    // TODO ? detach all other services currently attached
+    // detach();
+    // @grog is it ok for now ?
+    detach(getName());
 
     // recently added
     releasePeers();

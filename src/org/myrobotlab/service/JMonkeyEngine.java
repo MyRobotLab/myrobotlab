@@ -55,7 +55,7 @@ public class JMonkeyEngine extends Service implements Simulator {
       settings.setResolution(640,480);
       //settings.setEmulateMouse(false);
       // settings.setUseJoysticks(false);
-      settings.setUseInput(false);
+      settings.setUseInput(true);
       app.setSettings(settings);
       app.setShowSettings(false);
       app.start();
@@ -68,6 +68,8 @@ public class JMonkeyEngine extends Service implements Simulator {
     return null;
   }
   
+
+  
   @Override
   public void startService(){
     super.startService();
@@ -76,18 +78,22 @@ public class JMonkeyEngine extends Service implements Simulator {
 
   @Override
   public void stopService(){
-    super.stopService();
+
     for(String name : apps.keySet()){
       try {
       Jme3App jme3 = apps.get(name);
       SimpleApplication app = jme3.getApp();
+      app.getRootNode().detachAllChildren();
+      app.getGuiNode().detachAllChildren();
       app.stop();
-      app.destroy();
+      //app.destroy();
       } catch(Exception e){
         log.error("releasing jme3 app threw", e);
       }
     }
+    super.stopService();
   }
+  
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -122,15 +128,18 @@ public class JMonkeyEngine extends Service implements Simulator {
       // create the virtual hardware
       virtual.connect("COM5");
       
-      JMonkeyEngine jmonkey = (JMonkeyEngine)Runtime.start("jmonkey", "JMonkeyEngine");
-      virtual.attachSimulator(jmonkey);
-      
       // connect the service to the port
       arduino.connect("COM5");
       //jme3.create(servo);
       arduino.attach(servo, 7);
       
+      
+      JMonkeyEngine jmonkey = (JMonkeyEngine)Runtime.start("jmonkey", "JMonkeyEngine");
+      virtual.attachSimulator(jmonkey);
       servo.moveTo(30);
+      
+      Thread.sleep(2000);
+
       
       jmonkey.releaseService();
       
