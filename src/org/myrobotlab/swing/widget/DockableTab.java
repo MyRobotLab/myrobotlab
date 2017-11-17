@@ -142,7 +142,9 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 			}
 		} else if ("hide".equals(cmd)) {
 			hideTab();
-		} else if ("collapse".equals(cmd)) {
+	  } else if ("release".equals(cmd)) {
+      release();
+    } else if ("collapse".equals(cmd)) {
 			tabPane.collapse();
 		} else if ("explode".equals(cmd)) {
 			tabPane.explode();
@@ -361,6 +363,11 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 			}
 		});
 	}
+	
+	 private void release() {
+	   log.info("release invoked from SwingGui");
+	   Runtime.releaseService(title.getText());
+	 }
 
 	public void remove() {
 		// unsubscribeGui(); -> Runtime is responsible for unsubcribing ...
