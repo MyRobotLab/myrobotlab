@@ -328,6 +328,8 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
     meta.addDescription("Speech synthesis based on Microsoft speech with Jampal.");
     meta.addCategory("speech");
     meta.setSponsor("Dom14");
+    //TODO : missing interface + dependencies, merge with LocalSpeech ?
+    meta.setAvailable(false);
     return meta;
   }
 

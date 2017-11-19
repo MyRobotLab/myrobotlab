@@ -489,16 +489,16 @@ public class Security extends Service implements AuthorizationProvider {
     final String PWD_FILE = "howto.properties";
 
     // initializeStore("im a rockin rocker");
-    loadStore();
-    log.info(Security.getSecret("xmpp.user")); // FIXME - report stor is has not be loaded !!!
-    log.info(Security.getSecret("amazon.polly.user.key"));
-    log.info(Security.getSecret("amazon.polly.user.secret"));
     Security.addSecret("amazon.polly.user.key", "FIE3823873349852");
     Security.addSecret("amazon.polly.user.secret", "323Ujfkds838234jfkDKJkdlskjlfkj");
     Security.addSecret("xmpp.user", "supertick@gmail.com");
     Security.addSecret("xmpp.pwd", "mrlRocks!");
     saveStore();
     Security.getSecret("amazon.polly.user.key");
+    loadStore();
+    log.info(Security.getSecret("xmpp.user")); // FIXME - report stor is has not be loaded !!!
+    log.info(Security.getSecret("amazon.polly.user.key"));
+    log.info(Security.getSecret("amazon.polly.user.secret"));
 
     /*
     String clearPwd = "mrlRocks!";

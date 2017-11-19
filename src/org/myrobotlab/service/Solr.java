@@ -319,6 +319,8 @@ public class Solr extends Service implements DocumentListener {
     meta.addDescription("Solr Service - Open source search engine");
     meta.addCategory("data", "search");
     meta.addDependency("org.apache.solr", "4.10.2");
+    // Dependencies issue
+    meta.setAvailable(false);
     return meta;
   }
 

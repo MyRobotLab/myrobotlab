@@ -375,7 +375,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
 
     ServiceType meta = new ServiceType(AdafruitMotorHat4Pi.class.getCanonicalName());
     meta.addDescription("Adafruit DC and Stepper Motor Hat for Raspberry PI");
-    meta.addCategory("shield", "servo & pwm");
+    meta.addCategory("shield", "servo", "pwm");
     meta.setSponsor("Mats");
     meta.addPeer("raspi", "RasPi", "Raspberry PI");
     meta.setAvailable(true);

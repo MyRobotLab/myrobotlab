@@ -553,6 +553,8 @@ private Object language;
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    //end of support
+    meta.setAvailable(false);
     return meta;
   }
 

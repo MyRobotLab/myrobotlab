@@ -147,7 +147,8 @@ public class PythonProxy extends Service {
 
     ServiceType meta = new ServiceType(PythonProxy.class.getCanonicalName());
     meta.addDescription("Provides an API hook point to services written in native Python.");
-    //meta.setAvailable(true); // false if you do not want it viewable in a gui
+    // Is a python service script can be written to test ? and some documentation ?
+    meta.setAvailable(false); // false if you do not want it viewable in a gui
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
     meta.addCategory("bridge");
