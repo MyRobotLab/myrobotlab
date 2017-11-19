@@ -131,7 +131,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
         while (isRunning) {
 
           info("listening: %b", isListening);
-          invoke("listeningEvent");
+          invoke("listeningEvent",true);
           Result result = recognizer.recognize();
 
           if (!isListening) {
@@ -676,7 +676,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
     ServiceType meta = new ServiceType(Sphinx.class.getCanonicalName());
     meta.addDescription("open source pure Java speech recognition");
-    meta.addCategory("speech recognition", "control");
+    meta.addCategory("speech recognition");
     meta.addDependency("javax.speech.recognition", "1.0");
     meta.addDependency("edu.cmu.sphinx", "4-1.0beta6");
     return meta;

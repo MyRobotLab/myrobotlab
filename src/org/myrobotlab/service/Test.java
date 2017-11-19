@@ -55,6 +55,11 @@ import org.slf4j.Logger;
  *
  */
 public class Test extends Service implements StatusListener {
+  
+  /**
+   * filter services by availabilities 
+   */
+  public boolean showUnavailableServices=false;
 
   public static class Progress implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -66,7 +71,7 @@ public class Test extends Service implements StatusListener {
     public int successes;
     public int successPercentage;
     public int totalTests;
-    
+
     List<String> servicesWithErrors = new ArrayList<String>();
 
     // stats & accumulators python
@@ -380,7 +385,6 @@ public class Test extends Service implements StatusListener {
     String[] x = serviceData.getServiceTypeNames();
     List<String> serviceNames = new ArrayList<String>();
     for (int i = 0; i < x.length; ++i) {
-      serviceNames.add(x[i]);
     }
     return serviceNames;
   }
@@ -419,7 +423,7 @@ public class Test extends Service implements StatusListener {
   }
 
   public List<ServiceType> getServices() {
-    return serviceData.getServiceTypes();
+    return serviceData.getServiceTypes(showUnavailableServices);
   }
 
   public List<String> getServicesWithOutScripts(String branch) {
@@ -495,7 +499,6 @@ public class Test extends Service implements StatusListener {
     ArrayList<ServiceType> types = serviceData.getServiceTypes();
     for (int i = 0; i < types.size(); ++i) {
       ServiceType type = types.get(i);
-
       log.info("adding {}", type.getSimpleName());
       matrix.servicesToTest.add(type.getSimpleName());
     }

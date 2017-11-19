@@ -98,7 +98,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	}
 
 	public boolean isAvailable() {
-		return (available != null && available == true);
+		return available;
 	}
 
 	public int size() {

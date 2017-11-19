@@ -165,6 +165,8 @@ public class ServiceData implements Serializable {
 
         for (String cat : serviceType.categories) {
           Category category = null;
+          if (serviceType.isAvailable())
+          {
           if (sd.categoryTypes.containsKey(cat)) {
             category = sd.categoryTypes.get(cat);
           } else {
@@ -173,6 +175,7 @@ public class ServiceData implements Serializable {
           }
           category.serviceTypes.add(serviceType.getName());
           sd.categoryTypes.put(cat, category);
+          }
         }
 
       } catch (Exception e) {
@@ -266,9 +269,20 @@ public class ServiceData implements Serializable {
   }
 
   public ArrayList<ServiceType> getServiceTypes() {
+    return getServiceTypes(true);
+  }
+  
+  public ArrayList<ServiceType> getServiceTypes(boolean showUnavailable) {
     ArrayList<ServiceType> ret = new ArrayList<ServiceType>();
     for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
-      ret.add(o.getValue());
+      if (!o.getValue().isAvailable() && !showUnavailable)
+      {
+        log.info("getServiceTypes ignore : "+o.getValue().getSimpleName());
+      }
+      else
+      {
+        ret.add(o.getValue());
+      }
     }
     return ret;
   }
