@@ -28,7 +28,7 @@ public class _TemplateService extends Service {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(_TemplateService.class.getCanonicalName());
+    ServiceType meta = new ServiceType(_TemplateService.class);
     meta.addDescription("used as a general template");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary

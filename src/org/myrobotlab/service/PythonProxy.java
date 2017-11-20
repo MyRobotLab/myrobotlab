@@ -12,6 +12,11 @@ import org.slf4j.Logger;
 /**
 *This class exists as a proxy to control native MRL services connected through the web API. 
 *Methods of that native service are called through this class's {@link #exec(String, Object[])} method.
+*
+* FIXME - although this is a great idea & implementation, something more general needs to exist in order
+* to interoperate between processes - it will be coming as a network overlay & addressing system in the
+* next release
+*
 **/
 public class PythonProxy extends Service {
 

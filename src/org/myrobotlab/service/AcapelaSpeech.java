@@ -542,7 +542,6 @@ private Object language;
    */
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(AcapelaSpeech.class.getCanonicalName());
-    meta.setAvailable(false);
     
     meta.addDescription("is a proprietary cloud service, currently returns speech and background music");
     meta.addCategory("speech");
@@ -553,7 +552,8 @@ private Object language;
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
-    //end of support
+
+    //End of support
     meta.setAvailable(false);
     return meta;
   }
