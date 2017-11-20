@@ -468,6 +468,8 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     ServiceType meta = new ServiceType(EddieControlBoard.class.getCanonicalName());
     meta.addDescription("microcontroller designed for robotics");
     meta.addCategory("microcontroller");
+    // John Harland no longer uses this hardware
+    meta.setAvailable(false);
 
     // put peer definitions in
     meta.addPeer("serial", "Serial", "serial");

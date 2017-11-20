@@ -261,6 +261,7 @@ public class Picaxe extends Service // implements SerialPortEventListener,
     meta.addDescription("Picaxe microcontroller");
     meta.addCategory("microcontroller");
     meta.addPeer("serial", "Serial", "serial service");
+    meta.setAvailable(false);
     return meta;
   }
 
