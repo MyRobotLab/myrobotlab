@@ -149,19 +149,28 @@ public class OculusDiy extends Service implements OrientationListener {
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-
 		try {
-
-			// OculusDIY oculus = (OculusDIY) Runtime.start("oculus",
-			// "OculusDIY");
+			OculusDiy oculus = (OculusDiy) Runtime.start("oculus","OculusDiy");
 			Runtime.start("python", "Python");
 			Runtime.start("gui", "SwingGui");
-			// oculus.connect("COM15");
+			VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+			virtual.connect("COM15");
+			oculus.connect("COM15");
+			oculus.mpu6050.attach(oculus.arduino, "0", "0x68");
 
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 	}
+
+  @Override
+  public void releaseService() {
+    mpu6050.releaseService(); 
+    arduino.releaseService();
+    arduino.serial.releaseService();
+    super.releaseService();
+  } 
+
 
 	/**
 	 * This static method returns all the details of the class without it having
@@ -172,11 +181,11 @@ public class OculusDiy extends Service implements OrientationListener {
 	 * 
 	 */
 	static public ServiceType getMetaData() {
-
 		ServiceType meta = new ServiceType(OculusDiy.class.getCanonicalName());
 		meta.addDescription("Service to receive and compute data from a DIY Oculus");
 		meta.addCategory("video", "control", "sensor");
 		meta.addPeer("arduino", "Arduino", "Arduino for DIYOculus and Myo");
+		meta.addPeer("mpu6050", "Mpu6050", "mpu6050");
 		return meta;
 	}
 
