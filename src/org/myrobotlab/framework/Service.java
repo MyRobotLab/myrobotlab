@@ -1572,7 +1572,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // TODO ? detach all other services currently attached
     // detach();
     // @grog is it ok for now ?
-    detach(getName());
+    detach(Runtime.getService(getName()));
 
     // recently added
     releasePeers();
