@@ -28,8 +28,8 @@ package org.myrobotlab.swing;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.JButton;
+import javax.swing.SwingUtilities;
 
 import org.myrobotlab.service.AudioCapture;
 import org.myrobotlab.service.SwingGui;
@@ -93,8 +93,20 @@ public class AudioCaptureGui extends ServiceGui {
   
   }
   
-  public void onState(AudioCapture audiocapture){
-    
+  public void onState(final AudioCapture audiocapture){
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+
+        if (AudioCapture.stopCapture) {
+          captureBtn.setEnabled(true);
+          stopBtn.setEnabled(false);
+        } else {
+          captureBtn.setEnabled(false);
+          stopBtn.setEnabled(true);
+        }
+      }
+    });
   }
 
   @Override
