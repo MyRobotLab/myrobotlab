@@ -927,7 +927,8 @@ public class OledSsd1306 extends Service implements I2CControl {
 
   @Override
   public void detach(Attachable service) {
-
+    
+    if (service!=null)
     if (I2CController.class.isAssignableFrom(service.getClass())) {
       detachI2CController((I2CController) service);
       return;
@@ -943,6 +944,16 @@ public class OledSsd1306 extends Service implements I2CControl {
     controller.detachI2CControl(this);
     isAttached = false;
     broadcastState();
+  }
+  
+  
+  @Override
+  public void stopService() {
+
+    if (isAttached(controller))
+    {
+    controller.detachI2CControl(this);
+    }
   }
 
   // This section contains all the methods used to query / show all attached

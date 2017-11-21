@@ -391,8 +391,10 @@ public class Esp8266_01 extends Service implements I2CController {
     // The order of the detach is important because the higher level service may
     // want to execute something that
     // needs this service to still be availabe
-    if (i2cDevices.containsKey(control.getName())) {
-      i2cDevices.remove(control.getName());
+    String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
+    if (i2cDevices.containsKey(key)) {
+      log.info("detach : "+control.getName());
+      i2cDevices.remove(key);
       control.detachI2CController(this);
     }
   }
