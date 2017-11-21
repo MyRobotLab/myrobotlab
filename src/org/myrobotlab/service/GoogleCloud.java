@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -58,7 +59,8 @@ public class GoogleCloud extends Service {
   private static final String APPLICATION_NAME = "Google-VisionFaceDetectSample/1.0";
   transient Vision vision;
   int maxResults = 32;
-
+  boolean connected = false;
+  
   public GoogleCloud(String n) {
     super(n);
   }
@@ -136,8 +138,19 @@ public class GoogleCloud extends Service {
   }
   // [END get_vision_service]
 
-  public void connect(String credJsonFile) throws IOException, GeneralSecurityException {
+  public boolean connect(String credJsonFile) throws IOException, GeneralSecurityException {
+    File f = new File(credJsonFile);
+    if (f.exists())
+    {
     connect(getVisionService(credJsonFile));
+    connected=true;
+    }
+    else
+    {
+      connected=false;
+      error("getVisionService : File credJsonFile not exist");
+    }
+    return connected;
   }
 
   public void connect(Vision vision) {
@@ -176,7 +189,7 @@ public class GoogleCloud extends Service {
     if (response.getFaceAnnotations() == null) {
       throw new IOException(response.getError() != null ? response.getError().getMessage() : "Unknown error getting image annotations");
     }
-    return response.getFaceAnnotations();
+    return response.getFaceAnnotations();  
   }
   // [END detect_face]
 
