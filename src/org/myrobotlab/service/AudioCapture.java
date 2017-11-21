@@ -62,17 +62,17 @@ public class AudioCapture extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  boolean stopCapture = false;
+  public static boolean stopCapture = false;
 
   ByteArrayOutputStream byteArrayOutputStream;
 
   AudioFormat audioFormat;
 
-  TargetDataLine targetDataLine;
+  transient TargetDataLine targetDataLine;
 
-  AudioInputStream audioInputStream;
+  transient AudioInputStream audioInputStream;
 
-  SourceDataLine sourceDataLine;
+  transient SourceDataLine sourceDataLine;
 
   // Audio format fields
   float sampleRate = 16000.0F;
@@ -153,7 +153,7 @@ public class AudioCapture extends Service {
 
       AudioCapture audioIn = (AudioCapture) Runtime.start("audioIn", "AudioCapture");
       Runtime.start("gui", "SwingGui");
-
+      audioIn.setAudioFormat(16000, 16, 1, true, false);
       audioIn.captureAudio();
       Thread.sleep(3000);
       audioIn.stopAudioCapture();
@@ -216,7 +216,9 @@ public class AudioCapture extends Service {
       captureThread.start();
     } catch (Exception e) {
       Logging.logError(e);
-    } // end catch
+    } 
+    broadcastState();
+    // end catch
   }// end captureAudio method
 
   // This method creates and returns an
@@ -283,7 +285,9 @@ public class AudioCapture extends Service {
   }
 
   public void stopAudioCapture() {
+    targetDataLine.stop();
     stopCapture = true;
+    broadcastState();
   }
 
   /**
