@@ -17,6 +17,8 @@ import org.slf4j.Logger;
  */
 public class MouthControl extends Service {
 
+  // TODO: remove Peer & Make it attachable between generic servoControl & SpeechSynthesis
+  
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MouthControl.class.getCanonicalName());
   public int mouthClosedPos = 20;
@@ -27,6 +29,8 @@ public class MouthControl extends Service {
   transient Servo jaw;
   transient Arduino arduino;
   transient SpeechSynthesis mouth;
+  
+  @Deprecated
   public boolean autoAttach = true;
 
   public MouthControl(String n) {
@@ -34,9 +38,7 @@ public class MouthControl extends Service {
     jaw = (Servo) createPeer("jaw");
     arduino = (Arduino) createPeer("arduino");
     mouth = (SpeechSynthesis) createPeer("mouth");
-    
-    jaw.enableAutoEnable(autoAttach);
-    jaw.enableAutoDisable(autoAttach);
+
     // TODO: mouth should probably implement speech synthesis.
     // in a way of speaking, one day, people may be able to read the lips
     // of the inmoov.. so you're synthesising speech in a mechanical way.
@@ -76,8 +78,6 @@ public class MouthControl extends Service {
 
   public void setJaw(Servo jaw) {
     this.jaw = jaw;
-    jaw.enableAutoEnable(autoAttach);
-    jaw.enableAutoDisable(autoAttach);
   }
 
   public SpeechSynthesis getMouth() {
@@ -107,8 +107,8 @@ public class MouthControl extends Service {
       if (jaw == null) {
         return;
       }
-      if (!jaw.isEnabled() && !autoAttach) {
-        log.info("{} not enabled", jaw.getName());
+      if (!jaw.isEnabled()) {
+        log.warn("{} not enabled", jaw.getName());
       }
       boolean ison = false;
       String testword;
@@ -219,17 +219,14 @@ public class MouthControl extends Service {
 
       Runtime.createAndStart("gui", "SwingGui");
 
-      MouthControl.autoAttach = true;
       MouthControl.onStartSpeaking("test on");
     } catch (Exception e) {
       Logging.logError(e);
     }
   }
 
+  @Deprecated
   public void enableAutoAttach(boolean enable) {
-    autoAttach = enable;
-    jaw.enableAutoEnable(enable);
-    jaw.enableAutoDisable(enable);
-
   }
+  
 }
