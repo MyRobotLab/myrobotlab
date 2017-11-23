@@ -155,8 +155,6 @@
 	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/t-digest-3.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/hppc-0.7.1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/jackson-core-2.8.1.jar"/>
-	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-wikibaseapi-0.7.0.jar"/>
-	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-datamodel-0.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/commons-codec-1.9.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/httpclient-4.5.2.jar"/>
@@ -165,9 +163,6 @@
 	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-annotations-2.5.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-core-2.5.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-databind-2.5.0.jar"/>
-	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-dumpfiles-0.7.0.jar"/>
-	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-storage-0.7.0.jar"/>
-	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-util-0.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jnativehook/2.0.3/jnativehook-2.0.3.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-builder-5.2.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-client-5.2.jar"/>
@@ -421,5 +416,10 @@
 	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/log4j-over-slf4j-1.7.25.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/xmlgraphics-commons-1.4.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/xmlgraphics-commons-1.5.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-datamodel-0.8.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-dumpfiles-0.8.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-storage-0.8.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-util-0.8.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-wikibaseapi-0.8.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

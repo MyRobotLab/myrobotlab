@@ -427,7 +427,7 @@ public class WikiDataFetcher extends Service {
     meta.addDescription("This service grab data from wikidata website");
     meta.addCategory("intelligence");
     meta.setSponsor("beetlejuice");
-    meta.addDependency("org.wikidata.wdtk", "0.7.0");
+    meta.addDependency("org.wikidata.wdtk", "0.8.0-SNAPSHOT");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
     meta.addDependency("org.apache.commons.commons-lang3", "3.3.2");
     meta.addDependency("com.fasterxml.jackson.core", "2.5.0");
