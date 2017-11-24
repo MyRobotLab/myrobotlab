@@ -417,7 +417,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
       LoggingFactory.init("INFO");
 
-      boolean virtual = false;
+      boolean virtual = true;
       //////////////////////////////////////////////////////////////////////////////////
       // Sabertooth.py
       // categories: motor
@@ -455,6 +455,9 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       sabertooth.attach(m2);
       m1.attach(joy.getAxis("y"));
       m2.attach(joy.getAxis("rz"));
+      
+      m1.setInverted(true);
+      m2.setInverted(true);
       // m2.attach(arduino.getPin("A4"));
 
       // FIXME - sabertooth.attach(motor1) & sabertooth.attach(motor2)
