@@ -416,10 +416,12 @@
 	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/log4j-over-slf4j-1.7.25.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/xmlgraphics-commons-1.4.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/xmlgraphics-commons-1.5.jar"/>
+	<classpathentry kind="lib" path="/repo/org.mockito/1.10.19/mockito-all-1.10.19.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-datamodel-0.8.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-dumpfiles-0.8.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-storage-0.8.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-util-0.8.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-wikibaseapi-0.8.0-SNAPSHOT.jar"/>
+
 	<classpathentry kind="output" path="bin"/>
 </classpath>

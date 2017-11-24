@@ -194,6 +194,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
   protected static AuthorizationProvider security = null;
 
   private Status lastError = null;
+  
+  /**
+   * variable for services to virtualize some of their dependencies
+   */
+  protected boolean isVirtual = false;
 
   /**
    * Recursively builds Peer type information - which is not instance specific.
@@ -2270,4 +2275,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
     log.info("Service.attach does not know how to attach {} to a {}", service.getClass().getSimpleName(), this.getClass().getSimpleName());
   }
   
+  public void setVirtual(boolean b) {
+    this.isVirtual = b;
+  }
+  
+  public boolean isVirtual(){
+    return isVirtual;
+  }
 }
