@@ -203,7 +203,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     publish(topic, qos, msg);
   }
 
-  public void publish(String topic, int qos, byte[] payload) throws Throwable {
+  public void publish(String topic, Integer qos, byte[] payload) throws Throwable {
     MqttMessage message = null;
 
     if (client == null || !client.isConnected()) {
