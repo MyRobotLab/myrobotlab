@@ -168,21 +168,8 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     controller.ultrasonicSensorStopRanging(this);
   }
 
-  @SuppressWarnings("unused")
   synchronized public Double range() {
     Double rawMs = ping();
-    //too many fake 0 or null, we give a 2 second chance...
-    int i=0;
-    while (rawMs == null || rawMs == 0.0 )
-    {
-      rawMs = ping();
-      sleep(500);
-      i++;
-      if (i>4)
-      {
-        break;
-      }
-    }
     if (rawMs == null) {
       return null;
     }
