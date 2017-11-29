@@ -183,6 +183,10 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 	@Override
 	public List<String> getVoices() {
 		List<String> list = new ArrayList<>(marytts.getAvailableVoices());
+		log.info("{} has {} voices", getName(), list.size());
+		for (int i = 0; i < list.size(); ++i){
+		  log.info(list.get(i));
+		}
 		return list;
 	}
 
@@ -340,20 +344,23 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 			// String strEffectsAndParams = "Stadium(amount=40) +
 			// Robot(amount=87) +
 			// Whisper(amount=65)+FIRFilter(type=1,fc1=1540;)++";
-			mary.setAudioEffects(strEffectsAndParams);
+//			mary.setAudioEffects(strEffectsAndParams);
 
 			// mary.setVoice("dfki-spike en_GB male unitselection general");
-			// mary.speak("hello");
+      mary.setVoice("cmu-bdl-hsmm");
+      mary.setVoice("cmu-slt-hsmm");
+			mary.getVoices();
+			mary.speak("hello");
 			// mary.speak("world");
-			//mary.speakBlocking("Hello world");
-			// mary.speakBlocking("I am Mary TTS and I am open source");
-			// mary.speakBlocking("and I will evolve quicker than any closed
-			// source
-			// application if not in a short window of time");
-			// mary.speakBlocking("then in the long term evolution of
-			// software");
+			mary.speakBlocking("Hello world");
+			mary.speakBlocking("my name is worky");
+			mary.speakBlocking("I am Mary TTS and I am open source");
+			mary.speakBlocking("and I will evolve quicker than any closed source application if not in a short window of time");
+			mary.speakBlocking("then in the long term evolution of software");
 			// mary.speak("Hello world");
-			mary.installComponentsAcceptLicense("bits1");
+			
+			// WOW - that is a big install !
+			// mary.installComponentsAcceptLicense("bits1");
 		} catch (Exception e) {
 			Logging.logError(e);
 		}

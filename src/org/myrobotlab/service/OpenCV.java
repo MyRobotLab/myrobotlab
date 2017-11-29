@@ -904,4 +904,9 @@ public class OpenCV extends AbstractVideoSource {
 
   }
 
+  public void saveFrame(String string) {
+    OpenCVData data = getOpenCVData();
+    data.getInputBufferedImage();
+  }
+
 }

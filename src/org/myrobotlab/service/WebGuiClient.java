@@ -69,6 +69,8 @@ public class WebGuiClient extends Service {
     // gui
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
+    // FIXME - not quite ready for prime-time, need good network overlay which won't
+    // happen until post-manticore release
     meta.addCategory("general");
     return meta;
   }

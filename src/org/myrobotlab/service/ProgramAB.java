@@ -21,6 +21,7 @@ import org.alicebot.ab.Chat;
 import org.alicebot.ab.Predicates;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
@@ -125,8 +126,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     addListener("publishText", service.getName(), "onText");
   }
 
-  public void addTextPublisher(TextPublisher service) {
-    addListener("publishText", service.getName(), "onText");
+  public void addTextPublisher(TextPublisher service) {    
+    subscribe(service.getName(), "publishText");
   }
 
   private void cleanOutOfDateAimlIFFiles(String botName) {
@@ -243,9 +244,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       error(error);
       return new Response(username, error, null, new Date());
     }
-    
-    if (text.isEmpty())
-    {
+
+    if (text.isEmpty()) {
       return new Response(username, "", null, new Date());
     }
 
@@ -593,7 +593,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     startSession(path, username, currentBotName);
   }
 
-  /*
+  /**
    * Persist the predicates for all known sessions in the robot.
    * 
    */
@@ -603,7 +603,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // TODO: better parsing of this.
       String[] parts = session.split("-");
       String username = parts[0];
-      String botname = parts[1];
+      String botname = session.substring(username.length() + 1);
 
       String sessionPredicateFilename = createSessionPredicateFilename(username, botname);
       File sessionPredFile = new File(sessionPredicateFilename);
@@ -668,13 +668,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       warn("session %s already created", sessionKey);
       return;
     }
-    if (!getSessionNames().isEmpty())
-    {
+    if (!getSessionNames().isEmpty()) {
       wasCleanyShutdowned = "ok";
     }
     cleanOutOfDateAimlIFFiles(botName);
     wasCleanyShutdowned = "nok";
-  
+
     // TODO: manage the bots in a collective pool/hash map.
     if (bot == null) {
       bot = new Bot(botName, path);
@@ -718,26 +717,23 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public void setPath(String path) {
     this.path = path;
   }
-  
+
   /**
-   * setUsername will check if username correspond to current session
-   * If no, a new session is started
+   * setUsername will check if username correspond to current session If no, a
+   * new session is started
    * 
    * @param username
-   *          - The new username 
-   * @return boolean
-   *          - True if username changed
-   * @throws IOException 
+   *          - The new username
+   * @return boolean - True if username changed
+   * @throws IOException
    */
-  public boolean setUsername(String username)  {
-    if (username.isEmpty())
-    {
+  public boolean setUsername(String username) {
+    if (username.isEmpty()) {
       log.error("chatbot username is empty");
       return false;
     }
-    if (getSessionNames().isEmpty())
-    {
-      log.info(username+" first session started");
+    if (getSessionNames().isEmpty()) {
+      log.info(username + " first session started");
       startSession(username);
       return false;
     }
@@ -747,25 +743,23 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
-    if (username.equalsIgnoreCase(this.currentUserName))
-    {
-      log.info(username+" already connected");
+    if (username.equalsIgnoreCase(this.currentUserName)) {
+      log.info(username + " already connected");
       return false;
     }
-    if (!username.equalsIgnoreCase(this.currentUserName))
-    {
-      startSession(this.path,username,this.currentBotName);
-      setPredicate(username,"name",username);
-      setPredicate("default","lastUsername",username);
-      // robot name is stored inside default.predicates, not inside system.prop 
-      setPredicate(username,"botname",getPredicate("default","botname"));
+    if (!username.equalsIgnoreCase(this.currentUserName)) {
+      startSession(this.path, username, this.currentBotName);
+      setPredicate(username, "name", username);
+      setPredicate("default", "lastUsername", username);
+      // robot name is stored inside default.predicates, not inside system.prop
+      setPredicate(username, "botname", getPredicate("default", "botname"));
       try {
         savePredicates();
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
-      log.info(username+" session started");
+      log.info(username + " session started");
       return true;
     }
     return false;
@@ -806,6 +800,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       log.error("PrintWriter error");
     }
   }
+  
+  public void attach(Attachable attachable){
+    if (attachable instanceof TextPublisher){
+      addTextPublisher((TextPublisher)attachable);
+    } else {
+      log.error("don't know how to attach a {}", attachable.getName());
+    }
+  }
 
   @Override
   public void stopService() {
@@ -840,22 +842,48 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public static void main(String s[]) throws IOException {
-    LoggingFactory.init("INFO");
+    try {
+      LoggingFactory.init("INFO");
 
-    // Runtime.createAndStart("gui", "SwingGui");
-    Runtime.start("webgui", "WebGui");
+      Runtime.start("gui", "SwingGui");
+//      Runtime.start("webgui", "WebGui");
 
-    ProgramAB ai = (ProgramAB) Runtime.createAndStart("ai", "ProgramAB");
-    // ai.setPath(System.getProperty("user.dir")+File.separator+"ProgramAB"+File.separator);
-    ai.startSession("default", "alice2");
+      ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+      // brain.startSession("default", "alice2");
+      WebkitSpeechRecognition ear = (WebkitSpeechRecognition)Runtime.start("ear","WebkitSpeechRecognition"); 
+      MarySpeech mouth = (MarySpeech)Runtime.start("mouth", "MarySpeech");
 
-    log.info(ai.getResponse("hi there").toString());
-    log.info(ai.getResponse("こんにちは").toString());
-    log.info(ai.getResponse("test").toString());
-    log.info(ai.getResponse("").toString());
-    ai.setUsername("test");
+      // mouth.attach(ear);
+      ear.attach(mouth);
+      // ear.addMouth(mouth);
+      brain.attach(ear);
+      mouth.attach(brain);    
+      
+      brain.startSession("default", "work-e");
+//      ear.startListening(); 
+      
+      // FIXME - make this work
+      // brain.attach(mouth);
+           
+      // ear.attach(mouth);
+      // FIXME !!! - make this work
+      // ear.attach(mouth);
+      
+      // brain.addTextPublisher(service);
+      // ear.attach(brain);
 
-    // ai.savePredicates();
+      /*
+      log.info(brain.getResponse("hi there").toString());
+      log.info(brain.getResponse("こんにちは").toString());
+      log.info(brain.getResponse("test").toString());
+      log.info(brain.getResponse("").toString());
+      brain.setUsername("test");
+      */
+
+      brain.savePredicates();
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
 
   }
 

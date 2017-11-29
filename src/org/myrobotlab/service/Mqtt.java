@@ -48,8 +48,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
       this.topic = topic;
       this.payload = payload;
     }
-    
-    public String toString(){
+
+    public String toString() {
       return String.format("/%s-%s", topic, payload);
     }
   }
@@ -70,56 +70,46 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
   String url = "tcp://iot.eclipse.org:1883";
 
-
-
   public Mqtt(String n) {
     super(n);
   }
 
   public boolean connect(String url) throws MqttSecurityException, MqttException {
-    
-    return connect(url,null,null);
+
+    return connect(url, null, null);
   }
-  
-  public boolean connect(String url,String userName,char[] password) throws MqttSecurityException, MqttException {
 
-      
-      if (client == null) {
-        // FIXME - should be member ? what is this for ?
-        MemoryPersistence persistence = new MemoryPersistence();
-        this.url = url;
-        conOpt = new MqttConnectOptions();
-        conOpt.setCleanSession(true);
-        if (userName!=null)
-        {
-          conOpt.setUserName(userName); 
-          conOpt.setPassword(password);
-        }
-        clientId = String.format("%s@%s", getName(), Runtime.getInstance().getId());
-        client = new MqttAsyncClient(url, clientId, persistence);
+  public boolean connect(String url, String userName, char[] password) throws MqttSecurityException, MqttException {
 
-        // Set this wrapper as the callback handler
-        client.setCallback(this);
-        
-        client.connect(conOpt, "Connect sample context", this);
-        int i =0;
-        while (!client.isConnected() || i < 10)
-
-        {
-          sleep(1);
-          i+=1;
-
-        }
-        
-        if (!client.isConnected()) {
-          client.connect(conOpt, "Connect sample context", this);
-          isConnected = true;
-        }
-        else
-        {
-          isConnected = false;
-        }
+    if (client == null) {
+      // FIXME - should be member ? what is this for ?
+      MemoryPersistence persistence = new MemoryPersistence();
+      this.url = url;
+      conOpt = new MqttConnectOptions();
+      conOpt.setCleanSession(true);
+      if (userName != null) {
+        conOpt.setUserName(userName);
+        conOpt.setPassword(password);
       }
+      clientId = String.format("%s@%s", getName(), Runtime.getId());
+      client = new MqttAsyncClient(url, clientId, persistence);
+      client.setCallback(this);
+
+      client.connect(conOpt, "Connect sample context", this);
+      int i = 0;
+      while (!client.isConnected() || i < 10)
+      {
+        sleep(1);
+        i += 1;
+      }
+
+      if (!client.isConnected()) {
+        client.connect(conOpt, "Connect sample context", this);
+        isConnected = true;
+      } else {
+        isConnected = false;
+      }
+    }
     broadcastState();
     return isConnected;
   }
@@ -186,7 +176,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     log.info(messageStr);
     invoke("publishMqttMsg", topic, message.getPayload());
     invoke("publishMqttMsgByte", message.getPayload());
-    invoke("publishMqttMsgString", new String(message.getPayload()),topic);
+    invoke("publishMqttMsgString", new String(message.getPayload()), topic);
   }
 
   @Override
@@ -199,6 +189,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     log.info("success - {} ", tokenToString(token));
   }
 
+  // dangerous - as topic is a field value
   public void publish(String msg) throws Throwable {
     publish(topic, qos, msg);
   }
@@ -231,15 +222,15 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     return new MqttMsg(topic, msg);
   }
 
-  public String[] publishMqttMsgString(String msg,String topic) {
-    String[] result={msg, topic};
+  public String[] publishMqttMsgString(String msg, String topic) {
+    String[] result = { msg, topic };
     return result;
   }
-  
+
   public byte[] publishMqttMsgByte(byte[] msg) {
     return msg;
   }
-    
+
   public void setBroker(String broker) {
     url = broker;
   }
@@ -247,9 +238,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
   public void setClientId(String cId) {
     clientId = cId;
   }
-  
+
   public void setPubTopic(String Topic) {
-    topic = Topic;  
+    topic = Topic;
   }
 
   public void setQos(int q) {
@@ -265,11 +256,10 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
    * for the messages to arrive from the server that match the subscription. It
    * continues listening for messages until the enter key is pressed. {
    * 
-   * @param topic
-   *          to subscribe to (can be wild carded)
-   * @param qos
-   *          the maximum quality of service to receive messages at for this
-   *          subscription
+   * @param topic to subscribe to (can be wild carded)
+   * 
+   * @param qos the maximum quality of service to receive messages at for this
+   * subscription
    */
   public void subscribe(String topic, int qos) throws Throwable {
     if (client == null || !client.isConnected()) {
@@ -324,7 +314,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
       // Runtime.start("servo", "Servo");
       // Runtime.start("opencv", "OpenCV");
-      //Runtime.start("twitter", "Twitter");
+      // Runtime.start("twitter", "Twitter");
       Runtime.start("gui", "SwingGui");
 
       boolean done = true;

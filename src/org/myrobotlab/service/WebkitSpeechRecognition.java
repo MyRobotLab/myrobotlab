@@ -2,15 +2,13 @@ package org.myrobotlab.service;
 
 import java.util.HashMap;
 
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.SpeechRecognizer;
+import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
-import org.myrobotlab.service.interfaces.TextPublisher;
 import org.myrobotlab.string.StringUtil;
 
 /**
@@ -19,7 +17,7 @@ import org.myrobotlab.string.StringUtil;
  * chrome web browser this service requires the webgui to be running.
  *
  */
-public class WebkitSpeechRecognition extends Service implements SpeechRecognizer, TextPublisher {
+public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
   /**
    * TODO: make it's own class. TODO: merge this data structure with the

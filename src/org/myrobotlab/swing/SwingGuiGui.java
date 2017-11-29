@@ -171,7 +171,7 @@ public class SwingGuiGui extends ServiceGui implements ActionListener {
       graph.getModel().beginUpdate();
       try {
         buildLocalServiceGraph();
-        if (showRouteLabels.getText().equals("show routes")) {
+        if (hideRoutes.getText().equals("show routes")) {
           buildLocalServiceRoutes();
         }
       } finally {

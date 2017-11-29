@@ -12,7 +12,7 @@ import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.slf4j.Logger;
 
-public class Chassis extends Service implements JoystickListener {
+public class Chassis extends Service {
 
   private static final long serialVersionUID = 1L;
 
@@ -22,33 +22,12 @@ public class Chassis extends Service implements JoystickListener {
   String joystickRightAxisId;
 
   MotorController controller;
-
   MotorControl left;
   MotorControl right;
   Joystick joystick;
 
   public Chassis(String n) {
     super(n);
-  }
-
-  public MotorControl getLeft() {
-    left = (MotorControl) createPeer("left");
-    return left;
-  }
-
-  public MotorControl getRight() {
-    right = (MotorControl) createPeer("right");
-    return right;
-  }
-
-  public Joystick getJoystick() {
-    joystick = (Joystick) createPeer("joystick");
-    return joystick;
-  }
-
-  public MotorController getController() {
-    controller = (MotorController) createPeer("controller");
-    return controller;
   }
 
   /**
@@ -73,80 +52,101 @@ public class Chassis extends Service implements JoystickListener {
     return meta;
   }
 
-  @Override
-  public void onJoystickInput(JoystickData input) throws Exception {
-    log.info(String.format("onJoystickInput %s", input.toString()));
-    if (input.id.equals(joystickLeftAxisId)) {
-      left.move(input.value);
-    } else if (input.id.equals(joystickRightAxisId)) {
-      right.move(input.value);
-    }
-
-  }
-
-  public void attachJoystick(int index, String leftAxis, String rightAxis) {
-    joystick = (Joystick) startPeer("joystick");
-    joystick.addInputListener(this);
-    joystick.setController(index);
-    this.joystickLeftAxisId = leftAxis;
-    this.joystickRightAxisId = rightAxis;
-    joystick.addInputListener(this);
-  }
-
-  public void stop() {
-    left.stop();
-    right.stop();
-  }
-
-  public void connect(String port) throws Exception {
-    // if controller type - Aruduino 57600 if Sabertooh 9600
-    connect(port, Serial.BAUD_9600);
-  }
-
-  public void connect(String port, int rate) throws Exception {
-    controller = getController();
-    // controller.connect(port, rate, 8, 1, 0);
-  }
-
-  public void startService() {
-    super.startService();
-    left = (MotorControl) startPeer("left");
-    right = (MotorControl) startPeer("right");
-    joystick = (Joystick) startPeer("joystick");
-    controller = (MotorController) startPeer("controller");
-  }
-
-  public void attachMotors(int leftPortNumber, int rightPortNumber) throws Exception {
-    attachLeftMotor(leftPortNumber);
-    attachRightMotor(rightPortNumber);
-  }
-
-  public void attachLeftMotor(int portNumber) throws Exception {
-    MotorController mc = getController();
-    left.attachMotorController(mc);
-  }
-
-  public void attachRightMotor(int portNumber) throws Exception {
-    MotorController mc = getController();
-    right.attachMotorController(mc);
-  }
+  
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
     try {
 
-      Chassis chassis = (Chassis) Runtime.start("chassis", "Chassis");
-      chassis.connect("COM19");// , Serial.BAUD_9600);
-      // TODO - when not set (error + info on what is wrong - possible
-      // selections)
-      chassis.attachMotors(2, 1);
-      chassis.attachJoystick(5, "y", "rz");
-      // Runtime.start("webgui", "WebGui");
+      LoggingFactory.init("INFO");
+
+      boolean virtual = true;
+      //////////////////////////////////////////////////////////////////////////////////
+      // Sabertooth.py
+      // categories: motor
+      // more info @: http://myrobotlab.org/service/Sabertooth
+      //////////////////////////////////////////////////////////////////////////////////
+      // uncomment for virtual hardware
+      // virtual = True
+
+      String port = "COM14";
+      //String port = "/dev/ttyUSB0";
+
+      // start optional virtual serial service, used for test
+      if (virtual) {
+        // use static method Serial.connectVirtualUart to create
+        // a virtual hardware uart for the serial service to
+        // connect to
+        Serial uart = Serial.connectVirtualUart(port);
+        uart.logRecv(true); // dump bytes sent from sabertooth
+      }
+      // start the services
+      Runtime.start("gui", "SwingGui");
+      Sabertooth sabertooth = (Sabertooth) Runtime.start("sabertooth", "Sabertooth");
+      MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
+      MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
+      Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
+      // Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
+
+      // configure services
+      m1.setPort("m1");
+      m2.setPort("m2");
+      joy.setController(5); // 0 on Linux
+
+      // attach services
+      sabertooth.attach(m1);
+      sabertooth.attach(m2);
+      m1.attach(joy.getAxis("y"));
+      m2.attach(joy.getAxis("rz"));
+      
+      m1.setInverted(true);
+      m2.setInverted(true);
+
+      sabertooth.connect(port);
+      
+      Chassis chassis = (Chassis) Runtime.start("m1", "MotorPort");
+      // chassis.setLeftMotor(m1);
+      // chassis.setRightMotor(m1);
+
+      // m1.stop();
+      // m2.stop();
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      // speed up the motor
+      for (int i = 0; i < 100; ++i) {
+        double pwr = i * .01;
+        log.info("power {}", pwr);
+        m1.move(pwr);
+        sleep(100);
+      }
+
+      sleep(1000);
+
+      // slow down the motor
+      for (int i = 100; i > 0; --i) {
+        double pwr = i * .01;
+        log.info("power {}", pwr);
+        m1.move(pwr);
+        sleep(100);
+      }
+
+      // move motor clockwise
+      m1.move(0.3);
+      sleep(1000);
+      m1.stop();
+
+      // move motor counter-clockwise
+      m1.move(-0.3);
+      sleep(1);
+      m1.stop();
+
+      // TODO - stopAndLock
 
     } catch (Exception e) {
       Logging.logError(e);
     }
   }
-
-}
+  }
