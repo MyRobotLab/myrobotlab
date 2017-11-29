@@ -41,7 +41,7 @@ public class Mail extends Service {
   public static String body = "hey ! this is a body text";
 
   public static String smtpServer = "smtp.gmail.com";
-  public static String smtpServerPort = "465";
+  public static Integer smtpServerPort = 465;
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.WARN);
@@ -58,7 +58,7 @@ public class Mail extends Service {
     }
   }
 
-  public static void sendMailSSL() {
+  public void sendMailSSL() {
     Properties props = new Properties();
     props.put("mail.smtp.host", smtpServer);
     props.put("mail.smtp.socketFactory.port", smtpServerPort);
@@ -85,8 +85,8 @@ public class Mail extends Service {
 
       System.out.println("Done");
 
-    } catch (MessagingException e) {
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      error("Cant send this email ! Bad credentials ? : ", e);
     }
   }
 
