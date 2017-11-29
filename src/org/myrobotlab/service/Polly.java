@@ -73,6 +73,7 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
 
   private String keyIdSecret;
   private String keyId;
+  private boolean credentialsError = false;
 
   transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
 
@@ -167,6 +168,8 @@ private String language;
 
   @Override
   public AudioData speak(String toSpeak) throws Exception {
+    if (!credentialsError)
+    {
     cacheFile(toSpeak, OutputFormat.Mp3);
     AudioData audioData = audioFile.playCachedFile(getLocalFileName(this, toSpeak, "mp3"));
     utterances.put(audioData, toSpeak);
@@ -187,6 +190,8 @@ private String language;
      * 
      * // play it! player.play();
      */
+    }
+    return null;
 
   }
 
@@ -238,6 +243,7 @@ private String language;
           polly.setRegion(Region.getRegion(Regions.US_WEST_2));
           processVoicesRequest();
         } catch (Exception e2) {
+          credentialsError = true;
           error("could not get Polly client - did you setKeys ?");
           error("Environment variables â€“ AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY or");
           error("check http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html");
@@ -283,11 +289,14 @@ private String language;
 
   @Override
   public boolean speakBlocking(String toSpeak) throws Exception {
+    if (!credentialsError)
+    {
     cacheFile(toSpeak, OutputFormat.Mp3);
     invoke("publishStartSpeaking", toSpeak);
     audioFile.playBlocking(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, "mp3"));
     invoke("publishEndSpeaking", toSpeak);
-    return false;
+    }
+    return false;    
   }
 
   @Override
