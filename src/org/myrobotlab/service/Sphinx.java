@@ -48,6 +48,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -65,7 +66,7 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
  * what it's listening for. It does not do free-form speech recognition.
  * 
  */
-public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
+public class Sphinx extends AbstractSpeechRecognizer {
 
   /**
    * Commands must be created "before" startListening startListening will create

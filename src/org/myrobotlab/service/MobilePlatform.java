@@ -52,7 +52,7 @@ import org.slf4j.Logger;
  *         http://en.wikipedia.org/wiki/Dead_reckoning#
  *         Differential_steer_drive_dead_reckoning
  */
-
+@Deprecated // use Chassis
 public class MobilePlatform extends Service {
  
   private static final long serialVersionUID = 1L;
@@ -369,6 +369,7 @@ public class MobilePlatform extends Service {
     meta.addDescription(
         "used to encapsulate many of the functions and formulas regarding 2 motor platforms encoders and other feedback mechanisms can be added to provide heading, location and other information");
     meta.addCategory("robot", "control");
+    meta.setAvailable(false);
 
     return meta;
   }

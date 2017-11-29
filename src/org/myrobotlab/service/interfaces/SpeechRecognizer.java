@@ -29,6 +29,8 @@ public interface SpeechRecognizer extends NameProvider {
   /**
    *  This method should listen for 
    *  Mouth events
+   *  
+   *  FIXME - should be deprecated - use Attach Pattern !
    */
   public void addMouth(SpeechSynthesis mouth);
 

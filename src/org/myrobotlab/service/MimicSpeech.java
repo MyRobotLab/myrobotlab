@@ -187,6 +187,11 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener
 	
 	public static void main(String[] args) throws Exception {
 		MimicSpeech mimic = (MimicSpeech)Runtime.createAndStart("mimic", "MimicSpeech");
+		List<String> voices = mimic.getVoices();
+		for (int i = 0; i < voices.size(); ++i){
+		  log.info("voice " + voices.get(i));
+		}
+		mimic.speakBlocking("hello hello, this is a test .. testing 1 2 3");
 		mimic.speakBlocking("test me");
 		mimic.speakBlocking("Hello world");
 		mimic.speakBlocking("i am mimic");

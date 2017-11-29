@@ -85,6 +85,9 @@ public class Arm extends Service {
     meta.addCategory("robot");
     meta.setLicenseApache();
     meta.addTodo("add IK interfacing points");
+    // FIXME - add IK & DH Parameters
+    // not ready for primetime - nothing implemented
+    meta.setAvailable(false);
     return meta;
   }
 }

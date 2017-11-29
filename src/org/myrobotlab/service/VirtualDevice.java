@@ -225,6 +225,9 @@ public class VirtualDevice extends Service implements SerialDataListener {
     // put peer definitions in
     meta.addPeer("uart", "Serial", "uart");
     meta.addPeer("logic", "Python", "logic to implement");
+    
+    // this is used for testing, and does not need to be tested
+    meta.setAvailable(false);
 
     return meta;
   }

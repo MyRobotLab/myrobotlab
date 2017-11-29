@@ -17,6 +17,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -32,7 +33,7 @@ import org.slf4j.Logger;
  *         Client temporary sources :
  *         https://github.com/moz4r/SpeechRecognitionMRL
  */
-public class AndroidSpeechRecognition extends Service implements SpeechRecognizer, TextPublisher {
+public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
 
   public class Command {
     public String name;

@@ -271,7 +271,7 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Vision.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Vision.class);
     meta.addDescription("Vision (computer vision) service wrapping many of the functions and filters of Vision");
     meta.addCategory("video", "vision", "sensor");
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
@@ -282,6 +282,8 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
     // meta.addDependency("org.bytedeco.javacpp","1.1");
     meta.addDependency("org.bytedeco.javacv", "1.3");
     meta.addDependency("pl.sarxos.webcam", "0.3.10");
+    // FIXME - new OpenCV of post manticore release
+    meta.setAvailable(false);
     return meta;
   }
 

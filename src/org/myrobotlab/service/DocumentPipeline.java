@@ -185,6 +185,8 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     ServiceType meta = new ServiceType(DocumentPipeline.class.getCanonicalName());
     meta.addDescription("This service will pass a document through a document processing pipeline made up of transformers");
     meta.addCategory("ingest");
+    // FIXME - add service page, python script, give example of how to use
+    meta.setAvailable(false);
     return meta;
   }
 
