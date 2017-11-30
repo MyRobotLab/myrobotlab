@@ -772,6 +772,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     }
   }
 
+  public void setActiveTab(String title) {
+    //bug ? we need to wait a little after Runtime.start
+    sleep(1000);
+    this.tabs.getTabs().setSelectedIndex(tabs.getTabs().indexOfTab(title));       
+  }
+
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
