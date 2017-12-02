@@ -29,6 +29,7 @@ import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameRecorder;
+import org.bytedeco.javacv.OpenKinectFrameGrabber;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -392,7 +393,7 @@ public class VideoProcessor implements Runnable, Serializable {
 				if (Logging.performanceTiming)
 					Logging.logTime("start");
 
-				frame = grabber.grab();
+				frame = grabber.grab();				
 
 				if (Logging.performanceTiming)
 					Logging.logTime(String.format("post-grab %d", frameIndex));
@@ -422,6 +423,11 @@ public class VideoProcessor implements Runnable, Serializable {
 				 * grabber).grabDepth()); }
 				 */
 				
+				
+				if (grabber.getClass() == OpenKinectFrameGrabber.class) {
+          OpenKinectFrameGrabber kinect = (OpenKinectFrameGrabber)grabber;
+          data.put(OpenCV.SOURCE_KINECT_DEPTH, kinect.grabDepth());
+        }
 
 				if (Logging.performanceTiming)
 					Logging.logTime("pre-synchronized-filter");
