@@ -84,16 +84,21 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     // INFO - This filter has 2 sources !!!
     IplImage kinectDepth = data.get(OpenCV.SOURCE_KINECT_DEPTH);
 
-    // allowing publish & fork
-    if (dst == null || dst.width() != image.width() || dst.nChannels() != image.nChannels()) {
-      dst = cvCreateImage(cvSize(kinectDepth.width() / 2, kinectDepth.height() / 2), kinectDepth.depth(), kinectDepth.nChannels());
-    }
+    
+    boolean processDepth = false;
+    if (kinectDepth != null && processDepth) {
 
-    cvPyrDown(kinectDepth, dst, filter);
-    invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(dst));
+      // allowing publish & fork
+      if (dst == null || dst.width() != image.width() || dst.nChannels() != image.nChannels()) {
+        dst = cvCreateImage(cvSize(kinectDepth.width() / 2, kinectDepth.height() / 2), kinectDepth.depth(), kinectDepth.nChannels());
+      }
+
+      cvPyrDown(kinectDepth, dst, filter);
+      invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(dst));
+    }
     // end fork
 
-    return image;
+    return kinectDepth;
 
     /*
      * // check for depth ! 1 ch 16 depth - if not format error & return if
