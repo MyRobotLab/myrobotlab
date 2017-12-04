@@ -572,6 +572,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   @Override
   public String publishText(String text) {
+    //clean up whitespaces & cariage return
+    text = text.replaceAll("\\n", "");
+    text = text.replaceAll("\\r", "");
+    text = text.replaceAll("\\s{2,}", " ");
     return text;
   }
 
