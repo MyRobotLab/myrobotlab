@@ -146,7 +146,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 							double setPoint = pid.getSetpoint(pidKey);
 							double output = pid.getOutput(pidKey);
 							motorControl.setPowerLevel(output);
-							// log.debug(String.format("setPoint(%s), processVariable(%s), output(%s)", setPoint, processVariable, output));
+							log.debug(String.format("setPoint(%s), processVariable(%s), output(%s)", setPoint, processVariable, output));
 							if (output != lastOutput) {
 								motorControl.move(output);
 								lastOutput = output;
@@ -420,6 +420,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
 	public void map(double minX, double maxX, double minY, double maxY) {
 		mapper = new Mapper(minX, maxX, minY, maxY);
+		info("map change received : %s %s %s %s",minX,maxX,minY,maxY);
 		broadcastState();
 	}
 
@@ -591,22 +592,35 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 		try {
 			// Runtime.start("webgui", "WebGui");
 			Runtime.start("gui", "SwingGui");
-			Runtime.start("DiyServo", "DiyServo");
-			
-			boolean done = true;
+      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+      virtual.connect("COM3");
+			boolean done = false;
 			if (done){
 			  return;
 			}
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.connect("COM3");
 
+			//Adafruit16CServoDriver adafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver", "Adafruit16CServoDriver");
+			//adafruit16CServoDriver.attach(arduino,"1","0x40");
+			//Ads1115 ads = (Ads1115) Runtime.start("ads", "Ads1115");
+			//ads.attach(arduino,"2","0x40");
+			
+			
+			
+			MotorDualPwm motor = (MotorDualPwm) Runtime.start("dyiServo.motor", "MotorDualPwm");
+			
+      motor.setPwmPins(0, 1);
+			motor.attach(arduino);
+
+			
 			// Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
 			// ads.setController(arduino, "1", "0x48");
 
-			DiyServo dyiServo = (DiyServo) Runtime.start("DiyServo", "DiyServo");
+			DiyServo dyiServo = (DiyServo) Runtime.start("dyiServo", "DiyServo");
 			// dyiServo.attachServoController((ServoController)arduino);
 			// dyiServo.attach((ServoController)arduino);
-			dyiServo.attach((PinArrayControl) arduino, 0); // PIN 14 = A0
+			dyiServo.attach((PinArrayControl) arduino, 14); // PIN 14 = A0
 
 			// Servo Servo = (Servo) Runtime.start("Servo", "Servo");
 
@@ -763,8 +777,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
     @Override
     public void setVelocity(double velocity) {
-      // TODO Auto-generated method stub
-      
+     warn("TODO !");      
     }
 
     @Override
@@ -874,6 +887,14 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   public double getCurrentPosOutput() {
     // TODO Auto-generated method stub
     return 0;
+  }
+
+  public double getMinOutput() {
+    return mapper.getMinOutput();
+  }
+
+  public double getMaxOutput() {
+    return mapper.getMaxOutput();
   }
 
 }
