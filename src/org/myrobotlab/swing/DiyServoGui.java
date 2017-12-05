@@ -25,10 +25,12 @@
 
 package org.myrobotlab.swing;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -36,6 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
@@ -82,7 +85,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 	JLabel boundPos = new JLabel("90");
 	JButton attachListenerButton = new JButton(attachAnalog);
 
-	JButton updateLimitsButton = new JButton("update limits");
+
 
 	JSlider slider = new JSlider(0, 180, 90);
 	BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
@@ -92,9 +95,13 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 	JComboBox<String> pinArrayControlList = new JComboBox<String>();
 	JComboBox<Integer> analogInputPinList = new JComboBox<Integer>();
 	
-	JTextField posMin = new JTextField("0");
-
-	JTextField posMax = new JTextField("180");
+  JTextField minInput = new JTextField("0");
+  JTextField maxInput = new JTextField("180");
+  JTextField minOutput = new JTextField("0");
+  JTextField maxOutput = new JTextField("180");
+  JTextField velocity = new JTextField("-1");
+  JButton setVelocity = new JButton("Velocity");
+  JButton updateMapButton = new JButton("set");
 
 	DiyServo myServo = null;
 
@@ -105,17 +112,41 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 		myServo = (DiyServo) Runtime.getService(boundServiceName);
 		slider.addChangeListener(sliderListener);
 		boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
-		
+		velocity.setPreferredSize(new Dimension( 50, 24 ));
+		setVelocity.addActionListener(this);
+		updateMapButton.addActionListener(this);
 		JPanel s = new JPanel();
 		s.add(left);
 		s.add(slider);
 		s.add(right);
-		addTop(2, boundPos, 3, s);
+    addTopLeft(2, boundPos, 3, s,velocity,setVelocity );
 		
-		addTop("Analog input:", pinArrayControlList, " Analog input pin:", analogInputPinList, attachListenerButton);
-		addTop("min:", posMin, "   max:", posMax, updateLimitsButton);
+    JPanel controllerP = new JPanel();
+    Border borderController = BorderFactory.createTitledBorder("Controller");
+    controllerP.setBorder(borderController);
+    JLabel pinArrayControlListlabel = new JLabel("Analog input : ");
+    JLabel analogInputPinListabel = new JLabel("Analog input pin : ");
+    
+    controllerP.add(pinArrayControlListlabel);
+    controllerP.add(pinArrayControlList);
+    controllerP.add(analogInputPinListabel);
+    controllerP.add(analogInputPinList);
+    controllerP.add(attachListenerButton);
 
-    updateLimitsButton.addActionListener(this);
+    JPanel map = new JPanel();
+    Border bordermap = BorderFactory.createTitledBorder("map(minInput, maxInput, minOutput, maxOutput)");
+    map.setBorder(bordermap);
+    map.add(minInput);
+    map.add(maxInput);
+    map.add(minOutput);
+    map.add(maxOutput);
+    map.add(updateMapButton);
+    
+    addTopLeft(" ");
+    addTopLeft(controllerP);
+    addTopLeft(" ");
+    addTopLeft(map);
+
     left.addActionListener(this);
     right.addActionListener(this);
 
@@ -147,8 +178,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 					return;
 				}
 
-				if (o == updateLimitsButton) {
-					send("setMinMax", Integer.parseInt(posMin.getText()), Integer.parseInt(posMax.getText()));
+				if (o == updateMapButton) {
+				  send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()),Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
 					return;
 				}
 
@@ -156,6 +187,11 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 					slider.setValue(slider.getValue() + 1);
 					return;
 				}
+				
+        if (o == setVelocity) {
+          send("setVelocity", Double.parseDouble(velocity.getText()));
+          return;
+        }
 
 				if (o == left) {
 					slider.setValue(slider.getValue() - 1);
@@ -214,9 +250,13 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
 				slider.setMinimum((int)servo.getMin());
 				slider.setMaximum((int)servo.getMax());
+				
+        velocity.setText(servo.getVelocity() + "");
 
-				posMin.setText(servo.getMin() + "");
-				posMax.setText(servo.getMax() + "");
+        minInput.setText(servo.getMinInput() + "");
+        maxInput.setText(servo.getMaxInput() + "");
+        minOutput.setText(servo.getMinOutput() + "");
+        maxOutput.setText(servo.getMaxOutput() + "");
 
 				restoreListeners();
 			}
