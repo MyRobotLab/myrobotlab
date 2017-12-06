@@ -116,8 +116,8 @@ public class Cli extends Service {
     String inputEncoding = CodecUtils.TYPE_URI; // REST JSON
     String outputEncoding = CodecUtils.TYPE_JSON; // JSON / JSON MSG
 
-    public Decoder(Cli cli, String name, InputStream is) {
-      super(String.format("cli-decoder-%s", cli.getName()));
+    public Decoder(Cli cli, InputStream is) {
+      super(String.format("%s-stdin-decoder", cli.getName()));
       this.cli = cli;
       this.is = is;
     }
@@ -493,7 +493,7 @@ public class Cli extends Service {
   // FIXME - remove - do in constructor or "start"
   public void attachStdIO() {
     if (in == null) {
-      in = new Decoder(this, "stdin", System.in);
+      in = new Decoder(this, System.in);
       in.start();
     } else {
       log.info("stdin already attached");
@@ -657,6 +657,15 @@ public class Cli extends Service {
     meta.addDescription("command line interpreter interface for myrobotlab");
     meta.addCategory("framework");
     return meta;
+  }
+  
+  public void releaseService(){
+    super.releaseService();
+    if (in != null){
+      in.isRunning = false;
+      // in.interrupt();
+      in = null;
+    }
   }
 
   public static void main(String[] args) {

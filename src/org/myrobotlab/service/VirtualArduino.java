@@ -211,6 +211,13 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     uart.addPortListener(getName());
     start();
   }
+  
+  public void releaseService(){
+    super.releaseService();
+    if (runner != null){
+      runner.isRunning = false;
+    }
+  }
 
   public SerialDevice getSerial() {
     return uart;

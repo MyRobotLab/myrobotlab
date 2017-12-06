@@ -92,7 +92,7 @@ public class Esp8266_01 extends Service implements I2CController {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Esp8266_01.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(Esp8266_01.class);
 
   transient HttpClient httpclient;
 
@@ -102,9 +102,8 @@ public class Esp8266_01 extends Service implements I2CController {
 
   String host = "192.168.1.99";
 
-  public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+  public static void main(String[] args) {    
+    LoggingFactory.init(Level.DEBUG);
 
   }
 

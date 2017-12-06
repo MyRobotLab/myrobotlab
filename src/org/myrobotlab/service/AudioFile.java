@@ -173,6 +173,7 @@ public class AudioFile extends Service {
 
     File f = new File(filename);
     if (!f.exists()) {
+      error("File not found to play back " + f.getAbsolutePath());
       log.warn("File not found to play back " + f.getAbsolutePath());
       return;
     }

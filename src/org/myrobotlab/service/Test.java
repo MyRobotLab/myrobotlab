@@ -60,6 +60,12 @@ public class Test extends Service implements StatusListener {
    * filter services by availabilities 
    */
   public boolean showUnavailableServices=false;
+  
+  /**
+   * services which are necessary to conduct the test and will NOT
+   * be released after cleaning up a test
+   */
+  Set<String> globalServices = null;
 
   public static class Progress implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -71,7 +77,10 @@ public class Test extends Service implements StatusListener {
     public int successes;
     public int successPercentage;
     public int totalTests;
+    
+    
 
+    // FIXME - most of these can be removed as the "TestData" failure is saved for each failed test
     List<String> servicesWithErrors = new ArrayList<String>();
 
     // stats & accumulators python
@@ -79,14 +88,12 @@ public class Test extends Service implements StatusListener {
 
     List<String> pythonScriptsWithNoServiceType = new ArrayList<String>();
 
-    List<String> failedPythonScripts = new ArrayList<String>();
-
-    List<String> passedPythonScripts = new ArrayList<String>();
-
-    Set<String> skippedPythonScript = new TreeSet<String>();
+    List<String> passedPythonScripts = new ArrayList<String>();    
 
     // service indexed list of tests which were processed
     Map<String, Set<TestData>> results = new TreeMap<String, Set<TestData>>();
+    
+    // TODO - before test init
 
     public void process(TestData test) {
       Status status = test.status;
@@ -227,6 +234,19 @@ public class Test extends Service implements StatusListener {
     // meta.addPeer("python", "Python", "python to excercise python scripts");
     return meta;
   }
+  
+  /**
+   * pre-test
+   */
+  synchronized public void globalInit(){
+    if (globalServices != null){
+      return;
+    }
+    
+    // get list of services to NOT release after tests      
+    globalServices = new TreeSet<String>(Arrays.asList(Runtime.getServiceNames()));
+  }
+  
 
   public static void logThreadNames() {
 
@@ -253,7 +273,7 @@ public class Test extends Service implements StatusListener {
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser = false;
       webgui.startService();
-      Runtime.start("gui", "SwingGui");
+      //Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
       webgui.startBrowser("http://localhost:8888/#/service/test");
       // Runtime.start("python", "Python");
@@ -806,6 +826,7 @@ public class Test extends Service implements StatusListener {
    * moves the prepared tests to the test queue so the "tester" can run them all
    */
   public void test() {
+   //  globalInit(); WTF ??
     for (String serviceName : matrix.servicesToTest) {
       for (String testName : matrix.testsToRun) {
         try {
@@ -874,6 +895,7 @@ public class Test extends Service implements StatusListener {
   // creation and destruction through inventory
   public TestData testPythonScript(TestData test) throws Exception {
 
+    // TEST SETUP BEGIN .....
     Python python = (Python) Runtime.start("python", "Python");
 
     // identify the original services before the test
@@ -882,6 +904,10 @@ public class Test extends Service implements StatusListener {
     for (String s : sn) {
       preServices.add(s);
     }
+    
+    Set<Thread> preThreads = Thread.getAllStackTraces().keySet();
+    
+    log.info("pre test {} services {} threads {}", sn.length, Arrays.toString(sn), preThreads.size());
 
     // a test will resolve in 3 possible states
     // 1. complete & success - with onFinish callback called
@@ -906,6 +932,8 @@ public class Test extends Service implements StatusListener {
       return test;
     }
 
+    // TEST SETUP END ....
+    
     ///////////// BEGIN //////////////////////////
 
     String serviceName = test.serviceName;
@@ -988,6 +1016,25 @@ public class Test extends Service implements StatusListener {
         si.releaseService();
       }
     }
+    
+    // get services and threads after releasing all services involved in testing
+    sn = Runtime.getServiceNames();
+    Set<Thread> postThreads = Thread.getAllStackTraces().keySet();
+    
+    log.info("post test {} services {} threads {}", sn.length, Arrays.toString(sn), postThreads.size());
+    
+    /*
+    for (Thread t: postThreads){
+      if (preThreads.contains(t)){
+        if (t.getName().startsWith("New I/O")){
+          continue;
+        }
+        log.error("dirty release - thread [{}] {} {} not released, interrupting it !", t.getName(), t.getId(), t.isAlive());
+        t.interrupt();
+        // t.stop();
+      }
+    }
+    */
 
     log.info("TESTING COMPLETED");
 

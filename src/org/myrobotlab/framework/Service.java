@@ -1570,6 +1570,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   @Override
   public void releaseService() {
+    
+    // recently added - preference over detach(Runtime.getService(getName()));
+    // since this service is releasing - it should be detached from all existing services
+    detach();
+    
     // note - if stopService is overwritten with extra
     // threads - releaseService will need to be overwritten too
     stopService();
@@ -1577,9 +1582,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // TODO ? detach all other services currently attached
     // detach();
     // @grog is it ok for now ?
-    detach(Runtime.getService(getName()));
+    
+    // GroG says, I don't think so - this is releasing itself from itself 
+    // detach(Runtime.getService(getName()));
 
-    // recently added
+    // FIXME - deprecate - peers are no longer used ...
     releasePeers();
 
     purgeTasks();
@@ -2146,7 +2153,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * detaches ALL other services from this service
    */
   public void detach(){
-    log.error("detach was called but I'm a NOOP in Service.java - probably not what you wanted - override me !");
+    log.info("detach was called but I'm a NOOP in Service.java - probably not what you wanted - override me !");
+    // FIXME - attach should probably have a Service.java level of understanding where a Service understands
+    // that another service is attached
   }
 
   /**

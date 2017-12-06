@@ -32,6 +32,14 @@ public class LoggingFactory {
       logging.setLevel(level);
     }
   }
+  
+  public static void setLevel(String level){
+    Logging logging = getInstance();
+    logging.configure();
+    if (level != null) {
+      logging.setLevel(level);
+    }
+  }
 
   /**
    * at the moment "myrobotlab.log" - although it could be based on runtime name
