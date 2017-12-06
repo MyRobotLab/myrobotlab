@@ -205,6 +205,8 @@ public class Joystick extends Service {
 
         Thread.sleep(20);
       } catch (Exception e) {
+        log.info("leaving {} polling thread leaving", getName());
+        pollingThread = null;
       }
     }
   }
@@ -350,6 +352,14 @@ public class Joystick extends Service {
 
   public String getController() {
     return controller;
+  }
+  
+  public void releaseService(){
+    super.releaseService();
+    if (pollingThread != null){
+      pollingThread.interrupt();
+      isPolling = false;
+    }
   }
 
   /**

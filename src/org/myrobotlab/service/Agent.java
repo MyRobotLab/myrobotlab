@@ -157,11 +157,11 @@ public class Agent extends Service {
   // WebGui webmin = null; can't have a peer untile nettosphere is part of
   // base build
   // boolean updateRestartProcesses = false;
+  
 
-  static String updateUrl = "http://mrl-bucket-01.s3.amazonaws.com/current/%s";
-  static String jarUrlTemplate = "http://mrl-bucket-01.s3.amazonaws.com/current/%s/myrobotlab.jar";
-  static String versionUrlTemplate = "http://mrl-bucket-01.s3.amazonaws.com/current/%s/version.txt";
-  static String versionsListUrlTemplate = "http://mrl-bucket-01.s3.amazonaws.com/";
+  static String updateUrl = "http://34.201.4.170/deploy/%s";
+  static String jarUrlTemplate = "http://34.201.4.170/deploy/%s/myrobotlab.jar";
+  static String versionUrlTemplate = "http://34.201.4.170/deploy/%s/version.txt";
 
   static boolean checkRemoteVersions = false;
 
@@ -1150,7 +1150,8 @@ public class Agent extends Service {
 
       if (cmdline.containsKey("-test")) {
         serviceTest();
-      } else {
+      } else {        
+        
         // if we aren't forking then we create an agent
         // to maintain control of all spawned processes
         if (!cmdline.containsKey("-fork")) {
@@ -1159,6 +1160,13 @@ public class Agent extends Service {
           // agents runtime          
           Runtime.main(agentArgs);
           Runtime.start("agent", "Agent");
+       
+          // FIXME - shouldn't be global, should be on a process by 
+          // process config - technically this should be triggered by an
+          // -agent "-autoUpdate" .. but why trouble the user with cryptic encoding ?
+          if (cmdline.containsKey("-autoUpdate")){
+            autoUpdate(true);
+          }
         }
         if (!cmdline.containsKey("-client")) {
           p = spawn(args); // <-- agent's is now in charge of first

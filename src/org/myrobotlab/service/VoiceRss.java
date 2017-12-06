@@ -475,7 +475,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
     ServiceType meta = new ServiceType(VoiceRss.class.getCanonicalName());
     meta.addDescription("VoiceRss speech synthesis service.");
     meta.addCategory("speech");
-    meta.setSponsor("Steve");
+    meta.setSponsor("moz4r");
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     meta.setCloudService(true);

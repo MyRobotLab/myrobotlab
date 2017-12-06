@@ -27,7 +27,7 @@
     <td>
       <input type="checkbox" checklist-model="testPlan.servicesToTest" checklist-value="serviceType.simpleName">  
       <!-- <input type="checkbox" value="{{serviceType.simpleName}}" ng-checked="true" ng-click="toggleService(serviceType.simpleName)">  -->
-      <img ng-src="/{{serviceType.simpleName}}.png" width="16">&nbsp;&nbsp;{{serviceType.simpleName}}
+      <a href="http://myrobotlab.org/service/{{serviceType.simpleName}}"><img ng-src="/{{serviceType.simpleName}}.png" width="16">&nbsp;&nbsp;{{serviceType.simpleName}}</a>
     </td>
     <td>{{ serviceType.description }}</td>
     <td>{{ serviceType.available }}</td>
@@ -38,7 +38,7 @@
                </tr>
            </table>
     </td>    
-    <td>{{ serviceType.sponsor }}</td>
+    <td><a href="http://myrobotlab.org/users/{{ serviceType.sponsor }}">{{ serviceType.sponsor }}</a></td>
     <td width="40%">{{ serviceType.todo }}</td>
   </tr>
 </table>
