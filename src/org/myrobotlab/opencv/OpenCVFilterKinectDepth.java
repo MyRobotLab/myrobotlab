@@ -56,9 +56,8 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   int x = 0;
   int y = 0;
   int clickCounter = 0;
-  int frameCounter = 0;
-  Graphics g = null;
-  String lastHexValueOfPoint = "";
+
+  boolean displayCamera = false;
 
   public OpenCVFilterKinectDepth() {
     super();
@@ -66,6 +65,10 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
   public OpenCVFilterKinectDepth(String name) {
     super(name);
+  }
+  
+  public void setDisplayCamera(boolean b) {
+    displayCamera = b;
   }
 
   public void createMask() {
@@ -97,6 +100,10 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
       invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(dst));
     }
     // end fork
+    
+    if (displayCamera) {
+      return image;
+    }
 
     return kinectDepth;
 
