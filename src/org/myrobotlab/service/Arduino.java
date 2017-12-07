@@ -1071,8 +1071,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     Class<?> type = mc.getClass();
 
-    double powerOutput = motorPowerMapper.calcInput(mc.getPowerLevel());
-
+    double powerOutput = motorPowerMapper.calcOutput(mc.getPowerLevel());
+    //log.info(mc.getPowerLevel()+" "+powerOutput);
+    
     if (Motor.class == type) {
       Motor config = (Motor) mc;
       msg.digitalWrite(config.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
