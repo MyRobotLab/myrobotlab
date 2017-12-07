@@ -422,6 +422,6 @@
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-storage-0.8.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-util-0.8.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-wikibaseapi-0.8.0-SNAPSHOT.jar"/>
-
+	<classpathentry kind="lib" path="/repo/com.jidesoft/3.6.18/jide-oss.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
