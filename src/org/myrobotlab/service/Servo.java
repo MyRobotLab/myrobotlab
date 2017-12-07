@@ -1180,6 +1180,16 @@ public class Servo extends Service implements ServoControl {
   public boolean getAutoDisable() {
     return this.autoDisable;
   }
+  
+  public void setDisableDelayIfVelocity(int disableDelayIfVelocity) {
+    this.disableDelayIfVelocity = disableDelayIfVelocity;
+    broadcastState();
+  }
+  
+  public void setDefaultDisableDelayNoVelocity(int defaultDisableDelayNoVelocity) {
+    this.defaultDisableDelayNoVelocity = defaultDisableDelayNoVelocity;
+    broadcastState();
+  }
 
   public double microsecondsToDegree(int microseconds) {
     if (microseconds <= 180)
