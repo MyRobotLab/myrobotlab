@@ -191,6 +191,7 @@
 		<pathelement location="${repo}/com.sun.mail/1.4.5/mailapi.jar"/>
 		<pathelement location="${repo}/com.sun.mail/1.4.5/pop3.jar"/>
 		<pathelement location="${repo}/com.sun.mail/1.4.5/smtp.jar"/>
+    <pathelement location="${repo}/com.jidesoft/3.6.18/jide-oss.jar"/>
 		<pathelement location="${repo}/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar"/>
 		<pathelement location="${repo}/org.fife.autocomplete/2.0.4/autocomplete.jar"/>
 		<pathelement location="${repo}/com.googlecode.chatterbot/1.2.1/chatter-bot-api.jar"/>
@@ -675,6 +676,7 @@
 		<unzip src="${repo}/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar" dest="${build}/classes" />
 		<unzip src="${repo}/org.fife.autocomplete/2.0.4/autocomplete.jar" dest="${build}/classes" />
 		<unzip src="${repo}/com.mxgraph.jgraph/1.6.1.2/jgraphx.jar" dest="${build}/classes" />
+    <unzip src="${repo}/com.jidesoft/3.6.18/jide-oss.jar" dest="${build}/classes" />
 		<!-- <unzip src="${repo}/org.apache.log4j/1.2.14/log4j-1.2.14.jar" dest="${build}/classes" /> -->
 		
 		<!-- webgui -->
