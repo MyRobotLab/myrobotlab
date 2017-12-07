@@ -1,9 +1,16 @@
 package org.myrobotlab.service;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 
 public class MotorDualPwm extends AbstractMotor {
@@ -60,6 +67,34 @@ public class MotorDualPwm extends AbstractMotor {
     meta.addCategory("motor");
 
     return meta;
+  }
+  
+  public static void main(String[] args) throws InterruptedException {
+
+      LoggingFactory.init(Level.INFO);
+      String arduinoPort = "COM5";
+
+      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+      try {
+        virtual.connect(arduinoPort);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      Runtime.start("gui", "SwingGui");
+      Runtime.start("python", "Python");
+  
+      MotorDualPwm motor = (MotorDualPwm) Runtime.start("motor", "MotorDualPwm");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      arduino.connect(arduinoPort);
+      motor.setPwmPins(10,11);
+      try {
+        motor.attach(arduino);
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+
   }
 
 }
