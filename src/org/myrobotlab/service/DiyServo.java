@@ -123,8 +123,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /**
-   * MotorUpdater The control loop to update the MotorControl with new
-   * values based on the PID calculations
+   * MotorUpdater The control loop to update the MotorControl with new values
+   * based on the PID calculations
    * 
    */
   public class MotorUpdater extends Thread {
@@ -132,9 +132,9 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     double lastOutput = 0;
 
     public MotorUpdater(String name) {
-      super(String.format("%s.motorUpdater",name));
+      super(String.format("%s.motorUpdater", name));
     }
-    
+
     @Override
     public void run() {
 
@@ -252,34 +252,35 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   private double ki = 0.001; // 0.020;
   private double kd = 0.0; // 0.020;
   public double setPoint = 90; // Intial
-                  // setpoint
-                  // corresponding
-                  // to
-                  // a
-                  // centered
-                  // servo
-                  // The
-                  // pinListener
-                  // value
-                  // depends
-                  // on
-                  // the
-                  // hardwawe
-                  // behind
-                  // it,
-                  // so
-                  // the
-                  // value
-                  // from
-                  // the
+  // setpoint
+  // corresponding
+  // to
+  // a
+  // centered
+  // servo
+  // The
+  // pinListener
+  // value
+  // depends
+  // on
+  // the
+  // hardwawe
+  // behind
+  // it,
+  // so
+  // the
+  // value
+  // from
+  // the
   /**
-   *  AD converter needs to be remapped to 0 - 180. D1024 is the default for the Arduino
+   * AD converter needs to be remapped to 0 - 180. D1024 is the default for the
+   * Arduino
    */
-  double resolution = 1024; 
+  double resolution = 1024;
   /**
-   *  Sample time 20 ms = 50 Hz
+   * Sample time 20 ms = 50 Hz
    */
-  int sampleTime = 20; 
+  int sampleTime = 20;
   /**
    * Initial process variable
    */
@@ -292,16 +293,20 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   Mapper powerMap = new Mapper(-1.0, 1.0, -255.0, 255.0);
 
+  public String disableDelayIfVelocity;
+
+  public String defaultDisableDelayNoVelocity;
+
   /**
    * Constructor
    * 
    * @param n
-   *            name of the service
+   *          name of the service
    */
   public DiyServo(String n) {
     super(n);
     refreshPinArrayControls();
-      motorControl = (MotorControl) createPeer("motor","MotorDualPwm");
+    motorControl = (MotorControl) createPeer("motor", "MotorDualPwm");
     initPid();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
     lastActivityTime = System.currentTimeMillis();
@@ -323,11 +328,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     pid = (Pid) createPeer("pid");
     pidKey = this.getName();
     pid.setPID(pidKey, kp, ki, kd); // Create a PID with the name of this
-                    // service instance
+    // service instance
     pid.setMode(pidKey, MODE_AUTOMATIC); // Initial mode is manual
     pid.setOutputRange(pidKey, -1.0, 1.0); // Set the Output range to match
-                        // the
-                        // Motor input
+    // the
+    // Motor input
     pid.setSampleTime(pidKey, sampleTime); // Sets the sample time
     pid.setSetpoint(pidKey, setPoint);
     pid.startService();
@@ -392,7 +397,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     return mapper.getMaxX();
   }
 
-  
   public double getPos() {
     return targetPos;
   }
@@ -419,9 +423,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
-    mapper = new Mapper(minX, maxX, minY, maxY);
-    info("map change received : %s %s %s %s",minX,maxX,minY,maxY);
-    broadcastState();
+    if (minX != this.getMinInput() || maxX != this.getMaxInput() || minY != this.getMinOutput() || maxY != this.getMaxOutput()) {
+      mapper = new Mapper(minX, maxX, minY, maxY);
+      broadcastState();
+    }
   }
 
   /**
@@ -429,7 +434,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * move to
    */
   public void moveTo(double pos) {
-    
+
     if (motorControl == null) {
       error(String.format("%s's controller is not set", getName()));
       return;
@@ -447,7 +452,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
     pid.setSetpoint(pidKey, targetOutput);
     lastActivityTime = System.currentTimeMillis();
-    
+
     if (isEventsEnabled) {
       // update others of our position change
       invoke("publishServoEvent", targetOutput);
@@ -455,8 +460,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /*
-   * basic move command of the servo - usually is 0 - 180 valid range but can
-   * be adjusted and / or re-mapped with min / max and map commands
+   * basic move command of the servo - usually is 0 - 180 valid range but can be
+   * adjusted and / or re-mapped with min / max and map commands
    * 
    * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION"
    * response
@@ -474,9 +479,9 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   @Override
   public void releaseService() {
-                // FYI - super.releaseService() calls detach
+    // FYI - super.releaseService() calls detach
     // detach();
-    if (motorUpdater != null){
+    if (motorUpdater != null) {
       // shutting down motor updater thread
       motorUpdater.interrupt();
     }
@@ -557,21 +562,22 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   /**
    * Writes a value in microseconds (uS) to the servo, controlling the shaft
-   * accordingly. On a standard servo, this will set the angle of the shaft.
-   * On standard servos a parameter value of 1000 is fully counter-clockwise,
-   * 2000 is fully clockwise, and 1500 is in the middle.
+   * accordingly. On a standard servo, this will set the angle of the shaft. On
+   * standard servos a parameter value of 1000 is fully counter-clockwise, 2000
+   * is fully clockwise, and 1500 is in the middle.
    * 
    * Note that some manufactures do not follow this standard very closely so
    * that servos often respond to values between 700 and 2300. Feel free to
    * increase these endpoints until the servo no longer continues to increase
-   * its range. Note however that attempting to drive a servo past its
-   * endpoints (often indicated by a growling sound) is a high-current state,
-   * and should be avoided.
+   * its range. Note however that attempting to drive a servo past its endpoints
+   * (often indicated by a growling sound) is a high-current state, and should
+   * be avoided.
    * 
-   * Continuous-rotation servos will respond to the writeMicrosecond function
-   * in an analogous manner to the write function.
+   * Continuous-rotation servos will respond to the writeMicrosecond function in
+   * an analogous manner to the write function.
    * 
-   * @param uS - the microseconds value
+   * @param uS
+   *          - the microseconds value
    */
   public void writeMicroseconds(Integer uS) {
     // log.info("writeMicroseconds({})", uS);
@@ -601,25 +607,24 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
       virtual.connect("COM3");
       boolean done = false;
-      if (done){
+      if (done) {
         return;
       }
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect("COM3");
 
-      //Adafruit16CServoDriver adafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver", "Adafruit16CServoDriver");
-      //adafruit16CServoDriver.attach(arduino,"1","0x40");
-      //Ads1115 ads = (Ads1115) Runtime.start("ads", "Ads1115");
-      //ads.attach(arduino,"2","0x40");
-      
-      
-      
+      // Adafruit16CServoDriver adafruit16CServoDriver =
+      // (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver",
+      // "Adafruit16CServoDriver");
+      // adafruit16CServoDriver.attach(arduino,"1","0x40");
+      // Ads1115 ads = (Ads1115) Runtime.start("ads", "Ads1115");
+      // ads.attach(arduino,"2","0x40");
+
       MotorDualPwm motor = (MotorDualPwm) Runtime.start("dyiServo.motor", "MotorDualPwm");
-      
+
       motor.setPwmPins(0, 1);
       motor.attach(arduino);
 
-      
       // Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
       // ads.setController(arduino, "1", "0x48");
 
@@ -668,11 +673,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /*
-  public void attach(String controllerName) throws Exception {
-    attach((MotorController) Runtime.getService(controllerName));
-  }
-    */
-  
+   * public void attach(String controllerName) throws Exception {
+   * attach((MotorController) Runtime.getService(controllerName)); }
+   */
+
   @Override
   public void detach(String controllerName) {
     ServiceInterface si = Runtime.getService(controllerName);
@@ -702,13 +706,14 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   public void onPin(PinData pindata) {
     int inputValue = pindata.value;
     processVariable = 180 * inputValue / resolution;
-    // log.debug(String.format("onPin received value %s converted to %s",inputValue, processVariable));
+    // log.debug(String.format("onPin received value %s converted to
+    // %s",inputValue, processVariable));
     pid.setInput(pidKey, processVariable);
   }
 
   public void attach(String pinArrayControlName, Integer pin) throws Exception {
     // myServo = (DiyServo) Runtime.getService(boundServiceName);
-    attach((PinArrayControl)Runtime.getService(pinArrayControlName), (int) pin);
+    attach((PinArrayControl) Runtime.getService(pinArrayControlName), (int) pin);
   }
 
   public void attach(PinArrayControl pinArrayControl, int pin) throws Exception {
@@ -727,7 +732,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     if (pinArrayControl instanceof Ads1115) {
       resolution = 65536;
     }
-    // log.debug(String.format("Detected %s %s. Setting AD resolution to %s",pinArrayControl.getClass(), pinArrayControl.getName(),resolution));
+    // log.debug(String.format("Detected %s %s. Setting AD resolution to
+    // %s",pinArrayControl.getClass(), pinArrayControl.getName(),resolution));
 
     int rate = 1000 / sampleTime;
     pinArrayControl.attach(this, pin);
@@ -739,11 +745,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     this.powerLevel = power;
   }
 
-
   /**
-   * // A bunch of unimplemented methods from ServoControl.
-   * // Perhaps I should create a new // DiyServoControl interface. // I was
-   * hoping to be able to avoid that, but might be a better solution
+   * // A bunch of unimplemented methods from ServoControl. // Perhaps I should
+   * create a new // DiyServoControl interface. // I was hoping to be able to
+   * avoid that, but might be a better solution
    */
 
   @Override
@@ -773,60 +778,61 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   @Override
   public void setPin(int pin) {
-    // This method should never be used in DiyServo since it's a method specific to the Servo service
+    // This method should never be used in DiyServo since it's a method specific
+    // to the Servo service
   }
-  
-    @Override
+
+  @Override
   public double getAcceleration() {
     return 1.0;
   }
 
-    @Override
-    public void setVelocity(double velocity) {
-     warn("TODO !");      
-    }
+  @Override
+  public void setVelocity(double velocity) {
+    warn("TODO !");
+  }
 
-    @Override
-    public double getVelocity() {
-      // TODO Auto-generated method stub
-      return 0;
-    }
+  @Override
+  public double getVelocity() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
 
-    @Override
-    public double getMinInput() {
-      return mapper.getMinInput();
-    }
+  @Override
+  public double getMinInput() {
+    return mapper.getMinInput();
+  }
 
-    @Override
-    public double getMaxInput() {
-      return mapper.getMaxInput();
-    }
+  @Override
+  public double getMaxInput() {
+    return mapper.getMaxInput();
+  }
 
-    @Override
-    public void addIKServoEventListener(NameProvider service) {
-      // TODO Auto-generated method stub
-      
-    }
+  @Override
+  public void addIKServoEventListener(NameProvider service) {
+    // TODO Auto-generated method stub
 
-    @Override
-    public void sync(ServoControl sc) {
-      // TODO Auto-generated method stub
-      
-    }
+  }
 
-    // None of the methods below can or should be implemented in DiyServo
-    // DiyServo uses a Motor peer
-    
+  @Override
+  public void sync(ServoControl sc) {
+    // TODO Auto-generated method stub
+
+  }
+
+  // None of the methods below can or should be implemented in DiyServo
+  // DiyServo uses a Motor peer
+
   @Override
   public void attachServoController(ServoController controller) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void detachServoController(ServoController controller) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -838,25 +844,25 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   @Override
   public void attach(ServoController controller, int pin) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void attach(ServoController controller, int pin, double pos) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void attach(ServoController controller, int pin, double pos, double speed) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void setAutoDisable(boolean autoDisable) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -874,19 +880,19 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   @Override
   public void setOverrideAutoDisable(boolean overrideAutoDisable) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void waitTargetPos() {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void onServoEvent(Integer eventType, double currentPosUs) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -901,6 +907,21 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   public double getMaxOutput() {
     return mapper.getMaxOutput();
+  }
+
+  public boolean isEnabled() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  public boolean isSweeping() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  public boolean isEventsEnabled() {
+    // TODO Auto-generated method stub
+    return false;
   }
 
 }

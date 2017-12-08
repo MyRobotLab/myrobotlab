@@ -114,7 +114,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
     }
   }
   
-  private class MapInputSliderListener implements ChangeListener {
+  private class MapInputSliderListener implements ChangeListener, MouseListener {
 
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
@@ -122,15 +122,45 @@ public class ServoGui extends ServiceGui implements ActionListener {
       minInput.setText(String.format("%d", mapInputSlider.getLowValue()));
       maxInput.setText(String.format("%d", mapInputSlider.getHighValue()));
 
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
       if (myService != null) {
         send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),Double.parseDouble(maxOutput.getText()));
       } else {
         log.error("can not send message myService is null");
       }
+      
     }
   }
   
-  private class MapOutputSliderListener implements ChangeListener {
+  private class MapOutputSliderListener implements ChangeListener, MouseListener {
 
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
@@ -138,11 +168,41 @@ public class ServoGui extends ServiceGui implements ActionListener {
       minOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
       maxOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
 
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
       if (myService != null) {
        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),Double.parseDouble(maxOutput.getText()));
       } else {
         log.error("can not send message myService is null");
       }
+      
     }
   }
 
@@ -319,6 +379,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
     sweep.setBorder(sweepborder);
     sweep.add(sweepButton);
     sweep.add(eventsButton);
+    sweep.setBackground(Color.WHITE);
 
     JPanel power = new JPanel(new GridLayout(1, 2));
     Border extraborder = BorderFactory.createTitledBorder("Power");
@@ -445,9 +506,9 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
         if (o == autoDisable) {
           if (autoDisable.isSelected()) {
-            send("enableAutoDisable", true);
+            send("setAutoDisable", true);
           } else {
-            send("enableAutoDisable", false);
+            send("setAutoDisable", false);
           }
           return;
         }
@@ -656,6 +717,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
     slider.removeMouseListener(sliderListener);
     mapInputSlider.removeChangeListener(mapInputSliderListener);
     mapOutputSlider.removeChangeListener(mapOutputSliderListener);
+    mapInputSlider.removeMouseListener(mapInputSliderListener);
+    mapOutputSlider.removeMouseListener(mapOutputSliderListener);
   }
 
   public void restoreListeners() {
@@ -665,5 +728,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
     slider.addMouseListener(sliderListener);
     mapInputSlider.addChangeListener(mapInputSliderListener);
     mapOutputSlider.addChangeListener(mapOutputSliderListener);
+    mapInputSlider.addMouseListener(mapInputSliderListener);
+    mapOutputSlider.addMouseListener(mapOutputSliderListener);
   }
 }

@@ -182,7 +182,7 @@ public class Servo extends Service implements ServoControl {
   /**
    * default rest is 90 default target position will be 90 if not specified
    */
-  double rest = 90;
+  double rest = 90.0;
 
   /**
    * last time the servo has moved
@@ -471,8 +471,11 @@ public class Servo extends Service implements ServoControl {
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
-    mapper = new Mapper(minX, maxX, minY, maxY);
-    broadcastState();
+    if (minX != this.getMinInput() || maxX != this.getMaxInput() || minY != this.getMinOutput() || maxY != this.getMaxOutput())
+      {
+      mapper = new Mapper(minX, maxX, minY, maxY);
+      broadcastState();
+      }
   }
 
   public synchronized void moveTo(double pos) {
