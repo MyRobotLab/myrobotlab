@@ -511,7 +511,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       error(e.getMessage());
     }
 
-    // GAP broadcastState();
+    broadcastState();
   }
 
   /**
