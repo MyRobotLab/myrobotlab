@@ -37,11 +37,9 @@ public final class Mapper implements Serializable {
 		this.maxY = maxY;
 
 		if (minY < maxY) {
-			this.minOutput = minY;
-			this.maxOutput = maxY;
+			setInverted(false);
 		} else {
-			this.minOutput = maxY;
-			this.maxOutput = minY;
+		  setInverted(true);
 		}
 	}
 
@@ -99,13 +97,31 @@ public final class Mapper implements Serializable {
 	}
 
 	public void setInverted(boolean invert) {
-		if (invert != inverted) {
-			// change state 
-			double t = minY;
-			minY = maxY;
-			maxY = t;
-			inverted = invert;
+    // change state ONLY if needed
+    // we need only 1 logic : inverted=output inverted / output inverted=inverted
+
+    this.minOutput = minY;
+    this.maxOutput = maxY;
+    double t = minY;
+		if (invert) {
+		  if (minY<maxY) {
+		    minY = maxY;
+	      maxY = t;
+		  }
+      this.minOutput = maxY;
+      this.maxOutput = minY;
 		}
+		else
+		{
+      if (minY>maxY) {
+        minY = maxY;
+        maxY = t;
+      }
+      this.minOutput = minY;
+      this.maxOutput = maxY;
+		}
+    
+    inverted = invert;
 	}
 
 	public void setMax(double max) {

@@ -177,7 +177,7 @@ public class Servo extends Service implements ServoControl {
 
   String controllerName = null;
 
-  Mapper mapper = new Mapper(0, 180, 0, 180);
+  Mapper mapper;
 
   /**
    * default rest is 90 default target position will be 90 if not specified
@@ -245,34 +245,32 @@ public class Servo extends Service implements ServoControl {
 
   @Deprecated
   private boolean autoEnable = true;
-  
+
   /**
-   * defaultDisableDelayNoVelocity 
-   * this make sense if velocity == -1
-   * a timer is launched to delay disable
+   * defaultDisableDelayNoVelocity this make sense if velocity == -1 a timer is
+   * launched to delay disable
+   * 
    * @param defaultDisableDelayNoVelocity
    *          - milliSeconds
-   * @default
-   *          - 10000 
+   * @default - 10000
    */
   public int defaultDisableDelayNoVelocity = 10000;
-  
+
   /**
-   * disableDelayIfVelocity
-   * this make sense if velocity > 0
-   * a timer is launched for an extra delay to disable
+   * disableDelayIfVelocity this make sense if velocity > 0 a timer is launched
+   * for an extra delay to disable
+   * 
    * @param disableDelayIfVelocity
    *          - milliSeconds
-   * @default
-   *          - 1000 
+   * @default - 1000
    */
   public int disableDelayIfVelocity = 1000;
   private boolean moving;
   double currentPosInput;
   private boolean autoDisable = false;
-  
+
   private boolean overrideAutoDisable = false;
-  
+
   private transient Timer autoDisableTimer;
   private int SensorPin = -1;
   private ArrayList<Integer> sensorValues = new ArrayList<Integer>();
@@ -471,11 +469,13 @@ public class Servo extends Service implements ServoControl {
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
-    if (minX != this.getMinInput() || maxX != this.getMaxInput() || minY != this.getMinOutput() || maxY != this.getMaxOutput())
-      {
+    if (mapper == null) {
+      mapper = new Mapper(0, 180, 0, 180);
+    }
+    if (minX != mapper.getMinX() || maxX != mapper.getMaxX() || minY != mapper.getMinY() || maxY != mapper.getMaxY()) {
       mapper = new Mapper(minX, maxX, minY, maxY);
       broadcastState();
-      }
+    }
   }
 
   public synchronized void moveTo(double pos) {
@@ -494,31 +494,30 @@ public class Servo extends Service implements ServoControl {
     if (pos > mapper.getMaxX()) {
       pos = mapper.getMaxX();
     }
-    
+
     targetPos = pos;
-    
+
     if (!isEnabled() && pos != lastPos) {
       enable();
-    } 
-    
+    }
+
     if (intialTargetPosChange) {
       targetPosBeforeSensorFeebBackCorrection = targetPos;
     }
 
     targetOutput = getTargetOutput();// mapper.calcOutput(targetPos); //
-    
+
     lastActivityTime = System.currentTimeMillis();
-    
+
     if (lastPos != pos) {
-      //take care if servo will disable soon
+      // take care if servo will disable soon
       if (autoDisableTimer != null) {
         autoDisableTimer.cancel();
         autoDisableTimer = null;
       }
       controller.servoMoveTo(this);
     }
-    if (!isEventsEnabled || lastPos == pos)
-    {
+    if (!isEventsEnabled || lastPos == pos) {
       lastPos = targetPos;
       broadcastState();
     }
@@ -526,34 +525,33 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public boolean moveToBlocking(double pos) {
-    if (velocity<0){
+    if (velocity < 0) {
       log.info("No effect on moveToBlocking if velocity == -1");
     }
-    if (!isEventsEnabled)
-    {
+    if (!isEventsEnabled) {
       this.addServoEventListener(this);
     }
     targetPos = pos;
     this.moveTo(pos);
     // breakMoveToBlocking=false;
-      waitTargetPos();
+    waitTargetPos();
     return true;
   }
-  
+
   @Override
   public void waitTargetPos() {
     {
-      if (isMoving()||Math.round(lastPos) != Math.round(targetPos)) {
-        if (velocity>0)
-        {
-        synchronized (moveToBlocked) {
-          try {
-            // Will block until moveToBlocked.notify() is called on another thread.
-            moveToBlocked.wait(30000);// 30s timeout security delay
-          } catch (InterruptedException e) {
-            log.info("servo {} moveToBlocked was interrupted", getName());
+      if (isMoving() || Math.round(lastPos) != Math.round(targetPos)) {
+        if (velocity > 0) {
+          synchronized (moveToBlocked) {
+            try {
+              // Will block until moveToBlocked.notify() is called on another
+              // thread.
+              moveToBlocked.wait(30000);// 30s timeout security delay
+            } catch (InterruptedException e) {
+              log.info("servo {} moveToBlocked was interrupted", getName());
+            }
           }
-        }
         }
       }
     }
@@ -562,40 +560,35 @@ public class Servo extends Service implements ServoControl {
   private void delayDisable() {
     lastPos = targetPos;
     broadcastState();
-    if (!isMoving())
-    {
-    if (autoDisable)
-    {
-    int disableDelay=10000;
-    if (velocity > -1) {
-      disableDelay = disableDelayIfVelocity;
-    } else {
-      disableDelay = defaultDisableDelayNoVelocity;
-    }
-    if (autoDisableTimer != null) {
-      autoDisableTimer.cancel();
-      autoDisableTimer = null;
-    }
-    autoDisableTimer = new Timer();
-    autoDisableTimer.schedule(new TimerTask() {
-      @Override
-      public void run() {
-        if (!overrideAutoDisable && !isMoving())
-        {
-        disable();
+    if (!isMoving()) {
+      if (autoDisable) {
+        int disableDelay = 10000;
+        if (velocity > -1) {
+          disableDelay = disableDelayIfVelocity;
+        } else {
+          disableDelay = defaultDisableDelayNoVelocity;
         }
+        if (autoDisableTimer != null) {
+          autoDisableTimer.cancel();
+          autoDisableTimer = null;
+        }
+        autoDisableTimer = new Timer();
+        autoDisableTimer.schedule(new TimerTask() {
+          @Override
+          public void run() {
+            if (!overrideAutoDisable && !isMoving()) {
+              disable();
+            }
+            synchronized (moveToBlocked) {
+              moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
+            }
+          }
+        }, (long) disableDelay);
+      } else {
         synchronized (moveToBlocked) {
           moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
         }
       }
-    }, (long) disableDelay);
-    }
-    else
-    {
-      synchronized (moveToBlocked) {
-        moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
-      }
-    }
     }
     broadcastState();
   }
@@ -616,12 +609,21 @@ public class Servo extends Service implements ServoControl {
     super.releaseService();
   }
 
+  @Override
+  public void startService() {
+    super.startService();
+    if (mapper == null) {
+      mapper = new Mapper(0, 180, 0, 180);
+    }
+  }
+
   public void rest() {
     moveTo(rest);
   }
 
   public void setInverted(boolean invert) {
     mapper.setInverted(invert);
+    broadcastState();
   }
 
   @Override
@@ -981,7 +983,7 @@ public class Servo extends Service implements ServoControl {
   public Double getCurrentPos() {
     return currentPosInput;
   }
-  
+
   public double getCurrentPosOutput() {
     return mapper.calcOutput(getCurrentPos());
   }
@@ -1001,8 +1003,8 @@ public class Servo extends Service implements ServoControl {
   }
 
   /*
-   * Deprecated enableAutoAttach will attach a servo when ask to move and it when the move
-   * is complete
+   * Deprecated enableAutoAttach will attach a servo when ask to move and it
+   * when the move is complete
    * 
    */
   @Deprecated
@@ -1010,7 +1012,7 @@ public class Servo extends Service implements ServoControl {
     warn("enableAutoAttach is disabled please use enableAutoEnable");
     this.autoEnable = autoAttach;
   }
-  
+
   @Deprecated
   public void enableAutoEnable(boolean autoEnable) {
     this.autoEnable = autoEnable;
@@ -1029,13 +1031,13 @@ public class Servo extends Service implements ServoControl {
       error("Please select sensor source");
       return false;
     }
-    overrideAutoDisable=true;
+    overrideAutoDisable = true;
     int min = autoCalibrateSensorMin();
     int max = autoCalibrateSensorMax();
     // extra min calibration because foam is unstable
     int min2 = autoCalibrateSensorMin();
     min = MathUtils.getPercentFromRange(min, min2, 50);
-    overrideAutoDisable=false;
+    overrideAutoDisable = false;
     if (max != min && max > min) {
       return true;
     }
@@ -1095,7 +1097,7 @@ public class Servo extends Service implements ServoControl {
     // 100%=force servo to max
     // 50%=half torque
     // ...
-    overrideAutoDisable=true;
+    overrideAutoDisable = true;
     this.servoTorque = torqueInPercent;
     if (autoCalibrateMax <= autoCalibrateMin) {
       error("Problem with magic, sensor attached to " + this.getName() + " is not calibrated");
@@ -1108,7 +1110,7 @@ public class Servo extends Service implements ServoControl {
       this.getController().enablePin(SensorPin, 10);
     } else {
       this.getController().disablePin(SensorPin);
-      overrideAutoDisable=false;
+      overrideAutoDisable = false;
       log.info("set servo torque to " + torqueInPercent + " % > feedback disabled");
       unsubscribe(getController().getName(), "publishPinArray");
     }
@@ -1169,7 +1171,7 @@ public class Servo extends Service implements ServoControl {
   public void enableAutoDisable(boolean autoDisable) {
     setAutoDisable(autoDisable);
   }
-  
+
   @Override
   public void setAutoDisable(boolean autoDisable) {
     this.autoDisable = autoDisable;
@@ -1178,17 +1180,17 @@ public class Servo extends Service implements ServoControl {
     delayDisable();
     broadcastState();
   }
-  
+
   @Override
   public boolean getAutoDisable() {
     return this.autoDisable;
   }
-  
+
   public void setDisableDelayIfVelocity(int disableDelayIfVelocity) {
     this.disableDelayIfVelocity = disableDelayIfVelocity;
     broadcastState();
   }
-  
+
   public void setDefaultDisableDelayNoVelocity(int defaultDisableDelayNoVelocity) {
     this.defaultDisableDelayNoVelocity = defaultDisableDelayNoVelocity;
     broadcastState();
@@ -1245,9 +1247,9 @@ public class Servo extends Service implements ServoControl {
       invoke("publishServoEvent", currentPosInput);
     }
   }
-  
+
   public void onServoEvent(Integer eventType, Integer currentPosUs, double targetPos) {
-    double currentPos = microsecondsToDegree(currentPosUs);  
+    double currentPos = microsecondsToDegree(currentPosUs);
     onServoEvent(eventType, currentPos);
   }
 
@@ -1296,7 +1298,7 @@ public class Servo extends Service implements ServoControl {
       if (done) {
         return;
       }
-      
+
       Servo servo = (Servo) Runtime.start("servo", "Servo");
       Servo servo2 = (Servo) Runtime.start("servo2", "Servo");
       Map<String, MethodEntry> methods = servo.getMethodMap();
@@ -1330,7 +1332,6 @@ public class Servo extends Service implements ServoControl {
       fos.write(sb.toString().getBytes());
       fos.close();
 
-
       // Runtime.start("webgui", "WebGui");
       // arduino.record();
       // arduino.getSerial().record();
@@ -1340,7 +1341,7 @@ public class Servo extends Service implements ServoControl {
       log.info("ports {}", Arrays.toString(arduino.getSerial().getPortNames().toArray()));
       log.info("ready here");
       // arduino.ackEnabled = true;
-      
+
       servo.attach(arduino, 7);
       servo2.attach(arduino, 8);
       servo.sync(servo2);
@@ -1363,7 +1364,7 @@ public class Servo extends Service implements ServoControl {
       arduino.disconnect();
       arduino.connect(arduinoPort);
 
-      //arduino.reset();
+      // arduino.reset();
 
       log.info("ready here 2");
       // servo.attach(arduino, 8);
@@ -1379,7 +1380,7 @@ public class Servo extends Service implements ServoControl {
       servo.moveTo(90);
       servo.setRest(30);
       servo.moveTo(10);
-     
+
       // servo.test();
     } catch (Exception e) {
       Logging.logError(e);
@@ -1389,9 +1390,8 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public void setOverrideAutoDisable(boolean overrideAutoDisable) {
-    this.overrideAutoDisable=overrideAutoDisable;
-    if (!overrideAutoDisable)
-    {
+    this.overrideAutoDisable = overrideAutoDisable;
+    if (!overrideAutoDisable) {
       delayDisable();
     }
   }

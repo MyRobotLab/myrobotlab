@@ -195,7 +195,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   /**
    * mapper to be able to remap input values
    */
-  Mapper mapper = new Mapper(0, 180, 0, 180);
+  Mapper mapper;
 
   Double rest = 90.0;
 
@@ -423,7 +423,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
-    if (minX != this.getMinInput() || maxX != this.getMaxInput() || minY != this.getMinOutput() || maxY != this.getMaxOutput()) {
+    if (mapper == null) {
+      mapper = new Mapper(0, 180, 0, 180);
+    }
+    if (minX != mapper.getMinX() || maxX != mapper.getMaxX() || minY != mapper.getMinY() || maxY != mapper.getMaxY()) {
       mapper = new Mapper(minX, maxX, minY, maxY);
       broadcastState();
     }
@@ -489,18 +492,27 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     super.releaseService();
   }
 
+  @Override
+  public void startService() {
+    super.startService();
+    if (mapper == null) {
+      mapper = new Mapper(0, 180, 0, 180);
+    }
+  }
+
   public void rest() {
     moveTo(rest);
   }
 
   public void setInverted(boolean invert) {
     mapper.setInverted(invert);
+    motorControl.setInverted(invert);
+    broadcastState();
   }
 
   @Override
   public void setMinMax(double min, double max) {
     map(min, max, min, max);
-    broadcastState();
   }
 
   public void setRest(double rest) {

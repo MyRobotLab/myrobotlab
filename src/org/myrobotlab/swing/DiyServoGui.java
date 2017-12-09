@@ -28,7 +28,6 @@ package org.myrobotlab.swing;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -163,8 +162,14 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
-      minOutput.setText((double) mapOutputSlider.getLowValue() + "");
-      maxOutput.setText((double) mapOutputSlider.getHighValue() + "");
+      if (mapOutputSlider.getInverted()) {
+        minOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
+        maxOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
+      } else {
+        minOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
+        maxOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
+
+      }
     }
 
     @Override
@@ -223,6 +228,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
   JButton updateMapButton = new JButton("set");
   JButton enableButton = new JButton("enable");
   JCheckBox autoDisable = new JCheckBox("autoDisable");
+  JCheckBox setInverted = new JCheckBox("setInverted");
   JSlider slider = new JSlider(0, 180, 90);
   RangeSlider mapInputSlider = new RangeSlider();
   JLabel InputL = new JLabel("Input MAP :");
@@ -297,6 +303,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     imageenabled.setIcon(enabled);
     velocityPic.setIcon(velocityPng);
     autoDisable.setSelected(false);
+    setInverted.setSelected(false);
     defaultDisableDelayNoVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
     disableDelayIfVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
 
@@ -333,6 +340,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     attachButton.addActionListener(this);
     enableButton.addActionListener(this);
     autoDisable.addActionListener(this);
+    setInverted.addActionListener(this);
     sweepButton.addActionListener(this);
     eventsButton.addActionListener(this);
     setDisableDelays.addActionListener(this);
@@ -366,31 +374,52 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     map.add(updateMapButton);
     // map.add(updateMapButton);
 
-    JPanel powerSettings = new JPanel(new GridLayout(4, 1));
-    powerSettings.add(disableDelayIfVelocityL);
-    powerSettings.add(disableDelayIfVelocity);
-    powerSettings.add(defaultDisableDelayNoVelocityL);
-    powerSettings.add(defaultDisableDelayNoVelocity);
+    
+    //powerSettings.add(disableDelayIfVelocityL);
+    
+    //powerSettings.add(defaultDisableDelayNoVelocityL);
+    //powerSettings.add(defaultDisableDelayNoVelocity);
 
-    JPanel powerMain = new JPanel(new GridLayout(2, 1));
-    JPanel powerMainSub = new JPanel();
-    powerMainSub.add(autoDisable);
-    powerMainSub.add(setDisableDelays);
+    JPanel powerMain = new JPanel();
     powerMain.add(enableButton);
-    powerMain.add(powerMainSub);
-
+    powerMain.add(autoDisable);
+    powerMain.add(setDisableDelays);
+    powerMain.add(disableDelayIfVelocity);
+    //powerMain.add(powerMainSub);
+    
+    JPanel extra = new JPanel(new GridLayout(1, 1));  
+    Border settingsborder = BorderFactory.createTitledBorder("Extra :");
+    extra.setBorder(settingsborder);
     JPanel sweep = new JPanel();
-    Border sweepborder = BorderFactory.createTitledBorder("Sweep and Events");
-    sweep.setBorder(sweepborder);
+    sweep.add(setInverted);
     sweep.add(sweepButton);
     sweep.add(eventsButton);
     sweep.setBackground(Color.WHITE);
+    
+    JPanel velocityP = new JPanel(new GridLayout(2, 1));
+    Border borderVelocityP = BorderFactory.createTitledBorder("Velocity :");
+    velocityP.setBorder(borderVelocityP);
+    velocityP.setBackground(Color.WHITE);
 
-    JPanel power = new JPanel(new GridLayout(1, 2));
+    JPanel velocityPicP = new JPanel();
+    velocityPicP.add(velocityPic);
+    velocityPicP.setBackground(Color.WHITE);
+
+    JPanel velocitySetings = new JPanel();
+    velocitySetings.add(velocity);
+    velocitySetings.add(setVelocity);
+    velocitySetings.setBackground(Color.WHITE);
+    velocityP.add(velocitySetings);
+    velocityP.add(velocityPicP);
+    
+    extra.add(sweep);
+    extra.setBackground(Color.WHITE);
+
+    JPanel power = new JPanel(new GridLayout(1, 1));
     Border extraborder = BorderFactory.createTitledBorder("Power");
     power.setBorder(extraborder);
     power.add(powerMain);
-    power.add(powerSettings);
+    
 
     JPanel northPanel = new JPanel(new GridLayout());
     northPanel.add(controllerP);
@@ -401,30 +430,13 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
     JPanel centerPanel = new JPanel(new GridLayout(2, 1));
 
-    JPanel centerPanelStatus = new JPanel(new GridLayout(1, 3));
+    JPanel centerPanelStatus = new JPanel(new GridLayout(1, 4));
     centerPanelStatus.setBackground(Color.white);
     centerPanelStatus.add(boundPos);
     centerPanelStatus.add(imageenabled);
-    centerPanelStatus.add(sweep);
-
-    JPanel velocityP = new JPanel(new GridLayout(2, 1));
-    Border borderVelocityP = BorderFactory.createTitledBorder("Velocity");
-    velocityP.setBorder(borderVelocityP);
-    velocityP.setBackground(Color.WHITE);
-
-    JPanel velocityPicP = new JPanel(new FlowLayout());
-    velocityPicP.add(velocityPic);
-    velocityPicP.setBackground(Color.WHITE);
-
-    JPanel velocitySetings = new JPanel();
-    velocitySetings.add(velocity);
-    velocitySetings.add(setVelocity);
-    velocitySetings.setBackground(Color.WHITE);
-
-    velocityP.add(velocityPicP);
-    velocityP.add(velocitySetings);
-
     centerPanelStatus.add(velocityP);
+    centerPanelStatus.add(extra);
+
     centerPanel.add(centerPanelStatus);
 
     centerPanel.add(slider);
@@ -432,11 +444,6 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     display.add(left, BorderLayout.WEST);
 
     display.add(map, BorderLayout.SOUTH);
-
-    // JPanel southPanel = new JPanel(new GridLayout(2, 2));
-    // southPanel.add(map);
-    // southPanel.add(sweep);
-    // display.add(southPanel, BorderLayout.SOUTH);
 
     refreshControllers();
   }
@@ -490,6 +497,15 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
             send("setAutoDisable", true);
           } else {
             send("setAutoDisable", false);
+          }
+          return;
+        }
+        
+        if (o == setInverted) {
+          if (setInverted.isSelected()) {
+            send("setInverted", true);
+          } else {
+            send("setInverted", false);
           }
           return;
         }
@@ -598,6 +614,13 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
         } else {
           autoDisable.setSelected(false);
         }
+        
+        if (servo.isInverted()) {
+          setInverted.setSelected(true);
+        } else {
+          setInverted.setSelected(false);
+        }
+           
 
         Double pos = servo.getPos();
         if (pos != null) {
@@ -626,6 +649,14 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           mapInputSlider.setMaximum(mapInputSliderMaxValue);
         }
 
+        double minOutputTmp = servo.getMinOutput();
+        double maxOutputTmp = servo.getMaxOutput();
+
+        if (servo.isInverted()) {
+          minOutputTmp = servo.getMaxOutput();
+          maxOutputTmp = servo.getMinOutput();
+        }
+        
         if (servo.getMinOutput() < mapOutputSliderMinValue) {
           mapOutputSliderMinValue = (int) servo.getMinOutput();
           mapOutputSlider.setMinimum(mapOutputSliderMinValue);
@@ -636,15 +667,18 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
         }
 
+        mapOutputSlider.setInverted(servo.isInverted());
+
+        minInput.setText(servo.getMinInput() + "");
+        maxInput.setText(servo.getMaxInput() + "");
+        minOutput.setText(minOutputTmp + "");
+        maxOutput.setText(maxOutputTmp + "");
+
         mapInputSlider.setLowValue((int) servo.getMinInput());
         mapInputSlider.setHighValue((int) servo.getMaxInput());
         mapOutputSlider.setLowValue((int) servo.getMinOutput());
         mapOutputSlider.setHighValue((int) servo.getMaxOutput());
 
-        minInput.setText(servo.getMinInput() + "");
-        maxInput.setText(servo.getMaxInput() + "");
-        minOutput.setText(servo.getMinOutput() + "");
-        maxOutput.setText(servo.getMaxOutput() + "");
 
         if (servo.isSweeping()) {
           sweepButton.setText("stop");

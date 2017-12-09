@@ -113,7 +113,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
     }
   }
-  
+
   private class MapInputSliderListener implements ChangeListener, MouseListener {
 
     @Override
@@ -127,82 +127,89 @@ public class ServoGui extends ServiceGui implements ActionListener {
     @Override
     public void mouseClicked(MouseEvent e) {
       // TODO Auto-generated method stub
-      
+
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
       // TODO Auto-generated method stub
-      
+
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
       // TODO Auto-generated method stub
-      
+
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
       // TODO Auto-generated method stub
-      
+
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
 
       if (myService != null) {
-        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),Double.parseDouble(maxOutput.getText()));
+        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
+            Double.parseDouble(maxOutput.getText()));
       } else {
         log.error("can not send message myService is null");
       }
-      
+
     }
   }
-  
+
   private class MapOutputSliderListener implements ChangeListener, MouseListener {
 
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
 
-      minOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
-      maxOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
+      if (mapOutputSlider.getInverted()) {
+        minOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
+        maxOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
+      } else {
+        minOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
+        maxOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
 
+      }
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
       // TODO Auto-generated method stub
-      
+
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
       // TODO Auto-generated method stub
-      
+
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
       // TODO Auto-generated method stub
-      
+
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
       // TODO Auto-generated method stub
-      
+
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
 
       if (myService != null) {
-       send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),Double.parseDouble(maxOutput.getText()));
+        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
+            Double.parseDouble(maxOutput.getText()));
       } else {
         log.error("can not send message myService is null");
       }
-      
+
     }
   }
 
@@ -216,7 +223,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
   JTextField velocity = new JTextField("-1");
   JLabel disableDelayIfVelocityL = new JLabel("Extra delay ( ms ): ");
   JLabel defaultDisableDelayNoVelocityL = new JLabel("Max velocity delay ( ms ) : ");
-  
+
   JTextField disableDelayIfVelocity = new JTextField("1000");
   JTextField defaultDisableDelayNoVelocity = new JTextField("10000");
   JButton setVelocity = new JButton("set");
@@ -225,15 +232,17 @@ public class ServoGui extends ServiceGui implements ActionListener {
   JButton updateMapButton = new JButton("set");
   JButton enableButton = new JButton("enable");
   JCheckBox autoDisable = new JCheckBox("autoDisable");
+  JCheckBox setInverted = new JCheckBox("setInverted");
   JSlider slider = new JSlider(0, 180, 90);
   RangeSlider mapInputSlider = new RangeSlider();
   JLabel InputL = new JLabel("Input MAP :");
   JLabel OutputL = new JLabel("Output MAP : ");
-  Integer mapInputSliderMinValue=0;
-  Integer mapInputSliderMaxValue=180;
-  Integer mapOutputSliderMinValue=0;
-  Integer mapOutputSliderMaxValue=180;
+  Integer mapInputSliderMinValue = 0;
+  Integer mapInputSliderMaxValue = 180;
+  Integer mapOutputSliderMinValue = 0;
+  Integer mapOutputSliderMaxValue = 180;
   RangeSlider mapOutputSlider = new RangeSlider();
+  
 
   BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
   BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
@@ -261,8 +270,6 @@ public class ServoGui extends ServiceGui implements ActionListener {
   SliderListener sliderListener = new SliderListener();
   MapInputSliderListener mapInputSliderListener = new MapInputSliderListener();
   MapOutputSliderListener mapOutputSliderListener = new MapOutputSliderListener();
-  
-  
 
   boolean eventsEnabled;
 
@@ -280,18 +287,18 @@ public class ServoGui extends ServiceGui implements ActionListener {
     maxInput.setPreferredSize(new Dimension(50, 24));
     minOutput.setPreferredSize(new Dimension(50, 24));
     maxOutput.setPreferredSize(new Dimension(50, 24));
-    
-    minInput.setBackground(new Color(188,208,244));
-    maxInput.setBackground(new Color(188,208,244));
-    minOutput.setBackground(new Color(200,238,206));
-    maxOutput.setBackground(new Color(200,238,206));
-    
+
+    minInput.setBackground(new Color(188, 208, 244));
+    maxInput.setBackground(new Color(188, 208, 244));
+    minOutput.setBackground(new Color(200, 238, 206));
+    maxOutput.setBackground(new Color(200, 238, 206));
+
     mapInputSlider.setMinimum(0);
     mapInputSlider.setMaximum(180);
-    
+
     mapOutputSlider.setMinimum(0);
     mapOutputSlider.setMaximum(180);
-    
+
     velocity.setPreferredSize(new Dimension(50, 24));
     velocity.setSize(new Dimension(50, 24));
     defaultDisableDelayNoVelocity.setPreferredSize(new Dimension(40, 24));
@@ -301,9 +308,10 @@ public class ServoGui extends ServiceGui implements ActionListener {
     imageenabled.setIcon(enabled);
     velocityPic.setIcon(velocityPng);
     autoDisable.setSelected(false);
+    setInverted.setSelected(false);
     defaultDisableDelayNoVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
     disableDelayIfVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
- 
+
     slider.setForeground(Color.white);
     slider.setBackground(Color.DARK_GRAY);
     left.setForeground(Color.white);
@@ -315,9 +323,9 @@ public class ServoGui extends ServiceGui implements ActionListener {
     slider.setPaintTicks(true);
     slider.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     slider.setPaintLabels(true);
-    
-    mapInputSlider.setBackground(new Color(188,208,244));
-    mapOutputSlider.setBackground(new Color(200,238,206));
+
+    mapInputSlider.setBackground(new Color(188, 208, 244));
+    mapOutputSlider.setBackground(new Color(200, 238, 206));
 
     setVelocity.addActionListener(this);
     updateMinMaxButton.addActionListener(this);
@@ -328,6 +336,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
     attachButton.addActionListener(this);
     enableButton.addActionListener(this);
     autoDisable.addActionListener(this);
+    setInverted.addActionListener(this);
     sweepButton.addActionListener(this);
     eventsButton.addActionListener(this);
     pinList.addActionListener(this);
@@ -359,36 +368,54 @@ public class ServoGui extends ServiceGui implements ActionListener {
     map.add(maxOutput);
 
     map.add(updateMapButton);
-    //map.add(updateMapButton);
+    // map.add(updateMapButton);
 
-    JPanel powerSettings = new JPanel(new GridLayout(4, 1));
-    powerSettings.add(disableDelayIfVelocityL);
-    powerSettings.add(disableDelayIfVelocity);
-    powerSettings.add(defaultDisableDelayNoVelocityL);
-    powerSettings.add(defaultDisableDelayNoVelocity);
-
-    JPanel powerMain = new JPanel(new GridLayout(2, 1));
-    JPanel powerMainSub = new JPanel();
-    powerMainSub.add(autoDisable);
-    powerMainSub.add(setDisableDelays);
-    powerMain.add(enableButton);
-    powerMain.add(powerMainSub);
+  
+    //powerSettings.add(disableDelayIfVelocityL);
     
+    //powerSettings.add(defaultDisableDelayNoVelocityL);
+    //powerSettings.add(defaultDisableDelayNoVelocity);
+
+    JPanel powerMain = new JPanel();
+    powerMain.add(enableButton);
+    powerMain.add(autoDisable);
+    powerMain.add(setDisableDelays);
+    powerMain.add(disableDelayIfVelocity);
+    //powerMain.add(powerMainSub);
+
+    JPanel extra = new JPanel(new GridLayout(1, 1));
+    Border settingsborder = BorderFactory.createTitledBorder("Extra :");
+    extra.setBorder(settingsborder);
     JPanel sweep = new JPanel();
-    Border sweepborder = BorderFactory.createTitledBorder("Sweep and Events");
-    sweep.setBorder(sweepborder);
+    sweep.add(setInverted);
     sweep.add(sweepButton);
     sweep.add(eventsButton);
     sweep.setBackground(Color.WHITE);
 
-    JPanel power = new JPanel(new GridLayout(1, 2));
+    JPanel velocityP = new JPanel();
+    Border borderVelocityP = BorderFactory.createTitledBorder("Velocity :");
+    velocityP.setBorder(borderVelocityP);
+    velocityP.setBackground(Color.WHITE);
+
+    JPanel velocityPicP = new JPanel();
+    velocityPicP.add(velocityPic);
+    velocityPicP.setBackground(Color.WHITE);
+
+    JPanel velocitySetings = new JPanel();
+    velocitySetings.add(velocity);
+    velocitySetings.add(setVelocity);
+    velocitySetings.setBackground(Color.WHITE);
+    velocityP.add(velocitySetings);
+    velocityP.add(velocityPicP);
+
+
+    extra.add(sweep);
+    extra.setBackground(Color.WHITE);
+
+    JPanel power = new JPanel(new GridLayout(1, 1));
     Border extraborder = BorderFactory.createTitledBorder("Power");
     power.setBorder(extraborder);
     power.add(powerMain);
-    power.add(powerSettings);
-
-
-    
 
     JPanel northPanel = new JPanel(new GridLayout());
     northPanel.add(controllerP);
@@ -399,42 +426,22 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
     JPanel centerPanel = new JPanel(new GridLayout(2, 1));
 
-    JPanel centerPanelStatus = new JPanel(new GridLayout(1, 3));
+    JPanel centerPanelStatus = new JPanel(new GridLayout(1, 4));
     centerPanelStatus.setBackground(Color.white);
     centerPanelStatus.add(boundPos);
     centerPanelStatus.add(imageenabled);
-    centerPanelStatus.add(sweep);
-
-    JPanel velocityP = new JPanel(new GridLayout(2, 1));
-    Border borderVelocityP = BorderFactory.createTitledBorder("Velocity");
-    velocityP.setBorder(borderVelocityP);
-    velocityP.setBackground(Color.WHITE);
-
-    JPanel velocityPicP = new JPanel(new FlowLayout());
-    velocityPicP.add(velocityPic);
-    velocityPicP.setBackground(Color.WHITE);
-
-    JPanel velocitySetings = new JPanel();
-    velocitySetings.add(velocity);
-    velocitySetings.add(setVelocity);
-    velocitySetings.setBackground(Color.WHITE);
-
-    velocityP.add(velocityPicP);
-    velocityP.add(velocitySetings);
-
     centerPanelStatus.add(velocityP);
-    centerPanel.add(centerPanelStatus);
+    centerPanelStatus.add(extra);
 
+    centerPanel.add(centerPanelStatus);
     centerPanel.add(slider);
+    centerPanel.setMinimumSize(new Dimension(50, 200));
+    centerPanel.setSize(new Dimension(50, 200));
     display.add(centerPanel, BorderLayout.CENTER);
     display.add(left, BorderLayout.WEST);
 
     display.add(map, BorderLayout.SOUTH);
-    
-    //JPanel southPanel = new JPanel(new GridLayout(2, 2));
-    //southPanel.add(map);
-    //southPanel.add(sweep);
-    //display.add(southPanel, BorderLayout.SOUTH);
+
 
     refreshControllers();
   }
@@ -509,6 +516,15 @@ public class ServoGui extends ServiceGui implements ActionListener {
             send("setAutoDisable", true);
           } else {
             send("setAutoDisable", false);
+          }
+          return;
+        }
+
+        if (o == setInverted) {
+          if (setInverted.isSelected()) {
+            send("setInverted", true);
+          } else {
+            send("setInverted", false);
           }
           return;
         }
@@ -624,6 +640,12 @@ public class ServoGui extends ServiceGui implements ActionListener {
           autoDisable.setSelected(false);
         }
 
+        if (servo.isInverted()) {
+          setInverted.setSelected(true);
+        } else {
+          setInverted.setSelected(false);
+        }
+
         Double pos = servo.getPos();
         if (pos != null) {
           boundPos.setText(Double.toString(pos));
@@ -641,35 +663,41 @@ public class ServoGui extends ServiceGui implements ActionListener {
         disableDelayIfVelocity.setText(servo.disableDelayIfVelocity + "");
         defaultDisableDelayNoVelocity.setText(servo.defaultDisableDelayNoVelocity + "");
 
-        if (servo.getMinInput()<mapInputSliderMinValue)
-        {
-          mapInputSliderMinValue=(int) servo.getMinInput();
+        if (servo.getMinInput() < mapInputSliderMinValue) {
+          mapInputSliderMinValue = (int) servo.getMinInput();
           mapInputSlider.setMinimum(mapInputSliderMinValue);
         }
-        
-        if (servo.getMaxInput()>mapInputSliderMaxValue)
-        {
-          mapInputSliderMaxValue=(int) servo.getMaxInput();
+
+        if (servo.getMaxInput() > mapInputSliderMaxValue) {
+          mapInputSliderMaxValue = (int) servo.getMaxInput();
           mapInputSlider.setMaximum(mapInputSliderMaxValue);
         }
-        
-        if (servo.getMinOutput()<mapOutputSliderMinValue)
-        {
-          mapOutputSliderMinValue=(int) servo.getMinOutput();
+
+        double minOutputTmp = servo.getMinOutput();
+        double maxOutputTmp = servo.getMaxOutput();
+
+        if (servo.isInverted()) {
+          minOutputTmp = servo.getMaxOutput();
+          maxOutputTmp = servo.getMinOutput();
+        }
+
+        if (servo.getMinOutput() < mapOutputSliderMinValue) {
+          mapOutputSliderMinValue = (int) servo.getMinOutput();
           mapOutputSlider.setMinimum(mapOutputSliderMinValue);
         }
-        
-        if (servo.getMaxOutput()>mapOutputSliderMaxValue)
-        {
-          mapOutputSliderMaxValue=(int) servo.getMaxOutput();
+
+        if (servo.getMaxOutput() > mapOutputSliderMaxValue) {
+          mapOutputSliderMaxValue = (int) servo.getMaxOutput();
           mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
         }
-        
+
+        mapOutputSlider.setInverted(servo.isInverted());
+
         minInput.setText(servo.getMinInput() + "");
         maxInput.setText(servo.getMaxInput() + "");
-        minOutput.setText(servo.getMinOutput() + "");
-        maxOutput.setText(servo.getMaxOutput() + "");
-        
+        minOutput.setText(minOutputTmp + "");
+        maxOutput.setText(maxOutputTmp + "");
+
         mapInputSlider.setLowValue((int) servo.getMinInput());
         mapInputSlider.setHighValue((int) servo.getMaxInput());
         mapOutputSlider.setLowValue((int) servo.getMinOutput());
