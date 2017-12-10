@@ -1,15 +1,11 @@
 package org.myrobotlab.service;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 
