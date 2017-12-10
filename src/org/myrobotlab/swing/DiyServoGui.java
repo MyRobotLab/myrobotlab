@@ -242,8 +242,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
   BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
   BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 
-  final String attachAnalog = "attach analog input";
-  final String detachAnalog = "detach analog input";
+  final String attachAnalog = "attach";
+  final String detachAnalog = "detach";
   JComboBox<String> pinArrayControlList = new JComboBox<String>();
   JComboBox<Integer> analogInputPinList = new JComboBox<Integer>();
   JButton attachListenerButton = new JButton(attachAnalog);
@@ -348,10 +348,10 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     // addTopLeft(2, boundPos, 3, s,velocity,setVelocity );
 
     JPanel controllerP = new JPanel();
-    Border borderController = BorderFactory.createTitledBorder("Controller");
+    Border borderController = BorderFactory.createTitledBorder("Analog input");
     controllerP.setBorder(borderController);
-    JLabel pinArrayControlListlabel = new JLabel("Analog input : ");
-    JLabel analogInputPinListabel = new JLabel("Analog input pin : ");
+    JLabel pinArrayControlListlabel = new JLabel("Controller : ");
+    JLabel analogInputPinListabel = new JLabel("Pin : ");
 
     controllerP.add(pinArrayControlListlabel);
     controllerP.add(pinArrayControlList);
