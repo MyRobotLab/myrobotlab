@@ -262,6 +262,11 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   @Override
+  public boolean isLocked() {
+    return locked;
+  }
+  
+  @Override
   public void stopService() {
     super.stopService();
     if (controller != null) {

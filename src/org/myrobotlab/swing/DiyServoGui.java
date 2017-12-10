@@ -72,27 +72,30 @@ import com.jidesoft.swing.RangeSlider;
  */
 public class DiyServoGui extends ServiceGui implements ActionListener {
 
+  boolean mousePressed;
+
   private class SliderListener implements ChangeListener, MouseListener {
 
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
-
-      boundPos.setText(String.format("%d", slider.getValue()));
-
-      if (myService != null) {
-        myService.send(boundServiceName, "moveTo", Integer.valueOf(slider.getValue()));
-      } else {
-        log.error("can not send message myService is null");
+      if (mousePressed) {
+        if (myService != null) {
+          myService.send(boundServiceName, "moveTo", Integer.valueOf(slider.getValue()));
+        } else {
+          log.error("can not send message myService is null");
+        }
       }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
+      mousePressed = true;
       send("setOverrideAutoDisable", true);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
+      mousePressed = false;
       send("setOverrideAutoDisable", false);
     }
 
@@ -150,8 +153,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     @Override
     public void mouseReleased(MouseEvent e) {
       if (myService != null) {
-        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
-            Double.parseDouble(maxOutput.getText()));
+        myServo.map(Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
       } else {
         log.error("can not send message myService is null");
       }
@@ -163,11 +165,11 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
       if (mapOutputSlider.getInverted()) {
-        minOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
-        maxOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
+        minOutput.setText((double) mapOutputSlider.getHighValue() + "");
+        maxOutput.setText((double) mapOutputSlider.getLowValue() + "");
       } else {
-        minOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
-        maxOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
+        minOutput.setText((double) mapOutputSlider.getLowValue() + "");
+        maxOutput.setText((double) mapOutputSlider.getHighValue() + "");
 
       }
     }
@@ -199,9 +201,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     @Override
     public void mouseReleased(MouseEvent e) {
       if (myService != null) {
-
-        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
-            Double.parseDouble(maxOutput.getText()));
+        myServo.map(Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
       } else {
         log.error("can not send message myService is null");
       }
@@ -309,12 +309,12 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
     // not yet implemented
     setVelocity.setEnabled(false);
-    enableButton.setEnabled(false);
+    // enableButton.setEnabled(false);
     autoDisable.setEnabled(false);
     disableDelayIfVelocity.setEnabled(false);
     defaultDisableDelayNoVelocity.setEnabled(false);
     setDisableDelays.setEnabled(false);
-    sweepButton.setEnabled(false);
+    // sweepButton.setEnabled(false);
     eventsButton.setEnabled(false);
 
     slider.setForeground(Color.white);
@@ -374,20 +374,19 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     map.add(updateMapButton);
     // map.add(updateMapButton);
 
-    
-    //powerSettings.add(disableDelayIfVelocityL);
-    
-    //powerSettings.add(defaultDisableDelayNoVelocityL);
-    //powerSettings.add(defaultDisableDelayNoVelocity);
+    // powerSettings.add(disableDelayIfVelocityL);
+
+    // powerSettings.add(defaultDisableDelayNoVelocityL);
+    // powerSettings.add(defaultDisableDelayNoVelocity);
 
     JPanel powerMain = new JPanel();
     powerMain.add(enableButton);
     powerMain.add(autoDisable);
     powerMain.add(setDisableDelays);
     powerMain.add(disableDelayIfVelocity);
-    //powerMain.add(powerMainSub);
-    
-    JPanel extra = new JPanel(new GridLayout(1, 1));  
+    // powerMain.add(powerMainSub);
+
+    JPanel extra = new JPanel(new GridLayout(1, 1));
     Border settingsborder = BorderFactory.createTitledBorder("Extra :");
     extra.setBorder(settingsborder);
     JPanel sweep = new JPanel();
@@ -395,7 +394,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     sweep.add(sweepButton);
     sweep.add(eventsButton);
     sweep.setBackground(Color.WHITE);
-    
+
     JPanel velocityP = new JPanel(new GridLayout(2, 1));
     Border borderVelocityP = BorderFactory.createTitledBorder("Velocity :");
     velocityP.setBorder(borderVelocityP);
@@ -411,7 +410,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     velocitySetings.setBackground(Color.WHITE);
     velocityP.add(velocitySetings);
     velocityP.add(velocityPicP);
-    
+
     extra.add(sweep);
     extra.setBackground(Color.WHITE);
 
@@ -419,7 +418,6 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     Border extraborder = BorderFactory.createTitledBorder("Power");
     power.setBorder(extraborder);
     power.add(powerMain);
-    
 
     JPanel northPanel = new JPanel(new GridLayout());
     northPanel.add(controllerP);
@@ -479,12 +477,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
         if (o == enableButton) {
           if (enableButton.getText().equals("enable")) {
-            if (!attachButton.getText().equals("attach")) {
-              send("enable");
-              imageenabled.setVisible(true);
-            } else {
-              log.error("Servo is not attached");
-            }
+            send("enable");
+
           } else {
             send("disable");
             imageenabled.setVisible(false);
@@ -500,7 +494,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           }
           return;
         }
-        
+
         if (o == setInverted) {
           if (setInverted.isSelected()) {
             send("setInverted", true);
@@ -614,13 +608,12 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
         } else {
           autoDisable.setSelected(false);
         }
-        
+
         if (servo.isInverted()) {
           setInverted.setSelected(true);
         } else {
           setInverted.setSelected(false);
         }
-           
 
         Double pos = servo.getPos();
         if (pos != null) {
@@ -656,29 +649,29 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           minOutputTmp = servo.getMaxOutput();
           maxOutputTmp = servo.getMinOutput();
         }
-        
-        if (servo.getMinOutput() < mapOutputSliderMinValue) {
-          mapOutputSliderMinValue = (int) servo.getMinOutput();
-          mapOutputSlider.setMinimum(mapOutputSliderMinValue);
-        }
 
-        if (servo.getMaxOutput() > mapOutputSliderMaxValue) {
-          mapOutputSliderMaxValue = (int) servo.getMaxOutput();
-          mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
-        }
 
-        mapOutputSlider.setInverted(servo.isInverted());
+          if (servo.getMinOutput() < mapOutputSliderMinValue) {
+            mapOutputSliderMinValue = (int) servo.getMinOutput();
+            mapOutputSlider.setMinimum(mapOutputSliderMinValue);
+          }
 
-        minInput.setText(servo.getMinInput() + "");
-        maxInput.setText(servo.getMaxInput() + "");
-        minOutput.setText(minOutputTmp + "");
-        maxOutput.setText(maxOutputTmp + "");
+          if (servo.getMaxOutput() > mapOutputSliderMaxValue) {
+            mapOutputSliderMaxValue = (int) servo.getMaxOutput();
+            mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
+          }
 
-        mapInputSlider.setLowValue((int) servo.getMinInput());
-        mapInputSlider.setHighValue((int) servo.getMaxInput());
-        mapOutputSlider.setLowValue((int) servo.getMinOutput());
-        mapOutputSlider.setHighValue((int) servo.getMaxOutput());
+          mapOutputSlider.setInverted(servo.isInverted());
 
+          minInput.setText(servo.getMinInput() + "");
+          maxInput.setText(servo.getMaxInput() + "");
+          minOutput.setText(minOutputTmp + "");
+          maxOutput.setText(maxOutputTmp + "");
+
+          mapInputSlider.setLowValue((int) servo.getMinInput());
+          mapInputSlider.setHighValue((int) servo.getMaxInput());
+          mapOutputSlider.setLowValue((int) servo.getMinOutput());
+          mapOutputSlider.setHighValue((int) servo.getMaxOutput());
 
         if (servo.isSweeping()) {
           sweepButton.setText("stop");
@@ -706,7 +699,6 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     // Refresh the list of Pins inputs
     refreshAnalogPinList();
 
-    restoreListeners();
   }
 
   public void refreshAnalogPinList() {

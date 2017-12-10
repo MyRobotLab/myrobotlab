@@ -337,6 +337,7 @@ public class Servo extends Service implements ServoControl {
    * Equivalent to the Arduino IDE Servo.attach(). It energizes the servo
    * sending pulses to maintain its current position.
    */
+  @Override
   public void enable() {
     enable(pin);
   }
@@ -383,6 +384,7 @@ public class Servo extends Service implements ServoControl {
    * This method will leave the servo connected to the controller, however it
    * will stop sending pwm messages to the servo.
    */
+  @Override
   public void disable() {
     enabled = false;
     if (controller != null) {

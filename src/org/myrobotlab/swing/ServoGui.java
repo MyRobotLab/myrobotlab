@@ -71,27 +71,30 @@ import com.jidesoft.swing.RangeSlider;
  */
 public class ServoGui extends ServiceGui implements ActionListener {
 
+  boolean mousePressed;
+
   private class SliderListener implements ChangeListener, MouseListener {
 
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
-
-      boundPos.setText(String.format("%d", slider.getValue()));
-
-      if (myService != null) {
-        myService.send(boundServiceName, "moveTo", Integer.valueOf(slider.getValue()));
-      } else {
-        log.error("can not send message myService is null");
+      if (mousePressed) {
+        if (myService != null) {
+          myService.send(boundServiceName, "moveTo", Integer.valueOf(slider.getValue()));
+        } else {
+          log.error("can not send message myService is null");
+        }
       }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
+      mousePressed = true;
       send("setOverrideAutoDisable", true);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
+      mousePressed = false;
       send("setOverrideAutoDisable", false);
     }
 
@@ -165,14 +168,14 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
-
-      if (mapOutputSlider.getInverted()) {
-        minOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
-        maxOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
-      } else {
-        minOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
-        maxOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
-
+      if (mousePressed) {
+        if (mapOutputSlider.getInverted()) {
+          minOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
+          maxOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
+        } else {
+          minOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
+          maxOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
+        }
       }
     }
 
@@ -196,13 +199,12 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-      // TODO Auto-generated method stub
-
+      mousePressed = true;
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+      mousePressed = false;
       if (myService != null) {
         send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
             Double.parseDouble(maxOutput.getText()));
@@ -242,7 +244,6 @@ public class ServoGui extends ServiceGui implements ActionListener {
   Integer mapOutputSliderMinValue = 0;
   Integer mapOutputSliderMaxValue = 180;
   RangeSlider mapOutputSlider = new RangeSlider();
-  
 
   BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
   BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
@@ -370,18 +371,17 @@ public class ServoGui extends ServiceGui implements ActionListener {
     map.add(updateMapButton);
     // map.add(updateMapButton);
 
-  
-    //powerSettings.add(disableDelayIfVelocityL);
-    
-    //powerSettings.add(defaultDisableDelayNoVelocityL);
-    //powerSettings.add(defaultDisableDelayNoVelocity);
+    // powerSettings.add(disableDelayIfVelocityL);
+
+    // powerSettings.add(defaultDisableDelayNoVelocityL);
+    // powerSettings.add(defaultDisableDelayNoVelocity);
 
     JPanel powerMain = new JPanel();
     powerMain.add(enableButton);
     powerMain.add(autoDisable);
     powerMain.add(setDisableDelays);
     powerMain.add(disableDelayIfVelocity);
-    //powerMain.add(powerMainSub);
+    // powerMain.add(powerMainSub);
 
     JPanel extra = new JPanel(new GridLayout(1, 1));
     Border settingsborder = BorderFactory.createTitledBorder("Extra :");
@@ -407,7 +407,6 @@ public class ServoGui extends ServiceGui implements ActionListener {
     velocitySetings.setBackground(Color.WHITE);
     velocityP.add(velocitySetings);
     velocityP.add(velocityPicP);
-
 
     extra.add(sweep);
     extra.setBackground(Color.WHITE);
@@ -441,7 +440,6 @@ public class ServoGui extends ServiceGui implements ActionListener {
     display.add(left, BorderLayout.WEST);
 
     display.add(map, BorderLayout.SOUTH);
-
 
     refreshControllers();
   }

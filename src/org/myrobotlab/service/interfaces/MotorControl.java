@@ -31,7 +31,8 @@ import org.myrobotlab.sensor.Encoder;
 
 public interface MotorControl extends NameProvider, RelativePositionControl, Attachable {
   
-	void attachMotorController(MotorController controller) throws Exception;
+
+  void attachMotorController(MotorController controller) throws Exception;
 
 	void detachMotorController(MotorController controller);
 
@@ -81,6 +82,8 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
 	 * unlocked
 	 */
 	void lock();
+	
+	boolean isLocked();
 
 	/**
 	 * moveTo moves the motor to a specific location. Typically, an encoder is

@@ -85,38 +85,30 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     @Override
     public void run() {
 
-      if (targetPos == null) {
-        targetPos = sweepMin;
-      }
+      double sweepMin = 0.0;
+      double sweepMax = 0.0;
+      // start in the middle
+      double sweepPos = mapper.getMinX() + (mapper.getMaxX() - mapper.getMinX()) / 2;
+      isSweeping = true;
 
       try {
         while (isSweeping) {
-          // increment position that we should go to.
-          if (targetPos < sweepMax && sweepStep >= 0) {
-            targetPos += sweepStep;
-          } else if (targetPos > sweepMin && sweepStep < 0) {
-            targetPos += sweepStep;
-          }
 
-          // switch directions or exit if we are sweeping 1 way
-          if ((targetPos <= sweepMin && sweepStep < 0) || (targetPos >= sweepMax && sweepStep > 0)) {
-            if (sweepOneWay) {
-              isSweeping = false;
-              break;
-            }
+          // set our range to be inside 'real' min & max input
+          sweepMin = mapper.getMinX() + 1;
+          sweepMax = mapper.getMaxX() - 1;
+
+          // if pos is too small or too big flip direction
+          if (sweepPos >= sweepMax || sweepPos <= sweepMin) {
             sweepStep = sweepStep * -1;
           }
-          moveTo(targetPos.intValue());
+
+          sweepPos += sweepStep;
+          moveTo(sweepPos);
           Thread.sleep(sweepDelay);
         }
-
       } catch (Exception e) {
         isSweeping = false;
-        if (e instanceof InterruptedException) {
-          // info("shutting down sweeper");
-        } else {
-          log.error("sweeper threw", e);
-        }
       }
     }
 
@@ -129,7 +121,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    */
   public class MotorUpdater extends Thread {
 
-    double lastOutput = 0;
+    double lastOutput = 0.0;
 
     public MotorUpdater(String name) {
       super(String.format("%s.motorUpdater", name));
@@ -137,16 +129,16 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
     @Override
     public void run() {
-
       try {
-        while (true) {
+        while (isEnabled()) {
           if (motorControl != null) {
             // Calculate the new value for the motor
             if (pid.compute(pidKey)) {
               double setPoint = pid.getSetpoint(pidKey);
               double output = pid.getOutput(pidKey);
               motorControl.setPowerLevel(output);
-              log.debug(String.format("setPoint(%s), processVariable(%s), output(%s)", setPoint, processVariable, output));
+              // log.debug(String.format("setPoint(%s), processVariable(%s),
+              // output(%s)", setPoint, processVariable, output));
               if (output != lastOutput) {
                 motorControl.move(output);
                 lastOutput = output;
@@ -209,7 +201,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   /**
    * the calculated output for the servo
    */
-  Integer targetOutput;
+  double targetOutput;
 
   /**
    * list of names of possible controllers
@@ -219,13 +211,13 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   // FIXME - currently is only computer control - needs to be either
   // microcontroller or computer
   boolean isSweeping = false;
-  double sweepMin = 0;
-  double sweepMax = 180;
+  double sweepMin = 0.0;
+  double sweepMax = 180.0;
   int sweepDelay = 1;
 
-  int sweepStep = 1;
+  double sweepStep = 1.0;
   boolean sweepOneWay = false;
-
+  double lastPos;
   transient Thread sweeper = null;
 
   /**
@@ -251,7 +243,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   private double kp = 0.020;
   private double ki = 0.001; // 0.020;
   private double kd = 0.0; // 0.020;
-  public double setPoint = 90; // Intial
+  public double setPoint = 90.0; // Intial
   // setpoint
   // corresponding
   // to
@@ -398,7 +390,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   public double getPos() {
-    return targetPos;
+    if (targetPos == null) {
+      return rest;
+    } else {
+      return targetPos;
+    }
   }
 
   public double getRest() {
@@ -443,15 +439,21 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       return;
     }
 
-    if (motorUpdater == null) {
-      // log.info("Starting MotorUpdater");
-      motorUpdater = new MotorUpdater(getName());
-      motorUpdater.start();
-      // log.info("MotorUpdater started");
+    if (!isEnabled() && pos != lastPos) {
+      enable();
+    }
+
+    if (lastPos != pos) {
+      if (motorUpdater == null) {
+        // log.info("Starting MotorUpdater");
+        motorUpdater = new MotorUpdater(getName());
+        motorUpdater.start();
+        // log.info("MotorUpdater started");
+      }
     }
 
     targetPos = pos;
-    targetOutput = mapper.calcOutputInt(targetPos);
+    targetOutput = getTargetOutput();
 
     pid.setSetpoint(pidKey, targetOutput);
     lastActivityTime = System.currentTimeMillis();
@@ -460,6 +462,12 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       // update others of our position change
       invoke("publishServoEvent", targetOutput);
     }
+    if (lastPos != pos) {
+      log.info("dgb " + lastPos + " " + targetPos);
+      broadcastState();
+    }
+    lastPos = targetPos;
+
   }
 
   /*
@@ -471,7 +479,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    */
 
   // uber good
-  public Integer publishServoEvent(Integer position) {
+  public Double publishServoEvent(Double position) {
     return position;
   }
 
@@ -540,20 +548,20 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   public void sweep() {
     double min = mapper.getMinX();
     double max = mapper.getMaxX();
-    // sweep(min, max, 1, 1);
+    sweep(min, max, 50, 1.0);
   }
 
   public void sweep(double min, double max) {
-    // sweep(min, max, 1, 1);
+    sweep(min, max, 1, 1.0);
   }
 
   // FIXME - is it really speed control - you don't currently thread for
   // fractional speed values
-  public void sweep(int min, int max, int delay, int step) {
+  public void sweep(double min, double max, int delay, double step) {
     sweep(min, max, delay, step, false);
   }
 
-  public void sweep(int min, int max, int delay, int step, boolean oneWay) {
+  public void sweep(double min, double max, int delay, double step, boolean oneWay) {
 
     this.sweepMin = min;
     this.sweepMax = max;
@@ -641,6 +649,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       // ads.setController(arduino, "1", "0x48");
 
       DiyServo dyiServo = (DiyServo) Runtime.start("dyiServo", "DiyServo");
+      Python python = (Python) Runtime.start("python", "Python");
       // dyiServo.attachServoController((ServoController)arduino);
       // dyiServo.attach((ServoController)arduino);
       dyiServo.attach((PinArrayControl) arduino, 14); // PIN 14 = A0
@@ -681,6 +690,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   @Override
   public double getTargetOutput() {
+    if (targetPos == null) {
+      targetPos = rest;
+    }
+    targetOutput = mapper.calcOutput(targetPos);
     return targetOutput;
   }
 
@@ -922,18 +935,36 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   public boolean isEnabled() {
-    // TODO Auto-generated method stub
-    return false;
+    return !motorControl.isLocked();
   }
 
   public boolean isSweeping() {
-    // TODO Auto-generated method stub
-    return false;
+    return isSweeping;
   }
 
   public boolean isEventsEnabled() {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public void enable() {
+    motorControl.unlock();
+    if (motorUpdater == null) {
+      motorUpdater = new MotorUpdater(getName());
+    }
+    motorUpdater.start();
+    broadcastState();
+  }
+
+  @Override
+  public void disable() {
+    motorControl.stopAndLock();
+    if (motorUpdater != null) {
+      motorUpdater.interrupt();
+      motorUpdater = null;
+    }
+    broadcastState();
   }
 
 }

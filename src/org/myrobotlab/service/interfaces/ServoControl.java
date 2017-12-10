@@ -320,4 +320,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   double getCurrentPosOutput();
 
   void addServoEventListener(NameProvider service);
+  
+  public void enable();
+  
+  public void disable();
 }
