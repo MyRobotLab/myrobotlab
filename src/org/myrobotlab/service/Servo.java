@@ -499,9 +499,12 @@ public class Servo extends Service implements ServoControl {
 
     targetPos = pos;
 
-    if (!isEnabled() && pos != lastPos) {
+    if (!isEnabled())
+        {
+    if (pos != lastPos || overrideAutoDisable || !getAutoDisable()) {
       enable();
     }
+        }
 
     if (intialTargetPosChange) {
       targetPosBeforeSensorFeebBackCorrection = targetPos;
