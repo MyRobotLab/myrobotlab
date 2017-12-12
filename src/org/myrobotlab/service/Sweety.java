@@ -166,7 +166,6 @@ public class Sweety extends Service {
         valuesArray[i]=valuesArray[i+5];
         }
     }
-    
     return valuesArray;
   }
 
