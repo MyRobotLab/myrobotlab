@@ -40,14 +40,14 @@ public class Sweety extends Service {
   transient public Servo rightShoulderServo;
   transient public Servo rightArmServo;
   transient public Servo rightBicepsServo;
-  transient public Servo rightForearmServo;
+  transient public Servo rightElbowServo;
   transient public Servo rightWristServo;
  
  // Left arm Servomotors
   transient public Servo leftShoulderServo;
   transient public Servo leftArmServo;
   transient public Servo leftBicepsServo;
-  transient public Servo leftForearmServo;
+  transient public Servo leftElbowServo;
   transient public Servo leftWristServo;
  
  // Right hand Servomotors
@@ -118,14 +118,14 @@ public class Sweety extends Service {
   int rightShoulder[] = {34,1,2,3};
   int rightArm[] = {35,1,2,3};
   int rightBiceps[] = {36,1,2,3};
-  int rightForearm[] = {37,1,2,3};
+  int rightElbow[] = {37,1,2,3};
   int rightWrist[] = {38,1,2,3};
- 
- // Left arm
+   
+  // Left arm
   int leftShoulder[] = {39,1,2,3};
   int leftArm[] = {40,1,2,3};
   int leftBiceps[] = {41,1,2,3};
-  int leftForearm[] = {42,1,2,3};
+  int leftElbow[] = {42,1,2,3};
   int leftWrist[] = {43,1,2,3};
  
  // Right hand
@@ -146,7 +146,83 @@ public class Sweety extends Service {
   int neckTilt[] = {6,1,2,3};
   int neckPan[] = {7,1,2,3};
   
+  /**
+   * Check if a value of an array is -1 and if needed replace -1 by the old value
+   * Exemple if rightArm[]={35,1,2,3} and user ask to change by {-1,1,2,3}, this method will return {35,1,2,3}
+   * This method must receive an array of ten arrays.
+   * If one of these arrays is less or more than four numbers length , it doesn't will be changed.
+   */
+  int[][] changeArrayValues(int[][] valuesArray){
+    // valuesArray contain in 0,1,2,3,4 the news values and in 5,6,7,8,9 the old values
+    for (int i = 0; i < 5; i++) {
+      if (valuesArray[i].length ==4 ){
+        for (int j = 0; j < 3; j++) {
+          if (valuesArray[i][j] == -1){
+            valuesArray[i][j] = valuesArray[i+5][j];
+          }
+        }
+      }
+      else{
+        valuesArray[i]=valuesArray[i+5];
+        }
+    }
+    
+    return valuesArray;
+  }
 
+  /**
+   * Set pin, min, max, and rest for each servos. -1 mean in an array mean "no change"
+   * Exemple setRightArm({39,1,2,3},{40,1,2,3},{41,1,2,3},{-1,1,2,3},{-1,1,2,3})
+   * Python exemple : sweety.setRightArm([1,0,180,90],[2,0,180,0],[3,180,90,90],[7,7,4,4],[8,5,8,1])
+   */
+  public void setRightArm(int[] shoulder, int[] arm, int[] biceps, int[] elbow, int[] wrist){
+    int[][] valuesArray = new int[][]{shoulder, arm, biceps, elbow,wrist,rightShoulder,rightArm,rightBiceps,rightElbow,rightWrist};
+    valuesArray = changeArrayValues(valuesArray);
+    rightShoulder = valuesArray[0];
+    rightArm = valuesArray[1];
+    rightBiceps = valuesArray[2];
+    rightElbow = valuesArray[3];
+    rightWrist = valuesArray[4];
+  }
+  /**
+   * Same as setRightArm
+   */
+  public void setLefttArm(int[] shoulder, int[] arm, int[] biceps, int[] elbow, int[] wrist){
+    int[][] valuesArray = new int[][]{shoulder, arm, biceps, elbow,wrist,leftShoulder,leftArm,leftBiceps,leftElbow,leftWrist};
+    valuesArray = changeArrayValues(valuesArray);
+    leftShoulder = valuesArray[0];
+    leftArm = valuesArray[1];
+    leftBiceps = valuesArray[2];
+    leftElbow = valuesArray[3];
+    leftWrist = valuesArray[4];
+  }
+  
+  /**
+   * Same as setRightArm
+   */
+  public void setLeftHand(int[] thumb, int[] index, int[] middle, int[] ring, int[] pinky){
+    int[][] valuesArray = new int[][]{thumb, index, middle, ring, pinky, leftThumb, leftIndex, leftMiddle, leftRing, leftPinky};
+    valuesArray = changeArrayValues(valuesArray);
+    leftThumb = valuesArray[0];
+    leftIndex = valuesArray[1];
+    leftMiddle = valuesArray[2];
+    leftRing = valuesArray[3];
+    leftPinky = valuesArray[4];
+  }
+  
+  /**
+   * Same as setRightArm
+   */
+  public void setRightHand(int[] thumb, int[] index, int[] middle, int[] ring, int[] pinky){
+    int[][] valuesArray = new int[][]{thumb, index, middle, ring, pinky, rightThumb, rightIndex, rightMiddle, rightRing, rightPinky};
+    valuesArray = changeArrayValues(valuesArray);
+    rightThumb = valuesArray[0];
+    rightIndex = valuesArray[1];
+    rightMiddle = valuesArray[2];
+    rightRing = valuesArray[3];
+    rightPinky = valuesArray[4];
+  }
+  
   // variables for speak / mouth sync
   public int delaytime = 3;
   public int delaytimestop = 5;
@@ -181,16 +257,16 @@ public class Sweety extends Service {
    */
   public void attach() throws Exception {
 	
-    rightForearmServo.attach(arduino, rightForearm[pin]);
+    rightElbowServo.attach(arduino, rightElbow[pin]);
     rightShoulderServo.attach(arduino, rightShoulder[pin]);
     rightArmServo.attach(arduino, rightArm[pin]);
     rightBicepsServo.attach(arduino, rightBiceps[pin]);
-    rightForearmServo.attach(arduino, rightForearm[pin]);
+    rightElbowServo.attach(arduino, rightElbow[pin]);
     rightWristServo.attach(arduino, rightWrist[pin]);
     leftShoulderServo.attach(arduino, leftShoulder[pin]);
     leftArmServo.attach(arduino, leftArm[pin]);
     leftBicepsServo.attach(arduino, leftBiceps[pin]);
-    leftForearmServo.attach(arduino, leftForearm[pin]);
+    leftElbowServo.attach(arduino, leftElbow[pin]);
     leftWristServo.attach(arduino, leftWrist[pin]);
     rightThumbServo.attach(arduino, rightThumb[pin]);
     rightIndexServo.attach(arduino, rightIndex[pin]);
@@ -226,16 +302,16 @@ public class Sweety extends Service {
    * detach the servos from arduino pins
    */
   public void detach() {
-    rightForearmServo.detach();
+    rightElbowServo.detach();
     rightShoulderServo.detach();
     rightArmServo.detach();
     rightBicepsServo.detach();
-    rightForearmServo.detach();
+    rightElbowServo.detach();
     rightWristServo.detach();
     leftShoulderServo.detach();
     leftArmServo.detach();
     leftBicepsServo.detach();
-    leftForearmServo.detach();
+    leftElbowServo.detach();
     leftWristServo.detach();
     rightThumbServo.detach();
     rightIndexServo.detach();
@@ -273,14 +349,14 @@ public class Sweety extends Service {
 
   /**
    * Move the right arm . Use : setRightArm(shoulder angle, arm angle, biceps angle,
-   * forearm angle, wrist angle) -1 mean "no change"
+   * Elbow angle, wrist angle) -1 mean "no change"
    * @param shoulderAngle s
    * @param armAngle a
    * @param bicepsAngle b
-   * @param forearmAngle f 
+   * @param ElbowAngle f 
    * @param wristAngle w
    */
-  public void setRightArmPosition(double shoulderAngle, double armAngle, double bicepsAngle, double forearmAngle, double wristAngle) {
+  public void setRightArmPosition(double shoulderAngle, double armAngle, double bicepsAngle, double ElbowAngle, double wristAngle) {
 
     // TODO protect against self collision
     if (shoulderAngle == -1) {
@@ -292,8 +368,8 @@ public class Sweety extends Service {
     if (bicepsAngle == -1) {
       armAngle = rightBicepsServo.getPos();
     }
-    if (forearmAngle == -1) {
-      forearmAngle = rightForearmServo.getPos();
+    if (ElbowAngle == -1) {
+      ElbowAngle = rightElbowServo.getPos();
     }
     if (wristAngle == -1) {
       wristAngle = rightWristServo.getPos();
@@ -302,20 +378,20 @@ public class Sweety extends Service {
     rightShoulderServo.moveTo(shoulderAngle);
     rightArmServo.moveTo(armAngle);
     rightBicepsServo.moveTo(bicepsAngle);
-    rightForearmServo.moveTo(forearmAngle);
+    rightElbowServo.moveTo(ElbowAngle);
     rightWristServo.moveTo(wristAngle);
   }
 
   /*
-   * Move the left arm . Use : setLeftArm(shoulder angle, arm angle, biceps angle, forearm angle,
-   * forearm angle,wrist angle) -1 mean "no change"
+   * Move the left arm . Use : setLeftArm(shoulder angle, arm angle, biceps angle, Elbow angle,
+   * Elbow angle,wrist angle) -1 mean "no change"
    * @param shoulderAngle s
    * @param armAngle a
    * @param bicepsAngle b
-   * @param forearmAngle f 
+   * @param ElbowAngle f 
    * @param wristAngle w
    */
-  public void setLeftArmPosition(double shoulderAngle, double armAngle, double bicepsAngle, double forearmAngle, double wristAngle) {
+  public void setLeftArmPosition(double shoulderAngle, double armAngle, double bicepsAngle, double ElbowAngle, double wristAngle) {
     // TODO protect against self collision with -> servoName.getPos()
     if (shoulderAngle == -1) {
       shoulderAngle = leftShoulderServo.getPos();
@@ -326,8 +402,8 @@ public class Sweety extends Service {
     if (bicepsAngle == -1) {
       armAngle = leftBicepsServo.getPos();
     }
-    if (forearmAngle == -1) {
-      forearmAngle = leftForearmServo.getPos();
+    if (ElbowAngle == -1) {
+      ElbowAngle = leftElbowServo.getPos();
     }
     if (wristAngle == -1) {
       wristAngle = leftWristServo.getPos();
@@ -336,7 +412,7 @@ public class Sweety extends Service {
     leftShoulderServo.moveTo(shoulderAngle);
     leftArmServo.moveTo(armAngle);
     leftBicepsServo.moveTo(bicepsAngle);
-    leftForearmServo.moveTo(forearmAngle);
+    leftElbowServo.moveTo(ElbowAngle);
     leftWristServo.moveTo(wristAngle);
   }
   
@@ -537,8 +613,8 @@ public class Sweety extends Service {
    */
   public void posture(String pos) {
     if (pos == "rest") {
-      setLeftArmPosition(leftShoulder[rest], leftArm[rest], leftBiceps[rest], leftForearm[rest], leftWrist[rest]);
-      setRightArmPosition(rightShoulder[rest], rightArm[rest], rightBiceps[rest], rightForearm[rest], rightWrist[rest]);
+      setLeftArmPosition(leftShoulder[rest], leftArm[rest], leftBiceps[rest], leftElbow[rest], leftWrist[rest]);
+      setRightArmPosition(rightShoulder[rest], rightArm[rest], rightBiceps[rest], rightElbow[rest], rightWrist[rest]);
       setLeftHandPosition(leftThumb[rest], leftIndex[rest], leftMiddle[rest], leftRing[rest], leftPinky[rest]);
       setRightHandPosition(rightThumb[rest], rightIndex[rest], rightMiddle[rest], rightRing[rest], rightPinky[rest]);
       setHeadPosition(neckTilt[rest], neckPan[rest]);
@@ -595,11 +671,11 @@ public class Sweety extends Service {
     if (rightShoulderServo != null)rightShoulderServo.publishState();
     if (rightArmServo != null)rightArmServo.publishState();
     if (rightBicepsServo != null) rightBicepsServo.publishState();
-    if (rightForearmServo != null) rightForearmServo.publishState();
+    if (rightElbowServo != null) rightElbowServo.publishState();
     if (rightWristServo != null)rightWristServo.publishState();
     if (leftShoulderServo != null)leftShoulderServo.publishState();
     if (leftArmServo != null)leftArmServo.publishState();
-    if (leftForearmServo != null)leftForearmServo.publishState();
+    if (leftElbowServo != null)leftElbowServo.publishState();
     if (leftBicepsServo != null)leftBicepsServo.publishState();
     if (leftWristServo != null)leftWristServo.publishState();
     if (rightThumbServo != null)neckTiltServo.publishState();
@@ -703,12 +779,12 @@ public class Sweety extends Service {
     rightShoulderServo = (Servo) startPeer("rightShoulderServo");
     rightArmServo = (Servo) startPeer("rightArmServo");
     rightBicepsServo = (Servo) startPeer("rightBicepsServo");
-    rightForearmServo = (Servo) startPeer("rightForearmServo");
+    rightElbowServo = (Servo) startPeer("rightElbowServo");
     rightWristServo = (Servo) startPeer("rightWristServo");
     leftShoulderServo = (Servo) startPeer("leftShoulderServo");    
     leftArmServo = (Servo) startPeer("leftArmServo");
     leftBicepsServo = (Servo) startPeer("leftBicepsServo");
-    leftForearmServo = (Servo) startPeer("leftForearmServo");
+    leftElbowServo = (Servo) startPeer("leftElbowServo");
     leftWristServo = (Servo) startPeer("leftWristServo");
     rightThumbServo = (Servo) startPeer("rightThumbServo");
     rightIndexServo = (Servo) startPeer("rightIndexServo");
@@ -726,12 +802,12 @@ public class Sweety extends Service {
     rightShoulderServo.setMinMax(rightShoulder[min], rightShoulder[max]);
     rightArmServo.setMinMax(rightArm[min], rightArm[max]);
     rightBicepsServo.setMinMax(rightBiceps[min], rightBiceps[max]);
-    rightForearmServo.setMinMax(rightForearm[min], rightForearm[max]);
+    rightElbowServo.setMinMax(rightElbow[min], rightElbow[max]);
     rightWristServo.setMinMax(rightWrist[min], rightWrist[max]);
     leftShoulderServo.setMinMax(leftShoulder[min], leftShoulder[max]);
     leftArmServo.setMinMax(leftArm[min], leftArm[max]);
     leftBicepsServo.setMinMax(leftBiceps[min], leftBiceps[max]);
-    leftForearmServo.setMinMax(leftForearm[min], leftForearm[max]);
+    leftElbowServo.setMinMax(leftElbow[min], leftElbow[max]);
     leftWristServo.setMinMax(leftWrist[min], leftWrist[max]);
     rightThumbServo.setMinMax(rightThumb[min], rightThumb[max]);
     rightIndexServo.setMinMax(rightIndex[min], rightIndex[max]);
@@ -870,10 +946,10 @@ public class Sweety extends Service {
 
     script.append(indentSpace);
     script.append(
-        String.format("Sweety.setRightArmPosition(%d,%d,%d,%d,%d)\n", rightShoulderServo.getPos(), rightArmServo.getPos(), rightBicepsServo.getPos(), rightForearmServo.getPos(), rightWristServo.getPos()));
+        String.format("Sweety.setRightArmPosition(%d,%d,%d,%d,%d)\n", rightShoulderServo.getPos(), rightArmServo.getPos(), rightBicepsServo.getPos(), rightElbowServo.getPos(), rightWristServo.getPos()));
     script.append(indentSpace);
     script
-        .append(String.format("Sweety.setLeftArmPosition(%d,%d,%d,%d,%d)\n", leftShoulderServo.getPos(), leftArmServo.getPos(), leftBicepsServo.getPos(), leftForearmServo.getPos(), leftWristServo.getPos()));
+        .append(String.format("Sweety.setLeftArmPosition(%d,%d,%d,%d,%d)\n", leftShoulderServo.getPos(), leftArmServo.getPos(), leftBicepsServo.getPos(), leftElbowServo.getPos(), leftWristServo.getPos()));
     script.append(indentSpace);
     script.append(String.format("Sweety.setHeadPosition(%d,%d)\n", neckTiltServo.getPos(), neckPanServo.getPos()));
 
@@ -892,18 +968,18 @@ public class Sweety extends Service {
     }
     // TODO adapt for new design
 
-    int LforeArm = Math.round(skeleton.leftElbow.getAngleXY()) - (180 - leftForearm[max]);
+    int LElbow = Math.round(skeleton.leftElbow.getAngleXY()) - (180 - leftElbow[max]);
     int Larm = Math.round(skeleton.leftShoulder.getAngleXY()) - (180 - leftArm[max]);
     int Lshoulder = Math.round(skeleton.leftShoulder.getAngleYZ()) + leftShoulder[min];
-    int RforeArm = Math.round(skeleton.rightElbow.getAngleXY()) + rightForearm[min];
+    int RElbow = Math.round(skeleton.rightElbow.getAngleXY()) + rightElbow[min];
     int Rarm = Math.round(skeleton.rightShoulder.getAngleXY()) + rightArm[min];
     int Rshoulder = Math.round(skeleton.rightShoulder.getAngleYZ()) - (180 - rightShoulder[max]);
 
     // Move the left side
-    setLeftArmPosition(Lshoulder, Larm, LforeArm, -1, -1);
+    setLeftArmPosition(Lshoulder, Larm, LElbow, -1, -1);
 
     // Move the right side
-    setRightArmPosition(Rshoulder, Rarm, RforeArm, -1, -1);
+    setRightArmPosition(Rshoulder, Rarm, RElbow, -1, -1);
   }
 
   /**
@@ -940,7 +1016,7 @@ public class Sweety extends Service {
     meta.addPeer("rightShoulder", "Servo", "servo");
     meta.addPeer("rightBiceps", "Servo", "servo");
     meta.addPeer("rightArm", "Servo", "servo");
-    meta.addPeer("rightForearm", "Servo", "servo");
+    meta.addPeer("rightElbow", "Servo", "servo");
     meta.addPeer("rightWrist", "Servo", "servo");
     meta.addPeer("rightThumb", "Servo", "servo");
     meta.addPeer("rightIndex", "Servo", "servo");
@@ -951,7 +1027,7 @@ public class Sweety extends Service {
     meta.addPeer("leftShoulder", "Servo", "servo");
     meta.addPeer("leftBiceps", "Servo", "servo");
     meta.addPeer("leftArm", "Servo", "servo");
-    meta.addPeer("leftForearm", "Servo", "servo");
+    meta.addPeer("leftElbow", "Servo", "servo");
     meta.addPeer("leftWrist", "Servo", "servo");
     meta.addPeer("leftThumb", "Servo", "servo");
     meta.addPeer("leftIndex", "Servo", "servo");
