@@ -1,4 +1,6 @@
 package org.myrobotlab.math;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -76,4 +78,15 @@ public class MathUtils {
 		gray ^= (gray >> 1);
 		return gray;
 	}
+	
+	 /*
+   * just round a decimal based on digit
+   */
+	public static double round(double value, int digit) {
+    if (digit < 0) throw new IllegalArgumentException();
+
+    BigDecimal bd = new BigDecimal(value);
+    bd = bd.setScale(digit, RoundingMode.HALF_UP);
+    return bd.doubleValue();
+}
 }
