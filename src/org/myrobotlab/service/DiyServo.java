@@ -37,6 +37,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.PinArrayControl;
@@ -140,11 +141,13 @@ public class DiyServo extends Service implements ServoControl, PinListener {
               // log.debug(String.format("setPoint(%s), processVariable(%s),
               // output(%s)", setPoint, processVariable, output));
               if (output != lastOutput) {
+                //log.info(MathUtils.round(mapper.calcInput(getCurrentPos()),roundPos)+"");
                 motorControl.move(output);
                 lastOutput = output;
               }
             }
             Thread.sleep(1000 / sampleTime);
+            log.info(MathUtils.round(mapper.calcInput(getCurrentPos()),roundPos)+"");
           }
         }
 
@@ -202,6 +205,12 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * the calculated output for the servo
    */
   double targetOutput;
+  
+  /**
+   * Round pos values based on this digit count
+   * useful later to compare target>pos
+   */
+  int roundPos=1;
 
   /**
    * list of names of possible controllers
@@ -273,10 +282,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * Sample time 20 ms = 50 Hz
    */
   int sampleTime = 20;
-  /**
-   * Initial process variable
-   */
-  public double processVariable = 0;
+ 
   transient MotorUpdater motorUpdater = null;
 
   double powerLevel = 0;
@@ -288,6 +294,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   public String disableDelayIfVelocity;
 
   public String defaultDisableDelayNoVelocity;
+
+  Double currentPosInput=0.0;
 
   /**
    * Constructor
@@ -463,7 +471,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       invoke("publishServoEvent", targetOutput);
     }
     if (lastPos != pos) {
-      log.info("dgb " + lastPos + " " + targetPos);
       broadcastState();
     }
     lastPos = targetPos;
@@ -631,7 +638,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
         return;
       }
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      arduino.connect("COM3");
+      arduino.setBoardUno();
+      arduino.connect("COM14");
 
       // Adafruit16CServoDriver adafruit16CServoDriver =
       // (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver",
@@ -642,39 +650,23 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
       MotorDualPwm motor = (MotorDualPwm) Runtime.start("dyiServo.motor", "MotorDualPwm");
 
-      motor.setPwmPins(0, 1);
+      motor.setPwmPins(3, 5);
       motor.attach(arduino);
 
       // Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
       // ads.setController(arduino, "1", "0x48");
 
-      DiyServo dyiServo = (DiyServo) Runtime.start("dyiServo", "DiyServo");
+      DiyServo dyiServo = (DiyServo) Runtime.create("dyiServo", "DiyServo");
       Python python = (Python) Runtime.start("python", "Python");
       // dyiServo.attachServoController((ServoController)arduino);
       // dyiServo.attach((ServoController)arduino);
+      dyiServo.map(0,180,60,100);
+      dyiServo = (DiyServo) Runtime.start("dyiServo", "DiyServo");
       dyiServo.attach((PinArrayControl) arduino, 14); // PIN 14 = A0
 
       // Servo Servo = (Servo) Runtime.start("Servo", "Servo");
 
-      dyiServo.moveTo(90);
-      dyiServo.setRest(30);
-      dyiServo.moveTo(10);
-      dyiServo.moveTo(90);
-      dyiServo.moveTo(180);
-      dyiServo.rest();
-
-      dyiServo.setMinMax(30, 160);
-
-      dyiServo.moveTo(40);
-      dyiServo.moveTo(140);
-
-      dyiServo.moveTo(180);
-
-      dyiServo.setSpeed(0.5);
-      dyiServo.moveTo(31);
-      dyiServo.setSpeed(0.2);
-      dyiServo.moveTo(90);
-      dyiServo.moveTo(180);
+     
 
       // servo.test();
     } catch (Exception e) {
@@ -730,10 +722,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   @Override
   public void onPin(PinData pindata) {
     int inputValue = pindata.value;
-    processVariable = 180 * inputValue / resolution;
+
+    currentPosInput = 180 * inputValue / resolution;
     // log.debug(String.format("onPin received value %s converted to
     // %s",inputValue, processVariable));
-    pid.setInput(pidKey, processVariable);
+    pid.setInput(pidKey, currentPosInput);
   }
 
   public void attach(String pinArrayControlName, Integer pin) throws Exception {
@@ -919,12 +912,33 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     // TODO Auto-generated method stub
 
   }
+  
+  /**
+   * getCurrentPos() - return the calculated position of the servo use
+   * lastActivityTime and velocity for the computation
+   * 
+   * @return the current position of the servo
+   */
+  public Double getCurrentPos() {
+    return MathUtils.round(currentPosInput,roundPos);
+  }
 
   @Override
   public double getCurrentPosOutput() {
-    // TODO Auto-generated method stub
-    return 0;
+    return MathUtils.round(mapper.calcOutput(getCurrentPos()),roundPos);
   }
+  
+  /**
+   * getCurrentPosInput() - return the calculated position of the servo 
+   * must correspond to targetPos
+   * 
+   * @return the current position of the servo ( full range )
+   */
+  public Double getCurrentPosInput() {
+    return MathUtils.round(mapper.calcInput(getCurrentPos()),roundPos);
+  }
+  
+
 
   public double getMinOutput() {
     return mapper.getMinOutput();
