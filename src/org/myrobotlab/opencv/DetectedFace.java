@@ -25,7 +25,6 @@ public class DetectedFace {
       Rect tmp = mouth;
       mouth = leftEye;
       leftEye = tmp;
-
     }
     if (mouth.y() < rightEye.y() + rightEye.height()) {
       // the mouth
@@ -93,6 +92,11 @@ public class DetectedFace {
     int y = Math.max(0, face.y() - size / 2);
     int w = Math.min(cols, face.width() + size);
     int h = Math.min(rows, face.height() + size);
+    
+    if (x <0 || y < 0 || w <0 || h < 0) {
+      return null;
+    }
+    
     Rect faceWithBorder = new Rect(x, y, w, h);
     return faceWithBorder;
   }
