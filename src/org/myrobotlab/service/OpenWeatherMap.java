@@ -21,24 +21,13 @@ public class OpenWeatherMap extends HttpClient {
   private static final long serialVersionUID = 1L;
   private String apiBase = "http://api.openweathermap.org/data/2.5/weather?q=";
   private String apiForecast = "http://api.openweathermap.org/data/2.5/forecast/daily?q=";
-  private String units = "imperial";
+  private String units = "imperial"; // metric
   private String lang = "en";
   private String apiKey = "GET_API_KEY_FROM_OPEN_WEATHER_MAP";
   public final static Logger log = LoggerFactory.getLogger(OpenWeatherMap.class);
 
   public OpenWeatherMap(String reservedKey) {
     super(reservedKey);
-  }
-
-  /**
-   * Return a sentence describing the weather
-   */
-  private JSONObject fetch(String location) throws ClientProtocolException, IOException, JSONException {
-    String apiUrl = apiBase + URLEncoder.encode(location, "utf-8") + "&appid=" + apiKey + "&mode=json&units=" + units + "&lang=" + lang;
-    String response = this.get(apiUrl);
-    log.debug("Respnse: {}", response);
-    JSONObject obj = new JSONObject(response);
-    return obj;
   }
 
   /**
@@ -52,32 +41,7 @@ public class OpenWeatherMap extends HttpClient {
     return obj;
   }
 
-  public String[] fetchRaw(String location) throws ClientProtocolException, IOException, JSONException {
-    String[] result = new String[10];
-    result[0] = "error";
-    try {
-      JSONObject obj = fetch(location);
-      result[0] = obj.getJSONArray("weather").getJSONObject(0).get("description").toString();
-      result[1] = obj.getJSONObject("main").get("temp").toString();
-      result[2] = location;
-      result[3] = obj.getJSONArray("weather").getJSONObject(0).get("id").toString();
-      result[4] = obj.getJSONObject("main").get("pressure").toString();
-      result[5] = obj.getJSONObject("main").get("humidity").toString();
-      result[6] = obj.getJSONObject("main").get("temp_min").toString();
-      result[7] = obj.getJSONObject("main").get("temp_max").toString();
-      result[8] = obj.getJSONObject("wind").get("speed").toString();
-      result[9] = obj.getJSONObject("wind").get("deg").toString();
-      return result;
-    } catch (Exception e) {
-      log.error("openweathermap error ( api ? ) : ", e);
-      return result;
-    }
-  }
-
   /**
-   * Given a string of the form returned by the api call:
-   * http://api.openweathermap.org/data/2.5/forecast/daily?q=location&appid=XXXXXXXXXXXXXXXXXXXXXXXXX&mode=json&units=metric&cnt=3
-   * 
    * retrieve a string list of weather for the day indicated by dayIndex 0 <=
    * dayIndex <= 16 (Note: 0 would refer to the first day).
    * 
@@ -99,55 +63,64 @@ public class OpenWeatherMap extends HttpClient {
    * "pressure":1013.37, "humidity":95,
    * "weather":[{"id":501,"main":"Rain","description":"moderate
    * rain","icon":"10d"}], "speed":5.38, "deg":241, "clouds":44, "rain":5.55} ]}
+   * @throws JSONException 
+   * @throws IOException 
+   * @throws ClientProtocolException 
    */
+  public String[] fetchForecast(String location) throws ClientProtocolException, IOException, JSONException {
+    return fetchForecast(location, 0);
+  }
+  
+  
   public String[] fetchForecast(String location, int dayIndex) throws ClientProtocolException, IOException, JSONException {
-    String[] result = new String[10];
-    result[0] = location;
-
+    String[] result = new String[11];
+    String localUnits = "fahrenheit";
+    if (units.equals("metric")) {
+      // for metric, celsius
+      localUnits = "celsius";
+    }
     if ((dayIndex >= 0) && (dayIndex <= 16)) {
-      JSONObject jsonObj = fetch(location, (dayIndex + 1));
-
+      JSONObject jsonObj = null;
+      try {
+        jsonObj = fetch(location, (dayIndex + 1));
+      } catch (IOException | JSONException e) {
+        error("OpenWeatherMap : fetch error",e);
+        return null;
+      }
+      //log.info(jsonObj.toString());
       // Getting the list node
-      JSONArray list = jsonObj.getJSONArray("list");
+      JSONArray list;
+      try {
+        list = jsonObj.getJSONArray("list");
+      } catch (JSONException e) {
+        error("OpenWeatherMap : API key or the city is not recognized",e);
+        return null;
+      }
       // Getting the required element from list by dayIndex
       JSONObject item = list.getJSONObject(dayIndex);
 
-      // Weather
-      result[1] = item.getJSONArray("weather").getJSONObject(0).get("id").toString();
-      result[2] = item.getJSONArray("weather").getJSONObject(0).get("description").toString();
-      // Temperature
+      result[0] = item.getJSONArray("weather").getJSONObject(0).get("description").toString();
       JSONObject temp = item.getJSONObject("temp");
-      result[3] = temp.get("day").toString();
-      result[4] = temp.get("min").toString();
-      result[5] = temp.get("max").toString();
-      // Rest
-      result[6] = item.get("pressure").toString();
-      result[7] = item.get("humidity").toString();
+      result[1] = temp.get("day").toString();
+      result[2] = location;
+      result[3] = item.getJSONArray("weather").getJSONObject(0).get("id").toString();
+      result[4] = item.get("pressure").toString();
+      result[5] = item.get("humidity").toString();
+      result[6] = temp.get("min").toString();
+      result[7] = temp.get("max").toString();
       result[8] = item.get("speed").toString();
       result[9] = item.get("deg").toString();
+      result[10] = localUnits;
     } else {
-      result[1] = "Index error";
+      error("OpenWeatherMap : Index is out of range");
+      return null;
     }
     return result;
   }
-
+  
+  @Deprecated
   public String fetchWeather(String location) throws ClientProtocolException, IOException, JSONException {
-    String[] result = fetchRaw(location);
-    if (!result[0].isEmpty() && !result[0].equals("error")) {
-      String description = result[0];
-      String degrees = result[1];
-
-      // if we're imperial it's fahrenheit
-      String localUnits = "fahrenheit";
-      if (units.equals("metric")) {
-        // for metric, celsius
-        localUnits = "celsius";
-      }
-      int deg = (int) Double.valueOf(degrees.toString()).doubleValue();
-      String sentence = "In " + location + " the weather is " + description + ".  " + deg + " degrees " + localUnits;
-      return sentence;
-    }
-    return "openweathermap error";
+    return fetchForecast(location,0)[0];
   }
 
   public String getApiBase() {
@@ -210,9 +183,12 @@ public class OpenWeatherMap extends HttpClient {
   public static void main(String[] args) {
 
     OpenWeatherMap owm = new OpenWeatherMap("weather");
+    owm.setApiKey("KEY!!");
     owm.startService();
     try {
-      String response = owm.fetchWeather("Boston, MA");
+      String[] fetchForecast = owm.fetchForecast("Boston", 0);
+      String sentence = "("+fetchForecast[3]+") In " + fetchForecast[2] + " the weather is " + fetchForecast[0] + ".  " + fetchForecast[1] + " degrees " + fetchForecast[10];
+      log.info(sentence);
     } catch (ClientProtocolException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
