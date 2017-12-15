@@ -153,8 +153,8 @@ public class Sweety extends Service {
    * If one of these arrays is less or more than four numbers length , it doesn't will be changed.
    */
   int[][] changeArrayValues(int[][] valuesArray){
-    // valuesArray contain in 0,1,2,3,4 the news values and in 5,6,7,8,9 the old values
-    for (int i = 0; i < 5; i++) {
+    // valuesArray contain first the news values and after the old values
+    for (int i = 0; i < (valuesArray.length / 2 ); i++) {
       if (valuesArray[i].length ==4 ){
         for (int j = 0; j < 3; j++) {
           if (valuesArray[i][j] == -1){
@@ -163,7 +163,7 @@ public class Sweety extends Service {
         }
       }
       else{
-        valuesArray[i]=valuesArray[i+5];
+        valuesArray[i]=valuesArray[i+(valuesArray.length / 2 )];
         }
     }
     return valuesArray;
@@ -220,6 +220,18 @@ public class Sweety extends Service {
     rightMiddle = valuesArray[2];
     rightRing = valuesArray[3];
     rightPinky = valuesArray[4];
+  }
+  
+  /**
+   * Set pin, min, max, and rest for each servos. -1 mean in an array mean "no change"
+   * Exemple setNeck({39,1,2,3},{40,1,2,3})
+   * Python exemple : sweety.setNeck([1,0,180,90],[2,0,180,0])
+   */
+  public void setHead(int[] tilt, int[] pan){
+    int[][] valuesArray = new int[][]{tilt, pan,neckTilt,neckPan};
+    valuesArray = changeArrayValues(valuesArray);
+    neckTilt = valuesArray[0];
+    neckPan = valuesArray[1];
   }
   
   // variables for speak / mouth sync
