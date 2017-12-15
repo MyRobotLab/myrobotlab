@@ -69,6 +69,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
   public HashSet<String> voices = new HashSet<String>();
   public String key = "0000";
   public Integer rate = 0;
+  public boolean credentialsError = false;
   // this is a peer service.
   transient AudioFile audioFile = null;
   // TODO: fix the volume control
@@ -255,6 +256,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 
     } catch (Exception e) {
       error("VoiceRss error ( api key ? ) :", e);
+      credentialsError = true;
     }
     return false;
   }
@@ -342,6 +344,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 
     } catch (Exception e) {
       error("VoiceRss error ( api key ? ) :", e);
+      credentialsError = true;
     }
     return ret;
 
