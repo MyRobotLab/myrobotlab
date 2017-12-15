@@ -95,7 +95,12 @@ public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements Ac
         // This means we went from training mode to recognition mode
         // assume that we've created some new training images.
         // so we can invoke the training method
-        bf.train();
+        try {
+          bf.train();
+        } catch (IOException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
         // done training. start recognizing...
         bf.setMode(OpenCVFilterFaceRecognizer.Mode.RECOGNIZE);
       }
@@ -111,6 +116,7 @@ public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements Ac
       try {
         bf.save();
       } catch (IOException e1) {
+        log.warn("Error saving face recognition model {}", e1.getLocalizedMessage());
         // TODO Auto-generated catch block
         e1.printStackTrace();
       }
@@ -118,6 +124,7 @@ public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements Ac
       try {
         bf.load();
       } catch (IOException e1) {
+        log.warn("Error loading face recognition model {}", e1.getLocalizedMessage());
         // TODO Auto-generated catch block
         e1.printStackTrace();
       }
