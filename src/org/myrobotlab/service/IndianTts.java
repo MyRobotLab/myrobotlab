@@ -44,6 +44,7 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
   public String voice = "Default";
   public String api = "";
   public String userid = "";
+  public boolean credentialsError = false;
   public HashMap<String, Integer> voiceMap = new HashMap<String,Integer>();
   transient AudioFile audioFile = null;
   // private float volume = 1.0f;
@@ -135,7 +136,8 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
 
       if (b == null || b.length == 0 || b.length == 81 || b.length == 47){
         error("%s returned 0 byte file or API error !!! - it may block you", getName());
-       }
+        credentialsError = true; 
+      }
       EntityUtils.consume(entity);
     } catch (Exception e) {
       Logging.logError(e);
@@ -154,6 +156,7 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
     
     if (api == "" || userid == "") {
       error("Api or userid not set");
+      credentialsError = true; 
       return false;
     }
 
@@ -212,6 +215,7 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
     log.info("speak {}", toSpeak);
     if (api == "" || userid == "") {
       error("Api or userid not set");
+      credentialsError = true; 
       return ret;
     }
     if (voice == null) {

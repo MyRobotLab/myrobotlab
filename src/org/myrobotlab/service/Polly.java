@@ -73,7 +73,7 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
 
   private String keyIdSecret;
   private String keyId;
-  private boolean credentialsError = false;
+  public boolean credentialsError = false;
 
   transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
 
