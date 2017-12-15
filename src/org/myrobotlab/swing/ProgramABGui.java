@@ -1,17 +1,25 @@
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.ProgramAB.Response;
@@ -31,9 +39,11 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   public final String boundServiceName;
   static final String START_SESSION_LABEL = "Start Session";
   // TODO: make this auto-resize when added to gui..
-  private JTextField text = new JTextField("By your command:", 60);
-  private JTextArea response = new JTextArea("Program AB Response:");
-  private JButton askButton = new JButton("Ask Program AB");
+  private JTextField text = new JTextField("", 40);
+  private JTextArea response = new JTextArea("BOT Response :");
+  JLabel askLabel = new JLabel();
+
+  private JButton askButton = new JButton("Send it");
   private JScrollPane scrollResponse = new JScrollPane(response);
 
   private JTextField progABPath = new JTextField(new File("ProgramAB").getAbsolutePath(), 16);
@@ -43,34 +53,74 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   private JButton startSessionButton = new JButton(START_SESSION_LABEL);
   private JButton saveAIML = new JButton("Save AIML");
   private JButton savePredicates = new JButton("Save Predicates");
+  
+  JCheckBox filter = new JCheckBox("Filter ( ' , - )");
+
+  JLabel pathP = new JLabel();
+  ImageIcon pathI = Util.getImageIcon("GPS.png");
+  JLabel userP = new JLabel();
+  ImageIcon userI = Util.getImageIcon("FindHuman.png");
+  JLabel botnameP = new JLabel();
+  ImageIcon botnameI = Util.getImageIcon("robot.png");
+
 
   public ProgramABGui(String boundServiceName, SwingGui myService) {
     super(boundServiceName, myService);
     this.boundServiceName = boundServiceName;
+    pathP.setText("Path : ");
+    pathP.setIcon(pathI);
+    userP.setIcon(userI);
+    userP.setText("User name : ");
+    botnameP.setIcon(botnameI);
+    botnameP.setText("Bot name ( subfolder ) : ");
+    text.setFont(new Font("Arial", Font.BOLD, 14));
+    text.setPreferredSize(new Dimension(40, 35));
+    askLabel.setText("Ask : ");
+    filter.setSelected(true);
+
+    response.setAutoscrolls(true);
 
     //
     scrollResponse.setAutoscrolls(true);
     display.setLayout(new BorderLayout());
 
-    JPanel inputControl = new JPanel();
 
-    inputControl.add(text);
-    inputControl.add(askButton);
 
-    display.add(inputControl, BorderLayout.PAGE_START);
+    JPanel inputControlSub = new JPanel();
+    inputControlSub.add(askLabel);
+    inputControlSub.add(text);
+    inputControlSub.add(askButton);
+    inputControlSub.add(filter);
+
+
+    display.add(inputControlSub, BorderLayout.NORTH);
 
     display.add(scrollResponse, BorderLayout.CENTER);
 
-    JPanel botControl = new JPanel();
+    JPanel PAGEEND = new JPanel(new GridLayout(1, 3));
+    
+    JPanel botControl = new JPanel(new GridLayout(3, 2));
 
+    botControl.add(pathP);
     botControl.add(progABPath);
+    botControl.add(userP);
     botControl.add(userName);
+    botControl.add(botnameP);
     botControl.add(botName);
-    botControl.add(startSessionButton);
-    botControl.add(saveAIML);
-    botControl.add(savePredicates);
+    
+    JPanel buttons = new JPanel();
+    JPanel buttonssub = new JPanel();
+    buttonssub.add(startSessionButton);
+    buttonssub.add(saveAIML);
+    buttonssub.add(savePredicates);
+    buttons.add(buttonssub);
+    
+    PAGEEND.add(botControl);
+    PAGEEND.add(buttons);
+    
 
-    display.add(botControl, BorderLayout.PAGE_END);
+    //display.add(botControl, BorderLayout.SOUTH);
+    display.add(PAGEEND, BorderLayout.PAGE_END);
 
     text.addActionListener(this);
     askButton.addActionListener(this);
@@ -80,17 +130,18 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     saveAIML.addActionListener(this);
     savePredicates.addActionListener(this);
 
-  
   }
 
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();
     if (o == askButton || o == text) {
-      // myService.send(boundServiceName, "getResponse", new
-      // String(text.getText()), "1", "SampleBot");
-
-      Response answer = (Response) myService.sendBlocking(boundServiceName, 10000, "getResponse", text.getText());
+      String textFiltered=text.getText();
+      if (filter.isSelected())
+      {
+      textFiltered=textFiltered.replace("'", " ").replace("-", " ");
+      }
+      Response answer = (Response) myService.sendBlocking(boundServiceName, 10000, "getResponse", textFiltered);
       // response.setText(response.getText() + "<br/>\n\r" + answer);
       if (answer != null) {
         response.append("\n" + answer.msg.trim());
@@ -99,16 +150,15 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       }
       // clear out the original question.
       text.setText("");
+      response.setCaretPosition(response.getDocument().getLength());
     } else if (o == startSessionButton) {
       String path = progABPath.getText().trim();
       String user = userName.getText().trim();
       String bot = botName.getText().trim();
-      if (startSessionButton.getText().equals(START_SESSION_LABEL)) {
-        myService.send(boundServiceName, "startSession", path, user, bot);
-        startSessionButton.setText("Reload Session");
-      } else {
-        myService.send(boundServiceName, "reloadSession", path, user, bot);
-      }
+      myService.send(boundServiceName, "setPath", path);
+      myService.send(boundServiceName, "setCurrentBotName", bot);
+      myService.send(boundServiceName, "setUsername", user);
+
     } else if (o == saveAIML) {
       myService.send(boundServiceName, "writeAIML");
       myService.send(boundServiceName, "writeAIMLIF");
@@ -134,11 +184,30 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-
+        startSessionButton.setEnabled(true);
+        if (programab.getSessionNames().isEmpty()) {
+          startSessionButton.setText("Start Session");
+          startSessionButton.setBackground(Color.RED);
+        } else {
+          startSessionButton.setText("Reload Session");
+          startSessionButton.setBackground(Color.GREEN);
+        }
+        if (programab.loading) {
+          startSessionButton.setText("Loading...");
+          startSessionButton.setBackground(Color.ORANGE);
+          startSessionButton.setEnabled(false);
+        }
+        if (programab.aimlError) {
+          startSessionButton.setText("AIML error");
+          startSessionButton.setBackground(Color.RED);
+          startSessionButton.setEnabled(false);
+        }
+        progABPath.setText(new File(programab.getPath()).getAbsolutePath());
+        userName.setText(programab.getCurrentUserName());
+        botName.setText(programab.getCurrentBotName());
       }
     });
 
   }
-
 
 }
