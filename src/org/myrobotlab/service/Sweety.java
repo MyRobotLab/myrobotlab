@@ -253,13 +253,6 @@ public class Sweety extends Service {
 
   public Sweety(String n) {
     super(n);    
-    arduino = (Arduino) createPeer("arduino");
-    chatBot = (ProgramAB) createPeer("chatBot");
-    htmlFilter = (HtmlFilter) createPeer("htmlFilter");
-    mouth = (MarySpeech) createPeer("mouth");
-    ear = (WebkitSpeechRecognition) createPeer("ear");
-    webGui = (WebGui) createPeer("webGui");
-    pir = (Pir) createPeer("pir");
   }
 
   /**
@@ -267,7 +260,7 @@ public class Sweety extends Service {
    * @throws Exception e
    */
   public void attach() throws Exception {
-	
+  
     rightElbowServo.attach(arduino, rightElbow[pin]);
     rightShoulderServo.attach(arduino, rightShoulder[pin]);
     rightArmServo.attach(arduino, rightArm[pin]);
@@ -762,24 +755,29 @@ public class Sweety extends Service {
   }
   
   public void setLanguage(String lang){
-	  mouth.setLanguage(lang);
+    mouth.setLanguage(lang);
   }
   public void setVoice(String voice){
-	  mouth.setVoice(voice);
+    mouth.setVoice(voice);
   }
 
   @Override
   public void startService() {
     super.startService();
+    
 
-    arduino = (Arduino) startPeer("arduino");
-    chatBot = (ProgramAB) startPeer("chatBot");
-    htmlFilter = (HtmlFilter) startPeer("htmlFilter");
-    mouth = (MarySpeech) startPeer("mouth");
-    ear = (WebkitSpeechRecognition) startPeer("ear");
-    webGui = (WebGui) startPeer("webGui");
-    pir = (Pir) startPeer("pir");
+    arduino = (Arduino) Runtime.start("arduino","Arduino");
+    chatBot = (ProgramAB) Runtime.start("chatBot","ProgramAB");
+    htmlFilter = (HtmlFilter) Runtime.start("htmlFilter","HtmlFilter");
+    mouth = (MarySpeech) Runtime.start("mouth","MarySpeech");
+    ear = (WebkitSpeechRecognition) Runtime.start("ear","WebkitSpeechRecognition");
+    webGui = (WebGui) Runtime.start("webGui","WebGui");
+    pir = (Pir) Runtime.start("pir","Pir");
+
+    // configure services
     pir.attach(arduino,pirSensorPin );
+    
+    // FIXME - there is likely an "attach" that does this...
     subscribe(mouth.getName(), "publishStartSpeaking");
     subscribe(mouth.getName(), "publishEndSpeaking");
 
@@ -787,28 +785,28 @@ public class Sweety extends Service {
 
   public void startServos() {
     
-    rightShoulderServo = (Servo) startPeer("rightShoulderServo");
-    rightArmServo = (Servo) startPeer("rightArmServo");
-    rightBicepsServo = (Servo) startPeer("rightBicepsServo");
-    rightElbowServo = (Servo) startPeer("rightElbowServo");
-    rightWristServo = (Servo) startPeer("rightWristServo");
-    leftShoulderServo = (Servo) startPeer("leftShoulderServo");    
-    leftArmServo = (Servo) startPeer("leftArmServo");
-    leftBicepsServo = (Servo) startPeer("leftBicepsServo");
-    leftElbowServo = (Servo) startPeer("leftElbowServo");
-    leftWristServo = (Servo) startPeer("leftWristServo");
-    rightThumbServo = (Servo) startPeer("rightThumbServo");
-    rightIndexServo = (Servo) startPeer("rightIndexServo");
-    rightMiddleServo = (Servo) startPeer("rightMiddleServo");
-    rightRingServo = (Servo) startPeer("rightRingServo");
-    rightPinkyServo = (Servo) startPeer("rightPinkyServo");    
-    leftThumbServo = (Servo) startPeer("leftThumbServo");
-    leftIndexServo = (Servo) startPeer("leftIndexServo");
-    leftMiddleServo = (Servo) startPeer("leftMiddleServo");
-    leftRingServo = (Servo) startPeer("leftRingServo");
-    leftPinkyServo = (Servo) startPeer("leftPinkyServo"); 
-    neckTiltServo = (Servo) startPeer("neckTiltServo");
-    neckPanServo = (Servo) startPeer("neckPanServo");
+    rightShoulderServo = (Servo) Runtime.start("rightShoulderServo","Servo");
+    rightArmServo = (Servo) Runtime.start("rightArmServo","Servo");
+    rightBicepsServo = (Servo) Runtime.start("rightBicepsServo","Servo");
+    rightElbowServo = (Servo) Runtime.start("rightElbowServo","Servo");
+    rightWristServo = (Servo) Runtime.start("rightWristServo","Servo");
+    leftShoulderServo = (Servo) Runtime.start("leftShoulderServo","Servo");    
+    leftArmServo = (Servo) Runtime.start("leftArmServo","Servo");
+    leftBicepsServo = (Servo) Runtime.start("leftBicepsServo","Servo");
+    leftElbowServo = (Servo) Runtime.start("leftElbowServo","Servo");
+    leftWristServo = (Servo) Runtime.start("leftWristServo","Servo");
+    rightThumbServo = (Servo) Runtime.start("rightThumbServo","Servo");
+    rightIndexServo = (Servo) Runtime.start("rightIndexServo","Servo");
+    rightMiddleServo = (Servo) Runtime.start("rightMiddleServo","Servo");
+    rightRingServo = (Servo) Runtime.start("rightRingServo","Servo");
+    rightPinkyServo = (Servo) Runtime.start("rightPinkyServo","Servo");    
+    leftThumbServo = (Servo) Runtime.start("leftThumbServo","Servo");
+    leftIndexServo = (Servo) Runtime.start("leftIndexServo","Servo");
+    leftMiddleServo = (Servo) Runtime.start("leftMiddleServo","Servo");
+    leftRingServo = (Servo) Runtime.start("leftRingServo","Servo");
+    leftPinkyServo = (Servo) Runtime.start("leftPinkyServo","Servo"); 
+    neckTiltServo = (Servo) Runtime.start("neckTiltServo","Servo");
+    neckPanServo = (Servo) Runtime.start("neckPanServo","Servo");
 
     rightShoulderServo.setMinMax(rightShoulder[min], rightShoulder[max]);
     rightArmServo.setMinMax(rightArm[min], rightArm[max]);
@@ -840,7 +838,7 @@ public class Sweety extends Service {
     neckTiltServo.detach();
     neckPanServo.detach();
 
-    tracker = (Tracking) startPeer("tracker");
+    tracker = (Tracking) Runtime.start("tracker","Tracking");
     // OLD WAY
     //leftTracker.y.setPin(39); // neckTilt
     //leftTracker.connect(port);
@@ -862,12 +860,12 @@ public class Sweety extends Service {
    */
 
   public void startUltraSonic(String port) throws Exception {
-    USfront = (UltrasonicSensor) startPeer("USfront");
-    USfrontRight = (UltrasonicSensor) startPeer("USfrontRight");
-    USfrontLeft = (UltrasonicSensor) startPeer("USfrontLeft");
-    USback = (UltrasonicSensor) startPeer("USback");
-    USbackRight = (UltrasonicSensor) startPeer("USbackRight");
-    USbackLeft = (UltrasonicSensor) startPeer("USbackLeft");
+    USfront = (UltrasonicSensor) Runtime.start("USfront","UltrasonicSensor");
+    USfrontRight = (UltrasonicSensor) Runtime.start("USfrontRight","UltrasonicSensor");
+    USfrontLeft = (UltrasonicSensor) Runtime.start("USfrontLeft","UltrasonicSensor");
+    USback = (UltrasonicSensor) Runtime.start("USback","UltrasonicSensor");
+    USbackRight = (UltrasonicSensor) Runtime.start("USbackRight","UltrasonicSensor");
+    USbackLeft = (UltrasonicSensor) Runtime.start("USbackLeft","UltrasonicSensor");
 
     USfront.attach(arduino, frontUltrasonicTrig, frontUltrasonicEcho);
     USfrontRight.attach(arduino, front_rightUltrasonicTrig, front_rightUltrasonicEcho);
@@ -897,8 +895,8 @@ public class Sweety extends Service {
      */
     if (openni == null) {
       System.out.println("starting kinect");
-      openni = (OpenNi) startPeer("openni");
-      pid = (Pid) startPeer("pid");
+      openni = (OpenNi) Runtime.start("openni","OpenNi");
+      pid = (Pid) Runtime.start("pid","Pid");
 
       pid.setMode("kinect", Pid.MODE_AUTOMATIC);
       pid.setOutputRange("kinect", -1, 1);
@@ -995,7 +993,7 @@ public class Sweety extends Service {
 
   /**
    * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
+   * to be constructed. It has description, categories, and dependencies
    * definitions.
    * 
    * @return ServiceType - returns all the data
@@ -1006,53 +1004,6 @@ public class Sweety extends Service {
     ServiceType meta = new ServiceType(Sweety.class.getCanonicalName());
     meta.addDescription("service for the Sweety robot");
     meta.addCategory("robot");
-
-    // put peer definitions in
-    meta.addPeer("arduino", "Arduino", "arduino");
-    meta.addPeer("mouth", "MarySpeech", "sweetys mouth");
-    meta.addPeer("ear", "WebkitSpeechRecognition", "ear");
-    meta.addPeer("chatBot", "ProgramAB", "chatBot");
-    meta.addPeer("leftTracker", "Tracking", "leftTracker");
-    meta.addPeer("rightTracker", "Tracking", "rightTracker");
-    meta.addPeer("htmlFilter", "HtmlFilter", "htmlfilter");
-    meta.addPeer("webGui", "WebGui", "webGui");
-
-    meta.addPeer("USfront", "UltrasonicSensor", "USfront");
-    meta.addPeer("USfrontRight", "UltrasonicSensor", "USfrontRight");
-    meta.addPeer("USfrontLeft", "UltrasonicSensor", "USfrontLeft");
-    meta.addPeer("USback", "UltrasonicSensor", "USback");
-    meta.addPeer("USbackRight", "UltrasonicSensor", "USbackRight");
-    meta.addPeer("USbackLeft", "UltrasonicSensor", "USbackLeft");
-    
-    meta.addPeer("rightShoulder", "Servo", "servo");
-    meta.addPeer("rightBiceps", "Servo", "servo");
-    meta.addPeer("rightArm", "Servo", "servo");
-    meta.addPeer("rightElbow", "Servo", "servo");
-    meta.addPeer("rightWrist", "Servo", "servo");
-    meta.addPeer("rightThumb", "Servo", "servo");
-    meta.addPeer("rightIndex", "Servo", "servo");
-    meta.addPeer("rightMiddle", "Servo", "servo");
-    meta.addPeer("rightRing", "Servo", "servo");
-    meta.addPeer("rightPinky", "Servo", "servo");
-
-    meta.addPeer("leftShoulder", "Servo", "servo");
-    meta.addPeer("leftBiceps", "Servo", "servo");
-    meta.addPeer("leftArm", "Servo", "servo");
-    meta.addPeer("leftElbow", "Servo", "servo");
-    meta.addPeer("leftWrist", "Servo", "servo");
-    meta.addPeer("leftThumb", "Servo", "servo");
-    meta.addPeer("leftIndex", "Servo", "servo");
-    meta.addPeer("leftMiddle", "Servo", "servo");
-    meta.addPeer("leftRing", "Servo", "servo");
-    meta.addPeer("leftPinky", "Servo", "servo");
-
-    
-    meta.addPeer("neckTilt", "Servo", "servo");
-    meta.addPeer("neckPan", "Servo", "servo");
-    
-    meta.addPeer("openni", "OpenNi", "openni");
-    meta.addPeer("pid", "Pid", "pid");
-    meta.addPeer("pir", "Pir", "pir");
 
     return meta;
   }
