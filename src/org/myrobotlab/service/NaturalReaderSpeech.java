@@ -41,9 +41,10 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
   transient public final static Logger log = LoggerFactory.getLogger(NaturalReaderSpeech.class);
   // default voice
   // TODO: natural reader has this voice.. there are others
-  // but for now.. only Ryan is wired in.. it maps to voice id "33"
-  String voice = "Ryan";
-  HashMap<String, Integer> voiceMap = new HashMap<String,Integer>();
+  // but for now.. only US-English_Ronald is wired in.. it maps to voice id "33"
+  String voice = "US-English_Ronald";
+  HashMap<String, String> voiceMap = new HashMap<String,String>();
+  HashMap<String, String> voiceMapType = new HashMap<String,String>();
   ArrayList<String> voices = new ArrayList<String>();
   
   
@@ -55,6 +56,10 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
   transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
 
 private String language;
+
+private int IbmRate=0;
+private int AwsRate=100;
+private int rate=0;
   
   public NaturalReaderSpeech(String reservedKey) {
     super(reservedKey);
@@ -75,56 +80,140 @@ private String language;
     // needed because of an ssl error on the natural reader site
     System.setProperty("jsse.enableSNIExtension", "false");
     
-        voiceMap.put("Sharon",1);
-        voiceMap.put("Amanda",2);
-        voiceMap.put("Tracy",3);
-        voiceMap.put("Ryan",4);
-        voiceMap.put("Tim",5);
-        voiceMap.put("Suzan",6); 
-        voiceMap.put("Mike",7);
-        voiceMap.put("Rod",8);
-        voiceMap.put("Rachel",9);
-        voiceMap.put("Peter",10);
-        voiceMap.put("Graham",11);
-        voiceMap.put("Selene",12);
-        voiceMap.put("Darren",13);
-        voiceMap.put("Charles",14);
-        voiceMap.put("Audrey",15);
-        voiceMap.put("Rosa",16);
-        voiceMap.put("Alberto",17);
-        voiceMap.put("Diego",18); 
-        voiceMap.put("Camila",19);
-        voiceMap.put("Paula",20);
-        voiceMap.put("Joaquim",21);
-        voiceMap.put("Alain",22);
-        voiceMap.put("Juliette",23);
-        voiceMap.put("Emmanuel",24); 
-        voiceMap.put("Marie",25);
-        voiceMap.put("Bruno",26);
-        voiceMap.put("Alice",27);
-        voiceMap.put("Louice",28);
-        voiceMap.put("Reiner",29); 
-        voiceMap.put("Klara",30);
-        voiceMap.put("Klaus",31);
-        voiceMap.put("Sarah",32);
-        voiceMap.put("Bertha",33);
-        voiceMap.put("Jacob",34);
-        voiceMap.put("Vittorio",35);
-        voiceMap.put("Chiara",36);
-        voiceMap.put("Mario",37);
-        voiceMap.put("Valentina",38);
-        voiceMap.put("Celia",39);
-        voiceMap.put("Renata",40);
-        voiceMap.put("Andrea",41);
-        voiceMap.put("Julieta",42);
-        voiceMap.put("Emma",43);
-        voiceMap.put("Erik",44);
-        voiceMap.put("Gus",45);
-        voiceMap.put("Maja",46);
-        voiceMap.put("Anika",47);
-        voiceMap.put("Markus",48);
+    voiceMap.put("Australian-English_Noah","Russell");
+    voiceMap.put("Australian-English_Olivia","Nicole");
+    voiceMap.put("Brazilian-Portuguese_Manuela","Vitoria");
+    voiceMap.put("Brazilian-Portuguese_Miguel","Ricardo");
+    voiceMap.put("British-English_Charlotte","Amy");
+    voiceMap.put("British-English_Emily","Emma");
+    voiceMap.put("British-English_John","Brian");
+    voiceMap.put("Canadian-French_Adèle","Chantal");
+    voiceMap.put("Castilian-Spanish_Alejandro","Enrique");
+    voiceMap.put("Castilian-Spanish_Lucia","Conchita");
+    voiceMap.put("Danish_Line","Naja");
+    voiceMap.put("Danish_Mikkel","Mads");
+    voiceMap.put("Dutch_Birgit","de-DE_BirgitVoice");
+    voiceMap.put("Dutch_Daan","Ruben");
+    voiceMap.put("Dutch_Dieter","de-DE_DieterVoice");
+    voiceMap.put("Dutch_Roos","Lotte");
+    voiceMap.put("French_Chloé","Celine");
+    voiceMap.put("French_Gabriel","Mathieu");
+    voiceMap.put("French_Renee","fr-FR_ReneeVoice");
+    voiceMap.put("GB-English_Carrie","en-GB_KateVoice");
+    voiceMap.put("German_Ida","Marlene");
+    voiceMap.put("German_Johann","Hans");
+    voiceMap.put("German_Vicki","Vicki");
+    voiceMap.put("Icelandic_Gunnar","Karl");
+    voiceMap.put("Icelandic_Helga","Dora");
+    voiceMap.put("Indian-English_Aditi","Aditi");
+    voiceMap.put("Indian-English_Padma","Raveena");
+    voiceMap.put("Italian_Francesca","it-IT_FrancescaVoice");
+    voiceMap.put("Italian_Francesco","Giorgio");
+    voiceMap.put("Italian_Giulia","Carla");
+    voiceMap.put("Japanese_Hana","Mizuki");
+    voiceMap.put("Japanese_Midori","ja-JP_EmiVoice");
+    voiceMap.put("Japanese_Takumi","Takumi");
+    voiceMap.put("Korean_Seoyeon","Seoyeon");
+    voiceMap.put("Norwegian_Ingrid","Liv");
+    voiceMap.put("Polish_Jakub","Jan");
+    voiceMap.put("Polish_Kacper","Jacek");
+    voiceMap.put("Polish_Lena","Maja");
+    voiceMap.put("Polish_Zofia","Ewa");
+    voiceMap.put("Portuguese_BR-Isabela","pt-BR_IsabelaVoice");
+    voiceMap.put("Portuguese_Joao","Cristiano");
+    voiceMap.put("Portuguese_Mariana","Ines");
+    voiceMap.put("Romanian_Elena","Carmen");
+    voiceMap.put("Russian_Olga","Tatyana");
+    voiceMap.put("Russian_Sergei","Maxim");
+    voiceMap.put("Spanish_Enrique","es-ES_EnriqueVoice");
+    voiceMap.put("Spanish_Laura","es-ES_LauraVoice");
+    voiceMap.put("Spanish_Sofia","es-LA_SofiaVoice");
+    voiceMap.put("Swedish_Elsa","Astrid");
+    voiceMap.put("Turkish_Esma","Filiz");
+    voiceMap.put("US-English_Amber","en-US_AllisonVoice");
+    voiceMap.put("US-English_David","Justin");
+    voiceMap.put("US-English_James","Joey");
+    voiceMap.put("US-English_Jennifer","Joanna");
+    voiceMap.put("US-English_Kathy","Kimberly");
+    voiceMap.put("US-English_Leslie","en-US_LisaVoice");
+    voiceMap.put("US-English_Linda","Kendra");
+    voiceMap.put("US-English_Mary","Salli");
+    voiceMap.put("US-English_Matthew","Matthew");
+    voiceMap.put("US-English_Polly","Ivy");
+    voiceMap.put("US-English_Ronald","en-US_MichaelVoice");
+    voiceMap.put("US-English_Sofia","es-US_SofiaVoice");
+    voiceMap.put("US-Spanish_Isabella","Penelope");
+    voiceMap.put("US-Spanish_Matías","Miguel");
+    voiceMap.put("Welsh_Seren","Gwyneth");
+    voiceMap.put("Welsh-English_Gareth","Geraint");
     
-    
+    voiceMapType.put("Australian-English_Noah","aws");
+    voiceMapType.put("Australian-English_Olivia","aws");
+    voiceMapType.put("Brazilian-Portuguese_Manuela","aws");
+    voiceMapType.put("Brazilian-Portuguese_Miguel","aws");
+    voiceMapType.put("British-English_Charlotte","aws");
+    voiceMapType.put("British-English_Emily","aws");
+    voiceMapType.put("British-English_John","aws");
+    voiceMapType.put("Canadian-French_Adèle","aws");
+    voiceMapType.put("Castilian-Spanish_Alejandro","aws");
+    voiceMapType.put("Castilian-Spanish_Lucia","aws");
+    voiceMapType.put("Danish_Line","aws");
+    voiceMapType.put("Danish_Mikkel","aws");
+    voiceMapType.put("Dutch_Birgit","ibm");
+    voiceMapType.put("Dutch_Daan","aws");
+    voiceMapType.put("Dutch_Dieter","ibm");
+    voiceMapType.put("Dutch_Roos","aws");
+    voiceMapType.put("French_Chloé","aws");
+    voiceMapType.put("French_Gabriel","aws");
+    voiceMapType.put("French_Renee","ibm");
+    voiceMapType.put("GB-English_Carrie","ibm");
+    voiceMapType.put("German_Ida","aws");
+    voiceMapType.put("German_Johann","aws");
+    voiceMapType.put("German_Vicki","aws");
+    voiceMapType.put("Icelandic_Gunnar","aws");
+    voiceMapType.put("Icelandic_Helga","aws");
+    voiceMapType.put("Indian-English_Aditi","aws");
+    voiceMapType.put("Indian-English_Padma","aws");
+    voiceMapType.put("Italian_Francesca","ibm");
+    voiceMapType.put("Italian_Francesco","aws");
+    voiceMapType.put("Italian_Giulia","aws");
+    voiceMapType.put("Japanese_Hana","aws");
+    voiceMapType.put("Japanese_Midori","ibm");
+    voiceMapType.put("Japanese_Takumi","aws");
+    voiceMapType.put("Korean_Seoyeon","aws");
+    voiceMapType.put("Norwegian_Ingrid","aws");
+    voiceMapType.put("Polish_Jakub","aws");
+    voiceMapType.put("Polish_Kacper","aws");
+    voiceMapType.put("Polish_Lena","aws");
+    voiceMapType.put("Polish_Zofia","aws");
+    voiceMapType.put("Portuguese_BR-Isabela","ibm");
+    voiceMapType.put("Portuguese_Joao","aws");
+    voiceMapType.put("Portuguese_Mariana","aws");
+    voiceMapType.put("Romanian_Elena","aws");
+    voiceMapType.put("Russian_Olga","aws");
+    voiceMapType.put("Russian_Sergei","aws");
+    voiceMapType.put("Spanish_Enrique","ibm");
+    voiceMapType.put("Spanish_Laura","ibm");
+    voiceMapType.put("Spanish_Sofia","ibm");
+    voiceMapType.put("Swedish_Elsa","aws");
+    voiceMapType.put("Turkish_Esma","aws");
+    voiceMapType.put("US-English_Amber","ibm");
+    voiceMapType.put("US-English_David","aws");
+    voiceMapType.put("US-English_James","aws");
+    voiceMapType.put("US-English_Jennifer","aws");
+    voiceMapType.put("US-English_Kathy","aws");
+    voiceMapType.put("US-English_Leslie","ibm");
+    voiceMapType.put("US-English_Linda","aws");
+    voiceMapType.put("US-English_Mary","aws");
+    voiceMapType.put("US-English_Matthew","aws");
+    voiceMapType.put("US-English_Polly","aws");
+    voiceMapType.put("US-English_Ronald","ibm");
+    voiceMapType.put("US-English_Sofia","ibm");
+    voiceMapType.put("US-Spanish_Isabella","aws");
+    voiceMapType.put("US-Spanish_Matías","aws");
+    voiceMapType.put("Welsh_Seren","aws");
+    voiceMapType.put("Welsh-English_Gareth","aws");
+
     voices.addAll(voiceMap.keySet());
   }
 
@@ -147,29 +236,45 @@ private String language;
     // TODO: url encode this.
     
     String encoded = toSpeak;
-    try {
-      encoded = URLEncoder.encode(toSpeak, "UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }    
+    String voiceId = voiceMap.get(voice);
+    String provider = voiceMapType.get(voice);
+    String url = "";
+    if (provider=="ibm")
+    {
+      rate=IbmRate;
+      try {
+        encoded = URLEncoder.encode("<prosody rate=\""+rate+"%\">"+toSpeak+"</prosody>", "UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }    
+      
+      url = "http://api.naturalreaders.com/v4/tts/ibmspeak?speaker="+voiceId+"&text="+encoded;
+    }
+    if (provider=="aws")
+    {
+      rate=AwsRate;
+      try {
+        encoded = URLEncoder.encode(toSpeak, "UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }    
+      
+      url = "http://api.naturalreaders.com/v4/tts/awsspeak?voiceId="+voiceId+"&rate="+rate+"&text="+encoded+"&outputFormat=mp3";
+    }
     
-    int voiceId = voiceMap.get(voice);
-    
-    // TODO: expose thge "r=33" as the selection for Ryans voice.
-    // TOOD: also the speed setting is passed in as s= 
-   
-    //String url = "https://api.naturalreaders.com/v2/tts/?t=" + encoded + "&r="+voiceId+"&s=0";
-    // seem api V2 borked
-    // a very very VERY bad and quick fix ( find this key public after asked god )
-    String url = "http://api.naturalreaders.com/v4/tts/macspeak?apikey=b98x9xlfs54ws4k0wc0o8g4gwc0w8ss&src=pw&t=" + encoded + "&r="+voiceId+"&s=0";
+
+    // https://api.naturalreaders.com/v4/tts/awsspeak?voiceId=Salli&rate=100&text=test&outputFormat=mp3
+    // https://api.naturalreaders.com/v4/tts/ibmspeak?speaker=en-US_MichaelVoice&text=<prosody rate="0%">starting left arm, I am a watson voice</prosody>
+    // String url = "http://api.naturalreaders.com/v4/tts/macspeak?apikey=b98x9xlfs54ws4k0wc0o8g4gwc0w8ss&src=pw&t=" + encoded + "&r=2&s=0";
                   
       log.info("URL FOR AUDIO:{}",url);
     return url;
   }
 
   
-  public byte[] getRemoteFile(String toSpeak) {
+  public byte[] getRemoteFile(String toSpeak) throws UnsupportedEncodingException {
 
     String mp3Url = getMp3Url(toSpeak);
     HttpGet get = null;
@@ -205,9 +310,15 @@ private String language;
     log.info("speak blocking {}", toSpeak);
 
     if (voice == null) {
-      log.warn("voice is null! setting to default: Ryan");
-      voice = "Ryan";
+      log.warn("voice is null! setting to default: US-English_Ronald");
+      voice = "US-English_Ronald";
     }
+    rate=IbmRate;
+    if (voiceMapType.get(voice)=="ibm")
+    {
+      rate=IbmRate;
+    }
+    
     String localFileName = getLocalFileName(this, toSpeak, "mp3");
     String filename = AudioFile.globalFileCacheDir + File.separator + localFileName;
     if (!audioFile.cacheContains(localFileName)) {
@@ -226,6 +337,13 @@ private String language;
     // TODO: fix the volume control
     log.warn("Volume control not implemented in Natural Reader Speech yet.");
   }
+  
+  public void setRate(int rate) {
+    // 0 is normal +x fast / -x slow
+    this.IbmRate=rate;
+    this.AwsRate=rate+100;
+  }
+  
   
 
   @Override
@@ -258,8 +376,13 @@ private String language;
     AudioData ret = null;
     log.info("speak {}", toSpeak);
     if (voice == null) {
-      log.warn("voice is null! setting to default: Ryan");
-      voice = "Ryan";
+      log.warn("voice is null! setting to default: US-English_Ronald");
+      voice = "US-English_Ronald";
+    }
+    rate=IbmRate;
+    if (voiceMapType.get(voice)=="ibm")
+    {
+      rate=IbmRate;
     }
     String filename = this.getLocalFileName(this, toSpeak, "mp3");
     if (audioFile.cacheContains(filename)) {
@@ -283,7 +406,7 @@ private String language;
   @Override
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
     // TODO: make this a base class sort of thing.
-    return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
+    return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice()+"rate_"+rate, "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
         + audioFileType;
   }
 
@@ -353,6 +476,8 @@ private String language;
       this.voice = voice;
       return true;
     }
+    error("Voice "+voice+" not exist");
+    this.voice = "US-English_Ronald";
     return false;
   }
 
@@ -381,18 +506,22 @@ private String language;
     //try {
       // Runtime.start("webgui", "WebGui");
       NaturalReaderSpeech speech = (NaturalReaderSpeech) Runtime.start("speech", "NaturalReaderSpeech");
-      // speech.setVoice("Ryan");
+      // speech.setVoice("US-English_Ronald");
       // TODO: fix the volume control
       // speech.setVolume(0);
      // speech.speakBlocking("does this work");
 //       speech.getMP3ForSpeech("hello world");
-      
-      speech.setVoice("Lauren");
+      speech.setRate(0);
+      speech.setVoice("British-English_Emily");
       speech.speakBlocking("does it works?");
       
-      speech.setVoice("Lauren");
-
-      speech.speakBlocking("horray");
+      speech.setRate(-50);
+      speech.setVoice("US-English_Ronald");
+      speech.speakBlocking("Hey, Watson was here!");
+      
+      speech.setRate(-60);
+      speech.setVoice("Japanese_Midori");
+      speech.speakBlocking("ミロボトラブ岩");
   
     //}
   }
