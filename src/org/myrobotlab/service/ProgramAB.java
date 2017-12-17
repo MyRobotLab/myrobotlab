@@ -69,7 +69,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   HashSet<String> bots = new HashSet<String>();
 
   private String path = "ProgramAB";
-  public boolean aimlError=false;
+  public boolean aimlError = false;
 
   /**
    * botName - is un-initialized to preserve serialization stickyness
@@ -135,13 +135,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   private void cleanOutOfDateAimlIFFiles(String botName) {
     String aimlPath = getPath() + File.separator + "bots" + File.separator + botName + File.separator + "aiml";
     String aimlIFPath = getPath() + File.separator + "bots" + File.separator + botName + File.separator + "aimlif";
-    aimlError=false;
+    aimlError = false;
     log.info("AIML FILES:");
     File folder = new File(aimlPath);
     File folderaimlIF = new File(aimlIFPath);
     if (!folder.exists()) {
       log.error("{} does not exist", aimlPath);
-      aimlError=true;
+      aimlError = true;
       return;
     }
     if (wasCleanyShutdowned == null || wasCleanyShutdowned.isEmpty()) {
@@ -588,8 +588,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void reloadSession(String path, String username, String botname) {
+    reloadSession(path, username, botname, false);
+  }
+
+  public void reloadSession(String path, String username, String botname, Boolean killAimlIf) {
+    loading = true;
+    broadcastState();
     // kill the bot
-    bot = null;
+    writeAndQuit(killAimlIf);
     // kill the session
     String sessionKey = resolveSessionKey(username, botname);
     if (sessions.containsKey(sessionKey)) {
@@ -789,22 +795,45 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void writeAndQuit() {
+    writeAndQuit(false);
+  }
+
+  /**
+   * writeAndQuit will clean shutdown BOT so next stratup is sync & faaaast
+   * 
+   * @param killAimlIf
+   *          - Delete aimlif and restart bot from aiml - Useful to push aiml
+   *          modifications in realtime - Without restart whole script
+   */
+  public void writeAndQuit(Boolean killAimlIf) {
     if (bot == null) {
       log.info("no bot - don't need to write and quit");
       return;
     }
-    bot.writeQuit();
-
-    // edit moz4r : we need to change the last modification date to aimlif
-    // folder because at this time all is compilated.
-    // so programAb don't need to load AIML at startup
-    sleep(1000);
-    File folder = new File(bot.aimlif_path);
-
-    for (File f : folder.listFiles()) {
-      f.setLastModified(System.currentTimeMillis());
+    try {
+      savePredicates();
+    } catch (IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
     }
     String fil = bot.aimlif_path + File.separator + "folder_updated";
+    if (!killAimlIf) {
+      bot.writeQuit();
+      wasCleanyShutdowned = "ok";
+
+      // edit moz4r : we need to change the last modification date to aimlif
+      // folder because at this time all is compilated.
+      // so programAb don't need to load AIML at startup
+      sleep(1000);
+      File folder = new File(bot.aimlif_path);
+
+      for (File f : folder.listFiles()) {
+        f.setLastModified(System.currentTimeMillis());
+      }
+
+    } else {
+      fil = bot.aiml_path + File.separator + "folder_updated";
+    }
     File file = new File(fil);
     file.delete();
     try {
@@ -814,6 +843,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     } catch (IOException e) {
       log.error("PrintWriter error");
     }
+    bot = null;
   }
 
   public void attach(Attachable attachable) {
@@ -833,7 +863,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       e.printStackTrace();
     }
     writeAndQuit();
-    wasCleanyShutdowned = "ok";
     super.stopService();
   }
 
@@ -874,7 +903,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       brain.attach(ear);
       mouth.attach(brain);
 
-      brain.startSession("default", "work-e");
+      brain.startSession("default", "Alice2");
       // ear.startListening();
 
       // FIXME - make this work
