@@ -112,39 +112,37 @@ public class Sweety extends Service {
   int max = 2;
   int rest = 3;
       
-  // TODO Set pins and angles for each servomotors
-  // variable for servomotors ( pin, min, max, rest )
 //Right arm
-  int rightShoulder[] = {34,1,2,3};
-  int rightArm[] = {35,1,2,3};
-  int rightBiceps[] = {36,1,2,3};
-  int rightElbow[] = {37,1,2,3};
-  int rightWrist[] = {38,1,2,3};
+  int rightShoulder[] = {34,0,180,0};
+  int rightArm[] = {35,45,155,140};
+  int rightBiceps[] = {36,12,90,12};
+  int rightElbow[] = {37,8,90,8};
+  int rightWrist[] = {38,0,140,140};
    
   // Left arm
-  int leftShoulder[] = {39,1,2,3};
-  int leftArm[] = {40,1,2,3};
-  int leftBiceps[] = {41,1,2,3};
-  int leftElbow[] = {42,1,2,3};
-  int leftWrist[] = {43,1,2,3};
+  int leftShoulder[] = {39,0,150,148};
+  int leftArm[] = {40,0,85,0};
+  int leftBiceps[] = {41,60,140,140};
+  int leftElbow[] = {42,0,75,0};
+  int leftWrist[] = {43,0,168,0};
  
  // Right hand
-  int rightThumb[] = {44,1,2,3};
-  int rightIndex[] = {45,1,2,3};
+  int rightThumb[] = {44,170,75,170};
+  int rightIndex[] = {45,70,180,180};
   int rightMiddle[] = {46,1,2,3};
-  int rightRing[] = {47,1,2,3};
-  int rightPinky[] = {48,1,2,3};
+  int rightRing[] = {47,15,130,15};
+  int rightPinky[] = {48,25,180,25};
  
  // Left hand
-  int leftThumb[] = {8,1,2,3};
-  int leftIndex[] = {9,1,2,3};
-  int leftMiddle[] = {10,1,2,3};
-  int leftRing[] = {11,1,2,3};
-  int leftPinky[] = {12,1,2,3};
+  int leftThumb[] = {8,40,105,40};
+  int leftIndex[] = {9,0,180,0};
+  int leftMiddle[] = {10,0,180,0};
+  int leftRing[] = {11,10,180,180};
+  int leftPinky[] = {12,65,180,180};
  
  // Head
-  int neckTilt[] = {6,1,2,3};
-  int neckPan[] = {7,1,2,3};
+  int neckTilt[] = {6,0,75,30};
+  int neckPan[] = {7,20,140,80};
   
   /**
    * Check if a value of an array is -1 and if needed replace -1 by the old value
