@@ -174,7 +174,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       log.info(o.toString());
       log.info("Unknown action!");
     }
-    // TODO Auto-generated method stub
+
   }
 
   @Override
