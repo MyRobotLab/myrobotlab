@@ -603,6 +603,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // Or are there other handles to it?
       sessions.remove(sessionKey);
     }
+    bot = null;
     // TODO: we should make sure we keep the same path as before.
     startSession(path, username, getCurrentBotName());
   }
@@ -843,7 +844,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     } catch (IOException e) {
       log.error("PrintWriter error");
     }
-    bot = null;
   }
 
   public void attach(Attachable attachable) {
