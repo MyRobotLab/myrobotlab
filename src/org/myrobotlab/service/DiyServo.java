@@ -141,13 +141,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
               // log.debug(String.format("setPoint(%s), processVariable(%s),
               // output(%s)", setPoint, processVariable, output));
               if (output != lastOutput) {
-                //log.info(MathUtils.round(mapper.calcInput(getCurrentPos()),roundPos)+"");
                 motorControl.move(output);
                 lastOutput = output;
               }
             }
             Thread.sleep(1000 / sampleTime);
-            log.info(MathUtils.round(mapper.calcInput(getCurrentPos()),roundPos)+"");
           }
         }
 
@@ -195,6 +193,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   Double rest = 90.0;
 
   long lastActivityTime = 0;
+  
+  double currentVelocity = 0;
 
   /**
    * the requested INPUT position of the servo
@@ -205,7 +205,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * the calculated output for the servo
    */
   double targetOutput;
-  
+
   /**
    * Round pos values based on this digit count
    * useful later to compare target>pos
@@ -282,7 +282,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * Sample time 20 ms = 50 Hz
    */
   int sampleTime = 20;
- 
+
   transient MotorUpdater motorUpdater = null;
 
   double powerLevel = 0;
@@ -441,17 +441,17 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * move to
    */
   public void moveTo(double pos) {
-
+    double lastPosInput=mapper.calcInput(lastPos);
     if (motorControl == null) {
       error(String.format("%s's controller is not set", getName()));
       return;
     }
 
-    if (!isEnabled() && pos != lastPos) {
+    //if (!isEnabled() && pos != lastPosInput) {
       enable();
-    }
+    //}
 
-    if (lastPos != pos) {
+    if (lastPosInput != pos) {
       if (motorUpdater == null) {
         // log.info("Starting MotorUpdater");
         motorUpdater = new MotorUpdater(getName());
@@ -470,10 +470,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       // update others of our position change
       invoke("publishServoEvent", targetOutput);
     }
-    if (lastPos != pos) {
-      broadcastState();
-    }
-    lastPos = targetPos;
+
+    broadcastState();
 
   }
 
@@ -660,13 +658,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       Python python = (Python) Runtime.start("python", "Python");
       // dyiServo.attachServoController((ServoController)arduino);
       // dyiServo.attach((ServoController)arduino);
-      dyiServo.map(0,180,60,100);
+      dyiServo.map(0, 180, 0, 180);
       dyiServo = (DiyServo) Runtime.start("dyiServo", "DiyServo");
       dyiServo.attach((PinArrayControl) arduino, 14); // PIN 14 = A0
 
       // Servo Servo = (Servo) Runtime.start("Servo", "Servo");
-
-     
 
       // servo.test();
     } catch (Exception e) {
@@ -722,10 +718,14 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   @Override
   public void onPin(PinData pindata) {
     int inputValue = pindata.value;
-
     currentPosInput = 180 * inputValue / resolution;
     // log.debug(String.format("onPin received value %s converted to
     // %s",inputValue, processVariable));
+    // we need to read here real angle / seconds
+    // before try to control velocity
+    currentVelocity =  MathUtils.round(Math.abs(((currentPosInput - lastPos) * (1000 / sampleTime))),0);
+    lastPos = currentPosInput;
+    //log.info("currentVelocity : "currentVelocity);
     pid.setInput(pidKey, currentPosInput);
   }
 
@@ -912,7 +912,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     // TODO Auto-generated method stub
 
   }
-  
+
   /**
    * getCurrentPos() - return the calculated position of the servo use
    * lastActivityTime and velocity for the computation
@@ -927,18 +927,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   public double getCurrentPosOutput() {
     return MathUtils.round(mapper.calcOutput(getCurrentPos()),roundPos);
   }
-  
-  /**
-   * getCurrentPosInput() - return the calculated position of the servo 
-   * must correspond to targetPos
-   * 
-   * @return the current position of the servo ( full range )
-   */
-  public Double getCurrentPosInput() {
-    return MathUtils.round(mapper.calcInput(getCurrentPos()),roundPos);
-  }
-  
-
 
   public double getMinOutput() {
     return mapper.getMinOutput();
@@ -960,6 +948,18 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     // TODO Auto-generated method stub
     return false;
   }
+  
+  /**
+   * getCurrentVelocity() - return Current velocity
+   * ( realtime / based on frequency)
+   * 
+   * @return degrees / second
+   */
+  public double getCurrentVelocity() {
+    return currentVelocity;
+  }
+  
+  
 
   @Override
   public void enable() {
@@ -967,7 +967,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     if (motorUpdater == null) {
       motorUpdater = new MotorUpdater(getName());
     }
-    motorUpdater.start();
+    if (!motorUpdater.isAlive())
+    {
+      motorUpdater.start();
+    }
     broadcastState();
   }
 
@@ -979,6 +982,12 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       motorUpdater = null;
     }
     broadcastState();
+  }
+  
+  @Override
+  public void stopService() {
+    super.stopService();
+    disable();
   }
 
 }
