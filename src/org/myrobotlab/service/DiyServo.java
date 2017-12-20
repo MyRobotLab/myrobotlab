@@ -135,18 +135,34 @@ public class DiyServo extends Service implements ServoControl, PinListener {
           if (motorControl != null) {
             // Calculate the new value for the motor
             if (pid.compute(pidKey)) {
-              double setPoint = pid.getSetpoint(pidKey);
-              double output = pid.getOutput(pidKey);
+              // double setPoint = pid.getSetpoint(pidKey);
+
+              // TEMP SANTA TRICK TO CONTROL MAX VELOCITY
+              deltaVelocity = 1;
+
+              if (currentVelocity > maxVelocity && maxVelocity > 0) {
+                deltaVelocity = currentVelocity / maxVelocity;
+              }
+              // END TEMP SANTA TRICK
+
+              double output = pid.getOutput(pidKey) / deltaVelocity;
+
               motorControl.setPowerLevel(output);
               // log.debug(String.format("setPoint(%s), processVariable(%s),
               // output(%s)", setPoint, processVariable, output));
               if (output != lastOutput) {
                 motorControl.move(output);
                 lastOutput = output;
+                // log.info("currentPosInput:" + currentPosInput + " " +
+                // deltaVelocity + "currentVelocity:" + currentVelocity +
+                // "velocity:" + maxVelocity);
+
               }
+
             }
             Thread.sleep(1000 / sampleTime);
           }
+
         }
 
       } catch (Exception e) {
@@ -156,6 +172,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
           log.error("motor updater threw", e);
         }
       }
+
     }
   }
 
@@ -193,7 +210,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   Double rest = 90.0;
 
   long lastActivityTime = 0;
-  
+
   double currentVelocity = 0;
 
   /**
@@ -207,10 +224,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   double targetOutput;
 
   /**
-   * Round pos values based on this digit count
-   * useful later to compare target>pos
+   * Round pos values based on this digit count useful later to compare
+   * target>pos
    */
-  int roundPos=1;
+  int roundPos = 1;
 
   /**
    * list of names of possible controllers
@@ -235,7 +252,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    */
   boolean isEventsEnabled = false;
 
-  private int maxVelocity = 425;
+  private double maxVelocity = -1;
 
   private boolean isAttached = false;
   private boolean isControllerSet = false;
@@ -295,7 +312,9 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   public String defaultDisableDelayNoVelocity;
 
-  Double currentPosInput=0.0;
+  Double currentPosInput = 0.0;
+
+  double deltaVelocity = 1;
 
   /**
    * Constructor
@@ -441,15 +460,17 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * move to
    */
   public void moveTo(double pos) {
-    double lastPosInput=mapper.calcInput(lastPos);
+    deltaVelocity = 1;
+    double lastPosInput = mapper.calcInput(lastPos);
+
     if (motorControl == null) {
       error(String.format("%s's controller is not set", getName()));
       return;
     }
 
-    //if (!isEnabled() && pos != lastPosInput) {
-      enable();
-    //}
+    // if (!isEnabled() && pos != lastPosInput) {
+    enable();
+    // }
 
     if (lastPosInput != pos) {
       if (motorUpdater == null) {
@@ -660,6 +681,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       // dyiServo.attach((ServoController)arduino);
       dyiServo.map(0, 180, 0, 180);
       dyiServo = (DiyServo) Runtime.start("dyiServo", "DiyServo");
+      dyiServo.pid.setPID("dyiServo", 0.011, 0.0001, 0.0001);
       dyiServo.attach((PinArrayControl) arduino, 14); // PIN 14 = A0
 
       // Servo Servo = (Servo) Runtime.start("Servo", "Servo");
@@ -706,8 +728,9 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     }
   }
 
-  public void setMaxVelocity(int velocity) {
+  public void setMaxVelocity(double velocity) {
     this.maxVelocity = velocity;
+    broadcastState();
   }
 
   @Override
@@ -723,10 +746,16 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     // %s",inputValue, processVariable));
     // we need to read here real angle / seconds
     // before try to control velocity
-    currentVelocity =  MathUtils.round(Math.abs(((currentPosInput - lastPos) * (1000 / sampleTime))),0);
+
+    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - lastPos) * (500 / sampleTime))), 0);
+
     lastPos = currentPosInput;
-    //log.info("currentVelocity : "currentVelocity);
+    // log.info("currentVelocity : "currentVelocity);
+
+    // info(currentVelocity + " " + currentPosInput);
+
     pid.setInput(pidKey, currentPosInput);
+
   }
 
   public void attach(String pinArrayControlName, Integer pin) throws Exception {
@@ -920,12 +949,12 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * @return the current position of the servo
    */
   public Double getCurrentPos() {
-    return MathUtils.round(currentPosInput,roundPos);
+    return MathUtils.round(currentPosInput, roundPos);
   }
 
   @Override
   public double getCurrentPosOutput() {
-    return MathUtils.round(mapper.calcOutput(getCurrentPos()),roundPos);
+    return MathUtils.round(mapper.calcOutput(getCurrentPos()), roundPos);
   }
 
   public double getMinOutput() {
@@ -948,18 +977,16 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     // TODO Auto-generated method stub
     return false;
   }
-  
+
   /**
-   * getCurrentVelocity() - return Current velocity
-   * ( realtime / based on frequency)
+   * getCurrentVelocity() - return Current velocity ( realtime / based on
+   * frequency)
    * 
    * @return degrees / second
    */
   public double getCurrentVelocity() {
     return currentVelocity;
   }
-  
-  
 
   @Override
   public void enable() {
@@ -967,8 +994,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     if (motorUpdater == null) {
       motorUpdater = new MotorUpdater(getName());
     }
-    if (!motorUpdater.isAlive())
-    {
+    if (!motorUpdater.isAlive()) {
       motorUpdater.start();
     }
     broadcastState();
@@ -983,7 +1009,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     }
     broadcastState();
   }
-  
+
   @Override
   public void stopService() {
     super.stopService();
