@@ -227,7 +227,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * Round pos values based on this digit count useful later to compare
    * target>pos
    */
-  int roundPos = 1;
+  int roundPos = 0;
 
   /**
    * list of names of possible controllers
@@ -420,7 +420,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     if (targetPos == null) {
       return rest;
     } else {
-      return targetPos;
+      return MathUtils.round(targetPos, roundPos);
     }
   }
 
@@ -747,15 +747,23 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     // we need to read here real angle / seconds
     // before try to control velocity
 
-    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - lastPos) * (500 / sampleTime))), 0);
+    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - lastPos) * (500 / sampleTime))), roundPos);
 
-    lastPos = currentPosInput;
+
     // log.info("currentVelocity : "currentVelocity);
 
     // info(currentVelocity + " " + currentPosInput);
 
     pid.setInput(pidKey, currentPosInput);
-
+    
+    //offline feedback ! if diy servo is disabled
+    //useful to "learn" gestures ( later ... ) or simply start a moveTo() at real lastPos & sync with UI
+    if (!isEnabled() && lastPos!=currentPosInput)
+    {
+      targetPos=mapper.calcInput(lastPos);
+      broadcastState();
+    }
+    lastPos = currentPosInput;
   }
 
   public void attach(String pinArrayControlName, Integer pin) throws Exception {
