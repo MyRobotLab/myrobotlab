@@ -216,13 +216,13 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
   JLabel boundPos = new JLabel("90");
   JButton attachButton = new JButton("attach");
   JButton updateMinMaxButton = new JButton("set");
-  JTextField velocity = new JTextField("-1");
+  JTextField maxVelocity = new JTextField("-1");
   JLabel disableDelayIfVelocityL = new JLabel("Extra delay ( ms ): ");
   JLabel defaultDisableDelayNoVelocityL = new JLabel("Max velocity delay ( ms ) : ");
 
   JTextField disableDelayIfVelocity = new JTextField("1000");
   JTextField defaultDisableDelayNoVelocity = new JTextField("10000");
-  JButton setVelocity = new JButton("set");
+  JButton setMaxVelocity = new JButton("set");
   JButton setDisableDelays = new JButton("save");
 
   JButton updateMapButton = new JButton("set");
@@ -294,8 +294,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     mapOutputSlider.setMinimum(0);
     mapOutputSlider.setMaximum(180);
 
-    velocity.setPreferredSize(new Dimension(50, 24));
-    velocity.setSize(new Dimension(50, 24));
+    maxVelocity.setPreferredSize(new Dimension(50, 24));
+    maxVelocity.setSize(new Dimension(50, 24));
     defaultDisableDelayNoVelocity.setPreferredSize(new Dimension(40, 24));
     disableDelayIfVelocity.setPreferredSize(new Dimension(40, 24));
     boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
@@ -308,7 +308,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     disableDelayIfVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
 
     // not yet implemented
-    setVelocity.setEnabled(false);
+    ///setMaxVelocity.setEnabled(false);
     // enableButton.setEnabled(false);
     autoDisable.setEnabled(false);
     disableDelayIfVelocity.setEnabled(false);
@@ -332,7 +332,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     mapInputSlider.setBackground(new Color(188, 208, 244));
     mapOutputSlider.setBackground(new Color(200, 238, 206));
 
-    setVelocity.addActionListener(this);
+    setMaxVelocity.addActionListener(this);
     updateMinMaxButton.addActionListener(this);
     updateMapButton.addActionListener(this);
     left.addActionListener(this);
@@ -345,7 +345,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     eventsButton.addActionListener(this);
     setDisableDelays.addActionListener(this);
 
-    // addTopLeft(2, boundPos, 3, s,velocity,setVelocity );
+    // addTopLeft(2, boundPos, 3, s,velocity,setMaxVelocity );
 
     JPanel controllerP = new JPanel();
     Border borderController = BorderFactory.createTitledBorder("Analog input");
@@ -396,7 +396,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     sweep.setBackground(Color.WHITE);
 
     JPanel velocityP = new JPanel(new GridLayout(2, 1));
-    Border borderVelocityP = BorderFactory.createTitledBorder("Velocity :");
+    Border borderVelocityP = BorderFactory.createTitledBorder("Max Velocity ( poc ) :");
     velocityP.setBorder(borderVelocityP);
     velocityP.setBackground(Color.WHITE);
 
@@ -405,8 +405,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     velocityPicP.setBackground(Color.WHITE);
 
     JPanel velocitySetings = new JPanel();
-    velocitySetings.add(velocity);
-    velocitySetings.add(setVelocity);
+    velocitySetings.add(maxVelocity);
+    velocitySetings.add(setMaxVelocity);
     velocitySetings.setBackground(Color.WHITE);
     velocityP.add(velocitySetings);
     velocityP.add(velocityPicP);
@@ -470,8 +470,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           return;
         }
 
-        if (o == setVelocity) {
-          send("setVelocity", Double.parseDouble(velocity.getText()));
+        if (o == setMaxVelocity) {
+          send("setMaxVelocity", Double.parseDouble(maxVelocity.getText()));
           return;
         }
 
@@ -627,7 +627,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
         posMin.setText(servo.getMin() + "");
         posMax.setText(servo.getMax() + "");
-        velocity.setText(servo.getVelocity() + "");
+        maxVelocity.setText(servo.getMaxVelocity() + "");
 
         disableDelayIfVelocity.setText(servo.disableDelayIfVelocity + "");
         defaultDisableDelayNoVelocity.setText(servo.defaultDisableDelayNoVelocity + "");
