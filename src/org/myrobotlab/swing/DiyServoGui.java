@@ -153,7 +153,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     @Override
     public void mouseReleased(MouseEvent e) {
       if (myService != null) {
-        myServo.map(Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
+        myServo.map(Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
+            Double.parseDouble(maxOutput.getText()));
       } else {
         log.error("can not send message myService is null");
       }
@@ -201,7 +202,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     @Override
     public void mouseReleased(MouseEvent e) {
       if (myService != null) {
-        myServo.map(Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
+        myServo.map(Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
+            Double.parseDouble(maxOutput.getText()));
       } else {
         log.error("can not send message myService is null");
       }
@@ -217,11 +219,10 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
   JButton attachButton = new JButton("attach");
   JButton updateMinMaxButton = new JButton("set");
   JTextField maxVelocity = new JTextField("-1");
-  JLabel disableDelayIfVelocityL = new JLabel("Extra delay ( ms ): ");
-  JLabel defaultDisableDelayNoVelocityL = new JLabel("Max velocity delay ( ms ) : ");
+  JLabel disableDelayGraceL = new JLabel("Extra delay ( ms ): ");
 
-  JTextField disableDelayIfVelocity = new JTextField("1000");
-  JTextField defaultDisableDelayNoVelocity = new JTextField("10000");
+  JTextField disableDelayGrace = new JTextField("1000");
+
   JButton setMaxVelocity = new JButton("set");
   JButton setDisableDelays = new JButton("save");
 
@@ -296,24 +297,21 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
     maxVelocity.setPreferredSize(new Dimension(50, 24));
     maxVelocity.setSize(new Dimension(50, 24));
-    defaultDisableDelayNoVelocity.setPreferredSize(new Dimension(40, 24));
-    disableDelayIfVelocity.setPreferredSize(new Dimension(40, 24));
+
+    disableDelayGrace.setPreferredSize(new Dimension(40, 24));
     boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
     boundPos.setHorizontalAlignment(JLabel.RIGHT);
     imageenabled.setIcon(enabled);
     velocityPic.setIcon(velocityPng);
     autoDisable.setSelected(false);
     setInverted.setSelected(false);
-    defaultDisableDelayNoVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
-    disableDelayIfVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
+    disableDelayGraceL.setFont(new Font("Arial", Font.BOLD, 10));
 
     // not yet implemented
-    ///setMaxVelocity.setEnabled(false);
+    /// setMaxVelocity.setEnabled(false);
     // enableButton.setEnabled(false);
-    autoDisable.setEnabled(false);
-    disableDelayIfVelocity.setEnabled(false);
-    defaultDisableDelayNoVelocity.setEnabled(false);
-    setDisableDelays.setEnabled(false);
+    // autoDisable.setEnabled(false);
+    // setDisableDelays.setEnabled(false);
     // sweepButton.setEnabled(false);
     eventsButton.setEnabled(false);
 
@@ -383,7 +381,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     powerMain.add(enableButton);
     powerMain.add(autoDisable);
     powerMain.add(setDisableDelays);
-    powerMain.add(disableDelayIfVelocity);
+    powerMain.add(disableDelayGrace);
     // powerMain.add(powerMainSub);
 
     JPanel extra = new JPanel(new GridLayout(1, 1));
@@ -541,18 +539,14 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
         if (o == setDisableDelays) {
           Integer delayIfV = 1000;
-          Integer delayNoV = 10000;
 
           try {
-            delayIfV = Integer.parseInt(disableDelayIfVelocity.getText());
-            delayNoV = Integer.parseInt(defaultDisableDelayNoVelocity.getText());
+            delayIfV = Integer.parseInt(disableDelayGrace.getText());
           } catch (Exception e) {
             warn("Bad value for disableDelay !");
           }
 
-          send("setDisableDelayIfVelocity", delayIfV);
-          send("setDefaultDisableDelayNoVelocity", delayNoV);
-
+          send("setDisableDelayGrace", delayIfV);
           return;
         }
 
@@ -629,8 +623,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
         posMax.setText(servo.getMax() + "");
         maxVelocity.setText(servo.getMaxVelocity() + "");
 
-        disableDelayIfVelocity.setText(servo.disableDelayIfVelocity + "");
-        defaultDisableDelayNoVelocity.setText(servo.defaultDisableDelayNoVelocity + "");
+        disableDelayGrace.setText(servo.disableDelayGrace + "");
 
         if (servo.getMinInput() < mapInputSliderMinValue) {
           mapInputSliderMinValue = (int) servo.getMinInput();
@@ -650,28 +643,27 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           maxOutputTmp = servo.getMinOutput();
         }
 
+        if (servo.getMinOutput() < mapOutputSliderMinValue) {
+          mapOutputSliderMinValue = (int) servo.getMinOutput();
+          mapOutputSlider.setMinimum(mapOutputSliderMinValue);
+        }
 
-          if (servo.getMinOutput() < mapOutputSliderMinValue) {
-            mapOutputSliderMinValue = (int) servo.getMinOutput();
-            mapOutputSlider.setMinimum(mapOutputSliderMinValue);
-          }
+        if (servo.getMaxOutput() > mapOutputSliderMaxValue) {
+          mapOutputSliderMaxValue = (int) servo.getMaxOutput();
+          mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
+        }
 
-          if (servo.getMaxOutput() > mapOutputSliderMaxValue) {
-            mapOutputSliderMaxValue = (int) servo.getMaxOutput();
-            mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
-          }
+        mapOutputSlider.setInverted(servo.isInverted());
 
-          mapOutputSlider.setInverted(servo.isInverted());
+        minInput.setText(servo.getMinInput() + "");
+        maxInput.setText(servo.getMaxInput() + "");
+        minOutput.setText(minOutputTmp + "");
+        maxOutput.setText(maxOutputTmp + "");
 
-          minInput.setText(servo.getMinInput() + "");
-          maxInput.setText(servo.getMaxInput() + "");
-          minOutput.setText(minOutputTmp + "");
-          maxOutput.setText(maxOutputTmp + "");
-
-          mapInputSlider.setLowValue((int) servo.getMinInput());
-          mapInputSlider.setHighValue((int) servo.getMaxInput());
-          mapOutputSlider.setLowValue((int) servo.getMinOutput());
-          mapOutputSlider.setHighValue((int) servo.getMaxOutput());
+        mapInputSlider.setLowValue((int) servo.getMinInput());
+        mapInputSlider.setHighValue((int) servo.getMaxInput());
+        mapOutputSlider.setLowValue((int) servo.getMinOutput());
+        mapOutputSlider.setHighValue((int) servo.getMaxOutput());
 
         if (servo.isSweeping()) {
           sweepButton.setText("stop");
