@@ -27,6 +27,8 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -69,6 +71,8 @@ import org.slf4j.Logger;
  *         and use an Aduino, Ads1115 or some other input source that can give
  *         an analog input from a potentiometer or other device that can give
  *         analog feedback.
+ *         
+ *         TODO : move is not accurate ( 1° step seem not possible )
  */
 
 public class DiyServo extends Service implements ServoControl, PinListener {
@@ -123,6 +127,15 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   public class MotorUpdater extends Thread {
 
     double lastOutput = 0.0;
+    /**
+     * In most cases TargetPos is never reached So we need to emulate it ! if
+     * currentPosInput is the same since X we guess it is reached based on
+     * targetPosAngleTolerence
+     */
+    private int nbSamePosInputSinceX = 0;
+    private double lastCurrentPosInput = 0;
+    // goal is to not use this
+    private double targetPosAngleTolerence = 15;
 
     public MotorUpdater(String name) {
       super(String.format("%s.motorUpdater", name));
@@ -153,13 +166,33 @@ public class DiyServo extends Service implements ServoControl, PinListener {
               if (output != lastOutput) {
                 motorControl.move(output);
                 lastOutput = output;
-                // log.info("currentPosInput:" + currentPosInput + " " +
-                // deltaVelocity + "currentVelocity:" + currentVelocity +
-                // "velocity:" + maxVelocity);
+
+                if (isMoving()) {
+
+                  // tolerance
+                  if (currentPosInput == lastCurrentPosInput && Math.abs(targetPos - getCurrentPosOutput()) <= targetPosAngleTolerence) {
+                    nbSamePosInputSinceX += 1;
+                  } else {
+                    nbSamePosInputSinceX = 0;
+                  }
+
+                  // ok targetPos is reached ( with tolerance )
+                  if (nbSamePosInputSinceX >= 3 || getCurrentPosOutput() == targetPos) {
+                    onServoEvent(SERVO_EVENT_STOPPED, getCurrentPosOutput());
+                  } else {
+
+                    if (getCurrentPosOutput() != targetPos) {
+                      onServoEvent(SERVO_EVENT_POSITION_UPDATE, getCurrentPosOutput());
+                    }
+
+                  }
+
+                }
 
               }
 
             }
+            lastCurrentPosInput = currentPosInput;
             Thread.sleep(1000 / sampleTime);
           }
 
@@ -316,6 +349,23 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   double deltaVelocity = 1;
 
+  private boolean moving = false;
+  private boolean autoDisable;
+  private boolean overrideAutoDisable = false;
+  private transient Timer autoDisableTimer;
+  transient Object moveToBlocked = new Object();
+  /**
+   * disableDelayGrace : a timer is launched after targetpos reached
+   * 
+   * @param disableDelayGrace
+   *          - milliSeconds
+   * @default - 1000
+   */
+  public int disableDelayGrace = 1000;
+
+  public transient static final int SERVO_EVENT_STOPPED = 1;
+  public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
+
   /**
    * Constructor
    * 
@@ -329,6 +379,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     initPid();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
     lastActivityTime = System.currentTimeMillis();
+    this.addServoEventListener(this);
   }
 
   /*
@@ -460,6 +511,9 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * move to
    */
   public void moveTo(double pos) {
+    synchronized (moveToBlocked) {
+      moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
+    }
     deltaVelocity = 1;
     double lastPosInput = mapper.calcInput(lastPos);
 
@@ -468,11 +522,14 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       return;
     }
 
-    // if (!isEnabled() && pos != lastPosInput) {
-    enable();
-    // }
+    if (!isEnabled()) {
+      if (pos != lastPosInput || overrideAutoDisable || !getAutoDisable()) {
+        enable();
+      }
+    }
 
     if (lastPosInput != pos) {
+      moving = true;
       if (motorUpdater == null) {
         // log.info("Starting MotorUpdater");
         motorUpdater = new MotorUpdater(getName());
@@ -487,10 +544,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     pid.setSetpoint(pidKey, targetOutput);
     lastActivityTime = System.currentTimeMillis();
 
-    if (isEventsEnabled) {
-      // update others of our position change
-      invoke("publishServoEvent", targetOutput);
-    }
+    // if (isEventsEnabled) {
+    // update others of our position change
+    invoke("publishServoEvent", targetOutput);
+    // }
 
     broadcastState();
 
@@ -679,10 +736,16 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       Python python = (Python) Runtime.start("python", "Python");
       // dyiServo.attachServoController((ServoController)arduino);
       // dyiServo.attach((ServoController)arduino);
-      dyiServo.map(0, 180, 0, 180);
+      dyiServo.map(0, 180, 60, 175);
       dyiServo = (DiyServo) Runtime.start("dyiServo", "DiyServo");
       dyiServo.pid.setPID("dyiServo", 0.011, 0.0001, 0.0001);
       dyiServo.attach((PinArrayControl) arduino, 14); // PIN 14 = A0
+      dyiServo.setAutoDisable(true);
+      dyiServo.setMaxVelocity(10);
+      dyiServo.moveToBlocking(0);
+      dyiServo.moveToBlocking(180);
+      dyiServo.setMaxVelocity(-1);
+      dyiServo.moveTo(0);
 
       // Servo Servo = (Servo) Runtime.start("Servo", "Servo");
 
@@ -749,21 +812,21 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
     currentVelocity = MathUtils.round(Math.abs(((currentPosInput - lastPos) * (500 / sampleTime))), roundPos);
 
-
-    // log.info("currentVelocity : "currentVelocity);
+    // log.info("currentPosInput : " + currentPosInput);
 
     // info(currentVelocity + " " + currentPosInput);
 
     pid.setInput(pidKey, currentPosInput);
-    
-    //offline feedback ! if diy servo is disabled
-    //useful to "learn" gestures ( later ... ) or simply start a moveTo() at real lastPos & sync with UI
-    if (!isEnabled() && lastPos!=currentPosInput)
-    {
-      targetPos=mapper.calcInput(lastPos);
+
+    // offline feedback ! if diy servo is disabled
+    // useful to "learn" gestures ( later ... ) or simply start a moveTo() at
+    // real lastPos & sync with UI
+    if (!isEnabled() && MathUtils.round(lastPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
+      targetPos = mapper.calcInput(lastPos);
       broadcastState();
     }
     lastPos = currentPosInput;
+
   }
 
   public void attach(String pinArrayControlName, Integer pin) throws Exception {
@@ -916,20 +979,22 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   @Override
   public void setAutoDisable(boolean autoDisable) {
-    // TODO Auto-generated method stub
-
+    this.autoDisable = autoDisable;
   }
 
   @Override
   public boolean getAutoDisable() {
-    // TODO Auto-generated method stub
-    return false;
+    return this.autoDisable;
   }
 
   @Override
   public boolean moveToBlocking(double pos) {
-    // TODO Auto-generated method stub
-    return false;
+
+    targetPos = pos;
+    this.moveTo(pos);
+    // breakMoveToBlocking=false;
+    waitTargetPos();
+    return true;
   }
 
   @Override
@@ -940,14 +1005,73 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   @Override
   public void waitTargetPos() {
-    // TODO Auto-generated method stub
+    if (isMoving()) {
 
+      synchronized (moveToBlocked) {
+        try {
+          // Will block until moveToBlocked.notify() is called on another
+          // thread.
+          log.info("servo {} moveToBlocked was initiate", getName());
+          moveToBlocked.wait(15000);// 30s timeout security delay
+        } catch (InterruptedException e) {
+          log.info("servo {} moveToBlocked was interrupted", getName());
+        }
+      }
+
+    }
   }
 
   @Override
-  public void onServoEvent(Integer eventType, double currentPosUs) {
-    // TODO Auto-generated method stub
+  public void onServoEvent(Integer eventType, double currentPos) {
 
+    if (eventType == SERVO_EVENT_STOPPED) {
+      moving = false;
+    } else {
+      moving = true;
+    }
+
+    onServoEvent(currentPos);
+  }
+
+  public void onServoEvent(double currentPos) {
+
+    if (!isMoving() && isEnabled()) {
+      delayDisable();
+    }
+  }
+
+  private void delayDisable() {
+
+    if (!isMoving()) {
+      log.info("AutoDisable called");
+      if (autoDisable) {
+
+        if (autoDisableTimer != null) {
+          autoDisableTimer.cancel();
+          autoDisableTimer = null;
+        }
+        autoDisableTimer = new Timer();
+        autoDisableTimer.schedule(new TimerTask() {
+          @Override
+          public void run() {
+            if (!overrideAutoDisable && !isMoving()) {
+              disable();
+              targetPos = getCurrentPosOutput();
+            }
+            synchronized (moveToBlocked) {
+              moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
+            }
+          }
+        }, (long) disableDelayGrace);
+      } else {
+        synchronized (moveToBlocked) {
+          moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
+        }
+        targetPos = getCurrentPosOutput();
+      }
+    }
+
+    broadcastState();
   }
 
   /**
@@ -962,7 +1086,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   @Override
   public double getCurrentPosOutput() {
-    return MathUtils.round(mapper.calcOutput(getCurrentPos()), roundPos);
+    return MathUtils.round(mapper.calcInput(getCurrentPos()), roundPos);
   }
 
   public double getMinOutput() {
@@ -994,6 +1118,14 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    */
   public double getCurrentVelocity() {
     return currentVelocity;
+  }
+
+  public boolean isMoving() {
+    return moving;
+  }
+
+  public void setDisableDelayGrace(int disableDelayGrace) {
+    this.disableDelayGrace = disableDelayGrace;
   }
 
   @Override
