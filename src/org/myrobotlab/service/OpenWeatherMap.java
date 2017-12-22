@@ -182,7 +182,6 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   public static void main(String[] args) {
-
     OpenWeatherMap owm = new OpenWeatherMap("weather");
     owm.setApiKey("KEY_HERE");
     owm.startService();
