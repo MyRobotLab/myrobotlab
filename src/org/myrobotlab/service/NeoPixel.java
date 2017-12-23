@@ -329,6 +329,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
     this.controller = controller;
     controllerName = this.controller.getName();
     isAttached = true;
+    // update gui with full pixels
+    writeMatrix();
     broadcastState();
   }
 
