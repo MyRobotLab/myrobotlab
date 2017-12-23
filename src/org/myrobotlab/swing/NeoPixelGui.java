@@ -130,7 +130,7 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
     anim.add(animStart);
     animStart.addActionListener(this);
     animationList.addActionListener(this);
-    display.add(anim, BorderLayout.CENTER);
+
     
     JPanel center = new JPanel();
     center.setLayout(new GridLayout(0,2));
@@ -164,7 +164,8 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
       line1.add(sendPixel[i]);
       center.add(line1);
     }
-    display.add(center, BorderLayout.SOUTH);
+    display.add(center, BorderLayout.CENTER);
+    display.add(anim, BorderLayout.SOUTH);
     getPinList();
     getPixelList();
     getAnimationList();
@@ -246,21 +247,28 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
       refresh.setEnabled(true);
       animation.setText(neopixel.animation);
       animationList.setEnabled(true);
-      for (int i = 0; i < neopixel.savedPixelMatrix.size() ; i++ ) {
+      for (int i = 0; i < neopixel.savedPixelMatrix.size() && neopixel.savedPixelMatrix.size()>0; i++ ) {
         pixelAddress[i].setVisible(true);
         pixelRed[i].setVisible(true);
         pixelGreen[i].setVisible(true);
         pixelBlue[i].setVisible(true);
         setPixel[i].setVisible(true);
         sendPixel[i].setVisible(true);
-        pixelAddress[i].setText(String.format("%d",neopixel.savedPixelMatrix.get(i).address));
-        pixelRed[i].setText(String.format("%d",neopixel.savedPixelMatrix.get(i).red));
-        pixelGreen[i].setText(String.format("%d",neopixel.savedPixelMatrix.get(i).green));
-        pixelBlue[i].setText(String.format("%d",neopixel.savedPixelMatrix.get(i).blue));
+      try {
+        pixelAddress[i].setText(neopixel.savedPixelMatrix.get(i).address+"");
+        pixelRed[i].setText(neopixel.savedPixelMatrix.get(i).red+"");
+        pixelGreen[i].setText(neopixel.savedPixelMatrix.get(i).green+"");
+        pixelBlue[i].setText(neopixel.savedPixelMatrix.get(i).blue+"");
+ 
+      } catch (Exception e) {
+        log.warn("neopixel {} savedPixelMatrix InvocationTargetException", neopixel.getName());
+        log.debug("neopixel {} savedPixelMatrix InvocationTargetException : "+e, neopixel.getName());
+      }
+    
         setPixel[i].setEnabled(true);
         sendPixel[i].setEnabled(true);
       }
-      for (int i = neopixel.savedPixelMatrix.size(); i<25 ; i++ ) {
+      for (int i = neopixel.savedPixelMatrix.size(); i<25 && neopixel.savedPixelMatrix.size()>0; i++ ) {
         pixelAddress[i].setVisible(false);
         pixelRed[i].setVisible(false);
         pixelGreen[i].setVisible(false);
