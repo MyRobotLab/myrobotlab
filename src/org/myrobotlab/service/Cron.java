@@ -21,7 +21,7 @@ import it.sauronsoftware.cron4j.Scheduler;
  * FIXME - the common cron notation is kind of nice - but this thing doesn't do
  * more than Service.addTask
  * 
- * FIXME - make a purge & delete DUH !
+ * FIXME - make a purge &amp; delete DUH !
  *
  */
 public class Cron extends Service {
@@ -102,9 +102,9 @@ public class Cron extends Service {
       // 3. Tony - status ? and generated xml responses - "update" looks
       // ok
 
-      // Runtime.createAndStart("gui", "GUIService");
+      // Runtime.createAndStart("gui", "SwingGui");
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
     } catch (Exception e) {
       Logging.logError(e);
@@ -115,7 +115,7 @@ public class Cron extends Service {
     super(n);
   }
 
-  /**
+  /*
    * addTask - Add a task to the cron service to invoke a method on a service on
    * some schedule.
    * 
@@ -125,13 +125,12 @@ public class Cron extends Service {
    *          - The name of the service to invoke
    * @param method
    *          - the method on the service to invoke when the task starts.
-   * @return
    */
   public String addTask(String cron, String serviceName, String method) {
     return addTask(cron, serviceName, method, (Object[]) null);
   }
 
-  /**
+  /*
    * addTask - Add a task to the cron service to invoke a method on a service on
    * some schedule.
    * 
@@ -143,7 +142,6 @@ public class Cron extends Service {
    *          - the method on the service to invoke when the task starts.
    * @param data
    *          - additional objects/varags to pass to the method
-   * @return
    */
   public String addTask(String cron, String serviceName, String method, Object... data) {
     Task task = new Task(this, cron, serviceName, method, data);
@@ -187,7 +185,7 @@ public class Cron extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Cron.class.getCanonicalName());
-    meta.addDescription("A Cron like service capable of scheduling future actions");
+    meta.addDescription("is a cron like service capable of scheduling future actions using cron syntax");
     meta.addCategory("scheduling");
     meta.addDependency("it.sauronsoftware.cron4j", "2.2.5");
     return meta;

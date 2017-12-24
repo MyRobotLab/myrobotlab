@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="org/myrobotlab/opencv/OpenCVFilterMotionTemplate.java" kind="src" path="src">
+	<classpathentry excluding="org/myrobotlab/opencv/OpenCVFilterMotionTemplate.java|resource/Arduino/generate/*|org/myrobotlab/javafx/Gui.java|org/myrobotlab/service/JavaFxGui.java|org/myrobotlab/opencv2/OpenCVFilterMotionTemplate.java|org/myrobotlab/vision/OpenCVFilterMotionTemplate.java" kind="src" path="src">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="myrobotlab/libraries/native"/>
 		</attributes>
@@ -42,7 +42,6 @@
 	<classpathentry kind="lib" path="/repo/org.drjava.java/20120818/asm-3.1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.drjava.java/20120818/dynamicjava-base.jar"/>
 	<classpathentry kind="lib" path="/repo/org.drjava.java/20120818/plt.jar"/>
-	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/1.1/tess4j.jar"/>
 	<classpathentry kind="lib" path="/repo/com.wolfram.alpha/1.1/WolframAlpha-1.1.jar"/>
 	<classpathentry kind="lib" path="/repo/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
 	<classpathentry kind="lib" path="/repo/edu.northwestern.topcodes/1.0/topcodes.jar"/>
@@ -66,36 +65,19 @@
 	<classpathentry kind="lib" path="/repo/org.apache.solr/4.10.2/noggit-0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.solr/4.10.2/solr-solrj-4.10.2.jar"/>
-	<classpathentry kind="lib" path="/repo/org.apache.solr/4.10.2/commons-io-2.3.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.paho/1.0/org.eclipse.paho.client.mqttv3_1.0.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.junit/4.11/junit-4.11.jar"/>
-	<classpathentry kind="lib" path="/repo/com.google.gson/2.2.4/gson-2.2.4.jar"/>
-	<classpathentry kind="lib" path="/repo/net.java.games.jinput/2.0.5/jinput-2.0.5.jar"/>
-	<classpathentry kind="lib" path="/repo/net.java.games.jinput/2.0.5/jinput-platform-2.0.5-natives-windows.jar"/>
+	<classpathentry kind="lib" path="/repo/com.google.gson/2.8.0/gson-2.8.0.jar"/>
 	<classpathentry kind="lib" path="/repo/io.netty/3.10.0/netty-3.10.0.Final.jar"/>
 	<classpathentry kind="lib" path="/repo/org.atmosphere.nettosphere/2.3.0/geronimo-servlet_3.0_spec-1.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.atmosphere.nettosphere/2.3.0/nettosphere-assembly-2.3.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.atmosphere.nettosphere/2.3.0/wasync-2.1.3-20150917-all.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-1.0-20150502.231737-1-windows-x86_64.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-0.11.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-server-7.6.13.v20130916.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-servlet-7.6.13.v20130916.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-util-7.6.13.v20130916.jar"/>
-	<classpathentry kind="lib" path="/repo/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
 	<classpathentry kind="lib" path="/repo/com.googlecode.jssc/2.8.0/jssc-2.8.0.jar"/>
 	<classpathentry kind="lib" path="/repo/gnu.io.rxtx/2.1-7r2/RXTXcomm.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-de-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-en-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-fr-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-it-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-ru-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-sv-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-te-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-tr-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/voice-cmu-slt-hsmm-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/icu4j-54.1.1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jsoup/1.8.3/jsoup-1.8.3.jar"/>
-	<classpathentry kind="lib" path="/repo/net.java.games.jinput/2.0.5/jutils-1.0.0.jar"/>
 	<classpathentry kind="lib" path="build-lib/tools.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/glamour-lwjgl-1.0.8.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/jna-4.2.0.jar"/>
@@ -111,13 +93,6 @@
 	<classpathentry kind="lib" path="/repo/org.slf4j.logback/1.1.3/logback-core-1.1.3.jar"/>
 	<classpathentry kind="lib" path="/repo/org.slf4j.logback/1.1.3/slf4j-api-1.7.12.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/math-1.0.4.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/javacpp.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/javacv.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/opencv.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/opencv-windows-x86_64.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/opencv-macosx-x86_64.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/ffmpeg.jar"/>
-	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/ffmpeg-windows-x86_64.jar"/>
 	<classpathentry kind="lib" path="/repo/pl.sarxos.webcam/0.3.10/webcam-capture-0.3.10.jar"/>
 	<classpathentry kind="lib" path="/repo/pl.sarxos.webcam/0.3.10/bridj-0.6.2.jar"/>
 	<classpathentry kind="lib" path="/repo/com.xuggle.xuggler/5.4/xuggle-xuggler-arch-x86_64-w64-mingw32.jar"/>
@@ -134,24 +109,11 @@
 	<classpathentry kind="lib" path="/repo/net.sf.opencsv/2.3/opencsv-2.3.jar"/>
 	<classpathentry kind="lib" path="/repo/opennlp/1.6/opennlp-tools-1.6.0.jar"/>
 	<classpathentry kind="lib" path="/repo/opennlp/1.6/opennlp-uima-1.6.0.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-runtime-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-common-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/commons-lang-2.6.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-signalproc-5.1.2.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/log4j-1.2.16.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/hsqldb-2.0.0.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/commons-collections-3.2.1.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/jtok-core-1.9.1.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/emotionml-checker-java-1.1.jar"/>
 	<classpathentry kind="lib" path="/repo/com.sun.speech.freetts/1.2/freetts.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/freetts-de-1.0.jar"/>
-	<classpathentry kind="lib" path="/repo/marytts/5.1.2/freetts-en_us-1.0.jar"/>
-	<classpathentry kind="lib" path="/repo/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-core.jar"/>
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
 	<classpathentry kind="lib" path="/repo/org.node/0.1.1/nodyn-0.1.1-20141121.193443-283.jar"/>
 	<classpathentry kind="lib" path="/repo/org.json/20090211/json-20090211.jar"/>
-	<classpathentry kind="lib" path="/repo/org.alicebot.ab/0.0.1-kw/program-ab-kw-0.0.1.jar"/>
 	<classpathentry kind="lib" path="/repo/pl.sarxos.webcam/0.3.10/sosia.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.23/BoofCV-android-0.23.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.23/BoofCV-calibration-0.23.jar"/>
@@ -175,7 +137,6 @@
 	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.23/simple-0.29.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.23/xmlpull-1.1.3.1.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.23/xpp3_min-1.1.4c.jar"/>
-	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.23/xstream-1.4.7.jar"/>
 	<classpathentry kind="lib" path="/repo/net.objecthunter.exp4j/0.4.7/exp4j-0.4.7.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.vision/1.22.0/google-api-services-vision-v1-rev16-1.22.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.client/1.22.0/google-api-client-1.22.0.jar"/>
@@ -194,8 +155,6 @@
 	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/t-digest-3.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/hppc-0.7.1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.elasticsearch.elasticsearch/2.4.0/jackson-core-2.8.1.jar"/>
-	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-wikibaseapi-0.7.0.jar"/>
-	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-datamodel-0.7.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/commons-codec-1.9.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.5.2/httpclient-4.5.2.jar"/>
@@ -204,8 +163,265 @@
 	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-annotations-2.5.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-core-2.5.0.jar"/>
 	<classpathentry kind="lib" path="/repo/com.fasterxml.jackson.core/2.5.0/jackson-databind-2.5.0.jar"/>
-	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-dumpfiles-0.7.0.jar"/>
-	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-storage-0.7.0.jar"/>
-	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.7.0/wdtk-util-0.7.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jnativehook/2.0.3/jnativehook-2.0.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-builder-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-client-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-common-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-de-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-en-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-fr-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-it-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-lb-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-ru-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-sv-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-te-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-lang-tr-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-redstart-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-runtime-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-signalproc-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/marytts-transcription-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/voice-cmu-slt-hsmm-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/emotionml-checker-java-1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/commons-collections-3.2.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/commons-io-2.5.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/mysql-connector-java-5.1.16.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/groovy-all-2.4.5.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/diff4j-1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/guava-14.0.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/icu4j-54.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/fast-md5-2.7.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/jtok-core-1.9.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/jama-1.0.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/Jampack-1.0.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/trove4j-2.0.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/weka-dev-3.7.6.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/httpcore-4.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/httpcore-nio-4.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/opennlp-maxent-3.0.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/opennlp-tools-1.5.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/fest-assert-1.4.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/hamcrest-all-1.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/hsqldb-2.0.0.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/java-diff-1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/swing-layout-1.0.3.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/testng-6.9.11.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/xmlunit-1.6.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/sgt-3.0.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/mwdumper-1.16.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jfugue.music/5.0/jfugue-5.0.7.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-core.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-jogl.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-lwjgl-natives.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-lwjgl.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jinput.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jbullet.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-jbullet.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-desktop.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jme3.sdk/3.0.0/jME3-testdata.jar"/>
+	<classpathentry kind="lib" path="/repo/com.voicerss.tts/1.0/tts.jar"/>
+	<classpathentry kind="lib" path="/repo/com.amazonaws.services/1.11.118/aws-java-sdk-1.11.118.jar"/>
+	<classpathentry kind="lib" path="/repo/org.joda/2.9.4/joda-time.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.2/voice-cmu-bdl-hsmm-5.2.jar"/>
+	<classpathentry kind="lib" path="/repo/com.azure.translator/0.8.3/microsoft-translator-java-api-with-dependencies-0.8.3.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/atlassian-util-concurrent-2.4.2.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/spring-beans-4.3.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/spring-context-4.3.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/spring-core-4.3.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/spring-web-4.3.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/spring-websocket-4.3.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/tomcat-embed-core-8.5.4.jar"/>
+	<classpathentry kind="lib" path="/repo/org.springframework.spring-websocket/4.3.2.RELEASE/tomcat-embed-websocket-8.5.4.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/deeplearning4j-core-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/deeplearning4j-modelimport-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/deeplearning4j-nn-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/deeplearning4j-ui-components-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-api-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-buffer-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-common-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-context-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-native-0.8.0-android-arm.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-native-0.8.0-android-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-native-0.8.0-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-native-0.8.0-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-native-0.8.0-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-native-0.8.0-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-native-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-native-api-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/nd4j-native-platform-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/datavec-api-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/datavec-data-image-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/datavec-nd4j-common-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/commons-math3-3.4.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/reflections-0.9.10.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/annotations-2.0.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/common-image-3.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/common-io-3.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/common-lang-3.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/commons-compress-1.8.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/fastutil-6.5.7.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/freemarker-2.3.23.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/hdf5-platform-1.10.0-patch1-1.3.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/imageio-bmp-3.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/imageio-core-3.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/imageio-jpeg-3.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/imageio-metadata-3.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/imageio-psd-3.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/imageio-tiff-3.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/jackson-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/jai-imageio-core-1.3.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/javassist-3.19.0-GA.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/joda-time-2.2.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/json-20131018.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/jsr305-1.3.9.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/leptonica-1.73-1.3-android-arm.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/leptonica-1.73-1.3-android-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/leptonica-1.73-1.3-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/leptonica-1.73-1.3-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/leptonica-1.73-1.3-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/leptonica-1.73-1.3-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/leptonica-1.73-1.3-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/leptonica-1.73-1.3-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/leptonica-1.73-1.3-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/leptonica-1.73-1.3.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/leptonica-platform-1.73-1.3.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/libfreenect2-0.2.0-1.3.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/lombok-1.16.10.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/neoitertools-1.0.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/openblas-0.2.19-1.3-android-arm.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/openblas-0.2.19-1.3-android-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/openblas-0.2.19-1.3-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/openblas-0.2.19-1.3-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/openblas-0.2.19-1.3-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/openblas-0.2.19-1.3-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/openblas-0.2.19-1.3-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/openblas-0.2.19-1.3-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/openblas-0.2.19-1.3-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/openblas-0.2.19-1.3.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/openblas-platform-0.2.19-1.3.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/snakeyaml-1.12.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/stax2-api-3.1.4.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/stream-2.7.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/xz-1.5.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-android-arm.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-android-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/artoolkitplus.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-android-arm.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-android-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/ffmpeg.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-android-arm.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-android-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flandmark.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/flycapture.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libdc1394.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/libfreenect.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/librealsense-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/librealsense-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/librealsense-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/librealsense.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-android-arm.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-android-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-linux-armhf.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-linux-ppc64le.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/opencv.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/videoinput-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/videoinput-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/videoinput-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/videoinput.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacpp.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacv-platform.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.3/javacv.jar"/>
+	<classpathentry kind="lib" path="/repo/com.illposed.osc/0.4/javaosc-core-0.4.jar"/>
+	<classpathentry kind="lib" path="/repo/org.alicebot.ab/0.0.4-kw/program-ab-kw-0.0.4.jar"/>
+	<classpathentry kind="lib" path="/repo/org.deeplearning4j/0.8/deeplearning4j-zoo-0.8.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/tess4j.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/jai-imageio-core-1.3.1.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/jul-to-slf4j-1.7.25.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/lept4j-1.4.0.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/commons-beanutils-1.9.2.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/commons-io-2.5.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/ghost4j-1.0.1.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/hamcrest-core-1.3.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/itext-2.1.7.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/jboss-logging-3.1.4.GA.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/jboss-vfs-3.2.12.Final.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/jcl-over-slf4j-1.7.25.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/jna-4.1.0.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/log4j-over-slf4j-1.7.25.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/xmlgraphics-commons-1.4.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/3.4.0/xmlgraphics-commons-1.5.jar"/>
+	<classpathentry kind="lib" path="/repo/org.mockito/1.10.19/mockito-all-1.10.19.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-datamodel-0.8.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-dumpfiles-0.8.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-storage-0.8.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-util-0.8.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-wikibaseapi-0.8.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/repo/com.jidesoft/3.6.18/jide-oss.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,6 +1,6 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author grog (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -25,7 +25,11 @@
 
 package org.myrobotlab.service.interfaces;
 
-public interface MotorController extends DeviceController {
+import java.util.List;
+
+import org.myrobotlab.framework.interfaces.Attachable;
+
+public interface MotorController extends Attachable {
 
 		
 	/**
@@ -33,8 +37,7 @@ public interface MotorController extends DeviceController {
 	 * request for motor to move the motor can be queried for the new powerlevel
 	 * and the controller shall appropriately change power level and direction
 	 * if necessary
-	 * 
-	 * @param name
+	 * @param motor the motor that will be moved
 	 */
 	public void motorMove(MotorControl motor);
 
@@ -42,19 +45,19 @@ public interface MotorController extends DeviceController {
 	 * moveTo - move the MotorControl a relative amount the amount can be
 	 * negative or positive an integer value is expected
 	 * 
-	 * @param name
+	 * param name
 	 *            - name of the MotorControl
-	 * @param position
+	 * param position
 	 *            - positive or negative absolute amount to move the
 	 *            MotorControl
-	 * @return void
+   * @param motor the motor that will be moved
 	 */
 	public void motorMoveTo(MotorControl motor);
 
 	/**
 	 * stops the motor
+   * @param motor the motor that will be stopped
 	 * 
-	 * @param motor
 	 */
 	public void motorStop(MotorControl motor);
 
@@ -62,11 +65,15 @@ public interface MotorController extends DeviceController {
 	 * method for resetting all the variables of a motor this will reset
 	 * counters if the motor is a stepper and / or other variables for other
 	 * sorts of motors
+   * @param motor the motor that will be reset
 	 * 
-	 * @param motor
 	 */
 	public void motorReset(MotorControl motor);
-
-
+	
+	/**
+	 * if the motor controller uses ports - this method will return a list of ports
+	 * @return
+	 */
+	List<String> getPorts();
 
 }

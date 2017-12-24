@@ -1,5 +1,6 @@
 package org.myrobotlab.kinematics;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
@@ -10,7 +11,9 @@ import java.text.NumberFormat;
  * @author kwatters
  *
  */
-public class Point {
+public class Point implements Serializable {
+  
+  private static final long serialVersionUID = 1L;
   private double x;
   private double y;
   private double z;
@@ -46,6 +49,15 @@ public class Point {
     this.roll = roll;
     this.pitch = pitch;
     this.yaw = yaw;
+  }
+  
+  public Point(Point copy) {
+    this.x = copy.x;
+    this.y = copy.y;
+    this.z = copy.z;
+    this.roll = copy.roll;
+    this.pitch = copy.pitch;
+    this.yaw = copy.yaw;
   }
 
   @Override
@@ -162,9 +174,8 @@ public class Point {
   /**
    * add the x,y,z,roll,pitch,yaw of the point passed in, to the current point.
    * return a new point with the individual components summed.
-   * 
-   * @param p
-   * @return
+   * @param p the point to be added
+   * @return the new point
    */
   public Point add(Point p) {
     // add the linear and angular parts and return the resulting sum.
@@ -175,9 +186,8 @@ public class Point {
 
   /**
    * return a new point with the x,y,z values multipled by the xyzScale
-   * 
-   * @param xyzScale
-   * @return
+   * @param xyzScale the scaling (maintain aspect ratios)
+   * @return  the point as scaled
    */
   public Point multiplyXYZ(double xyzScale) {
     // add the linear and angular parts and return the resulting sum.
@@ -189,5 +199,13 @@ public class Point {
   public Double distanceTo(Point point) {
     Point calcPoint = subtract(point);
     return Math.sqrt(Math.pow(calcPoint.getX(), 2) + Math.pow(calcPoint.getY(), 2) + Math.pow(calcPoint.getZ(), 2));
+  }
+  
+  public Point unitVector(double unitSize){
+    if (magnitude() == 0){
+     return this;
+    }
+    Point retval = multiplyXYZ(unitSize/magnitude());
+    return retval;
   }
 }

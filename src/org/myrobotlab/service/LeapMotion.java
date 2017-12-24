@@ -166,7 +166,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
       LeapMotion leap = new LeapMotion("leap");
       leap.startService();
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
       Runtime.start("webgui", "WebGui");
 
       // Have the sample listener receive events from the controller
@@ -208,7 +208,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
     ServiceType meta = new ServiceType(LeapMotion.class.getCanonicalName());
     meta.addDescription("Leap Motion Service");
-    meta.addCategory("sensor");
+    meta.addCategory("sensor", "telerobotics");
     meta.addDependency("com.leapmotion", "2.1.3");
     return meta;
   }

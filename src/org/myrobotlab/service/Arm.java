@@ -80,9 +80,14 @@ public class Arm extends Service {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Arm.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Arm.class);
     meta.addDescription("robot arm service");
     meta.addCategory("robot");
+    meta.setLicenseApache();
+    meta.addTodo("add IK interfacing points");
+    // FIXME - add IK & DH Parameters
+    // not ready for primetime - nothing implemented
+    meta.setAvailable(false);
     return meta;
   }
 }

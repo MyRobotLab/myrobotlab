@@ -21,7 +21,7 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class DictionaryLoader {
 
-  public final static Logger log = LoggerFactory.getLogger(DictionaryLoader.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(DictionaryLoader.class);
   private static DictionaryLoader instance = null;
 
   // csvFile -> map-of-values

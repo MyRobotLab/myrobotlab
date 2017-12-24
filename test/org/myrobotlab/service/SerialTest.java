@@ -2,8 +2,6 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -20,8 +18,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.myrobotlab.codec.serial.Codec;
-import org.myrobotlab.codec.serial.DecimalCodec;
+import org.myrobotlab.codec.serial.HexCodec;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -53,17 +50,15 @@ public class SerialTest {
 
     log.info("setUpBeforeClass");
 
-    // Runtime.start("gui", "GUIService");
+    // Runtime.start("gui", "SwingGui");
     serial = (Serial) Runtime.start("serial", "Serial");
     catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
     virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
     virtual.createVirtualSerial(vport);
 
-    uart = virtual.getUart(vport);
+    uart = (Serial)virtual.getUart(vport);
     uart.setTimeout(300);
-
-    logic = virtual.getLogic();
-
+    Thread.sleep(100);
     serial.open(vport);
     Thread.sleep(300);
 
@@ -102,8 +97,6 @@ public class SerialTest {
       serial.open(vport);
     }
 
-    serial.setCodec("decimal");
-    uart.setCodec("decimal");
 
     serial.addByteListener(catcher);
   }
@@ -274,6 +267,7 @@ public class SerialTest {
     // Set<Thread> names = getDeadThreads();
 
     logThreads();
+    // serial.removeAllListeners();
 
     // serial --> uart
     serial.write(0);
@@ -522,16 +516,17 @@ public class SerialTest {
 
   @Test
   public final void testIsRecording() throws Exception {
-    serial.record("out");
+    serial.record();
     assertTrue(serial.isRecording());
     int x = 65;
     serial.write(65);
     serial.stopRecording();
     assertFalse(serial.isRecording());
 
-    String data = FileIO.toString("out.tx.dec");
-    DecimalCodec dec = new DecimalCodec(null);
-    assertEquals(dec.decode(x), data);
+    String data = FileIO.toString("serial.tx.hex");
+    HexCodec hex = new HexCodec(null);
+    // DecimalCodec dec = new DecimalCodec(null);
+    assertEquals(Integer.parseInt(hex.decode(x).trim()), Integer.parseInt(data.trim()));
   }
 
   @Test
@@ -680,72 +675,23 @@ public class SerialTest {
       return;
     }
 
-    // ==== null codec test ===
-    log.info("codec null test");
-    serial.setCodec(null);
-
-    String rxKey = serial.getRXCodecKey();
-    assertNull(rxKey);
-
-    Codec rxcodec = serial.getRXCodec();
-    assertNull(rxcodec);
-
-    String txKey = serial.getTXCodecKey();
-    assertNull(txKey);
-
-    Codec txcodec = serial.getTXCodec();
-    assertNull(txcodec);
+ 
 
     testReadAndWrite();
 
     // ==== decimal codec test ===
-    serial.setCodec("decimal");
+    // serial.setCodec("decimal");
 
-    rxKey = serial.getRXCodecKey();
-    assertEquals("decimal", rxKey);
-
-    rxcodec = serial.getRXCodec();
-    assertNotNull(rxcodec);
-
-    txKey = serial.getTXCodecKey();
-    assertEquals("decimal", txKey);
-
-    txcodec = serial.getTXCodec();
-    assertNotNull(txcodec);
-
+  
     testReadAndWrite();
 
     // ==== hex codec test ===
-    serial.setCodec("hex");
-
-    rxKey = serial.getRXCodecKey();
-    assertEquals("hex", rxKey);
-
-    rxcodec = serial.getRXCodec();
-    assertNotNull(rxcodec);
-
-    txKey = serial.getTXCodecKey();
-    assertEquals("hex", txKey);
-
-    txcodec = serial.getTXCodec();
-    assertNotNull(txcodec);
+ 
 
     testReadAndWrite();
 
     // ==== ascii codec test ===
-    serial.setCodec("ascii");
-
-    rxKey = serial.getRXCodecKey();
-    assertEquals("ascii", rxKey);
-
-    rxcodec = serial.getRXCodec();
-    assertNotNull(rxcodec);
-
-    txKey = serial.getTXCodecKey();
-    assertEquals("ascii", txKey);
-
-    txcodec = serial.getTXCodec();
-    assertNotNull(txcodec);
+   
 
     testReadAndWrite();
   }
@@ -819,7 +765,7 @@ public class SerialTest {
       Result result = junit.run(SerialTest.class);
       log.info("Result: {}", result);
       // WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
-      // ServiceInterface gui = Runtime.start("gui", "GUIService");
+      // ServiceInterface gui = Runtime.start("gui", "SwingGui");
 
       Runtime.dump();
 

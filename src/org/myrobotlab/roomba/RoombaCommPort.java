@@ -86,7 +86,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   // boolean bufferUntil;
   // int bufferUntilByte;
 
-  /**
+  /*
    * Let you check to see if a port is in use by another Rooomba before trying
    * to use it.
    */
@@ -366,15 +366,13 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   }
 
   @Override
-  public String onConnect(String portName) {
+  public void onConnect(String portName) {
     log.info(String.format("%s connected to %s", getName(), portName));
-    return portName;
   }
 
   @Override
-  public String onDisconnect(String portName) {
+  public void onDisconnect(String portName) {
     log.info(String.format("%s disconnected from %s", getName(), portName));
-    return portName;
   }
 
   @Override

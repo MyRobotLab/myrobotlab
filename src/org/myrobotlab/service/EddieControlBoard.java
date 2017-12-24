@@ -188,11 +188,11 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 
   public void go(float left, float right) throws Exception {
     log.info(String.format("go %f %f", left, right));
-    int l = mapper.calcInt(left);
+    int l = mapper.calcOutputInt(left);
     if (l > 127) {
       l = 128 - l;
     }
-    int r = mapper.calcInt(right);
+    int r = mapper.calcOutputInt(right);
     if (r > 127) {
       r = 128 - r;
     }
@@ -355,11 +355,9 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   /**
    * sending a command when expecting a string response in the context of
    * blocking for response
-   * 
-   * @param cmd
-   * @return
-   * @throws InterruptedException
-   * @throws IOException
+   * @param cmd to send
+   * @return  the string response
+   * @throws Exception e
    */
   public String sendCommand(String cmd) throws Exception {
     log.info(String.format("sendCommand %s", cmd));
@@ -421,7 +419,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     keyboard = (Keyboard) startPeer("keyboard");
     keyboard.addKeyListener(this);
     python = (Python) Runtime.start("python", "Python");
-    mouth = (SpeechSynthesis) Runtime.start("mouth", "AcapelaSpeech");
+    mouth = (SpeechSynthesis) Runtime.start("mouth", "NaturalReaderSpeech");
   }
 
   public void startWebGUI() throws Exception {
@@ -448,15 +446,13 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   }
 
   @Override
-  public String onConnect(String portName) {
+  public void onConnect(String portName) {
     info("%s connected to %s", getName(), portName);
-    return portName;
   }
 
   @Override
-  public String onDisconnect(String portName) {
+  public void onDisconnect(String portName) {
     info("%s disconnected from %s", getName(), portName);
-    return portName;
   }
 
   /**
@@ -470,8 +466,10 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(EddieControlBoard.class.getCanonicalName());
-    meta.addDescription("Special controller board for robotics");
+    meta.addDescription("microcontroller designed for robotics");
     meta.addCategory("microcontroller");
+    // John Harland no longer uses this hardware
+    meta.setAvailable(false);
 
     // put peer definitions in
     meta.addPeer("serial", "Serial", "serial");

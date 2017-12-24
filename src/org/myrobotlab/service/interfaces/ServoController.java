@@ -25,25 +25,63 @@
 
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.framework.interfaces.Attachable;
 
+public interface ServoController extends Attachable {
 
-public interface ServoController extends DeviceController {
-
-	void servoAttach(ServoControl servo, int pin);
+  /**
+   * The one and only attach which is type specific and does all the work
+   * which we expect
+   *  
+   * @param servo the servo
+   * @throws Exception e
+   */
+	void attachServoControl(ServoControl servo) throws Exception;
+	
+	/**
+	 * attach with parameters which will set attributes on ServoControl
+	 * ??? rules on which attributes in which service can be changed ???
+	 * 
+	 * @param servo the servo
+	 * @param pin the pin number 
+	 * @throws Exception e
+	 */
+	void attach(ServoControl servo, int pin) throws Exception;
+	
+	// this is Arduino's servo.attach
+	// void servoAttach(ServoControl servo, int pin, Integer targetOutput, Integer velocity);
+	
+	/*
+	 * Arduino's servo.attach(pin) which is just energizing on a pin
+	 */
+	// FIXME should be servoEnable - consistent with ServoControl
+	void servoAttachPin(ServoControl servo, int pin);
 
 	void servoSweepStart(ServoControl servo);
 
 	void servoSweepStop(ServoControl servo);
 
-	// FIXME - method should be renamed to servoMoveTo  (Write is Arduino specific)
-	void servoWrite(ServoControl servo);
+	void servoMoveTo(ServoControl servo);
 
 	void servoWriteMicroseconds(ServoControl servo, int uS);
 
-	void servoDetach(ServoControl servo);
+	// FIXME should be servoDisable - consistent with ServoControl
+	void servoDetachPin(ServoControl servo);
 
-  void servoSetMaxVelocity(ServoControl servo);
+	void servoSetVelocity(ServoControl servo);
 
-  void servoSetVelocity(ServoControl servo);
+	void servoSetAcceleration(ServoControl servo);
+
+	/**
+	 * @param sensorPin
+	 * @param i
+	 */
+	void enablePin(Integer sensorPin, Integer i);
+
+	/**
+	 * @param i
+	 */
+	void disablePin(Integer i);
+	
 
 }

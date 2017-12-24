@@ -3,8 +3,8 @@ package org.myrobotlab.framework;
 import static org.myrobotlab.framework.StatusLevel.DEBUG;
 import static org.myrobotlab.framework.StatusLevel.ERROR;
 import static org.myrobotlab.framework.StatusLevel.INFO;
-import static org.myrobotlab.framework.StatusLevel.WARN;
 import static org.myrobotlab.framework.StatusLevel.SUCCESS;
+import static org.myrobotlab.framework.StatusLevel.WARN;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,6 +23,7 @@ import org.slf4j.Logger;
  * the gson serializer would stack overflow with self reference issue
  * 
  * TODO - allow radix tree searches for "keys" ???
+ * 
  */
 public class Status implements Serializable {// extends Exception {
 
@@ -68,7 +69,7 @@ public class Status implements Serializable {// extends Exception {
 
   public static Status warn(String format, Object... args) {
     Status status = new Status(String.format(format, args));
-    status.level = ERROR;
+    status.level = WARN;
     return status;
   }
 
@@ -80,7 +81,6 @@ public class Status implements Serializable {// extends Exception {
 
   public static Status info(String format, Object... args) {
     String formattedInfo = String.format(format, args);
-    log.info(formattedInfo);
     Status status = new Status(formattedInfo);
     status.level = INFO;
     return status;
@@ -124,8 +124,7 @@ public class Status implements Serializable {// extends Exception {
   /**
    * for minimal amount of information error is assumed, and info is detail of
    * an ERROR
-   * 
-   * @param detail
+   * @param detail d
    */
   public Status(String detail) {
     this.level = ERROR;
@@ -199,6 +198,13 @@ public class Status implements Serializable {// extends Exception {
 
   public boolean isSuccess() {
     return SUCCESS.equals(level);
+  }
+
+  public static Status success(String detail) {
+    Status s = new Status(SUCCESS);
+    s.level = SUCCESS;
+    s.detail = detail;
+    return s;
   }
 
 }

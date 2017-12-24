@@ -1,7 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
-import java.io.IOException;
-import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.framework.interfaces.Attachable;
 
 /*
  * This interface is based on the methods for i2c read and write in the Pi4J project
@@ -9,47 +8,19 @@ import org.myrobotlab.service.interfaces.I2CControl;
  * device drivers either connected directly to the GPIO pins of a Raspberry PI or
  * to the ic2 bus on an Arduino. 
  */
-public interface I2CController extends DeviceController {
-	/**
-	 * This method creates a I2CDevice
-	 * 
-	 * @param busaddress
-	 * @param address
-	 *          local address in the i2c device
-	 * @param serviceName
-	 *          name of the service that invokes the createI2cDevice 
-	 */
-	void createI2cDevice(I2CControl control, int busAddress, int deviceAddress);
-
-	/**
-	 * This method returns and already existing I2CDevice
-	 * 
-	 * @param busaddress
-	 * @param address
-	 *          local address in the i2c device
-	 * 
-	 */
-	void releaseI2cDevice(I2CControl control, int busAddress, int deviceAddress);
-
-	/**
-	 * This method writes several bytes to the i2c device from given buffer.
-	 * 
-	 * @param busaddress
-	 * @param address
-	 *          local address in the i2c device
-	 * @param buffer
-	 *          buffer of data to be written to the i2c device in one go
-	 * @param size
-	 *          number of bytes to be written
-	 * 
-	 */
-
+public interface I2CController extends Attachable {
+	
+	void attachI2CControl(I2CControl control);	
+	
+	void detachI2CControl(I2CControl control);
+	
 	void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size);
   	
 	/**
 	 * This method reads bytes from the i2c device to given buffer.
-	 * 
-	 * @param busaddress
+   * @param control c
+	 * @param busAddress bus address
+	 * @param deviceAddress device address
 	 * @param buffer
 	 *          buffer of data to be read from the i2c device in one go
 	 * @param size
@@ -66,9 +37,10 @@ public interface I2CController extends DeviceController {
 	 * 
 	 * /** This method writes and reads bytes to/from the i2c device in a single
 	 * method call
-	 *
-	 * @param busaddress
-	 * @param address
+	 * 
+   * @param control c
+	 * @param busAddress bus address
+	 * @param deviceAddress
 	 *          local address in the i2c device
 	 * @param writeBuffer
 	 *          buffer of data to be written to the i2c device in one go
@@ -81,9 +53,9 @@ public interface I2CController extends DeviceController {
 	 *
 	 * @return number of bytes read
 	 *
-	 * @throws IOException
+	 * IOException
 	 *           thrown in case byte cannot be read from the i2c device or i2c bus
 	 */
-	int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize);
-  
+	int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize);	
+	
 }

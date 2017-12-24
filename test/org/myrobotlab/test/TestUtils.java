@@ -1,8 +1,11 @@
 package org.myrobotlab.test;
 
+import org.junit.Ignore;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 
+// TODO: the ant build picks this up and tries to run it.. 
+@Ignore
 public class TestUtils {
 
 	public static void initEnvirionment() {

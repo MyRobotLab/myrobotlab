@@ -38,6 +38,12 @@ import com.thalmic.myo.enums.XDirection;
  * The addPoseListener will wire data the orientation and pose data to another
  * service.
  * 
+ *  https://developer.thalmic.com/downloads
+ *  
+ *  https://github.com/NicholasAStuart/myo-java
+ *  
+ *  https://github.com/NicholasAStuart/myo-java-JNI-Library
+ * 
  */
 public class MyoThalmic extends Service implements DeviceListener, MyoDataListener, MyoDataPublisher {
 
@@ -52,8 +58,12 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
   transient Pose currentPose;
   transient Arm whichArm;
 
-  transient Myo myo = null;
-  transient Hub hub = null;
+  transient Myo thalmicMyo = null;
+  transient Hub thalmicHub = null;
+  
+  transient MyoProxy myo = null;
+  transient HubProxy hub = null;
+  
   transient HubThread hubThread = null;
 
   MyoData myodata = new MyoData();
@@ -79,7 +89,68 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
       }
     }
   }
+  
+  public class HubProxy {
+    
+    public HubProxy() {
+      if (!isVirtual && hub == null){
+        thalmicHub = new Hub("com.example.hello-myo");
+      }
+    }
+    
+    public void run(int x){
+      if (!isVirtual){
+        thalmicHub.run(x);
+      }else {
+        sleep(1000);
+      }
+    }
 
+    public void removeListener(DeviceListener myoThalmic) {
+      if (!isVirtual){
+        thalmicHub.removeListener(myoThalmic);
+      }
+    }
+
+    public MyoProxy waitForMyo(int i) {
+      if (!isVirtual){
+        thalmicMyo =  thalmicHub.waitForMyo(i);
+      } 
+      
+      myo = new MyoProxy();
+      
+      return myo;
+    }
+
+    public void addListener(DeviceListener myoThalmic) {
+      if (!isVirtual){
+        thalmicHub.addListener(myoThalmic);
+      }
+    }
+  }
+
+  public class MyoProxy {
+
+    public void requestBatteryLevel() {
+      if (!isVirtual){
+        thalmicMyo.requestBatteryLevel();
+      }
+    }
+
+    public void lock() {
+      if (!isVirtual){
+        thalmicMyo.lock();
+      }
+    }
+
+    public void unlock(UnlockType unlockTimed) {
+      if (!isVirtual){
+        thalmicMyo.unlock(unlockTimed);
+      }
+    }
+    
+  }
+  
   public void disconnect() {
 
     if (hubThread != null) {
@@ -98,7 +169,7 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
       // FIXME - put in connect
       try {
         currentPose = new Pose();
-        hub = new Hub("com.example.hello-myo");
+        hub = new HubProxy();
       } catch (Exception e) {
         Logging.logError(e);
       }
@@ -134,7 +205,7 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 
   @Override
   public void onOrientationData(Myo myo, long timestamp, Quaternion rotation) {
-
+    
     Quaternion normalized = rotation.normalized();
 
     double roll = Math.atan2(2.0f * (normalized.getW() * normalized.getX() + normalized.getY() * normalized.getZ()),
@@ -313,42 +384,7 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
     addListener("publishMyoData", service.getName(), "onMyoData");
   }
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
 
-    try {
-
-      MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
-      myo.connect();
-      Runtime.start("webgui", "WebGui");
-
-      /*
-       * Hub hub = new Hub("com.example.hello-myo");
-       * 
-       * log.info("Attempting to find a Myo..."); log.info(
-       * "Attempting to find a Myo");
-       * 
-       * Myo myodevice = hub.waitForMyo(10000);
-       * 
-       * if (myodevice == null) { throw new RuntimeException(
-       * "Unable to find a Myo!"); }
-       * 
-       * log.info("Connected to a Myo armband!"); log.info(
-       * "Connected to a Myo armband");
-       * 
-       * //DeviceListener dataCollector = new DataCollector();
-       * //hub.addListener(myo);
-       * 
-       * while (true) { hub.run(1000 / 20); //System.out.print(dataCollector);
-       * 
-       * 
-       * 
-       * }
-       */
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
 
   @Override
   public void onArmSync(Myo myo, long arg1, Arm arm, XDirection direction, WarmupState warmUpState) {
@@ -390,7 +426,46 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
     ServiceType meta = new ServiceType(MyoThalmic.class.getCanonicalName());
     meta.addDescription("Myo service to control with the Myo armband");
     meta.addCategory("control", "sensor");
+    meta.addDependency("com.thalmic.myo", "0.9.0");
     return meta;
+  }
+  
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+
+      MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
+      // myo.setVirtual(true);
+      myo.connect();
+      Runtime.start("webgui", "WebGui");
+
+      /*
+       * Hub hub = new Hub("com.example.hello-myo");
+       * 
+       * log.info("Attempting to find a Myo..."); log.info(
+       * "Attempting to find a Myo");
+       * 
+       * Myo myodevice = hub.waitForMyo(10000);
+       * 
+       * if (myodevice == null) { throw new RuntimeException(
+       * "Unable to find a Myo!"); }
+       * 
+       * log.info("Connected to a Myo armband!"); log.info(
+       * "Connected to a Myo armband");
+       * 
+       * //DeviceListener dataCollector = new DataCollector();
+       * //hub.addListener(myo);
+       * 
+       * while (true) { hub.run(1000 / 20); //System.out.print(dataCollector);
+       * 
+       * 
+       * 
+       * }
+       */
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
   }
 
 }

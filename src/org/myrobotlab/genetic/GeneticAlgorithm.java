@@ -31,6 +31,7 @@ import java.util.Random;
  *
  */
 
+
 public class GeneticAlgorithm {
 
   double recombinationRate = 0.7;
@@ -48,6 +49,18 @@ public class GeneticAlgorithm {
     this.geneSize = geneSize;
     this.geneticClass = geneticClass;
     for (int i = 0; i < populationSize; i++) {
+      Chromosome chromo = new Chromosome(genomeSize * geneSize);
+      chromosomes.add(chromo);
+    }
+  }
+  
+  public GeneticAlgorithm(Genetic geneticClass, int genomeSize, GeneticParameters param) {
+  	populationPoolSize = param.getGeneticPoolSize();
+  	recombinationRate = param.getGeneticRecombinationRate();
+  	mutationRate = param.getGeneticMutationRate();
+  	geneSize = genomeSize;
+  	this.geneticClass = geneticClass;
+    for (int i = 0; i < populationPoolSize; i++) {
       Chromosome chromo = new Chromosome(genomeSize * geneSize);
       chromosomes.add(chromo);
     }
@@ -83,13 +96,12 @@ public class GeneticAlgorithm {
   }
   
   private Chromosome RandomWheel(ArrayList<Chromosome> chromosomes, Double totalFitness) {
-    // TODO Auto-generated method stub
     Random rand = new Random();
-    double randomNumber = rand.nextInt(totalFitness.intValue());
+    double randomNumber = rand.nextDouble() * totalFitness;
     Double fitnessCount = 0.0;
     for (Chromosome chromosome : chromosomes) {
       fitnessCount += chromosome.fitness;
-      if (randomNumber < fitnessCount) {
+      if (randomNumber <= fitnessCount) {
         return chromosome;
       }
     }
@@ -97,7 +109,6 @@ public class GeneticAlgorithm {
   }
 
   public void setGeneticClass(Genetic geneticClass) {
-    // TODO Auto-generated method stub
     this.geneticClass = geneticClass;
   }
 

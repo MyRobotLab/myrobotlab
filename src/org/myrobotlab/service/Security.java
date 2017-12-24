@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -22,13 +21,13 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
+//import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 // SINGLETON ???  similar to Runtime ???
@@ -79,7 +78,7 @@ public class Security extends Service implements AuthorizationProvider {
 
   static private Properties store = new Properties();
 
-  static private String storeDirPath = String.format("%s%s.myrobotlab", System.getProperty("user.home"), File.separator);
+  static private String storeDirPath = String.format("%s%s.myrobotlab", System.getProperty("user.dir"), File.separator);
 
   static private String keyFileName = "key";
 
@@ -123,9 +122,11 @@ public class Security extends Service implements AuthorizationProvider {
 
   /**
    * decrypt a value
-   * 
-   * @throws GeneralSecurityException
-   * @throws IOException
+   * @param message m
+   * @param keyFile k
+   * @return string
+   * @throws GeneralSecurityException e 
+   * @throws IOException e
    */
   public static String decrypt(String message, File keyFile) throws GeneralSecurityException, IOException {
     SecretKeySpec sks = getSecretKeySpec(keyFile);
@@ -138,9 +139,12 @@ public class Security extends Service implements AuthorizationProvider {
   /**
    * encrypt a value and generate a keyfile if the keyfile is not found then a
    * new one is created
+   * @param passphrase p
+   * @param keyFile k
+   * @return string
+   * @throws GeneralSecurityException e 
+   * @throws IOException e
    * 
-   * @throws GeneralSecurityException
-   * @throws IOException
    */
   public static String encrypt(String passphrase, File keyFile) throws GeneralSecurityException, IOException {
     if (!keyFile.exists()) {
@@ -208,7 +212,7 @@ public class Security extends Service implements AuthorizationProvider {
       log.info(String.format("initializing key file %s", keyfile));
       encrypt(passphrase, new File(keyfile));
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("initializeStore threw", e);
     }
   }
 
@@ -227,45 +231,14 @@ public class Security extends Service implements AuthorizationProvider {
         store = fileStore;
         isLoaded = true;
       }
-
-    } catch (Exception e) {
-      Logging.logError(e);
+    } catch (FileNotFoundException e) {
+      log.info("Security.loadStore file not found {}", getStoreFileName());
+    } catch (Exception e2) {
+      log.error("loadStore threw", e2);
     }
   }
 
-  public static void main(String[] args) throws Exception {
-    LoggingFactory.init(Level.INFO);
-
-    final String KEY_FILE = "c:/tempPass/howto.key";
-    final String PWD_FILE = "c:/tempPass/howto.properties";
-
-    // initializeStore("im a rockin rocker");
-    loadStore();
-    log.info(Security.getSecret("xmpp.user"));
-    Security.addSecret("xmpp.user", "supertick@gmail.com");
-    Security.addSecret("xmpp.pwd", "mrlRocks!");
-    saveStore();
-
-    String clearPwd = "mrlRocks!";
-
-    Properties p1 = new Properties();
-
-    p1.put("webgui.user", "supertick@gmail.com");
-    p1.put("webgui.pwd", "zd7");
-    p1.put("xmpp.user", "supertick@gmail.com");
-    String encryptedPwd = Security.encrypt(clearPwd, new File(KEY_FILE));
-    p1.put("xmpp.pwd", encryptedPwd);
-    p1.store(new FileWriter(PWD_FILE), "");
-
-    // ==================
-    Properties p2 = new Properties();
-
-    p2.load(new FileReader(PWD_FILE));
-    encryptedPwd = p2.getProperty("xmpp.pwd");
-    System.out.println(encryptedPwd);
-    System.out.println(Security.decrypt(encryptedPwd, new File(KEY_FILE)));
-  }
-
+  
   private static byte[] readKeyFile(File keyFile) throws FileNotFoundException {
     Scanner scanner = new Scanner(keyFile);
     scanner.useDelimiter("\\Z");
@@ -273,38 +246,6 @@ public class Security extends Service implements AuthorizationProvider {
     scanner.close();
     return hexStringToByteArray(keyValue);
   }
-
-  /*
-   * public static void main(String[] args) {
-   * LoggingFactory.getInstance().configure();
-   * LoggingFactory.getInstance().setLevel(Level.INFO);
-   * 
-   * try {
-   * 
-   * //Serializable s = new SerializableImage(null, null); // passphrase - key
-   * // A better way to create a key is with a SecretKeyFactory using a salt:
-   * 
-   * String passphrase = "correct horse battery staple"; MessageDigest digest =
-   * MessageDigest.getInstance("SHA"); digest.update(passphrase.getBytes());
-   * SecretKeySpec key = new SecretKeySpec(digest.digest(), 0, 16, "AES");
-   * 
-   * Cipher aes = Cipher.getInstance("AES/ECB/PKCS5Padding");
-   * aes.init(Cipher.ENCRYPT_MODE, key); byte[] ciphertext = aes.doFinal(
-   * "my cleartext".getBytes()); log.info(new String(ciphertext));
-   * 
-   * aes.init(Cipher.DECRYPT_MODE, key); String cleartext = new
-   * String(aes.doFinal(ciphertext));
-   * 
-   * log.info(cleartext);
-   * 
-   * } catch (Exception e) { Logging.logException(e); }
-   * 
-   * Security security = new Security("security"); security.startService();
-   * 
-   * Runtime.createAndStart("gui", "GUIService");
-   * 
-   * }
-   */
 
   static public void saveStore() {
     try {
@@ -316,7 +257,7 @@ public class Security extends Service implements AuthorizationProvider {
       String encrypted = Security.encrypt(new String(out.toByteArray()), new File(getKeyFileName()));
       FileIO.toFile(getStoreFileName(), encrypted);
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("saveStore threw", e);
     }
   }
 
@@ -326,10 +267,10 @@ public class Security extends Service implements AuthorizationProvider {
 
     /*
      * FIXME - set predefined levels - high security medium low
-     * allowExportByType.put("XMPP", false);
+     * allowExportByType.put("Xmpp", false);
      * allowExportByType.put("RemoteAdapter", false);
      * allowExportByType.put("WebGui", false);
-     * allowExportByType.put("GUIService", false);
+     * allowExportByType.put("SwingGui", false);
      * 
      * allowExportByType.put("Java", false); allowExportByType.put("Python",
      * false);
@@ -540,5 +481,47 @@ public class Security extends Service implements AuthorizationProvider {
 
     return meta;
   }
+  
+  public static void main(String[] args) throws Exception {
+    LoggingFactory.init(Level.INFO);
+
+    final String KEY_FILE = "howto.key";
+    final String PWD_FILE = "howto.properties";
+
+    // initializeStore("im a rockin rocker");
+    Security.addSecret("amazon.polly.user.key", "FIE3823873349852");
+    Security.addSecret("amazon.polly.user.secret", "323Ujfkds838234jfkDKJkdlskjlfkj");
+    Security.addSecret("xmpp.user", "supertick@gmail.com");
+    Security.addSecret("xmpp.pwd", "mrlRocks!");
+    saveStore();
+    Security.getSecret("amazon.polly.user.key");
+    loadStore();
+    log.info(Security.getSecret("xmpp.user")); // FIXME - report stor is has not be loaded !!!
+    log.info(Security.getSecret("amazon.polly.user.key"));
+    log.info(Security.getSecret("amazon.polly.user.secret"));
+
+    /*
+    String clearPwd = "mrlRocks!";
+
+    Properties p1 = new Properties();
+
+    p1.put("webgui.user", "supertick@gmail.com");
+    p1.put("webgui.pwd", "zd7");
+    p1.put("xmpp.user", "supertick@gmail.com");
+    String encryptedPwd = Security.encrypt(clearPwd, new File(KEY_FILE));
+    p1.put("xmpp.pwd", encryptedPwd);
+    p1.store(new FileWriter(PWD_FILE), "");
+
+    // ==================
+    Properties p2 = new Properties();
+
+    p2.load(new FileReader(PWD_FILE));
+    encryptedPwd = p2.getProperty("xmpp.pwd");
+    System.out.println(encryptedPwd);
+    System.out.println(Security.decrypt(encryptedPwd, new File(KEY_FILE)));
+    */
+    
+  }
+
 
 }

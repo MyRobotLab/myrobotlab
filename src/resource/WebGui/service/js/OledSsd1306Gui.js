@@ -5,9 +5,11 @@ angular.module('mrlapp.service.OledSsd1306Gui', [])
     var msg = this.msg;
     
     // init
-    //$scope.controller = '';
     $scope.controllerName = '';
-    $scope.controllers = [];    
+    $scope.controllers = [];  
+    $scope.controllerLabel = 'Controller :';
+    $scope.deviceBusLabel = 'Bus :';
+    $scope.deviceAddressLabel = 'Address :';  
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
@@ -18,7 +20,7 @@ angular.module('mrlapp.service.OledSsd1306Gui', [])
         $scope.deviceBus = service.deviceBus;
         $scope.deviceAddressList = service.deviceAddressList;
         $scope.deviceAddress = service.deviceAddress;
-        $scope.isControllerSet = service.isControllerSet;
+        $scope.isAttached = service.isAttached;
 
     }
     ;

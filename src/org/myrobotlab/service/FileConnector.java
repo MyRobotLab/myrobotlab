@@ -64,7 +64,6 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 
   @Override
   public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-    System.out.println(file);
     if (interrupted) {
       state = ConnectorState.INTERRUPTED;
       return FileVisitResult.TERMINATE;

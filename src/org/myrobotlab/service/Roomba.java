@@ -109,7 +109,7 @@ public class Roomba extends Service {
        * 
        * roomba.setHardwareHandshake(false);
        */
-      GUIService gui = new GUIService("gui");
+      SwingGui gui = new SwingGui("gui");
       gui.startService();
 
     } catch (Exception e) {
@@ -185,9 +185,8 @@ public class Roomba extends Service {
    * Connect to a serial port specified by portid doesn't guarantee connection
    * to Roomba, just to serial port
    * 
-   * @param portid
+   * @param portName
    *          name of port, e.g. "/dev/cu.KeySerial1" or "COM3"
-   * @return true if connect was successful, false otherwise
    */
   public void connect(String portName) {
     roombacomm.connect(portName);
@@ -213,7 +212,7 @@ public class Roomba extends Service {
     roombacomm.createSong(5, song);
   }
 
-  /**
+  /*
    * Disconnect from serial portb
    */
 
@@ -247,7 +246,7 @@ public class Roomba extends Service {
     return roombacomm.getProtocol();
   }
 
-  /** Get speed for movement commands */
+  /** @return speed for movement commands */
   public int getSpeed() {
     return roombacomm.speed;
   }
@@ -269,7 +268,7 @@ public class Roomba extends Service {
     roombacomm.goBackward(distance);
   }
 
-  /**
+  /*
    * Go backward at a specified speed
    */
   public void goBackwardAt(int aspeed) {
@@ -299,7 +298,7 @@ public class Roomba extends Service {
   // higher-level functions
   //
 
-  /**
+  /*
    * Go forward at a specified speed
    */
   public void goForwardAt(int aspeed) {
@@ -378,7 +377,7 @@ public class Roomba extends Service {
     return roombacomm.send(cmd);
   }
 
-  /**
+  /*
    * This will handle both ints, bytes and chars transparently.
    */
   public boolean send(int b) {
@@ -393,7 +392,7 @@ public class Roomba extends Service {
     setWaitForDSR(hardwareHandshake);
   }
 
-  /**
+  /*
    * Turns on/off the various LEDs. Low-level command. FIXME: this is too
    * complex
    */
@@ -413,7 +412,7 @@ public class Roomba extends Service {
     roombacomm.setProtocol(protocol);
   }
 
-  /** Set speed for movement commands */
+  /* Set speed for movement commands */
   public void setSpeed(int s) {
     roombacomm.speed = Math.abs(s);
   }
@@ -486,7 +485,7 @@ public class Roomba extends Service {
     roombacomm.spinRightAt(aspeed);
   }
 
-  /**
+  /*
    * A Spirograph-like example
    * <p>
    * Run it with something like:
@@ -494,7 +493,7 @@ public class Roomba extends Service {
    * <pre>
    *    java roombacomm.Spiro1 /dev/cu.KeySerial1 velocity radius waittime<br>
    *   Usage: \n"+
-   *     roombacomm.Spiro1 <serialportname> [protocol] <velocity> <radius> <waittime> [options]<br>
+   *     roombacomm.Spiro1 &lt;serialportname&gt; [protocol] &lt;velocity&gt; &lt;radius&gt; &lt;waittime&gt; [options]<br>
    *   where: 
    *   protocol (optional) is SCI or OI
    *   velocity and radius in mm, waittime in milliseconds
@@ -560,7 +559,6 @@ public class Roomba extends Service {
 
   /**
    * Spy on the Roomba as it goes about its normal business
-   * <p>
    */
 
   public void spy() {
@@ -698,7 +696,7 @@ public class Roomba extends Service {
     return roombacomm.updateSensors();
   }
 
-  /**
+  /*
    * Update sensors. Block for up to 1000 ms waiting for update To use
    * non-blocking, call sensors() and then poll sensorsValid()
    */
@@ -743,7 +741,7 @@ public class Roomba extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Roomba.class.getCanonicalName());
-    meta.addDescription("Roomba control");
+    meta.addDescription("controls a Roomba robot through a blue-tooth serial port");
     meta.addCategory("robot", "control");
     meta.addPeer("serial", "Serial", "serial");
 

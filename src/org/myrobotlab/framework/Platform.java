@@ -1,12 +1,18 @@
 package org.myrobotlab.framework;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-//import org.myrobotlab.logging.Logging;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 public class Platform implements Serializable {
 
@@ -27,20 +33,30 @@ public class Platform implements Serializable {
   public final static String ARCH_X86 = "x86";
   public final static String ARCH_ARM = "arm";
 
-  private String os;
-  private String arch;
-  private int bitness;
-  private String vmName;
-  private String mrlVersion;
-  private String instanceId;
-  private String branch;
+  // non-changing values
+  String os;
+  String arch;
+  int bitness;
+  String vmName;
+  String vmVersion;
+  String mrlVersion;
+  String id;
+  String branch;
 
-  private static Platform localInstance = getLocalInstance();
+  private String commit;
+
+  private String build;
+
+  private String motd;
+
+  static Platform localInstance = getLocalInstance();
 
   // -------------pass through begin -------------------
-  public static Platform getLocalInstance() {
+  public static Platform getLocalInstance(String id) {
+
     if (localInstance == null) {
       Platform platform = new Platform();
+      platform.id = id;
 
       // os
       platform.os = System.getProperty("os.name").toLowerCase();
@@ -52,7 +68,8 @@ public class Platform implements Serializable {
         platform.os = OS_LINUX;
       }
 
-      platform.vmName = System.getProperty("java.vm.name").toLowerCase();
+      platform.vmName = System.getProperty("java.vm.name");
+      platform.vmVersion = System.getProperty("java.specification.version");
 
       // bitness
       String model = System.getProperty("sun.arch.data.model");
@@ -88,6 +105,11 @@ public class Platform implements Serializable {
         platform.arch = "armv" + armv + ".hfp";
       }
 
+      // for Ordroid 64 !
+      if ("aarch64".equals(arch)) {
+        platform.arch = "armv8";
+      }
+
       if (platform.arch == null) {
         platform.arch = arch;
       }
@@ -96,9 +118,9 @@ public class Platform implements Serializable {
       // logging !!
       // logging calls -> platform calls a util class -> calls logging --
       // infinite loop
-      // platform.mrlVersion = FileIO.getResourceFile("version.txt");
-      StringBuffer sb = new StringBuffer();
 
+      StringBuffer sb = new StringBuffer();
+      
       try {
         BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/version.txt"), "UTF-8"));
         for (int c = br.read(); c != -1; c = br.read()) {
@@ -116,6 +138,8 @@ public class Platform implements Serializable {
         platform.mrlVersion = format.format(new Date());
       }
 
+      // FIXME deprecate
+      /*
       try {
         sb.setLength(0);
         BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/branch.txt"), "UTF-8"));
@@ -128,14 +152,28 @@ public class Platform implements Serializable {
       } catch (Exception e) {
         // no logging silently die
       }
+      */
 
-      if (platform.branch == null) {
-        platform.branch = "unknown";
+      Map<String, String> manifest = getManifest();
+      if (manifest.containsKey("Branch")) {
+        platform.branch = manifest.get("Branch");
+      } else {
+        platform.branch = "develop";
+      }
+      
+      if (manifest.containsKey("Commit")) {
+        platform.commit = manifest.get("Commit");
+      } else {
+        platform.commit = "unknown";
+      }
+      
+      if (manifest.containsKey("Implementation-Version")) {
+        platform.mrlVersion = manifest.get("Implementation-Version");
+      } else {
+        platform.mrlVersion = "unknown";
       }
 
-      // TODO - ProcParser
-
-      // System.out.println(sb.toString());
+      platform.motd = "You Know, for Creative Machine Control !";
 
       localInstance = platform;
     }
@@ -146,8 +184,20 @@ public class Platform implements Serializable {
   public Platform() {
   }
 
+  public String getMotd() {
+    return motd;
+  }
+
   public String getBranch() {
     return branch;
+  }
+
+  public String getBuild() {
+    return build;
+  }
+
+  public String getCommit() {
+    return commit;
   }
 
   public String getArch() {
@@ -164,14 +214,6 @@ public class Platform implements Serializable {
     } else {
       return ":";
     }
-  }
-
-  public String getInstanceId() {
-    return instanceId;
-  }
-
-  public void getInstanceId(String isntanceId) {
-    this.instanceId = isntanceId;
   }
 
   public String getOS() {
@@ -214,9 +256,100 @@ public class Platform implements Serializable {
     return getArch().equals(ARCH_X86);
   }
 
+  static public final String getRoot() {
+    try {
+
+      String source = Platform.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+      System.out.println("getRoot " + source);
+      return source;
+    } catch (Exception e) {
+      System.out.println("getRoot threw " + e.getMessage());
+      return null;
+    }
+  }
+
+  static public Map<String, String> getManifest() {
+    Map<String, String> ret = new TreeMap<String, String>();
+    try {
+      File f = new File(getRoot());
+      Class<?> clazz = Platform.class;
+      String className = clazz.getSimpleName() + ".class";
+      String classPath = clazz.getResource(className).toString();
+      InputStream in = null;
+
+      if (!classPath.startsWith("jar")) {
+        System.out.println(String.format("manifest is \"not\" in jar - using file %s/META-INF/MANIFEST.MF", f.getAbsolutePath()));
+        // File file = new
+        // File(classLoader.getResource("file/test.xml").getFile());
+        in = clazz.getResource("/META-INF/MANIFEST.MF").openStream();
+
+      } else {
+        String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+        URL url = new URL(manifestPath);
+        System.out.println("jar url " + url);
+        in = url.openStream();
+      }
+
+      Manifest manifest = new Manifest(in);
+      ret.putAll(getAttributes(null , manifest.getMainAttributes()));
+      final Map<String, Attributes> attrs = manifest.getEntries();
+      Iterator<String> it = attrs.keySet().iterator();
+      while (it.hasNext()) {
+        String key = it.next();
+        Attributes attributes = attrs.get(key);
+        ret.putAll(getAttributes(key, attributes));
+      }
+
+      in.close();
+    } catch (Exception e) {
+      System.out.println(String.format("getManifest threw %s", e));
+    }
+    return ret;
+  }
+  
+  private static Map<String,String> getAttributes(String part, Attributes attributes){
+    Map<String,String> data = new TreeMap<String,String>();
+    Iterator<Object> it = attributes.keySet().iterator();
+    while (it.hasNext()){
+        java.util.jar.Attributes.Name key = (java.util.jar.Attributes.Name) it.next();
+        Object value = attributes.get(key);
+        String partKey = null;
+        if (part == null){
+          partKey = key.toString();
+        } else {
+          partKey = String.format("%s.%s", part, key);
+        }
+         
+        System.out.println(partKey + ":  " + value);
+        if (value != null){
+          data.put(partKey, value.toString());
+        }
+    }
+    return data;
+}
+
   @Override
   public String toString() {
     return String.format("%s.%d.%s", arch, bitness, os);
+  }
+
+  public static Platform getLocalInstance() {
+    return getLocalInstance(null);
+  }
+
+  public static void main(String[] args) {
+    try {
+
+      Platform platform = Platform.getLocalInstance("test");
+      System.out.println("platform : " + platform.toString());
+      System.out.println("build " + platform.getBuild());
+      System.out.println("branch " + platform.getBranch());
+      System.out.println("commit " + platform.getCommit());
+      System.out.println("toString " + platform.toString());
+
+    } catch (Exception e) {
+      System.out.println(e);
+    }
   }
 
 }

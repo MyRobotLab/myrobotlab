@@ -27,8 +27,12 @@ public class InMoovTorso extends Service {
   static public void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     try {
-      InMoovTorso torso = (InMoovTorso) Runtime.createAndStart("torso", "InMoovTorso");
+      VirtualArduino v = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+      
+      v.connect("COM4");
+      InMoovTorso torso = (InMoovTorso) Runtime.start("i01.torso", "InMoovTorso");
       torso.connect("COM4");
+      Runtime.start("webgui", "WebGui");
       torso.test();
     } catch (Exception e) {
       Logging.logError(e);
@@ -52,28 +56,53 @@ public class InMoovTorso extends Service {
     midStom.setRest(90);
     lowStom.setRest(90);
 
-    setVelocity(5,5,5);
-  
-  }
+    setVelocity(5.0,5.0,5.0);
+    
+   }
 
-  /**
+  /*
    * attach all the servos - this must be re-entrant and accomplish the
    * re-attachment when servos are detached
-   * 
-   * @return
    */
+  @Deprecated
   public boolean attach() {
- 
+  log.warn("attach deprecated please use enable");
+    return enable();
+  }
+
+  public boolean enable() {
+    
     sleep(InMoov.attachPauseMs);
-    topStom.attach();
+    topStom.enable();
     sleep(InMoov.attachPauseMs);
-    midStom.attach();
+    midStom.enable();
     sleep(InMoov.attachPauseMs);
-    lowStom.attach();
+    lowStom.enable();
     sleep(InMoov.attachPauseMs);
     return true;
   }
-
+  
+  @Deprecated
+  public void enableAutoEnable(Boolean param) {
+	  }
+  
+  @Deprecated
+  public void enableAutoDisable(Boolean param) {
+    setAutoDisable(param);
+	  }
+  
+  public void setAutoDisable(Boolean param) {
+    topStom.setAutoDisable(param);
+    midStom.setAutoDisable(param);
+    lowStom.setAutoDisable(param);
+    }
+  
+  public void setOverrideAutoDisable(Boolean param) {
+    topStom.setOverrideAutoDisable(param);
+    midStom.setOverrideAutoDisable(param);
+    lowStom.setOverrideAutoDisable(param);
+    }  
+  
   @Override
   public void broadcastState() {
     // notify the gui
@@ -100,12 +129,16 @@ public class InMoovTorso extends Service {
     topStom.attach(arduino, 27, topStom.getRest(), topStom.getVelocity());
     midStom.attach(arduino, 28, midStom.getRest(), midStom.getVelocity());
     lowStom.attach(arduino, 29, lowStom.getRest(), lowStom.getVelocity());
+    
+    enableAutoEnable(true);
 
     broadcastState();
     return true;
   }
 
+  @Deprecated
   public void detach() {
+  log.warn("detach deprecated please use disable");
     if (topStom != null) {
       topStom.detach();
       sleep(InMoov.attachPauseMs);
@@ -116,6 +149,21 @@ public class InMoovTorso extends Service {
     }
     if (lowStom != null) {
       lowStom.detach();
+      sleep(InMoov.attachPauseMs);
+    }
+  }
+
+  public void disable() {
+    if (topStom != null) {
+      topStom.disable();
+      sleep(InMoov.attachPauseMs);
+    } 
+    if (midStom != null) {
+      midStom.disable();
+      sleep(InMoov.attachPauseMs);
+    }
+    if (lowStom != null) {
+      lowStom.disable();
       sleep(InMoov.attachPauseMs);
     }
   }
@@ -140,7 +188,7 @@ public class InMoovTorso extends Service {
     return attached;
   }
 
-  public void moveTo(Integer topStom, Integer midStom, Integer lowStom) {
+  public void moveTo(double topStom, double midStom, double lowStom) {
     if (log.isDebugEnabled()) {
       log.debug(String.format("%s moveTo %d %d %d", getName(), topStom, midStom, lowStom));
     }
@@ -149,10 +197,24 @@ public class InMoovTorso extends Service {
     this.lowStom.moveTo(lowStom);
 
   }
+  
+  public void moveToBlocking(Double topStom, Double midStom, Double lowStom) {
+    log.info(String.format("init " + getName() + "moveToBlocking "));
+    moveTo(topStom, midStom, lowStom);
+    waitTargetPos();
+    log.info(String.format("end " + getName() + "moveToBlocking "));
+    }
 
+  public void waitTargetPos() {
+    topStom.waitTargetPos();
+    midStom.waitTargetPos();
+    lowStom.waitTargetPos();
+    }
+
+  
   // FIXME - releasePeers()
   public void release() {
-    detach();
+    disable();
     if (topStom != null) {
       topStom.releaseService();
       topStom = null;
@@ -169,7 +231,7 @@ public class InMoovTorso extends Service {
 
   public void rest() {
 
-    setSpeed(1.0, 1.0, 1.0);
+    //setSpeed(1.0, 1.0, 1.0);
 
     topStom.rest();
     midStom.rest();
@@ -185,10 +247,10 @@ public class InMoovTorso extends Service {
     return true;
   }
 
-  public void setLimits(int bicepMin, int bicepMax, int rotateMin, int rotateMax, int shoulderMin, int shoulderMax) {
-    topStom.setMinMax(bicepMin, bicepMax);
-    midStom.setMinMax(rotateMin, rotateMax);
-    lowStom.setMinMax(shoulderMin, shoulderMax);
+  public void setLimits(int topStomMin, int topStomMax, int midStomMin, int midStomMax, int lowStomMin, int lowStomMax) {
+    topStom.setMinMax(topStomMin, topStomMax);
+    midStom.setMinMax(midStomMin, midStomMax);
+    lowStom.setMinMax(lowStomMin, lowStomMax);
   }
 
   // ------------- added set pins
@@ -201,12 +263,14 @@ public class InMoovTorso extends Service {
     */
 	  
 
-	    arduino.servoAttach(topStom, topStomPin);
-	    arduino.servoAttach(topStom, midStomPin);
-	    arduino.servoAttach(topStom, lowStomPin);
+	    arduino.servoAttachPin(topStom, topStomPin);
+	    arduino.servoAttachPin(topStom, midStomPin);
+	    arduino.servoAttachPin(topStom, lowStomPin);
   }
 
+  @Deprecated
   public void setSpeed(Double topStom, Double midStom, Double lowStom) {
+	log.warn("setspeed deprecated please use setvelocity");
     this.topStom.setSpeed(topStom);
     this.midStom.setSpeed(midStom);
     this.lowStom.setSpeed(lowStom);
@@ -240,7 +304,7 @@ public class InMoovTorso extends Service {
     midStom.moveTo(midStom.getPos() + 2);
     lowStom.moveTo(lowStom.getPos() + 2);
 
-    moveTo(35, 45, 55);
+    moveTo(35.0, 45.0, 55.0);
     String move = getScript("i01");
     log.info(move);
   }
@@ -262,12 +326,12 @@ public class InMoovTorso extends Service {
     meta.addPeer("topStom", "Servo", "Top Stomach servo");
     meta.addPeer("midStom", "Servo", "Mid Stomach servo");
     meta.addPeer("lowStom", "Servo", "Low Stomach servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+    meta.addPeer("arduino", "Arduino", "Arduino controller for torso");
 
     return meta;
   }
 
-  public void setVelocity(Integer topStom, Integer midStom, Integer lowStom) {
+  public void setVelocity(Double topStom, Double midStom, Double lowStom) {
     this.topStom.setVelocity(topStom);
     this.midStom.setVelocity(midStom);
     this.lowStom.setVelocity(lowStom);

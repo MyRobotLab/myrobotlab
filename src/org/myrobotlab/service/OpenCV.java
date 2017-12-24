@@ -43,6 +43,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.bytedeco.javacpp.opencv_core.CvPoint;
@@ -65,14 +66,14 @@ import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect2;
-import org.myrobotlab.opencv.OpenCVFilterPyramidDown;
+import org.myrobotlab.opencv.OpenCVFilterTesseract;
+import org.myrobotlab.opencv.OpenCVFilterOverlay;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
+import org.myrobotlab.service.abstracts.AbstractVideoSource;
 import org.myrobotlab.service.data.Point2Df;
-import org.myrobotlab.service.interfaces.VideoSource;
 import org.slf4j.Logger;
 
 /*
@@ -106,12 +107,11 @@ import static org.bytedeco.javacpp.opencv_videostab.*;
  * Audet : https://github.com/bytedeco/javacv
  * 
  */
-public class OpenCV extends VideoSource {
+public class OpenCV extends AbstractVideoSource {
 
   // FIXME - don't return BufferedImage return SerializableImage always !
 
   private static final long serialVersionUID = 1L;
-
   public final static Logger log = LoggerFactory.getLogger(OpenCV.class);
 
   // FIXME - make more simple
@@ -131,6 +131,8 @@ public class OpenCV extends VideoSource {
   transient public static final String FILTER_DILATE = "Dilate";
   transient public static final String FILTER_FIND_CONTOURS = "FindContours";
   transient public static final String FILTER_FACE_DETECT = "FaceDetect";
+  transient public static final String FILTER_FACE_RECOGNIZER = "FaceRecognizer";
+  transient public static final String FILTER_GRAY = "Gray";
 
   // directional constants
   transient final static public String DIRECTION_FARTHEST_FROM_CENTER = "DIRECTION_FARTHEST_FROM_CENTER";
@@ -147,10 +149,10 @@ public class OpenCV extends VideoSource {
   transient public final static String SOURCE_KINECT_DEPTH = "SOURCE_KINECT_DEPTH";
 
   static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddAlpha", "AddMask", "Affine", "And", "AverageColor", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector",
-      "Dilate", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "FFMEG", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2",
-      "HSV", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "Output",
-      "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageROI", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split",
-      "State", "SURF", "Threshold", "Transpose" };
+      "Dilate", "DL4J","Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2",
+      "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "Output",
+      "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split",
+      "State", "Surf", "Tesseract", "Threshold", "Transpose" };
 
   // yep its public - cause a whole lotta data
   // will get set on it before a setState
@@ -163,6 +165,10 @@ public class OpenCV extends VideoSource {
   public boolean undockDisplay = false;
 
   // track the state of opencv. capturing true/false?
+  // FIXME - there should be a bool isCapturing() - part of VideoCapture
+  // interface !
+  // additionally this should not be public but package scope protected (ie no
+  // declaration)
   public boolean capturing = false;
 
   // TODO: a peer, but in the future , we should use WebGui and it's http
@@ -190,11 +196,8 @@ public class OpenCV extends VideoSource {
     return b;
   }
 
-  /**
+  /*
    * new way of converting IplImages to BufferedImages
-   * 
-   * @param src
-   * @return
    */
   public static BufferedImage IplImageToBufferedImage(IplImage src) {
     OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
@@ -203,11 +206,8 @@ public class OpenCV extends VideoSource {
     return converter.getBufferedImage(frame, 1);
   }
 
-  /**
+  /*
    * new way of converting BufferedImages to IplImages
-   * 
-   * @param src
-   * @return
    */
   public static IplImage BufferedImageToIplImage(BufferedImage src) {
     OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
@@ -215,11 +215,8 @@ public class OpenCV extends VideoSource {
     return grabberConverter.convert(jconverter.convert(src));
   }
 
-  /**
+  /*
    * new way of converting BufferedImages to IplImages
-   * 
-   * @param src
-   * @return
    */
   public static Frame BufferedImageToFrame(BufferedImage src) {
     Java2DFrameConverter jconverter = new Java2DFrameConverter();
@@ -236,12 +233,10 @@ public class OpenCV extends VideoSource {
     return img;
   }
 
-  /**
+  /*
    * the publishing point of all OpenCV goodies ! type conversion is held off
    * until asked for - then its cached SMART ! :)
    * 
-   * @param data
-   * @return
    */
   public final OpenCVData publishOpenCVData(OpenCVData data) {
     return data;
@@ -286,11 +281,10 @@ public class OpenCV extends VideoSource {
     return add(src);
   }
 
-  /**
+  /*
    * blocking safe exchange of data between different threads external thread
    * adds image data which can be retrieved from the blockingData queue
    * 
-   * @param image
    */
   public OpenCVData add(Frame image) {
     FrameGrabber grabber = videoProcessor.getGrabber();
@@ -310,12 +304,9 @@ public class OpenCV extends VideoSource {
     }
   }
 
-  /**
+  /*
    * when the video image changes size this function will be called with the new
    * dimension
-   * 
-   * @param d
-   * @return
    */
   public Dimension sizeChange(Dimension d) {
     return d;
@@ -368,26 +359,31 @@ public class OpenCV extends VideoSource {
   // publish functions end ---------------------------
 
   public void stopCapture() {
+    log.info("opencv - stop capture");
     videoProcessor.stop();
-    capturing = false;
     broadcastState(); // let everyone know
+    sleep(500);
+    capturing = false;
   }
 
   public void capture() {
-    save();
+    try {
+      save();
 
-    if (streamerEnabled) {
-      streamer = (VideoStreamer) startPeer("streamer");
-      streamer.attach(this);
+      if (streamerEnabled) {
+        streamer = (VideoStreamer) startPeer("streamer");
+        streamer.attach(this);
+      }
+      // stopCapture(); // restart?
+      videoProcessor.start();
+      // there's a nasty race condition,
+      // so we sleep here for 500 milliseconds to make sure
+      // the video stream is up and running before we publish our state.
+      sleep(500);
+      broadcastState(); // let everyone know
+    } catch (Exception e) {
+      error(e);
     }
-    // stopCapture(); // restart?
-    videoProcessor.start();
-    // there's a nasty race condition,
-    // so we sleep here for 500 milliseconds to make sure
-    // the video stream is up and running before we publish our state.
-    sleep(500);
-    capturing = true;
-    broadcastState(); // let everyone know
   }
 
   public void stopRecording(String filename) {
@@ -400,58 +396,52 @@ public class OpenCV extends VideoSource {
 
   public OpenCVFilter addFilter(OpenCVFilter filter) {
     videoProcessor.addFilter(filter);
-    broadcastState();
+    // broadcastState(); not needed as videoProcessor will send
+    // the broadcast state
     return filter;
   }
 
   public OpenCVFilter addFilter(String filterName) {
 
     OpenCVFilter filter = videoProcessor.addFilter(filterName, filterName);
-    broadcastState(); // let everyone know
+    // broadcastState(); // let everyone know - not needed as videoProcessor
+    // will
+    // filter.setVideoProcessor(videoProcessor);
+    // send the broadcast state
     return filter;
   }
 
   public OpenCVFilter addFilter(String name, String filterType) {
 
     OpenCVFilter filter = videoProcessor.addFilter(name, filterType);
-    broadcastState(); // let everyone know
+    // we need to pass a handle to our video processor down so filters can
+    // invoke things on opencv i guess.
+    // TODO: KW: maybe we want to change it so that filters invoke on
+    // themselves.. (but, filters aren't services, so that's a bit odd.)
+    // filter.setVideoProcessor(videoProcessor);
+    // broadcastState(); // let everyone know
+    // not needed as broadcast
     return filter;
   }
 
   // FIXME - rename removeFilters
   public void removeFilters() {
     videoProcessor.removeFilters();
-    broadcastState();
+    // broadcastState(); not needed
   }
 
   public void removeFilter(String name) {
-    OpenCVFilter f = videoProcessor.getFilter(name);
-    if (f != null) {
-      videoProcessor.removeFilter(f);
-    } else {
-      log.warn("can not remove filter {} - it does not exits", name);
-    }
-    broadcastState();
+    videoProcessor.removeFilter(name);
+    // broadcastState(); not needed
   }
 
-  public void removeFilter(OpenCVFilter filter) {
-    videoProcessor.removeFilter(filter);
-    broadcastState();
-  }
-
-  public ArrayList<OpenCVFilter> getFiltersCopy() {
+  public List<OpenCVFilter> getFiltersCopy() {
     return videoProcessor.getFiltersCopy();
   }
 
   public OpenCVFilter getFilter(String name) {
     return videoProcessor.getFilter(name);
   }
-
-  // filter dynamic data exchange begin ------------------
-  /*
-   * wrong place public void broadcastFilterState() {
-   * invoke("publishFilterState"); }
-   */
 
   /**
    * @param otherFilter
@@ -473,8 +463,8 @@ public class OpenCV extends VideoSource {
 
   }
 
-  /**
-   * Callback from the GUIService to the appropriate filter funnel through here
+  /*
+   * Callback from the SwingGui to the appropriate filter funnel through here
    */
   public void invokeFilterMethod(String filterName, String method, Object... params) {
     OpenCVFilter filter = getFilter(filterName);
@@ -485,7 +475,7 @@ public class OpenCV extends VideoSource {
     }
   }
 
-  /**
+  /*
    * publishing method for filters - used internally
    * 
    * @return FilterWrapper solves the problem of multiple types being resolved
@@ -495,7 +485,7 @@ public class OpenCV extends VideoSource {
     return filterWrapper;
   }
 
-  /**
+  /*
    * publishing method for filters - uses string parameter for remote invocation
    * 
    * @return FilterWrapper solves the problem of multiple types being resolved
@@ -585,7 +575,7 @@ public class OpenCV extends VideoSource {
     OpenCVFilterFaceDetect fd = new OpenCVFilterFaceDetect();
     addFilter(fd);
     OpenCVData d = getOpenCVData();
-    removeFilter(fd);
+    removeFilter(fd.name);
     return d;
   }
 
@@ -664,11 +654,6 @@ public class OpenCV extends VideoSource {
     return ret;
   }
 
-  /*
-   * public void useBlockingData(Boolean b) { videoProcessor.useBlockingData =
-   * true; }
-   */
-
   public int getCameraIndex() {
     return videoProcessor.cameraIndex;
   }
@@ -679,10 +664,9 @@ public class OpenCV extends VideoSource {
     videoProcessor.grabberType = "org.myrobotlab.opencv.PipelineFrameGrabber";
   }
 
-  /**
+  /*
    * minimum time between processing frames - time unit is in milliseconds
    * 
-   * @param time
    */
   public void setMinDelay(int time) {
     videoProcessor.setMinDelay(time);
@@ -732,6 +716,46 @@ public class OpenCV extends VideoSource {
 
   }
 
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(OpenCV.class.getCanonicalName());
+    meta.addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
+    meta.addCategory("video", "vision", "sensor");
+    // meta.addPeer("streamer", "VideoStreamer", "video streaming service
+    // for
+    // webgui.");
+
+    meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
+    // meta.addDependency("org.bytedeco.javacpp","1.1");
+    meta.addDependency("org.bytedeco.javacv", "1.3");
+    meta.addDependency("pl.sarxos.webcam", "0.3.10");
+    // FaceRecognizer no worky if missing it
+    meta.addDependency("org.apache.commons.commons-lang3", "3.3.2");
+    // for the mjpeg streamer support
+    meta.addDependency("net.sf.jipcam","0.9.1");
+    return meta;
+  }
+
+  public boolean isStreamerEnabled() {
+    return streamerEnabled;
+  }
+
+  public void setStreamerEnabled(boolean streamerEnabled) {
+    this.streamerEnabled = streamerEnabled;
+  }
+  
+  public boolean isCapturing(){
+    return capturing;
+  }
+  
   public static void main(String[] args) throws Exception {
 
     // TODO - Avoidance / Navigation Service
@@ -742,7 +766,7 @@ public class OpenCV extends VideoSource {
     // https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
     //
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
-    Runtime.start("gui", "GUIService");
+    Runtime.start("gui", "SwingGui");
 
     org.apache.log4j.BasicConfigurator.configure();
     LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -751,28 +775,50 @@ public class OpenCV extends VideoSource {
     // Runtime.start("right", "OpenCV");
     // opencvLeft.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
     // opencvLeft.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
-    // training images in this example must be same resolution as camera video
+    // training images in this example must be same resolution as camera
+    // video
     // stream.
     // OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
     // opencv.addFilter(tr);
 
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     // Runtime.start("right", "OpenCV");
-   // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
-    //opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
+    // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
+//    opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
 
-    // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
+   // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
     // opencv.setInputSource(INPUT_SOURCE_CAMERA);
-    //opencv.setInputSource(INPUT_SOURCE_NETWORK);
-//    opencv.setInputFileName("http://192.168.4.112:8080/?action=stream");
+//   opencv.setInputSource(INPUT_SOURCE_NETWORK);
+//   opencv.setInputFileName("http://192.168.4.117:8080/?action=stream");
     //opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
-    //opencv.addFilter("facerec", "FaceRecognizer");
-    
-    OpenCVFilterPyramidDown pyramid = new OpenCVFilterPyramidDown("pyramid");
-    opencv.addFilter(pyramid);
-    OpenCVFilterFaceDetect2 facedetect2 = new OpenCVFilterFaceDetect2("facedetect2");
-    opencv.addFilter(facedetect2);
+   opencv.setStreamerEnabled(false);
+   //  opencv.addFilter("facerec", "FaceRecognizer");
+
+    // OpenCVFilterPyramidDown pyramid = new OpenCVFilterPyramidDown("pyramid");
+    // opencv.addFilter(pyramid);
+
+    // OpenCVFilterDilate dilate = new OpenCVFilterDilate();
+    // opencv.addFilter(dilate);
+   // OpenCVFilterTesseract tess = new OpenCVFilterTesseract("tess");
+   
+   OpenCVFilterFaceDetect facedetect2 = new
+   OpenCVFilterFaceDetect("facedetect");
+   opencv.addFilter(facedetect2);
+   
+   OpenCVFilterOverlay filter = new OpenCVFilterOverlay("overlay");
+   // filter.addImage("overlay1.png", 0.3);
+  //  filter.addImage("red.png", 0.4);
+   filter.addImage("overlay_640x480.png", 1.0);
+   
+   // filter.addText("scanmode", 20, 40, 0.6, "SCAN MODE NONE");
+   // filter.addText("assessment", 20, 50, 0.6, "ASSESSMENT COMPLETED");
+   
+   opencv.addFilter(filter);
+   
+    // OpenCVFilterFaceDetect2 facedetect2 = new
+    // OpenCVFilterFaceDetect2("facedetect2");
+    // opencv.addFilter(facedetect2);
     // OpenCVFilterFaceRecognizer("facerec");
 
     // String trainingDir = "C:\\training";
@@ -781,7 +827,8 @@ public class OpenCV extends VideoSource {
 
     // opencvLeft.addFilter(facerec);
 
-    // VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
+    // VideoStreamer vs = (VideoStreamer)Runtime.start("vs",
+    // "VideoStreamer");
     // vs.attach(opencv);
     opencv.capture();
     // opencvLeft.capture();
@@ -837,10 +884,10 @@ public class OpenCV extends VideoSource {
     // opencv.capture();
     // opencv.captureFromImageFile("C:\\mrl\\myrobotlab\\image0.png");
 
-    // Runtime.createAndStart("gui", "GUIService");
+    // Runtime.createAndStart("gui", "SwingGui");
     // opencv.test();
     /*
-     * Runtime.createAndStart("gui", "GUIService"); RemoteAdapter remote =
+     * Runtime.createAndStart("gui", "SwingGui"); RemoteAdapter remote =
      * (RemoteAdapter) Runtime.start("ocvremote", "RemoteAdapter");
      * remote.connect("tcp://localhost:6767");
      * 
@@ -857,35 +904,9 @@ public class OpenCV extends VideoSource {
 
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(OpenCV.class.getCanonicalName());
-    meta.addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
-    meta.addCategory("video", "vision", "sensor");
-    // meta.addPeer("streamer", "VideoStreamer", "video streaming service for
-    // webgui.");
-
-    meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
-    // meta.addDependency("org.bytedeco.javacpp","1.1");
-    meta.addDependency("org.bytedeco.javacv", "1.1");
-    meta.addDependency("pl.sarxos.webcam", "0.3.10");
-    return meta;
-  }
-
-  public boolean isStreamerEnabled() {
-    return streamerEnabled;
-  }
-
-  public void setStreamerEnabled(boolean streamerEnabled) {
-    this.streamerEnabled = streamerEnabled;
+  public void saveFrame(String string) {
+    OpenCVData data = getOpenCVData();
+    data.getInputBufferedImage();
   }
 
 }

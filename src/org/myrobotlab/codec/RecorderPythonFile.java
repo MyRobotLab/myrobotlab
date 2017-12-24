@@ -10,8 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.NameProvider;
 
 public class RecorderPythonFile implements Recorder {
 

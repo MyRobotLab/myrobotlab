@@ -46,13 +46,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -66,7 +66,8 @@ import org.slf4j.Logger;
  * voice. That mp3 is then cached and played back by the AudioFile service.
  * 
  */
-public class AcapelaSpeech extends Service implements TextListener, SpeechSynthesis, AudioListener {
+@Deprecated // close source, closed service, no fun
+public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListener, AudioListener {
 
   transient public final static Logger log = LoggerFactory.getLogger(AcapelaSpeech.class);
   private static final long serialVersionUID = 1L;
@@ -428,11 +429,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
   }
 
-  public AudioData speak(String voice, String toSpeak) throws IOException {
-    setVoice(voice);
-    return speak(toSpeak);
-  }
-
   @Override
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
     // TODO: make this a base class sort of thing.
@@ -468,6 +464,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
   // audioData to utterance map TODO: revisit the design of this
   HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
+private Object language;
 
   @Override
   public String publishStartSpeaking(String utterance) {
@@ -507,9 +504,10 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
     try {
       // Runtime.start("webgui", "WebGui");
       AcapelaSpeech speech = (AcapelaSpeech) Runtime.start("speech", "AcapelaSpeech");
-      // speech.setVoice("Ryan");
+      speech.setVoice("Rod");
       // TODO: fix the volume control
       // speech.setVolume(0);
+      speech.speakBlocking("this is another test");
       speech.speakBlocking("does this work");
       speech.speakBlocking("uh oh");
       speech.speakBlocking("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
@@ -544,12 +542,20 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
    */
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(AcapelaSpeech.class.getCanonicalName());
-    meta.addDescription("Acapela group speech synthesis service.");
+    
+    meta.addDescription("is a proprietary cloud service, currently returns speech and background music");
     meta.addCategory("speech");
-    meta.setSponsor("GroG");
+    
+    meta.setLicenseProprietary();
+    meta.setCloudService(true);
+    
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+
+    //End of support
+    meta.setAvailable(false);
     return meta;
   }
+
 }

@@ -1,5 +1,6 @@
 package org.myrobotlab.kinematics;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
@@ -8,7 +9,10 @@ import java.text.NumberFormat;
  *
  *
  */
-public class Matrix {
+public class Matrix implements Serializable {
+
+  private static final long serialVersionUID = 1L;
+
   protected int numRows;
 
   protected int numCols;
@@ -16,9 +20,10 @@ public class Matrix {
   public double[][] elements;
 
   /**
-   * @param sx
-   *          sy sz translations in the x,y, and z directions
-   * @returns the associated scaling transformation matrix
+   * @param sx scaling in the x direction
+   * @param sy scaling in the y direction
+   * @param sz scaling in the z direction
+   * @return the associated scaling transformation matrix
    */
   public static Matrix scaling(double sx, double sy, double sz) {
     Matrix S = new Matrix();
@@ -30,9 +35,10 @@ public class Matrix {
   }
 
   /**
-   * @param tx
-   *          ty tz translations in the x,y, and z directions
-   * @returns the associated translation transformation matrix
+   * @param tx translations in the x direction
+   * @param ty translations in the y direction         
+   * @param tz translations in the z direction
+   * @return the associated translation transformation matrix
    */
   public static Matrix translation(double tx, double ty, double tz) {
     Matrix T = new Matrix();
@@ -160,12 +166,12 @@ public class Matrix {
    * 
    * @param m
    *          A Matrix with the same dimensions
-   * @returns the dot product (scalar product)
+   * @return the dot product (scalar product)
    */
   public Double dot(Matrix m) {
     if (numRows != m.numRows || numCols != m.numCols) {
       System.out.println("dimensions bad in dot()");
-      return null;
+      return 0.0;
     }
     double sum = 0;
 
@@ -179,7 +185,7 @@ public class Matrix {
   /**
    * @param val
    *          a scalar
-   * @returns true if and only if all elements of the matrix equal val
+   * @return true if and only if all elements of the matrix equal val
    */
   public boolean equals(double val) {
     for (int r = 0; r < numRows; r++)
@@ -218,12 +224,12 @@ public class Matrix {
    * @return a new matrix which is equal to the product of this*m
    */
   public Matrix multiply(Matrix m) {
+    Matrix ret = new Matrix(numRows, m.numCols);
     if (numCols != m.numRows) {
       System.out.println("dimensions bad in multiply()");
-      return null;
+      return ret;
     }
 
-    Matrix ret = new Matrix(numRows, m.numCols);
 
     for (int r = 0; r < numRows; r++)
       for (int c = 0; c < m.numCols; c++) {
@@ -247,52 +253,56 @@ public class Matrix {
     Matrix ak = new Matrix(numRows, 1);
     Matrix dk, ck, bk;
     Matrix R_plus;
-
-    for (r = 0; r < numRows; r++) {
-      ak.elements[r][0] = this.elements[r][0];
-    }
-
-    if (!ak.equals(0.0)) {
-      R_plus = ak.transpose().multiply(1.0 / (ak.dot(ak)));
-    } else {
-      R_plus = new Matrix(1, numCols);
-    }
-
-    while (k < this.numCols) {
-
+    try{
       for (r = 0; r < numRows; r++) {
-        ak.elements[r][0] = this.elements[r][k];
+        ak.elements[r][0] = this.elements[r][0];
       }
-
-      dk = R_plus.multiply(ak);
-      Matrix T = new Matrix(numRows, k);
-      for (r = 0; r < numRows; r++) {
-        for (c = 0; c < k; c++) {
-          T.elements[r][c] = this.elements[r][c];
-        }
-      }
-      ck = ak.subtractFrom(T.multiply(dk));
-
-      if (!ck.equals(0.0)) {
-        bk = ck.transpose().multiply(1.0 / (ck.dot(ck)));
+  
+      if (!ak.equals(0.0)) {
+        R_plus = ak.transpose().multiply(1.0 / (ak.dot(ak)));
       } else {
-        bk = dk.transpose().multiply(1.0 / (1.0 + dk.dot(dk))).multiply(R_plus);
+        R_plus = new Matrix(1, numCols);
       }
-
-      Matrix N = R_plus.subtractFrom(dk.multiply(bk));
-      R_plus = new Matrix(N.numRows + 1, N.numCols);
-
-      for (r = 0; r < N.numRows; r++) {
-        for (c = 0; c < N.numCols; c++) {
-          R_plus.elements[r][c] = N.elements[r][c];
+  
+      while (k < this.numCols) {
+  
+        for (r = 0; r < numRows; r++) {
+          ak.elements[r][0] = this.elements[r][k];
         }
+  
+        dk = R_plus.multiply(ak);
+        Matrix T = new Matrix(numRows, k);
+        for (r = 0; r < numRows; r++) {
+          for (c = 0; c < k; c++) {
+            T.elements[r][c] = this.elements[r][c];
+          }
+        }
+        ck = ak.subtractFrom(T.multiply(dk));
+  
+        if (!ck.equals(0.0)) {
+          bk = ck.transpose().multiply(1.0 / (ck.dot(ck)));
+        } else {
+          bk = dk.transpose().multiply(1.0 / (1.0 + dk.dot(dk))).multiply(R_plus);
+        }
+  
+        Matrix N = R_plus.subtractFrom(dk.multiply(bk));
+        R_plus = new Matrix(N.numRows + 1, N.numCols);
+  
+        for (r = 0; r < N.numRows; r++) {
+          for (c = 0; c < N.numCols; c++) {
+            R_plus.elements[r][c] = N.elements[r][c];
+          }
+        }
+        for (c = 0; c < N.numCols; c++) {
+          R_plus.elements[R_plus.numRows - 1][c] = bk.elements[0][c];
+        }
+        k++;
       }
-      for (c = 0; c < N.numCols; c++) {
-        R_plus.elements[R_plus.numRows - 1][c] = bk.elements[0][c];
-      }
-      k++;
+      return R_plus;
     }
-    return R_plus;
+    catch (ArrayIndexOutOfBoundsException e){
+      return null;
+    }
   }
 
   /**
@@ -301,11 +311,11 @@ public class Matrix {
    * @return a new matrix which is equal to the difference of this - m
    */
   public Matrix subtractFrom(Matrix m) {
-    if (numRows != m.numRows || numCols != m.numCols) {
-      System.out.println("dimensions bad in addTo()");
-      return null;
-    }
     Matrix ret = new Matrix(numRows, numCols);
+    if (numRows != m.numRows || numCols != m.numCols) {
+      System.out.println("dimensions bad in substractFrom()");
+      return ret;
+    }
 
     for (int r = 0; r < numRows; r++) {
       for (int c = 0; c < numCols; c++) {

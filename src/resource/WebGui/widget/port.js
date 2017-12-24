@@ -1,31 +1,27 @@
-/*
-
-
-*/
 angular.module('mrlapp.service').directive('port', ['$compile', 'mrl', '$log', function($compile, mrl, $log) {
     return {
         restrict: "E",
         templateUrl: 'widget/port.html',
         scope: {
             serviceName: '@',
-            portDirectiveScope : "=ngModel"
+            portTest: '@'//,
+            // portDirectiveScope: "=ngModel"
         },
         // scope: true,
         link: function(scope, element) {
             var _self = this;
-            var name = scope.serviceName;
-            scope.service = mrl.getService(name);
+            //var name = scope.serviceName;
+            scope.service = mrl.getService(scope.serviceName);
             _self.updateState = function(service) {
                 scope.service = service;
-                scope.isConnected = (scope.service.portName != null );
-                scope.isConnectedImage = (scope.service.portName != null ) ? "connected" : "disconnected";
-                scope.connectText = (scope.service.portName == null ) ? "connect" : "disconnect";
+                scope.isConnected = (scope.service.portName != null);
+                scope.isConnectedImage = (scope.service.portName != null) ? "connected" : "disconnected";
+                scope.connectText = (scope.service.portName == null) ? "connect" : "disconnect";
                 if (scope.isConnected) {
                     scope.portName = scope.service.portName;
                 } else {
                     scope.portName = scope.service.lastPortName;
                 }
-
                 // getting the data back from the directive to the controller
                 // scope.obj.portName = scope.portName;
             }
@@ -63,19 +59,20 @@ angular.module('mrlapp.service').directive('port', ['$compile', 'mrl', '$log', f
                 mrl.sendTo(scope.service.name, 'connect', portName, rate, dataBits, stopBits, parity);
             }
             ;
-            scope.refresh = function() {
-                mrl.sendTo(scope.service.name, 'refresh');
-            }
             scope.disconnect = function() {
-                mrl.sendTo(scope.service.name, 'disconnect')
+                mrl.sendTo(scope.service.name, 'disconnect');
             }
             ;
+            scope.refresh = function() {
+                mrl.sendTo(scope.service.name, 'getPortNames');
+            };
+           
             // subscribes
-            mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPortNames');
-            mrl.subscribeToServiceMethod(_self.onMsg, name, 'refresh');
-            mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishState');
-            mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishStats');
-            scope.portDirectiveScope = scope;
+            mrl.subscribeToServiceMethod(_self.onMsg, scope.serviceName, 'publishPortNames');
+            mrl.subscribeToServiceMethod(_self.onMsg, scope.serviceName, 'refresh');
+            mrl.subscribeToServiceMethod(_self.onMsg, scope.serviceName, 'publishState');
+            mrl.subscribeToServiceMethod(_self.onMsg, scope.serviceName, 'publishStats');
+            // scope.portDirectiveScope = scope;
         }
     };
 }

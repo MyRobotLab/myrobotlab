@@ -36,7 +36,7 @@ public class ServiceReservation implements Serializable {
   public ServiceReservation(String key, String actualName, String typeName, String comment) {
     this.key = key;
     this.actualName = actualName;
-    if (!typeName.contains(".")) {
+    if (typeName != null && !typeName.contains(".")) {
       this.fullTypeName = String.format("org.myrobotlab.service.%s", typeName);
     } else {
       this.fullTypeName = typeName;

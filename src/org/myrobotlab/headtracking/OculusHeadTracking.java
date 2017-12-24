@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OculusRift;
-import org.myrobotlab.service.data.OculusData;
+import org.myrobotlab.service.data.Orientation;
 import org.slf4j.Logger;
 
 import com.oculusvr.capi.Hmd;
@@ -55,8 +55,8 @@ public class OculusHeadTracking implements Runnable, Serializable {
 
       // TODO: remove the oculus data class and just use the point publisher
       // stuff.
-      OculusData headTrackingData = new OculusData(roll, pitch, yaw);
-      oculus.invoke("publishOculusData", headTrackingData);
+      Orientation headTrackingData = new Orientation(roll, pitch, yaw);
+      oculus.invoke("publishOrientation", headTrackingData);
 
       // positional information.
       double x = trackingState.HeadPose.Pose.Position.x;

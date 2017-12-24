@@ -3,7 +3,10 @@ package org.myrobotlab.service.interfaces;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import org.myrobotlab.framework.interfaces.NameProvider;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.AudioData;
+import org.slf4j.Logger;
 
 /**
  * SpeechSynthesis - This is the interface that services that provide text to
@@ -11,6 +14,8 @@ import org.myrobotlab.service.data.AudioData;
  * 
  */
 public interface SpeechSynthesis extends NameProvider {
+  
+  public final static Logger log = LoggerFactory.getLogger(SpeechSynthesis.class);
 
   public abstract List<String> getVoices();
 
@@ -21,9 +26,7 @@ public interface SpeechSynthesis extends NameProvider {
   public abstract String getLanguage();
 
   /**
-   * returns a list of current possible languages
-   * 
-   * @return
+   * @return a list of current possible languages
    */
   public abstract List<String> getLanguages();
 
@@ -33,18 +36,20 @@ public interface SpeechSynthesis extends NameProvider {
    * @param toSpeak
    *          - the string of text to speak.
    * @return TODO
+   * @throws Exception e
    */
   public abstract AudioData speak(String toSpeak) throws Exception;
-
+  
   /**
    * Begin speaking and wait until all speech has been played back/
    * 
    * @param toSpeak
    *          - the string of text to speak.
-   * @return
+   * @throws Exception e
+   * @return true/false
    */
   public abstract boolean speakBlocking(String toSpeak) throws Exception;
-
+  
   public abstract void setVolume(float volume);
 
   public abstract float getVolume();
@@ -58,19 +63,17 @@ public interface SpeechSynthesis extends NameProvider {
 
   /**
    * start callback for speech synth. (Invoked when speaking starts)
-   * 
-   * @param utterance
-   * @return
+   * @param utterance text
+   * @return the same text
    */
-  public abstract String publishStartSpeaking(String utterance);
+  public String publishStartSpeaking(String utterance);
 
   /**
    * stop callback for speech synth. (Invoked when speaking stops.)
-   * 
-   * @param utterance
-   * @return
+   * @param utterance text
+   * @return text
    */
-  public abstract String publishEndSpeaking(String utterance);
+  public String publishEndSpeaking(String utterance);
 
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException;
 

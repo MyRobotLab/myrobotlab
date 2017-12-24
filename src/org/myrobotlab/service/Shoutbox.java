@@ -13,6 +13,7 @@ import java.util.List;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.XMPPException;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Message;
 // import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -69,7 +70,7 @@ public class Shoutbox extends Service {
 
   transient static NameProvider nameProvider = new DefaultNameProvider();
 
-  /**
+  /*
    * Core to managing the connections are the keys The keys for websockets are
    * defined as remoteIp:remotePort - unfortunately these are null on disconnect
    * so a seperate lookup needs to be utilized The keys for xmpp "buddies" are
@@ -78,8 +79,6 @@ public class Shoutbox extends Service {
    * A Connection's UserId is a "user friendly" identification of the user using
    * that connection
    * 
-   * @param ws
-   * @return
    */
 
   static public String makeKey(String ws) {
@@ -166,7 +165,7 @@ public class Shoutbox extends Service {
       }
 
       if (fw == null) {
-        String filename = String.format("%s/shouts.%s.js", getName(), TSFormatter.format(new Date()));
+        String filename = String.format("%s/shouts.%s.js", getName(), tsFormatter.format(new Date()));
         File archive = new File(filename);
 
         fw = new FileWriter(archive.getAbsoluteFile());
@@ -260,10 +259,6 @@ public class Shoutbox extends Service {
     }
   }
 
-  /**
-   * 
-   * @param myName
-   */
   public void setNickName(String nickname) {
     // WebGui web
     log.info("setNickName {}", nickname);
@@ -296,7 +291,7 @@ public class Shoutbox extends Service {
   // FIXME FIXME FIXME - not normalized with publishShout(WebSocket) :PPPP
   // FIXME - must fill in your name - "Greg Perry" somewhere..
   public void onXMPPMsg(XmppMsg xmppMsg) {
-    log.info(String.format("XMPP - %s %s", xmppMsg.from, xmppMsg.msg));
+    log.info(String.format("Xmpp - %s %s", xmppMsg.from, xmppMsg.msg));
 
     // not exactly the same model as onConnect - so we try to add each time
     String user = "me";// FIXME
@@ -309,10 +304,9 @@ public class Shoutbox extends Service {
     invoke("publishShout", shout);
   }
 
-  /**
+  /*
    * shout of minimal complexity
    * 
-   * @param msg
    */
   public void shout(String msg) {
     // an optimized shout - there is client id & auth stuff which should be
@@ -322,11 +316,9 @@ public class Shoutbox extends Service {
     shout("test", msg);
   }
 
-  /**
+  /*
    * max complexity shout
    * 
-   * @param msg
-   * @param clientId
    */
   public void shout(String clientId, String msg) {
     Shout shout = createShout(TYPE_USER, msg);
@@ -350,7 +342,7 @@ public class Shoutbox extends Service {
     // Message out = createMessage("shoutclient", "publishShout",
     // CodecUtils.toJson(shout));
     // TODO: what do we do with the result of this method?
-    createMessage("shoutclient", "publishShout", CodecUtils.toJson(shout));
+    Message.createMessage(this, "shoutclient", "publishShout", CodecUtils.toJson(shout));
     // webgui.sendToAll(out);
 
     if (xmpp != null && !TYPE_SYSTEM.equals(shout.type)) {
@@ -420,7 +412,7 @@ public class Shoutbox extends Service {
     }
   }
 
-  // --------- XMPP END ------------
+  // --------- Xmpp END ------------
 
   // String lastShoutMsg = null;
 
@@ -429,7 +421,7 @@ public class Shoutbox extends Service {
     String msgString = CodecUtils.toJson(shout);
     // TODO: do something with the "sendTo" message?
     // Message sendTo = createMessage("shoutclient", "publishShout", msgString);
-    createMessage("shoutclient", "publishShout", msgString);
+    Message.createMessage(this, "shoutclient", "publishShout", msgString);
 
   }
 
@@ -478,9 +470,9 @@ public class Shoutbox extends Service {
    * CONCEPTS systemBroadcast - system needs to send to all system message list
    * - system sends to a list of users system message channel -
    * 
-   * channel - a group of recievers & senders
+   * channel - a group of recievers &amp; senders
    * 
-   * Authenticaiton & Authorization - OATH query to Drupal?
+   * Authenticaiton &amp; Authorization - OATH query to Drupal?
    * 
    * DATA timezone - set time zode - use UTC for all server data
    * 
@@ -490,10 +482,10 @@ public class Shoutbox extends Service {
    * getVersion
    */
 
-  // --------- XMPP BEGIN ------------
+  // --------- Xmpp BEGIN ------------
   public void startXMPP(String user, String password) throws Exception {
     if (xmpp == null) {
-      xmpp = (Xmpp) Runtime.start("xmpp", "XMPP");
+      xmpp = (Xmpp) Runtime.start("xmpp", "Xmpp");
     }
 
     xmpp.connect("myrobotlab.org", 5222, user, password);

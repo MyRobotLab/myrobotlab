@@ -9,11 +9,11 @@ import java.net.Socket;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
@@ -84,8 +84,10 @@ public class Blender extends Service {
   public static final String SUCCESS = "SUCCESS";
   Socket control = null;
   transient ControlHandler controlHandler = null;
+  
   String host = "localhost";
   Integer controlPort = 8989;
+  
 
   Integer serialPort = 9191;
   String blenderVersion;
@@ -106,11 +108,10 @@ public class Blender extends Service {
     super(n);
   }
 
-  /**
+  /*
    * important "attach" method for Blender - this way MRL World notifies Blender
    * to dynamically create "virtual" counterpart for device.
    * 
-   * @param service
    */
   public synchronized void attach(Arduino service) {
     // let Blender know we are going
@@ -173,12 +174,9 @@ public class Blender extends Service {
   }
 
   // call back from blender
-  /**
+  /*
    * call back from Blender when python script does an attach to a virtual
    * device - returns name of the service attached
-   * 
-   * @param name
-   * @return
    */
   public synchronized String onAttach(String name) {
     try {
@@ -198,7 +196,7 @@ public class Blender extends Service {
           Serial serial = arduino.getSerial();
 
           // connecting over tcp ip
-          serial.connectTcp(host, serialPort);
+          serial.connectTcp(String.format("tcp://%s:%d", host, serialPort));
 
           // int vpn = virtualPorts.size();
 
@@ -254,7 +252,7 @@ public class Blender extends Service {
   public void sendMsg(String method, Object... data) {
     if (isConnected()) {
       try {
-        Message msg = createMessage("Blender.py", method, data);
+        Message msg = Message.createMessage(this, "Blender.py", method, data);
         OutputStream out = control.getOutputStream();
         // FIXME - this encoder needs to
         // NOT PRETTY PRINT - delimiter is \n PRETY PRINT WILL BREAK IT !!!
@@ -283,7 +281,7 @@ public class Blender extends Service {
       // create masters
       Blender blender = (Blender) Runtime.start("blender", "Blender");
       // gui
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
 
       // connect blender service
       if (!blender.connect()) {
@@ -343,7 +341,7 @@ public class Blender extends Service {
        * blender.getVersion(); // blender.toJson(); // blender.toJson();
        */
 
-      // Runtime.start("gui", "GUIService");
+      // Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

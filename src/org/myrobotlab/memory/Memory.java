@@ -160,13 +160,10 @@ public class Memory {
     }
   }
 
-  /**
+  /*
    * put gets the last node in path - and adds a key to the node's data with a
    * node with Node named with the second parameter
    * 
-   * @param path
-   * @param nodeName
-   * @return
    */
   public Object putNode(String path, String nodeName) {
     Object o = root.get(path);

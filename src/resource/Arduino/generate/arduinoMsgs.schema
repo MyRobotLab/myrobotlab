@@ -1,0 +1,141 @@
+###############################################################################################################
+# Welcome to arduinoMsg.schema
+# ONE FILE TO RULE THEM ALL !!!
+# This file controls the messaging and serialization between
+# Arduino MrlComm library and MRL's Arduino service.
+# It does this by generating code which calls appropriate messages
+# after serializing and deserializing data over the serial line.
+# That way developers only need to worry about the business logic in MrlComm
+# or their MrlDevice, and all the nitty gritty dirty business of remote procedure
+# calls and data-type conversion is left to the generated code.
+#
+#	Type Conversions
+#
+# 	Grammar Type Conversions
+#
+#	Schema      Arduino					Java							Range
+#	none		byte/unsigned char		int (cuz Java byte bites)		1 byte - 0 to 255
+#	boolean		boolean					boolean							0 1
+#   b16			int						int (short)						2 bytes	-32,768 to 32,767
+#   b32			long					int								4 bytes -2,147,483,648 to 2,147,483,647
+#   bu32		unsigned long			long							0 to 4,294,967,295
+#   float		float 4  bytes			float							3.4028235E+38 to -3.4028235E+38
+#   str			char*, size				String							variable length
+#   []			byte[], size			int[]							variable length
+#
+#
+
+# Arduino Diagnostics and Status
+< publishMRLCommError/str errorMsg
+> getBoardInfo
+< publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/activePins/[] deviceSummary
+# removed - for simplicity, merged data into BoardInfo
+# < publishBoardStatus/b16 microsPerLoop/b16 sram/[] deviceSummary
+# > enableBoardInfo/bool enabled # simplified - just goes to Arduino-Javaland now
+> enablePin/address/type/b16 rate
+> setDebug/bool enabled
+> setSerialRate/b32 rate
+> softReset
+
+# Message acks
+> enableAck/bool enabled
+< publishAck/function
+
+# no longer needed - getBoardInfo is used as heartbeat
+# Heartbeat
+# > enableHeartbeat/bool enabled
+# > heartbeat
+# < publishHeartbeat
+
+
+# parameter echo testing
+#> echo/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
+#< publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
+> echo/f32 myFloat/myByte/f32 secondFloat
+< publishEcho/f32 myFloat/myByte/f32 secondFloat
+
+# Custom Messages
+> customMsg/[] msg
+< publishCustomMsg/[] msg
+
+# Device related
+# its complicated to attach a device but simple to detach one
+# all devices can use the same detach
+> deviceDetach/deviceId
+
+# I2cDevices
+> i2cBusAttach/deviceId/i2cBus
+> i2cRead/deviceId/deviceAddress/size
+> i2cWrite/deviceId/deviceAddress/[] data
+> i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
+< publishI2cData/deviceId/[] data
+
+# NeoPixel
+> neoPixelAttach/deviceId/pin/b32 numPixels
+> neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
+> neoPixelWriteMatrix/deviceId/[] buffer
+
+# Arduino Pins
+> analogWrite/pin/value
+> digitalWrite/pin/value
+> disablePin/pin
+> disablePins
+> pinMode/pin/mode
+# no longer used
+# < publishAttachedDevice/deviceId/str deviceName
+< publishDebug/str debugMsg
+# devices now can easily publish on their own channels
+# generalized publishSensorData is deprecated
+# < publishSensorData/deviceId/[] data
+< publishPinArray/[] data
+# TODO - implement 
+> setTrigger/pin/triggerValue
+# TODO implement
+> setDebounce/pin/delay
+# TODO - make trigger now !
+# > sensorPollingStart/deviceId - not currently used - but probably should be
+# > sensorPollingStop/deviceId - not currently used - but probably should be
+# perhaps a serial method identifying the array of possible serials or a device
+# > serialRelay/deviceId/serialPort/[] relayData
+
+# Servo
+# http://myrobotlab.org/service/Servo
+
+> servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
+> servoAttachPin/deviceId/pin
+> servoDetachPin/deviceId
+> servoSetVelocity/deviceId/b16 velocity
+> servoSweepStart/deviceId/min/max/step
+> servoSweepStop/deviceId
+# > servoWrite/deviceId/b16 target
+> servoMoveToMicroseconds/deviceId/b16 target
+# not needed use MoveToMicroseconds to incorporate speed/velocity
+# > servoWriteMicroseconds/deviceId/b16 ms
+> servoSetAcceleration/deviceId/b16 acceleration
+# not used as originally intended - as event information
+< publishServoEvent/deviceId/eventType/b16 currentPos/b16 targetPos
+
+# Serial - for relaying serial data to a different pin
+# I suspect this should model the same pattern as Servo
+# where a Serial device is created for each serail created and attached
+# to a pin
+> serialAttach/deviceId/relayPin
+> serialRelay/deviceId/[] data
+< publishSerialData/deviceId/[] data
+
+# UltrasonicSensor
+# http://myrobotlab.org/service/UltrasonicSensor
+> ultrasonicSensorAttach/deviceId/triggerPin/echoPin
+> ultrasonicSensorStartRanging/deviceId
+> ultrasonicSensorStopRanging/deviceId
+< publishUltrasonicSensorData/deviceId/b16 echoTime
+
+# set ARef
+> setAref/b16 type
+
+# motor
+> motorAttach/deviceId/type/[] pins
+> motorMove/deviceId/pwr
+> motorMoveTo/deviceId/pos
+
+

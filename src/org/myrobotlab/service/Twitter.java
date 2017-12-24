@@ -48,7 +48,7 @@ public class Twitter extends Service {
 
       twitter.startService();
 
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
 
       twitter.setSecurity("xxx", "xxx", "xxx", "xxx");
       twitter.configure();
@@ -68,7 +68,7 @@ public class Twitter extends Service {
       // SerializableImage.class);
 
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
 
     } catch (Exception e) {
@@ -76,11 +76,9 @@ public class Twitter extends Service {
     }
   }
 
-  /**
+  /*
    * Static list of third party dependencies for this service. The list will be
    * consumed by Ivy to download and manage the appropriate resources
-   * 
-   * @return
    */
 
   public Twitter(String n) {
@@ -174,6 +172,7 @@ public class Twitter extends Service {
     meta.addDescription("Service which can relay tweets");
     meta.addCategory("cloud", "connectivity");
     meta.addDependency("org.twitter4j.twitter", "3.0.5");
+    meta.setCloudService(true);
     return meta;
   }
 

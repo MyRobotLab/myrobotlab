@@ -34,7 +34,7 @@ import com.google.gson.GsonBuilder;
  * xmpp for example assumes (/api/string/gson)/service/method/param1/param2/ ...
  * 
  * scheme = alpha *( alpha | digit | "+" | "-" | "." ) Components of all URIs: [
- * <scheme>:]<scheme-specific-part>[#<fragment>]
+ * &lt;scheme&gt;:]&lt;scheme-specific-part&gt;[#&lt;fragment&gt;]
  * http://stackoverflow.com/questions/3641722/valid-characters-for-uri-schemes
  * 
  * branch API test 5
@@ -48,17 +48,15 @@ public class CodecUtils {
 
   public final static String SCHEME_BASE64 = "base64";
 
-  public final static String API_TYPE_MESSAGES = "messages";
-  public final static String API_TYPE_SERVICES = "services";
-
   // TODO change to mime-type
   public final static String TYPE_MESSAGES = "messages";
   public final static String TYPE_JSON = "json";
   public final static String TYPE_URI = "uri";
 
   // mime-types
+  // public final static String MIME_TYPE_JSON = "application/json";
+  // public final static String MIME_TYPE_MRL_JSON = "application/mrl-json";
   public final static String MIME_TYPE_JSON = "application/json";
-  public final static String MIME_TYPE_MESSAGES = "application/mrl-json";
 
   // disableHtmlEscaping to prevent encoding or "=" -
   // private transient static Gson gson = new
@@ -68,8 +66,6 @@ public class CodecUtils {
   // FIXME - switch to Jackson
 
   private static boolean initialized = false;
-
-  public final static String PREFIX_API = "api";
 
   public final static String makeFullTypeName(String type) {
     if (type == null) {
@@ -236,8 +232,8 @@ public class CodecUtils {
    * most lossy protocols need conversion of parameters into correctly typed
    * elements this method is used to query a candidate method to see if a simple
    * conversion is possible
-   * 
-   * @return
+   * @param clazz the class
+   * @return true/false
    */
   public static boolean isSimpleType(Class<?> clazz) {
     return WRAPPER_TYPES.contains(clazz) || clazz == String.class;
@@ -299,7 +295,7 @@ public class CodecUtils {
     return String.format("%s/%s/%d", fullObjectName, methodName, paramCount);
   }
 
-  // LOSSY Encoding (e.g. xml & gson - which do not encode type information)
+  // LOSSY Encoding (e.g. xml &amp; gson - which do not encode type information)
   // can possibly
   // give us the parameter count - from the parameter count we can grab method
   // candidates
@@ -417,7 +413,7 @@ public class CodecUtils {
     return String.format("org.myrobotlab.service.%s", type);
   }
 
-  static final String JSON = "application/javascript";
+  static final String JSON = "application/javascript";  
 
   // start fresh :P
   // FIXME should probably use a object factory and interface vs static methods
@@ -439,7 +435,7 @@ public class CodecUtils {
       init();
     }
 
-    String ret = MIME_TYPE_MESSAGES;
+    String ret = MIME_TYPE_JSON;
     if (keyToMimeType.containsKey(apiTypeKey)) {
       ret = keyToMimeType.get(apiTypeKey);
     }
@@ -449,7 +445,7 @@ public class CodecUtils {
 
   // API KEY to MIME TYPES (request or response?)
   private static synchronized void init() {
-    keyToMimeType.put("messages", MIME_TYPE_MESSAGES);
+    keyToMimeType.put("messages", MIME_TYPE_JSON);
     keyToMimeType.put("services", MIME_TYPE_JSON);
     initialized = true;
   }
