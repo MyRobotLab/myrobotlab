@@ -119,7 +119,9 @@ public class World {
   Color3f white = new Color3f(1, 1, 1);
   Color3f black = new Color3f(0, 0, 0);
 
-  /** Construct a World from a given EnvironmentDescription. */
+  /** Construct a World from a given EnvironmentDescription. 
+   * @param ed e
+   */
   public World(EnvironmentDescription ed) {
     create(ed);
   }
@@ -154,7 +156,7 @@ public class World {
     return light;
   }
 
-  /**
+  /*
    * Adds a 3D object to the world. Used only in the creation phase.
    */
   public void addObjectToPickableSceneBranch(BaseObject obj3d) {
@@ -162,7 +164,7 @@ public class World {
     pickableSceneBranch.addChild(obj3d.getNode());
   }
 
-  /** attach a 3d object to the scenegraph. */
+  /* attach a 3d object to the scenegraph. */
   public void attach(BaseObject obj3d) {
     pickableSceneBranch.addChild(obj3d.getNode());
   }
@@ -510,7 +512,7 @@ public class World {
     changeViewPoint(ed.worldViewPoint, null);
   }
 
-  /** Detach a previously attached object from the scenegraph. */
+  /* Detach a previously attached object from the scenegraph. */
   public void detach(BaseObject obj3d) {
     pickableSceneBranch.removeChild(obj3d.getNode());
   }

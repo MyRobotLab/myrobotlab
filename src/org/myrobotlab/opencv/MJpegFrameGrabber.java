@@ -20,26 +20,29 @@ public class MJpegFrameGrabber extends FrameGrabber {
   private URL url;
   private MjpegInputStream mStream;
   transient private Java2DFrameConverter converter = new Java2DFrameConverter();
-  
+
   public MJpegFrameGrabber(String uri) {
     super();
+    log.info("Startring MJpeg frame grabber for uri {}", uri);
     try {
-    	url = new URL(uri);
-	} catch (MalformedURLException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+      url = new URL(uri);
+    } catch (MalformedURLException e) {
+      // TODO Auto-generated catch block
+      log.warn("Error starting mjpeg frame grabber! {}", e);
+      // e.printStackTrace();
+    }
   }
 
   @Override
   public void start() throws Exception {
     try {
-		mStream = new MjpegInputStream(url.openStream());
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-		return;
-	}
+      mStream = new MjpegInputStream(url.openStream());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      log.warn("Error starting the mjpeg stream grabber: {}", e);
+      return;
+    }
     log.info("MJPEG Stream Open {}", url.toString());
   }
 
@@ -47,12 +50,13 @@ public class MJpegFrameGrabber extends FrameGrabber {
   public void stop() throws Exception {
     log.info("Framegrabber stop called");
     try {
-		mStream.close();
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-		return;
-	}
+      mStream.close();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      log.info("Error closing mjpeg frame grabber: {}", e);
+      // e.printStackTrace();
+      return;
+    }
   }
 
   @Override
@@ -62,18 +66,17 @@ public class MJpegFrameGrabber extends FrameGrabber {
 
   @Override
   public Frame grab() throws Exception {
-	
     BufferedImage img;
-	try {
-		img = (BufferedImage)(mStream.readMjpegFrame().getImage());
-	    // Frame frame = converter.getFrame(img, 1.0, true);
-	    Frame frame = converter.getFrame(img);
-	    return frame;
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-		return null;
-	}
+    try {
+      img = (BufferedImage)(mStream.readMjpegFrame().getImage());
+      // Frame frame = converter.getFrame(img, 1.0, true);
+      Frame frame = converter.getFrame(img);
+      return frame;
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
+    }
   }
 
   @Override
@@ -81,11 +84,10 @@ public class MJpegFrameGrabber extends FrameGrabber {
     // should we close here? or somewhere else?
     log.info("Framegrabber release called");
     try {
-		mStream.close();
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+      mStream.close();
+    } catch (IOException e) {
+      log.warn("Error releasing the MJpeg frame grabber :", e);
+    }
   }
 
 }

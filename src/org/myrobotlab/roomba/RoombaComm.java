@@ -309,16 +309,11 @@ public abstract class RoombaComm {
 
   public static final int REMOTE_SPINRIGHT = 0x81;
 
-  /**
-     *
-     */
+
   static public final short toShort(byte hi, byte lo) {
     return (short) ((hi << 8) | (lo & 0xff));
   }
 
-  /**
-     *
-     */
   static public final int toUnsignedShort(byte hi, byte lo) {
     return (hi & 0xff) << 8 | lo & 0xff;
   }
@@ -339,7 +334,7 @@ public abstract class RoombaComm {
     sensorsUpdateTime = updateTime;
   }
 
-  /**
+  /*
    * Angle traveled since last requested units: mm, diff in distance traveled by
    * two drive wheels range: -32768 - 32767
    */
@@ -347,7 +342,7 @@ public abstract class RoombaComm {
     return toShort(sensor_bytes[ANGLE_HI], sensor_bytes[ANGLE_LO]);
   }
 
-  /**
+  /*
    * angle since last read, but in degrees
    */
   // FIXME I think this should be (360 * angle())/(258 * PI)
@@ -355,7 +350,7 @@ public abstract class RoombaComm {
     return angle() / millimetersPerDegree;
   }
 
-  /**
+  /*
    * angle since last read, but in radians
    */
   // FIXME I think this should be (2 * angle())/258
@@ -367,17 +362,17 @@ public abstract class RoombaComm {
     return Integer.toBinaryString(i);
   }
 
-  /** Did we bump into anything */
+  /* Did we bump into anything */
   public boolean bump() {
     return (sensor_bytes[BUMPSWHEELDROPS] & BUMP_MASK) != 0;
   }
 
-  /** Left bump sensor */
+  /* Left bump sensor */
   public boolean bumpLeft() {
     return (sensor_bytes[BUMPSWHEELDROPS] & BUMPLEFT_MASK) != 0;
   }
 
-  /** Right bump sensor */
+  /* Right bump sensor */
   public boolean bumpRight() {
     return (sensor_bytes[BUMPSWHEELDROPS] & BUMPRIGHT_MASK) != 0;
   }
@@ -385,32 +380,32 @@ public abstract class RoombaComm {
   //
   // lower-level sensor access
   //
-  /** lower-level func, returns raw byte */
+  /** @return lower-level func, returns raw byte */
   public int bumps_wheeldrops() {
     return sensor_bytes[BUMPSWHEELDROPS];
   }
 
-  /** lower-level func, returns raw byte */
+  /** @return lower-level func, returns raw byte */
   public int buttons() {
     return sensor_bytes[BUTTONS];
   }
 
-  /**
-   * Estimated charge capacity of battery units: mAh range: 0-65535
+  /*@
+   * @return Estimated charge capacity of battery units: mAh range: 0-65535
    */
   public int capacity() {
     return toUnsignedShort(sensor_bytes[CAPACITY_HI], sensor_bytes[CAPACITY_LO]);
   }
 
   /**
-   * Current charge of battery units: mAh range: 0-65535
+   * @return Current charge of battery units: mAh range: 0-65535
    */
   public int charge() {
     return toUnsignedShort(sensor_bytes[CHARGE_HI], sensor_bytes[CHARGE_LO]);
   }
 
   /**
-   * Charging state units: enumeration range:
+   * @return Charging state units: enumeration range:
    */
   public int charging_state() {
     return sensor_bytes[CHARGINGSTATE] & 0xff;
@@ -423,47 +418,47 @@ public abstract class RoombaComm {
     send(CLEAN);
   }
 
-  /** 'Clean' button pressed state */
+  /** @return 'Clean' button pressed state */
   public boolean cleanButton() {
     return (sensor_bytes[BUTTONS] & CLEANBUTTON_MASK) != 0;
   }
 
-  /** lower-level func, returns raw byte */
+  /** @return lower-level func, returns raw byte */
   public int cliff_frontleft() {
     return sensor_bytes[CLIFFFRONTLEFT];
   }
 
-  /** lower-level func, returns raw byte */
+  /** @return lower-level func, returns raw byte */
   public int cliff_frontright() {
     return sensor_bytes[CLIFFFRONTRIGHT];
   }
 
-  /** lower-level func, returns raw byte */
+  /** @return lower-level func, returns raw byte */
   public int cliff_left() {
     return sensor_bytes[CLIFFLEFT];
   }
 
-  /** lower-level func, returns raw byte */
+  /** @return lower-level func, returns raw byte */
   public int cliff_right() {
     return sensor_bytes[CLIFFRIGHT];
   }
 
-  /** front left cliff sensor */
+  /** @return front left cliff sensor */
   public boolean cliffFrontLeft() {
     return (sensor_bytes[CLIFFFRONTLEFT] != 0);
   }
 
-  /** front right cliff sensor */
+  /** @return front right cliff sensor */
   public boolean cliffFrontRight() {
     return (sensor_bytes[CLIFFFRONTRIGHT] != 0);
   }
 
-  /** left cliff sensor */
+  /** @return left cliff sensor */
   public boolean cliffLeft() {
     return (sensor_bytes[CLIFFLEFT] != 0);
   }
 
-  /** right cliff sensor */
+  /**  @return right cliff sensor */
   public boolean cliffRight() {
     return sensor_bytes[CLIFFRIGHT] != 0;
   }
@@ -489,7 +484,7 @@ public abstract class RoombaComm {
   /**
    * Connect to a port (for serial, portid is serial port name, for net, portid
    * is url?)
-   * 
+   * @param portid port
    * @return true on successful connect, false otherwise
    */
   public abstract boolean connect(String portid);
@@ -562,13 +557,13 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Current flowing in or out of battery units: mA range: -332768 - 32767
+   * @return Current flowing in or out of battery units: mA range: -332768 - 32767
    */
   public short current() {
     return toShort(sensor_bytes[CURRENT_HI], sensor_bytes[CURRENT_LO]);
   }
 
-  /**
+  /*
    * Alias to pause
    * 
    * @see #pause(int)
@@ -587,25 +582,23 @@ public abstract class RoombaComm {
     return (dl > 100) || (dr > 100);
   }
 
-  /**  */
   public int dirt_left() {
     return sensor_bytes[DIRTLEFT] & 0xff;
   }
 
-  /** */
   public int dirt_right() {
     return sensor_bytes[DIRTRIGHT] & 0xff;
   }
 
   /**
-   * amount of dirt seen by left dirt sensor
+   * @return amount of dirt seen by left dirt sensor
    */
   public int dirtLeft() {
     return dirt_left(); // yeah yeah
   }
 
   /**
-   * amount of dirt seen by right dirt sensor
+   * @return amount of dirt seen by right dirt sensor
    */
   public int dirtRight() {
     return dirt_right();
@@ -617,7 +610,7 @@ public abstract class RoombaComm {
   public abstract void disconnect();
 
   /**
-   * Distance traveled since last requested units: mm range: -32768 - 32767
+   * @return Distance traveled since last requested units: mm range: -32768 - 32767
    */
   public short distance() {
     return toShort(sensor_bytes[DISTANCE_HI], sensor_bytes[DISTANCE_LO]);
@@ -638,7 +631,7 @@ public abstract class RoombaComm {
     send(cmd);
   }
 
-  /**
+  /*
    * General error reporting, all corraled here just in case I think of
    * something slightly more intelligent to do.
    */
@@ -654,7 +647,7 @@ public abstract class RoombaComm {
     send(FULL);
   }
 
-  /** Get speed for movement commands */
+  /** @return  speed for movement commands */
   public int getSpeed() {
     return speed;
   }
@@ -676,7 +669,7 @@ public abstract class RoombaComm {
     goStraight(-distance);
   }
 
-  /**
+  /*
    * Go backward at a specified speed
    */
   public void goBackwardAt(int aspeed) {
@@ -702,7 +695,7 @@ public abstract class RoombaComm {
     goStraight(distance);
   }
 
-  /**
+  /*
    * Go forward at a specified speed
    */
   public void goForwardAt(int aspeed) {
@@ -752,7 +745,7 @@ public abstract class RoombaComm {
     return Integer.toHexString(i);
   }
 
-  /**
+  /*
    * List available ports
    * 
    * @return a list available portids, if applicable or empty set if no ports,
@@ -760,7 +753,7 @@ public abstract class RoombaComm {
    */
   public abstract String[] listPorts();
 
-  /**
+  /*
    * just a little debug
    */
   public void logmsg(String msg) {
@@ -777,17 +770,17 @@ public abstract class RoombaComm {
     send(MAX);
   }
 
-  /** 'Max' button pressed state */
+  /** @return 'Max' button pressed state */
   public boolean maxButton() {
     return (sensor_bytes[BUTTONS] & MAXBUTTON_MASK) != 0;
   }
 
-  /** current ROI mode RoombaComm thinks the Roomba is in */
+  /** @return current ROI mode RoombaComm thinks the Roomba is in */
   public int mode() {
     return mode;
   }
 
-  /** mode as String */
+  /** @return mode as String */
   public String modeAsString() {
     String s = null;
     switch (mode) {
@@ -807,32 +800,32 @@ public abstract class RoombaComm {
     return s;
   }
 
-  /** lower-level func, returns raw byte */
+  /** @return lower-level func, returns raw byte */
   public int motor_overcurrents() {
     return sensor_bytes[MOTOROVERCURRENTS];
   }
 
-  /** overcurrent on left drive wheel */
+  /** @return overcurrent on left drive wheel */
   public boolean motorOvercurrentDriveLeft() {
     return (sensor_bytes[MOTOROVERCURRENTS] & MOVERDRIVELEFT_MASK) != 0;
   }
 
-  /** overcurrent on right drive wheel */
+  /** @return overcurrent on right drive wheel */
   public boolean motorOvercurrentDriveRight() {
     return (sensor_bytes[MOTOROVERCURRENTS] & MOVERDRIVERIGHT_MASK) != 0;
   }
 
-  /** overcurrent on main brush */
+  /** @return overcurrent on main brush */
   public boolean motorOvercurrentMainBrush() {
     return (sensor_bytes[MOTOROVERCURRENTS] & MOVERMAINBRUSH_MASK) != 0;
   }
 
-  /** overcurrent on side brush */
+  /** @return overcurrent on side brush */
   public boolean motorOvercurrentSideBrush() {
     return (sensor_bytes[MOTOROVERCURRENTS] & MOVERSIDEBRUSH_MASK) != 0;
   }
 
-  /** overcurrent on vacuum */
+  /** @return overcurrent on vacuum */
   public boolean motorOvercurrentVacuum() {
     return (sensor_bytes[MOTOROVERCURRENTS] & MOVERVACUUM_MASK) != 0;
   }
@@ -852,7 +845,7 @@ public abstract class RoombaComm {
 
   /**
    * Play a musical note Does it via the hacky method of defining a one-note
-   * song & playing it Uses up song slot 15. If another note is played before
+   * song &amp; playing it Uses up song slot 15. If another note is played before
    * one is finished, the new note cuts off the old one.
    * 
    * @param note
@@ -873,7 +866,7 @@ public abstract class RoombaComm {
     send(cmd);
   }
 
-  /** 'Power' button pressed state */
+  /** @return 'Power' button pressed state */
   public boolean powerButton() {
     return (sensor_bytes[BUTTONS] & POWERBUTTON_MASK) != 0;
   }
@@ -913,7 +906,7 @@ public abstract class RoombaComm {
     send(cmd);
   }
 
-  /** lower-level func, returns raw byte */
+  /** @return lower-level func, returns raw byte */
   public int remote_opcode() {
     return sensor_bytes[REMOTEOPCODE];
   }
@@ -941,9 +934,6 @@ public abstract class RoombaComm {
     send(SAFE);
   }
 
-  /**
-     *
-     */
   public boolean safetyFault() {
     return safetyFault;
   }
@@ -1074,19 +1064,14 @@ public abstract class RoombaComm {
         + voltage() + " curr:" + current() + " temp:" + temperature() + " chrg:" + charge() + " capa:" + capacity() + sd;
   }
 
-  /** */
   public boolean sensorsAutoUpdate() {
     return sensorsAutoUpdate;
   }
 
-  /** */
   public int sensorsUpdateTime() {
     return sensorsUpdateTime;
   }
 
-  /**
-     * 
-     */
   public boolean sensorsValid() {
     // FIXME:
     if (sensorsValid) { // may be valid but stale
@@ -1099,7 +1084,7 @@ public abstract class RoombaComm {
     return false;
   }
 
-  /**
+  /*
    * Turns on/off the various LEDs. Low-level command. FIXME: this is too
    * complex
    */
@@ -1126,17 +1111,15 @@ public abstract class RoombaComm {
     send(cmd);
   }
 
-  /** */
   public void setSensorsAutoUpdate(boolean b) {
     sensorsAutoUpdate = b;
   }
 
-  /** */
   public void setSensorsUpdateTime(int i) {
     sensorsUpdateTime = i;
   }
 
-  /** Set speed for movement commands */
+  /** @param s speed for movement commands */
   public void setSpeed(int s) {
     speed = Math.abs(s);
   }
@@ -1226,7 +1209,7 @@ public abstract class RoombaComm {
     send(SPOT);
   }
 
-  /** 'Spot' button pressed state */
+  /** @return 'Spot' button pressed state */
   public boolean spotButton() {
     return (sensor_bytes[BUTTONS] & SPOTBUTTON_MASK) != 0;
   }
@@ -1277,7 +1260,7 @@ public abstract class RoombaComm {
   }
 
   /**
-   * temperature of battery units: degrees Celcius range: -128 - 127
+   * @return temperature of battery units: degrees Celcius range: -128 - 127
    */
   public byte temperature() {
     return sensor_bytes[TEMPERATURE];
@@ -1330,13 +1313,13 @@ public abstract class RoombaComm {
     setMotors(state, state, state);
   }
 
-  /** lower-level func, returns raw byte */
+  /** @return lower-level func, returns raw byte */
   public int virtual_wall() {
     return sensor_bytes[VIRTUALWALL];
   }
 
   /**
-   * Voltage of battery units: mV range: 0 - 65535
+   * @return Voltage of battery units: mV range: 0 - 65535
    */
   public int voltage() {
     return toUnsignedShort(sensor_bytes[VOLTAGE_HI], sensor_bytes[VOLTAGE_LO]);
@@ -1351,22 +1334,22 @@ public abstract class RoombaComm {
     logmsg("subclass has not implemented");
   }
 
-  /** Can we see a wall? */
+  /** @return Can we see a wall? */
   public boolean wall() {
     return sensor_bytes[WALL] != 0;
   }
 
-  /** Center wheeldrop sensor */
+  /** @return Center wheeldrop sensor */
   public boolean wheelDropCenter() {
     return (sensor_bytes[BUMPSWHEELDROPS] & WHEELDROPCENT_MASK) != 0;
   }
 
-  /** Left wheeldrop sensor */
+  /** @return Left wheeldrop sensor */
   public boolean wheelDropLeft() {
     return (sensor_bytes[BUMPSWHEELDROPS] & WHEELDROPLEFT_MASK) != 0;
   }
 
-  /** Right wheeldrop sensor */
+  /** @return Right wheeldrop sensor */
   public boolean wheelDropRight() {
     return (sensor_bytes[BUMPSWHEELDROPS] & WHEELDROPRIGHT_MASK) != 0;
   }

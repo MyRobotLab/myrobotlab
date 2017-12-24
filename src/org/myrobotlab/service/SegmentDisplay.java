@@ -30,7 +30,7 @@ public class SegmentDisplay extends Service {
 
     ServiceType meta = new ServiceType(SegmentDisplay.class.getCanonicalName());
     meta.addDescription("used as a general template");
-    meta.setAvailable(true); // false if you do not want it viewable in a gui
+    meta.setAvailable(false); // false if you do not want it viewable in a gui
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
     meta.addCategory("general");
@@ -43,7 +43,7 @@ public class SegmentDisplay extends Service {
       LoggingFactory.init(Level.INFO);
 
       Runtime.start("template", "_TemplateService");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

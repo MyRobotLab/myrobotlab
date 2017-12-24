@@ -38,7 +38,7 @@ import javax.swing.ScrollPaneConstants;
 /**
  * <p>
  * Redirects all System.out.print in a window
- * <p>
+ * </p>
  */
 public class Console extends JInternalFrame implements Runnable {
 

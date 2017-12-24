@@ -24,7 +24,7 @@ import org.slf4j.Logger;
  *         Dependencies : Java3D simbad-1.4.jar
  * 
  *         Reference : http://simbad.sourceforge.net/guide.php#robotapi
- *         http://www.ibm.com/developerworks/java/library/j-robots/ - simbad &
+ *         http://www.ibm.com/developerworks/java/library/j-robots/ - simbad &amp;
  *         subsumption JMonkey
  */
 public class SlamBad extends Service {
@@ -84,7 +84,7 @@ public class SlamBad extends Service {
      * 
      * env.add(new Box(new Vector3d(3, 0, 0), new Vector3f(1, 1, 1), env));
      */
-    Runtime.start("gui", "GUIService");
+    Runtime.start("gui", "SwingGui");
 
   }
 
@@ -150,7 +150,7 @@ public class SlamBad extends Service {
 
     ServiceType meta = new ServiceType(SlamBad.class.getCanonicalName());
     meta.addDescription("basic simulator based on Simbad");
-    meta.addCategory("simulation", "display");
+    meta.addCategory("simulator", "display");
     meta.addDependency("javax.vecmath", "1.5.1");
     meta.addDependency("com.sun.java3d", "1.5.1");
     return meta;

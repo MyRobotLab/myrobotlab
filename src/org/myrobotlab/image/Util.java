@@ -103,6 +103,8 @@ public class Util {
 
   /**
    * Creates an image compatible with the current display
+   * @param width int
+   * @param height int
    * 
    * @return A BufferedImage with the appropriate color model
    */
@@ -193,10 +195,11 @@ public class Util {
 
   public static Image getImage(String path, String defaultImage) {
     Image icon = null;
-    java.net.URL imgURL = Util.class.getResource("/resource/" + path);
-    if (imgURL != null) {
+    File imgURL=new File(getRessourceDir()+path);
+    if (isExistRessourceElement(path)) {
       try {
         icon = ImageIO.read(imgURL);
+        //log.info(imgURL.getPath());
         return icon;
       } catch (IOException e) {
         Logging.logError(e);
@@ -204,7 +207,8 @@ public class Util {
     }
 
     // trying default image
-    imgURL = Util.class.getResource("/resource/" + defaultImage);
+    imgURL=new File(getRessourceDir()+defaultImage);
+
     if (imgURL != null) {
       try {
         icon = ImageIO.read(imgURL);
@@ -232,10 +236,35 @@ public class Util {
     }
   }
 
+  /**
+   * @return current resource directory
+   */
+  public static String getRessourceDir() {
+    String ressourceDir=System.getProperty("user.dir") + File.separator + "resource"+ File.separator;
+    if (!FileIO.isJar()) {
+      ressourceDir=System.getProperty("user.dir") + File.separator + "src/resource"+ File.separator;
+    }
+    return ressourceDir; 
+  }
+  
+  /**
+   * Check if file exist from current resource directory
+   * 
+   * @return boolean
+   */
+  public static Boolean isExistRessourceElement(String element) {
+    File f=new File(getRessourceDir()+element);
+    if (!f.exists()) {
+      return false;
+    }
+    return true;
+  }
+  
   public static final ImageIcon getResourceIcon(String path) {
     ImageIcon icon = null;
-    java.net.URL imgURL = FileIO.class.getResource("/resource/" + path);
-    if (imgURL != null) {
+
+    String imgURL = getRessourceDir() + path;
+    if (isExistRessourceElement(path)) {
       icon = new ImageIcon(imgURL);
       return icon;
     } else {

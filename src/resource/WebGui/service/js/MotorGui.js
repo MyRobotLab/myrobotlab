@@ -8,6 +8,7 @@ angular.module('mrlapp.service.MotorGui', []).controller('MotorGuiCtrl', ['$scop
     $scope.newEncoderPin = null ;
     $scope.controller = '';
     $scope.controllers = [];
+    $scope.controllerName='';
     $scope.newType = '';
     $scope.pins = [];
     for (i = 0; i < 54; ++i) {
@@ -21,6 +22,7 @@ angular.module('mrlapp.service.MotorGui', []).controller('MotorGuiCtrl', ['$scop
         $scope.newType = service.type;
         $scope.newEncoderType = service.encoderType;
         $scope.newEncoderPin = service.encoderPin;
+        $scope.controllers = service.controllers;
         $scope.newController = service.controllerName;
         if (service.config != null ) {
             var type = service.config.type;
@@ -72,21 +74,15 @@ angular.module('mrlapp.service.MotorGui', []).controller('MotorGuiCtrl', ['$scop
         msg.send('moveTo', $scope.moveToPos);
     }
     $scope.moveLeft = function() {
-        $scope.service.powerLevel = $scope.service.powerLevel - 0.1;
+        $scope.service.powerLevel = Math.round(($scope.service.powerLevel - 0.1) * 100) / 100;
         msg.send('move', $scope.service.powerLevel);
     }
     $scope.moveRight = function() {
-        $scope.service.powerLevel = $scope.service.powerLevel + 0.1;
+        $scope.service.powerLevel = Math.round(($scope.service.powerLevel + 0.1) * 100) / 100;
         msg.send('move', $scope.service.powerLevel);
     }
+    
     msg.subscribe("updatePosition")
-    var runtimeName = mrl.getRuntime().name;
-    // subscribe from Runtime --> WebGui (gateway)
-    mrl.subscribe(runtimeName, 'getServiceNamesFromInterface');
-    // subscribe callback from nameMethodCallbackMap --> onMsg !!!! FIXME - since this is to a "different" service and
-    // not self - it can be overwritten by another service subscribing to the same service.method  :(
-    mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface');
     msg.subscribe(this);
-    mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.MotorController');
 }
 ]);

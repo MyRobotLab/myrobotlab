@@ -2,15 +2,14 @@ package org.myrobotlab.service;
 
 import java.util.HashMap;
 
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.SpeechRecognizer;
+import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
-import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.string.StringUtil;
 
 /**
  * 
@@ -18,7 +17,7 @@ import org.myrobotlab.service.interfaces.TextPublisher;
  * chrome web browser this service requires the webgui to be running.
  *
  */
-public class WebkitSpeechRecognition extends Service implements SpeechRecognizer, TextPublisher {
+public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
   /**
    * TODO: make it's own class. TODO: merge this data structure with the
@@ -41,70 +40,69 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
    * 
    */
   private static final long serialVersionUID = 1L;
-
+  public String lastThingRecognized = "";
   private String language = "en-US";
+  private boolean autoListen = false;
 
   HashMap<String, Command> commands = new HashMap<String, Command>();
 
-  // track the state of the webgui, is it listening? maybe?
-  public boolean listening = false;
-  
+  private boolean listening = false;
+  private boolean speaking = false;
+  public boolean continuous = true;
+  private long lastAutoListenEvent = System.currentTimeMillis();
+  public boolean stripAccents = false;
+  private boolean lockOutAllGrammar = false;
+  private String lockPhrase = "";
+
   public WebkitSpeechRecognition(String reservedKey) {
     super(reservedKey);
   }
 
   @Override
   public String publishText(String text) {
-    log.info("Publish Text : {}", text);
-    // TODO: is there a better place to do this? maybe recognized?
-    // TODO: remove this! it probably should be invoking the command on publish
-    // text.. only on recognized?!
-    // not sure.
-    String cleantext = text.toLowerCase().trim();
-    /*
-     * Double Speak FIX - I don't think a cmd should be sent from here because
-     * it's not 'recognized' - recognized sends commands this method should be
-     * subscribed too - GroG
-     * 
-     * if (commands.containsKey(cleantext)) { // If we have a command. send it
-     * when we recognize... Command cmd = commands.get(cleantext);
-     * send(cmd.name, cmd.method, cmd.params); }
-     */
-
-    return cleantext;
+    return recognized(text);
   }
-
-  @Override
-  public void listeningEvent() {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void pauseListening() {
-    // TODO Auto-generated method stub
-
-  }
-
+  
   @Override
   public String recognized(String text) {
     log.info("Recognized : >{}<", text);
     String cleanedText = text.toLowerCase().trim();
-
+    if (isStripAccents()) {
+      cleanedText = StringUtil.removeAccents(cleanedText);
+    }
     if (commands.containsKey(cleanedText)) {
       // If we have a command. send it when we recognize...
       Command cmd = commands.get(cleanedText);
       send(cmd.name, cmd.method, cmd.params);
     }
-
+    lastThingRecognized = cleanedText;
+    broadcastState();
+    if (!lockOutAllGrammar)
+    {
     return cleanedText;
+    }
+    if (text.equalsIgnoreCase(lockPhrase))
+    {
+      clearLock();
+    }
+    return "";
+  }
+
+  @Override
+  public void listeningEvent(Boolean event) {
+    listening = event;
+    broadcastState();
+    return;
+  }
+
+  @Override
+  public void pauseListening() {
+    stopListening();
   }
 
   @Override
   public void resumeListening() {
-    log.info("Resume listening event seen.");
-    this.listening = true;
-    broadcastState();
+    startListening();
   }
 
   @Override
@@ -117,15 +115,55 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   @Override
   public void stopListening() {
     log.info("Stop listening event seen.");
-    this.listening = false;
+    if (this.autoListen && !this.speaking) {
+      // bug if there is multiple chrome tabs, we disbale autolisten
+      if (System.currentTimeMillis() - lastAutoListenEvent > 50) {
+        startListening();
+      } else {
+        if (listening)
+        {
+          error("WebkitSpeech : TOO MANY EVENTS, autoListen disabled now, please close zombie tabs !");
+          setAutoListen(false);
+        }
+      }
+      lastAutoListenEvent = System.currentTimeMillis();
+    } else {
+      log.info("micNotListening");
+      listening = false;
+    }
+    broadcastState();
+  }
+  
+  /**
+   * Here we want to set the language string and broadcast the update to the
+   * web gui so that it knows to update the language on webkit speech
+   */
+  public void setLanguage(String language) {
+    this.language = language;
     broadcastState();
   }
 
-  public void setLanguage(String language) {
-    // Here we want to set the language string and broadcast the update to the
-    // web gui so that it knows to update the language on webkit speech
-    this.language = language;
+  @Override
+  public void setAutoListen(boolean autoListen) {
+    this.autoListen = autoListen;
     broadcastState();
+  }
+
+  public boolean getautoListen() {
+    return this.autoListen;
+  }
+
+  /**
+   * If setContinuous is False, this speedup recognition processing
+   * If setContinuous is True, you have some time to speak again, in case of error
+   */
+  public void setContinuous(boolean continuous) {
+    this.continuous = continuous;
+    broadcastState();
+  }
+
+  public boolean getContinuous() {
+    return this.continuous;
   }
 
   public String getLanguage() {
@@ -141,6 +179,9 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   @Override
   public void addMouth(SpeechSynthesis mouth) {
     mouth.addEar(this);
+    subscribe(mouth.getName(), "publishStartSpeaking");
+    subscribe(mouth.getName(), "publishEndSpeaking");
+
     // TODO : we can implement the "did you say x?"
     // logic like sphinx if we want here.
     // when we add the ear, we need to listen for request confirmation
@@ -151,12 +192,16 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public void onStartSpeaking(String utterance) {
     // at this point we should subscribe to this in the webgui
     // so we can pause listening.
+    this.speaking = true;
+    stopListening();
   }
 
   @Override
   public void onEndSpeaking(String utterance) {
     // need to subscribe to this in the webgui
     // so we can resume listening.
+    this.speaking = false;
+    startListening();
   }
 
   public static void main(String[] args) {
@@ -164,7 +209,8 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
     try {
       Runtime.start("webgui", "WebGui");
-      Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
+      WebkitSpeechRecognition w = (WebkitSpeechRecognition) Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
+      w.setStripAccents(true);
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -183,18 +229,20 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
     ServiceType meta = new ServiceType(WebkitSpeechRecognition.class.getCanonicalName());
     meta.addDescription("Speech recognition using Google Chrome webkit");
     meta.addCategory("speech recognition");
-    // meta.addPeer("tracker", "Tracking", "test tracking");
     return meta;
   }
 
   @Override
   public void lockOutAllGrammarExcept(String lockPhrase) {
-    log.warn("Lock out grammar not supported on webkit, yet...");
+    log.info("Ear locked now, please use command "+lockPhrase+" to unlock");
+    lockOutAllGrammar=true;
+    this.lockPhrase=lockPhrase;
   }
 
   @Override
   public void clearLock() {
-    log.warn("clear lock out grammar not supported on webkit, yet...");
+    log.warn("Ear unlocked by "+lockPhrase);
+    lockOutAllGrammar=false;
   }
 
   // TODO - should this be in Service ?????
@@ -219,5 +267,28 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
   public void startListening(String grammar) {
     log.warn("Webkit speech doesn't listen for a specific grammar.  use startListening() instead. ");
     startListening();
+  }
+
+  public boolean isStripAccents() {
+    return stripAccents;
+  }
+  
+  /**
+   * track the state of listening process
+   */
+  @Override
+  public boolean isListening() {
+    return this.listening;
+  }
+
+  public void setStripAccents(boolean stripAccents) {
+    this.stripAccents = stripAccents;
+  }
+
+  @Override
+  public void stopService() {
+    super.stopService();
+    autoListen = false;
+    stopListening();
   }
 }

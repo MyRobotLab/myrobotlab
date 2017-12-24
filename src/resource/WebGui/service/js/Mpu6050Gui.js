@@ -8,6 +8,10 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     // Don't think init is necessary for data that is bound
     $scope.controllerName = '';
     $scope.controllers = [];  
+    $scope.controllerLabel = 'Controller :';
+    $scope.deviceBusLabel = 'Bus :';
+    $scope.deviceAddressLabel = 'Address :';
+    
     // Start of three.js scene and object creation
     // Create the scene
 	$log.info("Creating scene..");

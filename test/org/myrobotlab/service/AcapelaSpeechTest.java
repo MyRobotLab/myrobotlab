@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -14,6 +15,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
+@Ignore
 public class AcapelaSpeechTest {
 
   public final static Logger log = LoggerFactory.getLogger(AcapelaSpeechTest.class);

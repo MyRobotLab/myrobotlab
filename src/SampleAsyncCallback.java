@@ -88,7 +88,7 @@ public class SampleAsyncCallback implements MqttCallback {
    *          the username to connect with
    * @param password
    *          the password for the user
-   * @throws MqttException
+   * @throws MqttException if an error happens
    */
   public SampleAsyncCallback(String brokerUrl, String clientId, boolean cleanSession, boolean quietMode, String userName, String password) throws MqttException {
     this.brokerUrl = brokerUrl;
@@ -131,7 +131,7 @@ public class SampleAsyncCallback implements MqttCallback {
    *          the quality of service to delivery the message at (0,1,2)
    * @param payload
    *          the set of bytes to send to the MQTT server
-   * @throws MqttException
+   * @throws Throwable t
    */
   public void publish(String topicName, int qos, byte[] payload) throws Throwable {
     // Use a state machine to decide which step to do next. State change occurs
@@ -203,7 +203,7 @@ public class SampleAsyncCallback implements MqttCallback {
    * @param qos
    *          the maximum quality of service to receive messages at for this
    *          subscription
-   * @throws MqttException
+   * @throws Throwable t
    */
   public void subscribe(String topicName, int qos) throws Throwable {
     // Use a state machine to decide which step to do next. State change occurs

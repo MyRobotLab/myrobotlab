@@ -10,28 +10,40 @@ import static org.bytedeco.javacpp.opencv_face.createEigenFaceRecognizer;
 import static org.bytedeco.javacpp.opencv_face.createFisherFaceRecognizer;
 import static org.bytedeco.javacpp.opencv_face.createLBPHFaceRecognizer;
 import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
+import static org.bytedeco.javacpp.opencv_imgcodecs.imdecode;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
-import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_SIMPLEX;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
+import static org.bytedeco.javacpp.opencv_imgproc.cvInitFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 import static org.bytedeco.javacpp.opencv_imgproc.getAffineTransform;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_imgproc.warpAffine;
+import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_ROUGH_SEARCH;
+import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_FIND_BIGGEST_OBJECT;
+import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_CANNY_PRUNING;
 
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+import javax.imageio.ImageIO;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
@@ -39,13 +51,15 @@ import org.bytedeco.javacpp.opencv_core.MatVector;
 import org.bytedeco.javacpp.opencv_core.Point2f;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import org.bytedeco.javacpp.opencv_core.RectVector;
-import org.bytedeco.javacpp.opencv_core.Size;                                                                                   
+import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.myrobotlab.maryspeech.util.io.FileUtils;
+import org.myrobotlab.service.OpenCV;
 
 /**
  * This is the OpenCV Face Recognition. It must be trained with a set of images
@@ -64,6 +78,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
  *
  */
 public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
+  
   private static final long serialVersionUID = 1L;
   // training mode stuff
   public Mode mode = Mode.RECOGNIZE;
@@ -76,14 +91,12 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private String trainingDir = "training";
   private int modelSizeX = 256;
   private int modelSizeY = 256;
-
   //
   // We read in the face filter when training the first time, and use it for all
   // subsequent
   // training and for masking images prior to comparison.
   //
   private Mat facemask = null;
-
   private String cascadeDir = "haarcascades";
   private CascadeClassifier faceCascade;
   private CascadeClassifier eyeCascade;
@@ -92,11 +105,9 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   // effecient?!?!
   transient private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
-
-  private HashMap<Integer, String> idToLabelMap = new HashMap<Integer, String>();
-
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-
+  private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
+  
   private boolean debug = false;
   // KW: I made up this word, but I think it's fitting.
   private boolean dePicaso = true;
@@ -109,21 +120,22 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private boolean face = false;
 
   private String lastRecognizedName = null;
-
+  
+  public String faceModelFilename = "faceModel.bin";
+  
   public OpenCVFilterFaceRecognizer() {
     super();
-    initHaarCas();
-
+    initAll();
   }
 
   public OpenCVFilterFaceRecognizer(String name) {
     super(name);
-    initHaarCas();
+    initAll();
   }
 
   public OpenCVFilterFaceRecognizer(String filterName, String sourceKey) {
     super(filterName, sourceKey);
-    initHaarCas();
+    initAll();
   }
 
   public enum Mode {
@@ -134,6 +146,13 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     FISHER, EIGEN, LBPH
   }
 
+  public void initAll() {
+    initHaarCas();
+    initRecognizer();
+    cvInitFont(font,CV_FONT_HERSHEY_SIMPLEX,0.5,0.5,2,1,10);
+    cvInitFont(fontWarning,CV_FONT_HERSHEY_SIMPLEX,0.4,0.3);
+  }
+  
   public void initHaarCas() {
     faceCascade = new CascadeClassifier(cascadeDir + "/haarcascade_frontalface_default.xml");
     eyeCascade = new CascadeClassifier(cascadeDir + "/haarcascade_eye.xml");
@@ -149,16 +168,21 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
    * will be parsed for the label to apply to the image. At least 2 different
    * labels must exist in the training set.
    * 
-   * @return
-   */
-  public boolean train() {
+   * @return true if the training was successful.
+   * @throws IOException 
+   */ 
+  public boolean train() throws IOException {
     //
     // The first time we train, find the image mask, if present, scale it to the
     // current image size,
     // and save it for later.
     //
     if (facemask == null) {
-      File filterfile = new File("src/resource/facerec/Filter.png");
+      File filterfile = new File("resource/facerec/Filter.png");
+      if (!filterfile.exists()) {
+        // work around to fix this so it works in eclipse 
+        filterfile = new File("src/resource/facerec/Filter.png");
+      }
       //
       // Face mask used to mask edges of face pictures to eliminate noise around
       // the edges
@@ -167,6 +191,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
         log.warn("No image filter file found.  {}", filterfile.getAbsolutePath());
       } else {
         // Read the filter and rescale it to the current image size
+        // BytePointer fbp = new BytePointer(FileUtils.getFileAsBytes(filterfile.getAbsolutePath()));
+        // Mat incomingfacemask = imread(fbp, CV_LOAD_IMAGE_GRAYSCALE);
         Mat incomingfacemask = imread(filterfile.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
         facemask = resizeImage(incomingfacemask);
         if (debug) {
@@ -185,23 +211,36 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       root.mkdirs();
     }
     log.info("Using {} for training data.", root.getAbsolutePath());
-    File[] imageFiles = listImageFiles(root);
-    if (imageFiles.length < 1) {
+    ArrayList<File> imageFiles = listImageFiles(root);
+    if (imageFiles.size() < 1) {
       log.info("No images found for training.");
       return false;
     }
     // Storage for the files that we load.
-    MatVector images = new MatVector(imageFiles.length);
+    MatVector images = new MatVector(imageFiles.size());
     // storage for the labels for the images
-    Mat labels = new Mat(imageFiles.length, 1, CV_32SC1);
+    Mat labels = new Mat(imageFiles.size(), 1, CV_32SC1);
     IntBuffer labelsBuf = labels.getIntBuffer();
     int counter = 0;
+    
+    // a map between the hashcode and the string label
+    HashMap<Integer, String> idToLabelMap = new HashMap<Integer, String>();
+    
     for (File image : imageFiles) {
       // load the image
-      Mat img = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
-      // Parse the filename label-foo.jpg everything up to the first - is the
-      // label.
-      String personName = image.getName().split("\\-")[0];
+      log.info("Loading training image file: {}", image.getAbsolutePath());
+      
+      // we know that imread doesn't work with non-ascii file paths.. so we want to use a different
+      // so, load the image into memory, warp it in a byte pointer and pass it to imdecode to load the image from memory, instead of from disk
+      byte[] tmpImg = FileUtils.getFileAsBytes(image);
+      Mat img = imdecode(new Mat(new BytePointer(tmpImg)),CV_LOAD_IMAGE_GRAYSCALE);
+//      IplImage tempImg = cvLoadImage(image.getAbsolutePath());
+//      Mat img = converterToMat.convertToMat(converterToMat.convert(tempImg));
+      
+      // The directory name is the label.
+      String personName = image.getParentFile().getName();
+      // String personName = UnicodeFolder.get(image.getParentFile().getName());
+      
       // TODO: we need an integer to represent this string .. for now we're
       // using a hashcode here.
       // this can definitely have a collision!
@@ -209,7 +248,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       int label = personName.hashCode();
       // make sure all our test images are resized
       Mat resized = resizeImage(img);
-
       //
       // Mask out unwanted parts of the training image by applying the resized
       // mask
@@ -219,7 +257,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
         resized.copyTo(maskedface, facemask);
         resized = maskedface;
       }
-
       // so, now our input for the training set is always 256x256 image.
       // we should probably run face detect and center this resized image, so we
       // can see
@@ -237,14 +274,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       idToLabelMap.put(label, personName);
       counter++;
     }
-    // Configure which type of recognizer to use
-    if (RecognizerType.FISHER.equals(recognizerType)) {
-      faceRecognizer = createFisherFaceRecognizer();
-    } else if (RecognizerType.EIGEN.equals(recognizerType)) {
-      faceRecognizer = createEigenFaceRecognizer();
-    } else {
-      faceRecognizer = createLBPHFaceRecognizer();
-    }
+    initRecognizer();
     // must be at least 2 things to classify, is it A or B ?
     if (idToLabelMap.keySet().size() > 1) {
       faceRecognizer.train(images, labels);
@@ -253,18 +283,94 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       log.info("No labeled images loaded. training skipped.");
       trained = false;
     }
+    
+    // populate the human readable labels.
+    for (int k : idToLabelMap.keySet()) {
+      faceRecognizer.setLabelInfo(k, idToLabelMap.get(k));
+    }
+    
     return true;
   }
 
-  private File[] listImageFiles(File root) {
+  private void initRecognizer() {
+    // Configure which type of recognizer to use
+    if (RecognizerType.FISHER.equals(recognizerType)) {
+      faceRecognizer = createFisherFaceRecognizer();
+    } else if (RecognizerType.EIGEN.equals(recognizerType)) {
+      faceRecognizer = createEigenFaceRecognizer();
+    } else {
+      faceRecognizer = createLBPHFaceRecognizer();
+    }
+  }
+
+  /**
+   * Save the current model to the faceModelFilename
+   * @throws IOException 
+   */
+  public void save() throws IOException {
+    save(faceModelFilename);
+  }
+  
+  /**
+   * @param filename the filename to save the current model to.
+   * @throws IOException 
+   */
+  public void save(String filename) throws IOException {
+    String labelFilename = filename + ".labels";
+    faceRecognizer.save(filename);
+  }
+  
+  /**
+   * load the model from the default filename specified by faceModelFilename.
+   * @throws IOException 
+   */
+  public void load() throws IOException {
+    load(faceModelFilename);
+  }
+  /**
+   * Load a face recognizer model from the provided saved filename.
+   * @param filename the filename that represents the saved model.
+   * @throws IOException 
+   */
+  public void load(String filename) throws IOException {
+    String labelFilename = filename + ".labels";
+    faceRecognizer.load(filename);
+    //assume we're trained now..
+    trained = true;
+    // let's also flip it to recognize mode
+    mode = Mode.RECOGNIZE;
+  }
+  
+  private  ArrayList<File> listImageFiles(File root) {
+    
+    // 
+    ArrayList<File> trainingFiles = new ArrayList<File>();
+    
+    // only jpg , png , pgm files.  TODO: other formats? bmp/tiff/etc?
     FilenameFilter imgFilter = new FilenameFilter() {
       public boolean accept(File dir, String name) {
         name = name.toLowerCase();
         return name.endsWith(".jpg") || name.endsWith(".pgm") || name.endsWith(".png");
       }
     };
-    File[] imageFiles = root.listFiles(imgFilter);
-    return imageFiles;
+    
+    FilenameFilter labelFilter = new FilenameFilter() {
+      public boolean accept(File dir, String name) {
+        name = name.toLowerCase();
+        return name.endsWith(".label");
+      }
+    };
+    
+    String[] contents = root.list();
+    for (String fn : contents) {
+      File f = new File(root.getAbsolutePath() + File.separator + fn);
+      if (f.isDirectory()) {
+        for (File x : f.listFiles(imgFilter)) {
+          trainingFiles.add(x);
+        }
+      }
+    }
+    return trainingFiles;
   }
 
   private Mat resizeImage(Mat img, int width, int height) {
@@ -298,6 +404,10 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     // RectVector faces =
     // faceCascade.detectMultiScale(gray,scaleFactor=1.1,minNeighbors=5,minSize=(50,
     // 50),flags=cv2.cv.CV_HAAR_SCALE_IMAGE)
+    // faceCascade.detectMultiScale(mat, vec);
+   // int minSize = 10;
+   // int maxSize = 10;
+    //faceCascade.detectMultiScale(mat, vec,1.1,5,CV_HAAR_DO_ROUGH_SEARCH|CV_HAAR_DO_CANNY_PRUNING|CV_HAAR_FIND_BIGGEST_OBJECT , new Size(minSize), new Size(maxSize));
     faceCascade.detectMultiScale(mat, vec);
     return vec;
   }
@@ -313,12 +423,12 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     cvCopy(image, image1);
     CanvasFrame canvas = new CanvasFrame(title, 1);
     canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    final OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
-    canvas.showImage(converter.convert(image1));
+    canvas.showImage(converterToIpl.convert(image1));
   }
 
   @Override
   public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+
     // convert to grayscale
     Frame grayFrame = makeGrayScale(image);
     // TODO: this seems super wonky! isn't there an easy way to go from IplImage
@@ -327,7 +437,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     int rows = grayFrame.imageHeight;
     // convert to a Mat
     Mat bwImgMat = converterToIpl.convertToMat(grayFrame);
-
     //
     // Image detection is done on the grayscale image, so we can modify the
     // original frame once
@@ -363,6 +472,10 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
         // Mat dFaceMat = new Mat(bwImgMat, dF.getFace());
 
         Rect borderRect = dF.faceWithBorder(borderSize, cols, rows);
+        if (borderRect == null) {
+          log.warn("Invalid face border found... parts were negative!");
+          continue;
+        }
         Mat dFaceMat = new Mat(bwImgMat, borderRect);
         // TODO: transform the original image , then re-crop from that
         // so we don't loose the borders after the rotation
@@ -382,14 +495,14 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
           // we're in training mode.. so we should save the image
           log.info("Training Mode for {}.", trainName);
           if (!StringUtils.isEmpty(trainName)) {
-            // create some sort of a unique value so the file names don't
-            // conflict
-            // TODO: use something more random like a
-            UUID randValue = UUID.randomUUID();
-            String filename = trainingDir + "/" + trainName + "-" + randValue + ".png";
-            // TODO: I think this is a png file ? not sure.
-            imwrite(filename, dFaceMat);
-            cvPutText(image, "Snapshot Saved: " + trainName, cvPoint(20, 60), font, CvScalar.CYAN);
+            try {
+              saveTrainingImage(trainName, dFaceMat);
+              cvPutText(image, "Snapshot Saved: " + trainName, cvPoint(20, 60), font, CvScalar.CYAN);
+            } catch (IOException e) {
+              // TODO Auto-generated catch block
+              cvPutText(image, "Error saving: " + trainName, cvPoint(20, 60), font, CvScalar.CYAN);
+              e.printStackTrace();
+            }
           }
         } else if (Mode.RECOGNIZE.equals(mode)) {
           // You bettah recognize!
@@ -417,15 +530,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
             }
 
             int predictedLabel = faceRecognizer.predict(dFaceMatSized);
-            String name = Integer.toString(predictedLabel);
-            if (idToLabelMap.containsKey(predictedLabel)) {
-              name = idToLabelMap.get(predictedLabel);
-            } else {
-              // you shouldn't ever see this.
-              log.warn("Unknown predicted label returned! {}", predictedLabel);
-            }
+            BytePointer bp = faceRecognizer.getLabelInfo(predictedLabel);
+            // TODO: what char encoding is this?!
+            String name = bp.getString();
             log.info("Recognized a Face {} - {}", predictedLabel, name);
-            cvPutText(image, "Recognized:" + name, dF.resolveGlobalLowerLeftCorner(), font, CvScalar.CYAN);
+            cvPutText(image, name, dF.resolveGlobalLowerLeftCorner(), font, CvScalar.CYAN);
             // If it's a new name. invoke it an publish.
             if (lastRecognizedName != name) {
               invoke("publishRecognizedFace", name);
@@ -441,6 +550,29 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     return image;
   }
 
+  private void saveTrainingImage(String label, Mat dFaceMat) throws IOException {
+    // create some sort of a unique value so the file names don't
+    // conflict
+    // TODO: use something more random like a
+    // OK now we need to make a subdirectory for the label if it doesn't exist.
+    // imwrite dont like unicode, we map unicode name to ascii
+    File labelDir = new File(trainingDir + File.separator + label);
+    if (!labelDir.exists()) {
+      labelDir.mkdirs();
+    }
+    // TODO: should we give it something other than a random uuid ?
+    UUID randValue = UUID.randomUUID();
+    String filename = trainingDir + File.separator + label + File.separator + randValue + ".png";
+    // TODO: I think this is a png file ? not sure.
+    // TODO: we need to be able to write a unicode filename with a path here..
+    // we probably just need to get the image as a byte array png encoded, and write that out ourselves..
+    // a work around because imwrite doesn't support unicode in the filename.
+    // so we'll convert the image to something like a byte array, and write it out ourselves.
+    //  imwrite(filename, dFaceMat);
+    BufferedImage buffImg = OpenCV.IplImageToBufferedImage(converterToIpl.convertToIplImage(converterToIpl.convert(dFaceMat)));
+    ImageIO.write(buffImg,"png", new File(filename));
+  }
+
   private Frame makeGrayScale(IplImage image) {
     IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
@@ -452,7 +584,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     // first lets pick up on the face. we'll assume the eyes and mouth are
     // inside.
     RectVector faces = detectFaces(bwImgMat);
-
     //
     // For each detected face, we need to to find the eyes and mouths to make it
     // complete.

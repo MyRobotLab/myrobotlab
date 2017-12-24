@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.MouseEvent;
@@ -40,7 +41,7 @@ public class ImageDisplay extends Service {
       String path3 = "http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg";
 
       ImageDisplay imageDisplay = (ImageDisplay) Runtime.start("ImageDisplay", "ImageDisplay");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
       // Runtime.start("webgui", "WebGui");
       imageDisplay.display("https://www.cloudflare.com/ssl/ssl.png");
@@ -131,7 +132,7 @@ public class ImageDisplay extends Service {
   // @param alpha = Value how much the image is faded float from 0.0 to 1.0.
   // @param scaling = scale factor to resize the image.
   public void displayScaled(String source, float alpha, float scaling) {
-    DisplayedImage image = new DisplayedImage(source, 1, scaling);
+    DisplayedImage image = new DisplayedImage(source, alpha, scaling);
     log.info("Loading image done");
     buildFrame(image);
   }
@@ -159,24 +160,40 @@ public class ImageDisplay extends Service {
         ;
       }
 
-      public void mousePressed(MouseEvent e) {
-      }
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 
-      public void mouseReleased(MouseEvent e) {
-      }
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 
-      public void mouseEntered(MouseEvent e) {
-      }
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 
-      public void mouseExited(MouseEvent e) {
-      }
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
     });
-    gd.setFullScreenWindow(f);
+    f.setBackground(Color.BLACK);
+    f.getContentPane().setBackground(Color.BLACK);
     f.add(image);
     // It sets the size of the Frame to the size of the picture, if not it will
     // be build a boarder to the right end of the screen.
     f.setSize(image.getWidth() + wOffset, image.getHeight() + hOffset);
     getResolution();
+    f.setLocation(image.getwOffset(), image.gethOffset());
+    f.toFront();
+    gd.setFullScreenWindow(f);
     f.setLocation(image.getwOffset(), image.gethOffset());
     f.setVisible(true);
     frames.add(f);

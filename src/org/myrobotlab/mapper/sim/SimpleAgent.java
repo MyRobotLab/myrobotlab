@@ -196,7 +196,7 @@ public class SimpleAgent extends BaseObject {
   }
 
   /**
-   * Returns true if this agent is in physical contact with an other
+   * @return true if this agent is in physical contact with an other
    * SimpleAgent.
    */
   public boolean anOtherAgentIsVeryNear() {
@@ -302,7 +302,7 @@ public class SimpleAgent extends BaseObject {
   /**
    * Returns the actuator device designated by num. User will have to cast to
    * the appropriate class.
-   * 
+   * @param num n
    * @return a ActuatorDevice Object.
    */
   public ActuatorDevice getActuatorDevice(int num) {
@@ -313,11 +313,6 @@ public class SimpleAgent extends BaseObject {
     return actuators;
   }
 
-  /**
-   * Return agents coordinates.
-   * 
-   * @return agent point3d .
-   */
   public void getCoords(Point3d coord) {
     Vector3d t = v1;
     translation.get(t);
@@ -362,7 +357,9 @@ public class SimpleAgent extends BaseObject {
     return lifetime;
   }
 
-  /** Gets the agent's mass. */
+  /** 
+   * @return Gets the agent's mass. 
+   */
   public float getMass() {
     return mass;
 
@@ -389,7 +386,7 @@ public class SimpleAgent extends BaseObject {
   /**
    * Returns the sensor device designated by num. User will have to cast to the
    * appropriate class.
-   * 
+   * @param num n
    * @return a SensorDevice Object.
    */
   public SensorDevice getSensorDevice(int num) {
@@ -402,7 +399,7 @@ public class SimpleAgent extends BaseObject {
     return sensors;
   }
 
-  /** Returns the currently touched agent - null if no agent near. */
+  /** @return the currently touched agent - null if no agent near. */
   public SimpleAgent getVeryNearAgent() {
     return veryNearAgent;
   }
@@ -445,9 +442,9 @@ public class SimpleAgent extends BaseObject {
 
   /**
    * Go to given XZ position. Y coords is left unchanged.
-   * 
-   * @param position
-   *          - the new position.
+   * the new position.
+   * @param x the x coord
+   * @param z the z coord
    */
   public void moveToPosition(double x, double z) {
 

@@ -1,19 +1,16 @@
 package org.myrobotlab.service.interfaces;
 
 import java.io.Serializable;
+import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
 
-public class PinDefinition implements Serializable{
+public class PinDefinition extends SensorDefinition implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long	serialVersionUID	= 1L;
-	String name;
+	String pinName;
 	Integer address;
-	// String color; ?? 
 
 	/**
-	 * on Arduino this means actively reading
+	 * means actively reading
 	 */
 	boolean enabled = false;
 	
@@ -30,17 +27,33 @@ public class PinDefinition implements Serializable{
 	int max;
 	int avg;
 
-	boolean isAnalog;
+	boolean isAnalog = false;
 
-	boolean isPwm;
+	boolean isPwm = false;
 
-	boolean isDigital;
+	boolean isDigital = true;
 	
-	boolean isRx;
+	boolean isRx = false;
 	
-	boolean isTx;
+	boolean isTx = false;
+	
+	boolean canRead = true;
+	
+	boolean canWrite = true;
 
 	Integer value;
+	
+  GpioPinDigitalMultipurpose gpioPin;
+	
+	public PinDefinition(String serviceName, int address, String pinName){
+	  super(serviceName);    
+    this.address = address;
+    this.pinName = pinName;
+	}
+	
+	public PinDefinition(String serviceName, int address){
+	  this(serviceName, address, String.format("%d", address));
+	}
 
 	public Integer getValue() {
 		return value;
@@ -50,8 +63,8 @@ public class PinDefinition implements Serializable{
 		this.value = value;
 	}
 
-	public String getName() {
-		return name;
+	public String getPinName() {
+		return pinName;
 	}
 
 	public Integer getAddress() {
@@ -71,11 +84,11 @@ public class PinDefinition implements Serializable{
 	}
 
 	public void setName(int i) {
-		name = String.format("%d", i);
+		pinName = String.format("%d", i);
 	}
 
-	public void setName(String address) {
-		this.name = address;
+	public void setPinName(String pinName) {
+		this.pinName = pinName;
 	}
 
 	public void setAnalog(boolean b) {
@@ -95,10 +108,19 @@ public class PinDefinition implements Serializable{
 		isPwm = b;
 	}
 
+
+public void setGpioPin(GpioPinDigitalMultipurpose b) {
+      gpioPin = b;
+    }
+   
+  public GpioPinDigitalMultipurpose getGpioPin() {
+    return gpioPin;
+  }
+  
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
 		sb.append("pin def ");
-		sb.append(name);
+		sb.append(pinName);
 		sb.append(" ");
 		sb.append(address);
 		sb.append(" ");
@@ -156,6 +178,22 @@ public class PinDefinition implements Serializable{
 	public void setMode(String mode) {
 		this.mode = mode;
 	}
+	
+	public boolean canRead(){
+	  return canRead;
+	}
+	
+	public boolean canWrite(){
+    return canWrite;
+  }
+
+  public void canWrite(boolean canWrite) {
+    this.canWrite = canWrite;
+  }
+  
+  public void canRead(boolean canRead) {
+    this.canRead = canRead;
+  }
 
 }
 

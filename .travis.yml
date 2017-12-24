@@ -1,34 +1,32 @@
 # use https://lint.travis-ci.org/ to check validity
 # use https://gist.github.com/tgrrtt/96b206c22b82f92ce563 to see examples
-# env:
+# use https://github.com/travis-ci/artifacts#installation for artifacts guide
+# make the s3 directory public in aws give access to the artifacts
+
 language: java
 sudo: false
 script: ant dist
 jdk:
-- openjdk7
-
-# whitelist
-# branches:
-#   only:
-#     - develop
+- oraclejdk8
 
 deploy:
   provider: s3
-  deployment_group: s3 group
-  on:
-    # experiment to 'always' deploy so the results of junit can always be seen
-    # even if they fail
-    # condition: true
-    all_branches: true
-  access_key_id: AKIAJGL6AEN37LDO3N7A
-  secret_access_key:
-    secure: W8HJgOUEt/d+C+1zeD+Znum0Yso8LLZ9eV8rUrYH2MIVl5dCcH+WaGwhLompNOAUbWYhjcr8Rn/SLqvCEcVWe651R4pwHiD0KNfDUwp907Ic/efluCd/T6RjCG7pjbE5bdPIeZjyupMcZMHU4aW7YN6QE1UlVPhDFKQlU84iGsc=
-  bucket: mrl-bucket-01
+  access_key_id: "AKIAJ6CQ5PPESWGSKNXA"
+  secret_access_key: $AWS_SECRET_KEY
+  bucket: "mrl-bucket-02"
   skip_cleanup: true
-  # upload-dir: current
-  # travis will only copy 1 dir
-  local_dir: dist
-  # local_dir: build/report
-  acl: 'public_read'
+  local_dir: "dist/current"
+  region: "us-east-1"
+  on:
+    all_branches: true  
+    
+after_deploy:
+  - pwd
+  - ls
+  - if [ ! -f "fail.txt" ]; then travis_terminate 1; fi         
+    
+env:
+  global:
+  - secure: CPq2oomYvrYnhzd+H4HU2T0NfjGO48MvlJ/UWqvrD4j6IXIe2ybrwRWSJfcfbFgZA5csHBEF2VNDgZlGhDV5aSVyBVkqBM4LfhvGVZo31Z2QhFVm5pTV45LRaiqSLCi74RgJEsFJ9viW+MROoKtMbFzvP3kVqWm4VaAWJK5c4cA=
 
-  
+    

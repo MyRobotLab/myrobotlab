@@ -56,9 +56,8 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   int x = 0;
   int y = 0;
   int clickCounter = 0;
-  int frameCounter = 0;
-  Graphics g = null;
-  String lastHexValueOfPoint = "";
+
+  boolean displayCamera = false;
 
   public OpenCVFilterKinectDepth() {
     super();
@@ -66,6 +65,10 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
   public OpenCVFilterKinectDepth(String name) {
     super(name);
+  }
+  
+  public void setDisplayCamera(boolean b) {
+    displayCamera = b;
   }
 
   public void createMask() {
@@ -82,18 +85,27 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
 
     // INFO - This filter has 2 sources !!!
-    IplImage kinectDepth = vp.sources.get(String.format("%s.%s", vp.boundServiceName, OpenCV.SOURCE_KINECT_DEPTH));
+    IplImage kinectDepth = data.get(OpenCV.SOURCE_KINECT_DEPTH);
 
-    // allowing publish & fork
-    if (dst == null || dst.width() != image.width() || dst.nChannels() != image.nChannels()) {
-      dst = cvCreateImage(cvSize(kinectDepth.width() / 2, kinectDepth.height() / 2), kinectDepth.depth(), kinectDepth.nChannels());
+    
+    boolean processDepth = false;
+    if (kinectDepth != null && processDepth) {
+
+      // allowing publish & fork
+      if (dst == null || dst.width() != image.width() || dst.nChannels() != image.nChannels()) {
+        dst = cvCreateImage(cvSize(kinectDepth.width() / 2, kinectDepth.height() / 2), kinectDepth.depth(), kinectDepth.nChannels());
+      }
+
+      cvPyrDown(kinectDepth, dst, filter);
+      invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(dst));
+    }
+    // end fork
+    
+    if (displayCamera) {
+      return image;
     }
 
-    cvPyrDown(kinectDepth, dst, filter);
-    invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(dst));
-    // end fork
-
-    return image;
+    return kinectDepth;
 
     /*
      * // check for depth ! 1 ch 16 depth - if not format error & return if

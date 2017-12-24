@@ -1,32 +1,38 @@
 package org.myrobotlab.boofcv;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
+
+import org.myrobotlab.service.BoofCv;
+import org.myrobotlab.service.data.Point2Df;
+
+import com.github.sarxos.webcam.Webcam;
+
 import boofcv.abst.tracker.TrackerObjectQuad;
 import boofcv.factory.tracker.FactoryTrackerObjectQuad;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.webcamcapture.UtilWebcamCapture;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.ImageBase;
-
-import com.github.sarxos.webcam.Webcam;
-
 import georegression.geometry.UtilPolygons2D_F64;
 import georegression.struct.point.Point2D_I32;
 import georegression.struct.shapes.Quadrilateral_F64;
 import georegression.struct.shapes.Rectangle2D_F64;
 
-import javax.swing.*;
+public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseListener, MouseMotionListener, Runnable {
 
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
-
-import org.myrobotlab.service.BoofCv;
-import org.myrobotlab.service.data.Point2Df;
-
-public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseListener, MouseMotionListener {
-
+  
   /**
    * 
    */
@@ -49,6 +55,9 @@ public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseL
   Point2Df rectangleCenter = new Point2Df(0.0f, 0.0f);
 
   JFrame window;
+  boolean processing = false;
+  Thread worker = null;
+  Webcam webcam = null;
 
   /**
    * Configures the tracking application
@@ -72,12 +81,26 @@ public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseL
     window.setContentPane(this);
     window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
   }
+  
+  public void start(){
+    if (worker == null){
+      worker = new Thread(this, "objectTracker");
+      worker.start();
+    }
+  }
+  
+  public void stop(){
+    processing = false;
+    worker = null;
+    window.dispose();
+    webcam.close();
+  }
 
   /**
    * Invoke to start the main processing loop.
    */
-  public void process() {
-    Webcam webcam = UtilWebcamCapture.openDefault(desiredWidth, desiredHeight);
+  public void run() {
+    webcam = UtilWebcamCapture.openDefault(desiredWidth, desiredHeight);
     // Mapper mapperX = new Mapper(0,desiredWidth,0.0,1.0);
 
     // adjust the window size and let the GUI know it has changed
@@ -92,9 +115,11 @@ public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseL
     T input = tracker.getImageType().createImage(actualSize.width, actualSize.height);
 
     workImage = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_RGB);
+    processing = true;
 
-    while (true) {
+    while (processing) {
       BufferedImage buffered = webcam.getImage();
+      
       ConvertBufferedImage.convertFrom(webcam.getImage(), input, true);
 
       // mode is read/written to by the GUI also
@@ -230,6 +255,6 @@ public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseL
 
     ObjectTracker<GrayU8> app = new ObjectTracker<GrayU8>(tracker, 640, 480);
 
-    app.process();
+    app.start();
   }
 }

@@ -36,6 +36,7 @@
 
 package org.myrobotlab.service;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +44,6 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
@@ -57,15 +57,37 @@ import org.slf4j.Logger;
  */
 public class Pid extends Service {
 
-  public static class PidData {
-    private double dispKp; // * we'll hold on to the tuning parameters in
-    // user-entered
-    private double dispKi; // format for display purposes
-    private double dispKd; //
+  public static class PidData implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
 
-    private double kp; // * (P)roportional Tuning Parameter
-    private double ki; // * (I)ntegral Tuning Parameter
-    private double kd; // * (D)erivative Tuning Parameter
+    /**
+     * original user entered data for Kp value
+     */
+    private double dispKp;
+
+    /**
+     * original user entered data for Ki value
+     */
+    private double dispKi;
+
+    /**
+     * original user data entered for Kd value
+     */
+    private double dispKd;
+
+    /**
+     * (P)roportional Tuning Parameter
+     */
+    private double kp;
+    /**
+     * (I)ntegral Tuning Parameter
+     */
+    private double ki;
+    /**
+     * (D)erivative Tuning Parameter
+     */
+    private double kd;
 
     private int controllerDirection;
 
@@ -100,7 +122,7 @@ public class Pid extends Service {
 
   static final public int DIRECTION_REVERSE = 1;
 
-  private Map<String, PidData> data = new HashMap<String, PidData>();
+  public Map<String, PidData> data = new HashMap<String, PidData>();
 
   public Pid(String n) {
     super(n);
@@ -141,6 +163,8 @@ public class Pid extends Service {
       else if (output < piddata.outMin)
         output = piddata.outMin;
       piddata.output = output;
+
+      broadcastState();
 
       /* Remember some variables for next time */
       piddata.lastInput = piddata.input;
@@ -195,20 +219,19 @@ public class Pid extends Service {
     return piddata.setpoint;
   }
 
-  /*
-   * Initialize()**************************************************************
-   * ** does all the things that need to happen to ensure a bumpless transfer
-   * from manual to automatic mode. ********************************************
-   * ********************************
+  /**
+   * does all the things that need to happen to ensure a bumpless transfer
+   * from manual to automatic mode. 
    */
   public void init(String key) {
     PidData piddata = data.get(key);
     piddata.ITerm = piddata.output;
     piddata.lastInput = piddata.input;
-    if (piddata.ITerm > piddata.outMax)
+    if (piddata.ITerm > piddata.outMax) {
       piddata.ITerm = piddata.outMax;
-    else if (piddata.ITerm < piddata.outMin)
+    } else if (piddata.ITerm < piddata.outMin) {
       piddata.ITerm = piddata.outMin;
+    }
 
     piddata.lastTime = System.currentTimeMillis() - piddata.sampleTime; // FIXME
     // -
@@ -246,12 +269,10 @@ public class Pid extends Service {
     piddata.input = input;
   }
 
-  /*
-   * SetMode(...)**************************************************************
-   * ** Allows the controller Mode to be set to manual (0) or Automatic
-   * (non-zero) when the transition from manual to auto occurs, the controller
-   * is automatically initialized **********************************************
-   * ******************************
+  /**
+   * Allows the controller Mode to be set to manual (0) or Automatic (non-zero)
+   * when the transition from manual to auto occurs, the controller is
+   * automatically initialized
    */
   public void setMode(String key, int Mode) {
     PidData piddata = data.get(key);
@@ -264,26 +285,31 @@ public class Pid extends Service {
     broadcastState();
   }
 
-  /*
-   * setOutputRange(...)****************************************************
+  /**
    * This function will be used far more often than SetInputLimits. while the
    * input to the controller will generally be in the 0-1023 range (which is the
    * default already,) the output will be a little different. maybe they'll be
    * doing a time window and will need 0-8000 or something. or maybe they'll
    * want to clamp it from 0-125. who knows. at any rate, that can all be done
    * here.
-   * ************************************************************************
+   * 
+   * @param key
+   *          - named pid compute instance, so the Pid "service" can manage pid
+   *          systems
+   * @param min
+   * @param max
+   * 
    */
-  public void setOutputRange(String key, double Min, double Max) {
+  public void setOutputRange(String key, double min, double max) {
     PidData piddata = data.get(key);
-    if (Min >= Max) {
-      error("min >= max");
+    if (min >= max) {
+      error("min {} >= max {}", min, max);
       return;
     }
 
-    piddata.outCenter = (Min + Max) / 2;
-    piddata.outMin = Min - piddata.outCenter;
-    piddata.outMax = Max - piddata.outCenter;
+    piddata.outCenter = (min + max) / 2;
+    piddata.outMin = min - piddata.outCenter;
+    piddata.outMax = max - piddata.outCenter;
 
     if (piddata.inAuto) {
       if (piddata.output > piddata.outMax)
@@ -299,12 +325,20 @@ public class Pid extends Service {
     broadcastState();
   }
 
-  /*
-   * setPID(...)*************************************************************
+  /**
    * This function allows the controller's dynamic performance to be adjusted.
    * it's called automatically from the constructor, but tunings can also be
-   * adjusted on the fly during normal operation *******************************
-   * *********************************************
+   * adjusted on the fly during normal operation
+   * 
+   * @param key
+   *          - named pid compute instance, so the Pid "service" can manage pid
+   *          systems
+   * @param Kp
+   *          - constant proportional value
+   * @param Ki
+   *          - constant integral value
+   * @param Kd
+   *          - constant derivative value
    */
   public void setPID(String key, Double Kp, Double Ki, Double Kd) {
     PidData piddata = new PidData();
@@ -360,47 +394,6 @@ public class Pid extends Service {
     piddata.setpoint = setPoint;
   }
 
-  public static void main(String[] args) throws ClassNotFoundException {
-    Logging logging = LoggingFactory.getInstance();
-    logging.configure();
-    logging.setLevel(Level.INFO);
-
-    try {
-
-      int test = 35;
-      log.info("{}", test);
-
-      log.debug("hello");
-      log.trace("trace");
-      log.error("error");
-      log.info("info");
-
-      Pid pid = new Pid("pid");
-      pid.startService();
-      String key = "test";
-      pid.setPID(key, 2.0, 5.0, 1.0);
-      pid.setControllerDirection(key, DIRECTION_DIRECT);
-      pid.setMode(key, MODE_AUTOMATIC);
-      pid.setOutputRange(key, 0, 255);
-      pid.setSetpoint(key, 100);
-      pid.setSampleTime(key, 40);
-
-      // GUIService gui = new GUIService("gui");
-      // gui.startService();
-
-      for (int i = 0; i < 200; ++i) {
-        pid.setInput(key, i);
-        Service.sleep(30);
-        if (pid.compute(key)) {
-          log.info(String.format("%d %f", i, pid.getOutput(key)));
-        } 
-      }
-
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
-
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -417,8 +410,40 @@ public class Pid extends Service {
     return meta;
   }
 
-public Map<String, PidData> getPidData() {
-	return data;
-}
+  public Map<String, PidData> getPidData() {
+    return data;
+  }
+
+  public static void main(String[] args) throws ClassNotFoundException {
+
+    try {
+
+      LoggingFactory.init(Level.INFO);
+
+      Runtime.start("gui", "SwingGui");
+      Pid pid = (Pid) Runtime.start("pid", "Pid");
+      String key = "test";
+      pid.setPID(key, 2.0, 5.0, 1.0);
+      pid.setControllerDirection(key, DIRECTION_DIRECT);
+      // pid.setMode(key, MODE_AUTOMATIC);
+      pid.setOutputRange(key, 0, 255);
+      pid.setSetpoint(key, 100);
+      pid.setSampleTime(key, 40);
+
+      // SwingGui gui = new SwingGui("gui");
+      // gui.startService();
+
+      for (int i = 0; i < 200; ++i) {
+        pid.setInput(key, i);
+        Service.sleep(30);
+        if (pid.compute(key)) {
+          log.info(String.format("%d %f", i, pid.getOutput(key)));
+        }
+      }
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
 
 }

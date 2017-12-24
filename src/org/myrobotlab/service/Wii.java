@@ -101,11 +101,9 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
     Integer x = 7;
   }
 
-  /**
+  /*
    * Static list of third party dependencies for this service. The list will be
    * consumed by Ivy to download and manage the appropriate resources
-   * 
-   * @return
    */
 
   public static void main(String[] args) {
@@ -154,7 +152,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
       Servo servo = new Servo("servo");
       servo.startService();
 
-      // GUIService gui = new GUIService("gui");
+      // SwingGui gui = new SwingGui("gui");
       // gui.startService();
 
       wii.getWiimotes();
@@ -217,8 +215,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
       try {
         Thread.sleep(500);
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        logException(e);
+        
       } // must slow down to initialize
 
       // force to correct state strobe state
@@ -415,6 +412,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
     meta.addDescription("Wii mote control and sensor info");
     meta.addCategory("control", "sensor");
     meta.addDependency("wiiuse.wiimote", "0.12b");
+    // 
     return meta;
   }
 

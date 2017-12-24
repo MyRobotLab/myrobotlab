@@ -53,13 +53,11 @@ public class OpenCVFilterPyramidDown extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-
     dst = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
   }
 
   @Override
   public IplImage process(IplImage image, OpenCVData data) {
-
     cvPyrDown(image, dst, CV_GAUSSIAN_5X5);
     return dst;
   }

@@ -168,12 +168,9 @@ public class WiiDar extends Service {
         }
 
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        logException(e);
+        log.info("shutting down");
       }
-
     }
-
   }
 
   private static final long serialVersionUID = 1L;
@@ -181,8 +178,8 @@ public class WiiDar extends Service {
   /*
    * // TODO remoe these service ----- DEBUG ONLY ------ BEGIN Wii wii = new
    * Wii("wii"); Arduino arduino = new Arduino("arduino"); Servo servo = new
-   * Servo("servo"); // OpenCV opencv = new OpenCV("opencv"); GUIService gui =
-   * new GUIService("gui"); // TODO remoe these service ----- DEBUG ONLY ------
+   * Servo("servo"); // OpenCV opencv = new OpenCV("opencv"); SwingGui gui =
+   * new SwingGui("gui"); // TODO remoe these service ----- DEBUG ONLY ------
    * END
    */
 
@@ -312,7 +309,7 @@ public class WiiDar extends Service {
 
       WiiDar wiidar = new WiiDar("wiidar");
       wiidar.startService();
-      Runtime.createAndStart("gui", "GUIService");
+      Runtime.createAndStart("gui", "SwingGui");
       // wiidar.startRobot();
 
     } catch (Exception e) {
@@ -399,7 +396,7 @@ public class WiiDar extends Service {
    * 
    * // send the data from the wii to wiidar // wii.addListener("publishIR",
    * this.getName(), "computeDepth", IRData.class.getCanonicalName()); // send
-   * the computed depth & data to the gui // addListener("computeDepth",
+   * the computed depth &amp; data to the gui // addListener("computeDepth",
    * gui.getName(),"publishSinglePoint", Point.class.getCanonicalName());
    * addListener("publishSinglePoint", gui.getName(),"publishSinglePoint",
    * Point.class.getCanonicalName()); // gui.addListener("processImage",
@@ -507,6 +504,8 @@ public class WiiDar extends Service {
     meta.addDescription("ranging using a wiimote");
     meta.addDependency("wiiuse.wiimote", "0.12b");
     meta.addCategory("sensor");
+    // no longer have hardware for this ...
+    meta.setAvailable(false);
     return meta;
   }
 

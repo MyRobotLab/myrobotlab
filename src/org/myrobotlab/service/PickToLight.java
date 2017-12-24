@@ -57,15 +57,15 @@ import com.pi4j.io.i2c.I2CFactory;
  * 
  * @author GroG
  * 
- *         C:\mrl\myrobotlab>xjc -d src -p org.myrobotlab.pickToLight
+ *         C:\mrl\myrobotlab&gt;xjc -d src -p org.myrobotlab.pickToLight
  *         PickToLightTypes.xsd
  * 
- *         TODO - post report & statistics TODO - update URI - meta data - make
+ *         TODO - post report &amp; statistics TODO - update URI - meta data - make
  *         update.jar bin calls moduleList calls setAllBoxesLEDs (on off)
  *         setBoxesOn(String list) setBoxesOff(String list) getBesSwitchState()
  *         displayString(boxlist, str) ZOD update uri blinkOff TODO - automated
  *         registration Polling / Sensor - important - check sensor state FIXME
- *         - EROR is not being handled in non IP address & no connectivity !!!!
+ *         - EROR is not being handled in non IP address &amp; no connectivity !!!!
  *         - read config in /boot/ - registration url including password - proxy
  *         ?
  * 
@@ -350,7 +350,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 
       // Runtime.createAndStart("webgui", "WebGui");
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
     } catch (Exception e) {
       Logging.logError(e);
@@ -836,8 +836,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
       properties.load(input);
 
       if ("true".equalsIgnoreCase(properties.getProperty("xmpp.enabled"))) {
-        // Xmpp xmpp = (Xmpp) Runtime.createAndStart("xmpp", "XMPP");
-        Runtime.createAndStart("xmpp", "XMPP");
+        // Xmpp xmpp = (Xmpp) Runtime.createAndStart("xmpp", "Xmpp");
+        Runtime.createAndStart("xmpp", "Xmpp");
         // xmpp.connect(properties.getProperty("xmpp.user"),
         // properties.getProperty("xmpp.password"));
         // FIXME - xmpp.addAuditor("Greg Perry");
@@ -863,12 +863,9 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     return properties;
   }
 
-  /**
+  /*
    * single location for key generation - in case other parts are add in a
    * composite key
-   * 
-   * @param address
-   * @return
    */
   public String makeKey(Integer address) {
     return makeKey(rasPiBus, address);
@@ -1166,6 +1163,9 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     meta.addPeer("webgui", "WebGui", "web server interface");
     // FIXME - should use static methos from HttpClient
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    // FIXME - to specific to a partical hardware setup
+    // good idea though
+    meta.setAvailable(false);
 
     return meta;
   }

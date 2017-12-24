@@ -52,6 +52,8 @@ public final class MRLListener implements Serializable {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(MRLListener.class);
+  
+  int _hashCode;
 
   /**
    * the keyed topic Method - when this method is invoked listeners are sent
@@ -69,8 +71,6 @@ public final class MRLListener implements Serializable {
    */
   public String callbackMethod;
 
-  private int _hashCode = 0;
-
   public MRLListener(String topicMethod, String callbackName, String callbackMethod) {
     this.topicMethod = topicMethod;
     this.callbackMethod = callbackMethod;
@@ -84,6 +84,7 @@ public final class MRLListener implements Serializable {
     return false;
   }
 
+  
   @Override
   final public int hashCode() {
     if (_hashCode == 0) {
@@ -92,10 +93,8 @@ public final class MRLListener implements Serializable {
 
     return _hashCode;
   }
+  
 
-  /*
-   * Default format was xml is now JSON TODO - make toStringStyler like spring
-   */
   @Override
   public String toString() {
     return String.format("%s -will activate-> %s.%s", topicMethod, callbackName, callbackMethod);

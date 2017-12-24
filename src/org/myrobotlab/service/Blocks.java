@@ -30,7 +30,7 @@ public class Blocks extends Service {
 
     ServiceType meta = new ServiceType(Blocks.class.getCanonicalName());
     meta.addDescription("basic block programming interface");
-    meta.setAvailable(true);
+    meta.setAvailable(false);
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
     meta.addCategory("programming");
@@ -43,7 +43,7 @@ public class Blocks extends Service {
       LoggingFactory.init(Level.INFO);
 
       Runtime.start("template", "_TemplateService");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

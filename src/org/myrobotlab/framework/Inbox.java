@@ -116,12 +116,13 @@ public class Inbox implements Serializable {
    * message they invoke it.
    * 
    * @return the Message on the queue
+   * @throws InterruptedException e
    * @see Message
    */
   public Message getMsg() throws InterruptedException {
     /*
      * TODO - remove below - Inbox will call switchboards
-     * serializer/deserializer & communicator send/recieve interface switchboard
+     * serializer/deserializer &amp; communicator send/recieve interface switchboard
      * has references to serializer and communicator - also all configuration
      * needed At this level ALL details on where the Message / Message came from
      * should be hidden and interfaces should be exposed only-

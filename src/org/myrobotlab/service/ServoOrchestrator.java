@@ -17,14 +17,14 @@ import javax.sound.sampled.Clip;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_panel;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.myrobotlab.swing.widget.ServoOrchestratorGUI_middlemiddle_panel;
 import org.slf4j.Logger;
 
 /**
@@ -69,13 +69,13 @@ public class ServoOrchestrator extends Service {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(ServoOrchestrator.class);
-  transient org.myrobotlab.control.ServoOrchestratorGUI sogui_ref;
+  transient org.myrobotlab.swing.ServoOrchestratorGui sogui_ref;
 
   int sizex = 5;
 
   int sizey = 5;
 
-  SettingsItemHolder[] settingsitemholder;
+  transient SettingsItemHolder[] settingsitemholder;
   Servo[] servos;
 
   public boolean isClockRunning;
@@ -97,7 +97,7 @@ public class ServoOrchestrator extends Service {
     LoggingFactory.init(Level.INFO);
     try {
 
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
       Runtime.start("servoorchestrator", "ServoOrchestrator");
 
     } catch (Exception e) {
@@ -249,7 +249,7 @@ public class ServoOrchestrator extends Service {
       int max = settingsitemholder[middleright_shownitem].max;
       servos[middleright_shownitem] = (Servo) Runtime.start("so." + middleright_shownitem, "Servo");
       servos[middleright_shownitem].setMinMax(min, max);
-      arduino.servoAttach(servos[middleright_shownitem], pin);
+      arduino.servoAttachPin(servos[middleright_shownitem], pin);
       servos[middleright_shownitem].attach();
       sogui_ref.middleright_attach_button.setText("Detach");
       settingsitemholder[middleright_shownitem].attached = true;
@@ -498,7 +498,7 @@ public class ServoOrchestrator extends Service {
     sogui_ref.sizey = sizey;
   }
 
-  public void setsoguireference(org.myrobotlab.control.ServoOrchestratorGUI so_ref) {
+  public void setsoguireference(org.myrobotlab.swing.ServoOrchestratorGui so_ref) {
     sogui_ref = so_ref;
   }
 

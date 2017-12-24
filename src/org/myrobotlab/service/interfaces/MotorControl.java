@@ -25,31 +25,55 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.motor.MotorConfig;
+import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.sensor.Encoder;
 
-public interface MotorControl extends DeviceControl { 
+public interface MotorControl extends NameProvider, RelativePositionControl, Attachable {
+  
 
-	// a good canidate for Java-8 'default' interface method
-	// implementation of all attach(String name) { attach(Runtime.getService(name)); } 
-	public void attach(String controllerName) throws Exception;
-	public void attach(MotorController controller) throws Exception;
+  void attachMotorController(MotorController controller) throws Exception;
 
-	public void detach(String controllerName);
-	public void detach(MotorController controller);
-
-	double getPowerLevel();
-	
-	public void setPowerLevel(double power);
-
-	double getPowerOutput();
-
-	int getTargetPos();
+	void detachMotorController(MotorController controller);
 
 	/**
-	 * query the motor as to its inverted status
+	 * the raw non-computed input 
+	 * range is -1.0 <---> 1.0
+	 * @return input range
+	 */
+	double getPowerLevel();
+
+	/**
+	 * grog says, BAD METHOD - needs to be a solid
+	 * range interface between MotorControl & MotorControllers
+	 * where the range can be guaranteed -1.0 --to-- 1.0
+	 * it's MotorControllers job to change this if needed into
+	 * specific values (not MotorControl's job)
 	 * 
-	 * @return
+	 * the 'computed' power output
+	 * range can be anything ?
+	 * @return computer power output
+	 */
+	// double getPowerOutput(); NO NO NO !!!
+
+	double getTargetPos();
+
+	/**
+	 * general test if the motor is ready without having to supply
+	 * the specific motor controller
+	 * @return true/false
+	 */
+	boolean isAttached();
+
+	/**
+	 * testing if a 'specific' motor controller is attached
+	 * @param controller c
+	 * @return true if the contorller is attached to this control.
+	 */
+	boolean isAttached(MotorController controller);
+
+	/**
+	 * @return query the motor as to its inverted status
 	 */
 	boolean isInverted();
 
@@ -58,34 +82,27 @@ public interface MotorControl extends DeviceControl {
 	 * unlocked
 	 */
 	void lock();
-
-	/**
-	 * Move is the most common motor command. The command accepts a parameter of
-	 * power which can be of the range -1.0 to 1.0. Negative values are in one
-	 * direction and positive values are in the opposite value. For example -1.0
-	 * would be maximum power in a counter clock-wise direction and 0.9 would be
-	 * 90% power in a clockwise direction. 0.0 of course would be stop
-	 * 
-	 * @param power
-	 *            - new power level
-	 */
-	void move(double power);
+	
+	boolean isLocked();
 
 	/**
 	 * moveTo moves the motor to a specific location. Typically, an encoder is
 	 * needed in order to provide feedback data
 	 * 
-	 * @param newPos
+	 * FIXME - part of AbsolutePosition interface
+	 * 
+	 * @param newPos the new position to move to
 	 */
-	void moveTo(int newPos);
+	void moveTo(double newPos);
 
 	/**
 	 * moveTo moves the motor to a specific location. Typically, an encoder is
 	 * needed in order to provide feedback data
 	 * 
-	 * @param newPos
+	 * @param newPos new position
+	 * @param power 0-1
 	 */
-	void moveTo(int newPos, Double power);
+	void moveTo(double newPos, Double power);
 
 	void setEncoder(Encoder encoder);
 
@@ -94,10 +111,15 @@ public interface MotorControl extends DeviceControl {
 	 * clockwise if previous levels were counter clockwise and positive power
 	 * levels would become counter clockwise
 	 * 
-	 * @param invert
+	 * @param invert true or false
 	 */
 	void setInverted(boolean invert);
 
+	void setPowerLevel(double power);
+
+	/**
+	 * stop the motor
+	 */
 	void stop();
 
 	/**
@@ -110,7 +132,4 @@ public interface MotorControl extends DeviceControl {
 	 * unlocks the motor, so other commands can affect it
 	 */
 	void unlock();
-
-	public MotorConfig getConfig();
-
 }

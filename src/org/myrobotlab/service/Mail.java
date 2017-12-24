@@ -33,6 +33,15 @@ public class Mail extends Service {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(Mail.class.getCanonicalName());
+  public static String username = "*";
+  public static String password = "*";
+  public static String from = "who@domain";
+  public static String to = "who@domain";
+  public static String subjet = "mrl test";
+  public static String body = "hey ! this is a body text";
+
+  public static String smtpServer = "smtp.gmail.com";
+  public static Integer smtpServerPort = 465;
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.WARN);
@@ -40,54 +49,53 @@ public class Mail extends Service {
     try {
       Mail mail = new Mail("mail");
       mail.startService();
+      // sendMailSSL();
       /*
-       * GUIService gui = new GUIService("gui"); gui.startService();
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
        */
     } catch (Exception e) {
       Logging.logError(e);
     }
   }
 
-  public static void sendMailSSL() {
+  public void sendMailSSL() {
     Properties props = new Properties();
-    props.put("mail.smtp.host", "smtp.gmail.com");
-    props.put("mail.smtp.socketFactory.port", "465");
+    props.put("mail.smtp.host", smtpServer);
+    props.put("mail.smtp.socketFactory.port", smtpServerPort);
     props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
     props.put("mail.smtp.auth", "true");
-    props.put("mail.smtp.port", "465");
+    props.put("mail.smtp.port", smtpServerPort);
 
     Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
       @Override
       protected PasswordAuthentication getPasswordAuthentication() {
-        return new PasswordAuthentication("username", "password");
+        return new PasswordAuthentication(username, password);
       }
     });
 
     try {
 
       Message message = new MimeMessage(session);
-      message.setFrom(new InternetAddress("from@no-spam.com"));
-      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("to@no-spam.com"));
-      message.setSubject("Testing Subject");
-      message.setText("Dear Mail Crawler," + "\n\n No spam to my email, please!");
+      message.setFrom(new InternetAddress(from));
+      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+      message.setSubject(subjet);
+      message.setText(body);
 
       Transport.send(message);
 
       System.out.println("Done");
 
-    } catch (MessagingException e) {
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      error("Cant send this email ! Bad credentials ? : ", e);
     }
   }
 
   public static void sendMailTLS() {
-    final String username = "username@gmail.com";
-    final String password = "password";
 
     Properties props = new Properties();
     props.put("mail.smtp.auth", "true");
     props.put("mail.smtp.starttls.enable", "true");
-    props.put("mail.smtp.host", "smtp.gmail.com");
+    props.put("mail.smtp.host", smtpServer);
     props.put("mail.smtp.port", "587");
 
     Session session = Session.getInstance(props, new javax.mail.Authenticator() {
@@ -100,10 +108,10 @@ public class Mail extends Service {
     try {
 
       Message message = new MimeMessage(session);
-      message.setFrom(new InternetAddress("from-email@gmail.com"));
-      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("to-email@gmail.com"));
-      message.setSubject("Testing Subject");
-      message.setText("Dear Mail Crawler," + "\n\n No spam to my email, please!");
+      message.setFrom(new InternetAddress(from));
+      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+      message.setSubject(subjet);
+      message.setText(body);
 
       Transport.send(message);
 
@@ -129,7 +137,7 @@ public class Mail extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Mail.class.getCanonicalName());
-    meta.addDescription("General service for all your mail needs");
+    meta.addDescription("SMTP ssl/tls service used for sending things");
     meta.addCategory("connectivity");
 
     return meta;

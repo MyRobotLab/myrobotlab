@@ -79,7 +79,7 @@ public class Node implements Serializable {
     this.name = name;
   }
 
-  /**
+  /*
    * the most important method get is the effective "search" method of memory.
    * It has an XPath like syntax the "/" means "data of" a node, so when the
    * path is /k1/k2/ - would mean get the hashmap of k2 /k1/k2 - means get the
@@ -87,10 +87,9 @@ public class Node implements Serializable {
    * 
    * other examples /background /background/position/x /background/position/y
    * /foreground /known/ball/red /known/ball/yellow /known/cup /unknown/object1
-   * /positions/x/ <map> /positions/y/ <map> /positions/time/ <map> /tracking
+   * /positions/x/ &lt;map&gt; /positions/y/ &lt;map&gt; /positions/time/ &lt;map&gt; /tracking
    * 
-   * @param path
-   * @return
+   * @return - an object found at the given path
    */
   public Object get(String path) {
     if (path == "") {
@@ -138,11 +137,8 @@ public class Node implements Serializable {
     return name;
   }
 
-  /**
+  /*
    * a convienent cast method to get a node
-   * 
-   * @param path
-   * @return
    */
   public Node getNode(String path) {
     return (Node) get(path);

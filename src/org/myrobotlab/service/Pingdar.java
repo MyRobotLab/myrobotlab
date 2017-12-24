@@ -1,12 +1,12 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.RangeListener;
+import org.myrobotlab.service.interfaces.RangingControl;
 import org.slf4j.Logger;
 
 /**
@@ -15,14 +15,14 @@ import org.slf4j.Logger;
  * module. The result is a sonar style range finding.
  *
  */
-public class Pingdar extends Service {
+public class Pingdar extends Service implements RangingControl, RangeListener {
 
   public static class Point {
 
-    public float r;
-    public float theta;
+    public double r;
+    public double theta;
 
-    public Point(float servoPos, float z) {
+    public Point(double servoPos, double z) {
       this.theta = servoPos;
       this.r = z;
     }
@@ -37,43 +37,19 @@ public class Pingdar extends Service {
   public int sweepMax = 180;
 
   public int step = 1;
-  transient private Arduino arduino;
   transient private Servo servo;
-
   transient private UltrasonicSensor sensor;
+  
   // TODO - changed to XDar - make RangeSensor interface -> publishRange
   // TODO - set default sample rate
   // private boolean isAttached = false;
-  private Long lastRange;
+  private Double lastRange = 0.0;
 
-  private Integer lastPos;
+  private Double lastPos = 0.0;
 
-  private int rangeCount = 0;
+  // private int rangeCount = 0;
 
-  long rangeAvg = 0;
-
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    Runtime.createAndStart("gui", "GUIService");
-    // Runtime.createAndStart("webgui", "WebGui");
-    /*
-     * Serial.createNullModemCable("uart", "COM10"); Serial serial =
-     * (Serial)Runtime.createAndStart("uart", "Serial");
-     * 
-     * serial.connect("uart");
-     */
-
-    Runtime.start("pingdar", "Pingdar");
-
-    // Runtime.createAndStart("gui", "GUIService");
-
-    // pingdar.attach("COM15", 7, 8, 9);
-    // pingdar.sweep();
-    /*
-     * GUIService gui = new GUIService("gui"); gui.startService();
-     */
-  }
+  // long rangeAvg = 0;
 
   public Pingdar(String n) {
     super(n);
@@ -81,44 +57,14 @@ public class Pingdar extends Service {
 
   // ----------- interface begin ----------------
 
-  public boolean attach(Arduino arduino, String port, UltrasonicSensor sensor, int trigPin, int echoPin, Servo servo, int servoPin) throws Exception {
-    this.arduino = arduino;
+  public boolean attach(UltrasonicSensor sensor, Servo servo) throws Exception {
     this.sensor = sensor;
     this.servo = servo;
 
-   
-    arduino.connect(port);
-
-    // TODO - FIX ME
-    /*
-    if (!sensor.attach(port, trigPin, echoPin)) {
-      error("could not attach sensor");
-      return false;
-    }
-    */
-
-    // FIXME sensor.addRangeListener
-    // publishRange --> onRange
     sensor.addRangeListener(this);
     servo.addServoEventListener(this);
-    arduino.servoAttach(servo, servoPin);
-    
+    // from the Arduino and send it back in on packet ..
     return true;
-  }
-
-  // UBER GOOD
-  // UBER GOOD !!!! max & min complexity with service creation support with
-  // Peers !!!!
-  // attach (arduino port sensor trigPin echoPin servo servoPin ) <- max
-  // complexity - no service creation
-  // attach (port trigPin echoPin servoPin) <- min complexity - service
-  // creation on peers
-  public boolean attach(String port, int trigPin, int echoPin, int servoPin) throws Exception {
-    return attach(arduino, port, sensor, trigPin, echoPin, servo, servoPin);
-  }
-
-  public Arduino getArduino() {
-    return arduino;
   }
 
   // ----------- interface end ----------------
@@ -133,27 +79,16 @@ public class Pingdar extends Service {
 
   // sensor data has come in
   // grab the latest position
-  public Long onRange(Long range) {
-    info("range %d", range);
-    // filter too low
-    // TODO this should be done on the Arduino
-    if (range < 10) {
-      return range;
-    }
-
-    rangeAvg += range;
-
+  @Override
+  public void onRange(Double range) {
+    info("range %d", range.intValue());
+    invoke("publishPingdar", new Point(lastPos, range));
     lastRange = range;
-    ++rangeCount;
-
-    /*
-     * Point p = new Point(lastPos, range); invoke("publishPingdar", p);
-     */
-    return lastRange;
   }
 
-  public Integer onServoEvent(Integer pos) {
-    info("pos %d", pos);
+  public Double onServoEvent(Double pos) {
+    info("pos %d", pos.intValue());
+    /*
     lastPos = pos;
     if (rangeCount > 0) {
       Point p = new Point(lastPos, rangeAvg / rangeCount);
@@ -161,7 +96,10 @@ public class Pingdar extends Service {
       rangeCount = 0;
       invoke("publishPingdar", p);
     }
+    */
 
+    invoke("publishPingdar", new Point(pos, lastRange));
+    lastPos = pos;
     return lastPos;
   }
 
@@ -172,26 +110,22 @@ public class Pingdar extends Service {
   @Override
   public void startService() {
     super.startService();
-    arduino = (Arduino) startPeer("arduino");
-    sensor = (UltrasonicSensor) startPeer("sensor");
-    servo = (Servo) startPeer("servo");
+    broadcastState();
   }
 
   public void stop() {
-    super.stopService();
     sensor.stopRanging();
-    servo.eventsEnabled(false);
     servo.stop();
   }
 
-  public boolean sweep() {
-    return sweep(sweepMin, sweepMax);
+  public void sweep() {
+    sweep(sweepMin, sweepMax);
   }
 
-  public boolean sweep(int sweepMin, int sweepMax) {
+  public void sweep(int sweepMin, int sweepMax) {
     this.sweepMin = sweepMin;
     this.sweepMax = sweepMax;
-    this.step = 1; // FIXME STEP
+    this.step = 1;
 
     // TODO - configurable speed
     sensor = getSensor();
@@ -200,13 +134,13 @@ public class Pingdar extends Service {
     sensor.addRangeListener(this);
     servo.addServoEventListener(this);
 
-    servo.setSpeed(0.20);
+    // servo.setSpeed(60);
+    servo.setVelocity(30);
     servo.eventsEnabled(true);
-    // STEP ???
-    servo.sweep(sweepMin, sweepMax, 1, step);
-
+    
     sensor.startRanging();
-    return true;
+    // STEP ???
+    servo.sweep(sweepMin, sweepMax, 100, step);
   }
 
   /**
@@ -223,11 +157,73 @@ public class Pingdar extends Service {
     meta.addDescription("used as a ultra sonic radar");
     meta.addCategory("sensor", "display");
     // put peer definitions in
-    meta.addPeer("arduino", "Arduino", "arduino");
+    meta.addPeer("controller", "Arduino", "controller for servo and sensor");
     meta.addPeer("sensor", "UltrasonicSensor", "sensor");
     meta.addPeer("servo", "Servo", "servo");
+    
+    meta.sharePeer("sensor.controller", "controller", "Arduino", "shared arduino");
+    // theoretically - Servo should follow the same share config
+    // meta.sharePeer("servo.controller", "controller", "Arduino", "shared arduino");
 
     return meta;
+  }
+
+  @Override
+  public void startRanging() {
+    if (sensor != null){
+      sensor.startRanging();
+    } else {
+      error("null sensor");
+    }
+  }
+
+  @Override
+  public void stopRanging() {
+    if (sensor != null){
+      sensor.stopRanging();
+    } else {
+      error("null sensor");
+    } 
+  }
+  
+
+  public static void main(String[] args) {
+    try {
+      LoggingFactory.init(Level.INFO);
+
+      Runtime.start("gui", "SwingGui");
+      
+      VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual","VirtualArduino");
+      Servo servo = (Servo)Runtime.start("servo","Servo");
+      UltrasonicSensor sr04 = (UltrasonicSensor)Runtime.start("sr04", "UltrasonicSensor");
+      sleep(1000);
+      virtual.connect("COM5");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      arduino.connect("COM5");
+      sr04.attach(arduino, 12, 11);
+      servo.attach(arduino, 2);
+
+      Pingdar pingdar = (Pingdar) Runtime.start("pingdar", "Pingdar");
+      sleep(1000);
+      pingdar.attach(sr04, servo);
+      pingdar.sweep(70, 100);
+      sleep(5000);
+      pingdar.stop();
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+
+  }
+
+  @Override
+  public void setUnitCm() {
+    sensor.setUnitCm();
+  }
+
+  @Override
+  public void setUnitInches() {
+    sensor.setUnitInches();
   }
 
 }

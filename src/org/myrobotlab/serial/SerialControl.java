@@ -14,7 +14,7 @@ public interface SerialControl {
    *  
    *  p4j has a nice interface - similar would be nice too
    *  
-   *  for some reason we have .connect(port) & .connect(port, baud ...)
+   *  for some reason we have .connect(port) &amp; .connect(port, baud ...)
    *  what is the difference between "connect" and open - "open" is correct
    *  in the sense they all are InputStream or OutpuStream .. both are "open"
    *  where did connect come from ?

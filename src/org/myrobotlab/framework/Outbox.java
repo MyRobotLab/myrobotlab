@@ -31,9 +31,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
-import org.myrobotlab.service.interfaces.NameProvider;
 import org.slf4j.Logger;
 
 /*

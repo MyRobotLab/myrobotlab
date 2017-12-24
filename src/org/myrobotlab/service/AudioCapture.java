@@ -58,6 +58,33 @@ import org.slf4j.Logger;
  * 
  */
 public class AudioCapture extends Service {
+  public final static Logger log = LoggerFactory.getLogger(AudioCapture.class.getCanonicalName());
+
+  private static final long serialVersionUID = 1L;
+
+  public static boolean stopCapture = false;
+
+  ByteArrayOutputStream byteArrayOutputStream;
+
+  AudioFormat audioFormat;
+
+  transient TargetDataLine targetDataLine;
+
+  transient AudioInputStream audioInputStream;
+
+  transient SourceDataLine sourceDataLine;
+
+  // Audio format fields
+  float sampleRate = 16000.0F;
+  // 8000,11025,16000,22050,44100
+  int sampleSizeInBits = 16;
+  // 8,16
+  int channels = 1;
+  // 1,2
+  boolean signed = true;
+  // true,false
+  boolean bigEndian = false;
+  // true,false
 
   class CaptureThread extends Thread {
     // An arbitrary-size temporary holding
@@ -119,28 +146,14 @@ public class AudioCapture extends Service {
     }// end run
   }// end inner class PlayThread
 
-  public final static Logger log = LoggerFactory.getLogger(AudioCapture.class.getCanonicalName());
-
-  private static final long serialVersionUID = 1L;
-  boolean stopCapture = false;
-  ByteArrayOutputStream byteArrayOutputStream;
-  AudioFormat audioFormat;
-  TargetDataLine targetDataLine;
-
-  AudioInputStream audioInputStream;
-
-  SourceDataLine sourceDataLine;
-
-  // ===================================//
-
   public static void main(String[] args) throws InterruptedException {
     LoggingFactory.init(Level.DEBUG);
 
     try {
 
       AudioCapture audioIn = (AudioCapture) Runtime.start("audioIn", "AudioCapture");
-      Runtime.start("gui", "GUIService");
-
+      Runtime.start("gui", "SwingGui");
+      audioIn.setAudioFormat(16000, 16, 1, true, false);
       audioIn.captureAudio();
       Thread.sleep(3000);
       audioIn.stopAudioCapture();
@@ -203,7 +216,9 @@ public class AudioCapture extends Service {
       captureThread.start();
     } catch (Exception e) {
       Logging.logError(e);
-    } // end catch
+    } 
+    broadcastState();
+    // end catch
   }// end captureAudio method
 
   // This method creates and returns an
@@ -215,18 +230,17 @@ public class AudioCapture extends Service {
   // are shown in comments following
   // the declarations.
   private AudioFormat getAudioFormat() {
-    float sampleRate = 16000.0F;
-    // 8000,11025,16000,22050,44100
-    int sampleSizeInBits = 16;
-    // 8,16
-    int channels = 1;
-    // 1,2
-    boolean signed = true;
-    // true,false
-    boolean bigEndian = false;
-    // true,false
+    // new AudioFormat(Format PCM ULAW UNSIGNED etc ..)
     return new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
   }// end getAudioFormat
+
+  public void setAudioFormat(float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian) {
+    this.sampleRate = sampleRate;
+    this.sampleSizeInBits = sampleSizeInBits;
+    this.channels = channels;
+    this.signed = signed;
+    this.bigEndian = bigEndian;
+  }
 
   // This method plays back the audio
   // data that has been saved in the
@@ -265,13 +279,15 @@ public class AudioCapture extends Service {
   }
 
   public void save(String filename) throws IOException {
-
-    File file = new File(filename);
-    AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, file);
+    byte[] data = byteArrayOutputStream.toByteArray();
+    AudioInputStream ais = new AudioInputStream(new ByteArrayInputStream(data), audioFormat, data.length);
+    AudioSystem.write(ais, AudioFileFormat.Type.WAVE, new File(filename));
   }
 
   public void stopAudioCapture() {
+    targetDataLine.stop();
     stopCapture = true;
+    broadcastState();
   }
 
   /**

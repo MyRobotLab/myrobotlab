@@ -81,7 +81,7 @@ public class GoPro extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(GoPro.class.getCanonicalName());
-    meta.addDescription("Service to control your GoPro over Wifi");
+    meta.addDescription("controls a GoPro camera over wifi");
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
     meta.addCategory("video");
@@ -95,7 +95,7 @@ public class GoPro extends Service {
     try {
 
       Runtime.start("gopro", "GoPro");
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
 
     } catch (Exception e) {

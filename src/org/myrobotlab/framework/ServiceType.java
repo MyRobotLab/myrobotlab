@@ -22,8 +22,20 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	private static final long serialVersionUID = 1L;
 
 	String name;
+	String simpleName;
+	String link;
+	String license;// = "Apache";
+	boolean isCloudService = false;
 
-	String state = null;
+	public String getLink() {
+    return link;
+  }
+
+  public void setLink(String link) {
+    this.link = link;
+  }
+
+  String state = null;
 	Integer workingLevel = null;
 	/**
 	 * description of what the service does
@@ -36,7 +48,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	/**
 	 * ready for release
 	 */
-	Boolean ready = false;
+	// Boolean ready = false;
 
 	/**
 	 * available in the UI(s)
@@ -60,10 +72,12 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 
 	public ServiceType(Class<?> clazz) {
 		this.name = clazz.getCanonicalName();
+		this.simpleName = clazz.getSimpleName();
 	}
 
 	public ServiceType(String name) {
 		this.name = name;
+		this.simpleName = name.substring(name.lastIndexOf(".")+1);
 	}
 
 	public void addDependency(String org, String version) {
@@ -80,17 +94,11 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	}
 
 	public String getSimpleName() {
-		if (name == null) {
-			return null;
-		}
-		if (name.indexOf(".") == -1) {
-			return name;
-		}
-		return name.substring(name.lastIndexOf('.') + 1);
+		return simpleName;
 	}
 
 	public boolean isAvailable() {
-		return (available != null && available == true);
+		return available;
 	}
 
 	public int size() {
@@ -113,15 +121,38 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	}
 
 	public void addPeer(String name, String peerType, String comment) {
-		peers.put(name, new ServiceReservation(name, peerType, comment));
+		// peers.put(name, new ServiceReservation(name, peerType, comment));
+		mergePeer(new ServiceReservation(name, peerType, comment));
 	}
 
+	/**
+	 * sharing means sharePeer is forced - while addPeer will check before adding
+	 * @param key k
+	 * @param actualName n 
+	 * @param peerType n
+	 * @param comment comment
+	 */
 	public void sharePeer(String key, String actualName, String peerType, String comment) {
 		peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
 	}
 
 	public void addRootPeer(String actualName, String peerType, String comment) {
 		peers.put(actualName, new ServiceReservation(actualName, actualName, peerType, comment, true));
+	}
+	
+	/**
+	 * checks if already exists - if it does - merges only unset values into peers
+	 * @param sr the service reservation
+	 */
+	public void mergePeer(ServiceReservation sr){
+		if (peers.containsKey(sr.key)){
+			ServiceReservation existing = peers.get(sr.key);
+			existing.actualName = (existing.actualName != null)?existing.actualName:sr.actualName;
+			existing.fullTypeName = (existing.fullTypeName != null)?existing.fullTypeName:sr.fullTypeName;
+			existing.comment = (existing.comment != null)?existing.comment:sr.comment;
+		} else {
+			peers.put(sr.key, sr);
+		}
 	}
 
 	public void setAvailable(boolean b) {
@@ -140,9 +171,11 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 		this.sponsor = sponsor;
 	}
 
+	/*
 	public void setReady(boolean b) {
 		this.ready = b;
 	}
+	*/
 
 	public void addTodo(String todo) {
 		this.todo = todo;
@@ -151,5 +184,30 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	public String getDescription() {
 		return description;
 	}
+
+  public void addLicense(String license) {
+    this.license = license;
+  }
+  
+  public String getLicense(){
+    return license;
+  }
+
+  public void setLicenseProprietary() {
+    addLicense("proprietary");
+  }
+  
+  public void setLicenseApache() {
+    addLicense("apache");
+  }
+  
+  public void setLicenseGplV3() {
+    addLicense("gplv3");
+  }
+
+  public void setCloudService(boolean b) {
+    isCloudService = b;
+  }
+  
 
 }

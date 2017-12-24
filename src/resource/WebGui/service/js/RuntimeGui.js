@@ -19,6 +19,10 @@ angular.module('mrlapp.service.RuntimeGui', [])
                                 _self.updateState(inMsg.data[0]);
                             });
                             break;
+                         case 'onReleased':{
+                                $log.info("runtime - onRelease" +  inMsg.data[0] );
+                           break;
+                         }
                         default:
                             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);
                             break;

@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 
+import org.myrobotlab.framework.interfaces.LoggingSink;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.interfaces.LoggingSink;
 import org.slf4j.Logger;
 
 /**
