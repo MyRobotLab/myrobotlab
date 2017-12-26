@@ -114,7 +114,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
           }
           int pulseWidthOff = SERVOMIN + (int) (servoData.currentOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
           setServo(servoData.pin, pulseWidthOff);
-          //publishServoEvent(servoData.servo,2, servoData.currentOutput);
+          publishServoEvent(servoData.servo,2, servoData.currentOutput);
           // Sleep 100ms before sending next position
           lastExecution = now;
           log.info(String.format("Sent %s using a %s tick at velocity %s", servoData.currentOutput, deltaTime, _velocity));
@@ -431,6 +431,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
         log.debug(String.format("servoWrite %s deviceAddress %s targetOutput %f", servo.getName(), deviceAddress, servo.getTargetOutput()));
         int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
         setServo(servo.getPin(), pulseWidthOff);
+        publishServoEvent(servoData.servo,1, servoData.targetOutput);
       } else {
         log.debug(String.format("Ada move at velocity %s degrees/s", servoData.velocity));
         servoData.targetOutput = servo.getTargetOutput();
