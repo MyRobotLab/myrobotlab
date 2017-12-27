@@ -158,7 +158,7 @@ public class Test extends Service implements StatusListener {
 
 
     public String toString() {
-      return String.format("testName: %s service: %s/%s status: %s", testName, branch, serviceName, status);
+      return String.format("=== TEST ===> testName: %s service: %s/%s status: %s", testName, branch, serviceName, status);
     }
   }
 
@@ -895,6 +895,8 @@ public class Test extends Service implements StatusListener {
   // creation and destruction through inventory
   public TestData testPythonScript(TestData test) throws Exception {
 
+	  log.info("testPythonScript {}", test.toString());
+
     // TEST SETUP BEGIN .....
     Python python = (Python) Runtime.start("python", "Python");
 
@@ -1013,7 +1015,9 @@ public class Test extends Service implements StatusListener {
       if (!preServices.contains(cs)) {
         log.info(String.format("service %s created for testing %s - test finished attempting to release", cs, test.serviceName));
         ServiceInterface si = Runtime.getService(cs);
-        si.releaseService();
+        if (si != null){
+        	si.releaseService();
+        }
       }
     }
     
@@ -1085,7 +1089,8 @@ public class Test extends Service implements StatusListener {
   }
 
   public TestData testSerialization(TestData test) {
-    log.info("serializeTest {}", test.serviceName);
+    // log.info("serializeTest {}", test.serviceName);
+	  log.info("testSerialization {}", test.toString());
     String name = test.serviceName;
     if (name == null) {
       log.warn("Name was null on serialize test?!?");
