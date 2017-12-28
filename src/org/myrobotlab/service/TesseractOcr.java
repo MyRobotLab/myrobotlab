@@ -35,7 +35,7 @@ public class TesseractOcr extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(TesseractOcr.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(TesseractOcr.class); 
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
@@ -98,7 +98,7 @@ public class TesseractOcr extends Service {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(TesseractOcr.class.getCanonicalName());
+    ServiceType meta = new ServiceType(TesseractOcr.class);
     meta.addDescription("Optical character recognition - the ability to read");
     meta.addCategory("intelligence");
     meta.addDependency("net.sourceforge.tess4j", "3.4.0");
@@ -113,15 +113,19 @@ public class TesseractOcr extends Service {
       public int unsetenv(String name);
     }
 
-    static public class POSIX {
+    static public class POSIX { 
       static Object libc;
 
       static {
-        if (System.getProperty("os.name").equals("Linux")) {
-          libc = Native.loadLibrary("c", LinuxLibC.class);
+    	  try {
+        if (System.getProperty("os.name").contains("win")) {
+            libc = Native.loadLibrary("msvcrt", WinLibC.class);
         } else {
-          libc = Native.loadLibrary("msvcrt", WinLibC.class);
+            libc = Native.loadLibrary("c", LinuxLibC.class);
         }
+    	  } catch(Exception e){
+    		  log.error("loading native libraries threw", e);
+    	  }
       }
 
       public int setenv(String name, String value, int overwrite) {
