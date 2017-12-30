@@ -14,8 +14,8 @@ import java.util.LinkedHashMap;
 
 import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
 import org.myrobotlab.framework.Service;
+import org.apache.commons.lang.StringUtils;
 import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.datavec.api.berkeley.StringUtils;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
 import org.datavec.api.split.FileSplit;
 import org.datavec.image.loader.NativeImageLoader;
@@ -259,7 +259,10 @@ public class Deeplearning4j extends Service {
     network = ModelSerializer.restoreMultiLayerNetwork(f, true);
     log.info("Network restored. {}", network);
     // TODO: there has to be a better way to manage the labels!?!?!! Gah
-    networkLabels = StringUtils.split(FileIO.toString(new File(filename + ".labels")), "\\|");
+    networkLabels = new ArrayList<String>();
+    for (String s : StringUtils.split(FileIO.toString(new File(filename + ".labels")), "\\|")) {
+      networkLabels.add(s);
+    }
     modelNumLabels = networkLabels.size();
     log.info("Network labels {} objects", modelNumLabels);
   }
