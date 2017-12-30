@@ -3,9 +3,7 @@ package org.myrobotlab.i2c;
 import java.io.IOException;
 
 import org.myrobotlab.framework.Platform;
-
 import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.i2c.impl.I2CBusImpl;
 
 public class I2CFactory {
 
@@ -40,7 +38,10 @@ public class I2CFactory {
 
     if (platform.isArm()) {
       // raspi
-      return I2CBusImpl.getBus(busNumber);
+      // TODO: fix this!!!
+      //log.warn("This probable doesn't work for ARM / RasPI now.. update the code!");
+      //return I2CBusImpl.getBus(busNumber);
+      return null;
     } else {
       return I2CProxyImpl.getBus(busNumber);
     }

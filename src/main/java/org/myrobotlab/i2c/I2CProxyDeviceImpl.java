@@ -75,4 +75,10 @@ public class I2CProxyDeviceImpl implements I2CDevice {
 
   }
 
+  @Override
+  public int getAddress() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
 }
