@@ -797,18 +797,28 @@
 			<version>0.3.11</version>
 		</dependency>
 
-		<!--  custom jar not found in maven central.  TODO: get rid of this depenency -->
+		<!-- custom jar not found in maven central. TODO: get rid of this depenency -->
 		<dependency>
 			<groupId>sosia</groupId>
 			<artifactId>sosia</artifactId>
 			<version>sosia</version>
 		</dependency>
-		<!--  also a custom jar file that's not found in the wild. -->
+		<!-- also a custom jar file that's not found in the wild. -->
 		<dependency>
 			<groupId>com.voicerss</groupId>
 			<artifactId>tts</artifactId>
 			<version>1.0</version>
 		</dependency>
+
+		<!-- required by the ListMethodsDoclet.java file.. TODO: find a different 
+			way to do it. 
+		<dependency>
+			<groupId>sun.jdk</groupId>
+			<artifactId>tools</artifactId>
+			<version>1.8.0</version>
+			<scope>system</scope>
+			<systemPath>C:/Program Files/Java/jdk1.8.0_66/lib/tools.jar</systemPath>
+		</dependency> -->
 
 	</dependencies>
 
