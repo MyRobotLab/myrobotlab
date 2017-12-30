@@ -65,7 +65,8 @@ public class TestSimplePhysics extends SimpleApplication {
     public void simpleInitApp() {
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
-        bulletAppState.getPhysicsSpace().enableDebug(assetManager);
+        // TODO: this was commented out due to version 3.1.0-stable of jme (in maven update)
+        // bulletAppState.getPhysicsSpace().enableDebug(assetManager);
 
         // Add a physics sphere to the world
         Node physicsSphere = PhysicsTestHelper.createPhysicsTestNode(assetManager, new SphereCollisionShape(1), 1);
