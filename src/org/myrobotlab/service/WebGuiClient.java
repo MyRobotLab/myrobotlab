@@ -20,6 +20,7 @@ import org.atmosphere.wasync.impl.AtmosphereClient;
 import org.atmosphere.wasync.impl.DefaultOptions;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -91,7 +92,7 @@ public class WebGuiClient extends Service {
         // websockets ?
         .uri(url) // the url
         .trackMessageLength(false) // Atmosphere feature of max frame size ?
-        .header("id", Runtime.getId()) // should be MRL.id static field value
+        .header("id", Platform.getLocalInstance().getId()) // should be MRL.id static field value
         .encoder(new Encoder<Message, String>() {
 
           @Override

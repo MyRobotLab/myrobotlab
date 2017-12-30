@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.net.URI;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,8 +14,15 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.myrobotlab.codec.Codec;
+import org.myrobotlab.codec.CodecFactory;
+import org.myrobotlab.codec.CodecJson;
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -59,19 +67,34 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
   boolean cleanSession = true; // Non durable subscriptions
   transient MqttAsyncClient client;
-  String clientId = String.format("%s@%s", getName(), Runtime.getInstance().getId());
+  String id = Platform.getLocalInstance().getId();
+  String clientId = String.format("%s@%s", getName(), id);
   transient MqttConnectOptions conOpt;
   boolean isConnected = false;
-  String topic = String.format("myrobotlab/%s", Runtime.getInstance().getId());
+  String topic = String.format("myrobotlab/%s", id);
   int port = 1883;
   int qos = 2;
 
   Set<String> subscriptions = new HashSet<String>();
 
+  // String url = "tcp://iot.eclipse.org:1883";
+  
+  /**
+   * Two types of connection are supported tcp:// for a TCP connection and ssl:// ,
+   * which is weird, that its not mqtt:// & mqtts:// :P
+   */
   String url = "tcp://iot.eclipse.org:1883";
+
+  // mrl specific
+  Codec codec;
 
   public Mqtt(String n) {
     super(n);
+    try {
+      codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
+    } catch (Exception e) {
+      error("codec failed to initialize");
+    }
   }
 
   public boolean connect(String url) throws MqttSecurityException, MqttException {
@@ -91,14 +114,13 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
         conOpt.setUserName(userName);
         conOpt.setPassword(password);
       }
-      clientId = String.format("%s@%s", getName(), Runtime.getId());
+      clientId = String.format("%s@%s", getName(), id);
       client = new MqttAsyncClient(url, clientId, persistence);
       client.setCallback(this);
 
       client.connect(conOpt, "Connect sample context", this);
       int i = 0;
-      while (!client.isConnected() || i < 10)
-      {
+      while (!client.isConnected() || i < 10) {
         sleep(1);
         i += 1;
       }
@@ -172,8 +194,43 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     // Called when a message arrives from the server that matches any
     // subscription made by the client
     String time = new Timestamp(System.currentTimeMillis()).toString();
-    String messageStr = "onMqttMsg Time: " + time + "\tTopic: " + topic + "\tMessage: " + new String(message.getPayload()) + "\tQoS: " + message.getQos();
+    // FIXME - new String won't be happy with true binary payloads ..
+    String payload = new String(message.getPayload());
+    String messageStr = "onMqttMsg Time: " + time + "\tTopic: " + topic + "\tMessage: " + payload + "\tQoS: " + message.getQos();
     log.info(messageStr);
+
+    // serialization needs to be a logical layer - so we can change it to
+    // protobuf or native Java
+    try {
+      Message msg = (Message) codec.decode(payload, Message.class);
+      
+      // COMMON GATEWAY REGISTERATION AND X-FORWARDED BEGIN --------------
+      
+      // make a mrl key and protocol uri begin ------
+      // ADD TCP CLIENT BEGIN ! - probably should not be in RemoteAdapter - as this is a detail for tcp
+      
+      // String clientKey = String.format("mqtt://%s:%d", this.url);
+      URI uri = new URI(url);
+      // HELP PROTOKEY VS MRL KEY ??
+      // TcpThread tcp = new TcpThread(myService, uri, clientSocket);
+      // tcpClientList.put(uri, tcp);
+      // myService.connections.put(uri, tcp.data);
+      
+      // make a mrl key and protocol uri end -------
+      
+      
+      // registration request - security is applied here
+      // x-forwarded is 
+      // msg.name == runtime;
+          
+          
+      // COMMON GATEWAY REGISTERATION AND X-FORWARDED END ----------------       
+      
+    } catch (Exception e) {
+      error("tried decoding [%] into a message", payload);
+    }
+
+    // are all necessary ?
     invoke("publishMqttMsg", topic, message.getPayload());
     invoke("publishMqttMsgByte", message.getPayload());
     invoke("publishMqttMsgString", new String(message.getPayload()), topic);
@@ -194,7 +251,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     publish(topic, qos, msg);
   }
 
-  public void publish(String topic, Integer qos, byte[] payload) throws Throwable {
+  public void publish(String topic, Integer qos, byte[] payload) throws MqttPersistenceException, MqttException {
     MqttMessage message = null;
 
     if (client == null || !client.isConnected()) {
@@ -210,11 +267,12 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     String time = new Timestamp(System.currentTimeMillis()).toString();
     log.info("Publishing at: " + time + " to topic \"" + topic + "\" qos " + qos);
 
+    // FIXME - see if user context is like a backend id ...
     client.publish(topic, message, "Pub sample context", this);
 
   }
 
-  public void publish(String topicName, int qos, String payload) throws Throwable {
+  public void publish(String topicName, int qos, String payload) throws MqttPersistenceException, MqttException {
     publish(topicName, qos, payload.getBytes());
   }
 
@@ -247,7 +305,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     qos = q;
   }
 
-  public void subscribe(String topic) throws Throwable {
+  public void subscribe(String topic) throws MqttException {
     subscribe(topic, 2);
   }
 
@@ -261,7 +319,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
    * @param qos the maximum quality of service to receive messages at for this
    * subscription
    */
-  public void subscribe(String topic, int qos) throws Throwable {
+  public void subscribe(String topic, int qos) throws MqttException {
     if (client == null || !client.isConnected()) {
       connect(url);
     }
@@ -293,7 +351,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Mqtt.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Mqtt.class);
     meta.addDescription(
         "This is an Mqtt client based on the Paho Mqtt client library. Mqtt is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");
     meta.addCategory("connectivity", "cloud");
@@ -310,7 +368,18 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     try {
       LoggingFactory.init();
 
-      Mqtt mqtt = (Mqtt) Runtime.start("mqtt", "Mqtt");
+      Mqtt mqtt01 = (Mqtt) Runtime.start("mqtt01", "Mqtt");
+      
+      //      | mrl gateway uri | protocol key
+      // URI = mrl://{getName()}/tcp://iot.eclipse.org:1883
+      
+      // (broadcast)
+      // allow-register list of id's
+
+      mqtt01.connect("tcp://iot.eclipse.org:1883");
+      mqtt01.subscribe("mrl/broadcast/#");
+      Message msg = Message.createMessage(mqtt01.getName(), "runtime", "hello", new Object[] { Runtime.getPlatform() });
+      mqtt01.publish("mrl/broadcast", 1, CodecJson.encode(msg).getBytes());
 
       // Runtime.start("servo", "Servo");
       // Runtime.start("opencv", "OpenCV");
@@ -341,11 +410,11 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
       // - public brokers -
       // https://github.com/mqtt/mqtt.github.io/wiki/public_brokers
-      mqtt.connect("tcp://iot.eclipse.org:1883");
+      mqtt01.connect("tcp://iot.eclipse.org:1883");
 
       // mqtt.setBroker("tcp://iot.eclipse.org:1883");
-      mqtt.setQos(2); // this can be defaulted - but its "per"
-                      // send/subscription...
+      mqtt01.setQos(2); // this can be defaulted - but its "per"
+      // send/subscription...
       // mqtt.setClientId("mrl");
 
       // iot.eclipse.org - the topic name MUST NOT contain wildcards
@@ -356,7 +425,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
        * mqtt.subscribe("mrl", 2); mqtt.publish("mrl", 2,
        * "Greetings from MRL !!!");
        */
-      mqtt.publish("Hello and Greetings from MRL !!!!");
+      mqtt01.publish("Hello and Greetings from MRL !!!!");
 
     } catch (Throwable e) {
       log.error("wtf", e);

@@ -48,11 +48,9 @@ public class _TemplateService extends Service {
       Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
-
 }
 
-
-// cake eaten 
+// yum yum ...

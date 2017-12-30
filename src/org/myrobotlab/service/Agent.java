@@ -171,7 +171,7 @@ public class Agent extends Service {
 
   public Agent(String n) {
     super(n);
-    log.info("Agent {} Pid {} is alive", n, Runtime.getPid());
+    log.info("Agent {} Pid {} is alive", n, Platform.getLocalInstance().getPid());
 
     if (currentBranch == null) {
       currentBranch = platform.getBranch();
@@ -1123,7 +1123,7 @@ public class Agent extends Service {
       // line
       // is relayed to the service
       // Start with the default cmdline for the agent
-      String[] agentArgs = new String[] { "-isAgent", "-id", String.format("agent.%s.%s", formatter.format(new Date()), Runtime.getPid())};
+      String[] agentArgs = new String[] { "-isAgent", "-id", String.format("agent.%s.%s", formatter.format(new Date()), Platform.getLocalInstance().getPid())};
       if (cmdline.containsKey("-agent")) {
         String str = cmdline.getArgument("-agent", 0);
         String[] tmp = str.split(" ");

@@ -47,46 +47,43 @@ public class MqttGui extends ServiceGui implements ActionListener {
 
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MqttGui.class);
-  
+
   // meta data/config
   JTextField url = new JTextField(15);
-  
+
   JComboBox<String> subscriptions = new JComboBox<String>();
-  
+
   // input
   JTextArea recvData = new JTextArea(5, 20);
   JScrollPane onMsg = new JScrollPane(recvData);
-  
+
   JTextArea sendData = new JTextArea(5, 20);
   JScrollPane sendMsg = new JScrollPane(sendData);
-  
+
   JTextField topic = new JTextField(30);
   JButton send = new JButton("send");
   JButton subscribe = new JButton("subscribe");
-  
-  int qos = 2;
 
+  int qos = 2;
 
   public MqttGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
-    
+
     recvData.setEditable(false);
-    DefaultCaret caret = (DefaultCaret)recvData.getCaret();
+    DefaultCaret caret = (DefaultCaret) recvData.getCaret();
     caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-    
+
     addTopLine(" url ", url);
     addTopLine(" subscriptions ", subscriptions);
     addTopLine(" messages", "");
     /*
-    JPanel sendToTopicPanel = new JPanel();
-    sendToTopicPanel.add(send);
-    sendToTopicPanel.add(topic);
-    sendToTopicPanel.add(subscribe);
-    */
+     * JPanel sendToTopicPanel = new JPanel(); sendToTopicPanel.add(send);
+     * sendToTopicPanel.add(topic); sendToTopicPanel.add(subscribe);
+     */
     addLine(onMsg);
     addLine(sendMsg);
     addBottomLine(createFlowPanel("topic", send, topic, subscribe));
-    
+
     send.addActionListener(this);
     subscribe.addActionListener(this);
     // addTopLine("time", timeTextField);
@@ -95,18 +92,23 @@ public class MqttGui extends ServiceGui implements ActionListener {
     // addTopLine("messages", onMsg);
     // addLine(onMsg);
   }
-  
-  public void onMqttMsg(MqttMsg msg){
-    recvData.append(String.format("%s: %s %s\n", new Timestamp(System.currentTimeMillis()).toString(), msg.topic, new String(msg.payload)));
+
+  public void onMqttMsg(MqttMsg msg) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        recvData.append(String.format("%s: %s %s\n", new Timestamp(System.currentTimeMillis()).toString(), msg.topic, new String(msg.payload)));
+      }
+    });
   }
 
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();
-    if (o == send){
+    if (o == send) {
       send("publish", topic.getText(), qos, sendData.getText().getBytes());
     }
-    if (o == subscribe){
+    if (o == subscribe) {
       send("subscribe", topic.getText());
     }
   }
@@ -120,7 +122,7 @@ public class MqttGui extends ServiceGui implements ActionListener {
   public void unsubscribeGui() {
     unsubscribe("publishMqttMsg");
   }
- 
+
   public void onState(final Mqtt mqtt) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
@@ -130,13 +132,13 @@ public class MqttGui extends ServiceGui implements ActionListener {
         Set<String> subs = mqtt.getSubscriptions();
         qos = mqtt.getQos();
         subscriptions.removeAllItems();
-        for (String s : subs){
+        for (String s : subs) {
           subscriptions.addItem(s);
         }
         topic.setText(mqtt.getTopic());
         subscriptions.setSelectedItem(mqtt.getTopic());
         // fixme JList of subscriptions ...
-        
+
       }
     });
   }

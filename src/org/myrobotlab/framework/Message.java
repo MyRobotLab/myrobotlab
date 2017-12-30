@@ -170,6 +170,16 @@ public class Message implements Serializable {
 
     return msg;
   }
+  
+  public static Message createMessage(String sender, String name, String method, Object[] data) {
+    Message msg = new Message();
+    msg.name = name; // destination instance name
+    msg.sender = sender;//this.getName();
+    msg.data = data;
+    msg.method = method;
+
+    return msg;
+  }
 
   
   static public Message createMessage(NameProvider sender, String name, String method, Object data) {

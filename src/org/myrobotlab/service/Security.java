@@ -30,6 +30,25 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.slf4j.Logger;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 // SINGLETON ???  similar to Runtime ???
 // http://blog.palominolabs.com/2011/10/18/java-2-way-tlsssl-client-certificates-and-pkcs12-vs-jks-keystores/
 // http://juliusdavies.ca/commons-ssl/ssl.html
@@ -93,6 +112,8 @@ public class Security extends Service implements AuthorizationProvider {
   // private HashMap<String, byte[]> keys = new HashMap<String, byte[]>();
 
   public static final String AES = "AES";
+  
+  private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
 
   public static void addSecret(String name, String secret) {
     store.put(name, secret);
@@ -122,11 +143,16 @@ public class Security extends Service implements AuthorizationProvider {
 
   /**
    * decrypt a value
-   * @param message m
-   * @param keyFile k
+   * 
+   * @param message
+   *          m
+   * @param keyFile
+   *          k
    * @return string
-   * @throws GeneralSecurityException e 
-   * @throws IOException e
+   * @throws GeneralSecurityException
+   *           e
+   * @throws IOException
+   *           e
    */
   public static String decrypt(String message, File keyFile) throws GeneralSecurityException, IOException {
     SecretKeySpec sks = getSecretKeySpec(keyFile);
@@ -139,11 +165,16 @@ public class Security extends Service implements AuthorizationProvider {
   /**
    * encrypt a value and generate a keyfile if the keyfile is not found then a
    * new one is created
-   * @param passphrase p
-   * @param keyFile k
+   * 
+   * @param passphrase
+   *          p
+   * @param keyFile
+   *          k
    * @return string
-   * @throws GeneralSecurityException e 
-   * @throws IOException e
+   * @throws GeneralSecurityException
+   *           e
+   * @throws IOException
+   *           e
    * 
    */
   public static String encrypt(String passphrase, File keyFile) throws GeneralSecurityException, IOException {
@@ -238,7 +269,6 @@ public class Security extends Service implements AuthorizationProvider {
     }
   }
 
-  
   private static byte[] readKeyFile(File keyFile) throws FileNotFoundException {
     Scanner scanner = new Scanner(keyFile);
     scanner.useDelimiter("\\Z");
@@ -269,8 +299,8 @@ public class Security extends Service implements AuthorizationProvider {
      * FIXME - set predefined levels - high security medium low
      * allowExportByType.put("Xmpp", false);
      * allowExportByType.put("RemoteAdapter", false);
-     * allowExportByType.put("WebGui", false);
-     * allowExportByType.put("SwingGui", false);
+     * allowExportByType.put("WebGui", false); allowExportByType.put("SwingGui",
+     * false);
      * 
      * allowExportByType.put("Java", false); allowExportByType.put("Python",
      * false);
@@ -481,7 +511,152 @@ public class Security extends Service implements AuthorizationProvider {
 
     return meta;
   }
-  
+
+  public static void installCert(String[] args) throws Exception {
+    String host;
+    int port;
+    char[] passphrase;
+    if ((args.length == 1) || (args.length == 2)) {
+      String[] c = args[0].split(":");
+      host = c[0];
+      port = (c.length == 1) ? 443 : Integer.parseInt(c[1]);
+      String p = (args.length == 1) ? "changeit" : args[1];
+      passphrase = p.toCharArray();
+    } else {
+      System.out.println("Usage: java InstallCert <host>[:port] [passphrase]");
+      return;
+    }
+
+    File file = new File("jssecacerts");
+    File dir = null;
+    if (file.isFile() == false) {
+      char SEP = File.separatorChar;
+      dir = new File(System.getProperty("java.home") + SEP + "lib" + SEP + "security");
+      file = new File(dir, "jssecacerts");
+      if (file.isFile() == false) {
+        file = new File(dir, "cacerts");
+      }
+    }
+    System.out.println("Loading KeyStore " + file + "...");
+    InputStream in = new FileInputStream(file);
+    KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+    ks.load(in, passphrase);
+    in.close();
+
+    SSLContext context = SSLContext.getInstance("TLS");
+    TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+    tmf.init(ks);
+    X509TrustManager defaultTrustManager = (X509TrustManager) tmf.getTrustManagers()[0];
+    SavingTrustManager tm = new SavingTrustManager(defaultTrustManager);
+    context.init(null, new TrustManager[] { tm }, null);
+    SSLSocketFactory factory = context.getSocketFactory();
+
+    System.out.println("Opening connection to " + host + ":" + port + "...");
+    SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
+    socket.setSoTimeout(10000);
+    try {
+      System.out.println("Starting SSL handshake...");
+      socket.startHandshake();
+      socket.close();
+      System.out.println();
+      System.out.println("No errors, certificate is already trusted");
+    } catch (SSLException e) {
+      System.out.println();
+      e.printStackTrace(System.out);
+    }
+
+    X509Certificate[] chain = tm.chain;
+    if (chain == null) {
+      System.out.println("Could not obtain server certificate chain");
+      return;
+    }
+
+    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+    System.out.println();
+    System.out.println("Server sent " + chain.length + " certificate(s):");
+    System.out.println();
+    MessageDigest sha1 = MessageDigest.getInstance("SHA1");
+    MessageDigest md5 = MessageDigest.getInstance("MD5");
+    for (int i = 0; i < chain.length; i++) {
+      X509Certificate cert = chain[i];
+      System.out.println(" " + (i + 1) + " Subject " + cert.getSubjectDN());
+      System.out.println("   Issuer  " + cert.getIssuerDN());
+      sha1.update(cert.getEncoded());
+      System.out.println("   sha1    " + toHexString(sha1.digest()));
+      md5.update(cert.getEncoded());
+      System.out.println("   md5     " + toHexString(md5.digest()));
+      System.out.println();
+    }
+
+    /*
+     * System.out.
+     * println("Enter certificate to add to trusted keystore or 'q' to quit: [1]"
+     * ); String line = reader.readLine().trim();
+     */
+    int k = 1;
+    /*
+     * try { k = (line.length() == 0) ? 0 : Integer.parseInt(line) - 1; } catch
+     * (NumberFormatException e) { System.out.println("KeyStore not changed");
+     * return; }
+     */
+
+    X509Certificate cert = chain[1];
+    String alias = host + "-" + (k + 1);
+    ks.setCertificateEntry(alias, cert);
+
+    OutputStream out = new FileOutputStream("jssecacerts");
+    ks.store(out, passphrase);
+    out.close();
+    // FileUtils.copyFileToDirectory(file, dir);
+    System.out.println();
+    System.out.println(cert);
+    System.out.println();
+    System.out.println("Added certificate to keystore 'jssecacerts' using alias '" + alias + "'");
+  }
+
+  private static String toHexString(byte[] bytes) {
+    StringBuilder sb = new StringBuilder(bytes.length * 3);
+    for (int b : bytes) {
+      b &= 0xff;
+      sb.append(HEXDIGITS[b >> 4]);
+      sb.append(HEXDIGITS[b & 15]);
+      sb.append(' ');
+    }
+    return sb.toString();
+  }
+
+  private static class SavingTrustManager implements X509TrustManager {
+
+    private final X509TrustManager tm;
+    private X509Certificate[] chain;
+
+    SavingTrustManager(X509TrustManager tm) {
+      this.tm = tm;
+    }
+
+    public X509Certificate[] getAcceptedIssuers() {
+
+      /**
+       * This change has been done due to the following resolution advised for
+       * Java 1.7+
+       * http://infposs.blogspot.kr/2013/06/installcert-and-java-7.html
+       **/
+
+      return new X509Certificate[0];
+      // throw new UnsupportedOperationException();
+    }
+
+    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+      throw new UnsupportedOperationException();
+    }
+
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+      this.chain = chain;
+      tm.checkServerTrusted(chain, authType);
+    }
+  }
+
   public static void main(String[] args) throws Exception {
     LoggingFactory.init(Level.INFO);
 
@@ -489,39 +664,35 @@ public class Security extends Service implements AuthorizationProvider {
     final String PWD_FILE = "howto.properties";
 
     // initializeStore("im a rockin rocker");
-    Security.addSecret("amazon.polly.user.key", "FIE3823873349852");
-    Security.addSecret("amazon.polly.user.secret", "323Ujfkds838234jfkDKJkdlskjlfkj");
-    Security.addSecret("xmpp.user", "supertick@gmail.com");
-    Security.addSecret("xmpp.pwd", "mrlRocks!");
+    Security.addSecret("amazon.polly.user.key", "FIE38343873349852");
+    Security.addSecret("amazon.polly.user.secret", "323Ujfkis838234jfkDk3k4dlskjlfkj");
+    Security.addSecret("xmpp.user", "user@gmail.com");
+    Security.addSecret("xmpp.pwd", "xxxxxxxx");
     saveStore();
     Security.getSecret("amazon.polly.user.key");
     loadStore();
-    log.info(Security.getSecret("xmpp.user")); // FIXME - report stor is has not be loaded !!!
+    log.info(Security.getSecret("xmpp.user")); // FIXME - report stor is has not
+                                               // be loaded !!!
     log.info(Security.getSecret("amazon.polly.user.key"));
     log.info(Security.getSecret("amazon.polly.user.secret"));
 
     /*
-    String clearPwd = "mrlRocks!";
+     * String clearPwd = "mrlRocks!";
+     * 
+     * Properties p1 = new Properties();
+     * 
+     * p1.put("webgui.user", "supertick@gmail.com"); p1.put("webgui.pwd",
+     * "zd7"); p1.put("xmpp.user", "supertick@gmail.com"); String encryptedPwd =
+     * Security.encrypt(clearPwd, new File(KEY_FILE)); p1.put("xmpp.pwd",
+     * encryptedPwd); p1.store(new FileWriter(PWD_FILE), "");
+     * 
+     * // ================== Properties p2 = new Properties();
+     * 
+     * p2.load(new FileReader(PWD_FILE)); encryptedPwd =
+     * p2.getProperty("xmpp.pwd"); System.out.println(encryptedPwd);
+     * System.out.println(Security.decrypt(encryptedPwd, new File(KEY_FILE)));
+     */
 
-    Properties p1 = new Properties();
-
-    p1.put("webgui.user", "supertick@gmail.com");
-    p1.put("webgui.pwd", "zd7");
-    p1.put("xmpp.user", "supertick@gmail.com");
-    String encryptedPwd = Security.encrypt(clearPwd, new File(KEY_FILE));
-    p1.put("xmpp.pwd", encryptedPwd);
-    p1.store(new FileWriter(PWD_FILE), "");
-
-    // ==================
-    Properties p2 = new Properties();
-
-    p2.load(new FileReader(PWD_FILE));
-    encryptedPwd = p2.getProperty("xmpp.pwd");
-    System.out.println(encryptedPwd);
-    System.out.println(Security.decrypt(encryptedPwd, new File(KEY_FILE)));
-    */
-    
   }
-
 
 }
