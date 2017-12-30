@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
+import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 /**
  * <p>
@@ -190,7 +191,7 @@ public class AdafruitLEDBackpack implements I2CDevice {
     return b;
   }
 
-  public AdafruitLEDBackpack(int bus, int address) throws IOException {
+  public AdafruitLEDBackpack(int bus, int address) throws IOException, UnsupportedBusNumberException {
 
     log.info(String.format("AdafruitLEDBackpack on %d %d", bus, address));
 
@@ -381,6 +382,12 @@ public class AdafruitLEDBackpack implements I2CDevice {
     }
 
     return data;
+  }
+
+  @Override
+  public int getAddress() {
+    // TODO Auto-generated method stub
+    return 0;
   }
 
 }
