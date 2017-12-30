@@ -660,7 +660,7 @@
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
-			<version>1.4</version>
+			<version>1.4.5</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
@@ -788,6 +788,27 @@
 			<type>pom</type>
 		</dependency>
 
+
+		<!-- webcam service -->
+		<!-- https://mvnrepository.com/artifact/com.github.sarxos/webcam-capture -->
+		<dependency>
+			<groupId>com.github.sarxos</groupId>
+			<artifactId>webcam-capture</artifactId>
+			<version>0.3.11</version>
+		</dependency>
+
+		<!--  custom jar not found in maven central.  TODO: get rid of this depenency -->
+		<dependency>
+			<groupId>sosia</groupId>
+			<artifactId>sosia</artifactId>
+			<version>sosia</version>
+		</dependency>
+		<!--  also a custom jar file that's not found in the wild. -->
+		<dependency>
+			<groupId>com.voicerss</groupId>
+			<artifactId>tts</artifactId>
+			<version>1.0</version>
+		</dependency>
 
 	</dependencies>
 
