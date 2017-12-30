@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,6 +16,14 @@ import java.util.TreeMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+/**
+ * The purpose of this class is to retrieve all the detailed information
+ * regarding the details of the current platform which myrobotlab is running.
+ * 
+ * It must NOT have references to mrl services, or Runtime, or 3rd party library
+ * dependencies except perhaps for logging
+ *
+ */
 public class Platform implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -40,23 +50,40 @@ public class Platform implements Serializable {
   String vmName;
   String vmVersion;
   String mrlVersion;
+
+  /**
+   * Static identifier to identify the "instance" of myrobotlab - similar to
+   * network ip of a device and used in a similar way
+   */
   String id;
   String branch;
 
-  private String commit;
+  String pid;
+  String hostname;
+  String commit;
+  String build;
+  String motd;
+  Date startTime;
 
-  private String build;
+  static Platform localInstance; // = getLocalInstance();
 
-  private String motd;
-
-  static Platform localInstance = getLocalInstance();
-
-  // -------------pass through begin -------------------
-  public static Platform getLocalInstance(String id) {
+  /**
+   * The one big convoluted function to get all the crazy platform specific
+   * data. Potentially, it's done once and only once for a running instance.
+   * Most of the data should be immutable, although the "id"
+   * 
+   * All data should be accessed through public functions on the local instance.
+   * If the local instance is desired. If its from a serialized instance, the
+   * "getters" will be retrieving appropriate info for that serialized instance.
+   * 
+   * @return
+   */
+  public static Platform getLocalInstance() {
 
     if (localInstance == null) {
       Platform platform = new Platform();
-      platform.id = id;
+
+      platform.startTime = new Date();
 
       // os
       platform.os = System.getProperty("os.name").toLowerCase();
@@ -120,7 +147,7 @@ public class Platform implements Serializable {
       // infinite loop
 
       StringBuffer sb = new StringBuffer();
-      
+
       try {
         BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/version.txt"), "UTF-8"));
         for (int c = br.read(); c != -1; c = br.read()) {
@@ -138,42 +165,61 @@ public class Platform implements Serializable {
         platform.mrlVersion = format.format(new Date());
       }
 
-      // FIXME deprecate
-      /*
-      try {
-        sb.setLength(0);
-        BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/branch.txt"), "UTF-8"));
-        for (int c = br.read(); c != -1; c = br.read()) {
-          sb.append((char) c);
-        }
-        if (sb.length() > 0) {
-          platform.branch = sb.toString();
-        }
-      } catch (Exception e) {
-        // no logging silently die
-      }
-      */
-
+      // manifest
       Map<String, String> manifest = getManifest();
+
       if (manifest.containsKey("Branch")) {
         platform.branch = manifest.get("Branch");
       } else {
         platform.branch = "develop";
       }
-      
+
       if (manifest.containsKey("Commit")) {
         platform.commit = manifest.get("Commit");
       } else {
         platform.commit = "unknown";
       }
-      
+
       if (manifest.containsKey("Implementation-Version")) {
         platform.mrlVersion = manifest.get("Implementation-Version");
       } else {
         platform.mrlVersion = "unknown";
       }
 
+      // motd
       platform.motd = "You Know, for Creative Machine Control !";
+
+      // hostname
+      try {
+        platform.hostname = InetAddress.getLocalHost().getHostName();
+        if (platform.hostname != null) {
+          platform.hostname = platform.hostname.toLowerCase();
+        }
+      } catch (Exception e) {
+        platform.hostname = "localhost";
+      }
+
+      SimpleDateFormat TSFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+      platform.pid = TSFormatter.format(platform.startTime);
+
+      try {
+
+        // something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
+        // but non standard across jvms & hosts
+        // here we will attempt to standardize it - when asked for pid you
+        // "only"
+        // get pid ... if possible
+        String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+        int index = jvmName.indexOf('@');
+
+        if (index > 1) {
+          platform.pid = Long.toString(Long.parseLong(jvmName.substring(0, index)));
+        } else {
+          platform.pid = jvmName;
+        }
+
+      } catch (Exception e) {
+      }
 
       localInstance = platform;
     }
@@ -182,6 +228,10 @@ public class Platform implements Serializable {
   }
 
   public Platform() {
+  }
+
+  public String getPid() {
+    return pid;
   }
 
   public String getMotd() {
@@ -291,7 +341,7 @@ public class Platform implements Serializable {
       }
 
       Manifest manifest = new Manifest(in);
-      ret.putAll(getAttributes(null , manifest.getMainAttributes()));
+      ret.putAll(getAttributes(null, manifest.getMainAttributes()));
       final Map<String, Attributes> attrs = manifest.getEntries();
       Iterator<String> it = attrs.keySet().iterator();
       while (it.hasNext()) {
@@ -306,41 +356,37 @@ public class Platform implements Serializable {
     }
     return ret;
   }
-  
-  private static Map<String,String> getAttributes(String part, Attributes attributes){
-    Map<String,String> data = new TreeMap<String,String>();
+
+  private static Map<String, String> getAttributes(String part, Attributes attributes) {
+    Map<String, String> data = new TreeMap<String, String>();
     Iterator<Object> it = attributes.keySet().iterator();
-    while (it.hasNext()){
-        java.util.jar.Attributes.Name key = (java.util.jar.Attributes.Name) it.next();
-        Object value = attributes.get(key);
-        String partKey = null;
-        if (part == null){
-          partKey = key.toString();
-        } else {
-          partKey = String.format("%s.%s", part, key);
-        }
-         
-        System.out.println(partKey + ":  " + value);
-        if (value != null){
-          data.put(partKey, value.toString());
-        }
+    while (it.hasNext()) {
+      java.util.jar.Attributes.Name key = (java.util.jar.Attributes.Name) it.next();
+      Object value = attributes.get(key);
+      String partKey = null;
+      if (part == null) {
+        partKey = key.toString();
+      } else {
+        partKey = String.format("%s.%s", part, key);
+      }
+
+      System.out.println(partKey + ":  " + value);
+      if (value != null) {
+        data.put(partKey, value.toString());
+      }
     }
     return data;
-}
+  }
 
   @Override
   public String toString() {
     return String.format("%s.%d.%s", arch, bitness, os);
   }
 
-  public static Platform getLocalInstance() {
-    return getLocalInstance(null);
-  }
-
   public static void main(String[] args) {
     try {
 
-      Platform platform = Platform.getLocalInstance("test");
+      Platform platform = Platform.getLocalInstance();
       System.out.println("platform : " + platform.toString());
       System.out.println("build " + platform.getBuild());
       System.out.println("branch " + platform.getBranch());
@@ -350,6 +396,27 @@ public class Platform implements Serializable {
     } catch (Exception e) {
       System.out.println(e);
     }
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public String getHostname() {
+    return hostname;
+  }
+
+  /**
+   * the one place where the "id" can be set
+   * 
+   * @param argument
+   */
+  public void setId(String newId) {
+    id = newId;
+  }
+
+  public Date getStartTime() {
+    return startTime;
   }
 
 }

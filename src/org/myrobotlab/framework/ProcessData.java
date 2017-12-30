@@ -99,7 +99,7 @@ public class ProcessData implements Serializable {
 		this.branch = branch;
 		this.version = version;
 		this.process = process;
-		this.fromAgent = Runtime.getId();
+		this.fromAgent = Platform.getLocalInstance().getId();//Runtime.getId();
 	}
 
 	/**
@@ -244,7 +244,7 @@ public class ProcessData implements Serializable {
 		}
 
 		cmd.add("-fromAgent");
-		cmd.add(Runtime.getId());
+		cmd.add(Platform.getLocalInstance().getId());
 		
 		// if an id is not supplied for this process
 		// create a new "Unique" one

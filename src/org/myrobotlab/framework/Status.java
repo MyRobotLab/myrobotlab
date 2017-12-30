@@ -35,6 +35,11 @@ public class Status implements Serializable {// extends Exception {
   public String level;
   public String key;
   public String detail;
+  
+  /**
+   * optional source of status
+   */
+  public Object source;
 
   // --- static creation of typed Status objects ----
   public static Status debug(String format, Object... args) {
