@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.SerializableImage;
@@ -23,8 +24,9 @@ import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
 /**
- * FIXME - consider - https://stackoverflow.com/questions/1813881/java-ocr-implementation
- * If this thing is no worky ...
+ * FIXME - consider -
+ * https://stackoverflow.com/questions/1813881/java-ocr-implementation If this
+ * thing is no worky ...
  * 
  * TesseractOCR - This service will use the open source project tesseract.
  * Tesseract will take an Image and extract any recognizable text from that
@@ -35,20 +37,20 @@ public class TesseractOcr extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(TesseractOcr.class); 
+  public final static Logger log = LoggerFactory.getLogger(TesseractOcr.class);
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
     try {
 
-      TesseractOcr tesseract = (TesseractOcr)Runtime.start("tesseract", "TesseractOcr");
+      TesseractOcr tesseract = (TesseractOcr) Runtime.start("tesseract", "TesseractOcr");
       String found = tesseract.ocr("test.png");
       // String found = tesseract.ocr("test.jpg");
       // String found = tesseract.ocr("test.tif");
       log.info("found {}", found);
       Runtime.start("gui", "GUIService");
-     
+
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -77,7 +79,7 @@ public class TesseractOcr extends Service {
     }
     return null;
   }
-  
+
   public String ocr(String filename) throws IOException {
     BufferedImage image = ImageIO.read(new File(filename));
     return ocr(image);
@@ -86,7 +88,6 @@ public class TesseractOcr extends Service {
   public String ocr(SerializableImage image) {
     return ocr(image.getImage());
   }
-
 
   /**
    * This static method returns all the details of the class without it having
@@ -113,19 +114,20 @@ public class TesseractOcr extends Service {
       public int unsetenv(String name);
     }
 
-    static public class POSIX { 
+    static public class POSIX {
       static Object libc;
 
       static {
-    	  try {
-        if (System.getProperty("os.name").contains("win")) {
+        try {
+          Platform platform = Platform.getLocalInstance();
+          if (platform.isWindows()) {
             libc = Native.loadLibrary("msvcrt", WinLibC.class);
-        } else {
+          } else {
             libc = Native.loadLibrary("c", LinuxLibC.class);
+          }
+        } catch (Exception e) {
+          log.error("loading native libraries threw", e);
         }
-    	  } catch(Exception e){
-    		  log.error("loading native libraries threw", e);
-    	  }
       }
 
       public int setenv(String name, String value, int overwrite) {
