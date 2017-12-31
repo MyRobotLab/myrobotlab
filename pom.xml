@@ -28,8 +28,8 @@
 	<repositories>
 		<repository>
 			<id>myrobotlab</id>
-			<name>ip-172-31-41-252-releases</name>
-			<url>http://ec2-34-229-236-234.compute-1.amazonaws.com/artifactory/myrobotlab</url>
+			<name>repo.myrobotlab.org</name>
+			<url>http://repo.myrobotlab.org/artifactory/myrobotlab</url>
 		</repository>
 		<repository>
 			<id>bintray</id>
