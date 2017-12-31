@@ -1296,8 +1296,8 @@ public class Servo extends Service implements ServoControl {
 
       VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
       virtual.connect(arduinoPort);
-      Runtime.start("gui", "SwingGui");
-      Runtime.start("python", "Python");
+      // Runtime.start("gui", "SwingGui");
+      // Runtime.start("python", "Python");
 
       boolean done = false;
       if (done) {
