@@ -28,7 +28,7 @@ public class ArduinoMsgGenerator {
 	static final Integer MRLCOMM_VERSION = 57;
 
   public void generateDefinitions() throws IOException {
-    generateDefinitions(new File("src/resource/Arduino/generate/arduinoMsgs.schema"));
+    generateDefinitions(new File("src/main/resources/resource/Arduino/generate/arduinoMsgs.schema"));
   }
 
   static final HashSet<String> keywords = new HashSet<String>();
@@ -91,11 +91,11 @@ public class ArduinoMsgGenerator {
   public void generateDefinitions(File idl) throws IOException {
 
     // load templates
-    String arduinoMsgCodeTemplateH = toString("src/resource/Arduino/generate/ArduinoMsgCodec.template.h");
-    String idlToHpp = toString("src/resource/Arduino/generate/Msg.template.h");
-    String idlToCpp = toString("src/resource/Arduino/generate/Msg.template.cpp");
-    String idlToJava = toString("src/resource/Arduino/generate/Msg.template.java");
-    String virtualJava = toString("src/resource/Arduino/generate/Msg.template.java");
+    String arduinoMsgCodeTemplateH = toString("src/main/resources/resource/Arduino/generate/ArduinoMsgCodec.template.h");
+    String idlToHpp = toString("src/main/resources/resource/Arduino/generate/Msg.template.h");
+    String idlToCpp = toString("src/main/resources/resource/Arduino/generate/Msg.template.cpp");
+    String idlToJava = toString("src/main/resources/resource/Arduino/generate/Msg.template.java");
+    String virtualJava = toString("src/main/resources/resource/Arduino/generate/Msg.template.java");
 
     // String idlToJava = toString("blah");
 
@@ -208,10 +208,10 @@ public class ArduinoMsgGenerator {
     fileSnr.put("%javaDeviceTypes%", javaDeviceTypes.toString());
 
     // FIXME - will move to MrlComm.h
-    String mrlComm_h = toString("src/resource/Arduino/MRLComm/MrlComm.h");
+    String mrlComm_h = toString("src/main/resources/resource/Arduino/MRLComm/MrlComm.h");
     String top = mrlComm_h.substring(0, mrlComm_h.indexOf("<generatedCallBacks>") + "<generatedCallBacks>".length());
     String bottom = mrlComm_h.substring(mrlComm_h.indexOf("</generatedCallBacks>"));
-    FileOutputStream mrlComm_updated_h = new FileOutputStream("src/resource/Arduino/MRLComm/MrlComm.h");
+    FileOutputStream mrlComm_updated_h = new FileOutputStream("src/main/resources/resource/Arduino/MRLComm/MrlComm.h");
     mrlComm_updated_h.write((top + "\n" + cppGeneratedCallBacks.toString() + "    // " + bottom).getBytes());
     mrlComm_updated_h.close();
 
@@ -246,11 +246,11 @@ public class ArduinoMsgGenerator {
     }
 
     // write out to files ..
-    FileOutputStream MsgH = new FileOutputStream("src/resource/Arduino/MRLComm/Msg.h");
-    FileOutputStream MsgCpp = new FileOutputStream("src/resource/Arduino/MRLComm/Msg.cpp");
+    FileOutputStream MsgH = new FileOutputStream("src/main/resources/resource/Arduino/MRLComm/Msg.h");
+    FileOutputStream MsgCpp = new FileOutputStream("src/main/resources/resource/Arduino/MRLComm/Msg.cpp");
     FileOutputStream MsgJava = new FileOutputStream("src/org/myrobotlab/arduino/Msg.java");
     FileOutputStream VirtualMsg = new FileOutputStream("src/org/myrobotlab/arduino/VirtualMsg.java");
-    FileOutputStream ArduinoMsgCodedH = new FileOutputStream("src/resource/Arduino/MRLComm/ArduinoMsgCodec.h");
+    FileOutputStream ArduinoMsgCodedH = new FileOutputStream("src/main/resources/resource/Arduino/MRLComm/ArduinoMsgCodec.h");
 
     ArduinoMsgCodedH.write(arduinoMsgCodeTemplateH.getBytes());
     MsgH.write(idlToHpp.getBytes());
@@ -346,9 +346,9 @@ public class ArduinoMsgGenerator {
     Map<String, String> methodSnr = new TreeMap<String, String>();
 
     // load templates
-    String hMethod = toString("src/resource/Arduino/generate/Msg.method.template.h");
-    String cppMethod = toString("src/resource/Arduino/generate/Msg.method.template.cpp");
-    String javaMethod = toString("src/resource/Arduino/generate/Msg.method.template.java");
+    String hMethod = toString("src/main/resources/resource/Arduino/generate/Msg.method.template.h");
+    String cppMethod = toString("src/main/resources/resource/Arduino/generate/Msg.method.template.cpp");
+    String javaMethod = toString("src/main/resources/resource/Arduino/generate/Msg.method.template.java");
 
     // load search and replace
     Map<String, String> snr = new TreeMap<String, String>();

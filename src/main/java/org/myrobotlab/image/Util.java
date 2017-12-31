@@ -242,7 +242,7 @@ public class Util {
   public static String getRessourceDir() {
     String ressourceDir=System.getProperty("user.dir") + File.separator + "resource"+ File.separator;
     if (!FileIO.isJar()) {
-      ressourceDir=System.getProperty("user.dir") + File.separator + "src/resource"+ File.separator;
+      ressourceDir=System.getProperty("user.dir") + File.separator + "src/main/resources/resource"+ File.separator;
     }
     return ressourceDir; 
   }

@@ -102,7 +102,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // byte[] data = FileIO.fileToByteArray(new
         // File("flvTest.flv"));
         // byte[] data = FileIO.fileToByteArray(new
-        // File("src/resource/WebGUI/video/ffmpeg.1443989700495.mp4"));
+        // File("src/main/resources/resource/WebGUI/video/ffmpeg.1443989700495.mp4"));
         // byte[] data = FileIO.fileToByteArray(new
         // File("mp4Test.mp4"));
         byte[] data = FileIO.toByteArray(new File("test.avi.h264.mp4"));
@@ -382,7 +382,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // .resource("/video/ffmpeg.1443989700495.mp4", test)
 
         // for debugging
-        .resource("./src/resource/WebGui").resource("./src/resource")
+        .resource("./src/main/resources/resource/WebGui").resource("./src/main/resources/resource")
         // for runtime - after extractions
         .resource("./resource/WebGui").resource("./resource")
 

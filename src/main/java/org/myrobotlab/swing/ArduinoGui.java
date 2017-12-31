@@ -282,7 +282,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     }
     try {
       if (mrlIno == null) {
-        pathToMrlComm = "src/resource/Arduino/MrlComm/MrlComm.ino";
+        pathToMrlComm = "src/main/resources/resource/Arduino/MrlComm/MrlComm.ino";
         mrlIno = FileIO.toString(pathToMrlComm);
       }
     } catch (Exception e) {

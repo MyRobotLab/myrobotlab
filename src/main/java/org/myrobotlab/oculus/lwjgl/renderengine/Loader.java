@@ -70,7 +70,7 @@ public class Loader {
   public int loadTexture(String fileName) {
     Texture texture = null;
     try {
-      // FileInputStream is = new FileInputStream("src/resource/" + fileName +
+      // FileInputStream is = new FileInputStream("src/main/resources/resource/" + fileName +
       // ".png");
       // InputStream is = new
       // URL("https://upload.wikimedia.org/wikipedia/en/2/24/Lenna.png").openStream();
