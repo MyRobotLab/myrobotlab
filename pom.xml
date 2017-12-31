@@ -865,7 +865,7 @@
 				<executions>
 					<execution>
 						<configuration>
-							<mainClass>org.myrobotlab.service.Runtime</mainClass>
+							<mainClass>org.myrobotlab.service.Agent</mainClass>
 							<onejarVersion>0.97</onejarVersion>
 							<attachToBuild>true</attachToBuild>
 						</configuration>
