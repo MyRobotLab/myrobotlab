@@ -181,7 +181,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       File filterfile = new File("resource/facerec/Filter.png");
       if (!filterfile.exists()) {
         // work around to fix this so it works in eclipse 
-        filterfile = new File("src/resource/facerec/Filter.png");
+        filterfile = new File("src/main/resources/resource/facerec/Filter.png");
       }
       //
       // Face mask used to mask edges of face pictures to eliminate noise around
