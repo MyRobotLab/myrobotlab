@@ -1617,10 +1617,13 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     synchronized (instanceLockObject) {
       if (runtime == null) {
         runtime = this;
+      }
+      
+      if (runtime.platform == null){
         runtime.platform = Platform.getLocalInstance();
       }
     }
-
+    
     // 3 states
     // isAgent == make default directory (with pid) if custom not supplied
     // fromAgent == needs agentId

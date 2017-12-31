@@ -129,8 +129,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
     int i = 0;
 
-    Runtime.createAndStart(String.format("ras%d", i), "Runtime");
-    Runtime.createAndStart(String.format("rasPi%d", i), "RasPi");
+    Runtime.start(String.format("rasPi%d", i), "RasPi");
     Runtime.createAndStart(String.format("rasGUI%d", i), "SwingGui");
     Runtime.createAndStart(String.format("rasPython%d", i), "Python");
     // Runtime.createAndStart(String.format("rasClock%d",i), "Clock");
@@ -353,7 +352,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware like th GPIO pins and i2c");
     meta.addCategory("i2c", "control");
     meta.setSponsor("Mats");
-    meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
+    meta.addDependency("com.pi4j.pi4j", "1.1");
     return meta;
   }
 
