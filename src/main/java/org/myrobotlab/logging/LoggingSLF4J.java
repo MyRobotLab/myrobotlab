@@ -2,7 +2,6 @@ package org.myrobotlab.logging;
 
 import java.nio.charset.StandardCharsets;
 
-import org.apache.log4j.DailyRollingFileAppender;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;

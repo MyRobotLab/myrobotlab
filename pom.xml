@@ -81,7 +81,7 @@
 			<version>5.2</version>
 			<type>pom</type>
 		</dependency>
-		
+
 		<!-- Mary TTS stuff. -->
 		<dependency>
 			<groupId>de.dfki.mary</groupId>
@@ -120,9 +120,13 @@
 					<groupId>org.apache.httpcomponents</groupId>
 					<artifactId>httpcore</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 
 		<!-- These will be the local dependencies that are not in maven central.. or some other repo -->
 		<dependency>
@@ -241,26 +245,6 @@
 			</exclusions>
 		</dependency>
 
-<!-- 		<dependency>
-			<groupId>org.ghost4j</groupId>
-			<artifactId>ghost4j</artifactId>
-			<version>1.0.1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-io</groupId>
-					<artifactId>commons-io</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>  -->
-
 		<!-- https://mvnrepository.com/artifact/com.sun.media/jai_imageio -->
 		<dependency>
 			<groupId>com.sun.media</groupId>
@@ -268,7 +252,6 @@
 			<version>1.2-pre-dr-b04</version>
 		</dependency>
 
-		<!-- FIXME - should be a version from maven central https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j -->
 		<!-- https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j -->
 		<dependency>
 			<groupId>net.sourceforge.tess4j</groupId>
@@ -302,20 +285,24 @@
 				<exclusion>
 					<groupId>net.java.dev.jna</groupId>
 					<artifactId>jna</artifactId>
-				</exclusion>				
-				<!--  this conflicts with dl4j 1.3.0 , vs 1.3.1 here. -->
+				</exclusion>
+				<!-- this conflicts with dl4j 1.3.0 , vs 1.3.1 here. -->
 				<exclusion>
 					<groupId>com.github.jai-imageio</groupId>
 					<artifactId>jai-imageio-core</artifactId>
-				</exclusion>				
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>log4j-over-slf4j</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/net.java.dev.jna/jna -->
 		<dependency>
-		    <groupId>net.java.dev.jna</groupId>
-		    <artifactId>jna</artifactId>
-		    <version>4.5.1</version>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna</artifactId>
+			<version>4.5.1</version>
 		</dependency>
 
 		<dependency>
@@ -417,7 +404,7 @@
 					<groupId>junit</groupId>
 					<artifactId>junit</artifactId>
 				</exclusion>
-				
+
 			</exclusions>
 		</dependency>
 
@@ -435,7 +422,7 @@
 					<groupId>io.netty</groupId>
 					<artifactId>netty</artifactId>
 				</exclusion>
-				
+
 			</exclusions>
 		</dependency>
 
@@ -460,21 +447,6 @@
 			</exclusions>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/log4j/log4j -->
-		<dependency>
-		    <groupId>log4j</groupId>
-		    <artifactId>log4j</artifactId>
-		    <version>1.2.17</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
-		<dependency>
-		    <groupId>ch.qos.logback</groupId>
-		    <artifactId>logback-classic</artifactId>
-		    <version>1.2.3</version>
-		    <scope>test</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>org.wikidata.wdtk</groupId>
 			<artifactId>wdtk-wikibaseapi</artifactId>
@@ -484,7 +456,7 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
-								
+
 				<exclusion>
 					<groupId>org.apache.commons</groupId>
 					<artifactId>commons-lang3</artifactId>
@@ -516,6 +488,10 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-core</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -540,16 +516,12 @@
 					<groupId>org.bytedeco</groupId>
 					<artifactId>javacv</artifactId>
 				</exclusion>
-				
+
 			</exclusions>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.georegression/georegression 
-		<dependency>
-			<groupId>org.georegression</groupId>
-			<artifactId>georegression</artifactId>
-			<version>0.10</version>
-		</dependency> -->
+		<!-- https://mvnrepository.com/artifact/org.georegression/georegression <dependency> <groupId>org.georegression</groupId> <artifactId>georegression</artifactId> 
+			<version>0.10</version> </dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/org.scream3r/jssc -->
 		<dependency>
@@ -740,12 +712,8 @@
 			<version>2.0.4</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/io.netty/netty 
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty</artifactId>
-			<version>3.10.0.Final</version>
-		</dependency> -->
+		<!-- https://mvnrepository.com/artifact/io.netty/netty <dependency> <groupId>io.netty</groupId> <artifactId>netty</artifactId> <version>3.10.0.Final</version> 
+			</dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
 		<dependency>
@@ -755,15 +723,18 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
-		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
 		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<version>1.1.8</version>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>logback-classic</artifactId>
+		    <version>1.2.3</version>
 		</dependency>
 
-
-		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<!-- https://mvnrepository.com/artifact/log4j/log4j -->
+		<dependency>
+		    <groupId>log4j</groupId>
+		    <artifactId>log4j</artifactId>
+		    <version>1.2.17</version>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
@@ -856,7 +827,7 @@
 					<groupId>org.nd4j</groupId>
 					<artifactId>nd4j-api</artifactId>
 				</exclusion>
-				
+
 			</exclusions>
 		</dependency>
 
