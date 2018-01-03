@@ -7,7 +7,6 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.bytedeco.javacpp.opencv_core.CvScalar;
@@ -27,7 +26,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   
   public Map<String, Double> lastResult = null; 
-  private IplImage lastImage = null;
+  private volatile IplImage lastImage = null;
   
   public OpenCVFilterDL4J() {
     super();
@@ -52,18 +51,14 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
       
     }
     log.info("Done loading model..");
-    
     // start classifier thread
-    
     Thread classifier = new Thread(this, "DL4JClassifierThread");
     classifier.start();
-    
-    
+    log.info("DL4J Classifier thread started : {}", this.name);
   }
   
   @Override
   public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
-    
     if (lastResult != null) {
       // the thread running will be updating lastResult for it as fast as it can.
       // log.info("Display result " );
@@ -128,7 +123,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
         // log.info("No Image to classify...");
       }
       // TODO: see why there's a race condition. i seem to need a little delay here o/w the recognition never seems to start.
-      // maybe lastImage needs to be marked as volitite?
+      // maybe lastImage needs to be marked as volatile ?
       try {
         Thread.sleep(1);
       } catch (InterruptedException e) {
