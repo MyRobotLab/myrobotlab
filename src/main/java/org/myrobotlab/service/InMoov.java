@@ -1766,6 +1766,10 @@ public class InMoov extends Service {
           } else {
             calibrationWriter.write("# " + s.getName() + ".setPin(" + s.getPin() + ")\n");
           }
+          
+          s.map(s.getMinInput(), s.getMaxInput(), s.getMinOutput(), s.getMaxOutput());
+          // save the servo map
+          calibrationWriter.write(s.getName() + ".map(" +s.getMinInput() +","+ s.getMaxInput()+","+ s.getMinOutput()+","+ s.getMaxOutput() + ")\n");
           // if there's a controller reattach it at rest
           if (s.getController() != null) {
             String controller = s.getController().getName();

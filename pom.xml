@@ -15,12 +15,10 @@
 		<dl4j.version>0.9.1</dl4j.version>
 		<nd4j.backend>nd4j-native-platform</nd4j.backend>
 		<!-- To enable CUDA / GPU Support replace backend with the following. <nd4j.backend>nd4j-cuda-8.0-platform</nd4j.backend> -->
-
 		<aws.java.sdk.version>1.11.255</aws.java.sdk.version>
 
 		<jme3_g>org.jmonkeyengine</jme3_g>
 		<jme3_v>3.1.0-stable</jme3_v>
-
 
 	</properties>
 
@@ -72,10 +70,8 @@
 
 	<dependencies>
 
-		<!-- TODO This should not be here! there's some other config issue that 
-			makes this tools.jar not found for some reason. -->
-		<!-- <dependency> <groupId>tools</groupId> <artifactId>com.sun.jdk</artifactId> 
-			<version>0.0</version> <scope>system</scope> <systemPath>${project.basedir}/build-lib/tools.jar</systemPath> 
+		<!-- TODO This should not be here! there's some other config issue that makes this tools.jar not found for some reason. -->
+		<!-- <dependency> <groupId>tools</groupId> <artifactId>com.sun.jdk</artifactId> <version>0.0</version> <scope>system</scope> <systemPath>${project.basedir}/build-lib/tools.jar</systemPath> 
 			</dependency> -->
 
 		<!-- TODO upgrade to 5.2 -->
@@ -85,15 +81,55 @@
 			<version>5.2</version>
 			<type>pom</type>
 		</dependency>
+		
+		<!-- Mary TTS stuff. -->
+		<dependency>
+			<groupId>de.dfki.mary</groupId>
+			<artifactId>voice-cmu-slt-hsmm</artifactId>
+			<version>5.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-io</groupId>
+					<artifactId>commons-io</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-collections</groupId>
+					<artifactId>commons-collections</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-lang</groupId>
+					<artifactId>commons-lang</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.opennlp</groupId>
+					<artifactId>opennlp-tools</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpcore</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
 
-		<!-- These will be the local dependencies that are not in maven central.. 
-			or some other repo -->
+		<!-- These will be the local dependencies that are not in maven central.. or some other repo -->
 		<dependency>
 			<groupId>program-ab</groupId>
 			<artifactId>program-ab-kw</artifactId>
 			<version>0.0.4.1</version>
 		</dependency>
-
 		<dependency>
 			<groupId>program-ab</groupId>
 			<artifactId>program-ab-data</artifactId>
@@ -170,12 +206,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>edu.cmu.sphinx</groupId>
-			<artifactId>sphinx4-data</artifactId>
-			<version>5prealpha-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
 			<groupId>topcodes</groupId>
 			<artifactId>topcodes</artifactId>
 			<version>1.0.0</version>
@@ -203,13 +233,33 @@
 			<groupId>com.github.sarxos</groupId>
 			<artifactId>webcam-capture</artifactId>
 			<version>0.3.10</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.ghost4j</groupId>
 			<artifactId>ghost4j</artifactId>
 			<version>1.0.1</version>
-		</dependency>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-io</groupId>
+					<artifactId>commons-io</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>  -->
 
 		<!-- https://mvnrepository.com/artifact/com.sun.media/jai_imageio -->
 		<dependency>
@@ -224,8 +274,49 @@
 			<groupId>net.sourceforge.tess4j</groupId>
 			<artifactId>tess4j</artifactId>
 			<version>3.4.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-io</groupId>
+					<artifactId>commons-io</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-collections</groupId>
+					<artifactId>commons-collections</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.java.dev.jna</groupId>
+					<artifactId>jna</artifactId>
+				</exclusion>				
+				<!--  this conflicts with dl4j 1.3.0 , vs 1.3.1 here. -->
+				<exclusion>
+					<groupId>com.github.jai-imageio</groupId>
+					<artifactId>jai-imageio-core</artifactId>
+				</exclusion>				
+			</exclusions>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/net.java.dev.jna/jna -->
+		<dependency>
+		    <groupId>net.java.dev.jna</groupId>
+		    <artifactId>jna</artifactId>
+		    <version>4.5.1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.github.nicholasastuart</groupId>
@@ -260,13 +351,11 @@
 			<version>4.1.6</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.github.nicholasastuart/myo-java 
-			<dependency> <groupId>com.github.nicholasastuart</groupId> <artifactId>myo-java</artifactId> 
-			<version>0.9.1</version> </dependency> -->
+		<!-- https://mvnrepository.com/artifact/com.github.nicholasastuart/myo-java <dependency> <groupId>com.github.nicholasastuart</groupId> 
+			<artifactId>myo-java</artifactId> <version>0.9.1</version> </dependency> -->
 
 
-		<!-- https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j <dependency> 
-			<groupId>net.sourceforge.tess4j</groupId> <artifactId>tess4j</artifactId> 
+		<!-- https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j <dependency> <groupId>net.sourceforge.tess4j</groupId> <artifactId>tess4j</artifactId> 
 			<version>1.1</version> </dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.client.mqttv3 -->
@@ -284,8 +373,7 @@
 			<version>0.4.2</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.github.sarxos/webcam-capture 
-			<dependency> <groupId>com.github.sarxos</groupId> <artifactId>webcam-capture</artifactId> 
+		<!-- https://mvnrepository.com/artifact/com.github.sarxos/webcam-capture <dependency> <groupId>com.github.sarxos</groupId> <artifactId>webcam-capture</artifactId> 
 			<version>0.3.10</version> </dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/it.sauronsoftware.cron4j/cron4j -->
@@ -300,6 +388,37 @@
 			<groupId>net.sf.jipcam</groupId>
 			<artifactId>jipcam</artifactId>
 			<version>0.9.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache</groupId>
+					<artifactId>commons-codec</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache</groupId>
+					<artifactId>commons-lang</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-lang</groupId>
+					<artifactId>commons-lang</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-codec</groupId>
+					<artifactId>commons-codec</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+				
+			</exclusions>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.atmosphere/wasync -->
@@ -307,6 +426,17 @@
 			<groupId>org.atmosphere</groupId>
 			<artifactId>wasync</artifactId>
 			<version>2.1.3</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.netty</groupId>
+					<artifactId>netty</artifactId>
+				</exclusion>
+				
+			</exclusions>
 		</dependency>
 
 		<!-- oculus deps from https://github.com/OculusRiftInAction/jocular-examples -->
@@ -314,38 +444,56 @@
 			<groupId>org.saintandreas</groupId>
 			<artifactId>glamour-lwjgl</artifactId>
 			<version>[1.0.8, 2)</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.lwjgl.lwjgl</groupId>
+					<artifactId>lwjgl</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>org.saintandreas</groupId>
-			<artifactId>math</artifactId>
-			<version>[1.0.4, 2)</version>
-		</dependency>
-		<dependency>
-			<groupId>org.saintandreas</groupId>
-			<artifactId>oria-resources</artifactId>
-			<version>[1.0.4, 2)</version>
-		</dependency>
-		<!-- <dependency> <groupId>org.saintandreas</groupId> <artifactId>jovr</artifactId> 
-			<version>0.7.0.0-SNAPSHOT</version> </dependency> -->
-
 
 		<!-- https://mvnrepository.com/artifact/log4j/log4j -->
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
+		    <groupId>log4j</groupId>
+		    <artifactId>log4j</artifactId>
+		    <version>1.2.17</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+		<dependency>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>logback-classic</artifactId>
+		    <version>1.2.3</version>
+		    <scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.wikidata.wdtk</groupId>
 			<artifactId>wdtk-wikibaseapi</artifactId>
 			<version>0.7.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+								
+				<exclusion>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-lang3</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
-		<!-- todo I feel like there's a better way to get this into the class path?! 
-			<dependency> <groupId>sun.jdk</groupId> <artifactId>tools</artifactId> <version>1.7.0</version> 
-			<scope>system</scope> <systemPath>${java.home}/../lib/tools.jar</systemPath> 
-			</dependency> -->
+		<!-- todo I feel like there's a better way to get this into the class path?! <dependency> <groupId>sun.jdk</groupId> <artifactId>tools</artifactId> 
+			<version>1.7.0</version> <scope>system</scope> <systemPath>${java.home}/../lib/tools.jar</systemPath> </dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/com.1stleg/jnativehook -->
 		<dependency>
@@ -364,6 +512,10 @@
 					<groupId>ch.qos.logback</groupId>
 					<artifactId>logback-classic</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -379,15 +531,25 @@
 			<groupId>org.boofcv</groupId>
 			<artifactId>all</artifactId>
 			<version>0.26</version>
+			<exclusions>
+				<exclusion>
+					<groupId>net.java.dev.jna</groupId>
+					<artifactId>jna</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.bytedeco</groupId>
+					<artifactId>javacv</artifactId>
+				</exclusion>
+				
+			</exclusions>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.clojars.pauld/georegression -->
-		<!-- https://mvnrepository.com/artifact/org.georegression/georegression -->
+		<!-- https://mvnrepository.com/artifact/org.georegression/georegression 
 		<dependency>
 			<groupId>org.georegression</groupId>
 			<artifactId>georegression</artifactId>
 			<version>0.10</version>
-		</dependency>
+		</dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/org.scream3r/jssc -->
 		<dependency>
@@ -401,13 +563,12 @@
 			<artifactId>jovr</artifactId>
 			<groupId>org.saintandreas</groupId>
 			<version>0.7.0.0</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.wikidata.wdtk/wdtk-datamodel -->
-		<dependency>
-			<groupId>org.wikidata.wdtk</groupId>
-			<artifactId>wdtk-datamodel</artifactId>
-			<version>0.7.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>net.java.dev.jna</groupId>
+					<artifactId>jna</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/net.sf.jali/jali-cmusphinx -->
@@ -424,14 +585,10 @@
 			<version>0.3.11</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.pi4j/pi4j-core <dependency> 
-			<groupId>com.pi4j</groupId> <artifactId>pi4j-core</artifactId> <version>1.1</version> 
-			</dependency> <dependency> <groupId>com.pi4j</groupId> <artifactId>pi4j-device</artifactId> 
-			<version>1.1</version> </dependency> <dependency> <groupId>com.pi4j</groupId> 
-			<artifactId>pi4j-gpio-extension</artifactId> <version>1.1</version> </dependency> 
-			<dependency> <groupId>com.pi4j</groupId> <artifactId>pi4j-service</artifactId> 
-			<version>1.1</version> </dependency> -->
-
+		<!-- https://mvnrepository.com/artifact/com.pi4j/pi4j-core <dependency> <groupId>com.pi4j</groupId> <artifactId>pi4j-core</artifactId> 
+			<version>1.1</version> </dependency> <dependency> <groupId>com.pi4j</groupId> <artifactId>pi4j-device</artifactId> <version>1.1</version> 
+			</dependency> <dependency> <groupId>com.pi4j</groupId> <artifactId>pi4j-gpio-extension</artifactId> <version>1.1</version> </dependency> 
+			<dependency> <groupId>com.pi4j</groupId> <artifactId>pi4j-service</artifactId> <version>1.1</version> </dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/au.com.bytecode/opencsv -->
 		<dependency>
@@ -445,6 +602,16 @@
 			<groupId>org.apache.solr</groupId>
 			<artifactId>solr-solrj</artifactId>
 			<version>4.10.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-io</groupId>
+					<artifactId>commons-io</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.opennlp/opennlp-tools -->
@@ -496,21 +663,6 @@
 			<version>1.0.1</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/net.java.dev.jna/jna -->
-		<dependency>
-			<groupId>net.java.dev.jna</groupId>
-			<artifactId>jna</artifactId>
-			<version>4.2.2</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/com.memetix/microsoft-translator-java-api -->
-		<dependency>
-			<groupId>com.memetix</groupId>
-			<artifactId>microsoft-translator-java-api</artifactId>
-			<version>0.6.2</version>
-		</dependency>
-
-
 		<!-- https://mvnrepository.com/artifact/org.rxtx/rxtx -->
 		<dependency>
 			<groupId>org.rxtx</groupId>
@@ -523,21 +675,23 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.bytedeco/javacv -->
 		<dependency>
 			<groupId>org.bytedeco</groupId>
 			<artifactId>javacv</artifactId>
-			<version>1.3</version>
+			<version>1.3.3</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.bytedeco/javacpp -->
-		<dependency>
-			<groupId>org.bytedeco</groupId>
-			<artifactId>javacpp</artifactId>
-			<version>1.3</version>
-		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.bytedeco/javacpp <dependency> <groupId>org.bytedeco</groupId> <artifactId>javacpp</artifactId> 
+			<version>1.3</version> </dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
 		<dependency>
@@ -553,7 +707,6 @@
 			<version>3.5</version>
 		</dependency>
 
-
 		<!-- https://mvnrepository.com/artifact/org.apache.ivy/ivy -->
 		<dependency>
 			<groupId>org.apache.ivy</groupId>
@@ -568,16 +721,10 @@
 			<version>1.3.1</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.github.nicholasastuart/myo-java 
-			<dependency> <groupId>com.github.nicholasastuart</groupId> <artifactId>myo-java</artifactId> 
-			<version>0.9.1</version> </dependency> -->
+		<!-- https://mvnrepository.com/artifact/com.github.nicholasastuart/myo-java <dependency> <groupId>com.github.nicholasastuart</groupId> 
+			<artifactId>myo-java</artifactId> <version>0.9.1</version> </dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/org.lwjgl.lwjgl/lwjgl -->
-		<dependency>
-			<groupId>org.lwjgl.lwjgl</groupId>
-			<artifactId>lwjgl</artifactId>
-			<version>2.9.3</version>
-		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea -->
 		<dependency>
@@ -593,19 +740,12 @@
 			<version>2.0.4</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.atmosphere/atmosphere-runtime -->
-		<dependency>
-			<groupId>org.atmosphere</groupId>
-			<artifactId>atmosphere-runtime</artifactId>
-			<version>2.3.0</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/io.netty/netty -->
+		<!-- https://mvnrepository.com/artifact/io.netty/netty 
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty</artifactId>
 			<version>3.10.0.Final</version>
-		</dependency>
+		</dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
 		<dependency>
@@ -615,11 +755,6 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.1.8</version>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -629,18 +764,14 @@
 
 
 		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.21</version>
-		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.5</version>
+			<version>2.6</version>
 		</dependency>
+
 
 		<!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client -->
 		<dependency>
@@ -690,6 +821,16 @@
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-core</artifactId>
 			<version>${dl4j.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-io</groupId>
+					<artifactId>commons-io</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -702,6 +843,21 @@
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-zoo</artifactId>
 			<version>${dl4j.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.deeplearning4j</groupId>
+					<artifactId>deeplearning4j-nn</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.nd4j</groupId>
+					<artifactId>nd4j-api</artifactId>
+				</exclusion>
+				
+			</exclusions>
 		</dependency>
 
 		<!-- for amazon polly service -->
@@ -709,6 +865,12 @@
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-polly</artifactId>
 			<version>${aws.java.sdk.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-rekognition -->
@@ -744,14 +906,6 @@
 			<version>${jme3_v}</version>
 		</dependency>
 
-		<!-- Mary TTS stuff. -->
-		<dependency>
-			<groupId>de.dfki.mary</groupId>
-			<artifactId>voice-cmu-slt-hsmm</artifactId>
-			<version>5.2</version>
-		</dependency>
-
-
 		<!-- https://mvnrepository.com/artifact/com.illposed.osc/javaosc-core -->
 		<dependency>
 			<groupId>com.illposed.osc</groupId>
@@ -781,13 +935,6 @@
 			<version>20160810</version>
 		</dependency>
 
-		<dependency>
-			<groupId>io.github.firemaples</groupId>
-			<artifactId>microsoft-translator-java-api</artifactId>
-			<version>0.8.3</version>
-			<type>pom</type>
-		</dependency>
-
 
 		<!-- webcam service -->
 		<!-- https://mvnrepository.com/artifact/com.github.sarxos/webcam-capture -->
@@ -810,15 +957,8 @@
 			<version>1.0</version>
 		</dependency>
 
-		<!-- required by the ListMethodsDoclet.java file.. TODO: find a different 
-			way to do it. 
-		<dependency>
-			<groupId>sun.jdk</groupId>
-			<artifactId>tools</artifactId>
-			<version>1.8.0</version>
-			<scope>system</scope>
-			<systemPath>C:/Program Files/Java/jdk1.8.0_66/lib/tools.jar</systemPath>
-		</dependency> -->
+		<!-- required by the ListMethodsDoclet.java file.. TODO: find a different way to do it. <dependency> <groupId>sun.jdk</groupId> <artifactId>tools</artifactId> 
+			<version>1.8.0</version> <scope>system</scope> <systemPath>C:/Program Files/Java/jdk1.8.0_66/lib/tools.jar</systemPath> </dependency> -->
 
 	</dependencies>
 
@@ -914,17 +1054,14 @@
 				</configuration>
 				<version>2.9</version>
 			</plugin>
-			<!-- This plugin deletes the lib dir populated by the dependency plugin 
-				below. -->
+			<!-- This plugin deletes the lib dir populated by the dependency plugin below. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
 				<version>2.3</version>
 				<executions>
-					<!-- <execution> <phase>initialize</phase> <goals> <goal>clean</goal> 
-						</goals> <configuration> <excludeDefaultDirectories>true</excludeDefaultDirectories> 
-						<filesets> <fileset> <directory>target/lib</directory> </fileset> </filesets> 
-						</configuration> </execution> -->
+					<!-- <execution> <phase>initialize</phase> <goals> <goal>clean</goal> </goals> <configuration> <excludeDefaultDirectories>true</excludeDefaultDirectories> 
+						<filesets> <fileset> <directory>target/lib</directory> </fileset> </filesets> </configuration> </execution> -->
 				</executions>
 			</plugin>
 

@@ -198,6 +198,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     int counter = 0;
     for (File image : imageFiles) {
       // load the image
+      log.info("Loading image file : {}", image.getAbsolutePath());
       Mat img = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
       // Parse the filename label-foo.jpg everything up to the first - is the
       // label.
@@ -315,6 +316,9 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     // faceCascade.detectMultiScale(gray,scaleFactor=1.1,minNeighbors=5,minSize=(50,
     // 50),flags=cv2.cv.CV_HAAR_SCALE_IMAGE)
     faceCascade.detectMultiScale(mat, vec);
+    // TODO: what size?!
+    // faceCascade.detectMultiScale(mat, vec, 1.1, 5, CV_HAAR_SCALE_IMAGE, new Size(50), new Size(50));
+    //faceCascade.detectMultiScale(mat, vec, 1.1, 5, 0, new Size(20), new Size(20));
     return vec;
   }
 
@@ -426,7 +430,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
               }
             }
 
-            int predictedLabel = faceRecognizer.predict(dFaceMatSized);
+            
+            int predictedLabel = faceRecognizer.predict_label(dFaceMatSized);
             String name = Integer.toString(predictedLabel);
             if (idToLabelMap.containsKey(predictedLabel)) {
               name = idToLabelMap.get(predictedLabel);

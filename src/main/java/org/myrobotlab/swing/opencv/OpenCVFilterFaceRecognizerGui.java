@@ -121,13 +121,7 @@ public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements Ac
         e1.printStackTrace();
       }
     } else if (o == loadButton) {
-      try {
-        bf.load();
-      } catch (IOException e1) {
-        log.warn("Error loading face recognition model {}", e1.getLocalizedMessage());
-        // TODO Auto-generated catch block
-        e1.printStackTrace();
-      }
+      bf.load();
     }
   }
 
