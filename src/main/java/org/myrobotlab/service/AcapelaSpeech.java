@@ -551,7 +551,11 @@ private Object language;
     
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
-    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    
+    // FIXME - add HttpClient service ....
+    // meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
 
     //End of support
     meta.setAvailable(false);

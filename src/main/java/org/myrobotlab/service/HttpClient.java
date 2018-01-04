@@ -51,6 +51,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.InstallCert;
 import org.myrobotlab.service.data.HttpData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.HttpResponseListener;
@@ -88,7 +89,8 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     ServiceType meta = new ServiceType(HttpClient.class.getCanonicalName());
     meta.addDescription("a general purpose http client, used to fetch information on the web");
     meta.addCategory("network");
-    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
     meta.setCloudService(true);
     return meta;
   }
@@ -272,7 +274,15 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     try {
 
       HttpClient client = (HttpClient) Runtime.start("client", "HttpClient");
-      Runtime.start("gui", "SwingGui");
+      
+      // <host>[:port] [passphrase]
+      
+      InstallCert.main(new String[]{"searx.laquadrature.net:443"});
+      
+      String json = client.get("https://searx.laquadrature.net/?q=cat&format=json");
+      log.info(json);
+      
+      // Runtime.start("gui", "SwingGui");
       boolean done = true;
       
       if (done){
@@ -283,6 +293,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
       // with interface inspection ??
       client.addHttpResponseListener(client);
       client.addHttpDataListener(client);
+      
+      
+      
 
       // TODO - getByteArray(...)
       String index = client.get("https://www.cs.tut.fi/~jkorpela/forms/testing.html");

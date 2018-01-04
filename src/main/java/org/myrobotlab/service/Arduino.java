@@ -129,7 +129,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     meta.addDescription("controls an Arduino microcontroller as a slave, which allows control of all the devices the Arduino is attached to, such as servos, motors and sensors");
     meta.addCategory("microcontroller");
     meta.addPeer("serial", "Serial", "serial device for this Arduino");
-    meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
+    // meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT"); GroG-"This should not be here"
 
     meta.setLicenseGplV3(); // via jssc
 
@@ -2217,7 +2217,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       LoggingFactory.init(Level.INFO);
       log.info("{}", "nano".hashCode());
 
-      boolean virtual = true;
+      boolean virtual = false;
       boolean isDone = true;
       String port = "COM10";
       

@@ -1130,8 +1130,8 @@ public class Serial extends Service
 
 		ServiceType meta = new ServiceType(Serial.class.getCanonicalName());
 		meta.addDescription("reads and writes data to a serial port");
-		meta.addCategory("sensor", "control");
-		meta.addDependency("com.googlecode.jssc", "2.8.0");
+		meta.addCategory("sensor", "control");		
+		meta.addDependency("org.scream3r", "jssc", "2.8.0");
 		return meta;
 	}
 

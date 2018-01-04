@@ -51,7 +51,6 @@ import javax.swing.ImageIcon;
 
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
 /**
@@ -103,8 +102,11 @@ public class Util {
 
   /**
    * Creates an image compatible with the current display
-   * @param width int
-   * @param height int
+   * 
+   * @param width
+   *          int
+   * @param height
+   *          int
    * 
    * @return A BufferedImage with the appropriate color model
    */
@@ -195,26 +197,26 @@ public class Util {
 
   public static Image getImage(String path, String defaultImage) {
     Image icon = null;
-    File imgURL=new File(getRessourceDir()+path);
+    File imgURL = new File(getRessourceDir() + path);
     if (isExistRessourceElement(path)) {
       try {
         icon = ImageIO.read(imgURL);
-        //log.info(imgURL.getPath());
+        // log.info(imgURL.getPath());
         return icon;
       } catch (IOException e) {
-        Logging.logError(e);
+        log.error("getImage threw", e);
       }
     }
 
     // trying default image
-    imgURL=new File(getRessourceDir()+defaultImage);
+    imgURL = new File(getRessourceDir() + defaultImage);
 
     if (imgURL != null) {
       try {
         icon = ImageIO.read(imgURL);
         return icon;
       } catch (IOException e) {
-        Logging.logError(e);
+        log.error("read image threw", e);
       }
     }
 
@@ -240,26 +242,26 @@ public class Util {
    * @return current resource directory
    */
   public static String getRessourceDir() {
-    String ressourceDir=System.getProperty("user.dir") + File.separator + "resource"+ File.separator;
+    String ressourceDir = System.getProperty("user.dir") + File.separator + "resource" + File.separator;
     if (!FileIO.isJar()) {
-      ressourceDir=System.getProperty("user.dir") + File.separator + "src/main/resources/resource"+ File.separator;
+      ressourceDir = System.getProperty("user.dir") + File.separator + "src/main/resources/resource" + File.separator;
     }
-    return ressourceDir; 
+    return ressourceDir;
   }
-  
+
   /**
    * Check if file exist from current resource directory
    * 
    * @return boolean
    */
   public static Boolean isExistRessourceElement(String element) {
-    File f=new File(getRessourceDir()+element);
+    File f = new File(getRessourceDir() + element);
     if (!f.exists()) {
       return false;
     }
     return true;
   }
-  
+
   public static final ImageIcon getResourceIcon(String path) {
     ImageIcon icon = null;
 
@@ -434,7 +436,7 @@ public class Util {
       fos.write(baos.toByteArray());
       fos.close();
     } catch (IOException e) {
-      Logging.logError(e);
+      log.error("writeBufferedImage threw", e);
     }
 
   }
