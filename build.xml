@@ -97,7 +97,7 @@
 	<property environment="env" />
 	
 	<!-- default local build will be "develop" branch -->
-	<condition property="branch" value="${branch}" else="develop">
+	<condition property="branch" value="${branch}" else="master">
 	  <isset property="branch" />
 	</condition>
 	
