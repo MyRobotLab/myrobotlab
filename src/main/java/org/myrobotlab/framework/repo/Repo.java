@@ -47,6 +47,12 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.RepoInstallListener;
 import org.slf4j.Logger;
 
+/**
+ * FIXME - this should be a basic wrapper class for Ivy
+ * which allows easy service dependency resolution, and serializable units of data
+ * and easy status of dependencies
+ */
+
 // FIXME
 // clearRepo - whipes out all (calls other methods) <- not static
 // clearRepoCache - wipes out .repo <- static since it IS static - only 1 on machine
@@ -54,6 +60,7 @@ import org.slf4j.Logger;
 // clearServiceData <- not static - this is per instance/installation 
 
 /**
+ * FIXME - deprecated - no moving to maven based dependency resolution ... no github repo
  * This class is responsible for maintaining the "local" repo state for the MRL
  * instance running. It could have "potentially" the knowledge of the gitHub
  * repo using the github api. But at the moment, it maintains a local file
@@ -106,7 +113,7 @@ public class Repo implements Serializable {
     return localInstance;
   }
 
-  final public String REPO_DIR = "repo";
+  // final public String REPO_DIR = "repo";
 
   ArrayList<Status> errors = new ArrayList<Status>();
 
@@ -238,7 +245,7 @@ public class Repo implements Serializable {
 
     for (Library dep : unfulfilled) {
       libraries.put(dep.getKey(), dep);
-      resolveArtifacts(dep.getOrg(), dep.getRevision(), true);
+      resolveArtifacts(dep, true);
     }
   }
 
@@ -279,23 +286,15 @@ public class Repo implements Serializable {
    * @throws IOException e
    */
 
-  synchronized public ResolveReport resolveArtifacts(String org, String version, boolean retrieve) throws ParseException, IOException {
-    info("%s %s.%s", (retrieve) ? "retrieving" : "resolve", org, version);
+  synchronized public ResolveReport resolveArtifacts(Library library, boolean retrieve) throws ParseException, IOException {
+    info("%s.%s", (retrieve) ? "retrieving" : "resolve",  library);
+    
     // clear errors for this install
     errors.clear();
-
-    Library library = new Library(org, version);
+    
     libraries.put(library.getKey(), library);
     // creates clear ivy settings
-    // IvySettings ivySettings = new IvySettings();
-    String module;
-    int p = org.lastIndexOf(".");
-    if (p != -1) {
-      module = org.substring(p + 1, org.length());
-    } else {
-      module = org;
-    }
-
+    
     // creates an Ivy instance with settings
     // Ivy ivy = Ivy.newInstance(ivySettings);
     if (ivy == null) {
@@ -336,7 +335,7 @@ public class Repo implements Serializable {
     IvySettings settings = ivy.getSettings();
     // GAP20151208 settings.setDefaultCache(new
     // File(System.getProperty("user.home"), ".repo"));
-    settings.setDefaultCache(new File(REPO_DIR));
+    // settings.setDefaultCache(new File(REPO_DIR)); GAP20180101 - removing custom cache
     settings.addAllVariables(System.getProperties());
 
     File cache = new File(settings.substitute(settings.getDefaultCache().getAbsolutePath()));
@@ -351,8 +350,9 @@ public class Repo implements Serializable {
     String platformConf = String.format("runtime,%s.%s.%s", platform.getArch(), platform.getBitness(), platform.getOS());
     log.info(String.format("requesting %s", platformConf));
 
-    String[] confs = new String[] { platformConf };
-    String[] dep = new String[] { org, module, version };
+    // String[] confs = new String[] { platformConf }; // e.g. x86.64.windows
+    String[] confs = new String[] { };
+    String[] dep = new String[] { library.getOrg(), library.getArtifactId(), library.getVersion() };
 
     File ivyfile = File.createTempFile("ivy", ".xml");
     ivyfile.deleteOnExit();
@@ -378,7 +378,7 @@ public class Repo implements Serializable {
       }
     } else {
       // set as installed & save state
-      info("%s %s.%s for %s", (retrieve) ? "retrieved" : "installed", org, version, platform.getPlatformId());
+      info("%s %s for %s", (retrieve) ? "retrieved" : "installed", library, platform.getPlatformId());
       library.setInstalled(true);
       save();
     }
@@ -395,7 +395,7 @@ public class Repo implements Serializable {
 
       log.info("retrieve returned {}", ret);
 
-      setInstalled(getKey(org, version));
+      // setInstalled(getKey(org, version)); WTH?
       save();
 
       // TODO - retrieve should mean unzip from local cache -> to root of
@@ -442,11 +442,13 @@ public class Repo implements Serializable {
    * @param org the org 
    * @param version the version of that lib
    */
+  /*
   public void addLibrary(String org, String version) {
     Library dep = new Library(org, version);
     libraries.put(String.format("%s/%s", org, version), dep);
     save();
   }
+  */
 
   /**
    * generates instance of all dependencies from a repo directory would be

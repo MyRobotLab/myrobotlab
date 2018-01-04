@@ -80,9 +80,6 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 		this.simpleName = name.substring(name.lastIndexOf(".")+1);
 	}
 
-	public void addDependency(String org, String version) {
-		dependencies.add(String.format("%s/%s", org, version));
-	}
 
 	@Override
 	public int compare(ServiceType o1, ServiceType o2) {
@@ -207,6 +204,17 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 
   public void setCloudService(boolean b) {
     isCloudService = b;
+  }
+  
+  public void addDependency(String org, String version) {
+    dependencies.add(String.format("%s/%s", org, version));
+  }
+  
+
+  // TODO - without version is latest ?
+  public void addDependency(String groupId, String artifactId, String version) {
+    dependencies.add(String.format("%s/%s/%s", groupId, artifactId, version));
+    
   }
   
 

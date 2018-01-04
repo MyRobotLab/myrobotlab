@@ -11,12 +11,14 @@ public class Library implements Serializable, Comparator<Library> {
   transient public final static Logger log = LoggerFactory.getLogger(Library.class);
 
   private static final long serialVersionUID = 1L;
-  private String org;
-  private String revision;
+  private String groupId;
+  private String artifactId;
+  private String version;
+  
   private boolean installed = false;
 
   public Library() {
-    this(null, null, true);
+    this(null, null, null, true);
   }
 
   /**
@@ -25,23 +27,30 @@ public class Library implements Serializable, Comparator<Library> {
    */
   public Library(String key) {
     String[] split = key.split("/");
-    if (split.length != 2) {
+    
+    if (split.length == 2){
+      this.groupId = split[0];
+      this.version = split[1];
+    } else if (split.length == 3) {
+      this.groupId = split[0];
+      this.artifactId = split[1];
+      this.version = split[2];
+    } else {
       String err = String.format("%s not a valid library key", key);
       log.error(err);
       throw new RuntimeException(err);
     }
-    this.org = split[0];
-    this.revision = split[1];
   }
-
+/*
   public Library(String organisation, String version) {
-    this.org = organisation;
-    this.revision = version;
+    this.groupId = organisation;
+    this.version = version;
   }
-
-  public Library(String organisation, String version, boolean released) {
-    this.org = organisation;
-    this.revision = version;
+*/
+  public Library(String organisation, String artifactId, String version, boolean released) {
+    this.groupId = organisation;
+    this.artifactId = artifactId;
+    this.version = version;
   }
 
   @Override
@@ -50,23 +59,27 @@ public class Library implements Serializable, Comparator<Library> {
   }
 
   public String getModule() {
-    if (org == null) {
+    if (groupId == null) {
       return null;
     }
-    int p = org.lastIndexOf(".");
+    int p = groupId.lastIndexOf(".");
     if (p == -1) {
-      return org;
+      return groupId;
     } else {
-      return org.substring(p + 1);
+      return groupId.substring(p + 1);
     }
   }
 
   public String getOrg() {
-    return org;
+    return groupId;
+  }
+  
+  public String getArtifactId() {
+    return artifactId;
   }
 
-  public String getRevision() {
-    return revision;
+  public String getVersion() {
+    return version;
   }
 
   public boolean isInstalled() {
@@ -74,12 +87,12 @@ public class Library implements Serializable, Comparator<Library> {
   }
 
   public void setRevision(String revision) {
-    this.revision = revision;
+    this.version = revision;
   }
 
   @Override
   public String toString() {
-    return String.format("%s %s %b", org, revision, installed);
+    return String.format("%s %s %s %b", groupId, artifactId, version, installed);
   }
 
   public void setInstalled(boolean installed) {
@@ -87,7 +100,7 @@ public class Library implements Serializable, Comparator<Library> {
   }
 
   public String getKey() {
-    return String.format("%s/%s", org, revision);
+    return String.format("%s/%s", groupId, version);
   }
 
 }
