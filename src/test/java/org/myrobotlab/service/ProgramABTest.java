@@ -19,7 +19,8 @@ public class ProgramABTest {
   private ProgramAB testService;
   private String username = "testUser";
   private String botname = "lloyd";
-  private String path = "test/ProgramAB";
+  // TODO: move this to test resources
+  private String path = "src/test/resources/ProgramAB";
 
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
 
