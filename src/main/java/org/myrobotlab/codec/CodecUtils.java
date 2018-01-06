@@ -450,5 +450,13 @@ public class CodecUtils {
     initialized = true;
   }
 
+  public static String getSimpleName(String serviceType) {
+    int pos = serviceType.lastIndexOf(".");
+    if (pos > -1){
+      return serviceType.substring(pos + 1);
+    }    
+    return serviceType;
+  }
+
   // === method signatures end ===
 }
