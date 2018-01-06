@@ -19,9 +19,9 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
+import io.github.firemaples.detect.Detect;
 import io.github.firemaples.language.Language;
 import io.github.firemaples.translate.Translate;
-import io.github.firemaples.detect.*;
 
 
 
@@ -94,10 +94,10 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(AzureTranslator.class.getCanonicalName());
+    ServiceType meta = new ServiceType(AzureTranslator.class);
     meta.addDescription("interface to Azure translation services");
     meta.addCategory("translation", "cloud", "ai");
-    meta.addDependency("com.azure.translator", "0.8.3");
+    meta.addDependency("io.github.firemaples", "microsoft-translator-java-api", "0.8.3");
     meta.setCloudService(true);
     return meta;
   }

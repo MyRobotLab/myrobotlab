@@ -100,10 +100,12 @@
 					<groupId>log4j</groupId>
 					<artifactId>log4j</artifactId>
 				</exclusion>
+				<!--  we need a commons-collections
 				<exclusion>
 					<groupId>commons-collections</groupId>
 					<artifactId>commons-collections</artifactId>
 				</exclusion>
+				 -->
 				<exclusion>
 					<groupId>commons-lang</groupId>
 					<artifactId>commons-lang</artifactId>
@@ -1054,4 +1056,8 @@
 	</build>
 
 
+	<organization>
+		<name>myrobotlab</name>
+		<url>http://myrobotlab.org</url>
+	</organization>
 </project>

@@ -329,7 +329,7 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 	}
 
 	public static void main(String[] args) {
-	  LoggingFactory.init(Level.DEBUG);
+	  LoggingFactory.init(Level.WARN);
 		try {
 			//Runtime.start("webgui", "WebGui");
 			MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
@@ -347,8 +347,8 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 //			mary.setAudioEffects(strEffectsAndParams);
 
 			// mary.setVoice("dfki-spike en_GB male unitselection general");
-      mary.setVoice("cmu-bdl-hsmm");
-      mary.setVoice("cmu-slt-hsmm");
+      // mary.setVoice("cmu-bdl-hsmm");
+      // mary.setVoice("cmu-slt-hsmm");
 			mary.getVoices();
 			mary.speak("hello");
 			// mary.speak("world");
@@ -375,12 +375,12 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 	 * 
 	 */
 	static public ServiceType getMetaData() {
-		ServiceType meta = new ServiceType(MarySpeech.class.getCanonicalName());
+		ServiceType meta = new ServiceType(MarySpeech.class);
 		meta.addDescription("Speech synthesis based on MaryTTS");
 		meta.addCategory("speech", "sound");
 		meta.addDependency("de.dfki.mary", "marytts", "5.2");
-		meta.addDependency("com.sun.speech.freetts", "1.2");
-		meta.addDependency("opennlp", "1.6");
+		meta.addDependency("de.dfki.mary", "voice-cmu-slt-hsmm", "5.2");
+		// meta.addDependency("opennlp", "1.6");
 		return meta;
 	}
 
