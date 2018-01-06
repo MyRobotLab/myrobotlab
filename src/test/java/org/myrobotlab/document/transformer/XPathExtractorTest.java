@@ -18,7 +18,7 @@ public class XPathExtractorTest extends AbstractStageTest {
   public AbstractStage createStage() {
     // TODO Auto-generated method stub
     XPathExtractor stage = new XPathExtractor();
-    stage.setConfigFile("test/resources/xpaths.txt");
+    stage.setConfigFile("src/test/resources/xpaths.txt");
     stage.setXmlField("xml");
     // TODO: I want to remove this whole "stageConfiguration" thing...
     stage.startStage(null);
