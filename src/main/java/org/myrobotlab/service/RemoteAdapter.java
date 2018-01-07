@@ -440,7 +440,9 @@ public class RemoteAdapter extends Service implements Gateway {
 		ServiceType meta = new ServiceType(RemoteAdapter.class.getCanonicalName());
 		meta.addDescription("allows remote communication between applets, or remote instances of myrobotlab");
 		meta.addCategory("connectivity", "network", "framework");
-		meta.addDependency("org.atmosphere.nettosphere", "2.3.0");
+		// 2.1.3
+		// meta.addDependency("org.atmosphere.nettosphere", "2.3.0");
+		meta.addDependency("org.atmosphere", "wasync", "2.1.3");
 		return meta;
 	}
 

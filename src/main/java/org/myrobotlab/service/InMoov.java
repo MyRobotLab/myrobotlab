@@ -1915,8 +1915,11 @@ public class InMoov extends Service {
     ServiceType meta = new ServiceType(InMoov.class.getCanonicalName());
     meta.addDescription("The InMoov service");
     meta.addCategory("robot");
-    meta.addDependency("inmoov.fr", "1.0.0");
-    meta.addDependency("org.myrobotlab.inmoov", "1.0.0");
+    // meta.addDependency("inmoov.fr", "1.0.0");
+    // meta.addDependency("org.myrobotlab.inmoov", "1.0.0");
+    meta.addDependency("inmoov.fr", "inmoov", "1.0.0");
+    meta.addDependency("inmoov.fr", "jm3-model", "1.0.0");
+
 
     // SHARING !!! - modified key / actual name begin -------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");

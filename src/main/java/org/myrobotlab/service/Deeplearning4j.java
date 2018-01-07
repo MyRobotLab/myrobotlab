@@ -6,14 +6,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.LinkedHashMap;
 
-import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
-import org.myrobotlab.framework.Service;
 import org.apache.commons.lang.StringUtils;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
@@ -42,7 +39,6 @@ import org.deeplearning4j.nn.conf.layers.LocalResponseNormalization;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
-import org.deeplearning4j.nn.modelimport.keras.trainedmodels.TrainedModels;
 import org.deeplearning4j.nn.modelimport.keras.trainedmodels.Utils.ImageNetLabels;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
@@ -51,6 +47,8 @@ import org.deeplearning4j.util.ModelSerializer;
 import org.deeplearning4j.zoo.PretrainedType;
 import org.deeplearning4j.zoo.ZooModel;
 import org.deeplearning4j.zoo.model.VGG16;
+import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.nd4j.linalg.activations.Activation;
@@ -469,12 +467,28 @@ public class Deeplearning4j extends Service {
     ServiceType meta = new ServiceType(Deeplearning4j.class.getCanonicalName());
     meta.addDescription("A wrapper service for the Deeplearning4j framework.");
     meta.addCategory("ai");
-    meta.addDependency("org.deeplearning4j", "0.8");
+    
+    // (for gpu support you swap out the nd4j-backend dependency..
+    // kwatters: nd4j / nd4j-backend / dl4j
+    
+    meta.addDependency("org.deeplearning4j", "deeplearning4j-core", "0.9.1");
+    meta.addDependency("org.nd4j", "nd4j-native-platform", "0.9.1");
+    
+    //   meta.addDependency("org.bytedeco.javacpp-presets", "openblas", "0.2.19-1.3");
+    // org.bytedeco.javacpp-presets#openblas;0.2.19-1.3
+    
+    
+    
+    // cuda artifactId = nd4j-cuda-8.0-platform
+    // meta.addDependency("org.deeplearning4j", "deeplearning4j-core", "0.8");
+    // meta.addDependency("org.deeplearning4j", "deeplearning4j-core", "0.91");
+    /*
     // this also depends on opencv
     meta.addDependency("org.bytedeco.javacv", "1.3");
     // and this is just a good frame grabber.. might as well pull it in.
     meta.addDependency("pl.sarxos.webcam", "0.3.10");
     meta.addDependency("org.apache.commons.io", "2.3.0");
+    */
     return meta;
   }
 

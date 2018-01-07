@@ -149,10 +149,10 @@ public class OpenCV extends AbstractVideoSource {
   transient public final static String SOURCE_KINECT_DEPTH = "SOURCE_KINECT_DEPTH";
 
   static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddAlpha", "AddMask", "Affine", "And", "AverageColor", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector",
-      "Dilate", "DL4J","Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2",
-      "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "Output",
-      "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split",
-      "State", "Surf", "Tesseract", "Threshold", "Transpose" };
+      "Dilate", "DL4J", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray",
+      "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not",
+      "Output", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth",
+      "Split", "State", "Surf", "Tesseract", "Threshold", "Transpose" };
 
   // yep its public - cause a whole lotta data
   // will get set on it before a setState
@@ -479,7 +479,7 @@ public class OpenCV extends AbstractVideoSource {
    * publishing method for filters - used internally
    * 
    * @return FilterWrapper solves the problem of multiple types being resolved
-   *         in the setFilterState(FilterWrapper data) method
+   * in the setFilterState(FilterWrapper data) method
    */
   public FilterWrapper publishFilterState(FilterWrapper filterWrapper) {
     return filterWrapper;
@@ -489,7 +489,7 @@ public class OpenCV extends AbstractVideoSource {
    * publishing method for filters - uses string parameter for remote invocation
    * 
    * @return FilterWrapper solves the problem of multiple types being resolved
-   *         in the setFilterState(FilterWrapper data) method
+   * in the setFilterState(FilterWrapper data) method
    */
   public FilterWrapper publishFilterState(String name) {
     OpenCVFilter filter = getFilter(name);
@@ -730,17 +730,16 @@ public class OpenCV extends AbstractVideoSource {
     meta.addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
     meta.addCategory("video", "vision", "sensor");
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
-    // for
-    // webgui.");
-
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
-    // meta.addDependency("org.bytedeco.javacpp","1.1");
-    meta.addDependency("org.bytedeco.javacv", "1.3");
-    meta.addDependency("pl.sarxos.webcam", "0.3.10");
+
+    meta.addDependency("org.bytedeco.javacv", "javacv-platform", "1.3");
+    // sarxos webcam
+    meta.addDependency("com.github.sarxos", "webcam-capture", "0.3.10");
     // FaceRecognizer no worky if missing it
-    meta.addDependency("org.apache.commons.commons-lang3", "3.3.2");
-    // for the mjpeg streamer support
-    meta.addDependency("net.sf.jipcam","0.9.1");
+    meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
+    // for the mjpeg streamer support FIXME - this should only be in Video
+    // Streamer !
+    meta.addDependency("net.sf.jipcam", "jipcam", "0.9.1");
     return meta;
   }
 
@@ -751,11 +750,11 @@ public class OpenCV extends AbstractVideoSource {
   public void setStreamerEnabled(boolean streamerEnabled) {
     this.streamerEnabled = streamerEnabled;
   }
-  
-  public boolean isCapturing(){
+
+  public boolean isCapturing() {
     return capturing;
   }
-  
+
   public static void main(String[] args) throws Exception {
 
     // TODO - Avoidance / Navigation Service
@@ -784,38 +783,37 @@ public class OpenCV extends AbstractVideoSource {
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     // Runtime.start("right", "OpenCV");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
-//    opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
+    // opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
 
-   // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
+    // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
     // opencv.setInputSource(INPUT_SOURCE_CAMERA);
-//   opencv.setInputSource(INPUT_SOURCE_NETWORK);
-//   opencv.setInputFileName("http://192.168.4.117:8080/?action=stream");
-    //opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
+    // opencv.setInputSource(INPUT_SOURCE_NETWORK);
+    // opencv.setInputFileName("http://192.168.4.117:8080/?action=stream");
+    // opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
-   opencv.setStreamerEnabled(false);
-   //  opencv.addFilter("facerec", "FaceRecognizer");
+    opencv.setStreamerEnabled(false);
+    // opencv.addFilter("facerec", "FaceRecognizer");
 
     // OpenCVFilterPyramidDown pyramid = new OpenCVFilterPyramidDown("pyramid");
     // opencv.addFilter(pyramid);
 
     // OpenCVFilterDilate dilate = new OpenCVFilterDilate();
     // opencv.addFilter(dilate);
-   // OpenCVFilterTesseract tess = new OpenCVFilterTesseract("tess");
-   
-   OpenCVFilterFaceDetect facedetect2 = new
-   OpenCVFilterFaceDetect("facedetect");
-   opencv.addFilter(facedetect2);
-   
-   OpenCVFilterOverlay filter = new OpenCVFilterOverlay("overlay");
-   // filter.addImage("overlay1.png", 0.3);
-  //  filter.addImage("red.png", 0.4);
-   filter.addImage("overlay_640x480.png", 1.0);
-   
-   // filter.addText("scanmode", 20, 40, 0.6, "SCAN MODE NONE");
-   // filter.addText("assessment", 20, 50, 0.6, "ASSESSMENT COMPLETED");
-   
-   opencv.addFilter(filter);
-   
+    // OpenCVFilterTesseract tess = new OpenCVFilterTesseract("tess");
+
+    OpenCVFilterFaceDetect facedetect2 = new OpenCVFilterFaceDetect("facedetect");
+    opencv.addFilter(facedetect2);
+
+    OpenCVFilterOverlay filter = new OpenCVFilterOverlay("overlay");
+    // filter.addImage("overlay1.png", 0.3);
+    // filter.addImage("red.png", 0.4);
+    filter.addImage("overlay_640x480.png", 1.0);
+
+    // filter.addText("scanmode", 20, 40, 0.6, "SCAN MODE NONE");
+    // filter.addText("assessment", 20, 50, 0.6, "ASSESSMENT COMPLETED");
+
+    opencv.addFilter(filter);
+
     // OpenCVFilterFaceDetect2 facedetect2 = new
     // OpenCVFilterFaceDetect2("facedetect2");
     // opencv.addFilter(facedetect2);

@@ -54,7 +54,7 @@ public class Webcam extends Service {
    */
   static public ServiceType getMetaData() {
     setAutoOpenMode(true);
-    ServiceType meta = new ServiceType(Webcam.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Webcam.class);
     meta.addDescription("used as a general webcam");
     meta.addCategory("video");
     return meta;

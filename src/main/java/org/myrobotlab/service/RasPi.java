@@ -352,7 +352,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware like th GPIO pins and i2c");
     meta.addCategory("i2c", "control");
     meta.setSponsor("Mats");
-    meta.addDependency("com.pi4j.pi4j", "1.1");
+    meta.addDependency("com.pi4j", "pi4j-core", "1.1");
     return meta;
   }
 

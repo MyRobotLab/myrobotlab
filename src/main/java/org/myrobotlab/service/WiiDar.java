@@ -502,7 +502,9 @@ public class WiiDar extends Service {
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(WiiDar.class.getCanonicalName());
     meta.addDescription("ranging using a wiimote");
-    meta.addDependency("wiiuse.wiimote", "0.12b");
+    // meta.addDependency("wiiuse.wiimote", "0.12b");
+
+    meta.addDependency("wiiusej", "wiiusej", "wiiusej");
     meta.addCategory("sensor");
     // no longer have hardware for this ...
     meta.setAvailable(false);

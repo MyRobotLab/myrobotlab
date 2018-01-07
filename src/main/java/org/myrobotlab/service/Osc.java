@@ -98,7 +98,7 @@ public class Osc extends Service implements OSCListener {
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     meta.setLink("http://www.illposed.com/software/javaosc.html");
     // add dependency if necessary
-    meta.addDependency("com.illposed.osc", "0.4");
+    meta.addDependency("com.illposed.osc", "javaosc-core", "0.4");
     meta.addCategory("network", "music");
     return meta;
   }

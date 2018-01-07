@@ -362,9 +362,15 @@ private String language;
     // gui
     // add dependency if necessary
     meta.addPeer("audioFile", "AudioFile", "audioFile");
+    /*
     meta.addDependency("org.joda", "2.9.4");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");
-    meta.addDependency("com.amazonaws.services", "1.11.118");
+    */
+    meta.addDependency("com.amazonaws", "aws-java-sdk-polly", "1.11.118");
+    
+    // <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-polly -->
+    // <dependency org="com.amazonaws" name="aws-java-sdk-polly" rev="1.11.118"/>
+    
     meta.addCategory("speech");
     meta.setCloudService(true);
     return meta;

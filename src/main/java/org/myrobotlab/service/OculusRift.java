@@ -436,7 +436,8 @@ public class OculusRift extends Service implements PointPublisher {
 		meta.addPeer("leftOpenCV", "OpenCV", "Left Eye Camera");
 		meta.sharePeer("rightOpenCV", "leftOpenCV", "OpenCV", "Right Eye sharing left eye camera");
 		meta.addPeer("rightOpenCV", "OpenCV", "Right Eye Camera");
-		meta.addDependency("org.saintandreas.jovr", "0.7");
+		// compile(group: 'org.saintandreas', name: 'jovr', version: '0.7.0.0')
+		meta.addDependency("org.saintandreas", "jovr", "0.7.0.0");
 		return meta;
 	}
 

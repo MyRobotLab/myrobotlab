@@ -205,12 +205,12 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   public void setCloudService(boolean b) {
     isCloudService = b;
   }
-  
+  /*
   
   public void addDependency(String org, String version) {
     dependencies.add(String.format("%s/%s", org, version));
   }
-  
+  */
   
 
   // TODO - without version is latest ?

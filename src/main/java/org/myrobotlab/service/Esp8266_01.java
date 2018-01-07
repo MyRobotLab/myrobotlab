@@ -412,7 +412,12 @@ public class Esp8266_01 extends Service implements I2CController {
     meta.addDescription("ESP8266-01 service to communicate using WiFi and i2c");
     meta.addCategory("i2c", "control");
     meta.setSponsor("Mats");
-    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    //meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    // FIXME - add HttpClient as a peer .. and use its interface .. :)
+    // then remove direct dependencies to httpcomponents ...
+    // One HttpClient to Rule them all !!
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");  
 
     return meta;
   }
