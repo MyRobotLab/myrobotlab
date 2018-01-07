@@ -40,7 +40,7 @@ public class Chassis extends Service {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Chassis.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Chassis.class);
     meta.addDescription("control platform");
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");

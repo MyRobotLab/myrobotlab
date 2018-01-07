@@ -74,7 +74,7 @@ public class Node extends Service {
     meta.addDescription("embedded node js");
     // add dependency if necessary
     meta.setAvailable(false); // not ready for prime-time
-    meta.addDependency("org.node", "0.1.1");
+    meta.addDependency("io.nodyn", "nodyn", "0.1.1");
     meta.addCategory("programming");
     return meta;
   }

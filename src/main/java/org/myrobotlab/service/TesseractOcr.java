@@ -102,8 +102,8 @@ public class TesseractOcr extends Service {
     ServiceType meta = new ServiceType(TesseractOcr.class);
     meta.addDescription("Optical character recognition - the ability to read");
     meta.addCategory("intelligence");
-    meta.addDependency("net.sourceforge.tess4j", "3.4.0");
-    meta.addDependency("com.sun.jna", "3.2.2");
+    meta.addDependency("net.sourceforge.tess4j", "tess4j", "3.4.0");
+    // meta.addDependency("com.sun.jna", "3.2.2");
     return meta;
   }
 

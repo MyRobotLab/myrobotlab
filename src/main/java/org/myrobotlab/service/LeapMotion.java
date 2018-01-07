@@ -209,7 +209,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
     ServiceType meta = new ServiceType(LeapMotion.class.getCanonicalName());
     meta.addDescription("Leap Motion Service");
     meta.addCategory("sensor", "telerobotics");
-    meta.addDependency("com.leapmotion", "2.1.3");
+    meta.addDependency("leapmotion", "leap", "2.1.3");
     return meta;
   }
 

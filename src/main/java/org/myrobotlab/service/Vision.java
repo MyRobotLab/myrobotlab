@@ -279,10 +279,17 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
     // webgui.");
 
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
-    // meta.addDependency("org.bytedeco.javacpp","1.1");
-    meta.addDependency("org.bytedeco.javacv", "1.3");
-    meta.addDependency("pl.sarxos.webcam", "0.3.10");
-    // FIXME - new OpenCV of post manticore release
+    // meta.addPeer("streamer", "VideoStreamer", "video streaming service
+    meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
+
+    meta.addDependency("org.bytedeco.javacv", "javacv-platform", "1.3");
+    // sarxos webcam
+    meta.addDependency("com.github.sarxos", "webcam-capture", "0.3.10");
+    // FaceRecognizer no worky if missing it
+    meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
+    // for the mjpeg streamer support FIXME - this should only be in Video
+    // Streamer !
+    meta.addDependency("net.sf.jipcam", "jipcam", "0.9.1");
     meta.setAvailable(false);
     return meta;
   }

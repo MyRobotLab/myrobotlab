@@ -494,7 +494,8 @@ private int rate=0;
     meta.setSponsor("kwatters");
     meta.addPeer("audioFile", "AudioFile", "audioFile");
 //    meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
-    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
     //end of support
     meta.setAvailable(false);
     return meta;

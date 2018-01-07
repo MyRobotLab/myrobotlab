@@ -1,49 +1,46 @@
 package org.myrobotlab.service;
 
-// FIXME ! loose the awt (can't work on Android !)
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.image.BufferedImage;
-import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import javax.imageio.ImageIO;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
-//[BEGIN import_libraries]
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.vision.v1.Vision;
-import com.google.api.services.vision.v1.VisionScopes;
-import com.google.api.services.vision.v1.model.AnnotateImageRequest;
-import com.google.api.services.vision.v1.model.AnnotateImageResponse;
-import com.google.api.services.vision.v1.model.BatchAnnotateImagesRequest;
-import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
-import com.google.api.services.vision.v1.model.EntityAnnotation;
-import com.google.api.services.vision.v1.model.FaceAnnotation;
-import com.google.api.services.vision.v1.model.Feature;
-import com.google.api.services.vision.v1.model.Image;
-import com.google.api.services.vision.v1.model.Vertex;
-import com.google.common.collect.ImmutableList;
+import com.google.cloud.vision.v1.AnnotateImageRequest;
+import com.google.cloud.vision.v1.AnnotateImageResponse;
+import com.google.cloud.vision.v1.BatchAnnotateImagesResponse;
+import com.google.cloud.vision.v1.Block;
+import com.google.cloud.vision.v1.ColorInfo;
+import com.google.cloud.vision.v1.CropHint;
+import com.google.cloud.vision.v1.CropHintsAnnotation;
+import com.google.cloud.vision.v1.DominantColorsAnnotation;
+import com.google.cloud.vision.v1.EntityAnnotation;
+import com.google.cloud.vision.v1.FaceAnnotation;
+import com.google.cloud.vision.v1.Feature;
+import com.google.cloud.vision.v1.Feature.Type;
+import com.google.cloud.vision.v1.Image;
+import com.google.cloud.vision.v1.ImageAnnotatorClient;
+import com.google.cloud.vision.v1.ImageSource;
+import com.google.cloud.vision.v1.LocationInfo;
+import com.google.cloud.vision.v1.Page;
+import com.google.cloud.vision.v1.Paragraph;
+import com.google.cloud.vision.v1.SafeSearchAnnotation;
+import com.google.cloud.vision.v1.Symbol;
+import com.google.cloud.vision.v1.TextAnnotation;
+import com.google.cloud.vision.v1.WebDetection;
+import com.google.cloud.vision.v1.WebDetection.WebEntity;
+import com.google.cloud.vision.v1.WebDetection.WebImage;
+import com.google.cloud.vision.v1.WebDetection.WebPage;
+import com.google.cloud.vision.v1.Word;
+import com.google.protobuf.ByteString;
+
+import io.github.firemaples.detect.Detect;
 
 //[END import_libraries]
 
@@ -79,253 +76,1015 @@ public class GoogleCloud extends Service {
     meta.addDescription("google api client service");
     meta.setAvailable(true);
     // add dependency if necessary
-    meta.addDependency("com.google.client", "1.22.0");
-    meta.addDependency("com.google.vision", "1.22.0");
+    // meta.addDependency("com.google.api-client", "google-api-client", "1.23.0");
+    meta.addDependency("com.google.cloud", "google-cloud-vision", "1.14.0");
     meta.addCategory("cloud", "vision");
     meta.setCloudService(true);
     return meta;
   }
 
-  // [START main]
+
   /**
-   * Annotates an image using the Vision API.
+   * Detects entities,sentiment and syntax in a document using the Vision API.
+   *
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
    */
-
-  // [END main]
-
-  // [START get_vision_service]
-  /**
-   * Connects to the Vision API using Application Default Credentials.
-   * @param credJsonFile c
-   * @return v
-   * @throws IOException e 
-   * @throws GeneralSecurityException e 
-   */
-  public Vision getVisionService(String credJsonFile) throws IOException, GeneralSecurityException {
-
-    /*
-     * GoogleCredential credential = new
-     * GoogleCredential().setAccessToken(accessToken); Plus plus = new
-     * Plus.builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(),
-     * credential) .setApplicationName("Google-PlusSample/1.0") .build();
-     */
-
-    GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(credJsonFile)).createScoped(VisionScopes.all());
-
-    /*
-     * JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-     * 
-     * HttpTransport httpTransport =
-     * GoogleNetHttpTransport.newTrustedTransport();
-     * 
-     * InputStream inputStream = IOUtils.toInputStream(serviceAccountJson);
-     * 
-     * GoogleCredential credential = GoogleCredential.fromStream(inputStream,
-     * httpTransport, jsonFactory);
-     * 
-     * credential =
-     * credential.createScoped(Collections.singleton(AndroidPublisherScopes.
-     * ANDROIDPUBLISHER));
-     * 
-     * AndroidPublisher androidPublisher = new AndroidPublisher(httpTransport,
-     * jsonFactory, credential);
-     */
-
-    // GoogleCredential credential =
-    // GoogleCredential.getApplicationDefault().createScoped(VisionScopes.all());
-    JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-    return new Vision.Builder(GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential).setApplicationName(APPLICATION_NAME).build();
+  public static void main(String[] args) throws Exception, IOException {
+    argsHelper(args, System.out);
   }
-  // [END get_vision_service]
 
-  public boolean connect(String credJsonFile) throws IOException, GeneralSecurityException {
-    File f = new File(credJsonFile);
-    if (f.exists())
-    {
-    connect(getVisionService(credJsonFile));
-    connected=true;
+  /**
+   * Helper that handles the input passed to the program.
+   *
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void argsHelper(String[] args, PrintStream out) throws Exception, IOException {
+    if (args.length < 1) {
+      out.println("Usage:");
+      out.printf(
+          "\tmvn exec:java -DDetect -Dexec.args=\"<command> <path-to-image>\"\n"
+              + "Commands:\n"
+              + "\tfaces | labels | landmarks | logos | text | safe-search | properties"
+              + "| web | crop \n"
+              + "Path:\n\tA file path (ex: ./resources/wakeupcat.jpg) or a URI for a Cloud Storage "
+              + "resource (gs://...)\n");
+      return;
     }
-    else
-    {
-      connected=false;
-      error("getVisionService : File credJsonFile not exist");
-    }
-    return connected;
-  }
+    String command = args[0];
+    String path = args.length > 1 ? args[1] : "";
 
-  public void connect(Vision vision) {
-    this.vision = vision;
-  }
-
-  // [START detect_face]
-  public List<FaceAnnotation> detectFaces(String path) throws IOException {
-    return detectFaces(Paths.get(path), maxResults);
-  }
-
-  public List<FaceAnnotation> detectFaces(Path path) throws IOException {
-    return detectFaces(path, maxResults);
-  }
-
-  /**
-   * Gets up to {@code maxResults} faces for an image stored at {@code path}.
-   * @param path p
-   * @param maxResults m 
-   * @return list of face annotations
-   * @throws IOException e
-   */
-  public List<FaceAnnotation> detectFaces(Path path, int maxResults) throws IOException {
-    byte[] data = Files.readAllBytes(path);
-
-    AnnotateImageRequest request = new AnnotateImageRequest().setImage(new Image().encodeContent(data))
-        .setFeatures(ImmutableList.of(new Feature().setType("FACE_DETECTION").setMaxResults(maxResults)));
-    Vision.Images.Annotate annotate = vision.images().annotate(new BatchAnnotateImagesRequest().setRequests(ImmutableList.of(request)));
-    // Due to a bug: requests to Vision API containing large images fail
-    // when GZipped.
-    annotate.setDisableGZipContent(true);
-
-    BatchAnnotateImagesResponse batchResponse = annotate.execute();
-    assert batchResponse.getResponses().size() == 1;
-    AnnotateImageResponse response = batchResponse.getResponses().get(0);
-    if (response.getFaceAnnotations() == null) {
-      throw new IOException(response.getError() != null ? response.getError().getMessage() : "Unknown error getting image annotations");
-    }
-    return response.getFaceAnnotations();  
-  }
-  // [END detect_face]
-
-  // [START highlight_faces]
-
-  public void writeWithFaces(String inputPath, String outputPath, List<FaceAnnotation> faces) throws IOException {
-    writeWithFaces(Paths.get(inputPath), Paths.get(outputPath), faces);
-  }
-
-  /**
-   * Reads image {@code inputPath} and writes {@code outputPath} with
-   * {@code faces} outlined.
-   * @param inputPath i
-   * @param outputPath o
-   * @param faces f
-   * @throws IOException e 
-   */
-  public void writeWithFaces(Path inputPath, Path outputPath, List<FaceAnnotation> faces) throws IOException {
-    BufferedImage img = ImageIO.read(inputPath.toFile());
-    annotateWithFaces(img, faces);
-    ImageIO.write(img, "jpg", outputPath.toFile());
-  }
-
-  /**
-   * Annotates an image {@code img} with a polygon around each face in
-   * {@code faces}.
-   * @param img i 
-   * @param faces f
-   */
-  public void annotateWithFaces(BufferedImage img, List<FaceAnnotation> faces) {
-    for (FaceAnnotation face : faces) {
-      annotateWithFace(img, face);
+    GoogleCloud app = new GoogleCloud("googleVision");
+    if (command.equals("faces")) {
+      if (path.startsWith("gs://")) {
+        detectFacesGcs(path, out);
+      } else {
+        detectFaces(path, out);
+      }
+    } else if (command.equals("labels")) {
+      if (path.startsWith("gs://")) {
+        detectLabelsGcs(path, out);
+      } else {
+        detectLabels(path, out);
+      }
+    } else if (command.equals("landmarks")) {
+      if (path.startsWith("http")) {
+        detectLandmarksUrl(path, out);
+      } else if (path.startsWith("gs://")) {
+        detectLandmarksGcs(path, out);
+      } else {
+        detectLandmarks(path, out);
+      }
+    } else if (command.equals("logos")) {
+      if (path.startsWith("gs://")) {
+        detectLogosGcs(path, out);
+      } else {
+        detectLogos(path, out);
+      }
+    } else if (command.equals("text")) {
+      if (path.startsWith("gs://")) {
+        detectTextGcs(path, out);
+      } else {
+        detectText(path, out);
+      }
+    } else if (command.equals("properties")) {
+      if (path.startsWith("gs://")) {
+        detectPropertiesGcs(path, out);
+      } else {
+        detectProperties(path, out);
+      }
+    } else if (command.equals("safe-search")) {
+      if (path.startsWith("gs://")) {
+        detectSafeSearchGcs(path, out);
+      } else {
+        detectSafeSearch(path, out);
+      }
+    } else if (command.equals("web")) {
+      if (path.startsWith("gs://")) {
+        detectWebDetectionsGcs(path, out);
+      } else {
+        detectWebDetections(path, out);
+      }
+    } else if (command.equals("crop")) {
+      if (path.startsWith("gs://")) {
+        detectCropHintsGcs(path, out);
+      } else {
+        detectCropHints(path, out);
+      }
+    } else if (command.equals("fulltext")) {
+      if (path.startsWith("gs://")) {
+        detectDocumentTextGcs(path, out);
+      } else {
+        detectDocumentText(path, out);
+      }
     }
   }
 
   /**
-   * Annotates an image {@code img} with a polygon defined by {@code face}.
+   * Detects faces in the specified local image.
+   *
+   * @param filePath The path to the file to perform face detection on.
+   * @param out A {@link PrintStream} to write detected features to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
    */
-  private void annotateWithFace(BufferedImage img, FaceAnnotation face) {
-    Graphics2D gfx = img.createGraphics();
-    Polygon poly = new Polygon();
-    for (Vertex vertex : face.getFdBoundingPoly().getVertices()) {
-      poly.addPoint(vertex.getX(), vertex.getY());
+  public static void detectFaces(String filePath, PrintStream out) throws Exception, IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
+
+    Image img = Image.newBuilder().setContent(imgBytes).build();
+    Feature feat = Feature.newBuilder().setType(Type.FACE_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        for (FaceAnnotation annotation : res.getFaceAnnotationsList()) {
+          out.printf(
+              "anger: %s\njoy: %s\nsurprise: %s\nposition: %s",
+              annotation.getAngerLikelihood(),
+              annotation.getJoyLikelihood(),
+              annotation.getSurpriseLikelihood(),
+              annotation.getBoundingPoly());
+        }
+      }
     }
-    gfx.setStroke(new BasicStroke(5));
-    gfx.setColor(new Color(0x00ff00));
-    gfx.draw(poly);
   }
-  // [END highlight_faces]
 
   /**
-   * Prints the labels received from the Vision API.
-   * @param out o
-   * @param imagePath i 
-   * @param labels l
+   * Detects faces in the specified remote image on Google Cloud Storage.
+   *
+   * @param gcsPath The path to the remote file on Google Cloud Storage to perform face detection
+   *                on.
+   * @param out A {@link PrintStream} to write detected features to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
    */
-  public void printLabels(PrintStream out, Path imagePath, List<EntityAnnotation> labels) {
-    out.printf("Labels for image %s:\n", imagePath);
-    for (EntityAnnotation label : labels) {
-      out.printf("\t%s (score: %.3f)\n", label.getDescription(), label.getScore());
-    }
-    if (labels.isEmpty()) {
-      out.println("\tNo labels found.");
-    }
-  }
+  public static void detectFacesGcs(String gcsPath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
 
-  public List<EntityAnnotation> labelImage(Path path) throws IOException {
-    return labelImage(path, maxResults);
+    ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri(gcsPath).build();
+    Image img = Image.newBuilder().setSource(imgSource).build();
+    Feature feat = Feature.newBuilder().setType(Type.FACE_DETECTION).build();
+
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        for (FaceAnnotation annotation : res.getFaceAnnotationsList()) {
+          out.printf(
+              "anger: %s\njoy: %s\nsurprise: %s\nposition: %s",
+              annotation.getAngerLikelihood(),
+              annotation.getJoyLikelihood(),
+              annotation.getSurpriseLikelihood(),
+              annotation.getBoundingPoly());
+        }
+      }
+    }
   }
 
   /**
-   * Gets up to {@code maxResults} labels for an image stored at {@code path}.
-   * @param path p
-   * @param maxResults m 
-   * @return list of entity annotations
-   * @throws IOException e
+   * Detects labels in the specified local image.
+   *
+   * @param filePath The path to the file to perform label detection on.
+   * @param out A {@link PrintStream} to write detected labels to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
    */
-  public List<EntityAnnotation> labelImage(Path path, int maxResults) throws IOException {
-    // [START construct_request]
-    byte[] data = Files.readAllBytes(path);
+  public static void detectLabels(String filePath, PrintStream out) throws Exception, IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
 
-    AnnotateImageRequest request = new AnnotateImageRequest().setImage(new Image().encodeContent(data))
-        .setFeatures(ImmutableList.of(new Feature().setType("LABEL_DETECTION").setMaxResults(maxResults)));
-    Vision.Images.Annotate annotate = vision.images().annotate(new BatchAnnotateImagesRequest().setRequests(ImmutableList.of(request)));
-    // Due to a bug: requests to Vision API containing large images fail
-    // when GZipped.
-    // annotate.setDisableGZipContent(true);
-    // [END construct_request]
+    ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
 
-    // [START parse_response]
-    BatchAnnotateImagesResponse batchResponse = annotate.execute();
-    assert batchResponse.getResponses().size() == 1;
-    AnnotateImageResponse response = batchResponse.getResponses().get(0);
-    if (response.getLabelAnnotations() == null) {
-      throw new IOException(response.getError() != null ? response.getError().getMessage() : "Unknown error getting image annotations");
+    Image img = Image.newBuilder().setContent(imgBytes).build();
+    Feature feat = Feature.newBuilder().setType(Type.LABEL_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        for (EntityAnnotation annotation : res.getLabelAnnotationsList()) {
+          annotation.getAllFields().forEach((k, v) -> out.printf("%s : %s\n", k, v.toString()));
+        }
+      }
     }
-    return response.getLabelAnnotations();
-    // [END parse_response]
   }
 
-  public Map<String, Float> getLabels(String filename) throws IOException {
-    LinkedHashMap<String, Float> ret = new LinkedHashMap<String, Float>();
-    byte[] data = Files.readAllBytes(Paths.get(filename));
+  /**
+   * Detects labels in the specified remote image on Google Cloud Storage.
+   *
+   * @param gcsPath The path to the remote file on Google Cloud Storage to perform label detection
+   *                on.
+   * @param out A {@link PrintStream} to write detected features to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectLabelsGcs(String gcsPath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
 
-    AnnotateImageRequest request = new AnnotateImageRequest().setImage(new Image().encodeContent(data))
-        .setFeatures(ImmutableList.of(new Feature().setType("LABEL_DETECTION").setMaxResults(maxResults)));
-    Vision.Images.Annotate annotate = vision.images().annotate(new BatchAnnotateImagesRequest().setRequests(ImmutableList.of(request)));
-    // Due to a bug: requests to Vision API containing large images fail
-    // when GZipped.
-    // annotate.setDisableGZipContent(true);
-    // [END construct_request]
+    ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri(gcsPath).build();
+    Image img = Image.newBuilder().setSource(imgSource).build();
+    Feature feat = Feature.newBuilder().setType(Type.LABEL_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
 
-    // [START parse_response]
-    BatchAnnotateImagesResponse batchResponse = annotate.execute();
-    assert batchResponse.getResponses().size() == 1;
-    AnnotateImageResponse response = batchResponse.getResponses().get(0);
-    if (response.getLabelAnnotations() == null) {
-      throw new IOException(response.getError() != null ? response.getError().getMessage() : "Unknown error getting image annotations");
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        for (EntityAnnotation annotation : res.getLabelAnnotationsList()) {
+          annotation.getAllFields().forEach((k, v) ->
+              out.printf("%s : %s\n", k, v.toString()));
+        }
+      }
     }
-
-    List<EntityAnnotation> labels = response.getLabelAnnotations();
-
-    log.info("Labels for image {}:", filename);
-    for (EntityAnnotation label : labels) {
-      String desc = label.getDescription();
-      Float score = label.getScore();
-      log.info("\t{} (score: {})", desc, score);
-      ret.put(desc, score);
-    }
-
-    if (labels.isEmpty()) {
-      log.info("\tNo labels found.");
-    }
-
-    return ret;
   }
+
+  /**
+   * Detects landmarks in the specified local image.
+   *
+   * @param filePath The path to the file to perform landmark detection on.
+   * @param out A {@link PrintStream} to write detected landmarks to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectLandmarks(String filePath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+    ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
+
+    Image img = Image.newBuilder().setContent(imgBytes).build();
+    Feature feat = Feature.newBuilder().setType(Type.LANDMARK_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        for (EntityAnnotation annotation : res.getLandmarkAnnotationsList()) {
+          LocationInfo info = annotation.getLocationsList().listIterator().next();
+          out.printf("Landmark: %s\n %s\n", annotation.getDescription(), info.getLatLng());
+        }
+      }
+    }
+  }
+
+  /**
+   * Detects landmarks in the specified URI.
+   *
+   * @param uri The path to the file to perform landmark detection on.
+   * @param out A {@link PrintStream} to write detected landmarks to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectLandmarksUrl(String uri, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ImageSource imgSource = ImageSource.newBuilder().setImageUri(uri).build();
+    Image img = Image.newBuilder().setSource(imgSource).build();
+    Feature feat = Feature.newBuilder().setType(Type.LANDMARK_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        for (EntityAnnotation annotation : res.getLandmarkAnnotationsList()) {
+          LocationInfo info = annotation.getLocationsList().listIterator().next();
+          out.printf("Landmark: %s\n %s\n", annotation.getDescription(), info.getLatLng());
+        }
+      }
+    }
+  }
+
+  /**
+   * Detects landmarks in the specified remote image on Google Cloud Storage.
+   *
+   * @param gcsPath The path to the remote file on Google Cloud Storage to perform landmark
+   *                detection on.
+   * @param out A {@link PrintStream} to write detected landmarks to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectLandmarksGcs(String gcsPath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri(gcsPath).build();
+    Image img = Image.newBuilder().setSource(imgSource).build();
+    Feature feat = Feature.newBuilder().setType(Type.LANDMARK_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        for (EntityAnnotation annotation : res.getLandmarkAnnotationsList()) {
+          LocationInfo info = annotation.getLocationsList().listIterator().next();
+          out.printf("Landmark: %s\n %s\n", annotation.getDescription(), info.getLatLng());
+        }
+      }
+    }
+  }
+
+  /**
+   * Detects logos in the specified local image.
+   *
+   * @param filePath The path to the local file to perform logo detection on.
+   * @param out A {@link PrintStream} to write detected logos to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectLogos(String filePath, PrintStream out) throws Exception, IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
+
+    Image img = Image.newBuilder().setContent(imgBytes).build();
+    Feature feat = Feature.newBuilder().setType(Type.LOGO_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        for (EntityAnnotation annotation : res.getLogoAnnotationsList()) {
+          out.println(annotation.getDescription());
+        }
+      }
+    }
+  }
+
+  /**
+   * Detects logos in the specified remote image on Google Cloud Storage.
+   *
+   * @param gcsPath The path to the remote file on Google Cloud Storage to perform logo detection
+   *                on.
+   * @param out A {@link PrintStream} to write detected logos to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectLogosGcs(String gcsPath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri(gcsPath).build();
+    Image img = Image.newBuilder().setSource(imgSource).build();
+    Feature feat = Feature.newBuilder().setType(Type.LOGO_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        for (EntityAnnotation annotation : res.getLogoAnnotationsList()) {
+          out.println(annotation.getDescription());
+        }
+      }
+    }
+  }
+
+  /**
+   * Detects text in the specified image.
+   *
+   * @param filePath The path to the file to detect text in.
+   * @param out A {@link PrintStream} to write the detected text to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectText(String filePath, PrintStream out) throws Exception, IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
+
+    Image img = Image.newBuilder().setContent(imgBytes).build();
+    Feature feat = Feature.newBuilder().setType(Type.TEXT_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        for (EntityAnnotation annotation : res.getTextAnnotationsList()) {
+          out.printf("Text: %s\n", annotation.getDescription());
+          out.printf("Position : %s\n", annotation.getBoundingPoly());
+        }
+      }
+    }
+  }
+
+  /**
+   * Detects text in the specified remote image on Google Cloud Storage.
+   *
+   * @param gcsPath The path to the remote file on Google Cloud Storage to detect text in.
+   * @param out A {@link PrintStream} to write the detected text to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectTextGcs(String gcsPath, PrintStream out) throws Exception, IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri(gcsPath).build();
+    Image img = Image.newBuilder().setSource(imgSource).build();
+    Feature feat = Feature.newBuilder().setType(Type.TEXT_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        for (EntityAnnotation annotation : res.getTextAnnotationsList()) {
+          out.printf("Text: %s\n", annotation.getDescription());
+          out.printf("Position : %s\n", annotation.getBoundingPoly());
+        }
+      }
+    }
+  }
+
+  /**
+   * Detects image properties such as color frequency from the specified local image.
+   *
+   * @param filePath The path to the file to detect properties.
+   * @param out A {@link PrintStream} to write
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectProperties(String filePath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
+
+    Image img = Image.newBuilder().setContent(imgBytes).build();
+    Feature feat = Feature.newBuilder().setType(Type.IMAGE_PROPERTIES).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        DominantColorsAnnotation colors = res.getImagePropertiesAnnotation().getDominantColors();
+        for (ColorInfo color : colors.getColorsList()) {
+          out.printf(
+              "fraction: %f\nr: %f, g: %f, b: %f\n",
+              color.getPixelFraction(),
+              color.getColor().getRed(),
+              color.getColor().getGreen(),
+              color.getColor().getBlue());
+        }
+      }
+    }
+  }
+
+  /**
+   * Detects image properties such as color frequency from the specified remote image on Google
+   * Cloud Storage.
+   *
+   * @param gcsPath The path to the remote file on Google Cloud Storage to detect properties on.
+   * @param out A {@link PrintStream} to write
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectPropertiesGcs(String gcsPath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri(gcsPath).build();
+    Image img = Image.newBuilder().setSource(imgSource).build();
+    Feature feat = Feature.newBuilder().setType(Type.IMAGE_PROPERTIES).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        DominantColorsAnnotation colors = res.getImagePropertiesAnnotation().getDominantColors();
+        for (ColorInfo color : colors.getColorsList()) {
+          out.printf(
+              "fraction: %f\nr: %f, g: %f, b: %f\n",
+              color.getPixelFraction(),
+              color.getColor().getRed(),
+              color.getColor().getGreen(),
+              color.getColor().getBlue());
+        }
+      }
+    }
+  }
+
+  /**
+   * Detects whether the specified image has features you would want to moderate.
+   *
+   * @param filePath The path to the local file used for safe search detection.
+   * @param out A {@link PrintStream} to write the results to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectSafeSearch(String filePath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
+
+    Image img = Image.newBuilder().setContent(imgBytes).build();
+    Feature feat = Feature.newBuilder().setType(Type.SAFE_SEARCH_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        SafeSearchAnnotation annotation = res.getSafeSearchAnnotation();
+        out.printf(
+            "adult: %s\nmedical: %s\nspoofed: %s\nviolence: %s\n",
+            annotation.getAdult(),
+            annotation.getMedical(),
+            annotation.getSpoof(),
+            annotation.getViolence());
+      }
+    }
+  }
+
+  /**
+   * Detects whether the specified remote image on Google Cloud Storage has features you would want
+   * to moderate.
+   *
+   * @param gcsPath The path to the remote file on Google Cloud Storage to detect safe-search on.
+   * @param out A {@link PrintStream} to write the results to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectSafeSearchGcs(String gcsPath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri(gcsPath).build();
+    Image img = Image.newBuilder().setSource(imgSource).build();
+    Feature feat = Feature.newBuilder().setType(Type.SAFE_SEARCH_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        SafeSearchAnnotation annotation = res.getSafeSearchAnnotation();
+        out.printf(
+            "adult: %s\nmedical: %s\nspoofed: %s\nviolence: %s\n",
+            annotation.getAdult(),
+            annotation.getMedical(),
+            annotation.getSpoof(),
+            annotation.getViolence());
+      }
+    }
+  }
+
+  /**
+   * Finds references to the specified image on the web.
+   *
+   * @param filePath The path to the local file used for web annotation detection.
+   * @param out A {@link PrintStream} to write the results to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectWebDetections(String filePath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
+
+    Image img = Image.newBuilder().setContent(imgBytes).build();
+    Feature feat = Feature.newBuilder().setType(Type.WEB_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // Search the web for usages of the image. You could use these signals later
+        // for user input moderation or linking external references.
+        // For a full list of available annotations, see http://g.co/cloud/vision/docs
+        WebDetection annotation = res.getWebDetection();
+        out.println("Entity:Id:Score");
+        out.println("===============");
+        for (WebEntity entity : annotation.getWebEntitiesList()) {
+          out.println(entity.getDescription() + " : " + entity.getEntityId() + " : "
+              + entity.getScore());
+        }
+        out.println("\nPages with matching images: Score\n==");
+        for (WebPage page : annotation.getPagesWithMatchingImagesList()) {
+          out.println(page.getUrl() + " : " + page.getScore());
+        }
+        out.println("\nPages with partially matching images: Score\n==");
+        for (WebImage image : annotation.getPartialMatchingImagesList()) {
+          out.println(image.getUrl() + " : " + image.getScore());
+        }
+        out.println("\nPages with fully matching images: Score\n==");
+        for (WebImage image : annotation.getFullMatchingImagesList()) {
+          out.println(image.getUrl() + " : " + image.getScore());
+        }
+      }
+    }
+  }
+
+  /**
+   * Detects whether the specified remote image on Google Cloud Storage has features you would want to moderate.
+   *
+   * @param gcsPath The path to the remote file on Google Cloud Storage to detect safe-search on.
+   * @param out A {@link PrintStream} to write the results to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectWebDetectionsGcs(String gcsPath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri(gcsPath).build();
+    Image img = Image.newBuilder().setSource(imgSource).build();
+    Feature feat = Feature.newBuilder().setType(Type.WEB_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // Search the web for usages of the image. You could use these signals later
+        // for user input moderation or linking external references.
+        // For a full list of available annotations, see http://g.co/cloud/vision/docs
+        WebDetection annotation = res.getWebDetection();
+        out.println("Entity:Id:Score");
+        out.println("===============");
+        for (WebEntity entity : annotation.getWebEntitiesList()) {
+          out.println(entity.getDescription() + " : " + entity.getEntityId() + " : "
+              + entity.getScore());
+        }
+        out.println("\nPages with matching images: Score\n==");
+        for (WebPage page : annotation.getPagesWithMatchingImagesList()) {
+          out.println(page.getUrl() + " : " + page.getScore());
+        }
+        out.println("\nPages with partially matching images: Score\n==");
+        for (WebImage image : annotation.getPartialMatchingImagesList()) {
+          out.println(image.getUrl() + " : " + image.getScore());
+        }
+        out.println("\nPages with fully matching images: Score\n==");
+        for (WebImage image : annotation.getFullMatchingImagesList()) {
+          out.println(image.getUrl() + " : " + image.getScore());
+        }
+      }
+    }
+  }
+
+  /**
+   * Suggests a region to crop to for a local file.
+   *
+   * @param filePath The path to the local file used for web annotation detection.
+   * @param out A {@link PrintStream} to write the results to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectCropHints(String filePath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
+
+    Image img = Image.newBuilder().setContent(imgBytes).build();
+    Feature feat = Feature.newBuilder().setType(Type.CROP_HINTS).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        CropHintsAnnotation annotation = res.getCropHintsAnnotation();
+        for (CropHint hint : annotation.getCropHintsList()) {
+          out.println(hint.getBoundingPoly());
+        }
+      }
+    }
+  }
+
+  /**
+   * Suggests a region to crop to for a remote file on Google Cloud Storage.
+   *
+   * @param gcsPath The path to the remote file on Google Cloud Storage to detect safe-search on.
+   * @param out A {@link PrintStream} to write the results to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectCropHintsGcs(String gcsPath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri(gcsPath).build();
+    Image img = Image.newBuilder().setSource(imgSource).build();
+    Feature feat = Feature.newBuilder().setType(Type.CROP_HINTS).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        CropHintsAnnotation annotation = res.getCropHintsAnnotation();
+        for (CropHint hint : annotation.getCropHintsList()) {
+          out.println(hint.getBoundingPoly());
+        }
+      }
+    }
+  }
+
+  /**
+   * Performs document text detection on a local image file.
+   *
+   * @param filePath The path to the local file to detect document text on.
+   * @param out A {@link PrintStream} to write the results to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectDocumentText(String filePath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
+
+    Image img = Image.newBuilder().setContent(imgBytes).build();
+    Feature feat = Feature.newBuilder().setType(Type.DOCUMENT_TEXT_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+      client.close();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        TextAnnotation annotation = res.getFullTextAnnotation();
+        for (Page page: annotation.getPagesList()) {
+          String pageText = "";
+          for (Block block : page.getBlocksList()) {
+            String blockText = "";
+            for (Paragraph para : block.getParagraphsList()) {
+              String paraText = "";
+              for (Word word: para.getWordsList()) {
+                String wordText = "";
+                for (Symbol symbol: word.getSymbolsList()) {
+                  wordText = wordText + symbol.getText();
+                }
+                paraText = paraText + wordText;
+              }
+              // Output Example using Paragraph:
+              out.println("Paragraph: \n" + paraText);
+              out.println("Bounds: \n" + para.getBoundingBox() + "\n");
+              blockText = blockText + paraText;
+            }
+            pageText = pageText + blockText;
+          }
+        }
+        out.println(annotation.getText());
+      }
+    }
+  }
+
+  /**
+   * Performs document text detection on a local image file on Google Cloud Storage.
+   *
+   * @param gcsPath The path to the remote file on Google Cloud Storage to detect document text on.
+   * @param out A {@link PrintStream} to write the results to.
+   * @throws Exception on errors while closing the client.
+   * @throws IOException on Input/Output errors.
+   */
+  public static void detectDocumentTextGcs(String gcsPath, PrintStream out) throws Exception,
+      IOException {
+    List<AnnotateImageRequest> requests = new ArrayList<>();
+
+    ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri(gcsPath).build();
+    Image img = Image.newBuilder().setSource(imgSource).build();
+    Feature feat = Feature.newBuilder().setType(Type.DOCUMENT_TEXT_DETECTION).build();
+    AnnotateImageRequest request =
+        AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+    requests.add(request);
+
+    try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+      BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+      List<AnnotateImageResponse> responses = response.getResponsesList();
+      client.close();
+
+      for (AnnotateImageResponse res : responses) {
+        if (res.hasError()) {
+          out.printf("Error: %s\n", res.getError().getMessage());
+          return;
+        }
+        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        TextAnnotation annotation = res.getFullTextAnnotation();
+        for (Page page: annotation.getPagesList()) {
+          String pageText = "";
+          for (Block block : page.getBlocksList()) {
+            String blockText = "";
+            for (Paragraph para : block.getParagraphsList()) {
+              String paraText = "";
+              for (Word word: para.getWordsList()) {
+                String wordText = "";
+                for (Symbol symbol: word.getSymbolsList()) {
+                  wordText = wordText + symbol.getText();
+                }
+                paraText = paraText + wordText;
+              }
+              // Output Example using Paragraph:
+              out.println("Paragraph: \n" + paraText);
+              out.println("Bounds: \n" + para.getBoundingBox() + "\n");
+              blockText = blockText + paraText;
+            }
+            pageText = pageText + blockText;
+          }
+        }
+        out.println(annotation.getText());
+      }
+    }
+  }
+  
+  /*
 
   public static void main(String[] args) {
     try {
@@ -374,5 +1133,7 @@ public class GoogleCloud extends Service {
       Logging.logError(e);
     }
   }
+  
+  */
 
 }

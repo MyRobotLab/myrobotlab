@@ -324,7 +324,11 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
     meta.setSponsor("moz4r");
     meta.addPeer("audioFile", "AudioFile", "audioFile");
 //    meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
-    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    // FIXME - addPeer("httpClient","HttpClient") - to pull in dependencies - and use Mrl's HttpClient service
+    // then its "one HttpClient to Rule them all"
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
+
     return meta;
   }
   

@@ -426,9 +426,11 @@ public class Repo implements Serializable {
 
       // TODO check on extension here - additional processing
       if (retrievePattern == null){
-       retrievePattern = "libraries/[type]/[artifact]-[revision].[ext]";// settings.substitute(line.getOptionValue("retrieve"));
+       // retrievePattern = "libraries/[type]/[artifact]-[revision].[ext]";// settings.substitute(line.getOptionValue("retrieve"));
+        retrievePattern = "libraries/[type]/[originalname].[ext]";
       }
 
+      log.info(String.format("retrieve pattern is %s", retrievePattern));
       String ivyPattern = null;
       int ret = ivy.retrieve(md.getModuleRevisionId(), retrievePattern, new RetrieveOptions().setConfs(confs).setSync(false)// check
           .setUseOrigin(false).setDestIvyPattern(ivyPattern).setArtifactFilter(NO_FILTER).setMakeSymlinks(false).setMakeSymlinksInMass(false));
@@ -620,8 +622,11 @@ public class Repo implements Serializable {
   public void installServiceDir(String serviceType) throws ParseException, IOException {
     Set<Library> unfulfilled = getUnfulfilledDependencies(serviceType);
     String serviceTypeName = CodecUtils.getSimpleName(serviceType);
+    info("===== installing %s =====", serviceType);
     for (Library library : unfulfilled) {
-      String retrievePattern = String.format("libraries/service/%s/[type]/[artifact]-[revision].[ext]", serviceTypeName);
+      // String retrievePattern = String.format("libraries/service/%s/[type]/[conf]/[artifact]-[revision].[ext]", serviceTypeName);
+      // String retrievePattern = String.format("libraries/service/%s/[organisation]-[orgPath]-[artifact]-[module]-[branch]-[revision]-[type]-[conf]-[originalname].[ext]", serviceTypeName);
+      String retrievePattern = String.format("libraries/service/%s/[type]/[originalname].[ext]", serviceTypeName);
       resolveArtifacts(library, retrievePattern);
     }
   }
@@ -653,6 +658,7 @@ public class Repo implements Serializable {
        * 
        */
 
+      
       // FIXME - sync serviceData with ivy cache & library
 
       // get local instance
@@ -660,14 +666,17 @@ public class Repo implements Serializable {
       Repo repo = Repo.getLocalInstance();
       
       
-      repo.installServiceDir("BoofCv");
+      repo.installServiceDirs();
+      
+      // repo.installServiceDir("MarySpeech");
+      repo.installServiceDir("Deeplearning4j");
       
       boolean done = true;
       if (done){
         return;
       }
       
-      repo.installServiceDirs();
+      
       repo.install("MarySpeech");
       
       repo.install("OpenCV");

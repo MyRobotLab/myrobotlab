@@ -41,7 +41,7 @@ public class HtmlParser extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(HtmlParser.class.getCanonicalName());
-    meta.addDependency("org.jsoup", "1.8.3");
+    meta.addDependency("org.jsoup", "jsoup", "1.8.3");
     meta.addDescription("html parser");
     meta.addCategory("document");
     // Set to false since no JSoup service exists

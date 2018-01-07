@@ -107,8 +107,13 @@ public class JMonkeyEngine extends Service implements Simulator {
     ServiceType meta = new ServiceType(JMonkeyEngine.class.getCanonicalName());
     meta.addDescription("is a 3d game engine, used for simulators");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
-    // add dependency if necessary
-    meta.addDependency("org.jme3.sdk", "3.0.0");
+    // add dependency if necessary   
+    meta.addDependency("com.jme3", "jme3-core", "3.1.0-stable");
+    meta.addDependency("com.jme3", "jme3-desktop", "3.1.0-stable");
+    meta.addDependency("com.jme3", "jme3-lwjgl", "3.1.0-stable");
+    meta.addDependency("com.jme3", "jme3-jbullet", "3.1.0-stable");
+    meta.addDependency("com.jme3", "jme3-jogg", "3.1.0-stable");
+    meta.addDependency("com.jme3", "jme3-niftygui", "3.1.0-stable");
     meta.addCategory("simulator");
     return meta;
   }

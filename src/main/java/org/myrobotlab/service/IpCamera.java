@@ -235,7 +235,9 @@ public class IpCamera extends Service {
     meta.addCategory("video");
     // FIXME - should be webcam dependency not opencv !
     // meta.addDependency("org.bytedeco.javacpp","1.1");
-    meta.addDependency("org.bytedeco.javacv", "1.3");
+    
+    // FIXME - should just add IpFrameGrabber and drop the dependency !!!
+    meta.addDependency("org.bytedeco.javacv", "javacv-platform", "1.3");
     return meta;
   }
 

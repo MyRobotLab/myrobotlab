@@ -678,8 +678,13 @@ public class Sphinx extends AbstractSpeechRecognizer {
     ServiceType meta = new ServiceType(Sphinx.class.getCanonicalName());
     meta.addDescription("open source pure Java speech recognition");
     meta.addCategory("speech recognition");
-    meta.addDependency("javax.speech.recognition", "1.0");
-    meta.addDependency("edu.cmu.sphinx", "4-1.0beta6");
+
+    // details here ...
+    // https://cmusphinx.github.io/wiki/tutorialsphinx4/
+    // meta.addDependency("javax.speech.recognition", "1.0");
+    // meta.addDependency("edu.cmu.sphinx", "4-1.0beta6");
+    meta.addDependency("edu.cmu.sphinx", "sphinx4-core", "5prealpha-SNAPSHOT");    
+    meta.addDependency("edu.cmu.sphinx", "sphinx4-data", "5prealpha-SNAPSHOT");
     return meta;
   }
 

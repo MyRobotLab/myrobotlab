@@ -964,7 +964,9 @@ public class OpenNi extends Service // implements
     meta.addDescription("OpenNI Service - 3D sensor");
     meta.addCategory("video", "vision", "sensor", "telerobotics");
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "video streaming service for webgui.");
-    meta.addDependency("com.googlecode.simpleopenni", "1.96");
+    // meta.addDependency("com.googlecode.simpleopenni", "1.96");
+    
+    meta.addDependency("simpleopenni",  "openni", "1.96");
     return meta;
   }
 
