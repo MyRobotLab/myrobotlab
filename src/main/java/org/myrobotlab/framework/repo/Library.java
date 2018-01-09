@@ -14,6 +14,7 @@ public class Library implements Serializable, Comparator<Library> {
   private String groupId;
   private String artifactId;
   private String version;
+  private String ext; // ext
   
   private boolean installed = false;
 
@@ -35,6 +36,11 @@ public class Library implements Serializable, Comparator<Library> {
       this.groupId = split[0];
       this.artifactId = split[1];
       this.version = split[2];
+    } else if (split.length == 4) {
+      this.groupId = split[0];
+      this.artifactId = split[1];
+      this.version = split[2];
+      this.ext = split[3];
     } else {
       String err = String.format("%s not a valid library key", key);
       log.error(err);
@@ -52,22 +58,17 @@ public class Library implements Serializable, Comparator<Library> {
     this.artifactId = artifactId;
     this.version = version;
   }
+  
+  public Library(String organisation, String artifactId, String version, String ext, boolean released) {
+    this.groupId = organisation;
+    this.artifactId = artifactId;
+    this.version = version;
+    this.ext = ext;
+  }
 
   @Override
   public int compare(Library o1, Library o2) {
     return o1.getOrg().compareTo(o2.getOrg());
-  }
-
-  public String getModule() {
-    if (groupId == null) {
-      return null;
-    }
-    int p = groupId.lastIndexOf(".");
-    if (p == -1) {
-      return groupId;
-    } else {
-      return groupId.substring(p + 1);
-    }
   }
 
   public String getOrg() {
@@ -81,6 +82,11 @@ public class Library implements Serializable, Comparator<Library> {
   public String getVersion() {
     return version;
   }
+  
+  public String getExt() {
+    return ext;
+  }
+
 
   public boolean isInstalled() {
     return installed;
@@ -92,7 +98,7 @@ public class Library implements Serializable, Comparator<Library> {
 
   @Override
   public String toString() {
-    return String.format("%s %s %s %b", groupId, artifactId, version, installed);
+    return String.format("%s %s %s %s %b", groupId, artifactId, version, ext, installed);
   }
 
   public void setInstalled(boolean installed) {
