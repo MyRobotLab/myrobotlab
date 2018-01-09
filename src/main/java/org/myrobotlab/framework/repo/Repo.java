@@ -15,9 +15,12 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.ivy.Ivy;
+import org.apache.ivy.core.IvyPatternHelper;
 import org.apache.ivy.core.module.descriptor.Artifact;
+import org.apache.ivy.core.module.descriptor.DefaultDependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
+import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
@@ -337,7 +340,7 @@ public class Repo implements Serializable {
     // Ivy ivy = Ivy.newInstance(ivySettings);
     if (ivy == null) {
       ivy = Ivy.newInstance();
-      ivy.getLoggerEngine().pushLogger(new DefaultMessageLogger(Message.MSG_WARN));
+      ivy.getLoggerEngine().pushLogger(new DefaultMessageLogger(Message.MSG_DEBUG));
 
       // PROXY NEEDED ?
       // CredentialsStore.INSTANCE.addCredentials(realm, host, username,
@@ -387,7 +390,7 @@ public class Repo implements Serializable {
 
     Platform platform = Platform.getLocalInstance();
     String platformConf = String.format("runtime,%s.%s.%s", platform.getArch(), platform.getBitness(), platform.getOS());
-    log.info(String.format("requesting %s", platformConf));
+    // log.info(String.format("requesting %s", platformConf));
 
     // String[] confs = new String[] { platformConf }; // e.g. x86.64.windows
     String[] confs = new String[] {};
@@ -395,19 +398,81 @@ public class Repo implements Serializable {
 
     File ivyfile = File.createTempFile("ivy", ".xml");
     ivyfile.deleteOnExit();
-
+    // ModuleRevisionId.newInstance(
     DefaultModuleDescriptor md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(dep[0], dep[1] + "-caller", "working"));
-    DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md, ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]), false, false, true);
+
+    /*
+    Attributes attributes = new AttributesImpl();
+    String location = attributes.getValue("location") != null ? settings
+        .substitute(attributes.getValue("location"))
+        : getDefaultParentLocation();
+    */
+    
+    /*
+    Map<String,String> extraAttrib = new HashMap<String, String>();
+    extraAttrib.put("type", "zip");
+    extraAttrib.put("ext", "zip");
+    */
+    ModuleRevisionId module = ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]);
+    DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md, module, false, false, true);
+    
+    // extendType - http://ant.apache.org/ivy/history/latest-milestone/ivyfile/extends.html
+    // DefaultExtendsDescriptor ded = new DefaultExtendsDescriptor(md, null , new String[]{"jar","zip"});
+    
+    // if zip !!!
+    
+    if (library.getExt() != null){ 
+      String ext = library.getExt();
+      DependencyArtifactDescriptor dad = new DefaultDependencyArtifactDescriptor(dd, module.getName(), ext, ext, null, null);
+      dd.addDependencyArtifact("", dad);
+    }
+    
     for (int i = 0; i < confs.length; i++) {
       dd.addDependencyConfiguration("default", confs[i]);
     }
+    
+    /*
+    
+    <pre>
+    
+    String classifier = null;
+    String type = "zip";
+    
+    
+    THIS IS MORE LIKE A CONF RULE ...
+    dd.addIncludeRule("", new DefaultIncludeRule(
+        new ArtifactId(module.getModuleId(), classifier == null ? "*" : classifier, type, type),
+        new ExactOrRegexpPatternMatcher(),
+        Collections.emptyMap()));
+        
+    </pre>
+        
+    */
+    
+    // extendType - http://ant.apache.org/ivy/history/latest-milestone/ivyfile/extends.html
+    // md.addInheritedDescriptor(ded);
+    
     md.addDependency(dd);
+    
     XmlModuleDescriptorWriter.write(md, ivyfile);
+    
+    // hack for zip files ...
+    
+    
     confs = new String[] { "default" };
+    
+    // Filter jarsAndZips = FilterHelper.getArtifactTypeFilter(new String[]{"jar","zip"});// filter = new FilterHe
 
+    // FIXME - TODO - filter on jars & zips - don't need javadocs nor sources
+    // NO_FILTER
     ResolveOptions resolveOptions = new ResolveOptions().setConfs(confs).setValidate(true).setResolveMode(null).setArtifactFilter(NO_FILTER);
     // resolve & retrieve happen here ...
     ResolveReport report = ivy.resolve(ivyfile.toURI().toURL(), resolveOptions);
+    
+    // ArtifactOrigin origin = ivy.getRepositoryCacheManager().getSavedArtifactOrigin(ivy.toSystem(artifact));
+    // OriginalArtifactNameValue originalname = new OriginalArtifactNameValue(org, module, branch, revision, artifact, type, ext, extraModuleAttributes, extraArtifactAttributes));
+    
+    
     List<?> err = report.getAllProblemMessages();
 
     if (err.size() > 0) {
@@ -446,19 +511,28 @@ public class Repo implements Serializable {
       for (int i = 0; i < artifacts.length; ++i) {
         ArtifactDownloadReport ar = artifacts[i];
         Artifact artifact = ar.getArtifact();
+        // String filename = IvyPatternHelper.substitute("[originalname].[ext]", artifact);
+        
+        // cached file - resolve is resolve to cache 'retrieve' is copy from cache
         File file = ar.getLocalFile();
-        log.info("{}", file.getAbsoluteFile());
+        String filename = file.getAbsoluteFile().getAbsolutePath();
+        log.info("{}", filename);
         // FIXME - native move up one directory !!! - from denormalized
         // back to normalized Yay!
         // maybe look for PlatformId in path ?
         // ret > 0 && <-- retrieved -
-        if ("zip".equalsIgnoreCase(artifact.getType())) {
-          String filename = String.format("libraries/zip/%s.zip", artifact.getName());
+        
+        String ext = artifact.getExt();
+        if ("zip".equalsIgnoreCase(artifact.getExt())) {          
+          IvyPatternHelper pattern;
+          
           info("unzipping %s", filename);
           Zip.unzip(filename, "./");
           info("unzipped %s", filename);
         }
       }
+    } else {
+      log.error(err.toString());
     }
 
     return report;
@@ -664,18 +738,28 @@ public class Repo implements Serializable {
       // get local instance
 
       Repo repo = Repo.getLocalInstance();
+      /*
+      String serviceTypeName = "InMoov";
+      // Library library = new Library("inmoov.fr", "jm3-model", "1.0.0", false);
+      Library library = new Library("inmoov.fr", "jm3-model", "1.0.0", "zip", false);
       
-      
+      String retrievePattern = String.format("libraries/service/%s/[type]/[originalname].[ext]", serviceTypeName);
+      repo.resolveArtifacts(library, retrievePattern);
+      */
       repo.installServiceDirs();
-      
-      // repo.installServiceDir("MarySpeech");
-      repo.installServiceDir("Deeplearning4j");
       
       boolean done = true;
       if (done){
         return;
       }
       
+      repo.installServiceDir("InMoov");
+      /*
+      repo.installServiceDirs();
+      
+      
+      repo.installServiceDir("Deeplearning4j");
+      */
       
       repo.install("MarySpeech");
       

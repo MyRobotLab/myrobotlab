@@ -282,7 +282,7 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
-    meta.addDependency("org.bytedeco.javacv", "javacv-platform", "1.3");
+    meta.addDependency("org.bytedeco", "javacv-platform", "1.3.3");
     // sarxos webcam
     meta.addDependency("com.github.sarxos", "webcam-capture", "0.3.10");
     // FaceRecognizer no worky if missing it

@@ -175,7 +175,7 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener
 		ServiceType meta = new ServiceType(MimicSpeech.class.getCanonicalName());
 		meta.addDescription("Speech synthesis based on Mimic from the MyCroft AI project.");
 		meta.addCategory("speech", "sound");
-		meta.addDependency("mycroftai.mimic", "mimic_win64", "1.0");
+		meta.addDependency("mycroftai.mimic", "mimic_win64", "1.0", "zip");
 		//meta.addDependency("marytts", "5.2");
 		//meta.addDependency("com.sun.speech.freetts", "1.2");
 		//meta.addDependency("opennlp", "1.6");

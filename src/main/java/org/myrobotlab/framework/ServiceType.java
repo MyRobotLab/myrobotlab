@@ -206,17 +206,28 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
     isCloudService = b;
   }
   /*
-  
+  TODO - future w/o version (latest)
   public void addDependency(String org, String version) {
     dependencies.add(String.format("%s/%s", org, version));
   }
   */
   
-
   // TODO - without version is latest ?
   public void addDependency(String groupId, String artifactId, String version) {
-    dependencies.add(String.format("%s/%s/%s", groupId, artifactId, version));
-    
+    addDependency(groupId, artifactId, version, null);
+  }
+
+  public void addDependency(String groupId, String artifactId, String version, String ext) {
+    // TODO Auto-generated method stub
+    if (ext == null){
+      if (version == null){
+        dependencies.add(String.format("%s/%s", groupId, artifactId));
+      } else {
+        dependencies.add(String.format("%s/%s/%s", groupId, artifactId, version));
+      }
+    } else {
+      dependencies.add(String.format("%s/%s/%s/%s", groupId, artifactId, version, ext));
+    }
   }
   
 
