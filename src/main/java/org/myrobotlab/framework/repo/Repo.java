@@ -17,6 +17,7 @@ import java.util.TreeMap;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.IvyPatternHelper;
 import org.apache.ivy.core.module.descriptor.Artifact;
+import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
@@ -398,8 +399,19 @@ public class Repo implements Serializable {
 
     File ivyfile = File.createTempFile("ivy", ".xml");
     ivyfile.deleteOnExit();
+    String ext = library.getExt();
     // ModuleRevisionId.newInstance(
-    DefaultModuleDescriptor md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(dep[0], dep[1] + "-caller", "working"));
+    ModuleRevisionId module = ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]);
+    DefaultModuleDescriptor md = null;
+    if (library.getExt() != null){
+      
+      DefaultDependencyDescriptor ddd = new DefaultDependencyDescriptor(module, true);
+      DefaultDependencyArtifactDescriptor mainArtifact = new DefaultDependencyArtifactDescriptor(ddd, dep[1], ext, ext, null, null);
+      DependencyArtifactDescriptor[] artifacts = new DependencyArtifactDescriptor[]{mainArtifact};
+      md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(dep[0], dep[1] + "-caller", "working"), artifacts);
+    } else {
+      md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(dep[0], dep[1] + "-caller", "working"));      
+    }
 
     /*
     Attributes attributes = new AttributesImpl();
@@ -413,19 +425,21 @@ public class Repo implements Serializable {
     extraAttrib.put("type", "zip");
     extraAttrib.put("ext", "zip");
     */
-    ModuleRevisionId module = ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]);
+    
+    
+  
     DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md, module, false, false, true);
     
     // extendType - http://ant.apache.org/ivy/history/latest-milestone/ivyfile/extends.html
     // DefaultExtendsDescriptor ded = new DefaultExtendsDescriptor(md, null , new String[]{"jar","zip"});
     
-    // if zip !!!
-    
-    if (library.getExt() != null){ 
-      String ext = library.getExt();
+    // if zip !!! <==== WRONG !!?!?
+    /**/
+    if (ext != null){  
       DependencyArtifactDescriptor dad = new DefaultDependencyArtifactDescriptor(dd, module.getName(), ext, ext, null, null);
       dd.addDependencyArtifact("", dad);
     }
+    /**/
     
     for (int i = 0; i < confs.length; i++) {
       dd.addDependencyConfiguration("default", confs[i]);
@@ -522,10 +536,7 @@ public class Repo implements Serializable {
         // maybe look for PlatformId in path ?
         // ret > 0 && <-- retrieved -
         
-        String ext = artifact.getExt();
-        if ("zip".equalsIgnoreCase(artifact.getExt())) {          
-          IvyPatternHelper pattern;
-          
+        if ("zip".equalsIgnoreCase(artifact.getExt())) {                    
           info("unzipping %s", filename);
           Zip.unzip(filename, "./");
           info("unzipped %s", filename);
@@ -746,7 +757,11 @@ public class Repo implements Serializable {
       String retrievePattern = String.format("libraries/service/%s/[type]/[originalname].[ext]", serviceTypeName);
       repo.resolveArtifacts(library, retrievePattern);
       */
+            
       repo.installServiceDirs();
+      // repo.installServiceDir("Mqtt");
+      
+      // repo.install("MimicSpeech");
       
       boolean done = true;
       if (done){

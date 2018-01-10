@@ -274,7 +274,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
     // add dependency if necessary
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech");
-    meta.addDependency("com.microsoft", "tts", "1.1");
+    meta.addDependency("com.microsoft", "tts", "1.1", "zip");
     return meta;
   }
 
