@@ -6,28 +6,31 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.ivy.Ivy;
-import org.apache.ivy.core.IvyPatternHelper;
 import org.apache.ivy.core.module.descriptor.Artifact;
-import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
+import org.apache.ivy.core.module.descriptor.DefaultExcludeRule;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
+import org.apache.ivy.core.module.descriptor.ExcludeRule;
+import org.apache.ivy.core.module.id.ArtifactId;
+import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.retrieve.RetrieveOptions;
 import org.apache.ivy.core.settings.IvySettings;
+import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
+import org.apache.ivy.plugins.matcher.PatternMatcher;
 import org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorWriter;
 import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
@@ -42,7 +45,6 @@ import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.io.FindFile;
 import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -90,7 +92,7 @@ public class Repo implements Serializable {
 
   private static Repo localInstance = getLocalInstance();
 
-  TreeMap<String, Library> libraries = new TreeMap<String, Library>();
+  TreeMap<String, ServiceDependency> libraries = new TreeMap<String, ServiceDependency>();
 
   final public static String INSTALL_START = "install start";
   final public static String INSTALL_PROGRESS = "install progress";
@@ -273,10 +275,10 @@ public class Repo implements Serializable {
       fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
     }
 
-    Set<Library> unfulfilled = getUnfulfilledDependencies(fullTypeName);
+    Set<ServiceDependency> unfulfilled = getUnfulfilledDependencies(fullTypeName);
 
-    for (Library dep : unfulfilled) {
-      libraries.put(dep.getKey(), dep);
+    for (ServiceDependency dep : unfulfilled) {
+      // libraries.put(dep.getKey(), dep);
       ret.add(resolveArtifacts(dep, retrievePattern));
     }
     
@@ -300,7 +302,7 @@ public class Repo implements Serializable {
       return false;
     }
 
-    Set<Library> libraries = getUnfulfilledDependencies(fullTypeName);
+    Set<ServiceDependency> libraries = getUnfulfilledDependencies(fullTypeName);
     if (libraries.size() > 0) {
       // log.info("{} is NOT installed", fullTypeName);
       return false;
@@ -328,7 +330,7 @@ public class Repo implements Serializable {
    *           e
    */
   // FIXME - simplify - if retrievePattern != null then retrieve ..
-  synchronized public ResolveReport resolveArtifacts(Library library, String retrievePattern) throws ParseException, IOException {
+  synchronized public ResolveReport resolveArtifacts(ServiceDependency library, String retrievePattern) throws ParseException, IOException {
     info("retrieving %s" , library);
 
     // clear errors for this install
@@ -366,7 +368,7 @@ public class Repo implements Serializable {
           fos.write(xml.getBytes());
           fos.close();
         } catch (Exception e) {
-          Logging.logError(e);
+          log.error("writing the ivychain.xml threw", e);
         }
       }
       ivy.configure(ivychain);
@@ -395,22 +397,24 @@ public class Repo implements Serializable {
 
     // String[] confs = new String[] { platformConf }; // e.g. x86.64.windows
     String[] confs = new String[] {};
-    String[] dep = new String[] { library.getOrg(), library.getArtifactId(), library.getVersion() };
+    // String[] dep = new String[] { library.getOrg(), library.getArtifactId(), library.getVersion() };
+    String orgId = library.getOrg();
+    String artifactId = library.getArtifactId();
+    String version = library.getVersion();
 
     File ivyfile = File.createTempFile("ivy", ".xml");
     ivyfile.deleteOnExit();
     String ext = library.getExt();
     // ModuleRevisionId.newInstance(
-    ModuleRevisionId module = ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]);
+    ModuleRevisionId module = ModuleRevisionId.newInstance(orgId, artifactId, version);
     DefaultModuleDescriptor md = null;
-    if (library.getExt() != null){
-      
+    if (library.getExt() != null){      
       DefaultDependencyDescriptor ddd = new DefaultDependencyDescriptor(module, true);
-      DefaultDependencyArtifactDescriptor mainArtifact = new DefaultDependencyArtifactDescriptor(ddd, dep[1], ext, ext, null, null);
+      DefaultDependencyArtifactDescriptor mainArtifact = new DefaultDependencyArtifactDescriptor(ddd, artifactId, ext, ext, null, null);
       DependencyArtifactDescriptor[] artifacts = new DependencyArtifactDescriptor[]{mainArtifact};
-      md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(dep[0], dep[1] + "-caller", "working"), artifacts);
+      md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(orgId, artifactId + "-caller", "working"), artifacts);
     } else {
-      md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(dep[0], dep[1] + "-caller", "working"));      
+      md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(orgId, artifactId + "-caller", "working"));      
     }
 
     /*
@@ -466,16 +470,27 @@ public class Repo implements Serializable {
     // extendType - http://ant.apache.org/ivy/history/latest-milestone/ivyfile/extends.html
     // md.addInheritedDescriptor(ded);
     
+    // Excludes Begin ---------
+    List<ServiceExclude> excludes = library.getExcludes();
+    for (int i = 0; i < excludes.size(); ++i ){      
+      ServiceExclude se = excludes.get(i);      
+      // ModuleRevisionId excludeId =  ModuleRevisionId.newInstance(se.getOrgId(), se.getArtifactId(), se.getVersion());
+      ModuleId excludeId = ModuleId.newInstance(se.getOrgId(), se.getArtifactId());
+      String excludeExt = (se.getExt() != null)?se.getExt():"jar";
+      ArtifactId aid = new ArtifactId(excludeId, "", excludeExt, excludeExt);
+    
+      PatternMatcher matcher =  new ExactOrRegexpPatternMatcher();// new DefaultPatternMatcher();
+      ExcludeRule rule = new DefaultExcludeRule(aid, matcher, null);
+      dd.addExcludeRule("", rule);
+    }
+    // Excludes End ---------
+    
     md.addDependency(dd);
+    // dd.addExcludeRule(masterConf, rule);
     
     XmlModuleDescriptorWriter.write(md, ivyfile);
     
-    // hack for zip files ...
-    
-    
     confs = new String[] { "default" };
-    
-    // Filter jarsAndZips = FilterHelper.getArtifactTypeFilter(new String[]{"jar","zip"});// filter = new FilterHe
 
     // FIXME - TODO - filter on jars & zips - don't need javadocs nor sources
     // NO_FILTER
@@ -586,6 +601,7 @@ public class Repo implements Serializable {
    *          the directory to load from
    * @return map
    */
+  /*
   static public Map<String, Library> generateLibrariesFromRepo(String repoDir) {
     try {
 
@@ -615,7 +631,8 @@ public class Repo implements Serializable {
             // get latest version
             File ver = subDirs[subDirs.length - 1];
             log.info("adding third party library {} {}", f.getName(), ver.getName());
-            libraries.put(getKey(f.getName(), ver.getName()), new Library(getKey(f.getName(), ver.getName())));
+            // libraries.put(getKey(f.getName(), ver.getName()), new Library(getKey(f.getName(), ver.getName())));
+            libraries.put(key, value)
           } catch (Exception e) {
             log.error("folder {} is hosed !", f.getName());
             Logging.logError(e);
@@ -631,26 +648,28 @@ public class Repo implements Serializable {
     }
     return null;
   }
+  */
 
   public void setInstalled(String key) {
-    Library library = null;
+    ServiceDependency library = null;
     if (!libraries.containsKey(key)) {
-      libraries.put(key, new Library(key));
+      libraries.put(key, new ServiceDependency(key));
     }
 
     library = libraries.get(key);
     library.setInstalled(true);
   }
-
+/*
   public static String getKey(String org, String version) {
     return String.format("%s/%s", org, version);
   }
+*/  
 
-  public Set<Library> getUnfulfilledDependencies(String type) {
+  public Set<ServiceDependency> getUnfulfilledDependencies(String type) {
     if (!type.contains(".")) {
       type = String.format("org.myrobotlab.service.%s", type);
     }
-    HashSet<Library> ret = new HashSet<Library>();
+    HashSet<ServiceDependency> ret = new LinkedHashSet<ServiceDependency>();
 
     // get the dependencies required by the type
     ServiceData sd = ServiceData.getLocalInstance();
@@ -658,22 +677,23 @@ public class Repo implements Serializable {
       log.error(String.format("%s not found", type));
       return ret;
     }
-
+    
     ServiceType st = sd.getServiceType(type);
 
     // look through our repo and resolve
     // if we dont have it - we need it
-    Set<String> d = st.getDependencies();
+    List<ServiceDependency> metaDependencies = st.getDependencies();
 
-    if (d != null && d.size() > 0) {
-      for (String key : d) {
+    if (metaDependencies != null && metaDependencies.size() > 0) {
+      for (ServiceDependency library : metaDependencies) {
+        String key = library.getKey();
         if (!libraries.containsKey(key) || !libraries.get(key).isInstalled()) {
-          ret.add(new Library(key));
+          ret.add(library);
         }
       }
     }
 
-    TreeMap<String, ServiceReservation> peers = st.getPeers();
+    Map<String, ServiceReservation> peers = st.getPeers();
     if (peers != null) {
       for (String key : peers.keySet()) {
         ServiceReservation sr = peers.get(key);
@@ -700,17 +720,18 @@ public class Repo implements Serializable {
 
   public boolean isInstalled(String typeName) {
     String fullTypeName = CodecUtils.makeFullTypeName(typeName);
-    Set<Library> libraries = getUnfulfilledDependencies(fullTypeName);
+    Set<ServiceDependency> libraries = getUnfulfilledDependencies(fullTypeName);
     return libraries.size() == 0;
   }
 
   public void installServiceDir(String serviceType) throws ParseException, IOException {
-    Set<Library> unfulfilled = getUnfulfilledDependencies(serviceType);
+    Set<ServiceDependency> unfulfilled = getUnfulfilledDependencies(serviceType);
     String serviceTypeName = CodecUtils.getSimpleName(serviceType);
     info("===== installing %s =====", serviceType);
-    for (Library library : unfulfilled) {
+    for (ServiceDependency library : unfulfilled) {
       // String retrievePattern = String.format("libraries/service/%s/[type]/[conf]/[artifact]-[revision].[ext]", serviceTypeName);
       // String retrievePattern = String.format("libraries/service/%s/[organisation]-[orgPath]-[artifact]-[module]-[branch]-[revision]-[type]-[conf]-[originalname].[ext]", serviceTypeName);
+      // String retrievePattern = String.format("libraries/service/[type]/[originalname].[ext]", serviceTypeName);
       String retrievePattern = String.format("libraries/service/%s/[type]/[originalname].[ext]", serviceTypeName);
       resolveArtifacts(library, retrievePattern);
     }
@@ -758,8 +779,8 @@ public class Repo implements Serializable {
       repo.resolveArtifacts(library, retrievePattern);
       */
             
-      repo.installServiceDirs();
-      // repo.installServiceDir("Mqtt");
+     // repo.installServiceDirs();
+      repo.installServiceDir("OpenCV");
       
       // repo.install("MimicSpeech");
       

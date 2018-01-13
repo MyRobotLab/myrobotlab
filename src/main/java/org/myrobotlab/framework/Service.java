@@ -320,7 +320,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // getPeers
       Method method = theClass.getMethod("getMetaData");
       ServiceType st = (ServiceType) method.invoke(null);
-      TreeMap<String, ServiceReservation> peers = st.getPeers();
+      Map<String, ServiceReservation> peers = st.getPeers();
 
       log.info(String.format("processing %s.getPeers(%s) will process %d peers", serviceClass, myKey, peers.size()));
 
@@ -551,7 +551,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     if (serviceType != null) {
       // serviceType starts as static type information from getMetaData
       // here we have to replace instance differences
-      TreeMap<String, ServiceReservation> peers = serviceType.getPeers();
+      Map<String, ServiceReservation> peers = serviceType.getPeers();
       for (Entry<String, ServiceReservation> entry : peers.entrySet()) {
         String templateKey = entry.getKey();
         ServiceReservation template = entry.getValue();
@@ -630,7 +630,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void movePeerDna(String myKey, String actualName, String fullTypeName, String comment) {
     ServiceType meta = getMetaData(fullTypeName);
     if (meta != null) {
-      TreeMap<String, ServiceReservation> peers = meta.getPeers();
+      Map<String, ServiceReservation> peers = meta.getPeers();
 
       for (Entry<String, ServiceReservation> reservation : peers.entrySet()) {
         String templateKey = reservation.getKey();
@@ -1557,7 +1557,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       Class<?> theClass = Class.forName(serviceClass);
       Method method = theClass.getMethod("getMetaData");
       ServiceType serviceType = (ServiceType) method.invoke(null);
-      TreeMap<String, ServiceReservation> peers = serviceType.getPeers();
+      Map<String, ServiceReservation> peers = serviceType.getPeers();
       // FIXME - recursively release peers
 
     } catch (Exception e) {

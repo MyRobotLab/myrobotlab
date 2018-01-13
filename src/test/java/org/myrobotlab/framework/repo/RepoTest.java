@@ -188,7 +188,7 @@ public class RepoTest implements RepoInstallListener {
   public void testGetUnfulfilledDependencies() {
     Repo repo = Repo.getLocalInstance();
     repo.clear();
-    Set<Library> deps = repo.getUnfulfilledDependencies("Serial");
+    Set<ServiceDependency> deps = repo.getUnfulfilledDependencies("Serial");
     deps.size();
     // may change - but unlikely....
     assertTrue(deps.size() > 0);

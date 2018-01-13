@@ -733,8 +733,14 @@ public class OpenCV extends AbstractVideoSource {
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
     meta.addDependency("org.bytedeco", "javacv-platform", "1.3.3");
+//     meta.exclude("commons-codec", "commons-codec");
+    
+    meta.addDependency("commons-codec", "commons-codec", "1.10");
+    
     // sarxos webcam
     meta.addDependency("com.github.sarxos", "webcam-capture", "0.3.10");
+    // meta.exclude("");
+    
     // FaceRecognizer no worky if missing it
     meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     // for the mjpeg streamer support FIXME - this should only be in Video
