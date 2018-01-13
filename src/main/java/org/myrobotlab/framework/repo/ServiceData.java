@@ -135,8 +135,10 @@ public class ServiceData implements Serializable {
    * Run-Time must extract itself and scan/filter zip entries which is
    * potentially a lengthy process, and should only have to be done once for the
    * lifetime of the version or mrl
+   * 
    * @return the service data description
-   * @throws IOException e
+   * @throws IOException
+   *           e
    */
   static public ServiceData generate() throws IOException {
     log.info("================ generating serviceData.json begin ================");
@@ -144,7 +146,7 @@ public class ServiceData implements Serializable {
 
     // get services - all this could be done during Runtime
     // although running through zip entries would be a bit of a pain
-    // epecially if you have to spin through 12 megs of data
+    // epecially if you have to spin through 50 megs of data
     List<String> services = FileIO.getServiceList();
 
     log.info("found {} services", services.size());
@@ -165,16 +167,15 @@ public class ServiceData implements Serializable {
 
         for (String cat : serviceType.categories) {
           Category category = null;
-          if (serviceType.isAvailable())
-          {
-          if (sd.categoryTypes.containsKey(cat)) {
-            category = sd.categoryTypes.get(cat);
-          } else {
-            category = new Category();
-            category.name = cat;
-          }
-          category.serviceTypes.add(serviceType.getName());
-          sd.categoryTypes.put(cat, category);
+          if (serviceType.isAvailable()) {
+            if (sd.categoryTypes.containsKey(cat)) {
+              category = sd.categoryTypes.get(cat);
+            } else {
+              category = new Category();
+              category.name = cat;
+            }
+            category.serviceTypes.add(serviceType.getName());
+            sd.categoryTypes.put(cat, category);
           }
         }
 
@@ -229,13 +230,13 @@ public class ServiceData implements Serializable {
     return cat;
   }
 
-  public HashSet<String> getServiceTypeDependencyKeys() {
-    HashSet<String> uniqueKeys = new HashSet<String>();
+  public HashSet<ServiceDependency> getServiceTypeDependencyKeys() {
+    HashSet<ServiceDependency> uniqueKeys = new HashSet<ServiceDependency>();
     for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
       ServiceType st = o.getValue();
       if (st.dependencies != null) {
-        for (String org : st.dependencies) {
-          uniqueKeys.add(org);
+        for (ServiceDependency library : st.dependencies) {
+          uniqueKeys.add(library);
         }
       }
     }
@@ -271,16 +272,13 @@ public class ServiceData implements Serializable {
   public ArrayList<ServiceType> getServiceTypes() {
     return getServiceTypes(true);
   }
-  
+
   public ArrayList<ServiceType> getServiceTypes(boolean showUnavailable) {
     ArrayList<ServiceType> ret = new ArrayList<ServiceType>();
     for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
-      if (!o.getValue().isAvailable() && !showUnavailable)
-      {
-        log.info("getServiceTypes ignore : "+o.getValue().getSimpleName());
-      }
-      else
-      {
+      if (!o.getValue().isAvailable() && !showUnavailable) {
+        log.info("getServiceTypes ignore : " + o.getValue().getSimpleName());
+      } else {
         ret.add(o.getValue());
       }
     }
@@ -326,8 +324,8 @@ public class ServiceData implements Serializable {
     return categories;
   }
 
-  static public Set<String> getDependencyKeys(String fullTypeName) {
-    HashSet<String> keys = new HashSet<String>();
+  static public List<ServiceDependency> getDependencyKeys(String fullTypeName) {
+    List<ServiceDependency> keys = new ArrayList<ServiceDependency>();
     ServiceData sd = getLocalInstance();
     if (!sd.serviceTypes.containsKey(fullTypeName)) {
       log.error("{} not defined in service types");

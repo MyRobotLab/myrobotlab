@@ -467,10 +467,15 @@ public class FileIO {
 		// String path = packageName.replace('.', '/');
 		for (URL url : urls) {
 			String urlName = url.getPath();
+			if (urlName.contains("$")) {
+			  // inner classes we are not interested in
+			  continue;
+			}
 			String simpleName = urlName.substring(urlName.lastIndexOf("/") + 1, urlName.lastIndexOf("."));
 			String classname = String.format("org.myrobotlab.service.%s", simpleName);
 			classes.add(classname);
 		}
+		log.info("found {} service classes", classes.size());
 		return classes;
 	}
 

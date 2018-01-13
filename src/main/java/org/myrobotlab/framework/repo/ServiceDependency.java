@@ -1,14 +1,16 @@
 package org.myrobotlab.framework.repo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-public class Library implements Serializable, Comparator<Library> {
+public class ServiceDependency implements Serializable, Comparator<ServiceDependency> {
 
-  transient public final static Logger log = LoggerFactory.getLogger(Library.class);
+  transient public final static Logger log = LoggerFactory.getLogger(ServiceDependency.class);
 
   private static final long serialVersionUID = 1L;
   private String groupId;
@@ -17,16 +19,18 @@ public class Library implements Serializable, Comparator<Library> {
   private String ext; // ext
   
   private boolean installed = false;
+  
+  private List<ServiceExclude> excludes = new ArrayList<ServiceExclude>();
 
-  public Library() {
-    this(null, null, null, true);
+  public ServiceDependency() {
+    this(null, null, null);
   }
 
   /**
    * constructor with key - of form [org/version]
    * @param key k
    */
-  public Library(String key) {
+  public ServiceDependency(String key) {
     String[] split = key.split("/");
     
     if (split.length == 2){
@@ -40,35 +44,33 @@ public class Library implements Serializable, Comparator<Library> {
       this.groupId = split[0];
       this.artifactId = split[1];
       this.version = split[2];
-      this.ext = split[3];
+      if (!split[3].equals("null")){
+        this.ext = split[3];
+      }
     } else {
       String err = String.format("%s not a valid library key", key);
       log.error(err);
       throw new RuntimeException(err);
     }
   }
-/*
-  public Library(String organisation, String version) {
-    this.groupId = organisation;
-    this.version = version;
-  }
-*/
-  public Library(String organisation, String artifactId, String version, boolean released) {
+
+  public ServiceDependency(String organisation, String artifactId, String version) {
     this.groupId = organisation;
     this.artifactId = artifactId;
     this.version = version;
   }
   
-  public Library(String organisation, String artifactId, String version, String ext, boolean released) {
-    this.groupId = organisation;
+  public ServiceDependency(String groubId, String artifactId, String version, String ext) {
+    this.groupId = groubId;
     this.artifactId = artifactId;
     this.version = version;
     this.ext = ext;
   }
 
+
   @Override
-  public int compare(Library o1, Library o2) {
-    return o1.getOrg().compareTo(o2.getOrg());
+  public int compare(ServiceDependency o1, ServiceDependency o2) {
+    return o1.getKey().compareTo(o2.getKey());
   }
 
   public String getOrg() {
@@ -98,7 +100,8 @@ public class Library implements Serializable, Comparator<Library> {
 
   @Override
   public String toString() {
-    return String.format("%s %s %s %s %b", groupId, artifactId, version, ext, installed);
+    //  return String.format("%s %b", getKey(), installed);
+    return getKey();
   }
 
   public void setInstalled(boolean installed) {
@@ -106,7 +109,15 @@ public class Library implements Serializable, Comparator<Library> {
   }
 
   public String getKey() {
-    return String.format("%s/%s", groupId, version);
+    return String.format("%s/%s/%s/%s", groupId, artifactId, version, ext);
+  }
+
+  public void add(ServiceExclude serviceExclude) {
+    excludes.add(serviceExclude);
+  }
+
+  public List<ServiceExclude> getExcludes() {
+    return excludes;
   }
 
 }

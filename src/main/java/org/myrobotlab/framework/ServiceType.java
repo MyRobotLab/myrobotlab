@@ -1,10 +1,19 @@
 package org.myrobotlab.framework;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import org.myrobotlab.framework.repo.ServiceExclude;
+
+import org.myrobotlab.framework.repo.ServiceDependency;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.OpenCV;
+import org.slf4j.Logger;
 
 /**
  * list of relations from a Service type to a Dependency key the key is used to
@@ -19,6 +28,8 @@ import java.util.TreeMap;
  */
 public class ServiceType implements Serializable, Comparator<ServiceType> {
 
+  transient public final static Logger log = LoggerFactory.getLogger(ServiceType.class);
+  
 	private static final long serialVersionUID = 1L;
 
 	String name;
@@ -63,9 +74,11 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	/**
 	 * dependency keys of with key structure {org}-{version}
 	 */
-	public HashSet<String> dependencies = new HashSet<String>();
-	public HashSet<String> categories = new HashSet<String>();
-	public TreeMap<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
+	public List<ServiceDependency> dependencies = new ArrayList<ServiceDependency>();
+	public Set<String> categories = new HashSet<String>();
+	public Map<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
+
+  private ServiceDependency lastDependency;
 
 	public ServiceType() {
 	}
@@ -156,11 +169,11 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 		this.available = b;
 	}
 
-	public Set<String> getDependencies() {
+	public List<ServiceDependency> getDependencies() {
 		return dependencies;
 	}
 
-	public TreeMap<String, ServiceReservation> getPeers() {
+	public Map<String, ServiceReservation> getPeers() {
 		return peers;
 	}
 
@@ -205,12 +218,6 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   public void setCloudService(boolean b) {
     isCloudService = b;
   }
-  /*
-  TODO - future w/o version (latest)
-  public void addDependency(String org, String version) {
-    dependencies.add(String.format("%s/%s", org, version));
-  }
-  */
   
   // TODO - without version is latest ?
   public void addDependency(String groupId, String artifactId, String version) {
@@ -218,16 +225,18 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   }
 
   public void addDependency(String groupId, String artifactId, String version, String ext) {
-    // TODO Auto-generated method stub
-    if (ext == null){
-      if (version == null){
-        dependencies.add(String.format("%s/%s", groupId, artifactId));
-      } else {
-        dependencies.add(String.format("%s/%s/%s", groupId, artifactId, version));
-      }
-    } else {
-      dependencies.add(String.format("%s/%s/%s/%s", groupId, artifactId, version, ext));
-    }
+    ServiceDependency library = new ServiceDependency(groupId, artifactId, version, ext);
+    lastDependency = library;
+    dependencies.add(library);
+  }
+
+  public void exclude(String groupId, String artifactId) {
+    // get last dependency
+    // dependencies
+    if (lastDependency == null){
+      log.error("DEPENDENCY NOT DEFINED - CANNOT EXCLUDE");
+    }    
+    lastDependency.add(new ServiceExclude(groupId, artifactId));
   }
   
 
