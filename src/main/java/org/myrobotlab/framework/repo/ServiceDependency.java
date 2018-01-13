@@ -73,7 +73,7 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
     return o1.getKey().compareTo(o2.getKey());
   }
 
-  public String getOrg() {
+  public String getOrgId() {
     return groupId;
   }
   

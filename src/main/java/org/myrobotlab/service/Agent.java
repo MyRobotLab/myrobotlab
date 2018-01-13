@@ -714,7 +714,7 @@ public class Agent extends Service {
     long installTime = 0;
     Repo repo = Runtime.getInstance().getRepo();
     ServiceData serviceData = ServiceData.getLocalInstance();
-    ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
+    List<ServiceType> serviceTypes = serviceData.getServiceTypes();
 
     ret.add(Status.info("serviceTest will test %d services", serviceTypes.size()));
     long startTime = System.currentTimeMillis();

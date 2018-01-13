@@ -231,6 +231,8 @@ public class Test extends Service implements StatusListener {
     meta.addCategory("testing");
     meta.addPeer("http", "HttpClient", "to interface with Service pages");
     meta.setAvailable(false);
+    
+    meta.addDependency("junit", "junit", "4.12");
     // meta.addPeer("python", "Python", "python to excercise python scripts");
     return meta;
   }
@@ -459,7 +461,7 @@ public class Test extends Service implements StatusListener {
 
   public List<String> getServicesWithOutServicePages() throws ClientProtocolException, IOException {
     ArrayList<String> ret = new ArrayList<String>();
-    ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
+    List<ServiceType> serviceTypes = serviceData.getServiceTypes();
     HttpClient http = (HttpClient) startPeer("http");
     for (int i = 0; i < serviceTypes.size(); ++i) {
       ServiceType serviceType = serviceTypes.get(i);
@@ -516,7 +518,7 @@ public class Test extends Service implements StatusListener {
    */
   public void loadDefaultTests() {
 
-    ArrayList<ServiceType> types = serviceData.getServiceTypes();
+    List<ServiceType> types = serviceData.getServiceTypes();
     for (int i = 0; i < types.size(); ++i) {
       ServiceType type = types.get(i);
       log.info("adding {}", type.getSimpleName());

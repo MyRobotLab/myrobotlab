@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.ivy.Ivy;
+import org.apache.ivy.ant.IvyMakePom.Dependency;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
@@ -240,12 +241,11 @@ public class Repo implements Serializable {
   public void clearErrors() {
     errors.clear();
   }
-  
+
   public List<ResolveReport> install(String fullTypeName) throws ParseException, IOException {
     return install(fullTypeName, null);
   }
 
-  
   /**
    * Install the all dependencies for a service if it has any. This uses Ivy
    * programmatically to resolve and retrieve all necessary dependencies for a
@@ -281,7 +281,7 @@ public class Repo implements Serializable {
       // libraries.put(dep.getKey(), dep);
       ret.add(resolveArtifacts(dep, retrievePattern));
     }
-    
+
     return ret;
   }
 
@@ -331,7 +331,7 @@ public class Repo implements Serializable {
    */
   // FIXME - simplify - if retrievePattern != null then retrieve ..
   synchronized public ResolveReport resolveArtifacts(ServiceDependency library, String retrievePattern) throws ParseException, IOException {
-    info("retrieving %s" , library);
+    info("retrieving %s", library);
 
     // clear errors for this install
     errors.clear();
@@ -397,8 +397,9 @@ public class Repo implements Serializable {
 
     // String[] confs = new String[] { platformConf }; // e.g. x86.64.windows
     String[] confs = new String[] {};
-    // String[] dep = new String[] { library.getOrg(), library.getArtifactId(), library.getVersion() };
-    String orgId = library.getOrg();
+    // String[] dep = new String[] { library.getOrg(), library.getArtifactId(),
+    // library.getVersion() };
+    String orgId = library.getOrgId();
     String artifactId = library.getArtifactId();
     String version = library.getVersion();
 
@@ -408,88 +409,89 @@ public class Repo implements Serializable {
     // ModuleRevisionId.newInstance(
     ModuleRevisionId module = ModuleRevisionId.newInstance(orgId, artifactId, version);
     DefaultModuleDescriptor md = null;
-    if (library.getExt() != null){      
+    if (library.getExt() != null) {
       DefaultDependencyDescriptor ddd = new DefaultDependencyDescriptor(module, true);
       DefaultDependencyArtifactDescriptor mainArtifact = new DefaultDependencyArtifactDescriptor(ddd, artifactId, ext, ext, null, null);
-      DependencyArtifactDescriptor[] artifacts = new DependencyArtifactDescriptor[]{mainArtifact};
+      DependencyArtifactDescriptor[] artifacts = new DependencyArtifactDescriptor[] { mainArtifact };
       md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(orgId, artifactId + "-caller", "working"), artifacts);
     } else {
-      md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(orgId, artifactId + "-caller", "working"));      
+      md = DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(orgId, artifactId + "-caller", "working"));
     }
 
     /*
-    Attributes attributes = new AttributesImpl();
-    String location = attributes.getValue("location") != null ? settings
-        .substitute(attributes.getValue("location"))
-        : getDefaultParentLocation();
-    */
-    
+     * Attributes attributes = new AttributesImpl(); String location =
+     * attributes.getValue("location") != null ? settings
+     * .substitute(attributes.getValue("location")) :
+     * getDefaultParentLocation();
+     */
+
     /*
-    Map<String,String> extraAttrib = new HashMap<String, String>();
-    extraAttrib.put("type", "zip");
-    extraAttrib.put("ext", "zip");
-    */
-    
-    
-  
+     * Map<String,String> extraAttrib = new HashMap<String, String>();
+     * extraAttrib.put("type", "zip"); extraAttrib.put("ext", "zip");
+     */
+
     DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md, module, false, false, true);
-    
-    // extendType - http://ant.apache.org/ivy/history/latest-milestone/ivyfile/extends.html
-    // DefaultExtendsDescriptor ded = new DefaultExtendsDescriptor(md, null , new String[]{"jar","zip"});
-    
+
+    // extendType -
+    // http://ant.apache.org/ivy/history/latest-milestone/ivyfile/extends.html
+    // DefaultExtendsDescriptor ded = new DefaultExtendsDescriptor(md, null ,
+    // new String[]{"jar","zip"});
+
     // if zip !!! <==== WRONG !!?!?
     /**/
-    if (ext != null){  
+    if (ext != null) {
       DependencyArtifactDescriptor dad = new DefaultDependencyArtifactDescriptor(dd, module.getName(), ext, ext, null, null);
       dd.addDependencyArtifact("", dad);
     }
     /**/
-    
+
     for (int i = 0; i < confs.length; i++) {
       dd.addDependencyConfiguration("default", confs[i]);
     }
-    
+
     /*
-    
-    <pre>
-    
-    String classifier = null;
-    String type = "zip";
-    
-    
-    THIS IS MORE LIKE A CONF RULE ...
-    dd.addIncludeRule("", new DefaultIncludeRule(
-        new ArtifactId(module.getModuleId(), classifier == null ? "*" : classifier, type, type),
-        new ExactOrRegexpPatternMatcher(),
-        Collections.emptyMap()));
-        
-    </pre>
-        
-    */
-    
-    // extendType - http://ant.apache.org/ivy/history/latest-milestone/ivyfile/extends.html
+     * 
+     * <pre>
+     * 
+     * String classifier = null; String type = "zip";
+     * 
+     * 
+     * THIS IS MORE LIKE A CONF RULE ... dd.addIncludeRule("", new
+     * DefaultIncludeRule( new ArtifactId(module.getModuleId(), classifier ==
+     * null ? "*" : classifier, type, type), new ExactOrRegexpPatternMatcher(),
+     * Collections.emptyMap()));
+     * 
+     * </pre>
+     * 
+     */
+
+    // extendType -
+    // http://ant.apache.org/ivy/history/latest-milestone/ivyfile/extends.html
     // md.addInheritedDescriptor(ded);
-    
+
     // Excludes Begin ---------
     List<ServiceExclude> excludes = library.getExcludes();
-    for (int i = 0; i < excludes.size(); ++i ){      
-      ServiceExclude se = excludes.get(i);      
-      // ModuleRevisionId excludeId =  ModuleRevisionId.newInstance(se.getOrgId(), se.getArtifactId(), se.getVersion());
+    for (int i = 0; i < excludes.size(); ++i) {
+      ServiceExclude se = excludes.get(i);
+      // ModuleRevisionId excludeId =
+      // ModuleRevisionId.newInstance(se.getOrgId(), se.getArtifactId(),
+      // se.getVersion());
       ModuleId excludeId = ModuleId.newInstance(se.getOrgId(), se.getArtifactId());
-      String excludeExt = (se.getExt() != null)?se.getExt():"jar";
+      String excludeExt = (se.getExt() != null) ? se.getExt() : "jar";
       ArtifactId aid = new ArtifactId(excludeId, "", excludeExt, excludeExt);
-    
-      PatternMatcher matcher =  new ExactOrRegexpPatternMatcher();// new DefaultPatternMatcher();
+
+      PatternMatcher matcher = new ExactOrRegexpPatternMatcher();// new
+                                                                 // DefaultPatternMatcher();
       ExcludeRule rule = new DefaultExcludeRule(aid, matcher, null);
       dd.addExcludeRule("", rule);
     }
     // Excludes End ---------
-    
+
     md.addDependency(dd);
     // dd.addExcludeRule(masterConf, rule);
-    
+
     XmlModuleDescriptorWriter.write(md, ivyfile);
-    
+
     confs = new String[] { "default" };
 
     // FIXME - TODO - filter on jars & zips - don't need javadocs nor sources
@@ -497,11 +499,13 @@ public class Repo implements Serializable {
     ResolveOptions resolveOptions = new ResolveOptions().setConfs(confs).setValidate(true).setResolveMode(null).setArtifactFilter(NO_FILTER);
     // resolve & retrieve happen here ...
     ResolveReport report = ivy.resolve(ivyfile.toURI().toURL(), resolveOptions);
-    
-    // ArtifactOrigin origin = ivy.getRepositoryCacheManager().getSavedArtifactOrigin(ivy.toSystem(artifact));
-    // OriginalArtifactNameValue originalname = new OriginalArtifactNameValue(org, module, branch, revision, artifact, type, ext, extraModuleAttributes, extraArtifactAttributes));
-    
-    
+
+    // ArtifactOrigin origin =
+    // ivy.getRepositoryCacheManager().getSavedArtifactOrigin(ivy.toSystem(artifact));
+    // OriginalArtifactNameValue originalname = new
+    // OriginalArtifactNameValue(org, module, branch, revision, artifact, type,
+    // ext, extraModuleAttributes, extraArtifactAttributes));
+
     List<?> err = report.getAllProblemMessages();
 
     if (err.size() > 0) {
@@ -519,8 +523,9 @@ public class Repo implements Serializable {
     if (err.size() == 0) {
 
       // TODO check on extension here - additional processing
-      if (retrievePattern == null){
-       // retrievePattern = "libraries/[type]/[artifact]-[revision].[ext]";// settings.substitute(line.getOptionValue("retrieve"));
+      if (retrievePattern == null) {
+        // retrievePattern = "libraries/[type]/[artifact]-[revision].[ext]";//
+        // settings.substitute(line.getOptionValue("retrieve"));
         retrievePattern = "libraries/[type]/[originalname].[ext]";
       }
 
@@ -540,9 +545,11 @@ public class Repo implements Serializable {
       for (int i = 0; i < artifacts.length; ++i) {
         ArtifactDownloadReport ar = artifacts[i];
         Artifact artifact = ar.getArtifact();
-        // String filename = IvyPatternHelper.substitute("[originalname].[ext]", artifact);
-        
-        // cached file - resolve is resolve to cache 'retrieve' is copy from cache
+        // String filename = IvyPatternHelper.substitute("[originalname].[ext]",
+        // artifact);
+
+        // cached file - resolve is resolve to cache 'retrieve' is copy from
+        // cache
         File file = ar.getLocalFile();
         String filename = file.getAbsoluteFile().getAbsolutePath();
         log.info("{}", filename);
@@ -550,8 +557,8 @@ public class Repo implements Serializable {
         // back to normalized Yay!
         // maybe look for PlatformId in path ?
         // ret > 0 && <-- retrieved -
-        
-        if ("zip".equalsIgnoreCase(artifact.getExt())) {                    
+
+        if ("zip".equalsIgnoreCase(artifact.getExt())) {
           info("unzipping %s", filename);
           Zip.unzip(filename, "./");
           info("unzipped %s", filename);
@@ -602,53 +609,33 @@ public class Repo implements Serializable {
    * @return map
    */
   /*
-  static public Map<String, Library> generateLibrariesFromRepo(String repoDir) {
-    try {
-
-      HashMap<String, Library> libraries = new HashMap<String, Library>();
-
-      // get all third party libraries
-      // give me all the first level directories of the repo
-      // this CAN BE DONE REMOTELY TOO !!! - using v3 githup json api !!!
-      List<File> dirs = FindFile.find(repoDir, "^[^.].*[^-_.]$", false, true);
-      log.info("found {} files", dirs.size());
-      for (int i = 0; i < dirs.size(); ++i) {
-        File f = dirs.get(i);
-        if (f.isDirectory()) {
-          try {
-            // log.info("looking in {}", f.getAbsolutePath());
-            List<File> subDirsList = FindFile.find(f.getAbsolutePath(), ".*", false, true);
-            ArrayList<File> filtered = new ArrayList<File>();
-            for (int z = 0; z < subDirsList.size(); ++z) {
-              File dir = subDirsList.get(z);
-              if (dir.isDirectory()) {
-                filtered.add(dir);
-              }
-            }
-
-            File[] subDirs = filtered.toArray(new File[filtered.size()]);
-            Arrays.sort(subDirs);
-            // get latest version
-            File ver = subDirs[subDirs.length - 1];
-            log.info("adding third party library {} {}", f.getName(), ver.getName());
-            // libraries.put(getKey(f.getName(), ver.getName()), new Library(getKey(f.getName(), ver.getName())));
-            libraries.put(key, value)
-          } catch (Exception e) {
-            log.error("folder {} is hosed !", f.getName());
-            Logging.logError(e);
-          }
-
-        } else {
-          log.info("skipping file {}", f.getName());
-        }
-      }
-      return libraries;
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-    return null;
-  }
-  */
+   * static public Map<String, Library> generateLibrariesFromRepo(String
+   * repoDir) { try {
+   * 
+   * HashMap<String, Library> libraries = new HashMap<String, Library>();
+   * 
+   * // get all third party libraries // give me all the first level directories
+   * of the repo // this CAN BE DONE REMOTELY TOO !!! - using v3 githup json api
+   * !!! List<File> dirs = FindFile.find(repoDir, "^[^.].*[^-_.]$", false,
+   * true); log.info("found {} files", dirs.size()); for (int i = 0; i <
+   * dirs.size(); ++i) { File f = dirs.get(i); if (f.isDirectory()) { try { //
+   * log.info("looking in {}", f.getAbsolutePath()); List<File> subDirsList =
+   * FindFile.find(f.getAbsolutePath(), ".*", false, true); ArrayList<File>
+   * filtered = new ArrayList<File>(); for (int z = 0; z < subDirsList.size();
+   * ++z) { File dir = subDirsList.get(z); if (dir.isDirectory()) {
+   * filtered.add(dir); } }
+   * 
+   * File[] subDirs = filtered.toArray(new File[filtered.size()]);
+   * Arrays.sort(subDirs); // get latest version File ver =
+   * subDirs[subDirs.length - 1]; log.info("adding third party library {} {}",
+   * f.getName(), ver.getName()); // libraries.put(getKey(f.getName(),
+   * ver.getName()), new Library(getKey(f.getName(), ver.getName())));
+   * libraries.put(key, value) } catch (Exception e) {
+   * log.error("folder {} is hosed !", f.getName()); Logging.logError(e); }
+   * 
+   * } else { log.info("skipping file {}", f.getName()); } } return libraries; }
+   * catch (Exception e) { Logging.logError(e); } return null; }
+   */
 
   public void setInstalled(String key) {
     ServiceDependency library = null;
@@ -659,11 +646,10 @@ public class Repo implements Serializable {
     library = libraries.get(key);
     library.setInstalled(true);
   }
-/*
-  public static String getKey(String org, String version) {
-    return String.format("%s/%s", org, version);
-  }
-*/  
+  /*
+   * public static String getKey(String org, String version) { return
+   * String.format("%s/%s", org, version); }
+   */
 
   public Set<ServiceDependency> getUnfulfilledDependencies(String type) {
     if (!type.contains(".")) {
@@ -677,7 +663,7 @@ public class Repo implements Serializable {
       log.error(String.format("%s not found", type));
       return ret;
     }
-    
+
     ServiceType st = sd.getServiceType(type);
 
     // look through our repo and resolve
@@ -729,30 +715,101 @@ public class Repo implements Serializable {
     String serviceTypeName = CodecUtils.getSimpleName(serviceType);
     info("===== installing %s =====", serviceType);
     for (ServiceDependency library : unfulfilled) {
-      // String retrievePattern = String.format("libraries/service/%s/[type]/[conf]/[artifact]-[revision].[ext]", serviceTypeName);
-      // String retrievePattern = String.format("libraries/service/%s/[organisation]-[orgPath]-[artifact]-[module]-[branch]-[revision]-[type]-[conf]-[originalname].[ext]", serviceTypeName);
-      // String retrievePattern = String.format("libraries/service/[type]/[originalname].[ext]", serviceTypeName);
+      // String retrievePattern =
+      // String.format("libraries/service/%s/[type]/[conf]/[artifact]-[revision].[ext]",
+      // serviceTypeName);
+      // String retrievePattern =
+      // String.format("libraries/service/%s/[organisation]-[orgPath]-[artifact]-[module]-[branch]-[revision]-[type]-[conf]-[originalname].[ext]",
+      // serviceTypeName);
+      // String retrievePattern =
+      // String.format("libraries/service/[type]/[originalname].[ext]",
+      // serviceTypeName);
       String retrievePattern = String.format("libraries/service/%s/[type]/[originalname].[ext]", serviceTypeName);
       resolveArtifacts(library, retrievePattern);
     }
   }
-  
+
   public void installServiceDirs() throws ParseException, IOException {
     ServiceData sd = ServiceData.getLocalInstance();
     for (String type : sd.getServiceTypeNames()) {
-      installServiceDir(type);      
+      installServiceDir(type);
     }
   }
   
-  public void generatePomFromMetaData(){
-    
+  public String generatePomFromMetaData() {
+    return generatePomFromMetaData(null);
+   }  
+
+  public String generatePomFromMetaData(String serviceType) {
+    StringBuilder ret = new StringBuilder();
+
+    ret.append("<dependencies>\n\n");
+    ServiceData sd = ServiceData.getLocalInstance();
+    List<ServiceType> services = new ArrayList<ServiceType>();
+    if (serviceType != null) {
+      services.add(sd.getServiceType(serviceType));
+    } else {
+      services = sd.getServiceTypes();
+    }
+
+    for (ServiceType service : services) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(String.format("<!-- %s begin -->\n", service.getSimpleName()));
+      List<ServiceDependency> dependencies = service.getDependencies();
+      for (ServiceDependency dependency : dependencies) {
+        sb.append("<dependency>\n");
+        sb.append(String.format("  <groupId>%s</groupId>\n", dependency.getOrgId()));
+        sb.append(String.format("  <artifactId>%s</artifactId>\n", dependency.getArtifactId()));
+        // optional - means latest ???
+        sb.append(String.format("  <version>%s</version>\n", dependency.getVersion()));
+        if (dependency.getExt() != null) {
+          sb.append(String.format("  <type>%s</type>\n", dependency.getExt()));
+        }
+        List<ServiceExclude> excludes = dependency.getExcludes();
+
+        // exclusions begin ---
+        StringBuilder ex = new StringBuilder("    <exclusions>\n");
+        for (ServiceExclude exclude : excludes) {
+          ex.append("      <exclusion>\n");
+          ex.append(String.format("        <groupId>%s</groupId>\n", exclude.getOrgId()));
+          ex.append(String.format("        <artifactId>%s</artifactId>\n", exclude.getArtifactId()));
+          if (dependency.getVersion() != null) {
+            ex.append(String.format("        <version>%s</version>\n", exclude.getVersion()));
+          }
+          if (dependency.getExt() != null) {
+            ex.append(String.format("        <type>%s</type>\n", exclude.getExt()));
+          }
+          ex.append("      </exclusion>\n");
+        }
+        ex.append("    </exclusions>\n");
+        if (excludes.size() > 0) {
+          sb.append(ex);
+        }
+        // exclusions end ---
+
+        sb.append("</dependency>\n");
+      }
+      sb.append(String.format("<!-- %s end -->\n\n", service.getSimpleName()));
+      if (dependencies.size() > 0) {
+        ret.append(sb);
+      }
+    }
+
+    ret.append("</dependencies>\n");
+    try {
+      FileOutputStream fos = new FileOutputStream("dependencies.xml");
+      fos.write(ret.toString().getBytes());
+      fos.close();
+    } catch (Exception e) {
+      log.error("writing dependencies.xml threw", e);
+    }
+    return ret.toString();
   }
 
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
-      
-    
+
       /**
        * TODO - test with all directories missing test as "one jar"
        * 
@@ -764,41 +821,36 @@ public class Repo implements Serializable {
        * 
        */
 
-      
       // FIXME - sync serviceData with ivy cache & library
 
       // get local instance
 
       Repo repo = Repo.getLocalInstance();
-      /*
-      String serviceTypeName = "InMoov";
-      // Library library = new Library("inmoov.fr", "jm3-model", "1.0.0", false);
-      Library library = new Library("inmoov.fr", "jm3-model", "1.0.0", "zip", false);
+     
       
-      String retrievePattern = String.format("libraries/service/%s/[type]/[originalname].[ext]", serviceTypeName);
-      repo.resolveArtifacts(library, retrievePattern);
-      */
-            
-     // repo.installServiceDirs();
+
+      repo.generatePomFromMetaData("OpenCV");
+
+      // repo.installServiceDirs();
       repo.installServiceDir("OpenCV");
-      
+
       // repo.install("MimicSpeech");
-      
+
       boolean done = true;
-      if (done){
+      if (done) {
         return;
       }
-      
+
       repo.installServiceDir("InMoov");
       /*
-      repo.installServiceDirs();
-      
-      
-      repo.installServiceDir("Deeplearning4j");
-      */
-      
+       * repo.installServiceDirs();
+       * 
+       * 
+       * repo.installServiceDir("Deeplearning4j");
+       */
+
       repo.install("MarySpeech");
-      
+
       repo.install("OpenCV");
 
       /*
@@ -854,5 +906,7 @@ public class Repo implements Serializable {
       Logging.logError(e);
     }
   }
+
+
 
 }

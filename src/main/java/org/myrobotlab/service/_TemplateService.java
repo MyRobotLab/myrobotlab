@@ -32,7 +32,12 @@ public class _TemplateService extends Service {
     meta.addDescription("used as a general template");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
+    
+    // TEMPORARY CORE DEPENDENCIES !!! (for uber-jar)
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0");
+    
+    
+    
     meta.setAvailable(false);
     meta.addCategory("general");
     return meta;
