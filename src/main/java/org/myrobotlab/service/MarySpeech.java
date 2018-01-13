@@ -378,7 +378,7 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 		ServiceType meta = new ServiceType(MarySpeech.class);
 		meta.addDescription("Speech synthesis based on MaryTTS");
 		meta.addCategory("speech", "sound");
-		meta.addDependency("de.dfki.mary", "marytts", "5.2");
+		meta.addDependency("de.dfki.mary", "marytts", "5.2", "pom");
 		meta.addDependency("de.dfki.mary", "voice-cmu-slt-hsmm", "5.2");
 		// meta.addDependency("opennlp", "1.6");
 		return meta;

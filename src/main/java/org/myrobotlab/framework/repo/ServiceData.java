@@ -269,11 +269,11 @@ public class ServiceData implements Serializable {
     return serviceTypes.get(fullTypeName);
   }
 
-  public ArrayList<ServiceType> getServiceTypes() {
+  public List<ServiceType> getServiceTypes() {
     return getServiceTypes(true);
   }
 
-  public ArrayList<ServiceType> getServiceTypes(boolean showUnavailable) {
+  public List<ServiceType> getServiceTypes(boolean showUnavailable) {
     ArrayList<ServiceType> ret = new ArrayList<ServiceType>();
     for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
       if (!o.getValue().isAvailable() && !showUnavailable) {
@@ -316,7 +316,7 @@ public class ServiceData implements Serializable {
   // for all Peers - do ALL THERE TYPES CURRENTLY EXIST ???
   // FIXME - TODO - FIND
 
-  public ArrayList<Category> getCategories() {
+  public List<Category> getCategories() {
     ArrayList<Category> categories = new ArrayList<Category>();
     for (Category category : categoryTypes.values()) {
       categories.add(category);

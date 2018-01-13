@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -189,7 +190,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
     getCurrentServices();
 
-    ArrayList<Category> c = serviceData.getCategories();
+    List<Category> c = serviceData.getCategories();
     for (int i = 0; i < c.size(); ++i) {
       categoriesModel.addElement(c.get(i));
     }
@@ -604,7 +605,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
           possibleServicesModel.removeRow(i - 1);
         }
         // populate with serviceData
-        ArrayList<ServiceType> possibleService = serviceData.getServiceTypes();
+        List<ServiceType> possibleService = serviceData.getServiceTypes();
         for (int i = 0; i < possibleService.size(); ++i) {
           ServiceType serviceType = possibleService.get(i);
           if (filtered == "" || serviceType.getSimpleName().toLowerCase().indexOf(filtered.toLowerCase()) != -1) {
@@ -643,7 +644,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
         }
 
         // populate with serviceData
-        ArrayList<ServiceType> possibleService = serviceData.getServiceTypes();
+        List<ServiceType> possibleService = serviceData.getServiceTypes();
         for (int i = 0; i < possibleService.size(); ++i) {
           ServiceType serviceType = possibleService.get(i);
           if (filtered == null || filtered.contains(serviceType.getName())) {

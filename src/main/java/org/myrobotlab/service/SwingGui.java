@@ -791,6 +791,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     ServiceType meta = new ServiceType(SwingGui.class.getCanonicalName());
     meta.addDescription("Service used to graphically display and control other services");
     meta.addCategory("display");
+    
+    meta.addDependency("com.fifesoft", "rsyntaxtextarea", "2.0.5.1");
+    meta.addDependency("com.fifesoft", "autocomplete", "2.0.5.1");
+    meta.addDependency("com.jidesoft", "jide-oss", "3.6.18");
+  
+    
     return meta;
   }
 
