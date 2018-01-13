@@ -733,7 +733,7 @@ public class OpenCV extends AbstractVideoSource {
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
     meta.addDependency("org.bytedeco", "javacv-platform", "1.3.3");
-//     meta.exclude("commons-codec", "commons-codec");
+    meta.exclude("commons-codec", "commons-codec");
     
     meta.addDependency("commons-codec", "commons-codec", "1.10");
     
