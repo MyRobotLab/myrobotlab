@@ -34,7 +34,7 @@ public class _TemplateService extends Service {
     // add dependency if necessary
     
     // TEMPORARY CORE DEPENDENCIES !!! (for uber-jar)
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0");
+    // meta.addDependency("orgId", "artifactId", "2.4.0");
     
     
     
