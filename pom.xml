@@ -66,6 +66,11 @@
 			<url>https://jitpack.io</url>
 		</repository>
 
+		<repository>
+			<id>alfresco</id>
+			<url>https://artifacts.alfresco.com/nexus/content/repositories/public/</url>
+		</repository>
+
 	</repositories>
 	<!-- 
 	<pre>
@@ -678,12 +683,13 @@
   <artifactId>jide-oss</artifactId>
   <version>3.6.18</version>
 </dependency>
-<dependency>
+ <dependency>
   <groupId>com.mxgraph</groupId>
   <artifactId>jgraphx</artifactId>
   <version>1.10.4.2</version>
-</dependency>
+</dependency>  
 <!-- SwingGui end -->
+
 
 <!-- TesseractOcr begin -->
 <dependency>
