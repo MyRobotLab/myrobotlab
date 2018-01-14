@@ -111,9 +111,9 @@ public class JMonkeyEngine extends Service implements Simulator {
     meta.addDependency("org.jmonkeyengine", "jme3-core", "3.2.0-stable");
     meta.addDependency("org.jmonkeyengine", "jme3-desktop", "3.2.0-stable");
     meta.addDependency("org.jmonkeyengine", "jme3-lwjgl", "3.2.0-stable");
-    // meta.addDependency("org.jmonkeyengine", "jme3-jbullet", "3.2.0-stable");
     meta.addDependency("org.jmonkeyengine", "jme3-jogg", "3.2.0-stable");
     meta.addDependency("org.jmonkeyengine", "jme3-niftygui", "3.2.0-stable");
+    meta.addDependency("org.jmonkeyengine", "jme3-bullet", "3.2.0-stable");
     
     meta.addDependency("org.jmonkeyengine", "jme3-niftygui", "3.2.0-stable");
     // jbullet ==> org="net.sf.sociaal" name="jME3-jbullet" rev="3.0.0.20130526"

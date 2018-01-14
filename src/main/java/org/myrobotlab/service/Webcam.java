@@ -1,9 +1,6 @@
 package org.myrobotlab.service;
 
 import java.awt.Dimension;
-import java.awt.image.BufferedImage;
-import java.net.InetSocketAddress;
-import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -13,12 +10,12 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
-import us.sosia.video.stream.agent.StreamClientAgent;
-import us.sosia.video.stream.agent.StreamServerAgent;
-import us.sosia.video.stream.agent.ui.SingleVideoDisplayWindow;
-import us.sosia.video.stream.handler.StreamFrameListener;
+import com.github.sarxos.webcam.WebcamEvent;
+import com.github.sarxos.webcam.WebcamListener;
+import com.github.sarxos.webcam.WebcamStreamer;
 
-public class Webcam extends Service {
+
+public class Webcam extends Service implements WebcamListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -26,23 +23,13 @@ public class Webcam extends Service {
 
   transient com.github.sarxos.webcam.Webcam webcam;
   transient Dimension dimension = new Dimension(640, 480);
-  transient StreamClientAgent clientAgent;
-  transient SingleVideoDisplayWindow displayWindow = new SingleVideoDisplayWindow("Stream example", dimension);
+
+  private Object streamer;
 
   public Webcam(String n) {
     super(n);
   }
 
-  protected class StreamFrameListenerIMPL implements StreamFrameListener {
-    private volatile long count = 0;
-
-    @Override
-    public void onFrameReceived(BufferedImage image) {
-      log.info("frame received :{}", count++);
-      displayWindow.updateImage(image);
-    }
-
-  }
 
   /**
    * This static method returns all the details of the class without it having
@@ -53,66 +40,74 @@ public class Webcam extends Service {
    * 
    */
   static public ServiceType getMetaData() {
-    setAutoOpenMode(true);
+    // setAutoOpenMode(true);
     ServiceType meta = new ServiceType(Webcam.class);
     meta.addDescription("used as a general webcam");
     meta.addCategory("video");
     return meta;
   }
 
-  public void startStreamServer(String host, int port) {
 
-    webcam.setViewSize(dimension);
-
-    StreamServerAgent serverAgent = new StreamServerAgent(webcam, dimension);
-    serverAgent.start(new InetSocketAddress(host, port));
+  public void start() {
+    start(null);
   }
 
-  // FIXME - can't be swing !!!
-  public void startStreamClient(String host, int port) {
-    // setup the videoWindow
-    displayWindow.setVisible(true);
-
-    // setup the connection
-    log.info("setup dimension :{}", dimension);
-    clientAgent = new StreamClientAgent(new StreamFrameListenerIMPL(), dimension);
-    clientAgent.connect(new InetSocketAddress(host, port));
+  public void start(Integer port) {
+    if (webcam == null) {
+      webcam = com.github.sarxos.webcam.Webcam.getDefault();
+    }
+    if (port == null) {
+      port = 8080;
+    }
+    if (streamer == null) {
+      streamer = new WebcamStreamer(port, webcam, 0.5, true);
+    }
   }
 
-  // heh .. I wonder if com.github.sarxos.webcam.Webcam is serializable ? I give
-  // it 20 to 1...
-  public List<com.github.sarxos.webcam.Webcam> getWebcams() {
-    List<com.github.sarxos.webcam.Webcam> webcams = com.github.sarxos.webcam.Webcam.getWebcams();
-    return webcams;
+  @Override
+  public void webcamClosed(WebcamEvent arg0) {
+    // TODO Auto-generated method stub
+    
   }
 
-  public void startService() {
 
-    webcam = com.github.sarxos.webcam.Webcam.getDefault();
+  @Override
+  public void webcamDisposed(WebcamEvent arg0) {
+    // TODO Auto-generated method stub
+    
   }
 
-  static public void setAutoOpenMode(boolean b) {
-    com.github.sarxos.webcam.Webcam.setAutoOpenMode(b);
+
+  @Override
+  public void webcamImageObtained(WebcamEvent arg0) {
+    // TODO Auto-generated method stub
+    
   }
 
-  public void setDimension(int width, int height) {
-    dimension = new Dimension(640, 480);
-  }
 
+  @Override
+  public void webcamOpen(WebcamEvent arg0) {
+    // TODO Auto-generated method stub
+    
+  }
+  
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
     try {
 
       Webcam webcam = (Webcam) Runtime.start("webcam", "Webcam");
+      webcam.start(8080);
       // Runtime.start("webgui", "WebGui");
-      webcam.startStreamServer("0.0.0.0", 22222);
-      Runtime.start("webgui", "WebGui");
-      webcam.startStreamClient("127.0.0.1", 22222);
+      // webcam.startStreamServer("0.0.0.0", 22222);
+      // Runtime.start("webgui", "WebGui");
+      // webcam.startStreamClient("127.0.0.1", 22222);
+      
 
     } catch (Exception e) {
       Logging.logError(e);
     }
   }
+  
 
 }

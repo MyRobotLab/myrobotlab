@@ -9,19 +9,22 @@ import org.myrobotlab.genetic.Chromosome;
 import org.myrobotlab.genetic.Genetic;
 import org.myrobotlab.genetic.GeneticAlgorithm;
 import org.myrobotlab.kinematics.CollisionDectection.CollisionResults;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.IntegratedMovement;
 import org.myrobotlab.service.IntegratedMovement.ObjectPointLocation;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.Servo.IKData;
-import org.python.jline.internal.Log;
+import org.slf4j.Logger;
+
 
 /**
  * @author Christian
  *
  */
 public class IMEngine extends Thread implements Genetic {
+  public final static Logger log = LoggerFactory.getLogger(IMEngine.class);  
 	
 	DHRobotArm arm, computeArm;
 	public Point target = null;
@@ -97,8 +100,8 @@ public class IMEngine extends Thread implements Genetic {
         }
       }
 			if (target != null && currentPosition.distanceTo(target) > maxDistance /**&& !isWaitingForServo()**/) {
-				Log.info("distance to target {}", currentPosition.distanceTo(target));
-				Log.info(currentPosition.toString());
+				log.info("distance to target {}", currentPosition.distanceTo(target));
+				log.info(currentPosition.toString());
 				move(lastDHLink);
 				cogRetry = 0;
 				continue;
@@ -224,7 +227,7 @@ public class IMEngine extends Thread implements Genetic {
 //      //deltaCoG.setY(0.0);
 //      if (deltaCoG.distanceTo(service.cog.getCoGTarget()) < service.cog.getMaxDistanceToCog()) {
 //        Point pos = computeArm.getPalmPosition();
-//        Log.info("Moving to " + getName() + pos.toString());
+//        log.info("Moving to " + getName() + pos.toString());
 //        //publishAngles();
 //        return computeArm.getPalmPosition();
 //      }
@@ -262,7 +265,7 @@ public class IMEngine extends Thread implements Genetic {
       target = oldTarget;
     }
 		boolean success = moveToGoal(target, lastDHLink);
-    //Log.info("Moving to {}", arm.getPalmPosition());
+    //log.info("Moving to {}", arm.getPalmPosition());
     //target = null;
     if (success) {
     	publishAngles();
@@ -291,7 +294,7 @@ public class IMEngine extends Thread implements Genetic {
       numSteps++;
       if (numSteps >= maxIterations) {
         //if (numSteps >= maxIterations) return true;
-        //Log.info(computeArm.getPalmPosition().toString() + "genetic");
+        //log.info(computeArm.getPalmPosition().toString() + "genetic");
         calcFitnessType = CalcFitnessType.POSITION;
         GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, arm.getNumLinks(), 12, geneticRecombinationRate, geneticMutationRate );
         Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the number of time the chromosome pool will be recombined and mutate
@@ -315,7 +318,7 @@ public class IMEngine extends Thread implements Genetic {
         return true;
       }
       Point currentPos = computeArm.getPalmPosition(lastDHLink);
-      //Log.debug("Current Position " + currentPos);
+      //log.debug("Current Position " + currentPos);
       // vector to destination
       Point deltaPoint = goal.subtract(currentPos);
       Matrix dP = new Matrix(3, 1);
@@ -337,7 +340,7 @@ public class IMEngine extends Thread implements Genetic {
         }
       }
       
-      //Log.info("delta Theta + " + dTheta);
+      //log.info("delta Theta + " + dTheta);
       double maxTimeToMove = 0;
       for (int i = 0; i < dTheta.getNumRows(); i++) {
       	DHLink link = computeArm.getLink(i);
@@ -405,7 +408,7 @@ public class IMEngine extends Thread implements Genetic {
 	    time += timePerLoop;
 	  }
     if (collisionResult.haveCollision) {
-    	//Log.info("collision detected");
+    	//log.info("collision detected");
       CollisionItem ci = null;
       int itemIndex = 0;
       for (DHLink l : checkArm.getLinks()) {
@@ -420,7 +423,7 @@ public class IMEngine extends Thread implements Genetic {
         if (foundIt) break; //we have the item to watch
       }
       if (ci == null) {
-        //Log.info("Collision between static item {} and {} detected", collisionResult.collisionItems[0].getName(), collisionResult.collisionItems[1].getName());
+        //log.info("Collision between static item {} and {} detected", collisionResult.collisionItems[0].getName(), collisionResult.collisionItems[1].getName());
         return null;
       }
       Point armPos = checkArm.getPalmPosition();
@@ -473,7 +476,7 @@ public class IMEngine extends Thread implements Genetic {
 //        vtonewPos = vtonewPos.multiplyXYZ(100/distance);
 //        newPos = arm.getPalmPosition().add(vtonewPos);
 //      }
-      Log.info("Avoiding position toward ",newPos.toString());
+      log.info("Avoiding position toward ",newPos.toString());
       return newPos;
     }
     return null;
@@ -698,7 +701,7 @@ public class IMEngine extends Thread implements Genetic {
     moveInfo.lastLinkName = lastDHLink;
     this.lastDHLink = lastDHLink;
     if (moveInfo.targetItem == null){   
-      Log.info("no items named ", item.getName(), "found");   
+      log.info("no items named ", item.getName(), "found");   
       moveInfo = null;    
       return;   
     }   
@@ -809,7 +812,7 @@ public class IMEngine extends Thread implements Genetic {
     }
     
     Point moveToPoint = point[0];    
-    Log.info("Moving to point ", moveToPoint);    
+    log.info("Moving to point ", moveToPoint);    
     return moveToPoint;   
   }
   

@@ -243,6 +243,7 @@ public class Python extends Service {
 		ServiceType meta = new ServiceType(Python.class.getCanonicalName());
 		meta.addDescription("the Jython script engine compatible with pure Python 2.7 scripts");
 		meta.addCategory("programming", "control");
+		meta.addDependency("org.python", "jython", "2.7.0");
 		return meta;
 	}
 

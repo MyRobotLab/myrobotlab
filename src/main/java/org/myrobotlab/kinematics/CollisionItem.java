@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.openni.PVector;
-import org.python.jline.internal.Log;
+import org.slf4j.Logger;
 
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Mesh;
@@ -13,6 +14,7 @@ import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
 public class CollisionItem{
+  public final static Logger log = LoggerFactory.getLogger(CollisionItem.class);  
   Point origin = null;
   Point end = null;
   String name;
@@ -23,6 +25,7 @@ public class CollisionItem{
   public HashMap<Integer[], Map3DPoint> cloudMap;
   private boolean render = false;
   private Mesh mesh;
+  
   
   public CollisionItem(Point origin, Point end, String name, double radius, boolean render) {
     super();
@@ -294,11 +297,11 @@ public class CollisionItem{
 //  		radius = Math.max(((max[0]-min[0])/2), (max[2]-min[2])/2);
 //  	}
   	fromKinect = true;
-  	Log.info(name);
-  	Log.info(" origin ", origin.getX(), ",", origin.getY(), ",", origin.getZ());
-  	Log.info(" end ", end.getX(), ",", end.getY(), ",", end.getZ());
-  	Log.info(" radius ", radius);
-  	Log.info("------------");
+  	log.info(name);
+  	log.info(" origin ", origin.getX(), ",", origin.getY(), ",", origin.getZ());
+  	log.info(" end ", end.getX(), ",", end.getY(), ",", end.getZ());
+  	log.info(" radius ", radius);
+  	log.info("------------");
 	}
 
 	public String getName() {
@@ -390,7 +393,7 @@ public class CollisionItem{
 			vectorT[2] *= mult;		
   	}		
   	else {		
-  		Log.info("cannot calculate when item is horizontal");		
+  		log.info("cannot calculate when item is horizontal");		
   	}		
   	return vectorT;		
   }		
