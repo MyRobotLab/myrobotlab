@@ -207,6 +207,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     ServiceType meta = new ServiceType(WebGui.class.getCanonicalName());
     meta.addDescription("web display");
     meta.addCategory("connectivity", "display");
+    meta.addDependency("org.atmosphere", "nettosphere", "2.3.0");
 
     // MAKE NOTE !!! - we currently distribute myrobotlab.jar with a webgui
     // hence these following dependencies are zipped with myrobotlab.jar !

@@ -470,9 +470,13 @@ public class Deeplearning4j extends Service {
     
     // (for gpu support you swap out the nd4j-backend dependency..
     // kwatters: nd4j / nd4j-backend / dl4j
+
     
     meta.addDependency("org.deeplearning4j", "deeplearning4j-core", "0.9.1");
+    meta.addDependency("org.deeplearning4j", "deeplearning4j-zoo", "0.9.1");
     meta.addDependency("org.nd4j", "nd4j-native-platform", "0.9.1");
+    meta.addDependency("commons-lang", "commons-lang", "2.6");
+
     
     //   meta.addDependency("org.bytedeco.javacpp-presets", "openblas", "0.2.19-1.3");
     // org.bytedeco.javacpp-presets#openblas;0.2.19-1.3

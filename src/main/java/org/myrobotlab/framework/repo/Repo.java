@@ -773,10 +773,10 @@ public class Repo implements Serializable {
           ex.append("      <exclusion>\n");
           ex.append(String.format("        <groupId>%s</groupId>\n", exclude.getOrgId()));
           ex.append(String.format("        <artifactId>%s</artifactId>\n", exclude.getArtifactId()));
-          if (dependency.getVersion() != null) {
+          if (exclude.getVersion() != null) {
             ex.append(String.format("        <version>%s</version>\n", exclude.getVersion()));
           }
-          if (dependency.getExt() != null) {
+          if (exclude.getExt() != null) {
             ex.append(String.format("        <type>%s</type>\n", exclude.getExt()));
           }
           ex.append("      </exclusion>\n");
@@ -829,10 +829,11 @@ public class Repo implements Serializable {
      
       
 
-      repo.generatePomFromMetaData("OpenCV");
+      repo.generatePomFromMetaData();
+      // repo.generatePomFromMetaData("OpenCV");
 
       // repo.installServiceDirs();
-      repo.installServiceDir("OpenCV");
+      // repo.installServiceDir("OpenCV");
 
       // repo.install("MimicSpeech");
 

@@ -120,7 +120,8 @@ public class RSSConnector extends AbstractConnector {
     meta.setCloudService(true);
     meta.addCategory("data");
     // Tried to add this dependency, but no luck with defining the ivy.xml
-    // meta.addDependency("feed4j", "1.0");
+    
+    meta.addDependency("feed4j", "feed4j", "1.0.0");
 
     return meta;
   }

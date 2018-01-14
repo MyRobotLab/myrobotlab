@@ -266,7 +266,7 @@ public class Rekognition extends Service {
     meta.addDescription("Amazon visual recognition cloud service");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
+    meta.addDependency("com.amazonaws", "aws-java-sdk-rekognition", "1.11.263");
     meta.setCloudService(true);
     meta.addCategory("general");
     return meta;

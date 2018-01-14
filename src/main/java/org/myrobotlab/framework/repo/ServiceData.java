@@ -266,6 +266,9 @@ public class ServiceData implements Serializable {
   }
 
   public ServiceType getServiceType(String fullTypeName) {
+    if (!fullTypeName.contains(".")) {
+      fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
+    }
     return serviceTypes.get(fullTypeName);
   }
 

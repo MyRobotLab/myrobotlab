@@ -380,6 +380,17 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 		meta.addCategory("speech", "sound");
 		meta.addDependency("de.dfki.mary", "marytts", "5.2", "pom");
 		meta.addDependency("de.dfki.mary", "voice-cmu-slt-hsmm", "5.2");
+		
+    meta.exclude("org.slf4j", "slf4j-api");
+    meta.exclude("commons-io", "commons-io");
+    meta.exclude("log4j", "log4j");
+    meta.exclude("commons-lang", "commons-lang");
+    meta.exclude("com.google.guava", "guava");
+    meta.exclude("org.apache.opennlp", "opennlp-tools");
+    meta.exclude("org.slf4j", "slf4j-log4j12");
+    meta.exclude("org.apache.httpcomponents", "httpcore");
+		
+   
 		// meta.addDependency("opennlp", "1.6");
 		return meta;
 	}

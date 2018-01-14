@@ -98,10 +98,10 @@ public class NounPhraseExtractor extends AbstractStage {
           String tokens[] = tokenizer.tokenize(sentence);
           Span[] spans = nameFinder.find(tokens);
           // part of speech tagging
-          String posText = posTagger.tag(sentence);
+          String [] posText = posTagger.tag(new String[] {sentence});
           // extract a triple from the sentence.
-          children.addAll(createTripleDocuments(doc.getId(), posText));
-          doc.addToField(posTextField, posText);
+          children.addAll(createTripleDocuments(doc.getId(), posText[0]));
+          doc.addToField(posTextField, posText[0]);
           for (Span span : spans) {
             String[] terms = Arrays.copyOfRange(tokens, span.getStart(), span.getEnd());
             String entity = StringUtils.join(terms, sep);

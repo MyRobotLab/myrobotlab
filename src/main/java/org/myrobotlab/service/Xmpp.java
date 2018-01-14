@@ -107,7 +107,11 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     meta.addDescription("xmpp service to access the jabber network");
     meta.addCategory("connectivity");
 
-    meta.addDependency("org.igniterealtime.smack", "smack-core", "4.1.6");
+    meta.addDependency("org.igniterealtime.smack", "smack-java7", "4.1.6");
+    meta.addDependency("org.igniterealtime.smack", "smack-tcp", "4.1.6");
+    meta.addDependency("org.igniterealtime.smack", "smack-im", "4.1.6");
+    meta.addDependency("org.igniterealtime.smack", "smack-extensions", "4.1.6");
+
     return meta;
   }
 
