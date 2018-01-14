@@ -795,7 +795,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     meta.addDependency("com.fifesoft", "rsyntaxtextarea", "2.0.5.1");
     meta.addDependency("com.fifesoft", "autocomplete", "2.0.5.1");
     meta.addDependency("com.jidesoft", "jide-oss", "3.6.18");
-  
     meta.addDependency("com.mxgraph", "jgraphx", "1.10.4.2");
     
     return meta;
