@@ -1,12 +1,18 @@
 package org.myrobotlab.service;
 
+import static org.bytedeco.javacpp.lept.pixDestroy;
+import static org.bytedeco.javacpp.lept.pixRead;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import org.myrobotlab.framework.Platform;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.lept.PIX;
+import org.bytedeco.javacpp.tesseract.TessBaseAPI;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.SerializableImage;
@@ -14,14 +20,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.TesseractOcr.Environment.POSIX;
 import org.slf4j.Logger;
-
-import com.sun.jna.Library;
-import com.sun.jna.Native;
-
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.TesseractException;
 
 /**
  * FIXME - consider -
@@ -36,6 +35,7 @@ import net.sourceforge.tess4j.TesseractException;
 public class TesseractOcr extends Service {
 
   private static final long serialVersionUID = 1L;
+  transient private TessBaseAPI api;
 
   public final static Logger log = LoggerFactory.getLogger(TesseractOcr.class);
 
@@ -45,11 +45,15 @@ public class TesseractOcr extends Service {
     try {
 
       TesseractOcr tesseract = (TesseractOcr) Runtime.start("tesseract", "TesseractOcr");
-      String found = tesseract.ocr("test.png");
+      // String found = tesseract.ocr("phototest.jpg");
+      // String found = tesseract.ocr("30.speed.JPG");
+      String found = tesseract.ocr("traffic.sign.jpg");
+      
+      
       // String found = tesseract.ocr("test.jpg");
       // String found = tesseract.ocr("test.tif");
       log.info("found {}", found);
-      Runtime.start("gui", "GUIService");
+      Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);
@@ -58,34 +62,49 @@ public class TesseractOcr extends Service {
 
   public TesseractOcr(String n) {
     super(n);
-    File file = new File(".");
-    String filed = file.getAbsolutePath();
-    POSIX e = new Environment.POSIX();
-    e.setenv("TESSDATA_PREFIX", filed.substring(0, filed.length() - 1), 1);
-    // for (Entry<String, String> g : System.getenv().entrySet()) {
-    // System.out.println(g.getKey() + "=" + g.getValue());
-    //
-    // }
   }
 
-  public String ocr(BufferedImage image) {
-    try {
-      String hh = Tesseract.getInstance().doOCR(image);
-      // System.out.println(hh);
-      log.info("Read: " + hh);
-      return hh;
-    } catch (TesseractException e) {
-      e.printStackTrace();
-    }
-    return null;
+  public String ocr(BufferedImage image) throws IOException {
+    // A class called PIXConversions will convert directly
+    // but I'm afraid to import the library in that it might clash with the
+    // version
+    // javacv is expecting.. so we are going to do it the "file" way :P
+    File temp = File.createTempFile("tesseract", ".jpg");
+    FileOutputStream fos = new FileOutputStream(temp);
+    ImageIO.write(image, "jpg", fos);    
+    temp.deleteOnExit();
+    return ocr(temp.getAbsolutePath());
   }
 
   public String ocr(String filename) throws IOException {
-    BufferedImage image = ImageIO.read(new File(filename));
-    return ocr(image);
+
+    BytePointer outText;
+    if (api == null) {
+      api = new TessBaseAPI();
+    }
+    // Initialize tesseract-ocr with English, without specifying tessdata path
+    // FIXME - maybe don't just dump in the root - perhaps subdirectory - and what
+    // about integrating with other /resources ? 
+    if (api.Init(System.getProperty("user.dir"), "eng") != 0) {
+      log.error("Could not initialize tesseract.");
+    }
+
+    // Open input image with leptonica library
+    PIX image = pixRead(filename);
+    api.SetImage(image);
+    // Get OCR result
+    outText = api.GetUTF8Text();
+    String ret = outText.getString();
+    log.info("OCR output:\n" + ret);
+
+    // Destroy used object and release memory
+    api.End();
+    outText.deallocate();
+    pixDestroy(image);
+    return ret;
   }
 
-  public String ocr(SerializableImage image) {
+  public String ocr(SerializableImage image) throws IOException {
     return ocr(image.getImage());
   }
 
@@ -102,57 +121,11 @@ public class TesseractOcr extends Service {
     ServiceType meta = new ServiceType(TesseractOcr.class);
     meta.addDescription("Optical character recognition - the ability to read");
     meta.addCategory("intelligence");
-    meta.addDependency("net.sourceforge.tess4j", "tess4j", "3.4.0");
+    meta.addDependency("org.bytedeco.javacpp-presets", "tesseract-platform", "3.04.01-1.3");
+
+    // meta.addDependency("net.sourceforge.tess4j", "tess4j", "3.4.0");
     // meta.addDependency("com.sun.jna", "3.2.2");
     return meta;
-  }
-
-  static class Environment {
-    public interface LinuxLibC extends Library {
-      public int setenv(String name, String value, int overwrite);
-
-      public int unsetenv(String name);
-    }
-
-    static public class POSIX {
-      static Object libc;
-
-      static {
-        try {
-          Platform platform = Platform.getLocalInstance();
-          if (platform.isWindows()) {
-            libc = Native.loadLibrary("msvcrt", WinLibC.class);
-          } else {
-            libc = Native.loadLibrary("c", LinuxLibC.class);
-          }
-        } catch (Exception e) {
-          log.error("loading native libraries threw", e);
-        }
-      }
-
-      public int setenv(String name, String value, int overwrite) {
-        if (libc instanceof LinuxLibC) {
-          return ((LinuxLibC) libc).setenv(name, value, overwrite);
-        } else {
-          return ((WinLibC) libc)._putenv(name + "=" + value);
-        }
-      }
-
-      public int unsetenv(String name) {
-        if (libc instanceof LinuxLibC) {
-          return ((LinuxLibC) libc).unsetenv(name);
-        } else {
-          return ((WinLibC) libc)._putenv(name + "=");
-        }
-      }
-    }
-
-    public interface WinLibC extends Library {
-      public int _putenv(String name);
-    }
-
-    static POSIX libc = new POSIX();
-
   }
 
 }

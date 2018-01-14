@@ -828,7 +828,6 @@ public class Repo implements Serializable {
       Repo repo = Repo.getLocalInstance();
      
       
-
       repo.generatePomFromMetaData();
       // repo.generatePomFromMetaData("OpenCV");
 

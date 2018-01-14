@@ -6,6 +6,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Map;
 
@@ -95,7 +96,11 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
       // be updating it while it's being classified maybe?!
       if (lastImage != null) {
         BufferedImage buffImg = OpenCV.IplImageToBufferedImage(lastImage);
-        lastResult = tesseract.ocr(buffImg);
+        try {
+          lastResult = tesseract.ocr(buffImg);
+        } catch (IOException e) {
+          log.error("filter threw", e);
+        }
         log.info(lastResult);
       } else {
         // log.info("No Image to classify...");
