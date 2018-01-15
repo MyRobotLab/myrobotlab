@@ -44,7 +44,7 @@ public class OpenCVTest {
 
   @Test
   public final void testFileCapture() {
-    opencv.captureFromImageFile("test/resources/OpenCV/multipleFaces.jpg");
+    opencv.captureFromImageFile("src/test/resources/OpenCV/multipleFaces.jpg");
     
     opencv.setCameraIndex(3);
     assertEquals(3, opencv.getCameraIndex());

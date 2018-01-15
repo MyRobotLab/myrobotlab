@@ -78,7 +78,8 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	public Set<String> categories = new HashSet<String>();
 	public Map<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
 
-  private ServiceDependency lastDependency;
+	// only used for appending ServiceExcludes to ServiceDependencies
+  transient private ServiceDependency lastDependency;
 
 	public ServiceType() {
 	}
