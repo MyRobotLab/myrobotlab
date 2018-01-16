@@ -36,7 +36,8 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	String simpleName;
 	String link;
 	String license;// = "Apache";
-	boolean isCloudService = false;
+	Boolean isCloudService = false;
+	Boolean includeServiceInOneJar = false;
 
 	public String getLink() {
     return link;
@@ -238,6 +239,14 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
       log.error("DEPENDENCY NOT DEFINED - CANNOT EXCLUDE");
     }    
     lastDependency.add(new ServiceExclude(groupId, artifactId));
+  }
+
+  public void includeServiceInOneJar(Boolean b) {
+    includeServiceInOneJar = b;
+  }
+
+  public boolean includeServiceInOneJar() {
+    return includeServiceInOneJar;
   }
   
 

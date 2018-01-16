@@ -1618,12 +1618,12 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
       if (runtime == null) {
         runtime = this;
       }
-      
-      if (runtime.platform == null){
+
+      if (runtime.platform == null) {
         runtime.platform = Platform.getLocalInstance();
       }
     }
-    
+
     // 3 states
     // isAgent == make default directory (with pid) if custom not supplied
     // fromAgent == needs agentId
@@ -1872,8 +1872,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   // ============== configuration begin ==============
-  
-  static public String getId(){
+
+  static public String getId() {
     return Platform.getLocalInstance().getId();
   }
 
@@ -2361,19 +2361,15 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     Locale runtimeLocale = new Locale(language);
     Locale.setDefault(runtimeLocale);
   }
-  
-  public Platform login(Platform platform){
+
+  public Platform login(Platform platform) {
     info("runtime %s says \"hello\" %s", platform.getId(), platform);
-    
+
     // from which gateway ?
     // runtime "mqtt" --mqtt01--> --mqtt02--> runtime"watchdog"
-    
-    
-    
+
     // return to its runtime a register ..
-    
-    
-    
+
     return platform;
   }
 
@@ -2391,6 +2387,10 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     meta.addDescription("is a singleton service responsible for the creation, starting, stopping, releasing and registration of all other services");
     meta.addCategory("framework");
     meta.addPeer("cli", "Cli", "command line interpreter for the runtime");
+
+    meta.includeServiceInOneJar(true);
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0");
+    meta.addDependency("ch.qos.logback", "logback-classic", "1.2.3");
 
     return meta;
   }

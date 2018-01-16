@@ -90,18 +90,9 @@
 	</pre>
 	 -->
 
+
 <dependencies>
-	<dependency>
-	  <groupId>org.apache.ivy</groupId>
-	  <artifactId>ivy</artifactId>
-	  <version>2.4.0</version>
-	</dependency>	
-	
-	<dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.2.3</version>
-	</dependency>
+
 <!-- AcapelaSpeech begin -->
 <dependency>
   <groupId>org.apache.httpcomponents</groupId>
@@ -286,7 +277,6 @@
 <!-- ImapEmailConnector end -->
 
 <!-- InMoov begin -->
-
 <dependency>
   <groupId>inmoov.fr</groupId>
   <artifactId>jm3-model</artifactId>
@@ -643,7 +633,6 @@
   <groupId>org.python</groupId>
   <artifactId>jython</artifactId>
   <version>2.7.0</version>
-  <scope>provided</scope>
 </dependency>
 <!-- Python end -->
 
@@ -682,6 +671,19 @@
   <scope>provided</scope>
 </dependency>
 <!-- RemoteAdapter end -->
+
+<!-- Runtime begin -->
+<dependency>
+  <groupId>org.apache.ivy</groupId>
+  <artifactId>ivy</artifactId>
+  <version>2.4.0</version>
+</dependency>
+<dependency>
+  <groupId>ch.qos.logback</groupId>
+  <artifactId>logback-classic</artifactId>
+  <version>1.2.3</version>
+</dependency>
+<!-- Runtime end -->
 
 <!-- Serial begin -->
 <dependency>
@@ -742,25 +744,21 @@
   <groupId>com.fifesoft</groupId>
   <artifactId>rsyntaxtextarea</artifactId>
   <version>2.0.5.1</version>
-  <scope>provided</scope>
 </dependency>
 <dependency>
   <groupId>com.fifesoft</groupId>
   <artifactId>autocomplete</artifactId>
   <version>2.0.5.1</version>
-  <scope>provided</scope>
 </dependency>
 <dependency>
   <groupId>com.jidesoft</groupId>
   <artifactId>jide-oss</artifactId>
   <version>3.6.18</version>
-  <scope>provided</scope>
 </dependency>
 <dependency>
   <groupId>com.mxgraph</groupId>
   <artifactId>jgraphx</artifactId>
   <version>1.10.4.2</version>
-  <scope>provided</scope>
 </dependency>
 <!-- SwingGui end -->
 
@@ -853,7 +851,6 @@
   <groupId>org.atmosphere</groupId>
   <artifactId>nettosphere</artifactId>
   <version>2.3.0</version>
-  <scope>provided</scope>
 </dependency>
 <!-- WebGui end -->
 
@@ -933,8 +930,7 @@
 <!-- Xmpp end -->
 
 </dependencies>
-
-	 
+ 
 	<build>
 		<resources>
 			<resource>

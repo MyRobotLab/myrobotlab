@@ -762,7 +762,9 @@ public class Repo implements Serializable {
         sb.append(String.format("  <artifactId>%s</artifactId>\n", dependency.getArtifactId()));
         // optional - means latest ???
         sb.append(String.format("  <version>%s</version>\n", dependency.getVersion()));
-        sb.append("  <scope>provided</scope>\n");
+        if (!service.includeServiceInOneJar()) {
+          sb.append("  <scope>provided</scope>\n");
+        }
         if (dependency.getExt() != null) {
           sb.append(String.format("  <type>%s</type>\n", dependency.getExt()));
         }
