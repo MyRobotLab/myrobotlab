@@ -915,6 +915,11 @@
 				</executions>
 				<configuration>
 					<mainClass>org.myrobotlab.framework.repo.ServiceData</mainClass>
+					<classpathScope>test</classpathScope>
+					<arguments>
+						<!-- TODO: fix this with the proper location -->
+			            <argument>target/resources</argument>
+          			</arguments>
 				</configuration>
 			</plugin>
 		
