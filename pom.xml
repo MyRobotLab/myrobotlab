@@ -94,18 +94,6 @@
 <dependencies>
 
 <!-- AcapelaSpeech begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
 <!-- AcapelaSpeech end -->
 
 <!-- AudioFile begin -->
@@ -220,18 +208,7 @@
 <!-- DocumentPipeline end -->
 
 <!-- Esp8266_01 begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+
 <!-- Esp8266_01 end -->
 
 <!-- GoogleCloud begin -->
@@ -253,18 +230,7 @@
 <!-- HtmlParser end -->
 
 <!-- HttpClient begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+
 <!-- HttpClient end -->
 
 <!-- ImapEmailConnector begin -->
@@ -287,18 +253,7 @@
 <!-- InMoov end -->
 
 <!-- IndianTts begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
@@ -491,18 +446,7 @@
 <!-- MyoThalmic end -->
 
 <!-- NaturalReaderSpeech begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+
 <!-- NaturalReaderSpeech end -->
 
 <!-- OculusRift begin -->
@@ -683,6 +627,17 @@
   <artifactId>logback-classic</artifactId>
   <version>1.2.3</version>
 </dependency>
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpclient</artifactId>
+  <version>4.5.2</version>
+</dependency>
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpcore</artifactId>
+  <version>4.4.6</version>
+</dependency>
+
 <!-- Runtime end -->
 
 <!-- Serial begin -->
@@ -826,18 +781,7 @@
 <!-- Vision end -->
 
 <!-- VoiceRss begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+
 <dependency>
   <groupId>com.voicerss</groupId>
   <artifactId>tts</artifactId>
@@ -888,18 +832,7 @@
   <version>1.1</version>
   <scope>provided</scope>
 </dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+
 <!-- WolframAlpha end -->
 
 <!-- Xmpp begin -->
@@ -966,8 +899,26 @@
 		</testResources>
 
 		<plugins>
+	
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<executions>
+					<execution>
+						<id>service-data-execution</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>org.myrobotlab.framework.repo.ServiceData</mainClass>
+				</configuration>
+			</plugin>
 		
-				    <plugin>
+			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.1.0</version>
