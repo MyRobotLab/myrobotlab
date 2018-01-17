@@ -2389,6 +2389,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
     meta.addPeer("cli", "Cli", "command line interpreter for the runtime");
 
     meta.includeServiceInOneJar(true);
+    meta.addDependency("com.google.code.gson", "gson", "2.8.0");
     meta.addDependency("org.apache.ivy", "ivy", "2.4.0");
     meta.addDependency("ch.qos.logback", "logback-classic", "1.2.3");
 

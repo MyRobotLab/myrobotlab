@@ -89,11 +89,21 @@
 	===============Framework End ===============	
 	</pre>
 	 -->
-
-
-<dependencies>
+	 <dependencies>
 
 <!-- AcapelaSpeech begin -->
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpclient</artifactId>
+  <version>4.5.2</version>
+  <scope>provided</scope>
+</dependency>
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpcore</artifactId>
+  <version>4.4.6</version>
+  <scope>provided</scope>
+</dependency>
 <!-- AcapelaSpeech end -->
 
 <!-- AudioFile begin -->
@@ -208,7 +218,18 @@
 <!-- DocumentPipeline end -->
 
 <!-- Esp8266_01 begin -->
-
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpclient</artifactId>
+  <version>4.5.2</version>
+  <scope>provided</scope>
+</dependency>
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpcore</artifactId>
+  <version>4.4.6</version>
+  <scope>provided</scope>
+</dependency>
 <!-- Esp8266_01 end -->
 
 <!-- GoogleCloud begin -->
@@ -230,7 +251,18 @@
 <!-- HtmlParser end -->
 
 <!-- HttpClient begin -->
-
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpclient</artifactId>
+  <version>4.5.2</version>
+  <scope>provided</scope>
+</dependency>
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpcore</artifactId>
+  <version>4.4.6</version>
+  <scope>provided</scope>
+</dependency>
 <!-- HttpClient end -->
 
 <!-- ImapEmailConnector begin -->
@@ -245,6 +277,13 @@
 <!-- InMoov begin -->
 <dependency>
   <groupId>inmoov.fr</groupId>
+  <artifactId>inmoov</artifactId>
+  <version>1.0.0</version>
+  <scope>provided</scope>
+  <type>zip</type>
+</dependency>
+<dependency>
+  <groupId>inmoov.fr</groupId>
   <artifactId>jm3-model</artifactId>
   <version>1.0.0</version>
   <scope>provided</scope>
@@ -253,11 +292,28 @@
 <!-- InMoov end -->
 
 <!-- IndianTts begin -->
-
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpclient</artifactId>
+  <version>4.5.2</version>
+  <scope>provided</scope>
+</dependency>
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpcore</artifactId>
+  <version>4.4.6</version>
+  <scope>provided</scope>
+</dependency>
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
-
+<dependency>
+  <groupId>inmoov.fr</groupId>
+  <artifactId>inmoov</artifactId>
+  <version>1.0.0</version>
+  <scope>provided</scope>
+  <type>zip</type>
+</dependency>
 <dependency>
   <groupId>inmoov.fr</groupId>
   <artifactId>jm3-model</artifactId>
@@ -446,7 +502,18 @@
 <!-- MyoThalmic end -->
 
 <!-- NaturalReaderSpeech begin -->
-
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpclient</artifactId>
+  <version>4.5.2</version>
+  <scope>provided</scope>
+</dependency>
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpcore</artifactId>
+  <version>4.4.6</version>
+  <scope>provided</scope>
+</dependency>
 <!-- NaturalReaderSpeech end -->
 
 <!-- OculusRift begin -->
@@ -618,6 +685,11 @@
 
 <!-- Runtime begin -->
 <dependency>
+  <groupId>com.google.code.gson</groupId>
+  <artifactId>gson</artifactId>
+  <version>2.8.0</version>
+</dependency>
+<dependency>
   <groupId>org.apache.ivy</groupId>
   <artifactId>ivy</artifactId>
   <version>2.4.0</version>
@@ -627,17 +699,6 @@
   <artifactId>logback-classic</artifactId>
   <version>1.2.3</version>
 </dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-</dependency>
-
 <!-- Runtime end -->
 
 <!-- Serial begin -->
@@ -781,7 +842,18 @@
 <!-- Vision end -->
 
 <!-- VoiceRss begin -->
-
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpclient</artifactId>
+  <version>4.5.2</version>
+  <scope>provided</scope>
+</dependency>
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpcore</artifactId>
+  <version>4.4.6</version>
+  <scope>provided</scope>
+</dependency>
 <dependency>
   <groupId>com.voicerss</groupId>
   <artifactId>tts</artifactId>
@@ -832,7 +904,18 @@
   <version>1.1</version>
   <scope>provided</scope>
 </dependency>
-
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpclient</artifactId>
+  <version>4.5.2</version>
+  <scope>provided</scope>
+</dependency>
+<dependency>
+  <groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpcore</artifactId>
+  <version>4.4.6</version>
+  <scope>provided</scope>
+</dependency>
 <!-- WolframAlpha end -->
 
 <!-- Xmpp begin -->
@@ -863,7 +946,7 @@
 <!-- Xmpp end -->
 
 </dependencies>
- 
+	 
 	<build>
 		<resources>
 			<resource>
@@ -918,7 +1001,7 @@
 					<classpathScope>test</classpathScope>
 					<arguments>
 						<!-- TODO: fix this with the proper location -->
-			            <argument>target/resources</argument>
+			            <argument>src/main/resources/resource/framework/</argument>
           			</arguments>
 				</configuration>
 			</plugin>

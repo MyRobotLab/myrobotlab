@@ -53,7 +53,7 @@ import com.jme3.system.AppSettings;
 public class IntegratedMovement extends Service implements IKJointAnglePublisher {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(IntegratedMovement.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(IntegratedMovement.class);
 
   //private HashMap<String, DHRobotArm> arms = new HashMap<String, DHRobotArm>();
   private transient HashMap<String, IMEngine> engines = new HashMap<String, IMEngine>();
@@ -543,7 +543,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     meta.addDescription("a 3D kinematics service supporting D-H parameters");
     meta.addCategory("robot", "control");
     meta.addPeer("openni", "OpenNi", "Kinect service");
-    meta.addDependency("fr.inmoov", "inmoov", "1.0.0");
+    meta.addDependency("inmoov.fr", "inmoov", "1.0.0", "zip");
     meta.addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
     meta.setAvailable(true);
     return meta;
