@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
@@ -146,14 +145,14 @@ public class ServiceData implements Serializable {
 
     // get services - all this could be done during Runtime
     // although running through zip entries would be a bit of a pain
-    // epecially if you have to spin through 50 megs of data
+    // Especially if you have to spin through 50 megs of data
     List<String> services = FileIO.getServiceList();
 
     log.info("found {} services", services.size());
     for (int i = 0; i < services.size(); ++i) {
 
       String fullClassName = services.get(i);
-      // log.info("querying {}", fullClassName);
+      log.info("querying {}", fullClassName);
       try {
         Class<?> theClass = Class.forName(fullClassName);
         Method method = theClass.getMethod("getMetaData");
@@ -372,7 +371,7 @@ public class ServiceData implements Serializable {
     }
     
     
-    System.exit(0);
+    // System.exit(0);
     
     
     
