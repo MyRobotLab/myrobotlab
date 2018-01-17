@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.ivy.Ivy;
-import org.apache.ivy.ant.IvyMakePom.Dependency;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
