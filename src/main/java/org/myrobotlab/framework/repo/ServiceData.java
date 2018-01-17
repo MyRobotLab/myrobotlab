@@ -362,10 +362,20 @@ public class ServiceData implements Serializable {
       fos.write(CodecUtils.toJson(sd).getBytes());
       fos.close();
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - END ----
+      
+      
+      
 
     } catch (Exception e) {
       Logging.logError(e);
+      System.exit(-1);
     }
+    
+    
+    System.exit(0);
+    
+    
+    
   }
 
 }
