@@ -23,12 +23,12 @@ public class InMoovEyelids extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovEyelids.class);
 
-  transient public static Servo eyelidleft;
-  transient public static Servo eyelidright;
+  transient public Servo eyelidleft;
+  transient public Servo eyelidright;
   private transient ServoController controller;
   // todo : make this deprecated
 
-  static Timer blinkEyesTimer = new Timer();
+  Timer blinkEyesTimer = new Timer();
 
   
   public void blink()
@@ -272,7 +272,7 @@ public class InMoovEyelids extends Service {
     return meta;
   }
 
-  public static void setVelocity(Double eyelidleftVelo, Double eyelidrightVelo) {
+  public void setVelocity(Double eyelidleftVelo, Double eyelidrightVelo) {
     if (eyelidleft != null) {
     eyelidleft.setVelocity(eyelidleftVelo);
     }
