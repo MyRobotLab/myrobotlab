@@ -35,25 +35,24 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
    * 
    */
   static public ServiceType getMetaData() {
-
     ServiceType meta = new ServiceType(BoofCv.class.getCanonicalName());
     meta.addDescription("a very portable vision library using pure Java");
     meta.setAvailable(true);
     // add dependency if necessary
     meta.addDependency("org.boofcv", "all", "0.26");
     meta.addCategory("vision", "video");
+    meta.exclude("org.bytedeco", "javacv");
+    meta.exclude("org.bytedeco.javacpp-presets", "opencv");    
     return meta;
   }
 
   public Point2Df publishPoint2Df(Point2Df point) {
     return point;
-
   }
 
   public Point2Df onPoint2Df(Point2Df point) {
     System.out.println("Receinvig");
     return point;
-
   }
   
   public ObjectTracker<GrayU8> createTracker(){

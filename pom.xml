@@ -130,6 +130,16 @@
   <artifactId>all</artifactId>
   <version>0.26</version>
   <scope>provided</scope>
+  <exclusions>
+      <exclusion>
+        <groupId>org.bytedeco</groupId>
+        <artifactId>javacv</artifactId>
+      </exclusion>
+      <exclusion>
+        <groupId>org.bytedeco.javacpp-presets</groupId>
+        <artifactId>opencv</artifactId>
+      </exclusion>
+  </exclusions>
 </dependency>
 <!-- BoofCv end -->
 
