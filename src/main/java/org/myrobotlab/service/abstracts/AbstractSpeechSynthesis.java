@@ -3,11 +3,13 @@ package org.myrobotlab.service.abstracts;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
+import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis {
+public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener {
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesis.class);
 
@@ -63,5 +65,14 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     unsubscribe(textPublisher.getName(), "publishText");
   }
 
+  public void onText(String text) {
+	  // default implemetation/behavior for onText
+	  log.info("ON Text Called: {}", text);
+	  try {
+		  speak(text);
+	  } catch (Exception e) {
+		  Logging.logError(e);
+	  }
+  }
 
 }
